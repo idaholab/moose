@@ -10,6 +10,7 @@
 """Defines the MooseDocs build command."""
 import os
 import sys
+import time
 import collections
 import multiprocessing
 import logging
@@ -156,6 +157,8 @@ def main(options):
     Inputs:
         options[argparse options]: Complete options from argparse, see MooseDocs/main.py
     """
+    t = time.time()
+
     # Infinite nested dict
     tree = lambda: collections.defaultdict(tree)
     kwargs = tree()
@@ -258,6 +261,8 @@ def main(options):
         if subconfigs:
             LOG.info('Writing content specified by %s', config_files[index])
         translator.execute(contents[index], options.num_threads, read=False, tokenize=False)
+
+    LOG.info('Total Time [%s sec.]', time.time() - t)
 
     # Run live server and watch for content changes
     if options.serve:

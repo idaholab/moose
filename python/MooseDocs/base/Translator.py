@@ -221,6 +221,9 @@ class Translator(mixins.ConfigObject):
                   "be called twice."
             raise exceptions.MooseDocsException(msg, type(self))
 
+        LOG.info('Initializing...')
+        t = time.time()
+
         # Attach translator to Reader, Renderer, and Executioner
         self.__reader.setTranslator(self)
         self.__renderer.setTranslator(self)
@@ -255,6 +258,8 @@ class Translator(mixins.ConfigObject):
 
         # Initialize the Page objects
         self.__executioner.init(nodes or self.getPages())
+
+        LOG.info('Initializing complete [%s sec.]', time.time() - t)
         self.__initialized = True
 
     def execute(self, nodes=None, num_threads=1, read=True, tokenize=True, render=True, write=True):

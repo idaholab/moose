@@ -98,6 +98,7 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
         mixins.ConfigObject.__init__(self, **kwargs)
         mixins.TranslatorObject.__init__(self)
         self._page_objects = list()
+        self._total_time = 0
         self._clear_progress()
 
         # The method for spawning processes changed to "spawn" for macOS in python 3.9. Currently,
@@ -123,14 +124,9 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
         """Initialize the Page objects."""
 
         # Call Extension init() method
-        LOG.info('Executing extension init() methods...')
-        t = time.time()
         self.translator.executeMethod('init')
-        LOG.info('Executing extension init() methods complete [%s sec.]', time.time() - t)
 
         # Initialize Page objects
-        LOG.info('Executing extension initPage() methods...')
-        t = time.time()
         for node in nodes:
             # Assign translator instance, destination root, and output extension
             node.translator = self.translator
@@ -139,12 +135,9 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
                 node.output_extension = self.translator.renderer.EXTENSION
 
             # Setup page attributes
-            config = dict()
             for ext in self.translator.extensions:
                 node.attributes['__{}__'.format(ext.name)] = dict()
             self.translator.executePageMethod('initPage', node)
-
-        LOG.info('Executing extension initPage() methods complete [%s sec.]', time.time() - t)
 
     def addPage(self, page):
         """Add a Page object to be Translated."""
@@ -174,29 +167,31 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
         Inputs:
             nodes[list]: A list of page objects to convert.
             num_threads[int]: The number of threads to use for execution.
+            (read, tokenize, render, write)[bool]: The tasks to perform (see the class description).
         """
         raise NotImplementedError("The execute method must be defined.")
 
     def __call__(self, nodes, num_threads=1, read=True, tokenize=True, render=True, write=True):
         """
-        Called by Translator object, this executes the steps listed in the class description.
+        Called by Translator object - this executes the steps listed in the class description.
         """
-        total = time.time()
+        initial_time = time.time()
 
         if read:
             self.translator.executeMethod('preExecute', log=True)
 
         source_nodes = [n for n in nodes if isinstance(n, pages.Source)]
         if source_nodes:
-            self._setupCall(source_nodes, read, tokenize, render, write)
-            t = time.time()
-            n = len(source_nodes) if num_threads > len(source_nodes) else num_threads
-            if isinstance(self, MooseDocs.base.Serial):
-                LOG.info('Translating in serial...')
-            else:
-                LOG.info('Translating using %s threads...', n)
-            self.execute(source_nodes, n, read, tokenize, render, write)
-            LOG.info('Translating complete [%s sec.]', time.time() - t)
+            translate_steps = self._setupCall(source_nodes, read, tokenize, render, write)
+            if translate_steps:
+                t = time.time()
+                n = len(source_nodes) if num_threads > len(source_nodes) else num_threads
+                if isinstance(self, MooseDocs.base.Serial):
+                    LOG.info('Translating (%s) in serial...', translate_steps)
+                else:
+                    LOG.info('Translating (%s) using %s threads...', translate_steps, n)
+                self.execute(source_nodes, n, read, tokenize, render, write)
+                LOG.info('Translating complete [%s sec.]', time.time() - t)
 
         # Indexing/copying
         if write:
@@ -204,11 +199,14 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
             if other_nodes:
                 LOG.info('Copying content...')
                 t = self.finalize(other_nodes)
-                LOG.info('Copying Finished [%s sec.]', t)
+                LOG.info('Copying complete [%s sec.]', t)
 
             self.translator.executeMethod('postExecute', log=True)
 
-        LOG.info('Total Time [%s sec.]', time.time() - total)
+            LOG.info('Total Time [%s sec.]', self._total_time + time.time() - initial_time)
+            self._total_time = 0 # reset the execution timer
+        else:
+            self._total_time += time.time() - initial_time
 
     def read(self, node):
         """Perform reading of page content."""
@@ -270,6 +268,9 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
         """
         Helper that initializes the page output containers and asserts that the translation steps
         are executed in the correct order, i.e., Read -> Tokenize -> Render -> Write.
+
+        This method returns a string expressing the steps being performed if any, e.g., 'reading' or
+        'reading, tokenizing, and rendering', to be included in LOG.info() reports.
         """
         def calloc(nodes, container):
             uids = container.keys() # need only grab current uid keys, leave this out of node loop!!
@@ -283,26 +284,38 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
                     raise exceptions.MooseDocsException(msg, str(node).split(':')[0], node.local)
 
         msg = 'The "{}" translation step must be executed before the "{}" step.'
+        steps = list()
         if read:
             calloc(nodes, self._page_content)
+            steps.append('reading')
             self._has_read = True
 
         if tokenize:
             if not self._has_read:
                 raise exceptions.MooseDocsException(msg, "read", "tokenize")
             calloc(nodes, self._page_ast)
+            steps.append('tokenizing')
             self._has_tokenized = True
 
         if render:
             if not self._has_tokenized:
                 raise exceptions.MooseDocsException(msg, "tokenize", "render")
             calloc(nodes, self._page_result)
+            steps.append('rendering')
             self._has_rendered = True
 
         if write:
             if not self._has_rendered:
                 raise exceptions.MooseDocsException(msg, "render", "write")
+            steps.append('writing')
             self._clear_progress()
+
+        # If translation steps are being performed, return a string expressing those which are
+        if len(steps) > 2:
+            steps[-1] = 'and ' + steps[-1]
+            return ', '.join(steps)
+        elif steps:
+            return ' and '.join(steps)
 
     def _getPage(self, uid):
         """Retrieve a Page object from the global list by its UID."""
@@ -315,26 +328,21 @@ class Serial(Executioner):
 
     def execute(self, nodes, num_threads=1, read=True, tokenize=True, render=True, write=True):
         if read:
-            self._run(nodes, self._readHelper, 'Read')
+            self._run(nodes, self._readHelper)
         if tokenize:
-            self._run(nodes, self._tokenizeHelper, 'Tokenize')
+            self._run(nodes, self._tokenizeHelper)
         if render:
-            self._run(nodes, self._renderHelper, 'Render')
+            self._run(nodes, self._renderHelper)
         if write:
-            self._run(nodes, self._writeHelper, 'Write')
+            self._run(nodes, self._writeHelper)
 
-    def _run(self, nodes, target, prefix):
+    def _run(self, nodes, target):
         """Run and optionally profile a function"""
 
-        t = time.time()
-        LOG.info('%s...', prefix)
-
-        if self.get('profile', False):
+        if self['profile']:
             mooseutils.run_profile(target, nodes)
         else:
             target(nodes)
-
-        LOG.info('Finished %s [%s sec.]', prefix, time.time() - t)
 
     def _readHelper(self, nodes):
         for node in nodes:
@@ -370,28 +378,16 @@ class ParallelQueue(Executioner):
 
     def execute(self, nodes, num_threads=1, read=True, tokenize=True, render=True, write=True):
         if read:
-            self._run(nodes, self._page_content, self._read_target, num_threads,
-                      lambda n: -os.path.getsize(n.source) if os.path.isfile(n.source) else float('-inf'),
-                      "Reading")
+            self._run(nodes, self._page_content, self._read_target, num_threads)
         if tokenize:
-            self._run(nodes, self._page_ast, self._tokenize_target, num_threads,
-                      lambda n: -len(self._page_content[n.uid]),
-                      "Tokenizing")
+            self._run(nodes, self._page_ast, self._tokenize_target, num_threads)
         if render:
-            self._run(nodes, self._page_result, self._render_target, num_threads,
-                      lambda n: -self._page_ast[n.uid].count,
-                      "Rendering")
+            self._run(nodes, self._page_result, self._render_target, num_threads)
         if write:
-            self._run(nodes, None, self._write_target, num_threads,
-                      lambda n: -self._page_result[n.uid].count,
-                      "Writing")
+            self._run(nodes, None, self._write_target, num_threads)
 
-    def _run(self, nodes, container, target, num_threads=1, key=None, prefix='Running'):
+    def _run(self, nodes, container, target, num_threads=1):
         """Helper function for running in parallel using Queues"""
-
-        # Time the process
-        t = time.time()
-        LOG.info('%s using %s threads...', prefix, num_threads)
 
         # Input/Output Queue object
         page_queue = self._ctx.Queue()
@@ -416,10 +412,9 @@ class ParallelQueue(Executioner):
         for i in range(num_threads):
             page_queue.put(ParallelQueue.STOP)
 
-        LOG.info('Finished %s [%s sec.]', prefix, time.time() - t)
-
     def _read_target(self, qin, qout):
         """Function for calling self.read with Queue objects."""
+
         for uid in iter(qin.get, ParallelQueue.STOP):
             node = self._getPage(uid)
             content = self.read(node)
@@ -539,20 +534,16 @@ class ParallelPipe(Executioner):
 
     def execute(self, nodes, num_threads=1, read=True, tokenize=True, render=True, write=True):
         if read:
-            self._run(nodes, self._page_content, self._read_target, num_threads, "Reading")
+            self._run(nodes, self._page_content, self._read_target, num_threads)
         if tokenize:
-            self._run(nodes, self._page_ast, self._tokenize_target, num_threads, "Tokenizing")
+            self._run(nodes, self._page_ast, self._tokenize_target, num_threads)
         if render:
-            self._run(nodes, self._page_result, self._render_target, num_threads, "Rendering")
+            self._run(nodes, self._page_result, self._render_target, num_threads)
         if write:
-            self._run(nodes, None, self._write_target, num_threads, "Writing")
+            self._run(nodes, None, self._write_target, num_threads)
 
-    def _run(self, nodes, container, target, num_threads=1, prefix='Running'):
+    def _run(self, nodes, container, target, num_threads=1):
         """Helper function for running in parallel using Pipe"""
-
-        # Time the process
-        t = time.time()
-        LOG.info('%s using %s threads...', prefix, num_threads)
 
         # Create connection objects representing the receiver and sender ends of the pipe.
         receivers = []
@@ -578,8 +569,6 @@ class ParallelPipe(Executioner):
                         self._getPage(uid).attributes.update(attributes)
                         if container is not None:
                             container[uid] = out
-
-        LOG.info('Finished %s [%s sec.]', prefix, time.time() - t)
 
     def _read_target(self, nodes, conn):
         """Function for calling self.read with Connection object"""
