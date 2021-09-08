@@ -11,6 +11,9 @@
 
 #include "AuxKernel.h"
 
+/*
+ *Computes the mixing length for the mixing length turbulence model.
+ */
 class WallDistanceMixingLengthAux : public AuxKernel
 {
 public:
@@ -24,4 +27,6 @@ protected:
   std::vector<BoundaryName> _wall_boundary_names;
 
   const Real & _von_karman_const;
+  const Real & _von_karman_const_0;
+  const Real & _delta;
 };
