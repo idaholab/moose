@@ -90,6 +90,6 @@
 
 [LotsOfAuxVariables]
   [./avar]
-    number = 2000
+    number = 20
   [../]
 []

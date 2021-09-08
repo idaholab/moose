@@ -16,6 +16,7 @@
       ratio_tol = 3e-8
       difference_tol = 3e-6
       detail = 'using automatic differentiation and shall be able to produce the exact Jacobian.'
+      cli_args = 'Mesh/square/nx=3 Mesh/square/ny=3 -snes_test_err 1e-6'
     [../]
   [../]
 []
