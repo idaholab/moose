@@ -55,6 +55,7 @@
       difference_tol = 1e-5
       run_sim = True
       detail = "the correct Jacobian matrix."
+      cli_args = 'Mesh/nx=3 Mesh/ny=3'
     []
   []
 []
