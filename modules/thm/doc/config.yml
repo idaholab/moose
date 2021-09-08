@@ -23,6 +23,8 @@ Content:
         root_dir: ${MOOSE_DIR}/modules/rdg/doc/content
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
+    extra-css:
+        - css/thm.css
 Extensions:
     MooseDocs.extensions.navigation:
         name: THM
