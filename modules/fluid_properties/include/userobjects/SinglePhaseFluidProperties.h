@@ -160,15 +160,15 @@ public:
   propfunc(T, h, p)
   propfunc(rho, p, s)
   propfunc(e, v, h)
-  propfunc(s, p, T)
+  propfuncWithDefault(s, p, T)
   propfunc(pp_sat, p, T)
   propfunc(mu, rho, T)
   propfunc(k, rho, T)
-  propfunc(c, p, T)
-  propfunc(cp, p, T)
-  propfunc(cv, p, T)
-  propfunc(mu, p, T)
-  propfunc(k, p, T)
+  propfuncWithDefault(c, p, T)
+  propfuncWithDefault(cp, p, T)
+  propfuncWithDefault(cv, p, T)
+  propfuncWithDefault(mu, p, T)
+  propfuncWithDefault(k, p, T)
   propfunc(rho, p, T)
   propfunc(e, p, rho)
   propfunc(e, T, v)
@@ -288,6 +288,16 @@ public:
    * @return Henry's constant coefficients
    */
   virtual std::vector<Real> henryCoefficients() const;
+
+  virtual void v_e_from_p_T(Real p, Real T, Real & v, Real & e) const;
+  virtual void v_e_from_p_T(Real p,
+                            Real T,
+                            Real & v,
+                            Real & dv_dp,
+                            Real & dv_dT,
+                            Real & e,
+                            Real & de_dp,
+                            Real & de_dT) const;
 
   /**
    * Combined methods. These methods are particularly useful for the PorousFlow
