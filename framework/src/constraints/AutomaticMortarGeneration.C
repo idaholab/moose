@@ -593,7 +593,10 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     Elem * primary_elem = const_cast<Elem *>(msinfo.primary_elem);
     if (primary_elem == nullptr)
     {
+      // Remove element from mortar segment mesh
       mortar_segment_mesh->delete_elem(msm_elem);
+
+      // Erase msinfo
       msm_elem_to_info.erase(msm_elem);
     }
   }
@@ -608,12 +611,6 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
                 "primary element.");
   }
 #endif
-
-  // Set up the the mortar segment neighbor information.
-  mortar_segment_mesh->allow_renumbering(true);
-  mortar_segment_mesh->skip_partitioning(true);
-  mortar_segment_mesh->allow_find_neighbors(true);
-  mortar_segment_mesh->prepare_for_use();
 
   // (Optionally) Write the mortar segment mesh to file for inspection
   if (_debug)
@@ -1024,12 +1021,6 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
     // End loop through mortar constraint pairs
   }
 
-  // Set up the the mortar segment neighbor information.
-  mortar_segment_mesh->allow_renumbering(false);
-  mortar_segment_mesh->skip_partitioning(true);
-  mortar_segment_mesh->allow_find_neighbors(false);
-  mortar_segment_mesh->prepare_for_use();
-
 #ifndef NDEBUG
   // Output mortar segment mesh
   if (_debug)
@@ -1210,10 +1201,13 @@ AutomaticMortarGeneration::computeInactiveLMNodes()
         proc_to_active_nodes_vector[proc_set.first].push_back(node_id);
     }
 
+    const auto my_pid = mesh.processor_id();
+
     // First push data
-    auto action_functor = [this, &active_local_nodes](const processor_id_type libmesh_dbg_var(pid),
-                                                      const std::vector<dof_id_type> & sent_data) {
-      mooseAssert(pid != this->mesh.processor_id(), "should not be communicating with self");
+    auto action_functor = [my_pid,
+                           &active_local_nodes](const processor_id_type libmesh_dbg_var(pid),
+                                                const std::vector<dof_id_type> & sent_data) {
+      mooseAssert(pid != my_pid, "should not be communicating with self");
       for (const auto pr : sent_data)
         active_local_nodes.insert(pr);
     };
