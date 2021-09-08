@@ -6,35 +6,43 @@
     input = 'continuity_sphere_hex8.i'
     exodiff = 'continuity_sphere_hex8_out.e'
     requirement = 'We shall be able to produce the expected result for a solution continuity test case using the mortar method, e.g. the primal variable values across the mortar interface shall be the same.'
+    map = False
   []
   [continuity_sphere_hex27]
     type = 'Exodiff'
+    min_ad_size = 200
+    heavy = True
     input = 'continuity_sphere_hex27.i'
     exodiff = 'continuity_sphere_hex27_out.e'
     requirement = 'We shall be able to produce the expected result for a solution continuity test case using the mortar method, e.g. the primal variable values across the mortar interface shall be the same.'
+    map = False
   []
   [continuity_tet4]
     type = 'Exodiff'
     input = 'continuity_tet4.i'
     exodiff = 'continuity_tet4_out.e'
     requirement = 'We shall be able to produce the expected result for a solution continuity test case using the mortar method, e.g. the primal variable values across the mortar interface shall be the same.'
+    map = False
   []
   [continuity_tet10]
     type = 'Exodiff'
     input = 'continuity_tet10.i'
     exodiff = 'continuity_tet10_out.e'
     requirement = 'We shall be able to produce the expected result for a solution continuity test case using the mortar method, e.g. the primal variable values across the mortar interface shall be the same.'
+    map = False
   []
   [continuity_nonconforming_tet]
     type = 'Exodiff'
-    input = 'continuity_nonconforming_tet.i'
-    exodiff = 'continuity_nonconforming_tet_out.e'
+    input = 'continuity_non_conforming_tet.i'
+    exodiff = 'continuity_non_conforming_tet_out.e'
     requirement = 'We shall be able to produce the expected result for a solution continuity test case using the mortar method, e.g. the primal variable values across the mortar interface shall be the same.'
+    map = False
   []
   [continuity_mixed]
     type = 'Exodiff'
     input = 'continuity_mixed.i'
     exodiff = 'continuity_mixed_out.e'
     requirement = 'We shall be able to produce the expected result for a solution continuity test case using the mortar method, e.g. the primal variable values across the mortar interface shall be the same.'
+    map = False
   []
 []
