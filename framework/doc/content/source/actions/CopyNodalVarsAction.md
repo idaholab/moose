@@ -9,6 +9,6 @@ as used below,
 
 This syntax is restricted to restarting from `Exodus` files. More information about alternative
 options to restart simulations may be found in the
-[Restart/Recover system](application_usage/restart_recover.md).
+[Restart/Recover system](/application_usage/restart_recover.md optional=True).
 
 !syntax parameters /Variables/CopyNodalVarsAction

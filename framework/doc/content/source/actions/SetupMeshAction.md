@@ -5,7 +5,7 @@
 The `SetupMeshAction` is responsible for
 
 - setting the mesh base, which may come from `MeshGenerators`, from the legacy mesh loading (`file` parameter),
-or from a split mesh, a restart or a recovery process
+  or from a split mesh, a restart or a recovery process
 
 - the uniform refinement parameters
 
@@ -16,6 +16,7 @@ or from a split mesh, a restart or a recovery process
 - modifications to the mesh generation process when using split meshes
 
 - mesh initialization
+
 
 More information about the `Mesh` may be found on the
 [Mesh syntax documentation](syntax/Mesh/index.md).
