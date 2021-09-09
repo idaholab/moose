@@ -921,7 +921,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
           }
         }
 
-        // Mark primary elmenet as processed and remove from candidate list
+        // Mark primary element as processed and remove from candidate list
         processed_primary_elems.insert(primary_elem_candidate);
         primary_elem_candidates.erase(primary_elem_candidate);
 
@@ -1015,6 +1015,9 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
                            " a corresponding primary element; this may be expected depending on"
                            " problem geometry but may indicate a failure of the element search"
                            " or projection"));
+
+        // Deallocate helpers
+        delete mortar_segment_helper[sel];
       }
       // End loop through secondary elements
     }
@@ -1204,7 +1207,8 @@ AutomaticMortarGeneration::computeInactiveLMNodes()
     // First push data
     auto action_functor = [this, &active_local_nodes](const processor_id_type pid,
                                                       const std::vector<dof_id_type> & sent_data) {
-      mooseError(pid != mesh.processor_id(), "should not be communicating with self");
+      if (pid == mesh.processor_id())
+        mooseError("Should not be communicating with self.");
       for (const auto pr : sent_data)
         active_local_nodes.insert(pr);
     };
