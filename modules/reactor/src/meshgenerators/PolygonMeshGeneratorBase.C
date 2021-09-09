@@ -89,7 +89,7 @@ PolygonMeshGeneratorBase::build_simple_slice(std::unique_ptr<ReplicatedMesh> mes
                                {0.5 * corner_to_corner * std::sin(2.0 * M_PI / side_number),
                                 0.5 * corner_to_corner * std::cos(2.0 * M_PI / side_number)}};
   const unsigned int div_num = angle_number / 2 + 1;
-  Real id_array[div_num][div_num];
+  std::vector<std::vector<dof_id_type>> id_array(div_num, std::vector<dof_id_type>(div_num));
   dof_id_type node_id = 0;
   if (quad_center_elements)
   {
@@ -110,7 +110,7 @@ PolygonMeshGeneratorBase::build_simple_slice(std::unique_ptr<ReplicatedMesh> mes
                         ring_radii_0,
                         &node_id,
                         &nodes,
-                        (Real *)id_array);
+                        &id_array);
   }
   else
   {
@@ -193,7 +193,7 @@ PolygonMeshGeneratorBase::build_simple_slice(std::unique_ptr<ReplicatedMesh> mes
                              nodes,
                              block_id_shift,
                              boundary_id_shift,
-                             (Real *)id_array);
+                             &id_array);
   }
   else
   {
@@ -254,7 +254,7 @@ PolygonMeshGeneratorBase::center_nodes(std::unique_ptr<ReplicatedMesh> mesh,
                                        const Real ring_radii_0,
                                        dof_id_type * node_id,
                                        std::vector<Node *> * nodes,
-                                       Real * id_array)
+                                       std::vector<std::vector<dof_id_type>> * id_array)
 {
   const std::pair<Real, Real> p_origin = std::make_pair(0.0, 0.0);
   const std::pair<Real, Real> p_bottom =
@@ -286,7 +286,7 @@ PolygonMeshGeneratorBase::center_nodes(std::unique_ptr<ReplicatedMesh> mesh,
       std::pair<Real, Real> pc = four_point_intercept(p1, p2, p3, p4);
       Point p = Point(pc.first, pc.second, 0.0);
       (*nodes)[*node_id] = mesh->add_point(p, *node_id);
-      *(id_array + id_x * div_num + id_y) = *node_id;
+      (*id_array)[id_x][id_y] = *node_id;
       (*node_id)++;
       if (j < i)
         id_x++;
@@ -526,7 +526,7 @@ PolygonMeshGeneratorBase::cen_quad_elem_def(std::unique_ptr<ReplicatedMesh> mesh
                                             const std::vector<Node *> nodes,
                                             const unsigned int block_id_shift,
                                             const unsigned int boundary_id_shift,
-                                            Real * id_array)
+                                            std::vector<std::vector<dof_id_type>> * id_array)
 {
 
   BoundaryInfo & boundary_info = mesh->get_boundary_info();
@@ -539,10 +539,10 @@ PolygonMeshGeneratorBase::cen_quad_elem_def(std::unique_ptr<ReplicatedMesh> mesh
     for (unsigned int j = 0; j < 2 * i + 1; j++)
     {
       Elem * elem_Quad4 = mesh->add_elem(new Quad4);
-      elem_Quad4->set_node(0) = nodes[*(id_array + id_x * div_num + id_y)];
-      elem_Quad4->set_node(3) = nodes[*(id_array + id_x * div_num + id_y + 1)];
-      elem_Quad4->set_node(2) = nodes[*(id_array + (id_x + 1) * div_num + id_y + 1)];
-      elem_Quad4->set_node(1) = nodes[*(id_array + (id_x + 1) * div_num + id_y)];
+      elem_Quad4->set_node(0) = nodes[(*id_array)[id_x][id_y]];
+      elem_Quad4->set_node(3) = nodes[(*id_array)[id_x][id_y + 1]];
+      elem_Quad4->set_node(2) = nodes[(*id_array)[id_x + 1][id_y + 1]];
+      elem_Quad4->set_node(1) = nodes[(*id_array)[id_x + 1][id_y]];
       elem_Quad4->subdomain_id() = 1 + block_id_shift;
       if (id_x == 0)
         boundary_info.add_side(elem_Quad4, 3, SLICE_BEGIN);

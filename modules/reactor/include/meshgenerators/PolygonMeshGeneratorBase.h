@@ -86,7 +86,7 @@ protected:
                                                const Real ring_radii_0,
                                                dof_id_type * node_id,
                                                std::vector<Node *> * nodes,
-                                               Real * id_array);
+                                               std::vector<std::vector<dof_id_type>> * id_array);
 
   std::unique_ptr<ReplicatedMesh>
   ring_nodes(std::unique_ptr<ReplicatedMesh> mesh,
@@ -123,12 +123,13 @@ protected:
              std::vector<Node *> * nodes,
              const std::vector<Real> azimuthal_tangent = std::vector<Real>());
 
-  std::unique_ptr<ReplicatedMesh> cen_quad_elem_def(std::unique_ptr<ReplicatedMesh> mesh,
-                                                    const unsigned int div_num,
-                                                    const std::vector<Node *> nodes,
-                                                    const unsigned int block_id_shift,
-                                                    const unsigned int boundary_id_shift,
-                                                    Real * id_array);
+  std::unique_ptr<ReplicatedMesh>
+  cen_quad_elem_def(std::unique_ptr<ReplicatedMesh> mesh,
+                    const unsigned int div_num,
+                    const std::vector<Node *> nodes,
+                    const unsigned int block_id_shift,
+                    const unsigned int boundary_id_shift,
+                    std::vector<std::vector<dof_id_type>> * id_array);
 
   std::unique_ptr<ReplicatedMesh>
   cen_tri_elem_def(std::unique_ptr<ReplicatedMesh> mesh,
