@@ -104,7 +104,7 @@ CombinerGenerator::fillPositions()
       file.setFormatFlag(MooseUtils::DelimitedFileReader::FormatFlag::ROWS);
       file.read();
 
-      const std::vector<std::vector<double>> & data = file.getData();
+      const std::vector<Point> & data = file.getDataAsPoints();
 
       if (_input_names.size() != 1)
         if (data.size() && (_input_names.size() != data.size()))
@@ -112,25 +112,8 @@ CombinerGenerator::fillPositions()
                      "If more than one input mesh is provided then the number of positions must "
                      "exactly match the number of input meshes.");
 
-      if (file.numEntries() % LIBMESH_DIM != 0)
-        mooseError("Number of entries in 'positions_file' ",
-                   f,
-                   " must be divisible by ",
-                   LIBMESH_DIM,
-                   " in CombinerGenerator ",
-                   name());
-
-      for (unsigned int i = 0; i < data.size(); ++i)
-      {
-        Point position;
-
-        // This is here so it will theoretically work with LIBMESH_DIM=1 or 2. That is completely
-        // untested!
-        for (unsigned int j = 0; j < LIBMESH_DIM; j++)
-          position(j) = data[i][j];
-
-        _positions.push_back(position);
-      }
+      for (const auto & d : data)
+        _positions.push_back(d);
     }
   }
 }

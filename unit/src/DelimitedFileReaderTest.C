@@ -12,6 +12,7 @@
 // MOOSE includes
 #include "DelimitedFileReader.h"
 #include "MooseException.h"
+#include "libmesh/point.h"
 
 TEST(DelimitedFileReader, BadFilename)
 {
@@ -128,6 +129,23 @@ TEST(DelimitedFileReader, DataChangeDelimiter)
     std::vector<std::vector<double>> gold = {
         {1980, 1980, 2011, 2013}, {6, 10, 5, 5}, {24, 9, 1, 15}};
     EXPECT_EQ(data, gold);
+  }
+}
+
+TEST(DelimitedFileReader, WrongPointSize)
+{
+  try
+  {
+    MooseUtils::DelimitedFileReader reader("data/csv/example_bad_points.csv");
+    reader.read();
+    const std::vector<Point> pts = reader.getDataAsPoints();
+    FAIL();
+  }
+  catch (const std::exception & err)
+  {
+    std::string gold = "Each point in file data/csv/example_bad_points.csv must have 3 entries";
+    std::size_t pos = std::string(err.what()).find(gold);
+    ASSERT_TRUE(pos != std::string::npos);
   }
 }
 

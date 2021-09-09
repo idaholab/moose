@@ -18,6 +18,7 @@
 
 // MOOSE includes
 #include "MooseEnum.h"
+#include "MooseTypes.h"
 
 namespace MooseUtils
 {
@@ -102,6 +103,12 @@ public:
    * The outer vector is column and the inner the rows.
    */
   const std::vector<std::vector<double>> & getData() const;
+
+  /**
+   * Get the data in Point format. This performs checks that the data
+   * is of valid dimensions to do so.
+   */
+  const std::vector<Point> getDataAsPoints() const;
 
   ///@{
   /**

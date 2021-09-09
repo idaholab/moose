@@ -12,6 +12,7 @@
 // MOOSE includes
 #include "ElementIntegralVariableUserObject.h"
 #include "Enumerate.h"
+#include "DelimitedFileReader.h"
 
 // Forward Declarations
 class UserObject;
@@ -159,38 +160,11 @@ NearestPointBase<UserObjectType, BaseType>::fillPoints()
   else if (isParamValid("points_file"))
   {
     const FileName & points_file = this->template getParam<FileName>("points_file");
-    std::vector<Real> points_vec;
 
-    if (processor_id() == 0)
-    {
-      MooseUtils::checkFileReadable(points_file);
-
-      std::ifstream is(points_file.c_str());
-      std::istream_iterator<Real> begin(is), end;
-      points_vec.insert(points_vec.begin(), begin, end);
-
-      if (points_vec.size() % LIBMESH_DIM != 0)
-        mooseError(name(),
-                   ": Number of entries in 'points_file' ",
-                   points_file,
-                   " must be divisible by ",
-                   LIBMESH_DIM);
-    }
-
-    // Broadcast the vector to all processors
-    std::size_t num_points = points_vec.size();
-    _communicator.broadcast(num_points);
-    points_vec.resize(num_points);
-    _communicator.broadcast(points_vec);
-
-    for (std::size_t i = 0; i < points_vec.size(); i += LIBMESH_DIM)
-    {
-      Point point;
-      for (std::size_t j = 0; j < LIBMESH_DIM; j++)
-        point(j) = points_vec[i + j];
-
-      _points.push_back(point);
-    }
+    MooseUtils::DelimitedFileReader file(points_file, &_communicator);
+    file.setFormatFlag(MooseUtils::DelimitedFileReader::FormatFlag::ROWS);
+    file.read();
+    _points = file.getDataAsPoints();
   }
   else
     mooseError(name(), ": You need to supply either 'points' or 'points_file' parameter.");
