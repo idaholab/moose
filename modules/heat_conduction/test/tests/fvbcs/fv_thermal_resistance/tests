@@ -1,0 +1,12 @@
+[Tests]
+  [thermal_resistance]
+    issues = '#18626'
+    design = 'FVThermalResistanceBC.md'
+    requirement = 'The system shall be able to solve a heat conduction problem with diffusion/conduction/radiation combined thermal resistance boundary conditions.'
+    type = Exodiff
+    input = test.i
+    exodiff = 'test_out.e'
+    allow_warnings = true # thermal resistance bc has an inner solve that may not always converge enough
+    ad_indexing_type = 'global'
+  []
+[]

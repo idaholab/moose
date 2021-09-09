@@ -48,6 +48,9 @@ protected:
   /// Radius corresponding to the cylindrical surface (when using a cylindrical geometry)
   const Real _inner_radius;
 
+  /// temperature variable
+  const ADVariableValue & _T;
+
   /// ambient temperature for convection and radiation heat transfer
   const Real _T_ambient;
 
