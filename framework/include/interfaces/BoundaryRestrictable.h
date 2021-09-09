@@ -185,6 +185,9 @@ private:
   /// Set of the boundary ids
   std::set<BoundaryID> _bnd_ids;
 
+  /// Vector of the boundary ids
+  std::vector<BoundaryID> _vec_ids;
+
   /// Vector the the boundary names
   std::vector<BoundaryName> _boundary_names;
 

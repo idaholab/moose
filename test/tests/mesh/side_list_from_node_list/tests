@@ -2,7 +2,7 @@
   [missing_side_set]
     type = 'RunException'
     input = 'side_list_from_node_list.i'
-    expect_err = 'the following side set ids do not exist on the mesh: \d+'
+    expect_err = 'the following side sets \(ids\) do not exist on the mesh: 2'
 
     requirement = 'The system shall issue a diagnostic when a referenced side set does not exist in the mesh.'
     design = 'MooseMesh.md'
