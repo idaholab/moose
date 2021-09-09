@@ -1,6 +1,6 @@
 [Tests]
   design = PhysicsBasedPreconditioner.md
-  issues = '#1048'
+  issues = '#1048 #18777'
 
   [pbp]
     requirement = "The system shall support the use of a physics based preconditioner"
@@ -38,11 +38,7 @@
     type = 'Exodiff'
     input = 'lots_of_variables.i'
     exodiff = 'lots_of_variables_out.e'
-    max_parallel = 1
-    max_time = 60 # Newer GCC + Profiling takes ~30 seconds
-    compiler = 'GCC'
-    method = 'OPT OPROF'
-    valgrind = 'NONE'
+
     # this test has unknown issue with PETSc-master
     # It is related to communcators in VTK
     # We will fix it in the new release
