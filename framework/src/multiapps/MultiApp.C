@@ -25,6 +25,7 @@
 #include "CommandLine.h"
 #include "Conversion.h"
 #include "NonlinearSystemBase.h"
+#include "DelimitedFileReader.h"
 
 #include "libmesh/mesh_tools.h"
 #include "libmesh/numeric_vector.h"
@@ -443,49 +444,20 @@ MultiApp::fillPositions()
     for (unsigned int p_file_it = 0; p_file_it < positions_files.size(); p_file_it++)
     {
       std::string positions_file = positions_files[p_file_it];
+      MooseUtils::DelimitedFileReader file(positions_file, &_communicator);
+      file.setFormatFlag(MooseUtils::DelimitedFileReader::FormatFlag::ROWS);
+      file.read();
 
-      std::vector<Real> positions_vec;
+      const std::vector<Point> & data = file.getDataAsPoints();
+      for (const auto & d : data)
+        _positions.push_back(d);
 
-      // Read the file on the root processor then broadcast it
-      if (processor_id() == 0)
-      {
-        MooseUtils::checkFileReadable(positions_file);
-
-        std::ifstream is(positions_file.c_str());
-        std::istream_iterator<Real> begin(is), end;
-        positions_vec.insert(positions_vec.begin(), begin, end);
-
-        if (positions_vec.size() % LIBMESH_DIM != 0)
-          mooseError("Number of entries in 'positions_file' ",
-                     positions_file,
-                     " must be divisible by ",
-                     LIBMESH_DIM,
-                     " in MultiApp ",
-                     name());
-      }
-
-      // Bradcast the vector to all processors
-      std::size_t num_positions = positions_vec.size();
-      _communicator.broadcast(num_positions);
       // Save the number of positions for this input file
-      _npositions_inputfile.push_back(num_positions / LIBMESH_DIM);
-      positions_vec.resize(num_positions);
-      _communicator.broadcast(positions_vec);
+      _npositions_inputfile.push_back(data.size());
 
-      for (unsigned int i = 0; i < positions_vec.size(); i += LIBMESH_DIM)
-      {
+      for (unsigned int i = 0; i < data.size(); ++i)
         if (input_files.size() != 1)
           _input_files.push_back(input_files[p_file_it]);
-
-        Point position;
-
-        // This is here so it will theoretically work with LIBMESH_DIM=1 or 2. That is completely
-        // untested!
-        for (unsigned int j = 0; j < LIBMESH_DIM; j++)
-          position(j) = positions_vec[i + j];
-
-        _positions.push_back(position);
-      }
     }
   }
   else

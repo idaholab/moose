@@ -62,7 +62,7 @@
   [./bad_positions]
     type = 'RunException'
     input = 'check_error.i'
-    expect_err = 'Number of entries in \'positions_file\''
+    expect_err = 'Each point in file'
     cli_args = 'MultiApps/multi/input_files="sub1.i" MultiApps/multi/positions_file="bad_positions.txt"'
 
     issues = "#1845 #3556 #5784"

@@ -142,6 +142,37 @@ DelimitedFileReader::getData() const
   return _data;
 }
 
+const std::vector<Point>
+DelimitedFileReader::getDataAsPoints() const
+{
+  std::vector<Point> point_data;
+
+  for (std::size_t i = 0; i < _data.size(); ++i)
+  {
+    Point point;
+
+    // Other checks in this class ensure that each data entry has the same number of values;
+    // here we just need to check that each data set has LIBMESH_DIM entries (which we could do by
+    // equivalently checking that the total number of entries is divisibly by LIBMESH_DIM
+    // _and_ one of these data sets has LIBMESH_DIM entries (consider the fringe case where
+    // LIBMESH_DIM is 3, but you accidentally put a point file like
+    //   0 0
+    //   1 0
+    //   2 0
+    // where each point is the same length _and_ the total points is still divisible by 3.
+    // This check here is more exact.
+    if (_data.at(i).size() != LIBMESH_DIM)
+      mooseError("Each point in file ", _filename, " must have ", LIBMESH_DIM, " entries");
+
+    for (std::size_t j = 0; j < LIBMESH_DIM; ++j)
+      point(j) = _data.at(i).at(j);
+
+    point_data.push_back(point);
+  }
+
+  return point_data;
+}
+
 const std::vector<double> &
 DelimitedFileReader::getData(const std::string & name) const
 {
