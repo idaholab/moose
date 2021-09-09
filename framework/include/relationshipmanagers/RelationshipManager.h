@@ -122,6 +122,8 @@ public:
    */
   bool useDisplacedMesh() const { return _use_displaced_mesh; }
 
+  const DofMap * dofMap() { return _dof_map; }
+
 protected:
   /**
    * Called before this RM is attached.  Only called once
