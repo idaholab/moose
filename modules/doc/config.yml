@@ -134,6 +134,7 @@ Extensions:
             xfem: !include modules/xfem/doc/sqa_xfem.yml
             navier_stokes: !include modules/navier_stokes/doc/sqa_navier_stokes.yml
             rdg: !include modules/rdg/doc/sqa_rdg.yml
+            reactor: !include modules/reactor/doc/sqa_reactor.yml
             ray_tracing: !include modules/ray_tracing/doc/sqa_ray_tracing.yml
             fsi: !include modules/fsi/doc/sqa_fsi.yml
 

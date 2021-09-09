@@ -27,6 +27,7 @@
 #include "PorousFlowApp.h"
 #include "RayTracingApp.h"
 #include "RdgApp.h"
+#include "ReactorApp.h"
 #include "RichardsApp.h"
 #include "StochasticToolsApp.h"
 #include "PeridynamicsApp.h"
@@ -80,6 +81,7 @@ CombinedApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   PorousFlowApp::registerAll(f, af, s);
   RayTracingApp::registerAll(f, af, s);
   RdgApp::registerAll(f, af, s);
+  ReactorApp::registerAll(f, af, s);
   RichardsApp::registerAll(f, af, s);
   StochasticToolsApp::registerAll(f, af, s);
   PeridynamicsApp::registerAll(f, af, s);
