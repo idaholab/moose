@@ -71,7 +71,7 @@ GrainAdvectionVelocity::computeQpProperties()
       {
         const RealGradient velocity_translation = _mt / volume * _grain_forces[i];
         const RealGradient velocity_rotation =
-            _mr / volume * (_grain_torques[i].cross(_current_elem->centroid() - centroid));
+            _mr / volume * (_grain_torques[i].cross(_current_elem->vertex_average() - centroid));
 
         _velocity_advection[_qp][i] = velocity_translation + velocity_rotation;
       }

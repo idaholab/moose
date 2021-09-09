@@ -82,7 +82,7 @@ SidesetInfoVectorPostprocessor::execute()
 
   auto & bd = _boundary_data.find(_current_boundary_id)->second;
   bd.area += _current_side_volume;
-  bd.centroid += _current_side_elem->centroid() * _current_side_volume;
+  bd.centroid += _current_side_elem->vertex_average() * _current_side_volume;
 
   BoundingBox box = _current_side_elem->loose_bounding_box();
   Point lmin = box.min();

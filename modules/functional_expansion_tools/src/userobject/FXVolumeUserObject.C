@@ -38,7 +38,7 @@ FXVolumeUserObject::FXVolumeUserObject(const InputParameters & parameters)
 Point
 FXVolumeUserObject::getCentroid() const
 {
-  return _current_elem->centroid();
+  return _current_elem->vertex_average();
 }
 
 Real

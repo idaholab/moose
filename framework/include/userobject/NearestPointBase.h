@@ -182,7 +182,7 @@ template <typename UserObjectType, typename BaseType>
 void
 NearestPointBase<UserObjectType, BaseType>::execute()
 {
-  nearestUserObject(_current_elem->centroid())->execute();
+  nearestUserObject(_current_elem->vertex_average())->execute();
 }
 
 template <typename UserObjectType, typename BaseType>

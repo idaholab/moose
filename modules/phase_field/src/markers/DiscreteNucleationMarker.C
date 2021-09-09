@@ -34,7 +34,7 @@ DiscreteNucleationMarker::DiscreteNucleationMarker(const InputParameters & param
 Marker::MarkerValue
 DiscreteNucleationMarker::computeElementMarker()
 {
-  const RealVectorValue centroid = _current_elem->centroid();
+  const RealVectorValue centroid = _current_elem->vertex_average();
   const Real size = 0.5 * _current_elem->hmax();
 
   // check if the surface of a nucleus might touch the element

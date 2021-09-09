@@ -206,7 +206,7 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem) const
   if (coord_system == Moose::CoordinateSystemType::COORD_RZ)
   {
     const auto r_coord = this->_subproblem.getAxisymmetricRadialCoord();
-    grad_b(r_coord) -= elem_value / elem->centroid()(r_coord);
+    grad_b(r_coord) -= elem_value / elem->vertex_average()(r_coord);
   }
 
   mooseAssert(coord_system != Moose::CoordinateSystemType::COORD_RSPHERICAL,

@@ -84,7 +84,7 @@ WallFunctionWallShearStressAux::computeValue()
           const auto side_elem_ptr = elem.side_ptr(i_side);
           const FaceInfo * const fi = _mesh.faceInfo(&elem, i_side);
           const Point & this_normal = fi->normal();
-          Point this_wall_vec = (elem.centroid() - side_elem_ptr->centroid());
+          Point this_wall_vec = (elem.vertex_average() - side_elem_ptr->vertex_average());
           Real dist = std::abs(this_wall_vec * normal);
           if (dist < min_wall_dist)
           {

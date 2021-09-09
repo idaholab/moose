@@ -63,7 +63,7 @@ FVPropValPerSubdomainMaterialTempl<is_ad>::computeQpProperties()
       _face_info = _mesh.faceInfo(neighbor, neighbor_side);
       mooseAssert(_face_info, "We need to have retrieved something.");
     }
-    mooseAssert(_current_elem->build_side_ptr(_current_side)->centroid() ==
+    mooseAssert(_current_elem->build_side_ptr(_current_side)->vertex_average() ==
                     _face_info->faceCentroid(),
                 "Making sure we're in the right place");
     auto it = _sub_id_to_prop.find(_current_elem->subdomain_id());

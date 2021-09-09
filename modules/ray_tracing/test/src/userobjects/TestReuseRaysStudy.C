@@ -36,7 +36,7 @@ TestReuseRaysStudy::generateRays()
     for (const auto elem : *_mesh.getActiveLocalElementRange())
     {
       auto ray = acquireRay();
-      ray->setStart(elem->centroid(), elem);
+      ray->setStart(elem->vertex_average(), elem);
       ray->setStartingDirection(Point(1, 0, 0));
       moveRayToBuffer(ray);
     }

@@ -171,14 +171,14 @@ PeridynamicsMesh::createPeridynamicsMeshData(
     for (unsigned int j = 0; j < fe_elem->n_neighbors(); ++j)
       if (fe_elem->neighbor_ptr(j) != nullptr)
       {
-        dist_sum += (fe_elem->centroid() - fe_elem->neighbor_ptr(j)->centroid()).norm();
+        dist_sum += (fe_elem->vertex_average() - fe_elem->neighbor_ptr(j)->vertex_average()).norm();
         n_fe_neighbors++;
       }
       else // this side is on boundary and calculate the distance to the centroid
       {
         Real dist = 0.0;
         std::vector<unsigned int> nid = fe_elem->nodes_on_side(j);
-        Point p0 = fe_elem->centroid();
+        Point p0 = fe_elem->vertex_average();
         Point p1 = fe_elem->point(nid[0]);
         if (fe_elem->dim() == 2) // 2D elems
         {
@@ -201,7 +201,7 @@ PeridynamicsMesh::createPeridynamicsMeshData(
         _boundary_node_offset.insert(std::make_pair(id, -dist));
       }
 
-    _pdnode_coord[id] = fe_elem->centroid();
+    _pdnode_coord[id] = fe_elem->vertex_average();
     _pdnode_average_spacing[id] = dist_sum / n_fe_neighbors;
     _pdnode_horizon_radius[id] =
         (_has_horizon_number ? _horizon_number * dist_sum / n_fe_neighbors : _horizon_radius);

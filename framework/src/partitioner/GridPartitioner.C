@@ -123,7 +123,7 @@ GridPartitioner::_do_partition(MeshBase & mesh, const unsigned int /*n*/)
   for (auto & elem_ptr : mesh.active_element_ptr_range())
   {
     // Find the element it lands in in the GeneratedMesh
-    auto centroid = elem_ptr->centroid();
+    auto centroid = elem_ptr->vertex_average();
 
     coordx = centroid(0);
     mooseAssert(coordx >= min(0) && coordy <= max(0),

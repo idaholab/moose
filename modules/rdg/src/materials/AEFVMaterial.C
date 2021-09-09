@@ -51,7 +51,7 @@ AEFVMaterial::computeQpProperties()
     ugrad = _lslope.getElementSlope(_current_elem->id());
 
     // get the directional vector from cell center to face center
-    RealGradient dvec = _q_point[_qp] - _current_elem->centroid();
+    RealGradient dvec = _q_point[_qp] - _current_elem->vertex_average();
 
     // calculate the variable at face center
     _u[_qp] += ugrad[0] * dvec;

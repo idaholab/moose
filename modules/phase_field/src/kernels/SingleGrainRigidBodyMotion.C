@@ -100,7 +100,7 @@ SingleGrainRigidBodyMotion::getUserObjectJacobian(unsigned int jvar, dof_id_type
 
     const auto force_jac = _mt / volume * force_jacobian;
     const auto torque_jac =
-        _mr / volume * torque_jacobian.cross(_current_elem->centroid() - centroid);
+        _mr / volume * torque_jacobian.cross(_current_elem->vertex_average() - centroid);
 
     _velocity_advection_jacobian = (force_jac + torque_jac);
   }
@@ -120,7 +120,7 @@ SingleGrainRigidBodyMotion::calculateAdvectionVelocity()
     const auto centroid = _grain_tracker.getGrainCentroid(grain_id);
     const auto force = _mt / volume * _grain_forces[grain_id];
     const auto torque =
-        _mr / volume * (_grain_torques[grain_id].cross(_current_elem->centroid() - centroid));
+        _mr / volume * (_grain_torques[grain_id].cross(_current_elem->vertex_average() - centroid));
 
     _velocity_advection = (force + torque);
   }

@@ -351,7 +351,7 @@ MultiAppConservativeTransfer::adjustTransferedSolutionNearestPoint(
       Real scale = 1;
       if (_current_direction == FROM_MULTIAPP)
       {
-        unsigned int ii = pps.nearestPointIndex(elem->centroid());
+        unsigned int ii = pps.nearestPointIndex(elem->vertex_average());
         if (ii != i || !performAdjustment(from_adjuster, pps.userObjectValue(i)))
           continue;
 

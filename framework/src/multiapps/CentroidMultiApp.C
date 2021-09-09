@@ -43,7 +43,7 @@ CentroidMultiApp::fillPositions()
 
   for (const auto & elem_ptr : master_mesh.getMesh().active_local_element_ptr_range())
     if (hasBlocks(elem_ptr->subdomain_id()))
-      _positions.push_back(elem_ptr->centroid());
+      _positions.push_back(elem_ptr->vertex_average());
 
   // Use the comm from the problem this MultiApp is part of
   libMesh::ParallelObject::comm().allgather(_positions);

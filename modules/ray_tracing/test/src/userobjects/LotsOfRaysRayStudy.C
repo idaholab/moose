@@ -138,7 +138,7 @@ LotsOfRaysRayStudy::defineRays()
   {
     for (const auto & elem : *_mesh.getActiveLocalElementRange())
       if (elem->on_boundary())
-        boundary_centroids.push_back(elem->centroid());
+        boundary_centroids.push_back(elem->vertex_average());
     _comm.allgather(boundary_centroids);
   }
 
@@ -157,7 +157,7 @@ LotsOfRaysRayStudy::defineRays()
       continue;
 
     // Centroid on this boundary face
-    const auto & side_centroid = sidePtrHelper(elem, side)->centroid();
+    const auto & side_centroid = sidePtrHelper(elem, side)->vertex_average();
 
     // Vertices on this boundary side -> in direction of all other vertices not on said boundary
     // side on elem
@@ -185,11 +185,11 @@ LotsOfRaysRayStudy::defineRays()
       for (const auto edge : elem->edge_index_range())
         if (elem->is_edge_on_side(edge, side))
         {
-          const Point edge_centroid = elem->build_edge_ptr(edge)->centroid();
+          const Point edge_centroid = elem->build_edge_ptr(edge)->vertex_average();
           for (const auto edge_to : elem->edge_index_range())
             if (edge != edge_to)
               defineRay(
-                  elem, side, edge_centroid, elem->build_edge_ptr(edge_to)->centroid(), false);
+                  elem, side, edge_centroid, elem->build_edge_ptr(edge_to)->vertex_average(), false);
         }
 
     if (_side_aq)
@@ -210,7 +210,7 @@ LotsOfRaysRayStudy::defineRays()
     for (const Elem * elem : *_mesh.getActiveLocalElementRange())
       if (elem->processor_id() == _pid && elem->on_boundary())
       {
-        const auto centroid = elem->centroid();
+        const auto centroid = elem->vertex_average();
         for (std::size_t l = 0; l < full_aq.numDirections(); ++l)
           defineRay(elem,
                     RayTracingCommon::invalid_side,

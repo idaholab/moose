@@ -490,7 +490,7 @@ MooseVariableFV<OutputType>::getVertexValue(const Node & vertex) const
     if (this->hasBlocks(elem->subdomain_id()))
     {
       const auto & elem_value = getElemValue(elem);
-      auto distance = (vertex - elem->centroid()).norm();
+      auto distance = (vertex - elem->vertex_average()).norm();
       numerator += elem_value / distance;
       denominator += 1. / distance;
     }
@@ -842,7 +842,7 @@ MooseVariableFV<OutputType>::adGradSln(const Elem * const elem) const
   if (coord_system == Moose::CoordinateSystemType::COORD_RZ)
   {
     const auto r_coord = this->_subproblem.getAxisymmetricRadialCoord();
-    grad_b(r_coord) -= elem_value / elem->centroid()(r_coord);
+    grad_b(r_coord) -= elem_value / elem->vertex_average()(r_coord);
   }
 
   mooseAssert(coord_system != Moose::CoordinateSystemType::COORD_RSPHERICAL,
