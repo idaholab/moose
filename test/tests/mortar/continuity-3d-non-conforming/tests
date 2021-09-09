@@ -7,6 +7,7 @@
     exodiff = 'continuity_sphere_hex8_out.e'
     requirement = 'We shall be able to produce the expected result for a solution continuity test case using the mortar method, e.g. the primal variable values across the mortar interface shall be the same.'
     map = False
+    partial = True
   []
   [continuity_sphere_hex27]
     type = 'Exodiff'
@@ -16,6 +17,7 @@
     exodiff = 'continuity_sphere_hex27_out.e'
     requirement = 'We shall be able to produce the expected result for a solution continuity test case using the mortar method, e.g. the primal variable values across the mortar interface shall be the same.'
     map = False
+    partial = True
   []
   [continuity_tet4]
     type = 'Exodiff'
@@ -23,6 +25,7 @@
     exodiff = 'continuity_tet4_out.e'
     requirement = 'We shall be able to produce the expected result for a solution continuity test case using the mortar method, e.g. the primal variable values across the mortar interface shall be the same.'
     map = False
+    partial = True
   []
   [continuity_tet10]
     type = 'Exodiff'
@@ -30,6 +33,7 @@
     exodiff = 'continuity_tet10_out.e'
     requirement = 'We shall be able to produce the expected result for a solution continuity test case using the mortar method, e.g. the primal variable values across the mortar interface shall be the same.'
     map = False
+    partial = True
   []
   [continuity_nonconforming_tet]
     type = 'Exodiff'
@@ -37,6 +41,7 @@
     exodiff = 'continuity_non_conforming_tet_out.e'
     requirement = 'We shall be able to produce the expected result for a solution continuity test case using the mortar method, e.g. the primal variable values across the mortar interface shall be the same.'
     map = False
+    partial = True
   []
   [continuity_mixed]
     type = 'Exodiff'
@@ -44,5 +49,6 @@
     exodiff = 'continuity_mixed_out.e'
     requirement = 'We shall be able to produce the expected result for a solution continuity test case using the mortar method, e.g. the primal variable values across the mortar interface shall be the same.'
     map = False
+    partial = True
   []
 []
