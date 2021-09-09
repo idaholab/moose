@@ -43,13 +43,15 @@ struct FEBaseHelper<RealVectorValue>
 #ifdef MOOSE_GLOBAL_AD_INDEXING
 
 template <typename OutputType>
-template <typename Shapes, typename Solution>
+template <typename Shapes, typename Solution, typename GradShapes, typename GradSolution>
 void
 MooseVariableField<OutputType>::computeSolution(const Elem * const elem,
                                                 const QBase * const qrule,
                                                 const unsigned int state,
                                                 const Shapes & phi,
-                                                Solution & local_soln) const
+                                                Solution & local_soln,
+                                                const GradShapes & grad_phi,
+                                                GradSolution & grad_local_soln) const
 {
   std::vector<dof_id_type> dof_indices;
   _dof_map.dof_indices(elem, dof_indices, _var_num);
@@ -67,24 +69,29 @@ MooseVariableField<OutputType>::computeSolution(const Elem * const elem,
 
   const auto n_qp = qrule->n_points();
   local_soln.resize(n_qp);
+  grad_local_soln.resize(n_qp);
 
   for (const auto qp : make_range(n_qp))
   {
     local_soln[qp] = 0;
+    grad_local_soln[qp] = 0;
     for (const auto i : index_range(dof_indices))
+    {
       local_soln[qp] += dof_values[i] * phi[i][qp];
+      grad_local_soln[qp] += dof_values[i] * grad_phi[i][qp];
+    }
   }
 }
 
 template <typename OutputType>
-typename MooseVariableField<OutputType>::ValueType
-MooseVariableField<OutputType>::evaluate(const ElemQpArg & elem_qp, const unsigned int state) const
+void
+MooseVariableField<OutputType>::evaluateOnElement(const ElemQpArg & elem_qp,
+                                                  const unsigned int state) const
 {
   mooseAssert(this->hasBlocks(std::get<0>(elem_qp)->subdomain_id()),
               "This variable doesn't exist in the requested block!");
 
   const Elem * const elem = std::get<0>(elem_qp);
-  const auto qp = std::get<1>(elem_qp);
   if (elem != _current_elem_qp_functor_elem)
   {
     _current_elem_qp_functor_elem = elem;
@@ -96,27 +103,60 @@ MooseVariableField<OutputType>::evaluate(const ElemQpArg & elem_qp, const unsign
         qrule_template->type(), qrule_template->get_dim(), qrule_template->get_order()));
 
     const auto & phi = fe->get_phi();
+    const auto & dphi = fe->get_dphi();
     fe->attach_quadrature_rule(qrule.get());
     fe->reinit(elem);
 
-    computeSolution(elem, qrule.get(), state, phi, _current_elem_qp_functor_sln);
+    computeSolution(elem,
+                    qrule.get(),
+                    state,
+                    phi,
+                    _current_elem_qp_functor_sln,
+                    dphi,
+                    _current_elem_qp_functor_gradient);
   }
+}
+
+template <>
+void
+MooseVariableField<RealEigenVector>::evaluateOnElement(const ElemQpArg &, const unsigned int) const
+{
+  mooseError("evaluate not implemented for array variables");
+}
+
+template <typename OutputType>
+typename MooseVariableField<OutputType>::ValueType
+MooseVariableField<OutputType>::evaluate(const ElemQpArg & elem_qp, const unsigned int state) const
+{
+  evaluateOnElement(elem_qp, state);
+  const auto qp = std::get<1>(elem_qp);
   mooseAssert(qp < _current_elem_qp_functor_sln.size(),
               "The requested " << qp << " is outside our solution size");
   return _current_elem_qp_functor_sln[qp];
 }
 
 template <typename OutputType>
-typename MooseVariableField<OutputType>::ValueType
-MooseVariableField<OutputType>::evaluate(const ElemSideQpArg & elem_side_qp,
-                                         const unsigned int state) const
+typename MooseVariableField<OutputType>::GradientType
+MooseVariableField<OutputType>::evaluateGradient(const ElemQpArg & elem_qp,
+                                                 const unsigned int state) const
+{
+  evaluateOnElement(elem_qp, state);
+  const auto qp = std::get<1>(elem_qp);
+  mooseAssert(qp < _current_elem_qp_functor_sln.size(),
+              "The requested " << qp << " is outside our gradient size");
+  return _current_elem_qp_functor_gradient[qp];
+}
+
+template <typename OutputType>
+void
+MooseVariableField<OutputType>::evaluateOnElementSide(const ElemSideQpArg & elem_side_qp,
+                                                      const unsigned int state) const
 {
   mooseAssert(this->hasBlocks(std::get<0>(elem_side_qp)->subdomain_id()),
               "This variable doesn't exist in the requested block!");
 
   const Elem * const elem = std::get<0>(elem_side_qp);
   const auto side = std::get<1>(elem_side_qp);
-  const auto qp = std::get<2>(elem_side_qp);
   if (elem != _current_elem_side_qp_functor_elem_side.first ||
       side != _current_elem_side_qp_functor_elem_side.second)
   {
@@ -129,14 +169,50 @@ MooseVariableField<OutputType>::evaluate(const ElemSideQpArg & elem_side_qp,
         qrule_template->type(), qrule_template->get_dim(), qrule_template->get_order()));
 
     const auto & phi = fe->get_phi();
+    const auto & dphi = fe->get_dphi();
     fe->attach_quadrature_rule(qrule.get());
     fe->reinit(elem, side);
 
-    computeSolution(elem, qrule.get(), state, phi, _current_elem_side_qp_functor_sln);
+    computeSolution(elem,
+                    qrule.get(),
+                    state,
+                    phi,
+                    _current_elem_side_qp_functor_sln,
+                    dphi,
+                    _current_elem_side_qp_functor_gradient);
   }
+}
+
+template <>
+void
+MooseVariableField<RealEigenVector>::evaluateOnElementSide(const ElemSideQpArg &,
+                                                           const unsigned int) const
+{
+  mooseError("evaluate not implemented for array variables");
+}
+
+template <typename OutputType>
+typename MooseVariableField<OutputType>::ValueType
+MooseVariableField<OutputType>::evaluate(const ElemSideQpArg & elem_side_qp,
+                                         const unsigned int state) const
+{
+  evaluateOnElementSide(elem_side_qp, state);
+  const auto qp = std::get<2>(elem_side_qp);
   mooseAssert(qp < _current_elem_side_qp_functor_sln.size(),
               "The requested " << qp << " is outside our solution size");
   return _current_elem_side_qp_functor_sln[qp];
+}
+
+template <typename OutputType>
+typename MooseVariableField<OutputType>::GradientType
+MooseVariableField<OutputType>::evaluateGradient(const ElemSideQpArg & elem_side_qp,
+                                                 const unsigned int state) const
+{
+  evaluateOnElementSide(elem_side_qp, state);
+  const auto qp = std::get<2>(elem_side_qp);
+  mooseAssert(qp < _current_elem_side_qp_functor_gradient.size(),
+              "The requested " << qp << " is outside our gradient size");
+  return _current_elem_side_qp_functor_gradient[qp];
 }
 
 #else
@@ -159,6 +235,22 @@ MooseVariableField<OutputType>::evaluate(const ElemSideQpArg &, unsigned int) co
       "indexing");
 }
 
+template <typename OutputType>
+typename MooseVariableField<OutputType>::GradientType
+MooseVariableField<OutputType>::evaluateGradient(const ElemQpArg &, unsigned int) const
+{
+  mooseError("MooseVariableField::evaluateGradient(ElemQpArg &, unsigned int) is only supported "
+             "for global AD indexing");
+}
+
+template <typename OutputType>
+typename MooseVariableField<OutputType>::GradientType
+MooseVariableField<OutputType>::evaluateGradient(const ElemSideQpArg &, unsigned int) const
+{
+  mooseError("MooseVariableField::evaluateGradient(ElemSideQpArg &, unsigned int) is only "
+             "supported for global AD indexing");
+}
+
 #endif
 
 template <>
@@ -176,6 +268,22 @@ MooseVariableField<RealEigenVector>::evaluate(const ElemSideQpArg &, unsigned in
   mooseError(
       "MooseVariableField::evaluate(ElemSideQpArg &, unsigned int) overload not implemented for "
       "array variables");
+}
+
+template <>
+typename MooseVariableField<RealEigenVector>::GradientType
+MooseVariableField<RealEigenVector>::evaluateGradient(const ElemQpArg &, unsigned int) const
+{
+  mooseError("MooseVariableField::evaluateGradient(ElemQpArg &, unsigned int) overload not "
+             "implemented for array variables");
+}
+
+template <>
+typename MooseVariableField<RealEigenVector>::GradientType
+MooseVariableField<RealEigenVector>::evaluateGradient(const ElemSideQpArg &, unsigned int) const
+{
+  mooseError("MooseVariableField::evaluateGradient(ElemSideQpArg &, unsigned int) overload not "
+             "implemented for array variables");
 }
 
 template <typename OutputType>
@@ -219,6 +327,52 @@ MooseVariableField<OutputType>::evaluate(
 
         default:
           mooseError("Unsupported state ", state, " in MooseVariableField::evaluate");
+      }
+    }
+
+    default:
+      mooseError("Unrecognized element type");
+  }
+}
+
+template <typename OutputType>
+typename MooseVariableField<OutputType>::GradientType
+MooseVariableField<OutputType>::evaluateGradient(
+    const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp, unsigned int state) const
+{
+  mooseAssert(this->hasBlocks(std::get<2>(tqp)),
+              "This variable doesn't exist in the requested block!");
+  const auto elem_type = std::get<0>(tqp);
+  const auto qp = std::get<1>(tqp);
+  switch (elem_type)
+  {
+    case Moose::ElementType::Element:
+    {
+      switch (state)
+      {
+        case 0:
+          return adGradSln()[qp];
+
+        case 1:
+          return gradSlnOld()[qp];
+
+        default:
+          mooseError("Unsupported state ", state, " in MooseVariableField::evaluateGradient");
+      }
+    }
+
+    case Moose::ElementType::Neighbor:
+    {
+      switch (state)
+      {
+        case 0:
+          return adGradSlnNeighbor()[qp];
+
+        case 1:
+          return gradSlnOldNeighbor()[qp];
+
+        default:
+          mooseError("Unsupported state ", state, " in MooseVariableField::evaluateGradient");
       }
     }
 

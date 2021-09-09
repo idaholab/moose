@@ -82,6 +82,7 @@ public:
    */
   virtual RealVectorValue vectorCurl(Real t, const Point & p) const;
 
+  using Moose::Functor<T>::gradient;
   /**
    * Function objects can optionally provide a gradient at a point. By default
    * this returns 0, you must override it.
@@ -115,6 +116,7 @@ private:
   using typename Moose::Functor<T>::ElemQpArg;
   using typename Moose::Functor<T>::ElemSideQpArg;
   using typename Moose::Functor<T>::ValueType;
+  using typename Moose::Functor<T>::GradientType;
 
   /**
    * @return the time associated with the requested \p state
@@ -139,6 +141,17 @@ private:
    * Compute \p _current_elem_side_qp_functor_xyz if we are on a new element and side pair
    */
   void determineElemSideXYZ(const ElemSideQpArg & elem_side_qp) const;
+
+  GradientType evaluateGradient(const Elem * const & elem, unsigned int state) const override final;
+  GradientType evaluateGradient(const ElemFromFaceArg & elem_from_face,
+                                unsigned int state) const override final;
+  GradientType evaluateGradient(const FaceArg & face, unsigned int state) const override final;
+  GradientType evaluateGradient(const ElemQpArg & qp, unsigned int state) const override final;
+  GradientType evaluateGradient(const ElemSideQpArg & elem_side_qp,
+                                unsigned int state) const override final;
+  GradientType
+  evaluateGradient(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
+                   unsigned int state) const override final;
 
   /// Keep track of the current elem-qp functor element in order to enable local caching (e.g. if we
   /// call evaluate on the same element, but just with a different quadrature point, we can return

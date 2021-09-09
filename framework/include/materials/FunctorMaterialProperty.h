@@ -51,8 +51,9 @@ public:
   using typename Moose::Functor<T>::ElemQpArg;
   using typename Moose::Functor<T>::ElemSideQpArg;
   using typename Moose::Functor<T>::FunctorType;
-  using typename Moose::Functor<T>::FunctorReturnType;
   using typename Moose::Functor<T>::ValueType;
+  using typename Moose::Functor<T>::GradientType;
+  using typename Moose::Functor<T>::FunctorReturnType;
 
 protected:
   using ElemFn = std::function<T(const Elem * const &, const unsigned int &)>;
@@ -69,6 +70,17 @@ protected:
   ValueType evaluate(const ElemSideQpArg & elem_side_qp, unsigned int state) const override;
   ValueType evaluate(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
                      unsigned int state) const override;
+
+  GradientType evaluateGradient(const Elem * const & elem, unsigned int state) const override;
+  GradientType evaluateGradient(const ElemFromFaceArg & elem_from_face,
+                                unsigned int state) const override;
+  GradientType evaluateGradient(const FaceArg & face, unsigned int state) const override;
+  GradientType evaluateGradient(const ElemQpArg & elem_qp, unsigned int state) const override;
+  GradientType evaluateGradient(const ElemSideQpArg & elem_side_qp,
+                                unsigned int state) const override;
+  GradientType
+  evaluateGradient(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
+                   unsigned int state) const override;
 
 private:
   /**
@@ -244,10 +256,54 @@ FunctorMaterialPropertyImpl<T>::evaluate(
   return it->second(tqp, state);
 }
 
+template <typename T>
+typename FunctorMaterialPropertyImpl<T>::GradientType
+FunctorMaterialPropertyImpl<T>::evaluateGradient(const Elem * const &, unsigned int) const
+{
+  mooseError("Gradients of functor material properties not implemented");
+}
+
+template <typename T>
+typename FunctorMaterialPropertyImpl<T>::GradientType
+FunctorMaterialPropertyImpl<T>::evaluateGradient(const ElemFromFaceArg &, unsigned int) const
+{
+  mooseError("Gradients of functor material properties not implemented");
+}
+
+template <typename T>
+typename FunctorMaterialPropertyImpl<T>::GradientType
+FunctorMaterialPropertyImpl<T>::evaluateGradient(const FaceArg &, unsigned int) const
+{
+  mooseError("Gradients of functor material properties not implemented");
+}
+
+template <typename T>
+typename FunctorMaterialPropertyImpl<T>::GradientType
+FunctorMaterialPropertyImpl<T>::evaluateGradient(const ElemQpArg &, unsigned int) const
+{
+  mooseError("Gradients of functor material properties not implemented");
+}
+
+template <typename T>
+typename FunctorMaterialPropertyImpl<T>::GradientType
+FunctorMaterialPropertyImpl<T>::evaluateGradient(const ElemSideQpArg &, unsigned int) const
+{
+  mooseError("Gradients of functor material properties not implemented");
+}
+
+template <typename T>
+typename FunctorMaterialPropertyImpl<T>::GradientType
+FunctorMaterialPropertyImpl<T>::evaluateGradient(
+    const std::tuple<Moose::ElementType, unsigned int, SubdomainID> &, unsigned int) const
+{
+  mooseError("Gradients of functor material properties not implemented");
+}
+
 /**
  * This is a wrapper that forwards calls to the implementation,
- * which can be switched out at any time without disturbing references to FunctorMaterialProperty
- * Implementation motivated by https://stackoverflow.com/a/65455485/4493669
+ * which can be switched out at any time without disturbing references to
+ * FunctorMaterialPropertyImpl Implementation motivated by
+ * https://stackoverflow.com/a/65455485/4493669
  */
 template <typename T>
 class FunctorMaterialProperty : public Moose::Functor<T>
@@ -260,6 +316,7 @@ public:
   using typename Moose::Functor<T>::FunctorType;
   using typename Moose::Functor<T>::FunctorReturnType;
   using typename Moose::Functor<T>::ValueType;
+  using typename Moose::Functor<T>::GradientType;
 
   /**
    * Construct wrapper from wrapped object
@@ -332,6 +389,34 @@ protected:
                      unsigned int state = 0) const override
   {
     return _wrapped->evaluate(tqp, state);
+  }
+  GradientType evaluateGradient(const libMesh::Elem * const & elem,
+                                unsigned int state = 0) const override
+  {
+    return _wrapped->evaluateGradient(elem, state);
+  }
+  GradientType evaluateGradient(const ElemFromFaceArg & elem_from_face,
+                                unsigned int state = 0) const override
+  {
+    return _wrapped->evaluateGradient(elem_from_face, state);
+  }
+  GradientType evaluateGradient(const FaceArg & face, unsigned int state = 0) const override
+  {
+    return _wrapped->evaluateGradient(face, state);
+  }
+  GradientType evaluateGradient(const ElemQpArg & qp, unsigned int state = 0) const override
+  {
+    return _wrapped->evaluateGradient(qp, state);
+  }
+  GradientType evaluateGradient(const ElemSideQpArg & qp, unsigned int state = 0) const override
+  {
+    return _wrapped->evaluateGradient(qp, state);
+  }
+  GradientType
+  evaluateGradient(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
+                   unsigned int state = 0) const override
+  {
+    return _wrapped->evaluateGradient(tqp, state);
   }
   ///@}
 

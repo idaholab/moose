@@ -830,10 +830,16 @@ public:
                                                       ConstructionArgs &&... construction_args);
 
   /**
-   * Returns a functor corresponding to \p name on the thread id \p tid
+   * @tparam T The type that the functor will return when evaluated, e.g. \p
+               ADReal or \p Real
+   * @param name The name of the functor to retrieve
+   * @param tid The thread ID that we are retrieving the functor property for
+   * @param requestor_name The name of the object that is requesting this functor property
+   * @return a constant reference to the functor
    */
   template <typename T>
-  const Moose::Functor<T> & getFunctor(const std::string & name, THREAD_ID tid);
+  const Moose::Functor<T> &
+  getFunctor(const std::string & name, THREAD_ID tid, const std::string & requestor_name);
 
   /**
    * checks whether we have a functor corresponding to \p name on the thread id \p tid
@@ -967,6 +973,11 @@ private:
   /// A container holding pointers to all the functors in our problem
   std::vector<std::multimap<std::string, const Moose::FunctorBase *>> _functors;
 
+private:
+  /// The requestors of functors where the key is the prop name and the value is a set of names of
+  /// requestors
+  std::map<std::string, std::set<std::string>> _functor_to_requestors;
+
   /// The declared vector tags
   std::vector<VectorTag> _vector_tags;
 
@@ -1071,10 +1082,16 @@ SubProblem::declareFunctorProperty(const std::string & name,
 
 template <typename T>
 const Moose::Functor<T> &
-SubProblem::getFunctor(const std::string & name, const THREAD_ID tid)
+SubProblem::getFunctor(const std::string & name,
+                       const THREAD_ID tid,
+                       const std::string & requestor_name)
 {
-  // Do we already have the functor?
   mooseAssert(tid < _functors.size(), "Too large a thread ID");
+
+  // Log the requestor
+  _functor_to_requestors[name].insert(requestor_name);
+
+  // Get the requested functor if we already have it
   const auto & functors = _functors[tid];
   auto it = functors.find(name);
   if (it != functors.end())
@@ -1095,9 +1112,9 @@ SubProblem::getFunctor(const std::string & name, const THREAD_ID tid)
     return *functor;
   }
 
-  // If we don't then we're going to assume for now that it will be created in the future as a
-  // functor material property. We will almost certainly want to change this assumption eventually
-  // if functors take over the world
+  // If we don't already have the functor then we're going to assume for now that it will be created
+  // in the future as a functor material property. We will almost certainly want to change this
+  // assumption eventually if functors take over the world
   return declareFunctorProperty<T>(name, tid, true);
 }
 

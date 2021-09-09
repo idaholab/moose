@@ -485,6 +485,7 @@ public:
   using typename Moose::Functor<FunctorArg>::FaceArg;
   using typename Moose::Functor<FunctorArg>::ElemFromFaceArg;
   using typename Moose::Functor<FunctorArg>::ValueType;
+  using typename Moose::Functor<FunctorArg>::GradientType;
   ADReal getInternalFaceValue(const FaceArg & face) const;
 
 protected:
@@ -512,12 +513,14 @@ protected:
 
 private:
   using MooseVariableField<OutputType>::evaluate;
-  ValueType evaluate(const Elem * const & elem, unsigned int) const override final
-  {
-    return getElemValue(elem);
-  }
+  using MooseVariableField<OutputType>::evaluateGradient;
+  ValueType evaluate(const Elem * const & elem, unsigned int) const override final;
   ValueType evaluate(const ElemFromFaceArg & elem_from_face, unsigned int) const override final;
   ValueType evaluate(const FaceArg & face, unsigned int) const override final;
+  GradientType evaluateGradient(const Elem * const & elem, unsigned int) const override final;
+  GradientType evaluateGradient(const ElemFromFaceArg & elem_from_face,
+                                unsigned int) const override final;
+  GradientType evaluateGradient(const FaceArg & face, unsigned int) const override final;
 
   /**
    * @return the extrapolated value on the boundary face associated with \p fi
@@ -656,4 +659,27 @@ inline const MooseArray<ADReal> &
 MooseVariableFV<OutputType>::adDofValues() const
 {
   return _element_data->adDofValues();
+}
+
+template <typename OutputType>
+typename MooseVariableFV<OutputType>::ValueType
+MooseVariableFV<OutputType>::evaluate(const Elem * const & elem, unsigned int) const
+{
+  return getElemValue(elem);
+}
+
+template <typename OutputType>
+typename MooseVariableFV<OutputType>::GradientType
+MooseVariableFV<OutputType>::evaluateGradient(const Elem * const & elem, unsigned int) const
+{
+  return adGradSln(elem);
+}
+
+template <typename OutputType>
+typename MooseVariableFV<OutputType>::GradientType
+MooseVariableFV<OutputType>::evaluateGradient(const FaceArg & face, unsigned int) const
+{
+  const auto * const fi = std::get<0>(face);
+  mooseAssert(fi, "We must have a non-null face information");
+  return adGradSln(*fi);
 }

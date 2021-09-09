@@ -1133,6 +1133,21 @@ MooseVariableFV<OutputType>::evaluate(const ElemFromFaceArg & elem_from_face, un
   }
 }
 
+template <typename OutputType>
+typename MooseVariableFV<OutputType>::GradientType
+MooseVariableFV<OutputType>::evaluateGradient(const ElemFromFaceArg & elem_from_face,
+                                              unsigned int) const
+{
+  const Elem * const requested_elem = std::get<0>(elem_from_face);
+  mooseAssert(requested_elem != remote_elem,
+              "If the requested element is remote then I think we've messed up our ghosting");
+
+  if (requested_elem && this->hasBlocks(requested_elem->subdomain_id()))
+    return adGradSln(requested_elem);
+  else
+    mooseError("We do not currently support ghosting of gradients");
+}
+
 template class MooseVariableFV<Real>;
 // TODO: implement vector fv variable support. This will require some template
 // specializations for various member functions in this and the FV variable

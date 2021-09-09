@@ -1062,7 +1062,15 @@ SubProblem::initialSetup()
   for (const auto & functor_props : _functor_material_properties)
     for (const auto & key_value : functor_props)
       if (!key_value.second.first)
-        mooseError("Functor material property ", key_value.first, " has no declaration anywhere.");
+      {
+        const auto & functor_name = key_value.first;
+        const auto & requestors = _functor_to_requestors[functor_name];
+        mooseError("Functor ",
+                   functor_name,
+                   ", requested by ",
+                   MooseUtils::join(requestors, ", "),
+                   ", does not exist in our subproblem.");
+      }
 }
 
 void
