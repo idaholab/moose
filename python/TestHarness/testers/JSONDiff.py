@@ -7,64 +7,74 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-from RunApp import RunApp
+from FileTester import FileTester
 from TestHarness import util
 import os
-from mooseutils import JSONDiffer
 
-class JSONDiff(RunApp):
+class JSONDiff(FileTester):
 
     @staticmethod
     def validParams():
-        params = RunApp.validParams()
-        params.addRequiredParam('jsondiff',   [], "A list of XML files to compare.")
-        params.addParam('gold_dir',      'gold', "The directory where the \"golden standard\" files reside relative to the TEST_DIR: (default: ./gold/)")
-        params.addParam('skip_keys', [], "A list of keys to skip in the JSON comparison")
+        params = FileTester.validParams()
+        params.addRequiredParam('jsondiff',   [], "A list of JSON files to compare.")
+        params.addParam('skip_keys', [], "A list of keys to skip in the JSON comparison.")
         return params
 
     def __init__(self, name, params):
-        RunApp.__init__(self, name, params)
+        FileTester.__init__(self, name, params)
+        if self.specs['required_python_packages'] is None:
+             self.specs['required_python_packages'] = 'deepdiff'
+        elif 'deepdiff' not in self.specs['required_python_packages']:
+            self.specs['required_python_packages'] += ' deepdiff'
 
-    def prepare(self, options):
-        if self.specs['delete_output_before_running'] == True:
-            util.deleteFilesAndFolders(self.getTestDir(), self.specs['jsondiff'])
+    def getOutputFiles(self):
+        return self.specs['jsondiff']
+
+    def processResultsCommand(self, moose_dir, options):
+        commands = []
+
+        for file in self.specs['jsondiff']:
+            gold_file = os.path.join(self.getTestDir(), self.specs['gold_dir'], file)
+            test_file = os.path.join(self.getTestDir(), file)
+
+            jsondiff = [os.path.join(self.specs['moose_python_dir'], 'mooseutils', 'jsondiff.py')]
+            jsondiff.append(gold_file + ' ' + test_file)
+            if self.specs.isValid('rel_err'):
+                jsondiff.append('--rel_err %s' % (self.specs['rel_err']))
+            if self.specs.isValid('skip_keys'):
+                jsondiff.append('--skip_keys %s' % (' '.join(self.specs['skip_keys'])))
+            commands.append(' '.join(jsondiff))
+
+        return commands
 
     def processResults(self, moose_dir, options, output):
-        output += self.testFileOutput(moose_dir, options, output)
-        self.testExitCodes(moose_dir, options, output)
+        output += FileTester.processResults(self, moose_dir, options, output)
 
-        # Skip
-        specs = self.specs
-
-        if self.isFail() or specs['skip_checks']:
+        if self.isFail() or self.specs['skip_checks']:
             return output
 
-        # Don't Run XMLDiff on Scaled Tests
-        if options.scaling and specs['scale_refine']:
+        # Don't Run JSONDiff on Scaled Tests
+        if options.scaling and self.specs['scale_refine']:
             return output
 
-        # Loop over every file
-        for file in specs['jsondiff']:
-
-            # Error if gold file does not exist
-            if not os.path.exists(os.path.join(self.getTestDir(), specs['gold_dir'], file)):
-                output += "File Not Found: " + os.path.join(self.getTestDir(), specs['gold_dir'], file)
+        # Check if files exist
+        for file in self.specs['jsondiff']:
+            # Get file names and error if not found
+            gold_file = os.path.join(self.getTestDir(), self.specs['gold_dir'], file)
+            test_file = os.path.join(self.getTestDir(), file)
+            if not os.path.exists(gold_file):
+                output += "File Not Found: " + gold_file
                 self.setStatus(self.fail, 'MISSING GOLD FILE')
-                break
+            if not os.path.exists(test_file):
+                output += "File Not Found: " + test_file
+                self.setStatus(self.fail, 'MISSING OUTPUT FILE')
 
-            # Perform diff
-            else:
-                for file in self.specs['jsondiff']:
-                    gold = os.path.join(self.getTestDir(), specs['gold_dir'], file)
-                    test = os.path.join(self.getTestDir(), file)
-
-                    differ = JSONDiffer(gold, test, skip_keys=specs['skip_keys'])
-
-                    # Print the results of the Jsondiff whether it passed or failed.
-                    output += differ.message() + '\n'
-
-                    if differ.fail():
-                        self.setStatus(self.diff, 'JSONDIFF')
-                        break
+        if not self.isFail():
+            commands = self.processResultsCommand(moose_dir, options)
+            for command in commands:
+                exo_output = util.runCommand(command)
+                output += 'Running jsondiff: ' + command + '\n' + exo_output
+                if not "Files are the same" in exo_output:
+                    self.setStatus(self.diff, 'JSONDIFF')
 
         return output

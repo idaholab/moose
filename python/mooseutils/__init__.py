@@ -20,7 +20,6 @@ from .MooseException import MooseException
 from .eval_path import eval_path
 from .levenshtein import levenshtein, levenshteinDistance
 from .json_load import json_load, json_parse
-from .jsondiff import JSONDiffer
 from .civet_results import get_civet_results, get_civet_hashes
 from .template import apply_template_arguments
 

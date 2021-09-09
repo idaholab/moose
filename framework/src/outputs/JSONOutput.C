@@ -109,7 +109,7 @@ JSONOutput::outputReporters()
     }
 
     // Add Reporter values to the current node
-    auto & r_node = current_node["reporters"]; // non-accidental insert
+    auto & r_node = _json["reporters"]; // non-accidental insert
     for (const auto & r_name : r_names)
     {
       // Create/get object node
@@ -143,11 +143,18 @@ JSONOutput::outputReporters()
         // It is possible to have a Reporter value without a reporter objects (i.e., VPPs, PPs),
         // which is why objs can be empty.
         if (!objs.empty())
-          objs.front()->store(obj_node["info"]);
+          objs.front()->store(obj_node);
       }
 
+      // Create/get value node
+      auto value_node_pair = obj_node["values"].emplace(r_name.getValueName(), nlohmann::json());
+      // If the value node was created insert the value information
+      if (value_node_pair.second)
+        // Store value meta data
+        context.storeInfo(*value_node_pair.first);
+
       // Insert reporter value
-      auto & node = obj_node["values"].emplace_back();
+      auto & node = current_node[r_name.getObjectName()][r_name.getValueName()];
       context.store(node);
     }
   }

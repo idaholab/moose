@@ -1,34 +1,29 @@
 {
+    "reporters": {
+        "get": {
+            "type": "TestGetReporterDeclaredInInitialSetupReporter",
+            "values": {
+                "other_value": {
+                    "type": "double"
+                }
+            }
+        },
+        "initialSetup": {
+            "type": "TestDeclareInitialSetupReporter",
+            "values": {
+                "value": {
+                    "type": "double"
+                }
+            }
+        }
+    },
     "time_steps": [
         {
-            "reporters": {
-                "initialSetup": {
-                    "info": {
-                        "name": "initialSetup",
-                        "type": "TestDeclareInitialSetupReporter"
-                    },
-                    "values": [
-                        {
-                            "name": "value",
-                            "type": "double",
-                            "value": 1980.0
-                        }
-                    ]
-                },
-                "get": {
-                    "info": {
-                        "name": "get",
-                        "type": "TestGetReporterDeclaredInInitialSetupReporter"
-                    },
-                    "values": [
-                        {
-                            "name": "other_value",
-                            "type": "double",
-                            "value": 1980.0
-                        }
-                    ]
-                }
-
+            "get": {
+                "other_value": 1980.0
+            },
+            "initialSetup": {
+                "value": 1980.0
             },
             "time": 2.0,
             "time_step": 2

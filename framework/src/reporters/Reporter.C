@@ -39,7 +39,6 @@ Reporter::Reporter(const MooseObject * moose_object)
 void
 Reporter::store(nlohmann::json & json) const
 {
-  json["name"] = _reporter_name;
   json["type"] = _reporter_params.get<std::string>("_type");
 }
 

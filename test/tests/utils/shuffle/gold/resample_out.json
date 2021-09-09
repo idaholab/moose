@@ -1,31 +1,29 @@
 {
+    "reporters": {
+        "test": {
+            "type": "TestShuffle",
+            "values": {
+                "data": {
+                    "type": "std::vector<int>"
+                }
+            }
+        }
+    },
     "time_steps": [
         {
-            "reporters": {
-                "test": {
-                    "info": {
-                        "name": "test",
-                        "type": "TestShuffle"
-                    },
-                    "values": [
-                        {
-                            "name": "data",
-                            "type": "std::vector<int>",
-                            "value": [
-                                1,
-                                1,
-                                7,
-                                2,
-                                9,
-                                6,
-                                6,
-                                0,
-                                8,
-                                9
-                            ]
-                        }
-                    ]
-                }
+            "test": {
+                "data": [
+                    1,
+                    1,
+                    7,
+                    2,
+                    9,
+                    6,
+                    6,
+                    0,
+                    8,
+                    9
+                ]
             },
             "time": 2.0,
             "time_step": 2

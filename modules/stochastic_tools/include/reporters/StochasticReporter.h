@@ -26,7 +26,7 @@ public:
   virtual void copyValuesBack() override;
   virtual void finalize() override;
   virtual std::string contextType() const override { return MooseUtils::prettyCppType(this); }
-  virtual void store(nlohmann::json & json) const override;
+  virtual void storeInfo(nlohmann::json & json) const override;
 
 protected:
   const Sampler & _sampler;
@@ -88,9 +88,8 @@ StochasticReporterContext<T>::finalize()
 
 template <typename T>
 void
-StochasticReporterContext<T>::store(nlohmann::json & json) const
+StochasticReporterContext<T>::storeInfo(nlohmann::json & json) const
 {
-  ReporterGeneralContext<std::vector<T>>::store(json);
   if (_has_allgathered || (_has_gathered && this->processor_id() == 0))
   {
     json["row_begin"] = 0;

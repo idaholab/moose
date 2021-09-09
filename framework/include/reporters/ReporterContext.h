@@ -61,7 +61,7 @@ public:
   virtual const ReporterName & name() const = 0;
 
   /// Return the type of the data stored
-  // This is a helper for ReporterData::store
+  // This is a helper for ReporterContext::storeInfo
   virtual std::string type() const = 0;
 
   /**
@@ -74,14 +74,17 @@ public:
   /// Called by FEProblemBase::advanceState via ReporterData
   virtual void copyValuesBack() = 0;
 
-  /// Called by ReporterData::store to invoke storage of values for output
+  /// Called by JSONOutput::outputReporters to output meta data independent of calculated
+  /// values
+  virtual void storeInfo(nlohmann::json & json) const = 0;
+
+  /// Called by JSONOutput::outputReporters to invoke storage of values for output
   ///
   /// This method exists and is distinct from the RestartableData::store method for JSON output
   /// via the JSONOutput object. The RestartableData::store/load methods are designed for restart
   /// and include all the data including the old values.
   ///
-  /// This method only outputs the current value along with other information within the JSONOutput
-  /// object.
+  /// This method only outputs the current value within the JSONOutput object.
   ///
   /// @see JsonIO.h
   /// @see JSONOutput.h
@@ -223,7 +226,7 @@ public:
   /**
    * Return the type being stored by the associated ReporterState object.
    *
-   * @see ReporterData::store
+   * @see ReporterContext::storeInfo
    */
   std::string type() const override final { return MooseUtils::prettyCppType<T>(); }
 
@@ -266,6 +269,9 @@ protected:
   {
     mooseError("Can only broadcast fundamental types.");
   }
+
+  /// Output meta data to JSON, see JSONOutput
+  virtual void storeInfo(nlohmann::json & json) const override;
 
   /// Output data to JSON, see JSONOutput
   virtual void store(nlohmann::json & json) const override;
@@ -365,11 +371,16 @@ ReporterContext<T>::copyValuesBack()
 
 template <typename T>
 void
+ReporterContext<T>::storeInfo(nlohmann::json & json) const
+{
+  json["type"] = this->type();
+}
+
+template <typename T>
+void
 ReporterContext<T>::store(nlohmann::json & json) const
 {
-  json["name"] = this->name().getValueName();
-  json["type"] = this->type();
-  storeHelper(json["value"], this->_state.value());
+  storeHelper(json, this->_state.value());
 }
 
 template <typename T>

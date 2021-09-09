@@ -1,225 +1,138 @@
 {
     "number_of_parts": 4,
     "part": 2,
+    "reporters": {
+        "storage": {
+            "type": "StochasticReporter",
+            "values": {
+                "data:constant:int": {
+                    "row_begin": 4,
+                    "row_end": 6
+                },
+                "data:constant:str": {
+                    "row_begin": 4,
+                    "row_end": 6
+                },
+                "data:converged": {
+                    "row_begin": 4,
+                    "row_end": 6
+                },
+                "data:pp:value": {
+                    "row_begin": 4,
+                    "row_end": 6
+                },
+                "data:vpp:vec": {
+                    "row_begin": 4,
+                    "row_end": 6
+                }
+            }
+        }
+    },
     "time_steps": [
         {
-            "reporters": {
-                "storage": {
-                    "info": {
-                        "name": "storage",
-                        "type": "StochasticReporter"
-                    },
-                    "values": [
-                        {
-                            "name": "data:constant:int",
-                            "row_begin": 4,
-                            "row_end": 6,
-                            "type": "std::vector<int>",
-                            "value": [
-                                2,
-                                2
-                            ]
-                        },
-                        {
-                            "name": "data:constant:str",
-                            "row_begin": 4,
-                            "row_end": 6,
-                            "type": "std::vector<std::string>",
-                            "value": [
-                                "this_value",
-                                "this_value"
-                            ]
-                        },
-                        {
-                            "name": "data:converged",
-                            "row_begin": 4,
-                            "row_end": 6,
-                            "type": "std::vector<bool>",
-                            "value": [
-                                false,
-                                true
-                            ]
-                        },
-                        {
-                            "name": "data:pp:value",
-                            "row_begin": 4,
-                            "row_end": 6,
-                            "type": "std::vector<double>",
-                            "value": [
-                                0.0,
-                                0.1
-                            ]
-                        },
-                        {
-                            "name": "data:vpp:vec",
-                            "row_begin": 4,
-                            "row_end": 6,
-                            "type": "std::vector<std::vector<double>>",
-                            "value": [
-                                [
-                                    1.0,
-                                    10.0,
-                                    100.0,
-                                    1000.0
-                                ],
-                                [
-                                    1.0,
-                                    10.0,
-                                    100.0,
-                                    1000.0
-                                ]
-                            ]
-                        }
+            "storage": {
+                "data:constant:int": [
+                    2,
+                    2
+                ],
+                "data:constant:str": [
+                    "this_value",
+                    "this_value"
+                ],
+                "data:converged": [
+                    false,
+                    true
+                ],
+                "data:pp:value": [
+                    0.0,
+                    0.1
+                ],
+                "data:vpp:vec": [
+                    [
+                        1.0,
+                        10.0,
+                        100.0,
+                        1000.0
+                    ],
+                    [
+                        1.0,
+                        10.0,
+                        100.0,
+                        1000.0
                     ]
-                }
+                ]
             },
             "time": 0.0,
             "time_step": 0
         },
         {
-            "reporters": {
-                "storage": {
-                    "info": {
-                        "name": "storage",
-                        "type": "StochasticReporter"
-                    },
-                    "values": [
-                        {
-                            "name": "data:constant:int",
-                            "row_begin": 4,
-                            "row_end": 6,
-                            "type": "std::vector<int>",
-                            "value": [
-                                2,
-                                2
-                            ]
-                        },
-                        {
-                            "name": "data:constant:str",
-                            "row_begin": 4,
-                            "row_end": 6,
-                            "type": "std::vector<std::string>",
-                            "value": [
-                                "this_value",
-                                "this_value"
-                            ]
-                        },
-                        {
-                            "name": "data:converged",
-                            "row_begin": 4,
-                            "row_end": 6,
-                            "type": "std::vector<bool>",
-                            "value": [
-                                false,
-                                true
-                            ]
-                        },
-                        {
-                            "name": "data:pp:value",
-                            "row_begin": 4,
-                            "row_end": 6,
-                            "type": "std::vector<double>",
-                            "value": [
-                                0.0,
-                                0.1
-                            ]
-                        },
-                        {
-                            "name": "data:vpp:vec",
-                            "row_begin": 4,
-                            "row_end": 6,
-                            "type": "std::vector<std::vector<double>>",
-                            "value": [
-                                [
-                                    1.0,
-                                    10.0,
-                                    100.0,
-                                    1000.0
-                                ],
-                                [
-                                    1.0,
-                                    10.0,
-                                    100.0,
-                                    1000.0
-                                ]
-                            ]
-                        }
+            "storage": {
+                "data:constant:int": [
+                    2,
+                    2
+                ],
+                "data:constant:str": [
+                    "this_value",
+                    "this_value"
+                ],
+                "data:converged": [
+                    false,
+                    true
+                ],
+                "data:pp:value": [
+                    0.0,
+                    0.1
+                ],
+                "data:vpp:vec": [
+                    [
+                        1.0,
+                        10.0,
+                        100.0,
+                        1000.0
+                    ],
+                    [
+                        1.0,
+                        10.0,
+                        100.0,
+                        1000.0
                     ]
-                }
+                ]
             },
             "time": 0.01,
             "time_step": 1
         },
         {
-            "reporters": {
-                "storage": {
-                    "info": {
-                        "name": "storage",
-                        "type": "StochasticReporter"
-                    },
-                    "values": [
-                        {
-                            "name": "data:constant:int",
-                            "row_begin": 4,
-                            "row_end": 6,
-                            "type": "std::vector<int>",
-                            "value": [
-                                2,
-                                2
-                            ]
-                        },
-                        {
-                            "name": "data:constant:str",
-                            "row_begin": 4,
-                            "row_end": 6,
-                            "type": "std::vector<std::string>",
-                            "value": [
-                                "this_value",
-                                "this_value"
-                            ]
-                        },
-                        {
-                            "name": "data:converged",
-                            "row_begin": 4,
-                            "row_end": 6,
-                            "type": "std::vector<bool>",
-                            "value": [
-                                false,
-                                true
-                            ]
-                        },
-                        {
-                            "name": "data:pp:value",
-                            "row_begin": 4,
-                            "row_end": 6,
-                            "type": "std::vector<double>",
-                            "value": [
-                                0.0,
-                                0.1
-                            ]
-                        },
-                        {
-                            "name": "data:vpp:vec",
-                            "row_begin": 4,
-                            "row_end": 6,
-                            "type": "std::vector<std::vector<double>>",
-                            "value": [
-                                [
-                                    1.0,
-                                    10.0,
-                                    100.0,
-                                    1000.0
-                                ],
-                                [
-                                    1.0,
-                                    10.0,
-                                    100.0,
-                                    1000.0
-                                ]
-                            ]
-                        }
+            "storage": {
+                "data:constant:int": [
+                    2,
+                    2
+                ],
+                "data:constant:str": [
+                    "this_value",
+                    "this_value"
+                ],
+                "data:converged": [
+                    false,
+                    true
+                ],
+                "data:pp:value": [
+                    0.0,
+                    0.1
+                ],
+                "data:vpp:vec": [
+                    [
+                        1.0,
+                        10.0,
+                        100.0,
+                        1000.0
+                    ],
+                    [
+                        1.0,
+                        10.0,
+                        100.0,
+                        1000.0
                     ]
-                }
+                ]
             },
             "time": 0.02,
             "time_step": 2

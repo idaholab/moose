@@ -1,37 +1,32 @@
 {
+    "reporters": {
+        "storage": {
+            "type": "StochasticReporter",
+            "values": {
+                "data:converged": {
+                    "row_begin": 0,
+                    "row_end": 3
+                },
+                "data:pp:value": {
+                    "row_begin": 0,
+                    "row_end": 3
+                }
+            }
+        }
+    },
     "time_steps": [
         {
-            "reporters": {
-                "storage": {
-                    "info": {
-                        "name": "storage",
-                        "type": "StochasticReporter"
-                    },
-                    "values": [
-                        {
-                            "name": "data:converged",
-                            "row_begin": 0,
-                            "row_end": 3,
-                            "type": "std::vector<bool>",
-                            "value": [
-                                true,
-                                true,
-                                true
-                            ]
-                        },
-                        {
-                            "name": "data:pp:value",
-                            "row_begin": 0,
-                            "row_end": 3,
-                            "type": "std::vector<double>",
-                            "value": [
-                                0.0,
-                                1.0,
-                                2.0
-                            ]
-                        }
-                    ]
-                }
+            "storage": {
+                "data:converged": [
+                    true,
+                    true,
+                    true
+                ],
+                "data:pp:value": [
+                    0.0,
+                    1.0,
+                    2.0
+                ]
             },
             "time": 1.0,
             "time_step": 1

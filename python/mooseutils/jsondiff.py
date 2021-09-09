@@ -11,39 +11,82 @@ import os
 import argparse
 import json
 import collections
-import mooseutils
+import logging
+from deepdiff import DeepDiff
+from textwrap import indent
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Tool for comparing two JSON files')
-    parser.add_argument('files', nargs=2, type=argparse.FileType('r'))
+    parser.add_argument('files', nargs=2)
+    parser.add_argument('--rel_err', type=float, default=0.0, help="Relative error value used in exodiff comparisons.")
+    parser.add_argument('--skip_keys', default=[], nargs='+', type=str, help="A list of keys to skip in the JSON comparison.")
     return parser.parse_args()
+
+class MooseDeepDiff(DeepDiff):
+    def __init__(self, *args, relative_error=None, absolute_error=None, **kwargs):
+        self.rel_err = relative_error
+        self.abs_err = absolute_error
+        super().__init__(*args, **kwargs)
+
+    def relative_error(self, x, y, max_relative_error):
+        """ Determines whether a number has changed by calculating the relative error
+            max_relative_error: the maximum relative tolerance that will be detected as a changed value
+            Return True if the computed relative error is larger than the maximum relative error
+            Return False if the computed relative error is smaller than the maximum relative error"""
+        log = logging.getLogger(__name__)
+        if y == 0.0:
+            log.warning(
+                'Division by zero: Using absolute error for single instance where x={0}, y={1}'.
+                format(x, y))
+            self.absolute_error(x, y, max_relative_error)
+        else:
+            relative_error = abs((x - y) / y)
+            return relative_error > max_relative_error
+
+    def absolute_error(self, x, y, max_absolute_error):
+        """ Determines whether a number has changed by calculating the absolute error
+            max_absolute_error: the maximum absolute tolerance that will be detected as a changed value
+            Return True if the computed absolute error is larger than the maximum absolute error
+            Return False if the computed absolute error is smaller than the maximum absolute error"""
+        absolute_error = abs(x - y)
+        return absolute_error > max_absolute_error
+
+    def _diff_numbers(self, level):
+        """Diff Numbers"""
+        t1_type = "number" if self.ignore_numeric_type_changes else level.t1.__class__.__name__
+        t2_type = "number" if self.ignore_numeric_type_changes else level.t2.__class__.__name__
+
+        if self.rel_err is not None:
+            if self.relative_error(level.t1, level.t2, self.rel_err):
+                self._report_result('values_changed', level)
+        elif self.abs_err is not None:
+            if self.absolute_error(level.t1, level.t2, self.abs_err):
+                self._report_result('values_changed', level)
+        else:
+            DeepDiff._diff_numbers(self, level)
 
 class JSONDiffer(object):
     """Basic class for performing diff between JSON files/data"""
 
     def __init__(self, input0, input1, **kwargs):
         kwargs.setdefault('sort_keys', True)
-        kwargs.setdefault('indent', 4)
+        self._indent = kwargs.pop('indent', 4) * ' '
         color = kwargs.pop('color', True)
         self._skip_keys = kwargs.pop('skip_keys', [])
 
         self._data0 = self._load(input0)
         self._data1 = self._load(input1)
 
-        self._diff = mooseutils.text_unidiff(json.dumps(self._data0, **kwargs),
-                                             json.dumps(self._data1, **kwargs),
-                                             out_fname=input0 if os.path.isfile(input0) else None,
-                                             gold_fname=input1 if os.path.isfile(input1) else None,
-                                             color=color)
+        self._diff = MooseDeepDiff(self._data0, self._data1, relative_error=kwargs.pop('relative_error', 0.0))
 
     def fail(self):
         return bool(self._diff)
 
     def message(self):
-        return self._diff
+        return indent('Files are the same' if not self.fail() else self._diff.pretty(), self._indent)
 
     def __str__(self):
-        return self._diff
+        return indent('Files are the same' if not self.fail() else self._diff.pretty(), self._indent)
 
     def _load(self, input0):
         if os.path.isfile(input0):
@@ -58,5 +101,5 @@ class JSONDiffer(object):
 
 if __name__ == '__main__':
     args = parse_args()
-    obj = JSONDiff(*args.files)
+    obj = JSONDiffer(*args.files, relative_error=args.rel_err, skip_keys=args.skip_keys)
     print(obj)

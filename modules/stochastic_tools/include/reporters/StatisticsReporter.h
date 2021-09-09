@@ -41,7 +41,7 @@ public:
                             unsigned int ci_seed);
 
   virtual void finalize() override;
-  virtual void store(nlohmann::json & json) const override;
+  virtual void storeInfo(nlohmann::json & json) const override;
 
 private:
   /// Data used for the statistic calculation
@@ -108,9 +108,9 @@ ReporterStatisticsContext<InType, OutType>::finalize()
 
 template <typename InType, typename OutType>
 void
-ReporterStatisticsContext<InType, OutType>::store(nlohmann::json & json) const
+ReporterStatisticsContext<InType, OutType>::storeInfo(nlohmann::json & json) const
 {
-  ReporterGeneralContext<std::pair<OutType, std::vector<OutType>>>::store(json);
+  ReporterGeneralContext<std::pair<OutType, std::vector<OutType>>>::storeInfo(json);
   json["stat"] = _calc_ptr->name();
 }
 
