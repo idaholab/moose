@@ -1,10 +1,12 @@
 [Tests]
   design = 'Constraints/index.md'
   issues = '#13080'
-  [continuity_sphere_hex8]
+  [3d_periodic_mortar]
     type = 'Exodiff'
     input = 'periodic.i'
     exodiff = 'periodic_out.e'
     requirement = 'We shall be able to enforce periodic boundary conditions on 3d domains using mortar constraints.'
+    map = False
+    partial = True
   []
 []

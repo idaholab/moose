@@ -60,7 +60,7 @@
     secondary_boundary = bottom
     primary_subdomain = 12
     secondary_subdomain = 11
-
+    delta = 0.1
     periodic = true
   []
 []
@@ -74,6 +74,7 @@
 
 [Executioner]
   type = Steady
+  nl_rel_tol = 1e-12
   solve_type = NEWTON
 []
 
