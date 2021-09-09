@@ -36,7 +36,7 @@ class TestBuild(unittest.TestCase):
         kwargs.setdefault('args', None)
         kwargs.setdefault('disable', [])
         kwargs.setdefault('fast', False)
-        kwargs.setdefault('executioner', 'MooseDocs.base.ParallelBarrier')
+        kwargs.setdefault('executioner', 'MooseDocs.base.ParallelQueue')
         kwargs.setdefault('profile', False)
         kwargs.setdefault('destination', None)
         kwargs.setdefault('serve', False)

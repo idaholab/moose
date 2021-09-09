@@ -46,7 +46,7 @@ def command_line_options(subparser, parent):
                         help="Build the pages with the slowest extension (appsyntax) disabled.")
     parser.add_argument('--executioner',
                         help="Select the mode of execution " \
-                             "(default: MooseDocs.base.ParallelBarrier).")
+                             "(default: MooseDocs.base.ParallelQueue).")
     parser.add_argument('--profile', action='store_true',
                         help="Build the pages with python profiling.")
     parser.add_argument('--destination', default=None,
