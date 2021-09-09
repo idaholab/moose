@@ -67,21 +67,23 @@ INSFVMixingLengthScalarDiffusion::computeQpResidual()
 #ifdef MOOSE_GLOBAL_AD_INDEXING
   constexpr Real offset = 1e-15; // prevents explosion of sqrt(x) derivative to infinity
 
-  // Compute the normalized velocity gradient
   const auto & grad_u = _u_var->adGradSln(*_face_info);
-  ADReal velocity_gradient = grad_u(0) * grad_u(0);
+  ADReal symmetric_strain_tensor_norm = 2.0 * Utility::pow<2>(grad_u(0));
   if (_dim >= 2)
   {
-    const auto & grad_v = _v_var->adGradSln(*_face_info);
-    velocity_gradient += grad_u(1) * grad_u(1) + grad_v(0) * grad_v(0) + grad_v(1) * grad_v(1);
+    auto grad_v = _v_var->adGradSln(*_face_info);
+    symmetric_strain_tensor_norm +=
+        2.0 * Utility::pow<2>(grad_v(1)) + Utility::pow<2>(grad_v(0) + grad_u(1));
     if (_dim >= 3)
     {
-      const auto & grad_w = _w_var->adGradSln(*_face_info);
-      velocity_gradient += grad_u(2) * grad_u(2) + grad_v(2) * grad_v(2) + grad_w(0) * grad_w(0) +
-                           grad_w(1) * grad_w(1) + grad_w(2) * grad_w(2);
+      auto grad_w = _w_var->adGradSln(*_face_info);
+      symmetric_strain_tensor_norm += 2.0 * Utility::pow<2>(grad_w(2)) +
+                                      Utility::pow<2>(grad_u(2) + grad_w(0)) +
+                                      Utility::pow<2>(grad_v(2) + grad_w(1));
     }
   }
-  velocity_gradient = std::sqrt(velocity_gradient + offset);
+
+  symmetric_strain_tensor_norm = std::sqrt(symmetric_strain_tensor_norm + offset);
 
   // Interpolate the mixing length to the face
   ADReal mixing_len;
@@ -93,7 +95,7 @@ INSFVMixingLengthScalarDiffusion::computeQpResidual()
               true);
 
   // Compute the eddy diffusivity for momentum
-  ADReal eddy_diff = velocity_gradient * mixing_len * mixing_len;
+  ADReal eddy_diff = symmetric_strain_tensor_norm * mixing_len * mixing_len;
 
   // Use the turbulent Schmidt/Prandtl number to get the eddy diffusivity for
   // the scalar variable
