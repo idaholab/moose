@@ -1201,13 +1201,10 @@ AutomaticMortarGeneration::computeInactiveLMNodes()
         proc_to_active_nodes_vector[proc_set.first].push_back(node_id);
     }
 
-    const auto my_pid = mesh.processor_id();
-
     // First push data
-    auto action_functor = [my_pid,
-                           &active_local_nodes](const processor_id_type libmesh_dbg_var(pid),
-                                                const std::vector<dof_id_type> & sent_data) {
-      mooseAssert(pid != my_pid, "should not be communicating with self");
+    auto action_functor = [this, &active_local_nodes](const processor_id_type pid,
+                                                      const std::vector<dof_id_type> & sent_data) {
+      mooseError(pid != mesh.processor_id(), "should not be communicating with self");
       for (const auto pr : sent_data)
         active_local_nodes.insert(pr);
     };
