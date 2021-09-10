@@ -1,31 +1,24 @@
 {
+    "reporters": {
+        "data": {
+            "values": {
+                "value": {
+                    "type": "double"
+                }
+            }
+        }
+    },
     "time_steps": [
         {
-            "reporters": {
-                "data": {
-                    "values": [
-                        {
-                            "name": "value",
-                            "type": "double",
-                            "value": 0.0
-                        }
-                    ]
-                }
+            "data": {
+                "value": 0.0
             },
             "time": 0.0,
             "time_step": 0
         },
         {
-            "reporters": {
-                "data": {
-                    "values": [
-                        {
-                            "name": "value",
-                            "type": "double",
-                            "value": 1980.0
-                        }
-                    ]
-                }
+            "data": {
+                "value": 1980.0
             },
             "time": 1.0,
             "time_step": 1

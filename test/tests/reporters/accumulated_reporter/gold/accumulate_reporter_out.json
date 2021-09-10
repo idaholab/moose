@@ -1,742 +1,575 @@
 {
+    "reporters": {
+        "accumulate": {
+            "type": "AccumulateReporter",
+            "values": {
+                "pp:value": {
+                    "type": "std::vector<double>"
+                },
+                "rep:int": {
+                    "type": "std::vector<int>"
+                },
+                "rep:int_vec": {
+                    "type": "std::vector<std::vector<int>>"
+                },
+                "rep:str": {
+                    "type": "std::vector<std::string>"
+                },
+                "rep:str_vec": {
+                    "type": "std::vector<std::vector<std::string>>"
+                },
+                "vpp:fun": {
+                    "type": "std::vector<std::vector<double>>"
+                }
+            }
+        }
+    },
     "time_steps": [
         {
-            "reporters": {
-                "accumulate": {
-                    "info": {
-                        "name": "accumulate",
-                        "type": "AccumulateReporter"
-                    },
-                    "values": [
-                        {
-                            "name": "pp:value",
-                            "type": "std::vector<double>",
-                            "value": [
-                                0.0
-                            ]
-                        },
-                        {
-                            "name": "rep:int",
-                            "type": "std::vector<int>",
-                            "value": [
-                                1
-                            ]
-                        },
-                        {
-                            "name": "rep:int_vec",
-                            "type": "std::vector<std::vector<int>>",
-                            "value": [
-                                [
-                                    3,
-                                    4
-                                ]
-                            ]
-                        },
-                        {
-                            "name": "rep:str",
-                            "type": "std::vector<std::string>",
-                            "value": [
-                                "two"
-                            ]
-                        },
-                        {
-                            "name": "rep:str_vec",
-                            "type": "std::vector<std::vector<std::string>>",
-                            "value": [
-                                [
-                                    "five",
-                                    "six",
-                                    "seven",
-                                    "eight"
-                                ]
-                            ]
-                        },
-                        {
-                            "name": "vpp:fun",
-                            "type": "std::vector<std::vector<double>>",
-                            "value": [
-                                [
-                                    0.0,
-                                    0.0,
-                                    0.0,
-                                    0.0,
-                                    0.0,
-                                    0.0
-                                ]
-                            ]
-                        }
+            "accumulate": {
+                "pp:value": [
+                    0.0
+                ],
+                "rep:int": [
+                    1
+                ],
+                "rep:int_vec": [
+                    [
+                        3,
+                        4
                     ]
-                }
+                ],
+                "rep:str": [
+                    "two"
+                ],
+                "rep:str_vec": [
+                    [
+                        "five",
+                        "six",
+                        "seven",
+                        "eight"
+                    ]
+                ],
+                "vpp:fun": [
+                    [
+                        0.0,
+                        0.0,
+                        0.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                ]
             },
             "time": 0.0,
             "time_step": 0
         },
         {
-            "reporters": {
-                "accumulate": {
-                    "info": {
-                        "name": "accumulate",
-                        "type": "AccumulateReporter"
-                    },
-                    "values": [
-                        {
-                            "name": "pp:value",
-                            "type": "std::vector<double>",
-                            "value": [
-                                0.0,
-                                1.0
-                            ]
-                        },
-                        {
-                            "name": "rep:int",
-                            "type": "std::vector<int>",
-                            "value": [
-                                1,
-                                1
-                            ]
-                        },
-                        {
-                            "name": "rep:int_vec",
-                            "type": "std::vector<std::vector<int>>",
-                            "value": [
-                                [
-                                    3,
-                                    4
-                                ],
-                                [
-                                    3,
-                                    4
-                                ]
-                            ]
-                        },
-                        {
-                            "name": "rep:str",
-                            "type": "std::vector<std::string>",
-                            "value": [
-                                "two",
-                                "two"
-                            ]
-                        },
-                        {
-                            "name": "rep:str_vec",
-                            "type": "std::vector<std::vector<std::string>>",
-                            "value": [
-                                [
-                                    "five",
-                                    "six",
-                                    "seven",
-                                    "eight"
-                                ],
-                                [
-                                    "five",
-                                    "six",
-                                    "seven",
-                                    "eight"
-                                ]
-                            ]
-                        },
-                        {
-                            "name": "vpp:fun",
-                            "type": "std::vector<std::vector<double>>",
-                            "value": [
-                                [
-                                    0.0,
-                                    0.0,
-                                    0.0,
-                                    0.0,
-                                    0.0,
-                                    0.0
-                                ],
-                                [
-                                    0.0,
-                                    0.2,
-                                    0.4,
-                                    0.6000000000000001,
-                                    0.8,
-                                    1.0
-                                ]
-                            ]
-                        }
+            "accumulate": {
+                "pp:value": [
+                    0.0,
+                    1.0
+                ],
+                "rep:int": [
+                    1,
+                    1
+                ],
+                "rep:int_vec": [
+                    [
+                        3,
+                        4
+                    ],
+                    [
+                        3,
+                        4
                     ]
-                }
+                ],
+                "rep:str": [
+                    "two",
+                    "two"
+                ],
+                "rep:str_vec": [
+                    [
+                        "five",
+                        "six",
+                        "seven",
+                        "eight"
+                    ],
+                    [
+                        "five",
+                        "six",
+                        "seven",
+                        "eight"
+                    ]
+                ],
+                "vpp:fun": [
+                    [
+                        0.0,
+                        0.0,
+                        0.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.2,
+                        0.4,
+                        0.6000000000000001,
+                        0.8,
+                        1.0
+                    ]
+                ]
             },
             "time": 1.0,
             "time_step": 1
         },
         {
-            "reporters": {
-                "accumulate": {
-                    "info": {
-                        "name": "accumulate",
-                        "type": "AccumulateReporter"
-                    },
-                    "values": [
-                        {
-                            "name": "pp:value",
-                            "type": "std::vector<double>",
-                            "value": [
-                                0.0,
-                                1.0,
-                                2.0
-                            ]
-                        },
-                        {
-                            "name": "rep:int",
-                            "type": "std::vector<int>",
-                            "value": [
-                                1,
-                                1,
-                                1
-                            ]
-                        },
-                        {
-                            "name": "rep:int_vec",
-                            "type": "std::vector<std::vector<int>>",
-                            "value": [
-                                [
-                                    3,
-                                    4
-                                ],
-                                [
-                                    3,
-                                    4
-                                ],
-                                [
-                                    3,
-                                    4
-                                ]
-                            ]
-                        },
-                        {
-                            "name": "rep:str",
-                            "type": "std::vector<std::string>",
-                            "value": [
-                                "two",
-                                "two",
-                                "two"
-                            ]
-                        },
-                        {
-                            "name": "rep:str_vec",
-                            "type": "std::vector<std::vector<std::string>>",
-                            "value": [
-                                [
-                                    "five",
-                                    "six",
-                                    "seven",
-                                    "eight"
-                                ],
-                                [
-                                    "five",
-                                    "six",
-                                    "seven",
-                                    "eight"
-                                ],
-                                [
-                                    "five",
-                                    "six",
-                                    "seven",
-                                    "eight"
-                                ]
-                            ]
-                        },
-                        {
-                            "name": "vpp:fun",
-                            "type": "std::vector<std::vector<double>>",
-                            "value": [
-                                [
-                                    0.0,
-                                    0.0,
-                                    0.0,
-                                    0.0,
-                                    0.0,
-                                    0.0
-                                ],
-                                [
-                                    0.0,
-                                    0.2,
-                                    0.4,
-                                    0.6000000000000001,
-                                    0.8,
-                                    1.0
-                                ],
-                                [
-                                    0.0,
-                                    0.4,
-                                    0.8,
-                                    1.2000000000000002,
-                                    1.6,
-                                    2.0
-                                ]
-                            ]
-                        }
+            "accumulate": {
+                "pp:value": [
+                    0.0,
+                    1.0,
+                    2.0
+                ],
+                "rep:int": [
+                    1,
+                    1,
+                    1
+                ],
+                "rep:int_vec": [
+                    [
+                        3,
+                        4
+                    ],
+                    [
+                        3,
+                        4
+                    ],
+                    [
+                        3,
+                        4
                     ]
-                }
+                ],
+                "rep:str": [
+                    "two",
+                    "two",
+                    "two"
+                ],
+                "rep:str_vec": [
+                    [
+                        "five",
+                        "six",
+                        "seven",
+                        "eight"
+                    ],
+                    [
+                        "five",
+                        "six",
+                        "seven",
+                        "eight"
+                    ],
+                    [
+                        "five",
+                        "six",
+                        "seven",
+                        "eight"
+                    ]
+                ],
+                "vpp:fun": [
+                    [
+                        0.0,
+                        0.0,
+                        0.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.2,
+                        0.4,
+                        0.6000000000000001,
+                        0.8,
+                        1.0
+                    ],
+                    [
+                        0.0,
+                        0.4,
+                        0.8,
+                        1.2000000000000002,
+                        1.6,
+                        2.0
+                    ]
+                ]
             },
             "time": 2.0,
             "time_step": 2
         },
         {
-            "reporters": {
-                "accumulate": {
-                    "info": {
-                        "name": "accumulate",
-                        "type": "AccumulateReporter"
-                    },
-                    "values": [
-                        {
-                            "name": "pp:value",
-                            "type": "std::vector<double>",
-                            "value": [
-                                0.0,
-                                1.0,
-                                2.0,
-                                3.0
-                            ]
-                        },
-                        {
-                            "name": "rep:int",
-                            "type": "std::vector<int>",
-                            "value": [
-                                1,
-                                1,
-                                1,
-                                1
-                            ]
-                        },
-                        {
-                            "name": "rep:int_vec",
-                            "type": "std::vector<std::vector<int>>",
-                            "value": [
-                                [
-                                    3,
-                                    4
-                                ],
-                                [
-                                    3,
-                                    4
-                                ],
-                                [
-                                    3,
-                                    4
-                                ],
-                                [
-                                    3,
-                                    4
-                                ]
-                            ]
-                        },
-                        {
-                            "name": "rep:str",
-                            "type": "std::vector<std::string>",
-                            "value": [
-                                "two",
-                                "two",
-                                "two",
-                                "two"
-                            ]
-                        },
-                        {
-                            "name": "rep:str_vec",
-                            "type": "std::vector<std::vector<std::string>>",
-                            "value": [
-                                [
-                                    "five",
-                                    "six",
-                                    "seven",
-                                    "eight"
-                                ],
-                                [
-                                    "five",
-                                    "six",
-                                    "seven",
-                                    "eight"
-                                ],
-                                [
-                                    "five",
-                                    "six",
-                                    "seven",
-                                    "eight"
-                                ],
-                                [
-                                    "five",
-                                    "six",
-                                    "seven",
-                                    "eight"
-                                ]
-                            ]
-                        },
-                        {
-                            "name": "vpp:fun",
-                            "type": "std::vector<std::vector<double>>",
-                            "value": [
-                                [
-                                    0.0,
-                                    0.0,
-                                    0.0,
-                                    0.0,
-                                    0.0,
-                                    0.0
-                                ],
-                                [
-                                    0.0,
-                                    0.2,
-                                    0.4,
-                                    0.6000000000000001,
-                                    0.8,
-                                    1.0
-                                ],
-                                [
-                                    0.0,
-                                    0.4,
-                                    0.8,
-                                    1.2000000000000002,
-                                    1.6,
-                                    2.0
-                                ],
-                                [
-                                    0.0,
-                                    0.6000000000000001,
-                                    1.2000000000000002,
-                                    1.8000000000000003,
-                                    2.4000000000000004,
-                                    3.0
-                                ]
-                            ]
-                        }
+            "accumulate": {
+                "pp:value": [
+                    0.0,
+                    1.0,
+                    2.0,
+                    3.0
+                ],
+                "rep:int": [
+                    1,
+                    1,
+                    1,
+                    1
+                ],
+                "rep:int_vec": [
+                    [
+                        3,
+                        4
+                    ],
+                    [
+                        3,
+                        4
+                    ],
+                    [
+                        3,
+                        4
+                    ],
+                    [
+                        3,
+                        4
                     ]
-                }
+                ],
+                "rep:str": [
+                    "two",
+                    "two",
+                    "two",
+                    "two"
+                ],
+                "rep:str_vec": [
+                    [
+                        "five",
+                        "six",
+                        "seven",
+                        "eight"
+                    ],
+                    [
+                        "five",
+                        "six",
+                        "seven",
+                        "eight"
+                    ],
+                    [
+                        "five",
+                        "six",
+                        "seven",
+                        "eight"
+                    ],
+                    [
+                        "five",
+                        "six",
+                        "seven",
+                        "eight"
+                    ]
+                ],
+                "vpp:fun": [
+                    [
+                        0.0,
+                        0.0,
+                        0.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.2,
+                        0.4,
+                        0.6000000000000001,
+                        0.8,
+                        1.0
+                    ],
+                    [
+                        0.0,
+                        0.4,
+                        0.8,
+                        1.2000000000000002,
+                        1.6,
+                        2.0
+                    ],
+                    [
+                        0.0,
+                        0.6000000000000001,
+                        1.2000000000000002,
+                        1.8000000000000003,
+                        2.4000000000000004,
+                        3.0
+                    ]
+                ]
             },
             "time": 3.0,
             "time_step": 3
         },
         {
-            "reporters": {
-                "accumulate": {
-                    "info": {
-                        "name": "accumulate",
-                        "type": "AccumulateReporter"
-                    },
-                    "values": [
-                        {
-                            "name": "pp:value",
-                            "type": "std::vector<double>",
-                            "value": [
-                                0.0,
-                                1.0,
-                                2.0,
-                                3.0,
-                                4.0
-                            ]
-                        },
-                        {
-                            "name": "rep:int",
-                            "type": "std::vector<int>",
-                            "value": [
-                                1,
-                                1,
-                                1,
-                                1,
-                                1
-                            ]
-                        },
-                        {
-                            "name": "rep:int_vec",
-                            "type": "std::vector<std::vector<int>>",
-                            "value": [
-                                [
-                                    3,
-                                    4
-                                ],
-                                [
-                                    3,
-                                    4
-                                ],
-                                [
-                                    3,
-                                    4
-                                ],
-                                [
-                                    3,
-                                    4
-                                ],
-                                [
-                                    3,
-                                    4
-                                ]
-                            ]
-                        },
-                        {
-                            "name": "rep:str",
-                            "type": "std::vector<std::string>",
-                            "value": [
-                                "two",
-                                "two",
-                                "two",
-                                "two",
-                                "two"
-                            ]
-                        },
-                        {
-                            "name": "rep:str_vec",
-                            "type": "std::vector<std::vector<std::string>>",
-                            "value": [
-                                [
-                                    "five",
-                                    "six",
-                                    "seven",
-                                    "eight"
-                                ],
-                                [
-                                    "five",
-                                    "six",
-                                    "seven",
-                                    "eight"
-                                ],
-                                [
-                                    "five",
-                                    "six",
-                                    "seven",
-                                    "eight"
-                                ],
-                                [
-                                    "five",
-                                    "six",
-                                    "seven",
-                                    "eight"
-                                ],
-                                [
-                                    "five",
-                                    "six",
-                                    "seven",
-                                    "eight"
-                                ]
-                            ]
-                        },
-                        {
-                            "name": "vpp:fun",
-                            "type": "std::vector<std::vector<double>>",
-                            "value": [
-                                [
-                                    0.0,
-                                    0.0,
-                                    0.0,
-                                    0.0,
-                                    0.0,
-                                    0.0
-                                ],
-                                [
-                                    0.0,
-                                    0.2,
-                                    0.4,
-                                    0.6000000000000001,
-                                    0.8,
-                                    1.0
-                                ],
-                                [
-                                    0.0,
-                                    0.4,
-                                    0.8,
-                                    1.2000000000000002,
-                                    1.6,
-                                    2.0
-                                ],
-                                [
-                                    0.0,
-                                    0.6000000000000001,
-                                    1.2000000000000002,
-                                    1.8000000000000003,
-                                    2.4000000000000004,
-                                    3.0
-                                ],
-                                [
-                                    0.0,
-                                    0.8,
-                                    1.6,
-                                    2.4000000000000004,
-                                    3.2,
-                                    4.0
-                                ]
-                            ]
-                        }
+            "accumulate": {
+                "pp:value": [
+                    0.0,
+                    1.0,
+                    2.0,
+                    3.0,
+                    4.0
+                ],
+                "rep:int": [
+                    1,
+                    1,
+                    1,
+                    1,
+                    1
+                ],
+                "rep:int_vec": [
+                    [
+                        3,
+                        4
+                    ],
+                    [
+                        3,
+                        4
+                    ],
+                    [
+                        3,
+                        4
+                    ],
+                    [
+                        3,
+                        4
+                    ],
+                    [
+                        3,
+                        4
                     ]
-                }
+                ],
+                "rep:str": [
+                    "two",
+                    "two",
+                    "two",
+                    "two",
+                    "two"
+                ],
+                "rep:str_vec": [
+                    [
+                        "five",
+                        "six",
+                        "seven",
+                        "eight"
+                    ],
+                    [
+                        "five",
+                        "six",
+                        "seven",
+                        "eight"
+                    ],
+                    [
+                        "five",
+                        "six",
+                        "seven",
+                        "eight"
+                    ],
+                    [
+                        "five",
+                        "six",
+                        "seven",
+                        "eight"
+                    ],
+                    [
+                        "five",
+                        "six",
+                        "seven",
+                        "eight"
+                    ]
+                ],
+                "vpp:fun": [
+                    [
+                        0.0,
+                        0.0,
+                        0.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.2,
+                        0.4,
+                        0.6000000000000001,
+                        0.8,
+                        1.0
+                    ],
+                    [
+                        0.0,
+                        0.4,
+                        0.8,
+                        1.2000000000000002,
+                        1.6,
+                        2.0
+                    ],
+                    [
+                        0.0,
+                        0.6000000000000001,
+                        1.2000000000000002,
+                        1.8000000000000003,
+                        2.4000000000000004,
+                        3.0
+                    ],
+                    [
+                        0.0,
+                        0.8,
+                        1.6,
+                        2.4000000000000004,
+                        3.2,
+                        4.0
+                    ]
+                ]
             },
             "time": 4.0,
             "time_step": 4
         },
         {
-            "reporters": {
-                "accumulate": {
-                    "info": {
-                        "name": "accumulate",
-                        "type": "AccumulateReporter"
-                    },
-                    "values": [
-                        {
-                            "name": "pp:value",
-                            "type": "std::vector<double>",
-                            "value": [
-                                0.0,
-                                1.0,
-                                2.0,
-                                3.0,
-                                4.0,
-                                5.0
-                            ]
-                        },
-                        {
-                            "name": "rep:int",
-                            "type": "std::vector<int>",
-                            "value": [
-                                1,
-                                1,
-                                1,
-                                1,
-                                1,
-                                1
-                            ]
-                        },
-                        {
-                            "name": "rep:int_vec",
-                            "type": "std::vector<std::vector<int>>",
-                            "value": [
-                                [
-                                    3,
-                                    4
-                                ],
-                                [
-                                    3,
-                                    4
-                                ],
-                                [
-                                    3,
-                                    4
-                                ],
-                                [
-                                    3,
-                                    4
-                                ],
-                                [
-                                    3,
-                                    4
-                                ],
-                                [
-                                    3,
-                                    4
-                                ]
-                            ]
-                        },
-                        {
-                            "name": "rep:str",
-                            "type": "std::vector<std::string>",
-                            "value": [
-                                "two",
-                                "two",
-                                "two",
-                                "two",
-                                "two",
-                                "two"
-                            ]
-                        },
-                        {
-                            "name": "rep:str_vec",
-                            "type": "std::vector<std::vector<std::string>>",
-                            "value": [
-                                [
-                                    "five",
-                                    "six",
-                                    "seven",
-                                    "eight"
-                                ],
-                                [
-                                    "five",
-                                    "six",
-                                    "seven",
-                                    "eight"
-                                ],
-                                [
-                                    "five",
-                                    "six",
-                                    "seven",
-                                    "eight"
-                                ],
-                                [
-                                    "five",
-                                    "six",
-                                    "seven",
-                                    "eight"
-                                ],
-                                [
-                                    "five",
-                                    "six",
-                                    "seven",
-                                    "eight"
-                                ],
-                                [
-                                    "five",
-                                    "six",
-                                    "seven",
-                                    "eight"
-                                ]
-                            ]
-                        },
-                        {
-                            "name": "vpp:fun",
-                            "type": "std::vector<std::vector<double>>",
-                            "value": [
-                                [
-                                    0.0,
-                                    0.0,
-                                    0.0,
-                                    0.0,
-                                    0.0,
-                                    0.0
-                                ],
-                                [
-                                    0.0,
-                                    0.2,
-                                    0.4,
-                                    0.6000000000000001,
-                                    0.8,
-                                    1.0
-                                ],
-                                [
-                                    0.0,
-                                    0.4,
-                                    0.8,
-                                    1.2000000000000002,
-                                    1.6,
-                                    2.0
-                                ],
-                                [
-                                    0.0,
-                                    0.6000000000000001,
-                                    1.2000000000000002,
-                                    1.8000000000000003,
-                                    2.4000000000000004,
-                                    3.0
-                                ],
-                                [
-                                    0.0,
-                                    0.8,
-                                    1.6,
-                                    2.4000000000000004,
-                                    3.2,
-                                    4.0
-                                ],
-                                [
-                                    0.0,
-                                    1.0,
-                                    2.0,
-                                    3.0000000000000004,
-                                    4.0,
-                                    5.0
-                                ]
-                            ]
-                        }
+            "accumulate": {
+                "pp:value": [
+                    0.0,
+                    1.0,
+                    2.0,
+                    3.0,
+                    4.0,
+                    5.0
+                ],
+                "rep:int": [
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1
+                ],
+                "rep:int_vec": [
+                    [
+                        3,
+                        4
+                    ],
+                    [
+                        3,
+                        4
+                    ],
+                    [
+                        3,
+                        4
+                    ],
+                    [
+                        3,
+                        4
+                    ],
+                    [
+                        3,
+                        4
+                    ],
+                    [
+                        3,
+                        4
                     ]
-                }
+                ],
+                "rep:str": [
+                    "two",
+                    "two",
+                    "two",
+                    "two",
+                    "two",
+                    "two"
+                ],
+                "rep:str_vec": [
+                    [
+                        "five",
+                        "six",
+                        "seven",
+                        "eight"
+                    ],
+                    [
+                        "five",
+                        "six",
+                        "seven",
+                        "eight"
+                    ],
+                    [
+                        "five",
+                        "six",
+                        "seven",
+                        "eight"
+                    ],
+                    [
+                        "five",
+                        "six",
+                        "seven",
+                        "eight"
+                    ],
+                    [
+                        "five",
+                        "six",
+                        "seven",
+                        "eight"
+                    ],
+                    [
+                        "five",
+                        "six",
+                        "seven",
+                        "eight"
+                    ]
+                ],
+                "vpp:fun": [
+                    [
+                        0.0,
+                        0.0,
+                        0.0,
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.2,
+                        0.4,
+                        0.6000000000000001,
+                        0.8,
+                        1.0
+                    ],
+                    [
+                        0.0,
+                        0.4,
+                        0.8,
+                        1.2000000000000002,
+                        1.6,
+                        2.0
+                    ],
+                    [
+                        0.0,
+                        0.6000000000000001,
+                        1.2000000000000002,
+                        1.8000000000000003,
+                        2.4000000000000004,
+                        3.0
+                    ],
+                    [
+                        0.0,
+                        0.8,
+                        1.6,
+                        2.4000000000000004,
+                        3.2,
+                        4.0
+                    ],
+                    [
+                        0.0,
+                        1.0,
+                        2.0,
+                        3.0000000000000004,
+                        4.0,
+                        5.0
+                    ]
+                ]
             },
             "time": 5.0,
             "time_step": 5

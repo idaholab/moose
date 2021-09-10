@@ -1,41 +1,34 @@
 {
+    "reporters": {
+        "data": {
+            "values": {
+                "vector": {
+                    "type": "std::vector<double>"
+                }
+            }
+        }
+    },
     "time_steps": [
         {
-            "reporters": {
-                "data": {
-                    "values": [
-                        {
-                            "name": "vector",
-                            "type": "std::vector<double>",
-                            "value": [
-                                1949.0,
-                                1954.0,
-                                1977.0,
-                                1980.0
-                            ]
-                        }
-                    ]
-                }
+            "data": {
+                "vector": [
+                    1949.0,
+                    1954.0,
+                    1977.0,
+                    1980.0
+                ]
             },
             "time": 0.0,
             "time_step": 0
         },
         {
-            "reporters": {
-                "data": {
-                    "values": [
-                        {
-                            "name": "vector",
-                            "type": "std::vector<double>",
-                            "value": [
-                                1949.0,
-                                1954.0,
-                                1977.0,
-                                1980.0
-                            ]
-                        }
-                    ]
-                }
+            "data": {
+                "vector": [
+                    1949.0,
+                    1954.0,
+                    1977.0,
+                    1980.0
+                ]
             },
             "time": 1.0,
             "time_step": 1

@@ -2,7 +2,7 @@
   [block]
     type = 'RunException'
     input = 'undefined_block_kernel.i'
-    expect_err = "the following block ids do not exist on the mesh: 10"
+    expect_err = "the following blocks \(ids\) do not exist on the mesh: 10"
 
     requirement = 'The system shall issue an error when a referenced subdomain does not exist in the mesh.'
     design = 'MooseMesh.md'

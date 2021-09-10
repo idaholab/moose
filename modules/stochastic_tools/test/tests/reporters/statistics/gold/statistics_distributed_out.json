@@ -1,87 +1,78 @@
 {
+    "reporters": {
+        "stats": {
+            "type": "StatisticsReporter",
+            "values": {
+                "test_data_MAX": {
+                    "stat": "MAX",
+                    "type": "std::pair<double, std::vector<double> >"
+                },
+                "test_data_MEAN": {
+                    "stat": "MEAN",
+                    "type": "std::pair<double, std::vector<double> >"
+                },
+                "test_data_MIN": {
+                    "stat": "MIN",
+                    "type": "std::pair<double, std::vector<double> >"
+                },
+                "test_data_NORM2": {
+                    "stat": "NORM2",
+                    "type": "std::pair<double, std::vector<double> >"
+                },
+                "test_data_RATIO": {
+                    "stat": "RATIO",
+                    "type": "std::pair<double, std::vector<double> >"
+                },
+                "test_data_STDDEV": {
+                    "stat": "STDDEV",
+                    "type": "std::pair<double, std::vector<double> >"
+                },
+                "test_data_STDERR": {
+                    "stat": "STDERR",
+                    "type": "std::pair<double, std::vector<double> >"
+                },
+                "test_data_SUM": {
+                    "stat": "SUM",
+                    "type": "std::pair<double, std::vector<double> >"
+                }
+            }
+        }
+    },
     "time_steps": [
         {
-            "reporters": {
-                "stats": {
-                    "info": {
-                        "name": "stats",
-                        "type": "StatisticsReporter"
-                    },
-                    "values": [
-                        {
-                            "name": "test_data_MAX",
-                            "stat": "MAX",
-                            "type": "std::pair<double, std::vector<double> >",
-                            "value": [
-                                309.0,
-                                []
-                            ]
-                        },
-                        {
-                            "name": "test_data_MEAN",
-                            "stat": "MEAN",
-                            "type": "std::pair<double, std::vector<double> >",
-                            "value": [
-                                204.5,
-                                []
-                            ]
-                        },
-                        {
-                            "name": "test_data_MIN",
-                            "stat": "MIN",
-                            "type": "std::pair<double, std::vector<double> >",
-                            "value": [
-                                100.0,
-                                []
-                            ]
-                        },
-                        {
-                            "name": "test_data_NORM2",
-                            "stat": "NORM2",
-                            "type": "std::pair<double, std::vector<double> >",
-                            "value": [
-                                1206.173702250219,
-                                []
-                            ]
-                        },
-                        {
-                            "name": "test_data_RATIO",
-                            "stat": "RATIO",
-                            "type": "std::pair<double, std::vector<double> >",
-                            "value": [
-                                3.09,
-                                []
-                            ]
-                        },
-                        {
-                            "name": "test_data_STDDEV",
-                            "stat": "STDDEV",
-                            "type": "std::pair<double, std::vector<double> >",
-                            "value": [
-                                83.09684835718231,
-                                []
-                            ]
-                        },
-                        {
-                            "name": "test_data_STDERR",
-                            "stat": "STDERR",
-                            "type": "std::pair<double, std::vector<double> >",
-                            "value": [
-                                15.17133943427162,
-                                []
-                            ]
-                        },
-                        {
-                            "name": "test_data_SUM",
-                            "stat": "SUM",
-                            "type": "std::pair<double, std::vector<double> >",
-                            "value": [
-                                6135.0,
-                                []
-                            ]
-                        }
-                    ]
-                }
+            "stats": {
+                "test_data_MAX": [
+                    309.0,
+                    []
+                ],
+                "test_data_MEAN": [
+                    204.5,
+                    []
+                ],
+                "test_data_MIN": [
+                    100.0,
+                    []
+                ],
+                "test_data_NORM2": [
+                    1206.173702250219,
+                    []
+                ],
+                "test_data_RATIO": [
+                    3.09,
+                    []
+                ],
+                "test_data_STDDEV": [
+                    83.09684835718231,
+                    []
+                ],
+                "test_data_STDERR": [
+                    15.17133943427162,
+                    []
+                ],
+                "test_data_SUM": [
+                    6135.0,
+                    []
+                ]
             },
             "time": 2.0,
             "time_step": 2

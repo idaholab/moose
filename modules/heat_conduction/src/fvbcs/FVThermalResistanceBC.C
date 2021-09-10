@@ -16,6 +16,7 @@ InputParameters
 FVThermalResistanceBC::validParams()
 {
   auto params = FVFluxBC::validParams();
+  params.addCoupledVar("temperature", "temperature variable");
   params.addRequiredParam<Real>(HeatConduction::T_ambient, "constant ambient temperature");
   params.addRequiredParam<MaterialPropertyName>("htc", "heat transfer coefficient");
 
@@ -54,6 +55,7 @@ FVThermalResistanceBC::FVThermalResistanceBC(const InputParameters & parameters)
     _geometry(getParam<MooseEnum>("geometry").getEnum<Moose::CoordinateSystemType>()),
     _inner_radius(
         _geometry == Moose::CoordinateSystemType::COORD_RZ ? getParam<Real>("inner_radius") : 1.0),
+    _T(isParamValid("temperature") ? adCoupledValue("temperature") : _u),
     _T_ambient(getParam<Real>(HeatConduction::T_ambient)),
     _k(getParam<std::vector<Real>>("thermal_conductivities")),
     _dx(getParam<std::vector<Real>>("conduction_thicknesses")),
@@ -110,8 +112,8 @@ FVThermalResistanceBC::computeQpResidual()
   // radiation resistance has to be solved iteratively, since we don't know the
   // surface temperature. We do know that the heat flux in the conduction layers
   // must match the heat flux in the parallel convection-radiation segment. For a
-  // first guess, take the surface temperature as the average of _u and T_ambient.
-  _T_surface = 0.5 * (_u[_qp] + _T_ambient);
+  // first guess, take the surface temperature as the average of _T and T_ambient.
+  _T_surface = 0.5 * (_T[_qp] + _T_ambient);
 
   // total flux perpendicular to boundary
   ADReal flux;
@@ -133,7 +135,7 @@ FVThermalResistanceBC::computeQpResidual()
       T_surface_previous = _T_surface;
 
       // compute the flux based on the conduction part of the circuit
-      flux = (_u[_qp] - _T_surface) / _conduction_resistance;
+      flux = (_T[_qp] - _T_surface) / _conduction_resistance;
 
       computeParallelResistance();
 
@@ -155,7 +157,7 @@ FVThermalResistanceBC::computeQpResidual()
   // resistance to find the overall heat flux. For Cartesian, dividing by the
   // 'inner_radius' has no effect, but it is required for correct normalization
   // for cylindrical geometries.
-  flux = (_u[_qp] - _T_ambient) / (_conduction_resistance + _parallel_resistance) / _inner_radius;
+  flux = (_T[_qp] - _T_ambient) / (_conduction_resistance + _parallel_resistance) / _inner_radius;
   return flux;
 }
 
