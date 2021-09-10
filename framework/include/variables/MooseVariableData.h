@@ -293,6 +293,20 @@ public:
     return _ad_grad_u;
   }
 
+  const ADTemplateVariableGradient<OutputType> & adGradSlnDot() const
+  {
+    _need_ad = _need_ad_grad_u_dot = true;
+
+    if (!_time_integrator)
+      // If we don't have a time integrator (this will be the case for variables that are a part of
+      // the AuxiliarySystem) then we have no way to calculate _ad_grad_u_dot and we are just going
+      // to copy the values from _grad_u_dot. Of course in order to be able to do that we need to
+      // calculate _grad_u_dot
+      _need_grad_dot = true;
+
+    return _ad_grad_u_dot;
+  }
+
   const ADTemplateVariableSecond<OutputType> & adSecondSln() const
   {
     _need_ad = _need_ad_second_u = true;
@@ -600,6 +614,7 @@ private:
   mutable bool _need_ad;
   mutable bool _need_ad_u;
   mutable bool _need_ad_grad_u;
+  mutable bool _need_ad_grad_u_dot;
   mutable bool _need_ad_second_u;
 
   /// local solution flags
@@ -672,6 +687,7 @@ private:
   MooseArray<ADReal> _ad_dofs_dotdot;
   ADTemplateVariableValue<OutputType> _ad_u_dot;
   ADTemplateVariableValue<OutputType> _ad_u_dotdot;
+  ADTemplateVariableGradient<OutputType> _ad_grad_u_dot;
 
   // time derivatives
 
