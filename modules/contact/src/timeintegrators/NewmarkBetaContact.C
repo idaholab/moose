@@ -17,8 +17,6 @@
 #include "InterfaceKernelBase.h"
 #include "IntegratedBCBase.h"
 
-#include "libmesh/numeric_vector.h"
-
 registerMooseObject("MooseApp", NewmarkBetaContact);
 
 InputParameters
@@ -38,33 +36,14 @@ NewmarkBetaContact::NewmarkBetaContact(const InputParameters & parameters)
     _contact_residual(_nl.addVector(_contact_tag_id, false, PARALLEL)),
     _noncontact_tag_id(_fe_problem.addVectorTag("noncontact")),
     _noncontact_residual(_nl.addVector(_noncontact_tag_id, false, PARALLEL)),
+    _system_time_tag(_fe_problem.getMatrixTagID("TIME")),
+    _mass_matrix_diag(_nl.addVector("mass_matrix_diag", false, PARALLEL)),
+    _ones(&_nl.addVector("ones", false, PARALLEL)),
     _implicit_u_fraction(2 * _beta),
     _implicit_udot_fraction(_gamma),
-    _noncontact_old(_nl.addVector("noncontact_old", false, PARALLEL))
+    _noncontact_old(_nl.addVector("noncontact_old", false, PARALLEL)),
+    _u_dotdot_contact(_nl.addVector("u_dotdot_contact", false, PARALLEL))
 {
-  _fe_problem.setUDotDotRequested(false);
-  _fe_problem.setUDotDotOldRequested(false);
-}
-
-void
-NewmarkBetaContact::postResidual(NumericVector<Number> & residual)
-{
-  // time derivative residuals for all variables
-  residual += _Re_time;
-  // non-time residuals for all non-displacement variables
-  residual += _Re_non_time;
-  // contact residuals for displacement variables
-  residual += _contact_residual;
-  // noncontact residuals for displacement variables
-  residual.add(_implicit_u_fraction, _noncontact_residual);
-  residual.add(1 - _implicit_u_fraction, _noncontact_old);
-
-  // residual corresponding to -2 * u_dot_old / dt. Note that u_dot(_old) *does not* have units of
-  // m/s. Rather it has units of kg * m / s per its computation in postStep
-  const NumericVector<Number> & u_dot_old = *_sys.solutionUDotOld();
-  residual.add(-2. / _dt, u_dot_old);
-
-  residual.close();
 }
 
 template <typename T>
@@ -83,7 +62,7 @@ NewmarkBetaContact::changeNonContactTags(T & warehouse)
         {
           nc_ro->useVectorTag("noncontact");
           nc_ro->eraseVectorTag("nontime");
-          nc_ro->assignMatrixCoeff("system", _implicit_u_fraction);
+          // nc_ro->assignMatrixCoeff("system", _implicit_u_fraction);
         }
       }
     });
@@ -116,15 +95,9 @@ NewmarkBetaContact::init()
 void
 NewmarkBetaContact::postStep()
 {
+
   // Compute "current" time derivative and then shift. What is used in residual evaluation is
   // u_dot_old
-  NumericVector<Number> & u_dot_old = *_sys.solutionUDotOld();
-  NumericVector<Number> & u_dot = *_sys.solutionUDot();
-  u_dot = u_dot_old;
-  u_dot.add(-_dt * _implicit_udot_fraction, _noncontact_residual);
-  u_dot.add(-_dt * (1. - _implicit_udot_fraction), _noncontact_old);
-  u_dot.add(-_dt, _contact_residual);
-  u_dot_old = u_dot;
 
   // now shift noncontact residual
   _noncontact_old = _noncontact_residual;
@@ -137,20 +110,110 @@ NewmarkBetaContact::computeTimeDerivatives()
     mooseError("NewmarkBeta: Time derivative of solution (`u_dot`) is not stored. Please set "
                "uDotRequested() to true in FEProblemBase befor requesting `u_dot`.");
 
+  if (!_sys.solutionUDotDot())
+    mooseError("NewmarkBeta: Second time derivative of solution (`u_dotdot`) is not stored. Please "
+               "set uDotDotRequested() to true in FEProblemBase befor requesting `u_dotdot`.");
+
   if (!_sys.solutionUDotOld())
     mooseError("NewmarkBeta: Old time derivative of solution (`u_dot_old`) is not stored. Please "
                "set uDotOldRequested() to true in FEProblemBase befor requesting `u_dot_old`.");
 
-  // Users should not be using the current time derivatives in their residual objects if they're
-  // using this time integrator, but this method always gets called so we can't just error. We could
-  // insert a bunch of NaNs into the u_dot vector to try and catch bad use of u_dot, but for now I'm
-  // just going to return
+  if (!_sys.solutionUDotDotOld())
+    mooseError("NewmarkBeta: Old second time derivative of solution (`u_dotdot_old`) is not "
+               "stored. Please set uDotDotOldRequested() to true in FEProblemBase befor requesting "
+               "`u_dotdot_old`.");
+
+  NumericVector<Number> & u_dot = *_sys.solutionUDot();
+  NumericVector<Number> & u_dotdot = *_sys.solutionUDotDot();
+  NumericVector<Number> & u_dot_old = *_sys.solutionUDotOld();
+  NumericVector<Number> & u_dotdot_old = *_sys.solutionUDotDotOld();
+
+  if (_fe_problem.timeStep() <= _inactive_tsteps)
+  {
+    u_dot.zero();
+    u_dotdot.zero();
+  }
+  else
+  {
+    u_dotdot = *_solution;
+   computeTimeDerivativeHelper(
+        u_dot, _solution_old, u_dot_old, u_dotdot, u_dotdot_old, _u_dotdot_contact);
+  }
+
+  // make sure _u_dotdot and _u_dot are in good state
+  u_dotdot.close();
+  u_dot.close();
+
+  // used for Jacobian calculations
+  _du_dotdot_du = 1.0 / _beta / _dt / _dt;
+  _du_dot_du = _gamma / _beta / _dt;
+
   return;
 }
 
 void
-NewmarkBetaContact::computeADTimeDerivatives(ADReal &, const dof_id_type &, ADReal &) const
+NewmarkBetaContact::computeContactAccelerations()
 {
-  mooseError("If using NewmarkBetaContact, your residual objects should not involve current time "
-             "derivatives");
+
+  auto & mass_matrix = _nonlinear_implicit_system->get_system_matrix();
+  Moose::out << "After calling get_system_matrix \n";
+
+  _fe_problem.computeJacobianTag(
+      *_nonlinear_implicit_system->current_local_solution, mass_matrix, _system_time_tag);
+  ///
+  Moose::out << "After calling compute Jacobian \n";
+  //
+  mass_matrix.vector_mult(_mass_matrix_diag, *_ones);
+
+  // "Invert" the diagonal mass matrix
+  _mass_matrix_diag.reciprocal();
+  Moose::out << "After taking the reciprocal \n";
+
+  // Multiply the inversion by the RHS
+  _u_dotdot_contact.pointwise_mult(_mass_matrix_diag, _contact_residual);
+
+  // Check for convergence by seeing if there is a nan or inf
+  auto sum = _u_dotdot_contact.sum();
+  bool converged = std::isfinite(sum);
+
+
+  // Get things back to normal after mass matrix manipulations.
+  _nl.computeJacobian(mass_matrix);
+
+  Moose::out << "Can we lump the mass matrix correctly in the integrator? " << converged << "\n";
+}
+
+void
+NewmarkBetaContact::computeADTimeDerivatives(ADReal & ad_u_dot,
+                                             const dof_id_type & dof,
+                                             ADReal & ad_u_dotdot) const
+{
+  mooseError("Let's take care of AD later");
+
+  const auto & u_old = _solution_old(dof);
+  const auto & u_dot_old = (*_sys.solutionUDotOld())(dof);
+  const auto & u_dotdot_old = (*_sys.solutionUDotDotOld())(dof);
+
+  // Seeds ad_u_dotdot with _ad_dof_values and associated derivatives provided via ad_u_dot from
+  // MooseVariableData
+  ad_u_dotdot = ad_u_dot;
+
+  computeTimeDerivativeHelper(
+      ad_u_dot, u_old, u_dot_old, ad_u_dotdot, u_dotdot_old,_u_dotdot_contact);
+}
+
+void
+NewmarkBetaContact::postResidual(NumericVector<Number> & residual)
+{
+  // time derivative residuals for all variables
+  residual += _Re_time;
+  // non-time residuals for all non-displacement variables excluding contact
+  residual += _noncontact_residual;
+  // contact residuals for displacement variables
+  residual.add(1.0 / _implicit_u_fraction, _contact_residual);
+
+  // Compute contact accelerations
+  computeContactAccelerations();
+  // compute _u_dotdot_contact and cache
+  residual.close();
 }
