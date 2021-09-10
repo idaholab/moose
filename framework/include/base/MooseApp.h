@@ -1045,6 +1045,15 @@ private:
   void createMeshGeneratorOrder();
 
   /**
+   * @return whether we have created any clones for the provided template relationship manager and
+   * mesh yet. This may be false for instance when we are in the initial add relationship manager
+   * stage and haven't attempted attaching any relationship managers to the mesh or dof map yet
+   * (which is when we generate the clones). It's also maybe possible that we've created a clone of
+   * a given \p template_rm but not for the provided mesh so we return false in that case as well
+   */
+  bool hasRMClone(const RelationshipManager & template_rm, const MeshBase & mesh) const;
+
+  /**
    * Return the ghosting functor clone originally created from the provided template relationship
    * manager (the relationship manager stored by the \p MooseApp) and mesh
    */

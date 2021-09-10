@@ -2154,6 +2154,14 @@ MooseApp::addRelationshipManager(std::shared_ptr<RelationshipManager> new_rm)
   return add;
 }
 
+bool
+MooseApp::hasRMClone(const RelationshipManager & template_rm, const MeshBase & mesh) const
+{
+  auto it = _template_to_clones.find(&template_rm);
+  // C++ does short circuiting so we're safe here
+  return (it != _template_to_clones.end()) && (it->second.find(&mesh) != it->second.end());
+}
+
 GhostingFunctor &
 MooseApp::getRMClone(const RelationshipManager & template_rm, const MeshBase & mesh) const
 {
@@ -2177,25 +2185,35 @@ MooseApp::removeRelationshipManager(std::shared_ptr<RelationshipManager> rm)
     mooseError("The MooseMesh should exist");
 
   const MeshBase * const undisp_lm_mesh = mesh->getMeshPtr();
-  if (undisp_lm_mesh)
-    const_cast<MeshBase *>(undisp_lm_mesh)
-        ->remove_ghosting_functor(getRMClone(*rm, *undisp_lm_mesh));
+  GhostingFunctor * undisp_clone = nullptr;
+  if (undisp_lm_mesh && hasRMClone(*rm, *undisp_lm_mesh))
+  {
+    undisp_clone = &getRMClone(*rm, *undisp_lm_mesh);
+    const_cast<MeshBase *>(undisp_lm_mesh)->remove_ghosting_functor(*undisp_clone);
+  }
 
   auto & displaced_mesh = _action_warehouse.displacedMesh();
   MeshBase * const disp_lm_mesh = displaced_mesh ? &displaced_mesh->getMesh() : nullptr;
-  if (disp_lm_mesh)
-    disp_lm_mesh->remove_ghosting_functor(getRMClone(*rm, *disp_lm_mesh));
+  GhostingFunctor * disp_clone = nullptr;
+  if (disp_lm_mesh && hasRMClone(*rm, *disp_lm_mesh))
+  {
+    disp_clone = &getRMClone(*rm, *disp_lm_mesh);
+    disp_lm_mesh->remove_ghosting_functor(*disp_clone);
+  }
 
   if (_executioner)
   {
     auto & problem = _executioner->feProblem();
-    problem.removeAlgebraicGhostingFunctor(getRMClone(*rm, *undisp_lm_mesh));
+    if (undisp_clone)
+    {
+      problem.removeAlgebraicGhostingFunctor(*undisp_clone);
+      auto & dof_map = problem.getNonlinearSystemBase().dofMap();
+      dof_map.remove_coupling_functor(*undisp_clone);
+    }
 
-    if (auto * dp = problem.getDisplacedProblem().get())
-      dp->removeAlgebraicGhostingFunctor(getRMClone(*rm, *disp_lm_mesh));
-
-    auto & dof_map = problem.getNonlinearSystemBase().dofMap();
-    dof_map.remove_coupling_functor(getRMClone(*rm, *undisp_lm_mesh));
+    auto * dp = problem.getDisplacedProblem().get();
+    if (dp && disp_clone)
+      dp->removeAlgebraicGhostingFunctor(*disp_clone);
   }
 
   _factory.releaseSharedObjects(*rm);
