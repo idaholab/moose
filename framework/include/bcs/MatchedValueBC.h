@@ -35,4 +35,10 @@ protected:
 
   /// The id of the coupled variable
   unsigned int _v_num;
+
+private:
+  /// Coefficient for primary variable
+  const Real _u_coeff;
+  /// Coefficient for coupled variable
+  const Real _v_coeff;
 };

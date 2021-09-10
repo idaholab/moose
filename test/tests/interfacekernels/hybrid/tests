@@ -1,0 +1,22 @@
+[Tests]
+  issues = "#7437"
+   design = "InterfaceKernels/index.md"
+
+  [./matchedvalue]
+    type = 'Exodiff'
+    input = 'interface.i'
+    exodiff = 'interface_out.e'
+    requirement = "The system shall support interface conditions: Dirichlet and Neumann"
+  [../]
+
+  [./penalty]
+    type = 'Exodiff'
+    input = 'interface.i'
+    exodiff = 'interface_penalty.e'
+    cli_args = 'InterfaceKernels/active="penalty" BCs/active="u" Outputs/file_base=interface_penalty'
+    prereq = 'matchedvalue'
+    requirement = "The system shall support interface conditions: penalty"
+  [../]
+
+  
+[]
