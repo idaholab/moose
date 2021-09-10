@@ -51,52 +51,81 @@ private:
   /// remaining fraction will come from the previous time-steps noncontact forces
   const Real _implicit_u_fraction;
 
-  /// The fraction of the current noncontact forces to use in the current velocity/u_dot
-  /// evaluation. The remaining fraction will come from the previous time-steps noncontact forces
-  const Real _implicit_udot_fraction;
-
   NumericVector<Number> & _noncontact_old;
   NumericVector<Number> & _u_dotdot_contact;
+
+  NumericVector<Number> & _u_dotdot_internal;
+  NumericVector<Number> & _u_dotdot_internal_old;
 
   virtual void computeContactAccelerations();
 
   /// Helper function that actually does the math for computing the time derivative
-  template <typename T, typename T2, typename T3, typename T4, typename T5, typename T6>
+  template <typename T,
+            typename T2,
+            typename T3,
+            typename T4,
+            typename T5,
+            typename T6,
+            typename T7,
+            typename T8>
   void computeTimeDerivativeHelper(T & u_dot,
                                    const T2 & u_old,
                                    const T3 & u_dot_old,
                                    T4 & u_dotdot,
                                    const T5 & u_dotdot_old,
-                                   const T6 & u_dotdot_contact) const;
+                                   const T6 & u_dotdot_contact,
+                                   T7 & u_dotdot_internal,
+                                   const T8 & u_dotdot_internal_old);
 };
 
-template <typename T, typename T2, typename T3, typename T4, typename T5, typename T6>
+template <typename T,
+          typename T2,
+          typename T3,
+          typename T4,
+          typename T5,
+          typename T6,
+          typename T7,
+          typename T8>
 void
 NewmarkBetaContact::computeTimeDerivativeHelper(T & u_dot,
                                                 const T2 & u_old,
                                                 const T3 & u_dot_old,
                                                 T4 & u_dotdot,
-                                                const T5 & u_dotdot_old,
-                                                const T6 & /*u_dotdot_contact*/) const
+                                                const T5 & /*u_dotdot_old*/,
+                                                const T6 & u_dotdot_contact,
+                                                T7 & u_dotdot_internal,
+                                                const T8 & u_dotdot_internal_old)
 {
+  // Compute internal accelerations (i.e. non-contact accelerations)
+  //  MathUtils::addScaled(2.0 / (_dt * _dt), u_dotdot, u_dotdot_internal);
+  //  MathUtils::addScaled(-2.0 / (_dt * _dt), u_old, u_dotdot_internal);
+  //  MathUtils::addScaled(-1.0, u_dotdot_contact, u_dotdot_internal);
+  //  u_dotdot_internal /= 2.0 * _beta;
+
   // compute second derivative
-  // according to Newmark-Beta method
+  // according to Newmark-Beta-Contact method
   // u_dotdot = first_term - second_term - third_term
   //       first_term = (u - u_old) / beta / dt ^ 2
   //      second_term = u_dot_old / beta / dt
-  //       third_term = u_dotdot_old * (1 / 2 / beta - 1)
+  //       third_term = _u_dotdot_internal_old * (1 / 2 / beta - 1)
   u_dotdot -= u_old;
   u_dotdot *= 1.0 / _beta / _dt / _dt;
   MathUtils::addScaled(-1.0 / _beta / _dt, u_dot_old, u_dotdot);
-  MathUtils::addScaled(-0.5 / _beta + 1.0, u_dotdot_old, u_dotdot);
+  MathUtils::addScaled(-0.5 / _beta + 1.0, u_dotdot_internal_old, u_dotdot);
+  MathUtils::addScaled(-1.0 / 2.0 / _beta, u_dotdot_contact, u_dotdot);
+
+  u_dotdot_internal = u_dotdot;
+  u_dotdot += u_dotdot_contact;
 
   // compute first derivative
-  // according to Newmark-Beta method
+  // according to Newmark-Beta-Contact method
   // u_dot = first_term + second_term + third_term
   //       first_term = u_dot_old
-  //      second_term = u_dotdot_old * (1 - gamma) * dt
-  //       third_term = u_dotdot * gamma * dt
+  //      second_term = u_dotdot_internal_old * (1 - gamma) * dt
+  //       third_term = u_dotdot_internal * gamma * dt
+  //        four_term = u_dotdot_contact * dt
   u_dot = u_dot_old;
-  MathUtils::addScaled((1.0 - _gamma) * _dt, u_dotdot_old, u_dot);
-  MathUtils::addScaled(_gamma * _dt, u_dotdot, u_dot);
+  MathUtils::addScaled((1.0 - _gamma) * _dt, u_dotdot_internal_old, u_dot);
+  MathUtils::addScaled(_gamma * _dt, u_dotdot_internal, u_dot);
+  MathUtils::addScaled(_dt, u_dotdot_contact, u_dot);
 }
