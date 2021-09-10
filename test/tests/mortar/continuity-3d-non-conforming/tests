@@ -5,7 +5,7 @@
     type = 'Exodiff'
     input = 'continuity_sphere_hex8.i'
     exodiff = 'continuity_sphere_hex8_out.e'
-    requirement = 'We shall be able to produce the expected result for a solution continuity test case using the mortar method, e.g. the primal variable values across the mortar interface shall be the same.'
+    requirement = 'We shall be able to produce the expected result for a solution continuity test case using the mortar method on a HEX8 mesh with curved geometry, e.g. the primal variable values across the mortar interface shall be the same.'
     map = False
     partial = True
   []
@@ -15,7 +15,7 @@
     heavy = True
     input = 'continuity_sphere_hex27.i'
     exodiff = 'continuity_sphere_hex27_out.e'
-    requirement = 'We shall be able to produce the expected result for a solution continuity test case using the mortar method, e.g. the primal variable values across the mortar interface shall be the same.'
+    requirement = 'We shall be able to produce the expected result for a solution continuity test case using the mortar method on a HEX27 mesh with curved geometry, e.g. the primal variable values across the mortar interface shall be the same.'
     map = False
     partial = True
   []
@@ -23,15 +23,16 @@
     type = 'Exodiff'
     input = 'continuity_tet4.i'
     exodiff = 'continuity_tet4_out.e'
-    requirement = 'We shall be able to produce the expected result for a solution continuity test case using the mortar method, e.g. the primal variable values across the mortar interface shall be the same.'
+    requirement = 'We shall be able to produce the expected result for a solution continuity test case using the mortar method on a TET4 conforming mesh, e.g. the primal variable values across the mortar interface shall be the same.'
     map = False
     partial = True
   []
   [continuity_tet10]
     type = 'Exodiff'
+    min_ad_size = 100
     input = 'continuity_tet10.i'
     exodiff = 'continuity_tet10_out.e'
-    requirement = 'We shall be able to produce the expected result for a solution continuity test case using the mortar method, e.g. the primal variable values across the mortar interface shall be the same.'
+    requirement = 'We shall be able to produce the expected result for a solution continuity test case using the mortar method on a TET10 conforming mesh, e.g. the primal variable values across the mortar interface shall be the same.'
     map = False
     partial = True
   []
@@ -39,7 +40,7 @@
     type = 'Exodiff'
     input = 'continuity_non_conforming_tet.i'
     exodiff = 'continuity_non_conforming_tet_out.e'
-    requirement = 'We shall be able to produce the expected result for a solution continuity test case using the mortar method, e.g. the primal variable values across the mortar interface shall be the same.'
+    requirement = 'We shall be able to produce the expected result for a solution continuity test case using the mortar method on a TET4 non-conforming mesh, e.g. the primal variable values across the mortar interface shall be the same.'
     map = False
     partial = True
   []
@@ -47,7 +48,7 @@
     type = 'Exodiff'
     input = 'continuity_mixed.i'
     exodiff = 'continuity_mixed_out.e'
-    requirement = 'We shall be able to produce the expected result for a solution continuity test case using the mortar method, e.g. the primal variable values across the mortar interface shall be the same.'
+    requirement = 'We shall be able to produce the expected result for a solution continuity test case using the mortar method on a mesh with mixed element types, e.g. the primal variable values across the mortar interface shall be the same.'
     map = False
     partial = True
   []

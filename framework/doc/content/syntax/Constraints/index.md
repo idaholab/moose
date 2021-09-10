@@ -2,7 +2,7 @@
 
 ## MortarConstraints
 
-The mortar system in MOOSE uses a segment-based approach for evaluation of mortar integrals; for information on the automatic generation of mortar segment meshes see [AutomaticMortarGeneration](https://github.com/idaholab/moose/framework/doc/content/source/constraints/AutomaticMortarGeneration.md)
+The mortar system in MOOSE uses a segment-based approach for evaluation of mortar integrals; for information on the automatic generation of mortar segment meshes see [AutomaticMortarGeneration.md].
 
 ### Overview
 
@@ -21,15 +21,15 @@ error estimates for 2D problems and (see discussion and plots on
 General meshes in 3D—especially meshes with triangular face elements on the mortar interface—require additional care to ensure convergence.
 Triangular elements on the mortar interface typically exhibit the infamous (and well documented) 'locking' phenomenon; resulting in singular systems that require stabilization or other special treatment.
 
-The above *primal* convergence rates were realized on tetrahedral and mixed meshes using a stabilization with `delta = 0.1` for the `EqualValueConstraint`, under the additional assumption that meshes (both generated and unstructured) are re-generated for each experiment.
+The above *primal* convergence rates were realized on tetrahedral and mixed meshes using a stabilization with `delta = 0.1` for the `EqualValueConstraint`, with the additional caveat that meshes (both generated and unstructured) are re-generated for each experiment.
 Uniform refinement of tetrahedral meshes were typically observed to result in *divergence* of the Lagrange multiplier and degradation of primal convergence rates.
 Adaptive refinement of meshes with triangular faces on the mortar interface has not been thoroughly studied in MOOSE and should be approached with caution.
 
 Based on these observations the following recommendations are provided for using *3D* mortar in MOOSE:
 
 1. When possible, discretize the secondary side of the mortar interface with QUAD elements (i.e. use HEX elements or carefully oriented PRISM and PYRAMID elements for volume discretization).
-2. When TRI elements are present on the mortar interface, verify the wellposedness of the problem and use stabilization if necessary.
-3. Avoid uniformly refining mesh, instead regenerate meshes when a refined mesh is needed.
+2. When TRI elements are present on the mortar interface, verify that the problem is well conditioned of the problem and use stabilization if necessary.
+3. Avoid uniformly refining meshes, instead regenerate meshes when a refined mesh is needed.
 
 
 ### Parameters
@@ -40,9 +40,9 @@ from `MortarConstraint`:
 
 - `primary_boundary`: the boundary name or ID assigned to the primary side of the
   mortar interface
-- `secondary_boundary`: the boundary name or ID assigned to the secondary side of the
-  mortar interface
-- `primary_subdomain`: the subdomain name or ID assigned to the lower-dimesional
+- `secondary_boundary`: the boundary name or ID assigned to the secondary side of
+  the mortar interface
+- `primary_subdomain`: the subdomain name or ID assigned to the lower-dimensional
   block on the primary side of the mortar interface
 - `secondary_boundary`: the subdomain name or ID assigned to the lower-dimensional
   block on the secondary side of the mortar interface
@@ -73,7 +73,7 @@ shown in the below input file snippet:
 There are also some optional parameters that can be supplied to
 `MortarConstraints`. They are:
 
-- `variable`: Corresponds to a Lagrange Multipler variable that lives on the
+- `variable`: Corresponds to a Lagrange Multiplier variable that lives on the
   lower dimensional block on the secondary face
 - `secondary_variable`: Primal variable on the secondary side of the mortar interface
   (lives on the interior elements)
@@ -95,6 +95,13 @@ There are also some optional parameters that can be supplied to
 - `periodic`: Whether this constraint is going to be used to enforce a periodic
   condition. This has the effect of changing the normals vector, for mortar
   projection, from outward to inward facing.
+- `quadrature`: Specifies the quadrature order for mortar segment elements.
+  This is only useful for 3D mortar on QUAD face elements since integration of
+  QUAD face elements with TRI mortar segments on the mortar interface is
+  inexact. Default quadratures are typically sufficient, but *exact* integration
+  of FIRST order QUAD face elements (e.g. HEX8 meshes) requires SECOND order
+  integration. *Exact* integration of SECOND order QUAD face elements (e.g.
+  HEX27 meshes) requires FOURTH order integration.
 
 At present, either the `secondary_variable` or `primary_variable` parameter must be supplied.
 
