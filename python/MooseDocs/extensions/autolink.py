@@ -14,7 +14,7 @@ import MooseDocs
 from .. import common
 from ..base import components, Extension
 from ..tree import tokens, latex
-from . import core, floats, heading, modal
+from . import core, heading, modal
 
 def make_extension(**kwargs):
     return AutoLinkExtension(**kwargs)
@@ -41,7 +41,7 @@ class AutoLinkExtension(Extension):
     def extend(self, reader, renderer):
         """Replace default core link components on reader and provide auto link rendering."""
 
-        self.requires(core, floats, heading)
+        self.requires(core, heading, modal)
 
         reader.addInline(PageLinkComponent(), location='=LinkInline')
         reader.addInline(PageShortcutLinkComponent(), location='=ShortcutLinkInline')

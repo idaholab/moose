@@ -1,10 +1,10 @@
 # MooseDocs Configuration
 
-In order to use MooseDocs build command a configuration file is required. By default the
-`moosedocs.py` script looks for a `config.yml` file (the `--config` option can be used if a different
-name is desired). As the extension suggests, this file is a [YAML] file. The configuration file must
-contain a `Content` section and may optionally contain additional sections, as listed below, to
-configure your MooseDocs build.
+In order to use the MooseDocs `build` command, one or more configuration files are required. By
+default the `moosedocs.py` script looks for any file in the same directory as itself with a name
+that ends with "config.yml" (the `--config` option can be used to specify the files directly). As
+the extension suggests, these must be [YAML] files. The configurations must each contain a `Content`
+section, and optionally the additional sections described here to fine-tune your MooseDocs build.
 
 ## Content
 
@@ -24,6 +24,47 @@ or filename. For example, `doc/content/*/minimal` will include all sub-directori
 directory that contain a `minimal` directory. The `**` wildcard allows for arbitrary levels of
 nesting. For example `doc/content/**/minimal` will include the `minimal` directory for any
 directory below the content directory, regardless of depth.
+
+### Content Across Multiple Configurations id=multiconfigs
+
+For the case of multiple configuration files, +redundant content is not permitted+. That is, any two
+configurations may not specify the same file of any type---directories are the only exception. The
+content of each is added to a shared pool so the complete, combined list of files will be available
+to all translators. Importantly, the respective configurations of content files will be honored
+during translation allowing different pages to use different readers, renderers, executioners, and
+extensions, which provides an extraordinary amount of flexibility about how your website is built.
+
+As a good example of how to resolve content conflicts, consider the main
+[MOOSE website](index.md exact=True) along with the [workshop/index.md alternative=missing_config.md].
+It is possible to build the [main site configuration](modules/doc/config.yml language=yaml) by
+itself by running the following commands:
+
+!listing language=bash
+cd modules/doc
+./moosedocs.py build --config config.yml
+
+Or the [workshop configuration](tutorials/darcy_thermo_mech/doc/config.yml language=yaml) by
+
+!listing language=bash
+cd tutorials/darcy_thermo_mech/doc
+./moosedocs.py build
+
+However, these two configurations specify some of the same content. Thus, we made use of the YAML
+`!include` syntax to create a separate workshop configuration specialized for a combined build and
+it is shown in [workshop_config]. In this file, we made sure to not add any files already added by
+the main site configuration, which left only the actual workshop pages. All of the media,
+bibliographies, JavaScript, etc., that it needs will still be available in the combined build. Then
+the configurations of the Executioner, Renderer, and Extensions were simply imported from the
+original file.
+
+!listing modules/doc/workshop_config.yml language=yaml id=workshop_config
+         caption=Configuration for the MOOSE workshop designed to build alongside the main website
+                 that takes advantage of the `!include` syntax.
+
+!alert tip title=Backup links
+If you find yourself creating autolinks across pages from different configurations and you are
+concerned about them failing when only building one of those configurations, consider using the
+`alternative` setting (see the [MooseDocs/extensions/autolink.md] page for more information).
 
 ### Advanced Content
 
