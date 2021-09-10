@@ -23,5 +23,6 @@
     partial = True
     mesh_mode = replicated # Fix when mortar segment mesh is distributed
     rel_err = 2e-5
+    allow_warnings = True # This is a difficult problem that can result in poor mortar projections that emit warnings
   []
 []
