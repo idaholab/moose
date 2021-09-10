@@ -161,8 +161,10 @@ AutomaticMortarGeneration::getNormals(const Elem & secondary_elem,
       const auto phi =
           (mortar_dim == 1)
               ? Moose::fe_lagrange_1D_shape(secondary_elem.default_order(), n, xi1_pts[qp](0))
-              : Moose::fe_lagrange_2D_shape(
-                    secondary_elem.type(), secondary_elem.default_order(), n, xi1_pts[qp]);
+              : Moose::fe_lagrange_2D_shape(secondary_elem.type(),
+                                            secondary_elem.default_order(),
+                                            n,
+                                            static_cast<const TypeVector<Real> &>(xi1_pts[qp]));
       normals[qp] += phi * nodal_normals[n];
     }
 
