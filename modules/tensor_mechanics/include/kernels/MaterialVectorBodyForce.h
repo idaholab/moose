@@ -29,8 +29,8 @@ protected:
   /// coordinate axis this Kernel acts on
   unsigned int _component;
 
-  /// coupled force density vector property
-  const MaterialProperty<RealVectorValue> & _force_density;
+  /// coupled body force vector property
+  const MaterialProperty<RealVectorValue> & _body_force;
 
   /// optional scaling function
   const Function & _function;
