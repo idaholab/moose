@@ -9,8 +9,12 @@ combined with [ElemSideNeighborLayersGeomTester](ElemSideNeighborLayersGeomTeste
  or [ElemSideNeighborLayersTester](ElemSideNeighborLayersTester.md) to output
  ghosting information.
 
+## Example syntax
 
-!! Describe and include an example of how to use the ElementUOAux object.
+In this example, the `ElementUOAux` is used to examine the ghosting of elements on various ranks, computed by
+the three `ElemSideNeighborLayersGeomTester` on each rank.
+
+!listing test/tests/mesh/uniform_refine/3d_diffusion.i block=UserObjects AuxKernels
 
 !syntax parameters /AuxKernels/ElementUOAux
 

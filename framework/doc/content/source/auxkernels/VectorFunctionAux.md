@@ -2,22 +2,19 @@
 
 !syntax description /AuxKernels/VectorFunctionAux
 
-## Example
+The `VectorFunctionAux` helps turn a vector field defined by a function into a vector variable. It is generally
+helpful when the spatial and temporal dependence of a field is known ahead of time, and the kernels
+and other objects needing that field expect a vector variable rather than a function.
 
-The `VectorFunctionAux` object may be used to populate a vector auxiliary variable for use with
-objects designed to be coupled to vector variables or for computing vector valued values such
-as velocity for post processing purposes.
+## Example syntax
 
-The following partial input file shows an example of populating a vector auxiliary variable
-using a parsed function.
+In this example, the `VectorFunctionAux` is used to set the vector variable `vec` to the
+values computed by the aptly named `ParsedVectorFunction` `function`.
 
-!listing vector_function_aux.i block=AuxVariables Functions AuxKernels
-
+!listing test/tests/auxkernels/vector_function_aux/vector_function_aux.i block=Functions AuxKernels
 
 !syntax parameters /AuxKernels/VectorFunctionAux
 
 !syntax inputs /AuxKernels/VectorFunctionAux
 
 !syntax children /AuxKernels/VectorFunctionAux
-
-!bibtex bibliography

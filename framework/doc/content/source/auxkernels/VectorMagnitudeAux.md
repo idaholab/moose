@@ -1,33 +1,13 @@
 # VectorMagnitudeAux
 
-!alert! construction title=Undocumented Class
-The VectorMagnitudeAux has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# VectorMagnitudeAux
-
 !syntax description /AuxKernels/VectorMagnitudeAux
 
-## Overview
+## Example syntax
 
-!! Replace these lines with information regarding the VectorMagnitudeAux object.
+We retrieve in this input file the magnitude of the fluid velocity in
+a cavity problem. The components of the velocity vector are the problem variables.
 
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the VectorMagnitudeAux object.
-
-!syntax parameters /AuxKernels/VectorMagnitudeAux
-
-!syntax inputs /AuxKernels/VectorMagnitudeAux
-
-!syntax children /AuxKernels/VectorMagnitudeAux
-```
-!alert-end!
-
-!syntax description /AuxKernels/VectorMagnitudeAux
+!listing modules/navier_stokes/test/tests/finite_volume/ins/lid-driven/lid-driven.i block=AuxKernels
 
 !syntax parameters /AuxKernels/VectorMagnitudeAux
 

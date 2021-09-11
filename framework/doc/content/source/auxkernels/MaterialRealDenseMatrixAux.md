@@ -1,33 +1,26 @@
 # MaterialRealDenseMatrixAux
 
-!alert! construction title=Undocumented Class
-The MaterialRealDenseMatrixAux has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# MaterialRealDenseMatrixAux
-
 !syntax description /AuxKernels/MaterialRealDenseMatrixAux
 
-## Overview
+Converting a field from the material system, here a component of a matrix material property,
+to a variable may be desirable for several reasons: to match the format expected by certain
+kernels (thus lagging the field between time steps) or for output/testing/debugging.
 
-!! Replace these lines with information regarding the MaterialRealDenseMatrixAux object.
+This is particularly useful to examine anisotropic material properties. For output
+purposes only, an alternative is to use the `output_properties` argument of the `Material`
+or specify `output_material_properties` in the parameters of the desired output type nested in
+the `[Outputs]` block. This `AuxKernel` is used in the back-end by these parameters.
 
-## Example Input File Syntax
+!alert note
+The AD system currently does not support auxiliary variables. If you convert material properties, which
+do support automatic differentiation, to auxiliary variables, the derivatives will be ignored.
 
-!! Describe and include an example of how to use the MaterialRealDenseMatrixAux object.
+## Example syntax
 
-!syntax parameters /AuxKernels/MaterialRealDenseMatrixAux
+In this example, the `MaterialRealDenseMatrixAux` is used to examine the first row, first column element of
+a matrix material property.
 
-!syntax inputs /AuxKernels/MaterialRealDenseMatrixAux
-
-!syntax children /AuxKernels/MaterialRealDenseMatrixAux
-```
-!alert-end!
-
-!syntax description /AuxKernels/MaterialRealDenseMatrixAux
+!listing test/tests/materials/types/test.i block=AuxKernels start=[./densemat00] end=[./densemat01]
 
 !syntax parameters /AuxKernels/MaterialRealDenseMatrixAux
 

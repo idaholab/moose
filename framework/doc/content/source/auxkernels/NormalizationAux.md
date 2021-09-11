@@ -1,33 +1,21 @@
 # NormalizationAux
 
-!alert! construction title=Undocumented Class
-The NormalizationAux has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# NormalizationAux
-
 !syntax description /AuxKernels/NormalizationAux
 
-## Overview
+The formula for the normalization is
 
-!! Replace these lines with information regarding the NormalizationAux object.
+!equation
+\dfrac{variable * normal_factor}{normalization} - shift
 
-## Example Input File Syntax
+## Example syntax
 
-!! Describe and include an example of how to use the NormalizationAux object.
+In this example, the `NormalizationAux` is used to normalize the output of an eigenproblem.
+This is a common use case in reactor physics where the neutron flux output by
+the numerical solve may not be normalized, and has to be normalized to obtain the desired
+power level. The power, used for normalization, is stored in `unorm`, an
+`ElementIntegralVariablePostprocessor`.
 
-!syntax parameters /AuxKernels/NormalizationAux
-
-!syntax inputs /AuxKernels/NormalizationAux
-
-!syntax children /AuxKernels/NormalizationAux
-```
-!alert-end!
-
-!syntax description /AuxKernels/NormalizationAux
+!listing tests/problems/eigen_problem/eigensolvers/ne_coupled.i block=AuxKernels
 
 !syntax parameters /AuxKernels/NormalizationAux
 

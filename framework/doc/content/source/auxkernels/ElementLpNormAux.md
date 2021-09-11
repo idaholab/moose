@@ -1,33 +1,27 @@
 # ElementLpNormAux
 
-!alert! construction title=Undocumented Class
-The ElementLpNormAux has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# ElementLpNormAux
-
 !syntax description /AuxKernels/ElementLpNormAux
 
-## Overview
+This can be used to average variables on elements, to make a copy that is constant on each
+element, a monomial of order 0. The desired Lp-norm is natural conserved in this process.
 
-!! Replace these lines with information regarding the ElementLpNormAux object.
+This is also typically used on a variable representing an error or a difference to a known
+solution, to turn an error on each quadrature point to an element-wise error.
 
-## Example Input File Syntax
+## Alternative objects and kernels
 
-!! Describe and include an example of how to use the ElementLpNormAux object.
+To compute the Lp or Hp error directly from a variable and a known reference solution, use
+[ElementL2ErrorFunctionAux.md] or [ElementH1ErrorFunctionAux.md] respectively.
 
-!syntax parameters /AuxKernels/ElementLpNormAux
+For computing a global norm (error) metric, the [NodalL2Norm.md] and the [ElementL2Norm.md]
+(respectively [NodalL2Error.md] and the [ElementL2Error.md]) postprocessors may be considered.
 
-!syntax inputs /AuxKernels/ElementLpNormAux
+## Example syntax
 
-!syntax children /AuxKernels/ElementLpNormAux
-```
-!alert-end!
+In this example, we display several ways of creating fields computing local element-wise
+norms and errors of field variables.
 
-!syntax description /AuxKernels/ElementLpNormAux
+!listing test/tests/auxkernels/error_function_aux/error_function_aux.i block=AuxKernels
 
 !syntax parameters /AuxKernels/ElementLpNormAux
 

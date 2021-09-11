@@ -17,8 +17,7 @@ InputParameters
 ConstantScalarAux::validParams()
 {
   InputParameters params = AuxScalarKernel::validParams();
-  params.addClassDescription(
-      "Compute a histogram of volume fractions binned according to variable values.");
+  params.addClassDescription("Sets an auxiliary field variable to a controllable constant value.");
   params.addRequiredParam<Real>("value", "The value to be set to the scalar variable.");
   params.declareControllable("value");
   return params;
