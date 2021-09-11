@@ -29,7 +29,7 @@ MaterialVectorBodyForce::validParams()
 MaterialVectorBodyForce::MaterialVectorBodyForce(const InputParameters & parameters)
   : Kernel(parameters),
     _component(libMesh::invalid_uint),
-    _force_density(getMaterialProperty<RealVectorValue>("force_density")),
+    _force_density(getMaterialProperty<RealVectorValue>("body_force")),
     _function(getFunction("function")),
     _alpha(getParam<Real>("hht_alpha"))
 {
