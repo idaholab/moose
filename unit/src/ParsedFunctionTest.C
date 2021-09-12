@@ -9,6 +9,9 @@
 
 #include "ParsedFunctionTest.h"
 
+#include "libmesh/fe_map.h"
+#include "libmesh/quadrature_gauss.h"
+
 TEST_F(ParsedFunctionTest, basicConstructor)
 {
   InputParameters params = _factory->getValidParams("ParsedFunction");
@@ -22,6 +25,55 @@ TEST_F(ParsedFunctionTest, basicConstructor)
   MooseParsedFunction f(params);
   f.initialSetup();
   EXPECT_EQ(f.value(4, Point(1, 2, 3)), 11);
+
+  // Test the functor interfaces
+  const auto & lm_mesh = _mesh->getMesh();
+  const Elem * const elem = lm_mesh.elem_ptr(0);
+  const Point vtx_average = elem->centroid();
+  Real f_traditional = f.value(0, vtx_average);
+  Real f_functor = f(elem, 0);
+  EXPECT_EQ(f_traditional, f_functor);
+  const Elem * neighbor = nullptr;
+  unsigned int side = libMesh::invalid_uint;
+  for (const auto s : elem->side_index_range())
+    if (elem->neighbor_ptr(s))
+    {
+      neighbor = elem->neighbor_ptr(s);
+      side = s;
+      break;
+    }
+
+  const FaceInfo * const fi = _mesh->faceInfo(elem, side);
+
+  f_functor = f(std::make_tuple(elem, fi, elem->subdomain_id()), 0);
+  EXPECT_EQ(f_traditional, f_functor);
+  f_traditional = f.value(0, fi->faceCentroid());
+  f_functor =
+      f(std::make_tuple(
+            fi, nullptr, true, std::make_pair(elem->subdomain_id(), neighbor->subdomain_id())),
+        0);
+  EXPECT_EQ(f_traditional, f_functor);
+
+  const FEFamily mapping_family = FEMap::map_fe_type(*elem);
+  const FEType fe_type(elem->default_order(), mapping_family);
+  std::unique_ptr<FEBase> fe(FEBase::build(elem->dim(), fe_type));
+
+  const auto & xyz = fe->get_xyz();
+  QGauss qrule(elem->dim(), fe_type.default_quadrature_order());
+  fe->attach_quadrature_rule(&qrule);
+  fe->reinit(elem);
+
+  f_traditional = f.value(0, xyz[0]);
+  f_functor = f(std::make_tuple(elem, 0, &qrule), 0);
+  EXPECT_EQ(f_traditional, f_functor);
+
+  QGauss qrule_face(elem->dim() - 1, fe_type.default_quadrature_order());
+  fe->attach_quadrature_rule(&qrule_face);
+  fe->reinit(elem, side);
+
+  f_traditional = f.value(0, xyz[0]);
+  f_functor = f(std::make_tuple(elem, side, 0, &qrule_face), 0);
+  EXPECT_EQ(f_traditional, f_functor);
 }
 
 TEST_F(ParsedFunctionTest, advancedConstructor)
