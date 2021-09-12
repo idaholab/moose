@@ -36,7 +36,7 @@ In addition, [!param](/Mesh/PatternedHexMeshGenerator/assign_control_drum_id) ca
       id=cd_id
       caption=A schematic drawing the indexing rule of `control_drum_id` in the `PatternedHexMeshGenerator` object.
 
-These `MeshMetaData` as well as `control_drum_id` can be used by other MOOSE objects to simulate control drums rotation during power transients.
+These `MeshMetaData` as well as `control_drum_id` can be used by other MOOSE objects such as [`MultiControlDrumFunction`](/MultiControlDrumFunction.md) to simulate control drums rotation during power transients.
 
 
 ## Example Syntax
