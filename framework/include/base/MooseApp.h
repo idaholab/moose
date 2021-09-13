@@ -1044,6 +1044,35 @@ private:
    */
   void createMeshGeneratorOrder();
 
+  /**
+   * @return whether we have created any clones for the provided template relationship manager and
+   * mesh yet. This may be false for instance when we are in the initial add relationship manager
+   * stage and haven't attempted attaching any relationship managers to the mesh or dof map yet
+   * (which is when we generate the clones). It's also maybe possible that we've created a clone of
+   * a given \p template_rm but not for the provided mesh so we return false in that case as well
+   */
+  bool hasRMClone(const RelationshipManager & template_rm, const MeshBase & mesh) const;
+
+  /**
+   * Return the ghosting functor clone originally created from the provided template relationship
+   * manager (the relationship manager stored by the \p MooseApp) and mesh
+   */
+  GhostingFunctor & getRMClone(const RelationshipManager & template_rm,
+                               const MeshBase & mesh) const;
+
+  /**
+   * Take an input relationship manager, clone it, and then initialize it with provided mesh and
+   * optional \p dof_map
+   * @param template_rm The relationship manager template from which we will clone
+   * @param mesh The mesh to use for initialization
+   * @param dof_map An optional parameter that, if provided, will be used to help init the cloned
+   * relationship manager
+   * @return the cloned and initialized ghosting functor/relationship manager
+   */
+  std::shared_ptr<GhostingFunctor> createRMFromTemplate(const RelationshipManager & template_rm,
+                                                        MeshBase & mesh,
+                                                        const DofMap * dof_map = nullptr);
+
   /// Where the restartable data is held (indexed on tid)
   RestartableDataMaps _restartable_data;
 
@@ -1115,6 +1144,12 @@ private:
 
   /// Memory profiling
   bool _heap_profiling = false;
+
+  /// Map from a template relationship manager to a map in which the key-value pairs represent the \p
+  /// MeshBase object and the clone of the template relationship manager, e.g. the top-level map key
+  std::map<const RelationshipManager *,
+           std::map<const MeshBase *, std::shared_ptr<GhostingFunctor>>>
+      _template_to_clones;
 
   // Allow FEProblemBase to set the recover/restart state, so make it a friend
   friend class FEProblemBase;

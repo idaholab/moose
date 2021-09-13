@@ -543,6 +543,17 @@ public:
    */
   void setMortarQRule(Order order);
 
+  /**
+   * Indicates that dual shape functions are used for mortar constraint
+   */
+  void activateDual() { _need_dual = true; }
+
+  /**
+   * Indicates whether dual shape functions are used (computation is now repeated on each element
+   * so expense of computing dual shape functions is no longer trivial)
+   */
+  bool needDual() { return _need_dual; }
+
 private:
   /**
    * Set the qrule to be used for lower dimensional integration.
@@ -589,6 +600,10 @@ public:
                              Real tolerance,
                              const std::vector<Point> * const pts,
                              const std::vector<Real> * const weights = nullptr);
+
+  void reinitDual(const Elem * elem,
+                  const std::vector<Point> & pts,
+                  const std::vector<Real> & JxW);
 
   /**
    * Reinitialize FE data for a lower dimenesional element with a given set of reference points
@@ -2368,6 +2383,8 @@ protected:
   mutable bool _need_neighbor_lower_d_elem_volume;
   /// The current neighboring lower dimensional element volume
   Real _current_neighbor_lower_d_elem_volume;
+  /// Whether dual shape functions need to be computed for mortar constraints
+  bool _need_dual;
 
   /// This will be filled up with the physical points passed into reinitAtPhysical() if it is called.  Invalid at all other times.
   MooseArray<Point> _current_physical_points;

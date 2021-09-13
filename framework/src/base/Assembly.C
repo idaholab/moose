@@ -106,6 +106,7 @@ Assembly::Assembly(SystemBase & sys, THREAD_ID tid)
     _current_neighbor_lower_d_elem(nullptr),
     _need_lower_d_elem_volume(false),
     _need_neighbor_lower_d_elem_volume(false),
+    _need_dual(false),
 
     _residual_vector_tags(_subproblem.getVectorTags(Moose::VECTOR_TAG_RESIDUAL)),
     _cached_residual_values(2), // The 2 is for TIME and NONTIME
@@ -2299,6 +2300,22 @@ Assembly::reinitNeighborFaceRef(const Elem * neighbor,
       (*_holder_fe_face_neighbor_helper[neighbor_dim])->get_xyz()));
   _current_neighbor_normals.shallowCopy(const_cast<std::vector<Point> &>(
       (*_holder_fe_face_neighbor_helper[neighbor_dim])->get_normals()));
+}
+
+void
+Assembly::reinitDual(const Elem * elem,
+                     const std::vector<Point> & pts,
+                     const std::vector<Real> & JxW)
+{
+  const unsigned int elem_dim = elem->dim();
+  mooseAssert(elem_dim == _mesh_dimension - 1,
+              "Dual shape functions should only be computed on lower dimensional face elements");
+
+  for (const auto & it : _fe_lower[elem_dim])
+  {
+    FEBase * fe_lower = it.second;
+    fe_lower->reinit_dual_shape_coeffs(elem, pts, JxW);
+  }
 }
 
 void

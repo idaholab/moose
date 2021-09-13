@@ -648,16 +648,12 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     mortar_interface_coupling.insert(
         std::make_pair(secondary_elem->interior_parent()->id(), secondary_elem->id()));
 
-    // Insert both Elems as key and value.
-    if (primary_elem)
-    {
-      // LowerPrimary
-      mortar_interface_coupling.insert(
-          std::make_pair(secondary_elem->id(), primary_elem->interior_parent()->id()));
-      // PrimaryLower
-      mortar_interface_coupling.insert(
-          std::make_pair(primary_elem->interior_parent()->id(), secondary_elem->id()));
-    }
+    // LowerPrimary
+    mortar_interface_coupling.insert(
+        std::make_pair(secondary_elem->id(), primary_elem->interior_parent()->id()));
+    // PrimaryLower
+    mortar_interface_coupling.insert(
+        std::make_pair(primary_elem->interior_parent()->id(), secondary_elem->id()));
   }
 }
 
@@ -1073,16 +1069,12 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
     mortar_interface_coupling.insert(
         std::make_pair(secondary_elem->interior_parent()->id(), secondary_elem->id()));
 
-    // Insert both Elems as key and value.
-    if (primary_elem)
-    {
-      // LowerPrimary
-      mortar_interface_coupling.insert(
-          std::make_pair(secondary_elem->id(), primary_elem->interior_parent()->id()));
-      // PrimaryLower
-      mortar_interface_coupling.insert(
-          std::make_pair(primary_elem->interior_parent()->id(), secondary_elem->id()));
-    }
+    // LowerPrimary
+    mortar_interface_coupling.insert(
+        std::make_pair(secondary_elem->id(), primary_elem->interior_parent()->id()));
+    // PrimaryLower
+    mortar_interface_coupling.insert(
+        std::make_pair(primary_elem->interior_parent()->id(), secondary_elem->id()));
   }
 
 #ifndef NDEBUG
