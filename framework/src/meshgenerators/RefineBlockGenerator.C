@@ -42,7 +42,7 @@ RefineBlockGenerator::RefineBlockGenerator(const InputParameters & parameters)
     _input(getMesh("input")),
     _block(getParam<std::vector<SubdomainName>>("block")),
     _refinement(getParam<std::vector<int>>("refinement")),
-    _enable_neighbors(getParam<bool>("enable_neighbor_refinement"))
+    _enable_neighbor_refinement(getParam<bool>("enable_neighbor_refinement"))
 {
 }
 std::unique_ptr<MeshBase>
@@ -74,13 +74,13 @@ RefineBlockGenerator::generate()
   std::unique_ptr<MeshBase> mesh = std::move(_input);
   int max = *std::max_element(_refinement.begin(), _refinement.end());
 
-  return recurs_refine(block_ids, mesh, _refinement, max);
+  return recursive_refine(block_ids, mesh, _refinement, max);
 }
 
 std::unique_ptr<MeshBase>
-RefineBlockGenerator::recurs_refine(std::vector<subdomain_id_type> block_ids,
+RefineBlockGenerator::recursive_refine(std::vector<subdomain_id_type> block_ids,
                                     std::unique_ptr<MeshBase> & mesh,
-                                    std::vector<int> _refinement,
+                                    std::vector<int> refinement,
                                     int max,
                                     int ref_step)
 {
@@ -89,17 +89,17 @@ RefineBlockGenerator::recurs_refine(std::vector<subdomain_id_type> block_ids,
     return dynamic_pointer_cast<MeshBase>(mesh);
   for (std::size_t i = 0; i < block_ids.size(); i++)
   {
-    if (_refinement[i] > 0 && _refinement[i] > ref_step)
+    if (refinement[i] > 0 && refinement[i] > ref_step)
     {
       for (const auto & elem : mesh->active_subdomain_elements_ptr_range(block_ids[i]))
         elem->set_refinement_flag(Elem::REFINE);
     }
   }
   MeshRefinement refinedmesh(*mesh);
-  if (!_enable_neighbors)
+  if (!_enable_neighbor_refinement)
     refinedmesh.face_level_mismatch_limit() = 0;
   refinedmesh.refine_elements();
 
   ref_step++;
-  return recurs_refine(block_ids, mesh, _refinement, max, ref_step);
+  return recurs_refine(block_ids, mesh, refinement, max, ref_step);
 }
