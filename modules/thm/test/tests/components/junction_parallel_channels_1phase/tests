@@ -51,7 +51,6 @@
     type = 'RunException'
     input = 'err.missing_ics.i'
     expect_err = "junction: The following initial condition parameters are missing: initial_p initial_T initial_vel_x initial_vel_y initial_vel_z"
-    max_parallel = 1
   []
 
   [err.non_parallel_channels]
@@ -60,7 +59,6 @@
     cli_args = "--error Components/junction/volume=1.0 Components/pipe2/orientation='0 1 0'"
     expect_err = "junction: Connected flow channels are not parallel, use "
     "VolumeJunction1Phase component instead."
-    max_parallel = 1
   []
 
   # jacobian test

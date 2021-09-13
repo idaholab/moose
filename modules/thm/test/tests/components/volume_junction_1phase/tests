@@ -98,7 +98,6 @@
     type = 'RunException'
     input = 'err.missing_ics.i'
     expect_err = "junction: The following initial condition parameters are missing: initial_p initial_T initial_vel_x initial_vel_y initial_vel_z"
-    max_parallel = 1
   []
 
   [err.missing_K]
@@ -106,6 +105,5 @@
     input = 'phy.form_loss.i'
     cli_args = '--error Components/junction/A_ref=1'
     expect_err = "junction: Parameter 'A_ref' is specified, but 'K' is not specified, so the junction will behave as if there were no form loss."
-    max_parallel = 1
   []
 []

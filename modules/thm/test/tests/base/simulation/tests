@@ -24,7 +24,6 @@
     type = 'RunException'
     input = 'err.no_smp.i'
     expect_err = "Single matrix preconditioning with full coupling is required to run\. Please, check that your input file has the following preconditioning block\:"
-    max_parallel = 1
     deleted = "#190"
   []
 []
