@@ -76,8 +76,18 @@
   [phy.form_loss]
     type = 'CSVDiff'
     input = 'phy.form_loss.i'
-    csvdiff = 'phy.form_loss_out.csv'
-    cli_args = 'Components/junction/K=1 Components/junction/A_ref=0.1'
+    csvdiff = 'phy.form_loss.csv'
+    cli_args = 'Components/junction/K=1 Outputs/file_base=phy.form_loss'
+    rel_err = 2e-4
+    recover = false
+    max_parallel = 1
+  []
+
+  [phy.form_loss_Aref]
+    type = 'CSVDiff'
+    input = 'phy.form_loss.i'
+    csvdiff = 'phy.form_loss_Aref.csv'
+    cli_args = 'Components/junction/K=1 Components/junction/A_ref=0.2 Outputs/file_base=phy.form_loss_Aref'
     rel_err = 2e-4
     recover = false
     max_parallel = 1
@@ -88,14 +98,6 @@
     type = 'RunException'
     input = 'err.missing_ics.i'
     expect_err = "junction: The following initial condition parameters are missing: initial_p initial_T initial_vel_x initial_vel_y initial_vel_z"
-    max_parallel = 1
-  []
-
-  [err.missing_A_ref]
-    type = 'RunException'
-    input = 'phy.form_loss.i'
-    cli_args = 'Components/junction/K=1'
-    expect_err = "junction: With specified form loss factor 'K', parameter 'A_ref' is required."
     max_parallel = 1
   []
 

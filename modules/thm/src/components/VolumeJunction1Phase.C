@@ -53,8 +53,6 @@ VolumeJunction1Phase::VolumeJunction1Phase(const InputParameters & params)
     _K(getParam<Real>("K")),
     _A_ref(isParamValid("A_ref") ? getParam<Real>("A_ref") : _zero)
 {
-  if (params.isParamSetByUser("K") && !params.isParamSetByUser("A_ref"))
-    logError("With specified form loss factor 'K', parameter 'A_ref' is required.");
   // Note: 'A_ref' can be required by child classes
   if (!params.isParamRequired("A_ref") && params.isParamSetByUser("A_ref") &&
       !params.isParamSetByUser("K"))
