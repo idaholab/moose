@@ -1,28 +1,11 @@
 # AddSamplerAction
 
-!alert! construction title=Undocumented Action Class
-The AddSamplerAction has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with an Action;
-however, what is contained is ultimately determined by what is necessary to make the documentation
-clear for users.
-
-```markdown
-# AddSamplerAction
-
 !syntax description /Samplers/AddSamplerAction
 
-## Overview
+`Samplers` are specified as an object inside the `[Samplers]` block.
+This [MooseObjectAction.md] adds them to the [Problem](syntax/Problem/index.md).
 
-!! Replace these lines with information regarding the AddSamplerAction action.
-
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the AddSamplerAction action.
-
-!syntax parameters /Samplers/AddSamplerAction
-```
-!alert-end!
-
-!syntax description /Samplers/AddSamplerAction
+More information about `Samplers` may be found on the
+[Samplers syntax documentation](syntax/Samplers/index.md).
 
 !syntax parameters /Samplers/AddSamplerAction

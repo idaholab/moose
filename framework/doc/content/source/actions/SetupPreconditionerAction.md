@@ -1,28 +1,11 @@
 # SetupPreconditionerAction
 
-!alert! construction title=Undocumented Action Class
-The SetupPreconditionerAction has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with an Action;
-however, what is contained is ultimately determined by what is necessary to make the documentation
-clear for users.
-
-```markdown
-# SetupPreconditionerAction
-
 !syntax description /Preconditioning/SetupPreconditionerAction
 
-## Overview
+A preconditioner for the non-linear system is specified as an object inside the `[Preconditioner]` block.
+This [Action.md] takes care of adding it to the [NonlinearSystemBase.md].
 
-!! Replace these lines with information regarding the SetupPreconditionerAction action.
-
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the SetupPreconditionerAction action.
-
-!syntax parameters /Preconditioning/SetupPreconditionerAction
-```
-!alert-end!
-
-!syntax description /Preconditioning/SetupPreconditionerAction
+More information about preconditioners may be found on the
+[Preconditioning syntax documentation](syntax/Preconditioning/index.md).
 
 !syntax parameters /Preconditioning/SetupPreconditionerAction

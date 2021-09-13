@@ -1,28 +1,14 @@
 # AddScalarKernelAction
 
-!alert! construction title=Undocumented Action Class
-The AddScalarKernelAction has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with an Action;
-however, what is contained is ultimately determined by what is necessary to make the documentation
-clear for users.
-
-```markdown
-# AddScalarKernelAction
-
 !syntax description /ScalarKernels/AddScalarKernelAction
 
-## Overview
+This action handles both `ScalarKernels` and `AuxScalarKernels`.
 
-!! Replace these lines with information regarding the AddScalarKernelAction action.
+Kernels for scalar variables are specified as an object inside the `[ScalarKernels]` block,
+while auxiliary kernels for scalar variables are specified as an object inside the `[AuxScalarKernels]` block.
+This [MooseObjectAction.md] adds them to the [Problem](syntax/Problem/index.md).
 
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the AddScalarKernelAction action.
-
-!syntax parameters /ScalarKernels/AddScalarKernelAction
-```
-!alert-end!
-
-!syntax description /ScalarKernels/AddScalarKernelAction
+More information about `ScalarKernels` may be found on the
+[ScalarKernels syntax documentation](syntax/ScalarKernels/index.md).
 
 !syntax parameters /ScalarKernels/AddScalarKernelAction

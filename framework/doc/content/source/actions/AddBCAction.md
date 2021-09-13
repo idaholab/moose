@@ -1,28 +1,13 @@
 # AddBCAction
 
-!alert! construction title=Undocumented Action Class
-The AddBCAction has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with an Action;
-however, what is contained is ultimately determined by what is necessary to make the documentation
-clear for users.
-
-```markdown
-# AddBCAction
-
 !syntax description /BCs/AddBCAction
 
-## Overview
+Boundary conditions are specified as an object inside the `[BCs]` block.
+This action adds them to the [Problem](syntax/Problem/index.md).
 
-!! Replace these lines with information regarding the AddBCAction action.
+More information about boundary conditions can be found on the [BCs syntax page](syntax/BCs/index.md).
 
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the AddBCAction action.
-
-!syntax parameters /BCs/AddBCAction
-```
-!alert-end!
-
-!syntax description /BCs/AddBCAction
+Please note that finite volume boundary conditions `FVBCs` are specified in the `[FVBCs]` block handled
+by the [AddFVBCAction.md] action.
 
 !syntax parameters /BCs/AddBCAction

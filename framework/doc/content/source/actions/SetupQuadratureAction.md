@@ -1,28 +1,16 @@
 # SetupQuadratureAction
 
-!alert! construction title=Undocumented Action Class
-The SetupQuadratureAction has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with an Action;
-however, what is contained is ultimately determined by what is necessary to make the documentation
-clear for users.
-
-```markdown
-# SetupQuadratureAction
-
 !syntax description /Executioner/Quadrature/SetupQuadratureAction
 
-## Overview
+A `Quadrature` is specified as an object inside the `[Quadrature]` block with the `[Executioner]` block
+as shown below.
 
-!! Replace these lines with information regarding the SetupQuadratureAction action.
+!listing test/tests/quadrature/order/block-order.i block=Executioner
 
-## Example Input File Syntax
+This action adds the default quadrature rule to the `Problem` then adds custom requested quadratures
+in the specified blocks.
 
-!! Describe and include an example of how to use the SetupQuadratureAction action.
-
-!syntax parameters /Executioner/Quadrature/SetupQuadratureAction
-```
-!alert-end!
-
-!syntax description /Executioner/Quadrature/SetupQuadratureAction
+More information about quadratures may be found on the
+[Quadrature syntax documentation](syntax/Executioner/Quadrature/index.md).
 
 !syntax parameters /Executioner/Quadrature/SetupQuadratureAction
