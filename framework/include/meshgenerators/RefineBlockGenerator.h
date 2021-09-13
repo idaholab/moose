@@ -25,22 +25,22 @@ protected:
   virtual std::unique_ptr<MeshBase> generate() override;
 
 private:
-  /// Input mesh to modify
+  /// Input mesh to refine
   std::unique_ptr<MeshBase> & _input;
 
-  /// List of block(s) to modify
-  std::vector<SubdomainName> _block;
+  /// List of block(s) to refine
+  const std::vector<SubdomainName> _block;
 
   /// The amount of times to refine each block, corresponding to their index in 'block'
-  std::vector<int> _refinement;
+  const std::vector<int> _refinement;
 
   /// Toggles whether neighboring level one elements should be refined or not. Defaults to true.
-  bool _enable_neighbor_refinement;
+  const bool _enable_neighbor_refinement;
 
   /// The actual function refining the blocks. This is done recursively in order to minimize the number of refinement iterations to as little as possible.
-  virtual std::unique_ptr<MeshBase> recursive_refine(std::vector<subdomain_id_type> block_ids,
+  virtual std::unique_ptr<MeshBase> recursive_refine(const std::vector<subdomain_id_type> block_ids,
                                                      std::unique_ptr<MeshBase> & mesh,
-                                                     std::vector<int> refinement,
-                                                     int max,
+                                                     const std::vector<int> refinement,
+                                                     const int max,
                                                      int ref_step = 0);
 };

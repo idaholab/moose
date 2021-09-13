@@ -16,16 +16,14 @@
 
 registerMooseObject("MooseApp", RefineBlockGenerator);
 
-defineLegacyParams(RefineBlockGenerator);
-
 InputParameters
 RefineBlockGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
 
-  params.addClassDescription("Mesh generator which removes elements from the specified subdomains");
-  params.addRequiredParam<MeshGeneratorName>("input", "Input mesh to modify");
-  params.addRequiredParam<std::vector<SubdomainName>>("block", "The list of blocks to be modified");
+  params.addClassDescription("Mesh generator which refines one or more blocks in an existing mesh");
+  params.addRequiredParam<MeshGeneratorName>("input", "Input mesh to refine");
+  params.addRequiredParam<std::vector<SubdomainName>>("block", "The list of blocks to be refined");
   params.addRequiredParam<std::vector<int>>(
       "refinement",
       "The amount of times to refine each block, corresponding to their index in 'block'");
@@ -45,6 +43,7 @@ RefineBlockGenerator::RefineBlockGenerator(const InputParameters & parameters)
     _enable_neighbor_refinement(getParam<bool>("enable_neighbor_refinement"))
 {
 }
+
 std::unique_ptr<MeshBase>
 RefineBlockGenerator::generate()
 {
