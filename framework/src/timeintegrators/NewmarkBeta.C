@@ -92,6 +92,8 @@ NewmarkBeta::computeTimeDerivatives()
   u_dotdot.close();
   u_dot.close();
 
+  Moose::out << "u_dot.size() is: " << u_dot.size() << "\n";
+
   // used for Jacobian calculations
   _du_dotdot_du = 1.0 / _beta / _dt / _dt;
   _du_dot_du = _gamma / _beta / _dt;

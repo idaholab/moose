@@ -36,13 +36,13 @@ private:
 
   std::set<std::string> _disp;
   const TagID _contact_tag_id;
-  const NumericVector<Number> & _contact_residual;
+  const NumericVector<Number> * _contact_residual;
   const TagID _noncontact_tag_id;
-  const NumericVector<Number> & _noncontact_residual;
+  const NumericVector<Number> * _noncontact_residual;
   /// Tag for computing the mass matrix
   const TagID _system_time_tag;
   /// Diagonal of the lumped mass matrix (and its inversion)
-  NumericVector<Real> & _mass_matrix_diag;
+  NumericVector<Real> * _mass_matrix_diag;
 
   /// Vector of 1's to help with creating the lumped mass matrix
   NumericVector<Real> * _ones;
@@ -51,13 +51,14 @@ private:
   /// remaining fraction will come from the previous time-steps noncontact forces
   const Real _implicit_u_fraction;
 
-  NumericVector<Number> & _noncontact_old;
-  NumericVector<Number> & _u_dotdot_contact;
+  NumericVector<Number> * _noncontact_old;
+  NumericVector<Number> * _u_dotdot_contact;
 
-  NumericVector<Number> & _u_dotdot_internal;
-  NumericVector<Number> & _u_dotdot_internal_old;
+  NumericVector<Number> * _u_dotdot_internal;
+  NumericVector<Number> * _u_dotdot_internal_old;
 
   virtual void computeContactAccelerations();
+  virtual void addTimeIntegratorVectors(const bool is_nonlinear_system = true) override;
 
   /// Helper function that actually does the math for computing the time derivative
   template <typename T,

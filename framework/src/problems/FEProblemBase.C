@@ -5255,6 +5255,12 @@ FEProblemBase::addTimeIntegrator(const std::string & type,
   _aux->addDotVectors();
   _nl->addDotVectors();
 
+  if (_nl->getTimeIntegrator()->isNewmarkBetaContact())
+    _nl->getTimeIntegrator()->addTimeIntegratorVectors(true);
+
+  if (_aux->getTimeIntegrator()->isNewmarkBetaContact())
+    _aux->getTimeIntegrator()->addTimeIntegratorVectors(false);
+
   auto tag_udot = _nl->getTimeIntegrator()->uDotFactorTag();
   if (!_nl->hasVector(tag_udot))
     _nl->associateVectorToTag(*_nl->solutionUDot(), tag_udot);

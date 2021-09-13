@@ -45,7 +45,8 @@ TimeIntegrator::TimeIntegrator(const InputParameters & parameters)
     _is_explicit(false),
     _is_lumped(false),
     _u_dot_factor_tag(_fe_problem.addVectorTag("u_dot_factor", Moose::VECTOR_TAG_SOLUTION)),
-    _u_dotdot_factor_tag(_fe_problem.addVectorTag("u_dotdot_factor", Moose::VECTOR_TAG_SOLUTION))
+    _u_dotdot_factor_tag(_fe_problem.addVectorTag("u_dotdot_factor", Moose::VECTOR_TAG_SOLUTION)),
+    _is_newmark_beta_contact(false)
 {
   _fe_problem.setUDotRequested(true);
 }

@@ -16,6 +16,7 @@
 #include "DGKernelBase.h"
 #include "InterfaceKernelBase.h"
 #include "IntegratedBCBase.h"
+#include "AuxiliarySystem.h"
 
 registerMooseObject("MooseApp", NewmarkBetaContact);
 
@@ -33,19 +34,20 @@ NewmarkBetaContact::NewmarkBetaContact(const InputParameters & parameters)
     _disp(getParam<std::vector<std::string>>("displacements").begin(),
           getParam<std::vector<std::string>>("displacements").end()),
     _contact_tag_id(_fe_problem.addVectorTag("contact")),
-    _contact_residual(_nl.addVector(_contact_tag_id, false, PARALLEL)),
+    _contact_residual(nullptr),
     _noncontact_tag_id(_fe_problem.addVectorTag("noncontact")),
-    _noncontact_residual(_nl.addVector(_noncontact_tag_id, false, PARALLEL)),
+    _noncontact_residual(nullptr),
     _system_time_tag(_fe_problem.getMatrixTagID("TIME")),
-    _mass_matrix_diag(_nl.addVector("mass_matrix_diag", false, PARALLEL)),
-    _ones(&_nl.addVector("ones", false, PARALLEL)),
+    _mass_matrix_diag(nullptr),
+    _ones(nullptr),
     _implicit_u_fraction(2 * _beta),
-    _noncontact_old(_nl.addVector("noncontact_old", false, PARALLEL)),
-    _u_dotdot_contact(_nl.addVector("u_dotdot_contact", false, PARALLEL)),
-    _u_dotdot_internal(_nl.addVector("_u_dotdot_internal", false, PARALLEL)),
-    _u_dotdot_internal_old(_nl.addVector("_u_dotdot_internal_old", false, PARALLEL))
-
+    _noncontact_old(nullptr),
+    _u_dotdot_contact(nullptr),
+    _u_dotdot_internal(nullptr),
+    _u_dotdot_internal_old(nullptr)
 {
+  // Used to create the necessary vectors in the Auxiliary and Nonlinear systems
+  _is_newmark_beta_contact = true;
 }
 
 template <typename T>
@@ -97,13 +99,9 @@ NewmarkBetaContact::init()
 void
 NewmarkBetaContact::postStep()
 {
-
-  // Compute "current" time derivative and then shift. What is used in residual evaluation is
-  // u_dot_old
-
   // now shift noncontact residual
-  _noncontact_old = _noncontact_residual;
-  _u_dotdot_internal_old = _u_dotdot_internal;
+  *_noncontact_old = *_noncontact_residual;
+  *_u_dotdot_internal_old = *_u_dotdot_internal;
 }
 
 void
@@ -131,6 +129,16 @@ NewmarkBetaContact::computeTimeDerivatives()
   NumericVector<Number> & u_dot_old = *_sys.solutionUDotOld();
   NumericVector<Number> & u_dotdot_old = *_sys.solutionUDotDotOld();
 
+  Moose::out << "u_dot.size() is: " << u_dot.size() << "\n";
+  Moose::out << "u_dotdot.size() is: " << u_dotdot.size() << "\n";
+  Moose::out << "u_dot_old.size() is: " << u_dot_old.size() << "\n";
+
+  Moose::out << "u_dotdot_old.size() is: " << u_dotdot_old.size() << "\n";
+  Moose::out << "_u_dotdot_contact.size() is: " << _u_dotdot_contact->size() << "\n";
+  Moose::out << "_u_dotdot_internal.size() is: " << _u_dotdot_internal->size() << "\n";
+  Moose::out << "_u_dotdot_internal_old.size() is: " << _u_dotdot_internal_old->size() << "\n";
+  Moose::out << "_contact_residual.size() is: " << _contact_residual->size() << "\n";
+
   if (_fe_problem.timeStep() <= _inactive_tsteps)
   {
     u_dot.zero();
@@ -144,9 +152,9 @@ NewmarkBetaContact::computeTimeDerivatives()
                                 u_dot_old,
                                 u_dotdot,
                                 u_dotdot_old,
-                                _u_dotdot_contact,
-                                _u_dotdot_internal,
-                                _u_dotdot_internal_old);
+                                *_u_dotdot_contact,
+                                *_u_dotdot_internal,
+                                *_u_dotdot_internal_old);
   }
 
   // make sure _u_dotdot and _u_dot are in good state
@@ -161,6 +169,38 @@ NewmarkBetaContact::computeTimeDerivatives()
 }
 
 void
+NewmarkBetaContact::addTimeIntegratorVectors(const bool is_nonlinear_system)
+{
+  if (is_nonlinear_system)
+  {
+    _contact_residual = &_nl.addVector(_contact_tag_id, true, GHOSTED);
+    _noncontact_residual = &_nl.addVector(_noncontact_tag_id, true, GHOSTED);
+    _mass_matrix_diag = &_nl.addVector("mass_matrix_diag", true, GHOSTED);
+    _noncontact_old = &_nl.addVector("noncontact_old", true, GHOSTED);
+    _u_dotdot_contact = &_nl.addVector("u_dotdot_contact", true, GHOSTED);
+    _u_dotdot_internal = &_nl.addVector("_u_dotdot_internal", true, GHOSTED);
+    _u_dotdot_internal_old = &_nl.addVector("_u_dotdot_internal_old", true, GHOSTED);
+    _ones = &_nl.addVector("ones", false, PARALLEL);
+  }
+  else
+  {
+    _contact_residual = &_fe_problem.getAuxiliarySystem().addVector(_contact_tag_id, true, GHOSTED);
+    _noncontact_residual =
+        &_fe_problem.getAuxiliarySystem().addVector(_noncontact_tag_id, true, GHOSTED);
+    _mass_matrix_diag =
+        &_fe_problem.getAuxiliarySystem().addVector("mass_matrix_diag", true, GHOSTED);
+    _noncontact_old = &_fe_problem.getAuxiliarySystem().addVector("noncontact_old", true, GHOSTED);
+    _u_dotdot_contact =
+        &_fe_problem.getAuxiliarySystem().addVector("u_dotdot_contact", true, GHOSTED);
+    _u_dotdot_internal =
+        &_fe_problem.getAuxiliarySystem().addVector("_u_dotdot_internal", true, GHOSTED);
+    _u_dotdot_internal_old =
+        &_fe_problem.getAuxiliarySystem().addVector("_u_dotdot_internal_old", true, GHOSTED);
+    _ones = &_fe_problem.getAuxiliarySystem().addVector("ones", false, PARALLEL);
+  }
+}
+
+void
 NewmarkBetaContact::computeContactAccelerations()
 {
 
@@ -170,19 +210,20 @@ NewmarkBetaContact::computeContactAccelerations()
   _fe_problem.computeJacobianTag(
       *_nonlinear_implicit_system->current_local_solution, mass_matrix, _system_time_tag);
   ///
-  mass_matrix.vector_mult(_mass_matrix_diag, *_ones);
+  mass_matrix.vector_mult(*_mass_matrix_diag, *_ones);
 
   // "Invert" the diagonal mass matrix
-  _mass_matrix_diag.reciprocal();
+  _mass_matrix_diag->reciprocal();
 
   // Multiply the inversion by the RHS
-  _u_dotdot_contact.pointwise_mult(_mass_matrix_diag, _contact_residual);
+  _u_dotdot_contact->pointwise_mult(*_mass_matrix_diag, *_contact_residual);
 
   // Check for convergence by seeing if there is a nan or inf
-  auto sum = _u_dotdot_contact.sum();
+  auto sum = _u_dotdot_contact->sum();
   bool converged = std::isfinite(sum);
 
   // Get things back to normal after mass matrix manipulations.
+  // FIXME: Not sure how this is consistent for auxiliary system
   _nl.computeJacobian(mass_matrix);
 
   Moose::out << "Can we lump the mass matrix correctly in the integrator? " << converged << "\n";
@@ -201,7 +242,7 @@ NewmarkBetaContact::computeADTimeDerivatives(ADReal & /*ad_u_dot*/,
 
   // Seeds ad_u_dotdot with _ad_dof_values and associated derivatives provided via ad_u_dot from
   // MooseVariableData
-  // 	ad_u_dotdot = ad_u_dot;
+  // ad_u_dotdot = ad_u_dot;
 
   //  computeTimeDerivativeHelper(
   //      ad_u_dot, u_old, u_dot_old, ad_u_dotdot, u_dotdot_old, _u_dotdot_contact,
@@ -214,9 +255,9 @@ NewmarkBetaContact::postResidual(NumericVector<Number> & residual)
   // time derivative residuals for all variables
   residual += _Re_time;
   // non-time residuals for all non-displacement variables excluding contact
-  residual += _noncontact_residual;
+  residual += *_noncontact_residual;
   // contact residuals for displacement variables
-  residual.add(1.0 / _implicit_u_fraction, _contact_residual);
+  residual.add(1.0 / _implicit_u_fraction, *_contact_residual);
 
   // Compute contact accelerations
   computeContactAccelerations();

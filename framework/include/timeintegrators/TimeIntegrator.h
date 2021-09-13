@@ -128,6 +128,11 @@ public:
   virtual unsigned int getNumLinearIterations() const { return _n_linear_iterations; }
 
   /**
+   * Gets boolean telling whether this integrator is the Newmark-beta contact.
+   */
+  virtual bool isNewmarkBetaContact() const { return _is_newmark_beta_contact; }
+
+  /**
    * Returns the time step size
    * @return The time step size
    */
@@ -142,6 +147,11 @@ public:
    * Returns whether mass matrix is lumped
    */
   virtual const bool & isLumped() const { return _is_lumped; }
+
+  /**
+   * Add necessary time integrator vectors
+   */
+  virtual void addTimeIntegratorVectors(const bool /*is_nonlinear_system*/) {}
 
   /**
    * Returns the tag for the nodal multiplication factor for the residual calculation of the udot
@@ -208,4 +218,7 @@ protected:
   const TagID _u_dot_factor_tag;
   /// The vector tag for the nodal multiplication factor for the residual calculation of the udotdot term
   const TagID _u_dotdot_factor_tag;
+
+  /// Whether the time integrator is the Newmark-beta contact time integrator
+  bool _is_newmark_beta_contact;
 };
