@@ -61,7 +61,7 @@ StripeMesh::buildMesh()
     }
     else
     {
-      Point centroid = e->centroid(); // get its centroid
+      Point centroid = e->vertex_average(); // get its centroid
       subdomain_id_type sid =
           floor((centroid(0) - getParam<Real>("xmin")) / h); // figure out the subdomain ID
       e->subdomain_id() = sid;

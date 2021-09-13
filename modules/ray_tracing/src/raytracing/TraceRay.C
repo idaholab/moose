@@ -335,7 +335,7 @@ TraceRay::exitsElem(const Elem * elem,
     // Loop over all of the sides
     while (true)
     {
-      debugRay("  Side ", s, " with centroid ", sidePtrHelper(elem, s)->centroid());
+      debugRay("  Side ", s, " with centroid ", sidePtrHelper(elem, s)->vertex_average());
 
       // All of the checks that follow are done while we're still searching through
       // all of the sides. try_nonplanar_incoming_side is our last possible check
@@ -686,7 +686,7 @@ TraceRay::moveThroughNeighbor(const NeighborInfo & neighbor_info,
     return NO_EXIT;
 
   const Elem * neighbor = neighbor_info._elem;
-  debugRay("Checking neighbor ", neighbor->id(), " with centroid ", neighbor->centroid());
+  debugRay("Checking neighbor ", neighbor->id(), " with centroid ", neighbor->vertex_average());
 
   // Find an entrant side (if any)
   incoming_side = RayTracingCommon::invalid_side;
@@ -1252,7 +1252,7 @@ TraceRay::trace(const std::shared_ptr<Ray> & ray)
     debugRay("  _intersected_side centroid: ",
              _intersected_side == RayTracingCommon::invalid_side
                  ? RayTracingCommon::invalid_point
-                 : _current_elem->side_ptr(_intersected_side)->centroid());
+                 : _current_elem->side_ptr(_intersected_side)->vertex_average());
     debugRay("  _intersected_extrema = ", _intersected_extrema);
     debugRay("  _intersection_distance = ", _intersection_distance);
 
@@ -1465,11 +1465,11 @@ TraceRay::trace(const std::shared_ptr<Ray> & ray)
       ray->setCurrentElem(neighbor);
       ray->setCurrentIncomingSide(_incoming_side);
 
-      debugRay("Next elem: ", neighbor->id(), " with centroid ", neighbor->centroid());
+      debugRay("Next elem: ", neighbor->id(), " with centroid ", neighbor->vertex_average());
       debugRay("Next _incoming_side: ",
                _incoming_side,
                " with centroid ",
-               neighbor->side_ptr(_incoming_side)->centroid());
+               neighbor->side_ptr(_incoming_side)->vertex_average());
       traceAssert(_last_elem->subdomain_id() == _current_subdomain_id,
                   "_current_subdomain_id invalid");
 
@@ -1788,7 +1788,7 @@ TraceRay::getVertexNeighbors(const Elem * elem, const Node * vertex)
   traceAssert(vertex, "Vertex must be valid");
 
   debugRay("Called getVertexNeighbors() with:");
-  debugRay("  elem->id() = ", elem->id(), " with centroid ", elem->centroid());
+  debugRay("  elem->id() = ", elem->id(), " with centroid ", elem->vertex_average());
   debugRay("  vertex->id() = ", vertex->id(), ", at ", (Point)*vertex);
 
   traceAssert(elem->get_node_index(vertex) != libMesh::invalid_uint, "Doesn't contain node");
@@ -1843,7 +1843,7 @@ TraceRay::getEdgeNeighbors(const Elem * elem,
   traceAssert(vertices.second, "Must be valid");
 
   debugRay("Called getEdgeNeighbors() with:");
-  debugRay("  elem->id() = ", elem->id(), " with centroid ", elem->centroid());
+  debugRay("  elem->id() = ", elem->id(), " with centroid ", elem->vertex_average());
   debugRay("  vertices.first = ", vertices.first->id(), " at ", (Point)*vertices.first);
   debugRay("  vertices.second = ", vertices.second->id(), " at ", (Point)*vertices.second);
   debugRay("  point = ", point);

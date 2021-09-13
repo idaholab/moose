@@ -1567,7 +1567,7 @@ GrainTracker::updateFieldInfo()
       if (_is_elemental)
       {
         const Elem * elem = _mesh.elemPtr(entity);
-        std::vector<Point> centroid(1, elem->centroid());
+        std::vector<Point> centroid(1, elem->vertex_average());
         if (_poly_ic_uo && _first_time)
         {
           entity_value = _poly_ic_uo->getVariableValue(grain._var_index, centroid[0]);

@@ -312,7 +312,7 @@ MeshGeneratorPD::generate()
   std::map<dof_id_type, dof_id_type> fe_elem_pd_node_map;
   for (const auto & eid : elems_to_pd)
   {
-    new_mesh->add_point(old_mesh->elem_ptr(eid)->centroid(), new_node_id);
+    new_mesh->add_point(old_mesh->elem_ptr(eid)->vertex_average(), new_node_id);
     fe_elem_pd_node_map.insert(std::make_pair(eid, new_node_id));
 
     ++new_node_id;

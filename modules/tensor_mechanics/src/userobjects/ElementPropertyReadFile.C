@@ -169,7 +169,7 @@ ElementPropertyReadFile::getBlockData(const Elem * elem, unsigned int prop_num) 
 Real
 ElementPropertyReadFile::getGrainData(const Elem * elem, unsigned int prop_num) const
 {
-  Point centroid = elem->centroid();
+  Point centroid = elem->vertex_average();
   Real min_dist = _max_range;
   unsigned int igrain = 0;
 

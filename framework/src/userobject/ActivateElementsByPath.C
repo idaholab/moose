@@ -49,7 +49,7 @@ ActivateElementsByPath::isElementActivated()
   Real z_t = _function_z ? _function_z->value(_t, dummy) : 0.0;
 
   // activate element when element is close to the point
-  Real distance = (_current_elem->centroid() - Point(x_t, y_t, z_t)).norm();
+  Real distance = (_current_elem->vertex_average() - Point(x_t, y_t, z_t)).norm();
   if (distance < _activate_distance)
     return true;
   else

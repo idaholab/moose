@@ -37,7 +37,7 @@ PartitionerWeightTest::clone() const
 dof_id_type
 PartitionerWeightTest::computeElementWeight(Elem & elem)
 {
-  auto centroid = elem.centroid();
+  auto centroid = elem.vertex_average();
   if (centroid(0) < 0.5)
     return 2;
   else
@@ -48,7 +48,7 @@ dof_id_type
 PartitionerWeightTest::computeSideWeight(Elem & elem, unsigned int side)
 {
   auto side_elem = elem.build_side_ptr(side);
-  auto centroid = side_elem->centroid();
+  auto centroid = side_elem->vertex_average();
   if (centroid(0) == 0.5)
     return 20;
   else

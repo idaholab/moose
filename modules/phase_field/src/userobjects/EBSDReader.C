@@ -538,7 +538,7 @@ EBSDReader::buildNodeWeightMaps()
 
         // Retrieve EBSD grain number for the current element index
         const Elem * elem = mesh.elem_ptr(elem_id);
-        const EBSDReader::EBSDPointData & d = getData(elem->centroid());
+        const EBSDReader::EBSDPointData & d = getData(elem->vertex_average());
 
         // get the (global) grain ID for the EBSD feature ID
         const unsigned int global_id = getGlobalID(d._feature_id);

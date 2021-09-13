@@ -1372,7 +1372,7 @@ FeatureFloodCount::flood(const DofObject * dof_object, std::size_t current_index
       feature->_vol_count++;
 
       // Sum the centroid values for now, we'll average them later
-      feature->_centroid += elem->centroid();
+      feature->_centroid += elem->vertex_average();
 
       //      // Does the volume intersect the boundary?
       //      if (_all_boundary_entity_ids.find(elem->id()) != _all_boundary_entity_ids.end())
@@ -1422,7 +1422,7 @@ FeatureFloodCount::isNewFeatureOrConnectedRegion(const DofObject * dof_object,
   if (_is_elemental)
   {
     const Elem * elem = static_cast<const Elem *>(dof_object);
-    std::vector<Point> centroid(1, elem->centroid());
+    std::vector<Point> centroid(1, elem->vertex_average());
     _subproblem.reinitElemPhys(elem, centroid, 0);
     entity_value = _vars[current_index]->sln()[0];
   }

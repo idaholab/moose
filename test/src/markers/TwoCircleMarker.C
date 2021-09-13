@@ -50,7 +50,7 @@ TwoCircleMarker::TwoCircleMarker(const InputParameters & parameters)
 Marker::MarkerValue
 TwoCircleMarker::computeElementMarker()
 {
-  Point centroid = _current_elem->centroid();
+  Point centroid = _current_elem->vertex_average();
 
   if (((centroid - _p1).norm() < _r1) ||
       (((centroid - _p2).norm() < _r2) && (_fe_problem.time() < _shut_off_time)))

@@ -34,7 +34,7 @@ TEST(ElemExtremaTest, Test)
     EXPECT_FALSE(invalid.atVertex(0));
     EXPECT_FALSE(invalid.atEdge());
     EXPECT_FALSE(invalid.atEdge(0, 1));
-    EXPECT_TRUE(invalid.isValid(elem, elem->centroid()));
+    EXPECT_TRUE(invalid.isValid(elem, elem->vertex_average()));
 
     std::stringstream oss;
     oss << invalid;

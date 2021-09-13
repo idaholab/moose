@@ -251,7 +251,7 @@ CartesianMeshGenerator::generate()
   MeshBase::element_iterator el_end = mesh->active_elements_end();
   for (; el != el_end; ++el)
   {
-    const Point p = (*el)->centroid();
+    const Point p = (*el)->vertex_average();
     unsigned int ix = std::floor(p(0));
     unsigned int iy = std::floor(p(1));
     unsigned int iz = std::floor(p(2));

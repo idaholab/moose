@@ -48,7 +48,7 @@ PorousFlowElementLength::computeValue()
 {
   const auto direction =
       RealVectorValue(_direction_x[_qp], _direction_y[_qp], _direction_z[_qp]).unit();
-  const auto centroid = _current_elem->centroid();
+  const auto centroid = _current_elem->vertex_average();
   Real length = 0.0;
   for (const auto & node : _current_elem->node_ref_range())
     length += std::abs((node - centroid) * direction);

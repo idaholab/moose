@@ -60,7 +60,7 @@ AEFVSlopeLimitingOneD::limitElementSlope() const
   std::vector<Real> xc(nsten, 0.);
 
   // the first always stores the current cell
-  xc[0] = elem->centroid()(0);
+  xc[0] = elem->vertex_average()(0);
 
   // array for the cell-average values in the current cell and its neighbors
   std::vector<std::vector<Real>> ucell(nsten, std::vector<Real>(nvars, 0.));
@@ -105,7 +105,7 @@ AEFVSlopeLimitingOneD::limitElementSlope() const
       const Elem * neig = elem->neighbor_ptr(is);
       if (this->hasBlocks(neig->subdomain_id()))
       {
-        xc[in] = neig->centroid()(0);
+        xc[in] = neig->vertex_average()(0);
 
         // get the cell-average variable in this neighbor cell
         if (_is_implicit)

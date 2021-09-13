@@ -314,7 +314,7 @@ PatchSidesetGenerator::partition(MeshBase & mesh)
     const Real dz = delta(2) / nelems[2];
     for (auto & elem_ptr : mesh.active_element_ptr_range())
     {
-      const Point centroid = elem_ptr->centroid();
+      const Point centroid = elem_ptr->vertex_average();
       processor_id_type proc_id;
       const unsigned int ix = std::floor((centroid(0) - min(0)) / dx);
       const unsigned int iy = std::floor((centroid(1) - min(1)) / dy);

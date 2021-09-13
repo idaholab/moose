@@ -48,7 +48,7 @@ public:
    */
   virtual void getGrainsBasedOnElem(const Elem & elem, std::vector<unsigned int> & grains) const
   {
-    getGrainsBasedOnPoint(elem.centroid(), grains);
+    getGrainsBasedOnPoint(elem.vertex_average(), grains);
   }
 
   /**

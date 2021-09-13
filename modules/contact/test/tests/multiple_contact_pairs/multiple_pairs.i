@@ -92,7 +92,7 @@ offset = 1e-2
   petsc_options_value = 'lu       NONZERO               1e-15                   1e-5'
   l_max_its = 30
   nl_max_its = 20
-  nl_abs_tol = 1e-10
+  nl_abs_tol = 1e-9
   line_search = 'none'
   snesmf_reuse_base = false
 []

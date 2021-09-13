@@ -428,20 +428,22 @@ AdvancedOutput::initAvailableLists()
         else if (type.family == NEDELEC_ONE || type.family == LAGRANGE_VEC ||
                  type.family == MONOMIAL_VEC)
         {
+          const auto geom_type =
+              ((type.family == MONOMIAL_VEC) && (type.order == CONSTANT)) ? "elemental" : "nodal";
           switch (_es_ptr->get_mesh().spatial_dimension())
           {
             case 0:
             case 1:
-              _execute_data["nodal"].available.insert(vname);
+              _execute_data[geom_type].available.insert(vname);
               break;
             case 2:
-              _execute_data["nodal"].available.insert(vname + "_x");
-              _execute_data["nodal"].available.insert(vname + "_y");
+              _execute_data[geom_type].available.insert(vname + "_x");
+              _execute_data[geom_type].available.insert(vname + "_y");
               break;
             case 3:
-              _execute_data["nodal"].available.insert(vname + "_x");
-              _execute_data["nodal"].available.insert(vname + "_y");
-              _execute_data["nodal"].available.insert(vname + "_z");
+              _execute_data[geom_type].available.insert(vname + "_x");
+              _execute_data[geom_type].available.insert(vname + "_y");
+              _execute_data[geom_type].available.insert(vname + "_z");
               break;
           }
         }
@@ -513,20 +515,22 @@ AdvancedOutput::initShowHideLists(const std::vector<VariableName> & show,
         else if (type.family == NEDELEC_ONE || type.family == LAGRANGE_VEC ||
                  type.family == MONOMIAL_VEC)
         {
+          const auto geom_type =
+              ((type.family == MONOMIAL_VEC) && (type.order == CONSTANT)) ? "elemental" : "nodal";
           switch (_es_ptr->get_mesh().spatial_dimension())
           {
             case 0:
             case 1:
-              _execute_data["nodal"].show.insert(vname);
+              _execute_data[geom_type].show.insert(vname);
               break;
             case 2:
-              _execute_data["nodal"].show.insert(vname + "_x");
-              _execute_data["nodal"].show.insert(vname + "_y");
+              _execute_data[geom_type].show.insert(vname + "_x");
+              _execute_data[geom_type].show.insert(vname + "_y");
               break;
             case 3:
-              _execute_data["nodal"].show.insert(vname + "_x");
-              _execute_data["nodal"].show.insert(vname + "_y");
-              _execute_data["nodal"].show.insert(vname + "_z");
+              _execute_data[geom_type].show.insert(vname + "_x");
+              _execute_data[geom_type].show.insert(vname + "_y");
+              _execute_data[geom_type].show.insert(vname + "_z");
               break;
           }
         }

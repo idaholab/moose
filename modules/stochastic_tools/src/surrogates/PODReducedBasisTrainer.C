@@ -172,7 +172,7 @@ PODReducedBasisTrainer::computeCorrelationMatrix()
   // Therefore, the elements in the mesh below the diagonal are deleted.
   for (Elem * elem : mesh.active_element_ptr_range())
   {
-    const auto centroid = elem->centroid();
+    const auto centroid = elem->vertex_average();
     if (centroid(0) > centroid(1))
       mesh.delete_elem(elem);
   }
@@ -220,7 +220,7 @@ PODReducedBasisTrainer::computeCorrelationMatrix()
     {
       // The centroids in the mesh correspond to the 2D corrdinates of the elements
       // in the mesh.
-      const auto centroid = elem->centroid();
+      const auto centroid = elem->vertex_average();
       const unsigned int i = centroid(0);
       const unsigned int j = centroid(1);
 
@@ -333,8 +333,8 @@ PODReducedBasisTrainer::receiveObjects(
 
     // Getting pointers to the necessary snapshots for the matrix entry.
     // This points to a vector of size (number of variables).
-    const unsigned int i = elem->centroid()(0);
-    const unsigned int j = elem->centroid()(1);
+    const unsigned int i = elem->vertex_average()(0);
+    const unsigned int j = elem->vertex_average()(1);
     std::vector<std::shared_ptr<DenseVector<Real>>> * i_vec = nullptr;
     std::vector<std::shared_ptr<DenseVector<Real>>> * j_vec = nullptr;
 

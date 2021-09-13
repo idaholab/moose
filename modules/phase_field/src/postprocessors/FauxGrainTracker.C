@@ -162,7 +162,7 @@ FauxGrainTracker::execute()
     // value above a threshold
     if (_is_elemental)
     {
-      std::vector<Point> centroid(1, current_elem->centroid());
+      std::vector<Point> centroid(1, current_elem->vertex_average());
       _fe_problem.reinitElemPhys(current_elem, centroid, 0);
 
       auto entity = current_elem->id();
@@ -184,7 +184,7 @@ FauxGrainTracker::execute()
           _volume[var_num] += _assembly.elementVolume(current_elem);
           _vol_count[var_num]++;
           // Sum the centroid values for now, we'll average them later
-          _centroid[var_num] += current_elem->centroid();
+          _centroid[var_num] += current_elem->vertex_average();
           vec_ref[var_num] = var_num;
           break;
         }

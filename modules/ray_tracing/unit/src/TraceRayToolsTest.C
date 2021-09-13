@@ -78,7 +78,7 @@ TEST(TraceRayToolsTest, withinEdge)
       for (const auto e : elem->edge_index_range())
       {
         extrema.invalidate();
-        EXPECT_TRUE(TraceRayTools::withinEdge(elem, elem->build_edge_ptr(e)->centroid(), extrema));
+        EXPECT_TRUE(TraceRayTools::withinEdge(elem, elem->build_edge_ptr(e)->vertex_average(), extrema));
         EXPECT_TRUE(extrema.atEdge(elem->nodes_on_edge(e)[0], elem->nodes_on_edge(e)[1]));
       }
       for (const auto n : elem->node_index_range())
@@ -116,7 +116,7 @@ TEST(TraceRayToolsTest, withinEdgeOnSide)
       {
         extrema.invalidate();
         EXPECT_FALSE(
-            TraceRayTools::withinEdgeOnSide(elem, elem->build_side_ptr(s)->centroid(), s, extrema));
+            TraceRayTools::withinEdgeOnSide(elem, elem->build_side_ptr(s)->vertex_average(), s, extrema));
         EXPECT_TRUE(extrema.isInvalid());
 
         for (const auto e : elem->edge_index_range())
@@ -124,7 +124,7 @@ TEST(TraceRayToolsTest, withinEdgeOnSide)
           {
             extrema.invalidate();
             EXPECT_TRUE(TraceRayTools::withinEdgeOnSide(
-                elem, elem->build_edge_ptr(e)->centroid(), s, extrema));
+                elem, elem->build_edge_ptr(e)->vertex_average(), s, extrema));
           }
       }
       for (const auto n : elem->node_index_range())
@@ -155,7 +155,7 @@ TEST(TraceRayToolsTest, atVertex)
 
     for (const auto elem : mesh->element_ptr_range())
     {
-      EXPECT_EQ(TraceRayTools::atVertex(elem, elem->centroid()), RayTracingCommon::invalid_vertex);
+      EXPECT_EQ(TraceRayTools::atVertex(elem, elem->vertex_average()), RayTracingCommon::invalid_vertex);
       for (const auto n : elem->node_index_range())
         if (elem->is_vertex(n))
         {
@@ -177,7 +177,7 @@ TEST(TraceRayToolsTest, atVertexOnSide)
       {
         if (elem->dim() > 1)
         {
-          EXPECT_EQ(TraceRayTools::atVertexOnSide(elem, elem->build_side_ptr(s)->centroid(), s),
+          EXPECT_EQ(TraceRayTools::atVertexOnSide(elem, elem->build_side_ptr(s)->vertex_average(), s),
                     RayTracingCommon::invalid_vertex);
         }
 
@@ -226,7 +226,7 @@ TEST(TraceRayToolsTest, findPointNeighbors)
 
       for (const auto s : elem->side_index_range())
       {
-        const auto centroid = elem->build_side_ptr(s)->centroid();
+        const auto centroid = elem->build_side_ptr(s)->vertex_average();
         TraceRayTools::findPointNeighbors(elem,
                                           centroid,
                                           neighbor_set,
@@ -246,7 +246,7 @@ TEST(TraceRayToolsTest, findPointNeighbors)
       if (elem->dim() == 3)
         for (const auto e : elem->edge_index_range())
         {
-          const auto centroid = elem->build_edge_ptr(e)->centroid();
+          const auto centroid = elem->build_edge_ptr(e)->vertex_average();
           TraceRayTools::findPointNeighbors(elem,
                                             centroid,
                                             neighbor_set,
