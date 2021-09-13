@@ -16,7 +16,6 @@ public:
   virtual unsigned int effectiveSpatialDimension() const override;
   virtual std::unique_ptr<MooseMesh> safeClone() const override;
   virtual void buildMesh() override;
-  virtual void prep();
 
   /// Add a new node into the mesh
   Node * addNode(const Point & pt);

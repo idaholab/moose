@@ -6,6 +6,7 @@
 #include "ControlData.h"
 #include "LoggingInterface.h"
 #include "NamingInterface.h"
+#include "libmesh/parallel_object.h"
 
 class ActionWarehouse;
 class Component;
@@ -15,7 +16,7 @@ class THMProblem;
 /**
  * Main class for simulation (the driver of the simulation)
  */
-class Simulation : public LoggingInterface, public NamingInterface
+class Simulation : public libMesh::ParallelObject, public LoggingInterface, public NamingInterface
 {
 public:
   Simulation(FEProblemBase & fe_problem, const InputParameters & params);

@@ -81,7 +81,6 @@
     input = 'err.1phase.i'
     cli_args = "Components/hx/flow_channel=inlet Components/hx/Hw=300"
     expect_err = "hx: The component 'inlet' is not of type 'FlowChannelBase'"
-    max_parallel = 1
   []
 
   [err:not_a_hs]
@@ -89,7 +88,6 @@
     input = 'err.1phase.i'
     cli_args = "Components/hx/hs=inlet Components/hx/Hw=300 "
     expect_err = "hx: The component 'inlet' is not of type 'HeatStructureBase'"
-    max_parallel = 1
   []
 
   [err:wrong_hs_side]
@@ -97,7 +95,6 @@
     input = 'err.1phase.i'
     cli_args = "Components/hx/hs_side=asdf"
     expect_err = "hx: Invalid option 'asdf' provided for 'hs_side' parameter. Valid options \(not case-sensitive\) are 'inner' and 'outer'."
-    max_parallel = 1
   []
 
   [err:elems_mismatch]
@@ -105,7 +102,6 @@
     input = 'err.1phase.i'
     cli_args = "Components/pipe/n_elems=1 Components/hx/Hw=300"
     expect_err = "hx: The number of elements in component 'pipe' is 1, but the number of axial elements in component 'hs' is 2. They must be the same."
-    max_parallel = 1
   []
 
   [err:length_mismatch]
@@ -113,7 +109,6 @@
     input = 'err.1phase.i'
     cli_args = "Components/pipe/length=3 Components/hx/Hw=300"
     expect_err = "hx: The length of component 'pipe' is 3, but the length of component 'hs' is 4. They must be the same."
-    max_parallel = 1
   []
 
   [err:wrong_position]
@@ -121,7 +116,6 @@
     input = 'err.1phase.i'
     cli_args = "Components/pipe/position='0 0.2 0.5' Components/hx/Hw=300 Components/pipe/n_elems=10 Components/hs/n_elems=10"
     expect_err = "hx: The centers of the elements of flow channel 'pipe' do not align with the centers of the specified heat structure side."
-    max_parallel = 1
   []
 
   [err:wrong_orientation]
@@ -129,7 +123,6 @@
     input = 'err.1phase.i'
     cli_args = "Components/pipe/orientation='0 1 0' Components/hx/Hw=300"
     expect_err = "hx: The centers of the elements of flow channel 'pipe' do not align with the centers of the specified heat structure side."
-    max_parallel = 1
   []
 
   [err:zero_p_hs_radius]
@@ -137,14 +130,12 @@
     input = 'err.1phase.i'
     cli_args = "Components/pipe/position='0 0.1 0' Components/hx/hs_side=inner Components/hx/Hw=300"
     expect_err = "hx: 'hs_side' parameter is set to 'INNER', but this side of the heat structure 'hs' has radius of zero."
-    max_parallel = 1
   []
 
   [err:missing_hw]
     type = 'RunException'
     input = 'err.1phase.i'
     expect_err = "hx: The parameter 'Hw' must be provided when using simple closures."
-    max_parallel = 1
   []
 
   # Jacobians

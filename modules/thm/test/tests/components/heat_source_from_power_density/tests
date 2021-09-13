@@ -28,13 +28,11 @@
     input = 'err.base.i'
     cli_args = "Components/hgen/hs=hgen Components/hgen/regions='fuel'"
     expect_err = "hgen: The component 'hgen' is not of type 'HeatStructureBase'"
-    max_parallel = 1
   []
   [err:wrong_block_name]
     type = 'RunException'
     input = 'err.base.i'
     cli_args = "Components/hgen/hs=hs Components/hgen/regions='asdf'"
     expect_err = "hgen: Region 'asdf' does not exist in heat structure 'hs'."
-    max_parallel = 1
   []
 []
