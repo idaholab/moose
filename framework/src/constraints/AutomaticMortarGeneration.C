@@ -653,16 +653,12 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     _mortar_interface_coupling.emplace(secondary_elem->interior_parent()->id(),
                                        secondary_elem->id());
 
-    // Insert both Elems as key and value.
-    if (primary_elem)
-    {
-      // LowerPrimary
-      _mortar_interface_coupling.emplace(secondary_elem->id(),
-                                         primary_elem->interior_parent()->id());
-      // PrimaryLower
-      _mortar_interface_coupling.emplace(primary_elem->interior_parent()->id(),
-                                         secondary_elem->id());
-    }
+    // LowerPrimary
+    mortar_interface_coupling.insert(
+        std::make_pair(secondary_elem->id(), primary_elem->interior_parent()->id()));
+    // PrimaryLower
+    mortar_interface_coupling.insert(
+        std::make_pair(primary_elem->interior_parent()->id(), secondary_elem->id()));
   }
 }
 
@@ -1056,16 +1052,12 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
     _mortar_interface_coupling.emplace(secondary_elem->interior_parent()->id(),
                                        secondary_elem->id());
 
-    // Insert both Elems as key and value.
-    if (primary_elem)
-    {
-      // LowerPrimary
-      _mortar_interface_coupling.emplace(secondary_elem->id(),
-                                         primary_elem->interior_parent()->id());
-      // PrimaryLower
-      _mortar_interface_coupling.emplace(primary_elem->interior_parent()->id(),
-                                         secondary_elem->id());
-    }
+    // LowerPrimary
+    mortar_interface_coupling.insert(
+        std::make_pair(secondary_elem->id(), primary_elem->interior_parent()->id()));
+    // PrimaryLower
+    mortar_interface_coupling.insert(
+        std::make_pair(primary_elem->interior_parent()->id(), secondary_elem->id()));
   }
 
   // Print mortar segment mesh statistics

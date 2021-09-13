@@ -80,6 +80,9 @@ private:
   /// elements
   const libMesh::QBase * const & _qrule_msm;
 
+  /// The element Jacobian times weights
+  const std::vector<Real> & _JxW_msm;
+
   /// The secondary boundary id needed for reiniting the MOOSE systems on the element (secondary) face
   BoundaryID _secondary_boundary_id;
 
