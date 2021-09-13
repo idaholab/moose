@@ -1,33 +1,17 @@
 # FunctionAux
 
-!alert! construction title=Undocumented Class
-The FunctionAux has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# FunctionAux
-
 !syntax description /AuxKernels/FunctionAux
 
-## Overview
+The `FunctionAux` helps turn a field defined by a function into a variable. It is generally
+helpful when the spatial and temporal dependence of a field is known ahead of time, and the kernels
+and other objects needing that field expect a variable rather than a function.
 
-!! Replace these lines with information regarding the FunctionAux object.
+## Example syntax
 
-## Example Input File Syntax
+In this example, the `FunctionAux` is used to store the exact solution of the problem, known
+and defined as the function `aux_exact_fn` as an auxiliary variable `aux_u`.
 
-!! Describe and include an example of how to use the FunctionAux object.
-
-!syntax parameters /AuxKernels/FunctionAux
-
-!syntax inputs /AuxKernels/FunctionAux
-
-!syntax children /AuxKernels/FunctionAux
-```
-!alert-end!
-
-!syntax description /AuxKernels/FunctionAux
+!listing test/tests/auxkernels/element_var/element_var_test.i block=AuxKernels
 
 !syntax parameters /AuxKernels/FunctionAux
 

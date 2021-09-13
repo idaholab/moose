@@ -1,33 +1,14 @@
 # DebugResidualAux
 
-!alert! construction title=Undocumented Class
-The DebugResidualAux has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# DebugResidualAux
-
 !syntax description /AuxKernels/DebugResidualAux
 
-## Overview
+This kernel is used for debugging. The `[Debug]` block parameter `show_var_residual_norms`
+may be used to identify a problematic variable whose residual does not decrease over
+the solve. The spatial dependence of this variable's contribution to the residual may
+then be examined.
 
-!! Replace these lines with information regarding the DebugResidualAux object.
-
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the DebugResidualAux object.
-
-!syntax parameters /AuxKernels/DebugResidualAux
-
-!syntax inputs /AuxKernels/DebugResidualAux
-
-!syntax children /AuxKernels/DebugResidualAux
-```
-!alert-end!
-
-!syntax description /AuxKernels/DebugResidualAux
+More information about debugging convergence issues may be found
+[here](modules/doc/content/application_usage/failed_solves.md optional=True).
 
 !syntax parameters /AuxKernels/DebugResidualAux
 

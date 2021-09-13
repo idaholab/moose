@@ -16,7 +16,8 @@ ParsedAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
   params += FunctionParserUtils<false>::validParams();
-  params.addClassDescription("Parsed function AuxKernel.");
+  params.addClassDescription(
+      "Sets a field variable value to the evaluation of a parsed expression.");
 
   params.addRequiredCustomTypeParam<std::string>(
       "function", "FunctionExpression", "function expression");

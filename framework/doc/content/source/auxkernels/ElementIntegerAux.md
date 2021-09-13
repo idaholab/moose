@@ -1,33 +1,17 @@
 # ElementIntegerAux
 
-!alert! construction title=Undocumented Class
-The ElementIntegerAux has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# ElementIntegerAux
-
 !syntax description /AuxKernels/ElementIntegerAux
 
-## Overview
+Additional integer fields may be used to group element separately from the subdomain/block.
+The `ElementIntegerAux` allows to visualize this additional information stored on the
+mesh.
 
-!! Replace these lines with information regarding the ElementIntegerAux object.
+## Example syntax
 
-## Example Input File Syntax
+In this example, the `ElementIntegerAux` is used to retrieve the `material_id` additional
+field and store it in the `id` auxiliary variable.
 
-!! Describe and include an example of how to use the ElementIntegerAux object.
-
-!syntax parameters /AuxKernels/ElementIntegerAux
-
-!syntax inputs /AuxKernels/ElementIntegerAux
-
-!syntax children /AuxKernels/ElementIntegerAux
-```
-!alert-end!
-
-!syntax description /AuxKernels/ElementIntegerAux
+!listing test/tests/auxkernels/mesh_integer/dg_mesh_integer.i block=AuxKernels
 
 !syntax parameters /AuxKernels/ElementIntegerAux
 

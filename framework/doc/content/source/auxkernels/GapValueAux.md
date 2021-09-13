@@ -1,33 +1,18 @@
 # GapValueAux
 
-!alert! construction title=Undocumented Class
-The GapValueAux has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# GapValueAux
-
 !syntax description /AuxKernels/GapValueAux
 
-## Overview
+This object is typically used in mechanical contact problems to get information about the variable
+on the other side of the boundary.
 
-!! Replace these lines with information regarding the GapValueAux object.
+See [GeometricSearchData.md] for more information on the treatment of contact problems.
 
-## Example Input File Syntax
+## Example syntax
 
-!! Describe and include an example of how to use the GapValueAux object.
+In this example, the `GapValueAux` is used to retrieve the value of variable `u` on
+boundary `rightleft` across from boundary `leftright`.
 
-!syntax parameters /AuxKernels/GapValueAux
-
-!syntax inputs /AuxKernels/GapValueAux
-
-!syntax children /AuxKernels/GapValueAux
-```
-!alert-end!
-
-!syntax description /AuxKernels/GapValueAux
+!listing test/tests/auxkernels/gap_value/gap_value.i block=AuxKernels
 
 !syntax parameters /AuxKernels/GapValueAux
 

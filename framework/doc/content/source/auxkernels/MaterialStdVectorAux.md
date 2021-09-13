@@ -1,33 +1,29 @@
 # MaterialStdVectorAux
 
-!alert! construction title=Undocumented Class
-The MaterialStdVectorAux has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# MaterialStdVectorAux
-
 !syntax description /AuxKernels/MaterialStdVectorAux
 
-## Overview
+Converting a field from the material system, here a component of a vector material property,
+to a variable may be desirable for several reasons: to match the format expected by certain
+kernels (thus lagging the field between time steps) or for output/testing/debugging.
 
-!! Replace these lines with information regarding the MaterialStdVectorAux object.
+This is particularly useful to examine anisotropic material properties. For output
+purposes only, an alternative is to use the `output_properties` argument of the `Material`
+or specify `output_material_properties` in the parameters of the desired output type nested in
+the `[Outputs]` block. This `AuxKernel` is used in the back-end by these parameters.
 
-## Example Input File Syntax
+!alert note
+The [MaterialRealVectorValueAux.md] provides similar functionality.
 
-!! Describe and include an example of how to use the MaterialStdVectorAux object.
+!alert note
+The AD system currently does not support auxiliary variables. If you convert material properties, which
+do support automatic differentiation, to auxiliary variables, the derivatives will be ignored.
 
-!syntax parameters /AuxKernels/MaterialStdVectorAux
+## Example syntax
 
-!syntax inputs /AuxKernels/MaterialStdVectorAux
+In this example, the `MaterialStdVectorAux` is being used to examine the first component
+of an anisotropic permeability.
 
-!syntax children /AuxKernels/MaterialStdVectorAux
-```
-!alert-end!
-
-!syntax description /AuxKernels/MaterialStdVectorAux
+!listing porous_flow/test/tests/gravity/grav02g.i block=AuxKernels start=[relpermwater] end=[]
 
 !syntax parameters /AuxKernels/MaterialStdVectorAux
 
