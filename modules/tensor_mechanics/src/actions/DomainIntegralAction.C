@@ -663,10 +663,12 @@ DomainIntegralAction::act()
       if (_temp != "")
         params.set<std::vector<VariableName>>("temperature") = {_temp};
 
-      params.set<MaterialPropertyName>("eigenstrain_gradient") =
-          parameters().get<MaterialPropertyName>("eigenstrain_gradient");
-      params.set<MaterialPropertyName>("body_force") =
-          parameters().get<MaterialPropertyName>("body_force");
+      if (parameters().isParamValid("eigenstrain_gradient"))
+        params.set<MaterialPropertyName>("eigenstrain_gradient") =
+            parameters().get<MaterialPropertyName>("eigenstrain_gradient");
+      if (parameters().isParamValid("body_force"))
+        params.set<MaterialPropertyName>("body_force") =
+            parameters().get<MaterialPropertyName>("body_force");
 
       for (std::set<INTEGRAL>::iterator sit = _integrals.begin(); sit != _integrals.end(); ++sit)
       {

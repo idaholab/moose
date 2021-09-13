@@ -5,8 +5,6 @@
 #solution can be identified.
 
 [GlobalParams]
-  order = FIRST
-  family = LAGRANGE
   displacements = 'disp_x disp_y'
   volumetric_locking_correction = False
 []
@@ -40,7 +38,6 @@
   [Master/all]
     strain = FINITE
     add_variables = true
-    incremental = true
     generate_output = 'stress_xx stress_yy stress_zz vonmises_stress'
     planar_formulation = PLANE_STRAIN
   []

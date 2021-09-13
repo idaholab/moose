@@ -131,7 +131,7 @@ InteractionIntegral::InteractionIntegral(const InputParameters & parameters)
   for (std::size_t i = _ndisp; i < 3; ++i)
     _grad_disp[i] = &_grad_zero;
 
-  if (getParam<MaterialPropertyName>("eigenstrain_gradient") != "")
+  if (isParamValid("eigenstrain_gradient"))
   {
     _eigenstrain_gradient = &getMaterialProperty<RankThreeTensor>("eigenstrain_gradient");
     if (_total_deigenstrain_dT)
@@ -139,7 +139,7 @@ InteractionIntegral::InteractionIntegral(const InputParameters & parameters)
                  "eigenstrain_gradient cannot be specified for materials that provide the "
                  "total_deigenstrain_dT material property");
   }
-  if (getParam<MaterialPropertyName>("body_force") != "")
+  if (isParamValid("body_force"))
     _body_force = &getMaterialProperty<RealVectorValue>("body_force");
 }
 

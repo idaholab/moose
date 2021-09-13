@@ -18,8 +18,6 @@
 #C.F. Shih, B. Moran, T. Nakamura, Int J Fract 30 (1986) 79-102
 
 [GlobalParams]
-  order = FIRST
-  family = LAGRANGE
   displacements = 'disp_x disp_y'
   volumetric_locking_correction = False
 []
@@ -72,7 +70,6 @@
   [all]
     strain = FINITE
     add_variables = true
-    incremental = true
     generate_output = 'stress_xx stress_yy stress_zz vonmises_stress'
     planar_formulation = PLANE_STRAIN
     eigenstrain_names = thermal_expansion
