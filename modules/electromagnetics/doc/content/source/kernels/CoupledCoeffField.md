@@ -4,7 +4,7 @@
 
 ## Example Input File Syntax
 
-!listing waveguide2D_WaveCoeff.i block=Kernels/coupledCoeffField_real
+!listing coupled_diffusion_helmholtz.i block=Kernels/coupledField_real
 
 !syntax parameters /Kernels/CoupledCoeffField
 

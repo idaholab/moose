@@ -1,6 +1,6 @@
 # ReflectionCoefficient
 
-!syntax description /UserObjects/ReflectionCoefficient
+!syntax description /Postprocessors/ReflectionCoefficient
 
 ## Overview
 
@@ -40,8 +40,8 @@ R_{power} = |R|^2
 
 !listing slab_reflection.i block=Postprocessors/reflection_coefficient
 
-!syntax parameters /UserObjects/ReflectionCoefficient
+!syntax parameters /Postprocessors/ReflectionCoefficient
 
-!syntax inputs /UserObjects/ReflectionCoefficient
+!syntax inputs /Postprocessors/ReflectionCoefficient
 
-!syntax children /UserObjects/ReflectionCoefficient
+!syntax children /Postprocessors/ReflectionCoefficient

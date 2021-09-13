@@ -24,12 +24,7 @@ expected electrostatic field result from various electrodynamics texts by defaul
 
 ## Example Input File Syntax
 
-!alert warning title=This is not currently tested
-The PotentialToFieldAux object is not currently used in any tested input files. This
-section of the documentation will be updated when this occurs. See a selection of
-untested input files where this is used at the bottom of this page.
-
-!! TODO: add a test to fix this up!
+!listing eigen_base.i block=AuxKernels/Ex_aux
 
 !syntax parameters /AuxKernels/PotentialToFieldAux
 
