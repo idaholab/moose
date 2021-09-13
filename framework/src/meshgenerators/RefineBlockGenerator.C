@@ -79,10 +79,10 @@ RefineBlockGenerator::generate()
 
 std::unique_ptr<MeshBase>
 RefineBlockGenerator::recursive_refine(std::vector<subdomain_id_type> block_ids,
-                                    std::unique_ptr<MeshBase> & mesh,
-                                    std::vector<int> refinement,
-                                    int max,
-                                    int ref_step)
+                                       std::unique_ptr<MeshBase> & mesh,
+                                       std::vector<int> refinement,
+                                       int max,
+                                       int ref_step)
 {
 
   if (ref_step == max)

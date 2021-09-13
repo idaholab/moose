@@ -18,7 +18,7 @@ class RefineBlockGenerator : public MeshGenerator
 {
 public:
   static InputParameters validParams();
-  
+
   RefineBlockGenerator(const InputParameters & parameters);
 
 protected:
@@ -39,8 +39,8 @@ private:
 
   /// The actual function refining the blocks. This is done recursively in order to minimize the number of refinement iterations to as little as possible.
   virtual std::unique_ptr<MeshBase> recursive_refine(std::vector<subdomain_id_type> block_ids,
-                                                  std::unique_ptr<MeshBase> & mesh,
-                                                  std::vector<int> refinement,
-                                                  int max,
-                                                  int ref_step = 0);
+                                                     std::unique_ptr<MeshBase> & mesh,
+                                                     std::vector<int> refinement,
+                                                     int max,
+                                                     int ref_step = 0);
 };
