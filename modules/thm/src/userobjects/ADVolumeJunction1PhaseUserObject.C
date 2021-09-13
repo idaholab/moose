@@ -111,18 +111,35 @@ ADVolumeJunction1PhaseUserObject::computeFluxesAndResiduals(const unsigned int &
 
   if (c == 0)
   {
-    const ADRealVectorValue velJ = rhouV_vec / _rhoV[0];
-    const ADReal s0J = _fp.s_from_v_e(vJ, eJ);
-    const ADReal TJ = _fp.T_from_v_e(vJ, eJ);
-    const ADReal hJ = _fp.h_from_p_T(pJ, TJ);
-    const ADReal velJ2 = velJ * velJ;
-    const ADReal h0J = hJ + 0.5 * velJ2;
-    const ADReal p0J = _fp.p_from_h_s(h0J, s0J);
-    const ADReal S_loss = _K * (p0J - pJ) * _A_ref;
-
-    _residual[VolumeJunction1Phase::RHOUV_INDEX] += ni(0) * S_loss;
-    _residual[VolumeJunction1Phase::RHOVV_INDEX] += ni(1) * S_loss;
-    _residual[VolumeJunction1Phase::RHOWV_INDEX] += ni(2) * S_loss;
+    const ADReal vel_in = _rhouA[0] / _rhoA[0];
+    const ADReal v_in = THM::v_from_rhoA_A(_rhoA[0], _A[0]);
+    const ADReal rhouA2 = _rhouA[0] * _rhouA[0];
+    const ADReal e_in = _rhoEA[0] / _rhoA[0] - 0.5 * rhouA2 / (_rhoA[0] * _rhoA[0]);
+    const ADReal p_in = _fp.p_from_v_e(v_in, e_in);
+    const ADReal s0_in = _fp.s_from_v_e(v_in, e_in);
+    const ADReal T_in = _fp.T_from_v_e(v_in, e_in);
+    const ADReal h_in = _fp.h_from_p_T(p_in, T_in);
+    const ADReal velin2 = vel_in * vel_in;
+    const ADReal h0_in = h_in + 0.5 * velin2;
+    const ADReal p0_in = _fp.p_from_h_s(h0_in, s0_in);
+    ADReal S_loss;
+    if (_A_ref == 0)
+      S_loss = _K * (p0_in - p_in) * _A[0];
+    else
+      S_loss = _K * (p0_in - p_in) * _A_ref;
+    if (THM::isInlet(vel_in, _normal[c]))
+    {
+      _residual[VolumeJunction1Phase::RHOUV_INDEX] -= ni(0) * S_loss;
+      _residual[VolumeJunction1Phase::RHOVV_INDEX] -= ni(1) * S_loss;
+      _residual[VolumeJunction1Phase::RHOWV_INDEX] -= ni(2) * S_loss;
+    }
+    else
+    {
+      _residual[VolumeJunction1Phase::RHOUV_INDEX] += ni(0) * S_loss;
+      _residual[VolumeJunction1Phase::RHOVV_INDEX] += ni(1) * S_loss;
+      _residual[VolumeJunction1Phase::RHOWV_INDEX] += ni(2) * S_loss;
+    }
+    _residual[VolumeJunction1Phase::RHOEV_INDEX] += S_loss * std::abs(vel_in);
   }
 
   _residual[VolumeJunction1Phase::RHOV_INDEX] -= din * _flux[c][THM3Eqn::CONS_VAR_RHOA];
