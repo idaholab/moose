@@ -41,10 +41,8 @@ protected:
   /// What component of the velocity this object is acting on
   const unsigned int _comp;
 
-  /// The dynamic viscosity on the FaceInfo elem
-  const ADMaterialProperty<Real> & _mu_elem;
-  /// The dynamic viscosity on the FaceInfo neighbor
-  const ADMaterialProperty<Real> & _mu_neighbor;
+  /// The dynamic viscosity
+  const FunctorInterface<ADReal> & _mu;
 
   /// The mesh dimension
   const unsigned int _dim;

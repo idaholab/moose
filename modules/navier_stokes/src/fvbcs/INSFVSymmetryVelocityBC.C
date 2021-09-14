@@ -38,8 +38,7 @@ INSFVSymmetryVelocityBC::INSFVSymmetryVelocityBC(const InputParameters & params)
     _v_neighbor(adCoupledNeighborValue("v")),
     _w_neighbor(adCoupledNeighborValue("w")),
     _comp(getParam<MooseEnum>("momentum_component")),
-    _mu_elem(getADMaterialProperty<Real>("mu")),
-    _mu_neighbor(getNeighborADMaterialProperty<Real>("mu")),
+    _mu(getFunctorMaterialProperty<ADReal>("mu")),
     _dim(_subproblem.mesh().dimension())
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
@@ -59,8 +58,8 @@ INSFVSymmetryVelocityBC::computeQpResidual()
   const auto & v_C = use_elem ? _v_elem : _v_neighbor;
   const auto & w_C = use_elem ? _w_elem : _w_neighbor;
 
-  // FIXME: interpolate mu to the boundary, see #16809
-  const auto & mu_b = use_elem ? _mu_elem : _mu_neighbor;
+  //FIXME add limiter
+  const auto mu_b = _mu(std::make_tuple(_face_info, nullptr, true, faceArgSubdomains()));
 
   const auto d_perpendicular = std::abs((_face_info->faceCentroid() - cell_centroid) * _normal);
 
@@ -73,5 +72,5 @@ INSFVSymmetryVelocityBC::computeQpResidual()
   if (_dim > 2)
     v_dot_n += w_C[_qp] + _normal(2);
 
-  return 2. * mu_b[_qp] * _normal.norm() / d_perpendicular * v_dot_n * _normal(_comp);
+  return 2. * mu_b * _normal.norm() / d_perpendicular * v_dot_n * _normal(_comp);
 }
