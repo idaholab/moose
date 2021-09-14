@@ -1,23 +1,28 @@
 #pragma once
 
-// C++ includes
-#include <vector>
+#include "Restartable.h"
 
-// Forward declarations
 class ControlDataValue;
 class THMControl;
 
 /**
  * Abstract definition of a ControlData value.
  */
-class ControlDataValue
+class ControlDataValue : public Restartable
 {
 public:
   /**
    * Constructor
+   * @param moose_app MOOSEApp object this object belong to
    * @param name The full (unique) name for this piece of data.
    */
-  ControlDataValue(std::string name) : _name(name), _declared(false), _control(nullptr) {}
+  ControlDataValue(MooseApp & moose_app, const std::string & name)
+    : Restartable(moose_app, name, "thm::control_logic", 0),
+      _name(name),
+      _declared(false),
+      _control(nullptr)
+  {
+  }
 
   /**
    * Destructor.
@@ -36,9 +41,9 @@ public:
   const std::string & name() const { return _name; }
 
   /**
-   * Get the reference to the control object that declared this control data
+   * Get the pointer to the control object that declared this control data
    */
-  THMControl & getControl() const { return *_control; }
+  const THMControl * getControl() const { return _control; }
 
   /**
    * Set the pointer to the control object that declared this control data
@@ -81,33 +86,27 @@ public:
    * Constructor
    * @param name The full (unique) name for this piece of data.
    */
-  ControlData(std::string name) : ControlDataValue(name)
+  ControlData(MooseApp & moose_app, std::string name)
+    : ControlDataValue(moose_app, name),
+      _value(declareRestartableData<T>(name)),
+      _value_old(declareRestartableData<T>(name + "_old"))
   {
-    _value_ptr = new T;
-    _value_old_ptr = new T;
-    *_value_old_ptr = 0;
-  }
-
-  virtual ~ControlData()
-  {
-    delete _value_ptr;
-    delete _value_old_ptr;
   }
 
   /**
    * @returns a read-only reference to the parameter value.
    */
-  const T & get() const { return *_value_ptr; }
+  const T & get() const { return _value; }
 
   /**
    * @returns a read-only reference to the old value.
    */
-  const T & getOld() const { return *_value_old_ptr; }
+  const T & getOld() const { return _value_old; }
 
   /**
    * @returns a writable reference to the parameter value.
    */
-  T & set() { return *_value_ptr; }
+  T & set() { return _value; }
 
   /**
    * String identifying the type of parameter stored.
@@ -118,9 +117,9 @@ public:
 
 private:
   /// Stored value.
-  T * _value_ptr;
+  T & _value;
   /// Stored old value.
-  T * _value_old_ptr;
+  T & _value_old;
 };
 
 // ------------------------------------------------------------
@@ -136,5 +135,5 @@ template <typename T>
 inline void
 ControlData<T>::copyValuesBack()
 {
-  *_value_old_ptr = *_value_ptr;
+  _value_old = _value;
 }
