@@ -9,13 +9,13 @@
 
 #pragma once
 
-#include "ADMaterial.h"
+#include "FunctorMaterial.h"
 
 /*
  *Class to compute the total viscosity which considers molecular and
  *mixing length model turbulent viscosity.
  */
-class MixingLengthTurbulentViscosityMaterial : public ADMaterial
+class MixingLengthTurbulentViscosityMaterial : public FunctorMaterial
 {
 public:
   static InputParameters validParams();
@@ -23,21 +23,26 @@ public:
   MixingLengthTurbulentViscosityMaterial(const InputParameters & parameters);
 
 protected:
-  virtual void computeQpProperties();
-
   const unsigned int _mesh_dimension;
 
-  const ADVariableGradient & _grad_u;
-  const ADVariableGradient & _grad_v;
-  const ADVariableGradient & _grad_w;
+  /// x-component velocity
+  const MooseVariableFVReal & _u_vel;
+
+  /// y-component velocity
+  const MooseVariableFVReal * const _v_vel;
+
+  /// z-component velocity
+  const MooseVariableFVReal * const _w_vel;
+
   /// Turbulent eddy mixing length
-  const VariableValue & _mixing_len;
+  const FunctorInterface<ADReal> & _mixing_len;
 
   /// viscosity
-  const ADMaterialProperty<Real> & _mu;
+  const FunctorInterface<ADReal> & _mu;
 
   /// density
-  const ADMaterialProperty<Real> & _rho;
+  const FunctorInterface<ADReal> & _rho;
+
   // Total viscosity
-  ADMaterialProperty<Real> & _total_viscosity;
+  FunctorMaterialProperty<ADReal> & _total_viscosity;
 };
