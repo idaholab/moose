@@ -35,7 +35,7 @@ protected:
   const MooseVariableFVReal * const _w_vel;
 
   /// Turbulent eddy mixing length
-  const FunctorInterface<ADReal> & _mixing_len;
+  const MooseVariableFVReal & _mixing_len;
 
   /// viscosity
   const FunctorInterface<ADReal> & _mu;

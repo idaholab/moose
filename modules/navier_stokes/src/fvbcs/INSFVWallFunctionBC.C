@@ -42,8 +42,8 @@ INSFVWallFunctionBC::INSFVWallFunctionBC(const InputParameters & params)
     _w_var(params.isParamValid("w")
                ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("w", 0))
                : nullptr),
-    _rho(getParam<Real>("rho")),
-    _mu(getADMaterialProperty<Real>("mu"))
+   _rho(getFunctorMaterialProperty<ADReal>(NS::density)),
+   _mu(getFunctorMaterialProperty<ADReal>("mu"))
 {
 }
 
@@ -73,9 +73,11 @@ INSFVWallFunctionBC::computeQpResidual()
   if (!std::isfinite(parallel_speed.value()))
     return parallel_speed;
 
+  //TODO Make findUStar use AD!
   // Compute the friction velocity and the wall shear stress
-  ADReal u_star = findUStar(_mu[_qp].value(), _rho, parallel_speed, dist.value());
-  ADReal tau = u_star * u_star * _rho;
+  const auto rho = _rho(&elem);
+  ADReal u_star = findUStar(_mu(&elem).value(), rho.value(), parallel_speed, dist.value());
+  ADReal tau = u_star * u_star * rho;
 
   // Compute the shear stress component for this momentum equation
   if (_axis_index == 0)
