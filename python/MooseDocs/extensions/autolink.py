@@ -13,8 +13,8 @@ import logging
 import MooseDocs
 from .. import common
 from ..base import components, Extension
-from ..tree import tokens, latex
-from . import core, heading, modal
+from ..tree import tokens, latex, html
+from . import core, floats, heading, modal
 
 def make_extension(**kwargs):
     return AutoLinkExtension(**kwargs)
@@ -197,11 +197,15 @@ class RenderAutoLink(RenderLinkBase):
         alternative = token['alternative']
         optional = token['optional']
         exact = token['exact']
-        desired = self.translator.findPage(token['page'], exact=exact,
-                                           throw_on_zero=not optional and alternative is None)
+        try:
+            desired = self.translator.findPage(token['page'], exact=exact,
+                                               throw_on_zero=not optional and alternative is None)
+        except MooseDocs.common.exceptions.MooseDocsException:
+            html.String(parent, content=token['page'], class_='moose_error')
+            raise
 
         # If no page was found, create a new copy of the token and render the alernative hyperlink
-        if desired is None and alternative is not None:
+        if (desired is None) and (alternative is not None):
             token = token.copy(info=True)
             match = PAGE_LINK_RE.search(alternative)
             token['bookmark'] = match.group('bookmark')[1:] if match.group('bookmark') else None
