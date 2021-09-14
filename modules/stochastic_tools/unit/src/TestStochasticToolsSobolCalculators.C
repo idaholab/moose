@@ -108,7 +108,7 @@ TEST(StochasticTools, Sobol_Saltelli2002)
     // Compute SOBOL indices
     Parallel::Communicator comm;
     ParallelObject po(comm);
-    SobolCalculator calc(po, "SOBOL", true);
+    SobolCalculator<std::vector<Real>, Real> calc(po, "SOBOL", true);
     std::vector<Real> sobol = calc.compute(data, false);
 
     // First-order
@@ -150,7 +150,7 @@ TEST(StochasticTools, Sobol_Saltelli2002)
     // Construct Sobol calculator
     Parallel::Communicator comm;
     ParallelObject po(comm);
-    SobolCalculator calc(po, "SOBOL", true);
+    SobolCalculator<std::vector<Real>, Real> calc(po, "SOBOL", true);
 
     // Construct bootstrap calculator
     MooseEnum boot("percentile", "percentile");
@@ -291,7 +291,7 @@ TEST(StochasticTools, Sobol_Analytical)
     // Compute SOBOL vectors of g_function
     std::vector<Real> q_vector = {0, 0, 0, 0};
     std::vector<std::vector<Real>> data = sobolidx(q_vector, 1000000);
-    SobolCalculator calc(po, "SOBOL", true);
+    SobolCalculator<std::vector<Real>, Real> calc(po, "SOBOL", true);
     std::vector<Real> sobol = calc.compute(data, false);
 
     // p. 235
@@ -318,7 +318,7 @@ TEST(StochasticTools, Sobol_Analytical)
     // Compute SOBOL vectors of g_function
     std::vector<Real> q_vector = {0, 0, 0, 0};
     std::vector<std::vector<Real>> data = sobolidx(q_vector, 1000000, false);
-    SobolCalculator calc(po, "SOBOL", false);
+    SobolCalculator<std::vector<Real>, Real> calc(po, "SOBOL", false);
     std::vector<Real> sobol = calc.compute(data, false);
 
     // p. 235
@@ -337,7 +337,7 @@ TEST(StochasticTools, Sobol_Analytical)
   {
     std::vector<Real> q_vector = {0, 0, 0, 0, 0, 0, 0, 0};
     std::vector<std::vector<Real>> data = sobolidx(q_vector, 1000000);
-    SobolCalculator calc(po, "SOBOL", true);
+    SobolCalculator<std::vector<Real>, Real> calc(po, "SOBOL", true);
     std::vector<Real> sobol = calc.compute(data, false);
 
     // p. 235
@@ -384,7 +384,7 @@ TEST(StochasticTools, Sobol_Analytical)
   {
     std::vector<Real> q_vector = {0, 0, 3, 9, 9, 9, 9, 9};
     std::vector<std::vector<Real>> data = sobolidx(q_vector, 1000000);
-    SobolCalculator calc(po, "SOBOL", true);
+    SobolCalculator<std::vector<Real>, Real> calc(po, "SOBOL", true);
     std::vector<Real> sobol = calc.compute(data, false);
 
     // p. 235

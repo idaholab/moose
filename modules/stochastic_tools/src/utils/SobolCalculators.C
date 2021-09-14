@@ -10,21 +10,24 @@
 
 namespace StochasticTools
 {
-SobolCalculator::SobolCalculator(const ParallelObject & other,
-                                 const std::string & name,
-                                 bool resample)
-  : Calculator<std::vector<std::vector<Real>>, std::vector<Real>>(other, name), _resample(resample)
+template <typename InType, typename OutType>
+SobolCalculator<InType, OutType>::SobolCalculator(const ParallelObject & other,
+                                                  const std::string & name,
+                                                  bool resample)
+  : Calculator<std::vector<InType>, std::vector<OutType>>(other, name), _resample(resample)
 {
 }
 
+template <typename InType, typename OutType>
 void
-SobolCalculator::initialize()
+SobolCalculator<InType, OutType>::initialize()
 {
   _amat.resize(0, 0);
 }
 
+template <typename InType, typename OutType>
 void
-SobolCalculator::update(const std::vector<Real> & data)
+SobolCalculator<InType, OutType>::update(const InType & data)
 {
   if (_amat.n() == 0)
   {
@@ -39,8 +42,9 @@ SobolCalculator::update(const std::vector<Real> & data)
       _amat(r, c) += data[r] * data[c];
 }
 
+template <typename InType, typename OutType>
 void
-SobolCalculator::finalize(bool is_distributed)
+SobolCalculator<InType, OutType>::finalize(bool is_distributed)
 {
   if (is_distributed)
     this->_communicator.sum(_amat.get_values());
@@ -52,19 +56,19 @@ SobolCalculator::finalize(bool is_distributed)
   const std::size_t n = (s - 2) / (_resample ? 2 : 1);
 
   // The data to output
-  DenseMatrix<Real> S(n, n);
-  std::vector<Real> ST(n);
+  DenseMatrix<OutType> S(n, n);
+  std::vector<OutType> ST(n);
 
   // First order
   {
-    Real E = _amat(0, s - 1);
-    Real V = _amat(s - 1, s - 1) - E;
+    auto E = _amat(0, s - 1);
+    auto V = _amat(s - 1, s - 1) - E;
     for (std::size_t i = 0; i < n; ++i)
     {
-      Real U0 = _amat(i + 1, s - 1);
+      auto U0 = _amat(i + 1, s - 1);
       if (_resample)
       {
-        Real U1 = _amat(0, i + n + 1);
+        auto U1 = _amat(0, i + n + 1);
         S(i, i) = (((U0 + U1) / 2) - E) / V;
       }
       else
@@ -74,14 +78,14 @@ SobolCalculator::finalize(bool is_distributed)
 
   // Total-effect
   {
-    Real E = _amat(0, s - 1);
-    Real V = _amat(0, 0) - E;
+    auto E = _amat(0, s - 1);
+    auto V = _amat(0, 0) - E;
     for (std::size_t i = 0; i < n; ++i)
     {
-      Real U0 = _amat(0, i + 1);
+      auto U0 = _amat(0, i + 1);
       if (_resample)
       {
-        Real U1 = _amat(i + n + 1, s - 1);
+        auto U1 = _amat(i + n + 1, s - 1);
         ST[i] = 1 - (((U0 + U1) / 2) - E) / V;
       }
       else
@@ -94,14 +98,14 @@ SobolCalculator::finalize(bool is_distributed)
   {
     for (std::size_t i = 0; i < n; ++i)
     {
-      Real E = _amat(i + 1, i + n + 1);
+      auto E = _amat(i + 1, i + n + 1);
       for (std::size_t j = 0; j < i; ++j)
       {
-        Real V = _amat(j + n + 1, j + n + 1) - E;
-        Real U0 = _amat(i + 1, j + n + 1);
-        Real U1 = _amat(j + 1, i + n + 1);
-        Real Sc = (((U0 + U1) / 2) - E) / V;
-        Real S2 = Sc - S(i, i) - S(j, j);
+        auto V = _amat(j + n + 1, j + n + 1) - E;
+        auto U0 = _amat(i + 1, j + n + 1);
+        auto U1 = _amat(j + 1, i + n + 1);
+        auto Sc = (((U0 + U1) / 2) - E) / V;
+        auto S2 = Sc - S(i, i) - S(j, j);
         S(j, i) = S2;
       }
     }
@@ -131,4 +135,6 @@ SobolCalculator::finalize(bool is_distributed)
   }
 }
 
+template class SobolCalculator<std::vector<Real>, Real>;
+template class SobolCalculator<std::vector<std::vector<Real>>, std::vector<Real>>;
 } // namespace

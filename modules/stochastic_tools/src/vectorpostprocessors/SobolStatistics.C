@@ -21,7 +21,7 @@
 
 #include <numeric>
 
-registerMooseObject("StochasticToolsApp", SobolStatistics);
+registerMooseObjectDeprecated("StochasticToolsApp", SobolStatistics, "11/03/2021 12:00");
 
 InputParameters
 SobolStatistics::validParams()
@@ -85,7 +85,8 @@ SobolStatistics::execute()
 {
   TIME_SECTION("execute", 3, "Executing Sobol Statistics");
 
-  StochasticTools::SobolCalculator calc(*this, "SOBOL", _sobol_sampler.resample());
+  StochasticTools::SobolCalculator<std::vector<Real>, Real> calc(
+      *this, "SOBOL", _sobol_sampler.resample());
   auto boot_calc = _ci_levels.empty()
                        ? nullptr
                        : makeBootstrapCalculator(MooseEnum("percentile", "percentile"),

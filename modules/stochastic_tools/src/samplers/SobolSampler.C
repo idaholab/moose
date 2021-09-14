@@ -21,7 +21,6 @@ SobolSampler::validParams()
   params.addParam<bool>("resample", true, "Create the re-sample matrix for second-order indices.");
   params.addRequiredParam<SamplerName>("sampler_a", "The 'sample' matrix.");
   params.addRequiredParam<SamplerName>("sampler_b", "The 're-sample' matrix.");
-  params.suppressParameter<ExecFlagEnum>("execute_on");
   return params;
 }
 
