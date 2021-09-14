@@ -1,5 +1,10 @@
 #This problem from [Wilson 1979] tests the thermal strain term in the
-#interaction integral
+#interaction integral. In this variant of this test, rather than using the
+#standard mechanism for applying thermal strain, the eigenstrain for the
+#thermal strain is applied using a generic object, which also supplies its
+#gradient. This gradient is used in the interaction integral, with a nearly
+#identical result to that from the version of this test that applies that
+#in the standard manner.
 #
 #theta_e = 10 degrees C; a = 252; E = 207000; nu = 0.3; alpha = 1.35e-5
 #
@@ -28,26 +33,15 @@
 #  uniform_refine = 3
 []
 
-[AuxVariables]
-  [SED]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [temp]
-    order = FIRST
-    family = LAGRANGE
-  []
-[]
-
 [Functions]
-  [tempfunc]
+  [eigfunc]
     type = ParsedFunction
-    value = 10.0*(2*x/504)
+    value = 1.35e-5*10.0*(2*x/504)
   []
 []
 
 [DomainIntegral]
-  integrals = 'KFromJIntegral InteractionIntegralKI'
+  integrals = 'InteractionIntegralKI'
   boundary = 800
   crack_direction_method = CrackDirectionVector
   crack_direction_vector = '1 0 0'
@@ -62,8 +56,7 @@
   block = 1
   youngs_modulus = 207000
   poissons_ratio = 0.3
-  temperature = temp
-  eigenstrain_names = thermal_expansion
+  eigenstrain_gradient = thermal_expansion_gradient
 []
 
 [Modules/TensorMechanics/Master]
@@ -73,21 +66,6 @@
     generate_output = 'stress_xx stress_yy stress_zz vonmises_stress'
     planar_formulation = PLANE_STRAIN
     eigenstrain_names = thermal_expansion
-  []
-[]
-
-[AuxKernels]
-  [SED]
-    type = MaterialRealAux
-    variable = SED
-    property = strain_energy_density
-    execute_on = timestep_end
-  []
-  [tempfuncaux]
-    type = FunctionAux
-    variable = temp
-    function = tempfunc
-    block = 1
   []
 []
 
@@ -122,10 +100,8 @@
     type = ComputeFiniteStrainElasticStress
   []
   [thermal_expansion_strain]
-    type = ComputeThermalExpansionEigenstrain
-    stress_free_temperature = 0.0
-    thermal_expansion_coeff = 1.35e-5
-    temperature = temp
+    type = FunctionIsotropicEigenstrain
+    function = eigfunc
     eigenstrain_name = thermal_expansion
   []
 []

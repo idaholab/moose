@@ -23,6 +23,50 @@ design = 'syntax/DomainIntegral/index.md'
     requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals including the interaction integral for problems in 2D.'
     issues = '#7527 #9966'
   [../]
+  [./test_ii_arb_eig_grad]
+    type = 'CSVDiff'
+    input = 'interaction_integral_2d_eig_grad.i'
+    csvdiff = 'interaction_integral_2d_eig_grad_out.csv'
+    requirement = 'The interaction integral shall account for the contributions of the gradients of arbitrary eigenstrains in 2D'
+    allow_test_objects = true
+    issues = '#18804'
+  [../]
+  [./test_ii_arb_eig_grad_err_jint]
+    prereq = test_ii_arb_eig_grad
+    type = 'RunException'
+    input = 'interaction_integral_2d_eig_grad.i'
+    cli_args = "DomainIntegral/integrals='JIntegral InteractionIntegralKI'"
+    expect_err = "'eigenstrain_gradient' cannot be specified when the computed integrals include JIntegral, CIntegral, or KFromJIntegral"
+    requirement = 'The DomainIntegralAction shall generate an error if a user specifies the eigenstrain gradient and also request the J integral'
+    allow_test_objects = true
+    issues = '#18804'
+  [../]
+  [./test_ii_arb_eig_grad_err_temp]
+    prereq = test_ii_arb_eig_grad_err_jint
+    type = 'RunException'
+    input = 'interaction_integral_2d_eig_grad.i'
+    cli_args = "DomainIntegral/temperature=temp DomainIntegral/eigenstrain_names=thermal_expansion"
+    expect_err = "'eigenstrain_gradient' cannot be specified together with 'temperature' or 'eigenstrain_names'. These are for separate, mutually exclusive systems for including the effect of eigenstrains"
+    requirement = 'The DomainIntegralAction shall generate an error if a user specifies the temperature and also provides the eigenstrain_gradient'
+    allow_test_objects = true
+    issues = '#18804'
+  [../]
+  [./test_ii_bf]
+    type = 'CSVDiff'
+    input = 'interaction_integral_2d_bf.i'
+    csvdiff = 'interaction_integral_2d_bf_out.csv'
+    requirement = 'The interaction integral shall account for the contributions of body forces in 2D'
+    issues = '#18804'
+  [../]
+  [./test_ii_bf_err_jint]
+    prereq = test_ii_bf
+    type = 'RunException'
+    input = 'interaction_integral_2d_bf.i'
+    cli_args = "DomainIntegral/integrals='JIntegral InteractionIntegralKI'"
+    expect_err = "'body_force' cannot be specified when the computed integrals include JIntegral, CIntegral, or KFromJIntegral"
+    requirement = 'The DomainIntegralAction shall generate an error if a user specifies the body force and also request the J integral'
+    issues = '#18804'
+  [../]
   [./test_iithermal_rot]
     type = 'CSVDiff'
     input = 'interaction_integral_2d_rot.i'

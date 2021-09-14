@@ -29,7 +29,7 @@ MaterialVectorBodyForce::validParams()
 MaterialVectorBodyForce::MaterialVectorBodyForce(const InputParameters & parameters)
   : Kernel(parameters),
     _component(libMesh::invalid_uint),
-    _force_density(getMaterialProperty<RealVectorValue>("force_density")),
+    _body_force(getMaterialProperty<RealVectorValue>("body_force")),
     _function(getFunction("function")),
     _alpha(getParam<Real>("hht_alpha"))
 {
@@ -46,5 +46,5 @@ Real
 MaterialVectorBodyForce::computeQpResidual()
 {
   Real factor = _function.value(_t + _alpha * _dt, _q_point[_qp]);
-  return _force_density[_qp](_component) * _test[_i][_qp] * factor;
+  return -_body_force[_qp](_component) * _test[_i][_qp] * factor;
 }

@@ -1,21 +1,8 @@
-#This problem from [Wilson 1979] tests the thermal strain term in the
-#interaction integral
-#
-#theta_e = 10 degrees C; a = 252; E = 207000; nu = 0.3; alpha = 1.35e-5
-#
-#With uniform_refine = 3, KI converges to
-#KI = 5.602461e+02 (interaction integral)
-#KI = 5.655005e+02 (J-integral)
-#
-#Both are in good agreement with [Shih 1986]:
-#average_value = 0.4857 = KI / (sigma_theta * sqrt(pi * a))
-#sigma_theta = E * alpha * theta_e / (1 - nu)
-# = 207000 * 1.35e-5 * 10 / (1 - 0.3) = 39.9214
-#KI = average_value * sigma_theta * sqrt(pi * a) = 5.656e+02
-#
-#References:
-#W.K. Wilson, I.-W. Yu, Int J Fract 15 (1979) 377-387
-#C.F. Shih, B. Moran, T. Nakamura, Int J Fract 30 (1986) 79-102
+#This is a regression test that exercises the option to include
+#the effects of the body force in the interaction integral. This
+#uses the same basic model as the other cases in this directory.
+#This is a placeholder until a suitable problem with an analytical
+#solution can be identified.
 
 [GlobalParams]
   displacements = 'disp_x disp_y'
@@ -28,26 +15,8 @@
 #  uniform_refine = 3
 []
 
-[AuxVariables]
-  [SED]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [temp]
-    order = FIRST
-    family = LAGRANGE
-  []
-[]
-
-[Functions]
-  [tempfunc]
-    type = ParsedFunction
-    value = 10.0*(2*x/504)
-  []
-[]
-
 [DomainIntegral]
-  integrals = 'KFromJIntegral InteractionIntegralKI'
+  integrals = 'InteractionIntegralKI'
   boundary = 800
   crack_direction_method = CrackDirectionVector
   crack_direction_vector = '1 0 0'
@@ -62,32 +31,18 @@
   block = 1
   youngs_modulus = 207000
   poissons_ratio = 0.3
-  temperature = temp
-  eigenstrain_names = thermal_expansion
+  body_force = body_force
 []
 
-[Modules/TensorMechanics/Master]
-  [all]
+[Modules/TensorMechanics]
+  [Master/all]
     strain = FINITE
     add_variables = true
     generate_output = 'stress_xx stress_yy stress_zz vonmises_stress'
     planar_formulation = PLANE_STRAIN
-    eigenstrain_names = thermal_expansion
   []
-[]
-
-[AuxKernels]
-  [SED]
-    type = MaterialRealAux
-    variable = SED
-    property = strain_energy_density
-    execute_on = timestep_end
-  []
-  [tempfuncaux]
-    type = FunctionAux
-    variable = temp
-    function = tempfunc
-    block = 1
+  [MaterialVectorBodyForce/all]
+    body_force = body_force
   []
 []
 
@@ -107,7 +62,7 @@
   [no_x1]
     type = DirichletBC
     variable = disp_x
-    boundary = 900
+    boundary = 700
     value = 0.0
   []
 []
@@ -121,14 +76,13 @@
   [elastic_stress]
     type = ComputeFiniteStrainElasticStress
   []
-  [thermal_expansion_strain]
-    type = ComputeThermalExpansionEigenstrain
-    stress_free_temperature = 0.0
-    thermal_expansion_coeff = 1.35e-5
-    temperature = temp
-    eigenstrain_name = thermal_expansion
+  [body_force]
+    type = GenericConstantVectorMaterial
+    prop_names = 'body_force'
+    prop_values = '0.1 0.1 0.0'
   []
 []
+
 
 [Executioner]
   type = Transient
@@ -152,7 +106,6 @@
 
    end_time = 1
    num_steps = 1
-
 []
 
 [Outputs]
