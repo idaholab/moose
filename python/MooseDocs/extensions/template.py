@@ -21,6 +21,7 @@ from ..tree import tokens
 
 LOG = logging.getLogger(__name__)
 
+TemplateContent = tokens.newToken('TemplateContent', kwargs=None)
 TemplateItem = tokens.newToken('TemplateItem', key='')
 TemplateField = tokens.newToken('TemplateField', key='', required=True)
 
@@ -100,12 +101,19 @@ class TemplateLoadCommand(command.CommandComponent):
         location = self.translator.findPage(settings['file'])
         page['dependencies'].add(location.uid)
 
-        kwargs = self.extension.getConfig(page, 'args')
-        kwargs.update(t_args)
+        # It is possible to have nested load functions. This ensures that the arguments passed at the
+        # top level over ride the ones lower down
+        if parent.name == 'TemplateContent':
+            kwargs = t_args
+            kwargs.update(parent['kwargs'])
+        else:
+            kwargs = self.extension.getConfig(page, 'args')
+            kwargs.update(t_args)
 
+        token = TemplateContent(parent, kwargs=kwargs)
         content = common.read(location.source)
         content = mooseutils.apply_template_arguments(content, **kwargs)
-        self.reader.tokenize(parent, content, page, line=info.line)
+        self.reader.tokenize(token, content, page, line=info.line)
         return parent
 
 class TemplateFieldCommand(command.CommandComponent):

@@ -354,6 +354,7 @@ transported within its intended operational context.
 
 ## Verification
 
+
 !template field key=verification
 Provide the verification approaches and methods planned to qualify the system or system element. The
 information items for verification are recommended to be given in a parallel manner with the
