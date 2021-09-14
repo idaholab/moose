@@ -119,10 +119,10 @@ TaggingInterface::useVectorTag(const TagName & tag_name)
 bool
 TaggingInterface::hasVectorTag(const TagName & tag_name) const
 {
-  if (!_subproblem.vectorTagExists(tag_name))
-    mooseError("Vector tag ", tag_name, " does not exist in system");
-
-  return _vector_tags.find(_subproblem.getVectorTagID(tag_name)) != _vector_tags.end();
+  if (_vector_tags.find(_subproblem.getVectorTagID(tag_name)) == _vector_tags.end())
+    return false;
+  else
+    return true;
 }
 
 void

@@ -232,21 +232,31 @@ NewmarkBetaContact::computeContactAccelerations()
 void
 NewmarkBetaContact::computeADTimeDerivatives(ADReal & /*ad_u_dot*/,
                                              const dof_id_type & /*dof*/,
-                                             ADReal & /*ad_u_dotdot*/) const
+                                             ADReal & /*ad_u_dotdot*/)
 {
-  mooseError("Let's take care of AD later");
+  // mooseError("Let's take care of AD later");
 
-  // const auto & u_old = _solution_old(dof);
-  // const auto & u_dot_old = (*_sys.solutionUDotOld())(dof);
-  // const auto & u_dotdot_old = (*_sys.solutionUDotDotOld())(dof);
+  //  const auto & u_old = _solution_old(dof);
+  //  const auto & u_dot_old = (*_sys.solutionUDotOld())(dof);
+  //  const auto & u_dotdot_old = (*_sys.solutionUDotDotOld())(dof);
 
   // Seeds ad_u_dotdot with _ad_dof_values and associated derivatives provided via ad_u_dot from
   // MooseVariableData
-  // ad_u_dotdot = ad_u_dot;
+  //  ad_u_dotdot = ad_u_dot;
 
-  //  computeTimeDerivativeHelper(
-  //      ad_u_dot, u_old, u_dot_old, ad_u_dotdot, u_dotdot_old, _u_dotdot_contact,
-  //      _u_dotdot_internal, _u_dotdot_internal_old);
+  //  computeTimeDerivativeHelper(ad_u_dot,
+  //                              _solution_old,
+  //                              u_dot_old,
+  //                              ad_u_dotdot,
+  //                              u_dotdot_old,
+  //                              *_u_dotdot_contact,
+  //                              *_u_dotdot_internal,
+  //                              *_u_dotdot_internal_old);
+
+  /*
+  computeTimeDerivativeHelper(
+      ad_u_dot, u_old, u_dot_old, ad_u_dotdot, u_dotdot_old, ad_u_dotdot, ad_u_dotdot, ad_u_dotdot);
+*/
 }
 
 void
@@ -261,6 +271,7 @@ NewmarkBetaContact::postResidual(NumericVector<Number> & residual)
 
   // Compute contact accelerations
   computeContactAccelerations();
+
   // compute _u_dotdot_contact and cache
   residual.close();
 }
