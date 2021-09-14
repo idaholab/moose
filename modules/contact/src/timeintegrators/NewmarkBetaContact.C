@@ -232,7 +232,7 @@ NewmarkBetaContact::computeContactAccelerations()
 void
 NewmarkBetaContact::computeADTimeDerivatives(ADReal & /*ad_u_dot*/,
                                              const dof_id_type & /*dof*/,
-                                             ADReal & /*ad_u_dotdot*/)
+                                             ADReal & /*ad_u_dotdot*/) const
 {
   // mooseError("Let's take care of AD later");
 
@@ -269,8 +269,11 @@ NewmarkBetaContact::postResidual(NumericVector<Number> & residual)
   // contact residuals for displacement variables
   residual.add(1.0 / _implicit_u_fraction, *_contact_residual);
 
-  // Compute contact accelerations
+  // Compute contact accelerations. We're about to compute a Jacobian so we need to make sure we
+  // toggle our AD system on, otherwise bad things will happen like too many derivative insertions
+  ADReal::do_derivatives = true;
   computeContactAccelerations();
+  ADReal::do_derivatives = false;
 
   // compute _u_dotdot_contact and cache
   residual.close();

@@ -28,7 +28,7 @@ public:
   void init() override;
   void postStep() override;
   void computeTimeDerivatives() override;
-  void computeADTimeDerivatives(ADReal &, const dof_id_type &, ADReal &);
+  void computeADTimeDerivatives(ADReal &, const dof_id_type &, ADReal &) const override;
 
 private:
   template <typename T>
