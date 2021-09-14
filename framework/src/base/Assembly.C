@@ -3605,7 +3605,7 @@ Assembly::cacheJacobianBlock(DenseMatrix<Number> & jac_block,
     return;
   if (jac_block.n() == 0 || jac_block.m() == 0)
     return;
-  if (!_sys.hasMatrix(tag))
+  if (!_sys.hasMatrix(tag) || !_sys.matrixTagActive(tag))
     return;
 
   auto & scaling_factor = ivar.arrayScalingFactor();
@@ -3665,7 +3665,7 @@ Assembly::cacheJacobianBlockNonzero(DenseMatrix<Number> & jac_block,
     return;
   if (jac_block.n() == 0 || jac_block.m() == 0)
     return;
-  if (!_sys.hasMatrix(tag))
+  if (!_sys.hasMatrix(tag) || !_sys.matrixTagActive(tag))
     return;
 
   auto & scaling_factor = ivar.arrayScalingFactor();
@@ -3720,7 +3720,7 @@ Assembly::cacheJacobianBlock(DenseMatrix<Number> & jac_block,
 {
   // Only cache data when the matrix exists
   if ((idof_indices.size() > 0) && (jdof_indices.size() > 0) && jac_block.n() && jac_block.m() &&
-      _sys.hasMatrix(tag))
+      _sys.hasMatrix(tag) && _sys.matrixTagActive(tag))
   {
     std::vector<dof_id_type> di(idof_indices);
     std::vector<dof_id_type> dj(jdof_indices);
@@ -3799,7 +3799,7 @@ Assembly::addCachedJacobian()
   }
 
   for (MooseIndex(_cached_jacobian_rows) i = 0; i < _cached_jacobian_rows.size(); i++)
-    if (_sys.hasMatrix(i))
+    if (_sys.hasMatrix(i) && _sys.matrixTagActive(i))
       for (MooseIndex(_cached_jacobian_rows[i]) j = 0; j < _cached_jacobian_rows[i].size(); j++)
         _sys.getMatrix(i).add(_cached_jacobian_rows[i][j],
                               _cached_jacobian_cols[i][j],
@@ -3807,7 +3807,7 @@ Assembly::addCachedJacobian()
 
   for (MooseIndex(_cached_jacobian_rows) i = 0; i < _cached_jacobian_rows.size(); i++)
   {
-    if (!_sys.hasMatrix(i))
+    if (!_sys.hasMatrix(i) || !_sys.matrixTagActive(i))
       continue;
 
     if (_max_cached_jacobians < _cached_jacobian_values[i].size())
@@ -3832,7 +3832,7 @@ Assembly::addJacobianCoupledVarPair(const MooseVariableBase & ivar, const MooseV
   auto i = ivar.number();
   auto j = jvar.number();
   for (MooseIndex(_jacobian_block_used) tag = 0; tag < _jacobian_block_used.size(); tag++)
-    if (jacobianBlockUsed(tag, i, j) && _sys.hasMatrix(tag))
+    if (jacobianBlockUsed(tag, i, j) && _sys.hasMatrix(tag) && _sys.matrixTagActive(tag))
       addJacobianBlock(_sys.getMatrix(tag),
                        jacobianBlock(i, j, tag),
                        ivar,
@@ -3866,7 +3866,7 @@ Assembly::addJacobianNonlocal()
     for (MooseIndex(_jacobian_block_nonlocal_used) tag = 0;
          tag < _jacobian_block_nonlocal_used.size();
          tag++)
-      if (jacobianBlockNonlocalUsed(tag, i, j) && _sys.hasMatrix(tag))
+      if (jacobianBlockNonlocalUsed(tag, i, j) && _sys.hasMatrix(tag) && _sys.matrixTagActive(tag))
         addJacobianBlock(_sys.getMatrix(tag),
                          jacobianBlockNonlocal(i, j, tag),
                          *ivar,
@@ -3888,7 +3888,7 @@ Assembly::addJacobianNeighbor()
     for (MooseIndex(_jacobian_block_neighbor_used) tag = 0;
          tag < _jacobian_block_neighbor_used.size();
          tag++)
-      if (jacobianBlockNeighborUsed(tag, i, j) && _sys.hasMatrix(tag))
+      if (jacobianBlockNeighborUsed(tag, i, j) && _sys.hasMatrix(tag) && _sys.matrixTagActive(tag))
       {
         addJacobianBlock(_sys.getMatrix(tag),
                          jacobianBlockNeighbor(Moose::ElementNeighbor, i, j, tag),
@@ -3925,7 +3925,7 @@ Assembly::addJacobianMortar()
     auto j = jvar->number();
     for (MooseIndex(_jacobian_block_lower_used) tag = 0; tag < _jacobian_block_lower_used.size();
          tag++)
-      if (jacobianBlockLowerUsed(tag, i, j) && _sys.hasMatrix(tag))
+      if (jacobianBlockLowerUsed(tag, i, j) && _sys.hasMatrix(tag) && _sys.matrixTagActive(tag))
       {
         addJacobianBlock(_sys.getMatrix(tag),
                          jacobianBlockMortar(Moose::LowerLower, i, j, tag),
@@ -4004,7 +4004,7 @@ Assembly::addJacobianNeighborLowerD()
     auto j = jvar->number();
     for (MooseIndex(_jacobian_block_lower_used) tag = 0; tag < _jacobian_block_lower_used.size();
          tag++)
-      if (jacobianBlockLowerUsed(tag, i, j) && _sys.hasMatrix(tag))
+      if (jacobianBlockLowerUsed(tag, i, j) && _sys.hasMatrix(tag) && _sys.matrixTagActive(tag))
       {
         addJacobianBlock(_sys.getMatrix(tag),
                          jacobianBlockMortar(Moose::LowerLower, i, j, tag),
@@ -4045,7 +4045,7 @@ Assembly::addJacobianNeighborLowerD()
     for (MooseIndex(_jacobian_block_neighbor_used) tag = 0;
          tag < _jacobian_block_neighbor_used.size();
          tag++)
-      if (jacobianBlockNeighborUsed(tag, i, j) && _sys.hasMatrix(tag))
+      if (jacobianBlockNeighborUsed(tag, i, j) && _sys.hasMatrix(tag) && _sys.matrixTagActive(tag))
       {
         addJacobianBlock(_sys.getMatrix(tag),
                          jacobianBlockNeighbor(Moose::ElementNeighbor, i, j, tag),
@@ -4082,7 +4082,7 @@ Assembly::addJacobianLowerD()
     auto j = jvar->number();
     for (MooseIndex(_jacobian_block_lower_used) tag = 0; tag < _jacobian_block_lower_used.size();
          tag++)
-      if (jacobianBlockLowerUsed(tag, i, j) && _sys.hasMatrix(tag))
+      if (jacobianBlockLowerUsed(tag, i, j) && _sys.hasMatrix(tag) && _sys.matrixTagActive(tag))
       {
         addJacobianBlock(_sys.getMatrix(tag),
                          jacobianBlockMortar(Moose::LowerLower, i, j, tag),
@@ -4128,7 +4128,7 @@ Assembly::cacheJacobianCoupledVarPair(const MooseVariableBase & ivar,
   auto i = ivar.number();
   auto j = jvar.number();
   for (MooseIndex(_jacobian_block_used) tag = 0; tag < _jacobian_block_used.size(); tag++)
-    if (jacobianBlockUsed(tag, i, j) && _sys.hasMatrix(tag))
+    if (jacobianBlockUsed(tag, i, j) && _sys.hasMatrix(tag) && _sys.matrixTagActive(tag))
       cacheJacobianBlock(
           jacobianBlock(i, j, tag), ivar, jvar, ivar.dofIndices(), jvar.dofIndices(), tag);
 }
@@ -4145,7 +4145,7 @@ Assembly::cacheJacobianNonlocal()
     for (MooseIndex(_jacobian_block_nonlocal_used) tag = 0;
          tag < _jacobian_block_nonlocal_used.size();
          tag++)
-      if (jacobianBlockNonlocalUsed(tag, i, j) && _sys.hasMatrix(tag))
+      if (jacobianBlockNonlocalUsed(tag, i, j) && _sys.hasMatrix(tag) && _sys.matrixTagActive(tag))
         cacheJacobianBlockNonzero(jacobianBlockNonlocal(i, j, tag),
                                   *ivar,
                                   *jvar,
@@ -4168,7 +4168,7 @@ Assembly::cacheJacobianNeighbor()
     for (MooseIndex(_jacobian_block_neighbor_used) tag = 0;
          tag < _jacobian_block_neighbor_used.size();
          tag++)
-      if (jacobianBlockNeighborUsed(tag, i, j) && _sys.hasMatrix(tag))
+      if (jacobianBlockNeighborUsed(tag, i, j) && _sys.hasMatrix(tag) && _sys.matrixTagActive(tag))
       {
         cacheJacobianBlock(jacobianBlockNeighbor(Moose::ElementNeighbor, i, j, tag),
                            *ivar,
@@ -4203,7 +4203,7 @@ Assembly::cacheJacobianMortar()
     auto j = jvar->number();
     for (MooseIndex(_jacobian_block_lower_used) tag = 0; tag < _jacobian_block_lower_used.size();
          tag++)
-      if (jacobianBlockLowerUsed(tag, i, j) && _sys.hasMatrix(tag))
+      if (jacobianBlockLowerUsed(tag, i, j) && _sys.hasMatrix(tag) && _sys.matrixTagActive(tag))
       {
         cacheJacobianBlock(jacobianBlockMortar(Moose::LowerLower, i, j, tag),
                            *ivar,
@@ -4484,7 +4484,7 @@ Assembly::cacheJacobian(numeric_index_type i,
                         const std::set<TagID> & tags)
 {
   for (auto tag : tags)
-    if (_sys.hasMatrix(tag))
+    if (_sys.hasMatrix(tag) && _sys.matrixTagActive(tag))
       cacheJacobian(i, j, value, tag);
 }
 
@@ -4514,7 +4514,7 @@ void
 Assembly::setCachedJacobian()
 {
   for (MooseIndex(_cached_jacobian_rows) tag = 0; tag < _cached_jacobian_rows.size(); tag++)
-    if (_sys.hasMatrix(tag))
+    if (_sys.hasMatrix(tag) && _sys.matrixTagActive(tag))
     {
       // First zero the rows (including the diagonals) to prepare for
       // setting the cached values.
@@ -4542,7 +4542,7 @@ void
 Assembly::zeroCachedJacobian()
 {
   for (MooseIndex(_cached_jacobian_rows) tag = 0; tag < _cached_jacobian_rows.size(); tag++)
-    if (_sys.hasMatrix(tag))
+    if (_sys.hasMatrix(tag) && _sys.matrixTagActive(tag))
       _sys.getMatrix(tag).zero_rows(_cached_jacobian_rows[tag], 0.0);
 
   clearCachedJacobian();

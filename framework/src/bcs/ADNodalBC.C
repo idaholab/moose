@@ -99,7 +99,7 @@ ADNodalBCTempl<T>::computeJacobian()
 
   // Cache the user's computeQpJacobian() value for later use.
   for (auto tag : _matrix_tags)
-    if (_sys.hasMatrix(tag))
+    if (_sys.hasMatrix(tag) && _sys.matrixTagActive(tag))
       for (std::size_t i = 0; i < cached_rows.size(); ++i)
         if (_set_components[i])
         {
@@ -143,7 +143,7 @@ ADNodalBCTempl<T>::computeOffDiagJacobian(const unsigned int jvar_num)
 
     // Cache the user's computeQpJacobian() value for later use.
     for (auto tag : _matrix_tags)
-      if (_sys.hasMatrix(tag))
+      if (_sys.hasMatrix(tag) && _sys.matrixTagActive(tag))
         for (std::size_t i = 0; i < cached_rows.size(); ++i)
           if (_set_components[i])
           {
@@ -191,7 +191,7 @@ ADNodalBCTempl<T>::computeOffDiagJacobianScalar(unsigned int jvar)
 
   // Cache the user's computeQpJacobian() value for later use.
   for (auto tag : _matrix_tags)
-    if (_sys.hasMatrix(tag))
+    if (_sys.hasMatrix(tag) && _sys.matrixTagActive(tag))
       for (std::size_t i = 0; i < cached_rows.size(); ++i)
         if (_set_components[i])
         {

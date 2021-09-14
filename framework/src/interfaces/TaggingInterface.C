@@ -135,6 +135,15 @@ TaggingInterface::eraseVectorTag(const TagName & tag_name)
 }
 
 void
+TaggingInterface::eraseMatrixTag(const TagName & tag_name)
+{
+  if (!_subproblem.matrixTagExists(tag_name))
+    mooseError("Matrix tag ", tag_name, " does not exist in system");
+
+  _matrix_tags.erase(_subproblem.getMatrixTagID(tag_name));
+}
+
+void
 TaggingInterface::useMatrixTag(const TagName & tag_name)
 {
   if (!_subproblem.matrixTagExists(tag_name))

@@ -39,6 +39,7 @@ public:
   bool hasVectorTag(const TagName & tag_name) const;
   void useVectorTag(const TagName & tag_name);
   void eraseVectorTag(const TagName & tag_name);
+  void eraseMatrixTag(const TagName & tag_name);
 
   void useMatrixTag(const TagName & tag_name);
 

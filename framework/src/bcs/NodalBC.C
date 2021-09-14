@@ -111,7 +111,7 @@ NodalBC::computeJacobian()
 
     // Cache the user's computeQpJacobian() value for later use.
     for (auto tag : _matrix_tags)
-      if (_sys.hasMatrix(tag))
+      if (_sys.hasMatrix(tag) && _sys.matrixTagActive(tag))
         _fe_problem.assembly(0).cacheJacobian(cached_row, cached_row, cached_val, tag);
 
     if (_has_diag_save_in)
@@ -144,7 +144,7 @@ NodalBC::computeOffDiagJacobian(const unsigned int jvar_num)
 
     // Cache the user's computeQpJacobian() value for later use.
     for (auto tag : _matrix_tags)
-      if (_sys.hasMatrix(tag))
+      if (_sys.hasMatrix(tag) && _sys.matrixTagActive(tag))
         _fe_problem.assembly(0).cacheJacobian(cached_row, cached_col, cached_val, tag);
   }
 }

@@ -14,6 +14,12 @@
 
 #include "libmesh/numeric_vector.h"
 
+namespace libMesh
+{
+template <typename>
+class LumpedMassMatrix;
+}
+
 class NewmarkBetaContact;
 /**
  * Contact-implicit Newmark scheme
@@ -41,11 +47,10 @@ private:
   const NumericVector<Number> * _noncontact_residual;
   /// Tag for computing the mass matrix
   const TagID _system_time_tag;
-  /// Diagonal of the lumped mass matrix (and its inversion)
-  NumericVector<Real> * _mass_matrix_diag;
-
-  /// Vector of 1's to help with creating the lumped mass matrix
-  NumericVector<Real> * _ones;
+  /// the lumped mass matrix
+  std::unique_ptr<LumpedMassMatrix<Number>> _mass_matrix;
+  /// a work vector that will correspond to the lumped mass matrix
+  std::unique_ptr<NumericVector<Number>> _mass_matrix_diag;
 
   /// The fraction of the current noncontact forces to use in the current residual evaluation. The
   /// remaining fraction will come from the previous time-steps noncontact forces

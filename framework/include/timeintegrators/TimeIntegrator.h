@@ -221,4 +221,7 @@ protected:
 
   /// Whether the time integrator is the Newmark-beta contact time integrator
   bool _is_newmark_beta_contact;
+
+  /// Whether this is the nonlinear system time integrator
+  const bool _is_nl_ti;
 };
