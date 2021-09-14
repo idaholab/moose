@@ -1,5 +1,10 @@
 # {{project}} Requirements Traceability Matrix
 
+*This template follows [!ac](INL) template TEM-214, "IT System Requirements Traceability Matrix."*
+
+!template field key=pre-intro required=False
+
+
 ## Introduction id=introduction
 
 !template! field key=minimum_requirements
@@ -107,3 +112,7 @@ Include the tracebility matrix for performance requirements.
 
 !template field key=system-interfaces-requirements
 Include the tracebility matrix for system interface requirements.
+
+## References id=references
+
+!bibtex bibliography title=None
