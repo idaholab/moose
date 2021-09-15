@@ -32,9 +32,21 @@ protected:
   /// The sampler that generated the samples that produced results for the _results_vectors
   const SobolSampler & _sobol_sampler;
 
+  // CI levels to be computed
+  const std::vector<Real> & _ci_levels;
+
+  // Number of CI replicates to use in Bootstrap methods
+  const unsigned int & _ci_replicates;
+
+  // Random seed for producing CI replicates
+  const unsigned int & _ci_seed;
+
   /// Result vectors from StocasticResults object
   std::vector<std::pair<const VectorPostprocessorValue *, bool>> _result_vectors;
 
   /// Vectors computed by this object
   std::vector<VectorPostprocessorValue *> _sobol_stat_vectors;
+
+  /// Confidence interval vectors computed by this object
+  std::vector<std::vector<VectorPostprocessorValue *>> _sobol_ci_vectors;
 };

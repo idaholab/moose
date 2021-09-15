@@ -244,4 +244,35 @@ inplaceSort(std::vector<std::vector<T>> & values)
   }
 }
 
+/**
+ * Reshape a vector into matrix-like vector of vectors
+ *
+ * @param vec Input vector to reshape
+ * @param n Leading dimension size,
+            number of columns if row-major, number of rows if column-major
+ * @param row_major True if @param vec is in row-major format
+ *                  see https://en.wikipedia.org/wiki/Row-_and_column-major_order
+ * @return vector of vectors representing reshaped vector ([row][col])
+ */
+template <typename T>
+std::vector<std::vector<T>>
+reshapeVector(const std::vector<T> & vec, std::size_t n, bool row_major)
+{
+  const auto nelem = vec.size();
+  const auto nrow = row_major ? nelem / n : n;
+  const auto ncol = row_major ? n : nelem / n;
+  if (nelem % n != 0)
+    ::mooseError(
+        "Reshaping dimensions (", nrow, ", ", ncol, ") does not match vector size (", nelem, ").");
+
+  std::vector<std::vector<T>> mat(nrow, std::vector<T>(ncol));
+  for (const auto & i : make_range(nrow))
+    for (const auto & j : make_range(ncol))
+    {
+      const auto k = row_major ? (i * ncol + j) : (j * nrow + i);
+      mat[i][j] = vec[k];
+    }
+  return mat;
+}
+
 } // StochasticTools namespace

@@ -44,10 +44,6 @@ template <typename InType, typename OutType>
 std::vector<OutType>
 BiasCorrectedAccelerated<InType, OutType>::compute(const InType & data, const bool is_distributed)
 {
-  if (is_distributed)
-    mooseError("Due to the computational demands, the BiasCorrectedAccelerated does not work with "
-               "distributed data.");
-
   // Bootstrap estimates
   const std::vector<OutType> values = this->computeBootstrapEstimates(data, is_distributed);
 
@@ -80,36 +76,47 @@ OutType
 BiasCorrectedAccelerated<InType, OutType>::acceleration(const InType & data,
                                                         const bool is_distributed)
 {
-  // Jackknife statistics
-  std::vector<OutType> theta_i(data.size());
+  const std::size_t local_size = data.size();
+  std::vector<std::size_t> local_sizes = {local_size};
+  if (is_distributed)
+    this->_communicator.allgather(local_sizes);
+  const std::size_t count = std::accumulate(local_sizes.begin(), local_sizes.end(), 0);
+  const processor_id_type rank = is_distributed ? this->processor_id() : 0;
 
-  // Total number of data entries
-  const std::size_t count = data.size();
+  // Jackknife statistics
+  std::vector<OutType> theta_i(local_size);
 
   // Compute jackknife estimates, Ch. 11, Eq. 11.2, p. 141
-  InType data_not_i(data.size() - 1);
-  for (std::size_t i = 0; i < count; ++i)
-  {
-    std::copy(data.begin(), data.begin() + i, data_not_i.begin());
-    std::copy(data.begin() + i + 1, data.end(), data_not_i.begin() + i);
-    theta_i[i] = this->_calc.compute(data_not_i, is_distributed);
-  }
+  for (processor_id_type r = 0; r < local_sizes.size(); ++r)
+    for (std::size_t i = 0; i < local_sizes[r]; ++i)
+    {
+      this->_calc.initializeCalculator();
+      for (std::size_t il = 0; il < local_size; ++il)
+        if (i != il || r != rank)
+          this->_calc.updateCalculator(data[il]);
+      this->_calc.finalizeCalculator(is_distributed);
+      if (r == rank)
+        theta_i[i] = this->_calc.getValue();
+    }
 
   // Compute jackknife sum, Ch. 11, Eq. 11.4, p. 141
   OutType theta_dot = std::accumulate(theta_i.begin(), theta_i.end(), OutType());
+  if (is_distributed)
+    this->_communicator.sum(theta_dot);
   theta_dot /= count;
 
   // Acceleration, Ch. 14, Eq. 14.15, p. 185
-  OutType numerator = OutType();
-  OutType denomenator = OutType();
+  std::vector<OutType> num_den(2);
   for (const auto & jk : theta_i)
   {
-    numerator += MathUtils::pow(theta_dot - jk, 3);
-    denomenator += MathUtils::pow(theta_dot - jk, 2);
+    num_den[0] += MathUtils::pow(theta_dot - jk, 3);
+    num_den[1] += MathUtils::pow(theta_dot - jk, 2);
   }
+  if (is_distributed)
+    this->_communicator.sum(num_den);
 
-  mooseAssert(denomenator != OutType(), "The acceleration denomenator must not be zero.");
-  return numerator / (6 * std::pow(denomenator, 3. / 2.));
+  mooseAssert(num_den[1] != OutType(), "The acceleration denomenator must not be zero.");
+  return num_den[0] / (6 * std::pow(num_den[1], 3. / 2.));
 }
 
 template <typename InType, typename OutType>

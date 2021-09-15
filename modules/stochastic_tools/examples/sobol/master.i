@@ -63,37 +63,37 @@
     to_control = 'stochastic'
   []
   [results]
-    type = SamplerPostprocessorTransfer
+    type = SamplerReporterTransfer
     multi_app = runner
     sampler = sobol
-    to_vector_postprocessor = results
-    from_postprocessor = 'T_avg q_left'
+    stochastic_reporter = results
+    from_reporter = 'T_avg/value q_left/value'
   []
 []
 
-[VectorPostprocessors]
+[Reporters]
   [results]
-    type = StochasticResults
-  []
-  [samples]
-    type = SamplerData
-    sampler = sobol
+    type = StochasticReporter
+    outputs = none
   []
   [stats]
-    type = Statistics
-    vectorpostprocessors = results
+    type = StatisticsReporter
+    reporters = 'results/results:T_avg:value results/results:q_left:value'
     compute = 'mean'
     ci_method = 'percentile'
-    ci_levels = '0.05'
+    ci_levels = '0.05 0.95'
   []
   [sobol]
-    type = SobolStatistics
+    type = SobolReporter
     sampler = sobol
-    results = results
+    reporters = 'results/results:T_avg:value results/results:q_left:value'
+    ci_levels = '0.05 0.95'
   []
 []
 
 [Outputs]
-  csv = true
   execute_on = 'FINAL'
+  [out]
+    type = JSON
+  []
 []

@@ -58,8 +58,21 @@ SamplerTransientMultiApp::SamplerTransientMultiApp(const InputParameters & param
                "', currently is not implemented for the SamplerTransientMultiApp, the available "
                "options are 'normal' or 'batch-restore'.");
 
-  init(_sampler.getNumberOfRows(), _mode == StochasticTools::MultiAppMode::BATCH_RESTORE);
-  checkRankConfig();
+  if (getParam<unsigned int>("min_procs_per_app") !=
+          _sampler.getParam<unsigned int>("min_procs_per_row") ||
+      getParam<unsigned int>("max_procs_per_app") !=
+          _sampler.getParam<unsigned int>("max_procs_per_row"))
+    paramError("sampler",
+               "Sampler and multiapp communicator configuration inconsistent. Please ensure that "
+               "'MultiApps/",
+               name(),
+               "/min(max)_procs_per_app' and 'Samplers/",
+               _sampler.name(),
+               "/min(max)_procs_per_row' are the same.");
+
+  init(_sampler.getNumberOfRows(),
+       _sampler.getRankConfig(_mode == StochasticTools::MultiAppMode::BATCH_RESET ||
+                              _mode == StochasticTools::MultiAppMode::BATCH_RESTORE));
 }
 
 void
@@ -168,26 +181,6 @@ SamplerTransientMultiApp::solveStepBatch(Real dt, Real target_time, bool auto_ad
     transfer->finalizeFromMultiapp();
 
   return last_solve_converged;
-}
-
-void
-SamplerTransientMultiApp::checkRankConfig()
-{
-  // Logic:
-  //  - If the processor is not root, then the sampler shouldn't have rows
-  //  - Check number of sims versus number of local rows
-  //  - Check first sim versus first row
-  if ((!_rank_config.is_first_local_rank && _sampler.getNumberOfLocalRows() > 0) ||
-      (_rank_config.is_first_local_rank &&
-       _rank_config.num_local_sims != _sampler.getNumberOfLocalRows()) ||
-      (_rank_config.first_local_sim_index != _sampler.getLocalRowBegin()))
-    paramError("sampler",
-               "Sampler and multiapp communicator configuration inconsistent. Please ensure that "
-               "'MultiApps/",
-               name(),
-               "/min_procs_per_app' and 'Samplers/",
-               _sampler.name(),
-               "/min_procs_per_row' are the same.");
 }
 
 std::vector<std::shared_ptr<StochasticToolsTransfer>>

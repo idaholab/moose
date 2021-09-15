@@ -8,97 +8,73 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 #include "SobolCalculators.h"
 
-#include "libmesh/dense_matrix.h"
-#include "libmesh/parallel.h"
-
 namespace StochasticTools
 {
-SobolCalculator::SobolCalculator(const ParallelObject & other,
-                                 const std::string & name,
-                                 std::size_t n,
-                                 bool resample)
-  : Calculator<std::vector<Real>, std::vector<Real>>(other, name),
-    _num_rows_per_matrix(n),
-    _resample(resample)
+template <typename InType, typename OutType>
+SobolCalculator<InType, OutType>::SobolCalculator(const ParallelObject & other,
+                                                  const std::string & name,
+                                                  bool resample)
+  : Calculator<std::vector<InType>, std::vector<OutType>>(other, name), _resample(resample)
 {
 }
 
+template <typename InType, typename OutType>
 void
-SobolCalculator::initialize()
+SobolCalculator<InType, OutType>::initialize()
 {
-  _data.clear();
+  _amat.resize(0, 0);
 }
 
+template <typename InType, typename OutType>
 void
-SobolCalculator::update(const Real & data)
+SobolCalculator<InType, OutType>::update(const InType & data)
 {
-  _data.push_back(data);
-}
-
-void
-SobolCalculator::finalize(bool is_distributed)
-{
-  if (is_distributed)
-    this->_communicator.gather(0, _data);
-
-  // Set local convience variable
-  const std::size_t n = _num_rows_per_matrix;
-
-  // The size of the A matrix
-  const std::size_t s = _resample ? 2 * n + 2 : n + 2;
-
-  // The number of replicates per matrix
-  const std::size_t K = _data.size() / s;
-
-  // These data structures correspond to the comments in the calculations of the various indices;
-  // they are useful keeping around for debugging since the names match up with literature.
-  /*
-  std::vector<Real> a_0(data.begin() + 0*K, data.begin() + 1*K);
-  std::vector<Real> a_K(data.begin() + (s-1)*K, data.begin() + s*K);
-  std::vector<std::vector<Real>> a_i(n);
-  std::vector<std::vector<Real>> a_ni(n);
-  for (std::size_t i = 0; i < n; ++i)
+  if (_amat.n() == 0)
   {
-    a_i[i] = std::vector<Real>(data.begin() + (i+1)*K, data.begin() + (i+2)*K);
-    a_ni[i] = std::vector<Real>(data.begin() + (i+n+1)*K, data.begin() + (i+n+2)*K);
+    _amat.resize(data.size(), data.size());
+    if (_amat.n() < 2 || (_resample && _amat.n() % 2 != 0))
+      mooseError("Size of input data is inconsistent with Sobol resampling scheme.");
   }
-  */
+  mooseAssert(_amat.n() == data.size(), "Size of data updating SobolCalculator has changed.");
 
-  // Compute the necessary dot products of result vectors
-  DenseMatrix<double> A(s, s);
-  if (processor_id() == 0 || !is_distributed)
-    for (std::size_t c = 0; c < A.n(); ++c)
-      for (std::size_t r = 0; r <= c; ++r)
-      {
-        const std::size_t row_offset = r * K;
-        const std::size_t col_offset = c * K;
-        A(r, c) = 1. / K *
-                  std::inner_product(_data.begin() + row_offset,
-                                     _data.begin() + row_offset + K,
-                                     _data.begin() + col_offset,
-                                     0.);
-      }
+  for (const auto & c : index_range(data))
+    for (const auto & r : make_range(c + 1))
+      _amat(r, c) += data[r] * data[c];
+}
+
+template <typename InType, typename OutType>
+void
+SobolCalculator<InType, OutType>::finalize(bool is_distributed)
+{
+  // The size of the A matrix
+  std::size_t s = _amat.n();
+
   if (is_distributed)
-    _communicator.broadcast(A.get_values(), 0, true);
+  {
+    this->_communicator.max(s);
+    if (_amat.n() == 0)
+      _amat.resize(s, s);
+    mooseAssert(_amat.n() == s, "Size of data updating SobolCalculator has changed.");
+    this->_communicator.sum(_amat.get_values());
+  }
+
+  // Number of independent parameters
+  const std::size_t n = (s - 2) / (_resample ? 2 : 1);
 
   // The data to output
-  DenseMatrix<Real> S(n, n);
-  std::vector<Real> ST(n);
+  DenseMatrix<OutType> S(n, n);
+  std::vector<OutType> ST(n);
 
   // First order
   {
-    // Real E = 1./K * std::inner_product(a_0.begin(), a_0.end(), a_K.begin(), 0.);
-    // Real V = // 1./K * std::inner_product(a_K.begin(), a_K.end(), a_K.begin(), 0.) - E;
-    Real E = A(0, s - 1);
-    Real V = A(s - 1, s - 1) - E;
+    auto E = _amat(0, s - 1);
+    auto V = _amat(s - 1, s - 1) - E;
     for (std::size_t i = 0; i < n; ++i)
     {
-      // Real U0 = 1./K * std::inner_product(a_i[i].begin(), a_i[i].end(), a_K.begin(), 0.);
-      Real U0 = A(i + 1, s - 1);
+      auto U0 = _amat(i + 1, s - 1);
       if (_resample)
       {
-        // Real U1 = // 1./K * std::inner_product(a_K.begin(), a_K.end(), a_ni[i].begin(), 0.);
-        Real U1 = A(0, i + n + 1);
+        auto U1 = _amat(0, i + n + 1);
         S(i, i) = (((U0 + U1) / 2) - E) / V;
       }
       else
@@ -108,18 +84,14 @@ SobolCalculator::finalize(bool is_distributed)
 
   // Total-effect
   {
-    // Real E = 1./K * std::inner_product(a_0.begin(), a_0.end(), a_K.begin(), 0.);
-    // Real V = 1./K * std::inner_product(a_0.begin(), a_0.end(), a_0.begin(), 0.) - E;
-    Real E = A(0, s - 1);
-    Real V = A(0, 0) - E;
+    auto E = _amat(0, s - 1);
+    auto V = _amat(0, 0) - E;
     for (std::size_t i = 0; i < n; ++i)
     {
-      // Real U0 =  1./K * std::inner_product(a_0.begin(), a_0.end(), a_i[i].begin(), 0.);
-      Real U0 = A(0, i + 1);
+      auto U0 = _amat(0, i + 1);
       if (_resample)
       {
-        // Real U1 = 1./K * std::inner_product(a_K.begin(), a_K.end(), a_ni[i].begin(), 0.);
-        Real U1 = A(i + n + 1, s - 1);
+        auto U1 = _amat(i + n + 1, s - 1);
         ST[i] = 1 - (((U0 + U1) / 2) - E) / V;
       }
       else
@@ -132,20 +104,14 @@ SobolCalculator::finalize(bool is_distributed)
   {
     for (std::size_t i = 0; i < n; ++i)
     {
-      // Real E = 1./K * std::inner_product(a_i[i].begin(), a_i[i].end(), a_ni[i].begin(), 0.);
-      Real E = A(i + 1, i + n + 1);
+      auto E = _amat(i + 1, i + n + 1);
       for (std::size_t j = 0; j < i; ++j)
       {
-        // clang-format off
-        // Real V = 1./K*std::inner_product(a_ni[i].begin(), a_ni[i].end(), a_ni[i].begin(), 0.) - E;
-        // Real U0 = 1./K * std::inner_product(a_i[i].begin(), a_i[i].end(), a_ni[j].begin(), 0.);
-        // Real U1 = 1./K * std::inner_product(a_i[j].begin(), a_i[j].end(), a_ni[i].begin(), 0.);
-        // clang-format on
-        Real V = A(j + n + 1, j + n + 1) - E;
-        Real U0 = A(i + 1, j + n + 1);
-        Real U1 = A(j + 1, i + n + 1);
-        Real Sc = (((U0 + U1) / 2) - E) / V;
-        Real S2 = Sc - S(i, i) - S(j, j);
+        auto V = _amat(j + n + 1, j + n + 1) - E;
+        auto U0 = _amat(i + 1, j + n + 1);
+        auto U1 = _amat(j + 1, i + n + 1);
+        auto Sc = (((U0 + U1) / 2) - E) / V;
+        auto S2 = Sc - S(i, i) - S(j, j);
         S(j, i) = S2;
       }
     }
@@ -175,6 +141,6 @@ SobolCalculator::finalize(bool is_distributed)
   }
 }
 
-template class Calculator<std::vector<Real>, std::vector<Real>>;
-
+template class SobolCalculator<std::vector<Real>, Real>;
+template class SobolCalculator<std::vector<std::vector<Real>>, std::vector<Real>>;
 } // namespace
