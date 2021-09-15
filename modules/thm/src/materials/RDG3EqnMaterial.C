@@ -7,7 +7,7 @@ InputParameters
 RDG3EqnMaterial::validParams()
 {
   InputParameters params = Material::validParams();
-  params += SlopeReconstruction1DInterface::validParams();
+  params += SlopeReconstruction1DInterface<false>::validParams();
 
   params.addClassDescription(
       "Reconstructed solution values for the 1-D, 1-phase, variable-area Euler equations");
@@ -29,7 +29,7 @@ RDG3EqnMaterial::validParams()
 
 RDG3EqnMaterial::RDG3EqnMaterial(const InputParameters & parameters)
   : Material(parameters),
-    SlopeReconstruction1DInterface(this),
+    SlopeReconstruction1DInterface<false>(this),
 
     _A_avg(coupledValue("A_elem")),
     _A_linear(coupledValue("A_linear")),

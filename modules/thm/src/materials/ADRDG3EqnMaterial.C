@@ -7,7 +7,7 @@ InputParameters
 ADRDG3EqnMaterial::validParams()
 {
   InputParameters params = Material::validParams();
-  params += SlopeReconstruction1DInterface::validParams();
+  params += SlopeReconstruction1DInterface<true>::validParams();
 
   params.addClassDescription(
       "Reconstructed solution values for the 1-D, 1-phase, variable-area Euler equations");
@@ -29,7 +29,7 @@ ADRDG3EqnMaterial::validParams()
 
 ADRDG3EqnMaterial::ADRDG3EqnMaterial(const InputParameters & parameters)
   : Material(parameters),
-    SlopeReconstruction1DInterface(this),
+    SlopeReconstruction1DInterface<true>(this),
 
     _A_avg(adCoupledValue("A_elem")),
     _A_linear(adCoupledValue("A_linear")),
@@ -85,17 +85,32 @@ ADRDG3EqnMaterial::computeQpProperties()
   _rhoEA[_qp] = _rhoA[_qp] * E;
 }
 
-std::vector<Real>
+std::vector<ADReal>
 ADRDG3EqnMaterial::computeElementPrimitiveVariables(const Elem * elem) const
 {
   // get the cell-average conserved variables
-  Real A, rhoA, rhouA, rhoEA;
+  ADReal A, rhoA, rhouA, rhoEA;
   if (_is_implicit)
   {
     A = _A_var->getElementalValue(elem);
     rhoA = _rhoA_var->getElementalValue(elem);
     rhouA = _rhouA_var->getElementalValue(elem);
     rhoEA = _rhoEA_var->getElementalValue(elem);
+
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+    std::vector<dof_id_type> dof_indices;
+
+    _rhoA_var->dofMap().dof_indices(elem, dof_indices, _rhoA_var->number());
+    Moose::derivInsert(rhoA.derivatives(), dof_indices[0], 1.0);
+
+    _rhouA_var->dofMap().dof_indices(elem, dof_indices, _rhouA_var->number());
+    Moose::derivInsert(rhouA.derivatives(), dof_indices[0], 1.0);
+
+    _rhoEA_var->dofMap().dof_indices(elem, dof_indices, _rhoEA_var->number());
+    Moose::derivInsert(rhoEA.derivatives(), dof_indices[0], 1.0);
+#else
+    mooseError("Only global AD indexing is supported.");
+#endif
   }
   else
   {
@@ -107,12 +122,12 @@ ADRDG3EqnMaterial::computeElementPrimitiveVariables(const Elem * elem) const
 
   // compute primitive variables
 
-  const Real rho = rhoA / A;
-  const Real vel = rhouA / rhoA;
-  const Real v = 1.0 / rho;
-  const Real e = rhoEA / rhoA - 0.5 * vel * vel;
+  const ADReal rho = rhoA / A;
+  const ADReal vel = rhouA / rhoA;
+  const ADReal v = 1.0 / rho;
+  const ADReal e = rhoEA / rhoA - 0.5 * vel * vel;
 
-  std::vector<Real> W(_n_slopes);
+  std::vector<ADReal> W(_n_slopes);
   W[PRESSURE] = _fp.p_from_v_e(v, e);
   W[VELOCITY] = vel;
   W[TEMPERATURE] = _fp.T_from_v_e(v, e);
