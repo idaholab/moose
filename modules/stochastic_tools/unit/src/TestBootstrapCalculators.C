@@ -94,12 +94,12 @@ TEST(BootstrapCalculators, Percentile)
   ParallelObject po(comm);
 
   // Construct mean and standard-deviation calculators
-  MultiMooseEnum calc("mean stddev", "mean stddev");
+  MultiMooseEnum calc("mean stddev", "mean stddev", true);
   auto mean_calc = makeCalculator(calc[0], po);
   auto std_calc = makeCalculator(calc[1], po);
 
   // Construct bootstrap calculators
-  MooseEnum boot("percentile", "percentile");
+  MooseEnum boot("percentile", "percentile", true);
   auto mean_boot_calc = makeBootstrapCalculator(boot, po, levels, replicates, 2613, *mean_calc);
   auto std_boot_calc = makeBootstrapCalculator(boot, po, levels, replicates, 2613, *std_calc);
 
@@ -138,12 +138,12 @@ TEST(BootstrapCalculators, BiasCorrectedAccelerated)
   ParallelObject po(comm);
 
   // Construct mean and standard-deviation calculators
-  MultiMooseEnum calc("mean stddev", "mean stddev");
+  MultiMooseEnum calc("mean stddev", "mean stddev", true);
   auto mean_calc = makeCalculator(calc[0], po);
   auto std_calc = makeCalculator(calc[1], po);
 
   // Construct bootstrap calculators
-  MooseEnum boot("bca", "bca");
+  MooseEnum boot("bca", "bca", true);
   auto mean_boot_calc = makeBootstrapCalculator(boot, po, levels, replicates, 2613, *mean_calc);
   auto std_boot_calc = makeBootstrapCalculator(boot, po, levels, replicates, 2613, *std_calc);
 
@@ -184,12 +184,12 @@ TEST(BootstrapCalculators, Percentile_Vec)
   ParallelObject po(comm);
 
   // Construct mean and standard-deviation calculators
-  MultiMooseEnum calc("mean stddev", "mean stddev");
+  MultiMooseEnum calc("mean stddev", "mean stddev", true);
   auto mean_calc = makeCalculator<std::vector<std::vector<Real>>, std::vector<Real>>(calc[0], po);
   auto std_calc = makeCalculator<std::vector<std::vector<Real>>, std::vector<Real>>(calc[1], po);
 
   // Construct bootstrap calculators
-  MooseEnum boot("percentile", "percentile");
+  MooseEnum boot("percentile", "percentile", true);
   auto mean_boot_calc = makeBootstrapCalculator<std::vector<std::vector<Real>>, std::vector<Real>>(
       boot, po, levels, replicates, 2613, *mean_calc);
   auto std_boot_calc = makeBootstrapCalculator<std::vector<std::vector<Real>>, std::vector<Real>>(
@@ -235,12 +235,12 @@ TEST(BootstrapCalculators, BiasCorrectedAccelerated_Vec)
   ParallelObject po(comm);
 
   // Construct mean and standard-deviation calculators
-  MultiMooseEnum calc("mean stddev", "mean stddev");
+  MultiMooseEnum calc("mean stddev", "mean stddev", true);
   auto mean_calc = makeCalculator<std::vector<std::vector<Real>>, std::vector<Real>>(calc[0], po);
   auto std_calc = makeCalculator<std::vector<std::vector<Real>>, std::vector<Real>>(calc[1], po);
 
   // Construct bootstrap calculators
-  MooseEnum boot("bca", "bca");
+  MooseEnum boot("bca", "bca", true);
   auto mean_boot_calc = makeBootstrapCalculator<std::vector<std::vector<Real>>, std::vector<Real>>(
       boot, po, levels, replicates, 2613, *mean_calc);
   auto std_boot_calc = makeBootstrapCalculator<std::vector<std::vector<Real>>, std::vector<Real>>(

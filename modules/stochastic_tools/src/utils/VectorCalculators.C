@@ -197,8 +197,8 @@ BootstrapCalculatorBuilder<std::vector<InType>, std::vector<OutType>>::build(
 #define createVectorCalculators(InType, OutType)                                                   \
   template class Percentile<std::vector<InType>, std::vector<OutType>>;                            \
   template class BiasCorrectedAccelerated<std::vector<InType>, std::vector<OutType>>;              \
-  template class CalculatorBuilder<std::vector<InType>, std::vector<OutType>>;                     \
-  template class BootstrapCalculatorBuilder<std::vector<InType>, std::vector<OutType>>
+  template struct CalculatorBuilder<std::vector<InType>, std::vector<OutType>>;                    \
+  template struct BootstrapCalculatorBuilder<std::vector<InType>, std::vector<OutType>>
 
 createVectorCalculators(std::vector<Real>, Real);
 

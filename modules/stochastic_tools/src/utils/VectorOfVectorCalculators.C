@@ -54,7 +54,7 @@ BootstrapCalculatorBuilder<VecOfVec<InType>, VecOfVec<OutType>>::build(
 
 #define createVectorOfVectorCalculators(InType, OutType)                                           \
   template class Percentile<VecOfVec<InType>, VecOfVec<OutType>>;                                  \
-  template class BootstrapCalculatorBuilder<VecOfVec<InType>, VecOfVec<OutType>>
+  template struct BootstrapCalculatorBuilder<VecOfVec<InType>, VecOfVec<OutType>>
 
 createVectorOfVectorCalculators(std::vector<Real>, Real);
 }

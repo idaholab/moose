@@ -1,5 +1,5 @@
 [Tests]
-  design = Sobolreporter.md
+  design = SobolReporter.md
   issues = '#15558'
 
   [sobol]
