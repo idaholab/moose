@@ -46,4 +46,7 @@ protected:
 
   /// The mesh dimension
   const unsigned int _dim;
+
+  /// A "dummy" limiter required to call face-argument functor overloads
+  Moose::FV::CentralDifferenceLimiter<ADReal> _cd_limiter;
 };

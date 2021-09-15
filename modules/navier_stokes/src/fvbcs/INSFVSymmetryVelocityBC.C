@@ -39,7 +39,8 @@ INSFVSymmetryVelocityBC::INSFVSymmetryVelocityBC(const InputParameters & params)
     _w_neighbor(adCoupledNeighborValue("w")),
     _comp(getParam<MooseEnum>("momentum_component")),
     _mu(getFunctorMaterialProperty<ADReal>("mu")),
-    _dim(_subproblem.mesh().dimension())
+    _dim(_subproblem.mesh().dimension()),
+    _cd_limiter()
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
@@ -59,7 +60,7 @@ INSFVSymmetryVelocityBC::computeQpResidual()
   const auto & w_C = use_elem ? _w_elem : _w_neighbor;
 
   // FIXME add limiter
-  const auto mu_b = _mu(std::make_tuple(_face_info, nullptr, true, faceArgSubdomains()));
+  const auto mu_b = _mu(std::make_tuple(_face_info, &_cd_limiter, true, faceArgSubdomains()));
 
   const auto d_perpendicular = std::abs((_face_info->faceCentroid() - cell_centroid) * _normal);
 
