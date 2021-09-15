@@ -1,6 +1,6 @@
 > Try and add output for the vonMises stress in the simulation domain. Take a
 > look at the
-> [!param](/Modules/TensorMechanics/Master/TensorMechanicsAction/generate_outputs)
+> [!param](/Modules/TensorMechanics/Master/TensorMechanicsAction/generate_output)
 > parameter...
 
 `generate_outputs` is a convenient way to obtain scalar quantities, such as

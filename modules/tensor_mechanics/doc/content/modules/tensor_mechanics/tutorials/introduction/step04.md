@@ -58,7 +58,7 @@ elastic stress calculator for the finite strain formulation.
 
 Some more tweaks are made to the Executioner block:
 
-- We disable [!param](/Executioner/line_search). Line searches can accelerate the convergence of the linear system, but here it does more harm than good (check for yourself by commenting out this option).
+- We disable [!param](/Executioner/Transient/line_search). Line searches can accelerate the convergence of the linear system, but here it does more harm than good (check for yourself by commenting out this option).
 - We add a predictor to accelerate the solve. The `SimplePredictor` extrapolates an initial guess for the current time step from the two previous time steps. Especially with a Newton solve a good initial guess can lead to drastically improved convergence.
 
 ## Questions

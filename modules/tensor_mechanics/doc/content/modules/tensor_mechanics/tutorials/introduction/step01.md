@@ -82,14 +82,14 @@ A question that comes up often is "What units does MOOSE use?".
 >  Look through the input file and try to identify places where units might be
 >  relevant.
 
-[Click here for the answer.](introduction/answer01a.md)
+[Click here for the answer.](tensor_mechanics/tutorials/introduction/answer01a.md)
 
 ### Expected outcome
 
 > Before you run this first input file take a moment to think about what you
 > expect to happen.
 
-[Click here for the answer.](introduction/answer01b.md)
+[Click here for the answer.](tensor_mechanics/tutorials/introduction/answer01b.md)
 
-Once you've answerd the questions and run the first example it is time to move
-on to a slightly more complex scenario in [Step 2](introduction/step02.md).
+Once you've answered the questions and run the first example it is time to move
+on to a slightly more complex scenario in [Step 2](tensor_mechanics/tutorials/introduction/step02.md).
