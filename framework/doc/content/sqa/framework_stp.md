@@ -111,6 +111,11 @@ All tests have a pass/fail acceptance criteria based on the anticipated output a
 "Tester", see [#test-automation]. If the execution output matches the anticipated output than the
 test is accepted (pass), otherwise it is rejected (fail).
 
+In addition, test coverage reports will be created for all proposed changes. The overall line
+coverage is required to increase or remain constant (it may not decrease). Additionally, the
+independent reviewer is expected to use these report to ensure that the proposed changes are
+tested at an appropriate level at the discretion of the reviewer.q
+
 ### Reports, records, standard formatting, and conventions
 
 Each test case shall report the acceptance status (pass or fail). If the test case fails the
@@ -122,6 +127,7 @@ see [#test-automation] for details.
 All test cases are created by contributors during the development process and approved by independent
 reviewer. The creation of the tests cases follows the change control process. These tests cases can
 be in response to a bug fixes or as a part of an enhancement.
+
 
 !template item key=test-iteration
 [!ac](MOOSE) and MOOSE-based applications are stateless, deterministic software for a given input.
