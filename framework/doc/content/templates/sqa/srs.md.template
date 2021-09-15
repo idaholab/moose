@@ -1,5 +1,9 @@
 # {{project}} System Requirements Specification
 
+This template follows [!ac](INL) template TEM-135, "IT System Requirements Specification".
+
+!template field key=pre-intro required=False
+
 ## Introduction id=introduction
 
 ### System Purpose id=system-purpose

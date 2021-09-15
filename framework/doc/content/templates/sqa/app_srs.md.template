@@ -1,109 +1,13 @@
-# {{app}} System Requirement Specification
+!template load file=framework_srs.md project={{app}}
 
+!template item key=pre-intro
 !alert note
 This document serves as an addendum to [framework_srs.md] and captures information for
 [!ac](SRS) specific to the {{app}} application.
 
-## Introduction id=introduction
-
-!template field key=introduction required=False
-The [!ac](SRS) for {{app}} describes the system functional and non-functional requirements that
-describe the expected interactions that the software shall provide.
-
-### System Purpose id=system-purpose
-
-!template field key=system-purpose required=True includes={{category}}_system_purpose.md framework_system_purpose.md
-
-### System Scope id=system-scope
-
-!template field key=system-scope required=True includes={{category}}_system_scope.md framework_system_scope.md
-
-### Systen Overview id=system-overview
-
-#### System Context id=system-context
-
-!template field key=system-context required=True includes={{category}}_system_context.md framework_system_context.md
-
-#### System Functions id=system-functions
-
-!template field key=system-purpose required=True includes={{category}}_system_functions.md framework_system_functions.md
-
-#### Assumptions and Dependencies id=dependencies
-
-!template field key=dependencies-intro required=False
+!template! item key=assumptions-and-dependencies
 The {{app}} application is developed using MOOSE and is based on various modules, as such
 the [!ac](SRS) for {{app}} is dependent upon the following documents.
 
-!template! field key=dependencies required=False
 !sqa dependencies suffix=srs category={{category}}
 !template-end!
-
-## References id=references
-
-!bibtex bibliography title=None
-
-## Definitions and Acronyms id=definitions-and-acronyms
-
-### Definitions id=definitions
-
-!template field key=definitions-and-acronyms required=False
-This section defines, or provides the definition of, all terms and acronyms required to properly
-understand this specification.
-
-### Acronyms id=acronyms
-
-!template! field key=acronyms required=False
-!acronym list
-!template-end!
-
-
-## System Requirements id=system-requirements
-
-!template field key=requirements-intro required=False
-The following is a complete list for all the functional requirements for {{app}}.
-
-### Functional Requirements
-
-!template! field key=functional-requirements required=False
-!sqa requirements link=False collections=FUNCTIONAL category={{category}}
-!template-end!
-
-### Usability Requirements
-
-!template! field key=usability-requirements required=False
-!sqa requirements link=False collections=USABILITY category={{category}}
-!template-end!
-
-### Performance Requirements
-
-!template! field key=performance-requirements required=False
-!sqa requirements link=False collections=PERFORMANCE category={{category}}
-!template-end!
-
-### System Operations id=system-operations
-
-#### Human System Integration Requirements id=human-system-integration
-
-!template! field key=system-requirements required=False
-!sqa requirements link=False collections=SYSTEM category={{category}}
-!template-end!
-
-#### Maintainablity id=maintainability
-
-#### Reliability id=reliability
-
-### Phyisical Characteristics
-
-### Environmental Conditions
-
-### System Security
-
-### Information Management
-
-### Polices and Regulations
-
-### System Life Cycle Sustainment
-
-### Packaging, Handling, Shipping and Transportation
-
-## Verification
