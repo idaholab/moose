@@ -2,11 +2,10 @@ mu = 1
 rho = 'rho'
 k = 1
 cp = 1
-alpha = 1
+l = 10
 vel = 'velocity'
 velocity_interp_method = 'rc'
 advected_interp_method = 'average'
-# rayleigh=1e3
 cold_temp=300
 hot_temp=310
 
@@ -19,9 +18,9 @@ hot_temp=310
     type = GeneratedMeshGenerator
     dim = 2
     xmin = 0
-    xmax = 10
+    xmax = ${l}
     ymin = 0
-    ymax = 10
+    ymax = ${l}
     nx = 16
     ny = 16
   []
@@ -45,10 +44,6 @@ hot_temp=310
     scaling = 1e-4
     initial_condition = ${cold_temp}
   []
-  # [lambda]
-  #   family = SCALAR
-  #   order = FIRST
-  # []
 []
 
 [AuxVariables]
@@ -129,12 +124,6 @@ hot_temp=310
     mu = ${mu}
     rho = ${rho}
   []
-  # [mean_zero_pressure]
-  #   type = FVScalarLagrangeMultiplier
-  #   variable = pressure
-  #   lambda = lambda
-  #   phi0 = 1e5
-  # []
 
   [u_time]
     type = WCNSFVMomentumTimeDerivative
@@ -270,11 +259,6 @@ hot_temp=310
 []
 
 [Materials]
-  [const]
-    type = ADGenericConstantMaterial
-    prop_names = 'alpha'
-    prop_values = '${alpha}'
-  []
   [const_functor]
     type = ADGenericConstantFunctorMaterial
     prop_names = 'cp k'
@@ -317,6 +301,7 @@ hot_temp=310
   []
   nl_abs_tol = 1e-9
   normalize_solution_diff_norm_by_dt = false
+  nl_max_its = 10
 []
 
 [Outputs]
