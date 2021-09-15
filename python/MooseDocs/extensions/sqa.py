@@ -322,7 +322,7 @@ class SQARequirementsCommand(command.CommandComponent):
             return parent
 
         group_map = self.extension.get('requirement-groups', dict())
-        if not group_map:
+        if len(self.extension.requirements(category)) == 0:
             tokens.String(parent, content="No requirements of this type exist for this application.")
 
         for group, requirements in self.extension.requirements(category).items():

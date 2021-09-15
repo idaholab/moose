@@ -35,19 +35,23 @@ class TestTemplate(MooseDocsTestCase):
 
     def testAST(self):
         ast = self.tokenize(TEXT)
-        self.assertEqual(len(ast), 9)
-        self.assertToken(ast(0), 'Heading', size=3)
-        self.assertToken(ast(1), 'Paragraph', size=10)
-        self.assertToken(ast(2), 'Heading', size=5)
-        self.assertToken(ast(3), 'TemplateField', size=1)
-        self.assertToken(ast(3,0), 'Paragraph', size=17)
-        self.assertToken(ast(4), 'Heading', size=5)
-        self.assertToken(ast(5), 'TemplateField', size=0)
-        self.assertToken(ast(6), 'Heading', size=7)
-        self.assertToken(ast(7), 'TemplateField', size=1)
-        self.assertToken(ast(7,0), 'Paragraph', size=29)
-        self.assertToken(ast(8), 'TemplateItem', size=1)
-        self.assertToken(ast(8,0), 'Paragraph', size=22)
+        self.assertEqual(len(ast), 2)
+
+        self.assertEqual(len(ast(0)), 8)
+        self.assertToken(ast(0,0), 'Heading', size=3)
+        self.assertToken(ast(0,1), 'Paragraph', size=10)
+        self.assertToken(ast(0,2), 'Heading', size=5)
+        self.assertToken(ast(0,3), 'TemplateField', size=1)
+        self.assertToken(ast(0,3,0), 'Paragraph', size=17)
+        self.assertToken(ast(0,4), 'Heading', size=5)
+        self.assertToken(ast(0,5), 'TemplateField', size=0)
+        self.assertToken(ast(0,6), 'Heading', size=7)
+        self.assertToken(ast(0,7), 'TemplateField', size=1)
+        self.assertToken(ast(0,7,0), 'Paragraph', size=29)
+
+        self.assertEqual(len(ast(1)), 1)
+        self.assertToken(ast(1), 'TemplateItem', size=1)
+        self.assertToken(ast(1,0), 'Paragraph', size=22)
 
     def testRenderField(self):
         _, res = self.execute(TEXT, renderer=base.MaterializeRenderer())
