@@ -1148,6 +1148,46 @@ MooseVariableFV<OutputType>::evaluateGradient(const ElemFromFaceArg & elem_from_
     mooseError("We do not currently support ghosting of gradients");
 }
 
+template <typename OutputType>
+typename MooseVariableFV<OutputType>::DotType
+MooseVariableFV<OutputType>::evaluateDot(const Elem * const & elem, unsigned int state) const
+{
+  mooseError("evaluateDot not implemented for non-scalar finite volume variables");
+}
+
+template <>
+ADReal
+MooseVariableFV<Real>::evaluateDot(const Elem * const & elem,
+                                   const unsigned int libmesh_dbg_var(state)) const
+{
+  mooseAssert(state == 0,
+              "We dot not currently support any time derivative evaluations other than for the "
+              "current time-step");
+  mooseAssert(_time_integrator && _time_integrator->dt(),
+              "A time derivative is being requested but we do not have a time integrator so we'll "
+              "have no idea how to compute it");
+
+  std::vector<dof_id_type> dof_indices;
+  this->_dof_map.dof_indices(elem, dof_indices, _var_num);
+
+  mooseAssert(
+      dof_indices.size() == 1,
+      "There should only be one dof-index for a constant monomial variable on any given element");
+
+  const dof_id_type dof_index = dof_indices[0];
+
+  if (_var_kind == Moose::VAR_NONLINEAR)
+  {
+    ADReal dot = (*_solution)(dof_index);
+    if (ADReal::do_derivatives)
+      Moose::derivInsert(dot.derivatives(), dof_index, 1.);
+    _time_integrator->computeADTimeDerivatives(dot, dof_index, _ad_real_dummy);
+    return dot;
+  }
+  else
+    return (*_sys.solutionUDot())(dof_index);
+}
+
 template class MooseVariableFV<Real>;
 // TODO: implement vector fv variable support. This will require some template
 // specializations for various member functions in this and the FV variable

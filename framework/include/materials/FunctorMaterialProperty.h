@@ -52,6 +52,7 @@ public:
   using typename Moose::Functor<T>::ElemSideQpArg;
   using typename Moose::Functor<T>::FunctorType;
   using typename Moose::Functor<T>::ValueType;
+  using typename Moose::Functor<T>::DotType;
   using typename Moose::Functor<T>::GradientType;
   using typename Moose::Functor<T>::FunctorReturnType;
 
@@ -81,6 +82,14 @@ protected:
   GradientType
   evaluateGradient(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
                    unsigned int state) const override;
+
+  DotType evaluateDot(const Elem * const & elem, unsigned int state) const override;
+  DotType evaluateDot(const ElemFromFaceArg & elem_from_face, unsigned int state) const override;
+  DotType evaluateDot(const FaceArg & face, unsigned int state) const override;
+  DotType evaluateDot(const ElemQpArg & elem_qp, unsigned int state) const override;
+  DotType evaluateDot(const ElemSideQpArg & elem_side_qp, unsigned int state) const override;
+  DotType evaluateDot(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
+                      unsigned int state) const override;
 
 private:
   /**
@@ -299,6 +308,56 @@ FunctorMaterialPropertyImpl<T>::evaluateGradient(
   mooseError("Gradients of functor material properties not implemented");
 }
 
+template <typename T>
+typename FunctorMaterialPropertyImpl<T>::DotType
+FunctorMaterialPropertyImpl<T>::evaluateDot(const Elem * const &, unsigned int) const
+{
+  mooseError("Time derivatives of functor material properties not implemented");
+}
+
+template <typename T>
+typename FunctorMaterialPropertyImpl<T>::DotType
+FunctorMaterialPropertyImpl<T>::evaluateDot(const ElemFromFaceArg &, unsigned int) const
+{
+  mooseError("Time derivatives of functor material properties not implemented");
+}
+
+template <typename T>
+typename FunctorMaterialPropertyImpl<T>::DotType
+FunctorMaterialPropertyImpl<T>::evaluateDot(const FaceArg &, unsigned int) const
+{
+  mooseError("Time derivatives of functor material properties not implemented");
+}
+
+template <typename T>
+typename FunctorMaterialProperty<T>::DotType
+FunctorMaterialProperty<T>::evaluateDot(const ElemQpArg &, unsigned int) const
+{
+  mooseError("Time derivatives of functor material properties not implemented");
+}
+
+template <typename T>
+typename FunctorMaterialPropertyImpl<T>::DotType
+FunctorMaterialPropertyImpl<T>::evaluateDot(const ElemQpArg &, unsigned int) const
+{
+  mooseError("Time derivatives of functor material properties not implemented");
+}
+
+template <typename T>
+typename FunctorMaterialPropertyImpl<T>::DotType
+FunctorMaterialPropertyImpl<T>::evaluateDot(const ElemSideQpArg &, unsigned int) const
+{
+  mooseError("Time derivatives of functor material properties not implemented");
+}
+
+template <typename T>
+typename FunctorMaterialPropertyImpl<T>::DotType
+FunctorMaterialPropertyImpl<T>::evaluateDot(
+    const std::tuple<Moose::ElementType, unsigned int, SubdomainID> &, unsigned int) const
+{
+  mooseError("Time derivatives of functor material properties not implemented");
+}
+
 /**
  * This is a wrapper that forwards calls to the implementation,
  * which can be switched out at any time without disturbing references to
@@ -317,6 +376,7 @@ public:
   using typename Moose::Functor<T>::FunctorReturnType;
   using typename Moose::Functor<T>::ValueType;
   using typename Moose::Functor<T>::GradientType;
+  using typename Moose::Functor<T>::DotType;
 
   /**
    * Construct wrapper from wrapped object
@@ -417,6 +477,31 @@ protected:
                    unsigned int state = 0) const override
   {
     return _wrapped->evaluateGradient(tqp, state);
+  }
+  DotType evaluateDot(const libMesh::Elem * const & elem, unsigned int state = 0) const override
+  {
+    return _wrapped->evaluateDot(elem, state);
+  }
+  DotType evaluateDot(const ElemFromFaceArg & elem_from_face, unsigned int state = 0) const override
+  {
+    return _wrapped->evaluateDot(elem_from_face, state);
+  }
+  DotType evaluateDot(const FaceArg & face, unsigned int state = 0) const override
+  {
+    return _wrapped->evaluateDot(face, state);
+  }
+  DotType evaluateDot(const ElemQpArg & qp, unsigned int state = 0) const override
+  {
+    return _wrapped->evaluateDot(qp, state);
+  }
+  DotType evaluateDot(const ElemSideQpArg & qp, unsigned int state = 0) const override
+  {
+    return _wrapped->evaluateDot(qp, state);
+  }
+  DotType evaluateDot(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
+                      unsigned int state = 0) const override
+  {
+    return _wrapped->evaluateDot(tqp, state);
   }
   ///@}
 

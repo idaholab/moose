@@ -276,6 +276,65 @@ FunctionTempl<T>::evaluateGradient(
 }
 
 template <typename T>
+typename FunctionTempl<T>::DotType
+FunctionTempl<T>::evaluateDot(const Elem * const & elem, const unsigned int state) const
+{
+  return timeDerivative(getTime(state), elem->centroid());
+}
+
+template <typename T>
+typename FunctionTempl<T>::DotType
+FunctionTempl<T>::evaluateDot(const ElemFromFaceArg & elem_from_face,
+                              const unsigned int state) const
+{
+  const auto * const elem = std::get<0>(elem_from_face);
+  const auto * const fi = std::get<1>(elem_from_face);
+  mooseAssert(fi, "We must have a non-null face information pointer");
+  return timeDerivative(getTime(state),
+                        (elem == &fi->elem()) ? fi->elemCentroid() : fi->neighborCentroid());
+}
+
+template <typename T>
+typename FunctionTempl<T>::DotType
+FunctionTempl<T>::evaluateDot(const FaceArg & face, const unsigned int state) const
+{
+  return timeDerivative(getTime(state), std::get<0>(face)->faceCentroid());
+}
+
+template <typename T>
+typename FunctionTempl<T>::DotType
+FunctionTempl<T>::evaluateDot(const ElemQpArg & elem_qp, const unsigned int state) const
+{
+  determineElemXYZ(elem_qp);
+  const auto qp = std::get<1>(elem_qp);
+  mooseAssert(qp < _current_elem_qp_functor_xyz.size(),
+              "The requested " << qp << " is outside our xyz size");
+  return timeDerivative(getTime(state), _current_elem_qp_functor_xyz[qp]);
+}
+
+template <typename T>
+typename FunctionTempl<T>::DotType
+FunctionTempl<T>::evaluateDot(const ElemSideQpArg & elem_side_qp, const unsigned int state) const
+{
+  determineElemSideXYZ(elem_side_qp);
+  const auto qp = std::get<2>(elem_side_qp);
+  mooseAssert(qp < _current_elem_side_qp_functor_xyz.size(),
+              "The requested " << qp << " is outside our xyz size");
+  return timeDerivative(getTime(state), _current_elem_side_qp_functor_xyz[qp]);
+}
+
+template <typename T>
+typename FunctionTempl<T>::DotType
+FunctionTempl<T>::evaluateDot(
+    const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & /*tqp*/,
+    unsigned int /*state*/) const
+{
+  mooseError(
+      "The ElementType evaluate overload is not supported by Function because there is no simple "
+      "way to determine the location of quadrature points without being provided an element");
+}
+
+template <typename T>
 void
 FunctionTempl<T>::timestepSetup()
 {

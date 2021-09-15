@@ -115,6 +115,7 @@ public:
   using FunctorReturnType = T;
   using ValueType = T;
   using GradientType = typename libMesh::TensorTools::IncrementRank<T>::type;
+  using DotType = ValueType;
 
   virtual ~Functor() = default;
   Functor() : _clearance_schedule({EXEC_ALWAYS}) {}
@@ -145,6 +146,20 @@ public:
   GradientType gradient(const ElemSideQpArg & qp, unsigned int state = 0) const;
   GradientType gradient(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
                         unsigned int state = 0) const;
+  ///@}
+
+  ///@{
+  /**
+   * Same as their \p evaluateDot overloads with the same arguments but allows for caching
+   * implementation. These are the methods a user will call in their code
+   */
+  DotType dot(const libMesh::Elem * const & elem, unsigned int state = 0) const;
+  DotType dot(const ElemFromFaceArg & elem_from_face, unsigned int state = 0) const;
+  DotType dot(const FaceArg & face, unsigned int state = 0) const;
+  DotType dot(const ElemQpArg & qp, unsigned int state = 0) const;
+  DotType dot(const ElemSideQpArg & qp, unsigned int state = 0) const;
+  DotType dot(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
+              unsigned int state = 0) const;
   ///@}
 
   void residualSetup() override;
@@ -260,6 +275,56 @@ protected:
   virtual GradientType
   evaluateGradient(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
                    unsigned int state) const = 0;
+
+  /**
+   * Evaluate the functor time derivative with a given element. Some example implementations of this
+   * method could compute an element-average or evaluate at the element centroid
+   */
+  virtual DotType evaluateDot(const libMesh::Elem * const & elem, unsigned int state) const = 0;
+
+  /**
+   * @param elem_from_face See the \p ElemFromFaceArg doxygen
+   * @param state Corresponds to a time argument. A value of 0 corresponds to current time, 1
+   * corresponds to the old time, 2 corresponds to the older time, etc.
+   * @return The functor time derivative evaluated at the requested time and space
+   */
+  virtual DotType evaluateDot(const ElemFromFaceArg & elem_from_face, unsigned int state) const = 0;
+
+  /**
+   * @param face See the \p FaceArg doxygen
+   * @param state Corresponds to a time argument. A value of 0 corresponds to current time, 1
+   * corresponds to the old time, 2 corresponds to the older time, etc.
+   * @return The functor time derivative evaluated at the requested time and space
+   */
+  virtual DotType evaluateDot(const FaceArg & face, unsigned int state) const = 0;
+
+  /**
+   * @param qp See the \p ElemQpArg doxygen
+   * @param state Corresponds to a time argument. A value of 0 corresponds to current time, 1
+   * corresponds to the old time, 2 corresponds to the older time, etc.
+   * @return The functor time derivative evaluated at the requested time and space
+   */
+  virtual DotType evaluateDot(const ElemQpArg & qp, unsigned int state) const = 0;
+
+  /**
+   * @param side_qp See the \p ElemSideQpArg doxygen
+   * @param state Corresponds to a time argument. A value of 0 corresponds to current time, 1
+   * corresponds to the old time, 2 corresponds to the older time, etc.
+   * @return The functor time derivative evaluated at the requested time and space
+   */
+  virtual DotType evaluateDot(const ElemSideQpArg & side_qp, unsigned int state) const = 0;
+
+  /**
+   * @param tqp A tuple with the first member corresponding to an \p ElementType, either Element,
+   * Neighbor, or Lower corresponding to the three different possible \p MooseVariableData
+   * instances. The second member corresponds to the desired quadrature point. The third member
+   * corresponds to the subdomain that this functor is being evaluated on
+   * @return The requested element type data indexed at the requested quadrature point. There is a
+   * caveat with this \p evaluateDot overload: any variables involved in the functor evaluation must
+   * have their requested element data type properly pre-initialized at the desired quadrature point
+   */
+  virtual DotType evaluateDot(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
+                              unsigned int state) const = 0;
 
 private:
   /**
@@ -522,6 +587,49 @@ Functor<T>::gradient(const std::tuple<Moose::ElementType, unsigned int, Subdomai
   return evaluateGradient(tqp, state);
 }
 
+template <typename T>
+typename Functor<T>::DotType
+Functor<T>::dot(const Elem * const & elem, const unsigned int state) const
+{
+  return evaluateDot(elem, state);
+}
+
+template <typename T>
+typename Functor<T>::DotType
+Functor<T>::dot(const ElemFromFaceArg & elem_from_face, const unsigned int state) const
+{
+  return evaluateDot(elem_from_face, state);
+}
+
+template <typename T>
+typename Functor<T>::DotType
+Functor<T>::dot(const FaceArg & face, const unsigned int state) const
+{
+  return evaluateDot(face, state);
+}
+
+template <typename T>
+typename Functor<T>::DotType
+Functor<T>::dot(const ElemQpArg & elem_qp, const unsigned int state) const
+{
+  return evaluateDot(elem_qp, state);
+}
+
+template <typename T>
+typename Functor<T>::DotType
+Functor<T>::dot(const ElemSideQpArg & elem_side_qp, const unsigned int state) const
+{
+  return evaluateDot(elem_side_qp, state);
+}
+
+template <typename T>
+typename Functor<T>::DotType
+Functor<T>::dot(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
+                const unsigned int state) const
+{
+  return evaluateDot(tqp, state);
+}
+
 /**
  * Class template for creating constants
  */
@@ -537,6 +645,7 @@ public:
   using typename Functor<T>::FunctorReturnType;
   using typename Functor<T>::ValueType;
   using typename Functor<T>::GradientType;
+  using typename Functor<T>::DotType;
 
   ConstantFunctor(const ValueType & value) : _value(value) {}
   ConstantFunctor(ValueType && value) : _value(value) {}
@@ -572,6 +681,20 @@ private:
   }
   GradientType evaluateGradient(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> &,
                                 unsigned int) const override final
+  {
+    return 0;
+  }
+
+  DotType evaluateDot(const libMesh::Elem * const &, unsigned int) const override final
+  {
+    return 0;
+  }
+  DotType evaluateDot(const ElemFromFaceArg &, unsigned int) const override final { return 0; }
+  DotType evaluateDot(const FaceArg &, unsigned int) const override final { return 0; }
+  DotType evaluateDot(const ElemQpArg &, unsigned int) const override final { return 0; }
+  DotType evaluateDot(const ElemSideQpArg &, unsigned int) const override final { return 0; }
+  DotType evaluateDot(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> &,
+                      unsigned int) const override final
   {
     return 0;
   }

@@ -9,6 +9,7 @@
 
 #include "MooseVariableField.h"
 #include "SystemBase.h"
+#include "TimeIntegrator.h"
 
 #include "libmesh/fe_base.h"
 
@@ -21,7 +22,9 @@ MooseVariableField<OutputType>::validParams()
 
 template <typename OutputType>
 MooseVariableField<OutputType>::MooseVariableField(const InputParameters & parameters)
-  : MooseVariableFieldBase(parameters), MeshChangedInterface(parameters)
+  : MooseVariableFieldBase(parameters),
+    MeshChangedInterface(parameters),
+    _time_integrator(_sys.getTimeIntegrator())
 {
 }
 
@@ -51,11 +54,19 @@ MooseVariableField<OutputType>::computeSolution(const Elem * const elem,
                                                 const Shapes & phi,
                                                 Solution & local_soln,
                                                 const GradShapes & grad_phi,
-                                                GradSolution & grad_local_soln) const
+                                                GradSolution & grad_local_soln,
+                                                Solution & dot_local_soln) const
 {
   std::vector<dof_id_type> dof_indices;
   _dof_map.dof_indices(elem, dof_indices, _var_num);
   std::vector<ADReal> dof_values;
+  std::vector<ADReal> dof_values_dot;
+  dof_values.reserve(dof_indices.size());
+
+  const bool computing_dot = _time_integrator && _time_integrator->dt();
+  if (computing_dot)
+    dof_values_dot.reserve(dof_indices.size());
+
   // It's not safe to use solutionState(0) because it returns the libMesh System solution member
   // which is wrong during things like finite difference Jacobian evaluation, e.g. when PETSc
   // perturbs the solution vector we feed these perturbations into the current_local_solution
@@ -64,21 +75,39 @@ MooseVariableField<OutputType>::computeSolution(const Elem * const elem,
   for (const auto dof_index : dof_indices)
   {
     dof_values.push_back(ADReal(global_soln(dof_index)));
-    Moose::derivInsert(dof_values.back().derivatives(), dof_index, 1.);
+    if (ADReal::do_derivatives && _var_kind == Moose::VAR_NONLINEAR)
+      Moose::derivInsert(dof_values.back().derivatives(), dof_index, 1.);
+    if (computing_dot)
+    {
+      if (_var_kind == Moose::VAR_NONLINEAR)
+      {
+        dof_values_dot.push_back(dof_values.back());
+        _time_integrator->computeADTimeDerivatives(
+            dof_values_dot.back(), dof_index, _ad_real_dummy);
+      }
+      else
+        dof_values_dot.push_back((*_sys.solutionUDot())(dof_index));
+    }
   }
 
   const auto n_qp = qrule->n_points();
   local_soln.resize(n_qp);
   grad_local_soln.resize(n_qp);
+  if (computing_dot)
+    dot_local_soln.resize(n_qp);
 
   for (const auto qp : make_range(n_qp))
   {
     local_soln[qp] = 0;
     grad_local_soln[qp] = 0;
+    if (computing_dot)
+      dot_local_soln[qp] = 0;
     for (const auto i : index_range(dof_indices))
     {
       local_soln[qp] += dof_values[i] * phi[i][qp];
       grad_local_soln[qp] += dof_values[i] * grad_phi[i][qp];
+      if (computing_dot)
+        dot_local_soln[qp] += dof_values_dot[i] * phi[i][qp];
     }
   }
 }
@@ -113,7 +142,8 @@ MooseVariableField<OutputType>::evaluateOnElement(const ElemQpArg & elem_qp,
                     phi,
                     _current_elem_qp_functor_sln,
                     dphi,
-                    _current_elem_qp_functor_gradient);
+                    _current_elem_qp_functor_gradient,
+                    _current_elem_qp_functor_dot);
   }
 }
 
@@ -142,9 +172,24 @@ MooseVariableField<OutputType>::evaluateGradient(const ElemQpArg & elem_qp,
 {
   evaluateOnElement(elem_qp, state);
   const auto qp = std::get<1>(elem_qp);
-  mooseAssert(qp < _current_elem_qp_functor_sln.size(),
+  mooseAssert(qp < _current_elem_qp_functor_gradient.size(),
               "The requested " << qp << " is outside our gradient size");
   return _current_elem_qp_functor_gradient[qp];
+}
+
+template <typename OutputType>
+typename MooseVariableField<OutputType>::DotType
+MooseVariableField<OutputType>::evaluateDot(const ElemQpArg & elem_qp,
+                                            const unsigned int state) const
+{
+  mooseAssert(_time_integrator && _time_integrator->dt(),
+              "A time derivative is being requested but we do not have a time integrator so we'll "
+              "have no idea how to compute it");
+  evaluateOnElement(elem_qp, state);
+  const auto qp = std::get<1>(elem_qp);
+  mooseAssert(qp < _current_elem_qp_functor_dot.size(),
+              "The requested " << qp << " is outside our dot size");
+  return _current_elem_qp_functor_dot[qp];
 }
 
 template <typename OutputType>
@@ -179,7 +224,8 @@ MooseVariableField<OutputType>::evaluateOnElementSide(const ElemSideQpArg & elem
                     phi,
                     _current_elem_side_qp_functor_sln,
                     dphi,
-                    _current_elem_side_qp_functor_gradient);
+                    _current_elem_side_qp_functor_gradient,
+                    _current_elem_side_qp_functor_dot);
   }
 }
 
@@ -213,6 +259,21 @@ MooseVariableField<OutputType>::evaluateGradient(const ElemSideQpArg & elem_side
   mooseAssert(qp < _current_elem_side_qp_functor_gradient.size(),
               "The requested " << qp << " is outside our gradient size");
   return _current_elem_side_qp_functor_gradient[qp];
+}
+
+template <typename OutputType>
+typename MooseVariableField<OutputType>::DotType
+MooseVariableField<OutputType>::evaluateDot(const ElemSideQpArg & elem_side_qp,
+                                            const unsigned int state) const
+{
+  mooseAssert(_time_integrator && _time_integrator->dt(),
+              "A time derivative is being requested but we do not have a time integrator so we'll "
+              "have no idea how to compute it");
+  evaluateOnElementSide(elem_side_qp, state);
+  const auto qp = std::get<2>(elem_side_qp);
+  mooseAssert(qp < _current_elem_side_qp_functor_dot.size(),
+              "The requested " << qp << " is outside our dot size");
+  return _current_elem_side_qp_functor_dot[qp];
 }
 
 #else
@@ -251,6 +312,22 @@ MooseVariableField<OutputType>::evaluateGradient(const ElemSideQpArg &, unsigned
              "supported for global AD indexing");
 }
 
+template <typename OutputType>
+typename MooseVariableField<OutputType>::DotType
+MooseVariableField<OutputType>::evaluateDot(const ElemQpArg &, unsigned int) const
+{
+  mooseError("MooseVariableField::evaluateDot(ElemQpArg &, unsigned int) is only supported "
+             "for global AD indexing");
+}
+
+template <typename OutputType>
+typename MooseVariableField<OutputType>::DotType
+MooseVariableField<OutputType>::evaluateDot(const ElemSideQpArg &, unsigned int) const
+{
+  mooseError("MooseVariableField::evaluateDot(ElemSideQpArg &, unsigned int) is only "
+             "supported for global AD indexing");
+}
+
 #endif
 
 template <>
@@ -283,6 +360,22 @@ typename MooseVariableField<RealEigenVector>::GradientType
 MooseVariableField<RealEigenVector>::evaluateGradient(const ElemSideQpArg &, unsigned int) const
 {
   mooseError("MooseVariableField::evaluateGradient(ElemSideQpArg &, unsigned int) overload not "
+             "implemented for array variables");
+}
+
+template <>
+typename MooseVariableField<RealEigenVector>::DotType
+MooseVariableField<RealEigenVector>::evaluateDot(const ElemQpArg &, unsigned int) const
+{
+  mooseError("MooseVariableField::evaluateDot(ElemQpArg &, unsigned int) overload not "
+             "implemented for array variables");
+}
+
+template <>
+typename MooseVariableField<RealEigenVector>::DotType
+MooseVariableField<RealEigenVector>::evaluateDot(const ElemSideQpArg &, unsigned int) const
+{
+  mooseError("MooseVariableField::evaluateDot(ElemSideQpArg &, unsigned int) overload not "
              "implemented for array variables");
 }
 
@@ -373,6 +466,49 @@ MooseVariableField<OutputType>::evaluateGradient(
 
         default:
           mooseError("Unsupported state ", state, " in MooseVariableField::evaluateGradient");
+      }
+    }
+
+    default:
+      mooseError("Unrecognized element type");
+  }
+}
+
+template <typename OutputType>
+typename MooseVariableField<OutputType>::DotType
+MooseVariableField<OutputType>::evaluateDot(
+    const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp, unsigned int state) const
+{
+  mooseAssert(_time_integrator && _time_integrator->dt(),
+              "A time derivative is being requested but we do not have a time integrator so we'll "
+              "have no idea how to compute it");
+  mooseAssert(this->hasBlocks(std::get<2>(tqp)),
+              "This variable doesn't exist in the requested block!");
+  const auto elem_type = std::get<0>(tqp);
+  const auto qp = std::get<1>(tqp);
+  switch (elem_type)
+  {
+    case Moose::ElementType::Element:
+    {
+      switch (state)
+      {
+        case 0:
+          return adUDot()[qp];
+
+        default:
+          mooseError("Unsupported state ", state, " in MooseVariableField::evaluateDot");
+      }
+    }
+
+    case Moose::ElementType::Neighbor:
+    {
+      switch (state)
+      {
+        case 0:
+          return adUDotNeighbor()[qp];
+
+        default:
+          mooseError("Unsupported state ", state, " in MooseVariableField::evaluateDot");
       }
     }
 

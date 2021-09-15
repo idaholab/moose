@@ -343,7 +343,9 @@ protected:
   using FunctorArg = typename Moose::ADType<OutputType>::type;
   using Moose::Functor<FunctorArg>::evaluate;
   using Moose::Functor<FunctorArg>::evaluateGradient;
+  using Moose::Functor<FunctorArg>::evaluateDot;
   using typename Moose::Functor<FunctorArg>::ValueType;
+  using typename Moose::Functor<FunctorArg>::DotType;
   using typename Moose::Functor<FunctorArg>::GradientType;
   using typename Moose::Functor<FunctorArg>::ElemQpArg;
   using typename Moose::Functor<FunctorArg>::ElemSideQpArg;
@@ -360,19 +362,31 @@ protected:
   evaluateGradient(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
                    unsigned int state) const override final;
 
+  DotType evaluateDot(const ElemQpArg & elem_qp, unsigned int state) const override final;
+  DotType evaluateDot(const ElemSideQpArg & elem_side_qp, unsigned int state) const override final;
+  DotType evaluateDot(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
+                      unsigned int state) const override final;
+
+  /// the time integrator used for computing time derivatives
+  const TimeIntegrator * const _time_integrator;
+
+  /// A dummy ADReal variable
+  mutable ADReal _ad_real_dummy = 0;
+
 private:
 #ifdef MOOSE_GLOBAL_AD_INDEXING
   /**
-   * Compute the solution with provided shape functions
+   * Compute the solution, gradient, and time derivative with provided shape functions
    */
   template <typename Shapes, typename Solution, typename GradShapes, typename GradSolution>
   void computeSolution(const Elem * elem,
                        const QBase *,
                        unsigned int state,
                        const Shapes & phi,
-                       Solution & soln,
+                       Solution & local_soln,
                        const GradShapes & grad_phi,
-                       GradSolution & grad_local_soln) const;
+                       GradSolution & grad_local_soln,
+                       Solution & dot_local_soln) const;
 
   /**
    * Evaluate solution and gradient for the \p elem_qp argument
@@ -396,6 +410,9 @@ private:
   /// The values of the gradient for the \p _current_elem_qp_functor_elem
   mutable std::vector<GradientType> _current_elem_qp_functor_gradient;
 
+  /// The values of the time derivative for the \p _current_elem_qp_functor_elem
+  mutable std::vector<DotType> _current_elem_qp_functor_dot;
+
   /// Keep track of the current elem-side-qp functor element and side in order to enable local
   /// caching (e.g. if we call evaluate with the same element and side, but just with a different
   /// quadrature point, we can return previously computed results indexed at the different qp
@@ -407,4 +424,7 @@ private:
 
   /// The values of the gradient for the \p _current_elem_side_qp_functor_elem_side
   mutable std::vector<GradientType> _current_elem_side_qp_functor_gradient;
+
+  /// The values of the time derivative for the \p _current_elem_side_qp_functor_elem_side
+  mutable std::vector<DotType> _current_elem_side_qp_functor_dot;
 };

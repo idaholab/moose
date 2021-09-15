@@ -91,6 +91,7 @@ public:
   using typename Moose::Functor<FunctorArg>::FunctorReturnType;
   using typename Moose::Functor<FunctorArg>::ValueType;
   using typename Moose::Functor<FunctorArg>::GradientType;
+  using typename Moose::Functor<FunctorArg>::DotType;
 
   MooseVariableFE(const InputParameters & parameters);
 
@@ -689,6 +690,7 @@ private:
   using typename Moose::Functor<FunctorArg>::ElemFromFaceArg;
   using MooseVariableField<OutputType>::evaluate;
   using MooseVariableField<OutputType>::evaluateGradient;
+  using MooseVariableField<OutputType>::evaluateDot;
   ValueType evaluate(const Elem * const &, unsigned int) const override final
   {
     mooseError("Elem functor overload not yet implemented for finite element variables");
@@ -712,6 +714,19 @@ private:
         "Elem-and-face-info functor overload not yet implemented for finite element variables");
   }
   GradientType evaluateGradient(const FaceArg &, unsigned int) const override final
+  {
+    mooseError("Face info functor overload not yet implemented for finite element variables");
+  }
+  DotType evaluateDot(const Elem * const &, unsigned int) const override final
+  {
+    mooseError("Elem functor overload not yet implemented for finite element variables");
+  }
+  DotType evaluateDot(const ElemFromFaceArg &, unsigned int) const override final
+  {
+    mooseError(
+        "Elem-and-face-info functor overload not yet implemented for finite element variables");
+  }
+  DotType evaluateDot(const FaceArg &, unsigned int) const override final
   {
     mooseError("Face info functor overload not yet implemented for finite element variables");
   }

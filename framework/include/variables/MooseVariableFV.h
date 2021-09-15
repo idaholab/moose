@@ -485,6 +485,7 @@ public:
   using typename Moose::Functor<FunctorArg>::FaceArg;
   using typename Moose::Functor<FunctorArg>::ElemFromFaceArg;
   using typename Moose::Functor<FunctorArg>::ValueType;
+  using typename Moose::Functor<FunctorArg>::DotType;
   using typename Moose::Functor<FunctorArg>::GradientType;
   ADReal getInternalFaceValue(const FaceArg & face) const;
 
@@ -514,6 +515,7 @@ protected:
 private:
   using MooseVariableField<OutputType>::evaluate;
   using MooseVariableField<OutputType>::evaluateGradient;
+  using MooseVariableField<OutputType>::evaluateDot;
   ValueType evaluate(const Elem * const & elem, unsigned int) const override final;
   ValueType evaluate(const ElemFromFaceArg & elem_from_face, unsigned int) const override final;
   ValueType evaluate(const FaceArg & face, unsigned int) const override final;
@@ -521,6 +523,9 @@ private:
   GradientType evaluateGradient(const ElemFromFaceArg & elem_from_face,
                                 unsigned int) const override final;
   GradientType evaluateGradient(const FaceArg & face, unsigned int) const override final;
+  DotType evaluateDot(const Elem * const & elem, unsigned int) const override final;
+  DotType evaluateDot(const ElemFromFaceArg & elem_from_face, unsigned int) const override final;
+  DotType evaluateDot(const FaceArg & face, unsigned int) const override final;
 
   /**
    * @return the extrapolated value on the boundary face associated with \p fi
@@ -683,3 +688,20 @@ MooseVariableFV<OutputType>::evaluateGradient(const FaceArg & face, unsigned int
   mooseAssert(fi, "We must have a non-null face information");
   return adGradSln(*fi);
 }
+
+template <typename OutputType>
+typename MooseVariableFV<OutputType>::DotType
+MooseVariableFV<OutputType>::evaluateDot(const ElemFromFaceArg &, unsigned int) const
+{
+  mooseError("MooseVariableFV::evaluateDot(ElemFromFaceArg) not yet implemented");
+}
+
+template <typename OutputType>
+typename MooseVariableFV<OutputType>::DotType
+MooseVariableFV<OutputType>::evaluateDot(const FaceArg &, unsigned int) const
+{
+  mooseError("MooseVariableFV::evaluateDot(FaceArg) not yet implemented");
+}
+
+template <>
+ADReal MooseVariableFV<Real>::evaluateDot(const Elem * const & elem, unsigned int state) const;

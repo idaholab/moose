@@ -117,6 +117,7 @@ private:
   using typename Moose::Functor<T>::ElemSideQpArg;
   using typename Moose::Functor<T>::ValueType;
   using typename Moose::Functor<T>::GradientType;
+  using typename Moose::Functor<T>::DotType;
 
   /**
    * @return the time associated with the requested \p state
@@ -132,16 +133,6 @@ private:
   ValueType evaluate(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
                      unsigned int state) const override final;
 
-  /**
-   * Compute \p _current_elem_qp_functor_xyz if we are on a new element
-   */
-  void determineElemXYZ(const ElemQpArg & elem_qp) const;
-
-  /**
-   * Compute \p _current_elem_side_qp_functor_xyz if we are on a new element and side pair
-   */
-  void determineElemSideXYZ(const ElemSideQpArg & elem_side_qp) const;
-
   GradientType evaluateGradient(const Elem * const & elem, unsigned int state) const override final;
   GradientType evaluateGradient(const ElemFromFaceArg & elem_from_face,
                                 unsigned int state) const override final;
@@ -152,6 +143,25 @@ private:
   GradientType
   evaluateGradient(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
                    unsigned int state) const override final;
+
+  DotType evaluateDot(const Elem * const & elem, unsigned int state) const override final;
+  DotType evaluateDot(const ElemFromFaceArg & elem_from_face,
+                      unsigned int state) const override final;
+  DotType evaluateDot(const FaceArg & face, unsigned int state) const override final;
+  DotType evaluateDot(const ElemQpArg & qp, unsigned int state) const override final;
+  DotType evaluateDot(const ElemSideQpArg & elem_side_qp, unsigned int state) const override final;
+  DotType evaluateDot(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
+                      unsigned int state) const override final;
+
+  /**
+   * Compute \p _current_elem_qp_functor_xyz if we are on a new element
+   */
+  void determineElemXYZ(const ElemQpArg & elem_qp) const;
+
+  /**
+   * Compute \p _current_elem_side_qp_functor_xyz if we are on a new element and side pair
+   */
+  void determineElemSideXYZ(const ElemSideQpArg & elem_side_qp) const;
 
   /// Keep track of the current elem-qp functor element in order to enable local caching (e.g. if we
   /// call evaluate on the same element, but just with a different quadrature point, we can return
