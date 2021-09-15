@@ -111,16 +111,28 @@ template <typename InType, typename OutType>
 void
 SobolCalculator<std::vector<InType>, std::vector<OutType>>::finalize(bool is_distributed)
 {
-  for (const auto & c : index_range(_sobol_calcs))
+  // Need to create calculators here no data was added
+  if (is_distributed)
   {
-    _sobol_calcs[c].finalizeCalculator(is_distributed);
-    const auto val = _sobol_calcs[c].getValue();
+    auto ncalc = _sobol_calcs.size();
+    this->_communicator.max(ncalc);
+    for (const auto & i : make_range(_sobol_calcs.size(), ncalc))
+    {
+      _sobol_calcs.emplace_back(*this, "SOBOL_" + std::to_string(i), _resample);
+      _sobol_calcs[i].initializeCalculator();
+    }
+  }
+
+  for (const auto & i : index_range(_sobol_calcs))
+  {
+    _sobol_calcs[i].finalizeCalculator(is_distributed);
+    const auto val = _sobol_calcs[i].getValue();
 
     for (const auto & ind : index_range(val))
     {
       if (_values.size() <= ind)
         _values.emplace_back(_sobol_calcs.size());
-      _values[ind][c] = val[ind];
+      _values[ind][i] = val[ind];
     }
   }
 }

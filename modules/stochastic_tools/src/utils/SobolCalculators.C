@@ -46,11 +46,17 @@ template <typename InType, typename OutType>
 void
 SobolCalculator<InType, OutType>::finalize(bool is_distributed)
 {
-  if (is_distributed)
-    this->_communicator.sum(_amat.get_values());
-
   // The size of the A matrix
-  const std::size_t s = _amat.n();
+  std::size_t s = _amat.n();
+
+  if (is_distributed)
+  {
+    this->_communicator.max(s);
+    if (_amat.n() == 0)
+      _amat.resize(s, s);
+    mooseAssert(_amat.n() == s, "Size of data updating SobolCalculator has changed.");
+    this->_communicator.sum(_amat.get_values());
+  }
 
   // Number of independent parameters
   const std::size_t n = (s - 2) / (_resample ? 2 : 1);

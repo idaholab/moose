@@ -58,6 +58,18 @@ template <typename InType, typename OutType, template <typename, typename> class
 void
 VectorCalculator<InType, OutType, CalcType>::finalize(bool is_distributed)
 {
+  // Need to make calculator objects if some data added
+  if (is_distributed)
+  {
+    auto ncalc = _calcs.size();
+    this->_communicator.max(ncalc);
+    for (const auto & i : make_range(_calcs.size(), ncalc))
+    {
+      _calcs.emplace_back(*this, this->name() + "_" + std::to_string(i));
+      _calcs.back().initializeCalculator();
+    }
+  }
+
   _values.reserve(_calcs.size());
   for (auto & cc : _calcs)
   {
