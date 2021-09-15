@@ -32,7 +32,7 @@ private:
   const std::vector<SubdomainName> _block;
 
   /// The amount of times to refine each block, corresponding to their index in 'block'
-  const std::vector<int> _refinement;
+  const std::vector<unsigned int> _refinement;
 
   /// Toggles whether neighboring level one elements should be refined or not. Defaults to true.
   const bool _enable_neighbor_refinement;
@@ -40,7 +40,7 @@ private:
   /// The actual function refining the blocks. This is done recursively in order to minimize the number of refinement iterations to as little as possible.
   virtual std::unique_ptr<MeshBase> recursive_refine(const std::vector<subdomain_id_type> block_ids,
                                                      std::unique_ptr<MeshBase> & mesh,
-                                                     const std::vector<int> refinement,
+                                                     const std::vector<unsigned int> refinement,
                                                      const int max,
                                                      int ref_step = 0);
 };

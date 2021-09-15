@@ -1,5 +1,4 @@
 [Mesh]
-  active='eg refine'
   [eg]
     type = CartesianMeshGenerator
     dim = 3

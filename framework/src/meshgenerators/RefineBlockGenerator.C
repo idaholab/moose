@@ -24,7 +24,7 @@ RefineBlockGenerator::validParams()
   params.addClassDescription("Mesh generator which refines one or more blocks in an existing mesh");
   params.addRequiredParam<MeshGeneratorName>("input", "Input mesh to refine");
   params.addRequiredParam<std::vector<SubdomainName>>("block", "The list of blocks to be refined");
-  params.addRequiredParam<std::vector<int>>(
+  params.addRequiredParam<std::vector<unsigned int>>(
       "refinement",
       "The amount of times to refine each block, corresponding to their index in 'block'");
   params.addParam<bool>(
@@ -39,7 +39,7 @@ RefineBlockGenerator::RefineBlockGenerator(const InputParameters & parameters)
   : MeshGenerator(parameters),
     _input(getMesh("input")),
     _block(getParam<std::vector<SubdomainName>>("block")),
-    _refinement(getParam<std::vector<int>>("refinement")),
+    _refinement(getParam<std::vector<unsigned int>>("refinement")),
     _enable_neighbor_refinement(getParam<bool>("enable_neighbor_refinement"))
 {
 }
@@ -47,7 +47,6 @@ RefineBlockGenerator::RefineBlockGenerator(const InputParameters & parameters)
 std::unique_ptr<MeshBase>
 RefineBlockGenerator::generate()
 {
-
   // Get the list of block ids from the block names
   const auto block_ids =
       MooseMeshUtils::getSubdomainIDs(*_input, getParam<std::vector<SubdomainName>>("block"));
@@ -79,11 +78,10 @@ RefineBlockGenerator::generate()
 std::unique_ptr<MeshBase>
 RefineBlockGenerator::recursive_refine(std::vector<subdomain_id_type> block_ids,
                                        std::unique_ptr<MeshBase> & mesh,
-                                       std::vector<int> refinement,
+                                       std::vector<unsigned int> refinement,
                                        int max,
                                        int ref_step)
 {
-
   if (ref_step == max)
     return dynamic_pointer_cast<MeshBase>(mesh);
   for (std::size_t i = 0; i < block_ids.size(); i++)
