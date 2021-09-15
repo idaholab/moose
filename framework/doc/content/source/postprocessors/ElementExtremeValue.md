@@ -2,9 +2,10 @@
 
 !syntax description /Postprocessors/ElementExtremeValue
 
-## Example Input File Syntax
+The corresponding postprocessor that find extreme values of noodal variables
+evaluated at nodes is [NodalExtremeValue](NodalExtremeValue.md)
 
-!! Describe and include an example of how to use the ElementExtremeValue object.
+## Example Input File Syntax
 
 !syntax parameters /Postprocessors/ElementExtremeValue
 

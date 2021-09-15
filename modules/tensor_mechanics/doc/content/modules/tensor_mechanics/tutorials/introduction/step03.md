@@ -48,10 +48,6 @@ easy.
 
 [Click here for the answer.](tensor_mechanics/tutorials/introduction/answer03a.md)
 
-### Postprocessing results
-
->
-
 ### Sidebar: Thermal expansion
 
 > In addition to externally applied loading deformation can be induced by

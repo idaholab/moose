@@ -5,6 +5,7 @@
 
 [GlobalParams]
   displacements = 'disp_x disp_y'
+  block = 0
 []
 
 [Mesh]
@@ -45,7 +46,6 @@
     add_variables = true
     strain = FINITE
     generate_output = 'vonmises_stress'
-    block = 0
   []
 []
 
@@ -87,11 +87,9 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e9
     poissons_ratio = 0.3
-    block = 0
   []
   [stress]
     type = ComputeFiniteStrainElasticStress
-    block = 0
   []
 []
 

@@ -1,4 +1,4 @@
-# Step 2 - Adding Boundary Conditions
+# Step 2 - Adding boundary conditions
 
 In the previous step we set up a basic small strain mechanics simulation that
 did... nothing. In this step we're adding some loading on the top and we'll fix
@@ -97,6 +97,8 @@ is not always feasible, and it is not exact under every circumstance.
 > - [ADDirichletBC](ADDirichletBC.md)
 > - [ADComputeIsotropicElasticityTensor](ComputeIsotropicElasticityTensor.md)
 > - [ADComputeFiniteStrainElasticStress](ADComputeFiniteStrainElasticStress.md)
+
+[Click here for the answer.](tensor_mechanics/tutorials/introduction/answer02c.md)
 
 Once you've answered the questions and run this example we will move on to
 [Step 3](tensor_mechanics/tutorials/introduction/step03.md) where the concept of subdomains or "blocks" is

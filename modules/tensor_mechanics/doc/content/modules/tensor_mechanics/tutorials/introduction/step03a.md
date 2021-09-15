@@ -39,6 +39,40 @@ function of space and time. Note the
 MOOSE systems. Here we skip execution during LINEAR and NON_LINEAR iterations
 and only update the varaibale value at the beginning of the timestep.
 
+### TensorMechanics `Master` Action
+
+We've added the
+[!param](/Modules/TensorMechanics/Master/TensorMechanicsAction/automatic_eigenstrain_names)
+parameter to the master action. With this option enabled the master action will
+try to automatically detect all material objects that provide eigenstrain
+properties. This works well for most scenarios. Note that MOOSE will print a
+list of detected eigenstrain names very early in its console output. Look for
+
+```
+*** Automatic Eigenstrain Names ***
+all: thermal_expansion
+```
+
+when you run this example. Here `all` is the master action block name and
+`thermal_expansion` is the
+[!param](/Materials/ComputeThermalExpansionEigenstrain/eigenstrain_name)
+parameter value for the two eigenstrain materials below. The action correctly
+detected it and verified that eigenstrains are provided on all subdomains
+covered by the master action block. To manually supply the eigenstrain material
+properties use the
+[!param](/Modules/TensorMechanics/Master/TensorMechanicsAction/eigenstrain_names)
+parameter. Like so
+
+```
+[Modules/TensorMechanics/Master]
+  [all]
+    add_variables = true
+    eigenstrain_names = 'thermal_expansion'
+    generate_output = 'vonmises_stress'
+  []
+[]
+```
+
 ### `BCs`
 
 We have changed the way we apply the boundary condition on the x displacement
@@ -87,16 +121,24 @@ bimetallic strip.
 
 [Click here for the answer.](tensor_mechanics/tutorials/introduction/answer03b.md)
 
-### Constraining even less
+### Overconstraining
 
-> In the example we're fixing the y displacement to 0 in the entire bottom
-> boundary. Try to relax this constraint a bit try to add a second single node
-> boundary using the `ExtraNodesetGenerator` (chained in after the `pin`
-> generator). Use one of the two bottom corner nodes. Now think about where you
-> have to apply the `disp_y != 0` boundary condition.
+> Apply the `disp_x` boundary condition to the entire bottom surface again and
+> observe what happens. Undo that change before you move on to the next
+> question.
 
 [Click here for the answer.](tensor_mechanics/tutorials/introduction/answer03c.md)
 
-Once you've answerd the questions and run this example we will move on to
+### Constraining even less
+
+> In the original input we're fixing the y displacement to 0 in the entire
+> bottom boundary. Try to relax this constraint a bit try to add a second single
+> node boundary using the `ExtraNodesetGenerator` (chained in after the `pin`
+> generator). Use one of the two bottom corner nodes. Now think about where you
+> have to apply the `disp_y != 0` boundary condition.
+
+[Click here for the answer.](tensor_mechanics/tutorials/introduction/answer03d.md)
+
+Once you've answered the questions and run this example we will move on to
 [Step 4](tensor_mechanics/tutorials/introduction/step04.md)  and setup a
 cantilever problem that prepares us for contact.

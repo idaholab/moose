@@ -13,7 +13,7 @@ space without interacting. We're about to change that.
 
 ### `Mesh`
 
-We add the [!param](/Mesh/patch_update_strategy) parameter and set it to
+We add the [!param](/Mesh/FileMesh/patch_update_strategy) parameter and set it to
 `iteration`. MOOSE actually recommends this setting when you run the model
 without it. The parameter configures the geometric search that is required for
 modeling contact.
@@ -48,6 +48,8 @@ First run the example and look at the output. You should see some new fields
 that can be visualized in Paraview (or the Exodus viewer of your choice). In
 particular please pay attention to `contact_force` and `penetration`.
 
+### Penetration
+
 > Visualize the penetration variable. You may have to rescale the visualiztion
 > to start the color scale at 0. Negative pentrations are not of interest here
 > (they effectively are the gap width)
@@ -55,3 +57,7 @@ particular please pay attention to `contact_force` and `penetration`.
 You should see a maximum interpenetration of about 6e-4, which is about half a
 percent of the element width. It is application dependent whether this amount is
 acceptable.
+
+Once you've answered the questions and run this example we will move on to
+[Step 2](tensor_mechanics/tutorials/introduction/step03.md) which introduces
+mortar based contact.

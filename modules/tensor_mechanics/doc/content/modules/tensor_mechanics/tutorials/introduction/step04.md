@@ -90,4 +90,32 @@ petsc_options_iname = '-pc_type -pc_hypre_type'
 petsc_options_value = 'hypre boomeramg'
 ```
 
-This enables a very scalabl algebraic multigrid (AMG) preconditioner, provided by the [Hypre](https://computing.llnl.gov/projects/hypre-scalable-linear-solvers-multigrid-methods/software) library.
+This enables a very scalabl algebraic multigrid (AMG) preconditioner, provided
+by the
+[Hypre](https://computing.llnl.gov/projects/hypre-scalable-linear-solvers-multigrid-methods/software)
+library.
+
+### Postprocessing results
+
+MOOSE has a system of so called [Postprocessors](Postprocessors/index.md) that
+can extract scalar quantities for a simulation while it runs. These quantities
+can be prnte on the screen in real time or written to files for later analysis.
+You add postprocessors under the `[Postprocessors]` top level block.
+
+File output of postprocessors is enabled by adding the `csv = true` option in
+the `[Outputs]` block.
+
+> Let's see if we can extract the x deflection of the left cantilever. It should
+> be a positive value and the scalar we can extract is the maximum `disp_x`
+> value in the simualtion cell (the left cantilever has positive displacements
+> as it bends right in the positive x direction, while the right cantilever has
+> negative displacements as it bends left in the negative x direction). So we
+> need a postprocessor object that gives us an extreme value of a given
+> variable. Take a look at [NodalExtremeValue](NodalExtremeValue.md) and try to
+> set it up to output the maximum positive x deflection.
+
+[Click here for the answer.](tensor_mechanics/tutorials/introduction/answer04a.md)
+
+Once you've answered the questions and run this example we will move on to
+[Step 1](contact/tutorials/introduction/step04.md optional=True) of the contact
+tutorial, which builds on this step.
