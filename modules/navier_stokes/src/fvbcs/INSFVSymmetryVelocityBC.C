@@ -58,7 +58,7 @@ INSFVSymmetryVelocityBC::computeQpResidual()
   const auto & v_C = use_elem ? _v_elem : _v_neighbor;
   const auto & w_C = use_elem ? _w_elem : _w_neighbor;
 
-  //FIXME add limiter
+  // FIXME add limiter
   const auto mu_b = _mu(std::make_tuple(_face_info, nullptr, true, faceArgSubdomains()));
 
   const auto d_perpendicular = std::abs((_face_info->faceCentroid() - cell_centroid) * _normal);
