@@ -33,6 +33,10 @@ boundaries `pillar1_left`, `pillar1_right`, `pillar1_top`, and `pillar1_bottom`.
 
 The `generated2` generator will set up the second pillar and works very much like the first, except that we are also adding the [!param](/Mesh/GeneratedMeshGenerator/boundary_id_offset) to ensure that the boundaries of the second pillar have their own unique IDs (this is done by shifing the default IDs of the four boundaries by 4 so they don't overlap with the IDs of pillar1).
 
+!alert note
+When modeling the deformation/bending of walls with solid elements make sure to
+mesh at least about *five* elements through the wall thickness!
+
 The [`MeshCollectionGenerator`](MeshCollectionGenerator.md) then combines the two separate pillar mesh objects into a single mesh object that contains all elements from both meshes. Note that this does **not** mean the two meshes are glued together or connected in any way! Also, in contrast to the previous step the mesh generators do not form a *chain*, but they form a tree structure. The important thing for MOOSE is that a single genrator sits at the end of such a chain or root of such a tree (otherwise MOOSE will complain with an error message).
 
 ### TensorMechanics `Master` Action
@@ -52,11 +56,9 @@ elastic stress calculator for the finite strain formulation.
 
 ### `Executioner`
 
-A lot is going on in the Executionr block here, and you should try playing with some of the settings later on.
+Some more tweaks are made to the Executioner block:
 
-- We select NEWTON as our [!param](/Mesh/GeneratedMeshGenerator/solve_type). This is a good (fast) option whenever we have a complete Jacobian for the system. It should give us 1-2 linear iterations for every non-linear iteration. Note that for NEWTON solves MOOSE automatically sets up an [`SMP`](SingleMatrixPreconditioner.md) with the [!param](/Preconditioning/SMP/full) option set to `true` (this can be disabled by setting [!param](/Executioner/auto_preconditioning) to `false`).
 - We disable [!param](/Executioner/line_search). Line searches can accelerate the convergence of the linear system, but here it does more harm than good (check for yourself by commenting out this option).
-- We use LU decomposition to solve the linear problem, this preconditioner is very effective on a small problem like this.
 - We add a predictor to accelerate the solve. The `SimplePredictor` extrapolates an initial guess for the current time step from the two previous time steps. Especially with a Newton solve a good initial guess can lead to drastically improved convergence.
 
 ## Questions

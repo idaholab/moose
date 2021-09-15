@@ -99,5 +99,5 @@ is not always feasible, and it is not exact under every circumstance.
 > - [ADComputeFiniteStrainElasticStress](ADComputeFiniteStrainElasticStress.md)
 
 Once you've answerd the questions and run this example we will move on to
-[Step 3](introduction/step03.md) where the consept of subdomains or "blocks" is
+[Step 3](introduction/step03.md) where the concept of subdomains or "blocks" is
 introduced.

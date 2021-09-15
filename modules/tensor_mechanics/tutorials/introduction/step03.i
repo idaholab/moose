@@ -11,8 +11,8 @@
   [generated]
     type = GeneratedMeshGenerator
     dim = 2
-    nx = 10
-    ny = 10
+    nx = 40
+    ny = 20
     xmax = 2
     ymax = 1
   []
@@ -79,15 +79,11 @@
   []
 []
 
-[Preconditioning]
-  [SMP]
-    type = SMP
-    full = true
-  []
-[]
-
 [Executioner]
   type = Transient
+  solve_type = NEWTON
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'lu'
   end_time = 5
   dt = 1
 []
