@@ -156,7 +156,8 @@ All non-system includes should use quotes with a single space between `include` 
 ## Documentation
 
 - In source documentation should be extensive, designed toward the software developer, and be
-  formatted for the use of [Doxygen](https://www.doxygen.nl/index.html). For example,
+  formatted for the use of [Doxygen](https://www.doxygen.nl/index.html).
+
 
 ## Python
 
