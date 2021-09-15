@@ -28,23 +28,23 @@ private:
   /// Input mesh to refine
   std::unique_ptr<MeshBase> & _input;
 
-  /// List of block(s) to refine
+  /// List of boundarie(s) to refine
   const std::vector<BoundaryName> _boundaries;
 
-  /// The amount of times to refine each block, corresponding to their index in 'block'
+  /// The amount of times to refine each boundary, corresponding to their index in 'boundaries'
   const std::vector<int> _refinement;
 
   /// Toggles whether neighboring level one elements should be refined or not. Defaults to true.
   const bool _enable_neighbor_refinement;
 
-  /// Side(s) of the boundary to be refined
-  const std::vector<MooseEnum> _boundary_side;
+  /// Side(s) of the boundary/boundaries to be refined. Can be either "primary"(just the boundary elements), "secondary"(just the neighboring elements), or "both."
+  const MultiMooseEnum _boundary_side;
 
-  /// The actual function refining the blocks. This is done recursively in order to minimize the number of refinement iterations to as little as possible.
-  virtual std::unique_ptr<MeshBase> recursive_refine(const std::vector<boundary_id_type> boundary_ids,
-                                                     const std::vector<MooseEnum> boundary_side,
-                                                     std::unique_ptr<MeshBase> & mesh,
-                                                     const std::vector<int> refinement,
-                                                     const int max,
-                                                     int ref_step = 0);
+  /// The actual function refining the boundaries. This is done recursively in order to minimize the number of refinement iterations.
+  virtual std::unique_ptr<MeshBase>
+  recursive_refine(const std::vector<boundary_id_type> boundary_ids,
+                   std::unique_ptr<MeshBase> & mesh,
+                   const std::vector<int> refinement,
+                   const int max,
+                   int ref_step = 0);
 };
