@@ -33,7 +33,7 @@ def command_line_options(subparser, parent):
     parser.add_argument('--update-gold', action='store_true',
                         help="Copy the rendered results to the gold directory.")
     parser.add_argument('--executioner',
-                        default='MooseDocs.base.ParallelBarrier',
+                        default='MooseDocs.base.ParallelQueue',
                         help="Select the mode of execution.")
 
 def prepare_content(content):

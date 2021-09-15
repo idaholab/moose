@@ -17,7 +17,7 @@ import moosesqa
 import copy
 import MooseDocs
 from MooseDocs.commands import build
-from MooseDocs import base
+from MooseDocs import base, common
 
 class TestBuild(unittest.TestCase):
     def setUp(self):
@@ -36,7 +36,7 @@ class TestBuild(unittest.TestCase):
         kwargs.setdefault('args', None)
         kwargs.setdefault('disable', [])
         kwargs.setdefault('fast', False)
-        kwargs.setdefault('executioner', 'MooseDocs.base.ParallelBarrier')
+        kwargs.setdefault('executioner', 'MooseDocs.base.ParallelQueue')
         kwargs.setdefault('profile', False)
         kwargs.setdefault('destination', None)
         kwargs.setdefault('serve', False)
@@ -52,46 +52,91 @@ class TestBuild(unittest.TestCase):
 
     # Note: mock.patch.object() decorators are applied from the bottom upwards
     @mock.patch.object(base.Translator, 'execute')
-    @mock.patch.object(base.Translator, 'update')
     @mock.patch.object(base.Translator, 'init')
-    def testBuildDefault(self, init_mock, update_mock, execute_mock):
+    def testBuildDefault(self, init_mock, execute_mock):
         opt = self.getCommandLineArguments()
         status = build.main(opt)
-        update_mock.assert_called_once()
         init_mock.assert_called_once()
         execute_mock.assert_called()
 
     @mock.patch.object(base.Translator, 'execute')
-    @mock.patch.object(base.Translator, 'update')
     @mock.patch.object(base.Translator, 'init')
-    def testBuildConfigEdit(self, init_mock, update_mock, execute_mock):
-        load_func = MooseDocs.common.load_config
+    def testBuildConfigEdit(self, init_mock, execute_mock):
+        load_configs = common.load_configs # get a static refernce to the real load_configs()
 
-        # Un-modified
-        opt = self.getCommandLineArguments()
-        def load_un_modifed(*args, **kwargs):
-            t, c = load_func(*args, **kwargs)
-            self.assertNotIn('MooseDocs.extensions.listing', c['Extensions'])
-            for ext in t.extensions:
+        # Unmodified
+        def load_unmodified(filenames, **kwargs):
+            trans, _, confs = load_configs(filenames, **kwargs)
+            self.assertNotIn('MooseDocs.extensions.listing', confs[0]['Extensions'])
+            for ext in trans[0].extensions:
                 if isinstance(ext, MooseDocs.extensions.listing.ListingExtension):
                     self.assertTrue(ext['modal-link'])
-            return t, c
+            return trans, [[]], confs
 
-        with mock.patch('MooseDocs.common.load_config', wraps=load_un_modifed):
+        opt = self.getCommandLineArguments()
+        with mock.patch('MooseDocs.common.load_configs', load_unmodified):
             status = build.main(opt)
 
         # Modified
-        opt = self.getCommandLineArguments(args={'Extensions': {'MooseDocs.extensions.listing': {'modal-link': 0}}})
-        def load_modified(*args, **kwargs):
-            t, c = load_func(*args, **kwargs)
-            self.assertFalse(c['Extensions']['MooseDocs.extensions.listing']['modal-link'])
-            for ext in t.extensions:
+        def load_modified(filenames, **kwargs):
+            trans, _, confs = load_configs(filenames, **kwargs)
+            self.assertFalse(confs[0]['Extensions']['MooseDocs.extensions.listing']['modal-link'])
+            for ext in trans[0].extensions:
                 if isinstance(ext, MooseDocs.extensions.listing.ListingExtension):
                     self.assertFalse(ext['modal-link'])
-            return t, c
+            return trans, [[]], confs
 
-        with mock.patch('MooseDocs.common.load_config', wraps=load_modified):
+        args = {'Extensions': {'MooseDocs.extensions.listing': {'modal-link': 0}}}
+        opt = self.getCommandLineArguments(args=args)
+        with mock.patch('MooseDocs.common.load_configs', load_modified):
             status = build.main(opt)
+
+        # Multiple
+        def load_multiple(filenames, **kwargs):
+            trans, conts, confs = load_configs(filenames, **kwargs)
+
+            # Assert translators
+            self.assertEqual(len(trans), 2)
+            self.assertIsInstance(trans[0], base.Translator)
+            self.assertIsInstance(trans[1], base.Translator)
+            self.assertIsNot(*trans)
+            self.assertEqual(trans[0].destination, trans[1].destination)
+
+            # Assert that translators have access to the same global pool of non-directory content
+            isdir = lambda p: isinstance(p, MooseDocs.tree.pages.Directory)
+            sort_local = lambda p: p.local
+            page_list = [sorted([p for p in trans[0].getPages() if not isdir(p)], key=sort_local)]
+            page_list += [sorted([p for p in trans[1].getPages() if not isdir(p)], key=sort_local)]
+            self.assertListEqual(*page_list)
+
+            # Assert build content lists
+            self.assertEqual(len(conts), 2)
+            self.assertIsInstance(conts[0], list)
+            self.assertIsInstance(conts[1], list)
+            for page in conts[0]:
+                self.assertNotIn(page, conts[1])
+
+            # Assert configurations
+            self.assertEqual(len(confs), 2)
+            self.assertIsInstance(confs[0], dict)
+            self.assertIsInstance(confs[1], dict)
+            self.assertNotEqual(*confs)
+
+            self._load_multiple_out = (trans, conts, confs)
+            return self._load_multiple_out
+
+        testpath = '../../python/MooseDocs/test/'
+        configs = [testpath + config for config in ['config.yml', 'subsite_config.yml']]
+        opt = self.getCommandLineArguments(config=configs)
+        with mock.patch('MooseDocs.common.load_configs', load_multiple):
+            status = build.main(opt)
+            _, conts, _ = self._load_multiple_out
+            init_mock.assert_any_call(conts[0])
+            init_mock.assert_any_call(conts[1])
+            execute_mock.assert_any_call(conts[0], opt.num_threads, render=False, write=False)
+            execute_mock.assert_any_call(conts[1], opt.num_threads, render=False, write=False)
+            execute_mock.assert_any_call(conts[0], opt.num_threads, read=False, tokenize=False)
+            execute_mock.assert_any_call(conts[1], opt.num_threads, read=False, tokenize=False)
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

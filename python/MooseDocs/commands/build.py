@@ -10,6 +10,7 @@
 """Defines the MooseDocs build command."""
 import os
 import sys
+import time
 import collections
 import multiprocessing
 import logging
@@ -45,7 +46,7 @@ def command_line_options(subparser, parent):
                         help="Build the pages with the slowest extension (appsyntax) disabled.")
     parser.add_argument('--executioner',
                         help="Select the mode of execution " \
-                             "(default: MooseDocs.base.ParallelBarrier).")
+                             "(default: MooseDocs.base.ParallelQueue).")
     parser.add_argument('--profile', action='store_true',
                         help="Build the pages with python profiling.")
     parser.add_argument('--destination', default=None,
@@ -54,8 +55,9 @@ def command_line_options(subparser, parent):
                         help="Create a local live server.")
     parser.add_argument('--dump', action='store_true',
                         help="Show page tree to the screen.")
-    parser.add_argument('--num-threads', '-j', type=int, default=int(multiprocessing.cpu_count()/2),
-                        help="Specify the number of threads to build pages with.")
+    parser.add_argument('--num-threads', '-j', type=int, choices=range(1, 13),
+                        default=min(int(multiprocessing.cpu_count() / 2), 12),
+                        help="The number of parallel threads to execute with. The max. is twelve.")
     parser.add_argument('--port', default='8000', type=str,
                         help="The host port for live web server (default: %(default)s).")
     parser.add_argument('--host', default='127.0.0.1', type=str,
@@ -156,6 +158,8 @@ def main(options):
     Inputs:
         options[argparse options]: Complete options from argparse, see MooseDocs/main.py
     """
+    t = time.time()
+
     # Infinite nested dict
     tree = lambda: collections.defaultdict(tree)
     kwargs = tree()
@@ -258,6 +262,8 @@ def main(options):
         if subconfigs:
             LOG.info('Writing content specified by %s', config_files[index])
         translator.execute(contents[index], options.num_threads, read=False, tokenize=False)
+
+    LOG.info('Total Time [%s sec.]', time.time() - t)
 
     # Run live server and watch for content changes
     if options.serve:

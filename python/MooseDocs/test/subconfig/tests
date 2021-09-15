@@ -1,0 +1,11 @@
+[Tests]
+  issues = '#18137'
+  design = subsite/index.md
+
+  [build]
+    type = RunCommand
+    command = 'python moosedocs.py build'
+    requirement = "MooseDocs shall be able to successfully translate the standalone form of the "
+                  "subsite test configuration by using the default build command."
+  []
+[]

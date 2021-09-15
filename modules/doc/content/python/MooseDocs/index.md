@@ -28,3 +28,4 @@ The following links provide additional details on the MOOSE documentation system
 If you are creating a website for your own application the following page may be of use:
 
 - [MooseDocs/setup.md]
+- [MooseDocs/config.md]
