@@ -14,27 +14,29 @@
 namespace StochasticTools
 {
 
-template <typename T>
-using VecOfVec = std::vector<std::vector<T>>;
-
 template <typename InType, typename OutType>
-class Percentile<VecOfVec<InType>, VecOfVec<OutType>>
-  : public BootstrapCalculator<VecOfVec<InType>, VecOfVec<OutType>>
+class Percentile<std::vector<std::vector<InType>>, std::vector<std::vector<OutType>>>
+  : public BootstrapCalculator<std::vector<std::vector<InType>>, std::vector<std::vector<OutType>>>
 {
 public:
-  using BootstrapCalculator<VecOfVec<InType>, VecOfVec<OutType>>::BootstrapCalculator;
-  virtual std::vector<VecOfVec<OutType>> compute(const VecOfVec<InType> &, const bool) override;
+  using BootstrapCalculator<std::vector<std::vector<InType>>,
+                            std::vector<std::vector<OutType>>>::BootstrapCalculator;
+  virtual std::vector<std::vector<std::vector<OutType>>>
+  compute(const std::vector<std::vector<InType>> &, const bool) override;
 };
 
 template <typename InType, typename OutType>
-struct BootstrapCalculatorBuilder<VecOfVec<InType>, VecOfVec<OutType>>
+struct BootstrapCalculatorBuilder<std::vector<std::vector<InType>>,
+                                  std::vector<std::vector<OutType>>>
 {
-  static std::unique_ptr<BootstrapCalculator<VecOfVec<InType>, VecOfVec<OutType>>>
+  static std::unique_ptr<
+      BootstrapCalculator<std::vector<std::vector<InType>>, std::vector<std::vector<OutType>>>>
   build(const MooseEnum &,
         const libMesh::ParallelObject &,
         const std::vector<Real> &,
         unsigned int,
         unsigned int,
-        StochasticTools::Calculator<VecOfVec<InType>, VecOfVec<OutType>> &);
+        StochasticTools::Calculator<std::vector<std::vector<InType>>,
+                                    std::vector<std::vector<OutType>>> &);
 };
 }
