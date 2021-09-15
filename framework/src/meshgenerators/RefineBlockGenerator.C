@@ -98,5 +98,5 @@ RefineBlockGenerator::recursive_refine(std::vector<subdomain_id_type> block_ids,
   refinedmesh.refine_elements();
 
   ref_step++;
-  return recurs_refine(block_ids, mesh, refinement, max, ref_step);
+  return recursive_refine(block_ids, mesh, refinement, max, ref_step);
 }
