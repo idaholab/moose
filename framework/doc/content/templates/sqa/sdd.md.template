@@ -1,5 +1,9 @@
 # {{project}} System Design Description
 
+*This template follows [!ac](INL) template TEM-140, "IT System Design Description."*
+
+!template field key=pre-intro required=False
+
 ## Introduction id=introduction
 
 !template field key=introduction
