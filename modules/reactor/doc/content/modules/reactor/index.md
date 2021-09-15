@@ -10,7 +10,8 @@ This module consists of a series of new mesh generators to enable meshing of a h
 - Stitching the unit hexagon meshes and adding appropriate peripheral regions to form hexagon assembly regions;
 - Creating unit hexagon meshes with adaptive external boundaries that are stitch-able with assembly meshes;
 - Stitching the assembly meshes and adaptive-boundary unit hexagon meshes to form a core mesh;
-- Modifying unit hexagon meshes to create azimuthal section blocks to enable static simulation of rotational control drums.
+- Modifying unit hexagon meshes to create azimuthal section blocks to enable static simulation of rotational control drum;
+- Adding reporting IDs (extra element integers) to mesh elements to identify pins, assemblies, plane regions.
 
 Aside from the mesh generators, this `reactor` module also includes a Function object to enable dynamic simulation of rotational control drums in a reactor core mesh.
 

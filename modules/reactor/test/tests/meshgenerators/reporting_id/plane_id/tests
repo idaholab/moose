@@ -1,4 +1,6 @@
 [Tests]
+  design = 'meshgenerators/PlaneIDMeshGenerator.md'
+  issues = '#19217'
   [2d_cartesian_grid]
     requirement = 'The system shall support the generation of plane IDs for 2D Cartesian grid'
     [x_dir]

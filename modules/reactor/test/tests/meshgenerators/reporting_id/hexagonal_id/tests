@@ -1,4 +1,6 @@
 [Tests]
+  design = 'meshgenerators/HexIDPatternedMeshGenerator.md'
+  issues = '#19217'
   [assembly]
     requirement = 'The system shall support the generation of reporting IDs for hexagonal assemblies assigned'
     [cell]

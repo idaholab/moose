@@ -1,4 +1,6 @@
 [Tests]
+  design = 'meshgenerators/CartesianIDPatternedMeshGenerator.md'
+  issues = '#19217'
   [assembly]
     requirement = 'The system shall support the generation of reporting IDs for Cartesian assemblies assigned'
     [cell]
