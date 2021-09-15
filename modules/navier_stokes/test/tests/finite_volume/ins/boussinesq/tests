@@ -47,4 +47,13 @@
     method = '!dbg'
     valgrind = 'none'
   []
+  [transient_wcnsfv]
+    type = Exodiff
+    input = transient-wcnsfv.i
+    exodiff = transient-wcnsfv_out.e
+    requirement = 'The system shall be able to model transient natural convection using a weakly compressible implementation.'
+    ad_indexing_type = 'global'
+    method = '!dbg'
+    cli_args = "Outputs/out/execute_on='final'"
+  []
 []

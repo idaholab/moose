@@ -35,4 +35,6 @@ protected:
 
   /// the density to be computed
   FunctorMaterialProperty<ADReal> & _rho;
+  /// the time derivative of density to be computed
+  FunctorMaterialProperty<ADReal> & _rho_dot;
 };
