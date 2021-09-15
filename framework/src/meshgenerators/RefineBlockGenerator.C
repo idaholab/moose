@@ -79,8 +79,8 @@ std::unique_ptr<MeshBase>
 RefineBlockGenerator::recursive_refine(std::vector<subdomain_id_type> block_ids,
                                        std::unique_ptr<MeshBase> & mesh,
                                        std::vector<unsigned int> refinement,
-                                       int max,
-                                       int ref_step)
+                                       unsigned int max,
+                                       unsigned int ref_step)
 {
   if (ref_step == max)
     return dynamic_pointer_cast<MeshBase>(mesh);

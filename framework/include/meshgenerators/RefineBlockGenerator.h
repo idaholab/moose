@@ -41,6 +41,6 @@ private:
   virtual std::unique_ptr<MeshBase> recursive_refine(const std::vector<subdomain_id_type> block_ids,
                                                      std::unique_ptr<MeshBase> & mesh,
                                                      const std::vector<unsigned int> refinement,
-                                                     const int max,
-                                                     int ref_step = 0);
+                                                     const unsigned int max,
+                                                     unsigned int ref_step = 0);
 };
