@@ -1,5 +1,9 @@
 # {{project}} Software Test Plan
 
+*This template follows [!ac](INL) template TEM-141, "Software Test Plan."*
+
+!template field key=pre-intro required=False
+
 ## Test Scope id=test-scope
 
 !template! field key=test-scope
