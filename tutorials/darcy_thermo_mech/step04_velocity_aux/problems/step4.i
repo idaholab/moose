@@ -11,18 +11,6 @@
 []
 
 [AuxVariables]
-  [velocity_x]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [velocity_y]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [velocity_z]
-    order = CONSTANT
-    family = MONOMIAL
-  []
   [velocity]
     order = CONSTANT
     family = MONOMIAL_VEC
@@ -42,27 +30,6 @@
     variable = velocity
     execute_on = timestep_end
     pressure = pressure
-  []
-  [velocity_x]
-    type = VectorVariableComponentAux
-    variable = velocity_x
-    component = x
-    execute_on = timestep_end
-    vector_variable = velocity
-  []
-  [velocity_y]
-    type = VectorVariableComponentAux
-    variable = velocity_y
-    component = y
-    execute_on = timestep_end
-    vector_variable = velocity
-  []
-  [velocity_z]
-    type = VectorVariableComponentAux
-    variable = velocity_z
-    component = z
-    execute_on = timestep_end
-    vector_variable = velocity
   []
 []
 
