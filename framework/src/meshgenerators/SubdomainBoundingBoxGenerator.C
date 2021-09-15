@@ -92,7 +92,7 @@ SubdomainBoundingBoxGenerator::generate()
       if (_has_restriction && restricted_ids.count(elem->subdomain_id()) == 0)
         continue;
 
-      bool contains = _bounding_box.contains_point(elem->centroid());
+      bool contains = _bounding_box.contains_point(elem->vertex_average());
       if ((contains && _location == "INSIDE") || (!contains && _location == "OUTSIDE"))
         elem->set_extra_integer(id, _block_id);
     }
@@ -105,7 +105,7 @@ SubdomainBoundingBoxGenerator::generate()
       if (_has_restriction && restricted_ids.count(elem->subdomain_id()) == 0)
         continue;
 
-      bool contains = _bounding_box.contains_point(elem->centroid());
+      bool contains = _bounding_box.contains_point(elem->vertex_average());
       if ((contains && _location == "INSIDE") || (!contains && _location == "OUTSIDE"))
         elem->subdomain_id() = _block_id;
     }

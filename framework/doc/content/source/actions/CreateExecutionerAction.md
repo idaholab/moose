@@ -1,28 +1,11 @@
 # CreateExecutionerAction
 
-!alert! construction title=Undocumented Action Class
-The CreateExecutionerAction has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with an Action;
-however, what is contained is ultimately determined by what is necessary to make the documentation
-clear for users.
-
-```markdown
-# CreateExecutionerAction
-
 !syntax description /Executioner/CreateExecutionerAction
 
-## Overview
+This action can add a default preconditioner if none is specified.
+This action examines the parameter in the `[Executioner]` block for consistency with the `Problem`.
 
-!! Replace these lines with information regarding the CreateExecutionerAction action.
-
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the CreateExecutionerAction action.
-
-!syntax parameters /Executioner/CreateExecutionerAction
-```
-!alert-end!
-
-!syntax description /Executioner/CreateExecutionerAction
+More information about `Executioners` may be found on the
+[Executioners syntax documentation](syntax/Executioner/index.md).
 
 !syntax parameters /Executioner/CreateExecutionerAction

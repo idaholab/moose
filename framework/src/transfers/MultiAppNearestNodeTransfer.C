@@ -239,7 +239,7 @@ MultiAppNearestNodeTransfer::execute()
           // For constant monomial, we take the centroid of element
           if (is_constant)
           {
-            points.push_back(elem->centroid());
+            points.push_back(elem->vertex_average());
             point_ids.push_back(elem->id());
           }
 
@@ -298,7 +298,7 @@ MultiAppNearestNodeTransfer::execute()
                        ": No candidate BoundingBoxes found for Elem ",
                        elem->id(),
                        ", centroid = ",
-                       elem->centroid());
+                       elem->vertex_average());
       }
     }
   }
@@ -578,7 +578,7 @@ MultiAppNearestNodeTransfer::execute()
         // for constant shape function, we take the element centroid
         if (is_constant)
         {
-          points.push_back(elem->centroid());
+          points.push_back(elem->vertex_average());
           point_ids.push_back(elem->id());
         }
         // for higher order method, we take all nodes of element
@@ -786,7 +786,7 @@ MultiAppNearestNodeTransfer::getLocalEntitiesAndComponents(
           // CONSTANT Monomial
           if (is_constant)
           {
-            local_entities.emplace_back(belem->_elem->centroid(), belem->_elem);
+            local_entities.emplace_back(belem->_elem->vertex_average(), belem->_elem);
             local_comps.push_back(comp++);
           }
           // L2_LAGRANGE
@@ -823,7 +823,7 @@ MultiAppNearestNodeTransfer::getLocalEntitiesAndComponents(
         // CONSTANT Monomial
         if (is_constant)
         {
-          local_entities.emplace_back(elem->centroid(), elem);
+          local_entities.emplace_back(elem->vertex_average(), elem);
           local_comps.push_back(comp++);
         }
         // L2_LAGRANGE
@@ -864,7 +864,7 @@ MultiAppNearestNodeTransfer::getLocalEntities(
       for (const auto & belem : bnd_elems)
         if (belem->_bnd_id == src_bnd_id &&
             belem->_elem->processor_id() == mesh_base.processor_id())
-          local_entities.emplace_back(belem->_elem->centroid(), belem->_elem);
+          local_entities.emplace_back(belem->_elem->vertex_average(), belem->_elem);
     }
   }
   else
@@ -879,7 +879,7 @@ MultiAppNearestNodeTransfer::getLocalEntities(
     {
       local_entities.reserve(mesh_base.n_local_elem());
       for (auto & elem : mesh_base.active_local_element_ptr_range())
-        local_entities.emplace_back(elem->centroid(), elem);
+        local_entities.emplace_back(elem->vertex_average(), elem);
     }
   }
 }

@@ -59,7 +59,7 @@
   [force_density]
     type = GenericConstantVectorMaterial
     prop_names = force_density
-    prop_values = '0 19.9995 0'
+    prop_values = '0 -19.9995 0'
   []
 []
 

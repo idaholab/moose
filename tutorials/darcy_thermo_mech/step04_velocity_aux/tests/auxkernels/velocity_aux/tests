@@ -8,11 +8,4 @@
     requirement = "The Darcy-Thermomechanics tutorial shall include method for computing the velocity based pressure using Darcy equation."
     custom_cmp = 'velocity_aux.cmp'
   []
-  [nodal_error]
-    type = 'RunException'
-    input = 'velocity_aux.i'
-    cli_args = "AuxVariables/velocity_x/order=FIRST AuxVariables/velocity_x/family=LAGRANGE"
-    expect_err = "velocity_x: cannot couple elemental variables into nodal objects"
-    requirement = "The Darcy-Thermomechanics tutorial object for computing velocity shall error if computed at nodes."
-  []
 []

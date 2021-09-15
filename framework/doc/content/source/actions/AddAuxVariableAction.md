@@ -1,28 +1,13 @@
 # AddAuxVariableAction
 
-!alert! construction title=Undocumented Action Class
-The AddAuxVariableAction has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with an Action;
-however, what is contained is ultimately determined by what is necessary to make the documentation
-clear for users.
-
-```markdown
-# AddAuxVariableAction
-
 !syntax description /AuxVariables/AddAuxVariableAction
 
-## Overview
+This action derives from the [AddVariableAction.md]. It checks the auxiliary variable family and type before
+adding it to the [Problem](syntax/Problem/index.md).
 
-!! Replace these lines with information regarding the AddAuxVariableAction action.
+Auxiliary variables, which are not directly being solved for in the non-linear system,
+are specified as an object inside the `[AuxVariables]` block.
 
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the AddAuxVariableAction action.
-
-!syntax parameters /AuxVariables/AddAuxVariableAction
-```
-!alert-end!
-
-!syntax description /AuxVariables/AddAuxVariableAction
+More information about auxiliary variables can be found on the [AuxVariables syntax page](syntax/AuxVariables/index.md).
 
 !syntax parameters /AuxVariables/AddAuxVariableAction

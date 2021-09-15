@@ -158,7 +158,7 @@ MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
         // for constant shape function, we take the element centroid
         if (is_constant)
         {
-          points.push_back(elem->centroid());
+          points.push_back(elem->vertex_average());
           point_ids.push_back(elem->id());
         }
 
@@ -403,7 +403,7 @@ MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
         // for constant shape function, we take the element centroid
         if (is_constant)
         {
-          points.push_back(elem->centroid());
+          points.push_back(elem->vertex_average());
           point_ids.push_back(elem->id());
         }
         // for higher order method, we take all nodes of element
@@ -457,7 +457,7 @@ MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
           }
 
           if (_error_on_miss && !point_found)
-            mooseError("Point not found! ", elem->centroid() + _to_positions[i_to]);
+            mooseError("Point not found! ", elem->vertex_average() + _to_positions[i_to]);
 
           // Get the value for a dof
           dof_id_type dof = elem->dof_number(sys_num, var_num, offset);

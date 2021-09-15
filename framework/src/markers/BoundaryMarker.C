@@ -55,7 +55,7 @@ BoundaryMarker::computeElementMarker()
       for (const auto id : it->second)
       {
         const auto elem = _mesh.elemPtr(id);
-        const auto r = _current_elem->centroid() - elem->centroid();
+        const auto r = _current_elem->vertex_average() - elem->vertex_average();
         if (r.norm() < _distance)
           return _mark;
       }

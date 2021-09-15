@@ -4,7 +4,9 @@
 
 # Description
 
-Computes per-element quality metrics and puts the value in a field.  An example is shown below using the `SHAPE` metric on an unstructured mesh.  In this case "perfectly" shaped elements have a value of `1.0` and as the quality degrades so does the value of the shape metric.
+Computes per-element quality metrics and puts the value in a field.  An example is shown below using the `SHAPE` metric on
+an unstructured mesh.  In this case "perfectly" shaped elements have a value of `1.0` and as the quality degrades so does
+the value of the shape metric.
 
 !media media/framework/auxkernels/element_quality.png style=width:60%
 

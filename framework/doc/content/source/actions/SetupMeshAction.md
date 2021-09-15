@@ -1,28 +1,24 @@
 # SetupMeshAction
 
-!alert! construction title=Undocumented Action Class
-The SetupMeshAction has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with an Action;
-however, what is contained is ultimately determined by what is necessary to make the documentation
-clear for users.
-
-```markdown
-# SetupMeshAction
-
 !syntax description /Mesh/SetupMeshAction
 
-## Overview
+The `SetupMeshAction` is responsible for
 
-!! Replace these lines with information regarding the SetupMeshAction action.
+- setting the mesh base, which may come from `MeshGenerators`, from the legacy mesh loading (`file` parameter),
+  or from a split mesh, a restart or a recovery process
 
-## Example Input File Syntax
+- the uniform refinement parameters
 
-!! Describe and include an example of how to use the SetupMeshAction action.
+- conversion from first to second order mesh
 
-!syntax parameters /Mesh/SetupMeshAction
-```
-!alert-end!
+- the creation of the displaced mesh
 
-!syntax description /Mesh/SetupMeshAction
+- modifications to the mesh generation process when using split meshes
+
+- mesh initialization
+
+
+More information about the `Mesh` may be found on the
+[Mesh syntax documentation](syntax/Mesh/index.md).
 
 !syntax parameters /Mesh/SetupMeshAction

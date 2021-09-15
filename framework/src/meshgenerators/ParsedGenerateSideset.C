@@ -152,9 +152,9 @@ ParsedGenerateSideset::generate()
 
       // check expression
       std::unique_ptr<Elem> curr_side = elem->side_ptr(side);
-      _func_params[0] = curr_side->centroid()(0);
-      _func_params[1] = curr_side->centroid()(1);
-      _func_params[2] = curr_side->centroid()(2);
+      _func_params[0] = curr_side->vertex_average()(0);
+      _func_params[1] = curr_side->vertex_average()(1);
+      _func_params[2] = curr_side->vertex_average()(2);
       if (evaluate(_func_F))
         boundary_info.add_side(elem, side, boundary_ids[0]);
     }

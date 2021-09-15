@@ -44,7 +44,7 @@ LayeredSideIntegral::execute()
 {
   Real integral_value = computeIntegral();
 
-  unsigned int layer = getLayer(_current_elem->centroid());
+  unsigned int layer = getLayer(_current_elem->vertex_average());
 
   setLayerValue(layer, getLayerValue(layer) + integral_value);
 }

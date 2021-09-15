@@ -219,7 +219,7 @@ MultiAppInterpolationTransfer::fillSourceInterpolationPoints(
 
       points.clear();
       if (from_is_constant)
-        points.push_back(from_elem->centroid());
+        points.push_back(from_elem->vertex_average());
       else
         for (const auto & node : from_elem->node_ref_range())
           points.push_back(node);
@@ -360,7 +360,7 @@ MultiAppInterpolationTransfer::interpolateTargetPoints(
 
       points.clear();
       if (to_is_constant)
-        points.push_back(elem->centroid());
+        points.push_back(elem->vertex_average());
       else
         for (const auto & node : elem->node_ref_range())
           points.push_back(node);
@@ -531,7 +531,7 @@ MultiAppInterpolationTransfer::computeTransformation(
        as_range(libmesh_mesh.local_elements_begin(), libmesh_mesh.local_elements_end()))
   {
     // Compute center of the entire domain
-    subdomain_centers[max_subdomain_id] += elem->centroid();
+    subdomain_centers[max_subdomain_id] += elem->vertex_average();
     nelems[max_subdomain_id] += 1;
 
     auto subdomain = elem->subdomain_id();
@@ -540,7 +540,7 @@ MultiAppInterpolationTransfer::computeTransformation(
       mooseError("block is invalid");
 
     // Centers for subdomains
-    subdomain_centers[subdomain] += elem->centroid();
+    subdomain_centers[subdomain] += elem->vertex_average();
 
     nelems[subdomain] += 1;
   }

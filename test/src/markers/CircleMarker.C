@@ -41,7 +41,7 @@ CircleMarker::CircleMarker(const InputParameters & parameters)
 Marker::MarkerValue
 CircleMarker::computeElementMarker()
 {
-  Point centroid = _current_elem->centroid();
+  Point centroid = _current_elem->vertex_average();
 
   if ((centroid - _p).norm() < _r)
     return _inside;

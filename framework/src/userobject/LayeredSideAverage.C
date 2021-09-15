@@ -42,7 +42,7 @@ LayeredSideAverage::execute()
 {
   LayeredSideIntegral::execute();
 
-  unsigned int layer = getLayer(_current_elem->centroid());
+  unsigned int layer = getLayer(_current_elem->vertex_average());
   _layer_volumes[layer] += _current_side_volume;
 }
 

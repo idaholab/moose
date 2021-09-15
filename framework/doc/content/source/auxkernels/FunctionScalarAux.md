@@ -1,33 +1,15 @@
 # FunctionScalarAux
 
-!alert! construction title=Undocumented Class
-The FunctionScalarAux has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# FunctionScalarAux
-
 !syntax description /AuxScalarKernels/FunctionScalarAux
 
-## Overview
+The functions will be evaluated at the current time and the system origin (0,0,0).
 
-!! Replace these lines with information regarding the FunctionScalarAux object.
+## Example syntax
 
-## Example Input File Syntax
+In this example, this auxiliary scalar kernel is being used to convert a function output
+into a scalar variable, to verify the correctness of another system (parsed functions).
 
-!! Describe and include an example of how to use the FunctionScalarAux object.
-
-!syntax parameters /AuxScalarKernels/FunctionScalarAux
-
-!syntax inputs /AuxScalarKernels/FunctionScalarAux
-
-!syntax children /AuxScalarKernels/FunctionScalarAux
-```
-!alert-end!
-
-!syntax description /AuxScalarKernels/FunctionScalarAux
+!listing test/tests/functions/parsed/scalar.i block=AuxScalarKernels
 
 !syntax parameters /AuxScalarKernels/FunctionScalarAux
 

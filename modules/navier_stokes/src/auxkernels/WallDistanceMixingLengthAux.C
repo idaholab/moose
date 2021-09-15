@@ -67,7 +67,7 @@ WallDistanceMixingLengthAux::computeValue()
     for (dof_id_type elem_id : bnd_elems)
     {
       const Elem & elem{l_mesh.elem_ref(elem_id)};
-      Point bnd_pos = elem.centroid();
+      Point bnd_pos = elem.vertex_average();
       Real sq_dist = (bnd_pos - _q_point[_qp]).norm_sq();
       min_sq_dist = std::min(min_sq_dist, sq_dist);
     }

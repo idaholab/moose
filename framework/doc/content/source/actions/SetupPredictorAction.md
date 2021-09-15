@@ -1,28 +1,11 @@
 # SetupPredictorAction
 
-!alert! construction title=Undocumented Action Class
-The SetupPredictorAction has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with an Action;
-however, what is contained is ultimately determined by what is necessary to make the documentation
-clear for users.
-
-```markdown
-# SetupPredictorAction
-
 !syntax description /Executioner/Predictor/SetupPredictorAction
 
-## Overview
+A `Predictor` is specified as an object inside the `[Predictor]` block with the `[Executioner]` block.
+This action checks the a transient executioner is being used then sets the `Predictor` of the [NonlinearSystemBase.md].
 
-!! Replace these lines with information regarding the SetupPredictorAction action.
-
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the SetupPredictorAction action.
-
-!syntax parameters /Executioner/Predictor/SetupPredictorAction
-```
-!alert-end!
-
-!syntax description /Executioner/Predictor/SetupPredictorAction
+More information about predictors may be found on the
+[Predictor syntax documentation](syntax/Executioner/Predictor/index.md).
 
 !syntax parameters /Executioner/Predictor/SetupPredictorAction

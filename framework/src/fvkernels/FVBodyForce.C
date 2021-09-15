@@ -42,6 +42,6 @@ FVBodyForce::computeQpResidual()
   // FVKernels are not evaluated at quadrature points like our finite element kernels.
   // computeQpResidual is currrently only called once per element. With that in mind we'll just read
   // our function at the element centroid
-  Real factor = _scale * _postprocessor * _function.value(_t, _current_elem->centroid());
+  Real factor = _scale * _postprocessor * _function.value(_t, _current_elem->vertex_average());
   return -factor;
 }

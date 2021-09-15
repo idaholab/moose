@@ -49,7 +49,7 @@ ImageSubdomainGenerator::generate()
   // subdomain id
   for (auto & elem : mesh->active_element_ptr_range())
   {
-    subdomain_id_type id = static_cast<subdomain_id_type>(round(sample(elem->centroid())));
+    subdomain_id_type id = static_cast<subdomain_id_type>(round(sample(elem->vertex_average())));
     elem->subdomain_id() = id;
   }
 

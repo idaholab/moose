@@ -1,28 +1,12 @@
 # GlobalParamsAction
 
-!alert! construction title=Undocumented Action Class
-The GlobalParamsAction has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with an Action;
-however, what is contained is ultimately determined by what is necessary to make the documentation
-clear for users.
-
-```markdown
-# GlobalParamsAction
-
 !syntax description /GlobalParams/GlobalParamsAction
 
-## Overview
+Global parameters are set in their own `[GlobalParams]` block as shown below:
 
-!! Replace these lines with information regarding the GlobalParamsAction action.
+!listing misc/displaced_mesh_coupling/ad.i block=GlobalParams
 
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the GlobalParamsAction action.
-
-!syntax parameters /GlobalParams/GlobalParamsAction
-```
-!alert-end!
-
-!syntax description /GlobalParams/GlobalParamsAction
+More information about the `GlobalParams` system may be found on the
+[GlobalParams syntax documentation](syntax/GlobalParams/index.md).
 
 !syntax parameters /GlobalParams/GlobalParamsAction

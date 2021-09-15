@@ -57,7 +57,7 @@ ChangeRayRayKernelTest::onSegment()
   }
 
   if (getParam<bool>("change_start_direction"))
-    changeRayStartDirection(_current_elem->centroid(), -currentRay()->direction());
+    changeRayStartDirection(_current_elem->vertex_average(), -currentRay()->direction());
   if (getParam<bool>("change_direction_zero"))
     changeRayStartDirection(currentRay()->currentPoint(), Point(0, 0, 0));
 
@@ -65,7 +65,7 @@ ChangeRayRayKernelTest::onSegment()
     for (const auto neighbor : _current_elem->neighbor_ptr_range())
       if (neighbor && neighbor != remote_elem)
       {
-        changeRayStartDirection(neighbor->centroid(), currentRay()->direction());
+        changeRayStartDirection(neighbor->vertex_average(), currentRay()->direction());
         break;
       }
 }

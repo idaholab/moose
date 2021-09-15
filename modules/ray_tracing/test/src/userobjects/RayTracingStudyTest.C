@@ -106,11 +106,11 @@ RayTracingStudyTest::generateRays()
     ray->setStartingMaxDistance(1);
 
   if (getParam<bool>("ray_set_side_without_elem"))
-    ray->setStart(elem->centroid(), nullptr, 0);
+    ray->setStart(elem->vertex_average(), nullptr, 0);
   else if (getParam<bool>("ray_set_invalid_side"))
-    ray->setStart(elem->centroid(), elem, 100);
+    ray->setStart(elem->vertex_average(), elem, 100);
   else if (getParam<bool>("ray_set_bad_side"))
-    ray->setStart(elem->centroid(), elem, 0);
+    ray->setStart(elem->vertex_average(), elem, 0);
   else if (getParam<bool>("ray_set_start_fail_bbox"))
     ray->setStart(Point(1e6, 1e6, 1e6));
   else if (getParam<bool>("ray_set_bad_start"))
@@ -118,10 +118,10 @@ RayTracingStudyTest::generateRays()
     const Elem * another_elem = elem->neighbor_ptr(0);
     if (!another_elem)
       another_elem = elem->neighbor_ptr(1);
-    ray->setStart(elem->centroid(), another_elem);
+    ray->setStart(elem->vertex_average(), another_elem);
   }
   else
-    ray->setStart(elem->centroid(), elem);
+    ray->setStart(elem->vertex_average(), elem);
 
   if (getParam<bool>("ray_set_end_with_distance"))
   {
@@ -189,7 +189,7 @@ RayTracingStudyTest::generateRays()
     auto add_ray_functor = [&](processor_id_type, const std::vector<std::shared_ptr<Ray>> & rays) {
       std::shared_ptr<Ray> ray = rays[0];
       ray->clearStartingInfo();
-      ray->setStart(elem->centroid());
+      ray->setStart(elem->vertex_average());
       ray->setStartingEndPoint(elem->point(0));
       moveRayToBuffer(ray);
     };
@@ -204,7 +204,7 @@ RayTracingStudyTest::generateRays()
     _console << ray->endPoint() << std::endl;
 
   if (getParam<bool>("ray_set_start_again"))
-    ray->setStart(1.01 * elem->centroid());
+    ray->setStart(1.01 * elem->vertex_average());
 
   if (getParam<bool>("ray_error_if_tracing") || getParam<bool>("ray_reset_counters"))
     moveRayToBuffer(ray);

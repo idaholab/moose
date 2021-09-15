@@ -23,11 +23,11 @@ FaceInfo::FaceInfo(const Elem * elem, unsigned int side, const Elem * neighbor)
     _neighbor(neighbor),
     _elem_subdomain_id(elem->subdomain_id()),
     _elem_side_id(side),
-    _elem_centroid(elem->centroid()),
+    _elem_centroid(elem->vertex_average()),
     _elem_volume(elem->volume()),
     _face(const_cast<Elem *>(elem)->build_side_ptr(_elem_side_id)),
     _face_area(_face->volume()),
-    _face_centroid(_face->centroid()),
+    _face_centroid(_face->vertex_average()),
     // the neighbor info does not exist for domain boundaries. Additionally, we don't have any info
     // if the neighbor is a RemoteElem. This can happen for ghosted elements on the edge of a
     // stencil, for whom we have may have deleted some of their neighbors when running with a
@@ -36,7 +36,7 @@ FaceInfo::FaceInfo(const Elem * elem, unsigned int side, const Elem * neighbor)
     _neighbor_subdomain_id(_valid_neighbor ? neighbor->subdomain_id() : Moose::INVALID_BLOCK_ID),
     _neighbor_side_id(_valid_neighbor ? neighbor->which_neighbor_am_i(elem)
                                       : std::numeric_limits<unsigned int>::max()),
-    _neighbor_centroid(_valid_neighbor ? neighbor->centroid()
+    _neighbor_centroid(_valid_neighbor ? neighbor->vertex_average()
                                        : 2 * (_face_centroid - _elem_centroid) + _elem_centroid),
     _neighbor_volume(_valid_neighbor ? neighbor->volume() : _elem_volume),
     _gc((_neighbor_centroid - _face_centroid).norm() /

@@ -33,7 +33,7 @@ FXBoundaryBaseUserObject::FXBoundaryBaseUserObject(const InputParameters & param
 Point
 FXBoundaryBaseUserObject::getCentroid() const
 {
-  return _current_side_elem->centroid();
+  return _current_side_elem->vertex_average();
 }
 
 Real

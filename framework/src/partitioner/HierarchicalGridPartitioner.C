@@ -203,7 +203,7 @@ HierarchicalGridPartitioner::_do_partition(MeshBase & mesh, const unsigned int /
   // Loop over all of the elements in the given mesh
   for (auto & elem_ptr : mesh.active_element_ptr_range())
   {
-    auto elem_centroid = elem_ptr->centroid();
+    auto elem_centroid = elem_ptr->vertex_average();
 
     // Find the element it lands in in the Nodes mesh
     auto nodes_elem_ptr = (*nodes_point_locator_ptr)(elem_centroid);

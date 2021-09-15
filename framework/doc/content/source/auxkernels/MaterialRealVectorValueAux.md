@@ -1,33 +1,26 @@
 # MaterialRealVectorValueAux
 
-!alert! construction title=Undocumented Class
-The MaterialRealVectorValueAux has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# MaterialRealVectorValueAux
-
 !syntax description /AuxKernels/MaterialRealVectorValueAux
 
-## Overview
+Converting a field from the material system, here a component of a vector material property,
+to a variable may be desirable for several reasons: to match the format expected by certain
+kernels, for lagging the field between time steps or for output/testing/debugging.
 
-!! Replace these lines with information regarding the MaterialRealVectorValueAux object.
+This is particularly useful to examine anisotropic material properties. For output
+purposes only, an alternative is to use the `output_properties` argument of the `Material`
+or specify `output_material_properties` in the parameters of the desired output type nested in
+the `[Outputs]` block.
 
-## Example Input File Syntax
+!alert note
+The AD system currently does not support auxiliary variables. If you convert material properties, which
+do support automatic differentiation, to auxiliary variables, the derivatives will be ignored.
 
-!! Describe and include an example of how to use the MaterialRealVectorValueAux object.
+## Example syntax
 
-!syntax parameters /AuxKernels/MaterialRealVectorValueAux
+In this example, the `MaterialRealVectorValueAux` is being used to examine different cracking criteria
+for a smear cracking model.
 
-!syntax inputs /AuxKernels/MaterialRealVectorValueAux
-
-!syntax children /AuxKernels/MaterialRealVectorValueAux
-```
-!alert-end!
-
-!syntax description /AuxKernels/MaterialRealVectorValueAux
+!listing modules/tensor_mechanics/test/tests/smeared_cracking/cracking_rotation.i block=AuxKernels
 
 !syntax parameters /AuxKernels/MaterialRealVectorValueAux
 

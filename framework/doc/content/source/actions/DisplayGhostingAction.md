@@ -1,9 +1,9 @@
 #DisplayGhostingAction
 
-The DisplayGhostingAction is for outputting the ghosting of your simulation. In MOOSE, we attempt
+The `DisplayGhostingAction` is for outputting the ghosting of your simulation. In MOOSE, we attempt
 to ghost only the minimum amount of data for running the simulation. In order to know what ghosting
-we need each object can add one or more RelationshipManager classes. This object sets up
-several AuxVariables and AuxKernels for outputting both the "Geometric" and "Algebraic" ghosting.
+we need each object can add one or more `RelationshipManager` classes. This object sets up
+several `AuxVariables` and `AuxKernels` for outputting both the "Geometric" and "Algebraic" ghosting.
 
 To output ghosting add the following parameter(s) to your Mesh block:
 ```

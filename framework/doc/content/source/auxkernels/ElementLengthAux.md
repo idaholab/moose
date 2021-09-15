@@ -1,4 +1,3 @@
-
 # ElementLengthAux
 
 !syntax description /AuxKernels/ElementLengthAux

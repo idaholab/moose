@@ -46,7 +46,7 @@ PlaneDeletionGenerator::PlaneDeletionGenerator(const InputParameters & parameter
 bool
 PlaneDeletionGenerator::shouldDelete(const Elem * elem)
 {
-  auto centroid = elem->centroid();
+  auto centroid = elem->vertex_average();
 
   auto vec_from_plane_point = centroid - _point;
 

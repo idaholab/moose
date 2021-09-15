@@ -1,28 +1,14 @@
 # AddFVBCAction
 
-!alert! construction title=Undocumented Action Class
-The AddFVBCAction has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with an Action;
-however, what is contained is ultimately determined by what is necessary to make the documentation
-clear for users.
-
-```markdown
-# AddFVBCAction
-
 !syntax description /FVBCs/AddFVBCAction
 
-## Overview
+Finite volume boundary conditions are specified as an object inside the `[FVBCs]` block.
+This action adds them to the [Problem](syntax/Problem/index.md).
 
-!! Replace these lines with information regarding the AddFVBCAction action.
+More information about finite volume boundary conditions can be found on the
+[FVBCs syntax page](syntax/FVBCs/index.md).
 
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the AddFVBCAction action.
-
-!syntax parameters /FVBCs/AddFVBCAction
-```
-!alert-end!
-
-!syntax description /FVBCs/AddFVBCAction
+Please note that finite element boundary conditions `BCs` are specified in the `[BCs]` block
+handled by the [AddBCAction.md] action.
 
 !syntax parameters /FVBCs/AddFVBCAction

@@ -61,7 +61,7 @@ GrainTextureVectorPostprocessor::execute()
   _sample[1] = angle.phi1; // Get the Z   rotation
   _sample[2] = angle.Phi;  // Get the X'  rotation
   _sample[3] = angle.phi2; // Get the Z'' rotation
-  SamplerBase::addSample(_current_elem->centroid() /* x,y,z coordinates of elem centroid */,
+  SamplerBase::addSample(_current_elem->vertex_average() /* x,y,z coordinates of elem centroid */,
                          _current_elem->id(),
                          _sample);
 }

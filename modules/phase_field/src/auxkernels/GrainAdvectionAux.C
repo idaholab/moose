@@ -62,7 +62,7 @@ GrainAdvectionAux::precalculateValue()
 
     const RealGradient velocity_translation = _mt / volume * _grain_forces[grain_id];
     const RealGradient velocity_rotation =
-        _mr / volume * (_grain_torques[grain_id].cross(_current_elem->centroid() - centroid));
+        _mr / volume * (_grain_torques[grain_id].cross(_current_elem->vertex_average() - centroid));
     _velocity_advection = velocity_translation + velocity_rotation;
   }
   else

@@ -1,33 +1,40 @@
 # SpatialUserObjectAux
 
-!alert! construction title=Undocumented Class
-The SpatialUserObjectAux has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# SpatialUserObjectAux
-
 !syntax description /AuxKernels/SpatialUserObjectAux
 
-## Overview
+User objects are generally more flexible than auxiliary kernels, and this object creates
+allows to connect them to the [`Variables` system](syntax/Variables/index.md).
 
-!! Replace these lines with information regarding the SpatialUserObjectAux object.
+The `UserObject` _must_ implement the `spatialValue()` virtual function. In the framework,
+the following objects can currently be used:
 
-## Example Input File Syntax
+- [PostprocessorSpatialUserObject.md]
 
-!! Describe and include an example of how to use the SpatialUserObjectAux object.
+- [NearestPointIntegralVariablePostprocessor.md]
 
-!syntax parameters /AuxKernels/SpatialUserObjectAux
+- LayeredIntegral-derived objects such as [LayeredAverage.md] and [LayeredIntegral.md]
 
-!syntax inputs /AuxKernels/SpatialUserObjectAux
+- LayeredSideIntegral-derived objects such as [LayeredSideAverage.md] and [LayeredSideIntegral.md]
 
-!syntax children /AuxKernels/SpatialUserObjectAux
-```
-!alert-end!
+- NearestPointBase-derived objects such as [NearestPointLayeredAverage.md]
 
-!syntax description /AuxKernels/SpatialUserObjectAux
+- [LineValueSampler.md]
+
+- [FXIntegralBaseUserObject](FXIntegralBaseUserObject.md optional=True)
+
+
+Additional objects may be implemented in an application.
+
+## Example syntax
+
+In this example, a `SpatialUserObjectAux` is being used to store in an auxiliary variable the
+averages of another variable, u, on multiple layers along the `right` boundary in the `y` direction.
+
+!listing test/tests/userobjects/layered_side_integral/layered_side_average.i block=AuxKernels UserObjects
+
+!alert note
+Automatic differentiation is not supported in the auxiliary variable system, so using a `SpatialUserObjectAux`
+will not propagate derivatives.
 
 !syntax parameters /AuxKernels/SpatialUserObjectAux
 

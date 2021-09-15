@@ -1,28 +1,13 @@
 # PartitionerAction
 
-!alert! construction title=Undocumented Action Class
-The PartitionerAction has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with an Action;
-however, what is contained is ultimately determined by what is necessary to make the documentation
-clear for users.
-
-```markdown
-# PartitionerAction
-
 !syntax description /Mesh/Partitioner/PartitionerAction
 
-## Overview
+`Partitioners` are specified as an object inside the `[Partitioner]` block within the `[Mesh]`
+block, as shown below
 
-!! Replace these lines with information regarding the PartitionerAction action.
+!listing test/tests/partitioners/grid_partitioner/grid_partitioner.i block=Mesh
 
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the PartitionerAction action.
-
-!syntax parameters /Mesh/Partitioner/PartitionerAction
-```
-!alert-end!
-
-!syntax description /Mesh/Partitioner/PartitionerAction
+More information about `Partitioners` may be found on the
+[Partitioners syntax documentation](syntax/Mesh/Partitioner/index.md).
 
 !syntax parameters /Mesh/Partitioner/PartitionerAction

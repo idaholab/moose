@@ -1,28 +1,12 @@
 # AddControlAction
 
-!alert! construction title=Undocumented Action Class
-The AddControlAction has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with an Action;
-however, what is contained is ultimately determined by what is necessary to make the documentation
-clear for users.
-
-```markdown
-# AddControlAction
-
 !syntax description /Controls/AddControlAction
 
-## Overview
+Input file blocks and parameters may be controlled (enabled/disabled/modified)
+using `Controls` specified in the `[Controls]` block.
+This action adds them to the `ControlWarehouse`.
 
-!! Replace these lines with information regarding the AddControlAction action.
-
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the AddControlAction action.
-
-!syntax parameters /Controls/AddControlAction
-```
-!alert-end!
-
-!syntax description /Controls/AddControlAction
+More information about the Control system may be found on the
+[Controls syntax page](syntax/Controls/index.md).
 
 !syntax parameters /Controls/AddControlAction
