@@ -1,5 +1,9 @@
 # {{project}} System Requirements Specification
 
+*This template follows [!ac](INL) template TEM-135, "IT System Requirements Specification".*
+
+!template field key=pre-intro required=False
+
 ## Introduction id=introduction
 
 ### System Purpose id=system-purpose
@@ -353,6 +357,7 @@ Define requirements imposed on the system to ensure that it can be packaged, han
 transported within its intended operational context.
 
 ## Verification
+
 
 !template field key=verification
 Provide the verification approaches and methods planned to qualify the system or system element. The

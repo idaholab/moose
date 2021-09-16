@@ -1,16 +1,10 @@
-## {{app}} System Test Plan
+!template load file=framework_stp.md project={{app}}
 
-## Introduction id=introduction
+!template! item key=pre-intro
+!alert! note
+This document serves as an addendum to [framework_stp.md] and captures information for
+[!ac](STP) specific to the {{app}} application.
 
-!template field key=introduction required=False
-The [!ac](STP) details the objectives, resources, and processes utilized for testing {{app}}.
-
-## Dependencies id=dependencies
-
-!template field key=dependencies-intro required=False
-The {{app}} application is developed using MOOSE and is based on various modules, as such
-the [!ac](STP) for {{app}} is dependent upon the following documents.
-
-!template! field key=dependencies required=False
 !sqa dependencies suffix=stp category={{category}}
+!alert-end!
 !template-end!

@@ -122,7 +122,7 @@ class CivetExtension(command.CommandExtension):
         LOG.info("Collecting CIVET results complete [%s sec.]", time.time() - start)
 
         if not self.__database and self.get('generate_test_reports', True):
-            LOG.info("CIVET test result reports are being disabled, it requires results to exist and the specified branch ('%s') and author ('%s') to match the current repository.", self.get('branch'), self.get('author'))
+            LOG.info("CIVET test result reports are being disabled, it requires results to exist and the specified branch ('%s') to match the current repository.", self.get('branch'))
             self.update(generate_test_reports=False)
 
         if self.get('generate_test_reports', True):

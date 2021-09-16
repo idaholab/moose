@@ -39,6 +39,10 @@ def hasSubmodule(ext, name):
     """Module function for testing if an application has a submodule ending with the given name."""
     return ext.hasSubmodule(name)
 
+def hasPage(ext, filename):
+    """Module function for the existence of markdown page."""
+    return ext.translator.findPage(filename, throw_on_zero=False) is not None
+
 class IfElseExtension(command.CommandExtension):
     """
     Allows the if/elif/else statements to control content.

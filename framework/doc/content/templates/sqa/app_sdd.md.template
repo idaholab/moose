@@ -1,26 +1,14 @@
-# {{app}} Software Design Description
+!template load file=framework_sdd.md project={{app}}
 
-## Introduction id=introduction
+!template! item key=pre-intro
+!alert! note
+This document serves as an addendum to [framework_sdd.md] and captures information for
+[!ac](SDD) specific to the {{app}} application.
 
-!template field key=introduction required=False
-The [!ac](SDD) for {{app}} is a description of the software product and serves as guideline that
-describes the architecture of the system and all of its parts.
-
-## Dependencies id=dependencies
-
-!template field key=dependencies-intro required=False
-The {{app}} application is developed using MOOSE and is based on various modules, as such
-the [!ac](SDD) for {{app}} is dependent upon the following documents.
-
-!template! field key=dependencies required=False
 !sqa dependencies suffix=sdd category={{category}}
+!alert-end!
 !template-end!
 
-## Requirements Cross Reference
-
-!template field key=cross-reference-intro required=False
-The following is a list of all design documents and the associated requirements for {{app}}.
-
-!template! field key=cross-reference required=False
+!template! item key=requirements-cross-reference
 !sqa cross-reference category={{category}}
 !template-end!
