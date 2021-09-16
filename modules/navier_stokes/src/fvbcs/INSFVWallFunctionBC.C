@@ -21,7 +21,7 @@ INSFVWallFunctionBC::validParams()
   params.addRequiredCoupledVar("u", "The velocity in the x direction.");
   params.addCoupledVar("v", "The velocity in the y direction.");
   params.addCoupledVar("w", "The velocity in the z direction.");
-  params.addParam<Real>("rho", "fluid density");
+  params.addRequiredParam<MaterialPropertyName>(NS::density, "fluid density");
   params.addRequiredParam<MaterialPropertyName>("mu", "Dynamic viscosity");
   MooseEnum momentum_component("x=0 y=1 z=2", "x");
   params.addRequiredParam<MooseEnum>(

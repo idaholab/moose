@@ -21,7 +21,8 @@ INSFVEnergyTimeDerivative::validParams()
       "Adds the time derivative term to the incompressible Navier-Stokes energy equation.");
   params.addRequiredParam<Real>("rho", "The value for the density");
   params.declareControllable("rho");
-  params.addParam<MaterialPropertyName>("cp_name", "NS::cp", "The name of the specific heat capacity");
+  params.addParam<MaterialPropertyName>(
+      "cp_name", NS::cp, "The name of the specific heat capacity");
   return params;
 }
 
