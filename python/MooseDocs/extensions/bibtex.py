@@ -267,20 +267,27 @@ class RenderBibtexBibliography(components.RenderComponent):
 
         citations = self.getCitations(parent, token, page)
         formatted_bibliography = style().format_bibliography(self.extension.database(), citations)
-        html_backend = find_plugin('pybtex.backends', 'html')
 
-        div = html.Tag(parent, 'div', class_='moose-bibliography')
-        ol = html.Tag(div, 'ol')
+        if formatted_bibliography.entries:
+            html_backend = find_plugin('pybtex.backends', 'html')
+            div = html.Tag(parent, 'div', class_='moose-bibliography')
+            ol = html.Tag(div, 'ol')
 
-        backend = html_backend(encoding='utf-8')
-        for entry in formatted_bibliography:
-            text = entry.text.render(backend)
-            html.Tag(ol, 'li', id_=entry.key, string=text)
+            backend = html_backend(encoding='utf-8')
+            for entry in formatted_bibliography:
+                text = entry.text.render(backend)
+                html.Tag(ol, 'li', id_=entry.key, string=text)
 
-        return ol
+            return ol
+
+        else:
+            html.String(parent, content="No citations exist within this document.")
 
     def createMaterialize(self, parent, token, page):
         ol = self.createHTML(parent, token, page)
+        if ol is None:
+            return
+
         for child in ol.children:
             key = child['id']
             db = BibliographyData()

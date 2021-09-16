@@ -1,47 +1,30 @@
-# {{app}} Requirement Traceability Matrix
+!template load file=framework_rtm.md project={{app}}
 
-## Introduction id=introduction
+!template! item key=pre-intro
+!alert! note
+This document serves as an addendum to [framework_rtm.md] and captures information for
+[!ac](RTM) specific to the {{app}} application.
 
-!template field key=introduction required=False
-The [!ac](RTM) for {{app}} captures all requirements and maps each to the associated design
-documentation and associated test case.
-
-## Dependencies id=dependencies
-
-!template field key=dependencies-intro required=False
-The {{app}} application is developed using MOOSE and is based on various modules, as such
-the [!ac](RTM) for {{app}} is dependent upon the following documents.
-
-!template! field key=dependencies required=False
 !sqa dependencies suffix=rtm category={{category}}
+!alert-end!
 !template-end!
 
-## Requirements
+!template item key=assumptions-and-dependencies
+The {{app}} application is developed using MOOSE and is based on various modules, as such
+the [!ac](RTM) for {{app}} is dependent upon the files listed at the beginning of this document.
 
-!template field key=requirements-intro required=False
-The following is a complete list for all the functional requirements including links to the
-design documents and test cases for {{app}}.
-
-### Functional Requirements
-
-!template! field key=functional-requirements required=False
+!template! item key=functional-requirements
 !sqa requirements link=True collections=FUNCTIONAL category={{category}}
 !template-end!
 
-### Usability Requirements
-
-!template! field key=usability-requirements required=False
+!template! item key=usability-requirements
 !sqa requirements link=True collections=USABILITY category={{category}}
 !template-end!
 
-### Performance Requirements
-
-!template! field key=performance-requirements required=False
+!template! item key=performance-requirements
 !sqa requirements link=True collections=PERFORMANCE category={{category}}
 !template-end!
 
-### System Requirements
-
-!template! field key=system-requirements required=False
+!template! item key=system-interfaces-requirements
 !sqa requirements link=True collections=SYSTEM category={{category}}
 !template-end!
