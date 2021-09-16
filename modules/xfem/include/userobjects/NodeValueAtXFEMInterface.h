@@ -77,7 +77,7 @@ protected:
   MooseMesh & _mesh;
 
   /// The nodes to evaluate at
-  std::vector<Node> _nodes;
+  std::vector<Point> _nodes;
 
   /// Pointer to PointLocatorBase object
   std::unique_ptr<PointLocatorBase> _pl;
