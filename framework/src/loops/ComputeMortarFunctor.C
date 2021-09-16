@@ -82,6 +82,22 @@ ComputeMortarFunctor::operator()()
 
   unsigned int num_cached = 0;
 
+  // The blocks marked with **** are for regressing edge dropping treatment.
+  // These blocks are inefficient but I wanted to make them easy to remove once this
+  // 'feature' is depricated.
+  //****
+  std::unordered_map<const Elem *, Real> active_volume;
+
+  // Compute fraction of elements with corresponding primary elements
+  for (const auto msm_elem : _amg.mortarSegmentMesh().active_local_element_ptr_range())
+  {
+    const MortarSegmentInfo & msinfo = _amg.mortarSegmentMeshElemToInfo().at(msm_elem);
+    const Elem * secondary_elem = msinfo.secondary_elem;
+
+    active_volume[secondary_elem] += msm_elem->volume();
+  }
+  //****
+
   for (MeshBase::const_element_iterator
            el = _amg.mortarSegmentMesh().active_local_elements_begin(),
            end_el = _amg.mortarSegmentMesh().active_local_elements_end();
@@ -96,7 +112,6 @@ ComputeMortarFunctor::operator()()
     // Get a reference to the MortarSegmentInfo for this Elem.
     const MortarSegmentInfo & msinfo = _amg.mortarSegmentMeshElemToInfo().at(msm_elem);
 
-    // There may be no contribution from the primary side if it is not "in contact".
     bool has_secondary = msinfo.secondary_elem ? true : false;
 
     if (!has_secondary)
@@ -128,13 +143,15 @@ ComputeMortarFunctor::operator()()
     if (elem_volume / secondary_volume < TOLERANCE)
       continue;
 
-    // These only get initialized if there is a primary Elem associated to this segment.
-    const Elem * primary_ip = libmesh_nullptr;
-    unsigned int primary_side_id = libMesh::invalid_uint;
+    //****
+    if (_amg.wrongResults())
+      if (std::abs(active_volume[secondary_face_elem] / secondary_volume - 1.0) > TOLERANCE)
+        continue;
+    //****
 
     // Set the primary interior parent and side ids.
-    primary_ip = msinfo.primary_elem->interior_parent();
-    primary_side_id = primary_ip->which_side_am_i(msinfo.primary_elem);
+    const Elem * primary_ip = msinfo.primary_elem->interior_parent();
+    unsigned int primary_side_id = primary_ip->which_side_am_i(msinfo.primary_elem);
 
     // Compute a JxW for the actual mortar segment element (not the lower dimensional element on
     // the secondary face!)
@@ -260,8 +277,8 @@ ComputeMortarFunctor::operator()()
   // Call any post operations for our mortar constraints
   for (auto * const mc : _mortar_constraints)
   {
-    mc->zeroInactiveLMDofs(_amg.getInactiveLMNodes(), _amg.getInactiveLMElems());
     mc->post();
+    mc->zeroInactiveLMDofs(_amg.getInactiveLMNodes(), _amg.getInactiveLMElems());
   }
 
   // Make sure any remaining cached residuals/Jacobians get added

@@ -62,8 +62,8 @@
   [../]
   [./lambda]
     block = '10'
-    family = LAGRANGE
-    order = FIRST
+    family = MONOMIAL
+    order = CONSTANT
   [../]
 []
 
@@ -105,6 +105,7 @@
     secondary_variable = T
     use_displaced_mesh = true
     auxkernel_variable = 'aux_var'
+    give_me_wrong_results = false
   [../]
 []
 

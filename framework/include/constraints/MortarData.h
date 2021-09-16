@@ -38,7 +38,8 @@ public:
                              const std::pair<SubdomainID, SubdomainID> & subdomain_key,
                              SubProblem & subproblem,
                              bool on_displaced,
-                             bool periodic);
+                             bool periodic,
+                             bool give_me_wrong_results);
 
   /**
    * Getter to retrieve the AutomaticMortarGeneration object corresponding to the boundary and

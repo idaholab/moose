@@ -1352,7 +1352,8 @@ public:
       const std::pair<BoundaryID, BoundaryID> & primary_secondary_boundary_pair,
       const std::pair<SubdomainID, SubdomainID> & primary_secondary_subdomain_pair,
       bool on_displaced,
-      bool periodic);
+      bool periodic,
+      bool give_me_wrong_results);
 
   const AutomaticMortarGeneration &
   getMortarInterface(const std::pair<BoundaryID, BoundaryID> & primary_secondary_boundary_pair,

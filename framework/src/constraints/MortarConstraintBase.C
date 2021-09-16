@@ -201,9 +201,8 @@ MortarConstraintBase::zeroInactiveLMDofs(const std::unordered_set<dof_id_type> &
       // Get node from id
       const Node * node = _mesh.nodePtr(node_id);
       const auto dof_index = node->dof_number(_sys.number(), _var->number(), 0);
-
       if (_subproblem.currentlyComputingJacobian())
-        _assembly.cacheJacobian(dof_index, dof_index, 1.0, _matrix_tags);
+        _assembly.cacheJacobian(dof_index, dof_index, 1., _matrix_tags);
       else
       {
         Real lm_value = _var->getNodalValue(*node);
@@ -221,10 +220,9 @@ MortarConstraintBase::zeroInactiveLMDofs(const std::unordered_set<dof_id_type> &
       for (const auto comp : make_range(n_comp))
       {
         const auto dof_index = el->dof_number(_sys.number(), _var->number(), comp);
-
         // Insert to system
         if (_subproblem.currentlyComputingJacobian())
-          _assembly.cacheJacobian(dof_index, dof_index, 1.0, _matrix_tags);
+          _assembly.cacheJacobian(dof_index, dof_index, 1., _matrix_tags);
         else
         {
           Real lm_value = _var->getElementalValue(el, comp);
