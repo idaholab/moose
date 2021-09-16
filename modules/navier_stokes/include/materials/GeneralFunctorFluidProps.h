@@ -111,6 +111,6 @@ protected:
   /// Interstitial Reynolds number
   FunctorMaterialProperty<ADReal> & _Re_i;
 
-  using UserObjectInterface::getUserObject;
   using DerivativeMaterialPropertyNameInterface::derivativePropertyNameFirst;
+  using UserObjectInterface::getUserObject;
 };

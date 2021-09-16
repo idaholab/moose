@@ -22,10 +22,15 @@ GeneralFunctorFluidProps::validParams()
   params.addRequiredParam<UserObjectName>(NS::fluid, "Fluid properties functor userobject");
   params.addClassDescription("Creates functor fluid properties using a (P, T) formulation");
 
+  params.addRequiredCoupledVar(NS::pressure, "Pressure variable");
+  params.addRequiredCoupledVar(NS::T_fluid, "Fluid temperature variable");
+  params.addRequiredCoupledVar(NS::density, "Density variable");
+  params.addRequiredCoupledVar(NS::speed, "Velocity norm as a variable");
+
   params.addRequiredCoupledVar(NS::porosity, "porosity");
   params.addRequiredRangeCheckedParam<Real>(
       "characteristic_length",
-      "characteristic_length > 0.0 ",
+      "characteristic_length > 0.0",
       "characteristic length for Reynolds number calculation");
   return params;
 }
@@ -182,11 +187,8 @@ GeneralFunctorFluidProps::GeneralFunctorFluidProps(const InputParameters & param
     static constexpr Real small_number = 1e-8;
 
     return std::max(
-          fp::reynolds(_rho(r, t),
-                       _eps(r, t) * _speed(r, t),
-                       _d,
-                       std::max(_mu(r, t), small_number)),
-                       1.0);
+        fp::reynolds(_rho(r, t), _eps(r, t) * _speed(r, t), _d, std::max(_mu(r, t), small_number)),
+        1.0);
   });
   // _dRe_dp.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> ADReal {
   //   return reynoldsPropertyDerivative(MetaPhysicL::raw_value(_Re(r, t)),
@@ -212,6 +214,7 @@ GeneralFunctorFluidProps::GeneralFunctorFluidProps(const InputParameters & param
 
   // (interstitial) Reynolds number
   _Re_i.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> ADReal {
-    return _Re(r, t) / _eps(r, t);;
+    return _Re(r, t) / _eps(r, t);
+    ;
   });
 }
