@@ -40,7 +40,6 @@ offset = 1e-2
 
 [Contact]
   [./top_bottom]
-    mesh = file
     secondary = 10
     primary = 20
 

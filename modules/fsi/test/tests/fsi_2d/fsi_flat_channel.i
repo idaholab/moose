@@ -83,7 +83,7 @@
     variable = p
     u = vel_x
     v = vel_y
-    p = p
+    pressure = p
     block = 0
     use_displaced_mesh = true
   [../]
@@ -92,7 +92,7 @@
     variable = vel_x
     u = vel_x
     v = vel_y
-    p = p
+    pressure = p
     component = 0
     block = 0
     use_displaced_mesh = true
@@ -102,7 +102,7 @@
     variable = vel_y
     u = vel_x
     v = vel_y
-    p = p
+    pressure = p
     component = 1
     block = 0
     use_displaced_mesh = true

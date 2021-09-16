@@ -26,14 +26,14 @@ static unsigned int contact_auxkernel_counter = 0;
 // Counter for naming nodal area user objects
 static unsigned int contact_userobject_counter = 0;
 
-registerMooseAction("ContactApp", ContactAction, "add_aux_kernel");
+// for mortar subdomains
+registerMooseAction("ContactApp", ContactAction, "append_mesh_generator");
 registerMooseAction("ContactApp", ContactAction, "add_aux_variable");
-registerMooseAction("ContactApp", ContactAction, "add_constraint"); // for mortar constraint
-registerMooseAction("ContactApp", ContactAction, "add_dirac_kernel");
-registerMooseAction("ContactApp", ContactAction, "add_mesh_generator"); // for mortar subdomains
-registerMooseAction("ContactApp",
-                    ContactAction,
-                    "add_mortar_variable"); // for mortar lagrange multiplier
+// for mortar Lagrange multiplier
+registerMooseAction("ContactApp", ContactAction, "add_mortar_variable");
+registerMooseAction("ContactApp", ContactAction, "add_aux_kernel");
+// for mortar constraint
+registerMooseAction("ContactApp", ContactAction, "add_constraint");
 registerMooseAction("ContactApp", ContactAction, "output_penetration_info_vars");
 registerMooseAction("ContactApp", ContactAction, "add_user_object");
 
@@ -47,7 +47,10 @@ ContactAction::validParams()
       "primary", "The list of boundary IDs referring to primary sidesets");
   params.addRequiredParam<std::vector<BoundaryName>>(
       "secondary", "The list of boundary IDs referring to secondary sidesets");
-  params.addParam<MeshGeneratorName>("mesh", "", "The mesh generator for mortar method");
+  params.addDeprecatedParam<MeshGeneratorName>(
+      "mesh",
+      "This parameter is not used anymore and can simply be removed",
+      "The mesh generator for mortar method");
   params.addParam<VariableName>("secondary_gap_offset",
                                 "Offset to gap distance from secondary side");
   params.addParam<VariableName>("mapped_primary_gap_offset",
@@ -123,7 +126,6 @@ ContactAction::validParams()
   params.addClassDescription("Sets up all objects needed for mechanical contact enforcement");
   params.addParam<bool>(
       "use_dual",
-      true,
       "Whether to use the dual mortar approach. It is defaulted to true for "
       "weighted quantity approach, and to false for the legacy approach. To avoid instabilities "
       "in the solution and obtain the full benefits of a variational enforcement,"
@@ -136,28 +138,31 @@ ContactAction::validParams()
 ContactAction::ContactAction(const InputParameters & params)
   : Action(params),
     _boundary_pairs(getParam<BoundaryName, BoundaryName>("primary", "secondary")),
-    _model(getParam<MooseEnum>("model")),
-    _formulation(getParam<MooseEnum>("formulation")),
-    _mesh_gen_name(getParam<MeshGeneratorName>("mesh")),
-    _mortar_approach(getParam<MooseEnum>("mortar_approach").getEnum<MortarApproach>()),
-    _use_dual(getParam<bool>("use_dual"))
+    _model(getParam<MooseEnum>("model").getEnum<ContactModel>()),
+    _formulation(getParam<MooseEnum>("formulation").getEnum<ContactFormulation>()),
+    _mortar_approach(getParam<MooseEnum>("mortar_approach").getEnum<MortarApproach>())
 {
-
-  if (_boundary_pairs.size() != 1 && _formulation == "mortar")
-    paramError("formulation", "When using mortar, a vector of contact pairs cannot be used");
-
-  if (_formulation == "tangential_penalty")
+  // use dual basis function for Lagrange multipliers?
+  if (isParamValid("use_dual"))
+    _use_dual = getParam<bool>("use_dual");
+  else
   {
-    if (_model != "coulomb")
-      paramError("formulation",
-                 "The 'tangential_penalty' formulation can only be used with the 'coulomb' model");
+    if (_formulation == ContactFormulation::MORTAR && _mortar_approach != MortarApproach::Legacy)
+      _use_dual = true;
+    else
+      _use_dual = false;
   }
 
-  if (_formulation == "mortar")
+  if (_boundary_pairs.size() != 1 && _formulation == ContactFormulation::MORTAR)
+    paramError("formulation", "When using mortar, a vector of contact pairs cannot be used");
+
+  if (_formulation == ContactFormulation::TANGENTIAL_PENALTY && _model != ContactModel::COULOMB)
+    paramError("formulation",
+               "The 'tangential_penalty' formulation can only be used with the 'coulomb' model");
+
+  if (_formulation == ContactFormulation::MORTAR)
   {
-    if (_mesh_gen_name.empty())
-      paramError("mesh", "The 'mortar' formulation requires 'mesh' to be supplied");
-    if (_model == "glued")
+    if (_model == ContactModel::GLUED)
       paramError("model", "The 'mortar' formulation does not support glued contact (yet)");
 
     if (_mortar_approach == MortarApproach::Legacy)
@@ -165,25 +170,15 @@ ContactAction::ContactAction(const InputParameters & params)
       mooseDeprecated(
           "Use of legacy mortar contact approach is deprecated and will be removed by December "
           "2021. Instead, select the default option based on weighted quantities and dual bases");
-
-      // If user does not specify whether to use dual bases, standard bases will be used with the
-      // `legacy` option.
-      if (!params.isParamSetByUser("use_dual"))
-        _use_dual = false;
     }
   }
   else if (params.isParamSetByUser("mortar_approach"))
     paramError("mortar_approach",
                "The 'mortar_approach' option can only be used with the 'mortar' formulation");
-  else if (params.isParamSetByUser("use_dual"))
+  else if (params.isParamValid("use_dual"))
     paramError("use_dual", "The 'use_dual' option can only be used with the 'mortar' formulation");
 
-  if (_formulation != "ranfs")
-    if (getParam<bool>("ping_pong_protection"))
-      paramError("ping_pong_protection",
-                 "The 'ping_pong_protection' option can only be used with the 'ranfs' formulation");
-
-  if (_formulation == "ranfs")
+  if (_formulation == ContactFormulation::RANFS)
   {
     if (isParamValid("secondary_gap_offset"))
       paramError("secondary_gap_offset",
@@ -194,31 +189,34 @@ ContactAction::ContactAction(const InputParameters & params)
                  "The 'mapped_primary_gap_offset' option can only be used with the "
                  "'MechanicalContactConstraint'");
   }
+  else if (getParam<bool>("ping_pong_protection"))
+    paramError("ping_pong_protection",
+               "The 'ping_pong_protection' option can only be used with the 'ranfs' formulation");
 }
 
 void
 ContactAction::act()
 {
-  if (_formulation == "mortar")
-    // This method executes multiple tasks
-    addMortarContact();
-
-  if (_current_task == "add_dirac_kernel")
+  // proform problem checks/corrections once during the first feasible task
+  if (_current_task == "add_aux_variable")
   {
+    if (!_problem->getDisplacedProblem())
+      mooseError(
+          "Contact requires updated coordinates.  Use the 'displacements = ...' parameter in the "
+          "Mesh block.");
+
     // It is risky to apply this optimization to contact problems
     // since the problem configuration may be changed during Jacobian
     // evaluation. We therefore turn it off for all contact problems so that
     // PETSc-3.8.4 or higher will have the same behavior as PETSc-3.8.3.
     if (!_problem->isSNESMFReuseBaseSetbyUser())
       _problem->setSNESMFReuseBase(false, false);
-
-    if (!_problem->getDisplacedProblem())
-      mooseError("Contact requires updated coordinates.  Use the 'displacements = ...' line in the "
-                 "Mesh block.");
-
-    if (_formulation != "mortar")
-      addNodeFaceContact();
   }
+
+  if (_formulation == ContactFormulation::MORTAR)
+    addMortarContact();
+  else
+    addNodeFaceContact();
 
   if (_current_task == "add_aux_kernel")
   { // Add ContactPenetrationAuxAction.
@@ -256,7 +254,9 @@ ContactAction::act()
 
         _problem->addAuxKernel("PenetrationAux", name, params);
       }
-      // Add ContactPressureAuxAction
+
+      // Add ContactPressureAux
+      // if (_formulation != ContactFormulation::MORTAR)
       {
         InputParameters params = _factory.getValidParams("ContactPressureAux");
         params.applyParameters(parameters(), {"order"});
@@ -337,7 +337,7 @@ ContactAction::act()
 void
 ContactAction::addRelationshipManagers(Moose::RelationshipManagerType input_rm_type)
 {
-  if (_formulation == "mortar")
+  if (_formulation == ContactFormulation::MORTAR)
     addRelationshipManagers(input_rm_type, _pars);
 }
 
@@ -355,9 +355,8 @@ ContactAction::addMortarContact()
   const std::string normal_lagrange_multiplier_name = action_name + "_normal_lm";
   const std::string tangential_lagrange_multiplier_name = action_name + "_tangential_lm";
 
-  if (_current_task == "add_mesh_generator")
+  if (_current_task == "append_mesh_generator")
   {
-
     // Don't do mesh generators when recovering.
     if (!(_app.isRecovering() && _app.isUltimateMaster()) && !_app.masterMesh())
     {
@@ -367,17 +366,14 @@ ContactAction::addMortarContact()
       auto primary_params = _factory.getValidParams("LowerDBlockFromSidesetGenerator");
       auto secondary_params = _factory.getValidParams("LowerDBlockFromSidesetGenerator");
 
-      primary_params.set<MeshGeneratorName>("input") = _mesh_gen_name;
-      secondary_params.set<MeshGeneratorName>("input") = primary_name;
-
       primary_params.set<SubdomainName>("new_block_name") = primary_subdomain_name;
       secondary_params.set<SubdomainName>("new_block_name") = secondary_subdomain_name;
 
       primary_params.set<std::vector<BoundaryName>>("sidesets") = {_boundary_pairs[0].first};
       secondary_params.set<std::vector<BoundaryName>>("sidesets") = {_boundary_pairs[0].second};
 
-      _app.addMeshGenerator("LowerDBlockFromSidesetGenerator", primary_name, primary_params);
-      _app.addMeshGenerator("LowerDBlockFromSidesetGenerator", secondary_name, secondary_params);
+      _app.appendMeshGenerator("LowerDBlockFromSidesetGenerator", primary_name, primary_params);
+      _app.appendMeshGenerator("LowerDBlockFromSidesetGenerator", secondary_name, secondary_params);
     }
   }
 
@@ -436,10 +432,10 @@ ContactAction::addMortarContact()
     // Tangential contact:
     //    For standard Mortar: one order lower than primal, Lagrange family unless zeroth order,
     //    than MONOMIAL. For dual Mortar: same family, equal order as primal, Lagrange family.
-    if (_model == "coulomb" && _mortar_approach == MortarApproach::Weighted)
+    if (_model == ContactModel::COULOMB && _mortar_approach == MortarApproach::Weighted)
       addLagrangeMultiplier(
           tangential_lagrange_multiplier_name, 1, true, getParam<Real>("tangential_lm_scaling"));
-    else if (_model == "coulomb" && _mortar_approach == MortarApproach::Legacy)
+    else if (_model == ContactModel::COULOMB && _mortar_approach == MortarApproach::Legacy)
       addLagrangeMultiplier(
           tangential_lagrange_multiplier_name, 0, true, getParam<Real>("tangential_lm_scaling"));
   }
@@ -449,7 +445,7 @@ ContactAction::addMortarContact()
     // Add the normal Lagrange multiplier constraint on the secondary boundary.
 
     // If no friction, only weighted gap class
-    if (_model != "coulomb")
+    if (_model != ContactModel::COULOMB)
     {
       if (_mortar_approach == MortarApproach::Weighted)
       {
@@ -498,7 +494,7 @@ ContactAction::addMortarContact()
       }
     }
     // Add the tangential and normal Lagrange's multiplier constraints on the secondary boundary.
-    else if (_model == "coulomb")
+    else if (_model == ContactModel::COULOMB)
     {
       if (_mortar_approach == MortarApproach::Weighted)
       {
@@ -605,7 +601,7 @@ ContactAction::addMortarContact()
     addMechanicalContactConstraints(normal_lagrange_multiplier_name,
                                     action_name + "_normal_constraint_",
                                     "NormalMortarMechanicalContact");
-    if (_model == "coulomb")
+    if (_model == ContactModel::COULOMB)
       addMechanicalContactConstraints(tangential_lagrange_multiplier_name,
                                       action_name + "_tangential_constraint_",
                                       "TangentialMortarMechanicalContact");
@@ -615,13 +611,16 @@ ContactAction::addMortarContact()
 void
 ContactAction::addNodeFaceContact()
 {
+  if (_current_task != "add_constraint")
+    return;
+
   std::string action_name = MooseUtils::shortName(name());
   std::vector<VariableName> displacements = getParam<std::vector<VariableName>>("displacements");
   const unsigned int ndisp = displacements.size();
 
   std::string constraint_type;
 
-  if (_formulation == "ranfs")
+  if (_formulation == ContactFormulation::RANFS)
     constraint_type = "RANFSNormalMechanicalContact";
   else
     constraint_type = "MechanicalContactConstraint";
@@ -644,7 +643,7 @@ ContactAction::addNodeFaceContact()
 
   for (const auto & contact_pair : _boundary_pairs)
   {
-    if (_formulation != "ranfs")
+    if (_formulation != ContactFormulation::RANFS)
     {
       params.set<std::vector<VariableName>>("nodal_area") = {"nodal_area_" + name()};
       params.set<BoundaryName>("boundary") = contact_pair.first;
@@ -661,7 +660,7 @@ ContactAction::addNodeFaceContact()
       std::string name = action_name + "_constraint_" + Moose::stringify(contact_pair, "_") + "_" +
                          Moose::stringify(i);
 
-      if (_formulation == "ranfs")
+      if (_formulation == ContactFormulation::RANFS)
         params.set<MooseEnum>("component") = i;
       else
         params.set<unsigned int>("component") = i;

@@ -68,8 +68,9 @@ An "Eigenstrain" in MOOSE is a stress free strain. It is an intrinsic shape
 change of a volume element due to effects like thermal expansion, swelling,
 diffusion of over/undersized solutes, etc.
 
-We use two [`ComputeThermalExpansionEigenstrain`] objects to compute an
-eigenstrain tensor in each of the two subdomains. The
+We use two
+[`ComputeThermalExpansionEigenstrain`](ComputeThermalExpansionEigenstrain.md)
+objects to compute an eigenstrain tensor in each of the two subdomains. The
 [!param](/Materials/ComputeThermalExpansionEigenstrain/stress_free_temperature)
 is set to 300K, which is the initial temperature set for the `T` AuxVariable. At
 this temperature we assume the eigenstrain to be zero (with contraction at

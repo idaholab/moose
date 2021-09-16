@@ -68,7 +68,6 @@
 
 [Contact]
   [frictionless]
-    mesh = simple_mesh
     primary = 2
     secondary = 1
     formulation = mortar
