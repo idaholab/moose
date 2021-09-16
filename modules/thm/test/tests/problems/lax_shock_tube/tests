@@ -1,12 +1,38 @@
 [Tests]
-  [lax_shock_tube]
-    type = 'Exodiff'
-    input = 'lax_shock_tube.i'
-    exodiff = 'lax_shock_tube.e'
-    cli_args = 'Executioner/num_steps=5'
-    abs_zero = 1e-10
-    rel_err = 1e-5
-    max_parallel = 1
-    group = '1phase rdg explicit pipe free_boundary'
+  [all]
+    design = 'FlowChannel1Phase.md'
+    issues = '#5'
+    requirement = 'The system shall produce an accurate solution to the Lax shock tube benchmark problem'
+
+    [explicit]
+      type = 'Exodiff'
+      input = 'lax_shock_tube.i'
+      exodiff = 'lax_shock_tube.e'
+      cli_args = 'Executioner/num_steps=5 Executioner/TimeIntegrator/order=2'
+      abs_zero = 1e-10
+      rel_err = 1e-5
+      max_parallel = 1
+      group = '1phase rdg explicit pipe free_boundary'
+
+      detail = 'using an explicit temporal discretization, and'
+    []
+    [implicit]
+      type = 'Exodiff'
+      input = 'lax_shock_tube.i'
+      exodiff = 'lax_shock_tube_implicit.e'
+      cli_args = '
+        Preconditioning/pc/type=SMP
+        Preconditioning/pc/full=true
+        Executioner/TimeIntegrator/type=BDF2
+        Executioner/solve_type=NEWTON
+        Executioner/dt=0.01
+        Executioner/num_steps=5
+        Outputs/file_base=lax_shock_tube_implicit'
+      abs_zero = 1e-10
+      rel_err = 1e-5
+      max_parallel = 1
+
+      detail = 'using an implicit temporal discretization.'
+    []
   []
 []

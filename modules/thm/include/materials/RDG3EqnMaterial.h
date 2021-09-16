@@ -12,7 +12,7 @@ class SinglePhaseFluidProperties;
  * {p, u, T} and then computes the corresponding face values for the conserved
  * variables {rhoA, rhouA, rhoEA}.
  */
-class RDG3EqnMaterial : public Material, public SlopeReconstruction1DInterface
+class RDG3EqnMaterial : public Material, public SlopeReconstruction1DInterface<false>
 {
 public:
   RDG3EqnMaterial(const InputParameters & parameters);

@@ -52,6 +52,7 @@
       Preconditioning/pc/type=SMP
       Preconditioning/pc/full=true
       Executioner/TimeIntegrator/type=ImplicitEuler
+      Executioner/solve_type=NEWTON
       Executioner/num_steps=5
       Outputs/file_base=sod_shock_tube_be'
     abs_zero = 1e-7
