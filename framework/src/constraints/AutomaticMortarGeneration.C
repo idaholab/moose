@@ -52,13 +52,15 @@ AutomaticMortarGeneration::AutomaticMortarGeneration(
     const std::pair<BoundaryID, BoundaryID> & boundary_key,
     const std::pair<SubdomainID, SubdomainID> & subdomain_key,
     bool on_displaced,
-    bool periodic)
+    bool periodic,
+    bool give_me_wrong_results)
   : ConsoleStreamInterface(app),
     mesh(mesh_in),
     _debug(false),
     _on_displaced(on_displaced),
     _periodic(periodic),
-    _distributed(!mesh.is_replicated())
+    _distributed(!mesh.is_replicated()),
+    _give_me_wrong_results(give_me_wrong_results)
 {
   primary_secondary_boundary_id_pairs.push_back(boundary_key);
   primary_requested_boundary_ids.insert(boundary_key.first);
@@ -330,7 +332,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
       {
         mooseError("MortarSegmentInfo not found for the mortar segment candidate");
       }
-      if (info->xi1_a <= xi1 && xi1 <= info->xi1_b)
+      if (info->xi1_a < xi1 && xi1 < info->xi1_b)
       {
         current_mortar_segment = mortar_segment_candidate;
         break;
@@ -341,10 +343,10 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     if (current_mortar_segment == nullptr)
       mooseError("Unable to find appropriate mortar segment during linear search!");
 
-    // If node lands on endpoint of segment, don't split
-    info = &msm_elem_to_info.at(current_mortar_segment);
-    if (info->xi1_a == xi1 || xi1 == info->xi1_b)
-      continue;
+    // // If node lands on endpoint of segment, don't split
+    // info = &msm_elem_to_info.at(current_mortar_segment);
+    // if (info->xi1_a == xi1 || xi1 == info->xi1_b)
+    //   continue;
 
     const auto new_id = mortar_segment_mesh->max_node_id() + 1;
     mooseAssert(mortar_segment_mesh->comm().verify(new_id),
@@ -593,7 +595,8 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
   {
     MortarSegmentInfo & msinfo = msm_elem_to_info.at(msm_elem);
     Elem * primary_elem = const_cast<Elem *>(msinfo.primary_elem);
-    if (primary_elem == nullptr)
+    if (primary_elem == nullptr || std::abs(msinfo.xi2_a) > 1.0 + TOLERANCE ||
+        std::abs(msinfo.xi2_b) > 1.0 + TOLERANCE)
     {
       // Remove element from mortar segment mesh
       mortar_segment_mesh->delete_elem(msm_elem);
@@ -613,6 +616,12 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
                 "primary element.");
   }
 #endif
+
+  // // Set up the the mortar segment neighbor information.
+  // mortar_segment_mesh->allow_renumbering(true);
+  // mortar_segment_mesh->skip_partitioning(true);
+  // mortar_segment_mesh->allow_find_neighbors(true);
+  // mortar_segment_mesh->prepare_for_use();
 
   // (Optionally) Write the mortar segment mesh to file for inspection
   if (_debug)
@@ -1158,13 +1167,33 @@ AutomaticMortarGeneration::computeInactiveLMNodes()
   // List of active nodes on local secondary elements
   std::unordered_set<dof_id_type> active_local_nodes;
 
-  std::unordered_map<const Elem *, Real> active_volume;
+  // The following blocks marked with **** are for regressing edge dropping treatment.
+  // These blocks are inefficient but I wanted to make them easy to remove once this
+  // 'feature' is depricated.
+  //****
+  std::unordered_map<const Elem *, Real> active_volume{};
+
+  // Compute fraction of elements with corresponding primary elements
+  for (const auto msm_elem : mortar_segment_mesh->active_local_element_ptr_range())
+  {
+    const MortarSegmentInfo & msinfo = msm_elem_to_info.at(msm_elem);
+    const Elem * secondary_elem = msinfo.secondary_elem;
+
+    active_volume[secondary_elem] += msm_elem->volume();
+  }
+  //****
 
   // Mark all active local nodes
   for (const auto msm_elem : mortar_segment_mesh->active_local_element_ptr_range())
   {
     const MortarSegmentInfo & msinfo = msm_elem_to_info.at(msm_elem);
     const Elem * secondary_elem = msinfo.secondary_elem;
+
+    //****
+    if (_give_me_wrong_results)
+      if (std::abs(active_volume[secondary_elem] / secondary_elem->volume() - 1.0) > TOLERANCE)
+        continue;
+    //****
 
     for (auto n : make_range(secondary_elem->n_nodes()))
       active_local_nodes.insert(secondary_elem->node_id(n));
@@ -1235,10 +1264,29 @@ AutomaticMortarGeneration::computeInactiveLMElems()
   // Mark all active secondary elements
   std::unordered_set<const Elem *> active_local_elems;
 
+  //****
+  std::unordered_map<const Elem *, Real> active_volume;
+
+  // Compute fraction of elements with corresponding primary elements
   for (const auto msm_elem : mortar_segment_mesh->active_local_element_ptr_range())
   {
     const MortarSegmentInfo & msinfo = msm_elem_to_info.at(msm_elem);
     const Elem * secondary_elem = msinfo.secondary_elem;
+
+    active_volume[secondary_elem] += msm_elem->volume();
+  }
+  //****
+
+  for (const auto msm_elem : mortar_segment_mesh->active_local_element_ptr_range())
+  {
+    const MortarSegmentInfo & msinfo = msm_elem_to_info.at(msm_elem);
+    const Elem * secondary_elem = msinfo.secondary_elem;
+
+    //****
+    if (_give_me_wrong_results)
+      if (std::abs(active_volume[secondary_elem] / secondary_elem->volume() - 1.0) > TOLERANCE)
+        continue;
+    //****
 
     active_local_elems.insert(secondary_elem);
   }
@@ -1726,11 +1774,6 @@ AutomaticMortarGeneration::projectPrimaryNodesSinglePair(
           // If we've already rejected this candidate, we don't need to check it again.
           if (rejected_secondary_elem_candidates.count(secondary_elem_candidate))
             continue;
-
-          // Check that the candidate element is correctly oriented (that normals oppose each other)
-          // this is to fix an issue where projection accepts wrong neighbor of nearest node when
-          // node projects onto both neighbors but one is oriented in the wrong direction (for
-          // example neighbors on bottom of a sphere when primary surface is a verticle wall)
 
           std::vector<Point> nodal_normals(secondary_elem_candidate->n_nodes());
           for (const auto n : make_range(secondary_elem_candidate->n_nodes()))

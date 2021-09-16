@@ -67,7 +67,8 @@ public:
                             const std::pair<BoundaryID, BoundaryID> & boundary_key,
                             const std::pair<SubdomainID, SubdomainID> & subdomain_key,
                             bool on_displaced,
-                            bool periodic);
+                            bool periodic,
+                            bool give_me_wrong_results);
 
   /**
    * Once the secondary_requested_boundary_ids and
@@ -142,9 +143,22 @@ public:
    */
   void buildMortarSegmentMesh();
 
-  // TODO: function info
+  /**
+   * Builds the mortar segment mesh once the secondary and primary node
+   * projections have been completed.
+   *
+   * Inputs:
+   * - mesh
+   *
+   * Outputs:
+   * - mortar_segment_mesh
+   * - msm_elem_to_info
+   */
   void buildMortarSegmentMesh3d();
 
+  /**
+   * Outputs mesh statistics for mortar segment mesh
+   */
   void msmStatistics();
 
   /**
@@ -228,15 +242,23 @@ public:
 
   int dim() const { return mesh.mesh_dimension(); }
 
+  /**
+   * @return The set of nodes on which mortar constraint is not active
+   */
   const std::unordered_set<dof_id_type> & getInactiveLMNodes() const
   {
     return inactive_local_lm_nodes;
   }
 
+  /**
+   * @return The list of secondary elems on which mortar constraint is not active
+   */
   const std::unordered_set<const Elem *> & getInactiveLMElems() const
   {
     return inactive_local_lm_elems;
   }
+
+  bool wrongResults() const { return _give_me_wrong_results; }
 
 private:
   // Reference to the mesh stored in equation_systems.
@@ -358,4 +380,8 @@ private:
   /// a certain element (in which case -1 <= xi <= 1) or whether we should have *already* projected
   /// a primary node (in which case we error if abs(xi) is sufficiently close to 1)
   Real _xi_tolerance = 1e-6;
+
+  /// Flag to enable regressed treatment of edge dropping where all LM DoFs on edge dropping element
+  /// are strongly set to 0.
+  bool _give_me_wrong_results;
 };

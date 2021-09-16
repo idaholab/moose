@@ -97,6 +97,7 @@
     secondary_variable = T
     use_displaced_mesh = true
     material_property = 'layer_modifier'
+    give_me_wrong_results = false
   [../]
 []
 

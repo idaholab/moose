@@ -89,6 +89,7 @@
     secondary_subdomain = '11'
     variable = lambda
     secondary_variable = T
+    give_me_wrong_results = false
   [../]
 []
 
