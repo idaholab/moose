@@ -144,6 +144,7 @@ class MooseDocsWatcher(livereload.watcher.Watcher):
                     key = fname.replace(root, '').strip('/')
                     page = common.create_file_page(key, fname, self._primary.reader.EXTENSIONS)
                     self._primary.addPage(page)
+                    self._primary.initPage(page)
                     self._contents.append(page)
                     return page
         elif exists: # there is no way to know which translator should build the new content
@@ -203,7 +204,9 @@ def main(options):
         if subconfigs:
             LOG.info('Initializing translator object loaded from %s', config_files[index])
         translator.init(contents[index])
-        contents[index] = translator.getPages() # init methods can add pages (e.g., civet.py)
+
+        # init methods can add pages (e.g., civet.py), but don't add pages from another translator
+        contents[index] = [page for page in translator.getPages() if page.translator is translator]
 
     # Identify the first translator in the list as the "primary" one for convenience
     primary = translators[0]
@@ -256,13 +259,13 @@ def main(options):
     for index, translator in enumerate(translators):
         if subconfigs:
             LOG.info('Reading content specified by %s', config_files[index])
-        translator.execute(contents[index], options.num_threads, render=False, write=False)
+        translator.execute(contents[index], num_threads=options.num_threads, render=False, write=False)
 
     # Finally, execute the render and write methods
     for index, translator in enumerate(translators):
         if subconfigs:
             LOG.info('Writing content specified by %s', config_files[index])
-        translator.execute(contents[index], options.num_threads, read=False, tokenize=False)
+        translator.execute(contents[index], num_threads=options.num_threads, read=False, tokenize=False)
 
     LOG.info('Total Time [%s sec.]', time.time() - t)
 
