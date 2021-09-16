@@ -1,4 +1,4 @@
-!template load file=framework_rtm.md project={{app}}
+!template load file=framework_stp.md project={{app}}
 
 !template item key=pre-intro
 !alert note

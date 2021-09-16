@@ -113,8 +113,8 @@ test is accepted (pass), otherwise it is rejected (fail).
 
 In addition, test coverage reports will be created for all proposed changes. The overall line
 coverage is required to increase or remain constant (it may not decrease). Additionally, the
-independent reviewer is expected to use these report to ensure that the proposed changes are
-tested at an appropriate level at the discretion of the reviewer.q
+independent reviewer is expected to use these reports to ensure that the proposed changes are
+tested at an appropriate level at the discretion of the reviewer.
 
 ### Reports, records, standard formatting, and conventions
 
