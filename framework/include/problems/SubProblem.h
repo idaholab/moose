@@ -921,16 +921,19 @@ protected:
   /// AD flag indicating whether **any** AD objects have been added
   bool _have_ad_objects;
 
+private:
   /// Functor material properties for this problem. Outer vector is indexed by thread ID. Map key
   /// corresponds to the functor material property name. Map values are pairs where the first member
   /// of the pair is a boolean that indicates whether the functor property has been declared (if
   /// we've created a name key then by the time we're setting up the problem this boolean must
   /// evaluate to true or else it means someone has requested property that won't be provided) and
   /// the second member of the pair is a unique pointer to the functor material property object
-  std::vector<std::unordered_map<std::string, std::pair<bool, std::unique_ptr<Moose::FunctorBase>>>>
+  std::vector<std::map<std::string, std::pair<bool, std::unique_ptr<Moose::FunctorBase>>>>
       _functor_material_properties;
 
-private:
+  /// A container holding pointers to all the functors in our problem
+  std::vector<std::map<std::string, const Moose::FunctorBase *>> _functors;
+
   /// The declared vector tags
   std::vector<VectorTag> _vector_tags;
 
@@ -976,6 +979,7 @@ SubProblem::declareFunctorProperty(const std::string & name,
   auto & functor_material_properties = _functor_material_properties[tid];
   auto it = functor_material_properties.find(name);
   if (it == functor_material_properties.end())
+  {
     // No material property created yet so create it
     it = functor_material_properties
              .emplace(
@@ -984,6 +988,18 @@ SubProblem::declareFunctorProperty(const std::string & name,
                                 std::make_unique<P<T>>(
                                     name, std::forward<ConstructionArgs>(construction_args)...)))
              .first;
+    // And add it to our all-functors container
+    auto & functors = _functors[tid];
+    auto functors_insertion = functors.emplace(std::make_pair(name, it->second.second.get()));
+
+    // Insertion should have happened
+    if (!functors_insertion.second)
+      mooseError(
+          "We created a functor material property with name ",
+          name,
+          " but there is already a functor in our problem with that name. Make sure that you do "
+          "not have functor material properties, functions, and variables with the same names");
+  }
   else
   // The property already exists
   {
@@ -1033,9 +1049,27 @@ SubProblem::declareFunctorProperty(const std::string & name,
 }
 
 template <typename T>
-const FunctorMaterialProperty<T> &
-SubProblem::getFunctorProperty(const std::string & name, const THREAD_ID tid)
+const Moose::Functor<T> &
+SubProblem::getFunctor(const std::string & name, const THREAD_ID tid)
 {
+  // Do we already have the functor?
+  mooseAssert(tid < _functors.size(), "Too large a thread ID");
+  const auto & functors = _functors[tid];
+  auto it = functors.find(name);
+  if (it != functors.end())
+  {
+    const auto * const functor = dynamic_cast<const Moose::Functor<T> *>(it->second);
+    if (!functor)
+      mooseError("functor is of wrong type ",
+                 typeid(T).name(),
+                 " in SubProblem::getFunctor for functor named ",
+                 name);
+    return *functor;
+  }
+
+  // If we don't then we're going to assume for now that it will be created in the future as a
+  // functor material property. We will almost certainly want to change this assumption eventually
+  // if functors take over the world
   return declareFunctorProperty<T>(name, tid, true);
 }
 
