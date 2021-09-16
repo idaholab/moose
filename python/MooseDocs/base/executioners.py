@@ -205,11 +205,8 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
         self._page_result = dict()
         self._global_attributes = dict()
 
-    def init(self, nodes):
+    def initPages(self, nodes):
         """Initialize the Page objects."""
-
-        # Call Extension init() method
-        self.translator.executeMethod('init')
 
         # Initialize Page objects
         for node in nodes:

@@ -127,21 +127,18 @@ class CivetExtension(command.CommandExtension):
 
         if self.get('generate_test_reports', True):
             self.__has_test_reports = True
+
             start = time.time()
             LOG.info("Creating CIVET result pages...")
 
+            result_pages = list()
             report_root = self.get('test_reports_location')
             if not self.translator.findPage(report_root, exact=True, throw_on_zero=False):
-                self.translator.addPage(pages.Directory(report_root,
-                                                        base=self.translator.destination,
-                                                        source=report_root))
+                result_pages.append(pages.Directory(report_root, source=report_root))
 
-            src = pages.Source('{}/index.md'.format(report_root),
-                               output_extension='.md',
-                               base=self.translator.destination,
-                               source='{}/index.md'.format(report_root),
-                               read=False, tokenize=False)
-            self.translator.addPage(src)
+            result_pages.append(pages.Source('{}/index.md'.format(report_root),
+                                             source='{}/index.md'.format(report_root),
+                                             read=False, tokenize=False))
 
             count = 0
             for key, item in self.__database.items():
@@ -150,10 +147,11 @@ class CivetExtension(command.CommandExtension):
                 count += 1
 
                 fullname = '{}/{}.md'.format(report_root, name)
-                src = pages.Source(fullname, source=fullname, read=False, tokenize=False, key=key,
-                                   output_extension='.md',
-                                   base=self.translator.destination)
-                self.translator.addPage(src)
+                result_pages.append(pages.Source(fullname, source=fullname,
+                                                 read=False, tokenize=False, key=key))
+
+            self.translator.addPages(result_pages)
+            self.translator.executioner.initPages(result_pages)
 
             LOG.info("Creating CIVET result pages complete [%s sec.]", time.time() - start)
 

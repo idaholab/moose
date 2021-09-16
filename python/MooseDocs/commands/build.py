@@ -203,6 +203,7 @@ def main(options):
         if subconfigs:
             LOG.info('Initializing translator object loaded from %s', config_files[index])
         translator.init(contents[index])
+        contents[index] = translator.getPages() # init methods can add pages (e.g., civet.py)
 
     # Identify the first translator in the list as the "primary" one for convenience
     primary = translators[0]

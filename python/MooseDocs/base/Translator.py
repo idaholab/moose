@@ -117,8 +117,26 @@ class Translator(mixins.ConfigObject):
     def addPage(self, page):
         """Add an additional page to the list of available pages."""
         self.__executioner.addPage(page)
-        if self.__initialized:
-            self.__executioner.init([page])
+
+    def addPages(self, pages):
+        """Add an additional pages to the list of available pages."""
+        for page in pages:
+            self.__executioner.addPage(page)
+
+    def initPage(self, page):
+        """Initialize a page (call after addPage)."""
+        if not self.__initialized:
+            msg = "`initPage` should only be done after the Translator.init()"
+            raise exceptions.MooseDocsException(msg)
+        self.__executioner.addPage(page)
+
+    def initPages(self, pages):
+        """Add an additional pages to the list of available pages."""
+        if not self.__initialized:
+            msg = "`initPages` should only be done after the Translator.init()"
+            raise exceptions.MooseDocsException(msg)
+        for page in pages:
+            self.__executioner.addPage(page)
 
     def getPages(self):
         """Return the Page objects"""
@@ -257,8 +275,11 @@ class Translator(mixins.ConfigObject):
             if ext['active']:
                 self.__checkRequires(ext)
 
+        # Call Extension init() methods
+        self.executeMethod('init')
+
         # Initialize the Page objects
-        self.__executioner.init(nodes or self.getPages())
+        self.__executioner.initPages(nodes or self.getPages())
 
         LOG.info('Initializing complete [%s sec.]', time.time() - t)
         self.__initialized = True
