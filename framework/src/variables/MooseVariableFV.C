@@ -1148,7 +1148,7 @@ MooseVariableFV<OutputType>::evaluateGradient(const ElemFromFaceArg & elem_from_
 
 template <typename OutputType>
 typename MooseVariableFV<OutputType>::DotType
-MooseVariableFV<OutputType>::evaluateDot(const Elem * const & elem, unsigned int state) const
+MooseVariableFV<OutputType>::evaluateDot(const Elem * const &, unsigned int) const
 {
   mooseError("evaluateDot not implemented for non-scalar finite volume variables");
 }

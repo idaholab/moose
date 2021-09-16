@@ -10,6 +10,7 @@
 #pragma once
 
 #include "INSFVSymmetryBC.h"
+#include "CentralDifferenceLimiter.h"
 
 /**
  * A class for setting a symmetry boundary condition on the velocity. It should be

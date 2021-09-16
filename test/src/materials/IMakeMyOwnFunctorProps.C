@@ -24,6 +24,7 @@ public:
   }
 
   using typename Moose::Functor<T>::FaceArg;
+  using typename Moose::Functor<T>::SingleSidedFaceArg;
   using typename Moose::Functor<T>::ElemFromFaceArg;
   using typename Moose::Functor<T>::ElemQpArg;
   using typename Moose::Functor<T>::ElemSideQpArg;
@@ -49,6 +50,10 @@ private:
     return evaluateHelper(elem_from_face, state);
   }
   T evaluate(const FaceArg & face, unsigned int state) const override final
+  {
+    return evaluateHelper(face, state);
+  }
+  T evaluate(const SingleSidedFaceArg & face, unsigned int state) const override final
   {
     return evaluateHelper(face, state);
   }

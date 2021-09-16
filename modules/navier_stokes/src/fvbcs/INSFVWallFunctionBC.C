@@ -9,6 +9,7 @@
 
 #include "INSFVWallFunctionBC.h"
 #include "INSFVMethods.h"
+#include "NS.h"
 
 registerMooseObject("NavierStokesApp", INSFVWallFunctionBC);
 
