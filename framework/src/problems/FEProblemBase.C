@@ -2079,6 +2079,13 @@ FEProblemBase::addFunction(const std::string & type,
   {
     std::shared_ptr<Function> func = _factory.create<Function>(type, name, parameters, tid);
     _functions.addObject(func, tid);
+
+    auto * const functor = dynamic_cast<Moose::FunctorBase *>(func.get());
+    if (!functor)
+      mooseError("This should be a functor");
+    addFunctor(name, const_cast<const Moose::FunctorBase *>(functor), tid);
+    if (_displaced_problem)
+      _displaced_problem->addFunctor(name, const_cast<const Moose::FunctorBase *>(functor), tid);
   }
 }
 

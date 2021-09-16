@@ -39,10 +39,10 @@ INSFVMaterial::INSFVMaterial(const InputParameters & parameters)
     _rho_v(declareFunctorProperty<ADReal>(NS::momentum_y)),
     _rho_w(declareFunctorProperty<ADReal>(NS::momentum_z)),
     _p(declareFunctorProperty<ADReal>(NS::pressure)),
-    _rho(getFunctorMaterialProperty<ADReal>("rho")),
+    _rho(getFunctor<ADReal>("rho")),
     _has_temperature(isParamValid("temperature")),
     _temperature(_has_temperature ? getVarHelper<MooseVariableFVReal>("temperature", 0) : nullptr),
-    _cp(_has_temperature ? &getFunctorMaterialProperty<ADReal>("cp_name") : nullptr),
+    _cp(_has_temperature ? &getFunctor<ADReal>("cp_name") : nullptr),
     _rho_cp_temp(_has_temperature ? &declareFunctorProperty<ADReal>("rho_cp_temp") : nullptr)
 {
   if (_mesh.dimension() >= 2 && !_v_vel)

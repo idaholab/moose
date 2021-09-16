@@ -34,11 +34,11 @@ FVMatAdvectionOutflowBC::validParams()
 
 FVMatAdvectionOutflowBC::FVMatAdvectionOutflowBC(const InputParameters & params)
   : FVFluxBC(params),
-    _vel(getFunctorMaterialProperty<ADRealVectorValue>("vel")),
-    _adv_quant(isParamValid("advected_quantity")
-                   ? static_cast<const Moose::Functor<ADReal> &>(
-                         getFunctorMaterialProperty<ADReal>("advected_quantity"))
-                   : static_cast<const Moose::Functor<ADReal> &>(variable()))
+    _vel(getFunctor<ADRealVectorValue>("vel")),
+    _adv_quant(
+        isParamValid("advected_quantity")
+            ? static_cast<const Moose::Functor<ADReal> &>(getFunctor<ADReal>("advected_quantity"))
+            : static_cast<const Moose::Functor<ADReal> &>(variable()))
 {
   using namespace Moose::FV;
 

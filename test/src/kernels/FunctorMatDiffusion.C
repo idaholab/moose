@@ -17,8 +17,7 @@ InputParameters
 FunctorMatDiffusionTempl<is_ad>::validParams()
 {
   auto params = ADKernel::validParams();
-  params.template addParam<MaterialPropertyName>(
-      "diffusivity", "D", "The diffusivity value or material property");
+  params.template addParam<MooseFunctorName>("diffusivity", "D", "The diffusivity value");
   params.template addParam<bool>(
       "use_preinitd_data",
       false,
@@ -30,7 +29,7 @@ FunctorMatDiffusionTempl<is_ad>::validParams()
 template <bool is_ad>
 FunctorMatDiffusionTempl<is_ad>::FunctorMatDiffusionTempl(const InputParameters & parameters)
   : ADKernel(parameters),
-    _diff(getFunctorMaterialProperty<GenericReal<is_ad>>("diffusivity")),
+    _diff(getFunctor<GenericReal<is_ad>>("diffusivity")),
     _use_preinitd_data(getParam<bool>("use_preinitd_data"))
 {
 }

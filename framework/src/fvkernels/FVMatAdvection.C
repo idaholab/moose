@@ -16,8 +16,8 @@ FVMatAdvection::validParams()
 {
   InputParameters params = FVFluxKernel::validParams();
   params.addClassDescription("Computes the residual of advective term using finite volume method.");
-  params.addRequiredParam<MaterialPropertyName>("vel", "advection velocity");
-  params.addParam<MaterialPropertyName>(
+  params.addRequiredParam<MooseFunctorName>("vel", "advection velocity");
+  params.addParam<MooseFunctorName>(
       "advected_quantity",
       "An optional parameter for specifying an advected quantity from a material property. If this "
       "is not specified, then the advected quantity will simply be the variable that this object "
@@ -34,10 +34,9 @@ FVMatAdvection::validParams()
 
 FVMatAdvection::FVMatAdvection(const InputParameters & params)
   : FVFluxKernel(params),
-    _vel(getFunctorMaterialProperty<ADRealVectorValue>("vel")),
+    _vel(getFunctor<ADRealVectorValue>("vel")),
     _adv_quant(isParamValid("advected_quantity")
-                   ? static_cast<const Moose::Functor<ADReal> &>(
-                         getFunctorMaterialProperty<ADReal>("advected_quantity"))
+                   ? getFunctor<ADReal>("advected_quantity")
                    : static_cast<const Moose::Functor<ADReal> &>(variable()))
 {
   using namespace Moose::FV;

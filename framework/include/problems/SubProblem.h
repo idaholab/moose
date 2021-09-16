@@ -801,6 +801,25 @@ public:
    */
   void clearAllDofIndices();
 
+  /**
+   * @tparam T The type that the functor material property will return when evaluated, e.g. \p
+               ADReal or \p Real
+   * @tparam P \p P<T> corresponds to the functor material property class. If a \p P argument is not
+               provided to this method, then we will create a \p FunctorMaterialProperty. This
+               template parameter exists in order to enable users to create derivatives of \p
+               FunctorMaterialProperty
+   * @param name The name of the functor material property to declare
+   * @param tid The thread ID that we are declaring the functor property for
+   * @param called_from_getter Whether this method is being called from \p getFunctorProperty. This
+                               is useful for determining whether we are actually declaring the
+                               property or we are creating this property for a requestor and we are
+                               hoping that someone will actually declare the property later
+   * @param construction_args Optional arguments that may be used to help construct derivatives of
+                              \p FunctorMaterialProperty. These will be forwarded, along with the
+                              name of the property (which will be the first constructor argument),
+                              to the functor material property (potentially derivative) constructor
+   * @return a non-constant reference to the functor material property
+   */
   template <typename T,
             template <typename> class P = FunctorMaterialProperty,
             class... ConstructionArgs>
@@ -809,8 +828,21 @@ public:
                                 bool called_from_getter,
                                 ConstructionArgs &&... construction_args);
 
+  /**
+   * Returns a functor corresponding to \p name on the thread id \p tid
+   */
   template <typename T>
-  const FunctorMaterialProperty<T> & getFunctorProperty(const std::string & name, THREAD_ID tid);
+  const Moose::Functor<T> & getFunctor(const std::string & name, THREAD_ID tid);
+
+  /**
+   * checks whether we have a functor corresponding to \p name on the thread id \p tid
+   */
+  bool hasFunctor(const std::string & name, THREAD_ID tid) const;
+
+  /**
+   * add a functor to the problem functor container
+   */
+  void addFunctor(const std::string & name, const Moose::FunctorBase * functor, THREAD_ID tid);
 
   virtual void initialSetup();
   virtual void timestepSetup();

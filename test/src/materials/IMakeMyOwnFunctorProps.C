@@ -76,24 +76,22 @@ IMakeMyOwnFunctorProps::validParams()
   InputParameters params = FunctorMaterial::validParams();
   params += SetupInterface::validParams();
   params.set<ExecFlagEnum>("execute_on") = {EXEC_LINEAR, EXEC_NONLINEAR};
-  params.addCoupledVar("fe_var", 1., "A coupled finite element variable.");
-  params.addCoupledVar("fv_var", 1., "A coupled finite volume variable.");
-  params.addParam<MaterialPropertyName>("retrieved_prop_name",
-                                        "The name of the retrieved property.");
+  params.addParam<MooseFunctorName>("fe_var", 1., "A coupled finite element variable.");
+  params.addParam<MooseFunctorName>("fv_var", 1., "A coupled finite volume variable.");
+  params.addParam<MooseFunctorName>("retrieved_prop_name", "The name of the retrieved property.");
   return params;
 }
 
 IMakeMyOwnFunctorProps::IMakeMyOwnFunctorProps(const InputParameters & parameters)
   : FunctorMaterial(parameters),
-    _fe_var(getFunctor<MooseVariableFE<Real>>("fe_var", 0)),
-    _fv_var(getFunctor<MooseVariableFV<Real>>("fv_var", 0)),
-    _retrieved_prop(isParamValid("retrieved_prop_name")
-                        ? &getFunctorMaterialProperty<ADReal>("retrieved_prop_name")
-                        : nullptr),
-    _fe_prop(isCoupled("fe_var")
+    _fe_var(getFunctor<ADReal>("fe_var")),
+    _fv_var(getFunctor<ADReal>("fv_var")),
+    _retrieved_prop(isParamValid("retrieved_prop_name") ? &getFunctor<ADReal>("retrieved_prop_name")
+                                                        : nullptr),
+    _fe_prop(isFunctor("fe_var")
                  ? &declareFunctorProperty<ADReal, CustomFunctorProp>("fe_prop", _fe_var)
                  : nullptr),
-    _fv_prop(isCoupled("fv_var") ? &declareFunctorProperty<ADReal, CustomFunctorProp>(
+    _fv_prop(isFunctor("fv_var") ? &declareFunctorProperty<ADReal, CustomFunctorProp>(
                                        "fv_prop", _fv_var, _retrieved_prop)
                                  : nullptr)
 {

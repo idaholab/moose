@@ -227,7 +227,7 @@ functor property:
 where `TYPE` can be anything such as `Real, ADReal, RealVectorValue, ADRealVectorValue`
 etc. To get a functor material property:
 
-- `getFunctorMaterialProperty<TYPE>`
+- `getFunctor<TYPE>`
 
 It's worth noting that whereas the traditional regular material property system
 has different methods to declare/get non-AD and AD properties, the new functor

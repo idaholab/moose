@@ -27,8 +27,8 @@ FVDiffusionInterface::validParams()
 
 FVDiffusionInterface::FVDiffusionInterface(const InputParameters & params)
   : FVInterfaceKernel(params),
-    _coeff1(getFunctorMaterialProperty<ADReal>("coeff1")),
-    _coeff2(getFunctorMaterialProperty<ADReal>("coeff2"))
+    _coeff1(getFunctor<ADReal>("coeff1")),
+    _coeff2(getFunctor<ADReal>("coeff2"))
 {
 }
 

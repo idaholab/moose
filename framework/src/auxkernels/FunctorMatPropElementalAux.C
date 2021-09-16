@@ -24,7 +24,7 @@ FunctorMatPropElementalAux::validParams()
 }
 
 FunctorMatPropElementalAux::FunctorMatPropElementalAux(const InputParameters & parameters)
-  : AuxKernel(parameters), _mat_prop(getFunctorMaterialProperty<ADReal>("mat_prop"))
+  : AuxKernel(parameters), _mat_prop(getFunctor<ADReal>("mat_prop"))
 {
 }
 

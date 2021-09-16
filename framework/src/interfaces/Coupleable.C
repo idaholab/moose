@@ -2174,21 +2174,6 @@ Coupleable::adCoupledDots(const std::string & var_name) const
   return coupledVectorHelper<const ADVariableValue *>(var_name, func);
 }
 
-template <>
-const Moose::Functor<ADReal> &
-Coupleable::getDefaultFunctor(const std::string & var_name) const
-{
-  auto default_value_it = _default_ad_functor.find(var_name);
-  if (default_value_it == _default_ad_functor.end())
-  {
-    const auto default_value = _c_parameters.defaultCoupledValue(var_name);
-    auto value = libmesh_make_unique<ConstantFunctor<ADReal>>(default_value);
-    default_value_it = _default_ad_functor.insert(std::make_pair(var_name, std::move(value))).first;
-  }
-
-  return *default_value_it->second;
-}
-
 // Explicit instantiations
 
 template const Real & Coupleable::getDefaultNodalValue<Real>(const std::string & var_name,

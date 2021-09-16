@@ -49,7 +49,7 @@ PINSFVFunctorBC::PINSFVFunctorBC(const InputParameters & params)
                    ? &getFunctor<MooseVariableFVReal>(NS::superficial_velocity_z, 0)
                    : nullptr),
     _pressure(getFunctor<MooseVariableFVReal>(NS::pressure, 0)),
-    _rho(getFunctorMaterialProperty<ADReal>(NS::density)),
+    _rho(getFunctor<ADReal>(NS::density)),
     _eps(getFunctor<MooseVariableFVReal>(NS::porosity, 0)),
     _eqn(getParam<MooseEnum>("eqn")),
     _index(getParam<MooseEnum>("momentum_component")),

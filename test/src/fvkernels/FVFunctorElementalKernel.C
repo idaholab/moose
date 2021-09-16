@@ -16,13 +16,13 @@ InputParameters
 FVFunctorElementalKernel::validParams()
 {
   InputParameters params = FVElementalKernel::validParams();
-  params.addRequiredParam<MaterialPropertyName>(
+  params.addRequiredParam<MooseFunctorName>(
       "mat_prop_name", "The name of the functor material property that will provide the residual");
   return params;
 }
 
 FVFunctorElementalKernel::FVFunctorElementalKernel(const InputParameters & params)
-  : FVElementalKernel(params), _functor_prop(getFunctorMaterialProperty<ADReal>("mat_prop_name"))
+  : FVElementalKernel(params), _functor_prop(getFunctor<ADReal>("mat_prop_name"))
 {
 }
 

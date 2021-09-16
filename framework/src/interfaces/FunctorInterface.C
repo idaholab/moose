@@ -17,7 +17,7 @@ FunctorInterface::validParams()
 
 FunctorInterface::FunctorInterface(const MooseObject * const moose_object)
   : _fi_params(moose_object->parameters()),
-    _fi_name(_mi_params.get<std::string>("_object_name")),
+    _fi_name(_fi_params.get<std::string>("_object_name")),
     _fi_subproblem(*_fi_params.getCheckedPointerParam<SubProblem *>("_subproblem")),
     _fi_tid(_fi_params.get<THREAD_ID>("_tid"))
 {
@@ -28,6 +28,15 @@ FunctorInterface::deduceFunctorName(const std::string & name) const
 {
   if (_fi_params.have_parameter<MooseFunctorName>(name))
     return _fi_params.get<MooseFunctorName>(name);
+  // variables, functor material properties, and functions are also functors
+  else if (_fi_params.have_parameter<MaterialPropertyName>(name))
+    return _fi_params.get<MaterialPropertyName>(name);
+  else if (_fi_params.have_parameter<VariableName>(name))
+    return _fi_params.get<VariableName>(name);
+  else if (_fi_params.have_parameter<NonlinearVariableName>(name))
+    return _fi_params.get<NonlinearVariableName>(name);
+  else if (_fi_params.have_parameter<FunctionName>(name))
+    return _fi_params.get<FunctionName>(name);
   else
     return name;
 }
@@ -68,4 +77,13 @@ FunctorInterface::defaultFunctor(const std::string & name)
   }
 
   return nullptr;
+}
+
+bool
+FunctorInterface::isFunctor(const std::string & name) const
+{
+  // Check if the supplied parameter is a valid input parameter key
+  std::string functor_name = deduceFunctorName(name);
+
+  return _fi_subproblem.hasFunctor(functor_name, _fi_tid);
 }

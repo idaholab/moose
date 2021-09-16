@@ -25,6 +25,7 @@
 #include "TaggingInterface.h"
 #include "NeighborCoupleableMooseVariableDependencyIntermediateInterface.h"
 #include "TwoMaterialPropertyInterface.h"
+#include "FunctorInterface.h"
 
 #include <set>
 
@@ -52,7 +53,8 @@ class FVInterfaceKernel : public MooseObject,
                           public MeshChangedInterface,
                           public TaggingInterface,
                           public NeighborCoupleableMooseVariableDependencyIntermediateInterface,
-                          public TwoMaterialPropertyInterface
+                          public TwoMaterialPropertyInterface,
+                          public FunctorInterface
 {
 public:
   /**

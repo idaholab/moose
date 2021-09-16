@@ -49,7 +49,7 @@ VolumetricFlowRate::VolumetricFlowRate(const InputParameters & parameters)
     _fv_advected_variable(
         dynamic_cast<const MooseVariableFV<Real> *>(getFieldVar("advected_variable", 0))),
     _advected_mat_prop_supplied(parameters.isParamSetByUser("advected_mat_prop")),
-    _advected_material_property(getFunctorMaterialProperty<ADReal>("advected_mat_prop"))
+    _advected_material_property(getFunctor<ADReal>("advected_mat_prop"))
 {
   // Check that at most one advected quantity has been provided
   if (_advected_variable_supplied && _advected_mat_prop_supplied)

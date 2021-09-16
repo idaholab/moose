@@ -15,7 +15,7 @@ InputParameters
 MatPropBC::validParams()
 {
   InputParameters params = ADIntegratedBC::validParams();
-  params.addRequiredParam<MaterialPropertyName>(
+  params.addRequiredParam<MooseFunctorName>(
       "mat_prop", "The material property that will provide this residual.");
   params.addParam<bool>("use_preinitd_data",
                         false,
@@ -26,7 +26,7 @@ MatPropBC::validParams()
 
 MatPropBC::MatPropBC(const InputParameters & parameters)
   : ADIntegratedBC(parameters),
-    _coef(getFunctorMaterialProperty<ADReal>("mat_prop")),
+    _coef(getFunctor<ADReal>("mat_prop")),
     _use_preinitd_data(getParam<bool>("use_preinitd_data"))
 {
 }

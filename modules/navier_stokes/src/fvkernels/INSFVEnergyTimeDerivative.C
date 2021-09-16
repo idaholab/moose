@@ -28,7 +28,7 @@ INSFVEnergyTimeDerivative::validParams()
 INSFVEnergyTimeDerivative::INSFVEnergyTimeDerivative(const InputParameters & params)
   : FVTimeKernel(params),
     _rho(getParam<Real>("rho")),
-    _cp(getFunctorMaterialProperty<ADReal>("cp_name"))
+    _cp(getFunctor<ADReal>("cp_name"))
 {
 }
 

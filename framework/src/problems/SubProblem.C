@@ -1064,3 +1064,25 @@ SubProblem::initialSetup()
       if (!key_value.second.first)
         mooseError("Functor material property ", key_value.first, " has no declaration anywhere.");
 }
+
+void
+SubProblem::addFunctor(const std::string & name,
+                       const Moose::FunctorBase * functor,
+                       const THREAD_ID tid)
+{
+  mooseAssert(tid < _functors.size(), "Too large a thread ID");
+  auto insertion = _functors[tid].emplace(std::make_pair(name, functor));
+  if (!insertion.second)
+    mooseError("Attempted to add a functor with the name ",
+               name,
+               " but the functor already exists. Make sure that you do not have functor material "
+               "properties, functions, and variables with the same names");
+}
+
+bool
+SubProblem::hasFunctor(const std::string & name, const THREAD_ID tid) const
+{
+  mooseAssert(tid < _functors.size(), "Too large a thread ID");
+  auto & functors = _functors[tid];
+  return (functors.find(name) != functors.end());
+}

@@ -15,10 +15,10 @@ InputParameters
 ADCoupledVelocityMaterial::validParams()
 {
   InputParameters params = FunctorMaterial::validParams();
-  params.addRequiredCoupledVar("vel_x", "the x velocity");
-  params.addCoupledVar("vel_y", "the y velocity");
-  params.addCoupledVar("vel_z", "the z velocity");
-  params.addRequiredCoupledVar("rho", "The name of the density variable");
+  params.addRequiredParam<MooseFunctorName>("vel_x", "the x velocity");
+  params.addParam<MooseFunctorName>("vel_y", "the y velocity");
+  params.addParam<MooseFunctorName>("vel_z", "the z velocity");
+  params.addRequiredParam<MooseFunctorName>("rho", "The name of the density variable");
   params.addClassDescription("A material used to create a velocity from coupled variables");
   params.addParam<MaterialPropertyName>(
       "velocity", "velocity", "The name of the velocity material property to create");
@@ -38,10 +38,10 @@ ADCoupledVelocityMaterial::ADCoupledVelocityMaterial(const InputParameters & par
     _rho_u(declareFunctorProperty<ADReal>(getParam<MaterialPropertyName>("rho_u"))),
     _rho_v(declareFunctorProperty<ADReal>(getParam<MaterialPropertyName>("rho_v"))),
     _rho_w(declareFunctorProperty<ADReal>(getParam<MaterialPropertyName>("rho_w"))),
-    _vel_x(getFunctor<MooseVariableFVReal>("vel_x", 0)),
-    _vel_y(isParamValid("vel_y") ? &getFunctor<MooseVariableFVReal>("vel_y", 0) : nullptr),
-    _vel_z(isParamValid("vel_z") ? &getFunctor<MooseVariableFVReal>("vel_z", 0) : nullptr),
-    _rho(getFunctor<MooseVariableFVReal>("rho", 0))
+    _vel_x(getFunctor<ADReal>("vel_x")),
+    _vel_y(isParamValid("vel_y") ? &getFunctor<ADReal>("vel_y") : nullptr),
+    _vel_z(isParamValid("vel_z") ? &getFunctor<ADReal>("vel_z") : nullptr),
+    _rho(getFunctor<ADReal>("rho"))
 {
   _velocity.setFunctor(
       _mesh, blockIDs(), [this](const auto & r, const auto & t) -> ADRealVectorValue {

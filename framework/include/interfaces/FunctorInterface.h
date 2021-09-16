@@ -37,8 +37,19 @@ public:
   FunctorInterface(const MooseObject * moose_object);
 
 protected:
+  /**
+   * retrieves a functor from the subproblem. This method also leverages the ability to create
+   * default functors if the user passed an integer or real in the input file
+   */
   template <typename T>
   const Moose::Functor<T> & getFunctor(const std::string & name);
+
+  /**
+   * checks the subproblem for the given functor. This will not query default functors potentially
+   * stored in this object, e.g. this method will return false if the user passed an int or real to
+   * the functor param in the input file
+   */
+  bool isFunctor(const std::string & name) const;
 
 private:
   /**
@@ -84,7 +95,7 @@ FunctorInterface::getFunctor(const std::string & name)
   if (default_functor)
     return *default_functor;
 
-  return _fi_subproblem.getFunctor<T>(prop_name, _fi_tid);
+  return _fi_subproblem.getFunctor<T>(functor_name, _fi_tid);
 }
 
 template <>

@@ -1,12 +1,14 @@
 [Tests]
   issues = '#15894'
   design = 'fv_design.md'
-  [mat-error]
-    type = RunException
+  [fe-and-fv-with-functors]
+    type = Exodiff
     input = 1d.i
     cli_args = "Materials/active='bad_mat'"
-    expect_err = "Your material bad_mat couples in both FE and FV vars"
-    requirement = 'The system shall error if a user attempts to couple both finite volume and finite element variables into the same material.'
+    requirement = 'The system shall be able to couple both finite element and finite volume variables, as functors, into functor material property calculations.'
+    exodiff = '1d_out.e'
+    ad_indexing_type = 'global'
+    issues = '#16809'
   []
   [coupled-gold]
     type = Exodiff
@@ -14,6 +16,7 @@
     requirement = 'The system shall support coupling of a finite volume variable into a finite element calculation.'
     exodiff = '1d_out.e'
     ad_indexing_type = 'global'
+    prereq = 'fe-and-fv-with-functors'
   []
   [jac]
     type = PetscJacobianTester

@@ -19,7 +19,7 @@ VarFunctorMaterial::validParams()
   InputParameters params = FunctorMaterial::validParams();
   params += SetupInterface::validParams();
   params.set<ExecFlagEnum>("execute_on") = {EXEC_LINEAR, EXEC_NONLINEAR};
-  params.addRequiredCoupledVar("var", "The field variable to be coupled in");
+  params.addRequiredParam<MooseFunctorName>("var", "The field variable to be coupled in");
   params.addRequiredParam<MaterialPropertyName>("mat_prop_name",
                                                 "The name of the material property to produce");
   params.addClassDescription("Creates a functor material property whose evaluation corresponds to "
@@ -29,7 +29,7 @@ VarFunctorMaterial::validParams()
 
 VarFunctorMaterial::VarFunctorMaterial(const InputParameters & parameters)
   : FunctorMaterial(parameters),
-    _var(getFunctor<MooseVariableField<Real>>("var", 0)),
+    _var(getFunctor<ADReal>("var")),
     _functor_prop(declareFunctorProperty<ADReal>("mat_prop_name"))
 {
   _functor_prop.setFunctor(

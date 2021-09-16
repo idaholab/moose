@@ -67,7 +67,7 @@ INSFVMomentumAdvection::validParams()
 
 INSFVMomentumAdvection::INSFVMomentumAdvection(const InputParameters & params)
   : FVMatAdvection(params),
-    _mu(getFunctorMaterialProperty<ADReal>("mu")),
+    _mu(getFunctor<ADReal>("mu")),
     _p_var(dynamic_cast<const INSFVPressureVariable *>(getFieldVar(NS::pressure, 0))),
     _u_var(dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("u", 0))),
     _v_var(params.isParamValid("v")
@@ -76,7 +76,7 @@ INSFVMomentumAdvection::INSFVMomentumAdvection(const InputParameters & params)
     _w_var(params.isParamValid("w")
                ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("w", 0))
                : nullptr),
-    _rho(getFunctorMaterialProperty<ADReal>("rho")),
+    _rho(getFunctor<ADReal>("rho")),
     _dim(_subproblem.mesh().dimension()),
     _cd_limiter(Moose::FV::Limiter<ADReal>::build(Moose::FV::LimiterType::CentralDifference))
 {
