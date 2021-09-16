@@ -58,6 +58,8 @@ You should see a maximum interpenetration of about 6e-4, which is about half a
 percent of the element width. It is application dependent whether this amount is
 acceptable.
 
+
+
 Once you've answered the questions and run this example we will move on to
-[Step 2](tensor_mechanics/tutorials/introduction/step03.md) which introduces
+[Step 3](tensor_mechanics/tutorials/introduction/step03.md) which introduces
 mortar based contact.

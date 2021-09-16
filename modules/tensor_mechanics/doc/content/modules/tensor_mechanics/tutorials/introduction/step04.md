@@ -116,6 +116,28 @@ the `[Outputs]` block.
 
 [Click here for the answer.](tensor_mechanics/tutorials/introduction/answer04a.md)
 
+### Sidebar: Volumetric locking
+
+[Volumetric locking](tensor_mechanics/VolumetricLocking.md) can occur in
+mechanics simulations of near incompressible materials if the elements (and
+associated shape functions) cannot accomodate the incompressibility constraint.
+
+> Keep the postprocessing modifications from the previous question, set the
+> [!param](/Materials/ComputeIsotropicElasticityTensor/poissons_ratio) of the
+> cantilevers to `0.49`. Then add and modify the following parameters
+>
+> - [!param](/Mesh/uniform_refine) in the `[Mesh]` block
+> - [!param](/Modules/TensorMechanics/Master/TensorMechanicsAction/volumetric_locking_correction) in the tensor mechanics master action block
+> - [!param](/Mesh/GeneratedMeshGenerator/elem_type) in the `GeneratedMeshGenerator` blocks
+>
+> For convenience all those parameters may be listed under `[GlobalParams]`
+> instead. Compare first order QUAD4 elements to second order QUAD8 elements,
+> compare the cantilever deflection with and without volumetric locking
+> correction (with QUAD4 elements), and compare the result for different levels
+> of uniform refinement (1, 2, 3, 4).
+
+[Click here for the sidebar on volumetric locking.](tensor_mechanics/tutorials/introduction/step04a.md)
+
 Once you've answered the questions and run this example we will move on to
 [Step 1](contact/tutorials/introduction/step04.md optional=True) of the contact
 tutorial, which builds on this step.

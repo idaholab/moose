@@ -64,6 +64,14 @@ Let's look at the penetration variable again:
 
 You should see a maximum interpenetration of about 5.1e-9. That's quite an improvement compared to penalty contact!
 
+### Contact pressure
+
+Note that the `contact_pressure` variable is added but not used with the mortar formulation. The physical meaning of the Lagrange multiplier _is_ the contact pressure.
+
+> Visualize the contact pressure by plotting the `pillars_normal_lm` variable.
+
+### Extracting contact pressure data
+
 
 Once you've answered the questions and run this example we will move on to
 [Step 2](tensor_mechanics/tutorials/introduction/step03.md) which introduces

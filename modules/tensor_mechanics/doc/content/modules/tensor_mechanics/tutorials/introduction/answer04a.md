@@ -53,9 +53,9 @@ We can plot this data and obtain a curve that shows the x deflection as a
 function of time (and in our simulation time is proportional to the applied
 pressure).
 
-!plot scatter data=[{'time':  [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0],
-                     'x_deflection':  [0.0, 0.023715578545891, 0.047446543911184, 0.071191904882184, 0.094950668270887, 0.11872183902512, 0.14250442033962, 0.16629741376752, 0.19009981923785, 0.21391063550499, 0.23772885980544],
-                     'name':'v=0.3'}]
+!plot scatter data=[{'x': [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0],
+                     'y':  [0.0, 0.023715578545891, 0.047446543911184, 0.071191904882184, 0.094950668270887, 0.11872183902512, 0.14250442033962, 0.16629741376752, 0.19009981923785, 0.21391063550499, 0.23772885980544],
+                     'name':'v\=0.3'}]
               layout={'xaxis':{'title':'Time'},
                       'yaxis':{'title':'Maximum x displacement'},
                       'title':'Cantilever deflection'}

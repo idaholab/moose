@@ -6,3 +6,7 @@ Users are expected to have worked through the [Introduction to Tensor Mechanics]
 
 Continuing from the [final step](tensor_mechanics/tutorials/introduction/step04.md)
 in the tensor mechanics tutorial we add a first attempt at mechanical contact.
+
+## [Mortar Contact](contact/tutorials/introduction/step02.md)
+
+We learn how to how to use the mortar formulation for mechanical contact.

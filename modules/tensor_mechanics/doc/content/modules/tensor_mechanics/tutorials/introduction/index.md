@@ -25,3 +25,7 @@ In this step we'll have a look at how thermal expansion can be modeled in MOOSE.
 
 We'll set up a pair of mesh separate unconnected mesh blocks,as a final
 preparation before we start working with mechanical contact.
+
+### [Volumetric locking](tensor_mechanics/tutorials/introduction/step04a.md)
+
+We'll look at the effects of volumetric locking and how to mitigate them.
