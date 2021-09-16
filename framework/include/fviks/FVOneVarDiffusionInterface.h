@@ -18,6 +18,6 @@ public:
 protected:
   ADReal computeQpResidual() override;
 
-  const FunctorInterface<ADReal> & _coeff1;
-  const FunctorInterface<ADReal> & _coeff2;
+  const Moose::Functor<ADReal> & _coeff1;
+  const Moose::Functor<ADReal> & _coeff2;
 };

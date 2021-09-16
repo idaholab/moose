@@ -25,9 +25,11 @@
 
 class FaceInfo;
 
+namespace Moose
+{
 /**
  * A non-templated base class for functors that allow an owner object to hold
- * different class template instantiations of \p FunctorInterface in a single container
+ * different class template instantiations of \p Functor in a single container
  */
 class FunctorBase
 {
@@ -51,7 +53,7 @@ public:
  * template is meant to enable highly flexible on-the-fly variable and material property evaluations
  */
 template <typename T>
-class FunctorInterface : public FunctorBase
+class Functor : public FunctorBase
 {
 public:
   /**
@@ -111,10 +113,10 @@ public:
   using ElemSideQpArg =
       std::tuple<const libMesh::Elem *, unsigned int, unsigned int, const QBase *>;
 
-  using FunctorType = FunctorInterface<T>;
+  using FunctorType = Functor<T>;
   using FunctorReturnType = T;
-  virtual ~FunctorInterface() = default;
-  FunctorInterface() : _clearance_schedule({EXEC_ALWAYS}) {}
+  virtual ~Functor() = default;
+  Functor() : _clearance_schedule({EXEC_ALWAYS}) {}
 
   ///@{
   /**
@@ -246,22 +248,21 @@ private:
 
 template <typename T>
 T
-FunctorInterface<T>::operator()(const Elem * const & elem, const unsigned int state) const
+Functor<T>::operator()(const Elem * const & elem, const unsigned int state) const
 {
   return evaluate(elem, state);
 }
 
 template <typename T>
 T
-FunctorInterface<T>::operator()(const ElemFromFaceArg & elem_from_face,
-                                const unsigned int state) const
+Functor<T>::operator()(const ElemFromFaceArg & elem_from_face, const unsigned int state) const
 {
   return evaluate(elem_from_face, state);
 }
 
 template <typename T>
 T
-FunctorInterface<T>::operator()(const FaceArg & face, const unsigned int state) const
+Functor<T>::operator()(const FaceArg & face, const unsigned int state) const
 {
   return evaluate(face, state);
 }
@@ -269,11 +270,11 @@ FunctorInterface<T>::operator()(const FaceArg & face, const unsigned int state) 
 template <typename T>
 template <typename SpaceArg, typename TimeArg>
 T
-FunctorInterface<T>::queryQpCache(const unsigned int qp,
-                                  const QBase & qrule,
-                                  std::vector<std::pair<bool, T>> & qp_cache_data,
-                                  const SpaceArg & space,
-                                  const TimeArg & time) const
+Functor<T>::queryQpCache(const unsigned int qp,
+                         const QBase & qrule,
+                         std::vector<std::pair<bool, T>> & qp_cache_data,
+                         const SpaceArg & space,
+                         const TimeArg & time) const
 {
   // Check and see whether we even have sized for this quadrature point. If we haven't then we must
   // evaluate
@@ -299,7 +300,7 @@ FunctorInterface<T>::queryQpCache(const unsigned int qp,
 
 template <typename T>
 T
-FunctorInterface<T>::operator()(const ElemQpArg & elem_qp, const unsigned int state) const
+Functor<T>::operator()(const ElemQpArg & elem_qp, const unsigned int state) const
 {
   if (_clearance_schedule.count(EXEC_ALWAYS))
     return evaluate(elem_qp, state);
@@ -320,7 +321,7 @@ FunctorInterface<T>::operator()(const ElemQpArg & elem_qp, const unsigned int st
 
 template <typename T>
 T
-FunctorInterface<T>::operator()(const ElemSideQpArg & elem_side_qp, const unsigned int state) const
+Functor<T>::operator()(const ElemSideQpArg & elem_side_qp, const unsigned int state) const
 {
   if (_clearance_schedule.count(EXEC_ALWAYS))
     return evaluate(elem_side_qp, state);
@@ -350,23 +351,22 @@ FunctorInterface<T>::operator()(const ElemSideQpArg & elem_side_qp, const unsign
 
 template <typename T>
 T
-FunctorInterface<T>::operator()(
-    const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
-    const unsigned int state) const
+Functor<T>::operator()(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
+                       const unsigned int state) const
 {
   return evaluate(tqp, state);
 }
 
 template <typename T>
 void
-FunctorInterface<T>::setCacheClearanceSchedule(const std::set<ExecFlagType> & clearance_schedule)
+Functor<T>::setCacheClearanceSchedule(const std::set<ExecFlagType> & clearance_schedule)
 {
   _clearance_schedule = clearance_schedule;
 }
 
 template <typename T>
 void
-FunctorInterface<T>::clearCacheData()
+Functor<T>::clearCacheData()
 {
   for (auto & map_pr : _qp_to_value)
     for (auto & pr : map_pr.second)
@@ -388,7 +388,7 @@ FunctorInterface<T>::clearCacheData()
 
 template <typename T>
 void
-FunctorInterface<T>::timestepSetup()
+Functor<T>::timestepSetup()
 {
   if (_clearance_schedule.count(EXEC_TIMESTEP_BEGIN))
     clearCacheData();
@@ -396,7 +396,7 @@ FunctorInterface<T>::timestepSetup()
 
 template <typename T>
 void
-FunctorInterface<T>::residualSetup()
+Functor<T>::residualSetup()
 {
   if (_clearance_schedule.count(EXEC_LINEAR))
     clearCacheData();
@@ -404,7 +404,7 @@ FunctorInterface<T>::residualSetup()
 
 template <typename T>
 void
-FunctorInterface<T>::jacobianSetup()
+Functor<T>::jacobianSetup()
 {
   if (_clearance_schedule.count(EXEC_NONLINEAR))
     clearCacheData();
@@ -414,19 +414,19 @@ FunctorInterface<T>::jacobianSetup()
  * Class template for creating constants
  */
 template <typename T>
-class ConstantFunctor : public FunctorInterface<T>
+class ConstantFunctor : public Functor<T>
 {
 public:
   ConstantFunctor(const T & value) : _value(value) {}
   ConstantFunctor(T && value) : _value(value) {}
 
 private:
-  using typename FunctorInterface<T>::FaceArg;
-  using typename FunctorInterface<T>::ElemFromFaceArg;
-  using typename FunctorInterface<T>::ElemQpArg;
-  using typename FunctorInterface<T>::ElemSideQpArg;
-  using typename FunctorInterface<T>::FunctorType;
-  using typename FunctorInterface<T>::FunctorReturnType;
+  using typename Functor<T>::FaceArg;
+  using typename Functor<T>::ElemFromFaceArg;
+  using typename Functor<T>::ElemQpArg;
+  using typename Functor<T>::ElemSideQpArg;
+  using typename Functor<T>::FunctorType;
+  using typename Functor<T>::FunctorReturnType;
 
   T evaluate(const libMesh::Elem * const &, unsigned int) const override final { return _value; }
   T evaluate(const ElemFromFaceArg &, unsigned int) const override final { return _value; }
@@ -442,3 +442,4 @@ private:
 private:
   T _value;
 };
+}

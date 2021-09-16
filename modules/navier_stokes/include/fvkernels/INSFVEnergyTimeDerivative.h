@@ -21,5 +21,5 @@ protected:
   ADReal computeQpResidual() override;
 
   const Real & _rho;
-  const FunctorInterface<ADReal> & _cp;
+  const Moose::Functor<ADReal> & _cp;
 };

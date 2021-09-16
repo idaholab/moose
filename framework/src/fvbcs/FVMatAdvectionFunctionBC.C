@@ -50,9 +50,9 @@ FVMatAdvectionFunctionBC::FVMatAdvectionFunctionBC(const InputParameters & param
   : FVFluxBC(params),
     _vel(getFunctorMaterialProperty<ADRealVectorValue>("vel")),
     _adv_quant(isParamValid("advected_quantity")
-                   ? static_cast<const FunctorInterface<ADReal> &>(
+                   ? static_cast<const Moose::Functor<ADReal> &>(
                          getFunctorMaterialProperty<ADReal>("advected_quantity"))
-                   : static_cast<const FunctorInterface<ADReal> &>(variable())),
+                   : static_cast<const Moose::Functor<ADReal> &>(variable())),
     _flux_variable_exact_solution(isParamValid("flux_variable_exact_solution")
                                       ? &getFunction("flux_variable_exact_solution")
                                       : nullptr),

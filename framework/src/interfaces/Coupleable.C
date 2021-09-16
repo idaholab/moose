@@ -2175,7 +2175,7 @@ Coupleable::adCoupledDots(const std::string & var_name) const
 }
 
 template <>
-const FunctorInterface<ADReal> &
+const Moose::Functor<ADReal> &
 Coupleable::getDefaultFunctor(const std::string & var_name) const
 {
   auto default_value_it = _default_ad_functor.find(var_name);

@@ -24,5 +24,5 @@ public:
 protected:
   virtual Real computeValue() override;
 
-  const FunctorInterface<ADReal> & _mat_prop;
+  const Moose::Functor<ADReal> & _mat_prop;
 };

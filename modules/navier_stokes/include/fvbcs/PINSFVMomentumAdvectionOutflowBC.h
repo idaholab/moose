@@ -36,7 +36,7 @@ protected:
   /// z-velocity
   const INSFVVelocityVariable * const _w_var;
   /// porosity
-  const FunctorInterface<ADReal> & _eps;
+  const Moose::Functor<ADReal> & _eps;
   /// the dimension of the simulation
   const unsigned int _dim;
 };

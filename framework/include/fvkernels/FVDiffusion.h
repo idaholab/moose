@@ -31,7 +31,7 @@ public:
 protected:
   virtual ADReal computeQpResidual() override;
 
-  const FunctorInterface<ADReal> & _coeff;
+  const Moose::Functor<ADReal> & _coeff;
 
   /// A central difference limiter that will be passed to evaluation of \p _coeff in order to
   /// perform central/average interpolations

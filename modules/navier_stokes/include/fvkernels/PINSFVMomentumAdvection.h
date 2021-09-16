@@ -33,7 +33,7 @@ protected:
   /// porosity variable to compute gradients
   const MooseVariableFV<Real> * const _eps_var;
   /// porosity in the current element
-  const FunctorInterface<ADReal> & _eps;
+  const Moose::Functor<ADReal> & _eps;
   /// Whether the porosity field is smooth or has discontinuities
   const bool _smooth_porosity;
 };

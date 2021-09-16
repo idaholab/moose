@@ -17,7 +17,7 @@
 #include "Restartable.h"
 #include "MeshChangedInterface.h"
 #include "ScalarCoupleable.h"
-#include "FunctorInterface.h"
+#include "MooseFunctor.h"
 
 // libMesh
 #include "libmesh/vector_value.h"
@@ -46,7 +46,7 @@ class Function : public MooseObject,
                  public Restartable,
                  public MeshChangedInterface,
                  public ScalarCoupleable,
-                 public FunctorInterface<Real>
+                 public Moose::Functor<Real>
 {
 public:
   /**
@@ -117,10 +117,10 @@ public:
   void jacobianSetup() override;
 
 private:
-  using typename FunctorInterface<Real>::FaceArg;
-  using typename FunctorInterface<Real>::ElemFromFaceArg;
-  using typename FunctorInterface<Real>::ElemQpArg;
-  using typename FunctorInterface<Real>::ElemSideQpArg;
+  using typename Moose::Functor<Real>::FaceArg;
+  using typename Moose::Functor<Real>::ElemFromFaceArg;
+  using typename Moose::Functor<Real>::ElemQpArg;
+  using typename Moose::Functor<Real>::ElemSideQpArg;
 
   /**
    * @return the time associated with the requested \p state

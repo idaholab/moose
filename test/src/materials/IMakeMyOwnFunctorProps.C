@@ -17,18 +17,18 @@ class CustomFunctorProp : public FunctorMaterialProperty<T>
 {
 public:
   CustomFunctorProp(const std::string & name,
-                    const FunctorInterface<T> & var_functor,
-                    const FunctorInterface<T> * const prop_functor = nullptr)
+                    const Moose::Functor<T> & var_functor,
+                    const Moose::Functor<T> * const prop_functor = nullptr)
     : FunctorMaterialProperty<T>(name), _var_functor(var_functor), _prop_functor(prop_functor)
   {
   }
 
-  using typename FunctorInterface<T>::FaceArg;
-  using typename FunctorInterface<T>::ElemFromFaceArg;
-  using typename FunctorInterface<T>::ElemQpArg;
-  using typename FunctorInterface<T>::ElemSideQpArg;
-  using typename FunctorInterface<T>::FunctorType;
-  using typename FunctorInterface<T>::FunctorReturnType;
+  using typename Moose::Functor<T>::FaceArg;
+  using typename Moose::Functor<T>::ElemFromFaceArg;
+  using typename Moose::Functor<T>::ElemQpArg;
+  using typename Moose::Functor<T>::ElemSideQpArg;
+  using typename Moose::Functor<T>::FunctorType;
+  using typename Moose::Functor<T>::FunctorReturnType;
 
 private:
   template <typename Space, typename Time>
@@ -66,8 +66,8 @@ private:
     return evaluateHelper(tqp, state);
   }
 
-  const FunctorInterface<T> & _var_functor;
-  const FunctorInterface<T> * const _prop_functor;
+  const Moose::Functor<T> & _var_functor;
+  const Moose::Functor<T> * const _prop_functor;
 };
 
 InputParameters

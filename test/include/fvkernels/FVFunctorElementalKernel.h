@@ -20,5 +20,5 @@ public:
 protected:
   virtual ADReal computeQpResidual() override;
 
-  const FunctorInterface<ADReal> & _functor_prop;
+  const Moose::Functor<ADReal> & _functor_prop;
 };

@@ -12,7 +12,7 @@
 #include "MooseMesh.h"
 #include "MooseTypes.h"
 #include "MooseError.h"
-#include "FunctorInterface.h"
+#include "MooseFunctor.h"
 #include "Moose.h"
 #include "Limiter.h"
 #include "FVUtils.h"
@@ -28,7 +28,7 @@
  * A material property that is evaluated on-the-fly via calls to various overloads of \p operator()
  */
 template <typename T>
-class FunctorMaterialProperty : public FunctorInterface<T>
+class FunctorMaterialProperty : public Moose::Functor<T>
 
 {
 public:
@@ -45,12 +45,12 @@ public:
                   const std::set<SubdomainID> & block_ids,
                   PolymorphicLambda my_lammy);
 
-  using typename FunctorInterface<T>::FaceArg;
-  using typename FunctorInterface<T>::ElemFromFaceArg;
-  using typename FunctorInterface<T>::ElemQpArg;
-  using typename FunctorInterface<T>::ElemSideQpArg;
-  using typename FunctorInterface<T>::FunctorType;
-  using typename FunctorInterface<T>::FunctorReturnType;
+  using typename Moose::Functor<T>::FaceArg;
+  using typename Moose::Functor<T>::ElemFromFaceArg;
+  using typename Moose::Functor<T>::ElemQpArg;
+  using typename Moose::Functor<T>::ElemSideQpArg;
+  using typename Moose::Functor<T>::FunctorType;
+  using typename Moose::Functor<T>::FunctorReturnType;
 
 protected:
   using ElemFn = std::function<T(const Elem * const &, const unsigned int &)>;

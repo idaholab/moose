@@ -23,10 +23,10 @@ public:
   FEFVCouplingMaterial(const InputParameters & parameters);
 
 protected:
-  const FunctorInterface<ADReal> & _fe_var;
-  const FunctorInterface<ADReal> & _fv_var;
+  const Moose::Functor<ADReal> & _fe_var;
+  const Moose::Functor<ADReal> & _fv_var;
   FunctorMaterialProperty<ADReal> * const _fe_prop;
   FunctorMaterialProperty<ADReal> * const _fv_prop;
   FunctorMaterialProperty<ADReal> * const _declared_prop;
-  const FunctorInterface<ADReal> * const _retrieved_prop;
+  const Moose::Functor<ADReal> * const _retrieved_prop;
 };

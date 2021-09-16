@@ -18,7 +18,7 @@ controlled by setting the `execute_on` parameter.
 In this example, `ADGenericFunctionMaterial` is used to define a linearly varying in space
 diffusion coefficient for this finite volume diffusion calculation.
 We add the prefix `AD` as this simulation is making use of automatic differentiation to compute the Jacobian exactly.
-The diffusion coefficient is retrieved as a `FunctorInterface<ADReal>`, the base class
+The diffusion coefficient is retrieved as a `Moose::Functor<ADReal>`, the base class
 of `FunctorMaterialProperty<ADReal>`, by the diffusion kernel. The diffusion kernel can
 then obtain the diffusion coefficient directly on the faces when evaluating the face flux.
 

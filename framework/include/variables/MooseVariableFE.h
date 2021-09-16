@@ -86,7 +86,7 @@ public:
 
   using OutputData = typename MooseVariableField<OutputType>::OutputData;
   using DoFValue = typename MooseVariableField<OutputType>::DoFValue;
-  using typename FunctorInterface<typename Moose::ADType<OutputType>::type>::FunctorReturnType;
+  using typename Moose::Functor<typename Moose::ADType<OutputType>::type>::FunctorReturnType;
 
   MooseVariableFE(const InputParameters & parameters);
 
@@ -681,8 +681,8 @@ protected:
   std::unique_ptr<MooseVariableData<OutputType>> _lower_data;
 
 private:
-  using typename FunctorInterface<FunctorReturnType>::FaceArg;
-  using typename FunctorInterface<FunctorReturnType>::ElemFromFaceArg;
+  using typename Moose::Functor<FunctorReturnType>::FaceArg;
+  using typename Moose::Functor<FunctorReturnType>::ElemFromFaceArg;
   using MooseVariableField<OutputType>::evaluate;
   FunctorReturnType evaluate(const Elem * const &, unsigned int) const override final
   {

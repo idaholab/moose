@@ -48,7 +48,10 @@ class SystemBase;
 class LineSearch;
 class FaceInfo;
 class MooseObjectName;
+namespace Moose
+{
 class FunctorBase;
+}
 
 // libMesh forward declarations
 namespace libMesh
@@ -924,7 +927,7 @@ protected:
   /// we've created a name key then by the time we're setting up the problem this boolean must
   /// evaluate to true or else it means someone has requested property that won't be provided) and
   /// the second member of the pair is a unique pointer to the functor material property object
-  std::vector<std::unordered_map<std::string, std::pair<bool, std::unique_ptr<FunctorBase>>>>
+  std::vector<std::unordered_map<std::string, std::pair<bool, std::unique_ptr<Moose::FunctorBase>>>>
       _functor_material_properties;
 
 private:

@@ -14,7 +14,7 @@
 #include "SubProblem.h"
 #include "MooseMesh.h"
 #include "MooseVariableData.h"
-#include "FunctorInterface.h"
+#include "MooseFunctor.h"
 #include "MeshChangedInterface.h"
 
 #include "libmesh/numeric_vector.h"
@@ -38,7 +38,7 @@
  */
 template <typename OutputType>
 class MooseVariableField : public MooseVariableFieldBase,
-                           public FunctorInterface<typename Moose::ADType<OutputType>::type>,
+                           public Moose::Functor<typename Moose::ADType<OutputType>::type>,
                            public MeshChangedInterface
 
 {
@@ -338,9 +338,9 @@ public:
   void meshChanged() override;
 
 protected:
-  using FunctorInterface<typename Moose::ADType<OutputType>::type>::evaluate;
-  using typename FunctorInterface<typename Moose::ADType<OutputType>::type>::ElemQpArg;
-  using typename FunctorInterface<typename Moose::ADType<OutputType>::type>::ElemSideQpArg;
+  using Moose::Functor<typename Moose::ADType<OutputType>::type>::evaluate;
+  using typename Moose::Functor<typename Moose::ADType<OutputType>::type>::ElemQpArg;
+  using typename Moose::Functor<typename Moose::ADType<OutputType>::type>::ElemSideQpArg;
   typename Moose::ADType<OutputType>::type evaluate(const ElemQpArg & elem_qp,
                                                     unsigned int state) const override final;
   typename Moose::ADType<OutputType>::type evaluate(const ElemSideQpArg & elem_side_qp,

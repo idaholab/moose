@@ -1435,7 +1435,7 @@ private:
   const T & getDefaultNodalValue(const std::string & var_name, unsigned int comp = 0) const;
 
   template <typename T>
-  const FunctorInterface<T> & getDefaultFunctor(const std::string & var_name) const;
+  const Moose::Functor<T> & getDefaultFunctor(const std::string & var_name) const;
 
   /// Maximum qps for any element in this system
   unsigned int _coupleable_max_qps;
@@ -1460,7 +1460,7 @@ private:
   /// scalar value when the Coupleable::getFunctor API is used. This is the same behavior as when a
   /// user specifies a scalar value in their input and Coupleable::coupledValue or
   /// Coupleable::adCoupledValue is used
-  mutable std::unordered_map<std::string, std::unique_ptr<FunctorInterface<ADReal>>>
+  mutable std::unordered_map<std::string, std::unique_ptr<Moose::Functor<ADReal>>>
       _default_ad_functor;
 };
 
@@ -1526,7 +1526,7 @@ Coupleable::getFunctor(const std::string & var_name, unsigned int comp) const
 }
 
 template <typename T>
-const FunctorInterface<T> &
+const Moose::Functor<T> &
 Coupleable::getDefaultFunctor(const std::string & var_name) const
 {
   mooseError("Calling Coupleable::getDefaultFunctor with a new type ",
@@ -1537,4 +1537,4 @@ Coupleable::getDefaultFunctor(const std::string & var_name) const
 }
 
 template <>
-const FunctorInterface<ADReal> & Coupleable::getDefaultFunctor(const std::string & var_name) const;
+const Moose::Functor<ADReal> & Coupleable::getDefaultFunctor(const std::string & var_name) const;

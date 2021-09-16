@@ -27,6 +27,6 @@ public:
   VarFunctorMaterial(const InputParameters & parameters);
 
 protected:
-  const FunctorInterface<ADReal> & _var;
+  const Moose::Functor<ADReal> & _var;
   FunctorMaterialProperty<ADReal> & _functor_prop;
 };

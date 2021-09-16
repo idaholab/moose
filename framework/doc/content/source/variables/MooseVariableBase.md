@@ -173,7 +173,7 @@ gradient. Some of these methods are exemplified below:
 
 Derived field classes of `MooseVariableBase`, e.g. derivatives of the class
 template `MooseVariableField<T>` inherit from the
-`FunctorInterface`. Quadrature-based overloads of the `evaluate` method are
+`Moose::Functor`. Quadrature-based overloads of the `evaluate` method are
 implemented in `MooseVariableField<T>`. The `ElemQpArg` `evaluate` overload does a
 true on-the-fly computation of the solution based on the information contained
 within the `ElemQpArg`, e.g. the provided element and quadrature rule. The

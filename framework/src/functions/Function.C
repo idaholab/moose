@@ -185,17 +185,17 @@ Function::evaluate(const std::tuple<Moose::ElementType, unsigned int, SubdomainI
 void
 Function::timestepSetup()
 {
-  FunctorInterface<Real>::timestepSetup();
+  Moose::Functor<Real>::timestepSetup();
 }
 
 void
 Function::residualSetup()
 {
-  FunctorInterface<Real>::residualSetup();
+  Moose::Functor<Real>::residualSetup();
 }
 
 void
 Function::jacobianSetup()
 {
-  FunctorInterface<Real>::jacobianSetup();
+  Moose::Functor<Real>::jacobianSetup();
 }

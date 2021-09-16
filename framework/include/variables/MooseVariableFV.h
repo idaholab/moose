@@ -481,7 +481,7 @@ public:
                                       const FaceInfo & fi,
                                       const ADReal & elem_value) const;
 
-  using typename FunctorInterface<typename Moose::ADType<OutputType>::type>::FaceArg;
+  using typename Moose::Functor<typename Moose::ADType<OutputType>::type>::FaceArg;
   ADReal getInternalFaceValue(const FaceArg & face) const;
 
 protected:
@@ -508,7 +508,7 @@ protected:
   bool isExtrapolatedBoundaryFace(const FaceInfo & fi) const;
 
 private:
-  using typename FunctorInterface<typename Moose::ADType<OutputType>::type>::ElemFromFaceArg;
+  using typename Moose::Functor<typename Moose::ADType<OutputType>::type>::ElemFromFaceArg;
   using MooseVariableField<OutputType>::evaluate;
   typename Moose::ADType<OutputType>::type evaluate(const Elem * const & elem,
                                                     unsigned int) const override final

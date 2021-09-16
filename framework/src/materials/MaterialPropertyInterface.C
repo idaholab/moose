@@ -99,7 +99,7 @@ MaterialPropertyInterface::defaultMaterialProperty(const std::string & name)
 }
 
 template <>
-const FunctorInterface<Real> *
+const Moose::Functor<Real> *
 MaterialPropertyInterface::defaultFunctorMaterialProperty(const std::string & name)
 {
   std::istringstream ss(name);
@@ -118,7 +118,7 @@ MaterialPropertyInterface::defaultFunctorMaterialProperty(const std::string & na
 }
 
 template <>
-const FunctorInterface<ADReal> *
+const Moose::Functor<ADReal> *
 MaterialPropertyInterface::defaultFunctorMaterialProperty(const std::string & name)
 {
   std::istringstream ss(name);
