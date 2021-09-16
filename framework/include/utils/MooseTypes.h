@@ -918,6 +918,9 @@ DerivativeStringClass(OutputName);
 /// Used for objects that expect MaterialProperty names
 DerivativeStringClass(MaterialPropertyName);
 
+/// Used for objects that expect Moose::Functor names
+DerivativeStringClass(MooseFunctorName);
+
 /// User for accessing Material objects
 DerivativeStringClass(MaterialName);
 

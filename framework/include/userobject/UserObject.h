@@ -25,6 +25,7 @@
 #include "SetupInterface.h"
 #include "PerfGraphInterface.h"
 #include "SamplerInterface.h"
+#include "FunctionInterface.h"
 
 #include "libmesh/parallel.h"
 
@@ -53,7 +54,8 @@ class UserObject : public MooseObject,
                    protected MeshMetaDataInterface,
                    protected MeshChangedInterface,
                    protected ScalarCoupleable,
-                   protected PerfGraphInterface
+                   protected PerfGraphInterface,
+                   protected FunctionInterface
 {
 public:
   static InputParameters validParams();

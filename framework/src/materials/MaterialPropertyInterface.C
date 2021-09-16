@@ -99,44 +99,6 @@ MaterialPropertyInterface::defaultMaterialProperty(const std::string & name)
 }
 
 template <>
-const Moose::Functor<Real> *
-MaterialPropertyInterface::defaultFunctorMaterialProperty(const std::string & name)
-{
-  std::istringstream ss(name);
-  Real real_value;
-
-  // check if the string parsed cleanly into a Real number
-  if (ss >> real_value && ss.eof())
-  {
-    _default_functor_real_properties.emplace_back(
-        libmesh_make_unique<ConstantFunctor<Real>>(real_value));
-    auto & default_property = _default_functor_real_properties.back();
-    return default_property.get();
-  }
-
-  return nullptr;
-}
-
-template <>
-const Moose::Functor<ADReal> *
-MaterialPropertyInterface::defaultFunctorMaterialProperty(const std::string & name)
-{
-  std::istringstream ss(name);
-  Real real_value;
-
-  // check if the string parsed cleanly into a Real number
-  if (ss >> real_value && ss.eof())
-  {
-    _default_functor_ad_real_properties.emplace_back(
-        libmesh_make_unique<ConstantFunctor<ADReal>>(real_value));
-    auto & default_property = _default_functor_ad_real_properties.back();
-    return default_property.get();
-  }
-
-  return nullptr;
-}
-
-template <>
 const ADMaterialProperty<Real> *
 MaterialPropertyInterface::defaultADMaterialProperty(const std::string & name)
 {

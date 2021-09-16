@@ -22,8 +22,6 @@
 class MaterialPropertyInterface;
 class MooseObject;
 class FEProblemBase;
-template <typename>
-class FunctorMaterialProperty;
 
 template <>
 InputParameters validParams<MaterialPropertyInterface>();
@@ -58,8 +56,6 @@ public:
    */
   template <typename T>
   const MaterialProperty<T> & getMaterialProperty(const std::string & name);
-  template <typename T>
-  const Moose::Functor<T> & getFunctorMaterialProperty(const std::string & name);
   template <typename T>
   const ADMaterialProperty<T> & getADMaterialProperty(const std::string & name);
   template <typename T, bool is_ad, typename std::enable_if<is_ad, int>::type = 0>
@@ -306,13 +302,6 @@ protected:
    * as a specialization for supported types and returns NULL in all other cases.
    */
   template <typename T>
-  const Moose::Functor<T> * defaultFunctorMaterialProperty(const std::string & name);
-
-  /**
-   * Helper function to parse default material property values. This is implemented
-   * as a specialization for supported types and returns NULL in all other cases.
-   */
-  template <typename T>
   const ADMaterialProperty<T> * defaultADMaterialProperty(const std::string & name);
 
   ///@{ generic default material property helper
@@ -356,11 +345,6 @@ protected:
   std::vector<std::unique_ptr<ADMaterialProperty<RealVectorValue>>>
       _default_ad_real_vector_properties;
 
-  /// Storage vector for Moose::Functor<Real> default objects
-  std::vector<std::unique_ptr<Moose::Functor<Real>>> _default_functor_real_properties;
-  /// Storage vector for Moose::Functor<ADReal> default objects
-  std::vector<std::unique_ptr<Moose::Functor<ADReal>>> _default_functor_ad_real_properties;
-
   /// The set of material properties (as given by their IDs) that _this_ object depends on
   std::set<unsigned int> _material_property_dependencies;
 
@@ -400,21 +384,6 @@ MaterialPropertyInterface::getMaterialProperty(const std::string & name)
     return *default_property;
 
   return getMaterialPropertyByName<T>(prop_name);
-}
-
-template <typename T>
-const Moose::Functor<T> &
-MaterialPropertyInterface::getFunctorMaterialProperty(const std::string & name)
-{
-  // Check if the supplied parameter is a valid input parameter key
-  std::string prop_name = deducePropertyName(name);
-
-  // Check if it's just a constant
-  const auto * const default_property = defaultFunctorMaterialProperty<T>(prop_name);
-  if (default_property)
-    return *default_property;
-
-  return _mi_subproblem.getFunctorProperty<T>(prop_name, _mi_tid);
 }
 
 template <typename T>
@@ -484,14 +453,6 @@ MaterialPropertyInterface::defaultMaterialProperty(const std::string & /*name*/)
 
 // General version for types that do not accept default values
 template <typename T>
-const Moose::Functor<T> *
-MaterialPropertyInterface::defaultFunctorMaterialProperty(const std::string & /*name*/)
-{
-  return nullptr;
-}
-
-// General version for types that do not accept default values
-template <typename T>
 const ADMaterialProperty<T> *
 MaterialPropertyInterface::defaultADMaterialProperty(const std::string & /*name*/)
 {
@@ -514,14 +475,6 @@ MaterialPropertyInterface::defaultMaterialProperty<RealVectorValue>(const std::s
 template <>
 const ADMaterialProperty<RealVectorValue> *
 MaterialPropertyInterface::defaultADMaterialProperty<RealVectorValue>(const std::string & name);
-
-template <>
-const Moose::Functor<Real> *
-MaterialPropertyInterface::defaultFunctorMaterialProperty<Real>(const std::string & name);
-
-template <>
-const Moose::Functor<ADReal> *
-MaterialPropertyInterface::defaultFunctorMaterialProperty<ADReal>(const std::string & name);
 
 template <typename T>
 const MaterialProperty<T> &

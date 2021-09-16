@@ -19,6 +19,7 @@
 #include "PostprocessorInterface.h"
 #include "Assembly.h"
 #include "Restartable.h"
+#include "FunctorInterface.h"
 
 class SubProblem;
 
@@ -42,7 +43,8 @@ class FVKernel : public MooseObject,
                  public UserObjectInterface,
                  public PostprocessorInterface,
                  public SetupInterface,
-                 public Restartable
+                 public Restartable,
+                 public FunctorInterface
 {
 public:
   static InputParameters validParams();

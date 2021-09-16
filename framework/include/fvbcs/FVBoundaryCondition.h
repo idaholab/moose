@@ -24,6 +24,7 @@
 #include "MeshChangedInterface.h"
 #include "TaggingInterface.h"
 #include "MooseVariableDependencyInterface.h"
+#include "FunctorInterface.h"
 
 // Forward declerations
 template <typename>
@@ -52,7 +53,8 @@ class FVBoundaryCondition : public MooseObject,
                             public MeshChangedInterface,
                             public TaggingInterface,
                             public MooseVariableInterface<Real>,
-                            public MooseVariableDependencyInterface
+                            public MooseVariableDependencyInterface,
+                            public FunctorInterface
 {
 public:
   /**

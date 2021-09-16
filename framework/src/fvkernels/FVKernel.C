@@ -18,6 +18,7 @@ FVKernel::validParams()
   params += TransientInterface::validParams();
   params += BlockRestrictable::validParams();
   params += TaggingInterface::validParams();
+  params += FunctorInterface::validParams();
   params.addRequiredParam<NonlinearVariableName>(
       "variable", "The name of the finite volume variable this kernel applies to");
   params.addParam<bool>("use_displaced_mesh",
@@ -64,6 +65,7 @@ FVKernel::FVKernel(const InputParameters & params)
     PostprocessorInterface(this),
     SetupInterface(this),
     Restartable(this, "FVKernels"),
+    FunctorInterface(this),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _tid(params.get<THREAD_ID>("_tid")),
