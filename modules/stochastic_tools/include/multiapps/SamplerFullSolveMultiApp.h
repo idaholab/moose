@@ -46,11 +46,6 @@ private:
   bool solveStepBatch(Real dt, Real target_time, bool auto_advance = true);
 
   /**
-   * Checks whether the MultiApp partitioning is consistent with the sampler
-   */
-  void checkRankConfig();
-
-  /**
    * Helper function for updating _row_data and _local_row_index.
    * This allows multiple calls to the same row index
    */

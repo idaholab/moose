@@ -12,6 +12,13 @@
 
       detail = "of a vector of data"
     []
+    [vector]
+      type = JSONDiff
+      input = bca_main.i
+      jsondiff = bca_main_out.json
+
+      detail = "of a vector of vector data"
+    []
 
     [replicated]
       type = JSONDiff
@@ -26,14 +33,14 @@
     []
 
     [distributed]
-      type = RunException
+      type = JSONDiff
       input = bca_distributed.i
-      expect_err = "Due to the computational demands, the BiasCorrectedAccelerated does not work with distributed data"
+      jsondiff = bca_distributed_out.json
       min_parallel = 3
       max_parallel = 3
       allow_test_objects = true
 
-      detail = "errors when data distributed across processors."
+      detail = "using data that is distributed."
     []
   []
 []

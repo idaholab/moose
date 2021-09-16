@@ -1,84 +1,98 @@
 [Tests]
-  issues = '#6699'
   design = 'MooseDocs/index.md'
-  [materialize]
-    requirement = "MooseDocs shall be able to translate markdown syntax to HTML with Materialize support:"
-    [serial]
-      type = RunCommand
-      command = 'python moosedocs.py verify --form materialize --executioner MooseDocs.base.Serial'
-      detail = "using a serial scheme;"
+
+  [verify]
+    issues = '#6699'
+    requirement = "MooseDocs shall be able to use each of the available Executioner types (serial, "
+                  "queue-based parallel, barrier-based parallel, and pipe-based parallel schemes) "
+                  "to translate markdown syntax to:"
+
+    [html]
+      detail = "HTML;"
+
+      [serial]
+        type = RunCommand
+        command = 'python moosedocs.py verify --form html --executioner MooseDocs.base.Serial'
+      []
+      [queue]
+        type = RunCommand
+        command = 'python moosedocs.py verify --form html --executioner MooseDocs.base.ParallelQueue'
+        prereq = verify/html/serial
+      []
+      [barrier]
+        type = RunCommand
+        command = 'python moosedocs.py verify --form html --executioner MooseDocs.base.ParallelBarrier'
+        prereq = verify/html/queue
+      []
+      [pipe]
+        type = RunCommand
+        command = 'python moosedocs.py verify --form html --executioner MooseDocs.base.ParallelPipe'
+        prereq = verify/html/barrier
+      []
     []
-    [barrier]
-      type = RunCommand
-      command = 'python moosedocs.py verify --form materialize --executioner MooseDocs.base.ParallelBarrier'
-      detail = "using a barrier-based parallel scheme;"
-      prereq = materialize/serial
+    [materialize]
+      detail = "HTML with Materialize support; and"
+
+      [serial]
+        type = RunCommand
+        command = 'python moosedocs.py verify --form materialize --executioner MooseDocs.base.Serial'
+      []
+      [queue]
+        type = RunCommand
+        command = 'python moosedocs.py verify --form materialize --executioner MooseDocs.base.ParallelQueue'
+        prereq = verify/materialize/serial
+      []
+      [barrier]
+        type = RunCommand
+        command = 'python moosedocs.py verify --form materialize --executioner MooseDocs.base.ParallelBarrier'
+        prereq = verify/materialize/queue
+      []
+      [pipe]
+        type = RunCommand
+        command = 'python moosedocs.py verify --form materialize --executioner MooseDocs.base.ParallelPipe'
+        prereq = verify/materialize/barrier
+      []
     []
-    [pipe]
-      type = RunCommand
-      command = 'python moosedocs.py verify --form materialize --executioner MooseDocs.base.ParallelPipe '
-      prereq = materialize/barrier
-      detail = "using a pipe-based parallel scheme; and"
-    []
-    [queue]
-      type = RunCommand
-      command = 'python moosedocs.py verify --form materialize --executioner MooseDocs.base.ParallelQueue'
-      detail = "using a queue-based parallel scheme."
-      prereq = materialize/pipe
+    [latex]
+      detail = "LaTeX."
+
+      [serial]
+        type = RunCommand
+        command = 'python moosedocs.py verify --form latex --executioner MooseDocs.base.Serial'
+      []
+      [queue]
+        type = RunCommand
+        command = 'python moosedocs.py verify --form latex --executioner MooseDocs.base.ParallelQueue'
+        prereq = verify/latex/serial
+      []
+      [barrier]
+        type = RunCommand
+        command = 'python moosedocs.py verify --form latex --executioner MooseDocs.base.ParallelBarrier'
+        prereq = verify/latex/queue
+      []
+      [pipe]
+        type = RunCommand
+        command = 'python moosedocs.py verify --form latex --executioner MooseDocs.base.ParallelPipe'
+        prereq = verify/latex/barrier
+      []
     []
   []
 
-  [html]
-    requirement = "MooseDocs shall be able to translate markdown syntax to HTML:"
-    [serial]
-      type = RunCommand
-      command = 'python moosedocs.py verify --form html --executioner MooseDocs.base.Serial'
-      detail = "using a serial scheme;"
-    []
-    [barrier]
-      type = RunCommand
-      command = 'python moosedocs.py verify --form html --executioner MooseDocs.base.ParallelBarrier'
-      detail = "using a barrier-based parallel scheme;"
-      prereq = html/serial
-    []
-    [pipe]
-      type = RunCommand
-      command = 'python moosedocs.py verify --form html --executioner MooseDocs.base.ParallelPipe'
-      prereq = html/barrier
-      detail = "using a pipe-based parallel scheme; and"
-    []
-    [queue]
-      type = RunCommand
-      command = 'python moosedocs.py verify --form html --executioner MooseDocs.base.ParallelQueue'
-      detail = "using a queue-based parallel scheme."
-      prereq = html/pipe
-    []
-  []
+  [multiconfig_build]
+    issues = '#18137'
+    requirement = "MooseDocs shall be able to successfully translate multiple configurations by "
+                  "using the build command with the `--config` option such that"
 
-  [latex]
-    requirement = "MooseDocs shall be able to translate markdown syntax to latex:"
-    [serial]
+    [site_subsite]
       type = RunCommand
-      command = 'python moosedocs.py verify --form latex --executioner MooseDocs.base.Serial'
-      detail = "using a serial scheme;"
+      command = 'python moosedocs.py build --config config.yml subsite_config.yml'
+      detail = "the build routines for the main test site precede those of the subsite, as well as"
     []
-    [barrier]
+    [subsite_site]
       type = RunCommand
-      command = 'python moosedocs.py verify --form latex --executioner MooseDocs.base.ParallelBarrier'
-      detail = "using a barrier-based parallel scheme;"
-      prereq = latex/serial
-    []
-    [pipe]
-      type = RunCommand
-      command = 'python moosedocs.py verify --form latex --executioner MooseDocs.base.ParallelPipe'
-      prereq = latex/barrier
-      detail = "using a pipe-based parallel scheme; and"
-    []
-    [queue]
-      type = RunCommand
-      command = 'python moosedocs.py verify --form latex --executioner MooseDocs.base.ParallelQueue'
-      detail = "using a queue-based parallel scheme."
-      prereq = latex/pipe
+      command = 'python moosedocs.py build --fast --config subsite_config.yml config.yml'
+      prereq = multiconfig_build/site_subsite
+      detail = "in the reverse order but with the `--fast` option added for testing efficiency."
     []
   []
 []

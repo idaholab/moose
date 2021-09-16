@@ -6,7 +6,8 @@
 
     issues = '#1405'
     design = 'SideIntegralVariablePostprocessor.md'
-    requirement = 'The system shall support computing the integral of a variable quantity over a side on the mesh.'
+    requirement = 'The system shall support computing the integral of a variable quantity over a '
+                  'side on the mesh.'
   []
   [fv_test]
     type = 'Exodiff'
@@ -15,8 +16,46 @@
 
     issues = '#1405 #16099'
     design = 'SideIntegralVariablePostprocessor.md'
-    requirement = 'The system shall support computing the integral of a finite volume variable'
-        'quantity over a side on the mesh.'
+    requirement = 'The system shall support computing the integral of a finite volume variable '
+                  'quantity over a side on the mesh.'
     ad_indexing_type = 'global'
+  []
+
+  [side_integral_material_property]
+    issues = '#18649'
+    design = 'SideIntegralMaterialProperty.md'
+    requirement = 'The system shall support computing the integral of a material property over a '
+                  'side on the mesh.'
+    [real]
+      type = 'CSVDiff'
+      input = '../side_material.i side_integral_material_property.i'
+      csvdiff = 'side_integral_material_property_out.csv'
+      cli_args = 'Materials/active=real'
+      detail = 'if the material property is of `Real` type'
+    []
+    [realvector]
+      type = 'CSVDiff'
+      input = '../side_material.i side_integral_material_property.i'
+      csvdiff = 'side_integral_material_property_out.csv'
+      cli_args = 'Materials/active=realvector Postprocessors/integral/component="1"'
+      detail = 'if the material property is of `RealVectorValue` type'
+    []
+    [ranktwo]
+      type = 'CSVDiff'
+      input = '../side_material.i side_integral_material_property.i'
+      csvdiff = 'side_integral_material_property_out.csv'
+      cli_args = 'Materials/active=ranktwo Postprocessors/integral/component="2 2"'
+      detail = 'if the material property is of `RankTwoTensor` type'
+    []
+    [error]
+      type = 'RunException'
+      input = '../side_material.i side_integral_material_property.i'
+      expect_err = "Material property 'prop' is 1 dimensional, but an index vector of size 3 was "
+                   "supplied to select a component. It looks like you were expecting the material "
+                   "property to have a different type."
+      cli_args = 'Materials/active=realvector Postprocessors/integral/component="1 2 3"'
+      detail = 'And shall error out if the index components do not match teh dimension of the '
+               'supplied property'
+    []
   []
 []

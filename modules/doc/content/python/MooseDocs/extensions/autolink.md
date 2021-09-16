@@ -43,7 +43,7 @@ The `optional` and `exact` settings are similarly applied when handling alternat
        caption=Available settings for automatic links. Note that the `language` setting has no effect unless the link is a [source file](#source).
 
 !alert warning title=Try not to abuse alternative links.
-The `alternative` setting should not be used as a means to circumvent potentially broken content configurations, but rather consciously under special circumstances. For example, its main purpose is to provide a fallback when developing sites designed with multiple configurations and cross-links between them, but expeditiously building only one of those configurations such that certain content is only conditionally unavailable.
+The `alternative` setting should not be used as a means to circumvent potentially broken content configurations, but rather consciously under special circumstances. For example, its main purpose is to provide a fallback when developing sites designed with [multiple configurations](MooseDocs/config.md#multiconfigs) and cross-links between them, but expeditiously building only one of those configurations such that certain content is only conditionally unavailable.
 
 <!--TODO: The above alert should include a link to the appropriate multiconfigs documentation when it becomes available. See #18137-->
 

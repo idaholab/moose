@@ -16,6 +16,7 @@
 #include "DistributionInterface.h"
 #include "PerfGraphInterface.h"
 #include "SamplerInterface.h"
+#include "MultiApp.h"
 
 template <>
 InputParameters validParams<Sampler>();
@@ -110,6 +111,15 @@ public:
   dof_id_type getLocalRowBegin() const;
   dof_id_type getLocalRowEnd() const;
   ///@}
+
+  /**
+   * Reference to rank configuration defining the partitioning of the sampler matrix
+   * This is primarily used by MultiApps to ensure consistent partitioning
+   */
+  const LocalRankConfig & getRankConfig(bool batch_mode) const
+  {
+    return batch_mode ? _rank_config.second : _rank_config.first;
+  }
 
 protected:
   // The following methods are the basic methods that should be utilized my most application
@@ -227,6 +237,17 @@ protected:
   virtual void executeTearDown() {}
   ///@}
 
+  /**
+   * This is where the sampler partitioning is defined. It is NOT recommended to
+   * override this function unless you know EXACTLY what you are doing
+   */
+  virtual LocalRankConfig constructRankConfig(bool batch_mode) const;
+
+  /// The minimum number of processors that are associated with a set of rows
+  const dof_id_type _min_procs_per_row;
+  /// The maximum number of processors that are associated with a set of rows
+  const dof_id_type _max_procs_per_row;
+
 private:
   ///@{
   /**
@@ -310,9 +331,9 @@ private:
   /// Max number of entries for matrix returned by getNextLocalRow
   const dof_id_type _limit_get_next_local_row;
 
-  /// The minimum number of processors that are associated with a set of rows
-  /// Must be consistent with MultiApp::_min_procs_per_app
-  const dof_id_type _min_procs_per_row;
+  /// The partitioning of the sampler matrix, built in reinit()
+  /// first is for normal mode and send is for batch mode
+  std::pair<LocalRankConfig, LocalRankConfig> _rank_config;
 
   /// Flag for disabling automatic generator advancing
   bool _auto_advance_generators;

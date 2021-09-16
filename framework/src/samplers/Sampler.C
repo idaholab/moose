@@ -12,7 +12,6 @@
 
 // MOOSE includes
 #include "Sampler.h"
-#include "MultiApp.h"
 
 defineLegacyParams(Sampler);
 
@@ -49,11 +48,16 @@ Sampler::validParams()
       0.1 * std::numeric_limits<unsigned int>::max(),
       "The maximum allowed number of items in the std::vector returned by getNextLocalRow method.");
 
-  params.addParam<dof_id_type>(
+  params.addParam<unsigned int>(
       "min_procs_per_row",
       1,
       "This will ensure that the sampler is partitioned properly when "
       "'MultiApp/*/min_procs_per_app' is specified. It is not recommended to use otherwise.");
+  params.addParam<unsigned int>(
+      "max_procs_per_row",
+      std::numeric_limits<unsigned int>::max(),
+      "This will ensure that the sampler is partitioned properly when "
+      "'MultiApp/*/max_procs_per_app' is specified. It is not recommended to use otherwise.");
   return params;
 }
 
@@ -63,6 +67,10 @@ Sampler::Sampler(const InputParameters & parameters)
     DistributionInterface(this),
     PerfGraphInterface(this),
     SamplerInterface(this),
+    _min_procs_per_row(getParam<unsigned int>("min_procs_per_row") > n_processors()
+                           ? n_processors()
+                           : getParam<unsigned int>("min_procs_per_row")),
+    _max_procs_per_row(getParam<unsigned int>("max_procs_per_row")),
     _n_rows(0),
     _n_cols(0),
     _n_seeds(1),
@@ -73,9 +81,6 @@ Sampler::Sampler(const InputParameters & parameters)
     _limit_get_global_samples(getParam<dof_id_type>("limit_get_global_samples")),
     _limit_get_local_samples(getParam<dof_id_type>("limit_get_local_samples")),
     _limit_get_next_local_row(getParam<dof_id_type>("limit_get_next_local_row")),
-    _min_procs_per_row(getParam<dof_id_type>("min_procs_per_row") > n_processors()
-                           ? n_processors()
-                           : getParam<dof_id_type>("min_procs_per_row")),
     _auto_advance_generators(true)
 {
 }
@@ -110,13 +115,15 @@ Sampler::init()
 void
 Sampler::reinit()
 {
-  auto rc = rankConfig(processor_id(),
-                       n_processors(),
-                       _n_rows,
-                       _min_procs_per_row,
-                       std::numeric_limits<dof_id_type>::max());
-  _n_local_rows = rc.is_first_local_rank ? rc.num_local_apps : 0;
-  _local_row_begin = rc.first_local_app_index;
+  _rank_config.first = constructRankConfig(false);
+  _rank_config.second = constructRankConfig(true);
+  if (_rank_config.first.num_local_sims != _rank_config.second.num_local_sims ||
+      _rank_config.first.first_local_sim_index != _rank_config.second.first_local_sim_index ||
+      _rank_config.first.is_first_local_rank != _rank_config.second.is_first_local_rank)
+    mooseError("Sampler has inconsistent partitionings for normal and batch mode.");
+
+  _n_local_rows = _rank_config.first.is_first_local_rank ? _rank_config.first.num_local_sims : 0;
+  _local_row_begin = _rank_config.first.first_local_sim_index;
   _local_row_end = _local_row_begin + _n_local_rows;
 
   // Set the next row iterator index
@@ -124,6 +131,13 @@ Sampler::reinit()
 
   // Update reinit() flag (see execute method)
   _needs_reinit = false;
+}
+
+LocalRankConfig
+Sampler::constructRankConfig(bool batch_mode) const
+{
+  return rankConfig(
+      processor_id(), n_processors(), _n_rows, _min_procs_per_row, _max_procs_per_row, batch_mode);
 }
 
 void

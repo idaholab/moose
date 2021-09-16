@@ -228,7 +228,7 @@ public:
    *
    * @see ReporterContext::storeInfo
    */
-  std::string type() const override final { return MooseUtils::prettyCppType<T>(); }
+  virtual std::string type() const override { return MooseUtils::prettyCppType<T>(); }
 
   /**
    * Perform automatic parallel communication based on the producer/consumer modes

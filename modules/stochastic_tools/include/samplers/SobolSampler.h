@@ -32,13 +32,18 @@ public:
 
 protected:
   virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) override;
-  virtual void sampleSetUp(const Sampler::SampleMode mode) override;
-  virtual void sampleTearDown(const Sampler::SampleMode mode) override;
+
+  /**
+   * Sobol sampling should have a slightly different partitioning in order to keep
+   * the sample and resample samplers distributed and make computing indices more
+   * efficient.
+   */
+  virtual LocalRankConfig constructRankConfig(bool batch_mode) const override;
 
   ///@{
-  /// Sobol Monte Carlo matrices, these are sized and cleared to avoid keeping large matrices around
-  DenseMatrix<Real> _m1_matrix;
-  DenseMatrix<Real> _m2_matrix;
+  /// Sobol Monte Carlo rows
+  std::vector<Real> _row_a;
+  std::vector<Real> _row_b;
   ///@}
 
   /// Sampler matrix
@@ -50,13 +55,7 @@ protected:
   /// Flag for building the re-sampling matrix for computing second order sensitivity indices
   const bool & _resample;
 
-  /// Storage for distribution objects to be utilized
-  std::vector<Distribution const *> _distributions;
-
 private:
-  /// The number of rows per matrix
-  dof_id_type _num_rows_per_matrix;
-
   /// Number of matrices
-  dof_id_type _num_matrices;
+  const dof_id_type _num_matrices;
 };
