@@ -178,6 +178,7 @@ PerfGraph::addToExecutionList(const PerfID id,
   section_increment._state = state;
   section_increment._time = time;
   section_increment._memory = memory;
+  section_increment._beginning_num_printed = _console.numPrinted();
 
   // This will synchronize the above memory changes with the
   // atomic_thread_fence in the printing thread
