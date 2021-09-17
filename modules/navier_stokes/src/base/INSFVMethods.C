@@ -34,6 +34,6 @@ findUStar(const Real mu, const Real rho, ADReal u, const Real dist)
       return u_star;
   }
 
-  mooseError("Could not find the wall friction velocity mu: ",
-             mu, " rho: ", rho, " u: ", u, " dist: ", dist);
+  mooseError("Could not find the wall friction velocity (mu: ",
+             mu, " rho: ", rho, " velocity: ", u, " wall distance: ", dist, ")");
 }
