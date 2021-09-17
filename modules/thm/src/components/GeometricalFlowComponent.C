@@ -13,7 +13,7 @@ GeometricalFlowComponent::validParams()
   params.addRequiredParam<UserObjectName>("fp", "Fluid properties user object");
   params.addParam<MooseEnum>(
       "rdg_slope_reconstruction",
-      SlopeReconstruction1DInterface::getSlopeReconstructionMooseEnum("None"),
+      SlopeReconstruction1DInterface<true>::getSlopeReconstructionMooseEnum("None"),
       "Slope reconstruction type for rDG spatial discretization");
 
   return params;

@@ -12,14 +12,14 @@ class SinglePhaseFluidProperties;
  * {p, u, T} and then computes the corresponding face values for the conserved
  * variables {rhoA, rhouA, rhoEA}.
  */
-class ADRDG3EqnMaterial : public Material, public SlopeReconstruction1DInterface
+class ADRDG3EqnMaterial : public Material, public SlopeReconstruction1DInterface<true>
 {
 public:
   ADRDG3EqnMaterial(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties() override;
-  virtual std::vector<Real> computeElementPrimitiveVariables(const Elem * elem) const override;
+  virtual std::vector<ADReal> computeElementPrimitiveVariables(const Elem * elem) const override;
 
   /// Cross-sectional area, piecewise constant
   const ADVariableValue & _A_avg;

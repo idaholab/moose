@@ -92,12 +92,13 @@
   type = Transient
   [TimeIntegrator]
     type = ExplicitSSPRungeKutta
-    order = 2
-  []  solve_type = LINEAR
+    # add order via 'cli_args' in 'tests'
+  []
+  solve_type = LINEAR
 
   l_tol = 1e-4
 
-  nl_rel_tol = 1e-20
+  nl_rel_tol = 1e-8
   nl_abs_tol = 1e-8
   nl_max_its = 60
 
