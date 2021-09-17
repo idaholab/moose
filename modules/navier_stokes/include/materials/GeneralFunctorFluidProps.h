@@ -11,8 +11,10 @@
 
 #include "FunctorMaterial.h"
 #include "DerivativeMaterialPropertyNameInterface.h"
+#include "Function.h"
 
 class SinglePhaseFluidProperties;
+class Function;
 
 /**
  * Computes fluid properties in (P, T) formulation.
@@ -48,7 +50,7 @@ protected:
   FunctorMaterialProperty<Real> & _drho_dT;
 
   /// Derivative of density with respect to time
-  FunctorMaterialProperty<Real> & _drho_dt;
+  FunctorMaterialProperty<ADReal> & _drho_dt;
 
   /// Isobaric specific heat capacity
   FunctorMaterialProperty<ADReal> & _cp;
@@ -60,7 +62,7 @@ protected:
   FunctorMaterialProperty<Real> & _dcp_dT;
 
   /// Derivative of isobaric specific heat with respect to time
-  FunctorMaterialProperty<Real> & _dcp_dt;
+  FunctorMaterialProperty<ADReal> & _dcp_dt;
 
   /// Isochoric specific heat capacity
   FunctorMaterialProperty<ADReal> & _cv;
@@ -73,6 +75,9 @@ protected:
 
   /// Derivative of dynamic viscosity with respect to temperature
   FunctorMaterialProperty<Real> & _dmu_dT;
+
+  /// Function to ramp down the viscosity, useful for relaxation transient
+  const Function & _mu_rampdown;
 
   /// Thermal conductivity
   FunctorMaterialProperty<ADReal> & _k;
@@ -111,6 +116,6 @@ protected:
   /// Interstitial Reynolds number
   FunctorMaterialProperty<ADReal> & _Re_i;
 
-  using DerivativeMaterialPropertyNameInterface::derivativePropertyNameFirst;
   using UserObjectInterface::getUserObject;
+  using DerivativeMaterialPropertyNameInterface::derivativePropertyNameFirst;
 };

@@ -27,6 +27,8 @@ GeneralFunctorFluidProps::validParams()
   params.addRequiredCoupledVar(NS::density, "Density variable");
   params.addRequiredCoupledVar(NS::speed, "Velocity norm as a variable");
 
+  params.addParam<FunctionName>(
+      "mu_rampdown", 1, "A function describing a ramp down of viscosity over time");
   params.addRequiredCoupledVar(NS::porosity, "porosity");
   params.addRequiredRangeCheckedParam<Real>(
       "characteristic_length",
@@ -49,18 +51,19 @@ GeneralFunctorFluidProps::GeneralFunctorFluidProps(const InputParameters & param
 
     _drho_dp(declareFunctorProperty<Real>(derivativePropertyNameFirst(NS::density, NS::pressure))),
     _drho_dT(declareFunctorProperty<Real>(derivativePropertyNameFirst(NS::density, NS::T_fluid))),
-    _drho_dt(declareFunctorProperty<Real>(NS::time_deriv(NS::density))),
+    _drho_dt(declareFunctorProperty<ADReal>(NS::time_deriv(NS::density))),
 
     _cp(declareFunctorProperty<ADReal>(NS::cp)),
     _dcp_dp(declareFunctorProperty<Real>(derivativePropertyNameFirst(NS::cp, NS::pressure))),
     _dcp_dT(declareFunctorProperty<Real>(derivativePropertyNameFirst(NS::cp, NS::T_fluid))),
-    _dcp_dt(declareFunctorProperty<Real>(NS::time_deriv(NS::cp))),
+    _dcp_dt(declareFunctorProperty<ADReal>(NS::time_deriv(NS::cp))),
 
     _cv(declareFunctorProperty<ADReal>(NS::cv)),
 
     _mu(declareFunctorProperty<ADReal>(NS::mu)),
     _dmu_dp(declareFunctorProperty<Real>(derivativePropertyNameFirst(NS::mu, NS::pressure))),
     _dmu_dT(declareFunctorProperty<Real>(derivativePropertyNameFirst(NS::mu, NS::T_fluid))),
+    _mu_rampdown(getFunction("mu_rampdown")),
 
     _k(declareFunctorProperty<ADReal>(NS::k)),
     _dk_dp(declareFunctorProperty<Real>(derivativePropertyNameFirst(NS::k, NS::pressure))),
@@ -123,7 +126,15 @@ GeneralFunctorFluidProps::GeneralFunctorFluidProps(const InputParameters & param
   //   _fluid.cp_from_p_T(raw_pressure, raw_T_fluid, dummy, dcp_dp, dcp_dT);
   //   return dcp_dT;
   // });
-  //
+  _dcp_dt.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> ADReal {
+    Real dcp_dp, dcp_dT, dummy;
+    auto raw_pressure = MetaPhysicL::raw_value(_pressure(r, t));
+    auto raw_T_fluid = MetaPhysicL::raw_value(_T_fluid(r, t));
+    _fluid.cp_from_p_T(raw_pressure, raw_T_fluid, dummy, dcp_dp, dcp_dT);
+
+    return dcp_dp * _pressure.dot(r, t) + dcp_dT * _T_fluid.dot(r, t);
+  });
+
   // _dmu_dp.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> Real {
   //   Real dmu_dp, dmu_dT, dummy;
   //   auto raw_pressure = MetaPhysicL::raw_value(_pressure(r, t));
@@ -187,8 +198,11 @@ GeneralFunctorFluidProps::GeneralFunctorFluidProps(const InputParameters & param
     static constexpr Real small_number = 1e-8;
 
     return std::max(
-        fp::reynolds(_rho(r, t), _eps(r, t) * _speed(r, t), _d, std::max(_mu(r, t), small_number)),
-        1.0);
+          fp::reynolds(_rho(r, t),
+                       _eps(r, t) * _speed(r, t),
+                       _d,
+                       std::max(_mu(r, t), small_number)),
+                       1.0);
   });
   // _dRe_dp.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> ADReal {
   //   return reynoldsPropertyDerivative(MetaPhysicL::raw_value(_Re(r, t)),
@@ -214,7 +228,6 @@ GeneralFunctorFluidProps::GeneralFunctorFluidProps(const InputParameters & param
 
   // (interstitial) Reynolds number
   _Re_i.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> ADReal {
-    return _Re(r, t) / _eps(r, t);
-    ;
+    return _Re(r, t) / _eps(r, t);;
   });
 }
