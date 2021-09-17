@@ -37,7 +37,16 @@ private:
   /// Toggles whether neighboring level one elements should be refined or not. Defaults to true.
   const bool _enable_neighbor_refinement;
 
-  /// The actual function refining the blocks. This is done recursively in order to minimize the number of refinement iterations to as little as possible.
+  /**
+   * The actual function refining the blocks. This is done recursively in order
+   * to minimize the number of refinement iterations to as little as possible.
+   * @param block_ids Vector of block_ids to refine
+   * @param mesh The mesh to refine
+   * @param refinement Vector describing how many times to refine each block, corresponding to block_ids
+   * @param max Max value of refinement param vector
+   * @param ref_step Step counter for the recursive function, defaults to 0 for initial call.
+   * @return Unique pointer to a refined MeshBase
+   */
   virtual std::unique_ptr<MeshBase> recursive_refine(const std::vector<subdomain_id_type> block_ids,
                                                      std::unique_ptr<MeshBase> & mesh,
                                                      const std::vector<unsigned int> refinement,
