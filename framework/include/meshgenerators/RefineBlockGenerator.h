@@ -42,7 +42,8 @@ private:
    * to minimize the number of refinement iterations to as little as possible.
    * @param block_ids Vector of block_ids to refine
    * @param mesh The mesh to refine
-   * @param refinement Vector describing how many times to refine each block, corresponding to block_ids
+   * @param refinement Vector describing how many times to refine each block, corresponding to
+   * block_ids
    * @param max Max value of refinement param vector
    * @param ref_step Step counter for the recursive function, defaults to 0 for initial call.
    * @return Unique pointer to a refined MeshBase
