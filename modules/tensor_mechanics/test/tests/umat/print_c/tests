@@ -7,8 +7,8 @@
     cli_args = "Materials/active='umat'"
     library_mode = 'DYNAMIC'
     valgrind = 'NONE'
-    expect_out = 'stran 0 = -0.0000143\nstran 1 = 0.0000476\nstran 2 = -0.0000143\nstran 3 = '
-                 '-0.0000000\nstran 4 = 0.0000000\nstran 5 = -0.0000000\ndstran 0 = '
+    expect_out = 'stran 0 = 0.0000000\nstran 1 = 0.0000000\nstran 2 = 0.0000000\nstran 3 = '
+                 '0.0000000\nstran 4 = 0.0000000\nstran 5 = 0.0000000\ndstran 0 = '
                  '-0.0000143\ndstran 1 = 0.0000476\ndstran 2 = -0.0000143\ndstran 3 = '
                  '-0.0000000\ndstran 4 = 0.0000000\ndstran 5 = -0.0000000\nstress 0 = '
                  '-0.0000000\nstress 1 = 10.0000000\nstress 2 = -0.0000000\nstress 3 = '

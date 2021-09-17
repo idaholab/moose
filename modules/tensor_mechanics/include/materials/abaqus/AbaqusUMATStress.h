@@ -129,6 +129,9 @@ protected:
   /// Section point number within the current layer. (not supported)
   int _aqKSPT;
 
+  /// The step number (as per Abaqus definition) can be set by the user
+  int _aqKSTEP;
+
   /// Increment number (_t_step). This can be supported. The step number (as per Abaqus definition)
   /// is not supported by MOOSE.
   int _aqKINC;

@@ -91,6 +91,8 @@ AbaqusUMATStress::AbaqusUMATStress(const InputParameters & parameters)
 void
 AbaqusUMATStress::initQpStatefulProperties()
 {
+  ComputeStressBase::initQpStatefulProperties();
+
   // Initialize state variable vector
   _state_var[_qp].resize(_aqNSTATV);
   for (int i = 0; i < _aqNSTATV; ++i)
@@ -189,6 +191,7 @@ AbaqusUMATStress::computeQpStress()
 
   // Increment number
   _aqKINC = _t_step;
+  _aqKSTEP = 1;
 
   // Connection to extern statement
   _umat(_aqSTRESS.data(),
@@ -226,7 +229,7 @@ AbaqusUMATStress::computeQpStress()
         &_qp,
         &_aqLAYER,
         &_aqKSPT,
-        &_t_step,
+        &_aqKSTEP,
         &_aqKINC);
 
   // Update state variables
