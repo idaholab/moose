@@ -36,7 +36,7 @@ PINSFVMomentumDiffusion::validParams()
 PINSFVMomentumDiffusion::PINSFVMomentumDiffusion(const InputParameters & params)
   : FVFluxKernel(params),
     _mu(getFunctor<ADReal>("mu")),
-    _eps(getFunctor<MooseVariableFVReal>("porosity", 0)),
+    _eps(getFunctor<ADReal>("porosity")),
     _index(getParam<MooseEnum>("momentum_component")),
     _vel(isParamValid("vel") ? &getFunctor<ADRealVectorValue>("vel") : nullptr),
     _eps_var(dynamic_cast<const MooseVariableFVReal *>(getFieldVar("porosity", 0))),

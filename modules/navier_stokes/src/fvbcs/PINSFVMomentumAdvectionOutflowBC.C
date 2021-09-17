@@ -34,7 +34,7 @@ PINSFVMomentumAdvectionOutflowBC::PINSFVMomentumAdvectionOutflowBC(const InputPa
     _u_var(dynamic_cast<const PINSFVSuperficialVelocityVariable *>(getFieldVar("u", 0))),
     _v_var(dynamic_cast<const PINSFVSuperficialVelocityVariable *>(getFieldVar("v", 0))),
     _w_var(dynamic_cast<const PINSFVSuperficialVelocityVariable *>(getFieldVar("w", 0))),
-    _eps(getFunctor<MooseVariableFVReal>("porosity", 0)),
+    _eps(getFunctor<ADReal>("porosity")),
     _dim(_subproblem.mesh().dimension())
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING

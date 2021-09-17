@@ -964,7 +964,7 @@ private:
       _functor_material_properties;
 
   /// A container holding pointers to all the functors in our problem
-  std::vector<std::map<std::string, const Moose::FunctorBase *>> _functors;
+  std::vector<std::multimap<std::string, const Moose::FunctorBase *>> _functors;
 
   /// The declared vector tags
   std::vector<VectorTag> _vector_tags;
@@ -1022,15 +1022,7 @@ SubProblem::declareFunctorProperty(const std::string & name,
              .first;
     // And add it to our all-functors container
     auto & functors = _functors[tid];
-    auto functors_insertion = functors.emplace(std::make_pair(name, it->second.second.get()));
-
-    // Insertion should have happened
-    if (!functors_insertion.second)
-      mooseError(
-          "We created a functor material property with name ",
-          name,
-          " but there is already a functor in our problem with that name. Make sure that you do "
-          "not have functor material properties, functions, and variables with the same names");
+    functors.emplace(std::make_pair(name, it->second.second.get()));
   }
   else
   // The property already exists
@@ -1090,6 +1082,12 @@ SubProblem::getFunctor(const std::string & name, const THREAD_ID tid)
   auto it = functors.find(name);
   if (it != functors.end())
   {
+    if (functors.count(name) > 1)
+      mooseError("Attempted to get a functor with the name ",
+                 name,
+                 " but multiple functors match. Make sure that you do not have functor material "
+                 "properties, functions, and variables with the same names");
+
     const auto * const functor = dynamic_cast<const Moose::Functor<T> *>(it->second);
     if (!functor)
       mooseError("functor is of wrong type ",

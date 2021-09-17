@@ -1071,12 +1071,7 @@ SubProblem::addFunctor(const std::string & name,
                        const THREAD_ID tid)
 {
   mooseAssert(tid < _functors.size(), "Too large a thread ID");
-  auto insertion = _functors[tid].emplace(std::make_pair(name, functor));
-  if (!insertion.second)
-    mooseError("Attempted to add a functor with the name ",
-               name,
-               " but the functor already exists. Make sure that you do not have functor material "
-               "properties, functions, and variables with the same names");
+  _functors[tid].emplace(std::make_pair(name, functor));
 }
 
 bool

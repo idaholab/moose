@@ -38,7 +38,6 @@ INSFVMaterial::INSFVMaterial(const InputParameters & parameters)
     _rho_u(declareFunctorProperty<ADReal>(NS::momentum_x)),
     _rho_v(declareFunctorProperty<ADReal>(NS::momentum_y)),
     _rho_w(declareFunctorProperty<ADReal>(NS::momentum_z)),
-    _p(declareFunctorProperty<ADReal>(NS::pressure)),
     _rho(getFunctor<ADReal>("rho")),
     _has_temperature(isParamValid("temperature")),
     _temperature(_has_temperature ? getVarHelper<MooseVariableFVReal>("temperature", 0) : nullptr),
@@ -51,8 +50,6 @@ INSFVMaterial::INSFVMaterial(const InputParameters & parameters)
   if (_mesh.dimension() >= 3 && !_w_vel)
     mooseError("If the mesh dimension is 3, then a 'w' variable parameter must be supplied");
 
-  _p.setFunctor(
-      _mesh, blockIDs(), [this](const auto & r, const auto & t) -> ADReal { return _p_var(r, t); });
   _velocity.setFunctor(
       _mesh, blockIDs(), [this](const auto & r, const auto & t) -> ADRealVectorValue {
         ADRealVectorValue velocity(_u_vel(r, t));

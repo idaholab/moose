@@ -41,16 +41,16 @@ PINSFVFunctorBC::validParams()
 PINSFVFunctorBC::PINSFVFunctorBC(const InputParameters & params)
   : FVFluxBC(params),
     INSFVFlowBC(params),
-    _sup_vel_x(getFunctor<MooseVariableFVReal>(NS::superficial_velocity_x, 0)),
+    _sup_vel_x(getFunctor<ADReal>(NS::superficial_velocity_x)),
     _sup_vel_y(isParamValid(NS::superficial_velocity_y)
-                   ? &getFunctor<MooseVariableFVReal>(NS::superficial_velocity_y, 0)
+                   ? &getFunctor<ADReal>(NS::superficial_velocity_y)
                    : nullptr),
     _sup_vel_z(isParamValid(NS::superficial_velocity_z)
-                   ? &getFunctor<MooseVariableFVReal>(NS::superficial_velocity_z, 0)
+                   ? &getFunctor<ADReal>(NS::superficial_velocity_z)
                    : nullptr),
-    _pressure(getFunctor<MooseVariableFVReal>(NS::pressure, 0)),
+    _pressure(getFunctor<ADReal>(NS::pressure)),
     _rho(getFunctor<ADReal>(NS::density)),
-    _eps(getFunctor<MooseVariableFVReal>(NS::porosity, 0)),
+    _eps(getFunctor<ADReal>(NS::porosity)),
     _eqn(getParam<MooseEnum>("eqn")),
     _index(getParam<MooseEnum>("momentum_component")),
     _cd_limiter()

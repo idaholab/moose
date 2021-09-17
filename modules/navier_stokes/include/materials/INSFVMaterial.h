@@ -43,9 +43,6 @@ protected:
   /// The density times the z-velocity
   FunctorMaterialProperty<ADReal> & _rho_w;
 
-  /// The pressure material property
-  FunctorMaterialProperty<ADReal> & _p;
-
   /// density
   const Moose::Functor<ADReal> & _rho;
 

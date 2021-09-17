@@ -69,7 +69,7 @@ hot_temp=310
     order = FIRST
     family = MONOMIAL
   []
-  [rho]
+  [rho_out]
     type = MooseVariableFVReal
   []
 []
@@ -103,10 +103,10 @@ hot_temp=310
     execute_on = 'initial timestep_end'
     args = 'T'
   []
-  [rho]
+  [rho_out]
     type = FunctorMatPropElementalAux
     mat_prop = 'rho'
-    variable = 'rho'
+    variable = 'rho_out'
     execute_on = 'initial timestep_end'
   []
 []

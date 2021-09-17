@@ -17,7 +17,7 @@ INSFVEnergyAdvection::validParams()
   auto params = INSFVMomentumAdvection::validParams();
   params.addClassDescription("Advects energy, e.g. rho*cp*T. A user may still override what "
                              "quantity is advected, but the default is rho*cp*T");
-  params.set<MaterialPropertyName>("advected_quantity") = "rho_cp_temp";
+  params.set<MooseFunctorName>("advected_quantity") = "rho_cp_temp";
   return params;
 }
 

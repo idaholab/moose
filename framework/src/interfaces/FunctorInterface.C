@@ -33,6 +33,13 @@ FunctorInterface::deduceFunctorName(const std::string & name) const
     return _fi_params.get<MaterialPropertyName>(name);
   else if (_fi_params.have_parameter<VariableName>(name))
     return _fi_params.get<VariableName>(name);
+  else if (_fi_params.have_parameter<std::vector<VariableName>>(name))
+  {
+    const auto & var_names = _fi_params.get<std::vector<VariableName>>(name);
+    if (var_names.size() != 1)
+      mooseError("We only support a single variable name for retrieving a functor");
+    return var_names[0];
+  }
   else if (_fi_params.have_parameter<NonlinearVariableName>(name))
     return _fi_params.get<NonlinearVariableName>(name);
   else if (_fi_params.have_parameter<FunctionName>(name))
