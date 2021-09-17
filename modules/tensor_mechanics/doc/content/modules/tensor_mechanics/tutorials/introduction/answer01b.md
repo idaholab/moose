@@ -6,7 +6,7 @@ the elements. All initial conditions default to zero and we only have
 displacement variables in the system.
 
 The zero displacement initial condition should already be a solution to the
-given problem. We expect the redidual norm to be zero and each timestep to
+given problem. We expect the residual norm to be zero and each timestep to
 instantly converge.
 
 #### Running the input

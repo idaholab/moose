@@ -3,7 +3,7 @@
 > [!param](/Modules/TensorMechanics/Master/TensorMechanicsAction/generate_output)
 > parameter...
 
-`generate_outputs` is a convenient way to obtain scalar quantities, such as
+`generate_output` is a convenient way to obtain scalar quantities, such as
 tensor components, invariants, etc. as fields that can be visualized on a mesh.
 
 Change your master action block to

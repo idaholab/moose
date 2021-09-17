@@ -24,10 +24,10 @@ will use it below in the BCs.
 ### `AuxVariables`
 
 We introduce a new auxiliary variable `T` (for temperature). Auxiliary variables
-are variables we're not solvong for, but are computing directly. To simplify
-this step we are not soving a heat conduction problem, but instead just
-prescribe a global temperature that is rising with time (see next section).
-Auxiliary variables can be couple in everywhere regular (so called _nonlinear_)
+are variables we're not solving for, but are computing directly. To simplify
+this step we are not solving a heat conduction problem, but instead just
+prescribing a global temperature that is rising with time (see next section).
+Auxiliary variables can be coupled in everywhere regular (so called _nonlinear_)
 variables are coupled. They are a great tool for simplifying a model during
 development.
 
@@ -37,7 +37,7 @@ The [`FunctionAux`](FunctionAux.md) AuxKernel can set an AuxVariable to a
 function of space and time. Note the
 [!param](/AuxKernels/FunctionAux/execute_on) parameter that is available in many
 MOOSE systems. Here we skip execution during LINEAR and NON_LINEAR iterations
-and only update the varaibale value at the beginning of the timestep.
+and only update the variable value at the beginning of the timestep.
 
 ### TensorMechanics `Master` Action
 
@@ -93,7 +93,7 @@ avoid overconstraining your problems. Keep in mind that to remove all 6 rigid
 body modes in a 3D simulation you need to apply BCs on at least 3 nodes (which
 cannot be co-linear). One node will have to be constrained in 3 direction, one
 in 2 and one in just one direction. The first node will remove three translation
-modes. The second node will remove two rotational modes (and ill establish an
+modes. The second node will remove two rotational modes (and will establish an
 axis of rotation). The third node will remove that final rotational mode.
 
 ### `Materials`

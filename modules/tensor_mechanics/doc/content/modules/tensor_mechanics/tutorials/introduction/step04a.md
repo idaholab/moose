@@ -18,9 +18,9 @@
 
 We can run the various combinations of first/second order elements,
 active/deactivated volumetric locking correction, and levels of refinement
-andplot the resulting data.
+and plot the resulting data.
 
-Note that you can override input file parmeters from the commandline! That means you can runn all the cases plotted below using these commands:
+Note that you can override input file parameters from the command line! That means you can run all the cases plotted below using these commands:
 
 ```
 ../../tensor_mechanics-opt -i step04a.i GlobalParams/elem_type=QUAD4
@@ -61,5 +61,5 @@ order elements with certain material properties. It can be alleviated through
 - Use of higher order elements (QUAD8)
 - Use of volumetric locking correction
 
-Useres are encouraged to carefully check their results through convergence
+Users are encouraged to carefully check their results through convergence
 studies.

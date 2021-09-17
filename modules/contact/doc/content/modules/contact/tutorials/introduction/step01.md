@@ -40,7 +40,7 @@ compensate for mesh size effects.
 
 ### `BCs`
 
-Note that we've made a small change to the pressure BC, changing the applied pressure from `1e4*t` to `1e4*t^2`. This is simply for demonstartion purposes to apply a stronger pressure later in the simulation to force the cantilevers to bend more and establish contact over a larger area.
+Note that we've made a small change to the pressure BC, changing the applied pressure from `1e4*t` to `1e4*t^2`. This is simply for demonstration purposes to apply a stronger pressure later in the simulation to force the cantilevers to bend more and establish contact over a larger area.
 
 ## Tasks and questions
 
@@ -57,7 +57,6 @@ particular please pay attention to `contact_force` and `penetration`.
 You should see a maximum interpenetration of about 6e-4, which is about half a
 percent of the element width. It is application dependent whether this amount is
 acceptable.
-
 
 
 Once you've answered the questions and run this example we will move on to

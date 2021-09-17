@@ -17,8 +17,8 @@ IDs.
 
 #### `DirichletBC`
 
-The two [`DirichletBC`](DirichletBC.md) boundary conditions are bot set on the
-*bottom* surface of the simulation domain. The fix the `disp_x` and `disp_y`
+The two [`DirichletBC`](DirichletBC.md) boundary conditions are both set on the
+*bottom* surface of the simulation domain. This fixes the `disp_x` and `disp_y`
 variables to 0 respectively. Check the [list of available boundary conditions](tutorials/introduction/supplemental02.md).
 
 #### `Pressure`
@@ -73,7 +73,7 @@ boundary condition effect the deformation of the sample.
 
 > Experiment with different settings for the mechanical properties of the sample
 > and the applied loading. What happens if you drastically reduce the Young's
-> modulus or increase the applied pressure. Is the simulaion result still valid?
+> modulus or increase the applied pressure. Is the simulation result still valid?
 
 [Click here for the answer.](tensor_mechanics/tutorials/introduction/answer02a.md)
 

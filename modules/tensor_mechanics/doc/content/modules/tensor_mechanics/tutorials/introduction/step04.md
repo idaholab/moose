@@ -2,7 +2,7 @@
 
 As a final step in the tensor mechanics section of this tutorial we'll set up a
 pair of mesh separate mesh blocks - two cantilevers side by side, fixed at the
-bottom, that will be pushed towards eachother with pressure boundary conditions.
+bottom, that will be pushed towards each other with pressure boundary conditions.
 
 !listing modules/tensor_mechanics/tutorials/introduction/step04.i
 
@@ -31,13 +31,13 @@ GeneratedMeshGenerator sets up (`left`, `right`, `top`, `bottom` (for >=2D),
 `front`, and `back` (for 3D)). The `generated` block will create a mesh with the
 boundaries `pillar1_left`, `pillar1_right`, `pillar1_top`, and `pillar1_bottom`.
 
-The `generated2` generator will set up the second pillar and works very much like the first, except that we are also adding the [!param](/Mesh/GeneratedMeshGenerator/boundary_id_offset) to ensure that the boundaries of the second pillar have their own unique IDs (this is done by shifing the default IDs of the four boundaries by 4 so they don't overlap with the IDs of pillar1).
+The `generated2` generator will set up the second pillar and works very much like the first, except that we are also adding the [!param](/Mesh/GeneratedMeshGenerator/boundary_id_offset) to ensure that the boundaries of the second pillar have their own unique IDs (this is done by shifting the default IDs of the four boundaries by 4 so they don't overlap with the IDs of pillar1).
 
 !alert note
 When modeling the deformation/bending of walls with solid elements make sure to
 mesh at least about *five* elements through the wall thickness!
 
-The [`MeshCollectionGenerator`](MeshCollectionGenerator.md) then combines the two separate pillar mesh objects into a single mesh object that contains all elements from both meshes. Note that this does **not** mean the two meshes are glued together or connected in any way! Also, in contrast to the previous step the mesh generators do not form a *chain*, but they form a tree structure. The important thing for MOOSE is that a single genrator sits at the end of such a chain or root of such a tree (otherwise MOOSE will complain with an error message).
+The [`MeshCollectionGenerator`](MeshCollectionGenerator.md) then combines the two separate pillar mesh objects into a single mesh object that contains all elements from both meshes. Note that this does **not** mean the two meshes are glued together or connected in any way! Also, in contrast to the previous step the mesh generators do not form a *chain*, but they form a tree structure. The important thing for MOOSE is that a single generator sits at the end of such a chain or root of such a tree (otherwise MOOSE will complain with an error message).
 
 ### TensorMechanics `Master` Action
 
@@ -90,7 +90,7 @@ petsc_options_iname = '-pc_type -pc_hypre_type'
 petsc_options_value = 'hypre boomeramg'
 ```
 
-This enables a very scalabl algebraic multigrid (AMG) preconditioner, provided
+This enables a very scalable algebraic multigrid (AMG) preconditioner, provided
 by the
 [Hypre](https://computing.llnl.gov/projects/hypre-scalable-linear-solvers-multigrid-methods/software)
 library.
@@ -99,7 +99,7 @@ library.
 
 MOOSE has a system of so called [Postprocessors](Postprocessors/index.md) that
 can extract scalar quantities for a simulation while it runs. These quantities
-can be prnte on the screen in real time or written to files for later analysis.
+can be printed on the screen in real time or written to files for later analysis.
 You add postprocessors under the `[Postprocessors]` top level block.
 
 File output of postprocessors is enabled by adding the `csv = true` option in

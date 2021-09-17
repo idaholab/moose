@@ -18,7 +18,7 @@ based contact problem from the previous step) to a mortar formulation. Most of t
 
 The key difference with mortar based contact is the use of Lagrange multipliers
 for the enforcement of the contact constraints. These Lagrange multiplieres are
-addition solution variables (added by the Contact action) that live on lower
+additional solution variables (added by the Contact action) that live on lower
 dimensional subdomains along the contact interfaces.
 
 The Contact action automatically adds these lower dimensional subdomains, _but_

@@ -10,7 +10,7 @@ units in MOOSE.
 ## [Adding boundary conditions](tensor_mechanics/tutorials/introduction/step02.md)
 
 Next we add boundary conditions and loading. We think about the validity of the
-strain formulation and make a quick excusion into automatic differentiation.
+strain formulation and make a quick excursion into automatic differentiation.
 
 ## [Subdomains and subdomain-specific properties](tensor_mechanics/tutorials/introduction/step03.md)
 
