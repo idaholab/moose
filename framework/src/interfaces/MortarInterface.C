@@ -39,10 +39,9 @@ MortarInterface::validParams()
   params.addParam<bool>(
       "give_me_wrong_results",
       true,
-      "Whether to enable incorrect edge dropping treatment for mortar constraints. When enabled, "
-      "any "
-      "Lagrange Multiplier degree of freedom on a secondary element that is not fully covered by "
-      "projected primary elements will be strongly set to 0.");
+      "Whether to enable incorrect edge dropping treatment for mortar constraints. When enabled "
+      "any Lagrange Multiplier degree of freedom on a secondary element without full primary "
+      "contributions will be set (strongly) to 0.");
 
   return params;
 }

@@ -77,6 +77,7 @@
     component = x
     use_displaced_mesh = true
     compute_lm_residuals = false
+    give_me_wrong_results = false
   []
   [normal_y]
     type = NormalMortarMechanicalContact
@@ -89,6 +90,7 @@
     component = y
     use_displaced_mesh = true
     compute_lm_residuals = false
+    give_me_wrong_results = false
   []
 []
 
