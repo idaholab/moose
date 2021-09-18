@@ -1,9 +1,9 @@
 ###########################################################
 # This is a test of the Discontinuous Galerkin System.
 # Discontinous basis functions are used (Monomials) and
-# a the Laplacian DGKernel contributes to the
+# a Laplacian DGKernel contributes to the
 # internal edges around each element. Jumps are allowed
-# by penalized by this method.
+# but penalized by this method.
 #
 # @Requirement F3.60
 ###########################################################
