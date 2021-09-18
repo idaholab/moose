@@ -1,33 +1,20 @@
 # OneDEqualValueConstraintBC
 
-!alert! construction title=Undocumented Class
-The OneDEqualValueConstraintBC has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# OneDEqualValueConstraintBC
-
 !syntax description /BCs/OneDEqualValueConstraintBC
 
-## Overview
+The constraint is imposed using a Lagrange multiplier, a scalar variable.
 
-!! Replace these lines with information regarding the OneDEqualValueConstraintBC object.
+More information about the mortar method may be found in the
+[`Constraints documentation`](syntax/Constraints/index.md).
 
-## Example Input File Syntax
+## Example input syntax
 
-!! Describe and include an example of how to use the OneDEqualValueConstraintBC object.
+In this example, two 1D lines are connected using the `OneDEqualValueConstraintBC` as a mortar constraint.
+The sign to impose on the variable value on the boundary nodes is specified with the `vg` parameter.
+The Lagrange multiplier, `lm`, is also subjected to a `NodalEqualValueConstraint` to achieve the continuity
+at the interface.
 
-!syntax parameters /BCs/OneDEqualValueConstraintBC
-
-!syntax inputs /BCs/OneDEqualValueConstraintBC
-
-!syntax children /BCs/OneDEqualValueConstraintBC
-```
-!alert-end!
-
-!syntax description /BCs/OneDEqualValueConstraintBC
+!listing test/tests/mortar/1d/1d.i block=BCs
 
 !syntax parameters /BCs/OneDEqualValueConstraintBC
 

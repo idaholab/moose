@@ -1,33 +1,25 @@
 # VacuumBC
 
-!alert! construction title=Undocumented Class
-The VacuumBC has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# VacuumBC
-
 !syntax description /BCs/VacuumBC
 
-## Overview
+Vacuum is defined as no incoming flux from outside the boundary. This is a
+common approximation in reactor physics where beyond a certain distance from a
+nuclear system, we assume that while neutrons may still leave the system, they will
+not come back.
 
-!! Replace these lines with information regarding the VacuumBC object.
+The contribution to the residual is:
 
-## Example Input File Syntax
+!equation
+\int_{\partial \Omega} \alpha u(\vec{r}) \psi_t(\vec{r}) / 2. dS
 
-!! Describe and include an example of how to use the VacuumBC object.
+where $\partial \Omega$ is the domain definition and $\psi_t$ is the test function.
 
-!syntax parameters /BCs/VacuumBC
+# Example input syntax
 
-!syntax inputs /BCs/VacuumBC
+In this input, a `VacuumBC` is used to impose a 0 incoming flux boundary condition in
+a diffusion problem in a RZ geometry problem on the `top` boundary for variable `u`.
 
-!syntax children /BCs/VacuumBC
-```
-!alert-end!
-
-!syntax description /BCs/VacuumBC
+!listing test/tests/coord_type/coord_type_rz_integrated.i block=BCs
 
 !syntax parameters /BCs/VacuumBC
 
