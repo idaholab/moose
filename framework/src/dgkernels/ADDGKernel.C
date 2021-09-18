@@ -22,6 +22,7 @@ InputParameters
 ADDGKernel::validParams()
 {
   InputParameters params = DGKernelBase::validParams();
+  params.addClassDescription("Base class for all DG kernels making use of automatic differentiation");
   return params;
 }
 

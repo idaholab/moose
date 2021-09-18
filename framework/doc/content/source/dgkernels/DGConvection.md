@@ -1,33 +1,20 @@
 # DGConvection
 
-!alert! construction title=Undocumented Class
-The DGConvection has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# DGConvection
-
 !syntax description /DGKernels/DGConvection
 
-## Overview
+The velocity vector is a constant, so this may not be used for solving for the velocity in fluid
+simulations for example. This kernel is only for advecting a field with a known velocity.
+The first order upwind scheme used is diffusive and will only provide first order mesh convergence.
 
-!! Replace these lines with information regarding the DGConvection object.
+More information about the discontinuous Galerkin method may be found in the
+[DGKernels syntax page](/syntax/DGKernels/index.md).
 
-## Example Input File Syntax
+# Example input syntax
 
-!! Describe and include an example of how to use the DGConvection object.
+In this example, a field `u` is advected from a boundary condition on its left to the right boundary
+with a `1 0 0` velocity using the `ADDGConvection`, the version of this kernel with automatic differentiation.
 
-!syntax parameters /DGKernels/DGConvection
-
-!syntax inputs /DGKernels/DGConvection
-
-!syntax children /DGKernels/DGConvection
-```
-!alert-end!
-
-!syntax description /DGKernels/DGConvection
+!listing test/tests/dgkernels/ad_dg_convection/ad_dg_convection.i block=DGKernels
 
 !syntax parameters /DGKernels/DGConvection
 
