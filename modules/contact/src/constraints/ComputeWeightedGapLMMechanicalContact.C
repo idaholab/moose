@@ -50,8 +50,7 @@ ComputeWeightedGapLMMechanicalContact::validParams()
       "Whether to normalize c by weighting function norm. When unnormalized "
       "the value of c effectively depends on element size since in the constraint we compare nodal "
       "Lagrange Multiplier values to integrated gap values (LM nodal value is independent of "
-      "element "
-      "size, where integrated values are dependent on element size).");
+      "element size, where integrated values are dependent on element size).");
   params.set<bool>("use_displaced_mesh") = true;
   return params;
 }
