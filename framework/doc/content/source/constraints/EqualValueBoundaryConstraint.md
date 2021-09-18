@@ -1,33 +1,17 @@
 # EqualValueBoundaryConstraint
 
-!alert! construction title=Undocumented Class
-The EqualValueBoundaryConstraint has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# EqualValueBoundaryConstraint
-
 !syntax description /Constraints/EqualValueBoundaryConstraint
 
-## Overview
+The difference between the two variables (or a single variable) values on the primary node and the
+secondary node (or boundary) is simply multiplied by a penalty factor then added to the
+residual.
 
-!! Replace these lines with information regarding the EqualValueBoundaryConstraint object.
+# Example input syntax
 
-## Example Input File Syntax
+In this example, the variable `diffused` is constrained to be equal on node `45` and the `top` boundary, using
+a 10e6 penalty factor.
 
-!! Describe and include an example of how to use the EqualValueBoundaryConstraint object.
-
-!syntax parameters /Constraints/EqualValueBoundaryConstraint
-
-!syntax inputs /Constraints/EqualValueBoundaryConstraint
-
-!syntax children /Constraints/EqualValueBoundaryConstraint
-```
-!alert-end!
-
-!syntax description /Constraints/EqualValueBoundaryConstraint
+!listing test/tests/constraints/equal_value_boundary_constraint/equal_value_boundary_constraint_test.i block=Constraints
 
 !syntax parameters /Constraints/EqualValueBoundaryConstraint
 

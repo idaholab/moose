@@ -1,33 +1,19 @@
 # TiedValueConstraint
 
-!alert! construction title=Undocumented Class
-The TiedValueConstraint has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# TiedValueConstraint
-
 !syntax description /Constraints/TiedValueConstraint
 
-## Overview
+The constraint is imposed strongly on both sides of the interface, contributing to the residual.
+Please see the [CoupledTiedValueConstraint.md] for the two variables case.
+The `TiedValueConstraint` may also be used with two different variables, however the off diagonal terms
+in the Jacobian for the constraint are only implemented in the [CoupledTiedValueConstraint.md].
 
-!! Replace these lines with information regarding the TiedValueConstraint object.
+# Example input syntax
 
-## Example Input File Syntax
+In this example, the value of variable `u` defined in the left and right domains,
+is tied between the left and right boundaries of the two disconnected domains using a
+`TiedValueConstraint`.
 
-!! Describe and include an example of how to use the TiedValueConstraint object.
-
-!syntax parameters /Constraints/TiedValueConstraint
-
-!syntax inputs /Constraints/TiedValueConstraint
-
-!syntax children /Constraints/TiedValueConstraint
-```
-!alert-end!
-
-!syntax description /Constraints/TiedValueConstraint
+!listing test/tests/constraints/tied_value_constraint/tied_value_constraint_test.i block=Constraints
 
 !syntax parameters /Constraints/TiedValueConstraint
 
