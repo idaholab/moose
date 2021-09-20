@@ -32,7 +32,7 @@ For development of MOOSE-based applications see [Application Development](applic
 
 [Build Status (internal)](https://moosebuild.hpc.inl.gov)
 
-[Code Coverage](http://mooseframework.org/docs/coverage/moose/)
+[Code Coverage](http://mooseframework.org/docs/coverage/framework/)
 
 [Test Timing](http://mooseframework.org/docs/timing/)
 
