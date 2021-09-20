@@ -179,6 +179,7 @@
   [./strain]
     type = ComputeFiniteStrain
     block = 0
+    decomposition_method = EigenSolution
     displacements = 'disp_x disp_y disp_z'
   [../]
   [./mc]
