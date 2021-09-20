@@ -47,6 +47,7 @@
 #include "Attributes.h"
 #include "MooseApp.h"
 #include "CommonOutputAction.h"
+#include "CastUniquePointer.h"
 
 // Regular expression includes
 #include "pcrecpp.h"
@@ -2162,7 +2163,7 @@ MooseApp::hasRMClone(const RelationshipManager & template_rm, const MeshBase & m
   return (it != _template_to_clones.end()) && (it->second.find(&mesh) != it->second.end());
 }
 
-GhostingFunctor &
+RelationshipManager &
 MooseApp::getRMClone(const RelationshipManager & template_rm, const MeshBase & mesh) const
 {
   auto outer_it = _template_to_clones.find(&template_rm);
@@ -2185,7 +2186,7 @@ MooseApp::removeRelationshipManager(std::shared_ptr<RelationshipManager> rm)
     mooseError("The MooseMesh should exist");
 
   const MeshBase * const undisp_lm_mesh = mesh->getMeshPtr();
-  GhostingFunctor * undisp_clone = nullptr;
+  RelationshipManager * undisp_clone = nullptr;
   if (undisp_lm_mesh && hasRMClone(*rm, *undisp_lm_mesh))
   {
     undisp_clone = &getRMClone(*rm, *undisp_lm_mesh);
@@ -2194,7 +2195,7 @@ MooseApp::removeRelationshipManager(std::shared_ptr<RelationshipManager> rm)
 
   auto & displaced_mesh = _action_warehouse.displacedMesh();
   MeshBase * const disp_lm_mesh = displaced_mesh ? &displaced_mesh->getMesh() : nullptr;
-  GhostingFunctor * disp_clone = nullptr;
+  RelationshipManager * disp_clone = nullptr;
   if (disp_lm_mesh && hasRMClone(*rm, *disp_lm_mesh))
   {
     disp_clone = &getRMClone(*rm, *disp_lm_mesh);
@@ -2220,18 +2221,17 @@ MooseApp::removeRelationshipManager(std::shared_ptr<RelationshipManager> rm)
   _relationship_managers.erase(rm);
 }
 
-std::shared_ptr<GhostingFunctor>
-MooseApp::createRMFromTemplate(const RelationshipManager & template_rm,
-                               MeshBase & mesh,
-                               const DofMap * const dof_map)
+RelationshipManager &
+MooseApp::createRMFromTemplateAndInit(const RelationshipManager & template_rm,
+                                      MeshBase & mesh,
+                                      const DofMap * const dof_map)
 {
   auto & mesh_to_clone = _template_to_clones[&template_rm];
   auto it = mesh_to_clone.find(&mesh);
   if (it != mesh_to_clone.end())
   {
     // We've already created a clone for this mesh
-    auto clone_gf = it->second;
-    auto & clone_rm = static_cast<RelationshipManager &>(*clone_gf);
+    auto & clone_rm = *it->second;
     if (!clone_rm.dofMap() && dof_map)
       // We didn't have a DofMap before, but now we do, so we should re-init
       clone_rm.init(mesh, dof_map);
@@ -2239,7 +2239,7 @@ MooseApp::createRMFromTemplate(const RelationshipManager & template_rm,
       mooseError("Attempting to create and initialize an existing clone with a different DofMap. "
                  "This should not happen.");
 
-    return clone_gf;
+    return clone_rm;
   }
 
   // It's possible that this method is going to get called for multiple different MeshBase
@@ -2247,11 +2247,13 @@ MooseApp::createRMFromTemplate(const RelationshipManager & template_rm,
   // functor that is init'd with another MeshBase object. So the safe thing to do is to make a
   // different RM for every MeshBase object that gets called here. Then the
   // RelationshipManagers stored here in MooseApp are serving as a template only
-  std::shared_ptr<GhostingFunctor> clone_gf = template_rm.clone();
-  auto & clone_rm = static_cast<RelationshipManager &>(*clone_gf);
+  auto pr = mesh_to_clone.emplace(
+      std::make_pair(&const_cast<const MeshBase &>(mesh),
+                     dynamic_pointer_cast<RelationshipManager>(template_rm.clone())));
+  mooseAssert(pr.second, "An insertion should have happened");
+  auto & clone_rm = *pr.first->second;
   clone_rm.init(mesh, dof_map);
-  mesh_to_clone.emplace(std::make_pair(&const_cast<const MeshBase &>(mesh), clone_gf));
-  return clone_gf;
+  return clone_rm;
 }
 
 void
@@ -2262,7 +2264,7 @@ MooseApp::attachRelationshipManagers(MeshBase & mesh, MooseMesh & moose_mesh)
     if (rm->isType(Moose::RelationshipManagerType::GEOMETRIC))
     {
       if (rm->attachGeometricEarly())
-        mesh.add_ghosting_functor(createRMFromTemplate(*rm, mesh));
+        mesh.add_ghosting_functor(createRMFromTemplateAndInit(*rm, mesh));
       else
       {
         // If we have a geometric ghosting functor that can't be attached early, then we have to
@@ -2319,7 +2321,7 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type,
         const DofMap * const undisp_nl_dof_map =
             _executioner ? &_executioner->feProblem().systemBaseNonlinear().dofMap() : nullptr;
         undisp_mesh_base.add_ghosting_functor(
-            createRMFromTemplate(*rm, undisp_mesh_base, undisp_nl_dof_map));
+            createRMFromTemplateAndInit(*rm, undisp_mesh_base, undisp_nl_dof_map));
 
         // In the final stage, if there is a displaced mesh, we need to
         // clone ghosting functors for displacedMesh
@@ -2331,7 +2333,7 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type,
             disp_nl_dof_map =
                 &_executioner->feProblem().getDisplacedProblem()->systemBaseNonlinear().dofMap();
           disp_mesh_base.add_ghosting_functor(
-              createRMFromTemplate(*rm, disp_mesh_base, disp_nl_dof_map));
+              createRMFromTemplateAndInit(*rm, disp_mesh_base, disp_nl_dof_map));
         }
         else if (_action_warehouse.displacedMesh())
           mooseError("The displaced mesh should not yet exist at the time that we are attaching "
@@ -2364,7 +2366,8 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type,
           // inconsistent with the System DofMap that we are adding the coupling functor for! Let's
           // err on the side of *libMesh* consistency and pass properly paired MeshBase-DofMap
           undisp_nl_dof_map.add_coupling_functor(
-              createRMFromTemplate(*rm, undisp_mesh, &undisp_nl_dof_map), /*to_mesh = */ false);
+              createRMFromTemplateAndInit(*rm, undisp_mesh, &undisp_nl_dof_map),
+              /*to_mesh = */ false);
 
         else if (rm_type == Moose::RelationshipManagerType::ALGEBRAIC)
         {
@@ -2372,7 +2375,7 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type,
           MeshBase & disp_mesh = displaced_problem.mesh().getMesh();
           const DofMap * const disp_nl_dof_map = &displaced_problem.systemBaseNonlinear().dofMap();
           displaced_problem.addAlgebraicGhostingFunctor(
-              createRMFromTemplate(*rm, disp_mesh, disp_nl_dof_map),
+              createRMFromTemplateAndInit(*rm, disp_mesh, disp_nl_dof_map),
               /*to_mesh = */ false);
         }
       }
@@ -2380,11 +2383,13 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type,
       {
         if (rm_type == Moose::RelationshipManagerType::COUPLING)
           undisp_nl_dof_map.add_coupling_functor(
-              createRMFromTemplate(*rm, undisp_mesh, &undisp_nl_dof_map), /*to_mesh = */ false);
+              createRMFromTemplateAndInit(*rm, undisp_mesh, &undisp_nl_dof_map),
+              /*to_mesh = */ false);
 
         else if (rm_type == Moose::RelationshipManagerType::ALGEBRAIC)
           problem.addAlgebraicGhostingFunctor(
-              createRMFromTemplate(*rm, undisp_mesh, &undisp_nl_dof_map), /*to_mesh = */ false);
+              createRMFromTemplateAndInit(*rm, undisp_mesh, &undisp_nl_dof_map),
+              /*to_mesh = */ false);
       }
     }
   }
