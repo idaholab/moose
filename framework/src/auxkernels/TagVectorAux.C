@@ -33,6 +33,11 @@ TagVectorAux::TagVectorAux(const InputParameters & parameters)
   auto & execute_on = getParam<ExecFlagEnum>("execute_on");
   if (execute_on.size() != 1 || !execute_on.contains(EXEC_TIMESTEP_END))
     mooseError("execute_on for TagVectorAux must be set to EXEC_TIMESTEP_END");
+
+  if (getVar("v", 0)->feType() != _var.feType())
+    paramError("variable",
+               "The AuxVariable this AuxKernel is acting on has to have the same order and family "
+               "as the variable 'v'");
 }
 
 Real
