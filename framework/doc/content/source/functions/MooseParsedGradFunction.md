@@ -1,33 +1,20 @@
 # ParsedGradFunction
 
-!alert! construction title=Undocumented Class
-The ParsedGradFunction has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# ParsedGradFunction
-
 !syntax description /Functions/ParsedGradFunction
 
-## Overview
+The `ParsedGradFunction` is similar to the [ParsedFunction.md], differing only in that
+it also defines the gradient of the function. Inputs for defining each component of
+the gradient follow the same rules as outlined in [ParsedFunction.md].
 
-!! Replace these lines with information regarding the ParsedGradFunction object.
+# Example input syntax
 
-## Example Input File Syntax
+In this input, the `ParsedGradFunction` is used for using the
+[Method of Manufactured Solutions](python/mms.md optional=true). This method verifies the
+convergence of the finite element method to known analytical solutions of a simple problem.
+`u_func` is used in the `PostProcessors` block to compute the H1 error, or the error on both
+the solution and its gradient, between `u` and this known solution.
 
-!! Describe and include an example of how to use the ParsedGradFunction object.
-
-!syntax parameters /Functions/ParsedGradFunction
-
-!syntax inputs /Functions/ParsedGradFunction
-
-!syntax children /Functions/ParsedGradFunction
-```
-!alert-end!
-
-!syntax description /Functions/ParsedGradFunction
+!listing test/tests/postprocessors/mms_slope/mms_slope_test.i block=Functions
 
 !syntax parameters /Functions/ParsedGradFunction
 

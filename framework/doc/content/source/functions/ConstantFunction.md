@@ -1,33 +1,18 @@
 # ConstantFunction
 
-!alert! construction title=Undocumented Class
-The ConstantFunction has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# ConstantFunction
-
 !syntax description /Functions/ConstantFunction
 
-## Overview
+The `value` parameter of the `ConstantFunction` is controllable, so it may modified
+during the simulation using the [Controls system](syntax/Controls/index.md).
 
-!! Replace these lines with information regarding the ConstantFunction object.
+# Example input syntax
 
-## Example Input File Syntax
+This example uses a `ConstantFunction` to feed into vectorized spatial samplers, which
+sample the function in specified locations. These samples are then compared using
+another postprocessor. The `ConstantFunction` sampled anywhere in time and space will
+return its constant value.
 
-!! Describe and include an example of how to use the ConstantFunction object.
-
-!syntax parameters /Functions/ConstantFunction
-
-!syntax inputs /Functions/ConstantFunction
-
-!syntax children /Functions/ConstantFunction
-```
-!alert-end!
-
-!syntax description /Functions/ConstantFunction
+!listing test/tests/postprocessors/vector_postprocessor_comparison/vector_postprocessor_comparison.i block=Functions
 
 !syntax parameters /Functions/ConstantFunction
 
