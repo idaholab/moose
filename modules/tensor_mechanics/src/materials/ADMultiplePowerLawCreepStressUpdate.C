@@ -22,12 +22,14 @@ ADMultiplePowerLawCreepStressUpdate::validParams()
 
   // Linear strain hardening parameters
   params.addCoupledVar("temperature", "Coupled temperature");
-  params.addParam<std::vector<Real>>("coefficient", "Leading coefficient in power-law equation");
+  params.addRequiredParam<std::vector<Real>>("coefficient",
+                                             "Leading coefficient in power-law equation");
   params.addRequiredParam<std::vector<Real>>("n_exponent",
                                              "Exponent on effective stress in power-law equation");
-  params.addParam<std::vector<Real>>("m_exponent", "Exponent on time in power-law equation");
-  params.addParam<std::vector<Real>>("stress_thresholds",
-                                     "Stress intervals to switch creep behavior");
+  params.addRequiredParam<std::vector<Real>>("m_exponent",
+                                             "Exponent on time in power-law equation");
+  params.addRequiredParam<std::vector<Real>>("stress_thresholds",
+                                             "Stress intervals to switch creep behavior");
   params.addRequiredParam<std::vector<Real>>("activation_energy", "Activation energy");
   params.addParam<Real>("gas_constant", 8.3143, "Universal gas constant");
   params.addParam<Real>("start_time", 0.0, "Start time (if not zero)");

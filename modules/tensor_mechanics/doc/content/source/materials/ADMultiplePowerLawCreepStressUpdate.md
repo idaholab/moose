@@ -4,8 +4,6 @@
 
 ## Description
 
-!include modules/tensor_mechanics/common/supplementalRadialReturnStressUpdate.md
-
 Metals can exihibit distinctively different creep behavior depending on the stress
 level. This object represents creep behavior with various power law expressions (following
 logic analogous to [ADPowerLawCreepStressUpdate](ADPowerLawCreepStressUpdate.md)), 
