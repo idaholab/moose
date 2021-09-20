@@ -1,0 +1,14 @@
+[Tests]
+  issues = '#18865'
+  design = 'AbaqusUMATStress.md'
+
+  [build]
+    type = 'RunCommand'
+    command = 'make'
+  []
+  [test]
+    type = 'RunApp'
+    input = 'test.i'
+    valgrind = NONE
+  []
+[]
