@@ -26,10 +26,17 @@ in setting up all objects required to enforce mechanical contact in one of the
 numerous ways supported by MOOSE (penalty, kinematic, mortar - frictionless,
 glued, frictional).
 
-We use the [!param](/Contact/ContactAction/primary) and [!param](/Contact/ContactAction/secondary) parameters to specify the two interfaces we want to interact through mechanical contact. The [!param](/Contact/ContactAction/model) parameter is set to select frictionless contact and as the [!param](/Contact/ContactAction/formulation) we chose the penalty method. Frictionless penalty based contact is a good initial choice for contact modeling as it exhibits benign convergence properties and works in 2D as well as 3D.
+We use the [!param](/Contact/ContactAction/primary) and
+[!param](/Contact/ContactAction/secondary) parameters to specify the two
+interfaces we want to interact through mechanical contact. The
+[!param](/Contact/ContactAction/model) parameter is set to select frictionless
+contact and as the [!param](/Contact/ContactAction/formulation) we chose the
+penalty method. Frictionless penalty based contact is a good initial choice for
+contact modeling as it exhibits benign convergence properties and works in 2D as
+well as 3D.
 
 We select a [!param](/Contact/ContactAction/penalty) factor of 1e9. The choice
-of the penalty should be guided by the stiffness of you system. A factor close
+of the penalty should be guided by the stiffness of your system. A factor close
 to the Young's modulus of the materials involved in contact, but not exceeding
 it, is recommended. Penalty contact allows for a non-zero interpenetration of
 the contact surfaces. Both the `kinematic` and `mortar` formulation will enforce
@@ -50,14 +57,13 @@ particular please pay attention to `contact_force` and `penetration`.
 
 ### Penetration
 
-> Visualize the penetration variable. You may have to rescale the visualiztion
-> to start the color scale at 0. Negative pentrations are not of interest here
+> Visualize the penetration variable. You may have to rescale the visualization
+> to start the color scale at 0. Negative penetrations are not of interest here
 > (they effectively are the gap width)
 
 You should see a maximum interpenetration of about 6e-4, which is about half a
 percent of the element width. It is application dependent whether this amount is
 acceptable.
-
 
 Once you've answered the questions and run this example we will move on to
 [Step 3](tensor_mechanics/tutorials/introduction/step03.md) which introduces

@@ -1,7 +1,7 @@
 # Step 4 - Multiple submeshes
 
 As a final step in the tensor mechanics section of this tutorial we'll set up a
-pair of mesh separate mesh blocks - two cantilevers side by side, fixed at the
+pair of separate mesh blocks - two cantilevers side by side, fixed at the
 bottom, that will be pushed towards each other with pressure boundary conditions.
 
 !listing modules/tensor_mechanics/tutorials/introduction/step04.i
@@ -14,7 +14,7 @@ We again are using multiple mesh generators to set up a more complex mesh. You
 could also use a meshing software, such as Cubit or Gmsh to create your geometry
 and mesh - and will most definitely have to do so when modeling complex
 geometries for which no specialized mesh generators are provided. It is crucial
-to assign block and boundary IDs and names to your meshes do you can apply
+to assign block and boundary IDs and names to your meshes so you can apply
 material models and boundary conditions.
 
 Here we are using the familiar
