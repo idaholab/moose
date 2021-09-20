@@ -151,9 +151,9 @@ Spatially-varying geochemistry simulations use a large amount of memory since th
 
 Building the geochemistry module is a two-step process:
 
-1. Download and install the entire MOOSE package.  Detailed instructions are at the [MOOSE website](https://mooseframework.inl.gov/getting_started/installation/index.html).  Even if only in geochemistry is of interest (without transport, solid mechanics, etc) MOOSE comes as a complete package, so needs to be installed in its entirety.  Depending on the computer setup, this can be straightfoward (on a personal Mac computer) or complicated (on an administered supercomputer).
+1. Download and install the entire MOOSE package.  Detailed instructions are at the [MOOSE website](https://mooseframework.inl.gov/getting_started/installation/index.html).  Even if only geochemistry is of interest (without transport, solid mechanics, etc) MOOSE comes as a complete package, so needs to be installed in its entirety.  Depending on the computer setup, this can be straightfoward (on a personal Mac computer) or complicated (on an administered supercomputer).
 
-2. During the installation of MOOSE in part 1, only the "framework" will have been compiled.  To compile all the physics modules, including the geochemistry module, use the following instructions run from the command line:
+2. During the installation of MOOSE in part 1, only the "framework" will have been compiled.  To compile any of the physics modules, including the geochemistry module, use the following instructions run from the command line:
 ```
 cd ~/projects/moose/modules
 make
@@ -167,7 +167,7 @@ Check that the geochemistry module is correctly compiled using the following ins
 cd ~/projects/moose/modules/geochemistry
 ./run_tests
 ```
-Virtually all the tests should run and pass.  Some may be "skipped" due to a particular computer setup (for instance, not enough threads).
+Virtually all the tests should run and pass.  Some may be "skipped" due to a particular computer setup (for instance, not enough threads).  (If your computer has $N$ cores, the `run_tests` command may be sped up by using the command `./run_tests -j`$N$ instead of simply `./run_tests`.)
 
 The geochemistry executable is called `geochemistry-opt` and is found at `~/projects/moose/modules/geochemistry`.  This may be used to run pure geochemistry simulations.  For coupled reactive-transport simulations using the PorousFlow module, the `combined-opt` executable must be used.  For example, to run the Weber-Tensleep GeoTES example from the command line:
 ```
