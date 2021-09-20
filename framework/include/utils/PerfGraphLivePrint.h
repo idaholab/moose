@@ -121,4 +121,7 @@ private:
 
   /// Whether or not printing happened in this iteration
   bool _printed;
+
+  /// Whether or not the top thing on the stack is set to print dots
+  bool _stack_top_print_dots;
 };

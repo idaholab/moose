@@ -26,26 +26,29 @@ PerfGraphLivePrint::PerfGraphLivePrint(PerfGraph & perf_graph, MooseApp & app)
     _last_printed_increment(NULL),
     _last_num_printed(0),
     _console_num_printed(0),
-    _printed(false)
+    _printed(false),
+    _stack_top_print_dots(true)
 {
 }
 
 void
 PerfGraphLivePrint::printLiveMessage(PerfGraph::SectionIncrement & section_increment)
 {
-  // If this section is just started - but other stuff has printed before we got to print its message
-  // just mark it as printed and return (i.e. - don't print it)
-  if (section_increment._state == PerfGraph::IncrementState::STARTED && section_increment._beginning_num_printed != _console_num_printed)
+  auto & section_info = _perf_graph_registry.sectionInfo(section_increment._id);
+
+  // If this section is just started - but other stuff has printed before we got to print its
+  // message just mark it as printed and return (i.e. - don't print it)
+  if (_last_num_printed <= _console_num_printed &&
+      section_increment._state == PerfGraph::IncrementState::STARTED &&
+      section_increment._beginning_num_printed != _console_num_printed)
   {
     section_increment._state = PerfGraph::IncrementState::PRINTED;
     _last_printed_increment = &section_increment;
     return;
   }
 
-  auto & section_info = _perf_graph_registry.sectionInfo(section_increment._id);
-
   // If we're not printing dots - we shouldn't be printing the message at all
-  if (!section_info._print_dots)
+  if (!section_info._print_dots || !_stack_top_print_dots)
   {
     section_increment._state = PerfGraph::IncrementState::PRINTED;
     _last_printed_increment = &section_increment;
@@ -105,7 +108,7 @@ PerfGraphLivePrint::printLiveMessage(PerfGraph::SectionIncrement & section_incre
   _console << std::flush;
 
   // Keep track of where we printed in the console
-  section_increment._beginning_num_printed = _console.numPrinted();
+  _last_num_printed = section_increment._beginning_num_printed = _console.numPrinted();
 
   _last_printed_increment = &section_increment;
 
@@ -140,7 +143,8 @@ PerfGraphLivePrint::printStats(PerfGraph::SectionIncrement & section_increment_s
   // This happens after something else printed in-between when this increment started and finished
   if (!section_info_start._print_dots ||
       (_last_printed_increment && _last_printed_increment != &section_increment_start) ||
-      (section_increment_start._beginning_num_printed != _console_num_printed)) // This means someone _else_ printed
+      (section_increment_start._beginning_num_printed !=
+       _console_num_printed)) // This means someone _else_ printed
   {
     // If we had printed some dots - we need to finish the line
     if ((section_increment_start._beginning_num_printed == _console_num_printed) &&
@@ -174,6 +178,8 @@ PerfGraphLivePrint::printStats(PerfGraph::SectionIncrement & section_increment_s
 
   // If we're not printing dots - just finish the line
   _console << std::endl;
+
+  _last_num_printed = _console.numPrinted();
 
   _last_printed_increment = &section_increment_finish;
 
@@ -229,9 +235,9 @@ PerfGraphLivePrint::printStackUpToLast()
 void
 PerfGraphLivePrint::inSamePlace()
 {
-  // If someone else printed since, then we need to start over, and set everything on the stack to printed
-  // Everything is set to printed because if something printed and we're still in the same place
-  // then we need to NOT print out the beginning message
+  // If someone else printed since, then we need to start over, and set everything on the stack to
+  // printed Everything is set to printed because if something printed and we're still in the same
+  // place then we need to NOT print out the beginning message
   if (_last_num_printed != _console_num_printed)
   {
     _last_printed_increment = nullptr;
@@ -245,9 +251,15 @@ PerfGraphLivePrint::inSamePlace()
   // Only print if there is something to print!
   if (_stack_level > 0)
   {
+    _stack_top_print_dots =
+        _perf_graph_registry.sectionInfo(_print_thread_stack[_stack_level - 1]._id)._print_dots;
+
     printStackUpToLast();
 
     printLiveMessage(_print_thread_stack[_stack_level - 1]);
+
+    // Reset this each time
+    _stack_top_print_dots = true;
   }
 }
 
