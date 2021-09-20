@@ -60,7 +60,7 @@ At the point where a MOOSE developer believes your code is fit for inclusion in 
 - [Doxygen Documentation](http://www.mooseframework.com/docs/doxygen/moose/classes.html)
 - [Browseable Input File Syntax](http://mooseframework.com/docs/syntax/moose/)
 - [Test Timing Metrics](http://mooseframework.com/docs/timing/)
-- [Test Coverage](http://mooseframework.com/docs/coverage/moose/)
+- [Test Coverage](http://mooseframework.com/docs/coverage/framework/)
 
 ## 6. Inactive Pull Request Policy
 
