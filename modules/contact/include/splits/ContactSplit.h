@@ -25,11 +25,9 @@ public:
 
 #if !PETSC_VERSION_LESS_THAN(3, 3, 0)
 protected:
-  std::vector<std::string> _contact_primary;
-  std::vector<std::string> _contact_secondary;
+  const std::vector<std::pair<BoundaryName, BoundaryName>> _contact_pairs;
   std::vector<int> _contact_displaced;
-  std::vector<std::string> _uncontact_primary;
-  std::vector<std::string> _uncontact_secondary;
+  const std::vector<std::pair<BoundaryName, BoundaryName>> _uncontact_pairs;
   std::vector<int> _uncontact_displaced;
   bool _include_all_contact_nodes;
 #endif // !PETSC_VERSION_LESS_THAN(3,3,0)

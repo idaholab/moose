@@ -84,8 +84,8 @@ Split::Split(const InputParameters & parameters)
     _schur_ainv(getParam<MooseEnum>("schur_ainv"))
 {
   _petsc_options.flags = getParam<MultiMooseEnum>("petsc_options");
-  _petsc_options.inames = getParam<std::vector<std::string>>("petsc_options_iname");
-  _petsc_options.values = getParam<std::vector<std::string>>("petsc_options_value");
+  _petsc_options.pairs =
+      getParam<std::string, std::string>("petsc_options_iname", "petsc_options_value");
 }
 
 void
@@ -108,8 +108,7 @@ Split::setup(const std::string & prefix)
   // var options
   if (!_vars.empty())
   {
-    po.inames.push_back(dmprefix + "vars");
-    po.values.push_back(Moose::stringify(_vars));
+    po.pairs.emplace_back(dmprefix + "vars", Moose::stringify(_vars));
 
     for (const auto & var : _vars)
       if (!_fe_problem.hasVariable(var))
@@ -118,45 +117,34 @@ Split::setup(const std::string & prefix)
 
   // block options
   if (!_blocks.empty())
-  {
-    po.inames.push_back(dmprefix + "blocks");
-    po.values.push_back(Moose::stringify(_blocks));
-  }
+    po.pairs.emplace_back(dmprefix + "blocks", Moose::stringify(_blocks));
 
   // side options
   if (!_sides.empty())
-  {
-    po.inames.push_back(dmprefix + "sides");
-    po.values.push_back(Moose::stringify(_sides));
-  }
+    po.pairs.emplace_back(dmprefix + "sides", Moose::stringify(_sides));
 
   // unside options
   if (!_unsides.empty())
-  {
-    po.inames.push_back(dmprefix + "unsides");
-    po.values.push_back(Moose::stringify(_unsides));
-  }
+    po.pairs.emplace_back(dmprefix + "unsides", Moose::stringify(_unsides));
 
   if (!_splitting.empty())
   {
     // If this split has subsplits, it is presumed that the pc_type used to solve this split's
     // subsystem is fieldsplit
     // with the following parameters (unless overridden by the user-specified petsc_options below).
-    po.inames.push_back(prefix + "pc_type");
-    po.values.push_back("fieldsplit");
+    po.pairs.emplace_back(prefix + "pc_type", "fieldsplit");
 
     // set Splitting Type
     const std::string petsc_splitting_type[] = {
         "additive", "multiplicative", "symmetric_multiplicative", "schur"};
-    po.inames.push_back(prefix + "pc_fieldsplit_type");
-    po.values.push_back(petsc_splitting_type[_splitting_type]);
+    po.pairs.emplace_back(prefix + "pc_fieldsplit_type", petsc_splitting_type[_splitting_type]);
 
     if (_splitting_type == SplittingTypeSchur)
     {
       // set Schur Type
       const std::string petsc_schur_type[] = {"diag", "upper", "lower", "full"};
-      po.inames.push_back(prefix + "pc_fieldsplit_schur_fact_type");
-      po.values.push_back(petsc_schur_type[_splitting_type]);
+      po.pairs.emplace_back(prefix + "pc_fieldsplit_schur_fact_type",
+                            petsc_schur_type[_splitting_type]);
 
       // set Schur Preconditioner
       const std::string petsc_schur_pre[] = {
@@ -168,21 +156,18 @@ Split::setup(const std::string & prefix)
         "a11"
 #endif
       };
-      po.inames.push_back(prefix + "pc_fieldsplit_schur_precondition");
-      po.values.push_back(petsc_schur_pre[_schur_pre]);
+      po.pairs.emplace_back(prefix + "pc_fieldsplit_schur_precondition",
+                            petsc_schur_pre[_schur_pre]);
 
       // set Schur AInv
       const std::string petsc_schur_ainv[] = {"diag", "lump"};
-      po.inames.push_back(prefix + "mat_schur_complement_ainv_type");
-      po.values.push_back(petsc_schur_ainv[_schur_ainv]);
+      po.pairs.emplace_back(prefix + "mat_schur_complement_ainv_type",
+                            petsc_schur_ainv[_schur_ainv]);
     }
 
     // The DM associated with this split defines the subsplits' geometry.
-    po.inames.push_back(dmprefix + "nfieldsplits");
-    po.values.push_back(Moose::stringify(_splitting.size()));
-
-    po.inames.push_back(dmprefix + "fieldsplit_names");
-    po.values.push_back(Moose::stringify(_splitting));
+    po.pairs.emplace_back(dmprefix + "nfieldsplits", Moose::stringify(_splitting.size()));
+    po.pairs.emplace_back(dmprefix + "fieldsplit_names", Moose::stringify(_splitting));
 
     // Finally, recursively configure the splits contained within this split.
     for (const auto & split_name : _splitting)
@@ -205,18 +190,14 @@ Split::setup(const std::string & prefix)
     // push back PETSc options
     po.flags.push_back(prefix + op.substr(1));
   }
-  // check if inames match values
-  if (_petsc_options.values.size() != _petsc_options.inames.size())
-    mooseError("PETSc option values do not match PETSc option names");
 
-  for (std::size_t j = 0; j < _petsc_options.inames.size(); ++j)
+  for (auto & option : _petsc_options.pairs)
   {
     // Need to prepend the prefix and strip off the leading '-' on the option name.
-    const std::string & op = _petsc_options.inames[j];
+    const std::string & op = option.first;
     if (op[0] != '-')
       mooseError("Invalid PETSc option name ", op, " for Split ", _name);
 
-    po.inames.push_back(prefix + op.substr(1));
-    po.values.push_back(_petsc_options.values[j]);
+    po.pairs.emplace_back(prefix + op.substr(1), option.second);
   }
 }

@@ -35,9 +35,6 @@ protected:
   const AuxVariableName _gap_value_name;
   const AuxVariableName _gap_conductivity_name;
 
-  const std::vector<BoundaryName> _primary_name;
-  const std::vector<BoundaryName> _secondary_name;
-
-  /// Number of contact pairs on which to enable thermal contact
-  const unsigned int _number_pairs;
+  /// Primary/Secondary boundary name pairs for thermal contact
+  const std::vector<std::pair<BoundaryName, BoundaryName>> _boundary_pairs;
 };

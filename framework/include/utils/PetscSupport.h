@@ -39,11 +39,8 @@ class PetscOptions
 public:
   PetscOptions() : flags("", "", true) {}
 
-  /// Keys for PETSc key-value pairs
-  std::vector<std::string> inames;
-
-  /// Values for PETSc key-value pairs
-  std::vector<std::string> values;
+  /// PETSc key-value pairs
+  std::vector<std::pair<std::string, std::string>> pairs;
 
   /// Single value PETSc options (flags)
   MultiMooseEnum flags;

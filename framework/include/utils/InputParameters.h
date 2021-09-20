@@ -743,6 +743,8 @@ public:
                                                const std::vector<T> * the_type);
   ///@}
 
+  using Parameters::get;
+
   /// Combine two vector parameters into a single vector of pairs
   template <typename R1,
             typename R2,
@@ -752,8 +754,7 @@ public:
             typename V2 = typename std::conditional<std::is_same<R2, MooseEnumItem>::value,
                                                     MultiMooseEnum,
                                                     std::vector<R2>>::type>
-  std::vector<std::pair<R1, R2>> getPairs(const std::string & param1,
-                                          const std::string & param2) const;
+  std::vector<std::pair<R1, R2>> get(const std::string & param1, const std::string & param2) const;
 
   /**
    * Return list of controllable parameters
@@ -1591,7 +1592,7 @@ InputParameters::getParamHelper(const std::string & name,
 
 template <typename R1, typename R2, typename V1, typename V2>
 std::vector<std::pair<R1, R2>>
-InputParameters::getPairs(const std::string & param1, const std::string & param2) const
+InputParameters::get(const std::string & param1, const std::string & param2) const
 {
   const auto & v1 = get<V1>(param1);
   const auto & v2 = get<V2>(param2);
@@ -1600,8 +1601,9 @@ InputParameters::getPairs(const std::string & param1, const std::string & param2
   if (controllable.count(param1) || controllable.count(param2))
     mooseError(errorPrefix(param1),
                " and/or ",
-               errorPrefix(param2) + " are controllable parameters and cannot be retireved using "
-                                     "MooseObject::getParamPairs/InputParameters::getPairs");
+               errorPrefix(param2) +
+                   " are controllable parameters and cannot be retireved using "
+                   "the MooseObject::getParam/InputParameters::get methods for pairs");
 
   if (v1.size() != v2.size())
     mooseError("Vector parameters ",

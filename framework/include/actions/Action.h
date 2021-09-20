@@ -147,10 +147,10 @@ public:
    * @return Vector of pairs of first and second parameters
    */
   template <typename T1, typename T2>
-  std::vector<std::pair<T1, T2>> getParamPairs(const std::string & param1,
-                                               const std::string & param2) const
+  std::vector<std::pair<T1, T2>> getParam(const std::string & param1,
+                                          const std::string & param2) const
   {
-    return parameters().getPairs<T1, T2>(param1, param2);
+    return parameters().get<T1, T2>(param1, param2);
   }
 
   inline bool isParamValid(const std::string & name) const { return _pars.isParamValid(name); }
