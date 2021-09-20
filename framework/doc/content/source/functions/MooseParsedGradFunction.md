@@ -6,7 +6,7 @@ The `ParsedGradFunction` is similar to the [ParsedFunction.md], differing only i
 it also defines the gradient of the function. Inputs for defining each component of
 the gradient follow the same rules as outlined in [ParsedFunction.md].
 
-# Example input syntax
+## Example input syntax
 
 In this input, the `ParsedGradFunction` is used for using the
 [Method of Manufactured Solutions](python/mms.md optional=true). This method verifies the

@@ -10,7 +10,7 @@ The damping increases when the variable is moving further away from the prescrib
 More information about dampers may be found on the
 [Dampers syntax documentation](syntax/Dampers/index.md).
 
-# Example input syntax
+## Example input syntax
 
 In this example, the variable `u` is being damped with minimum and maximum values of -1.5 and
 1.5 respectively, with a minimum damping factor of 0.001.

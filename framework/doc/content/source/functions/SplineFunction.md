@@ -15,7 +15,7 @@ along one of the x, y, z directions (specified by the `component` parameter). Th
 From this information the spline is automatically generated. Both the first and second
 order derivatives of the spline are defined.
 
-# Example input syntax
+## Example input syntax
 
 In this example, we define a spline going through 4 points defined by the `x` and `y`
 parameters.

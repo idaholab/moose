@@ -9,7 +9,7 @@ domain (such as the [BoundingValueNodalDamper]) should impact less convergence p
 More information about dampers may be found on the
 [Dampers syntax documentation](syntax/Dampers/index.md).
 
-# Example input syntax
+## Example input syntax
 
 In this example, a constant damping factor of 0.9 is applied on all variables (just `u` here).
 

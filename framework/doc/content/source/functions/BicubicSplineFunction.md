@@ -19,7 +19,7 @@ The spline is uniquely defined by:
 From this information the bicubic spline is automatically generated. Both the first and second
 order derivatives of the spline are defined.
 
-# Example input syntax
+## Example input syntax
 
 In this example, we define a bicubic spline from a list of points and derivatives. The `z` normal is
 assumed by default and the bicubic spline is defined in the XY plane. The grid

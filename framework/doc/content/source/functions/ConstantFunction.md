@@ -5,7 +5,7 @@
 The `value` parameter of the `ConstantFunction` is controllable, so it may modified
 during the simulation using the [Controls system](syntax/Controls/index.md).
 
-# Example input syntax
+## Example input syntax
 
 This example uses a `ConstantFunction` to feed into vectorized spatial samplers, which
 sample the function in specified locations. These samples are then compared using

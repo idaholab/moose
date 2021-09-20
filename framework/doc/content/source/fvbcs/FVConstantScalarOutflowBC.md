@@ -14,7 +14,7 @@ be obtained by specifying `two_term_boundary_expansion = true` in the variable d
 This boundary condition assumes a constant velocity, so it may not be used in flow simulations
 where the velocity is a variable, such as in the Navier Stokes module.
 
-# Example input syntax
+## Example input syntax
 
 In this example, the `v` field is advected by a `1 0.5 0` velocity in the 2D plane. The
 boundary condition for outflow is only defined on the boundaries that are downstream of

@@ -1,6 +1,6 @@
 # Assembly
 
-The `Assembly` class keeps holds most routines and objects related to assembling the numerical
+The `Assembly` class holds most routines and objects related to assembling the numerical
 system, such as the ones listed below. In the non-exhaustive list below, we refer to as
 `local` the current element, face, quadrature points and neighbor values of each quantity.
 
@@ -10,7 +10,7 @@ system, such as the ones listed below. In the non-exhaustive list below, we refe
 
 - the local volumes
 
-- the jacobian weights
+- the Jacobian weights
 
 - the local quadrature rules and points
 
@@ -26,8 +26,8 @@ This system is in charge of:
   such as `reinit(Elem* elem)` for the current element, `reinitAtPhysical(...)` for a given vector of points
   or `reinitFVFace(face_info)` for the current face.
 
-- get the shape function values and its derivatives at the quadrature points, as well as the locations of the
-  quadrature points from libmesh in the `buildFE...` routines for various locations. 
+- getting the shape function values and its derivatives at the quadrature points, as well as the locations of the
+  quadrature points from libmesh in the `buildFE...` routines for various locations.
 
 - preparing the vectors for storing the local contributions to
   the Jacobian and the residual, by sizing and zeroing them, through the `prepare...` methods.
@@ -38,5 +38,5 @@ This system is in charge of:
   contributions without locking the global vector.
 
 - adding those local contributions to the global Jacobian and residual through the `add...` methods,
-  such as `addResidual` for the local element residual or `addJacobianNeighbor` for the
+  for example `addResidual` for the local element residual or `addJacobianNeighbor` for the
   Jacobian on the neighbor element.

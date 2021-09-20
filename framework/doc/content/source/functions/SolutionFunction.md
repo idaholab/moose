@@ -11,7 +11,7 @@ The accuracy on the evaluation of this variable in various locations may be dimi
 by the solution file format. `Exodus` for example does not store higher order variables
 accurately.
 
-# Example input syntax
+## Example input syntax
 
 In this input file, we load in `u_xda_func` a reference solution for the problem, previously
 computed and stored in `aux_nonlinear_solution_out_0001.xda`, then compare it to the current solution `u`.

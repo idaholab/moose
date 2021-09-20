@@ -9,7 +9,7 @@ The first order upwind scheme used is diffusive and will only provide first orde
 More information about the discontinuous Galerkin method may be found in the
 [DGKernels syntax page](/syntax/DGKernels/index.md).
 
-# Example input syntax
+## Example input syntax
 
 In this example, a field `u` is advected from a boundary condition on its left to the right boundary
 with a `1 0 0` velocity using the `ADDGConvection`, the version of this kernel with automatic differentiation.

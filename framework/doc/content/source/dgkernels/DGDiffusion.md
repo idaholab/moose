@@ -5,7 +5,7 @@
 More information about the discontinuous Galerkin method may be found in the
 [DGKernels syntax page](/syntax/DGKernels/index.md).
 
-# Example input syntax
+## Example input syntax
 
 This example is a 2D diffusion-reaction-source case using DG. It's not clear why there
 are both a DGKernel and a Kernel for diffusion.

@@ -6,7 +6,7 @@ The difference between the two variables (or a single variable) values on the pr
 secondary node (or boundary) is simply multiplied by a penalty factor then added to the
 residual.
 
-# Example input syntax
+## Example input syntax
 
 In this example, the variable `diffused` is constrained to be equal on node `45` and the `top` boundary, using
 a 10e6 penalty factor.

@@ -27,7 +27,7 @@ specified instead, this is equivalent to specifying a zero diffusive flux throug
 This kernel leverages the automatic differentiation system, so the Jacobian is
 computed at the same time as the residual and need not be defined separately.
 
-# Example input syntax
+## Example input syntax
 
 This example shows a simple 1D diffusion problem with two variables defined on two subdomains.
 Because of the limits of the legacy material system, the two material properties have to have different

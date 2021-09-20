@@ -14,7 +14,7 @@ The contribution to the residual is:
 
 where $\partial \Omega$ is the domain definition and $\psi_t$ is the test function.
 
-# Example input syntax
+## Example input syntax
 
 In this input, a `VacuumBC` is used to impose a 0 incoming flux boundary condition in
 a diffusion problem in a RZ geometry problem on the `top` boundary for variable `u`.

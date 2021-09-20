@@ -7,7 +7,7 @@ so the [`Control system`](syntax/Controls/index.md) may be leveraged to control 
 simulation. Alternatively, a [FunctionDiracSource.md] may be used for spatial and temporal variations
 of the point source using a `Function`.
 
-# Example input syntax
+## Example input syntax
 
 In this example, three `ConstantPointSource` are being applied to variable `u` with values 0.1 / -0.1 and -1
 at position (0.2 0.3 0.0) / (0.2 0.8 0) and (0.8 0.5 0.8) respectively. `u` is solution to a diffusion equation

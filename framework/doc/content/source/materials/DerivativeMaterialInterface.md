@@ -18,7 +18,7 @@ properties that are derivatives of other material properties.
 The `DerivativeMaterialInterface` is utilized by inheriting from it and
 supplying the original parent class as a template argument.
 
-# Examples
+## Examples
 
 The  can be used from Materials (to declare and get material property
 derivatives) or from Kernels (to get material property derivatives).

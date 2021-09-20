@@ -8,7 +8,7 @@ to a full 3D model. This is useful for assessing the validity of the 2D-RZ geome
 The axis of symmetry for the original 2D axisymmetric calculation and for mapping
 this 2D axisymmetric calculation into the 3D space can both be specified.
 
-# Example input syntax
+## Example input syntax
 
 In this example, three `Axisymmetric2D3DSolutionFunction` are used to load results for a 2D
 axisymmetric simulation in a 3D mechanics simulation. These results are then used in the `BCs`
