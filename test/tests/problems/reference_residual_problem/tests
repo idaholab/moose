@@ -23,4 +23,18 @@
     petsc_version = '>=3.9.0'
     max_parallel = 2
   []
+  [converge_on]
+    type = 'RunApp'
+    input = 'reference_residual.i'
+    expect_out = 'Solve Converged!'
+    cli_args = 'Problem/converge_on="u"'
+    requirement = 'The system shall have the ability to base system convergence on the convergence of a subset of variables.'
+  []
+  [wildcard]
+    type = 'RunApp'
+    input = 'reference_residual.i'
+    expect_out = 'Solve Converged!'
+    cli_args = 'Problem/converge_on="?"'
+    requirement = 'The system shall support wildcards for choosing the variables to base convergence on.'
+  []
 []
