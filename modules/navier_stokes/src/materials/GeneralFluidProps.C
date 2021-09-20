@@ -22,10 +22,6 @@ GeneralFluidProps::validParams()
   params.addRequiredParam<UserObjectName>(NS::fluid, "Fluid properties userobject");
   params.addClassDescription("Computes fluid properties using a (P, T) formulation");
 
-  params.addRequiredCoupledVar(NS::pressure, "Pressure variable");
-  params.addRequiredCoupledVar(NS::T_fluid, "Fluid temperature variable");
-  params.addRequiredCoupledVar(NS::density, "Density variable");
-
   params.addRequiredCoupledVar(NS::porosity, "porosity");
   params.addRequiredRangeCheckedParam<Real>(
       "characteristic_length",
