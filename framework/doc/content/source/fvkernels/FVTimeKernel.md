@@ -1,33 +1,22 @@
 # FVTimeKernel
 
-!alert! construction title=Undocumented Class
-The FVTimeKernel has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# FVTimeKernel
-
 !syntax description /FVKernels/FVTimeKernel
 
-## Overview
+The time derivative is automatically computed based on the [time integration scheme
+selected](syntax/Executioners/TimeIntegrator/index.md).
 
-!! Replace these lines with information regarding the FVTimeKernel object.
+!alert note
+When creating a new time derivative kernel, developers should consider inheriting this class
+as its provides the matrix/vector time tags. If not, those should be added in the `validParams()`
+routine of the new class.
 
-## Example Input File Syntax
+# Example input syntax
 
-!! Describe and include an example of how to use the FVTimeKernel object.
+In this example, the variable `v` is the solution of a simple time-dependent diffusion
+problem. The time derivative term of the equation is added to the numerical system using
+a `FVTimeKernel`.
 
-!syntax parameters /FVKernels/FVTimeKernel
-
-!syntax inputs /FVKernels/FVTimeKernel
-
-!syntax children /FVKernels/FVTimeKernel
-```
-!alert-end!
-
-!syntax description /FVKernels/FVTimeKernel
+!listing test/tests/fvkernels/fv_simple_diffusion/transient.i block=FVKernels
 
 !syntax parameters /FVKernels/FVTimeKernel
 
