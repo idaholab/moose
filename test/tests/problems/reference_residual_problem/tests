@@ -5,21 +5,25 @@
     type = 'Exodiff'
     input = 'reference_residual.i'
     exodiff = 'reference_residual_out.e'
-    requirement = 'The system shall have the ability to base convergence on the comparison of individual variables to reference quantities of those variables.'
+    requirement = 'The system shall have the ability to base convergence on the comparison of '
+                  'individual variables to reference quantities of those variables.'
   []
   [scaled_bad]
     type = 'RunApp'
     input = 'reference_residual.i'
     expect_out = 'Solve Did NOT Converge'
     cli_args = 'coef=1e17 Outputs/exodus=false -pc_type svd -pc_svd_monitor -ksp_max_it 10'
-    requirement = 'The system shall fail to find a converged solution when basing convergence on individual variable reference quantities with poor scaling.'
+    requirement = 'The system shall fail to find a converged solution when basing convergence on '
+                  'individual variable reference quantities with poor scaling.'
   []
   [scaled_good]
     type = 'Exodiff'
     input = 'reference_residual.i'
-    cli_args = 'coef=1e17 Outputs/file_base=scaled Executioner/automatic_scaling=true Executioner/verbose=true -pc_type svd -pc_svd_monitor -ksp_max_it 10'
+    cli_args = 'coef=1e17 Outputs/file_base=scaled Executioner/automatic_scaling=true '
+               'Executioner/verbose=true -pc_type svd -pc_svd_monitor -ksp_max_it 10'
     exodiff = 'scaled.e'
-    requirement = 'The system shall have the ability to automatically scale a originally poorly scaled problem and achieve convergence based on individual reference quantities'
+    requirement = 'The system shall have the ability to automatically scale a originally poorly '
+                  'scaled problem and achieve convergence based on individual reference quantities'
     petsc_version = '>=3.9.0'
     max_parallel = 2
   []
@@ -28,13 +32,24 @@
     input = 'reference_residual.i'
     expect_out = 'Solve Converged!'
     cli_args = 'Problem/converge_on="u"'
-    requirement = 'The system shall have the ability to base system convergence on the convergence of a subset of variables.'
+    requirement = 'The system shall have the ability to base system convergence on the convergence '
+                  'of a subset of variables.'
+  []
+  [converge_on_group_error]
+    type = 'RunException'
+    input = 'reference_residual.i'
+    expect_err = 'You added variable \'u\' to a group but excluded it from the convergence check. '
+                 'This is not permitted.'
+    cli_args = 'Problem/converge_on="v" Problem/group_variables="u v"'
+    requirement = 'The system shall require all grouped variables to be included in the convergence '
+                  'check.'
   []
   [wildcard]
     type = 'RunApp'
     input = 'reference_residual.i'
     expect_out = 'Solve Converged!'
     cli_args = 'Problem/converge_on="?"'
-    requirement = 'The system shall support wildcards for choosing the variables to base convergence on.'
+    requirement = 'The system shall support wildcards for choosing the variables to base convergence '
+                  'on.'
   []
 []

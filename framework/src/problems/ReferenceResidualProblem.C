@@ -245,6 +245,13 @@ ReferenceResidualProblem::initialSetup()
                       _group_variables[j].end(),
                       s.variable_name(_soln_vars[i])) != _group_variables[j].end())
         {
+          if (!_converge_on_var[i])
+            paramError(
+                "converge_on",
+                "You added variable '",
+                _soln_var_names[i],
+                "' to a group but excluded it from the convergence check. This is not permitted.");
+
           _variable_group_num_index[i] = j;
           find_group = true;
           break;
