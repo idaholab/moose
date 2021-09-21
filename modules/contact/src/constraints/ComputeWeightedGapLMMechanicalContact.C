@@ -176,6 +176,24 @@ ComputeWeightedGapLMMechanicalContact::post()
 }
 
 void
+ComputeWeightedGapLMMechanicalContact::wrongPost(const std::unordered_set<const Node *> & inactive_lm_nodes)
+{
+  for (const auto & pr : _dof_to_weighted_gap)
+  {
+    if (inactive_lm_nodes.find(static_cast<const Node *>(pr.first)) != inactive_lm_nodes.end())
+    {
+      // std::cout << "Skipped: " << static_cast<const Node *>(pr.first)->id() << std::endl;
+      continue;
+    }
+
+    _weighted_gap_ptr = &pr.second.first;
+    _normalization_ptr = &pr.second.second;
+
+    enforceConstraintOnDof(pr.first);
+  }
+}
+
+void
 ComputeWeightedGapLMMechanicalContact::enforceConstraintOnDof(const DofObject * const dof)
 {
   const auto & weighted_gap = *_weighted_gap_ptr;

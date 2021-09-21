@@ -1158,20 +1158,29 @@ AutomaticMortarGeneration::msmStatistics()
   }
 }
 
+// The blocks marked with **** are for regressing edge dropping treatment and should be removed eventually.
+//****
+// Had to make a new function because for wrong results a node is inactive if even one of
+// neighbor elements is inactive
 void
-AutomaticMortarGeneration::computeInactiveLMNodes()
+AutomaticMortarGeneration::computeWrongInactiveLMNodes()
 {
-  std::unordered_map<processor_id_type, std::set<dof_id_type>> proc_to_active_nodes_set;
+  // Note that in 3D our trick to check whether an element has edge dropping needs loose tolerances
+  // since the mortar segments are on the linearized element and comparing the volume of the
+  // linearized element does not have the same volume as the warped element
+  const Real tol = (dim() == 3) ? 0.1 : TOLERANCE;
+
+  std::unordered_map<processor_id_type, std::set<dof_id_type>> proc_to_inactive_nodes_set;
   const auto my_pid = mesh.processor_id();
 
-  // List of active nodes on local secondary elements
-  std::unordered_set<dof_id_type> active_local_nodes;
+  // List of inactive nodes on local secondary elements
+  std::unordered_set<dof_id_type> inactive_node_ids;
 
-  // The following blocks marked with **** are for regressing edge dropping treatment.
-  // These blocks are inefficient but I wanted to make them easy to remove once this
-  // 'feature' is depricated.
-  //****
   std::unordered_map<const Elem *, Real> active_volume{};
+
+  for (const auto & pr : primary_secondary_subdomain_id_pairs)
+    for (const auto el : mesh.active_subdomain_elements_ptr_range(pr.second))
+      active_volume[el] = 0.;
 
   // Compute fraction of elements with corresponding primary elements
   for (const auto msm_elem : mortar_segment_mesh->active_local_element_ptr_range())
@@ -1181,19 +1190,91 @@ AutomaticMortarGeneration::computeInactiveLMNodes()
 
     active_volume[secondary_elem] += msm_elem->volume();
   }
-  //****
+
+  // Mark all inactive local nodes
+  for (const auto & pr : primary_secondary_subdomain_id_pairs)
+    // Loop through all elements on my processor
+    for (const auto el : mesh.active_local_subdomain_elements_ptr_range(pr.second))
+      // If elem fully or partially dropped
+      if (std::abs(active_volume[el] / el->volume() - 1.0) > tol)
+      {
+        // Add all nodes to list of inactive
+        for (auto n : make_range(el->n_nodes()))
+          inactive_node_ids.insert(el->node_id(n));
+      }
+
+
+  // Assemble list of procs that nodes contribute to
+  for (const auto & pr : primary_secondary_subdomain_id_pairs)
+  {
+    const auto secondary_subd_id = pr.second;
+
+    // Loop through all elements not on my processor
+    for (const auto el : mesh.active_subdomain_elements_ptr_range(secondary_subd_id))
+    {
+      // Get processor_id
+      const auto pid = el->processor_id();
+
+      // If element is in my subdomain, skip
+      if (pid == my_pid)
+        continue;
+
+      // If element on proc pid shares any of my inactive nodes, mark to send
+      for (const auto n : make_range(el->n_nodes()))
+      {
+        const auto node_id = el->node_id(n);
+        if (inactive_node_ids.find(node_id) != inactive_node_ids.end())
+          proc_to_inactive_nodes_set[pid].insert(node_id);
+      }
+    }
+  }
+
+  // Send list of inactive nodes
+  {
+    // Pack set into vector for sending (push_parallel_vector_data doesn't like sets)
+    std::unordered_map<processor_id_type, std::vector<dof_id_type>> proc_to_inactive_nodes_vector;
+    for (const auto & proc_set : proc_to_inactive_nodes_set)
+    {
+      proc_to_inactive_nodes_vector[proc_set.first].reserve(proc_to_inactive_nodes_set.size());
+      for (const auto node_id : proc_set.second)
+        proc_to_inactive_nodes_vector[proc_set.first].push_back(node_id);
+    }
+
+    // First push data
+    auto action_functor = [this, &inactive_node_ids](const processor_id_type pid,
+                                                     const std::vector<dof_id_type> & sent_data) {
+      if (pid == mesh.processor_id())
+        mooseError("Should not be communicating with self.");
+      for (const auto pr : sent_data)
+        inactive_node_ids.insert(pr);
+    };
+    TIMPI::push_parallel_vector_data(mesh.comm(), proc_to_inactive_nodes_vector, action_functor);
+  }
+  inactive_local_lm_nodes.clear();
+  for (const auto node_id : inactive_node_ids)
+    inactive_local_lm_nodes.insert(mesh.node_ptr(node_id));
+}
+
+void
+AutomaticMortarGeneration::computeInactiveLMNodes()
+{
+  if (_give_me_wrong_results)
+  {
+    computeWrongInactiveLMNodes();
+    return;
+  }
+
+  std::unordered_map<processor_id_type, std::set<dof_id_type>> proc_to_active_nodes_set;
+  const auto my_pid = mesh.processor_id();
+
+  // List of active nodes on local secondary elements
+  std::unordered_set<dof_id_type> active_local_nodes;
 
   // Mark all active local nodes
   for (const auto msm_elem : mortar_segment_mesh->active_local_element_ptr_range())
   {
     const MortarSegmentInfo & msinfo = msm_elem_to_info.at(msm_elem);
     const Elem * secondary_elem = msinfo.secondary_elem;
-
-    //****
-    if (_give_me_wrong_results)
-      if (std::abs(active_volume[secondary_elem] / secondary_elem->volume() - 1.0) > TOLERANCE)
-        continue;
-    //****
 
     for (auto n : make_range(secondary_elem->n_nodes()))
       active_local_nodes.insert(secondary_elem->node_id(n));
@@ -1254,7 +1335,7 @@ AutomaticMortarGeneration::computeInactiveLMNodes()
          mesh.active_local_subdomain_elements_ptr_range(/*secondary_subd_id*/ pr.second))
       for (const auto n : make_range(el->n_nodes()))
         if (active_local_nodes.find(el->node_id(n)) == active_local_nodes.end())
-          inactive_local_lm_nodes.insert(el->node_id(n));
+          inactive_local_lm_nodes.insert(el->node_ptr(n));
 }
 
 // Note: could be combined with previous routine, keeping separate for clarity (for now)
@@ -1265,16 +1346,22 @@ AutomaticMortarGeneration::computeInactiveLMElems()
   std::unordered_set<const Elem *> active_local_elems;
 
   //****
+  // Note that in 3D our trick to check whether an element has edge dropping needs loose tolerances
+  // since the mortar segments are on the linearized element and comparing the volume of the
+  // linearized element does not have the same volume as the warped element
+  const Real tol = (dim() == 3) ? 0.1 : TOLERANCE;
+
   std::unordered_map<const Elem *, Real> active_volume;
 
   // Compute fraction of elements with corresponding primary elements
-  for (const auto msm_elem : mortar_segment_mesh->active_local_element_ptr_range())
-  {
-    const MortarSegmentInfo & msinfo = msm_elem_to_info.at(msm_elem);
-    const Elem * secondary_elem = msinfo.secondary_elem;
+  if (_give_me_wrong_results)
+    for (const auto msm_elem : mortar_segment_mesh->active_local_element_ptr_range())
+    {
+      const MortarSegmentInfo & msinfo = msm_elem_to_info.at(msm_elem);
+      const Elem * secondary_elem = msinfo.secondary_elem;
 
-    active_volume[secondary_elem] += msm_elem->volume();
-  }
+      active_volume[secondary_elem] += msm_elem->volume();
+    }
   //****
 
   for (const auto msm_elem : mortar_segment_mesh->active_local_element_ptr_range())
@@ -1284,7 +1371,7 @@ AutomaticMortarGeneration::computeInactiveLMElems()
 
     //****
     if (_give_me_wrong_results)
-      if (std::abs(active_volume[secondary_elem] / secondary_elem->volume() - 1.0) > TOLERANCE)
+      if (std::abs(active_volume[secondary_elem] / secondary_elem->volume() - 1.0) > tol)
         continue;
     //****
 

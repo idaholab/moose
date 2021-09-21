@@ -82,22 +82,6 @@ ComputeMortarFunctor::operator()()
 
   unsigned int num_cached = 0;
 
-  // The blocks marked with **** are for regressing edge dropping treatment.
-  // These blocks are inefficient but I wanted to make them easy to remove once this
-  // 'feature' is depricated.
-  //****
-  std::unordered_map<const Elem *, Real> active_volume;
-
-  // Compute fraction of elements with corresponding primary elements
-  for (const auto msm_elem : _amg.mortarSegmentMesh().active_local_element_ptr_range())
-  {
-    const MortarSegmentInfo & msinfo = _amg.mortarSegmentMeshElemToInfo().at(msm_elem);
-    const Elem * secondary_elem = msinfo.secondary_elem;
-
-    active_volume[secondary_elem] += msm_elem->volume();
-  }
-  //****
-
   for (MeshBase::const_element_iterator
            el = _amg.mortarSegmentMesh().active_local_elements_begin(),
            end_el = _amg.mortarSegmentMesh().active_local_elements_end();
@@ -143,11 +127,11 @@ ComputeMortarFunctor::operator()()
     if (elem_volume / secondary_volume < TOLERANCE)
       continue;
 
-    //****
-    if (_amg.wrongResults())
-      if (std::abs(active_volume[secondary_face_elem] / secondary_volume - 1.0) > TOLERANCE)
-        continue;
-    //****
+    // //****
+    // if (_amg.wrongResults())
+    //   if (_amg.getInactiveLMElems().find(secondary_face_elem) != _amg.getInactiveLMElems().end())
+    //     continue;
+    // //****
 
     // Set the primary interior parent and side ids.
     const Elem * primary_ip = msinfo.primary_elem->interior_parent();
@@ -277,7 +261,11 @@ ComputeMortarFunctor::operator()()
   // Call any post operations for our mortar constraints
   for (auto * const mc : _mortar_constraints)
   {
-    mc->post();
+    if (_amg.wrongResults())
+      mc->wrongPost(_amg.getInactiveLMNodes());
+    else
+      mc->post();
+
     mc->zeroInactiveLMDofs(_amg.getInactiveLMNodes(), _amg.getInactiveLMElems());
   }
 
