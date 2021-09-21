@@ -20,21 +20,28 @@ InputParameters
 SlowProblem::validParams()
 {
   InputParameters params = FEProblem::validParams();
-  params.addRequiredParam<unsigned int>("seconds_to_sleep", "The number of seconds to sleep");
+  params.addRequiredParam<std::vector<Real>>("seconds_to_sleep", "The number of seconds to sleep");
   return params;
 }
 
 SlowProblem::SlowProblem(const InputParameters & params)
-  : FEProblem(params), _seconds_to_sleep(getParam<unsigned int>("seconds_to_sleep"))
+  : FEProblem(params), _seconds_to_sleep(getParam<std::vector<Real>>("seconds_to_sleep"))
 {
+  if (_seconds_to_sleep.empty())
+    paramError("seconds_to_sleep", "Vector cannot be empty.");
 }
 
 void
 SlowProblem::solve()
 {
   {
+    const Real delay = _t_step <= 0 ? _seconds_to_sleep.front()
+                                    : (_t_step > static_cast<int>(_seconds_to_sleep.size())
+                                           ? _seconds_to_sleep.back()
+                                           : _seconds_to_sleep[_t_step - 1]);
+
     TIME_SECTION("slow", 1, "Testing Slowness");
-    std::this_thread::sleep_for(std::chrono::seconds(_seconds_to_sleep));
+    std::this_thread::sleep_for(std::chrono::duration<Real>(delay));
   }
 
   FEProblem::solve();

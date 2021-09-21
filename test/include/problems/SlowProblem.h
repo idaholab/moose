@@ -23,5 +23,5 @@ public:
   virtual void solve();
 
 protected:
-  unsigned int _seconds_to_sleep;
+  const std::vector<Real> _seconds_to_sleep;
 };
