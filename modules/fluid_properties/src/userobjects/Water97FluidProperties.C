@@ -485,24 +485,27 @@ Water97FluidProperties::mu_from_p_T(
 Real
 Water97FluidProperties::mu_from_rho_T(Real density, Real temperature) const
 {
-  Real mu_star = 1.e-6;
-  Real rhobar = density / _rho_critical;
-  Real Tbar = temperature / _T_critical;
+  const Real mu_star = 1.e-6;
+  const Real rhobar = density / _rho_critical;
+  const Real Tbar = temperature / _T_critical;
 
   // Viscosity in limit of zero density
   Real sum0 = 0.0;
   for (std::size_t i = 0; i < _mu_H0.size(); ++i)
     sum0 += _mu_H0[i] / MathUtils::pow(Tbar, i);
 
-  Real mu0 = 100.0 * std::sqrt(Tbar) / sum0;
+  const Real mu0 = 100.0 * std::sqrt(Tbar) / sum0;
 
   // Residual component due to finite density
   Real sum1 = 0.0;
-  for (std::size_t i = 0; i < _mu_H1.size(); ++i)
-    sum1 += MathUtils::pow(1.0 / Tbar - 1.0, _mu_I[i]) * _mu_H1[i] *
-            MathUtils::pow(rhobar - 1.0, _mu_J[i]);
+  for (unsigned int i = 0; i < 6; ++i)
+  {
+    const Real fact = MathUtils::pow(1.0 / Tbar - 1.0, i);
+    for (unsigned int j = 0; j < 7; ++j)
+      sum1 += fact * _mu_Hij[i][j] * MathUtils::pow(rhobar - 1.0, j);
+  }
 
-  Real mu1 = std::exp(rhobar * sum1);
+  const Real mu1 = std::exp(rhobar * sum1);
 
   // The water viscosity (in Pa.s) is then given by
   return mu_star * mu0 * mu1;
@@ -516,11 +519,11 @@ Water97FluidProperties::mu_from_rho_T(Real density,
                                       Real & dmu_drho,
                                       Real & dmu_dT) const
 {
-  Real mu_star = 1.0e-6;
-  Real rhobar = density / _rho_critical;
-  Real Tbar = temperature / _T_critical;
-  Real drhobar_drho = 1.0 / _rho_critical;
-  Real dTbar_dT = 1.0 / _T_critical;
+  const Real mu_star = 1.0e-6;
+  const Real rhobar = density / _rho_critical;
+  const Real Tbar = temperature / _T_critical;
+  const Real drhobar_drho = 1.0 / _rho_critical;
+  const Real dTbar_dT = 1.0 / _T_critical;
 
   // Limit of zero density. Derivative wrt rho is 0
   Real sum0 = 0.0, dsum0_dTbar = 0.0;
@@ -530,29 +533,32 @@ Water97FluidProperties::mu_from_rho_T(Real density,
     dsum0_dTbar -= i * _mu_H0[i] / MathUtils::pow(Tbar, i + 1);
   }
 
-  Real mu0 = 100.0 * std::sqrt(Tbar) / sum0;
-  Real dmu0_dTbar =
+  const Real mu0 = 100.0 * std::sqrt(Tbar) / sum0;
+  const Real dmu0_dTbar =
       50.0 / std::sqrt(Tbar) / sum0 - 100.0 * std::sqrt(Tbar) * dsum0_dTbar / sum0 / sum0;
 
   // Residual component due to finite density
-  Real sum1 = 0.0, dsum1_drho = 0.0, dsum1_dTbar = 0.0;
-  for (std::size_t i = 0; i < _mu_H1.size(); ++i)
+  Real sum1 = 0.0, dsum1_drhobar = 0.0, dsum1_dTbar = 0.0;
+  for (unsigned int i = 0; i < 6; ++i)
   {
-    sum1 += MathUtils::pow(1.0 / Tbar - 1.0, _mu_I[i]) * _mu_H1[i] *
-            MathUtils::pow(rhobar - 1.0, _mu_J[i]);
-    dsum1_drho += MathUtils::pow(1.0 / Tbar - 1.0, _mu_I[i]) * _mu_H1[i] * _mu_J[i] *
-                  MathUtils::pow(rhobar - 1.0, _mu_J[i] - 1);
-    dsum1_dTbar -= _mu_I[i] * MathUtils::pow(1.0 / Tbar - 1.0, _mu_I[i] - 1) * _mu_H1[i] *
-                   MathUtils::pow(rhobar - 1.0, _mu_J[i]) / Tbar / Tbar;
+    const Real fact = MathUtils::pow(1.0 / Tbar - 1.0, i);
+    const Real dfact_dTbar = i * MathUtils::pow(1.0 / Tbar - 1.0, i - 1) / Tbar / Tbar;
+
+    for (unsigned int j = 0; j < 7; ++j)
+    {
+      sum1 += fact * _mu_Hij[i][j] * MathUtils::pow(rhobar - 1.0, j);
+      dsum1_dTbar -= dfact_dTbar * _mu_Hij[i][j] * MathUtils::pow(rhobar - 1.0, j);
+      dsum1_drhobar += j * fact * _mu_Hij[i][j] * MathUtils::pow(rhobar - 1.0, j - 1);
+    }
   }
 
-  Real mu1 = std::exp(rhobar * sum1);
-  Real dmu1_drho = (sum1 + rhobar * dsum1_drho) * mu1;
-  Real dmu1_dTbar = (rhobar * dsum1_dTbar) * mu1;
+  const Real mu1 = std::exp(rhobar * sum1);
+  const Real dmu1_drhobar = (sum1 + rhobar * dsum1_drhobar) * mu1;
+  const Real dmu1_dTbar = (rhobar * dsum1_dTbar) * mu1;
 
   // Viscosity and its derivatives are then
   mu = mu_star * mu0 * mu1;
-  dmu_drho = mu_star * mu0 * dmu1_drho * drhobar_drho;
+  dmu_drho = mu_star * mu0 * dmu1_drhobar * drhobar_drho;
   dmu_dT = mu_star * (dmu0_dTbar * mu1 + mu0 * dmu1_dTbar) * dTbar_dT + dmu_drho * ddensity_dT;
 }
 

@@ -563,7 +563,7 @@ TEST_F(PorousFlowBrineCO2Test, liquidProperties)
   Real h2 = fsp[0].enthalpy.value();
 
   REL_TEST(liquid_density.derivatives()[_pidx], (rho1 - rho2) / (2.0 * dp), 1.0e-6);
-  REL_TEST(liquid_viscosity.derivatives()[_pidx], (mu1 - mu2) / (2.0 * dp), 1.0e-6);
+  REL_TEST(liquid_viscosity.derivatives()[_pidx], (mu1 - mu2) / (2.0 * dp), 2.0e-6);
   REL_TEST(liquid_enthalpy.derivatives()[_pidx], (h1 - h2) / (2.0 * dp), 1.0e-6);
 
   // Derivatives wrt temperature
@@ -644,7 +644,7 @@ TEST_F(PorousFlowBrineCO2Test, liquidProperties)
   h2 = fsp[0].enthalpy.value();
 
   REL_TEST(liquid_density.derivatives()[_pidx], (rho1 - rho2) / (2.0 * dp), 1.0e-6);
-  REL_TEST(liquid_viscosity.derivatives()[_pidx], (mu1 - mu2) / (2.0 * dp), 1.0e-6);
+  REL_TEST(liquid_viscosity.derivatives()[_pidx], (mu1 - mu2) / (2.0 * dp), 2.0e-6);
   REL_TEST(liquid_enthalpy.derivatives()[_pidx], (h1 - h2) / (2.0 * dp), 1.0e-6);
 
   // Derivatives wrt temperature
