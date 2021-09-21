@@ -1,10 +1,12 @@
 [Mesh]
   type = GeneratedMesh
-  dim = 2
+  dim = 1
 []
 
 [Variables]
   [u]
+    order = CONSTANT
+    family = MONOMIAL
   []
 []
 
@@ -16,11 +18,11 @@
 
 [Executioner]
   type = Transient
+  solve_type = NEWTON
   num_steps = 10
 
   [TimeStepper]
     type = SolutionTimeAdaptiveDT
-    adapt_log = true
     dt = 0.5
   []
 []
