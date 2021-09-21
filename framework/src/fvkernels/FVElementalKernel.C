@@ -38,6 +38,7 @@ FVElementalKernel::FVElementalKernel(const InputParameters & parameters)
     MaterialPropertyInterface(this, blockIDs(), Moose::EMPTY_BOUNDARY_IDS),
     _var(*mooseVariableFV()),
     _u(_var.adSln()),
+    _u_functor(_var),
     _current_elem(_assembly.elem()),
     _q_point(_assembly.qPoints())
 {
