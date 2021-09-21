@@ -58,6 +58,9 @@
 #ifdef RDG_ENABLED
 #include "RdgApp.h"
 #endif
+#ifdef REACTOR_ENABLED
+#include "ReactorApp.h"
+#endif
 #ifdef RICHARDS_ENABLED
 #include "RichardsApp.h"
 #endif
@@ -165,6 +168,10 @@ ModulesApp::registerObjects(Factory & factory)
   RdgApp::registerObjects(factory);
 #endif
 
+#ifdef REACTOR_ENABLED
+  ReactorApp::registerObjects(factory);
+#endif
+
 #ifdef RICHARDS_ENABLED
   RichardsApp::registerObjects(factory);
 #endif
@@ -240,6 +247,10 @@ ModulesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   RdgApp::associateSyntax(syntax, action_factory);
 #endif
 
+#ifdef REACTOR_ENABLED
+  ReactorApp::associateSyntax(syntax, action_factory);
+#endif
+
 #ifdef RICHARDS_ENABLED
   RichardsApp::associateSyntax(syntax, action_factory);
 #endif
@@ -309,6 +320,10 @@ ModulesApp::registerExecFlags(Factory & factory)
 
 #ifdef RDG_ENABLED
   RdgApp::registerExecFlags(factory);
+#endif
+
+#ifdef REACTOR_ENABLED
+  ReactorApp::registerExecFlags(factory);
 #endif
 
 #ifdef RICHARDS_ENABLED
@@ -387,6 +402,10 @@ ModulesApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 
 #ifdef RDG_ENABLED
   RdgApp::registerAll(f, af, s);
+#endif
+
+#ifdef REACTOR_ENABLED
+  ReactorApp::registerAll(f, af, s);
 #endif
 
 #ifdef RICHARDS_ENABLED

@@ -12,10 +12,10 @@
 #include "PolygonConcentricCircleMeshGeneratorBase.h"
 #include "MooseEnum.h"
 
-class HexagonConcentricCircleAdaptiveBoundaryMeshGenerator;
-
-template <>
-InputParameters validParams<HexagonConcentricCircleAdaptiveBoundaryMeshGenerator>();
+/**
+ * This HexagonConcentricCircleAdaptiveBoundaryMeshGenerator object is designed to generate
+ * hexagonal meshes with adaptive boundary to facilitate stitching.
+ */
 
 class HexagonConcentricCircleAdaptiveBoundaryMeshGenerator
   : public PolygonConcentricCircleMeshGeneratorBase
@@ -26,5 +26,6 @@ public:
   HexagonConcentricCircleAdaptiveBoundaryMeshGenerator(const InputParameters & parameters);
 
 protected:
+  /// Name of input mesh generator
   const std::vector<MeshGeneratorName> _input_names;
 };

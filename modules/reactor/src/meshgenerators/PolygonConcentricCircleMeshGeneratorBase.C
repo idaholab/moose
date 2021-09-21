@@ -232,30 +232,36 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
   unsigned int mesh_input_counter = 0;
   // azimuthal array used for radius radius_correction
   std::vector<Real> azimuthal_list;
+  // loop over all sides of the polygon to collect azimuthal angles of all nodes
   for (unsigned int mesh_index = 0; mesh_index < _num_sides; mesh_index++)
   {
+    // When adaptive boundaries exist (only possible for hexagon meshes thru
+    // `HexagonConcentricCircleAdaptiveBoundaryMeshGenerator`), nodes' azimuthal angle cannot be
+    // arithmetically obtained. Instead, `azimuthal_angles_collector() is used to get this
+    // information from the mesh directly.`
     if (std::find(_sides_to_adapt.begin(), _sides_to_adapt.end(), mesh_index) !=
         _sides_to_adapt.end())
     {
       // The following lines only work for hexagon; and only a hexagon needs such functionality.
       Real lower_azi = (Real)mesh_index * 60.0 - 150.0;
       Real upper_azi = (Real)((mesh_index + 1) % 6) * 60.0 - 150.0;
-      azimuthal_angles_array.push_back(azimuthal_angles_collector(
+      _azimuthal_angles_array.push_back(azimuthal_angles_collector(
           dynamic_pointer_cast<ReplicatedMesh>(*_input_ptrs[mesh_input_counter]),
           lower_azi,
           upper_azi));
-      for (unsigned int i = 1; i < azimuthal_angles_array.back().size(); i++)
+      // loop over the _azimuthal_angles_array just collected to convert tangent to azimuthal angles.
+      for (unsigned int i = 1; i < _azimuthal_angles_array.back().size(); i++)
       {
         azimuthal_list.push_back(
             (Real)mesh_index * 60.0 - 150.0 +
-            std::atan((azimuthal_angles_array.back()[i - 1] - 1.0) / std::sqrt(3.0)) * 180.0 /
+            std::atan((_azimuthal_angles_array.back()[i - 1] - 1.0) / std::sqrt(3.0)) * 180.0 /
                 M_PI);
       }
       mesh_input_counter++;
     }
     else
     {
-      azimuthal_angles_array.push_back(std::vector<Real>());
+      _azimuthal_angles_array.push_back(std::vector<Real>());
       for (unsigned int i = 0; i < _num_sectors_per_side[mesh_index]; i++)
       {
         azimuthal_list.push_back(
@@ -293,7 +299,7 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
                                   &_node_id_background_meta,
                                   _num_sides,
                                   1,
-                                  azimuthal_angles_array[0],
+                                  _azimuthal_angles_array[0],
                                   _block_id_shift,
                                   _quad_center_elements,
                                   _interface_boundary_id_shift);
@@ -314,7 +320,7 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
                                        &_node_id_background_meta,
                                        _num_sides,
                                        mesh_index + 1,
-                                       azimuthal_angles_array[mesh_index],
+                                       _azimuthal_angles_array[mesh_index],
                                        _block_id_shift,
                                        _quad_center_elements,
                                        _interface_boundary_id_shift);

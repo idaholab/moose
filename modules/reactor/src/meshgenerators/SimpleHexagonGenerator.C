@@ -76,9 +76,12 @@ SimpleHexagonGenerator::generate()
   const Real radius = _pitch / std::sqrt(3.0);
   auto mesh = buildReplicatedMesh(2);
   BoundaryInfo & boundary_info = mesh->get_boundary_info();
+  // A total of 6 + 1 = 7 nodes in this simple hexagon mesh
   std::vector<Node *> nodes(HEXAGON_NUM_SIDES + 1);
+  // The trivial center node with node_id = 6 (HEXAGON_NUM_SIDES)
   Point center_p = Point(0.0, 0.0, 0.0);
   nodes[HEXAGON_NUM_SIDES] = mesh->add_point(center_p, HEXAGON_NUM_SIDES);
+  // loop to create the six vertex nodes (node_id 0 ~ 5)
   for (unsigned int i = 0; i < HEXAGON_NUM_SIDES; i++)
   {
     Point side_p = Point(radius * sin(M_PI / ((Real)HEXAGON_NUM_SIDES / 2.0) * (Real)i),
@@ -86,16 +89,21 @@ SimpleHexagonGenerator::generate()
                          0.0);
     nodes[i] = mesh->add_point(side_p, i);
   }
+  // loop to create the six elements
   for (unsigned int i = 0; i < HEXAGON_NUM_SIDES; i++)
   {
     Elem * elem = mesh->add_elem(new Tri3);
     elem->set_node(0) = nodes[HEXAGON_NUM_SIDES];
-    elem->set_node(2) = nodes[i % HEXAGON_NUM_SIDES];
+    elem->set_node(2) = nodes[i];
     elem->set_node(1) = nodes[(i + 1) % HEXAGON_NUM_SIDES];
+    // Assign the default external boundary id so that the mesh can be used as input of
+    // `PatterneHexMeshGenerator`.
     boundary_info.add_side(elem, 1, OUTER_SIDESET_ID);
+    // Default subdomain id
     elem->subdomain_id() = 1;
   }
 
+  // Assign customized (optional) subdomain id/name and external boundary id/name.
   const subdomain_id_type block_id_new(_block_id_valid ? _block_id : 1);
   if (_block_id_valid)
     for (const auto & elem : mesh->active_element_ptr_range())

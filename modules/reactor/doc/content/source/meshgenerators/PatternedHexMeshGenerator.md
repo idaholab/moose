@@ -23,10 +23,10 @@ When `pattern_boundary` is set as `hexagon`, the user can also provide `duct_siz
 
 ## Control Drum Related MeshMetaData
 
-One of the application of this object is to generate meshes for prismatic reactor cores. In that case, by setting `generate_core_metadata` as true, control drum meshes can also be used as part of `inputs` to construct the core mesh. To facilitate the use of control drum rotation simulation objects, a series of `MeshMetaData` can be generated, including:
+One of the applications of this object is to generate meshes for prismatic reactor cores. In that case, by setting `generate_core_metadata` as true, control drum meshes can also be used as part of `inputs` to construct the core mesh. To facilitate the use of control drum rotation simulation objects, a series of `MeshMetaData` can be generated, including:
 
 - `control_drum_positions`: a vector of control drum center positions. This `MeshMetaData` can also be outputted as an ASCII file by setting `generate_control_drum_positions_file` as true and providing `position_file`;
-- `control_drum_angles`: a vector of the azimuthal angle of the control drum center position to the center of the core.
+- `control_drum_angles`: a vector of the azimuthal angles of the control drum center positions to the center of the core.
 - `control_drums_azimuthal_meta`: a two-dimensional vector containing the sorted azimuthal angles of nodes to the corresponding control drum center for all the control drums.
 
 In addition, `assign_control_drum_id` can be set as true so that the control drum `inputs` meshes can be indexed using an element extra integer called `control_drum_id`. As illustrated in [Figure 2](#cd_id), the `control_drum_id` is indexed based on the azimuthal angles of the control drums.

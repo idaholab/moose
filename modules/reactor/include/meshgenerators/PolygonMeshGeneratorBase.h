@@ -20,6 +20,10 @@
 #include "libmesh/boundary_info.h"
 #include "libmesh/utility.h"
 
+/**
+ * A base class that contains common members for Reactor module mesh generators.
+ */
+
 class PolygonMeshGeneratorBase : public MeshGenerator
 {
 public:
@@ -49,7 +53,7 @@ public:
   enum INTRINSIC_SIDESET_ID : boundary_id_type
   {
     OUTER_SIDESET_ID = 10000,
-    OUTER_SIDESET_ID_ALT = 20000,
+    OUTER_SIDESET_ID_ALT = 15000,
     SLICE_BEGIN = 30000,
     SLICE_END = 31000,
     SLICE_ALT = 30500
@@ -61,6 +65,8 @@ public:
   };
 
 protected:
+  // 'build_simple_slice' creates a mesh of a slice that corresponds to a single side of the polygon
+  // to be generated.
   std::unique_ptr<ReplicatedMesh>
   build_simple_slice(std::unique_ptr<ReplicatedMesh> mesh,
                      std::vector<Real> ring_radii,
@@ -80,6 +86,8 @@ protected:
                      const bool quad_center_elements = false,
                      const unsigned int boundary_id_shift = 0);
 
+  // 'center_nodes' create nodes of the very central mesh layer of the polygon for quad central
+  // elements
   std::unique_ptr<ReplicatedMesh> center_nodes(std::unique_ptr<ReplicatedMesh> mesh,
                                                const unsigned int side_number,
                                                const unsigned int div_num,
@@ -88,6 +96,7 @@ protected:
                                                std::vector<Node *> * nodes,
                                                std::vector<std::vector<dof_id_type>> * id_array);
 
+  // 'ring_nodes' creates nodes for the ring-geometry region of a single slice.
   std::unique_ptr<ReplicatedMesh>
   ring_nodes(std::unique_ptr<ReplicatedMesh> mesh,
              std::vector<Real> ring_radii,
@@ -99,6 +108,8 @@ protected:
              std::vector<Node *> * nodes,
              const std::vector<Real> azimuthal_tangent = std::vector<Real>());
 
+  // 'background_nodes' creates nodes for the ring-to-polygon transition region (i.e., background)
+  // of a single slice.
   std::unique_ptr<ReplicatedMesh>
   background_nodes(std::unique_ptr<ReplicatedMesh> mesh,
                    const unsigned int num_sectors_per_side,
@@ -112,6 +123,7 @@ protected:
                    const Real background_in,
                    const std::vector<Real> azimuthal_tangent = std::vector<Real>());
 
+  // 'duct_nodes' creates nodes for the duct-geometry region of a single slice.
   std::unique_ptr<ReplicatedMesh>
   duct_nodes(std::unique_ptr<ReplicatedMesh> mesh,
              std::vector<Real> * ducts_center_dist,
@@ -123,6 +135,7 @@ protected:
              std::vector<Node *> * nodes,
              const std::vector<Real> azimuthal_tangent = std::vector<Real>());
 
+  // 'cen_quad_elem_def' defines quad elements in the very central region of the polygon.
   std::unique_ptr<ReplicatedMesh>
   cen_quad_elem_def(std::unique_ptr<ReplicatedMesh> mesh,
                     const unsigned int div_num,
@@ -131,6 +144,7 @@ protected:
                     const unsigned int boundary_id_shift,
                     std::vector<std::vector<dof_id_type>> * id_array);
 
+  // 'cen_tri_elem_def' defines triangular elements in the very central region of the polygon.
   std::unique_ptr<ReplicatedMesh>
   cen_tri_elem_def(std::unique_ptr<ReplicatedMesh> mesh,
                    const unsigned int num_sectors_per_side,
@@ -139,6 +153,7 @@ protected:
                    const unsigned int block_id_shift = 0,
                    const unsigned int boundary_id_shift = 0);
 
+  // 'quad_elem_def' defines general quad elements for the polygon.
   std::unique_ptr<ReplicatedMesh>
   quad_elem_def(std::unique_ptr<ReplicatedMesh> mesh,
                 const unsigned int num_sectors_per_side,
@@ -150,6 +165,12 @@ protected:
                 const unsigned int nodeid_shift = 0,
                 const unsigned int boundary_id_shift = 0);
 
+  // 'build_simple_peripheral' creates peripheral area mesh for the patterned hexagon mesh
+  // Note that the function creat the pheripheral area for each side of the unit hexagon mesh before
+  // stitching. An edge unit hexagon has two sides that need peripheral areas, whereas a corner unit
+  // hexagon has three such sides. The positions of the inner and outer boundary nodes are
+  // pre-calculated as positions_inner and d_positions_outer; This function performs interpolation
+  // to generate the mesh grid.
   std::unique_ptr<ReplicatedMesh>
   build_simple_peripheral(std::unique_ptr<ReplicatedMesh> mesh,
                           const unsigned int num_sectors_per_side,
@@ -159,8 +180,11 @@ protected:
                           std::vector<Node *> * nodes,
                           const unsigned int id_shift);
 
+  // 'radius_correction_factor' makes radial correction to preserve ring area.
   Real radius_correction_factor(const std::vector<Real> azimuthal_list);
 
+  // 'point_interpolate' calculates the point coordinates of within a parallelogram region using
+  // linear interpolation.
   std::pair<Real, Real> point_interpolate(const Real pi_1_x,
                                           const Real pi_1_y,
                                           const Real po_1_x,
@@ -173,6 +197,10 @@ protected:
                                           const unsigned int j,
                                           const unsigned int num_sectors_per_side,
                                           const unsigned int peripheral_invervals);
+
+  // 'add_peripheral_mesh' adds background and duct region mesh to stiched hexagon meshes.
+  // Note that the function works for single unit hexagon mesh (corner or edge) separately before
+  // stitching
   std::unique_ptr<ReplicatedMesh>
   add_peripheral_mesh(const unsigned int pattern, //_pattern{i][j]
                       const Real pitch,           // pitch_array.front()
@@ -182,13 +210,21 @@ protected:
                       const std::vector<unsigned int> peripheral_duct_intervals,
                       const Real rotation_angle,
                       const unsigned int mesh_type);
+
+  // 'position_setup' sets up poisitions of peripheral region before deformation due to cutoff.
+  // Nine sets of positions are generated here, as shown below.
   void position_setup(std::vector<std::pair<Real, Real>> * positions_inner,
                       std::vector<std::pair<Real, Real>> * d_positions_outer,
                       const Real extra_dist_in,
                       const Real extra_dist_out,
                       const Real pitch,
                       const unsigned int radial_index);
+
+  // 'node_coord_rotate' calculates x and y coordinates after rotating by theta angle.
   void node_coord_rotate(Real * x, Real * y, const Real theta);
+
+  // 'cut_off_hex_deform' deforms peripheral region when the external side of a hexagonal assembly
+  // of stitched meshes cuts off the stitched meshes.
   void cut_off_hex_deform(MeshBase & mesh,
                           const Real orientation,
                           const Real y_max_0,
@@ -196,10 +232,14 @@ protected:
                           const Real y_min,
                           const unsigned int mesh_type,
                           const Real tols = 1E-5);
+
+  // 'four_point_intercept' finds the center of a quadrilateral based on four vertices.
   std::pair<Real, Real> four_point_intercept(const std::pair<Real, Real> p1,
                                              const std::pair<Real, Real> p2,
                                              const std::pair<Real, Real> p3,
                                              const std::pair<Real, Real> p4);
+
+  // 'azimuthal_angles_collector' collects sorted azimuthal angles of the external boundary.
   std::vector<Real> azimuthal_angles_collector(const std::unique_ptr<ReplicatedMesh> mesh,
                                                const Real lower_azi = -30.0,
                                                const Real upper_azi = 30.0,

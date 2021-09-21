@@ -12,10 +12,10 @@
 #include "PolygonConcentricCircleMeshGeneratorBase.h"
 #include "MooseEnum.h"
 
-class PolygonConcentricCircleMeshGenerator;
-
-template <>
-InputParameters validParams<PolygonConcentricCircleMeshGenerator>();
+/**
+ * This PolygonConcentricCircleMeshGenerator object is designed to mesh a polygon geometry with
+ * optional rings centered inside.
+ */
 
 class PolygonConcentricCircleMeshGenerator : public PolygonConcentricCircleMeshGeneratorBase
 {
@@ -25,5 +25,6 @@ public:
   PolygonConcentricCircleMeshGenerator(const InputParameters & parameters);
 
 protected:
+  /// Metadata of the maximum radius of ring regions
   Real & _max_radius_meta;
 };

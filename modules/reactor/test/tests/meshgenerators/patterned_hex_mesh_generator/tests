@@ -35,7 +35,7 @@
                 Mesh/pattern/pattern="0 0;0"
                 --mesh-only "patterned_err.e.e"'
     expect_err = 'this parameter must be odd to ensure a hexagonal shape.'
-    requirement ='The system shall throw an error if the layer number of pattern must be odd.'
+    requirement ='The system shall throw an error if the layer number of pattern is not odd.'
   []
   [err_pattern_unity]
     type = 'RunException'

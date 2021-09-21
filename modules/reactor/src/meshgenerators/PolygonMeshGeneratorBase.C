@@ -18,7 +18,7 @@ PolygonMeshGeneratorBase::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
   params.addClassDescription(
-      "A base class that contains common members for AMT based mesh generators.");
+      "A base class that contains common members for Reactor module mesh generators.");
 
   return params;
 }

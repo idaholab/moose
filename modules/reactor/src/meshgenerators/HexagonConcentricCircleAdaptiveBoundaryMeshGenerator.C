@@ -13,8 +13,6 @@
 
 registerMooseObject("ReactorApp", HexagonConcentricCircleAdaptiveBoundaryMeshGenerator);
 
-defineLegacyParams(HexagonConcentricCircleAdaptiveBoundaryMeshGenerator);
-
 InputParameters
 HexagonConcentricCircleAdaptiveBoundaryMeshGenerator::validParams()
 {
@@ -26,9 +24,10 @@ HexagonConcentricCircleAdaptiveBoundaryMeshGenerator::validParams()
       "hexagon_size_style",
       hexagon_size_style,
       "Style in which the hexagon size is given (default: apothem i.e. half-pitch).");
-  params.addParam<std::vector<unsigned int>>("sides_to_adapt",
-                                             "List of the hexagon reference side numbers that need "
-                                             "to be adaptively meshed to facilitate stitching.");
+  params.addParam<std::vector<unsigned int>>(
+      "sides_to_adapt",
+      "List of the hexagon reference side indices that correspond to the sides that need adaptive "
+      "meshing. The meshes to adapt these sides to are provided in 'inputs'.");
   params.addParam<std::vector<MeshGeneratorName>>("inputs", "The input MeshGenerator.");
   params.addParam<bool>("is_control_drum",
                         false,
