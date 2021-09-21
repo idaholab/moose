@@ -203,6 +203,7 @@ public:
    * Used to enforce zero values on inactive DoFs of nodal variables.
    */
   void computeInactiveLMNodes();
+  void computeWrongInactiveLMNodes();
 
   /**
    * Get list of secondary elems without any corresponding primary elements.
@@ -245,7 +246,7 @@ public:
   /**
    * @return The set of nodes on which mortar constraint is not active
    */
-  const std::unordered_set<dof_id_type> & getInactiveLMNodes() const
+  const std::unordered_set<const Node *> & getInactiveLMNodes() const
   {
     return inactive_local_lm_nodes;
   }
@@ -342,7 +343,7 @@ private:
   std::unordered_map<const Node *, Point> secondary_node_to_nodal_normal;
 
   // List of inactive lagrange multiplier nodes (for nodal variables)
-  std::unordered_set<dof_id_type> inactive_local_lm_nodes;
+  std::unordered_set<const Node *> inactive_local_lm_nodes;
 
   // List of inactive lagrange multiplier nodes (for elemental variables)
   std::unordered_set<const Elem *> inactive_local_lm_elems;
