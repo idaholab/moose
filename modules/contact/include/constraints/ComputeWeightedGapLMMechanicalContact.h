@@ -30,6 +30,7 @@ public:
   void residualSetup() override;
   void jacobianSetup() override;
   void post() override;
+  void wrongPost(const std::unordered_set<const Node *> & inactive_lm_nodes) override;
 
 protected:
   ADReal computeQpResidual(Moose::MortarType mortar_type) final;

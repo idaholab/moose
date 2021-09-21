@@ -180,7 +180,7 @@ MortarConstraintBase::computeJacobian()
 }
 
 void
-MortarConstraintBase::zeroInactiveLMDofs(const std::unordered_set<dof_id_type> & inactive_lm_nodes,
+MortarConstraintBase::zeroInactiveLMDofs(const std::unordered_set<const Node *> & inactive_lm_nodes,
                                          const std::unordered_set<const Elem *> & inactive_lm_elems)
 {
   // If no LM variable has been defined, skip
@@ -196,10 +196,8 @@ MortarConstraintBase::zeroInactiveLMDofs(const std::unordered_set<dof_id_type> &
   // If variable is nodal, zero DoFs based on inactive LM nodes
   if (_var->isNodal())
   {
-    for (const auto node_id : inactive_lm_nodes)
+    for (const auto node : inactive_lm_nodes)
     {
-      // Get node from id
-      const Node * node = _mesh.nodePtr(node_id);
       const auto dof_index = node->dof_number(_sys.number(), _var->number(), 0);
       if (_subproblem.currentlyComputingJacobian())
         _assembly.cacheJacobian(dof_index, dof_index, 1., _matrix_tags);

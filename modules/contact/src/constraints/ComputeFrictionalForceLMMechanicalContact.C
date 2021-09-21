@@ -128,6 +128,25 @@ ComputeFrictionalForceLMMechanicalContact::post()
 }
 
 void
+ComputeFrictionalForceLMMechanicalContact::wrongPost(const std::unordered_set<const Node *> & inactive_lm_nodes)
+{
+  // Enforce frictional complementarity constraints
+  for (const auto & pr : _dof_to_weighted_tangential_velocity)
+  {
+    // If node inactive, skip
+    if (inactive_lm_nodes.find(static_cast<const Node *>(pr.first)) != inactive_lm_nodes.end())
+      continue;
+
+    const DofObject * const dof = pr.first;
+
+    _weighted_gap_ptr = &_dof_to_weighted_gap[dof].first;
+    _tangential_vel_ptr = &pr.second;
+
+    enforceConstraintOnDof(dof);
+  }
+}
+
+void
 ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof(const DofObject * const dof)
 {
   ComputeWeightedGapLMMechanicalContact::enforceConstraintOnDof(dof);

@@ -98,9 +98,14 @@ public:
   virtual void post() {}
 
   /**
+   * This method will be called after the loop over the mortar segment mesh
+   */
+  virtual void wrongPost(const std::unordered_set<const Node *> &) {}
+
+  /**
    * A post routine for zeroing all inactive LM DoFs
    */
-  void zeroInactiveLMDofs(const std::unordered_set<dof_id_type> & inactive_lm_nodes,
+  void zeroInactiveLMDofs(const std::unordered_set<const Node *> & inactive_lm_nodes,
                           const std::unordered_set<const Elem *> & inactive_lm_elems);
 
 private:
