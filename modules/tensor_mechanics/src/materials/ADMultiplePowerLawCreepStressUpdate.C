@@ -55,7 +55,8 @@ ADMultiplePowerLawCreepStressUpdate::ADMultiplePowerLawCreepStressUpdate(
 {
 
   if (!std::is_sorted(_stress_thresholds.begin(), _stress_thresholds.end()))
-    paramError("stress_thresholds", "Stress thresholds input must be ordered in increasing order");
+    paramError("stress_thresholds",
+               "Stress thresholds input must be provided in increasing ordered");
 
   if (_coefficient.size() != _n_exponent.size() || _coefficient.size() != _m_exponent.size() ||
       _coefficient.size() != _activation_energy.size())

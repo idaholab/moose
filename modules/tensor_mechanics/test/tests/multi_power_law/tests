@@ -39,4 +39,14 @@
     rel_err = 5.0e-4
     requirement = "The AD multiple power law creep must avoid regression for a simple few-element problem whose solution has stress levels encompassing two different sets of power law parameters"
   []
+  [multipowerlaw_user_input_error]
+    type = 'RunException'
+    input = 'power_law_creep.i'
+    expect_err = 'Stress thresholds input must be provided in increasing ordered'
+    cli_args= "Materials/creep_one/type=ADMultiplePowerLawCreepStressUpdate Materials/creep_one/stress_thresholds='0 53000 52000' Materials/creep_one/coefficient='1e-24 1.92307692e-29' Materials/creep_one/n_exponent='4 9.0' Materials/creep_one/m_exponent='0 0' Materials/creep_one/activation_energy='0 0'
+              Materials/creep_nine/type=ADMultiplePowerLawCreepStressUpdate Materials/creep_nine/stress_thresholds='0 53000 300000' Materials/creep_nine/coefficient='9e-24 3.32840237e-33' Materials/creep_nine/n_exponent='4 9.0' Materials/creep_nine/m_exponent='0 0' Materials/creep_nine/activation_energy='0 0'
+              Outputs/file_base=multi_power_law_creep_two_intervals_different_no_continuity_out"
+
+    requirement = "Stress thresholds must be provided in increasing order, otherwise an error will inform the user of such a requirement. "
+  []
 []
