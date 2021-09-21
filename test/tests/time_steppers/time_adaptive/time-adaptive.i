@@ -3,22 +3,15 @@
   dim = 2
 []
 
-[GlobalParams]
-[]
-
 [Variables]
   [u]
-    order = FIRST
-    family = LAGRANGE
   []
 []
 
-[Kernels]
-  [u]
-    type = SlowKernel
-    variable = u
-    step_delay = '0.0 0.0 0.1 0.1 0.5 0.2 0.2 0.1 0.1 0.1'
-  []
+[Problem]
+  type = SlowProblem
+  seconds_to_sleep = '0.0 0.0 0.1 0.1 0.5 0.2 0.2 0.1 0.1 0.1'
+  kernel_coverage_check = false
 []
 
 [Executioner]
