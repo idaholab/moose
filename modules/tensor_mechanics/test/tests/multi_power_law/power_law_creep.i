@@ -11,43 +11,6 @@
   volumetric_locking_correction = false
 []
 
-[AuxVariables]
-  [./hydrostatic_stress]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./vonmises_stress]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-[]
-
-[AuxKernels]
-  [./hydrostatic_stress]
-    type = ADRankTwoScalarAux
-    variable = hydrostatic_stress
-    rank_two_tensor = stress
-    scalar_type = Hydrostatic
-  [../]
-  [./vonmises_stress]
-    type = ADRankTwoScalarAux
-    variable = vonmises_stress
-    rank_two_tensor = stress
-    scalar_type = VonMisesStress
-  [../]
-[]
-
-[Variables]
-  [./disp_x]
-    order = SECOND
-    scaling = 1e-10
-  [../]
-  [./disp_y]
-    order = SECOND
-    scaling = 1e-10
-  [../]
-[]
-
 [Functions]
   [./pull]
     type = PiecewiseLinear
@@ -56,28 +19,22 @@
   [../]
 []
 
-[Kernels]
-  [./stress_x]
-    type = ADStressDivergenceTensors
-    component = 0
-    variable = disp_x
-  [../]
-  [./stress_y]
-    type = ADStressDivergenceTensors
-    component = 1
-    variable = disp_y
-  [../]
+
+[Modules/TensorMechanics/Master]
+  [MasterAction]
+    strain = SMALL
+    incremental = true
+    add_variables = true
+    use_automatic_differentiation = true
+    generate_output = 'hydrostatic_stress vonmises_stress'
+  []
 []
 
 [Materials]
-
   [./elasticity_tensor]
     type = ADComputeIsotropicElasticityTensor
     youngs_modulus = 1e10
     poissons_ratio = 0.3
-  [../]
-  [./strain]
-    type = ADComputeIncrementalSmallStrain
   [../]
   [./elastic_strain]
     type = ADComputeMultipleInelasticStress
@@ -138,8 +95,8 @@
   petsc_options_value = boomeramg
 
   line_search = 'none'
-  nl_rel_tol = 1e-10
-  nl_abs_tol = 1e-10
+  nl_rel_tol = 1e-11
+  nl_abs_tol = 1e-11
   num_steps = 5
   dt = 1e-1
 []

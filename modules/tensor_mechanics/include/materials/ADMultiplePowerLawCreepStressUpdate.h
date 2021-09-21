@@ -17,9 +17,10 @@
  * constitutive models combine creep and plasticity.
  *
  * This class inherits from RadialReturnCreepStressUpdateBase and must be used
- * in conjunction with ComputeMultipleInelasticStress.  This class calculates
- * creep based on stress, temperature, and time effects.  This class also
- * computes the creep strain as a stateful material property.
+ * in conjunction with ComputeMultipleInelasticStress. It calculates
+ * creep based on stress, temperature, and time effects. Particularly, it allows
+ * the user to provide multiple power law parameters which are chosen within this
+ * object depending on the von Mises stress level at the quadrature point.
  */
 class ADMultiplePowerLawCreepStressUpdate : public ADRadialReturnCreepStressUpdateBase
 {
@@ -42,23 +43,24 @@ protected:
   virtual ADReal computeDerivative(const ADReal & effective_trial_stress,
                                    const ADReal & scalar) override;
 
-  unsigned int stressIndex(const ADReal & effective_trial_stress);
+  std::size_t stressIndex(const ADReal & effective_trial_stress);
+
   /// Temperature variable value
   const ADVariableValue * const _temperature;
 
-  /// Leading coefficient
+  /// Leading coefficient vector
   const std::vector<Real> _coefficient;
 
-  /// Exponent on the effective stress
+  /// Exponent on the effective stress vector
   const std::vector<Real> _n_exponent;
 
-  /// Exponent on time
+  /// Exponent on time vector
   const std::vector<Real> _m_exponent;
 
-  /// Stress thresholds
+  /// Stress thresholds vector
   const std::vector<Real> _stress_thresholds;
 
-  /// Activation energy for exp term
+  /// Activation energy for exp term vector
   const std::vector<Real> _activation_energy;
 
   /// Gas constant for exp term
@@ -67,13 +69,15 @@ protected:
   /// Simulation start time
   const Real _start_time;
 
-  /// Exponential calculated from activiaction, gas constant, and temperature
+  /// Exponential calculated from activation, gas constant, and temperature
   ADReal _exponential;
 
   /// Exponential calculated from current time
   Real _exp_time;
 
+  /// Quadrature-point value pointing to the right power law parameters
   unsigned int _stress_index;
 
+  /// Total number of models provided by the user
   const unsigned int _number_of_models;
 };

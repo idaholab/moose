@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ADMultiplePowerLawCreepStressUpdate.h"
+#include <algorithm>
 
 registerMooseObject("TensorMechanicsApp", ADMultiplePowerLawCreepStressUpdate);
 
@@ -53,6 +54,9 @@ ADMultiplePowerLawCreepStressUpdate::ADMultiplePowerLawCreepStressUpdate(
     _number_of_models(_m_exponent.size())
 {
 
+  if (!std::is_sorted(_stress_thresholds.begin(), _stress_thresholds.end()))
+    paramError("stress_thresholds", "Stress thresholds input must be ordered in increasing order");
+
   if (_coefficient.size() != _n_exponent.size() || _coefficient.size() != _m_exponent.size() ||
       _coefficient.size() != _activation_energy.size())
     paramError(
@@ -88,10 +92,6 @@ ADReal
 ADMultiplePowerLawCreepStressUpdate::computeResidual(const ADReal & effective_trial_stress,
                                                      const ADReal & scalar)
 {
-  if (_stress_index != stressIndex(effective_trial_stress))
-    mooseError("Internal issue in multiple creep model when selecting model according to stress "
-               "threshold");
-
   const ADReal stress_delta = effective_trial_stress - _three_shear_modulus * scalar;
   const ADReal creep_rate = _coefficient[_stress_index] *
                             std::pow(stress_delta, _n_exponent[_stress_index]) * _exponential *
@@ -129,16 +129,13 @@ ADMultiplePowerLawCreepStressUpdate::substeppingCapabilityEnabled()
   return getParam<bool>("use_substep");
 }
 
-unsigned int
+std::size_t
 ADMultiplePowerLawCreepStressUpdate::stressIndex(const ADReal & effective_trial_stress)
 {
+  // Check the correct model for *this* radial return
+  std::size_t i = 0;
+  while (i < _number_of_models - 1 && effective_trial_stress > _stress_thresholds[i + 1])
+    ++i;
 
-  for (unsigned int i = 0; i < _number_of_models; i++)
-  {
-    if (effective_trial_stress > _stress_thresholds[i] &&
-        effective_trial_stress < _stress_thresholds[i + 1])
-      return i;
-  }
-
-  return _number_of_models - 1;
+  return i;
 }
