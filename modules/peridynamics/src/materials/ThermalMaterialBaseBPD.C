@@ -21,8 +21,8 @@ ThermalMaterialBaseBPD::validParams()
   params.addClassDescription("Base class for bond-based peridynamic thermal models");
 
   params.addRequiredCoupledVar("temperature", "Nonlinear variable name for the temperature");
-  params.addRequiredParam<MaterialPropertyName>("thermal_conductivity",
-                                                "Name of material defining thermal conductivity");
+  params.addRequiredParam<MaterialPropertyName>(
+      "thermal_conductivity", "Name of material property defining thermal conductivity");
 
   return params;
 }

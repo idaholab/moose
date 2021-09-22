@@ -24,7 +24,7 @@ MaterialTensorIntegralTempl<is_ad>::validParams()
                              "a component of a material tensor as specified by "
                              "the user-supplied indices");
   params.addRequiredParam<MaterialPropertyName>("rank_two_tensor",
-                                                "The rank two material tensor name");
+                                                "The rank two material property tensor name");
   params.addRequiredRangeCheckedParam<unsigned int>(
       "index_i",
       "index_i >= 0 & index_i <= 2",

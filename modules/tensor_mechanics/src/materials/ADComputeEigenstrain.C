@@ -21,7 +21,7 @@ ADComputeEigenstrain::validParams()
   params.addRequiredParam<std::vector<Real>>(
       "eigen_base", "Vector of values defining the constant base tensor for the Eigenstrain");
   params.addParam<MaterialPropertyName>(
-      "prefactor", 1.0, "Name of material defining the variable dependence");
+      "prefactor", 1.0, "Name of material property defining the variable dependence");
   return params;
 }
 

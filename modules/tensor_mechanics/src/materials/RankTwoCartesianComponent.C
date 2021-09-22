@@ -22,7 +22,7 @@ RankTwoCartesianComponentTempl<is_ad>::validParams()
   InputParameters params = Material::validParams();
   params.addClassDescription("Access a component of a RankTwoTensor");
   params.addRequiredParam<MaterialPropertyName>("rank_two_tensor",
-                                                "The rank two material tensor name");
+                                                "The rank two material property tensor name");
   params.addRequiredParam<MaterialPropertyName>(
       "property_name", "Name of the material property computed by this model");
   params.addRequiredRangeCheckedParam<unsigned int>(
