@@ -782,6 +782,29 @@ wildCardMatch(std::string name, std::string search_string)
     return false;
 }
 
+bool
+globCompare(const std::string & candidate,
+            const std::string & pattern,
+            std::size_t c,
+            std::size_t p)
+{
+  if (p == pattern.size())
+    return c == candidate.size();
+
+  if (pattern[p] == '*')
+  {
+    for (; c < candidate.size(); ++c)
+      if (globCompare(candidate, pattern, c, p + 1))
+        return true;
+    return globCompare(candidate, pattern, c, p + 1);
+  }
+
+  if (pattern[p] != '?' && pattern[p] != candidate[c])
+    return false;
+
+  return globCompare(candidate, pattern, c + 1, p + 1);
+}
+
 template <typename T>
 T
 convertStringToInt(const std::string & str, bool throw_on_failure)

@@ -26,10 +26,8 @@ public:
   static InputParameters validParams();
 
   ReferenceResidualProblem(const InputParameters & params);
-  virtual ~ReferenceResidualProblem();
 
   virtual void initialSetup() override;
-  virtual void timestepSetup() override;
   void updateReferenceResidual();
   virtual MooseNonlinearConvergenceReason
   checkNonlinearConvergence(std::string & msg,
@@ -64,37 +62,27 @@ public:
                                    const Real initial_residual_before_preset_bcs);
 
   /**
-   * Add solution variables to ReferenceResidualProblem.
-   * @param sol_vars A set of solution variables that need to be added to ReferenceResidualProblem.
-   */
-  void addSolutionVariables(std::set<std::string> & sol_vars);
-
-  /**
-   * Add reference residual variables to ReferenceResidualProblem.
-   * @param ref_vars A set of reference residual variables that need to be added to
-   * ReferenceResidualProblem.
-   */
-  void addReferenceResidualVariables(std::set<std::string> & ref_vars);
-
-  /**
-   * Add a set of variables that need to be grouped together.
+   * Add a set of variables that need to be grouped together. For use in
+   * actions that create variables. This is templated for backwards compatibility to allow passing
+   * in std::string or NonlinearVariableName.
    * @param group_vars A set of solution variables that need to be grouped.
    */
-  void addGroupVariables(std::set<std::string> & group_vars);
+  template <typename T>
+  void addGroupVariables(const std::set<T> & group_vars);
 
 protected:
   ///@{
   /// List of solution variable names whose reference residuals will be stored,
   /// and the residual variable names that will store them.
-  std::vector<std::string> _soln_var_names;
-  std::vector<std::string> _ref_resid_var_names;
+  std::vector<NonlinearVariableName> _soln_var_names;
+  std::vector<AuxVariableName> _ref_resid_var_names;
   ///@}
 
   ///@{
   /// List of grouped solution variable names whose reference residuals will be stored,
   /// and the residual variable names that will store them.
-  std::vector<std::string> _group_soln_var_names;
-  std::vector<std::string> _group_ref_resid_var_names;
+  std::vector<NonlinearVariableName> _group_soln_var_names;
+  std::vector<AuxVariableName> _group_ref_resid_var_names;
   ///@}
 
   ///@{
@@ -112,15 +100,10 @@ protected:
   ///@}
 
   ///@{
-  /// Local storage for *discrete L2 residual norms* of the variables listed in _ref_resid_var_names.
-  std::vector<Real> _ref_resid;
-  std::vector<Real> _resid;
-  ///@}
-
-  ///@{
   /// Local storage for *discrete L2 residual norms* of the grouped variables listed in _group_ref_resid_var_names.
   std::vector<Real> _group_ref_resid;
   std::vector<Real> _group_resid;
+  std::vector<Real> _group_output_resid;
   ///@}
 
   /// Group number index for each variable
@@ -130,11 +113,23 @@ protected:
   std::vector<Real> _scaling_factors;
 
   /// Name of variables that are grouped together to check convergence
-  std::vector<std::vector<std::string>> _group_variables;
+  std::vector<std::vector<NonlinearVariableName>> _group_variables;
 
   /// True if any variables are grouped
   bool _use_group_variables;
 
   /// The vector storing the reference residual values
   const NumericVector<Number> * _reference_vector;
+
+  std::vector<NonlinearVariableName> _converge_on;
+  std::vector<bool> _converge_on_var;
 };
+
+template <typename T>
+void
+ReferenceResidualProblem::addGroupVariables(const std::set<T> & group_vars)
+{
+  _group_variables.push_back(
+      std::vector<NonlinearVariableName>(group_vars.begin(), group_vars.end()));
+  _use_group_variables = true;
+}
