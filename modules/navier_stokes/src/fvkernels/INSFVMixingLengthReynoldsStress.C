@@ -44,9 +44,8 @@ INSFVMixingLengthReynoldsStress::INSFVMixingLengthReynoldsStress(const InputPara
     _w_var(params.isParamValid("w")
                ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("w", 0))
                : nullptr),
-   _rho(*getVarHelper<MooseVariableFV<Real>>("rho", 0)),
-   _mixing_len(*getVarHelper<MooseVariableFV<Real>>("mixing_length", 0)),
-   _cd_limiter(Moose::FV::Limiter<ADReal>::build(Moose::FV::LimiterType::CentralDifference))
+    _rho(getFunctor<ADReal>("rho")),
+    _mixing_len(getFunctor<ADReal>("mixing_length"))
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
@@ -93,8 +92,8 @@ INSFVMixingLengthReynoldsStress::computeQpResidual()
   symmetric_strain_tensor_norm = std::sqrt(symmetric_strain_tensor_norm + offset);
 
   // Interpolate the mixing length to the face
-  ADReal mixing_len = _mixing_len(
-      std::make_tuple(_face_info, _cd_limiter.get(), true, faceArgSubdomains(_face_info)));
+  const ADReal mixing_len = _mixing_len(std::make_tuple(
+      _face_info, Moose::FV::LimiterType::CentralDifference, true, faceArgSubdomains(_face_info)));
 
   // Compute the eddy diffusivity
   ADReal eddy_diff = symmetric_strain_tensor_norm * mixing_len * mixing_len;
@@ -106,8 +105,8 @@ INSFVMixingLengthReynoldsStress::computeQpResidual()
   norm_strain_rate += _dim >= 2 ? _v_var->adGradSln(*_face_info)(_axis_index) * _normal(1) : 0;
   norm_strain_rate += _dim >= 3 ? _w_var->adGradSln(*_face_info)(_axis_index) * _normal(2) : 0;
 
-  ADReal rho = _rho(
-      std::make_tuple(_face_info, _cd_limiter.get(), true, faceArgSubdomains(_face_info)));
+  const ADReal rho = _rho(std::make_tuple(
+      _face_info, Moose::FV::LimiterType::CentralDifference, true, faceArgSubdomains(_face_info)));
 
   // Return the turbulent stress contribution to the momentum equation
   return -1 * rho * eddy_diff * norm_strain_rate;
