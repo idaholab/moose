@@ -20,7 +20,6 @@
     abs_zero = 1e-6
     # because output has execute_on = 'final'
     recover = false
-    mesh_mode = 'REPLICATED'
     max_parallel = 1
   []
 []

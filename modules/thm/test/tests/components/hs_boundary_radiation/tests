@@ -21,6 +21,5 @@
     max_parallel = 1
     # because output has execute_on = 'final'
     recover = false
-    mesh_mode = 'REPLICATED'
   []
 []
