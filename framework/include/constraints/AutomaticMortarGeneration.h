@@ -205,7 +205,7 @@ public:
   void computeInactiveLMNodes();
 
   /**
-   * Computes inactive secondary nodes when wrong edge dropping behavior enabled
+   * Computes inactive secondary nodes when incorrect edge dropping behavior is enabled
    * (any node touching a partially or fully dropped element is dropped)
    */
   void computeWrongInactiveLMNodes();
@@ -249,7 +249,7 @@ public:
   int dim() const { return mesh.mesh_dimension(); }
 
   /**
-   * @return The set of nodes on which mortar constraint is not active
+   * @return The set of nodes on which mortar constraints are not active
    */
   const std::unordered_set<const Node *> & getInactiveLMNodes() const
   {

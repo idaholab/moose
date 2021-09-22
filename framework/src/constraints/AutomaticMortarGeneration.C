@@ -672,7 +672,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
   // Number of new msm elems can be created by clipping and triangulating
   // secondary node with primary node
   // Note this parameter is subject to change, just a heuristic for now
-  const int multiplicity = 16;
+  constexpr int multiplicity = 16;
 
   dof_id_type local_id_index = 0;
   std::size_t node_unique_id_offset = 0;
@@ -1035,7 +1035,6 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
     // End loop through mortar constraint pairs
   }
 
-#ifndef NDEBUG
   // Output mortar segment mesh
   if (_debug)
   {
@@ -1053,7 +1052,6 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
       if (msm_el->type() != TRI3)
         msm_el->subdomain_id()--;
   }
-#endif
 
   // Loop over the msm_elem_to_info object and build a bi-directional
   // multimap from secondary elements to the primary Elems which they are
@@ -1085,7 +1083,6 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
     }
   }
 
-#ifndef NDEBUG
   // Print mortar segment mesh statistics
   if (_debug)
   {
@@ -1095,7 +1092,6 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
       mooseWarning("Mortar segment mesh statistics intended for debugging purposes in serial only, "
                    "parallel will only provide statistics for local mortar segment mesh.");
   }
-#endif
 }
 
 void
@@ -1115,7 +1111,7 @@ AutomaticMortarGeneration::msmStatistics()
     StatisticsVector<Real> secondary; // secondary.reserve(mesh.n_elem());
     StatisticsVector<Real> msm;       // msm.reserve(mortar_segment_mesh->n_elem());
 
-    for (auto el : mesh.active_element_ptr_range())
+    for (auto * el : mesh.active_element_ptr_range())
     {
       // Add secondary and primary elem volumes to statistics vector
       if (el->subdomain_id() == secondary_subd_id)

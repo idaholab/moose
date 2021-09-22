@@ -33,7 +33,7 @@ public:
   /**
    * Check that a point is inside the secondary polygon (for verification only)
    */
-  bool isInsideSecondary(const Point pt) const;
+  bool isInsideSecondary(const Point & pt) const;
 
   /**
    * Checks whether polygons are disjoint for an easy out
@@ -86,7 +86,7 @@ public:
   /**
    * Get center point of secondary element
    */
-  const Point center() { return _center; }
+  const Point & center() const { return _center; }
 
   /**
    * Get area fraction remaining after clipping against primary elements
@@ -96,7 +96,7 @@ public:
   /**
    * Get 3D position of node of linearized secondary element
    */
-  const Point point(unsigned int i) const
+  Point point(unsigned int i) const
   {
     return (_secondary_poly[i](0) * _u) + (_secondary_poly[i](1) * _v) + _center;
   }

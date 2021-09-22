@@ -106,10 +106,8 @@ MortarSegmentHelper::isDisjoint(const std::vector<Point> & poly) const
 
     bool all_outside = true;
     for (auto pt : poly)
-    {
       if (is_inside(pt, _area_tol))
         all_outside = false;
-    }
 
     if (all_outside)
       return true;
