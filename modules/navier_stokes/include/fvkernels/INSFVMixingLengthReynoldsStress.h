@@ -38,10 +38,12 @@ protected:
   const INSFVVelocityVariable * const _w_var;
 
   /// Density
-  const Real & _rho;
+  const FunctorInterface<ADReal> & _rho;
 
   /// Turbulent eddy mixing length
-  const VariableValue & _mixing_len;
-  /// Turbulent eddy mixing length for the neighbor cell
-  const VariableValue & _mixing_len_neighbor;
+  const FunctorInterface<ADReal> & _mixing_len;
+
+  /// Central difference limiter which provides a convenient way to construct average interpolations
+  /// at faces
+  std::unique_ptr<Moose::FV::Limiter<ADReal>> _cd_limiter;
 };
