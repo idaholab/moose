@@ -483,11 +483,13 @@ public:
 
   using FunctorArg = typename Moose::ADType<OutputType>::type;
   using typename Moose::Functor<FunctorArg>::FaceArg;
+  using typename Moose::Functor<FunctorArg>::SingleSidedFaceArg;
   using typename Moose::Functor<FunctorArg>::ElemFromFaceArg;
   using typename Moose::Functor<FunctorArg>::ValueType;
   using typename Moose::Functor<FunctorArg>::DotType;
   using typename Moose::Functor<FunctorArg>::GradientType;
-  ADReal getInternalFaceValue(const FaceArg & face) const;
+  ADReal getInternalFaceValue(
+      const std::tuple<const FaceInfo *, const Moose::FV::Limiter<ADReal> *, bool> & face) const;
 
 protected:
   /**
@@ -519,13 +521,16 @@ private:
   ValueType evaluate(const Elem * const & elem, unsigned int) const override final;
   ValueType evaluate(const ElemFromFaceArg & elem_from_face, unsigned int) const override final;
   ValueType evaluate(const FaceArg & face, unsigned int) const override final;
+  ValueType evaluate(const SingleSidedFaceArg & face, unsigned int) const override final;
   GradientType evaluateGradient(const Elem * const & elem, unsigned int) const override final;
   GradientType evaluateGradient(const ElemFromFaceArg & elem_from_face,
                                 unsigned int) const override final;
   GradientType evaluateGradient(const FaceArg & face, unsigned int) const override final;
+  GradientType evaluateGradient(const SingleSidedFaceArg & face, unsigned int) const override final;
   DotType evaluateDot(const Elem * const & elem, unsigned int) const override final;
   DotType evaluateDot(const ElemFromFaceArg & elem_from_face, unsigned int) const override final;
   DotType evaluateDot(const FaceArg & face, unsigned int) const override final;
+  DotType evaluateDot(const SingleSidedFaceArg & face, unsigned int) const override final;
 
   /**
    * @return the extrapolated value on the boundary face associated with \p fi
@@ -646,6 +651,13 @@ protected:
   bool _two_term_boundary_expansion;
 
 private:
+  /**
+   * A helper function for evaluating this variable with face arguments. This is leveraged by both
+   * \p FaceArg and \p SingleSidedFaceArg evaluate overloads
+   */
+  template <typename FaceCallingArg>
+  ValueType evaluateFaceHelper(const FaceCallingArg & face) const;
+
   /// A cache for storing gradients on faces
   mutable std::unordered_map<const FaceInfo *, VectorValue<ADReal>> _face_to_grad;
 
@@ -674,6 +686,24 @@ MooseVariableFV<OutputType>::evaluate(const Elem * const & elem, unsigned int) c
 }
 
 template <typename OutputType>
+template <typename FaceCallingArg>
+typename MooseVariableFV<OutputType>::ValueType
+MooseVariableFV<OutputType>::evaluateFaceHelper(const FaceCallingArg & face) const
+{
+  const FaceInfo * const fi = std::get<0>(face);
+  mooseAssert(fi, "The face information must be non-null");
+  if (isExtrapolatedBoundaryFace(*fi))
+    return getExtrapolatedBoundaryFaceValue(*fi);
+  else if (isInternalFace(*fi))
+    return getInternalFaceValue(std::make_tuple(fi, std::get<1>(face), std::get<2>(face)));
+  else
+  {
+    mooseAssert(isDirichletBoundaryFace(*fi), "We've run out of face types");
+    return getDirichletBoundaryFaceValue(*fi);
+  }
+}
+
+template <typename OutputType>
 typename MooseVariableFV<OutputType>::GradientType
 MooseVariableFV<OutputType>::evaluateGradient(const Elem * const & elem, unsigned int) const
 {
@@ -683,6 +713,15 @@ MooseVariableFV<OutputType>::evaluateGradient(const Elem * const & elem, unsigne
 template <typename OutputType>
 typename MooseVariableFV<OutputType>::GradientType
 MooseVariableFV<OutputType>::evaluateGradient(const FaceArg & face, unsigned int) const
+{
+  const auto * const fi = std::get<0>(face);
+  mooseAssert(fi, "We must have a non-null face information");
+  return adGradSln(*fi);
+}
+
+template <typename OutputType>
+typename MooseVariableFV<OutputType>::GradientType
+MooseVariableFV<OutputType>::evaluateGradient(const SingleSidedFaceArg & face, unsigned int) const
 {
   const auto * const fi = std::get<0>(face);
   mooseAssert(fi, "We must have a non-null face information");
@@ -701,6 +740,13 @@ typename MooseVariableFV<OutputType>::DotType
 MooseVariableFV<OutputType>::evaluateDot(const FaceArg &, unsigned int) const
 {
   mooseError("MooseVariableFV::evaluateDot(FaceArg) not yet implemented");
+}
+
+template <typename OutputType>
+typename MooseVariableFV<OutputType>::DotType
+MooseVariableFV<OutputType>::evaluateDot(const SingleSidedFaceArg &, unsigned int) const
+{
+  mooseError("MooseVariableFV::evaluateDot(SingleSidedFaceArg) not yet implemented");
 }
 
 template <>

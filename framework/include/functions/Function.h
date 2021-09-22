@@ -112,6 +112,7 @@ public:
 
 private:
   using typename Moose::Functor<T>::FaceArg;
+  using typename Moose::Functor<T>::SingleSidedFaceArg;
   using typename Moose::Functor<T>::ElemFromFaceArg;
   using typename Moose::Functor<T>::ElemQpArg;
   using typename Moose::Functor<T>::ElemSideQpArg;
@@ -128,6 +129,7 @@ private:
   ValueType evaluate(const ElemFromFaceArg & elem_from_face,
                      unsigned int state) const override final;
   ValueType evaluate(const FaceArg & face, unsigned int state) const override final;
+  ValueType evaluate(const SingleSidedFaceArg & face, unsigned int state) const override final;
   ValueType evaluate(const ElemQpArg & qp, unsigned int state) const override final;
   ValueType evaluate(const ElemSideQpArg & elem_side_qp, unsigned int state) const override final;
   ValueType evaluate(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
@@ -137,6 +139,8 @@ private:
   GradientType evaluateGradient(const ElemFromFaceArg & elem_from_face,
                                 unsigned int state) const override final;
   GradientType evaluateGradient(const FaceArg & face, unsigned int state) const override final;
+  GradientType evaluateGradient(const SingleSidedFaceArg & face,
+                                unsigned int state) const override final;
   GradientType evaluateGradient(const ElemQpArg & qp, unsigned int state) const override final;
   GradientType evaluateGradient(const ElemSideQpArg & elem_side_qp,
                                 unsigned int state) const override final;
@@ -148,6 +152,7 @@ private:
   DotType evaluateDot(const ElemFromFaceArg & elem_from_face,
                       unsigned int state) const override final;
   DotType evaluateDot(const FaceArg & face, unsigned int state) const override final;
+  DotType evaluateDot(const SingleSidedFaceArg & face, unsigned int state) const override final;
   DotType evaluateDot(const ElemQpArg & qp, unsigned int state) const override final;
   DotType evaluateDot(const ElemSideQpArg & elem_side_qp, unsigned int state) const override final;
   DotType evaluateDot(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,

@@ -47,6 +47,7 @@ public:
                   PolymorphicLambda my_lammy);
 
   using typename Moose::Functor<T>::FaceArg;
+  using typename Moose::Functor<T>::SingleSidedFaceArg;
   using typename Moose::Functor<T>::ElemFromFaceArg;
   using typename Moose::Functor<T>::ElemQpArg;
   using typename Moose::Functor<T>::ElemSideQpArg;
@@ -59,6 +60,7 @@ public:
 protected:
   using ElemFn = std::function<T(const Elem * const &, const unsigned int &)>;
   using ElemAndFaceFn = std::function<T(const ElemFromFaceArg &, const unsigned int &)>;
+  using FaceFn = std::function<T(const SingleSidedFaceArg &, const unsigned int &)>;
   using ElemQpFn = std::function<T(const ElemQpArg &, const unsigned int &)>;
   using ElemSideQpFn = std::function<T(const ElemSideQpArg &, const unsigned int &)>;
   using TQpFn = std::function<T(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> &,
@@ -67,6 +69,7 @@ protected:
   ValueType evaluate(const Elem * const & elem, unsigned int state) const override;
   ValueType evaluate(const ElemFromFaceArg & elem_from_face, unsigned int state) const override;
   ValueType evaluate(const FaceArg & face, unsigned int state) const override;
+  ValueType evaluate(const SingleSidedFaceArg & face, unsigned int state) const override;
   ValueType evaluate(const ElemQpArg & elem_qp, unsigned int state) const override;
   ValueType evaluate(const ElemSideQpArg & elem_side_qp, unsigned int state) const override;
   ValueType evaluate(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
@@ -76,6 +79,7 @@ protected:
   GradientType evaluateGradient(const ElemFromFaceArg & elem_from_face,
                                 unsigned int state) const override;
   GradientType evaluateGradient(const FaceArg & face, unsigned int state) const override;
+  GradientType evaluateGradient(const SingleSidedFaceArg & face, unsigned int state) const override;
   GradientType evaluateGradient(const ElemQpArg & elem_qp, unsigned int state) const override;
   GradientType evaluateGradient(const ElemSideQpArg & elem_side_qp,
                                 unsigned int state) const override;
@@ -86,6 +90,7 @@ protected:
   DotType evaluateDot(const Elem * const & elem, unsigned int state) const override;
   DotType evaluateDot(const ElemFromFaceArg & elem_from_face, unsigned int state) const override;
   DotType evaluateDot(const FaceArg & face, unsigned int state) const override;
+  DotType evaluateDot(const SingleSidedFaceArg & face, unsigned int state) const override;
   DotType evaluateDot(const ElemQpArg & elem_qp, unsigned int state) const override;
   DotType evaluateDot(const ElemSideQpArg & elem_side_qp, unsigned int state) const override;
   DotType evaluateDot(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
@@ -105,6 +110,10 @@ private:
   /// Functors that return the value on the requested element that will perform any necessary
   /// ghosting operations if this object is not technically defined on the requested subdomain
   std::unordered_map<SubdomainID, ElemAndFaceFn> _elem_from_face_functor;
+
+  /// Functors that return the property value on the requested side of the face (e.g. the
+  /// infinitetesimal + or - side of the face)
+  std::unordered_map<SubdomainID, FaceFn> _face_functor;
 
   /// Functors that will evaluate elements at quadrature points
   std::unordered_map<SubdomainID, ElemQpFn> _elem_qp_functor;
@@ -139,6 +148,7 @@ FunctorMaterialPropertyImpl<T>::setFunctor(const MooseMesh & mesh,
                  block_id,
                  ". Another material must already declare this property on that block.");
     _elem_from_face_functor.emplace(block_id, my_lammy);
+    _face_functor.emplace(block_id, my_lammy);
     _elem_qp_functor.emplace(block_id, my_lammy);
     _elem_side_qp_functor.emplace(block_id, my_lammy);
     _tqp_functor.emplace(block_id, my_lammy);
@@ -192,6 +202,16 @@ FunctorMaterialPropertyImpl<T>::evaluate(const ElemFromFaceArg & elem_from_face,
   mooseAssert(it != _elem_from_face_functor.end(),
               subdomainErrorMessage(std::get<2>(elem_from_face)));
   return it->second(elem_from_face, state);
+}
+
+template <typename T>
+typename FunctorMaterialPropertyImpl<T>::ValueType
+FunctorMaterialPropertyImpl<T>::evaluate(const SingleSidedFaceArg & face, unsigned int state) const
+{
+  const auto sub_id = std::get<3>(face);
+  auto it = _face_functor.find(sub_id);
+  mooseAssert(it != _face_functor.end(), subdomainErrorMessage(sub_id));
+  return it->second(face, state);
 }
 
 template <typename T>
@@ -288,6 +308,13 @@ FunctorMaterialPropertyImpl<T>::evaluateGradient(const FaceArg &, unsigned int) 
 
 template <typename T>
 typename FunctorMaterialPropertyImpl<T>::GradientType
+FunctorMaterialPropertyImpl<T>::evaluateGradient(const SingleSidedFaceArg &, unsigned int) const
+{
+  mooseError("Gradients of functor material properties not implemented");
+}
+
+template <typename T>
+typename FunctorMaterialPropertyImpl<T>::GradientType
 FunctorMaterialPropertyImpl<T>::evaluateGradient(const ElemQpArg &, unsigned int) const
 {
   mooseError("Gradients of functor material properties not implemented");
@@ -330,8 +357,8 @@ FunctorMaterialPropertyImpl<T>::evaluateDot(const FaceArg &, unsigned int) const
 }
 
 template <typename T>
-typename FunctorMaterialProperty<T>::DotType
-FunctorMaterialProperty<T>::evaluateDot(const ElemQpArg &, unsigned int) const
+typename FunctorMaterialPropertyImpl<T>::DotType
+FunctorMaterialPropertyImpl<T>::evaluateDot(const SingleSidedFaceArg &, unsigned int) const
 {
   mooseError("Time derivatives of functor material properties not implemented");
 }
@@ -369,6 +396,7 @@ class FunctorMaterialProperty : public Moose::Functor<T>
 {
 public:
   using typename Moose::Functor<T>::FaceArg;
+  using typename Moose::Functor<T>::SingleSidedFaceArg;
   using typename Moose::Functor<T>::ElemFromFaceArg;
   using typename Moose::Functor<T>::ElemQpArg;
   using typename Moose::Functor<T>::ElemSideQpArg;
@@ -437,6 +465,10 @@ protected:
   {
     return _wrapped->evaluate(face, state);
   }
+  ValueType evaluate(const SingleSidedFaceArg & face, unsigned int state = 0) const override
+  {
+    return _wrapped->evaluate(face, state);
+  }
   ValueType evaluate(const ElemQpArg & qp, unsigned int state = 0) const override
   {
     return _wrapped->evaluate(qp, state);
@@ -464,6 +496,11 @@ protected:
   {
     return _wrapped->evaluateGradient(face, state);
   }
+  GradientType evaluateGradient(const SingleSidedFaceArg & face,
+                                unsigned int state = 0) const override
+  {
+    return _wrapped->evaluateGradient(face, state);
+  }
   GradientType evaluateGradient(const ElemQpArg & qp, unsigned int state = 0) const override
   {
     return _wrapped->evaluateGradient(qp, state);
@@ -487,6 +524,10 @@ protected:
     return _wrapped->evaluateDot(elem_from_face, state);
   }
   DotType evaluateDot(const FaceArg & face, unsigned int state = 0) const override
+  {
+    return _wrapped->evaluateDot(face, state);
+  }
+  DotType evaluateDot(const SingleSidedFaceArg & face, unsigned int state = 0) const override
   {
     return _wrapped->evaluateDot(face, state);
   }

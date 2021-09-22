@@ -561,7 +561,8 @@ MooseVariableFV<OutputType>::isInternalFace(const FaceInfo & fi) const
 
 template <typename OutputType>
 ADReal
-MooseVariableFV<OutputType>::getInternalFaceValue(const FaceArg & face) const
+MooseVariableFV<OutputType>::getInternalFaceValue(
+    const std::tuple<const FaceInfo *, const Moose::FV::Limiter<ADReal> *, bool> & face) const
 {
   const FaceInfo * const fi = std::get<0>(face);
   mooseAssert(fi, "The face information must be non-null");
@@ -1098,17 +1099,14 @@ template <typename OutputType>
 typename MooseVariableFV<OutputType>::ValueType
 MooseVariableFV<OutputType>::evaluate(const FaceArg & face, unsigned int) const
 {
-  const FaceInfo * const fi = std::get<0>(face);
-  mooseAssert(fi, "The face information must be non-null");
-  if (isExtrapolatedBoundaryFace(*fi))
-    return getExtrapolatedBoundaryFaceValue(*fi);
-  else if (isInternalFace(*fi))
-    return getInternalFaceValue(face);
-  else
-  {
-    mooseAssert(isDirichletBoundaryFace(*fi), "We've run out of face types");
-    return getDirichletBoundaryFaceValue(*fi);
-  }
+  return evaluateFaceHelper(face);
+}
+
+template <typename OutputType>
+typename MooseVariableFV<OutputType>::ValueType
+MooseVariableFV<OutputType>::evaluate(const SingleSidedFaceArg & face, unsigned int) const
+{
+  return evaluateFaceHelper(face);
 }
 
 template <typename OutputType>

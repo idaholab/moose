@@ -73,6 +73,20 @@ public:
       tuple<const FaceInfo *, Moose::FV::LimiterType, bool, std::pair<SubdomainID, SubdomainID>>;
 
   /**
+   * A typedef defining a "single-sided face" evaluation calling argument. This is identical to the
+   * \p FaceArg argument with the exception that a single SubdomainID is given as the last argument
+   * to the tuple. This allows disambiguation, in \p FunctorMaterialProperty contexts, of which
+   * property definition to use at a face on which there may be different property definitions on
+   * either side of the face. Additionally this overload can be useful when on an external boundary
+   * face when we want to avoid using ghost information
+   */
+  using SingleSidedFaceArg =
+      std::tuple<const FaceInfo *,
+                 const Moose::FV::Limiter<typename Moose::FV::LimiterValueType<T>::value_type> *,
+                 bool,
+                 SubdomainID>;
+
+  /**
    * People should think of this geometric argument as corresponding to the location in space of the
    * provided element centroid, \b not as corresponding to the location of the provided face
    * information. Summary of data in this argument:
@@ -128,6 +142,7 @@ public:
   ValueType operator()(const libMesh::Elem * const & elem, unsigned int state = 0) const;
   ValueType operator()(const ElemFromFaceArg & elem_from_face, unsigned int state = 0) const;
   ValueType operator()(const FaceArg & face, unsigned int state = 0) const;
+  ValueType operator()(const SingleSidedFaceArg & face, unsigned int state = 0) const;
   ValueType operator()(const ElemQpArg & qp, unsigned int state = 0) const;
   ValueType operator()(const ElemSideQpArg & qp, unsigned int state = 0) const;
   ValueType operator()(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
@@ -142,6 +157,7 @@ public:
   GradientType gradient(const libMesh::Elem * const & elem, unsigned int state = 0) const;
   GradientType gradient(const ElemFromFaceArg & elem_from_face, unsigned int state = 0) const;
   GradientType gradient(const FaceArg & face, unsigned int state = 0) const;
+  GradientType gradient(const SingleSidedFaceArg & face, unsigned int state = 0) const;
   GradientType gradient(const ElemQpArg & qp, unsigned int state = 0) const;
   GradientType gradient(const ElemSideQpArg & qp, unsigned int state = 0) const;
   GradientType gradient(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
@@ -156,6 +172,7 @@ public:
   DotType dot(const libMesh::Elem * const & elem, unsigned int state = 0) const;
   DotType dot(const ElemFromFaceArg & elem_from_face, unsigned int state = 0) const;
   DotType dot(const FaceArg & face, unsigned int state = 0) const;
+  DotType dot(const SingleSidedFaceArg & face, unsigned int state = 0) const;
   DotType dot(const ElemQpArg & qp, unsigned int state = 0) const;
   DotType dot(const ElemSideQpArg & qp, unsigned int state = 0) const;
   DotType dot(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
@@ -193,6 +210,14 @@ protected:
    * @return The functor evaluated at the requested time and space
    */
   virtual ValueType evaluate(const FaceArg & face, unsigned int state) const = 0;
+
+  /**
+   * @param face See the \p SingleSidedFaceArg doxygen
+   * @param state Corresponds to a time argument. A value of 0 corresponds to current time, 1
+   * corresponds to the old time, 2 corresponds to the older time, etc.
+   * @return The functor evaluated at the requested time and space
+   */
+  virtual ValueType evaluate(const SingleSidedFaceArg & face, unsigned int state) const = 0;
 
   /**
    * @param qp See the \p ElemQpArg doxygen
@@ -247,6 +272,15 @@ protected:
   virtual GradientType evaluateGradient(const FaceArg & face, unsigned int state) const = 0;
 
   /**
+   * @param face See the \p SingleSidedFaceArg doxygen
+   * @param state Corresponds to a time argument. A value of 0 corresponds to current time, 1
+   * corresponds to the old time, 2 corresponds to the older time, etc.
+   * @return The functor gradient evaluated at the requested time and space
+   */
+  virtual GradientType evaluateGradient(const SingleSidedFaceArg & face,
+                                        unsigned int state) const = 0;
+
+  /**
    * @param qp See the \p ElemQpArg doxygen
    * @param state Corresponds to a time argument. A value of 0 corresponds to current time, 1
    * corresponds to the old time, 2 corresponds to the older time, etc.
@@ -297,6 +331,14 @@ protected:
    * @return The functor time derivative evaluated at the requested time and space
    */
   virtual DotType evaluateDot(const FaceArg & face, unsigned int state) const = 0;
+
+  /**
+   * @param face See the \p SingleSidedFaceArg doxygen
+   * @param state Corresponds to a time argument. A value of 0 corresponds to current time, 1
+   * corresponds to the old time, 2 corresponds to the older time, etc.
+   * @return The functor time derivative evaluated at the requested time and space
+   */
+  virtual DotType evaluateDot(const SingleSidedFaceArg & face, unsigned int state) const = 0;
 
   /**
    * @param qp See the \p ElemQpArg doxygen
@@ -397,6 +439,13 @@ Functor<T>::operator()(const ElemFromFaceArg & elem_from_face, const unsigned in
 template <typename T>
 typename Functor<T>::ValueType
 Functor<T>::operator()(const FaceArg & face, const unsigned int state) const
+{
+  return evaluate(face, state);
+}
+
+template <typename T>
+typename Functor<T>::ValueType
+Functor<T>::operator()(const SingleSidedFaceArg & face, const unsigned int state) const
 {
   return evaluate(face, state);
 }
@@ -567,6 +616,13 @@ Functor<T>::gradient(const FaceArg & face, const unsigned int state) const
 
 template <typename T>
 typename Functor<T>::GradientType
+Functor<T>::gradient(const SingleSidedFaceArg & face, const unsigned int state) const
+{
+  return evaluateGradient(face, state);
+}
+
+template <typename T>
+typename Functor<T>::GradientType
 Functor<T>::gradient(const ElemQpArg & elem_qp, const unsigned int state) const
 {
   return evaluateGradient(elem_qp, state);
@@ -610,6 +666,13 @@ Functor<T>::dot(const FaceArg & face, const unsigned int state) const
 
 template <typename T>
 typename Functor<T>::DotType
+Functor<T>::dot(const SingleSidedFaceArg & face, const unsigned int state) const
+{
+  return evaluateDot(face, state);
+}
+
+template <typename T>
+typename Functor<T>::DotType
 Functor<T>::dot(const ElemQpArg & elem_qp, const unsigned int state) const
 {
   return evaluateDot(elem_qp, state);
@@ -638,6 +701,7 @@ class ConstantFunctor : public Functor<T>
 {
 public:
   using typename Functor<T>::FaceArg;
+  using typename Functor<T>::SingleSidedFaceArg;
   using typename Functor<T>::ElemFromFaceArg;
   using typename Functor<T>::ElemQpArg;
   using typename Functor<T>::ElemSideQpArg;
@@ -657,6 +721,10 @@ private:
   }
   ValueType evaluate(const ElemFromFaceArg &, unsigned int) const override final { return _value; }
   ValueType evaluate(const FaceArg &, unsigned int) const override final { return _value; }
+  ValueType evaluate(const SingleSidedFaceArg &, unsigned int) const override final
+  {
+    return _value;
+  }
   ValueType evaluate(const ElemQpArg &, unsigned int) const override final { return _value; }
   ValueType evaluate(const ElemSideQpArg &, unsigned int) const override final { return _value; }
   ValueType evaluate(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> &,
@@ -674,6 +742,10 @@ private:
     return 0;
   }
   GradientType evaluateGradient(const FaceArg &, unsigned int) const override final { return 0; }
+  GradientType evaluateGradient(const SingleSidedFaceArg &, unsigned int) const override final
+  {
+    return 0;
+  }
   GradientType evaluateGradient(const ElemQpArg &, unsigned int) const override final { return 0; }
   GradientType evaluateGradient(const ElemSideQpArg &, unsigned int) const override final
   {
@@ -691,6 +763,7 @@ private:
   }
   DotType evaluateDot(const ElemFromFaceArg &, unsigned int) const override final { return 0; }
   DotType evaluateDot(const FaceArg &, unsigned int) const override final { return 0; }
+  DotType evaluateDot(const SingleSidedFaceArg &, unsigned int) const override final { return 0; }
   DotType evaluateDot(const ElemQpArg &, unsigned int) const override final { return 0; }
   DotType evaluateDot(const ElemSideQpArg &, unsigned int) const override final { return 0; }
   DotType evaluateDot(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> &,
