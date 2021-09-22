@@ -22,8 +22,8 @@ INSFVMixingLengthReynoldsStress::validParams()
   params.addRequiredCoupledVar("u", "The velocity in the x direction.");
   params.addCoupledVar("v", "The velocity in the y direction.");
   params.addCoupledVar("w", "The velocity in the z direction.");
-  params.addRequiredCoupledVar("rho", "fluid density");
-  params.addRequiredCoupledVar("mixing_length", "Turbulent eddy mixing length.");
+  params.addRequiredParam<MooseFunctorName>("rho", "fluid density");
+  params.addRequiredParam<MooseFunctorName>("mixing_length", "Turbulent eddy mixing length.");
   MooseEnum momentum_component("x=0 y=1 z=2", "x");
   params.addRequiredParam<MooseEnum>(
       "momentum_component",
