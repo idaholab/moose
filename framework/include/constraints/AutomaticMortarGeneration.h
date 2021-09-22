@@ -203,6 +203,11 @@ public:
    * Used to enforce zero values on inactive DoFs of nodal variables.
    */
   void computeInactiveLMNodes();
+
+  /**
+   * Computes inactive secondary nodes when wrong edge dropping behavior enabled
+   * (any node touching a partially or fully dropped element is dropped)
+   */
   void computeWrongInactiveLMNodes();
 
   /**
