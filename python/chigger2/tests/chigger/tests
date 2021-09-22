@@ -1,0 +1,6 @@
+[Tests]
+  [./command_line]
+    type = PythonUnitTest
+    input = test_chigger.py
+  [../]
+[]

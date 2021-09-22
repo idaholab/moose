@@ -1,0 +1,8 @@
+[Tests]
+  [./test]
+    type = ImageDiff
+    command = outline.py
+    imagediff = 'outline.png'
+    cli_args = '--test'
+  [../]
+[]

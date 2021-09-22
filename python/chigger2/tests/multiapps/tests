@@ -1,0 +1,8 @@
+[Tests]
+  [./auto]
+    type = ImageDiff
+    command = multiapp.py
+    imagediff = 'multiapp.png'
+    cli_args = '--test'
+  [../]
+[]

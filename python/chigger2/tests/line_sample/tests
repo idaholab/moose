@@ -1,0 +1,33 @@
+[Tests]
+  [./default]
+    type = ImageDiff
+    command = line_sample_default.py
+    imagediff = 'line_sample_default.png'
+    allowed_linux = 0.95
+    cli_args = '--test'
+  [../]
+
+  [./line_sample]
+    type = ImageDiff
+    command = line_sample.py
+    imagediff = 'line_sample.png'
+    allowed_linux = 0.92
+    cli_args = '--test'
+  [../]
+
+  [./line_sample_elem]
+    type = ImageDiff
+    command = line_sample_elem.py
+    imagediff = 'line_sample_elem.png'
+    allowed_linux = 0.97
+    cli_args = '--test'
+  [../]
+
+  [./line_sample_error]
+    type = RunApp
+    command = line_sample_error.py
+    expect_out = "Unable to locate the variable, invalid_name, in the supplied source data."
+    errors = "zzzzzzz" # Suppress default error checking
+    cli_args = '--test'
+  [../]
+[]

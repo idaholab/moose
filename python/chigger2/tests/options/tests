@@ -1,0 +1,7 @@
+[Tests]
+  [./Option]
+    type = PythonUnitTest
+    buffer = True
+    input = test_Option.py
+  [../]
+[]

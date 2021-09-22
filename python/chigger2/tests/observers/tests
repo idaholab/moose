@@ -1,0 +1,32 @@
+[Tests]
+  [./bindings]
+    type = ImageDiff
+    command = bindings.py
+    display_required = true
+    imagediff = 'bindings_select.png bindings_move.png bindings_font.png bindings_alpha.png'
+  [../]
+  [./timer]
+    type = RunApp
+    command = timer.py
+    expect_out = "count = 3"
+    display_required = true
+  [../]
+  [./custom_timer]
+    type = RunApp
+    command = custom_timer.py
+    expect_out = "This was called.\nThis was called."
+    display_required = true
+  [../]
+  [./keypress]
+    type = RunApp
+    command = keyobserver.py
+    expect_out = "the key was pressed"
+    display_required = true
+  [../]
+  [./mousemove]
+    type = RunApp
+    command = mouseobserver.py
+    expect_out = "the mouse moved"
+    display_required = true
+  [../]
+[]

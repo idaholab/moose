@@ -1,0 +1,46 @@
+[Tests]
+  [Window]
+    [default]
+      type = ChiggerImageDiff
+      command = default.py
+      imagediff = default.png
+    []
+    [solid]
+      type = ChiggerImageDiff
+      command = default.py
+      imagediff = solid.png
+      cli_args = "\"Window:background_color=(1,0,1)\" \"Window:filename='solid.png'\""
+    []
+    [gradient]
+      type = ChiggerImageDiff
+      command = default.py
+      imagediff = gradient.png
+      cli_args = "\"Window:background_color2=(0,1,1)\" \"Window:filename='gradient.png'\""
+    []
+  []
+  [Viewport]
+    [default]
+      type = ChiggerImageDiff
+      command = viewport.py
+      imagediff = default.png
+    []
+    [solid]
+      type = ChiggerImageDiff
+      command = viewport.py
+      imagediff = viewport_solid.png
+      cli_args = "\"Viewport:left:background_color=(1,0,1)\" "
+                 "\"Viewport:right:background_color=(0,1,1)\" "
+                 "\"Window:filename='viewport_solid.png'\""
+    []
+    [gradient]
+      type = ChiggerImageDiff
+      command = viewport.py
+      imagediff = viewport_gradient.png
+      cli_args = "\"Viewport:left:background_color=(1,0,1)\" "
+                 "\"Viewport:left:background_color2=(1,0,0)\" "
+                 "\"Viewport:right:background_color=(0,1,1)\" "
+                 "\"Viewport:right:background_color2=(0,0,1)\" "
+                 "\"Window:filename='viewport_gradient.png'\""
+    []
+  []
+[]

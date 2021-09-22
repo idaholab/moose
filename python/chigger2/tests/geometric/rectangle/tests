@@ -1,0 +1,8 @@
+[Tests]
+  [./test]
+    type = ImageDiff
+    command = plane_source.py
+    imagediff = 'plane_source.png'
+    cli_args = '--test'
+  [../]
+[]

@@ -1,0 +1,8 @@
+[Tests]
+  [./test]
+    type = ImageDiff
+    command = cylinder_source.py
+    imagediff = 'cylinder_source.png'
+    cli_args = '--test'
+  [../]
+[]

@@ -1,0 +1,12 @@
+[Tests]
+  [2D]
+    type = ChiggerImageDiff
+    command = source2D.py
+    imagediff = 'source2D_on.png source2D_off.png'
+  []
+  [3D]
+    type = ChiggerImageDiff
+    command = source3D.py
+    imagediff = 'source3D_on.png source3D_off.png'
+  []
+[]

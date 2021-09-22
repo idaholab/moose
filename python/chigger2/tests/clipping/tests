@@ -1,0 +1,50 @@
+[Tests]
+  [./plane]
+    type = ImageDiff
+    command = clip.py
+    imagediff = 'clip.png'
+    cli_args = '--test'
+  [../]
+
+  [./plane_elem_var]
+    type = ImageDiff
+    command = clip_elem.py
+    imagediff = 'clip_elem.png'
+    cli_args = '--test'
+  [../]
+
+  [./clip_z]
+    type = ImageDiff
+    command = clip_z.py
+    imagediff = 'clip_z.png'
+    cli_args = '--test'
+  [../]
+
+  [./dual]
+    type = ImageDiff
+    command = dual.py
+    imagediff = dual.png
+    cli_args = '--test'
+  [../]
+
+  [./box]
+    type = ImageDiff
+    command = box_clip.py
+    imagediff = 'box_clip.png'
+    cli_args = '--test'
+  [../]
+
+  [./dynamic]
+    type = ImageDiff
+    command = clip_change.py
+    imagediff = 'clip_change0.png clip_change1.png clip_change2.png'
+    cli_args = '--test'
+  [../]
+
+  [./multiple]
+    type = ImageDiff
+    command = multiple_clips.py
+    imagediff = 'multiple_clips.png'
+    cli_args = '--test'
+  [../]
+[]

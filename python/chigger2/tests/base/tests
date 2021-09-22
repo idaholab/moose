@@ -1,0 +1,10 @@
+[Tests]
+  [ChiggerObject]
+    type = PythonUnitTest
+    input = test_ChiggerObject.py
+  []
+  [ChiggerAlgorithm]
+    type = PythonUnitTest
+    input = test_ChiggerAlgorithm.py
+  []
+[]

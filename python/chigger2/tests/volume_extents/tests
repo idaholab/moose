@@ -1,0 +1,26 @@
+[Tests]
+  [./result]
+    type = ImageDiff
+    command = extents.py
+    imagediff = 'extents.png'
+    allowed_darwin = 0.96
+    allowed_linux = 0.96
+    cli_args = '--test'
+  [../]
+  [./source]
+    type = ImageDiff
+    command = axes_source.py
+    imagediff = 'axes_source.png'
+    allowed_darwin = 0.96
+    allowed_linux = 0.96
+    cli_args = '--test'
+  [../]
+  [./dynamic]
+    type = ImageDiff
+    command = extents_dynamic.py
+    imagediff = 'extents_on.png extents_off.png'
+    allowed_darwin = 0.96
+    allowed_linux = 0.96
+    display_required = true
+  [../]
+[]

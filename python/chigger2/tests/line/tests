@@ -1,0 +1,126 @@
+[Tests]
+  [./default]
+    type = ImageDiff
+    command = line.py
+    imagediff = 'line.png'
+    allowed_linux = 0.94
+<<<<<<< HEAD
+    requirement = 'Chigger shall provide a line plot widget'
+    design = ''
+    issues = '#7451'
+=======
+    cli_args = '--test'
+>>>>>>> Chigger re-factor
+  [../]
+
+  [./single_point]
+    type = ImageDiff
+    command = single_point.py
+    imagediff = 'single_point.png'
+    allowed_linux = 0.94
+<<<<<<< HEAD
+    requirement = 'Chigger shall provide a scatter plot widget'
+    design = ''
+    issues = '#7451'
+=======
+    cli_args = '--test'
+>>>>>>> Chigger re-factor
+  [../]
+
+  [./empty]
+    type = ImageDiff
+    command = empty.py
+    imagediff = 'empty.png'
+    allowed_linux = 0.935
+<<<<<<< HEAD
+    requirement = 'An empty graph shall be a valid chigger widget'
+    design = ''
+    issues = '#7451'
+=======
+    cli_args = '--test'
+>>>>>>> Chigger re-factor
+  [../]
+
+  [./color]
+    type = ImageDiff
+    command = color.py
+    imagediff = 'color.png'
+    allowed_linux = 0.94
+<<<<<<< HEAD
+    requirement = 'Chigger shall provide the capability to assign colors to curves in a graph'
+    design = ''
+    issues = '#7451'
+=======
+    cli_args = '--test'
+>>>>>>> Chigger re-factor
+  [../]
+
+  [./legend]
+    type = ImageDiff
+    command = legend.py
+    imagediff = 'legend.png'
+    allowed_linux = 0.94
+    allowed_darwin = 0.96
+<<<<<<< HEAD
+    requirement = 'Chigger shall provide an optional legend widget for curves in a graph'
+    design = ''
+    issues = '#7451'
+  [../]
+
+  [./legend_viewport]
+    type = ImageDiff
+    command = legend_viewport.py
+    imagediff = 'legend_viewport.png'
+    allowed_linux = 0.94
+    allowed_darwin = 0.96
+    requirement = 'Chigger shall scale teh legend position relative to the graph viewport'
+    design = ''
+    issues = '#7451'
+=======
+    cli_args = '--test'
+>>>>>>> Chigger re-factor
+  [../]
+
+  [./update]
+    type = ImageDiff
+    command = update.py
+    imagediff = 'update_0.png update_1.png update_2.png update_3.png update_4.png update_5.png'
+    allowed_linux = 0.93
+<<<<<<< HEAD
+    requirement = 'Chigger shall provide a capability for incremental curves updates in a graph'
+    design = ''
+    issues = '#7451'
+=======
+    cli_args = '--test'
+>>>>>>> Chigger re-factor
+  [../]
+
+  [./secondary]
+    type = ImageDiff
+    command = secondary.py
+    imagediff = 'secondary_initial.png secondary_0.png secondary_1.png secondary_2.png secondary_3.png'
+    allowed_linux = 0.94
+<<<<<<< HEAD
+    requirement = 'Chigger shall provide a capability for multiple curves and secondary axis in a graph'
+    design = ''
+    issues = '#7451'
+=======
+    cli_args = '--test'
+>>>>>>> Chigger re-factor
+  [../]
+
+  [./tracer]
+    type = ImageDiff
+    command = tracer.py
+    imagediff = 'tracer_1.png tracer_3.png tracer_5.png'
+    allowed_darwin = 0.97
+    allowed_linux = 0.96
+<<<<<<< HEAD
+    requirement = 'Chigger shall provide a tracer line indicator capability'
+    design = ''
+    issues = '#7451'
+=======
+    cli_args = '--test'
+>>>>>>> Chigger re-factor
+  [../]
+[]

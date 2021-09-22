@@ -1,0 +1,38 @@
+[Tests]
+  [./matplotlib]
+    # Tests that matplotlib colormaps are loaded
+    type = ImageDiff
+    command = colormap.py
+    imagediff = colormap.png
+    cli_args = '--test'
+  [../]
+
+  [./number]
+    # Test use of "number" for matplotlib colormaps
+    type = ImageDiff
+    command = colormap_number.py
+    imagediff = colormap_number.png
+    cli_args = '--test'
+  [../]
+
+  [./reverse_matplotlib]
+    type = ImageDiff
+    command = reverse.py
+    imagediff = reverse.png
+    cli_args = '--test'
+  [../]
+
+  [./reverse_xml]
+    type = ImageDiff
+    command = reverse_xml.py
+    imagediff = reverse_xml.png
+    cli_args = '--test'
+  [../]
+
+  [./reverse_default]
+    type = ImageDiff
+    command = reverse_default.py
+    imagediff = reverse_default.png
+    cli_args = '--test'
+  [../]
+[]

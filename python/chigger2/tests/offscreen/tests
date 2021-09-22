@@ -1,0 +1,8 @@
+[Tests]
+  [./offscreen]
+    type = ImageDiff
+    command = offscreen.py
+    imagediff = 'offscreen.png'
+    cli_args = '--test'
+  [../]
+[]

@@ -1,0 +1,28 @@
+[Tests]
+  [basic]
+    type = ImageDiff
+    command = basic.py
+    cli_args = '--test'
+    imagediff = basic.png
+  []
+  [interpolate]
+    type = ImageDiff
+    command = interpolate.py
+    cli_args = '--test'
+    imagediff = 'interpolate_2.png interpolate_6-5.png interpolate_11.png'
+  []
+  [./ExodusReader]
+    type = PythonUnitTest
+    input = test_ExodusReader.py
+  [../]
+  [./reader]
+    type = RunApp
+    command = reader.py
+    cli_args = '--test'
+  [../]
+  [./multiappreader]
+    type = RunApp
+    command = multiappreader.py
+    cli_args = '--test'
+  [../]
+[]
