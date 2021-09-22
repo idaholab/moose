@@ -3,7 +3,6 @@
     type = Exodiff
     input = 'phy.standalone.i'
     exodiff = 'phy.standalone_out.e'
-    mesh_mode = 'REPLICATED'
     max_parallel = 1
   []
 
