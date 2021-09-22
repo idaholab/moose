@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
-from __future__ import print_function
 import time
 import argparse
 import pandas
 import matplotlib.pyplot as plt
 import multiprocessing
-import mooseutils
+try:
+    from moosetools import mooseutils
+except ModuleNotFoundError:
+    import mooseutils
 
 
 def execute(infile, outfile, n_samples, processors, test_type):

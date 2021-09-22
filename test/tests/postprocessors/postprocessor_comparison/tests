@@ -16,10 +16,7 @@
     [less_than]
       type = 'CSVDiff'
       input = 'postprocessor_comparison.i'
-      cli_args = '
-      Postprocessors/pp_comparison/comparison_type=less_than
-      '
-                 'Outputs/file_base=less_than'
+      cli_args = 'Postprocessors/pp_comparison/comparison_type=less_than Outputs/file_base=less_than'
       csvdiff = 'less_than.csv'
 
       detail = "less than operator."

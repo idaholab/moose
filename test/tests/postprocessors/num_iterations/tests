@@ -54,9 +54,7 @@
       type = 'CSVDiff'
       input = 'num_iterations.i'
       csvdiff = 'bdf2.csv'
-      cli_args = '
-      Executioner/TimeIntegrator/type=BDF2
-      Outputs/file_base=bdf2'
+      cli_args = 'Executioner/TimeIntegrator/type=BDF2 Outputs/file_base=bdf2'
       max_parallel = 1
 
       detail = "second-order backward difference;"

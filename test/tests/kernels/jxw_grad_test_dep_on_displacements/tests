@@ -7,7 +7,6 @@
     ratio_tol = 2e-7
     difference_tol = 1e-5
     run_sim = True
-    petsc_version = '>=3.9'
     requirement = "We shall automatically capture the dependence of things like JxW and grad_test on (second order) displacements"
     max_parallel = 2 # The finite differencing in `-snes_test_jacobian` is a little finicky. This test failed **only** the distributed mesh sweep with p = 3
   [../]
@@ -17,7 +16,6 @@
     ratio_tol = 2e-7
     difference_tol = 1e-5
     run_sim = True
-    petsc_version = '>=3.9'
     cli_args = 'GlobalParams/order=FIRST Mesh/elem_type=QUAD4'
     requirement = "We shall automatically capture the dependence of things like JxW and grad_test on (first order) displacements"
     max_parallel = 2 # The finite differencing in `-snes_test_jacobian` is a little finicky. The above test failed **only** the distributed mesh sweep with p = 3 so we'll mark this one too
@@ -30,7 +28,6 @@
     difference_tol = 4e-4
     run_sim = True
     cli_args = '-snes_test_err 1e-9'
-    petsc_version = '>=3.9'
     requirement = "We shall automatically capture the dependence of things like JxW and grad_test on (second order) displacements for a cylindrical geometry"
     max_parallel = 2
   [../]
@@ -40,7 +37,6 @@
     ratio_tol = 4e-7
     difference_tol = 1e-5
     run_sim = True
-    petsc_version = '>=3.9'
     cli_args = 'GlobalParams/order=FIRST Mesh/elem_type=QUAD4 -snes_test_err 1e-9'
     requirement = "We shall automatically capture the dependence of things like JxW and grad_test on (first order) displacements for a cylindrical geometry"
     max_parallel = 2
@@ -52,7 +48,6 @@
     ratio_tol = 8e-7
     difference_tol = 1e-3
     run_sim = True
-    petsc_version = '>=3.9'
     requirement = "We shall automatically capture the dependence of things like JxW and grad_test on (second order) displacements for a spherical geometry"
     max_parallel = 2
   [../]
@@ -62,7 +57,6 @@
     ratio_tol = 4e-7
     difference_tol = 5e-5
     run_sim = True
-    petsc_version = '>=3.9'
     cli_args = 'GlobalParams/order=FIRST Mesh/elem_type=EDGE2'
     requirement = "We shall automatically capture the dependence of things like JxW and grad_test on (first order) displacements for a spherical geometry"
     max_parallel = 2

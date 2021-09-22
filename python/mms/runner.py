@@ -44,7 +44,6 @@ def _runner(input_files, num_refinements, *args, **kwargs):
 
     executable = kwargs.get('executable', None)
     csv = kwargs.get('csv', None)
-    console = kwargs.get('console', True)
     mpi = kwargs.get('mpi', None)
     rtype = kwargs.get('rtype') # SPATIAL or TEMPORAL
     dt = kwargs.pop('dt', 1) # only used with rtype=TEMPORAL
@@ -99,7 +98,7 @@ def _runner(input_files, num_refinements, *args, **kwargs):
                 fcsv = '{}.csv'.format(fbase)
 
         print('Running:', executable, ' '.join(a))
-        out = mooseutils.run_executable(executable, *a, mpi=mpi, suppress_output=not console)
+        out = mooseutils.run_executable(executable, *a, mpi=mpi)
 
         # Check that CSV file exists
         if not os.path.isfile(fcsv):

@@ -1,0 +1,35 @@
+MOOSE_DIR = '../..'
+LIBMESH_DIR = '${MOOSE_DIR}/libmesh'
+MOOSETOOLS_PLUGIN_DIRS = '${MOOSE_DIR}/python/plugins/moosetest ${MOOSE_DIR}/python/plugins/moosetest/controllers'
+
+[Controllers]
+  [moose]
+    type = MOOSEConfigController
+    config_files = '${MOOSE_DIR}/framework/include/base/MooseConfig.h'
+  []
+  [petsc]
+    type = PETScConfigController
+    config_files = '${LIBMESH_DIR}/include/libmesh/libmesh_config.h'
+  []
+  [slepc]
+    type = SLEPcConfigController
+    config_files = '${LIBMESH_DIR}/include/libmesh/libmesh_config.h'
+  []
+  [libmesh]
+    type = LibMeshConfigController
+    config_files = '${LIBMESH_DIR}/include/libmesh/libmesh_config.h'
+  []
+  [valgrind]
+    type = ValgrindController
+    suppressions = '${MOOSE_DIR}/python/plugins/moosetest/suppressions/errors.supp'
+  []
+[]
+
+[Defaults]
+  [moosetools.moosetest.base.Runner]
+    file_check_created = False # TODO: disable this and account for all files created/modified
+    file_check_modified = False # TODO: disable this and account for all files created/modified
+    file_ignore_patterns_created = 'tmp_jit*'
+    file_ignore_patterns_modified = 'tmp_jit*'
+  []
+[]

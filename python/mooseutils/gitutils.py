@@ -84,9 +84,9 @@ def git_root_dir(working_dir=os.getcwd()):
         return mooseutils.check_output(['git', 'rev-parse', '--show-toplevel'],
                             cwd=working_dir, stderr=subprocess.STDOUT).strip('\n')
     except subprocess.CalledProcessError:
-        print("The supplied directory is not a git repository: {}".format(working_dir))
+        pass
     except OSError:
-        print("The supplied directory does not exist: {}".format(working_dir))
+        pass
 
 def git_submodule_info(working_dir=os.getcwd(), *args):
     """

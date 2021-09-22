@@ -6,14 +6,14 @@
   [command-line]
     requirement = "The system will be operated using a command-line interface that"
     [empty]
-      type = RunCommand
+      type = RunApp
       method = opt
       command = "../../moose_test-opt"
 
       detail = "reports the available options in non are provided and"
     []
     [flags]
-      type = RunCommand
+      type = RunApp
       method = opt
       command = "../../moose_test-opt --help"
 
@@ -23,14 +23,14 @@
   [input]
     requirement = "The system will be operated using"
     [input_file]
-      type = RunCommand
+      type = RunApp
       method = opt
       command = "../../moose_test-opt -i input.i"
 
       detail = "an input file and"
     []
     [command_line]
-      type = RunCommand
+      type = RunApp
       method = opt
       command = "../../moose_test-opt -i input.i Mesh/uniform_refine=1"
 

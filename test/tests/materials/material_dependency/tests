@@ -8,9 +8,9 @@
     # evaluations performed by the code, and that varies between older and
     # newer versions of PETSc due to the changes in 3061bbd5d. This test is
     # therefore only valid with newer versions of PETSc.
-    petsc_version = '>=3.5.0'
-    petsc_version_release = true
-    compiler = '!INTEL'
+    #petsc_version = '>=3.5.0'
+    #petsc_version_release = true
+    #compiler = '!INTEL'
 
     design = 'syntax/Materials/index.md'
     issues = '#8444'

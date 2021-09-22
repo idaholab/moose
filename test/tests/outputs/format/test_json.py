@@ -12,9 +12,7 @@ import os, sys
 import subprocess
 import json
 import unittest
-from FactorySystem import Parser
-import pyhit
-import mooseutils
+import moosetools
 
 def run_app(args=[]):
     """
@@ -22,7 +20,7 @@ def run_app(args=[]):
     Exits if the app failed to run for any reason.
     """
     proc = None
-    app_name = mooseutils.find_moose_executable_recursive()
+    app_name = moosetools.mooseutils.find_moose_executable_recursive()
     args.insert(0, app_name)
     #  "-options_left 0" is used to stop the debug version of PETSc from printing
     # out WARNING messages that sometime confuse the json parser
@@ -123,8 +121,8 @@ class TestJSONBase(unittest.TestCase):
         output = output.split('### END DUMP DATA ###')[0]
 
         self.assertNotEqual(len(output), 0)
-        root = pyhit.parse(output)
-        errors = list(Parser.checkDuplicates(root))
+        root = moosetools.pyhit.parse(output)
+        errors = list(moosetools.factory.Parser.checkDuplicates(root))
         self.assertEqual(errors, [])
         return root
 

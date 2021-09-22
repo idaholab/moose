@@ -9,7 +9,6 @@
     expect_out = "FEProblem\nGeneratedMesh"
     input = 'IGNORED'
     input_switch = ''
-    display_required = True
 
     requirement = "The system shall support the programmatic creation of a simulation tools without the need of an input file."
   [../]
