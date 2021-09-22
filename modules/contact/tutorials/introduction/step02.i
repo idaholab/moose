@@ -55,7 +55,6 @@
     secondary = pillar2_left
     model = frictionless
     formulation = mortar
-    mesh = collect_meshes
   []
 []
 

@@ -47,11 +47,6 @@ remove the [!param](/Contact/ContactAction/penalty) and
 [!param](/Contact/ContactAction/normalize_penalty) parameters. They have no
 function in mortar contact.
 
-To enable the construction of the lower dimensional subdomains we need to point
-to the mesh modifier that produces the final mesh using the
-[!param](/Contact/ContactAction/mesh) parameter  (this will be automated in the
-future, making this parameter obsolete).
-
 ## Tasks and questions
 
 ### Penetration
