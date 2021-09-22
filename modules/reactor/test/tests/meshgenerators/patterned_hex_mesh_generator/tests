@@ -61,7 +61,7 @@
     cli_args = 'Mesh/pattern/pattern_boundary=none
                 Mesh/pattern/pattern="0 0;0 1 0;0 0"
                 --mesh-only "patterned_err.e.e"'
-    expect_err = 'Elements of this parameter be smaller than the length of input_name.'
+    expect_err = 'Elements of this parameter must be smaller than the length of input_name.'
     requirement ='The system shall throw an error if the pattern includes input mesh indices that exceed number of elements of inputs.'
   []
   [err_block_id]
@@ -107,7 +107,7 @@
     cli_args = 'Mesh/pattern/pattern_boundary=none
                 Mesh/pattern/background_block_name="background"
                 --mesh-only "patterned_err.e"'
-    expect_err = 'This parameter and background_block_name must not be set.'
+    expect_err = 'This parameter and background_block_name must not be set when the pattern_boundary is none.'
     requirement ='The system shall throw an error if background_block_name or background_block_id are provided when pattern_boundary is none.'
   []
   [err_no_hexagon_size]
@@ -116,6 +116,13 @@
     cli_args = '--mesh-only "patterned_err.e"'
     expect_err = 'This parameter must be provided when pattern_boundary is hexagon.'
     requirement ='The system shall throw an error if no hexagon size is provided when pattern_boundary is hexagon.'
+  []
+  [err_missing_input_meshes_in_pattern]
+    type = 'RunException'
+    input = 'patterned_2d_err.i'
+    cli_args = '--mesh-only "patterned_err.e"'
+    expect_err = 'All the meshes provided in inputs must be used here.'
+    requirement ='The system shall throw an error if not all the meshes provided in inputs are used in pattern.'
   []
   [err_no_appropriate_pitch_meta]
     type = 'RunException'

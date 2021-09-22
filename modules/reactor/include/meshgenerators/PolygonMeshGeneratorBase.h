@@ -213,6 +213,31 @@ protected:
 
   // 'position_setup' sets up poisitions of peripheral region before deformation due to cutoff.
   // Nine sets of positions are generated here, as shown below.
+  // CORNER MESH Peripherial {0 1 2}, {2 3 4} and {4 5 6}
+  //           3       2   1   0
+  //            \      :   :   :
+  //             \     :   :   :
+  //      4.       .       :   :
+  //         ` .               :
+  //      5.   |               |
+  //         ` |               |
+  //      6.   |               |
+  //         ` |               |
+  //               .       .
+  //                   .
+  //
+  // EDGE MESH Peripherial {0 1 2} and {2 7 8}
+  //           8   7   2   1   0
+  //           :   :   :   :   :
+  //           :   :   :   :   :
+  //           :   :       :   :
+  //           :               :
+  //           |               |
+  //           |               |
+  //           |               |
+  //           |               |
+  //               .       .
+  //                   .
   void position_setup(std::vector<std::pair<Real, Real>> * positions_inner,
                       std::vector<std::pair<Real, Real>> * d_positions_outer,
                       const Real extra_dist_in,

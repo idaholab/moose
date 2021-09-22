@@ -11,8 +11,6 @@
 
 #include <cmath>
 
-defineLegacyParams(PolygonMeshGeneratorBase);
-
 InputParameters
 PolygonMeshGeneratorBase::validParams()
 {
@@ -25,7 +23,6 @@ PolygonMeshGeneratorBase::validParams()
 
 PolygonMeshGeneratorBase::PolygonMeshGeneratorBase(const InputParameters & parameters)
   : MeshGenerator(parameters)
-
 {
 }
 
@@ -36,8 +33,6 @@ PolygonMeshGeneratorBase::generate()
   return dynamic_pointer_cast<MeshBase>(mesh);
 }
 
-// 'build_simple_slice' creates a mesh of a slice that corresponds to a single side of the polygon
-// to be generated.
 std::unique_ptr<ReplicatedMesh>
 PolygonMeshGeneratorBase::build_simple_slice(std::unique_ptr<ReplicatedMesh> mesh,
                                              std::vector<Real> ring_radii,
@@ -131,8 +126,8 @@ PolygonMeshGeneratorBase::build_simple_slice(std::unique_ptr<ReplicatedMesh> mes
                       azimuthal_tangent);
 
   // add nodes in background region; the background region is defined as the area between the
-  // outmost pin(if there is pin; if no pin, the center) and the innermost hex/duct; if
-  // _has_ducts is false, the backgground region is the area between the pin and enclosing hexagon
+  // outmost pin (if there is a pin; if no pin, the center) and the innermost hex/duct; if
+  // _has_ducts is false, the background region is the area between the pin and enclosing hexagon
   Real background_corner_radial_interval_length;
   Real background_corner_distance;
   Real background_in;
@@ -146,7 +141,7 @@ PolygonMeshGeneratorBase::build_simple_slice(std::unique_ptr<ReplicatedMesh> mes
   {
     background_out = ducts_center_dist.front();
     background_corner_distance =
-        ducts_center_dist.front(); // it is the center to duct (most inside duct) corner distance
+        ducts_center_dist.front(); // it is the center to duct (innermost duct) corner distance
   }
   else
   {
@@ -207,12 +202,12 @@ PolygonMeshGeneratorBase::build_simple_slice(std::unique_ptr<ReplicatedMesh> mes
 
   // Add Quad4 mesh into outer circle
   // total number of mesh should be all the rings for pin regions + background regions;
-  // total number of quad mesh should be total number of mesh -1 (-1 is becuase the inner circle for
+  // total number of quad mesh should be total number of mesh -1 (-1 is because the inner circle for
   // tri/quad mesh has been added above)
 
   std::vector<unsigned int> subdomain_rings;
 
-  if (has_rings) //  define the rings in each subdomaing
+  if (has_rings) //  define the rings in each subdomain
   {
     for (unsigned int i = 0; i < rings.size(); i++)
       subdomain_rings.push_back(rings[i]);
@@ -245,8 +240,6 @@ PolygonMeshGeneratorBase::build_simple_slice(std::unique_ptr<ReplicatedMesh> mes
   return dynamic_pointer_cast<ReplicatedMesh>(mesh);
 }
 
-// 'center_nodes' create nodes of the very central mesh layer of the polygon for quad central
-// elements
 std::unique_ptr<ReplicatedMesh>
 PolygonMeshGeneratorBase::center_nodes(std::unique_ptr<ReplicatedMesh> mesh,
                                        const unsigned int side_number,
@@ -298,7 +291,6 @@ PolygonMeshGeneratorBase::center_nodes(std::unique_ptr<ReplicatedMesh> mesh,
   return dynamic_pointer_cast<ReplicatedMesh>(mesh);
 }
 
-// 'ring_nodes' creates nodes for the ring-geometry region of a single slice.
 std::unique_ptr<ReplicatedMesh>
 PolygonMeshGeneratorBase::ring_nodes(std::unique_ptr<ReplicatedMesh> mesh,
                                      std::vector<Real> ring_radii,
@@ -373,8 +365,6 @@ PolygonMeshGeneratorBase::ring_nodes(std::unique_ptr<ReplicatedMesh> mesh,
   return dynamic_pointer_cast<ReplicatedMesh>(mesh);
 }
 
-// 'background_nodes' creates nodes for the ring-to-polygon transition region (i.e., background) of
-// a single slice.
 std::unique_ptr<ReplicatedMesh>
 PolygonMeshGeneratorBase::background_nodes(std::unique_ptr<ReplicatedMesh> mesh,
                                            const unsigned int num_sectors_per_side,
@@ -449,7 +439,6 @@ PolygonMeshGeneratorBase::background_nodes(std::unique_ptr<ReplicatedMesh> mesh,
   return dynamic_pointer_cast<ReplicatedMesh>(mesh);
 }
 
-// 'duct_nodes' creates nodes for the duct-geometry region of a single slice.
 std::unique_ptr<ReplicatedMesh>
 PolygonMeshGeneratorBase::duct_nodes(std::unique_ptr<ReplicatedMesh> mesh,
                                      std::vector<Real> * ducts_center_dist,
@@ -519,7 +508,6 @@ PolygonMeshGeneratorBase::duct_nodes(std::unique_ptr<ReplicatedMesh> mesh,
   return dynamic_pointer_cast<ReplicatedMesh>(mesh);
 }
 
-// 'cen_quad_elem_def' defines quad elements in the very central region of the polygon.
 std::unique_ptr<ReplicatedMesh>
 PolygonMeshGeneratorBase::cen_quad_elem_def(std::unique_ptr<ReplicatedMesh> mesh,
                                             const unsigned int div_num,
@@ -572,7 +560,6 @@ PolygonMeshGeneratorBase::cen_quad_elem_def(std::unique_ptr<ReplicatedMesh> mesh
   return dynamic_pointer_cast<ReplicatedMesh>(mesh);
 }
 
-// 'cen_tri_elem_def' defines triangular elements in the very central region of the polygon.
 std::unique_ptr<ReplicatedMesh>
 PolygonMeshGeneratorBase::cen_tri_elem_def(std::unique_ptr<ReplicatedMesh> mesh,
                                            const unsigned int num_sectors_per_side,
@@ -601,7 +588,6 @@ PolygonMeshGeneratorBase::cen_tri_elem_def(std::unique_ptr<ReplicatedMesh> mesh,
   return dynamic_pointer_cast<ReplicatedMesh>(mesh);
 }
 
-// 'quad_elem_def' defines general quad elements for the polygon.
 std::unique_ptr<ReplicatedMesh>
 PolygonMeshGeneratorBase::quad_elem_def(std::unique_ptr<ReplicatedMesh> mesh,
                                         const unsigned int num_sectors_per_side,
@@ -681,12 +667,6 @@ PolygonMeshGeneratorBase::radius_correction_factor(const std::vector<Real> azimu
   return std::sqrt(2 * M_PI / tmp_acc);
 }
 
-// 'build_simple_peripheral' creates peripheral area mesh for the patterned hexagon mesh
-// Note that the function creat the pheripheral area for each side of the unit hexagon mesh before
-// stitching. An edge unit hexagon has two sides that need peripheral areas, whereas a corner unit
-// hexagon has three such sides. The positions of the inner and outer boundary nodes are
-// pre-calculated as positions_inner and d_positions_outer; This function performs interpolation to
-// generate the mesh grid.
 std::unique_ptr<ReplicatedMesh>
 PolygonMeshGeneratorBase::build_simple_peripheral(
     std::unique_ptr<ReplicatedMesh> mesh,
@@ -774,8 +754,6 @@ PolygonMeshGeneratorBase::build_simple_peripheral(
   return dynamic_pointer_cast<ReplicatedMesh>(mesh);
 }
 
-// 'point_interpolate' calculates the point coordinates of within a parallelogram region using
-// linear interpolation.
 std::pair<Real, Real>
 PolygonMeshGeneratorBase::point_interpolate(const Real pi_1_x,
                                             const Real pi_1_y,
@@ -803,9 +781,6 @@ PolygonMeshGeneratorBase::point_interpolate(const Real pi_1_x,
   return std::make_pair(position_px, position_py);
 }
 
-// 'add_peripheral_mesh' adds background and duct region mesh to stiched hexagon meshes.
-// Note that the function works for single unit hexagon mesh (corner or edge) separately before
-// stitching
 std::unique_ptr<ReplicatedMesh>
 PolygonMeshGeneratorBase::add_peripheral_mesh(
     const unsigned int pattern, //_pattern{i][j]
@@ -890,33 +865,6 @@ PolygonMeshGeneratorBase::add_peripheral_mesh(
   return out_meshes;
 }
 
-// 'position_setup' sets up poisitions of peripheral region before deformation due to cutoff.
-// Nine sets of positions are generated here, as shown below.
-// CORNER MESH Peripherial {0 1 2}, {2 3 4} and {4 5 6}
-//           3       2   1   0
-//            \      :   :   :
-//             \     :   :   :
-//      4.       .       :   :
-//         ` .               :
-//      5.   |               |
-//         ` |               |
-//      6.   |               |
-//         ` |               |
-//               .       .
-//                   .
-//
-// EDGE MESH Peripherial {0 1 2} and {2 7 8}
-//           8   7   2   1   0
-//           :   :   :   :   :
-//           :   :   :   :   :
-//           :   :       :   :
-//           :               :
-//           |               |
-//           |               |
-//           |               |
-//           |               |
-//               .       .
-//                   .
 void
 PolygonMeshGeneratorBase::position_setup(std::vector<std::pair<Real, Real>> * positions_inner,
                                          std::vector<std::pair<Real, Real>> * d_positions_outer,
@@ -1020,7 +968,6 @@ PolygonMeshGeneratorBase::position_setup(std::vector<std::pair<Real, Real>> * po
               (radial_index != 0 ? std::sqrt(3.0) * pitch / 6.0 + extra_dist_in : 0.0)));
 }
 
-// 'node_coord_rotate' calculates x and y coordinates after rotating by theta angle.
 void
 PolygonMeshGeneratorBase::node_coord_rotate(Real * x, Real * y, const Real theta)
 {
@@ -1030,8 +977,6 @@ PolygonMeshGeneratorBase::node_coord_rotate(Real * x, Real * y, const Real theta
   *y = x_tmp * std::sin(theta * M_PI / 180.0) + y_tmp * std::cos(theta * M_PI / 180.0);
 }
 
-// 'cut_off_hex_deform' deforms peripheral region when the external side of a hexagonal assembly of
-// stitched meshes cuts off the stitched meshes.
 void
 PolygonMeshGeneratorBase::cut_off_hex_deform(MeshBase & mesh,
                                              const Real orientation,
@@ -1043,7 +988,7 @@ PolygonMeshGeneratorBase::cut_off_hex_deform(MeshBase & mesh,
 {
   for (libMesh::MeshBase::node_iterator it = mesh.nodes_begin(); it != mesh.nodes_end(); it++)
   {
-    // This function can definitely be optimized in future.
+    // This function can definitely be optimized in future for better efficiency.
     Real x_tmp = (**it)(0);
     Real y_tmp = (**it)(1);
     if (mesh_type == CORNER_MESH)
@@ -1104,7 +1049,6 @@ PolygonMeshGeneratorBase::cut_off_hex_deform(MeshBase & mesh,
   }
 }
 
-// 'four_point_intercept' finds the center of a quadrilateral based on four vertices.
 std::pair<Real, Real>
 PolygonMeshGeneratorBase::four_point_intercept(const std::pair<Real, Real> p1,
                                                const std::pair<Real, Real> p2,
@@ -1128,7 +1072,6 @@ PolygonMeshGeneratorBase::four_point_intercept(const std::pair<Real, Real> p1,
   return std::make_pair(x, y);
 }
 
-// 'azimuthal_angles_collector' collects sorted azimuthal angles of the external boundary.
 std::vector<Real>
 PolygonMeshGeneratorBase::azimuthal_angles_collector(const std::unique_ptr<ReplicatedMesh> mesh,
                                                      const Real lower_azi,

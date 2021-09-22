@@ -33,21 +33,18 @@ protected:
   const enum class HexagonStyle { apothem, radius } _hexagon_size_style;
   /// Pitch size of the hexagon
   Real _pitch;
-
   /// Whetther block_id is provided
   const bool _block_id_valid;
   /// Subdomain ID of the mesh
   const subdomain_id_type _block_id;
   /// Subdomain Name of the mesh
   const SubdomainName _block_name;
-
   /// Whether external_boundary_id is provided
   const bool _boundary_id_valid;
   /// Boundary ID of the external boundary
   const boundary_id_type _external_boundary_id;
   /// Boundary Name of the external boundary
   const std::string _external_boundary_name;
-
   /// MeshMetaData: pitch size of the hexagon
   Real & _pitch_meta;
   /// MeshMetaData: number of radial intervals of the background region

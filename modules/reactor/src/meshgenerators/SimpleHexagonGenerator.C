@@ -14,8 +14,6 @@
 
 registerMooseObject("ReactorApp", SimpleHexagonGenerator);
 
-defineLegacyParams(SimpleHexagonGenerator);
-
 InputParameters
 SimpleHexagonGenerator::validParams()
 {
@@ -36,6 +34,8 @@ SimpleHexagonGenerator::validParams()
                                                 "Optional customized external boundary id.");
   params.addParam<std::string>("external_boundary_name",
                                "Optional customized external boundary name.");
+  params.addParamNamesToGroup("block_id block_name external_boundary_id external_boundary_name",
+                              "Customized Subdomain/Boundary");
   params.addClassDescription(
       "This SimpleHexagonGenerator object is designed to generate a simple hexagonal mesh that "
       "only contains six simple azimuthal triangle slices.");
@@ -68,6 +68,7 @@ SimpleHexagonGenerator::SimpleHexagonGenerator(const InputParameters & parameter
   _pitch = 2.0 * (_hexagon_size_style == HexagonStyle::apothem
                       ? _hexagon_size
                       : _hexagon_size * std::cos(M_PI / (Real)HEXAGON_NUM_SIDES));
+  _pitch_meta = _pitch;
 }
 
 std::unique_ptr<MeshBase>
@@ -123,8 +124,6 @@ SimpleHexagonGenerator::generate()
         _external_boundary_id > 0 ? _external_boundary_id : (boundary_id_type)OUTER_SIDESET_ID) =
         _external_boundary_name;
   }
-
-  _pitch_meta = _pitch;
 
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

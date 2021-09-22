@@ -11,8 +11,6 @@
 
 #include <cmath>
 
-defineLegacyParams(PolygonConcentricCircleMeshGeneratorBase);
-
 InputParameters
 PolygonConcentricCircleMeshGeneratorBase::validParams()
 {
@@ -70,6 +68,13 @@ PolygonConcentricCircleMeshGeneratorBase::validParams()
   params.addParam<std::vector<std::string>>(
       "interface_boundary_names",
       "Optional customized boundary names for the internal interfaces between block.");
+  params.addParamNamesToGroup(
+      "background_block_ids background_block_names duct_block_ids duct_block_names ring_block_ids "
+      "ring_block_names external_boundary_id external_boundary_name interface_boundary_names "
+      "block_id_shift interface_boundary_id_shift",
+      "Customized Subdomain/Boundary");
+  params.addParamNamesToGroup(
+      "num_sectors_per_side background_intervals duct_intervals ring_intervals", "Mesh Density");
   params.addClassDescription("This PolygonConcentricCircleMeshGeneratorBase object is a base class "
                              "to be inherited for polygon mesh generators.");
 
@@ -144,6 +149,10 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
     _azimuthal_angle_meta(
         declareMeshProperty<std::vector<Real>>("azimuthal_angle_meta", std::vector<Real>()))
 {
+  // This error message is only reserved for future derived classes. Neither of the current derived
+  // classes will trigger this error.
+  if (!_sides_to_adapt.empty() && _num_sides != HEXAGON_NUM_SIDES)
+    paramError("sides_to_adapt", "If provided, the generated mesh must be a hexagon.");
   _pitch = 2.0 * (_polygon_size_style == PolygonStyle::apothem
                       ? _polygon_size
                       : _polygon_size * std::cos(M_PI / Real(_num_sides)));
@@ -249,7 +258,8 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
           dynamic_pointer_cast<ReplicatedMesh>(*_input_ptrs[mesh_input_counter]),
           lower_azi,
           upper_azi));
-      // loop over the _azimuthal_angles_array just collected to convert tangent to azimuthal angles.
+      // loop over the _azimuthal_angles_array just collected to convert tangent to azimuthal
+      // angles.
       for (unsigned int i = 1; i < _azimuthal_angles_array.back().size(); i++)
       {
         azimuthal_list.push_back(
@@ -404,8 +414,6 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
     lms.smooth(_smoothing_max_it);
   }
 
-  auto mesh1 = dynamic_pointer_cast<MeshBase>(mesh0);
-
   // Set up customized Block Names and/or IDs
   unsigned int block_it = 0;
   unsigned ring_block_num = 0;
@@ -482,7 +490,7 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
                  ": blocks with different ids cannot have the same block name.");
   }
 
-  for (const auto & elem : mesh1->element_ptr_range())
+  for (const auto & elem : mesh0->element_ptr_range())
     for (unsigned i = 0; i < block_ids_old.size(); ++i)
       if (elem->subdomain_id() == block_ids_old[i])
       {
@@ -490,16 +498,16 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
         break;
       }
   for (unsigned i = 0; i < block_ids_new.size(); ++i)
-    mesh1->subdomain_name(block_ids_new[i]) = block_names[i];
+    mesh0->subdomain_name(block_ids_new[i]) = block_names[i];
 
   if (_external_boundary_id > 0)
-    MooseMesh::changeBoundaryId(*mesh1, OUTER_SIDESET_ID, _external_boundary_id, false);
+    MooseMesh::changeBoundaryId(*mesh0, OUTER_SIDESET_ID, _external_boundary_id, false);
   if (!_external_boundary_name.empty())
   {
-    mesh1->boundary_info->sideset_name(
+    mesh0->boundary_info->sideset_name(
         _external_boundary_id > 0 ? _external_boundary_id : (boundary_id_type)OUTER_SIDESET_ID) =
         _external_boundary_name;
-    mesh1->boundary_info->nodeset_name(
+    mesh0->boundary_info->nodeset_name(
         _external_boundary_id > 0 ? _external_boundary_id : (boundary_id_type)OUTER_SIDESET_ID) =
         _external_boundary_name;
   }
@@ -509,11 +517,11 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
         _has_rings ? (_ring_intervals.front() > 1 ? 2 : 1) : (_background_intervals > 1 ? 2 : 1);
     for (unsigned int i = 0; i < _interface_boundary_names.size(); i++)
     {
-      mesh1->boundary_info->sideset_name(i + interface_id_shift + _interface_boundary_id_shift) =
+      mesh0->boundary_info->sideset_name(i + interface_id_shift + _interface_boundary_id_shift) =
           _interface_boundary_names[i];
-      mesh1->boundary_info->nodeset_name(i + interface_id_shift + _interface_boundary_id_shift) =
+      mesh0->boundary_info->nodeset_name(i + interface_id_shift + _interface_boundary_id_shift) =
           _interface_boundary_names[i];
     }
   }
-  return mesh1;
+  return dynamic_pointer_cast<MeshBase>(mesh0);
 }

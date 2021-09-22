@@ -11,8 +11,6 @@
 
 registerMooseObject("ReactorApp", PolygonConcentricCircleMeshGenerator);
 
-defineLegacyParams(PolygonConcentricCircleMeshGenerator);
-
 InputParameters
 PolygonConcentricCircleMeshGenerator::validParams()
 {
@@ -24,8 +22,7 @@ PolygonConcentricCircleMeshGenerator::validParams()
   MooseEnum polygon_size_style("apothem radius", "apothem");
   params.addParam<MooseEnum>("polygon_size_style",
                              polygon_size_style,
-                             "Style in which polygon size is given (default: apothem). Option: " +
-                                 polygon_size_style.getRawNames());
+                             "Style in which polygon size is given (default: apothem).");
   params.addRangeCheckedParam<unsigned int>(
       "num_sides", 6, "num_sides>=3", "Number of sides of the polygon.");
   params.addParam<bool>("uniform_mesh_on_sides",
@@ -37,6 +34,7 @@ PolygonConcentricCircleMeshGenerator::validParams()
                                 0,
                                 "Number of Laplacian smoothing iterations. This number is "
                                 "disregarded when duct_sizes is present.");
+  params.addParamNamesToGroup("uniform_mesh_on_sides", "Mesh Density");
   params.addClassDescription("This PolygonConcentricCircleMeshGenerator object is designed to mesh "
                              "a polygon geometry with optional rings centered inside.");
 
@@ -48,6 +46,8 @@ PolygonConcentricCircleMeshGenerator::PolygonConcentricCircleMeshGenerator(
   : PolygonConcentricCircleMeshGeneratorBase(parameters),
     _max_radius_meta(declareMeshProperty<Real>("max_radius_meta", 0.0))
 {
+  _is_control_drum_meta = declareMeshProperty<bool>("is_control_drum_meta", false);
+  _is_general_polygon = true;
   if (_has_rings)
     _max_radius_meta = _ring_radii.back();
   _uniform_mesh_on_sides = getParam<bool>("uniform_mesh_on_sides");
@@ -56,6 +56,4 @@ PolygonConcentricCircleMeshGenerator::PolygonConcentricCircleMeshGenerator(
     paramError("quad_center_elements",
                "This parameter must be false if different side sector numbers are set.");
   _smoothing_max_it = getParam<unsigned int>("smoothing_max_it");
-  _is_control_drum_meta = declareMeshProperty<bool>("is_control_drum_meta", false);
-  _is_general_polygon = true;
 }

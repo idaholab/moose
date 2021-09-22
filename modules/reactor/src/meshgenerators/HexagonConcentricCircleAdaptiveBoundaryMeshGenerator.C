@@ -33,6 +33,7 @@ HexagonConcentricCircleAdaptiveBoundaryMeshGenerator::validParams()
                         false,
                         "Whether this mesh is for a control drum. The value can be set as 'false' "
                         "if the user wants to use this object for other components.");
+  params.addParamNamesToGroup("is_control_drum", "Control Drum");
   params.addClassDescription(
       "This HexagonConcentricCircleAdaptiveBoundaryMeshGenerator object is designed to generate "
       "hexagonal meshes with adaptive boundary to facilitate stitching.");
