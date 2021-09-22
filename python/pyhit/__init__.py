@@ -8,6 +8,7 @@ First, attempt to import hit. If that fails, try adding the hit source directory
 and try the import again. If that fails, try running "make hit" before importing.
 """
 
+moose_dir = os.getenv('MOOSE_DIR', os.path.join(os.path.dirname(__file__), '..', '..'))
 try:
     import hit
 except ImportError:
