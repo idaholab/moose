@@ -94,8 +94,8 @@ public:
    * @return Vector of pairs of first and second parameters
    */
   template <typename T1, typename T2>
-  std::vector<std::pair<T1, T2>> getParamPairs(const std::string & param1,
-                                               const std::string & param2) const;
+  std::vector<std::pair<T1, T2>> getParam(const std::string & param1,
+                                          const std::string & param2) const;
 
   /**
    * Verifies that the requested parameter exists and is not NULL and returns it to the caller.
@@ -288,9 +288,9 @@ MooseObject::paramInfo(const std::string & param, Args... args) const
 
 template <typename T1, typename T2>
 std::vector<std::pair<T1, T2>>
-MooseObject::getParamPairs(const std::string & param1, const std::string & param2) const
+MooseObject::getParam(const std::string & param1, const std::string & param2) const
 {
-  return _pars.getPairs<T1, T2>(param1, param2);
+  return _pars.get<T1, T2>(param1, param2);
 }
 
 template <typename T>

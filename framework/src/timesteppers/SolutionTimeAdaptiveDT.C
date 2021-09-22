@@ -23,7 +23,7 @@ SolutionTimeAdaptiveDT::validParams()
   InputParameters params = TimeStepper::validParams();
   params.addClassDescription("Compute simulation timestep based on actual solution time.");
   params.addParam<Real>(
-      "percent_change", 0.1, "Percentage to change the timestep by.  Should be between 0 and 1");
+      "percent_change", 0.1, "Fraction to change the timestep by.  Should be between 0 and 1");
   params.addParam<int>(
       "initial_direction", 1, "Direction for the first step.  1 for up... -1 for down. ");
   params.addParam<bool>("adapt_log", false, "Output adaptive time step log");

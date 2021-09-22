@@ -311,7 +311,7 @@ TEST(InputParameters, getPairs)
   p.addParam<std::vector<std::string>>("first", num_words, "");
   p.addParam<std::vector<int>>("second", std::vector<int>{0, 1, 2, 3}, "");
 
-  auto pairs = p.getPairs<std::string, int>("first", "second");
+  auto pairs = p.get<std::string, int>("first", "second");
 
   for (int i = 0; i < 4; ++i)
   {
@@ -320,7 +320,7 @@ TEST(InputParameters, getPairs)
   }
 }
 
-TEST(InputParameters, getPairsMultiMooseEnum)
+TEST(InputParameters, getMultiMooseEnumPairs)
 {
   std::vector<std::string> v1{"zero", "one", "two", "three"};
   auto s1 = Moose::stringify(v1, " ");
@@ -331,7 +331,7 @@ TEST(InputParameters, getPairsMultiMooseEnum)
   p.addParam<MultiMooseEnum>("first", MultiMooseEnum(s1, s1), "");
   p.addParam<MultiMooseEnum>("second", MultiMooseEnum(s2, s2), "");
 
-  auto pairs = p.getPairs<MooseEnumItem, MooseEnumItem>("first", "second");
+  auto pairs = p.get<MooseEnumItem, MooseEnumItem>("first", "second");
 
   for (int i = 0; i < 4; ++i)
   {
@@ -340,7 +340,7 @@ TEST(InputParameters, getPairsMultiMooseEnum)
   }
 }
 
-TEST(InputParameters, getPairsLength)
+TEST(InputParameters, getPairLength)
 {
   std::vector<std::string> num_words{"zero", "one", "two"};
 
@@ -350,7 +350,7 @@ TEST(InputParameters, getPairsLength)
 
   try
   {
-    auto pairs = p.getPairs<std::string, int>("first", "second");
+    auto pairs = p.get<std::string, int>("first", "second");
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
@@ -364,7 +364,7 @@ TEST(InputParameters, getPairsLength)
   }
 }
 
-TEST(InputParameters, getPairsControllable)
+TEST(InputParameters, getControllablePairs)
 {
   std::vector<std::string> num_words{"zero", "one", "two", "three"};
 
@@ -375,15 +375,17 @@ TEST(InputParameters, getPairsControllable)
 
   try
   {
-    auto pairs = p.getPairs<std::string, int>("first", "second");
+    auto pairs = p.get<std::string, int>("first", "second");
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
   {
     std::string msg(e.what());
-    ASSERT_TRUE(msg.find("first: and/or second: are controllable parameters and cannot be "
-                         "retireved using MooseObject::getParamPairs/InputParameters::getPairs") !=
-                std::string::npos)
+    ASSERT_TRUE(
+        msg.find(
+            "first: and/or second: are controllable parameters and cannot be "
+            "retireved using the MooseObject::getParam/InputParameters::get methods for pairs") !=
+        std::string::npos)
         << "Failed with unexpected error message: " << msg;
   }
 }

@@ -10,6 +10,7 @@
 #include "ContactSplit.h"
 #include "InputParameters.h"
 #include "FEProblem.h"
+#include "Conversion.h"
 
 #if !PETSC_VERSION_LESS_THAN(3, 3, 0)
 registerMooseObject("ContactApp", ContactSplit);
@@ -18,17 +19,17 @@ InputParameters
 ContactSplit::validParams()
 {
   InputParameters params = Split::validParams();
-  params.addParam<std::vector<std::string>>("contact_primary",
-                                            "Primary surface list for included contacts");
-  params.addParam<std::vector<std::string>>("contact_secondary",
-                                            "Secondary surface list for included contacts");
+  params.addParam<std::vector<BoundaryName>>("contact_primary",
+                                             "Primary surface list for included contacts");
+  params.addParam<std::vector<BoundaryName>>("contact_secondary",
+                                             "Secondary surface list for included contacts");
   params.addParam<std::vector<int>>(
       "contact_displaced",
       "List of indicators whether displaced mesh is used to define included contact");
-  params.addParam<std::vector<std::string>>("uncontact_primary",
-                                            "Primary surface list for excluded contacts");
-  params.addParam<std::vector<std::string>>("uncontact_secondary",
-                                            "Secondary surface list for excluded contacts");
+  params.addParam<std::vector<BoundaryName>>("uncontact_primary",
+                                             "Primary surface list for excluded contacts");
+  params.addParam<std::vector<BoundaryName>>("uncontact_secondary",
+                                             "Secondary surface list for excluded contacts");
   params.addParam<std::vector<int>>(
       "uncontact_displaced",
       "List of indicators whether displaced mesh is used to define excluded contact");
@@ -42,47 +43,30 @@ ContactSplit::validParams()
 
 ContactSplit::ContactSplit(const InputParameters & params)
   : Split(params),
-    _contact_primary(getParam<std::vector<std::string>>("contact_primary")),
-    _contact_secondary(getParam<std::vector<std::string>>("contact_secondary")),
+    _contact_pairs(getParam<BoundaryName, BoundaryName>("contact_primary", "contact_secondary")),
     _contact_displaced(getParam<std::vector<int>>("contact_displaced")),
-    _uncontact_primary(getParam<std::vector<std::string>>("uncontact_primary")),
-    _uncontact_secondary(getParam<std::vector<std::string>>("uncontact_secondary")),
+    _uncontact_pairs(
+        getParam<BoundaryName, BoundaryName>("uncontact_primary", "uncontact_secondary")),
     _uncontact_displaced(getParam<std::vector<int>>("uncontact_displaced")),
     _include_all_contact_nodes(getParam<bool>("include_all_contact_nodes"))
 {
-  if (_contact_primary.size() != _contact_secondary.size())
-  {
-    std::ostringstream err;
-    err << "Primary and secondary contact lists must have matching sizes: "
-        << _contact_primary.size() << " != " << _contact_secondary.size();
-    mooseError(err.str());
-  }
-  if (_contact_displaced.size() && _contact_primary.size() != _contact_displaced.size())
-  {
-    std::ostringstream err;
-    err << "Primary and displaced contact lists must have matching sizes: "
-        << _contact_primary.size() << " != " << _contact_displaced.size();
-    mooseError(err.str());
-  }
-  if (!_contact_displaced.size())
-    _contact_displaced.resize(_contact_primary.size());
+  if (!_contact_displaced.empty() && _contact_pairs.size() != _contact_displaced.size())
+    mooseError("Primary and displaced contact lists must have matching sizes: ",
+               _contact_pairs.size(),
+               " != ",
+               _contact_displaced.size());
 
-  if (_uncontact_primary.size() != _uncontact_secondary.size())
-  {
-    std::ostringstream err;
-    err << "Primary and secondary uncontact lists must have matching sizes: "
-        << _uncontact_primary.size() << " != " << _uncontact_secondary.size();
-    mooseError(err.str());
-  }
-  if (_uncontact_displaced.size() && _uncontact_primary.size() != _uncontact_displaced.size())
-  {
-    std::ostringstream err;
-    err << "Primary and displaced uncontact lists must have matching sizes: "
-        << _uncontact_primary.size() << " != " << _uncontact_displaced.size();
-    mooseError(err.str());
-  }
+  if (_contact_displaced.empty())
+    _contact_displaced.resize(_contact_pairs.size());
+
+  if (!_uncontact_displaced.empty() && _uncontact_pairs.size() != _uncontact_displaced.size())
+    mooseError("Primary and displaced uncontact lists must have matching sizes: ",
+               _uncontact_pairs.size(),
+               " != ",
+               _uncontact_displaced.size());
+
   if (!_uncontact_displaced.size())
-    _uncontact_displaced.resize(_uncontact_primary.size());
+    _uncontact_displaced.resize(_uncontact_pairs.size());
 }
 
 void
@@ -91,110 +75,43 @@ ContactSplit::setup(const std::string & prefix)
   // A reference to the PetscOptions
   Moose::PetscSupport::PetscOptions & po = _fe_problem.getPetscOptions();
   // prefix
-  std::string dmprefix = prefix + "dm_moose_", opt, val;
+  const std::string dmprefix = prefix + "dm_moose_";
 
   // contacts options
-  if (_contact_primary.size())
+  if (!_contact_pairs.empty())
   {
-    opt = dmprefix + "ncontacts";
+    // append PETSc options
+    po.pairs.emplace_back(dmprefix + "ncontacts", Moose::stringify(_contact_pairs.size()));
+
+    for (std::size_t j = 0; j < _contact_pairs.size(); ++j)
     {
-      std::ostringstream oval;
-      oval << _contact_primary.size();
-      val = oval.str();
-    }
-    // push back PETSc options
-    if (val == "")
-      po.flags.push_back(opt);
-    else
-    {
-      po.inames.push_back(opt);
-      po.values.push_back(val);
-    }
-    for (unsigned int j = 0; j < _contact_primary.size(); ++j)
-    {
-      std::ostringstream oopt;
-      oopt << dmprefix << "contact_" << j;
-      opt = oopt.str();
-      val = _contact_primary[j] + "," + _contact_secondary[j];
-      // push back PETSc options
-      if (val == "")
-        po.flags.push_back(opt);
-      else
-      {
-        po.inames.push_back(opt);
-        po.values.push_back(val);
-      }
+      auto opt = dmprefix + "contact_" + Moose::stringify(j);
+      po.pairs.emplace_back(opt, Moose::stringify(_contact_pairs[j], ","));
+
       if (_contact_displaced[j])
-      {
-        opt = opt + "_displaced";
-        val = "yes";
-        // push back PETSc options
-        if (val == "")
-          po.flags.push_back(opt);
-        else
-        {
-          po.inames.push_back(opt);
-          po.values.push_back(val);
-        }
-      }
+        po.pairs.emplace_back(opt + "_displaced", "yes");
     }
   }
+
   // uncontacts options
-  if (_uncontact_primary.size())
+  if (!_uncontact_pairs.empty())
   {
-    opt = dmprefix + "nuncontacts";
+    po.pairs.emplace_back(dmprefix + "nuncontacts", Moose::stringify(_uncontact_pairs.size()));
+
+    for (std::size_t j = 0; j < _uncontact_pairs.size(); ++j)
     {
-      std::ostringstream oval;
-      oval << _uncontact_primary.size();
-      val = oval.str();
-    }
-    // push back PETSc options
-    if (val == "")
-      po.flags.push_back(opt);
-    else
-    {
-      po.inames.push_back(opt);
-      po.values.push_back(val);
-    }
-    for (unsigned int j = 0; j < _uncontact_primary.size(); ++j)
-    {
-      std::ostringstream oopt;
-      oopt << dmprefix << "uncontact_" << j;
-      opt = oopt.str();
-      val = _uncontact_primary[j] + "," + _uncontact_secondary[j];
-      // push back PETSc options
-      if (val == "")
-        po.flags.push_back(opt);
-      else
-      {
-        po.inames.push_back(opt);
-        po.values.push_back(val);
-      }
+      auto opt = dmprefix + "uncontact_" + Moose::stringify(j);
+      po.pairs.emplace_back(opt, Moose::stringify(_uncontact_pairs[j], ","));
+
       if (_uncontact_displaced[j])
-      {
-        opt = opt + "_displaced";
-        val = "yes";
-        // push back PETSc options
-        if (val == "")
-          po.flags.push_back(opt);
-        else
-        {
-          po.inames.push_back(opt);
-          po.values.push_back(val);
-        }
-      }
+        po.pairs.emplace_back(opt + "_displaced", "yes");
     }
   }
 
   // Whether to include all nodes on the contact surfaces
   // into the contact subsolver
-  opt = dmprefix + "includeAllContactNodes";
-  if (_include_all_contact_nodes)
-    val = "yes";
-  else
-    val = "no";
-  po.inames.push_back(opt);
-  po.values.push_back(val);
+  po.pairs.emplace_back(dmprefix + "includeAllContactNodes",
+                        _include_all_contact_nodes ? "yes" : "no");
   Split::setup(prefix);
 }
 #endif // #if !PETSC_VERSION_LESS_THAN(3, 3, 0)

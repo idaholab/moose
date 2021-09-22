@@ -81,10 +81,9 @@ public:
   static InputParameters commonParameters();
 
 protected:
-  /// Primary boundary names for mechanical contact
-  const std::vector<BoundaryName> _primary;
-  /// Secondary boundary names for mechanical contact
-  const std::vector<BoundaryName> _secondary;
+  /// Primary/Secondary boundary name pairs for mechanical contact
+  const std::vector<std::pair<BoundaryName, BoundaryName>> _boundary_pairs;
+
   /// Contact model type enum
   const MooseEnum _model;
   /// Contact formulation type enum
@@ -100,8 +99,6 @@ protected:
   const MortarApproach _mortar_approach;
   /// Whether to use the dual Mortar approach
   bool _use_dual;
-  /// Number of contact pairs on which to enable mechanical contact
-  const unsigned int _number_pairs;
 
 private:
   /**
