@@ -18,6 +18,7 @@
 #include "FunctorMaterialProperty.h"
 
 #include "libmesh/coupling_matrix.h"
+#include "libmesh/parameters.h"
 
 #include <memory>
 #include <unordered_map>
@@ -1038,9 +1039,9 @@ SubProblem::declareFunctorProperty(const std::string & name,
         // We've already been declared previously so we need to make sure that we are the same type
         auto * const property = dynamic_cast<P<T> *>(base_property.get());
         if (!property)
-          mooseError("Inconsistent types for functor material property ",
+          mooseError("Inconsistent types for functor material property '",
                      name,
-                     ". Did you declare this property name with different types in different "
+                     "'. Did you declare this property name with different types in different "
                      "FunctorMaterials?");
       }
       else
@@ -1049,9 +1050,9 @@ SubProblem::declareFunctorProperty(const std::string & name,
         auto * const functor_property =
             dynamic_cast<FunctorMaterialProperty<T> *>(base_property.get());
         if (!functor_property)
-          mooseError("Inconsistent types for functor material property ",
+          mooseError("Inconsistent types for functor material property '",
                      name,
-                     ". Did you declare and retrieve the property with different types?");
+                     "'. Did you declare and retrieve the property with different types?");
 
         // And let's make sure we're the correct template P. If we're not, this is the first
         // declaration so we're free to re-create with the correct P (if we're not the correct P, it
@@ -1083,17 +1084,18 @@ SubProblem::getFunctor(const std::string & name, const THREAD_ID tid)
   if (it != functors.end())
   {
     if (functors.count(name) > 1)
-      mooseError("Attempted to get a functor with the name ",
+      mooseError("Attempted to get a functor with the name '",
                  name,
-                 " but multiple functors match. Make sure that you do not have functor material "
+                 "' but multiple functors match. Make sure that you do not have functor material "
                  "properties, functions, and variables with the same names");
 
     const auto * const functor = dynamic_cast<const Moose::Functor<T> *>(it->second);
     if (!functor)
-      mooseError("functor is of wrong type ",
-                 typeid(T).name(),
-                 " in SubProblem::getFunctor for functor named ",
-                 name);
+      mooseError("A call to SubProblem::getFunctor requested a functor named '",
+                 name,
+                 "' that returns the type: ",
+                 libMesh::demangle(typeid(T).name()),
+                 ". However, that functor already exists and returns a different type.");
     return *functor;
   }
 
