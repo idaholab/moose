@@ -67,7 +67,18 @@ Note that the `contact_pressure` variable is added but not used with the mortar 
 
 ### Extracting contact pressure data
 
+To get a better picture of teh contact pressure distribution along a contact
+surface it can be helpful to create a line plot of the pressure.
 
-Once you've answered the questions and run this example we will move on to
-[Step 2](tensor_mechanics/tutorials/introduction/step03.md) which introduces
-mortar based contact.
+> Look at the
+> [`NodalValueSampler`](NodalValueSampler.md)[vectorpostprocessor](VectorPostprocessors/index.md)
+> and see if you can use its
+> [!param](VectorPostprocessors/NodalValueSampler/block) parameter to output the
+> `pillars_normal_lm` variable on the `pillars_secondary_subdomain` subdomain.
+
+[Click here for the answer.](tensor_mechanics/tutorials/introduction/answer02a.md)
+
+Once you've answered the questions and run this example we will move on to add
+thermal transport and later on thermal contact. You will need to build teh `combined-opt` executable to follow along
+
+- [Click here to continue the tutorial](combined/tutorials/introduction/step01.md optional=true)
