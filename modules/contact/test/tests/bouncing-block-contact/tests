@@ -5,6 +5,15 @@
   issues = '#13080 #14454'
   [frictionless-nodal-min-lm-mortar-disp-coarse]
     type = 'Exodiff'
+    input = 'frictionless-mortar-3d.i'
+    exodiff = 'frictionless-mortar-3d_out.e'
+    mesh_mode = 'REPLICATED'
+    requirement = 'We will solve the a 3D frictionless bouncing block problem with mortar constraint'
+    cli_args = "Postprocessors/active=''"
+    allow_test_objects = true
+  []
+  [frictionless-nodal-min-lm-mortar-disp-coarse]
+    type = 'Exodiff'
     input = 'frictionless-nodal-min-lm-mortar-disp.i'
     exodiff = 'frictionless-nodal-min-lm-mortar-disp_out.e'
     mesh_mode = 'REPLICATED'

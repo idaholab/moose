@@ -30,6 +30,10 @@ public:
   void residualSetup() override;
   void jacobianSetup() override;
   void post() override;
+
+  /**
+   * Copy of the post routine but that skips assembling inactive nodes
+   */
   void wrongPost(const std::unordered_set<const Node *> & inactive_lm_nodes) override;
 
 protected:
@@ -52,7 +56,7 @@ protected:
    * using an NCP function. This is also where we actually feed the node-based constraint
    * information into the system residual and Jacobian
    */
-  void enforceConstraintOnDof(const DofObject * const dof);
+  virtual void enforceConstraintOnDof(const DofObject * const dof);
 
   /// x-displacement on the secondary face
   const ADVariableValue & _secondary_disp_x;

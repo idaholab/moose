@@ -23,6 +23,10 @@ public:
   void residualSetup() override;
   void jacobianSetup() override;
   void post() override;
+
+  /**
+   * Copy of the post routine but that skips assembling inactive nodes
+   */
   void wrongPost(const std::unordered_set<const Node *> & inactive_lm_nodes) override;
 
 protected:
@@ -43,14 +47,13 @@ protected:
    * where we actually feed the node-based constraint information into the system residual and
    * Jacobian
    */
-  void enforceConstraintOnDof(const DofObject * const dof);
+  virtual void enforceConstraintOnDof(const DofObject * const dof) override;
 
   /// A map from node to weighted gap
   std::unordered_map<const DofObject *, ADReal> _dof_to_weighted_tangential_velocity;
 
-  /// A pointer members that can be used to help avoid copying ADReals
+  /// A pointer member that can be used to help avoid copying ADReals
   const ADReal * _tangential_vel_ptr = nullptr;
-  const ADReal * _tangential_traction_ptr = nullptr;
 
   /// The value of the tangential velocity at the current quadrature point
   ADReal _qp_tangential_velocity;
