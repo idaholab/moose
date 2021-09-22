@@ -224,8 +224,9 @@ GeneratedMeshGenerator::generate()
     for (unsigned int dir = 0; dir < LIBMESH_DIM; ++dir)
     {
       pows[dir].resize(nelem[dir] + 1);
-      for (unsigned int i = 0; i < pows[dir].size(); ++i)
-        pows[dir][i] = std::pow(bias[dir], static_cast<int>(i));
+      pows[dir][0] = 1.0;
+      for (unsigned int i = 1; i < pows[dir].size(); ++i)
+        pows[dir][i] = pows[dir][i - 1] * bias[dir];
     }
 
     // Loop over the nodes and move them to the desired location

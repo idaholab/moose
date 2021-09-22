@@ -92,7 +92,6 @@ refine = 1
 
 [Contact]
   [leftright]
-    mesh = original_file_mesh
     secondary = 10
     primary = 20
 
