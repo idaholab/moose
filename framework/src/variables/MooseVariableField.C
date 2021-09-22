@@ -77,7 +77,7 @@ MooseVariableField<OutputType>::computeSolution(const Elem * const elem,
 }
 
 template <typename OutputType>
-typename Moose::ADType<OutputType>::type
+typename MooseVariableField<OutputType>::ValueType
 MooseVariableField<OutputType>::evaluate(const ElemQpArg & elem_qp, const unsigned int state) const
 {
   mooseAssert(this->hasBlocks(std::get<0>(elem_qp)->subdomain_id()),
@@ -107,7 +107,7 @@ MooseVariableField<OutputType>::evaluate(const ElemQpArg & elem_qp, const unsign
 }
 
 template <typename OutputType>
-typename Moose::ADType<OutputType>::type
+typename MooseVariableField<OutputType>::ValueType
 MooseVariableField<OutputType>::evaluate(const ElemSideQpArg & elem_side_qp,
                                          const unsigned int state) const
 {
@@ -142,7 +142,7 @@ MooseVariableField<OutputType>::evaluate(const ElemSideQpArg & elem_side_qp,
 #else
 
 template <typename OutputType>
-typename Moose::ADType<OutputType>::type
+typename MooseVariableField<OutputType>::ValueType
 MooseVariableField<OutputType>::evaluate(const ElemQpArg &, unsigned int) const
 {
   mooseError(
@@ -151,7 +151,7 @@ MooseVariableField<OutputType>::evaluate(const ElemQpArg &, unsigned int) const
 }
 
 template <typename OutputType>
-typename Moose::ADType<OutputType>::type
+typename MooseVariableField<OutputType>::ValueType
 MooseVariableField<OutputType>::evaluate(const ElemSideQpArg &, unsigned int) const
 {
   mooseError(
@@ -162,7 +162,7 @@ MooseVariableField<OutputType>::evaluate(const ElemSideQpArg &, unsigned int) co
 #endif
 
 template <>
-typename Moose::ADType<RealEigenVector>::type
+typename MooseVariableField<RealEigenVector>::ValueType
 MooseVariableField<RealEigenVector>::evaluate(const ElemQpArg &, unsigned int) const
 {
   mooseError("MooseVariableField::evaluate(ElemQpArg &, unsigned int) overload not implemented for "
@@ -170,7 +170,7 @@ MooseVariableField<RealEigenVector>::evaluate(const ElemQpArg &, unsigned int) c
 }
 
 template <>
-typename Moose::ADType<RealEigenVector>::type
+typename MooseVariableField<RealEigenVector>::ValueType
 MooseVariableField<RealEigenVector>::evaluate(const ElemSideQpArg &, unsigned int) const
 {
   mooseError(
@@ -179,7 +179,7 @@ MooseVariableField<RealEigenVector>::evaluate(const ElemSideQpArg &, unsigned in
 }
 
 template <typename OutputType>
-typename Moose::ADType<OutputType>::type
+typename MooseVariableField<OutputType>::ValueType
 MooseVariableField<OutputType>::evaluate(
     const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp, unsigned int state) const
 {

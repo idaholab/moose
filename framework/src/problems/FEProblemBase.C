@@ -2077,7 +2077,8 @@ FEProblemBase::addFunction(const std::string & type,
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    std::shared_ptr<Function> func = _factory.create<Function>(type, name, parameters, tid);
+    std::shared_ptr<MooseFunctionBase> func =
+        _factory.create<MooseFunctionBase>(type, name, parameters, tid);
     _functions.addObject(func, tid);
 
     auto * const functor = dynamic_cast<Moose::FunctorBase *>(func.get());
@@ -2133,7 +2134,11 @@ FEProblemBase::getFunction(const std::string & name, THREAD_ID tid)
       mooseError("Unable to find function " + name);
   }
 
-  return *(_functions.getActiveObject(name, tid));
+  auto * const ret = dynamic_cast<Function *>(_functions.getActiveObject(name, tid).get());
+  if (!ret)
+    mooseError("No function named ", name, " of appropriate type");
+
+  return *ret;
 }
 
 void
@@ -7184,3 +7189,33 @@ FEProblemBase::jacobianSetup()
   if (_displaced_problem)
     _displaced_problem->jacobianSetup();
 }
+
+template <typename T>
+bool
+FEProblemBase::hasFunction(const std::string & name, THREAD_ID tid) const
+{
+  return _functions.hasActiveObject(name, tid) &&
+         dynamic_cast<FunctionTempl<T> *>(_functions.getActiveObject(name, tid).get());
+}
+
+template <>
+FunctionTempl<Real> &
+FEProblemBase::getFunction<Real>(const std::string & name, THREAD_ID tid)
+{
+  return getFunction(name, tid);
+}
+
+template <typename T>
+FunctionTempl<T> &
+FEProblemBase::getFunction(const std::string & name, THREAD_ID tid)
+{
+  if (!hasFunction<T>(name, tid))
+    mooseError("Unable to find function " + name);
+
+  return static_cast<FunctionTempl<T> &>(*(_functions.getActiveObject(name, tid)));
+}
+
+template bool FEProblemBase::hasFunction<Real>(const std::string & name, THREAD_ID tid) const;
+template bool FEProblemBase::hasFunction<ADReal>(const std::string & name, THREAD_ID tid) const;
+template FunctionTempl<ADReal> & FEProblemBase::getFunction<ADReal>(const std::string & name,
+                                                                    THREAD_ID tid);

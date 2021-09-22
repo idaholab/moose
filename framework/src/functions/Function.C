@@ -11,19 +11,20 @@
 
 defineLegacyParams(Function);
 
+template <typename T>
 InputParameters
-Function::validParams()
+FunctionTempl<T>::validParams()
 {
-  InputParameters params = MooseObject::validParams();
+  InputParameters params = MooseFunctionBase::validParams();
 
   params.registerBase("Function");
 
   return params;
 }
 
-Function::Function(const InputParameters & parameters)
-  : MooseObject(parameters),
-    SetupInterface(this),
+template <typename T>
+FunctionTempl<T>::FunctionTempl(const InputParameters & parameters)
+  : MooseFunctionBase(parameters),
     TransientInterface(this),
     PostprocessorInterface(this),
     UserObjectInterface(this),
@@ -33,55 +34,66 @@ Function::Function(const InputParameters & parameters)
 {
 }
 
-Function::~Function() {}
+template <typename T>
+FunctionTempl<T>::~FunctionTempl()
+{
+}
 
+template <typename T>
 Real
-Function::value(Real /*t*/, const Point & /*p*/) const
+FunctionTempl<T>::value(Real /*t*/, const Point & /*p*/) const
 {
   return 0.0;
 }
 
+template <typename T>
 RealGradient
-Function::gradient(Real /*t*/, const Point & /*p*/) const
+FunctionTempl<T>::gradient(Real /*t*/, const Point & /*p*/) const
 {
   return RealGradient(0, 0, 0);
 }
 
+template <typename T>
 Real
-Function::timeDerivative(Real /*t*/, const Point & /*p*/) const
+FunctionTempl<T>::timeDerivative(Real /*t*/, const Point & /*p*/) const
 {
   mooseError("timeDerivative method not defined for function ", name());
   return 0;
 }
 
+template <typename T>
 RealVectorValue
-Function::vectorValue(Real /*t*/, const Point & /*p*/) const
+FunctionTempl<T>::vectorValue(Real /*t*/, const Point & /*p*/) const
 {
   return RealVectorValue(0, 0, 0);
 }
 
+template <typename T>
 RealVectorValue
-Function::vectorCurl(Real /*t*/, const Point & /*p*/) const
+FunctionTempl<T>::vectorCurl(Real /*t*/, const Point & /*p*/) const
 {
   return RealVectorValue(0, 0, 0);
 }
 
+template <typename T>
 Real
-Function::integral() const
+FunctionTempl<T>::integral() const
 {
   mooseError("Integral method not defined for function ", name());
   return 0;
 }
 
+template <typename T>
 Real
-Function::average() const
+FunctionTempl<T>::average() const
 {
   mooseError("Average method not defined for function ", name());
   return 0;
 }
 
+template <typename T>
 Real
-Function::getTime(const unsigned int state) const
+FunctionTempl<T>::getTime(const unsigned int state) const
 {
   switch (state)
   {
@@ -96,32 +108,11 @@ Function::getTime(const unsigned int state) const
   }
 }
 
-Real
-Function::evaluate(const Elem * const & elem, const unsigned int state) const
-{
-  return value(getTime(state), elem->centroid());
-}
-
-Real
-Function::evaluate(const ElemFromFaceArg & elem_from_face, const unsigned int state) const
-{
-  const auto * const elem = std::get<0>(elem_from_face);
-  const auto * const fi = std::get<1>(elem_from_face);
-  mooseAssert(fi, "We must have a non-null face information pointer");
-  return value(getTime(state), (elem == &fi->elem()) ? fi->elemCentroid() : fi->neighborCentroid());
-}
-
-Real
-Function::evaluate(const FaceArg & face, const unsigned int state) const
-{
-  return value(getTime(state), std::get<0>(face)->faceCentroid());
-}
-
-Real
-Function::evaluate(const ElemQpArg & elem_qp, const unsigned int state) const
+template <typename T>
+void
+FunctionTempl<T>::determineElemXYZ(const ElemQpArg & elem_qp) const
 {
   const Elem * const elem = std::get<0>(elem_qp);
-  const auto qp = std::get<1>(elem_qp);
   if (elem != _current_elem_qp_functor_elem)
   {
     _current_elem_qp_functor_elem = elem;
@@ -139,17 +130,14 @@ Function::evaluate(const ElemQpArg & elem_qp, const unsigned int state) const
     fe->reinit(elem);
     _current_elem_qp_functor_xyz = std::move(xyz);
   }
-  mooseAssert(qp < _current_elem_qp_functor_xyz.size(),
-              "The requested " << qp << " is outside our xyz size");
-  return value(getTime(state), _current_elem_qp_functor_xyz[qp]);
 }
 
-Real
-Function::evaluate(const ElemSideQpArg & elem_side_qp, const unsigned int state) const
+template <typename T>
+void
+FunctionTempl<T>::determineElemSideXYZ(const ElemSideQpArg & elem_side_qp) const
 {
   const Elem * const elem = std::get<0>(elem_side_qp);
   const auto side = std::get<1>(elem_side_qp);
-  const auto qp = std::get<2>(elem_side_qp);
   if (elem != _current_elem_side_qp_functor_elem_side.first ||
       side != _current_elem_side_qp_functor_elem_side.second)
   {
@@ -168,34 +156,85 @@ Function::evaluate(const ElemSideQpArg & elem_side_qp, const unsigned int state)
     fe->reinit(elem, side);
     _current_elem_side_qp_functor_xyz = std::move(xyz);
   }
+}
+
+template <typename T>
+typename FunctionTempl<T>::ValueType
+FunctionTempl<T>::evaluate(const Elem * const & elem, const unsigned int state) const
+{
+  return value(getTime(state), elem->centroid());
+}
+
+template <typename T>
+typename FunctionTempl<T>::ValueType
+FunctionTempl<T>::evaluate(const ElemFromFaceArg & elem_from_face, const unsigned int state) const
+{
+  const auto * const elem = std::get<0>(elem_from_face);
+  const auto * const fi = std::get<1>(elem_from_face);
+  mooseAssert(fi, "We must have a non-null face information pointer");
+  return value(getTime(state), (elem == &fi->elem()) ? fi->elemCentroid() : fi->neighborCentroid());
+}
+
+template <typename T>
+typename FunctionTempl<T>::ValueType
+FunctionTempl<T>::evaluate(const FaceArg & face, const unsigned int state) const
+{
+  return value(getTime(state), std::get<0>(face)->faceCentroid());
+}
+
+template <typename T>
+typename FunctionTempl<T>::ValueType
+FunctionTempl<T>::evaluate(const ElemQpArg & elem_qp, const unsigned int state) const
+{
+  determineElemXYZ(elem_qp);
+  const auto qp = std::get<1>(elem_qp);
+  mooseAssert(qp < _current_elem_qp_functor_xyz.size(),
+              "The requested " << qp << " is outside our xyz size");
+  return value(getTime(state), _current_elem_qp_functor_xyz[qp]);
+}
+
+template <typename T>
+typename FunctionTempl<T>::ValueType
+FunctionTempl<T>::evaluate(const ElemSideQpArg & elem_side_qp, const unsigned int state) const
+{
+  determineElemSideXYZ(elem_side_qp);
+  const auto qp = std::get<2>(elem_side_qp);
   mooseAssert(qp < _current_elem_side_qp_functor_xyz.size(),
               "The requested " << qp << " is outside our xyz size");
   return value(getTime(state), _current_elem_side_qp_functor_xyz[qp]);
 }
 
-Real
-Function::evaluate(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & /*tqp*/,
-                   unsigned int /*state*/) const
+template <typename T>
+typename FunctionTempl<T>::ValueType
+FunctionTempl<T>::evaluate(
+    const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & /*tqp*/,
+    unsigned int /*state*/) const
 {
   mooseError(
       "The ElementType evaluate overload is not supported by Function because there is no simple "
       "way to determine the location of quadrature points without being provided an element");
 }
 
+template <typename T>
 void
-Function::timestepSetup()
+FunctionTempl<T>::timestepSetup()
 {
-  Moose::Functor<Real>::timestepSetup();
+  Moose::Functor<T>::timestepSetup();
 }
 
+template <typename T>
 void
-Function::residualSetup()
+FunctionTempl<T>::residualSetup()
 {
-  Moose::Functor<Real>::residualSetup();
+  Moose::Functor<T>::residualSetup();
 }
 
+template <typename T>
 void
-Function::jacobianSetup()
+FunctionTempl<T>::jacobianSetup()
 {
-  Moose::Functor<Real>::jacobianSetup();
+  Moose::Functor<T>::jacobianSetup();
 }
+
+template class FunctionTempl<Real>;
+template class FunctionTempl<ADReal>;

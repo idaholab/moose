@@ -51,6 +51,7 @@ public:
   using typename Moose::Functor<T>::ElemSideQpArg;
   using typename Moose::Functor<T>::FunctorType;
   using typename Moose::Functor<T>::FunctorReturnType;
+  using typename Moose::Functor<T>::ValueType;
 
 protected:
   using ElemFn = std::function<T(const Elem * const &, const unsigned int &)>;
@@ -60,13 +61,13 @@ protected:
   using TQpFn = std::function<T(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> &,
                                 const unsigned int &)>;
 
-  T evaluate(const Elem * const & elem, unsigned int state) const override;
-  T evaluate(const ElemFromFaceArg & elem_from_face, unsigned int state) const override;
-  T evaluate(const FaceArg & face, unsigned int state) const override;
-  T evaluate(const ElemQpArg & elem_qp, unsigned int state) const override;
-  T evaluate(const ElemSideQpArg & elem_side_qp, unsigned int state) const override;
-  T evaluate(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
-             unsigned int state) const override;
+  ValueType evaluate(const Elem * const & elem, unsigned int state) const override;
+  ValueType evaluate(const ElemFromFaceArg & elem_from_face, unsigned int state) const override;
+  ValueType evaluate(const FaceArg & face, unsigned int state) const override;
+  ValueType evaluate(const ElemQpArg & elem_qp, unsigned int state) const override;
+  ValueType evaluate(const ElemSideQpArg & elem_side_qp, unsigned int state) const override;
+  ValueType evaluate(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
+                     unsigned int state) const override;
 
 private:
   /**
@@ -142,7 +143,7 @@ FunctorMaterialProperty<T>::subdomainErrorMessage(const SubdomainID sub_id) cons
 }
 
 template <typename T>
-T
+typename FunctorMaterialProperty<T>::ValueType
 FunctorMaterialProperty<T>::evaluate(const Elem * const & elem, unsigned int state) const
 {
   mooseAssert(elem && elem != libMesh::remote_elem,
@@ -153,7 +154,7 @@ FunctorMaterialProperty<T>::evaluate(const Elem * const & elem, unsigned int sta
 }
 
 template <typename T>
-T
+typename FunctorMaterialProperty<T>::ValueType
 FunctorMaterialProperty<T>::evaluate(const ElemFromFaceArg & elem_from_face,
                                      unsigned int state) const
 {
@@ -169,7 +170,7 @@ FunctorMaterialProperty<T>::evaluate(const ElemFromFaceArg & elem_from_face,
 }
 
 template <typename T>
-T
+typename FunctorMaterialProperty<T>::ValueType
 FunctorMaterialProperty<T>::evaluate(const FaceArg & face, unsigned int state) const
 {
   const auto elem_sub_id = std::get<3>(face).first;
@@ -213,7 +214,7 @@ FunctorMaterialProperty<T>::evaluate(const FaceArg & face, unsigned int state) c
 }
 
 template <typename T>
-T
+typename FunctorMaterialProperty<T>::ValueType
 FunctorMaterialProperty<T>::evaluate(const ElemQpArg & elem_qp, unsigned int state) const
 {
   const auto sub_id = std::get<0>(elem_qp)->subdomain_id();
@@ -223,7 +224,7 @@ FunctorMaterialProperty<T>::evaluate(const ElemQpArg & elem_qp, unsigned int sta
 }
 
 template <typename T>
-T
+typename FunctorMaterialProperty<T>::ValueType
 FunctorMaterialProperty<T>::evaluate(const ElemSideQpArg & elem_side_qp, unsigned int state) const
 {
   const auto sub_id = std::get<0>(elem_side_qp)->subdomain_id();
@@ -233,7 +234,7 @@ FunctorMaterialProperty<T>::evaluate(const ElemSideQpArg & elem_side_qp, unsigne
 }
 
 template <typename T>
-T
+typename FunctorMaterialProperty<T>::ValueType
 FunctorMaterialProperty<T>::evaluate(
     const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp, unsigned int state) const
 {

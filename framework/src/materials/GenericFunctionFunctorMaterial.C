@@ -51,7 +51,7 @@ GenericFunctionFunctorMaterialTempl<is_ad>::GenericFunctionFunctorMaterialTempl(
   _functions.resize(num_names);
 
   for (const auto i : make_range(_num_props))
-    _functions[i] = &getFunctionByName(_prop_values[i]);
+    _functions[i] = &getFunctionByName<GenericReal<is_ad>>(_prop_values[i]);
 
   const std::set<ExecFlagType> clearance_schedule(_execute_enum.begin(), _execute_enum.end());
   for (const auto i : make_range(_num_props))

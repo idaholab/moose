@@ -86,7 +86,10 @@ public:
 
   using OutputData = typename MooseVariableField<OutputType>::OutputData;
   using DoFValue = typename MooseVariableField<OutputType>::DoFValue;
-  using typename Moose::Functor<typename Moose::ADType<OutputType>::type>::FunctorReturnType;
+
+  using FunctorArg = typename Moose::ADType<OutputType>::type;
+  using typename Moose::Functor<FunctorArg>::FunctorReturnType;
+  using typename Moose::Functor<FunctorArg>::ValueType;
 
   MooseVariableFE(const InputParameters & parameters);
 
@@ -681,19 +684,19 @@ protected:
   std::unique_ptr<MooseVariableData<OutputType>> _lower_data;
 
 private:
-  using typename Moose::Functor<FunctorReturnType>::FaceArg;
-  using typename Moose::Functor<FunctorReturnType>::ElemFromFaceArg;
+  using typename Moose::Functor<FunctorArg>::FaceArg;
+  using typename Moose::Functor<FunctorArg>::ElemFromFaceArg;
   using MooseVariableField<OutputType>::evaluate;
-  FunctorReturnType evaluate(const Elem * const &, unsigned int) const override final
+  ValueType evaluate(const Elem * const &, unsigned int) const override final
   {
     mooseError("Elem functor overload not yet implemented for finite element variables");
   }
-  FunctorReturnType evaluate(const ElemFromFaceArg &, unsigned int) const override final
+  ValueType evaluate(const ElemFromFaceArg &, unsigned int) const override final
   {
     mooseError(
         "Elem-and-face-info functor overload not yet implemented for finite element variables");
   }
-  FunctorReturnType evaluate(const FaceArg &, unsigned int) const override final
+  ValueType evaluate(const FaceArg &, unsigned int) const override final
   {
     mooseError("Face info functor overload not yet implemented for finite element variables");
   }

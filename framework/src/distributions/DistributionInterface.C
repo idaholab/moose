@@ -11,6 +11,7 @@
 #include "Distribution.h"
 #include "SubProblem.h"
 #include "MooseTypes.h"
+#include "FEProblemBase.h"
 
 defineLegacyParams(DistributionInterface);
 

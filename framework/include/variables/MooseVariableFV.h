@@ -481,7 +481,10 @@ public:
                                       const FaceInfo & fi,
                                       const ADReal & elem_value) const;
 
-  using typename Moose::Functor<typename Moose::ADType<OutputType>::type>::FaceArg;
+  using FunctorArg = typename Moose::ADType<OutputType>::type;
+  using typename Moose::Functor<FunctorArg>::FaceArg;
+  using typename Moose::Functor<FunctorArg>::ElemFromFaceArg;
+  using typename Moose::Functor<FunctorArg>::ValueType;
   ADReal getInternalFaceValue(const FaceArg & face) const;
 
 protected:
@@ -508,17 +511,13 @@ protected:
   bool isExtrapolatedBoundaryFace(const FaceInfo & fi) const;
 
 private:
-  using typename Moose::Functor<typename Moose::ADType<OutputType>::type>::ElemFromFaceArg;
   using MooseVariableField<OutputType>::evaluate;
-  typename Moose::ADType<OutputType>::type evaluate(const Elem * const & elem,
-                                                    unsigned int) const override final
+  ValueType evaluate(const Elem * const & elem, unsigned int) const override final
   {
     return getElemValue(elem);
   }
-  typename Moose::ADType<OutputType>::type evaluate(const ElemFromFaceArg & elem_from_face,
-                                                    unsigned int) const override final;
-  typename Moose::ADType<OutputType>::type evaluate(const FaceArg & face,
-                                                    unsigned int) const override final;
+  ValueType evaluate(const ElemFromFaceArg & elem_from_face, unsigned int) const override final;
+  ValueType evaluate(const FaceArg & face, unsigned int) const override final;
 
   /**
    * @return the extrapolated value on the boundary face associated with \p fi

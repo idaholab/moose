@@ -115,6 +115,7 @@ public:
 
   using FunctorType = Functor<T>;
   using FunctorReturnType = T;
+  using ValueType = T;
   virtual ~Functor() = default;
   Functor() : _clearance_schedule({EXEC_ALWAYS}) {}
 
@@ -123,13 +124,13 @@ public:
    * Same as their \p evaluate overloads with the same arguments but allows for caching
    * implementation. These are the methods a user will call in their code
    */
-  T operator()(const libMesh::Elem * const & elem, unsigned int state = 0) const;
-  T operator()(const ElemFromFaceArg & elem_from_face, unsigned int state = 0) const;
-  T operator()(const FaceArg & face, unsigned int state = 0) const;
-  T operator()(const ElemQpArg & qp, unsigned int state = 0) const;
-  T operator()(const ElemSideQpArg & qp, unsigned int state = 0) const;
-  T operator()(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
-               unsigned int state = 0) const;
+  ValueType operator()(const libMesh::Elem * const & elem, unsigned int state = 0) const;
+  ValueType operator()(const ElemFromFaceArg & elem_from_face, unsigned int state = 0) const;
+  ValueType operator()(const FaceArg & face, unsigned int state = 0) const;
+  ValueType operator()(const ElemQpArg & qp, unsigned int state = 0) const;
+  ValueType operator()(const ElemSideQpArg & qp, unsigned int state = 0) const;
+  ValueType operator()(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
+                       unsigned int state = 0) const;
   ///@}
 
   void residualSetup() override;
@@ -146,7 +147,7 @@ protected:
    * Evaluate the functor with a given element. Some example implementations of this method
    * could compute an element-average or evaluate at the element centroid
    */
-  virtual T evaluate(const libMesh::Elem * const & elem, unsigned int state) const = 0;
+  virtual ValueType evaluate(const libMesh::Elem * const & elem, unsigned int state) const = 0;
 
   /**
    * @param elem_from_face See the \p ElemFromFaceArg doxygen
@@ -154,7 +155,7 @@ protected:
    * corresponds to the old time, 2 corresponds to the older time, etc.
    * @return The functor evaluated at the requested time and space
    */
-  virtual T evaluate(const ElemFromFaceArg & elem_from_face, unsigned int state) const = 0;
+  virtual ValueType evaluate(const ElemFromFaceArg & elem_from_face, unsigned int state) const = 0;
 
   /**
    * @param face See the \p FaceArg doxygen
@@ -162,7 +163,7 @@ protected:
    * corresponds to the old time, 2 corresponds to the older time, etc.
    * @return The functor evaluated at the requested time and space
    */
-  virtual T evaluate(const FaceArg & face, unsigned int state) const = 0;
+  virtual ValueType evaluate(const FaceArg & face, unsigned int state) const = 0;
 
   /**
    * @param qp See the \p ElemQpArg doxygen
@@ -170,7 +171,7 @@ protected:
    * corresponds to the old time, 2 corresponds to the older time, etc.
    * @return The functor evaluated at the requested time and space
    */
-  virtual T evaluate(const ElemQpArg & qp, unsigned int state) const = 0;
+  virtual ValueType evaluate(const ElemQpArg & qp, unsigned int state) const = 0;
 
   /**
    * @param side_qp See the \p ElemSideQpArg doxygen
@@ -178,7 +179,7 @@ protected:
    * corresponds to the old time, 2 corresponds to the older time, etc.
    * @return The functor evaluated at the requested time and space
    */
-  virtual T evaluate(const ElemSideQpArg & side_qp, unsigned int state) const = 0;
+  virtual ValueType evaluate(const ElemSideQpArg & side_qp, unsigned int state) const = 0;
 
   /**
    * @param tqp A tuple with the first member corresponding to an \p ElementType, either Element,
@@ -189,8 +190,8 @@ protected:
    * caveat with this \p evaluate overload: any variables involved in the functor evaluation must
    * have their requested element data type properly pre-initialized at the desired quadrature point
    */
-  virtual T evaluate(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
-                     unsigned int state) const = 0;
+  virtual ValueType evaluate(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
+                             unsigned int state) const = 0;
 
 private:
   /**
@@ -202,11 +203,11 @@ private:
    * check a qp cache and if invalid then evaluate
    */
   template <typename SpaceArg, typename TimeArg>
-  T queryQpCache(unsigned int qp,
-                 const QBase & qrule,
-                 std::vector<std::pair<bool, T>> & qp_cache_data,
-                 const SpaceArg & space,
-                 const TimeArg & time) const;
+  ValueType queryQpCache(unsigned int qp,
+                         const QBase & qrule,
+                         std::vector<std::pair<bool, T>> & qp_cache_data,
+                         const SpaceArg & space,
+                         const TimeArg & time) const;
 
   /// How often to clear the material property cache
   std::set<ExecFlagType> _clearance_schedule;
@@ -247,21 +248,21 @@ private:
 };
 
 template <typename T>
-T
+typename Functor<T>::ValueType
 Functor<T>::operator()(const Elem * const & elem, const unsigned int state) const
 {
   return evaluate(elem, state);
 }
 
 template <typename T>
-T
+typename Functor<T>::ValueType
 Functor<T>::operator()(const ElemFromFaceArg & elem_from_face, const unsigned int state) const
 {
   return evaluate(elem_from_face, state);
 }
 
 template <typename T>
-T
+typename Functor<T>::ValueType
 Functor<T>::operator()(const FaceArg & face, const unsigned int state) const
 {
   return evaluate(face, state);
@@ -269,7 +270,7 @@ Functor<T>::operator()(const FaceArg & face, const unsigned int state) const
 
 template <typename T>
 template <typename SpaceArg, typename TimeArg>
-T
+typename Functor<T>::ValueType
 Functor<T>::queryQpCache(const unsigned int qp,
                          const QBase & qrule,
                          std::vector<std::pair<bool, T>> & qp_cache_data,
@@ -299,7 +300,7 @@ Functor<T>::queryQpCache(const unsigned int qp,
 }
 
 template <typename T>
-T
+typename Functor<T>::ValueType
 Functor<T>::operator()(const ElemQpArg & elem_qp, const unsigned int state) const
 {
   if (_clearance_schedule.count(EXEC_ALWAYS))
@@ -320,7 +321,7 @@ Functor<T>::operator()(const ElemQpArg & elem_qp, const unsigned int state) cons
 }
 
 template <typename T>
-T
+typename Functor<T>::ValueType
 Functor<T>::operator()(const ElemSideQpArg & elem_side_qp, const unsigned int state) const
 {
   if (_clearance_schedule.count(EXEC_ALWAYS))
@@ -350,7 +351,7 @@ Functor<T>::operator()(const ElemSideQpArg & elem_side_qp, const unsigned int st
 }
 
 template <typename T>
-T
+typename Functor<T>::ValueType
 Functor<T>::operator()(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
                        const unsigned int state) const
 {
@@ -417,29 +418,33 @@ template <typename T>
 class ConstantFunctor : public Functor<T>
 {
 public:
-  ConstantFunctor(const T & value) : _value(value) {}
-  ConstantFunctor(T && value) : _value(value) {}
-
-private:
   using typename Functor<T>::FaceArg;
   using typename Functor<T>::ElemFromFaceArg;
   using typename Functor<T>::ElemQpArg;
   using typename Functor<T>::ElemSideQpArg;
   using typename Functor<T>::FunctorType;
   using typename Functor<T>::FunctorReturnType;
+  using typename Functor<T>::ValueType;
 
-  T evaluate(const libMesh::Elem * const &, unsigned int) const override final { return _value; }
-  T evaluate(const ElemFromFaceArg &, unsigned int) const override final { return _value; }
-  T evaluate(const FaceArg &, unsigned int) const override final { return _value; }
-  T evaluate(const ElemQpArg &, unsigned int) const override final { return _value; }
-  T evaluate(const ElemSideQpArg &, unsigned int) const override final { return _value; }
-  T evaluate(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> &,
-             unsigned int) const override final
+  ConstantFunctor(const ValueType & value) : _value(value) {}
+  ConstantFunctor(ValueType && value) : _value(value) {}
+
+private:
+  ValueType evaluate(const libMesh::Elem * const &, unsigned int) const override final
+  {
+    return _value;
+  }
+  ValueType evaluate(const ElemFromFaceArg &, unsigned int) const override final { return _value; }
+  ValueType evaluate(const FaceArg &, unsigned int) const override final { return _value; }
+  ValueType evaluate(const ElemQpArg &, unsigned int) const override final { return _value; }
+  ValueType evaluate(const ElemSideQpArg &, unsigned int) const override final { return _value; }
+  ValueType evaluate(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> &,
+                     unsigned int) const override final
   {
     return _value;
   }
 
 private:
-  T _value;
+  ValueType _value;
 };
 }

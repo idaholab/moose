@@ -338,16 +338,15 @@ public:
   void meshChanged() override;
 
 protected:
-  using Moose::Functor<typename Moose::ADType<OutputType>::type>::evaluate;
-  using typename Moose::Functor<typename Moose::ADType<OutputType>::type>::ElemQpArg;
-  using typename Moose::Functor<typename Moose::ADType<OutputType>::type>::ElemSideQpArg;
-  typename Moose::ADType<OutputType>::type evaluate(const ElemQpArg & elem_qp,
-                                                    unsigned int state) const override final;
-  typename Moose::ADType<OutputType>::type evaluate(const ElemSideQpArg & elem_side_qp,
-                                                    unsigned int state) const override final;
-  typename Moose::ADType<OutputType>::type
-  evaluate(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
-           unsigned int state) const override final;
+  using FunctorArg = typename Moose::ADType<OutputType>::type;
+  using Moose::Functor<FunctorArg>::evaluate;
+  using typename Moose::Functor<FunctorArg>::ElemQpArg;
+  using typename Moose::Functor<FunctorArg>::ElemSideQpArg;
+  using typename Moose::Functor<FunctorArg>::ValueType;
+  ValueType evaluate(const ElemQpArg & elem_qp, unsigned int state) const override final;
+  ValueType evaluate(const ElemSideQpArg & elem_side_qp, unsigned int state) const override final;
+  ValueType evaluate(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
+                     unsigned int state) const override final;
 
 private:
 #ifdef MOOSE_GLOBAL_AD_INDEXING

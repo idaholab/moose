@@ -15,13 +15,15 @@
 #include "MooseParsedFunctionWrapper.h"
 
 registerMooseObjectAliased("MooseApp", MooseParsedFunction, "ParsedFunction");
+registerMooseObjectAliased("MooseApp", ADMooseParsedFunction, "ADParsedFunction");
 
 defineLegacyParams(MooseParsedFunction);
 
+template <typename T>
 InputParameters
-MooseParsedFunction::validParams()
+MooseParsedFunctionTempl<T>::validParams()
 {
-  InputParameters params = Function::validParams();
+  InputParameters params = T::validParams();
   params += MooseParsedFunctionBase::validParams();
   params.addRequiredCustomTypeParam<std::string>(
       "value", "FunctionExpression", "The user defined function.");
@@ -31,47 +33,56 @@ MooseParsedFunction::validParams()
   return params;
 }
 
-MooseParsedFunction::MooseParsedFunction(const InputParameters & parameters)
-  : Function(parameters),
+template <typename T>
+MooseParsedFunctionTempl<T>::MooseParsedFunctionTempl(const InputParameters & parameters)
+  : T(parameters),
     MooseParsedFunctionBase(parameters),
-    _value(verifyFunction(getParam<std::string>("value")))
+    _value(verifyFunction(this->template getParam<std::string>("value")))
 {
 }
 
+template <typename T>
 Real
-MooseParsedFunction::value(Real t, const Point & p) const
+MooseParsedFunctionTempl<T>::value(Real t, const Point & p) const
 {
   return _function_ptr->evaluate<Real>(t, p);
 }
 
+template <typename T>
 RealGradient
-MooseParsedFunction::gradient(Real t, const Point & p) const
+MooseParsedFunctionTempl<T>::gradient(Real t, const Point & p) const
 {
   return _function_ptr->evaluateGradient(t, p);
 }
 
+template <typename T>
 Real
-MooseParsedFunction::timeDerivative(Real t, const Point & p) const
+MooseParsedFunctionTempl<T>::timeDerivative(Real t, const Point & p) const
 {
   return _function_ptr->evaluateDot(t, p);
 }
 
+template <typename T>
 RealVectorValue
-MooseParsedFunction::vectorValue(Real /*t*/, const Point & /*p*/) const
+MooseParsedFunctionTempl<T>::vectorValue(Real /*t*/, const Point & /*p*/) const
 {
   mooseError("The vectorValue method is not defined in ParsedFunction");
 }
 
+template <typename T>
 void
-MooseParsedFunction::initialSetup()
+MooseParsedFunctionTempl<T>::initialSetup()
 {
   if (!_function_ptr)
   {
     THREAD_ID tid = 0;
-    if (isParamValid("_tid"))
-      tid = getParam<THREAD_ID>("_tid");
+    if (this->isParamValid("_tid"))
+      tid = this->template getParam<THREAD_ID>("_tid");
 
     _function_ptr =
         libmesh_make_unique<MooseParsedFunctionWrapper>(_pfb_feproblem, _value, _vars, _vals, tid);
   }
 }
+
+template class MooseParsedFunctionTempl<Function>;
+template class MooseParsedFunctionTempl<FunctionTempl<ADReal>>;

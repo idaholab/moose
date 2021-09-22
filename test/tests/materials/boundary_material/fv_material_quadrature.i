@@ -16,7 +16,7 @@
 
 [Functions]
   [linear_x]
-    type = ParsedFunction
+    type = ADParsedFunction
     value = 'x'
   []
 []

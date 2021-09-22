@@ -1067,9 +1067,8 @@ MooseVariableFV<OutputType>::clearAllDofIndices()
 }
 
 template <typename OutputType>
-typename Moose::ADType<OutputType>::type
-MooseVariableFV<OutputType>::evaluate(const MooseVariableFV<OutputType>::FaceArg & face,
-                                      unsigned int) const
+typename MooseVariableFV<OutputType>::ValueType
+MooseVariableFV<OutputType>::evaluate(const FaceArg & face, unsigned int) const
 {
   const FaceInfo * const fi = std::get<0>(face);
   mooseAssert(fi, "The face information must be non-null");
@@ -1085,7 +1084,7 @@ MooseVariableFV<OutputType>::evaluate(const MooseVariableFV<OutputType>::FaceArg
 }
 
 template <typename OutputType>
-typename Moose::ADType<OutputType>::type
+typename MooseVariableFV<OutputType>::ValueType
 MooseVariableFV<OutputType>::evaluate(const ElemFromFaceArg & elem_from_face, unsigned int) const
 {
   const Elem * const requested_elem = std::get<0>(elem_from_face);
