@@ -11,6 +11,9 @@
 #include "FEProblem.h"
 #include "Transient.h"
 
+#include <algorithm>
+#include <functional>
+
 defineLegacyParams(TimeSequenceStepperBase);
 
 InputParameters
@@ -45,10 +48,9 @@ TimeSequenceStepperBase::setupSequence(const std::vector<Real> & times)
       Real start_time = _executioner.getStartTime();
       Real end_time = _executioner.endTime();
 
-      // make sure time sequence is in ascending order
-      for (unsigned int j = 0; j < times.size() - 1; ++j)
-        if (times[j + 1] <= times[j])
-          mooseError("time_sequence must be in ascending order.");
+      // make sure time sequence is in strictly ascending order
+      if (!std::is_sorted(times.begin(), times.end(), std::less_equal<Real>()))
+        paramError("time_sequence", "Time points must be in strictly ascending order.");
 
       _time_sequence.push_back(start_time);
       for (unsigned int j = 0; j < times.size(); ++j)

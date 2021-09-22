@@ -128,8 +128,6 @@ offset = 0.01
 
 [Contact]
   [./leftright]
-
-    mesh = block_rename
     secondary = lb_right
     primary = rb_left
 

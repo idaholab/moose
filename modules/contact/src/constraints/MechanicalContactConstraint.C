@@ -38,7 +38,7 @@ MechanicalContactConstraint::validParams()
   params.addParam<BoundaryName>("secondary", "The secondary boundary");
   params.addRequiredParam<unsigned int>("component",
                                         "An integer corresponding to the direction "
-                                        "the variable this kernel acts in. (0 for x, "
+                                        "the variable this constraint acts on. (0 for x, "
                                         "1 for y, 2 for z)");
 
   params.addCoupledVar(

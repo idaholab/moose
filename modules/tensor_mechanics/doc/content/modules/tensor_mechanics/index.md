@@ -67,6 +67,7 @@ These types of code classes make up the core of the tensor mechanics module.
 Get started running your own tensor mechanics simulations by exploring the
 introductory tutorials and examples. Next browse through the information:
 
+- [Introduction](tensor_mechanics/tutorials/introduction/index.md)
 - [Visualizing Tensors](tensor_mechanics/VisualizingTensors.md)
 - [Setting Convergence Criteria](tensor_mechanics/Convergence.md)
 - [Module Documentation List](tensor_mechanics/systems.md)

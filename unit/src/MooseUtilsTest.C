@@ -411,3 +411,19 @@ TEST(MooseUtils, directory)
   EXPECT_FALSE(MooseUtils::pathExists(path));
   EXPECT_THROW(MooseUtils::makedirs("/should_not_access", true), std::invalid_argument);
 }
+
+TEST(MooseUtils, globCompare)
+{
+  EXPECT_TRUE(MooseUtils::globCompare("Bell", "?ell"));
+  EXPECT_TRUE(MooseUtils::globCompare("Bovine", "*vin*"));
+  EXPECT_TRUE(MooseUtils::globCompare("Bathroom", "Ba*"));
+  EXPECT_TRUE(MooseUtils::globCompare("Mop", "M*op"));
+  EXPECT_TRUE(MooseUtils::globCompare("Four", "????"));
+  EXPECT_TRUE(MooseUtils::globCompare("Bathroom", "*room"));
+  EXPECT_TRUE(MooseUtils::globCompare("Irradiation", "*ra*o*"));
+  EXPECT_TRUE(MooseUtils::globCompare("Clock", "C*ck"));
+  EXPECT_TRUE(MooseUtils::globCompare("LoveIsInTheAirTonight", "LoveIsInThe???Tonight"));
+  EXPECT_FALSE(MooseUtils::globCompare("Moose", "*ealII*"));
+  EXPECT_FALSE(MooseUtils::globCompare("FEM", "?EN"));
+  EXPECT_FALSE(MooseUtils::globCompare("Three", "????"));
+}

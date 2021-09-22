@@ -61,43 +61,44 @@ SingleMatrixPreconditioner::SingleMatrixPreconditioner(const InputParameters & p
 {
   NonlinearSystemBase & nl = _fe_problem.getNonlinearSystemBase();
   unsigned int n_vars = nl.nVariables();
+  auto cm = libmesh_make_unique<CouplingMatrix>(n_vars);
 
-  std::unique_ptr<CouplingMatrix> cm = libmesh_make_unique<CouplingMatrix>(n_vars);
-  bool full = getParam<bool>("full");
-
-  if (!full)
+  if (!getParam<bool>("full"))
   {
     // put 1s on diagonal
-    for (unsigned int i = 0; i < n_vars; i++)
+    for (unsigned int i = 0; i < n_vars; ++i)
       (*cm)(i, i) = 1;
 
     // off-diagonal entries from the off_diag_row and off_diag_column parameters
-    std::vector<std::vector<unsigned int>> off_diag(n_vars);
-    for (unsigned int i = 0;
-         i < getParam<std::vector<NonlinearVariableName>>("off_diag_row").size();
-         i++)
+    for (const auto & off_diag :
+         getParam<NonlinearVariableName, NonlinearVariableName>("off_diag_row", "off_diag_column"))
     {
-      unsigned int row =
-          nl.getVariable(0, getParam<std::vector<NonlinearVariableName>>("off_diag_row")[i])
-              .number();
-      unsigned int column =
-          nl.getVariable(0, getParam<std::vector<NonlinearVariableName>>("off_diag_column")[i])
-              .number();
+      const auto row = nl.getVariable(0, off_diag.first).number();
+      const auto column = nl.getVariable(0, off_diag.second).number();
       (*cm)(row, column) = 1;
     }
 
     // off-diagonal entries from the coupled_groups parameters
-    std::vector<NonlinearVariableName> groups =
-        getParam<std::vector<NonlinearVariableName>>("coupled_groups");
-    for (unsigned int i = 0; i < groups.size(); ++i)
+    const auto & all_vars = nl.getVariableNames();
+    auto groups = getParam<std::vector<NonlinearVariableName>>("coupled_groups");
+    for (const auto & group : groups)
     {
-      std::vector<NonlinearVariableName> vars;
-      MooseUtils::tokenize<NonlinearVariableName>(groups[i], vars, 1, ",");
+      std::vector<VariableName> vars;
+      MooseUtils::tokenize(group, vars, 1, ",");
+      try
+      {
+        MooseUtils::expandAllMatches(all_vars, vars);
+      }
+      catch (std::invalid_argument const & e)
+      {
+        mooseError("No variable name match found for '", e.what(), "'.");
+      }
+
       for (unsigned int j = 0; j < vars.size(); ++j)
         for (unsigned int k = j + 1; k < vars.size(); ++k)
         {
-          unsigned int row = nl.getVariable(0, vars[j]).number();
-          unsigned int column = nl.getVariable(0, vars[k]).number();
+          const auto row = nl.getVariable(0, vars[j]).number();
+          const auto column = nl.getVariable(0, vars[k]).number();
           (*cm)(row, column) = 1;
           (*cm)(column, row) = 1;
         }
@@ -105,8 +106,8 @@ SingleMatrixPreconditioner::SingleMatrixPreconditioner(const InputParameters & p
   }
   else
   {
-    for (unsigned int i = 0; i < n_vars; i++)
-      for (unsigned int j = 0; j < n_vars; j++)
+    for (unsigned int i = 0; i < n_vars; ++i)
+      for (unsigned int j = 0; j < n_vars; ++j)
         (*cm)(i, j) = 1;
   }
 

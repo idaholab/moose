@@ -44,7 +44,6 @@ offset = 1e-2
 
 [Contact]
   [frictional]
-    mesh = revised_file_mesh
     primary = 20
     secondary = 10
     formulation = mortar
