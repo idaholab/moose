@@ -31,6 +31,13 @@ Based on these observations the following recommendations are provided for using
 2. When TRI elements are present on the mortar interface, verify that the problem is well conditioned of the problem and use stabilization if necessary.
 3. Avoid uniformly refining meshes, instead regenerate meshes when a refined mesh is needed.
 
+---
+**NOTE**
+
+3D mortar often requires larger AD array sizes than specified by the default MOOSE configuration. To configure MOOSE with a larger array use configuration option `--with-derivative-size=<n>`. The AD size required for a problem depends on 1) problem physics, 2) the order of primal and Lagrange multiplier variables, and 3) the relative sizing of the secondary and primary meshes.
+
+---
+
 
 ### Parameters
 

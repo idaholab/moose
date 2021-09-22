@@ -53,14 +53,14 @@ AutomaticMortarGeneration::AutomaticMortarGeneration(
     const std::pair<SubdomainID, SubdomainID> & subdomain_key,
     bool on_displaced,
     bool periodic,
-    bool give_me_wrong_results)
+    bool correct_edge_dropping)
   : ConsoleStreamInterface(app),
     mesh(mesh_in),
     _debug(false),
     _on_displaced(on_displaced),
     _periodic(periodic),
     _distributed(!mesh.is_replicated()),
-    _give_me_wrong_results(give_me_wrong_results)
+    _correct_edge_dropping(correct_edge_dropping)
 {
   primary_secondary_boundary_id_pairs.push_back(boundary_key);
   primary_requested_boundary_ids.insert(boundary_key.first);
@@ -332,7 +332,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
       {
         mooseError("MortarSegmentInfo not found for the mortar segment candidate");
       }
-      if (info->xi1_a < xi1 && xi1 < info->xi1_b)
+      if (info->xi1_a <= xi1 && xi1 <= info->xi1_b)
       {
         current_mortar_segment = mortar_segment_candidate;
         break;
@@ -343,10 +343,10 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     if (current_mortar_segment == nullptr)
       mooseError("Unable to find appropriate mortar segment during linear search!");
 
-    // // If node lands on endpoint of segment, don't split
-    // info = &msm_elem_to_info.at(current_mortar_segment);
-    // if (info->xi1_a == xi1 || xi1 == info->xi1_b)
-    //   continue;
+    // If node lands on endpoint of segment, don't split
+    info = &msm_elem_to_info.at(current_mortar_segment);
+    if (info->xi1_a == xi1 || xi1 == info->xi1_b)
+      continue;
 
     const auto new_id = mortar_segment_mesh->max_node_id() + 1;
     mooseAssert(mortar_segment_mesh->comm().verify(new_id),
@@ -617,11 +617,11 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
   }
 #endif
 
-  // // Set up the the mortar segment neighbor information.
-  // mortar_segment_mesh->allow_renumbering(true);
-  // mortar_segment_mesh->skip_partitioning(true);
-  // mortar_segment_mesh->allow_find_neighbors(true);
-  // mortar_segment_mesh->prepare_for_use();
+  // Set up the the mortar segment neighbor information.
+  mortar_segment_mesh->allow_renumbering(true);
+  mortar_segment_mesh->skip_partitioning(true);
+  mortar_segment_mesh->allow_find_neighbors(false);
+  mortar_segment_mesh->prepare_for_use();
 
   // (Optionally) Write the mortar segment mesh to file for inspection
   if (_debug)
@@ -771,7 +771,8 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
       if (secondary_side_elem->subdomain_id() != secondary_subd_id)
         continue;
 
-      std::vector<MortarSegmentHelper *> mortar_segment_helper(secondary_side_elem->n_sub_elem());
+      std::vector<std::unique_ptr<MortarSegmentHelper>> mortar_segment_helper(
+          secondary_side_elem->n_sub_elem());
       const auto nodal_normals = getNodalNormals(*secondary_side_elem);
 
       /**
@@ -802,7 +803,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
         normal.unit();
 
         // Build and store linearized sub-elements for later use
-        mortar_segment_helper[sel] = new MortarSegmentHelper(nodes, center, normal);
+        mortar_segment_helper[sel] = std::make_unique<MortarSegmentHelper>(nodes, center, normal);
       }
 
       /**
@@ -1026,14 +1027,17 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
                            " a corresponding primary element; this may be expected depending on"
                            " problem geometry but may indicate a failure of the element search"
                            " or projection"));
-
-        // Deallocate helpers
-        delete mortar_segment_helper[sel];
       }
       // End loop through secondary elements
     }
     // End loop through mortar constraint pairs
   }
+
+  // Set up the the mortar segment neighbor information.
+  mortar_segment_mesh->allow_renumbering(true);
+  mortar_segment_mesh->skip_partitioning(true);
+  mortar_segment_mesh->allow_find_neighbors(false);
+  mortar_segment_mesh->prepare_for_use();
 
   // Output mortar segment mesh
   if (_debug)
@@ -1154,12 +1158,12 @@ AutomaticMortarGeneration::msmStatistics()
   }
 }
 
-// The blocks marked with **** are for regressing edge dropping treatment and should be removed eventually.
+// The blocks marked with **** are for regressing edge dropping treatment and should be removed
+// eventually.
 //****
-// Had to make a new function because for wrong results a node is inactive if even one of
-// neighbor elements is inactive
+// Compute inactve nodes when the old (incorrect) edge dropping treatemnt is enabled
 void
-AutomaticMortarGeneration::computeWrongInactiveLMNodes()
+AutomaticMortarGeneration::computeIncorrectEdgeDroppingInactiveLMNodes()
 {
   // Note that in 3D our trick to check whether an element has edge dropping needs loose tolerances
   // since the mortar segments are on the linearized element and comparing the volume of the
@@ -1198,7 +1202,6 @@ AutomaticMortarGeneration::computeWrongInactiveLMNodes()
         for (auto n : make_range(el->n_nodes()))
           inactive_node_ids.insert(el->node_id(n));
       }
-
 
   // Assemble list of procs that nodes contribute to
   for (const auto & pr : primary_secondary_subdomain_id_pairs)
@@ -1254,9 +1257,9 @@ AutomaticMortarGeneration::computeWrongInactiveLMNodes()
 void
 AutomaticMortarGeneration::computeInactiveLMNodes()
 {
-  if (_give_me_wrong_results)
+  if (!_correct_edge_dropping)
   {
-    computeWrongInactiveLMNodes();
+    computeIncorrectEdgeDroppingInactiveLMNodes();
     return;
   }
 
@@ -1350,7 +1353,7 @@ AutomaticMortarGeneration::computeInactiveLMElems()
   std::unordered_map<const Elem *, Real> active_volume;
 
   // Compute fraction of elements with corresponding primary elements
-  if (_give_me_wrong_results)
+  if (!_correct_edge_dropping)
     for (const auto msm_elem : mortar_segment_mesh->active_local_element_ptr_range())
     {
       const MortarSegmentInfo & msinfo = msm_elem_to_info.at(msm_elem);
@@ -1366,7 +1369,7 @@ AutomaticMortarGeneration::computeInactiveLMElems()
     const Elem * secondary_elem = msinfo.secondary_elem;
 
     //****
-    if (_give_me_wrong_results)
+    if (!_correct_edge_dropping)
       if (std::abs(active_volume[secondary_elem] / secondary_elem->volume() - 1.0) > tol)
         continue;
     //****

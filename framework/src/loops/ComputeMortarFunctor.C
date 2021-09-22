@@ -127,12 +127,6 @@ ComputeMortarFunctor::operator()()
     if (elem_volume / secondary_volume < TOLERANCE)
       continue;
 
-    // //****
-    // if (_amg.wrongResults())
-    //   if (_amg.getInactiveLMElems().find(secondary_face_elem) != _amg.getInactiveLMElems().end())
-    //     continue;
-    // //****
-
     // Set the primary interior parent and side ids.
     const Elem * primary_ip = msinfo.primary_elem->interior_parent();
     unsigned int primary_side_id = primary_ip->which_side_am_i(msinfo.primary_elem);
@@ -261,8 +255,8 @@ ComputeMortarFunctor::operator()()
   // Call any post operations for our mortar constraints
   for (auto * const mc : _mortar_constraints)
   {
-    if (_amg.wrongResults())
-      mc->wrongPost(_amg.getInactiveLMNodes());
+    if (_amg.incorrectEdgeDropping())
+      mc->incorrectEdgeDroppingPost(_amg.getInactiveLMNodes());
     else
       mc->post();
 

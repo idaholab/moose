@@ -27,7 +27,8 @@ public:
   /**
    * Copy of the post routine but that skips assembling inactive nodes
    */
-  void wrongPost(const std::unordered_set<const Node *> & inactive_lm_nodes) override;
+  void
+  incorrectEdgeDroppingPost(const std::unordered_set<const Node *> & inactive_lm_nodes) override;
 
 protected:
   /**

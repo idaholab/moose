@@ -1,0 +1,15 @@
+# An explanation and results for the full runs of these inputs files are given in the contact documentation
+
+[Examples]
+  design = 'Constraints/index.md'
+  issues = '#13080'
+  [frictionless-mortar-3d]
+    type = 'Exodiff'
+    input = 'frictionless-mortar-3d.i'
+    exodiff = 'frictionless-mortar-3d_out.e'
+    mesh_mode = 'REPLICATED'
+    requirement = 'We will solve the a 3D frictionless bouncing block problem with mortar constraint'
+    allow_test_objects = true
+    min_ad_size = 100
+  []
+[]

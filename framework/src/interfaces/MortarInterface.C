@@ -37,9 +37,9 @@ MortarInterface::validParams()
       "effect of changing the normals vector for projection from outward to inward facing");
 
   params.addParam<bool>(
-      "give_me_wrong_results",
-      true,
-      "Whether to enable incorrect edge dropping treatment for mortar constraints. When enabled "
+      "correct_edge_dropping",
+      false,
+      "Whether to enable correct edge dropping treatment for mortar constraints. When disabled "
       "any Lagrange Multiplier degree of freedom on a secondary element without full primary "
       "contributions will be set (strongly) to 0.");
 
@@ -66,7 +66,7 @@ MortarInterface::MortarInterface(const MooseObject * moose_object)
                                          ? moose_object->getParam<bool>("use_displaced_mesh")
                                          : false,
                                      moose_object->getParam<bool>("periodic"),
-                                     moose_object->getParam<bool>("give_me_wrong_results"));
+                                     moose_object->getParam<bool>("correct_edge_dropping"));
 
   const auto & secondary_set = _mortar_data.getHigherDimSubdomainIDs(_secondary_subdomain_id);
   const auto & primary_set = _mortar_data.getHigherDimSubdomainIDs(_primary_subdomain_id);

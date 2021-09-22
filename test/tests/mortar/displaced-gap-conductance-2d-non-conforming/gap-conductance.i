@@ -96,7 +96,7 @@
     variable = lambda
     secondary_variable = T
     use_displaced_mesh = true
-    give_me_wrong_results = false
+    correct_edge_dropping = true
   [../]
 []
 

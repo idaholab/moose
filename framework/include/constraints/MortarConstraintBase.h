@@ -100,7 +100,7 @@ public:
   /**
    * This method will be called after the loop over the mortar segment mesh
    */
-  virtual void wrongPost(const std::unordered_set<const Node *> &) {}
+  virtual void incorrectEdgeDroppingPost(const std::unordered_set<const Node *> &) {}
 
   /**
    * A post routine for zeroing all inactive LM DoFs
