@@ -34,6 +34,26 @@ ReactorApp::registerApps()
   registerApp(ReactorApp);
 }
 
+void
+ReactorApp::registerObjects(Factory & factory)
+{
+  mooseDeprecated("use registerAll instead of registerObjects");
+  Registry::registerObjectsTo(factory, {"ReactorApp"});
+}
+
+void
+ReactorApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
+{
+  mooseDeprecated("use registerAll instead of associateSyntax");
+  Registry::registerActionsTo(action_factory, {"ReactorApp"});
+}
+
+void
+ReactorApp::registerExecFlags(Factory & /*factory*/)
+{
+  mooseDeprecated("use registerAll instead of registerExecFlags");
+}
+
 /***************************************************************************************************
  *********************** Dynamic Library Entry Points - DO NOT MODIFY ******************************
  **************************************************************************************************/

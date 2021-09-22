@@ -228,22 +228,19 @@ PatternedHexMeshGenerator::PatternedHexMeshGenerator(const InputParameters & par
 std::unique_ptr<MeshBase>
 PatternedHexMeshGenerator::generate()
 {
-  std::vector<Real> control_drum_positions_x;
-  std::vector<Real> control_drum_positions_y;
-  std::vector<std::vector<Real>> control_drum_azimuthals;
+  for (MooseIndex(_input_names) i = 0; i < _input_names.size(); ++i)
+    _meshes.push_back(dynamic_pointer_cast<ReplicatedMesh>(*_mesh_ptrs[i]));
+
   std::vector<Real> pitch_array;
   std::vector<unsigned int> num_sectors_per_side_array;
   std::vector<unsigned int> num_sectors_per_side_array_tmp;
+  std::vector<std::vector<Real>> control_drum_azimuthal_array;
   std::vector<unsigned int> background_intervals_array;
   std::vector<dof_id_type> node_id_background_array;
   std::vector<Real> max_radius_array;
   std::vector<bool> is_control_drum_array;
   Real max_radius_global(0.0);
   std::vector<Real> pattern_pitch_array;
-  std::vector<std::vector<Real>> control_drum_azimuthal_array;
-
-  for (MooseIndex(_input_names) i = 0; i < _input_names.size(); ++i)
-    _meshes.push_back(dynamic_pointer_cast<ReplicatedMesh>(*_mesh_ptrs[i]));
 
   if (_pattern_boundary == "none" && _generate_core_metadata)
   {
@@ -388,7 +385,9 @@ PatternedHexMeshGenerator::generate()
   const Real input_pitch((_pattern_boundary == "hexagon" || !_generate_core_metadata)
                              ? pitch_array.front()
                              : _pattern_pitch);
-
+  std::vector<Real> control_drum_positions_x;
+  std::vector<Real> control_drum_positions_y;
+  std::vector<std::vector<Real>> control_drum_azimuthals;
   for (unsigned i = 0; i < _pattern.size(); i++)
   {
     Real deltax = -x_mov * input_pitch / 2;

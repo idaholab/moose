@@ -44,7 +44,7 @@ PolygonMeshGeneratorBase::build_simple_slice(std::unique_ptr<ReplicatedMesh> mes
                                              Real pitch,
                                              unsigned int num_sectors_per_side,
                                              unsigned int background_intervals,
-                                             dof_id_type * node_id_background_meta,
+                                             dof_id_type * const node_id_background_meta,
                                              const unsigned int side_number,
                                              const unsigned int side_index,
                                              const std::vector<Real> azimuthal_tangent,
@@ -126,7 +126,7 @@ PolygonMeshGeneratorBase::build_simple_slice(std::unique_ptr<ReplicatedMesh> mes
                       azimuthal_tangent);
 
   // add nodes in background region; the background region is defined as the area between the
-  // outmost pin (if there is a pin; if no pin, the center) and the innermost hex/duct; if
+  // outermost pin (if there is a pin; if no pin, the center) and the innermost hex/duct; if
   // _has_ducts is false, the background region is the area between the pin and enclosing hexagon
   Real background_corner_radial_interval_length;
   Real background_corner_distance;
@@ -209,9 +209,7 @@ PolygonMeshGeneratorBase::build_simple_slice(std::unique_ptr<ReplicatedMesh> mes
 
   if (has_rings) //  define the rings in each subdomain
   {
-    for (unsigned int i = 0; i < rings.size(); i++)
-      subdomain_rings.push_back(rings[i]);
-
+    subdomain_rings = rings;
     subdomain_rings[0] = subdomain_rings[0] - 1;     // remove the inner TRI mesh subdomain
     subdomain_rings.push_back(background_intervals); // add the background region
   }
@@ -237,7 +235,7 @@ PolygonMeshGeneratorBase::build_simple_slice(std::unique_ptr<ReplicatedMesh> mes
                        quad_center_elements ? (div_num * div_num - 1) : 0,
                        boundary_id_shift);
 
-  return dynamic_pointer_cast<ReplicatedMesh>(mesh);
+  return mesh;
 }
 
 std::unique_ptr<ReplicatedMesh>
@@ -245,9 +243,9 @@ PolygonMeshGeneratorBase::center_nodes(std::unique_ptr<ReplicatedMesh> mesh,
                                        const unsigned int side_number,
                                        const unsigned int div_num,
                                        const Real ring_radii_0,
-                                       dof_id_type * node_id,
-                                       std::vector<Node *> * nodes,
-                                       std::vector<std::vector<dof_id_type>> * id_array)
+                                       dof_id_type * const node_id,
+                                       std::vector<Node *> * const nodes,
+                                       std::vector<std::vector<dof_id_type>> * const id_array)
 {
   const std::pair<Real, Real> p_origin = std::make_pair(0.0, 0.0);
   const std::pair<Real, Real> p_bottom =
@@ -257,6 +255,40 @@ PolygonMeshGeneratorBase::center_nodes(std::unique_ptr<ReplicatedMesh> mesh,
                      p_bottom.second * std::cos(2.0 * M_PI / side_number));
   const std::pair<Real, Real> p_diag = std::make_pair(ring_radii_0 * std::sin(M_PI / side_number),
                                                       ring_radii_0 * std::cos(M_PI / side_number));
+
+  // The four vertices of the central quad region are defined above.
+  // The following loops transverse all the nodes within this central quad region by moving p1 thru
+  // p4 and calculate the four-point intercept (pc).
+  //  p_top------o-------p4--------o-----p_diag
+  //    |        |        |        |        |
+  //    |        |        |        |        |
+  //    o--------o--------o--------o--------o
+  //    |        |        |        |        |
+  //    |        |        |        |        |
+  //   p1--------o-------pc--------o-------p2
+  //    |        |        |        |        |
+  //    |        |        |        |        |
+  //    o--------o--------o--------o--------o
+  //    |        |        |        |        |
+  //    |        |        |        |        |
+  // p_origin-----o-------p3--------o----p_bottom
+  //
+  // The loops are desgined to transverse the nodes as shown below to facilitate elements
+  // and sides creation.
+  //
+  //   25-------24-------23-------22-------21
+  //    |        |        |        |        |
+  //    |        |        |        |        |
+  //   16-------15-------14-------13-------20
+  //    |        |        |        |        |
+  //    |        |        |        |        |
+  //    9--------8------- 7-------12-------19
+  //    |        |        |        |        |
+  //    |        |        |        |        |
+  //    4--------3--------6-------11-------18
+  //    |        |        |        |        |
+  //    |        |        |        |        |
+  //    1--------2--------5-------10-------17
 
   for (unsigned int i = 0; i < div_num; i++)
   {
@@ -288,7 +320,7 @@ PolygonMeshGeneratorBase::center_nodes(std::unique_ptr<ReplicatedMesh> mesh,
     }
   }
   (*node_id)--;
-  return dynamic_pointer_cast<ReplicatedMesh>(mesh);
+  return mesh;
 }
 
 std::unique_ptr<ReplicatedMesh>
@@ -296,10 +328,10 @@ PolygonMeshGeneratorBase::ring_nodes(std::unique_ptr<ReplicatedMesh> mesh,
                                      std::vector<Real> ring_radii,
                                      const std::vector<unsigned int> rings,
                                      const unsigned int num_sectors_per_side,
-                                     dof_id_type * node_id,
+                                     dof_id_type * const node_id,
                                      const Real corner_p[2][2],
                                      const Real corner_to_corner,
-                                     std::vector<Node *> * nodes,
+                                     std::vector<Node *> * const nodes,
                                      const std::vector<Real> azimuthal_tangent)
 {
   unsigned int angle_number =
@@ -331,7 +363,7 @@ PolygonMeshGeneratorBase::ring_nodes(std::unique_ptr<ReplicatedMesh> mesh,
       const Real pin_corner_p_y = corner_p[0][1] * bin_radial_distance / (0.5 * corner_to_corner);
 
       // pin_corner_p(s) are the points in the pin region, on the bins towards the six corners,
-      // at differnt intervals
+      // at different intervals
       Point p = Point(pin_corner_p_x, pin_corner_p_y, 0.0);
       (*nodes)[*node_id] = mesh->add_point(p, *node_id);
 
@@ -346,8 +378,8 @@ PolygonMeshGeneratorBase::ring_nodes(std::unique_ptr<ReplicatedMesh> mesh,
             corner_p[0][1] + (corner_p[1][1] - corner_p[0][1]) *
                                  (azimuthal_tangent.size() == 0 ? ((Real)j / (Real)angle_number)
                                                                 : (azimuthal_tangent[j] / 2.0));
-        // cell_boundary_p(s) are the points on the cell's six boundries (flat sides) at
-        // differnt azimuthal angles
+        // cell_boundary_p(s) are the points on the cell's six boundaries (flat sides) at
+        // different azimuthal angles
         const Real pin_azimuthal_p_x =
             cell_boundary_p_x * bin_radial_distance /
             std::sqrt(Utility::pow<2>(cell_boundary_p_x) + Utility::pow<2>(cell_boundary_p_y));
@@ -355,14 +387,14 @@ PolygonMeshGeneratorBase::ring_nodes(std::unique_ptr<ReplicatedMesh> mesh,
             cell_boundary_p_y * bin_radial_distance /
             std::sqrt(Utility::pow<2>(cell_boundary_p_x) + Utility::pow<2>(cell_boundary_p_y));
 
-        // pin_azimuthal_p are the points on the bins towards differnt azimuthal angles, at
-        // differnt intervals; excluding the ones produced by pin_corner_p
+        // pin_azimuthal_p are the points on the bins towards different azimuthal angles, at
+        // different intervals; excluding the ones produced by pin_corner_p
         Point p = Point(pin_azimuthal_p_x, pin_azimuthal_p_y, 0.0);
         (*nodes)[*node_id] = mesh->add_point(p, *node_id);
       }
     }
   }
-  return dynamic_pointer_cast<ReplicatedMesh>(mesh);
+  return mesh;
 }
 
 std::unique_ptr<ReplicatedMesh>
@@ -371,10 +403,10 @@ PolygonMeshGeneratorBase::background_nodes(std::unique_ptr<ReplicatedMesh> mesh,
                                            const unsigned int background_intervals,
                                            const Real background_corner_distance,
                                            const Real background_corner_radial_interval_length,
-                                           dof_id_type * node_id,
+                                           dof_id_type * const node_id,
                                            const Real corner_p[2][2],
                                            const Real corner_to_corner,
-                                           std::vector<Node *> * nodes,
+                                           std::vector<Node *> * const nodes,
                                            const Real background_in,
                                            const std::vector<Real> azimuthal_tangent)
 {
@@ -393,7 +425,7 @@ PolygonMeshGeneratorBase::background_nodes(std::unique_ptr<ReplicatedMesh> mesh,
         background_corner_distance;
 
     // background_corner_p(s) are the points in the background region, on the bins towards the six
-    // corners, at differnt intervals
+    // corners, at different intervals
     Point p = Point(background_corner_p_x, background_corner_p_y, 0.0);
     (*nodes)[*node_id] = mesh->add_point(p, *node_id);
 
@@ -410,7 +442,7 @@ PolygonMeshGeneratorBase::background_nodes(std::unique_ptr<ReplicatedMesh> mesh,
           (corner_p[0][1] + (corner_p[1][1] - corner_p[0][1]) *
                                 (azimuthal_tangent.size() == 0 ? ((Real)j / (Real)angle_number)
                                                                : (azimuthal_tangent[j] / 2.0)));
-      // cell_boundary_p(s) are the points on the cell's six boundries (flat sides) at differnt
+      // cell_boundary_p(s) are the points on the cell's six boundaries (flat sides) at different
       // azimuthal angles
       const Real pin_boundary_p_x =
           cell_boundary_p_x * background_in /
@@ -418,7 +450,7 @@ PolygonMeshGeneratorBase::background_nodes(std::unique_ptr<ReplicatedMesh> mesh,
       const Real pin_boundary_p_y =
           cell_boundary_p_y * background_in /
           std::sqrt(Utility::pow<2>(cell_boundary_p_x) + Utility::pow<2>(cell_boundary_p_y));
-      // pin_boundary_p(s) are the points on pin boundary (outside ring) at differnt azimuthal
+      // pin_boundary_p(s) are the points on pin boundary (outside ring) at different azimuthal
       // angles
       const Real background_radial_interval =
           std::sqrt(Utility::pow<2>(cell_boundary_p_x - pin_boundary_p_x) +
@@ -430,13 +462,13 @@ PolygonMeshGeneratorBase::background_nodes(std::unique_ptr<ReplicatedMesh> mesh,
       const Real background_azimuthal_p_y =
           cell_boundary_p_y * (background_in + (k + 1) * background_radial_interval) /
           std::sqrt(Utility::pow<2>(cell_boundary_p_x) + Utility::pow<2>(cell_boundary_p_y));
-      // background_azimuthal_p are the points on the bins towards differnt azimuthal angles, at
-      // differnt intervals; excluding the ones produced by background_corner_p
+      // background_azimuthal_p are the points on the bins towards different azimuthal angles, at
+      // different intervals; excluding the ones produced by background_corner_p
       Point p = Point(background_azimuthal_p_x, background_azimuthal_p_y, 0.0);
       (*nodes)[*node_id] = mesh->add_point(p, *node_id);
     }
   }
-  return dynamic_pointer_cast<ReplicatedMesh>(mesh);
+  return mesh;
 }
 
 std::unique_ptr<ReplicatedMesh>
@@ -444,18 +476,18 @@ PolygonMeshGeneratorBase::duct_nodes(std::unique_ptr<ReplicatedMesh> mesh,
                                      std::vector<Real> * ducts_center_dist,
                                      const std::vector<unsigned int> ducts_layers,
                                      const unsigned int num_sectors_per_side,
-                                     dof_id_type * node_id,
+                                     dof_id_type * const node_id,
                                      const Real corner_p[2][2],
                                      const Real corner_to_corner,
-                                     std::vector<Node *> * nodes,
+                                     std::vector<Node *> * const nodes,
                                      const std::vector<Real> azimuthal_tangent)
 {
   {
     unsigned int angle_number =
         azimuthal_tangent.size() == 0 ? num_sectors_per_side : (azimuthal_tangent.size() - 1);
-    // Add notes in ducts regions
+    // Add nodes in ducts regions
     (*ducts_center_dist)
-        .push_back(0.5 * corner_to_corner); // add hex boudnary as the last element in this vector
+        .push_back(0.5 * corner_to_corner); // add hex boundary as the last element in this vector
     std::vector<Real> duct_radius_interval_length(ducts_layers.size());
 
     Real bin_radial_distance;
@@ -475,7 +507,7 @@ PolygonMeshGeneratorBase::duct_nodes(std::unique_ptr<ReplicatedMesh> mesh,
         const Real pin_corner_p_y = corner_p[0][1] * bin_radial_distance / (0.5 * corner_to_corner);
 
         // pin_corner_p(s) are the points in the pin region, on the bins towards the six corners,
-        // at differnt intervals
+        // at different intervals
         Point p = Point(pin_corner_p_x, pin_corner_p_y, 0.0);
         (*nodes)[*node_id] = mesh->add_point(p, *node_id);
 
@@ -490,22 +522,22 @@ PolygonMeshGeneratorBase::duct_nodes(std::unique_ptr<ReplicatedMesh> mesh,
               corner_p[0][1] + (corner_p[1][1] - corner_p[0][1]) *
                                    (azimuthal_tangent.size() == 0 ? ((Real)j / (Real)angle_number)
                                                                   : (azimuthal_tangent[j] / 2.0));
-          // cell_boundary_p(s) are the points on the cell's six boundries (flat sides) at
-          // differnt azimuthal angles
+          // cell_boundary_p(s) are the points on the cell's six boundaries (flat sides) at
+          // different azimuthal angles
           const Real pin_azimuthal_p_x =
               cell_boundary_p_x * bin_radial_distance / (0.5 * corner_to_corner);
           const Real pin_azimuthal_p_y =
               cell_boundary_p_y * bin_radial_distance / (0.5 * corner_to_corner);
 
-          // pin_azimuthal_p are the points on the bins towards differnt azimuthal angles, at
-          // differnt intervals; excluding the ones produced by pin_corner_p
+          // pin_azimuthal_p are the points on the bins towards different azimuthal angles, at
+          // different intervals; excluding the ones produced by pin_corner_p
           Point p = Point(pin_azimuthal_p_x, pin_azimuthal_p_y, 0.0);
           (*nodes)[*node_id] = mesh->add_point(p, *node_id);
         }
       }
     }
   }
-  return dynamic_pointer_cast<ReplicatedMesh>(mesh);
+  return mesh;
 }
 
 std::unique_ptr<ReplicatedMesh>
@@ -514,12 +546,12 @@ PolygonMeshGeneratorBase::cen_quad_elem_def(std::unique_ptr<ReplicatedMesh> mesh
                                             const std::vector<Node *> nodes,
                                             const unsigned int block_id_shift,
                                             const unsigned int boundary_id_shift,
-                                            std::vector<std::vector<dof_id_type>> * id_array)
+                                            std::vector<std::vector<dof_id_type>> * const id_array)
 {
 
   BoundaryInfo & boundary_info = mesh->get_boundary_info();
 
-  // This loop defines quad elements for the central regions except for the outmost layer
+  // This loop defines quad elements for the central regions except for the outermost layer
   for (unsigned int i = 0; i < div_num - 1; i++)
   {
     unsigned int id_x = 0;
@@ -542,7 +574,7 @@ PolygonMeshGeneratorBase::cen_quad_elem_def(std::unique_ptr<ReplicatedMesh> mesh
         id_y--;
     }
   }
-  // This loop defines the outmost layer quad elements of the central region
+  // This loop defines the outermost layer quad elements of the central region
   for (unsigned int i = (div_num - 1) * (div_num - 1); i < div_num * div_num - 1; i++)
   {
     Elem * elem_Quad4 = mesh->add_elem(new Quad4);
@@ -557,7 +589,7 @@ PolygonMeshGeneratorBase::cen_quad_elem_def(std::unique_ptr<ReplicatedMesh> mesh
     if (i == div_num * div_num - 2)
       boundary_info.add_side(elem_Quad4, 1, SLICE_END);
   }
-  return dynamic_pointer_cast<ReplicatedMesh>(mesh);
+  return mesh;
 }
 
 std::unique_ptr<ReplicatedMesh>
@@ -585,7 +617,7 @@ PolygonMeshGeneratorBase::cen_tri_elem_def(std::unique_ptr<ReplicatedMesh> mesh,
     else if (i == angle_number)
       boundary_info.add_side(elem, 0, SLICE_END);
   }
-  return dynamic_pointer_cast<ReplicatedMesh>(mesh);
+  return mesh;
 }
 
 std::unique_ptr<ReplicatedMesh>
@@ -648,10 +680,9 @@ PolygonMeshGeneratorBase::quad_elem_def(std::unique_ptr<ReplicatedMesh> mesh,
       j++;
     }
   }
-  return dynamic_pointer_cast<ReplicatedMesh>(mesh);
+  return mesh;
 }
 
-// 'radius_correction_factor' makes radial correction to preserve ring area.
 Real
 PolygonMeshGeneratorBase::radius_correction_factor(const std::vector<Real> azimuthal_list)
 {
@@ -674,7 +705,7 @@ PolygonMeshGeneratorBase::build_simple_peripheral(
     const unsigned int peripheral_invervals,
     const std::vector<std::pair<Real, Real>> positions_inner,
     const std::vector<std::pair<Real, Real>> d_positions_outer,
-    std::vector<Node *> * nodes,
+    std::vector<Node *> * const nodes,
     const unsigned int id_shift)
 {
   dof_id_type node_id = 0;
@@ -751,7 +782,7 @@ PolygonMeshGeneratorBase::build_simple_peripheral(
     }
   }
 
-  return dynamic_pointer_cast<ReplicatedMesh>(mesh);
+  return mesh;
 }
 
 std::pair<Real, Real>
@@ -805,7 +836,7 @@ PolygonMeshGeneratorBase::add_peripheral_mesh(
 
   if (mesh_type == CORNER_MESH)
   {
-    // corner mesh has three sides that needs peripheral meshes.
+    // corner mesh has three sides that need peripheral meshes.
     // each element has three sub-elements, representing beginning, middle, and ending azimuthal
     // points
     inner_index = {{0, 1, 2}, {2, 3, 4}, {4, 5, 6}};
@@ -813,7 +844,7 @@ PolygonMeshGeneratorBase::add_peripheral_mesh(
   }
   else
   {
-    // side mesh has two sides that needs peripheral meshes.
+    // side mesh has two sides that need peripheral meshes.
     inner_index = {{0, 1, 2}, {2, 7, 8}};
     outer_index = {{0, 1, 2}, {2, 7, 8}};
   }
@@ -854,8 +885,6 @@ PolygonMeshGeneratorBase::add_peripheral_mesh(
       ReplicatedMesh other_mesh(*meshp0);
       // rotate the peripheral mesh to the desired side of the hexagon.
       MeshTools::Modification::rotate(other_mesh, rotation_angle, 0, 0);
-      out_meshes->prepare_for_use();
-      other_mesh.prepare_for_use();
       out_meshes->stitch_meshes(other_mesh, OUTER_SIDESET_ID, OUTER_SIDESET_ID, TOLERANCE, true);
       other_mesh.clear();
       sub_positions_inner.resize(0);
@@ -866,15 +895,43 @@ PolygonMeshGeneratorBase::add_peripheral_mesh(
 }
 
 void
-PolygonMeshGeneratorBase::position_setup(std::vector<std::pair<Real, Real>> * positions_inner,
-                                         std::vector<std::pair<Real, Real>> * d_positions_outer,
-                                         const Real extra_dist_in,
-                                         const Real extra_dist_out,
-                                         const Real pitch,
-                                         const unsigned int radial_index)
+PolygonMeshGeneratorBase::position_setup(
+    std::vector<std::pair<Real, Real>> * const positions_inner,
+    std::vector<std::pair<Real, Real>> * const d_positions_outer,
+    const Real extra_dist_in,
+    const Real extra_dist_out,
+    const Real pitch,
+    const unsigned int radial_index)
 {
   (*positions_inner).resize(0);
   (*d_positions_outer).resize(0);
+
+  // Nine sets of positions are generated here, as shown below.
+  // CORNER MESH Peripheral {0 1 2}, {2 3 4} and {4 5 6}
+  //           3       2   1   0
+  //            \      :   :   :
+  //             \     :   :   :
+  //      4.       .       :   :
+  //         ` .               :
+  //      5.   |               |
+  //         ` |               |
+  //      6.   |               |
+  //         ` |               |
+  //               .       .
+  //                   .
+  //
+  // EDGE MESH Peripheral {0 1 2} and {2 7 8}
+  //           8   7   2   1   0
+  //           :   :   :   :   :
+  //           :   :   :   :   :
+  //           :   :       :   :
+  //           :               :
+  //           |               |
+  //           |               |
+  //           |               |
+  //           |               |
+  //               .       .
+  //                   .
 
   (*positions_inner)
       .push_back(std::make_pair(
@@ -969,7 +1026,7 @@ PolygonMeshGeneratorBase::position_setup(std::vector<std::pair<Real, Real>> * po
 }
 
 void
-PolygonMeshGeneratorBase::node_coord_rotate(Real * x, Real * y, const Real theta)
+PolygonMeshGeneratorBase::node_coord_rotate(Real * const x, Real * const y, const Real theta)
 {
   const Real x_tmp = *x;
   const Real y_tmp = *y;
@@ -1114,35 +1171,8 @@ PolygonMeshGeneratorBase::azimuthal_angles_collector(const std::unique_ptr<Repli
          elem_it != mesh->elements_end();
          elem_it++)
     {
-      const unsigned int n_elem_nodes = (*elem_it)->n_nodes();
-      if (n_elem_nodes == 3)
-      {
-        origin_x += ((*elem_it)->centroid())(0) * ((*elem_it)->volume());
-        origin_y += ((*elem_it)->centroid())(1) * ((*elem_it)->volume());
-      }
-      else // n_elem_nodes == 4
-      {
-        // LibMesh "centroid" is just average of all nodes, which is not the real centroid of a
-        // quadrilateral. Use algorithm described in
-        // http://jwilson.coe.uga.edu/EMT668/EMT668.Folders.F97/Patterson/EMT%20669/centroid%20of%20quad/Centroid.html
-        std::vector<Point> elem_p;
-        std::vector<std::pair<Real, Real>> p(n_elem_nodes, std::make_pair(0.0, 0.0));
-
-        for (unsigned int i = 0; i < n_elem_nodes; i++)
-          elem_p.push_back((*elem_it)->point(i));
-        for (unsigned int i = 0; i < n_elem_nodes; i++)
-        {
-          p[i].first += (elem_p[i](0) + elem_p[(i + 1) % n_elem_nodes](0) +
-                         elem_p[(i + 2) % n_elem_nodes](0)) /
-                        3.0;
-          p[i].second += (elem_p[i](1) + elem_p[(i + 1) % n_elem_nodes](1) +
-                          elem_p[(i + 2) % n_elem_nodes](1)) /
-                         3.0;
-        }
-        const std::pair<Real, Real> origin_pair = four_point_intercept(p[0], p[2], p[1], p[3]);
-        origin_x += origin_pair.first * ((*elem_it)->volume());
-        origin_y += origin_pair.second * ((*elem_it)->volume());
-      }
+      origin_x += ((*elem_it)->true_centroid())(0) * ((*elem_it)->volume());
+      origin_y += ((*elem_it)->true_centroid())(1) * ((*elem_it)->volume());
       vol_tmp += (*elem_it)->volume();
     }
     origin_x /= vol_tmp;
