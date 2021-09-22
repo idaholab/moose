@@ -167,13 +167,9 @@ MortarData::update(AutomaticMortarGeneration & amg)
     amg.buildMortarSegmentMesh();
   }
   else if (dim == 3)
-  {
     amg.buildMortarSegmentMesh3d();
-  }
   else
-  {
     mooseError("Invalid mesh dimension for mortar constraint");
-  }
 
   amg.computeInactiveLMNodes();
   amg.computeInactiveLMElems();
