@@ -66,7 +66,7 @@ MortarSegmentHelper::getIntersection(
 }
 
 bool
-MortarSegmentHelper::isInsideSecondary(const Point pt) const
+MortarSegmentHelper::isInsideSecondary(const Point & pt) const
 {
   for (auto i : make_range(_secondary_poly.size()))
   {
@@ -295,25 +295,6 @@ MortarSegmentHelper::triangulatePoly(std::vector<Point> & poly_nodes,
     tri_map.push_back({0 + offset, 1 + offset, 2 + offset});
     return;
   }
-  // This was removed because it was observed to adversely affect convergence of
-  // problems on displaced mesh.
-  // // If 4 nodes, split along shortest diagonal
-  // else if (poly_nodes.size() == 4)
-  // {
-  //   const Point diag1 = poly_nodes[2] - poly_nodes[0];
-  //   const Point diag2 = poly_nodes[3] - poly_nodes[1];
-  //   if (diag1.norm() < diag2.norm())
-  //   {
-  //     tri_map.push_back({0 + offset, 1 + offset, 2 + offset});
-  //     tri_map.push_back({0 + offset, 2 + offset, 3 + offset});
-  //   }
-  //   else
-  //   {
-  //     tri_map.push_back({0 + offset, 1 + offset, 3 + offset});
-  //     tri_map.push_back({1 + offset, 2 + offset, 3 + offset});
-  //   }
-  //   return;
-  // }
   // Otherwise use simple center point triangulation
   // Note: Could use better algorithm to reduce number of triangles
   //    - Delaunay produces good quality triangulation but might be a bit overkill

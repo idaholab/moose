@@ -68,7 +68,7 @@ public:
                             const std::pair<SubdomainID, SubdomainID> & subdomain_key,
                             bool on_displaced,
                             bool periodic,
-                            bool give_me_wrong_results);
+                            bool correct_edge_dropping);
 
   /**
    * Once the secondary_requested_boundary_ids and
@@ -208,7 +208,7 @@ public:
    * Computes inactive secondary nodes when incorrect edge dropping behavior is enabled
    * (any node touching a partially or fully dropped element is dropped)
    */
-  void computeWrongInactiveLMNodes();
+  void computeIncorrectEdgeDroppingInactiveLMNodes();
 
   /**
    * Get list of secondary elems without any corresponding primary elements.
@@ -264,7 +264,7 @@ public:
     return inactive_local_lm_elems;
   }
 
-  bool wrongResults() const { return _give_me_wrong_results; }
+  bool incorrectEdgeDropping() const { return !_correct_edge_dropping; }
 
 private:
   // Reference to the mesh stored in equation_systems.
@@ -389,5 +389,5 @@ private:
 
   /// Flag to enable regressed treatment of edge dropping where all LM DoFs on edge dropping element
   /// are strongly set to 0.
-  bool _give_me_wrong_results;
+  bool _correct_edge_dropping;
 };

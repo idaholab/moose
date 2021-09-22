@@ -128,7 +128,8 @@ ComputeFrictionalForceLMMechanicalContact::post()
 }
 
 void
-ComputeFrictionalForceLMMechanicalContact::wrongPost(const std::unordered_set<const Node *> & inactive_lm_nodes)
+ComputeFrictionalForceLMMechanicalContact::incorrectEdgeDroppingPost(
+    const std::unordered_set<const Node *> & inactive_lm_nodes)
 {
   // Enforce frictional complementarity constraints
   for (const auto & pr : _dof_to_weighted_tangential_velocity)

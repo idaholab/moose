@@ -163,6 +163,8 @@ Assembly::Assembly(SystemBase & sys, THREAD_ID tid)
     (*_holder_fe_lower_helper[dim])->get_JxW();
   }
 
+  // For 3D mortar, mortar segments are always TRI3 elements so we want FIRST LAGRANGE regardless
+  // of discretization
   _fe_msm = (_mesh_dimension == 2)
                 ? FEGenericBase<Real>::build(_mesh_dimension - 1, FEType(helper_order, LAGRANGE))
                 : FEGenericBase<Real>::build(_mesh_dimension - 1, FEType(FIRST, LAGRANGE));
