@@ -10,12 +10,7 @@
 
 import os, re, time, sys
 import moosetree
-
-try:
-    import pyhit
-except:
-    print('failed to import pyhit - try running "make hit" in the $MOOSE_DIR/test directory.', file=sys.stderr)
-    sys.exit(1)
+import pyhit
 
 """
 Parser object for reading HIT formatted files

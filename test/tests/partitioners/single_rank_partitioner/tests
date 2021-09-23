@@ -1,0 +1,21 @@
+[Tests]
+  issues = '#18729'
+  design = 'partitioner/SingleRankPartitioner.md'
+
+  [./test]
+    type = 'Exodiff'
+    input = 'single_rank_partitioner.i'
+    exodiff = 'single_rank_partitioner_out.e'
+    min_parallel = 4
+    requirement = 'The system shall allow restricting apps to just one MPI rank'
+  [../]
+
+  [./test_error]
+    type = 'RunException'
+    input = 'single_rank_partitioner.i'
+    expect_err = 'Cannot be larger than'
+    min_parallel = 1
+    max_parallel = 1
+    requirement = 'The system shall error if an out of range rank is given to SingleRankPartitioner'
+  [../]
+[]

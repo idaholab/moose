@@ -187,7 +187,7 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
         self._clear_progress()
 
         # The method for spawning processes changed to "spawn" for macOS in python 3.9. Currently,
-        # MooseDocs does not work with this combination. This will be fixed in moosetools migration.
+        # MooseDocs does not work with this combination.
         if (platform.python_version() >= '3.9') and (platform.system() == 'Darwin'):
             self._ctx = multiprocessing.get_context('fork')
         else:
