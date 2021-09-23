@@ -100,7 +100,7 @@ ThreadedNodeLoop<RangeType, IteratorType>::operator()(const RangeType & range)
     for (IteratorType nd = range.begin(); nd != range.end(); ++nd)
     {
       if (!keepGoing())
-        break;
+        mooseError("me");
 
       onNode(nd);
 
