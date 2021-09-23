@@ -1,6 +1,6 @@
 #
-# A first attempt at mechanical contact
-# https://mooseframework.inl.gov/modules/contact/tutorials/introduction/step01.html
+# Switching to mortar based mechanical contact
+# https://mooseframework.inl.gov/modules/contact/tutorials/introduction/step02.html
 #
 
 [GlobalParams]
@@ -106,20 +106,8 @@
   []
 []
 
-[VectorPostprocessors]
-  [normal0]
-    type = NodalValueSampler
-    variable = pillars_normal_lm
-    block = pillars_secondary_subdomain
-    sort_by = id
-    use_displaced_mesh = true
-    execute_on = 'INITIAL TIMESTEP_END'
-  []
-[]
-
 [Outputs]
   exodus = true
-  csv = true
   print_linear_residuals = false
   perf_graph = true
 []
