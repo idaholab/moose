@@ -1,10 +1,4 @@
-# Simple problem consisting of two concentric cylinders (core and RPV) with a gap in-between
-# Power is applied to the core and can only escape the core through the gap
-# The only sink is a convective BC at the outer (radial) boundary of the RPV.
-# But heat balance is NOT obtained in steady-state with the discrepancy being seemingly equal to
-# the ratio of the radii of the gap (10% with core_outer_radius = 2 and rpv_core_gap_size = 0.2)
-
-rpv_core_gap_size = 0.02
+rpv_core_gap_size = 0.15
 
 core_outer_radius = 2
 rpv_inner_radius = ${fparse 2 + rpv_core_gap_size}
@@ -45,14 +39,6 @@ rpv_blocks = '3'
     input = rename_inner_rpv_bdy
     block = 2
   []
-  # [3d_mesh]
-  #   type = MeshExtruderGenerator
-  #   input = 2d_mesh
-  #   extrusion_vector = '0 0 5'
-  #   num_layers = 10
-  #   bottom_sideset = 'back'
-  #   top_sideset = 'front'
-  # []
 []
 
 [Variables]
@@ -174,22 +160,18 @@ rpv_blocks = '3'
   compute_scaling_once = false
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart '
   petsc_options_value = 'hypre boomeramg 100'
-  # petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
-  # petsc_options_value = 'lu       superlu_dist'
 
   nl_rel_tol = 1e-10
   nl_abs_tol = 1e-10
   l_max_its = 100
 
   [Quadrature]
-    # order = fifth
     side_order = seventh
   []
-
   line_search = none
 []
 
 [Outputs]
-  exodus = true
+  exodus = false
   csv = true
 []

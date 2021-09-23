@@ -1,15 +1,9 @@
-# Simple problem consisting of two concentric cylinders (core and RPV) with a gap in-between
-# Power is applied to the core and can only escape the core through the gap
-# The only sink is a convective BC at the outer (radial) boundary of the RPV.
-# But heat balance is NOT obtained in steady-state with the discrepancy being seemingly equal to
-# the ratio of the radii of the gap (10% with core_outer_radius = 2 and rpv_core_gap_size = 0.2)
-
 rpv_core_gap_size = 0.2
 
 core_outer_radius = 2
-rpv_inner_radius = ${fparse 2 + rpv_core_gap_size}
-rpv_outer_radius = ${fparse 2.5 + rpv_core_gap_size}
-rpv_width = ${fparse rpv_outer_radius - rpv_inner_radius}
+rpv_inner_radius = '${fparse 2 + rpv_core_gap_size}'
+rpv_outer_radius = '${fparse 2.5 + rpv_core_gap_size}'
+rpv_width = '${fparse rpv_outer_radius - rpv_inner_radius}'
 
 rpv_outer_htc = 10 # W/m^2/K
 rpv_outer_Tinf = 300 # K
@@ -97,7 +91,6 @@ rpv_blocks = '3'
   []
 []
 
-# comment out for test without gap
 [ThermalContact]
   [RPV_gap]
     type = GapHeatTransfer
@@ -178,13 +171,13 @@ rpv_blocks = '3'
     function = '(rpv_convective_out - ptot) / ptot'
     pp_names = 'rpv_convective_out ptot'
   []
-  [flux_from_core]          # converges to ptot as the mesh is refined
+  [flux_from_core] # converges to ptot as the mesh is refined
     type = SideDiffusiveFluxIntegral
     variable = Tsolid
     boundary = core_outer
     diffusivity = thermal_conductivity
   []
-  [flux_into_rpv]          # converges to rpv_convective_out as the mesh is refined
+  [flux_into_rpv] # converges to rpv_convective_out as the mesh is refined
     type = SideDiffusiveFluxIntegral
     variable = Tsolid
     boundary = rpv_inner
@@ -199,22 +192,17 @@ rpv_blocks = '3'
   compute_scaling_once = false
   petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart '
   petsc_options_value = 'hypre boomeramg 100'
-  # petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
-  # petsc_options_value = 'lu       superlu_dist'
-
   nl_rel_tol = 1e-10
   nl_abs_tol = 1e-10
   l_max_its = 100
-
   [Quadrature]
     # order = fifth
     side_order = seventh
   []
-
   line_search = none
 []
 
 [Outputs]
-  exodus = true
+  exodus = false
   csv = true
 []
