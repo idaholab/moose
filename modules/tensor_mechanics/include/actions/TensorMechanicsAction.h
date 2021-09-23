@@ -122,6 +122,12 @@ protected:
   Point _cylindrical_axis_point2;
   Point _direction;
 
+  /// booleans used to determine if spherical center point is passed
+  bool _spherical_center_point_valid;
+
+  /// center point for spherical stress/strain quantities
+  Point _spherical_center_point;
+
   /// automatically gather names of eigenstrain tensors provided by simulation objects
   const bool _auto_eigenstrain;
 

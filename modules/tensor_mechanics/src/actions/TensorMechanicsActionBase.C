@@ -62,6 +62,12 @@ const std::map<std::string, std::pair<std::string, std::vector<std::string>>>
          {"HoopStress", {"stress", "strain", "plastic_strain", "creep_strain", "elastic_strain"}}},
         {"radial", {"RadialStress", {"stress", "strain"}}}};
 
+const std::map<std::string, std::pair<std::string, std::vector<std::string>>>
+    TensorMechanicsActionBase::_rank_two_spherical_component_table = {
+        {"spherical_hoop",
+         {"HoopStress", {"stress", "strain", "plastic_strain", "creep_strain", "elastic_strain"}}},
+        {"spherical_radial", {"RadialStress", {"stress", "strain"}}}};
+
 InputParameters
 TensorMechanicsActionBase::validParams()
 {
@@ -229,6 +235,10 @@ TensorMechanicsActionBase::outputPropertiesType()
   for (auto & r2cc : _rank_two_cylindrical_component_table)
     for (auto & r : r2cc.second.second)
       options += " " + r2cc.first + "_" + r;
+
+  for (auto & r2sc : _rank_two_spherical_component_table)
+    for (auto & r : r2sc.second.second)
+      options += " " + r2sc.first + "_" + r;
 
   return MultiMooseEnum(options, "", true);
 }
