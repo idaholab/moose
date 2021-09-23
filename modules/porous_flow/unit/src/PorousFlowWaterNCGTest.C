@@ -444,9 +444,9 @@ TEST_F(PorousFlowWaterNCGTest, liquidProperties)
   DualReal mu2 = fsp[0].viscosity;
   DualReal h2 = fsp[0].enthalpy;
 
-  REL_TEST(ddensity_dp, (rho1 - rho2) / (2.0 * dp), 1.0e-8);
-  REL_TEST(dviscosity_dp, (mu1 - mu2) / (2.0 * dp), 1.0e-8);
-  REL_TEST(denthalpy_dp, (h1 - h2) / (2.0 * dp), 1.0e-8);
+  REL_TEST(ddensity_dp, (rho1 - rho2) / (2.0 * dp), 1.0e-6);
+  REL_TEST(dviscosity_dp, (mu1 - mu2) / (2.0 * dp), 1.0e-6);
+  REL_TEST(denthalpy_dp, (h1 - h2) / (2.0 * dp), 1.0e-6);
 
   const Real dT = 1.0e-4;
   _fs->liquidProperties(p, T + dT, fsp);

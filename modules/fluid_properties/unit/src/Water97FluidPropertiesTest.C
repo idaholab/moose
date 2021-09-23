@@ -315,6 +315,7 @@ TEST_F(Water97FluidPropertiesTest, properties)
   Real p0, p1, p2, T0, T1, T2;
 
   const Real tol = 1.0e-8;
+  const Real tol2 = 1.0e-12;
 
   // Region 1 properties
   p0 = 3.0e6;
@@ -438,28 +439,27 @@ TEST_F(Water97FluidPropertiesTest, properties)
   REL_TEST(_fp->cv_from_p_T(p0, T0), 2.1534e3, REL_TOL_EXTERNAL_VALUE);
 
   // Viscosity
-  REL_TEST(_fp->mu_from_rho_T(998.0, 298.15), 889.735100e-6, tol);
-  REL_TEST(_fp->mu_from_rho_T(1200.0, 298.15), 1437.649467e-6, tol);
-  REL_TEST(_fp->mu_from_rho_T(1000.0, 373.15), 307.883622e-6, tol);
-  REL_TEST(_fp->mu_from_rho_T(1.0, 433.15), 14.538324e-6, 1.0e-7);
-  REL_TEST(_fp->mu_from_rho_T(1000.0, 433.15), 217.685358e-6, tol);
-  REL_TEST(_fp->mu_from_rho_T(1.0, 873.15), 32.619287e-6, tol);
-  REL_TEST(_fp->mu_from_rho_T(100.0, 873.15), 35.802262e-6, tol);
-  REL_TEST(_fp->mu_from_rho_T(600.0, 873.15), 77.430195e-6, tol);
-  REL_TEST(_fp->mu_from_rho_T(1.0, 1173.15), 44.217245e-6, 1.0e-7);
-  REL_TEST(_fp->mu_from_rho_T(100.0, 1173.15), 47.640433e-6, tol);
-  REL_TEST(_fp->mu_from_rho_T(400.0, 1173.15), 64.154608e-6, tol);
-
-  ABS_TEST(_fp->mu_from_p_T(1e6, 298.15), 889.898581797e-6, 2e-8);
-  ABS_TEST(_fp->mu_from_p_T(2e6, 298.15), 889.763899645e-6, 1e-8);
-  ABS_TEST(_fp->mu_from_p_T(1e6, 373.15), 281.825180491e-6, 1e-8);
-  ABS_TEST(_fp->mu_from_p_T(2e6, 373.15), 282.09550632e-6, 1e-8);
-  ABS_TEST(_fp->mu_from_p_T(1e6, 433.15), 170.526801634e-6, 1e-8);
-  ABS_TEST(_fp->mu_from_p_T(2e6, 433.15), 170.780193827e-6, 1e-8);
-  ABS_TEST(_fp->mu_from_p_T(1e6, 873.15), 3.2641885983e-5, 1e-12);
-  ABS_TEST(_fp->mu_from_p_T(2e6, 873.15), 3.26820969808e-5, 1e-12);
-  ABS_TEST(_fp->mu_from_p_T(1e6, 1173.15), 4.42374919686e-5, 1e-12);
-  ABS_TEST(_fp->mu_from_p_T(2e6, 1173.15), 4.42823959629e-5, 1e-12);
+  ABS_TEST(_fp->mu_from_rho_T(998.0, 298.15), 889.735100e-6, tol2);
+  ABS_TEST(_fp->mu_from_rho_T(1200.0, 298.15), 1437.649467e-6, tol2);
+  ABS_TEST(_fp->mu_from_rho_T(1000.0, 373.15), 307.883622e-6, tol2);
+  ABS_TEST(_fp->mu_from_rho_T(1.0, 433.15), 14.538324e-6, tol2);
+  ABS_TEST(_fp->mu_from_rho_T(1000.0, 433.15), 217.685358e-6, tol2);
+  ABS_TEST(_fp->mu_from_rho_T(1.0, 873.15), 32.619287e-6, tol2);
+  ABS_TEST(_fp->mu_from_rho_T(100.0, 873.15), 35.802262e-6, tol2);
+  ABS_TEST(_fp->mu_from_rho_T(600.0, 873.15), 77.430195e-6, tol2);
+  ABS_TEST(_fp->mu_from_rho_T(1.0, 1173.15), 44.217245e-6, tol2);
+  ABS_TEST(_fp->mu_from_rho_T(100.0, 1173.15), 47.640433e-6, tol2);
+  ABS_TEST(_fp->mu_from_rho_T(400.0, 1173.15), 64.154608e-6, tol2);
+  REL_TEST(_fp->mu_from_p_T(1e6, 298.15), 889.898581797e-6, REL_TOL_EXTERNAL_VALUE);
+  REL_TEST(_fp->mu_from_p_T(2e6, 298.15), 889.763899645e-6, REL_TOL_EXTERNAL_VALUE);
+  REL_TEST(_fp->mu_from_p_T(1e6, 373.15), 281.825180491e-6, REL_TOL_EXTERNAL_VALUE);
+  REL_TEST(_fp->mu_from_p_T(2e6, 373.15), 282.09550632e-6, REL_TOL_EXTERNAL_VALUE);
+  REL_TEST(_fp->mu_from_p_T(1e6, 433.15), 170.526801634e-6, REL_TOL_EXTERNAL_VALUE);
+  REL_TEST(_fp->mu_from_p_T(2e6, 433.15), 170.780193827e-6, REL_TOL_EXTERNAL_VALUE);
+  REL_TEST(_fp->mu_from_p_T(1e6, 873.15), 3.2641885983e-5, REL_TOL_EXTERNAL_VALUE);
+  REL_TEST(_fp->mu_from_p_T(2e6, 873.15), 3.26820969808e-5, REL_TOL_EXTERNAL_VALUE);
+  REL_TEST(_fp->mu_from_p_T(1e6, 1173.15), 4.42374919686e-5, REL_TOL_EXTERNAL_VALUE);
+  REL_TEST(_fp->mu_from_p_T(2e6, 1173.15), 4.42823959629e-5, REL_TOL_EXTERNAL_VALUE);
 
   // Thermal conductivity
   REL_TEST(_fp->k_from_p_T(1.0e6, 323.15), 0.641, 1.0e-4);
