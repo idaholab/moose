@@ -4,7 +4,7 @@
 
 A constant damping factor may improve stability but will slow down convergence of the simulation.
 More advanced dampers, which taper off through the iterations or which damp less within a certain
-domain (such as the [BoundingValueNodalDamper]) should impact less convergence properties.
+domain (such as the [BoundingValueNodalDamper.md]) should impact less convergence properties.
 
 More information about dampers may be found on the
 [Dampers syntax documentation](syntax/Dampers/index.md).

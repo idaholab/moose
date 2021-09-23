@@ -6,7 +6,7 @@ More information about Dirichlet boundary conditions and their mathematical mean
 [DirichletBC.md] documentation.
 
 A common postprocessor input for the `PostprocessorDirichletBC` is the [Receiver.md] postprocessor,
-which is populated by a transfer from a [MultiApp.md]. The two simulations are then coupled through
+which is populated by a transfer from a [syntax/MultiApps/index.md]. The two simulations are then coupled through
 this boundary condition, by setting the value of a variable on a boundary.
 
 ## Example Input Syntax

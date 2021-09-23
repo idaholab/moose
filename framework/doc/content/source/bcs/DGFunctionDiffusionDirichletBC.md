@@ -2,7 +2,7 @@
 
 !syntax description /BCs/DGFunctionDiffusionDirichletBC
 
-Note that these boundary conditions are specific to DG and to a diffusion problem. Using a [Function.md]
+Note that these boundary conditions are specific to DG and to a diffusion problem. Using a [syntax/Functions/index.md]
 for the Dirichlet boundary conditions means that the spatial and time dependence is either known or imposed.
 
 More information about Dirichlet boundary conditions and their mathematical meaning may be found in the

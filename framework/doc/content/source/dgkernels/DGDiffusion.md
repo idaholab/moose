@@ -3,7 +3,7 @@
 !syntax description /DGKernels/DGDiffusion
 
 More information about the discontinuous Galerkin method may be found in the
-[DGKernels syntax page](/syntax/DGKernels/index.md).
+[DGKernels syntax page](syntax/DGKernels/index.md).
 
 ## Example input syntax
 

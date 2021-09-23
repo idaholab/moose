@@ -7,7 +7,7 @@ simulations for example. This kernel is only for advecting a field with a known 
 The first order upwind scheme used is diffusive and will only provide first order mesh convergence.
 
 More information about the discontinuous Galerkin method may be found in the
-[DGKernels syntax page](/syntax/DGKernels/index.md).
+[DGKernels syntax page](syntax/DGKernels/index.md).
 
 ## Example input syntax
 

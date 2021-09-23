@@ -6,7 +6,7 @@ More information about Neumann boundary conditions and their mathematical meanin
 [NeumannBC.md] documentation.
 
 A common postprocessor input for the `PostprocessorNeumannBC` is the [Receiver.md] postprocessor,
-which is populated by a transfer from a [MultiApp.md]. The two simulations are then coupled through
+which is populated by a transfer from a [syntax/MultiApps/index.md]. The two simulations are then coupled through
 this boundary condition, by a numerical flux on a boundary.
 
 ## Example Input Syntax

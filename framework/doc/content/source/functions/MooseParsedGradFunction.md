@@ -2,9 +2,9 @@
 
 !syntax description /Functions/ParsedGradFunction
 
-The `ParsedGradFunction` is similar to the [ParsedFunction.md], differing only in that
+The `ParsedGradFunction` is similar to the [MooseParsedFunction.md], differing only in that
 it also defines the gradient of the function. Inputs for defining each component of
-the gradient follow the same rules as outlined in [ParsedFunction.md].
+the gradient follow the same rules as outlined in [MooseParsedFunction.md].
 
 ## Example input syntax
 
