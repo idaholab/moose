@@ -1,0 +1,9 @@
+Content:
+    ccb:
+        root_dir: ${MOOSE_DIR}/modules/doc/training/content
+        content:
+            - sqa/training/ccb/**
+
+Executioner: !include ${MOOSE_DIR}/modules/doc/training/sqa_ccb_config.yml Executioner
+Renderer: !include ${MOOSE_DIR}/modules/doc/training/sqa_ccb_config.yml Renderer
+Extensions: !include ${MOOSE_DIR}/modules/doc/training/sqa_ccb_config.yml Extensions
