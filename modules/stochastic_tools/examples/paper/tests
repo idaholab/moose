@@ -1,0 +1,14 @@
+[Tests]
+  design = 'stochastic_tools/index.md'
+  issues = '#16137'
+
+  [run]
+    type = CheckFiles
+    command = 'execute.py --run --replicates=1 --base=2 --memory-levels=1 --weak-levels=1 --memory-cores=1 --write=0'
+    check_files = 'full_solve_memory_parallel_memory.pdf full_solve_memory_parallel_time.pdf'
+    max_parallel = 1
+    requirement = "The system shall include scripts necessary to demonstrate scaling of stochastic execution methods."
+    required_python_packages = 'pandas'
+    executable_pattern = 'stochastic_tools*'
+  []
+[]
