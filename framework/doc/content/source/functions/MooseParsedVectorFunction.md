@@ -10,7 +10,7 @@ outlined for the [MooseParsedFunction.md].
 ## Example input syntax
 
 In this example, a `ParsedVectorFunction` is used to define a curl boundary condition.
-Both x,y component and the z-curl are set for this function/.
+Both x,y component and the z-curl are set for this function.
 
 !listing functions/parsed/function_curl.i block=Functions BCs
 
