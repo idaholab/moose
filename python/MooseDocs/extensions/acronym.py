@@ -8,12 +8,14 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import collections
-
+import logging
 import moosetree
 from ..base import components, renderers
 from ..common import exceptions
 from ..tree import pages, tokens, html, latex
 from . import command, table, floats
+
+LOG = logging.getLogger(__name__)
 
 def make_extension(**kwargs):
     return AcronymExtension(**kwargs)
@@ -74,10 +76,6 @@ class AcronymExtension(command.CommandExtension):
             if not used:
                 self.__used.add(key)
             acro = AcronymItem(key=key, name=acro, used=used)
-
-        else:
-            msg = "The acronym '{}' was not found."
-            raise exceptions.MooseDocsException(msg, key)
 
         return acro
 
@@ -143,15 +141,22 @@ class RenderAcronymToken(components.RenderComponent):
 
     def _createSpan(self, parent, token, page):
         acro = self.extension.getAcronym(token['acronym'])
-        content = str(acro.key) if acro.used else '{} ({})'.format(acro.name, acro.key)
-        return html.Tag(parent, 'span', string=content), acro
+        if acro is None:
+            tag = html.Tag(parent, 'span', string=token['acronym'], class_='moose-error')
+            raise exceptions.MooseDocsException("The acronym '{}' was not found.", key)
+
+        else:
+            content = str(acro.key) if acro.used else '{} ({})'.format(acro.name, acro.key)
+            tag = html.Tag(parent, 'span', string=content)
+
+        return tag, acro
 
     def createHTML(self, parent, token, page):
         self._createSpan(parent, token, page)
 
     def createMaterialize(self, parent, token, page):
         span, acro = self._createSpan(parent, token, page)
-        if acro.used:
+        if (acro is not None) and acro.used:
             span.addClass('tooltipped')
             span['data-tooltip'] = acro.name
             span['data-position'] = 'top'
