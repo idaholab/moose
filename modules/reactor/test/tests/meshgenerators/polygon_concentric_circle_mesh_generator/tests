@@ -175,7 +175,7 @@
     input = 'poly_2d.i'
     cli_args = 'Mesh/gen/ring_radii="1 6" Mesh/gen/ring_intervals="2 2"
                 --mesh-only "poly_2d_err.e"'
-    expect_err = 'Elements of this parameter must be smaller than polygon apothem.'
+    expect_err = 'Elements of this parameter must be smaller than polygon apothem'
     requirement ="The system shall throw an error if rings are bigger than the polygon."
   []
   [err_duct_sizes_length]

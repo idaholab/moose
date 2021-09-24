@@ -204,8 +204,6 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
     for (unsigned int i = 1; i < _ring_intervals.size(); i++)
       if (_ring_radii[i] <= _ring_radii[i - 1])
         paramError("ring_radii", "This parameter must be strictly ascending.");
-    if (_ring_radii.back() >= _pitch / 2.0)
-      paramError("ring_radii", "Elements of this parameter must be smaller than polygon apothem.");
   }
   if (_has_ducts)
   {
@@ -293,6 +291,10 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
     }
     else
       ring_radii_corr = _ring_radii;
+    if (ring_radii_corr.back() >= _pitch / 2.0)
+      paramError("ring_radii",
+                 "Elements of this parameter must be smaller than polygon apothem (after volume "
+                 "preserve correction if applicable).");
   }
   auto mesh = buildReplicatedMesh(2);
   // build the first slice of the polygon.

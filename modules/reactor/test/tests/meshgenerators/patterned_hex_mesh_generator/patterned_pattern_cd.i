@@ -16,10 +16,12 @@
   [pattern_1]
     type = PatternedHexMeshGenerator
     inputs = 'hex_1'
-    pattern = '0 0;
-              0 0 0;
-               0 0'
-    hexagon_size = 15
+    pattern = '0 0 0;
+              0 0 0 0;
+             0 0 0 0 0;
+              0 0 0 0;
+               0 0 0'
+    hexagon_size = 25
     background_block_id = 80
     background_block_name = hex_background
   []
@@ -27,9 +29,10 @@
     type = HexagonConcentricCircleAdaptiveBoundaryMeshGenerator
     num_sectors_per_side = '4 4 4 4 4 4'
     background_intervals = 2
-    hexagon_size = 15
+    hexagon_size = 25
     sides_to_adapt = '0 1 5'
     inputs = 'pattern_1 pattern_1 pattern_1'
+    is_control_drum = true
   []
   [pattern_2]
     type = PatternedHexMeshGenerator
