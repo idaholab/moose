@@ -109,9 +109,26 @@ RankTwoTensorTempl<T>::RankTwoTensorTempl(const TypeVector<T> & row1,
   for (auto i : make_range(N))
     this->_coords[N + i] = row2(i);
 
-  const unsigned int two_n = N * 2;
   for (auto i : make_range(N))
-    this->_coords[two_n + i] = row3(i);
+    this->_coords[2 * N + i] = row3(i);
+}
+
+/// named constructor for initializing symetrically
+template <typename T>
+RankTwoTensorTempl<T>
+RankTwoTensorTempl<T>::initializeSymmetric(const TypeVector<T> & v0,
+                                           const TypeVector<T> & v1,
+                                           const TypeVector<T> & v2)
+{
+  return RankTwoTensorTempl<T>(v0(0),
+                               (v1(0) + v0(1)) / 2.0,
+                               (v2(0) + v0(2)) / 2.0,
+                               (v1(0) + v0(1)) / 2.0,
+                               v1(1),
+                               (v2(1) + v1(2)) / 2.0,
+                               (v2(0) + v0(2)) / 2.0,
+                               (v2(1) + v1(2)) / 2.0,
+                               v2(2));
 }
 
 template <typename T>
@@ -253,6 +270,17 @@ RankTwoTensorTempl<T>::column(const unsigned int c) const
     result(i) = (*this)(i, c);
 
   return result;
+}
+
+/// multiply vector v with row n of this tensor
+template <typename T>
+T
+RankTwoTensorTempl<T>::rowMultiply(std::size_t n, const TypeVector<T> & v) const
+{
+  T sum = 0.0;
+  for (unsigned int j = 0; j < LIBMESH_DIM; j++)
+    sum += this->_coords[n * LIBMESH_DIM + j] * v(j);
+  return sum;
 }
 
 template <typename T>

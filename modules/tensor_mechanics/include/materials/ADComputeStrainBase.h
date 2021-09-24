@@ -11,16 +11,18 @@
 
 #include "Material.h"
 #include "ADRankTwoTensorForward.h"
+#include "ADSymmetricRankTwoTensorForward.h"
 
 /**
- * ADADComputeStrainBase is the base class for strain tensors
+ * ADComputeStrainBase is the base class for strain tensors
  */
-class ADComputeStrainBase : public Material
+template <typename R2>
+class ADComputeStrainBaseTempl : public Material
 {
 public:
   static InputParameters validParams();
 
-  ADComputeStrainBase(const InputParameters & parameters);
+  ADComputeStrainBaseTempl(const InputParameters & parameters);
 
   void initialSetup() override;
 
@@ -40,14 +42,16 @@ protected:
   /// Base name of the material system
   const std::string _base_name;
 
-  ADMaterialProperty<RankTwoTensor> & _mechanical_strain;
-  ADMaterialProperty<RankTwoTensor> & _total_strain;
+  ADMaterialProperty<R2> & _mechanical_strain;
+  ADMaterialProperty<R2> & _total_strain;
 
   std::vector<MaterialPropertyName> _eigenstrain_names;
-  std::vector<const ADMaterialProperty<RankTwoTensor> *> _eigenstrains;
+  std::vector<const ADMaterialProperty<R2> *> _eigenstrains;
 
-  const ADMaterialProperty<RankTwoTensor> * const _global_strain;
+  const ADMaterialProperty<R2> * const _global_strain;
 
   const bool _volumetric_locking_correction;
   const Real & _current_elem_volume;
 };
+
+typedef ADComputeStrainBaseTempl<RankTwoTensor> ADComputeStrainBase;

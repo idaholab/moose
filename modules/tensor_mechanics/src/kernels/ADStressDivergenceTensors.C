@@ -9,12 +9,15 @@
 
 #include "ADStressDivergenceTensors.h"
 #include "RankTwoTensor.h"
+#include "SymmetricRankTwoTensor.h"
 #include "libmesh/quadrature.h"
 
 registerMooseObject("TensorMechanicsApp", ADStressDivergenceTensors);
+registerMooseObject("TensorMechanicsApp", ADSymmetricStressDivergenceTensors);
 
+template <typename T>
 InputParameters
-ADStressDivergenceTensors::validParams()
+ADStressDivergenceTensorsTempl<T>::validParams()
 {
   InputParameters params = ADKernel::validParams();
   params.addClassDescription("Stress divergence kernel with automatic differentiation for the "
@@ -36,10 +39,12 @@ ADStressDivergenceTensors::validParams()
   return params;
 }
 
-ADStressDivergenceTensors::ADStressDivergenceTensors(const InputParameters & parameters)
+template <typename T>
+ADStressDivergenceTensorsTempl<T>::ADStressDivergenceTensorsTempl(
+    const InputParameters & parameters)
   : ADKernel(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
-    _stress(getADMaterialProperty<RankTwoTensor>(_base_name + "stress")),
+    _stress(getADMaterialProperty<T>(_base_name + "stress")),
     _component(getParam<unsigned int>("component")),
     _ndisp(coupledComponents("displacements")),
     _disp_var(_ndisp),
@@ -59,18 +64,24 @@ ADStressDivergenceTensors::ADStressDivergenceTensors(const InputParameters & par
     mooseError("Volumetric locking correction should be set to false for 1-D problems.");
 }
 
+template <typename T>
 void
-ADStressDivergenceTensors::initialSetup()
+ADStressDivergenceTensorsTempl<T>::initialSetup()
 {
   if (getBlockCoordSystem() != Moose::COORD_XYZ)
     mooseError(
         "The coordinate system in the Problem block must be set to XYZ for cartesian geometries.");
 }
 
+template <typename T>
 ADReal
-ADStressDivergenceTensors::computeQpResidual()
+ADStressDivergenceTensorsTempl<T>::computeQpResidual()
 {
-  ADReal residual = _stress[_qp].row(_component) * _grad_test[_i][_qp];
+  // multiply _stress tensor row _component with the test function gradient
+  ADReal residual = _stress[_qp].rowMultiply(_component, _grad_test[_i][_qp]);
+  // std::cout << "Residual and stress " << residual << '\n';
+  // _stress[_qp].print(std::cout);
+  // std::cout << '\n';
 
   // volumetric locking correction
   if (_volumetric_locking_correction)
@@ -85,8 +96,9 @@ ADStressDivergenceTensors::computeQpResidual()
   return residual;
 }
 
+template <typename T>
 void
-ADStressDivergenceTensors::precalculateResidual()
+ADStressDivergenceTensorsTempl<T>::precalculateResidual()
 {
   if (!_volumetric_locking_correction)
     return;
@@ -106,3 +118,6 @@ ADStressDivergenceTensors::precalculateResidual()
     _avg_grad_test[_i] /= ad_current_elem_volume;
   }
 }
+
+template class ADStressDivergenceTensorsTempl<RankTwoTensor>;
+template class ADStressDivergenceTensorsTempl<SymmetricRankTwoTensor>;
