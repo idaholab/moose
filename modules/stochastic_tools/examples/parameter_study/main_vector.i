@@ -15,13 +15,13 @@
   []
   [T_0]
     type = Normal
-    mean = -10
-    standard_deviation = 1.5
+    mean = 300
+    standard_deviation = 45
   []
   [s]
     type = Normal
-    mean = 1
-    standard_deviation = 0.25
+    mean = 100
+    standard_deviation = 25
   []
 []
 
@@ -37,7 +37,7 @@
   [runner]
     type = SamplerFullSolveMultiApp
     sampler = hypercube
-    input_files = 'diffusion.i'
+    input_files = 'diffusion_vector.i'
     mode = batch-restore
   []
 []
@@ -51,32 +51,31 @@
     to_control = 'stochastic'
   []
   [results]
-    type = SamplerPostprocessorTransfer
+    type = SamplerReporterTransfer
     multi_app = runner
     sampler = hypercube
-    to_vector_postprocessor = results
-    from_postprocessor = 'T_avg q_left'
+    stochastic_reporter = results
+    from_reporter = 'acc/T_avg:value acc/q_left:value'
   []
 []
 
-[VectorPostprocessors]
+[Reporters]
   [results]
-    type = StochasticResults
-  []
-  [samples]
-    type = SamplerData
-    sampler = hypercube
+    type = StochasticReporter
+    outputs = none
   []
   [stats]
-    type = Statistics
-    vectorpostprocessors = results
-    compute = 'mean'
+    type = StatisticsReporter
+    reporters = 'results/results:acc:T_avg:value results/results:acc:q_left:value'
+    compute = 'mean stddev'
     ci_method = 'percentile'
-    ci_levels = '0.05'
+    ci_levels = '0.05 0.95'
   []
 []
 
 [Outputs]
-  csv = true
   execute_on = 'FINAL'
+  [out]
+    type = JSON
+  []
 []
