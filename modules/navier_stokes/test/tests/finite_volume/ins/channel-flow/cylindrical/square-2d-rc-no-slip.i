@@ -1,18 +1,22 @@
-mu=1.1
-rho=1.1
+mu=1
+rho=1
 advected_interp_method='average'
 velocity_interp_method='rc'
+
+[GlobalParams]
+  two_term_boundary_expansion = true
+[]
 
 [Mesh]
   [gen]
     type = GeneratedMeshGenerator
     dim = 2
     xmin = 0
-    xmax = 2
+    xmax = 3.9
     ymin = 0
-    ymax = 10
-    nx = 10
-    ny = 50
+    ymax = 3.9
+    nx = 4
+    ny = 4
   []
 []
 
@@ -113,15 +117,17 @@ velocity_interp_method='rc'
     variable = v
     function = 1
   []
-  [free-slip-wall-u]
-    type = INSFVNaturalFreeSlipBC
+  [no-slip-wall-u]
+    type = INSFVNoSlipWallBC
     boundary = 'right'
     variable = u
+    function = 0
   []
-  [free-slip-wall-v]
-    type = INSFVNaturalFreeSlipBC
+  [no-slip-wall-v]
+    type = INSFVNoSlipWallBC
     boundary = 'right'
     variable = v
+    function = 0
   []
   [outlet-p]
     type = INSFVOutletPressureBC
@@ -169,13 +175,11 @@ velocity_interp_method='rc'
     type = SideIntegralVariablePostprocessor
     variable = v
     boundary = 'bottom'
-    outputs = 'csv'
   []
   [out]
     type = SideIntegralVariablePostprocessor
     variable = v
     boundary = 'top'
-    outputs = 'csv'
   []
 []
 
@@ -185,6 +189,7 @@ velocity_interp_method='rc'
   petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_pc_type -sub_pc_factor_shift_type'
   petsc_options_value = 'asm      100                lu           NONZERO'
   line_search = 'none'
+  nl_rel_tol = 1e-12
 []
 
 [Outputs]

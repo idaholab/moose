@@ -1,24 +1,28 @@
-mu=1.1
-rho=1.1
+mu=1
+rho=1
+k=1e-3
+cp=1
 advected_interp_method='average'
 velocity_interp_method='rc'
 
+[GlobalParams]
+  two_term_boundary_expansion = true
+[]
 [Mesh]
   [gen]
     type = GeneratedMeshGenerator
     dim = 2
     xmin = 0
-    xmax = 2
+    xmax = 3.9
     ymin = 0
-    ymax = 10
-    nx = 10
-    ny = 50
+    ymax = 3.9
+    nx = 4
+    ny = 4
   []
 []
 
 [Problem]
   fv_bcs_integrity_check = true
-  coord_type = 'RZ'
 []
 
 [Variables]
@@ -32,6 +36,9 @@ velocity_interp_method='rc'
   []
   [pressure]
     type = INSFVPressureVariable
+  []
+  [temperature]
+    type = INSFVEnergyVariable
   []
 []
 
@@ -59,8 +66,8 @@ velocity_interp_method='rc'
     pressure = pressure
     u = u
     v = v
-    mu = ${mu}
     rho = ${rho}
+    mu = ${mu}
   []
   [u_viscosity]
     type = FVDiffusion
@@ -98,84 +105,89 @@ velocity_interp_method='rc'
     momentum_component = 'y'
     pressure = pressure
   []
+
+  [energy_advection]
+    type = INSFVEnergyAdvection
+    variable = temperature
+    vel = 'velocity'
+    velocity_interp_method = ${velocity_interp_method}
+    advected_interp_method = ${advected_interp_method}
+    pressure = pressure
+    u = u
+    v = v
+    rho = ${rho}
+    mu = ${mu}
+  []
+  [energy_diffusion]
+    type = FVDiffusion
+    coeff = ${k}
+    variable = temperature
+  []
+  [ambient_convection]
+    type = NSFVEnergyAmbientConvection
+    variable = temperature
+    T_ambient = 100
+    alpha = 'alpha'
+  []
 []
 
 [FVBCs]
   [inlet-u]
     type = INSFVInletVelocityBC
-    boundary = 'bottom'
+    boundary = 'left'
     variable = u
-    function = 0
+    function = '1'
   []
   [inlet-v]
     type = INSFVInletVelocityBC
-    boundary = 'bottom'
+    boundary = 'left'
     variable = v
-    function = 1
+    function = 0
   []
-  [free-slip-wall-u]
-    type = INSFVNaturalFreeSlipBC
-    boundary = 'right'
+  [walls-u]
+    type = INSFVNoSlipWallBC
+    boundary = 'top bottom'
     variable = u
+    function = 0
   []
-  [free-slip-wall-v]
-    type = INSFVNaturalFreeSlipBC
-    boundary = 'right'
+  [walls-v]
+    type = INSFVNoSlipWallBC
+    boundary = 'top bottom'
     variable = v
+    function = 0
   []
-  [outlet-p]
+  [outlet_p]
     type = INSFVOutletPressureBC
-    boundary = 'top'
+    boundary = 'right'
     variable = pressure
     function = 0
   []
-  [axis-u]
-    type = INSFVSymmetryVelocityBC
+  [inlet_t]
+    type = FVDirichletBC
     boundary = 'left'
-    variable = u
-    u = u
-    v = v
-    mu = ${mu}
-    momentum_component = x
-  []
-  [axis-v]
-    type = INSFVSymmetryVelocityBC
-    boundary = 'left'
-    variable = v
-    u = u
-    v = v
-    mu = ${mu}
-    momentum_component = y
-  []
-  [axis-p]
-    type = INSFVSymmetryPressureBC
-    boundary = 'left'
-    variable = pressure
+    variable = temperature
+    value = 1
   []
 []
 
 [Materials]
+  [const]
+    type = ADGenericConstantMaterial
+    prop_names = 'alpha'
+    prop_values = '1'
+  []
+  [const_functor]
+    type = ADGenericConstantFunctorMaterial
+    prop_names = 'cp'
+    prop_values = '${cp}'
+  []
   [ins_fv]
     type = INSFVMaterial
     u = 'u'
     v = 'v'
     pressure = 'pressure'
     rho = ${rho}
-  []
-[]
-
-[Postprocessors]
-  [in]
-    type = SideIntegralVariablePostprocessor
-    variable = v
-    boundary = 'bottom'
-    outputs = 'csv'
-  []
-  [out]
-    type = SideIntegralVariablePostprocessor
-    variable = v
-    boundary = 'top'
-    outputs = 'csv'
+    temperature = 'temperature'
   []
 []
 
@@ -185,6 +197,7 @@ velocity_interp_method='rc'
   petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_pc_type -sub_pc_factor_shift_type'
   petsc_options_value = 'asm      100                lu           NONZERO'
   line_search = 'none'
+  nl_rel_tol = 1e-12
 []
 
 [Outputs]

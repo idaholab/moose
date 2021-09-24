@@ -91,9 +91,9 @@
     design = 'INSFVMomentumFriction.md'
   []
   [ambient-convection]
-    type = 'Exodiff'
+    type = 'CSVDiff'
     input = 2d-rc-ambient-convection.i
-    exodiff = 2d-rc-ambient-convection_out.e
+    csvdiff = 2d-rc-ambient-convection_out.csv
     requirement = 'The system shall be able to model ambient volumetric convection in a channel.'
     issues = '#16948'
     ad_indexing_type = 'global'
@@ -137,5 +137,10 @@
     exodiff = one-elem-wide-channel_out.e
     issues = '#16822'
     requirement = 'The system shall be able to compute gradients, when extrapolated boundary face values make the gradient computation singular, by catching the singularity error and re-running without doing boundary face value extrapolation.'
+  []
+  [square]
+    type = Exodiff
+    input = 'square-ambient-convection.i'
+    exodiff = 'square-ambient-convection_out.e'
   []
 []

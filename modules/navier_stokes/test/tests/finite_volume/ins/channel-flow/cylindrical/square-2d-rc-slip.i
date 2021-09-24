@@ -8,11 +8,11 @@ velocity_interp_method='rc'
     type = GeneratedMeshGenerator
     dim = 2
     xmin = 0
-    xmax = 2
+    xmax = 3.9
     ymin = 0
-    ymax = 10
-    nx = 10
-    ny = 50
+    ymax = 3.9
+    nx = 4
+    ny = 4
   []
 []
 
@@ -45,8 +45,8 @@ velocity_interp_method='rc'
     pressure = pressure
     u = u
     v = v
-    mu = ${mu}
     rho = ${rho}
+    mu = ${mu}
   []
 
   [u_advection]
@@ -59,8 +59,8 @@ velocity_interp_method='rc'
     pressure = pressure
     u = u
     v = v
-    mu = ${mu}
     rho = ${rho}
+    mu = ${mu}
   []
   [u_viscosity]
     type = FVDiffusion
@@ -84,8 +84,8 @@ velocity_interp_method='rc'
     pressure = pressure
     u = u
     v = v
-    mu = ${mu}
     rho = ${rho}
+    mu = ${mu}
   []
   [v_viscosity]
     type = FVDiffusion
@@ -164,27 +164,13 @@ velocity_interp_method='rc'
   []
 []
 
-[Postprocessors]
-  [in]
-    type = SideIntegralVariablePostprocessor
-    variable = v
-    boundary = 'bottom'
-    outputs = 'csv'
-  []
-  [out]
-    type = SideIntegralVariablePostprocessor
-    variable = v
-    boundary = 'top'
-    outputs = 'csv'
-  []
-[]
-
 [Executioner]
   type = Steady
   solve_type = 'NEWTON'
   petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_pc_type -sub_pc_factor_shift_type'
   petsc_options_value = 'asm      100                lu           NONZERO'
   line_search = 'none'
+  nl_rel_tol = 1e-12
 []
 
 [Outputs]
