@@ -73,7 +73,7 @@ surface it can be helpful to create a line plot of the pressure.
 > Look at the
 > [`NodalValueSampler`](NodalValueSampler.md)[vectorpostprocessor](VectorPostprocessors/index.md)
 > and see if you can use its
-> [!param](VectorPostprocessors/NodalValueSampler/block) parameter to output the
+> [!param](/VectorPostprocessors/NodalValueSampler/block) parameter to output the
 > `pillars_normal_lm` variable on the `pillars_secondary_subdomain` subdomain.
 
 [Click here for the answer.](contact/tutorials/introduction/answer02a.md)
