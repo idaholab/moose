@@ -8,6 +8,11 @@
     cli_args = 'Mesh/pattern/background_intervals=2 Mesh/pattern/background_block_id=25
                 Mesh/pattern/background_block_name="assem_block"
                 Mesh/pattern/hexagon_size=18
+                Mesh/pattern/duct_sizes=17
+                Mesh/pattern/duct_intervals=1
+                Mesh/pattern/duct_block_ids=30
+                Mesh/pattern/duct_block_names="duct_block"
+                Mesh/pattern/uniform_mesh_on_sides=true
                 --mesh-only "patterned_hex.e"'
     requirement ='The system shall stitch hexagon meshes to form a large mesh with hexagon boundary.'
     recover = false
@@ -26,6 +31,14 @@
     exodiff = 'patterned_pattern.e'
     cli_args = '--mesh-only "patterned_pattern.e"'
     requirement ='The system shall stitch hexagon meshes twice to form a larger mesh.'
+    recover = false
+  []
+  [patterned_pattern_cd]
+    type = 'Exodiff'
+    input = 'patterned_pattern_cd.i'
+    exodiff = 'patterned_pattern_cd.e'
+    cli_args = '--mesh-only "patterned_pattern_cd.e"'
+    requirement ='The system shall stitch hexagon meshes twice to form a larger mesh with a control drum.'
     recover = false
   []
   [err_pattern_layer]
@@ -138,5 +151,12 @@
     cli_args = '--mesh-only "patterned_err.e"'
     expect_err = 'the unit hexagonal input mesh does not contain appropriate meta data required for generating a core mesh.'
     requirement ='The system shall throw an error if no pattern pitch meta data can be obtained from the input mesh.'
+  []
+  [err_different_pattern_pitch_meta]
+    type = 'RunException'
+    input = 'patterned_pattern_err2.i'
+    cli_args = '--mesh-only "patterned_err.e"'
+    expect_err = 'pattern_pitch metadata values of all input mesh generators must be identical'
+    requirement ='The system shall throw an error if input meshes have different pattern pitch meta data.'
   []
 []

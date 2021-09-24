@@ -16,6 +16,8 @@
     cli_args = 'Mesh/gen/background_block_ids="30" Mesh/gen/background_block_names="back"
                 Mesh/gen/ring_radii="2 3" Mesh/gen/ring_intervals="2 2"
                 Mesh/gen/ring_block_ids="10 15 20" Mesh/gen/ring_block_names="center_in center outer_ring"
+                Mesh/gen/uniform_mesh_on_sides=true
+                Mesh/gen/interface_boundary_names="int1 int2"
                 --mesh-only "poly_2d_rings.e"'
     requirement ='The system shall generate a hexagon mesh with rings.'
     recover = false

@@ -5,7 +5,6 @@
   []
   [gen]
     type = HexagonConcentricCircleAdaptiveBoundaryMeshGenerator
-    num_sides = 6
     num_sectors_per_side = '4 4 4 4 4 4'
     background_intervals = 2
     hexagon_size = 5.0

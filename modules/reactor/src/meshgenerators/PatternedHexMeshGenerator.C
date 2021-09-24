@@ -306,7 +306,7 @@ PatternedHexMeshGenerator::generate()
                             num_sectors_per_side_array_tmp.end()))
         mooseError("In PatternedHexMeshGenerator ",
                    _name,
-                   ": azimuthal_interval metadata values of all six sides of each input mesh "
+                   ": num_sectors_per_side metadata values of all six sides of each input mesh "
                    "generator must be identical.");
       num_sectors_per_side_array.push_back(*num_sectors_per_side_array_tmp.begin());
       background_intervals_array.push_back(
@@ -391,7 +391,9 @@ PatternedHexMeshGenerator::generate()
   for (unsigned i = 0; i < _pattern.size(); i++)
   {
     Real deltax = -x_mov * input_pitch / 2;
-    if (_pattern[i].size() < _pattern[i + 1].size())
+    if (i == _pattern.size() - 1)
+      x_mov--;
+    else if (_pattern[i].size() < _pattern[i + 1].size())
       x_mov++;
     else
       x_mov--;

@@ -25,13 +25,21 @@
   []
   [pattern_2]
     type = PatternedHexMeshGenerator
-    inputs = 'pattern_1'
+    inputs = 'hex_1'
+    pattern = '0 0;
+              0 0 0;
+               0 0'
+    hexagon_size = 16
+    background_block_id = 80
+    background_block_name = hex_background
+  []
+  [pattern_3]
+    type = PatternedHexMeshGenerator
+    inputs = 'pattern_1 pattern_2'
     pattern_boundary = none
     generate_core_metadata = true
-    pattern = '0 0 0;
-              0 0 0 0;
-             0 0 0 0 0;
-              0 0 0 0;
-               0 0 0'
+    pattern = '0 0;
+              0 1 0;
+               0 0'
   []
 []
