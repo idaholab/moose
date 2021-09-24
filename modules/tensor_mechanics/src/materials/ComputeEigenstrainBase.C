@@ -11,8 +11,9 @@
 
 #include "RankTwoTensor.h"
 
+template <bool is_ad>
 InputParameters
-ComputeEigenstrainBase::validParams()
+ComputeEigenstrainBaseTempl<is_ad>::validParams()
 {
   InputParameters params = Material::validParams();
   params.addParam<std::string>("base_name",
@@ -26,25 +27,28 @@ ComputeEigenstrainBase::validParams()
   return params;
 }
 
-ComputeEigenstrainBase::ComputeEigenstrainBase(const InputParameters & parameters)
+template <bool is_ad>
+ComputeEigenstrainBaseTempl<is_ad>::ComputeEigenstrainBaseTempl(const InputParameters & parameters)
   : Material(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _eigenstrain_name(_base_name + getParam<std::string>("eigenstrain_name")),
-    _eigenstrain(declareProperty<RankTwoTensor>(_eigenstrain_name)),
+    _eigenstrain(declareGenericProperty<RankTwoTensor, is_ad>(_eigenstrain_name)),
     _step_zero(declareRestartableData<bool>("step_zero", true))
 {
 }
 
+template <bool is_ad>
 void
-ComputeEigenstrainBase::initQpStatefulProperties()
+ComputeEigenstrainBaseTempl<is_ad>::initQpStatefulProperties()
 {
   // This property can be promoted to be stateful by other models that use it,
   // so it needs to be initalized.
   _eigenstrain[_qp].zero();
 }
 
+template <bool is_ad>
 void
-ComputeEigenstrainBase::computeQpProperties()
+ComputeEigenstrainBaseTempl<is_ad>::computeQpProperties()
 {
   if (_t_step >= 1)
     _step_zero = false;
@@ -56,8 +60,10 @@ ComputeEigenstrainBase::computeQpProperties()
     computeQpEigenstrain();
 }
 
-Real
-ComputeEigenstrainBase::computeVolumetricStrainComponent(const Real volumetric_strain) const
+template <bool is_ad>
+GenericReal<is_ad>
+ComputeEigenstrainBaseTempl<is_ad>::computeVolumetricStrainComponent(
+    const GenericReal<is_ad> & volumetric_strain) const
 {
   // The engineering strain in a given direction is:
   // epsilon_eng = cbrt(volumetric_strain + 1.0) - 1.0
@@ -73,3 +79,6 @@ ComputeEigenstrainBase::computeVolumetricStrainComponent(const Real volumetric_s
 
   return std::log(volumetric_strain + 1.0) / 3.0;
 }
+
+template class ComputeEigenstrainBaseTempl<false>;
+template class ComputeEigenstrainBaseTempl<true>;
