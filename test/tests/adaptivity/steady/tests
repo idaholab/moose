@@ -1,0 +1,11 @@
+[Tests]
+  issues = '#18656 #18655'
+  design = 'syntax/Adaptivity/index.md'
+  [steady]
+    type = Exodiff
+    input = steady.i
+    exodiff = steady_out.e
+
+    requirement = "The system shall support initial uniform mesh refinement within a subdomain for a steady-state calculation."
+  []
+[]
