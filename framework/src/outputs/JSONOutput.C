@@ -112,14 +112,14 @@ JSONOutput::outputReporters()
     auto & r_node = _json["reporters"]; // non-accidental insert
     for (const auto & r_name : r_names)
     {
+      // If this value is produced in root mode and we're not on root, don't report this value
+      const auto & context = _reporter_data.getReporterContextBase(r_name);
+      if (context.getProducerModeEnum() == REPORTER_MODE_ROOT && processor_id() != 0)
+        continue;
+
       // Create/get object node
       auto obj_node_pair = r_node.emplace(r_name.getObjectName(), nlohmann::json());
       auto & obj_node = *(obj_node_pair.first);
-      const auto & context = _reporter_data.getReporterContextBase(r_name);
-
-      // If this value is produced in root mode and we're not on root, don't report this value
-      if (context.getProducerModeEnum() == REPORTER_MODE_ROOT && processor_id() != 0)
-        continue;
 
       // If the object node was created insert the class level information
       if (obj_node_pair.second)
