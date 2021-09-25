@@ -4,7 +4,7 @@ NODAL VARIABLES
 	DP
 	P
 	S
-	SumWij relative 7e-4
+	SumWij relative 7e-4 floor 1.e-8
 	T
 	h
 	mdot
@@ -12,4 +12,3 @@ NODAL VARIABLES
 	q_prime
 	rho
 	w_perim
-
