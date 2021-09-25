@@ -13,9 +13,9 @@ entry port (x = 0) to the right exit port (x = L). Parameters for this scenario
 are shown in [waveguide-benchmark-parameters].
 
 !media media/waveguide.png
-  style=width:100%;margin:auto;
-  id=waveguide-benchmark-geometry
-  caption=Two-dimensional vacuum-filled waveguide geometry, with an incoming plane wave at left and exiting at right.
+       style=width:100%;margin:auto;
+       id=waveguide-benchmark-geometry
+       caption=Two-dimensional vacuum-filled waveguide geometry, with an incoming plane wave at left and exiting at right.
 
 !table id=waveguide-benchmark-parameters caption=Model parameters for the waveguide benchmark study.
 | Parameter (unit) | Value(s) |
@@ -138,25 +138,25 @@ The field result for this simulation (real and imaginary components) is shown in
        caption=Electric field result, $E_x$ (imaginary component), of the 2-D waveguide verification case.
 
 A comparison of the real component results to compared to that in [cheng-solution]
-is shown in [waveguide-benchmark-comparison].
-This data is taken town the centerline of the waveguide geometry ($y = 5$). There
-is decent agreement between the two solutions, but note the increasing phase
-error along the length of the waveguide. This is known as "numerical disperson"
-or "numerical phase error" in the literature, and is a byproduct of the numerical
-discretization, where the velocity of the calculated wave differs from that of
-the exact velocity due to lower resolution. Jin as well as Warren and Scott
-showed that the use of higher order elements as well as smaller elements can
-help mitigate this effect. [!citep](jin-fem, jin-computation, warren-and-scott-order)
-Further, Warren and Scott later showed that the orientation of the elements in the
-mesh for a triangular mesh, as used here, had a notable impact on the calculated
-phase error. [!citep](warren-and-scott-mesh) Since the error accumulates in the
-direction of wave travel, alternating the direction of the triangular elements in
-a hexagonal configuration had the lowest phase error in a TM1 mode simulation.
-Interestingly, randomizing the triangular element direction did not have the same
-impact (though did achieve lower phase error overall). A recalculation of this result
-using a finer mesh is shown in [waveguide-benchmark-comparison-finer],
-and shows that the refined (18,102 elements compared to 2,219 in the original),
-simulated result is almost exactly in alignment with the analytic solution.
+is shown in [waveguide-benchmark-comparison]. This data is taken town the centerline
+of the waveguide geometry ($y = 5$). There is decent agreement between the two
+solutions, but note the increasing phase error along the length of the waveguide.
+This is known as "numerical disperson" or "numerical phase error" in the literature,
+and is a byproduct of the numerical discretization, where the velocity of the
+calculated wave differs from that of the exact velocity due to lower resolution.
+Jin as well as Warren and Scott showed that the use of higher order elements as
+well as smaller elements can help mitigate this effect.
+[!citep](jin-fem, jin-computation, warren-and-scott-order) Further, Warren and
+Scott later showed that the orientation of the elements in the mesh for a triangular
+mesh, as used here, had a notable impact on the calculated phase error.
+[!citep](warren-and-scott-mesh) Since the error accumulates in the direction of
+wave travel, alternating the direction of the triangular elements in a hexagonal
+configuration had the lowest phase error in a TM1 mode simulation. Interestingly,
+randomizing the triangular element direction did not have the same impact (though
+did achieve lower phase error overall). A recalculation of this result using a
+finer mesh is shown in [waveguide-benchmark-comparison-finer], and shows that
+the refined (18,102 elements compared to 2,219 in the original), simulated result
+is almost exactly in alignment with the analytic solution.
 
 !media media/waveguide2D_comparison.png
        style=width:100%;margin:auto;
@@ -170,11 +170,11 @@ simulated result is almost exactly in alignment with the analytic solution.
 
 Finally to confirm the proper resolution of the phase between real and imaginary
 components (and to show that the port and absorbing boundary conditions have little
-reflection), a plot of the magnitude of the electric field is shown below in [waveguide-benchmark-magnitude]. If the components are 90$^{\circ}$
-out-of-phase with each other, then the magnitude of the field should be a
+reflection), a plot of the magnitude of the electric field is shown below in
+[waveguide-benchmark-magnitude]. If the components are 90$^{\circ}$ out-of-phase
+with each other, then the magnitude of the field should be a
 $\sin \left( \frac{\pi y}{10} \right)$ profile, extending the length of the
-waveguide. Indeed, [waveguide-benchmark-magnitude] confirms that
-this is the case.
+waveguide. Indeed, [waveguide-benchmark-magnitude] confirms that this is the case.
 
 !media media/waveguide2D_magnitude.png
        style=width:100%;margin:auto;

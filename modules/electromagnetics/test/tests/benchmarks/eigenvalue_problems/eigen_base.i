@@ -1,4 +1,4 @@
-# Base input file for eigenvalue example tests for muiltiple waveguide geometries
+# Base input file for eigenvalue example tests for multiple waveguide geometries
 # RECTANGULAR (Default)
 #     Mesh file rectangular.e based on Mesh block:
 #         [Mesh]
