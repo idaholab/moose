@@ -106,7 +106,7 @@ for $\beta$ used in the input file shown below is
 The mesh used in this study was created in [Gmsh], using the geometry shown
 above in [waveguide-geometry]. The `.geo` file used to create this mesh is shown
 at the end of this section. To reproduce the corresponding `.msh` file in a
-terminal, ensure that gmsh is installed available in the system PATH and simply
+terminal, ensure that gmsh is installed and available in the system PATH and simply
 run the following command at the location of `waveguide_discontinuous.geo`:
 
 ```

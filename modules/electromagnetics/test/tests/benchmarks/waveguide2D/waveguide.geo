@@ -1,3 +1,5 @@
+// Use global scaling factor = 0.12 to duplicate current saved MSH file.
+
 width = 10;
 length = 80;
 

@@ -130,10 +130,8 @@ The mesh used in this study was created in [Gmsh], using a top-down view of the
 geometry shown above in [dipole-geometry-figure]. The `.geo` file used to create
 this mesh is shown at the end of this section. To reproduce the corresponding
 `.msh` file (`dipole_antenna_1G_fine.msh`) in a terminal, ensure that gmsh is
-installed available in the system PATH and simply run the following command at
-the location of `dipole_antenna_1G.geo`
-
-!! TODO: fix the clscale parameter to get the "fine" version of the mesh file
+installed and available in the system PATH and simply run the following command
+at the location of `dipole_antenna_1G.geo`
 
 ```
 gmsh -2 dipole_antenna_1G.geo -clscale 0.2 -order 2 -algo del2d

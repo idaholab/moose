@@ -5,7 +5,7 @@
 
 [Mesh]
   type = FileMesh
-  file = waveguide_2408.msh
+  file = waveguide.msh
 []
 
 [Variables]
