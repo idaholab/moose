@@ -81,6 +81,12 @@ public:
    */
   virtual Real spatialValue(const Point & p) const override;
 
+  /**
+   * Get the points at which the nearest operation is performed
+   * @return points
+   */
+  virtual const std::vector<Point> & getPoints() const { return _points; }
+
 protected:
   /**
    * Fills in the `_points` variable from either 'points' or 'points_file' parameter.

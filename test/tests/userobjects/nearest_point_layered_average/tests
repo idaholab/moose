@@ -60,4 +60,13 @@
     design = 'NearestRadiusLayeredAverage.md'
     issues = '#16829'
   [../]
+
+  [./points_from_uo]
+    type = 'CSVdiff'
+    input = 'points_from_uo.i'
+    csvdiff = 'points_from_uo_out_spatial_from_uo_0002.csv'
+    requirement = 'The system shall compute layered averages computed from the closest values for a list of points and output to a spatial vector postprocessor with one point per unique nearest point and layer'
+    design = 'NearestPointLayeredAverage.md'
+    issues = '#14717'
+  [../]
 []

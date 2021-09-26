@@ -11,7 +11,7 @@
     type = 'CSVdiff'
     input = 'points_from_uo.i'
     csvdiff = 'points_from_uo_out_spatial_from_uo_0002.csv'
-    requirement = 'The system shall compute layered integrals that computed from the closest values for a list of points and output to a spatial vector postprocessor with one point per unique nearest point and layer'
+    requirement = 'The system shall compute layered integrals computed from the closest values for a list of points and output to a spatial vector postprocessor with one point per unique nearest point and layer'
     design = 'NearestPointLayeredIntegral.md'
     issues = '#14717'
   [../]
