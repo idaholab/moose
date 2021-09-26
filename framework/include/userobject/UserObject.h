@@ -100,6 +100,17 @@ public:
   }
 
   /**
+   * Optional interface function for providing the points at which a UserObject attains
+   * spatial values. If a UserObject overrides this function, then other objects that
+   * take both the UserObject and points can instead directly use the points specified
+   * on the UserObject.
+   */
+  virtual const std::vector<Point> spatialPoints() const
+  {
+    mooseError(name(), " does not satisfy the points Spatial UserObject interface!");
+  }
+
+  /**
    * Must override.
    *
    * @param uo The UserObject to be joined into _this_ object.  Take the data from the uo object and
