@@ -119,6 +119,7 @@ LayeredBase::LayeredBase(const InputParameters & parameters)
   _layer_has_value.resize(_num_layers);
 
   getBounds();
+  computeLayerCenters();
 }
 
 Real
@@ -317,6 +318,25 @@ LayeredBase::getLayer(Point p) const
       // The -1 is because the interval that we fall in is just _before_ the number that is bigger
       // (which is what we found
       return static_cast<unsigned int>(std::distance(_layer_bounds.begin(), one_higher - 1));
+  }
+}
+
+void
+LayeredBase::computeLayerCenters()
+{
+  _layer_centers.resize(_num_layers);
+
+  if (_interval_based)
+  {
+    Real dx = (_direction_max - _direction_min) / _num_layers;
+
+    for (unsigned int i = 0; i < _num_layers; ++i)
+      _layer_centers[i] = (i + 0.5) * dx;
+  }
+  else
+  {
+    for (unsigned int i = 0; i < _num_layers; ++i)
+      _layer_centers[i] = 0.5 * (_layer_bounds[i + 1] + _layer_bounds[i]);
   }
 }
 
