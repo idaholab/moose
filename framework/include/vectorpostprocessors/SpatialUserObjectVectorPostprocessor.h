@@ -53,6 +53,9 @@ protected:
   /// Userobject to evaluate spatially
   const UserObject & _uo;
 
+  /// Whether to get the points from the user object
+  const bool & _use_points_from_uo;
+
   /// Points at which to evaluate the user object
   std::vector<Point> _points;
 };
