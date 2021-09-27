@@ -11,10 +11,6 @@
 #include "NS.h"
 
 registerMooseObject("NavierStokesApp", PNSFVMomentumGravity);
-registerMooseObjectRenamed("NavierStokesApp",
-                           PINSFVMomentumGravity,
-                           "07/01/2021 00:00",
-                           PNSFVMomentumGravity);
 
 InputParameters
 PNSFVMomentumGravity::validParams()

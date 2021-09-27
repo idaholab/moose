@@ -11,10 +11,6 @@
 #include "NS.h"
 
 registerMooseObject("NavierStokesApp", PNSFVMomentumFriction);
-registerMooseObjectRenamed("NavierStokesApp",
-                           PINSFVMomentumFriction,
-                           "07/01/2021 00:00",
-                           PNSFVMomentumFriction);
 
 InputParameters
 PNSFVMomentumFriction::validParams()
