@@ -302,7 +302,8 @@ protected:
         _print_stack_level(0),
         _num_dots(0),
         _time(std::chrono::seconds(0)),
-        _memory(0)
+        _memory(0),
+        _beginning_num_printed(0)
     {
     }
 
@@ -323,6 +324,9 @@ protected:
 
     /// Either the starting memory or final memory depending on _state
     long int _memory;
+
+    /// The _console numPrinted() at the time this section was created
+    unsigned long long int _beginning_num_printed;
   };
 
   /**
