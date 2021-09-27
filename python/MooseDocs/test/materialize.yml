@@ -59,6 +59,7 @@ Extensions:
     MooseDocs.extensions.modal: default
     MooseDocs.extensions.datetime: default
     MooseDocs.extensions.gitutils: default
+    MooseDocs.extensions.coverage: default
     MooseDocs.extensions.template:
         active: True
     MooseDocs.extensions.sqa:

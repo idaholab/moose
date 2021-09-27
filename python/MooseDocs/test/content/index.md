@@ -35,6 +35,7 @@ links to test pages for the various extensions within MooseDocs.
 1. [extensions/pysyntax.md]
 1. [extensions/datetime.md]
 1. [extensions/gitutils.md]
+1. [extensions/coverage.md]
 
 ## Subsite Link Test
 
