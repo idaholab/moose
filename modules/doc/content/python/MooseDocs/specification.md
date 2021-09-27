@@ -63,6 +63,7 @@ tables. [user-ext] provides a list of extensions that are useful for those writi
 | [extensions/template.md] | Tools for building MooseDocs markdown templates. |
 | [extensions/datetime.md] | Functions for adding date/time information. |
 | [extensions/gitutils.md] | Tools for gleaning information regarding git repository. |
+| [extensions/coverage.md] | Tools for reporting settings form a coverage config file. |
 
 !table id=devel-ext caption=List of extensions useful for writing extensions for "MooseDown".
 | Extension | Description |
