@@ -74,13 +74,7 @@ public:
     return getVariableValue(op_index, static_cast<const Point &>(n));
   }
 
-  /**
-   * Method for retrieving the initial grain OP assignments.
-   */
-  virtual const std::vector<unsigned int> & getGrainToOps() const { return _grain_to_op; }
-
-  /**
-   * Returns all available coloring algorithms as an enumeration type for input files.
+  /* Returns all available coloring algorithms as an enumeration type for input files.
    */
   static MooseEnum coloringAlgorithms();
 
@@ -144,8 +138,8 @@ protected:
   /// The maximum number of order parameters (colors) available to assign to the grain structure
   const unsigned int _op_num;
 
-  /// A vector indicating which op is assigned to each grain
-  std::vector<unsigned int> _grain_to_op;
+  /// A map of the grain_id to op
+  std::map<unsigned int, unsigned int> _grain_to_op;
 
   /// The selected graph coloring algorithm used by this object
   const MooseEnum _coloring_algorithm;
@@ -163,6 +157,9 @@ protected:
   static const unsigned int HALO_THICKNESS;
 
 private:
+  /// A vector indicating which op is assigned to each grain (by index of the grain)
+  std::vector<unsigned int> _grain_idx_to_op;
+
   /// Temporary storage area for current grains at a point to avoid memory churn
   std::vector<unsigned int> _prealloc_tmp_grains;
 
