@@ -111,6 +111,9 @@ protected:
    * FParser parameter name when parsing the FParser expression.
    */
   const VariableNameMappingMode _map_mode;
+
+  /// This is true by default, but can be disabled to make non-existing properties default to zero
+  const bool _error_on_missing_material_properties;
 };
 
 template <>

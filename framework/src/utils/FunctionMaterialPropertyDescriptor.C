@@ -15,8 +15,8 @@
 
 template <bool is_ad>
 FunctionMaterialPropertyDescriptor<is_ad>::FunctionMaterialPropertyDescriptor(
-    const std::string & expression, MooseObject * parent)
-  : _dependent_symbols(), _derivative_symbols(), _parent(parent)
+    const std::string & expression, MooseObject * parent, bool required)
+  : _dependent_symbols(), _derivative_symbols(), _parent(parent), _required(required)
 {
   auto define = expression.find_last_of(":=");
 
@@ -42,7 +42,8 @@ FunctionMaterialPropertyDescriptor<is_ad>::FunctionMaterialPropertyDescriptor(
 }
 
 template <bool is_ad>
-FunctionMaterialPropertyDescriptor<is_ad>::FunctionMaterialPropertyDescriptor() : _value(nullptr)
+FunctionMaterialPropertyDescriptor<is_ad>::FunctionMaterialPropertyDescriptor()
+  : _value(nullptr), _required(false)
 {
 }
 
@@ -55,7 +56,8 @@ FunctionMaterialPropertyDescriptor<is_ad>::FunctionMaterialPropertyDescriptor(
     _derivative_symbols(rhs._derivative_symbols),
     _value(nullptr),
     _parent(rhs._parent),
-    _property_name(rhs._property_name)
+    _property_name(rhs._property_name),
+    _required(false)
 {
 }
 
@@ -68,7 +70,8 @@ FunctionMaterialPropertyDescriptor<is_ad>::FunctionMaterialPropertyDescriptor(
     _derivative_symbols(rhs._derivative_symbols),
     _value(nullptr),
     _parent(parent),
-    _property_name(rhs._property_name)
+    _property_name(rhs._property_name),
+    _required(false)
 {
 }
 
@@ -218,13 +221,16 @@ FunctionMaterialPropertyDescriptor<is_ad>::value() const
     DerivativeMaterialInterface<Kernel> * _kernel_parent =
         dynamic_cast<DerivativeMaterialInterface<Kernel> *>(_parent);
 
+    // property name
+    auto name = derivativePropertyName(_base_name, _derivative_symbols);
+
     // get the material property reference
     if (_material_parent)
-      _value = &(_material_parent->getMaterialPropertyDerivative<Real, is_ad>(_base_name,
-                                                                              _derivative_symbols));
+      _value = _required ? &(_material_parent->getGenericMaterialProperty<Real, is_ad>(name))
+                         : &(_material_parent->getGenericZeroMaterialProperty<Real, is_ad>(name));
     else if (_kernel_parent)
-      _value = &(_kernel_parent->getMaterialPropertyDerivative<Real, is_ad>(_base_name,
-                                                                            _derivative_symbols));
+      _value = _required ? &(_kernel_parent->getGenericMaterialProperty<Real, is_ad>(name))
+                         : &(_kernel_parent->getGenericZeroMaterialProperty<Real, is_ad>(name));
     else
       mooseError("A FunctionMaterialPropertyDescriptor must be owned by either a Material or a "
                  "Kernel object.");
