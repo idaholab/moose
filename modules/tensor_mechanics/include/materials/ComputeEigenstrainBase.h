@@ -15,18 +15,19 @@
 /**
  * ComputeEigenstrainBase is the base class for eigenstrain tensors
  */
-class ComputeEigenstrainBase : public Material
+template <bool is_ad>
+class ComputeEigenstrainBaseTempl : public Material
 {
 public:
   static InputParameters validParams();
 
-  ComputeEigenstrainBase(const InputParameters & parameters);
+  ComputeEigenstrainBaseTempl(const InputParameters & parameters);
 
   // We need this to be public for crystal plasticity eigenstrain calculations
-  virtual void computeQpProperties();
+  virtual void computeQpProperties() override;
 
 protected:
-  virtual void initQpStatefulProperties();
+  virtual void initQpStatefulProperties() override;
 
   ///Compute the eigenstrain and store in _eigenstrain
   virtual void computeQpEigenstrain() = 0;
@@ -38,7 +39,7 @@ protected:
   std::string _eigenstrain_name;
 
   ///Stores the current total eigenstrain
-  MaterialProperty<RankTwoTensor> & _eigenstrain;
+  GenericMaterialProperty<RankTwoTensor, is_ad> & _eigenstrain;
 
   /**
    * Helper function for models that compute the eigenstrain based on a volumetric
@@ -48,8 +49,12 @@ protected:
    * @return Current strain in one direction due to volumetric strain, expressed as a logarithmic
    * strain
    */
-  Real computeVolumetricStrainComponent(const Real volumetric_strain) const;
+  GenericReal<is_ad>
+  computeVolumetricStrainComponent(const GenericReal<is_ad> & volumetric_strain) const;
 
   /// Restartable data to check for the zeroth and first time steps for thermal calculations
   bool & _step_zero;
 };
+
+typedef ComputeEigenstrainBaseTempl<false> ComputeEigenstrainBase;
+typedef ComputeEigenstrainBaseTempl<true> ADComputeEigenstrainBase;
