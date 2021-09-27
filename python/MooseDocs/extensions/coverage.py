@@ -39,7 +39,7 @@ class CoverageExtension(command.CommandExtension):
         c_file = os.path.join(MooseDocs.ROOT_DIR, self.get('coverage-file'))
         if not os.path.isfile(c_file):
             msg = "The coverage file '%s' does not exist, the extension is being disabled."
-            LOG.error(msg, c_file)
+            LOG.warning(msg, c_file)
             self.setActive(False)
         else:
             self._coverage = configparser.ConfigParser()
