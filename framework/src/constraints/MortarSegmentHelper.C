@@ -7,7 +7,10 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 #include "MortarSegmentHelper.h"
-#include <vector>
+
+#include "libmesh/int_range.h"
+
+using namespace libMesh;
 
 MortarSegmentHelper::MortarSegmentHelper(const std::vector<Point> secondary_nodes,
                                          const Point & center,

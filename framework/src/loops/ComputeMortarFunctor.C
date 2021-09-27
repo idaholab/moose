@@ -383,7 +383,8 @@ ComputeMortarFunctor::projectQPoints3d(const Elem * msm_elem,
     // Get physical point on msm_elem to project
     Point x0;
     for (MooseIndex(msm_elem->n_nodes()) n = 0; n < msm_elem->n_nodes(); ++n)
-      x0 += Moose::fe_lagrange_2D_shape(msm_type, msm_order, n, _qrule_msm->qp(qp)) *
+      x0 += Moose::fe_lagrange_2D_shape(
+                msm_type, msm_order, n, static_cast<TypeVector<Real> &&>(_qrule_msm->qp(qp))) *
             msm_elem->point(n);
 
     // Use msm_elem quadrature point as initial guess
