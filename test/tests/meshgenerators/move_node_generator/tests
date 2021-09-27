@@ -24,4 +24,18 @@
       detail = 'in a Cartesian 3D mesh.'
     []
   []
+  [failure_missing]
+    type = 'RunException'
+    input = 'test2.i'
+    expect_err = "A node with the ID*"
+    cli_args = "Mesh/inactive='mismatchSize modifyNode' --mesh-only"
+    requirement = "The system shall error if the node to be moved cannot be found in the mesh."
+  []
+  [failure_mismatch]
+    type = 'RunException'
+    input = 'test2.i'
+    expect_err = "Must be the same length as 'new_position'."
+    cli_args = "Mesh/inactive='missingNode modifyNode' --mesh-only"
+    requirement = "The system shall error if the node position and node id arrays do not match in size"
+  []
 []

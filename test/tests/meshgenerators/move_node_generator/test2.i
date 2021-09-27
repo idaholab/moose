@@ -1,5 +1,6 @@
 [Mesh]
   allow_renumbering=false
+  inactive = 'missingNode mismatchSize'
   [./eg]
     type = CartesianMeshGenerator
     dim = 3
@@ -18,6 +19,18 @@
     new_position = '0.1 0 0
                     0.35 0 0
                     0.6 0 0'
+  []
+  [missingNode]
+    type = MoveNodeGenerator
+    input = eg
+    node_id = '999'
+    new_position = '0.1 0 0'
+  []
+  [mismatchSize]
+    type = MoveNodeGenerator
+    input = eg
+    node_id = '0 1 2'
+    new_position = '0.1 0 0'
   []
 []
 
