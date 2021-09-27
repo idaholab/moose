@@ -181,52 +181,59 @@ CrystalPlasticityHCPDislocationSlipBeyerleinUpdate::initQpStatefulProperties()
 {
   // check that the number of slip systems is equal to the sum of the types of slip system
   if (_number_slip_systems_per_mode.size() != _slip_system_modes)
-    mooseError("The size the number of slip systems per mode is not equal to the number of slip "
+    paramError("number_slip_systems_per_mode",
+               "The size the number of slip systems per mode is not equal to the number of slip "
                "system types.");
 
   unsigned int sum = 0;
   for (unsigned int i = 0; i < _slip_system_modes; ++i)
     sum += _number_slip_systems_per_mode[i];
   if (sum != _number_slip_systems)
-    mooseError("The number of slip systems and the sum of the slip systems in each of the slip "
+    paramError("slip_system_modes",
+               "The number of slip systems and the sum of the slip systems in each of the slip "
                "system modes are not equal");
 
   // Check that the number of slip mode dependent parameters is given matches the number of slip
   // modes
   if (_burgers_vector.size() != _slip_system_modes)
-    mooseError("Please ensure that the size of burgers_vector_per_mode equals the value "
-               "supplied for slip_system_modes");
+    paramError("burgers_vector_per_mode",
+               "Please ensure that the size of burgers_vector_per_mode equals the value supplied "
+               "for slip_system_modes");
 
   if (_slip_generation_coefficient.size() != _slip_system_modes)
-    mooseError(
-        "Please ensure that the size of slip_generation_coefficient_per_mode equals the value "
-        "supplied for slip_system_modes");
+    paramError("slip_generation_coefficient_per_mode",
+               "Please ensure that the size of slip_generation_coefficient_per_mode equals the "
+               "value supplied for slip_system_modes");
 
   if (_slip_activation_energy.size() != _slip_system_modes)
-    mooseError("Please ensure that the size of normalized_slip_activiation_energy_per_mode equals "
+    paramError("normalized_slip_activiation_energy_per_mode",
+               "Please ensure that the size of normalized_slip_activiation_energy_per_mode equals "
                "the value supplied for slip_system_modes");
 
   if (_proportionality_factor.size() != _slip_system_modes)
-    mooseError("Please ensure that the size of slip_energy_proportionality_factor_per_mode equals "
+    paramError("slip_energy_proportionality_factor_per_mode",
+               "Please ensure that the size of slip_energy_proportionality_factor_per_mode equals "
                "the value supplied for slip_system_modes");
 
   if (_shear_modulus.size() != _slip_system_modes)
-    mooseError("Please ensure that the size of effective_shear_modulus_per_mode equals the value "
-               "supplied for slip_system_modes");
+    paramError("effective_shear_modulus_per_mode",
+               "Please ensure that the size of effective_shear_modulus_per_mode equals the "
+               "value supplied for slip_system_modes");
 
   if (_substructure_rate_coefficient.size() != _slip_system_modes)
-    mooseError(
-        "Please ensure that the size of substructure_rate_coefficient_per_mode equals the value "
-        "supplied for slip_system_modes");
+    paramError("substructure_rate_coefficient_per_mode",
+               "Please ensure that the size of substructure_rate_coefficient_per_mode equals the "
+               "value supplied for slip_system_modes");
 
   if (_hallpetch_like_coefficient.size() != _slip_system_modes)
-    mooseError("Please ensure that the size of Hall_Petch_like_constant_per_mode equals the value "
+    paramError("Hall_Petch_like_constant_per_mode",
+               "Please ensure that the size of Hall_Petch_like_constant_per_mode equals the value "
                "supplied for slip_system_modes");
 
   if (_lattice_friction.size() != _slip_system_modes)
-    mooseError("Error in accessing the entries of the lattice_friction_per_mode vector. "
-               "Please ensure that the size of lattice_friction_per_mode equals the value "
-               "supplied for slip_system_modes");
+    paramError("lattice_friction_per_mode",
+               "Please ensure that the size of lattice_friction_per_mode equals the value supplied "
+               "for slip_system_modes");
 
   CrystalPlasticityStressUpdateBase::initQpStatefulProperties();
 
@@ -256,10 +263,6 @@ CrystalPlasticityHCPDislocationSlipBeyerleinUpdate::initQpStatefulProperties()
     {
       counter_adjustment += _number_slip_systems_per_mode[slip_mode];
       ++slip_mode;
-      mooseAssert(slip_mode < _slip_system_modes,
-                  "Error in accessing the number of slip systems provided for "
-                  "number_slip_systems_per_mode");
-
       _initial_lattice_friction(i) = _lattice_friction[slip_mode];
     }
   }
@@ -288,10 +291,6 @@ CrystalPlasticityHCPDislocationSlipBeyerleinUpdate::calculateGrainSizeResistance
     {
       counter_adjustment += _number_slip_systems_per_mode[slip_mode];
       ++slip_mode;
-      mooseAssert(slip_mode < _slip_system_modes,
-                  "Error in accessing the number of slip systems provided for "
-                  "number_slip_systems_per_mode");
-
       hallpetch_burgers_term = _hallpetch_like_coefficient[slip_mode] * _shear_modulus[slip_mode] *
                                std::sqrt(_burgers_vector[slip_mode]);
     }
@@ -447,12 +446,7 @@ CrystalPlasticityHCPDislocationSlipBeyerleinUpdate::calculateForestDislocationEv
     {
       counter_adjustment += _number_slip_systems_per_mode[slip_mode];
       ++slip_mode;
-      mooseAssert(
-          slip_mode < _slip_system_modes,
-          "Error in accessing either the entries of the slip_generation_coefficient_per_mode, "
-          "Burgers_vector_per_mode, normalized_slip_activiation_energy_per_mode, or "
-          "slip_energy_proportionality_factor_per_mode vectors. Please ensure that the size of "
-          "these vectors equals the value supplied for slip_system_modes");
+
       k1_term(i) = _slip_generation_coefficient[slip_mode];
       interaction_term = _forest_interaction_coefficient * _burgers_vector[slip_mode] /
                          _slip_activation_energy[slip_mode];
@@ -490,11 +484,6 @@ CrystalPlasticityHCPDislocationSlipBeyerleinUpdate::calculateSubstructureDensity
     {
       counter_adjustment += _number_slip_systems_per_mode[slip_mode];
       ++slip_mode;
-      mooseAssert(
-          slip_mode < _slip_system_modes,
-          "Error in accessing either the entries of the substructure_rate_coefficient_per_mode "
-          "or the Burgers_vector_per_mode vectors. Please ensure that the size "
-          "of these vectors equals the value supplied for slip_system_modes");
       generation_term(i) = _substructure_rate_coefficient[slip_mode] * _burgers_vector[slip_mode];
     }
   }
@@ -529,10 +518,6 @@ CrystalPlasticityHCPDislocationSlipBeyerleinUpdate::calculateSlipResistance()
     {
       counter_adjustment += _number_slip_systems_per_mode[slip_mode];
       ++slip_mode;
-      mooseAssert(
-          slip_mode < _slip_system_modes,
-          "Error in accessing the entries of the Burgers_vector_per_mode vectors. Please ensure "
-          "that the size of these vectors equals the value supplied for slip_system_modes");
       burgers = _burgers_vector[slip_mode];
       shear_modulus = _shear_modulus[slip_mode];
     }

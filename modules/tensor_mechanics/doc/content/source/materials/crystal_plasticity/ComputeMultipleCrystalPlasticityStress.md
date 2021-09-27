@@ -207,7 +207,12 @@ Hexagonal Close Packed (HCP) crystals are often described with the 4-index Mille
   \label{eqn:millerBravisHCPIndices}
   (HKIL) [uvtw]
 \end{equation}
-To compute the Schmid tensor from these slip direction and slip plane normals, the indices must first be transformed to the Cartesian coordinate system. Within the associated `ComputeMultipleCrystalPlasticityStress` implementation, this conversion uses the assumption that the a$_1$-axis, or the H index, align with the x-axis in the basal plane of the HCP crystal lattice. The c-axis, the L index, is assumed to be paralled to the z-axis of the Cartesian system.
+To compute the Schmid tensor from these slip direction and slip plane normals, the indices must first be transformed to the Cartesian coordinate system. Within the associated `ComputeMultipleCrystalPlasticityStress` implementation, this conversion uses the assumption that the a$_1$-axis, or the H index, align with the x-axis in the basal plane of the HCP crystal lattice, see [xtalpl_hcp_basalplane_notation]. The c-axis, the L index, is assumed to be paralled to the z-axis of the Cartesian system.
+
+!media tensor_mechanics/crystal_plasticity/HCP_basal_plane_diagram.png
+    id=xtalpl_hcp_basalplane_notation
+    caption=The convention used to transform the 4-index Miller-Bravis indices to the 3-index Cartesian system aligns the x-axis with the a$_1$-axis in the basal plane in this implementation.
+    style=display:block;margin-left:auto;margin-right:auto;width:50%
 
 The slip plane directions are transformed to the Cartesian system with the matrix equation
 \begin{equation}
