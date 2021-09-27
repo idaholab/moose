@@ -18,7 +18,7 @@ class ElementExtremeValue;
 template <>
 InputParameters validParams<ElementExtremeValue>();
 
-/// A postprocessor for collecting the nodal min or max value
+/// A postprocessor for collecting the elemental min or max value
 class ElementExtremeValue : public ElementVariablePostprocessor
 {
 public:
@@ -48,7 +48,19 @@ protected:
   /// The extreme value type
   ExtremeType _type;
 
-  /// The extreme value
+  /**
+   * The value of the variable at the point at which the proxy variable
+   * reaches the max/min value.
+   */
   Real _value;
+
+  /**
+   * A proxy variable used to find the quadrature point at
+   * which to evaluate the variable. If not provided, defaults to the variable.
+   */
+  const VariableValue & _proxy_variable;
+
+  /// Extreme value of the proxy variable
+  Real _proxy_value;
 };
 

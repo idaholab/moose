@@ -146,6 +146,9 @@ public:
   template <typename T1, typename T2>
   void gatherProxyValueMax(T1 & value, T2 & proxy);
 
+  template <typename T1, typename T2>
+  void gatherProxyValueMin(T1 & value, T2 & proxy);
+
   void setPrimaryThreadCopy(UserObject * primary);
 
   UserObject * primaryThreadCopy() { return _primary_thread_copy; }
@@ -199,5 +202,14 @@ UserObject::gatherProxyValueMax(T1 & value, T2 & proxy)
 {
   unsigned int rank;
   _communicator.maxloc(value, rank);
+  _communicator.broadcast(proxy, rank);
+}
+
+template <typename T1, typename T2>
+void
+UserObject::gatherProxyValueMin(T1 & value, T2 & proxy)
+{
+  unsigned int rank;
+  _communicator.minloc(value, rank);
   _communicator.broadcast(proxy, rank);
 }
