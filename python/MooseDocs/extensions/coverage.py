@@ -64,7 +64,7 @@ class CoverageTableCommand(command.CommandComponent):
     def createToken(self, parent, info, page):
 
         if 'inline' in info:
-            raise common.exceptions.MooseDocsException("The 'coverage table' command is a block level command, use '!coverage table' instead.")
+            raise exceptions.MooseDocsException("The 'coverage table' command is a block level command, use '!coverage table' instead.")
 
         # Create a set of available keys within each section
         options = set()
