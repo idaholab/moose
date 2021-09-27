@@ -81,20 +81,20 @@
   [spatial_manually_provided]
     type = SpatialUserObjectVectorPostprocessor
     userobject = nrla
-    points = '0.05 0.25 0
-              0.05 0.75 0
+    points = '0.05 0 0.25
+              0.05 0 0.75
 
-              0.15 0.25 0
-              0.15 0.75 0
+              0.15 0 0.25
+              0.15 0 0.75
 
-              0.25 0.25 0
-              0.25 0.75 0
+              0.25 0 0.25
+              0.25 0 0.75
 
-              0.35 0.25 0
-              0.35 0.75 0
+              0.35 0 0.25
+              0.35 0 0.75
 
-              0.45 0.25 0
-              0.45 0.75 0'
+              0.45 0 0.25
+              0.45 0 0.75'
   []
 []
 
@@ -108,5 +108,7 @@
 []
 
 [Outputs]
+  csv = true
   exodus = true
+  execute_on = final
 []

@@ -62,7 +62,7 @@
   [../]
 
   [./points_from_uo]
-    type = 'CSVdiff'
+    type = 'CSVDiff'
     input = 'points_from_uo.i'
     csvdiff = 'points_from_uo_out_spatial_from_uo_0002.csv'
     requirement = 'The system shall compute layered averages computed from the closest values for a list of points and output to a spatial vector postprocessor with one point per unique nearest point and layer'
@@ -70,7 +70,7 @@
     issues = '#18931'
   [../]
   [./radius_points_from_uo]
-    type = 'CSVdiff'
+    type = 'CSVDiff'
     input = 'radius_points_from_uo.i'
     csvdiff = 'radius_points_from_uo_out_spatial_from_uo_0002.csv'
     requirement = 'The system shall compute radial layered averages computed from the closest values for a list of points and output to a spatial vector postprocessor with one point per unique nearest point and layer'
