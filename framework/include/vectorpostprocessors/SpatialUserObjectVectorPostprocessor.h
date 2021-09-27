@@ -42,7 +42,9 @@ public:
   virtual void execute() override;
 
   /**
-   * Read the points at which to evaluate from a vector or file
+   * Read the points at which to evaluate from a vector ('points'), a file ('points_file'),
+   * or neither (which will read from the user object directly if it satisfies the
+   * spatialPoints interface)
    */
   void fillPoints();
 
@@ -52,9 +54,6 @@ protected:
 
   /// Userobject to evaluate spatially
   const UserObject & _uo;
-
-  /// Whether to get the points from the user object
-  const bool & _use_points_from_uo;
 
   /// Points at which to evaluate the user object
   std::vector<Point> _points;

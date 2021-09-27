@@ -71,7 +71,6 @@
   [spatial_from_uo]
     type = SpatialUserObjectVectorPostprocessor
     userobject = npla
-    use_points_from_uo = true
   []
   [spatial_manually_provided]
     type = SpatialUserObjectVectorPostprocessor

@@ -270,7 +270,8 @@ NearestPointBase<UserObjectType, BaseType>::spatialPoints() const
 
   for (MooseIndex(_points) i = 0; i < _points.size(); ++i)
   {
-    std::shared_ptr<LayeredBase> layered_base = std::dynamic_pointer_cast<LayeredBase>(_user_objects[i]);
+    std::shared_ptr<LayeredBase> layered_base =
+        std::dynamic_pointer_cast<LayeredBase>(_user_objects[i]);
     if (layered_base)
     {
       const auto & layers = layered_base->getLayerCenters();

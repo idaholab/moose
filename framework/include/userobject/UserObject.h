@@ -107,7 +107,7 @@ public:
    */
   virtual const std::vector<Point> spatialPoints() const
   {
-    mooseError(name(), " does not satisfy the points Spatial UserObject interface!");
+    mooseError("Spatial UserObject interface is not satisfied; spatialPoints() must be overridden");
   }
 
   /**
