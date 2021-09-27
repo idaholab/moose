@@ -61,7 +61,7 @@
     set_point = T_set_point:value
     K_i = 0.05
     K_p = 0.2
-    K_d = 0
+    K_d = 0.1
     initial_value = 340
   []
 
