@@ -143,7 +143,7 @@ class RenderAcronymToken(components.RenderComponent):
         acro = self.extension.getAcronym(token['acronym'])
         if acro is None:
             tag = html.Tag(parent, 'span', string=token['acronym'], class_='moose-error')
-            raise exceptions.MooseDocsException("The acronym '{}' was not found.", key)
+            raise exceptions.MooseDocsException("The acronym '{}' was not found.", token['acronym'])
 
         else:
             content = str(acro.key) if acro.used else '{} ({})'.format(acro.name, acro.key)
