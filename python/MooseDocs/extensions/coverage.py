@@ -8,12 +8,14 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import os
+import logging
 import configparser
 import MooseDocs
 from ..common import exceptions
 from ..base import components, LatexRenderer, HTMLRenderer, MarkdownReader
 from ..tree import tokens, html, latex
 from . import command, table, floats
+LOG = logging.getLogger(__name__)
 
 def make_extension(**kwargs):
     return CoverageExtension(**kwargs)
@@ -36,10 +38,12 @@ class CoverageExtension(command.CommandExtension):
 
         c_file = os.path.join(MooseDocs.ROOT_DIR, self.get('coverage-file'))
         if not os.path.isfile(c_file):
-            raise exceptions.MooseDocsException("The coverage file '{}' does not exist.", c_file)
-
-        self._coverage = configparser.ConfigParser()
-        self._coverage.read(c_file)
+            msg = "The coverage file '%s' does not exist, the extension is being disabled."
+            LOG.error(msg, c_file)
+            self.setActive(False)
+        else:
+            self._coverage = configparser.ConfigParser()
+            self._coverage.read(c_file)
 
     @property
     def coverage(self):
