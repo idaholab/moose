@@ -23,9 +23,9 @@
     []
     [neighbor_refinement]
       type = 'Exodiff'
-      input = 'test_neighbor.i'
+      input = 'test_multi.i'
       exodiff = 'test_neighbor_in.e'
-      cli_args = "--mesh-only"
+      cli_args = "Mesh/refine/enable_neighbor_refinement=true --mesh-only test_neighbor_in.e"
       recover = false
       detail = 'multiple blocks within a multi-domain mesh, with neighbor refinement enabled'
     []
