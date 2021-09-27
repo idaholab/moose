@@ -11,6 +11,10 @@ This postprocessor may be used to convert spatial user objects such as
 postprocessor that can be transferred to another application with a
 [MultiAppVectorPostprocessorTransfer](/transfers/MultiAppVectorPostprocessorTransfer.md).
 
+The `use_points_from_uo` parameter can be used with user objects that define
+the `spatialPoints()` interface to automatically get points in space at which the
+user object obtains unique values.
+
 ## Example Input File Syntax
 
 !listing test/tests/vectorpostprocessors/spatial_userobject_vector_postprocessor/spatial_userobject.i

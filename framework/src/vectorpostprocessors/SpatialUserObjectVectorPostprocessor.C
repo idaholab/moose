@@ -28,8 +28,8 @@ SpatialUserObjectVectorPostprocessor::validParams()
                             "A filename that should be looked in for points. Each "
                             "set of 3 values in that file will represent a Point.  "
                             "This and 'points' cannot be both supplied.");
-  params.addParam<bool>("use_points_from_uo", false,
-                        "Whether to obtain the points directly from the user object");
+  params.addParam<bool>(
+      "use_points_from_uo", false, "Whether to obtain the points directly from the user object");
   params.addClassDescription("Outputs the values of a spatial user object in the order "
                              "of the specified spatial points");
 
@@ -54,7 +54,7 @@ SpatialUserObjectVectorPostprocessor::fillPoints()
   {
     if (isParamValid("points") || isParamValid("points_file"))
       mooseWarning("When 'use_points_from_uo' is true, the 'points' and 'points_file' parameters "
-        "are ignored");
+                   "are ignored");
 
     _points = _uo.spatialPoints();
   }

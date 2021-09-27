@@ -5,6 +5,6 @@
     csvdiff = 'nearest_point_integral_out_spatial_from_uo_0002.csv'
     requirement = 'The system shall compute integrals computed from the closest values for a list of points and output to a spatial vector postprocessor with one point per point'
     design = 'NearestPointIntegralVariablePostprocessor.md'
-    issues = '#14717'
+    issues = '#18931'
   [../]
 []
