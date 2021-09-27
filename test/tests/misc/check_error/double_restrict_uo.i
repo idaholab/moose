@@ -55,7 +55,7 @@
 [Postprocessors]
   # This test demonstrates that you can have a block restricted NodalPostprocessor
   [./restricted_max]
-    type = NodalMaxValue
+    type = NodalExtremeValue
     variable = v
     block = 1   # Block restricted
     boundary = 1 # Boundary restricted
