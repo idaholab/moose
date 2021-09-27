@@ -34,7 +34,4 @@ public:
   static InputParameters validParams();
 
   NearestPointLayeredIntegral(const InputParameters & parameters);
-
-protected:
-  virtual const std::vector<Point> spatialPoints() const override;
 };

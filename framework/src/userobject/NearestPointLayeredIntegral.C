@@ -31,24 +31,3 @@ NearestPointLayeredIntegral::NearestPointLayeredIntegral(const InputParameters &
   : NearestPointBase<LayeredIntegral, ElementIntegralVariableUserObject>(parameters)
 {
 }
-
-const std::vector<Point>
-NearestPointLayeredIntegral::spatialPoints() const
-{
-  std::vector<Point> points;
-
-  for (MooseIndex(_points) i = 0; i < _points.size(); ++i)
-  {
-    const auto & layers = _user_objects[i]->getLayerCenters();
-    auto direction = _user_objects[i]->direction();
-
-    for (const auto & l : layers)
-    {
-      Point pt = _points[i];
-      pt(direction) = l;
-      points.push_back(pt);
-    }
-  }
-
-  return points;
-}

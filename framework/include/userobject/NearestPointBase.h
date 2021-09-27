@@ -13,6 +13,7 @@
 #include "ElementIntegralVariableUserObject.h"
 #include "Enumerate.h"
 #include "DelimitedFileReader.h"
+#include "LayeredBase.h"
 
 // Forward Declarations
 class UserObject;
@@ -86,6 +87,8 @@ public:
    * @return points
    */
   virtual const std::vector<Point> & getPoints() const { return _points; }
+
+  virtual const std::vector<Point> spatialPoints() const override;
 
 protected:
   /**
@@ -257,4 +260,30 @@ NearestPointBase<UserObjectType, BaseType>::nearestUserObject(const Point & p) c
   }
 
   return _user_objects[closest];
+}
+
+template <typename UserObjectType, typename BaseType>
+const std::vector<Point>
+NearestPointBase<UserObjectType, BaseType>::spatialPoints() const
+{
+  std::vector<Point> points;
+
+  for (MooseIndex(_points) i = 0; i < _points.size(); ++i)
+  {
+    std::shared_ptr<LayeredBase> layered_base = std::dynamic_pointer_cast<LayeredBase>(_user_objects[i]);
+    if (layered_base)
+    {
+      const auto & layers = layered_base->getLayerCenters();
+      auto direction = layered_base->direction();
+
+      for (const auto & l : layers)
+      {
+        Point pt = _points[i];
+        pt(direction) = l;
+        points.push_back(pt);
+      }
+    }
+  }
+
+  return points;
 }

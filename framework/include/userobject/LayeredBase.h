@@ -74,7 +74,7 @@ public:
    * Get direction of the layers
    * @return layer direction
    */
-  const unsigned int direction() const { return _direction; }
+  unsigned int direction() const { return _direction; }
 
   virtual void initialize();
   virtual void finalize();

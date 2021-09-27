@@ -29,7 +29,4 @@ public:
   static InputParameters validParams();
 
   NearestRadiusLayeredAverage(const InputParameters & parameters);
-
-protected:
-  virtual const std::vector<Point> spatialPoints() const override;
 };
