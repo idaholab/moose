@@ -10,6 +10,20 @@ pre[class*="language-"] {
     background-color: #eee;
 }
 
+.section {
+  margin-bottom: 0.5rem;
+}
+
+h2 {
+  font-size: 160%;
+}
+
+h3 {
+  font-size: 130%;
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+}
+
 pre.moose-pre {
     background-color: #eee;
 }
