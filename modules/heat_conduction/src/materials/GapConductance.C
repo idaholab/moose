@@ -287,7 +287,7 @@ GapConductance::computeQpConductance()
   if (_has_info)
   {
     _gap_conductance[_qp] = h_conduction() + h_radiation();
-    _gap_conductance_dT[_qp] = dh_conduction();
+    _gap_conductance_dT[_qp] = dh_conduction() + dh_radiation();
   }
   else
   {
