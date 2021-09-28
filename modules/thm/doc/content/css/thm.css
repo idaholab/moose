@@ -73,3 +73,21 @@ nav {
   -webkit-box-shadow: none;
   box-shadow: none;
 }
+
+.steps>ol {
+    list-style: none;
+    counter-reset: li;
+    position: relative;
+    padding-left: 16px;
+}
+
+.steps>ol>li::before {
+    content: counter(li);
+    counter-increment: li;
+    font-weight: 700;
+    position: absolute;
+    left: 0;
+    text-align: right;
+    width: 16px;
+    color: #AAA;
+}
