@@ -1,5 +1,5 @@
 {% set build = 0 %}
-{% set version = "2020.12.17" %}
+{% set version = "2021.07.23" %}
 {% set strbuild = "build_" + build|string %}
 
 {% set sha256 = "f8236c163aebbf8894381b7f71c42f3f3beeff6d8aee69b8a829cd76f7d5bd7a" %}
@@ -18,23 +18,23 @@ build:
 
 requirements:
   run:
-    - gcc_linux-64 {{ gcc }}                 # [linux]
-    - gxx_linux-64 {{ gxx }}                 # [linux]
-    - gfortran_linux-64 {{ fortran }}        # [linux]
-    - gcc_impl_linux-64 {{ gccimpl }}        # [linux]
-    - clang {{ clang }}                      # [osx]
-    - clang_osx-64 {{ clangosx }}            # [osx]
-    - clangxx {{ clangxx }}                  # [osx]
-    - clangxx_osx-64 {{ clangxxosx }}        # [osx]
-    - compiler-rt {{ compilerrt }}           # [osx]
-    - compiler-rt_osx-64 {{ compilerrtosx }} # [osx]
-    - libllvm11 {{ libllvm }}                # [osx]
-    - clang-tools                            # [osx]
-    - llvm-openmp {{ llvmopenmp }}           # [osx]
-    - gfortran_osx-64 {{ osxfortran }}       # [osx]
-    - libclang {{ libclang }}                # [osx]
-    - libcxx {{ libcxx }}                    # [osx]
-    - make                                   # [unix]
+    - gcc_linux-64 {{ moose_gcc }}                 # [linux]
+    - gxx_linux-64 {{ moose_gxx }}                 # [linux]
+    - gfortran_linux-64 {{ moose_fortran }}        # [linux]
+    - gcc_impl_linux-64 {{ moose_gccimpl }}        # [linux]
+    - clang {{ moose_clang }}                      # [osx]
+    - clang_osx-64 {{ moose_clangosx }}            # [osx]
+    - clangxx {{ moose_clangxx }}                  # [osx]
+    - clangxx_osx-64 {{ moose_clangxxosx }}        # [osx]
+    - compiler-rt {{ moose_compilerrt }}           # [osx]
+    - compiler-rt_osx-64 {{ moose_compilerrtosx }} # [osx]
+    - libllvm12 {{ moose_libllvm }}                # [osx]
+    - clang-tools                                  # [osx]
+    - llvm-openmp {{ moose_llvmopenmp }}           # [osx]
+    - gfortran_osx-64 {{ moose_osxfortran }}       # [osx]
+    - libclang {{ moose_libclang }}                # [osx]
+    - libcxx {{ moose_libcxx }}                    # [osx]
+    - make                                         # [unix]
 
 about:
   home: https://mooseframework.org/

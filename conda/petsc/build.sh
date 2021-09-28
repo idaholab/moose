@@ -13,18 +13,27 @@ elif [[ $mpi == "moose-mpich" ]]; then
   export HYDRA_LAUNCHER=fork
 fi
 
-unset CFLAGS CPPFLAGS CXXFLAGS FFLAGS LIBS
+unset CFLAGS CPPFLAGS CXXFLAGS FFLAGS LIBS LDFLAGS
 if [[ $(uname) == Darwin ]]; then
-    export LDFLAGS="${LDFLAGS:-} -Wl,-headerpad_max_install_names"
+    LDFLAGS="${LDFLAGS:-} -Wl,-headerpad_max_install_names"
     ADDITIONAL_ARGS="--with-blas-lib=libblas${SHLIB_EXT} --with-lapack-lib=liblapack${SHLIB_EXT}"
 else
     ADDITIONAL_ARGS="--download-fblaslapack=1"
 fi
 
 if [[ $(uname) == Darwin ]]; then
-    TUNING="-march=core2 -mtune=haswell"
+    if [[ $HOST == arm64-apple-darwin20.0.0 ]]; then
+        LDFLAGS="${LDFLAGS:-} -L$PREFIX/lib -Wl,-rpath,$PREFIX/lib"
+        CTUNING="-march=armv8.3-a -I$PREFIX/include"
+        FTUNING="-march=armv8.3-a -I$PREFIX/include"
+        export LIBRARY_PATH="$PREFIX/lib"
+    else
+        CTUNING="-march=core2 -mtune=haswell"
+        FTUNING="-I$PREFIX/include"
+    fi
 else
-    TUNING="-march=nocona -mtune=haswell"
+    CTUNING="-march=nocona -mtune=haswell"
+    FTUNING="-I$PREFIX/include"
 fi
 
 # for MPI discovery
@@ -44,7 +53,6 @@ BUILD_CONFIG=`cat <<"EOF"
   --with-cxx-dialect=C++11 \
   --with-shared-libraries=1 \
   --download-mumps=1 \
-  --download-strumpack=1 \
   --download-hypre=1 \
   --download-metis=1 \
   --download-slepc=1 \
@@ -65,8 +73,10 @@ python ./configure ${BUILD_CONFIG} ${ADDITIONAL_ARGS:-} \
        FC="mpifort" \
        F90="mpifort" \
        F77="mpifort" \
-       CFLAGS="${TUNING}" \
-       CXXFLAGS="${TUNING}" \
+       CFLAGS="${CTUNING}" \
+       CXXFLAGS="${CTUNING}" \
+       FFLAGS="${FTUNING}" \
+       FCFLAGS="${FTUNING}" \
        LDFLAGS="${LDFLAGS:-}" \
        --prefix=$PREFIX || (cat configure.log && exit 1)
 

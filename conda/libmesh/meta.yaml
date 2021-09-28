@@ -1,5 +1,5 @@
 # Do not use jinja templating (A physical change to this file is required to trigger a build)
-{% set build = 0 %}
+{% set build = 1 %}
 {% set strbuild = "build_" + build|string %}
 {% set version = "2021.10.27" %}
 
@@ -17,9 +17,13 @@ build:
 
 requirements:
   build:
+    - libtool                                           # [arm64]
+    - autoconf                                          # [arm64]
+    - automake                                          # [arm64]
+    - make                                              # [arm64]
     - pkg-config
-    - cctools                                           # [osx]
-    - ld64                                              # [osx]
+    - {{ moose_cctools }}                               # [osx]
+    - {{ moose_ld64 }}                                  # [osx]
     - moose-libmesh-vtk {{ moose_libmesh_vtk }}
     - moose-petsc {{ moose_petsc }}
 
@@ -27,7 +31,7 @@ requirements:
     - pkg-config
     - moose-libmesh-vtk {{ moose_libmesh_vtk }}
     - moose-petsc {{ moose_petsc }}
-    - libpng {{ libpng }}
+    - {{ moose_libpng }}
 
 test:
   commands:

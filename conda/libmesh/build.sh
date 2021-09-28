@@ -23,12 +23,29 @@ function sed_replace(){
     fi
 }
 
+# Bootstrap libmesh and it's contribs
+if [[ $target_platform == osx-arm64 ]]; then
+    ./bootstrap
+    cd contrib/metaphysicl
+    ./bootstrap
+    cd ../timpi
+    ./bootstrap
+    cd ../netcdf/netcdf*
+    autoreconf
+    cd ../../../
+fi
+
 mkdir -p build; cd build
 
 if [[ $(uname) == Darwin ]]; then
-    TUNING="-march=core2 -mtune=haswell"
+    if [[ $HOST == arm64-apple-darwin20.0.0 ]]; then
+        CTUNING="-march=armv8.3-a -I$PREFIX/include"
+        LIBRARY_PATH="$PREFIX/lib"
+    else
+        CTUNING="-march=core2 -mtune=haswell"
+    fi
 else
-    TUNING="-march=nocona -mtune=haswell"
+    CTUNING="-march=nocona -mtune=haswell"
 fi
 
 unset LIBMESH_DIR CFLAGS CPPFLAGS CXXFLAGS FFLAGS LIBS \
@@ -39,9 +56,13 @@ export F77=mpifort
 export FC=mpifort
 export CC=mpicc
 export CXX=mpicxx
-export CFLAGS="${TUNING}"
-export CXXFLAGS="${TUNING}"
-export LDFLAGS="-Wl,-S"
+export CFLAGS="${CTUNING}"
+export CXXFLAGS="${CTUNING}"
+if [[ $HOST == arm64-apple-darwin20.0.0 ]]; then
+    LDFLAGS="-L$PREFIX/lib -Wl,-S,-rpath,$PREFIX/lib"
+else
+    export LDFLAGS="-Wl,-S"
+fi
 
 if [[ $mpi == "openmpi" ]]; then
   export OMPI_MCA_plm=isolated
