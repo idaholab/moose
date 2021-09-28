@@ -9,6 +9,8 @@ v_in=1
 
 [GlobalParams]
   fp = fp
+  # retain behavior at time of test creation
+  two_term_boundary_expansion = false
 []
 
 [Mesh]

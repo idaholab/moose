@@ -21,6 +21,11 @@
   []
 []
 
+[GlobalParams]
+  # retain behavior at time of test creation
+  two_term_boundary_expansion = false
+[]
+
 [Variables]
   [u]
     type = MooseVariableFVReal

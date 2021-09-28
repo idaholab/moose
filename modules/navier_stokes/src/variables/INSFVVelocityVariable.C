@@ -50,14 +50,19 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem) const
     // we already have a gradient ready to go
     return it->second;
 
+  ADReal elem_value = getElemValue(elem);
+
+  // We'll save off the extrapolated boundary faces (ebf) for later assignment to the cache (these
+  // are the keys). The boolean in the pair will denote whether the ebf face is a fully developed
+  // flow (e.g. fdf) face
+  std::vector<std::pair<const FaceInfo *, bool>> ebf_faces;
+
   try
   {
     VectorValue<ADReal> grad = 0;
 
     bool volume_set = false;
     Real volume = 0;
-
-    ADReal elem_value = getElemValue(elem);
 
     // If we are performing a two term Taylor expansion for extrapolated boundary faces (faces on
     // boundaries that do not have associated Dirichlet conditions), then the element gradient
@@ -85,10 +90,6 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem) const
     // reflect the intent of the text, which is to guarantee a zero normal gradient in the direction
     // of the surface normal
 
-    // We'll save off the extrapolated boundary faces (ebf) for later assignment to the cache (these
-    // are the keys). The boolean in the pair will denote whether the ebf face is a fully developed
-    // flow (e.g. fdf) face
-    std::vector<std::pair<const FaceInfo *, bool>> ebf_faces;
     // ebf eqns: element gradient coefficients, e.g. eqn. 2, LHS term 2 coefficient. *Note* that
     // each element of the std::vector could correspond to a cell centroid gradient or to a face
     // gradient computed on a fully developed flow face
@@ -331,6 +332,13 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem) const
                 "being used");
     const_cast<INSFVVelocityVariable *>(this)->_two_term_boundary_expansion = false;
     const auto & grad = adGradSln(elem);
+
+    // We failed to compute the extrapolated boundary faces with two-term expansion and callers of
+    // this method may be relying on those values (e.g. if the caller is
+    // getExtrapolatedBoundaryFaceValue) so we populate them here with one-term expansion, e.g. we
+    // set the boundary face values to the cell centroid value
+    for (const auto & ebf_face_pr : ebf_faces)
+      _face_to_value.emplace(ebf_face_pr.first, elem_value);
 
     // Two term boundary expansion should only fail at domain corners. We want to keep trying it at
     // other boundary locations

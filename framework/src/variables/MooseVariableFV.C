@@ -39,13 +39,13 @@ MooseVariableFV<OutputType>::validParams()
                                  "Whether to use an extended stencil for gradient computation.");
   params.template addParam<bool>(
       "two_term_boundary_expansion",
-      false,
-      "Whether to use a two-term Taylor expansion to calculate boundary face values. The default "
-      "is to use one-term, e.g. the element centroid value will be used for the boundary face "
-      "value. If the two-term expansion is used, then the boundary face value depends on the "
-      "adjoining cell center gradient, which itself depends on the boundary face value. "
-      "Consequently an implicit solve is used to simultaneously solve for the adjoining cell "
-      "center gradient and boundary face value(s).");
+      true,
+      "Whether to use a two-term Taylor expansion to calculate boundary face values. If set to "
+      "false, the element centroid value will be used for the boundary face value. If the two-term "
+      "expansion is used, then the boundary face value depends on the adjoining cell center "
+      "gradient, which itself depends on the boundary face value. Consequently an implicit solve "
+      "is used to simultaneously solve for the adjoining cell center gradient and boundary face "
+      "value(s).");
 #endif
   return params;
 }
@@ -726,14 +726,18 @@ MooseVariableFV<OutputType>::adGradSln(const Elem * const elem) const
     // we already have a gradient ready to go
     return it->second;
 
+  ADReal elem_value = getElemValue(elem);
+
+  // We'll save off the extrapolated boundary faces (ebf) for later assignment to the cache (these
+  // are the keys)
+  std::vector<const FaceInfo *> ebf_faces;
+
   try
   {
     VectorValue<ADReal> grad = 0;
 
     bool volume_set = false;
     Real volume = 0;
-
-    ADReal elem_value = getElemValue(elem);
 
     // If we are performing a two term Taylor expansion for extrapolated boundary faces (faces on
     // boundaries that do not have associated Dirichlet conditions), then the element gradient
@@ -750,9 +754,6 @@ MooseVariableFV<OutputType>::adGradSln(const Elem * const elem) const
     // vector drawn from the element centroid to the face centroid, and $\vec{S_f}$ is the surface
     // vector, e.g. the face area times the outward facing normal
 
-    // We'll save off the extrapolated boundary faces (ebf) for later assignment to the cache (these
-    // are the keys)
-    std::vector<const FaceInfo *> ebf_faces;
     // ebf eqns: element gradient coefficients, e.g. eqn. 2, LHS term 2 coefficient
     std::vector<VectorValue<Real>> ebf_grad_coeffs;
     // ebf eqns: rhs b values. These will actually correspond to the elem_value so we can use a
@@ -919,6 +920,13 @@ MooseVariableFV<OutputType>::adGradSln(const Elem * const elem) const
                 "being used");
     const_cast<MooseVariableFV<OutputType> *>(this)->_two_term_boundary_expansion = false;
     const auto & grad = adGradSln(elem);
+
+    // We failed to compute the extrapolated boundary faces with two-term expansion and callers of
+    // this method may be relying on those values (e.g. if the caller is
+    // getExtrapolatedBoundaryFaceValue) so we populate them here with one-term expansion, e.g. we
+    // set the boundary face values to the cell centroid value
+    for (auto * const ebf_face : ebf_faces)
+      _face_to_value.emplace(ebf_face, elem_value);
 
     // Two term boundary expansion should only fail at domain corners. We want to keep trying it at
     // other boundary locations
