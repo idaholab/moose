@@ -147,6 +147,7 @@ velocity_interp_method='rc'
 []
 
 [FVBCs]
+  inactive = 'free-slip-u free-slip-v'
   [inlet-u]
     type = INSFVInletVelocityBC
     boundary = 'left'
@@ -171,6 +172,16 @@ velocity_interp_method='rc'
     boundary = 'top'
     variable = v
     function = 0
+  []
+  [free-slip-u]
+    type = INSFVNaturalFreeSlipBC
+    boundary = 'top'
+    variable = u
+  []
+  [free-slip-v]
+    type = INSFVNaturalFreeSlipBC
+    boundary = 'top'
+    variable = v
   []
   [symmetry-u]
     type = PINSFVSymmetryVelocityBC
