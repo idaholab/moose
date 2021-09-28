@@ -47,24 +47,29 @@ SpatialUserObjectVectorPostprocessor::SpatialUserObjectVectorPostprocessor(
 void
 SpatialUserObjectVectorPostprocessor::fillPoints()
 {
-  if (isParamValid("points") && isParamValid("points_file"))
-    mooseError(name(), ": Both 'points' and 'points_file' cannot be specified simultaneously.");
-
-  if (isParamValid("points"))
+  if (!isParamValid("points") && !isParamValid("points_file"))
   {
-    _points = getParam<std::vector<Point>>("points");
-  }
-  else if (isParamValid("points_file"))
-  {
-    const FileName & points_file = getParam<FileName>("points_file");
-
-    MooseUtils::DelimitedFileReader file(points_file, &_communicator);
-    file.setFormatFlag(MooseUtils::DelimitedFileReader::FormatFlag::ROWS);
-    file.read();
-    _points = file.getDataAsPoints();
+    _points = _uo.spatialPoints();
   }
   else
-    mooseError(name(), ": You need to supply either 'points' or 'points_file' parameter.");
+  {
+    if (isParamValid("points") && isParamValid("points_file"))
+      paramError("points", "Both 'points' and 'points_file' cannot be specified simultaneously.");
+
+    if (isParamValid("points"))
+    {
+      _points = getParam<std::vector<Point>>("points");
+    }
+    else if (isParamValid("points_file"))
+    {
+      const FileName & points_file = getParam<FileName>("points_file");
+
+      MooseUtils::DelimitedFileReader file(points_file, &_communicator);
+      file.setFormatFlag(MooseUtils::DelimitedFileReader::FormatFlag::ROWS);
+      file.read();
+      _points = file.getDataAsPoints();
+    }
+  }
 }
 
 void

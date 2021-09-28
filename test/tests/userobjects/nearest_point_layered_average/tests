@@ -1,5 +1,5 @@
 [Tests]
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'nearest_point_layered_average.i'
     cli_args = "UserObjects/npla/points='0.25 0 0.25 0.75 0 0.25 0.25 0 0.75 0.75 0 0.75'"
@@ -7,9 +7,9 @@
     requirement = 'The system shall compute layered averages that computed from the closest values for a list of points that are explicitly specified in an input file'
     design = 'NearestPointLayeredAverage.md'
     issues = '#1878'
-  [../]
+  []
 
-  [./from_file]
+  [from_file]
     type = 'Exodiff'
     input = 'nearest_point_layered_average.i'
     cli_args = "UserObjects/npla/points_file='points.txt'"
@@ -18,9 +18,9 @@
     design = 'NearestPointLayeredAverage.md'
     issues = '#12356'
     prereq = test
-  [../]
+  []
 
-  [./error_missing_point_spec]
+  [error_missing_point_spec]
     type = RunException
     input = 'nearest_point_layered_average.i'
     expect_err = "npla: You need to supply either 'points' or 'points_file' parameter\."
@@ -28,9 +28,9 @@
     requirement = 'The system shall report an error when points are not specified in an input file nor an external file when computing nearest point layered averages'
     design = 'NearestPointLayeredAverage.md'
     issues = '#12356'
-  [../]
+  []
 
-  [./error_conflicting_point_spec]
+  [error_conflicting_point_spec]
     type = RunException
     input = 'nearest_point_layered_average.i'
     cli_args = "UserObjects/npla/points='0.25 0 0.25' UserObjects/npla/points_file='points.txt'"
@@ -39,9 +39,9 @@
     requirement = 'The system shall report an error when points are specified both in an input file and an external file when computing nearest point layered averages'
     design = 'NearestPointLayeredAverage.md'
     issues = '#12356'
-  [../]
+  []
 
-  [./error_not_enough_points_in_a_file]
+  [error_not_enough_points_in_a_file]
     type = RunException
     input = 'nearest_point_layered_average.i'
     cli_args = "UserObjects/npla/points_file='bad_points.txt'"
@@ -50,14 +50,32 @@
     requirement = 'The system shall report an error when there is not enough coordinates specified in an external file specifing the point for computing nearest point layered averages'
     design = 'NearestPointLayeredAverage.md'
     issues = '#12356'
-  [../]
+  []
 
-  [./nearest_radius]
+  [nearest_radius]
     type = 'Exodiff'
     input = 'nearest_radius_layered_average.i'
     exodiff = 'nearest_radius_layered_average_out.e'
     requirement = 'The system shall compute layered averages for concentric cylindrical rings with equal thickness for a list of points that correspond to the average radius of each ring'
     design = 'NearestRadiusLayeredAverage.md'
     issues = '#16829'
-  [../]
+  []
+
+  [points_from_uo]
+    type = 'CSVDiff'
+    input = 'points_from_uo.i'
+    csvdiff = 'points_from_uo_out_spatial_from_uo_0002.csv'
+    requirement = 'The system shall compute layered averages computed from the closest values for a list of points and output to a spatial vector postprocessor with one point per unique nearest point and layer'
+    design = 'NearestPointLayeredAverage.md'
+    issues = '#18931'
+  []
+
+  [radius_points_from_uo]
+    type = 'CSVDiff'
+    input = 'radius_points_from_uo.i'
+    csvdiff = 'radius_points_from_uo_out_spatial_from_uo_0002.csv'
+    requirement = 'The system shall compute radial layered averages computed from the closest values for a list of points and output to a spatial vector postprocessor with one point per unique nearest point and layer'
+    design = 'NearestRadiusLayeredAverage.md'
+    issues = '#18931'
+  []
 []

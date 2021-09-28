@@ -42,7 +42,9 @@ public:
   virtual void execute() override;
 
   /**
-   * Read the points at which to evaluate from a vector or file
+   * Read the points at which to evaluate from a vector ('points'), a file ('points_file'),
+   * or neither (which will read from the user object directly if it satisfies the
+   * spatialPoints interface)
    */
   void fillPoints();
 
