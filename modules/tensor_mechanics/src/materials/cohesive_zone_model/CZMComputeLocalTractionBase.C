@@ -15,7 +15,7 @@ CZMComputeLocalTractionBase::validParams()
 {
   InputParameters params = InterfaceMaterial::validParams();
 
-  params.addClassDescription("Base class for implementing cohesive zone constituive material "
+  params.addClassDescription("Base class for implementing cohesive zone constitutive material "
                              "models that can be formulated using the total displacement jump");
   params.addRequiredCoupledVar("displacements",
                                "The string of displacements suitable for the problem statement");

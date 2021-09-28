@@ -1,33 +1,19 @@
 # ConstantDamper
 
-!alert! construction title=Undocumented Class
-The ConstantDamper has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# ConstantDamper
-
 !syntax description /Dampers/ConstantDamper
 
-## Overview
+A constant damping factor may improve stability but will slow down convergence of the simulation.
+More advanced dampers, which taper off through the iterations or which damp less within a certain
+domain (such as the [BoundingValueNodalDamper.md]) should impact less convergence properties.
 
-!! Replace these lines with information regarding the ConstantDamper object.
+More information about dampers may be found on the
+[Dampers syntax documentation](syntax/Dampers/index.md).
 
-## Example Input File Syntax
+## Example input syntax
 
-!! Describe and include an example of how to use the ConstantDamper object.
+In this example, a constant damping factor of 0.9 is applied on all variables (just `u` here).
 
-!syntax parameters /Dampers/ConstantDamper
-
-!syntax inputs /Dampers/ConstantDamper
-
-!syntax children /Dampers/ConstantDamper
-```
-!alert-end!
-
-!syntax description /Dampers/ConstantDamper
+!listing test/tests/dampers/constant_damper/constant_damper_test.i block=Dampers
 
 !syntax parameters /Dampers/ConstantDamper
 

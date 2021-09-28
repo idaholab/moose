@@ -8,7 +8,7 @@ The HierarchicalGridPartitioner is a two-level partitioner similar to [GridParti
 
 This type of scheme minimizes off-node communication, minimizing network communication during large simulations.
 
-# Example
+## Example
 
 An example is the best way to explain what's going on.  The mesh in [hier_mesh] is the mesh we want to partition.  It has 128x128 elements in it (16,384 total).  We're going to be running on a cluster where we're going to use 4 computational nodes---each of which has 16 processors (64 processors total).
 

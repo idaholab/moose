@@ -24,7 +24,7 @@ validParams<SideSetHeatTransferKernel>()
                                         "conductance ignored if not provided");
   params.addCoupledVar("Tbulk_var", "Bulk temperature of gap as variable");
   params.addParam<MaterialPropertyName>(
-      "Tbulk_mat", "gap_Tbulk", "Bulk temperature of gap as material");
+      "Tbulk_mat", "gap_Tbulk", "Bulk temperature of gap as material property");
   params.addParam<MaterialPropertyName>(
       "h_primary",
       "gap_h_primary",

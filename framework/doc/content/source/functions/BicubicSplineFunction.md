@@ -1,33 +1,31 @@
 # BicubicSplineFunction
 
-!alert! construction title=Undocumented Class
-The BicubicSplineFunction has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# BicubicSplineFunction
-
 !syntax description /Functions/BicubicSplineFunction
 
-## Overview
+The `BicubicSplineFunction` defines a 2D spline shape, which can be evaluated everywhere
+in the domain by translation. The 2D plane for defining the spline is set by specifying the
+`normal` parameter.
 
-!! Replace these lines with information regarding the BicubicSplineFunction object.
+The spline is uniquely defined by:
 
-## Example Input File Syntax
+- its values the 2D plane at the (`x1`, `x2`) points, given by the `y` parameter. The points
+  form a 2D grid, which each `x1` being the abscissa for a line in this grid, with points
+  at each `x2` specified
 
-!! Describe and include an example of how to use the BicubicSplineFunction object.
+- its derivatives along `x1` and `x2` at the points on each extremity, given by `yx11`, `yx1n`, `yx21`, `yx2n`
 
-!syntax parameters /Functions/BicubicSplineFunction
+- a functional form for the derivative along both directions, given by `yx1` and `yx2`
 
-!syntax inputs /Functions/BicubicSplineFunction
+From this information the bicubic spline is automatically generated. Both the first and second
+order derivatives of the spline are defined.
 
-!syntax children /Functions/BicubicSplineFunction
-```
-!alert-end!
+## Example input syntax
 
-!syntax description /Functions/BicubicSplineFunction
+In this example, we define a bicubic spline from a list of points and derivatives. The `z` normal is
+assumed by default and the bicubic spline is defined in the XY plane. The grid
+for the points has 3 points along the `x` direction and 4 points along the `y` direction.
+
+!listing test/tests/utils/spline_interpolation/bicubic_spline_interpolation.i block=Functions
 
 !syntax parameters /Functions/BicubicSplineFunction
 

@@ -1,33 +1,20 @@
 # DGFunctionDiffusionDirichletBC
 
-!alert! construction title=Undocumented Class
-The DGFunctionDiffusionDirichletBC has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# DGFunctionDiffusionDirichletBC
-
 !syntax description /BCs/DGFunctionDiffusionDirichletBC
 
-## Overview
+Note that these boundary conditions are specific to DG and to a diffusion problem. Using a [syntax/Functions/index.md]
+for the Dirichlet boundary conditions means that the spatial and time dependence is either known or imposed.
 
-!! Replace these lines with information regarding the DGFunctionDiffusionDirichletBC object.
+More information about Dirichlet boundary conditions and their mathematical meaning may be found in the
+[DirichletBC.md] documentation, and more information may be found about the discontinuous Galerkin
+discretization in the [DGKernels documentation](syntax/DGKernels/index.md)
 
-## Example Input File Syntax
+## Example input syntax
 
-!! Describe and include an example of how to use the DGFunctionDiffusionDirichletBC object.
+In this example, a 2D diffusion problem is solved with DG. A Dirichlet boundary condition is imposed
+on all boundaries using the `exact_fn` function. The `epsilon` and `sigma` parameters are DG parameters.
 
-!syntax parameters /BCs/DGFunctionDiffusionDirichletBC
-
-!syntax inputs /BCs/DGFunctionDiffusionDirichletBC
-
-!syntax children /BCs/DGFunctionDiffusionDirichletBC
-```
-!alert-end!
-
-!syntax description /BCs/DGFunctionDiffusionDirichletBC
+!listing test/tests/dgkernels/2d_diffusion_dg/2d_diffusion_dg_test.i block=BCs
 
 !syntax parameters /BCs/DGFunctionDiffusionDirichletBC
 

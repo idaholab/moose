@@ -1,33 +1,16 @@
 # CoupledTiedValueConstraint
 
-!alert! construction title=Undocumented Class
-The CoupledTiedValueConstraint has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# CoupledTiedValueConstraint
-
 !syntax description /Constraints/CoupledTiedValueConstraint
 
-## Overview
+The constraint is imposed strongly on both sides of the interface, contributing to the residual.
 
-!! Replace these lines with information regarding the CoupledTiedValueConstraint object.
+## Example input syntax
 
-## Example Input File Syntax
+In this example, the value of variable `u` and `v`, defined in the left and right domains,
+is tied between the left and right boundaries of the two disconnected domains using a
+`CoupledTiedValueConstraint`.
 
-!! Describe and include an example of how to use the CoupledTiedValueConstraint object.
-
-!syntax parameters /Constraints/CoupledTiedValueConstraint
-
-!syntax inputs /Constraints/CoupledTiedValueConstraint
-
-!syntax children /Constraints/CoupledTiedValueConstraint
-```
-!alert-end!
-
-!syntax description /Constraints/CoupledTiedValueConstraint
+!listing test/tests/constraints/coupled_tied_value_constraint/coupled_tied_value_constraint.i block=Constraints
 
 !syntax parameters /Constraints/CoupledTiedValueConstraint
 

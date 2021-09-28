@@ -24,7 +24,7 @@ CoupledTiedValueConstraint::validParams()
 {
   InputParameters params = NodeFaceConstraint::validParams();
   params.addClassDescription(
-      "Requires the value of a variable to be the consistent on both sides of an interface.");
+      "Requires the value of two variables to be the consistent on both sides of an interface.");
   params.addParam<Real>("scaling", 1, "scaling factor to be applied to constraint equations");
   params.set<bool>("use_displaced_mesh") = true;
   return params;
