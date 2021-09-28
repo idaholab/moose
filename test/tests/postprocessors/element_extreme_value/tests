@@ -1,12 +1,21 @@
 [Tests]
   design = 'ElementExtremeValue.md'
-  issues = '#2776'
 
-  [./elemental_extreme]
+  [elemental_extreme]
     type = 'Exodiff'
     input = 'element_extreme_value.i'
     exodiff = 'element_extreme_value_out.e'
+    issues = '#2776'
 
-    requirement = 'The system shall compute the the extreme (min/max) values of an elemental field variable over the domain.'
-  [../]
+    requirement = 'The system shall compute the extreme (min/max) values of an elemental field variable over the domain.'
+  []
+
+  [proxy_elemental_extreme]
+    type = 'CSVDiff'
+    input = 'element_proxy_extreme_value.i'
+    csvdiff = 'element_proxy_extreme_value_out.csv'
+    issues = '#18936'
+
+    requirement = 'The system shall compute the value of a variable at the point where a proxy variable reaches the extreme (max/min) value over the domain.'
+  []
 []

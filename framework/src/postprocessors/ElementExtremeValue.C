@@ -31,8 +31,13 @@ ElementExtremeValue::validParams()
                              "returns the maximum value. 'min' returns "
                              "the minimum value.");
 
+  params.addCoupledVar("proxy_variable",
+                       "The name of the variable to use to identify the location at which "
+                       "the variable value should be taken; if not provided, this defaults "
+                       "to the 'variable'.");
+
   params.addClassDescription(
-      "Finds either the min or max elemental value of a a variable over the domain.");
+      "Finds either the min or max elemental value of a variable over the domain.");
 
   return params;
 }
@@ -40,7 +45,7 @@ ElementExtremeValue::validParams()
 ElementExtremeValue::ElementExtremeValue(const InputParameters & parameters)
   : ElementVariablePostprocessor(parameters),
     _type((ExtremeType)(int)parameters.get<MooseEnum>("value_type")),
-    _value(_type == 0 ? -std::numeric_limits<Real>::max() : std::numeric_limits<Real>::max())
+    _proxy_variable(isParamValid("proxy_variable") ? coupledValue("proxy_variable") : _u)
 {
 }
 
@@ -50,11 +55,13 @@ ElementExtremeValue::initialize()
   switch (_type)
   {
     case MAX:
-      _value = -std::numeric_limits<Real>::max(); // start w/ the min
+      _proxy_value = -std::numeric_limits<Real>::max(); // start w/ the min
+      _value = -std::numeric_limits<Real>::max();
       break;
 
     case MIN:
-      _value = std::numeric_limits<Real>::max(); // start w/ the max
+      _proxy_value = std::numeric_limits<Real>::max(); // start w/ the max
+      _value = std::numeric_limits<Real>::max();
       break;
   }
 }
@@ -65,11 +72,19 @@ ElementExtremeValue::computeQpValue()
   switch (_type)
   {
     case MAX:
-      _value = std::max(_value, _u[_qp]);
+      if (_proxy_variable[_qp] > _proxy_value)
+      {
+        _proxy_value = _proxy_variable[_qp];
+        _value = _u[_qp];
+      }
       break;
 
     case MIN:
-      _value = std::min(_value, _u[_qp]);
+      if (_proxy_variable[_qp] < _proxy_value)
+      {
+        _proxy_value = _proxy_variable[_qp];
+        _value = _u[_qp];
+      }
       break;
   }
 }
@@ -80,10 +95,10 @@ ElementExtremeValue::getValue()
   switch (_type)
   {
     case MAX:
-      gatherMax(_value);
+      gatherProxyValueMax(_proxy_value, _value);
       break;
     case MIN:
-      gatherMin(_value);
+      gatherProxyValueMin(_proxy_value, _value);
       break;
   }
 
@@ -98,10 +113,18 @@ ElementExtremeValue::threadJoin(const UserObject & y)
   switch (_type)
   {
     case MAX:
-      _value = std::max(_value, pps._value);
+      if (pps._proxy_value > _proxy_value)
+      {
+        _proxy_value = pps._proxy_value;
+        _value = pps._value;
+      }
       break;
     case MIN:
-      _value = std::min(_value, pps._value);
+      if (pps._proxy_value < _proxy_value)
+      {
+        _proxy_value = pps._proxy_value;
+        _value = pps._value;
+      }
       break;
   }
 }
