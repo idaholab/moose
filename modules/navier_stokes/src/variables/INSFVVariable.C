@@ -20,7 +20,11 @@
 InputParameters
 INSFVVariable::validParams()
 {
-  return MooseVariableFVReal::validParams();
+  auto params = MooseVariableFVReal::validParams();
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+  params.set<bool>("two_term_boundary_expansion") = true;
+#endif
+  return params;
 }
 
 INSFVVariable::INSFVVariable(const InputParameters & params) : MooseVariableFVReal(params)
