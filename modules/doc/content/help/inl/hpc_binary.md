@@ -67,14 +67,14 @@ assumed that BISON is the desired application. Others include "GRIFFIN" and "BLU
 correct environment is loaded using the module command as follows.
 
 ```bash
-module load use.moose moose-apps BISON
+module load use.moose moose-apps bison
 ```
 
 At this point you should be able to run the executable. For this example, the BISON executable
 help can be displayed by running the following command.
 
 ```bash
-/apps/herd/bison/bison-opt --help
+bison-opt --help
 ```
 
 ## Create a Test Input File
@@ -128,7 +128,7 @@ should give you a node name. For example, on Sawtooth an example node name is "r
 When running in interactive mode you will also need to load the environment again.
 
 ```bash
-module load use.moose moose-apps BISON
+module load use.moose moose-apps bison
 ```
 
 ### (2) Run the simulation
@@ -145,7 +145,7 @@ Next, execute the application with the "-i" argument followed by the input filen
 example, when using BISON with the created test input file.
 
 ```bash
-/apps/herd/bison/bison-opt -i input.i
+bison-opt -i input.i
 ```
 
 !alert note title=Available binaries are user dependent
@@ -193,9 +193,9 @@ command line in the interactive job above.
 
 cd $PBS_O_WORKDIR
 source /etc/profile.d/modules.sh
-module load use.moose moose-apps PETSc BISON
+module load use.moose moose-apps bison
 
-mpirun /apps/herd/bison/bison-opt -i input.i Mesh/uniform_refine=7
+mpirun bison-opt -i input.i Mesh/uniform_refine=7
 ```
 
 It is recommend that this script be created in the same location with the input file(s) it will be
