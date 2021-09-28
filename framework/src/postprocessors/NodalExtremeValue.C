@@ -34,14 +34,14 @@ NodalExtremeValue::validParams()
 
   params.addCoupledVar("proxy_variable",
                        "The name of the variable to use to identify the location at which "
-                       "the variable value should be taken");
+                       "the variable value should be taken; if not provided, this defaults "
+                       "to the 'variable'.");
   return params;
 }
 
 NodalExtremeValue::NodalExtremeValue(const InputParameters & parameters)
   : NodalVariablePostprocessor(parameters),
     _type((ExtremeType)(int)parameters.get<MooseEnum>("value_type")),
-    _value(_type == 0 ? -std::numeric_limits<Real>::max() : std::numeric_limits<Real>::max()),
     _proxy_variable(isParamValid("proxy_variable") ? coupledValue("proxy_variable") : _u)
 {
 }
@@ -53,10 +53,12 @@ NodalExtremeValue::initialize()
   {
     case MAX:
       _proxy_value = -std::numeric_limits<Real>::max(); // start w/ the min
+      _value = -std::numeric_limits<Real>::max();
       break;
 
     case MIN:
       _proxy_value = std::numeric_limits<Real>::max(); // start w/ the max
+      _value = std::numeric_limits<Real>::max();
       break;
   }
 }

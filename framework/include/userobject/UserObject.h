@@ -143,9 +143,21 @@ public:
     _communicator.min(value);
   }
 
+  /**
+   * Gather the parallel value of a variable according to which process has the parallel
+   * maximum of the provided value.
+   * @param[in] value process with maximum value will be selected
+   * @param[in] proxy value to be obtained on process with maximum value
+   */
   template <typename T1, typename T2>
   void gatherProxyValueMax(T1 & value, T2 & proxy);
 
+  /**
+   * Gather the parallel value of a variable according to which process has the parallel
+   * minimum of the provided value.
+   * @param[in] value process with minimum value will be selected
+   * @param[in] proxy value to be obtained on process with minimum value
+   */
   template <typename T1, typename T2>
   void gatherProxyValueMin(T1 & value, T2 & proxy);
 
@@ -200,7 +212,7 @@ template <typename T1, typename T2>
 void
 UserObject::gatherProxyValueMax(T1 & value, T2 & proxy)
 {
-  unsigned int rank;
+  processor_id_type rank;
   _communicator.maxloc(value, rank);
   _communicator.broadcast(proxy, rank);
 }
@@ -209,7 +221,7 @@ template <typename T1, typename T2>
 void
 UserObject::gatherProxyValueMin(T1 & value, T2 & proxy)
 {
-  unsigned int rank;
+  processor_id_type rank;
   _communicator.minloc(value, rank);
   _communicator.broadcast(proxy, rank);
 }

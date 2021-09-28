@@ -33,7 +33,8 @@ ElementExtremeValue::validParams()
 
   params.addCoupledVar("proxy_variable",
                        "The name of the variable to use to identify the location at which "
-                       "the variable value should be taken");
+                       "the variable value should be taken; if not provided, this defaults "
+                       "to the 'variable'.");
 
   params.addClassDescription(
       "Finds either the min or max elemental value of a variable over the domain.");
@@ -44,7 +45,6 @@ ElementExtremeValue::validParams()
 ElementExtremeValue::ElementExtremeValue(const InputParameters & parameters)
   : ElementVariablePostprocessor(parameters),
     _type((ExtremeType)(int)parameters.get<MooseEnum>("value_type")),
-    _value(_type == 0 ? -std::numeric_limits<Real>::max() : std::numeric_limits<Real>::max()),
     _proxy_variable(isParamValid("proxy_variable") ? coupledValue("proxy_variable") : _u)
 {
 }
@@ -56,10 +56,12 @@ ElementExtremeValue::initialize()
   {
     case MAX:
       _proxy_value = -std::numeric_limits<Real>::max(); // start w/ the min
+      _value = -std::numeric_limits<Real>::max();
       break;
 
     case MIN:
       _proxy_value = std::numeric_limits<Real>::max(); // start w/ the max
+      _value = std::numeric_limits<Real>::max();
       break;
   }
 }
