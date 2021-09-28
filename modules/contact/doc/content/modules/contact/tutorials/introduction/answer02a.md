@@ -31,9 +31,9 @@ In the same directory as the tutorial inputs you will find a small python script
 to plot the contact pressure (using matplotlib and pandas). It should serve as a
 starting point for custom plot generation.
 
-Note since we did not explicitly request the `NodalValueSampler` to use the
+Note that since we did not explicitly request the `NodalValueSampler` to use the
 displaced mesh with `use_displaced_mesh = true` the coordinates in the CSV file
-refer to the un deformed positions along the contact surface.
+refer to the undeformed positions along the contact surface.
 
 Try increasing the [!param](/Executioner/Transient/end_time) to 10 and replot the
 contact pressures with the supplied script.

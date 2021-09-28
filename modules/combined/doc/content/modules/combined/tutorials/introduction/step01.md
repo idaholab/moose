@@ -13,7 +13,7 @@ objects required for mortar based thermal contact manually.
 
 ### `Variables`
 
-For the thermal part of the prboblem we add the `T` variable and supply an
+For the thermal part of the problem we add the temperature `T` variable and supply an
 `initial_condition` of 50 temperature units (this value is right between the 0
 and 100 values we're setting below for the cooling and heating BCs). Note that
 like the other physics variables and objects this variable is restricted to
@@ -48,12 +48,12 @@ We chose a gap conductance [!param](/Constraints/GapConductanceConstraint/k).
 The heat flux across the gap will be computed as $\frac kl$ where $l$ is the
 width of the gap.
 
-Then we set the prmary and secondary boundaries and subdomains. Again for the
+Then we set the primary and secondary boundaries and subdomains. Again for the
 subdomains we choose the lower dimensional meshes that the mechanical contact
 action set up for us. If you have a purely thermal contact problem you will need
 to create those lower dimensional subdomains manually using the
 [`LowerDBlockFromSidesetGenerator`](LowerDBlockFromSidesetGenerator.md) mesh
-modifier.
+generator.
 
 ### `BCs`
 
