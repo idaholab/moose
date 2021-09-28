@@ -53,6 +53,11 @@ ComputeMultipleCrystalPlasticityStress::validParams()
   params.addParam<MooseEnum>("line_search_method",
                              MooseEnum("CUT_HALF BISECTION", "CUT_HALF"),
                              "The method used in line search");
+  params.addParam<bool>(
+      "print_state_variable_convergence_error_messages",
+      false,
+      "Whether or not to print warning messages from the crystal plasticity specific convergence "
+      "checks on the stress measure and general constitutive model quantinties.");
   return params;
 }
 
@@ -92,7 +97,8 @@ ComputeMultipleCrystalPlasticityStress::ComputeMultipleCrystalPlasticityStress(
         declareProperty<RankTwoTensor>("total_lagrangian_strain")), // Lagrangian strain
     _update_rotation(declareProperty<RankTwoTensor>("update_rot")),
     _crysrot(getMaterialProperty<RankTwoTensor>(
-        "crysrot")) // defined in the elasticity tensor classes for crystal plasticity
+        "crysrot")), // defined in the elasticity tensor classes for crystal plasticity
+    _print_convergence_message(getParam<bool>("print_state_variable_convergence_error_messages"))
 {
   _convergence_failed = false;
 }
@@ -235,10 +241,11 @@ ComputeMultipleCrystalPlasticityStress::updateStress(RankTwoTensor & cauchy_stre
 
       if (_convergence_failed)
       {
-#ifdef DEBUG
-        mooseWarning("The crystal plasticity constitutive model has failed to converge. Increasing "
-                     "the number of substeps.");
-#endif
+        if (_print_convergence_message)
+          mooseWarning(
+              "The crystal plasticity constitutive model has failed to converge. Increasing "
+              "the number of substeps.");
+
         substep_iter++;
         num_substep *= 2;
         break;
@@ -356,30 +363,28 @@ ComputeMultipleCrystalPlasticityStress::solveStateVariables()
 
     if (iter_flag)
     {
-#ifdef DEBUG
-      mooseWarning("ComputeMultipleCrystalPlasticityStress: State variables (or the system "
-                   "resistance) did not "
-                   "converge at element ",
-                   _current_elem->id(),
-                   " and qp ",
-                   _qp,
-                   "\n");
-#endif
+      if (_print_convergence_message)
+        mooseWarning("ComputeMultipleCrystalPlasticityStress: State variables (or the system "
+                     "resistance) did not converge at element ",
+                     _current_elem->id(),
+                     " and qp ",
+                     _qp,
+                     "\n");
     }
     iteration++;
   } while (iter_flag && iteration < _maxiterg);
 
   if (iteration == _maxiterg)
   {
-#ifdef DEBUG
-    mooseWarning("ComputeMultipleCrystalPlasticityStress: Hardness Integration error. Reached the "
-                 "maximum number "
-                 "of iterations to solve for the state variables at element ",
-                 _current_elem->id(),
-                 " and qp ",
-                 _qp,
-                 "\n");
-#endif
+    if (_print_convergence_message)
+      mooseWarning(
+          "ComputeMultipleCrystalPlasticityStress: Hardness Integration error. Reached the "
+          "maximum number of iterations to solve for the state variables at element ",
+          _current_elem->id(),
+          " and qp ",
+          _qp,
+          "\n");
+
     _convergence_failed = true;
   }
 }
@@ -395,13 +400,13 @@ ComputeMultipleCrystalPlasticityStress::solveStress()
   calculateResidualAndJacobian();
   if (_convergence_failed)
   {
-#ifdef DEBUG
-    mooseWarning("ComputeMultipleCrystalPlasticityStress: Slip increment exceeds tolerance - "
-                 "Element number ",
-                 _current_elem->id(),
-                 " Gauss point = ",
-                 _qp);
-#endif
+    if (_print_convergence_message)
+      mooseWarning("ComputeMultipleCrystalPlasticityStress: the slip increment exceeds tolerance "
+                   "at element ",
+                   _current_elem->id(),
+                   " and Gauss point ",
+                   _qp);
+
     return;
   }
 
@@ -420,13 +425,13 @@ ComputeMultipleCrystalPlasticityStress::solveStress()
 
     if (_convergence_failed)
     {
-#ifdef DEBUG
-      mooseWarning("ComputeMultipleCrystalPlasticityStress: Slip increment exceeds tolerance - "
-                   "Element number ",
-                   _current_elem->id(),
-                   " Gauss point = ",
-                   _qp);
-#endif
+      if (_print_convergence_message)
+        mooseWarning("ComputeMultipleCrystalPlasticityStress: the slip increment exceeds tolerance "
+                     "at element ",
+                     _current_elem->id(),
+                     " and Gauss point ",
+                     _qp);
+
       return;
     }
 
@@ -435,9 +440,9 @@ ComputeMultipleCrystalPlasticityStress::solveStress()
 
     if (_use_line_search && rnorm > rnorm_prev && !lineSearchUpdate(rnorm_prev, dpk2))
     {
-#ifdef DEBUG
-      mooseWarning("ComputeMultipleCrystalPlasticityStress: Failed with line search");
-#endif
+      if (_print_convergence_message)
+        mooseWarning("ComputeMultipleCrystalPlasticityStress: Failed with line search");
+
       _convergence_failed = true;
       return;
     }
@@ -450,18 +455,18 @@ ComputeMultipleCrystalPlasticityStress::solveStress()
 
   if (iteration >= _maxiter)
   {
-#ifdef DEBUG
-    mooseWarning("ComputeMultipleCrystalPlasticityStress: Stress Integration error rmax = ",
-                 rnorm,
-                 " and the tolerance is ",
-                 _rtol * rnorm0,
-                 "when the rnorm0 value is ",
-                 rnorm0,
-                 "for element ",
-                 _current_elem->id(),
-                 " and qp ",
-                 _qp);
-#endif
+    if (_print_convergence_message)
+      mooseWarning("ComputeMultipleCrystalPlasticityStress: Stress Integration error rmax = ",
+                   rnorm,
+                   " and the tolerance is ",
+                   _rtol * rnorm0,
+                   " when the rnorm0 value is ",
+                   rnorm0,
+                   " for element ",
+                   _current_elem->id(),
+                   " and qp ",
+                   _qp);
+
     _convergence_failed = true;
   }
 }

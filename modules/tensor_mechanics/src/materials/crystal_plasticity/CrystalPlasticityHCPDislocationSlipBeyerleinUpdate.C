@@ -174,24 +174,12 @@ CrystalPlasticityHCPDislocationSlipBeyerleinUpdate::
   _previous_substep_forest_dislocations.resize(_number_slip_systems);
   _slip_resistance_before_update.resize(_number_slip_systems);
   _forest_dislocations_before_update.resize(_number_slip_systems);
-}
 
-void
-CrystalPlasticityHCPDislocationSlipBeyerleinUpdate::initQpStatefulProperties()
-{
   // check that the number of slip systems is equal to the sum of the types of slip system
   if (_number_slip_systems_per_mode.size() != _slip_system_modes)
     paramError("number_slip_systems_per_mode",
                "The size the number of slip systems per mode is not equal to the number of slip "
                "system types.");
-
-  unsigned int sum = 0;
-  for (unsigned int i = 0; i < _slip_system_modes; ++i)
-    sum += _number_slip_systems_per_mode[i];
-  if (sum != _number_slip_systems)
-    paramError("slip_system_modes",
-               "The number of slip systems and the sum of the slip systems in each of the slip "
-               "system modes are not equal");
 
   // Check that the number of slip mode dependent parameters is given matches the number of slip
   // modes
@@ -235,6 +223,18 @@ CrystalPlasticityHCPDislocationSlipBeyerleinUpdate::initQpStatefulProperties()
                "Please ensure that the size of lattice_friction_per_mode equals the value supplied "
                "for slip_system_modes");
 
+  unsigned int sum = 0;
+  for (unsigned int i = 0; i < _slip_system_modes; ++i)
+    sum += _number_slip_systems_per_mode[i];
+  if (sum != _number_slip_systems)
+    paramError("slip_system_modes",
+               "The number of slip systems and the sum of the slip systems in each of the slip "
+               "system modes are not equal");
+}
+
+void
+CrystalPlasticityHCPDislocationSlipBeyerleinUpdate::initQpStatefulProperties()
+{
   CrystalPlasticityStressUpdateBase::initQpStatefulProperties();
 
   // Resize constitutive-model specific material properties
@@ -336,10 +336,9 @@ CrystalPlasticityHCPDislocationSlipBeyerleinUpdate::calculateSlipRate()
     }
     if (std::abs(_slip_increment[_qp][i]) * _substep_dt > _slip_incr_tol)
     {
-#ifdef DEBUG
-      mooseWarning("Maximum allowable slip increment exceeded ",
-                   std::abs(_slip_increment[_qp][i]) * _substep_dt);
-#endif
+      if (_print_convergence_message)
+        mooseWarning("Maximum allowable slip increment exceeded ",
+                     std::abs(_slip_increment[_qp][i]) * _substep_dt);
       return false;
     }
   }
@@ -422,10 +421,9 @@ CrystalPlasticityHCPDislocationSlipBeyerleinUpdate::calculateForestDislocationEv
   DenseVector<Real> k1_term(_number_slip_systems);
   DenseVector<Real> k2_term(_number_slip_systems);
 
-  const Real relative_strain_rate =
-      std::log(_macro_applied_strain_rate / _macro_reference_strain_rate);
   const Real temperature_strain_term =
-      _boltzman_constant * _temperature[_qp] * relative_strain_rate;
+      _boltzman_constant * _temperature[_qp] *
+      std::log(_macro_applied_strain_rate / _macro_reference_strain_rate);
 
   // solve first for the coefficients, which depend on the given slip mode
   unsigned int slip_mode = 0;
@@ -459,12 +457,17 @@ CrystalPlasticityHCPDislocationSlipBeyerleinUpdate::calculateForestDislocationEv
   for (unsigned int i = 0; i < _number_slip_systems; ++i)
   {
     const Real abs_slip_increment = std::abs(_slip_increment[_qp][i]);
+    Real generated_dislocations = 0.0;
+
+    if (_forest_dislocation_density[_qp][i] > 0.0)
+      generated_dislocations = k1_term(i) * std::sqrt(_forest_dislocation_density[_qp][i]) *
+                               abs_slip_increment * _substep_dt;
+
     _forest_dislocations_removed_increment[_qp][i] =
         k2_term(i) * _forest_dislocation_density[_qp][i] * abs_slip_increment * _substep_dt;
-    _forest_dislocation_increment[_qp][i] = k1_term(i) *
-                                                std::sqrt(_forest_dislocation_density[_qp][i]) *
-                                                abs_slip_increment * _substep_dt -
-                                            _forest_dislocations_removed_increment[_qp][i];
+
+    _forest_dislocation_increment[_qp][i] =
+        generated_dislocations - _forest_dislocations_removed_increment[_qp][i];
   }
 }
 
@@ -523,8 +526,11 @@ CrystalPlasticityHCPDislocationSlipBeyerleinUpdate::calculateSlipResistance()
     }
 
     // forest dislocation hardening
-    const Real coeff = _forest_interaction_coefficient * burgers * shear_modulus;
-    forest_hardening(i) = coeff * std::sqrt(_forest_dislocation_density[_qp][i]);
+    if (_forest_dislocation_density[_qp][i] > 0.0)
+      forest_hardening(i) = _forest_interaction_coefficient * burgers * shear_modulus *
+                            std::sqrt(_forest_dislocation_density[_qp][i]);
+    else
+      forest_hardening(i) = 0.0;
 
     // substructure dislocation hardening
     if (_total_substructure_density[_qp] > 0.0)

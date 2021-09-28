@@ -71,6 +71,11 @@ CrystalPlasticityStressUpdateBase::validParams()
                         1e-12,
                         "Tolerance for residual check when variable value is zero for each "
                         "individual constitutive model");
+  params.addParam<bool>(
+      "print_state_variable_convergence_error_messages",
+      false,
+      "Whether or not to print warning messages from the crystal plasticity specific convergence "
+      "checks on both the constiutive model internal state variables.");
   return params;
 }
 
@@ -98,7 +103,8 @@ CrystalPlasticityStressUpdateBase::CrystalPlasticityStressUpdateBase(
     _slip_direction(_number_slip_systems),
     _slip_plane_normal(_number_slip_systems),
     _flow_direction(declareProperty<std::vector<RankTwoTensor>>(_base_name + "flow_direction")),
-    _tau(declareProperty<std::vector<Real>>(_base_name + "applied_shear_stress"))
+    _tau(declareProperty<std::vector<Real>>(_base_name + "applied_shear_stress")),
+    _print_convergence_message(getParam<bool>("print_state_variable_convergence_error_messages"))
 {
   getSlipSystems();
   sortCrossSlipFamilies();
@@ -144,8 +150,8 @@ CrystalPlasticityStressUpdateBase::getSlipSystems()
   for (unsigned int i = 0; i < _number_slip_systems; ++i)
   {
     // initialize to zero
-    _slip_direction[i].resize(LIBMESH_DIM);
-    _slip_plane_normal[i].resize(LIBMESH_DIM);
+    _slip_direction[i].zero();
+    _slip_plane_normal[i].zero();
   }
 
   if (_crystal_lattice_type == CrystalLatticeType::HCP)
@@ -170,13 +176,13 @@ CrystalPlasticityStressUpdateBase::getSlipSystems()
   for (unsigned int i = 0; i < _number_slip_systems; ++i)
   {
     // normalize
-    _slip_plane_normal[i].scale(1.0 / _slip_plane_normal[i].l2_norm());
-    _slip_direction[i].scale(1.0 / _slip_direction[i].l2_norm());
+    _slip_plane_normal[i] /= _slip_plane_normal[i].norm();
+    _slip_direction[i] /= _slip_direction[i].norm();
 
     if (_crystal_lattice_type != CrystalLatticeType::HCP)
     {
       // check if slip direction is normal to the slip plane normal
-      auto magnitude = _slip_plane_normal[i].dot(_slip_direction[i]);
+      auto magnitude = _slip_plane_normal[i] * _slip_direction[i];
       if (std::abs(magnitude) > libMesh::TOLERANCE)
       {
         orthonormal_error = true;
@@ -326,15 +332,16 @@ CrystalPlasticityStressUpdateBase::sortCrossSlipFamilies()
     }
   }
 
-#ifdef DEBUG
-  mooseWarning("Checking the slip system ordering now:");
-  for (unsigned int i = 0; i < _number_cross_slip_directions; ++i)
+  if (_print_convergence_message)
   {
-    Moose::out << "In cross slip family " << i << std::endl;
-    for (unsigned int j = 0; j < _number_cross_slip_planes; ++j)
-      Moose::out << " is the slip direction number " << _cross_slip_familes[i][j] << std::endl;
+    mooseWarning("Checking the slip system ordering now:");
+    for (unsigned int i = 0; i < _number_cross_slip_directions; ++i)
+    {
+      Moose::out << "In cross slip family " << i << std::endl;
+      for (unsigned int j = 0; j < _number_cross_slip_planes; ++j)
+        Moose::out << " is the slip direction number " << _cross_slip_familes[i][j] << std::endl;
+    }
   }
-#endif
 }
 
 unsigned int
@@ -359,20 +366,20 @@ CrystalPlasticityStressUpdateBase::calculateFlowDirection(const RankTwoTensor & 
 void
 CrystalPlasticityStressUpdateBase::calculateSchmidTensor(
     const unsigned int & number_slip_systems,
-    const std::vector<DenseVector<Real>> & plane_normal_vector,
-    const std::vector<DenseVector<Real>> & direction_vector,
+    const std::vector<RealVectorValue> & plane_normal_vector,
+    const std::vector<RealVectorValue> & direction_vector,
     std::vector<RankTwoTensor> & schmid_tensor,
     const RankTwoTensor & crysrot)
 {
-  std::vector<DenseVector<Real>> local_direction_vector, local_plane_normal;
+  std::vector<RealVectorValue> local_direction_vector, local_plane_normal;
   local_direction_vector.resize(number_slip_systems);
   local_plane_normal.resize(number_slip_systems);
 
   // Update slip direction and normal with crystal orientation
   for (unsigned int i = 0; i < number_slip_systems; ++i)
   {
-    local_direction_vector[i].resize(LIBMESH_DIM);
-    local_plane_normal[i].resize(LIBMESH_DIM);
+    local_direction_vector[i].zero();
+    local_plane_normal[i].zero();
 
     for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
       for (unsigned int k = 0; k < LIBMESH_DIM; ++k)

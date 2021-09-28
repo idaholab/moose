@@ -26,47 +26,18 @@ public:
   CrystalPlasticityHCPDislocationSlipBeyerleinUpdate(const InputParameters & parameters);
 
 protected:
-  //  TODO: add in capability to read the resistance parameters from the file?
-
-  /**
-   * initializes the stateful properties such as
-   * stress, plastic deformation gradient, slip system resistances, etc.
-   */
   virtual void initQpStatefulProperties() override;
 
-  /**
-   * Sets the value of the current and previous substep iteration slip system
-   * resistance to the old value at the start of the PK2 stress convergence
-   * while loop.
-   */
   virtual void setInitialConstitutiveVariableValues() override;
 
-  /**
-   * Sets the current slip system resistance value to the previous substep value.
-   * In cases where only one substep is taken (or when the first) substep is taken,
-   * this method just sets the current value to the old slip system resistance
-   * value again.
-   */
   virtual void setSubstepConstitutiveVariableValues() override;
 
-  /**
-   * Stores the current value of the slip system resistance and dislocation density
-   * into a separate material property in case substepping is needed.
-   */
   virtual void updateSubstepConstitutiveVariableValues() override;
 
   virtual bool calculateSlipRate() override;
 
-  /**
-   * Calculates the value of the plastic slip derivative with respect to dislocation
-   * slip alone
-   */
   virtual void calculateConstitutiveSlipDerivative(std::vector<Real> & dslip_dtau) override;
 
-  /**
-   * Finalizes the values of the state variables and slip system resistance
-   * for the current timestep after convergence has been reached.
-   */
   virtual void cacheStateVariablesBeforeUpdate() override;
 
   /**
@@ -80,10 +51,6 @@ protected:
    */
   virtual void calculateStateVariableEvolutionRateComponent() override;
 
-  /**
-   * Finalizes the values of the state variables and slip system resistance
-   * for the current timestep after convergence has been reached.
-   */
   virtual bool updateStateVariables() override;
 
   /**

@@ -84,8 +84,8 @@ public:
    * tensor from the Elasticity tensor class.
    */
   void calculateSchmidTensor(const unsigned int & number_dislocation_systems,
-                             const std::vector<DenseVector<Real>> & plane_normal_vector,
-                             const std::vector<DenseVector<Real>> & direction_vector,
+                             const std::vector<RealVectorValue> & plane_normal_vector,
+                             const std::vector<RealVectorValue> & direction_vector,
                              std::vector<RankTwoTensor> & schmid_tensor,
                              const RankTwoTensor & crysrot);
 
@@ -161,6 +161,10 @@ public:
 
   virtual void calculateStateVariableEvolutionRateComponent() {}
 
+  /**
+   * Finalizes the values of the state variables and slip system resistance
+   * for the current timestep after convergence has been reached.
+   */
   virtual bool updateStateVariables() = 0;
 
   virtual void calculateSlipResistance() {}
@@ -217,13 +221,16 @@ protected:
   MaterialProperty<std::vector<Real>> & _slip_increment;
 
   ///@{Slip system direction and normal and associated Schmid tensors
-  std::vector<DenseVector<Real>> _slip_direction;
-  std::vector<DenseVector<Real>> _slip_plane_normal;
+  std::vector<RealVectorValue> _slip_direction;
+  std::vector<RealVectorValue> _slip_plane_normal;
   MaterialProperty<std::vector<RankTwoTensor>> & _flow_direction;
   ///@}
 
   /// Resolved shear stress on each slip system
   MaterialProperty<std::vector<Real>> & _tau;
+
+  /// Flag to print to console warning messages on stress, constitutive model convergence
+  const bool _print_convergence_message;
 
   /// Substepping time step value used within the inheriting constitutive models
   Real _substep_dt;

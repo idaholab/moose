@@ -217,6 +217,9 @@ protected:
   RankTwoTensor _inverse_eigenstrain_deformation_grad;
   ///@}
 
+  /// Flag to print to console warning messages on stress, constitutive model convergence
+  const bool _print_convergence_message;
+
   /// Flag to check whether convergence is achieved or if substepping is needed
   bool _convergence_failed;
 

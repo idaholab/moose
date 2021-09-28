@@ -179,5 +179,13 @@
                    'the values supplied in the associated text file.'
       detail = ' ensure that the Miller-Bravis basal plane indices sum to zero.'
     []
+    [update_method_hcp_convergence_issue_flag]
+      type = 'RunException'
+      input = 'update_method_hcp_convergence_issue_flag.i'
+      expect_err = 'ComputeMultipleCrystalPlasticityStress: Stress Integration error rmax ='
+      detail = ' provide warning messages about constitutive model and stress '
+               'convergence issues when the corresponding input file parameter '
+               'is set to true.'
+    []
   []
 []

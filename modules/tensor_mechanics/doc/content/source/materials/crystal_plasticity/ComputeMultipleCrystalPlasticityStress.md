@@ -212,7 +212,7 @@ To compute the Schmid tensor from these slip direction and slip plane normals, t
 !media tensor_mechanics/crystal_plasticity/HCP_basal_plane_diagram.png
     id=xtalpl_hcp_basalplane_notation
     caption=The convention used to transform the 4-index Miller-Bravis indices to the 3-index Cartesian system aligns the x-axis with the a$_1$-axis in the basal plane in this implementation.
-    style=display:block;margin-left:auto;margin-right:auto;width:50%
+    style=display:block;margin-left:auto;margin-right:auto;width:40%
 
 The slip plane directions are transformed to the Cartesian system with the matrix equation
 \begin{equation}
