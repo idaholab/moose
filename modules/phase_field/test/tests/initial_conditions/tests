@@ -143,6 +143,16 @@
       detail = 'polycrystal circles specified from a file,'
     []
 
+    [PolycrystalCircles_FromFileClipped]
+      type = Exodiff
+      input = 'polycrystalcircles_clipped.i'
+      exodiff = 'polycrystalcircles_clipped_out.e'
+      # This test uses a coloring algorithm that requires PETSc >= 3.5.0.
+      petsc_version = '>=3.5.0'
+
+      detail = 'polycrystal circles specified from a file that may not appear in the final domain,'
+    []
+
     [PolycrystalCircles_FromVector]
       type = Exodiff
       input = 'polycrystalcircles_fromvector.i'
@@ -150,7 +160,7 @@
       # This test uses a coloring algorithm that requires PETSc >= 3.5.0.
       petsc_version = '>=3.5.0'
 
-      detail = 'and polycrystal circles specified from an input vector,'
+      detail = 'polycrystal circles specified from an input vector,'
     []
 
     [HexPolycrystalIC]
@@ -307,7 +317,7 @@
 
       detail = 'multiple bounding boxes in 3D.'
     []
-    
+
     [IsolatedBoundingBoxIC_2D]
       type = Exodiff
       input = 'IsolatedBoundingBoxIC_2D.i'
@@ -339,7 +349,7 @@
 
       detail = '3D.'
     []
-      
+
     [IsolatedBoundingBoxIC_2D_Overlapping]
       type = RunException
       input = 'IsolatedBoundingBoxIC_2D_Overlapping.i'
