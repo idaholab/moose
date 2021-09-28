@@ -21,7 +21,7 @@ ComputeVolumetricEigenstrain::validParams()
                              "also computes the derivatives of that eigenstrain with respect to a "
                              "supplied set of variable dependencies.");
   params.addRequiredParam<std::vector<MaterialPropertyName>>(
-      "volumetric_materials", "List of scalar materials defining the volumetric change");
+      "volumetric_materials", "List of scalar material properties defining the volumetric change");
   params.addRequiredCoupledVar("args", "variable dependencies for the volumetric_expansion");
   return params;
 }

@@ -17,10 +17,10 @@ ComputeVariableIsotropicElasticityTensor::validParams()
   InputParameters params = ComputeElasticityTensorBase::validParams();
   params.addClassDescription("Compute an isotropic elasticity tensor for elastic constants that "
                              "change as a function of material properties");
-  params.addRequiredParam<MaterialPropertyName>("youngs_modulus",
-                                                "Name of material defining the Young's Modulus");
-  params.addRequiredParam<MaterialPropertyName>("poissons_ratio",
-                                                "Name of material defining the Poisson's Ratio");
+  params.addRequiredParam<MaterialPropertyName>(
+      "youngs_modulus", "Name of material property defining the Young's Modulus");
+  params.addRequiredParam<MaterialPropertyName>(
+      "poissons_ratio", "Name of material property defining the Poisson's Ratio");
   params.addRequiredCoupledVar(
       "args", "Variable dependence for the Young's Modulus and Poisson's Ratio materials");
   return params;

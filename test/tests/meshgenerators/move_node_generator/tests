@@ -1,0 +1,41 @@
+[Tests]
+  issues = '#18577'
+  design = 'meshgenerators/MoveNodeGenerator.md'
+
+  [generate]
+    requirement = 'The system shall support the ability to modify node(s) coordinates'
+
+    [single_element]
+      type = 'Exodiff'
+      input = 'test.i'
+      cli_args = '--mesh-only'
+      exodiff = 'test_in.e'
+      recover = false
+      mesh_mode = replicated
+
+      detail = 'in a mesh with a single first order element'
+
+    []
+    [3d]
+      type = 'Exodiff'
+      input = 'test2.i'
+      exodiff = 'test2_out.e'
+
+      detail = 'in a Cartesian 3D mesh.'
+    []
+  []
+  [failure_missing]
+    type = 'RunException'
+    input = 'test2.i'
+    expect_err = "A node with the ID*"
+    cli_args = "Mesh/inactive='mismatchSize modifyNode' --mesh-only"
+    requirement = "The system shall error if the node to be moved cannot be found in the mesh."
+  []
+  [failure_mismatch]
+    type = 'RunException'
+    input = 'test2.i'
+    expect_err = "Must be the same length as 'new_position'."
+    cli_args = "Mesh/inactive='missingNode modifyNode' --mesh-only"
+    requirement = "The system shall error if the node position and node id arrays do not match in size"
+  []
+[]

@@ -1,33 +1,26 @@
 # SplineFunction
 
-!alert! construction title=Undocumented Class
-The SplineFunction has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# SplineFunction
-
 !syntax description /Functions/SplineFunction
 
-## Overview
+The `SplineFunction` defines a 1D spline (1D shape, it is defined everywhere in the domain by translation)
+along one of the x, y, z directions (specified by the `component` parameter). The spline is defined by
 
-!! Replace these lines with information regarding the SplineFunction object.
+- its value (ordinates, `y`) at several abscissa (`x`) through which the function passes
 
-## Example Input File Syntax
+- its first derivative at the first abscissa
 
-!! Describe and include an example of how to use the SplineFunction object.
+- its first derivative at the last abscissa
 
-!syntax parameters /Functions/SplineFunction
 
-!syntax inputs /Functions/SplineFunction
+From this information the spline is automatically generated. Both the first and second
+order derivatives of the spline are defined.
 
-!syntax children /Functions/SplineFunction
-```
-!alert-end!
+## Example input syntax
 
-!syntax description /Functions/SplineFunction
+In this example, we define a spline going through 4 points defined by the `x` and `y`
+parameters.
+
+!listing test/tests/ics/function_ic/spline_function.i block=Functions
 
 !syntax parameters /Functions/SplineFunction
 

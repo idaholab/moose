@@ -10,7 +10,7 @@ This allows a simple 1D parametric optimization to make the output of a postproc
 
 The parameter $C$ is replaced at every time step $n$, at time $t$, by:
 \begin{equation}
-C_{n} = C_{n-1} + K_{integral} \int_0^{t} pp(s) - target mathrm{d}s + K_{proportional} (pp(t) - target) + K_{derivative} \dfrac{pp(t) - target}{dt}
+C_{n} = C_{n-1} + K_{integral} \int_0^{t} pp(s) - target \mathrm{d}s + K_{proportional} (pp(t) - target) + K_{derivative} \dfrac{pp(t) - target}{dt}
 \end{equation}
 
 with $pp(t)$ the value at time $t$ of the postprocessor that we are trying to match to the $target$ value and

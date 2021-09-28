@@ -1,33 +1,18 @@
 # ParsedVectorFunction
 
-!alert! construction title=Undocumented Class
-The ParsedVectorFunction has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# ParsedVectorFunction
-
 !syntax description /Functions/ParsedVectorFunction
 
-## Overview
+The `ParsedVectorFunction` is a vectorized version of the [MooseParsedFunction.md].
+Both the vector components and the curl of the function may be specified.
+The inputs for the components of the vector and curl of the function follow the same rules as
+outlined for the [MooseParsedFunction.md].
 
-!! Replace these lines with information regarding the ParsedVectorFunction object.
+## Example input syntax
 
-## Example Input File Syntax
+In this example, a `ParsedVectorFunction` is used to define a curl boundary condition.
+Both x,y component and the z-curl are set for this function.
 
-!! Describe and include an example of how to use the ParsedVectorFunction object.
-
-!syntax parameters /Functions/ParsedVectorFunction
-
-!syntax inputs /Functions/ParsedVectorFunction
-
-!syntax children /Functions/ParsedVectorFunction
-```
-!alert-end!
-
-!syntax description /Functions/ParsedVectorFunction
+!listing functions/parsed/function_curl.i block=Functions BCs
 
 !syntax parameters /Functions/ParsedVectorFunction
 

@@ -7,7 +7,7 @@
 The `ParsedFunction` function takes a mathematical expression in `value`.  The
 expression can be a function of time (t) or coordinate (x, y, or z).  The expression
 can include common mathematical functions.  Examples include `4e4+1e2*t`,
-`sqrt(x*x+y*y+z*z)`, and `if(t\textless=1.0, 0.1*t, (1.0+0.1)*cos(pi/2*(t-1.0)) - 1.0)`.
+`sqrt(x*x+y*y+z*z)`, and `if(t<=1.0, 0.1*t, (1.0+0.1)*cos(pi/2*(t-1.0)) - 1.0)`.
 
 Additional variables may be declared in the `vars` parameter vector. The
 corresponding `vals` parameter vector should list the items these variables are

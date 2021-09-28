@@ -1,33 +1,21 @@
 # PostprocessorDirichletBC
 
-!alert! construction title=Undocumented Class
-The PostprocessorDirichletBC has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# PostprocessorDirichletBC
-
 !syntax description /BCs/PostprocessorDirichletBC
 
-## Overview
+More information about Dirichlet boundary conditions and their mathematical meaning may be found in the
+[DirichletBC.md] documentation.
 
-!! Replace these lines with information regarding the PostprocessorDirichletBC object.
+A common postprocessor input for the `PostprocessorDirichletBC` is the [Receiver.md] postprocessor,
+which is populated by a transfer from a [syntax/MultiApps/index.md]. The two simulations are then coupled through
+this boundary condition, by setting the value of a variable on a boundary.
 
-## Example Input File Syntax
+## Example Input Syntax
 
-!! Describe and include an example of how to use the PostprocessorDirichletBC object.
+This example demonstrates the use case outlined above with `PostprocessorDirichletBC` on the `right` boundary
+for variables `x` and `y`. The postprocessor input to the boundary conditions are `incoming_x` and `incoming_y`
+respectively.
 
-!syntax parameters /BCs/PostprocessorDirichletBC
-
-!syntax inputs /BCs/PostprocessorDirichletBC
-
-!syntax children /BCs/PostprocessorDirichletBC
-```
-!alert-end!
-
-!syntax description /BCs/PostprocessorDirichletBC
+!listing test/tests/multiapps/centroid_multiapp/sub_app.i block=Postprocessors BCs
 
 !syntax parameters /BCs/PostprocessorDirichletBC
 

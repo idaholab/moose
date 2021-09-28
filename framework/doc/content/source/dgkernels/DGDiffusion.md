@@ -1,33 +1,16 @@
 # DGDiffusion
 
-!alert! construction title=Undocumented Class
-The DGDiffusion has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# DGDiffusion
-
 !syntax description /DGKernels/DGDiffusion
 
-## Overview
+More information about the discontinuous Galerkin method, and in particular for the Poisson equation,
+may be found in the [DGKernels syntax page](syntax/DGKernels/index.md).
 
-!! Replace these lines with information regarding the DGDiffusion object.
+## Example input syntax
 
-## Example Input File Syntax
+This example is a 2D diffusion-reaction-source case using DG. The kernels are taking care of the
+volumetric terms in the equation, while the `DGDiffusion` DGKernel is defined on the element sides.
 
-!! Describe and include an example of how to use the DGDiffusion object.
-
-!syntax parameters /DGKernels/DGDiffusion
-
-!syntax inputs /DGKernels/DGDiffusion
-
-!syntax children /DGKernels/DGDiffusion
-```
-!alert-end!
-
-!syntax description /DGKernels/DGDiffusion
+!listing test/tests/dgkernels/2d_diffusion_dg/dg_stateful.i block=Kernels DGKernels
 
 !syntax parameters /DGKernels/DGDiffusion
 

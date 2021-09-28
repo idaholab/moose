@@ -40,7 +40,7 @@ Axisymmetric2D3DSolutionFunction::validParams()
   params.addParam<Real>("axial_dimension_ratio",
                         1.0,
                         "Ratio of the axial dimension in the 3d model to that in the 2d model. "
-                        "Optinally permits the 3d model to be larger than the 2d model in that "
+                        "Optionally permits the 3d model to be larger than the 2d model in that "
                         "dimension, and scales vector solutions in that direction by this factor.");
 
   params.addParam<RealVectorValue>("2d_axis_point1",

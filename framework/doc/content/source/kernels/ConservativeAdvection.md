@@ -44,7 +44,7 @@ Full upwinding only works for continuous FEM
 
 In DE systems describing more than just advection (e.g., in
 diffusion-advection problems) full upwinding may be used on the
-advection alone.  In practise, it is reasonably common that these more
+advection alone.  In practice, it is reasonably common that these more
 complicated cases benefit from numerical stabilization on their
 other terms too, in which case full upwinding could also be used, but
 this is not mandatory and is not implemented in the

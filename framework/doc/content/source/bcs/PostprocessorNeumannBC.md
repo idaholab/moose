@@ -1,33 +1,20 @@
 # PostprocessorNeumannBC
 
-!alert! construction title=Undocumented Class
-The PostprocessorNeumannBC has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# PostprocessorNeumannBC
-
 !syntax description /BCs/PostprocessorNeumannBC
 
-## Overview
+More information about Neumann boundary conditions and their mathematical meaning may be found in the
+[NeumannBC.md] documentation.
 
-!! Replace these lines with information regarding the PostprocessorNeumannBC object.
+A common postprocessor input for the `PostprocessorNeumannBC` is the [Receiver.md] postprocessor,
+which is populated by a transfer from a [syntax/MultiApps/index.md]. The two simulations are then coupled through
+this boundary condition, by a numerical flux on a boundary.
 
-## Example Input File Syntax
+## Example Input Syntax
 
-!! Describe and include an example of how to use the PostprocessorNeumannBC object.
+In this example, the value of variable `aux` is sampled using a `PointValue` postprocessor then
+reused as a Neumann boundary condition for the non linear variable `u` using a `PostprocessorNeumannBC`.
 
-!syntax parameters /BCs/PostprocessorNeumannBC
-
-!syntax inputs /BCs/PostprocessorNeumannBC
-
-!syntax children /BCs/PostprocessorNeumannBC
-```
-!alert-end!
-
-!syntax description /BCs/PostprocessorNeumannBC
+!listing test/tests/bcs/pp_neumann/pp_neumann.i block=Postprocessors BCs
 
 !syntax parameters /BCs/PostprocessorNeumannBC
 

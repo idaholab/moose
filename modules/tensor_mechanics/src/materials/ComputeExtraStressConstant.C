@@ -21,7 +21,7 @@ ComputeExtraStressConstant::validParams()
                                              "Vector of values defining the constant extra stress "
                                              "to add, in order 11, 22, 33, 23, 13, 12");
   params.addParam<MaterialPropertyName>(
-      "prefactor", 1.0, "Name of material defining additional constant prefactor");
+      "prefactor", 1.0, "Name of material property defining additional constant prefactor");
   return params;
 }
 
