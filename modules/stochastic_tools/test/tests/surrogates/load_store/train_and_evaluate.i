@@ -41,23 +41,24 @@
     to_control = 'stochastic'
   []
   [data]
-    type = SamplerPostprocessorTransfer
+    type = SamplerReporterTransfer
     multi_app = quad_sub
     sampler = quadrature
-    to_vector_postprocessor = storage
-    from_postprocessor = avg
+    stochastic_reporter = storage
+    from_reporter = avg/value
   []
 []
 
-[VectorPostprocessors]
+[Reporters]
   [storage]
-    type = StochasticResults
-    parallel_type = REPLICATED
+    type = StochasticReporter
+    parallel_type = ROOT
+    outputs = none
   []
-  [pc_moments]
-    type = PolynomialChaosStatistics
+  [pc_data]
+    type = PolynomialChaosReporter
     pc_name = poly_chaos
-    compute = 'mean stddev skewness kurtosis'
+    include_data = true
     execute_on = final
   []
 []
@@ -69,7 +70,7 @@
     order = 5
     distributions = 'D_dist S_dist'
     sampler = quadrature
-    response = storage/data:avg
+    response = storage/data:avg:value
   []
 []
 
@@ -80,7 +81,8 @@
   []
 []
 
-[Outputs]
-  csv = true
+[Outputs/out]
+  type = JSON
+  execute_system_information_on = none
   execute_on = FINAL
 []

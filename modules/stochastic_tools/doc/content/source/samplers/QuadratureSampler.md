@@ -80,11 +80,11 @@ The sampler uses inputted distributions to create a multidimensional quadrature 
 
 First, distributions are made, which define the weighting function of the integration:
 
-!listing poly_chaos/master_2d_quad.i block=Distributions
+!listing poly_chaos/main_2d_quad.i block=Distributions
 
 The QuadratureSampler then uses the distributions to create a quadrature with $N_q =$ `order`$+1$ points. The definition of `order` is important for use with polynomial chaos.
 
-!listing poly_chaos/master_2d_quad.i block=Samplers/quadrature
+!listing poly_chaos/main_2d_quad.i block=Samplers/quadrature
 
 !syntax parameters /Samplers/QuadratureSampler
 

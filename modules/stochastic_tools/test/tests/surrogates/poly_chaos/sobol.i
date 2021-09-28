@@ -22,10 +22,13 @@
     execute_on = INITIAL
     outputs = none
   []
+[]
+
+[Reporters]
   [sobol]
-    type = PolynomialChaosSobolStatistics
+    type = PolynomialChaosReporter
     pc_name = poly_chaos
-    sensitivity_order = 'all total'
+    include_sobol = true
     execute_on = timestep_end
   []
 []
@@ -50,5 +53,8 @@
 
 [Outputs]
   execute_on = 'FINAL'
-  csv = true
+  [out]
+    type = JSON
+    execute_system_information_on = none
+  []
 []

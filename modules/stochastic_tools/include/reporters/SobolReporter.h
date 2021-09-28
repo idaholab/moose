@@ -88,6 +88,8 @@ public:
   {
     return "SobolIndices<" + MooseUtils::prettyCppType<OutType>() + ">";
   }
+  static void
+  storeSobol(nlohmann::json & json, const SobolState<OutType> & val, unsigned int nparam);
 
 protected:
   virtual void store(nlohmann::json & json) const override;

@@ -21,13 +21,13 @@ Model objects are obtained by other objects using the `getSurrogateModel` and
 desired object name is determined. The later function simply accepts the actual name of the
 object.
 
-For example, the [PolynomialChaosData.md] object requires a [PolynomialChaos.md] object. In the
+For example, the [PolynomialChaosReporter.md] object requires a [PolynomialChaos.md] object. In the
 header a reference to the desired model is declare and in the source this reference is initialized
 with a get method.
 
-!listing PolynomialChaosData.h line=const PolynomialChaos
+!listing PolynomialChaosReporter.h line=std::vector<const PolynomialChaos *>
 
-!listing PolynomialChaosData.C line=getSurrogateModel
+!listing PolynomialChaosReporter.C line=getSurrogateModel
 
 ## Getting Training Data id=training-data
 
@@ -58,7 +58,7 @@ The following input file snippet adds a
 [PolynomialChaos.md] surrogate model for evaluation. Please refer to the documentation on the
 individual models for more details.
 
-!listing poly_chaos/master_2d_mc.i block=Surrogates
+!listing poly_chaos/main_2d_mc.i block=Surrogates
 
 !syntax list /Surrogates objects=True actions=False subsystems=False
 

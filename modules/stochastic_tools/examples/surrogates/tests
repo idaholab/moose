@@ -62,7 +62,7 @@
     [poly_chaos]
       type = RunApp
       input = poly_chaos_uniform.i
-      cli_args = "Reporters/inactive='samp_avg samp_max'
+      cli_args = "Reporters/inactive='samp'
                   Surrogates/poly_chaos_avg/filename=uniform_quad_poly_chaos_avg.rd
                   Surrogates/poly_chaos_max/filename=uniform_quad_poly_chaos_max.rd"
       prereq = train/poly_chaos_uniform_quad
@@ -84,7 +84,7 @@
     [poly_chaos]
       type = RunApp
       input = poly_chaos_normal.i
-      cli_args = "Reporters/inactive='samp_avg samp_max'
+      cli_args = "Reporters/inactive='samp'
                   Surrogates/poly_chaos_avg/filename=normal_quad_poly_chaos_avg.rd
                   Surrogates/poly_chaos_max/filename=normal_quad_poly_chaos_max.rd"
       prereq = train/poly_chaos_normal_quad

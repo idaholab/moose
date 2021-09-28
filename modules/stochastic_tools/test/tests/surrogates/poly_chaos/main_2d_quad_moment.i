@@ -3,14 +3,14 @@
 
 [Distributions]
   [D_dist]
-    type = Normal
-    mean = 5
-    standard_deviation = 0.5
+    type = Uniform
+    lower_bound = 2.5
+    upper_bound = 7.5
   []
   [S_dist]
-    type = Normal
-    mean = 8
-    standard_deviation = 0.7
+    type = Uniform
+    lower_bound = 2.5
+    upper_bound = 7.5
   []
 []
 
@@ -41,23 +41,23 @@
     to_control = 'stochastic'
   []
   [data]
-    type = SamplerPostprocessorTransfer
+    type = SamplerReporterTransfer
     multi_app = quad_sub
     sampler = quadrature
-    to_vector_postprocessor = storage
-    from_postprocessor = avg
+    stochastic_reporter = storage
+    from_reporter = avg/value
   []
 []
 
-[VectorPostprocessors]
+[Reporters]
   [storage]
-    type = StochasticResults
-    parallel_type = REPLICATED
+    type = StochasticReporter
+    outputs = none
   []
   [pc_moments]
-    type = PolynomialChaosStatistics
+    type = PolynomialChaosReporter
     pc_name = poly_chaos
-    compute = 'mean stddev skewness kurtosis'
+    statistics = 'mean stddev skewness kurtosis'
     execute_on = final
   []
 []
@@ -76,13 +76,14 @@
     order = 5
     distributions = 'D_dist S_dist'
     sampler = quadrature
-    response = storage/data:avg
+    response = storage/data:avg:value
   []
 []
 
 [Outputs]
   [out]
-    type = CSV
+    type = JSON
+    execute_system_information_on = none
     execute_on = FINAL
   []
 []

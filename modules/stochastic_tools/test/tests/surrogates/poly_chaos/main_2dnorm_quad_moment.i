@@ -15,10 +15,6 @@
 []
 
 [Samplers]
-  [grid]
-    type = CartesianProduct
-    linear_space_items = '2.5 0.5 10  3 1 10'
-  []
   [quadrature]
     type = Quadrature
     distributions = 'D_dist S_dist'
@@ -45,26 +41,23 @@
     to_control = 'stochastic'
   []
   [data]
-    type = SamplerPostprocessorTransfer
+    type = SamplerReporterTransfer
     multi_app = quad_sub
     sampler = quadrature
-    to_vector_postprocessor = storage
-    from_postprocessor = avg
+    stochastic_reporter = storage
+    from_reporter = avg/value
   []
 []
 
-[VectorPostprocessors]
+[Reporters]
   [storage]
-    type = StochasticResults
-    parallel_type = REPLICATED
+    type = StochasticReporter
+    outputs = none
   []
-  [local_sense]
-    type = PolynomialChaosLocalSensitivity
+  [pc_moments]
+    type = PolynomialChaosReporter
     pc_name = poly_chaos
-    local_points_sampler = grid
-    local_points = '3.14159 3.14159 2.7182 3.14159 3.14159 2.7182 2.7182 2.7182'
-    output_points = true
-    sensitivity_parameters = '0 1'
+    statistics = 'mean stddev skewness kurtosis'
     execute_on = final
   []
 []
@@ -83,13 +76,14 @@
     order = 5
     distributions = 'D_dist S_dist'
     sampler = quadrature
-    response = storage/data:avg
+    response = storage/data:avg:value
   []
 []
 
 [Outputs]
   [out]
-    type = CSV
+    type = JSON
     execute_on = FINAL
+    execute_system_information_on = none
   []
 []

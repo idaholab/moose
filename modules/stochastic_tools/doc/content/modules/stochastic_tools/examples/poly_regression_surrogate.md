@@ -155,9 +155,9 @@ Both of them are constructed using the information available within the correspo
 !listing surrogates/polynomial_regression/normal_surr.i block=Surrogates
 
 These surrogate models can be evaluated at the points defined in the testing sample batch.
-This is done using objects in the `VectorPostprocessors` block.
+This is done using objects in the `Reporters` block.
 
-!listing surrogates/polynomial_regression/normal_surr.i block=VectorPostprocessors
+!listing surrogates/polynomial_regression/normal_surr.i block=Reporters
 
 
 ## Results and Analysis
