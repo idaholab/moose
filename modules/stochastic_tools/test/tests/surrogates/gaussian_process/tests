@@ -1,65 +1,76 @@
 [Tests]
   issues = "#15482"
   design = "GaussianProcessTrainer.md GaussianProcess.md"
-  requirement = 'The system shall demonstrate a gaussian process surrogate by '
-  [GP_training]
-    type = CheckFiles
-    input = GP_squared_exponential_training.i
-    check_files = 'gauss_process_training_GP_avg_trainer.rd'
-    allow_test_objects = true
-    detail = 'training a Gaussian process model, '
+
+  [store_load]
+    requirement = 'The system shall demonstrate a gaussian process surrogate by '
+    [GP_training]
+      type = CheckFiles
+      input = GP_squared_exponential_training.i
+      check_files = 'gauss_process_training_GP_avg_trainer.rd'
+      allow_test_objects = true
+      detail = 'training a Gaussian process model and '
+    []
+    [GP_testing]
+      type = CSVDiff
+      input = GP_squared_exponential_testing.i
+      allow_test_objects = true
+      csvdiff = 'GP_squared_exponential_testing_out_samp_avg_0002.csv'
+      detail = 'evaluating the trained Gaussian process model'
+      prereq = store_load/GP_training
+    []
   []
-  [GP_testing]
-    type = CSVDiff
-    input = GP_squared_exponential_testing.i
-    allow_test_objects = true
-    csvdiff = 'GP_squared_exponential_testing_out_samp_avg_0002.csv'
-    detail = 'evaluating the trained Gaussian process model, '
-    prereq = GP_training
+
+  [kernels]
+    requirement = 'The system shall be able to produce a Gaussian process surrogate with'
+    [GP_squared_exponential]
+      type = CSVDiff
+      input = GP_squared_exponential.i
+      allow_test_objects = true
+      csvdiff = 'GP_squared_exponential_out_samp_avg_0002.csv GP_squared_exponential_out_results_0002.csv'
+      detail = 'a squared exponential kernel;'
+    []
+    [GP_exponential]
+      type = CSVDiff
+      input = GP_exponential.i
+      allow_test_objects = true
+      csvdiff = 'GP_exponential_out_samp_avg_0002.csv GP_exponential_out_results_0002.csv'
+      detail = 'an exponential kernel;'
+    []
+    [GP_Matern_half_int]
+      type = CSVDiff
+      input = GP_Matern_half_int.i
+      allow_test_objects = true
+      csvdiff = 'GP_Matern_half_int_out_samp_avg_0002.csv GP_Matern_half_int_out_results_0002.csv'
+      detail = 'Matern half integer kernel;'
+    []
   []
-  [GP_squared_exponential]
-    type = CSVDiff
-    input = GP_squared_exponential.i
-    allow_test_objects = true
-    csvdiff = 'GP_squared_exponential_out_samp_avg_0002.csv GP_squared_exponential_out_results_0002.csv'
-    detail = 'training and evaluating with a squared exponential kernel, '
-  []
-  [GP_exponential]
-    type = CSVDiff
-    input = GP_exponential.i
-    allow_test_objects = true
-    csvdiff = 'GP_exponential_out_samp_avg_0002.csv GP_exponential_out_results_0002.csv'
-    detail = 'training and evaluating with an exponential kernel, '
-  []
-  [GP_Matern_half_int]
-    type = CSVDiff
-    input = GP_Matern_half_int.i
-    allow_test_objects = true
-    csvdiff = 'GP_Matern_half_int_out_samp_avg_0002.csv GP_Matern_half_int_out_results_0002.csv'
-    detail = 'and training and evaluating with a Matern half integer kernel'
-  []
-  [GP_squared_exponential_tuned]
-    type = CSVDiff
-    input = GP_squared_exponential_tuned.i
-    allow_test_objects = true
-    csvdiff = 'GP_squared_exponential_tuned_out_samp_avg_0002.csv GP_squared_exponential_tuned_out_results_0002.csv GP_squared_exponential_tuned_out_hyperparams_0002.csv'
-    petsc_version = '>=3.10.0'
-    detail = 'then testing hyperparameter tuning for the squared exponential kernel, '
-  []
-  [GP_exponential_tuned]
-    type = CSVDiff
-    input = GP_exponential_tuned.i
-    allow_test_objects = true
-    csvdiff = 'GP_exponential_tuned_out_samp_avg_0002.csv GP_exponential_tuned_out_results_0002.csv GP_exponential_tuned_out_hyperparams_0002.csv'
-    petsc_version = '>=3.10.0'
-    detail = 'exponential kernel, '
-  []
-  [GP_Matern_half_int_tuned]
-    type = CSVDiff
-    input = GP_Matern_half_int_tuned.i
-    allow_test_objects = true
-    csvdiff = 'GP_Matern_half_int_tuned_out_samp_avg_0002.csv GP_Matern_half_int_tuned_out_results_0002.csv GP_Matern_half_int_tuned_out_hyperparams_0002.csv'
-    petsc_version = '>=3.10.0'
-    detail = 'and Matern half integer kernel, '
+
+  [tuning]
+    requirement = 'The system shall be be able to tune hyperparameters of a Gaussian process surrogate with'
+    [GP_squared_exponential_tuned]
+      type = CSVDiff
+      input = GP_squared_exponential_tuned.i
+      allow_test_objects = true
+      csvdiff = 'GP_squared_exponential_tuned_out_samp_avg_0002.csv GP_squared_exponential_tuned_out_results_0002.csv GP_squared_exponential_tuned_out_hyperparams_0002.csv'
+      petsc_version = '>=3.10.0'
+      detail = 'a squared exponential kernel;'
+    []
+    [GP_exponential_tuned]
+      type = CSVDiff
+      input = GP_exponential_tuned.i
+      allow_test_objects = true
+      csvdiff = 'GP_exponential_tuned_out_samp_avg_0002.csv GP_exponential_tuned_out_results_0002.csv GP_exponential_tuned_out_hyperparams_0002.csv'
+      petsc_version = '>=3.10.0'
+      detail = 'an exponential kernel;'
+    []
+    [GP_Matern_half_int_tuned]
+      type = CSVDiff
+      input = GP_Matern_half_int_tuned.i
+      allow_test_objects = true
+      csvdiff = 'GP_Matern_half_int_tuned_out_samp_avg_0002.csv GP_Matern_half_int_tuned_out_results_0002.csv GP_Matern_half_int_tuned_out_hyperparams_0002.csv'
+      petsc_version = '>=3.10.0'
+      detail = 'a Matern half integer kernel;'
+    []
   []
 []

@@ -1,20 +1,23 @@
 [Tests]
   issues = "#15538"
   design = "PODReducedBasisTrainer.md PODReducedBasisSurrogate.md PODFullSolveMultiApp.md PODSamplerSolutionTransfer.md PODResidualTransfer.md"
-  requirement = 'The system shall demonstrate a POD-RB surrogate (with Dirichlet BC) by '
-  [train]
-    type = CheckFiles
-    input = trainer.i
-    check_files = 'trainer_out_pod_rb.rd'
-    allow_test_objects = true
-    detail = 'training using known 4D data '
-  []
-  [load]
-    type = CSVDiff
-    input = surr.i
-    allow_test_objects = true
-    csvdiff = 'surr_out_res_0001.csv'
-    prereq = train # Creates data files that this test uses
-    detail = 'and then evaluating new samples separately for new data.'
+
+  [pod_boundary]
+    requirement = 'The system shall demonstrate a POD-RB surrogate (with Dirichlet BC) by '
+    [train]
+      type = CheckFiles
+      input = trainer.i
+      check_files = 'trainer_out_pod_rb.rd'
+      allow_test_objects = true
+      detail = 'training using known 4D data '
+    []
+    [load]
+      type = CSVDiff
+      input = surr.i
+      allow_test_objects = true
+      csvdiff = 'surr_out_res_0001.csv'
+      prereq = pod_boundary/train # Creates data files that this test uses
+      detail = 'and then evaluating new samples separately for new data.'
+    []
   []
 []
