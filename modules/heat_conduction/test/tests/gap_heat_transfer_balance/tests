@@ -1,0 +1,34 @@
+[Tests]
+  design = 'source/bcs/GapHeatTransfer.md'
+  issues = '#18585'
+  [large_gap_heat_transfer_test_sphere]
+    type = CSVDiff
+    input = 'large_gap_heat_transfer_test_sphere.i'
+    csvdiff = 'large_gap_heat_transfer_test_sphere_out.csv'
+    abs_zero = 1e-6
+    rel_err = 1e-6
+    requirement = "Energy balance must be fulfilled for the heat transfer of concentric spheres "
+                  "involving radiation, when the gap distance is not negligible with respect to the "
+                  "body main dimensions."
+  []
+  [large_gap_heat_transfer_test_rz_cylinder]
+    type = CSVDiff
+    input = 'large_gap_heat_transfer_test_rz_cylinder.i'
+    csvdiff = 'large_gap_heat_transfer_test_rz_cylinder_out.csv'
+    abs_zero = 1e-6
+    rel_err = 1e-6
+    requirement = "Energy balance must be fulfilled for the heat transfer of concentric cylinders "
+                  "involving radiation in two-dimensions, when the gap distance is not negligible "
+                  "with respect to the body main dimensions."
+  []
+  [large_gap_heat_transfer_test_cylinder]
+    type = CSVDiff
+    input = 'large_gap_heat_transfer_test_cylinder.i'
+    csvdiff = 'large_gap_heat_transfer_test_cylinder_out.csv'
+    abs_zero = 1e-6
+    rel_err = 1e-6
+    requirement = "Energy balance must be fulfilled for the heat transfer of concentric cylinders "
+                  "involving radiation in two-dimensions with axisymmetry, when the gap distance is "
+                  "not negligible with respect to the body main dimensions."
+  []
+[]
