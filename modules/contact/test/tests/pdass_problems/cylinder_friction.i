@@ -221,8 +221,8 @@
 
   line_search = 'none'
 
-  nl_abs_tol = 1e-5
-  nl_rel_tol = 1e-5
+  nl_abs_tol = 1e-7
+  nl_rel_tol = 1e-7
   l_max_its = 100
   nl_max_its = 30
 
@@ -270,7 +270,8 @@
 [Outputs]
   print_linear_residuals = true
   perf_graph = true
-  exodus = true
+  exodus = false
+  csv = false
   [console]
     type = Console
     max_rows = 5
@@ -278,8 +279,9 @@
   [chkfile]
     type = CSV
     show = 'x_disp y_disp cont_press friction'
-    start_time = 0.0
-    execute_vector_postprocessors_on = FINAL
+    file_base = cylinder_friction_check
+    create_final_symlink = true
+    execute_on = 'FINAL'
   []
 []
 
