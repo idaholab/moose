@@ -16,7 +16,6 @@
  * This PolygonConcentricCircleMeshGenerator object is designed to mesh a polygon geometry with
  * optional rings centered inside.
  */
-
 class PolygonConcentricCircleMeshGenerator : public PolygonConcentricCircleMeshGeneratorBase
 {
 public:

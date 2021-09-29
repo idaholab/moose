@@ -57,8 +57,8 @@ PolygonConcentricCircleMeshGeneratorBase::validParams()
   params.addParam<bool>("preserve_volumes",
                         true,
                         "Volume of concentric circles can be preserved using this function.");
-  params.addParam<unsigned int>("block_id_shift", 0, "Integer used to shift block IDs.");
-  params.addParam<unsigned int>(
+  params.addParam<subdomain_id_type>("block_id_shift", 0, "Integer used to shift block IDs.");
+  params.addParam<boundary_id_type>(
       "interface_boundary_id_shift", 0, "Integer used to shift interface boundary IDs.");
   params.addRangeCheckedParam<boundary_id_type>("external_boundary_id",
                                                 "external_boundary_id>0",
@@ -128,8 +128,8 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
                                 ? getParam<std::vector<SubdomainName>>("background_block_names")
                                 : std::vector<SubdomainName>()),
     _preserve_volumes(getParam<bool>("preserve_volumes")),
-    _block_id_shift(getParam<unsigned int>("block_id_shift")),
-    _interface_boundary_id_shift(getParam<unsigned int>("interface_boundary_id_shift")),
+    _block_id_shift(getParam<subdomain_id_type>("block_id_shift")),
+    _interface_boundary_id_shift(getParam<boundary_id_type>("interface_boundary_id_shift")),
     _external_boundary_id(isParamValid("external_boundary_id")
                               ? getParam<boundary_id_type>("external_boundary_id")
                               : 0),

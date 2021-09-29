@@ -16,7 +16,6 @@
  * This PolygonConcentricCircleMeshGeneratorBase object is a base class to be inherited for polygon
  * mesh generators.
  */
-
 class PolygonConcentricCircleMeshGeneratorBase : public PolygonMeshGeneratorBase
 {
 public:
@@ -66,9 +65,9 @@ protected:
   /// Volume preserving function is optional
   const bool _preserve_volumes;
   /// Shift in default subdomain IDs to avert potential conflicts
-  const unsigned int _block_id_shift;
+  const subdomain_id_type _block_id_shift;
   /// Shift in default boundary IDs of interfaces to avert potential conflicts
-  const unsigned int _interface_boundary_id_shift;
+  const boundary_id_type _interface_boundary_id_shift;
   /// Boundary ID of the mesh's external boundary
   const boundary_id_type _external_boundary_id;
   /// Boundary Name of the mesh's external boundary

@@ -16,7 +16,6 @@
  * This HexagonConcentricCircleAdaptiveBoundaryMeshGenerator object is designed to generate
  * hexagonal meshes with adaptive boundary to facilitate stitching.
  */
-
 class HexagonConcentricCircleAdaptiveBoundaryMeshGenerator
   : public PolygonConcentricCircleMeshGeneratorBase
 {

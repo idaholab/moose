@@ -48,9 +48,9 @@ PolygonMeshGeneratorBase::build_simple_slice(std::unique_ptr<ReplicatedMesh> mes
                                              const unsigned int side_number,
                                              const unsigned int side_index,
                                              const std::vector<Real> azimuthal_tangent,
-                                             const unsigned int block_id_shift,
+                                             const subdomain_id_type block_id_shift,
                                              const bool quad_center_elements,
-                                             const unsigned int boundary_id_shift)
+                                             const boundary_id_type boundary_id_shift)
 {
   unsigned int angle_number =
       azimuthal_tangent.size() == 0 ? num_sectors_per_side : (azimuthal_tangent.size() - 1);
@@ -273,7 +273,7 @@ PolygonMeshGeneratorBase::center_nodes(std::unique_ptr<ReplicatedMesh> mesh,
   //    |        |        |        |        |
   // p_origin-----o-------p3--------o----p_bottom
   //
-  // The loops are desgined to transverse the nodes as shown below to facilitate elements
+  // The loops are designed to transverse the nodes as shown below to facilitate elements
   // and sides creation.
   //
   //   25-------24-------23-------22-------21
@@ -544,8 +544,8 @@ std::unique_ptr<ReplicatedMesh>
 PolygonMeshGeneratorBase::cen_quad_elem_def(std::unique_ptr<ReplicatedMesh> mesh,
                                             const unsigned int div_num,
                                             const std::vector<Node *> nodes,
-                                            const unsigned int block_id_shift,
-                                            const unsigned int boundary_id_shift,
+                                            const subdomain_id_type block_id_shift,
+                                            const boundary_id_type boundary_id_shift,
                                             std::vector<std::vector<dof_id_type>> * const id_array)
 {
 
@@ -597,8 +597,8 @@ PolygonMeshGeneratorBase::cen_tri_elem_def(std::unique_ptr<ReplicatedMesh> mesh,
                                            const unsigned int num_sectors_per_side,
                                            const std::vector<Node *> nodes,
                                            const std::vector<Real> azimuthal_tangent,
-                                           const unsigned int block_id_shift,
-                                           const unsigned int boundary_id_shift)
+                                           const subdomain_id_type block_id_shift,
+                                           const boundary_id_type boundary_id_shift)
 {
   unsigned int angle_number =
       azimuthal_tangent.size() == 0 ? num_sectors_per_side : (azimuthal_tangent.size() - 1);
@@ -627,9 +627,9 @@ PolygonMeshGeneratorBase::quad_elem_def(std::unique_ptr<ReplicatedMesh> mesh,
                                         const std::vector<Node *> nodes,
                                         const unsigned int side_index,
                                         const std::vector<Real> azimuthal_tangent,
-                                        const unsigned int block_id_shift,
-                                        const unsigned int nodeid_shift,
-                                        const unsigned int boundary_id_shift)
+                                        const subdomain_id_type block_id_shift,
+                                        const dof_id_type nodeid_shift,
+                                        const boundary_id_type boundary_id_shift)
 {
   unsigned int angle_number =
       azimuthal_tangent.size() == 0 ? num_sectors_per_side : (azimuthal_tangent.size() - 1);
@@ -706,7 +706,7 @@ PolygonMeshGeneratorBase::build_simple_peripheral(
     const std::vector<std::pair<Real, Real>> positions_inner,
     const std::vector<std::pair<Real, Real>> d_positions_outer,
     std::vector<Node *> * const nodes,
-    const unsigned int id_shift)
+    const subdomain_id_type id_shift)
 {
   dof_id_type node_id = 0;
   std::pair<Real, Real> positions_p;
@@ -814,8 +814,8 @@ PolygonMeshGeneratorBase::point_interpolate(const Real pi_1_x,
 
 std::unique_ptr<ReplicatedMesh>
 PolygonMeshGeneratorBase::add_peripheral_mesh(
-    const unsigned int pattern, //_pattern{i][j]
-    const Real pitch,           // pitch_array.front()
+    const unsigned int pattern,
+    const Real pitch,
     const std::vector<Real> extra_dist,
     const std::unique_ptr<ReplicatedMesh> * meshes,
     const std::vector<unsigned int> num_sectors_per_side_array,

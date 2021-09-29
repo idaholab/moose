@@ -16,7 +16,6 @@
  * This SimpleHexagonGenerator object is designed to generate a simple hexagonal mesh that only
  * contains six simple azimuthal triangle slices.
  */
-
 class SimpleHexagonGenerator : public PolygonMeshGeneratorBase
 {
 public:

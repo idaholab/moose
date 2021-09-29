@@ -16,7 +16,6 @@
  * This PatternedHexMeshGenerator source code assembles hexagonal meshes into a hexagonal grid and
  * optionally forces the outer boundary to be hexagonal and/or adds a duct.
  */
-
 class PatternedHexMeshGenerator : public PolygonMeshGeneratorBase
 {
 public:
