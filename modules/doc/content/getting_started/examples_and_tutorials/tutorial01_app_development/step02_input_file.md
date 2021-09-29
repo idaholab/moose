@@ -181,9 +181,11 @@ git status
 The terminal output should read something like the following:
 
 !listing! language=git
+On branch main
+Your branch is up to date with 'origin/main'.
+
 Untracked files:
   (use "git add <file>..." to include in what will be committed)
-
 	problems/
 
 nothing added to commit but untracked files present (use "git add" to track)
@@ -198,9 +200,11 @@ git status
 Now, the terminal output should be the following:
 
 !listing! language=git
-Changes to be committed:
-  (use "git reset HEAD <file>..." to unstage)
+On branch main
+Your branch is up to date with 'origin/main'.
 
+Changes to be committed:
+  (use "git restore --staged <file>..." to unstage)
 	new file:   problems/pressure_diffusion.i
 !listing-end!
 

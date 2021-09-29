@@ -190,9 +190,8 @@ There are many changes to add to the git tracker here, but a wildcard can help s
 
 Disregard the warning about `.gitignore` files. Now, commit and push the changes to the remote repository:
 
-!listing language=bash
-git commit -m "developed material to compute properties of fluid flow through packed steel sphere medium and modified Darcy kernel"
-git push
+!include commands/git_commit.md
+         replace=['<m>', '"developed material to compute properties of fluid flow through packed steel sphere medium and modified Darcy kernel"']
 
 !content pagination previous=tutorial01_app_development/step08_test_harness.md
                     next=tutorial01_app_development/step10_auxkernels.md

@@ -129,9 +129,8 @@ Add the two new files, `DarcyPressure.h` and `DarcyPressure.C`, to the git track
 
 Now, commit and push the changes to the remote repository:
 
-!listing language=bash
-git commit -m "developed kernel to solve Darcy pressure and updated the problem input file"
-git push
+!include commands/git_commit.md
+         replace=['<m>', '"developed kernel to solve Darcy pressure and updated the problem input file"']
 
 !content pagination previous=tutorial01_app_development/step04_weak_form.md
                     next=tutorial01_app_development/step06_input_params.md

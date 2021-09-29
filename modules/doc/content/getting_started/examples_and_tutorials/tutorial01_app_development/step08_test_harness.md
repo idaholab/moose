@@ -68,7 +68,7 @@ Nonlinear solve did not converge due to DIVERGED_FNORM_NAN iterations 0
  Solve Did NOT Converge!
 Aborting as solve did not converge
 
-The status `DIVERGED_FNORM_NAN` indicates that the residual was indeed `NaN` due to division by zero. Please be sure to remove this erroneous input, or simply enter `git checkout pressure_diffusion.i`, before proceeding.
+The status `DIVERGED_FNORM_NAN` indicates that the residual was indeed `NaN` due to division by zero. Please be sure to remove this erroneous input, or simply enter `git restore pressure_diffusion.i`, before proceeding.
 
 Since it is clear that the zero-valued viscosity input is invalid, an error should occur from within the `DarcyPressure` class by invoking the [`paramError()` method](framework_development/sanity_checking.md#missing-and-incorrect-parameters optional=True) on the `"viscosity"` parameter. Add this call to the constructor method in `DarcyPressure.C`:
 
@@ -171,9 +171,8 @@ Update the `DarcyPressure.C` file and add all of the new test files to the git t
 
 Now, commit and push the changes to the remote repository:
 
-!listing language=bash
-git commit -m "implemented a zero-viscosity error and created tests for the Darcy pressure kernel"
-git push
+!include commands/git_commit.md
+         replace=['<m>', '"implemented a zero-viscosity error and created tests for the Darcy pressure kernel"']
 
 !content pagination previous=tutorial01_app_development/step07_parallel.md
                     next=tutorial01_app_development/step09_mat_props.md

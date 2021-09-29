@@ -110,13 +110,13 @@ Be sure to recompile the application before proceeding:
 
 ### Input File id=input-demo
 
-With the new `DarcyVelocity` class available, it is now possible to compute the volumetric flux $\vec{u}$ of the fluid in the pressure vessel model. First, recall that earilier in the [#demo] section it was noted that $u_{x}$ is given by a constant monomial expression, i.e., [!eqref](velocity-x). It could also be shown that $\vec{u}$ is =a vector of constant monomial expressions= when $p(x, y)$ is approximated by a linear lagrange polynomial, even if $\partial_{y} p \; {=}\mathllap{\small{/}\,} \; 0$. It therefore makes sense to add the `[AuxVariables]` block to `pressure_diffusion.i` using the following syntax:
+With the new `DarcyVelocity` class available, it is now possible to compute the volumetric flux $\vec{u}$ of the fluid in the pressure vessel model. First, recall that earlier in the [#demo] section it was noted that $u_{x}$ is given by a constant monomial expression, i.e., [!eqref](velocity-x). It could also be shown that $\vec{u}$ is =a vector of constant monomial expressions= when $p(x, y)$ is approximated by a linear Lagrange polynomial, even if $\partial_{y} p \; {=}\mathllap{\small{/}\,} \; 0$. It therefore makes sense to add the `[AuxVariables]` block to `pressure_diffusion.i` using the following syntax:
 
 !listing tutorials/tutorial01_app_development/step10_auxkernels/problems/pressure_diffusion.i
          block=AuxVariables
          link=False
 
-The `[velocity]` block creates an elemental variable with `order = CONSTANT` and `family = MONOMIAL_VEC`, where `MONOMIAL_VEC` types are just a vector of `MONOMIAL` ones. This is good, because that's exactly what $\vec{u}$ should be and it is a requirement that variables assosciated with `DarcyVelocity` objects be `RealVectorValue` objects (or something similar).
+The `[velocity]` block creates an elemental variable with `order = CONSTANT` and `family = MONOMIAL_VEC`, where `MONOMIAL_VEC` types are just a vector of `MONOMIAL` ones. This is good, because that's exactly what $\vec{u}$ should be and it is a requirement that variables associated with `DarcyVelocity` objects be `RealVectorValue` objects (or something similar).
 
 Proceed with adding the following `[AuxKernels]` block to `pressure_diffusion.i`:
 
@@ -124,7 +124,7 @@ Proceed with adding the following `[AuxKernels]` block to `pressure_diffusion.i`
          block=AuxKernels
          link=False
 
-Here, a `DarcyVelocity` object was created. The assosciated variable that stores the results was identified along with the nonlinear variable assosciated with the `DarcyPressure` object. The `"execute_on"` parameter is made available through the base class and is used to control when the object runs via the [`ExecFlagEnum`](src/utils/ExecFlagEnum.C) methods. For this demonstration, the velocity is calculated based on the current steady-state solution. Setting `execute_on = TIMESTEP_END` ensures that the `DarcyVelocity` object is constructed only after a `DarcyPressure` object has computed the current solution $p$.
+Here, a `DarcyVelocity` object was created. The associated variable that stores the results was identified along with the nonlinear variable associated with the `DarcyPressure` object. The `"execute_on"` parameter is made available through the base class and is used to control when the object runs via the [`ExecFlagEnum`](src/utils/ExecFlagEnum.C) methods. For this demonstration, the velocity is calculated based on the current steady-state solution. Setting `execute_on = TIMESTEP_END` ensures that the `DarcyVelocity` object is constructed only after a `DarcyPressure` object has computed the current solution $p$.
 
 Now, execute the application:
 
@@ -132,7 +132,7 @@ Now, execute the application:
 cd ~/projects/babbler/problems
 ../babbler-opt -i pressure_diffusion.i
 
-If the program ran succesfully, a formal test of the `DarcyVelocity` class is in order. Start by creating a directory to store the test files:
+If the program ran successfully, a formal test of the `DarcyVelocity` class is in order. Start by creating a directory to store the test files:
 
 !include commands/mkdir.md
          replace=['<d>', 'test/tests/auxkernels/darcy_velocity']
@@ -167,7 +167,7 @@ Use the dropdown menu to select the "velocity_" variable and render its contours
        id=results-1
        caption=Pressure vessel model results for $\lVert \vec{u} \rVert$ indicating differences smaller than $10^{-5}$ between any two elements.
 
-From [results-1], it can be concluded that the `DarcyVelocity` object produced the expected results of $\lVert \vec{u} \rVert = 0.01393 \, \textrm{m/s}$ at all points in the mesh. Still, the renderer seems to be registering slightly different values between elements as indicated by the many different colors displayed. For practical purposes, these differences are negligible, but they can be neutralized by using tighter solver tolerances as discussed in the [#input-demo] section. To test this hypothesis, there's no need to modify the input file as any parameter can be overriden from the terminal, e.g., the following will rerun it with a relative linear tolerance of $10^{-16}$:
+From [results-1], it can be concluded that the `DarcyVelocity` object produced the expected results of $\lVert \vec{u} \rVert = 0.01393 \, \textrm{m/s}$ at all points in the mesh. Still, the renderer seems to be registering slightly different values between elements as indicated by the many different colors displayed. For practical purposes, these differences are negligible, but they can be neutralized by using tighter solver tolerances as discussed in the [#input-demo] section. To test this hypothesis, there's no need to modify the input file as any parameter can be overridden from the terminal, e.g., the following will rerun it with a relative linear tolerance of $10^{-16}$:
 
 !listing language=bash
 cd ~/projects/babbler/problems
@@ -181,7 +181,7 @@ Next, rerun `peacock -r` on the new results and observe the uniformity in the co
        caption=Pressure vessel model results for $\lVert \vec{u} \rVert$ using a relative linear tolerance of $10^{-16}$. Every element shows exactly the predicted velocity magnitude of $0.01393 \, \textrm{m/s}$.
 
 !alert! tip title=Be aware of the many different types of controllable tolerances.
-There is usually a variety of parameters available to `Executioner` objects that are used to set solver tolerances. Sometimes, even slight changes to them can have profound numerical effects, and certain types of tolerances supersede others. For example, the same desired effect of constantness (up to 16 decimal digits---the available precision for [IEEE 754 decimal64](https://en.wikipedia.org/wiki/Decimal64_floating-point_format) formatted floats (referred to as *double precision* in C++)) can be acheived by setting `nl_rel_tol = 1e-12`, but more nonlinear iterations are required in this case.
+There is usually a variety of parameters available to `Executioner` objects that are used to set solver tolerances. Sometimes, even slight changes to them can have profound numerical effects, and certain types of tolerances supersede others. For example, the same desired effect of constantness (up to 16 decimal digits---the available precision for [IEEE 754 decimal64](https://en.wikipedia.org/wiki/Decimal64_floating-point_format) formatted floats (referred to as *double precision* in C++)) can be achieved by setting `nl_rel_tol = 1e-12`, but more nonlinear iterations are required in this case.
 
 *For more information about common solver parameters, please see the [source/executioners/Steady.md] or [source/executioners/Transient.md] page.*
 !alert-end!
@@ -242,9 +242,8 @@ As changes to the repository are made, it can be helpful to frequently check the
 
 Now, commit and push the changes to the remote repository:
 
-!listing language=bash
-git commit -m "developed auxkernel for computing the velocity associated with a pressure gradient in accordance with Darcy's law"
-git push
+!include commands/git_commit.md
+         replace=['<m>', '"developed auxkernel for computing the velocity associated with a pressure gradient in accordance with Darcy\'s law"']
 
 !content pagination previous=tutorial01_app_development/step09_mat_props.md
                     next=tutorial01_app_development/step11_transient_kernel.md

@@ -127,9 +127,8 @@ Add the changes made to the `DarcyPressure` object files and `pressure_diffusion
 
 Now, commit and push the changes to the remote repository:
 
-!listing language=bash
-git commit -m 'defined "permeability" and "viscosity" input parameters'
-git push
+!include commands/git_commit.md
+         replace=['<m>', '\'defined "permeability" and "viscosity" input parameters\'']
 
 !content pagination previous=tutorial01_app_development/step05_kernel_object.md
                     next=tutorial01_app_development/step07_parallel.md
