@@ -35,6 +35,7 @@
 
 // Forward declarations
 class Executioner;
+class Runner;
 class MooseApp;
 class Backup;
 class FEProblemBase;
@@ -66,6 +67,14 @@ class MooseApp : public ConsoleStreamInterface,
                  public libMesh::ParallelObject
 {
 public:
+  struct SolveConfig
+  {
+    SolveConfig() : sub_relaxation_factor(1.0) {}
+    Real sub_relaxation_factor;
+    std::vector<std::string> sub_transformed_vars;
+    std::vector<PostprocessorName> sub_transformed_pps;
+  };
+
   static const RestartableDataMapName MESH_META_DATA;
 
   static InputParameters validParams();
@@ -302,12 +311,27 @@ public:
   /**
    * Retrieve the Executioner for this App
    */
-  Executioner * getExecutioner() const { return _executioner.get(); }
+  Executioner * getExecutioner() const;
+  Runner * getRunner() const { return _runner.get(); }
+  bool useRunner() const { return _use_runner; }
+  FEProblemBase & feProblem() const;
 
   /**
    * Set the Executioner for this App
    */
   void setExecutioner(std::shared_ptr<Executioner> && executioner) { _executioner = executioner; }
+  void setRunner(std::shared_ptr<Runner> && runner) { _runner = runner; }
+  void addRunner(std::shared_ptr<Runner> && runner);
+  Runner & getRunner(const std::string & name) { return *_runners[name]; }
+
+  /**
+   * This info is stored here because we need a "globalish" place to put it in
+   * order to allow communication between a multiapp and solver-specific
+   * internals (i.e. relating to fixed-point inner loops like picard, etc.)
+   * for handling subapp-specific modifications necessary for those solve
+   * processes.
+   */
+  SolveConfig & solveConfig() { return _solve_config; }
 
   /**
    * Returns a writable Boolean indicating whether this app will use a Nonlinear or Eigen System.
@@ -938,6 +962,11 @@ protected:
 
   /// Pointer to the executioner of this run (typically build by actions)
   std::shared_ptr<Executioner> _executioner;
+  std::shared_ptr<Runner> _runner;
+  std::map<std::string, std::shared_ptr<Runner>> _runners;
+  SolveConfig _solve_config;
+
+  const bool _use_runner = false;
 
   /// Boolean to indicate whether to use a Nonlinear or EigenSystem (inspected by actions)
   bool _use_nonlinear;

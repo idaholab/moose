@@ -19,6 +19,7 @@ class MooseEnumItem
 {
 public:
   static const int INVALID_ID;
+  MooseEnumItem();
   MooseEnumItem(const std::string & name, const int & id = INVALID_ID);
   ~MooseEnumItem() = default;
   MooseEnumItem(const MooseEnumItem & other);

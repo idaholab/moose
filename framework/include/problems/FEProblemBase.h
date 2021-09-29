@@ -1608,6 +1608,9 @@ public:
    * Convenience function for performing execution of MOOSE systems.
    */
   virtual void execute(const ExecFlagType & exec_type);
+  virtual void executeAllObjects(const ExecFlagType & exec_type);
+
+  virtual Runner & getRunner(const std::string & name) { return _app.getRunner(name); }
 
   /**
    * Call compute methods on UserObjects.

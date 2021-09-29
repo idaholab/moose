@@ -176,6 +176,18 @@ FixedPointSolve::solve()
 {
   TIME_SECTION("PicardSolve", 1);
 
+  // subapps need some extra setup that needs to occur after the multiapp has
+  // been initiallized and set some relevant solve parameters.  This setup is
+  // done on-demand here.
+  if (!_app.isUltimateMaster() && !_sub_allocated)
+  {
+    _sub_allocated = true;
+    _secondary_relaxation_factor = _app.solveConfig().sub_relaxation_factor;
+    _secondary_transformed_variables = _app.solveConfig().sub_transformed_vars;
+    _secondary_transformed_pps = _app.solveConfig().sub_transformed_pps;
+    allocateStorage(false);
+  }
+
   Real current_dt = _problem.dt();
 
   _fixed_point_timestep_begin_norm.clear();
@@ -480,11 +492,6 @@ FixedPointSolve::examineFixedPointConvergence(bool & converged)
       _fixed_point_status = MooseFixedPointConvergenceReason::CONVERGED_RELATIVE;
       return true;
     }
-  }
-  if (_executioner.augmentedFixedPointConvergenceCheck())
-  {
-    _fixed_point_status = MooseFixedPointConvergenceReason::CONVERGED_CUSTOM;
-    return true;
   }
   if (std::abs(_pp_new - _pp_old) < _custom_abs_tol)
   {

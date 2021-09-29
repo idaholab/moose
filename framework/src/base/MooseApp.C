@@ -21,6 +21,7 @@
 #include "MooseSyntax.h"
 #include "MooseInit.h"
 #include "Executioner.h"
+#include "Runner.h"
 #include "PetscSupport.h"
 #include "Conversion.h"
 #include "CommandLine.h"
@@ -125,6 +126,8 @@ MooseApp::validParams()
       "registry", "--registry", "Lists all known objects and actions.");
   params.addCommandLineParam<bool>(
       "registry_hit", "--registry-hit", "Lists all known objects and actions in hit format.");
+  params.addCommandLineParam<bool>(
+      "use_runner", "--runner", "Use the new Runner system instead of Executioners");
 
   params.addCommandLineParam<bool>(
       "apptype", "--type", false, "Return the name of the application object.");
@@ -326,6 +329,7 @@ MooseApp::MooseApp(InputParameters parameters)
     _action_factory(*this),
     _action_warehouse(*this, _syntax, _action_factory),
     _parser(*this, _action_warehouse),
+    _use_runner(parameters.get<bool>("use_runner")),
     _use_nonlinear(true),
     _use_eigen_value(false),
     _enable_unused_check(WARN_UNUSED),
@@ -1039,7 +1043,7 @@ MooseApp::errorCheck()
 
   _parser.errorCheck(*_comm, warn, err);
 
-  auto apps = _executioner->feProblem().getMultiAppWarehouse().getObjects();
+  auto apps = feProblem().getMultiAppWarehouse().getObjects();
   for (auto app : apps)
     for (unsigned int i = 0; i < app->numLocalApps(); i++)
       app->localApp(i)->errorCheck();
@@ -1055,10 +1059,17 @@ MooseApp::executeExecutioner()
     return;
 
   // run the simulation
-  if (_executioner)
+  if (_use_runner && _runner)
   {
     Moose::PetscSupport::petscSetupOutput(_command_line.get());
 
+    _runner->init();
+    errorCheck();
+    _runner->run();
+  }
+  else if (_executioner)
+  {
+    Moose::PetscSupport::petscSetupOutput(_command_line.get());
     _executioner->init();
     errorCheck();
     _executioner->execute();
@@ -1124,7 +1135,7 @@ std::shared_ptr<Backup>
 MooseApp::backup()
 {
   mooseAssert(_executioner, "Executioner is nullptr");
-  FEProblemBase & fe_problem = _executioner->feProblem();
+  FEProblemBase & fe_problem = feProblem();
 
   RestartableDataIO rdio(fe_problem);
   return rdio.createBackup();
@@ -1136,7 +1147,7 @@ MooseApp::restore(std::shared_ptr<Backup> backup, bool for_restart)
   TIME_SECTION("restore", 2, "Restoring Application");
 
   mooseAssert(_executioner, "Executioner is nullptr");
-  FEProblemBase & fe_problem = _executioner->feProblem();
+  FEProblemBase & fe_problem = feProblem();
 
   RestartableDataIO rdio(fe_problem);
   rdio.restoreBackup(backup, for_restart);
@@ -1161,6 +1172,25 @@ void
 MooseApp::disableCheckUnusedFlag()
 {
   _enable_unused_check = OFF;
+}
+
+FEProblemBase &
+MooseApp::feProblem() const
+{
+  return _runner.get() ? _runner->feProblem() : _executioner->feProblem();
+}
+
+void
+MooseApp::addRunner(std::shared_ptr<Runner> && runner)
+{
+  _runners[runner->name()] = runner;
+  _runner = runner;
+}
+
+Executioner *
+MooseApp::getExecutioner() const
+{
+  return _executioner.get() ? _executioner.get() : _runner.get();
 }
 
 void
@@ -2204,7 +2234,7 @@ MooseApp::removeRelationshipManager(std::shared_ptr<RelationshipManager> rm)
 
   if (_executioner)
   {
-    auto & problem = _executioner->feProblem();
+    auto & problem = feProblem();
     if (undisp_clone)
     {
       problem.removeAlgebraicGhostingFunctor(*undisp_clone);
@@ -2319,7 +2349,7 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type,
       {
         MeshBase & undisp_mesh_base = mesh->getMesh();
         const DofMap * const undisp_nl_dof_map =
-            _executioner ? &_executioner->feProblem().systemBaseNonlinear().dofMap() : nullptr;
+            _executioner ? &feProblem().systemBaseNonlinear().dofMap() : nullptr;
         undisp_mesh_base.add_ghosting_functor(
             createRMFromTemplateAndInit(*rm, undisp_mesh_base, undisp_nl_dof_map));
 
@@ -2329,9 +2359,8 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type,
         {
           MeshBase & disp_mesh_base = _action_warehouse.displacedMesh()->getMesh();
           const DofMap * disp_nl_dof_map = nullptr;
-          if (_executioner && _executioner->feProblem().getDisplacedProblem())
-            disp_nl_dof_map =
-                &_executioner->feProblem().getDisplacedProblem()->systemBaseNonlinear().dofMap();
+          if (_executioner && feProblem().getDisplacedProblem())
+            disp_nl_dof_map = &feProblem().getDisplacedProblem()->systemBaseNonlinear().dofMap();
           disp_mesh_base.add_ghosting_functor(
               createRMFromTemplateAndInit(*rm, disp_mesh_base, disp_nl_dof_map));
         }
@@ -2342,12 +2371,12 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type,
     }
     else // rm_type is algebraic or coupling
     {
-      if (!_executioner)
+      if (!_executioner && !_runner)
         mooseError("We must have an executioner by now or else we do not have to data to add "
                    "algebraic or coupling functors to in MooseApp::attachRelationshipManagers");
 
       // Now we've built the problem, so we can use it
-      auto & problem = _executioner->feProblem();
+      auto & problem = feProblem();
       auto & undisp_nl = problem.systemBaseNonlinear();
       auto & undisp_nl_dof_map = undisp_nl.dofMap();
       auto & undisp_mesh = problem.mesh().getMesh();

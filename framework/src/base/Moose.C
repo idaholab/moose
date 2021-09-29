@@ -93,6 +93,7 @@ addActionTypes(Syntax & syntax)
   /**************************/
   registerMooseObjectTask("create_problem",               Problem,                false);
   registerMooseObjectTask("setup_executioner",            Executioner,            false);
+  registerMooseObjectTask("setup_runner",            Runner,            false);
 
   // This task does not construct an object, but it needs all of the parameters that
   // would normally be used to construct an object.
@@ -274,6 +275,7 @@ addActionTypes(Syntax & syntax)
                            "(setup_postprocessor_data)"
                            "(setup_time_integrator)"
                            "(setup_executioner)"
+                           "(setup_runner)"
                            "(check_integrity_early)"
                            "(setup_predictor)"
                            "(init_displaced_problem)"
@@ -478,6 +480,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("AddFieldSplitAction", "Preconditioning/*/*");
 
   registerSyntax("CreateExecutionerAction", "Executioner");
+  registerSyntax("CreateRunnerAction", "Runner/*");
   registerSyntax("SetupTimeStepperAction", "Executioner/TimeStepper");
   registerSyntax("SetupTimeIntegratorAction", "Executioner/TimeIntegrator");
 
