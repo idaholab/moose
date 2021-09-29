@@ -21,7 +21,7 @@ h2 {
 h3 {
   font-size: 130%;
   margin-top: 1.5rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
 }
 
 pre.moose-pre {
@@ -123,4 +123,36 @@ h3.footer {
   color: #888;
   margin-bottom: 1rem;
   font-size: 110%;
+}
+
+div.tutorial.row {
+}
+
+div.tutorial.row > div > h3 {
+  font-weight: 700;
+  font-size: 105%;
+  color: #444;
+}
+
+div.tutorial-content>div>ol {
+  padding-left: 0;
+  list-style: none;
+  counter-reset: li;
+  position: relative;
+  padding-left: 24px;
+}
+
+div.tutorial-content>div>ol>li {
+  padding-left: 0;
+}
+
+div.tutorial-content>div>ol>li::before {
+  content: counter(li);
+  counter-increment: li;
+  font-weight: 700;
+  position: absolute;
+  left: 0;
+  text-align: right;
+  width: 24px;
+  color: #AAA;
 }
