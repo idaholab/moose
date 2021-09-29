@@ -184,47 +184,17 @@ HillConstants::rotateHillConstants(const std::vector<Real> & hill_constants_inpu
   // Transformed the Hill tensor given the total rotation matrix
   // https://scicomp.stackexchange.com/questions/35600/4th-order-tensor-rotation-sources-to-refer
   DenseMatrix<Real> transformation_matrix_n(6, 6);
-  transformation_matrix_n(0, 0) = trm(0, 0) * trm(0, 0);
-  transformation_matrix_n(0, 1) = trm(0, 1) * trm(0, 1);
-  transformation_matrix_n(0, 2) = trm(0, 2) * trm(0, 2);
-  transformation_matrix_n(0, 3) = trm(0, 1) * trm(0, 2);
-  transformation_matrix_n(0, 4) = trm(0, 0) * trm(0, 2);
-  transformation_matrix_n(0, 5) = trm(0, 0) * trm(0, 1);
-
-  transformation_matrix_n(1, 0) = trm(1, 0) * trm(1, 0);
-  transformation_matrix_n(1, 1) = trm(1, 1) * trm(1, 1);
-  transformation_matrix_n(1, 2) = trm(1, 2) * trm(1, 2);
-  transformation_matrix_n(1, 3) = trm(1, 1) * trm(1, 2);
-  transformation_matrix_n(1, 4) = trm(1, 0) * trm(1, 2);
-  transformation_matrix_n(1, 5) = trm(1, 0) * trm(1, 1);
-
-  transformation_matrix_n(2, 0) = trm(2, 0) * trm(2, 0);
-  transformation_matrix_n(2, 1) = trm(2, 1) * trm(2, 1);
-  transformation_matrix_n(2, 2) = trm(2, 2) * trm(2, 2);
-  transformation_matrix_n(2, 3) = trm(2, 1) * trm(2, 2);
-  transformation_matrix_n(2, 4) = trm(2, 0) * trm(2, 2);
-  transformation_matrix_n(2, 5) = trm(2, 0) * trm(2, 1);
-
-  transformation_matrix_n(3, 0) = 2.0 * trm(1, 0) * trm(2, 0);
-  transformation_matrix_n(3, 1) = 2.0 * trm(1, 1) * trm(2, 1);
-  transformation_matrix_n(3, 2) = 2.0 * trm(1, 2) * trm(2, 2);
-  transformation_matrix_n(3, 3) = trm(1, 1) * trm(2, 2) + trm(1, 2) * trm(2, 1);
-  transformation_matrix_n(3, 4) = trm(1, 0) * trm(2, 2) + trm(1, 2) * trm(2, 0);
-  transformation_matrix_n(3, 5) = trm(1, 0) * trm(2, 1) + trm(1, 1) * trm(2, 0);
-
-  transformation_matrix_n(4, 0) = 2.0 * trm(0, 0) * trm(2, 0);
-  transformation_matrix_n(4, 1) = 2.0 * trm(0, 1) * trm(2, 1);
-  transformation_matrix_n(4, 2) = 2.0 * trm(0, 2) * trm(2, 2);
-  transformation_matrix_n(4, 3) = trm(0, 1) * trm(2, 2) + trm(0, 2) * trm(2, 1);
-  transformation_matrix_n(4, 4) = trm(0, 0) * trm(2, 2) + trm(0, 2) * trm(2, 0);
-  transformation_matrix_n(4, 5) = trm(0, 0) * trm(2, 1) + trm(0, 1) * trm(2, 0);
-
-  transformation_matrix_n(5, 0) = 2.0 * trm(0, 0) * trm(1, 0);
-  transformation_matrix_n(5, 1) = 2.0 * trm(0, 1) * trm(1, 1);
-  transformation_matrix_n(5, 2) = 2.0 * trm(0, 2) * trm(1, 2);
-  transformation_matrix_n(5, 3) = trm(0, 1) * trm(1, 2) + trm(0, 2) * trm(1, 1);
-  transformation_matrix_n(5, 4) = trm(0, 0) * trm(1, 2) + trm(0, 2) * trm(1, 0);
-  transformation_matrix_n(5, 5) = trm(0, 0) * trm(1, 1) + trm(0, 1) * trm(1, 0);
+  const static std::array<std::size_t, 3> a = {{1, 0, 0}};
+  const static std::array<std::size_t, 3> b = {{2, 2, 1}};
+  for (std::size_t i = 0; i < 3; ++i)
+    for (std::size_t j = 0; j < 3; ++j)
+    {
+      transformation_matrix_n(i, j) = trm(i, j) * trm(i, j);
+      transformation_matrix_n(i + 3, j) = 2.0 * trm((i + 1) % 3, j) * trm((i + 2) % 3, j);
+      transformation_matrix_n(j, i + 3) = trm(j, (i + 1) % 3) * trm(j, (i + 2) % 3);
+      transformation_matrix_n(i + 3, j + 3) =
+          trm(a[i], a[j]) * trm(b[i], b[j]) + trm(a[i], b[j]) * trm(b[i], a[j]);
+    }
 
   _hill_tensor.left_multiply(transformation_matrix_n);
   _hill_tensor.right_multiply_transpose(transformation_matrix_n);
