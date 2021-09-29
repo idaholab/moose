@@ -65,6 +65,17 @@ public:
    */
   virtual unsigned int getLayer(Point p) const;
 
+  /**
+   * Get the center coordinates for the layers (along given direction)
+   */
+  const std::vector<Real> & getLayerCenters() const { return _layer_centers; }
+
+  /**
+   * Get direction of the layers
+   * @return layer direction
+   */
+  unsigned int direction() const { return _direction; }
+
   virtual void initialize();
   virtual void finalize();
   virtual void threadJoin(const UserObject & y);
@@ -86,6 +97,11 @@ protected:
    * Compute bounds, restricted to blocks if given
    */
   void getBounds();
+
+  /**
+   * Compute the center points for each layer
+   */
+  void computeLayerCenters();
 
   /// Name of this object
   std::string _layered_base_name;
@@ -116,6 +132,9 @@ protected:
 
   /// true if this object operates on the displaced mesh, otherwise false
   bool _using_displaced_mesh;
+
+  /// center coordinates of each layer
+  std::vector<Real> _layer_centers;
 
   Real _direction_min;
   Real _direction_max;

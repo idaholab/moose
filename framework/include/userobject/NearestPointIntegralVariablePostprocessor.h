@@ -41,5 +41,7 @@ public:
   virtual void finalize() override;
 
 protected:
+  virtual const std::vector<Point> spatialPoints() const override { return getPoints(); }
+
   VectorPostprocessorValue & _np_post_processor_values;
 };

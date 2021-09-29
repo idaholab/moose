@@ -7,4 +7,13 @@
     design = 'SpatialUserObjectVectorPostprocessor.md'
     requirement = 'The system shall be able to query a spatial user object and aggregate the results into a vector postprocessor.'
   []
+  [missing_pts]
+    type = RunException
+    input = spatial_userobject.i
+    cli_args="VectorPostprocessors/vpp/points='0 0 0'"
+    expect_err = "Both 'points' and 'points_file' cannot be specified simultaneously."
+    issues = '#19831'
+    design = 'SpatialUserObjectVectorPostprocessor.md'
+    requirement = 'The system shall error if the points are specified in more than one manner for a spatial vector postprocessor.'
+  []
 []

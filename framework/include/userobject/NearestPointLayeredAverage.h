@@ -35,4 +35,3 @@ public:
 
   NearestPointLayeredAverage(const InputParameters & parameters);
 };
-
