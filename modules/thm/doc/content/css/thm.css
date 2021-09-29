@@ -113,3 +113,14 @@ div.alert2.warning {
   border: 1px solid rgb(191, 53, 54);
   background-color: rgb(252, 236, 234);
 }
+
+.footer {
+  font-size: 90%;
+}
+
+h3.footer {
+  font-weight: bold;
+  color: #888;
+  margin-bottom: 1rem;
+  font-size: 110%;
+}
