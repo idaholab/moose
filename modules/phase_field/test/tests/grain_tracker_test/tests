@@ -225,14 +225,36 @@
     design = "GrainTracker.md"
   [../]
 
-  [./test_ebsd]
-    type = 'Exodiff'
-    input = 'grain_tracker_ebsd.i'
-    exodiff = 'grain_tracker_ebsd_out.e'
-
-    requirement = "The GrainTracker shall support reading EBSD data to create initial conditions."
+  [./ebsd]
+    requirement = "The GrainTracker shall support reading EBSD data to create initial conditions where IDs in the data:"
     issues = '#5067 #9060'
     design = "PolycrystalICs.md"
+
+    [./test_ebsd]
+      type = 'Exodiff'
+      input = 'grain_tracker_ebsd.i'
+      exodiff = 'grain_tracker_ebsd_out.e'
+
+      detail = 'are contigious starting at zero,'
+    [../]
+
+    [./test_ebsd_no_zero_id]
+      type = 'Exodiff'
+      input = 'grain_tracker_ebsd.i'
+      exodiff = 'grain_tracker_ebsd_9_no_zero_out.e'
+      cli_args = 'Mesh/ebsd_mesh/filename=ebsd_9_no_zero.txt Outputs/file_base=grain_tracker_ebsd_9_no_zero_out'
+
+      detail = 'are contigious starting not starting at zero,'
+    [../]
+
+    [./test_ebsd_gap_id]
+      type = 'Exodiff'
+      input = 'grain_tracker_ebsd.i'
+      exodiff = 'grain_tracker_ebsd_8_with_gap_out.e'
+      cli_args = 'Mesh/ebsd_mesh/filename=ebsd_8_with_gap.txt Outputs/file_base=grain_tracker_ebsd_8_with_gap_out'
+
+      detail = 'and arbitrary with gaps.'
+    [../]
   [../]
 
   [./test_ebsd_adapt]
