@@ -1,18 +1,23 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
+# FreeBoundary1Phase
 
-# FreeBoundary
+This is a single-phase [1-D flow boundary component](component_groups/flow_boundary.md)
+in which no boundary data is supplied by the user. This component should be used
+only if the boundary is a supersonic exit, since this is the only situation in
+which no external characteristics enter the domain.
 
-!alert construction title=Undocumented Class
-The FreeBoundary has not been documented. The content contained on this page includes the
-typical automatic documentation associated with a MooseObject; however, what is contained is
-ultimately determined by what is necessary to make the documentation clear for users.
+## Usage
 
-!syntax description /Components/FreeBoundary
+!syntax parameters /Components/FreeBoundary1Phase
 
-!syntax parameters /Components/FreeBoundary
+!syntax inputs /Components/FreeBoundary1Phase
 
-!syntax inputs /Components/FreeBoundary
+!syntax children /Components/FreeBoundary1Phase
 
-!syntax children /Components/FreeBoundary
+## Formulation
 
-!bibtex bibliography
+In this formulation, no boundary data is supplied; thus, the boundary flux is evaluated
+entirely using the interior solution:
+
+\begin{equation}
+  \mathbf{F}_\text{b} = \mathcal{f}(\mathbf{U}_i) \eqp
+\end{equation}

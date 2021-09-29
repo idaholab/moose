@@ -6,8 +6,8 @@ Flow boundary components are attached to ends of
 ## Usage
 
 A flow boundary component connects to a flow channel end using the `input`
-parameter. The value of this parameter corresponds to the [boundary name corresponding
-to a specific end of a flow channel](component_groups/flow_channel.md#spatial_domain).
+parameter. The value of this parameter corresponds to the
+[boundary name corresponding to a specific end of a flow channel](component_groups/flow_channel.md#spatial_domain).
 
 ## Formulation id=formulation
 
@@ -32,7 +32,7 @@ using a numerical flux function $\mathcal{F}(\mathbf{U}_L, \mathbf{U}_R)$,
 taking the interior solution $\mathbf{U}_i$ and ghost cell solution
 $\mathbf{U}_\text{ghost}$ as inputs:
 \begin{equation}
-  \mathbf{F} = \mathcal{F}(\mathbf{U}_i, \mathbf{U}_\text{ghost}) \eqc
+  \mathbf{F}_\text{b} = \mathcal{F}(\mathbf{U}_i, \mathbf{U}_\text{ghost}) \eqc
 \end{equation}
 in this case for the "right" boundary of the flow channel.
 

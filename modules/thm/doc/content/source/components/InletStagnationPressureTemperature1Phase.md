@@ -9,15 +9,17 @@ and temperature are known.
 
 The user specifies the following parameters:
 
-- `p0`: the stagnation pressure, and
-- `T0`: the stagnation temperature.
+- [!param](/Components/InletStagnationPressureTemperature1Phase/p0): the stagnation pressure, and
+- [!param](/Components/InletStagnationPressureTemperature1Phase/T0): the stagnation temperature.
 
 The formulation of this boundary condition assumes flow +entering+ the flow
 channel at this boundary.
 
 +Reversible flow+: If +exit+ conditions are encountered,
 then the boundary condition is automatically changed to an outlet formulation.
-This behavior can be disabled by setting the `reversible` parameter to `false`.
+This behavior can be disabled by setting the
+[!param](/Components/InletStagnationPressureTemperature1Phase/reversible)
+parameter to `false`.
 
 !syntax parameters /Components/InletStagnationPressureTemperature1Phase
 
@@ -35,7 +37,8 @@ quantities:
 - $T_{0,\text{ext}}$, the provided exterior stagnation temperature, and
 - $u_i$, the interior velocity.
 
-If the boundary is specified to be reversible (`reversible = true`) and
+If the boundary is specified to be reversible
+([!param](/Components/InletDensityVelocity1Phase/reversible) set to `true`) and
 the flow is +exiting+, the ghost cell is instead computed with the following
 quantities:
 
