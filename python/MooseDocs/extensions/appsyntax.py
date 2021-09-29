@@ -432,9 +432,9 @@ class SyntaxParameterCommand(SyntaxCommandBase):
         elif obj.parameters:
             parameters.update(obj.parameters)
 
-        obj_syntax = self.settings['syntax']
         param_name = self.settings['_param']
         if param_name not in parameters:
+            obj_syntax = self.settings['syntax']
             results = mooseutils.levenshteinDistance(param_name, parameters.keys(), 5)
             msg = "Unable to locate the parameter '{}/{}', did you mean:\n".format(obj_syntax, param_name)
             for res in results:
