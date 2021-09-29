@@ -5,7 +5,6 @@ Content:
             - index.md
             - nqa-1.md
             - pln-4005.md
-            - sqa_setup.md
 
     moose:
         root_dir: ${MOOSE_DIR}/framework/doc/content

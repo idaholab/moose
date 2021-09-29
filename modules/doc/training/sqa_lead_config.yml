@@ -3,6 +3,10 @@ Content:
         root_dir: ${MOOSE_DIR}/modules/doc/training/content/sqa/training/lead
         content:
             - index.md
+            - sqa_moosedocs.md
+            - sqa_review.md
+            - sqa_civet.md
+            - sqa_release.md
 
     moose:
         root_dir: ${MOOSE_DIR}/framework/doc/content
@@ -41,6 +45,7 @@ Extensions:
     MooseDocs.extensions.table: default
     MooseDocs.extensions.content: default
     MooseDocs.extensions.modal: default
+    MooseDocs.extensions.alert: default
     MooseDocs.extensions.acronym:
         acronyms: !include framework/doc/acronyms.yml
     MooseDocs.extensions.listing:
