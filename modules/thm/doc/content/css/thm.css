@@ -92,20 +92,24 @@ nav {
     color: #AAA;
 }
 
-.note, .tip, .warning {
+div.alert2 {
   border-radius: 4px;
   margin-bottom: 10px;
   margin-top: 10px;
-  padding: 0 1em;
+  padding: 1em;
   font-size: 87.5%;
 }
 
-.note, .tip {
+div.alert2>p {
+  margin: 0;
+}
+
+div.alert2.note, div.alert2.tip {
   border: 1px solid rgb(41, 137, 211);
   background-color: rgb(225, 243, 256);
 }
 
-.warning {
+div.alert2.warning {
   border: 1px solid rgb(191, 53, 54);
   background-color: rgb(252, 236, 234);
 }
