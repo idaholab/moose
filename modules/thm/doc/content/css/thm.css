@@ -160,3 +160,31 @@ div.tutorial-content>div>ol>li::before {
 div.tutorial-nav.row>div>div>a.moose-content-next {
   float: none;
 }
+
+.smaller {
+  font-size: 90%;
+}
+
+div.enumerate {
+  padding-left: 0;
+}
+
+div.enumerate>ul.browser-default {
+  margin-left: 0;
+  list-style: none;
+  position: relative;
+  padding-left: 16px;
+}
+
+div.enumerate>ul.browser-default>li {
+  /* padding-left: 0; */
+  margin-left: 0;
+}
+
+div.enumerate>ul.browser-default>li::before {
+  content: "\2013\a0";
+  position: absolute;
+  left: 0;
+  text-align: right;
+  width: 16px;
+}
