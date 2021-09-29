@@ -156,3 +156,7 @@ div.tutorial-content>div>ol>li::before {
   width: 24px;
   color: #AAA;
 }
+
+div.tutorial-nav.row>div>div>a.moose-content-next {
+  float: none;
+}
