@@ -30,6 +30,9 @@ public:
   virtual void allocateStorage(const bool primary) override final;
 
 private:
+  bool _need_pp_values_init = true;
+  void initPostprocessorValues();
+
   /**
    * Saves the current values of the variables, and update the old(er) vectors.
    *
