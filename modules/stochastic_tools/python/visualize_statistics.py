@@ -9,6 +9,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import os
+import sys
 import argparse
 import pandas as pd
 import json
@@ -36,14 +37,14 @@ def command_line_options():
     parser.add_argument('-ci', '--confidence-interval', dest='confidence_interval', default=None, nargs=2, type=float, help="Pair of confidence interval levels to use, by default the largest and smallest are used.")
     parser.add_argument('-t', '--times', default=[], nargs='+', type=float, help="List of times to consider, by all times are considered.")
     parser.add_argument('-n', '--names', default='{}', type=str, help="Map between the value name and display name in json format. Example: '{\"value1_name\" : \"Value One\", \"value2_name\" : \"Value Two\"}'")
-    parser.add_argument('-sn', '--stat-names', dest='stat_names', default='{}', type=str, help="Map between the statistic name and  what is displayed in json format. Example: '{\"MEAN\" : \"Average\", \"STDDEV\" : \"Standard Deviation\"}'")
-    parser.add_argument('-nf', '--number-format', dest='number_format', default='.4g', type=str, help="The number format for tables.")
+    parser.add_argument('-sn', '--stat-names', default='{}', type=str, help="Map between the statistic name and  what is displayed in json format. Example: '{\"MEAN\" : \"Average\", \"STDDEV\" : \"Standard Deviation\"}'")
+    parser.add_argument('-nf', '--number-format', default='.4g', type=str, help="The number format for tables.")
     parser.add_argument('-o', '--output', default=None, type=str, help="File name to save figure or table")
-    parser.add_argument('--ignore-ci', dest='include_ci', action='store_false', help="Use this argument to ignore confidence intervals.")
+    parser.add_argument('--ignore-ci', action='store_true', help="Use this argument to ignore confidence intervals.")
 
     parser.add_argument('--xvalue', default='Time', type=str, help="The value to use for x value in the line plot. Default is time. This is only relevant with '--line-plot'.")
     parser.add_argument('--xlabel', default=None, type=str, help="The x-axis label in the line plot. Default is whatever '--xvalue' is. This is only relevant with '--line-plot'.")
-    parser.set_defaults(inclue_ci=True, format=0)
+    parser.set_defaults(ignore_ci=False, format=0)
     return parser.parse_args()
 
 def statTable(data, num_form):
@@ -59,7 +60,7 @@ def statTable(data, num_form):
 
     for vname in values:
         row = data[(data.vector_name == vname)].iloc(0)[0]
-        if row['ci_levels'] is not np.nan:
+        if isinstance(row['ci_levels'], tuple):
             tab['Values'].append('{} ({}%, {}%) CI'.format(row['vector_name'], row['ci_levels'][0] * 100, row['ci_levels'][1] * 100))
         else:
             tab['Values'].append(row['vector_name'])
@@ -73,7 +74,7 @@ def statTable(data, num_form):
         for vname in values:
             for time in times:
                 row = data[(data.vector_name == vname) & (data.time == time) & (data.statistic == stat)].iloc(0)[0]
-                if row['ci_levels'] is not np.nan:
+                if isinstance(row['ci_levels'], tuple):
                     tab[stat].append('{:{nf}} ({:{nf}}, {:{nf}})'.format(row['value'], row['confidence_interval'][0], row['confidence_interval'][1], nf=num_form))
                 else:
                     tab[stat].append('{:{nf}}'.format(row['value'], nf=num_form))
@@ -91,7 +92,7 @@ def statBar(data):
         ciminus = []
         ciplus = []
         for index, row in df.iterrows():
-            if row['ci_levels'] is not np.nan:
+            if isinstance(row['ci_levels'], tuple):
                 vnames.append('{} ({}%, {}%) CI'.format(row['vector_name'], row['ci_levels'][0] * 100, row['ci_levels'][1] * 100))
                 ciminus.append(row['value'] - row['confidence_interval'][0])
                 ciplus.append(row['confidence_interval'][1] - row['value'])
@@ -129,7 +130,7 @@ def statTimeLine(data, xlabel):
                 ciminus = []
                 ciplus = []
                 for index, row in df.iterrows():
-                    if row['ci_levels'] is not np.nan:
+                    if isinstance(row['ci_levels'], tuple):
                         ciminus.append(row['value'] - row['confidence_interval'][0])
                         ciplus.append(row['confidence_interval'][1] - row['value'])
                     else:
@@ -170,19 +171,19 @@ def statLine(data, xname):
                 if len(vecs) > 1:
                     name.append(vec)
                 name.append(stat)
-                if  yrow['confidence_interval'] is not np.nan and len(vecs) > 1:
+                if  isinstance(yrow['confidence_interval'], tuple) and len(vecs) > 1:
                     name.append('({}%, {}%) CI'.format(ci_df.ci_levels.iloc[0][0] * 100, ci_df.ci_levels.iloc[0][1] * 100))
                 if len(df.time) > 1:
                     name.append('Time = {}'.format(time))
                 if len(name):
                     line['name'] = ' '.join(name)
 
-                if yrow['confidence_interval'] is not np.nan:
+                if isinstance(yrow['confidence_interval'], tuple):
                     ciminus = np.asarray(yrow['value']) - np.asarray(yrow['confidence_interval'][0])
                     ciplus = np.asarray(yrow['confidence_interval'][1]) - np.asarray(yrow['value'])
                     line['error_y'] = dict(type='data', array=ciplus, arrayminus=ciminus)
 
-                if xrow['confidence_interval'] is not np.nan:
+                if isinstance(xrow['confidence_interval'], tuple):
                     ciminus = np.asarray(xrow['value']) - np.asarray(xrow['confidence_interval'][0])
                     ciplus = np.asarray(xrow['confidence_interval'][1]) - np.asarray(xrow['value'])
                     line['error_x'] = dict(type='data', array=ciplus, arrayminus=ciminus)
@@ -245,7 +246,7 @@ def linePlot(data, xname, file):
     else:
         plotly.io.write_image(fig, os.path.abspath(file))
 
-if __name__ == '__main__':
+def main():
 
     # Command-line options
     opt = command_line_options()
@@ -291,7 +292,7 @@ if __name__ == '__main__':
                 repinfo = data.info(objname)
                 ci_levels = np.nan
                 ci_val = np.nan
-                if opt.include_ci and 'confidence_intervals' in repinfo:
+                if not opt.ignore_ci and 'confidence_intervals' in repinfo:
                     levels = repinfo['confidence_intervals']['levels']
                     ci_levels = (min(levels), max(levels)) if opt.confidence_interval is None else tuple(opt.confidence_interval)
                     ci1, ci2 = (val[1][levels.index(ci_levels[0])], val[1][levels.index(ci_levels[1])])
@@ -345,3 +346,6 @@ if __name__ == '__main__':
         barPlot(frame, opt.output)
     elif opt.format == 4:
         linePlot(frame, opt.xlabel, opt.output)
+
+if __name__ == '__main__':
+    sys.exit(main())

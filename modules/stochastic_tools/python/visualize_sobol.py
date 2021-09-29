@@ -9,6 +9,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import os
+import sys
 import argparse
 import pandas as pd
 import json
@@ -37,13 +38,13 @@ def command_line_options():
     parser.add_argument('-ci', '--confidence-interval', dest='confidence_interval', default=None, nargs=2, type=str, help="Pair of confidence interval levels to use, by default the largest and smallest are used.")
     parser.add_argument('-t', '--time', default=None, type=float, help="Time to consider, by default the last time is used.")
     parser.add_argument('-n', '--names', default='{}', type=str, help="Map between the value name and display name in json format. Example: '{\"value1_name\" : \"Value One\", \"value2_name\" : \"Value Two\"}'")
-    parser.add_argument('-p', '--param-names', dest='param_names', nargs='+', default=[], type=str, help="List of names to display for the parameters.")
-    parser.add_argument('-nf', '--number-format', dest='number_format', default='.4g', type=str, help="The number format for tables.")
+    parser.add_argument('-p', '--param-names', nargs='+', default=[], type=str, help="List of names to display for the parameters.")
+    parser.add_argument('-nf', '--number-format', default='.4g', type=str, help="The number format for tables.")
     parser.add_argument('-o', '--output', default=None, type=str, help="File name to save figure or table")
-    parser.add_argument('--ignore-ci', dest='include_ci', action='store_false', help="Use this argument to ignore confidence intervals.")
-    parser.add_argument('--log-scale', dest='log_scale', action='store_true', help="Use this argument to plot on logrithmic scale.")
+    parser.add_argument('--ignore-ci', action='store_true', help="Use this argument to ignore confidence intervals.")
+    parser.add_argument('--log-scale', action='store_true', help="Use this argument to plot on logrithmic scale.")
 
-    parser.set_defaults(include_ci=True, format=0, log_scale=False)
+    parser.set_defaults(ignore_ci=False, format=0, log_scale=False)
     return parser.parse_args()
 
 def totalTable(data, num_form):
@@ -111,7 +112,7 @@ def barPlot(data, stat, log_scale):
         for j, pnamej in enumerate(data['param_names']):
             if j > i:
                 break;
-            if opt.stat == 'SECOND_ORDER':
+            if stat == 'SECOND_ORDER':
                 name = pnamei + ", " + pnamej
                 ind = (i, j)
             elif j == i:
@@ -128,11 +129,11 @@ def barPlot(data, stat, log_scale):
                 error_y['array'] = [data[vname]['ci_plus'].item(ind) - data[vname]['val'].item(ind) for vname in data['vector_names']]
             bars.append(go.Bar(name=name, x=data['vector_names'], y=y, error_y=error_y))
 
-    if opt.stat == 'TOTAL':
+    if stat == 'TOTAL':
         ylabel = '$S_T$'
-    elif opt.stat == 'FIRST_ORDER':
+    elif stat == 'FIRST_ORDER':
         ylabel = '$S_i$'
-    elif opt.stat == 'SECOND_ORDER':
+    elif stat == 'SECOND_ORDER':
         ylabel = '$S_{i,j}$'
 
     layout=go.Layout(barmode='group', yaxis=dict(title=ylabel, type=('log' if log_scale else 'linear')))
@@ -173,7 +174,7 @@ def heatmap(data, stat, log_scale):
 
     return fig
 
-if __name__ == '__main__':
+def main():
 
     # Command-line options
     opt = command_line_options()
@@ -198,7 +199,7 @@ if __name__ == '__main__':
     frame['param_names'] = [(opt.param_names[i] if i < len(opt.param_names) else str(i)) for i in range(repinfo['num_params'])]
     frame['indices'] = repinfo['indices']
     levels = False
-    if opt.include_ci and 'confidence_intervals' in repinfo:
+    if not opt.ignore_ci and 'confidence_intervals' in repinfo:
         levels = repinfo['confidence_intervals']['levels']
         frame['ci_levels'] = (min(levels), max(levels)) if opt.confidence_interval is None else tuple(opt.confidence_interval)
     for val in opt.values:
@@ -247,3 +248,8 @@ if __name__ == '__main__':
             fig.show()
         else:
             plotly.io.write_image(fig, os.path.abspath(opt.output))
+
+    return 0
+
+if __name__ == '__main__':
+    sys.exit(main())
