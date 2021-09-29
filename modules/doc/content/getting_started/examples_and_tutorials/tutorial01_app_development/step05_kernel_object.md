@@ -55,21 +55,21 @@ In the [previous step](tutorial01_app_development/step04_weak_form.md#demo), it 
 !equation id=darcy-weak
 (\nabla \psi, \dfrac{\mathbf{K}}{\mu} \nabla p) - \langle \psi, \dfrac{\mathbf{K}}{\mu} \nabla p \cdot \hat{n} \rangle = 0
 
-[darcy-weak] must satisfy the following [!ac](BVP): $p = 4000 \, \textrm{Pa}$ at the inlet (left) boundary, $p = 0$ at the outlet (right) boundary, and $\nabla p \cdot \hat{n} = 0$ on the remaining boundaries. Therefore, it is possible to drop the second term in [darcy-weak] and express it, more simply, as
+[!eqref](darcy-weak) must satisfy the following [!ac](BVP): $p = 4000 \, \textrm{Pa}$ at the inlet (left) boundary, $p = 0$ at the outlet (right) boundary, and $\nabla p \cdot \hat{n} = 0$ on the remaining boundaries. Therefore, it is possible to drop the second term in [!eqref](darcy-weak) and express it, more simply, as
 
 !equation id=darcy-weak-kernel
 (\nabla \psi, \dfrac{K}{\mu} \nabla p) = 0
 
-where $K$ is a scalar and was substituted under the assertion that the permeability be isotropic, such that the full tensor $\mathbf{K}$ may be consolidated into a single value. It was specified on the [Problem Statement](tutorial01_app_development/problem_statement.md#mats) page that the viscosity of the fluid (water) is $\mu = \mu_{f} = 7.98 \times 10^{-4} \, \textrm{Pa} \cdot \textrm{s}$. Also, assume that the isotropic permeability $K = 0.8451 \times 10^{-9} \, \textrm{m}^{2}$ represents the 1 mm steel sphere medium inside the pipe.
+where $K$ is a scalar and was substituted under the assertion that the permeability be isotropic, such that the full tensor $\mathbf{K}$ may be consolidated into a single value. It was specified on the [Problem Statement](tutorial01_app_development/problem_statement.md#mats) page that the viscosity of the fluid (water) is $\mu = \mu_{f} = 7.98 \times 10^{-4} \, \textrm{Pa} \cdot \textrm{s}$. Also, assume that the isotropic permeability $K = 0.8451 \times 10^{-9} \, \textrm{m}^{2}$ represents the 1 mm steel sphere medium inside the pipe (obtained by setting $d = 1$ in [!eqref](tutorial01_app_development/problem_statement.md#permeability)).
 
 ### Source Code id=source-demo
 
-To evaluate [darcy-weak-kernel], a new `ADKernelGrad` object can be created and it shall be called `DarcyPressure`. Start by making the directories to store files for objects that are part of the Kernels System:
+To evaluate [!eqref](darcy-weak-kernel), a new `ADKernelGrad` object can be created and it shall be called `DarcyPressure`. Start by making the directories to store files for objects that are part of the Kernels System:
 
 !include commands/mkdir.md
          replace=['<d>', 'include/kernels src/kernels']
 
-In `include/kernels`, create a file named `DarcyPressure.h` and add the code given in [darcy-header]. Here, the `DarcyPressure` class was defined as a type of `ADKernelGrad` object, and so the header file `ADKernelGrad.h` was included. A `MooseObject` must have a `validParams()` method and a constructor, and so these were included as part of the `public` members. The `precomputeQpResidual()` method was overridden so that [darcy-weak-kernel] may set its returned value in accordance with [kernel-methods]. Finally, two variables, `_permeability` and `_viscosity`, were created to store the values for $K$ and $\mu$, respectively, and were assigned `const` types to ensure that their values aren't accidentally modified after they are set by the constructor method.
+In `include/kernels`, create a file named `DarcyPressure.h` and add the code given in [darcy-header]. Here, the `DarcyPressure` class was defined as a type of `ADKernelGrad` object, and so the header file `ADKernelGrad.h` was included. A `MooseObject` must have a `validParams()` method and a constructor, and so these were included as part of the `public` members. The `precomputeQpResidual()` method was overridden so that [!eqref](darcy-weak-kernel) may set its returned value in accordance with [kernel-methods]. Finally, two variables, `_permeability` and `_viscosity`, were created to store the values for $K$ and $\mu$, respectively, and were assigned `const` types to ensure that their values aren't accidentally modified after they are set by the constructor method.
 
 !listing tutorials/tutorial01_app_development/step05_kernel_object/include/kernels/DarcyPressure.h
          link=False
@@ -77,7 +77,7 @@ In `include/kernels`, create a file named `DarcyPressure.h` and add the code giv
          caption=Header file for the `DarcyPressure` object.
 
 In `src/kernels`, create a file named `DarcyPressure.C` and add the code given in [darcy-source].
-Here, the header file for this object was included. Next, the `registerMooseObject()` method was called for `"BabblerApp"` and the `DarcyPressure` object. The `validParams()` method is the subject of the [next step](tutorial01_app_development/step06_input_params.md), so, for now, it is okay to simply copy and paste its definition. In the constructor method the `_permeability` and `_viscosity` attributes were set according to the values that were given earlier. Finally, the `precomputeQpResidual()` method was programmed to return the left-hand side of [darcy-weak-kernel], except that the $\nabla \psi$ (`_grad_test`) term is automatically handled by the base class.
+Here, the header file for this object was included. Next, the `registerMooseObject()` method was called for `"BabblerApp"` and the `DarcyPressure` object. The `validParams()` method is the subject of the [next step](tutorial01_app_development/step06_input_params.md), so, for now, it is okay to simply copy and paste its definition. In the constructor method the `_permeability` and `_viscosity` attributes were set according to the values that were given earlier. Finally, the `precomputeQpResidual()` method was programmed to return the left-hand side of [!eqref](darcy-weak-kernel), except that the $\nabla \psi$ (`_grad_test`) term is automatically handled by the base class.
 
 !listing tutorials/tutorial01_app_development/step05_kernel_object/src/kernels/DarcyPressure.C
          link=False

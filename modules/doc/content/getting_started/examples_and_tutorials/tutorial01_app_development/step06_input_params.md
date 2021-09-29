@@ -96,7 +96,7 @@ Do not modify any other parts of `DarcyPressure.C`. Now, recompile the applicati
 
 ### Input File id=input-demo
 
-The properties in [darcy-weak] can now be specified in the input file. However, since the default for the `"viscosity"` parameter is the desired value of $\mu_{f} = 7.98 \times 10^{-4} \, \textrm{Pa} \cdot \textrm{s}$, it need not be set. The `[Kernels]` block in `pressure_diffusion.i` should be as follows:
+The properties in [!eqref](darcy-weak) can now be specified in the input file. However, since the default for the `"viscosity"` parameter is the desired value of $\mu_{f} = 7.98 \times 10^{-4} \, \textrm{Pa} \cdot \textrm{s}$, it need not be set. The `[Kernels]` block in `pressure_diffusion.i` should be as follows:
 
 !listing tutorials/tutorial01_app_development/step06_input_params/problems/pressure_diffusion.i
          block=Kernels

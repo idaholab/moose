@@ -32,7 +32,7 @@ C \left(\dfrac{\partial T}{\partial t} + \epsilon \vec{u} \cdot \nabla T \right)
 !equation id=darcy
 \vec{u} = -\dfrac{\mathbf{K}}{\mu} \left(\nabla p - \rho \vec{g} \right)
 
-The variables shown in [mass], [energy], and [darcy] denote the properties listed in [variables].
+The variables shown in [!eqref](mass), [!eqref](energy), and [!eqref](darcy) denote the properties listed in [variables].
 
 !table id=variables caption=Disambiguation of problem variables.
 | Symbol | Property |
@@ -49,7 +49,7 @@ The variables shown in [mass], [energy], and [darcy] denote the properties liste
 | $\rho$ | Density |
 | $\vec{g}$ | Gravity Vector |
 
-If a zero-gravity condition is assumed, i.e., if $\vec{g} = 0$, and if the divergence-free condition of [mass] is imposed onto [darcy],
+If a zero-gravity condition is assumed, i.e., if $\vec{g} = 0$, and if the divergence-free condition of [!eqref](mass) is imposed onto [!eqref](darcy),
 then it follows that the two unknowns, $p$ and $T$, must satisfy the following system of two [!ac](PDEs):
 
 !equation id=system
