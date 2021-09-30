@@ -109,7 +109,7 @@ class CSVValidationTester(FileTester):
         self.file_name_len = 40
 
     def processResults(self, moose_dir, options, output):
-        FileTester.processResults(self, moose_dir, options, output)
+        output = FileTester.processResults(self, moose_dir, options, output)
 
         if self.isFail() or self.specs['skip_checks']:
             return output
@@ -119,13 +119,6 @@ class CSVValidationTester(FileTester):
             return output
 
         output = ""
-        # Make sure that all of the Exodiff files are actually available
-        for file in self.specs['csvdiff']:
-            if not os.path.exists(os.path.join(self.getTestDir(), self.specs['gold_dir'], file)):
-                output += "File Not Found: " + os.path.join(self.getTestDir(), self.specs['gold_dir'], file)
-                self.setStatus(self.fail, 'MISSING GOLD FILE')
-                break
-
         if not self.isFail():
             output += "\n"
             fmt = "{{:{}s}} | {{:20s}} | {{:20s}}\n".format(self.file_name_len)

@@ -7,16 +7,16 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-from RunApp import RunApp
+from FileTester import FileTester
 from TestHarness import util
 import os
 from TestHarness.XMLDiffer import XMLDiffer
 
-class XMLDiff(RunApp):
+class XMLDiff(FileTester):
 
     @staticmethod
     def validParams():
-        params = RunApp.validParams()
+        params = FileTester.validParams()
         params.addRequiredParam('xmldiff',   [], "A list of XML files to compare.")
         params.addParam('gold_dir',      'gold', "The directory where the \"golden standard\" files reside relative to the TEST_DIR: (default: ./gold/)")
         params.addParam('abs_zero',       1e-10, "Absolute zero cutoff used in exodiff comparisons.")
@@ -26,17 +26,14 @@ class XMLDiff(RunApp):
         return params
 
     def __init__(self, name, params):
-        RunApp.__init__(self, name, params)
+        FileTester.__init__(self, name, params)
 
     def prepare(self, options):
         if self.specs['delete_output_before_running'] == True:
             util.deleteFilesAndFolders(self.getTestDir(), self.specs['xmldiff'])
 
     def processResults(self, moose_dir, options, output):
-        output += self.testFileOutput(moose_dir, options, output)
-        self.testExitCodes(moose_dir, options, output)
-
-        # Skip
+        output = FileTester.processResults(self, moose_dir, options, output)
         specs = self.specs
 
         if self.isFail() or specs['skip_checks']:
@@ -48,31 +45,23 @@ class XMLDiff(RunApp):
 
         # Loop over every file
         for file in specs['xmldiff']:
-
-            # Error if gold file does not exist
-            if not os.path.exists(os.path.join(self.getTestDir(), specs['gold_dir'], file)):
-                output += "File Not Found: " + os.path.join(self.getTestDir(), specs['gold_dir'], file)
-                self.setStatus(self.fail, 'MISSING GOLD FILE')
-                break
-
             # Perform diff
-            else:
-                for file in self.specs['xmldiff']:
-                    gold = os.path.join(self.getTestDir(), specs['gold_dir'], file)
-                    test = os.path.join(self.getTestDir(), file)
+            for file in self.specs['xmldiff']:
+                gold = os.path.join(self.getTestDir(), specs['gold_dir'], file)
+                test = os.path.join(self.getTestDir(), file)
 
-                    # We always ignore the header_type attribute, since it was
-                    # introduced in VTK 7 and doesn't seem to be important as
-                    # far as Paraview is concerned.
-                    specs['ignored_attributes'].append('header_type')
+                # We always ignore the header_type attribute, since it was
+                # introduced in VTK 7 and doesn't seem to be important as
+                # far as Paraview is concerned.
+                specs['ignored_attributes'].append('header_type')
 
-                    differ = XMLDiffer(gold, test, abs_zero=specs['abs_zero'], rel_tol=specs['rel_err'], ignored_attributes=specs['ignored_attributes'])
+                differ = XMLDiffer(gold, test, abs_zero=specs['abs_zero'], rel_tol=specs['rel_err'], ignored_attributes=specs['ignored_attributes'])
 
-                    # Print the results of the XMLDiff whether it passed or failed.
-                    output += differ.message() + '\n'
+                # Print the results of the XMLDiff whether it passed or failed.
+                output += differ.message() + '\n'
 
-                    if differ.fail():
-                        self.setStatus(self.diff, 'XMLDIFF')
-                        break
+                if differ.fail():
+                    self.setStatus(self.diff, 'XMLDIFF')
+                    break
 
         return output
