@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#15795'
+  issues = '#15795 #18970'
   design = 'ActivateElementsUserObjectBase.md ActivateElementsByPath.md ActivateElementsCoupled.md'
   [check_element_addition]
     type = 'Exodiff'
@@ -17,6 +17,7 @@
     cli_args = "Executioner/end_time=0.5 Outputs/interval=5"
     requirement = 'The subdomain 1 should be expanded via ActivateElementsUserObject. The addition '
                   'of elements is controlled by a coupled variable strain_zz.'
+    valgrind = HEAVY
   []
   [check_stateful_properties]
     type = 'Exodiff'
