@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#6873 #8651'
+  issues = '#6873 #8651 #18970'
   design = 'source/materials/ComputeMultipleInelasticStress.md'
   [./combined]
     type = 'Exodiff'
@@ -7,6 +7,7 @@
     exodiff = 'combined_creep_plasticity_out.e'
     abs_zero = 1e-09
     method = 'OPT OPROF' # Test is too big for debug, but kept as is to match the published journal soln
+    valgrind = HEAVY
     requirement = "MOOSE tensor mechanics module shall solve a combined creep
                    and plasticity 1-d bar problem."
   [../]
@@ -17,6 +18,7 @@
     abs_zero = 1e-09
     method = 'OPT OPROF' # Test is too big for debug, but kept as is to match the published journal soln
     custom_cmp = start_time.cmp
+    valgrind = HEAVY
     requirement = "MOOSE tensor mechanics module shall solve a combined creep
                    and plasticity 1-d bar problem with a non-zero start time."
   [../]

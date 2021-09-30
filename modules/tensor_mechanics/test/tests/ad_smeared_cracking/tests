@@ -1,6 +1,6 @@
 [Tests]
 design = 'source/materials/ADComputeSmearedCrackingStress.md'
-issues = '#6815 #9227 #15311'
+issues = '#6815 #9227 #15311 #18970'
   [./cracking]
     type = Exodiff
     input = cracking.i
@@ -54,6 +54,7 @@ issues = '#6815 #9227 #15311'
     input = cracking_rz_exponential.i
     exodiff = cracking_rz_exponential_out.e
     custom_cmp = cracking_rz_exp.cmp
+    valgrind = HEAVY
     requirement = 'The MOOSE TensorMechanics module shall simulate exponential stress relase while using the rz coordinate system using AD and match non-AD methods.'
   [../]
   [./power]
