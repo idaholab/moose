@@ -9,7 +9,6 @@
 
 #include "ReporterPointSource.h"
 #include "MooseUtils.h"
-#include "DelimitedFileReader.h"
 
 registerMooseObject("MooseApp", ReporterPointSource);
 

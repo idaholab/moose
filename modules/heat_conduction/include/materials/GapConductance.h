@@ -29,11 +29,24 @@ public:
 
   static InputParameters actionParameters();
 
-  static Real gapLength(const GAP_GEOMETRY & gap_geom, Real radius, Real r1, Real r2, Real max_gap);
+  static Real gapLength(const GAP_GEOMETRY & gap_geom,
+                        const Real radius,
+                        const Real r1,
+                        const Real r2,
+                        const Real max_gap);
 
-  static Real gapRect(Real distance, Real max_gap);
-  static Real gapCyl(Real radius, Real r1, Real r2, Real max_denom);
-  static Real gapSphere(Real radius, Real r1, Real r2, Real max_denom);
+  /**
+   * Compute gap distance for plate geometry
+   */
+  static Real gapRect(const Real distance, const Real max_gap);
+  /**
+   * Compute gap distance for cylinder geometry
+   */
+  static Real gapCyl(const Real radius, const Real r1, const Real r2, const Real max_denom);
+  /**
+   * Compute gap distance for sphere geometry
+   */
+  static Real gapSphere(const Real radius, const Real r1, const Real r2, const Real max_denom);
 
   static Real gapAttenuation(Real adjusted_length, Real min_gap, unsigned int min_gap_order);
 
@@ -44,6 +57,7 @@ public:
                                        Point & p1,
                                        Point & p2);
 
+  /// Compute current gap radii for surface integration of gas conductance
   static void computeGapRadii(const GAP_GEOMETRY gap_geometry_type,
                               const Point & current_point,
                               const Point & p1,
