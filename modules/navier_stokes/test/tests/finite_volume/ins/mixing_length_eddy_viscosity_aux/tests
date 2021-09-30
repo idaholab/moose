@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#18666'
+  issues = '#18666 #18970'
   design = 'navier_stokes/fv.md'
   [capped_mixing_length]
     type = 'Exodiff'
@@ -11,6 +11,7 @@
     issues = '#18666'
     design = 'rans_theory.md INSFVMixingLengthTurbulentViscosityAux.md'
     mesh_mode = REPLICATED
+    valgrind = HEAVY
     recover = false
   []
 []

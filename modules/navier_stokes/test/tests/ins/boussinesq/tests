@@ -1,11 +1,12 @@
 [Tests]
   design = 'INSADBoussinesqBodyForce.md'
-  issues = '#15099'
+  issues = '#15099 #18970'
   [exo]
     type = Exodiff
     input = boussinesq_square.i
     exodiff = boussinesq_square_out.e
     requirement = 'The system shall be able to simulate natural convection by adding the Boussinesq approximation to the incompressible Navier-Stokes equations.'
+    valgrind = HEAVY
   []
   [threaded_exo]
     type = Exodiff

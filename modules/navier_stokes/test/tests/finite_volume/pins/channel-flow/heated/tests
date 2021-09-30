@@ -1,6 +1,6 @@
 [Tests]
   [heated]
-    issues = '#16756'
+    issues = '#16756 #18970'
     requirement = 'The system shall be able to solve for fluid energy diffusion, advection and convection with the solid phase in a 2D channel'
     design = 'PINSFVEnergyAdvection.md'
     [fluid_only]
@@ -11,6 +11,7 @@
       abs_zero = 1e-9
       detail = 'with a Cartesian geometry, only modeling the fluid phase,'
       ad_indexing_type = 'global'
+      valgrind = HEAVY
       cli_args = "Outputs/file_base='rc-heated'"
     []
     [rz]
@@ -21,6 +22,7 @@
       abs_zero = 1e-9
       detail = 'in rz geometry,'
       ad_indexing_type = 'global'
+      valgrind = HEAVY
       cli_args = "Problem/coord_type='rz' Problem/rz_coord_axis='x' Outputs/file_base='rc-heated-rz'"
     []
     [kappa]
@@ -31,6 +33,7 @@
       abs_zero = 1e-9
       detail = 'with an effective diffusion coefficient,'
       ad_indexing_type = 'global'
+      valgrind = HEAVY
       cli_args = "Outputs/file_base='rc-heated-effective'"
     []
   []
@@ -40,9 +43,10 @@
     exodiff = rc-heated-solid-fluid.e
     method = "!dbg"
     abs_zero = 1e-9
-    issues = '#16756'
+    issues = '#16756 #18970'
     requirement = 'The system shall be able to solve for fluid energy diffusion, advection and convection with the solid phase in a 2D channel, modeling both fluid and solid temperature.'
     ad_indexing_type = 'global'
+    valgrind = HEAVY
     design = 'PINSFVEnergyAmbientConvection.md'
     cli_args = "Variables/inactive='' AuxVariables/inactive='temp_solid' FVKernels/inactive='' FVBCs/inactive='' Outputs/file_base='rc-heated-solid-fluid'"
   []
@@ -51,9 +55,10 @@
     input = 2d-rc-heated-boussinesq.i
     exodiff = rc-heated-boussinesq.e
     method = "!dbg"
-    issues = '#16756'
+    issues = '#16756 #18970'
     requirement = 'The system shall be able to solve for fluid energy diffusion, advection and convection with the solid phase in a 2D channel with a Boussinesq approximation for the influence of temperature on density.'
     ad_indexing_type = 'global'
+    valgrind = HEAVY
     design = 'PINSFVMomentumBoussinesq.md'
     cli_args = "Outputs/file_base='rc-heated-boussinesq'"
   []

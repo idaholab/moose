@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#16758'
+  issues = '#16758 #18970'
   [continuous_eps]
     requirement = 'The system shall be able to solve a series of stages of continuous porosity changes with different schemes for computing the convective fluxes assuming piecewise constant data including'
     design = 'PCNSFVHLLC.md PCNSFVKT.md PNSFVPGradEpsilon.md PorousPrimitiveVarMaterial.md'
@@ -10,6 +10,7 @@
       detail = 'the Kurganov-Tadmor scheme'
       ad_indexing_type = 'global'
       recover = false # See https://github.com/idaholab/moose/issues/17906
+      valgrind = HEAVY
     []
     [continuous_eps_hllc]
       type = Exodiff
@@ -50,6 +51,7 @@
     ad_indexing_type = 'global'
     requirement = 'The system shall support the deferred correction algorithm for transitioning from low-order to high-order representations of the convective flux during a transient simulation.'
     abs_zero = 1e-8
+    valgrind = HEAVY
     design = 'PCNSFVKTDC.md'
   []
 []
