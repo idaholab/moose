@@ -37,7 +37,7 @@ public:
    *   'a:=D[x(t),t,t]'  The second time derivative of the t-dependent material property 'x'
    *                     which will be referred to as 'a' in the function expression.
    */
-  FunctionMaterialPropertyDescriptor(const std::string &, MooseObject *);
+  FunctionMaterialPropertyDescriptor(const std::string &, MooseObject *, bool required = false);
 
   /// default constructor
   FunctionMaterialPropertyDescriptor();
@@ -108,4 +108,7 @@ private:
 
   /// cache the final property name of the derivative
   std::string _property_name;
+
+  /// is this a property that was directly specified by the user? Then it _must_ exist.
+  bool _required;
 };

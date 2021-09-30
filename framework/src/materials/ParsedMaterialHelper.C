@@ -18,6 +18,10 @@ ParsedMaterialHelper<is_ad>::validParams()
   InputParameters params = FunctionMaterialBase<is_ad>::validParams();
   params += FunctionParserUtils<is_ad>::validParams();
   params.addClassDescription("Parsed Function Material.");
+  params.addParam<bool>("error_on_missing_material_properties",
+                        true,
+                        "Throw an error if any explicitly requested material property does not "
+                        "exist. Otherwise assume it to be zero.");
   return params;
 }
 
@@ -29,7 +33,9 @@ ParsedMaterialHelper<is_ad>::ParsedMaterialHelper(const InputParameters & parame
     _symbol_names(_nargs),
     _mat_prop_descriptors(0),
     _tol(0),
-    _map_mode(map_mode)
+    _map_mode(map_mode),
+    _error_on_missing_material_properties(
+        this->template getParam<bool>("error_on_missing_material_properties"))
 {
 }
 
@@ -149,8 +155,8 @@ ParsedMaterialHelper<is_ad>::functionParse(
   for (unsigned int i = 0; i < nmat_props; ++i)
   {
     // parse the material property parameter entry into a FunctionMaterialPropertyDescriptor
-    _mat_prop_descriptors[i] =
-        FunctionMaterialPropertyDescriptor<is_ad>(mat_prop_expressions[i], this);
+    _mat_prop_descriptors[i] = FunctionMaterialPropertyDescriptor<is_ad>(
+        mat_prop_expressions[i], this, _error_on_missing_material_properties);
 
     // get the fparser symbol name for the new material property
     _symbol_names.push_back(_mat_prop_descriptors[i].getSymbolName());
