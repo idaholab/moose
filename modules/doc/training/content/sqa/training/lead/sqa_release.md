@@ -51,10 +51,8 @@ Date:   Wed Sep 29 11:22:23 2021 -0600
     Merge commit '4812111857205877df7bb943958f9cd1f32b0d27'
 ```
 
-The hashes in this message can be used to obtain results from CIVET, as shown in the links below.
-The downloaded tag.gz files should be committed in a "release" directory at the top level of the
-repository. The files should be renamed to follow the pattern "results_12345.tar.gz", where the
-number is the job number.
+Use these hashes to download results from CIVET (see links below).
+The tag.gz files should be placed in the "release" directory.
 
 !style style=font-size:60%;
 [`https://civet.inl.gov/sha_events/idaholab/moose/b657ae26aae14fbc91ad2651a364cfad80c2b9ac/`](https://civet.inl.gov/sha_events/idaholab/moose/b657ae26aae14fbc91ad2651a364cfad80c2b9ac/)\\

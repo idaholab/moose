@@ -179,6 +179,10 @@
     max-height:500px;
 }
 
+.reveal pre {
+    max-width: 97.5%;
+}
+
 .reveal .moose-bibliography{
     overflow-y:scroll;
     height:45vh;

@@ -15,7 +15,7 @@ on "Merge/Pull Requests" and the development branch.
 - `trigger_pull_request = True`
 - `trigger_push_branch = devel`
 
-```
+!listing! style=max-height:150px;
 [Documentation: SQA]
 script = scripts/run_cmd.sh
 abort_on_failure = False
@@ -38,7 +38,7 @@ APP_SUBDIR = doc
 CIVET_SERVER_POST_COMMENT=1
 CHECK_EXISTS = site/index.html
 CIVET_SERVER_POST_EDIT_EXISTING = 1
-```
+!listing-end!
 
 !---
 
@@ -47,7 +47,7 @@ CIVET_SERVER_POST_EDIT_EXISTING = 1
 Code coverage can be added by building the the application with coverage enabled, initializing
 the coverage, running desired tests, and reporting the coverage results.
 
-```
+!listing! style=max-height:120px;
 [build]
 script = scripts/build.sh
 abort_on_failure = True
@@ -62,7 +62,8 @@ abort_on_failure = False
 [coverage: report]
 script = scripts/coverage_extract_and_store.sh
 COVERAGE_TAG = main
-```
+!listing-end!
+
 
 !alert note
 The MOOSE website includes additional information regarding

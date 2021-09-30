@@ -48,10 +48,6 @@ section of the "config.yml" file as follows.
 Extensions:
     MooseDocs.extensions.appsyntax:
         executable: ${ROOT_DIR}
-        remove:
-            framework: !include framework/doc/remove.yml
-        unregister:
-            framework: !include framework/doc/unregister.yml
         includes:
             - ${ROOT_DIR}/include
             - ${MOOSE_DIR}/framework/include
@@ -59,7 +55,7 @@ Extensions:
 ```
 
 !alert note
-This is not necessary for NQA-1 compliance, but it is good practice for creating complete documentation.
+This is not necessary for NQA-1 compliance, but it is good practice for complete documentation.
 
 !---
 
@@ -110,7 +106,7 @@ The "category" should match the prefix of the file names and the "app" be the re
 application name.
 
 !alert note
-Certain templates have required sections and others have sections that can be optionally overridden.
+Certain templates have required sections and others have optional sections.
 The required sections will be detailed upon rendering the website with the "build" command.
 
 !---
@@ -149,7 +145,7 @@ Applications:
 The document reports provide assurance that the necessary [!ac](SQA) documents are in place
 for conformance with PLN-4005.
 
-```
+!listing style=max-height:200px;
 Documents:
     working_dirs:
         - ${BLACKBEAR_DIR}/doc/content
@@ -173,7 +169,7 @@ Documents:
     user_manual: syntax/blackbear_index.md   # symlink to avoid duplicate file errors
     theory_manual: syntax/blackbear_index.md
     show_warning: false
-```
+
 
 !---
 
@@ -209,12 +205,10 @@ cd docs
 
 ## SQA Extension
 
-The [!ac](SQA) documentation and report information is finally added to the "config.yml" using the
+The [!ac](SQA) documentation and report information is added to the "config.yml" using the
 MooseDocs ["sqa"](MooseDocs/extensions/sqa.md optional=True) extension. This is accomplished by
-adding the extension to the "Extensions" section.
-
-The following is an example of what should be included for an application (e.g., blackbear) that
-includes the heat conduction module.
+adding the extension to the "Extensions" section. For example, the following is what should be
+included for an application that includes the heat conduction module.
 
 ```
     MooseDocs.extensions.sqa:
@@ -229,17 +223,16 @@ includes the heat conduction module.
             blackbear: !include ${ROOT_DIR}/doc/sqa_blackbear.yml
 ```
 
-!alert note
-This configuration includes an "sqa_blackbear.yml" file, which provides a connection between the
-report configuration and the MooseDocs website configuration. This is done in a separate file
-to allow for applications to share this information.
-
 !---
 
 ### SQA Extension: sqa_blackbear.md
 
-The included file in the "config.yml" above includes the following, which simply indicates where
-to locate the tests for the application: in the "tests" spec with the "test/tests" directories.
+The above configuration includes an "sqa_blackbear.yml" file. It provides a connection between the
+report configuration and the MooseDocs website configuration. This is done in a separate file
+to allow for applications to share this information.
+
+The included file simply indicates where to locate the tests for the application: in the "tests" spec
+with the "test/tests" directories.
 
 ```
 specs:
