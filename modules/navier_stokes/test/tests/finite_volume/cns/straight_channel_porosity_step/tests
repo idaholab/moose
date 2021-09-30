@@ -10,6 +10,7 @@
       detail = 'the Kurganov-Tadmor scheme'
       ad_indexing_type = 'global'
       recover = false # See https://github.com/idaholab/moose/issues/17906
+      valgrind = HEAVY
     []
     [continuous_eps_hllc]
       type = Exodiff
@@ -50,6 +51,7 @@
     ad_indexing_type = 'global'
     requirement = 'The system shall support the deferred correction algorithm for transitioning from low-order to high-order representations of the convective flux during a transient simulation.'
     abs_zero = 1e-8
+    valgrind = HEAVY
     design = 'PCNSFVKTDC.md'
   []
 []

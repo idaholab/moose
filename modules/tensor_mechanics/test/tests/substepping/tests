@@ -13,6 +13,7 @@
     input = 'ad_power_law_creep.i'
     cli_args = 'Materials/power_law_creep/use_substep=true Executioner/dtmin=0.1 Outputs/file_base=ad_power_law_substepping_out'
     exodiff = 'ad_power_law_substepping_out.e'
+    valgrind = HEAVY
     requirement = 'The system shall converge under large deformation owing to the help of substepping'
   [../]
   [./power_law]

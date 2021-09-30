@@ -6,6 +6,7 @@
     input = boussinesq_square.i
     exodiff = boussinesq_square_out.e
     requirement = 'The system shall be able to simulate natural convection by adding the Boussinesq approximation to the incompressible Navier-Stokes equations.'
+    valgrind = HEAVY
   []
   [threaded_exo]
     type = Exodiff

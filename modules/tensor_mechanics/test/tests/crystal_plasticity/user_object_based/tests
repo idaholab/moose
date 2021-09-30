@@ -105,6 +105,7 @@
     input = 'use_substep_dt.i'
     csvdiff = 'use_substep_dt_out.csv'
     allow_warnings = true
+    valgrind = HEAVY
     issues = '#17340'
     requirement = 'The system shall apply correct boundary condition after timestep being cut during substepping'
     design = '/FiniteStrainUObasedCP.md'

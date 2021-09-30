@@ -23,6 +23,7 @@
     csvdiff = 'power_law_creep_out.csv'
     cli_args = 'Materials/elastic_strain/inelastic_models="creep_nine creep_one"'
     prereq = powerlaw_zero
+    valgrind = HEAVY
     requirement = "The AD multiple inelastic stress calculator shall provide a correct stress for the linear combination of two power law creep models"
     design = 'ADComputeMultipleInelasticStress.md'
   [../]
