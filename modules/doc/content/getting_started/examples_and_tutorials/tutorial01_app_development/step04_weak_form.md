@@ -20,7 +20,7 @@ demonstrating the development of a MOOSE-base application. Please visit the [hel
 !equation id=laplace-residual
 \psi (-\nabla \cdot \nabla u) = 0, \enspace \forall \, \psi
 
-The left-hand side of [laplace-residual] is called the *residual* and the coefficient $\psi$ is arbitrary, except for requiring that it satisfy homogeneous boundary conditions.
+The left-hand side of [!eqref](laplace-residual) is called the *residual* and the coefficient $\psi$ is arbitrary, except for requiring that it satisfy homogeneous boundary conditions.
 
 There is a general procedure for expressing a residual as one that is readily solved with MOOSE. First, integrate with respect to the problem domain $\Omega$:
 
@@ -32,12 +32,12 @@ Next, recall that the product rule of differentiation implies that
 !equation id=laplace-product
 \psi (\nabla \cdot \nabla u) = \nabla \cdot (\psi \nabla u) - \nabla \psi \cdot \nabla u
 
-Substituting the right-hand side of [laplace-product] results in integration by parts of [laplace-sum]:
+Substituting the right-hand side of [!eqref](laplace-product) results in integration by parts of [!eqref](laplace-sum):
 
 !equation id=laplace-ibp
 \int_\Omega \nabla \psi \cdot \nabla u - \int_\Omega \nabla \cdot (\psi \nabla u) = 0
 
-Finally, notice that the second term in [laplace-ibp] is a volume integral whose integrand is the divergence of the field $\psi \nabla u$. Therefore, it is possible to apply the [divergence theorem](https://en.wikipedia.org/wiki/Divergence_theorem) and integrate the magnitude of this field along the volume's surface normal $\hat{n}$ with respect to that surface's domain $\Gamma = \partial \Omega$, i.e.,
+Finally, notice that the second term in [!eqref](laplace-ibp) is a volume integral whose integrand is the divergence of the field $\psi \nabla u$. Therefore, it is possible to apply the [divergence theorem](https://en.wikipedia.org/wiki/Divergence_theorem) and integrate the magnitude of this field along the volume's surface normal $\hat{n}$ with respect to that surface's domain $\Gamma = \partial \Omega$, i.e.,
 
 !equation id=laplace-weak
 \int_\Omega \nabla \psi \cdot \nabla u - \oint_\Gamma \psi \nabla u \cdot \hat{n} = 0
@@ -72,7 +72,7 @@ Consider the zero-gravity, divergence-free form of Darcy's Pressure law, as it w
 
 The [#procedure] shall now be applied to this equation. The result of each step will be provided here, but the reader should make their own attempt and then verify their conclusions.
 
-1. Write down the strong form: [darcy-strong]
+1. Write down the strong form: [!eqref](darcy-strong)
 2. Rearrange terms: *done*
 3. Multiply the equation by $\psi$:
 

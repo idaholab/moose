@@ -84,12 +84,12 @@ The terminal will prompt for GitHub account credentials before uploading the new
 
 ### Interacting with Git Using a Secure Shell (SSH) id=ssh
 
-As changes to the application are made, and more `push` commands are ran, it may become a nuisance to enter GitHub credentials each time. To avoid this, it is possible for a user to associate their computer with their GitHub account using [SSH](https://www.ssh.com/ssh/). To generate an SSH key, open the terminal and enter the following commands:
+As changes to the application are made, and more `push` commands are ran, it may become a nuisance to enter GitHub credentials each time. To avoid this, it is possible for a user to associate their computer with their GitHub account using [SSH](https://www.ssh.com/ssh/). To generate an SSH key, open the terminal and run the following interactive command:
 
 !listing language=bash
 ssh-keygen -t rsa -C YourEmail
 
-When the terminal prompts about where to save the key, just hit enter to use the default file (`~/.ssh/id_rsa.pub`). When it asks whether to overwrite the file, enter "`y`" and when it asks for a passphrase, leave it blank or else the key will require it every time it is used, which defeats its purpose here. Finally, the SSH key is setup and can be printed to the terminal:
+When the terminal prompts about where to save the key, just hit enter to use the default file (`~/.ssh/id_rsa.pub`). If it asks whether to overwrite the file, enter "`y`" or cancel and proceed with the existing file. When it asks for a passphrase, leave it blank or else the key will require it every time it is used, which defeats its purpose here. Finally, the unique key is set up and can be printed to the terminal:
 
 !listing language=bash
 cat ~/.ssh/id_rsa.pub

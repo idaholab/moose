@@ -96,7 +96,7 @@ Do not modify any other parts of `DarcyPressure.C`. Now, recompile the applicati
 
 ### Input File id=input-demo
 
-The properties in [darcy-weak] can now be specified in the input file. However, since the default for the `"viscosity"` parameter is the desired value of $\mu_{f} = 7.98 \times 10^{-4} \, \textrm{Pa} \cdot \textrm{s}$, it need not be set. The `[Kernels]` block in `pressure_diffusion.i` should be as follows:
+The properties in [!eqref](darcy-weak) can now be specified in the input file. However, since the default for the `"viscosity"` parameter is the desired value of $\mu_{f} = 7.98 \times 10^{-4} \, \textrm{Pa} \cdot \textrm{s}$, it need not be set. The `[Kernels]` block in `pressure_diffusion.i` should be as follows:
 
 !listing tutorials/tutorial01_app_development/step06_input_params/problems/pressure_diffusion.i
          block=Kernels
@@ -127,9 +127,8 @@ Add the changes made to the `DarcyPressure` object files and `pressure_diffusion
 
 Now, commit and push the changes to the remote repository:
 
-!listing language=bash
-git commit -m 'defined "permeability" and "viscosity" input parameters'
-git push
+!include commands/git_commit.md
+         replace=['<m>', '\'defined "permeability" and "viscosity" input parameters\'']
 
 !content pagination previous=tutorial01_app_development/step05_kernel_object.md
                     next=tutorial01_app_development/step07_parallel.md

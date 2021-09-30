@@ -117,7 +117,7 @@ The pressure variable $u$ shall be added to the `[Variables]` block with an unam
          block=Variables
          link=False
 
-The variables listed here are the variables to be solved for using the [!ac](FEM). Next, the `[Kernels]` block, whose syntax was demonstrated earlier, shall be included. Here, the [`ADDiffusion`](source/kernels/ADDiffusion.md) class will be used to solve [laplace] and the `pressure` variable will be operated on:
+The variables listed here are the variables to be solved for using the [!ac](FEM). Next, the `[Kernels]` block, whose syntax was demonstrated earlier, shall be included. Here, the [`ADDiffusion`](source/kernels/ADDiffusion.md) class will be used to solve [!eqref](laplace) and the `pressure` variable will be operated on:
 
 !listing tutorials/tutorial01_app_development/step02_input_file/problems/pressure_diffusion.i
          block=Kernels
@@ -166,7 +166,7 @@ After running the above commands, the Peacock window opens to the "ExodusViewer"
 !media tutorial01_app_development/step02_result.png
        style=width:100%;margin-left:auto;margin-right:auto;
        id=results
-       caption=Rendering of the [!ac](FEM) solution of [laplace] subject to the given [!ac](BVP).
+       caption=Rendering of the [!ac](FEM) solution of [!eqref](laplace) subject to the given [!ac](BVP).
 
 Notice that the [!ac](FEM) solution depicted in [results] satisfies the boundary conditions, i.e., a pressure of 4000 Pa can be observed at the inlet and zero pressure at the outlet. The pressure distribution over the length of the pipe also appears to be uniform across its radius, indicating that there is no flux through any of the remaining boundaries. Thus, $\nabla u \cdot \hat{n} = 0$ is also satisfied at those boundaries.
 
@@ -181,9 +181,11 @@ git status
 The terminal output should read something like the following:
 
 !listing! language=git
+On branch main
+Your branch is up to date with 'origin/main'.
+
 Untracked files:
   (use "git add <file>..." to include in what will be committed)
-
 	problems/
 
 nothing added to commit but untracked files present (use "git add" to track)
@@ -198,9 +200,11 @@ git status
 Now, the terminal output should be the following:
 
 !listing! language=git
-Changes to be committed:
-  (use "git reset HEAD <file>..." to unstage)
+On branch main
+Your branch is up to date with 'origin/main'.
 
+Changes to be committed:
+  (use "git restore --staged <file>..." to unstage)
 	new file:   problems/pressure_diffusion.i
 !listing-end!
 

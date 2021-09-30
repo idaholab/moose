@@ -1,5 +1,5 @@
 !config disable extensions=['.html', '.tex']
 
 !listing language=bash
-cd ~/projects/babbler
-git add *
+git commit -m <m>
+git push
