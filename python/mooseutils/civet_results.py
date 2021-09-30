@@ -33,7 +33,7 @@ TEST_RE = re.compile(r'^(?:\[(?P<time>.+?)s\])?'       # Optional test time
                      flags=re.MULTILINE)
 
 JOB_RE = re.compile(r'id=\"job_(?P<job>\d+)\"')
-JOB_NUMBER_RE = re.compile(r"results_(?P<number>[0-9]+).tar\.gz")
+JOB_NUMBER_RE = re.compile(r"results_(?P<number>[0-9]+)(.*?)\.tar\.gz")
 RECIPE_RE = re.compile(r'results_(?P<number>\d+)_(?P<job>.*)/(?P<recipe>.*)')
 RUN_TESTS_START_RE = re.compile(r'^.+?run_tests.+?$', flags=re.MULTILINE)
 RUN_TESTS_END_RE = re.compile(r'^-{5,}$', flags=re.MULTILINE)
