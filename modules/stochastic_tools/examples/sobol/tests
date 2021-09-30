@@ -1,6 +1,6 @@
 [Tests]
   design = sobol.md
-  issues = '#14933 #15558'
+  issues = '#14933 #15558 #18970'
 
   [stats]
     type = CheckFiles
@@ -9,5 +9,7 @@
     check_files = 'master_out.json'
 
     requirement = "The system shall include an example demonstrating the computation of Sobol sensitivity analysis."
+
+    valgrind = HEAVY
   []
 []
