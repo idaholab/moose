@@ -61,7 +61,7 @@ Recall, from [Step 2](tutorial01_app_development/step02_input_file.md#demo), tha
 !equation id=laplace
 -\nabla \cdot \nabla u = 0 \in \Omega
 
-It is necessary to acknowledge that [!ac](PDEs) must be expressed in a certain format to be able to solve them with MOOSE. That is, assuming that the natural boundary condition, $\nabla u \cdot \hat{n} = 0$, is satisfied, then the *weak form* of [laplace] is
+It is necessary to acknowledge that [!ac](PDEs) must be expressed in a certain format to be able to solve them with MOOSE. That is, assuming that the natural boundary condition, $\nabla u \cdot \hat{n} = 0$, is satisfied, then the *weak form* of [!eqref](laplace) is
 
 !equation id=weak
 \int_{\Omega} \nabla \psi \cdot \nabla u \, d\Omega = 0, \enspace \forall \, \psi
@@ -70,13 +70,13 @@ In the [next step](tutorial01_app_development/step04_weak_form.md), exactly what
 
 ### Source Code
 
-A `MooseObject` that was capable of solving the Laplace equation was required for [Step 2](tutorial01_app_development/step02_input_file.md) and it was demonstrated that `ADDiffusion` provides this capability. To understand how it works, consider [diffusion-src], and notice that the $\nabla u$ term of the integrand in [weak] was coded:
+A `MooseObject` that was capable of solving the Laplace equation was required for [Step 2](tutorial01_app_development/step02_input_file.md) and it was demonstrated that `ADDiffusion` provides this capability. To understand how it works, consider [diffusion-src], and notice that the $\nabla u$ term of the integrand in [!eqref](weak) was coded:
 
 !listing framework/src/kernels/ADDiffusion.C
          start=ADRealVectorValue
          link=False
 
-Here, the $\nabla \psi$ term in [weak],
+Here, the $\nabla \psi$ term in [!eqref](weak),
 is automatically handled by the `precomputeQpResidual()` method of the [`ADKernelGrad`](source/kernels/ADKernelGrad.md) base class, so there was no need to include this term manually.
 
 !alert tip title=MOOSE does a lot already.

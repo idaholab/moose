@@ -111,7 +111,7 @@ ExtraNodesetGenerator::generate()
                  " has too many components. Did you maybe forget to separate multiple coordinates "
                  "with a ';'?");
 
-    for (unsigned int j = 0; j < dim; ++j)
+    for (unsigned int j = 0; j < c.size(); ++j)
       p(j) = c[j];
 
     // locate candidate element

@@ -53,14 +53,14 @@ Every `AuxKernel` object will add a parameter `"variable"` taken from the `valid
 
 ## Demonstration id=demo
 
-The volumetric flux $\vec{u}$ of a fluid through a porous medium is governed by Darcy's Law as it was given in the [Problem Statement](tutorial01_app_development/problem_statement.md#equations). Assuming a negligible gravitational field and a homogeneous medium, the law can be expressed as
+The volumetric flux $\vec{u}$ of a fluid through a porous medium is governed by Darcy's Law as it was given in [!eqref](tutorial01_app_development/problem_statement.md#darcy). Assuming a negligible gravitational field and a homogeneous medium, the law can be expressed as
 
 !equation id=darcy
 \vec{u} = \underbrace{-\dfrac{K}{\mu} \nabla p}_{\clap{Auxiliary \, Kernel}} \in \Omega
 
-Assuming every term in [darcy] is known, including the pressure variable $p$, it can be developed as a `VectorAuxKernel` object. This new `MooseObject` shall accept an input for the name of the nonlinear variable holding the values for $p$ and retrieve the $K$ and $\mu$ terms from the available material properties.
+Assuming every term in [!eqref](darcy) is known, including the pressure variable $p$, it can be developed as a `VectorAuxKernel` object. This new `MooseObject` shall accept an input for the name of the nonlinear variable holding the values for $p$ and retrieve the $K$ and $\mu$ terms from the available material properties.
 
-In a $\R^{2}$ space, such as the axisymmetric pipe model developed in `pressure_diffusion.i`, the pressure gradient has two components, e.g., $\nabla p = \begin{bmatrix} \partial_{x} p & \partial_{y} p \end{bmatrix}^{\mathrm{T}}$. According to [darcy], the $x$-component of the volumetric flux through a distance $L$ must be
+In a $\R^{2}$ space, such as the axisymmetric pipe model developed in `pressure_diffusion.i`, the pressure gradient has two components, e.g., $\nabla p = \begin{bmatrix} \partial_{x} p & \partial_{y} p \end{bmatrix}^{\mathrm{T}}$. According to [!eqref](darcy), the $x$-component of the volumetric flux through a distance $L$ must be
 
 !equation id=darcy-x
 u_{x} = -\dfrac{K}{\mu} \dfrac{\partial p}{\partial x}, \enspace \forall \, x \in [0, L]
@@ -70,18 +70,18 @@ If $p$ is constant along the $y$-direction (i.e., if $\partial_{y} p = 0$), then
 !equation id=pressure-x
 p(x, y) \Rarr p(x) = \begin{bmatrix} 1 - \dfrac{x}{L} & \dfrac{x}{L} \end{bmatrix} \begin{Bmatrix} p_{0} \\ p_{1} \end{Bmatrix}
 
-where $p_{0}$ and $p_{1}$ are the pressures at the domain boundaries: $x_{0} = 0$ and $x_{1} = L$, respectively. Differentiating [pressure-x] and substituing it in [darcy-x] leads to the following:
+where $p_{0}$ and $p_{1}$ are the pressures at the domain boundaries: $x_{0} = 0$ and $x_{1} = L$, respectively. Differentiating [!eqref](pressure-x) and substituing it in [!eqref](darcy-x) leads to the following:
 
 !equation id=velocity-x
 u_{x} = \dfrac{K}{\mu L} \begin{bmatrix} 1 & -1 \end{bmatrix} \begin{Bmatrix} p_{0} \\ p_{1} \end{Bmatrix}
 
 Thus, for any model that satifies the foregoing assumptions, especially $\partial_{y} p = 0$ so that $p \equiv p(x)$, $u_{x}$ is a constant monomial that depends only on $p_{0}$, $p_{1}$, $K$, $\mu$, and $L$.
 
-In the pipe model of `pressure_diffusion.i`, $p_{0} = 4000 \, \textrm{Pa}$ and $p_{1} = 0$ are the only [!ac](BCs) applied. And since there are no pressure fluxes through any of the boundaries, the model indeed satisfies $\partial_{y} p = 0$. Therefore, [velocity-x] can be expected to hold for this problem because the `pressure` variable uses the default parameters: `order = FIRST` and `family = LAGRANGE`. To verify that a new class designed to evaluate [darcy] is working properly, it shall be confirmed that the L2-norm of the result in all elements is the value $\lVert \vec{u} \rVert = |u_{x}| = 0.01393 \, \textrm{m/s}$ obtained by substituting $p_{0}$, $p_{1}$, $K = 0.8451 \times 10^{-9} \, \textrm{m}^{2}$, $\mu_{f} = 7.98 \times 10^{-4} \, \textrm{Pa} \cdot \textrm{s}$, and $L = 0.304 \, \textrm{m}$. In addition, a simpler model that is also expected to satisfy [velocity-x] shall be developed as a regression test.
+In the pipe model of `pressure_diffusion.i`, $p_{0} = 4000 \, \textrm{Pa}$ and $p_{1} = 0$ are the only [!ac](BCs) applied. And since there are no pressure fluxes through any of the boundaries, the model indeed satisfies $\partial_{y} p = 0$. Therefore, [!eqref](velocity-x) can be expected to hold for this problem because the `pressure` variable uses the default parameters: `order = FIRST` and `family = LAGRANGE`. To verify that a new class designed to evaluate [!eqref](darcy) is working properly, it shall be confirmed that the L2-norm of the result in all elements is the value $\lVert \vec{u} \rVert = |u_{x}| = 0.01393 \, \textrm{m/s}$ obtained by substituting $p_{0}$, $p_{1}$, $K = 0.8451 \times 10^{-9} \, \textrm{m}^{2}$, $\mu_{f} = 7.98 \times 10^{-4} \, \textrm{Pa} \cdot \textrm{s}$, and $L = 0.304 \, \textrm{m}$. In addition, a simpler model that is also expected to satisfy [!eqref](velocity-x) shall be developed as a regression test.
 
 ### Source Code id=source-demo
 
-To evaluate [darcy], a new `VectorAuxKernel` object can be created and it shall be called `DarcyVelocity`. (The word "velocity" is used since $\vec{u}$ has units of distance-per-time, although it does not actually represent the flow velocity of a fluid; rather, it represents discharge-per-area). Start by making the directories to store files for objects that are part of the AuxKernels System:
+To evaluate [!eqref](darcy), a new `VectorAuxKernel` object can be created and it shall be called `DarcyVelocity`. (The word "velocity" is used since $\vec{u}$ has units of distance-per-time, although it does not actually represent the flow velocity of a fluid; rather, it represents discharge-per-area). Start by making the directories to store files for objects that are part of the AuxKernels System:
 
 !include commands/mkdir.md
          replace=['<d>', 'include/auxkernels src/auxkernels']
@@ -97,7 +97,7 @@ In `src/auxkernels`, create a file name `DarcyVelocity.C` and add the code given
 
 The only input that needs to be appended to those defined by `VectorAuxKernel::validParams()` is the name of the nonlinear variable containing the values for $p$. Thus, the `addRequiredCoupledVar()` method was used to define a parameter `"pressure"`. This `InputParameters` member is like `addRequiredParam()`, but the only type of data it accepts is a string identifying the variable object, for which, if not found, will cause an error.
 
-In the constructor definition, all $n$ components of the gradient of the variable provided to the `"pressure"` parameter were retrieved by the `coupledGradient()` method from the [`Couplable`](src/interfaces/Coupleable.C) class---a member of the [framework_development/interfaces/index.md] System in MOOSE. The data returned is then used to set `_grad_p`. Next, two material properties by the names `"permeability"` and `"viscosity"` are retrieved from the available material properties and used to set `_permeability` and `_viscosity`, respectively. Finally, the required `computeValue()` method is defined with the right-hand side of [darcy] discretized over all [!ac](QPs). Here, the derivatives of the `_permeability` and `_viscosity` variables are not of concern (and are zero at all [!ac](QPs) anyways), but the `MetaPhysicL::raw_value()` function will ensure that the value $K / \mu$ is returned when the [!ac](AD) data is passed to it.
+In the constructor definition, all $n$ components of the gradient of the variable provided to the `"pressure"` parameter were retrieved by the `coupledGradient()` method from the [`Couplable`](src/interfaces/Coupleable.C) class---a member of the [framework_development/interfaces/index.md] System in MOOSE. The data returned is then used to set `_grad_p`. Next, two material properties by the names `"permeability"` and `"viscosity"` are retrieved from the available material properties and used to set `_permeability` and `_viscosity`, respectively. Finally, the required `computeValue()` method is defined with the right-hand side of [!eqref](darcy) discretized over all [!ac](QPs). Here, the derivatives of the `_permeability` and `_viscosity` variables are not of concern (and are zero at all [!ac](QPs) anyways), but the `MetaPhysicL::raw_value()` function will ensure that the value $K / \mu$ is returned when the [!ac](AD) data is passed to it.
 
 !listing tutorials/tutorial01_app_development/step10_auxkernels/src/auxkernels/DarcyVelocity.C
          link=False
@@ -110,13 +110,13 @@ Be sure to recompile the application before proceeding:
 
 ### Input File id=input-demo
 
-With the new `DarcyVelocity` class available, it is now possible to compute the volumetric flux $\vec{u}$ of the fluid in the pressure vessel model. First, recall that earilier in the [#demo] section it was noted that $u_{x}$ is given by a constant monomial expression, i.e., [velocity-x]. It could also be shown that $\vec{u}$ is =a vector of constant monomial expressions= when $p(x, y)$ is approximated by a linear lagrange polynomial, even if $\partial_{y} p \; {=}\mathllap{\small{/}\,} \; 0$. It therefore makes sense to add the `[AuxVariables]` block to `pressure_diffusion.i` using the following syntax:
+With the new `DarcyVelocity` class available, it is now possible to compute the volumetric flux $\vec{u}$ of the fluid in the pressure vessel model. First, recall that earlier in the [#demo] section it was noted that $u_{x}$ is given by a constant monomial expression, i.e., [!eqref](velocity-x). It could also be shown that $\vec{u}$ is =a vector of constant monomial expressions= when $p(x, y)$ is approximated by a linear Lagrange polynomial, even if $\partial_{y} p \; {=}\mathllap{\small{/}\,} \; 0$. It therefore makes sense to add the `[AuxVariables]` block to `pressure_diffusion.i` using the following syntax:
 
 !listing tutorials/tutorial01_app_development/step10_auxkernels/problems/pressure_diffusion.i
          block=AuxVariables
          link=False
 
-The `[velocity]` block creates an elemental variable with `order = CONSTANT` and `family = MONOMIAL_VEC`, where `MONOMIAL_VEC` types are just a vector of `MONOMIAL` ones. This is good, because that's exactly what $\vec{u}$ should be and it is a requirement that variables assosciated with `DarcyVelocity` objects be `RealVectorValue` objects (or something similar).
+The `[velocity]` block creates an elemental variable with `order = CONSTANT` and `family = MONOMIAL_VEC`, where `MONOMIAL_VEC` types are just a vector of `MONOMIAL` ones. This is good, because that's exactly what $\vec{u}$ should be and it is a requirement that variables associated with `DarcyVelocity` objects be `RealVectorValue` objects (or something similar).
 
 Proceed with adding the following `[AuxKernels]` block to `pressure_diffusion.i`:
 
@@ -124,7 +124,7 @@ Proceed with adding the following `[AuxKernels]` block to `pressure_diffusion.i`
          block=AuxKernels
          link=False
 
-Here, a `DarcyVelocity` object was created. The assosciated variable that stores the results was identified along with the nonlinear variable assosciated with the `DarcyPressure` object. The `"execute_on"` parameter is made available through the base class and is used to control when the object runs via the [`ExecFlagEnum`](src/utils/ExecFlagEnum.C) methods. For this demonstration, the velocity is calculated based on the current steady-state solution. Setting `execute_on = TIMESTEP_END` ensures that the `DarcyVelocity` object is constructed only after a `DarcyPressure` object has computed the current solution $p$.
+Here, a `DarcyVelocity` object was created. The associated variable that stores the results was identified along with the nonlinear variable associated with the `DarcyPressure` object. The `"execute_on"` parameter is made available through the base class and is used to control when the object runs via the [`ExecFlagEnum`](src/utils/ExecFlagEnum.C) methods. For this demonstration, the velocity is calculated based on the current steady-state solution. Setting `execute_on = TIMESTEP_END` ensures that the `DarcyVelocity` object is constructed only after a `DarcyPressure` object has computed the current solution $p$.
 
 Now, execute the application:
 
@@ -132,7 +132,7 @@ Now, execute the application:
 cd ~/projects/babbler/problems
 ../babbler-opt -i pressure_diffusion.i
 
-If the program ran succesfully, a formal test of the `DarcyVelocity` class is in order. Start by creating a directory to store the test files:
+If the program ran successfully, a formal test of the `DarcyVelocity` class is in order. Start by creating a directory to store the test files:
 
 !include commands/mkdir.md
          replace=['<d>', 'test/tests/auxkernels/darcy_velocity']
@@ -167,7 +167,7 @@ Use the dropdown menu to select the "velocity_" variable and render its contours
        id=results-1
        caption=Pressure vessel model results for $\lVert \vec{u} \rVert$ indicating differences smaller than $10^{-5}$ between any two elements.
 
-From [results-1], it can be concluded that the `DarcyVelocity` object produced the expected results of $\lVert \vec{u} \rVert = 0.01393 \, \textrm{m/s}$ at all points in the mesh. Still, the renderer seems to be registering slightly different values between elements as indicated by the many different colors displayed. For practical purposes, these differences are negligible, but they can be neutralized by using tighter solver tolerances as discussed in the [#input-demo] section. To test this hypothesis, there's no need to modify the input file as any parameter can be overriden from the terminal, e.g., the following will rerun it with a relative linear tolerance of $10^{-16}$:
+From [results-1], it can be concluded that the `DarcyVelocity` object produced the expected results of $\lVert \vec{u} \rVert = 0.01393 \, \textrm{m/s}$ at all points in the mesh. Still, the renderer seems to be registering slightly different values between elements as indicated by the many different colors displayed. For practical purposes, these differences are negligible, but they can be neutralized by using tighter solver tolerances as discussed in the [#input-demo] section. To test this hypothesis, there's no need to modify the input file as any parameter can be overridden from the terminal, e.g., the following will rerun it with a relative linear tolerance of $10^{-16}$:
 
 !listing language=bash
 cd ~/projects/babbler/problems
@@ -181,7 +181,7 @@ Next, rerun `peacock -r` on the new results and observe the uniformity in the co
        caption=Pressure vessel model results for $\lVert \vec{u} \rVert$ using a relative linear tolerance of $10^{-16}$. Every element shows exactly the predicted velocity magnitude of $0.01393 \, \textrm{m/s}$.
 
 !alert! tip title=Be aware of the many different types of controllable tolerances.
-There is usually a variety of parameters available to `Executioner` objects that are used to set solver tolerances. Sometimes, even slight changes to them can have profound numerical effects, and certain types of tolerances supersede others. For example, the same desired effect of constantness (up to 16 decimal digits---the available precision for [IEEE 754 decimal64](https://en.wikipedia.org/wiki/Decimal64_floating-point_format) formatted floats (referred to as *double precision* in C++)) can be acheived by setting `nl_rel_tol = 1e-12`, but more nonlinear iterations are required in this case.
+There is usually a variety of parameters available to `Executioner` objects that are used to set solver tolerances. Sometimes, even slight changes to them can have profound numerical effects, and certain types of tolerances supersede others. For example, the same desired effect of constantness (up to 16 decimal digits---the available precision for [IEEE 754 decimal64](https://en.wikipedia.org/wiki/Decimal64_floating-point_format) formatted floats (referred to as *double precision* in C++)) can be achieved by setting `nl_rel_tol = 1e-12`, but more nonlinear iterations are required in this case.
 
 *For more information about common solver parameters, please see the [source/executioners/Steady.md] or [source/executioners/Transient.md] page.*
 !alert-end!
@@ -192,7 +192,7 @@ Now, use PEACOCK to inspect the results of the `DarcyVelocity` test:
          replace=['<d>', 'test/tests/auxkernels/darcy_velocity',
                   '<e>', 'darcy_velocity_test_out']
 
-Again, select the contours for the velocity magnitude and confirm that a solid contour is rendered up to 15 significant digits, as illustrated in [results-3]. This model was created by [dv-test] and uses $p_{0} = 0$, $p_{1} = 1 \, \textrm{Pa}$, and $L = 1 \, \textrm{m}$. And since the `PackedColumn` object used the defaults for the `"diameter"` and `"viscosity"` parameters, $K = 0.8451 \times 10^{-9} \, \textrm{m}^{2}$ and $\mu = 7.98 \times 10^{-4} \, \textrm{Pa} \cdot \textrm{s}$. Substituting these values in [velocity-x] yields
+Again, select the contours for the velocity magnitude and confirm that a solid contour is rendered up to 15 significant digits, as illustrated in [results-3]. This model was created by [dv-test] and uses $p_{0} = 0$, $p_{1} = 1 \, \textrm{Pa}$, and $L = 1 \, \textrm{m}$. And since the `PackedColumn` object used the defaults for the `"diameter"` and `"viscosity"` parameters, $K = 0.8451 \times 10^{-9} \, \textrm{m}^{2}$ and $\mu = 7.98 \times 10^{-4} \, \textrm{Pa} \cdot \textrm{s}$. Substituting these values in [!eqref](velocity-x) yields
 
 !equation
 u_{x} = \dfrac{0.8451 \times 10^{-9}}{7.98 \times 10^{-4}} \begin{bmatrix} 1 & -1 \end{bmatrix} \begin{Bmatrix} 0 \\ 1 \end{Bmatrix} = -1.059 \times 10^{-6} \, \textrm{m/s}
@@ -242,9 +242,8 @@ As changes to the repository are made, it can be helpful to frequently check the
 
 Now, commit and push the changes to the remote repository:
 
-!listing language=bash
-git commit -m "developed auxkernel for computing the velocity associated with a pressure gradient in accordance with Darcy's law"
-git push
+!include commands/git_commit.md
+         replace=['<m>', '"developed auxkernel for computing the velocity associated with a pressure gradient in accordance with Darcy\'s law"']
 
 !content pagination previous=tutorial01_app_development/step09_mat_props.md
                     next=tutorial01_app_development/step11_transient_kernel.md

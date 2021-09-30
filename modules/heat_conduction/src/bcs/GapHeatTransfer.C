@@ -140,12 +140,26 @@ GapHeatTransfer::GapHeatTransfer(const InputParameters & parameters)
 void
 GapHeatTransfer::initialSetup()
 {
-  GapConductance::setGapGeometryParameters(_pars,
-                                           _assembly.coordSystem(),
-                                           _fe_problem.getAxisymmetricRadialCoord(),
-                                           _gap_geometry_type,
-                                           _p1,
-                                           _p2);
+  std::set<SubdomainID> subdomain_ids;
+
+  for (const auto & bnd_elem : *_mesh.getBoundaryElementRange())
+  {
+    Elem * elem = bnd_elem->_elem;
+    subdomain_ids.insert(elem->subdomain_id());
+  }
+
+  if (subdomain_ids.empty())
+    mooseError("No boundary elements found");
+
+  Moose::CoordinateSystemType coord_system = _fe_problem.getCoordSystem(*subdomain_ids.begin());
+
+  for (auto sid : subdomain_ids)
+    if (_fe_problem.getCoordSystem(sid) != coord_system)
+      mooseError("The GapHeatTransfer model requires all boundary elements to have the same "
+                 "coordinate system.");
+
+  GapConductance::setGapGeometryParameters(
+      _pars, coord_system, _fe_problem.getAxisymmetricRadialCoord(), _gap_geometry_type, _p1, _p2);
 }
 
 Real

@@ -128,7 +128,7 @@ class Translator(mixins.ConfigObject):
         if not self.__initialized:
             msg = "`initPage` should only be done after the Translator.init()"
             raise exceptions.MooseDocsException(msg)
-        self.__executioner.initPage(page)
+        self.__executioner.initPages([page])
 
     def initPages(self, pages):
         """Add an additional pages to the list of available pages."""

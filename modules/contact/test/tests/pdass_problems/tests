@@ -3,9 +3,9 @@
   issues = '#17495'
   [cylinder_friction]
     type = 'CSVDiff'
-    csvdiff = 'cylinder_friction_chkfile_friction_0004.csv cylinder_friction_chkfile_x_disp_0004.csv '
-              'cylinder_friction_chkfile_y_disp_0004.csv '
-              'cylinder_friction_chkfile_cont_press_0004.csv'
+    csvdiff = 'cylinder_friction_check_friction_FINAL.csv cylinder_friction_check_x_disp_FINAL.csv '
+              'cylinder_friction_check_y_disp_FINAL.csv '
+              'cylinder_friction_check_cont_press_FINAL.csv'
     input = 'cylinder_friction.i'
     rel_err = 1.0e-4
     min_parallel = 4

@@ -297,9 +297,11 @@
     [error_variable]
       type = 'RunException'
       input = 'additional_derivatives.i'
-      expect_err = "Symbol name 'a' is a coupled variable. Derivatives w.r.t. coupled variables are always taken and they must not be specified again."
+      expect_err = "Symbol name 'a' is a coupled variable. Derivatives w.r.t. coupled variables are "
+                   "always taken and they must not be specified again."
       cli_args = "Materials/term/additional_derivative_symbols='a'"
-      detail = "and error out if derivatives MOOSE variables are requested in additional_derivative_symbols (as they are requested by default)"
+      detail = "and error out if derivatives MOOSE variables are requested in "
+               "additional_derivative_symbols (as they are requested by default)"
     []
     [error_duplicate]
       type = 'RunException'
@@ -307,6 +309,60 @@
       expect_err = "Symbol name 'e' was given more than once."
       cli_args = "Materials/term/additional_derivative_symbols='e d e'"
       detail = "and error out if any symbols are supplied more than once"
+    []
+  []
+
+  [required_property]
+    requirement = 'The system shall require explicitly coupled properties to exist'
+    issues = '#18917'
+    [parsed_material]
+      type = RunException
+      input = required_property.i
+      cli_args = 'Materials/prime/type=ParsedMaterial Materials/prime/material_property_names=Q'
+      expect_err = 'Material property \'Q\', requested by \'prime\' is not defined on block 0'
+      detail = 'for regular properties in ParsedMaterials'
+    []
+    [parsed_material_requested_non_existing_derivative]
+      type = RunException
+      input = required_property.i
+      cli_args = 'Materials/prime/type=ParsedMaterial '
+                 'Materials/prime/material_property_names="Q:=D[S,c,c]"'
+      expect_err = 'Material property \'d\^2S/dc\^2\', requested by \'prime\' is not defined on '
+                   'block 0'
+      detail = 'and error out for non-existing for explicitly requested derivatives in '
+               'ParsedMaterials'
+    []
+    [parsed_material_requested_existing_derivative]
+      type = RunApp
+      input = required_property.i
+      cli_args = 'Materials/prime/type=ParsedMaterial '
+                 'Materials/prime/material_property_names="Q:=D[S,c]"'
+      detail = 'for explicitly requested derivatives in ParsedMaterials'
+    []
+    [parsed_material_requested_optimized_out_derivative]
+      type = RunException
+      input = required_property.i
+      cli_args = 'Materials/prime/type=ParsedMaterial Materials/second/function=1 '
+                 'Materials/prime/material_property_names="Q:=D[S,c]"'
+      expect_err = 'Material property \'dS/dc\', requested by \'prime\' is not defined on block 0'
+      detail = 'for explicitly requested derivatives but optimized out derivatives in '
+               'ParsedMaterials'
+    []
+    [allow_override]
+      type = RunApp
+      input = required_property.i
+      cli_args = 'Materials/prime/type=ParsedMaterial Materials/second/function=1 '
+                 'Materials/prime/error_on_missing_material_properties=false '
+                 'Materials/prime/material_property_names="Q:=D[S,c]"'
+      detail = 'but provide for a user override to default non-existing properties to zero'
+    []
+    [derivative_parsed_material]
+      type = RunException
+      input = required_property.i
+      cli_args = 'Materials/prime/type=DerivativeParsedMaterial '
+                 'Materials/prime/material_property_names=Q'
+      expect_err = 'Material property \'Q\', requested by \'prime\' is not defined on block 0'
+      detail = 'in DerivativeParsedMaterials'
     []
   []
 []

@@ -1,0 +1,13 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'file_mesh_skip_partitioning.i'
+    exodiff = 'file_mesh_skip_partitioning_out.e'
+    min_parallel = 4
+    max_parallel = 4
+
+    issues = '#18759'
+    design = 'Mesh/Partitioner/index.md'
+    requirement = 'The system shall allow skipping partitioning after loading a mesh'
+  [../]
+[]
