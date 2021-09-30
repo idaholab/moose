@@ -10,10 +10,6 @@ rayleigh=1e3
 hot_temp=${rayleigh}
 temp_ref=${fparse hot_temp / 2.}
 
-[GlobalParams]
-  two_term_boundary_expansion = true
-[]
-
 [Mesh]
   [gen]
     type = GeneratedMeshGenerator

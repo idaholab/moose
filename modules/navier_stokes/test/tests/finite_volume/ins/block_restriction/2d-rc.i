@@ -5,10 +5,6 @@ velocity_interp_method='rc'
 
 restricted_blocks = '1'
 
-[GlobalParams]
-  two_term_boundary_expansion = true
-[]
-
 [Mesh]
   parallel_type = 'replicated'
   [mesh]

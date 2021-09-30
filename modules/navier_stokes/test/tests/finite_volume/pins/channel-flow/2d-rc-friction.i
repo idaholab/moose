@@ -16,10 +16,6 @@ velocity_interp_method='rc'
   []
 []
 
-[GlobalParams]
-  two_term_boundary_expansion = true
-[]
-
 [Variables]
   inactive = 'lambda'
   [u]

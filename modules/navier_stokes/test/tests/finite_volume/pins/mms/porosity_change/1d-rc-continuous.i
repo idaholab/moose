@@ -12,10 +12,6 @@ velocity_interp_method='rc'
   []
 []
 
-[GlobalParams]
-  two_term_boundary_expansion = true
-[]
-
 [Problem]
   error_on_jacobian_nonzero_reallocation = true
 []
