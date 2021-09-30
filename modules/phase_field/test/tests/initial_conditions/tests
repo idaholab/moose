@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#6858 #5816 #7358 #8721 #12000 #6655 #9174'
+  issues = '#6858 #5816 #7358 #8721 #12000 #6655 #9174 #18970'
   design = 'PolycrystalICs.md'
 
   [RampIC]
@@ -252,6 +252,7 @@
       input = ClosePackIC_3D.i
       exodiff = ClosePackIC_3D_out.e
       method = '!dbg' # This test is too slow in debug
+      valgrind = HEAVY
 
       detail = 'in 3D.'
     []
@@ -307,7 +308,7 @@
 
       detail = 'multiple bounding boxes in 3D.'
     []
-    
+
     [IsolatedBoundingBoxIC_2D]
       type = Exodiff
       input = 'IsolatedBoundingBoxIC_2D.i'
@@ -339,7 +340,7 @@
 
       detail = '3D.'
     []
-      
+
     [IsolatedBoundingBoxIC_2D_Overlapping]
       type = RunException
       input = 'IsolatedBoundingBoxIC_2D_Overlapping.i'
