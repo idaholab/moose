@@ -1,6 +1,6 @@
 [Tests]
   design = 'INSADBoussinesqBodyForce.md'
-  issues = '#15099 #18970'
+  issues = '#15099'
   [exo]
     type = Exodiff
     input = boussinesq_square.i

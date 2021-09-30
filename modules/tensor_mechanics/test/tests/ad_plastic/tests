@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#12650 #18970'
+  issues = '#12650'
   [./powerlaw_ten]
     type = 'CSVDiff'
     input = 'power_law_creep.i'

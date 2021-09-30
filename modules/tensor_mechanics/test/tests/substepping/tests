@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#14757 #18970'
+  issues = '#14757'
   design = 'ADRadialReturnStressUpdate.md'
   [./ad_power_law]
     type = 'RunException'

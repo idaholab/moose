@@ -1,6 +1,6 @@
 [Tests]
 design = 'source/materials/ADComputeSmearedCrackingStress.md'
-issues = '#6815 #9227 #15311 #18970'
+issues = '#6815 #9227 #15311'
   [./cracking]
     type = Exodiff
     input = cracking.i

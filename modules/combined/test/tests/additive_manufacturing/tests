@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#15795 #18970'
+  issues = '#15795'
   design = 'ActivateElementsUserObjectBase.md ActivateElementsByPath.md ActivateElementsCoupled.md'
   [check_element_addition]
     type = 'Exodiff'

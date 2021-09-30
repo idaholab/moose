@@ -1,6 +1,6 @@
 [Tests]
   design = 'navier_stokes/index.md'
-  issues = '#15640 #18970'
+  issues = '#15640'
   [exo]
     type = 'Exodiff'
     input = 'lid-driven.i'

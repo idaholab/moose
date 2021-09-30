@@ -35,7 +35,7 @@
     requirement = 'The system shall be able to transport arbitrary scalar field variables in a fluid flow field.'
     ad_indexing_type = 'global'
     design = 'INSFVScalarFieldAdvection.md'
-    issues = '#16732 #18970'
+    issues = '#16732'
     valgrind = HEAVY
   []
   [momentum-outflow-bcs]
@@ -44,7 +44,7 @@
     exodiff = 2d-rc-no-slip-outflow-bcs_out.e
     requirement = 'The system shall be able to use flux boundary conditions for the momentum and match results produced by using flux kernels.'
     design = 'INSFVMomentumAdvectionOutflowBC.md'
-    issues = '#16854 #18970'
+    issues = '#16854'
     ad_indexing_type = 'global'
     abs_zero = 2e-9
     valgrind = HEAVY
@@ -55,7 +55,7 @@
     exodiff = 2d-rc-no-slip-extrapolated-outlet-pressure_out.e
     requirement = 'The system shall be able to extrapolate a pressure value at a fully developed outflow boundary and use a mean pressure approach to eliminate the nullspace for the pressure.'
     design = 'INSFVMassAdvectionOutflowBC.md'
-    issues = '#16854 #18970'
+    issues = '#16854'
     ad_indexing_type = 'global'
     abs_zero = 6e-9
     valgrind = HEAVY
@@ -101,7 +101,7 @@
   []
   [triangles]
     requirement = 'The system shall be able to run incompressible Navier-Stokes channel-flow simulations with'
-    issues = '#16822 #18970'
+    issues = '#16822'
     design = 'MooseVariableFV.md'
     [tris]
       type = 'Exodiff'

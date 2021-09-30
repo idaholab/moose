@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#16758 #18970'
+  issues = '#16758'
   design = 'PCNSFVKT.md PNSFVMomentumGravity.md PCNSFVImplicitMomentumPressureBC.md'
   [natural_convection]
     requirement = 'The system shall be able to solve steady natural convection simulations using the finite volume method, a density-based compressible Navier-Stokes equation set, and central differencing of the advection terms for Rayleigh numbers of'

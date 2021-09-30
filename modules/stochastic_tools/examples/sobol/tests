@@ -1,6 +1,6 @@
 [Tests]
   design = sobol.md
-  issues = '#14933 #15558 #18970'
+  issues = '#14933 #15558'
 
   [stats]
     type = CheckFiles

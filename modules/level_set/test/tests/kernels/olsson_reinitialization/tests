@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#8465 #18970'
+  issues = '#8465'
   design = 'LevelSetAdvection.md'
   [./test]
     type = Exodiff

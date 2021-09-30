@@ -1,6 +1,6 @@
 [Tests]
   [heated]
-    issues = '#16756 #18970'
+    issues = '#16756'
     requirement = 'The system shall be able to solve for fluid energy diffusion, advection and convection with the solid phase in a 2D channel'
     design = 'PINSFVEnergyAdvection.md'
     [fluid_only]
@@ -43,7 +43,7 @@
     exodiff = rc-heated-solid-fluid.e
     method = "!dbg"
     abs_zero = 1e-9
-    issues = '#16756 #18970'
+    issues = '#16756'
     requirement = 'The system shall be able to solve for fluid energy diffusion, advection and convection with the solid phase in a 2D channel, modeling both fluid and solid temperature.'
     ad_indexing_type = 'global'
     valgrind = HEAVY
@@ -55,7 +55,7 @@
     input = 2d-rc-heated-boussinesq.i
     exodiff = rc-heated-boussinesq.e
     method = "!dbg"
-    issues = '#16756 #18970'
+    issues = '#16756'
     requirement = 'The system shall be able to solve for fluid energy diffusion, advection and convection with the solid phase in a 2D channel with a Boussinesq approximation for the influence of temperature on density.'
     ad_indexing_type = 'global'
     valgrind = HEAVY

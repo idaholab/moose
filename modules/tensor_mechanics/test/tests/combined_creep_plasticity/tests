@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#6873 #8651 #18970'
+  issues = '#6873 #8651'
   design = 'source/materials/ComputeMultipleInelasticStress.md'
   [./combined]
     type = 'Exodiff'

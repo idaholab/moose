@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#18850 #18970'
+  issues = '#18850'
   design = 'ADMultiplePowerLawCreepStressUpdate.md'
   [powerlaw]
     type = 'Exodiff'

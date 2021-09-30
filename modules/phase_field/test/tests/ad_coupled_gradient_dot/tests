@@ -1,6 +1,6 @@
 [Tests]
   design = 'Coupleable.md'
-  issues = '#16167 #18970'
+  issues = '#16167'
   [diffusionrate]
     type = 'CSVDiff'
     input = 'diffusion_rate.i'

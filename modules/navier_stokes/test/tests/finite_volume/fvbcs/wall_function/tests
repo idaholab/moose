@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#18273 #18970'
+  issues = '#18273'
   design = 'navier_stokes/fv.md'
   [wall-function-bc]
     type = 'Exodiff'

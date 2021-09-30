@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#18666 #18970'
+  issues = '#18666'
   design = 'navier_stokes/fv.md'
   [capped_mixing_length]
     type = 'Exodiff'

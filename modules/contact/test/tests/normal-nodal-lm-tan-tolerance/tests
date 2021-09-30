@@ -1,6 +1,6 @@
 [Tests]
   design = 'modules/contact/index.md'
-  issues = '#10950 #18970'
+  issues = '#10950'
   [exo]
     type = Exodiff
     input = normal-nodal-lm-tan-tolerance.i
