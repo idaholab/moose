@@ -126,10 +126,10 @@ class IfCommandBase(command.CommandComponent):
         settings['function'] = (None, "The function---with arguments---to evaluate. This setting is +required+.")
         return settings
 
-    def createTokenHelper(self, parent, info, page):
+    def createTokenHelper(self, parent, info, page, settings):
         group = MarkdownReader.INLINE if MarkdownReader.INLINE in info else MarkdownReader.BLOCK
         command = info['command']
-        function = self.settings['function']
+        function = settings['function']
 
         # Must supply 'function'
         if function is None:
@@ -150,11 +150,11 @@ class IfCommandBase(command.CommandComponent):
         condition = Condition(parent, command=command, content=info[group], function=function)
         return condition, group
 
-    def evaluateFunction(self):
+    def evaluateFunction(self, settings):
         """Helper for evaluating the 'function' setting."""
 
         # Separate function name from arguments
-        function = self.settings['function']
+        function = settings['function']
         match = IfCommand.FUNCTION_RE.search(function)
         if match is None:
             msg = "Invalid expression for 'function' setting: {}"
@@ -176,11 +176,11 @@ class IfCommandBase(command.CommandComponent):
 class IfCommand(IfCommandBase):
     COMMAND = 'if'
 
-    def createToken(self, parent, info, page):
-        condition, group = IfCommandBase.createTokenHelper(self, parent, info, page)
+    def createToken(self, parent, info, page, settings):
+        condition, group = IfCommandBase.createTokenHelper(self, parent, info, page, settings)
 
         # If the condition is not met, then remove content by setting it to None
-        if not self.evaluateFunction():
+        if not self.evaluateFunction(settings):
             info._LexerInformation__match[group] = None
 
         return condition
@@ -188,14 +188,14 @@ class IfCommand(IfCommandBase):
 class ElifCommand(IfCommandBase):
     COMMAND = 'elif'
 
-    def createToken(self, parent, info, page):
-        condition, group = IfCommandBase.createTokenHelper(self, parent, info, page)
+    def createToken(self, parent, info, page, settings):
+        condition, group = IfCommandBase.createTokenHelper(self, parent, info, page, settings)
 
         # Condition has already been satisfied if any sibling has content
         satisfied = any(bool(c.children) for c in condition.siblings)
 
         # If a previous condition is met or this condition is not met, remove content
-        if satisfied or not self.evaluateFunction():
+        if satisfied or not self.evaluateFunction(settings):
             info._LexerInformation__match[group] = None
 
         return condition
@@ -204,7 +204,7 @@ class ElseCommand(command.CommandComponent):
     COMMAND = 'else'
     SUBCOMMAND = None
 
-    def createToken(self, parent, info, page):
+    def createToken(self, parent, info, page, settings):
         group = MarkdownReader.INLINE if MarkdownReader.INLINE in info else MarkdownReader.BLOCK
 
         statement = parent.children[-1] if len(parent) > 0 else None

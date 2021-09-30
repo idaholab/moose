@@ -89,9 +89,6 @@ class ReaderComponent(Component, mixins.ReaderObject):
         Component.__init__(self)
         mixins.ReaderObject.__init__(self)
 
-        # Local settings, this is updated by __call__ just prior to calling the createToken()
-        self.__settings = None
-
         # Check return type of default settings
         defaults = self.defaultSettings()
         if not isinstance(defaults, dict):
@@ -118,17 +115,14 @@ class ReaderComponent(Component, mixins.ReaderObject):
         # Define the settings
         defaults = self.defaultSettings()
         if self.PARSE_SETTINGS and ('settings' in info):
-            self.__settings, _ = parse_settings(defaults, info['settings'])
+            settings, _ = parse_settings(defaults, info['settings'])
         else:
-            self.__settings = {k:v[0] for k, v in defaults.items()}
+            settings = {k:v[0] for k, v in defaults.items()}
 
-        # Call user method and reset settings
-        token = self.createToken(parent, info, page)
-        self.__settings = None
-        return token
+        return self.createToken(parent, info, page, settings)
 
-    @property
-    def attributes(self):
+    @staticmethod
+    def attributes(settings):
         """
         Return a dictionary with the common html settings.
 
@@ -136,31 +130,15 @@ class ReaderComponent(Component, mixins.ReaderObject):
         called externally.
         """
         out = dict()
-        if self.__settings:
-            if self.settings['style'] is not None:
-                out['style'] = self.settings['style'].strip()
-            if self.settings['id'] is not None:
-                out['id'] = self.settings['id'].strip()
-            if self.settings['class'] is not None:
-                out['class'] = self.settings['class'].strip()
+        if settings.get('style', None) is not None:
+            out['style'] = settings['style'].strip()
+        if settings.get('id', None) is not None:
+            out['id'] = settings['id'].strip()
+        if settings.get('class', None) is not None:
+            out['class'] = settings['class'].strip()
         return out
 
-    @property
-    def settings(self):
-        """
-        Return a copy of the settings, without the setting descriptions.
-        """
-        return self.__settings
-
-    def setSettings(self, settings):
-        """
-        Method for defining the settings for this object directly.
-
-        This is required to allow for the command extension to work correctly.
-        """
-        self.__settings = settings
-
-    def createToken(self, parent, info, page):
+    def createToken(self, parent, info, page, settings):
         """
         Method designed to be implemented by child classes, this method should create the
         token for the AST based on the regex match.

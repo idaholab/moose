@@ -191,15 +191,15 @@ class CivetCommandBase(command.CommandComponent):
         settings['repo'] = (None, "Override for the repository name provided in the 'category' option, e.g. 'idaholab/moose'.")
         return settings
 
-    def getCivetInfo(self):
+    def getCivetInfo(self, settings):
         available = self.extension.get('remotes')
         if len(available) > 0:
-            category = available.get(self.settings.get('remote') or list(available.keys())[0])
-            url = self.settings.get('url') or category['url']
-            repo = self.settings.get('repo') or category['repo']
+            category = available.get(settings.get('remote') or list(available.keys())[0])
+            url = settings.get('url') or category['url']
+            repo = settings.get('repo') or category['repo']
         else:
-            url = self.settings.get('url')
-            repo = self.settings.get('repo')
+            url = settings.get('url')
+            repo = settings.get('repo')
         return url, repo
 
 class CivetMergeResultsCommand(CivetCommandBase):
@@ -210,8 +210,8 @@ class CivetMergeResultsCommand(CivetCommandBase):
         settings = CivetCommandBase.defaultSettings()
         return settings
 
-    def createToken(self, parent, info, page):
-        site, repo = self.getCivetInfo()
+    def createToken(self, parent, info, page, settings):
+        site, repo = self.getCivetInfo(settings)
 
         rows = []
         for sha in self.extension.hashes() or list():
@@ -228,8 +228,8 @@ class CivetResultsCommand(CivetCommandBase):
         settings = CivetCommandBase.defaultSettings()
         return settings
 
-    def createToken(self, parent, info, page):
-        site, repo = self.getCivetInfo()
+    def createToken(self, parent, info, page, settings):
+        site, repo = self.getCivetInfo(settings)
         sha = mooseutils.git_commit()
         url = '{}/sha_events/{}/{}'.format(site, repo, sha)
         if info['inline']:
@@ -246,8 +246,8 @@ class CivetTestBadgesCommand(CivetCommandBase):
         config['tests'] = (None, "The name of the test(s) to report.")
         return config
 
-    def createToken(self, parent, info, page):
-        return CivetTestBadges(parent, tests=self.settings.get('tests').split())
+    def createToken(self, parent, info, page, settings):
+        return CivetTestBadges(parent, tests=settings.get('tests').split())
 
 class CivetTestReportCommand(CivetCommandBase):
     SUBCOMMAND = 'report'
@@ -258,8 +258,8 @@ class CivetTestReportCommand(CivetCommandBase):
         config['tests'] = (None, "The name of the test(s) to report.")
         return config
 
-    def createToken(self, parent, info, page):
-        return CivetTestReport(parent, tests=self.settings.get('tests').split())
+    def createToken(self, parent, info, page, settings):
+        return CivetTestReport(parent, tests=settings.get('tests').split())
 
 class RenderCivetTestBadges(components.RenderComponent):
 

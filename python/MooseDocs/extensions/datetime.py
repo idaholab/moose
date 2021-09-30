@@ -43,14 +43,14 @@ class TodayCommand(command.CommandComponent):
         settings['format'] = ('%Y-%m-%d', "The date format (see python datetime).")
         return settings
 
-    def createToken(self, parent, info, page):
+    def createToken(self, parent, info, page, settings):
         content = info['inline'] if 'inline' in info else info['block']
         if content:
             raise exceptions.MooseDocsException("Content is not supported for the 'datetime today' command.")
 
         DateTime(parent, datetime=datetime.date.today(),
                  inline='inline' in info,
-                 format=self.settings['format'])
+                 format=settings['format'])
         return parent
 
 class RenderDateTime(components.RenderComponent):

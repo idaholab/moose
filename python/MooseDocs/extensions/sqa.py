@@ -316,8 +316,8 @@ class SQARequirementsCommand(command.CommandComponent):
         config['link-validation'] = (True, "Enable/disable the validation file link.")
         return config
 
-    def createToken(self, parent, info, page):
-        category = self.settings['category']
+    def createToken(self, parent, info, page, settings):
+        category = settings['category']
         if category == '_empty_':
             return parent
 
@@ -330,12 +330,12 @@ class SQARequirementsCommand(command.CommandComponent):
             matrix = SQARequirementMatrix(parent)
             SQARequirementMatrixHeading(matrix, category=category, string=str(group))
             for req in requirements:
-                self._addRequirement(matrix, info, page, req, requirements, category)
+                self._addRequirement(matrix, info, page, req, requirements, category, settings)
         return parent
 
-    def _addRequirement(self, parent, info, page, req, requirements, category):
-        collections = self.settings['collections']
-        types = self.settings['types']
+    def _addRequirement(self, parent, info, page, req, requirements, category, settings):
+        collections = settings['collections']
+        types = settings['types']
 
         # Skip add if ...
         if req.deprecated:
@@ -376,8 +376,8 @@ class SQARequirementsCommand(command.CommandComponent):
                                                   'SQA TOKENIZE ERROR')
                         LOG.critical(msg)
 
-        if self.settings.get('link', False):
-            if self.settings.get('link-spec', False):
+        if settings.get('link', False):
+            if settings.get('link-spec', False):
                 p = core.Paragraph(item)
                 tokens.String(p, content='Specification(s): ')
                 for spec in req.specifications:
@@ -385,21 +385,21 @@ class SQARequirementsCommand(command.CommandComponent):
                         tokens.String(p, content=', ')
                     s = modal.ModalLink(p, string=spec.name, content=core.Code(None, content=spec.text))
 
-            if self.settings.get('link-design', False) and req.design:
+            if settings.get('link-design', False) and req.design:
                 SQARequirementDesign(item, filename=req.filename, design=req.design,
                                      line=req.design_line)
 
-            if self.settings.get('link-issues', False) and req.issues:
+            if settings.get('link-issues', False) and req.issues:
                 SQARequirementIssues(item, filename=req.filename, issues=req.issues,
                                      line=req.issues_line, url=self.extension.remote(category))
 
-            if self.settings.get('link-collections', False) and req.collections:
+            if settings.get('link-collections', False) and req.collections:
                 SQARequirementCollections(item, collections=req.collections)
 
-            if self.settings.get('link-types', False) and req.types:
+            if settings.get('link-types', False) and req.types:
                 SQARequirementTypes(item, types=req.types)
 
-            if self.settings.get('link-prerequisites', False) and req.prerequisites:
+            if settings.get('link-prerequisites', False) and req.prerequisites:
                 labels = []
                 for other in requirements:
                     if (other is not req) and (req.prerequisites.intersection(other.names)):
@@ -407,17 +407,17 @@ class SQARequirementsCommand(command.CommandComponent):
                 if labels:
                     SQARequirementPrerequisites(item, specs=labels)
 
-            if self.settings.get('link-results', False) and self.extension.hasCivetExtension():
+            if settings.get('link-results', False) and self.extension.hasCivetExtension():
                 civet.CivetTestBadges(item, prefix=req.prefix, tests=req.names)
 
-            if self.settings.get('link-verification', False) and req.verification:
+            if settings.get('link-verification', False) and req.verification:
                 p = core.Paragraph(item)
                 tokens.String(p, content='Verification: ')
                 for filename in req.verification:
                     autolink.AutoLink(p, page=str(filename))
                     core.Space(p)
 
-            if self.settings.get('link-validation', False) and req.validation:
+            if settings.get('link-validation', False) and req.validation:
                 p = core.Paragraph(item)
                 tokens.String(p, content='Validation: ')
                 for filename in req.validation:
@@ -433,8 +433,8 @@ class SQACrossReferenceCommand(SQARequirementsCommand):
         config.pop('link-prerequisites')
         return config
 
-    def createToken(self, parent, info, page):
-        category = self.settings['category']
+    def createToken(self, parent, info, page, settings):
+        category = settings['category']
         if category == '_empty_':
             return parent
 
@@ -461,7 +461,7 @@ class SQACrossReferenceCommand(SQARequirementsCommand):
             heading = SQARequirementMatrixHeading(matrix, category=category)
             autolink.AutoLink(heading, page=str(node.local))
             for req in requirements:
-                self._addRequirement(matrix, info, page, req, requirements, category)
+                self._addRequirement(matrix, info, page, req, requirements, category, settings)
 
         return parent
 
@@ -476,19 +476,19 @@ class SQAVerificationCommand(SQARequirementsCommand):
         config.pop('link-validation')
         return config
 
-    def createToken(self, parent, info, page):
-        category = self.settings['category']
+    def createToken(self, parent, info, page, settings):
+        category = settings['category']
         if category == '_empty_':
             return parent
 
         subcommand = info['subcommand']
-        self.settings['link-{}'.format(subcommand)] = True
+        settings['link-{}'.format(subcommand)] = True
         matrix = SQARequirementMatrix(parent)
         SQARequirementMatrixHeading(matrix, category=category, string=subcommand.title())
         for requirements in self.extension.requirements(category).values():
             for req in requirements:
                 if getattr(req, subcommand) is not None:
-                    self._addRequirement(matrix, info, page, req, requirements, category)
+                    self._addRequirement(matrix, info, page, req, requirements, category, settings)
 
         return parent
 
@@ -503,9 +503,9 @@ class SQADependenciesCommand(command.CommandComponent):
         config['category'] = (None, "Provide the category.")
         return config
 
-    def createToken(self, parent, info, page):
-        suffix = self.settings['suffix']
-        category = self.settings['category'] or None
+    def createToken(self, parent, info, page, settings):
+        suffix = settings['suffix']
+        category = settings['category'] or None
         if category == '_empty_':
             depends = self.extension.get('categories').keys()
         else:
@@ -531,12 +531,12 @@ class SQADocumentCommand(command.CommandComponent):
         config['category'] = (None, "Provide the category.")
         return config
 
-    def createToken(self, parent, info, page):
-        category = self.settings['category']
+    def createToken(self, parent, info, page, settings):
+        category = settings['category']
         if category == '_empty_':
             return parent
 
-        suffix = self.settings.get('suffix')
+        suffix = settings.get('suffix')
         return autolink.AutoLink(parent, page='sqa/{}_{}.md'.format(category, suffix),
                                  optional=True, warning=True)
 
@@ -550,8 +550,8 @@ class SQAReportCommand(command.CommandComponent):
         config['category'] = (None, "Provide the category.")
         return config
 
-    def createToken(self, parent, info, page):
-        category = self.settings.get('category') or '_empty_'
+    def createToken(self, parent, info, page, settings):
+        category = settings.get('category') or '_empty_'
         doc_reports, req_reports, app_reports = self.extension.reports(category)
         core.Heading(parent, string='Software Quality Status Report(s)', level=2)
         SQADocumentReportToken(parent, reports=doc_reports)
@@ -650,8 +650,8 @@ class SQARecordCommand(command.CommandComponent):
         config['category'] = (None, "Provide the category.")
         return config
 
-    def createToken(self, parent, info, page):
-        category = self.settings.get('category') or '_empty_'
+    def createToken(self, parent, info, page, settings):
+        category = settings.get('category') or '_empty_'
         doc_reports, _, _ = self.extension.reports(category)
         if doc_reports is not None:
             core.Heading(parent, string='Software Quality Records', level=2)

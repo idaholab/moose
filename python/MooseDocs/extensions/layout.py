@@ -47,8 +47,8 @@ class RowCommand(command.CommandComponent):
         settings = command.CommandComponent.defaultSettings()
         return settings
 
-    def createToken(self, parent, info, page):
-        return RowToken(parent, **self.attributes)
+    def createToken(self, parent, info, page, settings):
+        return RowToken(parent, **self.attributes(settings))
 
 
 class ColumnCommand(command.CommandComponent):
@@ -67,23 +67,23 @@ class ColumnCommand(command.CommandComponent):
         settings['large'] = (12, "The number of columns for large displays (1-12).")
         return settings
 
-    def createToken(self, parent, info, page):
+    def createToken(self, parent, info, page, settings):
 
         sml = []
         for s in ['small', 'medium', 'large']:
-            sml.append(int(self.settings[s]))
+            sml.append(int(settings[s]))
             if sml[-1] < 1 or sml[-1] > 12:
                 msg = "The '{}' setting must be an integer between 1 and 12."
                 raise exceptions.MooseDocsException(msg, s)
 
         col = ColumnToken(parent,
-                          width=self.settings['width'],
+                          width=settings['width'],
                           small=sml[0],
                           medium=sml[1],
                           large=sml[2],
-                          **self.attributes)
+                          **self.attributes(settings))
 
-        icon = self.settings.get('icon', None)
+        icon = settings.get('icon', None)
         if icon:
             materialicon.Icon(col, icon=str(icon), class_='moose-col-icon')
 

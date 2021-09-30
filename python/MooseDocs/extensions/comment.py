@@ -36,7 +36,7 @@ class HTMLCommentBlock(components.ReaderComponent):
     # TODO: Remove this in favor of !!! version
     RE = re.compile(r'<!--(?P<content>.*?)-->', flags=re.UNICODE|re.MULTILINE|re.DOTALL)
 
-    def createToken(self, parent, info, page):
+    def createToken(self, parent, info, page, settings):
         Comment(parent, content=info['content'])
         return parent
 
@@ -45,7 +45,7 @@ class CommentInline(components.ReaderComponent):
     Inline comments begin with !! and continue to the end of a line.
     """
     RE = re.compile(r'(?<!!)!{2}(?!!)(?P<content>.*?)$', flags=re.UNICODE|re.MULTILINE)
-    def createToken(self, parent, info, page):
+    def createToken(self, parent, info, page, settings):
         Comment(parent, content=info['content'])
         return parent
 
@@ -59,6 +59,6 @@ class CommentBlock(components.ReaderComponent):
                     r'(?=\n*\Z|\n{2,})',      # end of string or empty line
                     flags=re.UNICODE|re.MULTILINE|re.DOTALL)
 
-    def createToken(self, parent, info, page):
+    def createToken(self, parent, info, page, settings):
         Comment(parent, content=info['content'])
         return parent

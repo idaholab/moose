@@ -45,12 +45,12 @@ class IconCommand(command.CommandComponent):
                                     "LaTeX fontawesome package.")
         return settings
 
-    def createToken(self, parent, info, page):
+    def createToken(self, parent, info, page, settings):
         if info.pattern not in ('InlineCommand', 'OldInlineCommand', 'OlderInlineCommand'):
             core.Paragraph(parent)
         return Icon(parent, icon=info['subcommand'],
-                    tight=self.settings['tight'],
-                    faicon=self.settings['faicon'])
+                    tight=settings['tight'],
+                    faicon=settings['faicon'])
 
 class RenderIcon(components.RenderComponent):
     def createHTML(self, parent, token, page):

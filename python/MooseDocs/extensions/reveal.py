@@ -139,7 +139,7 @@ class RevealNotes(command.CommandComponent):
         settings = command.CommandComponent.defaultSettings()
         return settings
 
-    def createToken(self, parent, info, page):
+    def createToken(self, parent, info, page, settings):
         return Notes(parent)
 
 class SectionBlock(components.ReaderComponent):
@@ -151,7 +151,7 @@ class SectionBlock(components.ReaderComponent):
         settings = components.ReaderComponent.defaultSettings()
         return settings
 
-    def createToken(self, parent, info, page):
+    def createToken(self, parent, info, page, settings):
         n = len(info['SlideBreak'])
         if n == 2:
             SubSection(parent)

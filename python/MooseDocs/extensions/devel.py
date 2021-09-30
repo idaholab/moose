@@ -61,14 +61,14 @@ class ExampleCommand(command.CommandComponent):
         settings['prefix'] = ('Example', settings['prefix'][1])
         return settings
 
-    def createToken(self, parent, info, page):
-        flt = floats.create_float(parent, self.extension, self.reader, page, self.settings)
+    def createToken(self, parent, info, page, settings):
+        flt = floats.create_float(parent, self.extension, self.reader, page, settings)
         ex = Example(flt)
 
         data = info['block'] if 'block' in info else info['inline']
         code = core.Code(ex, content=data)
         if flt is parent:
-            ex.attributes.update(**self.attributes)
+            ex.attributes.update(**self.attributes(settings))
 
         return ex
 
@@ -86,43 +86,42 @@ class SettingsCommand(command.CommandComponent):
 
         return settings
 
-    def createToken(self, parent, info, page):
-        if self.settings['module'] is None:
+    def createToken(self, parent, info, page, settings):
+        if settings['module'] is None:
             raise exceptions.MooseDocsException("The 'module' setting is required.")
 
-        if self.settings['object'] is None:
+        if settings['object'] is None:
             raise exceptions.MooseDocsException("The 'object' setting is required.")
 
-        primary = floats.create_float(parent, self.extension, self.reader, page, self.settings,
+        primary = floats.create_float(parent, self.extension, self.reader, page, settings,
                                      token_type=table.TableFloat)
         try:
-            mod = importlib.import_module(self.settings['module'])
+            mod = importlib.import_module(settings['module'])
         except ImportError:
             msg = "Unable to load the '{}' module."
-            raise exceptions.MooseDocsException(msg, self.settings['module'])
+            raise exceptions.MooseDocsException(msg, settings['module'])
 
         try:
-            obj = getattr(mod, self.settings['object'])
+            obj = getattr(mod, settings['object'])
         except AttributeError:
             msg = "Unable to load the '{}' attribute from the '{}' module."
-            raise exceptions.MooseDocsException(msg, self.settings['object'],
-                                                self.settings['module'])
+            raise exceptions.MooseDocsException(msg, settings['object'], settings['module'])
 
         if hasattr(obj, 'defaultSettings'):
-            settings = obj.defaultSettings()
+            obj_settings = obj.defaultSettings()
         elif hasattr(obj, 'defaultConfig'):
-            settings = obj.defaultConfig()
+            obj_settings = obj.defaultConfig()
         else:
             msg = "The '{}' object in the '{}' module does not have a 'defaultSettings' or "\
                   "'defaultConfig' method."
             raise exceptions.MooseDocsException(msg, mod, obj)
 
-        rows = [[key, value[0], value[1]] for key, value in settings.items()]
+        rows = [[key, value[0], value[1]] for key, value in obj_settings.items()]
         tbl = table.builder(rows, headings=['Key', 'Default', 'Description'])
         tbl.parent = primary
 
         if primary is parent:
-            tbl.attributes.update(**self.attributes)
+            tbl.attributes.update(**self.attributes(settings))
 
         return primary
 

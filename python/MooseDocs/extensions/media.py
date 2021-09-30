@@ -84,14 +84,14 @@ class ImageCommand(command.CommandComponent):
         settings.update(floats.caption_settings())
         return settings
 
-    def createToken(self, parent, info, page):
+    def createToken(self, parent, info, page, settings):
 
-        flt = floats.create_float(parent, self.extension, self.reader, page, self.settings,
-                                  bottom=True, **self.attributes)
-        img = Image(flt, src=info['subcommand'], dark=self.settings['dark_src'],
-                    tex=self.settings['latex_src'])
+        flt = floats.create_float(parent, self.extension, self.reader, page, settings,
+                                  bottom=True, **self.attributes(settings))
+        img = Image(flt, src=info['subcommand'], dark=settings['dark_src'],
+                    tex=settings['latex_src'])
         if flt is parent:
-            img.attributes.update(**self.attributes)
+            img.attributes.update(**self.attributes(settings))
         return parent
 
 class VideoCommand(command.CommandComponent):
@@ -111,23 +111,23 @@ class VideoCommand(command.CommandComponent):
         settings.update(floats.caption_settings())
         return settings
 
-    def createToken(self, parent, info, page):
-        flt = floats.create_float(parent, self.extension, self.reader, page, self.settings,
-                                  bottom=True, img=True, **self.attributes)
+    def createToken(self, parent, info, page, settings):
+        flt = floats.create_float(parent, self.extension, self.reader, page, settings,
+                                  bottom=True, img=True, **self.attributes(settings))
 
         vid = Video(flt,
                     src=info['subcommand'],
                     youtube='www.youtube.com' in info['subcommand'],
-                    tex=self.settings['latex_src'],
-                    controls=self.settings['controls'],
-                    poster=self.settings['poster'],
-                    loop=self.settings['loop'],
-                    autoplay=self.settings['autoplay'],
-                    tstart=self.settings['tstart'],
-                    tstop=self.settings['tstop'])
+                    tex=settings['latex_src'],
+                    controls=settings['controls'],
+                    poster=settings['poster'],
+                    loop=settings['loop'],
+                    autoplay=settings['autoplay'],
+                    tstart=settings['tstart'],
+                    tstop=settings['tstop'])
 
         if flt is parent:
-            vid.attributes.update(**self.attributes)
+            vid.attributes.update(**self.attributes(settings))
 
         return parent
 

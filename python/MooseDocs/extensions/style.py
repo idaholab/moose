@@ -47,14 +47,14 @@ class StyleCommand(command.CommandComponent):
         settings['fontweight'] = (None, "Set the font weight.")
         return settings
 
-    def createToken(self, parent, info, page):
+    def createToken(self, parent, info, page, settings):
         return StyleToken(parent,
-                          halign=self.settings['halign'],
-                          border=self.settings['border'],
-                          color=self.settings['color'],
-                          fontsize=self.settings['fontsize'],
-                          fontweight=self.settings['fontweight'],
-                          **self.attributes)
+                          halign=settings['halign'],
+                          border=settings['border'],
+                          color=settings['color'],
+                          fontsize=settings['fontsize'],
+                          fontweight=settings['fontweight'],
+                          **self.attributes(settings))
 
 class RenderStyleToken(components.RenderComponent):
 

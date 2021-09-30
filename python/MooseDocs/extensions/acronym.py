@@ -102,7 +102,7 @@ class AcronymComponent(command.CommandComponent):
     COMMAND = 'ac'
     SUBCOMMAND = None
 
-    def createToken(self, parent, info, page):
+    def createToken(self, parent, info, page, settings):
         AcronymToken(parent, acronym=info['inline'])
         return parent
 
@@ -121,19 +121,19 @@ class AcronymListComponent(command.CommandComponent):
         settings['caption'] = (None, "The caption to use for the acronym table.")
         return settings
 
-    def createToken(self, parent, info, page):
-        if self.settings['location'] and self.settings['complete']:
+    def createToken(self, parent, info, page, settings):
+        if settings['location'] and settings['complete']:
             msg = "The 'complete' setting must be 'False' (default) when using 'location'."
             raise exceptions.MooseDocsException(msg)
 
-        flt = floats.create_float(parent, self.extension, self.reader, page, self.settings,
-                                  **self.attributes)
+        flt = floats.create_float(parent, self.extension, self.reader, page, settings,
+                                  **self.attributes(settings))
         acro = AcronymListToken(flt,
-                                complete=self.settings['complete'],
-                                location=self.settings['location'],
-                                heading=self.settings['heading'])
+                                complete=settings['complete'],
+                                location=settings['location'],
+                                heading=settings['heading'])
         if flt is parent:
-            acro.attributes.update(**self.attributes)
+            acro.attributes.update(**self.attributes(settings))
 
         return parent
 

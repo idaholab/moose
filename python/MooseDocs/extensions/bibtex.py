@@ -122,7 +122,7 @@ class BibtexReferenceComponent(command.CommandComponent):
     COMMAND = ('cite', 'citet', 'citep', 'nocite')
     SUBCOMMAND = None
 
-    def createToken(self, parent, info, page):
+    def createToken(self, parent, info, page, settings):
         keys = [key.strip() for key in info['inline'].split(',')]
         BibtexCite(parent, keys=keys, cite=info['command'])
         page['citations'].extend(keys)
@@ -140,11 +140,11 @@ class BibtexCommand(command.CommandComponent):
         config['title-level'] = (2, "The heading level for the section title for the references.")
         return config
 
-    def createToken(self, parent, token, page):
-        if self.settings['title']:
-            h = core.Heading(parent, level=int(self.settings['title-level']))
-            self.reader.tokenize(h, self.settings['title'], page, MarkdownReader.INLINE)
-        BibtexBibliography(parent, bib_style=self.settings['style'])
+    def createToken(self, parent, token, page, settings):
+        if settings['title']:
+            h = core.Heading(parent, level=int(settings['title-level']))
+            self.reader.tokenize(h, settings['title'], page, MarkdownReader.INLINE)
+        BibtexBibliography(parent, bib_style=settings['style'])
         return parent
 
 class BibtexListCommand(command.CommandComponent):
@@ -157,8 +157,8 @@ class BibtexListCommand(command.CommandComponent):
         config['bib_files'] = (None, "The list of *.bib files to use for a complete citation list.")
         return config
 
-    def createToken(self, parent, token, page):
-        bfiles = self.settings['bib_files']
+    def createToken(self, parent, token, page, settings):
+        bfiles = settings['bib_files']
         bib_files = list()
         if bfiles is None:
             bib_files = self.extension.bibfiles()

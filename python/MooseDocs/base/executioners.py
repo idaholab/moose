@@ -191,7 +191,7 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
         if (platform.python_version() >= '3.9') and (platform.system() == 'Darwin'):
             self._ctx = multiprocessing.get_context('fork')
         else:
-            self._ctx = multiprocessing
+            self._ctx = multiprocessing.get_context()
 
         # A lock used prior to caching items or during directory creation to prevent race conditions
         self._lock = self._ctx.Lock()
