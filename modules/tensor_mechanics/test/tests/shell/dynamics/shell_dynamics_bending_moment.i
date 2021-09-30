@@ -459,23 +459,24 @@
 
 [Executioner]
   type = Transient
-  solve_type = NEWTON
+  solve_type = PJFNK
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'lu'
   nl_max_its = 2
   nl_rel_tol = 1e-10
-  nl_abs_tol = 5e-4
+  nl_abs_tol = 5e-8
 
   dt = 0.0005
   dtmin = 0.0005
   end_time = 1
 
-#  [./TimeIntegrator]
-#    type = NewmarkBeta
-#    beta = 0.25
-#    gamma = 0.5
-#  [../]
-
+  [TimeIntegrator]
+    type = NewmarkBeta
+    beta = 0.25
+    gamma = 0.5
+  []
 []
 
 [Outputs]
-  exodus = true
+  csv = true
 []
