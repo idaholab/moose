@@ -22,7 +22,7 @@ cd doc
 
 ## Update Content
 
-To allow for the design documentation to be complete, the content [!ac](MOOSE) framework and
+To allow for the design documentation to be complete, the content of the [!ac](MOOSE) framework and
 all modules enabled for an application must be added to the "config.yml" within
 the application "doc" directory.
 
@@ -59,7 +59,7 @@ Extensions:
 ```
 
 !alert note
-This is not necessary for NQA-1 compliance, but it is could practice for creating complete documentation.
+This is not necessary for NQA-1 compliance, but it is good practice for creating complete documentation.
 
 !---
 
@@ -110,7 +110,7 @@ The "category" should match the prefix of the file names and the "app" be the re
 application name.
 
 !alert note
-Certain templates have required section and others have sections that can be optionally overridden.
+Certain templates have required sections and others have sections that can be optionally overridden.
 The required sections will be detailed upon rendering the website with the "build" command.
 
 !---
@@ -122,7 +122,7 @@ To use this system a report configuration file ("sqa_reports.yml") must be creat
 directory of the MOOSE-based application.
 
 This file should contain three sections: "Applications", "Documents", and "Requirements". In the
-following slides the configuration from the "blackbear" application are presented. The file
+following slides the configuration from the "blackbear" application is presented. The file
 for any application will be nearly identical, with the application name being the major difference.
 
 !---

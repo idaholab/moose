@@ -5,7 +5,7 @@
 ## PLN-4005 and Releases
 
 !alert warning title=Refer to PLN-4005
-PLN-4005 details what must be performed during a release of MOOSE and MOOSE-based applications, it
+PLN-4005 details what must be performed during a release of MOOSE and MOOSE-based applications, and it
 should be utilized as a reference. This presentation is an introduction to aid in following the
 procedure within PLN-4005.
 
@@ -66,7 +66,7 @@ number is the job number.
 
 PLN-4005 details the necessary steps for performing the release which includes performing a
 final review of MOOSE or MOOSE-based application. This review +must+ be performed by the Project Lead
-and is intended to ensure that all requirements are satisfied and the all [!ac](SQA) documentation
+and is intended to ensure that all requirements are satisfied and that all [!ac](SQA) documentation
 is correct and complete.
 
 !---
@@ -77,7 +77,7 @@ The "release log" provides evidence that the final review of software was conduc
 a text file ("RELEASE_LOG.md") that should be added to the "release" directory of the repository.
 
 !alert note
-Please refer to the current version of PLN-4005 to determine what is necessary, do not
+Please refer to the current version of PLN-4005 to determine what is necessary. Do not
 rely on a log from a previous release. The necessary components of the log might have been
 altered since the previous release.
 
@@ -85,7 +85,7 @@ altered since the previous release.
 
 ## Update MooseDocs config.yml
 
-To ensure that the results displayed on the generate website are correct and pulled from the
+To ensure that the results displayed on the generated website are correct and pulled from the
 stored results, the "config.yml" must be updated to disable downloading and enable using the
 results in the "release" directory. The following are the changes to the "config.yml" for a
 release of "blackbear".
@@ -119,8 +119,8 @@ index b46b6c19..a97a9828 100644
 
 ## Commit Release
 
-After the testing results are downloaded, the release log created, and the "config.yml" are
-created the additions must be committed to the repository. It is suggested that the following
+After the testing results are downloaded, the release log created, and the "config.yml" is
+created, the additions must be committed to the repository. It is suggested that the following
 commit message pattern be followed.
 
 ```
@@ -148,5 +148,5 @@ Depending on your configuration the main repository may be named something other
 ## Upload Release Website (optional)
 
 Although not required by PLN-4005 the website for the release should be uploaded for consumption
-by users of MOOSE or MOOSE-based application. Please contact the MOOSE developers for assistance
+by users of MOOSE or the MOOSE-based application. Please contact the MOOSE developers for assistance
 with this process.
