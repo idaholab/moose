@@ -1,0 +1,235 @@
+# Input File
+
+An input file used by MOOSE-based applications is a human-readable text file that can be prepared in an ordinary text editor.
+
+## Blocks
+
+Every input file will contain blocks with the following format:
+
+```
+[BlockName]
+  parameters
+[]
+```
+
+where `BlockName` can contain letters, numbers.
+Whitespaces should be avoided, since they can create unexpected problems
+
+
+## Nested Blocks
+
+Some blocks allow nesting, an example of a nested block would look like this:
+
+```
+[BlockName]
+  [SubBlock]
+    parameters
+  []
+[]
+```
+
+## Parameters
+
+Parameters are specified in the following format:
+
+```
+parameter_name = value
+```
+
+There are several +types+ of values that can be supplied as parameters:
+
+| Parameter type | Example value | Note
+| :- | :- | :- |
+| Integer | `1` |
+| Real | `3.2` |
+| Vector of integers | `'1 14 6'` | Note the `'` around the values |
+| Vector of reals | `'1.2 5.4 6.99'` | Note the `'` around the values |
+| Point in 3D space | `'x y z'` | `x`, `y` and `z` are real spatial coordinates |
+| Boolean | `True`, `False`, `On`,  `Off`, `1`,  `0` |
+| String | `"Text"` | Note the `"` around the values |
+
+
+The list of parameters you can specify in each block is given via the `type` parameter.
+The type refers to a C++ class which defines its input file parameters.
+The type of each parameter is specified in the C++ class and is documented in the user manual.
+
+## Comments
+
+Comments are supported.
+They start with `#` and can be placed almost anywhere in the input file.
+
+```
+[Components]
+  # 1 meter long pipe at (0, 0, 1)
+  [pipe1]
+    type = FlowChannel1Phase
+    # geometrical parameters
+    position = '0 0 1'
+    length = 1.0       # in meters
+  []
+[]
+```
+
+## Named values
+
+It is possible to create named values that can be used thoughout the input file.
+
+```
+radius = 2
+```
+
+!alert2 note
++Note:+ These values cannot be specified inside blocks that have the `type` parameter.
+Usually, these values are specified at the top level of the input file outside of any block.
+When specified inside a block, they are local to the block.
+
+### Expressions
+
+Mathematical operations can be done using the `fparse` directive:
+
+```
+circumference = ${fparse 2 * pi * radius}
+```
+
+### Unit conversion
+
+Simple unit conversion is supported via `units` directive:
+
+```
+length = ${units 1 in -> m}
+```
+
+Here, `length` will have the value of `0.0254`.
+
+### Substitution
+
+To use the named value in an input file, use the `${name}` syntax:
+
+```
+len = 1
+
+[Block]
+  length = ${len}
+[]
+```
+
+Here, the `length` parameter in `Block` will have the value of `1`.
+
+## Global Parameters
+
+Global parameters are parameters that are used globally in the whole input file.
+They are specified in the `[GlobalParams]` block:
+
+```
+[GlobalParams]
+  A = 1.0
+[]
+```
+
+If any block in the input file accepts parameter `A`, then this value will be used and does not
+have to supplied individually in every such block.
+
+The global value can be locally overriden inside the block:
+
+```
+[GlobalParams]
+  A = 1.0
+[]
+
+[Block]
+  type = SomeType
+  A = 2.0
+[]
+```
+
+## Example
+
+The following input file shows the above-explained features on a simple {{project-name-abbrev}} input file:
+
+```
+# radius of a flow channel
+r = ${units 5 cm -> m}
+# cross-sectioanl area
+A_pipe = ${fparse pi * r * r}
+# hydraulic diameter
+D_h_pipe = ${fparse 2 * r}
+
+[GlobalParams]
+  initial_p = 1e5   # Pa
+  initial_vel = 0   # m/2
+  initial_T = 310   # K
+
+  closures = simple
+  rdg_slope_reconstruction = full
+[]
+
+[FluidProperties]
+  [fluid]
+    type = IdealGasFluidProperties
+  []
+[]
+
+[Components]
+  [pipe]
+    type = FlowChannel1Phase
+    position = '0 0 0'
+    orientation = '1 0 0'
+    length = 2
+    A = ${A_pipe}
+    D_h = ${D_h_pipe}
+    n_elems = 25
+    f = 0
+    fp = fluid
+  []
+
+  [inlet]
+    type = InletStagnationPressureTemperature1Phase
+    input = 'pipe:in'
+    p0 = 1.00001e5
+    T0 = 310
+  []
+
+  [outlet]
+    type = Outlet1Phase
+    input = 'pipe:out'
+    p = 1e5
+  []
+[]
+
+[Postprocessors]
+  [T_inlet]
+    type = SideAverageValue
+    boundary = pipe:in
+    variable = T
+  []
+[]
+
+[Preconditioning]
+  [pc]
+    type = SMP
+    full = true
+  []
+[]
+
+[Executioner]
+  type = Transient
+  start_time = 0
+  end_time = 1
+  dt = 0.1
+
+  solve_type = NEWTON
+  line_search = basic
+
+  nl_max_its = 5
+  nl_rel_tol = 1e-5
+[]
+
+[Outputs]
+  exodus = true
+  csv = true
+[]
+```
+
+## More Information
+
+The exact blocks and their allowed types will be explained in other sections of this documentation.

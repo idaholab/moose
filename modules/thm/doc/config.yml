@@ -91,6 +91,11 @@ Extensions:
         macros: !include ${ROOT_DIR}/doc/latex_macros.yml
     MooseDocs.extensions.template:
         active: true
+        args:
+            project-name: Thermal Hydraulics Module
+            project-name-abbrev: THM
+            bin-opt: thm-opt
+            bin-dbg: thm-dbg
     MooseDocs.extensions.sqa:
         active: true
         reports: !include ${ROOT_DIR}/doc/sqa_reports.yml
@@ -105,3 +110,5 @@ Extensions:
         repos:
             default: https://gitlab.software.inl.gov/idaholab/thm
             relap-7: https://hpcgitlab.hpc.inl.gov/idaholab/relap-7
+    alert2:
+        active: true

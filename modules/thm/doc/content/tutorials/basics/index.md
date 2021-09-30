@@ -1,5 +1,5 @@
 !template load
-  file=tutorial.md.template
+  file=tutorial.index.md.template
   title=The Basics
   pages=tutorials/basics/execution.md
     tutorials/basics/input_file.md
@@ -9,7 +9,7 @@
 
 !template! item key=description
 
-This self-paced tutorial will teach you the basics of how to use the Thermal Hydraulics Module.
+This self-paced tutorial will teach you the basics of how to use the {{project-name}}.
 
 The tutorial starts by teaching you how to run the code.
 The next section will introduce the input file structure.
