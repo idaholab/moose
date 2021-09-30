@@ -182,7 +182,7 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
     def __init__(self, **kwargs):
         mixins.ConfigObject.__init__(self, **kwargs)
         mixins.TranslatorObject.__init__(self)
-        self._page_objects = list()
+        self._page_objects = dict()
         self._total_time = 0
         self._clear_progress()
 
@@ -223,11 +223,11 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
 
     def addPage(self, page):
         """Add a Page object to be Translated."""
-        self._page_objects.append(page)
+        self._page_objects[page.uid] = page
 
     def getPages(self):
         """Return a list of Page objects."""
-        return self._page_objects
+        return self._page_objects.values()
 
     def setGlobalAttribute(self, key, value):
         """Set a global attribute to be communicated across processors."""
@@ -401,9 +401,7 @@ class Executioner(mixins.ConfigObject, mixins.TranslatorObject):
 
     def _getPage(self, uid):
         """Retrieve a Page object from the global list by its UID."""
-        for page in self._page_objects:
-            if uid == page.uid:
-                return page
+        return self._page_objects[uid]
 
 class Serial(Executioner):
     """Simple serial Executioner, this is useful for debugging or for very small builds."""

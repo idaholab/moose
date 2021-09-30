@@ -25,12 +25,15 @@ def get_requirements_from_tests(directories, specs, include_non_testable=False):
     """
     out = collections.defaultdict(list)
     for location in directories:
+        root_dir = mooseutils.git_root_dir(location)
         for filename in sorted(mooseutils.git_ls_files(location)):
             if os.path.isfile(filename) and (os.path.basename(filename) in specs):
                 local = os.path.relpath(filename, location)
                 group = local.split('/')[0]
-                out[group] += get_requirements_from_file(filename, os.path.dirname(local),
-                                                         include_non_testable)
+                out[group] += get_requirements_from_file(filename,
+                                                         os.path.dirname(local),
+                                                         include_non_testable,
+                                                         root_dir)
     return out
 
 def number_requirements(requirement_dict, category):
@@ -52,7 +55,7 @@ def number_requirements(requirement_dict, category):
         for j, req in enumerate(requirements):
             req.label = "{}.{}.{}".format(category, i+1, j+1)
 
-def get_requirements_from_file(filename, prefix=None, include_non_testable=False):
+def get_requirements_from_file(filename, prefix=None, include_non_testable=False, root_dir=None):
     """
     Opens hit file and extracts requirement items.
 
@@ -91,11 +94,11 @@ def get_requirements_from_file(filename, prefix=None, include_non_testable=False
         # Get "detail" parameter from nested tests
         for grandchild in child.children:
             detail = _create_detail(grandchild, filename)
-            detail.specification = _create_specification(grandchild, '{}/{}'.format(child.name, grandchild.name), filename)
+            detail.specification = _create_specification(grandchild, '{}/{}'.format(child.name, grandchild.name), filename, root_dir)
             req.details.append(detail)
 
         if not req.details:
-            req.specification = _create_specification(child, child.name, filename)
+            req.specification = _create_specification(child, child.name, filename, root_dir)
 
         if req.testable or include_non_testable:
             requirements.append(req)
@@ -123,7 +126,7 @@ def get_test_specification(filename, block):
 
     # Build/return TestSpecification object
     name = node.name if node.parent.parent.is_root else '{}/{}'.format(node.parent.name, node.name)
-    return _create_specification(node, name, filename)
+    return _create_specification(node, name, filename, mooseutils.git_root_dir(os.path.dirname(filename)))
 
 def _find_file(working_dir, pattern):
     """
@@ -145,7 +148,7 @@ def _find_file(working_dir, pattern):
 
     return matches[0]
 
-def _create_specification(child, name, filename):
+def _create_specification(child, name, filename, root_dir):
     """
     Create and return a TestSpecificaiton object.
 
@@ -157,7 +160,7 @@ def _create_specification(child, name, filename):
     spec = TestSpecification(name=name, filename=filename, line=child.line())
     spec.type = child.get('type').strip() if child.get('type', None) is not None else None
     spec.text = child.render()
-    spec.local = mooseutils.git_localpath(filename)
+    spec.local = os.path.relpath(filename, root_dir)
 
     # "skip" and "deleted" for creating satisfied parameter (i.e., does the test run)
     spec.skip = child.get('skip', None) is not None
