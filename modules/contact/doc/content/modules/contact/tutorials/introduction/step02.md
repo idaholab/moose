@@ -14,16 +14,19 @@ to out of contact.
 !listing modules/contact/tutorials/introduction/step02.i
 
 Here we show the steps for migrating a node on face contact problem (the penalty
-based contact problem from the previous step) to a mortar formulation. Most of the extra work is performed by the Contact action.
+based contact problem from the previous step) to a mortar formulation. Most of
+the extra work is performed by the Contact action.
 
 The key difference with mortar based contact is the use of Lagrange multipliers
 for the enforcement of the contact constraints. These Lagrange multiplieres are
 additional solution variables (added by the Contact action) that live on lower
 dimensional subdomains along the contact interfaces.
 
-The Contact action automatically adds these lower dimensional subdomains, _but_
-now that they exist in the simulation we have to be careful not to add any physics
-on them beyond the Lagrange multipliers. This means we have to add *block restrictions* for all our kernels, materials, and variables to only add them to the volume subdomains.
+The Contact action automatically adds these lower dimensional subdomains, *but*
+now that they exist in the simulation we have to be careful not to add any
+physics on them beyond the Lagrange multipliers. This means we have to add
+*block restrictions* for all our kernels, materials, and variables to only add
+them to the volume subdomains.
 
 ## Input file
 
@@ -57,11 +60,14 @@ Let's look at the penetration variable again:
 > to start the color scale at 0. Negative pentrations are not of interest here
 > (they effectively are the gap width)
 
-You should see a maximum interpenetration of about 5.1e-9. That's quite an improvement compared to penalty contact!
+You should see a maximum interpenetration of about 5.1e-9. That's quite an
+improvement compared to penalty contact!
 
 ### Contact pressure
 
-Note that the `contact_pressure` variable is added but not used with the mortar formulation. The physical meaning of the Lagrange multiplier _is_ the contact pressure.
+Note that the `contact_pressure` variable is added but not used with the mortar
+formulation. The physical meaning of the Lagrange multiplier *is* the contact
+pressure.
 
 > Visualize the contact pressure by plotting the `pillars_normal_lm` variable.
 

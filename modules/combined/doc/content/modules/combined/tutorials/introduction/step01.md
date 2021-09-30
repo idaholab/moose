@@ -36,7 +36,7 @@ The constraint object acts on the Lagrange multiplier
 the [!param](/Constraints/GapConductanceConstraint/secondary_variable) `T`, the
 temperature.
 
-We make sure to enable the evaluation of the constraint on the _displaced mesh_
+We make sure to enable the evaluation of the constraint on the *displaced mesh*
 (that is a copy of the mesh that has all nodes moved by their displacement
 variable values) by setting the
 [!param](/Constraints/GapConductanceConstraint/use_displaced_mesh) parameter to

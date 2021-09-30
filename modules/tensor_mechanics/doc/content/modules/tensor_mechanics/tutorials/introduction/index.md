@@ -1,6 +1,9 @@
 # Introduction to Tensor Mechanics
 
-This tutorial aim to to guide new users through their first set of tensor mechanics simulations. We'll start with a minimal setup and work our way up in complexity to where this tutorial can hand off to the [Introduction to Contact](contact/tutorials/introduction/index.md optional=True).
+This tutorial aims to to guide new users through their first set of tensor
+mechanics simulations. We'll start with a minimal setup and work our way up in
+complexity to where this tutorial can hand off to the
+[Introduction to Contact](contact/tutorials/introduction/index.md optional=True).
 
 ## [First steps](tensor_mechanics/tutorials/introduction/step01.md)
 
