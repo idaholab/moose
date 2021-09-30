@@ -215,6 +215,13 @@ class TestParam(AppSyntaxTestCase):
         self.assertLatexCommand(res(0), 'par')
         self.assertLatexString(res(1), content=u'"variable"')
 
+    def testMissing(self):
+        ast = self.tokenize('[!param](/Kernels/Diffusion/foobar)')
+        self.assertToken(ast(0,0), "ErrorToken")
+        message = ast(0,0)['message']
+        self.assertIn("Unable to locate the parameter '/Kernels/Diffusion/foobar', did you mean:", message)
+        self.assertIn('    /Kernels/Diffusion/', message)
+
 class TestChildren(AppSyntaxTestCase):
     TEXT = "!syntax children /Kernels/Diffusion"
 
