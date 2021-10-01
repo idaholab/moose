@@ -82,6 +82,8 @@ TensorMechanicsAction::validParams()
   params.addParam<Point>(
       "cylindrical_axis_point2",
       "Ending point for direction of axis of rotation for cylindrical stress/strain.");
+  params.addParam<Point>("spherical_center_point",
+                         "Center point of the spherical coordinate system.");
   params.addParam<Point>("direction", "Direction stress/strain is calculated in");
   params.addParam<bool>("automatic_eigenstrain_names",
                         false,
@@ -111,6 +113,7 @@ TensorMechanicsAction::TensorMechanicsAction(const InputParameters & params)
     _cylindrical_axis_point2_valid(params.isParamSetByUser("cylindrical_axis_point2")),
     _direction_valid(params.isParamSetByUser("direction")),
     _verbose(getParam<bool>("verbose")),
+    _spherical_center_point_valid(params.isParamSetByUser("spherical_center_point")),
     _auto_eigenstrain(getParam<bool>("automatic_eigenstrain_names"))
 {
   // determine if incremental strains are to be used
@@ -199,6 +202,10 @@ TensorMechanicsAction::TensorMechanicsAction(const InputParameters & params)
     _cylindrical_axis_point1 = getParam<Point>("cylindrical_axis_point1");
     _cylindrical_axis_point2 = getParam<Point>("cylindrical_axis_point2");
   }
+
+  // Get spherical center point if set by user
+  if (_spherical_center_point_valid)
+    _spherical_center_point = getParam<Point>("spherical_center_point");
 
   // Get direction for tensor component if set by user
   if (_direction_valid)
@@ -794,6 +801,21 @@ TensorMechanicsAction::actOutputMatProp()
                 params.set<MaterialPropertyName>("property_name") = _base_name + out;
                 _problem->addMaterial(type, _base_name + out + '_' + name(), params);
               }))
+        continue;
+
+      // RankTwoSphericalComponent
+      if (setupOutput(out,
+                      _rank_two_spherical_component_table,
+                      [&](std::string prop_name, std::string component) {
+                        auto type = ad_prepend + "RankTwoSphericalComponent";
+                        params = _factory.getValidParams(type);
+                        params.set<MaterialPropertyName>("rank_two_tensor") =
+                            _base_name + prop_name;
+                        params.set<MooseEnum>("spherical_component") = component;
+                        params.applyParameters(parameters());
+                        params.set<MaterialPropertyName>("property_name") = _base_name + out;
+                        _problem->addMaterial(type, _base_name + out + '_' + name(), params);
+                      }))
         continue;
 
       paramError("generate_output", "Unable to add output Material for '", out, "'");
