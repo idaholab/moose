@@ -5,7 +5,6 @@ rho=1
   vel = 'velocity'
   velocity_interp_method = 'rc'
   advected_interp_method = 'average'
-  two_term_boundary_expansion = true
 []
 
 [Mesh]

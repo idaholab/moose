@@ -621,7 +621,7 @@ protected:
   mutable std::unordered_map<const FaceInfo *, ADReal> _face_to_value;
 
   /// Whether to use a two term expansion for computing boundary face values
-  const bool _two_term_boundary_expansion;
+  bool _two_term_boundary_expansion;
 
 private:
   /// A cache for storing gradients on faces

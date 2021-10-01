@@ -6,27 +6,14 @@ velocity_interp_method='rc'
 [Mesh]
   [gen]
     type = GeneratedMeshGenerator
-    dim = 3
+    dim = 2
     xmin = 0
     xmax = 10
     ymin = -1
     ymax = 1
-    zmin = -1
-    zmax = 1
-    nx = 20
-    ny = 4
-    nz = 4
-    elem_type = TET4
+    nx = 5
+    ny = 1
   []
-[]
-
-[Problem]
-  fv_bcs_integrity_check = true
-[]
-
-[GlobalParams]
-  # retain behavior at time of test creation
-  two_term_boundary_expansion = false
 []
 
 [Variables]
@@ -36,11 +23,7 @@ velocity_interp_method='rc'
   []
   [v]
     type = INSFVVelocityVariable
-    initial_condition = 1e-15
-  []
-  [w]
-    type = INSFVVelocityVariable
-    initial_condition = 1e-15
+    initial_condition = 1
   []
   [pressure]
     type = INSFVPressureVariable
@@ -57,7 +40,6 @@ velocity_interp_method='rc'
     pressure = pressure
     u = u
     v = v
-    w = w
     mu = ${mu}
     rho = ${rho}
   []
@@ -72,7 +54,6 @@ velocity_interp_method='rc'
     pressure = pressure
     u = u
     v = v
-    w = w
     mu = ${mu}
     rho = ${rho}
   []
@@ -98,7 +79,6 @@ velocity_interp_method='rc'
     pressure = pressure
     u = u
     v = v
-    w = w
     mu = ${mu}
     rho = ${rho}
   []
@@ -111,32 +91,6 @@ velocity_interp_method='rc'
     type = INSFVMomentumPressure
     variable = v
     momentum_component = 'y'
-    pressure = pressure
-  []
-
-  [w_advection]
-    type = INSFVMomentumAdvection
-    variable = v
-    advected_quantity = 'rhow'
-    vel = 'velocity'
-    advected_interp_method = ${advected_interp_method}
-    velocity_interp_method = ${velocity_interp_method}
-    pressure = pressure
-    u = u
-    v = v
-    w = w
-    mu = ${mu}
-    rho = ${rho}
-  []
-  [w_viscosity]
-    type = FVDiffusion
-    variable = w
-    coeff = ${mu}
-  []
-  [w_pressure]
-    type = INSFVMomentumPressure
-    variable = w
-    momentum_component = 'z'
     pressure = pressure
   []
 []
@@ -154,29 +108,15 @@ velocity_interp_method='rc'
     variable = v
     function = '0'
   []
-  [inlet-w]
-    type = INSFVInletVelocityBC
-    boundary = 'left'
-    variable = w
-    function = '0'
-  []
   [walls-u]
-    type = INSFVNoSlipWallBC
-    boundary = 'top bottom front back'
+    type = INSFVNaturalFreeSlipBC
+    boundary = 'top bottom'
     variable = u
-    function = 0
   []
   [walls-v]
-    type = INSFVNoSlipWallBC
-    boundary = 'top bottom front back'
+    type = INSFVNaturalFreeSlipBC
+    boundary = 'top bottom'
     variable = v
-    function = 0
-  []
-  [walls-w]
-    type = INSFVNoSlipWallBC
-    boundary = 'top bottom front back'
-    variable = w
-    function = 0
   []
   [outlet_p]
     type = INSFVOutletPressureBC
@@ -191,7 +131,6 @@ velocity_interp_method='rc'
     type = INSFVMaterial
     u = 'u'
     v = 'v'
-    w = 'w'
     pressure = 'pressure'
     rho = ${rho}
   []
@@ -200,8 +139,8 @@ velocity_interp_method='rc'
 [Executioner]
   type = Steady
   solve_type = 'NEWTON'
-  petsc_options_iname = '-pc_type -pc_factor_mat_solver_type -pc_factor_shift_type'
-  petsc_options_value = 'lu       mumps                      NONZERO'
+  petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_pc_type -sub_pc_factor_shift_type'
+  petsc_options_value = 'asm      200                lu           NONZERO'
   line_search = 'none'
   nl_rel_tol = 1e-12
 []
@@ -209,8 +148,4 @@ velocity_interp_method='rc'
 [Outputs]
   exodus = true
   csv = true
-  [dof]
-    type = DOFMap
-    execute_on = 'initial'
-  []
 []

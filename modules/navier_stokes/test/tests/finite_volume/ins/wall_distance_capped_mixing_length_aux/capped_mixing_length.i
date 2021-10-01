@@ -12,10 +12,6 @@ mu = ${fparse rho * bulk_u * 2 * H / Re}
 advected_interp_method='upwind'
 velocity_interp_method='rc'
 
-[GlobalParams]
-  two_term_boundary_expansion = true
-[]
-
 [Mesh]
   [gen]
     type = CartesianMeshGenerator
