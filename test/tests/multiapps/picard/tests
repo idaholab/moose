@@ -85,6 +85,7 @@
     design = 'multiapps/FullSolveMultiApp.md'
     issues = '#9038'
     requirement = "The system shall allow custom convergence check on Picard iteration with derived executioners"
+    deleted = 'unused functionality - was removed'
   [../]
 
   [./steady_with_pseudo_transient_sub]
