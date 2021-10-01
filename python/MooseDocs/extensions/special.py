@@ -30,12 +30,12 @@ class SpecialExtension(Extension):
 
 class HTMLNumberCode(components.ReaderComponent):
     RE = re.compile(r'(?P<code>&#[0-9]+;)')
-    def createToken(self, parent, info, page):
+    def createToken(self, parent, info, page, settings):
         tokens.String(parent, content=info['code'], escape=False)
         return parent
 
 class HTMLEntityCode(components.ReaderComponent):
     RE = re.compile(r'(?P<code>&[A-Za-z0-9]+;)')
-    def createToken(self, parent, info, page):
+    def createToken(self, parent, info, page, settings):
         tokens.String(parent, content=info['code'], escape=False)
         return parent

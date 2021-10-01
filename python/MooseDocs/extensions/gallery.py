@@ -70,8 +70,8 @@ class CardComponent(command.CommandComponent):
         settings['title'] = (None, "Title of the card.")
         return settings
 
-    def createToken(self, parent, info, page):
-        card = Card(parent, **self.attributes)
+    def createToken(self, parent, info, page, settings):
+        card = Card(parent, **self.attributes(settings))
 
         # Insert image or movie
         img = CardImage(card)
@@ -82,7 +82,7 @@ class CardComponent(command.CommandComponent):
             media.Image(img, src=src, class_='activator')
 
         # A title is required
-        title = self.settings['title']
+        title = settings['title']
         if title is None:
             raise exceptions.MooseDocsException("The 'title' option is required.")
 
@@ -121,11 +121,11 @@ class GalleryComponent(command.CommandComponent):
         settings['small'] = (12, "Number of columns on small screens (1-12).")
         return settings
 
-    def createToken(self, parent, info, page):
+    def createToken(self, parent, info, page, settings):
         return Gallery(parent,
-                       large=int(self.settings['large']),
-                       medium=int(self.settings['medium']),
-                       small=int(self.settings['small']))
+                       large=int(settings['large']),
+                       medium=int(settings['medium']),
+                       small=int(settings['small']))
 
 class RenderCard(components.RenderComponent):
     def createHTML(self, parent, token, page):

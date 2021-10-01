@@ -67,7 +67,7 @@ class TestReaderComponent(unittest.TestCase):
         comp = ReaderComponent()
 
         with self.assertRaises(NotImplementedError):
-            comp.createToken(None, None, None)
+            comp.createToken(None, None, None, None)
 
         # Test defaultSettings return type check
         class TestToken(ReaderComponent):

@@ -22,7 +22,7 @@ from MooseDocs.base import readers, lexers, components
 Word = tokens.newToken('Word')
 class WordComponent(components.ReaderComponent):
     RE = re.compile('(?P<inline>\w+)\s*')
-    def createToken(self, parent, info, page):
+    def createToken(self, parent, info, page, settings):
         if info['inline'] == 'throw':
             raise Exception("testing")
         return Word(parent)
@@ -30,7 +30,7 @@ class WordComponent(components.ReaderComponent):
 Letter = tokens.newToken('Letter', content='')
 class LetterComponent(components.ReaderComponent):
     RE = re.compile('(?P<content>\w)')
-    def createToken(self, parent, info, page):
+    def createToken(self, parent, info, page, settings):
         return Letter(parent, content=info['content'])
 
 class TestReader(unittest.TestCase):

@@ -299,27 +299,27 @@ class SyntaxCommandBase(command.CommandComponent):
                                     "omitted, e.g., `!syntax parameters /Kernels/Diffusion`.")
         return settings
 
-    def createToken(self, parent, info, page):
-        if self.settings['syntax'] is None:
+    def createToken(self, parent, info, page, settings):
+        if settings['syntax'] is None:
             args = info['settings'].split()
             if args and ('=' not in args[0]):
-                self.settings['syntax'] = args[0]
+                settings['syntax'] = args[0]
 
-        if self.settings['syntax']:
-            obj = self.extension.find(self.settings['syntax'], page, self.NODE_TYPE)
+        if settings['syntax']:
+            obj = self.extension.find(settings['syntax'], page, self.NODE_TYPE)
             if obj is None:
-                return self.createDisabledToken(parent, info, page)
+                return self.createDisabledToken(parent, info, page, settings)
         else:
             obj = self.extension.syntax
 
-        return self.createTokenFromSyntax(parent, info, page, obj)
+        return self.createTokenFromSyntax(parent, info, page, obj, settings)
 
-    def createDisabledToken(self, parent, info, page):
+    def createDisabledToken(self, parent, info, page, settings):
         tag = 'span' if MarkdownReader.INLINE in info else 'p'
-        tok = tokens.DisabledToken(parent, tag=tag, string=self.settings['syntax'])
+        tok = tokens.DisabledToken(parent, tag=tag, string=settings['syntax'])
         return parent
 
-    def createTokenFromSyntax(self, parent, info, page, obj):
+    def createTokenFromSyntax(self, parent, info, page, obj, settings):
         pass
 
 class SyntaxCommandHeadingBase(SyntaxCommandBase):
@@ -332,8 +332,7 @@ class SyntaxCommandHeadingBase(SyntaxCommandBase):
         settings['heading-level'] = (2, "Heading level for section title.")
         return settings
 
-    def createHeading(self, parent, page, settings=None):
-        settings = settings or self.settings
+    def createHeading(self, parent, page, settings):
         heading = settings['heading']
         if heading is not None:
             h = core.Heading(parent, level=int(settings['heading-level']), id_=settings['id'])
@@ -343,7 +342,7 @@ class SyntaxDescriptionCommand(SyntaxCommandBase):
     SUBCOMMAND = 'description'
     NODE_TYPE = moosesyntax.ObjectNodeBase
 
-    def createTokenFromSyntax(self, parent, info, page, obj):
+    def createTokenFromSyntax(self, parent, info, page, obj, settings):
 
         if obj.description is None:
             msg = "The class description is missing for %s, it can be added using the " \
@@ -372,7 +371,7 @@ class SyntaxParametersCommand(SyntaxCommandHeadingBase):
                                "un-collapsed sections.")
         return settings
 
-    def createTokenFromSyntax(self, parent, info, page, obj):
+    def createTokenFromSyntax(self, parent, info, page, obj, settings):
 
         parameters = list()
         if isinstance(obj, moosesyntax.SyntaxNode):
@@ -383,21 +382,21 @@ class SyntaxParametersCommand(SyntaxCommandHeadingBase):
             for param in obj.parameters.values():
                 parameters.append(ParameterToken(None, parameter=param, syntax=obj.name))
 
-        self.createHeading(parent, page)
+        self.createHeading(parent, page, settings)
         token = InputParametersToken(parent, syntax=obj.name, parameters=parameters,
-                                     **self.attributes)
-        if self.settings['groups']:
-            token['groups'] = [group.strip() for group in self.settings['groups'].split(' ')]
+                                     **self.attributes(settings))
+        if settings['groups']:
+            token['groups'] = [group.strip() for group in settings['groups'].split(' ')]
 
-        if self.settings['hide']:
-            token['hide'] = [param.strip() for param in self.settings['hide'].split(' ')]
+        if settings['hide']:
+            token['hide'] = [param.strip() for param in settings['hide'].split(' ')]
 
-        if self.settings['show']:
-            token['show'] = [param.strip() for param in self.settings['show'].split(' ')]
+        if settings['show']:
+            token['show'] = [param.strip() for param in settings['show'].split(' ')]
 
-        if self.settings['visible'] is not None:
+        if settings['visible'] is not None:
             token['visible'] = [group.strip().lower() for group in \
-                                self.settings['visible'].split(' ')]
+                                settings['visible'].split(' ')]
         else:
             token['visible'] = self.extension.get('visible')
 
@@ -413,18 +412,18 @@ class SyntaxParameterCommand(SyntaxCommandBase):
         settings = SyntaxCommandBase.defaultSettings()
         return settings
 
-    def createDisabledToken(self, parent, info, page):
+    def createDisabledToken(self, parent, info, page, settings):
         tag = 'span' if MarkdownReader.INLINE in info else 'p'
-        tokens.DisabledToken(parent, tag=tag, string=self.settings['_param'])
+        tokens.DisabledToken(parent, tag=tag, string=settings['_param'])
         return parent
 
-    def createToken(self, parent, info, page):
+    def createToken(self, parent, info, page, settings):
         obj_syntax, param_name = info[MarkdownReader.INLINE].rsplit('/', 1)
-        self.settings['syntax'] = obj_syntax
-        self.settings['_param'] = param_name
-        return SyntaxCommandBase.createToken(self, parent, info, page)
+        settings['syntax'] = obj_syntax
+        settings['_param'] = param_name
+        return SyntaxCommandBase.createToken(self, parent, info, page, settings)
 
-    def createTokenFromSyntax(self, parent, info, page, obj):
+    def createTokenFromSyntax(self, parent, info, page, obj, settings):
         parameters = dict()
         if isinstance(obj, moosesyntax.SyntaxNode):
             for action in obj.actions():
@@ -432,9 +431,9 @@ class SyntaxParameterCommand(SyntaxCommandBase):
         elif obj.parameters:
             parameters.update(obj.parameters)
 
-        param_name = self.settings['_param']
+        param_name = settings['_param']
         if param_name not in parameters:
-            obj_syntax = self.settings['syntax']
+            obj_syntax = settings['syntax']
             results = mooseutils.levenshteinDistance(param_name, parameters.keys(), 5)
             msg = "Unable to locate the parameter '{}/{}', did you mean:\n".format(obj_syntax, param_name)
             for res in results:
@@ -456,12 +455,12 @@ class SyntaxChildrenCommand(SyntaxCommandHeadingBase):
                                "Heading to include for sections, use 'None' to remove the title.")
         return settings
 
-    def createTokenFromSyntax(self, parent, info, page, obj):
+    def createTokenFromSyntax(self, parent, info, page, obj, settings):
 
         item = self.extension.database.get(obj.name, None)
         attr = getattr(item, self.SUBCOMMAND, None)
         if item and attr:
-            self.createHeading(parent, page)
+            self.createHeading(parent, page, settings)
             ul = core.UnorderedList(parent, class_='moose-list-{}'.format(self.SUBCOMMAND))
             for filename in attr:
                 filename = os.path.abspath(os.path.join(MooseDocs.ROOT_DIR, str(filename)))
@@ -499,11 +498,11 @@ class SyntaxListCommand(SyntaxCommandHeadingBase):
         settings['subsystems'] = (True, "Include a list of sub system syntax in the output.")
         return settings
 
-    def createTokenFromSyntax(self, parent, info, page, obj):
+    def createTokenFromSyntax(self, parent, info, page, obj, settings):
 
-        primary = SyntaxList(None, **self.attributes)
-        if self.settings['groups']:
-            groups = self.settings['groups'].split()
+        primary = SyntaxList(None, **self.attributes(settings))
+        if settings['groups']:
+            groups = settings['groups'].split()
         else:
             groups = list(set([child.group for child in obj if child.group is not None]))
 
@@ -512,43 +511,43 @@ class SyntaxListCommand(SyntaxCommandHeadingBase):
             groups.insert(0, 'MooseApp')
 
         for group in groups:
-            if self.settings['group-headings']:
+            if settings['group-headings']:
                 header = SyntaxListItem(primary,
                                         header=True,
                                         string=str(mooseutils.camel_to_space(group)))
 
             count = 0
-            if self.settings['actions']:
+            if settings['actions']:
                 count += self._addItems(primary, info, page, group, obj.actions(), 'Action')
-            if self.settings['objects']:
+            if settings['objects']:
                 count += self._addItems(primary, info, page, group, obj.objects(), 'MooseObject')
-            if self.settings['subsystems']:
+            if settings['subsystems']:
                 count += self._addItems(primary, info, page, group, obj.syntax())
 
             if count == 0:
                 header.parent = None
 
         if primary.children:
-            self.createHeading(parent, page)
+            self.createHeading(parent, page, settings)
             primary.parent = parent
 
         return parent
 
-    def createHeading(self, parent, page, **kwargs):
-        if self.settings['heading'] == 'AUTO':
+    def createHeading(self, parent, page, settings, **kwargs):
+        if settings['heading'] == 'AUTO':
             h = ['Objects', 'Actions', 'Subsystems']
-            idx = [self.settings['objects'], self.settings['actions'], self.settings['subsystems']]
+            idx = [settings['objects'], settings['actions'], settings['subsystems']]
             names = [h[i] for i, v in enumerate(idx) if v]
             if len(names) == 1:
-                self.settings['heading'] = 'Available {}'.format(*names)
+                settings['heading'] = 'Available {}'.format(*names)
             elif len(names) == 2:
-                self.settings['heading'] = 'Available {} and {}'.format(*names)
+                settings['heading'] = 'Available {} and {}'.format(*names)
             elif len(names) == 3:
-                self.settings['heading'] = 'Available {}, {}, and {}'.format(*names)
+                settings['heading'] = 'Available {}, {}, and {}'.format(*names)
             else:
-                self.settings['heading'] = None
+                settings['heading'] = None
 
-        super(SyntaxListCommand, self).createHeading(parent, page, copy.copy(self.settings))
+        super(SyntaxListCommand, self).createHeading(parent, page, settings)
 
     def _addItems(self, parent, info, page, group, objects, base=None):
 
@@ -583,18 +582,16 @@ class SyntaxCompleteCommand(SyntaxListCommand):
         settings['heading'] = (None, settings['heading'][1])
         return settings
 
-    def createTokenFromSyntax(self, parent, info, page, obj):
+    def createTokenFromSyntax(self, parent, info, page, obj, settings):
         # Always search entire syntax tree for group members when listing root systems by setting
         # `recursive=True`. This is so that top level headers are always rendered even if a system
         # only has actions and/or subsystems available for the group and no child objects.
-        self._addList(parent, info, page, obj, self.settings['level'], True)
+        self._addList(parent, info, page, obj, settings, level=settings['level'], recursive=True)
         return parent
 
-    def _addList(self, parent, info, page, obj, level, recursive=False):
-
-        gs = self.settings['groups']
-        groups = set(gs.split()) if gs else None
-
+    def _addList(self, parent, info, page, obj, settings, *, level=None, recursive=False):
+        groups = set(settings['groups'].split()) if settings['groups'] else None
+        h_id = settings['id']
         for child in obj.syntax():
             if child.removed or child.test:
                 continue
@@ -604,12 +601,12 @@ class SyntaxCompleteCommand(SyntaxListCommand):
 
             if (groups is None) or (cgs.intersection(groups)):
                 url = os.path.join('syntax', child.markdown)
-                h = core.Heading(parent, level=level, id_=self.settings['id'])
+                h = core.Heading(parent, level=level, id_=h_id)
                 autolink.AutoLink(h, page=url, string=str(child.fullpath().strip('/')))
 
-            SyntaxListCommand.createTokenFromSyntax(self, parent, info, page, child)
+            SyntaxListCommand.createTokenFromSyntax(self, parent, info, page, child, settings)
 
-            self._addList(parent, info, page, child, level + 1)
+            self._addList(parent, info, page, child, settings, level=level+1)
 
 
 class RenderSyntaxList(components.RenderComponent):

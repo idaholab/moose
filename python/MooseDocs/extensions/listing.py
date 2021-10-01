@@ -72,15 +72,15 @@ class LocalListingCommand(command.CommandComponent):
                                       "will be inferred from the extension (if possible).")
         return settings
 
-    def createToken(self, parent, info, page):
-        flt = floats.create_float(parent, self.extension, self.reader, page, self.settings,
+    def createToken(self, parent, info, page, settings):
+        flt = floats.create_float(parent, self.extension, self.reader, page, settings,
                                   token_type=Listing)
         content = info['inline'] if 'inline' in info else info['block']
-        code = core.Code(flt, style="max-height:{};".format(self.settings['max-height']),
-                         language=self.settings['language'], content=content)
+        code = core.Code(flt, style="max-height:{};".format(settings['max-height']),
+                         language=settings['language'], content=content)
 
         if flt is parent:
-            code.attributes.update(**self.attributes)
+            code.attributes.update(**self.attributes(settings))
         else:
             code.name = 'ListingCode' #TODO: Find a better way
 
@@ -97,38 +97,38 @@ class FileListingCommand(LocalListingCommand):
         settings.update(common.extractContentSettings())
         return settings
 
-    def createToken(self, parent, info, page):
+    def createToken(self, parent, info, page, settings):
         """
         Build the tokens needed for displaying code listing.
         """
 
         filename = common.check_filenames(info['subcommand'])
-        flt = floats.create_float(parent, self.extension, self.reader, page, self.settings,
+        flt = floats.create_float(parent, self.extension, self.reader, page, settings,
                                   token_type=Listing)
         # Create code token
-        lang = self.settings.get('language')
-        content = self.extractContent(filename)
+        lang = settings.get('language')
+        content = self.extractContent(filename, settings)
         lang = lang if lang else common.get_language(filename)
 
-        code = core.Code(flt, style="max-height:{};".format(self.settings['max-height']),
+        code = core.Code(flt, style="max-height:{};".format(settings['max-height']),
                          content=content, language=lang)
 
         if flt is parent:
-            code.attributes.update(**self.attributes)
+            code.attributes.update(**self.attributes(settings))
         else:
             code.name = 'ListingCode' #TODO: Find a better way
 
-        if self.settings['link']:
+        if settings['link']:
             modal.ModalSourceLink(flt, src=filename)
 
         return parent
 
-    def extractContent(self, filename):
+    def extractContent(self, filename, settings):
         """
         Extract content to display in listing code box.
         """
         content = common.read(filename)
-        content, _ = common.extractContent(content, self.settings)
+        content, _ = common.extractContent(content, settings)
         return content
 
 
@@ -149,15 +149,15 @@ class InputListingCommand(FileListingCommand):
                                     'e.g., `Kernels/diffusion/variable`.')
         return settings
 
-    def extractContent(self, filename):
+    def extractContent(self, filename, settings):
         """Extract the file contents for display."""
-        if any([self.settings['block'], self.settings['remove']]):
-            hit = self.extractInputBlocks(filename, self.settings['block'] or '')
-            content = self.removeInputBlocks(hit, self.settings['remove'] or '')
+        if any([settings['block'], settings['remove']]):
+            hit = self.extractInputBlocks(filename, settings['block'] or '')
+            content = self.removeInputBlocks(hit, settings['remove'] or '')
         else:
             content = common.read(filename)
 
-        content, _ = common.extractContent(content, self.settings)
+        content, _ = common.extractContent(content, settings)
         return content
 
     @staticmethod

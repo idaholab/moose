@@ -42,7 +42,7 @@ class CommitCommand(command.CommandComponent):
         settings = command.CommandComponent.defaultSettings()
         return settings
 
-    def createToken(self, parent, info, page):
+    def createToken(self, parent, info, page, settings):
         content = info['inline'] if 'inline' in info else info['block']
         if content:
             raise exceptions.MooseDocsException("Content is not supported for the 'git commit' command.")
@@ -63,7 +63,7 @@ class SubmoduleHashCommand(command.CommandComponent):
         settings['url'] = (None, "If provided, prefix the hash with the url to create a link.")
         return settings
 
-    def createToken(self, parent, info, page):
+    def createToken(self, parent, info, page, settings):
         inline = 'inline' in info
         if not inline:
             raise exceptions.MooseDocsException("The '!git submodule-hash' command is an inline level command, use '[!git!submodule-hash](name)' instead.")
@@ -72,7 +72,7 @@ class SubmoduleHashCommand(command.CommandComponent):
         status = mooseutils.git_submodule_info(MooseDocs.ROOT_DIR, '--recursive')
         for repo, ginfo in status.items():
             if repo.endswith(name):
-                url = self.settings['url']
+                url = settings['url']
                 if url is None:
                     core.Word(parent, content=ginfo[1])
                 else:

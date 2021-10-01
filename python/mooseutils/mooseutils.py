@@ -392,6 +392,7 @@ def check_output(cmd, **kwargs):
     """Get output from a process"""
     kwargs.setdefault('check', True)
     kwargs.setdefault('stdout', subprocess.PIPE)
+    kwargs.setdefault('stderr', subprocess.STDOUT)
     kwargs.setdefault('encoding', 'utf-8')
     return subprocess.run(cmd, **kwargs).stdout
 

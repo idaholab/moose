@@ -73,8 +73,8 @@ class PackageCommand(command.CommandComponent):
         settings['arch'] = (None, "The name of the OS package name to retrieve.")
         return settings
 
-    def createToken(self, parent, info, page):
-        arch = self.settings['arch']
+    def createToken(self, parent, info, page, settings):
+        arch = settings['arch']
         packages = self.extension.get('moose_packages', dict())
 
         if arch not in packages:
@@ -112,12 +112,12 @@ class PackageCodeReplace(command.CommandComponent):
                                          "it will be inferred from the extension (if possible).")
         return settings
 
-    def createToken(self, parent, info, page):
+    def createToken(self, parent, info, page, settings):
         content = info['inline'] if 'inline' in info else info['block']
         content = re.sub(r'__(?P<package>[A-Z][A-Z_]+)__', self._subFunction, content,
                          flags=re.UNICODE)
-        core.Code(parent, style="max-height:{};".format(self.settings['max-height']),
-                  language=self.settings['language'], content=content)
+        core.Code(parent, style="max-height:{};".format(settings['max-height']),
+                  language=settings['language'], content=content)
         return parent
 
     def _subFunction(self, match):
@@ -148,7 +148,7 @@ class PackageTextReplace(command.CommandComponent):
         settings = command.CommandComponent.defaultSettings()
         return settings
 
-    def createToken(self, parent, info, page):
+    def createToken(self, parent, info, page, settings):
         content = self.extension.get(info['subcommand'], dict())
         tokens.String(parent, content=str(content))
         return parent

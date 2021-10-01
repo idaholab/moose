@@ -57,7 +57,7 @@ class ConfigCommand(command.CommandComponent):
     SUBCOMMAND = '*'
     PARSE_SETTINGS = False
 
-    def createToken(self, parent, info, page):
+    def createToken(self, parent, info, page, settings):
         return parent
 
 class ConfigPageActiveCommand(command.CommandComponent):
@@ -73,5 +73,5 @@ class ConfigPageActiveCommand(command.CommandComponent):
                                       "translation.")
         return settings
 
-    def createToken(self, parent, info, page):
+    def createToken(self, parent, info, page, settings):
         return parent

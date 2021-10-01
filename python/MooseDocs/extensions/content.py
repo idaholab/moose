@@ -115,11 +115,11 @@ class ContentCommand(command.CommandComponent):
         settings['level'] = (2, 'Heading level for top-level headings.')
         return settings
 
-    def createToken(self, parent, info, page):
+    def createToken(self, parent, info, page, settings):
         if info['command'] == 'contents':
             msg = 'The command "!contents" is deprecated, please use "!content list".'
             LOG.warning(common.report_error(msg, page.source, info.line, info[0], prefix='WARNING'))
-        ContentToken(parent, location=self.settings['location'], level=self.settings['level'])
+        ContentToken(parent, location=settings['location'], level=settings['level'])
         return parent
 
 class AtoZCommand(command.CommandComponent):
@@ -134,12 +134,12 @@ class AtoZCommand(command.CommandComponent):
         settings['buttons'] = (True, 'Display buttons linking to the A, B,... headings.')
         return settings
 
-    def createToken(self, parent, info, page):
+    def createToken(self, parent, info, page, settings):
         if info['command'] == 'contents':
             msg = 'The command "!contents a-to-z" is deprecated, please use "!content a-to-z".'
             LOG.warning(common.report_error(msg, page.source, info.line, info[0], prefix='WARNING'))
-        AtoZToken(parent, location=self.settings['location'], level=self.settings['level'],
-                  buttons=self.settings['buttons'])
+        AtoZToken(parent, location=settings['location'], level=settings['level'],
+                  buttons=settings['buttons'])
         return parent
 
 class TableOfContentsCommand(command.CommandComponent):
@@ -154,19 +154,19 @@ class TableOfContentsCommand(command.CommandComponent):
         settings['hide'] = ('', "A list of heading ids to hide.")
         return settings
 
-    def createToken(self, parent, info, page):
+    def createToken(self, parent, info, page, settings):
         if info['command'] == 'contents':
             msg = 'The command "!contents toc" is deprecated, please use "!content toc".'
             LOG.warning(common.report_error(msg, page.source, info.line, info[0], prefix='WARNING'))
 
-        levels = self.settings['levels']
+        levels = settings['levels']
         if isinstance(levels, (str, str)):
             levels = [int(l) for l in levels.split()]
 
         return TableOfContents(parent,
-                               hide=self.settings['hide'].split(),
+                               hide=settings['hide'].split(),
                                levels=levels,
-                               columns=int(self.settings['columns']))
+                               columns=int(settings['columns']))
 
 class ContentOutlineCommand(command.CommandComponent):
     COMMAND = 'content'
@@ -184,20 +184,20 @@ class ContentOutlineCommand(command.CommandComponent):
         settings['no_count'] = ('', "A list of heading levels and/or ids to not count the indices for.")
         return settings
 
-    def createToken(self, parent, info, page):
-        if self.settings['location'] is None and not self.settings['pages']:
+    def createToken(self, parent, info, page, settings):
+        if settings['location'] is None and not settings['pages']:
             msg = "Either the 'location' or the 'pages' setting is required for the !content outline command."
             raise exceptions.MooseDocsException(msg)
-        if self.settings['location'] is not None and self.settings['pages']:
+        if settings['location'] is not None and settings['pages']:
             msg = "The 'location' and 'pages' settings must be used exclusively."
             raise exceptions.MooseDocsException(msg)
-        if self.settings['recursive'] and self.settings['pages']:
+        if settings['recursive'] and settings['pages']:
             msg = "Setting 'recursive=True' has no effect when the 'pages' setting is used."
             LOG.warning(common.report_error(msg, page.source, info.line, info[0], prefix='WARNING'))
 
         # split strings into lists and convert floats to ints to lists of strings
-        no_prefix = self.settings['no_prefix']
-        no_count = self.settings['no_count']
+        no_prefix = settings['no_prefix']
+        no_count = settings['no_count']
         if isinstance(no_prefix, (str, str)):
             no_prefix = no_prefix.split()
         else:
@@ -208,11 +208,11 @@ class ContentOutlineCommand(command.CommandComponent):
             no_count = [str(int(no_count))]
 
         return ContentOutline(parent,
-                              location=self.settings['location'],
-                              recursive=self.settings['recursive'],
-                              pages=self.settings['pages'].split(),
-                              max_level=int(self.settings['max_level']),
-                              hide=self.settings['hide'].split(),
+                              location=settings['location'],
+                              recursive=settings['recursive'],
+                              pages=settings['pages'].split(),
+                              max_level=int(settings['max_level']),
+                              hide=settings['hide'].split(),
                               no_prefix=no_prefix,
                               no_count=no_count)
 
@@ -230,16 +230,16 @@ class PaginationCommand(command.CommandComponent):
         settings['margin-bottom'] = ('24px', "The bottom margin of the buttons.")
         return settings
 
-    def createToken(self, parent, info, page):
-        if self.settings['previous'] is None and self.settings['next'] is None:
+    def createToken(self, parent, info, page, settings):
+        if settings['previous'] is None and settings['next'] is None:
             msg = "At least one: a 'previous' page or a 'next' page is required for the !content pagination command."
             raise exceptions.MooseDocsException(msg)
 
-        margins = [self.settings['margin-top'], self.settings['margin-bottom']]
+        margins = [settings['margin-top'], settings['margin-bottom']]
         return PaginationToken(parent,
-                               previous=self.settings['previous'],
-                               next=self.settings['next'],
-                               use_title=self.settings['use_title'],
+                               previous=settings['previous'],
+                               next=settings['next'],
+                               use_title=settings['use_title'],
                                margins=margins)
 
 class RenderContentToken(components.RenderComponent):
