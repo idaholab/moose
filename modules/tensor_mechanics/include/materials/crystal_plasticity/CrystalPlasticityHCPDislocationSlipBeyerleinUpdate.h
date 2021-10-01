@@ -63,7 +63,7 @@ protected:
 
   /**
    * Computes the evolution of the total substructure dislocations,
-   * using the nominclature introduced in Capolungo et al. Materials Science
+   * using the nomenclature introduced in Capolungo et al. Materials Science
    * and Engineering A 513-514 (2009) 42-51, and the equation form given in
    * Zecevic et al. International Journal of Plasticity 84 (2016) 138-159.
    */
