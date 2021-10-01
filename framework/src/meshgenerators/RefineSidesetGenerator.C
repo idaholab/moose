@@ -64,9 +64,9 @@ RefineSidesetGenerator::generate()
                  "The boundary '",
                  getParam<std::vector<BoundaryName>>("boundaries")[i],
                  "' was not found within the mesh");
-std::unique_ptr<MeshBase> mesh = std::move(_input);
-int max = *std::max_element(_refinement.begin(), _refinement.end());
-return recursive_refine(boundary_ids, mesh, _refinement, max);
+  std::unique_ptr<MeshBase> mesh = std::move(_input);
+  int max = *std::max_element(_refinement.begin(), _refinement.end());
+  return recursive_refine(boundary_ids, mesh, _refinement, max);
 }
 
 std::unique_ptr<MeshBase>
