@@ -5,6 +5,7 @@
     type = 'Exodiff'
     input = 'power_law_creep.i'
     exodiff = 'power_law_creep_out.e'
+    valgrind = HEAVY
     requirement = "The AD multiple power law creep must reproduce the results of the AD single power "
                   "law creep: Reference results."
   []
@@ -15,6 +16,7 @@
     cli_args= "Materials/creep_one/type=ADMultiplePowerLawCreepStressUpdate Materials/creep_one/stress_thresholds='0 999999999999'
               Materials/creep_nine/type=ADMultiplePowerLawCreepStressUpdate Materials/creep_nine/stress_thresholds='0 999999999999'
                Outputs/file_base=multi_power_law_creep_out"
+    valgrind = HEAVY
     requirement = "The AD multiple power law creep must reproduce the results of the AD single power "
                   "law creep when a single stress increment is provided by the user."
   []
@@ -25,6 +27,7 @@
     cli_args= "Materials/creep_one/type=ADMultiplePowerLawCreepStressUpdate Materials/creep_one/stress_thresholds='0 42000 300000' Materials/creep_one/coefficient='1e-24 1e-24' Materials/creep_one/n_exponent='4 4' Materials/creep_one/m_exponent='0 0' Materials/creep_one/activation_energy='0 0'
               Materials/creep_nine/type=ADMultiplePowerLawCreepStressUpdate Materials/creep_nine/stress_thresholds='0 42000 300000' Materials/creep_nine/coefficient='9e-24 9e-24' Materials/creep_nine/n_exponent='4 4' Materials/creep_nine/m_exponent='0 0' Materials/creep_nine/activation_energy='0 0'
               Outputs/file_base=multipowerlaw_two_intervals_out"
+    valgrind = HEAVY
     requirement = "The AD multiple power law creep must reproduce the results of the AD single power "
                   "law creep with multiple stress intervals with same power law material parameters."
   []

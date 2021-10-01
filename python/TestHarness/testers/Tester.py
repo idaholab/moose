@@ -490,10 +490,8 @@ class Tester(MooseObject):
         # If we're testing with valgrind, then skip tests that require parallel or threads or don't meet the valgrind setting
         elif options.valgrind_mode != '':
             tmp_reason = ''
-            if self.specs['valgrind'].upper() == 'NONE':
-                tmp_reason = 'Valgrind==NONE'
-            elif self.specs['valgrind'].upper() == 'HEAVY' and options.valgrind_mode.upper() == 'NORMAL':
-                tmp_reason = 'Valgrind==HEAVY'
+            if self.specs['valgrind'].upper() != options.valgrind_mode.upper():
+                tmp_reason = 'Valgrind==' + self.specs['valgrind'].upper()
             elif int(self.specs['min_threads']) > 1:
                 tmp_reason = 'Valgrind requires non-threaded'
             elif self.specs["check_input"]:

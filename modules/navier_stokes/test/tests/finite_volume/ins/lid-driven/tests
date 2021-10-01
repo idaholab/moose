@@ -34,6 +34,7 @@
     requirement = 'The system shall be able to transport scalar quantities using the simultaneously calculated velocity field from the incompressible Navier Stokes equations.'
     method = '!dbg'
     ad_indexing_type = 'global'
+    valgrind = HEAVY
     cli_args = '-pc_type lu -pc_factor_shift_type NONZERO'
   []
   [transient-with-temp]
@@ -43,6 +44,7 @@
     requirement = 'The system shall be able to transport scalar quantities using the simultaneously calculated velocity field from the transient incompressible Navier Stokes equations.'
     method = '!dbg'
     ad_indexing_type = 'global'
+    valgrind = HEAVY
     cli_args = '-pc_type lu -pc_factor_shift_type NONZERO'
   []
 []

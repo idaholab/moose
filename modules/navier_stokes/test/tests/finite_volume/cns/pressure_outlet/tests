@@ -8,5 +8,6 @@
     abs_zero = 1e-9
     requirement = "The system shall be able to model subsonic nozzle flow using an HLLC discretization with a specified outlet pressure."
     recover = false # See https://github.com/idaholab/moose/issues/17906
+    valgrind = HEAVY
   []
 []

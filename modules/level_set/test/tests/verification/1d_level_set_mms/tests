@@ -35,5 +35,6 @@
     csvdiff = level_set_mms_04.csv
     cli_args = 'Mesh/uniform_refine=4 Outputs/file_base=level_set_mms_04'
     requirement = "The level set module shall use the method of manufactured solutions to test convergence of the level set equation and ensure that the level 4 solution is consistent."
+    valgrind = HEAVY
   [../]
 []

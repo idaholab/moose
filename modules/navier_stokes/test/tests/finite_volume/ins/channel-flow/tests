@@ -36,6 +36,7 @@
     ad_indexing_type = 'global'
     design = 'INSFVScalarFieldAdvection.md'
     issues = '#16732'
+    valgrind = HEAVY
   []
   [momentum-outflow-bcs]
     type = 'Exodiff'
@@ -46,6 +47,7 @@
     issues = '#16854'
     ad_indexing_type = 'global'
     abs_zero = 2e-9
+    valgrind = HEAVY
   []
   [extrapolated-outlet-pressure]
     type = 'Exodiff'
@@ -56,6 +58,7 @@
     issues = '#16854'
     ad_indexing_type = 'global'
     abs_zero = 6e-9
+    valgrind = HEAVY
     cli_args = '-pc_type lu -sub_pc_factor_shift_type NONZERO'
   []
   [mixing-length]
@@ -106,6 +109,7 @@
       exodiff = 2d-rc-no-slip-tris.e
       cli_args = 'Mesh/gen/elem_type=TRI3 GlobalParams/two_term_boundary_expansion=false Outputs/file_base=2d-rc-no-slip-tris'
       ad_indexing_type = 'global'
+      valgrind = HEAVY
       detail = 'two-dimensional triangular elements'
     []
     [tets]

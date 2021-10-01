@@ -9,5 +9,6 @@
     input = 'adkobayashi.i'
     exodiff = 'adkobayashi_out.e'
     custom_cmp = 'adkobayashi.exodiff'
+    valgrind = HEAVY
   [../]
 []

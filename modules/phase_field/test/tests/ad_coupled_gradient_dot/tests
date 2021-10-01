@@ -8,5 +8,6 @@
     allow_test_objects = true
     requirement = 'The phase field module shall be able to compute the gradient of the rate of the '
                   'variable using automatic differentiation.'
+    valgrind = HEAVY
   []
 []

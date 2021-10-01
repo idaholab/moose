@@ -19,6 +19,7 @@
       detail = '1.7e4'
       strumpack = true
       ad_indexing_type = 'global'
+      valgrind = HEAVY
     []
     [ray_1pt4e5]
       type = RunApp
@@ -27,6 +28,7 @@
       detail = '1.4e5'
       strumpack = true
       ad_indexing_type = 'global'
+      valgrind = HEAVY
     []
   []
 []
