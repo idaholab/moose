@@ -98,7 +98,7 @@ PolycrystalVoronoi::getVariableValue(unsigned int op_index, const Point & p) con
   // Now see if any of those grains are represented by the passed in order parameter
   unsigned int active_grain_on_op = invalid_id;
   for (auto grain_id : grain_ids)
-    if (op_index == _grain_to_op[grain_id])
+    if (op_index == _grain_to_op.at(grain_id))
     {
       active_grain_on_op = grain_id;
       break;

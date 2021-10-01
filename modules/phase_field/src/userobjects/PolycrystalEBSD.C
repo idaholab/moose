@@ -81,7 +81,7 @@ PolycrystalEBSD::getNodalVariableValue(unsigned int op_index, const Node & n) co
         _phase != libMesh::invalid_uint ? _ebsd_reader.getGlobalID(_phase, index) : index;
     mooseAssert(grain_index < it->second.size(), "grain_index out of range");
     auto value = (it->second)[grain_index];
-    if (_grain_to_op[index] == op_index && value > 0.0)
+    if (_grain_to_op.at(index) == op_index && value > 0.0)
       return value;
   }
 
@@ -99,7 +99,6 @@ PolycrystalEBSD::getVariableValue(unsigned int op_index, const Point & p) const
 
   mooseAssert(grain_ids.size() == 1, "Expected only one grain at point in EBSDReader");
   auto index = grain_ids[0];
-  mooseAssert(index < _grain_to_op.size(), "Index out of range");
 
-  return _grain_to_op[index] == op_index ? 1.0 : 0.0;
+  return _grain_to_op.at(index) == op_index ? 1.0 : 0.0;
 }

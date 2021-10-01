@@ -88,6 +88,7 @@ temp_print_trace.*
 *.json
 *.json.*
 *.bak
+*.data
 *.processor.*
 .clang_complete
 .failed_tests
