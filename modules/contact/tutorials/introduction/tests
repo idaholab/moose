@@ -1,0 +1,17 @@
+[Tests]
+  [step01]
+    type = RunApp
+    input = step01.i
+    check_input = True
+  []
+  [step02]
+    type = RunApp
+    input = step02.i
+    check_input = True
+  []
+  [plot02]
+    type = RunApp
+    command = plot02.py
+    display_required = true
+  []
+[]
