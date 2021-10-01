@@ -65,7 +65,7 @@ class CoverageTableCommand(command.CommandComponent):
         settings.update(floats.caption_settings())
         return settings
 
-    def createToken(self, parent, info, page):
+    def createToken(self, parent, info, page, settings):
 
         if 'inline' in info:
             raise exceptions.MooseDocsException("The 'coverage table' command is a block level command, use '!coverage table' instead.")
@@ -81,7 +81,7 @@ class CoverageTableCommand(command.CommandComponent):
             rows.append([name] + [sec.get(k, fallback='') for k in options])
 
         # Create complete table
-        flt = floats.create_float(parent, self.extension, self.reader, page, self.settings,
+        flt = floats.create_float(parent, self.extension, self.reader, page, settings,
                                   token_type=table.TableFloat)
         token = table.builder(rows, headings=['Section'] + list(options))
         token.parent = flt
@@ -99,10 +99,10 @@ class CoverageValueCommand(command.CommandComponent):
         settings['option'] = (None, "The name of the option within the section.")
         return settings
 
-    def createToken(self, parent, info, page):
+    def createToken(self, parent, info, page, settings):
 
-        sec = self.settings['section']
-        opt = self.settings['option']
+        sec = settings['section']
+        opt = settings['option']
 
         if sec not in self.extension.coverage:
             raise exceptions.MooseDocsException("The '{}' section does not exist in coverage file.",
