@@ -31,6 +31,8 @@ public:
       _rank_two_directional_component_table;
   static const std::map<std::string, std::pair<std::string, std::vector<std::string>>>
       _rank_two_cylindrical_component_table;
+  static const std::map<std::string, std::pair<std::string, std::vector<std::string>>>
+      _rank_two_spherical_component_table;
   ///@}
 
   static void addCartesianComponentOutput(const std::string & name,

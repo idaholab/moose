@@ -36,6 +36,12 @@ cylindricalOptions()
   return MooseEnum("AxialStress HoopStress RadialStress");
 }
 
+MooseEnum
+sphericalOptions()
+{
+  return MooseEnum("HoopStress RadialStress");
+}
+
 void
 normalPositionVector(const Point & point1,
                      const Point & point2,

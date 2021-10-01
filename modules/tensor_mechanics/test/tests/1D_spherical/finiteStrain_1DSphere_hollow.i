@@ -38,62 +38,46 @@
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     strain = FINITE
     add_variables = true
-  [../]
-[]
-
-[AuxVariables]
-  [./stress_rr]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
+    spherical_center_point = '4.0 0.0 0.0'
+    generate_output = 'spherical_radial_stress'
+  []
 []
 
 [Postprocessors]
-  [./stress_rr]
+  [stress_rr]
     type = ElementAverageValue
-    variable = stress_rr
-  [../]
-[]
-
-[AuxKernels]
-  [./stress_rr]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    index_i = 0
-    index_j = 0
-    variable = stress_rr
-    execute_on = timestep_end
-  [../]
+    variable = spherical_radial_stress
+  []
 []
 
 [BCs]
-  [./innerDisp]
+  [innerDisp]
     type = DirichletBC
     boundary = left
     variable = disp_r
     value = 0.0
-  [../]
-  [./outerPressure]
+  []
+  [outerPressure]
     type = Pressure
     boundary = right
     variable = disp_r
     component = 0
     factor = 2
-  [../]
+  []
 []
 
 [Materials]
-  [./Elasticity_tensor]
+  [Elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     poissons_ratio = 0.345
     youngs_modulus = 1e4
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
+  []
 []
 
 [Executioner]
@@ -101,21 +85,20 @@
   solve_type = PJFNK
   line_search = none
 
-
-# controls for linear iterations
+  # controls for linear iterations
   l_max_its = 100
   l_tol = 1e-8
 
-# controls for nonlinear iterations
+  # controls for nonlinear iterations
   nl_max_its = 15
   nl_rel_tol = 1e-10
   nl_abs_tol = 1e-5
 
-# time control
+  # time control
   start_time = 0.0
   dt = 0.25
   dtmin = 0.0001
-  end_time = 1.0
+  end_time = 0.25
 []
 
 [Outputs]
