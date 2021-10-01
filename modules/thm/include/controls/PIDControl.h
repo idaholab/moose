@@ -28,8 +28,12 @@ protected:
   const Real & _K_d;
   /// The output computed by the PID controller
   Real & _output;
+  /// Initial value
+  const Real & _initial_value;
   /// The integral value accumulated over time
   Real & _integral;
+  /// The old value of _integral
+  const Real & _integral_old;
   /// The current value of the error
   Real & _error;
   /// The old value of the error

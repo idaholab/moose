@@ -209,7 +209,6 @@ public:
    * Get control data of type T and name 'name', if it does not exist it will be created
    *
    * @param name The unique name of the control data
-   * @param name The control object that declared this data
    * @return Pointer to the control data of type T
    */
   template <typename T>
@@ -218,7 +217,7 @@ public:
     ControlData<T> * data = nullptr;
     if (_control_data.find(name) == _control_data.end())
     {
-      data = new ControlData<T>(name);
+      data = new ControlData<T>(_app, name);
       _control_data[name] = data;
     }
     else

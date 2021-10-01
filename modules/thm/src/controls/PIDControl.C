@@ -24,16 +24,19 @@ PIDControl::PIDControl(const InputParameters & parameters)
     _K_i(getParam<Real>("K_i")),
     _K_d(getParam<Real>("K_d")),
     _output(declareComponentControlData<Real>("output")),
-    _integral(declareRestartableData<Real>("integral", getParam<Real>("initial_value"))),
+    _initial_value(getParam<Real>("initial_value")),
+    _integral(declareComponentControlData<Real>("integral")),
+    _integral_old(getComponentControlDataOld<Real>("integral")),
     _error(declareComponentControlData<Real>("error")),
     _error_old(getComponentControlDataOld<Real>("error"))
 {
+  _integral = _initial_value;
 }
 
 void
 PIDControl::execute()
 {
   _error = _set_point - _value;
-  _integral = _integral + _K_i * (_error * _dt);
+  _integral = _integral_old + _K_i * (_error * _dt);
   _output = _K_p * _error + _integral + _K_d * (_error - _error_old) / _dt;
 }
