@@ -29,11 +29,11 @@ public:
     std::string reason;
     std::map<std::string, Result> subs;
 
-    std::string str(bool success_msg = false, const std::string & indent = "")
+    std::string str(bool success_msg = false, const std::string & indent = "", const std::string & subname = "")
     {
-      std::string s = indent + label(success_msg) + "\n";
+      std::string s = indent + label(success_msg, subname) + "\n";
       for (auto & entry : subs)
-        s += entry.second.str(success_msg, indent + "  ") + "\n";
+        s += entry.second.str(success_msg, indent + "  ", entry.first) + "\n";
       return s;
     }
 
@@ -68,9 +68,9 @@ public:
     }
 
   private:
-    std::string label(bool success_msg)
+    std::string label(bool success_msg, const std::string & subname = "")
     {
-      return _name + "(" + (converged ? "success" : "FAIL") + ")" +
+      return subname + "." + _name + "(" + (converged ? "success" : "FAIL") + ")" +
              ((success_msg || !converged) && !reason.empty() ? ": " + reason : "");
     }
     std::string _name;
