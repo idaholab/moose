@@ -5,7 +5,7 @@
 ## Overview
 
 The `XFEMElementPairMaterialManager` is a user object that manages stateful
-properties along XFEM fragmet cuts. It is used by constratints derived from
+properties along XFEM fragment cuts. It is used by constratints derived from
 `XFEMMaterialManagerConstraint`, such as
 [XFEMCohesiveConstraint](XFEMCohesiveConstraint.md).
 

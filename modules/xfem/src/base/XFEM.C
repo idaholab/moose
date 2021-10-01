@@ -282,10 +282,9 @@ XFEM::update(Real time, NonlinearSystemBase & nl, AuxiliarySystem & aux)
   {
     _mesh->allow_renumbering(false);
     _mesh->skip_partitioning(true);
-    _mesh->prepare_for_use();
 
-    //    _mesh->prepare_for_use(true,true); //doing this preserves the numbering, but generates
-    //    warning
+    // _mesh->prepare_for_use(true,true) would preserves the numbering, but generates a warning
+    _mesh->prepare_for_use();
 
     if (_displaced_mesh)
     {

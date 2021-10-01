@@ -7,7 +7,8 @@
     input = manager.i
     unique_id = true
     allow_test_objects = true
-    requirement = 'The XFEM module shall provide a means of managing stateful materials on added XFEM quadrature points'
+    requirement = 'The XFEM module shall provide a means of managing stateful materials on added '
+                  'XFEM quadrature points'
   []
   [manager_constraint]
     type = Exodiff
@@ -16,7 +17,8 @@
     unique_id = true
     map = false
     allow_test_objects = true
-    requirement = 'The XFEM module shall represent a propagating crack in a 2D mechanics problem with stateful materials'
+    requirement = 'The XFEM module shall represent a propagating crack in a 2D mechanics problem '
+                  'with with stateful materials on the added XFEM quadrature points'
   []
   [manager_constraint_two_materials]
     type = Exodiff
@@ -25,6 +27,7 @@
     unique_id = true
     map = false
     allow_test_objects = true
-    requirement = 'The XFEM module shall support multiple stateful materials on XFEM phantom element pairs'
+    requirement = 'The XFEM module shall support multiple stateful materials on added XFEM '
+                  'quadrature points'
   []
 []

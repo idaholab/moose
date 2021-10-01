@@ -5,7 +5,7 @@
 ## Overview
 
 The `XFEMMaterialManager` is a user object that manages stateful
-properties at custom quadrature points on XFEM fragmets.
+properties at custom quadrature points on XFEM fragments.
 
 ## Example Input File Syntax
 

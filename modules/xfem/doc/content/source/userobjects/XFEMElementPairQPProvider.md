@@ -4,8 +4,9 @@
 
 ## Overview
 
-The `XFEMElementPairQPProvider` is a user object that manages stateful properties along XFEM fragmet cuts.
-It is used by the
+The `XFEMElementPairQPProvider` is a user object that manages stateful
+properties along XFEM fragment cuts. It is used by the
+[XFEMElementPairMaterialManager](XFEMElementPairMaterialManager.md).
 
 ## Example Input File Syntax
 

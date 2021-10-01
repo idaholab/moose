@@ -19,12 +19,12 @@ XFEMCohesiveConstraint::validParams()
 {
   InputParameters params = XFEMMaterialManagerConstraint::validParams();
   params.addClassDescription("Enforce a cohesive zone traction-separation-law.");
-  params.addParam<Real>("stiffness", 9.6628, "Initial stiffness.");
-  params.addParam<Real>("max_traction", 11.75, "Max traction.");
+  params.addRequiredParam<Real>("stiffness", "Initial stiffness.");
+  params.addRequiredParam<Real>("max_traction", "Max traction.");
   params.addParam<std::string>("base_name",
                                "Optional parameter that allows the user to define "
                                "multiple mechanics material systems on the same block");
-  params.addParam<Real>("Gc", 82.2478, "Strain energy release rate.");
+  params.addRequiredParam<Real>("Gc", "Strain energy release rate.");
   params.addRequiredCoupledVar("displacements", "Names of the displacement variables to couple");
   params.addRequiredParam<unsigned int>("component",
                                         "An integer corresponding to the direction "
