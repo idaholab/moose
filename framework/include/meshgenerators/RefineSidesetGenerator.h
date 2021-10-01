@@ -40,7 +40,17 @@ private:
   /// Side(s) of the boundary/boundaries to be refined. Can be either "primary"(just the boundary elements), "secondary"(just the neighboring elements), or "both."
   const MultiMooseEnum _boundary_side;
 
-  /// The actual function refining the boundaries. This is done recursively in order to minimize the number of refinement iterations.
+  /**
+   * The actual function refining the boundaries. This is done recursively in order
+   * to minimize the number of refinement iterations to as little as possible.
+   * @param boundary_ids Vector of boundary_ids to refine
+   * @param mesh The mesh to refine
+   * @param refinement Vector describing how many times to refine each boundary,
+   * corresponding to their placement in boundary_ids
+   * @param max Max value of all the refinement levels in the above vector
+   * @param ref_step Step counter for the recursive function, defaults to 0 for initial call.
+   * @return Unique pointer to a refined MeshBase
+   */
   virtual std::unique_ptr<MeshBase>
   recursive_refine(const std::vector<boundary_id_type> boundary_ids,
                    std::unique_ptr<MeshBase> & mesh,
