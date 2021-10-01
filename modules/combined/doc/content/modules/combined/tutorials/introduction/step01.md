@@ -24,6 +24,14 @@ This variable will be block restricted to the lower dimensional mortar subdomain
 the `[Contact]` action created for us (the name of that subdomain is the name of
 the contact action subblock with `_secondary_subdomain` appended).
 
+This marks the first time we're directly adding variables to an input file. In
+all previous steps all variables were added for us automatically by the tensor
+mechanics master action and the contact action. The [!param](/Variables/MooseVariable/family)
+and [!param](/Variables/MooseVariable/order) parameters define the shape function
+family and element order. First order Lagrange (no connection to "Lagrange multiplier!")
+are the MOOSE default settings. In future inputs you might see those parameters
+omitted. Lagrange shape functions are purely nodal interpolary shape functions.
+
 ### `Constraints`
 
 The [`GapConductanceConstraint`](GapConductanceConstraint.md) is the bare bones

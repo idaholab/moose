@@ -45,10 +45,14 @@
   [T]
     # initialize to an average temperature
     initial_condition = 50
+    order = FIRST
+    family = LAGRANGE
   []
   # temperature lagrange multiplier
   [Tlm]
     block = 'pillars_secondary_subdomain'
+    order = FIRST
+    family = LAGRANGE
   []
 []
 
