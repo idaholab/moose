@@ -92,7 +92,7 @@ velocity_interp_method='rc'
     porosity = porosity
   []
   [u_friction]
-    type = PNSFVMomentumFriction
+    type = PINSFVMomentumFriction
     variable = u
     momentum_component = 'x'
     porosity = porosity
@@ -129,7 +129,7 @@ velocity_interp_method='rc'
     porosity = porosity
   []
   [v_friction]
-    type = PNSFVMomentumFriction
+    type = PINSFVMomentumFriction
     variable = v
     momentum_component = 'y'
     porosity = porosity
@@ -226,7 +226,7 @@ velocity_interp_method='rc'
     rho = ${rho}
   []
   [darcy]
-    type = ADGenericConstantVectorMaterial
+    type = ADGenericConstantVectorFunctorMaterial
     prop_names = 'Darcy_coefficient Forchheimer_coefficient'
     prop_values = '0.1 0.1 0.1 0.1 0.1 0.1'
   []
