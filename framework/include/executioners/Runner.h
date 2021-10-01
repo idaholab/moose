@@ -29,11 +29,12 @@ public:
     std::string reason;
     std::map<std::string, Result> subs;
 
-    std::string str(bool success_msg = false, const std::string & indent = "", const std::string & subname = "")
+    std::string
+    str(bool success_msg = false, const std::string & indent = "", const std::string & subname = "")
     {
       std::string s = indent + label(success_msg, subname) + "\n";
       for (auto & entry : subs)
-        s += entry.second.str(success_msg, indent + "  ", entry.first) + "\n";
+        s += entry.second.str(success_msg, indent + "    ", entry.first);
       return s;
     }
 
@@ -70,7 +71,9 @@ public:
   private:
     std::string label(bool success_msg, const std::string & subname = "")
     {
-      return subname + "." + _name + "(" + (converged ? "success" : "FAIL") + ")" +
+      std::string state_str =
+          success_msg || !converged ? (std::string("(") + (converged ? "pass" : "FAIL") + ")") : "";
+      return subname + (subname.empty() ? "" : ":") + _name + state_str +
              ((success_msg || !converged) && !reason.empty() ? ": " + reason : "");
     }
     std::string _name;
@@ -87,6 +90,12 @@ public:
   virtual Result gogogadget() = 0;
 
   virtual void execute() override {}
+
+  Result & newResult()
+  {
+    _result = Result(this);
+    return _result;
+  }
 
   virtual bool lastSolveConverged() const override { return _result.convergedAll(); }
 
