@@ -119,9 +119,7 @@ class AlertCommand(command.CommandComponent):
 class RenderAlertToken(components.RenderComponent):
 
     def createHTML(self, parent, token, page):
-        div = html.Tag(parent, 'div', class_='moose-alert moose-alert-{}'.format(token['brand']))
-        content = html.Tag(div, 'div', class_='moose-alert-content')
-        return content
+        return html.Tag(parent, 'div', class_='moose-alert moose-alert-{}'.format(token['brand']))
 
     def createMaterialize(self, parent, token, page):
         return html.Tag(parent, 'div',
@@ -151,13 +149,13 @@ class RenderAlertToken(components.RenderComponent):
 class RenderAlertContent(components.RenderComponent):
 
     def createHTML(self, parent, token, page):
-        return html.Tag(parent, 'p')
+        return html.Tag(parent, 'div', class_='moose-alert-content')
 
     def createMaterialize(self, parent, token, page):
 
         card_content = html.Tag(parent, 'div', class_='card-content')
         content = html.Tag(card_content, 'div', class_='moose-alert-content')
-        return html.Tag(content, 'p')
+        return content
 
     def createLatex(self, parent, token, page):
         return parent
@@ -165,7 +163,20 @@ class RenderAlertContent(components.RenderComponent):
 class RenderAlertTitle(components.RenderComponent):
 
     def createHTML(self, parent, token, page):
-        return html.Tag(parent, 'p')
+        title = html.Tag(parent, 'div', class_='moose-alert-title')
+
+        if token.get('icon'):
+            i = html.Tag(title, 'i', token, string=token['icon_name'])
+            i.addClass('material-icons')
+            i.addClass('moose-inline-icon')
+
+        if token.get('prefix'):
+            brand = token['brand']
+            prefix = html.Tag(title, 'span', string=brand, class_='moose-alert-title-brand')
+            if token.children:
+                html.String(prefix, content=': ')
+
+        return title
 
     def createMaterialize(self, parent, token, page):
 

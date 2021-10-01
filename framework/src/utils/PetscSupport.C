@@ -292,7 +292,7 @@ petscSetupOutput(CommandLine * cmd_line)
   const std::vector<std::string> argv = cmd_line->getArguments();
   for (const auto & arg : argv)
   {
-    if (arg == std::string(code, 10))
+    if (arg.compare(code) == 0)
     {
       Console::petscSetupOutput();
       break;
