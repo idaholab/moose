@@ -3,10 +3,10 @@
 The `StochasticTools` block is provides parameters that provide convenience for running stochastic
 simulations. For example, if the block is present it will automatically create the
 necessary objects for running a parameter study style stochastic analysis. This is where the
-master input file does not perform a solve, but simply spawns other simulations. Please
+main input file does not perform a solve, but simply spawns other simulations. Please
 refer to [examples/parameter_study.md] for an example.
 
-!listing examples/parameter_study/master.i block=StochasticTools
+!listing examples/parameter_study/main.i block=StochasticTools
 
 !syntax parameters /StochasticTools
 

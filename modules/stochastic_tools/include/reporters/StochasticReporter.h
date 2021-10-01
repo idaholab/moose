@@ -90,6 +90,7 @@ template <typename T>
 void
 StochasticReporterContext<T>::storeInfo(nlohmann::json & json) const
 {
+  ReporterGeneralContext<std::vector<T>>::storeInfo(json);
   if (_has_allgathered || (_has_gathered && this->processor_id() == 0))
   {
     json["row_begin"] = 0;

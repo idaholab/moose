@@ -41,6 +41,8 @@ class JSONDiff(FileTester):
             jsondiff.append(gold_file + ' ' + test_file)
             if self.specs.isValid('rel_err'):
                 jsondiff.append('--rel_err %s' % (self.specs['rel_err']))
+            if self.specs.isValid('abs_zero'):
+                jsondiff.append('--abs_zero %s' % (self.specs['abs_zero']))
             if self.specs.isValid('skip_keys'):
                 jsondiff.append('--skip_keys %s' % (' '.join(self.specs['skip_keys'])))
             commands.append(' '.join(jsondiff))
