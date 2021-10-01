@@ -1,0 +1,10 @@
+[Tests]
+  design = 'PerfGraphReporter.md'
+  issues = '#16256'
+
+  [test]
+    type = 'RunApp'
+    input = 'perf_graph_reporter.i'
+    requirement = 'The system shall include the ability to report performance information'
+  []
+[]

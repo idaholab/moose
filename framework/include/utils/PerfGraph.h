@@ -25,6 +25,7 @@
 #include <thread>
 #include <future>
 #include <mutex>
+#include <functional>
 
 // Forward Declarations
 class PerfGuard;
@@ -63,6 +64,60 @@ public:
     SELF_MEMORY,
     CHILDREN_MEMORY,
     TOTAL_MEMORY
+  };
+
+  /**
+   * Data structure that contains all of the information pertaining to a PerfNode
+   * entry for use in output.
+   */
+  class PerfNodeInfo
+  {
+  public:
+    PerfNodeInfo(const PerfNode & node,
+                 const PerfNode * const parent_node,
+                 const PerfGraphRegistry::SectionInfo & section_info,
+                 const unsigned int depth,
+                 const Real root_time)
+      : _node(node),
+        _parent_node(parent_node),
+        _section_info(section_info),
+        _depth(depth),
+        _root_time(root_time)
+    {
+    }
+
+    /**
+     * @returns The node
+     */
+    const PerfNode & node() const { return _node; }
+    /**
+     * @returns The parent node (if any)
+     */
+    const PerfNode * parentNode() const { return _parent_node; }
+    /**
+     * @returns The SectionInfo associated with this node (contains name, level, etc)
+     */
+    const PerfGraphRegistry::SectionInfo & sectionInfo() const { return _section_info; }
+    /**
+     * @returns The depth of the node in the tree
+     */
+    unsigned int depth() const { return _depth; }
+    /**
+     * @returns The root node time (total run time)
+     */
+    Real rootTime() const { return _root_time; }
+
+  private:
+    /// The node
+    const PerfNode & _node;
+    /// The parent node
+    const PerfNode * const _parent_node;
+    /// The SectionInfo responsible for this node
+    const PerfGraphRegistry::SectionInfo & _section_info;
+    /// The depth of the node in the tree
+    const unsigned int _depth;
+    /// The root node time (total run time)
+    const Real _root_time;
   };
 
   /**
@@ -224,9 +279,14 @@ public:
   }
 
   /**
-   * Udates the time section_time and time for all currently running nodes
+   * Updates the time section_time and time for all currently running nodes
    */
   void updateTiming();
+
+  template <typename Functor>
+  void treeRecurse(const Functor & act,
+                   const unsigned int level = MAX_STACK_SIZE,
+                   const bool heaviest = false) const;
 
 protected:
   typedef VariadicTable<std::string,
@@ -354,44 +414,13 @@ protected:
   void pop();
 
   /**
-   * Helper for printing out the graph
-   *
-   * @param current_node The node to be working on right now
-   * @param console Where to print to
-   * @param level The level to print out below (<=)
-   * @param current_depth - Used in the recursion
-   */
-  void recursivelyPrintGraph(PerfNode * current_node,
-                             FullTable & vtable,
-                             unsigned int level,
-                             unsigned int current_depth = 0);
-
-  /**
-   * Helper for printing out the trace that has taken the most time
-   *
-   * @param current_node The node to be working on right now
-   * @param console Where to print to
-   * @param current_depth - Used in the recursion
-   */
-  void recursivelyPrintHeaviestGraph(PerfNode * current_node,
-                                     FullTable & vtable,
-                                     unsigned int current_depth = 0);
-
-  /**
    * Updates the cumulative self/children/total time
    *
    * Note: requires that self/children/total time are resized and zeroed before calling.
    *
    * @param current_node The current node to work on
    */
-  void recursivelyFillTime(PerfNode * current_node);
-
-  /**
-   * Helper for printing out the heaviest sections
-   *
-   * @param console Where to print to
-   */
-  void printHeaviestSections(const ConsoleStream & console);
+  void recursivelyFillTime(const PerfNode & current_node);
 
   /// Whether or not to put everything in the perf graph
   bool _live_print_all;
@@ -479,4 +508,78 @@ protected:
   // Here so PerfGuard is the only thing that can call push/pop
   friend class PerfGuard;
   friend class PerfGraphLivePrint;
+
+private:
+  /**
+   * Helper for building a VariadicTable that represents the tree.
+   *
+   * @param level The level to print out below (<=)
+   * @param heaviest Show only the heaviest branch
+   */
+  FullTable treeTable(const unsigned int level, const bool heaviest = false);
+
+  template <typename Functor>
+  void treeRecurseInternal(const PerfNode & node,
+                           const PerfNode * const parent,
+                           const Functor & act,
+                           const unsigned int level,
+                           const bool heaviest,
+                           unsigned int current_depth) const;
 };
+
+template <typename Functor>
+void
+PerfGraph::treeRecurseInternal(const PerfNode & node,
+                               const PerfNode * const parent,
+                               const Functor & act,
+                               const unsigned int level,
+                               const bool heaviest,
+                               unsigned int current_depth) const
+{
+  mooseAssert(_perf_graph_registry.sectionExists(node.id()), "Unable to find section name!");
+
+  const auto & current_section_info = _perf_graph_registry.readSectionInfo(node.id());
+  if (current_section_info.level() <= level)
+  {
+    mooseAssert(!_section_time_ptrs.empty(), "updateTiming() must be run before treeRecurse!");
+
+    PerfNodeInfo info(node,
+                      parent,
+                      current_section_info,
+                      current_depth,
+                      _section_time_ptrs[_root_node_id]->_total);
+    act(info);
+
+    ++current_depth;
+  }
+
+  if (heaviest)
+  {
+    const PerfNode * heaviest_child = nullptr;
+    for (const auto & child_it : node.children())
+    {
+      const auto & current_child = *child_it.second;
+
+      if (!heaviest_child || (current_child.totalTime() > heaviest_child->totalTime()))
+        heaviest_child = &current_child;
+    }
+
+    if (heaviest_child)
+      treeRecurseInternal(*heaviest_child, &node, act, level, true, current_depth);
+  }
+  else
+  {
+    for (const auto & child_it : node.children())
+      treeRecurseInternal(*child_it.second, &node, act, level, false, current_depth);
+  }
+}
+
+template <typename Functor>
+void
+PerfGraph::treeRecurse(const Functor & act,
+                       const unsigned int level /* = MAX_STACK_SIZE */,
+                       const bool heaviest /* = false */) const
+{
+  mooseAssert(_root_node, "Root node does not exist; calling this too early");
+  treeRecurseInternal(*_root_node, nullptr, act, level, heaviest, 0);
+}

@@ -46,26 +46,51 @@ public:
   class SectionInfo
   {
   public:
-    SectionInfo(
-        PerfID id, std::string name, unsigned int level, std::string live_message, bool print_dots)
+    SectionInfo(const PerfID id,
+                const std::string & name,
+                const unsigned int level,
+                const std::string & live_message,
+                const bool print_dots)
       : _id(id), _name(name), _level(level), _live_message(live_message), _print_dots(print_dots)
     {
     }
 
+    /**
+     * @returns The unique ID for the section
+     */
+    PerfID id() const { return _id; }
+    /**
+     * @returns The name of the section
+     */
+    const std::string & name() const { return _name; }
+    /**
+     * @returns The verbosity level of the section
+     */
+    unsigned int level() const { return _level; }
+    /**
+     * @returns The message to print while the section is running
+     */
+    const std::string & liveMessage() const { return _live_message; }
+    /**
+     * @returns Whether or not to print dots while this section runs
+     */
+    bool printDots() const { return _print_dots; }
+
+  private:
     /// Unique ID
-    PerfID _id;
+    const PerfID _id;
 
     /// The name
-    std::string _name;
+    const std::string _name;
 
     /// Print level (verbosity level)
-    unsigned int _level;
+    const unsigned int _level;
 
     /// Message to print while the section is running
-    std::string _live_message;
+    const std::string _live_message;
 
     /// Whether or not to print dots while this section runs
-    bool _print_dots;
+    const bool _print_dots;
   };
 
   /**

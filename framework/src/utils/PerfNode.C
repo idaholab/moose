@@ -35,13 +35,13 @@ PerfNode::childrenTime() const
 }
 
 long int
-PerfNode::selfMemory()
+PerfNode::selfMemory() const
 {
   return _total_memory - childrenMemory();
 }
 
 long int
-PerfNode::childrenMemory()
+PerfNode::childrenMemory() const
 {
   long int children_memory = 0;
 

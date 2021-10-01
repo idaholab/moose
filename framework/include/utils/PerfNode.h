@@ -15,7 +15,6 @@
  * within the Node - and only raw pointers are handed back out.
  */
 
-
 #include "MooseTypes.h"
 #include "MemoryUtils.h"
 
@@ -110,40 +109,60 @@ public:
    * Get the time this node took
    */
   std::chrono::steady_clock::duration selfTime() const;
+  /**
+   * Get the time this node took in seconds
+   */
+  Real selfTimeSec() const { return std::chrono::duration<Real>(selfTime()).count(); }
+  /**
+   * The average time this node took in seconds
+   */
+  Real selfTimeAvg() const { return selfTimeSec() / static_cast<Real>(numCalls()); }
 
   /**
    * The time this Node plus all of it's children took
    */
   std::chrono::steady_clock::duration totalTime() const;
+  /**
+   * The time this Node plus all of it's children took in seconds
+   */
+  Real totalTimeSec() const { return std::chrono::duration<Real>(totalTime()).count(); }
+  /**
+   * The average time this Node plus all of it's children took in seconds
+   */
+  Real totalTimeAvg() const { return totalTimeSec() / static_cast<Real>(numCalls()); }
 
   /**
    * Get the time this nodes children took
    */
   std::chrono::steady_clock::duration childrenTime() const;
+  /**
+   * The time this node's children took in seconds
+   */
+  Real childrenTimeSec() const { return std::chrono::duration<Real>(childrenTime()).count(); }
 
   /**
    * Get the number of times this node was called
    */
-  unsigned long int numCalls() { return _num_calls; }
+  unsigned long int numCalls() const { return _num_calls; }
 
   /**
    * Get the amount of memory added by this node
    */
-  long int selfMemory();
+  long int selfMemory() const;
 
   /**
    * Get the amount of memory added by this node
    */
-  long int childrenMemory();
+  long int childrenMemory() const;
 
   /**
    * Get the amount of memory added by this node
    */
-  long int totalMemory() { return _total_memory; }
+  long int totalMemory() const { return _total_memory; }
 
-protected:
+private:
   /// The unique ID for the section this Node corresponds to
-  PerfID _id;
+  const PerfID _id;
 
   /// The current start_time for this node (if it's on the stack)
   std::chrono::time_point<std::chrono::steady_clock> _start_time;
