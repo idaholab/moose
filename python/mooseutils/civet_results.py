@@ -19,6 +19,7 @@ import urllib.error
 import collections
 import logging
 import subprocess
+import concurrent.futures
 
 DEFAULT_JOBS_CACHE = os.path.join(os.getenv('HOME'), '.local', 'share', 'civet', 'jobs')
 DEFAULT_CIVET_SITE = 'https://civet.inl.gov'
@@ -32,7 +33,7 @@ TEST_RE = re.compile(r'^(?:\[(?P<time>.+?)s\])?'       # Optional test time
                      flags=re.MULTILINE)
 
 JOB_RE = re.compile(r'id=\"job_(?P<job>\d+)\"')
-JOB_NUMBER_RE = re.compile(r"results_(?P<number>[0-9]+).tar\.gz")
+JOB_NUMBER_RE = re.compile(r"results_(?P<number>[0-9]+)(.*?)\.tar\.gz")
 RECIPE_RE = re.compile(r'results_(?P<number>\d+)_(?P<job>.*)/(?P<recipe>.*)')
 RUN_TESTS_START_RE = re.compile(r'^.+?run_tests.+?$', flags=re.MULTILINE)
 RUN_TESTS_END_RE = re.compile(r'^-{5,}$', flags=re.MULTILINE)
@@ -65,24 +66,25 @@ def _get_remote_civet_jobs(hashes, site, repo, cache=DEFAULT_JOBS_CACHE, logger=
     Get a list of Job objects for the supplied git SHA1 strings.
     """
 
-    jobs = set()
+    info = list()
     for sha1 in hashes:
         url = '{}/sha_events/{}/{}'.format(site, repo, sha1)
         pid = urllib.request.urlopen(url)
 
         page = pid.read().decode('utf8')
         for match in JOB_RE.finditer(page):
-            job = jobs.add(_download_job(int(match.group('job')), site, cache, logger))
+            info.append((int(match.group('job')), site, cache, logger))
 
+    executor = concurrent.futures.ThreadPoolExecutor()
+    jobs = [job for job in executor.map(_download_job, info)]
     return sorted(jobs, key=lambda j: j.number)
 
-def _download_job(job, site, cache, logger):
+def _download_job(info):
     """
     Download, if it doesn't already exist, the raw data file from CIVET testing given a Job object.
     """
-
-    if not os.path.isdir(cache):
-        os.makedirs(cache)
+    job, site, cache, logger = info
+    os.makedirs(cache, exist_ok=True)
 
     url = '{}/job_results/{}'.format(site, job)
     filename = '{}/results_{}.tar.gz'.format(cache, job)
@@ -207,18 +209,3 @@ def get_civet_hashes(commit=None):
     regex = r"commit (?P<master>[a-f0-9]{40}).*?Merge commit\s+'(?P<devel>[0-9a-f]{40})'"
     match = re.match(regex, out.stdout, flags=re.DOTALL|re.UNICODE)
     return (match.group('master'), match.group('devel')) if match else None
-
-
-    """
-    if not git_is_repo():
-        raise OSError("The current working directory ({}) is not a git repository.".format(os.getcwd()))
-
-    full_branch = f'{remote}/{branch}'
-    remotes = mooseutils.get_branches()
-    if full_branch not in remotes:
-        raise OSError(f"The branch '{full_branch}' does not exist.")
-
-    # Create "git clone" command
-    fetch_cmd = ['git', 'fetch', remote, branch]
-    subprocess.run(fetch_cmd, capture_output=True, text=True, check=True)
-    """

@@ -21,9 +21,6 @@ A helpful tip.
 !alert construction
 Under construction.
 
-!alert construction
-Under construction.
-
 !alert! error
 An alert with some code.
 
