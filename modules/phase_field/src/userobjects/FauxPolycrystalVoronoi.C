@@ -62,8 +62,8 @@ FauxPolycrystalVoronoi::execute()
 void
 FauxPolycrystalVoronoi::finalize()
 {
-  _grain_to_op.resize(_grain_num);
+  _grain_to_op.clear();
 
   for (auto grain = decltype(_grain_num)(0); grain < _grain_num; grain++)
-    _grain_to_op[grain] = grain;
+    _grain_to_op.emplace_hint(_grain_to_op.end(), grain, grain);
 }

@@ -1,7 +1,7 @@
 [Mesh]
   [ebsd_mesh]
     type = EBSDMeshGenerator
-    filename = 'test.txt'
+    filename = 'ebsd_9.txt'
   []
 []
 
