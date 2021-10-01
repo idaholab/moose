@@ -765,7 +765,7 @@ Simulation::controlDataIntegrityCheck()
       {
         ControlDataValue * cdv = _control_data[cd_name];
         // find out which control object built the control data
-        std::string dep_name = cdv->getControl().name();
+        std::string dep_name = cdv->getControl()->name();
         auto & deps = ctrl->getDependencies();
         // and if it is not in its dependency list, add it
         auto it = std::find(deps.begin(), deps.end(), dep_name);
@@ -783,16 +783,16 @@ Simulation::controlDataIntegrityCheck()
   {
     if (TerminateControl * ctrl = dynamic_cast<TerminateControl *>(i.get()))
     {
-      std::list<THMControl *> l;
+      std::list<const THMControl *> l;
       l.push_back(ctrl);
       while (l.size() > 0)
       {
-        THMControl * ctrl = l.front();
+        const THMControl * ctrl = l.front();
         auto & cd_deps = ctrl->getControlDataDependencies();
         for (auto && cd_name : cd_deps)
         {
           ControlDataValue * cdv = _control_data[cd_name];
-          l.push_back(&cdv->getControl());
+          l.push_back(cdv->getControl());
         }
         ctrl_wh_tse.addObject(ctrl_wh.getObject(ctrl->name()));
         l.pop_front();

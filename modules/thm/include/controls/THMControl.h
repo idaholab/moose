@@ -14,7 +14,10 @@ public:
   /**
    * Return the Controls that must run before this Control
    */
-  std::vector<std::string> & getControlDataDependencies() { return _control_data_depends_on; }
+  const std::vector<std::string> & getControlDataDependencies() const
+  {
+    return _control_data_depends_on;
+  }
 
 protected:
   /**
@@ -128,10 +131,9 @@ THMControl::getControlDataByName(const std::string & data_name)
                "', but it does not exist in the system. Check your spelling.");
 
   // set up dependencies for this control object
-  auto & deps = getControlDataDependencies();
-  auto it = std::find(deps.begin(), deps.end(), data_name);
-  if (it == deps.end())
-    deps.push_back(data_name);
+  auto it = std::find(_control_data_depends_on.begin(), _control_data_depends_on.end(), data_name);
+  if (it == _control_data_depends_on.end())
+    _control_data_depends_on.push_back(data_name);
 
   return data_ptr->get();
 }
