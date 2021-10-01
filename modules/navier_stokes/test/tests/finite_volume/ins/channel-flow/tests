@@ -126,4 +126,12 @@
     requirement = 'The system shall be able to model free-slip conditions in a 3D square channel; specifically the tangential velocity shall have a uniform value of unity and the pressure shall not change.'
     ad_indexing_type = 'global'
   []
+  [singular_two_term_expansion]
+    type = 'Exodiff'
+    input = one-elem-wide-channel.i
+    ad_indexing_type = 'global'
+    exodiff = one-elem-wide-channel_out.e
+    issues = '#16822'
+    requirement = 'The system shall be able to compute gradients, when extrapolated boundary face values make the gradient computation singular, by catching the singularity error and re-running without doing boundary face value extrapolation.'
+  []
 []
