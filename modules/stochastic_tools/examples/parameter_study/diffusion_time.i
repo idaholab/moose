@@ -70,6 +70,18 @@
   []
 []
 
+[VectorPostprocessors]
+  [T_vec]
+    type = LineValueSampler
+    variable = T
+    start_point = '0 0.5 0'
+    end_point = '1 0.5 0'
+    num_points = 11
+    sort_by = x
+    execute_on = 'initial timestep_end'
+  []
+[]
+
 [Controls/stochastic]
   type = SamplerReceiver
 []

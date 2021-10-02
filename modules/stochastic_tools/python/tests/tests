@@ -1,0 +1,22 @@
+[Tests]
+  issues = '#17391'
+  design = 'parameter_study.md sobol.md'
+  [make_histogram]
+    type = PythonUnitTest
+    input = test_make_histogram.py
+    requirement = "The system shall include python utilities that produce histogram figures from stochastic data."
+    required_python_packages = 'numpy plotly kaleido'
+  []
+  [visualize_statistics]
+    type = PythonUnitTest
+    input = test_visualize_statistics.py
+    requirement = "The system shall include python utilities that process StatisticsReporter output."
+    required_python_packages = 'numpy plotly kaleido'
+  []
+  [visualize_sobol]
+    type = PythonUnitTest
+    input = test_visualize_sobol.py
+    requirement = "The system shall include python utilities that process SobolReporter output."
+    required_python_packages = 'numpy plotly kaleido'
+  []
+[]

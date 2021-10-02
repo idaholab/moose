@@ -11,6 +11,7 @@
 import os
 import argparse
 import numpy as np
+import glob
 import plotly
 import plotly.graph_objects as go
 import mooseutils
@@ -19,8 +20,8 @@ def command_line_options():
     """
     Command-line options for histogram tool.
     """
-    parser = argparse.ArgumentParser(description="Command-line utility for creating histograms from VectorPostprocessor data.")
-    parser.add_argument('filenames', nargs='+', type=str, help="The VectorPostprocessor data file pattern to open, for sample 'foo_x_*.csv'.")
+    parser = argparse.ArgumentParser(description="Command-line utility for creating histograms from VectorPostprocessor or Reporter data.")
+    parser.add_argument('filenames', nargs='+', type=str, help="The VectorPostprocessor or Reporter data file to open. Can be pattern for distributed data 'large_data.json.*'")
     parser.add_argument('-v', '--vectors', default=[], nargs='+', type=str, help="List of vector names to consider, by default all vectors are shown.")
     parser.add_argument('--names', default=[], nargs='+', type=str, help="Name to show on legend, default is no legend.")
     parser.add_argument('--probability', default=True, type=bool, help="True to plot with probability density normalization.")
@@ -38,34 +39,64 @@ if __name__ == '__main__':
     opt = command_line_options()
 
     # Read data
-    data = []
+    data = dict()
     for file in opt.filenames:
-        data.append(mooseutils.PostprocessorReader(os.path.abspath(file)))
+        for fname in sorted(glob.glob(file)):
 
-    # Set the default vector names
-    vectors = []
-    if not opt.vectors:
-        vectors = data[0].variables()
-    else:
-        vectors = opt.vectors
+            if '.csv' in fname:
+                vdata = mooseutils.PostprocessorReader(fname)
+                vars = vdata.variables()
+                ind = dict()
+                for vec in vars:
+                    obj_val = vec.split(':')
+                    if obj_val[-1] == 'converged':
+                        ind[obj_val[0]] = np.where(vdata[vec])[0]
+                for vec in vars:
+                    obj_val = vec.split(':')
+                    if obj_val[-1] == 'converged':
+                        continue
+                    val = vdata[vec][ind[obj_val[0]]].tolist() if obj_val[0] in ind else vdata[vec].tolist()
+                    if vec in data:
+                        data[vec].extend(val)
+                    else:
+                        data[vec] = val
+
+            else:
+                rdata = mooseutils.ReporterReader(fname)
+                vars = rdata.variables()
+                ind = dict()
+                for vec in vars:
+                    obj_val = vec[1].split(':')
+                    if obj_val[-1] == 'converged':
+                        ind[obj_val[0]] = np.where(rdata[vec])[0]
+                for vec in vars:
+                    obj_val = vec[1].split(':')
+                    if obj_val[-1] == 'converged' or rdata.info(vec)['type'] != 'std::vector<double>':
+                        continue
+                    val = np.array(rdata[vec])[ind[obj_val[0]]].tolist() if obj_val[0] in ind else rdata[vec]
+                    if vec[1] in data:
+                        data[vec[1]].extend(val)
+                    else:
+                        data[vec[1]] = val
+
 
     # Plot the results
-    fig_data = [dict() for k in range(len(vectors)*len(data))]
+    fig_data = []
     k = -1
-    for i in range(len(data)):
-        for j in range(len(vectors)):
-            if not vectors[j] in data[i].variables():
-                fig_data.pop(k+1)
-                continue
-            k += 1
-            fig_data[k]['type'] = 'histogram'
-            fig_data[k]['x'] = data[i][vectors[j]].tolist()
-            fig_data[k]['nbinsx'] = opt.bins
-            fig_data[k]['opacity'] = opt.alpha
-            if opt.probability:
-                fig_data[k]['histnorm'] = 'probability'
-            if i < len(opt.names):
-                fig_data[k]['name'] = opt.names[k]
+    for vec in data:
+        if len(opt.vectors) and not vec in opt.vectors:
+            continue
+        k = k + 1
+        fig_frame = dict()
+        fig_frame['type'] = 'histogram'
+        fig_frame['x'] = data[vec]
+        fig_frame['nbinsx'] = opt.bins
+        fig_frame['opacity'] = opt.alpha
+        if opt.probability:
+            fig_frame['histnorm'] = 'probability'
+        if k < len(opt.names):
+            fig_frame['name'] = opt.names[k]
+        fig_data.append(fig_frame)
     xaxis = dict()
     xaxis['title'] = opt.xlabel
     yaxis = dict()

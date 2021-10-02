@@ -5,11 +5,13 @@
             "values": {
                 "data:converged": {
                     "row_begin": 0,
-                    "row_end": 3
+                    "row_end": 3,
+                    "type": "std::vector<bool>"
                 },
                 "data:pp:value": {
                     "row_begin": 0,
-                    "row_end": 3
+                    "row_end": 3,
+                    "type": "std::vector<double>"
                 }
             }
         }

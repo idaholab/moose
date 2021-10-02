@@ -1,0 +1,128 @@
+{
+    "reporters": {
+        "results": {
+            "type": "StochasticReporter",
+            "values": {
+                "results:T_avg:value": {
+                    "row_begin": 0,
+                    "row_end": 10,
+                    "type": "std::vector<double>"
+                },
+                "results:converged": {
+                    "row_begin": 0,
+                    "row_end": 10,
+                    "type": "std::vector<bool>"
+                },
+                "results:q_left:value": {
+                    "row_begin": 0,
+                    "row_end": 10,
+                    "type": "std::vector<double>"
+                }
+            }
+        },
+        "stats": {
+            "confidence_intervals": {
+                "levels": [
+                    0.05,
+                    0.95
+                ],
+                "method": "percentile",
+                "replicates": 10000,
+                "seed": 1
+            },
+            "type": "StatisticsReporter",
+            "values": {
+                "results_results:T_avg:value_MEAN": {
+                    "stat": "MEAN",
+                    "type": "std::pair<double, std::vector<double> >"
+                },
+                "results_results:T_avg:value_STDDEV": {
+                    "stat": "STDDEV",
+                    "type": "std::pair<double, std::vector<double> >"
+                },
+                "results_results:q_left:value_MEAN": {
+                    "stat": "MEAN",
+                    "type": "std::pair<double, std::vector<double> >"
+                },
+                "results_results:q_left:value_STDDEV": {
+                    "stat": "STDDEV",
+                    "type": "std::pair<double, std::vector<double> >"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "results": {
+                "results:T_avg:value": [
+                    290.0493845242595,
+                    248.6050947481139,
+                    192.0301321316896,
+                    131.58596857841474,
+                    272.5977017632619,
+                    212.76355765830587,
+                    151.82993831123738,
+                    191.70332294603384,
+                    148.04326716479108,
+                    155.07004432808066
+                ],
+                "results:converged": [
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true
+                ],
+                "results:q_left:value": [
+                    324.27838280823414,
+                    278.95232322012805,
+                    107.37667968314861,
+                    99.3833233984007,
+                    281.57633634305506,
+                    182.60721896502028,
+                    112.2623447967543,
+                    125.51199465235003,
+                    114.6937641007055,
+                    169.10791450427786
+                ]
+            },
+            "stats": {
+                "results_results:T_avg:value_MEAN": [
+                    199.42784121541888,
+                    [
+                        172.4194543916743,
+                        227.45755683125793
+                    ]
+                ],
+                "results_results:T_avg:value_STDDEV": [
+                    55.53057128319956,
+                    [
+                        35.73264905596605,
+                        64.78429485236896
+                    ]
+                ],
+                "results_results:q_left:value_MEAN": [
+                    179.57502824720748,
+                    [
+                        138.96130933930553,
+                        223.43024101745672
+                    ]
+                ],
+                "results_results:q_left:value_STDDEV": [
+                    84.7510259100363,
+                    [
+                        54.29352893810827,
+                        98.00828658688752
+                    ]
+                ]
+            },
+            "time": 2.0,
+            "time_step": 2
+        }
+    ]
+}

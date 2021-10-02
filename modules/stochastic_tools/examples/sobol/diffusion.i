@@ -6,6 +6,7 @@
 []
 
 [Variables/T]
+  initial_condition = 300
 []
 
 [Kernels]
@@ -21,7 +22,7 @@
   [source]
     type = ADBodyForce
     variable = T
-    value = 1
+    value = 100
     function = 1
   []
 []
@@ -31,7 +32,7 @@
     type = ADDirichletBC
     variable = T
     boundary = left
-    value = -10
+    value = 300
   []
   [right]
     type = ADNeumannBC
@@ -56,14 +57,16 @@
 
 [Postprocessors]
   [T_avg]
-    type = AverageNodalVariableValue
+    type = ElementAverageValue
     variable = T
+    execute_on = 'initial timestep_end'
   []
   [q_left]
     type = ADSideDiffusiveFluxAverage
     variable = T
     boundary = left
     diffusivity = diffusivity
+    execute_on = 'initial timestep_end'
   []
 []
 

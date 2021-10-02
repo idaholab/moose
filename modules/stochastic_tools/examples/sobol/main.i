@@ -15,13 +15,13 @@
   []
   [T_0]
     type = Normal
-    mean = -10
-    standard_deviation = 1.5
+    mean = 300
+    standard_deviation = 45
   []
   [s]
     type = Normal
-    mean = 1
-    standard_deviation = 0.25
+    mean = 100
+    standard_deviation = 25
   []
 []
 

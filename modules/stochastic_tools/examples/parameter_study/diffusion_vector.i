@@ -70,6 +70,13 @@
   []
 []
 
+[Reporters]
+  [acc]
+    type = AccumulateReporter
+    reporters = 'T_avg/value q_left/value'
+  []
+[]
+
 [Controls/stochastic]
   type = SamplerReceiver
 []

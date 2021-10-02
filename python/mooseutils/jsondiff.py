@@ -19,13 +19,15 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Tool for comparing two JSON files')
     parser.add_argument('files', nargs=2)
     parser.add_argument('--rel_err', type=float, default=0.0, help="Relative error value used in exodiff comparisons.")
+    parser.add_argument('--abs_zero', type=float, default=None, help='Value representing an absolute zero (default: 0)')
     parser.add_argument('--skip_keys', default=[], nargs='+', type=str, help="A list of keys to skip in the JSON comparison.")
     return parser.parse_args()
 
 class MooseDeepDiff(DeepDiff):
-    def __init__(self, *args, relative_error=None, absolute_error=None, **kwargs):
+    def __init__(self, *args, relative_error=None, absolute_error=None, absolute_zero=None, **kwargs):
         self.rel_err = relative_error
         self.abs_err = absolute_error
+        self.abs_zero = absolute_zero
         super().__init__(*args, **kwargs)
 
     def relative_error(self, x, y, max_relative_error):
@@ -56,11 +58,17 @@ class MooseDeepDiff(DeepDiff):
         t1_type = "number" if self.ignore_numeric_type_changes else level.t1.__class__.__name__
         t2_type = "number" if self.ignore_numeric_type_changes else level.t2.__class__.__name__
 
+        x = level.t1
+        y = level.t2
+        if self.abs_zero is not None:
+            x = 0 if abs(x) < self.abs_zero else x
+            y = 0 if abs(y) < self.abs_zero else y
+
         if self.rel_err is not None:
-            if self.relative_error(level.t1, level.t2, self.rel_err):
+            if self.relative_error(x, y, self.rel_err):
                 self._report_result('values_changed', level)
         elif self.abs_err is not None:
-            if self.absolute_error(level.t1, level.t2, self.abs_err):
+            if self.absolute_error(x, y, self.abs_err):
                 self._report_result('values_changed', level)
         else:
             DeepDiff._diff_numbers(self, level)
@@ -77,7 +85,7 @@ class JSONDiffer(object):
         self._data0 = self._load(input0)
         self._data1 = self._load(input1)
 
-        self._diff = MooseDeepDiff(self._data0, self._data1, relative_error=kwargs.pop('relative_error', 0.0))
+        self._diff = MooseDeepDiff(self._data0, self._data1, relative_error=kwargs.pop('relative_error', 0.0), absolute_zero=kwargs.pop('absolute_zero', None))
 
     def fail(self):
         return bool(self._diff)
@@ -101,5 +109,5 @@ class JSONDiffer(object):
 
 if __name__ == '__main__':
     args = parse_args()
-    obj = JSONDiffer(*args.files, relative_error=args.rel_err, skip_keys=args.skip_keys)
+    obj = JSONDiffer(*args.files, relative_error=args.rel_err, absolute_zero=args.abs_zero, skip_keys=args.skip_keys)
     print(obj)

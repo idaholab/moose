@@ -52,5 +52,13 @@ class TestJSONDiff(unittest.TestCase):
         obj = JSONDiffer(self._tmpfile0, self._tmpfile1, skip_keys=['bar'])
         self.assertEqual("    Files are the same", obj.message())
 
+    def testFailAbsZero(self):
+        obj = JSONDiffer(self._tmpfile0, self._tmpfile1, absolute_zero=1.01)
+        self.assertEqual("    Value of root['bar'][2] changed from 1.0 to 1.1.", obj.message())
+
+    def testPassAbsZero(self):
+        obj = JSONDiffer(self._tmpfile0, self._tmpfile1, absolute_zero=1.11)
+        self.assertEqual("    Files are the same", obj.message())
+
 if __name__ == '__main__':
     unittest.main(module=__name__, verbosity=2, buffer=True, exit=False)

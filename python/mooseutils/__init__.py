@@ -32,6 +32,7 @@ try:
     from .MooseDataFrame import MooseDataFrame
     from .PostprocessorReader import PostprocessorReader
     from .VectorPostprocessorReader import VectorPostprocessorReader
+    from .ReporterReader import ReporterReader
 except:
     pass
 
