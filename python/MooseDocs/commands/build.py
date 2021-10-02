@@ -55,8 +55,8 @@ def command_line_options(subparser, parent):
                         help="Create a local live server.")
     parser.add_argument('--dump', action='store_true',
                         help="Show page tree to the screen.")
-    parser.add_argument('--num-threads', '-j', type=int, choices=range(1, 13),
-                        default=min(int(multiprocessing.cpu_count() / 2), 12),
+    parser.add_argument('--num-threads', '-j', type=int,
+                        default=int(multiprocessing.cpu_count() / 2),
                         help="The number of parallel threads to execute with. The max. is twelve.")
     parser.add_argument('--port', default='8000', type=str,
                         help="The host port for live web server (default: %(default)s).")

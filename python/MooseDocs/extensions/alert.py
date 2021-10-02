@@ -84,10 +84,10 @@ class AlertCommand(command.CommandComponent):
         settings['icon-name'] = (None, "Set the icon name, see material icon for available options.")
         return settings
 
-    def createToken(self, parent, info, page):
-        title = self.settings.pop('title', None)
+    def createToken(self, parent, info, page, settings):
+        title = settings.pop('title', None)
         brand = info['subcommand']
-        icon_name = self.settings['icon-name']
+        icon_name = settings['icon-name']
         if icon_name is None:
             if brand == 'note':
                 icon_name = 'comment'
@@ -100,16 +100,16 @@ class AlertCommand(command.CommandComponent):
             else:
                 icon_name = brand
 
-        if self.settings['prefix'] is not None:
-            prefix = self.settings['prefix']
+        if settings['prefix'] is not None:
+            prefix = settings['prefix']
         else:
             prefix = self.extension.get('use-title-prefix', True)
 
         alert_token = AlertToken(parent, brand=brand)
         title_token = AlertTitle(alert_token, prefix=prefix, brand=brand,
-                                 icon=self.settings['icon'],
+                                 icon=settings['icon'],
                                  icon_name=icon_name,
-                                 center=self.settings['center-title'])
+                                 center=settings['center-title'])
 
         if title:
             self.reader.tokenize(title_token, title, page, MarkdownReader.INLINE)

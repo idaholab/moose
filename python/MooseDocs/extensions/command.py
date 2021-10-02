@@ -86,7 +86,7 @@ class CommandBase(components.ReaderComponent):
     def __init__(self, *args, **kwargs):
         components.ReaderComponent.__init__(self, *args, **kwargs)
 
-    def createToken(self, parent, info, page):
+    def createToken(self, parent, info, page, _):
         cmd = (info['command'], info['subcommand'])
         settings = info['settings']
 
@@ -122,8 +122,7 @@ class CommandBase(components.ReaderComponent):
         # Build the token
         if obj.PARSE_SETTINGS:
             settings, _ = common.parse_settings(obj.defaultSettings(), settings)
-            obj.setSettings(settings)
-        token = obj.createToken(parent, info, page)
+        token = obj.createToken(parent, info, page, settings)
         return token
 
     def setTranslator(self, translator):

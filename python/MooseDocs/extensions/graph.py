@@ -92,16 +92,16 @@ class GraphScatter(command.CommandComponent):
         settings['prefix'] = ('Figure', settings['prefix'][1])
         return settings
 
-    def createToken(self, parent, info, page):
+    def createToken(self, parent, info, page, settings):
 
         # Build the JSON data for plotting
-        data = self.settings['data']
+        data = settings['data']
         if data is None:
             raise common.exceptions.MooseDocsException("The 'data' setting is required.")
         data = eval(data)
 
         # Use Postprocessor file for data
-        filename = self.settings['filename']
+        filename = settings['filename']
         if filename is not None:
             filename = common.check_filenames(filename)
             reader = mooseutils.PostprocessorReader(filename)
@@ -110,12 +110,12 @@ class GraphScatter(command.CommandComponent):
                 data[i]['x'] = reader[line['x']].tolist()
                 data[i]['y'] = reader[line['y']].tolist()
 
-        flt = floats.create_float(parent, self.extension, self.reader, page, self.settings,
+        flt = floats.create_float(parent, self.extension, self.reader, page, settings,
                                   bottom=True)
-        scatter = ScatterToken(flt, data=data, layout=eval(self.settings['layout']))
+        scatter = ScatterToken(flt, data=data, layout=eval(settings['layout']))
 
         if flt is parent:
-            scatter.attributes.update(**self.attributes)
+            scatter.attributes.update(**self.attributes(settings))
 
         return parent
 
@@ -152,14 +152,14 @@ class GraphHistogram(command.CommandComponent):
         settings['prefix'] = ('Figure', settings['prefix'][1])
         return settings
 
-    def createToken(self, parent, info, page):
+    def createToken(self, parent, info, page, settings):
 
         # Build the JSON data for plotting
-        data = self.settings['data']
-        layout = self.settings['layout']
+        data = settings['data']
+        layout = settings['layout']
 
         # Use Postprocessor file for data
-        filename = self.settings['filename']
+        filename = settings['filename']
         if filename is None:
             raise common.exceptions.MooseDocsException("The 'filename' setting is required.")
         filename = common.check_filenames(filename)
@@ -169,12 +169,12 @@ class GraphHistogram(command.CommandComponent):
 
         if data is None:
             vectors = reader.variables()
-            if not self.settings['vectors'] is None:
-                vectors = self.settings['vectors'].split(' ')
+            if not settings['vectors'] is None:
+                vectors = settings['vectors'].split(' ')
 
             names = []
-            if self.settings['names'] is not None:
-                names = self.settings['names'].split(' ')
+            if settings['names'] is not None:
+                names = settings['names'].split(' ')
                 if not len(vectors) == len(names):
                     raise common.exceptions.MooseDocsException("Number of names must equal number of vectors.")
             else:
@@ -187,9 +187,9 @@ class GraphHistogram(command.CommandComponent):
                     raise common.exceptions.MooseDocsException(string)
                 data[i]['type'] = 'histogram'
                 data[i]['x'] = reader[vectors[i]].tolist()
-                data[i]['xbins'] = self.settings['bins']
-                data[i]['opacity'] = self.settings['alpha']
-                if self.settings['probability']:
+                data[i]['xbins'] = settings['bins']
+                data[i]['opacity'] = settings['alpha']
+                if settings['probability']:
                     data[i]['histnorm'] = 'probability'
                 if len(names) > 0:
                     data[i]['name'] = names[i]
@@ -202,26 +202,26 @@ class GraphHistogram(command.CommandComponent):
 
         if layout is None:
             xaxis = dict()
-            xaxis['title'] = self.settings['xlabel']
+            xaxis['title'] = settings['xlabel']
 
             yaxis = dict()
-            yaxis['title'] = self.settings['ylabel']
+            yaxis['title'] = settings['ylabel']
 
             layout = dict()
             layout['xaxis'] = xaxis
             layout['yaxis'] = yaxis
-            layout['showlegend'] = str(self.settings['legend'])
-            layout['title'] = self.settings['title']
+            layout['showlegend'] = str(settings['legend'])
+            layout['title'] = settings['title']
 
         else:
             layout = eval(layout)
 
-        flt = floats.create_float(parent, self.extension, self.reader, page, self.settings,
+        flt = floats.create_float(parent, self.extension, self.reader, page, settings,
                                   bottom=True)
         histogram = HistogramToken(flt, data=data, layout=layout)
 
         if flt is parent:
-            histogram.attributes.update(**self.attributes)
+            histogram.attributes.update(**self.attributes(settings))
 
         return parent
 

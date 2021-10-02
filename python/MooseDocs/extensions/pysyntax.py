@@ -147,9 +147,9 @@ class PySyntaxClassCommand(PySyntaxCommandBase):
         settings = PySyntaxCommandBase.defaultSettings()
         return settings
 
-    def createToken(self, parent, info, page):
-        h_level = int(self.settings['heading-level'])
-        obj = self.settings.get('name', None)
+    def createToken(self, parent, info, page, settings):
+        h_level = int(settings['heading-level'])
+        obj = settings.get('name', None)
         if obj is None:
             raise exceptions.MooseDocsException("The 'name' setting is required.")
 
@@ -169,9 +169,9 @@ class PySyntaxFunctionCommand(PySyntaxCommandBase):
         settings['heading-level'] = (2, settings['heading-level'][1])
         return settings
 
-    def createToken(self, parent, info, page):
-        h_level = int(self.settings['heading-level'])
-        obj = self.settings.get('name', None)
+    def createToken(self, parent, info, page, settings):
+        h_level = int(settings['heading-level'])
+        obj = settings.get('name', None)
         if obj is None:
             raise exceptions.MooseDocsException("The 'name' setting is required.")
 

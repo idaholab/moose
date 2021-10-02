@@ -80,9 +80,9 @@ class PageShortcutLinkComponent(core.ShortcutLinkInline):
         settings['language'] = (None, "The language used for source file syntax highlighting.")
         return settings
 
-    def createToken(self, parent, info, page):
-        token = createTokenHelper('key', parent, info, page, self.settings)
-        return token or core.ShortcutLinkInline.createToken(self, parent, info, page)
+    def createToken(self, parent, info, page, settings):
+        token = createTokenHelper('key', parent, info, page, settings)
+        return token or core.ShortcutLinkInline.createToken(self, parent, info, page, settings)
 
 class PageLinkComponent(core.LinkInline):
     """
@@ -99,9 +99,9 @@ class PageLinkComponent(core.LinkInline):
         settings['language'] = (None, "The language used for source file syntax highlighting.")
         return settings
 
-    def createToken(self, parent, info, page):
-        token = createTokenHelper('url', parent, info, page, self.settings)
-        return token or core.LinkInline.createToken(self, parent, info, page)
+    def createToken(self, parent, info, page, settings):
+        token = createTokenHelper('url', parent, info, page, settings)
+        return token or core.LinkInline.createToken(self, parent, info, page, settings)
 
 class RenderLinkBase(components.RenderComponent):
 
