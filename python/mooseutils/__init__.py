@@ -33,6 +33,7 @@ try:
     from .PostprocessorReader import PostprocessorReader
     from .VectorPostprocessorReader import VectorPostprocessorReader
     from .ReporterReader import ReporterReader
+    from .PerfGraphReporterReader import PerfGraphReporterReader
 except:
     pass
 
