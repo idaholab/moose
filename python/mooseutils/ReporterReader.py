@@ -20,6 +20,7 @@ class ReporterReader(object):
     Args:
 
     - file\[str\]: JSON file containing reporter data, can be blob pattern if there is one file per timestep.
+    - part\[int\]: Part to read; for reporter data with multiple parts
 
     MOOSE outputs Reporter data in two different ways: Every timestep in a single file or
     separate files for each timestep, using the timestep as
@@ -43,12 +44,19 @@ class ReporterReader(object):
         print('value_name in object object_name was NOT found!')
     ```
     """
-    def __init__(self, file):
+    def __init__(self, file, part=None):
         self._filename = file
         self._data = dict(time_steps=[])
         self._time = -1
         self._index = 0
         self.update()
+
+        # WIP ADD TEST
+        if part is not None and part != 0:
+            if part >= self.numParts():
+                raise Exception('Cannot load part {}; "{}" has {} parts'.format(part, file, self.numParts()))
+            self._filename = file + '.' + '{}'.format(part).zfill(len(str(self.numParts())))
+            self.update()
 
     @property
     def data(self):
@@ -120,6 +128,12 @@ class ReporterReader(object):
         Returns the list of available time indices contained in the data.
         """
         return [ts['time'] for ts in self._data['time_steps']]
+
+    def numParts(self):
+        """
+        Returns the number of parts available
+        """
+        return self._data.get('number_of_parts', 1)
 
     def clear(self):
         """
