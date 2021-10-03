@@ -432,14 +432,14 @@ protected:
   /// This processor id
   const processor_id_type _pid;
 
-  /// The root node of the graph
-  std::unique_ptr<PerfNode> _root_node;
-
   /// Name of the root node
-  std::string _root_name;
+  const std::string _root_name;
 
   /// The id for the root node
-  PerfID _root_node_id;
+  const PerfID _root_node_id;
+
+  /// The root node of the graph
+  const std::unique_ptr<PerfNode> _root_node;
 
   /// The current node position in the stack
   int _current_position;
@@ -498,7 +498,7 @@ protected:
   unsigned int _live_print_mem_limit;
 
   /// The object that is doing live printing
-  std::unique_ptr<PerfGraphLivePrint> _live_print;
+  const std::unique_ptr<PerfGraphLivePrint> _live_print;
 
   /// The thread for printing sections as they execute
   std::thread _print_thread;
@@ -541,11 +541,11 @@ PerfGraph::treeRecurseInternal(const PerfNode & node,
   {
     mooseAssert(!_cumulative_section_info_ptrs.empty(), "update() must be run before treeRecurse!");
 
-    PerfNodeInfo info(node,
-                      parent,
-                      current_section_info,
-                      current_depth,
-                      _cumulative_section_info_ptrs[_root_node_id]->_total);
+    const PerfNodeInfo info(node,
+                            parent,
+                            current_section_info,
+                            current_depth,
+                            _cumulative_section_info_ptrs[_root_node_id]->_total);
     act(info);
 
     ++current_depth;

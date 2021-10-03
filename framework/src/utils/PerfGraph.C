@@ -35,6 +35,9 @@ PerfGraph::PerfGraph(const std::string & root_name,
     _disable_live_print(!perf_graph_live),
     _perf_graph_registry(moose::internal::getPerfGraphRegistry()),
     _pid(app.processor_id()),
+    _root_name(root_name),
+    _root_node_id(_perf_graph_registry.registerSection(root_name, 0)),
+    _root_node(libmesh_make_unique<PerfNode>(_root_node_id)),
     _current_position(-1),
     _stack(),
     _execution_list_begin(0),
@@ -51,9 +54,6 @@ PerfGraph::PerfGraph(const std::string & root_name,
     // Start the printing thread
     _print_thread = std::thread([this] { this->_live_print->start(); });
   }
-
-  _root_name = root_name;
-  _root_node_id = _perf_graph_registry.registerSection(root_name, 0);
 
   push(_root_node_id);
 }
@@ -200,11 +200,8 @@ PerfGraph::push(const PerfID id)
 
   PerfNode * new_node = nullptr;
 
-  if (_current_position == -1) // Must be the root node - need to make it
-  {
-    _root_node = libmesh_make_unique<PerfNode>(id);
+  if (id == _root_node_id)
     new_node = _root_node.get();
-  }
   else
     new_node = _stack[_current_position]->getChild(id);
 
