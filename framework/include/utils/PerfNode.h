@@ -123,11 +123,11 @@ public:
    */
   std::chrono::steady_clock::duration totalTime() const;
   /**
-   * The time this Node plus all of it's children took in seconds
+   * The time this Node plus all of its children took in seconds
    */
   Real totalTimeSec() const { return std::chrono::duration<Real>(totalTime()).count(); }
   /**
-   * The average time this Node plus all of it's children took in seconds
+   * The average time this Node plus all of its children took in seconds
    */
   Real totalTimeAvg() const { return totalTimeSec() / static_cast<Real>(numCalls()); }
 
