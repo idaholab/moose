@@ -76,13 +76,8 @@ public:
     PerfNodeInfo(const PerfNode & node,
                  const PerfNode * const parent_node,
                  const PerfGraphRegistry::SectionInfo & section_info,
-                 const unsigned int depth,
-                 const Real root_time)
-      : _node(node),
-        _parent_node(parent_node),
-        _section_info(section_info),
-        _depth(depth),
-        _root_time(root_time)
+                 const unsigned int depth)
+      : _node(node), _parent_node(parent_node), _section_info(section_info), _depth(depth)
     {
     }
 
@@ -102,10 +97,6 @@ public:
      * @returns The depth of the node in the tree
      */
     unsigned int depth() const { return _depth; }
-    /**
-     * @returns The root node time (total run time)
-     */
-    Real rootTime() const { return _root_time; }
 
   private:
     /// The node
@@ -116,8 +107,6 @@ public:
     const PerfGraphRegistry::SectionInfo & _section_info;
     /// The depth of the node in the tree
     const unsigned int _depth;
-    /// The root node time (total run time)
-    const Real _root_time;
   };
 
   /**
@@ -541,14 +530,7 @@ PerfGraph::treeRecurseInternal(const PerfNode & node,
   {
     mooseAssert(!_cumulative_section_info_ptrs.empty(), "update() must be run before treeRecurse!");
 
-    const PerfNodeInfo info(node,
-                            parent,
-                            current_section_info,
-                            current_depth,
-                            _cumulative_section_info_ptrs[_root_node_id]->_total);
-    act(info);
-
-    ++current_depth;
+    act(PerfNodeInfo(node, parent, current_section_info, current_depth++));
   }
 
   if (heaviest)

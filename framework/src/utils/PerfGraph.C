@@ -393,16 +393,16 @@ PerfGraph::treeTable(const unsigned int level, const bool heaviest /* = false */
       0, // Memory
   });
 
-  auto act = [&vtable](const PerfNodeInfo & info) {
+  auto act = [this, &vtable](const PerfNodeInfo & info) {
     vtable.addRow(std::string(info.depth() * 2, ' ') + info.sectionInfo().name(), // Section Name
                   info.node().numCalls(),                                         // Calls
                   info.node().selfTimeSec(),                                      // Self
                   info.node().selfTimeAvg(),                                      // Avg.
-                  100. * info.node().selfTimeSec() / info.rootTime(),             // %
+                  100. * info.node().selfTimeSec() / _root_node->totalTimeSec(),  // %
                   info.node().selfMemory(),                                       // Memory
                   info.node().totalTimeSec(),                                     // Total
                   info.node().totalTimeAvg(),                                     // Avg.
-                  100. * info.node().totalTimeSec() / info.rootTime(),            // %
+                  100. * info.node().totalTimeSec() / _root_node->totalTimeSec(), // %
                   info.node().totalMemory());                                     // Memory
   };
   treeRecurse(act, level, heaviest);

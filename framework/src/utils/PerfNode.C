@@ -19,7 +19,7 @@ std::chrono::steady_clock::duration
 PerfNode::totalTime() const
 {
   // Note that all of the children's time is already
-  // accounte for in the total time
+  // accounted for in the total time
   return _total_time;
 }
 
