@@ -402,7 +402,7 @@ PerfGraph::treeTable(const unsigned int level, const bool heaviest /* = false */
                   info.node().selfMemory(),                                       // Memory
                   info.node().totalTimeSec(),                                     // Total
                   info.node().totalTimeAvg(),                                     // Avg.
-                  100. * info.node().selfTimeSec() / info.rootTime(),             // %
+                  100. * info.node().totalTimeSec() / info.rootTime(),            // %
                   info.node().totalMemory());                                     // Memory
   };
   treeRecurse(act, level, heaviest);
