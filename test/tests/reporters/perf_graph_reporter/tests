@@ -3,8 +3,16 @@
   issues = '#16256'
 
   [test]
-    type = 'RunApp'
-    input = 'perf_graph_reporter.i'
     requirement = 'The system shall include the ability to report performance information'
+
+    [run]
+      type = 'RunApp'
+      input = 'perf_graph_reporter.i'
+    []
+    [verify]
+      type = RunCommand
+      command = 'python verify_perf_graph_reporter.py'
+      prereq = test/run
+    []
   []
 []
