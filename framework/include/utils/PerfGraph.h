@@ -211,72 +211,72 @@ public:
    * Get a reference to the self time for a section
    *
    * This reference can be held onto and the value
-   * will be updated anytime updateTiming() is called.
+   * will be updated anytime update() is called.
    */
   const Real & getSelfTime(const std::string & section_name)
   {
-    return _section_time[section_name]._self;
+    return _cumulative_section_info[section_name]._self;
   }
 
   /**
    * Get a reference to the children time for a section
    *
    * This reference can be held onto and the value
-   * will be updated anytime updateTiming() is called.
+   * will be updated anytime update() is called.
    */
   const Real & getChildrenTime(const std::string & section_name)
   {
-    return _section_time[section_name]._children;
+    return _cumulative_section_info[section_name]._children;
   }
 
   /**
    * Get a reference to the total time for a section
    *
    * This reference can be held onto and the value
-   * will be updated anytime updateTiming() is called.
+   * will be updated anytime update() is called.
    */
   const Real & getTotalTime(const std::string & section_name)
   {
-    return _section_time[section_name]._total;
+    return _cumulative_section_info[section_name]._total;
   }
 
   /**
    * Get a reference to the self memory usage for a section
    *
    * This reference can be held onto and the value
-   * will be updated anyting updateTiming() is called
+   * will be updated anyting update() is called
    */
   const long int & getSelfMemory(const std::string & section_name)
   {
-    return _section_time[section_name]._self_memory;
+    return _cumulative_section_info[section_name]._self_memory;
   }
 
   /**
    * Get a reference to the children memory usage for a section
    *
    * This reference can be held onto and the value
-   * will be updated anyting updateTiming() is called
+   * will be updated anyting update() is called
    */
   const long int & getChildrenMemory(const std::string & section_name)
   {
-    return _section_time[section_name]._children_memory;
+    return _cumulative_section_info[section_name]._children_memory;
   }
 
   /**
    * Get a reference to the total memory usage for a section
    *
    * This reference can be held onto and the value
-   * will be updated anyting updateTiming() is called
+   * will be updated anyting update() is called
    */
   const long int & getTotalMemory(const std::string & section_name)
   {
-    return _section_time[section_name]._total_memory;
+    return _cumulative_section_info[section_name]._total_memory;
   }
 
   /**
    * Updates the time section_time and time for all currently running nodes
    */
-  void updateTiming();
+  void update();
 
   template <typename Functor>
   void treeRecurse(const Functor & act,
@@ -299,11 +299,12 @@ protected:
   typedef VariadicTable<std::string, unsigned long int, Real, Real, Real, long int> HeaviestTable;
 
   /**
-   * Use to hold the time for each section
+   * Use to hold the cumulative time and memory for each section, which comes
+   * from all of the PerfNodes that contribute to said section
    *
-   * These will be filled by updateTiming()
+   * These will be filled by update()
    */
-  struct SectionTime
+  struct CumulativeSectionInfo
   {
     /// Amount of time used within this section (without children)
     Real _self = 0.;
@@ -409,13 +410,15 @@ protected:
   void pop();
 
   /**
-   * Updates the cumulative self/children/total time
+   * Updates the cumulative self/children/total time and memory for each section
+   * across all nodes that contribute to said section in _cumulative_section_info
    *
-   * Note: requires that self/children/total time are resized and zeroed before calling.
+   * Note: requires that the contents in each CumulativeSectionInfo in
+   * _cumulative_section_info be initially resized and zeroed
    *
    * @param current_node The current node to work on
    */
-  void recursivelyFillTime(const PerfNode & current_node);
+  void recursivelyUpdate(const PerfNode & current_node);
 
   /// Whether or not to put everything in the perf graph
   bool _live_print_all;
@@ -453,8 +456,8 @@ protected:
   /// Where the print thread should stop reading the execution list
   std::atomic<unsigned int> _execution_list_end;
 
-  /// The time for each section.  This is updated on updateTiming()
-  /// Note that this is _total_ cumulative time across every place
+  /// The cumulative time and memory for each section.  This is updated on update()
+  /// Note that this is _total_ cumulative time/memory across every place
   /// that section is in the graph
   ///
   /// I'm making this a map so that we can give out references to the values
@@ -462,13 +465,13 @@ protected:
   /// The map is on std::string because we might need to be able to retrieve
   /// timing values in a "late binding" situation _before_ the section
   /// has been registered.
-  std::unordered_map<std::string, SectionTime> _section_time;
+  std::unordered_map<std::string, CumulativeSectionInfo> _cumulative_section_info;
 
-  /// Pointers into _section_time indexed on PerfID
+  /// Pointers into _cumulative_section_info indexed on PerfID
   /// This is here for convenience and speed so we don't need
   /// to iterate over the above map much - and it makes it
   /// easier to sort
-  std::vector<SectionTime *> _section_time_ptrs;
+  std::vector<CumulativeSectionInfo *> _cumulative_section_info_ptrs;
 
   /// Whether or not timing is active
   bool _active;
@@ -536,13 +539,13 @@ PerfGraph::treeRecurseInternal(const PerfNode & node,
   const auto & current_section_info = _perf_graph_registry.readSectionInfo(node.id());
   if (current_section_info.level() <= level)
   {
-    mooseAssert(!_section_time_ptrs.empty(), "updateTiming() must be run before treeRecurse!");
+    mooseAssert(!_cumulative_section_info_ptrs.empty(), "update() must be run before treeRecurse!");
 
     PerfNodeInfo info(node,
                       parent,
                       current_section_info,
                       current_depth,
-                      _section_time_ptrs[_root_node_id]->_total);
+                      _cumulative_section_info_ptrs[_root_node_id]->_total);
     act(info);
 
     ++current_depth;

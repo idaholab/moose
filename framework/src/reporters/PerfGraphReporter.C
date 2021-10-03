@@ -38,7 +38,7 @@ to_json(nlohmann::json & json, const PerfGraph * const & perf_graph)
 {
   // Must update the timing before filling so that the data in each
   // PerfNode is up to date
-  const_cast<PerfGraph *>(perf_graph)->updateTiming();
+  const_cast<PerfGraph *>(perf_graph)->update();
 
   // Leverage the treeRecurse() method in PerfGraph, which will recurse
   // through the graph and act on each entry. In this case, for each entry

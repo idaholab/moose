@@ -89,11 +89,12 @@ PerfGraph::disableLivePrint()
 unsigned long int
 PerfGraph::getNumCalls(const std::string & section_name)
 {
-  updateTiming();
+  update();
 
-  auto section_it = _section_time.find(section_name == "Root" ? _root_name : section_name);
+  auto section_it =
+      _cumulative_section_info.find(section_name == "Root" ? _root_name : section_name);
 
-  if (section_it == _section_time.end())
+  if (section_it == _cumulative_section_info.end())
   {
     // The section exists but has not ran yet, in which case we can return zero
     if (_perf_graph_registry.sectionExists(section_name))
@@ -111,11 +112,12 @@ PerfGraph::getNumCalls(const std::string & section_name)
 Real
 PerfGraph::getTime(const TimeType type, const std::string & section_name)
 {
-  updateTiming();
+  update();
 
-  auto section_it = _section_time.find(section_name == "Root" ? _root_name : section_name);
+  auto section_it =
+      _cumulative_section_info.find(section_name == "Root" ? _root_name : section_name);
 
-  if (section_it == _section_time.end())
+  if (section_it == _cumulative_section_info.end())
   {
     // The section exists but has not ran yet, in which case we can return zero
     if (_perf_graph_registry.sectionExists(section_name))
@@ -127,7 +129,7 @@ PerfGraph::getTime(const TimeType type, const std::string & section_name)
         " in PerfGraph::getTime()\nIf you are attempting to retrieve the root use \"Root\".");
   }
 
-  auto app_time = _section_time_ptrs[_root_node_id]->_total;
+  auto app_time = _cumulative_section_info_ptrs[_root_node_id]->_total;
 
   switch (type)
   {
@@ -284,7 +286,7 @@ PerfGraph::pop()
 }
 
 void
-PerfGraph::updateTiming()
+PerfGraph::update()
 {
   // First update all of the currently running nodes
   auto now = std::chrono::steady_clock::now();
@@ -302,7 +304,7 @@ PerfGraph::updateTiming()
   }
 
   // Zero out the entries
-  for (auto & section_time_it : _section_time)
+  for (auto & section_time_it : _cumulative_section_info)
   {
     auto & section_time = section_time_it.second;
 
@@ -315,28 +317,28 @@ PerfGraph::updateTiming()
     section_time._total_memory = 0.;
   }
 
-  recursivelyFillTime(*_root_node);
+  recursivelyUpdate(*_root_node);
 
   // Update vector pointing to section times
   // Note: we are doing this _after_ recursively filling
   // because new entries may have been created
-  _section_time_ptrs.resize(_perf_graph_registry.numSections());
+  _cumulative_section_info_ptrs.resize(_perf_graph_registry.numSections());
 
-  for (auto & section_time_it : _section_time)
+  for (auto & section_time_it : _cumulative_section_info)
   {
     auto id = _perf_graph_registry.sectionID(section_time_it.first);
 
-    _section_time_ptrs[id] = &section_time_it.second;
+    _cumulative_section_info_ptrs[id] = &section_time_it.second;
   }
 }
 
 void
-PerfGraph::recursivelyFillTime(const PerfNode & current_node)
+PerfGraph::recursivelyUpdate(const PerfNode & current_node)
 {
   const auto & section_name = _perf_graph_registry.readSectionInfo(current_node.id()).name();
 
   // RHS insertion on purpose
-  auto & section_time = _section_time[section_name];
+  auto & section_time = _cumulative_section_info[section_name];
 
   section_time._self += current_node.selfTimeSec();
   section_time._children += current_node.childrenTimeSec();
@@ -348,13 +350,13 @@ PerfGraph::recursivelyFillTime(const PerfNode & current_node)
   section_time._total_memory += current_node.totalMemory();
 
   for (auto & child_it : current_node.children())
-    recursivelyFillTime(*child_it.second);
+    recursivelyUpdate(*child_it.second);
 }
 
 PerfGraph::FullTable
 PerfGraph::treeTable(const unsigned int level, const bool heaviest /* = false */)
 {
-  updateTiming();
+  update();
 
   FullTable vtable({"Section",
                     "Calls",
@@ -428,16 +430,16 @@ PerfGraph::printHeaviestBranch(const ConsoleStream & console)
 void
 PerfGraph::printHeaviestSections(const ConsoleStream & console, const unsigned int num_sections)
 {
-  updateTiming();
+  update();
 
   console << "\nHeaviest Sections:\n";
 
   // Indirect Sort The Self Time
   std::vector<size_t> sorted;
-  Moose::indirectSort(_section_time_ptrs.begin(),
-                      _section_time_ptrs.end(),
+  Moose::indirectSort(_cumulative_section_info_ptrs.begin(),
+                      _cumulative_section_info_ptrs.end(),
                       sorted,
-                      [](SectionTime * lhs, SectionTime * rhs) {
+                      [](CumulativeSectionInfo * lhs, CumulativeSectionInfo * rhs) {
                         if (lhs && rhs)
                           return lhs->_self > rhs->_self;
 
@@ -460,27 +462,27 @@ PerfGraph::printHeaviestSections(const ConsoleStream & console, const unsigned i
 
   vtable.setColumnPrecision({1, 1, 3, 3, 2, 1});
 
-  mooseAssert(!_section_time_ptrs.empty(),
-              "updateTiming() must be run before printHeaviestSections()!");
+  mooseAssert(!_cumulative_section_info_ptrs.empty(),
+              "update() must be run before printHeaviestSections()!");
 
   // The total time of the root node
-  auto total_root_time = _section_time_ptrs[_root_node_id]->_total;
+  auto total_root_time = _cumulative_section_info_ptrs[_root_node_id]->_total;
 
   // Now print out the largest ones
   for (unsigned int i = 0; i < num_sections; i++)
   {
     auto id = sorted[i];
 
-    if (!_section_time_ptrs[id])
+    if (!_cumulative_section_info_ptrs[id])
       continue;
 
     vtable.addRow(_perf_graph_registry.sectionInfo(id).name(),
-                  _section_time_ptrs[id]->_num_calls,
-                  _section_time_ptrs[id]->_total_memory,
-                  _section_time_ptrs[id]->_self,
-                  _section_time_ptrs[id]->_self /
-                      static_cast<Real>(_section_time_ptrs[id]->_num_calls),
-                  100 * _section_time_ptrs[id]->_self / total_root_time);
+                  _cumulative_section_info_ptrs[id]->_num_calls,
+                  _cumulative_section_info_ptrs[id]->_total_memory,
+                  _cumulative_section_info_ptrs[id]->_self,
+                  _cumulative_section_info_ptrs[id]->_self /
+                      static_cast<Real>(_cumulative_section_info_ptrs[id]->_num_calls),
+                  100 * _cumulative_section_info_ptrs[id]->_self / total_root_time);
   }
 
   vtable.print(console);
