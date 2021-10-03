@@ -40,13 +40,26 @@ to_json(nlohmann::json & json, const PerfGraph * const & perf_graph)
   // PerfNode is up to date
   const_cast<PerfGraph *>(perf_graph)->update();
 
+  // PerfNodes do not have unique IDs; their ID is based on the section
+  // in which they are generated. But... we want unique IDs. Hence this map
+  std::size_t next_unique_id = 0;
+  std::map<const PerfNode *, std::size_t> unique_ids;
+  auto unique_id = [&unique_ids, &next_unique_id](const PerfNode & node) {
+    const auto find = unique_ids.find(&node);
+    if (find != unique_ids.end())
+      return find->second;
+    unique_ids[&node] = next_unique_id;
+    return next_unique_id++;
+  };
+
   // Leverage the treeRecurse() method in PerfGraph, which will recurse
   // through the graph and act on each entry. In this case, for each entry
   // in the graph we add a single entry along with the parent/children
   // info so that the graph can be rebuilt in postprocessing
-  auto act = [&json](const PerfGraph::PerfNodeInfo & info) {
+  auto & graph = json["graph"];
+  auto act = [&graph, &unique_id](const PerfGraph::PerfNodeInfo & info) {
     nlohmann::json entry;
-    entry["id"] = info.node().id();
+    entry["id"] = unique_id(info.node());
     entry["name"] = info.sectionInfo().name();
     entry["level"] = info.sectionInfo().level();
     entry["num_calls"] = info.node().numCalls();
@@ -58,13 +71,13 @@ to_json(nlohmann::json & json, const PerfGraph * const & perf_graph)
     {
       entry["children_ids"] = std::vector<PerfID>();
       for (const auto & id_node_pair : info.node().children())
-        entry["children_ids"].push_back(id_node_pair.first);
+        entry["children_ids"].push_back(unique_id(*id_node_pair.second));
     }
 
     if (info.parentNode())
-      entry["parent_id"] = info.parentNode()->id();
+      entry["parent_id"] = unique_id(*info.parentNode());
 
-    json.push_back(entry);
+    graph.push_back(entry);
   };
   perf_graph->treeRecurse(act);
 }
