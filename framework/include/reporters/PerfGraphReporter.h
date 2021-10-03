@@ -30,16 +30,9 @@ public:
 
 void to_json(nlohmann::json & json, const PerfGraph * const & perf_graph);
 /**
- * Data store and load methods for PerfGraph, which do nothing. It doesn't
- * make sense to load PerfGraph in restart/recover.
+ * Data store and load methods for PerfGraph, which do nothing.
  */
 ///@{
-void
-dataStore(std::ostream &, const PerfGraph *&, void *)
-{
-}
-void
-dataLoad(std::istream &, const PerfGraph *&, void *)
-{
-}
+void dataStore(std::ostream & stream, const PerfGraph *& perf_graph, void * context);
+void dataLoad(std::istream & stream, const PerfGraph *& perf_graph, void * context);
 ///@}
