@@ -450,14 +450,22 @@ PerfGraph::printHeaviestSections(const ConsoleStream & console, const unsigned i
 
   HeaviestTable vtable({"Section", "Calls", "Self(s)", "Avg.", "%", "Mem(MB)"}, 10);
 
-  vtable.setColumnFormat({VariadicTableColumnFormat::AUTO, // Doesn't matter
-                          VariadicTableColumnFormat::AUTO,
-                          VariadicTableColumnFormat::FIXED,
-                          VariadicTableColumnFormat::FIXED,
-                          VariadicTableColumnFormat::PERCENT,
-                          VariadicTableColumnFormat::AUTO});
+  vtable.setColumnFormat({VariadicTableColumnFormat::AUTO,    // Section; doesn't matter
+                          VariadicTableColumnFormat::AUTO,    // Calls
+                          VariadicTableColumnFormat::FIXED,   // Time
+                          VariadicTableColumnFormat::FIXED,   // Avg.
+                          VariadicTableColumnFormat::PERCENT, // Percent
+                          VariadicTableColumnFormat::AUTO}    // Memory
+  );
 
-  vtable.setColumnPrecision({1, 1, 3, 3, 2, 1});
+  vtable.setColumnPrecision({
+      1, // Section
+      1, // Calls
+      3, // Time
+      3, // Avg.
+      2, // Percent
+      1  // Memory
+  });
 
   mooseAssert(!_cumulative_section_info_ptrs.empty(),
               "update() must be run before printHeaviestSections()!");
@@ -473,13 +481,13 @@ PerfGraph::printHeaviestSections(const ConsoleStream & console, const unsigned i
     if (!_cumulative_section_info_ptrs[id])
       continue;
 
-    vtable.addRow(_perf_graph_registry.sectionInfo(id).name(),
-                  _cumulative_section_info_ptrs[id]->_num_calls,
-                  _cumulative_section_info_ptrs[id]->_total_memory,
-                  _cumulative_section_info_ptrs[id]->_self,
-                  _cumulative_section_info_ptrs[id]->_self /
-                      static_cast<Real>(_cumulative_section_info_ptrs[id]->_num_calls),
-                  100 * _cumulative_section_info_ptrs[id]->_self / total_root_time);
+    const auto & entry = *_cumulative_section_info_ptrs[id];
+    vtable.addRow(_perf_graph_registry.sectionInfo(id).name(),       // Section
+                  entry._num_calls,                                  // Calls
+                  entry._self,                                       // Time
+                  entry._self / static_cast<Real>(entry._num_calls), // Avg.
+                  100. * entry._self / total_root_time,              // Percent
+                  entry._self_memory);                               // Memory
   }
 
   vtable.print(console);
