@@ -161,11 +161,6 @@ public:
   void printHeaviestSections(const ConsoleStream & console, const unsigned int num_sections);
 
   /**
-   * Grab the name of a section
-   */
-  const std::string & sectionName(const PerfID id) const;
-
-  /**
    * Whether or not timing is active
    *
    * When not active no timing information will be kept

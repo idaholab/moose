@@ -60,12 +60,6 @@ PerfGraph::PerfGraph(const std::string & root_name,
 
 PerfGraph::~PerfGraph() { disableLivePrint(); }
 
-const std::string &
-PerfGraph::sectionName(const PerfID id) const
-{
-  return _perf_graph_registry.readSectionInfo(id).name();
-}
-
 void
 PerfGraph::disableLivePrint()
 {
