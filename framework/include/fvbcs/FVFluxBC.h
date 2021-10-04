@@ -12,7 +12,7 @@
 #include "FVBoundaryCondition.h"
 #include "NeighborCoupleableMooseVariableDependencyIntermediateInterface.h"
 #include "TwoMaterialPropertyInterface.h"
-#include "FVUtils.h"
+#include "MathFVUtils.h"
 
 // Provides an interface for computing residual contributions from finite
 // volume numerical fluxes computed on faces to neighboring elements.

@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "InterfaceDiffusiveFluxIntegral.h"
-#include "FVUtils.h"
+#include "MathFVUtils.h"
 #include "FaceInfo.h"
 
 #include "libmesh/remote_elem.h"

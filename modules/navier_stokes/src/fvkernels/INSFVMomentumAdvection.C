@@ -22,7 +22,7 @@
 #include "INSFVAttributes.h"
 #include "MooseUtils.h"
 #include "NS.h"
-#include "NonMathFVUtils.h"
+#include "FVUtils.h"
 
 #include "libmesh/dof_map.h"
 #include "libmesh/elem.h"

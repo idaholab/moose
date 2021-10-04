@@ -10,7 +10,7 @@
 #include "PINSFVMomentumAdvection.h"
 #include "INSFVPressureVariable.h"
 #include "PINSFVSuperficialVelocityVariable.h"
-#include "NonMathFVUtils.h"
+#include "FVUtils.h"
 
 registerMooseObject("NavierStokesApp", PINSFVMomentumAdvection);
 

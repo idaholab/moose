@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "VolumetricFlowRate.h"
-#include "FVUtils.h"
+#include "MathFVUtils.h"
 #include <math.h>
 
 registerMooseObject("NavierStokesApp", VolumetricFlowRate);

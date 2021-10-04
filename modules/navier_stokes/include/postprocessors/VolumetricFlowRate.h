@@ -11,7 +11,7 @@
 
 // MOOSE includes
 #include "SideIntegralPostprocessor.h"
-#include "FVUtils.h"
+#include "MathFVUtils.h"
 
 /**
  * This postprocessor computes the volumetric flow rate through a boundary.

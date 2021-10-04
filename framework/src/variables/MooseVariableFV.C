@@ -14,8 +14,8 @@
 #include "SystemBase.h"
 #include "SubProblem.h"
 #include "Assembly.h"
+#include "MathFVUtils.h"
 #include "FVUtils.h"
-#include "NonMathFVUtils.h"
 #include "FVFluxBC.h"
 #include "FVDirichletBCBase.h"
 

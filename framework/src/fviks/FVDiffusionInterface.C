@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "FVDiffusionInterface.h"
-#include "FVUtils.h"
+#include "MathFVUtils.h"
 
 registerMooseObject("MooseApp", FVDiffusionInterface);
 

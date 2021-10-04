@@ -10,7 +10,7 @@
 #pragma once
 
 #include "FVKernel.h"
-#include "FVUtils.h"
+#include "MathFVUtils.h"
 #include "NeighborCoupleable.h"
 #include "TwoMaterialPropertyInterface.h"
 #include "NeighborMooseVariableInterface.h"
