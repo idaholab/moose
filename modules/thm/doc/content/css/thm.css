@@ -10,6 +10,20 @@ pre[class*="language-"] {
     background-color: #eee;
 }
 
+.section {
+  margin-bottom: 0.5rem;
+}
+
+h2 {
+  font-size: 160%;
+}
+
+h3 {
+  font-size: 130%;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
 pre.moose-pre {
     background-color: #eee;
 }
@@ -58,4 +72,119 @@ pre.code-toolbar > .toolbar span:focus {
 nav {
   -webkit-box-shadow: none;
   box-shadow: none;
+}
+
+.steps>ol {
+    list-style: none;
+    counter-reset: li;
+    position: relative;
+    padding-left: 16px;
+}
+
+.steps>ol>li::before {
+    content: counter(li);
+    counter-increment: li;
+    font-weight: 700;
+    position: absolute;
+    left: 0;
+    text-align: right;
+    width: 16px;
+    color: #AAA;
+}
+
+div.alert2 {
+  border-radius: 4px;
+  margin-bottom: 10px;
+  margin-top: 10px;
+  padding: 1em;
+  font-size: 87.5%;
+}
+
+div.alert2>p {
+  margin: 0;
+}
+
+div.alert2.note, div.alert2.tip {
+  border: 1px solid rgb(41, 137, 211);
+  background-color: rgb(225, 243, 256);
+}
+
+div.alert2.warning {
+  border: 1px solid rgb(191, 53, 54);
+  background-color: rgb(252, 236, 234);
+}
+
+.footer {
+  font-size: 90%;
+}
+
+h3.footer {
+  font-weight: bold;
+  color: #888;
+  margin-bottom: 1rem;
+  font-size: 110%;
+}
+
+div.tutorial.row {
+}
+
+div.tutorial.row > div > h3 {
+  font-weight: 700;
+  font-size: 105%;
+  color: #444;
+}
+
+div.tutorial-content>div>ol {
+  padding-left: 0;
+  list-style: none;
+  counter-reset: li;
+  position: relative;
+  padding-left: 24px;
+}
+
+div.tutorial-content>div>ol>li {
+  padding-left: 0;
+}
+
+div.tutorial-content>div>ol>li::before {
+  content: counter(li);
+  counter-increment: li;
+  font-weight: 700;
+  position: absolute;
+  left: 0;
+  text-align: right;
+  width: 24px;
+  color: #AAA;
+}
+
+div.tutorial-nav.row>div>div>a.moose-content-next {
+  float: none;
+}
+
+.smaller {
+  font-size: 90%;
+}
+
+div.enumerate {
+  padding-left: 0;
+}
+
+div.enumerate>ul.browser-default {
+  margin-left: 0;
+  list-style: none;
+  position: relative;
+  padding-left: 16px;
+}
+
+div.enumerate>ul.browser-default>li {
+  /* padding-left: 0; */
+  margin-left: 0;
+}
+
+div.enumerate>ul.browser-default>li::before {
+  content: "\2013\a0";
+  position: absolute;
+  left: 0;
+  text-align: right;
+  width: 16px;
 }
