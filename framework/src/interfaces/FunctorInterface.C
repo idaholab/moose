@@ -24,28 +24,34 @@ FunctorInterface::FunctorInterface(const MooseObject * const moose_object)
 }
 
 std::string
-FunctorInterface::deduceFunctorName(const std::string & name) const
+FunctorInterface::deduceFunctorName(const std::string & name, const InputParameters & params)
 {
-  if (_fi_params.have_parameter<MooseFunctorName>(name))
-    return _fi_params.get<MooseFunctorName>(name);
+  if (params.have_parameter<MooseFunctorName>(name))
+    return params.get<MooseFunctorName>(name);
   // variables, functor material properties, and functions are also functors
-  else if (_fi_params.have_parameter<MaterialPropertyName>(name))
-    return _fi_params.get<MaterialPropertyName>(name);
-  else if (_fi_params.have_parameter<VariableName>(name))
-    return _fi_params.get<VariableName>(name);
-  else if (_fi_params.have_parameter<std::vector<VariableName>>(name))
+  else if (params.have_parameter<MaterialPropertyName>(name))
+    return params.get<MaterialPropertyName>(name);
+  else if (params.have_parameter<VariableName>(name))
+    return params.get<VariableName>(name);
+  else if (params.have_parameter<std::vector<VariableName>>(name))
   {
-    const auto & var_names = _fi_params.get<std::vector<VariableName>>(name);
+    const auto & var_names = params.get<std::vector<VariableName>>(name);
     if (var_names.size() != 1)
       mooseError("We only support a single variable name for retrieving a functor");
     return var_names[0];
   }
-  else if (_fi_params.have_parameter<NonlinearVariableName>(name))
-    return _fi_params.get<NonlinearVariableName>(name);
-  else if (_fi_params.have_parameter<FunctionName>(name))
-    return _fi_params.get<FunctionName>(name);
+  else if (params.have_parameter<NonlinearVariableName>(name))
+    return params.get<NonlinearVariableName>(name);
+  else if (params.have_parameter<FunctionName>(name))
+    return params.get<FunctionName>(name);
   else
     return name;
+}
+
+std::string
+FunctorInterface::deduceFunctorName(const std::string & name) const
+{
+  return deduceFunctorName(name, _fi_params);
 }
 
 template <>

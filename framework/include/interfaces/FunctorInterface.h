@@ -36,6 +36,14 @@ public:
 
   FunctorInterface(const MooseObject * moose_object);
 
+  /**
+   * helper to look up a functor name through the input parameter keys
+   * @param name The input parameter name that we are trying to deduce the functor name for
+   * @param params The input parameters object that we will be checking for parameters named \p name
+   * @return The functor name
+   */
+  static std::string deduceFunctorName(const std::string & name, const InputParameters & params);
+
 protected:
   /**
    * retrieves a functor from the subproblem. This method also leverages the ability to create
