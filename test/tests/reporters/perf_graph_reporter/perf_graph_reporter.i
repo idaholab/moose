@@ -15,8 +15,12 @@
 
 [Reporters/perf_graph]
   type = PerfGraphReporter
+  execute_on = FINAL
 []
 
 [Outputs]
-  json = true
+  [json]
+    type = JSON
+    execute_on = FINAL
+  []
 []

@@ -11,8 +11,6 @@
 
 #include "GeneralReporter.h"
 
-class PerfGraph;
-
 /**
  * Reports the full graph from the PerfGraph
  */
@@ -25,14 +23,25 @@ public:
 
   void initialize() override {}
   void finalize() override {}
-  void execute() override {}
+  void execute() override;
+
+  /**
+   * Struct that stores all of the information about a PerfGraphNode,
+   * which is used as the value for this Reporter
+   */
+  struct NodeEntry
+  {
+    std::string name;
+    Real time;
+    std::map<std::string, unsigned int> ints;
+    std::vector<unsigned int> children_ids;
+  };
+
+private:
+  /// Reporter value for the nodes in the graph
+  std::vector<NodeEntry> & _nodes;
 };
 
-void to_json(nlohmann::json & json, const PerfGraph * const & perf_graph);
-/**
- * Data store and load methods for PerfGraph, which do nothing.
- */
-///@{
-void dataStore(std::ostream & stream, const PerfGraph *& perf_graph, void * context);
-void dataLoad(std::istream & stream, const PerfGraph *& perf_graph, void * context);
-///@}
+void to_json(nlohmann::json & json, const PerfGraphReporter::NodeEntry & entry);
+void dataStore(std::ostream & stream, PerfGraphReporter::NodeEntry & entry, void * context);
+void dataLoad(std::istream & stream, PerfGraphReporter::NodeEntry & entry, void * context);

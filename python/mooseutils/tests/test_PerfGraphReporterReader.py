@@ -22,7 +22,7 @@ class TestPerfGraphReporterReader(unittest.TestCase):
 
         reader = ReporterReader(self._file)
         reader.update(reader.times()[-1])
-        self._data = reader[('perf_graph', 'perf_graph')]['graph']
+        self._data = reader[('perf_graph', 'nodes')]
 
     def childrenTime(self, node_data):
         val = 0

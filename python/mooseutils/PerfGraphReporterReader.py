@@ -225,12 +225,12 @@ class PerfGraphReporterReader:
             # Find the Reporter variable that contains the PerfGraph graph
             perf_graph_var = None
             for var in self._reader.variables():
-                if self._reader.info(var[0])['type'] == 'PerfGraphReporter' and var[1] == 'perf_graph':
+                if self._reader.info(var[0])['type'] == 'PerfGraphReporter' and var[1] == 'nodes':
                     if perf_graph_var:
                         raise Exception('Multiple PerfGraphReporter values were found')
                     perf_graph_var = var
 
-            graph_data = self._reader[perf_graph_var]['graph']
+            graph_data = self._reader[perf_graph_var]
         else:
             graph_data = raw
 

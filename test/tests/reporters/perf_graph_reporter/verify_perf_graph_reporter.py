@@ -55,7 +55,7 @@ def check(file, pid):
         check_parent(child, root_node)
 
 def main():
-    file = 'perf_graph_reporter_out.json'
+    file = 'perf_graph_reporter_json.json'
     rr = ReporterReader(file)
 
     for pid in range(0, rr.numParts()):
