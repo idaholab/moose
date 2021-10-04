@@ -28,7 +28,7 @@ The Tensor Mechanics `Master` Action is used to construct the kernels, displacem
 
 ### For the `StressDivergenceTensors` Kernels
 
-!table id=tmMaster_action_table caption=Correspondence Among Action Functionality and MooseObjects for the Tensor Mechanics `Master` Action, old kernel system
+!table id=tmMaster_action_table_sdt caption=Correspondence Among Action Functionality and MooseObjects for the Tensor Mechanics `Master` Action, old kernel system
 | Functionality     | Replaced Classes   | Associated Parameters   |
 |-------------------|--------------------|-------------------------|
 | Calculate stress divergence equilibrium for the given coordinate system | [StressDivergenceTensors](/StressDivergenceTensors.md) and optionally [WeakPlaneStress](/WeakPlaneStress.md) or [StressDivergenceRZTensors](/StressDivergenceRZTensors.md) or [StressDivergenceRSphericalTensors](/StressDivergenceRSphericalTensors.md) | `displacements` : a string of the displacement field variables |
@@ -44,7 +44,7 @@ Note that there are many variations for the calculation of the stress divergence
 
 ### For the New Lagrangian Kernel system
 
-!table id=tmMaster_action_table caption=Correspondence Among Action Functionality and MooseObjects for the Tensor Mechanics `Master` Action, new kernel system
+!table id=tmMaster_action_table_lc caption=Correspondence Among Action Functionality and MooseObjects for the Tensor Mechanics `Master` Action, new kernel system
 | Functionality     | Replaced Classes   | Associated Parameters   |
 |-------------------|--------------------|-------------------------|
 | Calculate stress divergence equilibrium for the given coordinate system | [TotalLagrangianStressDivergence](/TotalLagrangianStressDivergence.md) or [UpdatedLagrangianStressDivergence](/UpdatedLagrangianStressDivergence.md) | `displacements` : a string of the displacement field variables, `formulation` : a MooseEnum controlling if the `UPDATED` or `TOTAL` Lagrangian formulation is used |
