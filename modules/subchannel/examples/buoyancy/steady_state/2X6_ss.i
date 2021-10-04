@@ -1,46 +1,18 @@
-mass_flux_in = 3500 # kg /sec m2
 T_in = 297.039 # K
 P_out = 101325 # Pa
 
 [Mesh]
   type = QuadSubChannelMesh
-  nx = 3
+  nx = 7
   ny = 3
-  n_cells = 100
+  n_cells = 48
   n_blocks = 1
-  pitch = 0.0126
-  rod_diameter = 0.00950
-  gap = 0.00095
-  unheated_length_entry = 2.5
-  heated_length = 5.0
-  unheated_length_exit = 2.5
-  spacer_z = '0.0'
-  spacer_k = '0.0'
-[]
-
-[AuxVariables]
-  [mdot]
-  []
-  [SumWij]
-  []
-  [P]
-  []
-  [DP]
-  []
-  [h]
-  []
-  [T]
-  []
-  [rho]
-  []
-  [mu]
-  []
-  [S]
-  []
-  [w_perim]
-  []
-  [q_prime]
-  []
+  pitch = 0.014605
+  rod_diameter = 0.012065
+  gap = 0.0015875
+  heated_length = 1.2192
+  spacer_z = '0.0 '
+  spacer_k = '0.0 '
 []
 
 [Modules]
@@ -51,7 +23,7 @@ P_out = 101325 # Pa
   []
 []
 
-[Problem]
+[SubChannel]
   type = LiquidWaterSubChannel1PhaseProblem
   fp = water
   beta = 0.006
@@ -70,12 +42,6 @@ P_out = 101325 # Pa
     variable = S
   []
 
-  [T_ic]
-    type = ConstantIC
-    variable = T
-    value = ${T_in}
-  []
-
   [w_perim_IC]
     type = QuadWettedPerimIC
     variable = w_perim
@@ -84,8 +50,14 @@ P_out = 101325 # Pa
   [q_prime_IC]
     type = QuadPowerIC
     variable = q_prime
-    power = 10000.0  # W
+    power = 5460  # W
     filename = "power_profile.txt"
+  []
+
+  [T_ic]
+    type = ConstantIC
+    variable = T
+    value = ${T_in}
   []
 
   [P_ic]
@@ -144,68 +116,67 @@ P_out = 101325 # Pa
     variable = mdot
     boundary = inlet
     area = S
-    mass_flux = ${mass_flux_in}
+    mass_flux = 131.43435930715006
     execute_on = 'timestep_begin'
   []
 []
 
 [Outputs]
   exodus = true
-  [h_3]
+  [mdot_in_MATRIX]
     type = QuadSubChannelNormalSliceValues
-    variable = h
+    variable = mdot
     execute_on = final
-    file_base = "h_3.txt"
-    height = 10.0
-  []
-  [h_2]
-    type = QuadSubChannelNormalSliceValues
-    variable = h
-    execute_on = final
-    file_base = "h_2.txt"
-    height = 7.5
-  []
-  [h_1]
-    type = QuadSubChannelNormalSliceValues
-    variable = h
-    execute_on = final
-    file_base = "h_1.txt"
-    height = 2.5
-  []
-  [h_0]
-    type = QuadSubChannelNormalSliceValues
-    variable = h
-    execute_on = final
-    file_base = "h_0.txt"
+    file_base = "mdot_in.txt"
     height = 0.0
   []
-  [mdot_3]
+
+  [rho_in_MATRIX]
     type = QuadSubChannelNormalSliceValues
-    variable = mdot
+    variable = rho
     execute_on = final
-    file_base = "mdot_3.txt"
-    height = 10.0
-  []
-  [mdot_2]
-    type = QuadSubChannelNormalSliceValues
-    variable = mdot
-    execute_on = final
-    file_base = "mdot_2.txt"
-    height = 7.5
-  []
-  [mdot_1]
-    type = QuadSubChannelNormalSliceValues
-    variable = mdot
-    execute_on = final
-    file_base = "mdot_1.txt"
-    height = 2.5
-  []
-  [mdot_0]
-    type = QuadSubChannelNormalSliceValues
-    variable = mdot
-    execute_on = final
-    file_base = "mdot_0.txt"
+    file_base = "rho_in.txt"
     height = 0.0
+  []
+
+  [mdot_out_MATRIX]
+    type = QuadSubChannelNormalSliceValues
+    variable = mdot
+    execute_on = final
+    file_base = "mdot_out.txt"
+    height = 1.2192
+  []
+
+  [rho_out_MATRIX]
+    type = QuadSubChannelNormalSliceValues
+    variable = rho
+    execute_on = final
+    file_base = "rho_out.txt"
+    height = 1.2192
+  []
+
+  [mdot_MATRIX]
+    type = QuadSubChannelNormalSliceValues
+    variable = mdot
+    execute_on = final
+    file_base = "mdot_075.txt"
+    height = 0.9144
+  []
+
+  [T_in_MATRIX]
+    type = QuadSubChannelNormalSliceValues
+    variable = T
+    execute_on = final
+    file_base = "T_in.txt"
+    height = 0.0
+  []
+
+  [T_out_MATRIX]
+    type = QuadSubChannelNormalSliceValues
+    variable = T
+    execute_on = final
+    file_base = "T_out.txt"
+    height = 1.2192
   []
 []
 
@@ -291,4 +262,13 @@ P_out = 101325 # Pa
     source_variable = q_prime
     variable = q_prime
   []
+  [xfer_S]
+    type = MultiAppNearestNodeTransfer
+    multi_app = pretty_mesh
+    direction = to_multiapp
+    source_variable = S
+    variable = S
+  []
 []
+
+
