@@ -21,3 +21,14 @@ public:
 protected:
   void defineRays() override;
 };
+
+class RepeatableRayStudyDefineNoClaimTest : public RepeatableRayStudy
+{
+public:
+  RepeatableRayStudyDefineNoClaimTest(const InputParameters & params);
+
+  static InputParameters validParams();
+
+protected:
+  void defineRays() override {}
+};

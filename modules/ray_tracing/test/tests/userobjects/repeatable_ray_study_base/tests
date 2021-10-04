@@ -24,6 +24,15 @@
     []
   []
 
+  [replicated_no_claim]
+    requirement = 'The RepeatableRayStudyBase shall report a useful warning when rays are to be replicated but claiming is disabled.'
+    type = 'RunException'
+    input = 'errors.i'
+    cli_args = 'UserObjects/study/type=RepeatableRayStudyDefineNoClaimTest'
+    allow_test_objects = True
+    expect_err = '_define_rays_replicated is being set to false.'
+  []
+
   [non_unique_id_error]
     requirement = 'The RepeatableRayStudyBase shall return a useful error when a ray is added with a non-unique ID.'
     type = 'RunException'
@@ -38,7 +47,7 @@
     [additional]
       type = 'RunException'
       input = 'errors.i'
-      cli_args = 'UserObjects/study/create_additional_ray_pid=1'
+      cli_args = 'UserObjects/study/create_additional_ray_pid=0'
       min_parallel = 2
       max_parallel = 2
       allow_test_objects = true
@@ -48,7 +57,7 @@
     [non_replicated_id]
       type = 'RunException'
       input = 'errors.i'
-      cli_args = 'UserObjects/study/create_non_replicated_id_ray_pid=1'
+      cli_args = 'UserObjects/study/create_non_replicated_id_ray_pid=0'
       min_parallel = 2
       max_parallel = 2
       allow_test_objects = true
@@ -58,12 +67,20 @@
     [non_replicated]
       type = 'RunException'
       input = 'errors.i'
-      cli_args = 'UserObjects/study/create_non_replicated_ray_pid=1'
+      cli_args = 'UserObjects/study/create_non_replicated_ray_pid=0'
       min_parallel = 2
       max_parallel = 2
       allow_test_objects = true
       expect_err = 'A Ray was found on rank 1 that does not exist on rank 0.'
-      detail = 'and a non-replicated ray exists on a processor.'
+      detail = 'a non-replicated ray exists on a processor,'
+    []
+    [starting_elem_set]
+      type = 'RunException'
+      input = 'errors.i'
+      cli_args = 'UserObjects/study/define_ray_with_starting_elem=true'
+      allow_test_objects = true
+      expect_err = 'A Ray was found in _rays after defineRays\(\) that has a starting element or incoming side set.'
+      detail = 'and a ray is created with starting element information when it should not.'
     []
   []
 
