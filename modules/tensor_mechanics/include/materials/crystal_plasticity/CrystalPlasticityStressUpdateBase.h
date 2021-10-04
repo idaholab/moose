@@ -12,6 +12,7 @@
 #include "Material.h"
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
+#include "DelimitedFileReader.h"
 
 class CrystalPlasticityStressUpdateBase : public Material
 {
@@ -38,8 +39,19 @@ public:
    */
   virtual void initQpStatefulProperties() override;
 
-  /// Read in the crystal specific glide slip systems from a file
+  /**
+   * A helper method to read in plane normal and direction vectors from a file
+   * and to normalize the vectors. This method is abstracted to allow for reuse
+   * in inheriting classes with multiple plane normal and direction vector pairs.
+   */
   virtual void getSlipSystems();
+
+  /**
+   * A helper method to transform the Miller-Bravis 4-index notation for HCP
+   * crystals into a a 3-index Cartesian representation, using the convention
+   * a$_1$ = x of axis alignment in the basal plane
+   */
+  void transformHexagonalMillerBravisSlipSystems(const MooseUtils::DelimitedFileReader & reader);
 
   /**
    * Computes the Schmid tensor (m x n) for the original (reference) crystal
@@ -72,21 +84,10 @@ public:
    * tensor from the Elasticity tensor class.
    */
   void calculateSchmidTensor(const unsigned int & number_dislocation_systems,
-                             const DenseVector<Real> & plane_normal_vector,
-                             const DenseVector<Real> & direction_vector,
+                             const std::vector<RealVectorValue> & plane_normal_vector,
+                             const std::vector<RealVectorValue> & direction_vector,
                              std::vector<RankTwoTensor> & schmid_tensor,
                              const RankTwoTensor & crysrot);
-
-  /**
-   * A helper method to read in plane normal and direction vectors from a file
-   * and to normalize the vectors. This method is abstracted to allow for reuse
-   * in inheriting classes with multiple plane normal and direction vector pairs.
-   */
-  void getPlaneNormalAndDirectionVectors(const FileName & vector_file_name,
-                                         const unsigned int & number_dislocation_systems,
-                                         DenseVector<Real> & plane_normal_vector,
-                                         DenseVector<Real> & direction_vector,
-                                         bool & orthonormal_error);
 
   /**
    * A helper method to sort the slip systems of a crystal into cross slip families based
@@ -160,6 +161,10 @@ public:
 
   virtual void calculateStateVariableEvolutionRateComponent() {}
 
+  /**
+   * Finalizes the values of the state variables and slip system resistance
+   * for the current timestep after convergence has been reached.
+   */
   virtual bool updateStateVariables() = 0;
 
   virtual void calculateSlipResistance() {}
@@ -182,6 +187,10 @@ protected:
   /// Base name prepended to all material property names to allow for
   /// multi-material systems
   const std::string _base_name;
+
+  const enum class CrystalLatticeType { BCC, FCC, HCP } _crystal_lattice_type;
+
+  const std::vector<Real> _unit_cell_dimension;
 
   ///Maximum number of active slip systems for the crystalline material being modeled
   const unsigned int _number_slip_systems;
@@ -212,13 +221,16 @@ protected:
   MaterialProperty<std::vector<Real>> & _slip_increment;
 
   ///@{Slip system direction and normal and associated Schmid tensors
-  DenseVector<Real> _slip_direction;
-  DenseVector<Real> _slip_plane_normal;
+  std::vector<RealVectorValue> _slip_direction;
+  std::vector<RealVectorValue> _slip_plane_normal;
   MaterialProperty<std::vector<RankTwoTensor>> & _flow_direction;
   ///@}
 
   /// Resolved shear stress on each slip system
   MaterialProperty<std::vector<Real>> & _tau;
+
+  /// Flag to print to console warning messages on stress, constitutive model convergence
+  const bool _print_convergence_message;
 
   /// Substepping time step value used within the inheriting constitutive models
   Real _substep_dt;

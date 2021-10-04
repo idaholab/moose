@@ -16,10 +16,6 @@ velocity_interp_method='rc'
   []
 []
 
-[GlobalParams]
-  two_term_boundary_expansion = true
-[]
-
 [Problem]
   fv_bcs_integrity_check = true
 []

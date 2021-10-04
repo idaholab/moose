@@ -4,7 +4,7 @@ from mooseutils import fuzzyEqual
 
 class TestSteadyAdapt(unittest.TestCase):
     def test(self):
-        df1 = mms.run_spatial('steady-adapt.i', 7, mpi=8)
+        df1 = mms.run_spatial('steady-adapt.i', 8, mpi=8)
 
         fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
         fig.plot(df1,
@@ -15,7 +15,8 @@ class TestSteadyAdapt(unittest.TestCase):
                  slope_precision=1)
         fig.save('steady-adapt.png')
 
-        for _,value in fig.label_to_slope.items():
+        for key,value in fig.label_to_slope.items():
+            print("%s slope, %f" % (key, value))
             self.assertTrue(fuzzyEqual(value, 1., .05))
 
 if __name__ == '__main__':
