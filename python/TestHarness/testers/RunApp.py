@@ -136,7 +136,11 @@ class RunApp(Tester):
 
         # Just return an arbitrary command if one is supplied
         if specs.isValid('command'):
-            return os.path.join('%s%s:%s; %s' % ('PATH=', specs['test_dir'], os.getenv('PATH'), specs['command']))
+            return os.path.join('%s%s:%s; %s %s' % ('PATH=',
+                                                    specs['test_dir'],
+                                                    os.getenv('PATH'),
+                                                    specs['command'],
+                                                    ' '.join(specs['cli_args'])))
 
         # Create the additional command line arguments list
         cli_args = list(specs['cli_args'])
