@@ -206,21 +206,18 @@ class PerfGraphReporterReader:
 
     The final timestep is used to capture the PerfGraph data.
     """
-    def __init__(self, file=None, raw=None, part=None):
+    def __init__(self, file=None, raw=None, part=0):
         if not file and not raw:
             raise Exception('Must provide either "file" or "raw"')
         if file and raw:
             raise Exception('Cannot provide both "file" and "raw"')
-        if not file and part is not None:
+        if not file and part != 0:
             raise Exception('"part" is not used with "raw"')
 
         self._reader = None
         if file:
-            self._reader = ReporterReader(file, part)
-
-            # Only read from the final timestep
-            final_time = self._reader.times()[-1]
-            self._reader.update(final_time)
+            self._reader = ReporterReader(file)
+            self._reader.update(part=part)
 
             # Find the Reporter variable that contains the PerfGraph graph
             perf_graph_var = None
