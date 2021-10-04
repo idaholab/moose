@@ -1,11 +1,11 @@
-# INSFVMomentumGravity
+# NSFVMomentumGravity
 
-This object adds a simple gravitational force term to the incompressible or
-compressible Navier-Stokes/Euler equations of the form $-\rho\vec{g}$ where
-$\rho$ is the density and $\vec{g}$ is the gravity vector.
+This object adds a simple gravitational force term to the compressible
+Navier-Stokes/Euler equations of the form $-\rho\vec{g}$ where $\rho$ is the
+density and $\vec{g}$ is the gravity vector.
 
-!syntax parameters /FVKernels/INSFVMomentumGravity
+!syntax parameters /FVKernels/NSFVMomentumGravity
 
-!syntax inputs /FVKernels/INSFVMomentumGravity
+!syntax inputs /FVKernels/NSFVMomentumGravity
 
-!syntax children /FVKernels/INSFVMomentumGravity
+!syntax children /FVKernels/NSFVMomentumGravity

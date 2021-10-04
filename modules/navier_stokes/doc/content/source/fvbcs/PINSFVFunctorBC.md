@@ -23,7 +23,8 @@ functional behavior of `PINSFVFunctorBC` and `PCNSFVStrongBC` are quite similar.
 Note that if this object is used in conjunction with
 [PINSFVMomentumPressureFlux.md], then `force_boundary_execution` must be set to
 `false` in the momentum pressure flux input file block since `PINSFVFunctorBC`
-already adds the pressure flux contribution no the boundary.
+already adds the pressure flux contribution no the boundary. `PINSFVFunctorBC`
+should not be used in conjunction with [PINSFVMomentumPressure.md]
 
 !syntax parameters /FVBCs/PINSFVFunctorBC
 

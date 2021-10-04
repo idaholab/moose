@@ -169,20 +169,22 @@ gradient. Some of these methods are exemplified below:
   at the quadrature points (`VectorVariableCurl`)
 
 
-### Variable functor evaluation
+### Variable functor evaluation id=functor-vars
 
 Derived field classes of `MooseVariableBase`, e.g. derivatives of the class
 template `MooseVariableField<T>` inherit from the
 `Moose::Functor`. Quadrature-based overloads of the `evaluate` method are
-implemented in `MooseVariableField<T>`. The `ElemQpArg` `evaluate` overload does a
+implemented in `MooseVariableField<T>`. The `ElemQpArg` and `ElemSideQpArg` `evaluate` overloads do
 true on-the-fly computation of the solution based on the information contained
-within the `ElemQpArg`, e.g. the provided element and quadrature rule. The
+within the argument, e.g. they perform calls to libMesh `FE::reinit` methods
+after attaching the quadrature rule provided withing the calling argument. The
 `ElementType` overload, however, simply queries methods like `adSln()`,
 `slnOld()`, `slnOlder()`, `adSlnNeighbor()`, and `slnOldNeighbor()`. The success
 of this latter overload depends on the fact that the variable has already been
 reinit'd on the requested element or neighbor type. If a user is unsure whether
 this precondition will be met, then they should call the likely slower but more
-flexible `ElemQpArg` overload.
+flexible `ElemQpArg` overload. For an overview of the different spatial
+overloads available for functors, please see [Materials/index.md#spatial-overloads].
 
 Finite-volume-centric `evaluate` overloads are individually implemented in
 `MooseVariableFE<T>` and `MooseVariableFV<T>` class templates. The finite
