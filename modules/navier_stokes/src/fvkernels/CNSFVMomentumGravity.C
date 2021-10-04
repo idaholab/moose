@@ -7,13 +7,13 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "NSFVMomentumGravity.h"
+#include "CNSFVMomentumGravity.h"
 #include "NS.h"
 
-registerMooseObject("NavierStokesApp", NSFVMomentumGravity);
+registerMooseObject("NavierStokesApp", CNSFVMomentumGravity);
 
 InputParameters
-NSFVMomentumGravity::validParams()
+CNSFVMomentumGravity::validParams()
 {
   InputParameters params = FVElementalKernel::validParams();
   params.addClassDescription("Computes a body force due to gravity.");
@@ -27,7 +27,7 @@ NSFVMomentumGravity::validParams()
   return params;
 }
 
-NSFVMomentumGravity::NSFVMomentumGravity(const InputParameters & params)
+CNSFVMomentumGravity::CNSFVMomentumGravity(const InputParameters & params)
   : FVElementalKernel(params),
     _gravity(getParam<RealVectorValue>("gravity")),
     _rho(getFunctor<ADReal>(NS::density)),
@@ -36,7 +36,7 @@ NSFVMomentumGravity::NSFVMomentumGravity(const InputParameters & params)
 }
 
 ADReal
-NSFVMomentumGravity::computeQpResidual()
+CNSFVMomentumGravity::computeQpResidual()
 {
   return -_rho(_current_elem) * _gravity(_index);
 }

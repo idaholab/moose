@@ -1,4 +1,4 @@
-# PNSFVMomentumFriction
+# PCNSFVMomentumFriction
 
 This kernel adds the friction term to the fully compressible porous media Navier
 Stokes momentum equations. This kernel requires that the parameter
@@ -21,8 +21,8 @@ $f_i$ is the ith-component of the Forchheimer friction factor. If both
 forces from the two models will be summed. The component is determined by the
 `momentum_component` parameter.
 
-!syntax parameters /FVKernels/PNSFVMomentumFriction
+!syntax parameters /FVKernels/PCNSFVMomentumFriction
 
-!syntax inputs /FVKernels/PNSFVMomentumFriction
+!syntax inputs /FVKernels/PCNSFVMomentumFriction
 
-!syntax children /FVKernels/PNSFVMomentumFriction
+!syntax children /FVKernels/PCNSFVMomentumFriction

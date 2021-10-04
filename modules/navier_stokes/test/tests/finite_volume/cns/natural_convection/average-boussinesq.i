@@ -113,7 +113,7 @@ mu=18.23e-6
     diffusing_quantity = 'vel_x'
   []
   [x_momentum_gravity_source]
-    type = PNSFVMomentumGravity
+    type = PCNSFVMomentumGravity
     variable = sup_rho_u
     momentum_component = 'x'
   []
@@ -137,7 +137,7 @@ mu=18.23e-6
     diffusing_quantity = 'vel_y'
   []
   [y_momentum_gravity_source]
-    type = PNSFVMomentumGravity
+    type = PCNSFVMomentumGravity
     variable = sup_rho_v
     momentum_component = 'y'
   []

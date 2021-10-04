@@ -7,13 +7,13 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "PNSFVMomentumFriction.h"
+#include "PCNSFVMomentumFriction.h"
 #include "NS.h"
 
-registerMooseObject("NavierStokesApp", PNSFVMomentumFriction);
+registerMooseObject("NavierStokesApp", PCNSFVMomentumFriction);
 
 InputParameters
-PNSFVMomentumFriction::validParams()
+PCNSFVMomentumFriction::validParams()
 {
   InputParameters params = FVElementalKernel::validParams();
   params.addClassDescription("Computes a friction force term on fluid in porous media in the "
@@ -35,7 +35,7 @@ PNSFVMomentumFriction::validParams()
   return params;
 }
 
-PNSFVMomentumFriction::PNSFVMomentumFriction(const InputParameters & params)
+PCNSFVMomentumFriction::PCNSFVMomentumFriction(const InputParameters & params)
   : FVElementalKernel(params),
     _component(getParam<MooseEnum>("momentum_component")),
     _cL(isParamValid("Darcy_name") ? &getADMaterialProperty<RealVectorValue>("Darcy_name")
@@ -54,7 +54,7 @@ PNSFVMomentumFriction::PNSFVMomentumFriction(const InputParameters & params)
 }
 
 ADReal
-PNSFVMomentumFriction::computeQpResidual()
+PCNSFVMomentumFriction::computeQpResidual()
 {
   ADReal friction_term = 0;
 

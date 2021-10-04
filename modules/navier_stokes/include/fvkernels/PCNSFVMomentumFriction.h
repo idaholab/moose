@@ -14,11 +14,11 @@
 /**
  * Imposes a friction force on the momentum equation in porous media.
  */
-class PNSFVMomentumFriction : public FVElementalKernel
+class PCNSFVMomentumFriction : public FVElementalKernel
 {
 public:
   static InputParameters validParams();
-  PNSFVMomentumFriction(const InputParameters & params);
+  PCNSFVMomentumFriction(const InputParameters & params);
 
 protected:
   ADReal computeQpResidual() override;

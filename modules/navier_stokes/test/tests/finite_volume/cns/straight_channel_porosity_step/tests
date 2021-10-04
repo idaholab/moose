@@ -30,7 +30,7 @@
     recover = false # See https://github.com/idaholab/moose/issues/17906
     method = "!dbg"
     valgrind = 'none'
-    design = 'PCNSFVKT.md PNSFVPGradEpsilon.md PorousPrimitiveVarMaterial.md PNSFVMomentumFriction.md'
+    design = 'PCNSFVKT.md PNSFVPGradEpsilon.md PorousPrimitiveVarMaterial.md PCNSFVMomentumFriction.md'
   []
   [twod_y_channel_upwind_frictional_porosity_function_mixed]
     type = Exodiff
@@ -42,7 +42,7 @@
     recover = false # See https://github.com/idaholab/moose/issues/17906
     method = "!dbg"
     valgrind = 'none'
-    design = 'PCNSFVKT.md PNSFVPGradEpsilon.md PorousMixedVarMaterial.md PNSFVMomentumFriction.md'
+    design = 'PCNSFVKT.md PNSFVPGradEpsilon.md PorousMixedVarMaterial.md PCNSFVMomentumFriction.md'
   []
   [deferred_correction]
     type = Exodiff

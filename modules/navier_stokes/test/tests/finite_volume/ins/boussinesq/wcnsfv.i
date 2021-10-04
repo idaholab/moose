@@ -147,7 +147,7 @@ hot_temp=310
     pressure = pressure
   []
   [u_gravity]
-    type = NSFVMomentumGravity
+    type = INSFVMomentumGravity
     variable = u
     gravity = '0 -1 0'
     rho = ${rho}
@@ -179,7 +179,7 @@ hot_temp=310
     pressure = pressure
   []
   [v_gravity]
-    type = NSFVMomentumGravity
+    type = INSFVMomentumGravity
     variable = v
     gravity = '0 -1 0'
     rho = ${rho}

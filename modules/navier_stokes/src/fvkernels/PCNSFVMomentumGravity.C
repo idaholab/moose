@@ -7,15 +7,15 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "PNSFVMomentumGravity.h"
+#include "PCNSFVMomentumGravity.h"
 #include "NS.h"
 
-registerMooseObject("NavierStokesApp", PNSFVMomentumGravity);
+registerMooseObject("NavierStokesApp", PCNSFVMomentumGravity);
 
 InputParameters
-PNSFVMomentumGravity::validParams()
+PCNSFVMomentumGravity::validParams()
 {
-  InputParameters params = NSFVMomentumGravity::validParams();
+  InputParameters params = CNSFVMomentumGravity::validParams();
   params.addClassDescription(
       "Computes a body force, $eps * \rho * g$ due to gravity on fluid in porous media.");
   params.addCoupledVar("porosity",
@@ -24,15 +24,15 @@ PNSFVMomentumGravity::validParams()
   return params;
 }
 
-PNSFVMomentumGravity::PNSFVMomentumGravity(const InputParameters & params)
-  : NSFVMomentumGravity(params),
+PCNSFVMomentumGravity::PCNSFVMomentumGravity(const InputParameters & params)
+  : CNSFVMomentumGravity(params),
     _eps(isCoupled("porosity") ? coupledValue("porosity")
                                : getMaterialProperty<Real>(NS::porosity).get())
 {
 }
 
 ADReal
-PNSFVMomentumGravity::computeQpResidual()
+PCNSFVMomentumGravity::computeQpResidual()
 {
-  return _eps[_qp] * NSFVMomentumGravity::computeQpResidual();
+  return _eps[_qp] * CNSFVMomentumGravity::computeQpResidual();
 }

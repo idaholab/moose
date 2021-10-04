@@ -14,23 +14,23 @@
 /**
  * Implements a linear or quadratic friction term for the momentum equation.
  */
-class NSFVMomentumFriction : public FVElementalKernel
+class INSFVMomentumFriction : public FVElementalKernel
 {
 public:
   static InputParameters validParams();
 
-  NSFVMomentumFriction(const InputParameters & parameters);
+  INSFVMomentumFriction(const InputParameters & parameters);
 
 protected:
   ADReal computeQpResidual() override;
 
 protected:
-  /// The linear friction factor, for laminar flow, as a material property
-  const ADMaterialProperty<Real> * const _linear_friction_matprop;
-  /// The quadratic friction factor, for turbulent flow, as a material property
-  const ADMaterialProperty<Real> * const _quadratic_friction_matprop;
+  /// The linear friction factor, for laminar flow
+  const Moose::Functor<ADReal> * const _linear_friction;
+  /// The quadratic friction factor, for turbulent flow
+  const Moose::Functor<ADReal> * const _quadratic_friction;
   /// Boolean to select the right model
-  const bool _use_linear_friction_matprop;
+  const bool _use_linear_friction;
   /// drag quantity
-  const MooseArray<ADReal> & _drag_quantity;
+  const Moose::Functor<ADReal> & _drag_quantity;
 };

@@ -1,11 +1,11 @@
-# NSFVMomentumGravity
+# CNSFVMomentumGravity
 
 This object adds a simple gravitational force term to the compressible
 Navier-Stokes/Euler equations of the form $-\rho\vec{g}$ where $\rho$ is the
 density and $\vec{g}$ is the gravity vector.
 
-!syntax parameters /FVKernels/NSFVMomentumGravity
+!syntax parameters /FVKernels/CNSFVMomentumGravity
 
-!syntax inputs /FVKernels/NSFVMomentumGravity
+!syntax inputs /FVKernels/CNSFVMomentumGravity
 
-!syntax children /FVKernels/NSFVMomentumGravity
+!syntax children /FVKernels/CNSFVMomentumGravity
