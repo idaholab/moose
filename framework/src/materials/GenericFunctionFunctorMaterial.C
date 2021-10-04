@@ -29,7 +29,6 @@ GenericFunctionFunctorMaterialTempl<is_ad>::validParams()
                                              "The corresponding names of the "
                                              "functions that are going to provide "
                                              "the values for the variables");
-  params.set<ExecFlagEnum>("execute_on") = {EXEC_TIMESTEP_BEGIN};
   return params;
 }
 
