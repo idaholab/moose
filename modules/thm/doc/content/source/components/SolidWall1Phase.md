@@ -1,13 +1,13 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # SolidWall1Phase
 
-!alert construction title=Undocumented Class
-The SolidWall1Phase has not been documented. The content contained on this page includes the
-typical automatic documentation associated with a MooseObject; however, what is contained is
-ultimately determined by what is necessary to make the documentation clear for users.
+This is a single-phase [1-D flow boundary component](component_groups/flow_boundary.md)
+corresponding to a solid wall. This component should be used where a flow channel
+ends with no inlet or outlet.
 
-!syntax description /Components/SolidWall1Phase
+## Usage
+
+This component must be connected to a [/FlowChannel1Phase.md]. See
+[how to connect a flow boundary component](component_groups/flow_boundary.md#usage).
 
 !syntax parameters /Components/SolidWall1Phase
 
@@ -15,4 +15,14 @@ ultimately determined by what is necessary to make the documentation clear for u
 
 !syntax children /Components/SolidWall1Phase
 
-!bibtex bibliography
+## Formulation
+
+This boundary condition uses a [ghost cell formulation](component_groups/flow_boundary.md#ghostcell_flux),
+where the ghost cell solution $\mathbf{U}_\text{ghost}$ is the same as the interior
+solution but with opposite velocity:
+
+\begin{equation}
+  u_\text{ghost} = -u_i \,.
+\end{equation}
+
+This produces a zero velocity in the boundary flux computation.
