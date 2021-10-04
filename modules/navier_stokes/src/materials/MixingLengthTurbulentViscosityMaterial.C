@@ -35,8 +35,8 @@ MixingLengthTurbulentViscosityMaterial::MixingLengthTurbulentViscosityMaterial(
     _v_vel(isCoupled("v") ? getVarHelper<MooseVariableFVReal>("v", 0) : nullptr),
     _w_vel(isCoupled("w") ? getVarHelper<MooseVariableFVReal>("w", 0) : nullptr),
     _mixing_len(*getVarHelper<MooseVariableFVReal>("mixing_length", 0)),
-    _mu(getFunctorMaterialProperty<ADReal>("mu")),
-    _rho(getFunctorMaterialProperty<ADReal>("rho")),
+    _mu(getFunctor<ADReal>("mu")),
+    _rho(getFunctor<ADReal>("rho")),
     _total_viscosity(declareFunctorProperty<ADReal>("total_viscosity"))
 {
   _total_viscosity.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> ADReal {

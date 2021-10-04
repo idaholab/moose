@@ -27,8 +27,8 @@ WCNSFVMomentumTimeDerivative::validParams()
 
 WCNSFVMomentumTimeDerivative::WCNSFVMomentumTimeDerivative(const InputParameters & params)
   : FVTimeKernel(params),
-    _rho(getFunctorMaterialProperty<ADReal>(NS::density)),
-    _rho_dot(getFunctorMaterialProperty<ADReal>(NS::time_deriv(NS::density)))
+    _rho(getFunctor<ADReal>(NS::density)),
+    _rho_dot(getFunctor<ADReal>(NS::time_deriv(NS::density)))
 {
 }
 

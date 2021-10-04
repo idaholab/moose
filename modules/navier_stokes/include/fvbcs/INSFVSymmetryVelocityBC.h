@@ -10,7 +10,6 @@
 #pragma once
 
 #include "INSFVSymmetryBC.h"
-#include "CentralDifferenceLimiter.h"
 
 /**
  * A class for setting a symmetry boundary condition on the velocity. It should be
@@ -43,11 +42,8 @@ protected:
   const unsigned int _comp;
 
   /// The dynamic viscosity
-  const FunctorInterface<ADReal> & _mu;
+  const Moose::Functor<ADReal> & _mu;
 
   /// The mesh dimension
   const unsigned int _dim;
-
-  /// A "dummy" limiter required to call face-argument functor overloads
-  Moose::FV::CentralDifferenceLimiter<ADReal> _cd_limiter;
 };

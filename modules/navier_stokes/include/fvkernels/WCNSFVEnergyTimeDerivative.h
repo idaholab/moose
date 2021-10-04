@@ -21,14 +21,14 @@ protected:
   ADReal computeQpResidual() override;
 
   /// Density functor, material property or variable
-  const FunctorInterface<ADReal> & _rho;
+  const Moose::Functor<ADReal> & _rho;
 
   /// Specific heat functor, material property or variable
-  const FunctorInterface<ADReal> & _cp;
+  const Moose::Functor<ADReal> & _cp;
 
   /// Functor for the time derivative of density, material property or variable
-  const FunctorInterface<ADReal> & _rho_dot;
+  const Moose::Functor<ADReal> & _rho_dot;
 
   /// Functor for the time derivative of the specific heat, material property or variable
-  const FunctorInterface<ADReal> & _cp_dot;
+  const Moose::Functor<ADReal> & _cp_dot;
 };

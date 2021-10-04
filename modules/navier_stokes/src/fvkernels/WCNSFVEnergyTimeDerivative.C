@@ -32,10 +32,10 @@ WCNSFVEnergyTimeDerivative::validParams()
 
 WCNSFVEnergyTimeDerivative::WCNSFVEnergyTimeDerivative(const InputParameters & params)
   : FVTimeKernel(params),
-    _rho(getFunctorMaterialProperty<ADReal>(NS::density)),
-    _cp(getFunctorMaterialProperty<ADReal>(NS::cp)),
-    _rho_dot(getFunctorMaterialProperty<ADReal>(NS::time_deriv(NS::density))),
-    _cp_dot(getFunctorMaterialProperty<ADReal>(NS::time_deriv(NS::cp)))
+    _rho(getFunctor<ADReal>(NS::density)),
+    _cp(getFunctor<ADReal>(NS::cp)),
+    _rho_dot(getFunctor<ADReal>(NS::time_deriv(NS::density))),
+    _cp_dot(getFunctor<ADReal>(NS::time_deriv(NS::cp)))
 {
 }
 

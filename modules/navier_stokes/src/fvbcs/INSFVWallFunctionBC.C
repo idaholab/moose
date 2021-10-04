@@ -43,8 +43,8 @@ INSFVWallFunctionBC::INSFVWallFunctionBC(const InputParameters & params)
     _w_var(params.isParamValid("w")
                ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("w", 0))
                : nullptr),
-    _rho(getFunctorMaterialProperty<ADReal>(NS::density)),
-    _mu(getFunctorMaterialProperty<ADReal>("mu"))
+    _rho(getFunctor<ADReal>(NS::density)),
+    _mu(getFunctor<ADReal>("mu"))
 {
 }
 

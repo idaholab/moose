@@ -38,10 +38,10 @@ protected:
   const MooseVariableFVReal & _mixing_len;
 
   /// viscosity
-  const FunctorInterface<ADReal> & _mu;
+  const Moose::Functor<ADReal> & _mu;
 
   /// density
-  const FunctorInterface<ADReal> & _rho;
+  const Moose::Functor<ADReal> & _rho;
 
   // Total viscosity
   FunctorMaterialProperty<ADReal> & _total_viscosity;

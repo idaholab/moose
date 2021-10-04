@@ -33,15 +33,11 @@ protected:
   const INSFVVelocityVariable * const _w_var;
 
   /// the specific enthalpy that is being diffused
-  const FunctorInterface<ADReal> & _rho_cp_temp;
+  const Moose::Functor<ADReal> & _rho_cp_temp;
 
   /// Turbulent eddy mixing length
   const MooseVariableFVReal & _mixing_len;
 
   /// Turbulent Schmidt number (or turbulent Prandtl number)
   const Real & _schmidt_number;
-
-  /// Central difference limiter which provides a convenient way to construct average interpolations
-  /// at faces
-  std::unique_ptr<Moose::FV::Limiter<ADReal>> _cd_limiter;
 };

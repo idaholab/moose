@@ -39,8 +39,8 @@ protected:
   const INSFVVelocityVariable * const _w_var;
 
   /// density
-  const FunctorInterface<ADReal> & _rho;
+  const Moose::Functor<ADReal> & _rho;
 
   /// dynamic viscosity
-  const FunctorInterface<ADReal> & _mu;
+  const Moose::Functor<ADReal> & _mu;
 };

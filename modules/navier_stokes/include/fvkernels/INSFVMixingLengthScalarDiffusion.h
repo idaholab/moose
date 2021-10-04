@@ -37,8 +37,4 @@ protected:
 
   /// Turbulent Schmidt number (or turbulent Prandtl number)
   const Real & _schmidt_number;
-
-  /// Central difference limiter which provides a convenient way to construct average interpolations
-  /// at faces
-  std::unique_ptr<Moose::FV::Limiter<ADReal>> _cd_limiter;
 };

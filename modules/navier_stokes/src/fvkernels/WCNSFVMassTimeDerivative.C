@@ -25,7 +25,7 @@ WCNSFVMassTimeDerivative::validParams()
 }
 
 WCNSFVMassTimeDerivative::WCNSFVMassTimeDerivative(const InputParameters & params)
-  : FVTimeKernel(params), _rho_dot(getFunctorMaterialProperty<ADReal>(NS::time_deriv(NS::density)))
+  : FVTimeKernel(params), _rho_dot(getFunctor<ADReal>(NS::time_deriv(NS::density)))
 {
 }
 
