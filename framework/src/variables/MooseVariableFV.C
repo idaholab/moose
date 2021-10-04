@@ -562,7 +562,7 @@ MooseVariableFV<OutputType>::isInternalFace(const FaceInfo & fi) const
 template <typename OutputType>
 ADReal
 MooseVariableFV<OutputType>::getInternalFaceValue(
-    const std::tuple<const FaceInfo *, const Moose::FV::Limiter<ADReal> *, bool> & face) const
+    const std::tuple<const FaceInfo *, Moose::FV::LimiterType, bool> & face) const
 {
   const FaceInfo * const fi = std::get<0>(face);
   mooseAssert(fi, "The face information must be non-null");

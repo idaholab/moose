@@ -81,10 +81,7 @@ public:
    * face when we want to avoid using ghost information
    */
   using SingleSidedFaceArg =
-      std::tuple<const FaceInfo *,
-                 const Moose::FV::Limiter<typename Moose::FV::LimiterValueType<T>::value_type> *,
-                 bool,
-                 SubdomainID>;
+      std::tuple<const FaceInfo *, Moose::FV::LimiterType, bool, SubdomainID>;
 
   /**
    * People should think of this geometric argument as corresponding to the location in space of the

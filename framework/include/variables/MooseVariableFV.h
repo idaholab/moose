@@ -489,7 +489,7 @@ public:
   using typename Moose::Functor<FunctorArg>::DotType;
   using typename Moose::Functor<FunctorArg>::GradientType;
   ADReal getInternalFaceValue(
-      const std::tuple<const FaceInfo *, const Moose::FV::Limiter<ADReal> *, bool> & face) const;
+      const std::tuple<const FaceInfo *, Moose::FV::LimiterType, bool> & face) const;
 
 protected:
   /**
