@@ -30,7 +30,7 @@ InternalVolumetricFlowRate::validParams()
                              "'upwind' and 'average', with the default being 'upwind'.");
   params.addCoupledVar(
       "advected_variable", 0, "The advected variable quantity of which to study the flow");
-  params.addParam<MaterialPropertyName>(
+  params.addParam<MooseFunctorName>(
       "advected_mat_prop", 0, "The advected material property of which to study the flow");
   return params;
 }
@@ -146,8 +146,8 @@ InternalVolumetricFlowRate::computeQpIntegral()
       return _advected_variable[_qp] * RealVectorValue(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]) *
              _normals[_qp];
     else if (parameters().isParamSetByUser("advected_mat_prop"))
-      return MetaPhysicL::raw_value(_advected_material_property(std::make_tuple(
-                 Moose::ElementType::Element, _qp, _current_elem->subdomain_id()))) *
+      return MetaPhysicL::raw_value(_advected_material_property(
+                 std::make_tuple(_current_elem, _current_side, _qp, _qrule))) *
              RealVectorValue(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]) * _normals[_qp];
     else
       return RealVectorValue(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]) * _normals[_qp];
