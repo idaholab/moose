@@ -16,19 +16,48 @@
 class Problem;
 class Runner;
 
+/// The Runner class directs the execution flow of simulations.  It manages
+/// outputting, time stepping, mesh adaptivity, solve sequencing, multiapp
+/// execution, etc.  Users can compose runner objects in an input file using
+/// the same pattern as with mesh generators.  Subclass here and implement your
+/// own gogogadget function if you need special or fancy functionality that
+/// isn't supported by the default runners available.
 class Runner : public Executioner
 {
 public:
+  /// This object tracks the success/failure state of the runner system as
+  /// execution proceeds in a simulation.  Because runners can be composed into
+  /// trees, result objects are correspondingly composed into trees to track
+  /// simulation progress.  Result objects should generally be created by
+  /// runners calling the Result::newResult() function rather than by using
+  /// the Result constructor directly.
   struct Result
   {
     Result() : converged(true), _name("NO_NAME") {}
     Result(const std::string & name) : converged(true), _name(name) {}
     Result(const MooseObject * obj) : converged(true), _name(obj->name()) {}
 
+    /// whether or not a runner ran its code successfully - only reports
+    /// results from the runner itself.  If a sub/internal runner of a runner
+    /// fails, that sub-runner's result object will have converged=false, while
+    /// the parent may still have converged=truee. Users should use convergedAll
+    /// to recursively determine if there was any descendant runner failure.
     bool converged = true;
+
+    /// Optional message detailing why a runner passed or failed (i.e. failed to converge).
     std::string reason;
+
+    /// Maps a name/label of a runner's internal/sub runners to the result
+    /// object returned by running each of those internal/sub runners.  This
+    /// member should generally not be accessed directly.  It should generally
+    /// be populated through the record function.  Info contained in these
+    /// results will be included in printouts from the str function.
     std::map<std::string, Result> subs;
 
+    /// Prints a full recursive output of this result object - including all
+    /// descendant's results.  If success_msg is true, then all result output
+    /// that contains a message will be printed even if it converged/passed.
+    /// Otherwise, messages will only be printed for unconverged/failed results.
     std::string
     str(bool success_msg = false, const std::string & indent = "", const std::string & subname = "")
     {
@@ -38,6 +67,10 @@ public:
       return s;
     }
 
+    /// Marks the result as passing/converged with the given msg text
+    /// describing detail about how things ran.  A result object is in this
+    /// state by default, so it is not necessary to call this function for
+    /// converged/passing scenarios.
     void pass(const std::string & msg, bool overwrite = false)
     {
       mooseAssert(converged || overwrite,
@@ -46,18 +79,31 @@ public:
       reason = msg;
       converged = true;
     }
+
+    /// Marks the result as failing/unconverged with the given msg text
+    /// describing detail about how things ran.
     void fail(const std::string & msg)
     {
       reason = msg;
       converged = false;
     }
 
+    /// Records results from sub/internal runners in a runner's result.  When
+    /// child-runners return a result object following their execution, this
+    /// function should be called to add that info into the result heirarchy.
+    /// If the child runner was identified by a label/text from the input file
+    /// (e.g. via sub_solve1=foo_runner) - then "name" should be "sub_solve1".
     bool record(const std::string & name, const Result & r)
     {
       subs[name] = r;
       return r.convergedAll();
     }
 
+    /// Returns false if any single runner in the current hierarchy of results
+    /// (i.e. including all child results accumulated recursively via record)
+    /// had a faild/unconverged return state.  Returns true otherwise.  This
+    /// is how convergence should generally be checked/tracked by runners -
+    /// rather than accessing e.g. the converged member directly.
     bool convergedAll() const
     {
       if (!converged)
@@ -85,12 +131,23 @@ public:
 
   static InputParameters validParams();
 
+  /// This is the main function for runners - this is how runners should
+  /// invoke child/sub runners - by calling their run function.
   Result run();
 
+  /// This function contains the primary execution implementation for a
+  /// runner.  Custom runner behavior should be localized to this function.  If
+  /// you are writing a runner - this is basically where you should put all your
+  /// code.
   virtual Result gogogadget() = 0;
 
   virtual void execute() override {}
 
+  /// Runners need to return a Result object describing how execution went -
+  /// rather than constructing Result objects directly, the newResult function
+  /// should be called to generate new objects.  *DO NOT* catch the result by
+  /// value - if you do, MOOSE cannot track result state for restart capability.
+  /// You must catch result values from this function by reference.
   Result & newResult()
   {
     _result = Result(this);
