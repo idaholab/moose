@@ -37,7 +37,9 @@ class TestRCNoDiffusion(unittest.TestCase):
 
 class TestRCNoDiffusionStrongBC(unittest.TestCase):
     def test(self):
-        df1 = run_spatial('1d-rc-no-diffusion-strong-bc.i', 6, y_pp=['L2u', 'L2p'])
+        df1 = run_spatial('1d-rc-no-diffusion-strong-bc.i', 6,
+                          "--allow-test-objects",
+                          y_pp=['L2u', 'L2p'])
 
         fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
         fig.plot(df1, label=['L2u', 'L2p'], marker='o', markersize=8, num_fitted_points=3, slope_precision=1)

@@ -11,9 +11,8 @@
 #include "NS.h"
 #include "SinglePhaseFluidProperties.h"
 #include "Function.h"
-#include "MfrPostprocessor.h"
 
-registerMooseObject("NavierStokesApp", PINSFVFunctorBC);
+registerMooseObject("NavierStokesTestApp", PINSFVFunctorBC);
 
 InputParameters
 PINSFVFunctorBC::validParams()

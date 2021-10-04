@@ -216,7 +216,11 @@ class TestBasic1DVaryingPorousKTMixedUpwind(unittest.TestCase):
 
 class PWCNSFV(unittest.TestCase):
     def test(self):
-        df1 = run_spatial('pwcnsfv.i', 8, "--error", "--error-unused", y_pp=['L2sup_vel_x', 'L2pressure'])
+        df1 = run_spatial('pwcnsfv.i', 8,
+                          "--allow-test-objects",
+                          "--error",
+                          "--error-unused",
+                          y_pp=['L2sup_vel_x', 'L2pressure'])
 
         fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
         fig.plot(df1, label=['L2sup_vel_x', 'L2pressure'], marker='o', markersize=8, num_fitted_points=3, slope_precision=1)
