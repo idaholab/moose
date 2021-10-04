@@ -13,7 +13,7 @@
 #include "INSFVFlowBC.h"
 
 /**
- *  Evaluates boundary mass or momentum fluxes through functor evaluation of the superficial
+ * Evaluates boundary mass or momentum fluxes through functor evaluation of the superficial
  * velocities, pressure, density, and porosity
  */
 class PINSFVFunctorBC : public FVFluxBC, public INSFVFlowBC

@@ -17,7 +17,6 @@ template <bool is_ad>
 InputParameters
 GenericFunctionFunctorMaterialTempl<is_ad>::validParams()
 {
-
   InputParameters params = FunctorMaterial::validParams();
   params += SetupInterface::validParams();
   params.addClassDescription(

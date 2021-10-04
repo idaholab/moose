@@ -34,7 +34,7 @@ protected:
   /// Which momentum component this kernel applies to
   const int _index;
 
-  /// Velocity as material properties
+  /// Velocity as functors
   const Moose::Functor<ADRealVectorValue> * const _vel;
 
   /// the porosity as a variable to be able to compute a face gradient

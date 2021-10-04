@@ -28,7 +28,7 @@ PINSFVMomentumFriction::validParams()
   params.addParam<MaterialPropertyName>("momentum_name",
                                         "Name of the superficial momentum material property for "
                                         "the Darcy and Forchheimer friction terms.");
-  params.addParam<MooseFunctorName>("rho", 0, "Constant density to use with incompressible flow.");
+  params.addParam<MooseFunctorName>("rho", 0, "The density.");
   MooseEnum momentum_component("x=0 y=1 z=2");
   params.addRequiredParam<MooseEnum>(
       "momentum_component",

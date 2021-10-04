@@ -25,7 +25,7 @@ VolumetricFlowRate::validParams()
   params.addCoupledVar("vel_z", 0, "The z-axis velocity");
   params.addCoupledVar(
       "advected_variable", 0, "The advected variable quantity of which to study the flow");
-  params.addParam<MaterialPropertyName>(
+  params.addParam<MooseFunctorName>(
       "advected_mat_prop", 0, "The advected material property of which to study the flow");
   MooseEnum advected_interp_method("average upwind", "upwind");
   params.addParam<MooseEnum>("advected_interp_method",

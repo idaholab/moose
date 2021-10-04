@@ -19,7 +19,7 @@ INSFVMomentumGravity::validParams()
   params.addClassDescription(
       "Computes a body force due to gravity in Rhie-Chow based simulations.");
   params.addRequiredParam<RealVectorValue>("gravity", "Direction of the gravity vector");
-  params.addParam<MaterialPropertyName>(NS::density, NS::density, "The value for the density");
+  params.addParam<MooseFunctorName>(NS::density, NS::density, "The value for the density");
   MooseEnum momentum_component("x=0 y=1 z=2");
   params.addRequiredParam<MooseEnum>(
       "momentum_component",

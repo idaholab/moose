@@ -25,7 +25,6 @@ GenericConstantVectorFunctorMaterialTempl<is_ad>::validParams()
                                              "The values associated with the named properties. "
                                              "The vector lengths must be the same.");
   params.declareControllable("prop_values");
-  params.set<MooseEnum>("constant_on") = "SUBDOMAIN";
   return params;
 }
 

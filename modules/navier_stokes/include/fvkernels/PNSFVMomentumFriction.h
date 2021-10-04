@@ -35,7 +35,5 @@ protected:
   /// Porosity to compute the intersitial velocity from the superficial velocity
   const VariableValue & _eps;
   /// Momentum as a material property
-  const ADMaterialProperty<Real> * const _momentum;
-  /// Constant density, use only with incompressible flow
-  const Real _rho;
+  const ADMaterialProperty<Real> & _momentum;
 };

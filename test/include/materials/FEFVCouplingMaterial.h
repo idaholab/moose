@@ -13,7 +13,7 @@
 
 /**
  * A material that optionally couples both a finite element and finite volume variable (strictly
- * speaking they don't have to be one or the either)
+ * speaking they don't have to be one or the other)
  */
 class FEFVCouplingMaterial : public FunctorMaterial
 {

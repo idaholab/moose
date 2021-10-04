@@ -20,7 +20,7 @@ PINSFVMomentumDiffusion::validParams()
   params.addClassDescription("Viscous diffusion term, div(mu grad(u_d / eps)), in the porous media "
                              "incompressible Navier-Stokes momentum equation.");
   params.addRequiredCoupledVar("porosity", "Porosity auxiliary variable");
-  params.addRequiredParam<MaterialPropertyName>("mu", "viscosity");
+  params.addRequiredParam<MooseFunctorName>("mu", "viscosity");
   MooseEnum momentum_component("x=0 y=1 z=2", "x");
   params.addParam<MooseEnum>("momentum_component",
                              momentum_component,

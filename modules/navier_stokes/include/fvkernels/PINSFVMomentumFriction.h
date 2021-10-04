@@ -34,8 +34,8 @@ protected:
   const bool _use_Forchheimer_friction_model;
   /// Porosity to compute the intersitial velocity from the superficial velocity
   const Moose::Functor<ADReal> & _eps;
-  /// Momentum as a material property
+  /// Momentum as a functor
   const Moose::Functor<ADReal> * const _momentum;
-  /// Constant density, use only with incompressible flow
+  /// Density as a functor
   const Moose::Functor<ADReal> & _rho;
 };

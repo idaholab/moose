@@ -54,7 +54,7 @@ INSFVMomentumAdvection::validParams()
       "The interpolation to use for the velocity. Options are "
       "'average' and 'rc' which stands for Rhie-Chow. The default is Rhie-Chow.");
 
-  params.addRequiredParam<MaterialPropertyName>("mu", "The viscosity functor material property");
+  params.addRequiredParam<MooseFunctorName>("mu", "The viscosity functor material property");
   params.addRequiredParam<MaterialPropertyName>("rho", "Density functor material property");
 
   // We need 2 ghost layers for the Rhie-Chow interpolation

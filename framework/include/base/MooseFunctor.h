@@ -73,7 +73,7 @@ public:
 
   /**
    * People should think of this geometric argument as corresponding to the location in space of the
-   * provided element centroid, \b not as corresonding the location of the provided face
+   * provided element centroid, \b not as corresponding to the location of the provided face
    * information. Summary of data in this argument:
    * - an element, whose centroid we should think of as the evaluation point. It is possible that\n
    *   the element will be a nullptr in which case, the evaluation point should be thought of as\n
@@ -215,7 +215,7 @@ private:
   /// Current key for qp map cache
   mutable dof_id_type _current_qp_map_key = DofObject::invalid_id;
 
-  /// Current value for qp mach cache
+  /// Current value for qp map cache
   mutable std::vector<std::pair<bool, T>> * _current_qp_map_value = nullptr;
 
   /// Cached element quadrature point functor property evaluations. The map key is the element
