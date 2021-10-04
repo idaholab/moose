@@ -68,11 +68,8 @@ public:
    *   passed-in subdomain IDs will both correspond to the subdomain ID that the flux kernel is\n
    *   defined on
    */
-  using FaceArg =
-      std::tuple<const FaceInfo *,
-                 const Moose::FV::Limiter<typename Moose::FV::LimiterValueType<T>::value_type> *,
-                 bool,
-                 std::pair<SubdomainID, SubdomainID>>;
+  using FaceArg = std::
+      tuple<const FaceInfo *, Moose::FV::LimiterType, bool, std::pair<SubdomainID, SubdomainID>>;
 
   /**
    * People should think of this geometric argument as corresponding to the location in space of the

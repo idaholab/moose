@@ -22,7 +22,7 @@ FVDiffusion::validParams()
 }
 
 FVDiffusion::FVDiffusion(const InputParameters & params)
-  : FVFluxKernel(params), _coeff(getFunctor<ADReal>("coeff")), _cd_limiter()
+  : FVFluxKernel(params), _coeff(getFunctor<ADReal>("coeff"))
 {
 }
 
@@ -34,7 +34,8 @@ FVDiffusion::computeQpResidual()
   // Eventually, it will be nice to offer automatic-switching triggered by
   // input parameters to change between different interpolation methods for
   // this.
-  const auto k = _coeff(std::make_tuple(_face_info, &_cd_limiter, true, faceArgSubdomains()));
+  const auto k = _coeff(std::make_tuple(
+      _face_info, Moose::FV::LimiterType::CentralDifference, true, faceArgSubdomains()));
 
   return -1 * k * dudn;
 }

@@ -565,8 +565,7 @@ MooseVariableFV<OutputType>::getInternalFaceValue(const FaceArg & face) const
 {
   const FaceInfo * const fi = std::get<0>(face);
   mooseAssert(fi, "The face information must be non-null");
-  const Moose::FV::Limiter<ADReal> * const limiter = std::get<1>(face);
-  mooseAssert(limiter, "the limiter must be non-null");
+  auto limiter = Moose::FV::Limiter<ADReal>::build(std::get<1>(face));
   const bool elem_is_upwind = std::get<2>(face);
 
   const auto elem_value = getElemValue(&fi->elem());

@@ -11,7 +11,6 @@
 
 #include "FVMatAdvectionOutflowBC.h"
 #include "INSFVFullyDevelopedFlowBC.h"
-#include "CentralDifferenceLimiter.h"
 
 class INSFVVelocityVariable;
 
@@ -39,7 +38,4 @@ protected:
 
   /// the dimension of the simulation
   const unsigned int _dim;
-
-  /// A "dummy" limiter required to call face-argument functor overloads
-  Moose::FV::CentralDifferenceLimiter<ADReal> _cd_limiter;
 };

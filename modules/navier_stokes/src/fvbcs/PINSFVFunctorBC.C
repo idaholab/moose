@@ -52,8 +52,7 @@ PINSFVFunctorBC::PINSFVFunctorBC(const InputParameters & params)
     _rho(getFunctor<ADReal>(NS::density)),
     _eps(getFunctor<ADReal>(NS::porosity)),
     _eqn(getParam<MooseEnum>("eqn")),
-    _index(getParam<MooseEnum>("momentum_component")),
-    _cd_limiter()
+    _index(getParam<MooseEnum>("momentum_component"))
 {
   if ((_eqn == "momentum") && !isParamValid("momentum_component"))
     paramError("eqn",
@@ -73,7 +72,8 @@ PINSFVFunctorBC::computeQpResidual()
 
   // No interpolation on a boundary so argument values to fi_elem_is_upwind do not
   // matter
-  const auto face = std::make_tuple(_face_info, &_cd_limiter, true, faceArgSubdomains());
+  const auto face = std::make_tuple(
+      _face_info, Moose::FV::LimiterType::CentralDifference, true, faceArgSubdomains());
   const VectorValue<ADReal> sup_vel(_sup_vel_x(face),
                                     _sup_vel_y ? (*_sup_vel_y)(face) : ADReal(0),
                                     _sup_vel_z ? (*_sup_vel_z)(face) : ADReal(0));

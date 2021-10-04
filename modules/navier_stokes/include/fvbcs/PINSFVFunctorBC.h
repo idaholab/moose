@@ -11,7 +11,6 @@
 
 #include "FVFluxBC.h"
 #include "INSFVFlowBC.h"
-#include "CentralDifferenceLimiter.h"
 
 /**
  *  Evaluates boundary mass or momentum fluxes through functor evaluation of the superficial
@@ -43,7 +42,4 @@ protected:
   /// If computing the boundary fluxes for the momentum equation, this denotes the component of the
   /// momentum equation we are computing for
   const unsigned int _index;
-
-  /// A "dummy" limiter required to call face-argument functor overloads
-  Moose::FV::CentralDifferenceLimiter<ADReal> _cd_limiter;
 };

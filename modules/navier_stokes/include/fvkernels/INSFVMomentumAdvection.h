@@ -110,10 +110,6 @@ protected:
                             std::vector<std::unordered_map<const Elem *, VectorValue<ADReal>>>>
       _rc_a_coeffs;
 
-  /// Central difference limiter which provides a convenient way to construct average interpolations
-  /// at faces
-  std::unique_ptr<Moose::FV::Limiter<ADReal>> _cd_limiter;
-
 private:
   /**
    * Query for \p INSFVBCs::INSFVFlowBC on \p bc_id and add if query successful

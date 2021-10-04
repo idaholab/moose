@@ -173,43 +173,38 @@ template <typename T>
 typename FunctorMaterialProperty<T>::ValueType
 FunctorMaterialProperty<T>::evaluate(const FaceArg & face, unsigned int state) const
 {
+  using namespace Moose::FV;
+
   const auto elem_sub_id = std::get<3>(face).first;
   const auto neighbor_sub_id = std::get<3>(face).second;
-  const auto * const limiter = std::get<1>(face);
-  mooseAssert(limiter,
-              "We must have a non-null limiter in order to decide how to interpolate a functor "
-              "material property");
+  const auto limiter = std::get<1>(face);
   const auto * const face_info = std::get<0>(face);
   mooseAssert(face_info,
               "We must have a non-null face_info in order to prepare our ElemFromFace tuples");
   const bool fi_elem_is_upwind = std::get<2>(face);
   static const typename libMesh::TensorTools::IncrementRank<T>::type example_gradient(0);
 
-  switch (limiter->interpMethod())
+  switch (limiter)
   {
-    case Moose::FV::InterpMethod::Average:
-    case Moose::FV::InterpMethod::Upwind:
+    case LimiterType::CentralDifference:
+    case LimiterType::Upwind:
     {
       const auto elem_from_face = std::make_tuple(&face_info->elem(), face_info, elem_sub_id);
       const auto neighbor_from_face =
           std::make_tuple(face_info->neighborPtr(), face_info, neighbor_sub_id);
       const auto & upwind_elem = fi_elem_is_upwind ? elem_from_face : neighbor_from_face;
       const auto & downwind_elem = fi_elem_is_upwind ? neighbor_from_face : elem_from_face;
-      return Moose::FV::interpolate(*limiter,
-                                    evaluate(upwind_elem, state),
-                                    evaluate(downwind_elem, state),
-                                    &example_gradient,
-                                    *face_info,
-                                    fi_elem_is_upwind);
+      auto limiter_obj = Limiter<typename LimiterValueType<T>::value_type>::build(limiter);
+      return interpolate(*limiter_obj,
+                         evaluate(upwind_elem, state),
+                         evaluate(downwind_elem, state),
+                         &example_gradient,
+                         *face_info,
+                         fi_elem_is_upwind);
     }
 
     default:
-    {
-      mooseAssert(!limiter->constant(),
-                  "If the limiter is constant, then we should be able to build it into the functor "
-                  "material property switch-case statement at faces");
       mooseError("Unsported limiter type in FunctorMaterialProperty::evaluate(FaceArg)");
-    }
   }
 }
 

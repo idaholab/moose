@@ -106,9 +106,12 @@ PINSFVMomentumAdvection::coeffCalculator(const Elem & elem) const
     // Rhie-Chow coefficient for. "neighbor" is the element across the current FaceInfo (fi)
     // face from the Rhie-Chow element
 
-    const auto face_mu = _mu(std::make_tuple(fi, _cd_limiter.get(), true, faceArgSubdomains(fi)));
-    const auto face_rho = _rho(std::make_tuple(fi, _cd_limiter.get(), true, faceArgSubdomains(fi)));
-    const auto face_eps = _eps(std::make_tuple(fi, _cd_limiter.get(), true, faceArgSubdomains(fi)));
+    const auto face_mu = _mu(std::make_tuple(
+        fi, Moose::FV::LimiterType::CentralDifference, true, faceArgSubdomains(fi)));
+    const auto face_rho = _rho(std::make_tuple(
+        fi, Moose::FV::LimiterType::CentralDifference, true, faceArgSubdomains(fi)));
+    const auto face_eps = _eps(std::make_tuple(
+        fi, Moose::FV::LimiterType::CentralDifference, true, faceArgSubdomains(fi)));
 
     if (onBoundary(*fi))
     {
@@ -322,8 +325,8 @@ PINSFVMomentumAdvection::interpolate(Moose::FV::InterpMethod m, ADRealVectorValu
       Moose::FV::InterpMethod::Average, face_D, elem_D, neighbor_D, *_face_info, true);
 
   // evaluate face porosity, see (18) in Hanimann 2021 or (11) in Nordlund 2016
-  const auto face_eps =
-      _eps(std::make_tuple(_face_info, _cd_limiter.get(), true, faceArgSubdomains()));
+  const auto face_eps = _eps(std::make_tuple(
+      _face_info, Moose::FV::LimiterType::CentralDifference, true, faceArgSubdomains()));
 
   // perform the pressure correction
   for (const auto i : make_range(_dim))

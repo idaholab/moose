@@ -48,10 +48,11 @@ TEST_F(ParsedFunctionTest, basicConstructor)
   f_functor = f(std::make_tuple(elem, fi, elem->subdomain_id()), 0);
   EXPECT_EQ(f_traditional, f_functor);
   f_traditional = f.value(0, fi->faceCentroid());
-  f_functor =
-      f(std::make_tuple(
-            fi, nullptr, true, std::make_pair(elem->subdomain_id(), neighbor->subdomain_id())),
-        0);
+  f_functor = f(std::make_tuple(fi,
+                                Moose::FV::LimiterType::CentralDifference,
+                                true,
+                                std::make_pair(elem->subdomain_id(), neighbor->subdomain_id())),
+                0);
   EXPECT_EQ(f_traditional, f_functor);
 
   const FEFamily mapping_family = FEMap::map_fe_type(*elem);

@@ -77,8 +77,7 @@ INSFVMomentumAdvection::INSFVMomentumAdvection(const InputParameters & params)
                ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("w", 0))
                : nullptr),
     _rho(getFunctor<ADReal>("rho")),
-    _dim(_subproblem.mesh().dimension()),
-    _cd_limiter(Moose::FV::Limiter<ADReal>::build(Moose::FV::LimiterType::CentralDifference))
+    _dim(_subproblem.mesh().dimension())
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
@@ -322,8 +321,10 @@ INSFVMomentumAdvection::coeffCalculator(const Elem & elem) const
           "Let's make sure our normal is what we think it is");
 #endif
 
-    const auto face_mu = _mu(std::make_tuple(fi, _cd_limiter.get(), true, faceArgSubdomains(fi)));
-    const auto face_rho = _rho(std::make_tuple(fi, _cd_limiter.get(), true, faceArgSubdomains(fi)));
+    const auto face_mu = _mu(std::make_tuple(
+        fi, Moose::FV::LimiterType::CentralDifference, true, faceArgSubdomains(fi)));
+    const auto face_rho = _rho(std::make_tuple(
+        fi, Moose::FV::LimiterType::CentralDifference, true, faceArgSubdomains(fi)));
 
     // Unless specified otherwise, "elem" here refers to the element we're computing the
     // Rhie-Chow coefficient for. "neighbor" is the element across the current FaceInfo (fi)
