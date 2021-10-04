@@ -15,12 +15,19 @@
                     3 3 1 3
                     1 1 1 1'
   []
+  [sideset]
+    type = SideSetsBetweenSubdomainsGenerator
+    input = eg
+    primary_block = 1
+    paired_block = 2
+    new_boundary = sideset_1
+  []
   [refine]
     type = RefineSidesetGenerator
-    input = eg
-    boundaries = 'left'
-    refinement = '3'
-    boundary_side = 'primary'
+    input = sideset
+    boundaries = 'sideset_1'
+    refinement = '2'
+    boundary_side = 'secondary'
     enable_neighbor_refinement = false
   []
 []

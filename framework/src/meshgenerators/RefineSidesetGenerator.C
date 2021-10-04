@@ -55,11 +55,11 @@ RefineSidesetGenerator::generate()
 {
   // Get the list of boundary ids from the boundary names
   const auto boundary_ids = MooseMeshUtils::getBoundaryIDs(
-      *_input, getParam<std::vector<BoundaryName>>("boundaries"), true);
+      *_input, getParam<std::vector<BoundaryName>>("boundaries"), false);
 
   // Check that the boundary ids/names exist in the mesh
   for (std::size_t i = 0; i < boundary_ids.size(); ++i)
-    if (boundary_ids[i] == Moose::INVALID_BOUNDARY_ID && isParamValid("boundaries"))
+    if (boundary_ids[i] == Moose::INVALID_BOUNDARY_ID)
       paramError("boundaries",
                  "The boundary '",
                  getParam<std::vector<BoundaryName>>("boundaries")[i],
