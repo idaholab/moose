@@ -1,0 +1,31 @@
+[Tests]
+  design = 'vectorpostprocessors/ExtraIDIntegralVectorPostprocessor.md'
+  issues = '#19617'
+  [test]
+    requirement = 'The system shall be able to integrate variables parsed by extra IDs'
+    [default]
+      type = 'CSVDiff'
+      input = 'extra_id_vpp.i'
+      csvdiff = 'extra_id_vpp_default_integral_0001.csv'
+      cli_args = "Outputs/file_base='extra_id_vpp_default'"
+      detail = 'with a single variable integral and a single extra ID'
+      recover = false
+    []
+    [multi_ids]
+      type = 'CSVDiff'
+      input = 'extra_id_vpp.i'
+      csvdiff = 'extra_id_vpp_multi_ids_integral_0001.csv'
+      cli_args = "VectorPostprocessors/integral/id_name='assembly_id pin_id' Outputs/file_base='extra_id_vpp_multi_ids'"
+      detail = 'with a single variable integral and multiple extra IDs'
+      recover = false
+    []
+    [multi_ids_multi_vars]
+      type = 'CSVDiff'
+      input = 'extra_id_vpp.i'
+      csvdiff = 'extra_id_vpp_multi_vars_integral_0001.csv'
+      cli_args = "VectorPostprocessors/integral/id_name='assembly_id pin_id' VectorPostprocessors/integral/variable='value1 value2' Outputs/file_base='extra_id_vpp_multi_vars'"
+      detail = 'with multiple variable integrals and multiple extra IDs'
+      recover = false
+    []
+  []
+[]
