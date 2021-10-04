@@ -182,7 +182,8 @@ InputParameterWarehouse::addControllableParameterConnection(
 
     for (auto primary_ptr : primaries)
       for (auto secondary_ptr : secondaries)
-        if (primary_ptr != secondary_ptr)
+        if ((primary_ptr != secondary_ptr) &&
+            (primary_ptr->name().parameter() == secondary_ptr->name().parameter()))
           primary_ptr->connect(secondary_ptr);
   }
 }
