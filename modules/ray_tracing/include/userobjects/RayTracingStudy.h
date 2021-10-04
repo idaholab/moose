@@ -551,7 +551,7 @@ public:
    * @param name The name of said ray
    * @param graceful Whether or not to exit gracefully if none is found (with invalid_id)
    */
-  RayID registeredRayID(const std::string & name, const bool graceful) const;
+  RayID registeredRayID(const std::string & name, const bool graceful = false) const;
   /**
    * Gets the name of a registered ray
    * @param ray_id The ID of said ray
