@@ -5,6 +5,9 @@ in which the velocity and temperature are specified.
 
 ## Usage
 
+This component must be connected to a [/FlowChannel1Phase.md]. See
+[how to connect a flow boundary component](component_groups/flow_boundary.md#usage).
+
 The user specifies the following parameters:
 
 - [!param](/Components/InletVelocityTemperature1Phase/vel): the velocity, and

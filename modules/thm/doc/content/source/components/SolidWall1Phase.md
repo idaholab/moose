@@ -6,6 +6,9 @@ ends with no inlet or outlet.
 
 ## Usage
 
+This component must be connected to a [/FlowChannel1Phase.md]. See
+[how to connect a flow boundary component](component_groups/flow_boundary.md#usage).
+
 !syntax parameters /Components/SolidWall1Phase
 
 !syntax inputs /Components/SolidWall1Phase

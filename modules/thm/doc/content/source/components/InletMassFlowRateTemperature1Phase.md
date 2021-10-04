@@ -7,6 +7,9 @@ and temperature are known.
 
 ## Usage
 
+This component must be connected to a [/FlowChannel1Phase.md]. See
+[how to connect a flow boundary component](component_groups/flow_boundary.md#usage).
+
 The user specifies the following parameters:
 
 - [!param](/Components/InletMassFlowRateTemperature1Phase/m_dot): the mass flow rate, and

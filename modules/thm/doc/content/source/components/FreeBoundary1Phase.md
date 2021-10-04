@@ -7,6 +7,9 @@ which no external characteristics enter the domain.
 
 ## Usage
 
+This component must be connected to a [/FlowChannel1Phase.md]. See
+[how to connect a flow boundary component](component_groups/flow_boundary.md#usage).
+
 !syntax parameters /Components/FreeBoundary1Phase
 
 !syntax inputs /Components/FreeBoundary1Phase

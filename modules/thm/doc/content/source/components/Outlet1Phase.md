@@ -6,6 +6,9 @@ boundary is anticipated to be an outlet.
 
 ## Usage
 
+This component must be connected to a [/FlowChannel1Phase.md]. See
+[how to connect a flow boundary component](component_groups/flow_boundary.md#usage).
+
 The user specifies the following parameters:
 
 - [!param](/Components/Outlet1Phase/p): the pressure.
