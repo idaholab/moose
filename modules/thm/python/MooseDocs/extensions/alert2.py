@@ -37,7 +37,7 @@ class Alert2Command(command.CommandComponent):
         settings = command.CommandComponent.defaultSettings()
         return settings
 
-    def createToken(self, parent, info, page):
+    def createToken(self, parent, info, page, settings):
         brand = info['subcommand']
         return Alert2Token(parent, brand=brand)
 
