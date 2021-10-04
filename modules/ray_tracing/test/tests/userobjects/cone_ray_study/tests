@@ -17,4 +17,57 @@
       detail = 'and in three-dimensional meshes.'
     []
   []
+
+  [errors]
+    requirement = 'The ConeRayStudy shall repot a useful error when'
+    [direction_size]
+      type = 'RunException'
+      input = 'cone_ray_study_errors.i'
+      cli_args = "UserObjects/study/directions='2 1 0 1 0 0'"
+      expect_err = 'Not the same size as start_points'
+      detail = 'the provided directions are inconsistent in size'
+    []
+    [scaling_factors_size]
+      type = 'RunException'
+      input = 'cone_ray_study_errors.i'
+      cli_args = "UserObjects/study/scaling_factors='1 1'"
+      expect_err = 'Not the same size as start_points'
+      detail = 'the provided scaling factors are inconsistent in size'
+    []
+    [half_cone_angles_size]
+      type = 'RunException'
+      input = 'cone_ray_study_errors.i'
+      cli_args = "UserObjects/study/half_cone_angles='1 1'"
+      expect_err = 'Not the same size as start_points'
+      detail = 'the provided half cone angles are inconsistent in size'
+    []
+    [half_cone_angles_valid]
+      type = 'RunException'
+      input = 'cone_ray_study_errors.i'
+      cli_args = "UserObjects/study/half_cone_angles='-10'"
+      expect_err = 'Must be > 0 and <= 90 degrees'
+      detail = 'the provided half cone angles are not valid angles'
+    []
+    [polar_quad_orders_size]
+      type = 'RunException'
+      input = 'cone_ray_study_errors.i'
+      cli_args = "UserObjects/study/polar_quad_orders='1 2'"
+      expect_err = 'Not the same size as start_points'
+      detail = 'the provided polar quadrature orders are inconsistent in size'
+    []
+    [azimuthal_quad_orders_size]
+      type = 'RunException'
+      input = 'cone_ray_study_errors.i'
+      cli_args = "UserObjects/study/azimuthal_quad_orders='1 2'"
+      expect_err = 'Not the same size as start_points'
+      detail = 'the provided azimuthal quadrature orders are inconsistent in size'
+    []
+    [1d]
+      type = 'RunException'
+      input = 'cone_ray_study_errors.i'
+      cli_args = 'Mesh/active=1d Mesh/1d/type=GeneratedMeshGenerator Mesh/1d/dim=1'
+      expect_err = 'Does not support 1D'
+      detail = 'it is run with an invalid mesh dimension'
+    []
+  []
 []
