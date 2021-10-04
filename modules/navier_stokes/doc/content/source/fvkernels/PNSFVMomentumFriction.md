@@ -1,33 +1,28 @@
-# PINSFVMomentumFriction
+# PNSFVMomentumFriction
 
-This kernel adds the friction term to the porous media Navier Stokes
-momentum equations. This kernel should be used with a superficial velocity
-variable unless `momentum_name` is provided.
-A variety of models are supported for the friction force:
+This kernel adds the friction term to the fully compressible porous media Navier
+Stokes momentum equations. This kernel requires that the parameter
+`momentum_name` is provided.  Darcy and Forchheimer models, as well as the
+superposition of the two, are supported for the friction force:
 
-Linear friction, for laminar flow
-\begin{equation}
-F_i = - f v_i
-\end{equation}
-Quadratic friction, for turbulent flow
-\begin{equation}
-F_i = - f v_i |v_i|
-\end{equation}
 Darcy drag model
 \begin{equation}
-F_i = - \dfrac{f_i}{\epsilon} \rho v_i
+F_i = - \dfrac{d_i}{\epsilon} p_i
 \end{equation}
 Forchheimer drag model
 \begin{equation}
-F_i = - \dfrac{f_i}{\epsilon} \rho v_i
+F_i = - \dfrac{f_i}{\epsilon} \rho p_i
 \end{equation}
-where $F_i$ is the i-th component of the friction force, f the friction factor, which may be anisotropic,
-$\epsilon$ the porosity and $\rho$ the fluid density and $v_i$ the fluid superficial velocity. The
-Darcy and Forchheimer drags may also be expressed with a momentum material property using the
-`momentum_name` parameter.
+where $F_i$ is the i-th component of the friction force, $d_i$ is the i-th
+component of the Darcy friction factor,
+$\epsilon$ is the porosity, $p_i$ is the ith-component of the momentum, and
+$f_i$ is the ith-component of the Forchheimer friction factor. If both
+`Darcy_name` and `Forchheimer_name` parameters are supplied, then the drag
+forces from the two models will be summed. The component is determined by the
+`momentum_component` parameter.
 
-!syntax parameters /FVKernels/PINSFVMomentumFriction
+!syntax parameters /FVKernels/PNSFVMomentumFriction
 
-!syntax inputs /FVKernels/PINSFVMomentumFriction
+!syntax inputs /FVKernels/PNSFVMomentumFriction
 
-!syntax children /FVKernels/PINSFVMomentumFriction
+!syntax children /FVKernels/PNSFVMomentumFriction

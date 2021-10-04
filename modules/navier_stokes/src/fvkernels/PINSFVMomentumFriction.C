@@ -24,11 +24,7 @@ PINSFVMomentumFriction::validParams()
   params.addParam<MaterialPropertyName>("Forchheimer_name",
                                         "Name of the Forchheimer coefficients material property.");
   params.addParam<MooseFunctorName>(NS::porosity, NS::porosity, "Porosity variable.");
-
-  params.addParam<MaterialPropertyName>("momentum_name",
-                                        "Name of the superficial momentum material property for "
-                                        "the Darcy and Forchheimer friction terms.");
-  params.addParam<MooseFunctorName>("rho", 0, "The density.");
+  params.addRequiredParam<MooseFunctorName>("rho", "The density.");
   MooseEnum momentum_component("x=0 y=1 z=2");
   params.addRequiredParam<MooseEnum>(
       "momentum_component",
@@ -46,16 +42,10 @@ PINSFVMomentumFriction::PINSFVMomentumFriction(const InputParameters & params)
     _use_Darcy_friction_model(isParamValid("Darcy_name")),
     _use_Forchheimer_friction_model(isParamValid("Forchheimer_name")),
     _eps(getFunctor<ADReal>(NS::porosity)),
-    _momentum(isParamValid("momentum_name") ? &getFunctor<ADReal>("momentum_name") : nullptr),
     _rho(getFunctor<ADReal>("rho"))
 {
   if (!_use_Darcy_friction_model && !_use_Forchheimer_friction_model)
     mooseError("At least one friction model needs to be specified.");
-
-  if ((_use_Darcy_friction_model || _use_Forchheimer_friction_model) &&
-      !params.isParamSetByUser("rho") && !isParamValid("momentum_name"))
-    mooseError("The density (rho) or the momentum material property name should be specified to "
-               "use the Darcy or Forchheimer friction models.");
 }
 
 ADReal
@@ -63,24 +53,12 @@ PINSFVMomentumFriction::computeQpResidual()
 {
   ADReal friction_term = 0;
 
-  if (!_momentum)
-  {
-    if (_use_Darcy_friction_model)
-      friction_term += (*_cL)(_current_elem)(_index)*_rho(_current_elem) *
-                       _u_functor(_current_elem) / _eps(_current_elem);
-    if (_use_Forchheimer_friction_model)
-      friction_term += (*_cQ)(_current_elem)(_index)*_rho(_current_elem) *
-                       _u_functor(_current_elem) / _eps(_current_elem);
-  }
-  else
-  {
-    if (_use_Darcy_friction_model)
-      friction_term +=
-          (*_cL)(_current_elem)(_index) * (*_momentum)(_current_elem) / _eps(_current_elem);
-    if (_use_Forchheimer_friction_model)
-      friction_term +=
-          (*_cQ)(_current_elem)(_index) * (*_momentum)(_current_elem) / _eps(_current_elem);
-  }
+  if (_use_Darcy_friction_model)
+    friction_term += (*_cL)(_current_elem)(_index)*_rho(_current_elem) * _u_functor(_current_elem) /
+                     _eps(_current_elem);
+  if (_use_Forchheimer_friction_model)
+    friction_term += (*_cQ)(_current_elem)(_index)*_rho(_current_elem) * _u_functor(_current_elem) /
+                     _eps(_current_elem);
 
   return friction_term;
 }
