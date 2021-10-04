@@ -1,6 +1,6 @@
 [Tests]
   [rom]
-    issues = '#14046 #16520'
+    issues = '#14046 #16520 #17287'
     design = '/LAROMANCE.md'
     requirement = 'The system shall compute a creep rate based on a reduced order model '
     [3d]
@@ -9,6 +9,16 @@
       csvdiff = '3d_out.csv'
       detail = 'in 3D.'
       petsc_version = '>=3.9.0'
+      allow_test_objects = true
+    []
+
+    [3d_MPA]
+      type = 'CSVDiff'
+      prereq = 'rom/3d'
+      input = '3d.i'
+      cli_args = 'stress_unit=MPa E=3.3e5 p=1e-1'
+      csvdiff = '3d_out.csv'
+      detail = 'with units of stress other than Pascal.'
       allow_test_objects = true
     []
 
@@ -72,6 +82,15 @@
       cli_args = 'Outputs/file_base=3d_out'
       detail = 'in 3D.'
       petsc_version = '>=3.9.0'
+      allow_test_objects = true
+    []
+    [3d_MPA]
+      type = 'CSVDiff'
+      prereq = 'rom/3d'
+      input = 'AD3d.i'
+      cli_args = 'stress_unit=MPa E=3.3e5 p=1e-1 Outputs/file_base=3d_out'
+      csvdiff = '3d_out.csv'
+      detail = 'with units of stress other than Pascal.'
       allow_test_objects = true
     []
     [3d-jac]
