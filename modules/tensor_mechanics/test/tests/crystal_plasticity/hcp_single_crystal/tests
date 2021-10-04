@@ -1,0 +1,191 @@
+[Tests]
+  [constitutive_model]
+    issues = '#18846'
+    design = '/CrystalPlasticityHCPDislocationSlipBeyerleinUpdate.md'
+    requirement = 'The model for HCP crystal plasticity, using the '
+                  'Beyerlein and Tome (2008) constitutive model, shall:'
+    [update_method_hcp_aprismatic_capyramidal]
+      type = 'CSVDiff'
+      input = 'update_method_hcp_aprismatic_capyramidal.i'
+      csvdiff = 'update_method_hcp_aprismatic_capyramidal_out.csv'
+      allow_warnings = true
+      detail =  'compute the slip system strength and resolved applied shear '
+                'stress for the prismatic<a> and pyramidal<c+a> slip systems when '
+                'loaded along the c-axis;'
+    []
+    [update_method_hcp_aprismatic_active]
+      type = 'CSVDiff'
+      input = 'update_method_hcp_aprismatic_active.i'
+      csvdiff = 'update_method_hcp_aprismatic_active_out.csv'
+      allow_warnings = true
+      detail = 'evolve the forest dislocation and substructure densities on '
+               'prismatic<a> slip planes when loaded in an appropriate orientation;'
+    []
+    [update_method_hcp_capyramidal_active]
+      type = 'CSVDiff'
+      input = 'update_method_hcp_capyramidal_active.i'
+      csvdiff = 'update_method_hcp_capyramidal_active_out.csv'
+      allow_warnings = true
+      detail = 'evolve the forest dislocation densities on pyramidal <c+a> slip '
+               'planes and the substructure density when the crystal is loaded in '
+               'an appropriate orientation.'
+    []
+    [update_method_hcp_no_substructure]
+      type = 'CSVDiff'
+      input = 'update_method_hcp_no_substructure.i'
+      csvdiff = 'update_method_hcp_no_substructure_out.csv'
+      allow_warnings = true
+      detail = 'prevent the calculation of a negative substructure density increment.'
+    []
+    [update_method_hcp_no_negative_aprismatic]
+      type = 'CSVDiff'
+      input = 'update_method_hcp_no_negative_aprismatic.i'
+      csvdiff = 'update_method_hcp_no_negative_aprismatic_out.csv'
+      allow_warnings = true
+      detail = 'prevent the calculation of a negative total forest density.'
+    []
+    [update_method_hcp_size_slip_modes]
+      type = 'RunException'
+      input = 'update_method_hcp_aprismatic_capyramidal.i'
+      cli_args = 'Materials/trial_xtalpl/number_slip_systems_per_mode="3 3 9"'
+      expect_err = 'The size the number of slip systems per mode is not equal to '
+                   'the number of slip system types'
+      detail =  'ensure the user specifies a number of the slip systems per mode '
+                'which is equal to the number of modes;'
+    []
+    [update_method_hcp_sum_slip_modes_vs_systems]
+      type = 'RunException'
+      input = 'update_method_hcp_aprismatic_capyramidal.i'
+      cli_args = 'Materials/trial_xtalpl/number_slip_systems_per_mode="3 15"'
+      expect_err = 'The number of slip systems and the sum of the slip systems in '
+                   'each of the slip system modes are not equal'
+      detail =  'ensure the user specifies an equal total number of slip systems '
+                ' and the sum of the different slip mode systems;'
+    []
+    [update_method_hcp_size_burgers_vectors]
+      type = 'RunException'
+      input = 'update_method_hcp_aprismatic_capyramidal.i'
+      cli_args = 'Materials/trial_xtalpl/burgers_vector_per_mode="2"'
+      expect_err = 'Please ensure that the size of burgers_vector_per_mode equals '
+                   'the value supplied for slip_system_modes'
+      detail =  'ensure the user specifies a number of burgers vectors per mode '
+                'that is equal to the number of modes;'
+    []
+    [update_method_hcp_size_slip_generation]
+      type = 'RunException'
+      input = 'update_method_hcp_aprismatic_capyramidal.i'
+      cli_args = 'Materials/trial_xtalpl/slip_generation_coefficient_per_mode="1 2 3"'
+      expect_err = 'Please ensure that the size of slip_generation_coefficient_per_mode '
+                   'equals the value supplied for slip_system_modes'
+      detail =  'ensure the user specifies a number of slip generation coefficient '
+                'per mode that is equal to the number of modes;'
+    []
+    [update_method_hcp_size_activation_energy]
+      type = 'RunException'
+      input = 'update_method_hcp_aprismatic_capyramidal.i'
+      cli_args = 'Materials/trial_xtalpl/normalized_slip_activiation_energy_per_mode="1 2 3 4"'
+      expect_err = 'Please ensure that the size of normalized_slip_activiation_energy_per_mode '
+                   'equals the value supplied for slip_system_modes'
+      detail =  'ensure the user specifies a size of slip activation energy per '
+                'mode that is equal to the specified number of modes;'
+    []
+    [update_method_hcp_size_proportionality_factor]
+      type = 'RunException'
+      input = 'update_method_hcp_aprismatic_capyramidal.i'
+      cli_args = 'Materials/trial_xtalpl/slip_energy_proportionality_factor_per_mode="1"'
+      expect_err = 'Please ensure that the size of slip_energy_proportionality_factor_per_mode '
+                   'equals the value supplied for slip_system_modes'
+      detail =  'ensure the user specifies a size of slip energy proportionality '
+                'factor per mode that is equal to the specified number of modes;'
+    []
+    [update_method_hcp_size_shear_modulus]
+      type = 'RunException'
+      input = 'update_method_hcp_aprismatic_capyramidal.i'
+      cli_args = 'Materials/trial_xtalpl/effective_shear_modulus_per_mode="1"'
+      expect_err = 'Please ensure that the size of effective_shear_modulus_per_mode '
+                   'equals the value supplied for slip_system_modes'
+      detail =  'ensure the user specifies a size of effective shear modulus per '
+                'mode that is equal to the specified number of modes;'
+    []
+    [update_method_hcp_size_substructure_rate]
+      type = 'RunException'
+      input = 'update_method_hcp_aprismatic_capyramidal.i'
+      cli_args = 'Materials/trial_xtalpl/substructure_rate_coefficient_per_mode="3 2 1"'
+      expect_err = 'Please ensure that the size of substructure_rate_coefficient_per_mode '
+                   'equals the value supplied for slip_system_modes'
+      detail =  'ensure the user specifies a size of substructure generation rate '
+                'coefficient per mode that is equal to the specified number of modes;'
+    []
+    [update_method_hcp_size_hall_petch]
+      type = 'RunException'
+      input = 'update_method_hcp_aprismatic_capyramidal.i'
+      cli_args = 'Materials/trial_xtalpl/Hall_Petch_like_constant_per_mode="1"'
+      expect_err = 'Please ensure that the size of Hall_Petch_like_constant_per_mode '
+                   'equals the value supplied for slip_system_modes'
+      detail =  'ensure the user specifies a size of Hall-Petch like coefficient '
+                'per mode that is equal to the specified number of modes;'
+    []
+    [update_method_hcp_size_lattice_friction]
+      type = 'RunException'
+      input = 'update_method_hcp_aprismatic_capyramidal.i'
+      cli_args = 'Materials/trial_xtalpl/lattice_friction_per_mode="3"'
+      expect_err = 'Please ensure that the size of lattice_friction_per_mode '
+                   'equals the value supplied for slip_system_modes'
+      detail =  'ensure the user specifies a size of lattice friction values per '
+                'mode that is equal to the specified number of modes;'
+    []
+  []
+  [base_class_hcp]
+    issues = '#18846'
+    design = '/ComputeMultipleCrystalPlasticityStress.md'
+    requirement = 'The HCP crystal plasticity capability shall:'
+    [update_method_hcp_representative_slip_systems]
+      type = 'CSVDiff'
+      input = 'update_method_hcp_representative_slip_systems.i'
+      csvdiff = 'update_method_hcp_representative_slip_systems_out.csv'
+      allow_warnings = true
+      detail = ' compute the Schmid tensors and resulting resolved '
+               'applied shear stress for a non-physical representative '
+               'set of basal, prismatic, and pyramidal slip systems;'
+    []
+    [update_method_hcp_representative_equal_lattice_parameters]
+      type = 'RunException'
+      input = 'update_method_hcp_representative_slip_systems.i'
+      cli_args = 'Materials/trial_xtalpl/unit_cell_dimension="3e-7 3e-7 3e-7"'
+      expect_err = 'The specified unit cell dimensions are not consistent with '
+                   'expectations for HCP crystal hexagonal lattices'
+      detail = 'ensure that the provided lattice parameters match '
+              'the expectation a = b != c for HCP crystals;'
+    []
+    [update_method_hcp_representative_incorrect_index_numbers]
+      type = 'RunException'
+      input = 'update_method_hcp_representative_slip_systems.i'
+      cli_args = 'Materials/trial_xtalpl/slip_sys_file_name=input_slip_sys.txt '
+                 'Materials/trial_xtalpl/number_slip_systems=12'
+      expect_err = 'CrystalPlasticityStressUpdateBase Error: The number of '
+                   'entries in the first row of the slip system file is not '
+                   'consistent with the expectations for the 4-index Miller-Bravis '
+                   'assumption for HCP crystals. This file should represent both the '
+                   'slip plane normal and the slip direction with 4-indices each.'
+      detail = 'ensure that eight indices are given for the '
+               'Miller-Bravis notation for HCP slip systems;'
+    []
+    [update_method_hcp_representative_incorrect_basal_plane]
+      type = 'RunException'
+      input = 'update_method_hcp_representative_slip_systems.i'
+      cli_args = 'Materials/trial_xtalpl/slip_sys_file_name=error_slip_sys_hcp.txt'
+      expect_err = 'CrystalPlasticityStressUpdateBase Error: The specified HCP '
+                   'basal plane Miller-Bravis indices do not sum to zero. Check '
+                   'the values supplied in the associated text file.'
+      detail = ' ensure that the Miller-Bravis basal plane indices sum to zero.'
+    []
+    [update_method_hcp_convergence_issue_flag]
+      type = 'RunException'
+      input = 'update_method_hcp_convergence_issue_flag.i'
+      expect_err = 'ComputeMultipleCrystalPlasticityStress: Stress Integration error rmax ='
+      detail = ' provide warning messages about constitutive model and stress '
+               'convergence issues when the corresponding input file parameter '
+               'is set to true.'
+    []
+  []
+[]

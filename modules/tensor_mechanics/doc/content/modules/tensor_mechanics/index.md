@@ -88,7 +88,7 @@ introductory theory pages on the various models:
 - [Multiple Inelastic Stresses](/ComputeMultipleInelasticStress.md)
 - [Generalized Plane Strain](tensor_mechanics/generalized_plane_strain.md)
 - [Fracture Integrals](tensor_mechanics/FractureIntegrals.md)
-- Crystal Plasticity
+- [Crystal Plasticity](/ComputeMultipleCrystalPlasticityStress.md)
 - [C0 Timoshenko Beam](tensor_mechanics/C0TimoshenkoBeam.md)
 - [Dynamics](tensor_mechanics/Dynamics.md)
 - [Viscoplasticity](/ADViscoplasticityStressUpdate.md)
