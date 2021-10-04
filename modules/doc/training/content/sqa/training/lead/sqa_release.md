@@ -5,32 +5,32 @@
 ## PLN-4005 and Releases
 
 !alert warning title=Refer to PLN-4005
-PLN-4005 details what must be performed during a release of MOOSE and MOOSE-based applications, and it
-should be utilized as a reference. This presentation is an introduction to aid in following the
-procedure within PLN-4005.
+PLN-4005 details what must be performed during a release of MOOSE and MOOSE-based applications, and
+it should be utilized as a reference. This presentation is an introduction to aid in following the
+required process that is documented in PLN-4005
 
 !---
 
 ## Overview of Release Process
 
-1. Select a stable (main/master branch) for release
-1. Download testing results
-1. Complete second review
-1. Document the review by creating "release log"
-1. Update MooseDocs config.yml to point to downloaded results
-1. Commit the results and log
-1. Use `git tag` to label the release
-1. Push the tag to the main repository
+1. Select a stable (main/master branch) for release.
+1. Download testing results.
+1. Complete second review.
+1. Document the review by creating "release log."
+1. Update MooseDocs config.yml to point to downloaded results.
+1. Commit the results and log.
+1. Use `git tag` to label the release.
+1. Push the tag to the main repository.
 
 !---
 
 ## Select Revision for Release
 
-Any revision of MOOSE or MOOSE-based application can be selected for a release as long as all
+Any revision of MOOSE or a MOOSE-based application can be selected for a release as long as all
 the testing is complete and passed.
 
 !alert note title=Releases +must+ depend on releases
-A MOOSE-based application release must use release versions of MOOSE and dependent
+A MOOSE-based application release must use a released version of MOOSE and dependent
 applications. When releasing an application a Merge/Pull Request should be created with the
 MOOSE and application submodules updated to the release tags. The following process is then followed
 after merging and testing of this change is complete.
@@ -62,17 +62,17 @@ The tag.gz files should be placed in the "release" directory.
 
 ## Perform Release Review
 
-PLN-4005 details the necessary steps for performing the release which includes performing a
-final review of MOOSE or MOOSE-based application. This review +must+ be performed by the Project Lead
-and is intended to ensure that all requirements are satisfied and that all [!ac](SQA) documentation
-is correct and complete.
+PLN-4005 details the necessary steps for performing the release which includes performing a final
+review of a MOOSE or MOOSE-based application. This review +must+ be performed by the Project Lead and
+is intended to ensure that all requirements are complete, accurate, and are satisifed and that all
+[!ac](SQA) documentation is correct and complete.
 
 !---
 
 ## Create Release Log
 
 The "release log" provides evidence that the final review of software was conducted. This log is
-a text file ("RELEASE_LOG.md") that should be added to the "release" directory of the repository.
+a text file ("RELEASE_LOG.md") that must be added to the "release" directory of the repository.
 
 !alert note
 Please refer to the current version of PLN-4005 to determine what is necessary. Do not
