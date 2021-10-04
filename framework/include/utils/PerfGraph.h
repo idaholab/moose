@@ -25,7 +25,6 @@
 #include <thread>
 #include <future>
 #include <mutex>
-#include <functional>
 
 // Forward Declarations
 class PerfGuard;
