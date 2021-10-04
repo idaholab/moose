@@ -182,8 +182,7 @@ InputParameterWarehouse::addControllableParameterConnection(
 
     for (auto primary_ptr : primaries)
       for (auto secondary_ptr : secondaries)
-        if ((primary_ptr != secondary_ptr) &&
-            (primary_ptr->name().parameter() == secondary_ptr->name().parameter()))
+        if (primary_ptr != secondary_ptr)
           primary_ptr->connect(secondary_ptr);
   }
 }
@@ -257,4 +256,15 @@ InputParameterWarehouse::dumpChangedControls(bool reset_changed) const
         item->resetChanged();
     }
   return oss.str();
+}
+
+std::vector<MooseObjectParameterName>
+InputParameterWarehouse::getControllableParameterNames(const MooseObjectParameterName & input) const
+{
+  std::vector<MooseObjectParameterName> names;
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+    for (auto it = _controllable_items[tid].begin(); it != _controllable_items[tid].end(); ++it)
+      if ((*it)->name() == input)
+        names.push_back((*it)->name());
+  return names;
 }

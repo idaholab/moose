@@ -98,6 +98,12 @@ public:
   template <typename T>
   std::vector<T> getControllableParameterValues(const MooseObjectParameterName & input) const;
 
+  /**
+   * Return a vector of paramters names matching the supplied name.
+   */
+  std::vector<MooseObjectParameterName>
+  getControllableParameterNames(const MooseObjectParameterName & input) const;
+
 private:
   /// Storage for the InputParameters objects
   /// TODO: Remove multimap
