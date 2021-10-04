@@ -28,13 +28,13 @@
       cli_args = "--mesh-only"
       detail = 'both the neighboring elements of, and the elements along, a specified boundary'
     []
-    [failure]
-      type = 'RunException'
-      input = 'test_multi.i'
-      recover = false
-      cli_args = "Mesh/refine/boundaries='foo' --mesh-only"
-      expect_err = "The boundary *"
-      detail = 'both the neighboring elements of, and the elements along, a specified boundary'
-    []
+  []
+  [failureBoundary]
+    type = 'RunException'
+    input = 'test_multi.i'
+    recover = false
+    cli_args = "Mesh/refine/boundaries='foo' --mesh-only"
+    expect_err = "The boundary *"
+    requirement = 'The system shall error if the specified boundary to be refined does not exist'
   []
 []

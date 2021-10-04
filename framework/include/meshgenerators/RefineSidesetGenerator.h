@@ -51,10 +51,9 @@ private:
    * @param ref_step Step counter for the recursive function, defaults to 0 for initial call.
    * @return Unique pointer to a refined MeshBase
    */
-  virtual std::unique_ptr<MeshBase>
-  recursive_refine(const std::vector<boundary_id_type> boundary_ids,
-                   std::unique_ptr<MeshBase> & mesh,
-                   const std::vector<int> refinement,
-                   const int max,
-                   int ref_step = 0);
+  std::unique_ptr<MeshBase> recursive_refine(const std::vector<boundary_id_type> boundary_ids,
+                                             std::unique_ptr<MeshBase> & mesh,
+                                             const std::vector<int> refinement,
+                                             const int max,
+                                             int ref_step = 0);
 };
