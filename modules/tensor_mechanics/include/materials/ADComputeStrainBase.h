@@ -13,6 +13,20 @@
 #include "ADRankTwoTensorForward.h"
 #include "ADSymmetricRankTwoTensorForward.h"
 
+#define usingComputeStrainBaseMembers                                                              \
+  usingMaterialMembers;                                                                            \
+  using ADComputeStrainBaseTempl<R2>::_ndisp;                                                      \
+  using ADComputeStrainBaseTempl<R2>::_disp;                                                       \
+  using ADComputeStrainBaseTempl<R2>::_grad_disp;                                                  \
+  using ADComputeStrainBaseTempl<R2>::_base_name;                                                  \
+  using ADComputeStrainBaseTempl<R2>::_mechanical_strain;                                          \
+  using ADComputeStrainBaseTempl<R2>::_total_strain;                                               \
+  using ADComputeStrainBaseTempl<R2>::_eigenstrain_names;                                          \
+  using ADComputeStrainBaseTempl<R2>::_eigenstrains;                                               \
+  using ADComputeStrainBaseTempl<R2>::_global_strain;                                              \
+  using ADComputeStrainBaseTempl<R2>::_volumetric_locking_correction;                              \
+  using ADComputeStrainBaseTempl<R2>::_current_elem_volume
+
 /**
  * ADComputeStrainBase is the base class for strain tensors
  */

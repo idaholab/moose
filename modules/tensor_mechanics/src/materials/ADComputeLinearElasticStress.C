@@ -48,12 +48,6 @@ template <typename R2, typename R4>
 void
 ADComputeLinearElasticStressTempl<R2, R4>::computeQpStress()
 {
-  // std::cout << "stiffness and strain\n";
-  // _elasticity_tensor[_qp].print(std::cout);
-  // std::cout << '\n';
-  // _mechanical_strain[_qp].print(std::cout);
-  // std::cout << '\n';
-
   // stress = C * e
   _stress[_qp] = _elasticity_tensor[_qp] * _mechanical_strain[_qp];
 

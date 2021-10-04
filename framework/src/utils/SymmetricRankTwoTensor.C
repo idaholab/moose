@@ -29,3 +29,21 @@ mooseSetToZero<ADSymmetricRankTwoTensor>(ADSymmetricRankTwoTensor & v)
   v.zero();
 }
 }
+
+template SymmetricRankTwoTensor
+SymmetricRankTwoTensor::operator+(const SymmetricRankTwoTensor & a) const;
+template ADSymmetricRankTwoTensor
+ADSymmetricRankTwoTensor::operator+(const SymmetricRankTwoTensor & a) const;
+template ADSymmetricRankTwoTensor
+SymmetricRankTwoTensor::operator+(const ADSymmetricRankTwoTensor & a) const;
+template ADSymmetricRankTwoTensor
+ADSymmetricRankTwoTensor::operator+(const ADSymmetricRankTwoTensor & a) const;
+
+template SymmetricRankTwoTensor
+SymmetricRankTwoTensor::operator-(const SymmetricRankTwoTensor & a) const;
+template ADSymmetricRankTwoTensor
+ADSymmetricRankTwoTensor::operator-(const SymmetricRankTwoTensor & a) const;
+template ADSymmetricRankTwoTensor
+SymmetricRankTwoTensor::operator-(const ADSymmetricRankTwoTensor & a) const;
+template ADSymmetricRankTwoTensor
+ADSymmetricRankTwoTensor::operator-(const ADSymmetricRankTwoTensor & a) const;

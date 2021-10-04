@@ -104,6 +104,35 @@ SymmetricRankFourTensorTempl<T>::zero()
 }
 
 template <typename T>
+SymmetricRankFourTensorTempl<T>
+SymmetricRankFourTensorTempl<T>::rotationMatrix(const TypeTensor<T> & R)
+{
+  SymmetricRankFourTensorTempl<T> M(initNone);
+  const static std::array<std::size_t, 3> a = {{1, 0, 0}};
+  const static std::array<std::size_t, 3> b = {{2, 2, 1}};
+  for (std::size_t i = 0; i < 3; ++i)
+    for (std::size_t j = 0; j < 3; ++j)
+    {
+      M(i, j) = R(i, j) * R(i, j);
+      M(i + 3, j) = SQRT2 * R((i + 1) % 3, j) * R((i + 2) % 3, j);
+      M(j, i + 3) = SQRT2 * R(j, (i + 1) % 3) * R(j, (i + 2) % 3);
+      M(i + 3, j + 3) = R(a[i], a[j]) * R(b[i], b[j]) + R(a[i], b[j]) * R(b[i], a[j]);
+    }
+  return M;
+}
+
+template <typename T>
+void
+SymmetricRankFourTensorTempl<T>::rotate(const TypeTensor<T> & R)
+{
+  // build 6x6 rotation matrix
+  auto M = SymmetricRankFourTensorTempl<T>::rotationMatrix(R);
+
+  // rotate tensor
+  (*this) = M * (*this) * M.transposeMajor();
+}
+
+template <typename T>
 SymmetricRankFourTensorTempl<T> &
 SymmetricRankFourTensorTempl<T>::operator=(const SymmetricRankFourTensorTempl<T> & a)
 {
@@ -231,13 +260,6 @@ SymmetricRankFourTensorTempl<Real>::invSymm() const
 
 template <typename T>
 void
-SymmetricRankFourTensorTempl<T>::rotate(const TypeTensor<T> & /*R*/)
-{
-  mooseError("Not implemented yet (use bond-like matrix)");
-}
-
-template <typename T>
-void
 SymmetricRankFourTensorTempl<T>::print(std::ostream & stm) const
 {
   std::size_t index = 0;
@@ -254,14 +276,12 @@ template <typename T>
 SymmetricRankFourTensorTempl<T>
 SymmetricRankFourTensorTempl<T>::transposeMajor() const
 {
-  mooseError("Not implemented yet");
-}
-
-template <typename T>
-SymmetricRankFourTensorTempl<T>
-SymmetricRankFourTensorTempl<T>::transposeIj() const
-{
-  mooseError("Not implemented yet");
+  std::size_t index = 0;
+  SymmetricRankFourTensorTempl<T> ret;
+  for (unsigned int i = 0; i < N; ++i)
+    for (unsigned int j = 0; j < N; ++j)
+      ret._vals[index++] = _vals[i + N * j];
+  return ret;
 }
 
 template <typename T>

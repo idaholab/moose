@@ -13,6 +13,7 @@
 #include "ADRankTwoTensorForward.h"
 #include "ADRankFourTensorForward.h"
 #include "ADRankThreeTensorForward.h"
+#include "ADSymmetricRankTwoTensorForward.h"
 #include "MooseUtils.h"
 
 // Any requisite includes here
@@ -141,6 +142,13 @@ public:
 
   /// Copy constructor from TypeTensor<T>
   RankTwoTensorTempl(const TypeTensor<T> & a) : TensorValue<T>(a) {}
+
+  /// Copy constructor from SymmetricRankTwoTensor (delegates)
+  template <typename T2>
+  RankTwoTensorTempl(const SymmetricRankTwoTensorTempl<T2> & a)
+    : RankTwoTensorTempl<T>(a(0), a(1), a(2), a(3) / sqrt(2.0), a(4) / sqrt(2.0), a(5) / sqrt(2.0))
+  {
+  }
 
   /// Construct from other template
   template <typename T2>
@@ -507,6 +515,9 @@ public:
 
   /// RankTwoTensorTempl<T> from outer product of vectors
   void vectorOuterProduct(const TypeVector<T> &, const TypeVector<T> &);
+
+  /// RankTwoTensorTempl<T> from outer product of a vector with itself
+  void vectorSelfOuterProduct(const TypeVector<T> &);
 
   /// Return real tensor of a rank two tensor
   void fillRealTensor(TensorValue<T> &);

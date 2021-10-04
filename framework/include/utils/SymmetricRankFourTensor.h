@@ -10,6 +10,7 @@
 #pragma once
 
 #include "Moose.h"
+#include "ADRankTwoTensorForward.h"
 #include "ADSymmetricRankTwoTensorForward.h"
 #include "ADSymmetricRankFourTensorForward.h"
 
@@ -233,6 +234,14 @@ public:
   SymmetricRankFourTensorTempl<T> invSymm() const;
 
   /**
+   * Build a 6x6 rotation matrix
+   * MEHRABADI, MORTEZA M.; COWIN, STEPHEN C.  (1990). EIGENTENSORS OF LINEAR ANISOTROPIC ELASTIC
+   * MATERIALS. The Quarterly Journal of Mechanics and Applied Mathematics, 43(1), 15–41.
+   * doi:10.1093/qjmam/43.1.15 
+   */
+  static SymmetricRankFourTensorTempl<T> rotationMatrix(const TypeTensor<T> & R);
+
+  /**
    * Rotate the tensor using
    * C_ijkl = R_im R_jn R_ko R_lp C_mnop
    */
@@ -240,15 +249,15 @@ public:
 
   /**
    * Transpose the tensor by swapping the first pair with the second pair of indices
+   * This amounts to a regular transpose of the 6x6 matrix
    * @return C_klji
    */
   SymmetricRankFourTensorTempl<T> transposeMajor() const;
 
   /**
-   * Transpose the tensor by swapping the first two indeces
-   * @return C_jikl
+   * Transpose the tensor by swapping the first two indices - a no-op
    */
-  SymmetricRankFourTensorTempl<T> transposeIj() const;
+  SymmetricRankFourTensorTempl<T> transposeIj() const { return *this; }
 
   /**
    * Fills the tensor entries ignoring the last dimension (ie, C_ijkl=0 if any of i, j, k, or l =

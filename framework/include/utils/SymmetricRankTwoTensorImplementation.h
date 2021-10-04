@@ -192,6 +192,14 @@ SymmetricRankTwoTensorTempl<T>::fillFromScalarVariable(const VariableValue & sca
 }
 
 template <typename T>
+void
+SymmetricRankTwoTensorTempl<T>::rotate(const TypeTensor<T> & R)
+{
+  auto M = SymmetricRankFourTensorTempl<T>::rotationMatrix(R);
+  *this = M * (*this);
+}
+
+template <typename T>
 SymmetricRankTwoTensorTempl<T>
 SymmetricRankTwoTensorTempl<T>::transpose() const
 {
@@ -247,9 +255,9 @@ template <typename T2>
 SymmetricRankTwoTensorTempl<typename CompareTypes<T, T2>::supertype>
 SymmetricRankTwoTensorTempl<T>::operator+(const SymmetricRankTwoTensorTempl<T2> & a) const
 {
-  SymmetricRankTwoTensorTempl<T> result;
+  SymmetricRankTwoTensorTempl<typename CompareTypes<T, T2>::supertype> result;
   for (std::size_t i = 0; i < N; ++i)
-    result[i] = _vals[i] + a._vals[i];
+    result(i) = _vals[i] + a(i);
   return result;
 }
 
@@ -258,9 +266,9 @@ template <typename T2>
 SymmetricRankTwoTensorTempl<typename CompareTypes<T, T2>::supertype>
 SymmetricRankTwoTensorTempl<T>::operator-(const SymmetricRankTwoTensorTempl<T2> & a) const
 {
-  SymmetricRankTwoTensorTempl<T> result;
+  SymmetricRankTwoTensorTempl<typename CompareTypes<T, T2>::supertype> result;
   for (std::size_t i = 0; i < N; ++i)
-    result[i] = _vals[i] - a._vals[i];
+    result(i) = _vals[i] - a(i);
   return result;
 }
 
@@ -638,27 +646,26 @@ SymmetricRankTwoTensorTempl<T>::initRandom(unsigned int rand_seed)
 
 template <typename T>
 SymmetricRankTwoTensorTempl<T>
-SymmetricRankTwoTensorTempl<T>::genRandomTensor(T scale, T offset)
-{
-  SymmetricRankTwoTensorTempl<T> tensor;
-  for (unsigned int i = 0; i < N; i++)
-    tensor._vals[i] = (MooseRandom::rand() + offset) * scale;
-  return tensor;
-}
-
-template <typename T>
-SymmetricRankTwoTensorTempl<T>
 SymmetricRankTwoTensorTempl<T>::genRandomSymmTensor(T scale, T offset)
 {
-  return genRandomTensor(scale, offset);
+  SymmetricRankTwoTensorTempl<T> ret;
+  for (unsigned int i = 0; i < 3; ++i)
+    ret._vals[i] = (MooseRandom::rand() + offset) * scale;
+  for (unsigned int i = 3; i < 6; ++i)
+    ret._vals[i] = SQRT2 * (MooseRandom::rand() + offset) * scale;
+  return ret;
 }
 
 template <typename T>
 void
-SymmetricRankTwoTensorTempl<T>::vectorOuterProduct(const TypeVector<T> & /*v1*/,
-                                                   const TypeVector<T> & /*v2*/)
+SymmetricRankTwoTensorTempl<T>::vectorSelfOuterProduct(const TypeVector<T> & v)
 {
-  mooseError("Not possible for symmetric tensors unlees v1 == v2");
+  _vals[0] = v(0) * v(0);
+  _vals[1] = v(1) * v(1);
+  _vals[2] = v(2) * v(2);
+  _vals[3] = SQRT2 * v(2) * v(3);
+  _vals[4] = SQRT2 * v(1) * v(3);
+  _vals[5] = SQRT2 * v(1) * v(2);
 }
 
 template <typename T>

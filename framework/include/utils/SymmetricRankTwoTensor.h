@@ -10,12 +10,14 @@
 #pragma once
 
 #include "Moose.h"
+#include "ADRankTwoTensorForward.h"
 #include "ADSymmetricRankTwoTensorForward.h"
 #include "ADSymmetricRankFourTensorForward.h"
 #include "MooseUtils.h"
 
 // Any requisite includes here
 #include "libmesh/libmesh.h"
+#include "libmesh/tensor_value.h"
 
 #include "metaphysicl/raw_type.h"
 
@@ -98,7 +100,7 @@ public:
 
   /**
    * Constructor that takes in 3 vectors and uses them to create rows
-   * _coords[0][i] = row1(i), _coords[1][i] = row2(i), _coords[2][i] = row3(i)
+   * _vals[0][i] = row1(i), _vals[1][i] = row2(i), _vals[2][i] = row3(i)
    */
   SymmetricRankTwoTensorTempl(const TypeVector<T> & row1,
                               const TypeVector<T> & row2,
@@ -144,12 +146,12 @@ public:
   /**
    * fillFromInputVector takes 6 or 9 inputs to fill in the Rank-2 tensor.
    * If 6 inputs, then symmetry is assumed S_ij = S_ji, and
-   *   _coords[0][0] = input[0]
-   *   _coords[1][1] = input[1]
-   *   _coords[2][2] = input[2]
-   *   _coords[1][2] = input[3]
-   *   _coords[0][2] = input[4]
-   *   _coords[0][1] = input[5]
+   *   _vals[0][0] = input[0]
+   *   _vals[1][1] = input[1]
+   *   _vals[2][2] = input[2]
+   *   _vals[1][2] = input[3]
+   *   _vals[0][2] = input[4]
+   *   _vals[0][1] = input[5]
    * If 9 inputs then input order is [0][0], [1][0], [2][0], [0][1], [1][1], ..., [2][2]
    */
   void fillFromInputVector(const std::vector<T> & input, FillMethod fill_method = autodetect);
@@ -173,12 +175,19 @@ public:
   inline T operator()(unsigned int i) const { return _vals[i]; }
 
   /**
+   * rotates the tensor data given a rank two tensor rotation tensor
+   * _vals[i][j] = R_ij * R_jl * _vals[k][l]
+   * @param R rotation matrix as a TypeTensor
+   */
+  void rotate(const TypeTensor<T> & R);
+
+  /**
    * Returns a matrix that is the transpose of the matrix this
    * was called on. This is a non-operation.
    */
   SymmetricRankTwoTensorTempl<T> transpose() const;
 
-  /// sets _coords to a, and returns _coords
+  /// sets _vals to a, and returns _vals
   SymmetricRankTwoTensorTempl<T> & operator=(const SymmetricRankTwoTensorTempl<T> & a);
 
   /**
@@ -193,40 +202,41 @@ public:
     return *this;
   }
 
-  /// adds a to _coords
+  /// adds a to _vals
   SymmetricRankTwoTensorTempl<T> & operator+=(const SymmetricRankTwoTensorTempl<T> & a);
 
-  /// returns _coords + a
+  /// returns _vals + a
   template <typename T2>
   SymmetricRankTwoTensorTempl<typename CompareTypes<T, T2>::supertype>
   operator+(const SymmetricRankTwoTensorTempl<T2> & a) const;
 
-  /// sets _coords -= a and returns vals
+  /// sets _vals -= a and returns vals
   SymmetricRankTwoTensorTempl<T> & operator-=(const SymmetricRankTwoTensorTempl<T> & a);
 
-  /// returns _coords - a
+  /// returns _vals - a
   template <typename T2>
   SymmetricRankTwoTensorTempl<typename CompareTypes<T, T2>::supertype>
   operator-(const SymmetricRankTwoTensorTempl<T2> & a) const;
 
-  /// returns -_coords
+  /// returns -_vals
   SymmetricRankTwoTensorTempl<T> operator-() const;
 
-  /// performs _coords *= a
+  /// performs _vals *= a
   SymmetricRankTwoTensorTempl<T> & operator*=(const T & a);
 
-  /// returns _coords*a
+  /// returns _vals*a
   template <typename T2, typename std::enable_if<ScalarTraits<T2>::value, int>::type = 0>
   SymmetricRankTwoTensorTempl<typename CompareTypes<T, T2>::supertype>
   operator*(const T2 & a) const;
 
-  /// performs _coords /= a
+  /// performs _vals /= a
   SymmetricRankTwoTensorTempl<T> & operator/=(const T & a);
 
-  /// returns _coords/a
-  template <typename T2, typename std::enable_if<ScalarTraits<T2>::value, int>::type = 0>
-  SymmetricRankTwoTensorTempl<typename CompareTypes<T, T2>::supertype>
-  operator/(const T2 & a) const;
+  /// returns _vals/a
+  template <typename T2>
+  auto operator/(const T2 & a) const ->
+      typename std::enable_if<ScalarTraits<T2>::value,
+                              SymmetricRankTwoTensorTempl<decltype(T() / T2())>>::type;
 
   /// Defines multiplication with a vector to get a vector
   template <typename T2>
@@ -248,10 +258,10 @@ public:
   template <typename T2>
   bool operator!=(const SymmetricRankTwoTensorTempl<T2> & a) const;
 
-  /// Sets _coords to the values in a ColumnMajorMatrix (must be 3x3)
+  /// Sets _vals to the values in a ColumnMajorMatrix (must be 3x3)
   SymmetricRankTwoTensorTempl<T> & operator=(const ColumnMajorMatrixTempl<T> & a);
 
-  /// returns _coords_ij * a_ij (sum on i, j)
+  /// returns _vals_ij * a_ij (sum on i, j)
   T doubleContraction(const SymmetricRankTwoTensorTempl<T> & a) const;
 
   /// returns C_ijkl = a_ij * b_kl
@@ -286,23 +296,23 @@ public:
   typename std::enable_if<!MooseUtils::IsLikeReal<T2>::value, SymmetricRankFourTensorTempl<T>>::type
   positiveProjectionEigenDecomposition(std::vector<T> &, SymmetricRankTwoTensorTempl<T> &) const;
 
-  /// returns A_ij - de_ij*tr(A)/3, where A are the _coords
+  /// returns A_ij - de_ij*tr(A)/3, where A are the _vals
   SymmetricRankTwoTensorTempl<T> deviatoric() const;
 
-  /// returns the trace of the tensor, ie _coords[i][i] (sum i = 0, 1, 2)
+  /// returns the trace of the tensor, ie _vals[i][i] (sum i = 0, 1, 2)
   T trace() const;
 
   /// retuns the inverse of the tensor
   SymmetricRankTwoTensorTempl<T> inverse() const;
 
   /**
-   * Denote the _coords[i][j] by A_ij, then this returns
+   * Denote the _vals[i][j] by A_ij, then this returns
    * d(trace)/dA_ij
    */
   SymmetricRankTwoTensorTempl<T> dtrace() const;
 
   /**
-   * Denote the _coords[i][j] by A_ij, then
+   * Denote the _vals[i][j] by A_ij, then
    * S_ij = A_ij - de_ij*tr(A)/3
    * Then this returns (S_ij + S_ji)*(S_ij + S_ji)/8
    * Note the explicit symmeterisation
@@ -315,13 +325,13 @@ public:
   T secondInvariant() const;
 
   /**
-   * Denote the _coords[i][j] by A_ij, then this returns
+   * Denote the _vals[i][j] by A_ij, then this returns
    * d(secondInvariant)/dA_ij
    */
   SymmetricRankTwoTensorTempl<T> dsecondInvariant() const;
 
   /**
-   * Denote the _coords[i][j] by A_ij, then this returns
+   * Denote the _vals[i][j] by A_ij, then this returns
    * d^2(secondInvariant)/dA_ij/dA_kl
    */
   SymmetricRankFourTensorTempl<T> d2secondInvariant() const;
@@ -366,7 +376,7 @@ public:
   d2sin3Lode(const T & r0) const;
 
   /**
-   * Denote the _coords[i][j] by A_ij, then
+   * Denote the _vals[i][j] by A_ij, then
    * S_ij = A_ij - de_ij*tr(A)/3
    * Then this returns det(S + S.transpose())/2
    * Note the explicit symmeterisation
@@ -374,19 +384,19 @@ public:
   T thirdInvariant() const;
 
   /**
-   * Denote the _coords[i][j] by A_ij, then
+   * Denote the _vals[i][j] by A_ij, then
    * this returns d(thirdInvariant()/dA_ij
    */
   SymmetricRankTwoTensorTempl<T> dthirdInvariant() const;
 
   /**
-   * Denote the _coords[i][j] by A_ij, then this returns
+   * Denote the _vals[i][j] by A_ij, then this returns
    * d^2(thirdInvariant)/dA_ij/dA_kl
    */
   SymmetricRankFourTensorTempl<T> d2thirdInvariant() const;
 
   /**
-   * Denote the _coords[i][j] by A_ij, then this returns
+   * Denote the _vals[i][j] by A_ij, then this returns
    * d(det)/dA_ij
    */
   SymmetricRankTwoTensorTempl<T> ddet() const;
@@ -400,14 +410,14 @@ public:
   /// Print the Real part of the DualReal rank two tensor along with its first nDual dual numbers
   void printDualReal(unsigned int nDual, std::ostream & stm = Moose::out) const;
 
-  /// Add identity times a to _coords
+  /// Add identity times a to _vals
   void addIa(const T & a);
 
-  /// Sqrt(_coords[i][j]*_coords[i][j])
+  /// Sqrt(_vals[i][j]*_vals[i][j])
   T L2norm() const;
 
   /**
-   * sets _coords[0][0], _coords[0][1], _coords[1][0], _coords[1][1] to input,
+   * sets _vals[0][0], _vals[0][1], _vals[1][0], _vals[1][1] to input,
    * and the remainder to zero
    */
   void surfaceFillFromInputVector(const std::vector<T> & input);
@@ -488,7 +498,7 @@ public:
   void d2symmetricEigenvalues(std::vector<SymmetricRankFourTensorTempl<T>> & deriv) const;
 
   /**
-   * Uses the petscblaslapack.h LAPACKsyev_ routine to find, for symmetric _coords:
+   * Uses the petscblaslapack.h LAPACKsyev_ routine to find, for symmetric _vals:
    *  (1) the eigenvalues (if calculation_type == "N")
    *  (2) the eigenvalues and eigenvectors (if calculation_type == "V")
    * @param calculation_type If "N" then calculation eigenvalues only
@@ -510,21 +520,14 @@ public:
   static void initRandom(unsigned int);
 
   /**
-   * This function generates a random unsymmetric rank two tensor.
-   * The first real scales the random number.
-   * The second real offsets the uniform random number
-   */
-  static SymmetricRankTwoTensorTempl<T> genRandomTensor(T, T);
-
-  /**
    * This function generates a random symmetric rank two tensor.
    * The first real scales the random number.
    * The second real offsets the uniform random number
    */
   static SymmetricRankTwoTensorTempl<T> genRandomSymmTensor(T, T);
 
-  /// SymmetricRankTwoTensorTempl<T> from outer product of vectors
-  void vectorOuterProduct(const TypeVector<T> &, const TypeVector<T> &);
+  /// SymmetricRankTwoTensorTempl<T> from outer product of a vector with itself
+  void vectorSelfOuterProduct(const TypeVector<T> &);
 
   /// Return real tensor of a rank two tensor
   void fillRealTensor(TensorValue<T> &);
@@ -578,6 +581,19 @@ struct RawType<SymmetricRankTwoTensorTempl<T>>
     return ret;
   }
 };
+}
+
+template <typename T>
+template <typename T2>
+auto
+SymmetricRankTwoTensorTempl<T>::operator/(const T2 & a) const ->
+    typename std::enable_if<ScalarTraits<T2>::value,
+                            SymmetricRankTwoTensorTempl<decltype(T() / T2())>>::type
+{
+  SymmetricRankTwoTensorTempl<decltype(T() / T2())> result;
+  for (std::size_t i = 0; i < N; ++i)
+    result._vals[i] = _vals[i] / a;
+  return result;
 }
 
 template <typename T>
