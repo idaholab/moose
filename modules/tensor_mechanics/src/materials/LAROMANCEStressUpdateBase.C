@@ -10,6 +10,7 @@
 #include "LAROMANCEStressUpdateBase.h"
 #include "Function.h"
 #include "MathUtils.h"
+#include "Units.h"
 
 template <bool is_ad>
 InputParameters
@@ -94,6 +95,9 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::validParams()
       "old_creep_strain_forcing_function",
       "Advanced");
 
+  params.addParam<std::string>("stress_unit", "Pa", "unit of stress");
+  params.addParamNamesToGroup("stress_unit", "Advanced");
+
   return params;
 }
 
@@ -169,6 +173,19 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::LAROMANCEStressUpdateBaseTempl(
   if (_environmental)
     _window_failure[_environmental_input_index] =
         parameters.get<MooseEnum>("environment_input_window_failure").getEnum<WindowFailure>();
+
+  setupUnitConversionFactors(parameters);
+}
+
+template <bool is_ad>
+void
+LAROMANCEStressUpdateBaseTempl<is_ad>::setupUnitConversionFactors(
+    const InputParameters & parameters)
+{
+  // Stress unit conversion factor
+  const MooseUnits stress_unit_to("MPa");
+  const MooseUnits stress_unit_from(parameters.get<std::string>("stress_unit"));
+  _stress_ucf = stress_unit_to.convert(1, stress_unit_from);
 }
 
 template <bool is_ad>
@@ -492,14 +509,14 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::computeResidual(
     const GenericReal<is_ad> & effective_trial_stress, const GenericReal<is_ad> & scalar)
 {
   // Update new stress
-  auto trial_stress_mpa = effective_trial_stress * 1.0e-6;
+  auto trial_stress_mpa = effective_trial_stress * _stress_ucf;
   GenericReal<is_ad> dtrial_stress_dscalar = 0.0;
 
   // Update stress if strain is being applied, i.e. non-testing simulation
   if (this->_apply_strain)
   {
-    trial_stress_mpa -= this->_three_shear_modulus * scalar * 1.0e-6;
-    dtrial_stress_dscalar -= this->_three_shear_modulus * 1.0e-6;
+    trial_stress_mpa -= this->_three_shear_modulus * scalar * _stress_ucf;
+    dtrial_stress_dscalar -= this->_three_shear_modulus * _stress_ucf;
   }
   _input_values[_stress_input_index] = trial_stress_mpa;
 
@@ -545,7 +562,7 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::computeResidual(
     Moose::err << "  old cell disl: " << _old_input_values[_cell_output_index] << "\n";
     Moose::err << "  old wall disl: " << _old_input_values[_wall_output_index] << "\n";
     Moose::err << "  initial stress (MPa): "
-               << MetaPhysicL::raw_value(effective_trial_stress) * 1.0e-6 << "\n";
+               << MetaPhysicL::raw_value(effective_trial_stress) * _stress_ucf << "\n";
     Moose::err << "  temperature: " << MetaPhysicL::raw_value(_temperature[_qp]) << "\n";
     Moose::err << "  environmental factor: " << MetaPhysicL::raw_value(environmental) << "\n";
     Moose::err << "  calculated scalar strain value: " << MetaPhysicL::raw_value(scalar) << "\n";
