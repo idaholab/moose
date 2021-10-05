@@ -304,7 +304,7 @@ MooseApp::validParams()
 
 MooseApp::MooseApp(InputParameters parameters)
   : ConsoleStreamInterface(*this),
-    PerfGraphInterface(_perf_graph, "MooseApp"),
+    PerfGraphInterface(*this, "MooseApp"),
     ParallelObject(*parameters.get<std::shared_ptr<Parallel::Communicator>>(
         "_comm")), // Can't call getParam() before pars is set
     _name(parameters.get<std::string>("_app_name")),
@@ -317,10 +317,8 @@ MooseApp::MooseApp(InputParameters parameters)
     _start_time(0.0),
     _global_time_offset(0.0),
     _output_warehouse(*this),
-    _perf_graph(type() + " (" + name() + ')',
-                *this,
-                getParam<bool>("perf_graph_live_all"),
-                !getParam<bool>("disable_perf_graph_live")),
+    _restartable_data(libMesh::n_threads()),
+    _perf_graph(createRecoverablePerfGraph()),
     _rank_map(*_comm, _perf_graph),
     _input_parameter_warehouse(new InputParameterWarehouse()),
     _action_factory(*this),
@@ -346,7 +344,6 @@ MooseApp::MooseApp(InputParameters parameters)
     _restart_recover_suffix("cpr"),
     _half_transient(false),
     _check_input(getParam<bool>("check_input")),
-    _restartable_data(libMesh::n_threads()),
     _multiapp_level(
         isParamValid("_multiapp_level") ? parameters.get<unsigned int>("_multiapp_level") : 0),
     _multiapp_number(
@@ -2521,4 +2518,22 @@ MooseApp::registerRestartableDataMapName(const RestartableDataMapName & name, st
   suffix.insert(0, "_");
   _restartable_meta_data.emplace(
       std::make_pair(name, std::make_pair(RestartableDataMap(), suffix)));
+}
+
+PerfGraph &
+MooseApp::createRecoverablePerfGraph()
+{
+  registerRestartableNameWithFilter("perf_graph", Moose::RESTARTABLE_FILTER::RECOVERABLE);
+
+  auto perf_graph =
+      libmesh_make_unique<RestartableData<PerfGraph>>("perf_graph",
+                                                      this,
+                                                      type() + " (" + name() + ')',
+                                                      *this,
+                                                      getParam<bool>("perf_graph_live_all"),
+                                                      !getParam<bool>("disable_perf_graph_live"));
+
+  return dynamic_cast<RestartableData<PerfGraph> &>(
+             registerRestartableData("perf_graph", std::move(perf_graph), 0, false))
+      .set();
 }

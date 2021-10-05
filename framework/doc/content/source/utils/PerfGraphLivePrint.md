@@ -14,11 +14,11 @@ The PGLP primarily works by waking up every second and inspecting what the progr
 
 The PGLP utilizes several different objects and datastructures for reading the current state of the execution and for storing the current state of what's been printed.
 
-### PerfGraphRegistry::SectionInfo
+### PerfGraphSectionInfo
 
-The `PerfGraphRegistry` keeps track of which sections have been registered, including their unique id, short name, verbosity level, live message, and whether or not to print dots for that section.  This is all kept in a `SectionInfo` object that is part of the `PerfGraphRegistry`.
+The `PerfGraphRegistry` keeps track of which sections have been registered, including their unique id, short name, verbosity level, live message, and whether or not to print dots for that section.  This is all kept in a `PerfGraphSectionInfo` object that is part of the `PerfGraphRegistry`.
 
-This information is heavily utilized by the PGLP to know what to print and when.  Due to the main thread registering this information and the print thread using it, the accessors surrounding `SectionInfo` have locks in them.  However, the `PerfGraph` executes on the main thread and therefore utilizes a protected member function on `PerfGraphRegistry` to access `SectionInfo` without a lock.
+This information is heavily utilized by the PGLP to know what to print and when.  Due to the main thread registering this information and the print thread using it, the accessors surrounding `PerfGraphSectionInfo` have locks in them.  However, the `PerfGraph` executes on the main thread and therefore utilizes a protected member function on `PerfGraphRegistry` to access `PerfGraphSectionInfo` without a lock.
 
 ### PerfGraph::SectionIncrement
 

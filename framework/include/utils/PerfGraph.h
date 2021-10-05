@@ -44,7 +44,7 @@ class PerfGraph : protected ConsoleStreamInterface
 {
 public:
   using PerfGraphRegistry = moose::internal::PerfGraphRegistry;
-  using SectionInfo = PerfGraphRegistry::SectionInfo;
+  using PerfGraphSectionInfo = moose::internal::PerfGraphSectionInfo;
 
   /**
    * For retrieving values
@@ -74,7 +74,7 @@ public:
   public:
     PerfNodeInfo(const PerfNode & node,
                  const PerfNode * const parent_node,
-                 const PerfGraphRegistry::SectionInfo & section_info,
+                 const PerfGraphSectionInfo & section_info,
                  const unsigned int depth)
       : _node(node), _parent_node(parent_node), _section_info(section_info), _depth(depth)
     {
@@ -91,7 +91,7 @@ public:
     /**
      * @returns The SectionInfo associated with this node (contains name, level, etc)
      */
-    const PerfGraphRegistry::SectionInfo & sectionInfo() const { return _section_info; }
+    const PerfGraphSectionInfo & sectionInfo() const { return _section_info; }
     /**
      * @returns The depth of the node in the tree
      */
@@ -103,7 +103,7 @@ public:
     /// The parent node
     const PerfNode * const _parent_node;
     /// The SectionInfo responsible for this node
-    const PerfGraphRegistry::SectionInfo & _section_info;
+    const PerfGraphSectionInfo & _section_info;
     /// The depth of the node in the tree
     const unsigned int _depth;
   };
@@ -266,6 +266,16 @@ public:
    */
   void update();
 
+  /**
+   * @returns The MooseApp
+   */
+  MooseApp & mooseApp() { return _moose_app; }
+
+  /**
+   * @returns A constant reference to the root node
+   */
+  const PerfNode & rootNode() const { return *_root_node; }
+
   template <typename Functor>
   void treeRecurse(const Functor & act,
                    const unsigned int level = MAX_STACK_SIZE,
@@ -408,6 +418,9 @@ protected:
    */
   void recursivelyUpdate(const PerfNode & current_node);
 
+  /// The MooseApp
+  MooseApp & _moose_app;
+
   /// Whether or not to put everything in the perf graph
   bool _live_print_all;
 
@@ -494,6 +507,8 @@ protected:
   // Here so PerfGuard is the only thing that can call push/pop
   friend class PerfGuard;
   friend class PerfGraphLivePrint;
+  friend void dataStore(std::ostream &, PerfGraph &, void *);
+  friend void dataLoad(std::istream &, PerfGraph &, void *);
 
 private:
   /**
@@ -525,7 +540,7 @@ PerfGraph::treeRecurseInternal(const PerfNode & node,
   mooseAssert(_perf_graph_registry.sectionExists(node.id()), "Unable to find section name!");
 
   const auto & current_section_info = _perf_graph_registry.readSectionInfo(node.id());
-  if (current_section_info.level() <= level)
+  if (current_section_info._level <= level)
   {
     mooseAssert(!_cumulative_section_info_ptrs.empty(), "update() must be run before treeRecurse!");
 
@@ -562,3 +577,6 @@ PerfGraph::treeRecurse(const Functor & act,
   mooseAssert(_root_node, "Root node does not exist; calling this too early");
   treeRecurseInternal(*_root_node, nullptr, act, level, heaviest, 0);
 }
+
+void dataStore(std::ostream & stream, PerfGraph & perf_graph, void * context);
+void dataLoad(std::istream & stream, PerfGraph & perf_graph, void * context);

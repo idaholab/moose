@@ -8,8 +8,9 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "RankMap.h"
-
 #include "PerfGraphInterface.h"
+
+#include "MooseApp.h"
 
 #include "libmesh/parallel.h"
 

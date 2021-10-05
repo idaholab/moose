@@ -181,4 +181,10 @@ private:
 
   /// Timers that are directly underneath this node
   std::map<PerfID, std::unique_ptr<PerfNode>> _children;
+
+  friend void dataStore(std::ostream &, const std::unique_ptr<PerfNode> &, void *);
+  friend void dataLoad(std::istream &, const std::unique_ptr<PerfNode> &, void *);
 };
+
+void dataStore(std::ostream & stream, const std::unique_ptr<PerfNode> & node, void * context);
+void dataLoad(std::istream & stream, const std::unique_ptr<PerfNode> & node, void * context);

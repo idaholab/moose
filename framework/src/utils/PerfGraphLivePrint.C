@@ -48,7 +48,7 @@ PerfGraphLivePrint::printLiveMessage(PerfGraph::SectionIncrement & section_incre
   }
 
   // If we're not printing dots - we shouldn't be printing the message at all
-  if (!section_info.printDots() || !_stack_top_print_dots)
+  if (!section_info._print_dots || !_stack_top_print_dots)
   {
     section_increment._state = PerfGraph::IncrementState::PRINTED;
     _last_printed_increment = &section_increment;
@@ -57,13 +57,13 @@ PerfGraphLivePrint::printLiveMessage(PerfGraph::SectionIncrement & section_incre
 
   // If the live_message is empty - just print the name
   const auto message =
-      !section_info.liveMessage().empty() ? section_info.liveMessage() : section_info.name();
+      !section_info._live_message.empty() ? section_info._live_message : section_info._name;
 
   // This line is different - need to finish the last line
   if (_last_printed_increment && _last_printed_increment != &section_increment &&
       (_last_printed_increment->_state == PerfGraph::IncrementState::PRINTED ||
        _last_printed_increment->_state == PerfGraph::IncrementState::CONTINUED) &&
-      section_info.printDots())
+      section_info._print_dots)
     _console << '\n';
 
   // Do we need to print dots?
@@ -72,7 +72,7 @@ PerfGraphLivePrint::printLiveMessage(PerfGraph::SectionIncrement & section_incre
        (section_increment._state == PerfGraph::IncrementState::PRINTED ||
         section_increment._state == PerfGraph::IncrementState::CONTINUED)))
   {
-    if (section_info.printDots())
+    if (section_info._print_dots)
     {
       _console << ".";
       section_increment._num_dots++;
@@ -85,7 +85,7 @@ PerfGraphLivePrint::printLiveMessage(PerfGraph::SectionIncrement & section_incre
     _console << std::string(2 * section_increment._print_stack_level, ' ') << "Still " << message;
 
     // If we're not printing dots - just finish the line
-    if (!section_info.printDots())
+    if (!section_info._print_dots)
       _console << '\n';
 
     // The 6 is for "Still "
@@ -96,7 +96,7 @@ PerfGraphLivePrint::printLiveMessage(PerfGraph::SectionIncrement & section_incre
     _console << std::string(2 * section_increment._print_stack_level, ' ') << message;
 
     // If we're not printing dots - just finish the line
-    if (!section_info.printDots())
+    if (!section_info._print_dots)
       _console << '\n';
 
     section_increment._num_dots = 0;
@@ -128,8 +128,8 @@ PerfGraphLivePrint::printStats(PerfGraph::SectionIncrement & section_increment_s
   auto & section_info_start = _perf_graph_registry.sectionInfo(section_increment_start._id);
 
   // If the live_message is empty - just print the name
-  auto message = !section_info_start.liveMessage().empty() ? section_info_start.liveMessage()
-                                                           : section_info_start.name();
+  auto message = !section_info_start._live_message.empty() ? section_info_start._live_message
+                                                           : section_info_start._name;
 
   auto time_increment =
       std::chrono::duration<double>(section_increment_finish._time - section_increment_start._time)
@@ -141,7 +141,7 @@ PerfGraphLivePrint::printStats(PerfGraph::SectionIncrement & section_increment_s
 
   // Do we need to print "Finished"?
   // This happens after something else printed in-between when this increment started and finished
-  if (!section_info_start.printDots() ||
+  if (!section_info_start._print_dots ||
       (_last_printed_increment && _last_printed_increment != &section_increment_start) ||
       (section_increment_start._beginning_num_printed !=
        _console_num_printed)) // This means someone _else_ printed
@@ -150,7 +150,7 @@ PerfGraphLivePrint::printStats(PerfGraph::SectionIncrement & section_increment_s
     if ((section_increment_start._beginning_num_printed == _console_num_printed) &&
         (_last_printed_increment &&
          _last_printed_increment->_state == PerfGraph::IncrementState::PRINTED &&
-         _perf_graph_registry.sectionInfo(_last_printed_increment->_id).printDots()))
+         _perf_graph_registry.sectionInfo(_last_printed_increment->_id)._print_dots))
       _console << '\n';
 
     _console << std::string(2 * section_increment_start._print_stack_level, ' ') << "Finished "
@@ -205,7 +205,7 @@ PerfGraphLivePrint::printStack()
 
     auto & section_info = _perf_graph_registry.sectionInfo(section._id);
 
-    _console << std::string(s * 2, ' ') << section_info.liveMessage() << '\n';
+    _console << std::string(s * 2, ' ') << section_info._live_message << '\n';
   }
 
   _console << "-------\n" << std::endl;
@@ -252,7 +252,7 @@ PerfGraphLivePrint::inSamePlace()
   if (_stack_level > 0)
   {
     _stack_top_print_dots =
-        _perf_graph_registry.sectionInfo(_print_thread_stack[_stack_level - 1]._id).printDots();
+        _perf_graph_registry.sectionInfo(_print_thread_stack[_stack_level - 1]._id)._print_dots;
 
     printStackUpToLast();
 

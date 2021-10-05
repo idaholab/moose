@@ -22,9 +22,62 @@ namespace moose
 {
 namespace internal
 {
-
-// Forward Declarations
 class PerfGraphRegistry;
+class PerfGraphSectionInfo;
+}
+}
+
+void dataStore(std::ostream & stream, moose::internal::PerfGraphSectionInfo & info, void * context);
+void dataLoad(std::istream & stream, moose::internal::PerfGraphSectionInfo & info, void * context);
+void dataLoad(std::istream & stream, PerfGraph & perf_graph, void * context);
+
+namespace moose
+{
+namespace internal
+{
+
+/**
+ * Used to hold metadata about the registered sections
+ * Note: this is a class instead of a struct because structs
+ * are not able to be created in place using emplace_back in
+ * C++11.  This will be fixed in C++20.
+ */
+class PerfGraphSectionInfo
+{
+public:
+  PerfGraphSectionInfo()
+    : _id(std::numeric_limits<PerfID>::max()),
+      _name(),
+      _level(std::numeric_limits<unsigned int>::max()),
+      _live_message(),
+      _print_dots(false)
+  {
+  }
+
+  PerfGraphSectionInfo(const PerfID id,
+                       const std::string & name,
+                       const unsigned int level,
+                       const std::string & live_message,
+                       const bool print_dots)
+    : _id(id), _name(name), _level(level), _live_message(live_message), _print_dots(print_dots)
+  {
+  }
+
+  /// Unique ID
+  PerfID _id;
+
+  /// The name
+  std::string _name;
+
+  /// Print level (verbosity level)
+  unsigned int _level;
+
+  /// Message to print while the section is running
+  std::string _live_message;
+
+  /// Whether or not to print dots while this section runs
+  bool _print_dots;
+};
 
 /**
  * Get the global PerfGraphRegistry singleton.
@@ -37,62 +90,6 @@ PerfGraphRegistry & getPerfGraphRegistry();
 class PerfGraphRegistry
 {
 public:
-  /**
-   * Used to hold metadata about the registered sections
-   * Note: this is a class instead of a struct because structs
-   * are not able to be created in place using emplace_back in
-   * C++11.  This will be fixed in C++20.
-   */
-  class SectionInfo
-  {
-  public:
-    SectionInfo(const PerfID id,
-                const std::string & name,
-                const unsigned int level,
-                const std::string & live_message,
-                const bool print_dots)
-      : _id(id), _name(name), _level(level), _live_message(live_message), _print_dots(print_dots)
-    {
-    }
-
-    /**
-     * @returns The unique ID for the section
-     */
-    PerfID id() const { return _id; }
-    /**
-     * @returns The name of the section
-     */
-    const std::string & name() const { return _name; }
-    /**
-     * @returns The verbosity level of the section
-     */
-    unsigned int level() const { return _level; }
-    /**
-     * @returns The message to print while the section is running
-     */
-    const std::string & liveMessage() const { return _live_message; }
-    /**
-     * @returns Whether or not to print dots while this section runs
-     */
-    bool printDots() const { return _print_dots; }
-
-  private:
-    /// Unique ID
-    const PerfID _id;
-
-    /// The name
-    const std::string _name;
-
-    /// Print level (verbosity level)
-    const unsigned int _level;
-
-    /// Message to print while the section is running
-    const std::string _live_message;
-
-    /// Whether or not to print dots while this section runs
-    const bool _print_dots;
-  };
-
   /**
    * Call to register a named section for timing.
    *
@@ -124,11 +121,11 @@ public:
   PerfID sectionID(const std::string & section_name) const;
 
   /**
-   * Given a PerfID return the SectionInfo
+   * Given a PerfID return the PerfGraphSectionInfo
    * @section_id The ID
-   * @return The SectionInfo
+   * @return The PerfGraphSectionInfo
    */
-  const SectionInfo & sectionInfo(const PerfID section_id) const;
+  const PerfGraphSectionInfo & sectionInfo(const PerfID section_id) const;
 
   /**
    * Whether or not a section with that name has been registered
@@ -149,7 +146,16 @@ public:
    */
   long unsigned int numSections() const;
 
-protected:
+  /**
+   * @returns a thread safe copy of all of the SectionInfo objects
+   *
+   * WARNING: This is intended for use only in copy operations;
+   * it returns a _copy_. If you're looking for the info pertaining
+   * to a specific ID, use sectionInfo(id) instead
+   */
+  std::vector<PerfGraphSectionInfo> sectionInfo() const;
+
+private:
   PerfGraphRegistry();
 
   /**
@@ -170,9 +176,9 @@ protected:
    * thread will be registering sections and only
    * the main thread will be running PerfGraph routines
    *
-   * @return the SectionInfo associated with the section_id
+   * @return the PerfGraphSectionInfo associated with the section_id
    */
-  const SectionInfo & readSectionInfo(PerfID section_id);
+  const PerfGraphSectionInfo & readSectionInfo(PerfID section_id);
 
   /// Map of section names to IDs
   std::unordered_map<std::string, PerfID> _section_name_to_id;
@@ -182,7 +188,7 @@ protected:
   /// Note that only the main thread is ever modifying
   /// this vector (because timed sections cannot be in threaded regions
   /// so there is no need to lock it when reading from the main thread
-  std::vector<SectionInfo> _id_to_section_info;
+  std::vector<PerfGraphSectionInfo> _id_to_section_info;
 
   /// Mutex for locking access to the section_name_to_id
   /// NOTE: These can be changed to shared_mutexes once we get C++17
@@ -199,6 +205,8 @@ protected:
 
   /// This is only here so that PerfGraph can access readSectionInfo
   friend PerfGraph;
+
+  friend void ::dataLoad(std::istream &, PerfGraph &, void *);
 };
 
 }

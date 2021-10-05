@@ -54,9 +54,9 @@ PerfGraphData::getValue()
     case 6:
     case 7:
     case 8:
-      return _perf_graph.getTime(static_cast<PerfGraph::TimeType>(_data_type), _section_name);
+      return _app.perfGraph().getTime(static_cast<PerfGraph::TimeType>(_data_type), _section_name);
     case 9:
-      return _perf_graph.getNumCalls(_section_name);
+      return _app.perfGraph().getNumCalls(_section_name);
   }
 
   mooseError("Unknown selection for data_type!");

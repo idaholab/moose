@@ -23,7 +23,7 @@
 #include <unistd.h>
 
 OutputWarehouse::OutputWarehouse(MooseApp & app)
-  : PerfGraphInterface(app.perfGraph(), "OutputWarehouse"),
+  : PerfGraphInterface(app, "OutputWarehouse"),
     _app(app),
     _buffer_action_console_outputs(false),
     _common_params_ptr(NULL),

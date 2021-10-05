@@ -16,7 +16,7 @@
 #ifndef MOOSE_NO_PERF_GRAPH
 #define TIME_SECTION1(id)                                                                          \
   mooseAssert(!Threads::in_threads, "PerfGraph timing cannot be used within threaded sections");   \
-  PerfGuard time_guard(this->_perf_graph, id);
+  PerfGuard time_guard(this->_pg_moose_app.perfGraph(), id);
 #else
 #define TIME_SECTION1(id)
 #endif
@@ -46,7 +46,9 @@ template <>
 InputParameters validParams<PerfGraphInterface>();
 
 /**
- * Interface for objects that needs transient capabilities
+ * Interface for objects interacting with the PerfGraph.
+ *
+ * Enables getting PerfGraph information and registering PerfGraph timed sections.
  */
 class PerfGraphInterface
 {
@@ -67,6 +69,12 @@ public:
    * For objects that aren't MooseObjects
    */
   PerfGraphInterface(PerfGraph & perf_graph, const std::string prefix = "");
+
+  /**
+   * For objects that construct the PerfGraphInterface _before_ the PerfGraph
+   * is initialized (see MooseApp and OutputWarehouse)
+   */
+  PerfGraphInterface(MooseApp & moose_app, const std::string prefix = "");
 
   virtual ~PerfGraphInterface() = default;
 
@@ -97,9 +105,9 @@ protected:
   /// Params
   const InputParameters * const _pg_params;
 
-  /// The performance graph to add to
-  PerfGraph & _perf_graph;
+  /// The MooseApp that owns the PerfGraph
+  MooseApp & _pg_moose_app;
 
   /// A prefix to use for all sections
-  std::string _prefix;
+  const std::string _prefix;
 };

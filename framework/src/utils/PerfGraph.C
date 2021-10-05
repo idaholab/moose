@@ -31,10 +31,11 @@ PerfGraph::PerfGraph(const std::string & root_name,
                      const bool live_all,
                      const bool perf_graph_live)
   : ConsoleStreamInterface(app),
+    _moose_app(app),
     _live_print_all(live_all),
     _disable_live_print(!perf_graph_live),
     _perf_graph_registry(moose::internal::getPerfGraphRegistry()),
-    _pid(app.processor_id()),
+    _pid(app.comm().rank()),
     _root_name(root_name),
     _root_node_id(_perf_graph_registry.registerSection(root_name, 0)),
     _root_node(libmesh_make_unique<PerfNode>(_root_node_id)),
@@ -234,7 +235,7 @@ PerfGraph::push(const PerfID id)
 
   // Add this to the execution list unless the message is empty - but pre-emted by live_print_all
   if ((_live_print_active || _live_print_all) && (_pid == 0 && !_disable_live_print) &&
-      (!_perf_graph_registry.readSectionInfo(id).liveMessage().empty() || _live_print_all))
+      (!_perf_graph_registry.readSectionInfo(id)._live_message.empty() || _live_print_all))
     addToExecutionList(id, IncrementState::STARTED, current_time, start_memory);
 }
 
@@ -266,7 +267,7 @@ PerfGraph::pop()
 
   // Add this to the exection list
   if ((_live_print_active || _live_print_all) && (_pid == 0 && !_disable_live_print) &&
-      (!_perf_graph_registry.readSectionInfo(current_node->id()).liveMessage().empty() ||
+      (!_perf_graph_registry.readSectionInfo(current_node->id())._live_message.empty() ||
        _live_print_all))
   {
     addToExecutionList(current_node->id(), IncrementState::FINISHED, current_time, current_memory);
@@ -332,7 +333,7 @@ PerfGraph::update()
 void
 PerfGraph::recursivelyUpdate(const PerfNode & current_node)
 {
-  const auto & section_name = _perf_graph_registry.readSectionInfo(current_node.id()).name();
+  const auto & section_name = _perf_graph_registry.readSectionInfo(current_node.id())._name;
 
   // RHS insertion on purpose
   auto & section_time = _cumulative_section_info[section_name];
@@ -394,7 +395,7 @@ PerfGraph::treeTable(const unsigned int level, const bool heaviest /* = false */
   });
 
   auto act = [this, &vtable](const PerfNodeInfo & info) {
-    vtable.addRow(std::string(info.depth() * 2, ' ') + info.sectionInfo().name(), // Section Name
+    vtable.addRow(std::string(info.depth() * 2, ' ') + info.sectionInfo()._name,  // Section Name
                   info.node().numCalls(),                                         // Calls
                   info.node().selfTimeSec(),                                      // Self
                   info.node().selfTimeAvg(),                                      // Avg.
@@ -482,7 +483,7 @@ PerfGraph::printHeaviestSections(const ConsoleStream & console, const unsigned i
       continue;
 
     const auto & entry = *_cumulative_section_info_ptrs[id];
-    vtable.addRow(_perf_graph_registry.sectionInfo(id).name(),       // Section
+    vtable.addRow(_perf_graph_registry.sectionInfo(id)._name,        // Section
                   entry._num_calls,                                  // Calls
                   entry._self,                                       // Time
                   entry._self / static_cast<Real>(entry._num_calls), // Avg.
@@ -491,4 +492,38 @@ PerfGraph::printHeaviestSections(const ConsoleStream & console, const unsigned i
   }
 
   vtable.print(console);
+}
+
+void
+dataStore(std::ostream & stream, PerfGraph & perf_graph, void *)
+{
+  // We need to store the registry id -> section info map so that we can add
+  // registered sections that may not be added yet during recover
+  auto section_info = moose::internal::getPerfGraphRegistry().sectionInfo();
+  dataStore(stream, section_info, nullptr);
+
+  // Update before serializing the nodes so that the time/memory/calls are correct
+  perf_graph.update();
+
+  // Recursively serialize all of the nodes
+  dataStore(stream, perf_graph._root_node, nullptr);
+}
+
+void
+dataLoad(std::istream & stream, PerfGraph & perf_graph, void *)
+{
+  // Load in all of the recovered sections and register those that do not exist yet
+  std::vector<moose::internal::PerfGraphSectionInfo> recovered_section_info;
+  dataLoad(stream, recovered_section_info, nullptr);
+  for (const auto & info : recovered_section_info)
+    moose::internal::getPerfGraphRegistry().actuallyRegisterSection(
+        info._name, info._level, info._live_message, info._print_dots);
+
+  // Update the current node time/memory/calls before loading the nodes as the load
+  // will append information to current nodes that exist
+  perf_graph.update();
+
+  // Recursively load all of the nodes; this will append information to matching nodes
+  // and will create new nodes for section paths that do not exist
+  dataLoad(stream, perf_graph._root_node, &perf_graph);
 }

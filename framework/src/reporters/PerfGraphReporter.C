@@ -45,9 +45,9 @@ PerfGraphReporter::execute()
   // Action that stores the nodes information info _nodes
   const auto add_entry = [this, &unique_id](const PerfGraph::PerfNodeInfo & info) {
     NodeEntry entry;
-    entry.name = info.sectionInfo().name();
+    entry.name = info.sectionInfo()._name;
     entry.ints["id"] = unique_id(info.node());
-    entry.ints["level"] = info.sectionInfo().level();
+    entry.ints["level"] = info.sectionInfo()._level;
     entry.ints["num_calls"] = info.node().numCalls();
     entry.ints["memory"] = info.node().selfMemory();
     entry.time = info.node().selfTimeSec();
@@ -63,8 +63,8 @@ PerfGraphReporter::execute()
 
   // Fill _nodes for to_json
   _nodes.clear();
-  _perf_graph.update();
-  _perf_graph.treeRecurse(add_entry);
+  _app.perfGraph().update();
+  _app.perfGraph().treeRecurse(add_entry);
 }
 
 void
