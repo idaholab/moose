@@ -64,9 +64,6 @@ hot_temp=310
     order = FIRST
     family = MONOMIAL
   []
-  [rho_out]
-    type = MooseVariableFVReal
-  []
 []
 
 [AuxKernels]
@@ -97,12 +94,6 @@ hot_temp=310
     function = 'T'
     execute_on = 'initial timestep_end'
     args = 'T'
-  []
-  [rho]
-    type = FunctorMatPropElementalAux
-    mat_prop = 'rho'
-    variable = 'rho_out'
-    execute_on = 'initial timestep_end'
   []
 []
 
@@ -156,7 +147,7 @@ hot_temp=310
     pressure = pressure
   []
   [u_gravity]
-    type = NSFVMomentumGravity
+    type = INSFVMomentumGravity
     variable = u
     gravity = '0 -1 0'
     rho = ${rho}
@@ -194,7 +185,7 @@ hot_temp=310
     pressure = pressure
   []
   [v_gravity]
-    type = NSFVMomentumGravity
+    type = INSFVMomentumGravity
     variable = v
     gravity = '0 -1 0'
     rho = ${rho}
