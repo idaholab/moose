@@ -27,7 +27,7 @@ def check_num_children(node, num_children):
     if len(node.children()) != num_children:
         sys.exit(node_name(node) + ' should have {} children'.format(num_children))
 
-def check(file, pid):
+def check(file, pid, recover):
     pgr = PerfGraphReporterReader(file, part=pid)
 
     # The name of the root node
@@ -42,7 +42,7 @@ def check(file, pid):
     if pgr.rootNode().name() != root_name:
         sys.exit(root_name + ' is not the root node')
     check_level(root_node, 0)
-    check_num_calls(root_node, 1)
+    check_num_calls(root_node, 2 if recover else 1)
     check_num_children(root_node, len(root_children_names))
     if not isclose(pgr.rootNode().percentTime(), 100):
         sys.exit('Root node percent time is not 100%')
@@ -51,15 +51,17 @@ def check(file, pid):
     for child in root_node.children():
         if child.name() not in root_children_names:
             sys.exit('Unexpected child "{}" in root node'.format(child.name()))
-        check_num_calls(child, 1)
+        check_num_calls(child, 2 if recover else 1)
         check_parent(child, root_node)
 
 def main():
-    file = 'perf_graph_reporter_json.json'
+    recover = len(sys.argv) == 2 and sys.argv[1] == 'recover'
+
+    file = 'perf_graph_reporter_' + ('recover_' if recover else '') + 'json.json'
     rr = ReporterReader(file)
 
     for pid in range(0, rr.numParts()):
-        check(file, pid)
+        check(file, pid, recover)
 
 if __name__ == '__main__':
     sys.exit(main())
