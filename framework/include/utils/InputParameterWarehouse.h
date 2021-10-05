@@ -99,7 +99,7 @@ public:
   std::vector<T> getControllableParameterValues(const MooseObjectParameterName & input) const;
 
   /**
-   * Return a vector of paramters names matching the supplied name.
+   * Return a vector of parameters names matching the supplied name.
    */
   std::vector<MooseObjectParameterName>
   getControllableParameterNames(const MooseObjectParameterName & input) const;

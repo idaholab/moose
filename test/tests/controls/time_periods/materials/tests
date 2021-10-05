@@ -5,6 +5,6 @@
     type = CSVDiff
     input = material.i
     csvdiff = material_out.csv
-    requirement = "The system shall be capable of activating or deactivating material property calculations with time."
+    requirement = "The system shall be capable of activating or deactivating materials in the input file depending on time."
   []
 []
