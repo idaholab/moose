@@ -13,13 +13,13 @@
 registerMooseObject("MooseTestApp", IMakeMyOwnFunctorProps);
 
 template <typename T>
-class CustomFunctorProp : public FunctorMaterialProperty<T>
+class CustomFunctorProp : public FunctorMaterialPropertyImpl<T>
 {
 public:
   CustomFunctorProp(const std::string & name,
                     const Moose::Functor<T> & var_functor,
                     const Moose::Functor<T> * const prop_functor = nullptr)
-    : FunctorMaterialProperty<T>(name), _var_functor(var_functor), _prop_functor(prop_functor)
+    : FunctorMaterialPropertyImpl<T>(name), _var_functor(var_functor), _prop_functor(prop_functor)
   {
   }
 
@@ -79,6 +79,10 @@ IMakeMyOwnFunctorProps::validParams()
   params.addParam<MooseFunctorName>("fe_var", 1., "A coupled finite element variable.");
   params.addParam<MooseFunctorName>("fv_var", 1., "A coupled finite volume variable.");
   params.addParam<MooseFunctorName>("retrieved_prop_name", "The name of the retrieved property.");
+  params.addParam<MaterialPropertyName>(
+      "fe_prop_name", "fe_prop", "The name of the FE functor material property to declare.");
+  params.addParam<MaterialPropertyName>(
+      "fv_prop_name", "fv_prop", "The name of the FE functor material property to declare.");
   return params;
 }
 
@@ -88,11 +92,11 @@ IMakeMyOwnFunctorProps::IMakeMyOwnFunctorProps(const InputParameters & parameter
     _fv_var(getFunctor<ADReal>("fv_var")),
     _retrieved_prop(isParamValid("retrieved_prop_name") ? &getFunctor<ADReal>("retrieved_prop_name")
                                                         : nullptr),
-    _fe_prop(isFunctor("fe_var")
-                 ? &declareFunctorProperty<ADReal, CustomFunctorProp>("fe_prop", _fe_var)
-                 : nullptr),
+    _fe_prop(isFunctor("fe_var") ? &declareFunctorProperty<ADReal, CustomFunctorProp>(
+                                       "fe_prop_name", _fe_var, _retrieved_prop)
+                                 : nullptr),
     _fv_prop(isFunctor("fv_var") ? &declareFunctorProperty<ADReal, CustomFunctorProp>(
-                                       "fv_prop", _fv_var, _retrieved_prop)
+                                       "fv_prop_name", _fv_var, _retrieved_prop)
                                  : nullptr)
 {
   if (_fe_prop)

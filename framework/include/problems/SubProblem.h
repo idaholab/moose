@@ -822,12 +822,12 @@ public:
    * @return a non-constant reference to the functor material property
    */
   template <typename T,
-            template <typename> class P = FunctorMaterialProperty,
+            template <typename> class P = FunctorMaterialPropertyImpl,
             class... ConstructionArgs>
-  P<T> & declareFunctorProperty(const std::string & name,
-                                THREAD_ID tid,
-                                bool called_from_getter,
-                                ConstructionArgs &&... construction_args);
+  FunctorMaterialProperty<T> & declareFunctorProperty(const std::string & name,
+                                                      THREAD_ID tid,
+                                                      bool called_from_getter,
+                                                      ConstructionArgs &&... construction_args);
 
   /**
    * Returns a functor corresponding to \p name on the thread id \p tid
@@ -1000,7 +1000,7 @@ private:
 };
 
 template <typename T, template <typename> class P, class... ConstructionArgs>
-P<T> &
+FunctorMaterialProperty<T> &
 SubProblem::declareFunctorProperty(const std::string & name,
                                    const THREAD_ID tid,
                                    const bool called_from_getter,
@@ -1018,8 +1018,8 @@ SubProblem::declareFunctorProperty(const std::string & name,
              .emplace(
                  name,
                  std::make_pair(actually_declaring_property,
-                                std::make_unique<P<T>>(
-                                    name, std::forward<ConstructionArgs>(construction_args)...)))
+                                std::make_unique<FunctorMaterialProperty<T>>(std::make_unique<P<T>>(
+                                    name, std::forward<ConstructionArgs>(construction_args)...))))
              .first;
     // And add it to our all-functors container
     auto & functors = _functors[tid];
@@ -1030,15 +1030,20 @@ SubProblem::declareFunctorProperty(const std::string & name,
   {
     auto & prop_pair = it->second;
     bool & already_declared = prop_pair.first;
-    auto & base_property = prop_pair.second;
+    auto * const wrapper_property =
+        dynamic_cast<FunctorMaterialProperty<T> *>(prop_pair.second.get());
+    if (!wrapper_property)
+      mooseError("Inconsistent return types for functor material property '",
+                 name,
+                 "'. Did you declare and retrieve the property with different return types?");
 
     if (actually_declaring_property)
     {
       if (already_declared)
       {
-        // We've already been declared previously so we need to make sure that we are the same type
-        auto * const property = dynamic_cast<P<T> *>(base_property.get());
-        if (!property)
+        // Let's make sure all of our declarations of a given property have the same template P,
+        // e.g. underlying/wrapped type
+        if (!wrapper_property->template wrapsType<P<T>>())
           mooseError("Inconsistent types for functor material property '",
                      name,
                      "'. Did you declare this property name with different types in different "
@@ -1046,20 +1051,11 @@ SubProblem::declareFunctorProperty(const std::string & name,
       }
       else
       {
-        // Let's make sure we're the correct type T
-        auto * const functor_property =
-            dynamic_cast<FunctorMaterialProperty<T> *>(base_property.get());
-        if (!functor_property)
-          mooseError("Inconsistent types for functor material property '",
-                     name,
-                     "'. Did you declare and retrieve the property with different types?");
-
-        // And let's make sure we're the correct template P. If we're not, this is the first
-        // declaration so we're free to re-create with the correct P (if we're not the correct P, it
-        // means P is a derived class of FunctorMaterialProperty)
-        auto * const property = dynamic_cast<P<T> *>(base_property.get());
-        if (!property)
-          base_property =
+        // Let's make sure we're the correct template P. If we're not, this is the first
+        // declaration so we're free to re-create with the correct P (if we're not the correct P,
+        // it means P is a derived class of FunctorMaterialPropertyImpl)
+        if (!wrapper_property->template wrapsType<P<T>>())
+          (*wrapper_property) =
               std::make_unique<P<T>>(name, std::forward<ConstructionArgs>(construction_args)...);
 
         // Now we can update the declaration status
@@ -1068,7 +1064,7 @@ SubProblem::declareFunctorProperty(const std::string & name,
     }
   }
 
-  auto * const property = dynamic_cast<P<T> *>(it->second.second.get());
+  auto * const property = dynamic_cast<FunctorMaterialProperty<T> *>(it->second.second.get());
   mooseAssert(property, "We should have handled all cases");
   return *property;
 }

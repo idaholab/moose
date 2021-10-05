@@ -11,9 +11,6 @@
 
 #include "FunctorMaterial.h"
 
-template <typename>
-class CustomFunctorProp;
-
 /**
  * A material that optionally couples both a finite element and finite volume variable (strictly
  * speaking they don't have to be one or the other). This class also uses a specialization of
@@ -30,6 +27,6 @@ protected:
   const Moose::Functor<ADReal> & _fe_var;
   const Moose::Functor<ADReal> & _fv_var;
   const Moose::Functor<ADReal> * const _retrieved_prop;
-  CustomFunctorProp<ADReal> * const _fe_prop;
-  CustomFunctorProp<ADReal> * const _fv_prop;
+  FunctorMaterialProperty<ADReal> * const _fe_prop;
+  FunctorMaterialProperty<ADReal> * const _fv_prop;
 };

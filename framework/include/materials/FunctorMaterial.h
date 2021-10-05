@@ -11,6 +11,11 @@
 
 #include "Material.h"
 
+template <typename>
+class FunctorMaterialProperty;
+template <typename>
+class FunctorMaterialPropertyImpl;
+
 /**
  * FunctorMaterials compute functor material properties
  */
@@ -29,13 +34,14 @@ protected:
    * Declare a functor material property that this object will responsible for providing
    */
   template <typename T,
-            template <typename> class P = FunctorMaterialProperty,
+            template <typename> class P = FunctorMaterialPropertyImpl,
             class... ConstructionArgs>
-  P<T> & declareFunctorProperty(const std::string & name, ConstructionArgs &&... construction_args);
+  FunctorMaterialProperty<T> & declareFunctorProperty(const std::string & name,
+                                                      ConstructionArgs &&... construction_args);
 };
 
 template <typename T, template <typename> class P, class... ConstructionArgs>
-P<T> &
+FunctorMaterialProperty<T> &
 FunctorMaterial::declareFunctorProperty(const std::string & name,
                                         ConstructionArgs &&... construction_args)
 {
