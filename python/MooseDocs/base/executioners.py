@@ -17,6 +17,7 @@ import multiprocessing
 import mooseutils
 import random
 import platform
+import queue
 
 import MooseDocs
 from ..tree import pages
@@ -450,11 +451,6 @@ class ParallelQueue(Executioner):
     Follows Queue example:
     https://docs.python.org/3/library/multiprocessing.html#multiprocessing-examples
     """
-    STOP = float('inf')
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._global_attributes = self._ctx.Manager().dict()
 
     def execute(self, nodes, num_threads=1, read=True, tokenize=True, render=True, write=True):
         if read:
@@ -470,59 +466,75 @@ class ParallelQueue(Executioner):
         """Helper function for running in parallel using Queues"""
 
         # Input/Output Queue object
-        page_queue = self._ctx.Queue()
-        output_queue = self._ctx.Queue()
-
-        # Populate the input Queue with the ids for the nodes to be read
-        random.shuffle(nodes)
-        for node in nodes:
-            page_queue.put(node.uid)
+        manager = self._ctx.Manager()
+        lock = manager.Lock()
+        output_queue = manager.list()
+        page_queue = manager.list([node.uid for node in nodes])
 
         # Create Processes for each thread that reads the data and updates the Queue objects
+        jobs = list()
         for i in range(num_threads):
-            self._ctx.Process(target=target, args=(page_queue, output_queue)).start()
+            p = self._ctx.Process(target=target, args=(page_queue, output_queue, lock))
+            jobs.append(p)
+            p.start()
 
-        # Extract the data from the output Queue object and update Page object attributes
-        for i in range(len(nodes)):
-            uid, attributes, out = output_queue.get()
-            self._getPage(uid).attributes.update(attributes)
-            if container is not None:
+        # Wait for all jobs to complete
+        for p in jobs:
+            p.join()
+
+        # Gather information from processes and update local data
+        if container is not None:
+            for uid, attributes, out in output_queue:
+                self._getPage(uid).attributes.update(attributes)
                 container[uid] = out
 
-        for i in range(num_threads):
-            page_queue.put(ParallelQueue.STOP)
+        # Shut down all the processes
+        for p in jobs:
+            p.close()
 
-    def _read_target(self, qin, qout):
+    @staticmethod
+    def _get_container_item(container, lock):
+        with lock:
+            return container.pop() if len(container) > 0 else None
+
+    def _read_target(self, qin, qout, lock):
         """Function for calling self.read with Queue objects."""
-
-        for uid in iter(qin.get, ParallelQueue.STOP):
+        local = list()
+        for uid in iter(lambda: ParallelQueue._get_container_item(qin, lock), None):
             node = self._getPage(uid)
             content = self.read(node)
-            qout.put((uid, node.attributes, content))
+            local.append((uid, node.attributes, content))
 
-    def _tokenize_target(self, qin, qout):
+        with lock:
+            qout.extend(local)
+
+    def _tokenize_target(self, qin, qout, lock):
         """Function for calling self.tokenize with Queue objects."""
-
-        for uid in iter(qin.get, ParallelQueue.STOP):
+        local = list()
+        for uid in iter(lambda: ParallelQueue._get_container_item(qin, lock), None):
             node = self._getPage(uid)
             ast = self.tokenize(node, self._page_content[uid])
-            qout.put((uid, node.attributes, ast))
+            local.append((uid, node.attributes, ast))
 
-    def _render_target(self, qin, qout):
+        with lock:
+            qout.extend(local)
+
+    def _render_target(self, qin, qout, lock):
         """Function for calling self.tokenize with Queue objects."""
-
-        for uid in iter(qin.get, ParallelQueue.STOP):
+        local = list()
+        for uid in iter(lambda: ParallelQueue._get_container_item(qin, lock), None):
             node = self._getPage(uid)
             result = self.render(node, self._page_ast[uid])
-            qout.put((uid, node.attributes, result))
+            local.append((uid, node.attributes, result))
 
-    def _write_target(self, qin, qout):
+        with lock:
+            qout.extend(local)
+
+    def _write_target(self, qin, qout, lock):
         """Function for calling self.write with Queue objects."""
-
-        for uid in iter(qin.get, ParallelQueue.STOP):
+        for uid in iter(lambda: ParallelQueue._get_container_item(qin, lock), None):
             node = self._getPage(uid)
             ast = self.write(node, self._page_result[uid])
-            qout.put((uid, node.attributes, None))
 
 class ParallelBarrier(Executioner):
     """
