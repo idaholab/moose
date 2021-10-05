@@ -15,7 +15,6 @@ public:
   virtual Real value(Real t, const Point & p) const override;
 
 protected:
-
   Real _k;
 
   Real _theta;

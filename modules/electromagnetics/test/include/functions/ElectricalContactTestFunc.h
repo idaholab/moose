@@ -26,7 +26,6 @@ public:
   virtual Real value(Real t, const Point & p) const override;
 
 protected:
-
   /// Function used to calculate two block test case analytic solution
   Real twoBlockFunction(Real t, const Point & p) const;
 

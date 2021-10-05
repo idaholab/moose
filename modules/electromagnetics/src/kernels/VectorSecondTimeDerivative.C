@@ -16,8 +16,7 @@ InputParameters
 VectorSecondTimeDerivative::validParams()
 {
   InputParameters params = VectorTimeKernel::validParams();
-  params.addClassDescription(
-      "The second time derivative operator for vector variables.");
+  params.addClassDescription("The second time derivative operator for vector variables.");
   params.addParam<FunctionName>("coefficient", 1.0, "Coefficient function.");
   return params;
 }

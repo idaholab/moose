@@ -31,7 +31,10 @@ ElectromagneticsTestApp::ElectromagneticsTestApp(InputParameters parameters) : M
 ElectromagneticsTestApp::~ElectromagneticsTestApp() {}
 
 void
-ElectromagneticsTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_test_objs)
+ElectromagneticsTestApp::registerAll(Factory & f,
+                                     ActionFactory & af,
+                                     Syntax & s,
+                                     bool use_test_objs)
 {
   ElectromagneticsApp::registerAll(f, af, s);
   if (use_test_objs)

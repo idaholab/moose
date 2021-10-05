@@ -15,7 +15,8 @@ InputParameters
 ParallelElectricFieldInterface::validParams()
 {
   InputParameters params = VectorInterfaceKernel::validParams();
-  params.addClassDescription("VectorInterfaceKernel that implements the condition $\\vec{E}_{1}^{\\parallel} - \\vec{E}_{2}^{\\parallel} = 0$");
+  params.addClassDescription("VectorInterfaceKernel that implements the condition "
+                             "$\\vec{E}_{1}^{\\parallel} - \\vec{E}_{2}^{\\parallel} = 0$");
   return params;
 }
 

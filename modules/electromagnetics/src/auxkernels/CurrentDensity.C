@@ -35,7 +35,8 @@ CurrentDensityTempl<is_ad>::CurrentDensityTempl(const InputParameters & paramete
 
     _is_es(getParam<bool>("electrostatic")),
     _grad_potential(isParamValid("potential") ? coupledGradient("potential") : _grad_zero),
-    _electric_field(isParamValid("electric_field") ? coupledVectorValue("electric_field") : _vector_zero),
+    _electric_field(isParamValid("electric_field") ? coupledVectorValue("electric_field")
+                                                   : _vector_zero),
 
     _conductivity(getGenericMaterialProperty<Real, is_ad>("electrical_conductivity"))
 {

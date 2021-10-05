@@ -80,9 +80,9 @@ MMSTestFunc::value(Real t, const Point & p) const
   std::complex<double> c_2 = (g_l - g_0 * std::cos(c_l * _length)) / std::sin(c_l * _length);
 
   F = -c_1 * ((c_second * p(0) + 2.0 * c_grad) * std::sin(c * p(0)) +
-               (std::pow(c_grad * p(0), 2) + 2.0 * c_grad * c * p(0)) * std::cos(c * p(0))) +
-       c_2 * ((c_second * p(0) + 2.0 * c_grad) * std::cos(c * p(0)) -
-              (std::pow(c_grad * p(0), 2) + 2.0 * c_grad * c * p(0)) * std::sin(c * p(0)));
+              (std::pow(c_grad * p(0), 2) + 2.0 * c_grad * c * p(0)) * std::cos(c * p(0))) +
+      c_2 * ((c_second * p(0) + 2.0 * c_grad) * std::cos(c * p(0)) -
+             (std::pow(c_grad * p(0), 2) + 2.0 * c_grad * c * p(0)) * std::sin(c * p(0)));
 
   if (_component == electromagnetics::REAL)
   {

@@ -39,5 +39,4 @@ protected:
   Real _g_l_imag;
 
   MooseEnum _component;
-
 };

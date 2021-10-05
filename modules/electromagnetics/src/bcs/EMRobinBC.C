@@ -58,7 +58,8 @@ EMRobinBC::EMRobinBC(const InputParameters & parameters)
   bool profile_func_real_was_set = parameters.isParamSetByUser("profile_func_real");
   bool profile_func_imag_was_set = parameters.isParamSetByUser("profile_func_imag");
 
-  if (_mode == electromagnetics::ABSORBING && (profile_func_real_was_set || profile_func_imag_was_set))
+  if (_mode == electromagnetics::ABSORBING &&
+      (profile_func_real_was_set || profile_func_imag_was_set))
   {
     mooseError(
         "In ",
