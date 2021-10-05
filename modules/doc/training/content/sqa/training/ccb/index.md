@@ -1,6 +1,6 @@
-# INL RDHERD01
+# RDHERD01
 
-## Introduction to MOOSE and MOOSE-based Application development processes
+## Introduction to MOOSE and MOOSE-based Application Development Processes
 
 !---
 

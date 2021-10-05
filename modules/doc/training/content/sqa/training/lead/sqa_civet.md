@@ -67,5 +67,5 @@ COVERAGE_TAG = main
 
 !alert note
 The MOOSE website includes additional information regarding
-[code coverage](application_development/coverage.md optional=True) and please use the
+[code coverage](application_development/coverage.md optional=True). Please use the
 [MOOSE Discussion forum](https://github.com/idaholab/moose/discussions) for assistance.
