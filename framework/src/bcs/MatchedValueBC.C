@@ -26,23 +26,25 @@ MatchedValueBC::validParams()
 }
 
 MatchedValueBC::MatchedValueBC(const InputParameters & parameters)
-  : NodalBC(parameters), _v(coupledValue("v")), _v_num(coupled("v")),
-  _u_coeff(getParam<Real>("u_coeff")),
-  _v_coeff(getParam<Real>("v_coeff"))
+  : NodalBC(parameters),
+    _v(coupledValue("v")),
+    _v_num(coupled("v")),
+    _u_coeff(getParam<Real>("u_coeff")),
+    _v_coeff(getParam<Real>("v_coeff"))
 {
 }
 
 Real
 MatchedValueBC::computeQpResidual()
 {
-  return _u_coeff*_u[_qp] - _v_coeff*_v[_qp];
+  return _u_coeff * _u[_qp] - _v_coeff * _v[_qp];
 }
 
 Real
 MatchedValueBC::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _v_num)
-    return -1.0*_v_coeff;
+    return -1.0 * _v_coeff;
   else
     return 0.;
 }

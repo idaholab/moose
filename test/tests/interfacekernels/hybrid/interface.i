@@ -7,76 +7,70 @@
     ny = 40
     ymax = 2
   []
-  [./subdomain1]
+  [subdomain1]
     input = gen
     type = SubdomainBoundingBoxGenerator
     bottom_left = '0.5 0.5 0'
     top_right = '1.5 1.5 0'
     block_id = 1
-  [../]
-  [./interface]
+  []
+  [interface]
     type = SideSetsBetweenSubdomainsGenerator
     input = subdomain1
     primary_block = '1'
     paired_block = '0'
     new_boundary = 'primary1_interface'
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
-    order = FIRST
-    family = LAGRANGE
+  [u]
     block = 0
-  [../]
-
-  [./v]
-    order = FIRST
-    family = LAGRANGE
+  []
+  [v]
     block = 1
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff_u]
+  [diff_u]
     type = MatDiffusion
     variable = u
     diffusivity = D
     block = 0
-  [../]
-  [./diff_v]
+  []
+  [diff_v]
     type = MatDiffusion
     variable = v
     diffusivity = D
     block = 1
-  [../]
-  [./source_u]
+  []
+  [source_u]
     type = BodyForce
     variable = u
     value = 1
     block = 0
-  [../]
-  [./source_v]
+  []
+  [source_v]
     type = BodyForce
     variable = v
     value = 1
     block = 1
-  [../]
+  []
 []
 
 [BCs]
-  [./u]
+  [u]
     type = VacuumBC
     variable = u
     boundary = 'left bottom right top'
-  [../]
-
-  [./interface_bc]
+  []
+  [interface_bc]
     type = ADMatchedValueBC
     variable = v
     v = u
     boundary = primary1_interface
-  [../]
+  []
 []
 
 [Preconditioning]

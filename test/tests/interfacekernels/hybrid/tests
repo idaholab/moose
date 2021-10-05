@@ -18,5 +18,20 @@
     requirement = "The system shall support interface conditions: penalty"
   [../]
 
-  
+  [./variable_coeffs_AD]
+    type = 'Exodiff'
+    input = 'interface.i'
+    exodiff = 'variable_coeffs.e'
+    cli_args = 'BCs/interface_bc/u_coeff=1 BCs/interface_bc/v_coeff=1.08 Outputs/file_base=variable_coeffs'
+    requirement = "The system shall support matched-value interface with different variable coefficients with AD"
+  [../]
+
+  [./variable_coeffs]
+    type = 'Exodiff'
+    input = 'interface.i'
+    exodiff = 'variable_coeffs.e'
+    prereq = 'variable_coeffs_AD'
+    cli_args = 'BCs/interface_bc/type=MatchedValueBC BCs/interface_bc/u_coeff=1 BCs/interface_bc/v_coeff=1.08 Outputs/file_base=variable_coeffs'
+    requirement = "The system shall support matched-value interface with different variable coefficients"
+  [../]
 []
