@@ -30,4 +30,15 @@
     requirement = 'The Abaqus UMAT interface shall produce the same results as the built-in MOOSE '
                   'material models for finite strain elasticity'
   []
+  [elastic_incremental]
+    type = 'Exodiff'
+    input = 'elastic.i'
+    cli_args = "Materials/active='umat' Materials/umat/plugin='../../plugins/elastic_incremental'"
+    exodiff = 'elastic_out.e'
+    library_mode = 'DYNAMIC'
+    valgrind = 'NONE'
+    requirement = 'The system shall provide an interface to use Abaqus UMAT materials as '
+                  'constitutive models, with support for incremental strain elastic material models'
+    issues = '#18843'
+  []
 []
