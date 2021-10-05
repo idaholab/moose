@@ -37,6 +37,15 @@ public:
 protected:
   virtual void initialSetup() override;
 
+  // Setup unit conversion factors. The required units in the ROM are:
+  // Cell dislocation density: m^-2
+  // Wall dislocation density: m^-2
+  // MX phase fracture: nondim.
+  // stress: MPa
+  // strain: nondim.
+  // temperature: K
+  virtual void setupUnitConversionFactors(const InputParameters & parameters);
+
   virtual void initQpStatefulProperties() override;
   virtual void
   computeStressInitialize(const GenericReal<is_ad> & effective_trial_stress,
@@ -514,6 +523,9 @@ protected:
 
   /// Container for tiling orientations
   std::vector<unsigned int> _tiling;
+
+  /// Unit conversion factors required to convert from the specified unit to MPa
+  Real _stress_ucf;
 };
 
 typedef LAROMANCEStressUpdateBaseTempl<false> LAROMANCEStressUpdateBase;
