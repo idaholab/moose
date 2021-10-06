@@ -1,6 +1,6 @@
 # Test for VectorCurrentSource
-# Manufactured solution: u_real = -x^2 * y_hat
-#                        u_imag = y^2 * x_hat
+# Manufactured solution: u_real = y^2 * x_hat - x^2 * y_hat
+#                        u_imag = y^2 * x_hat - x^2 * y_hat
 
 [Mesh]
   type = GeneratedMesh
@@ -16,9 +16,11 @@
   [./source_real]
     type = ParsedVectorFunction
     value_x = 'y*y - 2'
+    value_y = '2 - x*x'
   [../]
   [./source_imag]
     type = ParsedVectorFunction
+    value_x = '2 - y*y'
     value_y = 'x*x - 2'
   [../]
 []
@@ -73,6 +75,7 @@
   [./sides_real]
     type = VectorCurlPenaltyDirichletBC
     variable = u_real
+    x_exact_soln = 'y*y'
     y_exact_soln = '-x*x'
     penalty = 1e8
     boundary = 'left right top bottom'
@@ -81,6 +84,7 @@
     type = VectorCurlPenaltyDirichletBC
     variable = u_imag
     x_exact_soln = 'y*y'
+    y_exact_soln = '-x*x'
     penalty = 1e8
     boundary = 'left right top bottom'
   [../]

@@ -71,7 +71,14 @@ void
 ReflectionCoefficient::threadJoin(const UserObject & y)
 {
   const ReflectionCoefficient & pps = static_cast<const ReflectionCoefficient &>(y);
-  _reflection_coefficient = pps._reflection_coefficient;
+  Real temp_rc = _reflection_coefficient;
+  _reflection_coefficient = std::max(temp_rc, pps._reflection_coefficient);
+}
+
+void
+ReflectionCoefficient::finalize()
+{
+  gatherMax(_reflection_coefficient);
 }
 
 Real

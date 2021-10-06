@@ -1,3 +1,6 @@
+# Test for EM module vector kernels CurlCurlField and VectorCoeffField
+# Manufactured solution: u = y * x_hat - x * y_hat
+
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -6,15 +9,6 @@
   xmin = -1
   ymin = -1
   elem_type = QUAD9
-[]
-
-[Functions]
-  [./mms] # Manufactured solution, real component
-    type = ParsedVectorFunction
-    value_x = 'y'
-    value_y = '-x'
-    curl_z = '-2'
-  [../]
 []
 
 [Variables]

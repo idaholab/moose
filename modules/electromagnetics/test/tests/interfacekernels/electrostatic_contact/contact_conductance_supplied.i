@@ -115,8 +115,8 @@
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -ksp_grmres_restart -sub_ksp_type -sub_pc_type -pc_asm_overlap'
   petsc_options_value = 'asm         101   preonly   ilu      1'
-  #petsc_options = '-snes_test_jacobian'
   automatic_scaling = true
+  nl_rel_tol = 1e-09
 []
 
 [Outputs]
