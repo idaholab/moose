@@ -75,8 +75,8 @@ def _get_remote_civet_jobs(hashes, site, repo, cache=DEFAULT_JOBS_CACHE, logger=
         for match in JOB_RE.finditer(page):
             info.append((int(match.group('job')), site, cache, logger))
 
-    executor = concurrent.futures.ThreadPoolExecutor()
-    jobs = [job for job in executor.map(_download_job, info)]
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        jobs = [job for job in executor.map(_download_job, info)]
     return sorted(jobs, key=lambda j: j.number)
 
 def _download_job(info):

@@ -6,7 +6,7 @@
 
 # NQA-1
 
-A regulatory standard created by the ASME (American Society of Mechanical Engineers) governing the
+A regulatory standard created by the [!ac](ASME) governing the
 supply of items or services, which provide a safety function for nuclear facilities. +Software is
 considered an "item"+.
 
@@ -16,30 +16,35 @@ INL's contract with DOE requires us to abide by NQA-1 standards where applicable
 
 # NQA-1: SQA Program at INL
 
-> The Software Quality Assurance (SQA) program at Idaho National Laboratory (INL) implements the
-> contractual requirements and Department of Energy (DOE) expectations of 10 CFR 830 Subpart A,
-> "Quality Assurance Requirements;" DOE Order 414.1D, "Quality Assurance;" and the American Society
-> of Mechanical Engineers (ASME) NQA-1-2008/1a-2009 and 2017 editions, "Quality Assurance
-> Requirements for Nuclear Facility Applications," which apply to software. These requirements are
-> implemented in the following INL documents: PDD-13610, "Software Quality Assurance Program;" and
-> LWP-13620, "Managing Information Technology Assets," and the associated templates and forms.
+The [!ac](SQA) program at Idaho National Laboratory [!ac](INL) implements the
+contractual requirements and [!ac](DOE) expectations of 10 CFR 830 Subpart A,
+"Quality Assurance Requirements;" DOE Order 414.1D, "Quality Assurance;" and the American Society
+of Mechanical Engineers (ASME) NQA-1-2008/1a-2009 and 2017 editions, "Quality Assurance
+Requirements for Nuclear Facility Applications," which apply to software.
+
+These requirements are
+implemented in the following [!ac](INL) documents: PDD-13610, "Software Quality Assurance Program;" and
+LWP-13620, "Managing Information Technology Assets," and the associated templates and forms.
 
 !---
 
 # NQA-1: SQA Program at INL
 
-> SQA is a set of activities whereby software engineering and quality processes and methods are
-> followed to ensure proper quality is achieved. A graded approach is applied commensurate with the
-> consequence of failure of the software: more rigor is applied with respect to controls and other work
-> activities if the software meets the DOE definition of safety software and has a high consequence of
-> failure, and less rigor is applied if the software is non-safety software and has a lower consequence
-> of failure.
+SQA is a set of activities whereby software engineering and quality processes and methods are
+followed to ensure proper quality is achieved. A graded approach is applied commensurate with the
+consequence of failure of the software:
+
+- more rigor is applied with respect to controls and other work
+  activities if the software meets the DOE definition of safety software and has a high consequence of
+  failure; and
+- less rigor is applied if the software is non-safety software and has a lower consequence
+  of failure.
 
 !---
 
 # NQA-1: SQA and MOOSE
 
-- MOOSE and many MOOSE-based applications are are moving beyond being "research" projects.
+- MOOSE and many MOOSE-based applications are moving beyond being "research" projects.
 - These tools +must+ be developed following the NQA-1 process as defined by
   the [!ac](DOE) and [!ac](INL).
 
@@ -47,7 +52,7 @@ INL's contract with DOE requires us to abide by NQA-1 standards where applicable
 
 # NQA-1: Process
 
-- The NQA-1 process was designed around traditional "waterfall" software development model.
+- The NQA-1 process is designed around traditional "waterfall" software development model.
 
 !style halign=center
 !media training/waterfall.png
@@ -66,7 +71,7 @@ INL's contract with DOE requires us to abide by NQA-1 standards where applicable
 
 # NQA-1: Traceability
 
-The connection (traceablity) between four items is the key to satisfying the NQA-1 standard.
+The connection (traceability) between four items is the key to satisfying the NQA-1 standard.
 
 1. +Change Request (CR)+: Why is the code being changed?
 1. +Requirement+: What is the required function of the code?
@@ -83,7 +88,7 @@ The connection (traceablity) between four items is the key to satisfying the NQA
 - +Non-Conjugated (Atomic)+: must be atomic, i.e., it does not contain conjunctions\\
 - +Traceable+: meets a business need\\
 - +Current+: has not been made obsolete by the passage of time\\
-- +Unambiguous+:concisely stated without recourse to technical jargon\\
+- +Unambiguous+: concisely stated without recourse to technical jargon\\
 - +Verifiable+: implementation can be determined through inspection, test, or analysis
 
 !style halign=center

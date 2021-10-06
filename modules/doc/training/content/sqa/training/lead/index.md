@@ -3,7 +3,6 @@
 ## MOOSE and MOOSE-Based Applications Project Lead and SQA Lead Training
 
 !style halign=center
-*Continuation of INL RDHERD01*
 
 !---
 
