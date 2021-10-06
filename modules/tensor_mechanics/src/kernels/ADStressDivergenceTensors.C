@@ -15,9 +15,9 @@
 registerMooseObject("TensorMechanicsApp", ADStressDivergenceTensors);
 registerMooseObject("TensorMechanicsApp", ADSymmetricStressDivergenceTensors);
 
-template <typename T>
+template <typename R2>
 InputParameters
-ADStressDivergenceTensorsTempl<T>::validParams()
+ADStressDivergenceTensorsTempl<R2>::validParams()
 {
   InputParameters params = ADKernel::validParams();
   params.addClassDescription("Stress divergence kernel with automatic differentiation for the "
@@ -39,12 +39,12 @@ ADStressDivergenceTensorsTempl<T>::validParams()
   return params;
 }
 
-template <typename T>
-ADStressDivergenceTensorsTempl<T>::ADStressDivergenceTensorsTempl(
+template <typename R2>
+ADStressDivergenceTensorsTempl<R2>::ADStressDivergenceTensorsTempl(
     const InputParameters & parameters)
   : ADKernel(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
-    _stress(getADMaterialProperty<T>(_base_name + "stress")),
+    _stress(getADMaterialProperty<R2>(_base_name + "stress")),
     _component(getParam<unsigned int>("component")),
     _ndisp(coupledComponents("displacements")),
     _disp_var(_ndisp),
@@ -64,24 +64,21 @@ ADStressDivergenceTensorsTempl<T>::ADStressDivergenceTensorsTempl(
     mooseError("Volumetric locking correction should be set to false for 1-D problems.");
 }
 
-template <typename T>
+template <typename R2>
 void
-ADStressDivergenceTensorsTempl<T>::initialSetup()
+ADStressDivergenceTensorsTempl<R2>::initialSetup()
 {
   if (getBlockCoordSystem() != Moose::COORD_XYZ)
     mooseError(
         "The coordinate system in the Problem block must be set to XYZ for cartesian geometries.");
 }
 
-template <typename T>
+template <typename R2>
 ADReal
-ADStressDivergenceTensorsTempl<T>::computeQpResidual()
+ADStressDivergenceTensorsTempl<R2>::computeQpResidual()
 {
   // multiply _stress tensor row _component with the test function gradient
   ADReal residual = _stress[_qp].rowMultiply(_component, _grad_test[_i][_qp]);
-  // std::cout << "Residual and stress " << residual << '\n';
-  // _stress[_qp].print(std::cout);
-  // std::cout << '\n';
 
   // volumetric locking correction
   if (_volumetric_locking_correction)
@@ -96,9 +93,9 @@ ADStressDivergenceTensorsTempl<T>::computeQpResidual()
   return residual;
 }
 
-template <typename T>
+template <typename R2>
 void
-ADStressDivergenceTensorsTempl<T>::precalculateResidual()
+ADStressDivergenceTensorsTempl<R2>::precalculateResidual()
 {
   if (!_volumetric_locking_correction)
     return;

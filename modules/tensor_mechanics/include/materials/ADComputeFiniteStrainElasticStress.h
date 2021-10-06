@@ -55,11 +55,7 @@ protected:
    */
   const MaterialProperty<R2> & _elastic_strain_old;
 
-  using ADComputeStressBaseTempl<R2>::_qp;
-  using ADComputeStressBaseTempl<R2>::_stress;
-  using ADComputeStressBaseTempl<R2>::_mechanical_strain;
-  using ADComputeStressBaseTempl<R2>::_elastic_strain;
-  using ADComputeStressBaseTempl<R2>::_base_name;
+  usingComputeStressBaseMembers;
 };
 
 typedef ADComputeFiniteStrainElasticStressTempl<RankTwoTensor, RankFourTensor>

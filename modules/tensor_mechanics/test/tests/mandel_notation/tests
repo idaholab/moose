@@ -1,0 +1,38 @@
+[Tests]
+  issues = '#19000'
+  design = 'TensorClasses.md'
+
+  [small_strain]
+    requirement = 'The system shall solve the continuum mechanics equations in the small strain '
+                  'formulation'
+    [full_tensor_reference]
+      type = Exodiff
+      input = small_elastic.i
+      exodiff = small_elastic_out.e
+      detail = 'with full tensors'
+    []
+    [symmetric_tensor]
+      type = Exodiff
+      input = symmetric_small_elastic.i
+      exodiff = symmetric_small_elastic_out.e
+      detail = 'with symmetric Mandel notation tensors'
+    []
+  []
+
+  [finite_strain]
+    requirement = 'The system shall solve the continuum mechanics equations in the finite strain '
+                  'formulation'
+    [full_tensor_reference]
+      type = Exodiff
+      input = finite_elastic.i
+      exodiff = finite_elastic_out.e
+      detail = 'with full tensors'
+    []
+    [symmetric_tensor]
+      type = Exodiff
+      input = symmetric_finite_elastic.i
+      exodiff = symmetric_finite_elastic_out.e
+      detail = 'with symmetric Mandel notation tensors'
+    []
+  []
+[]

@@ -62,11 +62,6 @@ ADComputeSmallStrainTempl<R2>::computeProperties()
 
     _mechanical_strain[_qp] = _total_strain[_qp];
 
-    // std::cout << "Grad and Mechanical strain " << (*_grad_disp[0])[_qp](0) << ' '
-    //           << (*_grad_disp[0])[_qp](1) << ' ' << (*_grad_disp[0])[_qp](2) << '\n';
-    // _mechanical_strain[_qp].print(std::cout);
-    // std::cout << '\n';
-
     // Remove the Eigen strain
     for (auto es : _eigenstrains)
       _mechanical_strain[_qp] -= (*es)[_qp];

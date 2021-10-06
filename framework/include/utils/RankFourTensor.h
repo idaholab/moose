@@ -170,6 +170,9 @@ public:
   /// Print the rank four tensor
   void print(std::ostream & stm = Moose::out) const;
 
+  /// Print the values of the rank four tensor
+  void printReal(std::ostream & stm = Moose::out) const;
+
   /// copies values from a into this tensor
   RankFourTensorTempl<T> & operator=(const RankFourTensorTempl<T> & a);
 

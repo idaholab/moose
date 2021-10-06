@@ -39,9 +39,8 @@ template <typename T>
 MooseEnum
 SymmetricRankFourTensorTempl<T>::fillMethodEnum()
 {
-  return MooseEnum("antisymmetric symmetric9 symmetric21 general_isotropic symmetric_isotropic "
-                   "symmetric_isotropic_E_nu antisymmetric_isotropic axisymmetric_rz general "
-                   "principal orthotropic");
+  return MooseEnum("symmetric9 symmetric21  symmetric_isotropic symmetric_isotropic_E_nu  "
+                   "axisymmetric_rz principal orthotropic");
 }
 
 template <typename T>
@@ -273,6 +272,20 @@ SymmetricRankFourTensorTempl<T>::print(std::ostream & stm) const
 }
 
 template <typename T>
+void
+SymmetricRankFourTensorTempl<T>::printReal(std::ostream & stm) const
+{
+  std::size_t index = 0;
+  for (unsigned int i = 0; i < N; ++i)
+  {
+    for (unsigned int j = 0; j < N; ++j)
+      stm << std::setw(15) << MetaPhysicL::raw_value(_vals[index++]) << " ";
+    stm << '\n';
+  }
+  stm << std::flush;
+}
+
+template <typename T>
 SymmetricRankFourTensorTempl<T>
 SymmetricRankFourTensorTempl<T>::transposeMajor() const
 {
@@ -299,17 +312,11 @@ SymmetricRankFourTensorTempl<T>::fillFromInputVector(const std::vector<T> & inpu
 
   switch (fill_method)
   {
-    case antisymmetric:
-      fillAntisymmetricFromInputVector(input);
-      break;
     case symmetric9:
       fillSymmetric9FromInputVector(input);
       break;
     case symmetric21:
       fillSymmetric21FromInputVector(input);
-      break;
-    case general_isotropic:
-      fillGeneralIsotropicFromInputVector(input);
       break;
     case symmetric_isotropic:
       fillSymmetricIsotropicFromInputVector(input);
@@ -317,14 +324,8 @@ SymmetricRankFourTensorTempl<T>::fillFromInputVector(const std::vector<T> & inpu
     case symmetric_isotropic_E_nu:
       fillSymmetricIsotropicEandNuFromInputVector(input);
       break;
-    case antisymmetric_isotropic:
-      fillAntisymmetricIsotropicFromInputVector(input);
-      break;
     case axisymmetric_rz:
       fillAxisymmetricRZFromInputVector(input);
-      break;
-    case general:
-      fillGeneralFromInputVector(input);
       break;
     case principal:
       fillPrincipalFromInputVector(input);
@@ -335,62 +336,6 @@ SymmetricRankFourTensorTempl<T>::fillFromInputVector(const std::vector<T> & inpu
     default:
       mooseError("fillFromInputVector called with unknown fill_method of ", fill_method);
   }
-}
-
-template <typename T>
-void
-SymmetricRankFourTensorTempl<T>::fillAntisymmetricFromInputVector(const std::vector<T> & /*input*/)
-{
-  mooseError("Not possible");
-}
-
-template <typename T>
-void
-SymmetricRankFourTensorTempl<T>::fillGeneralIsotropicFromInputVector(const std::vector<T> & input)
-{
-  if (input.size() != 3)
-    mooseError("To use fillGeneralIsotropicFromInputVector, your input must have size 3.  Yours "
-               "has size ",
-               input.size());
-
-  fillGeneralIsotropic(input[0], input[1], input[2]);
-}
-
-template <typename T>
-void
-SymmetricRankFourTensorTempl<T>::fillGeneralIsotropic(const T & i0, const T & i1, const T & /*i2*/)
-{
-
-  for (unsigned int i = 0; i < N; ++i)
-    for (unsigned int j = 0; j < N; ++j)
-      _vals[i + j * N] = i0;
-
-  _vals[21] = _vals[28] = _vals[35] = i1;
-
-  //???
-  // for (unsigned int m = 0; m < N; ++m)
-  //   (*this)(i, j, k, l) +=
-  //       i2 * Real(PermutationTensor::eps(i, j, m)) * Real(PermutationTensor::eps(k, l, m));
-}
-
-template <typename T>
-void
-SymmetricRankFourTensorTempl<T>::fillAntisymmetricIsotropicFromInputVector(
-    const std::vector<T> & input)
-{
-  if (input.size() != 1)
-    mooseError("To use fillAntisymmetricIsotropicFromInputVector, your input must have size 1. "
-               "Yours has size ",
-               input.size());
-
-  fillGeneralIsotropic(0.0, 0.0, input[0]);
-}
-
-template <typename T>
-void
-SymmetricRankFourTensorTempl<T>::fillAntisymmetricIsotropic(const T & i0)
-{
-  fillGeneralIsotropic(0.0, 0.0, i0);
 }
 
 template <typename T>
@@ -464,13 +409,6 @@ SymmetricRankFourTensorTempl<T>::fillAxisymmetricRZFromInputVector(const std::ve
                                           input[4], 0.0,
                                                     (input[0] - input[1]) * 0.5}});
   // clang-format on
-}
-
-template <typename T>
-void
-SymmetricRankFourTensorTempl<T>::fillGeneralFromInputVector(const std::vector<T> & /*input*/)
-{
-  mooseError("Not implemented");
 }
 
 template <typename T>
@@ -551,24 +489,6 @@ SymmetricRankFourTensorTempl<T>::fillGeneralOrthotropicFromInputVector(const std
   _vals[21] = 2 * Gab;
   _vals[28] = 2 * Gca;
   _vals[35] = 2 * Gbc;
-}
-
-template <typename T>
-SymmetricRankTwoTensorTempl<T>
-SymmetricRankFourTensorTempl<T>::innerProductTranspose(
-    const SymmetricRankTwoTensorTempl<T> & b) const
-{
-  SymmetricRankTwoTensorTempl<T> result;
-
-  unsigned int index = 0;
-  for (unsigned int ij = 0; ij < N2; ++ij)
-  {
-    T bb = b._coords[ij];
-    for (unsigned int kl = 0; kl < N2; ++kl)
-      result._coords[kl] += _vals[index++] * bb;
-  }
-
-  return result;
 }
 
 template <typename T>

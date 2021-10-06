@@ -187,6 +187,17 @@ public:
   /// multiply vector v with row n of this tensor
   T rowMultiply(std::size_t n, const TypeVector<T> & v) const;
 
+  /// return the marix multiplied with its transpose A*A^T (guaranteed symmetric)
+  static RankTwoTensorTempl<T> timesTranspose(const RankTwoTensorTempl<T> &);
+
+  /// return the marix plus its transpose A-A^T (guaranteed symmetric)
+  static RankTwoTensorTempl<T> plusTranspose(const RankTwoTensorTempl<T> &);
+
+  /**
+   * Returns the matrix squared
+   */
+  RankTwoTensorTempl<T> sqr() const;
+
   /**
    * Returns a rotated version of the tensor data given a rank two tensor rotation tensor
    * _coords[i][j] = R_ij * R_jl * _coords[k][l]

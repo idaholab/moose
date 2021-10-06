@@ -47,7 +47,7 @@ ADComputeIncrementalStrainBaseTempl<R2>::initialSetup()
   ADComputeStrainBaseTempl<R2>::initialSetup();
   for (unsigned int i = 0; i < 3; ++i)
   {
-    if (_fe_problem.isTransient() && i < _ndisp)
+    if (this->_fe_problem.isTransient() && i < _ndisp)
       _grad_disp_old[i] = &this->coupledGradientOld("displacements", i);
     else
       _grad_disp_old[i] = &_grad_zero;

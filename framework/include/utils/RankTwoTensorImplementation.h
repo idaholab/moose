@@ -14,6 +14,7 @@
 #include "ColumnMajorMatrix.h"
 #include "MooseRandom.h"
 #include "RankFourTensor.h"
+#include "SymmetricRankTwoTensor.h"
 #include "Conversion.h"
 #include "MooseArray.h"
 
@@ -281,6 +282,27 @@ RankTwoTensorTempl<T>::rowMultiply(std::size_t n, const TypeVector<T> & v) const
   for (unsigned int j = 0; j < LIBMESH_DIM; j++)
     sum += this->_coords[n * LIBMESH_DIM + j] * v(j);
   return sum;
+}
+
+template <typename T>
+RankTwoTensorTempl<T>
+RankTwoTensorTempl<T>::timesTranspose(const RankTwoTensorTempl<T> & a)
+{
+  return a * a.transpose();
+}
+
+template <typename T>
+RankTwoTensorTempl<T>
+RankTwoTensorTempl<T>::plusTranspose(const RankTwoTensorTempl<T> & a)
+{
+  return a + a.transpose();
+}
+
+template <typename T>
+RankTwoTensorTempl<T>
+RankTwoTensorTempl<T>::sqr() const
+{
+  return *this * *this;
 }
 
 template <typename T>

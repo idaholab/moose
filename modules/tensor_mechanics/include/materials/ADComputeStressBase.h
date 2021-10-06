@@ -14,6 +14,15 @@
 #include "ADRankTwoTensorForward.h"
 #include "ADSymmetricRankTwoTensorForward.h"
 
+#define usingComputeStressBaseMembers                                                              \
+  usingMaterialMembers;                                                                            \
+  using ADComputeStressBaseTempl<R2>::_base_name;                                                  \
+  using ADComputeStressBaseTempl<R2>::_mechanical_strain;                                          \
+  using ADComputeStressBaseTempl<R2>::_stress;                                                     \
+  using ADComputeStressBaseTempl<R2>::_elastic_strain;                                             \
+  using ADComputeStressBaseTempl<R2>::_extra_stresses;                                             \
+  using ADComputeStressBaseTempl<R2>::_initial_stress_fcn
+
 /**
  * ADComputeStressBaseTempl is the base class for stress tensors
  */

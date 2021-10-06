@@ -68,7 +68,7 @@ void mooseSetToZero<ADSymmetricRankTwoTensor>(ADSymmetricRankTwoTensor & v);
  * Voigt notation.
  */
 template <typename T>
-class SymmetricRankTwoTensorTempl : public TensorValue<T>
+class SymmetricRankTwoTensorTempl
 {
 public:
   // Select initialization
@@ -94,8 +94,7 @@ public:
     autodetect = 0,
     isotropic1 = 1,
     diagonal3 = 3,
-    symmetric6 = 6,
-    general = 9
+    symmetric6 = 6
   };
 
   /**
@@ -112,22 +111,26 @@ public:
   /// Initialization list replacement constructors, 6 arguments
   SymmetricRankTwoTensorTempl(T S11, T S22, T S33, T S23, T S13, T S12);
 
-  /// Initialization list replacement constructors, 9 arguments
+private:
+  /// Initialization list replacement constructors, 9 arguments (for internal use only)
   SymmetricRankTwoTensorTempl(T S11, T S21, T S31, T S12, T S22, T S32, T S13, T S23, T S33);
 
+public:
   /// Copy assignment operator must be defined if used
   SymmetricRankTwoTensorTempl(const SymmetricRankTwoTensorTempl<T> & a) = default;
 
   /// Copy constructor from TensorValue<T>
-  SymmetricRankTwoTensorTempl(const TensorValue<T> & a) : TensorValue<T>(a) {}
+  explicit SymmetricRankTwoTensorTempl(const TensorValue<T> & a);
 
   /// Copy constructor from TypeTensor<T>
-  SymmetricRankTwoTensorTempl(const TypeTensor<T> & a) : TensorValue<T>(a) {}
+  explicit SymmetricRankTwoTensorTempl(const TypeTensor<T> & a);
 
   /// Construct from other template
   template <typename T2>
-  SymmetricRankTwoTensorTempl(const SymmetricRankTwoTensorTempl<T2> & a) : TensorValue<T>(a)
+  SymmetricRankTwoTensorTempl(const SymmetricRankTwoTensorTempl<T2> & a)
   {
+    for (std::size_t i = 0; i < N; ++i)
+      _vals[i] = a(i);
   }
 
   // Named constructors
@@ -152,7 +155,6 @@ public:
    *   _vals[1][2] = input[3]
    *   _vals[0][2] = input[4]
    *   _vals[0][1] = input[5]
-   * If 9 inputs then input order is [0][0], [1][0], [2][0], [0][1], [1][1], ..., [2][2]
    */
   void fillFromInputVector(const std::vector<T> & input, FillMethod fill_method = autodetect);
 
@@ -167,6 +169,23 @@ public:
 
   /// multiply vector v with row n of this tensor
   T rowMultiply(std::size_t n, const TypeVector<T> & v) const;
+
+  /// return the marix multiplied with its transpose A*A^T (guaranteed symmetric)
+  static SymmetricRankTwoTensorTempl<T> timesTranspose(const RankTwoTensorTempl<T> &);
+  static SymmetricRankTwoTensorTempl<T> timesTranspose(const SymmetricRankTwoTensorTempl<T> &);
+
+  /// return the marix plus its transpose A-A^T (guaranteed symmetric)
+  static SymmetricRankTwoTensorTempl<T> plusTranspose(const RankTwoTensorTempl<T> &);
+  static SymmetricRankTwoTensorTempl<T> plusTranspose(const SymmetricRankTwoTensorTempl<T> &);
+
+  /// Returns the matrix squared
+  SymmetricRankTwoTensorTempl<T> sqr() const;
+
+  /// Returns the trace
+  T tr() const { return _vals[0] + _vals[1] + _vals[2]; }
+
+  /// Set all components to zero
+  void zero();
 
   /**
    * Gets the value for the index specified.  Takes index = 0,1,2
@@ -225,9 +244,10 @@ public:
   SymmetricRankTwoTensorTempl<T> & operator*=(const T & a);
 
   /// returns _vals*a
-  template <typename T2, typename std::enable_if<ScalarTraits<T2>::value, int>::type = 0>
-  SymmetricRankTwoTensorTempl<typename CompareTypes<T, T2>::supertype>
-  operator*(const T2 & a) const;
+  template <typename T2>
+  auto operator*(const T2 & a) const ->
+      typename std::enable_if<ScalarTraits<T2>::value,
+                              SymmetricRankTwoTensorTempl<decltype(T() * T2())>>::type;
 
   /// performs _vals /= a
   SymmetricRankTwoTensorTempl<T> & operator/=(const T & a);
@@ -241,14 +261,6 @@ public:
   /// Defines multiplication with a vector to get a vector
   template <typename T2>
   TypeVector<typename CompareTypes<T, T2>::supertype> operator*(const TypeVector<T2> & a) const;
-
-  /// Defines multiplication with a TypeTensor<T>
-  template <typename T2>
-  SymmetricRankTwoTensorTempl<typename CompareTypes<T, T2>::supertype>
-  operator*(const TypeTensor<T2> & a) const;
-
-  /// Defines multiplication with a TypeTensor<T>
-  SymmetricRankTwoTensorTempl<T> & operator*=(const TypeTensor<T> & a);
 
   /// Defines logical equality with another SymmetricRankTwoTensorTempl<T2>
   template <typename T2>
@@ -548,7 +560,7 @@ public:
   static constexpr unsigned int N = 6;
 
 private:
-  static constexpr std::array<Real, N> identityCoords = {1, 1, 1, 0, 0, 0};
+  static constexpr std::array<Real, N> identityCoords = {{1, 1, 1, 0, 0, 0}};
 
   // tensor components
   std::array<T, N> _vals;
@@ -586,6 +598,19 @@ struct RawType<SymmetricRankTwoTensorTempl<T>>
 template <typename T>
 template <typename T2>
 auto
+SymmetricRankTwoTensorTempl<T>::operator*(const T2 & a) const ->
+    typename std::enable_if<ScalarTraits<T2>::value,
+                            SymmetricRankTwoTensorTempl<decltype(T() * T2())>>::type
+{
+  SymmetricRankTwoTensorTempl<decltype(T() * T2())> result;
+  for (std::size_t i = 0; i < N; ++i)
+    result._vals[i] = _vals[i] * a;
+  return result;
+}
+
+template <typename T>
+template <typename T2>
+auto
 SymmetricRankTwoTensorTempl<T>::operator/(const T2 & a) const ->
     typename std::enable_if<ScalarTraits<T2>::value,
                             SymmetricRankTwoTensorTempl<decltype(T() / T2())>>::type
@@ -594,6 +619,18 @@ SymmetricRankTwoTensorTempl<T>::operator/(const T2 & a) const ->
   for (std::size_t i = 0; i < N; ++i)
     result._vals[i] = _vals[i] / a;
   return result;
+}
+
+/// Defines multiplication with a vector to get a vector
+template <typename T>
+template <typename T2>
+TypeVector<typename CompareTypes<T, T2>::supertype>
+SymmetricRankTwoTensorTempl<T>::operator*(const TypeVector<T2> & a) const
+{
+  TypeVector<typename CompareTypes<T, T2>::supertype> ret;
+  ret(0) = a(0) * _vals[0] + a(1) * _vals[5] + a(2) * _vals[4];
+  ret(1) = a(0) * _vals[5] + a(1) * _vals[1] + a(2) * _vals[3];
+  ret(2) = a(0) * _vals[4] + a(1) * _vals[3] + a(2) * _vals[2];
 }
 
 template <typename T>

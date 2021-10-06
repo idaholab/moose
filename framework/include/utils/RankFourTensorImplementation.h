@@ -440,6 +440,26 @@ RankFourTensorTempl<T>::print(std::ostream & stm) const
 }
 
 template <typename T>
+void
+RankFourTensorTempl<T>::printReal(std::ostream & stm) const
+{
+  for (unsigned int i = 0; i < N; ++i)
+    for (unsigned int j = 0; j < N; ++j)
+    {
+      stm << "i = " << i << " j = " << j << '\n';
+      for (unsigned int k = 0; k < N; ++k)
+      {
+        for (unsigned int l = 0; l < N; ++l)
+          stm << std::setw(15) << MetaPhysicL::raw_value((*this)(i, j, k, l)) << " ";
+
+        stm << '\n';
+      }
+    }
+
+  stm << std::flush;
+}
+
+template <typename T>
 RankFourTensorTempl<T>
 RankFourTensorTempl<T>::transposeMajor() const
 {

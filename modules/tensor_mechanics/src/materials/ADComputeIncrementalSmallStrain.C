@@ -8,6 +8,11 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ADComputeIncrementalSmallStrain.h"
+#include "RankTwoTensor.h"
+#include "RankFourTensor.h"
+#include "SymmetricRankTwoTensor.h"
+#include "SymmetricRankFourTensor.h"
+
 #include "libmesh/quadrature.h"
 
 registerMooseObject("TensorMechanicsApp", ADComputeIncrementalSmallStrain);

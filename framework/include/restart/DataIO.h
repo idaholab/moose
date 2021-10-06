@@ -745,7 +745,7 @@ template <typename T>
 void
 dataLoad(std::istream & stream, SymmetricRankTwoTensorTempl<T> & rtt, void * context)
 {
-  dataLoad(stream, rtt._coords, context);
+  dataLoad(stream, rtt._vals, context);
 }
 
 template <typename T>

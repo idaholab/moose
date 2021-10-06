@@ -34,12 +34,7 @@ protected:
   /// Elasticity tensor material property
   const ADMaterialProperty<R4> & _elasticity_tensor;
 
-  using ADComputeStressBaseTempl<R2>::computeQpStress;
-  using ADComputeStressBaseTempl<R2>::_qp;
-  using ADComputeStressBaseTempl<R2>::_stress;
-  using ADComputeStressBaseTempl<R2>::_mechanical_strain;
-  using ADComputeStressBaseTempl<R2>::_elastic_strain;
-  using ADComputeStressBaseTempl<R2>::_base_name;
+  usingComputeStressBaseMembers;
 };
 
 typedef ADComputeLinearElasticStressTempl<RankTwoTensor, RankFourTensor>

@@ -15,7 +15,7 @@
 /**
  * ADStressDivergenceTensors is the automatic differentiation version of StressDivergenceTensors
  */
-template <typename T>
+template <typename R2>
 class ADStressDivergenceTensorsTempl : public ADKernel
 {
 public:
@@ -33,7 +33,7 @@ protected:
   const std::string _base_name;
 
   /// The stress tensor that the divergence operator operates on
-  const ADMaterialProperty<T> & _stress;
+  const ADMaterialProperty<R2> & _stress;
 
   /// An integer corresponding to the direction this kernel acts in
   const unsigned int _component;

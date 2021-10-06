@@ -225,6 +225,62 @@ SymmetricRankTwoTensorTempl<T>::rowMultiply(std::size_t n, const TypeVector<T> &
 }
 
 template <typename T>
+SymmetricRankTwoTensorTempl<T>
+SymmetricRankTwoTensorTempl<T>::timesTranspose(const RankTwoTensorTempl<T> & a)
+{
+  return SymmetricRankTwoTensorTempl<T>(a(0, 0) * a(0, 0) + a(0, 1) * a(0, 1) + a(0, 2) * a(0, 2),
+                                        a(1, 0) * a(1, 0) + a(1, 1) * a(1, 1) + a(1, 2) * a(1, 2),
+                                        a(2, 0) * a(2, 0) + a(2, 1) * a(2, 1) + a(2, 2) * a(2, 2),
+                                        a(1, 0) * a(2, 0) + a(1, 1) * a(2, 1) + a(1, 2) * a(2, 2),
+                                        a(0, 0) * a(2, 0) + a(0, 1) * a(2, 1) + a(0, 2) * a(2, 2),
+                                        a(0, 0) * a(1, 0) + a(0, 1) * a(1, 1) + a(0, 2) * a(1, 2));
+}
+
+template <typename T>
+SymmetricRankTwoTensorTempl<T>
+SymmetricRankTwoTensorTempl<T>::timesTranspose(const SymmetricRankTwoTensorTempl<T> & a)
+{
+  return SymmetricRankTwoTensorTempl<T>(
+      a._vals[0] * a._vals[0] + a._vals[4] * a._vals[4] + a._vals[5] * a._vals[5],
+      a._vals[1] * a._vals[1] + a._vals[3] * a._vals[3] + a._vals[5] * a._vals[5],
+      a._vals[2] * a._vals[2] + a._vals[3] * a._vals[3] + a._vals[4] * a._vals[4],
+      a._vals[1] * a._vals[3] + a._vals[2] * a._vals[3] + a._vals[4] * a._vals[5],
+      a._vals[0] * a._vals[4] + a._vals[2] * a._vals[4] + a._vals[3] * a._vals[5],
+      a._vals[0] * a._vals[5] + a._vals[1] * a._vals[5] + a._vals[3] * a._vals[4]);
+}
+
+template <typename T>
+SymmetricRankTwoTensorTempl<T>
+SymmetricRankTwoTensorTempl<T>::plusTranspose(const RankTwoTensorTempl<T> & a)
+{
+  return SymmetricRankTwoTensorTempl<T>(
+             a(0, 0), a(0, 1), a(0, 2), a(1, 0), a(1, 1), a(1, 2), a(2, 0), a(2, 1), a(2, 2)) *
+         2.0;
+}
+
+template <typename T>
+SymmetricRankTwoTensorTempl<T>
+SymmetricRankTwoTensorTempl<T>::plusTranspose(const SymmetricRankTwoTensorTempl<T> & a)
+{
+  return a * 2.0;
+}
+
+template <typename T>
+SymmetricRankTwoTensorTempl<T>
+SymmetricRankTwoTensorTempl<T>::sqr() const
+{
+  return SymmetricRankTwoTensorTempl<T>::timesTranspose(*this);
+}
+
+template <typename T>
+void
+SymmetricRankTwoTensorTempl<T>::zero()
+{
+  for (std::size_t i = 0; i < N; ++i)
+    _vals[i] = 0.0;
+}
+
+template <typename T>
 SymmetricRankTwoTensorTempl<T> &
 SymmetricRankTwoTensorTempl<T>::operator=(const SymmetricRankTwoTensorTempl<T> & a)
 {
@@ -266,10 +322,19 @@ template <typename T2>
 SymmetricRankTwoTensorTempl<typename CompareTypes<T, T2>::supertype>
 SymmetricRankTwoTensorTempl<T>::operator-(const SymmetricRankTwoTensorTempl<T2> & a) const
 {
-  SymmetricRankTwoTensorTempl<typename CompareTypes<T, T2>::supertype> result;
+  SymmetricRankTwoTensorTempl<typename CompareTypes<T, T2>::supertype> result(
+      SymmetricRankTwoTensorTempl<typename CompareTypes<T, T2>::supertype>::initNone);
   for (std::size_t i = 0; i < N; ++i)
     result(i) = _vals[i] - a(i);
   return result;
+}
+
+/// returns -_vals
+template <typename T>
+SymmetricRankTwoTensorTempl<T>
+SymmetricRankTwoTensorTempl<T>::operator-() const
+{
+  return (*this) * -1.0;
 }
 
 template <typename T>

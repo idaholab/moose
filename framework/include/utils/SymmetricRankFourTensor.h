@@ -17,6 +17,8 @@
 #include "libmesh/libmesh.h"
 #include "libmesh/tuple_of.h"
 
+#include <array>
+
 #include "metaphysicl/raw_type.h"
 
 #include <petscsys.h>
@@ -83,17 +85,13 @@ public:
    */
   enum FillMethod
   {
-    antisymmetric,
-    symmetric9,
-    symmetric21,
-    general_isotropic,
-    symmetric_isotropic,
-    symmetric_isotropic_E_nu,
-    antisymmetric_isotropic,
-    axisymmetric_rz,
-    general,
-    principal,
-    orthotropic
+    symmetric9,               // fillSymmetric9FromInputVector
+    symmetric21,              // fillSymmetric21FromInputVector
+    symmetric_isotropic,      // fillSymmetricIsotropicFromInputVector
+    symmetric_isotropic_E_nu, // fillSymmetricIsotropicEandNu
+    axisymmetric_rz,          // fillAxisymmetricRZFromInputVector
+    principal,                // fillPrincipalFromInputVector
+    orthotropic               // fillGeneralOrthotropicFromInputVector
   };
 
   template <template <typename> class Tensor, typename Scalar>
@@ -159,6 +157,9 @@ public:
 
   /// Print the rank four tensor
   void print(std::ostream & stm = Moose::out) const;
+
+  /// Print the values of the rank four tensor
+  void printReal(std::ostream & stm = Moose::out) const;
 
   /// copies values from a into this tensor
   SymmetricRankFourTensorTempl<T> & operator=(const SymmetricRankFourTensorTempl<T> & a);
@@ -236,8 +237,8 @@ public:
   /**
    * Build a 6x6 rotation matrix
    * MEHRABADI, MORTEZA M.; COWIN, STEPHEN C.  (1990). EIGENTENSORS OF LINEAR ANISOTROPIC ELASTIC
-   * MATERIALS. The Quarterly Journal of Mechanics and Applied Mathematics, 43(1), 15–41.
-   * doi:10.1093/qjmam/43.1.15 
+   * MATERIALS. The Quarterly Journal of Mechanics and Applied Mathematics, 43(1), 15-41.
+   * doi:10.1093/qjmam/43.1.15
    */
   static SymmetricRankFourTensorTempl<T> rotationMatrix(const TypeTensor<T> & R);
 
@@ -280,22 +281,11 @@ public:
    * fillFromInputVector takes some number of inputs to fill
    * the Rank-4 tensor.
    * @param input the numbers that will be placed in the tensor
-   * @param fill_method this can be:
-   *             antisymmetric (use fillAntisymmetricFromInputVector)
-   *             symmetric9 (use fillSymmetric9FromInputVector)
-   *             symmetric21 (use fillSymmetric21FromInputVector)
-   *             general_isotropic (use fillGeneralIsotropicFrominputVector)
-   *             symmetric_isotropic (use fillSymmetricIsotropicFromInputVector)
-   *             antisymmetric_isotropic (use fillAntisymmetricIsotropicFromInputVector)
-   *             axisymmetric_rz (use fillAxisymmetricRZFromInputVector)
-   *             general (use fillGeneralFromInputVector)
-   *             principal (use fillPrincipalFromInputVector)
+   * @param fill_method See FillMethod
    */
   void fillFromInputVector(const std::vector<T> & input, FillMethod fill_method);
 
   ///@{ Vector-less fill API functions. See docs of the corresponding ...FromInputVector methods
-  void fillGeneralIsotropic(const T & i0, const T & i1, const T & i2);
-  void fillAntisymmetricIsotropic(const T & i0);
   void fillSymmetricIsotropic(const T & i0, const T & i1);
   void fillSymmetricIsotropicEandNu(const T & E, const T & nu);
   ///@}
@@ -324,10 +314,6 @@ public:
   template <typename T2>
   void fillSymmetric21FromInputVector(const T2 & input);
 
-  /// Inner product of the major transposed tensor with a rank two tensor
-  SymmetricRankTwoTensorTempl<T>
-  innerProductTranspose(const SymmetricRankTwoTensorTempl<T> &) const;
-
   /// Calculates the sum of Ciijj for i and j varying from 0 to 2
   T sum3x3() const;
 
@@ -350,32 +336,6 @@ protected:
 
   /// as std::sqrt is not constexpr we need to define this here ourselves
   static constexpr Real SQRT2 = 1.4142135623730951;
-
-  /**
-   * fillAntisymmetricFromInputVector takes 6 inputs to fill the
-   * the antisymmetric Rank-4 tensor with the appropriate symmetries maintained.
-   * I.e., B_ijkl = -B_jikl = -B_ijlk = B_klij
-   * @param input this is B1212, B1213, B1223, B1313, B1323, B2323.
-   */
-  void fillAntisymmetricFromInputVector(const std::vector<T> & input);
-
-  /**
-   * fillGeneralIsotropicFromInputVector takes 3 inputs to fill the
-   * Rank-4 tensor with symmetries C_ijkl = C_klij, and isotropy, ie
-   * C_ijkl = la*de_ij*de_kl + mu*(de_ik*de_jl + de_il*de_jk) + a*ep_ijm*ep_klm
-   * where la is the first Lame modulus, mu is the second (shear) Lame modulus,
-   * and a is the antisymmetric shear modulus, and ep is the permutation tensor
-   * @param input this is la, mu, a in the above formula
-   */
-  void fillGeneralIsotropicFromInputVector(const std::vector<T> & input);
-
-  /**
-   * fillAntisymmetricIsotropicFromInputVector takes 1 input to fill the
-   * the antisymmetric Rank-4 tensor with the appropriate symmetries maintained.
-   * I.e., C_ijkl = a * ep_ijm * ep_klm, where epsilon is the permutation tensor (and sum on m)
-   * @param input this is a in the above formula
-   */
-  void fillAntisymmetricIsotropicFromInputVector(const std::vector<T> & input);
 
   /**
    * fillSymmetricIsotropicFromInputVector takes 2 inputs to fill the
@@ -405,13 +365,6 @@ protected:
    * @param input this is C1111, C1122, C1133, C3333, C2323.
    */
   void fillAxisymmetricRZFromInputVector(const std::vector<T> & input);
-
-  /**
-   * fillGeneralFromInputVector takes 81 inputs to fill the Rank-4 tensor
-   * No symmetries are explicitly maintained
-   * @param input  C(i,j,k,l) = input[i*N*N*N + j*N*N + k*N + l]
-   */
-  void fillGeneralFromInputVector(const std::vector<T> & input);
 
   /**
    * fillPrincipalFromInputVector takes 9 inputs to fill a Rank-4 tensor
@@ -569,7 +522,7 @@ template <typename T2>
 void
 SymmetricRankFourTensorTempl<T>::fillSymmetric21FromInputVector(const T2 & input)
 {
-  static constexpr std::array<Real, 21> mandel_factor = {
+  static const std::array<Real, 21> mandel_factor = {
       {1.0, 1.0,   1.0,   SQRT2, SQRT2, SQRT2, 1.0, 1.0, SQRT2, SQRT2, SQRT2,
        1.0, SQRT2, SQRT2, SQRT2, 2.0,   2.0,   2.0, 2.0, 2.0,   2.0}};
   mooseAssert(input.size() == 21,
