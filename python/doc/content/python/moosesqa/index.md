@@ -25,7 +25,7 @@ Type "help", "copyright", "credits" or "license" for more information.
 ## SQA Reports
 
 The information that is output from the SQA check command (i.e., `./moosedocs.py check`) and
-the shown on the SQA landing page ([sqa/index.md exact=True]) are generated from report objects.
+the shown in the [MOOSE SQA](sqa/index.md exact=True optional=True) documentation are generated from report objects.
 There exists three types of report objects:
 
 - +`SQADocumentReport`+\\
@@ -43,7 +43,7 @@ requires one argument, the name of a report configuration YAML file. This is com
 three sections: "Applications", "Documents", and "Requirements". These sections include the
 options for the `SQAMooseAppReport`, `SQADocumentReport`, and the `SQARequirementReport`,
 respectively. The file shown in [example-config] is configuration file from the
-[Stochastic Tools SQA page](stochastic_tools/sqa/index.md). The available options for
+[Stochastic Tools SQA page](stochastic_tools/sqa/index.md optional=True). The available options for
 each report should be gathered from the source code for the various report objects. If you
 are creating reports for a new application and need assistance getting started please
 contact MOOSE developers via the [Discussions forum](https://github.com/idaholab/moose/discussions).

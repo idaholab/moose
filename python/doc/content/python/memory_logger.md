@@ -39,7 +39,7 @@ Matplotlib is far more efficient.
 
 ## Using Matplotlib
 
-!media media/memory_logger-plot_multi.png
+!media python/memory_logger-plot_multi.png
        id=memory-logger-example
        style=width:300px;float:right;
        caption=Example memory logger plot.
@@ -106,7 +106,7 @@ You can also display stdout along the Matplotlib graph:
 memory_logger.py --pstack --stdout --plot simple_diffusion_memory.log
 ```
 
-!media media/memory_logger-darkmode.png style=width:300px;float:right; caption=--darkmode
+!media python/memory_logger-darkmode.png style=width:300px;float:right; caption=--darkmode
 
 That white back ground to bright for you? Try dark mode:
 
