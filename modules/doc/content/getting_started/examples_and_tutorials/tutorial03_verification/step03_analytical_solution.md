@@ -131,7 +131,7 @@ cd ~/projects/problems/verification
 ```
 
 When complete an output file will be produced with the name "1d_analytical_out.e", this file
-can be viewed using [Paraview](https://www.paraview.org/) or [application_usage/peacock.md].
+can be viewed using [Paraview](https://www.paraview.org/) or [python/peacock.md].
 
 
 ## Compute Error
