@@ -257,3 +257,14 @@ InputParameterWarehouse::dumpChangedControls(bool reset_changed) const
     }
   return oss.str();
 }
+
+std::vector<MooseObjectParameterName>
+InputParameterWarehouse::getControllableParameterNames(const MooseObjectParameterName & input) const
+{
+  std::vector<MooseObjectParameterName> names;
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+    for (auto it = _controllable_items[tid].begin(); it != _controllable_items[tid].end(); ++it)
+      if ((*it)->name() == input)
+        names.push_back((*it)->name());
+  return names;
+}
