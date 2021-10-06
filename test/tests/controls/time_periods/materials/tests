@@ -1,0 +1,10 @@
+[Tests]
+  issues = "#5676 #18994"
+  design = "controls/TimePeriod.md"
+  [test]
+    type = CSVDiff
+    input = material.i
+    csvdiff = material_out.csv
+    requirement = "The system shall be capable of activating or deactivating materials in the input file depending on time."
+  []
+[]

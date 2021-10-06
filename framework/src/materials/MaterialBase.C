@@ -58,6 +58,9 @@ MaterialBase::validParams()
       "An optional suffix parameter that can be appended to any declared properties. The suffix "
       "will be prepended with a '_' character.");
 
+  // Allow Material objects to be enabled/disabled by Control objects
+  params.declareControllable("enable");
+
   params.addParamNamesToGroup("outputs output_properties", "Outputs");
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
   params.registerBase("MaterialBase");

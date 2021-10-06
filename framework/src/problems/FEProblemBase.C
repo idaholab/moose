@@ -3175,15 +3175,26 @@ FEProblemBase::addMaterialHelper(std::vector<MaterialWarehouse *> warehouses,
         for (auto && warehouse : warehouses)
           warehouse->addObjects(material, neighbor_material, face_material, tid);
 
-      // link parameters of face and neighbor materials
+      // Names of all controllable parameters for this Material object
       const std::string & base = parameters.get<std::string>("_moose_base");
       MooseObjectParameterName name(MooseObjectName(base, material->name()), "*");
-      MooseObjectParameterName face_name(MooseObjectName(base, face_material->name()), "*");
-      MooseObjectParameterName neighbor_name(MooseObjectName(base, neighbor_material->name()), "*");
+      const auto param_names =
+          _app.getInputParameterWarehouse().getControllableParameterNames(name);
 
-      _app.getInputParameterWarehouse().addControllableParameterConnection(name, face_name, false);
-      _app.getInputParameterWarehouse().addControllableParameterConnection(
-          name, neighbor_name, false);
+      // Connect parameters of the primary Material object to those on the face and neighbor objects
+      for (const auto & p_name : param_names)
+      {
+        MooseObjectParameterName primary_name(MooseObjectName(base, material->name()),
+                                              p_name.parameter());
+        MooseObjectParameterName face_name(MooseObjectName(base, face_material->name()),
+                                           p_name.parameter());
+        MooseObjectParameterName neighbor_name(MooseObjectName(base, neighbor_material->name()),
+                                               p_name.parameter());
+        _app.getInputParameterWarehouse().addControllableParameterConnection(
+            primary_name, face_name, false);
+        _app.getInputParameterWarehouse().addControllableParameterConnection(
+            primary_name, neighbor_name, false);
+      }
     }
   }
 }
