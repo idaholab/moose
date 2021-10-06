@@ -535,6 +535,85 @@ TEST(HitTests, MergeTree)
   }
 }
 
+TEST(HitTests, Clone)
+{
+  auto root1 = hit::parse("TESTCASE", "[foo][bar]baz=42[][]");
+  hit::Section root2("");
+  hit::Section root3("");
+  root2.addChild(root1->children()[0]->children()[0]->children()[0]->clone());
+  root3.addChild(root1->children()[0]->children()[0]->children()[0]->clone(true));
+
+  EXPECT_EQ("baz = 42", root2.render());
+  EXPECT_EQ("foo/bar/baz = 42", root3.render());
+}
+
+TEST(HitTests, GatherParamWalker)
+{
+  std::vector<std::pair<std::string, std::map<std::string, std::string>>> tests = {
+      {"[foo]bar=42[][baz][qux]quux=1[][]", {{"foo/bar", "42"}, {"baz/qux/quux", "1"}}},
+      {"foo='123'\nbar=baz", {{"foo", "123"}, {"bar", "baz"}}}};
+
+  for (const auto & test : tests)
+  {
+    auto root = hit::parse("TESTCASE", test.first);
+    hit::GatherParamWalker::ParamMap params;
+    hit::GatherParamWalker walker(params);
+    root->walk(&walker);
+
+    if (test.second.size() != params.size())
+      FAIL() << "case " << test.first << " failed.";
+
+    auto it1 = test.second.begin();
+    auto it2 = params.begin();
+    for (; it1 != test.second.end() && it2 != params.end(); ++it1, ++it2)
+      if (it1->first != it2->first || it1->second != it2->second->strVal())
+        FAIL() << "case " << test.first << " failed.";
+  }
+}
+
+TEST(HitTests, RemoveParamWalker)
+{
+  std::vector<std::array<std::string, 3>> tests = {
+      {"[foo][bar]baz=qux\nlorem=ipsum[][]",
+       "foo/bar/baz=qux",
+       "[foo]\n  [bar]\n    lorem = ipsum\n  []\n[]"},
+      {"[foo][bar]baz=qux[][]", "foo/bar/baz=qux", "[foo]\n  [bar]\n  []\n[]"}};
+
+  for (const auto & test : tests)
+  {
+    auto root1 = hit::parse("TESTCASE", test[0]);
+    auto root2 = hit::parse("TESTCASE", test[1]);
+
+    hit::GatherParamWalker::ParamMap params;
+    hit::GatherParamWalker gather_walker(params);
+    hit::RemoveParamWalker remove_walker(params);
+
+    root2->walk(&gather_walker);
+    root1->walk(&remove_walker);
+
+    EXPECT_EQ(root1->render(), test[2]);
+  }
+}
+
+TEST(HitTests, RemoveEmptySectionWalker)
+{
+  std::vector<std::array<std::string, 2>> tests = {
+      {"[foo][bar]lorem=ipsum[][]", "[foo]\n  [bar]\n    lorem = ipsum\n  []\n[]"},
+      {"[foo][bar][][]", ""},
+      {"[foo][bar]\n\n\n[][]", ""},
+      {"[foo][bar]\n# comment\n\n[][]", ""}};
+
+  for (const auto & test : tests)
+  {
+    auto root = hit::parse("TESTCASE", test[0]);
+
+    hit::RemoveEmptySectionWalker walker;
+    root->walk(&walker);
+
+    EXPECT_EQ(root->render(), test[1]);
+  }
+}
+
 TEST(HitTests, Formatter)
 {
   RenderCase cases[] = {
@@ -622,5 +701,35 @@ TEST(HitTests, Formatter_sorting)
       FAIL() << "case " << i + 1 << " FAIL (" << test.name << "): unexpected error: " << err.what();
     }
     EXPECT_EQ(test.want, got) << "case " << i + 1 << " FAIL (" << test.name << ")";
+  }
+}
+
+TEST(HitTests, unsigned_int)
+{
+  hit::Node * root = nullptr;
+  try
+  {
+    root = hit::parse("TESTCASE", "par = -3");
+    root->param<unsigned int>("par");
+    FAIL() << "Exception was not thrown";
+  }
+  catch (std::exception & err)
+  {
+    EXPECT_EQ("negative value read from file 'TESTCASE' on line 1", std::string(err.what()));
+  }
+}
+
+TEST(HitTests, vector_unsigned_int)
+{
+  hit::Node * root = nullptr;
+  try
+  {
+    root = hit::parse("TESTCASE", "par = '-3 0 1'");
+    root->param<std::vector<unsigned int>>("par");
+    FAIL() << "Exception was not thrown";
+  }
+  catch (std::exception & err)
+  {
+    EXPECT_EQ("negative value read from file 'TESTCASE' on line 1", std::string(err.what()));
   }
 }
