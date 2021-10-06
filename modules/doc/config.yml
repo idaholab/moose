@@ -1,6 +1,7 @@
 Content:
-    - modules/doc/content
     - framework/doc/content
+    - python/doc/content
+    - modules/doc/content
     - modules/chemical_reactions/doc/content
     - modules/combined/doc/content
     - modules/contact/doc/content
