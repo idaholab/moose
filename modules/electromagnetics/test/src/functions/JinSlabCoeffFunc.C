@@ -46,7 +46,7 @@ JinSlabCoeffFunc::value(Real /*t*/, const Point & p) const
   std::complex<double> mu_r(2, -0.1);
 
   std::complex<double> val =
-      mu_r * std::pow(_k, 2) * (eps_r - (1 / mu_r) * std::pow(sin(_theta * libMesh::pi / 180.), 2));
+      mu_r * std::pow(_k, 2) * (eps_r - (1.0 / mu_r) * std::pow(sin(_theta * libMesh::pi / 180.), 2));
 
   if (_component == electromagnetics::REAL)
   {
