@@ -187,7 +187,7 @@ protected:
   void computeQpStress() override;
 
   const MaterialProperty<RankTwoTensor> & _stress_old;
-  const MaterialProperty<RankTwoTensor> & _total_strain;
+  const MaterialProperty<RankTwoTensor> & _total_strain_old;
   const MaterialProperty<RankTwoTensor> & _strain_increment;
 
   /// Jacobian multiplier
