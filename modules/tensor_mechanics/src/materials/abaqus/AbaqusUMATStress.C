@@ -43,7 +43,7 @@ AbaqusUMATStress::AbaqusUMATStress(const InputParameters & parameters)
     _aqPROPS(getParam<std::vector<Real>>("constant_properties")),
     _aqNPROPS(_aqPROPS.size()),
     _stress_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "stress")),
-    _total_strain(getMaterialProperty<RankTwoTensor>(_base_name + "total_strain")),
+    _total_strain_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "total_strain")),
     _strain_increment(getMaterialProperty<RankTwoTensor>(_base_name + "strain_increment")),
     _jacobian_mult(declareProperty<RankFourTensor>(_base_name + "Jacobian_mult")),
     _Fbar(getMaterialProperty<RankTwoTensor>(_base_name + "deformation_gradient")),
@@ -164,7 +164,8 @@ AbaqusUMATStress::computeQpStress()
   for (int i = 0; i < _aqNTENS; ++i)
   {
     _aqSTRESS[i] = _stress_old[_qp](component[i].first, component[i].second);
-    _aqSTRAN[i] = _total_strain[_qp](component[i].first, component[i].second) * strain_factor[i];
+    _aqSTRAN[i] =
+        _total_strain_old[_qp](component[i].first, component[i].second) * strain_factor[i];
     _aqDSTRAN[i] =
         _strain_increment[_qp](component[i].first, component[i].second) * strain_factor[i];
   }

@@ -63,11 +63,12 @@ C
       END DO
 C
 C     CALCULATE STRESS
-C     compute stress using a stress increment from a strain increment
+C     compute stress from a total strain (using old strain and strain increment)
 C
       DO K1=1, NTENS
+         STRESS(K1)=0
          DO K2=1, NTENS
-            STRESS(K1)=STRESS(K1)+DDSDDE(K2, K1)*DSTRAN(K2)
+            STRESS(K1)=STRESS(K1)+DDSDDE(K2, K1)*(STRAN(K2)+DSTRAN(K2))
          END DO
       END DO
 C
