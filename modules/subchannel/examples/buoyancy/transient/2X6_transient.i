@@ -28,7 +28,7 @@ P_out = 101325 # Pa
   type = LiquidWaterSubChannel1PhaseProblem
   fp = water
   beta = 0.006
-  CT = 2.0
+  CT = 2.6
   P_tol = 1e-6
   T_tol = 1e-6
   compute_density = true
@@ -148,6 +148,15 @@ P_out = 101325 # Pa
     iy = 1
     execute_on = 'initial timestep_end'
     height = 0.4953
+  []
+
+  [mdot2]
+    type = QuadSubChannelPointValue
+    variable = mdot
+    ix = 3
+    iy = 1
+    execute_on = 'initial timestep_end'
+    height = 0.0
   []
 []
 

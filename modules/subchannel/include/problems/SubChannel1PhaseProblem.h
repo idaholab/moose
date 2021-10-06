@@ -87,6 +87,16 @@ protected:
   const Real & _P_tol;
   /// Convergence tolerance for the temperature loop in external solve
   const Real & _T_tol;
+  /// Maximum iterations for the inner temperature loop
+  const int & _T_maxit;
+  /// The relative convergence tolerance, (relative decrease) for the ksp linear solver
+  const PetscReal & _rtol;
+  /// The absolute convergence tolerance for the ksp linear solver
+  const PetscReal & _atol;
+  /// The divergence tolerance for the ksp linear solver
+  const PetscReal & _dtol;
+  /// The maximum number of iterations to use for the ksp linear solver
+  const PetscInt & _maxit;
   const SinglePhaseFluidProperties * _fp;
   SolutionHandle * _mdot_soln;
   SolutionHandle * _SumWij_soln;
