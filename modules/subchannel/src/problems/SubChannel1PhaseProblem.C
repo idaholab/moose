@@ -60,6 +60,11 @@ SubChannel1PhaseProblem::validParams()
   params.addRequiredParam<Real>("CT", "Turbulent modeling parameter");
   params.addParam<Real>("P_tol", 1e-6, "Pressure tolerance");
   params.addParam<Real>("T_tol", 1e-6, "Temperature tolerance");
+  params.addParam<int>("T_maxit", 10, "Maximum number of iterations for inner temperature loop");
+  params.addParam<PetscReal>("rtol", 1e-6, "Relative tolerance for ksp solver");
+  params.addParam<PetscReal>("atol", 1e-6, "Absolute tolerance for ksp solver");
+  params.addParam<PetscReal>("dtol", 1e5, "Divergence tolerance or ksp solver");
+  params.addParam<PetscInt>("maxit", 1e4, "Maximum number of iterations for ksp solver");
   params.addRequiredParam<bool>("compute_density", "Flag that enables the calculation of density");
   params.addRequiredParam<bool>("compute_viscosity",
                                 "Flag that enables the calculation of viscosity");
@@ -88,6 +93,11 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
     _CT(getParam<Real>("CT")),
     _P_tol(getParam<Real>("P_tol")),
     _T_tol(getParam<Real>("T_tol")),
+    _T_maxit(getParam<int>("T_maxit")),
+    _rtol(getParam<PetscReal>("rtol")),
+    _atol(getParam<PetscReal>("atol")),
+    _dtol(getParam<PetscReal>("dtol")),
+    _maxit(getParam<PetscInt>("maxit")),
     _fp(nullptr)
 {
   _n_cells = _subchannel_mesh.getNumOfAxialCells();
@@ -661,7 +671,7 @@ SubChannel1PhaseProblem::petscSnesSolver(int iblock,
   CHKERRQ(ierr);
   ierr = PCSetType(pc, PCNONE);
   CHKERRQ(ierr);
-  ierr = KSPSetTolerances(ksp, 1.e-4, PETSC_DEFAULT, PETSC_DEFAULT, 20);
+  ierr = KSPSetTolerances(ksp, _rtol, _atol, _dtol, _maxit);
   CHKERRQ(ierr);
 
   ierr = SNESSetFromOptions(snes);
@@ -721,14 +731,13 @@ SubChannel1PhaseProblem::externalSolve()
       int last_level = (iblock + 1) * _block_size;
       int first_level = iblock * _block_size + 1;
       auto T_block_error = 1.0;
-      auto T_it_max = 5;
       auto T_it = 0;
       _console << "Solving Block: " << iblock << " From first level: " << first_level
                << " to last level: " << last_level << std::endl;
-      while (T_block_error > _T_tol && T_it < T_it_max)
+      while (T_block_error > _T_tol && T_it < _T_maxit)
       {
         T_it += 1;
-        if (T_it == T_it_max)
+        if (T_it == _T_maxit)
         {
           _console << "Reached maximum number of temperature iterations for block: " << iblock
                    << std::endl;
