@@ -1,8 +1,8 @@
 [GlobalParams]
   initial_p = 1e6
   initial_T = 517
-  initial_vel = 1.0
-  initial_vel_x = 1
+  initial_vel = 4.3
+  initial_vel_x = 4.3
   initial_vel_y = 0
   initial_vel_z = 0
 
@@ -11,28 +11,24 @@
   closures = simple
   f = 0
 
+  rdg_slope_reconstruction = minmod
   gravity_vector = '0 0 0'
 []
 
 [FluidProperties]
   [fp]
-    type = StiffenedGasFluidProperties
-    gamma = 1.43
-    cv = 1040.0
-    q = 2.03e6
-    p_inf = 0.0
-    q_prime = -2.3e4
-    k = 0.026
-    mu = 134.4e-7
-    M = 0.01801488
+    type = IdealGasFluidProperties
+    gamma = 1.4
+    molar_mass = 0.01
   []
 []
 
+
 [Components]
   [inlet]
-    type = InletVelocityTemperature1Phase
+    type = InletMassFlowRateTemperature1Phase
     input = 'pipe1:in'
-    vel = 1
+    m_dot = 10
     T = 517
   []
 
@@ -88,6 +84,36 @@
     pp_coefs = '1 -1'
     pp_names = 'mass_in mass_out'
   []
+  [p_in]
+    type = SideAverageValue
+    boundary = pipe1:in
+    variable = p
+  []
+  [vel_in]
+    type = SideAverageValue
+    boundary = pipe1:in
+    variable = vel_x
+  []
+  [momentum_in]
+    type = ADFlowBoundaryFlux1Phase
+    equation = momentum
+    boundary = inlet
+  []
+  [momentum_out]
+    type = ADFlowBoundaryFlux1Phase
+    equation = momentum
+    boundary = outlet
+  []
+  [dP]
+    type = ParsedPostprocessor
+    pp_names = 'p_in W_dot'
+    function = 'p_in * (1 - (1-W_dot/(10*2910.06*517))^(1.4/0.4))'
+  []
+  [momentum_diff]
+    type = LinearCombinationPostprocessor
+    pp_coefs = '1 -1 -1'
+    pp_names = 'momentum_in momentum_out dP' # momentum source = -dP * A and A=1
+  []
 
   [energy_in]
     type = ADFlowBoundaryFlux1Phase
@@ -131,16 +157,16 @@
   line_search = 'basic'
 
   nl_rel_tol = 1e-7
-  nl_abs_tol = 2e-5
+  nl_abs_tol = 2e-6
 
-  nl_max_its = 5
-  l_tol = 1e-4
+  nl_max_its = 10
+  l_tol = 1e-3
 []
 
 [Outputs]
   [csv]
     type = CSV
-    show = 'mass_diff energy_diff'
+    show = 'mass_diff energy_diff momentum_diff'
     execute_on = 'final'
   []
 []
