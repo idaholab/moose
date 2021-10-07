@@ -15,7 +15,7 @@ Conda issues can be the root cause for just about any issue on this page. Scroll
   If you receive errors about a channel not present (CondaKeyError), please ignore. You most likely will not have all three 'old' channels. Next, add the correct channel:
 
   ```bash
-  conda config --add channels idaholab
+  conda config --add channels https://conda.software.inl.gov/public
   ```
 
   When you're finished, a `conda config --show channels` should resemble the following:
@@ -23,7 +23,7 @@ Conda issues can be the root cause for just about any issue on this page. Scroll
   ```bash
   $ conda config --show channels
   channels:
-    - idaholab
+    - https://conda.software.inl.gov/public
     - conda-forge
     - defaults
   ```
@@ -81,7 +81,7 @@ Conda issues can be the root cause for just about any issue on this page. Scroll
 
   ```bash
   channels:
-    - idaholab
+    - https://conda.software.inl.gov/public
     - conda-forge
     - defaults
   ```
