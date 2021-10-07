@@ -44,7 +44,7 @@ Real
 MatchedValueBC::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _v_num)
-    return -1.0 * _v_coeff;
+    return -_v_coeff;
   else
     return 0.;
 }
