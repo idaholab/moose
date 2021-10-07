@@ -271,6 +271,7 @@
 [VectorPostprocessors]
   [./hydro]
     type = LineValueSampler
+    warn_discontinuous_face_values = false
     num_points = 100
     start_point = '1 0.07e-3 0'
     end_point = '3 0.07e-3 0'

@@ -308,6 +308,7 @@ outlet_pressure = 0.9e5
     end_point = '3 0 0'
     num_points = 100
     sort_by = x
+    warn_discontinuous_face_values = false
   []
 []
 

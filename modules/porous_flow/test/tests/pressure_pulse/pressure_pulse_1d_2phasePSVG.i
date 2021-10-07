@@ -181,6 +181,7 @@
 [VectorPostprocessors]
   [pp]
     type = LineValueSampler
+    warn_discontinuous_face_values = false
     sort_by = x
     variable = 'ppwater ppgas'
     start_point = '0 0 0'

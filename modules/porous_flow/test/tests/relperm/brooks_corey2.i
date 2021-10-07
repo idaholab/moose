@@ -136,6 +136,7 @@
 [VectorPostprocessors]
   [vpp]
     type = LineValueSampler
+    warn_discontinuous_face_values = false
     variable = 's0aux s1aux kr0aux kr1aux'
     start_point = '0 0 0'
     end_point = '1 0 0'
