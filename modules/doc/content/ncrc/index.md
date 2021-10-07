@@ -4,8 +4,9 @@ The NCRC manages a wide range of applications and access to those applications t
 the needs of researchers around the world. Please follow the instructions for the level
 of access granted to you.
 
-- [Level 1 - Execution on INL HPC systems](ncrc_ondemand.md)
-- Level 2 - Local Binary Installation *comming soon*
+- [Level 1 - HPC OnDemand Execution](ncrc_ondemand.md)
+- [Level 1 - Execution while on INL HPC systems](help/inl/hpc_binary.md)
+- [Level 2 - Local Binary Installation](ncrc_local_binary.md)
 - [Level 4 - Source Repository Access](ncrc_repository.md)
 
 
