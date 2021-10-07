@@ -50,6 +50,7 @@ c = 0
   [integral]
     type = ElementIntegralVariablePostprocessor
     variable = u
+    execute_on = 'initial timestep_end'
   []
 []
 
@@ -62,6 +63,7 @@ c = 0
     K_integral = -1
     K_proportional = -1
     K_derivative = -0.1
+    execute_on = 'initial timestep_begin'
   []
 []
 
