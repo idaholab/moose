@@ -6,8 +6,8 @@
 
 !style halign=left
 This function object calculates the complex analytical solution used in a
-convergence study for the implemented Helmholtz wave equation in ELK.
-Specifically, the following PDE for a 1D domain extending from $x = [0, L]$:
+convergence study for the implemented Helmholtz wave equation in the electromagnetics
+module. Specifically, the following PDE for a 1D domain extending from $x = [0, L]$:
 
 \begin{equation}
     k \frac{\text{d}^2 u(x)}{\text{d} x^2} + c(x)^2 u(x) = 0

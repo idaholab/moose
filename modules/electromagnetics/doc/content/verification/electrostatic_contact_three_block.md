@@ -328,7 +328,7 @@ for each domain given the boundary and interface conditions described in
 \phi_{S3}(x) = \frac{-\sigma_G C_E}{2 \sigma_G C_E + 2 \sigma_G \sigma_S + \sigma_S C_E} (x - 3)
 
 This is implemented in source code as `ElectricalContactTestFunc.C` and is
-located within the test source code directory located at `elk/test/src`.
+located within the test source code directory located at `modules/electromagnetics/test/src`.
 
 ## Input File
 

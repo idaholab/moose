@@ -52,8 +52,8 @@ Please note that `variable` *must always* refer to the variable of higher potent
 while the `neighbor_var` *must always* refer to the variable of lower potential in
 your model. Knowledge of your boundary conditions (where potential is applied or
 grounded) and electrical conductivities on either side of the boundary is vital
-to making the right choice! Please refer to the ELK test examples as well as
-[!citep](cincotti2007sps) for guidance and usage.
+to making the right choice! Please refer to the electromagnetics module test
+examples as well as [!citep](cincotti2007sps) for guidance and usage.
 
 ## Example Input File Syntax
 

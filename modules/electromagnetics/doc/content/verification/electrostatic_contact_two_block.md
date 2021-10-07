@@ -197,7 +197,7 @@ for each domain given the boundary and interface conditions described in
 \end{equation}
 
 This is implemented in source code as `ElectricalContactTestFunc.C` and is
-located within the test source code directory located at `elk/test/src`.
+located within the test source code directory located at `modules/electromagnetics/test/src`.
 
 ## Input File
 
