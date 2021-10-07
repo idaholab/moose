@@ -22,13 +22,24 @@ plugin_OBJECTS += $(patsubst %.F, %.$(obj-suffix), $(filter %.F, $(plugin_SOURCE
 plugin_OBJECTS += $(patsubst %.f90, %.$(obj-suffix), $(filter %.f90, $(plugin_SOURCES)))
 
 plugin_NAME ?= umat
+plugin_FILE := $(plugin_NAME)-$(METHOD).plugin
+plugin_LAFILE := lib$(plugin_NAME)-$(METHOD).la
+plugin_SOFILE = $(shell . ./$(plugin_LAFILE) && echo $$dlname)
 
-all: $(plugin_NAME)-$(METHOD).plugin
+all: $(plugin_FILE)
 
-$(plugin_NAME)-$(METHOD).plugin : $(plugin_OBJECTS) $(plugin_INCLUDES)
+# we use libtool to link and temporarily "install" the plugin library
+$(plugin_LAFILE) : $(plugin_OBJECTS) $(plugin_INCLUDES)
 	@echo "Linking plugin "$(plugin_NAME)"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
-	  $(libmesh_CXX) $(libmesh_CPPFLAGS) $(CXXFLAGS) $(libmesh_CXXFLAGS) $(PLUGIN_FLAGS)  $(libmesh_INCLUDE) $(plugin_OBJECTS) -o $@ $(libmesh_LDFLAGS) $(libmesh_LIBS) $(EXTERNAL_FLAGS)
+	  $(libmesh_CXX) $(libmesh_CPPFLAGS) $(CXXFLAGS) $(libmesh_CXXFLAGS) $(libmesh_INCLUDE) -o $@ $(plugin_OBJECTS) $(libmesh_LDFLAGS) $(libmesh_LIBS) $(EXTERNAL_FLAGS) -rpath $(CURDIR)
+	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(plugin_LAFILE) $(CURDIR)
+
+# here we copy the lib*.so file to the expected plugin name and uninstall the libtool clutter right away
+$(plugin_FILE): $(plugin_LAFILE)
+	@install -c $(plugin_SOFILE) $(plugin_FILE)
+	@$(libmesh_LIBTOOL) --mode=uninstall --quiet rm -f $(plugin_LAFILE)
 
 clean:
-	rm -rf $(plugin_OBJECTS)
+	@$(libmesh_LIBTOOL) --mode=uninstall --quiet rm -f $(plugin_LAFILE)
+	@rm -rf $(plugin_OBJECTS) $(plugin_FILE) .libs
