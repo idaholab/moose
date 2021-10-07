@@ -101,7 +101,7 @@
   dt = 5
   abort_on_solve_fail = true
 
-  solve_type = 'PJFNK'
+  solve_type = 'NEWTON'
   line_search = 'basic'
   nl_rel_tol = 1e-6
   nl_abs_tol = 1e-6

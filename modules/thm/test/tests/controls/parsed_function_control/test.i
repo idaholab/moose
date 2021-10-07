@@ -108,7 +108,7 @@
 [Executioner]
   type = Transient
   dt = 0.1
-  num_steps = 1
+  num_steps = 2
   abort_on_solve_fail = true
 []
 
