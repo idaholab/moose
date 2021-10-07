@@ -48,6 +48,7 @@ class TestBuild(unittest.TestCase):
         kwargs.setdefault('files', [])
         kwargs.setdefault('home', None)
         kwargs.setdefault('stable', False)
+        kwargs.setdefault('hide_source', False)
         return types.SimpleNamespace(**kwargs)
 
     # Note: mock.patch.object() decorators are applied from the bottom upwards
