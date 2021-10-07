@@ -9,32 +9,31 @@
 
 #pragma once
 
-#include "NodalBC.h"
-
-// Forward Declarations
-class MatchedValueBC;
-
-template <>
-InputParameters validParams<MatchedValueBC>();
+#include "GenericNodalBC.h"
 
 /**
  * Implements a simple coupled boundary condition where u=v on the boundary.
  */
-class MatchedValueBC : public NodalBC
+template <bool is_ad>
+class MatchedValueBCTempl : public GenericNodalBC<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  MatchedValueBC(const InputParameters & parameters);
+  MatchedValueBCTempl(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual() override;
+  virtual GenericReal<is_ad> computeQpResidual() override;
+
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
-  const VariableValue & _v;
+  const GenericVariableValue<is_ad> & _v;
 
   /// The id of the coupled variable
   unsigned int _v_num;
+
+  /// General members
+  usingGenericNodalBCMembers;
 
 private:
   /// Coefficient for primary variable
@@ -42,3 +41,6 @@ private:
   /// Coefficient for coupled variable
   const Real _v_coeff;
 };
+
+using MatchedValueBC = MatchedValueBCTempl<false>;
+using ADMatchedValueBC = MatchedValueBCTempl<true>;
