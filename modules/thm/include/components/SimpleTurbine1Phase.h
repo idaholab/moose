@@ -1,13 +1,13 @@
 #pragma once
 
-#include "VolumeJunction1Phase.h"
+#include "JunctionParallelChannels1Phase.h"
 
 class SimpleTurbine1Phase;
 
 /**
  * Simple turbine model that extracts prescribed power from the working fluid
  */
-class SimpleTurbine1Phase : public VolumeJunction1Phase
+class SimpleTurbine1Phase : public JunctionParallelChannels1Phase
 {
 public:
   SimpleTurbine1Phase(const InputParameters & params);
@@ -16,7 +16,6 @@ public:
   virtual void addMooseObjects() override;
 
 protected:
-  virtual void check() const override;
   virtual void buildVolumeJunctionUserObject() override;
 
   /// Flag that specifies if the turbine is operating or not
