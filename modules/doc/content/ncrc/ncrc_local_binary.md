@@ -47,22 +47,22 @@ optional arguments:
 !alert note
 Where applicable, you only need to activate the environment once. The examples below assume the environment has not yet been activated.
 
--  List all available NCRC applications (no activation necessary)
+-  List all available NCRC applications
 
   ```bash
   $> ncrc list
 
-  Loading channels: done
-  No match found for: ncrc-. Search: *ncrc-*
-  # Name                       Version           Build  Channel
-  ncrc-bison                2021_10_02         build_0  ncrc-applications
-  ncrc-griffin              2021_10_02         build_0  ncrc-applications
-  ncrc-pronghorn            2021_09_29         build_0  ncrc-applications
-  ncrc-relap7               2021_10_05         build_0  ncrc-applications
-  ncrc-sabertooth           2021_09_28         build_0  ncrc-applications
+  # Use 'ncrc search app' to list more detail
+  # NCRC applications available:
+
+	pronghorn
+	bison
+	griffin
+	sabertooth
+	relap7
   ```
 
-- Lists all available versions of griffin (no activation necessary)
+- Lists all available versions of griffin
 
   ```bash
   $> ncrc search griffin
@@ -115,7 +115,7 @@ Where applicable, you only need to activate the environment once. The examples b
 
 ## Uninstalling NCRC Applications
 
-The NCRC script being a wrapper tool, is unable to perform such a function. The user must deactivate the environment and remove that environment using the appropraite conda commands instead:
+The NCRC script being a wrapper tool, is unable to perform such a function. The user must deactivate the environment and remove that environment using the appropiate conda commands instead:
 
 ```bash
 $> ncrc remove bison
