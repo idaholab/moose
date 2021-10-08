@@ -417,7 +417,7 @@ diff(int argc, char ** argv)
   flags.add("v", "verbose diff");
   flags.add("C", "output color");
   flags.add("color", "output color");
-  flags.add("common", "show common parts on bothe sides");
+  flags.add("common", "show common parts on both sides");
   flags.add("h", "print help");
   flags.add("help", "print help");
   flags.addVector("left", "Left hand inputs");
