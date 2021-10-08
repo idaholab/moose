@@ -10,6 +10,9 @@ LineValueSampler could also be used as an UserObject with the [MultiAppUserObjec
 
 If the variable to be plotted needs to be scaled, this can be done by supplying a postprocessor. Caution should be used to make sure that the postprocessor is being evaluated in such a way that its value will not be lagged when being called by LineValueSampler.
 
+!alert note
+If the line value sampler is used with a discontinuous variable on the edge/face of a 2D/3D element, then the value from the element with the lowest ID will be returned.
+
 !syntax parameters /VectorPostprocessors/LineValueSampler
 
 !syntax inputs /VectorPostprocessors/LineValueSampler

@@ -11,6 +11,7 @@
 
 // MOOSE includes
 #include "MooseMesh.h"
+#include "Assembly.h"
 
 #include "libmesh/mesh_tools.h"
 
@@ -27,6 +28,10 @@ PointSamplerBase::validParams()
       "variable", "The names of the variables that this VectorPostprocessor operates on");
   params.addParam<PostprocessorName>(
       "scaling", 1.0, "The postprocessor that the variables are multiplied with");
+  params.addParam<bool>(
+      "warn_discontinuous_face_values",
+      true,
+      "Whether to return a warning if a discontinuous variable is sampled on a face");
 
   return params;
 }
@@ -41,7 +46,9 @@ PointSamplerBase::PointSamplerBase(const InputParameters & parameters)
                                  Moose::VarFieldType::VAR_FIELD_STANDARD),
     SamplerBase(parameters, this, _communicator),
     _mesh(_subproblem.mesh()),
-    _pp_value(getPostprocessorValue("scaling"))
+    _pp_value(getPostprocessorValue("scaling")),
+    _warn_discontinuous_face_values(getParam<bool>("warn_discontinuous_face_values")),
+    _discontinuous_variables(false)
 {
   addMooseVariableDependency(&mooseVariableField());
 
@@ -72,6 +79,11 @@ PointSamplerBase::initialize()
   _point_values.resize(_points.size());
   std::for_each(
       _point_values.begin(), _point_values.end(), [](std::vector<Real> & vec) { vec.clear(); });
+
+  // Check for elemental variables, which are ill-defined on faces for this object
+  for (unsigned int i = 0; i < _coupled_moose_vars.size(); i++)
+    if (!_assembly.getFE(_coupled_moose_vars[i]->feType(), _mesh.dimension())->get_continuity())
+      _discontinuous_variables = true;
 }
 
 void
@@ -87,7 +99,8 @@ PointSamplerBase::execute()
     Point & p = _points[i];
 
     // Do a bounding box check so we're not doing unnecessary PointLocator lookups
-    if (bbox.contains_point(p))
+    // If discontinuous variables, do all lookups to have global consensus on point ownership
+    if (bbox.contains_point(p) || _discontinuous_variables)
     {
       auto & values = _point_values[i];
 
@@ -121,23 +134,23 @@ PointSamplerBase::finalize()
   // Save off for speed
   const auto pid = processor_id();
 
-  /*
-   * Figure out which processor is actually going "claim" each point.
-   * If multiple processors found the point and computed values what happens is that
-   * maxloc will give us the smallest PID in max_id
-   */
-  std::vector<unsigned int> max_id(_found_points.size());
+  // Consolidate _found_points across processes to know which points were found
+  auto _global_found_points = _found_points;
+  _comm.sum(_global_found_points);
 
-  _communicator.maxloc(_found_points, max_id);
+  // Keep track of maximum process ids for each point to only add it once
+  std::vector<unsigned int> max_pid(_found_points.size());
+  _comm.maxloc(_found_points, max_pid);
 
-  for (MooseIndex(max_id) i = 0; i < max_id.size(); ++i)
+  for (MooseIndex(_found_points) i = 0; i < _found_points.size(); ++i)
   {
-    // Only do this check on the proc zero because it's the same on every processor
-    // _found_points should contain all 1's at this point (ie every point was found by a proc)
-    if (pid == 0 && !_found_points[i])
+    // _global_found_points should contain all 1's at this point (ie every point was found by a
+    // proc)
+    if (pid == 0 && !_global_found_points[i])
       mooseError("In ", name(), ", sample point not found: ", _points[i]);
 
-    if (max_id[i] == pid)
+    // only process that found the point has the value, and only process with max id should add
+    if (pid == max_pid[i] && _found_points[i])
       SamplerBase::addSample(_points[i], _ids[i], _point_values[i]);
   }
 
@@ -159,7 +172,34 @@ PointSamplerBase::transferPointsVector(std::vector<Point> && points)
 const Elem *
 PointSamplerBase::getLocalElemContainingPoint(const Point & p)
 {
-  const Elem * elem = (*_pl)(p);
+  const Elem * elem = nullptr;
+  if (_discontinuous_variables)
+  {
+    // Get all possible elements the point may be in
+    std::set<const Elem *> candidate_elements;
+    (*_pl)(p, candidate_elements);
+
+    // Look at all the element IDs
+    std::set<dof_id_type> candidate_ids;
+    for (auto candidate : candidate_elements)
+      candidate_ids.insert(candidate->id());
+
+    comm().set_union(candidate_ids);
+
+    // Domains without candidate elements will not own the lowest ID one
+    if (candidate_elements.size())
+    {
+      // If we know of the minimum, this will be valid. Otherwise, it'll be
+      // nullptr which is fine
+      elem = _mesh.queryElemPtr(*(candidate_ids.begin()));
+
+      // Print a warning if it's on a face and a variable is discontinuous
+      if (_warn_discontinuous_face_values && candidate_ids.size() > 1)
+        mooseWarning("A discontinuous variable is sampled on a face, at ", p);
+    }
+  }
+  else // continuous variables
+    elem = (*_pl)(p);
 
   if (elem && elem->processor_id() == processor_id())
     return elem;

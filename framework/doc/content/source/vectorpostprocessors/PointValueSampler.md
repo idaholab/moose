@@ -29,6 +29,9 @@ documentation clear for users.
 
 !syntax description /VectorPostprocessors/PointValueSampler
 
+!alert note
+If the point value sampler is used with a discontinuous variable on the edge/face of a 2D/3D element, then the value from the element with the lowest ID will be returned.
+
 !syntax parameters /VectorPostprocessors/PointValueSampler
 
 !syntax inputs /VectorPostprocessors/PointValueSampler

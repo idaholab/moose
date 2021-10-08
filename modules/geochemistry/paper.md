@@ -113,7 +113,7 @@ Combinations of these may be used.  For instance, changing temperature while con
 
 ## Mathematical solution strategy
 
-At each time-step, the geochemistry module calculates: the mass of solvent water; the molality of all aqueous species and dissolved gases; the mineral activity products and saturation indices; the mole number of precipitated minerals; the molality of unoccupied surface sites; the surface potentials; the molality of sorbed species; the mole number of kinetic species; and all activities and activity coefficients.  To achieve this, a fully-implicit, under-relaxed, iterative Newton-Raphson procedure is used.
+At each time-step, the geochemistry module calculates: the mass of solvent water; the molality of all aqueous species and dissolved gases; the mineral activity products and saturation indices; the mole number of precipitated minerals; the molality of unoccupied surface sites; the surface potentials; the molality of sorbed species; the mole number of kinetic species; and all activities and activity coefficients.  To achieve this, a fully-implicit, under-relaxed, iterative Newton-Raphson procedure is used.  Further information can be found [here](https://mooseframework.inl.gov/modules/geochemistry/theory/index.html).
 
 During this procedure, care is taken to avoid numerical overflows or underflows.  Multiple sub-steps may be performed in each time-step to ensure good convergence.  Minerals are allowed to precipitate or dissolve during the procedure, with rates re-calculated at the beginning of every Newton-Raphson step.  Charge neutrality is enforced.
 
@@ -123,12 +123,12 @@ The geochemistry module's functionality allows it to handle most common modellin
 
 # Reactive transport
 
-One of the notable features of the MOOSE framework is the ability to couple different physics together.  Different types of couplings are available: tight (full) coupling; operator-splitting; etc.  To perform reactive-transport simulations using the geochemistry module, an operator-splitting approach must be used.  Usually, MOOSE's PorousFlow module [@Wilkins2020] will be employed to simulate the transport (and any other non-geochemistry physics such as mechanics).  This means that each time-step involves a two-step process:
+One of the notable features of the MOOSE framework is the ability to couple different physics together.  Different types of couplings are available: tight (full) coupling; operator-splitting; etc.  To perform reactive-transport simulations using the geochemistry module, an operator-splitting approach must be used, in a sequential iterative or non-iterative approach (SIA or SNIA).  Users must therefore be careful with time-step sizes [@steefel2015].  Usually, MOOSE's PorousFlow module [@Wilkins2020] will be employed to simulate the transport (and any other non-geochemistry physics such as mechanics).  This means that each time-step involves a two-step process:
 
 1. The PorousFlow module transports the solutes in the aqueous phase, as well as the temperature distribution.  A fully-implicit approach is used to solve the transport, but note that the chemical reactions are held fixed during this stage.  The result provides the temperature and extra chemical source terms (to be added to the geochemical equations) at each point in the spatial domain.  The extra source terms are the total component concentrations of the transporting species.
 2. With these sources, the geochemistry module solves for the mole numbers of each species at each point in the spatial domain, using the Newton-Raphson method mentioned in the previous section.  During this stage, the non-geochemistry physics (transport, mechanics, etc) is held fixed.
 
-It is easy to use multiple sub-steps within (1) and/or (2), which may be necessary if the time-scales of the transport and chemical reactions are very different.  The operator-split approach is also used by other reactive-transport solvers, such as the [Geochemist's Workbench](https://www.gwb.com/).
+It is easy to use multiple sub-steps within (1) and/or (2), which may be necessary if the time-scales of the transport and chemical reactions are very different.  It is also possible to iterate (1) and (2) in a "SIA" approach [@steefel2015].  The operator-split approach is also used by other reactive-transport solvers, such as the [Geochemist's Workbench](https://www.gwb.com/).
 
 The PorousFlow module is a sophisticated multi-component, multi-phase transport code, and employing it means:
 
@@ -159,17 +159,26 @@ cd ~/projects/moose/modules
 make
 cd ~/projects/moose/modules/geochemistry
 make
+cd ~/projects/moose/modules/geochemistry/unit
+make
 ```
 (If your computer has $N$ cores, the `make` process may be sped up by using the command `make -j`$N$ instead of simply `make`.)
 
 Check that the geochemistry module is correctly compiled using the following instructions:
 ```
+cd ~/projects/moose/modules/geochemistry/unit
+./run_tests
 cd ~/projects/moose/modules/geochemistry
 ./run_tests
 ```
 Virtually all the tests should run and pass.  Some may be "skipped" due to a particular computer setup (for instance, not enough threads).  (If your computer has $N$ cores, the `run_tests` command may be sped up by using the command `./run_tests -j`$N$ instead of simply `./run_tests`.)
 
-The geochemistry executable is called `geochemistry-opt` and is found at `~/projects/moose/modules/geochemistry`.  This may be used to run pure geochemistry simulations.  For coupled reactive-transport simulations using the PorousFlow module, the `combined-opt` executable must be used.  For example, to run the Weber-Tensleep GeoTES example from the command line:
+The geochemistry executable is called `geochemistry-opt` and is found at `~/projects/moose/modules/geochemistry`.  This may be used to run pure geochemistry simulations.  For example, to run the [cooling a solution in contact with feldspars example](https://mooseframework.inl.gov/modules/geochemistry/tests_and_examples/cooling_feldspar.html) from the command line, use:
+```
+cd ~/projects/moose/modules/geochemistry/test/tests/time_dependent_reactions
+../../../geochemistry-opt -i cooling.i
+```
+For coupled reactive-transport simulations using the PorousFlow module, the `combined-opt` executable must be used.  For example, to run the [Weber-Tensleep GeoTES example](https://mooseframework.org/modules/geochemistry/tests_and_examples/geotes_weber_tensleep.html) from the command line, use:
 ```
 cd ~/projects/moose/modules/combined/examples/geochem-porous_flow/geotes_weber_tensleep
 ../../../combined-opt -i exchanger.i
@@ -181,7 +190,7 @@ The geochemistry module's [code coverage](https://mooseframework.inl.gov/docs/co
 
 # Benchmark: cooling with feldspars
 
-One of the geochemistry [tests and examples](https://mooseframework.org/modules/geochemistry/tests_and_examples/index.html) involves slowly cooling an aqueous solution from 300$^{\circ}$C to 25$^{\circ}$C.  The aqueous solution is in equilibrium contact with albite, maximum microcline, muscovite and quartz.  This example is documented in Section 14.1 of @bethke_2007.  \autoref{fig:feldspar_eg} shows the comparison of the results from MOOSE's geochemistry module and the Geochemist's Workbench.
+One of the geochemistry tests and examples involves slowly cooling an aqueous solution from 300$^{\circ}$C to 25$^{\circ}$C, and details can be found [here](https://mooseframework.inl.gov/modules/geochemistry/tests_and_examples/cooling_feldspar.html).  The aqueous solution is in equilibrium contact with albite, maximum microcline, muscovite and quartz.  This example is documented in Section 14.1 of @bethke_2007.  \autoref{fig:feldspar_eg} shows the comparison of the results from MOOSE's geochemistry module and the Geochemist's Workbench.
 
 ![Precipitated volumes as a function of temperature when an aqueous solution in contact with feldspars is cooled.\label{fig:feldspar_eg}](joss_paper_feldspar.png){ width=60% }
 
