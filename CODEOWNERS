@@ -34,8 +34,8 @@
 /framework/*/problems @lindsayad
 /framework/*/problems/EigenProblem* @fdkong
 /framework/*/relationshipmanagers @lindsayad
-/framework/*/reporters @aeslaughter
-/framework/*/samplers @aeslaughter @zachmprince
+/framework/*/reporters @loganharbour @zachmprince
+/framework/*/samplers @zachmprince
 /framework/*/systems @lindsayad
 /framework/*/systems/NonlinearEigenSystem* @fdkong
 /framework/*/transfers @fdkong
@@ -54,7 +54,7 @@
 /modules/phase_field @dschwen
 /modules/ray_tracing @loganharbour
 /modules/rdg @joshuahansel
-/modules/stochastic_tools @aeslaughter @zachmprince
+/modules/stochastic_tools @zachmprince
 /modules/tensor_mechanics @bwspenc @dschwen @jiangwen84
 /modules/xfem @bwspenc @jiangwen84
 
