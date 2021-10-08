@@ -615,8 +615,9 @@ common(int argc, char ** argv)
 int
 subtract(int argc, char ** argv)
 {
-  Flags flags("hit subtract left.i right.i\n  Subtract left.i from right.i by removing all "
-              "parameters listed in left.i from right.i.\n");
+  Flags flags(
+      "hit subtract base.i remove.i\n  Build the input base.i minus remove.i by removing all "
+      "parameters listed in remove.i from base.i.\n");
   flags.add("h", "print help");
   flags.add("help", "print help");
   auto positional = parseOpts(argc, argv, flags);
@@ -633,18 +634,18 @@ subtract(int argc, char ** argv)
   if (!left || !right)
     return 1;
 
-  std::cerr << "Subtracting:\n    " << positional[0] << "\nfrom:\n    " << positional[1] << '\n';
+  std::cerr << "Subtracting:\n    " << positional[1] << "\nfrom:\n    " << positional[0] << '\n';
 
-  hit::GatherParamWalker::ParamMap left_params;
-  hit::GatherParamWalker left_walker(left_params);
-  hit::RemoveParamWalker right_walker(left_params);
-  hit::RemoveEmptySectionWalker right_section_walker;
+  hit::GatherParamWalker::ParamMap right_params;
+  hit::GatherParamWalker right_walker(right_params);
+  hit::RemoveParamWalker left_walker(right_params);
+  hit::RemoveEmptySectionWalker left_section_walker;
 
-  left->walk(&left_walker);
   right->walk(&right_walker);
-  right->walk(&right_section_walker);
+  left->walk(&left_walker);
+  left->walk(&left_section_walker);
 
-  std::cout << right->render();
+  std::cout << left->render();
 
   return 0;
 }
