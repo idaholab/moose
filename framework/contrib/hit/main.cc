@@ -16,6 +16,9 @@ int findParam(int argc, char ** argv);
 int validate(int argc, char ** argv);
 int format(int argc, char ** argv);
 int merge(int argc, char ** argv);
+int diff(int argc, char ** argv);
+int common(int argc, char ** argv);
+int subtract(int argc, char ** argv);
 
 int
 main(int argc, char ** argv)
@@ -36,6 +39,12 @@ main(int argc, char ** argv)
     return format(argc - 2, argv + 2);
   else if (subcmd == "merge")
     return merge(argc - 2, argv + 2);
+  else if (subcmd == "diff")
+    return diff(argc - 2, argv + 2);
+  else if (subcmd == "common")
+    return common(argc - 2, argv + 2);
+  else if (subcmd == "subtract")
+    return subtract(argc - 2, argv + 2);
   else if (subcmd == "braceexpr")
   {
     std::stringstream ss;
@@ -59,8 +68,10 @@ main(int argc, char ** argv)
 struct Flag
 {
   bool arg;
+  bool vec;
   bool have;
   std::string val;
+  std::vector<std::string> vec_val;
   std::string help;
 };
 
@@ -71,13 +82,19 @@ public:
   void add(std::string name, std::string help, std::string def = "__NONE__")
   {
     if (def == "__NONE__")
-      flags[name] = {false, false, "", help};
+      flags[name] = {false, false, false, "", {}, help};
     else
-      flags[name] = {true, false, def, help};
+      flags[name] = {true, false, false, def, {}, help};
+  }
+
+  void addVector(std::string name, std::string help)
+  {
+    flags[name] = {false, true, false, "", {}, help};
   }
 
   bool have(std::string flag) { return flags.count(flag) > 0 && flags[flag].have; }
   std::string val(std::string flag) { return flags[flag].val; }
+  std::vector<std::string> vecVal(std::string flag) { return flags[flag].vec_val; }
   std::string usage()
   {
     std::stringstream ss;
@@ -88,7 +105,12 @@ public:
       if (flag.arg)
         ss << "-" << pair.first << " <arg>    " << flag.help << " (default='" << flag.val << "')\n";
       else
-        ss << "-" << pair.first << "    " << flag.help << " (default=false)\n";
+      {
+        if (flag.vec)
+          ss << "-" << pair.first << "    " << flag.help << '\n';
+        else
+          ss << "-" << pair.first << "    " << flag.help << " (default=false)\n";
+      }
     }
     return ss.str();
   }
@@ -123,6 +145,12 @@ parseOpts(int argc, char ** argv, Flags & flags)
       i++;
       flag.val = argv[i];
     }
+    else if (flag.vec)
+      while (i < argc - 1 && argv[i + 1][0] != '-')
+      {
+        i++;
+        flag.vec_val.push_back(argv[i]);
+      }
   }
 
   std::vector<std::string> positional;
@@ -279,6 +307,11 @@ format(int argc, char ** argv)
     std::string fname(positional[i]);
     std::istream && f =
         (fname == "-" ? (std::istream &&) std::cin : (std::istream &&) std::ifstream(fname));
+    if (!f)
+    {
+      std::cerr << "Can't open '" << fname << "'\n";
+      return 1;
+    }
     std::string input(std::istreambuf_iterator<char>(f), {});
 
     try
@@ -301,6 +334,34 @@ format(int argc, char ** argv)
   }
 
   return ret;
+}
+
+std::unique_ptr<hit::Node>
+readMerged(const std::vector<std::string> & input_filenames)
+{
+  std::unique_ptr<hit::Node> combined_root;
+
+  for (auto & input_filename : input_filenames)
+  {
+    std::ifstream f(input_filename);
+    if (!f)
+    {
+      std::cerr << "Can't open '" << input_filename << "'\n";
+      return nullptr;
+    }
+
+    std::string input((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
+
+    std::unique_ptr<hit::Node> root(hit::parse(input_filename, input));
+    hit::explode(root.get());
+
+    if (!combined_root)
+      combined_root = std::move(root);
+    else
+      hit::merge(root.get(), combined_root.get());
+  }
+
+  return combined_root;
 }
 
 int
@@ -343,6 +404,247 @@ merge(int argc, char ** argv)
   }
 
   output << root->render();
+
+  return 0;
+}
+
+int
+diff(int argc, char ** argv)
+{
+  Flags flags("hit diff left.i right.i\nhit diff -left <files> -right <files>\n  Compare (merged) "
+              "inputs on the left with "
+              "(merged) inputs on the right.\n");
+  flags.add("v", "verbose diff");
+  flags.add("C", "output color");
+  flags.add("color", "output color");
+  flags.add("common", "show common parts on bothe sides");
+  flags.add("h", "print help");
+  flags.add("help", "print help");
+  flags.addVector("left", "Left hand inputs");
+  flags.addVector("right", "Right hand inputs");
+
+  auto positional = parseOpts(argc, argv, flags);
+
+  if (flags.have("h") || flags.have("help"))
+  {
+    std::cout << flags.usage();
+    return 0;
+  }
+
+  if (flags.have("left") != flags.have("right") || (flags.have("left") && positional.size() > 0) ||
+      (!flags.have("left") && positional.size() != 2))
+  {
+    std::cout << flags.usage();
+    return 1;
+  }
+
+  bool use_color = flags.have("C");
+
+  // terminal colors
+  std::string color_red = use_color ? "\33[31m" : "";
+  std::string color_green = use_color ? "\33[32m" : "";
+  std::string color_blue = use_color ? "\33[34m" : "";
+  std::string color_yellow = use_color ? "\33[33m" : "";
+  std::string color_default = use_color ? "\33[39m" : "";
+
+  auto left_files =
+      flags.have("left") ? flags.vecVal("left") : std::vector<std::string>{positional[0]};
+  auto right_files =
+      flags.have("right") ? flags.vecVal("right") : std::vector<std::string>{positional[1]};
+  auto left = readMerged(left_files);
+  auto right = readMerged(right_files);
+
+  if (!left || !right)
+    return 1;
+
+  std::cout << "Left hand side:\n";
+  for (const auto & file : left_files)
+    std::cout << "    " << file << '\n';
+
+  std::cout << "\nRight hand side:\n";
+  for (const auto & file : right_files)
+    std::cout << "    " << file << '\n';
+
+  std::cout << '\n';
+
+  hit::GatherParamWalker::ParamMap left_params;
+  hit::GatherParamWalker::ParamMap right_params;
+
+  hit::GatherParamWalker left_walker(left_params);
+  hit::GatherParamWalker right_walker(right_params);
+
+  left->walk(&left_walker, hit::NodeType::Field);
+  right->walk(&right_walker, hit::NodeType::Field);
+
+  // verbose outputs
+  std::stringstream diff_val;
+  std::stringstream missing_left;
+  std::stringstream missing_right;
+  hit::Section missing_left_root("");
+  hit::Section missing_right_root("");
+  hit::Section common_root("");
+
+  // params on left but not on right
+  for (const auto & lparam : left_params)
+  {
+    auto it = right_params.find(lparam.first);
+    if (it == right_params.end())
+    {
+      missing_right << color_red << lparam.first << color_blue << " (" << lparam.second->filename()
+                    << ':' << lparam.second->line() << ")" << color_default
+                    << " is missing on the right.\n";
+      missing_right_root.addChild(lparam.second->clone(/*absolute_path = */ true));
+    }
+    else
+    {
+      if (lparam.second->strVal() != it->second->strVal())
+        diff_val << "    " << color_yellow << lparam.first << color_blue << " ("
+                 << lparam.second->filename() << ':' << lparam.second->line() << ")"
+                 << color_default << " has differing values\n      '" << color_red
+                 << lparam.second->strVal() << color_default << "' ->"
+                 << (lparam.second->strVal().size() > 40 ? "\n      '" : " '") << color_green
+                 << it->second->strVal() << color_default << "'\n";
+      else
+        common_root.addChild(lparam.second->clone(/*absolute_path = */ true));
+    }
+  }
+
+  // params on right but not on left
+  for (const auto & rparam : right_params)
+    if (left_params.count(rparam.first) == 0)
+    {
+      missing_left << color_green << rparam.first << color_blue << " (" << rparam.second->filename()
+                   << ':' << rparam.second->line() << ")" << color_default
+                   << " is missing on the left.\n";
+      missing_left_root.addChild(rparam.second->clone(/*absolute_path = */ true));
+    }
+
+  // output report
+  bool verbose = flags.have("v");
+  bool common = flags.have("common");
+
+  if (common)
+  {
+    std::cout << "Common parameters:\n";
+    hit::explode(&common_root);
+    std::cout << common_root.render(4) << "\n\n";
+    return 0;
+  }
+  else
+  {
+    if (missing_right.str().size())
+    {
+      std::cout << "Parameters removed left -> right:\n" << color_red;
+      if (verbose)
+        std::cout << missing_right.str() << '\n';
+      else
+      {
+        hit::explode(&missing_right_root);
+        std::cout << missing_right_root.render(4) << "\n\n";
+      }
+      std::cout << color_default;
+    }
+
+    if (missing_left.str().size())
+    {
+      std::cout << "Parameters added left -> right:\n" << color_green;
+      if (verbose)
+        std::cout << missing_left.str() << '\n';
+      else
+      {
+        hit::explode(&missing_left_root);
+        std::cout << missing_left_root.render(4) << "\n\n";
+      }
+      std::cout << color_default;
+    }
+
+    if (diff_val.str().size())
+      std::cout << "Parameters with differing values:\n\n" << diff_val.str() << "\n\n";
+
+    return (missing_left.str().size() + missing_right.str().size() + diff_val.str().size() > 0) ? 1
+                                                                                                : 0;
+  }
+}
+
+int
+common(int argc, char ** argv)
+{
+  Flags flags("hit common <files>\n  Extract common parameters from all files.\n");
+  flags.add("h", "print help");
+  flags.add("help", "print help");
+  auto positional = parseOpts(argc, argv, flags);
+
+  if (flags.have("h") || flags.have("help") || positional.size() == 0)
+  {
+    std::cout << flags.usage();
+    return positional.size() == 0 ? 1 : 0;
+  }
+
+  std::vector<std::unique_ptr<hit::Node>> roots;
+  for (const auto & file : positional)
+    roots.emplace_back(readMerged({file}));
+
+  hit::GatherParamWalker::ParamMap common_params;
+  hit::GatherParamWalker common_walker(common_params);
+  roots[0]->walk(&common_walker);
+  for (std::size_t i = 1; i < roots.size(); ++i)
+  {
+    hit::GatherParamWalker::ParamMap next_params;
+    hit::GatherParamWalker next_walker(next_params);
+    roots[i]->walk(&next_walker);
+
+    for (auto it1 = common_params.begin(); it1 != common_params.end();)
+    {
+      auto it2 = next_params.find(it1->first);
+      if (it2 == next_params.end() || it2->second->strVal() != it1->second->strVal())
+        it1 = common_params.erase(it1);
+      else
+        ++it1;
+    }
+  }
+
+  hit::Section common_root("");
+  for (const auto & param : common_params)
+    common_root.addChild(param.second->clone(/*absolute_path = */ true));
+  hit::explode(&common_root);
+  std::cout << common_root.render() << '\n';
+
+  return 0;
+}
+
+int
+subtract(int argc, char ** argv)
+{
+  Flags flags("hit subtract left.i right.i\n  Subtract left.i from right.i by removing all "
+              "parameters listed in left.i from right.i.\n");
+  flags.add("h", "print help");
+  flags.add("help", "print help");
+  auto positional = parseOpts(argc, argv, flags);
+
+  if (flags.have("h") || flags.have("help") || positional.size() != 2)
+  {
+    std::cout << flags.usage();
+    return positional.size() != 2 ? 1 : 0;
+  }
+
+  auto left = readMerged({positional[0]});
+  auto right = readMerged({positional[1]});
+
+  if (!left || !right)
+    return 1;
+
+  std::cerr << "Subtracting:\n    " << positional[0] << "\nfrom:\n    " << positional[1] << '\n';
+
+  hit::GatherParamWalker::ParamMap left_params;
+  hit::GatherParamWalker left_walker(left_params);
+  hit::RemoveParamWalker right_walker(left_params);
+  hit::RemoveEmptySectionWalker right_section_walker;
+
+  left->walk(&left_walker);
+  right->walk(&right_walker);
+  right->walk(&right_section_walker);
+
+  std::cout << right->render();
 
   return 0;
 }
