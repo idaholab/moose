@@ -20,6 +20,29 @@ int diff(int argc, char ** argv);
 int common(int argc, char ** argv);
 int subtract(int argc, char ** argv);
 
+bool
+globCompare(const std::string & candidate,
+            const std::string & pattern,
+            std::size_t c = 0,
+            std::size_t p = 0)
+{
+  if (p == pattern.size())
+    return c == candidate.size();
+
+  if (pattern[p] == '*')
+  {
+    for (; c < candidate.size(); ++c)
+      if (globCompare(candidate, pattern, c, p + 1))
+        return true;
+    return globCompare(candidate, pattern, c, p + 1);
+  }
+
+  if (pattern[p] != '?' && pattern[p] != candidate[c])
+    return false;
+
+  return globCompare(candidate, pattern, c + 1, p + 1);
+}
+
 int
 main(int argc, char ** argv)
 {
@@ -191,50 +214,75 @@ private:
 int
 findParam(int argc, char ** argv)
 {
-  Flags flags("hit find [flags] <parameter-path> <file>...\n  Specify '-' as a file name to accept "
-              "input from stdin.");
+  Flags flags(
+      "hit find [flags] <parameter-pathern> <file>...\n  Specify '-' as a file name to accept "
+      "input from stdin.\n  A pattern has the form param[=value] and wildcards (*,?) may be used");
   flags.add("f", "only show file name");
+  flags.add("h", "print help");
+  flags.add("help", "print help");
   auto positional = parseOpts(argc, argv, flags);
 
-  if (positional.size() < 2)
+  if (flags.have("h") || flags.have("help") || positional.size() < 2)
   {
     std::cerr << flags.usage();
     return 1;
   }
 
-  std::string srcpath(positional[0]);
+  const bool file_only = flags.have("f");
 
-  int ret = 0;
-  for (int i = 1; i < positional.size(); i++)
+  auto equal_sign = positional[0].find('=');
+  std::string param(positional[0], 0, equal_sign);
+  std::unique_ptr<std::string> value(
+      equal_sign == std::string::npos
+          ? nullptr
+          : new std::string(positional[0], equal_sign + 1, std::string::npos));
+
+  std::size_t n_matches = 0;
+  for (std::size_t i = 1; i < positional.size(); i++)
   {
+    // load and parse input
     std::string fname(positional[i]);
     std::istream && f =
         (fname == "-" ? (std::istream &&) std::cin : (std::istream &&) std::ifstream(fname));
     std::string input((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
 
-    hit::Node * root = nullptr;
+    std::unique_ptr<hit::Node> root;
     try
     {
-      root = hit::parse(fname, input);
+      root.reset(hit::parse(fname, input));
     }
     catch (std::exception & err)
     {
       std::cerr << err.what() << "\n";
-      ret = 1;
       continue;
     }
 
-    auto n = root->find(srcpath);
-    if (n)
-    {
-      if (flags.have("f"))
-        std::cout << n->filename() << "\n";
-      else
-        std::cout << n->filename() << ":" << n->line() << "\n";
-    }
+    // gather paremters
+    hit::GatherParamWalker::ParamMap params;
+    hit::GatherParamWalker walker(params);
+    root->walk(&walker);
+
+    // search parameters
+    for (const auto & p : params)
+      if (globCompare(p.first, param))
+      {
+        auto n = p.second;
+        auto v = n->strVal();
+        // if a value was given, make sure it matches, too
+        if (value && !globCompare(v, *value))
+          continue;
+        n_matches++;
+
+        if (file_only)
+          std::cout << n->filename() << "\n";
+        else
+          std::cout << n->filename() << ":" << n->line() << ' ' << p.first << " = " << v << "\n";
+      }
   }
 
-  return ret;
+  if (!file_only)
+    std::cout << n_matches << (n_matches == 1 ? " match" : " matches") << " found.\n";
+  return n_matches == 0;
 }
 
 // the style file is of the format:
