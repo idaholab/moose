@@ -1,0 +1,40 @@
+[Tests]
+  issues = '#18913'
+  design = 'meshgenerators/RefineSidesetGenerator.md'
+  [generate]
+    requirement = 'The system shall support the ability to refine'
+
+    [left]
+      type = 'Exodiff'
+      input = 'test_left.i'
+      exodiff = 'test_left_in.e'
+      cli_args = '--mesh-only'
+      recover = false
+      detail = 'neighboring elements of an external boundary along a mesh'
+    []
+    [secondary]
+      type = 'Exodiff'
+      input = 'test_secondary.i'
+      exodiff = 'test_secondary_in.e'
+      cli_args = '--mesh-only'
+      recover = false
+      detail = 'neighboring elements of a specified boundary along a mesh'
+    []
+    [both]
+      type = 'Exodiff'
+      input = 'test_multi.i'
+      exodiff = 'test_multi_in.e'
+      recover = false
+      cli_args = "--mesh-only"
+      detail = 'both the neighboring elements of, and the elements along, a specified boundary'
+    []
+  []
+  [failureBoundary]
+    type = 'RunException'
+    input = 'test_multi.i'
+    recover = false
+    cli_args = "Mesh/refine/boundaries='foo' --mesh-only"
+    expect_err = "The boundary *"
+    requirement = 'The system shall error if the specified boundary to be refined does not exist'
+  []
+[]
