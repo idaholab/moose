@@ -218,6 +218,7 @@ findParam(int argc, char ** argv)
       "hit find [flags] <parameter-pathern> <file>...\n  Specify '-' as a file name to accept "
       "input from stdin.\n  A pattern has the form param[=value] and wildcards (*,?) may be used");
   flags.add("f", "only show file name");
+  flags.add("i", "case insensitive matches");
   flags.add("h", "print help");
   flags.add("help", "print help");
   auto positional = parseOpts(argc, argv, flags);
@@ -229,6 +230,10 @@ findParam(int argc, char ** argv)
   }
 
   const bool file_only = flags.have("f");
+  const bool case_insensitive = flags.have("i");
+
+  if (case_insensitive)
+    positional[0] = hit::lower(positional[0]);
 
   auto equal_sign = positional[0].find('=');
   std::string param(positional[0], 0, equal_sign);
@@ -264,12 +269,12 @@ findParam(int argc, char ** argv)
 
     // search parameters
     for (const auto & p : params)
-      if (globCompare(p.first, param))
+      if (globCompare(case_insensitive ? hit::lower(p.first) : p.first, param))
       {
         auto n = p.second;
         auto v = n->strVal();
         // if a value was given, make sure it matches, too
-        if (value && !globCompare(v, *value))
+        if (value && !globCompare(case_insensitive ? hit::lower(v) : v, *value))
           continue;
         n_matches++;
 

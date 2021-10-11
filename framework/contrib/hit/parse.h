@@ -57,6 +57,9 @@ namespace hit
 
 const std::string default_indent = "  ";
 
+// lower converts all characters in str to their lower-case versions.
+std::string lower(const std::string & str);
+
 /// toBool converts the given val to a boolean value which is stored in dst.  It returns true if
 /// val was successfully converted to a boolean and returns false otherwise.
 bool toBool(const std::string & val, bool * dst);
