@@ -1,0 +1,154 @@
+# Execution
+
+## Command Line
+
+The main interaction with {{project-name-abbrev}} is via a command-line.
+
+The main mode of operation is that users supply an input file and get an output file back.
+This is done by doing:
+
+```
+{{bin-opt}} -i input_file.i
+```
+
+Based on your {{project-name-abbrev}} installation, the exact command how to run the code can differ,
+see the follwing subsections below.
+
+!alert2 note
++Note:+ Further details on [command line switches](user/command_line_args.md) are in the user manual.
+
+### Pre-installed Version
+
+If you are using pre-installed version of the code (like on INL HPC, for example),
+the executable should be in your path and the above command should work.
+
+### Self-built Version
+
+If you built the code yourself, you can run it via:
+
+```
+/path/to/{{bin-opt}} -i input_file.i
+```
+
+If you are running from the location where you built {{project-name-abbrev}}, you will need to
+prepend `./`, so the command would be:
+
+```
+./{{bin-opt}} -i input_file.i
+```
+
+In later steps of this tutorial, we will look at how to build such an input file
+and how to view the obtained results.
+
+## Terminal Output
+
+In this section we explain different sections that are diplayed during the execution:
+
++Framework information+ gives an overview of used dependent libraries.
+This is useful information to provide if you ever need to report a problem or ask for help.
+
+```
+Framework Information:
+MOOSE Version:           git commit b5a350860f on 2021-09-28
+LibMesh Version:         aebb5a5c0e1f6d8cf523a720e19f70a6d17c0236
+PETSc Version:           3.14.2
+Current Time:            Thu Sep 30 14:25:58 2021
+Executable Timestamp:    Tue Sep 28 14:05:09 2021
+```
+
+The +parallelism+ section will tell you how many MPI processes and/or threads your run is using.
+
+```
+Parallelism:
+  Num Processors:          1
+  Num Threads:             1
+```
+
+The +mesh+ section provides information about how many elements and nodes are used in the simulation.
+
+```
+Mesh:
+  Parallel Type:           replicated
+  Mesh Dimension:          1
+  Spatial Dimension:       3
+  Nodes:                   51
+  Elems:                   50
+  Num Subdomains:          1
+```
+
+The +system+ information tells you how many degrees of freedom (DOFs) you have in the whole simulation and per MPI process (local DOFs).
+It also lists the primary and auxiliary varaibles present in your simulation.
+
+```
+Nonlinear System:
+  Num DOFs:                350
+  Num Local DOFs:          350
+  Variables:               { "rhoA" "rhoEA" "rhouA" }
+  Finite Element Types:    "MONOMIAL"
+  Approximation Orders:    "CONSTANT"
+
+Auxiliary System:
+  Num DOFs:                1001
+  Num Local DOFs:          1001
+  Variables:               "A" "A_linear" { "H" "P_hf" "T" "e" "p" "rho" "v" "vel" }
+  Finite Element Types:    "MONOMIAL" "LAGRANGE" "MONOMIAL"
+  Approximation Orders:    "CONSTANT" "FIRST" "CONSTANT"
+```
+
+The +execution information+ provides information about the time stepper used, preconditioner, etc.
+
+```
+Execution Information:
+  Executioner:             Transient
+  TimeStepper:             ConstantDT
+  Solver Mode:             Preconditioned JFNK
+  MOOSE Preconditioner:    SMP
+```
+
+After the run header is printed, information about each time step is printed as it executes.
+A typical +time step+ will tell you the simulation time, time step number and time step size (dt).
+The convergence history for each time step is printed out by default.
+You will see residuals for non-linear and linear steps and the result of the solve.
+
+```
+Time Step 1, time = 1e-05, dt = 1e-05
+ 0 Nonlinear |R| = 9.848097e+01
+      0 Linear |R| = 9.848097e+01
+      1 Linear |R| = 9.450620e-04
+ 1 Nonlinear |R| = 5.292274e-02
+      0 Linear |R| = 5.292274e-02
+      1 Linear |R| = 2.882857e-05
+ 2 Nonlinear |R| = 2.878039e-05
+      0 Linear |R| = 2.878039e-05
+      1 Linear |R| = 4.478868e-09
+ 3 Nonlinear |R| = 4.538872e-09
+ Solve Converged!
+```
+
+If your input file contains errors, it will be reported in the terminal.
+
+This example shows how THM-based applications report errors.
+
+```
+Execution stopped, the following problems were found:
+
+2 errors:
+  - Component 'pipe' does not have connected inlet.
+  - Component 'pipe' does not have connected outlet.
+```
+
+If the error is detect by the MOOSE framework you will see something like this:
+
+```
+*** ERROR ***
+/path/to/check_error.i:50: missing required parameter 'MultiApps/multi/input_files'
+	Doc String: "The input file for each App.  If this parameter only contains one input file it will be used for all of the Apps.  When using 'positions_from_file' it is also admissable to provide one input_file per file."
+```
+
+## Parallel Execution
+
+{{project-name-abbrev}} supports the following parallel execution models:
+
+1. Threads
+2. MPI
+3. MPI+Threads
