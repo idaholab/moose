@@ -14,8 +14,7 @@
 #include "libmesh/boundary_info.h"
 
 registerMooseObject("MooseApp", NodalMaxValueId);
-registerMooseObjectRenamed(
-  "MooseApp", NodalMaxValueId, "04/01/2022 00:00", NodalProxyMaxValue);
+registerMooseObjectRenamed("MooseApp", NodalProxyMaxValue, "04/01/2022 00:00", NodalMaxValueId);
 
 defineLegacyParams(NodalMaxValueId);
 

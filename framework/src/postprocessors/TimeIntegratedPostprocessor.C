@@ -10,8 +10,10 @@
 #include "TimeIntegratedPostprocessor.h"
 
 registerMooseObject("MooseApp", TimeIntegratedPostprocessor);
-registerMooseObjectRenamed(
-  "MooseApp", TimeIntegratedPostprocessor, "04/01/2022 00:00", TotalVariableValue);
+registerMooseObjectRenamed("MooseApp",
+                           TotalVariableValue,
+                           "04/01/2022 00:00",
+                           TimeIntegratedPostprocessor);
 
 defineLegacyParams(TimeIntegratedPostprocessor);
 

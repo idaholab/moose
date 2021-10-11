@@ -1,33 +1,18 @@
 # Residual
 
-!alert! construction title=Undocumented Class
-The Residual has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# Residual
-
 !syntax description /Postprocessors/Residual
 
-## Overview
+The non linear residual may be queried before a non-linear iteration or after.
+More information about residuals may be found [here](resres).
 
-!! Replace these lines with information regarding the Residual object.
+The residual may be split by variables using the [VariableResidual.md] postprocessor.
 
-## Example Input File Syntax
+## Example input syntax
 
-!! Describe and include an example of how to use the Residual object.
+In this example, `u` is the solution of a diffusion problem. A predictor time integrating
+scheme is used and the `Residual` postprocessor reports the residual.
 
-!syntax parameters /Postprocessors/Residual
-
-!syntax inputs /Postprocessors/Residual
-
-!syntax children /Postprocessors/Residual
-```
-!alert-end!
-
-!syntax description /Postprocessors/Residual
+!listing test/tests/postprocessors/predictors/simple/predictor_test.i block=Postprocessors
 
 !syntax parameters /Postprocessors/Residual
 

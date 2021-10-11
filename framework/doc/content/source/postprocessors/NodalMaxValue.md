@@ -1,33 +1,16 @@
 # NodalMaxValue
 
-!alert! construction title=Undocumented Class
-The NodalMaxValue has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# NodalMaxValue
-
 !syntax description /Postprocessors/NodalMaxValue
 
-## Overview
+!alert note
+If the solution space is non convex over each element, the maximum of a variable may not be at a node.
 
-!! Replace these lines with information regarding the NodalMaxValue object.
+## Example input syntax
 
-## Example Input File Syntax
+In this example, `v` is the solution of diffusion problem. We examine the maximum value of
+the variable over block 1.
 
-!! Describe and include an example of how to use the NodalMaxValue object.
-
-!syntax parameters /Postprocessors/NodalMaxValue
-
-!syntax inputs /Postprocessors/NodalMaxValue
-
-!syntax children /Postprocessors/NodalMaxValue
-```
-!alert-end!
-
-!syntax description /Postprocessors/NodalMaxValue
+!listing test/tests/postprocessors/nodal_max_value/block_nodal_pps_test.i block=Postprocessors
 
 !syntax parameters /Postprocessors/NodalMaxValue
 
