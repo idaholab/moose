@@ -9,4 +9,11 @@
     input = csvdiff.i
     csvdiff = csvdiff_out.csv
   []
+  [imagediff]
+    type = ImageDiff
+    input = good.i
+    imagediff = 'not_a_kitten.png'
+    display_required = false
+    delete_output_before_running = false
+  []
 []

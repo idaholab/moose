@@ -73,7 +73,7 @@ class Exodiff(FileTester):
         return commands
 
     def processResults(self, moose_dir, options, output):
-        output += FileTester.processResults(self, moose_dir, options, output)
+        output = FileTester.processResults(self, moose_dir, options, output)
 
         if self.isFail() or self.specs['skip_checks']:
             return output
@@ -81,13 +81,6 @@ class Exodiff(FileTester):
         # Don't Run Exodiff on Scaled Tests
         if options.scaling and self.specs['scale_refine']:
             return output
-
-        # Make sure that all of the Exodiff files are actually available
-        for file in self.specs['exodiff']:
-            if not os.path.exists(os.path.join(self.getTestDir(), self.specs['gold_dir'], file)):
-                output += "File Not Found: " + os.path.join(self.getTestDir(), self.specs['gold_dir'], file)
-                self.setStatus(self.fail, 'MISSING GOLD FILE')
-                break
 
         if not self.isFail():
             # Retrieve the commands
