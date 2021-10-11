@@ -22,84 +22,106 @@ class TestPerfGraphReporterReader(unittest.TestCase):
 
         reader = ReporterReader(self._file)
         reader.update(reader.times()[-1])
-        self._data = reader[('perf_graph', 'nodes')]
-
-    def childrenTime(self, node_data):
-        val = 0
-        for entry in self._data:
-            if 'parent_id' in entry and entry['parent_id'] == node_data['id']:
-                val += self.totalTime(entry)
-        return val
-
-    def childrenMemory(self, node_data):
-        val = 0
-        for entry in self._data:
-            if 'parent_id' in entry and entry['parent_id'] == node_data['id']:
-                val += self.totalMemory(entry)
-        return val
-
-    def totalTime(self, node_data):
-        return node_data['time'] + self.childrenTime(node_data)
-
-    def totalMemory(self, node_data):
-        return node_data['memory'] + self.childrenMemory(node_data)
+        self._data = reader[('perf_graph', 'graph')]
+        self._root_node = self._data['MooseTestApp (main)']
 
     def test(self):
+        def totalTime(node_data):
+            return node_data['time'] + childrenTime(node_data)
+
+        def totalMemory(node_data):
+            return node_data['memory'] + childrenMemory(node_data)
+
+        def childrenTime(node_data):
+            children_time = 0
+            for entry in node_data.values():
+                if type(entry) == dict:
+                    children_time += totalTime(entry)
+            return children_time
+
+        def childrenMemory(node_data):
+            children_memory = 0
+            for entry in node_data.values():
+                if type(entry) == dict:
+                    children_memory += totalMemory(entry)
+            return children_memory
+
         # Test both file and raw separately
         for args in [{'file': self._file}, {'raw': self._data}]:
             pgrr = PerfGraphReporterReader(**args)
 
-            # Find the root in the data
-            root_node_data = None
-            for entry in self._data:
-                if 'parent_id' not in entry:
-                    root_node_data = entry
-                    self.assertEqual(root_node_data['id'], pgrr.rootNode().id())
-                    self.assertEqual(pgrr.rootNode().parent(), None)
-            self.assertNotEqual(root_node_data, None)
-            root_time_total = self.totalTime(root_node_data)
-            root_memory_total = self.totalMemory(root_node_data)
+            self.assertNotEqual(None, pgrr.rootNode())
+            self.assertAlmostEqual(100, pgrr.rootNode().percentTime())
+            self.assertAlmostEqual(100, pgrr.rootNode().percentMemory())
 
-            # Should have the same number of nodes overall
-            self.assertEqual(len(pgrr.nodes()), len(self._data))
+            root_node_name = list(self._data.keys())[0]
+            self.assertEqual(root_node_name, pgrr.rootNode().name())
 
-            sections = []
-            all_children = {}
-            all_parents = {}
+            root_node_data = list(self._data.values())[0]
+            root_node_time = totalTime(root_node_data)
+            root_node_memory = totalMemory(root_node_data)
 
-            # Verify each node in json
-            for node_data in self._data:
-                node = pgrr.node(node_data['id'])
-                self.assertEqual(node.id(), node_data['id'])
+            sections = {}
+
+            def verify_node(node):
+                print(node)
+
+                node_data = self._data
+                for name in node.path():
+                    self.assertIn(name, node_data)
+                    node_data = node_data[name]
+
+                self.assertEqual(node._nodes, [node])
+                self.assertEqual(node.name(), node.path()[-1])
+                self.assertEqual(node.name(), node.section().name())
+                self.assertIn(node, node.section().nodes())
+                self.assertEqual(pgrr.rootNode(), node.rootNode())
+
                 self.assertEqual(node.level(), node_data['level'])
-                self.assertEqual(node.name(), node_data['name'])
                 self.assertEqual(node.numCalls(), node_data['num_calls'])
 
                 self.assertEqual(node.selfTime(), node_data['time'])
-                self.assertEqual(node.childrenTime(), self.childrenTime(node_data))
-                self.assertEqual(node.totalTime(), self.totalTime(node_data))
-                self.assertEqual(node.percentTime(), self.totalTime(node_data) * 100 / root_time_total)
+                self.assertEqual(node.childrenTime(), childrenTime(node_data))
+                self.assertEqual(node.totalTime(), totalTime(node_data))
+                self.assertEqual(node.percentTime(), totalTime(node_data) * 100 / root_node_time)
 
                 self.assertEqual(node.selfMemory(), node_data['memory'])
-                self.assertEqual(node.childrenMemory(), self.childrenMemory(node_data))
-                self.assertEqual(node.totalMemory(), self.totalMemory(node_data))
-                self.assertEqual(node.percentMemory(), self.totalMemory(node_data) * 100 / root_memory_total)
+                self.assertEqual(node.childrenTime(), childrenTime(node_data))
+                self.assertEqual(node.totalTime(), totalTime(node_data))
+                self.assertEqual(node.percentMemory(), totalMemory(node_data) * 100 / root_node_memory)
 
-                if 'parent_id' in node_data:
-                    self.assertEqual(node_data['parent_id'], node.parent().id())
-                    self.assertEqual(node.rootNode(), pgrr.rootNode())
+                if node.name() not in sections:
+                    sections[node.name()] = []
+                sections[node.name()].append(node_data)
 
-                children_ids_data = node_data.get('children_ids', [])
-                self.assertEqual(len(node.children()), len(children_ids_data))
                 for child in node.children():
-                    self.assertIn(child.id(), children_ids_data)
+                    self.assertEqual(child.parent(), node)
 
-                self.assertIn(node_data['name'], pgrr.sections())
-                self.assertIn(node, pgrr.section(node_data['name']))
-                if node_data['name'] not in sections:
-                    sections.append(node_data['name'])
+            # Verify nodes
+            pgrr.recursivelyDo(verify_node)
 
-            self.assertEqual(len(sections), len(pgrr.sections()))
+            # Verify sections
+            for name, data in sections.items():
+                section = pgrr.section(name)
+                print(section)
+
+                self.assertEqual(name, section.name())
+                self.assertEqual(len(data), len(section.nodes()))
+
+                for node in section.nodes():
+                    self.assertEqual(node.section(), section)
+                    self.assertEqual(node.level(), section.level())
+                    self.assertEqual(node.name(), section.name())
+
+                self.assertEqual(section.numCalls(), sum([node.numCalls() for node in section.nodes()]))
+
+                self.assertAlmostEqual(section.selfTime(), sum([node.selfTime() for node in section.nodes()]))
+                self.assertAlmostEqual(section.totalTime(), sum([node.totalTime() for node in section.nodes()]))
+                self.assertAlmostEqual(section.childrenTime(), sum([node.childrenTime() for node in section.nodes()]))
+
+                self.assertAlmostEqual(section.selfMemory(), sum([node.selfMemory() for node in section.nodes()]))
+                self.assertAlmostEqual(section.totalMemory(), sum([node.totalMemory() for node in section.nodes()]))
+                self.assertAlmostEqual(section.childrenMemory(), sum([node.childrenMemory() for node in section.nodes()]))
 
     def testExceptions(self):
         with self.assertRaisesRegex(Exception, 'Must provide either "file" or "raw"'):
@@ -111,50 +133,25 @@ class TestPerfGraphReporterReader(unittest.TestCase):
         with self.assertRaisesRegex(Exception, '"part" is not used with "raw"'):
             PerfGraphReporterReader(raw='foo', part=1)
 
-        with self.assertRaisesRegex(Exception, 'Multiple root nodes found'):
+        with self.assertRaisesRegex(Exception, 'Single root node not found in data'):
             data = copy.deepcopy(self._data)
-            del data[1]['parent_id']
+            data['foo'] = {}
             PerfGraphReporterReader(raw=data)
 
     def testPerfGraphNodeExceptions(self):
-        with self.assertRaisesRegex(Exception, 'Entry missing ID'):
-            data = copy.deepcopy(self._data)
-            del data[0]['id']
-            PerfGraphNode(0, None, data)
+        with self.assertRaisesRegex(TypeError, 'parent is not of type "PerfGraphNode"'):
+            PerfGraphNode(0, self._root_node, 'foo')
 
-        with self.assertRaisesRegex(Exception, 'Duplicate ID 0 found'):
-            data = copy.deepcopy(self._data)
-            data[1]['id'] = 0
-            PerfGraphNode(0, None, data)
-
-        with self.assertRaisesRegex(Exception, 'Failed to find node with ID 123456'):
-            PerfGraphNode(123456, None, data)
-
-        with self.assertRaisesRegex(Exception, 'parent is not of type "PerfGraphNode"'):
-            PerfGraphNode(0, 'foo', self._data)
-
-        for key in ['level', 'memory', 'name', 'num_calls', 'time', 'parent_id']:
-            if key in self._data[0]:
-                with self.assertRaisesRegex(Exception, 'Entry missing key "{}"'.format(key)):
-                    data = copy.deepcopy(self._data)
-                    del data[0][key]
-                    PerfGraphNode(0, None, data)
+        for key in ['level', 'memory', 'num_calls', 'time']:
+            with self.assertRaisesRegex(Exception, 'Entry missing key "{}"'.format(key)):
+                data = copy.deepcopy(self._root_node)
+                del data[key]
+                PerfGraphNode('foo', data, None)
 
             with self.assertRaisesRegex(Exception, 'Key "{}" in node entry is not the required type'.format(key)):
-                data = copy.deepcopy(self._data)
-                data[0][key] = None
-                PerfGraphNode(0, None, data)
-
-        with self.assertRaisesRegex(Exception, 'Key "children_ids" in node entry is not the required type'):
-            data = copy.deepcopy(self._data)
-            data[0]['children_ids'] = ['foo']
-            PerfGraphNode(0, None, data)
-
-        with self.assertRaisesRegex(Exception, 'Key "foo" in node entry is invalid'):
-            data = copy.deepcopy(self._data)
-            data[0]['foo'] = 'bar'
-            PerfGraphNode(0, None, data)
-
+                data = copy.deepcopy(self._root_node)
+                data[key] = None
+                PerfGraphNode('foo', data, None)
 
 if __name__ == '__main__':
     unittest.main(module=__name__, verbosity=2, buffer=True)

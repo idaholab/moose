@@ -9,36 +9,152 @@
 
 from mooseutils.ReporterReader import ReporterReader
 
-class PerfGraphNode:
+class PerfGraphObject:
+    """
+    Base class PerfGraphNode and PerfGraphSection.
+
+    This allows the interface for these two objects to be
+    similar and reduces duplication.
+    """
+
+    def __init__(self, name, level):
+        """
+        Inputs:
+            name[str]: The section name
+            level[int] The section level
+        """
+        self._name = name
+        self._level = level
+
+        # The nodes associated with this object. For a PerfGraphNode,
+        # this is a single node. For a PerfGraphSection this is one or
+        # more nodes in said section.
+        self._nodes = []
+
+    def __str__(self):
+        return self.info()
+
+    def _addNode(self, node):
+        """
+        Internal method for adding a node to this object.
+        """
+        if node not in self._nodes:
+            self._nodes.append(node)
+
+    def _sumAllNodes(self, do):
+        """
+        Internal method for summing across all nodes
+        """
+        return sum([do(node) for node in self._nodes])
+
+    def info(self):
+        """
+        Returns the number of calls, the time, and the memory
+        in a human readable form.
+        """
+        info_str = 'Num calls: {}'.format(self.numCalls())
+        info_str += '\nTime ({:.2f}%): Self {:.2e} s, Children {:.2e} s, Total {:.2e} s'.format(self.percentTime(), self.selfTime(), self.childrenTime(), self.totalTime())
+        info_str += '\nMemory ({:.2f}%): Self {} MB, Children {} MB, Total {} MB'.format(self.percentMemory(), self.selfMemory(), self.childrenMemory(), self.totalMemory())
+        return info_str
+
+    def name(self):
+        """
+        Returns the name assigned to the section
+        """
+        return self._name
+
+    def level(self):
+        """
+        Returns the level assigned to the section
+        """
+        return self._level
+
+    def numCalls(self):
+        """
+        Returns the number of times this was called
+        """
+        return self._sumAllNodes(lambda node: node._num_calls)
+
+    def selfTime(self):
+        """
+        Returns the time only this (not including children) took
+        """
+        return self._sumAllNodes(lambda node: node._time)
+
+    def totalTime(self):
+        """
+        Returns the time this plus its children took
+        """
+        return self.selfTime() + self.childrenTime()
+
+    def childrenTime(self):
+        """
+        Returns the time the children took
+        """
+        return self._sumAllNodes(lambda node: sum([child.totalTime() for child in node.children()]))
+
+    def percentTime(self):
+        """
+        Returns the percentage of time this took relative to the
+        total time of the root node
+        """
+        return self.totalTime() * 100 / self.rootNode().totalTime()
+
+    def selfMemory(self):
+        """
+        Returns the memory added by only this (not including children)
+        """
+        return self._sumAllNodes(lambda node: node._memory)
+
+    def totalMemory(self):
+        """
+        Returns the memory added by only this plus its children
+        """
+        return self.selfMemory() + self.childrenMemory()
+
+    def childrenMemory(self):
+        """
+        Returns the memory added by children
+        """
+        return self._sumAllNodes(lambda node: sum([child.totalMemory() for child in node.children()]))
+
+    def percentMemory(self):
+        """
+        Returns the percentage of memory this this took relative
+        to thetotal time of the root node
+        """
+        return self.totalMemory() * 100 / self.rootNode().totalMemory()
+
+    def rootNode(self):
+        """
+        Returns the root (top node in the graph)
+        """
+        parent = self._nodes[0]
+        while parent.parent() is not None:
+            parent = parent.parent()
+        return parent
+
+class PerfGraphNode(PerfGraphObject):
     """
     A node in the graph for the PerfGraphReporterReader.
     These should really only be constructed internally within
     the PerfGraphReporterReader.
 
     Inputs:
-        id[int]: The ID in the JSON graph
-        parents[PerfGraphNode]: The node parent (None if root)
-        data[dict]: The object that contains the full graph
+        name[str]: Section name for this node
+        node_data[dict]: JSON output for this node
+        parent[PerfGraphNode]: The parent to this node (None if root)
     """
-    def __init__(self, id, parent, data):
-        node_data = None
-        for entry in data:
-            if 'id' not in entry or not isinstance(entry['id'], int):
-                raise Exception('Entry missing ID\n{}'.format(entry))
-            if entry['id'] == id:
-                if node_data:
-                    raise Exception('Duplicate ID {} found'.format(id))
-                node_data = entry
-        if node_data is None:
-            raise Exception('Failed to find node with ID {}'.format(id))
-
+    def __init__(self, name, node_data, parent):
         # Validate that the data in the node is as we expect
-        self._validateNodeData(node_data)
+        self._validateNodeData(name, node_data)
 
-        # Sets self._id, self._level, self._memory, etc...
-        for key, val in node_data.items():
-            if key not in ['parent_id', 'children_ids']:
-                setattr(self, '_' + key, val)
+        self._memory = node_data['memory']
+        self._num_calls = node_data['num_calls']
+        self._time = node_data['time']
+
+        super().__init__(name, node_data['level'])
+        self._addNode(self)
 
         if parent is not None and not isinstance(parent, PerfGraphNode):
             raise TypeError('parent is not of type "PerfGraphNode"')
@@ -46,49 +162,65 @@ class PerfGraphNode:
 
         # Recursively add all of the children
         self._children = []
-        for child_id in node_data.get('children_ids', []):
-            self._children.append(PerfGraphNode(child_id, self, data))
+        for key, val in node_data.items():
+            if key not in self._validNodeData():
+                self._children.append(PerfGraphNode(key, val, self))
+
+        # We will fill the section after we build the graph
+        self._section = None
 
     @staticmethod
-    def _validateNodeData(node_data):
+    def _validNodeData():
+        """
+        Returns a dict of the valid keys for a single node from JSON
+        and to their corresponding types.
+        """
+        return {'level': int, 'memory': int, 'num_calls': int, 'time': float}
+
+    @staticmethod
+    def _validateNodeData(name, node_data, check_children=True):
         """
         Internal method that validates all of the data within a single
         entry that represents a node
         """
+        for key, type in PerfGraphNode._validNodeData().items():
+            if key not in node_data: # Required key is missing
+                raise Exception('Entry missing key "{}":\n{}'.format(key, node_data))
+            if not isinstance(node_data.get(key), type):
+                raise Exception('Key "{}" in node entry is not the required type "{}"\n{}'.format(key, type, node_data))
 
-        valid = {'children_ids': {'type': list, 'subtype': int},
-                 'id': {'required': True, 'type': int},
-                 'level': {'required': True, 'type': int},
-                 'memory': {'required': True, 'type': int},
-                 'name': {'required': True, 'type': str},
-                 'num_calls': {'required': True, 'type': int},
-                 'parent_id': {'type': int},
-                 'time': {'required': True, 'type': float}}
+    def __getitem__(self, name):
+        return self.child(name)
 
-        # Check each entry
-        for key, info in valid.items():
-            if info.get('required', False):
-                if key not in node_data: # Required key is missing
-                    raise Exception('Entry missing key "{}":\n{}'.format(key, node_data))
-            elif key not in node_data: # Key is optional and doesn't exist
-                continue
+    def info(self):
+        """
+        Returns the number of calls, the time, memory,
+        and children in a human readable form.
+        """
+        info_str = 'PerfGraphNode "' + '/'.join(self.path()) + '":'
+        info_str += '\n  ' + super().info().replace('\n', '\n  ')
+        if self.children():
+            info_str += '\n  Children:'
+            for child in self.children():
+                info_str += '\n    ' + child.name()
+        return info_str
 
-            val = node_data.get(key)
+    def path(self):
+        """
+        Returns the full name path for this node.
+        """
+        names = [self.name()]
+        parent = self
+        while parent.parent() is not None:
+            names.append(parent.parent().name())
+            parent = parent.parent()
+        return names[::-1]
 
-            # Verify the primary type
-            if not isinstance(val, info.get('type')):
-                raise Exception('Key "{}" in node entry is not the required type "{}"\n{}'.format(key, info.get('type'), node_data))
-
-            # Verify the sub type (for example, list of ints)
-            if 'subtype' in info:
-                for subval in val:
-                    if not isinstance(subval, info.get('subtype')):
-                        raise Exception('Key "{}" in node entry is not the required type "{}" of "{}"\n{}'.format(key, info.get('type'), info.get('subtype'), node_data))
-
-        # Check for extraneous entries
-        for key in node_data:
-            if key not in valid:
-                raise Exception('Key "{}" in node entry is invalid\n{}'.format(key, node_data))
+    def section(self):
+        """
+        Returns the PerfGraphSection that this node is in
+        """
+        return self._section
 
     def children(self):
         """
@@ -96,29 +228,16 @@ class PerfGraphNode:
         """
         return self._children
 
-    def id(self):
+    def child(self, name):
         """
-        Returns the unique ID of this node
+        Returns the child node with the given name, if one exists, otherwise None
         """
-        return self._id
-
-    def level(self):
-        """
-        Returns the level assigned to the section that created this node
-        """
-        return self._level
-
-    def name(self):
-        """
-        Returns the name assigned to the section that created this nod
-        """
-        return self._name
-
-    def numCalls(self):
-        """
-        Returns the number of times this node was called
-        """
-        return self._num_calls
+        if not isinstance(name, str):
+            raise TypeError('"name" should be a str')
+        for child in self.children():
+            if child.name() == name:
+                return child
+        return None
 
     def parent(self):
         """
@@ -126,72 +245,37 @@ class PerfGraphNode:
         """
         return self._parent
 
-    def selfTime(self):
-        """
-        Returns the time this node took
-        """
-        return self._time
+    def showGraph(self, depth=0):
+        info_str = '  ' * depth + '{} ({:.1f}% time, {:.1f}% memory)'.format(self.name(), self.percentTime(), self.percentMemory())
+        for child in self.children():
+            info_str += '\n' + child.showGraph(depth + 1)
+        return info_str
 
-    def totalTime(self):
-        """
-        Returns the time this node plus its children took
-        """
-        return self.selfTime() + self.childrenTime()
+class PerfGraphSection(PerfGraphObject):
+    """
+    A section in the graph for the PerfGraphReporterReader.
+    These should really only be constructed internally within
+    the PerfGraphReporterReader.
 
-    def childrenTime(self):
-        """
-        Returns the time this node's children took
-        """
-        return sum([child.totalTime() for child in self.children()])
+    Inputs:
+        name[str]: Section name for this node
+        node_data[dict]: JSON output for this node
+        parent[PerfGraphNode]: The parent to this node (None if root)
+    """
 
-    def percentTime(self, alt_root_node=None):
-        """
-        Returns the percentage of time this node took relative to the
-        total time of the root node, which defaults to the top node
-        in the graph.
+    def info(self):
+        info_str = 'PerfGraphSection "' + self.name() + '":'
+        info_str += '\n  ' + super().info().replace('\n', '\n  ')
+        info_str += '\n  Nodes:'
+        for node in self.nodes():
+            info_str += '\n    ' + '/'.join(node.path())
+        return info_str
 
-        Inputs:
-            alt_root_node[PerfGraphNode]: Alternate root node; if not given, use the top root node
+    def nodes(self):
         """
-        return self.totalTime() * 100 / (self.rootNode() if not alt_root_node else alt_root_node).totalTime()
-
-    def selfMemory(self):
+        Returns the nodes that are in this section
         """
-        Returns the amount of memory (in MB) added by this node
-        """
-        return self._memory
-
-    def totalMemory(self):
-        """
-        Returns the amount of memory (in MB) added by this node and its children
-        """
-        return self.selfMemory() + self.childrenMemory()
-
-    def childrenMemory(self):
-        """
-        Returns the amount of memory (in MB) added by this node's children
-        """
-        return sum([child.totalMemory() for child in self.children()])
-
-    def percentMemory(self, alt_root_node=None):
-        """
-        Returns the percentage of memory this node added relative to the
-        total memory added by the root node, which defaults to the top
-        node in the graph.
-
-        Inputs:
-            alt_root_node[PerfGraphNode]: Alternate root node; if not given, use the top root node
-        """
-        return self.totalMemory() * 100 / (self.rootNode() if not alt_root_node else alt_root_node).totalMemory()
-
-    def rootNode(self):
-        """
-        Returns the root (top node in the graph)
-        """
-        parent = self
-        while parent.parent() is not None:
-            parent = parent.parent()
-        return parent
+        return self._nodes
 
 class PerfGraphReporterReader:
     """
@@ -222,63 +306,49 @@ class PerfGraphReporterReader:
             # Find the Reporter variable that contains the PerfGraph graph
             perf_graph_var = None
             for var in self._reader.variables():
-                if self._reader.info(var[0])['type'] == 'PerfGraphReporter' and var[1] == 'nodes':
-                    if perf_graph_var:
-                        raise Exception('Multiple PerfGraphReporter values were found')
+                if self._reader.info(var[0])['type'] == 'PerfGraphReporter' and var[1] == 'graph':
                     perf_graph_var = var
 
             graph_data = self._reader[perf_graph_var]
         else:
             graph_data = raw
 
+        if len(graph_data) != 1:
+            raise Exception('Single root node not found in data')
+
         # Build the graph; the PerfGraphNode constructor will recursively add children
-        self._root_node = None
-        for node_data in graph_data:
-            if 'parent_id' not in node_data:
-                if self._root_node:
-                    raise Exception('Multiple root nodes found')
-                self._root_node = PerfGraphNode(node_data['id'], None, graph_data)
+        root_node_name = list(graph_data.keys())[0]
+        root_node_data = graph_data[root_node_name]
+        self._root_node = PerfGraphNode(root_node_name, root_node_data, None)
 
-        # Dict of node ID -> node for convenience, built on initial request
-        self._nodes = None
-        # Dict of section name -> nodes in that section for convenience, built on initial request
-        self._sections = None
+        # Setup all of the sections
+        self._sections = {}
+        def add_section(node):
+            if node.name() in self._sections:
+                section = self._sections.get(node.name())
+            else:
+                section = PerfGraphSection(node.name(), node.level())
+                self._sections[node.name()] = section
+            node._section = section
+            section._addNode(node)
+        self.recursivelyDo(add_section)
 
-    def recursivelyDo(self, do, alt_root_node=None, *args, **kwargs):
+    def __getitem__(self, name):
+        return self.rootNode().child(name)
+
+    def recursivelyDo(self, do, *args, **kwargs):
         """
-        Recursively do an action through the graph.
-        If alt_root_node is not provided, act through the entire graph,
-        starting with the graph root node.
+        Recursively do an action through the graph starting with the root node.
 
         Inputs:
             do[function]: Action to perform on each node (input: a PerfGraphNode)
-            alt_root_node[PerfGraphNode]: Alternate node to start with
         """
         def recurse(node, do, *args, **kwargs):
             do(node, *args, **kwargs)
             for child in node.children():
                 recurse(child, do, *args, **kwargs)
 
-        root_node = self._root_node if alt_root_node is None else alt_root_node
-        recurse(root_node, do, *args, **kwargs)
-
-    def nodes(self):
-        """
-        Returns a dict of all of the nodes in the graph,
-        in which the key is the ID.
-        """
-        if self._nodes is None:
-            self._nodes = {}
-            def add_to_nodes(node):
-                self._nodes[node.id()] = node
-            self.recursivelyDo(add_to_nodes)
-        return self._nodes
-
-    def node(self, id):
-        """
-        Returns the PerfGraphNode with the given ID
-        """
-        return self.nodes().get(id)
+        recurse(self.rootNode(), do, *args, **kwargs)
 
     def rootNode(self):
         """
@@ -288,25 +358,17 @@ class PerfGraphReporterReader:
 
     def sections(self):
         """
-        Returns a dict of all of the sections. The key
-        is the section name and the entries are a list of
-        PerfGraphNode that are a part of said section.
+        Returns all of the named sections.
         """
-        if self._sections is None:
-            self._sections = {}
-            def add_to_sections(node):
-                if node.name() not in self._sections:
-                    self._sections[node.name()] = []
-                self._sections[node.name()].append(node)
-            self.recursivelyDo(add_to_sections)
-        return self._sections
+        return self._sections.items()
 
     def section(self, name):
         """
-        Returns all of the PerfGraphNode objects that
-        are contained within a given section.
+        Returns all of the PerfGraphSection with the given name
 
         Inputs:
             name[str]: The name of the section
         """
-        return self.sections().get(name)
+        if not isinstance(name, str):
+            raise TypeError('"name" should be a str')
+        return self._sections.get(name, None)

@@ -21,6 +21,6 @@
 [Outputs]
   [json]
     type = JSON
-    execute_on = FINAL
+    execute_on = 'INITIAL FINAL'
   []
 []
