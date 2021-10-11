@@ -39,7 +39,6 @@ p {
 }
 
 pre.moose-pre {
-    background-color: #eee;
     margin-top; 0;
     margin-bottom: 1em;
 }
@@ -49,13 +48,13 @@ pre.moose-pre {
 }
 
 code[class*="language-"] {
-    color: #444;
     text-shadow: none
 }
 
 .token.punctuation {
     color: #08080D;
 }
+
 /* redefine the little toolbar for code blocks */
 pre.code-toolbar:hover > .toolbar {
     opacity: 1;
@@ -64,10 +63,8 @@ pre.code-toolbar:hover > .toolbar {
 pre.code-toolbar > .toolbar a,
 pre.code-toolbar > .toolbar button,
 pre.code-toolbar > .toolbar span {
-    color: #eee;
     font-size: .8em;
     padding: 0 .5em;
-    background: rgba(0, 0, 0, 0.2);
     box-shadow: none;
     border-radius: .5em;
 }
@@ -78,8 +75,70 @@ pre.code-toolbar > .toolbar button:hover,
 pre.code-toolbar > .toolbar button:focus,
 pre.code-toolbar > .toolbar span:hover,
 pre.code-toolbar > .toolbar span:focus {
-    color: #fff;
     text-decoration: none;
+}
+
+@media (prefers-color-scheme: light) {
+  pre.moose-pre  {
+      background-color: #eee;
+  }
+
+  code[class*="language-"] {
+      color: #444;
+  }
+
+  pre.code-toolbar > .toolbar a,
+  pre.code-toolbar > .toolbar button,
+  pre.code-toolbar > .toolbar span {
+      color: #eee;
+      background: rgba(0, 0, 0, 0.2);
+  }
+
+  pre.code-toolbar > .toolbar a:hover,
+  pre.code-toolbar > .toolbar a:focus,
+  pre.code-toolbar > .toolbar button:hover,
+  pre.code-toolbar > .toolbar button:focus,
+  pre.code-toolbar > .toolbar span:hover,
+  pre.code-toolbar > .toolbar span:focus {
+      color: #fff;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  h1, h2, h3, h4, h5, h6 {
+    color: #c8c8c8;
+  }
+
+  pre.moose-pre {
+      background-color: #111;
+  }
+
+  code[class*="language-"] {
+      color: #aaa;
+  }
+
+  pre.code-toolbar > .toolbar a,
+  pre.code-toolbar > .toolbar button,
+  pre.code-toolbar > .toolbar span {
+      color: #aaa;
+      background: rgba(0, 0, 0, 0.2);
+  }
+
+  pre.code-toolbar > .toolbar a:hover,
+  pre.code-toolbar > .toolbar a:focus,
+  pre.code-toolbar > .toolbar button:hover,
+  pre.code-toolbar > .toolbar button:focus,
+  pre.code-toolbar > .toolbar span:hover,
+  pre.code-toolbar > .toolbar span:focus {
+      color: #fff;
+  }
+
+  .moose-table-div table thead {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.82);
+  }
+  tr {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.82);
+  }
 }
 
 /* do not highlight the row on mouse hover */
@@ -124,14 +183,28 @@ div.alert2>p {
   margin: 0;
 }
 
-div.alert2.note, div.alert2.tip {
-  border: 1px solid rgb(41, 137, 211);
-  background-color: rgb(225, 243, 256);
+@media (prefers-color-scheme: light) {
+  div.alert2.note, div.alert2.tip {
+    border: 1px solid rgb(41, 137, 211);
+    background-color: rgb(225, 243, 256);
+  }
+
+  div.alert2.warning {
+    border: 1px solid rgb(191, 53, 54);
+    background-color: rgb(252, 236, 234);
+  }
 }
 
-div.alert2.warning {
-  border: 1px solid rgb(191, 53, 54);
-  background-color: rgb(252, 236, 234);
+@media (prefers-color-scheme: dark) {
+  div.alert2.note, div.alert2.tip {
+    border: 1px solid rgb(51, 113, 227);
+    background-color: rgb(24, 35, 56);
+  }
+
+  div.alert2.warning {
+    border: 1px solid rgb(201, 69, 60);
+    background-color: rgb(46, 28, 31);
+  }
 }
 
 .footer {
