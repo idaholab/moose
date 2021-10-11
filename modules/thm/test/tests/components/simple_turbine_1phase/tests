@@ -3,9 +3,9 @@
     type = 'CSVDiff'
     input = 'phy.conservation.i'
     csvdiff = 'phy.conservation_csv.csv'
-    override_columns = 'energy_diff mass_diff'
-    override_abs_zero = '1e-4 1e-10'
-    override_rel_err = '0 0'
+    override_columns = 'energy_diff mass_diff momentum_diff'
+    override_abs_zero = '1e-7 1e-7 1e-4'
+    override_rel_err = '0 0 0'
     max_parallel = 1
   []
 

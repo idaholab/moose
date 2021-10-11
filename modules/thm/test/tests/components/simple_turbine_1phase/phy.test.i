@@ -16,23 +16,17 @@
 
 [FluidProperties]
   [fp]
-    type = StiffenedGasFluidProperties
-    gamma = 1.43
-    cv = 1040.0
-    q = 2.03e6
-    p_inf = 0.0
-    q_prime = -2.3e4
-    k = 0.026
-    mu = 134.4e-7
-    M = 0.01801488
+    type = IdealGasFluidProperties
+    gamma = 1.4
+    molar_mass = 0.01
   []
 []
 
 [Components]
   [inlet]
-    type = InletVelocityTemperature1Phase
+    type = InletMassFlowRateTemperature1Phase
     input = 'pipe1:in'
-    vel = 1
+    m_dot = 10
     T = 517
   []
 
@@ -50,8 +44,6 @@
     connections = 'pipe1:out pipe2:in'
     position = '1 0 0'
     volume = 1
-    A_ref = 1.0
-    K = 0
     on = true
     power = 1000
   []
