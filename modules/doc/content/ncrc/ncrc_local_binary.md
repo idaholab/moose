@@ -52,7 +52,7 @@ Where applicable, you only need to activate the environment once. The examples b
   ```bash
   $> ncrc list
 
-  # Use 'ncrc search app' to list more detail
+  # Use 'ncrc search name-of-application' to list more detail
   # NCRC applications available:
 
 	pronghorn
