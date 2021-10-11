@@ -25,4 +25,10 @@ protected:
   virtual ADReal computeQpResidual() override;
 
   const ADVariableValue & _v;
+
+private:
+  /// Coefficient for primary variable
+  const Real _u_coeff;
+  /// Coefficient for coupled variable
+  const Real _v_coeff;
 };
