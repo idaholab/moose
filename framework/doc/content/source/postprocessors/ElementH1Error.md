@@ -1,33 +1,20 @@
 # ElementH1Error
 
-!alert! construction title=Undocumented Class
-The ElementH1Error has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# ElementH1Error
-
 !syntax description /Postprocessors/ElementH1Error
 
-## Overview
+The H1 error is a popular metric of error as it is associated with the natural norm
+for commonly used finite element spaces.
 
-!! Replace these lines with information regarding the ElementH1Error object.
+!equation
+(\int_\Omega (u(x,t) - f(x,t))^p + (\nabla u(x,t) - \nabla f(x,t))^p d\Omega)^{\dfrac{1}{p}}
 
-## Example Input File Syntax
+where `u` is the variable parameter, `f` the function parameter and $\Omega$ the domain of integration, which may be limited to certain blocks using the `block` parameter.
 
-!! Describe and include an example of how to use the ElementH1Error object.
+## Example input syntax
 
-!syntax parameters /Postprocessors/ElementH1Error
+In this example, we compute a variety of error between a variable and a function with the H1, L2 and H1-semi norms to verify that the H1 error is the sum of the L2 error and the H1-semi error.
 
-!syntax inputs /Postprocessors/ElementH1Error
-
-!syntax children /Postprocessors/ElementH1Error
-```
-!alert-end!
-
-!syntax description /Postprocessors/ElementH1Error
+!listing postprocessors/element_h1_error_pps/element_h1_error_pp_test.i block=Postprocessors
 
 !syntax parameters /Postprocessors/ElementH1Error
 

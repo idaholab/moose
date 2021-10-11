@@ -1,33 +1,16 @@
 # FunctionSideIntegral
 
-!alert! construction title=Undocumented Class
-The FunctionSideIntegral has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# FunctionSideIntegral
-
 !syntax description /Postprocessors/FunctionSideIntegral
 
-## Overview
+The sideset may be an internal or external boundary.
+The function is evaluated at each quadrature point on the specified sideset. The default quadrature rule is used for integration.
 
-!! Replace these lines with information regarding the FunctionSideIntegral object.
+## Example input syntax
 
-## Example Input File Syntax
+In this example test, we compute a few function integrals on the boundaries of
+the domain. Since the mesh is Cartesian, the integrals are known.
 
-!! Describe and include an example of how to use the FunctionSideIntegral object.
-
-!syntax parameters /Postprocessors/FunctionSideIntegral
-
-!syntax inputs /Postprocessors/FunctionSideIntegral
-
-!syntax children /Postprocessors/FunctionSideIntegral
-```
-!alert-end!
-
-!syntax description /Postprocessors/FunctionSideIntegral
+!listing test/tests/postprocessors/function_sideintegral/function_sideintegral.i block=Postprocessors
 
 !syntax parameters /Postprocessors/FunctionSideIntegral
 

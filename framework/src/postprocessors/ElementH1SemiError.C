@@ -19,6 +19,7 @@ ElementH1SemiError::validParams()
 {
   InputParameters params = ElementIntegralVariablePostprocessor::validParams();
   params.addRequiredParam<FunctionName>("function", "The analytic solution to compare against");
+  params.addClassDescription("Returns the gradient difference norm part of the H1 error");
   return params;
 }
 

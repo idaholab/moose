@@ -1,36 +1,17 @@
-# NodalProxyMaxValue
+# NodalMaxValueId
 
-!alert! construction title=Undocumented Class
-The NodalProxyMaxValue has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
+!syntax description /Postprocessors/NodalMaxValueId
 
-```markdown
-# NodalProxyMaxValue
+This postprocessor performs a reduction across all ranks to compute the maximum, then returns the id of the node with the global maximum.
 
-!syntax description /Postprocessors/NodalProxyMaxValue
+## Example input syntax
 
-## Overview
+In this input file we obtain both the maximum value of variable `u` using a [NodalExtremeValue.md] and the location where it is reached using a `NodalMaxValueId`.
 
-!! Replace these lines with information regarding the NodalProxyMaxValue object.
+!listing test/tests/postprocessors/nodal_extreme_value/nodal_extreme_pps_test.i block=Postprocessors
 
-## Example Input File Syntax
+!syntax parameters /Postprocessors/NodalMaxValueId
 
-!! Describe and include an example of how to use the NodalProxyMaxValue object.
+!syntax inputs /Postprocessors/NodalMaxValueId
 
-!syntax parameters /Postprocessors/NodalProxyMaxValue
-
-!syntax inputs /Postprocessors/NodalProxyMaxValue
-
-!syntax children /Postprocessors/NodalProxyMaxValue
-```
-!alert-end!
-
-!syntax description /Postprocessors/NodalProxyMaxValue
-
-!syntax parameters /Postprocessors/NodalProxyMaxValue
-
-!syntax inputs /Postprocessors/NodalProxyMaxValue
-
-!syntax children /Postprocessors/NodalProxyMaxValue
+!syntax children /Postprocessors/NodalMaxValueId

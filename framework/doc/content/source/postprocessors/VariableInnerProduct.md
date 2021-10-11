@@ -1,33 +1,19 @@
 # VariableInnerProduct
 
-!alert! construction title=Undocumented Class
-The VariableInnerProduct has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# VariableInnerProduct
-
 !syntax description /Postprocessors/VariableInnerProduct
 
-## Overview
+The inner product computed is for the L2 norm:
 
-!! Replace these lines with information regarding the VariableInnerProduct object.
+!equation
+<u, v> = \int_\Omega u(x, t) v(x, t) d\Omega
 
-## Example Input File Syntax
+where $u$ and $v$ are the `variable` and `second_variable` parameters and $\Omega$ is the integration domain, either the whole domain or the specified `blocks`.
 
-!! Describe and include an example of how to use the VariableInnerProduct object.
+## Example input syntax
 
-!syntax parameters /Postprocessors/VariableInnerProduct
+In this input file, we compute the inner products $<f,g>$ and $<f,f>$ of auxiliary variables. We verify that $<f,f>$ is equal to the L2 norm.
 
-!syntax inputs /Postprocessors/VariableInnerProduct
-
-!syntax children /Postprocessors/VariableInnerProduct
-```
-!alert-end!
-
-!syntax description /Postprocessors/VariableInnerProduct
+!listing test/tests/postprocessors/variable_inner_product/variable_inner_product.i block=Postprocessors
 
 !syntax parameters /Postprocessors/VariableInnerProduct
 
