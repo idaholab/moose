@@ -9,7 +9,7 @@
 
 #include "PenaltyInterfaceDiffusion.h"
 
-registerMooseObject("MooseTestApp", PenaltyInterfaceDiffusion);
+registerMooseObject("MooseApp", PenaltyInterfaceDiffusion);
 
 InputParameters
 PenaltyInterfaceDiffusion::validParams()

@@ -9,7 +9,7 @@
 
 #include "InterfaceDiffusion.h"
 
-registerMooseObject("MooseTestApp", InterfaceDiffusion);
+registerMooseObject("MooseApp", InterfaceDiffusion);
 
 InputParameters
 InterfaceDiffusion::validParams()
