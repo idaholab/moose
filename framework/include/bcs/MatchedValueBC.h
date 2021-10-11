@@ -24,7 +24,6 @@ public:
 
 protected:
   virtual GenericReal<is_ad> computeQpResidual() override;
-
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
   const GenericVariableValue<is_ad> & _v;
