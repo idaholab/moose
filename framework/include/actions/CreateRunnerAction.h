@@ -13,9 +13,6 @@
 
 class CreateRunnerAction;
 
-template <>
-InputParameters validParams<CreateRunnerAction>();
-
 class CreateRunnerAction : public MooseObjectAction
 {
 public:

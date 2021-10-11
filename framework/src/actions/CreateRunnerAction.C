@@ -18,8 +18,6 @@
 
 registerMooseAction("MooseApp", CreateRunnerAction, "setup_runner");
 
-defineLegacyParams(CreateRunnerAction);
-
 InputParameters
 CreateRunnerAction::validParams()
 {
