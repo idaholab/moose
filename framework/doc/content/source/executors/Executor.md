@@ -66,40 +66,39 @@ equivalent executor trees programmatically in order to replicate the current
 This executor would simply generate the init+solve+refine trio of executors
 programmatically - hiding the executor structure from the user.  By default the
 last executor listed in the `Executor` block becomes the master/primary executor.
-MOOSE only directly runs this executor; all other executors are executed if/when
+MOOSE only directly executes this executor; all other executors are executed if/when
 execution reaches them within the executor tree starting from the master executor.
-Executors
 
-By default, a executor has automatically generated execute-on flags created for
+By default, an executor has automatically generated execute-on flags created for
 it.  These flags are executed right before and right after the executor executes
 and are named `exec_[obj-name]_begin` and `exec_[obj-name]_end` respectively
 where `[obj-name]` is the name given to an object by it's block header in an
 input file - e.g. `[foo] type = FooExecutor []` has an object name of `foo`.
-Other objects (e.g. user objects, materials, etc.) can be assigned to run at
-these execute on flags/times within the input file.  This behavior is NOT
+Other objects (e.g. user objects, materials, etc.) can be assigned to execute at
+these execute-on flags/times within the input file.  This behavior is NOT
 fully implemented and will almost certainly not work right - so you should
 definitely not try to use it (yet).  The names of these flags can also be
-modified from within the input file via a executor's `begin_exec_flag` and
+modified from within the input file via an executor's `begin_exec_flag` and
 `end_exec_flag` input parameters.
 
 ## Writing Custom Executors
 
-Executors have one primary function - `virtual Result gogogadget()` - that must
-be implemented.  If a executor has any internal executors, it will call these
-executors' `Result run()` functions - NOT their gogogadget functions.
+Executors have one primary function - `virtual Result run()` that must
+be implemented.  If an executor has any internal executors, it will call these
+executors' `Result exec()` functions - NOT their run functions.
 
-All executors' "gogogadget" and "run" functions return a `Result` value contains
+All executors' "exec" and "run" functions return a `Result` value containing
 information about how execution turned out within the executor tree.  Each
 executor is responsible for recording how convergence/success occurs within it.
 This should generally be accomplished using the `Result::pass(msg)` and
 `Result::fail(msg)` functions on a result object created and initialized
-within it's own gogogadget function:
+by calling the `newResult()` member function:
 
 ```
 Result
-FooExecutor::gogogadget()
+FooExecutor::run()
 {
-  Result r(this);
+  Result & r = newResult(); // MUST catch this return value by reference
 
   ...
   bool success = ... // do some solve stuff
@@ -142,14 +141,14 @@ FooExecutor::FooExecutor(InputParameters & params)
 }
 
 Result
-FooExecutor::gogogadget()
+FooExecutor::run()
 {
-  Result r(this);
+  Result & r = newResult();
   ...
   // When we record an inner/sub executor's result, we give it a label - which
   // helps identify its placement/role within the executor heirarchy.
-  r.record("solve1", _inner_solve1->run());
-  r.record("solve2", _inner_solve2->run());
+  r.record("solve1", _inner_solve1->exec());
+  r.record("solve2", _inner_solve2->exec());
   ...
   return r;
 }
@@ -157,18 +156,20 @@ FooExecutor::gogogadget()
 
 Result values provide a convenience `bool convergedAll()`function for
 recursively determining if *any* single executor result within the currently
-executed portion of the tree has failed to converge.  When checking for convergence within a executor, this is usually the mechanism that should be used:
+executed portion of the tree has failed to converge.  When checking for
+convergence within an executor, this is usually the mechanism that should be
+used:
 
 ```
 Result
-FooExecutor::gogogadget()
+FooExecutor::run()
 {
-  Result r(this);
+  Result & r = newResult();
   ...
   // When we record an inner/sub executor's result, we give it a label - which
   // helps identify its placement/role within the executor heirarchy.
-  r.record("solve1", _inner_solve1->run());
-  r.record("solve2", _inner_solve2->run());
+  r.record("solve1", _inner_solve1->exec());
+  r.record("solve2", _inner_solve2->exec());
 
   // something inside _inner_solve1 or _inner_solve2 may have failed to converge
   if (!r.convergedAll())
@@ -177,7 +178,7 @@ FooExecutor::gogogadget()
     return r; // maybe you want to bail early
   }
 
-  r.record("solve3", _inner_solve3->run());
+  r.record("solve3", _inner_solve3->exec());
   ...
   return r;
 }

@@ -1065,7 +1065,7 @@ MooseApp::executeExecutioner()
 
     _executor->init();
     errorCheck();
-    _executor->run();
+    _executor->exec();
   }
   else if (_executioner)
   {

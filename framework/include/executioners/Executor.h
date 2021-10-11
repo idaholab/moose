@@ -20,7 +20,7 @@ class Executor;
 /// outputting, time stepping, mesh adaptivity, solve sequencing, multiapp
 /// execution, etc.  Users can compose executor objects in an input file using
 /// the same pattern as with mesh generators.  Subclass here and implement your
-/// own gogogadget function if you need special or fancy functionality that
+/// own run function if you need special or fancy functionality that
 /// isn't supported by the default executors available.
 class Executor : public Executioner
 {
@@ -132,14 +132,14 @@ public:
   static InputParameters validParams();
 
   /// This is the main function for executors - this is how executors should
-  /// invoke child/sub executors - by calling their run function.
-  Result run();
+  /// invoke child/sub executors - by calling their exec function.
+  Result exec();
 
   /// This function contains the primary execution implementation for a
   /// executor.  Custom executor behavior should be localized to this function.  If
   /// you are writing a executor - this is basically where you should put all your
   /// code.
-  virtual Result gogogadget() = 0;
+  virtual Result run() = 0;
 
   virtual void execute() override {}
 

@@ -42,10 +42,10 @@ Executor::Executor(const InputParameters & parameters)
 }
 
 Executor::Result
-Executor::run()
+Executor::exec()
 {
   _fe_problem.executeAllObjects(_begin_flag);
-  auto result = gogogadget();
+  auto result = run();
   _fe_problem.executeAllObjects(_end_flag);
 
   _result = result;
