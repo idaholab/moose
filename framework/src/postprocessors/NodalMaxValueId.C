@@ -7,44 +7,46 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "NodalProxyMaxValue.h"
+#include "NodalMaxValueId.h"
 #include "MooseMesh.h"
 #include "SubProblem.h"
 // libMesh
 #include "libmesh/boundary_info.h"
 
-registerMooseObject("MooseApp", NodalProxyMaxValue);
+registerMooseObject("MooseApp", NodalMaxValueId);
+registerMooseObjectRenamed(
+  "MooseApp", NodalMaxValueId, "04/01/2022 00:00", NodalProxyMaxValue);
 
-defineLegacyParams(NodalProxyMaxValue);
+defineLegacyParams(NodalMaxValueId);
 
 InputParameters
-NodalProxyMaxValue::validParams()
+NodalMaxValueId::validParams()
 {
   InputParameters params = NodalVariablePostprocessor::validParams();
   params.addClassDescription(
-      "Computes the max value at a node and broadcasts it to all processors.");
+      "Finds the node id with the maximum nodal value across all postprocessors.");
   return params;
 }
 
-NodalProxyMaxValue::NodalProxyMaxValue(const InputParameters & parameters)
+NodalMaxValueId::NodalMaxValueId(const InputParameters & parameters)
   : NodalVariablePostprocessor(parameters), _value(-std::numeric_limits<Real>::max())
 {
 }
 
 void
-NodalProxyMaxValue::initialize()
+NodalMaxValueId::initialize()
 {
   _value = -std::numeric_limits<Real>::max();
 }
 
 Real
-NodalProxyMaxValue::computeValue()
+NodalMaxValueId::computeValue()
 {
   return _u[_qp];
 }
 
 void
-NodalProxyMaxValue::execute()
+NodalMaxValueId::execute()
 {
   Real val = computeValue();
 
@@ -56,16 +58,16 @@ NodalProxyMaxValue::execute()
 }
 
 Real
-NodalProxyMaxValue::getValue()
+NodalMaxValueId::getValue()
 {
   gatherProxyValueMax(_value, _node_id);
   return _node_id;
 }
 
 void
-NodalProxyMaxValue::threadJoin(const UserObject & y)
+NodalMaxValueId::threadJoin(const UserObject & y)
 {
-  const NodalProxyMaxValue & pps = static_cast<const NodalProxyMaxValue &>(y);
+  const NodalMaxValueId & pps = static_cast<const NodalMaxValueId &>(y);
   if (pps._value > _value)
   {
     _value = pps._value;

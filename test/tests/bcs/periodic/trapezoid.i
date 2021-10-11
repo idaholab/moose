@@ -64,6 +64,20 @@
   [../]
 []
 
+[Postprocessors]
+  [./max_nodal_pps]
+    type = NodalMaxValue
+    variable = u
+    block = ANY_BLOCK_ID
+  [../]
+
+  [./max_node_id]
+    type = NodalMaxValueId
+    variable = u
+    block = ANY_BLOCK_ID
+  [../]
+[]
+
 [Executioner]
   type = Transient
   dt = 0.5

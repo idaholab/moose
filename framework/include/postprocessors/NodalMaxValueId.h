@@ -12,21 +12,20 @@
 #include "NodalVariablePostprocessor.h"
 
 // Forward Declarations
-class NodalProxyMaxValue;
+class NodalMaxValueId;
 
 template <>
-InputParameters validParams<NodalProxyMaxValue>();
+InputParameters validParams<NodalMaxValueId>();
 
 /**
- * Computes the max value at a node and broadcasts it to all
- * processors.
+ * Computes the id of the node with the maximum value across all processes
  */
-class NodalProxyMaxValue : public NodalVariablePostprocessor
+class NodalMaxValueId : public NodalVariablePostprocessor
 {
 public:
   static InputParameters validParams();
 
-  NodalProxyMaxValue(const InputParameters & parameters);
+  NodalMaxValueId(const InputParameters & parameters);
 
   virtual void initialize() override;
   virtual void execute() override;
@@ -44,4 +43,3 @@ protected:
   Real _value;
   dof_id_type _node_id;
 };
-

@@ -70,7 +70,7 @@
     variable = u
   [../]
   [./max_node_id]
-    type = NodalProxyMaxValue
+    type = NodalMaxValueId
     variable = u
   [../]
   [./min_nodal_pps]
