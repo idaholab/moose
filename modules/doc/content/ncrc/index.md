@@ -29,8 +29,8 @@ NCRC applications may be obtained by outside institutions and individuals for ex
   application and contributing directly to the project.
 
 
-!alert note
-The site handling access requests, is currently transitioning to a new location.
+To request access to an [!ac](INL) developed code, please  follow the instructions
+on [NCRC](https://inl.gov/ncrc) website.
 
 ## HPC OnDemand id=gen_ondemand
 
