@@ -1,3 +1,7 @@
+.main {
+  line-height: 1.25;
+}
+
 .section {
   padding-bottom: 0.5em
 }
@@ -14,6 +18,11 @@ pre[class*="language-"] {
   margin-bottom: 0.5rem;
 }
 
+h1 {
+  margin-top: 0;
+  margin-bottom: 0.5em;
+}
+
 h2 {
   font-size: 160%;
 }
@@ -24,8 +33,19 @@ h3 {
   margin-bottom: 0.5rem;
 }
 
+p {
+  margin-top: 0;
+  margin-bottom: 1em;
+}
+
 pre.moose-pre {
     background-color: #eee;
+    margin-top; 0;
+    margin-bottom: 1em;
+}
+
+.moose-table-div {
+    margin-bottom: 1em;
 }
 
 code[class*="language-"] {
@@ -125,6 +145,10 @@ h3.footer {
   font-size: 110%;
 }
 
+li {
+  margin-bottom: 0.33em;
+}
+
 div.tutorial.row {
 }
 
@@ -187,4 +211,17 @@ div.enumerate>ul.browser-default>li::before {
   left: 0;
   text-align: right;
   width: 16px;
+}
+
+.snippet {
+  margin: 0 auto 1em auto;
+  width: 90%;
+  border-radius: 4px;
+  border: 2px solid rgb(209, 215, 221);
+  padding: 1em;
+  background-color: #fcfcfc;
+}
+
+.snippet > p:first {
+  margin-top: 0;
 }

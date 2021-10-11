@@ -22,7 +22,7 @@
 !style! class=tutorial-content
 
 !content outline
-  max_level=2
+  max_level=1
   pages={{pages}}
 
 !style-end!
