@@ -484,7 +484,11 @@ public:
    * quadrature rules, while volume_order and face_order are for elem and face
    * quadrature respectively.
    */
-  void createQRules(QuadratureType type, Order order, Order volume_order, Order face_order);
+  void createQRules(QuadratureType type,
+                    Order order,
+                    Order volume_order,
+                    Order face_order,
+                    bool allow_negative_qweights = true);
 
   /**
    * Creates block-specific volume, face and arbitrary qrules based on the
@@ -494,8 +498,12 @@ public:
    * volume_order and face_order are for elem and face quadrature
    * respectively.
    */
-  void createQRules(
-      QuadratureType type, Order order, Order volume_order, Order face_order, SubdomainID block);
+  void createQRules(QuadratureType type,
+                    Order order,
+                    Order volume_order,
+                    Order face_order,
+                    SubdomainID block,
+                    bool allow_negative_qweights = true);
 
   /**
    * Increases the element/volume quadrature order for the specified mesh
