@@ -6,7 +6,7 @@ registerMooseObject("THMApp", SimpleTurbine1Phase);
 InputParameters
 SimpleTurbine1Phase::validParams()
 {
-  InputParameters params = VolumeJunction1Phase::validParams();
+  InputParameters params = JunctionParallelChannels1Phase::validParams();
 
   params.addRequiredParam<Real>("power", "Turbine power [W]");
   params.addRequiredParam<bool>("on", "Flag determining if turbine is operating or not [-]");
@@ -18,7 +18,7 @@ SimpleTurbine1Phase::validParams()
 }
 
 SimpleTurbine1Phase::SimpleTurbine1Phase(const InputParameters & params)
-  : VolumeJunction1Phase(params),
+  : JunctionParallelChannels1Phase(params),
     _on(getParam<bool>("on")),
     _power(getParam<Real>("power")),
     _W_dot_var_name(genName(name(), "W_dot"))
@@ -26,15 +26,9 @@ SimpleTurbine1Phase::SimpleTurbine1Phase(const InputParameters & params)
 }
 
 void
-SimpleTurbine1Phase::check() const
-{
-  VolumeJunction1Phase::check();
-}
-
-void
 SimpleTurbine1Phase::addVariables()
 {
-  VolumeJunction1Phase::addVariables();
+  JunctionParallelChannels1Phase::addVariables();
 
   _sim.addSimVariable(false, _W_dot_var_name, FEType(FIRST, SCALAR));
 }
@@ -52,6 +46,7 @@ SimpleTurbine1Phase::buildVolumeJunctionUserObject()
     params.set<std::vector<Real>>("normals") = _normals;
     params.set<std::vector<UserObjectName>>("numerical_flux_names") = _numerical_flux_names;
     params.set<Real>("volume") = _volume;
+    params.set<std::string>("component_name") = name();
     params.set<std::vector<VariableName>>("A") = {FlowModel::AREA};
     params.set<std::vector<VariableName>>("rhoA") = {FlowModelSinglePhase::RHOA};
     params.set<std::vector<VariableName>>("rhouA") = {FlowModelSinglePhase::RHOUA};
@@ -61,6 +56,7 @@ SimpleTurbine1Phase::buildVolumeJunctionUserObject()
     params.set<std::vector<VariableName>>("rhovV") = {_rhovV_var_name};
     params.set<std::vector<VariableName>>("rhowV") = {_rhowV_var_name};
     params.set<std::vector<VariableName>>("rhoEV") = {_rhoEV_var_name};
+    params.set<RealVectorValue>("dir_c0") = _directions[0];
     params.set<Real>("K") = _K;
     params.set<Real>("A_ref") = _A_ref;
     params.set<bool>("on") = _on;
@@ -76,7 +72,7 @@ SimpleTurbine1Phase::buildVolumeJunctionUserObject()
 void
 SimpleTurbine1Phase::addMooseObjects()
 {
-  VolumeJunction1Phase::addMooseObjects();
+  JunctionParallelChannels1Phase::addMooseObjects();
 
   {
     const std::string nm = genName(name(), "W_dot_aux");

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ADVolumeJunction1PhaseUserObject.h"
+#include "ADJunctionParallelChannels1PhaseUserObject.h"
 
 class ADSimpleTurbine1PhaseUserObject;
 
@@ -11,7 +11,7 @@ class ADSimpleTurbine1PhaseUserObject;
  * \li residuals for the scalar variables associated with the turbine, and
  * \li fluxes between the flow channels and the turbine.
  */
-class ADSimpleTurbine1PhaseUserObject : public ADVolumeJunction1PhaseUserObject
+class ADSimpleTurbine1PhaseUserObject : public ADJunctionParallelChannels1PhaseUserObject
 {
 public:
   ADSimpleTurbine1PhaseUserObject(const InputParameters & params);

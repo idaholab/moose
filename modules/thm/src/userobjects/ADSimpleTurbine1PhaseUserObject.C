@@ -10,7 +10,7 @@ registerMooseObject("THMApp", ADSimpleTurbine1PhaseUserObject);
 InputParameters
 ADSimpleTurbine1PhaseUserObject::validParams()
 {
-  InputParameters params = ADVolumeJunction1PhaseUserObject::validParams();
+  InputParameters params = ADJunctionParallelChannels1PhaseUserObject::validParams();
   params.addRequiredParam<bool>("on", "Flag determining if turbine is operating or not");
   params.addRequiredParam<Real>("W_dot", "Power, [W]");
 
@@ -22,7 +22,7 @@ ADSimpleTurbine1PhaseUserObject::validParams()
 }
 
 ADSimpleTurbine1PhaseUserObject::ADSimpleTurbine1PhaseUserObject(const InputParameters & params)
-  : ADVolumeJunction1PhaseUserObject(params),
+  : ADJunctionParallelChannels1PhaseUserObject(params),
     _on(getParam<bool>("on")),
     _W_dot(getParam<Real>("W_dot"))
 {
@@ -31,7 +31,7 @@ ADSimpleTurbine1PhaseUserObject::ADSimpleTurbine1PhaseUserObject(const InputPara
 void
 ADSimpleTurbine1PhaseUserObject::computeFluxesAndResiduals(const unsigned int & c)
 {
-  ADVolumeJunction1PhaseUserObject::computeFluxesAndResiduals(c);
+  ADJunctionParallelChannels1PhaseUserObject::computeFluxesAndResiduals(c);
 
   if ((c == 0) && _on)
   {
@@ -40,8 +40,23 @@ ADSimpleTurbine1PhaseUserObject::computeFluxesAndResiduals(const unsigned int & 
 
     // energy source
     const ADReal S_E = _W_dot;
+
     // momentum source
-    const ADRealVectorValue S_M = _W_dot * _rhoV[0] * di / rhouV_vec.norm();
+    const ADReal v_in = THM::v_from_rhoA_A(_rhoA[0], _A[0]);
+
+    const ADReal rhouA2 = _rhouA[0] * _rhouA[0];
+    const ADReal e_in = _rhoEA[0] / _rhoA[0] - 0.5 * rhouA2 / (_rhoA[0] * _rhoA[0]);
+
+    const ADReal cp = _fp.cp_from_v_e(v_in, e_in);
+    const ADReal cv = _fp.cv_from_v_e(v_in, e_in);
+    const ADReal gamma = cp / cv;
+    const ADReal p_in = _fp.p_from_v_e(v_in, e_in);
+    const ADReal T_in = _fp.T_from_v_e(v_in, e_in);
+    const ADReal h_in = _fp.h_from_p_T(p_in, T_in);
+    const ADReal delta_p =
+        p_in * (1 - std::pow((1 - _W_dot / _rhouA[0] / h_in), (gamma / (gamma - 1))));
+
+    const ADRealVectorValue S_M = delta_p * _A[0] * di;
 
     _residual[VolumeJunction1Phase::RHOUV_INDEX] += S_M(0);
     _residual[VolumeJunction1Phase::RHOVV_INDEX] += S_M(1);

@@ -124,7 +124,7 @@ JunctionParallelChannels1Phase::buildVolumeJunctionUserObject()
 void
 JunctionParallelChannels1Phase::addMooseObjects()
 {
-  JunctionParallelChannels1Phase::buildVolumeJunctionUserObject();
+  buildVolumeJunctionUserObject();
 
   // Add BC to each of the connected flow channels
   for (std::size_t i = 0; i < _boundary_names.size(); i++)
