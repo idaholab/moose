@@ -135,12 +135,6 @@ public:
   /// invoke child/sub executors - by calling their exec function.
   Result exec();
 
-  /// This function contains the primary execution implementation for a
-  /// executor.  Custom executor behavior should be localized to this function.  If
-  /// you are writing a executor - this is basically where you should put all your
-  /// code.
-  virtual Result run() = 0;
-
   virtual void execute() override {}
 
   /// Executors need to return a Result object describing how execution went -
@@ -157,6 +151,12 @@ public:
   virtual bool lastSolveConverged() const override { return _result.convergedAll(); }
 
 protected:
+  /// This function contains the primary execution implementation for a
+  /// executor.  Custom executor behavior should be localized to this function.  If
+  /// you are writing a executor - this is basically where you should put all your
+  /// code.
+  virtual Result run() = 0;
+
   ExecFlagType _begin_flag;
   ExecFlagType _end_flag;
 
