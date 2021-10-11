@@ -48,7 +48,7 @@ public:
    */
   Executioner(const InputParameters & parameters);
 
-  /// runner-style constructor that skips the fixed point solve object
+  /// executor-style constructor that skips the fixed point solve object
   /// allocation.
   Executioner(const InputParameters & parameters, bool);
 

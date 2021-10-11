@@ -14,22 +14,22 @@
 #include <string>
 
 class Problem;
-class Runner;
+class Executor;
 
-/// The Runner class directs the execution flow of simulations.  It manages
+/// The Executor class directs the execution flow of simulations.  It manages
 /// outputting, time stepping, mesh adaptivity, solve sequencing, multiapp
-/// execution, etc.  Users can compose runner objects in an input file using
+/// execution, etc.  Users can compose executor objects in an input file using
 /// the same pattern as with mesh generators.  Subclass here and implement your
 /// own gogogadget function if you need special or fancy functionality that
-/// isn't supported by the default runners available.
-class Runner : public Executioner
+/// isn't supported by the default executors available.
+class Executor : public Executioner
 {
 public:
-  /// This object tracks the success/failure state of the runner system as
-  /// execution proceeds in a simulation.  Because runners can be composed into
+  /// This object tracks the success/failure state of the executor system as
+  /// execution proceeds in a simulation.  Because executors can be composed into
   /// trees, result objects are correspondingly composed into trees to track
   /// simulation progress.  Result objects should generally be created by
-  /// runners calling the Result::newResult() function rather than by using
+  /// executors calling the Result::newResult() function rather than by using
   /// the Result constructor directly.
   struct Result
   {
@@ -37,18 +37,18 @@ public:
     Result(const std::string & name) : converged(true), _name(name) {}
     Result(const MooseObject * obj) : converged(true), _name(obj->name()) {}
 
-    /// whether or not a runner ran its code successfully - only reports
-    /// results from the runner itself.  If a sub/internal runner of a runner
-    /// fails, that sub-runner's result object will have converged=false, while
+    /// whether or not a executor ran its code successfully - only reports
+    /// results from the executor itself.  If a sub/internal executor of a executor
+    /// fails, that sub-executor's result object will have converged=false, while
     /// the parent may still have converged=truee. Users should use convergedAll
-    /// to recursively determine if there was any descendant runner failure.
+    /// to recursively determine if there was any descendant executor failure.
     bool converged = true;
 
-    /// Optional message detailing why a runner passed or failed (i.e. failed to converge).
+    /// Optional message detailing why a executor passed or failed (i.e. failed to converge).
     std::string reason;
 
-    /// Maps a name/label of a runner's internal/sub runners to the result
-    /// object returned by running each of those internal/sub runners.  This
+    /// Maps a name/label of a executor's internal/sub executors to the result
+    /// object returned by running each of those internal/sub executors.  This
     /// member should generally not be accessed directly.  It should generally
     /// be populated through the record function.  Info contained in these
     /// results will be included in printouts from the str function.
@@ -88,21 +88,21 @@ public:
       converged = false;
     }
 
-    /// Records results from sub/internal runners in a runner's result.  When
-    /// child-runners return a result object following their execution, this
+    /// Records results from sub/internal executors in a executor's result.  When
+    /// child-executors return a result object following their execution, this
     /// function should be called to add that info into the result heirarchy.
-    /// If the child runner was identified by a label/text from the input file
-    /// (e.g. via sub_solve1=foo_runner) - then "name" should be "sub_solve1".
+    /// If the child executor was identified by a label/text from the input file
+    /// (e.g. via sub_solve1=foo_executor) - then "name" should be "sub_solve1".
     bool record(const std::string & name, const Result & r)
     {
       subs[name] = r;
       return r.convergedAll();
     }
 
-    /// Returns false if any single runner in the current hierarchy of results
+    /// Returns false if any single executor in the current hierarchy of results
     /// (i.e. including all child results accumulated recursively via record)
     /// had a faild/unconverged return state.  Returns true otherwise.  This
-    /// is how convergence should generally be checked/tracked by runners -
+    /// is how convergence should generally be checked/tracked by executors -
     /// rather than accessing e.g. the converged member directly.
     bool convergedAll() const
     {
@@ -125,25 +125,25 @@ public:
     std::string _name;
   };
 
-  Runner(const InputParameters & parameters);
+  Executor(const InputParameters & parameters);
 
-  virtual ~Runner() {}
+  virtual ~Executor() {}
 
   static InputParameters validParams();
 
-  /// This is the main function for runners - this is how runners should
-  /// invoke child/sub runners - by calling their run function.
+  /// This is the main function for executors - this is how executors should
+  /// invoke child/sub executors - by calling their run function.
   Result run();
 
   /// This function contains the primary execution implementation for a
-  /// runner.  Custom runner behavior should be localized to this function.  If
-  /// you are writing a runner - this is basically where you should put all your
+  /// executor.  Custom executor behavior should be localized to this function.  If
+  /// you are writing a executor - this is basically where you should put all your
   /// code.
   virtual Result gogogadget() = 0;
 
   virtual void execute() override {}
 
-  /// Runners need to return a Result object describing how execution went -
+  /// Executors need to return a Result object describing how execution went -
   /// rather than constructing Result objects directly, the newResult function
   /// should be called to generate new objects.  *DO NOT* catch the result by
   /// value - if you do, MOOSE cannot track result state for restart capability.

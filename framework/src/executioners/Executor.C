@@ -7,24 +7,24 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "Runner.h"
+#include "Executor.h"
 #include "MooseApp.h"
 #include "FEProblem.h"
 
 InputParameters
-Runner::validParams()
+Executor::validParams()
 {
   InputParameters params = Executioner::validParams();
 
   params.addParam<ExecFlagType>(
-      "begin_exec_flag", EXEC_NONE, "exec flag associated with the beginning of this runner");
+      "begin_exec_flag", EXEC_NONE, "exec flag associated with the beginning of this executor");
   params.addParam<ExecFlagType>(
-      "end_exec_flag", EXEC_NONE, "exec flag associated with the end of this runner");
-  params.registerBase("Runner");
+      "end_exec_flag", EXEC_NONE, "exec flag associated with the end of this executor");
+  params.registerBase("Executor");
   return params;
 }
 
-Runner::Runner(const InputParameters & parameters)
+Executor::Executor(const InputParameters & parameters)
   : Executioner(parameters, false),
     _begin_flag(getParam<ExecFlagType>("begin_exec_flag")),
     _end_flag(getParam<ExecFlagType>("end_exec_flag"))
@@ -41,8 +41,8 @@ Runner::Runner(const InputParameters & parameters)
   }
 }
 
-Runner::Result
-Runner::run()
+Executor::Result
+Executor::run()
 {
   _fe_problem.executeAllObjects(_begin_flag);
   auto result = gogogadget();

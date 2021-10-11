@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "Runner.h"
+#include "Executor.h"
 
 #include "gtest_include.h"
 
@@ -20,11 +20,11 @@ struct PassFailCase
   std::string input;
 };
 
-TEST(RunnerTests, ResultStr)
+TEST(ExecutorTests, ResultStr)
 {
-  Runner::Result r1("foo");
-  Runner::Result r2("bar");
-  Runner::Result r3("baz");
+  Executor::Result r1("foo");
+  Executor::Result r2("bar");
+  Executor::Result r3("baz");
 
   r1.pass("glaberdorf danked successfully");
   r2.fail("failed to fromp the strabler");

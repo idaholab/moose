@@ -1610,7 +1610,7 @@ public:
   virtual void execute(const ExecFlagType & exec_type);
   virtual void executeAllObjects(const ExecFlagType & exec_type);
 
-  virtual Runner & getRunner(const std::string & name) { return _app.getRunner(name); }
+  virtual Executor & getExecutor(const std::string & name) { return _app.getExecutor(name); }
 
   /**
    * Call compute methods on UserObjects.

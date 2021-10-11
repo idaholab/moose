@@ -21,7 +21,7 @@
 #include "MooseSyntax.h"
 #include "MooseInit.h"
 #include "Executioner.h"
-#include "Runner.h"
+#include "Executor.h"
 #include "PetscSupport.h"
 #include "Conversion.h"
 #include "CommandLine.h"
@@ -127,7 +127,7 @@ MooseApp::validParams()
   params.addCommandLineParam<bool>(
       "registry_hit", "--registry-hit", "Lists all known objects and actions in hit format.");
   params.addCommandLineParam<bool>(
-      "use_runner", "--runner", "Use the new Runner system instead of Executioners");
+      "use_executor", "--executor", "Use the new Executor system instead of Executioners");
 
   params.addCommandLineParam<bool>(
       "apptype", "--type", false, "Return the name of the application object.");
@@ -329,7 +329,7 @@ MooseApp::MooseApp(InputParameters parameters)
     _action_factory(*this),
     _action_warehouse(*this, _syntax, _action_factory),
     _parser(*this, _action_warehouse),
-    _use_runner(parameters.get<bool>("use_runner")),
+    _use_executor(parameters.get<bool>("use_executor")),
     _use_nonlinear(true),
     _use_eigen_value(false),
     _enable_unused_check(WARN_UNUSED),
@@ -1059,13 +1059,13 @@ MooseApp::executeExecutioner()
     return;
 
   // run the simulation
-  if (_use_runner && _runner)
+  if (_use_executor && _executor)
   {
     Moose::PetscSupport::petscSetupOutput(_command_line.get());
 
-    _runner->init();
+    _executor->init();
     errorCheck();
-    _runner->run();
+    _executor->run();
   }
   else if (_executioner)
   {
@@ -1177,20 +1177,20 @@ MooseApp::disableCheckUnusedFlag()
 FEProblemBase &
 MooseApp::feProblem() const
 {
-  return _runner.get() ? _runner->feProblem() : _executioner->feProblem();
+  return _executor.get() ? _executor->feProblem() : _executioner->feProblem();
 }
 
 void
-MooseApp::addRunner(std::shared_ptr<Runner> && runner)
+MooseApp::addExecutor(std::shared_ptr<Executor> && executor)
 {
-  _runners[runner->name()] = runner;
-  _runner = runner;
+  _executors[executor->name()] = executor;
+  _executor = executor;
 }
 
 Executioner *
 MooseApp::getExecutioner() const
 {
-  return _executioner.get() ? _executioner.get() : _runner.get();
+  return _executioner.get() ? _executioner.get() : _executor.get();
 }
 
 void
@@ -2371,7 +2371,7 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type,
     }
     else // rm_type is algebraic or coupling
     {
-      if (!_executioner && !_runner)
+      if (!_executioner && !_executor)
         mooseError("We must have an executioner by now or else we do not have to data to add "
                    "algebraic or coupling functors to in MooseApp::attachRelationshipManagers");
 

@@ -35,7 +35,7 @@
 
 // Forward declarations
 class Executioner;
-class Runner;
+class Executor;
 class MooseApp;
 class Backup;
 class FEProblemBase;
@@ -312,17 +312,17 @@ public:
    * Retrieve the Executioner for this App
    */
   Executioner * getExecutioner() const;
-  Runner * getRunner() const { return _runner.get(); }
-  bool useRunner() const { return _use_runner; }
+  Executor * getExecutor() const { return _executor.get(); }
+  bool useExecutor() const { return _use_executor; }
   FEProblemBase & feProblem() const;
 
   /**
    * Set the Executioner for this App
    */
   void setExecutioner(std::shared_ptr<Executioner> && executioner) { _executioner = executioner; }
-  void setRunner(std::shared_ptr<Runner> && runner) { _runner = runner; }
-  void addRunner(std::shared_ptr<Runner> && runner);
-  Runner & getRunner(const std::string & name) { return *_runners[name]; }
+  void setExecutor(std::shared_ptr<Executor> && executor) { _executor = executor; }
+  void addExecutor(std::shared_ptr<Executor> && executor);
+  Executor & getExecutor(const std::string & name) { return *_executors[name]; }
 
   /**
    * This info is stored here because we need a "globalish" place to put it in
@@ -962,11 +962,11 @@ protected:
 
   /// Pointer to the executioner of this run (typically build by actions)
   std::shared_ptr<Executioner> _executioner;
-  std::shared_ptr<Runner> _runner;
-  std::map<std::string, std::shared_ptr<Runner>> _runners;
+  std::shared_ptr<Executor> _executor;
+  std::map<std::string, std::shared_ptr<Executor>> _executors;
   SolveConfig _solve_config;
 
-  const bool _use_runner = false;
+  const bool _use_executor = false;
 
   /// Boolean to indicate whether to use a Nonlinear or EigenSystem (inspected by actions)
   bool _use_nonlinear;

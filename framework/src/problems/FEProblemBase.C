@@ -3716,7 +3716,7 @@ FEProblemBase::executeAllObjects(const ExecFlagType & exec_type)
   computeUserObjects(exec_type, Moose::PRE_AUX);
 
   // TODO: this triggers execute warehouse errors when there are no objects
-  // for the dynamic/custom runner execute on flags.  Figure out how to
+  // for the dynamic/custom executor execute on flags.  Figure out how to
   // fix this.
   // computeAuxiliaryKernels(exec_type);
 

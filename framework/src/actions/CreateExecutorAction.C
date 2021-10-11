@@ -7,50 +7,50 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "CreateRunnerAction.h"
+#include "CreateExecutorAction.h"
 #include "Factory.h"
 #include "PetscSupport.h"
 #include "MooseApp.h"
-#include "Runner.h"
+#include "Executor.h"
 #include "Eigenvalue.h"
 #include "FEProblem.h"
 #include "EigenProblem.h"
 
-registerMooseAction("MooseApp", CreateRunnerAction, "setup_runner");
+registerMooseAction("MooseApp", CreateExecutorAction, "setup_executor");
 
 InputParameters
-CreateRunnerAction::validParams()
+CreateExecutorAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
-  params.addClassDescription("Add an Runner object to the simulation.");
+  params.addClassDescription("Add an Executor object to the simulation.");
   params.addParam<bool>(
       "auto_preconditioning",
       true,
       "When true and a [Preconditioning] block does not exist, the application will attempt to use "
-      "the correct preconditioning given the Runner settings.");
+      "the correct preconditioning given the Executor settings.");
   return params;
 }
 
-CreateRunnerAction::CreateRunnerAction(InputParameters params)
+CreateExecutorAction::CreateExecutorAction(InputParameters params)
   : MooseObjectAction(params), _auto_preconditioning(getParam<bool>("auto_preconditioning"))
 {
 }
 
 void
-CreateRunnerAction::act()
+CreateExecutorAction::act()
 {
-  std::shared_ptr<Runner> runner = _factory.create<Runner>(_type, _name, _moose_object_pars);
+  std::shared_ptr<Executor> executor = _factory.create<Executor>(_type, _name, _moose_object_pars);
 
   // If enabled, automatically create a Preconditioner if the [Preconditioning] block is not found
   if (_auto_preconditioning && !_awh.hasActions("add_preconditioning") &&
       _moose_object_pars.isParamValid("solve_type"))
     setupAutoPreconditioning();
 
-  _app.addRunner(std::move(runner));
+  _app.addExecutor(std::move(executor));
 }
 
 void
-CreateRunnerAction::setupAutoPreconditioning()
+CreateExecutorAction::setupAutoPreconditioning()
 {
   // If using NEWTON or LINEAR then automatically create SingleMatrixPreconditioner object with
   // full=true

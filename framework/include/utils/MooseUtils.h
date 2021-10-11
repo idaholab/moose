@@ -84,7 +84,7 @@ pathjoin(const std::string & s, Args... args)
 }
 
 /// Returns the location of either a local repo run_tests script - or an
-/// installed test runner script if run_tests isn't found.
+/// installed test executor script if run_tests isn't found.
 std::string runTestsExecutable();
 
 /// Searches in the current working directory and then recursively up in each

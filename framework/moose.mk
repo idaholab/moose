@@ -398,7 +398,7 @@ install_harness:
 	@mkdir -p $(moose_include_dir)
 	@mkdir -p $(bin_install_dir)
 	@cp -R $(MOOSE_DIR)/python/* $(python_install_dir)/
-	@cp -f $(MOOSE_DIR)/scripts/moose_test_runner $(bin_install_dir)/moose_test_runner
+	@cp -f $(MOOSE_DIR)/scripts/moose_test_executor $(bin_install_dir)/moose_test_executor
 	@cp -f $(MOOSE_DIR)/framework/contrib/exodiff/exodiff $(moose_share_dir)/bin/
 	@cp -f $(MOOSE_DIR)/framework/include/base/MooseConfig.h $(moose_include_dir)/
 	@cp -f $(HIT_DIR)/hit.so $(python_install_dir)/

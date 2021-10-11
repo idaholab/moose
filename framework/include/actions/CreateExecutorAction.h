@@ -11,14 +11,14 @@
 
 #include "MooseObjectAction.h"
 
-class CreateRunnerAction;
+class CreateExecutorAction;
 
-class CreateRunnerAction : public MooseObjectAction
+class CreateExecutorAction : public MooseObjectAction
 {
 public:
   static InputParameters validParams();
 
-  CreateRunnerAction(InputParameters params);
+  CreateExecutorAction(InputParameters params);
 
   virtual void act() override;
 
