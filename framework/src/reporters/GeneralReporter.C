@@ -14,10 +14,23 @@ GeneralReporter::validParams()
 {
   InputParameters params = GeneralUserObject::validParams();
   params += Reporter::validParams();
+
+  // Whether or not to always store this object's value
+  // See the override for shouldStore() for more information
+  params.addPrivateParam<bool>("_always_store", true);
+
   return params;
 }
 
 GeneralReporter::GeneralReporter(const InputParameters & parameters)
-  : GeneralUserObject(parameters), Reporter(this)
+  : GeneralUserObject(parameters), Reporter(this), _always_store(getParam<bool>("_always_store"))
 {
+}
+
+bool
+GeneralReporter::shouldStore() const
+{
+  // Either we always store, or we store if the current execution flag matches
+  // a flag that is within this GeneralReporter's 'execute_on'
+  return _always_store || getExecuteOnEnum().contains(_fe_problem.getCurrentExecuteOnFlag());
 }

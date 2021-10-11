@@ -18,79 +18,46 @@ PerfGraphReporter::validParams()
 {
   InputParameters params = GeneralReporter::validParams();
   params.addClassDescription("Reports the full performance graph from the PerfGraph.");
+
+  // Because the PerfGraphReporter does all of its execution within the
+  // to_json specialization (does not fill the structure within execute()),
+  // this allows us to obey the user's requeste for execute_on
+  params.set<bool>("_always_store") = false;
+
   return params;
 }
 
 PerfGraphReporter::PerfGraphReporter(const InputParameters & parameters)
   : GeneralReporter(parameters),
-    _nodes(declareValueByName<std::vector<NodeEntry>>("nodes", REPORTER_MODE_DISTRIBUTED))
+    _graph(declareValueByName<const PerfGraph *>(
+        "graph", REPORTER_MODE_DISTRIBUTED, &_app.perfGraph()))
 {
 }
 
 void
-PerfGraphReporter::execute()
+to_json(nlohmann::json & json, const PerfGraph * const & perf_graph)
 {
-  // PerfNodes do not have unique IDs; their ID is based on the section
-  // in which they are generated. But... we want unique IDs. Hence this map
-  std::size_t next_unique_id = 0;
-  std::map<const PerfNode *, std::size_t> unique_ids;
-  const auto unique_id = [&unique_ids, &next_unique_id](const PerfNode & node) {
-    const auto find = unique_ids.find(&node);
-    if (find != unique_ids.end())
-      return find->second;
-    unique_ids[&node] = next_unique_id;
-    return next_unique_id++;
-  };
+  mooseAssert(perf_graph, "perf_graph is not set");
 
-  // Action that stores the nodes information info _nodes
-  const auto add_entry = [this, &unique_id](const PerfGraph::PerfNodeInfo & info) {
-    NodeEntry entry;
-    entry.name = info.sectionInfo()._name;
-    entry.ints["id"] = unique_id(info.node());
-    entry.ints["level"] = info.sectionInfo()._level;
-    entry.ints["num_calls"] = info.node().numCalls();
-    entry.ints["memory"] = info.node().selfMemory();
-    entry.time = info.node().selfTimeSec();
+  // Update the timings in each node before we output them
+  const_cast<PerfGraph *>(perf_graph)->update();
 
-    if (info.parentNode())
-      entry.ints["parent_id"] = unique_id(*info.parentNode());
-
-    for (const auto & id_node_pair : info.node().children())
-      entry.children_ids.push_back(unique_id(*id_node_pair.second));
-
-    _nodes.push_back(entry);
-  };
-
-  // Fill _nodes for to_json
-  _nodes.clear();
-  _app.perfGraph().update();
-  _app.perfGraph().treeRecurse(add_entry);
+  // Recurse through the nodes starting with the root to fill the graph
+  to_json(json, perf_graph->rootNode());
 }
 
 void
-to_json(nlohmann::json & json, const PerfGraphReporter::NodeEntry & entry)
+to_json(nlohmann::json & json, const PerfNode & node)
 {
-  json["name"] = entry.name;
-  json["time"] = entry.time;
-  for (const auto & name_val_pair : entry.ints)
-    json[name_val_pair.first] = name_val_pair.second;
-  if (entry.children_ids.size())
-    json["children_ids"] = entry.children_ids;
-}
+  const auto & info = moose::internal::getPerfGraphRegistry().sectionInfo(node.id());
 
-void
-dataStore(std::ostream & stream, PerfGraphReporter::NodeEntry & entry, void * context)
-{
-  dataStore(stream, entry.name, context);
-  dataStore(stream, entry.ints, context);
-  dataStore(stream, entry.time, context);
-  dataStore(stream, entry.children_ids, context);
-}
-void
-dataLoad(std::istream & stream, PerfGraphReporter::NodeEntry & entry, void * context)
-{
-  dataLoad(stream, entry.name, context);
-  dataLoad(stream, entry.ints, context);
-  dataLoad(stream, entry.time, context);
-  dataLoad(stream, entry.children_ids, context);
+  auto & node_json = json[info._name];
+  node_json["level"] = info._level;
+  node_json["num_calls"] = node.numCalls();
+  node_json["memory"] = node.selfMemory();
+  node_json["time"] = node.selfTimeSec();
+
+  // Recursively add the children
+  for (const auto & id_child_pair : node.children())
+    to_json(node_json, *id_child_pair.second);
 }

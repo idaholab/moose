@@ -11,6 +11,9 @@
 
 #include "GeneralReporter.h"
 
+class PerfNode;
+class PerfGraph;
+
 /**
  * Reports the full graph from the PerfGraph
  */
@@ -23,25 +26,30 @@ public:
 
   void initialize() override {}
   void finalize() override {}
-  void execute() override;
-
-  /**
-   * Struct that stores all of the information about a PerfGraphNode,
-   * which is used as the value for this Reporter
-   */
-  struct NodeEntry
-  {
-    std::string name;
-    Real time;
-    std::map<std::string, unsigned int> ints;
-    std::vector<unsigned int> children_ids;
-  };
+  void execute() override {}
 
 private:
-  /// Reporter value for the nodes in the graph
-  std::vector<NodeEntry> & _nodes;
+  const PerfGraph * const & _graph;
 };
 
-void to_json(nlohmann::json & json, const PerfGraphReporter::NodeEntry & entry);
-void dataStore(std::ostream & stream, PerfGraphReporter::NodeEntry & entry, void * context);
-void dataLoad(std::istream & stream, PerfGraphReporter::NodeEntry & entry, void * context);
+void to_json(nlohmann::json & json, const PerfGraph * const & perf_graph);
+void to_json(nlohmann::json & json, const PerfNode & node);
+
+/**
+ * Store and load methods for const PerfGraph *, used in the PerfGraphReporter,
+ * which does nothing.
+ *
+ * They do nothing because the recover capability is retained in the
+ * PerfGraph itself, which will recover and append a previously ran
+ * graph to the current PerfGraph.
+ */
+///@{
+void
+dataStore(std::ostream &, const PerfGraph *&, void *)
+{
+}
+void
+dataLoad(std::istream &, const PerfGraph *&, void *)
+{
+}
+///@}
