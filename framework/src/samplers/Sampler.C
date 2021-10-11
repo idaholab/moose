@@ -129,6 +129,9 @@ Sampler::reinit()
   // Set the next row iterator index
   _next_local_row = _local_row_begin;
 
+  // Create communicator that only has processors with rows
+  _communicator.split(_n_local_rows > 0 ? 1 : MPI_UNDEFINED, processor_id(), _local_comm);
+
   // Update reinit() flag (see execute method)
   _needs_reinit = false;
 }
@@ -230,10 +233,13 @@ Sampler::getLocalSamples()
                _limit_get_local_samples,
                ".");
 
+  DenseMatrix<Real> output(_n_local_rows, _n_cols);
+  if (_n_local_rows == 0)
+    return output;
+
   _next_local_row_requires_state_restore = true;
   _generator.restoreState();
   sampleSetUp(SampleMode::LOCAL);
-  DenseMatrix<Real> output(_n_local_rows, _n_cols);
   computeLocalSampleMatrix(output);
   sampleTearDown(SampleMode::LOCAL);
   return output;

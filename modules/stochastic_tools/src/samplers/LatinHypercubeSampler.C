@@ -66,7 +66,7 @@ LatinHypercubeSampler::sampleSetUp(const Sampler::SampleMode mode)
         const auto upper = (row + 1) * bin_size;
         local[row] = getRand(col) * (upper - lower) + lower;
       }
-      shuffle(local, col + getNumberOfCols(), false);
+      shuffle(local, col + getNumberOfCols(), CommMethod::NONE);
     }
   }
 
@@ -86,7 +86,7 @@ LatinHypercubeSampler::sampleSetUp(const Sampler::SampleMode mode)
       advanceGenerator(col, getNumberOfRows() - getLocalRowEnd());
 
       // Do not advance generator for shuffle, the shuffle handles it
-      shuffle(local, col + getNumberOfCols(), true);
+      shuffle(local, col + getNumberOfCols(), CommMethod::SEMI_LOCAL);
     }
   }
 }
