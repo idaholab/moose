@@ -12,7 +12,7 @@ center-point.
 !style halign=left
 A half-wave dipole antenna has a geometry shown in [dipole-geometry-figure].
 
-!media media/dipole_geometry.png
+!media dipole_geometry.png
   style=width:50%;margin:auto;
   id=dipole-geometry-figure
   caption=Half-wave dipole antenna with oscillating voltage and current standing wave.
@@ -144,7 +144,7 @@ mesh contains 39905 nodes and 20157 elements. An image of the result is shown in
 [dipole-mesh-figure]. Note that the second order mesh is required because we are using
 `NEDELEC_ONE` vector finite elements for all solution variables.
 
-!media media/dipole_antenna_1G_mesh.png
+!media dipole_antenna_1G_mesh.png
        style=width:50%;margin:auto;
        id=dipole-mesh-figure
        caption=Mesh used in the dipole antenna benchmark study.
@@ -185,7 +185,7 @@ to its length, with maximum intensity at $\theta = 90^{\circ}$ and $\theta = 270
 The beamwidth, or the region outside of which has a signal which is below 3 dB,
 or half power, compared to the peak intensity, is around $90^{\circ}$.
 
-!media media/dipole_radiation_pattern.png
+!media dipole_radiation_pattern.png
        style=width:50%;margin:auto;
        id=dipole-pattern-figure
        caption=Theoretical radiation intensity pattern of a vertically-oriented half-wave dipole antenna.
@@ -204,7 +204,7 @@ the electromagnetics module. These results are shown in [dipole-results-figure].
 Very good qualitative agreement is seen with the theoretical far-field radiation
 pattern.
 
-!media media/dipole_1G_frequency.png
+!media dipole_1G_frequency.png
        style=width:50%;margin:auto;
        id=dipole-results-figure
        caption=Electric field radiation pattern of half-wave dipole antenna driven by a 1GHz signal, simulated using the EM module. Note that field intensity is normalized to 1.0.

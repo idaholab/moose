@@ -9,7 +9,7 @@ relevant background theory, results, and the test input file for review.
 !style halign=left
 The domain geometry for this case is shown below:
 
-!media media/waveguide_discontinuity_geometry.png
+!media waveguide_discontinuity_geometry.png
        style=width:100%;margin:auto;
        id=waveguide-geometry
        caption=Evanescent wave decay benchmark geometry.
@@ -120,7 +120,7 @@ mesh contains 67028 nodes and 33822 elements. An image of the result is shown
 in [evanescent-mesh]. Note that the second order mesh is required because we are
 using `NEDELEC_ONE` vector finite elements for all solution variables.
 
-!media media/waveguide_discontinuity_mesh.png
+!media waveguide_discontinuity_mesh.png
        style=width:100%;margin:auto;
        id=evanescent-mesh
        caption=Mesh used in the evanescent wave decay benchmark study.
@@ -179,7 +179,7 @@ of the waveguide is ~30 GHz. As the operating frequency approaches the cutoff
 frequency, attenuation of the wave is lessened as shown in [field-results-284],
 which leads to a slight deviation from the ideal decay rate shown here.
 
-!media media/evanescent_decay_results.png
+!media evanescent_decay_results.png
        style=width:80%;margin:auto;
        id=evanescent-wave-results
        caption=Results of the evanescent wave decay benchmark study.
@@ -212,22 +212,22 @@ global error while possibly allowing local ones). Away from this singularity,
 this property allows us to successfully use this model to examine evanescent wave
 decay in the smaller waveguide region on the right.
 
-!media media/evanescent_field_results_20.png
+!media evanescent_field_results_20.png
        style=width:100%;margin:auto;
        id=field-results-20
        caption=Field results of the evanescent wave decay benchmark study at 20GHz.
 
-!media media/evanescent_field_results_284.png
+!media evanescent_field_results_284.png
        style=width:100%;margin:auto;
        id=field-results-284
        caption=Field results of the evanescent wave decay benchmark study at 28.4GHz. Note the increased electric field strength in the narrower section compared to 20GHz.
 
-!media media/rounded_corner_results.png
+!media rounded_corner_results.png
        style=width:100%;margin:auto;
        id=rounded-corner
        caption=Field results of the evanescent wave decay benchmark study at 20GHz, using a rounded corner instead of a sharp one.
 
-!media media/rounded_mesh.png
+!media rounded_mesh.png
        style=width:50%;margin:auto;
        id=rounded-geometry
        caption=Rounded corner in waveguide geometry.

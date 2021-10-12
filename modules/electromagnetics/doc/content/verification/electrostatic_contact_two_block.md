@@ -11,7 +11,7 @@ test input file for review.
 A visual summary of the two block verification test domain, as well as relevant
 boundary and interface conditions is shown below (click to zoom):
 
-!media media/two_block.png
+!media two_block.png
        style=width:100%;
        id=two-block-summary
        caption=Visual summary of the two block verification test with boundary and interface conditions.
@@ -211,7 +211,7 @@ Results from the input file shown above (with `Mesh/line/nx=30` and
 [two-block-results]. Note that the number of points shown in the plot has been
 down-sampled compared to the solved number of elements for readability.
 
-!media media/two_block_results.png
+!media two_block_results.png
        style=width:50%;margin:auto;
        id=two-block-results
        caption=Results of electrostatic contact two block validation case.

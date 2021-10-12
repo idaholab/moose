@@ -57,7 +57,7 @@ for the geometry in [rectangular-geo] of $a_r/b_r = 2$. In the EM module
 simulations, $a_r = 2$ for simplicity. The mesh was made up of 2500 structured
 triangular elements, generated using the MOOSE mesh system.
 
-!media media/rectangular_geo.png
+!media rectangular_geo.png
        style=width:50%;margin:auto;
        caption=Rectangular waveguide geometry, from [!citep](nasa-fem-eigenvalue-problems).
        id=rectangular-geo
@@ -70,7 +70,7 @@ geometry shown in [circular-geo]. The EM module calculation used a mesh of 417
 unstructured triangular elements generated using [Gmsh] 4.6.0 with a scaling factor
 of 0.5 using a Delaunay triangulation algorithm.
 
-!media media/circular_geo.png
+!media circular_geo.png
        style=width:50%;margin:auto;
        caption=Circular waveguide geometry, from [!citep](nasa-fem-eigenvalue-problems).
        id=circular-geo
@@ -88,7 +88,7 @@ The `.geo` file for this geometry is shown below:
 
 and this generates the following mesh:
 
-!media media/circle_mesh.png
+!media circle_mesh.png
        style=width:50%;margin:auto;
        id=circle-mesh-figure
        caption=Mesh used in the circle case of the electromagnetic eigenvalue benchmark study.
@@ -101,7 +101,7 @@ $r_2/r_1 = 4$ for the geometry shown in [coaxial-geo]. In the EM module
 simulations, $r_1 = 0.125$, and the mesh had 626 unstructured triangular elements
 generated using [Gmsh] 4.6.0 with a scaling factor of 0.4 using a Delaunay triangulation algorithm.
 
-!media media/coaxial_geo.png
+!media coaxial_geo.png
        style=width:50%;margin:auto;
        caption=Coaxial waveguide geometry, from [!citep](nasa-fem-eigenvalue-problems).
        id=coaxial-geo
@@ -119,7 +119,7 @@ The `.geo` file for this geometry is shown below:
 
 and this generates the following mesh file:
 
-!media media/coaxial_mesh.png
+!media coaxial_mesh.png
        style=width:50%;margin:auto;
        id=coaxial-mesh-figure
        caption=Mesh used in the coaxial case of the electromagnetic eigenvalue benchmark study.
@@ -186,42 +186,42 @@ consistent with established literature expectations for this waveguide geometry.
 Other visual differences in the vector glyph distribution and magnitude in all
 cases are due to mesh differences and Paraview visualization software scaling.
 
-!media media/rectangleTM11.png
+!media rectangleTM11.png
        style=width:50%;margin:auto;
        caption=TM11 mode electric field distribution in a rectangular waveguide, calculated by the EM module.
        id=rectangular-results-emm
 
-!media media/rectangleTM11_reddy.png
+!media rectangleTM11_reddy.png
        style=width:50%;margin:auto;
        caption=TM11 mode electric field distribution in a rectangular waveguide, calculated by HELM10. [!citep](nasa-fem-eigenvalue-problems)
        id=rectangular-results-reddy
 
-!media media/circleTM01.png
+!media circleTM01.png
        style=width:50%;margin:auto;
        caption=TM01 mode electric field distribution in a circular waveguide, calculated by the EM module.
        id=circular-results-emm
 
-!media media/circleTM01_reddy.png
+!media circleTM01_reddy.png
        style=width:50%;margin:auto;
        caption=TM01 mode electric field distribution in a circular waveguide, calculated by HELM10. [!citep](nasa-fem-eigenvalue-problems)
        id=circular-results-reddy
 
-!media media/circular_TM01_comsol.png
+!media circular_TM01_comsol.png
        style=width:50%;margin:auto;
        caption=TM01 mode electric field distribution in a circular waveguide, calculated by the COMSOL RF Module in [!citep](comsol-circular-port-boundary-condition). (Coloring is the electric field norm)
        id=comsol-tm01
 
-!media media/circular_TM01_jin.png
+!media circular_TM01_jin.png
        style=width:50%;margin:auto;
        caption=TM01 mode field distribution in a circular waveguide, presented by Jin. [!citep](jin-computation) Note that the solid lines correspond to the electric field.
        id=jin-tm01
 
-!media media/coaxialTM01.png
+!media coaxialTM01.png
        style=width:50%;margin:auto;
        caption=TM01 mode electric field distribution in a coaxial waveguide, calculated by the EM module.
        id=coaxial-results-emm
 
-!media media/coaxialTM01_reddy.png
+!media coaxialTM01_reddy.png
        style=width:50%;margin:auto;
        caption=TM01 mode electric field distribution in a coaxial waveguide, calculated by HELM10. [!citep](nasa-fem-eigenvalue-problems)
        id=coaxial-results-reddy

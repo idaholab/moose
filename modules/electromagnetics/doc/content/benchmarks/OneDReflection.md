@@ -12,7 +12,7 @@ and the test input file for review.
 !style halign=left
 The geometry used in this benchmark is shown below in [slab-geometry].
 
-!media media/slab.png
+!media slab.png
        style=width:50%;margin:auto;
        id=slab-geometry
        caption=Slab reflection benchmark geometry.
@@ -95,7 +95,7 @@ but will be summarized here. First the slab in [slab-geometry] should be divided
 into $M$ thin layers as shown in [slab-layers], and the analytic solution to the
 original Helmholtz equation in [eqn-helmholtz] in a single layer should be found.
 
-!media media/slab_layers.png
+!media slab_layers.png
        style=width:50%;margin:auto;
        id=slab-layers
        caption=Slab reflection benchmark geometry, cut into $M$ layers.
@@ -166,7 +166,7 @@ $x$-direction as we approach $\theta = 90^{\circ}$, giving more consistent resul
 between the two solutions. A 1D model might not be adequate to capture the
 reflection exactly with smaller $\theta$.
 
-!media media/slab_results.png
+!media slab_results.png
        style=width:100%;margin:auto;
        id=reflection-results
        caption=Slab reflection benchmark results.

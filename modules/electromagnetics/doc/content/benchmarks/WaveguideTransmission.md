@@ -12,7 +12,7 @@ an electromagnetic plane wave representing the TM11 mode travels from the left
 entry port (x = 0) to the right exit port (x = L). Parameters for this scenario
 are shown in [waveguide-benchmark-parameters].
 
-!media media/waveguide.png
+!media waveguide.png
        style=width:100%;margin:auto;
        id=waveguide-benchmark-geometry
        caption=Two-dimensional vacuum-filled waveguide geometry, with an incoming plane wave at left and exiting at right.
@@ -108,7 +108,7 @@ size factor of 0.12 using a Delaunay algorithm. The unstructured, triangular
 mesh contains 1202 nodes and 2806 elements. An image of the result is shown in
 [waveguide-mesh-figure].
 
-!media media/waveguide2D_mesh.png
+!media waveguide2D_mesh.png
        style=width:100%;margin:auto;
        id=waveguide-mesh-figure
        caption=Mesh used in the waveguide transmission benchmark study.
@@ -127,12 +127,12 @@ mesh contains 1202 nodes and 2806 elements. An image of the result is shown in
 The field result for this simulation (real and imaginary components) is shown in
 [waveguide-benchmark-real] and [waveguide-benchmark-imaginary].
 
-!media media/waveguide2D_real.png
+!media waveguide2D_real.png
        style=width:100%;margin:auto;
        id=waveguide-benchmark-real
        caption=Electric field result, $E_x$ (real component), of the 2-D waveguide verification case.
 
-!media media/waveguide2D_imaginary.png
+!media waveguide2D_imaginary.png
        style=width:100%;margin:auto;
        id=waveguide-benchmark-imaginary
        caption=Electric field result, $E_x$ (imaginary component), of the 2-D waveguide verification case.
@@ -158,12 +158,12 @@ finer mesh is shown in [waveguide-benchmark-comparison-finer], and shows that
 the refined (18,102 elements compared to 2,219 in the original), simulated result
 is almost exactly in alignment with the analytic solution.
 
-!media media/waveguide2D_comparison.png
+!media waveguide2D_comparison.png
        style=width:100%;margin:auto;
        id=waveguide-benchmark-comparison
        caption=Comparison of the real electric field result with the analytic solution in the 2-D waveguide verification case.
 
-!media media/waveguide2D_comparison_finer.png
+!media waveguide2D_comparison_finer.png
        style=width:100%;margin:auto;
        id=waveguide-benchmark-comparison-finer
        caption=Comparison of the real electric field result with the analytic solution in the 2-D waveguide verification case, with a refined mesh.
@@ -176,7 +176,7 @@ with each other, then the magnitude of the field should be a
 $\sin \left( \frac{\pi y}{10} \right)$ profile, extending the length of the
 waveguide. Indeed, [waveguide-benchmark-magnitude] confirms that this is the case.
 
-!media media/waveguide2D_magnitude.png
+!media waveguide2D_magnitude.png
        style=width:100%;margin:auto;
        id=waveguide-benchmark-magnitude
        caption=Electric field result for the magnitude of $E_x$ in the 2-D waveguide verification case, confirming that the real and imaginary components are in the proper phase relative to each other.
