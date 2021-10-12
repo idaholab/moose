@@ -30,6 +30,7 @@
 #include "ActionWarehouse.h"
 #include "Conversion.h"
 #include "Material.h"
+#include "FunctorMaterial.h"
 #include "ConstantIC.h"
 #include "Parser.h"
 #include "ElementH1Error.h"
@@ -614,6 +615,8 @@ FEProblemBase::initialSetup()
 {
   TIME_SECTION("initialSetup", 2, "Performing Initial Setup");
 
+  SubProblem::initialSetup();
+
   if (_skip_exception_check)
     mooseWarning("MOOSE may fail to catch an exception when the \"skip_exception_check\" parameter "
                  "is used. If you receive a terse MPI error during execution, remove this "
@@ -1101,6 +1104,8 @@ FEProblemBase::initialSetup()
 void
 FEProblemBase::timestepSetup()
 {
+  SubProblem::timestepSetup();
+
   if (_t_step > 1 && _num_grid_steps)
   {
     MeshRefinement mesh_refinement(_mesh);
@@ -2072,8 +2077,16 @@ FEProblemBase::addFunction(const std::string & type,
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    std::shared_ptr<Function> func = _factory.create<Function>(type, name, parameters, tid);
+    std::shared_ptr<MooseFunctionBase> func =
+        _factory.create<MooseFunctionBase>(type, name, parameters, tid);
     _functions.addObject(func, tid);
+
+    auto * const functor = dynamic_cast<Moose::FunctorBase *>(func.get());
+    if (!functor)
+      mooseError("This should be a functor");
+    addFunctor(name, const_cast<const Moose::FunctorBase *>(functor), tid);
+    if (_displaced_problem)
+      _displaced_problem->addFunctor(name, const_cast<const Moose::FunctorBase *>(functor), tid);
   }
 }
 
@@ -2121,7 +2134,11 @@ FEProblemBase::getFunction(const std::string & name, THREAD_ID tid)
       mooseError("Unable to find function " + name);
   }
 
-  return *(_functions.getActiveObject(name, tid));
+  auto * const ret = dynamic_cast<Function *>(_functions.getActiveObject(name, tid).get());
+  if (!ret)
+    mooseError("No function named ", name, " of appropriate type");
+
+  return *ret;
 }
 
 void
@@ -3125,8 +3142,9 @@ FEProblemBase::addMaterialHelper(std::vector<MaterialWarehouse *> warehouses,
 
     bool discrete = !material->getParam<bool>("compute");
 
-    // If the object is boundary restricted do not create the neighbor and face objects
-    if (material->boundaryRestricted())
+    // If the object is boundary restricted or if it is a functor material we do not create the
+    // neighbor and face objects
+    if (material->boundaryRestricted() || dynamic_cast<FunctorMaterial *>(material.get()))
     {
       _all_materials.addObject(material, tid);
       if (discrete)
@@ -7166,3 +7184,49 @@ FEProblemBase::resizeMaterialData(const Moose::MaterialDataType data_type,
       break;
   }
 }
+
+void
+FEProblemBase::residualSetup()
+{
+  SubProblem::residualSetup();
+  if (_displaced_problem)
+    _displaced_problem->residualSetup();
+}
+
+void
+FEProblemBase::jacobianSetup()
+{
+  SubProblem::jacobianSetup();
+  if (_displaced_problem)
+    _displaced_problem->jacobianSetup();
+}
+
+template <typename T>
+bool
+FEProblemBase::hasFunction(const std::string & name, THREAD_ID tid) const
+{
+  return _functions.hasActiveObject(name, tid) &&
+         dynamic_cast<FunctionTempl<T> *>(_functions.getActiveObject(name, tid).get());
+}
+
+template <>
+FunctionTempl<Real> &
+FEProblemBase::getFunction<Real>(const std::string & name, THREAD_ID tid)
+{
+  return getFunction(name, tid);
+}
+
+template <typename T>
+FunctionTempl<T> &
+FEProblemBase::getFunction(const std::string & name, THREAD_ID tid)
+{
+  if (!hasFunction<T>(name, tid))
+    mooseError("Unable to find function " + name);
+
+  return static_cast<FunctionTempl<T> &>(*(_functions.getActiveObject(name, tid)));
+}
+
+template bool FEProblemBase::hasFunction<Real>(const std::string & name, THREAD_ID tid) const;
+template bool FEProblemBase::hasFunction<ADReal>(const std::string & name, THREAD_ID tid) const;
+template FunctionTempl<ADReal> & FEProblemBase::getFunction<ADReal>(const std::string & name,
+                                                                    THREAD_ID tid);

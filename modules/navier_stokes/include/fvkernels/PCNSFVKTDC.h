@@ -18,6 +18,7 @@ namespace Moose
 {
 namespace FV
 {
+template <typename>
 class Limiter;
 }
 }
@@ -37,7 +38,7 @@ protected:
   virtual ADReal computeQpResidual() override;
   Real getOldFlux(bool upwind) const;
 
-  std::unique_ptr<Moose::FV::Limiter> _upwind_limiter;
+  std::unique_ptr<Moose::FV::Limiter<ADReal>> _upwind_limiter;
   std::unordered_map<std::pair<dof_id_type, unsigned int>, Real> & _old_upwind_fluxes;
   /// Old high order fluxes
   std::unordered_map<std::pair<dof_id_type, unsigned int>, Real> & _old_ho_fluxes;

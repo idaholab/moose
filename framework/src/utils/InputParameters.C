@@ -1040,6 +1040,30 @@ InputParameters::setParamHelper<MaterialPropertyName, int>(const std::string & /
 }
 
 template <>
+void
+InputParameters::setParamHelper<MooseFunctorName, Real>(const std::string & /*name*/,
+                                                        MooseFunctorName & l_value,
+                                                        const Real & r_value)
+{
+  // Assign the default value so that it appears in the dump
+  std::ostringstream oss;
+  oss << r_value;
+  l_value = oss.str();
+}
+
+template <>
+void
+InputParameters::setParamHelper<MooseFunctorName, int>(const std::string & /*name*/,
+                                                       MooseFunctorName & l_value,
+                                                       const int & r_value)
+{
+  // Assign the default value so that it appears in the dump
+  std::ostringstream oss;
+  oss << r_value;
+  l_value = oss.str();
+}
+
+template <>
 const MooseEnum &
 InputParameters::getParamHelper<MooseEnum>(const std::string & name,
                                            const InputParameters & pars,

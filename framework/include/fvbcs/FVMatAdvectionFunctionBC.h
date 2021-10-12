@@ -20,10 +20,10 @@ public:
 protected:
   virtual ADReal computeQpResidual() override;
 
-  const ADMaterialProperty<RealVectorValue> & _vel;
+  const Moose::Functor<ADRealVectorValue> & _vel;
 
   /// The advected quantity on the elem
-  const MooseArray<ADReal> & _adv_quant;
+  const Moose::Functor<ADReal> & _adv_quant;
 
   /// The interpolation method to use for the advected quantity
   Moose::FV::InterpMethod _advected_interp_method;

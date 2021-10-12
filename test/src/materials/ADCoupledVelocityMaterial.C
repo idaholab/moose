@@ -14,11 +14,11 @@ registerMooseObject("MooseTestApp", ADCoupledVelocityMaterial);
 InputParameters
 ADCoupledVelocityMaterial::validParams()
 {
-  InputParameters params = Material::validParams();
-  params.addRequiredCoupledVar("vel_x", "the x velocity");
-  params.addCoupledVar("vel_y", "the y velocity");
-  params.addCoupledVar("vel_z", "the z velocity");
-  params.addRequiredCoupledVar("rho", "The name of the density variable");
+  InputParameters params = FunctorMaterial::validParams();
+  params.addRequiredParam<MooseFunctorName>("vel_x", "the x velocity");
+  params.addParam<MooseFunctorName>("vel_y", "the y velocity");
+  params.addParam<MooseFunctorName>("vel_z", "the z velocity");
+  params.addRequiredParam<MooseFunctorName>("rho", "The name of the density variable");
   params.addClassDescription("A material used to create a velocity from coupled variables");
   params.addParam<MaterialPropertyName>(
       "velocity", "velocity", "The name of the velocity material property to create");
@@ -32,29 +32,34 @@ ADCoupledVelocityMaterial::validParams()
 }
 
 ADCoupledVelocityMaterial::ADCoupledVelocityMaterial(const InputParameters & parameters)
-  : Material(parameters),
-    _velocity(declareADProperty<RealVectorValue>(getParam<MaterialPropertyName>("velocity"))),
-    _rho_u(declareADProperty<Real>(getParam<MaterialPropertyName>("rho_u"))),
-    _rho_v(declareADProperty<Real>(getParam<MaterialPropertyName>("rho_v"))),
-    _rho_w(declareADProperty<Real>(getParam<MaterialPropertyName>("rho_w"))),
-    _vel_x(adCoupledValue("vel_x")),
-    _vel_y(isParamValid("vel_y") ? &adCoupledValue("vel_y") : nullptr),
-    _vel_z(isParamValid("vel_z") ? &adCoupledValue("vel_z") : nullptr),
-    _rho(adCoupledValue("rho"))
+  : FunctorMaterial(parameters),
+    _velocity(
+        declareFunctorProperty<ADRealVectorValue>(getParam<MaterialPropertyName>("velocity"))),
+    _rho_u(declareFunctorProperty<ADReal>(getParam<MaterialPropertyName>("rho_u"))),
+    _rho_v(declareFunctorProperty<ADReal>(getParam<MaterialPropertyName>("rho_v"))),
+    _rho_w(declareFunctorProperty<ADReal>(getParam<MaterialPropertyName>("rho_w"))),
+    _vel_x(getFunctor<ADReal>("vel_x")),
+    _vel_y(isParamValid("vel_y") ? &getFunctor<ADReal>("vel_y") : nullptr),
+    _vel_z(isParamValid("vel_z") ? &getFunctor<ADReal>("vel_z") : nullptr),
+    _rho(getFunctor<ADReal>("rho"))
 {
-}
+  _velocity.setFunctor(
+      _mesh, blockIDs(), [this](const auto & r, const auto & t) -> ADRealVectorValue {
+        ADRealVectorValue velocity(_vel_x(r, t));
+        velocity(1) = _vel_y ? (*_vel_y)(r, t) : ADReal(0);
+        velocity(2) = _vel_z ? (*_vel_z)(r, t) : ADReal(0);
+        return velocity;
+      });
 
-void
-ADCoupledVelocityMaterial::computeQpProperties()
-{
-  ADRealVectorValue & velocity = _velocity[_qp];
+  _rho_u.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> ADReal {
+    return _rho(r, t) * _vel_x(r, t);
+  });
 
-  velocity(0) = _vel_x[_qp];
-  _rho_u[_qp] = _rho[_qp] * velocity(0);
+  _rho_v.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> ADReal {
+    return _vel_y ? _rho(r, t) * (*_vel_y)(r, t) : ADReal(0);
+  });
 
-  velocity(1) = _vel_y ? (*_vel_y)[_qp] : 0;
-  _rho_v[_qp] = _vel_y ? _rho[_qp] * velocity(1) : 0;
-
-  velocity(2) = _vel_z ? (*_vel_z)[_qp] : 0;
-  _rho_w[_qp] = _vel_z ? _rho[_qp] * velocity(2) : 0;
+  _rho_w.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> ADReal {
+    return _vel_z ? _rho(r, t) * (*_vel_z)(r, t) : ADReal(0);
+  });
 }

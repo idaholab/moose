@@ -1,0 +1,92 @@
+[Tests]
+  design = VarFunctorMaterial.md
+  issues = '#16809'
+  [exo]
+    type = Exodiff
+    ad_indexing_type = 'global'
+    input = 1d_dirichlet.i
+    exodiff = 1d_dirichlet_out.e
+    requirement = 'The system shall be able to create material properties that can be evaluated on-the-fly provided geometric arguments.'
+  []
+  [multiple_definitions]
+    type = RunException
+    expect_err = 'No insertion for the functor material property'
+    input = 1d_dirichlet.i
+    prereq = 'exo'
+    requirement = 'The system shall error if multiple definitions are given for a functor material property on a given subdomain.'
+    cli_args = "Materials/active='functor overlapping_functor'"
+  []
+  [qp_functor]
+    requirement = 'The system shall be able to solve a diffusion problem with different diffusivities on different subdomains and obtain the same results using'
+    [regular]
+      detail = 'material properties bound to references'
+      type = Exodiff
+      input = traditional-mat-props.i
+      exodiff = traditional-mat-props_out.e
+    []
+    [functor]
+      detail = 'material properties evaluated with geometric position information'
+      type = Exodiff
+      input = functor-mat-props.i
+      exodiff = functor-mat-props_out.e
+      ad_indexing_type = 'global'
+    []
+  []
+  [prop_caching]
+    requirement = 'The system shall be able to evaluate, cache, and then clear functor material property evaluations'
+    [on_timestep_begin]
+      type = Exodiff
+      input = prop-caching.i
+      exodiff = prop-caching_out.e
+      detail = 'at the beginning of timesteps'
+      cli_args = "Materials/slow_prop/execute_on='timestep_begin'"
+      ad_indexing_type = 'global'
+      method = '!dbg' # stl container checking takes forever
+    []
+    [always]
+      type = Exodiff
+      input = prop-caching.i
+      exodiff = prop-caching_out.e
+      detail = 'always, so always perform evaluations'
+      ad_indexing_type = 'global'
+      prereq = 'prop_caching/on_timestep_begin'
+      method = '!dbg' # stl container checking takes forever
+    []
+    [on_nonlinear]
+      type = Exodiff
+      input = prop-caching.i
+      exodiff = prop-caching_out.e
+      detail = 'on nonlinear iterations'
+      cli_args = "Materials/slow_prop/execute_on='nonlinear'"
+      prereq = 'prop_caching/always'
+      ad_indexing_type = 'global'
+      method = '!dbg' # stl container checking takes forever
+    []
+    [on_linear]
+      type = Exodiff
+      input = prop-caching.i
+      exodiff = prop-caching_out.e
+      detail = 'on linear iterations'
+      cli_args = "Materials/slow_prop/execute_on='linear'"
+      prereq = 'prop_caching/on_nonlinear'
+      ad_indexing_type = 'global'
+      method = '!dbg' # stl container checking takes forever
+    []
+  []
+  [inconsistent_types]
+    type = RunException
+    ad_indexing_type = 'global'
+    input = wrong-type.i
+    expect_err = '[Ii]nconsistent.*types for functor'
+    requirement = 'The system shall error if a functor material property is declared as returning one type and is retrieved as returning a different type.'
+    design = 'Materials/index.md'
+  []
+  [replace_underlying_type]
+    type = Exodiff
+    ad_indexing_type = 'global'
+    input = converted-prop.i
+    exodiff = converted-prop_out.e
+    requirement = 'The system shall allow replacement of an underlying functor material property type such that users do not have to worry about material ordering when declaring and retrieving functor material properties.'
+    design = 'Materials/index.md'
+  []
+[]

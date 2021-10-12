@@ -14,47 +14,57 @@ registerMooseObject("MooseTestApp", FEFVCouplingMaterial);
 InputParameters
 FEFVCouplingMaterial::validParams()
 {
-  InputParameters params = Material::validParams();
-  params.addCoupledVar("fe_var", 1., "A coupled finite element variable.");
-  params.addCoupledVar("fv_var", 1., "A coupled finite volume variable.");
+  InputParameters params = FunctorMaterial::validParams();
+  params += SetupInterface::validParams();
+  params.set<ExecFlagEnum>("execute_on") = {EXEC_LINEAR, EXEC_NONLINEAR};
+  params.addParam<MooseFunctorName>("fe_var", 1., "A coupled finite element variable.");
+  params.addParam<MooseFunctorName>("fv_var", 1., "A coupled finite volume variable.");
   params.addParam<MaterialPropertyName>("declared_prop_name", "The name of the declared property.");
-  params.addParam<MaterialPropertyName>("retrieved_prop_name",
-                                        "The name of the retrieved property.");
+  params.addParam<MooseFunctorName>("retrieved_prop_name", "The name of the retrieved property.");
   params.addParam<MaterialPropertyName>("fv_prop_name", "The name of the fv property");
   return params;
 }
 
 FEFVCouplingMaterial::FEFVCouplingMaterial(const InputParameters & parameters)
-  : Material(parameters),
-    _fe_var(adCoupledValue("fe_var")),
-    _fv_var(adCoupledValue("fv_var")),
-    _fe_prop(isCoupled("fe_var") ? &declareADProperty<Real>("fe_prop") : nullptr),
-    _fv_prop(isCoupled("fv_var")
-                 ? &declareADProperty<Real>(isParamValid("fv_prop_name")
-                                                ? getParam<MaterialPropertyName>("fv_prop_name")
-                                                : "fv_prop")
+  : FunctorMaterial(parameters),
+    _fe_var(getFunctor<ADReal>("fe_var")),
+    _fv_var(getFunctor<ADReal>("fv_var")),
+    _fe_prop(isFunctor("fe_var") ? &declareFunctorProperty<ADReal>("fe_prop") : nullptr),
+    _fv_prop(isFunctor("fv_var")
+                 ? &declareFunctorProperty<ADReal>(
+                       isParamValid("fv_prop_name") ? getParam<MaterialPropertyName>("fv_prop_name")
+                                                    : "fv_prop")
                  : nullptr),
     _declared_prop(
         isParamValid("declared_prop_name")
-            ? &declareADProperty<Real>(getParam<MaterialPropertyName>("declared_prop_name"))
+            ? &declareFunctorProperty<ADReal>(getParam<MaterialPropertyName>("declared_prop_name"))
             : nullptr),
-    _retrieved_prop(isParamValid("retrieved_prop_name")
-                        ? &getADMaterialProperty<Real>("retrieved_prop_name")
-                        : nullptr)
-{
-}
-
-void
-FEFVCouplingMaterial::computeQpProperties()
+    _retrieved_prop(isParamValid("retrieved_prop_name") ? &getFunctor<ADReal>("retrieved_prop_name")
+                                                        : nullptr)
 {
   if (_declared_prop)
-    (*_declared_prop)[_qp] = 1.;
+  {
+    _declared_prop->setFunctor(
+        _mesh, blockIDs(), [](const auto &, const auto &) -> ADReal { return 1.; });
+    _declared_prop->setCacheClearanceSchedule({EXEC_TIMESTEP_BEGIN});
+  }
   if (_fe_prop)
-    (*_fe_prop)[_qp] = 1. + _fe_var[_qp];
+  {
+    _fe_prop->setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> ADReal {
+      return 1. + _fe_var(r, t);
+    });
+    _fe_prop->setCacheClearanceSchedule(
+        std::set<ExecFlagType>(_execute_enum.begin(), _execute_enum.end()));
+  }
   if (_fv_prop)
   {
-    (*_fv_prop)[_qp] = 1. + _fv_var[_qp];
-    if (_retrieved_prop)
-      (*_fv_prop)[_qp] *= (*_retrieved_prop)[_qp];
+    _fv_prop->setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> ADReal {
+      auto ret = 1. + _fv_var(r, t);
+      if (_retrieved_prop)
+        ret *= (*_retrieved_prop)(r, t);
+      return ret;
+    });
+    _fv_prop->setCacheClearanceSchedule(
+        std::set<ExecFlagType>(_execute_enum.begin(), _execute_enum.end()));
   }
 }

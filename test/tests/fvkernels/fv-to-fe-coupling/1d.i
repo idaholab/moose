@@ -34,7 +34,7 @@
 
 [Kernels]
   [diff]
-    type = ADMatDiffusion
+    type = ADFunctorMatDiffusion
     variable = fe
     diffusivity = fe_prop
   []
@@ -81,10 +81,12 @@
     type = FEFVCouplingMaterial
     fe_var = fe
     fv_var = fv
+    execute_on = 'linear nonlinear'
   []
   [fe_mat]
     type = FEFVCouplingMaterial
     fe_var = fe
+    execute_on = 'linear nonlinear'
   []
   [fv_mat]
     type = FEFVCouplingMaterial

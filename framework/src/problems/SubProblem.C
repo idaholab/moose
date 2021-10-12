@@ -66,6 +66,9 @@ SubProblem::SubProblem(const InputParameters & parameters)
   _active_fe_var_coupleable_vector_tags.resize(n_threads);
   _active_sc_var_coupleable_matrix_tags.resize(n_threads);
   _active_sc_var_coupleable_vector_tags.resize(n_threads);
+
+  _functor_material_properties.resize(n_threads);
+  _functors.resize(n_threads);
 }
 
 SubProblem::~SubProblem() {}
@@ -1027,4 +1030,54 @@ SubProblem::clearAllDofIndices()
 {
   systemBaseNonlinear().clearAllDofIndices();
   systemBaseAuxiliary().clearAllDofIndices();
+}
+
+void
+SubProblem::timestepSetup()
+{
+  for (auto & map : _functor_material_properties)
+    for (auto & pr : map)
+      pr.second.second->timestepSetup();
+}
+
+void
+SubProblem::residualSetup()
+{
+  for (auto & map : _functor_material_properties)
+    for (auto & pr : map)
+      pr.second.second->residualSetup();
+}
+
+void
+SubProblem::jacobianSetup()
+{
+  for (auto & map : _functor_material_properties)
+    for (auto & pr : map)
+      pr.second.second->jacobianSetup();
+}
+
+void
+SubProblem::initialSetup()
+{
+  for (const auto & functor_props : _functor_material_properties)
+    for (const auto & key_value : functor_props)
+      if (!key_value.second.first)
+        mooseError("Functor material property ", key_value.first, " has no declaration anywhere.");
+}
+
+void
+SubProblem::addFunctor(const std::string & name,
+                       const Moose::FunctorBase * functor,
+                       const THREAD_ID tid)
+{
+  mooseAssert(tid < _functors.size(), "Too large a thread ID");
+  _functors[tid].emplace(std::make_pair(name, functor));
+}
+
+bool
+SubProblem::hasFunctor(const std::string & name, const THREAD_ID tid) const
+{
+  mooseAssert(tid < _functors.size(), "Too large a thread ID");
+  auto & functors = _functors[tid];
+  return (functors.find(name) != functors.end());
 }

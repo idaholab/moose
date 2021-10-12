@@ -8,10 +8,11 @@ domain explored by the simulation.
 
 ## Example Input File Syntax
 
-In this example, we create a `GenericConstantVectorMaterial` for two anisotropic friction factors in a porous media flow simulation.
-Note the syntax for declaring two material properties and their values in the same material.
+In this example, we create a `GenericConstantVectorMaterial` to generate an
+anisotropic vector diffusivity and then compute the integral of the diffusive
+flux through a specified boundary on the mesh.
 
-!listing modules/navier_stokes/test/tests/finite_volume/pins/channel-flow/2d-rc-friction.i block=Materials/darcy
+!listing test/tests/postprocessors/side_diffusive_flux_integral/side_diffusive_flux_integral.i block=Materials/mat_props_vector
 
 !syntax parameters /Materials/GenericConstantVectorMaterial
 

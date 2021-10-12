@@ -30,6 +30,7 @@ FVInterfaceKernel::validParams()
   params += TaggingInterface::validParams();
   params += NeighborCoupleableMooseVariableDependencyIntermediateInterface::validParams();
   params += TwoMaterialPropertyInterface::validParams();
+  params += FunctorInterface::validParams();
 
   params.addRequiredParam<std::vector<SubdomainName>>(
       "subdomain1", "The subdomains on the 1st side of the boundary.");
@@ -91,6 +92,7 @@ FVInterfaceKernel::FVInterfaceKernel(const InputParameters & parameters)
     NeighborCoupleableMooseVariableDependencyIntermediateInterface(
         this, /*nodal=*/false, /*neighbor_nodal=*/false, /*is_fv=*/true),
     TwoMaterialPropertyInterface(this, Moose::EMPTY_BLOCK_IDS, boundaryIDs()),
+    FunctorInterface(this),
     _tid(getParam<THREAD_ID>("_tid")),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _assembly(_subproblem.assembly(_tid)),
@@ -202,4 +204,17 @@ FVInterfaceKernel::computeJacobian(const FaceInfo & fi)
 
   processDerivatives(r, elem_dof_indices[0]);
   processDerivatives(-r, neigh_dof_indices[0]);
+}
+
+std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID>
+FVInterfaceKernel::elemFromFace() const
+{
+  return std::make_tuple(&_face_info->elem(), _face_info, _face_info->elem().subdomain_id());
+}
+
+std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID>
+FVInterfaceKernel::neighborFromFace() const
+{
+  return std::make_tuple(
+      _face_info->neighborPtr(), _face_info, _face_info->neighborPtr()->subdomain_id());
 }

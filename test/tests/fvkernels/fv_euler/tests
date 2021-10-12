@@ -6,6 +6,7 @@
     input = 'fv_euler.i'
     exodiff = 'fv_euler_out.e'
     requirement = 'The system shall be able to couple variables at faces when using the finite volume method.'
+    ad_indexing_type = 'global'
   []
   [jac]
     type = PetscJacobianTester
@@ -15,5 +16,6 @@
     run_sim = True
     cli_args = "Outputs/active=''"
     requirement = 'The system shall have an accurate Jacobian when coupling variables at faces and using the finite volume method.'
+    ad_indexing_type = 'global'
   []
 []

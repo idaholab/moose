@@ -10,6 +10,7 @@
 #pragma once
 
 #include "Limiter.h"
+#include "MathFVUtils.h"
 
 namespace Moose
 {
@@ -19,10 +20,22 @@ namespace FV
  * Implements a limiter which reproduces the QUICK scheme, defined by
  * $\beta(r_f) = \frac{3+r_f}{4}$
  */
-class QUICKLimiter : public Limiter
+template <typename T>
+class QUICKLimiter : public Limiter<T>
 {
 public:
-  ADReal operator()(const ADReal & r_f) const override final { return (3. + r_f) / 4.; }
+  T operator()(const T & phi_upwind,
+               const T & phi_downwind,
+               const VectorValue<T> * grad_phi_upwind,
+               const RealVectorValue & dCD) const override final
+  {
+    mooseAssert(grad_phi_upwind, "QUICK limiter requires a gradient");
+    const auto r_f = Moose::FV::rF(phi_upwind, phi_downwind, *grad_phi_upwind, dCD);
+
+    return (3. + r_f) / 4.;
+  }
+  bool constant() const override final { return false; }
+  InterpMethod interpMethod() const override final { return InterpMethod::QUICK; }
 
   QUICKLimiter() = default;
 };

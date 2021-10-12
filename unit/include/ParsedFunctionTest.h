@@ -33,9 +33,14 @@ protected:
     mesh_params.set<MooseEnum>("dim") = "3";
     mesh_params.set<std::string>("_object_name") = "mesh";
     mesh_params.set<std::string>("_type") = "GneratedMesh";
+    mesh_params.set<unsigned int>("nx") = 2;
+    mesh_params.set<unsigned int>("ny") = 2;
+    mesh_params.set<unsigned int>("nz") = 2;
+    mesh_params.set<MooseEnum>("parallel_type") = "REPLICATED";
 
     _mesh = libmesh_make_unique<GeneratedMesh>(mesh_params);
     _mesh->setMeshBase(_mesh->buildMeshBaseObject());
+    _mesh->buildMesh();
 
     InputParameters problem_params = _factory->getValidParams("FEProblem");
     problem_params.set<MooseMesh *>("mesh") = _mesh.get();
@@ -54,4 +59,3 @@ protected:
   std::unique_ptr<FEProblem> _fe_problem;
   Factory * _factory;
 };
-

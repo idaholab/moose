@@ -16,7 +16,7 @@ template <bool is_ad>
 InputParameters
 FVPropValPerSubdomainMaterialTempl<is_ad>::validParams()
 {
-  auto params = Material::validParams();
+  auto params = FunctorMaterial::validParams();
   params.addClassDescription("Computes a property value on a per-subdomain basis");
   // Somehow min gcc doesn't know the type of params here
   params.template addRequiredParam<MaterialPropertyName>("prop_name",
@@ -29,70 +29,16 @@ FVPropValPerSubdomainMaterialTempl<is_ad>::validParams()
 template <bool is_ad>
 FVPropValPerSubdomainMaterialTempl<is_ad>::FVPropValPerSubdomainMaterialTempl(
     const InputParameters & params)
-  : Material(params), _prop(declareGenericProperty<Real, is_ad>("prop_name"))
+  : FunctorMaterial(params), _prop(declareFunctorProperty<GenericReal<is_ad>>("prop_name"))
 {
   for (const auto & map_pr : getParam<std::map<std::string, Real>>("subdomain_to_prop_value"))
-    _sub_id_to_prop.emplace(std::make_pair(_mesh.getSubdomainID(map_pr.first), map_pr.second));
-}
-
-template <bool is_ad>
-void
-FVPropValPerSubdomainMaterialTempl<is_ad>::computeQpProperties()
-{
-  if (!_bnd)
   {
-    mooseAssert(_current_elem,
-                "We should be on a block which means we should definitely have a current element");
-    auto it = _sub_id_to_prop.find(_current_elem->subdomain_id());
-    mooseAssert(it != _sub_id_to_prop.end(),
-                "Block restriction must match the subdomain names passed in the "
-                "subdomain_to_prop_value parameter");
-    _prop[_qp] = it->second;
-
-    return;
+    const Real value = map_pr.second;
+    _prop.setFunctor(
+        _mesh,
+        {_mesh.getSubdomainID(map_pr.first)},
+        [value](const auto & /*r*/, const auto & /*t*/) -> GenericReal<is_ad> { return value; });
   }
-
-  if (_current_elem)
-  {
-    _face_info = _mesh.faceInfo(_current_elem, _current_side);
-    if (!_face_info)
-    {
-      const Elem * const neighbor = _current_elem->neighbor_ptr(_current_side);
-      mooseAssert(neighbor, "Should be non-null");
-      const auto neighbor_side = neighbor->which_neighbor_am_i(_current_elem);
-      _face_info = _mesh.faceInfo(neighbor, neighbor_side);
-      mooseAssert(_face_info, "We need to have retrieved something.");
-    }
-    mooseAssert(_current_elem->build_side_ptr(_current_side)->vertex_average() ==
-                    _face_info->faceCentroid(),
-                "Making sure we're in the right place");
-    auto it = _sub_id_to_prop.find(_current_elem->subdomain_id());
-    if (it == _sub_id_to_prop.end())
-    {
-      // We may be a ghosted material
-      const bool current_elem_is_fi_elem = _current_elem == &_face_info->elem();
-      const Elem * const other_elem_to_try =
-          current_elem_is_fi_elem ? _face_info->neighborPtr() : &_face_info->elem();
-      mooseAssert(other_elem_to_try, "This should be non-null");
-      it = _sub_id_to_prop.find(other_elem_to_try->subdomain_id());
-      mooseAssert(it != _sub_id_to_prop.end(),
-                  "Block restriction must match the subdomain names passed in the "
-                  "subdomain_to_prop_value parameter");
-    }
-    _prop[_qp] = it->second;
-    return;
-  }
-
-  mooseAssert(_face_info,
-              "We must have set a face info object in order for the FVPropValPerSubdomainMaterial "
-              "class to work on faces");
-
-  // We must be off the domain
-  auto it = _sub_id_to_prop.find(_face_info->elem().subdomain_id());
-  mooseAssert(it != _sub_id_to_prop.end(),
-              "Block restriction must match the subdomain names passed in the "
-              "subdomain_to_prop_value parameter");
-  _prop[_qp] = it->second;
 }
 
 template class FVPropValPerSubdomainMaterialTempl<false>;

@@ -94,10 +94,10 @@ hit $(pyhit_LIB): $(pyhit_srcfiles)
 #
 gtest_DIR       := $(FRAMEWORK_DIR)/contrib/gtest
 gtest_srcfiles  := $(gtest_DIR)/gtest-all.cc
-gtest_objects   := $(patsubst %.cc, %.$(obj-suffix), $(gtest_srcfiles))
+gtest_objects   := $(patsubst %.cc, %.$(no-method-obj-suffix), $(gtest_srcfiles))
 gtest_LIB       := $(gtest_DIR)/libgtest.la
 # dependency files
-gtest_deps      := $(patsubst %.cc, %.$(obj-suffix).d, $(gtest_srcfiles))
+gtest_deps      := $(patsubst %.cc, %.$(no-method-obj-suffix).d, $(gtest_srcfiles))
 
 #
 # MooseConfigure
@@ -312,7 +312,7 @@ $(pcre_LIB): $(pcre_objects)
 $(gtest_LIB): $(gtest_objects)
 	@echo "Linking Library "$@"..."
 	@$(libmesh_LIBTOOL) --tag=CC $(LIBTOOLFLAGS) --mode=link --quiet \
-	  $(libmesh_CC) $(libmesh_CFLAGS) -o $@ $(gtest_objects) $(libmesh_LDFLAGS) $(libmesh_LIBS) $(EXTERNAL_FLAGS) -rpath $(gtest_DIR)
+	  $(libmesh_CC) -o $@ $(gtest_objects) $(EXTERNAL_FLAGS) -rpath $(gtest_DIR)
 	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(gtest_LIB) $(gtest_DIR)
 
 $(hit_LIB): $(hit_objects)

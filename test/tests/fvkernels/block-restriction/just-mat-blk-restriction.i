@@ -63,13 +63,13 @@
 
 [Materials]
   [left]
-    type = ADGenericConstantMaterial
+    type = ADGenericConstantFunctorMaterial
     prop_names = 'diff'
     prop_values = '1'
     block = 0
   []
   [right]
-    type = ADGenericConstantMaterial
+    type = ADGenericConstantFunctorMaterial
     prop_names = 'diff'
     prop_values = '2'
     block = 1

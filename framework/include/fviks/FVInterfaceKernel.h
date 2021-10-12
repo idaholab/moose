@@ -25,6 +25,7 @@
 #include "TaggingInterface.h"
 #include "NeighborCoupleableMooseVariableDependencyIntermediateInterface.h"
 #include "TwoMaterialPropertyInterface.h"
+#include "FunctorInterface.h"
 
 #include <set>
 
@@ -52,7 +53,8 @@ class FVInterfaceKernel : public MooseObject,
                           public MeshChangedInterface,
                           public TaggingInterface,
                           public NeighborCoupleableMooseVariableDependencyIntermediateInterface,
-                          public TwoMaterialPropertyInterface
+                          public TwoMaterialPropertyInterface,
+                          public FunctorInterface
 {
 public:
   /**
@@ -137,6 +139,18 @@ protected:
    * Process the derivatives for the provided residual and dof index
    */
   void processDerivatives(const ADReal & resid, dof_id_type dof_index);
+
+  /**
+   * @return a tuple corresponding to the face info element, the face info, and the face info
+   * element subdomain id for use with functors
+   */
+  std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID> elemFromFace() const;
+
+  /**
+   * @return a tuple corresponding to the face info neighbor, the face info, and the face info
+   * neighbor subdomain id for use with functors
+   */
+  std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID> neighborFromFace() const;
 
   /// To be consistent with FE interfaces we introduce this quadrature point member. However, for FV
   /// calculations there should every only be one qudrature point and it should be located at the

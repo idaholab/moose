@@ -38,4 +38,12 @@
     valgrind = 'none'
     ad_indexing_type = 'global'
   []
+  [wcnsfv]
+    type = Exodiff
+    input = wcnsfv.i
+    exodiff = wcnsfv_out.e
+    requirement = 'The system shall be able to model natural convection using a weakly compressible implementation.'
+    ad_indexing_type = 'global'
+    method = '!dbg'
+  []
 []

@@ -214,4 +214,15 @@
       method = "!dbg"
     []
   []
+  [pwcnsfv]
+    type = PythonUnitTest
+    input = test.py
+    test_case = PWCNSFV
+    required_python_packages = 'pandas matplotlib'
+    ad_indexing_type = 'global'
+    method = "!dbg"
+    requirement = 'The system shall demonstrate first order convergence rates for pressure and superficial velocity when using an upwind interpolation for advected quantities in a weakly compressible formulation of the mass and momentum Euler equations.'
+    issues = '#18215'
+    design = 'PINSFVMomentumAdvection.md'
+  []
 []

@@ -29,6 +29,7 @@
 #include "MooseVariableInterface.h"
 #include "ElementIDInterface.h"
 #include "UserObject.h"
+#include "FunctorInterface.h"
 
 // forward declarations
 template <typename ComputeValueType>
@@ -74,7 +75,8 @@ class AuxKernelTempl : public MooseObject,
                        public Restartable,
                        public MeshChangedInterface,
                        protected VectorPostprocessorInterface,
-                       public ElementIDInterface
+                       public ElementIDInterface,
+                       protected FunctorInterface
 {
 public:
   static InputParameters validParams();

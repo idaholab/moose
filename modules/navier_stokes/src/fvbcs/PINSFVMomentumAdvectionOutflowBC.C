@@ -34,8 +34,7 @@ PINSFVMomentumAdvectionOutflowBC::PINSFVMomentumAdvectionOutflowBC(const InputPa
     _u_var(dynamic_cast<const PINSFVSuperficialVelocityVariable *>(getFieldVar("u", 0))),
     _v_var(dynamic_cast<const PINSFVSuperficialVelocityVariable *>(getFieldVar("v", 0))),
     _w_var(dynamic_cast<const PINSFVSuperficialVelocityVariable *>(getFieldVar("w", 0))),
-    _eps(coupledValue("porosity")),
-    _eps_neighbor(coupledNeighborValue("porosity")),
+    _eps(getFunctor<ADReal>("porosity")),
     _dim(_subproblem.mesh().dimension())
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
@@ -64,6 +63,9 @@ PINSFVMomentumAdvectionOutflowBC::computeQpResidual()
 #ifdef MOOSE_GLOBAL_AD_INDEXING
   using namespace Moose::FV;
 
+  const auto elem_face = elemFromFace();
+  const auto neighbor_face = neighborFromFace();
+
   ADRealVectorValue v(_u_var->getBoundaryFaceValue(*_face_info));
   if (_v_var)
     v(1) = _v_var->getBoundaryFaceValue(*_face_info);
@@ -73,8 +75,8 @@ PINSFVMomentumAdvectionOutflowBC::computeQpResidual()
   ADReal adv_quant_boundary;
   interpolate(_advected_interp_method,
               adv_quant_boundary,
-              _adv_quant_elem[_qp] / _eps[_qp],
-              _adv_quant_neighbor[_qp] / _eps_neighbor[_qp],
+              _adv_quant(elem_face) / _eps(elem_face),
+              _adv_quant(neighbor_face) / _eps(neighbor_face),
               v,
               *_face_info,
               true);

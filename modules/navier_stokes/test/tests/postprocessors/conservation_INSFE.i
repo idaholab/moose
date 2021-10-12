@@ -58,7 +58,7 @@
     prop_values = '1  1'
   []
   [ADconst]
-    type = ADGenericConstantMaterial
+    type = ADGenericConstantFunctorMaterial
     block = '1 2 3'
     prop_names = 'rho_ad'
     prop_values = '1'
@@ -104,6 +104,13 @@
     boundary = internal_bot
     vel_x = vel_x
     vel_y = vel_y
+  []
+  [other_mid1_mass]
+    type = InternalVolumetricFlowRate
+    boundary = internal_bot
+    vel_x = vel_x
+    vel_y = vel_y
+    advected_mat_prop = 'rho_ad'
   []
   [mid2_mass]
     type = InternalVolumetricFlowRate

@@ -13,12 +13,6 @@
 #include "Function.h"
 #include "MooseParsedFunctionBase.h"
 
-// Forward declarations
-class MooseParsedFunction;
-
-template <>
-InputParameters validParams<MooseParsedFunction>();
-
 /**
  * This class is used to evaluate symbolic equations passed in to Moose through
  * the input file. It supports symbolic variables that you can change by putting
@@ -27,7 +21,8 @@ InputParameters validParams<MooseParsedFunction>();
  * Documentation for the Function Parser can be found at:
  * http://warp.povusers.org/FunctionParser/fparser.html
  */
-class MooseParsedFunction : public Function, public MooseParsedFunctionBase
+template <typename T>
+class MooseParsedFunctionTempl : public T, public MooseParsedFunctionBase
 {
 public:
   /**
@@ -36,7 +31,7 @@ public:
    */
   static InputParameters validParams();
 
-  MooseParsedFunction(const InputParameters & parameters);
+  MooseParsedFunctionTempl(const InputParameters & parameters);
 
   /**
    * Evaluate the equation at the given location. For 1-D and 2-D equations
@@ -79,3 +74,17 @@ protected:
 
   friend class ParsedFunctionTest;
 };
+
+typedef MooseParsedFunctionTempl<FunctionTempl<ADReal>> ADMooseParsedFunction;
+
+class MooseParsedFunction : public MooseParsedFunctionTempl<Function>
+{
+public:
+  static InputParameters validParams() { return MooseParsedFunctionTempl<Function>::validParams(); }
+  MooseParsedFunction(const InputParameters & params) : MooseParsedFunctionTempl<Function>(params)
+  {
+  }
+};
+
+template <>
+InputParameters validParams<MooseParsedFunction>();

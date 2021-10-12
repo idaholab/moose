@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "FVOneVarDiffusionInterface.h"
-#include "FVUtils.h"
+#include "MathFVUtils.h"
 
 registerMooseObject("MooseApp", FVOneVarDiffusionInterface);
 
@@ -28,10 +28,8 @@ FVOneVarDiffusionInterface::validParams()
 
 FVOneVarDiffusionInterface::FVOneVarDiffusionInterface(const InputParameters & params)
   : FVInterfaceKernel(params),
-    _coeff1_elem(getADMaterialProperty<Real>("coeff1")),
-    _coeff2_elem(getADMaterialProperty<Real>("coeff2")),
-    _coeff1_neighbor(getNeighborADMaterialProperty<Real>("coeff1")),
-    _coeff2_neighbor(getNeighborADMaterialProperty<Real>("coeff2"))
+    _coeff1(getFunctor<ADReal>("coeff1")),
+    _coeff2(getFunctor<ADReal>("coeff2"))
 {
   if (&var1() != &var2())
     paramError("variable2",
@@ -42,16 +40,16 @@ FVOneVarDiffusionInterface::FVOneVarDiffusionInterface(const InputParameters & p
 ADReal
 FVOneVarDiffusionInterface::computeQpResidual()
 {
-  const auto & coef_elem = elemIsOne() ? _coeff1_elem : _coeff2_elem;
-  const auto & coef_neighbor = elemIsOne() ? _coeff2_neighbor : _coeff1_neighbor;
+  const auto & coef_elem = elemIsOne() ? _coeff1 : _coeff2;
+  const auto & coef_neighbor = elemIsOne() ? _coeff2 : _coeff1;
 
   const auto & grad = var1().adGradSln(*_face_info);
 
   ADReal coef;
   interpolate(Moose::FV::InterpMethod::Average,
               coef,
-              coef_elem[_qp],
-              coef_neighbor[_qp],
+              coef_elem(elemFromFace()),
+              coef_neighbor(neighborFromFace()),
               *_face_info,
               true);
 

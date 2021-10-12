@@ -35,6 +35,7 @@ AuxKernelTempl<ComputeValueType>::validParams()
   params += RandomInterface::validParams();
   params += MeshChangedInterface::validParams();
   params += MaterialPropertyInterface::validParams();
+  params += FunctorInterface::validParams();
 
   // Add the SetupInterface parameter 'execute_on' with 'linear' and 'timestep_end'
   params += SetupInterface::validParams();
@@ -111,6 +112,7 @@ AuxKernelTempl<ComputeValueType>::AuxKernelTempl(const InputParameters & paramet
     MeshChangedInterface(parameters),
     VectorPostprocessorInterface(this),
     ElementIDInterface(this),
+    FunctorInterface(this),
     _check_boundary_restricted(getParam<bool>("check_boundary_restricted")),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),

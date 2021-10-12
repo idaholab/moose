@@ -9,20 +9,17 @@
 
 #pragma once
 
-#include "MooseObject.h"
-#include "SetupInterface.h"
+#include "MooseFunctionBase.h"
 #include "TransientInterface.h"
 #include "PostprocessorInterface.h"
 #include "UserObjectInterface.h"
 #include "Restartable.h"
 #include "MeshChangedInterface.h"
 #include "ScalarCoupleable.h"
+#include "MooseFunctor.h"
 
 // libMesh
 #include "libmesh/vector_value.h"
-
-// Forward declarations
-class Function;
 
 // libMesh forward declarations
 namespace libMesh
@@ -30,21 +27,19 @@ namespace libMesh
 class Point;
 }
 
-template <>
-InputParameters validParams<Function>();
-
 /**
  * Base class for function objects.  Functions override value to supply a
  * value at a point.
  */
-class Function : public MooseObject,
-                 public SetupInterface,
-                 public TransientInterface,
-                 public PostprocessorInterface,
-                 public UserObjectInterface,
-                 public Restartable,
-                 public MeshChangedInterface,
-                 public ScalarCoupleable
+template <typename T>
+class FunctionTempl : public MooseFunctionBase,
+                      public TransientInterface,
+                      public PostprocessorInterface,
+                      public UserObjectInterface,
+                      public Restartable,
+                      public MeshChangedInterface,
+                      public ScalarCoupleable,
+                      public Moose::Functor<T>
 {
 public:
   /**
@@ -53,12 +48,12 @@ public:
    */
   static InputParameters validParams();
 
-  Function(const InputParameters & parameters);
+  FunctionTempl(const InputParameters & parameters);
 
   /**
    * Function destructor
    */
-  virtual ~Function();
+  virtual ~FunctionTempl();
 
   /**
    * Override this to evaluate the scalar function at point (t,x,y,z), by default
@@ -109,4 +104,68 @@ public:
 
   // Not defined
   virtual Real average() const;
+
+  void timestepSetup() override;
+  void residualSetup() override;
+  void jacobianSetup() override;
+
+private:
+  using typename Moose::Functor<T>::FaceArg;
+  using typename Moose::Functor<T>::ElemFromFaceArg;
+  using typename Moose::Functor<T>::ElemQpArg;
+  using typename Moose::Functor<T>::ElemSideQpArg;
+  using typename Moose::Functor<T>::ValueType;
+
+  /**
+   * @return the time associated with the requested \p state
+   */
+  Real getTime(unsigned int state) const;
+
+  ValueType evaluate(const Elem * const & elem, unsigned int state) const override final;
+  ValueType evaluate(const ElemFromFaceArg & elem_from_face,
+                     unsigned int state) const override final;
+  ValueType evaluate(const FaceArg & face, unsigned int state) const override final;
+  ValueType evaluate(const ElemQpArg & qp, unsigned int state) const override final;
+  ValueType evaluate(const ElemSideQpArg & elem_side_qp, unsigned int state) const override final;
+  ValueType evaluate(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
+                     unsigned int state) const override final;
+
+  /**
+   * Compute \p _current_elem_qp_functor_xyz if we are on a new element
+   */
+  void determineElemXYZ(const ElemQpArg & elem_qp) const;
+
+  /**
+   * Compute \p _current_elem_side_qp_functor_xyz if we are on a new element and side pair
+   */
+  void determineElemSideXYZ(const ElemSideQpArg & elem_side_qp) const;
+
+  /// Keep track of the current elem-qp functor element in order to enable local caching (e.g. if we
+  /// call evaluate on the same element, but just with a different quadrature point, we can return
+  /// previously computed results indexed at the different qp)
+  mutable const Elem * _current_elem_qp_functor_elem = nullptr;
+
+  /// The location of the quadrature points in physical space for the
+  /// \p _current_elem_qp_functor_elem
+  mutable std::vector<Point> _current_elem_qp_functor_xyz;
+
+  /// Keep track of the current elem-side-qp functor element-side pair in order to enable local
+  /// caching (e.g. if we call evaluate on the same element and side, but just with a different
+  /// quadrature point, we can return previously computed results indexed at the different qp)
+  mutable std::pair<const Elem *, unsigned int> _current_elem_side_qp_functor_elem_side{
+      nullptr, libMesh::invalid_uint};
+
+  /// The location of the quadrature points in physical space for the
+  /// \p _current_elem_side_qp_functor_elem_side
+  mutable std::vector<Point> _current_elem_side_qp_functor_xyz;
 };
+
+class Function : public FunctionTempl<Real>
+{
+public:
+  static InputParameters validParams() { return FunctionTempl<Real>::validParams(); }
+  Function(const InputParameters & params) : FunctionTempl<Real>(params) {}
+};
+
+template <>
+InputParameters validParams<Function>();

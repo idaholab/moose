@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "VolumetricFlowRate.h"
-#include "FVUtils.h"
+#include "MathFVUtils.h"
 #include <math.h>
 
 registerMooseObject("NavierStokesApp", VolumetricFlowRate);
@@ -25,7 +25,7 @@ VolumetricFlowRate::validParams()
   params.addCoupledVar("vel_z", 0, "The z-axis velocity");
   params.addCoupledVar(
       "advected_variable", 0, "The advected variable quantity of which to study the flow");
-  params.addParam<MaterialPropertyName>(
+  params.addParam<MooseFunctorName>(
       "advected_mat_prop", 0, "The advected material property of which to study the flow");
   MooseEnum advected_interp_method("average upwind", "upwind");
   params.addParam<MooseEnum>("advected_interp_method",
@@ -49,7 +49,7 @@ VolumetricFlowRate::VolumetricFlowRate(const InputParameters & parameters)
     _fv_advected_variable(
         dynamic_cast<const MooseVariableFV<Real> *>(getFieldVar("advected_variable", 0))),
     _advected_mat_prop_supplied(parameters.isParamSetByUser("advected_mat_prop")),
-    _advected_material_property(getADMaterialProperty<Real>("advected_mat_prop"))
+    _advected_material_property(getFunctor<ADReal>("advected_mat_prop"))
 {
   // Check that at most one advected quantity has been provided
   if (_advected_variable_supplied && _advected_mat_prop_supplied)
@@ -114,9 +114,8 @@ VolumetricFlowRate::computeQpIntegral()
     }
     else if (_advected_mat_prop_supplied)
     {
-      // FIXME The material property would need to be computed on the face #16809
-      // This requires knowing the neighbor value, (1)MaterialInterface cant do that
-      advected_quantity = MetaPhysicL::raw_value(_advected_material_property[_qp]);
+      advected_quantity = MetaPhysicL::raw_value(_advected_material_property(
+          std::make_tuple(Moose::ElementType::Element, _qp, _current_elem->subdomain_id())));
     }
     else
       advected_quantity = 1;
@@ -130,7 +129,8 @@ VolumetricFlowRate::computeQpIntegral()
       return _advected_variable[_qp] * RealVectorValue(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]) *
              _normals[_qp];
     else if (_advected_mat_prop_supplied)
-      return MetaPhysicL::raw_value(_advected_material_property[_qp]) *
+      return MetaPhysicL::raw_value(_advected_material_property(std::make_tuple(
+                 Moose::ElementType::Element, _qp, _current_elem->subdomain_id()))) *
              RealVectorValue(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]) * _normals[_qp];
     else
       return RealVectorValue(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]) * _normals[_qp];

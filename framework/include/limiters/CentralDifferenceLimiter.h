@@ -10,6 +10,7 @@
 #pragma once
 
 #include "Limiter.h"
+#include "MathFVUtils.h"
 
 namespace Moose
 {
@@ -20,10 +21,19 @@ namespace FV
  * Implements a limiter which reproduces a central-differencing scheme, defined by
  * $\beta(r_f) = 1$
  */
-class CentralDifferenceLimiter : public Limiter
+template <typename T>
+class CentralDifferenceLimiter : public Limiter<T>
 {
 public:
-  ADReal operator()(const ADReal & /*r_f*/) const override final { return 1; }
+  T operator()(const T &,
+               const T &,
+               const VectorValue<T> *,
+               const RealVectorValue &) const override final
+  {
+    return 1;
+  }
+  bool constant() const override final { return true; }
+  InterpMethod interpMethod() const override final { return InterpMethod::Average; }
 
   CentralDifferenceLimiter() = default;
 };

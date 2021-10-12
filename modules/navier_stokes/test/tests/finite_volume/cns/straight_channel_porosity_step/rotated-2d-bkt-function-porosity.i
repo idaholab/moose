@@ -130,7 +130,7 @@ friction_coeff=10
     epsilon_function = 'eps'
   []
   [drag]
-    type = PNSFVMomentumFriction
+    type = PCNSFVMomentumFriction
     variable = sup_vel_x
     momentum_component = 'x'
     Darcy_name = 'cl'
@@ -155,7 +155,7 @@ friction_coeff=10
     epsilon_function = 'eps'
   []
   [drag_y]
-    type = PNSFVMomentumFriction
+    type = PCNSFVMomentumFriction
     variable = sup_vel_y
     momentum_component = 'y'
     Darcy_name = 'cl'

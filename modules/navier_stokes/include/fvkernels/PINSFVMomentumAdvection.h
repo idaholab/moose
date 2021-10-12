@@ -25,20 +25,15 @@ protected:
   /**
    * interpolation overload for the velocity
    */
-  void interpolate(Moose::FV::InterpMethod m,
-                   ADRealVectorValue & interp_v,
-                   const ADRealVectorValue & elem_v,
-                   const ADRealVectorValue & neighbor_v) override;
+  void interpolate(Moose::FV::InterpMethod m, ADRealVectorValue & interp_v) override;
 
   virtual ADReal computeQpResidual() override;
-  VectorValue<ADReal> coeffCalculator(const Elem & elem, const ADReal & mu) const override;
+  VectorValue<ADReal> coeffCalculator(const Elem & elem) const override;
 
   /// porosity variable to compute gradients
   const MooseVariableFV<Real> * const _eps_var;
   /// porosity in the current element
-  const VariableValue & _eps;
-  /// porosity in the neighbor element
-  const VariableValue & _eps_neighbor;
+  const Moose::Functor<ADReal> & _eps;
   /// Whether the porosity field is smooth or has discontinuities
   const bool _smooth_porosity;
 };

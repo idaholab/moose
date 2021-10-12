@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "InternalVolumetricFlowRate.h"
-#include "FVUtils.h"
+#include "MathFVUtils.h"
 #include <math.h>
 
 registerMooseObject("NavierStokesApp", InternalVolumetricFlowRate);
@@ -30,7 +30,7 @@ InternalVolumetricFlowRate::validParams()
                              "'upwind' and 'average', with the default being 'upwind'.");
   params.addCoupledVar(
       "advected_variable", 0, "The advected variable quantity of which to study the flow");
-  params.addParam<MaterialPropertyName>(
+  params.addParam<MooseFunctorName>(
       "advected_mat_prop", 0, "The advected material property of which to study the flow");
   return params;
 }
@@ -49,8 +49,7 @@ InternalVolumetricFlowRate::InternalVolumetricFlowRate(const InputParameters & p
     _fv_advected_variable(
         dynamic_cast<const MooseVariableFV<Real> *>(getFieldVar("advected_variable", 0))),
     _advected_mat_prop_supplied(parameters.isParamSetByUser("advected_mat_prop")),
-    _advected_material_property(getADMaterialProperty<Real>("advected_mat_prop")),
-    _advected_material_property_neighbor(getNeighborADMaterialProperty<Real>("advected_mat_prop"))
+    _advected_material_property(getFunctor<ADReal>("advected_mat_prop"))
 {
   // Check that at most one advected quantity has been provided
   if (_advected_variable_supplied && _advected_mat_prop_supplied)
@@ -124,13 +123,16 @@ InternalVolumetricFlowRate::computeQpIntegral()
     else if (_advected_mat_prop_supplied)
     {
       // The material property needs to be interpolated since we are on an internal face
-      Moose::FV::interpolate(_advected_interp_method,
-                             advected_quantity,
-                             MetaPhysicL::raw_value(_advected_material_property[_qp]),
-                             MetaPhysicL::raw_value(_advected_material_property_neighbor[_qp]),
-                             RealVectorValue(vx_face, vy_face, vz_face),
-                             *fi,
-                             current_elem_is_fi_elem);
+      Moose::FV::interpolate(
+          _advected_interp_method,
+          advected_quantity,
+          MetaPhysicL::raw_value(_advected_material_property(
+              std::make_tuple(Moose::ElementType::Element, _qp, _current_elem->subdomain_id()))),
+          MetaPhysicL::raw_value(_advected_material_property(
+              std::make_tuple(Moose::ElementType::Neighbor, _qp, _neighbor_elem->subdomain_id()))),
+          RealVectorValue(vx_face, vy_face, vz_face),
+          *fi,
+          current_elem_is_fi_elem);
     }
     else
       advected_quantity = 1;
@@ -144,7 +146,8 @@ InternalVolumetricFlowRate::computeQpIntegral()
       return _advected_variable[_qp] * RealVectorValue(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]) *
              _normals[_qp];
     else if (parameters().isParamSetByUser("advected_mat_prop"))
-      return MetaPhysicL::raw_value(_advected_material_property[_qp]) *
+      return MetaPhysicL::raw_value(_advected_material_property(
+                 std::make_tuple(_current_elem, _current_side, _qp, _qrule))) *
              RealVectorValue(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]) * _normals[_qp];
     else
       return RealVectorValue(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]) * _normals[_qp];

@@ -48,10 +48,11 @@ FVMatAdvectionFunctionBC::validParams()
 
 FVMatAdvectionFunctionBC::FVMatAdvectionFunctionBC(const InputParameters & params)
   : FVFluxBC(params),
-    _vel(getADMaterialProperty<RealVectorValue>("vel")),
-    _adv_quant(isParamValid("advected_quantity")
-                   ? getADMaterialProperty<Real>("advected_quantity").get()
-                   : _u),
+    _vel(getFunctor<ADRealVectorValue>("vel")),
+    _adv_quant(
+        isParamValid("advected_quantity")
+            ? static_cast<const Moose::Functor<ADReal> &>(getFunctor<ADReal>("advected_quantity"))
+            : static_cast<const Moose::Functor<ADReal> &>(variable())),
     _flux_variable_exact_solution(isParamValid("flux_variable_exact_solution")
                                       ? &getFunction("flux_variable_exact_solution")
                                       : nullptr),
@@ -103,11 +104,16 @@ FVMatAdvectionFunctionBC::computeQpResidual()
                                   _t, 2. * _face_info->faceCentroid() - _face_info->elemCentroid())
                             : 0);
 
-  interpolate(Moose::FV::InterpMethod::Average, v_face, _vel[_qp], v_ghost, *_face_info, true);
+  interpolate(Moose::FV::InterpMethod::Average,
+              v_face,
+              _vel(&_face_info->elem()),
+              v_ghost,
+              *_face_info,
+              true);
 
   interpolate(_advected_interp_method,
               flux_var_face,
-              _adv_quant[_qp],
+              _adv_quant(&_face_info->elem()),
               flux_var_ghost,
               v_face,
               *_face_info,

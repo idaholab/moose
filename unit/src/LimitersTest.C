@@ -1,0 +1,46 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "gtest/gtest.h"
+#include "MathFVUtils.h"
+#include "FaceInfo.h"
+#include "UpwindLimiter.h"
+#include "AppFactory.h"
+#include "libmesh/elem.h"
+#include "libmesh/replicated_mesh.h"
+#include "libmesh/mesh_generation.h"
+#include "libmesh/parallel_object.h"
+#include "libmesh/vector_value.h"
+#include "libmesh/tensor_value.h"
+
+using namespace libMesh;
+using namespace Moose::FV;
+
+TEST(LimitersTest, limitVector)
+{
+  UpwindLimiter<Real> limiter;
+  VectorValue<Real> upwind(1, 1, 1);
+  VectorValue<Real> downwind(0, 0, 0);
+  TensorValue<Real> grad(0);
+
+  const char * argv[2] = {"foo", "\0"};
+  auto app = AppFactory::createAppShared("MooseUnitApp", 1, (char **)argv);
+  ReplicatedMesh mesh(app->comm(), /*dim=*/2);
+  MeshTools::Generation::build_square(mesh, 2, 2);
+  auto * const elem = mesh.elem_ptr(0);
+  for (const auto s : elem->side_index_range())
+    if (elem->neighbor_ptr(s))
+    {
+      auto * const neighbor = elem->neighbor_ptr(s);
+      FaceInfo fi(elem, s, neighbor);
+      auto result = interpolate(limiter, upwind, downwind, &grad, fi, true);
+      for (const auto d : make_range(unsigned(LIBMESH_DIM)))
+        EXPECT_EQ(result(d), 1);
+    }
+}

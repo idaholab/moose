@@ -87,6 +87,10 @@ public:
   using OutputData = typename MooseVariableField<OutputType>::OutputData;
   using DoFValue = typename MooseVariableField<OutputType>::DoFValue;
 
+  using FunctorArg = typename Moose::ADType<OutputType>::type;
+  using typename Moose::Functor<FunctorArg>::FunctorReturnType;
+  using typename Moose::Functor<FunctorArg>::ValueType;
+
   MooseVariableFE(const InputParameters & parameters);
 
   void clearDofIndices() override;
@@ -678,6 +682,24 @@ protected:
 
   /// Holder for all the data associated with the lower dimeensional element
   std::unique_ptr<MooseVariableData<OutputType>> _lower_data;
+
+private:
+  using typename Moose::Functor<FunctorArg>::FaceArg;
+  using typename Moose::Functor<FunctorArg>::ElemFromFaceArg;
+  using MooseVariableField<OutputType>::evaluate;
+  ValueType evaluate(const Elem * const &, unsigned int) const override final
+  {
+    mooseError("Elem functor overload not yet implemented for finite element variables");
+  }
+  ValueType evaluate(const ElemFromFaceArg &, unsigned int) const override final
+  {
+    mooseError(
+        "Elem-and-face-info functor overload not yet implemented for finite element variables");
+  }
+  ValueType evaluate(const FaceArg &, unsigned int) const override final
+  {
+    mooseError("Face info functor overload not yet implemented for finite element variables");
+  }
 };
 
 template <typename OutputType>

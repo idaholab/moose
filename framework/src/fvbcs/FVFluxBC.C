@@ -222,3 +222,43 @@ FVFluxBC::uOnGhost() const
   else
     return _u[_qp];
 }
+
+std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID>
+FVFluxBC::makeSidedFace(const bool fi_elem) const
+{
+  const auto ft = _face_info->faceType(_var.name());
+  const Elem * const elem = fi_elem ? &_face_info->elem() : _face_info->neighborPtr();
+
+  // Are we are on the side that the variable is defined on?
+  if (fi_elem == (ft == FaceInfo::VarFaceNeighbors::ELEM))
+  {
+    mooseAssert(elem, "This should be non-null");
+    return std::make_tuple(elem, _face_info, elem->subdomain_id());
+  }
+  else
+  {
+    const Elem * const elem_across = fi_elem ? _face_info->neighborPtr() : &_face_info->elem();
+    mooseAssert(elem_across,
+                "The elem across should be non-null and the element across should have dof indices "
+                "for this variable defined on it");
+    return std::make_tuple(elem, _face_info, elem_across->subdomain_id());
+  }
+}
+
+std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID>
+FVFluxBC::elemFromFace() const
+{
+  return makeSidedFace(true);
+}
+
+std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID>
+FVFluxBC::neighborFromFace() const
+{
+  return makeSidedFace(false);
+}
+
+std::pair<SubdomainID, SubdomainID>
+FVFluxBC::faceArgSubdomains() const
+{
+  return std::make_pair(std::get<2>(elemFromFace()), std::get<2>(neighborFromFace()));
+}

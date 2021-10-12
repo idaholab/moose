@@ -10,6 +10,7 @@
 #pragma once
 
 #include "FVFluxKernel.h"
+#include "CentralDifferenceLimiter.h"
 
 /**
  * A flux kernel for diffusion of momentum in porous media across cell faces
@@ -24,26 +25,24 @@ protected:
   ADReal computeQpResidual() override;
 
   /// the current element viscosity
-  const ADMaterialProperty<Real> & _mu_elem;
-  /// the neighbor element viscosity
-  const ADMaterialProperty<Real> & _mu_neighbor;
+  const Moose::Functor<ADReal> & _mu;
 
   /// the porosity
-  const VariableValue & _eps;
-  /// the neighbor element porosity
-  const VariableValue & _eps_neighbor;
+  const Moose::Functor<ADReal> & _eps;
 
   // Parameters for the gradient diffusion term
   /// Which momentum component this kernel applies to
   const int _index;
 
-  /// Velocity as material properties
-  const ADMaterialProperty<RealVectorValue> * _vel_elem;
-  const ADMaterialProperty<RealVectorValue> * _vel_neighbor;
+  /// Velocity as functors
+  const Moose::Functor<ADRealVectorValue> * const _vel;
 
   /// the porosity as a variable to be able to compute a face gradient
   const MooseVariableFVReal * const _eps_var;
 
   /// Whether to add the porosity gradient term, only for continuous porosity
   const bool _smooth_porosity;
+
+  /// The object used to perform average/central-difference interpolations
+  Moose::FV::CentralDifferenceLimiter<ADReal> _cd_limiter;
 };

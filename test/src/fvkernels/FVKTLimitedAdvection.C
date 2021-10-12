@@ -32,8 +32,8 @@ FVKTLimitedAdvection::validParams()
 FVKTLimitedAdvection::FVKTLimitedAdvection(const InputParameters & params)
   : FVFluxKernel(params),
     _velocity(getParam<RealVectorValue>("velocity")),
-    _limiter(Limiter::build(LimiterType(int(getParam<MooseEnum>("limiter"))))),
-    _cd_limiter(Limiter::build(LimiterType::CentralDifference)),
+    _limiter(Limiter<ADReal>::build(LimiterType(int(getParam<MooseEnum>("limiter"))))),
+    _cd_limiter(Limiter<ADReal>::build(LimiterType::CentralDifference)),
     _grad_u_elem(_var.adGradSln()),
     _grad_u_neighbor(_var.adGradSlnNeighbor()),
     _max_abs_eig(getADMaterialProperty<Real>("max_abs_eig")),
@@ -45,11 +45,11 @@ ADReal
 FVKTLimitedAdvection::computeQpResidual()
 {
   const auto phi_avg_f = interpolate(
-      *_cd_limiter, _u_elem[_qp], _u_neighbor[_qp], _grad_u_elem[_qp], *_face_info, true);
+      *_cd_limiter, _u_elem[_qp], _u_neighbor[_qp], &_grad_u_elem[_qp], *_face_info, true);
   const auto phi_elem =
-      interpolate(*_limiter, _u_elem[_qp], _u_neighbor[_qp], _grad_u_elem[_qp], *_face_info, true);
+      interpolate(*_limiter, _u_elem[_qp], _u_neighbor[_qp], &_grad_u_elem[_qp], *_face_info, true);
   const auto phi_neighbor = interpolate(
-      *_limiter, _u_neighbor[_qp], _u_elem[_qp], _grad_u_neighbor[_qp], *_face_info, false);
+      *_limiter, _u_neighbor[_qp], _u_elem[_qp], &_grad_u_neighbor[_qp], *_face_info, false);
 
   auto resid = _normal * _velocity * phi_avg_f;
   if (_add_artificial_diff)

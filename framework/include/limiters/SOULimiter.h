@@ -10,6 +10,7 @@
 #pragma once
 
 #include "Limiter.h"
+#include "MathFVUtils.h"
 
 namespace Moose
 {
@@ -19,10 +20,21 @@ namespace FV
  * Implements a limiter which reproduces the second-order-upwind scheme, defined by
  * $\beta(r_f) = r_f$
  */
-class SOULimiter : public Limiter
+template <typename T>
+class SOULimiter : public Limiter<T>
 {
 public:
-  ADReal operator()(const ADReal & r_f) const override final { return r_f; }
+  T operator()(const T & phi_upwind,
+               const T & phi_downwind,
+               const VectorValue<T> * grad_phi_upwind,
+               const RealVectorValue & dCD) const override final
+  {
+    mooseAssert(grad_phi_upwind, "SOU limiter requires a gradient");
+    const auto r_f = Moose::FV::rF(phi_upwind, phi_downwind, *grad_phi_upwind, dCD);
+    return r_f;
+  }
+  bool constant() const override final { return false; }
+  InterpMethod interpMethod() const override final { return InterpMethod::SOU; }
 
   SOULimiter() = default;
 };
