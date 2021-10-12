@@ -11,3 +11,5 @@
 
 // This header is created for CI purposes only
 #include "NodalMaxValueId.h"
+
+typedef NodalMaxValueId NodalProxyMaxValue;
