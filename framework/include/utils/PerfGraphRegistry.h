@@ -17,6 +17,7 @@
 class PerfGraph;
 class PerfGraphLivePrint;
 class PerfNode;
+void dataStore(std::ostream &, PerfGraph &, void *);
 
 namespace moose
 {
@@ -26,10 +27,6 @@ class PerfGraphRegistry;
 class PerfGraphSectionInfo;
 }
 }
-
-void dataStore(std::ostream & stream, moose::internal::PerfGraphSectionInfo & info, void * context);
-void dataLoad(std::istream & stream, moose::internal::PerfGraphSectionInfo & info, void * context);
-void dataLoad(std::istream & stream, PerfGraph & perf_graph, void * context);
 
 namespace moose
 {
@@ -146,15 +143,6 @@ public:
    */
   long unsigned int numSections() const;
 
-  /**
-   * @returns a thread safe copy of all of the SectionInfo objects
-   *
-   * WARNING: This is intended for use only in copy operations;
-   * it returns a _copy_. If you're looking for the info pertaining
-   * to a specific ID, use sectionInfo(id) instead
-   */
-  std::vector<PerfGraphSectionInfo> sectionInfo() const;
-
 private:
   PerfGraphRegistry();
 
@@ -202,12 +190,14 @@ private:
 
   /// So it can be constructed
   friend PerfGraphRegistry & getPerfGraphRegistry();
-
   /// This is only here so that PerfGraph can access readSectionInfo
   friend PerfGraph;
-
-  friend void ::dataLoad(std::istream &, PerfGraph &, void *);
+  // For accessing _id_to_section_info when storing the PerfGraph
+  friend void ::dataStore(std::ostream &, PerfGraph &, void *);
 };
 
 }
 }
+
+void dataStore(std::ostream & stream, moose::internal::PerfGraphSectionInfo & info, void * context);
+void dataLoad(std::istream & stream, moose::internal::PerfGraphSectionInfo & info, void * context);

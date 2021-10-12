@@ -501,8 +501,7 @@ dataStore(std::ostream & stream, PerfGraph & perf_graph, void *)
 {
   // We need to store the registry id -> section info map so that we can add
   // registered sections that may not be added yet during recover
-  auto section_info = moose::internal::getPerfGraphRegistry().sectionInfo();
-  dataStore(stream, section_info, nullptr);
+  dataStore(stream, perf_graph._perf_graph_registry._id_to_section_info, nullptr);
 
   // Update before serializing the nodes so that the time/memory/calls are correct
   perf_graph.update();
@@ -518,8 +517,13 @@ dataLoad(std::istream & stream, PerfGraph & perf_graph, void *)
   std::vector<moose::internal::PerfGraphSectionInfo> recovered_section_info;
   dataLoad(stream, recovered_section_info, nullptr);
   for (const auto & info : recovered_section_info)
-    moose::internal::getPerfGraphRegistry().actuallyRegisterSection(
-        info._name, info._level, info._live_message, info._print_dots);
+  {
+    if (info._live_message.size())
+      perf_graph._perf_graph_registry.registerSection(
+          info._name, info._level, info._live_message, info._print_dots);
+    else
+      perf_graph._perf_graph_registry.registerSection(info._name, info._level);
+  }
 
   // Update the current node time/memory/calls before loading the nodes as the load
   // will append information to current nodes that exist

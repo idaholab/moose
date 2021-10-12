@@ -136,13 +136,6 @@ PerfGraphRegistry::readSectionInfo(PerfID section_id)
   return _id_to_section_info[section_id];
 }
 
-std::vector<PerfGraphSectionInfo>
-PerfGraphRegistry::sectionInfo() const
-{
-  std::lock_guard<std::mutex> lock(_id_to_section_info_mutex);
-  auto info = _id_to_section_info;
-  return info;
-}
 }
 }
 
@@ -155,6 +148,7 @@ dataStore(std::ostream & stream, moose::internal::PerfGraphSectionInfo & info, v
   dataStore(stream, info._live_message, context);
   dataStore(stream, info._print_dots, context);
 }
+
 void
 dataLoad(std::istream & stream, moose::internal::PerfGraphSectionInfo & info, void * context)
 {
