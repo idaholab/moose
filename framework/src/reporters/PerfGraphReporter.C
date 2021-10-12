@@ -21,7 +21,7 @@ PerfGraphReporter::validParams()
 
   // Because the PerfGraphReporter does all of its execution within the
   // to_json specialization (does not fill the structure within execute()),
-  // this allows us to obey the user's requeste for execute_on
+  // this allows us to obey the user's request for execute_on
   params.set<bool>("_always_store") = false;
 
   return params;

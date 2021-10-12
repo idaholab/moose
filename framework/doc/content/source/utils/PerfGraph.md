@@ -129,7 +129,7 @@ What `TIME_SECTION` is doing is creating a `PerfGuard` object using the passed i
 
 ## Retrieving Time
 
-An object that inherits from `PerfGraphInterface` can retrieve the time for a registered section by calling `_perf_graph.getTime()` (or `_perf_graph.getSelf`/`Children`/`TotalTime()`).  These functions return a reference to where the time will be updated for that particular section.  In the normal MOOSE way, the object should hold onto that reference and just use the value of it when it needs to know the time a section has taken.  There is one small issue though... `_perf_graph.update()` should be called to ensure that the time held by the referene is up to date.
+An object that inherits from `PerfGraphInterface` can retrieve the time for a registered section by calling `_perf_graph.getTime()` (or `_perf_graph.getSelf`/`Children`/`TotalTime()`).  These functions return a reference to where the time will be updated for that particular section.  In the normal MOOSE way, the object should hold onto that reference and just use the value of it when it needs to know the time a section has taken.  There is one small issue though... `_perf_graph.update()` should be called to ensure that the time held by the reference is up to date.
 
 ## The `PerfGraph` Internals
 
