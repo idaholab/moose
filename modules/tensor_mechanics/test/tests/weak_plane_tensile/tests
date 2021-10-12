@@ -1,4 +1,6 @@
 [Tests]
+  issues = '#3878 #4150 #4507'
+  design = '/TensorMechanicsPlasticWeakPlaneTensile.md'
   [./except1]
     type = 'RunException'
     input = 'except1.i'
@@ -7,32 +9,32 @@
   [./small1]
     type = 'CSVDiff'
     input = 'small_deform1.i'
-    csvdiff = 'small_deform1.csv'
+    csvdiff = 'small_deform1_out.csv'
     rel_err = 1.0E-5
   [../]
   [./small1N]
     type = 'CSVDiff'
     input = 'small_deform1N.i'
-    csvdiff = 'small_deform1N.csv'
+    csvdiff = 'small_deform1N_out.csv'
     rel_err = 1.0E-5
   [../]
   [./small2]
     type = 'CSVDiff'
     input = 'small_deform2.i'
-    csvdiff = 'small_deform2.csv'
+    csvdiff = 'small_deform2_out.csv'
     rel_err = 1.0E-5
   [../]
   [./large1]
     type = 'Exodiff'
     input = 'large_deform1.i'
-    exodiff = 'large_deform1.e'
+    exodiff = 'large_deform1_out.e'
     abs_zero = 1.0E-6
     recover = false
   [../]
   [./large2]
     type = 'Exodiff'
     input = 'large_deform2.i'
-    exodiff = 'large_deform2.e'
+    exodiff = 'large_deform2_out.e'
     abs_zero = 1.0E-6
     recover = false
   [../]
@@ -40,28 +42,28 @@
   [./small_hard1]
     type = 'CSVDiff'
     input = 'small_deform_hard1.i'
-    csvdiff = 'small_deform_hard1.csv'
+    csvdiff = 'small_deform_hard1_out.csv'
     rel_err = 1.0E-5
     recover = false
   [../]
   [./small_hard2]
     type = 'CSVDiff'
     input = 'small_deform_hard2.i'
-    csvdiff = 'small_deform_hard2.csv'
+    csvdiff = 'small_deform_hard2_out.csv'
     rel_err = 1.0E-5
     recover = false
   [../]
   [./small_hard3]
     type = 'CSVDiff'
     input = 'small_deform_hard3.i'
-    csvdiff = 'small_deform_hard3.csv'
+    csvdiff = 'small_deform_hard3_out.csv'
     rel_err = 1.0E-5
     recover = false
   [../]
   [./small_hard_cubic]
     type = 'CSVDiff'
     input = 'small_deform_hard_cubic.i'
-    csvdiff = 'small_deform_hard_cubic.csv'
+    csvdiff = 'small_deform_hard_cubic_out.csv'
     rel_err = 1.0E-5
     recover = false
   [../]
