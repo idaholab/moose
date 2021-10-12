@@ -34,23 +34,23 @@ PolygonMeshGeneratorBase::generate()
 }
 
 std::unique_ptr<ReplicatedMesh>
-PolygonMeshGeneratorBase::build_simple_slice(std::unique_ptr<ReplicatedMesh> mesh,
-                                             std::vector<Real> ring_radii,
-                                             std::vector<unsigned int> rings,
-                                             std::vector<Real> ducts_center_dist,
-                                             std::vector<unsigned int> ducts_layers,
-                                             bool has_rings,
-                                             bool has_ducts,
-                                             Real pitch,
-                                             unsigned int num_sectors_per_side,
-                                             unsigned int background_intervals,
-                                             dof_id_type * const node_id_background_meta,
-                                             const unsigned int side_number,
-                                             const unsigned int side_index,
-                                             const std::vector<Real> azimuthal_tangent,
-                                             const subdomain_id_type block_id_shift,
-                                             const bool quad_center_elements,
-                                             const boundary_id_type boundary_id_shift)
+PolygonMeshGeneratorBase::buildSimpleSlice(std::unique_ptr<ReplicatedMesh> mesh,
+                                           const std::vector<Real> ring_radii,
+                                           const std::vector<unsigned int> rings,
+                                           std::vector<Real> ducts_center_dist,
+                                           const std::vector<unsigned int> ducts_layers,
+                                           const bool has_rings,
+                                           const bool has_ducts,
+                                           const Real pitch,
+                                           const unsigned int num_sectors_per_side,
+                                           const unsigned int background_intervals,
+                                           dof_id_type * const node_id_background_meta,
+                                           const unsigned int side_number,
+                                           const unsigned int side_index,
+                                           const std::vector<Real> azimuthal_tangent,
+                                           const subdomain_id_type block_id_shift,
+                                           const bool quad_center_elements,
+                                           const boundary_id_type boundary_id_shift)
 {
   unsigned int angle_number =
       azimuthal_tangent.size() == 0 ? num_sectors_per_side : (azimuthal_tangent.size() - 1);
@@ -99,13 +99,13 @@ PolygonMeshGeneratorBase::build_simple_slice(std::unique_ptr<ReplicatedMesh> mes
       ring_radii_0 = pitch / 2.0 / (Real)background_intervals;
     ring_radii_0 = ring_radii_0 / div_num * (div_num - 1);
 
-    mesh = center_nodes(dynamic_pointer_cast<ReplicatedMesh>(mesh),
-                        side_number,
-                        div_num,
-                        ring_radii_0,
-                        &node_id,
-                        &nodes,
-                        &id_array);
+    mesh = centerNodes(dynamic_pointer_cast<ReplicatedMesh>(mesh),
+                       side_number,
+                       div_num,
+                       ring_radii_0,
+                       &node_id,
+                       &nodes,
+                       &id_array);
   }
   else
   {
@@ -115,15 +115,15 @@ PolygonMeshGeneratorBase::build_simple_slice(std::unique_ptr<ReplicatedMesh> mes
 
   // create nodes for the ring regions
   if (has_rings)
-    mesh = ring_nodes(dynamic_pointer_cast<ReplicatedMesh>(mesh),
-                      ring_radii,
-                      rings,
-                      num_sectors_per_side,
-                      &node_id,
-                      corner_p,
-                      corner_to_corner,
-                      &nodes,
-                      azimuthal_tangent);
+    mesh = ringNodes(dynamic_pointer_cast<ReplicatedMesh>(mesh),
+                     ring_radii,
+                     rings,
+                     num_sectors_per_side,
+                     &node_id,
+                     corner_p,
+                     corner_to_corner,
+                     &nodes,
+                     azimuthal_tangent);
 
   // add nodes in background region; the background region is defined as the area between the
   // outermost pin (if there is a pin; if no pin, the center) and the innermost hex/duct; if
@@ -155,49 +155,49 @@ PolygonMeshGeneratorBase::build_simple_slice(std::unique_ptr<ReplicatedMesh> mes
   *node_id_background_meta = node_id;
 
   // create nodes for background region
-  mesh = background_nodes(dynamic_pointer_cast<ReplicatedMesh>(mesh),
-                          num_sectors_per_side,
-                          background_intervals,
-                          background_corner_distance,
-                          background_corner_radial_interval_length,
-                          &node_id,
-                          corner_p,
-                          corner_to_corner,
-                          &nodes,
-                          background_in,
-                          azimuthal_tangent);
+  mesh = backgroundNodes(dynamic_pointer_cast<ReplicatedMesh>(mesh),
+                         num_sectors_per_side,
+                         background_intervals,
+                         background_corner_distance,
+                         background_corner_radial_interval_length,
+                         &node_id,
+                         corner_p,
+                         corner_to_corner,
+                         &nodes,
+                         background_in,
+                         azimuthal_tangent);
 
   // create nodes for duct regions
   if (has_ducts)
-    mesh = duct_nodes(dynamic_pointer_cast<ReplicatedMesh>(mesh),
-                      &ducts_center_dist,
-                      ducts_layers,
-                      num_sectors_per_side,
-                      &node_id,
-                      corner_p,
-                      corner_to_corner,
-                      &nodes,
-                      azimuthal_tangent);
+    mesh = ductNodes(dynamic_pointer_cast<ReplicatedMesh>(mesh),
+                     &ducts_center_dist,
+                     ducts_layers,
+                     num_sectors_per_side,
+                     &node_id,
+                     corner_p,
+                     corner_to_corner,
+                     &nodes,
+                     azimuthal_tangent);
 
   // Assign elements, boundaries, and subdomains;
   // Add Tri3 or Quad4 mesh into innermost (central) region
   if (quad_center_elements)
   {
-    mesh = cen_quad_elem_def(dynamic_pointer_cast<ReplicatedMesh>(mesh),
-                             div_num,
-                             nodes,
-                             block_id_shift,
-                             boundary_id_shift,
-                             &id_array);
+    mesh = cenQuadElemDef(dynamic_pointer_cast<ReplicatedMesh>(mesh),
+                          div_num,
+                          nodes,
+                          block_id_shift,
+                          boundary_id_shift,
+                          &id_array);
   }
   else
   {
-    mesh = cen_tri_elem_def(dynamic_pointer_cast<ReplicatedMesh>(mesh),
-                            num_sectors_per_side,
-                            nodes,
-                            azimuthal_tangent,
-                            block_id_shift,
-                            boundary_id_shift);
+    mesh = cenTriElemDef(dynamic_pointer_cast<ReplicatedMesh>(mesh),
+                         num_sectors_per_side,
+                         nodes,
+                         azimuthal_tangent,
+                         block_id_shift,
+                         boundary_id_shift);
   }
 
   // Add Quad4 mesh into outer circle
@@ -225,27 +225,27 @@ PolygonMeshGeneratorBase::build_simple_slice(std::unique_ptr<ReplicatedMesh> mes
       subdomain_rings.push_back(ducts_layers[i]);
   }
 
-  mesh = quad_elem_def(dynamic_pointer_cast<ReplicatedMesh>(mesh),
-                       num_sectors_per_side,
-                       subdomain_rings,
-                       nodes,
-                       side_index,
-                       azimuthal_tangent,
-                       block_id_shift,
-                       quad_center_elements ? (div_num * div_num - 1) : 0,
-                       boundary_id_shift);
+  mesh = quadElemDef(dynamic_pointer_cast<ReplicatedMesh>(mesh),
+                     num_sectors_per_side,
+                     subdomain_rings,
+                     nodes,
+                     side_index,
+                     azimuthal_tangent,
+                     block_id_shift,
+                     quad_center_elements ? (div_num * div_num - 1) : 0,
+                     boundary_id_shift);
 
   return mesh;
 }
 
 std::unique_ptr<ReplicatedMesh>
-PolygonMeshGeneratorBase::center_nodes(std::unique_ptr<ReplicatedMesh> mesh,
-                                       const unsigned int side_number,
-                                       const unsigned int div_num,
-                                       const Real ring_radii_0,
-                                       dof_id_type * const node_id,
-                                       std::vector<Node *> * const nodes,
-                                       std::vector<std::vector<dof_id_type>> * const id_array)
+PolygonMeshGeneratorBase::centerNodes(std::unique_ptr<ReplicatedMesh> mesh,
+                                      const unsigned int side_number,
+                                      const unsigned int div_num,
+                                      const Real ring_radii_0,
+                                      dof_id_type * const node_id,
+                                      std::vector<Node *> * const nodes,
+                                      std::vector<std::vector<dof_id_type>> * const id_array)
 {
   const std::pair<Real, Real> p_origin = std::make_pair(0.0, 0.0);
   const std::pair<Real, Real> p_bottom =
@@ -308,7 +308,7 @@ PolygonMeshGeneratorBase::center_nodes(std::unique_ptr<ReplicatedMesh> mesh,
       std::pair<Real, Real> p4 = std::make_pair(
           (p_top.first * (div_num - 1 - id_y) + p_diag.first * id_y) / (div_num - 1),
           (p_top.second * (div_num - 1 - id_y) + p_diag.second * id_y) / (div_num - 1));
-      std::pair<Real, Real> pc = four_point_intercept(p1, p2, p3, p4);
+      std::pair<Real, Real> pc = fourPointIntercept(p1, p2, p3, p4);
       Point p = Point(pc.first, pc.second, 0.0);
       (*nodes)[*node_id] = mesh->add_point(p, *node_id);
       (*id_array)[id_x][id_y] = *node_id;
@@ -324,15 +324,15 @@ PolygonMeshGeneratorBase::center_nodes(std::unique_ptr<ReplicatedMesh> mesh,
 }
 
 std::unique_ptr<ReplicatedMesh>
-PolygonMeshGeneratorBase::ring_nodes(std::unique_ptr<ReplicatedMesh> mesh,
-                                     std::vector<Real> ring_radii,
-                                     const std::vector<unsigned int> rings,
-                                     const unsigned int num_sectors_per_side,
-                                     dof_id_type * const node_id,
-                                     const Real corner_p[2][2],
-                                     const Real corner_to_corner,
-                                     std::vector<Node *> * const nodes,
-                                     const std::vector<Real> azimuthal_tangent)
+PolygonMeshGeneratorBase::ringNodes(std::unique_ptr<ReplicatedMesh> mesh,
+                                    const std::vector<Real> ring_radii,
+                                    const std::vector<unsigned int> rings,
+                                    const unsigned int num_sectors_per_side,
+                                    dof_id_type * const node_id,
+                                    const Real corner_p[2][2],
+                                    const Real corner_to_corner,
+                                    std::vector<Node *> * const nodes,
+                                    const std::vector<Real> azimuthal_tangent)
 {
   unsigned int angle_number =
       azimuthal_tangent.size() == 0 ? num_sectors_per_side : (azimuthal_tangent.size() - 1);
@@ -398,17 +398,17 @@ PolygonMeshGeneratorBase::ring_nodes(std::unique_ptr<ReplicatedMesh> mesh,
 }
 
 std::unique_ptr<ReplicatedMesh>
-PolygonMeshGeneratorBase::background_nodes(std::unique_ptr<ReplicatedMesh> mesh,
-                                           const unsigned int num_sectors_per_side,
-                                           const unsigned int background_intervals,
-                                           const Real background_corner_distance,
-                                           const Real background_corner_radial_interval_length,
-                                           dof_id_type * const node_id,
-                                           const Real corner_p[2][2],
-                                           const Real corner_to_corner,
-                                           std::vector<Node *> * const nodes,
-                                           const Real background_in,
-                                           const std::vector<Real> azimuthal_tangent)
+PolygonMeshGeneratorBase::backgroundNodes(std::unique_ptr<ReplicatedMesh> mesh,
+                                          const unsigned int num_sectors_per_side,
+                                          const unsigned int background_intervals,
+                                          const Real background_corner_distance,
+                                          const Real background_corner_radial_interval_length,
+                                          dof_id_type * const node_id,
+                                          const Real corner_p[2][2],
+                                          const Real corner_to_corner,
+                                          std::vector<Node *> * const nodes,
+                                          const Real background_in,
+                                          const std::vector<Real> azimuthal_tangent)
 {
   unsigned int angle_number =
       azimuthal_tangent.size() == 0 ? num_sectors_per_side : (azimuthal_tangent.size() - 1);
@@ -472,15 +472,15 @@ PolygonMeshGeneratorBase::background_nodes(std::unique_ptr<ReplicatedMesh> mesh,
 }
 
 std::unique_ptr<ReplicatedMesh>
-PolygonMeshGeneratorBase::duct_nodes(std::unique_ptr<ReplicatedMesh> mesh,
-                                     std::vector<Real> * ducts_center_dist,
-                                     const std::vector<unsigned int> ducts_layers,
-                                     const unsigned int num_sectors_per_side,
-                                     dof_id_type * const node_id,
-                                     const Real corner_p[2][2],
-                                     const Real corner_to_corner,
-                                     std::vector<Node *> * const nodes,
-                                     const std::vector<Real> azimuthal_tangent)
+PolygonMeshGeneratorBase::ductNodes(std::unique_ptr<ReplicatedMesh> mesh,
+                                    std::vector<Real> * const ducts_center_dist,
+                                    const std::vector<unsigned int> ducts_layers,
+                                    const unsigned int num_sectors_per_side,
+                                    dof_id_type * const node_id,
+                                    const Real corner_p[2][2],
+                                    const Real corner_to_corner,
+                                    std::vector<Node *> * const nodes,
+                                    const std::vector<Real> azimuthal_tangent)
 {
   {
     unsigned int angle_number =
@@ -541,12 +541,12 @@ PolygonMeshGeneratorBase::duct_nodes(std::unique_ptr<ReplicatedMesh> mesh,
 }
 
 std::unique_ptr<ReplicatedMesh>
-PolygonMeshGeneratorBase::cen_quad_elem_def(std::unique_ptr<ReplicatedMesh> mesh,
-                                            const unsigned int div_num,
-                                            const std::vector<Node *> nodes,
-                                            const subdomain_id_type block_id_shift,
-                                            const boundary_id_type boundary_id_shift,
-                                            std::vector<std::vector<dof_id_type>> * const id_array)
+PolygonMeshGeneratorBase::cenQuadElemDef(std::unique_ptr<ReplicatedMesh> mesh,
+                                         const unsigned int div_num,
+                                         const std::vector<Node *> nodes,
+                                         const subdomain_id_type block_id_shift,
+                                         const boundary_id_type boundary_id_shift,
+                                         std::vector<std::vector<dof_id_type>> * const id_array)
 {
 
   BoundaryInfo & boundary_info = mesh->get_boundary_info();
@@ -593,12 +593,12 @@ PolygonMeshGeneratorBase::cen_quad_elem_def(std::unique_ptr<ReplicatedMesh> mesh
 }
 
 std::unique_ptr<ReplicatedMesh>
-PolygonMeshGeneratorBase::cen_tri_elem_def(std::unique_ptr<ReplicatedMesh> mesh,
-                                           const unsigned int num_sectors_per_side,
-                                           const std::vector<Node *> nodes,
-                                           const std::vector<Real> azimuthal_tangent,
-                                           const subdomain_id_type block_id_shift,
-                                           const boundary_id_type boundary_id_shift)
+PolygonMeshGeneratorBase::cenTriElemDef(std::unique_ptr<ReplicatedMesh> mesh,
+                                        const unsigned int num_sectors_per_side,
+                                        const std::vector<Node *> nodes,
+                                        const std::vector<Real> azimuthal_tangent,
+                                        const subdomain_id_type block_id_shift,
+                                        const boundary_id_type boundary_id_shift)
 {
   unsigned int angle_number =
       azimuthal_tangent.size() == 0 ? num_sectors_per_side : (azimuthal_tangent.size() - 1);
@@ -621,15 +621,15 @@ PolygonMeshGeneratorBase::cen_tri_elem_def(std::unique_ptr<ReplicatedMesh> mesh,
 }
 
 std::unique_ptr<ReplicatedMesh>
-PolygonMeshGeneratorBase::quad_elem_def(std::unique_ptr<ReplicatedMesh> mesh,
-                                        const unsigned int num_sectors_per_side,
-                                        const std::vector<unsigned int> subdomain_rings,
-                                        const std::vector<Node *> nodes,
-                                        const unsigned int side_index,
-                                        const std::vector<Real> azimuthal_tangent,
-                                        const subdomain_id_type block_id_shift,
-                                        const dof_id_type nodeid_shift,
-                                        const boundary_id_type boundary_id_shift)
+PolygonMeshGeneratorBase::quadElemDef(std::unique_ptr<ReplicatedMesh> mesh,
+                                      const unsigned int num_sectors_per_side,
+                                      const std::vector<unsigned int> subdomain_rings,
+                                      const std::vector<Node *> nodes,
+                                      const unsigned int side_index,
+                                      const std::vector<Real> azimuthal_tangent,
+                                      const subdomain_id_type block_id_shift,
+                                      const dof_id_type nodeid_shift,
+                                      const boundary_id_type boundary_id_shift)
 {
   unsigned int angle_number =
       azimuthal_tangent.size() == 0 ? num_sectors_per_side : (azimuthal_tangent.size() - 1);
@@ -684,7 +684,7 @@ PolygonMeshGeneratorBase::quad_elem_def(std::unique_ptr<ReplicatedMesh> mesh,
 }
 
 Real
-PolygonMeshGeneratorBase::radius_correction_factor(const std::vector<Real> azimuthal_list)
+PolygonMeshGeneratorBase::radiusCorrectionFactor(const std::vector<Real> azimuthal_list)
 {
   std::vector<Real> azimuthal_list_alt;
   Real tmp_acc = 0.0;
@@ -699,7 +699,7 @@ PolygonMeshGeneratorBase::radius_correction_factor(const std::vector<Real> azimu
 }
 
 std::unique_ptr<ReplicatedMesh>
-PolygonMeshGeneratorBase::build_simple_peripheral(
+PolygonMeshGeneratorBase::buildSimplePeripheral(
     std::unique_ptr<ReplicatedMesh> mesh,
     const unsigned int num_sectors_per_side,
     const unsigned int peripheral_invervals,
@@ -715,36 +715,36 @@ PolygonMeshGeneratorBase::build_simple_peripheral(
   {
     for (unsigned int j = 0; j <= num_sectors_per_side / 2; j++)
     {
-      positions_p = point_interpolate(positions_inner[0].first,
-                                      positions_inner[0].second,
-                                      d_positions_outer[0].first,
-                                      d_positions_outer[0].second,
-                                      positions_inner[1].first,
-                                      positions_inner[1].second,
-                                      d_positions_outer[1].first,
-                                      d_positions_outer[1].second,
-                                      i,
-                                      j,
-                                      num_sectors_per_side,
-                                      peripheral_invervals);
+      positions_p = pointInterpolate(positions_inner[0].first,
+                                     positions_inner[0].second,
+                                     d_positions_outer[0].first,
+                                     d_positions_outer[0].second,
+                                     positions_inner[1].first,
+                                     positions_inner[1].second,
+                                     d_positions_outer[1].first,
+                                     d_positions_outer[1].second,
+                                     i,
+                                     j,
+                                     num_sectors_per_side,
+                                     peripheral_invervals);
       Point p = Point(positions_p.first, positions_p.second, 0.0);
       (*nodes)[node_id] = mesh->add_point(p, node_id);
       node_id++;
     }
     for (unsigned int j = 1; j <= num_sectors_per_side / 2; j++)
     {
-      positions_p = point_interpolate(positions_inner[1].first,
-                                      positions_inner[1].second,
-                                      d_positions_outer[1].first,
-                                      d_positions_outer[1].second,
-                                      positions_inner[2].first,
-                                      positions_inner[2].second,
-                                      d_positions_outer[2].first,
-                                      d_positions_outer[2].second,
-                                      i,
-                                      j,
-                                      num_sectors_per_side,
-                                      peripheral_invervals);
+      positions_p = pointInterpolate(positions_inner[1].first,
+                                     positions_inner[1].second,
+                                     d_positions_outer[1].first,
+                                     d_positions_outer[1].second,
+                                     positions_inner[2].first,
+                                     positions_inner[2].second,
+                                     d_positions_outer[2].first,
+                                     d_positions_outer[2].second,
+                                     i,
+                                     j,
+                                     num_sectors_per_side,
+                                     peripheral_invervals);
       Point p = Point(positions_p.first, positions_p.second, 0.0);
       (*nodes)[node_id] = mesh->add_point(p, node_id);
       node_id++;
@@ -786,18 +786,18 @@ PolygonMeshGeneratorBase::build_simple_peripheral(
 }
 
 std::pair<Real, Real>
-PolygonMeshGeneratorBase::point_interpolate(const Real pi_1_x,
-                                            const Real pi_1_y,
-                                            const Real d_po_1_x,
-                                            const Real d_po_1_y,
-                                            const Real pi_2_x,
-                                            const Real pi_2_y,
-                                            const Real d_po_2_x,
-                                            const Real d_po_2_y,
-                                            const unsigned int i,
-                                            const unsigned int j,
-                                            const unsigned int num_sectors_per_side,
-                                            const unsigned int peripheral_invervals)
+PolygonMeshGeneratorBase::pointInterpolate(const Real pi_1_x,
+                                           const Real pi_1_y,
+                                           const Real d_po_1_x,
+                                           const Real d_po_1_y,
+                                           const Real pi_2_x,
+                                           const Real pi_2_y,
+                                           const Real d_po_2_x,
+                                           const Real d_po_2_y,
+                                           const unsigned int i,
+                                           const unsigned int j,
+                                           const unsigned int num_sectors_per_side,
+                                           const unsigned int peripheral_invervals)
 {
   auto position_px_inner =
       (pi_1_x * (num_sectors_per_side / 2.0 - j) + pi_2_x * j) / (num_sectors_per_side / 2.0);
@@ -813,7 +813,7 @@ PolygonMeshGeneratorBase::point_interpolate(const Real pi_1_x,
 }
 
 std::unique_ptr<ReplicatedMesh>
-PolygonMeshGeneratorBase::add_peripheral_mesh(
+PolygonMeshGeneratorBase::addPeripheralMesh(
     const unsigned int pattern,
     const Real pitch,
     const std::vector<Real> extra_dist,
@@ -853,12 +853,12 @@ PolygonMeshGeneratorBase::add_peripheral_mesh(
   // Loop to calculate the positions of the boundaries.
   for (unsigned int i = 0; i < extra_dist.size(); i++)
   {
-    position_setup(&positions_inner,
-                   &d_positions_outer,
-                   i == 0 ? 0.0 : extra_dist[i - 1],
-                   extra_dist[i],
-                   pitch,
-                   i);
+    positionSetup(positions_inner,
+                  d_positions_outer,
+                  i == 0 ? 0.0 : extra_dist[i - 1],
+                  extra_dist[i],
+                  pitch,
+                  i);
 
     num_total_nodes_p = (num_sectors_per_side_array[pattern] + 1) *
                         (peripheral_duct_intervals[i] + 1); // use uniformed azi first
@@ -875,13 +875,13 @@ PolygonMeshGeneratorBase::add_peripheral_mesh(
             d_positions_outer[outer_index[peripheral_index][vector_index]]);
       }
       auto mesh_p = buildReplicatedMesh(2); // create an empty 2D mesh
-      auto meshp0 = build_simple_peripheral(dynamic_pointer_cast<ReplicatedMesh>(mesh_p),
-                                            num_sectors_per_side_array[pattern],
-                                            peripheral_duct_intervals[i],
-                                            sub_positions_inner,
-                                            sub_d_positions_outer,
-                                            &nodes_p,
-                                            i);
+      auto meshp0 = buildSimplePeripheral(dynamic_pointer_cast<ReplicatedMesh>(mesh_p),
+                                          num_sectors_per_side_array[pattern],
+                                          peripheral_duct_intervals[i],
+                                          sub_positions_inner,
+                                          sub_d_positions_outer,
+                                          &nodes_p,
+                                          i);
       ReplicatedMesh other_mesh(*meshp0);
       // rotate the peripheral mesh to the desired side of the hexagon.
       MeshTools::Modification::rotate(other_mesh, rotation_angle, 0, 0);
@@ -895,16 +895,15 @@ PolygonMeshGeneratorBase::add_peripheral_mesh(
 }
 
 void
-PolygonMeshGeneratorBase::position_setup(
-    std::vector<std::pair<Real, Real>> * const positions_inner,
-    std::vector<std::pair<Real, Real>> * const d_positions_outer,
-    const Real extra_dist_in,
-    const Real extra_dist_out,
-    const Real pitch,
-    const unsigned int radial_index)
+PolygonMeshGeneratorBase::positionSetup(std::vector<std::pair<Real, Real>> & positions_inner,
+                                        std::vector<std::pair<Real, Real>> & d_positions_outer,
+                                        const Real extra_dist_in,
+                                        const Real extra_dist_out,
+                                        const Real pitch,
+                                        const unsigned int radial_index)
 {
-  (*positions_inner).resize(0);
-  (*d_positions_outer).resize(0);
+  positions_inner.resize(0);
+  d_positions_outer.resize(0);
 
   // Nine sets of positions are generated here, as shown below.
   // CORNER MESH Peripheral {0 1 2}, {2 3 4} and {4 5 6}
@@ -933,100 +932,80 @@ PolygonMeshGeneratorBase::position_setup(
   //               .       .
   //                   .
 
-  (*positions_inner)
-      .push_back(std::make_pair(
-          -pitch / 2.0,
-          std::sqrt(3.0) * pitch / 6.0 +
-              (radial_index != 0 ? std::sqrt(3.0) * pitch / 6.0 + extra_dist_in : 0.0)));
-  (*positions_inner)
-      .push_back(std::make_pair(
-          -pitch / 4.0,
-          std::sqrt(3.0) * pitch / 4.0 +
-              (radial_index != 0 ? std::sqrt(3.0) * pitch / 12.0 + extra_dist_in : 0.0)));
-  (*positions_inner)
-      .push_back(std::make_pair(
-          0.0, std::sqrt(3.0) * pitch / 3.0 + (radial_index != 0 ? extra_dist_in : 0.0)));
-  (*positions_inner)
-      .push_back(std::make_pair(
-          pitch / 4.0 +
-              (radial_index != 0 ? pitch / 12.0 + std::sqrt(3.0) * extra_dist_in / 3.0 : 0.0),
-          std::sqrt(3.0) * pitch / 4.0 +
-              (radial_index != 0 ? pitch * std::sqrt(3.0) / 12.0 + extra_dist_in : 0.0)));
-  (*positions_inner)
-      .push_back(std::make_pair(
-          pitch / 2.0 + (radial_index != 0 ? std::sqrt(3.0) * extra_dist_in / 2.0 : 0.0),
-          std::sqrt(3.0) * pitch / 6.0 + (radial_index != 0 ? extra_dist_in / 2.0 : 0.0)));
-  (*positions_inner)
-      .push_back(std::make_pair(
-          pitch / 2.0 +
-              (radial_index != 0 ? pitch / 8.0 + std::sqrt(3.0) * extra_dist_in / 2.0 : 0.0),
-          0.0 + (radial_index != 0 ? std::sqrt(3.0) * pitch / 24.0 + extra_dist_in / 2.0 : 0.0)));
-  (*positions_inner)
-      .push_back(std::make_pair(
-          pitch / 2.0 +
-              (radial_index != 0 ? pitch / 4.0 + std::sqrt(3.0) * extra_dist_in / 2.0 : 0.0),
-          -std::sqrt(3.0) * pitch / 6.0 +
-              (radial_index != 0 ? std::sqrt(3.0) * pitch / 12.0 + extra_dist_in / 2.0 : 0.0)));
-  (*positions_inner)
-      .push_back(std::make_pair(
-          pitch / 4.0,
-          std::sqrt(3.0) * pitch / 4.0 +
-              (radial_index != 0 ? std::sqrt(3.0) * pitch / 12.0 + extra_dist_in : 0.0)));
-  (*positions_inner)
-      .push_back(std::make_pair(
-          pitch / 2.0,
-          std::sqrt(3.0) * pitch / 6.0 +
-              (radial_index != 0 ? std::sqrt(3.0) * pitch / 6.0 + extra_dist_in : 0.0)));
+  positions_inner.push_back(
+      std::make_pair(-pitch / 2.0,
+                     std::sqrt(3.0) * pitch / 6.0 +
+                         (radial_index != 0 ? std::sqrt(3.0) * pitch / 6.0 + extra_dist_in : 0.0)));
+  positions_inner.push_back(std::make_pair(
+      -pitch / 4.0,
+      std::sqrt(3.0) * pitch / 4.0 +
+          (radial_index != 0 ? std::sqrt(3.0) * pitch / 12.0 + extra_dist_in : 0.0)));
+  positions_inner.push_back(std::make_pair(
+      0.0, std::sqrt(3.0) * pitch / 3.0 + (radial_index != 0 ? extra_dist_in : 0.0)));
+  positions_inner.push_back(std::make_pair(
+      pitch / 4.0 + (radial_index != 0 ? pitch / 12.0 + std::sqrt(3.0) * extra_dist_in / 3.0 : 0.0),
+      std::sqrt(3.0) * pitch / 4.0 +
+          (radial_index != 0 ? pitch * std::sqrt(3.0) / 12.0 + extra_dist_in : 0.0)));
+  positions_inner.push_back(std::make_pair(
+      pitch / 2.0 + (radial_index != 0 ? std::sqrt(3.0) * extra_dist_in / 2.0 : 0.0),
+      std::sqrt(3.0) * pitch / 6.0 + (radial_index != 0 ? extra_dist_in / 2.0 : 0.0)));
+  positions_inner.push_back(std::make_pair(
+      pitch / 2.0 + (radial_index != 0 ? pitch / 8.0 + std::sqrt(3.0) * extra_dist_in / 2.0 : 0.0),
+      0.0 + (radial_index != 0 ? std::sqrt(3.0) * pitch / 24.0 + extra_dist_in / 2.0 : 0.0)));
+  positions_inner.push_back(std::make_pair(
+      pitch / 2.0 + (radial_index != 0 ? pitch / 4.0 + std::sqrt(3.0) * extra_dist_in / 2.0 : 0.0),
+      -std::sqrt(3.0) * pitch / 6.0 +
+          (radial_index != 0 ? std::sqrt(3.0) * pitch / 12.0 + extra_dist_in / 2.0 : 0.0)));
+  positions_inner.push_back(std::make_pair(
+      pitch / 4.0,
+      std::sqrt(3.0) * pitch / 4.0 +
+          (radial_index != 0 ? std::sqrt(3.0) * pitch / 12.0 + extra_dist_in : 0.0)));
+  positions_inner.push_back(
+      std::make_pair(pitch / 2.0,
+                     std::sqrt(3.0) * pitch / 6.0 +
+                         (radial_index != 0 ? std::sqrt(3.0) * pitch / 6.0 + extra_dist_in : 0.0)));
 
-  (*d_positions_outer)
-      .push_back(std::make_pair(
-          0.0,
-          std::sqrt(3.0) * pitch / 6.0 + extra_dist_out -
-              (radial_index != 0 ? std::sqrt(3.0) * pitch / 6.0 + extra_dist_in : 0.0)));
-  (*d_positions_outer)
-      .push_back(std::make_pair(
-          0.0,
-          std::sqrt(3.0) * pitch / 12.0 + extra_dist_out -
-              (radial_index != 0 ? std::sqrt(3.0) * pitch / 12.0 + extra_dist_in : 0.0)));
-  (*d_positions_outer)
-      .push_back(std::make_pair(0.0, extra_dist_out - (radial_index != 0 ? extra_dist_in : 0.0)));
-  (*d_positions_outer)
-      .push_back(std::make_pair(
-          pitch / 12.0 + std::sqrt(3.0) * extra_dist_out / 3.0 -
-              (radial_index != 0 ? pitch / 12.0 + std::sqrt(3.0) * extra_dist_in / 3.0 : 0.0),
-          pitch * std::sqrt(3.0) / 12.0 + extra_dist_out -
-              (radial_index != 0 ? pitch * std::sqrt(3.0) / 12.0 + extra_dist_in : 0.0)));
-  (*d_positions_outer)
-      .push_back(
-          std::make_pair(std::sqrt(3.0) * extra_dist_out / 2.0 -
-                             (radial_index != 0 ? std::sqrt(3.0) * extra_dist_in / 2.0 : 0.0),
-                         extra_dist_out / 2.0 - (radial_index != 0 ? extra_dist_in / 2.0 : 0.0)));
-  (*d_positions_outer)
-      .push_back(std::make_pair(
-          pitch / 8.0 + std::sqrt(3.0) * extra_dist_out / 2.0 -
-              (radial_index != 0 ? pitch / 8.0 + std::sqrt(3.0) * extra_dist_in / 2.0 : 0.0),
-          std::sqrt(3.0) * pitch / 24.0 + extra_dist_out / 2.0 -
-              (radial_index != 0 ? std::sqrt(3.0) * pitch / 24.0 + extra_dist_in / 2.0 : 0.0)));
-  (*d_positions_outer)
-      .push_back(std::make_pair(
-          pitch / 4.0 + std::sqrt(3.0) * extra_dist_out / 2.0 -
-              (radial_index != 0 ? pitch / 4.0 + std::sqrt(3.0) * extra_dist_in / 2.0 : 0.0),
-          std::sqrt(3.0) * pitch / 12.0 + extra_dist_out / 2.0 -
-              (radial_index != 0 ? std::sqrt(3.0) * pitch / 12.0 + extra_dist_in / 2.0 : 0.0)));
-  (*d_positions_outer)
-      .push_back(std::make_pair(
-          0.0,
-          std::sqrt(3.0) * pitch / 12.0 + extra_dist_out -
-              (radial_index != 0 ? std::sqrt(3.0) * pitch / 12.0 + extra_dist_in : 0.0)));
-  (*d_positions_outer)
-      .push_back(std::make_pair(
-          0.0,
-          std::sqrt(3.0) * pitch / 6.0 + extra_dist_out -
-              (radial_index != 0 ? std::sqrt(3.0) * pitch / 6.0 + extra_dist_in : 0.0)));
+  d_positions_outer.push_back(
+      std::make_pair(0.0,
+                     std::sqrt(3.0) * pitch / 6.0 + extra_dist_out -
+                         (radial_index != 0 ? std::sqrt(3.0) * pitch / 6.0 + extra_dist_in : 0.0)));
+  d_positions_outer.push_back(std::make_pair(
+      0.0,
+      std::sqrt(3.0) * pitch / 12.0 + extra_dist_out -
+          (radial_index != 0 ? std::sqrt(3.0) * pitch / 12.0 + extra_dist_in : 0.0)));
+  d_positions_outer.push_back(
+      std::make_pair(0.0, extra_dist_out - (radial_index != 0 ? extra_dist_in : 0.0)));
+  d_positions_outer.push_back(std::make_pair(
+      pitch / 12.0 + std::sqrt(3.0) * extra_dist_out / 3.0 -
+          (radial_index != 0 ? pitch / 12.0 + std::sqrt(3.0) * extra_dist_in / 3.0 : 0.0),
+      pitch * std::sqrt(3.0) / 12.0 + extra_dist_out -
+          (radial_index != 0 ? pitch * std::sqrt(3.0) / 12.0 + extra_dist_in : 0.0)));
+  d_positions_outer.push_back(
+      std::make_pair(std::sqrt(3.0) * extra_dist_out / 2.0 -
+                         (radial_index != 0 ? std::sqrt(3.0) * extra_dist_in / 2.0 : 0.0),
+                     extra_dist_out / 2.0 - (radial_index != 0 ? extra_dist_in / 2.0 : 0.0)));
+  d_positions_outer.push_back(std::make_pair(
+      pitch / 8.0 + std::sqrt(3.0) * extra_dist_out / 2.0 -
+          (radial_index != 0 ? pitch / 8.0 + std::sqrt(3.0) * extra_dist_in / 2.0 : 0.0),
+      std::sqrt(3.0) * pitch / 24.0 + extra_dist_out / 2.0 -
+          (radial_index != 0 ? std::sqrt(3.0) * pitch / 24.0 + extra_dist_in / 2.0 : 0.0)));
+  d_positions_outer.push_back(std::make_pair(
+      pitch / 4.0 + std::sqrt(3.0) * extra_dist_out / 2.0 -
+          (radial_index != 0 ? pitch / 4.0 + std::sqrt(3.0) * extra_dist_in / 2.0 : 0.0),
+      std::sqrt(3.0) * pitch / 12.0 + extra_dist_out / 2.0 -
+          (radial_index != 0 ? std::sqrt(3.0) * pitch / 12.0 + extra_dist_in / 2.0 : 0.0)));
+  d_positions_outer.push_back(std::make_pair(
+      0.0,
+      std::sqrt(3.0) * pitch / 12.0 + extra_dist_out -
+          (radial_index != 0 ? std::sqrt(3.0) * pitch / 12.0 + extra_dist_in : 0.0)));
+  d_positions_outer.push_back(
+      std::make_pair(0.0,
+                     std::sqrt(3.0) * pitch / 6.0 + extra_dist_out -
+                         (radial_index != 0 ? std::sqrt(3.0) * pitch / 6.0 + extra_dist_in : 0.0)));
 }
 
 void
-PolygonMeshGeneratorBase::node_coord_rotate(Real * const x, Real * const y, const Real theta)
+PolygonMeshGeneratorBase::nodeCoordRotate(Real * const x, Real * const y, const Real theta)
 {
   const Real x_tmp = *x;
   const Real y_tmp = *y;
@@ -1035,13 +1014,13 @@ PolygonMeshGeneratorBase::node_coord_rotate(Real * const x, Real * const y, cons
 }
 
 void
-PolygonMeshGeneratorBase::cut_off_hex_deform(MeshBase & mesh,
-                                             const Real orientation,
-                                             const Real y_max_0,
-                                             const Real y_max_n,
-                                             const Real y_min,
-                                             const unsigned int mesh_type,
-                                             const Real tols)
+PolygonMeshGeneratorBase::cutOffHexDeform(MeshBase & mesh,
+                                          const Real orientation,
+                                          const Real y_max_0,
+                                          const Real y_max_n,
+                                          const Real y_min,
+                                          const unsigned int mesh_type,
+                                          const Real tols)
 {
   for (libMesh::MeshBase::node_iterator it = mesh.nodes_begin(); it != mesh.nodes_end(); it++)
   {
@@ -1050,7 +1029,7 @@ PolygonMeshGeneratorBase::cut_off_hex_deform(MeshBase & mesh,
     Real y_tmp = (**it)(1);
     if (mesh_type == CORNER_MESH)
     {
-      node_coord_rotate(&x_tmp, &y_tmp, orientation);
+      nodeCoordRotate(&x_tmp, &y_tmp, orientation);
       if (x_tmp >= 0.0 && y_tmp > y_max_0)
         y_tmp = y_tmp - y_max_0 + y_max_n;
       else if (x_tmp >= 0.0 && y_tmp >= y_min)
@@ -1067,11 +1046,11 @@ PolygonMeshGeneratorBase::cut_off_hex_deform(MeshBase & mesh,
         y_tmp = (y_tmp - y_min) / (y_max_0 - y_min) * (y_max_n - y_min) + y_min;
         x_tmp *= y_tmp;
       }
-      node_coord_rotate(&x_tmp, &y_tmp, -orientation);
+      nodeCoordRotate(&x_tmp, &y_tmp, -orientation);
       (**it)(0) = x_tmp;
       (**it)(1) = y_tmp;
 
-      node_coord_rotate(&x_tmp, &y_tmp, orientation - 60.0);
+      nodeCoordRotate(&x_tmp, &y_tmp, orientation - 60.0);
       if (x_tmp <= 0 && y_tmp > y_max_0)
         y_tmp = y_tmp - y_max_0 + y_max_n;
       else if (x_tmp <= 0 && y_tmp >= y_min)
@@ -1088,18 +1067,18 @@ PolygonMeshGeneratorBase::cut_off_hex_deform(MeshBase & mesh,
         y_tmp = (y_tmp - y_min) / (y_max_0 - y_min) * (y_max_n - y_min) + y_min;
         x_tmp *= y_tmp;
       }
-      node_coord_rotate(&x_tmp, &y_tmp, 60.0 - orientation);
+      nodeCoordRotate(&x_tmp, &y_tmp, 60.0 - orientation);
       (**it)(0) = x_tmp;
       (**it)(1) = y_tmp;
     }
     else
     {
-      node_coord_rotate(&x_tmp, &y_tmp, orientation);
+      nodeCoordRotate(&x_tmp, &y_tmp, orientation);
       if (y_tmp > y_max_0)
         y_tmp = y_tmp - y_max_0 + y_max_n;
       else if (y_tmp >= y_min)
         y_tmp = (y_tmp - y_min) / (y_max_0 - y_min) * (y_max_n - y_min) + y_min;
-      node_coord_rotate(&x_tmp, &y_tmp, -orientation);
+      nodeCoordRotate(&x_tmp, &y_tmp, -orientation);
       (**it)(0) = x_tmp;
       (**it)(1) = y_tmp;
     }
@@ -1107,10 +1086,10 @@ PolygonMeshGeneratorBase::cut_off_hex_deform(MeshBase & mesh,
 }
 
 std::pair<Real, Real>
-PolygonMeshGeneratorBase::four_point_intercept(const std::pair<Real, Real> p1,
-                                               const std::pair<Real, Real> p2,
-                                               const std::pair<Real, Real> p3,
-                                               const std::pair<Real, Real> p4)
+PolygonMeshGeneratorBase::fourPointIntercept(const std::pair<Real, Real> p1,
+                                             const std::pair<Real, Real> p2,
+                                             const std::pair<Real, Real> p3,
+                                             const std::pair<Real, Real> p4)
 {
   const Real x1 = p1.first;
   const Real y1 = p1.second;
@@ -1130,14 +1109,14 @@ PolygonMeshGeneratorBase::four_point_intercept(const std::pair<Real, Real> p1,
 }
 
 std::vector<Real>
-PolygonMeshGeneratorBase::azimuthal_angles_collector(const std::unique_ptr<ReplicatedMesh> mesh,
-                                                     const Real lower_azi,
-                                                     const Real upper_azi,
-                                                     const unsigned int return_type,
-                                                     const bool calculate_origin,
-                                                     const Real input_origin_x,
-                                                     const Real input_origin_y,
-                                                     const Real tol)
+PolygonMeshGeneratorBase::azimuthalAnglesCollector(const std::unique_ptr<ReplicatedMesh> mesh,
+                                                   const Real lower_azi,
+                                                   const Real upper_azi,
+                                                   const unsigned int return_type,
+                                                   const bool calculate_origin,
+                                                   const Real input_origin_x,
+                                                   const Real input_origin_y,
+                                                   const Real tol)
 {
   std::vector<Real> azimuthal_output;
   std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>> side_list =

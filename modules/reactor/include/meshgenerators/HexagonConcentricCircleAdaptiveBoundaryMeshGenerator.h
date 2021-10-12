@@ -10,7 +10,6 @@
 #pragma once
 
 #include "PolygonConcentricCircleMeshGeneratorBase.h"
-#include "MooseEnum.h"
 
 /**
  * This HexagonConcentricCircleAdaptiveBoundaryMeshGenerator object is designed to generate

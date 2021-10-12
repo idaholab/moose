@@ -9,8 +9,6 @@
 
 #pragma once
 #include "PolygonMeshGeneratorBase.h"
-#include "MooseEnum.h"
-#include "MeshMetaDataInterface.h"
 
 /**
  * This SimpleHexagonGenerator object is designed to generate a simple hexagonal mesh that only
@@ -47,11 +45,11 @@ protected:
   /// MeshMetaData: pitch size of the hexagon
   Real & _pitch_meta;
   /// MeshMetaData: number of radial intervals of the background region
-  const unsigned int _background_intervals_meta;
+  const unsigned int & _background_intervals_meta;
   /// MeshMetaData: maximum node id of the ground region
-  const unsigned int _node_id_background_meta;
+  const unsigned int & _node_id_background_meta;
   /// MeshMetaData: maximum radius of the ring regions
-  const Real _max_radius_meta;
+  const Real & _max_radius_meta;
   /// MeshMetaData: mesh sector number of each hexagon side
-  const std::vector<unsigned int> _num_sectors_per_side_meta;
+  const std::vector<unsigned int> & _num_sectors_per_side_meta;
 };

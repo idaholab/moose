@@ -86,23 +86,23 @@ protected:
    * @return a mesh of a polygon slice
    */
   std::unique_ptr<ReplicatedMesh>
-  build_simple_slice(std::unique_ptr<ReplicatedMesh> mesh,
-                     std::vector<Real> ring_radii,
-                     std::vector<unsigned int> rings,
-                     std::vector<Real> ducts_center_dist,
-                     std::vector<unsigned int> ducts_layers,
-                     bool has_rings,
-                     bool has_ducts,
-                     Real pitch,
-                     unsigned int num_sectors_per_side,
-                     unsigned int background_intervals,
-                     dof_id_type * const node_id_background_meta,
-                     const unsigned int side_number,
-                     const unsigned int side_index,
-                     const std::vector<Real> azimuthal_tangent = std::vector<Real>(),
-                     const subdomain_id_type block_id_shift = 0,
-                     const bool quad_center_elements = false,
-                     const boundary_id_type boundary_id_shift = 0);
+  buildSimpleSlice(std::unique_ptr<ReplicatedMesh> mesh,
+                   const std::vector<Real> ring_radii,
+                   const std::vector<unsigned int> rings,
+                   std::vector<Real> ducts_center_dist,
+                   const std::vector<unsigned int> ducts_layers,
+                   const bool has_rings,
+                   const bool has_ducts,
+                   const Real pitch,
+                   const unsigned int num_sectors_per_side,
+                   const unsigned int background_intervals,
+                   dof_id_type * const node_id_background_meta,
+                   const unsigned int side_number,
+                   const unsigned int side_index,
+                   const std::vector<Real> azimuthal_tangent = std::vector<Real>(),
+                   const subdomain_id_type block_id_shift = 0,
+                   const bool quad_center_elements = false,
+                   const boundary_id_type boundary_id_shift = 0);
 
   /**
    * Creates nodes of the very central mesh layer of the polygon for quad central elements.
@@ -116,13 +116,13 @@ protected:
    * @return a mesh with central nodes created
    */
   std::unique_ptr<ReplicatedMesh>
-  center_nodes(std::unique_ptr<ReplicatedMesh> mesh,
-               const unsigned int side_number,
-               const unsigned int div_num,
-               const Real ring_radii_0,
-               dof_id_type * const node_id,
-               std::vector<Node *> * const nodes,
-               std::vector<std::vector<dof_id_type>> * const id_array);
+  centerNodes(std::unique_ptr<ReplicatedMesh> mesh,
+              const unsigned int side_number,
+              const unsigned int div_num,
+              const Real ring_radii_0,
+              dof_id_type * const node_id,
+              std::vector<Node *> * const nodes,
+              std::vector<std::vector<dof_id_type>> * const id_array);
 
   /**
    * Creates nodes for the ring-geometry region of a single slice.
@@ -139,15 +139,15 @@ protected:
    * @return a mesh with ring region nodes created
    */
   std::unique_ptr<ReplicatedMesh>
-  ring_nodes(std::unique_ptr<ReplicatedMesh> mesh,
-             std::vector<Real> ring_radii,
-             const std::vector<unsigned int> rings,
-             const unsigned int num_sectors_per_side,
-             dof_id_type * const node_id,
-             const Real corner_p[2][2],
-             const Real corner_to_corner,
-             std::vector<Node *> * const nodes,
-             const std::vector<Real> azimuthal_tangent = std::vector<Real>());
+  ringNodes(std::unique_ptr<ReplicatedMesh> mesh,
+            const std::vector<Real> ring_radii,
+            const std::vector<unsigned int> rings,
+            const unsigned int num_sectors_per_side,
+            dof_id_type * const node_id,
+            const Real corner_p[2][2],
+            const Real corner_to_corner,
+            std::vector<Node *> * const nodes,
+            const std::vector<Real> azimuthal_tangent = std::vector<Real>());
 
   /**
    * Creates nodes for the ring-to-polygon transition region (i.e., background) of a single slice.
@@ -166,17 +166,17 @@ protected:
    * @return a mesh with background region nodes created
    */
   std::unique_ptr<ReplicatedMesh>
-  background_nodes(std::unique_ptr<ReplicatedMesh> mesh,
-                   const unsigned int num_sectors_per_side,
-                   const unsigned int background_intervals,
-                   const Real background_corner_distance,
-                   const Real background_corner_radial_interval_length,
-                   dof_id_type * const node_id,
-                   const Real corner_p[2][2],
-                   const Real corner_to_corner,
-                   std::vector<Node *> * const nodes,
-                   const Real background_in,
-                   const std::vector<Real> azimuthal_tangent = std::vector<Real>());
+  backgroundNodes(std::unique_ptr<ReplicatedMesh> mesh,
+                  const unsigned int num_sectors_per_side,
+                  const unsigned int background_intervals,
+                  const Real background_corner_distance,
+                  const Real background_corner_radial_interval_length,
+                  dof_id_type * const node_id,
+                  const Real corner_p[2][2],
+                  const Real corner_to_corner,
+                  std::vector<Node *> * const nodes,
+                  const Real background_in,
+                  const std::vector<Real> azimuthal_tangent = std::vector<Real>());
 
   /**
    * Creates nodes for the duct-geometry region of a single slice.
@@ -193,15 +193,15 @@ protected:
    * @return a mesh with duct region nodes created
    */
   std::unique_ptr<ReplicatedMesh>
-  duct_nodes(std::unique_ptr<ReplicatedMesh> mesh,
-             std::vector<Real> * ducts_center_dist,
-             const std::vector<unsigned int> ducts_layers,
-             const unsigned int num_sectors_per_side,
-             dof_id_type * const node_id,
-             const Real corner_p[2][2],
-             const Real corner_to_corner,
-             std::vector<Node *> * const nodes,
-             const std::vector<Real> azimuthal_tangent = std::vector<Real>());
+  ductNodes(std::unique_ptr<ReplicatedMesh> mesh,
+            std::vector<Real> * const ducts_center_dist,
+            const std::vector<unsigned int> ducts_layers,
+            const unsigned int num_sectors_per_side,
+            dof_id_type * const node_id,
+            const Real corner_p[2][2],
+            const Real corner_to_corner,
+            std::vector<Node *> * const nodes,
+            const std::vector<Real> azimuthal_tangent = std::vector<Real>());
 
   /**
    * Defines quad elements in the very central region of the polygon.
@@ -214,12 +214,12 @@ protected:
    * @return a mesh with central region created with quad elements
    */
   std::unique_ptr<ReplicatedMesh>
-  cen_quad_elem_def(std::unique_ptr<ReplicatedMesh> mesh,
-                    const unsigned int div_num,
-                    const std::vector<Node *> nodes,
-                    const subdomain_id_type block_id_shift,
-                    const boundary_id_type boundary_id_shift,
-                    std::vector<std::vector<dof_id_type>> * const id_array);
+  cenQuadElemDef(std::unique_ptr<ReplicatedMesh> mesh,
+                 const unsigned int div_num,
+                 const std::vector<Node *> nodes,
+                 const subdomain_id_type block_id_shift,
+                 const boundary_id_type boundary_id_shift,
+                 std::vector<std::vector<dof_id_type>> * const id_array);
 
   /**
    * Defines triangular elements in the very central region of the polygon.
@@ -233,12 +233,12 @@ protected:
    * @return a mesh with central region created with tri elements
    */
   std::unique_ptr<ReplicatedMesh>
-  cen_tri_elem_def(std::unique_ptr<ReplicatedMesh> mesh,
-                   const unsigned int num_sectors_per_side,
-                   const std::vector<Node *> nodes,
-                   const std::vector<Real> azimuthal_tangent = std::vector<Real>(),
-                   const subdomain_id_type block_id_shift = 0,
-                   const boundary_id_type boundary_id_shift = 0);
+  cenTriElemDef(std::unique_ptr<ReplicatedMesh> mesh,
+                const unsigned int num_sectors_per_side,
+                const std::vector<Node *> nodes,
+                const std::vector<Real> azimuthal_tangent = std::vector<Real>(),
+                const subdomain_id_type block_id_shift = 0,
+                const boundary_id_type boundary_id_shift = 0);
 
   /**
    * Defines general quad elements for the polygon.
@@ -255,15 +255,15 @@ protected:
    * @return a mesh with remaining regions created with quad elements
    */
   std::unique_ptr<ReplicatedMesh>
-  quad_elem_def(std::unique_ptr<ReplicatedMesh> mesh,
-                const unsigned int num_sectors_per_side,
-                const std::vector<unsigned int> subdomain_rings,
-                const std::vector<Node *> nodes,
-                const unsigned int side_index,
-                const std::vector<Real> azimuthal_tangent = std::vector<Real>(),
-                const subdomain_id_type block_id_shift = 0,
-                const dof_id_type nodeid_shift = 0,
-                const boundary_id_type boundary_id_shift = 0);
+  quadElemDef(std::unique_ptr<ReplicatedMesh> mesh,
+              const unsigned int num_sectors_per_side,
+              const std::vector<unsigned int> subdomain_rings,
+              const std::vector<Node *> nodes,
+              const unsigned int side_index,
+              const std::vector<Real> azimuthal_tangent = std::vector<Real>(),
+              const subdomain_id_type block_id_shift = 0,
+              const dof_id_type nodeid_shift = 0,
+              const boundary_id_type boundary_id_shift = 0);
 
   /**
    * Makes radial correction to preserve ring area.
@@ -271,7 +271,7 @@ protected:
    * @return a correction factor to preserve the area of the circle after polygonization during
    * meshing
    */
-  Real radius_correction_factor(const std::vector<Real> azimuthal_list);
+  Real radiusCorrectionFactor(const std::vector<Real> azimuthal_list);
 
   /**
    * Creates peripheral area mesh for the patterned hexagon mesh. Note that the function create the
@@ -289,13 +289,13 @@ protected:
    * @return a mesh with the peripheral region added to a hexagon input mesh
    */
   std::unique_ptr<ReplicatedMesh>
-  build_simple_peripheral(std::unique_ptr<ReplicatedMesh> mesh,
-                          const unsigned int num_sectors_per_side,
-                          const unsigned int peripheral_invervals,
-                          const std::vector<std::pair<Real, Real>> position_inner,
-                          const std::vector<std::pair<Real, Real>> d_position_outer,
-                          std::vector<Node *> * const nodes,
-                          const subdomain_id_type id_shift);
+  buildSimplePeripheral(std::unique_ptr<ReplicatedMesh> mesh,
+                        const unsigned int num_sectors_per_side,
+                        const unsigned int peripheral_invervals,
+                        const std::vector<std::pair<Real, Real>> position_inner,
+                        const std::vector<std::pair<Real, Real>> d_position_outer,
+                        std::vector<Node *> * const nodes,
+                        const subdomain_id_type id_shift);
 
   /**
    * Calculates the point coordinates of within a parallelogram region using linear interpolation.
@@ -313,18 +313,18 @@ protected:
    * @param peripheral_invervals number of radial intervals of the peripheral region
    * @return an interpolated position within a parallelogram
    */
-  std::pair<Real, Real> point_interpolate(const Real pi_1_x,
-                                          const Real pi_1_y,
-                                          const Real po_1_x,
-                                          const Real po_1_y,
-                                          const Real pi_2_x,
-                                          const Real pi_2_y,
-                                          const Real po_2_x,
-                                          const Real po_2_y,
-                                          const unsigned int i,
-                                          const unsigned int j,
-                                          const unsigned int num_sectors_per_side,
-                                          const unsigned int peripheral_invervals);
+  std::pair<Real, Real> pointInterpolate(const Real pi_1_x,
+                                         const Real pi_1_y,
+                                         const Real po_1_x,
+                                         const Real po_1_y,
+                                         const Real pi_2_x,
+                                         const Real pi_2_y,
+                                         const Real po_2_x,
+                                         const Real po_2_y,
+                                         const unsigned int i,
+                                         const unsigned int j,
+                                         const unsigned int num_sectors_per_side,
+                                         const unsigned int peripheral_invervals);
 
   /**
    * Adds background and duct region mesh to stitched hexagon meshes. Note that the function works
@@ -340,14 +340,14 @@ protected:
    * @return a mesh of the hexagon unit mesh with peripheral region added.
    */
   std::unique_ptr<ReplicatedMesh>
-  add_peripheral_mesh(const unsigned int pattern, //_pattern{i][j]
-                      const Real pitch,           // pitch_array.front()
-                      const std::vector<Real> extra_dist,
-                      const std::unique_ptr<ReplicatedMesh> * meshes,
-                      const std::vector<unsigned int> num_sectors_per_side_array,
-                      const std::vector<unsigned int> peripheral_duct_intervals,
-                      const Real rotation_angle,
-                      const unsigned int mesh_type);
+  addPeripheralMesh(const unsigned int pattern, //_pattern{i][j]
+                    const Real pitch,           // pitch_array.front()
+                    const std::vector<Real> extra_dist,
+                    const std::unique_ptr<ReplicatedMesh> * meshes,
+                    const std::vector<unsigned int> num_sectors_per_side_array,
+                    const std::vector<unsigned int> peripheral_duct_intervals,
+                    const Real rotation_angle,
+                    const unsigned int mesh_type);
 
   /**
    * Sets up poisitions of peripheral region layer by layer before deformation due to cutoff.
@@ -359,12 +359,12 @@ protected:
    * @param radial_index radial layer index
    * @return n/a
    */
-  void position_setup(std::vector<std::pair<Real, Real>> * const positions_inner,
-                      std::vector<std::pair<Real, Real>> * const d_positions_outer,
-                      const Real extra_dist_in,
-                      const Real extra_dist_out,
-                      const Real pitch,
-                      const unsigned int radial_index);
+  void positionSetup(std::vector<std::pair<Real, Real>> & positions_inner,
+                     std::vector<std::pair<Real, Real>> & d_positions_outer,
+                     const Real extra_dist_in,
+                     const Real extra_dist_out,
+                     const Real pitch,
+                     const unsigned int radial_index);
 
   /**
    * Calculates x and y coordinates after rotating by theta angle.
@@ -373,7 +373,7 @@ protected:
    * @param theta rotation angle
    * @return n/a
    */
-  void node_coord_rotate(Real * const x, Real * const y, const Real theta);
+  void nodeCoordRotate(Real * const x, Real * const y, const Real theta);
 
   /**
    * Deforms peripheral region when the external side of a hexagonal assembly of stitched meshes
@@ -387,13 +387,13 @@ protected:
    * @param tols tolerance used to determine the boundary of deformation region
    * @return n/a (input mesh is directly altered)
    */
-  void cut_off_hex_deform(MeshBase & mesh,
-                          const Real orientation,
-                          const Real y_max_0,
-                          const Real y_max_n,
-                          const Real y_min,
-                          const unsigned int mesh_type,
-                          const Real tols = 1E-5);
+  void cutOffHexDeform(MeshBase & mesh,
+                       const Real orientation,
+                       const Real y_max_0,
+                       const Real y_max_n,
+                       const Real y_min,
+                       const unsigned int mesh_type,
+                       const Real tols = 1E-5);
 
   /**
    * Finds the center of a quadrilateral based on four vertices.
@@ -403,10 +403,10 @@ protected:
    * @param p4 vertex 4
    * @return the intecept point coordinate x and y
    */
-  std::pair<Real, Real> four_point_intercept(const std::pair<Real, Real> p1,
-                                             const std::pair<Real, Real> p2,
-                                             const std::pair<Real, Real> p3,
-                                             const std::pair<Real, Real> p4);
+  std::pair<Real, Real> fourPointIntercept(const std::pair<Real, Real> p1,
+                                           const std::pair<Real, Real> p2,
+                                           const std::pair<Real, Real> p3,
+                                           const std::pair<Real, Real> p4);
 
   /**
    * Collects sorted azimuthal angles of the external boundary.
@@ -421,12 +421,12 @@ protected:
    * @return the list of azimuthal angles of all the nodes on the external grain boundary within the
    * given range
    */
-  std::vector<Real> azimuthal_angles_collector(const std::unique_ptr<ReplicatedMesh> mesh,
-                                               const Real lower_azi = -30.0,
-                                               const Real upper_azi = 30.0,
-                                               const unsigned int return_type = ANGLE_TANGENT,
-                                               const bool calculate_origin = true,
-                                               const Real input_origin_x = 0.0,
-                                               const Real input_origin_y = 0.0,
-                                               const Real tol = 1.0E-10);
+  std::vector<Real> azimuthalAnglesCollector(const std::unique_ptr<ReplicatedMesh> mesh,
+                                             const Real lower_azi = -30.0,
+                                             const Real upper_azi = 30.0,
+                                             const unsigned int return_type = ANGLE_TANGENT,
+                                             const bool calculate_origin = true,
+                                             const Real input_origin_x = 0.0,
+                                             const Real input_origin_y = 0.0,
+                                             const Real tol = 1.0E-10);
 };

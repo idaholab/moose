@@ -10,7 +10,6 @@
 #pragma once
 
 #include "PolygonConcentricCircleMeshGeneratorBase.h"
-#include "MooseEnum.h"
 
 /**
  * This PolygonConcentricCircleMeshGenerator object is designed to mesh a polygon geometry with

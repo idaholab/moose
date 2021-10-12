@@ -31,7 +31,7 @@ protected:
   /// 2D vector of the hexagonal pattern
   const std::vector<std::vector<unsigned int>> & _pattern;
   /// Type of the external boundary shape
-  MooseEnum _pattern_boundary;
+  const MooseEnum _pattern_boundary;
   /// Whether a reactor core mesh with core metadata is generated
   const bool _generate_core_metadata;
   /// Number of radial intervals in the background region

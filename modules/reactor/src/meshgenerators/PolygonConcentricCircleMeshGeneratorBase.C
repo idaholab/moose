@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PolygonConcentricCircleMeshGeneratorBase.h"
+#include "libmesh/mesh_smoother_laplace.h"
 
 #include <cmath>
 
@@ -68,13 +69,23 @@ PolygonConcentricCircleMeshGeneratorBase::validParams()
   params.addParam<std::vector<std::string>>(
       "interface_boundary_names",
       "Optional customized boundary names for the internal interfaces between block.");
+  params.addParam<bool>("uniform_mesh_on_sides",
+                        false,
+                        "Whether the side elements are reorganized to have a uniform size.");
+  params.addParam<bool>(
+      "quad_center_elements", false, "Whether the center elements are quad or triangular.");
+  params.addParam<unsigned int>("smoothing_max_it",
+                                0,
+                                "Number of Laplacian smoothing iterations. This number is "
+                                "disregarded when duct_sizes is present.");
   params.addParamNamesToGroup(
       "background_block_ids background_block_names duct_block_ids duct_block_names ring_block_ids "
       "ring_block_names external_boundary_id external_boundary_name interface_boundary_names "
       "block_id_shift interface_boundary_id_shift",
       "Customized Subdomain/Boundary");
-  params.addParamNamesToGroup(
-      "num_sectors_per_side background_intervals duct_intervals ring_intervals", "Mesh Density");
+  params.addParamNamesToGroup("num_sectors_per_side background_intervals duct_intervals "
+                              "ring_intervals uniform_mesh_on_sides",
+                              "Mesh Density");
   params.addClassDescription("This PolygonConcentricCircleMeshGeneratorBase object is a base class "
                              "to be inherited for polygon mesh generators.");
 
@@ -139,6 +150,9 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
     _interface_boundary_names(isParamValid("interface_boundary_names")
                                   ? getParam<std::vector<std::string>>("interface_boundary_names")
                                   : std::vector<std::string>()),
+    _uniform_mesh_on_sides(getParam<bool>("uniform_mesh_on_sides")),
+    _quad_center_elements(getParam<bool>("quad_center_elements")),
+    _smoothing_max_it(getParam<unsigned int>("smoothing_max_it")),
     _sides_to_adapt(isParamValid("sides_to_adapt")
                         ? getParam<std::vector<unsigned int>>("sides_to_adapt")
                         : std::vector<unsigned int>()),
@@ -147,7 +161,8 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
     _node_id_background_meta(declareMeshProperty<dof_id_type>("node_id_background_meta", 0)),
     _pattern_pitch_meta(declareMeshProperty<Real>("pattern_pitch_meta", 0.0)),
     _azimuthal_angle_meta(
-        declareMeshProperty<std::vector<Real>>("azimuthal_angle_meta", std::vector<Real>()))
+        declareMeshProperty<std::vector<Real>>("azimuthal_angle_meta", std::vector<Real>())),
+    _is_control_drum_meta(declareMeshProperty<bool>("is_control_drum_meta", false))
 {
   // This error message is only reserved for future derived classes. Neither of the current derived
   // classes will trigger this error.
@@ -244,7 +259,7 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
   {
     // When adaptive boundaries exist (only possible for hexagon meshes thru
     // `HexagonConcentricCircleAdaptiveBoundaryMeshGenerator`), nodes' azimuthal angle cannot be
-    // arithmetically obtained. Instead, `azimuthal_angles_collector() is used to get this
+    // arithmetically obtained. Instead, `azimuthalAnglesCollector() is used to get this
     // information from the mesh directly.`
     if (std::find(_sides_to_adapt.begin(), _sides_to_adapt.end(), mesh_index) !=
         _sides_to_adapt.end())
@@ -252,7 +267,7 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
       // The following lines only work for hexagon; and only a hexagon needs such functionality.
       Real lower_azi = (Real)mesh_index * 60.0 - 150.0;
       Real upper_azi = (Real)((mesh_index + 1) % 6) * 60.0 - 150.0;
-      _azimuthal_angles_array.push_back(azimuthal_angles_collector(
+      _azimuthal_angles_array.push_back(azimuthalAnglesCollector(
           dynamic_pointer_cast<ReplicatedMesh>(*_input_ptrs[mesh_input_counter]),
           lower_azi,
           upper_azi));
@@ -285,7 +300,7 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
   {
     if (_preserve_volumes)
     {
-      Real corr_factor = radius_correction_factor(azimuthal_list);
+      Real corr_factor = radiusCorrectionFactor(azimuthal_list);
       for (unsigned int i = 0; i < _ring_radii.size(); i++)
         ring_radii_corr.push_back(_ring_radii[i] * corr_factor);
     }
@@ -298,44 +313,44 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
   }
   auto mesh = buildReplicatedMesh(2);
   // build the first slice of the polygon.
-  auto mesh0 = build_simple_slice(dynamic_pointer_cast<ReplicatedMesh>(mesh),
-                                  ring_radii_corr,
-                                  _ring_intervals,
-                                  _duct_sizes,
-                                  _duct_intervals,
-                                  _has_rings,
-                                  _has_ducts,
-                                  _pitch,
-                                  _num_sectors_per_side[0],
-                                  _background_intervals,
-                                  &_node_id_background_meta,
-                                  _num_sides,
-                                  1,
-                                  _azimuthal_angles_array[0],
-                                  _block_id_shift,
-                                  _quad_center_elements,
-                                  _interface_boundary_id_shift);
+  auto mesh0 = buildSimpleSlice(dynamic_pointer_cast<ReplicatedMesh>(mesh),
+                                ring_radii_corr,
+                                _ring_intervals,
+                                _duct_sizes,
+                                _duct_intervals,
+                                _has_rings,
+                                _has_ducts,
+                                _pitch,
+                                _num_sectors_per_side[0],
+                                _background_intervals,
+                                &_node_id_background_meta,
+                                _num_sides,
+                                1,
+                                _azimuthal_angles_array[0],
+                                _block_id_shift,
+                                _quad_center_elements,
+                                _interface_boundary_id_shift);
   // This loop builds add-on slices and stitches them to the first slice
   for (unsigned int mesh_index = 1; mesh_index < _num_sides; mesh_index++)
   {
     auto mesh_tmp0 = buildReplicatedMesh(2);
-    auto mesh_tmp = build_simple_slice(dynamic_pointer_cast<ReplicatedMesh>(mesh_tmp0),
-                                       ring_radii_corr,
-                                       _ring_intervals,
-                                       _duct_sizes,
-                                       _duct_intervals,
-                                       _has_rings,
-                                       _has_ducts,
-                                       _pitch,
-                                       _num_sectors_per_side[mesh_index],
-                                       _background_intervals,
-                                       &_node_id_background_meta,
-                                       _num_sides,
-                                       mesh_index + 1,
-                                       _azimuthal_angles_array[mesh_index],
-                                       _block_id_shift,
-                                       _quad_center_elements,
-                                       _interface_boundary_id_shift);
+    auto mesh_tmp = buildSimpleSlice(dynamic_pointer_cast<ReplicatedMesh>(mesh_tmp0),
+                                     ring_radii_corr,
+                                     _ring_intervals,
+                                     _duct_sizes,
+                                     _duct_intervals,
+                                     _has_rings,
+                                     _has_ducts,
+                                     _pitch,
+                                     _num_sectors_per_side[mesh_index],
+                                     _background_intervals,
+                                     &_node_id_background_meta,
+                                     _num_sides,
+                                     mesh_index + 1,
+                                     _azimuthal_angles_array[mesh_index],
+                                     _block_id_shift,
+                                     _quad_center_elements,
+                                     _interface_boundary_id_shift);
 
     ReplicatedMesh other_mesh(*mesh_tmp);
     MeshTools::Modification::rotate(other_mesh, 360.0 / _num_sides * mesh_index, 0, 0);
@@ -354,7 +369,7 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
   if (!_is_general_polygon)
   {
     auto mesh0_dup = mesh0->clone();
-    _azimuthal_angle_meta = azimuthal_angles_collector(
+    _azimuthal_angle_meta = azimuthalAnglesCollector(
         dynamic_pointer_cast<ReplicatedMesh>(mesh0_dup), -180.0, 180.0, ANGLE_DEGREE);
     _pattern_pitch_meta = _pitch;
   }
@@ -393,9 +408,9 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
                                   1.0 / std::tan(M_PI / (Real)_num_sides));
         Real x_tmp = _pitch / 2.0;
         Real y_tmp = x_tmp * std::tan(azi_corr_tmp);
-        node_coord_rotate(&x_tmp,
-                          &y_tmp,
-                          (Real)i * 360.0 / (Real)_num_sides - (180.0 - 180.0 / (Real)_num_sides));
+        nodeCoordRotate(&x_tmp,
+                        &y_tmp,
+                        (Real)i * 360.0 / (Real)_num_sides - (180.0 - 180.0 / (Real)_num_sides));
         Point p_tmp = Point(x_tmp, y_tmp, 0.0);
         mesh0->add_point(
             p_tmp,

@@ -10,7 +10,6 @@
 #pragma once
 
 #include "PolygonMeshGeneratorBase.h"
-#include "libmesh/mesh_smoother_laplace.h"
 
 /**
  * This PolygonConcentricCircleMeshGeneratorBase object is a base class to be inherited for polygon
@@ -29,7 +28,7 @@ protected:
   /// Number of polygon sides
   const unsigned int _num_sides;
   /// Radii of concentric circles
-  std::vector<Real> _ring_radii;
+  const std::vector<Real> _ring_radii;
   /// Number of rings in each circle or in the enclosing square
   const std::vector<unsigned int> _ring_intervals;
   /// Subdomain IDs of the ring regions
@@ -74,18 +73,16 @@ protected:
   const std::string _external_boundary_name;
   /// Boundary Names of the mesh's interface boundaries
   const std::vector<std::string> _interface_boundary_names;
+  /// Whether the nodes on the external boundary needs to be uniformly distributed
+  const bool _uniform_mesh_on_sides;
+  /// Whether the central elements need to be QUAD4
+  const bool _quad_center_elements;
+  /// Maximum smooth iteration number
+  const unsigned int _smoothing_max_it;
   /// Indices of the hexagon sides that need to adapt
   const std::vector<unsigned int> _sides_to_adapt;
   /// Pointers to input mesh pointers
   std::vector<std::unique_ptr<MeshBase> *> _input_ptrs;
-  /// Whether the nodes on the external boundary needs to be uniformly distributed
-  bool _uniform_mesh_on_sides;
-  /// Whether the central elements need to be QUAD4
-  bool _quad_center_elements;
-  /// Maximum smooth iteration number
-  unsigned int _smoothing_max_it;
-  /// MeshMetaData: whether this produced mesh is a control drum
-  bool _is_control_drum_meta;
   /// MeshMetaData: whether this produced mesh is a general polygon (or a hexagon)
   bool _is_general_polygon;
   /// MeshMetaData: pitch size of the produced mesh
@@ -104,4 +101,6 @@ protected:
   Real & _pattern_pitch_meta;
   /// MeshMetaData: azimuthal angles of all nodes
   std::vector<Real> & _azimuthal_angle_meta;
+  /// MeshMetaData: whether this produced mesh is a control drum
+  bool & _is_control_drum_meta;
 };

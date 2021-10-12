@@ -182,9 +182,7 @@ PatternedHexMeshGenerator::PatternedHexMeshGenerator(const InputParameters & par
     paramError("pattern", "All the meshes provided in inputs must be used here.");
   _mesh_ptrs.reserve(_input_names.size());
   for (auto & input_name : _input_names)
-  {
     _mesh_ptrs.push_back(&getMeshByName(input_name));
-  }
 
   if (isParamValid("background_block_id"))
   {
@@ -432,16 +430,16 @@ PatternedHexMeshGenerator::generate()
         {
           tmp_meshes_ptrs = _meshes[_pattern[i][j]]->clone();
           tmp_meshes = dynamic_pointer_cast<ReplicatedMesh>(tmp_meshes_ptrs);
-          _out_meshes = add_peripheral_mesh(_pattern[i][j],
-                                            pitch_array.front(),
-                                            extra_dist,
-                                            &tmp_meshes,
-                                            num_sectors_per_side_array,
-                                            peripheral_duct_intervals,
-                                            60.0,
-                                            CORNER_MESH);
+          _out_meshes = addPeripheralMesh(_pattern[i][j],
+                                          pitch_array.front(),
+                                          extra_dist,
+                                          &tmp_meshes,
+                                          num_sectors_per_side_array,
+                                          peripheral_duct_intervals,
+                                          60.0,
+                                          CORNER_MESH);
           if (extra_dist_shift != 0)
-            cut_off_hex_deform(*_out_meshes, 0.0, y_max_0, y_max_n, y_min, CORNER_MESH);
+            cutOffHexDeform(*_out_meshes, 0.0, y_max_0, y_max_n, y_min, CORNER_MESH);
 
           continue;
         }
@@ -449,23 +447,23 @@ PatternedHexMeshGenerator::generate()
         {
           tmp_meshes_ptrs = _meshes[_pattern[i][j]]->clone();
           tmp_meshes = dynamic_pointer_cast<ReplicatedMesh>(tmp_meshes_ptrs);
-          _tmp_peripheral_mesh = add_peripheral_mesh(_pattern[i][j],
-                                                     pitch_array.front(),
-                                                     extra_dist,
-                                                     &tmp_meshes,
-                                                     num_sectors_per_side_array,
-                                                     peripheral_duct_intervals,
-                                                     180.0,
-                                                     CORNER_MESH);
+          _tmp_peripheral_mesh = addPeripheralMesh(_pattern[i][j],
+                                                   pitch_array.front(),
+                                                   extra_dist,
+                                                   &tmp_meshes,
+                                                   num_sectors_per_side_array,
+                                                   peripheral_duct_intervals,
+                                                   180.0,
+                                                   CORNER_MESH);
 
           if (extra_dist_shift != 0)
-            cut_off_hex_deform(*_tmp_peripheral_mesh, -120.0, y_max_0, y_max_n, y_min, CORNER_MESH);
+            cutOffHexDeform(*_tmp_peripheral_mesh, -120.0, y_max_0, y_max_n, y_min, CORNER_MESH);
 
           // Define a reference map variable for subdomain map
           auto & main_subdomain_map = _out_meshes->set_subdomain_name_map();
           // Retrieve subdomain name map from the mesh to be stitched and insert it into the main
           // subdomain map
-          auto increment_subdomain_map = _tmp_peripheral_mesh->get_subdomain_name_map();
+          const auto & increment_subdomain_map = _tmp_peripheral_mesh->get_subdomain_name_map();
           main_subdomain_map.insert(increment_subdomain_map.begin(), increment_subdomain_map.end());
 
           MeshTools::Modification::translate(
@@ -481,23 +479,23 @@ PatternedHexMeshGenerator::generate()
         {
           tmp_meshes_ptrs = _meshes[_pattern[i][j]]->clone();
           tmp_meshes = dynamic_pointer_cast<ReplicatedMesh>(tmp_meshes_ptrs);
-          _tmp_peripheral_mesh = add_peripheral_mesh(_pattern[i][j],
-                                                     pitch_array.front(),
-                                                     extra_dist,
-                                                     &tmp_meshes,
-                                                     num_sectors_per_side_array,
-                                                     peripheral_duct_intervals,
-                                                     120.0,
-                                                     CORNER_MESH);
+          _tmp_peripheral_mesh = addPeripheralMesh(_pattern[i][j],
+                                                   pitch_array.front(),
+                                                   extra_dist,
+                                                   &tmp_meshes,
+                                                   num_sectors_per_side_array,
+                                                   peripheral_duct_intervals,
+                                                   120.0,
+                                                   CORNER_MESH);
 
           if (extra_dist_shift != 0)
-            cut_off_hex_deform(*_tmp_peripheral_mesh, -60.0, y_max_0, y_max_n, y_min, CORNER_MESH);
+            cutOffHexDeform(*_tmp_peripheral_mesh, -60.0, y_max_0, y_max_n, y_min, CORNER_MESH);
 
           // Define a reference map variable for subdomain map
           auto & main_subdomain_map = _out_meshes->set_subdomain_name_map();
           // Retrieve subdomain name map from the mesh to be stitched and insert it to the main
           // subdomain map
-          auto increment_subdomain_map = _tmp_peripheral_mesh->get_subdomain_name_map();
+          const auto & increment_subdomain_map = _tmp_peripheral_mesh->get_subdomain_name_map();
           main_subdomain_map.insert(increment_subdomain_map.begin(), increment_subdomain_map.end());
 
           MeshTools::Modification::translate(
@@ -513,23 +511,23 @@ PatternedHexMeshGenerator::generate()
         {
           tmp_meshes_ptrs = _meshes[_pattern[i][j]]->clone();
           tmp_meshes = dynamic_pointer_cast<ReplicatedMesh>(tmp_meshes_ptrs);
-          _tmp_peripheral_mesh = add_peripheral_mesh(_pattern[i][j],
-                                                     pitch_array.front(),
-                                                     extra_dist,
-                                                     &tmp_meshes,
-                                                     num_sectors_per_side_array,
-                                                     peripheral_duct_intervals,
-                                                     0.0,
-                                                     CORNER_MESH);
+          _tmp_peripheral_mesh = addPeripheralMesh(_pattern[i][j],
+                                                   pitch_array.front(),
+                                                   extra_dist,
+                                                   &tmp_meshes,
+                                                   num_sectors_per_side_array,
+                                                   peripheral_duct_intervals,
+                                                   0.0,
+                                                   CORNER_MESH);
 
           if (extra_dist_shift != 0)
-            cut_off_hex_deform(*_tmp_peripheral_mesh, 60.0, y_max_0, y_max_n, y_min, CORNER_MESH);
+            cutOffHexDeform(*_tmp_peripheral_mesh, 60.0, y_max_0, y_max_n, y_min, CORNER_MESH);
 
           // Define a reference map variable for subdomain map
           auto & main_subdomain_map = _out_meshes->set_subdomain_name_map();
           // Retrieve subdomain name map from the mesh to be stitched and insert it to the main
           // subdomain map
-          auto increment_subdomain_map = _tmp_peripheral_mesh->get_subdomain_name_map();
+          const auto & increment_subdomain_map = _tmp_peripheral_mesh->get_subdomain_name_map();
           main_subdomain_map.insert(increment_subdomain_map.begin(), increment_subdomain_map.end());
 
           MeshTools::Modification::translate(
@@ -545,23 +543,23 @@ PatternedHexMeshGenerator::generate()
         {
           tmp_meshes_ptrs = _meshes[_pattern[i][j]]->clone();
           tmp_meshes = dynamic_pointer_cast<ReplicatedMesh>(tmp_meshes_ptrs);
-          _tmp_peripheral_mesh = add_peripheral_mesh(_pattern[i][j],
-                                                     pitch_array.front(),
-                                                     extra_dist,
-                                                     &tmp_meshes,
-                                                     num_sectors_per_side_array,
-                                                     peripheral_duct_intervals,
-                                                     -120.0,
-                                                     CORNER_MESH);
+          _tmp_peripheral_mesh = addPeripheralMesh(_pattern[i][j],
+                                                   pitch_array.front(),
+                                                   extra_dist,
+                                                   &tmp_meshes,
+                                                   num_sectors_per_side_array,
+                                                   peripheral_duct_intervals,
+                                                   -120.0,
+                                                   CORNER_MESH);
 
           if (extra_dist_shift != 0)
-            cut_off_hex_deform(*_tmp_peripheral_mesh, 180.0, y_max_0, y_max_n, y_min, CORNER_MESH);
+            cutOffHexDeform(*_tmp_peripheral_mesh, 180.0, y_max_0, y_max_n, y_min, CORNER_MESH);
 
           // Define a reference map variable for subdomain map
           auto & main_subdomain_map = _out_meshes->set_subdomain_name_map();
           // Retrieve subdomain name map from the mesh to be stitched and insert it to the main
           // subdomain map
-          auto increment_subdomain_map = _tmp_peripheral_mesh->get_subdomain_name_map();
+          const auto & increment_subdomain_map = _tmp_peripheral_mesh->get_subdomain_name_map();
           main_subdomain_map.insert(increment_subdomain_map.begin(), increment_subdomain_map.end());
 
           MeshTools::Modification::translate(
@@ -577,23 +575,23 @@ PatternedHexMeshGenerator::generate()
         {
           tmp_meshes_ptrs = _meshes[_pattern[i][j]]->clone();
           tmp_meshes = dynamic_pointer_cast<ReplicatedMesh>(tmp_meshes_ptrs);
-          _tmp_peripheral_mesh = add_peripheral_mesh(_pattern[i][j],
-                                                     pitch_array.front(),
-                                                     extra_dist,
-                                                     &tmp_meshes,
-                                                     num_sectors_per_side_array,
-                                                     peripheral_duct_intervals,
-                                                     -60.0,
-                                                     CORNER_MESH);
+          _tmp_peripheral_mesh = addPeripheralMesh(_pattern[i][j],
+                                                   pitch_array.front(),
+                                                   extra_dist,
+                                                   &tmp_meshes,
+                                                   num_sectors_per_side_array,
+                                                   peripheral_duct_intervals,
+                                                   -60.0,
+                                                   CORNER_MESH);
 
           if (extra_dist_shift != 0)
-            cut_off_hex_deform(*_tmp_peripheral_mesh, 120.0, y_max_0, y_max_n, y_min, CORNER_MESH);
+            cutOffHexDeform(*_tmp_peripheral_mesh, 120.0, y_max_0, y_max_n, y_min, CORNER_MESH);
 
           // Define a reference map variable for subdomain map
           auto & main_subdomain_map = _out_meshes->set_subdomain_name_map();
           // Retrieve subdomain name map from the mesh to be stitched and insert it to the main
           // subdomain map
-          auto increment_subdomain_map = _tmp_peripheral_mesh->get_subdomain_name_map();
+          const auto & increment_subdomain_map = _tmp_peripheral_mesh->get_subdomain_name_map();
           main_subdomain_map.insert(increment_subdomain_map.begin(), increment_subdomain_map.end());
 
           MeshTools::Modification::translate(
@@ -610,23 +608,23 @@ PatternedHexMeshGenerator::generate()
         {
           tmp_meshes_ptrs = _meshes[_pattern[i][j]]->clone();
           tmp_meshes = dynamic_pointer_cast<ReplicatedMesh>(tmp_meshes_ptrs);
-          _tmp_peripheral_mesh = add_peripheral_mesh(_pattern[i][j],
-                                                     pitch_array.front(),
-                                                     extra_dist,
-                                                     &tmp_meshes,
-                                                     num_sectors_per_side_array,
-                                                     peripheral_duct_intervals,
-                                                     0.0,
-                                                     BOUNDARY_MESH);
+          _tmp_peripheral_mesh = addPeripheralMesh(_pattern[i][j],
+                                                   pitch_array.front(),
+                                                   extra_dist,
+                                                   &tmp_meshes,
+                                                   num_sectors_per_side_array,
+                                                   peripheral_duct_intervals,
+                                                   0.0,
+                                                   BOUNDARY_MESH);
 
           if (extra_dist_shift != 0)
-            cut_off_hex_deform(*_tmp_peripheral_mesh, 0.0, y_max_0, y_max_n, y_min, BOUNDARY_MESH);
+            cutOffHexDeform(*_tmp_peripheral_mesh, 0.0, y_max_0, y_max_n, y_min, BOUNDARY_MESH);
 
           // Define a reference map variable for subdomain map
           auto & main_subdomain_map = _out_meshes->set_subdomain_name_map();
           // Retrieve subdomain name map from the mesh to be stitched and insert it to the main
           // subdomain map
-          auto increment_subdomain_map = _tmp_peripheral_mesh->get_subdomain_name_map();
+          const auto & increment_subdomain_map = _tmp_peripheral_mesh->get_subdomain_name_map();
           main_subdomain_map.insert(increment_subdomain_map.begin(), increment_subdomain_map.end());
 
           MeshTools::Modification::translate(
@@ -642,24 +640,23 @@ PatternedHexMeshGenerator::generate()
         {
           tmp_meshes_ptrs = _meshes[_pattern[i][j]]->clone();
           tmp_meshes = dynamic_pointer_cast<ReplicatedMesh>(tmp_meshes_ptrs);
-          _tmp_peripheral_mesh = add_peripheral_mesh(_pattern[i][j],
-                                                     pitch_array.front(),
-                                                     extra_dist,
-                                                     &tmp_meshes,
-                                                     num_sectors_per_side_array,
-                                                     peripheral_duct_intervals,
-                                                     180.0,
-                                                     BOUNDARY_MESH);
+          _tmp_peripheral_mesh = addPeripheralMesh(_pattern[i][j],
+                                                   pitch_array.front(),
+                                                   extra_dist,
+                                                   &tmp_meshes,
+                                                   num_sectors_per_side_array,
+                                                   peripheral_duct_intervals,
+                                                   180.0,
+                                                   BOUNDARY_MESH);
 
           if (extra_dist_shift != 0)
-            cut_off_hex_deform(
-                *_tmp_peripheral_mesh, -180.0, y_max_0, y_max_n, y_min, BOUNDARY_MESH);
+            cutOffHexDeform(*_tmp_peripheral_mesh, -180.0, y_max_0, y_max_n, y_min, BOUNDARY_MESH);
 
           // Define a reference map variable for subdomain map
           auto & main_subdomain_map = _out_meshes->set_subdomain_name_map();
           // Retrieve subdomain name map from the mesh to be stitched and insert it to the main
           // subdomain map
-          auto increment_subdomain_map = _tmp_peripheral_mesh->get_subdomain_name_map();
+          const auto & increment_subdomain_map = _tmp_peripheral_mesh->get_subdomain_name_map();
           main_subdomain_map.insert(increment_subdomain_map.begin(), increment_subdomain_map.end());
 
           MeshTools::Modification::translate(
@@ -675,24 +672,23 @@ PatternedHexMeshGenerator::generate()
         {
           tmp_meshes_ptrs = _meshes[_pattern[i][j]]->clone();
           tmp_meshes = dynamic_pointer_cast<ReplicatedMesh>(tmp_meshes_ptrs);
-          _tmp_peripheral_mesh = add_peripheral_mesh(_pattern[i][j],
-                                                     pitch_array.front(),
-                                                     extra_dist,
-                                                     &tmp_meshes,
-                                                     num_sectors_per_side_array,
-                                                     peripheral_duct_intervals,
-                                                     60.0,
-                                                     BOUNDARY_MESH);
+          _tmp_peripheral_mesh = addPeripheralMesh(_pattern[i][j],
+                                                   pitch_array.front(),
+                                                   extra_dist,
+                                                   &tmp_meshes,
+                                                   num_sectors_per_side_array,
+                                                   peripheral_duct_intervals,
+                                                   60.0,
+                                                   BOUNDARY_MESH);
 
           if (extra_dist_shift != 0)
-            cut_off_hex_deform(
-                *_tmp_peripheral_mesh, -60.0, y_max_0, y_max_n, y_min, BOUNDARY_MESH);
+            cutOffHexDeform(*_tmp_peripheral_mesh, -60.0, y_max_0, y_max_n, y_min, BOUNDARY_MESH);
 
           // Define a reference map variable for subdomain map
           auto & main_subdomain_map = _out_meshes->set_subdomain_name_map();
           // Retrieve subdomain name map from the mesh to be stitched and insert it to the main
           // subdomain map
-          auto increment_subdomain_map = _tmp_peripheral_mesh->get_subdomain_name_map();
+          const auto & increment_subdomain_map = _tmp_peripheral_mesh->get_subdomain_name_map();
           main_subdomain_map.insert(increment_subdomain_map.begin(), increment_subdomain_map.end());
 
           MeshTools::Modification::translate(
@@ -708,24 +704,23 @@ PatternedHexMeshGenerator::generate()
         {
           tmp_meshes_ptrs = _meshes[_pattern[i][j]]->clone();
           tmp_meshes = dynamic_pointer_cast<ReplicatedMesh>(tmp_meshes_ptrs);
-          _tmp_peripheral_mesh = add_peripheral_mesh(_pattern[i][j],
-                                                     pitch_array.front(),
-                                                     extra_dist,
-                                                     &tmp_meshes,
-                                                     num_sectors_per_side_array,
-                                                     peripheral_duct_intervals,
-                                                     120.0,
-                                                     BOUNDARY_MESH);
+          _tmp_peripheral_mesh = addPeripheralMesh(_pattern[i][j],
+                                                   pitch_array.front(),
+                                                   extra_dist,
+                                                   &tmp_meshes,
+                                                   num_sectors_per_side_array,
+                                                   peripheral_duct_intervals,
+                                                   120.0,
+                                                   BOUNDARY_MESH);
 
           if (extra_dist_shift != 0)
-            cut_off_hex_deform(
-                *_tmp_peripheral_mesh, -120.0, y_max_0, y_max_n, y_min, BOUNDARY_MESH);
+            cutOffHexDeform(*_tmp_peripheral_mesh, -120.0, y_max_0, y_max_n, y_min, BOUNDARY_MESH);
 
           // Define a reference map variable for subdomain map
           auto & main_subdomain_map = _out_meshes->set_subdomain_name_map();
           // Retrieve subdomain name map from the mesh to be stitched and insert it to the main
           // subdomain map
-          auto increment_subdomain_map = _tmp_peripheral_mesh->get_subdomain_name_map();
+          const auto & increment_subdomain_map = _tmp_peripheral_mesh->get_subdomain_name_map();
           main_subdomain_map.insert(increment_subdomain_map.begin(), increment_subdomain_map.end());
 
           MeshTools::Modification::translate(
@@ -741,23 +736,23 @@ PatternedHexMeshGenerator::generate()
         {
           tmp_meshes_ptrs = _meshes[_pattern[i][j]]->clone();
           tmp_meshes = dynamic_pointer_cast<ReplicatedMesh>(tmp_meshes_ptrs);
-          _tmp_peripheral_mesh = add_peripheral_mesh(_pattern[i][j],
-                                                     pitch_array.front(),
-                                                     extra_dist,
-                                                     &tmp_meshes,
-                                                     num_sectors_per_side_array,
-                                                     peripheral_duct_intervals,
-                                                     -60.0,
-                                                     BOUNDARY_MESH);
+          _tmp_peripheral_mesh = addPeripheralMesh(_pattern[i][j],
+                                                   pitch_array.front(),
+                                                   extra_dist,
+                                                   &tmp_meshes,
+                                                   num_sectors_per_side_array,
+                                                   peripheral_duct_intervals,
+                                                   -60.0,
+                                                   BOUNDARY_MESH);
 
           if (extra_dist_shift != 0)
-            cut_off_hex_deform(*_tmp_peripheral_mesh, 60.0, y_max_0, y_max_n, y_min, BOUNDARY_MESH);
+            cutOffHexDeform(*_tmp_peripheral_mesh, 60.0, y_max_0, y_max_n, y_min, BOUNDARY_MESH);
 
           // Define a reference map variable for subdomain map
           auto & main_subdomain_map = _out_meshes->set_subdomain_name_map();
           // Retrieve subdomain name map from the mesh to be stitched and insert it to the main
           // subdomain map
-          auto increment_subdomain_map = _tmp_peripheral_mesh->get_subdomain_name_map();
+          const auto & increment_subdomain_map = _tmp_peripheral_mesh->get_subdomain_name_map();
           main_subdomain_map.insert(increment_subdomain_map.begin(), increment_subdomain_map.end());
 
           MeshTools::Modification::translate(
@@ -773,24 +768,23 @@ PatternedHexMeshGenerator::generate()
         {
           tmp_meshes_ptrs = _meshes[_pattern[i][j]]->clone();
           tmp_meshes = dynamic_pointer_cast<ReplicatedMesh>(tmp_meshes_ptrs);
-          _tmp_peripheral_mesh = add_peripheral_mesh(_pattern[i][j],
-                                                     pitch_array.front(),
-                                                     extra_dist,
-                                                     &tmp_meshes,
-                                                     num_sectors_per_side_array,
-                                                     peripheral_duct_intervals,
-                                                     -120.0,
-                                                     BOUNDARY_MESH);
+          _tmp_peripheral_mesh = addPeripheralMesh(_pattern[i][j],
+                                                   pitch_array.front(),
+                                                   extra_dist,
+                                                   &tmp_meshes,
+                                                   num_sectors_per_side_array,
+                                                   peripheral_duct_intervals,
+                                                   -120.0,
+                                                   BOUNDARY_MESH);
 
           if (extra_dist_shift != 0)
-            cut_off_hex_deform(
-                *_tmp_peripheral_mesh, 120.0, y_max_0, y_max_n, y_min, BOUNDARY_MESH);
+            cutOffHexDeform(*_tmp_peripheral_mesh, 120.0, y_max_0, y_max_n, y_min, BOUNDARY_MESH);
 
           // Define a reference map variable for subdomain map
           auto & main_subdomain_map = _out_meshes->set_subdomain_name_map();
           // Retrieve subdomain name map from the mesh to be stitched and insert it to the main
           // subdomain map
-          auto increment_subdomain_map = _tmp_peripheral_mesh->get_subdomain_name_map();
+          const auto & increment_subdomain_map = _tmp_peripheral_mesh->get_subdomain_name_map();
           main_subdomain_map.insert(increment_subdomain_map.begin(), increment_subdomain_map.end());
 
           MeshTools::Modification::translate(
@@ -815,7 +809,7 @@ PatternedHexMeshGenerator::generate()
       auto & main_subdomain_map = _out_meshes->set_subdomain_name_map();
       // Retrieve subdomain name map from the mesh to be stitched and insert it to the main
       // subdomain map
-      auto increment_subdomain_map = cell_mesh.get_subdomain_name_map();
+      const auto & increment_subdomain_map = cell_mesh.get_subdomain_name_map();
       main_subdomain_map.insert(increment_subdomain_map.begin(), increment_subdomain_map.end());
 
       _out_meshes->stitch_meshes(cell_mesh,
@@ -878,7 +872,7 @@ PatternedHexMeshGenerator::generate()
         Real azi_corr_tmp = atan2((Real)j * 2.0 / (Real)side_intervals - 1.0, std::sqrt(3.0));
         Real x_tmp = _pattern_pitch / 2.0;
         Real y_tmp = x_tmp * std::tan(azi_corr_tmp);
-        node_coord_rotate(&x_tmp, &y_tmp, (Real)i * 60.0 - 150.0);
+        nodeCoordRotate(&x_tmp, &y_tmp, (Real)i * 60.0 - 150.0);
         Point p_tmp = Point(x_tmp, y_tmp, 0.0);
         _out_meshes->add_point(p_tmp, node_azi_list[i * side_intervals + j - 1].second);
       }
@@ -899,7 +893,7 @@ PatternedHexMeshGenerator::generate()
     {
       control_drum_positions_x[i] -= origin_x;
       control_drum_positions_y[i] -= origin_y;
-      node_coord_rotate(&control_drum_positions_x[i], &control_drum_positions_y[i], _rotate_angle);
+      nodeCoordRotate(&control_drum_positions_x[i], &control_drum_positions_y[i], _rotate_angle);
       Real cd_angle = atan2(control_drum_positions_y[i], control_drum_positions_x[i]);
 
       for (unsigned int j = 0; j < control_drum_azimuthals[i].size(); j++)
