@@ -6,8 +6,8 @@ Sets up a single material property that is computed using a parsed function expr
 
 A `ParsedMaterial` object takes the function expression as an input parameter in
 the form of a Function Parser expression. Parsed materials (unlike
-`ParsedFunctions`) can couple to non-linear variables and material properties.
-In its configuration block all non-linear variables the function depends on
+`ParsedFunctions`) can couple to nonlinear variables and material properties.
+In its configuration block all nonlinear variables the function depends on
 ([!param](/Materials/ParsedMaterial/args)), as well as constants
 ([!param](/Materials/ParsedMaterial/constant_names) and
 [!param](/Materials/ParsedMaterial/constant_expressions)), other material

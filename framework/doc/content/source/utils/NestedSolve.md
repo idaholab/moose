@@ -2,12 +2,12 @@
 
 ## Overview
 
-The `NestedSolve` utility class implements a non-linear solve for NxN systems.
+The `NestedSolve` utility class implements a nonlinear solve for NxN systems.
 It can be used in Kernels, Materials, and UserObjects to compute quantities
-given by the solution of a non-linear equation system rather than a closed form
+given by the solution of a nonlinear equation system rather than a closed form
 expression.
 
-Such a non-linear equation system is defined by a residual function and a
+Such a nonlinear equation system is defined by a residual function and a
 Jacobian function. These functions are provided as C++11 lambda expression. A
 lambda expression can access all local and member variables from the enclosing
 scope. In this application that mainly refers to coupled variable values and

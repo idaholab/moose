@@ -2,7 +2,7 @@
 
 !syntax description /Postprocessors/Residual
 
-The non linear residual may be queried before a non-linear iteration or after.
+The nonlinear residual may be queried before a nonlinear iteration or after.
 More information about residuals may be found [here](resres).
 
 The residual may be split by variables using the [VariableResidual.md] postprocessor.

@@ -5,7 +5,10 @@
 The formula for the relative difference is:
 
 !equation
-\dfrac{current\_solution - old\_solution}{current\_solution}
+\dfrac{u^{n+1} - u^n}{u^n}
+
+where $u$ is the solution vector, composed of the degrees of freedom of all the components of all the nonlinear variables,
+and $n$ is the index of the time step.
 
 ## Example input syntax
 

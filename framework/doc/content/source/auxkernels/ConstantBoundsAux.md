@@ -4,7 +4,7 @@
 
 ## Description
 
-`ConstantBoundsAux` is used for setting bounds on a non-linear variable specified
+`ConstantBoundsAux` is used for setting bounds on a nonlinear variable specified
 through the parameter `bounded_variable`. The bound type of `upper` or `lower` is set with `bound_type` parameter. The `bound_value` is used to specify the value of a bound. `ConstantBoundsAux` expects a `variable` parameter to be set (as do all `AuxKernels`). This can be a dummy
 `AuxVariable`; the `ConstantBoundsAux` actually operates on `NumericVectors` held by the
 nonlinear system and does nothing but return 0 for the value of the specified
@@ -21,8 +21,8 @@ MOOSE users can also enforce constraints through MOOSE using
 [`UpperBoundNodalKernel`](/UpperBoundNodalKernel.md) and
 [`LowerBoundNodalKernel`](/LowerBoundNodalKernel.md). However, using these
 objects requires introduction of Lagrange multiplier variables that increase the
-size of the non-linear system as well as render some preconditioning methods
-like algebraic multi-grid ineffective. The number of non-linear iterations
+size of the nonlinear system as well as render some preconditioning methods
+like algebraic multi-grid ineffective. The number of nonlinear iterations
 required to solve a constrained PDE defined by
 [this input file](/upper-and-lower-bound.i) with the various constraint
 algorithms is summarized below:

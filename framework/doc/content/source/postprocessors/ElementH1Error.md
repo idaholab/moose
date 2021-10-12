@@ -6,9 +6,10 @@ The H1 error is a popular metric of error as it is associated with the natural n
 for commonly used finite element spaces.
 
 !equation
-(\int_\Omega (u(x,t) - f(x,t))^p + (\nabla u(x,t) - \nabla f(x,t))^p d\Omega)^{\dfrac{1}{p}}
+||u - f||_{H_1} = \left( \int_\Omega \left( u(x,t) - f(x,t) \right)^p + \left(\nabla u(x,t) - \nabla f(x,t) \right)^p d\Omega \right)^{\dfrac{1}{p}}
 
-where `u` is the variable parameter, `f` the function parameter and $\Omega$ the domain of integration, which may be limited to certain blocks using the `block` parameter.
+where `u` is the variable parameter, `f` the function parameter, $p$ the norm exponent and $\Omega$ the domain of integration,
+which may be limited to certain blocks using the `block` parameter.
 
 ## Example input syntax
 
