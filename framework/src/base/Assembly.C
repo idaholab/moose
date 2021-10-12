@@ -653,16 +653,6 @@ Assembly::createQRules(QuadratureType type,
 }
 
 void
-Assembly::createQRules(QuadratureType type,
-                       Order order,
-                       Order volume_order,
-                       Order face_order,
-                       const bool allow_negative_qweights)
-{
-  createQRules(type, order, volume_order, face_order, Moose::ANY_BLOCK_ID, allow_negative_qweights);
-}
-
-void
 Assembly::setVolumeQRule(QBase * qrule, unsigned int dim)
 {
   _const_current_qrule = _current_qrule = qrule;
