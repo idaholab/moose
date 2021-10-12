@@ -2,9 +2,11 @@
 
 ## Overview
 
-`PenaltyInterfaceDiffusion` is a penalty-based interface condition that forces
-the continuity of variables across an interface, and the flux equivalence,
-as follows:
+`PenaltyInterfaceDiffusion` is an interface condition that forces
+the variable equivalence using a penalty. At the same time,
+the flux equivalence is implicitly satisfied as long as no other
+side (interface) residual objects are present. Mathematically, it is
+written as follows:
 \begin{equation}
 \begin{aligned}
 & D \frac{\partial u}{ \partial n} = P (u - u_{neighbor}), \\

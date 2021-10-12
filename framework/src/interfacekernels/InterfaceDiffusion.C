@@ -18,6 +18,8 @@ InterfaceDiffusion::validParams()
   params.addParam<MaterialPropertyName>("D", "D", "The diffusion coefficient.");
   params.addParam<MaterialPropertyName>(
       "D_neighbor", "D_neighbor", "The neighboring diffusion coefficient.");
+  params.addClassDescription(
+      "The kernel is utilized to establish flux equivalence on an interface for variables.");
   return params;
 }
 
