@@ -12,7 +12,7 @@ The residual may be split by variables using the [VariableResidual.md] postproce
 In this example, `u` is the solution of a diffusion problem. A predictor time integrating
 scheme is used and the `Residual` postprocessor reports the residual.
 
-!listing test/tests/postprocessors/predictors/simple/predictor_test.i block=Postprocessors
+!listing test/tests/predictors/simple/predictor_test.i block=Postprocessors
 
 !syntax parameters /Postprocessors/Residual
 

@@ -5,8 +5,6 @@
 This postprocessor is deprecated. Please use a [ChangeOverTimePostprocessor.md] and set the `compute_relative_change`
 parameter to `true`.
 
-!listing test/tests/postprocessors/ block=Postprocessors
-
 !syntax parameters /Postprocessors/PercentChangePostprocessor
 
 !syntax inputs /Postprocessors/PercentChangePostprocessor
