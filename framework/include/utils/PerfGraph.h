@@ -66,49 +66,6 @@ public:
   };
 
   /**
-   * Data structure that contains all of the information pertaining to a PerfNode
-   * entry for use in output.
-   */
-  class PerfNodeInfo
-  {
-  public:
-    PerfNodeInfo(const PerfNode & node,
-                 const PerfNode * const parent_node,
-                 const PerfGraphSectionInfo & section_info,
-                 const unsigned int depth)
-      : _node(node), _parent_node(parent_node), _section_info(section_info), _depth(depth)
-    {
-    }
-
-    /**
-     * @returns The node
-     */
-    const PerfNode & node() const { return _node; }
-    /**
-     * @returns The parent node (if any)
-     */
-    const PerfNode * parentNode() const { return _parent_node; }
-    /**
-     * @returns The SectionInfo associated with this node (contains name, level, etc)
-     */
-    const PerfGraphSectionInfo & sectionInfo() const { return _section_info; }
-    /**
-     * @returns The depth of the node in the tree
-     */
-    unsigned int depth() const { return _depth; }
-
-  private:
-    /// The node
-    const PerfNode & _node;
-    /// The parent node
-    const PerfNode * const _parent_node;
-    /// The SectionInfo responsible for this node
-    const PerfGraphSectionInfo & _section_info;
-    /// The depth of the node in the tree
-    const unsigned int _depth;
-  };
-
-  /**
    * Create a new PerfGraph
    *
    * @param root_name The name of the root node
@@ -521,7 +478,6 @@ private:
 
   template <typename Functor>
   void treeRecurseInternal(const PerfNode & node,
-                           const PerfNode * const parent,
                            const Functor & act,
                            const unsigned int level,
                            const bool heaviest,
@@ -531,7 +487,6 @@ private:
 template <typename Functor>
 void
 PerfGraph::treeRecurseInternal(const PerfNode & node,
-                               const PerfNode * const parent,
                                const Functor & act,
                                const unsigned int level,
                                const bool heaviest,
@@ -543,8 +498,7 @@ PerfGraph::treeRecurseInternal(const PerfNode & node,
   if (current_section_info._level <= level)
   {
     mooseAssert(!_cumulative_section_info_ptrs.empty(), "update() must be run before treeRecurse!");
-
-    act(PerfNodeInfo(node, parent, current_section_info, current_depth++));
+    act(node, current_section_info, current_depth++);
   }
 
   if (heaviest)
@@ -559,12 +513,12 @@ PerfGraph::treeRecurseInternal(const PerfNode & node,
     }
 
     if (heaviest_child)
-      treeRecurseInternal(*heaviest_child, &node, act, level, true, current_depth);
+      treeRecurseInternal(*heaviest_child, act, level, true, current_depth);
   }
   else
   {
     for (const auto & child_it : node.children())
-      treeRecurseInternal(*child_it.second, &node, act, level, false, current_depth);
+      treeRecurseInternal(*child_it.second, act, level, false, current_depth);
   }
 }
 
@@ -575,7 +529,7 @@ PerfGraph::treeRecurse(const Functor & act,
                        const bool heaviest /* = false */) const
 {
   mooseAssert(_root_node, "Root node does not exist; calling this too early");
-  treeRecurseInternal(*_root_node, nullptr, act, level, heaviest, 0);
+  treeRecurseInternal(*_root_node, act, level, heaviest, 0);
 }
 
 void dataStore(std::ostream & stream, PerfGraph & perf_graph, void * context);

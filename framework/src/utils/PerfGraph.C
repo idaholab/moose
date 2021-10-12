@@ -394,17 +394,19 @@ PerfGraph::treeTable(const unsigned int level, const bool heaviest /* = false */
       0, // Memory
   });
 
-  auto act = [this, &vtable](const PerfNodeInfo & info) {
-    vtable.addRow(std::string(info.depth() * 2, ' ') + info.sectionInfo()._name,  // Section Name
-                  info.node().numCalls(),                                         // Calls
-                  info.node().selfTimeSec(),                                      // Self
-                  info.node().selfTimeAvg(),                                      // Avg.
-                  100. * info.node().selfTimeSec() / _root_node->totalTimeSec(),  // %
-                  info.node().selfMemory(),                                       // Memory
-                  info.node().totalTimeSec(),                                     // Total
-                  info.node().totalTimeAvg(),                                     // Avg.
-                  100. * info.node().totalTimeSec() / _root_node->totalTimeSec(), // %
-                  info.node().totalMemory());                                     // Memory
+  auto act = [this, &vtable](const PerfNode & node,
+                             const PerfGraphSectionInfo & section_info,
+                             const unsigned int depth) {
+    vtable.addRow(std::string(depth * 2, ' ') + section_info._name,        // Section Name
+                  node.numCalls(),                                         // Calls
+                  node.selfTimeSec(),                                      // Self
+                  node.selfTimeAvg(),                                      // Avg.
+                  100. * node.selfTimeSec() / _root_node->totalTimeSec(),  // %
+                  node.selfMemory(),                                       // Memory
+                  node.totalTimeSec(),                                     // Total
+                  node.totalTimeAvg(),                                     // Avg.
+                  100. * node.totalTimeSec() / _root_node->totalTimeSec(), // %
+                  node.totalMemory());                                     // Memory
   };
   treeRecurse(act, level, heaviest);
 
