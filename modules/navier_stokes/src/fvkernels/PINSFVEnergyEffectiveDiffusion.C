@@ -20,6 +20,7 @@ PINSFVEnergyEffectiveDiffusion::validParams()
       "Effective diffusion term in the porous media incompressible Navier-Stokes "
       "equations : -div(kappa grad(T))");
   params.addParam<MaterialPropertyName>("kappa", "Vector of effective thermal conductivity");
+  params.addRequiredCoupledVar("porosity", "Porosity variable");
 
   params.set<unsigned short>("ghost_layers") = 2;
   return params;
@@ -28,7 +29,9 @@ PINSFVEnergyEffectiveDiffusion::validParams()
 PINSFVEnergyEffectiveDiffusion::PINSFVEnergyEffectiveDiffusion(const InputParameters & params)
   : FVFluxKernel(params),
     _kappa_elem(getADMaterialProperty<RealVectorValue>("kappa")),
-    _kappa_neighbor(getNeighborADMaterialProperty<RealVectorValue>("kappa"))
+    _kappa_neighbor(getNeighborADMaterialProperty<RealVectorValue>("kappa")),
+    _eps(coupledValue("porosity")),
+    _eps_neighbor(coupledNeighborValue("porosity"))
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError("PINSFV is not supported by local AD indexing. In order to use PINSFV, please run the "
@@ -47,8 +50,8 @@ PINSFVEnergyEffectiveDiffusion::computeQpResidual()
   ADRealVectorValue k_eps_face;
   interpolate(Moose::FV::InterpMethod::Average,
               k_eps_face,
-              _kappa_elem[_qp],
-              _kappa_neighbor[_qp],
+              _kappa_elem[_qp] * _eps[_qp],
+              _kappa_neighbor[_qp] * _eps_neighbor[_qp],
               *_face_info,
               true);
 

@@ -28,4 +28,8 @@ protected:
   const ADMaterialProperty<RealVectorValue> & _kappa_elem;
   /// the neighbor effective element thermal conductivity
   const ADMaterialProperty<RealVectorValue> & _kappa_neighbor;
+  /// the porosity
+  const VariableValue & _eps;
+  /// the neighbor element porosity
+  const VariableValue & _eps_neighbor;
 };
