@@ -657,7 +657,7 @@ Assembly::createQRules(QuadratureType type,
                        Order order,
                        Order volume_order,
                        Order face_order,
-                       bool allow_negative_qweights)
+                       const bool allow_negative_qweights)
 {
   createQRules(type, order, volume_order, face_order, Moose::ANY_BLOCK_ID, allow_negative_qweights);
 }

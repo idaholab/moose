@@ -4783,7 +4783,7 @@ FEProblemBase::createQRules(QuadratureType type,
                             Order volume_order,
                             Order face_order,
                             SubdomainID block,
-                            bool allow_negative_qweights)
+                            const bool allow_negative_qweights)
 {
   if (order == INVALID_ORDER)
   {

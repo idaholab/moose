@@ -106,7 +106,7 @@ DisplacedProblem::createQRules(QuadratureType type,
                                Order volume_order,
                                Order face_order,
                                SubdomainID block,
-                               bool allow_negative_qweights)
+                               const bool allow_negative_qweights)
 {
   for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
     _assembly[tid]->createQRules(
