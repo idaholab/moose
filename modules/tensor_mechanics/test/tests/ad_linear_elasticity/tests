@@ -42,7 +42,7 @@
     input = 'applied_strain.i'
     exodiff = 'applied_strain_out.e'
     requirement = 'We shall be able to reproduce eigenstrain results of the hand-coded simulation using automatic differentiation.'
-    design = 'ADComputeEigenstrain.md'
+    design = 'ComputeEigenstrain.md'
   [../]
   [./applied_strain-jac]
     type = 'PetscJacobianTester'
@@ -52,7 +52,7 @@
     difference_tol = 1e-1
     prereq = applied_strain
     requirement = 'The Jacobian for the AD eigenstrain problem shall be perfect'
-    design = 'ADComputeEigenstrain.md'
+    design = 'ComputeEigenstrain.md'
   [../]
 
   [./tensor]
@@ -79,7 +79,7 @@
     input = 'thermal_expansion.i'
     exodiff = 'thermal_expansion_out.e'
     requirement = 'We shall be able to reproduce thermal eigenstrain results of the hand-coded simulation using automatic differentiation.'
-    design = 'ADComputeEigenstrain.md'
+    design = 'ComputeEigenstrain.md'
   [../]
   [./thermal_expansion-jac]
     type = 'PetscJacobianTester'
@@ -89,6 +89,6 @@
     difference_tol = 1e-4
     prereq = thermal_expansion
     requirement = 'The Jacobian for the AD thermal eigenstrain problem shall be perfect'
-    design = 'ADComputeEigenstrain.md'
+    design = 'ComputeEigenstrain.md'
   [../]
 []
