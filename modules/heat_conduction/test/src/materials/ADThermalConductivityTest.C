@@ -14,7 +14,7 @@ registerMooseObject("HeatConductionTestApp", ADThermalConductivityTest);
 InputParameters
 ADThermalConductivityTest::validParams()
 {
-  auto params = ADMaterial::validParams();
+  auto params = Material::validParams();
   params.addRequiredCoupledVar("temperature", "Coupled temperature");
   params.addRequiredCoupledVar(
       "c", "Coupled variable used to help verify automatic differentiation capability");
@@ -22,7 +22,7 @@ ADThermalConductivityTest::validParams()
 }
 
 ADThermalConductivityTest::ADThermalConductivityTest(const InputParameters & parameters)
-  : ADMaterial(parameters),
+  : Material(parameters),
     _diffusivity(declareADProperty<Real>("thermal_conductivity")),
     _temperature(adCoupledValue("temperature")),
     _c(adCoupledValue("c"))

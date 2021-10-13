@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "ADMaterial.h"
+#include "Material.h"
 
 // A helper class from MOOSE that linear interpolates x,y data
 #include "LinearInterpolation.h"
@@ -20,7 +20,7 @@
  * use by other objects in the calculation such as Kernels and
  * BoundaryConditions.
  */
-class PackedColumn : public ADMaterial
+class PackedColumn : public Material
 {
 public:
   static InputParameters validParams();

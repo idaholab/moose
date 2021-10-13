@@ -9,9 +9,9 @@
 
 #pragma once
 
-#include "ADMaterial.h"
+#include "Material.h"
 
-class ADSoretCoeffTest : public ADMaterial
+class ADSoretCoeffTest : public Material
 {
 public:
   static InputParameters validParams();

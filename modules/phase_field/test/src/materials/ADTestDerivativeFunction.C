@@ -14,7 +14,7 @@ registerMooseObject("PhaseFieldTestApp", ADTestDerivativeFunction);
 InputParameters
 ADTestDerivativeFunction::validParams()
 {
-  InputParameters params = ADMaterial::validParams();
+  InputParameters params = Material::validParams();
   params.addClassDescription(
       "Material that implements the a function of one variable and its first derivative.");
   MooseEnum functionEnum("F1 F2 F3");
@@ -29,7 +29,7 @@ ADTestDerivativeFunction::validParams()
 }
 
 ADTestDerivativeFunction::ADTestDerivativeFunction(const InputParameters & parameters)
-  : ADMaterial(parameters),
+  : Material(parameters),
     _function(getParam<MooseEnum>("function").template getEnum<FunctionEnum>()),
     _op(adCoupledValues("op")),
     _f_name(getParam<MaterialPropertyName>("f_name")),

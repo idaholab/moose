@@ -14,14 +14,14 @@ registerMooseObject("MooseTestApp", ADStatefulMaterial);
 InputParameters
 ADStatefulMaterial::validParams()
 {
-  InputParameters params = ADMaterial::validParams();
+  InputParameters params = Material::validParams();
   params.addParam<Real>("initial_diffusivity", 0.5, "The Initial Diffusivity");
   params.addRequiredCoupledVar("u", "The coupled variable");
   return params;
 }
 
 ADStatefulMaterial::ADStatefulMaterial(const InputParameters & parameters)
-  : ADMaterial(parameters),
+  : Material(parameters),
 
     // Get a parameter value for the diffusivity
     _initial_diffusivity(getParam<Real>("initial_diffusivity")),

@@ -27,7 +27,7 @@ registerMooseObject("TensorMechanicsApp", ADComputeIncrementalShellStrain);
 InputParameters
 ADComputeIncrementalShellStrain::validParams()
 {
-  InputParameters params = ADMaterial::validParams();
+  InputParameters params = Material::validParams();
   params.addClassDescription("Compute a small strain increment for the shell.");
   params.addRequiredCoupledVar(
       "rotations", "The rotations appropriate for the simulation geometry and coordinate system");
@@ -45,7 +45,7 @@ ADComputeIncrementalShellStrain::validParams()
 }
 
 ADComputeIncrementalShellStrain::ADComputeIncrementalShellStrain(const InputParameters & parameters)
-  : ADMaterial(parameters),
+  : Material(parameters),
     _nrot(coupledComponents("rotations")),
     _ndisp(coupledComponents("displacements")),
     _rot_num(_nrot),

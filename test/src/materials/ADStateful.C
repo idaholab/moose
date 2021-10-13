@@ -14,7 +14,7 @@ registerMooseObject("MooseTestApp", ADStateful);
 InputParameters
 ADStateful::validParams()
 {
-  InputParameters params = ADMaterial::validParams();
+  InputParameters params = Material::validParams();
 
   params.addRequiredParam<MaterialPropertyName>("property_name",
                                                 "Name of porosity material property");
@@ -23,7 +23,7 @@ ADStateful::validParams()
 }
 
 ADStateful::ADStateful(const InputParameters & parameters)
-  : ADMaterial(parameters),
+  : Material(parameters),
     _property(declareADProperty<Real>("property_name")),
     _property_old(getMaterialPropertyOld<Real>("property_name"))
 {

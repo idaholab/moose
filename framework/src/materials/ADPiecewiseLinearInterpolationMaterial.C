@@ -16,7 +16,7 @@ registerMooseObject("MooseApp", ADPiecewiseLinearInterpolationMaterial);
 InputParameters
 ADPiecewiseLinearInterpolationMaterial::validParams()
 {
-  InputParameters params = ADMaterial::validParams();
+  InputParameters params = Material::validParams();
   params.addClassDescription("Compute a property using a piecewise linear interpolation to define "
                              "its dependence on a variable");
   params.addRequiredParam<std::string>("property",
@@ -38,7 +38,7 @@ ADPiecewiseLinearInterpolationMaterial::validParams()
 
 ADPiecewiseLinearInterpolationMaterial::ADPiecewiseLinearInterpolationMaterial(
     const InputParameters & parameters)
-  : ADMaterial(parameters),
+  : Material(parameters),
     _prop_name(getParam<std::string>("property")),
     _coupled_var(adCoupledValue("variable")),
     _scale_factor(getParam<Real>("scale_factor")),
