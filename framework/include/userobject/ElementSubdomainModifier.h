@@ -27,7 +27,7 @@ public:
 
 protected:
   // Compute the subdomain ID of the current element
-  virtual SubdomainID computeSubdomainID() = 0;
+  virtual SubdomainID computeSubdomainID() const = 0;
 
   // Range of the elements who changed their subdomain ID
   ConstElemRange & movedElemsRange() const { return *_moved_elems_range; }

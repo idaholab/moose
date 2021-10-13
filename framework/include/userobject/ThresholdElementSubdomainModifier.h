@@ -20,10 +20,10 @@ public:
   ThresholdElementSubdomainModifier(const InputParameters & parameters);
 
 protected:
-  virtual SubdomainID computeSubdomainID() override;
+  virtual SubdomainID computeSubdomainID() const override;
 
   /// Compute the value used in the criterion
-  virtual Real computeValue() = 0;
+  virtual Real computeValue() const = 0;
 
 private:
   /// Threshold to modify the element subdomain ID

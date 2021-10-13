@@ -9,19 +9,19 @@
 
 #pragma once
 
-#include "ThresholdElementSubdomainModifier.h"
+#include "ElementSubdomainModifier.h"
 
-class CoupledVarThresholdElementSubdomainModifier : public ThresholdElementSubdomainModifier
+class CoupledVarSubdomainModifier : public ElementSubdomainModifier
 {
 public:
   static InputParameters validParams();
 
-  CoupledVarThresholdElementSubdomainModifier(const InputParameters & parameters);
+  CoupledVarSubdomainModifier(const InputParameters & parameters);
 
 protected:
-  virtual Real computeValue() const override;
+  virtual SubdomainID computeSubdomainID() const override;
 
 private:
-  /// The coupled variable used in the criterion
+  /// The coupled variable that defines the Subdomain ID
   const VariableValue & _v;
 };

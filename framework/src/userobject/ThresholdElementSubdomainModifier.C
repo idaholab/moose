@@ -41,7 +41,7 @@ ThresholdElementSubdomainModifier::ThresholdElementSubdomainModifier(
 }
 
 SubdomainID
-ThresholdElementSubdomainModifier::computeSubdomainID()
+ThresholdElementSubdomainModifier::computeSubdomainID() const
 {
   Real criterion = computeValue();
 

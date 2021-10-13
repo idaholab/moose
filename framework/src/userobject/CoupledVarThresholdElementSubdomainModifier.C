@@ -29,7 +29,7 @@ CoupledVarThresholdElementSubdomainModifier::CoupledVarThresholdElementSubdomain
 }
 
 Real
-CoupledVarThresholdElementSubdomainModifier::computeValue()
+CoupledVarThresholdElementSubdomainModifier::computeValue() const
 {
   Real avg_val = 0;
 
