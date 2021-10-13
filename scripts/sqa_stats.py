@@ -36,6 +36,7 @@ if __name__ == '__main__':
     data += mooseutils.compute_requirement_stats('modules/phase_field')
     data += mooseutils.compute_requirement_stats('modules/porous_flow')
     data += mooseutils.compute_requirement_stats('modules/rdg')
+    data += mooseutils.compute_requirement_stats('modules/reactor')
     data += mooseutils.compute_requirement_stats('modules/richards')
     data += mooseutils.compute_requirement_stats('modules/solid_mechanics')
     data += mooseutils.compute_requirement_stats('modules/stochastic_tools')

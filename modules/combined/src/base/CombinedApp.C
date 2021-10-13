@@ -27,6 +27,7 @@
 #include "PorousFlowApp.h"
 #include "RayTracingApp.h"
 #include "RdgApp.h"
+#include "ReactorApp.h"
 #include "RichardsApp.h"
 #include "StochasticToolsApp.h"
 #include "PeridynamicsApp.h"
@@ -80,6 +81,7 @@ CombinedApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   PorousFlowApp::registerAll(f, af, s);
   RayTracingApp::registerAll(f, af, s);
   RdgApp::registerAll(f, af, s);
+  ReactorApp::registerAll(f, af, s);
   RichardsApp::registerAll(f, af, s);
   StochasticToolsApp::registerAll(f, af, s);
   PeridynamicsApp::registerAll(f, af, s);
@@ -103,6 +105,7 @@ CombinedApp::registerObjects(Factory & factory)
   PhaseFieldApp::registerObjects(factory);
   PorousFlowApp::registerObjects(factory);
   RayTracingApp::registerObjects(factory);
+  ReactorApp::registerObjects(factory);
   RdgApp::registerObjects(factory);
   RichardsApp::registerObjects(factory);
   StochasticToolsApp::registerObjects(factory);
@@ -126,6 +129,7 @@ CombinedApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   PhaseFieldApp::associateSyntax(syntax, action_factory);
   PorousFlowApp::associateSyntax(syntax, action_factory);
   RayTracingApp::associateSyntax(syntax, action_factory);
+  ReactorApp::associateSyntax(syntax, action_factory);
   RdgApp::associateSyntax(syntax, action_factory);
   RichardsApp::associateSyntax(syntax, action_factory);
   StochasticToolsApp::associateSyntax(syntax, action_factory);
@@ -146,6 +150,7 @@ CombinedApp::registerExecFlags(Factory & factory)
   NavierStokesApp::registerExecFlags(factory);
   PhaseFieldApp::registerExecFlags(factory);
   RayTracingApp::registerExecFlags(factory);
+  ReactorApp::registerExecFlags(factory);
   RichardsApp::registerExecFlags(factory);
   StochasticToolsApp::registerExecFlags(factory);
   PeridynamicsApp::registerExecFlags(factory);

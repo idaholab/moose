@@ -17,6 +17,7 @@ application.
 - [Phase Field](modules/phase_field/index.md)
 - [Porous Flow](modules/porous_flow/index.md)
 - [Ray Tracing](modules/ray_tracing/index.md)
+- [Reactor](modules/reactor/index.md)
 - [Reconstructed Discontinous Galerkin](modules/rdg/index.md)
 - [Richards](modules/richards/index.md)
 - [Stochastic Tools](modules/stochastic_tools/index.md)

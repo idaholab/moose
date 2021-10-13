@@ -29,6 +29,7 @@
 #include "XFEMTestApp.h"
 #include "PorousFlowTestApp.h"
 #include "RdgTestApp.h"
+#include "ReactorTestApp.h"
 #include "LevelSetTestApp.h"
 #include "ExternalPetscSolverApp.h"
 
@@ -72,6 +73,7 @@ CombinedTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool u
     XFEMTestApp::registerAll(f, af, s, use_test_objs);
     PorousFlowTestApp::registerAll(f, af, s, use_test_objs);
     RdgTestApp::registerAll(f, af, s, use_test_objs);
+    ReactorTestApp::registerAll(f, af, s, use_test_objs);
     LevelSetTestApp::registerAll(f, af, s, use_test_objs);
     ExternalPetscSolverApp::registerAll(f, af, s);
   }

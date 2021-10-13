@@ -178,6 +178,16 @@ Applications:
         app_types:
             - RdgApp
 
+    reactor:
+        exe_directory: modules/combined
+        app_types:
+            - ReactorApp
+        content_directory: modules/reactor/doc/content
+        remove:
+            - framework/doc/remove.yml
+        unregister:
+            - framework/doc/unregister.yml
+
     stochastic_tools:
         exe_directory: modules/combined
         app_types:
@@ -366,6 +376,10 @@ Requirements:
     rdg:
         directories:
             - modules/rdg
+
+    reactor:
+        directories:
+            - modules/reactor
 
     richards:
         directories:
