@@ -45,5 +45,6 @@
     requirement = 'The system shall be able to model natural convection using a weakly compressible implementation.'
     ad_indexing_type = 'global'
     method = '!dbg'
+    valgrind = 'none'
   []
 []
