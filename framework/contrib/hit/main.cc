@@ -29,6 +29,7 @@ globCompare(const std::string & candidate,
   if (p == pattern.size())
     return c == candidate.size();
 
+  // '*' matches an arbitrary number of characters
   if (pattern[p] == '*')
   {
     for (; c < candidate.size(); ++c)
@@ -37,6 +38,7 @@ globCompare(const std::string & candidate,
     return globCompare(candidate, pattern, c, p + 1);
   }
 
+  // '?' matches exactly one character
   if (pattern[p] != '?' && pattern[p] != candidate[c])
     return false;
 
@@ -158,6 +160,10 @@ parseOpts(int argc, char ** argv, Flags & flags)
     if (flagname[0] == '-')
       flagname = flagname.substr(1);
 
+    // -- marks the start of positional arguments
+    if (flagname == "-")
+      break;
+
     if (flags.flags.count(flagname) == 0)
       throw std::runtime_error("unknown flag '" + arg);
 
@@ -211,6 +217,17 @@ private:
   std::map<std::string, hit::Node *> _have;
 };
 
+std::pair<std::string, std::unique_ptr<std::string>>
+splitParamValue(const std::string & pv)
+{
+  auto equal_sign = pv.find('=');
+  return std::make_pair(
+      std::string(pv, 0, equal_sign),
+      std::unique_ptr<std::string>(equal_sign == std::string::npos
+                                       ? nullptr
+                                       : new std::string(pv, equal_sign + 1, std::string::npos)));
+}
+
 int
 findParam(int argc, char ** argv)
 {
@@ -219,6 +236,12 @@ findParam(int argc, char ** argv)
       "input from stdin.\n  A pattern has the form param[=value] and wildcards (*,?) may be used");
   flags.add("f", "only show file name");
   flags.add("i", "case insensitive matches");
+  flags.add("v", "show only files that don't match");
+  flags.addVector(
+      "p",
+      "additional parameter patterns that must match the parent of the matched pattern (e.g. "
+      "-p type=Diffusion variable=u). The -p option must be followed by another option or "
+      "terminated with a double dash '--' followed by the list of filenames.");
   flags.add("h", "print help");
   flags.add("help", "print help");
   auto positional = parseOpts(argc, argv, flags);
@@ -231,20 +254,24 @@ findParam(int argc, char ** argv)
 
   const bool file_only = flags.have("f");
   const bool case_insensitive = flags.have("i");
+  const bool invert = flags.have("v");
+
+  // get additional parameters
+  auto pargs = flags.vecVal("p");
+  std::vector<std::pair<std::string, std::unique_ptr<std::string>>> additional_parameters;
+  for (auto & p : pargs)
+    additional_parameters.push_back(std::move(splitParamValue(p)));
 
   if (case_insensitive)
     positional[0] = hit::lower(positional[0]);
 
-  auto equal_sign = positional[0].find('=');
-  std::string param(positional[0], 0, equal_sign);
-  std::unique_ptr<std::string> value(
-      equal_sign == std::string::npos
-          ? nullptr
-          : new std::string(positional[0], equal_sign + 1, std::string::npos));
+  auto param_value = splitParamValue(positional[0]);
 
   std::size_t n_matches = 0;
   for (std::size_t i = 1; i < positional.size(); i++)
   {
+    auto n_matches_old = n_matches;
+
     // load and parse input
     std::string fname(positional[i]);
     std::istream && f =
@@ -262,27 +289,66 @@ findParam(int argc, char ** argv)
       continue;
     }
 
-    // gather paremters
+    // gather parameters
     hit::GatherParamWalker::ParamMap params;
     hit::GatherParamWalker walker(params);
     root->walk(&walker);
 
     // search parameters
     for (const auto & p : params)
-      if (globCompare(case_insensitive ? hit::lower(p.first) : p.first, param))
+      if (globCompare(case_insensitive ? hit::lower(p.first) : p.first, param_value.first))
       {
         auto n = p.second;
         auto v = n->strVal();
+
         // if a value was given, make sure it matches, too
-        if (value && !globCompare(case_insensitive ? hit::lower(v) : v, *value))
+        if (param_value.second &&
+            !globCompare(case_insensitive ? hit::lower(v) : v, *param_value.second))
           continue;
+
+        // if aditional -p arguments were given, check those, too
+        bool ap_match = true;
+        for (const auto & ap : additional_parameters)
+        {
+          // first check if the parent exists
+          auto parent = n->parent();
+          if (parent)
+          {
+            // look for the parameter name in the parent (and if it exists and a value was given
+            // also match that)
+            auto other_match = parent->find(ap.first);
+            if (!other_match ||
+                (ap.second && !globCompare(case_insensitive ? hit::lower(other_match->strVal())
+                                                            : other_match->strVal(),
+                                           *param_value.second)))
+            {
+              ap_match = false;
+              break;
+            }
+          }
+          else
+          {
+            // no parent exists, so this cannot be a match
+            ap_match = false;
+            break;
+          }
+        }
+        if (!ap_match)
+          break;
+
         n_matches++;
 
-        if (file_only)
-          std::cout << n->filename() << "\n";
-        else
-          std::cout << n->filename() << ":" << n->line() << ' ' << p.first << " = " << v << "\n";
+        if (!invert)
+        {
+          if (file_only)
+            std::cout << n->filename() << "\n";
+          else
+            std::cout << n->filename() << ":" << n->line() << ' ' << p.first << " = " << v << "\n";
+        }
       }
+
+    if (invert && n_matches_old == n_matches)
+      std::cout << positional[i] << "\n";
   }
 
   if (!file_only)
