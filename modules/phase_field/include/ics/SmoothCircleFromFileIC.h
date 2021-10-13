@@ -26,9 +26,11 @@ public:
 
   SmoothCircleFromFileIC(const InputParameters & parameters);
 
+  virtual void initialSetup() override;
+
 protected:
-  virtual void computeCircleRadii();
-  virtual void computeCircleCenters();
+  virtual void computeCircleRadii() override;
+  virtual void computeCircleCenters() override;
 
   enum COLS
   {
@@ -44,4 +46,7 @@ protected:
   MooseUtils::DelimitedFileReader _txt_reader;
   std::vector<std::string> _col_names;
   unsigned int _n_circles;
+
+private:
+  void readBubbleCoordinates();
 };

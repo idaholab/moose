@@ -27,6 +27,9 @@ SmoothCircleFromFileIC::SmoothCircleFromFileIC(const InputParameters & parameter
     _file_name(getParam<FileName>("file_name")),
     _txt_reader(_file_name, &_communicator),
     _n_circles(0)
+{}
+
+void SmoothCircleFromFileIC::readBubbleCoordinates()
 {
   // Read names and vectors from file
   _txt_reader.read();
@@ -61,6 +64,12 @@ SmoothCircleFromFileIC::SmoothCircleFromFileIC(const InputParameters & parameter
     mooseError("No column in ", _file_name, " labeled 'z'.");
   if (_col_map[R] == -1)
     mooseError("No column in ", _file_name, " labeled 'r'.");
+}
+
+void SmoothCircleFromFileIC::initialSetup()
+{
+  readBubbleCoordinates();
+  SmoothCircleBaseIC::initialSetup();
 }
 
 void
