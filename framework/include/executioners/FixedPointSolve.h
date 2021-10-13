@@ -276,6 +276,4 @@ private:
   /// The value of auto_advance set by the user for handling advancement of sub-applications in
   /// multi-app contexts
   const bool _auto_advance_user_value;
-
-  bool _sub_allocated = false;
 };

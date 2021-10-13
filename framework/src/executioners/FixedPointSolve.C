@@ -169,24 +169,19 @@ FixedPointSolve::FixedPointSolve(Executioner & ex)
     mooseWarning(
         "Both variable and postprocessor transformation are active. If the two share dofs, the "
         "transformation will not be correct.");
+
+  if (!_app.isUltimateMaster())
+  {
+    _secondary_relaxation_factor = _app.solveConfig().sub_relaxation_factor;
+    _secondary_transformed_variables = _app.solveConfig().sub_transformed_vars;
+    _secondary_transformed_pps = _app.solveConfig().sub_transformed_pps;
+  }
 }
 
 bool
 FixedPointSolve::solve()
 {
   TIME_SECTION("PicardSolve", 1);
-
-  // subapps need some extra setup that needs to occur after the multiapp has
-  // been initiallized and set some relevant solve parameters.  This setup is
-  // done on-demand here.
-  if (!_app.isUltimateMaster() && !_sub_allocated)
-  {
-    _sub_allocated = true;
-    _secondary_relaxation_factor = _app.solveConfig().sub_relaxation_factor;
-    _secondary_transformed_variables = _app.solveConfig().sub_transformed_vars;
-    _secondary_transformed_pps = _app.solveConfig().sub_transformed_pps;
-    allocateStorage(false);
-  }
 
   Real current_dt = _problem.dt();
 
