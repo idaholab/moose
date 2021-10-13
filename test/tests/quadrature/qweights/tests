@@ -1,6 +1,6 @@
 [Tests]
   issues = '#19066'
-  design = 'Quadrature/index.md'
+  design = 'SetupQuadratureAction.md'
 
   [./weights]
     type = Exodiff
