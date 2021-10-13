@@ -20,7 +20,6 @@ public:
 
   ElementSubdomainModifier(const InputParameters & parameters);
 
-  virtual void initialSetup() override;
   virtual void initialize() override;
   virtual void execute() override;
   virtual void threadJoin(const UserObject & /*uo*/) override{};
@@ -29,22 +28,6 @@ public:
 protected:
   // Compute the subdomain ID of the current element
   virtual SubdomainID computeSubdomainID() = 0;
-
-  // The ID of the moving boundary that this object creates/modifies.
-  BoundaryID movingBoundaryID() const
-  {
-    if (!_moving_boundary_specified)
-      mooseError("no moving boundary specified");
-    return _moving_boundary_id;
-  }
-
-  // The name of the moving boundary that this object creates/modifies.
-  const BoundaryName movingBoundaryName() const
-  {
-    if (!_moving_boundary_specified)
-      mooseError("no moving boundary specified");
-    return _moving_boundary_name;
-  }
 
   // Range of the elements who changed their subdomain ID
   ConstElemRange & movedElemsRange() const { return *_moved_elems_range; }
@@ -55,28 +38,14 @@ protected:
   // Pointer to the displaced problem
   DisplacedProblem * _displaced_problem;
 
-private:
-  // Set the name of the moving boundary. Create the nodeset/sideset if not exist.
-  void setMovingBoundaryName(MooseMesh & mesh);
-
   // Update the moving boundary (both the underlying sideset and nodeset)
-  void updateBoundaryInfo(MooseMesh & mesh, const std::vector<const Elem *> & moved_elems);
+  virtual void updateBoundaryInfo(MooseMesh & mesh, const std::vector<const Elem *> & moved_elems);
 
+private:
   // Helper function to add nodes on a side of an element to a set
   void recordNodeIdsOnElemSide(const Elem * elem,
                                const unsigned short int side,
                                std::set<dof_id_type> & node_ids);
-
-  // Remove ghosted element sides
-  void pushBoundarySideInfo(
-      MooseMesh & mesh,
-      std::unordered_map<processor_id_type, std::vector<std::pair<dof_id_type, unsigned int>>> &
-          elems_to_push);
-
-  // Remove ghosted boundary nodes
-  void pushBoundaryNodeInfo(
-      MooseMesh & mesh,
-      std::unordered_map<processor_id_type, std::vector<dof_id_type>> & nodes_to_push);
 
   // Helper function to build the range of moved elements
   void buildMovedElemsRange();
@@ -104,13 +73,4 @@ private:
 
   // Whether to re-apply ICs on moved elements and moved nodes
   const bool _apply_ic;
-
-  /// Whether a moving boundary name is provided
-  const bool _moving_boundary_specified;
-
-  /// The name of the moving boundary
-  BoundaryName _moving_boundary_name;
-
-  /// The Id of the moving boundary
-  BoundaryID _moving_boundary_id;
 };

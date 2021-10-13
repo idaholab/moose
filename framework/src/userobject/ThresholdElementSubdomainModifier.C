@@ -12,7 +12,7 @@
 InputParameters
 ThresholdElementSubdomainModifier::validParams()
 {
-  InputParameters params = ElementSubdomainModifier::validParams();
+  InputParameters params = ElementSubdomainAndBoundaryModifier::validParams();
 
   params.addRequiredParam<Real>("threshold",
                                 "The value above (or below) which to change the element subdomain");
@@ -30,7 +30,7 @@ ThresholdElementSubdomainModifier::validParams()
 
 ThresholdElementSubdomainModifier::ThresholdElementSubdomainModifier(
     const InputParameters & parameters)
-  : ElementSubdomainModifier(parameters),
+  : ElementSubdomainAndBoundaryModifier(parameters),
     _threshold(getParam<Real>("threshold")),
     _criterion_type(getParam<MooseEnum>("criterion_type").getEnum<CriterionType>()),
     _subdomain_id(getParam<SubdomainID>("subdomain_id")),

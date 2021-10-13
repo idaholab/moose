@@ -9,10 +9,10 @@
 
 #pragma once
 
-#include "ElementSubdomainModifier.h"
+#include "ElementSubdomainAndBoundaryModifier.h"
 #include "MooseEnum.h"
 
-class ThresholdElementSubdomainModifier : public ElementSubdomainModifier
+class ThresholdElementSubdomainModifier : public ElementSubdomainAndBoundaryModifier
 {
 public:
   static InputParameters validParams();
