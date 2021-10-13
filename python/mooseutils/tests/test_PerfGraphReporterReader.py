@@ -73,6 +73,7 @@ class TestPerfGraphReporterReader(unittest.TestCase):
 
                 self.assertEqual(node._nodes, [node])
                 self.assertEqual(node.name(), node.path()[-1])
+                self.assertEqual(pgrr.node(node.path()), node)
                 self.assertEqual(node.name(), node.section().name())
                 self.assertIn(node, node.section().nodes())
                 self.assertEqual(pgrr.rootNode(), node.rootNode())
@@ -109,6 +110,7 @@ class TestPerfGraphReporterReader(unittest.TestCase):
                 self.assertEqual(len(data), len(section.nodes()))
 
                 for node in section.nodes():
+                    self.assertEqual(section.node(node.path()), node)
                     self.assertEqual(node.section(), section)
                     self.assertEqual(node.level(), section.level())
                     self.assertEqual(node.name(), section.name())

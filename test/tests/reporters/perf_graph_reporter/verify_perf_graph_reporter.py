@@ -2,62 +2,79 @@
 import sys
 from mooseutils.PerfGraphReporterReader import PerfGraphReporterReader
 from mooseutils.ReporterReader import ReporterReader
-from math import isclose
-
-def node_name(node):
-    return 'Node {} with name "{}"'.format(node.id(), node.name())
-
-def check_section(pgr, name):
-    if not pgr.section(name):
-        sys.exit(name + ' is not a section'.format(name))
-
-def check_level(node, level):
-    if node.level() != level:
-        sys.exit(node_name(node) + ' should have a level of {}'.format(level))
-
-def check_num_calls(node, num_calls):
-    if node.numCalls() != num_calls:
-        sys.exit(node_name(node) + ' should have {} calls'.format(num_calls))
-
-def check_parent(node, parent_node):
-    if node.parent() != parent_node:
-        sys.exit(node_name(node) + ' has an incorrect parent')
-
-def check_num_children(node, num_children):
-    if len(node.children()) != num_children:
-        sys.exit(node_name(node) + ' should have {} children'.format(num_children))
 
 def check(file, pid, recover):
+    # Load the test output; we do this first because we don't do diffs when
+    # we have more than one processor but we can still make sure the output
+    # is readable
     pgr = PerfGraphReporterReader(file, part=pid)
 
-    # The name of the root node
-    root_name = 'MooseTestApp (main)'
-    # The children that the root node should have (these may change over time)
-    # The root node should have these two children (this may change over time)
-    root_children_names = ['RankMap::construct', 'MooseApp::run']
+    if pid != 0:
+        return
 
-    # Look for the root node we expect
-    root_node = pgr.rootNode()
-    check_section(pgr, root_name)
-    if pgr.rootNode().name() != root_name:
-        sys.exit(root_name + ' is not the root node')
-    check_level(root_node, 0)
-    check_num_calls(root_node, 2 if recover else 1)
-    check_num_children(root_node, len(root_children_names))
-    if not isclose(pgr.rootNode().percentTime(), 100):
-        sys.exit('Root node percent time is not 100%')
+    # Load the gold file, from which will make sure that all of the sections
+    # and nodes in the gold output also exist in the test output
+    print('gold/' + file)
+    gold_pgr = PerfGraphReporterReader('gold/' + file)
 
-    # Look for the children we expect
-    for child in root_node.children():
-        if child.name() not in root_children_names:
-            sys.exit('Unexpected child "{}" in root node'.format(child.name()))
-        check_num_calls(child, 2 if recover else 1)
-        check_parent(child, root_node)
+    errors = []
+    def check_node(statement, gold_node, message):
+        if not statement:
+            errors.append('Node "' + '/'.join(gold_node.path()) + '": ' + message)
+    def check_section(statement, gold_section, message):
+        if not statement:
+            errors.append('Section "' + gold_section.name() + '": ' + message)
+
+    def act_node(gold_node):
+        node = pgr.node(gold_node.path())
+        if node is None:
+            check_node(false, gold_node, 'Node is missing')
+            return
+
+        check_node(node.name() == gold_node.name(), gold_node, 'Name mismatch')
+        check_node(node.level() == gold_node.level(), gold_node, 'Level mismatch')
+        check_node(node.numCalls() == gold_node.numCalls(), gold_node, 'Num calls mismatch')
+        check_node(len(node.children()) == len(gold_node.children()), gold_node, 'Number of children mismatch')
+
+        for gold_child in gold_node.children():
+            if pgr.node(gold_child.path()) is None:
+                check_node(False, gold_node, 'Child "' + gold_child.name() + '" is missing')
+
+        if gold_node.parent() is None:
+            check_node(node.parent() == None, gold_node, 'Null parent mismatch')
+        else:
+            check_node(gold_node.parent().name() == node.parent().name(), gold_node, 'Parent mismatch')
+    gold_pgr.recursivelyDo(act_node)
+
+    for gold_section in gold_pgr.sections():
+        section = pgr.section(gold_section.name())
+        if section is None:
+            check_section(false, gold_section, 'Section is missing')
+
+        check_section(section.name() == gold_section.name(), gold_section, 'Name mismatch')
+        check_section(section.level() == gold_section.level(), gold_section, 'Level mismatch')
+        check_section(section.numCalls() == gold_section.numCalls(), gold_section, 'Num calls mismatch')
+        check_section(len(section.nodes()) == len(gold_section.nodes()), gold_section, 'Number of nodes mismatch')
+
+        for gold_node in gold_section.nodes():
+            if section.node(gold_node.path()) is None:
+                check_section(False, gold_section, 'Node "' + gold_node.name() + '" is missing')
+
+    for section in pgr.sections():
+        if gold_pgr.section(section.name()) is None:
+            check_section(False, gold_section, 'Extraneous section "' + section.name() + '"')
+
+    if errors:
+        print('Errors were found when diffing the graph from the gold file.')
+        print('It is likely that you just need to regold "' + file + '".\n')
+        print('\n'.join(errors))
+        sys.exit()
 
 def main():
     recover = len(sys.argv) == 2 and sys.argv[1] == 'recover'
 
     file = 'perf_graph_reporter_' + ('recover_' if recover else '') + 'json.json'
+
     rr = ReporterReader(file)
 
     for pid in range(0, rr.numParts()):

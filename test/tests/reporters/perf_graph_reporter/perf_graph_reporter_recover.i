@@ -19,9 +19,7 @@
   execute_on = FINAL
 []
 
-[Outputs]
-  [json]
-    type = JSON
-    execute_on = FINAL
-  []
+[Outputs/json]
+  type = JSON
+  execute_on = FINAL
 []

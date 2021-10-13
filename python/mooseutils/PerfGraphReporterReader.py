@@ -53,7 +53,8 @@ class PerfGraphObject:
         in a human readable form.
         """
         info_str = 'Num calls: {}'.format(self.numCalls())
-        info_str += '\nTime ({:.2f}%): Self {:.2e} s, Children {:.2e} s, Total {:.2e} s'.format(self.percentTime(), self.selfTime(), self.childrenTime(), self.totalTime())
+        info_str += '\nLevel: {}'.format(self.level())
+        info_str += '\nTime ({:.2f}%): Self {:.2f} s, Children {:.2f} s, Total {:.2f} s'.format(self.percentTime(), self.selfTime(), self.childrenTime(), self.totalTime())
         info_str += '\nMemory ({:.2f}%): Self {} MB, Children {} MB, Total {} MB'.format(self.percentMemory(), self.selfMemory(), self.childrenMemory(), self.totalMemory())
         return info_str
 
@@ -197,12 +198,15 @@ class PerfGraphNode(PerfGraphObject):
         Returns the number of calls, the time, memory,
         and children in a human readable form.
         """
-        info_str = 'PerfGraphNode "' + '/'.join(self.path()) + '":'
-        info_str += '\n  ' + super().info().replace('\n', '\n  ')
+        info_str = 'PerfGraphNode\n'
+        info_str += '  Path:\n'
+        for i in range(0, len(self.path())):
+            info_str += '    ' + ' ' * i + self.path()[i] + '\n'
+        info_str += '  ' + super().info().replace('\n', '\n  ')
         if self.children():
             info_str += '\n  Children:'
             for child in self.children():
-                info_str += '\n    ' + child.name()
+                info_str += '\n    ' + child.name() + ' ({} call(s), {:.1f}% time, {:.1f}% memory)'.format(child.numCalls(), child.percentTime(), child.percentMemory())
         return info_str
 
     def path(self):
@@ -266,9 +270,14 @@ class PerfGraphSection(PerfGraphObject):
     def info(self):
         info_str = 'PerfGraphSection "' + self.name() + '":'
         info_str += '\n  ' + super().info().replace('\n', '\n  ')
-        info_str += '\n  Nodes:'
+        info_str += '\n  Nodes:\n'
         for node in self.nodes():
-            info_str += '\n    ' + '/'.join(node.path())
+            for i in range(len(node.path())):
+                info_str += '    ' + ('- ' if i == 0 else '  ')
+                info_str += ' ' * i + node.path()[i]
+                if i == len(node.path()) - 1:
+                    info_str += ' ({} call(s), {:.1f}% time, {:.1f}% memory)'.format(node.numCalls(), node.percentTime(), node.percentMemory())
+                info_str += '\n'
         return info_str
 
     def nodes(self):
@@ -276,6 +285,19 @@ class PerfGraphSection(PerfGraphObject):
         Returns the nodes that are in this section
         """
         return self._nodes
+
+    def node(self, path):
+        """
+        Returns the node with the given path, if one exists, otherwise None
+
+        Inputs:
+            path[list(str)]: Path to the node
+        """
+        for node in self.nodes():
+            if node.path() == path:
+                return node
+
+        return None
 
 class PerfGraphReporterReader:
     """
@@ -356,11 +378,26 @@ class PerfGraphReporterReader:
         """
         return self._root_node
 
+    def node(self, path):
+        """
+        Returns the node with the given path if one exists, otherwise None
+
+        Inputs:
+            path[list(str)]: Path to the node
+        """
+        if len(path) == 0 or path[0] != self.rootNode().name():
+            return None
+        node = self.rootNode()
+        for name in path[1:]:
+            if node:
+                node = node[name]
+        return node
+
     def sections(self):
         """
         Returns all of the named sections.
         """
-        return self._sections.items()
+        return self._sections.values()
 
     def section(self, name):
         """
