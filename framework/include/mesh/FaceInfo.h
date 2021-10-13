@@ -231,15 +231,27 @@ private:
   const Point _neighbor_centroid;
   const Real _neighbor_volume;
 
-  /// Geometric weighting factor
-  const Real _gc;
-
   /// the distance vector between neighbor and element centroids
   const RealVectorValue _d_cf;
+
   /// the distance norm between neighbor and element centroids
   const Real _d_cf_mag;
+
   /// The unit normal vector pointing from element center C to element center F
   const RealVectorValue _e_cf;
+
+  /// The vector to the intersection of d_{CF} and the face. Not constant
+  /// because the surface normal needs to be used for the computation.
+  RealVectorValue _r_int;
+
+  /// Bool describing skewed elements connected with this face.
+  /// If ||r_f-r_{f'}\\ > 0.05*||d_cf||, then this is a skewed connection
+  /// and will need correction. The criterium may change in the future.
+  /// Not constant since _r_int is used for the computation.
+  bool _skewed;
+
+  /// Geometric weighting factor
+  Real _gc;
 
   /// cached locations of variables in solution vectors
   /// TODO: make this more efficient by not using a map if possible
