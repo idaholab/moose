@@ -13,10 +13,10 @@ written as follows:
 & D_{neighbor} \frac{\partial u_{neighbor}}{ \partial n_{neighbor}} = - P (u - u_{neighbor}).
 \end{aligned}
 \end{equation}
-Here $D$ and $D_{neighbor}$ are material properties for the current elmetn and
-its neighbor, respectively. $n$ and $n_{neighbor}$ are outward normal vectors
-from the element and its neighbor, and normally, $n = - n_{neighbor}$.
-$P$ is the penalty chosen by users.
+where $D$ and $D_{neighbor}$ are material properties for the current element and
+its neighbor, respectively, $n$ and $n_{neighbor}$ are the outward normal vectors
+from the element and its neighbor (typically $n = - n_{neighbor})$.
+$P$ is the the penalty supplied in the parameter [!param](/InterfaceKernels/PenaltyInterfaceDiffusion/penalty).
 
 ## Example Input File Syntax
 
