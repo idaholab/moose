@@ -151,6 +151,13 @@ parseOpts(int argc, char ** argv, Flags & flags)
   for (; i < argc; i++)
   {
     std::string arg = argv[i];
+    // -- marks the start of positional arguments
+    if (arg == "--")
+    {
+      i++;
+      break;
+    }
+
     if (arg[0] != '-')
       break;
     else if (arg.length() == 1)
@@ -160,12 +167,8 @@ parseOpts(int argc, char ** argv, Flags & flags)
     if (flagname[0] == '-')
       flagname = flagname.substr(1);
 
-    // -- marks the start of positional arguments
-    if (flagname == "-")
-      break;
-
     if (flags.flags.count(flagname) == 0)
-      throw std::runtime_error("unknown flag '" + arg);
+      throw std::runtime_error("unknown flag '" + arg + "'");
 
     auto & flag = flags.flags[flagname];
     flag.have = true;
@@ -246,6 +249,12 @@ findParam(int argc, char ** argv)
   flags.add("help", "print help");
   auto positional = parseOpts(argc, argv, flags);
 
+  if (flags.have("p") && positional.empty())
+  {
+    std::cerr << "Add a -- after the values provided to the -p option.";
+    return 1;
+  }
+
   if (flags.have("h") || flags.have("help") || positional.size() < 2)
   {
     std::cerr << flags.usage();
@@ -256,18 +265,19 @@ findParam(int argc, char ** argv)
   const bool case_insensitive = flags.have("i");
   const bool invert = flags.have("v");
 
+  // parse main search pattern
+  auto param_value = splitParamValue(case_insensitive ? hit::lower(positional[0]) : positional[0]);
+
   // get additional parameters
   auto pargs = flags.vecVal("p");
   std::vector<std::pair<std::string, std::unique_ptr<std::string>>> additional_parameters;
   for (auto & p : pargs)
-    additional_parameters.push_back(std::move(splitParamValue(p)));
-
-  if (case_insensitive)
-    positional[0] = hit::lower(positional[0]);
-
-  auto param_value = splitParamValue(positional[0]);
+    additional_parameters.push_back(
+        std::move(splitParamValue(case_insensitive ? hit::lower(p) : p)));
 
   std::size_t n_matches = 0;
+  std::size_t n_misses = 0;
+
   for (std::size_t i = 1; i < positional.size(); i++)
   {
     auto n_matches_old = n_matches;
@@ -320,7 +330,7 @@ findParam(int argc, char ** argv)
             if (!other_match ||
                 (ap.second && !globCompare(case_insensitive ? hit::lower(other_match->strVal())
                                                             : other_match->strVal(),
-                                           *param_value.second)))
+                                           *ap.second)))
             {
               ap_match = false;
               break;
@@ -348,12 +358,16 @@ findParam(int argc, char ** argv)
       }
 
     if (invert && n_matches_old == n_matches)
+    {
       std::cout << positional[i] << "\n";
+      n_misses++;
+    }
   }
 
+  auto num = invert ? n_misses : n_matches;
   if (!file_only)
-    std::cout << n_matches << (n_matches == 1 ? " match" : " matches") << " found.\n";
-  return n_matches == 0;
+    std::cout << num << (num == 1 ? " match" : " matches") << " found.\n";
+  return num == 0;
 }
 
 // the style file is of the format:
