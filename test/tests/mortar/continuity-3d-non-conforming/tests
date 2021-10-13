@@ -8,6 +8,7 @@
     requirement = 'We shall be able to produce the expected result for a solution continuity test case using the mortar method on a HEX8 mesh with curved geometry, e.g. the primal variable values across the mortar interface shall be the same.'
     map = False
     partial = True
+    ad_indexing_type = global
   []
   [continuity_sphere_hex27]
     type = 'Exodiff'
@@ -18,6 +19,7 @@
     requirement = 'We shall be able to produce the expected result for a solution continuity test case using the mortar method on a HEX27 mesh with curved geometry, e.g. the primal variable values across the mortar interface shall be the same.'
     map = False
     partial = True
+    ad_indexing_type = global
   []
   [continuity_tet4]
     type = 'Exodiff'
@@ -26,6 +28,7 @@
     requirement = 'We shall be able to produce the expected result for a solution continuity test case using the mortar method on a TET4 conforming mesh, e.g. the primal variable values across the mortar interface shall be the same.'
     map = False
     partial = True
+    ad_indexing_type = global
   []
   [continuity_tet10]
     type = 'Exodiff'
@@ -35,6 +38,7 @@
     requirement = 'We shall be able to produce the expected result for a solution continuity test case using the mortar method on a TET10 conforming mesh, e.g. the primal variable values across the mortar interface shall be the same.'
     map = False
     partial = True
+    ad_indexing_type = global
   []
   [continuity_nonconforming_tet]
     type = 'Exodiff'
@@ -43,6 +47,7 @@
     requirement = 'We shall be able to produce the expected result for a solution continuity test case using the mortar method on a TET4 non-conforming mesh, e.g. the primal variable values across the mortar interface shall be the same.'
     map = False
     partial = True
+    ad_indexing_type = global
   []
   [continuity_mixed]
     type = 'Exodiff'
@@ -51,5 +56,6 @@
     requirement = 'We shall be able to produce the expected result for a solution continuity test case using the mortar method on a mesh with mixed element types, e.g. the primal variable values across the mortar interface shall be the same.'
     map = False
     partial = True
+    ad_indexing_type = global
   []
 []
