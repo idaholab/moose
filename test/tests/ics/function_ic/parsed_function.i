@@ -1,6 +1,6 @@
 #
 # Test the automatically generated gradients in ParsedFunction and the gradient pass-through in FunctionIC
-# OLD MOOSE behavior was for parsed_function to behave the sam eas parsed_zerograd_function
+# OLD MOOSE behavior was for parsed_function to behave the same as parsed_zerograd_function
 # NEW MOOSE behavior is for parsed_function to behave the same as parsed_grad_function
 #
 

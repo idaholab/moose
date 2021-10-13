@@ -1,33 +1,14 @@
 # ScalarComponentIC
 
-!alert! construction title=Undocumented Class
-The ScalarComponentIC has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# ScalarComponentIC
-
 !syntax description /ICs/ScalarComponentIC
 
-## Overview
+All components of the scalar variable must be set simultaneously.
 
-!! Replace these lines with information regarding the ScalarComponentIC object.
+## Example input syntax
 
-## Example Input File Syntax
+In this example, the initial values of scalar variables `v` and `a`, both of size 2, are set using `ScalarComponentIC`.
 
-!! Describe and include an example of how to use the ScalarComponentIC object.
-
-!syntax parameters /ICs/ScalarComponentIC
-
-!syntax inputs /ICs/ScalarComponentIC
-
-!syntax children /ICs/ScalarComponentIC
-```
-!alert-end!
-
-!syntax description /ICs/ScalarComponentIC
+!listing test/tests/ics/component_ic/component_ic.i block=ICs
 
 !syntax parameters /ICs/ScalarComponentIC
 

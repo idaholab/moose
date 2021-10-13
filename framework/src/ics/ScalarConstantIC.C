@@ -19,7 +19,7 @@ ScalarConstantIC::validParams()
   InputParameters params = ScalarInitialCondition::validParams();
   params.addClassDescription(
       "Initalize a scalar variable with a constant value prescribed by an input parameter.");
-  params.set<Real>("value") = 0.0;
+  params.addRequiredParam<Real>("value", "Initial value of the scalar variable");
   return params;
 }
 
