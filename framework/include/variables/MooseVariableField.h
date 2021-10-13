@@ -336,6 +336,8 @@ public:
   virtual const DoFValue & nodalVectorTagValue(TagID tag) const = 0;
 
   void meshChanged() override;
+  void residualSetup() override;
+  void jacobianSetup() override;
 
 protected:
   using FunctorArg = typename Moose::ADType<OutputType>::type;

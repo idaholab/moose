@@ -235,6 +235,26 @@ MooseVariableField<OutputType>::meshChanged()
   _current_elem_side_qp_functor_elem_side = std::make_pair(nullptr, libMesh::invalid_uint);
 }
 
+template <typename OutputType>
+void
+MooseVariableField<OutputType>::residualSetup()
+{
+  _current_elem_qp_functor_elem = nullptr;
+  _current_elem_side_qp_functor_elem_side = std::make_pair(nullptr, libMesh::invalid_uint);
+  MooseVariableFieldBase::residualSetup();
+  Moose::Functor<typename Moose::ADType<OutputType>::type>::residualSetup();
+}
+
+template <typename OutputType>
+void
+MooseVariableField<OutputType>::jacobianSetup()
+{
+  _current_elem_qp_functor_elem = nullptr;
+  _current_elem_side_qp_functor_elem_side = std::make_pair(nullptr, libMesh::invalid_uint);
+  MooseVariableFieldBase::jacobianSetup();
+  Moose::Functor<typename Moose::ADType<OutputType>::type>::jacobianSetup();
+}
+
 template class MooseVariableField<Real>;
 template class MooseVariableField<RealVectorValue>;
 template class MooseVariableField<RealEigenVector>;
