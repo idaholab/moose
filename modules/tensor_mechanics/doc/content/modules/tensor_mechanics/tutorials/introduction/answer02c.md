@@ -24,8 +24,8 @@ up.
 We replaced `DirichletBC` with the AD-enabled `ADDirichletBC` object. Note that
 in general it is fine to mix AD and non-AD objects, although you might then end
 up with a less than perfect Jacobian. Also keep in mind that you cannot use AD
-and non-AD versions of *material properties* (such as the stiffness tensoror the
-strain) interchangably. If an object request an AD property you need to use the
+and non-AD versions of *material properties* (such as the stiffness tensor or the
+strain) interchangeably. If an object requests an AD property you need to use the
 AD-enable version of the material to provide it.
 
 In the `Pressure` action we also supplied `use_automatic_differentiation = true`
@@ -37,7 +37,7 @@ condition objects that act on the displacement variables in the problem.
 As mentioned above, when using AD-enabled kernels (added through the master
 action), we must supply them with AD-enabled material properties. That's why we
 select the AD-enabled objects to compute stiffness tensor and stress. (The
-AD-enabled strain calculator us automatically added by the master action.)
+AD-enabled strain calculator is automatically added by the master action.)
 
 Note that in [the first exercise](tensor_mechanics/tutorials/introduction/answer02a.md)
 we switched to a large strain formulation. In case you didn't make that change
@@ -46,8 +46,8 @@ FINITE` in the master action.
 
 ### `Executioner`
 
-We select Newton as the solve type. MOOSE actually sets up the appropriate
-preconditioning block for us automatically in this case , which is why we
+We select `Newton` as the solve type. MOOSE actually sets up the appropriate
+preconditioning block for us automatically in this case, which is why we
 removed it from the input file here.
 
 > What did you observe when you ran the converted example?

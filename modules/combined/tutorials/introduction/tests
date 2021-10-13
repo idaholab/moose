@@ -3,10 +3,12 @@
     type = RunApp
     input = step01.i
     check_input = True
+    ad_indexing_type = 'global'
   []
   [step02]
     type = RunApp
     input = step02.i
     check_input = True
+    ad_indexing_type = 'global'
   []
 []
