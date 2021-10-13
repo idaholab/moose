@@ -20,7 +20,7 @@
 
   [nodal_max]
     requirement = 'The system shall compute the maximum value of a field variable by sampling nodes'
-    issues = #658
+    issues = '#658'
     [test_nodal_max]
       type = 'Exodiff'
       input = 'nodal_max_value_test.i'
