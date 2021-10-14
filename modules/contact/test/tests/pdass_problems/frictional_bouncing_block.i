@@ -9,6 +9,7 @@ offset = 1e-2
   file = long-bottom-block-1elem-blocks.e
   uniform_refine = 0 # 1,2
   patch_update_strategy = always
+  allow_renumbering = false
 []
 
 [Variables]
@@ -189,6 +190,7 @@ offset = 1e-2
     variable = frictional_normal_lm
     boundary = '10'
     sort_by = x
+
     execute_on = FINAL
   []
   [friction]

@@ -244,6 +244,15 @@
       ad_indexing_type = 'global'
       min_ad_size = '73'
     []
+    [equal_order_edge_dropping]
+      type = 'Exodiff'
+      input = frictionless-weighted-gap.i
+      exodiff = 'frictionless-weighted-gap-edge-dropping_out.e'
+      detail = 'using equal, first order bases for displacements and the lagrange multiplier with correct edge dropping'
+      cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Constraints/weighted_gap_lm/correct_edge_dropping=true Executioner/end_time=50 Outputs/exodus=true Outputs/file_base=frictionless-weighted-gap-edge-dropping_out "
+                 "Postprocessors/active=''"
+      ad_indexing_type = 'global'
+    []
   []
   [weighted_vel_pdass]
     requirement = 'The system shall support a variationally consistent mortar frictional constraints '
