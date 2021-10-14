@@ -13,7 +13,8 @@
   [continuity_sphere_hex27]
     type = 'Exodiff'
     min_ad_size = 200
-    heavy = True
+    # Since this test is run through recipe "augmented sparsity" no need to designate it as heavy. Should take about 7 seconds.
+    # heavy = True
     input = 'continuity_sphere_hex27.i'
     exodiff = 'continuity_sphere_hex27_out.e'
     requirement = 'We shall be able to produce the expected result for a solution continuity test case using the mortar method on a HEX27 mesh with curved geometry, e.g. the primal variable values across the mortar interface shall be the same.'

@@ -998,7 +998,11 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
 
             // If element is smaller than tolerance, don't add to msm
             if (new_elem->volume() / secondary_volume < TOLERANCE)
+            {
+              // Delete element if we are not going to use it
+              delete (new_elem);
               continue;
+            }
 
             // Add elements to mortar segment mesh
             mortar_segment_mesh->add_elem(new_elem);
