@@ -2,10 +2,11 @@
   [taolmvm]
     requirement = "This tests optimization of the function a*sin(2*pi*b*(y+c))+d"
                   " where c and d are being parameterized for.  This function is also"
-                  " being applied to the top, left, and bottom surfaces.   This is nonlinear"
+                  " being applied to the left surface.   This is nonlinear"
                   " since the gradient term contains the parameters.  It is able to find a set"
-                  " of parameters that match the measurement points but they are not unique "
-                  " and the phase of the function is all over the place.  "
+                  " of parameters that match the measurement points but they are not unique"
+                  " and the phase of the function is all over the place.  It is important to use"
+                  " to use the bounded tao solvers with good bounds."
     type = CSVDiff
     rel_err = 0.01
     input = master.i

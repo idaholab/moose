@@ -30,11 +30,16 @@
   num_values = '1 1'
   misfit_name = 'misfit'
   adjoint_data_name = 'adjoint'
+  initial_condition = '0 500'
+  upper_bounds = '2 1500'
+  lower_bounds = '0 0'
+  # measured data for p1=1, p2=1000
+  # not sure if bounds are used when -tao_ls_type=unit
 []
 
 [Executioner]
   type = Optimize
-  tao_solver = taolmvm
+  tao_solver = taoblmvm
   petsc_options_iname = '-tao_gatol -tao_ls_type'
   petsc_options_value = '1e-4 unit'
   # petsc_options_iname = '-tao_fd_gradient -tao_fd_delta -tao_gatol'
@@ -42,7 +47,7 @@
    # petsc_options = '-tao_test_gradient_view'
    # petsc_options_iname='-tao_max_it -tao_fd_test -tao_test_gradient -tao_fd_gradient -tao_fd_delta -tao_gatol'
    # petsc_options_value='1 true true false 0.0001 0.0001'
-  # verbose = true
+  verbose = true
 []
 
 [MultiApps]

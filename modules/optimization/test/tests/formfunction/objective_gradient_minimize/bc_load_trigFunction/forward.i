@@ -26,22 +26,11 @@
     boundary = right
     value = 100
   []
-  [bottom]
-    type = FunctionNeumannBC
-    variable = temperature
-    boundary = bottom
-    function = sin_function
-  []
-  [top]
-    type = FunctionNeumannBC
-    variable = temperature
-    boundary = top
-    function = sin_function
-  []
 []
 
 [Functions]
   [sin_function]
+    # measured data for p1=1 p2=1000
     type = ParsedFunction
     value = a*sin(2*pi*b*(y+c))+d
     vars = 'a b c d'
@@ -71,10 +60,10 @@
     type = MeasuredDataPointSampler
     variable = temperature
     points = '0.2 0.2 0
-              0.8 0.6 0
+              0.2 0.6 0
               0.2 1.4 0
-              0.8 1.8 0'
-    measured_values = '228 128 214 151'
+              0.2 1.8 0'
+    measured_values = '229 236 284 290'
   []
 []
 
