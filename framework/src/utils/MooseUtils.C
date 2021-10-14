@@ -61,8 +61,8 @@ runTestsExecutable()
   auto build_loc = pathjoin(Moose::getExecutablePath(), "run_tests");
   if (pathExists(build_loc) && checkFileReadable(build_loc))
     return build_loc;
-  // TODO: maybe no path prefix - just moose_test_executor here?
-  return pathjoin(Moose::getExecutablePath(), "moose_test_executor");
+  // TODO: maybe no path prefix - just moose_test_runner here?
+  return pathjoin(Moose::getExecutablePath(), "moose_test_runner");
 }
 std::string
 findTestRoot()
