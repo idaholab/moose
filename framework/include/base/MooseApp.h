@@ -67,9 +67,9 @@ class MooseApp : public ConsoleStreamInterface,
                  public libMesh::ParallelObject
 {
 public:
-  struct SolveConfig
+  struct FixedPointConfig
   {
-    SolveConfig() : sub_relaxation_factor(1.0) {}
+    FixedPointConfig() : sub_relaxation_factor(1.0) {}
     Real sub_relaxation_factor;
     std::vector<std::string> sub_transformed_vars;
     std::vector<PostprocessorName> sub_transformed_pps;
@@ -331,7 +331,7 @@ public:
    * for handling subapp-specific modifications necessary for those solve
    * processes.
    */
-  SolveConfig & solveConfig() { return _solve_config; }
+  FixedPointConfig & fixedPointConfig() { return _fixed_point_config; }
 
   /**
    * Returns a writable Boolean indicating whether this app will use a Nonlinear or Eigen System.
@@ -964,7 +964,7 @@ protected:
   std::shared_ptr<Executioner> _executioner;
   std::shared_ptr<Executor> _executor;
   std::map<std::string, std::shared_ptr<Executor>> _executors;
-  SolveConfig _solve_config;
+  FixedPointConfig _fixed_point_config;
 
   const bool _use_executor = false;
 

@@ -172,9 +172,9 @@ FixedPointSolve::FixedPointSolve(Executioner & ex)
 
   if (!_app.isUltimateMaster())
   {
-    _secondary_relaxation_factor = _app.solveConfig().sub_relaxation_factor;
-    _secondary_transformed_variables = _app.solveConfig().sub_transformed_vars;
-    _secondary_transformed_pps = _app.solveConfig().sub_transformed_pps;
+    _secondary_relaxation_factor = _app.fixedPointConfig().sub_relaxation_factor;
+    _secondary_transformed_variables = _app.fixedPointConfig().sub_transformed_vars;
+    _secondary_transformed_pps = _app.fixedPointConfig().sub_transformed_pps;
   }
 }
 

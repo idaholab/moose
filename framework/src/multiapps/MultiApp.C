@@ -876,14 +876,14 @@ MultiApp::createApp(unsigned int i, Real start_time)
   preRunInputFile();
 
   // Transfer coupling relaxation information to the subapps
-  _apps[i]->solveConfig().sub_relaxation_factor = getParam<Real>("relaxation_factor");
-  _apps[i]->solveConfig().sub_transformed_vars =
+  _apps[i]->fixedPointConfig().sub_relaxation_factor = getParam<Real>("relaxation_factor");
+  _apps[i]->fixedPointConfig().sub_transformed_vars =
       getParam<std::vector<std::string>>("transformed_variables");
   // Handle deprecated parameter
   if (!parameters().isParamSetByAddParam("relaxed_variables"))
-    _apps[i]->solveConfig().sub_transformed_vars =
+    _apps[i]->fixedPointConfig().sub_transformed_vars =
         getParam<std::vector<std::string>>("relaxed_variables");
-  _apps[i]->solveConfig().sub_transformed_pps =
+  _apps[i]->fixedPointConfig().sub_transformed_pps =
       getParam<std::vector<PostprocessorName>>("transformed_postprocessors");
 
   app->runInputFile();
