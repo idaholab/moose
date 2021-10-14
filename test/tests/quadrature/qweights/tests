@@ -1,0 +1,12 @@
+[Tests]
+  issues = '#19066'
+  design = 'SetupQuadratureAction.md'
+
+  [./weights]
+    type = Exodiff
+    input = 'positive_qweights.i'
+    exodiff = 'positive_qweights_out.e'
+
+    requirement = 'The system shall support the ability to force positive quadrature weights.'
+  [../]
+[]

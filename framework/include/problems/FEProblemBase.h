@@ -307,7 +307,8 @@ public:
                             Order order,
                             Order volume_order = INVALID_ORDER,
                             Order face_order = INVALID_ORDER,
-                            SubdomainID block = Moose::ANY_BLOCK_ID);
+                            SubdomainID block = Moose::ANY_BLOCK_ID,
+                            bool allow_negative_qweights = true);
 
   /**
    * Increases the element/volume quadrature order for the specified mesh

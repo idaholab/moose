@@ -479,23 +479,19 @@ public:
   const Node * const & nodeNeighbor() const { return _current_neighbor_node; }
 
   /**
-   * Creates volume, face and arbitrary qrules based on the orders passed in
-   * that apply to all subdomains. order is used for arbitrary volume
-   * quadrature rules, while volume_order and face_order are for elem and face
-   * quadrature respectively.
-   */
-  void createQRules(QuadratureType type, Order order, Order volume_order, Order face_order);
-
-  /**
    * Creates block-specific volume, face and arbitrary qrules based on the
-   * orders passed in.  Any quadrature rules specified using this function
-   * override those created via in the non-block-specific/global createQRules
-   * function. order is used for arbitrary volume quadrature rules, while
-   * volume_order and face_order are for elem and face quadrature
-   * respectively.
+   * orders and the flag of whether or not to allow negative qweights passed in.
+   * Any quadrature rules specified using this function override those created
+   * via in the non-block-specific/global createQRules function. order is used
+   * for arbitrary volume quadrature rules, while volume_order and face_order
+   * are for elem and face quadrature respectively.
    */
-  void createQRules(
-      QuadratureType type, Order order, Order volume_order, Order face_order, SubdomainID block);
+  void createQRules(QuadratureType type,
+                    Order order,
+                    Order volume_order,
+                    Order face_order,
+                    SubdomainID block,
+                    bool allow_negative_qweights = true);
 
   /**
    * Increases the element/volume quadrature order for the specified mesh

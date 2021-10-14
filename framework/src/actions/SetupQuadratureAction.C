@@ -37,6 +37,8 @@ SetupQuadratureAction::validParams()
   params.addParam<std::vector<std::string>>("custom_orders",
                                             std::vector<std::string>{},
                                             "list of quadrature orders (e.g. FIRST, SECOND, etc.)");
+  params.addParam<bool>(
+      "allow_negative_qweights", true, "Whether or not allow negative quadrature weights");
 
   return params;
 }
@@ -48,7 +50,8 @@ SetupQuadratureAction::SetupQuadratureAction(InputParameters parameters)
     _element_order(Moose::stringToEnum<Order>(getParam<MooseEnum>("element_order"))),
     _side_order(Moose::stringToEnum<Order>(getParam<MooseEnum>("side_order"))),
     _custom_blocks(getParam<std::vector<SubdomainID>>("custom_blocks")),
-    _custom_orders(getParam<std::vector<std::string>>("custom_orders"))
+    _custom_orders(getParam<std::vector<std::string>>("custom_orders")),
+    _allow_negative_qweights(getParam<bool>("allow_negative_qweights"))
 {
 }
 
@@ -59,7 +62,8 @@ SetupQuadratureAction::act()
     return;
 
   // add default/global quadrature rules
-  _problem->createQRules(_type, _order, _element_order, _side_order);
+  _problem->createQRules(
+      _type, _order, _element_order, _side_order, Moose::ANY_BLOCK_ID, _allow_negative_qweights);
 
   // add custom block-specific quadrature rules
   for (unsigned int i = 0; i < _custom_blocks.size(); i++)
@@ -67,5 +71,6 @@ SetupQuadratureAction::act()
                            _order,
                            Moose::stringToEnum<Order>(_custom_orders[i]),
                            Moose::stringToEnum<Order>(_custom_orders[i]),
-                           _custom_blocks[i]);
+                           _custom_blocks[i],
+                           _allow_negative_qweights);
 }
