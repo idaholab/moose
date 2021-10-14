@@ -1183,6 +1183,8 @@ MooseApp::feProblem() const
 void
 MooseApp::addExecutor(std::shared_ptr<Executor> && executor)
 {
+  if (_executors.count(executor->name()) > 0)
+    mooseError("an executor with name '", executor->name(), "' already exists");
   _executors[executor->name()] = executor;
   _executor = executor;
 }
