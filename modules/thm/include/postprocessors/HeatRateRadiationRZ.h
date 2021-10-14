@@ -1,29 +1,18 @@
 #pragma once
 
-#include "SideIntegralPostprocessor.h"
+#include "HeatRateRadiation.h"
 #include "RZSymmetry.h"
 
 /**
  * Integrates a cylindrical heat structure boundary radiative heat flux
  */
-class HeatRateRadiationRZ : public SideIntegralPostprocessor, public RZSymmetry
+class HeatRateRadiationRZ : public HeatRateRadiation, public RZSymmetry
 {
 public:
   HeatRateRadiationRZ(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpIntegral() override;
-
-  /// Temperature
-  const VariableValue & _T;
-  /// Ambient temperature
-  const Function & _T_ambient;
-  /// Emissivity
-  const Real & _emissivity;
-  /// View factor function
-  const Function & _view_factor_fn;
-  /// Stefan-Boltzmann constant
-  const Real & _sigma_stefan_boltzmann;
 
 public:
   static InputParameters validParams();
