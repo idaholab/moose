@@ -24,7 +24,7 @@ require_total = 93
 require_total = 78
 
 [combined]
-require_total = 38
+require_total = 37
 
 [external_petsc_solver]
 require_total = 86

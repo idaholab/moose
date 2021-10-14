@@ -1,0 +1,12 @@
+[Tests]
+  [./simple_hexagon_generator]
+    type = 'Exodiff'
+    input = 'sim_hex.i'
+    cli_args = '--mesh-only'
+    exodiff = 'sim_hex_in.e'
+    requirement = 'MOOSE shall be able to create a simple hexagon mesh.'
+    design = 'meshgenerators/SimpleHexagonGenerator.md'
+    issues = '#18628'
+    recover = false
+  [../]
+[]

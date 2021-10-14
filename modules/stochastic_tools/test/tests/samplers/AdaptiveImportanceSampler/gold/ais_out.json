@@ -1,0 +1,265 @@
+{
+    "number_of_parts": 4,
+    "part": 0,
+    "reporters": {
+        "adaptive_MC": {
+            "type": "AdaptiveMonteCarloDecision",
+            "values": {
+                "inputs": {
+                    "type": "std::vector<double>"
+                },
+                "output_required": {
+                    "type": "std::vector<double>"
+                }
+            }
+        },
+        "constant": {
+            "type": "StochasticReporter",
+            "values": {
+                "reporter_transfer:average:value": {
+                    "row_begin": 0,
+                    "row_end": 1,
+                    "type": "std::vector<double>"
+                },
+                "reporter_transfer:converged": {
+                    "row_begin": 0,
+                    "row_end": 1,
+                    "type": "std::vector<bool>"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "adaptive_MC": {
+                "inputs": [
+                    0.0,
+                    0.0
+                ],
+                "output_required": [
+                    0.0
+                ]
+            },
+            "constant": {
+                "reporter_transfer:average:value": [
+                    0.0
+                ],
+                "reporter_transfer:converged": [
+                    false
+                ]
+            },
+            "time": 0.0,
+            "time_step": 0
+        },
+        {
+            "adaptive_MC": {
+                "inputs": [
+                    -0.0776883638963326,
+                    1.2953839241199576
+                ],
+                "output_required": [
+                    1.0
+                ]
+            },
+            "constant": {
+                "reporter_transfer:average:value": [
+                    0.5932364124559403
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "time": 1.0,
+            "time_step": 1
+        },
+        {
+            "adaptive_MC": {
+                "inputs": [
+                    -0.22364817456641106,
+                    1.2528061795117535
+                ],
+                "output_required": [
+                    1.0
+                ]
+            },
+            "constant": {
+                "reporter_transfer:average:value": [
+                    0.5508595324487431
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "time": 2.0,
+            "time_step": 2
+        },
+        {
+            "adaptive_MC": {
+                "inputs": [
+                    -0.2492732343641012,
+                    1.2844970720064466
+                ],
+                "output_required": [
+                    1.0
+                ]
+            },
+            "constant": {
+                "reporter_transfer:average:value": [
+                    0.46500465273162916
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "time": 3.0,
+            "time_step": 3
+        },
+        {
+            "adaptive_MC": {
+                "inputs": [
+                    -0.2492732343641012,
+                    1.2844970720064466
+                ],
+                "output_required": [
+                    0.0
+                ]
+            },
+            "constant": {
+                "reporter_transfer:average:value": [
+                    0.43551655944963424
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "time": 4.0,
+            "time_step": 4
+        },
+        {
+            "adaptive_MC": {
+                "inputs": [
+                    -0.1908041754094547,
+                    1.4853747248796259
+                ],
+                "output_required": [
+                    1.0
+                ]
+            },
+            "constant": {
+                "reporter_transfer:average:value": [
+                    0.5978806515627411
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "time": 5.0,
+            "time_step": 5
+        },
+        {
+            "adaptive_MC": {
+                "inputs": [
+                    -0.15964978995559231,
+                    1.2847754634894508
+                ],
+                "output_required": [
+                    1.0
+                ]
+            },
+            "constant": {
+                "reporter_transfer:average:value": [
+                    0.5481382538725218
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "time": 6.0,
+            "time_step": 6
+        },
+        {
+            "adaptive_MC": {
+                "inputs": [
+                    -0.1842857356685773,
+                    1.266749911493687
+                ],
+                "output_required": [
+                    1.0
+                ]
+            },
+            "constant": {
+                "reporter_transfer:average:value": [
+                    0.5273544433065319
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "time": 7.0,
+            "time_step": 7
+        },
+        {
+            "adaptive_MC": {
+                "inputs": [
+                    -0.11831464231970179,
+                    1.2755340611954162
+                ],
+                "output_required": [
+                    1.0
+                ]
+            },
+            "constant": {
+                "reporter_transfer:average:value": [
+                    0.5637736712714162
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "time": 8.0,
+            "time_step": 8
+        },
+        {
+            "adaptive_MC": {
+                "inputs": [
+                    -0.12744530114432184,
+                    1.2815735166918252
+                ],
+                "output_required": [
+                    1.0
+                ]
+            },
+            "constant": {
+                "reporter_transfer:average:value": [
+                    0.5622677001301049
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "time": 9.0,
+            "time_step": 9
+        },
+        {
+            "adaptive_MC": {
+                "inputs": [
+                    -0.21093480180023594,
+                    1.28272521952715
+                ],
+                "output_required": [
+                    1.0
+                ]
+            },
+            "constant": {
+                "reporter_transfer:average:value": [
+                    0.5221544063117075
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "time": 10.0,
+            "time_step": 10
+        }
+    ]
+}

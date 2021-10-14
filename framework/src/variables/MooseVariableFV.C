@@ -8,13 +8,13 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MooseVariableFV.h"
-#include <typeinfo>
 #include "TimeIntegrator.h"
 #include "NonlinearSystemBase.h"
 #include "DisplacedSystem.h"
 #include "SystemBase.h"
 #include "SubProblem.h"
 #include "Assembly.h"
+#include "MathFVUtils.h"
 #include "FVUtils.h"
 #include "FVFluxBC.h"
 #include "FVDirichletBCBase.h"
@@ -22,6 +22,7 @@
 #include "libmesh/numeric_vector.h"
 
 #include <climits>
+#include <typeinfo>
 
 registerMooseObject("MooseApp", MooseVariableFVReal);
 
@@ -559,6 +560,32 @@ MooseVariableFV<OutputType>::isInternalFace(const FaceInfo & fi) const
 }
 
 template <typename OutputType>
+ADReal
+MooseVariableFV<OutputType>::getInternalFaceValue(const FaceArg & face) const
+{
+  const FaceInfo * const fi = std::get<0>(face);
+  mooseAssert(fi, "The face information must be non-null");
+  auto limiter = Moose::FV::Limiter<ADReal>::build(std::get<1>(face));
+  const bool elem_is_upwind = std::get<2>(face);
+
+  const auto elem_value = getElemValue(&fi->elem());
+  mooseAssert(fi->neighborPtr(), "We're supposed to be on an internal face.");
+  const auto neighbor_value = getElemValue(fi->neighborPtr());
+  const auto & upwind_value = elem_is_upwind ? elem_value : neighbor_value;
+  const auto & downwind_value = elem_is_upwind ? neighbor_value : elem_value;
+  auto upwind_gradient = [this, elem_is_upwind, fi]() -> const ADRealVectorValue & {
+    return elem_is_upwind ? adGradSln(&fi->elem()) : adGradSln(fi->neighborPtr());
+  };
+
+  return Moose::FV::interpolate(*limiter,
+                                upwind_value,
+                                downwind_value,
+                                limiter->constant() ? nullptr : &upwind_gradient(),
+                                *fi,
+                                elem_is_upwind);
+}
+
+template <typename OutputType>
 const ADReal &
 MooseVariableFV<OutputType>::getInternalFaceValue(const Elem * const neighbor,
                                                   const FaceInfo & fi,
@@ -665,6 +692,10 @@ MooseVariableFV<OutputType>::getExtrapolatedBoundaryFaceValue(const FaceInfo & f
   mooseAssert(isExtrapolatedBoundaryFace(fi),
               "This function should only be called on extrapolated boundary faces");
 
+  auto it = _face_to_value.find(&fi);
+  if (it != _face_to_value.end())
+    return it->second;
+
   const auto & tup = Moose::FV::determineElemOneAndTwo(fi, *this);
   const Elem * const elem = std::get<0>(tup);
 
@@ -674,7 +705,7 @@ MooseVariableFV<OutputType>::getExtrapolatedBoundaryFaceValue(const FaceInfo & f
     // for us
     adGradSln(elem);
 
-    auto it = _face_to_value.find(&fi);
+    it = _face_to_value.find(&fi);
     mooseAssert(it != _face_to_value.end(),
                 "adGradSln(elem) should have generated the boundary face value for us");
 
@@ -1061,6 +1092,45 @@ MooseVariableFV<OutputType>::clearAllDofIndices()
 {
   _element_data->clearDofIndices();
   _neighbor_data->clearDofIndices();
+}
+
+template <typename OutputType>
+typename MooseVariableFV<OutputType>::ValueType
+MooseVariableFV<OutputType>::evaluate(const FaceArg & face, unsigned int) const
+{
+  const FaceInfo * const fi = std::get<0>(face);
+  mooseAssert(fi, "The face information must be non-null");
+  if (isExtrapolatedBoundaryFace(*fi))
+    return getExtrapolatedBoundaryFaceValue(*fi);
+  else if (isInternalFace(*fi))
+    return getInternalFaceValue(face);
+  else
+  {
+    mooseAssert(isDirichletBoundaryFace(*fi), "We've run out of face types");
+    return getDirichletBoundaryFaceValue(*fi);
+  }
+}
+
+template <typename OutputType>
+typename MooseVariableFV<OutputType>::ValueType
+MooseVariableFV<OutputType>::evaluate(const ElemFromFaceArg & elem_from_face, unsigned int) const
+{
+  const Elem * const requested_elem = std::get<0>(elem_from_face);
+  mooseAssert(requested_elem != remote_elem,
+              "If the requested element is remote then I think we've messed up our ghosting");
+
+  if (requested_elem && this->hasBlocks(requested_elem->subdomain_id()))
+    return getElemValue(requested_elem);
+  else
+  {
+    const FaceInfo * const fi = std::get<1>(elem_from_face);
+    mooseAssert(fi, "We need a FaceInfo");
+    mooseAssert((requested_elem == &fi->elem()) || (requested_elem == fi->neighborPtr()),
+                "The requested element should match something from the FaceInfo");
+    const Elem * const elem_across =
+        (requested_elem == &fi->elem()) ? fi->neighborPtr() : &fi->elem();
+    return getNeighborValue(requested_elem, *fi, getElemValue(elem_across));
+  }
 }
 
 template class MooseVariableFV<Real>;

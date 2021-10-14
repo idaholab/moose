@@ -31,7 +31,7 @@ protected:
   virtual void initQpStatefulProperties() override;
   virtual void computeQpProperties() override;
 
-  std::vector<std::string> _prop_names;
+  const std::vector<std::string> & _prop_names;
   const std::vector<Real> & _prop_values;
 
   unsigned int _num_props;

@@ -1131,6 +1131,8 @@ DisplacedProblem::computingScalingResidual() const
 void
 DisplacedProblem::initialSetup()
 {
+  SubProblem::initialSetup();
+
   _displaced_nl.initialSetup();
   _displaced_aux.initialSetup();
 }
@@ -1138,6 +1140,8 @@ DisplacedProblem::initialSetup()
 void
 DisplacedProblem::timestepSetup()
 {
+  SubProblem::timestepSetup();
+
   _displaced_nl.timestepSetup();
   _displaced_aux.timestepSetup();
 }

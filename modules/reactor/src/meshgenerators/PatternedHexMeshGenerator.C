@@ -1,0 +1,995 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "PatternedHexMeshGenerator.h"
+#include "MooseUtils.h"
+
+// C++ includes
+#include <cmath> // provides round, not std::round (see http://www.cplusplus.com/reference/cmath/round/)
+#include <fstream> // used to generate the optional control drum position file
+
+registerMooseObject("ReactorApp", PatternedHexMeshGenerator);
+
+InputParameters
+PatternedHexMeshGenerator::validParams()
+{
+  InputParameters params = PolygonMeshGeneratorBase::validParams();
+  params.addRequiredParam<std::vector<MeshGeneratorName>>("inputs", "The input MeshGenerators.");
+  params.addRequiredRangeCheckedParam<std::vector<std::vector<unsigned int>>>(
+      "pattern",
+      "pattern>=0",
+      "A double-indexed hexagonal-shaped array starting with the upper-left corner.");
+  MooseEnum pattern_boundary("none hexagon", "hexagon");
+  params.addParam<MooseEnum>(
+      "pattern_boundary", pattern_boundary, "The boundary shape of the patterned mesh.");
+  params.addParam<bool>("generate_core_metadata",
+                        false,
+                        "A Boolean parameter that controls whether the core related metadata "
+                        "is generated for other MOOSE objects or not.");
+  params.addRangeCheckedParam<unsigned int>("background_intervals",
+                                            3,
+                                            "background_intervals>0",
+                                            "Radial intervals in the assembly peripheral region.");
+  params.addRangeCheckedParam<Real>("hexagon_size",
+                                    "hexagon_size>0.0",
+                                    "Size of the outmost hexagon boundary to be generated; this is "
+                                    "required only when pattern type is 'hexagon'.");
+  MooseEnum hexagon_size_style("apothem radius", "apothem");
+  params.addParam<MooseEnum>(
+      "hexagon_size_style",
+      hexagon_size_style,
+      "Style in which the hexagon size is given (default: apothem i.e. half-pitch).");
+  params.addRangeCheckedParam<std::vector<Real>>(
+      "duct_sizes", "duct_sizes>0.0", "Distance(s) from center to duct(s) inner boundaries.");
+  MooseEnum duct_sizes_style("apothem radius", "apothem");
+  params.addParam<MooseEnum>("duct_sizes_style",
+                             duct_sizes_style,
+                             "Style in which hexagon center to duct distance(s) is given (apothem "
+                             "= center-to-face, radius = center-to-vertex).");
+  params.addRangeCheckedParam<std::vector<unsigned int>>(
+      "duct_intervals", "duct_intervals>0", "Number of meshing intervals in each enclosing duct.");
+  params.addParam<bool>("uniform_mesh_on_sides",
+                        false,
+                        "Whether the side elements are reorganized to have a uniform size.");
+  params.addParam<bool>("generate_control_drum_positions_file",
+                        false,
+                        "Whether a positions file is generated in the core mesh mode.");
+  params.addParam<bool>("assign_control_drum_id",
+                        true,
+                        "Whether control drum id is assigned to the mesh as an extra integer.");
+  std::string position_file_default = "positions_meta.data";
+  params.addParam<std::string>(
+      "position_file", position_file_default, "Data file name to store control drum positions.");
+  // A hexagon pattern_boundary mesh can be used in "inputs" of `PatternedHexMeshGenerator` after a
+  // 90-degree rotation.
+  params.addParam<Real>(
+      "rotate_angle",
+      90.0,
+      "Rotate the entire patterned mesh by a certain degrees that is defined here.");
+  params.addParam<subdomain_id_type>(
+      "background_block_id",
+      "Optional customized block id for the background block in 'assembly' mode; must be provided "
+      "along with 'duct_block_ids' if 'duct_sizes' is provided.");
+  params.addParam<SubdomainName>(
+      "background_block_name",
+      "Optional customized block name for the background block in 'assembly' mode; must be "
+      "provided along with 'duct_block_names' if 'duct_sizes' is provided.");
+  params.addParam<std::vector<subdomain_id_type>>(
+      "duct_block_ids",
+      "Optional customized block ids for each duct geometry block in 'assembly' mode; must be "
+      "provided along with 'background_block_id'.");
+  params.addParam<std::vector<SubdomainName>>(
+      "duct_block_names",
+      "Optional customized block names for each duct geometry block in 'assembly' mode; must be "
+      "provided along with 'background_block_name'.");
+  params.addRangeCheckedParam<boundary_id_type>("external_boundary_id",
+                                                "external_boundary_id>0",
+                                                "Optional customized external boundary id.");
+  params.addParam<std::string>("external_boundary_name",
+                               "Optional customized external boundary name.");
+  params.addParamNamesToGroup("background_block_id background_block_name duct_block_ids "
+                              "duct_block_names external_boundary_id external_boundary_name",
+                              "Customized Subdomain/Boundary");
+  params.addParamNamesToGroup(
+      "generate_control_drum_positions_file assign_control_drum_id position_file", "Control Drum");
+  params.addParamNamesToGroup("background_intervals duct_intervals uniform_mesh_on_sides",
+                              "Mesh Density");
+  params.addClassDescription(
+      "This PatternedHexMeshGenerator source code assembles hexagonal meshes into a hexagonal grid "
+      "and optionally forces the outer boundary to be hexagonal and/or adds a duct.");
+
+  return params;
+}
+
+PatternedHexMeshGenerator::PatternedHexMeshGenerator(const InputParameters & parameters)
+  : PolygonMeshGeneratorBase(parameters),
+    _input_names(getParam<std::vector<MeshGeneratorName>>("inputs")),
+    _pattern(getParam<std::vector<std::vector<unsigned int>>>("pattern")),
+    _pattern_boundary(getParam<MooseEnum>("pattern_boundary")),
+    _generate_core_metadata(getParam<bool>("generate_core_metadata")),
+    _background_intervals(getParam<unsigned int>("background_intervals")),
+    _has_assembly_duct(isParamValid("duct_sizes")),
+    _duct_sizes(isParamValid("duct_sizes") ? getParam<std::vector<Real>>("duct_sizes")
+                                           : std::vector<Real>()),
+    _duct_sizes_style(getParam<MooseEnum>("duct_sizes_style").template getEnum<DuctStyle>()),
+    _duct_intervals(isParamValid("duct_intervals")
+                        ? getParam<std::vector<unsigned int>>("duct_intervals")
+                        : std::vector<unsigned int>()),
+    _uniform_mesh_on_sides(getParam<bool>("uniform_mesh_on_sides")),
+    _generate_control_drum_positions_file(getParam<bool>("generate_control_drum_positions_file")),
+    _assign_control_drum_id(getParam<bool>("assign_control_drum_id")),
+    _rotate_angle(getParam<Real>("rotate_angle")),
+    _duct_block_ids(isParamValid("duct_block_ids")
+                        ? getParam<std::vector<subdomain_id_type>>("duct_block_ids")
+                        : std::vector<subdomain_id_type>()),
+    _duct_block_names(isParamValid("duct_block_names")
+                          ? getParam<std::vector<SubdomainName>>("duct_block_names")
+                          : std::vector<SubdomainName>()),
+    _external_boundary_id(isParamValid("external_boundary_id")
+                              ? getParam<boundary_id_type>("external_boundary_id")
+                              : 0),
+    _external_boundary_name(isParamValid("external_boundary_name")
+                                ? getParam<std::string>("external_boundary_name")
+                                : std::string()),
+    _hexagon_size_style(getParam<MooseEnum>("hexagon_size_style").template getEnum<PolygonStyle>()),
+    _pattern_pitch_meta(declareMeshProperty("pattern_pitch_meta", 0.0)),
+    _is_control_drum_meta(declareMeshProperty<bool>("is_control_drum_meta", false)),
+    _control_drum_positions(
+        declareMeshProperty<std::vector<Point>>("control_drum_positions", std::vector<Point>())),
+    _control_drum_angles(
+        declareMeshProperty<std::vector<Real>>("control_drum_angles", std::vector<Real>())),
+    _control_drums_azimuthal_meta(declareMeshProperty<std::vector<std::vector<Real>>>(
+        "control_drums_azimuthal_meta", std::vector<std::vector<Real>>())),
+    _position_file_name(declareMeshProperty<std::string>("position_file_name",
+                                                         getParam<std::string>("position_file")))
+{
+  const unsigned int n_pattern_layers = _pattern.size();
+  if (n_pattern_layers % 2 == 0)
+    paramError(
+        "pattern",
+        "The length (layer number) of this parameter must be odd to ensure a hexagonal shape.");
+  if (n_pattern_layers == 1)
+    paramError("pattern", "The length (layer number) of this parameter must be larger than unity.");
+  std::vector<unsigned int> pattern_max_array;
+  std::vector<unsigned int> pattern_1d;
+  for (unsigned int i = 0; i <= n_pattern_layers / 2; i++)
+  {
+    pattern_max_array.push_back(*std::max_element(_pattern[i].begin(), _pattern[i].end()));
+    pattern_max_array.push_back(*std::max_element(_pattern[n_pattern_layers - 1 - i].begin(),
+                                                  _pattern[n_pattern_layers - 1 - i].end()));
+    pattern_1d.insert(pattern_1d.end(), _pattern[i].begin(), _pattern[i].end());
+    pattern_1d.insert(pattern_1d.end(),
+                      _pattern[n_pattern_layers - 1 - i].begin(),
+                      _pattern[n_pattern_layers - 1 - i].end());
+    if (_pattern[i].size() != n_pattern_layers / 2 + i + 1 ||
+        _pattern[n_pattern_layers - 1 - i].size() != n_pattern_layers / 2 + i + 1)
+      paramError(
+          "pattern",
+          "The two-dimentional array parameter pattern must have a correct hexagonal shape.");
+  }
+  if (*std::max_element(pattern_max_array.begin(), pattern_max_array.end()) >= _input_names.size())
+    paramError("pattern",
+               "Elements of this parameter must be smaller than the length of input_name.");
+  if ((unsigned int)std::distance(pattern_1d.begin(),
+                                  std::unique(pattern_1d.begin(), pattern_1d.end())) <
+      _input_names.size())
+    paramError("pattern", "All the meshes provided in inputs must be used here.");
+  _mesh_ptrs.reserve(_input_names.size());
+  for (auto & input_name : _input_names)
+    _mesh_ptrs.push_back(&getMeshByName(input_name));
+
+  if (isParamValid("background_block_id"))
+  {
+    _peripheral_block_ids.push_back(getParam<subdomain_id_type>("background_block_id"));
+    _peripheral_block_ids.insert(
+        _peripheral_block_ids.end(), _duct_block_ids.begin(), _duct_block_ids.end());
+  }
+  else if (!_duct_block_ids.empty())
+    paramError("background_block_id",
+               "This parameter and duct_block_ids must be "
+               "provided simultaneously.");
+  if (isParamValid("background_block_name"))
+  {
+    _peripheral_block_names.push_back(getParam<SubdomainName>("background_block_name"));
+    _peripheral_block_names.insert(
+        _peripheral_block_names.end(), _duct_block_names.begin(), _duct_block_names.end());
+  }
+  else if (!_duct_block_names.empty())
+    paramError("background_block_name",
+               "This parameter and duct_block_names must be provided simultaneously.");
+
+  if (_pattern_boundary == "hexagon")
+  {
+    if (!_peripheral_block_ids.empty() && _peripheral_block_ids.size() != _duct_sizes.size() + 1)
+      paramError("duct_block_ids",
+                 "This parameter, if provided, must have a length equal to length of duct_sizes.");
+    if (!_peripheral_block_names.empty() &&
+        _peripheral_block_names.size() != _duct_sizes.size() + 1)
+      paramError("duct_block_names",
+                 "This parameter, if provided, must have a length equal to length of duct_sizes.");
+  }
+  else
+  {
+    if (!_peripheral_block_ids.empty() || !_peripheral_block_names.empty())
+      paramError("background_block_id",
+                 "This parameter and background_block_name must not be set when the "
+                 "pattern_boundary is none.");
+  }
+}
+
+std::unique_ptr<MeshBase>
+PatternedHexMeshGenerator::generate()
+{
+  for (MooseIndex(_input_names) i = 0; i < _input_names.size(); ++i)
+    _meshes.push_back(dynamic_pointer_cast<ReplicatedMesh>(*_mesh_ptrs[i]));
+
+  std::vector<Real> pitch_array;
+  std::vector<unsigned int> num_sectors_per_side_array;
+  std::vector<unsigned int> num_sectors_per_side_array_tmp;
+  std::vector<std::vector<Real>> control_drum_azimuthal_array;
+  std::vector<unsigned int> background_intervals_array;
+  std::vector<dof_id_type> node_id_background_array;
+  std::vector<Real> max_radius_array;
+  std::vector<bool> is_control_drum_array;
+  Real max_radius_global(0.0);
+  std::vector<Real> pattern_pitch_array;
+
+  if (_pattern_boundary == "none" && _generate_core_metadata)
+  {
+    for (MooseIndex(_input_names) i = 0; i < _input_names.size(); ++i)
+    {
+      // throw an error message if the input mesh does not contain the required meta data
+      if (!hasMeshProperty("pattern_pitch_meta", _input_names[i]))
+        mooseError("In PatternedHexMeshGenerator ",
+                   _name,
+                   ": the unit hexagonal input mesh does not contain appropriate meta data "
+                   "required for generating a core mesh.");
+      pattern_pitch_array.push_back(getMeshProperty<Real>("pattern_pitch_meta", _input_names[i]));
+      // throw an error message if the input mesh contains non-sense meta data
+      if (pattern_pitch_array.back() == 0.0)
+        mooseError("In PatternedHexMeshGenerator ",
+                   _name,
+                   ": the unit hexagonal input mesh does not contain appropriate meta data "
+                   "required for generating a core mesh.");
+      is_control_drum_array.push_back(
+          getMeshProperty<bool>("is_control_drum_meta", _input_names[i]));
+      control_drum_azimuthal_array.push_back(
+          getMeshProperty<bool>("is_control_drum_meta", _input_names[i])
+              ? getMeshProperty<std::vector<Real>>("azimuthal_angle_meta", _input_names[i])
+              : std::vector<Real>());
+    }
+    if (!MooseUtils::absoluteFuzzyEqual(
+            *std::max_element(pattern_pitch_array.begin(), pattern_pitch_array.end()),
+            *std::min_element(pattern_pitch_array.begin(), pattern_pitch_array.end())))
+      mooseError("In PatternedHexMeshGenerator ",
+                 _name,
+                 ": pattern_pitch metadata values of all input mesh generators must be identical "
+                 "when pattern_boundary is 'none' and generate_core_metadata is true.");
+    else
+      _pattern_pitch = pattern_pitch_array.front();
+  }
+  else
+  {
+    if (_pattern_boundary == "hexagon")
+    {
+      if (!isParamValid("hexagon_size"))
+        paramError("hexagon_size",
+                   "This parameter must be provided when pattern_boundary is hexagon.");
+      else
+        _pattern_pitch = 2.0 * (_hexagon_size_style == PolygonStyle::apothem
+                                    ? getParam<Real>("hexagon_size")
+                                    : getParam<Real>("hexagon_size") * std::cos(M_PI / 6.0));
+    }
+    for (MooseIndex(_input_names) i = 0; i < _input_names.size(); ++i)
+    {
+      // throw an error message if the input mesh does not contain the required meta data
+      if (!hasMeshProperty("pitch_meta", _input_names[i]))
+        mooseError("In PatternedHexMeshGenerator ",
+                   _name,
+                   ": the unit hexagonal input mesh does not contain appropriate meta data "
+                   "required for generating an assembly.");
+      pitch_array.push_back(getMeshProperty<Real>("pitch_meta", _input_names[i]));
+
+      num_sectors_per_side_array_tmp =
+          getMeshProperty<std::vector<unsigned int>>("num_sectors_per_side_meta", _input_names[i]);
+      if (*std::max_element(num_sectors_per_side_array_tmp.begin(),
+                            num_sectors_per_side_array_tmp.end()) !=
+          *std::min_element(num_sectors_per_side_array_tmp.begin(),
+                            num_sectors_per_side_array_tmp.end()))
+        mooseError("In PatternedHexMeshGenerator ",
+                   _name,
+                   ": num_sectors_per_side metadata values of all six sides of each input mesh "
+                   "generator must be identical.");
+      num_sectors_per_side_array.push_back(*num_sectors_per_side_array_tmp.begin());
+      background_intervals_array.push_back(
+          getMeshProperty<unsigned int>("background_intervals_meta", _input_names[i]));
+      node_id_background_array.push_back(
+          getMeshProperty<dof_id_type>("node_id_background_meta", _input_names[i]));
+      max_radius_array.push_back(getMeshProperty<Real>("max_radius_meta", _input_names[i]));
+    }
+    max_radius_global = *max_element(max_radius_array.begin(), max_radius_array.end());
+    if (!MooseUtils::absoluteFuzzyEqual(*std::max_element(pitch_array.begin(), pitch_array.end()),
+                                        *std::min_element(pitch_array.begin(), pitch_array.end())))
+      mooseError("In PatternedHexMeshGenerator ",
+                 _name,
+                 ": pitch metadata values of all input mesh generators must be identical.");
+    if (*std::max_element(num_sectors_per_side_array.begin(), num_sectors_per_side_array.end()) !=
+        *std::min_element(num_sectors_per_side_array.begin(), num_sectors_per_side_array.end()))
+      mooseError(
+          "In PatternedHexMeshGenerator ",
+          _name,
+          ": num_sectors_per_side metadata values of all input mesh generators must be identical.");
+  }
+
+  std::vector<Real> extra_dist;
+  Real extra_dist_shift(0.0);
+  Real y_min(0.0);
+  Real y_max_0(0.0);
+  Real y_max_n(0.0);
+  const Real extra_dist_tol = _pattern_boundary == "hexagon" ? pitch_array.front() / 10.0 : 0.0;
+  const Real extra_dist_shift_0 = _pattern_boundary == "hexagon" ? pitch_array.front() / 5.0 : 0.0;
+  std::vector<unsigned int> peripheral_duct_intervals;
+  if (_pattern_boundary == "hexagon")
+  {
+    if (_has_assembly_duct)
+      for (unsigned int i = 0; i < _duct_sizes.size(); i++)
+      {
+        if (_duct_sizes_style == DuctStyle::radius)
+          _duct_sizes[i] /= std::cos(M_PI / 6.0);
+        extra_dist.push_back(0.5 *
+                             (_duct_sizes[i] * 2.0 - pitch_array.front() / std::sqrt(3.0) *
+                                                         (Real)((_pattern.size() / 2) * 3 + 2)));
+        peripheral_duct_intervals.push_back(_duct_intervals[i]);
+      }
+    // calculate the distance between the larger hexagon boundary and the boundary of stitched unit
+    // hexagons this is used to decide whether deformation is needed when cut-off happens or when
+    // the distance is small.
+    extra_dist.push_back(0.5 * (_pattern_pitch - pitch_array.front() / std::sqrt(3.0) *
+                                                     (Real)((_pattern.size() / 2) * 3 + 2)));
+    peripheral_duct_intervals.insert(peripheral_duct_intervals.begin(), _background_intervals);
+
+    // In same cases, when the external hexagon size is small enough, the external hexagon boundary
+    // may either be very close to the input hexagon meshes that are near the boundary or even cut
+    // off the these hexagons. As long as the ring regions are not cut off, the input hexagons can
+    // be deformed to accomodate the external hexagon shape. This block sets up the range of mesh
+    // region that needs to be deformed.
+    if (extra_dist.front() <= extra_dist_tol)
+    {
+      extra_dist_shift = extra_dist_shift_0 - extra_dist.front();
+      for (Real & d : extra_dist)
+        d += extra_dist_shift;
+      y_min = max_radius_global; // Currently use this, ideally this should be the max of the outer
+                                 // layer radii;
+      y_max_0 = pitch_array.front() / std::sqrt(3.0) + extra_dist.front();
+      y_max_n = y_max_0 - extra_dist_shift;
+      if (y_max_n <= y_min)
+        mooseError("In PatternedHexMeshGenerator ",
+                   _name,
+                   ": the assembly is cut off so much that the internal circular structure is "
+                   "compromised.");
+    }
+  }
+
+  _pattern_pitch_meta = _pattern_pitch;
+
+  int x_mov = 0;
+
+  const Real input_pitch((_pattern_boundary == "hexagon" || !_generate_core_metadata)
+                             ? pitch_array.front()
+                             : _pattern_pitch);
+  std::vector<Real> control_drum_positions_x;
+  std::vector<Real> control_drum_positions_y;
+  std::vector<std::vector<Real>> control_drum_azimuthals;
+  for (unsigned i = 0; i < _pattern.size(); i++)
+  {
+    Real deltax = -x_mov * input_pitch / 2;
+    if (i == _pattern.size() - 1)
+      x_mov--;
+    else if (_pattern[i].size() < _pattern[i + 1].size())
+      x_mov++;
+    else
+      x_mov--;
+    Real deltay = -(Real)(i)*input_pitch * std::sin(M_PI / 3);
+
+    for (unsigned int j = 0; j < _pattern[i].size(); j++)
+    {
+      // corner mesh
+      if (_pattern_boundary == "none" && _generate_core_metadata)
+        if (is_control_drum_array[_pattern[i][j]] == 1)
+        {
+          control_drum_positions_x.push_back(deltax + j * input_pitch);
+          control_drum_positions_y.push_back(deltay);
+          control_drum_azimuthals.push_back(control_drum_azimuthal_array[_pattern[i][j]]);
+        }
+      if (_pattern_boundary == "none")
+      {
+        if (j == 0 && i == 0)
+        {
+          _out_meshes_ptrs = _meshes[_pattern[i][j]]->clone(); // clone
+          _out_meshes = dynamic_pointer_cast<ReplicatedMesh>(_out_meshes_ptrs);
+          if (_assign_control_drum_id && _generate_core_metadata)
+            _out_meshes->add_elem_integer(
+                "control_drum_id",
+                true,
+                is_control_drum_array[_pattern[i][j]] ? control_drum_azimuthals.size() : 0);
+          continue;
+        }
+      }
+      else
+      {
+        std::unique_ptr<MeshBase> tmp_meshes_ptrs;
+        std::unique_ptr<ReplicatedMesh> tmp_meshes;
+
+        if (j == 0 && i == 0)
+        {
+          tmp_meshes_ptrs = _meshes[_pattern[i][j]]->clone();
+          tmp_meshes = dynamic_pointer_cast<ReplicatedMesh>(tmp_meshes_ptrs);
+          _out_meshes = addPeripheralMesh(_pattern[i][j],
+                                          pitch_array.front(),
+                                          extra_dist,
+                                          &tmp_meshes,
+                                          num_sectors_per_side_array,
+                                          peripheral_duct_intervals,
+                                          60.0,
+                                          CORNER_MESH);
+          if (extra_dist_shift != 0)
+            cutOffHexDeform(*_out_meshes, 0.0, y_max_0, y_max_n, y_min, CORNER_MESH);
+
+          continue;
+        }
+        if (j == 0 && i == _pattern.size() - 1)
+        {
+          tmp_meshes_ptrs = _meshes[_pattern[i][j]]->clone();
+          tmp_meshes = dynamic_pointer_cast<ReplicatedMesh>(tmp_meshes_ptrs);
+          _tmp_peripheral_mesh = addPeripheralMesh(_pattern[i][j],
+                                                   pitch_array.front(),
+                                                   extra_dist,
+                                                   &tmp_meshes,
+                                                   num_sectors_per_side_array,
+                                                   peripheral_duct_intervals,
+                                                   180.0,
+                                                   CORNER_MESH);
+
+          if (extra_dist_shift != 0)
+            cutOffHexDeform(*_tmp_peripheral_mesh, -120.0, y_max_0, y_max_n, y_min, CORNER_MESH);
+
+          // Define a reference map variable for subdomain map
+          auto & main_subdomain_map = _out_meshes->set_subdomain_name_map();
+          // Retrieve subdomain name map from the mesh to be stitched and insert it into the main
+          // subdomain map
+          const auto & increment_subdomain_map = _tmp_peripheral_mesh->get_subdomain_name_map();
+          main_subdomain_map.insert(increment_subdomain_map.begin(), increment_subdomain_map.end());
+
+          MeshTools::Modification::translate(
+              *_tmp_peripheral_mesh, deltax + j * input_pitch, deltay, 0);
+          _out_meshes->stitch_meshes(*_tmp_peripheral_mesh,
+                                     OUTER_SIDESET_ID,
+                                     OUTER_SIDESET_ID,
+                                     TOLERANCE,
+                                     /*clear_stitched_boundary_ids=*/true);
+          continue;
+        }
+        if (j == 0 && i == (_pattern.size() - 1) / 2)
+        {
+          tmp_meshes_ptrs = _meshes[_pattern[i][j]]->clone();
+          tmp_meshes = dynamic_pointer_cast<ReplicatedMesh>(tmp_meshes_ptrs);
+          _tmp_peripheral_mesh = addPeripheralMesh(_pattern[i][j],
+                                                   pitch_array.front(),
+                                                   extra_dist,
+                                                   &tmp_meshes,
+                                                   num_sectors_per_side_array,
+                                                   peripheral_duct_intervals,
+                                                   120.0,
+                                                   CORNER_MESH);
+
+          if (extra_dist_shift != 0)
+            cutOffHexDeform(*_tmp_peripheral_mesh, -60.0, y_max_0, y_max_n, y_min, CORNER_MESH);
+
+          // Define a reference map variable for subdomain map
+          auto & main_subdomain_map = _out_meshes->set_subdomain_name_map();
+          // Retrieve subdomain name map from the mesh to be stitched and insert it to the main
+          // subdomain map
+          const auto & increment_subdomain_map = _tmp_peripheral_mesh->get_subdomain_name_map();
+          main_subdomain_map.insert(increment_subdomain_map.begin(), increment_subdomain_map.end());
+
+          MeshTools::Modification::translate(
+              *_tmp_peripheral_mesh, deltax + j * input_pitch, deltay, 0);
+          _out_meshes->stitch_meshes(*_tmp_peripheral_mesh,
+                                     OUTER_SIDESET_ID,
+                                     OUTER_SIDESET_ID,
+                                     TOLERANCE,
+                                     /*clear_stitched_boundary_ids=*/true);
+          continue;
+        }
+        if (j == _pattern[i].size() - 1 && i == 0)
+        {
+          tmp_meshes_ptrs = _meshes[_pattern[i][j]]->clone();
+          tmp_meshes = dynamic_pointer_cast<ReplicatedMesh>(tmp_meshes_ptrs);
+          _tmp_peripheral_mesh = addPeripheralMesh(_pattern[i][j],
+                                                   pitch_array.front(),
+                                                   extra_dist,
+                                                   &tmp_meshes,
+                                                   num_sectors_per_side_array,
+                                                   peripheral_duct_intervals,
+                                                   0.0,
+                                                   CORNER_MESH);
+
+          if (extra_dist_shift != 0)
+            cutOffHexDeform(*_tmp_peripheral_mesh, 60.0, y_max_0, y_max_n, y_min, CORNER_MESH);
+
+          // Define a reference map variable for subdomain map
+          auto & main_subdomain_map = _out_meshes->set_subdomain_name_map();
+          // Retrieve subdomain name map from the mesh to be stitched and insert it to the main
+          // subdomain map
+          const auto & increment_subdomain_map = _tmp_peripheral_mesh->get_subdomain_name_map();
+          main_subdomain_map.insert(increment_subdomain_map.begin(), increment_subdomain_map.end());
+
+          MeshTools::Modification::translate(
+              *_tmp_peripheral_mesh, deltax + j * input_pitch, deltay, 0);
+          _out_meshes->stitch_meshes(*_tmp_peripheral_mesh,
+                                     OUTER_SIDESET_ID,
+                                     OUTER_SIDESET_ID,
+                                     TOLERANCE,
+                                     /*clear_stitched_boundary_ids=*/true);
+          continue;
+        }
+        if (j == _pattern[i].size() - 1 && i == _pattern.size() - 1)
+        {
+          tmp_meshes_ptrs = _meshes[_pattern[i][j]]->clone();
+          tmp_meshes = dynamic_pointer_cast<ReplicatedMesh>(tmp_meshes_ptrs);
+          _tmp_peripheral_mesh = addPeripheralMesh(_pattern[i][j],
+                                                   pitch_array.front(),
+                                                   extra_dist,
+                                                   &tmp_meshes,
+                                                   num_sectors_per_side_array,
+                                                   peripheral_duct_intervals,
+                                                   -120.0,
+                                                   CORNER_MESH);
+
+          if (extra_dist_shift != 0)
+            cutOffHexDeform(*_tmp_peripheral_mesh, 180.0, y_max_0, y_max_n, y_min, CORNER_MESH);
+
+          // Define a reference map variable for subdomain map
+          auto & main_subdomain_map = _out_meshes->set_subdomain_name_map();
+          // Retrieve subdomain name map from the mesh to be stitched and insert it to the main
+          // subdomain map
+          const auto & increment_subdomain_map = _tmp_peripheral_mesh->get_subdomain_name_map();
+          main_subdomain_map.insert(increment_subdomain_map.begin(), increment_subdomain_map.end());
+
+          MeshTools::Modification::translate(
+              *_tmp_peripheral_mesh, deltax + j * input_pitch, deltay, 0);
+          _out_meshes->stitch_meshes(*_tmp_peripheral_mesh,
+                                     OUTER_SIDESET_ID,
+                                     OUTER_SIDESET_ID,
+                                     TOLERANCE,
+                                     /*clear_stitched_boundary_ids=*/true);
+          continue;
+        }
+        if (j == _pattern[i].size() - 1 && i == (_pattern.size() - 1) / 2)
+        {
+          tmp_meshes_ptrs = _meshes[_pattern[i][j]]->clone();
+          tmp_meshes = dynamic_pointer_cast<ReplicatedMesh>(tmp_meshes_ptrs);
+          _tmp_peripheral_mesh = addPeripheralMesh(_pattern[i][j],
+                                                   pitch_array.front(),
+                                                   extra_dist,
+                                                   &tmp_meshes,
+                                                   num_sectors_per_side_array,
+                                                   peripheral_duct_intervals,
+                                                   -60.0,
+                                                   CORNER_MESH);
+
+          if (extra_dist_shift != 0)
+            cutOffHexDeform(*_tmp_peripheral_mesh, 120.0, y_max_0, y_max_n, y_min, CORNER_MESH);
+
+          // Define a reference map variable for subdomain map
+          auto & main_subdomain_map = _out_meshes->set_subdomain_name_map();
+          // Retrieve subdomain name map from the mesh to be stitched and insert it to the main
+          // subdomain map
+          const auto & increment_subdomain_map = _tmp_peripheral_mesh->get_subdomain_name_map();
+          main_subdomain_map.insert(increment_subdomain_map.begin(), increment_subdomain_map.end());
+
+          MeshTools::Modification::translate(
+              *_tmp_peripheral_mesh, deltax + j * input_pitch, deltay, 0);
+          _out_meshes->stitch_meshes(*_tmp_peripheral_mesh,
+                                     OUTER_SIDESET_ID,
+                                     OUTER_SIDESET_ID,
+                                     TOLERANCE,
+                                     /*clear_stitched_boundary_ids=*/true);
+          continue;
+        }
+        // boundary mesh
+        if (i == 0)
+        {
+          tmp_meshes_ptrs = _meshes[_pattern[i][j]]->clone();
+          tmp_meshes = dynamic_pointer_cast<ReplicatedMesh>(tmp_meshes_ptrs);
+          _tmp_peripheral_mesh = addPeripheralMesh(_pattern[i][j],
+                                                   pitch_array.front(),
+                                                   extra_dist,
+                                                   &tmp_meshes,
+                                                   num_sectors_per_side_array,
+                                                   peripheral_duct_intervals,
+                                                   0.0,
+                                                   BOUNDARY_MESH);
+
+          if (extra_dist_shift != 0)
+            cutOffHexDeform(*_tmp_peripheral_mesh, 0.0, y_max_0, y_max_n, y_min, BOUNDARY_MESH);
+
+          // Define a reference map variable for subdomain map
+          auto & main_subdomain_map = _out_meshes->set_subdomain_name_map();
+          // Retrieve subdomain name map from the mesh to be stitched and insert it to the main
+          // subdomain map
+          const auto & increment_subdomain_map = _tmp_peripheral_mesh->get_subdomain_name_map();
+          main_subdomain_map.insert(increment_subdomain_map.begin(), increment_subdomain_map.end());
+
+          MeshTools::Modification::translate(
+              *_tmp_peripheral_mesh, deltax + j * input_pitch, deltay, 0);
+          _out_meshes->stitch_meshes(*_tmp_peripheral_mesh,
+                                     OUTER_SIDESET_ID,
+                                     OUTER_SIDESET_ID,
+                                     TOLERANCE,
+                                     /*clear_stitched_boundary_ids=*/true);
+          continue;
+        }
+        if (i == _pattern.size() - 1)
+        {
+          tmp_meshes_ptrs = _meshes[_pattern[i][j]]->clone();
+          tmp_meshes = dynamic_pointer_cast<ReplicatedMesh>(tmp_meshes_ptrs);
+          _tmp_peripheral_mesh = addPeripheralMesh(_pattern[i][j],
+                                                   pitch_array.front(),
+                                                   extra_dist,
+                                                   &tmp_meshes,
+                                                   num_sectors_per_side_array,
+                                                   peripheral_duct_intervals,
+                                                   180.0,
+                                                   BOUNDARY_MESH);
+
+          if (extra_dist_shift != 0)
+            cutOffHexDeform(*_tmp_peripheral_mesh, -180.0, y_max_0, y_max_n, y_min, BOUNDARY_MESH);
+
+          // Define a reference map variable for subdomain map
+          auto & main_subdomain_map = _out_meshes->set_subdomain_name_map();
+          // Retrieve subdomain name map from the mesh to be stitched and insert it to the main
+          // subdomain map
+          const auto & increment_subdomain_map = _tmp_peripheral_mesh->get_subdomain_name_map();
+          main_subdomain_map.insert(increment_subdomain_map.begin(), increment_subdomain_map.end());
+
+          MeshTools::Modification::translate(
+              *_tmp_peripheral_mesh, deltax + j * input_pitch, deltay, 0);
+          _out_meshes->stitch_meshes(*_tmp_peripheral_mesh,
+                                     OUTER_SIDESET_ID,
+                                     OUTER_SIDESET_ID,
+                                     TOLERANCE,
+                                     /*clear_stitched_boundary_ids=*/true);
+          continue;
+        }
+        if (j == 0 && i < (_pattern.size() - 1) / 2)
+        {
+          tmp_meshes_ptrs = _meshes[_pattern[i][j]]->clone();
+          tmp_meshes = dynamic_pointer_cast<ReplicatedMesh>(tmp_meshes_ptrs);
+          _tmp_peripheral_mesh = addPeripheralMesh(_pattern[i][j],
+                                                   pitch_array.front(),
+                                                   extra_dist,
+                                                   &tmp_meshes,
+                                                   num_sectors_per_side_array,
+                                                   peripheral_duct_intervals,
+                                                   60.0,
+                                                   BOUNDARY_MESH);
+
+          if (extra_dist_shift != 0)
+            cutOffHexDeform(*_tmp_peripheral_mesh, -60.0, y_max_0, y_max_n, y_min, BOUNDARY_MESH);
+
+          // Define a reference map variable for subdomain map
+          auto & main_subdomain_map = _out_meshes->set_subdomain_name_map();
+          // Retrieve subdomain name map from the mesh to be stitched and insert it to the main
+          // subdomain map
+          const auto & increment_subdomain_map = _tmp_peripheral_mesh->get_subdomain_name_map();
+          main_subdomain_map.insert(increment_subdomain_map.begin(), increment_subdomain_map.end());
+
+          MeshTools::Modification::translate(
+              *_tmp_peripheral_mesh, deltax + j * input_pitch, deltay, 0);
+          _out_meshes->stitch_meshes(*_tmp_peripheral_mesh,
+                                     OUTER_SIDESET_ID,
+                                     OUTER_SIDESET_ID,
+                                     TOLERANCE,
+                                     /*clear_stitched_boundary_ids=*/true);
+          continue;
+        }
+        if (j == 0 && i > (_pattern.size() - 1) / 2)
+        {
+          tmp_meshes_ptrs = _meshes[_pattern[i][j]]->clone();
+          tmp_meshes = dynamic_pointer_cast<ReplicatedMesh>(tmp_meshes_ptrs);
+          _tmp_peripheral_mesh = addPeripheralMesh(_pattern[i][j],
+                                                   pitch_array.front(),
+                                                   extra_dist,
+                                                   &tmp_meshes,
+                                                   num_sectors_per_side_array,
+                                                   peripheral_duct_intervals,
+                                                   120.0,
+                                                   BOUNDARY_MESH);
+
+          if (extra_dist_shift != 0)
+            cutOffHexDeform(*_tmp_peripheral_mesh, -120.0, y_max_0, y_max_n, y_min, BOUNDARY_MESH);
+
+          // Define a reference map variable for subdomain map
+          auto & main_subdomain_map = _out_meshes->set_subdomain_name_map();
+          // Retrieve subdomain name map from the mesh to be stitched and insert it to the main
+          // subdomain map
+          const auto & increment_subdomain_map = _tmp_peripheral_mesh->get_subdomain_name_map();
+          main_subdomain_map.insert(increment_subdomain_map.begin(), increment_subdomain_map.end());
+
+          MeshTools::Modification::translate(
+              *_tmp_peripheral_mesh, deltax + j * input_pitch, deltay, 0);
+          _out_meshes->stitch_meshes(*_tmp_peripheral_mesh,
+                                     OUTER_SIDESET_ID,
+                                     OUTER_SIDESET_ID,
+                                     TOLERANCE,
+                                     /*clear_stitched_boundary_ids=*/true);
+          continue;
+        }
+        if (j == _pattern[i].size() - 1 && i < (_pattern.size() - 1) / 2)
+        {
+          tmp_meshes_ptrs = _meshes[_pattern[i][j]]->clone();
+          tmp_meshes = dynamic_pointer_cast<ReplicatedMesh>(tmp_meshes_ptrs);
+          _tmp_peripheral_mesh = addPeripheralMesh(_pattern[i][j],
+                                                   pitch_array.front(),
+                                                   extra_dist,
+                                                   &tmp_meshes,
+                                                   num_sectors_per_side_array,
+                                                   peripheral_duct_intervals,
+                                                   -60.0,
+                                                   BOUNDARY_MESH);
+
+          if (extra_dist_shift != 0)
+            cutOffHexDeform(*_tmp_peripheral_mesh, 60.0, y_max_0, y_max_n, y_min, BOUNDARY_MESH);
+
+          // Define a reference map variable for subdomain map
+          auto & main_subdomain_map = _out_meshes->set_subdomain_name_map();
+          // Retrieve subdomain name map from the mesh to be stitched and insert it to the main
+          // subdomain map
+          const auto & increment_subdomain_map = _tmp_peripheral_mesh->get_subdomain_name_map();
+          main_subdomain_map.insert(increment_subdomain_map.begin(), increment_subdomain_map.end());
+
+          MeshTools::Modification::translate(
+              *_tmp_peripheral_mesh, deltax + j * input_pitch, deltay, 0);
+          _out_meshes->stitch_meshes(*_tmp_peripheral_mesh,
+                                     OUTER_SIDESET_ID,
+                                     OUTER_SIDESET_ID,
+                                     TOLERANCE,
+                                     /*clear_stitched_boundary_ids=*/true);
+          continue;
+        }
+        if (j == _pattern[i].size() - 1 && i > (_pattern.size() - 1) / 2)
+        {
+          tmp_meshes_ptrs = _meshes[_pattern[i][j]]->clone();
+          tmp_meshes = dynamic_pointer_cast<ReplicatedMesh>(tmp_meshes_ptrs);
+          _tmp_peripheral_mesh = addPeripheralMesh(_pattern[i][j],
+                                                   pitch_array.front(),
+                                                   extra_dist,
+                                                   &tmp_meshes,
+                                                   num_sectors_per_side_array,
+                                                   peripheral_duct_intervals,
+                                                   -120.0,
+                                                   BOUNDARY_MESH);
+
+          if (extra_dist_shift != 0)
+            cutOffHexDeform(*_tmp_peripheral_mesh, 120.0, y_max_0, y_max_n, y_min, BOUNDARY_MESH);
+
+          // Define a reference map variable for subdomain map
+          auto & main_subdomain_map = _out_meshes->set_subdomain_name_map();
+          // Retrieve subdomain name map from the mesh to be stitched and insert it to the main
+          // subdomain map
+          const auto & increment_subdomain_map = _tmp_peripheral_mesh->get_subdomain_name_map();
+          main_subdomain_map.insert(increment_subdomain_map.begin(), increment_subdomain_map.end());
+
+          MeshTools::Modification::translate(
+              *_tmp_peripheral_mesh, deltax + j * input_pitch, deltay, 0);
+          _out_meshes->stitch_meshes(*_tmp_peripheral_mesh,
+                                     OUTER_SIDESET_ID,
+                                     OUTER_SIDESET_ID,
+                                     TOLERANCE,
+                                     /*clear_stitched_boundary_ids=*/true);
+          continue;
+        }
+      }
+      ReplicatedMesh & cell_mesh = *_meshes[_pattern[i][j]];
+      if (_assign_control_drum_id && _pattern_boundary == "none" && _generate_core_metadata)
+        cell_mesh.add_elem_integer(
+            "control_drum_id",
+            true,
+            is_control_drum_array[_pattern[i][j]] ? control_drum_azimuthals.size() : 0);
+      MeshTools::Modification::translate(cell_mesh, deltax + j * input_pitch, deltay, 0);
+
+      // Define a reference map variable for subdomain map
+      auto & main_subdomain_map = _out_meshes->set_subdomain_name_map();
+      // Retrieve subdomain name map from the mesh to be stitched and insert it to the main
+      // subdomain map
+      const auto & increment_subdomain_map = cell_mesh.get_subdomain_name_map();
+      main_subdomain_map.insert(increment_subdomain_map.begin(), increment_subdomain_map.end());
+
+      _out_meshes->stitch_meshes(cell_mesh,
+                                 OUTER_SIDESET_ID,
+                                 OUTER_SIDESET_ID,
+                                 TOLERANCE,
+                                 /*clear_stitched_boundary_ids=*/true);
+      MeshTools::Modification::translate(cell_mesh, -(deltax + j * input_pitch), -deltay, 0);
+    }
+  }
+
+  std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>> side_list =
+      _out_meshes->get_boundary_info().build_side_list();
+  _out_meshes->get_boundary_info().build_node_list_from_side_list();
+  std::vector<std::tuple<dof_id_type, boundary_id_type>> node_list =
+      _out_meshes->get_boundary_info().build_node_list();
+
+  std::vector<Real> bd_x_list;
+  std::vector<Real> bd_y_list;
+  std::vector<std::pair<Real, unsigned int>> node_azi_list;
+  Real origin_x;
+  Real origin_y;
+
+  for (unsigned int i = 0; i < node_list.size(); ++i)
+  {
+    if (std::get<1>(node_list[i]) == OUTER_SIDESET_ID)
+    {
+      bd_x_list.push_back((*_out_meshes->node_ptr(std::get<0>(node_list[i])))(0));
+      bd_y_list.push_back((*_out_meshes->node_ptr(std::get<0>(node_list[i])))(1));
+    }
+  }
+  origin_x = std::accumulate(bd_x_list.begin(), bd_x_list.end(), 0.0) / bd_x_list.size();
+  origin_y = std::accumulate(bd_y_list.begin(), bd_y_list.end(), 0.0) / bd_y_list.size();
+
+  MeshTools::Modification::translate(*_out_meshes, -origin_x, -origin_y, 0);
+
+  if (_uniform_mesh_on_sides)
+  {
+    const Real azi_tol = 1E-8;
+    for (unsigned int i = 0; i < node_list.size(); ++i)
+    {
+      if (std::get<1>(node_list[i]) == OUTER_SIDESET_ID)
+      {
+        node_azi_list.push_back(
+            std::make_pair(atan2((*_out_meshes->node_ptr(std::get<0>(node_list[i])))(1),
+                                 (*_out_meshes->node_ptr(std::get<0>(node_list[i])))(0)) *
+                               180.0 / M_PI,
+                           std::get<0>(node_list[i])));
+        // correct the last node's angle value (180.0) if it becomes a negative value.
+        if (node_azi_list.back().first + 180.0 <= azi_tol)
+          node_azi_list.back().first = 180;
+      }
+    }
+    std::sort(node_azi_list.begin(), node_azi_list.end());
+    const unsigned int side_intervals = node_azi_list.size() / HEXAGON_NUM_SIDES;
+    for (unsigned int i = 0; i < HEXAGON_NUM_SIDES; i++)
+    {
+      for (unsigned int j = 1; j <= side_intervals; j++)
+      {
+        Real azi_corr_tmp = atan2((Real)j * 2.0 / (Real)side_intervals - 1.0, std::sqrt(3.0));
+        Real x_tmp = _pattern_pitch / 2.0;
+        Real y_tmp = x_tmp * std::tan(azi_corr_tmp);
+        nodeCoordRotate(&x_tmp, &y_tmp, (Real)i * 60.0 - 150.0);
+        Point p_tmp = Point(x_tmp, y_tmp, 0.0);
+        _out_meshes->add_point(p_tmp, node_azi_list[i * side_intervals + j - 1].second);
+      }
+    }
+  }
+
+  MeshTools::Modification::rotate(*_out_meshes, _rotate_angle, 0.0, 0.0);
+
+  // This combination of input parameters is usually used for core mesh generation by stitching
+  // assembly meshes together.
+  if (_pattern_boundary == "none" && _generate_core_metadata)
+  {
+    const Real azi_tol = 1E-8;
+    std::vector<std::tuple<Real, Point, std::vector<Real>, dof_id_type>> control_drum_tmp;
+    std::vector<dof_id_type> control_drum_id_sorted;
+    unsigned int id = _out_meshes->get_elem_integer_index("control_drum_id");
+    for (unsigned int i = 0; i < control_drum_positions_x.size(); ++i)
+    {
+      control_drum_positions_x[i] -= origin_x;
+      control_drum_positions_y[i] -= origin_y;
+      nodeCoordRotate(&control_drum_positions_x[i], &control_drum_positions_y[i], _rotate_angle);
+      Real cd_angle = atan2(control_drum_positions_y[i], control_drum_positions_x[i]);
+
+      for (unsigned int j = 0; j < control_drum_azimuthals[i].size(); j++)
+      {
+        control_drum_azimuthals[i][j] += _rotate_angle;
+        control_drum_azimuthals[i][j] =
+            atan2(std::sin(control_drum_azimuthals[i][j] / 180.0 * M_PI),
+                  std::cos(control_drum_azimuthals[i][j] / 180.0 * M_PI)) /
+            M_PI * 180.0; // quick way to move to -M_PI to M_PI
+      }
+      std::sort(control_drum_azimuthals[i].begin(), control_drum_azimuthals[i].end());
+
+      if (std::abs(cd_angle) < azi_tol)
+        cd_angle = 0;
+      else if (cd_angle < 0.0)
+        cd_angle += 2 * M_PI;
+      control_drum_tmp.push_back(
+          std::make_tuple(cd_angle,
+                          Point(control_drum_positions_x[i], control_drum_positions_y[i], 0.0),
+                          control_drum_azimuthals[i],
+                          i + 1)); // control drum index to help sort control_drum_id
+    }
+    std::sort(control_drum_tmp.begin(), control_drum_tmp.end());
+    for (unsigned int i = 0; i < control_drum_tmp.size(); ++i)
+    {
+      _control_drum_positions.push_back(std::get<1>(control_drum_tmp[i]));
+      _control_drum_angles.push_back(std::get<0>(control_drum_tmp[i]));
+      _control_drums_azimuthal_meta.push_back(std::get<2>(control_drum_tmp[i]));
+      control_drum_id_sorted.push_back(std::get<3>(control_drum_tmp[i]));
+    }
+
+    if (_assign_control_drum_id)
+    {
+      for (const auto & elem : _out_meshes->element_ptr_range())
+      {
+        dof_id_type unsorted_control_drum_id = elem->get_extra_integer(id);
+        if (unsorted_control_drum_id != 0)
+        {
+          auto sorted_iter = std::find(control_drum_id_sorted.begin(),
+                                       control_drum_id_sorted.end(),
+                                       unsorted_control_drum_id);
+          elem->set_extra_integer(id,
+                                  std::distance(control_drum_id_sorted.begin(), sorted_iter) + 1);
+        }
+      }
+    }
+
+    if (_generate_control_drum_positions_file)
+    {
+      std::ofstream pos_file(_position_file_name);
+      for (unsigned int i = 0; i < _control_drum_positions.size(); ++i)
+        pos_file << _control_drum_positions[i](0) << " " << _control_drum_positions[i](1)
+                 << " 0.0\n";
+      pos_file.close();
+    }
+  }
+
+  // Assign customized peripheral block ids and names
+  if (!_peripheral_block_ids.empty())
+    for (const auto & elem : _out_meshes->active_element_ptr_range())
+      for (subdomain_id_type i = PERIPHERAL_ID_SHIFT; i <= PERIPHERAL_ID_SHIFT + _duct_sizes.size();
+           i++)
+        if (elem->subdomain_id() == i)
+        {
+          elem->subdomain_id() = _peripheral_block_ids[i - PERIPHERAL_ID_SHIFT];
+          break;
+        }
+  if (!_peripheral_block_names.empty())
+  {
+    for (unsigned i = 0; i < _peripheral_block_names.size(); i++)
+      _out_meshes->subdomain_name(_peripheral_block_ids.empty() ? (PERIPHERAL_ID_SHIFT + i)
+                                                                : _peripheral_block_ids[i]) =
+          _peripheral_block_names[i];
+  }
+  // Assign customized outer surface boundary id and name
+  if (_external_boundary_id > 0)
+    MooseMesh::changeBoundaryId(*_out_meshes, OUTER_SIDESET_ID, _external_boundary_id, false);
+  if (!_external_boundary_name.empty())
+  {
+    _out_meshes->boundary_info->sideset_name(
+        _external_boundary_id > 0 ? _external_boundary_id : (boundary_id_type)OUTER_SIDESET_ID) =
+        _external_boundary_name;
+    _out_meshes->boundary_info->nodeset_name(
+        _external_boundary_id > 0 ? _external_boundary_id : (boundary_id_type)OUTER_SIDESET_ID) =
+        _external_boundary_name;
+  }
+  // assign sideset and nodeset maps
+  auto & new_sideset_map = _out_meshes->boundary_info->set_sideset_name_map();
+  auto & new_nodeset_map = _out_meshes->boundary_info->set_nodeset_name_map();
+  for (unsigned int i = 0; i < _meshes.size(); i++)
+  {
+    auto input_sideset_map = _meshes[i]->boundary_info->get_sideset_name_map();
+    new_sideset_map.insert(input_sideset_map.begin(), input_sideset_map.end());
+    auto input_nodeset_map = _meshes[i]->boundary_info->get_nodeset_name_map();
+    new_nodeset_map.insert(input_nodeset_map.begin(), input_nodeset_map.end());
+  }
+
+  return dynamic_pointer_cast<MeshBase>(_out_meshes);
+}

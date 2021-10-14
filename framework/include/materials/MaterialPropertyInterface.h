@@ -16,6 +16,7 @@
 #include "MathUtils.h"
 #include "MooseObjectName.h"
 #include "InputParameters.h"
+#include "SubProblem.h"
 
 // Forward declarations
 class MaterialPropertyInterface;
@@ -266,6 +267,9 @@ protected:
   /// Reference to the FEProblemBase class
   FEProblemBase & _mi_feproblem;
 
+  /// Reference to the subproblem
+  SubProblem & _mi_subproblem;
+
   /// Current threaded it
   const THREAD_ID _mi_tid;
 
@@ -284,7 +288,7 @@ protected:
   /**
    * Small helper to look up a material property name through the input parameter keys
    */
-  std::string deducePropertyName(const std::string & name);
+  std::string deducePropertyName(const std::string & name) const;
 
   /**
    * Helper function to parse default material property values. This is implemented

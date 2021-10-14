@@ -12,7 +12,7 @@
 #include "FVBoundaryCondition.h"
 #include "NeighborCoupleableMooseVariableDependencyIntermediateInterface.h"
 #include "TwoMaterialPropertyInterface.h"
-#include "FVUtils.h"
+#include "MathFVUtils.h"
 
 // Provides an interface for computing residual contributions from finite
 // volume numerical fluxes computed on faces to neighboring elements.
@@ -51,7 +51,42 @@ protected:
    */
   const ADReal & uOnGhost() const;
 
+  /**
+   * @return the value of \p makeSidedFace with \p fi_elem = true
+   */
+  std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID> elemFromFace() const;
+
+  /**
+   * @return the value of \p makeSidedFace with \p fi_elem = false
+   */
+  std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID> neighborFromFace() const;
+
+  /**
+   * Determine the subdomain ID pair that should be used when creating a face argument for a
+   * functor. The first member of the pair will correspond to the SubdomainID in the tuple returned
+   * by \p elemFromFace. The second member of the pair will correspond to the SubdomainID in the
+   * tuple returned by \p neighborFromFace. As explained in the doxygen for \p makeSidedFace these
+   * subdomain IDs do not simply correspond to the subdomain ID of the element; they must respect
+   * the block restriction of the variable this object is acting upon
+   */
+  std::pair<SubdomainID, SubdomainID> faceArgSubdomains() const;
+
 private:
+  /**
+   * This creates a tuple of an element, \p FaceInfo, and subdomain ID. The element returned will
+   * correspond to the method argument, e.g. if \p fi_elem is true, then this will return the \p
+   * FaceInfo element, else it will return the \p FaceInfo neighbor. The \p FaceInfo part of the
+   * tuple will simply correspond to the current \p _face_info. The subdomain ID part of the tuple
+   * will correspond to the subdomain ID that this object is defined on because flux boundary
+   * conditions do indeed have sidedness. If a variable is only defined on the element side of the
+   * current face, then the subdomain ID will be equivalent to \p _face_info->elem().subdomain_id().
+   * If the variable is only defined on the neighbor side of the face, then the subdomain ID will be
+   * equivalent to \p _face_info->neighborPtr()->subdomain_id(). We currently error in flux bcs if
+   * the variable is defined on both sides of the face
+   */
+  std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID>
+  makeSidedFace(bool fi_elem) const;
+
   /// Computes the Jacobian contribution for every coupled variable.
   ///
   /// @param type Either ElementElement, ElementNeighbor, NeighborElement, or NeighborNeighbor. As an

@@ -95,7 +95,7 @@
 
 [Kernels]
   [left_diff]
-    type = ADMatDiffusion
+    type = ADFunctorMatDiffusion
     variable = left_fe
     diffusivity = fe_prop
   []
@@ -105,7 +105,7 @@
     variable = left_fe
   []
   [right_diff]
-    type = ADMatDiffusion
+    type = ADFunctorMatDiffusion
     variable = right_fe
     diffusivity = fe_prop
   []

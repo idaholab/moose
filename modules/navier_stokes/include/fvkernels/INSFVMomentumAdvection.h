@@ -36,35 +36,29 @@ protected:
   /**
    * interpolation overload for the velocity
    */
-  virtual void interpolate(Moose::FV::InterpMethod m,
-                           ADRealVectorValue & interp_v,
-                           const ADRealVectorValue & elem_v,
-                           const ADRealVectorValue & neighbor_v);
+  virtual void interpolate(Moose::FV::InterpMethod m, ADRealVectorValue & interp_v);
 
   virtual ADReal computeQpResidual() override;
 
   void residualSetup() override final { clearRCCoeffs(); }
   void jacobianSetup() override final { clearRCCoeffs(); }
 
-  /// The dynamic viscosity on the FaceInfo elem
-  const ADMaterialProperty<Real> & _mu_elem;
-
-  /// The dynamic viscosity on the FaceInfo neighbor
-  const ADMaterialProperty<Real> & _mu_neighbor;
+  /// The dynamic viscosity
+  const Moose::Functor<ADReal> & _mu;
 
   /**
    * Returns the Rhie-Chow 'a' coefficient for the requested element \p elem
    * @param elem The elem to get the Rhie-Chow coefficient for
    * @param mu The dynamic viscosity
    */
-  const VectorValue<ADReal> & rcCoeff(const Elem & elem, const ADReal & mu) const;
+  const VectorValue<ADReal> & rcCoeff(const Elem & elem) const;
 
   /**
    * method for computing the Rhie-Chow 'a' coefficients for the given elem \p elem
    * @param elem The elem to compute the Rhie-Chow coefficient for
    * @param mu The dynamic viscosity
    */
-  virtual VectorValue<ADReal> coeffCalculator(const Elem & elem, const ADReal & mu) const;
+  virtual VectorValue<ADReal> coeffCalculator(const Elem & elem) const;
 
   /**
    * Clear the RC 'a' coefficient cache
@@ -83,7 +77,7 @@ protected:
   const INSFVVelocityVariable * const _w_var;
 
   /// Density
-  const Real & _rho;
+  const Moose::Functor<ADReal> & _rho;
 
   /// the dimension of the simulation
   const unsigned int _dim;

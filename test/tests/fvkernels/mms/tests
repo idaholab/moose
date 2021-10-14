@@ -18,6 +18,7 @@
     input = 'mat-advection-diffusion.i'
     exodiff = 'mat-advection-diffusion_out.e'
     requirement = 'The system shall be able to solve a advection-diffusion problem with the finite volume method, using a velocity supplied by a material, and display second order convergence.'
+    ad_indexing_type = 'global'
   []
   [advection]
     type = Exodiff
@@ -30,6 +31,7 @@
     input = 'mat-advection.i'
     exodiff = 'mat-advection_out.e'
     requirement = 'The system shall be able to solve a advection problem with the finite volume method, using a velocity supplied by a material, and display second order convergence.'
+    ad_indexing_type = 'global'
   []
   [upwind-advection-diffusion]
     type = Exodiff

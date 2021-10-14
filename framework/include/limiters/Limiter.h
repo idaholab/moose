@@ -10,6 +10,8 @@
 #pragma once
 
 #include "ADReal.h"
+#include "MooseTypes.h"
+#include "HasMembers.h"
 #include <memory>
 
 class MooseEnum;
@@ -18,6 +20,8 @@ namespace Moose
 {
 namespace FV
 {
+enum class InterpMethod;
+
 enum class LimiterType : int
 {
   VanLeer = 0,
@@ -29,10 +33,30 @@ enum class LimiterType : int
 };
 extern const MooseEnum moose_limiter_type;
 
+template <typename T, typename Enable = void>
+struct LimiterValueType;
+
+template <>
+struct LimiterValueType<Real>
+{
+  typedef Real value_type;
+};
+template <>
+struct LimiterValueType<ADReal>
+{
+  typedef ADReal value_type;
+};
+template <typename T>
+struct LimiterValueType<T, typename std::enable_if<HasMemberType_value_type<T>::value>::type>
+{
+  typedef typename T::value_type value_type;
+};
+
 /**
  * Base class for defining slope limiters for finite volume or potentially reconstructed
  * Discontinuous-Galerkin applications
  */
+template <typename T>
 class Limiter
 {
 public:
@@ -40,7 +64,12 @@ public:
    * Defines the slope limiter function $\beta(r_f)$ where $r_f$ represents the ratio of upstream to
    * downstream gradients
    */
-  virtual ADReal operator()(const ADReal & r_f) const = 0;
+  virtual T operator()(const T & phi_upwind,
+                       const T & phi_downwind,
+                       const VectorValue<T> * grad_phi_upwind,
+                       const RealVectorValue & dCD) const = 0;
+  virtual bool constant() const = 0;
+  virtual InterpMethod interpMethod() const = 0;
 
   Limiter() = default;
 

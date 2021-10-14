@@ -212,10 +212,10 @@ velocity='velocity'
 []
 
 [Materials]
-  [const]
-    type = ADGenericConstantMaterial
-    prop_names = 'k cp'
-    prop_values = '${k} ${cp}'
+  [const_functor]
+    type = ADGenericConstantFunctorMaterial
+    prop_names = 'cp k'
+    prop_values = '${cp} ${k}'
   []
   [ins_fv]
     type = INSFVMaterial

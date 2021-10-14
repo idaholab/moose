@@ -67,14 +67,12 @@ INSFVMomentumAdvectionOutflowBC::computeQpResidual()
   if (_w_var)
     v(2) = _w_var->getBoundaryFaceValue(*_face_info);
 
-  ADReal adv_quant_boundary;
-  interpolate(_advected_interp_method,
-              adv_quant_boundary,
-              _adv_quant_elem[_qp],
-              _adv_quant_neighbor[_qp],
-              v,
-              *_face_info,
-              true);
+  const auto adv_quant_boundary =
+      _adv_quant(std::make_tuple(_face_info,
+                                 Moose::FV::LimiterType::CentralDifference,
+                                 v * _face_info->normal() > 0,
+                                 faceArgSubdomains()));
+
   mooseAssert(_normal * v >= 0,
               "This boundary condition is for outflow but the flow is in the opposite direction of "
               "the boundary normal");

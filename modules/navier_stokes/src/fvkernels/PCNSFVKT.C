@@ -78,7 +78,7 @@ PCNSFVKT::PCNSFVKT(const InputParameters & params)
     _scalar_neighbor(_u_neighbor),
     _grad_scalar_elem((_eqn == "scalar") ? &_var.adGradSln() : nullptr),
     _grad_scalar_neighbor((_eqn == "scalar") ? &_var.adGradSlnNeighbor() : nullptr),
-    _limiter(Limiter::build(LimiterType(int(getParam<MooseEnum>("limiter"))))),
+    _limiter(Limiter<ADReal>::build(LimiterType(int(getParam<MooseEnum>("limiter"))))),
     _knp_for_omega(getParam<bool>("knp_for_omega"))
 {
   if ((_eqn == "momentum") && !isParamValid("momentum_component"))
@@ -137,61 +137,61 @@ PCNSFVKT::computeQpResidual()
   const auto pressure_elem = interpolate(*_limiter,
                                          _pressure_elem[_qp],
                                          _pressure_neighbor[_qp],
-                                         _grad_pressure_elem[_qp],
+                                         &_grad_pressure_elem[_qp],
                                          *_face_info,
                                          /*elem_is_up=*/true);
   const auto pressure_neighbor = interpolate(*_limiter,
                                              _pressure_neighbor[_qp],
                                              _pressure_elem[_qp],
-                                             _grad_pressure_neighbor[_qp],
+                                             &_grad_pressure_neighbor[_qp],
                                              *_face_info,
                                              /*elem_is_up=*/false);
   const auto T_fluid_elem = interpolate(*_limiter,
                                         _T_fluid_elem[_qp],
                                         _T_fluid_neighbor[_qp],
-                                        _grad_T_fluid_elem[_qp],
+                                        &_grad_T_fluid_elem[_qp],
                                         *_face_info,
                                         /*elem_is_up=*/true);
   const auto T_fluid_neighbor = interpolate(*_limiter,
                                             _T_fluid_neighbor[_qp],
                                             _T_fluid_elem[_qp],
-                                            _grad_T_fluid_neighbor[_qp],
+                                            &_grad_T_fluid_neighbor[_qp],
                                             *_face_info,
                                             /*elem_is_up=*/false);
   const auto sup_vel_x_elem = interpolate(*_limiter,
                                           _sup_vel_x_elem[_qp],
                                           _sup_vel_x_neighbor[_qp],
-                                          _grad_sup_vel_x_elem[_qp],
+                                          &_grad_sup_vel_x_elem[_qp],
                                           *_face_info,
                                           /*elem_is_up=*/true);
   const auto sup_vel_x_neighbor = interpolate(*_limiter,
                                               _sup_vel_x_neighbor[_qp],
                                               _sup_vel_x_elem[_qp],
-                                              _grad_sup_vel_x_neighbor[_qp],
+                                              &_grad_sup_vel_x_neighbor[_qp],
                                               *_face_info,
                                               /*elem_is_up=*/false);
   const auto sup_vel_y_elem = interpolate(*_limiter,
                                           _sup_vel_y_elem[_qp],
                                           _sup_vel_y_neighbor[_qp],
-                                          _grad_sup_vel_y_elem[_qp],
+                                          &_grad_sup_vel_y_elem[_qp],
                                           *_face_info,
                                           /*elem_is_up=*/true);
   const auto sup_vel_y_neighbor = interpolate(*_limiter,
                                               _sup_vel_y_neighbor[_qp],
                                               _sup_vel_y_elem[_qp],
-                                              _grad_sup_vel_y_neighbor[_qp],
+                                              &_grad_sup_vel_y_neighbor[_qp],
                                               *_face_info,
                                               /*elem_is_up=*/false);
   const auto sup_vel_z_elem = interpolate(*_limiter,
                                           _sup_vel_z_elem[_qp],
                                           _sup_vel_z_neighbor[_qp],
-                                          _grad_sup_vel_z_elem[_qp],
+                                          &_grad_sup_vel_z_elem[_qp],
                                           *_face_info,
                                           /*elem_is_up=*/true);
   const auto sup_vel_z_neighbor = interpolate(*_limiter,
                                               _sup_vel_z_neighbor[_qp],
                                               _sup_vel_z_elem[_qp],
-                                              _grad_sup_vel_z_neighbor[_qp],
+                                              &_grad_sup_vel_z_neighbor[_qp],
                                               *_face_info,
                                               /*elem_is_up=*/false);
 
@@ -250,13 +250,13 @@ PCNSFVKT::computeQpResidual()
     const auto scalar_elem = interpolate(*_limiter,
                                          _scalar_elem[_qp],
                                          _scalar_neighbor[_qp],
-                                         (*_grad_scalar_elem)[_qp],
+                                         &(*_grad_scalar_elem)[_qp],
                                          *_face_info,
                                          true);
     const auto scalar_neighbor = interpolate(*_limiter,
                                              _scalar_neighbor[_qp],
                                              _scalar_elem[_qp],
-                                             (*_grad_scalar_neighbor)[_qp],
+                                             &(*_grad_scalar_neighbor)[_qp],
                                              *_face_info,
                                              false);
     const auto rhos_elem = rho_elem * scalar_elem;

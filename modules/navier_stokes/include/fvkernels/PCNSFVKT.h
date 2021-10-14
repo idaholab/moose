@@ -17,6 +17,7 @@ namespace Moose
 {
 namespace FV
 {
+template <typename>
 class Limiter;
 }
 }
@@ -95,7 +96,7 @@ protected:
   ///@}
 
   /// The slope limiter we will apply when interpolating from cell centroids to faces
-  std::unique_ptr<Moose::FV::Limiter> _limiter;
+  std::unique_ptr<Moose::FV::Limiter<ADReal>> _limiter;
 
   /// Whether to use the Kurganov, Noelle, and Petrova method to compute the omega parameter for
   /// stabilization. If false, then the Kurganov-Tadmor method will be used

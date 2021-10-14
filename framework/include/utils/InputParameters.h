@@ -1558,6 +1558,16 @@ void InputParameters::setParamHelper<MaterialPropertyName, int>(const std::strin
                                                                 MaterialPropertyName & l_value,
                                                                 const int & r_value);
 
+template <>
+void InputParameters::setParamHelper<MooseFunctorName, Real>(const std::string & /*name*/,
+                                                             MooseFunctorName & l_value,
+                                                             const Real & r_value);
+
+template <>
+void InputParameters::setParamHelper<MooseFunctorName, int>(const std::string & /*name*/,
+                                                            MooseFunctorName & l_value,
+                                                            const int & r_value);
+
 template <typename T>
 const T &
 InputParameters::getParamHelper(const std::string & name, const InputParameters & pars, const T *)

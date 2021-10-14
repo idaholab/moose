@@ -22,6 +22,7 @@
 #include "MeshChangedInterface.h"
 #include "TaggingInterface.h"
 #include "SystemBase.h"
+#include "FunctorInterface.h"
 
 class FEProblemBase;
 class MooseMesh;
@@ -44,7 +45,8 @@ class ResidualObject : public MooseObject,
                        public RandomInterface,
                        public Restartable,
                        public MeshChangedInterface,
-                       public TaggingInterface
+                       public TaggingInterface,
+                       public FunctorInterface
 {
 public:
   static InputParameters validParams();

@@ -1,18 +1,22 @@
 [Tests]
   issues = '#15894'
   design = 'fv_design.md'
-  [mat-error]
-    type = RunException
+  [fe-and-fv-with-functors]
+    type = Exodiff
     input = 1d.i
     cli_args = "Materials/active='bad_mat'"
-    expect_err = "Your material bad_mat couples in both FE and FV vars"
-    requirement = 'The system shall error if a user attempts to couple both finite volume and finite element variables into the same material.'
+    requirement = 'The system shall be able to couple both finite element and finite volume variables, as functors, into functor material property calculations.'
+    exodiff = '1d_out.e'
+    ad_indexing_type = 'global'
+    issues = '#16809'
   []
   [coupled-gold]
     type = Exodiff
     input = 1d.i
     requirement = 'The system shall support coupling of a finite volume variable into a finite element calculation.'
     exodiff = '1d_out.e'
+    ad_indexing_type = 'global'
+    prereq = 'fe-and-fv-with-functors'
   []
   [jac]
     type = PetscJacobianTester
@@ -21,13 +25,25 @@
     requirement = 'The system shall compute a perfect Jacobian when coupling a finite volume variable into a finite element calculation.'
     difference_tol = 1e-4
     ratio_tol = 1e-7
+    ad_indexing_type = 'global'
   []
-  [deps-not-satisfied]
-    type = RunException
+  [dep-in-same-mat-as-coupled-fe]
+    type = Exodiff
+    exodiff = 1d_out.e
     input = 1d.i
-    method = 'devel dbg'
     cli_args = "Materials/active='fe_mat_bad_dep fv_mat_bad_dep'"
-    expect_err = 'All of the material properties we depend on should already be supplied/computed'
-    requirement = 'The system shall error in non-optimized modes if material dependencies for finite volume computations are not satisfied.'
+    requirement = 'The system shall allow a finite volume object to consume a material property that depends on another material property that is computed in a material that couples in a finite element variable.'
+    prereq = coupled-gold
+    issues = '#16809'
+    ad_indexing_type = 'global'
+  []
+  [custom_functor_props]
+    type = Exodiff
+    exodiff = custom-functor-props_out.e
+    input = custom-functor-props.i
+    ad_indexing_type = 'global'
+    requirement = 'The system shall allow a developer to create custom functor material property templates.'
+    design = 'syntax/Materials/index.md'
+    issues = '#16809'
   []
 []

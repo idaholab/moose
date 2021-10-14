@@ -51,6 +51,7 @@ protected:
 
   MooseVariableFV<Real> & _var;
   const ADVariableValue & _u;
+  const Moose::Functor<ADReal> & _u_functor;
   const unsigned int _qp = 0;
   const Elem * const & _current_elem;
 

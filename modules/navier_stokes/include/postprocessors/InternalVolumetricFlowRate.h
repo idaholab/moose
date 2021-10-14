@@ -11,7 +11,7 @@
 
 // MOOSE includes
 #include "InterfaceIntegralPostprocessor.h"
-#include "FVUtils.h"
+#include "MathFVUtils.h"
 
 /**
  * This postprocessor computes the volumetric flow rate through an internal boundary.
@@ -49,9 +49,7 @@ protected:
   /// Whether an advected material property was supplied in the input
   const bool _advected_mat_prop_supplied;
   /// Material property storing the advected quantity
-  const ADMaterialProperty<Real> & _advected_material_property;
-  /// Material property storing the advected quantity on the neighbor element
-  const ADMaterialProperty<Real> & _advected_material_property_neighbor;
+  const Moose::Functor<ADReal> & _advected_material_property;
 
   /// The interpolation method to use for the advected quantity
   Moose::FV::InterpMethod _advected_interp_method;

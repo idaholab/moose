@@ -26,12 +26,12 @@ INSFVEnergyTimeDerivative::validParams()
 }
 
 INSFVEnergyTimeDerivative::INSFVEnergyTimeDerivative(const InputParameters & params)
-  : FVTimeKernel(params), _rho(getParam<Real>("rho")), _cp(getADMaterialProperty<Real>("cp_name"))
+  : FVTimeKernel(params), _rho(getParam<Real>("rho")), _cp(getFunctor<ADReal>("cp_name"))
 {
 }
 
 ADReal
 INSFVEnergyTimeDerivative::computeQpResidual()
 {
-  return _rho * _cp[_qp] * FVTimeKernel::computeQpResidual();
+  return _rho * _cp(_current_elem) * FVTimeKernel::computeQpResidual();
 }

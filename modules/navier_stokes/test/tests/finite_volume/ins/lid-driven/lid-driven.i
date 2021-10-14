@@ -60,7 +60,7 @@ rho=1
     pressure = pressure
     u = u
     v = v
-    mu = ${mu}
+    mu = 'mu'
     rho = ${rho}
   []
   [mean_zero_pressure]
@@ -76,7 +76,7 @@ rho=1
     pressure = pressure
     u = u
     v = v
-    mu = ${mu}
+    mu = 'mu'
     rho = ${rho}
   []
 
@@ -100,7 +100,7 @@ rho=1
     pressure = pressure
     u = u
     v = v
-    mu = ${mu}
+    mu = 'mu'
     rho = ${rho}
   []
 
@@ -148,6 +148,11 @@ rho=1
     v = 'v'
     pressure = 'pressure'
     rho = ${rho}
+  []
+  [mu]
+    type = ADGenericConstantFunctorMaterial
+    prop_names = 'mu'
+    prop_values = '${mu}'
   []
 []
 

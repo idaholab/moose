@@ -1349,6 +1349,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
       setscalar(MultiAppName, string);
       setscalar(OutputName, string);
       setscalar(MaterialPropertyName, string);
+      setscalar(MooseFunctorName, string);
       setscalar(MaterialName, string);
       setscalar(DistributionName, string);
       setscalar(SamplerName, string);
@@ -1409,6 +1410,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
       setvector(VectorPostprocessorName, string);
       setvector(OutputName, string);
       setvector(MaterialPropertyName, string);
+      setvector(MooseFunctorName, string);
       setvector(MaterialName, string);
       setvector(DistributionName, string);
       setvector(SamplerName, string);
@@ -1456,6 +1458,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
       setvectorvector(MarkerName);
       setvectorvector(OutputName);
       setvectorvector(MaterialPropertyName);
+      setvectorvector(MooseFunctorName);
       setvectorvector(MaterialName);
       setvectorvector(DistributionName);
       setvectorvector(SamplerName);

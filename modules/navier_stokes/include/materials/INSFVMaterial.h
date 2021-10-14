@@ -9,9 +9,9 @@
 
 #pragma once
 
-#include "Material.h"
+#include "FunctorMaterial.h"
 
-class INSFVMaterial : public Material
+class INSFVMaterial : public FunctorMaterial
 {
 public:
   static InputParameters validParams();
@@ -19,41 +19,36 @@ public:
   INSFVMaterial(const InputParameters & parameters);
 
 protected:
-  void computeQpProperties() override;
-
   /// x-component velocity
-  const ADVariableValue & _u_vel;
+  const MooseVariableFVReal & _u_vel;
 
   /// y-component velocity
-  const ADVariableValue & _v_vel;
+  const MooseVariableFVReal * const _v_vel;
 
   /// z-component velocity
-  const ADVariableValue & _w_vel;
+  const MooseVariableFVReal * const _w_vel;
 
   /// pressure variable
-  const ADVariableValue & _p_var;
+  const MooseVariableFVReal & _p_var;
 
   /// The velocity as a vector
-  ADMaterialProperty<RealVectorValue> & _velocity;
+  FunctorMaterialProperty<ADRealVectorValue> & _velocity;
 
   /// The density times the x-velocity
-  ADMaterialProperty<Real> & _rho_u;
+  FunctorMaterialProperty<ADReal> & _rho_u;
 
   /// The density times the y-velocity
-  ADMaterialProperty<Real> & _rho_v;
+  FunctorMaterialProperty<ADReal> & _rho_v;
 
   /// The density times the z-velocity
-  ADMaterialProperty<Real> & _rho_w;
-
-  /// The pressure material property
-  ADMaterialProperty<Real> & _p;
+  FunctorMaterialProperty<ADReal> & _rho_w;
 
   /// density
-  const Real & _rho;
+  const Moose::Functor<ADReal> & _rho;
 
   const bool _has_temperature;
 
-  const ADVariableValue * const _temperature;
-  const ADMaterialProperty<Real> * const _cp;
-  ADMaterialProperty<Real> * const _rho_cp_temp;
+  const MooseVariableFVReal * const _temperature;
+  const Moose::Functor<ADReal> * const _cp;
+  FunctorMaterialProperty<ADReal> * const _rho_cp_temp;
 };

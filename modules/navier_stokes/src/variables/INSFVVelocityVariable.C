@@ -10,6 +10,7 @@
 #include "INSFVVelocityVariable.h"
 #include "FaceInfo.h"
 #include "ADReal.h"
+#include "MathFVUtils.h"
 #include "FVUtils.h"
 #include "MooseError.h"
 #include "SubProblem.h"

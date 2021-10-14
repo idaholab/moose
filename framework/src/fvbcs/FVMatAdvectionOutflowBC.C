@@ -34,14 +34,11 @@ FVMatAdvectionOutflowBC::validParams()
 
 FVMatAdvectionOutflowBC::FVMatAdvectionOutflowBC(const InputParameters & params)
   : FVFluxBC(params),
-    _vel_elem(getADMaterialProperty<RealVectorValue>("vel")),
-    _vel_neighbor(getNeighborADMaterialProperty<RealVectorValue>("vel")),
-    _adv_quant_elem(isParamValid("advected_quantity")
-                        ? getADMaterialProperty<Real>("advected_quantity").get()
-                        : _u),
-    _adv_quant_neighbor(isParamValid("advected_quantity")
-                            ? getNeighborADMaterialProperty<Real>("advected_quantity").get()
-                            : _u_neighbor)
+    _vel(getFunctor<ADRealVectorValue>("vel")),
+    _adv_quant(
+        isParamValid("advected_quantity")
+            ? static_cast<const Moose::Functor<ADReal> &>(getFunctor<ADReal>("advected_quantity"))
+            : static_cast<const Moose::Functor<ADReal> &>(variable()))
 {
   using namespace Moose::FV;
 
@@ -58,19 +55,23 @@ FVMatAdvectionOutflowBC::FVMatAdvectionOutflowBC(const InputParameters & params)
 ADReal
 FVMatAdvectionOutflowBC::computeQpResidual()
 {
-  ADReal adv_quant_boundary;
-
   using namespace Moose::FV;
 
+  ADRealVectorValue v;
+  ADReal adv_quant_boundary;
+
+  const auto elem_face = elemFromFace();
+  const auto neighbor_face = neighborFromFace();
+
   // Currently only Average is supported for the velocity
-  interpolate(InterpMethod::Average, _v, _vel_elem[_qp], _vel_neighbor[_qp], *_face_info, true);
+  interpolate(InterpMethod::Average, v, _vel(elem_face), _vel(neighbor_face), *_face_info, true);
 
   interpolate(_advected_interp_method,
               adv_quant_boundary,
-              _adv_quant_elem[_qp],
-              _adv_quant_neighbor[_qp],
-              _v,
+              _adv_quant(elem_face),
+              _adv_quant(neighbor_face),
+              v,
               *_face_info,
               true);
-  return _normal * _v * adv_quant_boundary;
+  return _normal * v * adv_quant_boundary;
 }

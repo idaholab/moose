@@ -481,6 +481,12 @@ public:
                                       const FaceInfo & fi,
                                       const ADReal & elem_value) const;
 
+  using FunctorArg = typename Moose::ADType<OutputType>::type;
+  using typename Moose::Functor<FunctorArg>::FaceArg;
+  using typename Moose::Functor<FunctorArg>::ElemFromFaceArg;
+  using typename Moose::Functor<FunctorArg>::ValueType;
+  ADReal getInternalFaceValue(const FaceArg & face) const;
+
 protected:
   /**
    * @return whether \p fi is an internal face for this variable
@@ -505,6 +511,14 @@ protected:
   bool isExtrapolatedBoundaryFace(const FaceInfo & fi) const;
 
 private:
+  using MooseVariableField<OutputType>::evaluate;
+  ValueType evaluate(const Elem * const & elem, unsigned int) const override final
+  {
+    return getElemValue(elem);
+  }
+  ValueType evaluate(const ElemFromFaceArg & elem_from_face, unsigned int) const override final;
+  ValueType evaluate(const FaceArg & face, unsigned int) const override final;
+
   /**
    * @return the extrapolated value on the boundary face associated with \p fi
    */

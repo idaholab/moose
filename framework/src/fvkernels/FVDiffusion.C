@@ -16,15 +16,13 @@ FVDiffusion::validParams()
 {
   InputParameters params = FVFluxKernel::validParams();
   params.addClassDescription("Computes residual for diffusion operator for finite volume method.");
-  params.addRequiredParam<MaterialPropertyName>("coeff", "diffusion coefficient");
+  params.addRequiredParam<MooseFunctorName>("coeff", "diffusion coefficient");
   params.set<unsigned short>("ghost_layers") = 2;
   return params;
 }
 
 FVDiffusion::FVDiffusion(const InputParameters & params)
-  : FVFluxKernel(params),
-    _coeff_elem(getADMaterialProperty<Real>("coeff")),
-    _coeff_neighbor(getNeighborADMaterialProperty<Real>("coeff"))
+  : FVFluxKernel(params), _coeff(getFunctor<ADReal>("coeff"))
 {
 }
 
@@ -36,13 +34,8 @@ FVDiffusion::computeQpResidual()
   // Eventually, it will be nice to offer automatic-switching triggered by
   // input parameters to change between different interpolation methods for
   // this.
-  ADReal k;
-  interpolate(Moose::FV::InterpMethod::Average,
-              k,
-              _coeff_elem[_qp],
-              _coeff_neighbor[_qp],
-              *_face_info,
-              true);
+  const auto k = _coeff(std::make_tuple(
+      _face_info, Moose::FV::LimiterType::CentralDifference, true, faceArgSubdomains()));
 
   return -1 * k * dudn;
 }

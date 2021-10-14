@@ -17,6 +17,7 @@ namespace Moose
 {
 namespace FV
 {
+template <typename>
 class Limiter;
 }
 }
@@ -32,8 +33,8 @@ protected:
 
   const RealVectorValue _velocity;
 
-  std::unique_ptr<Moose::FV::Limiter> _limiter;
-  std::unique_ptr<Moose::FV::Limiter> _cd_limiter;
+  std::unique_ptr<Moose::FV::Limiter<ADReal>> _limiter;
+  std::unique_ptr<Moose::FV::Limiter<ADReal>> _cd_limiter;
 
   const ADVariableGradient & _grad_u_elem;
   const ADVariableGradient & _grad_u_neighbor;

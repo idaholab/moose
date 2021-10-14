@@ -74,6 +74,7 @@ endif
 # machine in question (from config.guess, i.e. @host@ in
 # contrib/utils/Make.common.in) and the $(METHOD).
 obj-suffix := $(libmesh_HOST).$(METHOD).lo
+no-method-obj-suffix := $(libmesh_HOST).lo
 
 # The libtool script used by libmesh is in different places depending on
 # whether you are using "installed" or "uninstalled" libmesh.
@@ -118,6 +119,11 @@ pcre%.$(obj-suffix) : pcre%.cc
 	@echo "Compiling C++ (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile --quiet \
           $(libmesh_CXX) $(libmesh_CPPFLAGS) $(CXXFLAGS) $(libmesh_CXXFLAGS) $(ADDITIONAL_CPPFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -w -DHAVE_CONFIG_H -MMD -MP -MF $@.d -MT $@ -c $< -o $@
+
+gtest%.$(no-method-obj-suffix) : gtest%.cc
+	@echo "Compiling C++ "$<"..."
+	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile --quiet \
+          $(libmesh_CXX) $(ADDITIONAL_CPPFLAGS) $(CXXFLAGS) -w -MMD -MP -MF $@.d -MT $@ -c $< -o $@
 
 %.$(obj-suffix) : %.cc
 	@echo "Compiling C++ (in "$(METHOD)" mode) "$<"..."

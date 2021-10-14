@@ -1431,6 +1431,9 @@ private:
   template <typename T>
   const T & getDefaultNodalValue(const std::string & var_name, unsigned int comp = 0) const;
 
+  template <typename T>
+  const Moose::Functor<T> & getDefaultFunctor(const std::string & var_name) const;
+
   /// Maximum qps for any element in this system
   unsigned int _coupleable_max_qps;
 
@@ -1447,7 +1450,6 @@ private:
   /// Whether the MooseObject is a finite volume object
   const bool _is_fv;
 
-private:
   const MooseObject * const _obj;
 };
 

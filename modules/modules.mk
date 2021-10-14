@@ -31,6 +31,7 @@ ifeq ($(ALL_MODULES),yes)
         POROUS_FLOW                 := yes
         RAY_TRACING                 := yes
         RDG                         := yes
+				REACTOR                     := yes
         RICHARDS                    := yes
         STOCHASTIC_TOOLS            := yes
         TENSOR_MECHANICS            := yes
@@ -78,7 +79,7 @@ ifeq ($(HEAT_CONDUCTION),yes)
 endif
 
 # The master list of all moose modules
-MODULE_NAMES := "chemical_reactions contact external_petsc_solver fluid_properties fsi functional_expansion_tools geochemistry heat_conduction level_set misc navier_stokes peridynamics phase_field porous_flow ray_tracing rdg richards stochastic_tools tensor_mechanics xfem"
+MODULE_NAMES := "chemical_reactions contact external_petsc_solver fluid_properties fsi functional_expansion_tools geochemistry heat_conduction level_set misc navier_stokes peridynamics phase_field porous_flow ray_tracing rdg reactor richards stochastic_tools tensor_mechanics xfem"
 
 ################################################################################
 ########################## MODULE REGISTRATION #################################
@@ -145,6 +146,13 @@ ifeq ($(RDG),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/rdg
   APPLICATION_NAME   := rdg
   SUFFIX             := rdg
+  include $(FRAMEWORK_DIR)/app.mk
+endif
+
+ifeq ($(REACTOR),yes)
+  APPLICATION_DIR    := $(MOOSE_DIR)/modules/reactor
+  APPLICATION_NAME   := reactor
+  SUFFIX             := rct
   include $(FRAMEWORK_DIR)/app.mk
 endif
 
