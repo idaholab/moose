@@ -101,7 +101,18 @@ MultiAppCommandLineControl::initialSetup()
 void
 MultiAppCommandLineControl::execute()
 {
-  std::vector<std::string> cli_args;
+  if (_orig_args.empty())
+  {
+    _orig_args = getControllableValueByName<std::vector<std::string>>(
+        "MultiApp", _multi_app->name(), "cli_args", true);
+    if (_orig_args.size() == 0)
+      _orig_args.push_back("");
+    else if (_param_names.size())
+      for (auto & clia : _orig_args)
+        clia += ";";
+  }
+
+  std::vector<std::string> cli_args = _orig_args;
 
   // To avoid storing duplicated param_names for each sampler, we store only param_names once in
   // "cli_args".
@@ -132,7 +143,8 @@ MultiAppCommandLineControl::execute()
     oss << _param_names[col];
   }
 
-  cli_args.push_back(oss.str());
+  for (auto & clia : cli_args)
+    clia += oss.str();
 
   setControllableValueByName<std::vector<std::string>>(
       "MultiApp", _multi_app->name(), "cli_args", cli_args);

@@ -26,6 +26,13 @@ public:
   virtual bool solveStep(Real dt, Real target_time, bool auto_advance = true) override;
   virtual void preTransfer(Real dt, Real target_time) override;
 
+  /**
+   * Helper for inserting row data into commandline arguments
+   * Used here and in SamplerTransientMultiApp
+   */
+  static std::string sampledCommandLineArgs(const std::vector<Real> & row,
+                                            const std::vector<std::string> & full_args_name);
+
 protected:
   /// Sampler to utilize for creating MultiApps
   Sampler & _sampler;
