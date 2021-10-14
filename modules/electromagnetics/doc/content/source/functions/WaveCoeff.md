@@ -5,7 +5,8 @@
 ## Overview
 
 !style halign=left
-This object provides a ready-to-use coefficient for the electric field Helmholtz wave equation problem, specifically a coefficient function of the form
+This object provides a ready-to-use coefficient for the electric field Helmholtz
+wave equation problem, specifically a coefficient function of the form
 
 \begin{equation}
   f(\mathbf{r}) = k^2 \mu_r \epsilon_r
@@ -13,18 +14,16 @@ This object provides a ready-to-use coefficient for the electric field Helmholtz
 
 where
 
-- $k$ is the wave number ($2 \pi / \lambda$ where $\lambda$ is the wavelength),
+- $k$ is the complex wave number ($2 \pi / \lambda$ where $\lambda$ is the wavelength),
 - $\epsilon_r$ is the complex relative electric permittivity, and
 - $\mu_r$ is the complex relative magnetic permeability.
 
+Note that all of these parameters (real and imaginary parts) can be provided by
+the user as functions.
+
 ## Example Input File Syntax
 
-!alert warning title=This is not currently tested
-The WaveCoeff object is not currently used in any tested input files. This
-section of the documentation will be updated when this occurs. See a selection of
-untested input files where this is used at the bottom of this page.
-
-!! TODO: add a test to fix this up!
+!listing scalar_complex_helmholtz.i block=Functions/ASquaredMinusBSquared
 
 !syntax parameters /Functions/WaveCoeff
 

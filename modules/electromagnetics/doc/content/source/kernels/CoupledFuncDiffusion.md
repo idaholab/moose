@@ -19,7 +19,7 @@ where
 
 ## Example Input File Syntax
 
-!listing coupled_diffusion_helmholtz.i block=Kernels/coupledLaplacian_real
+!listing scalar_complex_helmholtz.i block=Kernels/coupledLaplacian_real
 
 !syntax parameters /Kernels/CoupledFuncDiffusion
 

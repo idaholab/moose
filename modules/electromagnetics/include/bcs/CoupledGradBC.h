@@ -1,8 +1,8 @@
 #pragma once
 
-#include "IntegratedBC.h"
+#include "ADIntegratedBC.h"
 
-class CoupledGradBC : public IntegratedBC
+class CoupledGradBC : public ADIntegratedBC
 {
 public:
   static InputParameters validParams();
@@ -10,8 +10,7 @@ public:
   CoupledGradBC(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual() override;
-  virtual Real computeQpJacobian() override;
+  virtual ADReal computeQpResidual() override;
 
 private:
   Real _sign;
@@ -20,5 +19,5 @@ private:
 
   const Function & _func;
 
-  const VariableGradient & _coupled_grad;
+  const ADVariableGradient & _coupled_grad;
 };

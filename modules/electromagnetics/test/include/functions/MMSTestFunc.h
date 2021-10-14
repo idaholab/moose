@@ -10,12 +10,11 @@
 #pragma once
 
 #include "Function.h"
-#include "FunctionInterface.h"
 
 /**
- *  Function of RHS for manufactured solution in spatial_constant_helmholtz test
+ *  Function of RHS for manufactured solution in scalar_complex_helmholtz test
  */
-class MMSTestFunc : public Function, public FunctionInterface
+class MMSTestFunc : public Function
 {
 public:
   static InputParameters validParams();
@@ -26,17 +25,11 @@ public:
 protected:
   Real _length;
 
-  const Function & _a;
-  const Function & _b;
+  const Real _g_0_real;
+  const Real _g_0_imag;
 
-  Real _d;
-  Real _h;
+  const Real _g_l_real;
+  const Real _g_l_imag;
 
-  Real _g_0_real;
-  Real _g_0_imag;
-
-  Real _g_l_real;
-  Real _g_l_imag;
-
-  MooseEnum _component;
+  const MooseEnum _component;
 };

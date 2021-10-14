@@ -4,7 +4,7 @@
 
 ## Example Input File Syntax
 
-!listing coupled_diffusion_helmholtz.i block=Kernels/coupledField_real
+!listing scalar_complex_helmholtz.i block=Kernels/coupledField_real
 
 !syntax parameters /Kernels/CoupledCoeffField
 

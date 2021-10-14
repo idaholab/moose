@@ -1,13 +1,18 @@
-# problem: -(ku')' - c^2 * u' = 0 , 0 < x < L, u: R -> C
+# problem: -(cu')' - k^2 * u = -F , 0 < x < L, u: R -> C
 # u(x=0) = g0 , u(x=L) = gL
-# c = a + jb , k = d + jh
-# g0 = g0_real + jg0_imaginary, gL = gL_real + jgL_imaginary
+# k = a + jb
+#     a = a(x) =  2 * (1 + x/L)
+#     b = b(x) =      (1 + x/L)
+# c = d + jh
+#     d = d(x) = 12 * (1 + x/L)^2
+#     h = h(x) =  4 * (1 + x/L)^2
+# L = 10
 
 [Mesh]
   type = GeneratedMesh
   dim = 1
   xmin = 0
-  xmax = 1
+  xmax = 10
   nx = 100
 []
 
@@ -24,32 +29,62 @@
 
 [Functions]
   [./ASquaredMinusBSquared]
-    type = ParsedFunction
-    value = '15^2 - 7^2'
+    type = WaveCoeff
+    k_real = '2 * (1 + x/10)'
+    k_imag = '(1 + x/10)'
+    eps_rel_real = 1
+    eps_rel_imag = 0
+    mu_rel_real = 1
+    mu_rel_imag = 0
+    component = real
   [../]
   [./2TimesAB]
+    type = WaveCoeff
+    k_real = '2 * (1 + x/10)'
+    k_imag = '(1 + x/10)'
+    eps_rel_real = 1
+    eps_rel_imag = 0
+    mu_rel_real = 1
+    mu_rel_imag = 0
+    component = imaginary
+  [../]
+  [./d_func]
     type = ParsedFunction
-    value = '2*15*7'
+    value = '12 * (1 + x/10)^2'
   [../]
-  [./d]
-    type = ConstantFunction
-    value = 1
+  [./h_func]
+    type = ParsedFunction
+    value = '4 * (1 + x/10)^2'
   [../]
-  [./h]
-    type = ConstantFunction
-    value = 1
+  [./RHS_real]
+    type = MMSTestFunc
+    L = 10
+    g0_real = 1
+    g0_imag = -1
+    gL_real = 0
+    gL_imag = 0
+    component = real
+  [../]
+  [./RHS_imag]
+    type = MMSTestFunc
+    L = 10
+    g0_real = 1
+    g0_imag = -1
+    gL_real = 0
+    gL_imag = 0
+    component = imaginary
   [../]
 []
 
 [Kernels]
   [./laplacian_real]
     type = FuncDiffusion
-    func = d
+    func = d_func
     variable = u_real
   [../]
   [./coupledLaplacian_real]
     type = CoupledFuncDiffusion
-    func = h
+    func = h_func
     sign = -1.0
     coupled_field = u_imag
     variable = u_real
@@ -67,14 +102,19 @@
     sign = 1.0
     variable = u_real
   [../]
+  [./bodyForce_real]
+    type = BodyForce
+    function = RHS_real
+    variable = u_real
+  [../]
   [./laplacian_imag]
     type = FuncDiffusion
-    func = d
+    func = d_func
     variable = u_imag
   [../]
   [./coupledLaplacian_imag]
     type = CoupledFuncDiffusion
-    func = h
+    func = h_func
     sign = 1.0
     coupled_field = u_real
     variable = u_imag
@@ -92,24 +132,29 @@
     sign = -1.0
     variable = u_imag
   [../]
+  [./bodyForce_imag]
+    type = BodyForce
+    function = RHS_imag
+    variable = u_imag
+  [../]
 []
 
 [BCs]
   [./left_real]
     type = DirichletBC
-    value = 0
+    value = 1
     boundary = left
     variable = u_real
   [../]
   [./left_imag]
     type = DirichletBC
-    value = 1
+    value = -1
     boundary = left
     variable = u_imag
   [../]
   [./right_real]
     type = DirichletBC
-    value = 1
+    value = 0
     boundary = right
     variable = u_real
   [../]
