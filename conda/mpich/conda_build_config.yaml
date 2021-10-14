@@ -150,10 +150,21 @@ yaml:
   - 0.2.5 h516909a_0           # [linux]
   - 0.2.5 haf1e3a3_0           # [osx]
 
+sympy:
+  - 1.8 py39hecd8cb5_0         # [osx]
+  - 1.8 py38hecd8cb5_0         # [osx]
+  - 1.8 py37hecd8cb5_0         # [osx]
+  - 1.8 py36hecd8cb5_0         # [osx]
+  - 1.8 py39h6ffa863_0         # [linux]
+  - 1.8 py38h6ffa863_0         # [linux]
+  - 1.8 py37h6ffa863_0         # [linux]
+  - 1.8 py36h6ffa863_0         # [linux]
+
 zip_keys:
   - python
   - vtk
   - numpy
+  - sympy
   - pyqt
   - matplotlib
   - pandas
