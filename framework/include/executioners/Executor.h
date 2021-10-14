@@ -135,7 +135,7 @@ public:
   /// invoke child/sub executors - by calling their exec function.
   Result exec();
 
-  virtual void execute() override {}
+  virtual void execute() override final {}
 
   /// Executors need to return a Result object describing how execution went -
   /// rather than constructing Result objects directly, the newResult function
