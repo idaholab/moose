@@ -220,15 +220,27 @@ private:
   std::map<std::string, hit::Node *> _have;
 };
 
-std::pair<std::string, std::unique_ptr<std::string>>
+struct Pattern
+{
+  std::string param, value;
+  bool negate;
+};
+
+Pattern
 splitParamValue(const std::string & pv)
 {
   auto equal_sign = pv.find('=');
-  return std::make_pair(
-      std::string(pv, 0, equal_sign),
-      std::unique_ptr<std::string>(equal_sign == std::string::npos
-                                       ? nullptr
-                                       : new std::string(pv, equal_sign + 1, std::string::npos)));
+  auto not_equal_sign = pv.find("!=");
+
+  if (equal_sign == std::string::npos && not_equal_sign == std::string::npos)
+    return Pattern{pv, "*", false};
+
+  if (not_equal_sign != std::string::npos)
+    return Pattern{std::string(pv, 0, not_equal_sign),
+                   std::string(pv, not_equal_sign + 2, std::string::npos),
+                   true};
+  return Pattern{
+      std::string(pv, 0, equal_sign), std::string(pv, equal_sign + 1, std::string::npos), false};
 }
 
 int
@@ -266,14 +278,13 @@ findParam(int argc, char ** argv)
   const bool invert = flags.have("v");
 
   // parse main search pattern
-  auto param_value = splitParamValue(case_insensitive ? hit::lower(positional[0]) : positional[0]);
+  auto pattern = splitParamValue(case_insensitive ? hit::lower(positional[0]) : positional[0]);
 
   // get additional parameters
   auto pargs = flags.vecVal("p");
-  std::vector<std::pair<std::string, std::unique_ptr<std::string>>> additional_parameters;
+  std::vector<Pattern> additional_parameters;
   for (auto & p : pargs)
-    additional_parameters.push_back(
-        std::move(splitParamValue(case_insensitive ? hit::lower(p) : p)));
+    additional_parameters.push_back(splitParamValue(case_insensitive ? hit::lower(p) : p));
 
   std::size_t n_matches = 0;
   std::size_t n_misses = 0;
@@ -306,14 +317,13 @@ findParam(int argc, char ** argv)
 
     // search parameters
     for (const auto & p : params)
-      if (globCompare(case_insensitive ? hit::lower(p.first) : p.first, param_value.first))
+      if (globCompare(case_insensitive ? hit::lower(p.first) : p.first, pattern.param))
       {
         auto n = p.second;
         auto v = n->strVal();
 
         // if a value was given, make sure it matches, too
-        if (param_value.second &&
-            !globCompare(case_insensitive ? hit::lower(v) : v, *param_value.second))
+        if (globCompare(case_insensitive ? hit::lower(v) : v, pattern.value) == pattern.negate)
           continue;
 
         // if aditional -p arguments were given, check those, too
@@ -326,19 +336,18 @@ findParam(int argc, char ** argv)
           {
             // look for the parameter name in the parent (and if it exists and a value was given
             // also match that)
-            auto other_match = parent->find(ap.first);
-            if (!other_match ||
-                (ap.second && !globCompare(case_insensitive ? hit::lower(other_match->strVal())
-                                                            : other_match->strVal(),
-                                           *ap.second)))
+            auto other_match = parent->find(ap.param);
+            if (!other_match || globCompare(case_insensitive ? hit::lower(other_match->strVal())
+                                                             : other_match->strVal(),
+                                            ap.value) == ap.negate)
             {
               ap_match = false;
               break;
             }
           }
-          else
+          else if (!ap.negate)
           {
-            // no parent exists, so this cannot be a match
+            // no parent exists, so this cannot be a match, unless this is a != pattern
             ap_match = false;
             break;
           }
