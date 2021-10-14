@@ -13,7 +13,7 @@
 
 #include <fstream>
 
-registerMooseObject("TensorMechanicsApp", ElementPropertyReadFile);
+registerMooseObject("MooseApp", ElementPropertyReadFile);
 
 InputParameters
 ElementPropertyReadFile::validParams()
@@ -21,22 +21,33 @@ ElementPropertyReadFile::validParams()
   InputParameters params = GeneralUserObject::validParams();
   params.addClassDescription("User Object to read property data from an external file and assign "
                              "to elements.");
-  params.addParam<FileName>("prop_file_name", "", "Name of the property file name");
+  params.addRequiredParam<FileName>("prop_file_name", "Name of the property file name");
   params.addRequiredParam<unsigned int>("nprop", "Number of tabulated property values");
-  params.addParam<unsigned int>("ngrain", 0, "Number of grains");
+  params.addParam<unsigned int>(
+      "nvoronoi", 0, "Number of voronoi tesselations/grains/nearest neighbor regions");
+  params.addDeprecatedParam<unsigned int>(
+      "ngrain", "Number of grains.", "ngrain is deprecated, use nvoronoi instead");
   params.addParam<unsigned int>("nblock", 0, "Number of blocks");
-  params.addParam<MooseEnum>("read_type",
-                             MooseEnum("element grain block"),
-                             "Type of property distribution: element:element by element property "
-                             "grain:voronoi grain structure "
-                             "block:by mesh block");
+  params.addRequiredParam<MooseEnum>("read_type",
+                                     MooseEnum("element voronoi block"),
+                                     "Type of property distribution: "
+                                     "element:by element "
+                                     "voronoi:nearest neighbor / voronoi grain structure "
+                                     "block:by mesh block");
+  params.addParam<bool>("use_random_voronoi",
+                        false,
+                        "Wether to generate random positions for the Voronoi tesselation");
   params.addParam<unsigned int>("rand_seed", 2000, "random seed");
   params.addParam<MooseEnum>(
       "rve_type",
       MooseEnum("periodic none", "none"),
+<<<<<<< HEAD
       "Periodic or non-periodic grain distribution: Default is non-periodic");
   params.addParam<bool>(
       "use_zero_based_block_indexing", true, "Are the blocks numbered starting at zero?");
+=======
+      "Periodic or non-periodic voronoi distribution: Default is non-periodic");
+>>>>>>> 36924d4ccc (Add a function to retrieve values from the CSV UO, adapt CSV property reader UO to framework, refs #19109)
   return params;
 }
 
@@ -45,14 +56,17 @@ ElementPropertyReadFile::ElementPropertyReadFile(const InputParameters & paramet
     _prop_file_name(getParam<FileName>("prop_file_name")),
     _reader(_prop_file_name),
     _nprop(getParam<unsigned int>("nprop")),
-    _ngrain(getParam<unsigned int>("ngrain")),
+    _nvoronoi(getParam<unsigned int>("nvoronoi")),
     _nblock(getParam<unsigned int>("nblock")),
     _read_type(getParam<MooseEnum>("read_type").getEnum<ReadType>()),
+    _use_random_tesselation(getParam<bool>("use_random_voronoi")),
     _rand_seed(getParam<unsigned int>("rand_seed")),
     _rve_type(getParam<MooseEnum>("rve_type")),
     _block_zero(getParam<bool>("use_zero_based_block_indexing")),
     _mesh(_fe_problem.mesh())
 {
+  if (!_use_random_tesselation && parameters.isParamSetByUser("rand_seed"))
+    paramError("rand_seed", "Random seeds should only be provided if random tesselation is desired");
   _nelem = _mesh.nElem();
 
   for (unsigned int i = 0; i < LIBMESH_DIM; i++)
@@ -84,10 +98,10 @@ ElementPropertyReadFile::readData()
       nobjects = _nelem;
       break;
 
-    case ReadType::GRAIN:
-      if (_ngrain <= 0)
-        paramError("ngrain", "Provide non-zero number of grains.");
-      nobjects = _ngrain;
+    case ReadType::VORONOI:
+      if (_nvoronoi <= 0)
+        paramError("nvoronoi", "Provide non-zero number of voronoi tesselations/grains.");
+      nobjects = _nvoronoi;
       break;
 
     case ReadType::BLOCK:
@@ -101,22 +115,39 @@ ElementPropertyReadFile::readData()
   if (_reader.getData().size() < nobjects)
     mooseError(
         "Data in ", _prop_file_name, " does not have enough rows for ", nobjects, " objects.");
+  if (_reader.getData().size() > nobjects)
+    mooseWarning("Data size in ",
+                 _prop_file_name,
+                 " is larger than ",
+                 nobjects,
+                 " objects, some data will not be used.");
   for (unsigned int i = 0; i < nobjects; i++)
     if (_reader.getData(i).size() < _nprop)
       mooseError("Row ", i, " in ", _prop_file_name, " has number of data less than ", _nprop);
 
-  if (_read_type == ReadType::GRAIN)
-    initGrainCenterPoints();
+  if (_read_type == ReadType::VORONOI)
+    initVoronoiCenterPoints();
 }
 
 void
-ElementPropertyReadFile::initGrainCenterPoints()
+ElementPropertyReadFile::initVoronoiCenterPoints()
 {
-  _center.resize(_ngrain);
-  MooseRandom::seed(_rand_seed);
-  for (unsigned int i = 0; i < _ngrain; i++)
-    for (unsigned int j = 0; j < LIBMESH_DIM; j++)
-      _center[i](j) = _bottom_left(j) + MooseRandom::rand() * _range(j);
+  // Generate a random tesselation
+  if (_use_random_tesselation)
+  {
+    _center.resize(_nvoronoi);
+    MooseRandom::seed(_rand_seed);
+    for (unsigned int i = 0; i < _nvoronoi; i++)
+      for (unsigned int j = 0; j < LIBMESH_DIM; j++)
+        _center[i](j) = _bottom_left(j) + MooseRandom::rand() * _range(j);
+  }
+  // Read tesselation from file
+  else
+  {
+    for (unsigned int i = 0; i < _nvoronoi; i++)
+      for (unsigned int j = 0; j < LIBMESH_DIM; j++)
+        _reader.getData(i)[j];
+  }
 }
 
 Real
@@ -136,8 +167,8 @@ ElementPropertyReadFile::getData(const Elem * elem, unsigned int prop_num) const
       data = getElementData(elem, prop_num);
       break;
 
-    case ReadType::GRAIN:
-      data = getGrainData(elem, prop_num);
+    case ReadType::VORONOI:
+      data = getVoronoiData(elem, prop_num);
       break;
 
     case ReadType::BLOCK:
@@ -174,13 +205,13 @@ ElementPropertyReadFile::getBlockData(const Elem * elem, unsigned int prop_num) 
 }
 
 Real
-ElementPropertyReadFile::getGrainData(const Elem * elem, unsigned int prop_num) const
+ElementPropertyReadFile::getVoronoiData(const Elem * elem, unsigned int prop_num) const
 {
   Point centroid = elem->vertex_average();
   Real min_dist = _max_range;
-  unsigned int igrain = 0;
+  unsigned int ivoronoi = 0;
 
-  for (unsigned int i = 0; i < _ngrain; ++i)
+  for (unsigned int i = 0; i < _nvoronoi; ++i)
   {
     Real dist = 0.0;
     switch (_rve_type)
@@ -201,10 +232,10 @@ ElementPropertyReadFile::getGrainData(const Elem * elem, unsigned int prop_num) 
     if (dist < min_dist)
     {
       min_dist = dist;
-      igrain = i;
+      ivoronoi = i;
     }
   }
-  return _reader.getData(igrain)[prop_num];
+  return _reader.getData(ivoronoi)[prop_num];
 }
 
 // TODO: this should probably use the built-in min periodic distance!

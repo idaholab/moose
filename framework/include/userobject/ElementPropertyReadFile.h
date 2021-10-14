@@ -35,36 +35,44 @@ public:
   virtual void finalize() {}
 
   /**
-   * This function reads data from file
+   * This function reads the data from file
    */
   void readData();
 
   /**
-   * This function generates grain center point
+   * This function generates voronoi tesselation center points
    * Presently random generated
    */
-  virtual void initGrainCenterPoints();
+  virtual void initVoronoiCenterPoints();
 
   /**
    * This function assign property data to elements
+   * @param elem the element to get data for
+   * @param prop_num the column index of the property we want to retrieve
    */
-  Real getData(const Elem *, unsigned int) const;
+  Real getData(const Elem * elem, unsigned int prop_num) const;
 
   /**
    * This function assign properties to element read from file with element based properties
+   * @param elem the element to get data for
+   * @param prop_num the column index of the property we want to retrieve
    */
-  Real getElementData(const Elem *, unsigned int) const;
+  Real getElementData(const Elem * elem, unsigned int prop_num) const;
 
   /**
-   * This function assign properties to element read from file with grain  based properties
-   * Grain distribution in the RVE can be Periodic or non-periodic (default)
+   * This function assign properties to element read from file with nearest neighbor / grain based properties
+   * Voronoi centers distribution in the RVE can be Periodic or non-periodic (default)
+   * @param elem the element to get data for
+   * @param prop_num the column index of the property we want to retrieve
    */
-  Real getGrainData(const Elem *, unsigned int) const;
+  Real getVoronoiData(const Elem * elem, unsigned int prop_num) const;
 
   /**
    * This function assigns properties to elements read from file with block  based properties
+   * @param elem the element to get data for
+   * @param prop_num the column index of the property we want to retrieve
    */
-  Real getBlockData(const Elem *, unsigned int) const;
+  Real getBlockData(const Elem * elem, unsigned int prop_num) const;
 
   /**
    * This function calculates minimum distance between 2 points
@@ -73,22 +81,24 @@ public:
   Real minPeriodicDistance(Point, Point) const;
 
 protected:
-  ///Name of file containing property values
-  std::string _prop_file_name;
-  ///Use DelimitedFileReader to read and store data from file
+  /// Name of file containing property values
+  const std::string _prop_file_name;
+  /// Use DelimitedFileReader to read and store data from file
   MooseUtils::DelimitedFileReader _reader;
-  ///Number of properties in a row
-  unsigned int _nprop;
-  ///Number of grains (for property read based on grains)
-  unsigned int _ngrain;
-  ///Number of blocks (for property read based on blocks)
-  unsigned int _nblock;
-  ///Type of read - element, grain, or block
-  const enum class ReadType { ELEMENT, GRAIN, BLOCK } _read_type;
-  ///Random seed - used for generating grain centers
-  unsigned int _rand_seed;
-  ///Type of grain structure - non-periodic default
-  MooseEnum _rve_type;
+  /// Number of properties in a row
+  const unsigned int _nprop;
+  /// Number of grains (for property read based on grains)
+  const unsigned int _nvoronoi;
+  /// Number of blocks (for property read based on blocks)
+  const unsigned int _nblock;
+  /// Type of read - element, grain, or block
+  const enum class ReadType { ELEMENT, VORONOI, BLOCK } _read_type;
+  /// Whether to use a random tesselation for the Voronoi/grain type
+  const bool _use_random_tesselation;
+  /// Random seed - used for generating grain centers
+  const unsigned int _rand_seed;
+  /// Type of voronoi tesselation/grain structure - non-periodic default
+  const MooseEnum _rve_type;
   /// Do the block numbers start with zero or one?
   bool _block_zero;
 

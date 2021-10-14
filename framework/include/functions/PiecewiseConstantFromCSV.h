@@ -9,27 +9,26 @@
 
 #pragma once
 
-#include "PiecewiseTabularBase.h"
+#include "Function.h"
+#include "ElementPropertyReadFile.h"
 
 /**
- * Function which provides a piecewise constant interpolation of a provided (x,y) point data set.
+ * Function which provides a piecewise constant field from a CSV file
  */
-class PiecewiseConstant : public PiecewiseTabularBase
+class PiecewiseConstantFromCSV : public Function
 {
 public:
   static InputParameters validParams();
 
-  PiecewiseConstant(const InputParameters & parameters);
+  PiecewiseConstantFromCSV(const InputParameters & parameters);
 
-  using Function::value;
   /**
    * Get the value of the function (based on time only)
    * \param t The time
    * \param pt The point in space (x,y,z) (unused)
    * \return The value of the function at the specified time
    */
-  virtual Real value(Real t, const Point & p) const override;
-  virtual ADReal value(const ADReal & t, const ADPoint & p) const override;
+  virtual Real value(Real t, const Point & pt) const override;
 
   /**
    * Get the time derivative of the function (based on time only)
@@ -38,10 +37,11 @@ public:
    * \return The time derivative of the function at the specified time
    */
   virtual Real timeDerivative(Real t, const Point & pt) const override;
-  virtual Real integral() const override;
-  virtual Real average() const override;
 
-private:
-  /// Enum for which direction to apply values
-  const enum class Direction { LEFT, RIGHT, LEFT_INCLUSIVE, RIGHT_INCLUSIVE } _direction;
+protected:
+  /// A user object that takes care of reading the CSV file
+  const ElementPropertyReadFile & _read_prop_user_object;
+
+  /// The column number of interest in the CSV file
+  const unsigned int _column_number;
 };
