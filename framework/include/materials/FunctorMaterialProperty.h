@@ -75,22 +75,6 @@ protected:
   ValueType evaluate(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
                      unsigned int state) const override;
 
-  GradientType evaluateGradient(const Elem * const & elem, unsigned int state) const override;
-  GradientType evaluateGradient(const ElemFromFaceArg & elem_from_face,
-                                unsigned int state) const override;
-  GradientType evaluateGradient(const FaceArg & face, unsigned int state) const override;
-  GradientType evaluateGradient(const SingleSidedFaceArg & face, unsigned int state) const override;
-  GradientType evaluateGradient(const ElemQpArg & elem_qp, unsigned int state) const override;
-  GradientType evaluateGradient(const ElemSideQpArg & elem_side_qp,
-                                unsigned int state) const override;
-
-  DotType evaluateDot(const Elem * const & elem, unsigned int state) const override;
-  DotType evaluateDot(const ElemFromFaceArg & elem_from_face, unsigned int state) const override;
-  DotType evaluateDot(const FaceArg & face, unsigned int state) const override;
-  DotType evaluateDot(const SingleSidedFaceArg & face, unsigned int state) const override;
-  DotType evaluateDot(const ElemQpArg & elem_qp, unsigned int state) const override;
-  DotType evaluateDot(const ElemSideQpArg & elem_side_qp, unsigned int state) const override;
-
 private:
   /**
    * Provide a useful error message about lack of functor material property on the provided
@@ -280,90 +264,6 @@ FunctorMaterialPropertyImpl<T>::evaluate(
   return it->second(tqp, state);
 }
 
-template <typename T>
-typename FunctorMaterialPropertyImpl<T>::GradientType
-FunctorMaterialPropertyImpl<T>::evaluateGradient(const Elem * const &, unsigned int) const
-{
-  mooseError("Gradients of functor material properties not implemented");
-}
-
-template <typename T>
-typename FunctorMaterialPropertyImpl<T>::GradientType
-FunctorMaterialPropertyImpl<T>::evaluateGradient(const ElemFromFaceArg &, unsigned int) const
-{
-  mooseError("Gradients of functor material properties not implemented");
-}
-
-template <typename T>
-typename FunctorMaterialPropertyImpl<T>::GradientType
-FunctorMaterialPropertyImpl<T>::evaluateGradient(const FaceArg &, unsigned int) const
-{
-  mooseError("Gradients of functor material properties not implemented");
-}
-
-template <typename T>
-typename FunctorMaterialPropertyImpl<T>::GradientType
-FunctorMaterialPropertyImpl<T>::evaluateGradient(const SingleSidedFaceArg &, unsigned int) const
-{
-  mooseError("Gradients of functor material properties not implemented");
-}
-
-template <typename T>
-typename FunctorMaterialPropertyImpl<T>::GradientType
-FunctorMaterialPropertyImpl<T>::evaluateGradient(const ElemQpArg &, unsigned int) const
-{
-  mooseError("Gradients of functor material properties not implemented");
-}
-
-template <typename T>
-typename FunctorMaterialPropertyImpl<T>::GradientType
-FunctorMaterialPropertyImpl<T>::evaluateGradient(const ElemSideQpArg &, unsigned int) const
-{
-  mooseError("Gradients of functor material properties not implemented");
-}
-
-template <typename T>
-typename FunctorMaterialPropertyImpl<T>::DotType
-FunctorMaterialPropertyImpl<T>::evaluateDot(const Elem * const &, unsigned int) const
-{
-  mooseError("Time derivatives of functor material properties not implemented");
-}
-
-template <typename T>
-typename FunctorMaterialPropertyImpl<T>::DotType
-FunctorMaterialPropertyImpl<T>::evaluateDot(const ElemFromFaceArg &, unsigned int) const
-{
-  mooseError("Time derivatives of functor material properties not implemented");
-}
-
-template <typename T>
-typename FunctorMaterialPropertyImpl<T>::DotType
-FunctorMaterialPropertyImpl<T>::evaluateDot(const FaceArg &, unsigned int) const
-{
-  mooseError("Time derivatives of functor material properties not implemented");
-}
-
-template <typename T>
-typename FunctorMaterialPropertyImpl<T>::DotType
-FunctorMaterialPropertyImpl<T>::evaluateDot(const SingleSidedFaceArg &, unsigned int) const
-{
-  mooseError("Time derivatives of functor material properties not implemented");
-}
-
-template <typename T>
-typename FunctorMaterialPropertyImpl<T>::DotType
-FunctorMaterialPropertyImpl<T>::evaluateDot(const ElemQpArg &, unsigned int) const
-{
-  mooseError("Time derivatives of functor material properties not implemented");
-}
-
-template <typename T>
-typename FunctorMaterialPropertyImpl<T>::DotType
-FunctorMaterialPropertyImpl<T>::evaluateDot(const ElemSideQpArg &, unsigned int) const
-{
-  mooseError("Time derivatives of functor material properties not implemented");
-}
-
 /**
  * This is a wrapper that forwards calls to the implementation,
  * which can be switched out at any time without disturbing references to
@@ -460,57 +360,6 @@ protected:
                      unsigned int state = 0) const override
   {
     return _wrapped->evaluate(tqp, state);
-  }
-  GradientType evaluateGradient(const libMesh::Elem * const & elem,
-                                unsigned int state = 0) const override
-  {
-    return _wrapped->evaluateGradient(elem, state);
-  }
-  GradientType evaluateGradient(const ElemFromFaceArg & elem_from_face,
-                                unsigned int state = 0) const override
-  {
-    return _wrapped->evaluateGradient(elem_from_face, state);
-  }
-  GradientType evaluateGradient(const FaceArg & face, unsigned int state = 0) const override
-  {
-    return _wrapped->evaluateGradient(face, state);
-  }
-  GradientType evaluateGradient(const SingleSidedFaceArg & face,
-                                unsigned int state = 0) const override
-  {
-    return _wrapped->evaluateGradient(face, state);
-  }
-  GradientType evaluateGradient(const ElemQpArg & qp, unsigned int state = 0) const override
-  {
-    return _wrapped->evaluateGradient(qp, state);
-  }
-  GradientType evaluateGradient(const ElemSideQpArg & qp, unsigned int state = 0) const override
-  {
-    return _wrapped->evaluateGradient(qp, state);
-  }
-  DotType evaluateDot(const libMesh::Elem * const & elem, unsigned int state = 0) const override
-  {
-    return _wrapped->evaluateDot(elem, state);
-  }
-  DotType evaluateDot(const ElemFromFaceArg & elem_from_face, unsigned int state = 0) const override
-  {
-    return _wrapped->evaluateDot(elem_from_face, state);
-  }
-  DotType evaluateDot(const FaceArg & face, unsigned int state = 0) const override
-  {
-    return _wrapped->evaluateDot(face, state);
-  }
-  DotType evaluateDot(const SingleSidedFaceArg & face, unsigned int state = 0) const override
-  {
-    return _wrapped->evaluateDot(face, state);
-  }
-  DotType evaluateDot(const ElemQpArg & qp, unsigned int state = 0) const override
-  {
-    return _wrapped->evaluateDot(qp, state);
-  }
-  DotType evaluateDot(const ElemSideQpArg & qp, unsigned int state = 0) const override
-  {
-    return _wrapped->evaluateDot(qp, state);
   }
   ///@}
 

@@ -244,8 +244,10 @@ protected:
    * Evaluate the functor gradient with a given element. Some example implementations of this method
    * could compute an element-average or evaluate at the element centroid
    */
-  virtual GradientType evaluateGradient(const libMesh::Elem * const & elem,
-                                        unsigned int state) const = 0;
+  virtual GradientType evaluateGradient(const libMesh::Elem * const &, unsigned int) const
+  {
+    mooseError("not implemented");
+  }
 
   /**
    * @param elem_from_face See the \p ElemFromFaceArg doxygen
@@ -253,8 +255,10 @@ protected:
    * corresponds to the old time, 2 corresponds to the older time, etc.
    * @return The functor gradient evaluated at the requested time and space
    */
-  virtual GradientType evaluateGradient(const ElemFromFaceArg & elem_from_face,
-                                        unsigned int state) const = 0;
+  virtual GradientType evaluateGradient(const ElemFromFaceArg &, unsigned int) const
+  {
+    mooseError("not implemented");
+  }
 
   /**
    * @param face See the \p FaceArg doxygen
@@ -262,7 +266,10 @@ protected:
    * corresponds to the old time, 2 corresponds to the older time, etc.
    * @return The functor gradient evaluated at the requested time and space
    */
-  virtual GradientType evaluateGradient(const FaceArg & face, unsigned int state) const = 0;
+  virtual GradientType evaluateGradient(const FaceArg &, unsigned int) const
+  {
+    mooseError("not implemented");
+  }
 
   /**
    * @param face See the \p SingleSidedFaceArg doxygen
@@ -270,8 +277,10 @@ protected:
    * corresponds to the old time, 2 corresponds to the older time, etc.
    * @return The functor gradient evaluated at the requested time and space
    */
-  virtual GradientType evaluateGradient(const SingleSidedFaceArg & face,
-                                        unsigned int state) const = 0;
+  virtual GradientType evaluateGradient(const SingleSidedFaceArg &, unsigned int) const
+  {
+    mooseError("not implemented");
+  }
 
   /**
    * @param qp See the \p ElemQpArg doxygen
@@ -279,7 +288,10 @@ protected:
    * corresponds to the old time, 2 corresponds to the older time, etc.
    * @return The functor gradient evaluated at the requested time and space
    */
-  virtual GradientType evaluateGradient(const ElemQpArg & qp, unsigned int state) const = 0;
+  virtual GradientType evaluateGradient(const ElemQpArg &, unsigned int) const
+  {
+    mooseError("not implemented");
+  }
 
   /**
    * @param side_qp See the \p ElemSideQpArg doxygen
@@ -287,14 +299,19 @@ protected:
    * corresponds to the old time, 2 corresponds to the older time, etc.
    * @return The functor gradient evaluated at the requested time and space
    */
-  virtual GradientType evaluateGradient(const ElemSideQpArg & side_qp,
-                                        unsigned int state) const = 0;
+  virtual GradientType evaluateGradient(const ElemSideQpArg &, unsigned int) const
+  {
+    mooseError("not implemented");
+  }
 
   /**
    * Evaluate the functor time derivative with a given element. Some example implementations of this
    * method could compute an element-average or evaluate at the element centroid
    */
-  virtual DotType evaluateDot(const libMesh::Elem * const & elem, unsigned int state) const = 0;
+  virtual DotType evaluateDot(const libMesh::Elem * const &, unsigned int) const
+  {
+    mooseError("not implemented");
+  }
 
   /**
    * @param elem_from_face See the \p ElemFromFaceArg doxygen
@@ -302,7 +319,10 @@ protected:
    * corresponds to the old time, 2 corresponds to the older time, etc.
    * @return The functor time derivative evaluated at the requested time and space
    */
-  virtual DotType evaluateDot(const ElemFromFaceArg & elem_from_face, unsigned int state) const = 0;
+  virtual DotType evaluateDot(const ElemFromFaceArg &, unsigned int) const
+  {
+    mooseError("not implemented");
+  }
 
   /**
    * @param face See the \p FaceArg doxygen
@@ -310,7 +330,10 @@ protected:
    * corresponds to the old time, 2 corresponds to the older time, etc.
    * @return The functor time derivative evaluated at the requested time and space
    */
-  virtual DotType evaluateDot(const FaceArg & face, unsigned int state) const = 0;
+  virtual DotType evaluateDot(const FaceArg &, unsigned int) const
+  {
+    mooseError("not implemented");
+  }
 
   /**
    * @param face See the \p SingleSidedFaceArg doxygen
@@ -318,7 +341,10 @@ protected:
    * corresponds to the old time, 2 corresponds to the older time, etc.
    * @return The functor time derivative evaluated at the requested time and space
    */
-  virtual DotType evaluateDot(const SingleSidedFaceArg & face, unsigned int state) const = 0;
+  virtual DotType evaluateDot(const SingleSidedFaceArg &, unsigned int) const
+  {
+    mooseError("not implemented");
+  }
 
   /**
    * @param qp See the \p ElemQpArg doxygen
@@ -326,7 +352,10 @@ protected:
    * corresponds to the old time, 2 corresponds to the older time, etc.
    * @return The functor time derivative evaluated at the requested time and space
    */
-  virtual DotType evaluateDot(const ElemQpArg & qp, unsigned int state) const = 0;
+  virtual DotType evaluateDot(const ElemQpArg &, unsigned int) const
+  {
+    mooseError("not implemented");
+  }
 
   /**
    * @param side_qp See the \p ElemSideQpArg doxygen
@@ -334,7 +363,10 @@ protected:
    * corresponds to the old time, 2 corresponds to the older time, etc.
    * @return The functor time derivative evaluated at the requested time and space
    */
-  virtual DotType evaluateDot(const ElemSideQpArg & side_qp, unsigned int state) const = 0;
+  virtual DotType evaluateDot(const ElemSideQpArg &, unsigned int) const
+  {
+    mooseError("not implemented");
+  }
 
 private:
   /**
