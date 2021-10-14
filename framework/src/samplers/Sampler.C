@@ -248,8 +248,6 @@ Sampler::getLocalSamples()
 std::vector<Real>
 Sampler::getNextLocalRow()
 {
-  TIME_SECTION("getNextLocalRow", 1, "Getting Next Local Row");
-
   checkReinitStatus();
 
   if (_next_local_row_requires_state_restore)
@@ -322,8 +320,6 @@ Sampler::computeLocalSampleMatrix(DenseMatrix<Real> & matrix)
 void
 Sampler::computeSampleRow(dof_id_type i, std::vector<Real> & data)
 {
-  TIME_SECTION("computeSampleRow", 2, "Computing Sample Row");
-
   for (dof_id_type j = 0; j < _n_cols; ++j)
   {
     data[j] = computeSample(i, j);

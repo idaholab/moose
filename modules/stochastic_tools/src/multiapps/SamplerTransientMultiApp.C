@@ -114,8 +114,6 @@ SamplerTransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance
 bool
 SamplerTransientMultiApp::solveStepBatch(Real dt, Real target_time, bool auto_advance)
 {
-  TIME_SECTION("solveStepBatch", 3, "Solving Step Batch For SamplerTransientMultiApp");
-
   // Value to return
   bool last_solve_converged = true;
 
