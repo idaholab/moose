@@ -10,6 +10,7 @@
     min_parallel = 2
     ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
+    heavy = true
   []
   [extended]
     type = PythonUnitTest
@@ -21,5 +22,6 @@
     min_parallel = 2
     ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
+    heavy = true
   []
 []
