@@ -159,9 +159,13 @@ class Scheduler(MooseObject):
         """
         return
 
+    def retrieveJobs(self):
+        """ return all the jobs the scheduler was tasked to perform work for """
+        return self.__dag_bank
+
     def __sortAndLaunch(self):
         """
-        Sort and return the largest number of job objects amonst all the DAG objects
+        Sort by largest DAG and launch
         """
         sorted_jobs = sorted(self.__dag_bank, key=lambda x: len(x[1].topological_sort()), reverse=True)
         for (Jobs, j_dag, j_lock) in sorted_jobs:
@@ -229,9 +233,6 @@ class Scheduler(MooseObject):
         with j_lock:
             self.__job_bank.update(j_dag.topological_sort())
             self.__dag_bank.append([Jobs, j_dag, j_lock])
-
-        # Launch these jobs to perform work
-        #self.queueJobs(Jobs, j_lock)
 
     def queueJobs(self, Jobs, j_lock):
         """
