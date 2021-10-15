@@ -41,7 +41,9 @@ FaceInfo::FaceInfo(const Elem * elem, unsigned int side, const Elem * neighbor)
     _neighbor_volume(_valid_neighbor ? neighbor->volume() : _elem_volume),
     _d_cf(_neighbor_centroid - _elem_centroid),
     _d_cf_mag(_d_cf.norm()),
-    _e_cf(_d_cf / _d_cf_mag)
+    _e_cf(_d_cf / _d_cf_mag),
+    _gc((_neighbor_centroid - _face_centroid).norm() /
+        ((_neighbor_centroid - _face_centroid).norm() + (_elem_centroid - _face_centroid).norm()))
 {
   // compute an centroid face normal by using 1-point quadrature
   unsigned int dim = elem->dim();
@@ -66,7 +68,5 @@ FaceInfo::FaceInfo(const Elem * elem, unsigned int side, const Elem * neighbor)
 
   // If not skewed use the regular compact stencil coefficients, if skewed use
   // the modified ones
-  _gc = _skewed ? (_neighbor_centroid - _face_centroid).norm() / _d_cf_mag
-                : (_neighbor_centroid - _r_int).norm() /
-                      ((_neighbor_centroid - _r_int).norm() + (_elem_centroid - _r_int).norm());
+  _gc_skewed = (_neighbor_centroid - _r_int).norm() / _d_cf_mag;
 }

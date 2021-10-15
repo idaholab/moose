@@ -65,8 +65,15 @@ public:
   /// Returns true if this face resides on the mesh boundary.
   bool isBoundary() const { return (_neighbor == nullptr); }
 
+  /// Returns true if the element connection is skewed.
+  /// Used for cases with skewness correction.
+  bool isSkewed() const { return _skewed; }
+
   /// Returns the coordinates of the face centroid.
   const Point & faceCentroid() const { return _face_centroid; }
+
+  /// Returns the coordinates of the face centroid.
+  Point rInt() const { return _r_int; }
 
   ///@{
   /// Returns the elem and neighbor elements adjacent to the face.
@@ -158,6 +165,9 @@ public:
   /// Return the geometric weighting factor
   Real gC() const { return _gc; }
 
+  /// Return the weighting factor for skewed element-pairs
+  Real gCSkewed() const { return _gc_skewed; }
+
   /**
    * @return the distance vector drawn from centroid C to F, or in terms of MOOSE implementation,
    * the distance vector obtained from subtracting the element centroid from the neighbor centroid
@@ -240,6 +250,9 @@ private:
   /// The unit normal vector pointing from element center C to element center F
   const RealVectorValue _e_cf;
 
+  /// Geometric weighting factor for face value interpolation
+  Real _gc;
+
   /// The vector to the intersection of d_{CF} and the face. Not constant
   /// because the surface normal needs to be used for the computation.
   RealVectorValue _r_int;
@@ -250,8 +263,8 @@ private:
   /// Not constant since _r_int is used for the computation.
   bool _skewed;
 
-  /// Geometric weighting factor
-  Real _gc;
+  /// Geometric weighting factor for face value interpolation
+  Real _gc_skewed;
 
   /// cached locations of variables in solution vectors
   /// TODO: make this more efficient by not using a map if possible
