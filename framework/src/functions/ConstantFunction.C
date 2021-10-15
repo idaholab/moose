@@ -40,3 +40,9 @@ ConstantFunction::timeDerivative(Real /*t*/, const Point & /*p*/) const
 {
   return 0;
 }
+
+RealVectorValue
+ConstantFunction::gradient(Real /*t*/, const Point & /*p*/) const
+{
+  return RealVectorValue(0);
+}
