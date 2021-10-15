@@ -84,11 +84,11 @@ class Scheduler(MooseObject):
         # A combination of processors + threads (-j/-n) currently in use, that a job requires
         self.slots_in_use = 0
 
-        # List of Lists containing all scheduled jobs
-        self.__scheduled_jobs = []
-
-        # Set containing jobs entering the run_pool
+        # Set containing all job objects entering the run_pool
         self.__job_bank = set([])
+
+        # List of lists containing all job objects entering the run_pool
+        self.__dag_bank = []
 
         # Total running Job and Test failures encountered
         self.__failures = 0
@@ -133,10 +133,6 @@ class Scheduler(MooseObject):
         else:
             self.triggerErrorState()
 
-    def retrieveJobs(self):
-        """ return all the jobs the scheduler was tasked to perform work for """
-        return self.__scheduled_jobs
-
     def schedulerError(self):
         """ boolean if the scheduler prematurely exited """
         return self.__error_state and not self.maxFailures()
@@ -163,32 +159,30 @@ class Scheduler(MooseObject):
         """
         return
 
+    def __sortAndLaunch(self):
+        """
+        Sort and return the largest number of job objects amonst all the DAG objects
+        """
+        sorted_jobs = sorted(self.__dag_bank, key=lambda x: len(x[1].topological_sort()), reverse=True)
+        for (Jobs, j_dag, j_lock) in sorted_jobs:
+            self.queueJobs(Jobs, j_lock)
+
     def waitFinish(self):
         """
-        Inform the Scheduler there are no further jobs to schedule.
-        Return once all jobs have completed.
+        Inform the Scheduler to begin running. Block until all jobs finish.
         """
+        self.__sortAndLaunch()
         self.__waiting = True
         try:
-            # wait until there is an error, or if all the queus are empty
-            waiting_on_status_pool = True
-            waiting_on_runner_pool = True
-
-            while (waiting_on_status_pool or waiting_on_runner_pool) and self.__job_bank:
-
+            # wait until there is an error, or job_bank has emptied
+            while self.__job_bank:
                 if self.__error_state:
                     break
-
-                with self.__status_pool_lock:
-                    waiting_on_status_pool = sum(1 for x in self.__status_pool_jobs if not x.ready())
-                with self.__runner_pool_lock:
-                    waiting_on_runner_pool = sum(1 for x in self.__runner_pool_jobs if not x.ready())
-
                 sleep(0.1)
 
             # Completed all jobs sanity check
             if not self.__error_state and self.__job_bank:
-                raise SchedulerError('Scheduler exiting with different amount of work than what was tasked!')
+                raise SchedulerError('Scheduler exiting with different amount of work than what was initially tasked!')
 
             if not self.__error_state:
                 self.run_pool.close()
@@ -234,12 +228,10 @@ class Scheduler(MooseObject):
         # this set. This will function as our final sanity check on 100% job completion
         with j_lock:
             self.__job_bank.update(j_dag.topological_sort())
-
-        # Store all scheduled jobs
-        self.__scheduled_jobs.append(j_dag.topological_sort())
+            self.__dag_bank.append([Jobs, j_dag, j_lock])
 
         # Launch these jobs to perform work
-        self.queueJobs(Jobs, j_lock)
+        #self.queueJobs(Jobs, j_lock)
 
     def queueJobs(self, Jobs, j_lock):
         """
