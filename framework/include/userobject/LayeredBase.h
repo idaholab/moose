@@ -154,4 +154,7 @@ private:
 
   /// List of SubdomainIDs, if given
   std::vector<SubdomainID> _layer_bounding_blocks;
+
+  /// whether the max/min coordinate in the direction is known from user input
+  bool _has_direction_max_min;
 };

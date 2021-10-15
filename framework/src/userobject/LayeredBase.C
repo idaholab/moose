@@ -61,6 +61,11 @@ LayeredBase::validParams()
                                               "all layers. If this is not specified, the ids "
                                               "specified in 'block' are used for this purpose.");
 
+  params.addParam<Real>("direction_min",
+                        "Minimum coordinate along 'direction' that bounds the layers");
+  params.addParam<Real>("direction_max",
+                        "Maximum coordinate along 'direction' that bounds the layers");
+
   return params;
 }
 
@@ -80,7 +85,8 @@ LayeredBase::LayeredBase(const InputParameters & parameters)
     _layer_has_value(declareRestartableData<std::vector<int>>("layer_has_value")),
     _layered_base_subproblem(*parameters.getCheckedPointerParam<SubProblem *>("_subproblem")),
     _cumulative(parameters.get<bool>("cumulative")),
-    _layer_bounding_blocks()
+    _layer_bounding_blocks(),
+    _has_direction_max_min(false)
 {
   if (_layered_base_params.isParamValid("num_layers") &&
       _layered_base_params.isParamValid("bounds"))
@@ -101,6 +107,9 @@ LayeredBase::LayeredBase(const InputParameters & parameters)
     std::sort(_layer_bounds.begin(), _layer_bounds.end());
 
     _num_layers = _layer_bounds.size() - 1; // Layers are only in-between the bounds
+    _direction_min = _layer_bounds.front();
+    _direction_max = _layer_bounds.back();
+    _has_direction_max_min = true;
   }
   else
     mooseError("One of 'bounds' or 'num_layers' must be specified for ", _layered_base_name);
@@ -108,17 +117,57 @@ LayeredBase::LayeredBase(const InputParameters & parameters)
   if (!_interval_based && _sample_type == 1)
     mooseError("'sample_type = interpolate' not supported with 'bounds' in ", _layered_base_name);
 
-  if (_layered_base_params.isParamValid("layer_bounding_block"))
+  bool layer_bounding_block = _layered_base_params.isParamValid("layer_bounding_block");
+  bool block = _layered_base_params.isParamValid("block");
+  bool direction_min = _layered_base_params.isParamValid("direction_min");
+  bool direction_max = _layered_base_params.isParamValid("direction_max");
+
+  if (_has_direction_max_min && direction_min)
+    mooseWarning("'direction_min' is unused when providing 'bounds' in ", _layered_base_name);
+
+  if (_has_direction_max_min && direction_max)
+    mooseWarning("'direction_max' is unused when providing 'bounds' in ", _layered_base_name);
+
+  if (layer_bounding_block && block)
+    mooseError("'layer_bounding_block' and 'block' cannot both be set in ", _layered_base_name);
+
+  // can only specify one of layer_bounding_block, block, or the pair direction_max/min
+  if ((layer_bounding_block || block) && (direction_min || direction_max))
+    mooseError("Only one of 'layer_bounding_block', 'block', and the pair 'direction_max' and "
+               "'direction_min' can be provided in ",
+               _layered_base_name);
+
+  // if either one of direction_min or direction_max is specified, must provide the other one
+  if (direction_min != direction_max)
+    mooseError("If providing the layer max/min directions, both 'direction_max' and "
+               "'direction_min' must be specified.");
+
+  if (layer_bounding_block)
     _layer_bounding_blocks = _layered_base_subproblem.mesh().getSubdomainIDs(
         _layered_base_params.get<std::vector<SubdomainName>>("layer_bounding_block"));
-  else if (_layered_base_params.isParamValid("block"))
+
+  if (block)
     _layer_bounding_blocks = _layered_base_subproblem.mesh().getSubdomainIDs(
         _layered_base_params.get<std::vector<SubdomainName>>("block"));
+
+  if (direction_min && direction_max)
+  {
+    _direction_min = parameters.get<Real>("direction_min");
+    _direction_max = parameters.get<Real>("direction_max");
+    _has_direction_max_min = true;
+
+    if (_direction_max <= _direction_min)
+      mooseError("'direction_max' must be larger than 'direction_min' in ", _layered_base_name);
+  }
 
   _layer_values.resize(_num_layers);
   _layer_has_value.resize(_num_layers);
 
-  getBounds();
+  // if we haven't already figured out the max/min in specified direction
+  // (either with the 'bounds' or explicit specification from the user), do so
+  if (!_has_direction_max_min)
+    getBounds();
+
   computeLayerCenters();
 }
 
