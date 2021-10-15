@@ -12,6 +12,10 @@
 #include "FVFluxKernel.h"
 #include "INSFVVelocityVariable.h"
 
+/**
+ * Computes the turbulent diffusion of energy term in the weakly compressible formulation
+ * of the energy equation, using functor material properties
+ */
 class WCNSFVMixingLengthEnergyDiffusion : public FVFluxKernel
 {
 public:
@@ -32,8 +36,11 @@ protected:
   /// z-velocity
   const INSFVVelocityVariable * const _w_var;
 
-  /// the specific enthalpy that is being diffused
-  const Moose::Functor<ADReal> & _rho_cp_temp;
+  /// the fluid density
+  const Moose::Functor<ADReal> & _rho;
+
+  /// the specific heat capacity
+  const Moose::Functor<ADReal> & _cp;
 
   /// Turbulent eddy mixing length
   const MooseVariableFVReal & _mixing_len;

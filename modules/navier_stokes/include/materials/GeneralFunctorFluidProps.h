@@ -17,7 +17,7 @@ class SinglePhaseFluidProperties;
 class Function;
 
 /**
- * Computes fluid properties in (P, T) formulation.
+ * Computes fluid properties in (P, T) formulation using functor material properties
  */
 class GeneralFunctorFluidProps : public FunctorMaterial, DerivativeMaterialPropertyNameInterface
 {

@@ -11,6 +11,10 @@
 
 #include "FVTimeKernel.h"
 
+/**
+ * Computes the energy time derivative for the weakly compressible formulation of the energy
+ * equation, using functor material properties
+ */
 class WCNSFVEnergyTimeDerivative : public FVTimeKernel
 {
 public:

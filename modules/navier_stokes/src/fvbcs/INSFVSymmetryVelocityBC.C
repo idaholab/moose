@@ -59,7 +59,14 @@ INSFVSymmetryVelocityBC::computeQpResidual()
   const auto & w_C = use_elem ? _w_elem : _w_neighbor;
 
   // Evaluate viscosity on the face
-  const auto mu_b = _mu(std::make_tuple(_face_info, Moose::FV::LimiterType::CentralDifference, true, faceArgSubdomains()));
+  const auto mu_b = use_elem ? _mu(std::make_tuple(_face_info,
+                                                   Moose::FV::LimiterType::CentralDifference,
+                                                   true,
+                                                   _face_info->elem().subdomain_id()))
+                             : _mu(std::make_tuple(_face_info,
+                                                   Moose::FV::LimiterType::CentralDifference,
+                                                   true,
+                                                   _face_info->neighborPtr()->subdomain_id()));
 
   const auto d_perpendicular = std::abs((_face_info->faceCentroid() - cell_centroid) * _normal);
 

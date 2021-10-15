@@ -15,12 +15,12 @@
 
 /**
  * Finds the friction velocity using standard velocity wall functions formulation.
-  * It is used in WallFunctionWallShearStressAux, WallFunctionYPlusAux and
-  * INSFVWallFunctionBC.
-  * @param mu the dynamic viscosity
-  * @param rho the density
-  * @param u the centroid velocity
-  * @param dist the element centroid distance to the wall
-  * @return the velocity at the wall
-  */
+ * It is used in WallFunctionWallShearStressAux, WallFunctionYPlusAux and
+ * INSFVWallFunctionBC.
+ * @param mu the dynamic viscosity
+ * @param rho the density
+ * @param u the centroid velocity
+ * @param dist the element centroid distance to the wall
+ * @return the velocity at the wall
+ */
 ADReal findUStar(const ADReal mu, const ADReal rho, ADReal u, const Real dist);

@@ -25,7 +25,8 @@ WCNSFVMixingLengthEnergyDiffusion::validParams()
       "schmidt_number",
       "The turbulent Schmidt number (or turbulent Prandtl number if the passive scalar is energy) "
       "that relates the turbulent scalar diffusivity to the turbulent momentum diffusivity.");
-  params.addRequiredParam<MaterialPropertyName>("rho_cp_temp", "Energy material property");
+  params.addRequiredParam<MaterialPropertyName>("rho", "Density");
+  params.addRequiredParam<MaterialPropertyName>("cp", "Specific heat capacity");
 
   params.set<unsigned short>("ghost_layers") = 2;
   return params;
@@ -39,7 +40,8 @@ WCNSFVMixingLengthEnergyDiffusion::WCNSFVMixingLengthEnergyDiffusion(const Input
                              : nullptr),
     _w_var(isParamValid("w") ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("w", 0))
                              : nullptr),
-    _rho_cp_temp(getFunctor<ADReal>("rho_cp_temp")),
+    _rho(getFunctor<ADReal>("rho")),
+    _cp(getFunctor<ADReal>("cp")),
     _mixing_len(*getVarHelper<MooseVariableFV<Real>>("mixing_length", 0)),
     _schmidt_number(getParam<Real>("schmidt_number"))
 {
@@ -98,13 +100,21 @@ WCNSFVMixingLengthEnergyDiffusion::computeQpResidual()
   // the scalar variable
   eddy_diff /= _schmidt_number;
 
-  // Compute the diffusive flux of the scalar variable
-  auto dudn = _rho_cp_temp.gradient(std::make_tuple(_face_info,
-                                                    Moose::FV::LimiterType::CentralDifference,
-                                                    true,
-                                                    faceArgSubdomains(_face_info))) *
-              _normal;
-  return -1 * eddy_diff * dudn;
+  const auto dTdn = gradUDotNormal();
+
+  // Interpolate the heat capacity
+  const auto face_elem = elemFromFace();
+  const auto face_neighbor = neighborFromFace();
+
+  ADReal rho_cp_face;
+  interpolate(Moose::FV::InterpMethod::Average,
+              rho_cp_face,
+              _rho(face_elem) * _cp(face_elem),
+              _rho(face_neighbor) * _cp(face_neighbor),
+              *_face_info,
+              true);
+
+  return -1 * eddy_diff * rho_cp_face * dTdn;
 
 #else
   return 0;

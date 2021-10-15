@@ -62,7 +62,7 @@ MixingLengthTurbulentViscosityMaterial::MixingLengthTurbulentViscosityMaterial(
     }
     symmetric_strain_tensor_norm = std::sqrt(symmetric_strain_tensor_norm + offset);
 
-    // Define turbulent_viscosity
+    // Return the sum of turbulent viscosity and dynamic viscosity
     return _mu(r, t) +
            _rho(r, t) * symmetric_strain_tensor_norm * Utility::pow<2>(_mixing_len(r, t));
   });
