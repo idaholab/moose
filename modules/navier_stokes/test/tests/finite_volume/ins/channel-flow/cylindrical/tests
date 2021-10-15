@@ -16,22 +16,12 @@
     requirement = 'The system shall be able to solve incompressible Navier-Stokes channel flow with no-slip boundary conditions on the wall in an axisymmetric coordinate system using a Rhie-Chow interpolation scheme for the velocity.'
     ad_indexing_type = 'global'
   []
-  [rc-rz-no-slip-mass-conservation-square]
-    type = 'Exodiff'
-    input = square-2d-rc-no-slip.i
-    exodiff = square-2d-rc-no-slip_out.e
-  []
   [rc-free-slip]
     type = 'CSVDiff'
     input = 2d-rc-slip.i
     csvdiff = 2d-rc-slip_out.csv
     requirement = 'The system shall be able to solve incompressible Navier-Stokes channel flow with free-slip boundary conditions on the wall in an axisymmetric coordinate system using a Rhie-Chow interpolation scheme for the velocity.'
     ad_indexing_type = 'global'
-  []
-  [rc-free-slip-square]
-    type = 'Exodiff'
-    input = square-2d-rc-slip.i
-    exodiff = square-2d-rc-slip_out.e
   []
   [rz-diverging-no-slip]
     type = 'CSVDiff'
@@ -46,6 +36,7 @@
     input = no-slip-tris.i
     exodiff = 'no-slip-tris_out.e'
     cli_args = "FVBCs/active='inlet-u inlet-v no-slip-wall-u no-slip-wall-v outlet-p axis-u axis-v' -pc_type lu -pc_factor_shift_type NONZERO"
+    requirement = 'The system shall be able to solve a straight channel problem in cylindrical coordinates using triangular elements with no slip boundary conditions.'
   []
   [rz-diverging-free-slip]
     type = 'Exodiff'

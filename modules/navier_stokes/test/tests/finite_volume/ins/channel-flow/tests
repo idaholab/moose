@@ -138,9 +138,4 @@
     issues = '#16822'
     requirement = 'The system shall be able to compute gradients, when extrapolated boundary face values make the gradient computation singular, by catching the singularity error and re-running without doing boundary face value extrapolation.'
   []
-  [square]
-    type = Exodiff
-    input = 'square-ambient-convection.i'
-    exodiff = 'square-ambient-convection_out.e'
-  []
 []
