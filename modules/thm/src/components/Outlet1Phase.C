@@ -7,17 +7,13 @@ InputParameters
 Outlet1Phase::validParams()
 {
   InputParameters params = FlowBoundary1Phase::validParams();
-  params.addParam<bool>("reversible", false, "True for reversible outlet boundary conditions");
   params.addRequiredParam<Real>("p", "Prescribed pressure [Pa]");
   params.addClassDescription(
       "Boundary condition with prescribed pressure for 1-phase flow channels.");
   return params;
 }
 
-Outlet1Phase::Outlet1Phase(const InputParameters & params)
-  : FlowBoundary1Phase(params), _reversible(getParam<bool>("reversible"))
-{
-}
+Outlet1Phase::Outlet1Phase(const InputParameters & params) : FlowBoundary1Phase(params) {}
 
 void
 Outlet1Phase::check() const

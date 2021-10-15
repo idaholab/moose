@@ -15,8 +15,6 @@ public:
 protected:
   virtual void check() const override;
 
-  bool _reversible;
-
 public:
   static InputParameters validParams();
 };
