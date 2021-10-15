@@ -1150,7 +1150,7 @@ template <typename OutputType>
 typename MooseVariableFV<OutputType>::DotType
 MooseVariableFV<OutputType>::evaluateDot(const Elem * const &, unsigned int) const
 {
-  mooseError("evaluateDot not implemented for non-scalar finite volume variables");
+  mooseError("evaluateDot not implemented for this class of finite volume variables");
 }
 
 template <>

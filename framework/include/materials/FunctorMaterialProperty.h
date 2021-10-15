@@ -112,7 +112,7 @@ private:
   std::unordered_map<SubdomainID, ElemAndFaceFn> _elem_from_face_functor;
 
   /// Functors that return the property value on the requested side of the face (e.g. the
-  /// infinitetesimal + or - side of the face)
+  /// infinitesimal + or - side of the face)
   std::unordered_map<SubdomainID, FaceFn> _face_functor;
 
   /// Functors that will evaluate elements at quadrature points
