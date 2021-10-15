@@ -17,12 +17,11 @@
 []
 
 [UserObjects]
-  active = 'reader_element'
   [reader_element]
     type = ElementPropertyReadFile
     prop_file_name = 'data_element.csv'
     read_type = 'element'
-    nprop = 3
+    nprop = 3  # number of columns in CSV
   []
   [reader_nearest]
     type = ElementPropertyReadFile
@@ -33,7 +32,7 @@
   []
   [reader_block]
     type = ElementPropertyReadFile
-    prop_file_name = 'data_block.csv'
+    prop_file_name = 'data_nearest.csv'
     read_type = 'block'
     nprop = 3
     nblock = 3
@@ -41,24 +40,23 @@
 []
 
 [Functions]
-  active = 'element'
   [element]
     type = PiecewiseConstantFromCSV
     read_prop_user_object = 'reader_element'
     read_type = 'element'
-    column_number = '3'
+    column_number = '2'
   []
   [nearest]
     type = PiecewiseConstantFromCSV
     read_prop_user_object = 'reader_nearest'
     read_type = 'voronoi'
-    column_number = '3'
+    column_number = '2'
   []
   [block]
     type = PiecewiseConstantFromCSV
     read_prop_user_object = 'reader_block'
     read_type = 'block'
-    column_number = '3'
+    column_number = '2'
   []
 []
 
@@ -103,6 +101,7 @@
 
 [Executioner]
   type = Transient
+  end_time = 0.1
 []
 
 [Outputs]

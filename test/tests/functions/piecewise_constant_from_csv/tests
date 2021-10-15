@@ -6,21 +6,22 @@
     [element]
       type = 'Exodiff'
       input = 'piecewise_constant.i'
-      exodiff = 'piecewise_constant_out.e'
+      exodiff = 'piecewise_constant_element.e'
+      cli_args = 'Outputs/file_base=piecewise_constant_element'
       detail = 'with data sorted by element ids'
     []
     [voronoi]
       type = 'Exodiff'
       input = 'piecewise_constant.i'
-      exodiff = 'piecewise_constant_out.e'
-      cli_args = 'Functions/active=nearest UserObjects/active=reader_nearest ICs/active=nearest'
+      exodiff = 'piecewise_constant_voronoi.e'
+      cli_args = 'ICs/active=nearest Outputs/file_base=piecewise_constant_voronoi'
       detail = 'with data at given locations and using nearest neighbor interpolation in between'
     []
     [block]
       type = 'Exodiff'
       input = 'piecewise_constant.i'
-      exodiff = 'piecewise_constant_out.e'
-      cli_args = 'Functions/active=block UserObjects/active=reader_block ICs/active=block'
+      exodiff = 'piecewise_constant_block.e'
+      cli_args = 'ICs/active=block Outputs/file_base=piecewise_constant_block'
       detail = 'with data sorted by blocks and with constant values on each block.'
     []
   []
@@ -37,15 +38,15 @@
       type = RunException
       input = 'piecewise_constant.i'
       cli_args = 'Functions/element/column_number=26'
-      expect_err = 'Row 0 in data_element.csv has number of data less than 26'
+      expect_err = 'Property number 26 greater than total number of properties 3'
       detail = 'if the desired column number in the CSV file is higher than the number of columns in the file'
     []
     [num_rows]
       type = RunException
       input = 'piecewise_constant.i'
-      cli_args = 'UserObjects/reader_element/prop_file_name=data_block.csv'
-      expect_err = 'Data in data_element.csv does not have enough rows for'
-      detail = 'if the desired column number in the CSV file is higher than the number of columns in the file'
+      cli_args = 'UserObjects/reader_element/prop_file_name=data_nearest.csv'
+      expect_err = 'does not have enough rows for*'
+      detail = 'if the data saught exceeds the row number in the CSV file'
     []
   []
   [warnings]
@@ -53,15 +54,15 @@
     [num_columns]
       type = RunException
       input = 'piecewise_constant.i'
-      cli_args = 'Functions/element/column_number=0'
+      cli_args = 'Functions/nearest/column_number=0'
       expect_err = 'The column requested in the function is likely to just be containing point coordinates'
-      detail = 'if the desired column number in the CSV file is likely to be a column holding point coordinates'
+      detail = 'if the desired column number in the CSV file is known to be a column holding point coordinates'
     []
     [too_much_data_in_file]
       type = RunException
       input = 'piecewise_constant.i'
-      cli_args = 'Functions/active=block ICs/active=block UserObjects/active=reader_block UserObjects/reader_block/prop_file_name=data_element.csv'
-      expect_err = ''
+      cli_args = 'ICs/active=block UserObjects/reader_block/prop_file_name=data_element.csv'
+      expect_err = ", some data will not be used."
       detail = 'if the data file contains more points/rows than the reader needs'
     []
   []

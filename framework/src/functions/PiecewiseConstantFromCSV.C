@@ -45,7 +45,7 @@ PiecewiseConstantFromCSV::PiecewiseConstantFromCSV(const InputParameters & param
   if (_read_type != _read_prop_user_object.getReadType())
     paramError(
         "read_type", "The ElementPropertyReadFile UO should have the same read_type parameter.");
-  if (_column_number < LIBMESH_DIM)
+  if (_column_number < LIBMESH_DIM && _read_type == ReadTypeEnum::VORONOI)
     mooseWarning(
       "The column requested in the function is likely to just be containing point coordinates");
 }
