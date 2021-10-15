@@ -1,0 +1,44 @@
+[Tests]
+  [01.check_syntax]
+    type = RunApp
+    input = '01_flow_channel.i'
+    check_input = true
+    max_parallel = 1
+    recover = false
+  []
+  [02.check_syntax]
+    type = RunApp
+    input = '02_core.i'
+    check_input = true
+    max_parallel = 1
+    recover = false
+  []
+  [03.check_syntax]
+    type = RunApp
+    input = '03_upper_loop.i'
+    check_input = true
+    max_parallel = 1
+    recover = false
+  []
+  [04.check_syntax]
+    type = RunApp
+    input = '04_loop.i'
+    check_input = true
+    max_parallel = 1
+    recover = false
+  []
+  [05.check_syntax]
+    type = RunApp
+    input = '05_secondary_side.i'
+    check_input = true
+    max_parallel = 1
+    recover = false
+  []
+  [06.check_syntax]
+    type = RunApp
+    input = '06_custom_closures.i'
+    check_input = true
+    max_parallel = 1
+    recover = false
+  []
+[]
