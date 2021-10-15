@@ -99,8 +99,8 @@ class Scheduler(MooseObject):
         # Private set of jobs currently running
         self.__active_jobs = set([])
 
-        # Jobs that are taking longer to finish than the alloted time are reported back early to inform
-        # the user 'stuff' is still running. Jobs entering this set will not be reported again.
+        # jobs that are taking longer to finish than the alloted time are reported back early to inform
+        # the user 'stuff' is still running. jobs entering this set will not be reported again.
         self.jobs_reported = set([])
 
         # The last time the scheduler reported something
@@ -150,9 +150,9 @@ class Scheduler(MooseObject):
         """ Notify derived schedulers we are finished """
         return
 
-    def augmentJobs(self, Jobs):
+    def augmentJobs(self, jobs):
         """
-        Allow derived schedulers to augment Jobs before they perform work.
+        Allow derived schedulers to augment jobs before they perform work.
         Note: This occurs before we perform a job count sanity check. So
         any additions or subtractions to the number of jobs will result in
         an exception.
@@ -161,15 +161,15 @@ class Scheduler(MooseObject):
 
     def retrieveJobs(self):
         """ return all the jobs the scheduler was tasked to perform work for """
-        return self.__dag_bank
+        return [x[1].topological_sort() for x in self.__dag_bank]
 
     def __sortAndLaunch(self):
         """
         Sort by largest DAG and launch
         """
         sorted_jobs = sorted(self.__dag_bank, key=lambda x: len(x[1].topological_sort()), reverse=True)
-        for (Jobs, j_dag, j_lock) in sorted_jobs:
-            self.queueJobs(Jobs, j_lock)
+        for (jobs, j_dag, j_lock) in sorted_jobs:
+            self.queueJobs(jobs, j_lock)
 
     def waitFinish(self):
         """
@@ -217,12 +217,12 @@ class Scheduler(MooseObject):
             return
 
         # Instance our job DAG, create jobs, and a private lock for this group of jobs (testers)
-        Jobs = JobDAG(self.options)
-        j_dag = Jobs.createJobs(testers)
+        jobs = JobDAG(self.options)
+        j_dag = jobs.createJobs(testers)
         j_lock = threading.Lock()
 
         # Allow derived schedulers access to the jobs before they launch
-        self.augmentJobs(Jobs)
+        self.augmentJobs(jobs)
 
         # job-count to tester-count sanity check
         if j_dag.size() != len(testers):
@@ -232,9 +232,9 @@ class Scheduler(MooseObject):
         # this set. This will function as our final sanity check on 100% job completion
         with j_lock:
             self.__job_bank.update(j_dag.topological_sort())
-            self.__dag_bank.append([Jobs, j_dag, j_lock])
+            self.__dag_bank.append([jobs, j_dag, j_lock])
 
-    def queueJobs(self, Jobs, j_lock):
+    def queueJobs(self, jobs, j_lock):
         """
         Determine which queue jobs should enter. Finished jobs are placed in the status
         pool to be printed while all others are placed in the runner pool to perform work.
@@ -245,18 +245,18 @@ class Scheduler(MooseObject):
 
         state = self.getStatusPoolState()
         with j_lock:
-            concurrent_jobs = Jobs.getJobsAndAdvance()
+            concurrent_jobs = jobs.getJobsAndAdvance()
             for job in concurrent_jobs:
                 if job.isFinished():
                     if not state:
                         with self.__status_pool_lock:
-                            self.__status_pool_jobs.add(self.status_pool.apply_async(self.jobStatus, (job, Jobs, j_lock)))
+                            self.__status_pool_jobs.add(self.status_pool.apply_async(self.jobStatus, (job, jobs, j_lock)))
 
                 elif job.isHold():
                     if not state:
                         with self.__runner_pool_lock:
                             job.setStatus(job.queued)
-                            self.__runner_pool_jobs.add(self.run_pool.apply_async(self.runJob, (job, Jobs, j_lock)))
+                            self.__runner_pool_jobs.add(self.run_pool.apply_async(self.runJob, (job, jobs, j_lock)))
 
     def getLoad(self):
         """ Method to return current load average """
@@ -308,12 +308,12 @@ class Scheduler(MooseObject):
                 job.setStatus(job.timeout, 'TIMEOUT')
                 job.killProcess()
 
-    def handleLongRunningJob(self, job, Jobs, j_lock):
+    def handleLongRunningJob(self, job, jobs, j_lock):
         """ Handle jobs that have not reported in the alotted time """
         with self.__status_pool_lock:
-            self.__status_pool_jobs.add(self.status_pool.apply_async(self.jobStatus, (job, Jobs, j_lock)))
+            self.__status_pool_jobs.add(self.status_pool.apply_async(self.jobStatus, (job, jobs, j_lock)))
 
-    def jobStatus(self, job, Jobs, j_lock):
+    def jobStatus(self, job, jobs, j_lock):
         """
         Instruct the TestHarness to print the status of job. This is a serial
         threaded operation, so as to prevent clobbering of text being printed
@@ -352,7 +352,7 @@ class Scheduler(MooseObject):
                         adjusted_interval = max(1, self.min_report_time - max(1, clock() - self.last_reported_time))
                         job.report_timer = threading.Timer(adjusted_interval,
                                                            self.handleLongRunningJob,
-                                                           (job, Jobs, j_lock,))
+                                                           (job, jobs, j_lock,))
                         job.report_timer.start()
                         return
 
@@ -383,7 +383,7 @@ class Scheduler(MooseObject):
         except KeyboardInterrupt:
             self.killRemaining(keyboard=True)
 
-    def runJob(self, job, Jobs, j_lock):
+    def runJob(self, job, jobs, j_lock):
         """ Method the run_pool calls when an available thread becomes ready """
         # Its possible, the queue is just trying to empty. Allow it to do so
         # with out generating overhead
@@ -405,7 +405,7 @@ class Scheduler(MooseObject):
 
                 job.report_timer = threading.Timer(self.min_report_time,
                                                    self.handleLongRunningJob,
-                                                   (job, Jobs, j_lock,))
+                                                   (job, jobs, j_lock,))
 
                 job.report_timer.start()
                 timeout_timer.start()
@@ -435,7 +435,7 @@ class Scheduler(MooseObject):
                     sleep(.1)
 
             # Job is done (or needs to re-enter the queue)
-            self.queueJobs(Jobs, j_lock)
+            self.queueJobs(jobs, j_lock)
 
         except Exception:
             print('runWorker Exception: %s' % (traceback.format_exc()))
