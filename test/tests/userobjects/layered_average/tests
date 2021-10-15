@@ -37,7 +37,7 @@
     [bounds_and_interp]
       type = 'RunException'
       input = 'layered_average_bounds.i'
-      expect_err = "'sample_type = interpolate' not supported with 'bounds' in"
+      expect_err = "'sample_type = interpolate' not supported with 'bounds'"
       cli_args = 'UserObjects/average/sample_type=interpolate'
 
       detail = "sample interpolate and"
@@ -46,7 +46,7 @@
     [no_bounds_or_num_layers]
       type = 'RunException'
       input = 'layered_average_bounds_error.i'
-      expect_err = "One of 'bounds' or 'num_layers' must be specified for"
+      expect_err = "One of 'bounds' or 'num_layers' must be specified"
 
       detail = "if neither the bounds or number of layers are set."
     []

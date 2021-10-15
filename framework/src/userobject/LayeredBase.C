@@ -90,7 +90,7 @@ LayeredBase::LayeredBase(const InputParameters & parameters)
 {
   if (_layered_base_params.isParamValid("num_layers") &&
       _layered_base_params.isParamValid("bounds"))
-    mooseError("'bounds' and 'num_layers' cannot both be set in ", _layered_base_name);
+    mooseError("'bounds' and 'num_layers' cannot both be set");
 
   if (_layered_base_params.isParamValid("num_layers"))
   {
@@ -128,9 +128,6 @@ LayeredBase::LayeredBase(const InputParameters & parameters)
   if (_has_direction_max_min && has_direction_max)
     mooseWarning("'direction_max' is unused when providing 'bounds'");
 
-  if (has_layer_bounding_block && has_block)
-    mooseError("'layer_bounding_block' and 'block' cannot both be set");
-
   // can only specify one of layer_bounding_block or the pair direction_max/min
   if (has_layer_bounding_block && (has_direction_min || has_direction_max))
     mooseError("Only one of 'layer_bounding_block' and the pair 'direction_max' and "
@@ -144,8 +141,7 @@ LayeredBase::LayeredBase(const InputParameters & parameters)
   if (has_layer_bounding_block)
     _layer_bounding_blocks = _layered_base_subproblem.mesh().getSubdomainIDs(
         _layered_base_params.get<std::vector<SubdomainName>>("layer_bounding_block"));
-
-  if (has_block)
+  else if (has_block)
     _layer_bounding_blocks = _layered_base_subproblem.mesh().getSubdomainIDs(
         _layered_base_params.get<std::vector<SubdomainName>>("block"));
 

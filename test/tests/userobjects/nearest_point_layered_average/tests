@@ -79,16 +79,6 @@
     issues = '#18931'
   []
 
-  [error_duplicate_block]
-    type = RunException
-    input = 'nearest_point_layered_average.i'
-    cli_args = "UserObjects/npla/points='0.25 0 0.25' UserObjects/npla/layer_bounding_block='0' UserObjects/npla/block='0'"
-    expect_err = "'layer_bounding_block' and 'block' cannot both be set"
-    requirement = 'The system shall error if both means of specifying bounding blocks are provided'
-    design = 'NearestPointLayeredAverage.md'
-    issues = '#19122'
-  []
-
   [error_duplicate_block_specs]
     type = RunException
     input = 'nearest_point_layered_average.i'
