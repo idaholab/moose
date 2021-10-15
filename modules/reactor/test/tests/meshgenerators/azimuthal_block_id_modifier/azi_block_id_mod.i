@@ -18,7 +18,7 @@
     input = cd
     start_angle = 280
     angle_range = 100
-    old_block_ids = '10 15 20'
+    old_blocks = '10 15 20'
     new_block_ids = '100 150 200'
     new_block_names = 'center_tri_new center_new cd_ring_new'
     preserve_volumes = true

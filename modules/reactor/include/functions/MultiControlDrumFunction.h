@@ -14,7 +14,7 @@
 #include "ElementIDInterface.h"
 
 /**
- * A function that returns an adsorber fraction value for multuple control drums application.
+ * A function that returns an absorber fraction value for multiple control drums application.
  */
 class MultiControlDrumFunction : public Function,
                                  public MeshMetaDataInterface,
@@ -38,10 +38,10 @@ protected:
   const std::vector<Real> _angle_ranges;
   /// Whether extra element id user_control_drum_id is used.
   const bool _use_control_drum_id;
-  /// MeshMetaData: positions of control drums
-  std::vector<Point> _control_drum_positions;
-  /// MeshMetaData: vector of azimuthal angles of all nodes of each control drum
-  std::vector<std::vector<Real>> _control_drums_azimuthal_meta;
   /// ExtraElementID: control drum ExtraElementID
   const dof_id_type & _control_drum_id;
+  /// MeshMetaData: positions of control drums
+  const std::vector<Point> & _control_drum_positions;
+  /// MeshMetaData: vector of azimuthal angles of all nodes of each control drum
+  const std::vector<std::vector<Real>> & _control_drums_azimuthal_meta;
 };

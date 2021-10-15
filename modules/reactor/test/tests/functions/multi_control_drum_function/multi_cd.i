@@ -4,7 +4,7 @@
 
 [Mesh]
   [hex_unit]
-    type =PolygonConcentricCircleMeshGenerator
+    type = PolygonConcentricCircleMeshGenerator
     num_sides = 6 # must be six to use hex pattern
     num_sectors_per_side= '2 2 2 2 2 2'
     background_intervals=1
@@ -172,7 +172,6 @@
 
 [Outputs]
   [default]
-    # execute_on = FINAL
     type = Exodus
   []
 []
