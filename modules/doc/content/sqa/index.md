@@ -30,3 +30,5 @@ The documentation for the SQA releases can be found using the following links:
 - [v1.0.0](https://mooseframework.org/releases/moose/v1.0.0)
 
 !sqa report
+
+[Github Backup](sqa/github_backup.md) 
