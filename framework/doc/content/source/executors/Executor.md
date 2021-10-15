@@ -72,7 +72,7 @@ execution reaches them within the executor tree starting from the master executo
 By default, an executor has automatically generated execute-on flags created for
 it.  These flags are executed right before and right after the executor executes
 and are named `exec_[obj-name]_begin` and `exec_[obj-name]_end` respectively
-where `[obj-name]` is the name given to an object by it's block header in an
+where `[obj-name]` is the name given to an object by its block header in an
 input file - e.g. `[foo] type = FooExecutor []` has an object name of `foo`.
 Other objects (e.g. user objects, materials, etc.) can be assigned to execute at
 these execute-on flags/times within the input file.  This behavior is NOT
