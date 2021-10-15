@@ -93,39 +93,39 @@ GeneralFunctorFluidProps::GeneralFunctorFluidProps(const InputParameters & param
     return _fluid.k_from_p_T(_pressure(r, t), _T_fluid(r, t));
   });
 
-  // _drho_dp.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> Real {
-  //   Real drho_dp, drho_dT, dummy;
-  //   auto raw_pressure = MetaPhysicL::raw_value(_pressure(r, t));
-  //   auto raw_T_fluid = MetaPhysicL::raw_value(_T_fluid(r, t));
-  //
-  //   _fluid.rho_from_p_T(raw_pressure, raw_T_fluid, dummy, drho_dp, drho_dT);
-  //   return drho_dp;
-  // });
-  // _drho_dT.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> Real {
-  //   Real drho_dp, drho_dT, dummy;
-  //   auto raw_pressure = MetaPhysicL::raw_value(_pressure(r, t));
-  //   auto raw_T_fluid = MetaPhysicL::raw_value(_T_fluid(r, t));
-  //
-  //   _fluid.rho_from_p_T(raw_pressure, raw_T_fluid, dummy, drho_dp, drho_dT);
-  //   return drho_dT;
-  // });
-  //
-  // _dcp_dp.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> Real {
-  //   Real dcp_dp, dcp_dT, dummy;
-  //   auto raw_pressure = MetaPhysicL::raw_value(_pressure(r, t));
-  //   auto raw_T_fluid = MetaPhysicL::raw_value(_T_fluid(r, t));
-  //
-  //   _fluid.cp_from_p_T(raw_pressure, raw_T_fluid, dummy, dcp_dp, dcp_dT);
-  //   return dcp_dp;
-  // });
-  // _dcp_dT.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> Real {
-  //   Real dcp_dp, dcp_dT, dummy;
-  //   auto raw_pressure = MetaPhysicL::raw_value(_pressure(r, t));
-  //   auto raw_T_fluid = MetaPhysicL::raw_value(_T_fluid(r, t));
-  //
-  //   _fluid.cp_from_p_T(raw_pressure, raw_T_fluid, dummy, dcp_dp, dcp_dT);
-  //   return dcp_dT;
-  // });
+  _drho_dp.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> Real {
+    Real drho_dp, drho_dT, dummy;
+    auto raw_pressure = MetaPhysicL::raw_value(_pressure(r, t));
+    auto raw_T_fluid = MetaPhysicL::raw_value(_T_fluid(r, t));
+
+    _fluid.rho_from_p_T(raw_pressure, raw_T_fluid, dummy, drho_dp, drho_dT);
+    return drho_dp;
+  });
+  _drho_dT.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> Real {
+    Real drho_dp, drho_dT, dummy;
+    auto raw_pressure = MetaPhysicL::raw_value(_pressure(r, t));
+    auto raw_T_fluid = MetaPhysicL::raw_value(_T_fluid(r, t));
+
+    _fluid.rho_from_p_T(raw_pressure, raw_T_fluid, dummy, drho_dp, drho_dT);
+    return drho_dT;
+  });
+
+  _dcp_dp.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> Real {
+    Real dcp_dp, dcp_dT, dummy;
+    auto raw_pressure = MetaPhysicL::raw_value(_pressure(r, t));
+    auto raw_T_fluid = MetaPhysicL::raw_value(_T_fluid(r, t));
+
+    _fluid.cp_from_p_T(raw_pressure, raw_T_fluid, dummy, dcp_dp, dcp_dT);
+    return dcp_dp;
+  });
+  _dcp_dT.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> Real {
+    Real dcp_dp, dcp_dT, dummy;
+    auto raw_pressure = MetaPhysicL::raw_value(_pressure(r, t));
+    auto raw_T_fluid = MetaPhysicL::raw_value(_T_fluid(r, t));
+
+    _fluid.cp_from_p_T(raw_pressure, raw_T_fluid, dummy, dcp_dp, dcp_dT);
+    return dcp_dT;
+  });
   _dcp_dt.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> ADReal {
     Real dcp_dp, dcp_dT, dummy;
     auto raw_pressure = MetaPhysicL::raw_value(_pressure(r, t));
@@ -135,61 +135,61 @@ GeneralFunctorFluidProps::GeneralFunctorFluidProps(const InputParameters & param
     return dcp_dp * _pressure.dot(r, t) + dcp_dT * _T_fluid.dot(r, t);
   });
 
-  // _dmu_dp.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> Real {
-  //   Real dmu_dp, dmu_dT, dummy;
-  //   auto raw_pressure = MetaPhysicL::raw_value(_pressure(r, t));
-  //   auto raw_T_fluid = MetaPhysicL::raw_value(_T_fluid(r, t));
-  //
-  //   _fluid.mu_from_p_T(raw_pressure, raw_T_fluid, dummy, dmu_dp, dmu_dT);
-  //   return dmu_dp;
-  // });
-  // _dmu_dT.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> Real {
-  //   Real dmu_dp, dmu_dT, dummy;
-  //   auto raw_pressure = MetaPhysicL::raw_value(_pressure(r, t));
-  //   auto raw_T_fluid = MetaPhysicL::raw_value(_T_fluid(r, t));
-  //
-  //   _fluid.mu_from_p_T(raw_pressure, raw_T_fluid, dummy, dmu_dp, dmu_dT);
-  //   return dmu_dT;
-  // });
-  //
-  // _dk_dp.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> Real {
-  //   Real dk_dp, dk_dT, dummy;
-  //   auto raw_pressure = MetaPhysicL::raw_value(_pressure(r, t));
-  //   auto raw_T_fluid = MetaPhysicL::raw_value(_T_fluid(r, t));
-  //
-  //   _fluid.k_from_p_T(raw_pressure, raw_T_fluid, dummy, dk_dp, dk_dT);
-  //   return dk_dp;
-  // });
-  // _dk_dT.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> Real {
-  //   Real dk_dp, dk_dT, dummy;
-  //   auto raw_pressure = MetaPhysicL::raw_value(_pressure(r, t));
-  //   auto raw_T_fluid = MetaPhysicL::raw_value(_T_fluid(r, t));
-  //
-  //   _fluid.k_from_p_T(raw_pressure, raw_T_fluid, dummy, dk_dp, dk_dT);
-  //   return dk_dT;
-  // });
-  //
+  _dmu_dp.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> Real {
+    Real dmu_dp, dmu_dT, dummy;
+    auto raw_pressure = MetaPhysicL::raw_value(_pressure(r, t));
+    auto raw_T_fluid = MetaPhysicL::raw_value(_T_fluid(r, t));
+
+    _fluid.mu_from_p_T(raw_pressure, raw_T_fluid, dummy, dmu_dp, dmu_dT);
+    return dmu_dp;
+  });
+  _dmu_dT.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> Real {
+    Real dmu_dp, dmu_dT, dummy;
+    auto raw_pressure = MetaPhysicL::raw_value(_pressure(r, t));
+    auto raw_T_fluid = MetaPhysicL::raw_value(_T_fluid(r, t));
+
+    _fluid.mu_from_p_T(raw_pressure, raw_T_fluid, dummy, dmu_dp, dmu_dT);
+    return dmu_dT;
+  });
+
+  _dk_dp.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> Real {
+    Real dk_dp, dk_dT, dummy;
+    auto raw_pressure = MetaPhysicL::raw_value(_pressure(r, t));
+    auto raw_T_fluid = MetaPhysicL::raw_value(_T_fluid(r, t));
+
+    _fluid.k_from_p_T(raw_pressure, raw_T_fluid, dummy, dk_dp, dk_dT);
+    return dk_dp;
+  });
+  _dk_dT.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> Real {
+    Real dk_dp, dk_dT, dummy;
+    auto raw_pressure = MetaPhysicL::raw_value(_pressure(r, t));
+    auto raw_T_fluid = MetaPhysicL::raw_value(_T_fluid(r, t));
+
+    _fluid.k_from_p_T(raw_pressure, raw_T_fluid, dummy, dk_dp, dk_dT);
+    return dk_dT;
+  });
+
   _Pr.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> ADReal {
     static constexpr Real small_number = 1e-8;
 
     return fp::prandtl(_cp(r, t), _mu(r, t), std::max(_k(r, t), small_number));
   });
-  // _dPr_dp.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> ADReal {
-  //   return prandtlPropertyDerivative(MetaPhysicL::raw_value(_mu(r, t)),
-  //                                    MetaPhysicL::raw_value(_cp(r, t)),
-  //                                    MetaPhysicL::raw_value(_k(r, t)),
-  //                                    _dmu_dp(r, t),
-  //                                    _dcp_dp(r, t),
-  //                                    _dk_dp(r, t));
-  // });
-  // _dPr_dT.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> ADReal {
-  //   return prandtlPropertyDerivative(MetaPhysicL::raw_value(_mu(r, t)),
-  //                                    MetaPhysicL::raw_value(_cp(r, t)),
-  //                                    MetaPhysicL::raw_value(_k(r, t)),
-  //                                    _dmu_dT(r, t),
-  //                                    _dcp_dT(r, t),
-  //                                    _dk_dT(r, t));
-  // });
+  _dPr_dp.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> Real {
+    return prandtlPropertyDerivative(MetaPhysicL::raw_value(_mu(r, t)),
+                                     MetaPhysicL::raw_value(_cp(r, t)),
+                                     MetaPhysicL::raw_value(_k(r, t)),
+                                     _dmu_dp(r, t),
+                                     _dcp_dp(r, t),
+                                     _dk_dp(r, t));
+  });
+  _dPr_dT.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> Real {
+    return prandtlPropertyDerivative(MetaPhysicL::raw_value(_mu(r, t)),
+                                     MetaPhysicL::raw_value(_cp(r, t)),
+                                     MetaPhysicL::raw_value(_k(r, t)),
+                                     _dmu_dT(r, t),
+                                     _dcp_dT(r, t),
+                                     _dk_dT(r, t));
+  });
 
   // (pore / particle) Reynolds number based on superficial velocity and
   // characteristic length. Only call Reynolds() one time to compute all three so that
@@ -201,20 +201,20 @@ GeneralFunctorFluidProps::GeneralFunctorFluidProps(const InputParameters & param
         fp::reynolds(_rho(r, t), _eps(r, t) * _speed(r, t), _d, std::max(_mu(r, t), small_number)),
         1.0);
   });
-  // _dRe_dp.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> ADReal {
-  //   return reynoldsPropertyDerivative(MetaPhysicL::raw_value(_Re(r, t)),
-  //                                     MetaPhysicL::raw_value(_rho(r, t)),
-  //                                     MetaPhysicL::raw_value(_mu(r, t)),
-  //                                     _drho_dp(r, t),
-  //                                     _dmu_dp(r, t));
-  // });
-  // _dRe_dT.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> ADReal {
-  //   return reynoldsPropertyDerivative(MetaPhysicL::raw_value(_Re(r, t)),
-  //                                     MetaPhysicL::raw_value(_rho(r, t)),
-  //                                     MetaPhysicL::raw_value(_mu(r, t)),
-  //                                     _drho_dT(r, t),
-  //                                     _dmu_dT(r, t));
-  // });
+  _dRe_dp.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> Real {
+    return reynoldsPropertyDerivative(MetaPhysicL::raw_value(_Re(r, t)),
+                                      MetaPhysicL::raw_value(_rho(r, t)),
+                                      MetaPhysicL::raw_value(_mu(r, t)),
+                                      _drho_dp(r, t),
+                                      _dmu_dp(r, t));
+  });
+  _dRe_dT.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> Real {
+    return reynoldsPropertyDerivative(MetaPhysicL::raw_value(_Re(r, t)),
+                                      MetaPhysicL::raw_value(_rho(r, t)),
+                                      MetaPhysicL::raw_value(_mu(r, t)),
+                                      _drho_dT(r, t),
+                                      _dmu_dT(r, t));
+  });
 
   // (hydraulic) Reynolds number
   _Re_h.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> ADReal {

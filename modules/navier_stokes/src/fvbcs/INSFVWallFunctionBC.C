@@ -74,10 +74,9 @@ INSFVWallFunctionBC::computeQpResidual()
   if (!std::isfinite(parallel_speed.value()))
     return parallel_speed;
 
-  // TODO Make findUStar use AD!
   // Compute the friction velocity and the wall shear stress
   const auto rho = _rho(&elem);
-  ADReal u_star = findUStar(_mu(&elem).value(), rho.value(), parallel_speed, dist.value());
+  ADReal u_star = findUStar(_mu(&elem), rho, parallel_speed, dist.value());
   ADReal tau = u_star * u_star * rho;
 
   // Compute the shear stress component for this momentum equation
