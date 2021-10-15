@@ -60,8 +60,12 @@ public:
   // Return a constant reference to the vector of variable names.
   const std::vector<std::string> & getDisplacementVarNames() const { return _displacements; }
 
-  virtual void createQRules(
-      QuadratureType type, Order order, Order volume_order, Order face_order, SubdomainID block);
+  virtual void createQRules(QuadratureType type,
+                            Order order,
+                            Order volume_order,
+                            Order face_order,
+                            SubdomainID block,
+                            bool allow_negative_qweights = true);
 
   void bumpVolumeQRuleOrder(Order order, SubdomainID block);
   void bumpAllQRuleOrder(Order order, SubdomainID block);

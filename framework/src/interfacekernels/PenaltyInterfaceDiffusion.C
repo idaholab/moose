@@ -9,7 +9,7 @@
 
 #include "PenaltyInterfaceDiffusion.h"
 
-registerMooseObject("MooseTestApp", PenaltyInterfaceDiffusion);
+registerMooseObject("MooseApp", PenaltyInterfaceDiffusion);
 
 InputParameters
 PenaltyInterfaceDiffusion::validParams()
@@ -19,6 +19,9 @@ PenaltyInterfaceDiffusion::validParams()
       "penalty", "The penalty that penalizes jump between primary and neighbor variables.");
   params.addParam<MaterialPropertyName>(
       "jump_prop_name", "the name of the material property that calculates the jump.");
+  params.addClassDescription(
+      "A penalty-based interface condition that forces"
+      "the continuity of variables and the flux equivalence across an interface.");
   return params;
 }
 

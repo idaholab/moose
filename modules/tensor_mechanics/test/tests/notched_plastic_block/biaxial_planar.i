@@ -64,187 +64,188 @@
 []
 
 [Modules/TensorMechanics/Master]
-  [./all]
+  [all]
     add_variables = true
     incremental = true
     generate_output = 'max_principal_stress mid_principal_stress min_principal_stress stress_zz'
     eigenstrain_names = ini_stress
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./uz]
+  [uz]
     type = PointValue
     point = '0 0 0.1'
     use_displaced_mesh = false
     variable = disp_z
-  [../]
-  [./s_zz]
+  []
+  [s_zz]
     type = ElementAverageValue
     use_displaced_mesh = false
     variable = stress_zz
-  [../]
-  [./num_res]
+  []
+  [num_res]
     type = NumResidualEvaluations
-  [../]
-  [./nr_its]
+  []
+  [nr_its]
     type = ElementAverageValue
     variable = num_iters
-  [../]
-  [./max_nr_its]
+  []
+  [max_nr_its]
     type = ElementExtremeValue
     variable = num_iters
-  [../]
-  [./runtime]
+  []
+  [runtime]
     type = PerfGraphData
     data_type = TOTAL
     section_name = 'Root'
-  [../]
+  []
 []
 
 [BCs]
   # back=zmin, front=zmax, bottom=ymin, top=ymax, left=xmin, right=xmax
-  [./xmin_xzero]
+  [xmin_xzero]
     type = DirichletBC
     variable = disp_x
     boundary = left
     value = 0.0
-  [../]
-  [./xmax_xzero]
+  []
+  [xmax_xzero]
     type = DirichletBC
     variable = disp_x
     boundary = right
     value = 0.0
-  [../]
-  [./ymin_yzero]
+  []
+  [ymin_yzero]
     type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0
-  [../]
-  [./ymax_yzero]
+  []
+  [ymax_yzero]
     type = DirichletBC
     variable = disp_y
     boundary = top
     value = 0.0
-  [../]
-  [./zmin_zzero]
+  []
+  [zmin_zzero]
     type = DirichletBC
     variable = disp_z
     boundary = back
     value = '0'
-  [../]
-  [./zmax_disp]
+  []
+  [zmax_disp]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = front
     function = '1E-6*max(t,0)'
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./mc_int]
+  [mc_int]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./plastic_strain]
+  []
+  [plastic_strain]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./num_iters]
+  []
+  [num_iters]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./yield_fcn]
+  []
+  [yield_fcn]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./mc_int_auxk]
+  [mc_int_auxk]
     type = MaterialStdVectorAux
     index = 0
     property = plastic_internal_parameter
     variable = mc_int
-  [../]
-  [./plastic_strain_aux]
+  []
+  [plastic_strain_aux]
     type = MaterialRankTwoTensorAux
     i = 2
     j = 2
     property = plastic_strain
     variable = plastic_strain
-  [../]
-  [./num_iters_auxk] # cannot use plastic_NR_iterations directly as this is zero, since no NR iterations are actually used, since we use a custom algorithm to do the return
+  []
+  [num_iters_auxk] # cannot use plastic_NR_iterations directly as this is zero, since no NR iterations are actually used, since we use a custom algorithm to do the return
     type = ParsedAux
     args = plastic_strain
     function = 'if(plastic_strain>0,1,0)'
     variable = num_iters
-  [../]
-  [./yield_fcn_auxk]
+  []
+  [yield_fcn_auxk]
     type = MaterialStdVectorAux
     index = 0
     property = plastic_yield_function
     variable = yield_fcn
-  [../]
+  []
 []
 
 [UserObjects]
-  [./mc_coh]
+  [mc_coh]
     type = TensorMechanicsHardeningConstant
     value = 5E6
-  [../]
-  [./mc_phi]
+  []
+  [mc_phi]
     type = TensorMechanicsHardeningConstant
     value = 35
     convert_to_radians = true
-  [../]
-  [./mc_psi]
+  []
+  [mc_psi]
     type = TensorMechanicsHardeningConstant
     value = 10
     convert_to_radians = true
-  [../]
-  [./mc]
+  []
+  [mc]
     type = TensorMechanicsPlasticMohrCoulombMulti
     cohesion = mc_coh
     friction_angle = mc_phi
     dilation_angle = mc_psi
     yield_function_tolerance = 1E-5
     internal_constraint_tolerance = 1E-11
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 16E9
     poissons_ratio = 0.25
-  [../]
-  [./mc]
+  []
+  [mc]
     type = ComputeMultiPlasticityStress
     ep_plastic_tolerance = 1E-11
     plastic_models = mc
     max_NR_iterations = 1000
     debug_fspb = crash
-  [../]
-  [./strain_from_initial_stress]
+  []
+  [strain_from_initial_stress]
     type = ComputeEigenstrainFromInitialStress
     initial_stress = '6E6 0 0  0 6E6 0  0 0 6E6'
     eigenstrain_name = ini_stress
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./andy]
+  [andy]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
   start_time = -1
   end_time = 10
   dt = 1
+  dtmin = 1
   solve_type = NEWTON
   type = Transient
 
@@ -260,8 +261,6 @@
 
 
 [Outputs]
-  file_base = biaxial_planar
   perf_graph = true
-  exodus = false
   csv = true
 []

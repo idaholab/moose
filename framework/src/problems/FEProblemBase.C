@@ -4796,8 +4796,12 @@ FEProblemBase::bumpAllQRuleOrder(Order order, SubdomainID block)
 }
 
 void
-FEProblemBase::createQRules(
-    QuadratureType type, Order order, Order volume_order, Order face_order, SubdomainID block)
+FEProblemBase::createQRules(QuadratureType type,
+                            Order order,
+                            Order volume_order,
+                            Order face_order,
+                            SubdomainID block,
+                            const bool allow_negative_qweights)
 {
   if (order == INVALID_ORDER)
   {
@@ -4814,10 +4818,12 @@ FEProblemBase::createQRules(
     face_order = order;
 
   for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
-    _assembly[tid]->createQRules(type, order, volume_order, face_order, block);
+    _assembly[tid]->createQRules(
+        type, order, volume_order, face_order, block, allow_negative_qweights);
 
   if (_displaced_problem)
-    _displaced_problem->createQRules(type, order, volume_order, face_order, block);
+    _displaced_problem->createQRules(
+        type, order, volume_order, face_order, block, allow_negative_qweights);
 
   updateMaxQps();
 }

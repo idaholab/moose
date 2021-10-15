@@ -616,8 +616,12 @@ Assembly::bumpAllQRuleOrder(Order order, SubdomainID block)
 }
 
 void
-Assembly::createQRules(
-    QuadratureType type, Order order, Order volume_order, Order face_order, SubdomainID block)
+Assembly::createQRules(QuadratureType type,
+                       Order order,
+                       Order volume_order,
+                       Order face_order,
+                       SubdomainID block,
+                       bool allow_negative_qweights)
 {
   auto & qvec = _qrules[block];
   unsigned int ndims = _mesh_dimension + 1; // must account for 0-dimensional quadrature.
@@ -629,22 +633,23 @@ Assembly::createQRules(
     int dim = i;
     auto & q = qvec[dim];
     q.vol = QBase::build(type, dim, volume_order);
+    q.vol->allow_rules_with_negative_weights = allow_negative_qweights;
     q.face = QBase::build(type, dim - 1, face_order);
+    q.face->allow_rules_with_negative_weights = allow_negative_qweights;
     q.fv_face = QBase::build(QMONOMIAL, dim - 1, CONSTANT);
+    q.fv_face->allow_rules_with_negative_weights = allow_negative_qweights;
     q.neighbor = libmesh_make_unique<ArbitraryQuadrature>(dim - 1, face_order);
+    q.neighbor->allow_rules_with_negative_weights = allow_negative_qweights;
     q.arbitrary_vol = libmesh_make_unique<ArbitraryQuadrature>(dim, order);
+    q.arbitrary_vol->allow_rules_with_negative_weights = allow_negative_qweights;
     q.arbitrary_face = libmesh_make_unique<ArbitraryQuadrature>(dim - 1, face_order);
+    q.arbitrary_face->allow_rules_with_negative_weights = allow_negative_qweights;
   }
 
   delete _qrule_msm;
   _const_qrule_msm = _qrule_msm = QBase::build(type, _mesh_dimension - 1, face_order).release();
+  _qrule_msm->allow_rules_with_negative_weights = allow_negative_qweights;
   _fe_msm->attach_quadrature_rule(_qrule_msm);
-}
-
-void
-Assembly::createQRules(QuadratureType type, Order order, Order volume_order, Order face_order)
-{
-  createQRules(type, order, volume_order, face_order, Moose::ANY_BLOCK_ID);
 }
 
 void
