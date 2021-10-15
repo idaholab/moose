@@ -15,6 +15,14 @@
     cli_args = 'Variables/u/fv=true'
     ad_indexing_type = 'global'
   []
+  [steady-coarse]
+    type = Exodiff
+    input = steady-adapt.i
+    exodiff = steady-adapt_out.e
+    requirement = 'The system shall be able to combat a singular solve, resulting from two term boundary expansion during gradient computation, by reverting to a one term boundary expansion.'
+    issues = '#16822'
+    ad_indexing_type = 'global'
+  []
   [steady-mms]
     type = PythonUnitTest
     input = 'steady-adapt-run-and-plot.py'
@@ -24,5 +32,6 @@
     min_parallel = 8
     required_python_packages = 'pandas matplotlib'
     heavy = true
+    ad_indexing_type = 'global'
   []
 []
