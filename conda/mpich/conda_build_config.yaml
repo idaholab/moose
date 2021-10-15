@@ -151,14 +151,14 @@ yaml:
   - 0.2.5 haf1e3a3_0           # [osx]
 
 sympy:
-  - 1.8 py39hecd8cb5_0         # [osx]
-  - 1.8 py38hecd8cb5_0         # [osx]
-  - 1.8 py37hecd8cb5_0         # [osx]
-  - 1.8 py36hecd8cb5_0         # [osx]
-  - 1.8 py39h6ffa863_0         # [linux]
-  - 1.8 py38h6ffa863_0         # [linux]
-  - 1.8 py37h6ffa863_0         # [linux]
-  - 1.8 py36h6ffa863_0         # [linux]
+  - 1.9 py39h6e9494a_0         # [osx]
+  - 1.9 py38h50d1736_0         # [osx]
+  - 1.9 py37hf985489_0         # [osx]
+  - 1.8 py36h79c6626_0         # [osx]
+  - 1.9 py39hf3d152e_0         # [linux]
+  - 1.9 py38h578d9bd_0         # [linux]
+  - 1.9 py37h89c1867_0         # [linux]
+  - 1.8 py36h5fab9bb_0         # [linux]
 
 zip_keys:
   - python
