@@ -46,7 +46,7 @@
     prop_file_name = 'input_file.txt'
     # Enter file data as prop#1, prop#2, .., prop#nprop
     nprop = 4
-    read_type = grain
+    read_type = voronoi
     ngrain = 3
     rand_seed = 25346
     rve_type = periodic
