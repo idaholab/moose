@@ -44,7 +44,7 @@
 
 [Postprocessors]
   [./obj]
-    type = NodalMaxValue
+    type = NodalExtremeValue
     variable = var_1
     #block = 1 # this is what being tested, see the test spec
     execute_on = 'initial'
