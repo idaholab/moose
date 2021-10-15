@@ -106,13 +106,6 @@ class Scheduler(MooseObject):
         # The last time the scheduler reported something
         self.last_reported_time = clock()
 
-        # Sets of threading objects created by jobs entering and exiting the queues. When scheduler.waitFinish()
-        # is called, and both thread pools are empty, the pools shut down, and the call to waitFinish() returns.
-        self.__status_pool_lock = threading.Lock()
-        self.__runner_pool_lock = threading.Lock()
-        self.__status_pool_jobs = set([])
-        self.__runner_pool_jobs = set([])
-
         # True when scheduler.waitFinish() is called. This alerts the scheduler, no more jobs are
         # to be scheduled. KeyboardInterrupts are then handled by the thread pools.
         self.__waiting = False
@@ -249,14 +242,12 @@ class Scheduler(MooseObject):
             for job in concurrent_jobs:
                 if job.isFinished():
                     if not state:
-                        with self.__status_pool_lock:
-                            self.__status_pool_jobs.add(self.status_pool.apply_async(self.jobStatus, (job, jobs, j_lock)))
+                        self.status_pool.apply_async(self.jobStatus, (job, jobs, j_lock))
 
                 elif job.isHold():
                     if not state:
-                        with self.__runner_pool_lock:
-                            job.setStatus(job.queued)
-                            self.__runner_pool_jobs.add(self.run_pool.apply_async(self.runJob, (job, jobs, j_lock)))
+                        job.setStatus(job.queued)
+                        self.run_pool.apply_async(self.runJob, (job, jobs, j_lock))
 
     def getLoad(self):
         """ Method to return current load average """
@@ -310,8 +301,7 @@ class Scheduler(MooseObject):
 
     def handleLongRunningJob(self, job, jobs, j_lock):
         """ Handle jobs that have not reported in the alotted time """
-        with self.__status_pool_lock:
-            self.__status_pool_jobs.add(self.status_pool.apply_async(self.jobStatus, (job, jobs, j_lock)))
+        self.status_pool.apply_async(self.jobStatus, (job, jobs, j_lock))
 
     def jobStatus(self, job, jobs, j_lock):
         """
