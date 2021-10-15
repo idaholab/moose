@@ -20,7 +20,8 @@ MortarData::createMortarInterface(const std::pair<BoundaryID, BoundaryID> & boun
                                   SubProblem & subproblem,
                                   bool on_displaced,
                                   bool periodic,
-                                  bool give_me_wrong_results)
+                                  const bool debug,
+                                  const bool correct_edge_dropping)
 {
   _mortar_subdomain_coverage.insert(subdomain_key.first);
   _mortar_subdomain_coverage.insert(subdomain_key.second);
@@ -35,7 +36,7 @@ MortarData::createMortarInterface(const std::pair<BoundaryID, BoundaryID> & boun
     auto && periodic_map_iterator = _displaced_periodic_map.find(boundary_key);
     if (periodic_map_iterator != _displaced_periodic_map.end() &&
         periodic_map_iterator->second != periodic)
-      mooseError("We do not currently support enforcing both periodic and non-perodic constraints "
+      mooseError("We do not currently support enforcing both periodic and non-periodic constraints "
                  "on the same boundary primary-secondary pair");
     else
       _displaced_periodic_map.insert(periodic_map_iterator, std::make_pair(boundary_key, periodic));
@@ -48,7 +49,8 @@ MortarData::createMortarInterface(const std::pair<BoundaryID, BoundaryID> & boun
                                                                      subdomain_key,
                                                                      on_displaced,
                                                                      periodic,
-                                                                     give_me_wrong_results));
+                                                                     debug,
+                                                                     correct_edge_dropping));
   }
   else
   {
@@ -67,7 +69,8 @@ MortarData::createMortarInterface(const std::pair<BoundaryID, BoundaryID> & boun
                                                            subdomain_key,
                                                            on_displaced,
                                                            periodic,
-                                                           give_me_wrong_results));
+                                                           debug,
+                                                           correct_edge_dropping));
   }
 
   // See whether to query the mesh

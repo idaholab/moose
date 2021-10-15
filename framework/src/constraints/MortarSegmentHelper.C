@@ -250,35 +250,6 @@ MortarSegmentHelper::clipPoly(const std::vector<Point> & primary_nodes) const
 }
 
 void
-MortarSegmentHelper::plotPoly(const std::vector<Point> & poly) const
-{
-  if (poly.size() < 2)
-    return;
-
-  Moose::out << "plt.plot([";
-  for (auto pt : poly)
-    Moose::out << pt(0) << ", ";
-  Moose::out << poly[0](0) << "], [";
-  for (auto pt : poly)
-    Moose::out << pt(1) << ", ";
-  Moose::out << poly[0](1) << "])" << std::endl;
-}
-
-void
-MortarSegmentHelper::plotTriangulation(
-    const std::vector<Point> & nodes,
-    const std::vector<std::vector<unsigned int>> & elem_to_nodes) const
-{
-  for (auto el : elem_to_nodes)
-  {
-    std::vector<Point> poly;
-    for (auto i : make_range(el.size()))
-      poly.push_back(nodes[el[i]]);
-    plotPoly(poly);
-  }
-}
-
-void
 MortarSegmentHelper::triangulatePoly(std::vector<Point> & poly_nodes,
                                      const unsigned int offset,
                                      std::vector<std::vector<unsigned int>> & tri_map) const

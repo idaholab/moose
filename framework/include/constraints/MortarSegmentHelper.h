@@ -54,18 +54,6 @@ public:
   std::vector<libMesh::Point> clipPoly(const std::vector<libMesh::Point> & primary_nodes) const;
 
   /**
-   * Prints python plotting commands (to terminal) for visualizing polygons (for debugging only)
-   */
-  void plotPoly(const std::vector<libMesh::Point> & poly) const;
-
-  /**
-   * Prints python plotting commands (to terminal) for visualizing triangulation (for debugging
-   * only)
-   */
-  void plotTriangulation(const std::vector<libMesh::Point> & nodes,
-                         const std::vector<std::vector<unsigned int>> & elem_to_nodes) const;
-
-  /**
    * Triangulate a polygon (currently uses center of polygon to define triangulation)
    * @param poly_nodes List of 2D nodes defining polygon
    * @param offset Current size of 3D nodes array (not poly_nodes)

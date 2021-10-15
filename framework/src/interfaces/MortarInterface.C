@@ -37,6 +37,12 @@ MortarInterface::validParams()
       "effect of changing the normals vector for projection from outward to inward facing");
 
   params.addParam<bool>(
+      "debug_mesh",
+      false,
+      "Whether this constraint is going to enable mortar segment mesh debug information. An exodus"
+      "file will be generated if the user sets this flag to true");
+
+  params.addParam<bool>(
       "correct_edge_dropping",
       false,
       "Whether to enable correct edge dropping treatment for mortar constraints. When disabled "
@@ -66,6 +72,7 @@ MortarInterface::MortarInterface(const MooseObject * moose_object)
                                          ? moose_object->getParam<bool>("use_displaced_mesh")
                                          : false,
                                      moose_object->getParam<bool>("periodic"),
+                                     moose_object->getParam<bool>("debug_mesh"),
                                      moose_object->getParam<bool>("correct_edge_dropping"));
 
   const auto & secondary_set = _mortar_data.getHigherDimSubdomainIDs(_secondary_subdomain_id);

@@ -68,7 +68,8 @@ public:
                             const std::pair<SubdomainID, SubdomainID> & subdomain_key,
                             bool on_displaced,
                             bool periodic,
-                            bool correct_edge_dropping);
+                            const bool debug,
+                            const bool correct_edge_dropping);
 
   /**
    * Once the secondary_requested_boundary_ids and
@@ -368,7 +369,7 @@ private:
                                      subdomain_id_type lower_dimensional_secondary_subdomain_id);
 
   /// Whether to print debug output
-  bool _debug;
+  const bool _debug;
 
   /// Whether this object is on the displaced mesh
   const bool _on_displaced;

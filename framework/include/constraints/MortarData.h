@@ -33,13 +33,16 @@ public:
    * @param periodic Whether the AMG object will be used for enforcing periodic constraints. Note
    * that this changes the direction of the projection normals so one AMG object cannot be used to
    * enforce both periodic and non-periodic constraints
+   * @param debug whether to output mortar segment mesh exodus file for debugging purposes
+   * @param correct_edge_dropping edge dropping treatment selection
    */
   void createMortarInterface(const std::pair<BoundaryID, BoundaryID> & boundary_key,
                              const std::pair<SubdomainID, SubdomainID> & subdomain_key,
                              SubProblem & subproblem,
                              bool on_displaced,
                              bool periodic,
-                             bool give_me_wrong_results);
+                             const bool debug,
+                             const bool correct_edge_dropping);
 
   /**
    * Getter to retrieve the AutomaticMortarGeneration object corresponding to the boundary and

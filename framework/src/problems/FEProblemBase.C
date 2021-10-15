@@ -5954,7 +5954,8 @@ FEProblemBase::createMortarInterface(
     const std::pair<SubdomainID, SubdomainID> & primary_secondary_subdomain_pair,
     bool on_displaced,
     bool periodic,
-    bool correct_edge_dropping)
+    const bool debug,
+    const bool correct_edge_dropping)
 {
   _has_mortar = true;
 
@@ -5964,6 +5965,7 @@ FEProblemBase::createMortarInterface(
                                               *_displaced_problem,
                                               on_displaced,
                                               periodic,
+                                              debug,
                                               correct_edge_dropping);
   else
     return _mortar_data.createMortarInterface(primary_secondary_boundary_pair,
@@ -5971,6 +5973,7 @@ FEProblemBase::createMortarInterface(
                                               *this,
                                               on_displaced,
                                               periodic,
+                                              debug,
                                               correct_edge_dropping);
 }
 

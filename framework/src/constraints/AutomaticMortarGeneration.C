@@ -53,10 +53,11 @@ AutomaticMortarGeneration::AutomaticMortarGeneration(
     const std::pair<SubdomainID, SubdomainID> & subdomain_key,
     bool on_displaced,
     bool periodic,
-    bool correct_edge_dropping)
+    const bool debug,
+    const bool correct_edge_dropping)
   : ConsoleStreamInterface(app),
     mesh(mesh_in),
-    _debug(false),
+    _debug(debug),
     _on_displaced(on_displaced),
     _periodic(periodic),
     _distributed(!mesh.is_replicated()),
@@ -978,9 +979,9 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
           for (auto el : make_range(elem_to_node_map.size()))
           {
             // Create new triangular element
-            Elem * new_elem;
+            std::unique_ptr<Elem> new_elem;
             if (elem_to_node_map[el].size() == 3)
-              new_elem = new Tri3;
+              new_elem = std::make_unique<Tri3>();
             else
               mooseError("Active mortar segments only supports TRI elements, 3 nodes expected "
                          "but: ",
@@ -998,25 +999,21 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
 
             // If element is smaller than tolerance, don't add to msm
             if (new_elem->volume() / secondary_volume < TOLERANCE)
-            {
-              // Delete element if we are not going to use it
-              delete (new_elem);
               continue;
-            }
 
             // Add elements to mortar segment mesh
-            mortar_segment_mesh->add_elem(new_elem);
-            new_elem->set_extra_integer(secondary_sub_elem, sub_elem_map[el].first);
-            new_elem->set_extra_integer(primary_sub_elem, sub_elem_map[el].second);
+            Elem * msm_new_elem = mortar_segment_mesh->add_elem(new_elem.release());
+
+            msm_new_elem->set_extra_integer(secondary_sub_elem, sub_elem_map[el].first);
+            msm_new_elem->set_extra_integer(primary_sub_elem, sub_elem_map[el].second);
 
             // Fill out mortar segment info
             MortarSegmentInfo msinfo;
             msinfo.secondary_elem = secondary_side_elem;
             msinfo.primary_elem = primary_elem_candidate;
-            msm_elem_to_info.insert(std::make_pair(new_elem, msinfo));
 
             // Associate this MSM elem with the MortarSegmentInfo.
-            msm_elem_to_info.insert(std::make_pair(new_elem, msinfo));
+            msm_elem_to_info.insert(std::make_pair(msm_new_elem, msinfo));
           }
         }
         // End loop through primary element candidates
@@ -1138,7 +1135,7 @@ AutomaticMortarGeneration::msmStatistics()
 
     // Create table
     std::vector<std::string> col_names = {"mesh", "n_elems", "max", "min", "median"};
-    std::vector<std::string> subds = {"secondary_lower", "primary_lower", "mortar_segement"};
+    std::vector<std::string> subds = {"secondary_lower", "primary_lower", "mortar_segment"};
     std::vector<size_t> n_elems = {secondary.size(), primary.size(), msm.size()};
     std::vector<Real> maxs = {secondary.maximum(), primary.maximum(), msm.maximum()};
     std::vector<Real> mins = {secondary.minimum(), primary.minimum(), msm.minimum()};
