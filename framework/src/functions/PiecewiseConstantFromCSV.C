@@ -74,9 +74,3 @@ PiecewiseConstantFromCSV::value(Real, const Point & p) const
     // No need to search for the element if we're just looking at nearest neighbors
     return _read_prop_user_object->getVoronoiData(p, _column_number);
 }
-
-Real
-PiecewiseConstantFromCSV::timeDerivative(Real /*t*/, const Point & /*p*/) const
-{
-  return 0;
-}

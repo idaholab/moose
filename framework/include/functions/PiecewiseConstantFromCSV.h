@@ -32,11 +32,11 @@ public:
 
   /**
    * Get the time derivative of the function (based on time only)
-   * \param t The time
+   * \param t The time (unused)
    * \param pt The point in space (x,y,z) (unused)
    * \return The time derivative of the function at the specified time
    */
-  virtual Real timeDerivative(Real t, const Point & pt) const override;
+  virtual Real timeDerivative(Real t, const Point & pt) const override { return 0; };
 
 protected:
   void initialSetup();
