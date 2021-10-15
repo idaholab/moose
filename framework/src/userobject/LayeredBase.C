@@ -112,52 +112,52 @@ LayeredBase::LayeredBase(const InputParameters & parameters)
     _has_direction_max_min = true;
   }
   else
-    mooseError("One of 'bounds' or 'num_layers' must be specified for ", _layered_base_name);
+    mooseError("One of 'bounds' or 'num_layers' must be specified");
 
   if (!_interval_based && _sample_type == 1)
-    mooseError("'sample_type = interpolate' not supported with 'bounds' in ", _layered_base_name);
+    mooseError("'sample_type = interpolate' not supported with 'bounds'");
 
-  bool layer_bounding_block = _layered_base_params.isParamValid("layer_bounding_block");
-  bool block = _layered_base_params.isParamValid("block");
-  bool direction_min = _layered_base_params.isParamValid("direction_min");
-  bool direction_max = _layered_base_params.isParamValid("direction_max");
+  bool has_layer_bounding_block = _layered_base_params.isParamValid("layer_bounding_block");
+  bool has_block = _layered_base_params.isParamValid("block");
+  bool has_direction_min = _layered_base_params.isParamValid("direction_min");
+  bool has_direction_max = _layered_base_params.isParamValid("direction_max");
 
-  if (_has_direction_max_min && direction_min)
-    mooseWarning("'direction_min' is unused when providing 'bounds' in ", _layered_base_name);
+  if (_has_direction_max_min && has_direction_min)
+    mooseWarning("'direction_min' is unused when providing 'bounds'");
 
-  if (_has_direction_max_min && direction_max)
-    mooseWarning("'direction_max' is unused when providing 'bounds' in ", _layered_base_name);
+  if (_has_direction_max_min && has_direction_max)
+    mooseWarning("'direction_max' is unused when providing 'bounds'");
 
-  if (layer_bounding_block && block)
-    mooseError("'layer_bounding_block' and 'block' cannot both be set in ", _layered_base_name);
+  if (has_layer_bounding_block && has_block)
+    mooseError("'layer_bounding_block' and 'block' cannot both be set");
 
-  // can only specify one of layer_bounding_block, block, or the pair direction_max/min
-  if ((layer_bounding_block || block) && (direction_min || direction_max))
-    mooseError("Only one of 'layer_bounding_block', 'block', and the pair 'direction_max' and "
-               "'direction_min' can be provided in ",
-               _layered_base_name);
+  // can only specify one of layer_bounding_block or the pair direction_max/min
+  if (has_layer_bounding_block && (has_direction_min || has_direction_max))
+    mooseError("Only one of 'layer_bounding_block' and the pair 'direction_max' and "
+               "'direction_min' can be provided");
 
   // if either one of direction_min or direction_max is specified, must provide the other one
-  if (direction_min != direction_max)
+  if (has_direction_min != has_direction_max)
     mooseError("If providing the layer max/min directions, both 'direction_max' and "
                "'direction_min' must be specified.");
 
-  if (layer_bounding_block)
+  if (has_layer_bounding_block)
     _layer_bounding_blocks = _layered_base_subproblem.mesh().getSubdomainIDs(
         _layered_base_params.get<std::vector<SubdomainName>>("layer_bounding_block"));
 
-  if (block)
+  if (has_block)
     _layer_bounding_blocks = _layered_base_subproblem.mesh().getSubdomainIDs(
         _layered_base_params.get<std::vector<SubdomainName>>("block"));
 
-  if (direction_min && direction_max)
+  // specifying the direction max/min overrides anything set with the 'block'
+  if (has_direction_min && has_direction_max)
   {
     _direction_min = parameters.get<Real>("direction_min");
     _direction_max = parameters.get<Real>("direction_max");
     _has_direction_max_min = true;
 
     if (_direction_max <= _direction_min)
-      mooseError("'direction_max' must be larger than 'direction_min' in ", _layered_base_name);
+      mooseError("'direction_max' must be larger than 'direction_min'");
   }
 
   _layer_values.resize(_num_layers);
