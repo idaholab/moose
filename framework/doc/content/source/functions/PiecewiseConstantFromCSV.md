@@ -14,7 +14,8 @@ It can assume CSV data
 - defines an interpolation grid, in which case the function will locate the closest point in that interpolation grid, then return the value for that point in the CSV file
 
 
-For the latter case, the first columns of the CSV data must define the coordinates of each point forming the interpolation grid.
+For the latter case, the first columns of the CSV data must define the coordinates of each point forming the interpolation grid. The number of columns used to define these coordinates
+must match the dimension of the mesh.
 
 ## Example Input Syntax
 

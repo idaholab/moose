@@ -66,7 +66,8 @@ ElementPropertyReadFile::ElementPropertyReadFile(const InputParameters & paramet
     _mesh(_fe_problem.mesh())
 {
   if (!_use_random_tesselation && parameters.isParamSetByUser("rand_seed"))
-    paramError("rand_seed", "Random seeds should only be provided if random tesselation is desired");
+    paramError("rand_seed",
+               "Random seeds should only be provided if random tesselation is desired");
   _nelem = _mesh.nElem();
 
   for (unsigned int i = 0; i < LIBMESH_DIM; i++)
@@ -132,10 +133,11 @@ ElementPropertyReadFile::readData()
 void
 ElementPropertyReadFile::initVoronoiCenterPoints()
 {
+  _center.resize(_nvoronoi);
+
   // Generate a random tesselation
   if (_use_random_tesselation)
   {
-    _center.resize(_nvoronoi);
     MooseRandom::seed(_rand_seed);
     for (unsigned int i = 0; i < _nvoronoi; i++)
       for (unsigned int j = 0; j < LIBMESH_DIM; j++)
@@ -145,8 +147,8 @@ ElementPropertyReadFile::initVoronoiCenterPoints()
   else
   {
     for (unsigned int i = 0; i < _nvoronoi; i++)
-      for (unsigned int j = 0; j < LIBMESH_DIM; j++)
-        _reader.getData(i)[j];
+      for (unsigned int j = 0; j < _ti_feproblem.mesh().dimension(); j++)
+        _center[i](j) = _reader.getData(i)[j];
   }
 }
 
@@ -154,11 +156,8 @@ Real
 ElementPropertyReadFile::getData(const Elem * elem, unsigned int prop_num) const
 {
   if (prop_num >= _nprop)
-    paramError("nprop",
-               "Property number ",
-               prop_num,
-               " greater than than total number of properties ",
-               _nprop);
+    paramError(
+        "nprop", "Property number ", prop_num, " greater than total number of properties ", _nprop);
 
   Real data = 0.0;
   switch (_read_type)

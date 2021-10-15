@@ -19,8 +19,8 @@ PiecewiseConstantFromCSV::validParams()
                                           "The ElementReadPropertyFile "
                                           "GeneralUserObject to read element "
                                           "specific property values from file");
-  params.addRequiredParam<unsigned int>(
-      "column_number", "The column number for the desired data in the CSV");
+  params.addRequiredParam<unsigned int>("column_number",
+                                        "The column number for the desired data in the CSV");
 
   // This parameter is added for optimization when doing nearest neighbor interpolation
   // but it's also safer to have that parameter be close to the use case, and not only in the UO
@@ -37,17 +37,26 @@ PiecewiseConstantFromCSV::validParams()
 
 PiecewiseConstantFromCSV::PiecewiseConstantFromCSV(const InputParameters & parameters)
   : Function(parameters),
-    _read_prop_user_object(getUserObject<ElementPropertyReadFile>("read_prop_user_object")),
+    _read_prop_user_object(nullptr),
     _column_number(getParam<unsigned int>("column_number")),
     _read_type(getParam<MooseEnum>("read_type").getEnum<ReadTypeEnum>()),
-    _point_locator()
+    _point_locator(_ti_feproblem.mesh().getPointLocator())
 {
-  if (_read_type != _read_prop_user_object.getReadType())
-    paramError(
-        "read_type", "The ElementPropertyReadFile UO should have the same read_type parameter.");
-  if (_column_number < LIBMESH_DIM && _read_type == ReadTypeEnum::VORONOI)
+  if (_column_number < _ti_feproblem.mesh().dimension() && _read_type == ReadTypeEnum::VORONOI)
     mooseWarning(
-      "The column requested in the function is likely to just be containing point coordinates");
+        "The column requested in the function is likely to just be containing point coordinates");
+}
+
+void
+PiecewiseConstantFromCSV::initialSetup()
+{
+  // Get a pointer to the ElementPropertyReadFile. A pointer is used because the UserObject is not
+  // available during the construction of the function
+  _read_prop_user_object = &getUserObject<ElementPropertyReadFile>("read_prop_user_object");
+
+  if (_read_type != _read_prop_user_object->getReadType())
+    paramError("read_type",
+               "The ElementPropertyReadFile UO should have the same read_type parameter.");
 }
 
 Real
@@ -59,11 +68,11 @@ PiecewiseConstantFromCSV::value(Real, const Point & p) const
     // CSV by element or by block.
     const auto current_elem = (*_point_locator)(p);
 
-    return _read_prop_user_object.getData(current_elem, _column_number);
+    return _read_prop_user_object->getData(current_elem, _column_number);
   }
   else
     // No need to search for the element if we're just looking at nearest neighbors
-    return _read_prop_user_object.getVoronoiData(p, _column_number);
+    return _read_prop_user_object->getVoronoiData(p, _column_number);
 }
 
 Real

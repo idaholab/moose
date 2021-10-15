@@ -16,7 +16,12 @@
 /**
  * How data is organized in the CSV file
  */
-enum class ReadTypeEnum {ELEMENT=0, VORONOI=1, BLOCK=2};
+enum class ReadTypeEnum
+{
+  ELEMENT = 0,
+  VORONOI = 1,
+  BLOCK = 2
+};
 
 /**
  * Read properties from file - grain, element, or block
@@ -65,8 +70,8 @@ public:
   Real getElementData(const Elem * elem, unsigned int prop_num) const;
 
   /**
-   * This function assign properties to element read from file with nearest neighbor / grain based properties
-   * Voronoi centers distribution in the RVE can be Periodic or non-periodic (default)
+   * This function assign properties to element read from file with nearest neighbor / grain based
+   * properties Voronoi centers distribution in the RVE can be Periodic or non-periodic (default)
    * @param centroid the centroid of the element to get data for
    * @param prop_num the column index of the property we want to retrieve
    */
@@ -88,7 +93,7 @@ public:
   /**
    * Returns the ordering of data expected in the CSV file
    */
-  ReadTypeEnum getReadType() const {return _read_type;}
+  ReadTypeEnum getReadType() const { return _read_type; }
 
 protected:
   /// Name of file containing property values
