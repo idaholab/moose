@@ -19,7 +19,18 @@ PiecewiseConstantFromCSV::validParams()
                                           "The ElementReadPropertyFile "
                                           "GeneralUserObject to read element "
                                           "specific property values from file");
-  params.addRequiredParam<unsigned int>("column_number", "The column number for the desired data in the CSV");
+  params.addRequiredParam<unsigned int>(
+      "column_number", "The column number for the desired data in the CSV");
+
+  // This parameter is added for optimization when doing nearest neighbor interpolation
+  // but it's also safer to have that parameter be close to the use case, and not only in the UO
+  params.addRequiredParam<MooseEnum>("read_type",
+                                     MooseEnum("element voronoi block"),
+                                     "Organization of data in the CSV file: "
+                                     "element:by element "
+                                     "voronoi:nearest neighbor / voronoi tesselation structure "
+                                     "block:by mesh block");
+
   params.addClassDescription("Uses data read from CSV to assign values");
   return params;
 }
@@ -27,18 +38,32 @@ PiecewiseConstantFromCSV::validParams()
 PiecewiseConstantFromCSV::PiecewiseConstantFromCSV(const InputParameters & parameters)
   : Function(parameters),
     _read_prop_user_object(getUserObject<ElementPropertyReadFile>("read_prop_user_object")),
-    _column_number(getParam<unsigned int>("column_number"))
+    _column_number(getParam<unsigned int>("column_number")),
+    _read_type(getParam<MooseEnum>("read_type").getEnum<ReadTypeEnum>()),
+    _point_locator()
 {
+  if (_read_type != _read_prop_user_object.getReadType())
+    paramError(
+        "read_type", "The ElementPropertyReadFile UO should have the same read_type parameter.");
+  if (_column_number < LIBMESH_DIM)
+    mooseWarning(
+      "The column requested in the function is likely to just be containing point coordinates");
 }
 
 Real
-PiecewiseConstantFromCSV::value(Real t, const Point & p) const
+PiecewiseConstantFromCSV::value(Real, const Point & p) const
 {
-  // This is somewhat inefficient, but it allows us to retrieve the data in the
-  // CSV by element or by block. It's unnecessary for nearest neighbor
-  const auto current_elem =
+  if (_read_type != ReadTypeEnum::VORONOI)
+  {
+    // This is somewhat inefficient, but it allows us to retrieve the data in the
+    // CSV by element or by block.
+    const auto current_elem = (*_point_locator)(p);
 
-  _read_prop_user_object.getData(current_elem, _column_number);
+    return _read_prop_user_object.getData(current_elem, _column_number);
+  }
+  else
+    // No need to search for the element if we're just looking at nearest neighbors
+    return _read_prop_user_object.getVoronoiData(p, _column_number);
 }
 
 Real

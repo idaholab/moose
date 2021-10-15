@@ -1,0 +1,68 @@
+[Tests]
+  issues = '#19109'
+  design = 'PiecewiseConstantFromCSV.md'
+  [csv_read]
+    requirement = 'The Function system shall include a function that can obtain data from a CSV file'
+    [element]
+      type = 'Exodiff'
+      input = 'piecewise_constant.i'
+      exodiff = 'piecewise_constant_out.e'
+      detail = 'with data sorted by element ids'
+    []
+    [voronoi]
+      type = 'Exodiff'
+      input = 'piecewise_constant.i'
+      exodiff = 'piecewise_constant_out.e'
+      cli_args = 'Functions/active=nearest UserObjects/active=reader_nearest ICs/active=nearest'
+      detail = 'with data at given locations and using nearest neighbor interpolation in between'
+    []
+    [block]
+      type = 'Exodiff'
+      input = 'piecewise_constant.i'
+      exodiff = 'piecewise_constant_out.e'
+      cli_args = 'Functions/active=block UserObjects/active=reader_block ICs/active=block'
+      detail = 'with data sorted by blocks and with constant values on each block.'
+    []
+  []
+  [errors]
+    requirement = 'The system shall error out if'
+    [read_type]
+      type = RunException
+      input = 'piecewise_constant.i'
+      cli_args = 'Functions/element/read_type=voronoi'
+      expect_err = 'The ElementPropertyReadFile UO should have the same read_type parameter'
+      detail = 'if the CSV reader object and the function expect the CSV data to be ordered differently'
+    []
+    [num_columns]
+      type = RunException
+      input = 'piecewise_constant.i'
+      cli_args = 'Functions/element/column_number=26'
+      expect_err = 'Row 0 in data_element.csv has number of data less than 26'
+      detail = 'if the desired column number in the CSV file is higher than the number of columns in the file'
+    []
+    [num_rows]
+      type = RunException
+      input = 'piecewise_constant.i'
+      cli_args = 'UserObjects/reader_element/prop_file_name=data_block.csv'
+      expect_err = 'Data in data_element.csv does not have enough rows for'
+      detail = 'if the desired column number in the CSV file is higher than the number of columns in the file'
+    []
+  []
+  [warnings]
+    requirement = 'The system shall issue a warning if'
+    [num_columns]
+      type = RunException
+      input = 'piecewise_constant.i'
+      cli_args = 'Functions/element/column_number=0'
+      expect_err = 'The column requested in the function is likely to just be containing point coordinates'
+      detail = 'if the desired column number in the CSV file is likely to be a column holding point coordinates'
+    []
+    [too_much_data_in_file]
+      type = RunException
+      input = 'piecewise_constant.i'
+      cli_args = 'Functions/active=block ICs/active=block UserObjects/active=reader_block UserObjects/reader_block/prop_file_name=data_element.csv'
+      expect_err = ''
+      detail = 'if the data file contains more points/rows than the reader needs'
+    []
+  []
+[]

@@ -14,6 +14,11 @@
 #include "DelimitedFileReader.h"
 
 /**
+ * How data is organized in the CSV file
+ */
+enum class ReadTypeEnum {ELEMENT=0, VORONOI=1, BLOCK=2};
+
+/**
  * Read properties from file - grain, element, or block
  * Input file syntax: prop1 prop2 etc. See test.
  * For grain level, voronoi tesellation with random grain centers are generated;
@@ -62,10 +67,10 @@ public:
   /**
    * This function assign properties to element read from file with nearest neighbor / grain based properties
    * Voronoi centers distribution in the RVE can be Periodic or non-periodic (default)
-   * @param elem the element to get data for
+   * @param centroid the centroid of the element to get data for
    * @param prop_num the column index of the property we want to retrieve
    */
-  Real getVoronoiData(const Elem * elem, unsigned int prop_num) const;
+  Real getVoronoiData(const Point centroid, unsigned int prop_num) const;
 
   /**
    * This function assigns properties to elements read from file with block  based properties
@@ -80,6 +85,11 @@ public:
    */
   Real minPeriodicDistance(Point, Point) const;
 
+  /**
+   * Returns the ordering of data expected in the CSV file
+   */
+  ReadTypeEnum getReadType() const {return _read_type;}
+
 protected:
   /// Name of file containing property values
   const std::string _prop_file_name;
@@ -92,7 +102,7 @@ protected:
   /// Number of blocks (for property read based on blocks)
   const unsigned int _nblock;
   /// Type of read - element, grain, or block
-  const enum class ReadType { ELEMENT, VORONOI, BLOCK } _read_type;
+  const ReadTypeEnum _read_type;
   /// Whether to use a random tesselation for the Voronoi/grain type
   const bool _use_random_tesselation;
   /// Random seed - used for generating grain centers

@@ -58,7 +58,7 @@ ElementPropertyReadFile::ElementPropertyReadFile(const InputParameters & paramet
     _nprop(getParam<unsigned int>("nprop")),
     _nvoronoi(getParam<unsigned int>("nvoronoi")),
     _nblock(getParam<unsigned int>("nblock")),
-    _read_type(getParam<MooseEnum>("read_type").getEnum<ReadType>()),
+    _read_type(getParam<MooseEnum>("read_type").getEnum<ReadTypeEnum>()),
     _use_random_tesselation(getParam<bool>("use_random_voronoi")),
     _rand_seed(getParam<unsigned int>("rand_seed")),
     _rve_type(getParam<MooseEnum>("rve_type")),
@@ -94,17 +94,17 @@ ElementPropertyReadFile::readData()
 
   switch (_read_type)
   {
-    case ReadType::ELEMENT:
+    case ReadTypeEnum::ELEMENT:
       nobjects = _nelem;
       break;
 
-    case ReadType::VORONOI:
+    case ReadTypeEnum::VORONOI:
       if (_nvoronoi <= 0)
         paramError("nvoronoi", "Provide non-zero number of voronoi tesselations/grains.");
       nobjects = _nvoronoi;
       break;
 
-    case ReadType::BLOCK:
+    case ReadTypeEnum::BLOCK:
       if (_nblock <= 0)
         paramError("nblock", "Provide non-zero number of blocks.");
       nobjects = _nblock;
@@ -125,7 +125,7 @@ ElementPropertyReadFile::readData()
     if (_reader.getData(i).size() < _nprop)
       mooseError("Row ", i, " in ", _prop_file_name, " has number of data less than ", _nprop);
 
-  if (_read_type == ReadType::VORONOI)
+  if (_read_type == ReadTypeEnum::VORONOI)
     initVoronoiCenterPoints();
 }
 
@@ -163,15 +163,15 @@ ElementPropertyReadFile::getData(const Elem * elem, unsigned int prop_num) const
   Real data = 0.0;
   switch (_read_type)
   {
-    case ReadType::ELEMENT:
+    case ReadTypeEnum::ELEMENT:
       data = getElementData(elem, prop_num);
       break;
 
-    case ReadType::VORONOI:
-      data = getVoronoiData(elem, prop_num);
+    case ReadTypeEnum::VORONOI:
+      data = getVoronoiData(elem->centroid(), prop_num);
       break;
 
-    case ReadType::BLOCK:
+    case ReadTypeEnum::BLOCK:
       data = getBlockData(elem, prop_num);
       break;
   }
@@ -205,9 +205,8 @@ ElementPropertyReadFile::getBlockData(const Elem * elem, unsigned int prop_num) 
 }
 
 Real
-ElementPropertyReadFile::getVoronoiData(const Elem * elem, unsigned int prop_num) const
+ElementPropertyReadFile::getVoronoiData(const Point centroid, unsigned int prop_num) const
 {
-  Point centroid = elem->vertex_average();
   Real min_dist = _max_range;
   unsigned int ivoronoi = 0;
 
