@@ -4,7 +4,7 @@ from mooseutils import fuzzyEqual
 
 class TestSteadyAdapt(unittest.TestCase):
     def test(self):
-        df1 = mms.run_spatial('steady-adapt.i', 8, mpi=8)
+        df1 = mms.run_spatial('steady-adapt.i', 8, "--error", mpi=8)
 
         fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
         fig.plot(df1,
