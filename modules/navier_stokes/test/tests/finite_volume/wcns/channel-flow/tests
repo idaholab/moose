@@ -9,6 +9,7 @@
     requirement = 'The system shall be able to solve for a transient 2D channel case with a weakly compressible formulation.'
     ad_indexing_type = 'global'
     abs_zero = 1e-9
+    recover = false # see #19126
   []
   [turbulence]
     type = 'Exodiff'
@@ -20,5 +21,6 @@
     ad_indexing_type = 'global'
     mesh_mode = REPLICATED
     abs_zero = 1e-9
+    recover = false # see #19126
   []
 []
