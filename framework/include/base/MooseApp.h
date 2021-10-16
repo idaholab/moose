@@ -839,10 +839,7 @@ public:
    *
    * NOTE: This does require that you keep track of executions using appendExecution().
    */
-  unsigned int executionCount(const ExecFlagType & exec_type) const
-  {
-    return _exec_counts[exec_type.id()];
-  }
+  unsigned int executionCount(const ExecFlagType & exec_type) const;
 
 protected:
   /**

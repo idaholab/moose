@@ -2522,3 +2522,12 @@ MooseApp::registerRestartableDataMapName(const RestartableDataMapName & name, st
   _restartable_meta_data.emplace(
       std::make_pair(name, std::make_pair(RestartableDataMap(), suffix)));
 }
+
+unsigned int
+MooseApp::executionCount(const ExecFlagType & exec_type) const
+{
+  const auto it = _exec_counts.find(exec_type.id());
+  if (it != _exec_counts.end())
+    return it->second;
+  return 0; // hasn't ran yet
+}
