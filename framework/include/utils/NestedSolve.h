@@ -85,14 +85,17 @@ public:
     NOT_CONVERGED
   };
 
-  /**
-   * Get the solver state
-   */
+  /// Get the solver state
   const State & getState() const { return _state; }
+  /// Get the number of iterations from the last solve
+  const std::size_t & getIterations() { return _n_iterations; };
 
 protected:
   /// current solver state
   State _state;
+
+  /// number of nested iterations
+  std::size_t _n_iterations;
 
   ///@{ Deduce the Jacobian type from the solution type
   template <typename T>
@@ -303,7 +306,7 @@ NestedSolve::nonlinear(V & guess, T compute)
   CorrespondingJacobian<V> jacobian;
   sizeItems(guess, residual, jacobian);
 
-  std::size_t n_iterations = 0;
+  _n_iterations = 0;
   compute(guess, residual, jacobian);
 
   // compute first residual norm for relative convergence checks
@@ -331,16 +334,16 @@ NestedSolve::nonlinear(V & guess, T compute)
   };
 
   // perform non-linear iterations
-  while (n_iterations < _max_iterations)
+  while (_n_iterations < _max_iterations)
   {
     // check convergence
-    if (n_iterations >= _min_iterations && is_converged())
+    if (_n_iterations >= _min_iterations && is_converged())
       return;
 
     // solve and apply next increment
     linear(jacobian, delta, residual);
     guess -= delta;
-    n_iterations++;
+    _n_iterations++;
 
     // compute residual and jacobian for the next iteration
     compute(guess, residual, jacobian);
