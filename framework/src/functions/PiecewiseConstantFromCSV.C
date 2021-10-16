@@ -68,6 +68,13 @@ PiecewiseConstantFromCSV::value(Real, const Point & p) const
     // CSV by element or by block.
     const auto current_elem = (*_point_locator)(p);
 
+    // A point may be on the boundary of some elements
+    // auto elem_id = current_elem ? current_elem->id() : DofObject::invalid_id;
+    // _communicator.min(elem_id);
+
+    if (elem_id == DofObject::invalid_id)
+      mooseError("No element located at ", p, " in PointValue Postprocessor named: ", name());
+
     return _read_prop_user_object->getData(current_elem, _column_number);
   }
   else

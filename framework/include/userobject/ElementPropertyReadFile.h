@@ -117,6 +117,9 @@ protected:
   /// Do the block numbers start with zero or one?
   bool _block_zero;
 
+  /// To pass CI TODO: delete
+  const unsigned int _ngrain;
+
   MooseMesh & _mesh;
   std::vector<Point> _center;
 

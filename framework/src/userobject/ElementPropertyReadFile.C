@@ -41,13 +41,9 @@ ElementPropertyReadFile::validParams()
   params.addParam<MooseEnum>(
       "rve_type",
       MooseEnum("periodic none", "none"),
-<<<<<<< HEAD
       "Periodic or non-periodic grain distribution: Default is non-periodic");
   params.addParam<bool>(
       "use_zero_based_block_indexing", true, "Are the blocks numbered starting at zero?");
-=======
-      "Periodic or non-periodic voronoi distribution: Default is non-periodic");
->>>>>>> 36924d4ccc (Add a function to retrieve values from the CSV UO, adapt CSV property reader UO to framework, refs #19109)
   return params;
 }
 
@@ -63,6 +59,7 @@ ElementPropertyReadFile::ElementPropertyReadFile(const InputParameters & paramet
     _rand_seed(getParam<unsigned int>("rand_seed")),
     _rve_type(getParam<MooseEnum>("rve_type")),
     _block_zero(getParam<bool>("use_zero_based_block_indexing")),
+    _ngrain(_nvoronoi),
     _mesh(_fe_problem.mesh())
 {
   if (!_use_random_tesselation && parameters.isParamSetByUser("rand_seed"))
@@ -88,6 +85,9 @@ ElementPropertyReadFile::ElementPropertyReadFile(const InputParameters & paramet
 void
 ElementPropertyReadFile::readData()
 {
+  if (_read_type == ReadTypeEnum::ELEMENT && _mesh.getMesh().allow_renumbering())
+    mooseWarning("CSV data is sorted by element, but mesh element renumbering is on, be careful!");
+
   _reader.setFormatFlag(MooseUtils::DelimitedFileReader::FormatFlag::ROWS);
   _reader.read();
 
@@ -147,7 +147,7 @@ ElementPropertyReadFile::initVoronoiCenterPoints()
   else
   {
     for (unsigned int i = 0; i < _nvoronoi; i++)
-      for (unsigned int j = 0; j < _ti_feproblem.mesh().dimension(); j++)
+      for (unsigned int j = 0; j < _mesh.dimension(); j++)
         _center[i](j) = _reader.getData(i)[j];
   }
 }
@@ -182,7 +182,7 @@ ElementPropertyReadFile::getElementData(const Elem * elem, unsigned int prop_num
 {
   unsigned int jelem = elem->id();
   if (jelem >= _nelem)
-    mooseError("Element ID", jelem, " greater than than total number of element in mesh ", _nelem);
+    mooseError("Element ID ", jelem, " greater than than total number of element in mesh ", _nelem);
   return _reader.getData(jelem)[prop_num];
 }
 

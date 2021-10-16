@@ -48,6 +48,7 @@
     nprop = 4
     read_type = voronoi
     ngrain = 3
+    use_random_voronoi = true
     rand_seed = 25346
     rve_type = periodic
   [../]

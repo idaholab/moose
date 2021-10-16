@@ -1,4 +1,5 @@
 [Mesh]
+  allow_renumbering = false
   [cmg]
     type = CartesianMeshGenerator
     dim = 2

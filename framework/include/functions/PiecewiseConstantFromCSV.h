@@ -36,7 +36,7 @@ public:
    * \param pt The point in space (x,y,z) (unused)
    * \return The time derivative of the function at the specified time
    */
-  virtual Real timeDerivative(Real t, const Point & pt) const override { return 0; };
+  virtual Real timeDerivative(Real, const Point &) const override { return 0; };
 
 protected:
   void initialSetup();

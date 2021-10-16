@@ -27,7 +27,7 @@ In this example, we display three options for using CSV data to compute a functi
 - the `block` function, using the `reader_block` user object, assumes the data in the CSV file is sorted by block, and returns the value corresponding to the block containing each point
 
 
-!listing test/tests/functions/piecewise_constant_from_csv/piecewise_constant_from_csv.i block=Functions UserObjects
+!listing test/tests/functions/piecewise_constant_from_csv/piecewise_constant.i block=Functions UserObjects
 
 !syntax parameters /Functions/PiecewiseConstantFromCSV
 
