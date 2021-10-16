@@ -44,7 +44,6 @@ class PerfGraph : protected ConsoleStreamInterface
 {
 public:
   using PerfGraphRegistry = moose::internal::PerfGraphRegistry;
-  using SectionInfo = PerfGraphRegistry::SectionInfo;
 
   /**
    * For retrieving values
