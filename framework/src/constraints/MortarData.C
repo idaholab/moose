@@ -33,7 +33,8 @@ MortarData::createMortarInterface(const std::pair<BoundaryID, BoundaryID> & boun
 
   if (on_displaced)
   {
-    auto && periodic_map_iterator = _displaced_periodic_map.find(boundary_key);
+    // Periodic flag displaced
+    auto periodic_map_iterator = _displaced_periodic_map.find(boundary_key);
     if (periodic_map_iterator != _displaced_periodic_map.end() &&
         periodic_map_iterator->second != periodic)
       mooseError("We do not currently support enforcing both periodic and non-periodic constraints "
@@ -41,6 +42,19 @@ MortarData::createMortarInterface(const std::pair<BoundaryID, BoundaryID> & boun
     else
       _displaced_periodic_map.insert(periodic_map_iterator, std::make_pair(boundary_key, periodic));
 
+    // Debug mesh flag displaced
+    auto debug_flag_map_iterator = _displaced_debug_flag_map.find(boundary_key);
+    if (debug_flag_map_iterator != _displaced_debug_flag_map.end() &&
+        debug_flag_map_iterator->second != debug)
+      mooseError(
+          "We do not currently support generating and not generating debug output "
+          "on the same boundary primary-secondary surface pair. Please set debug_mesh = true for "
+          "all constraints sharing the same primary-secondary surface pairs");
+    else
+      _displaced_debug_flag_map.insert(debug_flag_map_iterator,
+                                       std::make_pair(boundary_key, debug));
+
+    // Generate lower-d mesh
     if (_displaced_mortar_interfaces.find(boundary_key) == _displaced_mortar_interfaces.end())
       _displaced_mortar_interfaces.emplace(boundary_key,
                                            AutomaticMortarGeneration(subproblem.getMooseApp(),
@@ -54,13 +68,25 @@ MortarData::createMortarInterface(const std::pair<BoundaryID, BoundaryID> & boun
   }
   else
   {
-    auto && periodic_map_iterator = _periodic_map.find(boundary_key);
+    // Periodic flag undisplaced
+    auto periodic_map_iterator = _periodic_map.find(boundary_key);
     if (periodic_map_iterator != _periodic_map.end() && periodic_map_iterator->second != periodic)
-      mooseError("We do not currently support enforcing both periodic and non-perodic constraints "
+      mooseError("We do not currently support enforcing both periodic and non-periodic constraints "
                  "on the same boundary primary-secondary pair");
     else
       _periodic_map.insert(periodic_map_iterator, std::make_pair(boundary_key, periodic));
 
+    // Debug mesh flag undisplaced
+    auto debug_flag_map_iterator = _debug_flag_map.find(boundary_key);
+    if (debug_flag_map_iterator != _debug_flag_map.end() &&
+        debug_flag_map_iterator->second != debug)
+      mooseError(
+          "We do not currently support generating and not generating debug output "
+          "on the same boundary primary-secondary surface pair. Please set debug_mesh = true for "
+          "all constraints sharing the same primary-secondary surface pairs");
+    else
+      _debug_flag_map.insert(debug_flag_map_iterator, std::make_pair(boundary_key, debug));
+    // Generate lower-d mesh
     if (_mortar_interfaces.find(boundary_key) == _mortar_interfaces.end())
       _mortar_interfaces.emplace(boundary_key,
                                  AutomaticMortarGeneration(subproblem.getMooseApp(),

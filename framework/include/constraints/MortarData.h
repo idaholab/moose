@@ -126,6 +126,12 @@ private:
   /// Map from displaced AMG key to whether the displaced AMG object is enforcing periodic constraints
   std::unordered_map<MortarKey, bool> _displaced_periodic_map;
 
+  /// Map from undisplaced AMG key to whether the undisplaced AMG object is to output mortar segment mesh
+  std::unordered_map<MortarKey, bool> _debug_flag_map;
+
+  /// Map from displaced AMG key to whether the displaced AMG object is to output mortar segment mesh
+  std::unordered_map<MortarKey, bool> _displaced_debug_flag_map;
+
   /// Map from lower dimensional subdomain ids to corresponding higher simensional subdomain ids
   /// (e.g. the ids of the interior parents)
   std::unordered_map<SubdomainID, std::set<SubdomainID>> _lower_d_sub_to_higher_d_subs;

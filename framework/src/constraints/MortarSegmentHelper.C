@@ -22,9 +22,9 @@ MortarSegmentHelper::MortarSegmentHelper(const std::vector<Point> secondary_node
   _secondary_poly.reserve(secondary_nodes.size());
 
   // Get orientation of secondary poly
-  Point e1 = secondary_nodes[0] - secondary_nodes[1];
-  Point e2 = secondary_nodes[2] - secondary_nodes[1];
-  Real orient = e2.cross(e1) * _normal;
+  const Point e1 = secondary_nodes[0] - secondary_nodes[1];
+  const Point e2 = secondary_nodes[2] - secondary_nodes[1];
+  const Real orient = e2.cross(e1) * _normal;
 
   // u and v define the tangent plane of the element (at center)
   // Note we embed orientation into our transformation to make 2D poly always
@@ -33,7 +33,7 @@ MortarSegmentHelper::MortarSegmentHelper(const std::vector<Point> secondary_node
   _v = (orient > 0) ? _normal.cross(_u).unit() : _u.cross(_normal).unit();
 
   // Transform problem to 2D plane spanned by u and v
-  for (auto node : secondary_nodes)
+  for (const auto & node : secondary_nodes)
   {
     Point pt = node - _center;
     _secondary_poly.emplace_back(pt * _u, pt * _v, 0);
@@ -47,19 +47,19 @@ MortarSegmentHelper::MortarSegmentHelper(const std::vector<Point> secondary_node
   _area_tol = _tolerance * _secondary_area;
 
   // Tolerance for quantites with length dimensions
-  _length_tol = _tolerance * sqrt(_secondary_area);
+  _length_tol = _tolerance * std::sqrt(_secondary_area);
 }
 
 Point
 MortarSegmentHelper::getIntersection(
     const Point & p1, const Point & p2, const Point & q1, const Point & q2, Real & s) const
 {
-  Point dp = p2 - p1;
-  Point dq = q2 - q1;
-  Real cp1q1 = p1(0) * q1(1) - p1(1) * q1(0);
-  Real cp1q2 = p1(0) * q2(1) - p1(1) * q2(0);
-  Real cq1q2 = q1(0) * q2(1) - q1(1) * q2(0);
-  Real alpha = 1. / (dp(0) * dq(1) - dp(1) * dq(0));
+  const Point dp = p2 - p1;
+  const Point dq = q2 - q1;
+  const Real cp1q1 = p1(0) * q1(1) - p1(1) * q1(0);
+  const Real cp1q2 = p1(0) * q2(1) - p1(1) * q2(0);
+  const Real cq1q2 = q1(0) * q2(1) - q1(1) * q2(0);
+  const Real alpha = 1. / (dp(0) * dq(1) - dp(1) * dq(0));
   s = -alpha * (cp1q2 - cp1q1 - cq1q2);
 
   // Intersection should be between p1 and p2, if it's not (due to poor conditioning), simply
@@ -77,8 +77,8 @@ MortarSegmentHelper::isInsideSecondary(const Point & pt) const
     const Point & q1 = _secondary_poly[i];
     const Point & q2 = _secondary_poly[(i + 1) % _secondary_poly.size()];
 
-    Point e1 = q2 - q1;
-    Point e2 = pt - q1;
+    const Point e1 = q2 - q1;
+    const Point e2 = pt - q1;
 
     // If point corresponds to one of the secondary vertices, skip
     if (e2.norm() < _tolerance)
@@ -123,12 +123,12 @@ std::vector<Point>
 MortarSegmentHelper::clipPoly(const std::vector<Point> & primary_nodes) const
 {
   // Check orientation of primary_poly
-  Point e1 = primary_nodes[0] - primary_nodes[1];
-  Point e2 = primary_nodes[2] - primary_nodes[1];
+  const Point e1 = primary_nodes[0] - primary_nodes[1];
+  const Point e2 = primary_nodes[2] - primary_nodes[1];
 
   // Note we use u x v here instead of normal because it may be flipped if secondary elem was
   // negatively oriented
-  Real orient = e2.cross(e1) * _u.cross(_v);
+  const Real orient = e2.cross(e1) * _u.cross(_v);
 
   // Get primary_poly (primary is clipping poly). If negatively oriented, reverse
   std::vector<Point> primary_poly;
@@ -186,8 +186,8 @@ MortarSegmentHelper::clipPoly(const std::vector<Point> & primary_nodes) const
       const Point prev_pt = input_poly[j];
 
       // TODO: Don't need to calculate both each loop
-      bool is_current_inside = is_inside(curr_pt, _area_tol);
-      bool is_previous_inside = is_inside(prev_pt, _area_tol);
+      const bool is_current_inside = is_inside(curr_pt, _area_tol);
+      const bool is_previous_inside = is_inside(prev_pt, _area_tol);
 
       if (is_current_inside)
       {
@@ -261,9 +261,7 @@ MortarSegmentHelper::triangulatePoly(std::vector<Point> & poly_nodes,
 
   // Fewer than 3 nodes can't be triangulated
   if (poly_nodes.size() < 3)
-  {
     mooseError("Can't triangulate poly with fewer than 3 nodes");
-  }
   // If 3 nodes, already a triangle, simply pass back map
   else if (poly_nodes.size() == 3)
   {
@@ -277,7 +275,7 @@ MortarSegmentHelper::triangulatePoly(std::vector<Point> & poly_nodes,
   else
   {
     Point poly_center;
-    unsigned int n_verts = poly_nodes.size();
+    const unsigned int n_verts = poly_nodes.size();
 
     // Get geometric center of polygon
     for (auto node : poly_nodes)

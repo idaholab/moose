@@ -13,6 +13,9 @@
 
 #include <vector>
 
+using libMesh::Point;
+using libMesh::Real;
+
 /**
  * This class supports defining mortar segment mesh elements in 3D by projecting secondary and
  * primary elements onto a linearized plane, computing the overlapping polygon formed by their
@@ -22,36 +25,33 @@
 class MortarSegmentHelper
 {
 public:
-  MortarSegmentHelper(const std::vector<libMesh::Point> secondary_nodes,
-                      const libMesh::Point & center,
-                      const libMesh::Point & normal);
+  MortarSegmentHelper(const std::vector<Point> secondary_nodes,
+                      const Point & center,
+                      const Point & normal);
 
   /**
    * Computes the intersection between line segments defined by point pairs (p1,p2) and (q1,q2)
    * Also computes s, the ratio of distance between (p1,p2) that the intersection falls,
    * quantity s is useful in avoiding adding nearly degenerate nodes
    */
-  libMesh::Point getIntersection(const libMesh::Point & p1,
-                                 const libMesh::Point & p2,
-                                 const libMesh::Point & q1,
-                                 const libMesh::Point & q2,
-                                 libMesh::Real & s) const;
+  Point getIntersection(
+      const Point & p1, const Point & p2, const Point & q1, const Point & q2, Real & s) const;
 
   /**
    * Check that a point is inside the secondary polygon (for verification only)
    */
-  bool isInsideSecondary(const libMesh::Point & pt) const;
+  bool isInsideSecondary(const Point & pt) const;
 
   /**
    * Checks whether polygons are disjoint for an easy out
    */
-  bool isDisjoint(const std::vector<libMesh::Point> & poly) const;
+  bool isDisjoint(const std::vector<Point> & poly) const;
 
   /**
    * Clip secondary element (defined in instantiation) against given primary polygon
    * result is a set of 2D nodes defining clipped polygon
    */
-  std::vector<libMesh::Point> clipPoly(const std::vector<libMesh::Point> & primary_nodes) const;
+  std::vector<Point> clipPoly(const std::vector<Point> & primary_nodes) const;
 
   /**
    * Triangulate a polygon (currently uses center of polygon to define triangulation)
@@ -59,7 +59,7 @@ public:
    * @param offset Current size of 3D nodes array (not poly_nodes)
    * @return tri_map List of integer arrays defining which nodes belong to each triangle
    */
-  void triangulatePoly(std::vector<libMesh::Point> & poly_nodes,
+  void triangulatePoly(std::vector<Point> & poly_nodes,
                        const unsigned int offset,
                        std::vector<std::vector<unsigned int>> & tri_map) const;
 
@@ -69,29 +69,29 @@ public:
    * @return nodes List of 3D mortar segment nodes
    * @return tri_map List of integer arrays defining which nodes belong to each mortar segment
    */
-  void getMortarSegments(const std::vector<libMesh::Point> & primary_nodes,
-                         std::vector<libMesh::Point> & nodes,
+  void getMortarSegments(const std::vector<Point> & primary_nodes,
+                         std::vector<Point> & nodes,
                          std::vector<std::vector<unsigned int>> & elem_to_nodes);
 
   /**
    * Compute area of polygon
    */
-  libMesh::Real area(const std::vector<libMesh::Point> & nodes) const;
+  Real area(const std::vector<Point> & nodes) const;
 
   /**
    * Get center point of secondary element
    */
-  const libMesh::Point & center() const { return _center; }
+  const Point & center() const { return _center; }
 
   /**
    * Get area fraction remaining after clipping against primary elements
    */
-  libMesh::Real remainder() const { return _remaining_area_fraction; }
+  Real remainder() const { return _remaining_area_fraction; }
 
   /**
    * Get 3D position of node of linearized secondary element
    */
-  libMesh::Point point(unsigned int i) const
+  Point point(unsigned int i) const
   {
     return (_secondary_poly[i](0) * _u) + (_secondary_poly[i](1) * _v) + _center;
   }
@@ -100,49 +100,49 @@ private:
   /**
    * Geometric center of secondary element
    */
-  libMesh::Point _center;
+  Point _center;
 
   /**
    * Normal at geometric center of secondary element
    */
-  libMesh::Point _normal;
+  Point _normal;
 
   /**
    * Vectors orthogonal to normal that span the plane projection will be performed on.
    * These vectors are used to project the polygon clipping problem on a 2D plane,
    * they are defined so the nodes of the projected polygon are listed with positive orientation
    */
-  libMesh::Point _u, _v;
+  Point _u, _v;
 
   /**
    * Area of projected secondary element
    */
-  libMesh::Real _secondary_area;
+  Real _secondary_area;
 
   /**
    * Fraction of area remaining after overlapping primary polygons clipped
    */
-  libMesh::Real _remaining_area_fraction;
+  Real _remaining_area_fraction;
 
   bool _debug;
 
   /**
    * Tolerance for intersection and clipping
    */
-  libMesh::Real _tolerance = 1e-8;
+  Real _tolerance = 1e-8;
 
   /**
    * Tolerance times secondary area for dimensional consistency
    */
-  libMesh::Real _area_tol;
+  Real _area_tol;
 
   /**
    * Tolerance times secondary area for dimensional consistency
    */
-  libMesh::Real _length_tol;
+  Real _length_tol;
 
   /**
    * List of projected points on the linearized secondary element
    */
-  std::vector<libMesh::Point> _secondary_poly;
+  std::vector<Point> _secondary_poly;
 };
