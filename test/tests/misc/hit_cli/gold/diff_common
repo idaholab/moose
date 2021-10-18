@@ -1,0 +1,15 @@
+Left hand side:
+    input1.i
+
+Right hand side:
+    input2.i
+
+Common parameters:
+
+        [PostProcessor]
+          [min2]
+            mode = MIN
+            type = Calculation
+          []
+        []
+

@@ -31,6 +31,21 @@
   [min2]
     type = Calculation
     mode = MIN
-    value = 0
+    value = 1
+  []
+  [max]
+    type = Calculation
+    mode = MAX
+    value = 1
+  []
+  [min]
+    type = Calculation
+    mode = min
+    value = 1
+  []
+[]
+[Outputs]
+  [out]
+    type = Exodus
   []
 []

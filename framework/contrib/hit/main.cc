@@ -529,9 +529,6 @@ merge(int argc, char ** argv)
     return 1;
   }
 
-  std::string fname(flags.val("output"));
-  std::ofstream output(fname);
-
   hit::Node * root = nullptr;
   for (int i = 0; i < positional.size(); i++)
   {
@@ -545,7 +542,14 @@ merge(int argc, char ** argv)
       root = hit::parse(fname, input);
   }
 
-  output << root->render();
+  std::string fname(flags.val("output"));
+  if (fname == "-")
+    std::cout << root->render();
+  else
+  {
+    std::ofstream output(fname);
+    output << root->render();
+  }
 
   return 0;
 }
@@ -580,7 +584,7 @@ diff(int argc, char ** argv)
     return 1;
   }
 
-  bool use_color = flags.have("C");
+  bool use_color = flags.have("C") || flags.have("color");
 
   // terminal colors
   std::string color_red = use_color ? "\33[31m" : "";
