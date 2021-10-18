@@ -1,0 +1,15 @@
+[Tests]
+  issues = '#16809'
+  design = 'navier_stokes/wcnsfv.md'
+  [transient]
+    type = 'Exodiff'
+    input = 2d-transient.i
+    exodiff = 2d-transient_out.e
+    method = "!dbg"
+    requirement = 'The system shall be able to use realistic fluid properties in a weakly compressible flow simulation'
+    ad_indexing_type = 'global'
+    abs_zero = 1e-9
+    rel_err = 1e-5
+    recover = false # see #19126
+  []
+[]

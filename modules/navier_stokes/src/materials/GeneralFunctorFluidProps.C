@@ -24,7 +24,6 @@ GeneralFunctorFluidProps::validParams()
 
   params.addRequiredCoupledVar(NS::pressure, "Pressure variable");
   params.addRequiredCoupledVar(NS::T_fluid, "Fluid temperature variable");
-  params.addRequiredCoupledVar(NS::density, "Density variable");
   params.addRequiredCoupledVar(NS::speed, "Velocity norm as a variable");
 
   params.addParam<FunctionName>(
@@ -45,10 +44,9 @@ GeneralFunctorFluidProps::GeneralFunctorFluidProps(const InputParameters & param
 
     _pressure(*getVarHelper<MooseVariableFV<Real>>(NS::pressure, 0)),
     _T_fluid(*getVarHelper<MooseVariableFV<Real>>(NS::T_fluid, 0)),
-
-    _rho(*getVarHelper<MooseVariableFV<Real>>(NS::density, 0)),
     _speed(*getVarHelper<MooseVariableFV<Real>>(NS::speed, 0)),
 
+    _rho(declareFunctorProperty<ADReal>(NS::density)),
     _drho_dp(declareFunctorProperty<Real>(derivativePropertyNameFirst(NS::density, NS::pressure))),
     _drho_dT(declareFunctorProperty<Real>(derivativePropertyNameFirst(NS::density, NS::T_fluid))),
     _drho_dt(declareFunctorProperty<ADReal>(NS::time_deriv(NS::density))),
@@ -80,6 +78,10 @@ GeneralFunctorFluidProps::GeneralFunctorFluidProps(const InputParameters & param
     _Re_h(declareFunctorProperty<ADReal>(NS::Reynolds_hydraulic)),
     _Re_i(declareFunctorProperty<ADReal>(NS::Reynolds_interstitial))
 {
+  // Set material properties functors
+  _rho.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> ADReal {
+    return _fluid.rho_from_p_T(_pressure(r, t), _T_fluid(r, t));
+  });
   _cv.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> ADReal {
     return _fluid.cv_from_p_T(_pressure(r, t), _T_fluid(r, t));
   });
@@ -93,6 +95,22 @@ GeneralFunctorFluidProps::GeneralFunctorFluidProps(const InputParameters & param
     return _fluid.k_from_p_T(_pressure(r, t), _T_fluid(r, t));
   });
 
+  // Time derivatives of fluid properties
+  _drho_dt.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> ADReal {
+    ADReal rho, drho_dp, drho_dT;
+    _fluid.rho_from_p_T(_pressure(r, t), _T_fluid(r, t), rho, drho_dp, drho_dT);
+    return drho_dp * _pressure.dot(r, t) + drho_dT * _T_fluid.dot(r, t);
+  });
+  _dcp_dt.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> ADReal {
+    Real dcp_dp, dcp_dT, dummy;
+    auto raw_pressure = MetaPhysicL::raw_value(_pressure(r, t));
+    auto raw_T_fluid = MetaPhysicL::raw_value(_T_fluid(r, t));
+    _fluid.cp_from_p_T(raw_pressure, raw_T_fluid, dummy, dcp_dp, dcp_dT);
+
+    return dcp_dp * _pressure.dot(r, t) + dcp_dT * _T_fluid.dot(r, t);
+  });
+
+  // Temperature and pressure derivatives, to help with computing time derivatives
   _drho_dp.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> Real {
     Real drho_dp, drho_dT, dummy;
     auto raw_pressure = MetaPhysicL::raw_value(_pressure(r, t));
@@ -125,14 +143,6 @@ GeneralFunctorFluidProps::GeneralFunctorFluidProps(const InputParameters & param
 
     _fluid.cp_from_p_T(raw_pressure, raw_T_fluid, dummy, dcp_dp, dcp_dT);
     return dcp_dT;
-  });
-  _dcp_dt.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> ADReal {
-    Real dcp_dp, dcp_dT, dummy;
-    auto raw_pressure = MetaPhysicL::raw_value(_pressure(r, t));
-    auto raw_T_fluid = MetaPhysicL::raw_value(_T_fluid(r, t));
-    _fluid.cp_from_p_T(raw_pressure, raw_T_fluid, dummy, dcp_dp, dcp_dT);
-
-    return dcp_dp * _pressure.dot(r, t) + dcp_dT * _T_fluid.dot(r, t);
   });
 
   _dmu_dp.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> Real {
@@ -169,6 +179,7 @@ GeneralFunctorFluidProps::GeneralFunctorFluidProps(const InputParameters & param
     return dk_dT;
   });
 
+  // Fluid adimensional quantities, used in numerous correlations
   _Pr.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> ADReal {
     static constexpr Real small_number = 1e-8;
 

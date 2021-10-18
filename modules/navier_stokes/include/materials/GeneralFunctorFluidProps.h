@@ -40,8 +40,10 @@ protected:
   /// variables
   const MooseVariableFVReal & _pressure;
   const MooseVariableFVReal & _T_fluid;
-  const MooseVariableFVReal & _rho;
   const MooseVariableFVReal & _speed;
+
+  /// Density
+  FunctorMaterialProperty<ADReal> & _rho;
 
   /// Derivative of density with respect to pressure
   FunctorMaterialProperty<Real> & _drho_dp;
