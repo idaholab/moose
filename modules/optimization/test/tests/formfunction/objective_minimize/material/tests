@@ -25,10 +25,4 @@
               " Outputs/file_base=upper_bounds"
     requirement = "Best conductivity is upper bound"
   []
-  [andy_model]
-    type = CSVDiff
-    input = andy_main.i
-    csvdiff = andy_main_out.csv
-    requirement = "XXXX shall be able to use finite-differencing with a gradient method to invert for material properties"
-  []
 []

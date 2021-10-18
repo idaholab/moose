@@ -1,0 +1,9 @@
+[Tests]
+  [bimaterial]
+    type = CSVDiff
+    input = main.i
+    csvdiff = main_out_FormFunction_0001.csv
+    heavy = true
+    requirement = "XXXX shall be able to use finite-differencing with a gradient method to invert for material properties"
+  []
+[]
