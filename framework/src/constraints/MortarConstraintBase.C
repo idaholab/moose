@@ -223,7 +223,7 @@ MortarConstraintBase::zeroInactiveLMDofs(const std::unordered_set<const Node *> 
           _assembly.cacheJacobian(dof_index, dof_index, 1., _matrix_tags);
         else
         {
-          Real lm_value = _var->getElementalValue(el, comp);
+          const Real lm_value = _var->getElementalValue(el, comp);
           _assembly.cacheResidual(dof_index, lm_value, _vector_tags);
         }
       }

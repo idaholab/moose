@@ -9,7 +9,7 @@ offset = 0.00
 
 [Mesh]
   second_order = false
-  [./top_block]
+  [top_block]
     type = GeneratedMeshGenerator
     dim = 3
     nx = 3
@@ -22,25 +22,25 @@ offset = 0.00
     zmin = -0.25
     zmax = 0.25
     elem_type = HEX8
-  [../]
-  [./rotate_top_block]
+  []
+  [rotate_top_block]
     type = TransformGenerator
     input = top_block
     transform = ROTATE
     vector_value = '0 0 0'
   []
-  [./top_block_sidesets]
+  [top_block_sidesets]
     type = RenameBoundaryGenerator
     input = rotate_top_block
     old_boundary = '0 1 2 3 4 5'
     new_boundary = 'top_bottom top_back top_right top_front top_left top_top'
-  [../]
-  [./top_block_id]
+  []
+  [top_block_id]
     type = SubdomainIDGenerator
     input = top_block_sidesets
     subdomain_id = 1
-  [../]
-  [./bottom_block]
+  []
+  [bottom_block]
     type = GeneratedMeshGenerator
     dim = 3
     nx = 10
@@ -53,28 +53,28 @@ offset = 0.00
     zmin = -.3
     zmax = -.25
     elem_type = HEX8
-  [../]
-  [./bottom_block_id]
+  []
+  [bottom_block_id]
     type = SubdomainIDGenerator
     input = bottom_block
     subdomain_id = 2
-  [../]
+  []
   [bottom_block_change_boundary_id]
     type = RenameBoundaryGenerator
     input = bottom_block_id
     old_boundary = '0 1 2 3 4 5'
     new_boundary = '100 101 102 103 104 105'
   []
-  [./combined]
+  [combined]
     type = MeshCollectionGenerator
     inputs = 'top_block_id bottom_block_change_boundary_id'
-  [../]
-  [./block_rename]
+  []
+  [block_rename]
     type = RenameBlockGenerator
     input = combined
     old_block_id = '1 2'
     new_block_name = 'top_block bottom_block'
-  [../]
+  []
   [bottom_right_sideset]
     type = SideSetsAroundSubdomainGenerator
     input = block_rename
@@ -120,7 +120,7 @@ offset = 0.00
   [secondary]
     input = bottom_back_sideset
     type = LowerDBlockFromSidesetGenerator
-    sidesets = 'top_bottom'# top_back top_left'
+    sidesets = 'top_bottom' # top_back top_left'
     new_block_id = '10001'
     new_block_name = 'secondary_lower'
   []
@@ -134,78 +134,56 @@ offset = 0.00
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
     block = '1 2'
-  [../]
-  [./disp_y]
+  []
+  [disp_y]
     block = '1 2'
-  [../]
-  [./disp_z]
+  []
+  [disp_z]
     block = '1 2'
-  [../]
-  [./normal_lm]
+  []
+  [normal_lm]
     block = 'secondary_lower'
     use_dual = true
-  [../]
+  []
 []
 
 [ICs]
-  [./disp_z]
+  [disp_z]
     block = 1
     variable = disp_z
-    value = ${fparse offset}
+    value = '${fparse offset}'
     type = ConstantIC
-  [../]
-  [./disp_x]
+  []
+  [disp_x]
     block = 1
     variable = disp_x
     value = 0
     type = ConstantIC
-  [../]
-  [./disp_y]
+  []
+  [disp_y]
     block = 1
     variable = disp_y
     value = 0
     type = ConstantIC
-  [../]
+  []
 []
 
 [Kernels]
-  [./disp_x]
+  [disp_x]
     type = MatDiffusion
     variable = disp_x
-  [../]
-  [./disp_y]
+  []
+  [disp_y]
     type = MatDiffusion
     variable = disp_y
-  [../]
-  [./disp_z]
+  []
+  [disp_z]
     type = MatDiffusion
     variable = disp_z
-  [../]
+  []
 []
-
-# [Modules/TensorMechanics/Master]
-#   [all]
-#     add_variables = false
-#     use_automatic_differentiation = true
-#     strain = SMALL
-#     block = '1 2'
-#   []
-# []
-
-# [Materials]
-#   [elasticity]
-#     type = ADComputeIsotropicElasticityTensor
-#     youngs_modulus = 1e2
-#     poissons_ratio = 0.2
-#     block = '1 2'
-#   []
-#   [stress]
-#     type = ADComputeLinearElasticStress
-#     block = '1 2'
-#   []
-# []
 
 [Constraints]
   [normal_lm]
@@ -259,42 +237,42 @@ offset = 0.00
 []
 
 [BCs]
-  [./botx]
+  [botx]
     type = DirichletBC
     variable = disp_x
     boundary = 'bottom_left bottom_right bottom_front bottom_back'
     value = 0.0
-  [../]
-  [./boty]
+  []
+  [boty]
     type = DirichletBC
     variable = disp_y
     boundary = 'bottom_left bottom_right bottom_front bottom_back'
     value = 0.0
-  [../]
-  [./botz]
+  []
+  [botz]
     type = DirichletBC
     variable = disp_z
     boundary = 'bottom_left bottom_right bottom_front bottom_back'
     value = 0.0
-  [../]
-  [./topx]
+  []
+  [topx]
     type = DirichletBC
     variable = disp_x
     boundary = 'top_top'
     value = 0.0
-  [../]
-  [./topy]
+  []
+  [topy]
     type = DirichletBC
     variable = disp_y
     boundary = 'top_top'
     value = 0.0
-  [../]
-  [./topz]
+  []
+  [topz]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = 'top_top'
     function = '-${starting_point} * sin(2 * pi / 40 * t) + ${offset}'
-  [../]
+  []
 []
 
 [Executioner]
@@ -303,7 +281,8 @@ offset = 0.00
   dt = .5
   dtmin = .01
   solve_type = 'PJFNK'
-  petsc_options = '-snes_converged_reason -ksp_converged_reason -pc_svd_monitor -snes_linesearch_monitor'
+  petsc_options = '-snes_converged_reason -ksp_converged_reason -pc_svd_monitor '
+                  '-snes_linesearch_monitor'
   petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_shift_amount -mat_mffd_err'
   petsc_options_value = 'lu       NONZERO               1e-15                   1e-5'
   l_max_its = 100
@@ -323,21 +302,21 @@ offset = 0.00
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Postprocessors]
   active = 'num_nl cumulative contact'
-  [./num_nl]
+  [num_nl]
     type = NumNonlinearIterations
-  [../]
-  [./cumulative]
+  []
+  [cumulative]
     type = CumulativeValuePostprocessor
     postprocessor = num_nl
-  [../]
+  []
   [contact]
     type = ContactDOFSetSize
     variable = normal_lm

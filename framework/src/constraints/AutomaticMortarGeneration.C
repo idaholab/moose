@@ -56,73 +56,73 @@ AutomaticMortarGeneration::AutomaticMortarGeneration(
     const bool debug,
     const bool correct_edge_dropping)
   : ConsoleStreamInterface(app),
-    mesh(mesh_in),
+    _mesh(mesh_in),
     _debug(debug),
     _on_displaced(on_displaced),
     _periodic(periodic),
-    _distributed(!mesh.is_replicated()),
+    _distributed(!_mesh.is_replicated()),
     _correct_edge_dropping(correct_edge_dropping)
 {
-  primary_secondary_boundary_id_pairs.push_back(boundary_key);
-  primary_requested_boundary_ids.insert(boundary_key.first);
-  secondary_requested_boundary_ids.insert(boundary_key.second);
-  primary_secondary_subdomain_id_pairs.push_back(subdomain_key);
-  primary_boundary_subdomain_ids.insert(subdomain_key.first);
-  secondary_boundary_subdomain_ids.insert(subdomain_key.second);
+  _primary_secondary_boundary_id_pairs.push_back(boundary_key);
+  _primary_requested_boundary_ids.insert(boundary_key.first);
+  _secondary_requested_boundary_ids.insert(boundary_key.second);
+  _primary_secondary_subdomain_id_pairs.push_back(subdomain_key);
+  _primary_boundary_subdomain_ids.insert(subdomain_key.first);
+  _secondary_boundary_subdomain_ids.insert(subdomain_key.second);
 
   if (_distributed)
-    mortar_segment_mesh = libmesh_make_unique<DistributedMesh>(mesh.comm());
+    _mortar_segment_mesh = libmesh_make_unique<DistributedMesh>(_mesh.comm());
   else
-    mortar_segment_mesh = libmesh_make_unique<ReplicatedMesh>(mesh.comm());
+    _mortar_segment_mesh = libmesh_make_unique<ReplicatedMesh>(_mesh.comm());
 }
 
 void
 AutomaticMortarGeneration::clear()
 {
-  mortar_segment_mesh->clear();
-  nodes_to_secondary_elem_map.clear();
-  nodes_to_primary_elem_map.clear();
-  secondary_node_and_elem_to_xi2_primary_elem.clear();
-  primary_node_and_elem_to_xi1_secondary_elem.clear();
-  msm_elem_to_info.clear();
-  lower_elem_to_side_id.clear();
-  mortar_interface_coupling.clear();
-  secondary_node_to_nodal_normal.clear();
+  _mortar_segment_mesh->clear();
+  _nodes_to_secondary_elem_map.clear();
+  _nodes_to_primary_elem_map.clear();
+  _secondary_node_and_elem_to_xi2_primary_elem.clear();
+  _primary_node_and_elem_to_xi1_secondary_elem.clear();
+  _msm_elem_to_info.clear();
+  _lower_elem_to_side_id.clear();
+  _mortar_interface_coupling.clear();
+  _secondary_node_to_nodal_normal.clear();
 }
 
 void
 AutomaticMortarGeneration::buildNodeToElemMaps()
 {
-  if (secondary_requested_boundary_ids.empty() || primary_requested_boundary_ids.empty())
+  if (_secondary_requested_boundary_ids.empty() || _primary_requested_boundary_ids.empty())
     mooseError(
         "Must specify secondary and primary boundary ids before building node-to-elem maps.");
 
   // Construct nodes_to_secondary_elem_map
   for (const auto & secondary_elem :
-       as_range(mesh.active_elements_begin(), mesh.active_elements_end()))
+       as_range(_mesh.active_elements_begin(), _mesh.active_elements_end()))
   {
     // If this is not one of the lower-dimensional secondary side elements, go on to the next one.
-    if (!this->secondary_boundary_subdomain_ids.count(secondary_elem->subdomain_id()))
+    if (!this->_secondary_boundary_subdomain_ids.count(secondary_elem->subdomain_id()))
       continue;
 
     for (MooseIndex(secondary_elem->n_vertices()) n = 0; n < secondary_elem->n_vertices(); ++n)
     {
-      std::vector<const Elem *> & vec = nodes_to_secondary_elem_map[secondary_elem->node_id(n)];
+      std::vector<const Elem *> & vec = _nodes_to_secondary_elem_map[secondary_elem->node_id(n)];
       vec.push_back(secondary_elem);
     }
   }
 
   // Construct nodes_to_primary_elem_map
   for (const auto & primary_elem :
-       as_range(mesh.active_elements_begin(), mesh.active_elements_end()))
+       as_range(_mesh.active_elements_begin(), _mesh.active_elements_end()))
   {
     // If this is not one of the lower-dimensional primary side elements, go on to the next one.
-    if (!this->primary_boundary_subdomain_ids.count(primary_elem->subdomain_id()))
+    if (!this->_primary_boundary_subdomain_ids.count(primary_elem->subdomain_id()))
       continue;
 
     for (MooseIndex(primary_elem->n_vertices()) n = 0; n < primary_elem->n_vertices(); ++n)
     {
-      std::vector<const Elem *> & vec = nodes_to_primary_elem_map[primary_elem->node_id(n)];
+      std::vector<const Elem *> & vec = _nodes_to_primary_elem_map[primary_elem->node_id(n)];
       vec.push_back(primary_elem);
     }
   }
@@ -133,7 +133,7 @@ AutomaticMortarGeneration::getNodalNormals(const Elem & secondary_elem) const
 {
   std::vector<Point> nodal_normals(secondary_elem.n_nodes());
   for (const auto n : make_range(secondary_elem.n_nodes()))
-    nodal_normals[n] = secondary_node_to_nodal_normal.at(secondary_elem.node_ptr(n));
+    nodal_normals[n] = _secondary_node_to_nodal_normal.at(secondary_elem.node_ptr(n));
 
   return nodal_normals;
 }
@@ -153,7 +153,7 @@ std::vector<Point>
 AutomaticMortarGeneration::getNormals(const Elem & secondary_elem,
                                       const std::vector<Point> & xi1_pts) const
 {
-  const auto mortar_dim = mesh.mesh_dimension() - 1;
+  const auto mortar_dim = _mesh.mesh_dimension() - 1;
   const auto num_qps = xi1_pts.size();
   const auto nodal_normals = getNodalNormals(secondary_elem);
   std::vector<Point> normals(num_qps);
@@ -194,14 +194,14 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
   // the number of lower-dimensional secondary subdomain elements. Recall that the number of mortar
   // segments created is a function of node projection, *and* that if we split elems we will delete
   // that elem which has already taken a unique id
-  for (const auto & pr : primary_secondary_boundary_id_pairs)
+  for (const auto & pr : _primary_secondary_boundary_id_pairs)
   {
     const auto primary_bnd_id = pr.first;
     const auto secondary_bnd_id = pr.second;
     const auto num_primary_nodes =
-        std::distance(mesh.bid_nodes_begin(primary_bnd_id), mesh.bid_nodes_end(primary_bnd_id));
-    const auto num_secondary_nodes =
-        std::distance(mesh.bid_nodes_begin(secondary_bnd_id), mesh.bid_nodes_end(secondary_bnd_id));
+        std::distance(_mesh.bid_nodes_begin(primary_bnd_id), _mesh.bid_nodes_end(primary_bnd_id));
+    const auto num_secondary_nodes = std::distance(_mesh.bid_nodes_begin(secondary_bnd_id),
+                                                   _mesh.bid_nodes_end(secondary_bnd_id));
     mooseAssert(num_primary_nodes,
                 "There are no primary nodes on boundary ID "
                     << primary_bnd_id << ". Does that bondary ID even exist on the mesh?");
@@ -213,21 +213,21 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
   }
 
   // 1.) Add all lower-dimensional secondary side elements as the "initial" mortar segments.
-  for (MeshBase::const_element_iterator el = mesh.active_elements_begin(),
-                                        end_el = mesh.active_elements_end();
+  for (MeshBase::const_element_iterator el = _mesh.active_elements_begin(),
+                                        end_el = _mesh.active_elements_end();
        el != end_el;
        ++el)
   {
     const Elem * secondary_elem = *el;
 
     // If this is not one of the lower-dimensional secondary side elements, go on to the next one.
-    if (!this->secondary_boundary_subdomain_ids.count(secondary_elem->subdomain_id()))
+    if (!this->_secondary_boundary_subdomain_ids.count(secondary_elem->subdomain_id()))
       continue;
 
     std::vector<Node *> new_nodes;
     for (MooseIndex(secondary_elem->n_nodes()) n = 0; n < secondary_elem->n_nodes(); ++n)
     {
-      new_nodes.push_back(mortar_segment_mesh->add_point(
+      new_nodes.push_back(_mortar_segment_mesh->add_point(
           secondary_elem->point(n), secondary_elem->node_id(n), secondary_elem->processor_id()));
       Node * const new_node = new_nodes.back();
       new_node->set_unique_id(new_node->id() + node_unique_id_offset);
@@ -247,7 +247,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     for (MooseIndex(new_elem->n_nodes()) n = 0; n < new_elem->n_nodes(); ++n)
       new_elem->set_node(n) = new_nodes[n];
 
-    mortar_segment_mesh->add_elem(new_elem);
+    _mortar_segment_mesh->add_elem(new_elem);
 
     // The xi^(1) values for this mortar segment are initially -1 and 1.
     MortarSegmentInfo msinfo;
@@ -255,15 +255,15 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     msinfo.xi1_b = +1;
     msinfo.secondary_elem = secondary_elem;
 
-    auto new_container_it0 = secondary_node_and_elem_to_xi2_primary_elem.find(
+    auto new_container_it0 = _secondary_node_and_elem_to_xi2_primary_elem.find(
              std::make_pair(secondary_elem->node_ptr(0), secondary_elem)),
-         new_container_it1 = secondary_node_and_elem_to_xi2_primary_elem.find(
+         new_container_it1 = _secondary_node_and_elem_to_xi2_primary_elem.find(
              std::make_pair(secondary_elem->node_ptr(1), secondary_elem));
 
     bool new_container_node0_found =
-             (new_container_it0 != secondary_node_and_elem_to_xi2_primary_elem.end()),
+             (new_container_it0 != _secondary_node_and_elem_to_xi2_primary_elem.end()),
          new_container_node1_found =
-             (new_container_it1 != secondary_node_and_elem_to_xi2_primary_elem.end());
+             (new_container_it1 != _secondary_node_and_elem_to_xi2_primary_elem.end());
 
     const Elem * node0_primary_candidate = nullptr;
     const Elem * node1_primary_candidate = nullptr;
@@ -290,7 +290,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
       msinfo.primary_elem = node0_primary_candidate;
 
     // Associate this MSM elem with the MortarSegmentInfo.
-    msm_elem_to_info.insert(std::make_pair(new_elem, msinfo));
+    _msm_elem_to_info.emplace(new_elem, msinfo);
 
     // Maintain the mapping between secondary elems and mortar segment elems contained within them.
     // Initially, only the original secondary_elem is present.
@@ -298,7 +298,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
   }
 
   // 2.) Insert new nodes from primary side and split mortar segments as necessary.
-  for (const auto & pr : primary_node_and_elem_to_xi1_secondary_elem)
+  for (const auto & pr : _primary_node_and_elem_to_xi1_secondary_elem)
   {
     auto key = pr.first;
     auto val = pr.second;
@@ -327,7 +327,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     {
       try
       {
-        info = &msm_elem_to_info.at(mortar_segment_candidate);
+        info = &_msm_elem_to_info.at(mortar_segment_candidate);
       }
       catch (std::out_of_range &)
       {
@@ -344,16 +344,20 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     if (current_mortar_segment == nullptr)
       mooseError("Unable to find appropriate mortar segment during linear search!");
 
-    // If node lands on endpoint of segment, don't split
-    info = &msm_elem_to_info.at(current_mortar_segment);
+    // If node lands on endpoint of segment, don't split.
+    // Jacob: This condition was getting missed by the < comparison a few lines above. To fix it I
+    // just made it <= and put this condition in to handle equality different. It probably could be
+    // done with a tolerance but the the toleranced equality is already handled later when we drop
+    // segments with small volume.
+    info = &_msm_elem_to_info.at(current_mortar_segment);
     if (info->xi1_a == xi1 || xi1 == info->xi1_b)
       continue;
 
-    const auto new_id = mortar_segment_mesh->max_node_id() + 1;
-    mooseAssert(mortar_segment_mesh->comm().verify(new_id),
+    const auto new_id = _mortar_segment_mesh->max_node_id() + 1;
+    mooseAssert(_mortar_segment_mesh->comm().verify(new_id),
                 "new_id must be the same on all processes");
     Node * const new_node =
-        mortar_segment_mesh->add_point(new_pt, new_id, secondary_elem->processor_id());
+        _mortar_segment_mesh->add_point(new_pt, new_id, secondary_elem->processor_id());
     new_node->set_unique_id(new_id + node_unique_id_offset);
 
     // Reconstruct the nodal normal at xi1. This will help us
@@ -362,11 +366,11 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     const Point normal = getNormals(*secondary_elem, std::vector<Real>({xi1}))[0];
 
     // Get the set of primary_node neighbors.
-    if (this->nodes_to_primary_elem_map.find(primary_node->id()) ==
-        this->nodes_to_primary_elem_map.end())
+    if (this->_nodes_to_primary_elem_map.find(primary_node->id()) ==
+        this->_nodes_to_primary_elem_map.end())
       mooseError("We should already have built this primary node to elem pair!");
     const std::vector<const Elem *> & primary_node_neighbors =
-        this->nodes_to_primary_elem_map[primary_node->id()];
+        this->_nodes_to_primary_elem_map[primary_node->id()];
 
     // Sanity check
     if (primary_node_neighbors.size() == 0 || primary_node_neighbors.size() > 2)
@@ -491,10 +495,10 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
         left_interior_point += Moose::fe_lagrange_1D_shape(order, n, current_left_interior_eta) *
                                current_mortar_segment->point(n);
 
-      const auto new_interior_left_id = mortar_segment_mesh->max_node_id() + 1;
-      mooseAssert(mortar_segment_mesh->comm().verify(new_interior_left_id),
+      const auto new_interior_left_id = _mortar_segment_mesh->max_node_id() + 1;
+      mooseAssert(_mortar_segment_mesh->comm().verify(new_interior_left_id),
                   "new_id must be the same on all processes");
-      Node * const new_interior_node_left = mortar_segment_mesh->add_point(
+      Node * const new_interior_node_left = _mortar_segment_mesh->add_point(
           left_interior_point, new_interior_left_id, new_elem_left->processor_id());
       new_elem_left->set_node(2) = new_interior_node_left;
       new_interior_node_left->set_unique_id(new_interior_left_id + node_unique_id_offset);
@@ -512,17 +516,17 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
         right_interior_point += Moose::fe_lagrange_1D_shape(order, n, current_right_interior_eta) *
                                 current_mortar_segment->point(n);
 
-      const auto new_interior_id_right = mortar_segment_mesh->max_node_id() + 1;
-      mooseAssert(mortar_segment_mesh->comm().verify(new_interior_id_right),
+      const auto new_interior_id_right = _mortar_segment_mesh->max_node_id() + 1;
+      mooseAssert(_mortar_segment_mesh->comm().verify(new_interior_id_right),
                   "new_id must be the same on all processes");
-      Node * const new_interior_node_right = mortar_segment_mesh->add_point(
+      Node * const new_interior_node_right = _mortar_segment_mesh->add_point(
           right_interior_point, new_interior_id_right, new_elem_right->processor_id());
       new_elem_right->set_node(2) = new_interior_node_right;
       new_interior_node_right->set_unique_id(new_interior_id_right + node_unique_id_offset);
     }
 
-    mortar_segment_mesh->add_elem(new_elem_right);
-    mortar_segment_mesh->add_elem(new_elem_left);
+    _mortar_segment_mesh->add_elem(new_elem_right);
+    _mortar_segment_mesh->add_elem(new_elem_left);
 
     // If orientation 2 was valid, swap the left and right primaries.
     if (orientation2_valid)
@@ -540,8 +544,8 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     // current_mortar_segment is not found... Since we're going to
     // erase this entry from the map momentarily, we make an actual
     // copy rather than grabbing a reference.
-    auto msm_it = msm_elem_to_info.find(current_mortar_segment);
-    if (msm_it == msm_elem_to_info.end())
+    auto msm_it = _msm_elem_to_info.find(current_mortar_segment);
+    if (msm_it == _msm_elem_to_info.end())
       mooseError("MortarSegmentInfo not found for current_mortar_segment.");
     MortarSegmentInfo current_msinfo = msm_it->second;
 
@@ -566,11 +570,11 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     new_msinfo_right.primary_elem = right_primary_elem;
 
     // Erase the MortarSegmentInfo object for current_mortar_segment from the map.
-    msm_elem_to_info.erase(msm_it);
+    _msm_elem_to_info.erase(msm_it);
 
     // Add new_msinfo_left and new_msinfo_right objects to the map.
-    msm_elem_to_info.insert(std::make_pair(new_elem_left, new_msinfo_left));
-    msm_elem_to_info.insert(std::make_pair(new_elem_right, new_msinfo_right));
+    _msm_elem_to_info.emplace(new_elem_left, new_msinfo_left);
+    _msm_elem_to_info.emplace(new_elem_right, new_msinfo_right);
 
     // current_mortar_segment must be erased from the
     // mortar_segment_set since it has now been split.
@@ -578,7 +582,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
 
     // The original mortar segment has been split, so erase it from
     // the mortar segment mesh.
-    mortar_segment_mesh->delete_elem(current_mortar_segment);
+    _mortar_segment_mesh->delete_elem(current_mortar_segment);
 
     // We need to insert new_elem_left and new_elem_right in
     // the mortar_segment_set for this secondary_elem.
@@ -592,26 +596,26 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
    * are not used in assembly if there is no corresponding primary element and inactive
    * LM DoFs (those with no contribution to an active primary element) are zeroed.
    */
-  for (auto msm_elem : mortar_segment_mesh->active_element_ptr_range())
+  for (auto msm_elem : _mortar_segment_mesh->active_element_ptr_range())
   {
-    MortarSegmentInfo & msinfo = msm_elem_to_info.at(msm_elem);
+    MortarSegmentInfo & msinfo = _msm_elem_to_info.at(msm_elem);
     Elem * primary_elem = const_cast<Elem *>(msinfo.primary_elem);
     if (primary_elem == nullptr || std::abs(msinfo.xi2_a) > 1.0 + TOLERANCE ||
         std::abs(msinfo.xi2_b) > 1.0 + TOLERANCE)
     {
       // Remove element from mortar segment mesh
-      mortar_segment_mesh->delete_elem(msm_elem);
+      _mortar_segment_mesh->delete_elem(msm_elem);
 
       // Erase msinfo
-      msm_elem_to_info.erase(msm_elem);
+      _msm_elem_to_info.erase(msm_elem);
     }
   }
 
 #ifndef NDEBUG
   // Verify that all segments without primary contribution have been deleted
-  for (auto msm_elem : mortar_segment_mesh->active_element_ptr_range())
+  for (auto msm_elem : _mortar_segment_mesh->active_element_ptr_range())
   {
-    const MortarSegmentInfo & msinfo = msm_elem_to_info.at(msm_elem);
+    const MortarSegmentInfo & msinfo = _msm_elem_to_info.at(msm_elem);
     mooseAssert(msinfo.primary_elem != nullptr,
                 "All mortar segment elements should have valid "
                 "primary element.");
@@ -619,15 +623,15 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
 #endif
 
   // Set up the the mortar segment neighbor information.
-  mortar_segment_mesh->allow_renumbering(true);
-  mortar_segment_mesh->skip_partitioning(true);
-  mortar_segment_mesh->allow_find_neighbors(false);
-  mortar_segment_mesh->prepare_for_use();
+  _mortar_segment_mesh->allow_renumbering(true);
+  _mortar_segment_mesh->skip_partitioning(true);
+  _mortar_segment_mesh->allow_find_neighbors(false);
+  _mortar_segment_mesh->prepare_for_use();
 
   // (Optionally) Write the mortar segment mesh to file for inspection
   if (_debug)
   {
-    ExodusII_IO mortar_segment_mesh_writer(*mortar_segment_mesh);
+    ExodusII_IO mortar_segment_mesh_writer(*_mortar_segment_mesh);
     mortar_segment_mesh_writer.write("mortar_segment_mesh.e");
   }
 
@@ -637,27 +641,27 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
   // AugmentSparsityOnInterface functor to determine whether a given
   // secondary Elem is coupled across the mortar interface to a primary
   // element.
-  for (const auto & pr : msm_elem_to_info)
+  for (const auto & pr : _msm_elem_to_info)
   {
     const Elem * secondary_elem = pr.second.secondary_elem;
     const Elem * primary_elem = pr.second.primary_elem;
 
     // LowerSecondary
-    mortar_interface_coupling.insert(
-        std::make_pair(secondary_elem->id(), secondary_elem->interior_parent()->id()));
+    _mortar_interface_coupling.emplace(secondary_elem->id(),
+                                       secondary_elem->interior_parent()->id());
     // SecondaryLower
-    mortar_interface_coupling.insert(
-        std::make_pair(secondary_elem->interior_parent()->id(), secondary_elem->id()));
+    _mortar_interface_coupling.emplace(secondary_elem->interior_parent()->id(),
+                                       secondary_elem->id());
 
     // Insert both Elems as key and value.
     if (primary_elem)
     {
       // LowerPrimary
-      mortar_interface_coupling.insert(
-          std::make_pair(secondary_elem->id(), primary_elem->interior_parent()->id()));
+      _mortar_interface_coupling.emplace(secondary_elem->id(),
+                                         primary_elem->interior_parent()->id());
       // PrimaryLower
-      mortar_interface_coupling.insert(
-          std::make_pair(primary_elem->interior_parent()->id(), secondary_elem->id()));
+      _mortar_interface_coupling.emplace(primary_elem->interior_parent()->id(),
+                                         secondary_elem->id());
     }
   }
 }
@@ -667,10 +671,10 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
 {
   // Add an integer flag to mortar segment mesh to keep track of which subelem
   // of second order primal elements mortar segments correspond to
-  auto secondary_sub_elem = mortar_segment_mesh->add_elem_integer("secondary_sub_elem");
-  auto primary_sub_elem = mortar_segment_mesh->add_elem_integer("primary_sub_elem");
+  auto secondary_sub_elem = _mortar_segment_mesh->add_elem_integer("secondary_sub_elem");
+  auto primary_sub_elem = _mortar_segment_mesh->add_elem_integer("primary_sub_elem");
 
-  // Number of new msm elems can be created by clipping and triangulating
+  // Number of new msm elems that can be created by clipping and triangulating
   // secondary node with primary node
   // Note this parameter is subject to change, just a heuristic for now
   constexpr int multiplicity = 16;
@@ -680,14 +684,14 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
 
   // Create an offset by the maximum number of mortar segment elements that can be created *plus*
   // the number of lower-dimensional secondary subdomain elements
-  for (const auto & pr : primary_secondary_boundary_id_pairs)
+  for (const auto & pr : _primary_secondary_boundary_id_pairs)
   {
     const auto primary_bnd_id = pr.first;
     const auto secondary_bnd_id = pr.second;
     const auto num_primary_nodes =
-        std::distance(mesh.bid_nodes_begin(primary_bnd_id), mesh.bid_nodes_end(primary_bnd_id));
-    const auto num_secondary_nodes =
-        std::distance(mesh.bid_nodes_begin(secondary_bnd_id), mesh.bid_nodes_end(secondary_bnd_id));
+        std::distance(_mesh.bid_nodes_begin(primary_bnd_id), _mesh.bid_nodes_end(primary_bnd_id));
+    const auto num_secondary_nodes = std::distance(_mesh.bid_nodes_begin(secondary_bnd_id),
+                                                   _mesh.bid_nodes_end(secondary_bnd_id));
     mooseAssert(num_primary_nodes,
                 "There are no primary nodes on boundary ID "
                     << primary_bnd_id << ". Does that boundary ID even exist on the mesh?");
@@ -699,13 +703,13 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
   }
 
   // Loop through mortar secondary and primary pairs to create mortar segment mesh between each
-  for (const auto & pr : primary_secondary_subdomain_id_pairs)
+  for (const auto & pr : _primary_secondary_subdomain_id_pairs)
   {
     const auto primary_subd_id = pr.first;
     const auto secondary_subd_id = pr.second;
 
     // Build k-d tree for use in Step 1.2 for primary interface coarse screening
-    NanoflannMeshSubdomainAdaptor<3> mesh_adaptor(mesh, primary_subd_id);
+    NanoflannMeshSubdomainAdaptor<3> mesh_adaptor(_mesh, primary_subd_id);
     subdomain_kd_tree_t kd_tree(
         3, mesh_adaptor, nanoflann::KDTreeSingleIndexAdaptorParams(/*max leaf=*/10));
 
@@ -759,8 +763,8 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
     /**
      *  Step 1: Build mortar segments for all secondary elements
      */
-    for (MeshBase::const_element_iterator el = mesh.active_local_elements_begin(),
-                                          end_el = mesh.active_local_elements_end();
+    for (MeshBase::const_element_iterator el = _mesh.active_local_elements_begin(),
+                                          end_el = _mesh.active_local_elements_end();
          el != end_el;
          ++el)
     {
@@ -861,13 +865,13 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
       for (auto r : make_range(result_set.size()))
       {
         // Verify that the squared distance we compute is the same as nanoflann's
-        if (std::abs((mesh.point(ret_index[r]) - center_point).norm_sq() - out_dist_sqr[r]) >
-            TOLERANCE)
-          mooseError("Lower-dimensional element squared distance verification failed.");
+        mooseAssert(std::abs((_mesh.point(ret_index[r]) - center_point).norm_sq() -
+                             out_dist_sqr[r]) <= TOLERANCE,
+                    "Lower-dimensional element squared distance verification failed.");
 
         // Get list of elems connected to node
         std::vector<const Elem *> & node_elems =
-            this->nodes_to_primary_elem_map.at(static_cast<dof_id_type>(ret_index[r]));
+            this->_nodes_to_primary_elem_map.at(static_cast<dof_id_type>(ret_index[r]));
 
         // Uniquely add elems to candidate set
         for (auto elem : node_elems)
@@ -889,10 +893,10 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
         if (processed_primary_elems.count(primary_elem_candidate))
           continue;
 
-        // Initialize set of nodes used to construct mortar segmenet elements
+        // Initialize set of nodes used to construct mortar segment elements
         std::vector<Point> nodal_points;
 
-        // Initialize map from mortar segmenet elements to nodes
+        // Initialize map from mortar segment elements to nodes
         std::vector<std::vector<unsigned int>> elem_to_node_map;
 
         // Initialize list of secondary and primary sub-elements that formed each mortar segment
@@ -939,7 +943,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
         primary_elem_candidates.erase(primary_elem_candidate);
 
         // If overlap of polygons was non-trivial (created mortar segment elements)
-        if (elem_to_node_map.size() > 0)
+        if (!elem_to_node_map.empty())
         {
           // If this is the first element with non-trivial overlap, set flag
           // Candidates will now be neighbors of elements that had non-trivial overlap
@@ -969,14 +973,14 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
           std::vector<Node *> new_nodes;
           for (auto pt : nodal_points)
           {
-            new_nodes.push_back(mortar_segment_mesh->add_point(
-                pt, mortar_segment_mesh->max_node_id(), secondary_side_elem->processor_id()));
+            new_nodes.push_back(_mortar_segment_mesh->add_point(
+                pt, _mortar_segment_mesh->max_node_id(), secondary_side_elem->processor_id()));
             Node * const new_node = new_nodes.back();
             new_node->set_unique_id(new_node->id() + node_unique_id_offset);
           }
 
           // Loop through triangular elements in map
-          for (auto el : make_range(elem_to_node_map.size()))
+          for (auto el : index_range(elem_to_node_map))
           {
             // Create new triangular element
             std::unique_ptr<Elem> new_elem;
@@ -994,7 +998,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
             new_elem->set_unique_id(new_elem->id());
 
             // Attach newly created nodes
-            for (auto i : make_range(elem_to_node_map[el].size()))
+            for (auto i : index_range(elem_to_node_map[el]))
               new_elem->set_node(i) = new_nodes[elem_to_node_map[el][i]];
 
             // If element is smaller than tolerance, don't add to msm
@@ -1002,7 +1006,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
               continue;
 
             // Add elements to mortar segment mesh
-            Elem * msm_new_elem = mortar_segment_mesh->add_elem(new_elem.release());
+            Elem * msm_new_elem = _mortar_segment_mesh->add_elem(new_elem.release());
 
             msm_new_elem->set_extra_integer(secondary_sub_elem, sub_elem_map[el].first);
             msm_new_elem->set_extra_integer(primary_sub_elem, sub_elem_map[el].second);
@@ -1013,7 +1017,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
             msinfo.primary_elem = primary_elem_candidate;
 
             // Associate this MSM elem with the MortarSegmentInfo.
-            msm_elem_to_info.insert(std::make_pair(msm_new_elem, msinfo));
+            _msm_elem_to_info.emplace(msm_new_elem, msinfo);
           }
         }
         // End loop through primary element candidates
@@ -1035,25 +1039,25 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
   }
 
   // Set up the the mortar segment neighbor information.
-  mortar_segment_mesh->allow_renumbering(true);
-  mortar_segment_mesh->skip_partitioning(true);
-  mortar_segment_mesh->allow_find_neighbors(false);
-  mortar_segment_mesh->prepare_for_use();
+  _mortar_segment_mesh->allow_renumbering(true);
+  _mortar_segment_mesh->skip_partitioning(true);
+  _mortar_segment_mesh->allow_find_neighbors(false);
+  _mortar_segment_mesh->prepare_for_use();
 
   // Output mortar segment mesh
   if (_debug)
   {
     // If element is not triangular, increment subdomain id
     // (ExodusII does not support mixed element types in a single subdomain)
-    for (const auto msm_el : mortar_segment_mesh->active_local_element_ptr_range())
+    for (const auto msm_el : _mortar_segment_mesh->active_local_element_ptr_range())
       if (msm_el->type() != TRI3)
         msm_el->subdomain_id()++;
 
-    ExodusII_IO mortar_segment_mesh_writer(*mortar_segment_mesh);
+    ExodusII_IO mortar_segment_mesh_writer(*_mortar_segment_mesh);
     mortar_segment_mesh_writer.write("mortar_segment_mesh.e");
 
     // Undo increment
-    for (const auto msm_el : mortar_segment_mesh->active_local_element_ptr_range())
+    for (const auto msm_el : _mortar_segment_mesh->active_local_element_ptr_range())
       if (msm_el->type() != TRI3)
         msm_el->subdomain_id()--;
   }
@@ -1064,34 +1068,34 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
   // AugmentSparsityOnInterface functor to determine whether a given
   // secondary Elem is coupled across the mortar interface to a primary
   // element.
-  for (const auto & pr : msm_elem_to_info)
+  for (const auto & pr : _msm_elem_to_info)
   {
     const Elem * secondary_elem = pr.second.secondary_elem;
     const Elem * primary_elem = pr.second.primary_elem;
 
     // LowerSecondary
-    mortar_interface_coupling.insert(
-        std::make_pair(secondary_elem->id(), secondary_elem->interior_parent()->id()));
+    _mortar_interface_coupling.emplace(secondary_elem->id(),
+                                       secondary_elem->interior_parent()->id());
     // SecondaryLower
-    mortar_interface_coupling.insert(
-        std::make_pair(secondary_elem->interior_parent()->id(), secondary_elem->id()));
+    _mortar_interface_coupling.emplace(secondary_elem->interior_parent()->id(),
+                                       secondary_elem->id());
 
     // Insert both Elems as key and value.
     if (primary_elem)
     {
       // LowerPrimary
-      mortar_interface_coupling.insert(
-          std::make_pair(secondary_elem->id(), primary_elem->interior_parent()->id()));
+      _mortar_interface_coupling.emplace(secondary_elem->id(),
+                                         primary_elem->interior_parent()->id());
       // PrimaryLower
-      mortar_interface_coupling.insert(
-          std::make_pair(primary_elem->interior_parent()->id(), secondary_elem->id()));
+      _mortar_interface_coupling.emplace(primary_elem->interior_parent()->id(),
+                                         secondary_elem->id());
     }
   }
 
   // Print mortar segment mesh statistics
   if (_debug)
   {
-    if (mesh.n_processors() == 1)
+    if (_mesh.n_processors() == 1)
       msmStatistics();
     else
       mooseWarning("Mortar segment mesh statistics intended for debugging purposes in serial only, "
@@ -1106,7 +1110,7 @@ AutomaticMortarGeneration::msmStatistics()
   Moose::out << "Mortar Interface Statistics:" << std::endl;
 
   // Count number of elements on primary and secondary sides
-  for (const auto & pr : primary_secondary_subdomain_id_pairs)
+  for (const auto & pr : _primary_secondary_subdomain_id_pairs)
   {
     const auto primary_subd_id = pr.first;
     const auto secondary_subd_id = pr.second;
@@ -1116,7 +1120,7 @@ AutomaticMortarGeneration::msmStatistics()
     StatisticsVector<Real> secondary; // secondary.reserve(mesh.n_elem());
     StatisticsVector<Real> msm;       // msm.reserve(mortar_segment_mesh->n_elem());
 
-    for (auto * el : mesh.active_element_ptr_range())
+    for (auto * el : _mesh.active_element_ptr_range())
     {
       // Add secondary and primary elem volumes to statistics vector
       if (el->subdomain_id() == secondary_subd_id)
@@ -1127,7 +1131,7 @@ AutomaticMortarGeneration::msmStatistics()
 
     // Note: when we allow more than one primary secondary pair will need to make
     // separate mortar segment mesh for each
-    for (auto msm_elem : mortar_segment_mesh->active_local_element_ptr_range())
+    for (auto msm_elem : _mortar_segment_mesh->active_local_element_ptr_range())
     {
       // Add msm elem volume to statistic vector
       msm.push_back(msm_elem->volume());
@@ -1143,7 +1147,7 @@ AutomaticMortarGeneration::msmStatistics()
 
     FormattedTable table;
     table.clear();
-    for (auto i : make_range(subds.size()))
+    for (auto i : index_range(subds))
     {
       table.addRow(i);
       table.addData<std::string>(col_names[0], subds[i]);
@@ -1172,30 +1176,30 @@ AutomaticMortarGeneration::computeIncorrectEdgeDroppingInactiveLMNodes()
   const Real tol = (dim() == 3) ? 0.1 : TOLERANCE;
 
   std::unordered_map<processor_id_type, std::set<dof_id_type>> proc_to_inactive_nodes_set;
-  const auto my_pid = mesh.processor_id();
+  const auto my_pid = _mesh.processor_id();
 
   // List of inactive nodes on local secondary elements
   std::unordered_set<dof_id_type> inactive_node_ids;
 
   std::unordered_map<const Elem *, Real> active_volume{};
 
-  for (const auto & pr : primary_secondary_subdomain_id_pairs)
-    for (const auto el : mesh.active_subdomain_elements_ptr_range(pr.second))
+  for (const auto & pr : _primary_secondary_subdomain_id_pairs)
+    for (const auto el : _mesh.active_subdomain_elements_ptr_range(pr.second))
       active_volume[el] = 0.;
 
   // Compute fraction of elements with corresponding primary elements
-  for (const auto msm_elem : mortar_segment_mesh->active_local_element_ptr_range())
+  for (const auto msm_elem : _mortar_segment_mesh->active_local_element_ptr_range())
   {
-    const MortarSegmentInfo & msinfo = msm_elem_to_info.at(msm_elem);
+    const MortarSegmentInfo & msinfo = _msm_elem_to_info.at(msm_elem);
     const Elem * secondary_elem = msinfo.secondary_elem;
 
     active_volume[secondary_elem] += msm_elem->volume();
   }
 
   // Mark all inactive local nodes
-  for (const auto & pr : primary_secondary_subdomain_id_pairs)
+  for (const auto & pr : _primary_secondary_subdomain_id_pairs)
     // Loop through all elements on my processor
-    for (const auto el : mesh.active_local_subdomain_elements_ptr_range(pr.second))
+    for (const auto el : _mesh.active_local_subdomain_elements_ptr_range(pr.second))
       // If elem fully or partially dropped
       if (std::abs(active_volume[el] / el->volume() - 1.0) > tol)
       {
@@ -1205,12 +1209,12 @@ AutomaticMortarGeneration::computeIncorrectEdgeDroppingInactiveLMNodes()
       }
 
   // Assemble list of procs that nodes contribute to
-  for (const auto & pr : primary_secondary_subdomain_id_pairs)
+  for (const auto & pr : _primary_secondary_subdomain_id_pairs)
   {
     const auto secondary_subd_id = pr.second;
 
     // Loop through all elements not on my processor
-    for (const auto el : mesh.active_subdomain_elements_ptr_range(secondary_subd_id))
+    for (const auto el : _mesh.active_subdomain_elements_ptr_range(secondary_subd_id))
     {
       // Get processor_id
       const auto pid = el->processor_id();
@@ -1234,25 +1238,24 @@ AutomaticMortarGeneration::computeIncorrectEdgeDroppingInactiveLMNodes()
     // Pack set into vector for sending (push_parallel_vector_data doesn't like sets)
     std::unordered_map<processor_id_type, std::vector<dof_id_type>> proc_to_inactive_nodes_vector;
     for (const auto & proc_set : proc_to_inactive_nodes_set)
-    {
-      proc_to_inactive_nodes_vector[proc_set.first].reserve(proc_to_inactive_nodes_set.size());
-      for (const auto node_id : proc_set.second)
-        proc_to_inactive_nodes_vector[proc_set.first].push_back(node_id);
-    }
+      proc_to_inactive_nodes_vector[proc_set.first].insert(
+          proc_to_inactive_nodes_vector[proc_set.first].end(),
+          proc_set.second.begin(),
+          proc_set.second.end());
 
     // First push data
     auto action_functor = [this, &inactive_node_ids](const processor_id_type pid,
                                                      const std::vector<dof_id_type> & sent_data) {
-      if (pid == mesh.processor_id())
+      if (pid == _mesh.processor_id())
         mooseError("Should not be communicating with self.");
       for (const auto pr : sent_data)
         inactive_node_ids.insert(pr);
     };
-    TIMPI::push_parallel_vector_data(mesh.comm(), proc_to_inactive_nodes_vector, action_functor);
+    TIMPI::push_parallel_vector_data(_mesh.comm(), proc_to_inactive_nodes_vector, action_functor);
   }
-  inactive_local_lm_nodes.clear();
+  _inactive_local_lm_nodes.clear();
   for (const auto node_id : inactive_node_ids)
-    inactive_local_lm_nodes.insert(mesh.node_ptr(node_id));
+    _inactive_local_lm_nodes.insert(_mesh.node_ptr(node_id));
 }
 
 void
@@ -1265,15 +1268,15 @@ AutomaticMortarGeneration::computeInactiveLMNodes()
   }
 
   std::unordered_map<processor_id_type, std::set<dof_id_type>> proc_to_active_nodes_set;
-  const auto my_pid = mesh.processor_id();
+  const auto my_pid = _mesh.processor_id();
 
   // List of active nodes on local secondary elements
   std::unordered_set<dof_id_type> active_local_nodes;
 
   // Mark all active local nodes
-  for (const auto msm_elem : mortar_segment_mesh->active_local_element_ptr_range())
+  for (const auto msm_elem : _mortar_segment_mesh->active_local_element_ptr_range())
   {
-    const MortarSegmentInfo & msinfo = msm_elem_to_info.at(msm_elem);
+    const MortarSegmentInfo & msinfo = _msm_elem_to_info.at(msm_elem);
     const Elem * secondary_elem = msinfo.secondary_elem;
 
     for (auto n : make_range(secondary_elem->n_nodes()))
@@ -1281,12 +1284,12 @@ AutomaticMortarGeneration::computeInactiveLMNodes()
   }
 
   // Assemble list of procs that nodes contribute to
-  for (const auto & pr : primary_secondary_subdomain_id_pairs)
+  for (const auto & pr : _primary_secondary_subdomain_id_pairs)
   {
     const auto secondary_subd_id = pr.second;
 
     // Loop through all elements not on my processor
-    for (const auto el : mesh.active_subdomain_elements_ptr_range(secondary_subd_id))
+    for (const auto el : _mesh.active_subdomain_elements_ptr_range(secondary_subd_id))
     {
       // Get processor_id
       const auto pid = el->processor_id();
@@ -1319,23 +1322,22 @@ AutomaticMortarGeneration::computeInactiveLMNodes()
     // First push data
     auto action_functor = [this, &active_local_nodes](const processor_id_type pid,
                                                       const std::vector<dof_id_type> & sent_data) {
-      if (pid == mesh.processor_id())
+      if (pid == _mesh.processor_id())
         mooseError("Should not be communicating with self.");
-      for (const auto pr : sent_data)
-        active_local_nodes.insert(pr);
+      active_local_nodes.insert(sent_data.begin(), sent_data.end());
     };
-    TIMPI::push_parallel_vector_data(mesh.comm(), proc_to_active_nodes_vector, action_functor);
+    TIMPI::push_parallel_vector_data(_mesh.comm(), proc_to_active_nodes_vector, action_functor);
   }
 
   // Every proc has correct list of active local nodes, now take complement (list of inactive nodes)
   // and store to use later to zero LM DoFs on inactive nodes
-  inactive_local_lm_nodes.clear();
-  for (const auto & pr : primary_secondary_subdomain_id_pairs)
+  _inactive_local_lm_nodes.clear();
+  for (const auto & pr : _primary_secondary_subdomain_id_pairs)
     for (const auto el :
-         mesh.active_local_subdomain_elements_ptr_range(/*secondary_subd_id*/ pr.second))
+         _mesh.active_local_subdomain_elements_ptr_range(/*secondary_subd_id*/ pr.second))
       for (const auto n : make_range(el->n_nodes()))
         if (active_local_nodes.find(el->node_id(n)) == active_local_nodes.end())
-          inactive_local_lm_nodes.insert(el->node_ptr(n));
+          _inactive_local_lm_nodes.insert(el->node_ptr(n));
 }
 
 // Note: could be combined with previous routine, keeping separate for clarity (for now)
@@ -1355,18 +1357,18 @@ AutomaticMortarGeneration::computeInactiveLMElems()
 
   // Compute fraction of elements with corresponding primary elements
   if (!_correct_edge_dropping)
-    for (const auto msm_elem : mortar_segment_mesh->active_local_element_ptr_range())
+    for (const auto msm_elem : _mortar_segment_mesh->active_local_element_ptr_range())
     {
-      const MortarSegmentInfo & msinfo = msm_elem_to_info.at(msm_elem);
+      const MortarSegmentInfo & msinfo = _msm_elem_to_info.at(msm_elem);
       const Elem * secondary_elem = msinfo.secondary_elem;
 
       active_volume[secondary_elem] += msm_elem->volume();
     }
   //****
 
-  for (const auto msm_elem : mortar_segment_mesh->active_local_element_ptr_range())
+  for (const auto msm_elem : _mortar_segment_mesh->active_local_element_ptr_range())
   {
-    const MortarSegmentInfo & msinfo = msm_elem_to_info.at(msm_elem);
+    const MortarSegmentInfo & msinfo = _msm_elem_to_info.at(msm_elem);
     const Elem * secondary_elem = msinfo.secondary_elem;
 
     //****
@@ -1379,19 +1381,19 @@ AutomaticMortarGeneration::computeInactiveLMElems()
   }
 
   // Take complement of active elements in active local subdomain to get inactive local elements
-  inactive_local_lm_elems.clear();
-  for (const auto & pr : primary_secondary_subdomain_id_pairs)
+  _inactive_local_lm_elems.clear();
+  for (const auto & pr : _primary_secondary_subdomain_id_pairs)
     for (const auto el :
-         mesh.active_local_subdomain_elements_ptr_range(/*secondary_subd_id*/ pr.second))
+         _mesh.active_local_subdomain_elements_ptr_range(/*secondary_subd_id*/ pr.second))
       if (active_local_elems.find(el) == active_local_elems.end())
-        inactive_local_lm_elems.insert(el);
+        _inactive_local_lm_elems.insert(el);
 }
 
 void
 AutomaticMortarGeneration::computeNodalNormals()
 {
   // The dimension according to Mesh::mesh_dimension().
-  const auto dim = mesh.mesh_dimension();
+  const auto dim = _mesh.mesh_dimension();
 
   // A nodal lower-dimensional nodal quadrature rule to be used on faces.
   QNodal qface(dim - 1);
@@ -1409,15 +1411,15 @@ AutomaticMortarGeneration::computeNodalNormals()
   // First loop over lower-dimensional secondary side elements and compute/save the outward normal
   // for each one. We loop over all active elements currently, but this procedure could be
   // parallelized as well.
-  for (MeshBase::const_element_iterator el = mesh.active_elements_begin(),
-                                        end_el = mesh.active_elements_end();
+  for (MeshBase::const_element_iterator el = _mesh.active_elements_begin(),
+                                        end_el = _mesh.active_elements_end();
        el != end_el;
        ++el)
   {
     const Elem * secondary_elem = *el;
 
     // If this is not one of the lower-dimensional secondary side elements, go on to the next one.
-    if (!this->secondary_boundary_subdomain_ids.count(secondary_elem->subdomain_id()))
+    if (!_secondary_boundary_subdomain_ids.count(secondary_elem->subdomain_id()))
       continue;
 
     // We will create an FE object and attach the nodal quadrature rule such that we can get out the
@@ -1461,7 +1463,7 @@ AutomaticMortarGeneration::computeNodalNormals()
     for (const auto & norm_and_weight : normals_and_weights_vec)
       nodal_normal += norm_and_weight.first * norm_and_weight.second;
 
-    secondary_node_to_nodal_normal[mesh.node_ptr(node_id)] = nodal_normal.unit();
+    _secondary_node_to_nodal_normal[_mesh.node_ptr(node_id)] = nodal_normal.unit();
   }
 }
 
@@ -1472,7 +1474,7 @@ AutomaticMortarGeneration::projectSecondaryNodes()
 {
   // For each primary/secondary boundary id pair, call the
   // project_secondary_nodes_single_pair() helper function.
-  for (const auto & pr : primary_secondary_subdomain_id_pairs)
+  for (const auto & pr : _primary_secondary_subdomain_id_pairs)
     projectSecondaryNodesSinglePair(pr.first, pr.second);
 }
 
@@ -1482,15 +1484,15 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
     subdomain_id_type lower_dimensional_secondary_subdomain_id)
 {
   // Build the "subdomain" adaptor based KD Tree.
-  NanoflannMeshSubdomainAdaptor<3> mesh_adaptor(mesh, lower_dimensional_primary_subdomain_id);
+  NanoflannMeshSubdomainAdaptor<3> mesh_adaptor(_mesh, lower_dimensional_primary_subdomain_id);
   subdomain_kd_tree_t kd_tree(
       3, mesh_adaptor, nanoflann::KDTreeSingleIndexAdaptorParams(/*max leaf=*/10));
 
   // Construct the KD tree.
   kd_tree.buildIndex();
 
-  for (MeshBase::const_element_iterator el = mesh.active_elements_begin(),
-                                        end_el = mesh.active_elements_end();
+  for (MeshBase::const_element_iterator el = _mesh.active_elements_begin(),
+                                        end_el = _mesh.active_elements_end();
        el != end_el;
        ++el)
   {
@@ -1512,7 +1514,7 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
       // Get the nodal neighbors for secondary_node, so we can check whether we've
       // already successfully projected it.
       const std::vector<const Elem *> & secondary_node_neighbors =
-          this->nodes_to_secondary_elem_map.at(secondary_node->id());
+          this->_nodes_to_secondary_elem_map.at(secondary_node->id());
 
       // Check whether we've already mapped this secondary node
       // successfully for all of its nodal neighbors.
@@ -1521,7 +1523,7 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
            ++snn)
       {
         auto secondary_key = std::make_pair(secondary_node, secondary_node_neighbors[snn]);
-        if (!secondary_node_and_elem_to_xi2_primary_elem.count(secondary_key))
+        if (!_secondary_node_and_elem_to_xi2_primary_elem.count(secondary_key))
         {
           is_mapped = false;
           break;
@@ -1533,7 +1535,7 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
         continue;
 
       // Look up the new nodal normal value in the local storage, error if not found.
-      Point nodal_normal = this->secondary_node_to_nodal_normal.at(secondary_node);
+      Point nodal_normal = _secondary_node_to_nodal_normal.at(secondary_node);
 
       // Data structure for performing Nanoflann searches.
       std::array<Real, 3> query_pt = {
@@ -1565,15 +1567,15 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
       // the projection succeeds.
       for (MooseIndex(result_set) r = 0; r < result_set.size(); ++r)
       {
-        // Verify that the squared distance we compute is the same as nanoflann's
-        if (std::abs((mesh.point(ret_index[r]) - *secondary_node).norm_sq() - out_dist_sqr[r]) >
-            TOLERANCE)
-          mooseError("Lower-dimensional element squared distance verification failed.");
+        // Verify that the squared distance we compute is the same as nanoflann'sFss
+        mooseAssert(std::abs((_mesh.point(ret_index[r]) - *secondary_node).norm_sq() -
+                             out_dist_sqr[r]) <= TOLERANCE,
+                    "Lower-dimensional element squared distance verification failed.");
 
         // Get a reference to the vector of lower dimensional elements from the
         // nodes_to_primary_elem_map.
         std::vector<const Elem *> & primary_elem_candidates =
-            this->nodes_to_primary_elem_map.at(static_cast<dof_id_type>(ret_index[r]));
+            this->_nodes_to_primary_elem_map.at(static_cast<dof_id_type>(ret_index[r]));
 
         // Search the Elems connected to this node on the primary mesh side.
         for (MooseIndex(primary_elem_candidates) e = 0; e < primary_elem_candidates.size(); ++e)
@@ -1625,7 +1627,7 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
                                                     : primary_elem_candidate->node_ptr(1);
 
               const std::vector<const Elem *> & primary_node_neighbors =
-                  this->nodes_to_primary_elem_map.at(primary_node->id());
+                  _nodes_to_primary_elem_map.at(primary_node->id());
 
               std::vector<bool> primary_elems_mapped(primary_node_neighbors.size(), false);
 
@@ -1683,8 +1685,8 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
                     auto secondary_key =
                         std::make_pair(secondary_node, secondary_node_neighbors[snn]);
                     auto primary_val = std::make_pair(xi2, primary_node_neighbors[mnn]);
-                    secondary_node_and_elem_to_xi2_primary_elem.insert(
-                        std::make_pair(secondary_key, primary_val));
+                    _secondary_node_and_elem_to_xi2_primary_elem.emplace(secondary_key,
+                                                                         primary_val);
 
                     // Also map in the other direction.
                     Real xi1 =
@@ -1692,8 +1694,8 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
                     auto primary_key = std::make_tuple(
                         primary_node->id(), primary_node, primary_node_neighbors[mnn]);
                     auto secondary_val = std::make_pair(xi1, secondary_node_neighbors[snn]);
-                    primary_node_and_elem_to_xi1_secondary_elem.insert(
-                        std::make_pair(primary_key, secondary_val));
+                    _primary_node_and_elem_to_xi1_secondary_elem.emplace(primary_key,
+                                                                         secondary_val);
                   }
 
               // Sanity check
@@ -1709,10 +1711,10 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
                   if (*it == false)
                   {
                     auto index = std::distance(primary_elems_mapped.begin(), it);
-                    primary_node_and_elem_to_xi1_secondary_elem.insert(std::make_pair(
+                    _primary_node_and_elem_to_xi1_secondary_elem.emplace(
                         std::make_tuple(
                             primary_node->id(), primary_node, primary_node_neighbors[index]),
-                        std::make_pair(1, nullptr)));
+                        std::make_pair(1, nullptr));
                   }
             }
             else // Point falls somewhere in the middle of the Elem.
@@ -1730,7 +1732,7 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
                   {
                     auto key = std::make_pair(neigh_node, neigh);
                     auto val = std::make_pair(xi2, primary_elem_candidate);
-                    secondary_node_and_elem_to_xi2_primary_elem.insert(std::make_pair(key, val));
+                    _secondary_node_and_elem_to_xi2_primary_elem.emplace(key, val);
                   }
                 }
               }
@@ -1768,7 +1770,7 @@ AutomaticMortarGeneration::projectPrimaryNodes()
 {
   // For each primary/secondary boundary id pair, call the
   // project_primary_nodes_single_pair() helper function.
-  for (const auto & pr : primary_secondary_subdomain_id_pairs)
+  for (const auto & pr : _primary_secondary_subdomain_id_pairs)
     projectPrimaryNodesSinglePair(pr.first, pr.second);
 }
 
@@ -1778,7 +1780,7 @@ AutomaticMortarGeneration::projectPrimaryNodesSinglePair(
     subdomain_id_type lower_dimensional_secondary_subdomain_id)
 {
   // Build a Nanoflann object on the lower-dimensional secondary elements of the Mesh.
-  NanoflannMeshSubdomainAdaptor<3> mesh_adaptor(mesh, lower_dimensional_secondary_subdomain_id);
+  NanoflannMeshSubdomainAdaptor<3> mesh_adaptor(_mesh, lower_dimensional_secondary_subdomain_id);
   subdomain_kd_tree_t kd_tree(
       3, mesh_adaptor, nanoflann::KDTreeSingleIndexAdaptorParams(/*max leaf=*/10));
 
@@ -1787,7 +1789,7 @@ AutomaticMortarGeneration::projectPrimaryNodesSinglePair(
 
   std::unordered_set<dof_id_type> primary_nodes_visited;
 
-  for (const auto & primary_side_elem : mesh.active_element_ptr_range())
+  for (const auto & primary_side_elem : _mesh.active_element_ptr_range())
   {
     // If this is not one of the lower-dimensional primary side elements, go on to the next one.
     if (primary_side_elem->subdomain_id() != lower_dimensional_primary_subdomain_id)
@@ -1803,7 +1805,7 @@ AutomaticMortarGeneration::projectPrimaryNodesSinglePair(
 
       // Get the nodal neighbors connected to this primary node.
       const std::vector<const Elem *> & primary_node_neighbors =
-          this->nodes_to_primary_elem_map.at(primary_node->id());
+          _nodes_to_primary_elem_map.at(primary_node->id());
 
       // Check whether we have already successfully inverse mapped this primary node (whether during
       // secondary node projection or now during primary node projection) or we have already failed
@@ -1812,7 +1814,7 @@ AutomaticMortarGeneration::projectPrimaryNodesSinglePair(
       auto primary_key =
           std::make_tuple(primary_node->id(), primary_node, primary_node_neighbors[0]);
       if (!primary_nodes_visited.insert(primary_node->id()).second ||
-          primary_node_and_elem_to_xi1_secondary_elem.count(primary_key))
+          _primary_node_and_elem_to_xi1_secondary_elem.count(primary_key))
         continue;
 
       // Data structure for performing Nanoflann searches.
@@ -1844,14 +1846,14 @@ AutomaticMortarGeneration::projectPrimaryNodesSinglePair(
       for (MooseIndex(result_set) r = 0; r < result_set.size(); ++r)
       {
         // Verify that the squared distance we compute is the same as nanoflann's
-        if (std::abs((mesh.point(ret_index[r]) - *primary_node).norm_sq() - out_dist_sqr[r]) >
-            TOLERANCE)
-          mooseError("Lower-dimensional element squared distance verification failed.");
+        mooseAssert(std::abs((_mesh.point(ret_index[r]) - *primary_node).norm_sq() -
+                             out_dist_sqr[r]) <= TOLERANCE,
+                    "Lower-dimensional element squared distance verification failed.");
 
         // Get a reference to the vector of lower dimensional elements from the
         // nodes_to_secondary_elem_map.
         const std::vector<const Elem *> & secondary_elem_candidates =
-            this->nodes_to_secondary_elem_map.at(static_cast<dof_id_type>(ret_index[r]));
+            _nodes_to_secondary_elem_map.at(static_cast<dof_id_type>(ret_index[r]));
 
         // Print the Elems connected to this node on the secondary mesh side.
         for (MooseIndex(secondary_elem_candidates) e = 0; e < secondary_elem_candidates.size(); ++e)
@@ -1865,7 +1867,7 @@ AutomaticMortarGeneration::projectPrimaryNodesSinglePair(
           std::vector<Point> nodal_normals(secondary_elem_candidate->n_nodes());
           for (const auto n : make_range(secondary_elem_candidate->n_nodes()))
             nodal_normals[n] =
-                secondary_node_to_nodal_normal.at(secondary_elem_candidate->node_ptr(n));
+                _secondary_node_to_nodal_normal.at(secondary_elem_candidate->node_ptr(n));
 
           // Use equation 2.4.6 from Bin Yang's dissertation to try and solve for
           // the position on the secondary element where this primary came from.  This
@@ -1933,7 +1935,7 @@ AutomaticMortarGeneration::projectPrimaryNodesSinglePair(
                 {
                   auto key = std::make_tuple(neigh_node->id(), neigh_node, neigh);
                   auto val = std::make_pair(xi1, secondary_elem_candidate);
-                  primary_node_and_elem_to_xi1_secondary_elem.insert(std::make_pair(key, val));
+                  _primary_node_and_elem_to_xi1_secondary_elem.emplace(key, val);
                 }
               }
             }
@@ -1966,13 +1968,13 @@ void
 AutomaticMortarGeneration::writeNodalNormalsToFile()
 {
   // Must call compute_nodal_normals() first!
-  if (secondary_node_to_nodal_normal.empty())
+  if (_secondary_node_to_nodal_normal.empty())
     mooseError("No entries found in the secondary node -> nodal normal map.");
 
   // Note: I seem to remember an issue with creating a second
   // EquationSystems with the same Mesh, but this code seems to work
   // OK currently.
-  EquationSystems nodal_normals_es(this->mesh);
+  EquationSystems nodal_normals_es(_mesh);
   ExplicitSystem & nodal_normals_system =
       nodal_normals_es.add_system<ExplicitSystem>("nodal_normals");
   auto nnx_var_num = nodal_normals_system.add_variable("nodal_normal_x", FEType(FIRST, LAGRANGE)),
@@ -1982,7 +1984,7 @@ AutomaticMortarGeneration::writeNodalNormalsToFile()
   const DofMap & dof_map = nodal_normals_system.get_dof_map();
   std::vector<dof_id_type> dof_indices_nnx, dof_indices_nny;
 
-  for (MeshBase::const_element_iterator el = mesh.elements_begin(), end_el = mesh.elements_end();
+  for (MeshBase::const_element_iterator el = _mesh.elements_begin(), end_el = _mesh.elements_end();
        el != end_el;
        ++el)
   {
@@ -1996,8 +1998,8 @@ AutomaticMortarGeneration::writeNodalNormalsToFile()
     // container, set the corresponding nodal normal dof values.
     for (MooseIndex(elem->n_vertices()) n = 0; n < elem->n_vertices(); ++n)
     {
-      auto it = this->secondary_node_to_nodal_normal.find(elem->node_ptr(n));
-      if (it != this->secondary_node_to_nodal_normal.end())
+      auto it = _secondary_node_to_nodal_normal.find(elem->node_ptr(n));
+      if (it != _secondary_node_to_nodal_normal.end())
       {
         nodal_normals_system.solution->set(dof_indices_nnx[n], it->second(0));
         nodal_normals_system.solution->set(dof_indices_nny[n], it->second(1));
@@ -2009,5 +2011,5 @@ AutomaticMortarGeneration::writeNodalNormalsToFile()
   nodal_normals_system.solution->close();
 
   // Write the nodal normals to file
-  ExodusII_IO(this->mesh).write_equation_systems("nodal_normals_only.e", nodal_normals_es);
+  ExodusII_IO(_mesh).write_equation_systems("nodal_normals_only.e", nodal_normals_es);
 }

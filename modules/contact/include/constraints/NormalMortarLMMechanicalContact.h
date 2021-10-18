@@ -11,6 +11,12 @@
 
 #include "ADMortarConstraint.h"
 
+enum class NCPType
+{
+  MIN,
+  FB,
+};
+
 class NormalMortarLMMechanicalContact : public ADMortarConstraint
 {
 public:
@@ -35,5 +41,5 @@ protected:
 
   const Real _epsilon;
 
-  MooseEnum _ncp_type;
+  const NCPType _ncp_type;
 };

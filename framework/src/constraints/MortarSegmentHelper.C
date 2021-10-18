@@ -72,7 +72,7 @@ MortarSegmentHelper::getIntersection(
 bool
 MortarSegmentHelper::isInsideSecondary(const Point & pt) const
 {
-  for (auto i : make_range(_secondary_poly.size()))
+  for (auto i : index_range(_secondary_poly))
   {
     const Point & q1 = _secondary_poly[i];
     const Point & q2 = _secondary_poly[(i + 1) % _secondary_poly.size()];
@@ -94,7 +94,7 @@ MortarSegmentHelper::isInsideSecondary(const Point & pt) const
 bool
 MortarSegmentHelper::isDisjoint(const std::vector<Point> & poly) const
 {
-  for (auto i : make_range(_secondary_poly.size()))
+  for (auto i : index_range(_secondary_poly))
   {
     // Get edge to check
     const Point & q1 = _secondary_poly[i];
@@ -133,7 +133,7 @@ MortarSegmentHelper::clipPoly(const std::vector<Point> & primary_nodes) const
   // Get primary_poly (primary is clipping poly). If negatively oriented, reverse
   std::vector<Point> primary_poly;
   const int n_verts = primary_nodes.size();
-  for (auto n : make_range(n_verts))
+  for (auto n : index_range(primary_nodes))
   {
     Point pt = (orient > 0) ? primary_nodes[n] - _center : primary_nodes[n_verts - 1 - n] - _center;
     primary_poly.emplace_back(pt * _u, pt * _v, 0.);
@@ -149,7 +149,7 @@ MortarSegmentHelper::clipPoly(const std::vector<Point> & primary_nodes) const
   std::vector<Point> clipped_poly = _secondary_poly;
 
   // Loop through clipping edges
-  for (auto i : make_range(primary_poly.size()))
+  for (auto i : index_range(primary_poly))
   {
     // If clipped poly trivial, return
     if (clipped_poly.size() < 3)
@@ -179,7 +179,7 @@ MortarSegmentHelper::clipPoly(const std::vector<Point> & primary_nodes) const
     };
 
     // Loop through edges of target polygon (with previous clippings already included)
-    for (auto j : make_range(input_poly.size()))
+    for (auto j : index_range(input_poly))
     {
       // Get target edge
       const Point curr_pt = input_poly[(j + 1) % input_poly.size()];
@@ -322,7 +322,7 @@ Real
 MortarSegmentHelper::area(const std::vector<Point> & nodes) const
 {
   Real poly_area = 0;
-  for (auto i : make_range(nodes.size()))
+  for (auto i : index_range(nodes))
     poly_area += nodes[i](0) * nodes[(i + 1) % nodes.size()](1) -
                  nodes[i](1) * nodes[(i + 1) % nodes.size()](0);
   poly_area *= 0.5;

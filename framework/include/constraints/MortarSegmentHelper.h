@@ -10,6 +10,7 @@
 #pragma once
 
 #include "libmesh/point.h"
+#include "libmesh/int_range.h"
 
 #include <vector>
 
