@@ -144,9 +144,6 @@ private:
   GradientType evaluateGradient(const ElemQpArg & qp, unsigned int state) const override final;
   GradientType evaluateGradient(const ElemSideQpArg & elem_side_qp,
                                 unsigned int state) const override final;
-  GradientType
-  evaluateGradient(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
-                   unsigned int state) const override final;
 
   DotType evaluateDot(const Elem * const & elem, unsigned int state) const override final;
   DotType evaluateDot(const ElemFromFaceArg & elem_from_face,
@@ -155,8 +152,6 @@ private:
   DotType evaluateDot(const SingleSidedFaceArg & face, unsigned int state) const override final;
   DotType evaluateDot(const ElemQpArg & qp, unsigned int state) const override final;
   DotType evaluateDot(const ElemSideQpArg & elem_side_qp, unsigned int state) const override final;
-  DotType evaluateDot(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
-                      unsigned int state) const override final;
 
   /**
    * Compute \p _current_elem_qp_functor_xyz if we are on a new element

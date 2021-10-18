@@ -278,17 +278,6 @@ FunctionTempl<T>::evaluateGradient(const ElemSideQpArg & elem_side_qp,
 }
 
 template <typename T>
-typename FunctionTempl<T>::GradientType
-FunctionTempl<T>::evaluateGradient(
-    const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & /*tqp*/,
-    unsigned int /*state*/) const
-{
-  mooseError(
-      "The ElementType evaluate overload is not supported by Function because there is no simple "
-      "way to determine the location of quadrature points without being provided an element");
-}
-
-template <typename T>
 typename FunctionTempl<T>::DotType
 FunctionTempl<T>::evaluateDot(const Elem * const & elem, const unsigned int state) const
 {
@@ -341,17 +330,6 @@ FunctionTempl<T>::evaluateDot(const ElemSideQpArg & elem_side_qp, const unsigned
   mooseAssert(qp < _current_elem_side_qp_functor_xyz.size(),
               "The requested " << qp << " is outside our xyz size");
   return timeDerivative(getTime(state), _current_elem_side_qp_functor_xyz[qp]);
-}
-
-template <typename T>
-typename FunctionTempl<T>::DotType
-FunctionTempl<T>::evaluateDot(
-    const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & /*tqp*/,
-    unsigned int /*state*/) const
-{
-  mooseError(
-      "The ElementType evaluate overload is not supported by Function because there is no simple "
-      "way to determine the location of quadrature points without being provided an element");
 }
 
 template <typename T>
