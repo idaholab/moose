@@ -1,33 +1,39 @@
 # DT2
 
-!alert! construction title=Undocumented Class
-The DT2 has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# DT2
-
 !syntax description /Executioner/TimeStepper/DT2
 
-## Overview
+This is an adaptive, error-estimate based multi-step time step calculation scheme.
+It is meant to provide confidence in the convergence in time step of the results.
+Because it takes three time steps for every step, it is a relatively computationally
+expensive time stepping scheme.
 
-!! Replace these lines with information regarding the DT2 object.
+For each time step, the solution is compared to what the solution would be if two half-time steps
+had been taken instead. This latter solution is generally more accurate, so this gives an estimate
+of the error. Based on the error, detailed below, and the user set acceptable errors, the time step may be accepted
+or rejected.
 
-## Example Input File Syntax
+!equation
+error = \dfrac{||u_{dt} - u_{2dt/2}||_2}{max(||u_{dt}||_2, ||u_{2dt/2}||_2) dt}
 
-!! Describe and include an example of how to use the DT2 object.
+where $u$ is the solution and $dt$ the time step size.
+If the time step is accepted, then the time step is increased to
 
-!syntax parameters /Executioner/TimeStepper/DT2
+!equation
+dt^{n+1} = dt^n \left(\dfrac{e_tol}{error} \right)^{1/order}
 
-!syntax inputs /Executioner/TimeStepper/DT2
+where $e_tol$ is the user set tolerance on the error and $order$ is the accuracy order
+of the time integration scheme.
 
-!syntax children /Executioner/TimeStepper/DT2
-```
-!alert-end!
+If the step is rejected, both the non linear and auxiliary systems are reset, and the
+time step is reduced before the next attempt.
 
-!syntax description /Executioner/TimeStepper/DT2
+## Example input syntax
+
+The `DT2` time stepping scheme is used in this example. The two half-steps are taken after the full step.
+In this example, the full step is always accepted. By tightening `e_max` to 3e-1, the reader may make
+the time stepper reject the full step, and lower the time step accordingly.
+
+!listing test/tests/time_steppers/dt2/dt2.i block=Executioner
 
 !syntax parameters /Executioner/TimeStepper/DT2
 

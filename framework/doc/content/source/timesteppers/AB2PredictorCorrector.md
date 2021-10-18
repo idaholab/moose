@@ -1,33 +1,24 @@
 # AB2PredictorCorrector
 
-!alert! construction title=Undocumented Class
-The AB2PredictorCorrector has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# AB2PredictorCorrector
-
 !syntax description /Executioner/TimeStepper/AB2PredictorCorrector
 
-## Overview
+This time stepper first adds an [AdamsPredictor.md] to the problem. The predictor
+uses previous solutions to compute a predicted solution vector. This prediction is
+then compared using a $L\_infinity$ norm to the solution. If the error is lower than `e_max`,
+then the time step is accepted. If not, then it is reduced.
 
-!! Replace these lines with information regarding the AB2PredictorCorrector object.
+The time step is regularly increased based on the `steps_between_increase` parameter. The
+magnitude of the increase is based on the magnitude of the prediction error.
 
-## Example Input File Syntax
+The `AB2PredictorCorrector` may be used with the following three time integration schemes:
+implicit Euler (default in MOOSE), Crank Nicholson and 2nd order backward differences (BDF2).
 
-!! Describe and include an example of how to use the AB2PredictorCorrector object.
+## Example input syntax
 
-!syntax parameters /Executioner/TimeStepper/AB2PredictorCorrector
+In this example, we solve a simple heating problem with backwards differences and a predictor
+corrector scheme. The prediction and correction steps can be observed during the solve.
 
-!syntax inputs /Executioner/TimeStepper/AB2PredictorCorrector
-
-!syntax children /Executioner/TimeStepper/AB2PredictorCorrector
-```
-!alert-end!
-
-!syntax description /Executioner/TimeStepper/AB2PredictorCorrector
+!listing test/tests/time_integrators/aee/aee.i block=Executioner
 
 !syntax parameters /Executioner/TimeStepper/AB2PredictorCorrector
 

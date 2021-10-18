@@ -38,7 +38,6 @@ protected:
   /// Multiplier applied to the postprocessor value
   const Real & _scale;
 
-  /// Factor added to the postprocessor value
-  const Real & _factor;
+  /// Offset added to the postprocessor value
+  const Real & _offset;
 };
-
