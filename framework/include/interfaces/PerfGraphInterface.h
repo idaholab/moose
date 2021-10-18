@@ -16,22 +16,22 @@
 #ifndef MOOSE_NO_PERF_GRAPH
 #define TIME_SECTION1(id)                                                                          \
   mooseAssert(!Threads::in_threads, "PerfGraph timing cannot be used within threaded sections");   \
-  PerfGuard time_guard(_perf_graph, id);
+  PerfGuard time_guard(this->_perf_graph, id);
 #else
 #define TIME_SECTION1(id)
 #endif
 
 #define TIME_SECTION2(section_name, level)                                                         \
-  static const PerfID __perf_id = registerTimedSection(section_name, level);                       \
+  static const PerfID __perf_id = this->registerTimedSection(section_name, level);                 \
   TIME_SECTION1(__perf_id);
 
 #define TIME_SECTION3(section_name, level, live_message)                                           \
-  static const PerfID __perf_id = registerTimedSection(section_name, level, live_message);         \
+  static const PerfID __perf_id = this->registerTimedSection(section_name, level, live_message);   \
   TIME_SECTION1(__perf_id);
 
 #define TIME_SECTION4(section_name, level, live_message, print_dots)                               \
   static const PerfID __perf_id =                                                                  \
-      registerTimedSection(section_name, level, live_message, print_dots);                         \
+      this->registerTimedSection(section_name, level, live_message, print_dots);                   \
   TIME_SECTION1(__perf_id);
 
 // Overloading solution from https://stackoverflow.com/a/11763277
