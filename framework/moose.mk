@@ -49,6 +49,9 @@ hit_objects   := $(patsubst %.cc, %.$(obj-suffix), $(hit_srcfiles))
 hit_LIB       := $(HIT_DIR)/libhit-$(METHOD).la
 # dependency files
 hit_deps      := $(patsubst %.cc, %.$(obj-suffix).d, $(hit_srcfiles))
+# hit command line tool
+hit_CLI_srcfiles := $(HIT_DIR)/main.cc
+hit_CLI          := $(HIT_DIR)/hit
 
 #
 # hit python bindings
@@ -85,9 +88,10 @@ else
 endif
 
 
-hit $(pyhit_LIB): $(pyhit_srcfiles)
+hit $(pyhit_LIB) $(hit_CLI): $(pyhit_srcfiles) $(hit_CLI_srcfiles)
 	@echo "Building and linking "$@"..."
 	@bash -c '(cd "$(HIT_DIR)" && $(libmesh_CXX) -std=c++11 -w -fPIC -lstdc++ -shared $^ $(pyhit_COMPILEFLAGS) $(DYNAMIC_LOOKUP) -o $(pyhit_LIB))'
+	@bash -c '(cd "$(HIT_DIR)" && make)'
 
 #
 # gtest
