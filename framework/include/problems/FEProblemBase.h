@@ -153,6 +153,8 @@ public:
   virtual Moose::CoordinateSystemType getCoordSystem(SubdomainID sid) const override;
   virtual void setCoordSystem(const std::vector<SubdomainName> & blocks,
                               const MultiMooseEnum & coord_sys);
+  virtual void setCoordSystem(const std::vector<SubdomainID> & blocks,
+                              const MultiMooseEnum & coord_sys);
   void setAxisymmetricCoordAxis(const MooseEnum & rz_coord_axis);
 
   /**

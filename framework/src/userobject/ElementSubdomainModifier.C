@@ -9,6 +9,7 @@
 
 #include "ElementSubdomainModifier.h"
 
+#include "libmesh/string_to_enum.h"
 InputParameters
 ElementSubdomainModifier::validParams()
 {
@@ -102,6 +103,13 @@ ElementSubdomainModifier::finalize()
   // Apply initial condition for the newly moved elements and boundary nodes
   buildMovedElemsRange();
   buildMovedBndNodesRange();
+
+  // This does not work because _mesh.meshSubdomains() does not contain the new subdomains
+  // MultiMooseEnum blah("COORD_XYZ");
+  //_fe_problem.setCoordSystem({}, blah);
+  MultiMooseEnum blah("COORD_XYZ");
+  std::vector<SubdomainID> asdf({0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10});
+  _fe_problem.setCoordSystem(asdf, blah);
 
   if (_apply_ic)
   {

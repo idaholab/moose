@@ -592,6 +592,65 @@ FEProblemBase::setCoordSystem(const std::vector<SubdomainName> & blocks,
 }
 
 void
+FEProblemBase::setCoordSystem(const std::vector<SubdomainID> & blocks,
+                              const MultiMooseEnum & coord_sys)
+{
+  TIME_SECTION("setCoordSystem", 5, "Setting Coordinate System");
+
+  const std::set<SubdomainID> & subdomains = _mesh.meshSubdomains();
+  if (blocks.size() == 0)
+  {
+    // no blocks specified -> assume the whole domain
+    Moose::CoordinateSystemType coord_type = Moose::COORD_XYZ; // all is going to be XYZ by default
+    if (coord_sys.size() == 0)
+      ; // relax, do nothing
+    else if (coord_sys.size() == 1)
+      coord_type = Moose::stringToEnum<Moose::CoordinateSystemType>(
+          coord_sys[0]); // one system specified, the whole domain is going to have that system
+    else
+      mooseError("Multiple coordinate systems specified, but no blocks given.");
+
+    for (const auto & sbd : subdomains)
+      _coord_sys[sbd] = coord_type;
+  }
+  else
+  {
+    // user specified 'blocks' but not coordinate systems
+    if (coord_sys.size() == 0)
+    {
+      // set all blocks to cartesian coordinate system
+      for (const auto & block : blocks)
+        _coord_sys[block] = Moose::COORD_XYZ;
+    }
+    else if (coord_sys.size() == 1)
+    {
+      // set all blocks to the coordinate system specified by `coord_sys[0]`
+      Moose::CoordinateSystemType coord_type =
+          Moose::stringToEnum<Moose::CoordinateSystemType>(coord_sys[0]);
+      for (const auto & block : blocks)
+        _coord_sys[block] = coord_type;
+    }
+    else
+    {
+      if (blocks.size() != coord_sys.size())
+        mooseError("Number of blocks and coordinate systems does not match.");
+
+      for (unsigned int i = 0; i < blocks.size(); i++)
+      {
+        Moose::CoordinateSystemType coord_type =
+            Moose::stringToEnum<Moose::CoordinateSystemType>(coord_sys[i]);
+        _coord_sys[blocks[i]] = coord_type;
+      }
+
+      for (const auto & sid : subdomains)
+        if (_coord_sys.find(sid) == _coord_sys.end())
+          mooseError("Subdomain '" + Moose::stringify(sid) +
+                     "' does not have a coordinate system specified.");
+    }
+  }
+}
+
+void
 FEProblemBase::setAxisymmetricCoordAxis(const MooseEnum & rz_coord_axis)
 {
   _rz_coord_axis = rz_coord_axis;
