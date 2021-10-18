@@ -1,0 +1,71 @@
+[Tests]
+  issues = '#19027'
+  design = 'TrussHeatConduction.md TrussHeatConductionTimeDerivative.md'
+  [two_materials_in_domain]
+    requirement = 'The system shall model heat transfer in a bar and a strip '
+                  'made of two materials in series having differing thermal '
+                  'properties and provide equivalent solutions.'
+    [line]
+      type = 'Exodiff'
+      input = 'line.i'
+      exodiff = 'line_out.e'
+      rel_err = 1e-6
+      abs_zero = 1e-10
+      detail = 'using 1D truss elements.'
+    []
+    [strip]
+      type = 'Exodiff'
+      input = 'strip.i'
+      exodiff = 'strip_out.e'
+      rel_err = 1e-6
+      abs_zero = 1e-10
+      detail = 'using 2D continuum elements in a 2D medium.'
+    []
+  []
+  [w_and_wo_embedded_case]
+    requirement = 'The system shall model heat transfer in a bar/strip '
+                  'embedded in a medium having differing thermal properties '
+                  'from the bar/strip, and provide equivalent solutions.'
+    [rectangle_with_strip]
+      type = 'Exodiff'
+      input = 'rectangle_w_strip.i'
+      exodiff = 'rectangle_w_strip_out.e'
+      rel_err = 1e-6
+      abs_zero = 1e-10
+      detail = 'using 2D continuum elements for the bar contiguously meshed with a 2D medium.'
+    []
+    [rectangle_with_line]
+      type = 'Exodiff'
+      input = 'rectangle_w_line.i'
+      exodiff = 'rectangle_w_line_out.e'
+      rel_err = 1e-6
+      abs_zero = 1e-10
+      detail = 'using 1D truss elements embedded in a 2D medium and connected using constraints.'
+    []
+    [block_with_bar]
+      type = 'Exodiff'
+      input = 'block_w_bar.i'
+      exodiff = 'block_w_bar_out.e'
+      rel_err = 1e-6
+      abs_zero = 1e-10
+      detail = 'using 3D continuum elements for the bar contiguously meshed with a 3D medium.'
+    []
+    [block_with_line]
+      type = 'Exodiff'
+      input = 'block_w_line.i'
+      exodiff = 'block_w_line_out.e'
+      rel_err = 1e-6
+      abs_zero = 1e-10
+      detail = 'using 1D truss elements embedded in a 3D medium and connected using constraints.'
+    []
+  []
+  [plotting]
+    requirement = 'The system shall generate comparison plots of the thermal '
+                  'solutions for a bar embedded in a continuum represented '
+                  'various ways.'
+    type = RunCommand
+    method = opt
+    command = "python3 temp_plots.py"
+    required_python_packages = 'matplotlib'
+  []
+[]
