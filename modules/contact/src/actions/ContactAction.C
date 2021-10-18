@@ -49,8 +49,8 @@ ContactAction::validParams()
       "secondary", "The list of boundary IDs referring to secondary sidesets");
   params.addDeprecatedParam<MeshGeneratorName>(
       "mesh",
-      "This parameter is not used anymore and can simply be removed",
-      "The mesh generator for mortar method");
+      "The mesh generator for mortar method",
+      "This parameter is not used anymore and can simply be removed");
   params.addParam<VariableName>("secondary_gap_offset",
                                 "Offset to gap distance from secondary side");
   params.addParam<VariableName>("mapped_primary_gap_offset",
