@@ -40,9 +40,10 @@ FunctorMatDiffusionTempl<is_ad>::computeQpResidual()
 {
   if (_use_preinitd_data)
     return _diff(std::make_tuple(Moose::ElementType::Element, _qp, _current_elem->subdomain_id())) *
-           _grad_test[_i][_qp] * _grad_u[_qp];
+           _grad_test[_i][_qp] * _var.gradient(std::make_tuple(_current_elem, _qp, _qrule));
   else
-    return _diff(std::make_tuple(_current_elem, _qp, _qrule)) * _grad_test[_i][_qp] * _grad_u[_qp];
+    return _diff(std::make_tuple(_current_elem, _qp, _qrule)) * _grad_test[_i][_qp] *
+           _var.gradient(std::make_tuple(_current_elem, _qp, _qrule));
 }
 
 template class FunctorMatDiffusionTempl<false>;
