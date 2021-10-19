@@ -13,7 +13,7 @@
 
 [Executioner]
   type = Optimize
-  tao_solver = TAOCG
+  tao_solver = taobncg
   solve_on = none
   verbose = true
 []

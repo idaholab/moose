@@ -11,7 +11,7 @@
 
 [Executioner]
   type = Optimize
-  tao_solver = TAOCG
+  tao_solver = taobncg
   petsc_options_iname = '-tao_gatol -tao_max_it'
   petsc_options_value = '1e-1 50'
   verbose = true

@@ -15,7 +15,7 @@
   # tao_solver = taonm
   # petsc_options_iname='-tao_gatol'
   # petsc_options_value='1e-2'
-  tao_solver = taolmvm #TAOOWLQN #TAOBMRM #taolmvm #taocg
+  tao_solver = taolmvm #TAOOWLQN #TAOBMRM #taolmvm #taobncg
   petsc_options_iname = '-tao_gatol'# -tao_cg_delta_max'
   petsc_options_value = '1e-2'
   # tao_solver = taontr

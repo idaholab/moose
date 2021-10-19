@@ -13,7 +13,7 @@
 
 [Executioner]
   type = Optimize
-  tao_solver = taolmvm #TAOOWLQN #TAOBMRM #taolmvm #taocg
+  tao_solver = taolmvm #TAOOWLQN #TAOBMRM #taolmvm #taobncg
   petsc_options_iname = '-tao_gatol'# -tao_cg_delta_max'
   petsc_options_value = '1e-4'
 
