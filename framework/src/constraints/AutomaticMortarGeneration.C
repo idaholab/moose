@@ -739,6 +739,20 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
             default:
               mooseError("get_sub_elem_nodes: Invalid sub_elem: ", sub_elem);
           }
+        case QUAD8:
+           switch (sub_elem)
+           {
+              case 0:
+                 return {{0, 4, 7, /*dummy, out of range*/ 10}};
+              case 1: 
+                 return {{4, 1, 5, /*dummy, out of range*/ 10}};
+              case 2:
+                 return {{3, 2, 6, /*dummy, out of range*/ 10}};
+              case 3:
+                 return {{7, 6, 3, /*dummy, out of range*/ 10}};
+              case 4: 
+                 return {{0, 1, 2, 3}};
+           }
         case QUAD9:
           switch (sub_elem)
           {
