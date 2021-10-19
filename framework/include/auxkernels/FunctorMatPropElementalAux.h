@@ -14,15 +14,19 @@
 /**
  * Evaluate a functor material property with the element as the functor argument
  */
-class FunctorMatPropElementalAux : public AuxKernel
+template <bool is_ad>
+class FunctorMatPropElementalAuxTempl : public AuxKernel
 {
 public:
   static InputParameters validParams();
 
-  FunctorMatPropElementalAux(const InputParameters & parameters);
+  FunctorMatPropElementalAuxTempl(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue() override;
 
-  const Moose::Functor<ADReal> & _mat_prop;
+  const Moose::Functor<GenericReal<is_ad>> & _mat_prop;
 };
+
+typedef FunctorMatPropElementalAuxTempl<false> FunctorMatPropElementalAux;
+typedef FunctorMatPropElementalAuxTempl<true> FunctorADMatPropElementalAux;

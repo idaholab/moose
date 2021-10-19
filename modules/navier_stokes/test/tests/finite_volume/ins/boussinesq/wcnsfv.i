@@ -104,7 +104,7 @@ hot_temp=310
     args = 'T'
   []
   [rho_out]
-    type = FunctorMatPropElementalAux
+    type = FunctorADMatPropElementalAux
     mat_prop = 'rho'
     variable = 'rho_out'
     execute_on = 'initial timestep_end'

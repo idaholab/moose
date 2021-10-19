@@ -12,4 +12,12 @@
     rel_err = 1e-5
     recover = false # see #19126
   []
+  [fluidprops]
+    type = 'Exodiff'
+    input = functorfluidprops.i
+    exodiff = functorfluidprops_out.e
+    requirement = 'The system shall be able to output gradeurs, derivatives and adimensional quantities from realistic functor fluid properties'
+    ad_indexing_type = 'global'
+    recover = false
+  []
 []

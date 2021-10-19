@@ -11,9 +11,11 @@
 #include "metaphysicl/raw_type.h"
 
 registerMooseObject("MooseApp", FunctorMatPropElementalAux);
+registerMooseObject("MooseApp", FunctorADMatPropElementalAux);
 
+template <bool is_ad>
 InputParameters
-FunctorMatPropElementalAux::validParams()
+FunctorMatPropElementalAuxTempl<is_ad>::validParams()
 {
   InputParameters params = AuxKernel::validParams();
   params.addClassDescription(
@@ -23,13 +25,16 @@ FunctorMatPropElementalAux::validParams()
   return params;
 }
 
-FunctorMatPropElementalAux::FunctorMatPropElementalAux(const InputParameters & parameters)
-  : AuxKernel(parameters), _mat_prop(getFunctor<ADReal>("mat_prop"))
+template <bool is_ad>
+FunctorMatPropElementalAuxTempl<is_ad>::FunctorMatPropElementalAuxTempl(
+    const InputParameters & parameters)
+  : AuxKernel(parameters), _mat_prop(getFunctor<GenericReal<is_ad>>("mat_prop"))
 {
 }
 
+template <bool is_ad>
 Real
-FunctorMatPropElementalAux::computeValue()
+FunctorMatPropElementalAuxTempl<is_ad>::computeValue()
 {
   return MetaPhysicL::raw_value(_mat_prop(_current_elem));
 }
