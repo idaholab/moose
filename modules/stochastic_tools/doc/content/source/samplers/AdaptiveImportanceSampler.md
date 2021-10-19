@@ -44,7 +44,10 @@ The use of an independent Normal distribution is different from the work by [!ci
 who use a multi-dimensional kernel density distribution. However, experience suggests that
 a Normal distribution is more robust under a wide variety of cases. Once the samples from the
 importance distribution are obtained, equation (2) and equation (19) in [!cite](au1999new)
-can be used for estimating the $P_f$ and COV, respectively.
+can be used for estimating the $P_f$ and COV, respectively. Figure [ais_sch] presents
+ a schematic of the AIS method.
+
+!media Adaptive_Importance_Sampler.svg style=width:50%; id=ais_sch caption=Schematic of the AIS method
 
 ## Interaction with the `AdaptiveMonteCarloDecision` class
 
