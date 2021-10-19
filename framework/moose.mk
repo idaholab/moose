@@ -384,7 +384,7 @@ moose_share_dir = $(share_dir)/moose
 python_install_dir = $(moose_share_dir)/python
 bin_install_dir = $(PREFIX)/bin
 
-install: install_libs install_bin install_harness install_exodiff install_adreal_monolith
+install: install_libs install_bin install_harness install_exodiff install_adreal_monolith install_hit
 
 install_adreal_monolith: ADRealMonolithic.h
 	@ mkdir -p $(moose_include_dir)
@@ -407,6 +407,10 @@ install_harness:
 	@cp -f $(MOOSE_DIR)/framework/include/base/MooseConfig.h $(moose_include_dir)/
 	@cp -f $(HIT_DIR)/hit.so $(python_install_dir)/
 	@echo "libmesh_install_dir = '$(LIBMESH_DIR)'" > $(moose_share_dir)/moose_config.py
+
+install_hit: all
+	@echo "Installing HIT"
+	@cp $(MOOSE_DIR)/framework/contrib/hit/hit $(bin_install_dir)
 
 lib_install_suffix = lib/$(APPLICATION_NAME)
 lib_install_dir = $(PREFIX)/$(lib_install_suffix)

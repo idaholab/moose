@@ -19,8 +19,11 @@ hit_args = sys.argv[2:]
 with open(gold_file, 'rb') as f:
     gold = f.read()
 
-result = subprocess.run([hit] + hit_args, capture_output=True)
-out = result.stdout
+try:
+    out = subprocess.check_output([hit] + hit_args, stderr=subprocess.STDOUT)
+except subprocess.CalledProcessError as err:
+    return_code = err.returncode
+    out = err.output
 
 if out == gold:
     sys.exit(0)
