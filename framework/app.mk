@@ -461,7 +461,7 @@ install_$(APPLICATION_NAME)_docs:
 ifeq ($(MOOSE_SKIP_DOCS),)
 	@echo "Installing docs"
 	@mkdir -p $(docs_install_dir)
-	@if [ -f "$(docs_dir)/moosedocs.py" ]; then cd $(docs_dir) && ./moosedocs.py build --destination $(docs_install_dir); fi
+	@if [ -f "$(docs_dir)/moosedocs.py" ]; then cd $(docs_dir) && ./moosedocs.py build $(MOOSE_DOCS_FLAGS) --destination $(docs_install_dir); fi
 else
 	@echo "Skipping docs installation."
 endif
