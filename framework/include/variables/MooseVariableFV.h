@@ -658,6 +658,13 @@ private:
   template <typename FaceCallingArg>
   ValueType evaluateFaceHelper(const FaceCallingArg & face) const;
 
+  /**
+   * A helper function for evaluating this variable's time derivative with face arguments. This is
+   * leveraged by both \p FaceArg and \p SingleSidedFaceArg evaluateDot overloads
+   */
+  template <typename FaceCallingArg>
+  DotType evaluateFaceDotHelper(const FaceCallingArg & face) const;
+
   /// A cache for storing gradients on faces
   mutable std::unordered_map<const FaceInfo *, VectorValue<ADReal>> _face_to_grad;
 
@@ -704,6 +711,42 @@ MooseVariableFV<OutputType>::evaluateFaceHelper(const FaceCallingArg & face) con
 }
 
 template <typename OutputType>
+template <typename FaceCallingArg>
+typename MooseVariableFV<OutputType>::DotType
+MooseVariableFV<OutputType>::evaluateFaceDotHelper(const FaceCallingArg & face) const
+{
+  const FaceInfo * const fi = std::get<0>(face);
+  mooseAssert(fi, "The face information must be non-null");
+  if (isInternalFace(*fi))
+  {
+    auto limiter = Moose::FV::Limiter<ADReal>::build(std::get<1>(face));
+    mooseAssert(limiter->constant(),
+                "Cannot do interpolation of time derivatives with non-constant limiting functions "
+                "because we have not implementation computation of gradients of time derivatives.");
+    const bool elem_is_upwind = std::get<2>(face);
+
+    const auto elem_dot = this->dot(&fi->elem());
+    mooseAssert(fi->neighborPtr(), "We're supposed to be on an internal face.");
+    const auto neighbor_dot = this->dot(fi->neighborPtr());
+    const auto & upwind_dot = elem_is_upwind ? elem_dot : neighbor_dot;
+    const auto & downwind_dot = elem_is_upwind ? neighbor_dot : elem_dot;
+
+    return Moose::FV::interpolate(
+        *limiter, upwind_dot, downwind_dot, (ADRealVectorValue *)nullptr, *fi, elem_is_upwind);
+  }
+  else
+  {
+    if (this->hasBlocks(fi->elem().subdomain_id()))
+      // Use element centroid evaluation as face evaluation
+      return this->dot(&fi->elem());
+    mooseAssert(fi->neighborPtr() && this->hasBlocks(fi->neighbor().subdomain_id()),
+                "We should not be evaluating this variable when the variable doesn't exist on "
+                "either side of the face.");
+    return this->dot(fi->neighborPtr());
+  }
+}
+
+template <typename OutputType>
 typename MooseVariableFV<OutputType>::GradientType
 MooseVariableFV<OutputType>::evaluateGradient(const Elem * const & elem, unsigned int) const
 {
@@ -737,16 +780,16 @@ MooseVariableFV<OutputType>::evaluateDot(const ElemFromFaceArg &, unsigned int) 
 
 template <typename OutputType>
 typename MooseVariableFV<OutputType>::DotType
-MooseVariableFV<OutputType>::evaluateDot(const FaceArg &, unsigned int) const
+MooseVariableFV<OutputType>::evaluateDot(const FaceArg & face, unsigned int) const
 {
-  mooseError("MooseVariableFV::evaluateDot(FaceArg) not yet implemented");
+  return evaluateFaceDotHelper(face);
 }
 
 template <typename OutputType>
 typename MooseVariableFV<OutputType>::DotType
-MooseVariableFV<OutputType>::evaluateDot(const SingleSidedFaceArg &, unsigned int) const
+MooseVariableFV<OutputType>::evaluateDot(const SingleSidedFaceArg & face, unsigned int) const
 {
-  mooseError("MooseVariableFV::evaluateDot(SingleSidedFaceArg) not yet implemented");
+  return evaluateFaceDotHelper(face);
 }
 
 template <>

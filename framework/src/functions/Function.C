@@ -162,7 +162,7 @@ template <typename T>
 typename FunctionTempl<T>::ValueType
 FunctionTempl<T>::evaluate(const Elem * const & elem, const unsigned int state) const
 {
-  return value(getTime(state), elem->centroid());
+  return value(getTime(state), elem->vertex_average());
 }
 
 template <typename T>
@@ -214,7 +214,7 @@ template <typename T>
 typename FunctionTempl<T>::GradientType
 FunctionTempl<T>::evaluateGradient(const Elem * const & elem, const unsigned int state) const
 {
-  return gradient(getTime(state), elem->centroid());
+  return gradient(getTime(state), elem->vertex_average());
 }
 
 template <typename T>
@@ -270,7 +270,7 @@ template <typename T>
 typename FunctionTempl<T>::DotType
 FunctionTempl<T>::evaluateDot(const Elem * const & elem, const unsigned int state) const
 {
-  return timeDerivative(getTime(state), elem->centroid());
+  return timeDerivative(getTime(state), elem->vertex_average());
 }
 
 template <typename T>
