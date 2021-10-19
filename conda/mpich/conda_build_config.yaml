@@ -190,12 +190,12 @@ zip_keys:
 #### Compilers
 moose_cc:                                      # [unix]
   - gcc_linux-64 9.3.0 h7247604_29             # [linux]
-  - clang_osx-64 12.0.1 hb91bd55_0             # [not arm64 and osx]
+  - clang_osx-64 12.0.1 hb91bd55_1             # [not arm64 and osx]
   - clang_osx-arm64 12.0.1 h54d7cd3_0          # [arm64]
 
 moose_cxx:                                     # [unix]
   - gxx_linux-64 9.3.0 h0d07fa4_29             # [linux]
-  - clangxx_osx-64 12.0.1 h7e1b574_0           # [not arm64 and osx]
+  - clangxx_osx-64 12.0.1 h7e1b574_1           # [not arm64 and osx]
   - clangxx_osx-arm64 12.0.1 hb84c830_0        # [arm64]
 
 moose_fortran:                                 # [unix]
@@ -219,8 +219,11 @@ moose_libcxx:                                  # [osx]
   - libcxx 12.0.1 habf9029_0                   # [not arm64 and osx]
   - libcxx 12.0.1 h168391b_0                   # [arm64]
 
+moose_libclang:                                # [osx]
+  - libclang 12.0.1 default_he082bbe_4         # [not arm64 and osx]
+
 moose_openmp:                                  # [osx]
-  - llvm-openmp 12.0.1 hda6cdc1_0              # [not arm64 and osx]
+  - llvm-openmp 12.0.1 hda6cdc1_1              # [not arm64 and osx]
   - llvm-openmp 12.0.1 hf3c4609_1              # [arm64]
 
 moose_llvm_tools:                              # [osx]
@@ -228,28 +231,28 @@ moose_llvm_tools:                              # [osx]
   - llvm-tools 12.0.1 h93073aa_2               # [arm64]
 
 moose_cctools:                                 # [osx]
-  - cctools_osx-64 973.0.1 h3e07e27_0          # [not arm64 and osx]
+  - cctools 973.0.1 hd9211c8_2                 # [not arm64 and osx]
   - cctools_osx-arm64 973.0.1 h92b3a8a_0       # [arm64]
 
 moose_ld64:                                    # [osx]
-  - ld64_osx-arm64 609 h2487922_0              # [not arm64 and osx]
+  - ld64 609 hd2e7500_2                        # [not arm64 and osx]
   - ld64_osx-arm64 609 ha291f0b_0              # [arm64]
 
 #### Support Libraries (PETSc, libMesh)
 moose_libblas:                                 # [osx]
-  - libblas 3.9.0 8_openblas                   # [not arm64 and osx]
+  - libblas 3.9.0 12_osx64_openblas            # [not arm64 and osx]
   - libblas 3.9.0 11_osxarm64_openblas         # [arm64]
 
 moose_libcblas:                                # [osx]
-  - libcblas 3.9.0 8_openblas                  # [not arm64 and osx]
+  - libcblas 3.9.0 12_osx64_openblas           # [not arm64 and osx]
   - libcblas 3.9.0 11_osxarm64_openblas        # [arm64]
 
 moose_liblapack:                               # [osx]
-  - liblapack 3.9.0 8_openblas                 # [not arm64 and osx]
+  - liblapack 3.9.0 12_osx64_openblas          # [not arm64 and osx]
   - liblapack 3.9.0 11_osxarm64_openblas       # [arm64]
 
 moose_libopenblas:                             # [osx]
-  - libopenblas 0.3.12 openmp_h63d9170_1       # [not arm64 and osx]
+  - libopenblas 0.3.18 openmp_h3351f45_0       # [not arm64 and osx]
   - libopenblas 0.3.17 openmp_h5dd58f0_1       # [arm64]
 
 moose_libglu:                                  # [linux]
