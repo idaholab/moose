@@ -1,33 +1,16 @@
 # VariableResidual
 
-!alert! construction title=Undocumented Class
-The VariableResidual has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# VariableResidual
-
 !syntax description /Postprocessors/VariableResidual
 
-## Overview
+This postprocessor allows a user to retrieve the residual at different times in the simulation using the `execute_on` parameter.
 
-!! Replace these lines with information regarding the VariableResidual object.
+The residual for the entire system may be found using the [Residual.md] postprocessor.
 
-## Example Input File Syntax
+## Example input syntax
 
-!! Describe and include an example of how to use the VariableResidual object.
+In this example, the residual is output for variable `u` and `v` with two `VariableResidual` postprocessors.
 
-!syntax parameters /Postprocessors/VariableResidual
-
-!syntax inputs /Postprocessors/VariableResidual
-
-!syntax children /Postprocessors/VariableResidual
-```
-!alert-end!
-
-!syntax description /Postprocessors/VariableResidual
+!listing test/tests/postprocessors/variable_residual_norm/variable_residual.i block=Postprocessors
 
 !syntax parameters /Postprocessors/VariableResidual
 

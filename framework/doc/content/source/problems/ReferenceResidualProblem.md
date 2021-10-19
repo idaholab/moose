@@ -89,7 +89,7 @@ low to ensure that the solution is converged when that limit is reached.
 !listing test/tests/problems/reference_residual_problem/reference_residual.i block=Problem
 
 where the `extra_tag_vectors` parameter indicates the additional vectors that should be added to the
-non-linear system. This parameter must contain the name of the vector to be used for the
+nonlinear system. This parameter must contain the name of the vector to be used for the
 `reference_vector`. In this example we only create one extra vector, the `ref` vector, that will be
 used for holding the reference residuals. To have computing objects add into the reference vector,
 simply add the `extra_vector_tags = <reference_vector_name>` param/value pair as illustrated below:

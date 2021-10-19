@@ -1,7 +1,7 @@
 # Kernel
 
 Kernel is the base class for object that calculate residual vector contributions
-of non-linear scalar field variables.
+of nonlinear scalar field variables.
 
 Derived from it are two sets of optimized base classes that - through loop
 reordering - reduce the number of necessary residual evaluations and enable the

@@ -7,14 +7,18 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "TotalVariableValue.h"
+#include "TimeIntegratedPostprocessor.h"
 
-registerMooseObject("MooseApp", TotalVariableValue);
+registerMooseObject("MooseApp", TimeIntegratedPostprocessor);
+registerMooseObjectRenamed("MooseApp",
+                           TotalVariableValue,
+                           "04/01/2022 00:00",
+                           TimeIntegratedPostprocessor);
 
-defineLegacyParams(TotalVariableValue);
+defineLegacyParams(TimeIntegratedPostprocessor);
 
 InputParameters
-TotalVariableValue::validParams()
+TimeIntegratedPostprocessor::validParams()
 {
   InputParameters params = GeneralPostprocessor::validParams();
   params.addClassDescription("Integrate a Postprocessor value over time using trapezoidal rule.");
@@ -22,7 +26,7 @@ TotalVariableValue::validParams()
   return params;
 }
 
-TotalVariableValue::TotalVariableValue(const InputParameters & parameters)
+TimeIntegratedPostprocessor::TimeIntegratedPostprocessor(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
     _value(0),
     _value_old(getPostprocessorValueOldByName(name())),
@@ -32,18 +36,18 @@ TotalVariableValue::TotalVariableValue(const InputParameters & parameters)
 }
 
 void
-TotalVariableValue::initialize()
+TimeIntegratedPostprocessor::initialize()
 {
 }
 
 void
-TotalVariableValue::execute()
+TimeIntegratedPostprocessor::execute()
 {
   _value = _value_old + 0.5 * (_pps_value + _pps_value_old) * _dt;
 }
 
 Real
-TotalVariableValue::getValue()
+TimeIntegratedPostprocessor::getValue()
 {
   return _value;
 }

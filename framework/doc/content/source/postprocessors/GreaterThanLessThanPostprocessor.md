@@ -5,7 +5,7 @@
 ## Description
 
 The `GreaterThanLessThanPostprocessor` computes the total number of degrees of
-freedom of a non-linear `variable` that are greater than or less than the
+freedom of a nonlinear `variable` that are greater than or less than the
 parameter `value`. The comparison of greater or less is specified using the
 `MooseEnum` parameter `comparator`; the possible values of `comparator` are
 `greater` or `less`. The computation may also be restricted to a subdomain using

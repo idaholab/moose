@@ -1,33 +1,23 @@
 # ElementH1SemiError
 
-!alert! construction title=Undocumented Class
-The ElementH1SemiError has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# ElementH1SemiError
-
 !syntax description /Postprocessors/ElementH1SemiError
 
-## Overview
+The gradient of the variable is compared to the gradient of the specified function.
+Examining the error on the gradient can reveal excessive oscillations, highlight
+the need for a higher order finite element family, or show that the gradient
+of a known solution is well captured by the numerical solution.
 
-!! Replace these lines with information regarding the ElementH1SemiError object.
+!equation
+|u - f|_{H_1} = \left( \int_\Omega \left(\nabla u(x,t) - \nabla f(x,t) \right)^p d\Omega \right)^{\dfrac{1}{p}}
 
-## Example Input File Syntax
+where $u$ is the `variable`, $f$ the `function`, $p$ the norm exponent and $\Omega$ the integration domain,
+which may be limited to certain blocks using the `block` parameter.
 
-!! Describe and include an example of how to use the ElementH1SemiError object.
+## Example input syntax
 
-!syntax parameters /Postprocessors/ElementH1SemiError
+In this example, we compute a variety of error with the H1, L2 and H1-semi norms to verify that the H1 error is the sum of the L2 error and the H1-semi error.
 
-!syntax inputs /Postprocessors/ElementH1SemiError
-
-!syntax children /Postprocessors/ElementH1SemiError
-```
-!alert-end!
-
-!syntax description /Postprocessors/ElementH1SemiError
+!listing test/tests/postprocessors/element_h1_error_pps/element_h1_error_pp_test.i block=Postprocessors
 
 !syntax parameters /Postprocessors/ElementH1SemiError
 

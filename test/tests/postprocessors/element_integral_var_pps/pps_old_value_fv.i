@@ -63,7 +63,7 @@
   [../]
 
   [./total_a]
-    type = TotalVariableValue
+    type = TimeIntegratedPostprocessor
     value = a
     execute_on = 'initial timestep_end'
   [../]

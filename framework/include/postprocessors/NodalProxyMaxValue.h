@@ -9,39 +9,7 @@
 
 #pragma once
 
-#include "NodalVariablePostprocessor.h"
+// This header is created for CI purposes only
+#include "NodalMaxValueId.h"
 
-// Forward Declarations
-class NodalProxyMaxValue;
-
-template <>
-InputParameters validParams<NodalProxyMaxValue>();
-
-/**
- * Computes the max value at a node and broadcasts it to all
- * processors.
- */
-class NodalProxyMaxValue : public NodalVariablePostprocessor
-{
-public:
-  static InputParameters validParams();
-
-  NodalProxyMaxValue(const InputParameters & parameters);
-
-  virtual void initialize() override;
-  virtual void execute() override;
-  virtual Real getValue() override;
-
-  /**
-   * The method called to compute the value that will be returned
-   * by the proxy value.
-   */
-  virtual Real computeValue();
-
-  void threadJoin(const UserObject & y) override;
-
-protected:
-  Real _value;
-  dof_id_type _node_id;
-};
-
+typedef NodalMaxValueId NodalProxyMaxValue;

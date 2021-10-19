@@ -1,33 +1,21 @@
 # ScalarL2Error
 
-!alert! construction title=Undocumented Class
-The ScalarL2Error has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# ScalarL2Error
-
 !syntax description /Postprocessors/ScalarL2Error
 
-## Overview
+The function to compare the scalar variable against is evaluated at the simulation time
+and at the (0,0,0) point. Given that a single number is included in this sum, the
+L2 norm is the same as the absolute value.
 
-!! Replace these lines with information regarding the ScalarL2Error object.
+!alert note
+This postprocessor does not compute the L2 error for an array scalar variable! It only
+uses the first component of the scalar variable.
 
-## Example Input File Syntax
+## Example input syntax
 
-!! Describe and include an example of how to use the ScalarL2Error object.
+In this example, we solve an ODE for scalar variable `n`, then compute the convergence
+to a known analytic solution to examine the order of convergence of a time scheme.
 
-!syntax parameters /Postprocessors/ScalarL2Error
-
-!syntax inputs /Postprocessors/ScalarL2Error
-
-!syntax children /Postprocessors/ScalarL2Error
-```
-!alert-end!
-
-!syntax description /Postprocessors/ScalarL2Error
+!listing test/tests/time_integrators/scalar/scalar.i block=Postprocessors
 
 !syntax parameters /Postprocessors/ScalarL2Error
 

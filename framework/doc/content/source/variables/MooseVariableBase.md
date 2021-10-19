@@ -48,7 +48,7 @@ template `FEGenericBase<T>` implements the type dependent methods analogous to
 `MooseVariableFE<T>` implements methods that return the variable's solution
 and its associated shape functions. Additionally, it contains the methods
 responsible for computing the variable solution at quadrature points given the
-degree of freedom values computed from the previous non-linear
+degree of freedom values computed from the previous nonlinear
 solution. "Standard" or "traditional" finite element variables that are
 single-component are instantiated with the template argument `Real`; these hold
 variables of finite element families `LAGRANGE`, `MONOMIAL`, `HERMITE`,

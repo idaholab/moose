@@ -1,33 +1,21 @@
 # RelativeSolutionDifferenceNorm
 
-!alert! construction title=Undocumented Class
-The RelativeSolutionDifferenceNorm has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# RelativeSolutionDifferenceNorm
-
 !syntax description /Postprocessors/RelativeSolutionDifferenceNorm
 
-## Overview
+The formula for the relative difference is:
 
-!! Replace these lines with information regarding the RelativeSolutionDifferenceNorm object.
+!equation
+\dfrac{u^{n+1} - u^n}{u^n}
 
-## Example Input File Syntax
+where $u$ is the solution vector, composed of the degrees of freedom of all the components of all the nonlinear variables,
+and $n$ is the index of the time step.
 
-!! Describe and include an example of how to use the RelativeSolutionDifferenceNorm object.
+## Example input syntax
 
-!syntax parameters /Postprocessors/RelativeSolutionDifferenceNorm
+In this example, the `RelativeSolutionDifferenceNorm` is used to examine the
+convergence of a transient source-diffusion problem.
 
-!syntax inputs /Postprocessors/RelativeSolutionDifferenceNorm
-
-!syntax children /Postprocessors/RelativeSolutionDifferenceNorm
-```
-!alert-end!
-
-!syntax description /Postprocessors/RelativeSolutionDifferenceNorm
+!listing test/tests/postprocessors/relative_solution_difference_norm/test.i block=Postprocessors
 
 !syntax parameters /Postprocessors/RelativeSolutionDifferenceNorm
 
