@@ -1,9 +1,34 @@
 [Tests]
-  [bimaterial]
+[nm]
+  type = CSVDiff
+  input = main.i
+  csvdiff = main_out_temperature_at_observation_points_0001.csv
+  heavy = true
+  cli_args = "Executioner/tao_solver=TAONM"
+  " Executioner/petsc_options_iname='-tao_gatol' "
+  " Executioner/petsc_options_value='0.0001'"
+  requirement = "XXXX shall be able to use Nelder Mead to invert for material properties"
+[]
+  [fd_grad]
     type = CSVDiff
     input = main.i
-    csvdiff = main_out_FormFunction_0001.csv
+    csvdiff = main_out_temperature_at_observation_points_0001.csv
     heavy = true
-    requirement = "XXXX shall be able to use finite-differencing with a gradient method to invert for material properties"
+    cli_args = "Executioner/tao_solver=TAOLMVM"
+    " Executioner/petsc_options_iname='-tao_fd_gradient -tao_gatol' "
+    " Executioner/petsc_options_value='True 0.01'"
+    requirement = "XXXX shall be able to use finite-differencing with a gradient method"
+                  " to invert for material properties"
+  []
+  [fd_hess]
+    type = CSVDiff
+    input = main.i
+    csvdiff = main_out_temperature_at_observation_points_0001.csv
+    heavy = true
+    cli_args = "Executioner/tao_solver=taontr"
+    " Executioner/petsc_options_iname='-tao_fd_gradient -tao_fd_hessian -tao_gatol' "
+    " Executioner/petsc_options_value='true True 0.01'"
+    requirement = "XXXX shall be able to use finite-differencing with a hessian method"
+                  " to invert for material properties"
   []
 []

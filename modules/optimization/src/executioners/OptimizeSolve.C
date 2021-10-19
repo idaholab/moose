@@ -8,8 +8,8 @@ InputParameters
 OptimizeSolve::validParams()
 {
   InputParameters params = emptyInputParameters();
-  MooseEnum tao_solver_enum("taontr taobmrm taoowlqn taolmvm taocg taonm taoblmvm taobncg taobqnls "
-                            "taobnls taobntr taogpcg");
+  MooseEnum tao_solver_enum("taontr taobntr taocg taobncg taonls taobnls taontl taobntl taolmvm "
+                            "taoblmvm taonm taobqnls taoowlqn taogpcg taobmrm ");
   params.addRequiredParam<MooseEnum>(
       "tao_solver", tao_solver_enum, "Tao solver to use for optimization.");
   ExecFlagEnum exec_enum = ExecFlagEnum();
@@ -73,39 +73,51 @@ OptimizeSolve::taoSolve()
     case TaoSolverEnum::NEWTON_TRUST_REGION:
       ierr = TaoSetType(_tao, TAONTR);
       break;
-    case TaoSolverEnum::BUNDLE_RISK_MIN:
-      ierr = TaoSetType(_tao, TAOBMRM);
-      break;
-    case TaoSolverEnum::ORTHANT_QUASI_NEWTON:
-      ierr = TaoSetType(_tao, TAOOWLQN);
-      break;
-    case TaoSolverEnum::QUASI_NEWTON:
-      ierr = TaoSetType(_tao, TAOLMVM);
+    case TaoSolverEnum::BOUNDED_NEWTON_TRUST_REGION:
+      ierr = TaoSetType(_tao, TAOBNTR);
       break;
     case TaoSolverEnum::CONJUGATE_GRADIENT:
       ierr = TaoSetType(_tao, TAOCG);
       break;
-    case TaoSolverEnum::NELDER_MEAD:
-      ierr = TaoSetType(_tao, TAONM);
-      break;
-    case TaoSolverEnum::BOUNDED_QUASI_NEWTON:
-      ierr = TaoSetType(_tao, TAOBLMVM);
-      break;
     case TaoSolverEnum::BOUNDED_CONJUGATE_GRADIENT:
       ierr = TaoSetType(_tao, TAOBNCG);
       break;
-    case TaoSolverEnum::BOUNDED_QUASI_NEWTON_LINE_SEARCH:
-      ierr = TaoSetType(_tao, TAOBQNLS);
+    case TaoSolverEnum::NEWTON_LINE_SEARCH:
+      ierr = TaoSetType(_tao, TAONLS);
       break;
     case TaoSolverEnum::BOUNDED_NEWTON_LINE_SEARCH:
       ierr = TaoSetType(_tao, TAOBNLS);
       break;
-    case TaoSolverEnum::BOUNDED_NEWTON_TRUST_REGION:
-      ierr = TaoSetType(_tao, TAOBNTR);
+    case TaoSolverEnum::NEWTON_TRUST_LINE:
+      ierr = TaoSetType(_tao, TAONTL);
+      break;
+    case TaoSolverEnum::BOUNDED_NEWTON_TRUST_LINE:
+      ierr = TaoSetType(_tao, TAOBNTL);
+      break;
+    case TaoSolverEnum::QUASI_NEWTON:
+      ierr = TaoSetType(_tao, TAOLMVM);
+      break;
+    case TaoSolverEnum::BOUNDED_QUASI_NEWTON:
+      ierr = TaoSetType(_tao, TAOBLMVM);
+      break;
+
+    case TaoSolverEnum::NELDER_MEAD:
+      ierr = TaoSetType(_tao, TAONM);
+      break;
+
+    case TaoSolverEnum::BOUNDED_QUASI_NEWTON_LINE_SEARCH:
+      ierr = TaoSetType(_tao, TAOBQNLS);
+      break;
+    case TaoSolverEnum::ORTHANT_QUASI_NEWTON:
+      ierr = TaoSetType(_tao, TAOOWLQN);
       break;
     case TaoSolverEnum::GRADIENT_PROJECTION_CONJUGATE_GRADIENT:
       ierr = TaoSetType(_tao, TAOGPCG);
       break;
+    case TaoSolverEnum::BUNDLE_RISK_MIN:
+      ierr = TaoSetType(_tao, TAOBMRM);
+      break;
+
     default:
       mooseError("Invalid Tao solve type");
   }

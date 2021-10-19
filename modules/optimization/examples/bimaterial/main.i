@@ -1,7 +1,7 @@
 # This main.i file runs the subapp model.i, using an OptimizeFullSolveMultiApp
 # The purpose of main.i is to find the two diffusivity_values (one in the bottom material of model.i, and one in the top material of model.i) such that the misfit between experimental observations (defined in model.i) and MOOSE predictions is minimised.
 # PETSc-TAO optimisation is used to perform this inversion
-# 
+#
 # PETSc-TAO is set to uses "lmvm" and finite-difference approximations to the derivative of the objective function
 # This means that for each PETSc-TAO iteration, 5 runs of model.i are performed: one for the current value of diffusivity_values, and four more for forward and backward finite differences around this point.  (Hence, if there were n diffusivity values, PETSc-TAO would run model.i 1 + 2^n times per iteration).
 #
@@ -21,8 +21,8 @@
 [Executioner]
   type = Optimize
   tao_solver = taolmvm
-  petsc_options_iname = '-tao_fd_gradient'
-  petsc_options_value = ' true           '
+  petsc_options_iname = '-tao_fd_gradient -tao_gatol'
+  petsc_options_value = ' true            0.001'
 # Most of following are not needed in this input file, but are useful when debugging
 #  petsc_options = '-tao_ls_view'
 #   petsc_options_iname = '-tao_max_it -tao_max_funcs -tao_ls_max_funcs -tao_ls_ftol -tao_ls_rtol -tao_fd_gradient -tao_fd_delta -tao_gatol -tao_ls_type'
@@ -56,7 +56,7 @@
     to_reporters = 'FormFunction/temperature_misfit temperature_at_observation_points/values diffusivities/values'
   []
 []
-		
+
 [Reporters]
   [diffusivities]
     type = ConstantReporter
