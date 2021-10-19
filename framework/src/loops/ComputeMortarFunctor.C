@@ -353,6 +353,17 @@ ComputeMortarFunctor::projectQPoints3d(const Elem * msm_elem,
           default:
             mooseError("get_sub_elem_inds: Invalid sub_elem: ", sub_elem);
         }
+      case QUAD8:
+        case 0:
+          return Point(nu - 1, xi - 1, 0);
+        case 1:
+          return Point(1 - nu, xi - 1, 0);
+        case 2:
+          return Point(1 - nu, 1 - xi, 0);
+        case 3:
+          return Point(nu - 1, 1 - xi, 0);
+        case 4:
+          return Point(0.5 * (nu - xi), 0.5 * (nu + xi), 0);
       case QUAD9:
         switch (sub_elem)
         {
