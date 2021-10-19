@@ -1,6 +1,6 @@
 [Mesh]
   second_order = false
-  [./left_block]
+  [left_block]
     type = GeneratedMeshGenerator
     dim = 3
     nx = 1
@@ -13,19 +13,19 @@
     zmin = 0
     zmax = .5
     elem_type = TET4
-  [../]
-  [./left_block_sidesets]
+  []
+  [left_block_sidesets]
     type = RenameBoundaryGenerator
     input = left_block
     old_boundary = '0 1 2 3 4 5'
     new_boundary = 'lb_bottom lb_back lb_right lb_front lb_left lb_top'
-  [../]
-  [./left_block_id]
+  []
+  [left_block_id]
     type = SubdomainIDGenerator
     input = left_block_sidesets
     subdomain_id = 1
-  [../]
-  [./right_block]
+  []
+  [right_block]
     type = GeneratedMeshGenerator
     dim = 3
     nx = 1
@@ -38,28 +38,28 @@
     zmin = 0
     zmax = .5
     elem_type = TET4
-  [../]
-  [./right_block_id]
+  []
+  [right_block_id]
     type = SubdomainIDGenerator
     input = right_block
     subdomain_id = 2
-  [../]
+  []
   [right_block_change_boundary_id]
     type = RenameBoundaryGenerator
     input = right_block_id
     old_boundary = '0 1 2 3 4 5'
     new_boundary = '100 101 102 103 104 105'
   []
-  [./combined]
+  [combined]
     type = MeshCollectionGenerator
     inputs = 'left_block_id right_block_change_boundary_id'
-  [../]
-  [./block_rename]
+  []
+  [block_rename]
     type = RenameBlockGenerator
     input = combined
     old_block_id = '1 2'
     new_block_name = 'left_block right_block'
-  [../]
+  []
   [right_right_sideset]
     type = SideSetsAroundSubdomainGenerator
     input = block_rename
@@ -123,54 +123,54 @@
 []
 
 [Variables]
-  [./T]
+  [T]
     block = '1 2'
     order = FIRST
-  [../]
-  [./lambda]
+  []
+  [lambda]
     block = 'secondary'
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [BCs]
-  [./neumann]
+  [neumann]
     type = FunctionGradientNeumannBC
     exact_solution = exact_soln_primal
     variable = T
     boundary = 'lb_back lb_front lb_left lb_top lb_bottom rb_right rb_top rb_bottom rb_front rb_back'
-  [../]
+  []
 []
 
 [Kernels]
-  [./conduction]
+  [conduction]
     type = Diffusion
     variable = T
     block = '1 2'
-  [../]
-  [./sink]
+  []
+  [sink]
     type = Reaction
     variable = T
     block = '1 2'
-  [../]
-  [./forcing_function]
+  []
+  [forcing_function]
     type = BodyForce
     variable = T
     function = forcing_function
     block = '1 2'
-  [../]
+  []
 []
 
 [Functions]
-  [./forcing_function]
+  [forcing_function]
     type = ParsedFunction
     value = 'sin(x*pi)*sin(y*pi)*sin(z*pi) + 3*pi^2*sin(x*pi)*sin(y*pi)*sin(z*pi)'
-  [../]
-  [./exact_soln_primal]
+  []
+  [exact_soln_primal]
     type = ParsedFunction
     value = 'sin(x*pi)*sin(y*pi)*sin(z*pi)'
-  [../]
+  []
   [exact_soln_lambda]
     type = ParsedFunction
     value = 'pi*sin(pi*y)*sin(pi*z)*cos(pi*x)'
@@ -182,7 +182,7 @@
 []
 
 [Constraints]
-  [./mortar]
+  [mortar]
     type = EqualValueConstraint
     primary_boundary = 'rb_left'
     secondary_boundary = 'lb_right'
@@ -191,20 +191,21 @@
     variable = lambda
     secondary_variable = T
     delta = .1
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
   solve_type = NEWTON
   type = Steady
-  petsc_options_iname = '-pc_type -snes_linesearch_type -pc_factor_shift_type -pc_factor_shift_amount'
+  petsc_options_iname = '-pc_type -snes_linesearch_type -pc_factor_shift_type '
+                        '-pc_factor_shift_amount'
   petsc_options_value = 'lu       basic                 NONZERO               1e-15'
 []
 
