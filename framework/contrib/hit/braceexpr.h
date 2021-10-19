@@ -74,6 +74,7 @@ class BraceExpander;
 class Evaler
 {
 public:
+  virtual ~Evaler() {}
   virtual std::string eval(Field * n, const std::list<std::string> & args, BraceExpander & exp) = 0;
 };
 

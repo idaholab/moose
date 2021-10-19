@@ -45,6 +45,20 @@ globCompare(const std::string & candidate,
   return globCompare(candidate, pattern, c + 1, p + 1);
 }
 
+std::string
+readInput(const std::string & fname)
+{
+  if (fname == "-")
+    return std::string(std::istreambuf_iterator<char>(std::cin), std::istreambuf_iterator<char>());
+  else
+  {
+    std::ifstream f(fname);
+    if (!f)
+      throw std::runtime_error("Can't open '" + fname + "'");
+    return std::string((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
+  }
+}
+
 int
 main(int argc, char ** argv)
 {
@@ -247,7 +261,7 @@ int
 findParam(int argc, char ** argv)
 {
   Flags flags(
-      "hit find [flags] <parameter-pathern> <file>...\n  Specify '-' as a file name to accept "
+      "hit find [flags] <parameter-pattern> <file>...\n  Specify '-' as a file name to accept "
       "input from stdin.\n  A pattern has the form param[=value] and wildcards (*,?) may be used");
   flags.add("f", "only show file name");
   flags.add("i", "case insensitive matches");
@@ -295,10 +309,7 @@ findParam(int argc, char ** argv)
 
     // load and parse input
     std::string fname(positional[i]);
-    std::istream && f =
-        (fname == "-" ? (std::istream &&) std::cin : (std::istream &&) std::ifstream(fname));
-    std::string input((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
-
+    std::string input = readInput(fname);
     std::unique_ptr<hit::Node> root;
     try
     {
@@ -446,16 +457,8 @@ format(int argc, char ** argv)
   int ret = 0;
   for (int i = 0; i < positional.size(); i++)
   {
-    std::string fname(positional[i]);
-    std::istream && f =
-        (fname == "-" ? (std::istream &&) std::cin : (std::istream &&) std::ifstream(fname));
-    if (!f)
-    {
-      std::cerr << "Can't open '" << fname << "'\n";
-      return 1;
-    }
-    std::string input(std::istreambuf_iterator<char>(f), {});
-
+    const std::string fname(positional[i]);
+    const std::string input = readInput(fname);
     try
     {
       auto fmted = fmt.format(fname, input);
@@ -485,15 +488,7 @@ readMerged(const std::vector<std::string> & input_filenames)
 
   for (auto & input_filename : input_filenames)
   {
-    std::ifstream f(input_filename);
-    if (!f)
-    {
-      std::cerr << "Can't open '" << input_filename << "'\n";
-      return nullptr;
-    }
-
-    std::string input((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
-
+    std::string input = readInput(input_filename);
     std::unique_ptr<hit::Node> root(hit::parse(input_filename, input));
     hit::explode(root.get());
 
@@ -532,10 +527,8 @@ merge(int argc, char ** argv)
   hit::Node * root = nullptr;
   for (int i = 0; i < positional.size(); i++)
   {
-    std::string fname(positional[i]);
-    std::istream && f =
-        (fname == "-" ? (std::istream &&) std::cin : (std::istream &&) std::ifstream(fname));
-    std::string input(std::istreambuf_iterator<char>(f), {});
+    const std::string fname(positional[i]);
+    const std::string input = readInput(fname);
     if (root)
       hit::merge(hit::parse(fname, input), root);
     else
@@ -808,11 +801,8 @@ validate(int argc, char ** argv)
   int ret = 0;
   for (int i = 0; i < argc; i++)
   {
-    std::string fname(argv[i]);
-    std::istream && f =
-        (fname == "-" ? (std::istream &&) std::cin : (std::istream &&) std::ifstream(fname));
-    std::string input((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
-
+    const std::string fname(argv[i]);
+    const std::string input = readInput(fname);
     std::unique_ptr<hit::Node> root;
     try
     {
