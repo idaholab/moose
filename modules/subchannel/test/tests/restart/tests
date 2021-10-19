@@ -4,11 +4,13 @@
     input = steady.i
     exodiff = steady_out.e
     recover = false
+    abs_zero = 1e-7
   []
   [transient]
     type = Exodiff
     input = transient.i
     exodiff = transient_out.e
     prereq = 'steady'
+    abs_zero = 1e-7
   []
 []
