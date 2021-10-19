@@ -23,10 +23,7 @@ Residual::validParams()
   InputParameters params = GeneralPostprocessor::validParams();
   params.addClassDescription("Report the non-linear residual.");
   MooseEnum residual_types("FINAL INITIAL_BEFORE_PRESET INITIAL_AFTER_PRESET", "FINAL");
-  params.addParam<MooseEnum>("residual_type",
-                             residual_types,
-                             "Type of residual to be reported.  Choices are: " +
-                                 residual_types.getRawNames());
+  params.addParam<MooseEnum>("residual_type", residual_types, "Type of residual to be reported.");
   return params;
 }
 

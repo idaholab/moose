@@ -18,6 +18,7 @@ InputParameters
 ElementH1Error::validParams()
 {
   InputParameters params = ElementW1pError::validParams();
+  params.addClassDescription("Computes the H1 error between a variable and a function");
   return params;
 }
 

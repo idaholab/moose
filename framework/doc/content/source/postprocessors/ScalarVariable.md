@@ -1,33 +1,14 @@
 # ScalarVariable
 
-!alert! construction title=Undocumented Class
-The ScalarVariable has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# ScalarVariable
-
 !syntax description /Postprocessors/ScalarVariable
 
-## Overview
+## Example input syntax
 
-!! Replace these lines with information regarding the ScalarVariable object.
+In this example, the scalar variable `v` is the solution of a simple reaction ODE.
+We use the `ScalarVariable` postprocessor to output the value of the scalar variable
+to a CSV file.
 
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the ScalarVariable object.
-
-!syntax parameters /Postprocessors/ScalarVariable
-
-!syntax inputs /Postprocessors/ScalarVariable
-
-!syntax children /Postprocessors/ScalarVariable
-```
-!alert-end!
-
-!syntax description /Postprocessors/ScalarVariable
+!listing test/tests/postprocessors/scalar_variable/scalar_variable_pps.i block=Postprocessors/reporter
 
 !syntax parameters /Postprocessors/ScalarVariable
 

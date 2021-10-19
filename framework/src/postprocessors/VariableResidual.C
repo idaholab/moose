@@ -27,7 +27,8 @@ VariableResidual::validParams()
   params.addRequiredParam<VariableName>("variable",
                                         "The name of the variable to compute the residual for");
 
-  params.addClassDescription("Computes the Residual of a single variable in the solution vector.");
+  params.addClassDescription(
+      "Computes the L2 norm of the residual of a single variable in the solution vector.");
   return params;
 }
 

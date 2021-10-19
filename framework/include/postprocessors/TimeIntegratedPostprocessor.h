@@ -11,20 +11,20 @@
 
 #include "GeneralPostprocessor.h"
 
-class TotalVariableValue;
+class TimeIntegratedPostprocessor;
 
 template <>
-InputParameters validParams<TotalVariableValue>();
+InputParameters validParams<TimeIntegratedPostprocessor>();
 
 /**
  * Integrate a post-processor value over time using trapezoidal rule
  */
-class TotalVariableValue : public GeneralPostprocessor
+class TimeIntegratedPostprocessor : public GeneralPostprocessor
 {
 public:
   static InputParameters validParams();
 
-  TotalVariableValue(const InputParameters & parameters);
+  TimeIntegratedPostprocessor(const InputParameters & parameters);
 
   virtual void initialize() override;
   virtual void execute() override;
@@ -43,4 +43,3 @@ protected:
   /// The old post-processor value
   const PostprocessorValue & _pps_value_old;
 };
-

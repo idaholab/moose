@@ -1,33 +1,19 @@
 # NodalL2Error
 
-!alert! construction title=Undocumented Class
-The NodalL2Error has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# NodalL2Error
-
 !syntax description /Postprocessors/NodalL2Error
 
-## Overview
+This is typically used to compare a nodal variable to a known analytical solution.
+To compute the error with regards to a variable, instead of a function, you may use
+a [ParsedAux.md] to store the difference in an `AuxVariable`, then use the `NodalL2Error`
+or [NodalL2Norm.md] postprocessor to compute the norm.
 
-!! Replace these lines with information regarding the NodalL2Error object.
+## Example input syntax
 
-## Example Input File Syntax
+In this example, variable `u` is the solution of a diffusion-source problem. We know the
+analytical solution of this problem and use the `NodalL2Error` postprocessor to examine
+the quality of the numerical solution.
 
-!! Describe and include an example of how to use the NodalL2Error object.
-
-!syntax parameters /Postprocessors/NodalL2Error
-
-!syntax inputs /Postprocessors/NodalL2Error
-
-!syntax children /Postprocessors/NodalL2Error
-```
-!alert-end!
-
-!syntax description /Postprocessors/NodalL2Error
+!listing test/tests/auxkernels/time_integration/time_integration.i block=Postprocessors Functions
 
 !syntax parameters /Postprocessors/NodalL2Error
 

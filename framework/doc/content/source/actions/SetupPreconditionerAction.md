@@ -2,7 +2,7 @@
 
 !syntax description /Preconditioning/SetupPreconditionerAction
 
-A preconditioner for the non-linear system is specified as an object inside the `[Preconditioner]` block.
+A preconditioner for the nonlinear system is specified as an object inside the `[Preconditioner]` block.
 This [Action.md] takes care of adding it to the [NonlinearSystemBase.md].
 
 More information about preconditioners may be found on the

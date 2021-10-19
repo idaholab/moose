@@ -4,7 +4,7 @@
 
 ## Overview
 
-The SolutionHistory output is a simple output format that writes the non-linear and linear
+The SolutionHistory output is a simple output format that writes the nonlinear and linear
 solve history to a file.
 
 

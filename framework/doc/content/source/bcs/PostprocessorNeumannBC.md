@@ -12,7 +12,7 @@ this boundary condition, by a numerical flux on a boundary.
 ## Example Input Syntax
 
 In this example, the value of variable `aux` is sampled using a `PointValue` postprocessor then
-reused as a Neumann boundary condition for the non linear variable `u` using a `PostprocessorNeumannBC`.
+reused as a Neumann boundary condition for the nonlinear variable `u` using a `PostprocessorNeumannBC`.
 
 !listing test/tests/bcs/pp_neumann/pp_neumann.i block=Postprocessors BCs
 
