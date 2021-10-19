@@ -29,7 +29,7 @@ protected:
   const SinglePhaseFluidProperties & _fluid;
 
   /// Porosity
-  const MooseVariableFVReal & _eps;
+  const Moose::Functor<ADReal> & _eps;
 
   /**
    * Characteristic length $d$ used in computing the Reynolds number
@@ -38,9 +38,9 @@ protected:
   const Real _d;
 
   /// variables
-  const MooseVariableFVReal & _pressure;
-  const MooseVariableFVReal & _T_fluid;
-  const MooseVariableFVReal & _speed;
+  const Moose::Functor<ADReal> & _pressure;
+  const Moose::Functor<ADReal> & _T_fluid;
+  const Moose::Functor<ADReal> & _speed;
 
   /// Density
   FunctorMaterialProperty<ADReal> & _rho;

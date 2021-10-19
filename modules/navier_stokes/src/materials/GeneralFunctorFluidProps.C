@@ -22,13 +22,13 @@ GeneralFunctorFluidProps::validParams()
   params.addRequiredParam<UserObjectName>(NS::fluid, "Fluid properties functor userobject");
   params.addClassDescription("Creates functor fluid properties using a (P, T) formulation");
 
-  params.addRequiredCoupledVar(NS::pressure, "Pressure variable");
-  params.addRequiredCoupledVar(NS::T_fluid, "Fluid temperature variable");
-  params.addRequiredCoupledVar(NS::speed, "Velocity norm as a variable");
+  params.addRequiredParam<MooseFunctorName>(NS::pressure, "Pressure");
+  params.addRequiredParam<MooseFunctorName>(NS::T_fluid, "Fluid temperature");
+  params.addRequiredParam<MooseFunctorName>(NS::speed, "Velocity norm");
 
   params.addParam<FunctionName>(
       "mu_rampdown", 1, "A function describing a ramp down of viscosity over time");
-  params.addRequiredCoupledVar(NS::porosity, "porosity");
+  params.addRequiredParam<MooseFunctorName>(NS::porosity, "porosity");
   params.addRequiredRangeCheckedParam<Real>(
       "characteristic_length",
       "characteristic_length > 0.0",
@@ -39,12 +39,12 @@ GeneralFunctorFluidProps::validParams()
 GeneralFunctorFluidProps::GeneralFunctorFluidProps(const InputParameters & parameters)
   : FunctorMaterial(parameters),
     _fluid(UserObjectInterface::getUserObject<SinglePhaseFluidProperties>(NS::fluid)),
-    _eps(*getVarHelper<MooseVariableFV<Real>>(NS::porosity, 0)),
+    _eps(getFunctor<ADReal>(NS::porosity)),
     _d(getParam<Real>("characteristic_length")),
 
-    _pressure(*getVarHelper<MooseVariableFV<Real>>(NS::pressure, 0)),
-    _T_fluid(*getVarHelper<MooseVariableFV<Real>>(NS::T_fluid, 0)),
-    _speed(*getVarHelper<MooseVariableFV<Real>>(NS::speed, 0)),
+    _pressure(getFunctor<ADReal>(NS::pressure)),
+    _T_fluid(getFunctor<ADReal>(NS::T_fluid)),
+    _speed(getFunctor<ADReal>(NS::speed)),
 
     _rho(declareFunctorProperty<ADReal>(NS::density)),
     _drho_dp(declareFunctorProperty<Real>(derivativePropertyNameFirst(NS::density, NS::pressure))),
