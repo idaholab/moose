@@ -1,0 +1,28 @@
+reset
+create sphere radius 2 xpositive ypositive zpositive
+create sphere radius 3 xpositive ypositive zpositive
+subtract volume 1 from volume 2 keep
+delete volume 2
+create sphere radius 1
+subtract volume 4 from volume 1
+curve 1 4 6 22 23 24 interval 8
+curve 1 4 6 22 23 24 scheme bias factor 1.0
+curve 13 14 15 17 20 21 interval 12
+curve 13 14 15 17 20 21 scheme bias factor 1.0
+mesh volume 1
+mesh volume 3
+Sideset 1 surface 15 16 17 18
+Sideset 2 surface 10 11 12 13
+Sideset 101 surface 4
+Sideset 102 surface 9
+block 1 volume 1
+block 2 volume 3
+undo group begin
+set large exodus file off
+export Genesis  "/Users/badgjc/projects/moose/test/tests/mortar/continuity-3d-non-conforming/spheres_hex8.e" overwrite
+undo group end
+block all element type hex27
+undo group begin
+set large exodus file off
+export Genesis "/Users/badgjc/projects/moose/test/tests/mortar/continuity-3d-non-conforming/spheres_hex27.e" overwrite
+undo group end

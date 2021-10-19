@@ -530,6 +530,15 @@ public:
    */
   void setFaceQRule(QBase * qrule, unsigned int dim);
 
+  /**
+   * Specifies a custom qrule for integration on mortar segment mesh
+   *
+   * Used to properly integrate QUAD face elements using quadrature on TRI mortar segment elements.
+   * For example, to exactly integrate a FIRST order QUAD element, SECOND order quadrature on TRI
+   * mortar segments is needed.
+   */
+  void setMortarQRule(Order order);
+
 private:
   /**
    * Set the qrule to be used for lower dimensional integration.
@@ -2287,6 +2296,8 @@ private:
   QBase * _qrule_msm;
   /// A pointer to const qrule_msm
   const QBase * _const_qrule_msm;
+  /// Flag specifying whether a custom quadrature rule has been specified for mortar segment mesh
+  bool _custom_mortar_qrule;
 
 private:
   /// quadrature rule used on lower dimensional elements. This should always be the same as the face

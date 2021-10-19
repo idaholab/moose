@@ -36,6 +36,19 @@ MortarInterface::validParams()
       "Whether this constraint is going to be used to enforce a periodic condition. This has the "
       "effect of changing the normals vector for projection from outward to inward facing");
 
+  params.addParam<bool>(
+      "debug_mesh",
+      false,
+      "Whether this constraint is going to enable mortar segment mesh debug information. An exodus"
+      "file will be generated if the user sets this flag to true");
+
+  params.addParam<bool>(
+      "correct_edge_dropping",
+      false,
+      "Whether to enable correct edge dropping treatment for mortar constraints. When disabled "
+      "any Lagrange Multiplier degree of freedom on a secondary element without full primary "
+      "contributions will be set (strongly) to 0.");
+
   return params;
 }
 
@@ -52,16 +65,15 @@ MortarInterface::MortarInterface(const MooseObject * moose_object)
     _primary_subdomain_id(
         _moi_mesh.getSubdomainID(moose_object->getParam<SubdomainName>("primary_subdomain")))
 {
-  if (_moi_mesh.dimension() == 3)
-    mooseError("Mortar cannot currently be run in three dimensions. It's on the to-do list!");
-
   // Create the mortar interface if it hasn't already been created
   _moi_problem.createMortarInterface(std::make_pair(_primary_id, _secondary_id),
                                      std::make_pair(_primary_subdomain_id, _secondary_subdomain_id),
                                      moose_object->isParamValid("use_displaced_mesh")
                                          ? moose_object->getParam<bool>("use_displaced_mesh")
                                          : false,
-                                     moose_object->getParam<bool>("periodic"));
+                                     moose_object->getParam<bool>("periodic"),
+                                     moose_object->getParam<bool>("debug_mesh"),
+                                     moose_object->getParam<bool>("correct_edge_dropping"));
 
   const auto & secondary_set = _mortar_data.getHigherDimSubdomainIDs(_secondary_subdomain_id);
   const auto & primary_set = _mortar_data.getHigherDimSubdomainIDs(_primary_subdomain_id);

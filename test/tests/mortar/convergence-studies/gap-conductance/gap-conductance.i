@@ -19,7 +19,7 @@
     type = RenameBoundaryGenerator
     input = left_block
     old_boundary_id = '0 1 2 3'
-    new_boundary_name = 'lb_bottom lb_right lb_top lb_left'
+    new_boundary = 'lb_bottom lb_right lb_top lb_left'
   [../]
   [./left_block_id]
     type = SubdomainIDGenerator

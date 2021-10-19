@@ -105,6 +105,7 @@
     secondary_variable = T
     use_displaced_mesh = true
     auxkernel_variable = 'aux_var'
+    correct_edge_dropping = true
   [../]
 []
 

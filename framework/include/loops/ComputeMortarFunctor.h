@@ -43,6 +43,14 @@ public:
    */
   void operator()();
 
+  /**
+   * 3D projection operator for mapping qpoints on mortar segments to secondary or primary elements
+   */
+  void projectQPoints3d(const Elem * msm_elem,
+                        const Elem * primal_elem,
+                        const unsigned int sub_elem_ind,
+                        std::vector<Point> & q_pts);
+
 private:
   /// The mortar constraints to loop over when on each element. These must be
   /// pointers to the base class otherwise the compiler will fail to compile
@@ -77,7 +85,4 @@ private:
 
   /// The primary boundary id needed for reiniting the MOOSE systems on the neighbor (primary) face
   BoundaryID _primary_boundary_id;
-
-  /// boolean flag for holding whether our current mortar segment projects onto a primary element
-  bool _has_primary;
 };
