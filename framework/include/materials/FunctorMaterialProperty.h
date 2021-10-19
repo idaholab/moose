@@ -63,8 +63,6 @@ protected:
   using FaceFn = std::function<T(const SingleSidedFaceArg &, const unsigned int &)>;
   using ElemQpFn = std::function<T(const ElemQpArg &, const unsigned int &)>;
   using ElemSideQpFn = std::function<T(const ElemSideQpArg &, const unsigned int &)>;
-  using TQpFn = std::function<T(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> &,
-                                const unsigned int &)>;
 
   ValueType evaluate(const Elem * const & elem, unsigned int state) const override;
   ValueType evaluate(const ElemFromFaceArg & elem_from_face, unsigned int state) const override;
@@ -72,8 +70,6 @@ protected:
   ValueType evaluate(const SingleSidedFaceArg & face, unsigned int state) const override;
   ValueType evaluate(const ElemQpArg & elem_qp, unsigned int state) const override;
   ValueType evaluate(const ElemSideQpArg & elem_side_qp, unsigned int state) const override;
-  ValueType evaluate(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
-                     unsigned int state) const override;
 
 private:
   /**
@@ -99,10 +95,6 @@ private:
 
   /// Functors that will evaluate elements at side quadrature points
   std::unordered_map<SubdomainID, ElemSideQpFn> _elem_side_qp_functor;
-
-  /// Functors that will index elemental, neighbor, or lower-dimensional data at a provided
-  /// quadrature point index
-  std::unordered_map<SubdomainID, TQpFn> _tqp_functor;
 
   /// The name of this object
   std::string _name;
@@ -130,7 +122,6 @@ FunctorMaterialPropertyImpl<T>::setFunctor(const MooseMesh & mesh,
     _face_functor.emplace(block_id, my_lammy);
     _elem_qp_functor.emplace(block_id, my_lammy);
     _elem_side_qp_functor.emplace(block_id, my_lammy);
-    _tqp_functor.emplace(block_id, my_lammy);
   };
 
   for (const auto block_id : block_ids)
@@ -253,17 +244,6 @@ FunctorMaterialPropertyImpl<T>::evaluate(const ElemSideQpArg & elem_side_qp,
   return it->second(elem_side_qp, state);
 }
 
-template <typename T>
-typename FunctorMaterialPropertyImpl<T>::ValueType
-FunctorMaterialPropertyImpl<T>::evaluate(
-    const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp, unsigned int state) const
-{
-  const auto sub_id = std::get<2>(tqp);
-  auto it = _tqp_functor.find(sub_id);
-  mooseAssert(it != _tqp_functor.end(), subdomainErrorMessage(sub_id));
-  return it->second(tqp, state);
-}
-
 /**
  * This is a wrapper that forwards calls to the implementation,
  * which can be switched out at any time without disturbing references to
@@ -355,11 +335,6 @@ protected:
   ValueType evaluate(const ElemSideQpArg & qp, unsigned int state = 0) const override
   {
     return _wrapped->evaluate(qp, state);
-  }
-  ValueType evaluate(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
-                     unsigned int state = 0) const override
-  {
-    return _wrapped->evaluate(tqp, state);
   }
   ///@}
 

@@ -211,17 +211,6 @@ FunctionTempl<T>::evaluate(const ElemSideQpArg & elem_side_qp, const unsigned in
 }
 
 template <typename T>
-typename FunctionTempl<T>::ValueType
-FunctionTempl<T>::evaluate(
-    const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & /*tqp*/,
-    unsigned int /*state*/) const
-{
-  mooseError(
-      "The ElementType evaluate overload is not supported by Function because there is no simple "
-      "way to determine the location of quadrature points without being provided an element");
-}
-
-template <typename T>
 typename FunctionTempl<T>::GradientType
 FunctionTempl<T>::evaluateGradient(const Elem * const & elem, const unsigned int state) const
 {

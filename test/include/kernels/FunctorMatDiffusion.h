@@ -21,7 +21,6 @@ protected:
   ADReal computeQpResidual() override;
 
   const Moose::Functor<GenericReal<is_ad>> & _diff;
-  const bool _use_preinitd_data;
 };
 
 typedef FunctorMatDiffusionTempl<false> FunctorMatDiffusion;

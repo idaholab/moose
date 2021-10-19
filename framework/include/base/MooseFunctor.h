@@ -142,8 +142,6 @@ public:
   ValueType operator()(const SingleSidedFaceArg & face, unsigned int state = 0) const;
   ValueType operator()(const ElemQpArg & qp, unsigned int state = 0) const;
   ValueType operator()(const ElemSideQpArg & qp, unsigned int state = 0) const;
-  ValueType operator()(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
-                       unsigned int state = 0) const;
   ///@}
 
   ///@{
@@ -227,18 +225,6 @@ protected:
    * @return The functor evaluated at the requested time and space
    */
   virtual ValueType evaluate(const ElemSideQpArg & side_qp, unsigned int state) const = 0;
-
-  /**
-   * @param tqp A tuple with the first member corresponding to an \p ElementType, either Element,
-   * Neighbor, or Lower corresponding to the three different possible \p MooseVariableData
-   * instances. The second member corresponds to the desired quadrature point. The third member
-   * corresponds to the subdomain that this functor is being evaluated on
-   * @return The requested element type data indexed at the requested quadrature point. There is a
-   * caveat with this \p evaluate overload: any variables involved in the functor evaluation must
-   * have their requested element data type properly pre-initialized at the desired quadrature point
-   */
-  virtual ValueType evaluate(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
-                             unsigned int state) const = 0;
 
   /**
    * Evaluate the functor gradient with a given element. Some example implementations of this method
@@ -533,14 +519,6 @@ Functor<T>::operator()(const ElemSideQpArg & elem_side_qp, const unsigned int st
 }
 
 template <typename T>
-typename Functor<T>::ValueType
-Functor<T>::operator()(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
-                       const unsigned int state) const
-{
-  return evaluate(tqp, state);
-}
-
-template <typename T>
 void
 Functor<T>::setCacheClearanceSchedule(const std::set<ExecFlagType> & clearance_schedule)
 {
@@ -711,11 +689,6 @@ private:
   }
   ValueType evaluate(const ElemQpArg &, unsigned int) const override final { return _value; }
   ValueType evaluate(const ElemSideQpArg &, unsigned int) const override final { return _value; }
-  ValueType evaluate(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> &,
-                     unsigned int) const override final
-  {
-    return _value;
-  }
 
   GradientType evaluateGradient(const libMesh::Elem * const &, unsigned int) const override final
   {

@@ -113,10 +113,7 @@ VolumetricFlowRate::computeQpIntegral()
                              true);
     }
     else if (_advected_mat_prop_supplied)
-    {
-      advected_quantity = MetaPhysicL::raw_value(_advected_material_property(
-          std::make_tuple(Moose::ElementType::Element, _qp, _current_elem->subdomain_id())));
-    }
+      advected_quantity = MetaPhysicL::raw_value(_advected_material_property(_current_elem));
     else
       advected_quantity = 1;
 
@@ -129,8 +126,8 @@ VolumetricFlowRate::computeQpIntegral()
       return _advected_variable[_qp] * RealVectorValue(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]) *
              _normals[_qp];
     else if (_advected_mat_prop_supplied)
-      return MetaPhysicL::raw_value(_advected_material_property(std::make_tuple(
-                 Moose::ElementType::Element, _qp, _current_elem->subdomain_id()))) *
+      return MetaPhysicL::raw_value(
+                 _advected_material_property(std::make_tuple(_current_elem, _qp, _qrule))) *
              RealVectorValue(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]) * _normals[_qp];
     else
       return RealVectorValue(_vel_x[_qp], _vel_y[_qp], _vel_z[_qp]) * _normals[_qp];

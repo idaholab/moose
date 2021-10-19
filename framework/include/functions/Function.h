@@ -132,8 +132,6 @@ private:
   ValueType evaluate(const SingleSidedFaceArg & face, unsigned int state) const override final;
   ValueType evaluate(const ElemQpArg & qp, unsigned int state) const override final;
   ValueType evaluate(const ElemSideQpArg & elem_side_qp, unsigned int state) const override final;
-  ValueType evaluate(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
-                     unsigned int state) const override final;
 
   GradientType evaluateGradient(const Elem * const & elem, unsigned int state) const override final;
   GradientType evaluateGradient(const ElemFromFaceArg & elem_from_face,

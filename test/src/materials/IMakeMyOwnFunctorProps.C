@@ -65,11 +65,6 @@ private:
   {
     return evaluateHelper(elem_side_qp, state);
   }
-  T evaluate(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
-             unsigned int state) const override final
-  {
-    return evaluateHelper(tqp, state);
-  }
 
   const Moose::Functor<T> & _var_functor;
   const Moose::Functor<T> * const _prop_functor;
