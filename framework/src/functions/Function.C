@@ -325,6 +325,8 @@ template <typename T>
 void
 FunctionTempl<T>::timestepSetup()
 {
+  _current_elem_qp_functor_elem = nullptr;
+  _current_elem_side_qp_functor_elem_side = std::make_pair(nullptr, libMesh::invalid_uint);
   Moose::Functor<T>::timestepSetup();
 }
 
@@ -332,6 +334,8 @@ template <typename T>
 void
 FunctionTempl<T>::residualSetup()
 {
+  _current_elem_qp_functor_elem = nullptr;
+  _current_elem_side_qp_functor_elem_side = std::make_pair(nullptr, libMesh::invalid_uint);
   Moose::Functor<T>::residualSetup();
 }
 
@@ -339,6 +343,8 @@ template <typename T>
 void
 FunctionTempl<T>::jacobianSetup()
 {
+  _current_elem_qp_functor_elem = nullptr;
+  _current_elem_side_qp_functor_elem_side = std::make_pair(nullptr, libMesh::invalid_uint);
   Moose::Functor<T>::jacobianSetup();
 }
 
