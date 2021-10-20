@@ -1049,12 +1049,6 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
     // End loop through mortar constraint pairs
   }
 
-  // Set up the the mortar segment neighbor information.
-  _mortar_segment_mesh->allow_renumbering(true);
-  _mortar_segment_mesh->skip_partitioning(true);
-  _mortar_segment_mesh->allow_find_neighbors(false);
-  _mortar_segment_mesh->prepare_for_use();
-
   // Output mortar segment mesh
   if (_debug)
   {
