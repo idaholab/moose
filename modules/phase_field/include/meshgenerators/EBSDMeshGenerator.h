@@ -9,14 +9,14 @@
 
 #pragma once
 
-#include "GeneratedMeshGenerator.h"
+#include "MeshGenerator.h"
 
 #include <array>
 
 /**
- * Mesh generated from parameters
+ * Mesh generated from parameters read from a DREAM3D EBSD file
  */
-class EBSDMeshGenerator : public GeneratedMeshGenerator
+class EBSDMeshGenerator : public MeshGenerator
 {
 public:
   static InputParameters validParams();
@@ -45,9 +45,18 @@ protected:
   /// Read the EBSD data file header
   void readEBSDHeader();
 
+  /// are we working on a distributed mesh?
+  const bool _distributed;
+
   /// Name of the file containing the EBSD data
   const FileName & _filename;
 
   /// EBSD data file mesh information
   Geometry _geometry;
+
+  // Sub-MeshGenerator for the regular base mesh
+  std::unique_ptr<MeshBase> * _base;
+
+  // Number of coarsening levels available in adaptive mesh refinement
+  const unsigned int _pre_refine;
 };
