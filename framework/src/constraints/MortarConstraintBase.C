@@ -12,6 +12,8 @@
 #include "Assembly.h"
 #include "MooseVariableFE.h"
 
+#include "libmesh/string_to_enum.h"
+
 defineLegacyParams(MortarConstraintBase);
 
 InputParameters
@@ -74,6 +76,14 @@ MortarConstraintBase::validParams()
       "Whether to interpolate the nodal normals (e.g. classic idea of evaluating field at "
       "quadrature points). If this is set to false, then non-interpolated nodal normals will be "
       "used, and then the _normals member should be indexed with _i instead of _qp");
+  params.addParam<MooseEnum>(
+      "quadrature",
+      MooseEnum("DEFAULT FIRST SECOND THIRD FOURTH", "DEFAULT"),
+      "Quadrature rule to use on mortar segments. For 2D mortar DEFAULT is recommended. "
+      "For 3D mortar, QUAD meshes are integrated using triangle mortar segments. "
+      "While DEFAULT quadrature order is typically sufficiently accurate, exact integration of "
+      "QUAD mortar faces requires SECOND order quadrature for FIRST variables and FOURTH order "
+      "quadrature for SECOND order variables.");
   return params;
 }
 
@@ -122,23 +132,29 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
     _displaced(getParam<bool>("use_displaced_mesh")),
     _interpolate_normals(getParam<bool>("interpolate_normals"))
 {
+  // Note parameter is discretization order, we then convert to quadrature order
+  const MooseEnum p_order = getParam<MooseEnum>("quadrature");
+  // If quadrature not DEFAULT, set mortar qrule
+  if (p_order != "DEFAULT")
+  {
+    if (_var->useDual())
+      mooseError("Using custom mortar quadrature order not supported with dual shape functions");
+
+    Order q_order = static_cast<Order>(2 * Utility::string_to_enum<Order>(p_order) + 1);
+    _assembly.setMortarQRule(q_order);
+  }
 }
 
 void
-MortarConstraintBase::computeResidual(bool has_primary)
+MortarConstraintBase::computeResidual()
 {
-  // Set this member for potential use by derived classes
-  _has_primary = has_primary;
-
   if (_compute_primal_residuals)
   {
     // Compute the residual for the secondary interior primal dofs
     computeResidual(Moose::MortarType::Secondary);
 
-    // Compute the residual for the primary interior primal dofs. If we don't have a primary
-    // element, then we don't have any primary dofs
-    if (_has_primary)
-      computeResidual(Moose::MortarType::Primary);
+    // Compute the residual for the primary interior primal dofs.
+    computeResidual(Moose::MortarType::Primary);
   }
 
   if (_compute_lm_residuals)
@@ -147,22 +163,70 @@ MortarConstraintBase::computeResidual(bool has_primary)
 }
 
 void
-MortarConstraintBase::computeJacobian(bool has_primary)
+MortarConstraintBase::computeJacobian()
 {
-  _has_primary = has_primary;
-
   if (_compute_primal_residuals)
   {
     // Compute the jacobian for the secondary interior primal dofs
     computeJacobian(Moose::MortarType::Secondary);
 
-    // Compute the jacobian for the primary interior primal dofs. If we don't have a primary
-    // element, then we don't have any primary dofs
-    if (_has_primary)
-      computeJacobian(Moose::MortarType::Primary);
+    // Compute the jacobian for the primary interior primal dofs.
+    computeJacobian(Moose::MortarType::Primary);
   }
 
   if (_compute_lm_residuals)
     // Compute the jacobian for the lower dimensional LM dofs (if we even have an LM variable)
     computeJacobian(Moose::MortarType::Lower);
+}
+
+void
+MortarConstraintBase::zeroInactiveLMDofs(const std::unordered_set<const Node *> & inactive_lm_nodes,
+                                         const std::unordered_set<const Elem *> & inactive_lm_elems)
+{
+  // If no LM variable has been defined, skip
+  if (!_var)
+    return;
+
+  if (_subproblem.currentlyComputingJacobian())
+    prepareMatrixTagLower(
+        _assembly, _var->number(), _var->number(), Moose::ConstraintJacobianType::LowerLower);
+  else
+    prepareVectorTagLower(_assembly, _var->number());
+
+  // If variable is nodal, zero DoFs based on inactive LM nodes
+  if (_var->isNodal())
+  {
+    for (const auto node : inactive_lm_nodes)
+    {
+      const auto dof_index = node->dof_number(_sys.number(), _var->number(), 0);
+      if (_subproblem.currentlyComputingJacobian())
+        _assembly.cacheJacobian(dof_index, dof_index, 1., _matrix_tags);
+      else
+      {
+        Real lm_value = _var->getNodalValue(*node);
+        _assembly.cacheResidual(dof_index, lm_value, _vector_tags);
+      }
+    }
+  }
+  // If variable is elemental, zero based on inactive LM elems
+  else
+  {
+    for (const auto el : inactive_lm_elems)
+    {
+      const auto n_comp = el->n_comp(_sys.number(), _var->number());
+
+      for (const auto comp : make_range(n_comp))
+      {
+        const auto dof_index = el->dof_number(_sys.number(), _var->number(), comp);
+        // Insert to system
+        if (_subproblem.currentlyComputingJacobian())
+          _assembly.cacheJacobian(dof_index, dof_index, 1., _matrix_tags);
+        else
+        {
+          const Real lm_value = _var->getElementalValue(el, comp);
+          _assembly.cacheResidual(dof_index, lm_value, _vector_tags);
+        }
+      }
+    }
+  }
 }

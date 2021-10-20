@@ -1,0 +1,40 @@
+# An explanation and results for the full runs of these inputs files are given in the contact documentation
+
+[Examples]
+  design = 'Constraints/index.md'
+  issues = '#13080'
+  [frictionless-mortar-3d]
+    type = 'Exodiff'
+    input = 'frictionless-mortar-3d.i'
+    exodiff = 'frictionless-mortar-3d_out.e'
+    mesh_mode = 'REPLICATED'
+    requirement = 'MOOSE shall solve a 3D frictionless bouncing block problem with mortar constraint'
+    allow_test_objects = true
+    min_ad_size = 100
+  []
+  [frictionless-mortar-3d-debug-mesh]
+    type = 'Exodiff'
+    input = 'frictionless-mortar-3d.i'
+    exodiff = 'mortar_segment_mesh.e'
+    mesh_mode = 'REPLICATED'
+    cli_args = 'Executioner/end_time=0.5 Executioner/dtmin=0.5 Constraints/normal_lm/debug_mesh=true '
+               'Constraints/normal_x/debug_mesh=true Constraints/normal_y/debug_mesh=true '
+               'Constraints/normal_z/debug_mesh=true'
+    requirement = 'MOOSE shall will solve a 3D frictionless bouncing block problem with mortar '
+                  'constraint and output the mortar segment mesh for debugging purposes'
+    min_ad_size = 100
+    max_parallel = 1
+  []
+  [frictionless-mortar-3d-debug-mesh-error]
+    type = 'RunException'
+    input = 'frictionless-mortar-3d.i'
+    mesh_mode = 'REPLICATED'
+    expect_err = 'Please set debug_mesh = true for all constraints'
+    cli_args = 'Executioner/end_time=0.5 Executioner/dtmin=0.5 Constraints/normal_lm/debug_mesh=true '
+               'Constraints/normal_x/debug_mesh=true Constraints/normal_y/debug_mesh=true'
+    requirement = 'MOOSE shall generate an error message if contradicting debug outputs are '
+                  'requested for mortar constraints on the same primary-secondary pairs'
+    min_ad_size = 100
+    max_parallel = 1
+  []
+[]

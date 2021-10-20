@@ -117,15 +117,3 @@ MortarSegmentInfo::isValid() const
   // If we made it here, we're valid.
   return true;
 }
-
-bool
-MortarSegmentInfo::hasPrimary() const
-{
-  bool xi2_set =
-      (std::abs(xi2_a - invalid_xi) >= TOLERANCE) && (std::abs(xi2_b - invalid_xi) >= TOLERANCE);
-
-  if (xi2_set && primary_elem)
-    return true;
-
-  return false;
-}

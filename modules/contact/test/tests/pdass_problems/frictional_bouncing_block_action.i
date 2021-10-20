@@ -10,6 +10,7 @@ offset = 1e-2
     type = FileMeshGenerator
     file = long-bottom-block-1elem-blocks.e
   []
+  allow_renumbering = false
   uniform_refine = 0 # 1,2
   patch_update_strategy = always
 []

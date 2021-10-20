@@ -84,6 +84,7 @@ Assembly::Assembly(SystemBase & sys, THREAD_ID tid)
     _current_qrule_neighbor(nullptr),
     _need_JxW_neighbor(false),
     _qrule_msm(nullptr),
+    _custom_mortar_qrule(false),
     _current_qrule_lower(nullptr),
 
     _current_elem(nullptr),
@@ -162,7 +163,11 @@ Assembly::Assembly(SystemBase & sys, THREAD_ID tid)
     (*_holder_fe_lower_helper[dim])->get_JxW();
   }
 
-  _fe_msm = FEGenericBase<Real>::build(_mesh_dimension - 1, FEType(helper_order, LAGRANGE));
+  // For 3D mortar, mortar segments are always TRI3 elements so we want FIRST LAGRANGE regardless
+  // of discretization
+  _fe_msm = (_mesh_dimension == 2)
+                ? FEGenericBase<Real>::build(_mesh_dimension - 1, FEType(helper_order, LAGRANGE))
+                : FEGenericBase<Real>::build(_mesh_dimension - 1, FEType(FIRST, LAGRANGE));
   _JxW_msm = &_fe_msm->get_JxW();
   // Prerequest xyz so that it is computed for _fe_msm so that it can be used for calculating
   // _coord_msm
@@ -647,6 +652,7 @@ Assembly::createQRules(QuadratureType type,
   }
 
   delete _qrule_msm;
+  _custom_mortar_qrule = false;
   _const_qrule_msm = _qrule_msm = QBase::build(type, _mesh_dimension - 1, face_order).release();
   _qrule_msm->allow_rules_with_negative_weights = allow_negative_qweights;
   _fe_msm->attach_quadrature_rule(_qrule_msm);
@@ -700,6 +706,31 @@ Assembly::setNeighborQRule(QBase * qrule, unsigned int dim)
     it.second->attach_quadrature_rule(qrule);
   for (auto & it : _vector_fe_face_neighbor[dim])
     it.second->attach_quadrature_rule(qrule);
+}
+
+void
+Assembly::setMortarQRule(Order order)
+{
+  if (order != _qrule_msm->get_order())
+  {
+    // If custom mortar qrule has not yet been specified
+    if (!_custom_mortar_qrule)
+    {
+      _custom_mortar_qrule = true;
+      const unsigned int dim = _qrule_msm->get_dim();
+      const QuadratureType type = _qrule_msm->type();
+      delete _qrule_msm;
+
+      _const_qrule_msm = _qrule_msm = QBase::build(type, dim, order).release();
+      _fe_msm->attach_quadrature_rule(_qrule_msm);
+    }
+    else
+      mooseError("Mortar quadrature_order: ",
+                 order,
+                 " does not match previously specified quadrature_order: ",
+                 _qrule_msm->get_order(),
+                 ". Quadrature_order (when specified) must match for all mortar constraints.");
+  }
 }
 
 void

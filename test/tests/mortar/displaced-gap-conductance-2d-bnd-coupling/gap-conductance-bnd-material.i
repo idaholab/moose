@@ -97,6 +97,7 @@
     secondary_variable = T
     use_displaced_mesh = true
     material_property = 'layer_modifier'
+    correct_edge_dropping = true
   [../]
 []
 

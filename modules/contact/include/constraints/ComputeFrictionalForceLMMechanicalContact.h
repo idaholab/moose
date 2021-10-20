@@ -24,6 +24,12 @@ public:
   void jacobianSetup() override;
   void post() override;
 
+  /**
+   * Copy of the post routine but that skips assembling inactive nodes
+   */
+  void
+  incorrectEdgeDroppingPost(const std::unordered_set<const Node *> & inactive_lm_nodes) override;
+
 protected:
   /**
    * Computes properties that are functions only of the current quadrature point (\p _qp), e.g.
@@ -42,10 +48,10 @@ protected:
    * where we actually feed the node-based constraint information into the system residual and
    * Jacobian
    */
-  virtual void enforceConstraintOnNode(const Node * node) override;
+  virtual void enforceConstraintOnDof(const DofObject * const dof) override;
 
   /// A map from node to weighted gap
-  std::unordered_map<const Node *, ADReal> _node_to_weighted_tangential_velocity;
+  std::unordered_map<const DofObject *, ADReal> _dof_to_weighted_tangential_velocity;
 
   /// A pointer member that can be used to help avoid copying ADReals
   const ADReal * _tangential_vel_ptr = nullptr;
@@ -70,6 +76,12 @@ protected:
 
   /// y-velocity on the primary face
   const ADVariableValue & _primary_y_dot;
+
+  /// z-velocity on the secondary face
+  const ADVariableValue * const _secondary_z_dot;
+
+  /// z-velocity on the primary face
+  const ADVariableValue * const _primary_z_dot;
 
   /// Small contact pressure value to trigger computation of frictional forces
   const Real _epsilon;

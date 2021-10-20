@@ -33,12 +33,16 @@ public:
    * @param periodic Whether the AMG object will be used for enforcing periodic constraints. Note
    * that this changes the direction of the projection normals so one AMG object cannot be used to
    * enforce both periodic and non-periodic constraints
+   * @param debug whether to output mortar segment mesh exodus file for debugging purposes
+   * @param correct_edge_dropping edge dropping treatment selection
    */
   void createMortarInterface(const std::pair<BoundaryID, BoundaryID> & boundary_key,
                              const std::pair<SubdomainID, SubdomainID> & subdomain_key,
                              SubProblem & subproblem,
                              bool on_displaced,
-                             bool periodic);
+                             bool periodic,
+                             const bool debug,
+                             const bool correct_edge_dropping);
 
   /**
    * Getter to retrieve the AutomaticMortarGeneration object corresponding to the boundary and
@@ -121,6 +125,12 @@ private:
 
   /// Map from displaced AMG key to whether the displaced AMG object is enforcing periodic constraints
   std::unordered_map<MortarKey, bool> _displaced_periodic_map;
+
+  /// Map from undisplaced AMG key to whether the undisplaced AMG object is to output mortar segment mesh
+  std::unordered_map<MortarKey, bool> _debug_flag_map;
+
+  /// Map from displaced AMG key to whether the displaced AMG object is to output mortar segment mesh
+  std::unordered_map<MortarKey, bool> _displaced_debug_flag_map;
 
   /// Map from lower dimensional subdomain ids to corresponding higher simensional subdomain ids
   /// (e.g. the ids of the interior parents)

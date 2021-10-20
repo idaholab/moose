@@ -55,23 +55,19 @@ GapHeatConductanceAuxKernel::computeQpResidual(Moose::MortarType type)
     case Moose::MortarType::Lower:
     {
       ADReal heat_transfer_coeff(0);
-      if (_has_primary)
-      {
-        auto gap = (_phys_points_secondary[_qp] - _phys_points_primary[_qp]).norm();
-        mooseAssert(MetaPhysicL::raw_value(gap) > TOLERANCE * TOLERANCE,
-                    "Gap distance is too small in GapHeatConductanceAuxKernel");
+      auto gap = (_phys_points_secondary[_qp] - _phys_points_primary[_qp]).norm();
+      mooseAssert(MetaPhysicL::raw_value(gap) > TOLERANCE * TOLERANCE,
+                  "Gap distance is too small in GapHeatConductanceAuxKernel");
 
-        heat_transfer_coeff =
-            (0.5 * (_secondary_gap_conductance[_qp] + _primary_gap_conductance[_qp])) / gap;
-      }
+      heat_transfer_coeff =
+          (0.5 * (_secondary_gap_conductance[_qp] + _primary_gap_conductance[_qp])) / gap;
 
       // Modify heat transfer coefficient with auxiliary kernel variable
       if (_aux_variable[_qp] != 0.0)
         heat_transfer_coeff *= 0.5 * (_aux_variable[_qp] + _aux_variable_old[_qp]);
 
       return _test[_i][_qp] *
-             (_lambda[_qp] -
-              heat_transfer_coeff * (_u_secondary[_qp] - (_has_primary ? _u_primary[_qp] : 0)));
+             (_lambda[_qp] - heat_transfer_coeff * (_u_secondary[_qp] - _u_primary[_qp]));
     }
 
     default:
