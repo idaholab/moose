@@ -56,6 +56,7 @@
     method = '!dbg'
     cli_args = "Outputs/out/execute_on='final'"
     recover = false # See https://github.com/idaholab/moose/issues/17906
+    valgrind = 'none'
   []
   [high_rayleigh_transient_wcnsfv]
     type = Exodiff
