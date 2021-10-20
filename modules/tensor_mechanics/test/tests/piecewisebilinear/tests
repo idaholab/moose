@@ -1,0 +1,7 @@
+[Tests]
+  [./small1]
+    type = 'Exodiff'
+    input = 'solid.i'
+    exodiff = 'solid_out.e'
+  [../]
+[]
