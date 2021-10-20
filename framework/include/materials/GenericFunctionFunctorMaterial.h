@@ -29,7 +29,7 @@ protected:
   std::vector<FunctionName> _prop_values;
 
   unsigned int _num_props;
-  std::vector<const FunctionTempl<GenericReal<is_ad>> *> _functions;
+  std::vector<const Function *> _functions;
 };
 
 typedef GenericFunctionFunctorMaterialTempl<false> GenericFunctionFunctorMaterial;

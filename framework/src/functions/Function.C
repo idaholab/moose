@@ -162,7 +162,7 @@ template <typename T>
 typename FunctionTempl<T>::ValueType
 FunctionTempl<T>::evaluate(const Elem * const & elem, const unsigned int state) const
 {
-  return value(getTime(state), elem->centroid());
+  return value(getTime(state), elem->vertex_average());
 }
 
 template <typename T>
@@ -178,6 +178,12 @@ FunctionTempl<T>::evaluate(const ElemFromFaceArg & elem_from_face, const unsigne
 template <typename T>
 typename FunctionTempl<T>::ValueType
 FunctionTempl<T>::evaluate(const FaceArg & face, const unsigned int state) const
+{
+  return value(getTime(state), std::get<0>(face)->faceCentroid());
+}
+template <typename T>
+typename FunctionTempl<T>::ValueType
+FunctionTempl<T>::evaluate(const SingleSidedFaceArg & face, const unsigned int state) const
 {
   return value(getTime(state), std::get<0>(face)->faceCentroid());
 }
@@ -205,20 +211,122 @@ FunctionTempl<T>::evaluate(const ElemSideQpArg & elem_side_qp, const unsigned in
 }
 
 template <typename T>
-typename FunctionTempl<T>::ValueType
-FunctionTempl<T>::evaluate(
-    const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & /*tqp*/,
-    unsigned int /*state*/) const
+typename FunctionTempl<T>::GradientType
+FunctionTempl<T>::evaluateGradient(const Elem * const & elem, const unsigned int state) const
 {
-  mooseError(
-      "The ElementType evaluate overload is not supported by Function because there is no simple "
-      "way to determine the location of quadrature points without being provided an element");
+  return gradient(getTime(state), elem->vertex_average());
+}
+
+template <typename T>
+typename FunctionTempl<T>::GradientType
+FunctionTempl<T>::evaluateGradient(const ElemFromFaceArg & elem_from_face,
+                                   const unsigned int state) const
+{
+  const auto * const elem = std::get<0>(elem_from_face);
+  const auto * const fi = std::get<1>(elem_from_face);
+  mooseAssert(fi, "We must have a non-null face information pointer");
+  return gradient(getTime(state),
+                  (elem == &fi->elem()) ? fi->elemCentroid() : fi->neighborCentroid());
+}
+
+template <typename T>
+typename FunctionTempl<T>::GradientType
+FunctionTempl<T>::evaluateGradient(const FaceArg & face, const unsigned int state) const
+{
+  return gradient(getTime(state), std::get<0>(face)->faceCentroid());
+}
+
+template <typename T>
+typename FunctionTempl<T>::GradientType
+FunctionTempl<T>::evaluateGradient(const SingleSidedFaceArg & face, const unsigned int state) const
+{
+  return gradient(getTime(state), std::get<0>(face)->faceCentroid());
+}
+
+template <typename T>
+typename FunctionTempl<T>::GradientType
+FunctionTempl<T>::evaluateGradient(const ElemQpArg & elem_qp, const unsigned int state) const
+{
+  determineElemXYZ(elem_qp);
+  const auto qp = std::get<1>(elem_qp);
+  mooseAssert(qp < _current_elem_qp_functor_xyz.size(),
+              "The requested " << qp << " is outside our xyz size");
+  return gradient(getTime(state), _current_elem_qp_functor_xyz[qp]);
+}
+
+template <typename T>
+typename FunctionTempl<T>::GradientType
+FunctionTempl<T>::evaluateGradient(const ElemSideQpArg & elem_side_qp,
+                                   const unsigned int state) const
+{
+  determineElemSideXYZ(elem_side_qp);
+  const auto qp = std::get<2>(elem_side_qp);
+  mooseAssert(qp < _current_elem_side_qp_functor_xyz.size(),
+              "The requested " << qp << " is outside our xyz size");
+  return gradient(getTime(state), _current_elem_side_qp_functor_xyz[qp]);
+}
+
+template <typename T>
+typename FunctionTempl<T>::DotType
+FunctionTempl<T>::evaluateDot(const Elem * const & elem, const unsigned int state) const
+{
+  return timeDerivative(getTime(state), elem->vertex_average());
+}
+
+template <typename T>
+typename FunctionTempl<T>::DotType
+FunctionTempl<T>::evaluateDot(const ElemFromFaceArg & elem_from_face,
+                              const unsigned int state) const
+{
+  const auto * const elem = std::get<0>(elem_from_face);
+  const auto * const fi = std::get<1>(elem_from_face);
+  mooseAssert(fi, "We must have a non-null face information pointer");
+  return timeDerivative(getTime(state),
+                        (elem == &fi->elem()) ? fi->elemCentroid() : fi->neighborCentroid());
+}
+
+template <typename T>
+typename FunctionTempl<T>::DotType
+FunctionTempl<T>::evaluateDot(const FaceArg & face, const unsigned int state) const
+{
+  return timeDerivative(getTime(state), std::get<0>(face)->faceCentroid());
+}
+
+template <typename T>
+typename FunctionTempl<T>::DotType
+FunctionTempl<T>::evaluateDot(const SingleSidedFaceArg & face, const unsigned int state) const
+{
+  return timeDerivative(getTime(state), std::get<0>(face)->faceCentroid());
+}
+
+template <typename T>
+typename FunctionTempl<T>::DotType
+FunctionTempl<T>::evaluateDot(const ElemQpArg & elem_qp, const unsigned int state) const
+{
+  determineElemXYZ(elem_qp);
+  const auto qp = std::get<1>(elem_qp);
+  mooseAssert(qp < _current_elem_qp_functor_xyz.size(),
+              "The requested " << qp << " is outside our xyz size");
+  return timeDerivative(getTime(state), _current_elem_qp_functor_xyz[qp]);
+}
+
+template <typename T>
+typename FunctionTempl<T>::DotType
+FunctionTempl<T>::evaluateDot(const ElemSideQpArg & elem_side_qp, const unsigned int state) const
+{
+  determineElemSideXYZ(elem_side_qp);
+  const auto qp = std::get<2>(elem_side_qp);
+  mooseAssert(qp < _current_elem_side_qp_functor_xyz.size(),
+              "The requested " << qp << " is outside our xyz size");
+  return timeDerivative(getTime(state), _current_elem_side_qp_functor_xyz[qp]);
 }
 
 template <typename T>
 void
 FunctionTempl<T>::timestepSetup()
 {
+  _current_elem_qp_functor_elem = nullptr;
+  _current_elem_side_qp_functor_elem_side = std::make_pair(nullptr, libMesh::invalid_uint);
   Moose::Functor<T>::timestepSetup();
 }
 
@@ -226,6 +334,8 @@ template <typename T>
 void
 FunctionTempl<T>::residualSetup()
 {
+  _current_elem_qp_functor_elem = nullptr;
+  _current_elem_side_qp_functor_elem_side = std::make_pair(nullptr, libMesh::invalid_uint);
   Moose::Functor<T>::residualSetup();
 }
 
@@ -233,6 +343,8 @@ template <typename T>
 void
 FunctionTempl<T>::jacobianSetup()
 {
+  _current_elem_qp_functor_elem = nullptr;
+  _current_elem_side_qp_functor_elem_side = std::make_pair(nullptr, libMesh::invalid_uint);
   Moose::Functor<T>::jacobianSetup();
 }
 

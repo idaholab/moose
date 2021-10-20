@@ -188,6 +188,13 @@ velocity_interp_method='rc'
   []
 []
 
+[Postprocessors]
+  [temp]
+    type = ElementAverageValue
+    variable = temperature
+  []
+[]
+
 [Executioner]
   type = Steady
   solve_type = 'NEWTON'

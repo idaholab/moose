@@ -37,7 +37,6 @@ GeneralFluidProps::GeneralFluidProps(const InputParameters & parameters)
     _d(getParam<Real>("characteristic_length")),
 
     _pressure(getADMaterialProperty<Real>(NS::pressure)),
-    _rhoE(getADMaterialProperty<Real>(NS::total_energy_density)),
     _T_fluid(getADMaterialProperty<Real>(NS::T_fluid)),
     _rho(getADMaterialProperty<Real>(NS::density)),
     _speed(getADMaterialProperty<Real>(NS::speed)),

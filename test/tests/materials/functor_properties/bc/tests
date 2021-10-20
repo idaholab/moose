@@ -20,13 +20,4 @@
       cli_args = "Materials/functor/execute_on='always'"
     []
   []
-  [preinitd]
-    requirement = 'The system shall be able to query preinitialized variable data when evaluating functors in order to possibly speed-up computation'
-    type = Exodiff
-    input = bc.i
-    exodiff = bc_out.e
-    ad_indexing_type = 'global'
-    prereq = 'functors_with_bcs/no_caching'
-    cli_args = 'Kernels/diff/use_preinitd_data=true BCs/bounds/use_preinitd_data=true'
-  []
 []

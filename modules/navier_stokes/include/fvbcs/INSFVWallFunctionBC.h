@@ -38,9 +38,9 @@ protected:
   /// z-velocity
   const INSFVVelocityVariable * const _w_var;
 
-  /// Density
-  const Real & _rho;
+  /// density
+  const Moose::Functor<ADReal> & _rho;
 
-  /// Dynamic viscosity
-  const ADMaterialProperty<Real> & _mu;
+  /// dynamic viscosity
+  const Moose::Functor<ADReal> & _mu;
 };

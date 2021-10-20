@@ -13,6 +13,7 @@ please refer to the below pages:
 
 - [Continuous Galerkin Finite Element](navier_stokes/cgfe.md)
 - [Incompressible Finite Volume](insfv.md)
+- [Weakly Compressible Finite Volume](wcnsfv.md)
 - [Porous media Incompressible Finite Volume](pinsfv.md)
 - [Compressible Finite Volume HLLC](CNSFVHLLCBase.md)
 - [Porous media Compressible Finite Volume Kurganov-Tadmor](PCNSFVKT.md)
@@ -22,16 +23,17 @@ please refer to the below pages:
 Here we give a brief tabular summary of the Navier-Stokes implementations:
 
 !table id=navier_stokes_summary caption=Summary of Navier-Stokes implementations
-| prefix     | Jacobian   | compressibility | turbulence support | friction support  | method | advection strategy                |
-| ------     | --------   | --------------- | ------------------ | ----------------  | ------ | ------------------                |
-| INS        | Hand-coded | incompressible  | None               | Not porous        | CGFE   | SUPG                              |
-| INSAD      | AD         | incompressible  | Smagorinsky        | Not porous        | CGFE   | SUPG                              |
-| NS         | Hand-coded | compressible    | None               | Not porous        | CGFE   | SUPG                              |
-| INSFV      | AD         | incompressible  | mixing length      | Not porous        | FV     | RC, CD velocity; limited advected |
-| PINSFV     | AD         | incompressible  | None               | Darcy, Forcheimer | FV     | RC, CD velocity; limited advected |
-| CNSFVHLLC  | AD         | compressible    | None               | Not porous        | FV     | HLLC, piecewise constant data     |
-| PCNSFVHLLC | AD         | compressible    | None               | Darcy, Forcheimer | FV     | HLLC, piecewise constant data     |
-| PCNSFVKT   | AD         | compressible    | None               | Darcy, Forcheimer | FV     | Kurganov-Tadmor, limited data     |
+| prefix     | Jacobian   | compressibility      | turbulence support | friction support  | method | advection strategy                |
+| ------     | --------   | -------------------- | ------------------ | ----------------  | ------ | ------------------                |
+| INS        | Hand-coded | incompressible       | None               | Not porous        | CGFE   | SUPG                              |
+| INSAD      | AD         | incompressible       | Smagorinsky        | Not porous        | CGFE   | SUPG                              |
+| NS         | Hand-coded | compressible         | None               | Not porous        | CGFE   | SUPG                              |
+| INSFV      | AD         | incompressible       | mixing length      | Not porous        | FV     | RC, CD velocity; limited advected |
+| WCNSFV     | AD         | weakly compressible  | mixing length      | Not porous        | FV     | RC, CD velocity; limited advected |
+| PINSFV     | AD         | incompressible       | None               | Darcy, Forcheimer | FV     | RC, CD velocity; limited advected |
+| CNSFVHLLC  | AD         | compressible         | None               | Not porous        | FV     | HLLC, piecewise constant data     |
+| PCNSFVHLLC | AD         | compressible         | None               | Darcy, Forcheimer | FV     | HLLC, piecewise constant data     |
+| PCNSFVKT   | AD         | compressible         | None               | Darcy, Forcheimer | FV     | Kurganov-Tadmor, limited data     |
 
 Table definitions:
 

@@ -152,6 +152,7 @@ advected_interp_method = 'average'
     type = INSFVEnergyTimeDerivative
     variable = T
     rho = ${rho}
+    cp_name = 'cp'
   []
   [temp_conduction]
     type = FVDiffusion

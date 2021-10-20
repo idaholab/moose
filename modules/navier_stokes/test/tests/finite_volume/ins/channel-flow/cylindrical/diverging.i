@@ -178,6 +178,7 @@ velocity_interp_method='rc'
   petsc_options_iname = '-pc_type -sub_pc_type -sub_pc_factor_shift_type -ksp_gmres_restart'
   petsc_options_value = 'asm      lu           NONZERO                   200'
   line_search = 'none'
+  nl_rel_tol = 1e-12
 []
 
 [Debug]

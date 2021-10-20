@@ -1,0 +1,26 @@
+[Tests]
+  issues = '#16809'
+  design = 'navier_stokes/wcnsfv.md'
+  [transient]
+    type = 'Exodiff'
+    input = 2d-transient.i
+    exodiff = 2d-transient_out.e
+    method = "!dbg"
+    requirement = 'The system shall be able to solve for a transient 2D channel case with a weakly compressible formulation.'
+    ad_indexing_type = 'global'
+    abs_zero = 1e-9
+    recover = false # see #19126
+  []
+  [turbulence]
+    type = 'Exodiff'
+    input = 2d-transient.i
+    exodiff = 2d-turbulent.e
+    cli_args = "FVKernels/inactive='' AuxKernels/inactive='' Outputs/file_base='2d-turbulent'"
+    method = "!dbg"
+    requirement = 'The system shall be able to solve for a transient 2D channel case with a weakly compressible formulation and a mixing length turbulence model.'
+    ad_indexing_type = 'global'
+    mesh_mode = REPLICATED
+    abs_zero = 1e-9
+    recover = false # see #19126
+  []
+[]
