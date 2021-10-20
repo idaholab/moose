@@ -37,6 +37,18 @@
       cli_args = "Outputs/file_base='rc-heated-effective'"
     []
   []
+  [transient]
+    type = 'Exodiff'
+    input = 2d-transient.i
+    exodiff = 2d-transient_out.e
+    method = "!dbg"
+    abs_zero = 1e-9
+    issues = '#16756'
+    requirement = 'The system shall be able to solve transient relaxations with fluid energy diffusion, advection and convection with the solid phase in a 2D channel, modeling both fluid and solid temperature.'
+    ad_indexing_type = 'global'
+    valgrind = HEAVY
+    design = 'PINSFVEnergyTimeDerivative.md INSFVMomentumTimeDerivative.md'
+  []
   [solid-fluid]
     type = 'Exodiff'
     input = 2d-rc-heated.i
