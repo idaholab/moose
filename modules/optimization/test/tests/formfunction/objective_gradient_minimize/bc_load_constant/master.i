@@ -24,9 +24,9 @@
 [Executioner]
   type = Optimize
   tao_solver = taolmvm
-  petsc_options_iname = '-tao_ls_type'
-  petsc_options_value = 'unit'
-  # verbose = true
+  #petsc_options_iname = '-tao_ls_type'
+  #petsc_options_value = 'unit'
+  verbose = true
 []
 
 [MultiApps]

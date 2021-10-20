@@ -16,7 +16,7 @@
     type = CSVDiff
     rel_err = 0.01
     input = master.i
-    cli_args = "Executioner/tao_solver=TAOCG"
+    cli_args = "Executioner/tao_solver=TAOBNCG"
     " Executioner/petsc_options_iname='-tao_fd_gradient -tao_fd_delta -tao_gatol'"
     " Executioner/petsc_options_value='true 0.0001 0.1'"
     csvdiff = master_out_receiver_0001.csv

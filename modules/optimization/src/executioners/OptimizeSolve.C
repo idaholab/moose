@@ -335,8 +335,10 @@ PetscErrorCode
 OptimizeSolve::variableBounds(Tao tao)
 {
   // get bounds
-  std::vector<Real> upper_bounds = _form_function->getUpperBounds();
-  std::vector<Real> lower_bounds = _form_function->getLowerBounds();
+  if (!_form_function->hasBounds())
+    return 0;
+  const std::vector<Real> & upper_bounds = _form_function->getUpperBounds();
+  const std::vector<Real> & lower_bounds = _form_function->getLowerBounds();
 
   unsigned int sz = _form_function->getNumParams();
 

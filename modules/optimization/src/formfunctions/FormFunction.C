@@ -18,9 +18,9 @@ FormFunction::validParams()
   params.addParam<std::vector<Real>>("initial_condition",
                                      "Initial condition for each parameter values, default is 0.");
   params.addParam<std::vector<Real>>(
-      "lower_bounds", "lower bounds for each parameter values, default is -infinity.");
+      "lower_bounds", std::vector<Real>(), "Lower bounds for each parameter value.");
   params.addParam<std::vector<Real>>(
-      "upper_bounds", "upper bounds for each parameter values, default is infinity.");
+      "upper_bounds", std::vector<Real>(), "Upper bounds for each parameter value.");
   return params;
 }
 
@@ -30,12 +30,8 @@ FormFunction::FormFunction(const InputParameters & parameters)
     _nparam(_parameter_names.size()),
     _nvalues(getParam<std::vector<dof_id_type>>("num_values")),
     _ndof(std::accumulate(_nvalues.begin(), _nvalues.end(), 0)),
-    _lower_bounds(isParamValid("lower_bounds")
-                      ? getParam<std::vector<Real>>("lower_bounds")
-                      : computeDefaultBounds(-std::numeric_limits<double>::infinity())),
-    _upper_bounds(isParamValid("upper_bounds")
-                      ? getParam<std::vector<Real>>("upper_bounds")
-                      : computeDefaultBounds(std::numeric_limits<double>::infinity())),
+    _lower_bounds(getParam<std::vector<Real>>("lower_bounds")),
+    _upper_bounds(getParam<std::vector<Real>>("upper_bounds")),
     _misfit(getDataValueHelper("misfit_computed", "misfit_name"))
 {
   if (_parameter_names.size() != _nvalues.size())
@@ -49,6 +45,14 @@ FormFunction::FormFunction(const InputParameters & parameters)
     paramError("initial_condition",
                "Initial condition must be same length as the total number of parameter values.");
 
+  if (_upper_bounds.size() > 0 && _upper_bounds.size() != _ndof)
+    paramError("upper_bounds", "Upper bound data is not equal to the total number of parameters.");
+  else if (_lower_bounds.size() > 0 && _lower_bounds.size() != _ndof)
+    paramError("lower_bounds", "Lower bound data is not equal to the total number of parameters.");
+  else if (_lower_bounds.size() != _upper_bounds.size())
+    paramError((_lower_bounds.size() == 0 ? "upper_bounds" : "lower_bounds"),
+               "Both upper and lower bounds must be specified if bounds are used");
+
   _parameters.reserve(_nparam);
   unsigned int v = 0;
   for (unsigned int i = 0; i < _parameter_names.size(); ++i)
@@ -59,11 +63,6 @@ FormFunction::FormFunction(const InputParameters & parameters)
                            initial_condition.begin() + v + _nvalues[i]);
     v += _nvalues[i];
   }
-
-  if (_lower_bounds.size() != _nparam)
-    paramError("lower_bounds", "Lower bound data is not equal to the total number of parameters.");
-  if (_upper_bounds.size() != _nparam)
-    paramError("upper_bounds", "Upper bound data is not equal to the total number of parameters.");
 }
 
 void

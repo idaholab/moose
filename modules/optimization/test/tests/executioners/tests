@@ -7,15 +7,15 @@
     csvdiff = quadratic_minimize_out_FormFunction_0001.csv
     requirement = "Use TAONM solver, not as accurate"
   []
-  [quadratic_taocg]
+  [quadratic_taobncg]
     type = CSVDiff
     rel_err = 1.0e-4
-    cli_args = "Executioner/tao_solver=TAOCG"
+    cli_args = "Executioner/tao_solver=TAOBNCG"
     " Executioner/petsc_options_iname='-tao_gatol -tao_cg_delta_max'"
     " Executioner/petsc_options_value='1e-4 1e-2'"
     input = quadratic_minimize.i
     csvdiff = quadratic_minimize_out_FormFunction_0001.csv
-    requirement = "Use TAOCG solver"
+    requirement = "Use bounded conjugate gradient solver"
   []
   [quadratic_taontr]
     type = CSVDiff

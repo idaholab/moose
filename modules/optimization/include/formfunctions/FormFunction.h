@@ -23,11 +23,11 @@ public:
   void setInitialCondition(libMesh::PetscVector<Number> & param);
 
   /**
-   * Function to get bounds
+   * Functions to get and check bounds
    */
-  std::vector<Real> getUpperBounds() { return _upper_bounds; };
-  std::vector<Real> getLowerBounds() { return _lower_bounds; };
-
+  bool hasBounds() const { return _upper_bounds.size() > 0 && _lower_bounds.size() > 0; }
+  const std::vector<Real> & getUpperBounds() const { return _upper_bounds; };
+  const std::vector<Real> & getLowerBounds() const { return _lower_bounds; };
   /**
    * Function to compute default bounds when user did not provide bounds
    */
@@ -60,7 +60,7 @@ public:
   /**
    * Function to get the total number of parameters
    */
-  unsigned int getNumParams() { return _nparam; };
+  unsigned int getNumParams() { return _ndof; };
 
 protected:
   /// Helper for getting or declaring data
@@ -69,19 +69,19 @@ protected:
 
   /// Parameter names
   const std::vector<ReporterValueName> & _parameter_names;
-  /// Number of parameters
+  /// Number of parameter vectors
   const unsigned int _nparam;
   /// Number of values for each parameter
   const std::vector<dof_id_type> & _nvalues;
-  /// Total number of degrees of freedom
+  /// Total number of parameters
   const dof_id_type _ndof;
 
   /// Parameter values declared as reporter data
   std::vector<std::vector<Real> *> _parameters;
 
   /// Bounds of the parameters
-  const std::vector<Real> _lower_bounds;
-  const std::vector<Real> _upper_bounds;
+  const std::vector<Real> & _lower_bounds;
+  const std::vector<Real> & _upper_bounds;
 
   /// vector of misfit data
   const std::vector<Real> & _misfit;
