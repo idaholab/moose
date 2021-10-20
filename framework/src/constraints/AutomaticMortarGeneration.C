@@ -1049,6 +1049,8 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
     // End loop through mortar constraint pairs
   }
 
+  _mortar_segment_mesh->cache_elem_data();
+
   // Output mortar segment mesh
   if (_debug)
   {
