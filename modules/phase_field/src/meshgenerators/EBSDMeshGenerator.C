@@ -47,7 +47,13 @@ EBSDMeshGenerator::EBSDMeshGenerator(const InputParameters & parameters)
     _distributed(_mesh->isDistributedMesh()),
     _filename(getParam<FileName>("filename")),
     _pre_refine(isParamValid("pre_refine") ? getParam<unsigned int>("pre_refine")
-                                           : getParam<unsigned int>("uniform_refine"))
+                                           : getParam<unsigned int>("uniform_refine")),
+    _base(buildMeshSubgenerator())
+{
+}
+
+std::unique_ptr<MeshBase> &
+EBSDMeshGenerator::buildMeshSubgenerator()
 {
   readEBSDHeader();
 
@@ -97,7 +103,7 @@ EBSDMeshGenerator::EBSDMeshGenerator(const InputParameters & parameters)
     params.set<unsigned int>("nz") = nr[2];
   }
 
-  _base = &addMeshSubgenerator(generator_type, name() + "_base_mesh", params);
+  return addMeshSubgenerator(generator_type, name() + "_base_mesh", params);
 }
 
 void
@@ -185,8 +191,8 @@ EBSDMeshGenerator::generate()
 {
   if (_pre_refine)
   {
-    MeshRefinement mesh_refinement(**_base);
+    MeshRefinement mesh_refinement(*_base);
     mesh_refinement.uniformly_refine(_pre_refine);
   }
-  return std::move(*_base);
+  return std::move(_base);
 }

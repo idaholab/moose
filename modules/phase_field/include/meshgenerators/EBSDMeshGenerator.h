@@ -42,6 +42,8 @@ public:
   const std::string & getEBSDFilename() const { return _filename; }
 
 protected:
+  std::unique_ptr<MeshBase> & buildMeshSubgenerator();
+
   /// Read the EBSD data file header
   void readEBSDHeader();
 
@@ -54,9 +56,9 @@ protected:
   /// EBSD data file mesh information
   Geometry _geometry;
 
-  // Sub-MeshGenerator for the regular base mesh
-  std::unique_ptr<MeshBase> * _base;
-
   // Number of coarsening levels available in adaptive mesh refinement
   const unsigned int _pre_refine;
+
+  // Sub-MeshGenerator for the regular base mesh
+  std::unique_ptr<MeshBase> & _base;
 };
