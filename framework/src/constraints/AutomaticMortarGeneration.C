@@ -674,33 +674,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
   auto secondary_sub_elem = _mortar_segment_mesh->add_elem_integer("secondary_sub_elem");
   auto primary_sub_elem = _mortar_segment_mesh->add_elem_integer("primary_sub_elem");
 
-  // Number of new msm elems that can be created by clipping and triangulating
-  // secondary node with primary node
-  // Note this parameter is subject to change, just a heuristic for now
-  constexpr int multiplicity = 16;
-
   dof_id_type local_id_index = 0;
-  std::size_t node_unique_id_offset = 0;
-
-  // Create an offset by the maximum number of mortar segment elements that can be created *plus*
-  // the number of lower-dimensional secondary subdomain elements
-  for (const auto & pr : _primary_secondary_boundary_id_pairs)
-  {
-    const auto primary_bnd_id = pr.first;
-    const auto secondary_bnd_id = pr.second;
-    const auto num_primary_nodes =
-        std::distance(_mesh.bid_nodes_begin(primary_bnd_id), _mesh.bid_nodes_end(primary_bnd_id));
-    const auto num_secondary_nodes = std::distance(_mesh.bid_nodes_begin(secondary_bnd_id),
-                                                   _mesh.bid_nodes_end(secondary_bnd_id));
-    mooseAssert(num_primary_nodes,
-                "There are no primary nodes on boundary ID "
-                    << primary_bnd_id << ". Does that boundary ID even exist on the mesh?");
-    mooseAssert(num_secondary_nodes,
-                "There are no secondary nodes on boundary ID "
-                    << secondary_bnd_id << ". Does that boundary ID even exist on the mesh?");
-
-    node_unique_id_offset += multiplicity * num_primary_nodes + 2 * num_secondary_nodes;
-  }
 
   // Loop through mortar secondary and primary pairs to create mortar segment mesh between each
   for (const auto & pr : _primary_secondary_subdomain_id_pairs)
@@ -983,12 +957,8 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
            */
           std::vector<Node *> new_nodes;
           for (auto pt : nodal_points)
-          {
             new_nodes.push_back(_mortar_segment_mesh->add_point(
                 pt, _mortar_segment_mesh->max_node_id(), secondary_side_elem->processor_id()));
-            Node * const new_node = new_nodes.back();
-            new_node->set_unique_id(new_node->id() + node_unique_id_offset);
-          }
 
           // Loop through triangular elements in map
           for (auto el : index_range(elem_to_node_map))
@@ -1006,7 +976,6 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
             new_elem->processor_id() = secondary_side_elem->processor_id();
             new_elem->subdomain_id() = secondary_side_elem->subdomain_id();
             new_elem->set_id(local_id_index++);
-            new_elem->set_unique_id(new_elem->id());
 
             // Attach newly created nodes
             for (auto i : index_range(elem_to_node_map[el]))
