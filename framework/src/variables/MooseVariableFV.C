@@ -561,7 +561,8 @@ MooseVariableFV<OutputType>::isInternalFace(const FaceInfo & fi) const
 
 template <typename OutputType>
 ADReal
-MooseVariableFV<OutputType>::getInternalFaceValue(const FaceArg & face) const
+MooseVariableFV<OutputType>::getInternalFaceValue(
+    const std::tuple<const FaceInfo *, Moose::FV::LimiterType, bool> & face) const
 {
   const FaceInfo * const fi = std::get<0>(face);
   mooseAssert(fi, "The face information must be non-null");
@@ -1098,17 +1099,14 @@ template <typename OutputType>
 typename MooseVariableFV<OutputType>::ValueType
 MooseVariableFV<OutputType>::evaluate(const FaceArg & face, unsigned int) const
 {
-  const FaceInfo * const fi = std::get<0>(face);
-  mooseAssert(fi, "The face information must be non-null");
-  if (isExtrapolatedBoundaryFace(*fi))
-    return getExtrapolatedBoundaryFaceValue(*fi);
-  else if (isInternalFace(*fi))
-    return getInternalFaceValue(face);
-  else
-  {
-    mooseAssert(isDirichletBoundaryFace(*fi), "We've run out of face types");
-    return getDirichletBoundaryFaceValue(*fi);
-  }
+  return evaluateFaceHelper(face);
+}
+
+template <typename OutputType>
+typename MooseVariableFV<OutputType>::ValueType
+MooseVariableFV<OutputType>::evaluate(const SingleSidedFaceArg & face, unsigned int) const
+{
+  return evaluateFaceHelper(face);
 }
 
 template <typename OutputType>
@@ -1131,6 +1129,61 @@ MooseVariableFV<OutputType>::evaluate(const ElemFromFaceArg & elem_from_face, un
         (requested_elem == &fi->elem()) ? fi->neighborPtr() : &fi->elem();
     return getNeighborValue(requested_elem, *fi, getElemValue(elem_across));
   }
+}
+
+template <typename OutputType>
+typename MooseVariableFV<OutputType>::GradientType
+MooseVariableFV<OutputType>::evaluateGradient(const ElemFromFaceArg & elem_from_face,
+                                              unsigned int) const
+{
+  const Elem * const requested_elem = std::get<0>(elem_from_face);
+  mooseAssert(requested_elem != remote_elem,
+              "If the requested element is remote then I think we've messed up our ghosting");
+
+  if (requested_elem && this->hasBlocks(requested_elem->subdomain_id()))
+    return adGradSln(requested_elem);
+  else
+    mooseError("We do not currently support ghosting of gradients");
+}
+
+template <typename OutputType>
+typename MooseVariableFV<OutputType>::DotType
+MooseVariableFV<OutputType>::evaluateDot(const Elem * const &, unsigned int) const
+{
+  mooseError("evaluateDot not implemented for this class of finite volume variables");
+}
+
+template <>
+ADReal
+MooseVariableFV<Real>::evaluateDot(const Elem * const & elem,
+                                   const unsigned int libmesh_dbg_var(state)) const
+{
+  mooseAssert(state == 0,
+              "We dot not currently support any time derivative evaluations other than for the "
+              "current time-step");
+  mooseAssert(_time_integrator && _time_integrator->dt(),
+              "A time derivative is being requested but we do not have a time integrator so we'll "
+              "have no idea how to compute it");
+
+  std::vector<dof_id_type> dof_indices;
+  this->_dof_map.dof_indices(elem, dof_indices, _var_num);
+
+  mooseAssert(
+      dof_indices.size() == 1,
+      "There should only be one dof-index for a constant monomial variable on any given element");
+
+  const dof_id_type dof_index = dof_indices[0];
+
+  if (_var_kind == Moose::VAR_NONLINEAR)
+  {
+    ADReal dot = (*_solution)(dof_index);
+    if (ADReal::do_derivatives)
+      Moose::derivInsert(dot.derivatives(), dof_index, 1.);
+    _time_integrator->computeADTimeDerivatives(dot, dof_index, _ad_real_dummy);
+    return dot;
+  }
+  else
+    return (*_sys.solutionUDot())(dof_index);
 }
 
 template class MooseVariableFV<Real>;

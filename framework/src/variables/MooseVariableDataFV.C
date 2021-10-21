@@ -590,9 +590,8 @@ MooseVariableDataFV<OutputType>::computeGhostValuesFace(
       "data.");
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
-  const ADReal u_other = _subproblem.currentlyComputingJacobian()
-                             ? other_face.adSln()[0]
-                             : other_face.sln(Moose::Current)[0];
+  const ADReal u_other =
+      ADReal::do_derivatives ? other_face.adSln()[0] : other_face.sln(Moose::Current)[0];
   const auto & u_face = _var.getBoundaryFaceValue(fi);
   const auto u_ghost = 2 * u_face - u_other;
 
@@ -625,7 +624,7 @@ MooseVariableDataFV<OutputType>::computeGhostValuesFace(
     // hack has been implemented by initializing _need_ad_u and friends to 'true'
     // by default.  Consider perhaps a better solution to this problem.
     DualReal u_other;
-    if (_subproblem.currentlyComputingJacobian())
+    if (ADReal::do_derivatives)
       u_other = other_face.adSln()[0];
     else
       u_other = other_face.sln(Moose::Current)[0];
@@ -655,7 +654,7 @@ MooseVariableDataFV<OutputType>::computeGhostValuesFace(
     // TODO: make sure DirichletBC and FluxBC are _not_ defined on
     // the same sideset
     DualReal u_other;
-    if (_subproblem.currentlyComputingJacobian())
+    if (ADReal::do_derivatives)
       u_other = other_face.adSln()[0];
     else
       u_other = other_face.sln(Moose::Current)[0];

@@ -37,8 +37,7 @@ INSFVMixingLengthScalarDiffusion::INSFVMixingLengthScalarDiffusion(const InputPa
                              : nullptr),
     _w_var(isParamValid("w") ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("w", 0))
                              : nullptr),
-    _mixing_len(coupledValue("mixing_length")),
-    _mixing_len_neighbor(coupledNeighborValue("mixing_length")),
+    _mixing_len(*getVarHelper<MooseVariableFV<Real>>("mixing_length", 0)),
     _schmidt_number(getParam<Real>("schmidt_number"))
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
@@ -86,13 +85,8 @@ INSFVMixingLengthScalarDiffusion::computeQpResidual()
   symmetric_strain_tensor_norm = std::sqrt(symmetric_strain_tensor_norm + offset);
 
   // Interpolate the mixing length to the face
-  ADReal mixing_len;
-  interpolate(Moose::FV::InterpMethod::Average,
-              mixing_len,
-              _mixing_len[_qp],
-              _mixing_len_neighbor[_qp],
-              *_face_info,
-              true);
+  ADReal mixing_len = _mixing_len(std::make_tuple(
+      _face_info, Moose::FV::LimiterType::CentralDifference, true, faceArgSubdomains(_face_info)));
 
   // Compute the eddy diffusivity for momentum
   ADReal eddy_diff = symmetric_strain_tensor_norm * mixing_len * mixing_len;

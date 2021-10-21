@@ -91,9 +91,9 @@
     design = 'INSFVMomentumFriction.md'
   []
   [ambient-convection]
-    type = 'Exodiff'
+    type = 'CSVDiff'
     input = 2d-rc-ambient-convection.i
-    exodiff = 2d-rc-ambient-convection_out.e
+    csvdiff = 2d-rc-ambient-convection_out.csv
     requirement = 'The system shall be able to model ambient volumetric convection in a channel.'
     issues = '#16948'
     ad_indexing_type = 'global'

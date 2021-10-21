@@ -47,28 +47,29 @@ public:
                   PolymorphicLambda my_lammy);
 
   using typename Moose::Functor<T>::FaceArg;
+  using typename Moose::Functor<T>::SingleSidedFaceArg;
   using typename Moose::Functor<T>::ElemFromFaceArg;
   using typename Moose::Functor<T>::ElemQpArg;
   using typename Moose::Functor<T>::ElemSideQpArg;
   using typename Moose::Functor<T>::FunctorType;
-  using typename Moose::Functor<T>::FunctorReturnType;
   using typename Moose::Functor<T>::ValueType;
+  using typename Moose::Functor<T>::DotType;
+  using typename Moose::Functor<T>::GradientType;
+  using typename Moose::Functor<T>::FunctorReturnType;
 
 protected:
   using ElemFn = std::function<T(const Elem * const &, const unsigned int &)>;
   using ElemAndFaceFn = std::function<T(const ElemFromFaceArg &, const unsigned int &)>;
+  using FaceFn = std::function<T(const SingleSidedFaceArg &, const unsigned int &)>;
   using ElemQpFn = std::function<T(const ElemQpArg &, const unsigned int &)>;
   using ElemSideQpFn = std::function<T(const ElemSideQpArg &, const unsigned int &)>;
-  using TQpFn = std::function<T(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> &,
-                                const unsigned int &)>;
 
   ValueType evaluate(const Elem * const & elem, unsigned int state) const override;
   ValueType evaluate(const ElemFromFaceArg & elem_from_face, unsigned int state) const override;
   ValueType evaluate(const FaceArg & face, unsigned int state) const override;
+  ValueType evaluate(const SingleSidedFaceArg & face, unsigned int state) const override;
   ValueType evaluate(const ElemQpArg & elem_qp, unsigned int state) const override;
   ValueType evaluate(const ElemSideQpArg & elem_side_qp, unsigned int state) const override;
-  ValueType evaluate(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
-                     unsigned int state) const override;
 
 private:
   /**
@@ -85,15 +86,15 @@ private:
   /// ghosting operations if this object is not technically defined on the requested subdomain
   std::unordered_map<SubdomainID, ElemAndFaceFn> _elem_from_face_functor;
 
+  /// Functors that return the property value on the requested side of the face (e.g. the
+  /// infinitesimal + or - side of the face)
+  std::unordered_map<SubdomainID, FaceFn> _face_functor;
+
   /// Functors that will evaluate elements at quadrature points
   std::unordered_map<SubdomainID, ElemQpFn> _elem_qp_functor;
 
   /// Functors that will evaluate elements at side quadrature points
   std::unordered_map<SubdomainID, ElemSideQpFn> _elem_side_qp_functor;
-
-  /// Functors that will index elemental, neighbor, or lower-dimensional data at a provided
-  /// quadrature point index
-  std::unordered_map<SubdomainID, TQpFn> _tqp_functor;
 
   /// The name of this object
   std::string _name;
@@ -118,9 +119,9 @@ FunctorMaterialPropertyImpl<T>::setFunctor(const MooseMesh & mesh,
                  block_id,
                  ". Another material must already declare this property on that block.");
     _elem_from_face_functor.emplace(block_id, my_lammy);
+    _face_functor.emplace(block_id, my_lammy);
     _elem_qp_functor.emplace(block_id, my_lammy);
     _elem_side_qp_functor.emplace(block_id, my_lammy);
-    _tqp_functor.emplace(block_id, my_lammy);
   };
 
   for (const auto block_id : block_ids)
@@ -171,6 +172,16 @@ FunctorMaterialPropertyImpl<T>::evaluate(const ElemFromFaceArg & elem_from_face,
   mooseAssert(it != _elem_from_face_functor.end(),
               subdomainErrorMessage(std::get<2>(elem_from_face)));
   return it->second(elem_from_face, state);
+}
+
+template <typename T>
+typename FunctorMaterialPropertyImpl<T>::ValueType
+FunctorMaterialPropertyImpl<T>::evaluate(const SingleSidedFaceArg & face, unsigned int state) const
+{
+  const auto sub_id = std::get<3>(face);
+  auto it = _face_functor.find(sub_id);
+  mooseAssert(it != _face_functor.end(), subdomainErrorMessage(sub_id));
+  return it->second(face, state);
 }
 
 template <typename T>
@@ -233,33 +244,26 @@ FunctorMaterialPropertyImpl<T>::evaluate(const ElemSideQpArg & elem_side_qp,
   return it->second(elem_side_qp, state);
 }
 
-template <typename T>
-typename FunctorMaterialPropertyImpl<T>::ValueType
-FunctorMaterialPropertyImpl<T>::evaluate(
-    const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp, unsigned int state) const
-{
-  const auto sub_id = std::get<2>(tqp);
-  auto it = _tqp_functor.find(sub_id);
-  mooseAssert(it != _tqp_functor.end(), subdomainErrorMessage(sub_id));
-  return it->second(tqp, state);
-}
-
 /**
  * This is a wrapper that forwards calls to the implementation,
- * which can be switched out at any time without disturbing references to FunctorMaterialProperty
- * Implementation motivated by https://stackoverflow.com/a/65455485/4493669
+ * which can be switched out at any time without disturbing references to
+ * FunctorMaterialPropertyImpl Implementation motivated by
+ * https://stackoverflow.com/a/65455485/4493669
  */
 template <typename T>
 class FunctorMaterialProperty : public Moose::Functor<T>
 {
 public:
   using typename Moose::Functor<T>::FaceArg;
+  using typename Moose::Functor<T>::SingleSidedFaceArg;
   using typename Moose::Functor<T>::ElemFromFaceArg;
   using typename Moose::Functor<T>::ElemQpArg;
   using typename Moose::Functor<T>::ElemSideQpArg;
   using typename Moose::Functor<T>::FunctorType;
   using typename Moose::Functor<T>::FunctorReturnType;
   using typename Moose::Functor<T>::ValueType;
+  using typename Moose::Functor<T>::GradientType;
+  using typename Moose::Functor<T>::DotType;
 
   /**
    * Construct wrapper from wrapped object
@@ -320,6 +324,10 @@ protected:
   {
     return _wrapped->evaluate(face, state);
   }
+  ValueType evaluate(const SingleSidedFaceArg & face, unsigned int state = 0) const override
+  {
+    return _wrapped->evaluate(face, state);
+  }
   ValueType evaluate(const ElemQpArg & qp, unsigned int state = 0) const override
   {
     return _wrapped->evaluate(qp, state);
@@ -327,11 +335,6 @@ protected:
   ValueType evaluate(const ElemSideQpArg & qp, unsigned int state = 0) const override
   {
     return _wrapped->evaluate(qp, state);
-  }
-  ValueType evaluate(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
-                     unsigned int state = 0) const override
-  {
-    return _wrapped->evaluate(tqp, state);
   }
   ///@}
 

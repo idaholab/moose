@@ -87,4 +87,13 @@
     cli_args = "Executioner/automatic_scaling=true Executioner/compute_scaling_once=false Materials/active='function' Executioner/num_steps=10 BCs/right/function='ramp' Outputs/file_base=transient -pc_type hypre -pc_hypre_type boomeramg"
     prereq = 'automatic-scaling-done-per-time-step'
   []
+  [dot_grad_test]
+    type = Exodiff
+    input = functor_transient_diffusion.i
+    exodiff = functor_transient_diffusion_out.e
+    requirement = 'The system shall be able to do on the fly time derivative and gradient evaluations of variable functors.'
+    design = 'MooseVariableBase.md'
+    issues = '#16809'
+    ad_indexing_type = 'global'
+  []
 []

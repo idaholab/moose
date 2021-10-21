@@ -38,10 +38,8 @@ protected:
   const INSFVVelocityVariable * const _w_var;
 
   /// Density
-  const Real & _rho;
+  const Moose::Functor<ADReal> & _rho;
 
   /// Turbulent eddy mixing length
-  const VariableValue & _mixing_len;
-  /// Turbulent eddy mixing length for the neighbor cell
-  const VariableValue & _mixing_len_neighbor;
+  const Moose::Functor<ADReal> & _mixing_len;
 };

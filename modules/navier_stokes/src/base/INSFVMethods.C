@@ -10,14 +10,14 @@
 #include "INSFVMethods.h"
 
 ADReal
-findUStar(const Real mu, const Real rho, ADReal u, const Real dist)
+findUStar(const ADReal mu, const ADReal rho, ADReal u, const Real dist)
 {
   constexpr int MAX_ITERS{50};
   constexpr Real REL_TOLERANCE{1e-6};
 
   constexpr Real von_karman{0.4187};
 
-  Real nu = mu / rho;
+  const ADReal nu = mu / rho;
 
   ADReal u_star = std::sqrt(nu * u / dist);
 
@@ -34,5 +34,13 @@ findUStar(const Real mu, const Real rho, ADReal u, const Real dist)
       return u_star;
   }
 
-  mooseError("Could not find the friction velocity for WallFunctionWallShearStressAux");
+  mooseError("Could not find the wall friction velocity (mu: ",
+             mu,
+             " rho: ",
+             rho,
+             " velocity: ",
+             u,
+             " wall distance: ",
+             dist,
+             ")");
 }

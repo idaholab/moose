@@ -103,7 +103,7 @@ FunctorInterface::getFunctor(const std::string & name)
   if (default_functor)
     return *default_functor;
 
-  return _fi_subproblem.getFunctor<T>(functor_name, _fi_tid);
+  return _fi_subproblem.getFunctor<T>(functor_name, _fi_tid, _fi_name);
 }
 
 template <>

@@ -123,16 +123,13 @@ InternalVolumetricFlowRate::computeQpIntegral()
     else if (_advected_mat_prop_supplied)
     {
       // The material property needs to be interpolated since we are on an internal face
-      Moose::FV::interpolate(
-          _advected_interp_method,
-          advected_quantity,
-          MetaPhysicL::raw_value(_advected_material_property(
-              std::make_tuple(Moose::ElementType::Element, _qp, _current_elem->subdomain_id()))),
-          MetaPhysicL::raw_value(_advected_material_property(
-              std::make_tuple(Moose::ElementType::Neighbor, _qp, _neighbor_elem->subdomain_id()))),
-          RealVectorValue(vx_face, vy_face, vz_face),
-          *fi,
-          current_elem_is_fi_elem);
+      Moose::FV::interpolate(_advected_interp_method,
+                             advected_quantity,
+                             MetaPhysicL::raw_value(_advected_material_property(_current_elem)),
+                             MetaPhysicL::raw_value(_advected_material_property(_neighbor_elem)),
+                             RealVectorValue(vx_face, vy_face, vz_face),
+                             *fi,
+                             current_elem_is_fi_elem);
     }
     else
       advected_quantity = 1;

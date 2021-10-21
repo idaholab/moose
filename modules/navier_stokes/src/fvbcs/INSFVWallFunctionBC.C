@@ -9,6 +9,7 @@
 
 #include "INSFVWallFunctionBC.h"
 #include "INSFVMethods.h"
+#include "NS.h"
 
 registerMooseObject("NavierStokesApp", INSFVWallFunctionBC);
 
@@ -21,7 +22,7 @@ INSFVWallFunctionBC::validParams()
   params.addRequiredCoupledVar("u", "The velocity in the x direction.");
   params.addCoupledVar("v", "The velocity in the y direction.");
   params.addCoupledVar("w", "The velocity in the z direction.");
-  params.addParam<Real>("rho", "fluid density");
+  params.addRequiredParam<MaterialPropertyName>(NS::density, "fluid density");
   params.addRequiredParam<MaterialPropertyName>("mu", "Dynamic viscosity");
   MooseEnum momentum_component("x=0 y=1 z=2", "x");
   params.addRequiredParam<MooseEnum>(
@@ -42,8 +43,8 @@ INSFVWallFunctionBC::INSFVWallFunctionBC(const InputParameters & params)
     _w_var(params.isParamValid("w")
                ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("w", 0))
                : nullptr),
-    _rho(getParam<Real>("rho")),
-    _mu(getADMaterialProperty<Real>("mu"))
+    _rho(getFunctor<ADReal>(NS::density)),
+    _mu(getFunctor<ADReal>("mu"))
 {
 }
 
@@ -74,8 +75,9 @@ INSFVWallFunctionBC::computeQpResidual()
     return parallel_speed;
 
   // Compute the friction velocity and the wall shear stress
-  ADReal u_star = findUStar(_mu[_qp].value(), _rho, parallel_speed, dist.value());
-  ADReal tau = u_star * u_star * _rho;
+  const auto rho = _rho(&elem);
+  ADReal u_star = findUStar(_mu(&elem), rho, parallel_speed, dist.value());
+  ADReal tau = u_star * u_star * rho;
 
   // Compute the shear stress component for this momentum equation
   if (_axis_index == 0)

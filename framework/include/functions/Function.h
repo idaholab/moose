@@ -82,6 +82,7 @@ public:
    */
   virtual RealVectorValue vectorCurl(Real t, const Point & p) const;
 
+  using Moose::Functor<T>::gradient;
   /**
    * Function objects can optionally provide a gradient at a point. By default
    * this returns 0, you must override it.
@@ -111,10 +112,13 @@ public:
 
 private:
   using typename Moose::Functor<T>::FaceArg;
+  using typename Moose::Functor<T>::SingleSidedFaceArg;
   using typename Moose::Functor<T>::ElemFromFaceArg;
   using typename Moose::Functor<T>::ElemQpArg;
   using typename Moose::Functor<T>::ElemSideQpArg;
   using typename Moose::Functor<T>::ValueType;
+  using typename Moose::Functor<T>::GradientType;
+  using typename Moose::Functor<T>::DotType;
 
   /**
    * @return the time associated with the requested \p state
@@ -125,10 +129,27 @@ private:
   ValueType evaluate(const ElemFromFaceArg & elem_from_face,
                      unsigned int state) const override final;
   ValueType evaluate(const FaceArg & face, unsigned int state) const override final;
+  ValueType evaluate(const SingleSidedFaceArg & face, unsigned int state) const override final;
   ValueType evaluate(const ElemQpArg & qp, unsigned int state) const override final;
   ValueType evaluate(const ElemSideQpArg & elem_side_qp, unsigned int state) const override final;
-  ValueType evaluate(const std::tuple<Moose::ElementType, unsigned int, SubdomainID> & tqp,
-                     unsigned int state) const override final;
+
+  GradientType evaluateGradient(const Elem * const & elem, unsigned int state) const override final;
+  GradientType evaluateGradient(const ElemFromFaceArg & elem_from_face,
+                                unsigned int state) const override final;
+  GradientType evaluateGradient(const FaceArg & face, unsigned int state) const override final;
+  GradientType evaluateGradient(const SingleSidedFaceArg & face,
+                                unsigned int state) const override final;
+  GradientType evaluateGradient(const ElemQpArg & qp, unsigned int state) const override final;
+  GradientType evaluateGradient(const ElemSideQpArg & elem_side_qp,
+                                unsigned int state) const override final;
+
+  DotType evaluateDot(const Elem * const & elem, unsigned int state) const override final;
+  DotType evaluateDot(const ElemFromFaceArg & elem_from_face,
+                      unsigned int state) const override final;
+  DotType evaluateDot(const FaceArg & face, unsigned int state) const override final;
+  DotType evaluateDot(const SingleSidedFaceArg & face, unsigned int state) const override final;
+  DotType evaluateDot(const ElemQpArg & qp, unsigned int state) const override final;
+  DotType evaluateDot(const ElemSideQpArg & elem_side_qp, unsigned int state) const override final;
 
   /**
    * Compute \p _current_elem_qp_functor_xyz if we are on a new element

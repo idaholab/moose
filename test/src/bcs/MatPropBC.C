@@ -17,26 +17,16 @@ MatPropBC::validParams()
   InputParameters params = ADIntegratedBC::validParams();
   params.addRequiredParam<MooseFunctorName>(
       "mat_prop", "The material property that will provide this residual.");
-  params.addParam<bool>("use_preinitd_data",
-                        false,
-                        "Whether to do on the fly computation of variable data or assume that "
-                        "variable data has already been pre-initialized");
   return params;
 }
 
 MatPropBC::MatPropBC(const InputParameters & parameters)
-  : ADIntegratedBC(parameters),
-    _coef(getFunctor<ADReal>("mat_prop")),
-    _use_preinitd_data(getParam<bool>("use_preinitd_data"))
+  : ADIntegratedBC(parameters), _coef(getFunctor<ADReal>("mat_prop"))
 {
 }
 
 ADReal
 MatPropBC::computeQpResidual()
 {
-  if (_use_preinitd_data)
-    return _test[_i][_qp] *
-           _coef(std::make_tuple(Moose::ElementType::Element, _qp, _current_elem->subdomain_id()));
-  else
-    return _test[_i][_qp] * _coef(std::make_tuple(_current_elem, _current_side, _qp, _qrule));
+  return _test[_i][_qp] * _coef(std::make_tuple(_current_elem, _current_side, _qp, _qrule));
 }

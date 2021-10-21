@@ -22,5 +22,4 @@ protected:
   ADReal computeQpResidual() override;
 
   const Moose::Functor<ADReal> & _coef;
-  const bool _use_preinitd_data;
 };

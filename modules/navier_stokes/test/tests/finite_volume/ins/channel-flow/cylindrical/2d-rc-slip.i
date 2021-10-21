@@ -164,6 +164,21 @@ velocity_interp_method='rc'
   []
 []
 
+[Postprocessors]
+  [in]
+    type = SideIntegralVariablePostprocessor
+    variable = v
+    boundary = 'bottom'
+    outputs = 'csv'
+  []
+  [out]
+    type = SideIntegralVariablePostprocessor
+    variable = v
+    boundary = 'top'
+    outputs = 'csv'
+  []
+[]
+
 [Executioner]
   type = Steady
   solve_type = 'NEWTON'

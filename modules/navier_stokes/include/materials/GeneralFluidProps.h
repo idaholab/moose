@@ -39,7 +39,6 @@ protected:
 
   /// variables
   const ADMaterialProperty<Real> & _pressure;
-  const ADMaterialProperty<Real> & _rhoE;
   const ADMaterialProperty<Real> & _T_fluid;
   const ADMaterialProperty<Real> & _rho;
   const ADMaterialProperty<Real> & _speed;
