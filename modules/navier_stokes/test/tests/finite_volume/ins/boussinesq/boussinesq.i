@@ -140,7 +140,7 @@ temp_ref=${fparse hot_temp / 2.}
   [u_buoyancy]
     type = INSFVMomentumBoussinesq
     variable = u
-    temperature = T
+    T_fluid = T
     gravity = '0 -1 0'
     rho = ${rho}
     ref_temperature = ${temp_ref}
@@ -181,7 +181,7 @@ temp_ref=${fparse hot_temp / 2.}
   [v_buoyancy]
     type = INSFVMomentumBoussinesq
     variable = v
-    temperature = T
+    T_fluid = T
     gravity = '0 -1 0'
     rho = ${rho}
     ref_temperature = ${temp_ref}
@@ -254,7 +254,7 @@ temp_ref=${fparse hot_temp / 2.}
 [Materials]
   [const]
     type = ADGenericConstantMaterial
-    prop_names = 'alpha'
+    prop_names = 'alpha_b'
     prop_values = '${alpha}'
   []
   [const_functor]

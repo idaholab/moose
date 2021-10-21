@@ -174,8 +174,8 @@ velocity_interp_method='rc'
     type = PINSFVEnergyAmbientConvection
     variable = temp_fluid
     is_solid = false
-    temp_fluid = temp_fluid
-    temp_solid = temp_solid
+    T_fluid = temp_fluid
+    T_solid = temp_solid
     h_solid_fluid = 'h_cv'
   []
 
@@ -196,8 +196,8 @@ velocity_interp_method='rc'
     type = PINSFVEnergyAmbientConvection
     variable = temp_solid
     is_solid = true
-    temp_fluid = temp_fluid
-    temp_solid = temp_solid
+    T_fluid = temp_fluid
+    T_solid = temp_solid
     h_solid_fluid = 'h_cv'
   []
 []

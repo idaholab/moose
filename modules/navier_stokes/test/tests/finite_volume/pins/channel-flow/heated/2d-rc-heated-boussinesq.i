@@ -105,11 +105,12 @@ velocity_interp_method='rc'
   [u_boussinesq]
     type = PINSFVMomentumBoussinesq
     variable = u
-    temperature = 'temperature'
+    T_fluid = 'temperature'
     rho = ${rho}
     ref_temperature = 150
     gravity = '0 -9.81 0'
     momentum_component = 'x'
+    alpha_name = 'alpha_b'
     porosity = porosity
   []
 
@@ -151,11 +152,12 @@ velocity_interp_method='rc'
   [v_boussinesq]
     type = PINSFVMomentumBoussinesq
     variable = v
-    temperature = 'temperature'
+    T_fluid = 'temperature'
     rho = ${rho}
     ref_temperature = 150
     gravity = '0 -9.81 0'
     momentum_component = 'y'
+    alpha_name = 'alpha_b'
     porosity = porosity
   []
 
@@ -182,8 +184,8 @@ velocity_interp_method='rc'
     type = PINSFVEnergyAmbientConvection
     variable = temperature
     is_solid = false
-    temp_fluid = temperature
-    temp_solid = temp_solid
+    T_fluid = temperature
+    T_solid = temp_solid
     h_solid_fluid = 'h_cv'
   []
 []
@@ -258,7 +260,7 @@ velocity_interp_method='rc'
 [Materials]
   [constants]
     type = ADGenericConstantMaterial
-    prop_names = 'h_cv alpha'
+    prop_names = 'h_cv alpha_b'
     prop_values = '1e-3 8e-4'
   []
   [functor_constants]

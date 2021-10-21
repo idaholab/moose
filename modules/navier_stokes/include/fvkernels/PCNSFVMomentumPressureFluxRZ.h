@@ -19,11 +19,11 @@
  * for use when performing axisymmetric simulations and the \f$\epsilon \nabla p\f$ term has been
  * integrated by parts as is done for both HLLC and Kurganov-Tadmor schemes
  */
-class PNSFVMomentumPressureRZ : public FVElementalKernel
+class PCNSFVMomentumPressureFluxRZ : public FVElementalKernel
 {
 public:
   static InputParameters validParams();
-  PNSFVMomentumPressureRZ(const InputParameters & params);
+  PCNSFVMomentumPressureFluxRZ(const InputParameters & params);
 
 protected:
   ADReal computeQpResidual() override;

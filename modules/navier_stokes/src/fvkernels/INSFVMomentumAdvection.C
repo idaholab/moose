@@ -54,8 +54,8 @@ INSFVMomentumAdvection::validParams()
       "The interpolation to use for the velocity. Options are "
       "'average' and 'rc' which stands for Rhie-Chow. The default is Rhie-Chow.");
 
-  params.addRequiredParam<MooseFunctorName>("mu", "The viscosity functor material property");
-  params.addRequiredParam<MaterialPropertyName>("rho", "Density functor material property");
+  params.addRequiredParam<MooseFunctorName>(NS::mu, "Dynamic viscosity functor");
+  params.addRequiredParam<MooseFunctorName>(NS::density, "Density functor");
 
   // We need 2 ghost layers for the Rhie-Chow interpolation
   params.set<unsigned short>("ghost_layers") = 2;
@@ -67,7 +67,7 @@ INSFVMomentumAdvection::validParams()
 
 INSFVMomentumAdvection::INSFVMomentumAdvection(const InputParameters & params)
   : FVMatAdvection(params),
-    _mu(getFunctor<ADReal>("mu")),
+    _mu(getFunctor<ADReal>(NS::mu)),
     _p_var(dynamic_cast<const INSFVPressureVariable *>(getFieldVar(NS::pressure, 0))),
     _u_var(dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("u", 0))),
     _v_var(params.isParamValid("v")
@@ -76,7 +76,7 @@ INSFVMomentumAdvection::INSFVMomentumAdvection(const InputParameters & params)
     _w_var(params.isParamValid("w")
                ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("w", 0))
                : nullptr),
-    _rho(getFunctor<ADReal>("rho")),
+    _rho(getFunctor<ADReal>(NS::density)),
     _dim(_subproblem.mesh().dimension())
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING

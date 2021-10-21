@@ -22,7 +22,7 @@ INSFVMixingLengthReynoldsStress::validParams()
   params.addRequiredCoupledVar("u", "The velocity in the x direction.");
   params.addCoupledVar("v", "The velocity in the y direction.");
   params.addCoupledVar("w", "The velocity in the z direction.");
-  params.addRequiredParam<MooseFunctorName>("rho", "fluid density");
+  params.addRequiredParam<MooseFunctorName>(NS::density, "fluid density");
   params.addRequiredParam<MooseFunctorName>("mixing_length", "Turbulent eddy mixing length.");
   MooseEnum momentum_component("x=0 y=1 z=2", "x");
   params.addRequiredParam<MooseEnum>(
@@ -44,7 +44,7 @@ INSFVMixingLengthReynoldsStress::INSFVMixingLengthReynoldsStress(const InputPara
     _w_var(params.isParamValid("w")
                ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("w", 0))
                : nullptr),
-    _rho(getFunctor<ADReal>("rho")),
+    _rho(getFunctor<ADReal>(NS::density)),
     _mixing_len(getFunctor<ADReal>("mixing_length"))
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING

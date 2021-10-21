@@ -19,15 +19,15 @@ PINSFVMomentumDiffusion::validParams()
   auto params = FVFluxKernel::validParams();
   params.addClassDescription("Viscous diffusion term, div(mu grad(u_d / eps)), in the porous media "
                              "incompressible Navier-Stokes momentum equation.");
-  params.addRequiredCoupledVar("porosity", "Porosity auxiliary variable");
-  params.addRequiredParam<MooseFunctorName>("mu", "viscosity");
+  params.addRequiredCoupledVar(NS::porosity, "Porosity auxiliary variable");
+  params.addRequiredParam<MooseFunctorName>(NS::mu, "viscosity");
   MooseEnum momentum_component("x=0 y=1 z=2", "x");
   params.addParam<MooseEnum>("momentum_component",
                              momentum_component,
                              "The component of the momentum equation that this kernel applies to.");
   params.addParam<bool>(
       "smooth_porosity", false, "Whether to include the diffusion porosity gradient term");
-  params.addParam<MaterialPropertyName>("vel", "The superficial velocity as a material property");
+  params.addParam<MaterialPropertyName>(NS::superficial_velocity, "The superficial velocity as a material property");
 
   params.set<unsigned short>("ghost_layers") = 2;
   return params;
@@ -35,11 +35,11 @@ PINSFVMomentumDiffusion::validParams()
 
 PINSFVMomentumDiffusion::PINSFVMomentumDiffusion(const InputParameters & params)
   : FVFluxKernel(params),
-    _mu(getFunctor<ADReal>("mu")),
-    _eps(getFunctor<ADReal>("porosity")),
+    _mu(getFunctor<ADReal>(NS::mu)),
+    _eps(getFunctor<ADReal>(NS::porosity)),
     _index(getParam<MooseEnum>("momentum_component")),
-    _vel(isParamValid("vel") ? &getFunctor<ADRealVectorValue>("vel") : nullptr),
-    _eps_var(dynamic_cast<const MooseVariableFVReal *>(getFieldVar("porosity", 0))),
+    _vel(isParamValid(NS::superficial_velocity) ? &getFunctor<ADRealVectorValue>(NS::superficial_velocity) : nullptr),
+    _eps_var(dynamic_cast<const MooseVariableFVReal *>(getFieldVar(NS::porosity, 0))),
     _smooth_porosity(getParam<bool>("smooth_porosity")),
     _cd_limiter()
 {
@@ -54,7 +54,8 @@ PINSFVMomentumDiffusion::PINSFVMomentumDiffusion(const InputParameters & params)
 
   // Check that the parameters required for the porosity gradient term are set by the user
   if (_smooth_porosity &&
-      (!parameters().isParamSetByUser("momentum_component") || !isParamValid("vel")))
+      (!parameters().isParamSetByUser("momentum_component") ||
+       !isParamValid(NS::superficial_velocity)))
     paramError("smooth_porosity",
                "The porosity gradient diffusion term requires specifying "
                "both the momentum component and a superficial velocity material property.");

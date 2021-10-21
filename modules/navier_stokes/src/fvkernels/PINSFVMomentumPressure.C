@@ -18,13 +18,13 @@ PINSFVMomentumPressure::validParams()
   InputParameters params = INSFVMomentumPressure::validParams();
   params.addClassDescription("Introduces the coupled pressure term $eps \nabla P$ into the "
                              "Navier-Stokes porous media momentum equation.");
-  params.addRequiredCoupledVar("porosity", "Porosity auxiliary variable");
+  params.addRequiredCoupledVar(NS::porosity, "Porosity auxiliary variable");
 
   return params;
 }
 
 PINSFVMomentumPressure::PINSFVMomentumPressure(const InputParameters & params)
-  : INSFVMomentumPressure(params), _eps(coupledValue("porosity"))
+  : INSFVMomentumPressure(params), _eps(coupledValue(NS::porosity))
 {
   if (!dynamic_cast<PINSFVSuperficialVelocityVariable *>(&_var))
     mooseError("PINSFVMomentumPressure may only be used with a superficial velocity "

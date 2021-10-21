@@ -25,8 +25,8 @@ WCNSFVMixingLengthEnergyDiffusion::validParams()
       "schmidt_number",
       "The turbulent Schmidt number (or turbulent Prandtl number if the passive scalar is energy) "
       "that relates the turbulent scalar diffusivity to the turbulent momentum diffusivity.");
-  params.addRequiredParam<MaterialPropertyName>("rho", "Density");
-  params.addRequiredParam<MaterialPropertyName>("cp", "Specific heat capacity");
+  params.addRequiredParam<MooseFunctorName>(NS::density, "Density");
+  params.addRequiredParam<MooseFunctorName>(NS::cp, "Specific heat capacity");
 
   params.set<unsigned short>("ghost_layers") = 2;
   return params;
@@ -40,8 +40,8 @@ WCNSFVMixingLengthEnergyDiffusion::WCNSFVMixingLengthEnergyDiffusion(const Input
                              : nullptr),
     _w_var(isParamValid("w") ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("w", 0))
                              : nullptr),
-    _rho(getFunctor<ADReal>("rho")),
-    _cp(getFunctor<ADReal>("cp")),
+    _rho(getFunctor<ADReal>(NS::density)),
+    _cp(getFunctor<ADReal>(NS::cp)),
     _mixing_len(*getVarHelper<MooseVariableFV<Real>>("mixing_length", 0)),
     _schmidt_number(getParam<Real>("schmidt_number"))
 {

@@ -144,16 +144,19 @@ velocity_interp_method='rc'
     porosity = porosity
   []
   [energy_diffusion]
-    type = PINSFVEnergyEffectiveDiffusion
+    # kappa is defined as a regular material property, so we use the compressible
+    # flow object which uses those
+    type = PCNSFVEnergyAnisotropicDiffusion
     kappa = 'kappa'
     variable = temperature
+    porosity = porosity
   []
   [energy_convection]
     type = PINSFVEnergyAmbientConvection
     variable = temperature
     is_solid = false
-    temp_fluid = temperature
-    temp_solid = temp_solid
+    T_fluid = temperature
+    T_solid = temp_solid
     h_solid_fluid = 'h_cv'
   []
 
@@ -166,8 +169,8 @@ velocity_interp_method='rc'
     type = PINSFVEnergyAmbientConvection
     variable = temp_solid
     is_solid = true
-    temp_fluid = temperature
-    temp_solid = temp_solid
+    T_fluid = temperature
+    T_solid = temp_solid
     h_solid_fluid = 'h_cv'
   []
 []

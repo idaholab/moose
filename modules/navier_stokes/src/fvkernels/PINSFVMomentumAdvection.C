@@ -11,6 +11,7 @@
 #include "INSFVPressureVariable.h"
 #include "PINSFVSuperficialVelocityVariable.h"
 #include "FVUtils.h"
+#include "NS.h"
 
 registerMooseObject("NavierStokesApp", PINSFVMomentumAdvection);
 
@@ -20,7 +21,7 @@ PINSFVMomentumAdvection::validParams()
   auto params = INSFVMomentumAdvection::validParams();
   params.addClassDescription("Object for advecting superficial momentum, e.g. rho*u_d, "
                              "in the porous media momentum equation");
-  params.addRequiredCoupledVar("porosity", "Porosity auxiliary variable");
+  params.addRequiredCoupledVar(NS::porosity, "Porosity auxiliary variable");
   params.addParam<bool>(
       "smooth_porosity", false, "Whether the porosity field is smooth or has discontinuities");
 
@@ -29,8 +30,8 @@ PINSFVMomentumAdvection::validParams()
 
 PINSFVMomentumAdvection::PINSFVMomentumAdvection(const InputParameters & params)
   : INSFVMomentumAdvection(params),
-    _eps_var(dynamic_cast<const MooseVariableFV<Real> *>(getFieldVar("porosity", 0))),
-    _eps(getFunctor<ADReal>("porosity")),
+    _eps_var(dynamic_cast<const MooseVariableFV<Real> *>(getFieldVar(NS::porosity, 0))),
+    _eps(getFunctor<ADReal>(NS::porosity)),
     _smooth_porosity(getParam<bool>("smooth_porosity"))
 {
   if (!dynamic_cast<const PINSFVSuperficialVelocityVariable *>(_u_var))

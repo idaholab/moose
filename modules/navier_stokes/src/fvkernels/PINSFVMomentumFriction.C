@@ -24,7 +24,7 @@ PINSFVMomentumFriction::validParams()
   params.addParam<MaterialPropertyName>("Forchheimer_name",
                                         "Name of the Forchheimer coefficients material property.");
   params.addParam<MooseFunctorName>(NS::porosity, NS::porosity, "Porosity variable.");
-  params.addRequiredParam<MooseFunctorName>("rho", "The density.");
+  params.addRequiredParam<MooseFunctorName>(NS::density, "The density.");
   MooseEnum momentum_component("x=0 y=1 z=2");
   params.addRequiredParam<MooseEnum>(
       "momentum_component",
@@ -42,7 +42,7 @@ PINSFVMomentumFriction::PINSFVMomentumFriction(const InputParameters & params)
     _use_Darcy_friction_model(isParamValid("Darcy_name")),
     _use_Forchheimer_friction_model(isParamValid("Forchheimer_name")),
     _eps(getFunctor<ADReal>(NS::porosity)),
-    _rho(getFunctor<ADReal>("rho"))
+    _rho(getFunctor<ADReal>(NS::density))
 {
   if (!_use_Darcy_friction_model && !_use_Forchheimer_friction_model)
     mooseError("At least one friction model needs to be specified.");

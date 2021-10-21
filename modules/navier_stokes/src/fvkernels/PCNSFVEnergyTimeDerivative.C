@@ -29,7 +29,7 @@ PCNSFVEnergyTimeDerivative::validParams()
   params.addRequiredParam<MaterialPropertyName>(
       NS::time_deriv(NS::cp), "Specific heat capacity time derivative material property");
 
-  params.addCoupledVar("porosity", "Porosity variable");
+  params.addCoupledVar(NS::porosity, "Porosity variable");
   params.addParam<MaterialPropertyName>("porosity_prop_name",
                                         "A name for a porosity material property.");
   params.addRequiredParam<bool>("is_solid", "Whether this kernel acts on the solid temperature");

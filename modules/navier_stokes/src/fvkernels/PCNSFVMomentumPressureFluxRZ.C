@@ -7,23 +7,30 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "PNSFVMomentumPressureRZ.h"
+#include "PCNSFVMomentumPressureFluxRZ.h"
 
 #include "NS.h"
 
-registerMooseObject("NavierStokesApp", PNSFVMomentumPressureRZ);
+registerMooseObject("NavierStokesApp", PCNSFVMomentumPressureFluxRZ);
+registerMooseObjectRenamed("MooseApp",
+                           PNSFVMomentumPressureRZ,
+                           "05/01/2022 00:01",
+                           PCNSFVMomentumPressureFluxRZ);
 
 InputParameters
-PNSFVMomentumPressureRZ::validParams()
+PCNSFVMomentumPressureFluxRZ::validParams()
 {
   InputParameters params = FVElementalKernel::validParams();
   params.addClassDescription(
       "Adds the porous $-p/r$ term into the radial component of the Navier-Stokes "
-      "momentum equation for the problems in the RZ coordinate system.");
+      "momentum equation for the problems in the RZ coordinate system when integrating by parts.");
+  params.addRequiredCoupledVar(NS::pressure, "Pressure variable");
+  params.addRequiredCoupledVar(NS::porosity, "Porosity variable");
+
   return params;
 }
 
-PNSFVMomentumPressureRZ::PNSFVMomentumPressureRZ(const InputParameters & params)
+PCNSFVMomentumPressureFluxRZ::PCNSFVMomentumPressureFluxRZ(const InputParameters & params)
   : FVElementalKernel(params),
     _p(getADMaterialProperty<Real>(NS::pressure)),
     _eps(getMaterialProperty<Real>(NS::porosity))
@@ -31,7 +38,7 @@ PNSFVMomentumPressureRZ::PNSFVMomentumPressureRZ(const InputParameters & params)
 }
 
 ADReal
-PNSFVMomentumPressureRZ::computeQpResidual()
+PCNSFVMomentumPressureFluxRZ::computeQpResidual()
 {
   mooseAssert(_subproblem.getCoordSystem(_current_elem->subdomain_id()) == Moose::COORD_RZ,
               "This object should only be active in an RZ coordinate system.");

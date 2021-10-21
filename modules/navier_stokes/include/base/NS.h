@@ -91,6 +91,7 @@ static const std::string heat_source = "heat_source";
 // Navier-Stokes Materials
 static const std::string cL = "Darcy_coefficient";
 static const std::string cQ = "Forchheimer_coefficient";
+static const std::string alpha_boussinesq = "alpha_b";
 static const std::string drhos_dTs = "drhos_dTs";
 static const std::string dks_dTs = "dks_dTs";
 static const std::string kappa = "kappa";

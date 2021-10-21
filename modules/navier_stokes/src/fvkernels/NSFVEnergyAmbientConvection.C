@@ -1,4 +1,5 @@
 #include "NSFVEnergyAmbientConvection.h"
+#include "NS.h"
 
 registerMooseObject("NavierStokesApp", NSFVEnergyAmbientConvection);
 
@@ -18,7 +19,7 @@ NSFVEnergyAmbientConvection::validParams()
 
 NSFVEnergyAmbientConvection::NSFVEnergyAmbientConvection(const InputParameters & parameters)
   : FVElementalKernel(parameters),
-    _alpha(getADMaterialProperty<Real>("alpha")),
+    _alpha(getADMaterialProperty<Real>(NS::alpha)),
     _temp_ambient(adCoupledValue("T_ambient"))
 {
 }
