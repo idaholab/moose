@@ -37,6 +37,19 @@ TEST(FunctorInterfaceTest, deduceFunctorName)
   }
   {
     auto params = base_params;
+    params.set<std::vector<VariableName>>("test") = {"vector_var", "bad_vector_var"};
+    try
+    {
+      FunctorInterface::deduceFunctorName("test", params);
+      ASSERT_TRUE(false);
+    }
+    catch (std::runtime_error & e)
+    {
+      ASSERT_TRUE(std::string(e.what()).find("single variable name") != std::string::npos);
+    }
+  }
+  {
+    auto params = base_params;
     params.set<NonlinearVariableName>("test") = "nl_var";
     EXPECT_EQ(FunctorInterface::deduceFunctorName("test", params), "nl_var");
   }
@@ -44,6 +57,20 @@ TEST(FunctorInterfaceTest, deduceFunctorName)
     auto params = base_params;
     params.set<FunctionName>("test") = "function";
     EXPECT_EQ(FunctorInterface::deduceFunctorName("test", params), "function");
+  }
+  {
+    auto params = base_params;
+    params.set<PostprocessorName>("test") = "pp";
+    try
+    {
+      FunctorInterface::deduceFunctorName("test", params);
+      ASSERT_TRUE(false);
+    }
+    catch (std::runtime_error & e)
+    {
+      ASSERT_TRUE(std::string(e.what()).find("Invalid parameter type for retrieving a functor") !=
+                  std::string::npos);
+    }
   }
   {
     auto params = base_params;

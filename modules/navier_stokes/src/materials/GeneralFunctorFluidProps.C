@@ -27,7 +27,7 @@ GeneralFunctorFluidProps::validParams()
   params.addRequiredParam<MooseFunctorName>(NS::speed, "Velocity norm");
 
   // We have to have a default here, otherwise NS::density will be replaced by ""
-  params.addParam<MooseFunctorName>(NS::density, NS::density, "Density");
+  params.addParam<MooseFunctorName>(NS::density, "Density");
 
   params.addParam<FunctionName>(
       "mu_rampdown", 1, "A function describing a ramp down of viscosity over time");
@@ -49,9 +49,7 @@ GeneralFunctorFluidProps::GeneralFunctorFluidProps(const InputParameters & param
     _T_fluid(getFunctor<ADReal>(NS::T_fluid)),
     _speed(getFunctor<ADReal>(NS::speed)),
 
-    _rho_prop(parameters.isParamSetByUser(NS::density)
-                  ? nullptr
-                  : &declareFunctorProperty<ADReal>(NS::density)),
+    _rho_prop(isParamValid(NS::density) ? nullptr : &declareFunctorProperty<ADReal>(NS::density)),
     _rho(getFunctor<ADReal>(NS::density)),
     _drho_dp(declareFunctorProperty<Real>(derivativePropertyNameFirst(NS::density, NS::pressure))),
     _drho_dT(declareFunctorProperty<Real>(derivativePropertyNameFirst(NS::density, NS::T_fluid))),
