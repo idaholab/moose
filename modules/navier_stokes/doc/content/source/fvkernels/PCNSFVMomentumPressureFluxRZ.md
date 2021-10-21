@@ -1,6 +1,6 @@
-# PNSFVMomentumPressureRZ
+# PCNSFVMomentumPressureFluxRZ
 
-!syntax description /FVKernels/PNSFVMomentumPressureRZ
+!syntax description /FVKernels/PCNSFVMomentumPressureFluxRZ
 
 ## Overview
 
@@ -14,8 +14,8 @@ for use when performing axisymmetric simulations with `Problem/coord_type=RZ`
 and when the $\epsilon \nabla p$ term has been integrated by parts as is done
 for [PCNSFVKT.md] and for [PCNSFVHLLC.md].
 
-!syntax parameters /FVKernels/PNSFVMomentumPressureRZ
+!syntax parameters /FVKernels/PCNSFVMomentumPressureFluxRZ
 
-!syntax inputs /FVKernels/PNSFVMomentumPressureRZ
+!syntax inputs /FVKernels/PCNSFVMomentumPressureFluxRZ
 
-!syntax children /FVKernels/PNSFVMomentumPressureRZ
+!syntax children /FVKernels/PCNSFVMomentumPressureFluxRZ
