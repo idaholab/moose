@@ -198,7 +198,7 @@ superficial_vel_in=${fparse u_in * eps}
     fp = fp
     porosity = porosity
   []
-  [zero]
+  [fluid_only]
     type = GenericConstantMaterial
     prop_names = 'porosity'
     prop_values = '${eps}'
