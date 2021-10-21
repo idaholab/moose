@@ -1,0 +1,36 @@
+[Tests]
+  [errors]
+    requirement = 'The system shall detect invalid or inconsistent EBSD file parameters'
+    issues = '#19150'
+    design = 'EBSDMeshGenerator.md'
+
+    [zerostep]
+      type = RunException
+      input = test.i
+      cli_args = 'Mesh/ebsd/filename=ebsd3D_zerostep.txt --mesh-only'
+      expect_err = 'Error reading header, EBSD data step size is zero.'
+      detail = 'if the EBSD data step size is zero,'
+    []
+    [zerosize]
+      type = RunException
+      input = test.i
+      cli_args = 'Mesh/ebsd/filename=ebsd3D_zerosize.txt --mesh-only'
+      expect_err = 'Error reading header, EBSD grid size is zero.'
+      detail = 'if the EBSD grid size is zero,'
+    []
+    [zerodim]
+      type = RunException
+      input = test.i
+      cli_args = 'Mesh/ebsd/filename=ebsd3D_zerodim.txt --mesh-only'
+      expect_err = 'Error reading header, EBSD data is zero dimensional.'
+      detail = 'if the EBSD data is zero dimensional,'
+    []
+    [norefine]
+      type = RunException
+      input = test.i
+      cli_args = 'Mesh/ebsd/filename=ebsd3D_norefine.txt Mesh/ebsd/pre_refine=2 --mesh-only'
+      expect_err = 'EBSDMeshGenerator error. Requested levels of pre refinement not possible.'
+      detail = 'if the requested pre_refine levels are not possible'
+    []
+  []
+[]
