@@ -10,5 +10,6 @@
     ad_indexing_type = 'global'
     valgrind = HEAVY
     design = 'PINSFVEnergyTimeDerivative.md'
+    recover = false # see #19126
   []
 []

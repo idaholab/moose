@@ -1,9 +1,9 @@
-# PINSFVEnergyDiffusion
+# PCNSFVEnergyDiffusion
 
 ## Description
 
 This kernel implements a diffusion term for the fluid energy equation. The thermal diffusivity
-is isotropic for this kernel. For anistropic diffusion, use the [PINSFVEnergyAnisotropicDiffusion.md] kernel.
+is isotropic for this kernel. For anistropic diffusion, use the [PCNSFVEnergyAnisotropicDiffusion.md] kernel.
 
 
 \begin{equation}
@@ -16,10 +16,10 @@ generally neglected. It is not computed by this kernel.
 
 !alert note
 To switch from using a regular diffusivity to an effective diffusivity, use the
-[!param](/FVKernels/PINSFVEnergyDiffusion/effective_diffusivity) parameter.
+[!param](/FVKernels/PCNSFVEnergyDiffusion/effective_diffusivity) parameter.
 
-!syntax parameters /FVKernels/PINSFVEnergyDiffusion
+!syntax parameters /FVKernels/PCNSFVEnergyDiffusion
 
-!syntax inputs /FVKernels/PINSFVEnergyDiffusion
+!syntax inputs /FVKernels/PCNSFVEnergyDiffusion
 
-!syntax children /FVKernels/PINSFVEnergyDiffusion
+!syntax children /FVKernels/PCNSFVEnergyDiffusion

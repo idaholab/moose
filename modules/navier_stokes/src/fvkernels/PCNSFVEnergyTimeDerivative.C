@@ -63,10 +63,8 @@ PCNSFVEnergyTimeDerivative::computeQpResidual()
   else
   {
     auto derivative = _rho[_qp] * _cp[_qp] * FVTimeKernel::computeQpResidual();
-    if (_rho_dot)
-      derivative += (*_rho_dot)[_qp] * _cp[_qp] * _var.getElemValue(_current_elem);
-    if (_cp_dot)
-      derivative += _rho[_qp] * (*_cp_dot)[_qp] * _var.getElemValue(_current_elem);
+    derivative += (*_rho_dot)[_qp] * _cp[_qp] * _var.getElemValue(_current_elem);
+    derivative += _rho[_qp] * (*_cp_dot)[_qp] * _var.getElemValue(_current_elem);
 
     return _scaling * (_is_solid ? 1 - _eps[_qp] : _eps[_qp]) * derivative;
   }
