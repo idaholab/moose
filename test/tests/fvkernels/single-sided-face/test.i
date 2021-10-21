@@ -44,6 +44,13 @@
     grad_functor = "second_grad"
     dot_functor = "second_dot"
   []
+  [third]
+    type = FVGradAndDotFunctorFluxKernel
+    variable = v
+    value_functor = "third_value"
+    grad_functor = "third_grad"
+    dot_functor = "third_dot"
+  []
 []
 
 [FVBCs]
@@ -84,6 +91,11 @@
     functor = 'aux'
     root_functor_prop_name = 'second'
   []
+  [third]
+    type = FunctorPropFromGradAndDot
+    functor = 'v'
+    root_functor_prop_name = 'third'
+  []
 []
 
 [Problem]
@@ -93,6 +105,7 @@
 [Executioner]
   type = Transient
   num_steps = 2
+  dt = 0.5
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []

@@ -23,6 +23,6 @@ protected:
 
   const ADMaterialProperty<Real> & _secondary_gap_conductance;
   const ADMaterialProperty<Real> & _primary_gap_conductance;
-  const Function & _secondary_mms_function;
-  const Function & _primary_mms_function;
+  const FunctionTempl<Real> & _secondary_mms_function;
+  const FunctionTempl<Real> & _primary_mms_function;
 };
