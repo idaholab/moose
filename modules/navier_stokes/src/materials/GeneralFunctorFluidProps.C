@@ -49,7 +49,9 @@ GeneralFunctorFluidProps::GeneralFunctorFluidProps(const InputParameters & param
     _T_fluid(getFunctor<ADReal>(NS::T_fluid)),
     _speed(getFunctor<ADReal>(NS::speed)),
 
-    _rho_prop(parameters.isParamSetByUser(NS::density) ? nullptr : &declareFunctorProperty<ADReal>(NS::density)),
+    _rho_prop(parameters.isParamSetByUser(NS::density)
+                  ? nullptr
+                  : &declareFunctorProperty<ADReal>(NS::density)),
     _rho(getFunctor<ADReal>(NS::density)),
     _drho_dp(declareFunctorProperty<Real>(derivativePropertyNameFirst(NS::density, NS::pressure))),
     _drho_dT(declareFunctorProperty<Real>(derivativePropertyNameFirst(NS::density, NS::T_fluid))),

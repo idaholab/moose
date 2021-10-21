@@ -23,11 +23,10 @@ PINSFVEnergyTimeDerivative::validParams()
       "for fluids: d(eps * rho * cp * T)/dt, for solids: (1 - eps) * d(rho * cp * T)/dt"
       "Material property derivatives are ignored if not provided.");
   params.addRequiredParam<MooseFunctorName>(NS::density, "Density");
-  params.addParam<MooseFunctorName>(
-      NS::time_deriv(NS::density), "Density time derivative functor");
+  params.addParam<MooseFunctorName>(NS::time_deriv(NS::density), "Density time derivative functor");
   params.addRequiredParam<MooseFunctorName>(NS::cp, "Specific heat capacity");
-  params.addParam<MooseFunctorName>(
-      NS::time_deriv(NS::cp), "Specific heat capacity time derivative functor");
+  params.addParam<MooseFunctorName>(NS::time_deriv(NS::cp),
+                                    "Specific heat capacity time derivative functor");
 
   params.addRequiredParam<MooseFunctorName>(NS::porosity, "Porosity variable");
   params.addParam<MaterialPropertyName>("porosity_prop_name",
@@ -44,9 +43,12 @@ PINSFVEnergyTimeDerivative::validParams()
 PINSFVEnergyTimeDerivative::PINSFVEnergyTimeDerivative(const InputParameters & params)
   : FVTimeKernel(params),
     _rho(getFunctor<ADReal>(NS::density)),
-    _rho_dot(isParamValid(NS::time_deriv(NS::density)) ? &getFunctor<ADReal>(NS::time_deriv(NS::density)) : nullptr),
+    _rho_dot(isParamValid(NS::time_deriv(NS::density))
+                 ? &getFunctor<ADReal>(NS::time_deriv(NS::density))
+                 : nullptr),
     _cp(getFunctor<ADReal>(NS::cp)),
-    _cp_dot(isParamValid(NS::time_deriv(NS::cp)) ? &getFunctor<ADReal>(NS::time_deriv(NS::cp)) : nullptr),
+    _cp_dot(isParamValid(NS::time_deriv(NS::cp)) ? &getFunctor<ADReal>(NS::time_deriv(NS::cp))
+                                                 : nullptr),
     _eps(getFunctor<ADReal>(NS::porosity)),
     _is_solid(getParam<bool>("is_solid")),
     _scaling(getParam<Real>("scaling")),
@@ -63,9 +65,9 @@ PINSFVEnergyTimeDerivative::computeQpResidual()
   {
     auto derivative = _rho(_current_elem) * _cp(_current_elem) * FVTimeKernel::computeQpResidual();
     if (_rho_dot)
-      derivative += (*_rho_dot)(_current_elem) * _cp(_current_elem) * _var(_current_elem);
+      derivative += (*_rho_dot)(_current_elem)*_cp(_current_elem) * _var(_current_elem);
     if (_cp_dot)
-      derivative += _rho(_current_elem) * (*_cp_dot)(_current_elem) * _var(_current_elem);
+      derivative += _rho(_current_elem) * (*_cp_dot)(_current_elem)*_var(_current_elem);
 
     return _scaling * (_is_solid ? 1 - _eps(_current_elem) : _eps(_current_elem)) * derivative;
   }

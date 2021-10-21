@@ -23,8 +23,8 @@ PCNSFVEnergyTimeDerivative::validParams()
       "for fluids: eps * d(rho * cp * T)/dt, for solids: (1 - eps) * d(rho * cp * T)/dt. "
       "Material property derivatives are ignored if not provided.");
   params.addRequiredParam<MaterialPropertyName>(NS::density, "Density material property");
-  params.addRequiredParam<MaterialPropertyName>(
-      NS::time_deriv(NS::density), "Density time derivative material property");
+  params.addRequiredParam<MaterialPropertyName>(NS::time_deriv(NS::density),
+                                                "Density time derivative material property");
   params.addRequiredParam<MaterialPropertyName>(NS::cp, "Specific heat capacity material property");
   params.addRequiredParam<MaterialPropertyName>(
       NS::time_deriv(NS::cp), "Specific heat capacity time derivative material property");

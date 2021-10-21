@@ -9,6 +9,7 @@
 
 #include "PINSFVMomentumAdvectionPorosityGradient.h"
 #include "PINSFVSuperficialVelocityVariable.h"
+#include "NS.h"
 
 registerMooseObject("NavierStokesApp", PINSFVMomentumAdvectionPorosityGradient);
 

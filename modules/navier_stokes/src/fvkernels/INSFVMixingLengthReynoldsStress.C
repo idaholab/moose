@@ -9,6 +9,7 @@
 
 #include "INSFVMixingLengthReynoldsStress.h"
 #include "INSFVVelocityVariable.h"
+#include "NS.h"
 
 registerMooseObject("NavierStokesApp", INSFVMixingLengthReynoldsStress);
 

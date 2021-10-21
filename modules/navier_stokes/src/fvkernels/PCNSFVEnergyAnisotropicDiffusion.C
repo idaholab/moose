@@ -9,6 +9,7 @@
 
 #include "PCNSFVEnergyAnisotropicDiffusion.h"
 #include "INSFVEnergyVariable.h"
+#include "NS.h"
 
 registerMooseObject("NavierStokesApp", PCNSFVEnergyAnisotropicDiffusion);
 registerMooseObjectRenamed("MooseApp",
@@ -23,11 +24,14 @@ PCNSFVEnergyAnisotropicDiffusion::validParams()
   params.addClassDescription(
       "Anisotropic diffusion term in the porous media incompressible Navier-Stokes "
       "equations : -div(kappa grad(T))");
-  params.addRequiredParam<MaterialPropertyName>(NS::kappa, "Vector of effective thermal conductivity");
+  params.addRequiredParam<MaterialPropertyName>(NS::kappa,
+                                                "Vector of effective thermal conductivity");
   params.addRequiredCoupledVar(NS::porosity, "Porosity variable");
-  params.addParam<bool>("effective_diffusivity", true, "Whether the diffusivity should be "
-      "multiplied by porosity, or whether the provided diffusivity is an effective diffusivity "
-      "taking porosity effects into account");
+  params.addParam<bool>(
+      "effective_diffusivity",
+      true,
+      "Whether the diffusivity should be multiplied by porosity, or whether the provided "
+      "diffusivity is an effective diffusivity taking porosity effects into account");
 
   params.set<unsigned short>("ghost_layers") = 2;
   return params;
@@ -47,8 +51,9 @@ PCNSFVEnergyAnisotropicDiffusion::PCNSFVEnergyAnisotropicDiffusion(const InputPa
              "'--with-ad-indexing-type=global'");
 #endif
   if (!dynamic_cast<INSFVEnergyVariable *>(&_var))
-    mooseError("PCNSFVEnergyAnisotropicDiffusion may only be used with a fluid temperature variable, "
-               "of variable type INSFVEnergyVariable.");
+    mooseError(
+        "PCNSFVEnergyAnisotropicDiffusion may only be used with a fluid temperature variable, "
+        "of variable type INSFVEnergyVariable.");
 }
 
 ADReal

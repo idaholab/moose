@@ -9,6 +9,7 @@
 
 #include "PINSFVMomentumBoussinesq.h"
 #include "PINSFVSuperficialVelocityVariable.h"
+#include "NS.h"
 
 registerMooseObject("NavierStokesApp", PINSFVMomentumBoussinesq);
 

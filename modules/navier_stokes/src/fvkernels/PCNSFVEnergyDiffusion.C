@@ -9,6 +9,7 @@
 
 #include "PCNSFVEnergyDiffusion.h"
 #include "INSFVEnergyVariable.h"
+#include "NS.h"
 
 registerMooseObject("NavierStokesApp", PCNSFVEnergyDiffusion);
 
@@ -20,9 +21,11 @@ PCNSFVEnergyDiffusion::validParams()
                              "fluid energy equations :  $-div(eps * k * grad(T))$");
   params.addRequiredCoupledVar(NS::porosity, "Porosity variable");
   params.addRequiredParam<MaterialPropertyName>(NS::k, "Thermal conductivity");
-  params.addParam<bool>("effective_diffusivity", false, "Whether the diffusivity should be "
-      "multiplied by porosity, or whether the provided diffusivity is an effective diffusivity "
-      "taking porosity effects into account");
+  params.addParam<bool>(
+      "effective_diffusivity",
+      false,
+      "Whether the diffusivity should be multiplied by porosity, or whether the provided "
+      "diffusivity is an effective diffusivity taking porosity effects into account");
 
   params.set<unsigned short>("ghost_layers") = 2;
   return params;
