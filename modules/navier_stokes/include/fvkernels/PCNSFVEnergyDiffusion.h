@@ -12,24 +12,26 @@
 #include "FVDiffusion.h"
 
 /**
- * A flux kernel for diffusion of energy in porous media across cell faces using an effective
- * diffusion coefficient
+ * A flux kernel for diffusing energy in porous media across cell faces, using a scalar
+ * isotropic diffusion coefficient, using regular material properties
  */
-class PINSFVEnergyEffectiveDiffusion : public FVFluxKernel
+class PCNSFVEnergyDiffusion : public FVFluxKernel
 {
 public:
   static InputParameters validParams();
-  PINSFVEnergyEffectiveDiffusion(const InputParameters & params);
+  PCNSFVEnergyDiffusion(const InputParameters & params);
 
 protected:
   ADReal computeQpResidual() override;
 
-  /// the effective thermal conductivity
-  const ADMaterialProperty<RealVectorValue> & _kappa_elem;
-  /// the neighbor effective element thermal conductivity
-  const ADMaterialProperty<RealVectorValue> & _kappa_neighbor;
+  /// the thermal conductivity
+  const ADMaterialProperty<Real> & _k_elem;
+  /// the neighbor element thermal conductivity
+  const ADMaterialProperty<Real> & _k_neighbor;
   /// the porosity
   const VariableValue & _eps;
   /// the neighbor element porosity
   const VariableValue & _eps_neighbor;
+  /// whether the diffusivity should be multiplied by porosity
+  const bool _porosity_factored_in;
 };

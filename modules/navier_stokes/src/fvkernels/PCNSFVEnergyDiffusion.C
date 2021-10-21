@@ -7,19 +7,19 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "PINSFVEnergyDiffusion.h"
+#include "PCNSFVEnergyDiffusion.h"
 #include "INSFVEnergyVariable.h"
 
-registerMooseObject("NavierStokesApp", PINSFVEnergyDiffusion);
+registerMooseObject("NavierStokesApp", PCNSFVEnergyDiffusion);
 
 InputParameters
-PINSFVEnergyDiffusion::validParams()
+PCNSFVEnergyDiffusion::validParams()
 {
   auto params = FVFluxKernel::validParams();
   params.addClassDescription("Diffusion term in the porous media incompressible Navier-Stokes "
                              "fluid energy equations :  $-div(eps * k * grad(T))$");
-  params.addRequiredParam<MooseFunctorName>(NS::porosity, "Porosity");
-  params.addRequiredParam<MooseFunctorName>(NS::k, "Thermal conductivity");
+  params.addRequiredCoupledVar(NS::porosity, "Porosity variable");
+  params.addRequiredParam<MaterialPropertyName>(NS::k, "Thermal conductivity");
   params.addParam<bool>("effective_diffusivity", false, "Whether the diffusivity should be "
       "multiplied by porosity, or whether the provided diffusivity is an effective diffusivity "
       "taking porosity effects into account");
@@ -28,10 +28,12 @@ PINSFVEnergyDiffusion::validParams()
   return params;
 }
 
-PINSFVEnergyDiffusion::PINSFVEnergyDiffusion(const InputParameters & params)
+PCNSFVEnergyDiffusion::PCNSFVEnergyDiffusion(const InputParameters & params)
   : FVFluxKernel(params),
-    _k(getFunctor<ADReal>(NS::k)),
-    _eps(getFunctor<ADReal>(NS::porosity)),
+    _k_elem(getADMaterialProperty<Real>(NS::k)),
+    _k_neighbor(getNeighborADMaterialProperty<Real>(NS::k)),
+    _eps(coupledValue(NS::porosity)),
+    _eps_neighbor(coupledNeighborValue(NS::porosity)),
     _porosity_factored_in(getParam<bool>("effective_diffusivity"))
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
@@ -40,30 +42,27 @@ PINSFVEnergyDiffusion::PINSFVEnergyDiffusion(const InputParameters & params)
              "'--with-ad-indexing-type=global'");
 #endif
   if (!dynamic_cast<INSFVEnergyVariable *>(&_var))
-    mooseError("PINSFVEnergyDiffusion may only be used with a fluid temperature variable, "
+    mooseError("PCNSFVEnergyDiffusion may only be used with a fluid temperature variable, "
                "of variable type INSFVEnergyVariable.");
 }
 
 ADReal
-PINSFVEnergyDiffusion::computeQpResidual()
+PCNSFVEnergyDiffusion::computeQpResidual()
 {
   // Interpolate thermal conductivity times porosity on the face
   ADReal k_eps_face;
-  const auto face_elem = elemFromFace();
-  const auto face_neighbor = neighborFromFace();
-
   if (!_porosity_factored_in)
     interpolate(Moose::FV::InterpMethod::Average,
                 k_eps_face,
-                _k(face_elem) * _eps(face_elem),
-                _k(face_neighbor) * _eps(face_neighbor),
+                _k_elem[_qp] * _eps[_qp],
+                _k_neighbor[_qp] * _eps_neighbor[_qp],
                 *_face_info,
                 true);
   else
     interpolate(Moose::FV::InterpMethod::Average,
                 k_eps_face,
-                _k(face_elem),
-                _k(face_neighbor),
+                _k_elem[_qp],
+                _k_neighbor[_qp],
                 *_face_info,
                 true);
 
