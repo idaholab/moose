@@ -86,7 +86,31 @@ as listed here.
 
 ### Navier-Stokes
 
-If you use the incompressible portion of the Navier-Stokes module, please cite:
+If you use the finite volume incompressible, compressible and weakly compressible implementations in the Navier-Stokes module, please cite:
+
+```
+@techreport{,
+      title = {NEAMS-TH-CRAB},
+     author = {Guillaume L. Giudicelli, Alexander D. Lindsay, Ramiro Freile, Jieun Lee},
+       year = {2021},
+     number = {INL/EXT-21-62895},
+institution = {Idaho National Laboratory}
+}
+```
+
+If you use the finite volume incompressible porous flow equations implementation in the Navier-Stokes module, please cite:
+
+```
+@inproceedings{,
+    title = {Coupled Multiphysics Transient Simulations of the MK1-FHR reactor Using the Finite Volume Capabilities of the MOOSE Framework},
+   author = {Guillaume Giudicelli, Alexander Lindsay, Paolo Balestra, Robert Carlsen, Javier Ortensi, Derek Gaston, Mark DeHart, Abdalla Abou-Jaoude, April J. Novak},
+     year = {2021},
+booktitle = {Mathematics and Computation for Nuclear Science and Engineering},
+publisher = {American Nuclear Society}
+}
+```
+
+If you use the finite element incompressible portion of the Navier-Stokes module, please cite:
 
 ```
 @article{peterson2018overview,
