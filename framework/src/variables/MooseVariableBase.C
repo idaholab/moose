@@ -48,7 +48,7 @@ MooseVariableBase::validParams()
                              "Order of the FE shape function to use for this variable (additional "
                              "orders not listed here are allowed, depending on the family).");
 
-  MooseEnum family { AddVariableAction::getNonlinearVariableFamilies() };
+  MooseEnum family{AddVariableAction::getNonlinearVariableFamilies()};
 
   params.addParam<MooseEnum>(
       "family", family, "Specifies the family of FE shape functions to use for this variable.");
