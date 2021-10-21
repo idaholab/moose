@@ -528,7 +528,6 @@ private:
   GradientType evaluateGradient(const FaceArg & face, unsigned int) const override final;
   GradientType evaluateGradient(const SingleSidedFaceArg & face, unsigned int) const override final;
   DotType evaluateDot(const Elem * const & elem, unsigned int) const override final;
-  DotType evaluateDot(const ElemFromFaceArg & elem_from_face, unsigned int) const override final;
   DotType evaluateDot(const FaceArg & face, unsigned int) const override final;
   DotType evaluateDot(const SingleSidedFaceArg & face, unsigned int) const override final;
 
@@ -769,13 +768,6 @@ MooseVariableFV<OutputType>::evaluateGradient(const SingleSidedFaceArg & face, u
   const auto * const fi = std::get<0>(face);
   mooseAssert(fi, "We must have a non-null face information");
   return adGradSln(*fi);
-}
-
-template <typename OutputType>
-typename MooseVariableFV<OutputType>::DotType
-MooseVariableFV<OutputType>::evaluateDot(const ElemFromFaceArg &, unsigned int) const
-{
-  mooseError("MooseVariableFV::evaluateDot(ElemFromFaceArg) not yet implemented");
 }
 
 template <typename OutputType>

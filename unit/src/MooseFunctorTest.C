@@ -42,7 +42,7 @@ private:
   ValueType evaluate(const ElemSideQpArg &, unsigned int) const override final { return 0; }
 };
 
-TEST(MooseFunctorTest, testErrors)
+TEST(MooseFunctorTest, testArgs)
 {
   TestFunctor<Real> test;
   Node node0(0);
@@ -108,4 +108,34 @@ TEST(MooseFunctorTest, testErrors)
   test_gradient(elem_from_face);
   test_gradient(elem_qp);
   test_gradient(elem_side_qp);
+
+  ConstantFunctor<Real> cf(2);
+  EXPECT_EQ(cf(elem.get()), 2);
+  EXPECT_EQ(cf(elem_from_face), 2);
+  EXPECT_EQ(cf(face), 2);
+  EXPECT_EQ(cf(single_face), 2);
+  EXPECT_EQ(cf(elem_from_face), 2);
+  EXPECT_EQ(cf(elem_qp), 2);
+  EXPECT_EQ(cf(elem_side_qp), 2);
+
+  auto constant_gradient_test = [&cf](const auto & arg) {
+    const auto result = cf.gradient(arg);
+    for (const auto i : make_range(unsigned(LIBMESH_DIM)))
+      EXPECT_EQ(result(i), 0);
+  };
+  constant_gradient_test(elem.get());
+  constant_gradient_test(elem_from_face);
+  constant_gradient_test(face);
+  constant_gradient_test(single_face);
+  constant_gradient_test(elem_from_face);
+  constant_gradient_test(elem_qp);
+  constant_gradient_test(elem_side_qp);
+
+  EXPECT_EQ(cf.dot(elem.get()), 0);
+  EXPECT_EQ(cf.dot(elem_from_face), 0);
+  EXPECT_EQ(cf.dot(face), 0);
+  EXPECT_EQ(cf.dot(single_face), 0);
+  EXPECT_EQ(cf.dot(elem_from_face), 0);
+  EXPECT_EQ(cf.dot(elem_qp), 0);
+  EXPECT_EQ(cf.dot(elem_side_qp), 0);
 }
