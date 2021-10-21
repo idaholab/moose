@@ -674,33 +674,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
   auto secondary_sub_elem = _mortar_segment_mesh->add_elem_integer("secondary_sub_elem");
   auto primary_sub_elem = _mortar_segment_mesh->add_elem_integer("primary_sub_elem");
 
-  // Number of new msm elems that can be created by clipping and triangulating
-  // secondary node with primary node
-  // Note this parameter is subject to change, just a heuristic for now
-  constexpr int multiplicity = 16;
-
   dof_id_type local_id_index = 0;
-  std::size_t node_unique_id_offset = 0;
-
-  // Create an offset by the maximum number of mortar segment elements that can be created *plus*
-  // the number of lower-dimensional secondary subdomain elements
-  for (const auto & pr : _primary_secondary_boundary_id_pairs)
-  {
-    const auto primary_bnd_id = pr.first;
-    const auto secondary_bnd_id = pr.second;
-    const auto num_primary_nodes =
-        std::distance(_mesh.bid_nodes_begin(primary_bnd_id), _mesh.bid_nodes_end(primary_bnd_id));
-    const auto num_secondary_nodes = std::distance(_mesh.bid_nodes_begin(secondary_bnd_id),
-                                                   _mesh.bid_nodes_end(secondary_bnd_id));
-    mooseAssert(num_primary_nodes,
-                "There are no primary nodes on boundary ID "
-                    << primary_bnd_id << ". Does that boundary ID even exist on the mesh?");
-    mooseAssert(num_secondary_nodes,
-                "There are no secondary nodes on boundary ID "
-                    << secondary_bnd_id << ". Does that boundary ID even exist on the mesh?");
-
-    node_unique_id_offset += multiplicity * num_primary_nodes + 2 * num_secondary_nodes;
-  }
 
   // Loop through mortar secondary and primary pairs to create mortar segment mesh between each
   for (const auto & pr : _primary_secondary_subdomain_id_pairs)
@@ -853,13 +827,24 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
       result_set.init(&ret_index[0], &out_dist_sqr[0]);
       kd_tree.findNeighbors(result_set, &query_pt[0], nanoflann::SearchParams(10));
 
+      struct CompareElemsByID
+      {
+        bool operator()(const Elem * a, const Elem * b) const
+        {
+          libmesh_assert(a);
+          libmesh_assert(b);
+
+          return a->id() < b->id();
+        }
+      };
+
       // Initialize list of processed primary elements, we don't want to revisit processed elements
-      std::set<const Elem *> processed_primary_elems;
+      std::set<const Elem *, CompareElemsByID> processed_primary_elems;
 
       // Initialize candidate set and flag for switching between coarse screening and breadth-first
       // search
       bool primary_elem_found = false;
-      std::set<const Elem *> primary_elem_candidates;
+      std::set<const Elem *, CompareElemsByID> primary_elem_candidates;
 
       // Loop candidate nodes (returned by Nanoflann) and add all adjoining elems to candidate set
       for (auto r : make_range(result_set.size()))
@@ -972,12 +957,8 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
            */
           std::vector<Node *> new_nodes;
           for (auto pt : nodal_points)
-          {
             new_nodes.push_back(_mortar_segment_mesh->add_point(
                 pt, _mortar_segment_mesh->max_node_id(), secondary_side_elem->processor_id()));
-            Node * const new_node = new_nodes.back();
-            new_node->set_unique_id(new_node->id() + node_unique_id_offset);
-          }
 
           // Loop through triangular elements in map
           for (auto el : index_range(elem_to_node_map))
@@ -995,7 +976,6 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
             new_elem->processor_id() = secondary_side_elem->processor_id();
             new_elem->subdomain_id() = secondary_side_elem->subdomain_id();
             new_elem->set_id(local_id_index++);
-            new_elem->set_unique_id(new_elem->id());
 
             // Attach newly created nodes
             for (auto i : index_range(elem_to_node_map[el]))
@@ -1038,11 +1018,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
     // End loop through mortar constraint pairs
   }
 
-  // Set up the the mortar segment neighbor information.
-  _mortar_segment_mesh->allow_renumbering(true);
-  _mortar_segment_mesh->skip_partitioning(true);
-  _mortar_segment_mesh->allow_find_neighbors(false);
-  _mortar_segment_mesh->prepare_for_use();
+  _mortar_segment_mesh->cache_elem_data();
 
   // Output mortar segment mesh
   if (_debug)

@@ -80,7 +80,6 @@
                   'variable values across the mortar interface shall be the same.'
     map = False
     partial = True
-    max_parallel = 1
     ad_indexing_type = global
   []
 []
