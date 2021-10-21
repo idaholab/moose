@@ -59,3 +59,6 @@ include            $(FRAMEWORK_DIR)/app.mk
 tags:
 	@echo Building tags...
 	@ctags -f .tags -R --c++-kinds=+p --fields=+iaS --extras=+q --exclude=doc --exclude=test --exclude=.git --exclude=problems --exclude="*header_symlinks*"
+
+mrproper:
+	git clean -Xfd && git submodule foreach git clean -Xfd
