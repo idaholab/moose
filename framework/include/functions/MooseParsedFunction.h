@@ -42,6 +42,7 @@ public:
    */
   virtual Real value(Real t, const Point & pt) const override;
 
+  using T::gradient;
   /**
    * Evaluate the gradient of the function. This is computed in libMesh
    * through automatic symbolic differentiation.

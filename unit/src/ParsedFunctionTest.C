@@ -26,13 +26,42 @@ TEST_F(ParsedFunctionTest, basicConstructor)
   f.initialSetup();
   EXPECT_EQ(f.value(4, Point(1, 2, 3)), 11);
 
+  //
   // Test the functor interfaces
+  //
+
   const auto & lm_mesh = _mesh->getMesh();
+
+  Real f_traditional(0);
+  Real f_functor(0);
+  RealVectorValue gradient_traditional;
+  RealVectorValue gradient_functor;
+  Real dot_traditional(0);
+  Real dot_functor(0);
+
+  auto test_eq = [&f_traditional,
+                  &f_functor,
+                  &gradient_traditional,
+                  &gradient_functor,
+                  &dot_traditional,
+                  &dot_functor]() {
+    EXPECT_EQ(f_traditional, f_functor);
+    for (const auto i : make_range(unsigned(LIBMESH_DIM)))
+      EXPECT_EQ(gradient_traditional(i), gradient_functor(i));
+    EXPECT_EQ(dot_traditional, dot_functor);
+  };
+
+  // Test elem overloads
   const Elem * const elem = lm_mesh.elem_ptr(0);
-  const Point vtx_average = elem->centroid();
-  Real f_traditional = f.value(0, vtx_average);
-  Real f_functor = f(elem, 0);
-  EXPECT_EQ(f_traditional, f_functor);
+  const Point vtx_average = elem->vertex_average();
+  f_traditional = f.value(0, vtx_average);
+  f_functor = f(elem, 0);
+  gradient_traditional = f.gradient(0, vtx_average);
+  gradient_functor = f.gradient(elem, 0);
+  dot_traditional = f.timeDerivative(0, vtx_average);
+  dot_functor = f.dot(elem, 0);
+  test_eq();
+
   const Elem * neighbor = nullptr;
   unsigned int side = libMesh::invalid_uint;
   for (const auto s : elem->side_index_range())
@@ -43,38 +72,56 @@ TEST_F(ParsedFunctionTest, basicConstructor)
       break;
     }
 
+  // Test elem_from_face overloads
   const FaceInfo * const fi = _mesh->faceInfo(elem, side);
+  auto elem_from_face = std::make_tuple(elem, fi, elem->subdomain_id());
+  f_functor = f(elem_from_face, 0);
+  gradient_functor = f.gradient(elem_from_face, 0);
+  dot_functor = f.dot(elem_from_face, 0);
+  test_eq();
 
-  f_functor = f(std::make_tuple(elem, fi, elem->subdomain_id()), 0);
-  EXPECT_EQ(f_traditional, f_functor);
+  // Test face overloads
+  auto face = std::make_tuple(fi,
+                              Moose::FV::LimiterType::CentralDifference,
+                              true,
+                              std::make_pair(elem->subdomain_id(), neighbor->subdomain_id()));
   f_traditional = f.value(0, fi->faceCentroid());
-  f_functor = f(std::make_tuple(fi,
-                                Moose::FV::LimiterType::CentralDifference,
-                                true,
-                                std::make_pair(elem->subdomain_id(), neighbor->subdomain_id())),
-                0);
-  EXPECT_EQ(f_traditional, f_functor);
+  f_functor = f(face, 0);
+  gradient_traditional = f.gradient(0, fi->faceCentroid());
+  gradient_functor = f.gradient(face, 0);
+  dot_traditional = f.timeDerivative(0, fi->faceCentroid());
+  dot_functor = f.dot(face, 0);
+  test_eq();
 
+  // Test ElemQp overloads
   const FEFamily mapping_family = FEMap::map_fe_type(*elem);
   const FEType fe_type(elem->default_order(), mapping_family);
   std::unique_ptr<FEBase> fe(FEBase::build(elem->dim(), fe_type));
-
   const auto & xyz = fe->get_xyz();
   QGauss qrule(elem->dim(), fe_type.default_quadrature_order());
   fe->attach_quadrature_rule(&qrule);
   fe->reinit(elem);
-
+  auto elem_qp = std::make_tuple(elem, 0, &qrule);
   f_traditional = f.value(0, xyz[0]);
-  f_functor = f(std::make_tuple(elem, 0, &qrule), 0);
-  EXPECT_EQ(f_traditional, f_functor);
+  f_functor = f(elem_qp, 0);
+  gradient_traditional = f.gradient(0, xyz[0]);
+  gradient_functor = f.gradient(elem_qp, 0);
+  dot_traditional = f.timeDerivative(0, xyz[0]);
+  dot_functor = f.dot(elem_qp, 0);
+  test_eq();
 
+  // Test ElemSideQp overloads
   QGauss qrule_face(elem->dim() - 1, fe_type.default_quadrature_order());
   fe->attach_quadrature_rule(&qrule_face);
   fe->reinit(elem, side);
-
+  auto elem_side_qp = std::make_tuple(elem, side, 0, &qrule_face);
   f_traditional = f.value(0, xyz[0]);
-  f_functor = f(std::make_tuple(elem, side, 0, &qrule_face), 0);
-  EXPECT_EQ(f_traditional, f_functor);
+  f_functor = f(elem_side_qp, 0);
+  gradient_traditional = f.gradient(0, xyz[0]);
+  gradient_functor = f.gradient(elem_side_qp, 0);
+  dot_traditional = f.timeDerivative(0, xyz[0]);
+  dot_functor = f.dot(elem_side_qp, 0);
+  test_eq();
 }
 
 TEST_F(ParsedFunctionTest, advancedConstructor)
