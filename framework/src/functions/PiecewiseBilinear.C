@@ -10,9 +10,7 @@
 #include "PiecewiseBilinear.h"
 #include "ColumnMajorMatrix.h"
 #include "BilinearInterpolation.h"
-
-#include <fstream>
-
+using namespace std;
 registerMooseObject("MooseApp", PiecewiseBilinear);
 
 defineLegacyParams(PiecewiseBilinear);
@@ -145,43 +143,45 @@ PiecewiseBilinear::parse(std::vector<Real> & x, std::vector<Real> & y, ColumnMaj
   if (!file.good())
     mooseError("In PiecewiseBilinear ", _name, ": Error opening file '" + _data_file_name + "'.");
   std::string line;
+  std::string stri;
   unsigned int linenum = 0;
   unsigned int itemnum = 0;
   unsigned int num_cols = 0;
   std::vector<Real> data;
-
   while (getline(file, line))
   {
     linenum++;
     std::istringstream linestream(line);
     std::string item;
     itemnum = 0;
-
     while (getline(linestream, item, ','))
     {
       itemnum++;
-      std::istringstream i(item);
+      std::istringstream icol(item);
       Real d;
-      i >> d;
-      data.push_back(d);
+      icol >> d;
+      if(linenum == 1 && itemnum == 1)
+      {
+      }
+      else
+        data.push_back(d);
     }
 
     if (linenum == 1)
       num_cols = itemnum;
-    else if (num_cols + 1 != itemnum)
+    else if (num_cols != itemnum)
       mooseError("In PiecewiseBilinear ",
                  _name,
                  ": Read ",
                  itemnum,
                  " columns of data but expected ",
-                 num_cols + 1,
+                 num_cols,
                  " columns while reading line ",
                  linenum,
                  " of '",
                  _data_file_name,
                  "'.");
   }
-
   x.resize(itemnum - 1);
   y.resize(linenum - 1);
   z.reshape(linenum - 1, itemnum - 1);
@@ -205,7 +205,6 @@ PiecewiseBilinear::parse(std::vector<Real> & x, std::vector<Real> & y, ColumnMaj
       ++offset;
     }
   }
-
   if (data.size() != offset)
     mooseError("ERROR! Inconsistency in data read from '" + _data_file_name +
                "' for PiecewiseBilinear function.");
