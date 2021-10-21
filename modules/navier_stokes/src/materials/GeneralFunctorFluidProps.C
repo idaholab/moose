@@ -85,7 +85,7 @@ GeneralFunctorFluidProps::GeneralFunctorFluidProps(const InputParameters & param
     _Re_i(declareFunctorProperty<ADReal>(NS::Reynolds_interstitial))
 {
   // Set material properties functors
-  if (!parameters.isParamSetByUser(NS::density))
+  if (_rho_prop)
     _rho_prop->setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> ADReal {
       return _fluid.rho_from_p_T(_pressure(r, t), _T_fluid(r, t));
     });

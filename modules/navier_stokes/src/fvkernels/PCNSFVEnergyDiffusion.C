@@ -55,19 +55,19 @@ PCNSFVEnergyDiffusion::computeQpResidual()
   // Interpolate thermal conductivity times porosity on the face
   ADReal k_eps_face;
   if (!_porosity_factored_in)
-    interpolate(Moose::FV::InterpMethod::Average,
-                k_eps_face,
-                _k_elem[_qp] * _eps[_qp],
-                _k_neighbor[_qp] * _eps_neighbor[_qp],
-                *_face_info,
-                true);
+    Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
+                           k_eps_face,
+                           _k_elem[_qp] * _eps[_qp],
+                           _k_neighbor[_qp] * _eps_neighbor[_qp],
+                           *_face_info,
+                           true);
   else
-    interpolate(Moose::FV::InterpMethod::Average,
-                k_eps_face,
-                _k_elem[_qp],
-                _k_neighbor[_qp],
-                *_face_info,
-                true);
+    Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
+                           k_eps_face,
+                           _k_elem[_qp],
+                           _k_neighbor[_qp],
+                           *_face_info,
+                           true);
 
   // Compute the temperature gradient dotted with the surface normal
   auto dTdn = gradUDotNormal();

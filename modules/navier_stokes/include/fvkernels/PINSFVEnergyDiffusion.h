@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "FVDiffusion.h"
+#include "FVFluxKernel.h"
 
 /**
  * A flux kernel for diffusing energy in porous media across cell faces, using a scalar

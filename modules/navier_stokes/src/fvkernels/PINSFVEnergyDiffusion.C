@@ -56,19 +56,19 @@ PINSFVEnergyDiffusion::computeQpResidual()
   const auto face_neighbor = neighborFromFace();
 
   if (!_porosity_factored_in)
-    interpolate(Moose::FV::InterpMethod::Average,
-                k_eps_face,
-                _k(face_elem) * _eps(face_elem),
-                _k(face_neighbor) * _eps(face_neighbor),
-                *_face_info,
-                true);
+    Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
+                           k_eps_face,
+                           _k(face_elem) * _eps(face_elem),
+                           _k(face_neighbor) * _eps(face_neighbor),
+                           *_face_info,
+                           true);
   else
-    interpolate(Moose::FV::InterpMethod::Average,
-                k_eps_face,
-                _k(face_elem),
-                _k(face_neighbor),
-                *_face_info,
-                true);
+    Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
+                           k_eps_face,
+                           _k(face_elem),
+                           _k(face_neighbor),
+                           *_face_info,
+                           true);
 
   // Compute the temperature gradient dotted with the surface normal
   auto dTdn = gradUDotNormal();

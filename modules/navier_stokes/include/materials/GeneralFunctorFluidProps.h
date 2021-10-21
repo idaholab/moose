@@ -43,7 +43,7 @@ protected:
   const Moose::Functor<ADReal> & _speed;
 
   /// Density as a material property, if density is not a variable
-  FunctorMaterialProperty<ADReal> * _rho_prop;
+  FunctorMaterialProperty<ADReal> * const _rho_prop;
 
   /// Density as a functor, which could be from the variable set or the property
   const Moose::Functor<ADReal> & _rho;

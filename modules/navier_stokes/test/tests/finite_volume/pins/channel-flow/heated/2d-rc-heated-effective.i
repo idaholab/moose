@@ -144,9 +144,7 @@ velocity_interp_method='rc'
     porosity = porosity
   []
   [energy_diffusion]
-    # kappa is defined as a regular material property, so we use the compressible
-    # flow object which uses those
-    type = PCNSFVEnergyAnisotropicDiffusion
+    type = PINSFVEnergyAnisotropicDiffusion
     kappa = 'kappa'
     variable = temperature
     porosity = porosity
@@ -261,7 +259,7 @@ velocity_interp_method='rc'
     prop_values = '${cp}'
   []
   [kappa]
-    type = ADGenericConstantVectorMaterial
+    type = ADGenericConstantVectorFunctorMaterial
     prop_names = 'kappa'
     prop_values = '1e-3 1e-2 1e-1'
   []
