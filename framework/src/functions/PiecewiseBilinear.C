@@ -10,7 +10,6 @@
 #include "PiecewiseBilinear.h"
 #include "ColumnMajorMatrix.h"
 #include "BilinearInterpolation.h"
-using namespace std;
 registerMooseObject("MooseApp", PiecewiseBilinear);
 
 defineLegacyParams(PiecewiseBilinear);
@@ -143,7 +142,6 @@ PiecewiseBilinear::parse(std::vector<Real> & x, std::vector<Real> & y, ColumnMaj
   if (!file.good())
     mooseError("In PiecewiseBilinear ", _name, ": Error opening file '" + _data_file_name + "'.");
   std::string line;
-  std::string stri;
   unsigned int linenum = 0;
   unsigned int itemnum = 0;
   unsigned int num_cols = 0;

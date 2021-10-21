@@ -19,25 +19,38 @@ class BilinearInterpolation;
 
 template <>
 InputParameters validParams<PiecewiseBilinear>();
-
-//c
-//c PiecewiseBilinear reads a file containing a (x, y, z) data table
-//c where (x,y) is a descretized or measured point and z is the measured value at (x,y) point.
-//c  Then, function PiecewiseBilinear will evalaute any (x',y') points by making
-//c  a bilinear interpolation based on these measured/input (x,y) table.
-//c  For example, you measure temperatures on a rectangular meshed by 2x2 elements, which has total 9
-//c  points/nodes to be measured. Assuming that the (x, y) coordinates of these 9 points/nodes are
-//c  (1000.0,7000.0),(2000.0,7000.0),(3000.0,7000.0),(1000.0,8500.0),(2000,8500.0),(3000.0,8500.0),
-//c  (1000.0,9600.0),(2000.0,9600.0),(3000.0,9600.0) and the corresponding measured temparatures are:
-//c  20.000,20.300,20.800,30.030,32.300,34.800,40.100,42.500,45.030.
-//c The input data in the file (temparature.csv) should be below:
-
-// Temparature,1000.0,2000.0,3000.0
-//      7000.0,20.000,20.300,20.800
-//      8500.0,30.030,32.300,34.800
-//      9600.0,40.100,42.500,45.030
-
-//in the function block of the inpute file: data_file = temperature.csv
+/**
+ * PiecewiseBilinear reads from a file the information necessary to build the vectors x and y and
+ * the ColumnMajorMatrix z, and then sends those (along with a sample point) to
+ * BilinearInterpolation.
+ * See BilinearInterpolation in moose/src/utils for a description of how that works...it is a 2D
+ * linear
+ * interpolation algorithm.  The format of the data file must be the following:
+ *
+ * T,10.0,20.0,30.0
+ * 50.0,1.0,2.2,3.5
+ * 55.0,2.0,2.5,4.0
+ * 60.0,2.7,3.2,3.9
+ *
+ * The first entry of data will be skipped. The first row is the x vector data.
+ * After the first row, the first column is the y vector data.
+ * The rest of the data is used to build the ColumnMajorMatrix z.
+ *
+ * x = [10.0 20.0 30.0]
+ * y = [50.0 55.0 60.0]
+ *
+ * z = [1.0 2.2 3.5]
+ *     [2.0 2.5 4.0]
+ *     [2.7 3.2 3.9]
+ *
+ *     z has to be x.size() by y.size()
+ *
+ * PiecewisBilinear also sends samples to BilinearInterpolation.  These samples are the z-coordinate
+ * of the current
+ * integration point, and the current value of time.  The name of the file that contains this data
+ * has to be included
+ * in the function block of the inpute file like this...data_file = example.csv.
+ */
 
 class PiecewiseBilinear : public Function
 {
