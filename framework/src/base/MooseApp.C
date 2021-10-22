@@ -1191,6 +1191,42 @@ MooseApp::addExecutor(std::shared_ptr<Executor> && executor)
   _executor = executor;
 }
 
+void
+MooseApp::addExecutorParams(const std::string & type, const std::string & name, const InputParameters & params)
+{
+  _executor_params[name] = std::make_pair(type, libmesh_make_unique<InputParameters>(params));
+}
+
+void
+MooseApp::createExecutors()
+{
+  // Holds the names of Executors that may be the root executor
+  std::list<std::string> possibly_root;
+
+  // What is already built
+  std::map<std::string, bool> already_built;
+
+  for (const auto & params_entry : _executor_params)
+  {
+    const auto & name = params_entry.first;
+    const auto & params = *params_entry.second.second;
+
+    std::cout << name << std::endl;
+
+    for (const auto & param : params)
+    {
+//      std::cout << "Param: " << param.first << std::endl;
+      if(dynamic_cast<InputParameters::Parameter<ExecutorName> *>(param.second))
+      {
+        const auto & dependency_name = static_cast<InputParameters::Parameter<ExecutorName> *>(param.second)->get();
+
+        if (!dependency_name.empty())
+          std::cout << "Depends on: " << dependency_name << std::endl;
+      }
+    }
+  }
+}
+
 Executioner *
 MooseApp::getExecutioner() const
 {

@@ -322,6 +322,18 @@ public:
   void setExecutioner(std::shared_ptr<Executioner> && executioner) { _executioner = executioner; }
   void setExecutor(std::shared_ptr<Executor> && executor) { _executor = executor; }
   void addExecutor(std::shared_ptr<Executor> && executor);
+
+  /**
+   * Adds the parameters for an Executor to the list of parameters.  This is done
+   * so that the Executors can be created in _exactly_ the correct order.
+   */
+  void addExecutorParams(const std::string & type, const std::string & name, const InputParameters & params);
+
+  /**
+   * After adding all of the Executor Params - this function will actually cause all of them to be built
+   */
+  void createExecutors();
+
   Executor & getExecutor(const std::string & name) { return *_executors[name]; }
 
   /**
@@ -763,6 +775,13 @@ private:
    * preexisting RMs using this method
    */
   void removeRelationshipManager(std::shared_ptr<RelationshipManager> relationship_manager);
+
+  /**
+   * Used in building the Executors
+   *
+   * Maps the name of the Executor block to the <type, params>
+   */
+  std::unordered_map<std::string, std::pair<std::string, std::unique_ptr<InputParameters>>> _executor_params;
 
 public:
   /**

@@ -94,6 +94,7 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("create_problem",               Problem,                false);
   registerMooseObjectTask("setup_executioner",            Executioner,            false);
   registerMooseObjectTask("setup_executor",            Executor,            false);
+  registerTask("add_executor", true);
 
   // This task does not construct an object, but it needs all of the parameters that
   // would normally be used to construct an object.
@@ -276,6 +277,7 @@ addActionTypes(Syntax & syntax)
                            "(setup_time_integrator)"
                            "(setup_executioner)"
                            "(setup_executor)"
+                           "(add_executor)"
                            "(check_integrity_early)"
                            "(setup_predictor)"
                            "(init_displaced_problem)"

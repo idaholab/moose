@@ -1356,6 +1356,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
       setscalar(MeshGeneratorName, string);
       setscalar(ExtraElementIDName, string);
       setscalar(PostprocessorName, PostprocessorName);
+      setscalar(ExecutorName, string);
 
       // Moose Compound Scalars
       setscalar(RealVectorValue, RealVectorValue);
@@ -1418,6 +1419,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
       setvector(ExtraElementIDName, string);
       setvector(ReporterName, string);
       setvector(ReporterValueName, string);
+      setvector(ExecutorName, string);
 
       // map types
       setmap(string, Real);

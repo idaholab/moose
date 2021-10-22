@@ -39,14 +39,17 @@ CreateExecutorAction::CreateExecutorAction(InputParameters params)
 void
 CreateExecutorAction::act()
 {
-  std::shared_ptr<Executor> executor = _factory.create<Executor>(_type, _name, _moose_object_pars);
+//  std::shared_ptr<Executor> executor = _factory.create<Executor>(_type, _name, _moose_object_pars);
 
   // If enabled, automatically create a Preconditioner if the [Preconditioning] block is not found
   if (_auto_preconditioning && !_awh.hasActions("add_preconditioning") &&
       _moose_object_pars.isParamValid("solve_type"))
     setupAutoPreconditioning();
 
-  _app.addExecutor(std::move(executor));
+  std::cout << "Name: " << _name << std::endl;
+
+//  _app.addExecutor(std::move(executor));
+  _app.addExecutorParams(_type, _name, _moose_object_pars);
 }
 
 void

@@ -15,8 +15,8 @@ InputParameters
 BinaryTestExecutor::validParams()
 {
   InputParameters params = Executor::validParams();
-  params.addParam<std::string>("inner1", "", "inner executor name to run");
-  params.addParam<std::string>("inner2", "", "another inner executor name to run");
+  params.addParam<ExecutorName>("inner1", "", "inner executor name to run");
+  params.addParam<ExecutorName>("inner2", "", "another inner executor name to run");
   params.addParam<bool>(
       "fail_early", false, "true to cause executor to fail execution before inner executors run");
   params.addParam<bool>(
@@ -29,10 +29,10 @@ BinaryTestExecutor::validParams()
 
 BinaryTestExecutor::BinaryTestExecutor(const InputParameters & parameters)
   : Executor(parameters),
-    _inner1(getParam<std::string>("inner1").empty()
+    _inner1(getParam<ExecutorName>("inner1").empty()
                 ? nullptr
                 : &_fe_problem.getExecutor(getParam<std::string>("inner1"))),
-    _inner2(getParam<std::string>("inner2").empty()
+    _inner2(getParam<ExecutorName>("inner2").empty()
                 ? nullptr
                 : &_fe_problem.getExecutor(getParam<std::string>("inner2")))
 {
