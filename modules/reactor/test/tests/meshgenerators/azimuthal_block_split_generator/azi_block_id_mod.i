@@ -14,7 +14,7 @@
     preserve_volumes = true
   []
   [./cd_azi_define]
-    type = AzimuthalBlockIDMeshGenerator
+    type = AzimuthalBlockSplitGenerator
     input = cd
     start_angle = 280
     angle_range = 100

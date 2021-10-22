@@ -14,7 +14,7 @@
 #include "ElementIDInterface.h"
 
 /**
- * A function that returns an absorber fraction value for multiple control drums application.
+ * A function that returns an absorber fraction for multiple control drums application.
  */
 class MultiControlDrumFunction : public Function,
                                  public MeshMetaDataInterface,
@@ -36,6 +36,10 @@ protected:
   const std::vector<Real> _start_angles;
   /// Vector of angular ranges of control drums
   const std::vector<Real> _angle_ranges;
+  /// Start time of control drums rotation
+  const Real _rotation_start_time;
+  /// End time of control drums rotation
+  const Real _rotation_end_time;
   /// Whether extra element id user_control_drum_id is used.
   const bool _use_control_drum_id;
   /// ExtraElementID: control drum ExtraElementID

@@ -16,7 +16,7 @@ MultiControlDrumFunction::validParams()
 {
   InputParameters params = Function::validParams();
   params.addClassDescription(
-      "A function that returns an absorber fraction value for multiple control drums application.");
+      "A function that returns an absorber fraction for multiple control drums application.");
   params.addRequiredParam<MeshGeneratorName>(
       "mesh_generator",
       "Name of the mesh generator to be used to retrieve control drums information.");
@@ -27,6 +27,11 @@ MultiControlDrumFunction::validParams()
       "Vector of initial angular positions of the beginning of the absorber components.");
   params.addRequiredParam<std::vector<Real>>(
       "angle_ranges", "Vector of angular ranges of the beginning of the absorber components.");
+  params.addParam<Real>(
+      "rotation_start_time", 0.0, "The time point at which the control drums start rotating.");
+  params.addParam<Real>("rotation_end_time",
+                        std::numeric_limits<Real>::max(),
+                        "The time point at which the control drums stop rotating.");
   params.addParam<bool>(
       "use_control_drum_id", true, "Whether extra element id user_control_drum_id is used.");
   params.addParamNamesToGroup("use_control_drum_id", "Advanced");
@@ -42,6 +47,8 @@ MultiControlDrumFunction::MultiControlDrumFunction(const InputParameters & param
     _angular_speeds(getParam<std::vector<Real>>("angular_speeds")),
     _start_angles(getParam<std::vector<Real>>("start_angles")),
     _angle_ranges(getParam<std::vector<Real>>("angle_ranges")),
+    _rotation_start_time(getParam<Real>("rotation_start_time")),
+    _rotation_end_time(getParam<Real>("rotation_end_time")),
     _use_control_drum_id(getParam<bool>("use_control_drum_id")),
     _control_drum_id(getElementIDByName("control_drum_id")),
     _control_drum_positions(
@@ -59,11 +66,18 @@ MultiControlDrumFunction::MultiControlDrumFunction(const InputParameters & param
     paramError("angular_speeds",
                "the size of this parameter must be identical to the control drum number recorded "
                "in the MeshMetaData.");
+  if (_rotation_end_time <= _rotation_start_time)
+    paramError("rotation_end_time", "this parameter must be larger than rotation_start_time.");
 }
 
 Real
 MultiControlDrumFunction::value(Real t, const Point & p) const
 {
+  // Calculate the effective rotation time
+  const Real t_eff = t < _rotation_start_time
+                         ? 0.0
+                         : (t > _rotation_end_time ? (_rotation_end_time - _rotation_start_time)
+                                                   : t - _rotation_start_time);
   // Find the closest control drum for a given Point p; only needed if control drum id is not used.
   std::vector<std::pair<Real, unsigned int>> meshcontrol_drum_dist_vec;
   if (!_use_control_drum_id)
@@ -81,7 +95,7 @@ MultiControlDrumFunction::value(Real t, const Point & p) const
                                  : meshcontrol_drum_dist_vec.front().second;
   const auto & cd_pos = _control_drum_positions[cd_id];
 
-  Real dynamic_start_angle = (_angular_speeds[cd_id] * t + _start_angles[cd_id]) / 180.0 * M_PI;
+  Real dynamic_start_angle = (_angular_speeds[cd_id] * t_eff + _start_angles[cd_id]) / 180.0 * M_PI;
   Real dynamic_end_angle = dynamic_start_angle + _angle_ranges[cd_id] / 180.0 * M_PI;
 
   dynamic_start_angle = atan2(std::sin(dynamic_start_angle),
@@ -104,10 +118,10 @@ MultiControlDrumFunction::value(Real t, const Point & p) const
   // This part seems long; but it only solves one simple issue -> transition from M_PI to -M_PI
 
   // The two azimuthal ends of the element that the start angle intercepts;
-  // and The two azimuthal ends of the element that the end angle intercepts;
+  // and the two azimuthal ends of the element that the end angle intercepts;
   Real start_low, start_high, end_low, end_high;
-  // This means that dynamic_start_angle is greater than the lowest mesh azimuthal angle and lower
-  // than the greatest mesh azimuthal angle. Namely, dynamic_start_angle does not cause the
+  // This means that the dynamic_start_angle is greater than the lowest mesh azimuthal angle and
+  // lower than the greatest mesh azimuthal angle. Namely, dynamic_start_angle does not cause the
   // "transition from M_PI to -M_PI" issue.
   if (start_bound != _control_drums_azimuthal_meta[cd_id].begin() &&
       start_bound != _control_drums_azimuthal_meta[cd_id].end())
@@ -150,7 +164,7 @@ MultiControlDrumFunction::value(Real t, const Point & p) const
   // In the presence of "transition from M_PI to -M_PI", the relation above is compromised.
   // Based on how the relation is compromised, we can tell where the transition occurs.
 
-  // Most trivial scenario -> no transition from M_PI to -M_PI is involved (it happens to an pure
+  // Most trivial scenario -> no transition from M_PI to -M_PI is involved (it happens to a pure
   // reflector element)
   if (end_high >= start_low)
   {

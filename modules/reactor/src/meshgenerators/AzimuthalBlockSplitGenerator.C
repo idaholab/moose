@@ -7,16 +7,16 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "AzimuthalBlockIDMeshGenerator.h"
+#include "AzimuthalBlockSplitGenerator.h"
 #include "MooseMeshUtils.h"
 
 // C++ includes
 #include <cmath> // provides round, not std::round (see http://www.cplusplus.com/reference/cmath/round/)
 
-registerMooseObject("ReactorApp", AzimuthalBlockIDMeshGenerator);
+registerMooseObject("ReactorApp", AzimuthalBlockSplitGenerator);
 
 InputParameters
-AzimuthalBlockIDMeshGenerator::validParams()
+AzimuthalBlockSplitGenerator::validParams()
 {
   InputParameters params = PolygonMeshGeneratorBase::validParams();
   params.addRequiredParam<MeshGeneratorName>("input", "The input mesh to be modified.");
@@ -37,13 +37,13 @@ AzimuthalBlockIDMeshGenerator::validParams()
                                             "angle_range>0.0 & angle_range<=180.0",
                                             "Azimuthal angle range of the new block.");
   params.addClassDescription(
-      "This AzimuthalBlockIDMeshGenerator object takes in a polygon/hexagon concentric circle mesh "
+      "This AzimuthalBlockSplitGenerator object takes in a polygon/hexagon concentric circle mesh "
       "and renames blocks on a user-defined azimuthal segment / wedge of the mesh.");
 
   return params;
 }
 
-AzimuthalBlockIDMeshGenerator::AzimuthalBlockIDMeshGenerator(const InputParameters & parameters)
+AzimuthalBlockSplitGenerator::AzimuthalBlockSplitGenerator(const InputParameters & parameters)
   : PolygonMeshGeneratorBase(parameters),
     _input_name(getParam<MeshGeneratorName>("input")),
     _new_block_ids(getParam<std::vector<subdomain_id_type>>("new_block_ids")),
@@ -68,7 +68,7 @@ AzimuthalBlockIDMeshGenerator::AzimuthalBlockIDMeshGenerator(const InputParamete
 }
 
 std::unique_ptr<MeshBase>
-AzimuthalBlockIDMeshGenerator::generate()
+AzimuthalBlockSplitGenerator::generate()
 {
   auto mesh = dynamic_pointer_cast<MeshBase>(_mesh);
 
@@ -113,11 +113,11 @@ AzimuthalBlockIDMeshGenerator::generate()
 
   // Identify the mesh azimuthal angles of the elements that need to be modified for the starting
   // edge of the absorber region.
-  angleIndentifier(_start_angle,
-                   original_start_down,
-                   original_start_down_it,
-                   original_start_up,
-                   original_start_up_it);
+  angleIdentifier(_start_angle,
+                  original_start_down,
+                  original_start_down_it,
+                  original_start_up,
+                  original_start_up_it);
 
   Real original_end_down;
   std::vector<Real>::iterator original_end_down_it;
@@ -126,7 +126,7 @@ AzimuthalBlockIDMeshGenerator::generate()
 
   // Identify the mesh azimuthal angles of the elements that need to be modified for the ending
   // edge of the absorber region.
-  angleIndentifier(
+  angleIdentifier(
       _end_angle, original_end_down, original_end_down_it, original_end_up, original_end_up_it);
 
   Real azi_to_mod_start;
@@ -252,7 +252,7 @@ AzimuthalBlockIDMeshGenerator::generate()
   {
     if (min_non_circular_radius <
         max_circular_radius / radiusCorrectionFactor_original * radiusCorrectionFactor_mod)
-      mooseError("In AzimuthalBlockIDMeshGenerator ",
+      mooseError("In AzimuthalBlockSplitGenerator ",
                  _name,
                  ": the circular region is overlapped with background region after correction.");
     for (libMesh::MeshBase::node_iterator node_it = mesh->nodes_begin();
@@ -302,11 +302,11 @@ AzimuthalBlockIDMeshGenerator::generate()
 }
 
 void
-AzimuthalBlockIDMeshGenerator::angleIndentifier(const Real terminal_angle,
-                                                Real & original_down,
-                                                std::vector<Real>::iterator & original_down_it,
-                                                Real & original_up,
-                                                std::vector<Real>::iterator & original_up_it)
+AzimuthalBlockSplitGenerator::angleIdentifier(const Real & terminal_angle,
+                                              Real & original_down,
+                                              std::vector<Real>::iterator & original_down_it,
+                                              Real & original_up,
+                                              std::vector<Real>::iterator & original_up_it)
 {
 
   auto term_up =
@@ -335,22 +335,22 @@ AzimuthalBlockIDMeshGenerator::angleIndentifier(const Real terminal_angle,
 }
 
 void
-AzimuthalBlockIDMeshGenerator::angleModifier(const Real side_angular_shift,
-                                             const Real side_angular_range,
-                                             const Real azi_tol,
-                                             const Real terminal_angle,
-                                             const Real original_down,
-                                             std::vector<Real>::iterator & original_down_it,
-                                             const Real original_up,
-                                             std::vector<Real>::iterator & original_up_it,
-                                             Real & azi_to_keep,
-                                             Real & azi_to_mod)
+AzimuthalBlockSplitGenerator::angleModifier(const Real & side_angular_shift,
+                                            const Real & side_angular_range,
+                                            const Real & azi_tol,
+                                            const Real & terminal_angle,
+                                            const Real & original_down,
+                                            std::vector<Real>::iterator & original_down_it,
+                                            const Real & original_up,
+                                            std::vector<Real>::iterator & original_up_it,
+                                            Real & azi_to_keep,
+                                            Real & azi_to_mod)
 {
-  // Half internal is used to help determine which of the two identified azimuthal angles needs to
+  // Half interval is used to help determine which of the two identified azimuthal angles needs to
   // be moved.
   const Real half_interval = (original_up - original_down) / 2.0;
-  // In this case, the downer azimuthal angle matches a vertex position, while the target angle is
-  // not overlapped with the same vertex position. Thus the downer azimuthal angle is not moved
+  // In this case, the lower azimuthal angle matches a vertex position, while the target angle is
+  // not overlapped with the same vertex position. Thus the lower azimuthal angle is not moved
   // anyway.
   if (std::abs((original_down + side_angular_shift) / side_angular_range -
                std::round((original_down + side_angular_shift) / side_angular_range)) < azi_tol &&
@@ -379,7 +379,7 @@ AzimuthalBlockIDMeshGenerator::angleModifier(const Real side_angular_shift,
     azi_to_mod = original_up;
     *original_up_it = terminal_angle;
   }
-  // Move downer azimuthal angle as it is closer to the target angle.
+  // Move lower azimuthal angle as it is closer to the target angle.
   else
   {
     azi_to_keep = original_up;
@@ -389,16 +389,16 @@ AzimuthalBlockIDMeshGenerator::angleModifier(const Real side_angular_shift,
 }
 
 std::unique_ptr<MeshBase>
-AzimuthalBlockIDMeshGenerator::nodeModifier(
+AzimuthalBlockSplitGenerator::nodeModifier(
     std::unique_ptr<MeshBase> mesh,
-    const std::vector<std::pair<Real, dof_id_type>> node_id_mod,
-    const std::vector<std::pair<Real, dof_id_type>> node_id_keep,
+    const std::vector<std::pair<Real, dof_id_type>> & node_id_mod,
+    const std::vector<std::pair<Real, dof_id_type>> & node_id_keep,
     std::vector<Real> & circular_rad_list,
     std::vector<Real> & non_circular_rad_list,
-    const std::vector<std::tuple<dof_id_type, boundary_id_type>> node_list,
-    const Real term_angle,
-    const bool external_block_change,
-    const Real rad_tol)
+    const std::vector<std::tuple<dof_id_type, boundary_id_type>> & node_list,
+    const Real & term_angle,
+    const bool & external_block_change,
+    const Real & rad_tol)
 {
   for (unsigned int i = 0; i < node_id_mod.size(); i++)
   {
