@@ -73,10 +73,8 @@ With this extension, DGKernels can handle three pieces of residual, marked as `E
 Similarly, a variable for the Lagrange multiplier on boundary $\Omega_D$ can be coupled in integrated boundary conditions.
 
 The DGKernal for $\left( \lambda^\ast, [ u ] \right)_\Gamma + \left( [ u^\ast ], \lambda \right)_\Gamma$ can be found at [HFEMDiffusion.md].
-The boundary condition for $\left( u^\ast, \lambda_D \right)_{\partial \Omega_D} + \left( \lambda_D^\ast, u - g \right)_{\partial \Omega_D}$ can be found at [HFEMDirichletBC.md].
-
-!alert note
-Only array variables are enabled for HFEM calculations.
+The boundary condition for $\left( u^\ast, \lambda_D \right)_{\partial \Omega_D} + \left( \lambda_D^\ast, u - g \right)_{\partial \Omega_D}$ can be found at [HFEMDirichletBC.md] with the generalization of $g$ being either a fixed value or a variable defined on boundary.
+With this generalization, [HFEMDirichletBC.md] can be used along with kernels defined on the Robin boundary for $\left( u_R^\ast, \alpha u_R - c - \lambda_R \right)_{\partial \Omega_R}$ for the alternative way of imposing the Robin boundary condition above.
 
 !alert warning
 MOOSE does not support mesh adaptation with HFEM currently.
