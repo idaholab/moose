@@ -108,9 +108,12 @@ InputFileFormatter::printParams(const std::string & /*prefix*/,
       {
         libMesh::Parameters::Parameter<std::string> * val =
             dynamic_cast<libMesh::Parameters::Parameter<std::string> *>(iter.second);
-        const std::string & active = val->get();
-        if (val != NULL && active == "")
-          continue;
+        if (val)
+        {
+          const std::string & active = val->get();
+          if (val != NULL && active == "")
+            continue;
+        }
       }
 
       found = true;
