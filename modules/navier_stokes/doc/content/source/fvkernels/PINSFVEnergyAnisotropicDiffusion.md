@@ -4,7 +4,7 @@
 
 This kernel implements a diffusion term for the fluid energy equation.
 This kernel accepts an anisotropic thermal diffusivity material property, an isotropic thermal diffusivity may be
-specified using a [PCNSFVEnergyDiffusion.md] kernel.
+specified using a [PINSFVEnergyDiffusion.md] kernel.
 
 \begin{equation}
 \nabla \cdot \left( \epsilon \k \nabla T \right)

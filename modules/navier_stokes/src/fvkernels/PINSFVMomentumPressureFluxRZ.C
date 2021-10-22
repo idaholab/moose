@@ -31,9 +31,7 @@ PINSFVMomentumPressureFluxRZ::validParams()
 }
 
 PINSFVMomentumPressureFluxRZ::PINSFVMomentumPressureFluxRZ(const InputParameters & params)
-  : FVElementalKernel(params),
-    _p(coupledValue(NS::pressure)),
-    _eps(coupledValue(NS::porosity))
+  : FVElementalKernel(params), _p(adCoupledValue(NS::pressure)), _eps(coupledValue(NS::porosity))
 {
 }
 

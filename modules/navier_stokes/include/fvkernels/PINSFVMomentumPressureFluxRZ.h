@@ -28,6 +28,6 @@ public:
 protected:
   ADReal computeQpResidual() override;
 
-  const VariableValue & _p;
+  const ADVariableValue & _p;
   const VariableValue & _eps;
 };
