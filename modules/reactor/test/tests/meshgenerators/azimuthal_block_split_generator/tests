@@ -1,5 +1,5 @@
 [Tests]
-  design = 'meshgenerators/AzimuthalBlockIDMeshGenerator.md'
+  design = 'meshgenerators/AzimuthalBlockSplitGenerator.md'
   issues = '#19100'
   [block_id_in]
     type = 'Exodiff'

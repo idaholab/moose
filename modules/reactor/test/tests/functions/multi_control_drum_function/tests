@@ -10,12 +10,8 @@
   []
   [multi_cd_func_noid]
     type = 'Exodiff'
-    input = 'multi_cd.i'
-    exodiff = 'multi_cd_nocdid.e'
-    cli_args = 'Functions/cd_param_func/use_control_drum_id=false
-                Functions/cd_param_func/angular_speeds="5 10 15 20 25 30"
-                Outputs/nocdid/enable=true
-                Outputs/default/enable=false'
+    input = 'multi_cd_noid.i'
+    exodiff = 'multi_cd_noid_nocdid.e'
     requirement = 'The system should create a function that describes the rotation of multiple control drums without using control_drum_id.'
     mesh_mode = 'REPLICATED'
   []

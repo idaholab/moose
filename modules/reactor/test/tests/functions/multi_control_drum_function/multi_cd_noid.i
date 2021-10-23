@@ -158,7 +158,8 @@
   [cd_param_func]
     type = MultiControlDrumFunction
     mesh_generator = core
-    angular_speeds = '2 4 8 16 64 128'
+    use_control_drum_id = false
+    angular_speeds = '5 10 15 20 25 30'
     start_angles = '0 0 0 0 0 0'
     angle_ranges = '90 90 90 90 90 90'
   []
@@ -171,7 +172,7 @@
 []
 
 [Outputs]
-  [default]
+  [nocdid]
     type = Exodus
   []
 []
