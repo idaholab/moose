@@ -26,6 +26,8 @@ PolycrystalRandomICAction::validParams()
                              "The type of random polycrystal initial condition. Whether one "
                              "order parameter is chosen to be 1 at each node or if each order "
                              "parameter continuously varies from 0 to 1");
+  params.addParam<std::vector<SubdomainName>>("block",
+                                              "Block restriction for the initial condition");
 
   return params;
 }
@@ -54,6 +56,9 @@ PolycrystalRandomICAction::act()
     poly_params.set<unsigned int>("op_num") = _op_num;
     poly_params.set<unsigned int>("op_index") = op;
     poly_params.set<unsigned int>("random_type") = _random_type;
+    if (isParamValid("block"))
+      poly_params.set<std::vector<SubdomainName>>("block") =
+          getParam<std::vector<SubdomainName>>("block");
 
     // Add initial condition
     _problem->addInitialCondition("PolycrystalRandomIC",
