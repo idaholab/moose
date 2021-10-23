@@ -48,7 +48,7 @@ LeastSquaresFitBase::doLeastSquares()
   auto x = Eigen::Map<SolveVec, Eigen::Unaligned>(_coeffs.data(), _num_coeff);
   typedef Eigen::Matrix<Real, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor> SolveMatrix;
   auto A = Eigen::Map<SolveMatrix, Eigen::Unaligned>(_matrix.data(), _y.size(), _num_coeff);
-  x = A.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(b);
+  x = A.colPivHouseholderQr().solve(b);
 }
 
 unsigned int
