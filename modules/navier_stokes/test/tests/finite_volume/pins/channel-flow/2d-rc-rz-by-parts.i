@@ -131,9 +131,8 @@ velocity_interp_method='rc'
     pressure = pressure
     porosity = porosity
   []
-  # This term fails with r=0
   [v_pressure_by_parts_volume_term]
-    type = PINSFVMomentumPressureFluxRZ
+    type = PNSFVMomentumPressureFluxRZ
     variable = v
     pressure = pressure
     porosity = porosity

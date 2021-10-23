@@ -25,8 +25,6 @@ GeneralFunctorFluidProps::validParams()
   params.addRequiredParam<MooseFunctorName>(NS::pressure, "Pressure");
   params.addRequiredParam<MooseFunctorName>(NS::T_fluid, "Fluid temperature");
   params.addRequiredParam<MooseFunctorName>(NS::speed, "Velocity norm");
-
-  // We have to have a default here, otherwise NS::density will be replaced by ""
   params.addParam<MooseFunctorName>(NS::density, "Density");
 
   params.addParam<FunctionName>(
