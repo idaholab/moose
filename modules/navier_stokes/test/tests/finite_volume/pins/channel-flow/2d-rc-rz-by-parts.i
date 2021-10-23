@@ -9,7 +9,6 @@ velocity_interp_method='rc'
     dim = 2
     xmin = 0
     xmax = 5
-    # r=0 case fails with the p/r term
     ymin = 0
     ymax = 1
     nx = 40
