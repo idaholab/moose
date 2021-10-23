@@ -59,8 +59,7 @@ PiecewiseConstantFromCSV::initialSetup()
   _read_prop_user_object = &getUserObject<PropertyReadFile>("read_prop_user_object");
 
   if (_read_type != _read_prop_user_object->getReadType())
-    paramError("read_type",
-               "The PropertyReadFile UO should have the same read_type parameter.");
+    paramError("read_type", "The PropertyReadFile UO should have the same read_type parameter.");
 }
 
 Real
@@ -70,7 +69,7 @@ PiecewiseConstantFromCSV::value(Real, const Point & p) const
   {
     // This is somewhat inefficient, but it allows us to retrieve the data in the
     // CSV by element or by block.
-    std::set< const Elem *> candidate_elements;
+    std::set<const Elem *> candidate_elements;
     (*_point_locator)(p, candidate_elements);
 
     // Find the element with the lowest ID (that is also on the domain ???????)
@@ -78,16 +77,16 @@ PiecewiseConstantFromCSV::value(Real, const Point & p) const
     const Elem * min_id_elem;
     unsigned int num_candidates = 0;
 
-    std::set< const Elem *>::iterator it = candidate_elements.begin();
+    std::set<const Elem *>::iterator it = candidate_elements.begin();
     while (it != candidate_elements.end())
     {
-        if ((*it)->id() < min_elem_id)
-        {
-          min_elem_id = (*it)->id();
-          min_id_elem = (*it);
-          num_candidates++;
-        }
-        it++;
+      if ((*it)->id() < min_elem_id)
+      {
+        min_elem_id = (*it)->id();
+        min_id_elem = (*it);
+        num_candidates++;
+      }
+      it++;
     }
 
     if (num_candidates == 0)

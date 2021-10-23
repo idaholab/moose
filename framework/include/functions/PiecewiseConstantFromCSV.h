@@ -39,7 +39,7 @@ public:
   virtual Real timeDerivative(Real, const Point &) const override { return 0; };
 
 protected:
-  void initialSetup();
+  void initialSetup() override;
 
   /// A user object that takes care of reading the CSV file
   const PropertyReadFile * _read_prop_user_object;

@@ -186,7 +186,7 @@ PropertyReadFile::getData(const Elem * elem, unsigned int prop_num) const
 
     case ReadTypeEnum::NODE:
       mooseError(
-        "PropertyReadFile has data sorted by node, it should note be retrieved by element");
+          "PropertyReadFile has data sorted by node, it should note be retrieved by element");
       break;
   }
   return data;

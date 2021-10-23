@@ -10,7 +10,7 @@
 #pragma once
 
 #include "ComputeElasticityTensor.h"
-#include "ElementPropertyReadFile.h"
+#include "PropertyReadFile.h"
 #include "RankTwoTensor.h"
 #include "RotationTensor.h"
 
@@ -33,7 +33,7 @@ protected:
    * Element property read user object
    * Presently used to read Euler angles -  see test
    */
-  const ElementPropertyReadFile * const _read_prop_user_object;
+  const PropertyReadFile * const _read_prop_user_object;
 
   MaterialProperty<RealVectorValue> & _Euler_angles_mat_prop;
 
