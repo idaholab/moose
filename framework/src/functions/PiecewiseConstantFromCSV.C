@@ -16,7 +16,7 @@ PiecewiseConstantFromCSV::validParams()
 {
   InputParameters params = Function::validParams();
   params.addRequiredParam<UserObjectName>("read_prop_user_object",
-                                          "The ElementReadPropertyFile "
+                                          "The ElementPropertyReadFile "
                                           "GeneralUserObject to read element "
                                           "specific property values from file");
   params.addRequiredParam<unsigned int>("column_number",
@@ -30,6 +30,9 @@ PiecewiseConstantFromCSV::validParams()
                                      "element:by element "
                                      "voronoi:nearest neighbor / voronoi tesselation structure "
                                      "block:by mesh block");
+  // We need one ghost layer in case we need to retrieve the id or subdomain id from an
+  // element that is on the other side of a domain boundary
+  params.set<unsigned short>("ghost_layers") = 1;
 
   params.addClassDescription("Uses data read from CSV to assign values");
   return params;
@@ -66,16 +69,30 @@ PiecewiseConstantFromCSV::value(Real, const Point & p) const
   {
     // This is somewhat inefficient, but it allows us to retrieve the data in the
     // CSV by element or by block.
-    const auto current_elem = (*_point_locator)(p);
+    std::set< const Elem *> candidate_elements;
+    (*_point_locator)(p, candidate_elements);
 
-    // A point may be on the boundary of some elements
-    // auto elem_id = current_elem ? current_elem->id() : DofObject::invalid_id;
-    // _communicator.min(elem_id);
+    // Find the element with the lowest ID (that is also on the domain ???????)
+    unsigned int min_elem_id = std::numeric_limits<unsigned int>::max();
+    const Elem * min_id_elem;
+    unsigned int num_candidates = 0;
 
-    if (elem_id == DofObject::invalid_id)
-      mooseError("No element located at ", p, " in PointValue Postprocessor named: ", name());
+    std::set< const Elem *>::iterator it = candidate_elements.begin();
+    while (it != candidate_elements.end())
+    {
+        if ((*it)->id() < min_elem_id)
+        {
+          min_elem_id = (*it)->id();
+          min_id_elem = (*it);
+          num_candidates++;
+        }
+        it++;
+    }
 
-    return _read_prop_user_object->getData(current_elem, _column_number);
+    if (num_candidates == 0)
+      mooseError("No element located at ", p, " to search in element or block sorted CSV values");
+
+    return _read_prop_user_object->getData(min_id_elem, _column_number);
   }
   else
     // No need to search for the element if we're just looking at nearest neighbors

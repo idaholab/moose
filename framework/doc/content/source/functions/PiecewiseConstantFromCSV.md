@@ -18,6 +18,10 @@ It can assume CSV data
 For the latter case, the first columns of the CSV data must define the coordinates of each point forming the interpolation grid. The number of columns used to define these coordinates
 must match the dimension of the mesh.
 
+!alert note
+When use data by block or by element, if there is multiple possibilities for the element to choose from, for example at a node,
+the element with the lowest ID will be used.
+
 ## Example Input Syntax
 
 In this example, we display three options for using CSV data to compute a function over an unstructured mesh:
