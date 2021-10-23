@@ -7,16 +7,20 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ElementPropertyReadFile.h"
+#include "PropertyReadFile.h"
 #include "MooseRandom.h"
 #include "MooseMesh.h"
 
 #include <fstream>
 
-registerMooseObject("MooseApp", ElementPropertyReadFile);
+registerMooseObject("MooseApp", PropertyReadFile);
+registerMooseObjectRenamed("MooseApp",
+                           ElementPropertyReadFile,
+                           "06/30/2021 24:00",
+                           PropertyReadFile);
 
 InputParameters
-ElementPropertyReadFile::validParams()
+PropertyReadFile::validParams()
 {
   InputParameters params = GeneralUserObject::validParams();
   params.addClassDescription("User Object to read property data from an external file and assign "
@@ -29,9 +33,10 @@ ElementPropertyReadFile::validParams()
       "ngrain", "Number of grains.", "ngrain is deprecated, use nvoronoi instead");
   params.addParam<unsigned int>("nblock", 0, "Number of blocks");
   params.addRequiredParam<MooseEnum>("read_type",
-                                     MooseEnum("element voronoi block"),
+                                     MooseEnum("element voronoi block node"),
                                      "Type of property distribution: "
                                      "element:by element "
+                                     "node: by node "
                                      "voronoi:nearest neighbor / voronoi grain structure "
                                      "block:by mesh block");
   params.addParam<bool>("use_random_voronoi",
@@ -47,7 +52,7 @@ ElementPropertyReadFile::validParams()
   return params;
 }
 
-ElementPropertyReadFile::ElementPropertyReadFile(const InputParameters & parameters)
+PropertyReadFile::PropertyReadFile(const InputParameters & parameters)
   : GeneralUserObject(parameters),
     _prop_file_name(getParam<FileName>("prop_file_name")),
     _reader(_prop_file_name),
@@ -66,6 +71,7 @@ ElementPropertyReadFile::ElementPropertyReadFile(const InputParameters & paramet
     paramError("rand_seed",
                "Random seeds should only be provided if random tesselation is desired");
   _nelem = _mesh.nElem();
+  _nnodes = _mesh.nNodes();
 
   for (unsigned int i = 0; i < LIBMESH_DIM; i++)
   {
@@ -83,7 +89,7 @@ ElementPropertyReadFile::ElementPropertyReadFile(const InputParameters & paramet
 }
 
 void
-ElementPropertyReadFile::readData()
+PropertyReadFile::readData()
 {
   if (_read_type == ReadTypeEnum::ELEMENT && _mesh.getMesh().allow_renumbering())
     mooseWarning("CSV data is sorted by element, but mesh element renumbering is on, be careful!");
@@ -97,6 +103,10 @@ ElementPropertyReadFile::readData()
   {
     case ReadTypeEnum::ELEMENT:
       nobjects = _nelem;
+      break;
+
+    case ReadTypeEnum::NODE:
+      nobjects = _nnodes;
       break;
 
     case ReadTypeEnum::VORONOI:
@@ -131,7 +141,7 @@ ElementPropertyReadFile::readData()
 }
 
 void
-ElementPropertyReadFile::initVoronoiCenterPoints()
+PropertyReadFile::initVoronoiCenterPoints()
 {
   _center.resize(_nvoronoi);
 
@@ -153,7 +163,7 @@ ElementPropertyReadFile::initVoronoiCenterPoints()
 }
 
 Real
-ElementPropertyReadFile::getData(const Elem * elem, unsigned int prop_num) const
+PropertyReadFile::getData(const Elem * elem, unsigned int prop_num) const
 {
   if (prop_num >= _nprop)
     paramError(
@@ -173,12 +183,17 @@ ElementPropertyReadFile::getData(const Elem * elem, unsigned int prop_num) const
     case ReadTypeEnum::BLOCK:
       data = getBlockData(elem, prop_num);
       break;
+
+    case ReadTypeEnum::NODE:
+      mooseError(
+        "PropertyReadFile has data sorted by node, it should note be retrieved by element");
+      break;
   }
   return data;
 }
 
 Real
-ElementPropertyReadFile::getElementData(const Elem * elem, unsigned int prop_num) const
+PropertyReadFile::getElementData(const Elem * elem, unsigned int prop_num) const
 {
   unsigned int jelem = elem->id();
   if (jelem >= _nelem)
@@ -187,7 +202,16 @@ ElementPropertyReadFile::getElementData(const Elem * elem, unsigned int prop_num
 }
 
 Real
-ElementPropertyReadFile::getBlockData(const Elem * elem, unsigned int prop_num) const
+PropertyReadFile::getNodeData(const Node * node, unsigned int prop_num) const
+{
+  unsigned int jnode = node->id();
+  if (jnode >= _nnodes)
+    mooseError("Node ID ", jnode, " greater than than total number of nodes in mesh ", _nnodes);
+  return _reader.getData(jnode)[prop_num];
+}
+
+Real
+PropertyReadFile::getBlockData(const Elem * elem, unsigned int prop_num) const
 {
   unsigned int offset = 0;
   if (!_block_zero)
@@ -204,7 +228,7 @@ ElementPropertyReadFile::getBlockData(const Elem * elem, unsigned int prop_num) 
 }
 
 Real
-ElementPropertyReadFile::getVoronoiData(const Point centroid, unsigned int prop_num) const
+PropertyReadFile::getVoronoiData(const Point centroid, unsigned int prop_num) const
 {
   Real min_dist = _max_range;
   unsigned int ivoronoi = 0;
@@ -238,7 +262,7 @@ ElementPropertyReadFile::getVoronoiData(const Point centroid, unsigned int prop_
 
 // TODO: this should probably use the built-in min periodic distance!
 Real
-ElementPropertyReadFile::minPeriodicDistance(Point c, Point p) const
+PropertyReadFile::minPeriodicDistance(Point c, Point p) const
 {
   Point dist_vec = c - p;
   Real min_dist = dist_vec.norm();

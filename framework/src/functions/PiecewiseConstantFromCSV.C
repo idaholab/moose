@@ -16,18 +16,19 @@ PiecewiseConstantFromCSV::validParams()
 {
   InputParameters params = Function::validParams();
   params.addRequiredParam<UserObjectName>("read_prop_user_object",
-                                          "The ElementPropertyReadFile "
+                                          "The PropertyReadFile "
                                           "GeneralUserObject to read element "
                                           "specific property values from file");
-  params.addRequiredParam<unsigned int>("column_number",
-                                        "The column number for the desired data in the CSV");
+  params.addRequiredParam<unsigned int>(
+      "column_number", "The column number (0-indexing) for the desired data in the CSV");
 
   // This parameter is added for optimization when doing nearest neighbor interpolation
   // but it's also safer to have that parameter be close to the use case, and not only in the UO
   params.addRequiredParam<MooseEnum>("read_type",
-                                     MooseEnum("element voronoi block"),
+                                     MooseEnum("element voronoi block node"),
                                      "Organization of data in the CSV file: "
                                      "element:by element "
+                                     "node: by node "
                                      "voronoi:nearest neighbor / voronoi tesselation structure "
                                      "block:by mesh block");
   // We need one ghost layer in case we need to retrieve the id or subdomain id from an
@@ -55,17 +56,17 @@ PiecewiseConstantFromCSV::initialSetup()
 {
   // Get a pointer to the ElementPropertyReadFile. A pointer is used because the UserObject is not
   // available during the construction of the function
-  _read_prop_user_object = &getUserObject<ElementPropertyReadFile>("read_prop_user_object");
+  _read_prop_user_object = &getUserObject<PropertyReadFile>("read_prop_user_object");
 
   if (_read_type != _read_prop_user_object->getReadType())
     paramError("read_type",
-               "The ElementPropertyReadFile UO should have the same read_type parameter.");
+               "The PropertyReadFile UO should have the same read_type parameter.");
 }
 
 Real
 PiecewiseConstantFromCSV::value(Real, const Point & p) const
 {
-  if (_read_type != ReadTypeEnum::VORONOI)
+  if (_read_type == ReadTypeEnum::ELEMENT || _read_type == ReadTypeEnum::BLOCK)
   {
     // This is somewhat inefficient, but it allows us to retrieve the data in the
     // CSV by element or by block.
@@ -94,7 +95,22 @@ PiecewiseConstantFromCSV::value(Real, const Point & p) const
 
     return _read_prop_user_object->getData(min_id_elem, _column_number);
   }
-  else
+  else if (_read_type == ReadTypeEnum::NODE)
+  {
+    // Get the node id
+    const auto node = _point_locator->locate_node(p);
+
+    if (!node)
+      mooseError("No node was found at", p, " for retrieving nodal data from CSV.");
+
+    return _read_prop_user_object->getNodeData(node, _column_number);
+  }
+  else if (_read_type == ReadTypeEnum::VORONOI)
     // No need to search for the element if we're just looking at nearest neighbors
     return _read_prop_user_object->getVoronoiData(p, _column_number);
+  else
+  {
+    mooseError("This should not be reachable. Implementation error somewhere");
+    return 0;
+  }
 }

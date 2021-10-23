@@ -10,7 +10,7 @@
 #pragma once
 
 #include "Function.h"
-#include "ElementPropertyReadFile.h"
+#include "PropertyReadFile.h"
 
 /**
  * Function which provides a piecewise constant field from a CSV file
@@ -42,7 +42,7 @@ protected:
   void initialSetup();
 
   /// A user object that takes care of reading the CSV file
-  const ElementPropertyReadFile * _read_prop_user_object;
+  const PropertyReadFile * _read_prop_user_object;
 
   /// The column number of interest in the CSV file
   const unsigned int _column_number;

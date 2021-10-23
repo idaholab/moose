@@ -10,6 +10,13 @@
       cli_args = 'Outputs/file_base=piecewise_constant_element'
       detail = 'with data sorted by element ids'
     []
+    [node]
+      type = 'Exodiff'
+      input = 'piecewise_constant.i'
+      exodiff = 'piecewise_constant_node.e'
+      cli_args = 'ICs/active=node Outputs/file_base=piecewise_constant_node'
+      detail = 'with data sorted by node ids'
+    []
     [voronoi]
       type = 'Exodiff'
       input = 'piecewise_constant.i'
@@ -31,7 +38,7 @@
       type = RunException
       input = 'piecewise_constant.i'
       cli_args = 'Functions/element/read_type=voronoi'
-      expect_err = 'The ElementPropertyReadFile UO should have the same read_type parameter'
+      expect_err = 'The PropertyReadFile UO should have the same read_type parameter'
       detail = 'if the CSV reader object and the function expect the CSV data to be ordered differently'
     []
     [num_columns]

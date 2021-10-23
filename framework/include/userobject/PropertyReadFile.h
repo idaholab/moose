@@ -20,25 +20,28 @@ enum class ReadTypeEnum
 {
   ELEMENT = 0,
   VORONOI = 1,
-  BLOCK = 2
+  BLOCK = 2,
+  NODE = 3
 };
 
 /**
- * Read properties from file - grain, element, or block
+ * Read properties from file - grain, element, node or block
  * Input file syntax: prop1 prop2 etc. See test.
  * For grain level, voronoi tesellation with random grain centers are generated;
  * Element center points used for assigning properties
  * Usable for generated mesh
+ * For sorting by elements: the CSV data should be sorted by element ID
+ * For sorting by nodes: the CSV data should be organized by node ID
  * For block type, elements inside one block are assigned identical material properties;
  */
 
-class ElementPropertyReadFile : public GeneralUserObject
+class PropertyReadFile : public GeneralUserObject
 {
 public:
   static InputParameters validParams();
 
-  ElementPropertyReadFile(const InputParameters & parameters);
-  virtual ~ElementPropertyReadFile() {}
+  PropertyReadFile(const InputParameters & parameters);
+  virtual ~PropertyReadFile() {}
 
   virtual void initialize() {}
   virtual void execute() {}
@@ -68,6 +71,13 @@ public:
    * @param prop_num the column index of the property we want to retrieve
    */
   Real getElementData(const Elem * elem, unsigned int prop_num) const;
+
+  /**
+   * This function assign properties to read from file with node based properties
+   * @param node the node to get the data for
+   * @param prop_num the column index of the property we want to retrieve
+   */
+  Real getNodeData(const Node * node, unsigned int prop_num) const;
 
   /**
    * This function assign properties to element read from file with nearest neighbor / grain based
@@ -125,6 +135,7 @@ protected:
 
 private:
   unsigned int _nelem;
+  unsigned int _nnodes;
   Point _top_right;
   Point _bottom_left;
   Point _range;

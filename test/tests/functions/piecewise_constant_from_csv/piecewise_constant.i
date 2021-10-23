@@ -19,20 +19,26 @@
 
 [UserObjects]
   [reader_element]
-    type = ElementPropertyReadFile
+    type = PropertyReadFile
     prop_file_name = 'data_element.csv'
     read_type = 'element'
     nprop = 3  # number of columns in CSV
   []
+  [reader_node]
+    type = PropertyReadFile
+    prop_file_name = 'data_node.csv'
+    read_type = 'node'
+    nprop = 3  # number of columns in CSV
+  []
   [reader_nearest]
-    type = ElementPropertyReadFile
+    type = PropertyReadFile
     prop_file_name = 'data_nearest.csv'
     read_type = 'voronoi'
     nprop = 3
     nvoronoi = 3
   []
   [reader_block]
-    type = ElementPropertyReadFile
+    type = PropertyReadFile
     prop_file_name = 'data_nearest.csv'
     read_type = 'block'
     nprop = 3
@@ -45,6 +51,12 @@
     type = PiecewiseConstantFromCSV
     read_prop_user_object = 'reader_element'
     read_type = 'element'
+    column_number = '2'
+  []
+  [node]
+    type = PiecewiseConstantFromCSV
+    read_prop_user_object = 'reader_node'
+    read_type = 'node'
     column_number = '2'
   []
   [nearest]
@@ -67,6 +79,11 @@
     type = FunctionIC
     variable = 'u'
     function = 'element'
+  []
+  [node]
+    type = FunctionIC
+    variable = 'u'
+    function = 'node'
   []
   [nearest]
     type = FunctionIC
