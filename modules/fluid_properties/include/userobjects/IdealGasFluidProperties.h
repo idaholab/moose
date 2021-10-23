@@ -10,6 +10,7 @@
 #pragma once
 
 #include "SinglePhaseFluidProperties.h"
+#include "NaNInterface.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
@@ -18,7 +19,7 @@
  * Ideal gas fluid properties
  * Default parameters are for air at atmospheric pressure and temperature
  */
-class IdealGasFluidProperties : public SinglePhaseFluidProperties
+class IdealGasFluidProperties : public SinglePhaseFluidProperties, public NaNInterface
 {
 public:
   static InputParameters validParams();
