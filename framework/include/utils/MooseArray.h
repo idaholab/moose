@@ -10,6 +10,7 @@
 #pragma once
 
 #include <vector>
+#include <memory>
 #include "MooseError.h"
 
 template <typename T>
