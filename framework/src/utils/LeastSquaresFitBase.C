@@ -10,7 +10,8 @@
 #include "LeastSquaresFitBase.h"
 #include "MooseError.h"
 
-extern "C" void FORTRAN_CALL(dgels)(...);
+#include "libmesh/int_range.h"
+#include <Eigen/Dense>
 
 LeastSquaresFitBase::LeastSquaresFitBase() {}
 
@@ -40,56 +41,14 @@ LeastSquaresFitBase::generate()
 void
 LeastSquaresFitBase::doLeastSquares()
 {
-  char mode = 'N';
-  int num_rows = _x.size();
-  unsigned int num_coeff = _num_coeff;
-  int num_rhs = 1;
-  int buffer_size = -1;
-  Real opt_buffer_size;
-  Real * buffer;
-  int return_value = 0;
+  _coeffs.resize(_num_coeff);
 
-  // Must copy _y because the call to dgels destroys the original values
-  std::vector<Real> rhs = _y;
-
-  FORTRAN_CALL(dgels)
-  (&mode,
-   &num_rows,
-   &num_coeff,
-   &num_rhs,
-   &_matrix[0],
-   &num_rows,
-   &rhs[0],
-   &num_rows,
-   &opt_buffer_size,
-   &buffer_size,
-   &return_value);
-  if (return_value)
-    throw std::runtime_error("Call to Fortran routine 'dgels' returned non-zero exit code");
-
-  buffer_size = (int)opt_buffer_size;
-
-  buffer = new Real[buffer_size];
-  FORTRAN_CALL(dgels)
-  (&mode,
-   &num_rows,
-   &num_coeff,
-   &num_rhs,
-   &_matrix[0],
-   &num_rows,
-   &rhs[0],
-   &num_rows,
-   buffer,
-   &buffer_size,
-   &return_value);
-  delete[] buffer;
-
-  if (return_value)
-    throw std::runtime_error("Call to Fortran routine 'dgels' returned non-zero exit code");
-
-  _coeffs.resize(num_coeff);
-  for (unsigned int i = 0; i < num_coeff; ++i)
-    _coeffs[i] = rhs[i];
+  typedef Eigen::Matrix<Real, Eigen::Dynamic, 1> SolveVec;
+  auto b = Eigen::Map<SolveVec, Eigen::Unaligned>(_y.data(), _y.size());
+  auto x = Eigen::Map<SolveVec, Eigen::Unaligned>(_coeffs.data(), _num_coeff);
+  typedef Eigen::Matrix<Real, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor> SolveMatrix;
+  auto A = Eigen::Map<SolveMatrix, Eigen::Unaligned>(_matrix.data(), _y.size(), _num_coeff);
+  x = A.colPivHouseholderQr().solve(b);
 }
 
 unsigned int
