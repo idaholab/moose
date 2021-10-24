@@ -9,6 +9,7 @@
       exodiff = 'piecewise_constant_element.e'
       cli_args = 'Outputs/file_base=piecewise_constant_element'
       detail = 'with data sorted by element ids'
+      recover = false
     []
     [node]
       type = 'Exodiff'
@@ -16,6 +17,7 @@
       exodiff = 'piecewise_constant_node.e'
       cli_args = 'ICs/active=node Outputs/file_base=piecewise_constant_node'
       detail = 'with data sorted by node ids'
+      recover = false
     []
     [voronoi]
       type = 'Exodiff'
@@ -23,6 +25,7 @@
       exodiff = 'piecewise_constant_voronoi.e'
       cli_args = 'ICs/active=nearest Outputs/file_base=piecewise_constant_voronoi'
       detail = 'with data at given locations and using nearest neighbor interpolation in between'
+      recover = false
     []
     [block]
       type = 'Exodiff'
@@ -30,6 +33,7 @@
       exodiff = 'piecewise_constant_block.e'
       cli_args = 'ICs/active=block Outputs/file_base=piecewise_constant_block'
       detail = 'with data sorted by blocks and with constant values on each block.'
+      recover = false
     []
   []
   [errors]

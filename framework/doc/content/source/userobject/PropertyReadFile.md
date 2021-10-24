@@ -1,6 +1,6 @@
-# ElementPropertyReadFile
+# PropertyReadFile
 
-!syntax description /UserObjects/ElementPropertyReadFile
+!syntax description /UserObjects/PropertyReadFile
 
 This user object has two modes to operate in, which are toggled using the
 `read_type` parameter.
@@ -21,8 +21,8 @@ or one (`false`).
 
 !syntax parameters /UserObjects/ElementPropertyReadFile
 
-!syntax inputs /UserObjects/ElementPropertyReadFile
+!syntax inputs /UserObjects/PropertyReadFile
 
-!syntax children /UserObjects/ElementPropertyReadFile
+!syntax children /UserObjects/PropertyReadFile
 
 !bibtex bibliography

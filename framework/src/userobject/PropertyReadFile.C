@@ -57,7 +57,8 @@ PropertyReadFile::PropertyReadFile(const InputParameters & parameters)
     _prop_file_name(getParam<FileName>("prop_file_name")),
     _reader(_prop_file_name),
     _nprop(getParam<unsigned int>("nprop")),
-    _nvoronoi(getParam<unsigned int>("nvoronoi")),
+    _nvoronoi(isParamValid("ngrain") ? getParam<unsigned int>("ngrain")
+                                     : getParam<unsigned int>("nvoronoi")),
     _nblock(getParam<unsigned int>("nblock")),
     _read_type(getParam<MooseEnum>("read_type").getEnum<ReadTypeEnum>()),
     _use_random_tesselation(getParam<bool>("use_random_voronoi")),
