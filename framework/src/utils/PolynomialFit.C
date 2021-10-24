@@ -10,6 +10,7 @@
 #include "PolynomialFit.h"
 
 #include "MooseError.h"
+#include "MathUtils.h"
 
 // C++ includes
 #include <fstream>
@@ -45,13 +46,7 @@ PolynomialFit::fillMatrix()
 
   for (unsigned int col = 0; col < num_cols; ++col)
     for (unsigned int row = 0; row < num_rows; ++row)
-    {
-      Real value = 1;
-      for (unsigned int i = 0; i < col; ++i)
-        value *= _x[row];
-
-      _matrix[(col * num_rows) + row] = value;
-    }
+      _matrix[(col * num_rows) + row] = MathUtils::pow(_x[row], col);
 }
 
 Real
