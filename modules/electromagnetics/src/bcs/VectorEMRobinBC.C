@@ -52,12 +52,12 @@ VectorEMRobinBC::VectorEMRobinBC(const InputParameters & parameters)
     // Value of complex j (can't use _j or _i due to MOOSE basis fxn conventions)
     _jay(0, 1),
 
-    _mode(getParam<MooseEnum>("mode"))
-{
-  bool real_incoming_was_set = parameters.isParamSetByUser("real_incoming");
-  bool imag_incoming_was_set = parameters.isParamSetByUser("imag_incoming");
+    _mode(getParam<MooseEnum>("mode")),
 
-  if (_mode == electromagnetics::ABSORBING && (real_incoming_was_set || imag_incoming_was_set))
+    _real_incoming_was_set(parameters.isParamSetByUser("real_incoming")),
+    _imag_incoming_was_set(parameters.isParamSetByUser("imag_incoming"))
+{
+  if (_mode == electromagnetics::ABSORBING && (_real_incoming_was_set || _imag_incoming_was_set))
   {
     mooseError(
         "In ",
@@ -101,22 +101,38 @@ VectorEMRobinBC::computeQpResidual()
   }
   VectorValue<std::complex<double>> field(field_0, field_1, field_2);
 
-  // Creating vector, curl for field_inc before residual and Jacobian contributions
-  std::complex<double> field_inc_0(_inc_real.vectorValue(_t, _q_point[_qp])(0),
-                                   _inc_imag.vectorValue(_t, _q_point[_qp])(0));
-  std::complex<double> field_inc_1(_inc_real.vectorValue(_t, _q_point[_qp])(1),
-                                   _inc_imag.vectorValue(_t, _q_point[_qp])(1));
-  std::complex<double> field_inc_2(_inc_real.vectorValue(_t, _q_point[_qp])(2),
-                                   _inc_imag.vectorValue(_t, _q_point[_qp])(2));
-  VectorValue<std::complex<double>> field_inc(field_inc_0, field_inc_1, field_inc_2);
+  // Initialize proper zero defaults for the case when real and imag incoming functions are not set
+  VectorValue<std::complex<double>> field_inc(std::complex<double>(0.0, 0.0),
+                                              std::complex<double>(0.0, 0.0),
+                                              std::complex<double>(0.0, 0.0));
+  VectorValue<std::complex<double>> curl_inc(std::complex<double>(0.0, 0.0),
+                                             std::complex<double>(0.0, 0.0),
+                                             std::complex<double>(0.0, 0.0));
 
-  std::complex<double> curl_inc0(_inc_real.vectorCurl(_t, _q_point[_qp])(0),
-                                 _inc_imag.vectorCurl(_t, _q_point[_qp])(0));
-  std::complex<double> curl_inc1(_inc_real.vectorCurl(_t, _q_point[_qp])(1),
-                                 _inc_imag.vectorCurl(_t, _q_point[_qp])(1));
-  std::complex<double> curl_inc2(_inc_real.vectorCurl(_t, _q_point[_qp])(2),
-                                 _inc_imag.vectorCurl(_t, _q_point[_qp])(2));
-  VectorValue<std::complex<double>> curl_inc(curl_inc0, curl_inc1, curl_inc2);
+  /**
+   * Stops us calling un-implemented methods within the scalar ConstantFunction
+   * default for _inc_real and _inc_imag function variables, since we don't have
+   * an automatic vector function constant default in MOOSE FEProblemBase right now.
+   */
+  if (_real_incoming_was_set && _imag_incoming_was_set)
+  {
+    // Creating vector, curl for field_inc before residual and Jacobian contributions
+    std::complex<double> field_inc_0(_inc_real.vectorValue(_t, _q_point[_qp])(0),
+                                     _inc_imag.vectorValue(_t, _q_point[_qp])(0));
+    std::complex<double> field_inc_1(_inc_real.vectorValue(_t, _q_point[_qp])(1),
+                                     _inc_imag.vectorValue(_t, _q_point[_qp])(1));
+    std::complex<double> field_inc_2(_inc_real.vectorValue(_t, _q_point[_qp])(2),
+                                     _inc_imag.vectorValue(_t, _q_point[_qp])(2));
+    field_inc = VectorValue<std::complex<double>>(field_inc_0, field_inc_1, field_inc_2);
+
+    std::complex<double> curl_inc_0(_inc_real.vectorCurl(_t, _q_point[_qp])(0),
+                                   _inc_imag.vectorCurl(_t, _q_point[_qp])(0));
+    std::complex<double> curl_inc_1(_inc_real.vectorCurl(_t, _q_point[_qp])(1),
+                                   _inc_imag.vectorCurl(_t, _q_point[_qp])(1));
+    std::complex<double> curl_inc_2(_inc_real.vectorCurl(_t, _q_point[_qp])(2),
+                                   _inc_imag.vectorCurl(_t, _q_point[_qp])(2));
+    curl_inc = VectorValue<std::complex<double>>(curl_inc_0, curl_inc_1, curl_inc_2);
+  }
 
   std::complex<double> u_inc_dot_test = 0.0;
   switch (_mode)

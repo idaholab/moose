@@ -37,4 +37,7 @@ protected:
   const std::complex<double> _jay;
 
   const MooseEnum _mode;
+
+  const bool _real_incoming_was_set;
+  const bool _imag_incoming_was_set;
 };
