@@ -28,7 +28,7 @@ def check(file, pid, recover):
     def act_node(gold_node):
         node = pgr.node(gold_node.path())
         if node is None:
-            check_node(false, gold_node, 'Node is missing')
+            check_node(False, gold_node, 'Node is missing')
             return
 
         check_node(node.name() == gold_node.name(), gold_node, 'Name mismatch')
@@ -44,12 +44,12 @@ def check(file, pid, recover):
             check_node(node.parent() == None, gold_node, 'Null parent mismatch')
         else:
             check_node(gold_node.parent().name() == node.parent().name(), gold_node, 'Parent mismatch')
-    gold_pgr.recursivelyDo(act_node)
+    gold_pgr.recurse(act_node)
 
     for gold_section in gold_pgr.sections():
         section = pgr.section(gold_section.name())
         if section is None:
-            check_section(false, gold_section, 'Section is missing')
+            check_section(False, gold_section, 'Section is missing')
 
         check_section(section.name() == gold_section.name(), gold_section, 'Name mismatch')
         check_section(section.level() == gold_section.level(), gold_section, 'Level mismatch')

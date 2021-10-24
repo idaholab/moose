@@ -34,6 +34,8 @@ try:
     from .VectorPostprocessorReader import VectorPostprocessorReader
     from .ReporterReader import ReporterReader
     from .PerfGraphReporterReader import PerfGraphReporterReader
+    from .PerfGraphReporterReader import PerfGraphNode
+    from .PerfGraphReporterReader import PerfGraphSection
 except:
     pass
 
