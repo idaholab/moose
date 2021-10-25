@@ -234,8 +234,4 @@ private:
 #error PETSc has not been detected, please ensure your environment is set up properly then rerun the libmesh build script and try to compile MOOSE again.
 #endif
 
-#if PETSC_VERSION_LESS_THAN(3, 5, 0)
-#error PETSc-3.5.x or newer is required for MOOSE and libmesh, please ensure your environment has the required version of PETSc available.
-#endif
-
 } // namespace Moose
