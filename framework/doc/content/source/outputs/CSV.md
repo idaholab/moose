@@ -5,11 +5,11 @@
 ## Overview
 
 The CSV output object creates files containing comma separated values. Unless disabled
-(see [syntax/Outputs/index.md) all postprocessors and scalar variables will be written to a single
+(see [Outputs](syntax/Outputs/index.md) all postprocessors and scalar variables will be written to a single
 file that includes a time column.
 
-If vector postprocessors exist within the simulation an additional set of files will be created,
-there will be one file for every vector that exists within a VectorPostprocessor object for
+If [vector postprocessors](syntax/VectorPostprocessors/index.md) exist within the simulation an additional set of files will be created,
+there will be one file for every vector that exists within a `VectorPostprocessor` object for
 each timestep.
 
 !syntax parameters /Outputs/CSV
