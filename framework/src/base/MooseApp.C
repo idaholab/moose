@@ -1200,11 +1200,30 @@ MooseApp::addExecutorParams(const std::string & type, const std::string & name, 
 
 
 void
-MooseApp::recursivelyCreateExecutors(const std::string & current_executor_name, std::list<std::string> & possible_roots)
+MooseApp::recursivelyCreateExecutors(const std::string & current_executor_name, std::list<std::string> & possible_roots, std::list<std::string> & current_branch)
 {
   // Did we already make this one?
   if(_executors.find(current_executor_name) != _executors.end())
     return;
+
+  // Is this one already on the current branch (i.e. there is a cycle)
+  if(std::find(current_branch.begin(), current_branch.end(), current_executor_name) != current_branch.end())
+  {
+    std::stringstream exec_names_string;
+
+    auto branch_it = current_branch.begin();
+
+    exec_names_string << *branch_it++;
+
+    for(; branch_it != current_branch.end(); ++branch_it)
+      exec_names_string << ", " << *branch_it;
+
+    exec_names_string << ", " << current_executor_name;
+
+    mooseError("Executor cycle detected: ", exec_names_string.str());
+  }
+
+  current_branch.push_back(current_executor_name);
 
   // Build the dependencies first
   const auto & params = *_executor_params[current_executor_name].second;
@@ -1218,13 +1237,15 @@ MooseApp::recursivelyCreateExecutors(const std::string & current_executor_name, 
       possible_roots.remove(dependency_name);
 
       if (!dependency_name.empty())
-        recursivelyCreateExecutors(dependency_name, possible_roots);
+        recursivelyCreateExecutors(dependency_name, possible_roots, current_branch);
     }
   }
 
   // Add this Executor
   const auto & type = _executor_params[current_executor_name].first;
   addExecutor(type, current_executor_name, params);
+
+  current_branch.pop_back();
 }
 
 void
@@ -1239,6 +1260,9 @@ MooseApp::createExecutors()
   // The Executors that are currently candidates for being roots
   std::list<std::string> possible_roots;
 
+  // The current line of dependencies - used for finding cycles
+  std::list<std::string> current_branch;
+
   for (const auto & params_entry : _executor_params)
   {
     const auto & name = params_entry.first;
@@ -1249,7 +1273,7 @@ MooseApp::createExecutors()
 
     possible_roots.emplace_back(name);
 
-    recursivelyCreateExecutors(name, possible_roots);
+    recursivelyCreateExecutors(name, possible_roots, current_branch);
   }
 
   // If there is more than one possible root - error

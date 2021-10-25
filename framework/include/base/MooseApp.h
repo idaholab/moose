@@ -338,7 +338,7 @@ private:
    * @param current_executor_name The name of the executor currently needing to be built
    * @param possible_roots The names of executors that are currently candidates for being the root
    */
-  void recursivelyCreateExecutors(const std::string & current_executor_name, std::list<std::string> & possible_roots);
+  void recursivelyCreateExecutors(const std::string & current_executor_name, std::list<std::string> & possible_roots, std::list<std::string> & current_branch);
 
 public:
 
