@@ -1200,7 +1200,7 @@ MooseApp::addExecutorParams(const std::string & type, const std::string & name, 
 
 
 void
-MooseApp::recursivelyCreateExecutors(const ExecutorName & current_executor_name)
+MooseApp::recursivelyCreateExecutors(const std::string & current_executor_name, std::list<std::string> & possible_roots)
 {
   // Did we already make this one?
   if(_executors.find(current_executor_name) != _executors.end())
@@ -1215,8 +1215,10 @@ MooseApp::recursivelyCreateExecutors(const ExecutorName & current_executor_name)
     {
       const auto & dependency_name = static_cast<InputParameters::Parameter<ExecutorName> *>(param.second)->get();
 
+      possible_roots.remove(dependency_name);
+
       if (!dependency_name.empty())
-        recursivelyCreateExecutors(dependency_name);
+        recursivelyCreateExecutors(dependency_name, possible_roots);
     }
   }
 
@@ -1234,7 +1236,8 @@ MooseApp::createExecutors()
   // What is already built
   std::map<std::string, bool> already_built;
 
-  std::string current_root;
+  // The Executors that are currently candidates for being roots
+  std::list<std::string> possible_roots;
 
   for (const auto & params_entry : _executor_params)
   {
@@ -1244,13 +1247,28 @@ MooseApp::createExecutors()
     if(_executors.find(name) != _executors.end())
       continue;
 
-    current_root = name;
+    possible_roots.emplace_back(name);
 
-    recursivelyCreateExecutors(name);
+    recursivelyCreateExecutors(name, possible_roots);
+  }
+
+  // If there is more than one possible root - error
+  if (possible_roots.size() > 1)
+  {
+    auto root_string_it = possible_roots.begin();
+
+    std::stringstream roots_string;
+
+    roots_string << *root_string_it++;
+
+    for (; root_string_it != possible_roots.end(); ++root_string_it)
+      roots_string << ", " << *root_string_it;
+
+    mooseError("Multiple Executor roots found: ", roots_string.str());
   }
 
   // Set the root executor
-  _executor = _executors[current_root];
+  _executor = _executors[possible_roots.front()];
 }
 
 Executioner *

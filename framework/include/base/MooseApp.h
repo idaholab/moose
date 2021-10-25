@@ -334,8 +334,11 @@ private:
    * Internal function used to recursively create the executor objects.
    *
    * Called by createExecutors
+   *
+   * @param current_executor_name The name of the executor currently needing to be built
+   * @param possible_roots The names of executors that are currently candidates for being the root
    */
-  void recursivelyCreateExecutors(const ExecutorName & current_executor_name);
+  void recursivelyCreateExecutors(const std::string & current_executor_name, std::list<std::string> & possible_roots);
 
 public:
 
@@ -786,13 +789,6 @@ private:
    */
   void removeRelationshipManager(std::shared_ptr<RelationshipManager> relationship_manager);
 
-  /**
-   * Used in building the Executors
-   *
-   * Maps the name of the Executor block to the <type, params>
-   */
-  std::unordered_map<std::string, std::pair<std::string, std::unique_ptr<InputParameters>>> _executor_params;
-
 public:
   /**
    * Attach the relationship managers of the given type
@@ -991,8 +987,17 @@ protected:
 
   /// Pointer to the executioner of this run (typically build by actions)
   std::shared_ptr<Executioner> _executioner;
+
+  /// Pointer to the Executor of this run
   std::shared_ptr<Executor> _executor;
+
+  /// Pointers to all of the Executors for this run
   std::map<std::string, std::shared_ptr<Executor>> _executors;
+
+  /// Used in building the Executors
+  /// Maps the name of the Executor block to the <type, params>
+  std::unordered_map<std::string, std::pair<std::string, std::unique_ptr<InputParameters>>> _executor_params;
+
   FixedPointConfig _fixed_point_config;
 
   const bool _use_executor = false;
