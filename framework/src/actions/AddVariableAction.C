@@ -69,9 +69,10 @@ AddVariableAction::AddVariableAction(InputParameters params)
 MooseEnum
 AddVariableAction::getNonlinearVariableFamilies()
 {
-  return MooseEnum("LAGRANGE MONOMIAL HERMITE SCALAR HIERARCHIC CLOUGH XYZ SZABAB BERNSTEIN "
-                   "L2_LAGRANGE L2_HIERARCHIC NEDELEC_ONE LAGRANGE_VEC MONOMIAL_VEC",
-                   "LAGRANGE");
+  return MooseEnum(
+      "LAGRANGE MONOMIAL HERMITE SCALAR HIERARCHIC CLOUGH XYZ SZABAB BERNSTEIN "
+      "L2_LAGRANGE L2_HIERARCHIC NEDELEC_ONE LAGRANGE_VEC MONOMIAL_VEC RATIONAL_BERNSTEIN",
+      "LAGRANGE");
 }
 
 MooseEnum

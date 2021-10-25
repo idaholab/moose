@@ -260,6 +260,7 @@ class TestHarness:
             checks['petsc_version'] = 'N/A'
             checks['petsc_version_release'] = 'N/A'
             checks['slepc_version'] = 'N/A'
+            checks['exodus_version'] = 'N/A'
             checks['library_mode'] = set(['ALL'])
             checks['mesh_mode'] = set(['ALL'])
             checks['ad_mode'] = set(['ALL'])
@@ -291,6 +292,7 @@ class TestHarness:
             checks['petsc_version'] = util.getPetscVersion(self.libmesh_dir)
             checks['petsc_version_release'] = util.getLibMeshConfigOption(self.libmesh_dir, 'petsc_version_release')
             checks['slepc_version'] = util.getSlepcVersion(self.libmesh_dir)
+            checks['exodus_version'] = util.getExodusVersion(self.libmesh_dir)
             checks['library_mode'] = util.getSharedOption(self.libmesh_dir)
             checks['mesh_mode'] = util.getLibMeshConfigOption(self.libmesh_dir, 'mesh_mode')
             checks['ad_mode'] = util.getMooseConfigOption(self.moose_dir, 'ad_mode')
