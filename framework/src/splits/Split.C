@@ -91,11 +91,6 @@ Split::Split(const InputParameters & parameters)
 void
 Split::setup(const std::string & prefix)
 {
-// petsc 3.3.0 or later needed
-#if PETSC_VERSION_LESS_THAN(3, 3, 0)
-  mooseError("The Splits functionality requires PETSc 3.3.0 or later.");
-#endif
-
   // The Split::setup() implementation does not actually depend on any
   // specific version of PETSc, so there's no need to wrap the entire
   // function.
@@ -147,15 +142,7 @@ Split::setup(const std::string & prefix)
                             petsc_schur_type[_splitting_type]);
 
       // set Schur Preconditioner
-      const std::string petsc_schur_pre[] = {
-        "self",
-        "selfp",
-#if PETSC_VERSION_LESS_THAN(3, 4, 0)
-        "diag"
-#else
-        "a11"
-#endif
-      };
+      const std::string petsc_schur_pre[] = {"self", "selfp", "a11"};
       po.pairs.emplace_back(prefix + "pc_fieldsplit_schur_precondition",
                             petsc_schur_pre[_schur_pre]);
 

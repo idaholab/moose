@@ -23,12 +23,10 @@ public:
   ContactSplit(const InputParameters & params);
   virtual void setup(const std::string & prefix = "-") override;
 
-#if !PETSC_VERSION_LESS_THAN(3, 3, 0)
 protected:
   const std::vector<std::pair<BoundaryName, BoundaryName>> _contact_pairs;
   std::vector<int> _contact_displaced;
   const std::vector<std::pair<BoundaryName, BoundaryName>> _uncontact_pairs;
   std::vector<int> _uncontact_displaced;
   bool _include_all_contact_nodes;
-#endif // !PETSC_VERSION_LESS_THAN(3,3,0)
 };

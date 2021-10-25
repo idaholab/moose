@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "libmesh/petsc_macro.h"
-#if !PETSC_VERSION_LESS_THAN(3, 3, 0)
 #include "FieldSplitPreconditioner.h"
 
 // MOOSE includes
@@ -97,5 +96,3 @@ FieldSplitPreconditioner::FieldSplitPreconditioner(const InputParameters & param
   // apply prefix and store PETSc options
   _fe_problem.getNonlinearSystemBase().setupFieldDecomposition();
 }
-
-#endif
