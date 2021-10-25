@@ -1,4 +1,14 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #include "PINSFVEnergyAmbientConvection.h"
+#include "NS.h"
 
 registerMooseObject("NavierStokesApp", PINSFVEnergyAmbientConvection);
 
@@ -13,16 +23,16 @@ PINSFVEnergyAmbientConvection::validParams()
       "Name of the convective heat "
       "transfer coefficient. This coefficient should include the influence of porosity.");
   params.addRequiredParam<bool>("is_solid", "Whether this kernel acts on the solid temperature");
-  params.addRequiredCoupledVar("temp_fluid", "Fluid temperature");
-  params.addRequiredCoupledVar("temp_solid", "Solid temperature");
+  params.addRequiredCoupledVar(NS::T_fluid, "Fluid temperature");
+  params.addRequiredCoupledVar(NS::T_solid, "Solid temperature");
   return params;
 }
 
 PINSFVEnergyAmbientConvection::PINSFVEnergyAmbientConvection(const InputParameters & parameters)
   : FVElementalKernel(parameters),
     _h_solid_fluid(getADMaterialProperty<Real>("h_solid_fluid")),
-    _temp_fluid(adCoupledValue("temp_fluid")),
-    _temp_solid(adCoupledValue("temp_solid")),
+    _temp_fluid(adCoupledValue(NS::T_fluid)),
+    _temp_solid(adCoupledValue(NS::T_solid)),
     _is_solid(getParam<bool>("is_solid"))
 {
 }

@@ -42,8 +42,11 @@ protected:
   const Moose::Functor<ADReal> & _T_fluid;
   const Moose::Functor<ADReal> & _speed;
 
-  /// Density
-  FunctorMaterialProperty<ADReal> & _rho;
+  /// Density as a material property, if density is not a variable
+  FunctorMaterialProperty<ADReal> * const _rho_prop;
+
+  /// Density as a functor, which could be from the variable set or the property
+  const Moose::Functor<ADReal> & _rho;
 
   /// Derivative of density with respect to pressure
   FunctorMaterialProperty<Real> & _drho_dp;

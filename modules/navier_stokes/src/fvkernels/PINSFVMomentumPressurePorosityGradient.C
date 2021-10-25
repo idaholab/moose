@@ -26,7 +26,7 @@ PINSFVMomentumPressurePorosityGradient::validParams()
       "momentum_component",
       momentum_component,
       "The component of the momentum equation that this kernel applies to.");
-  params.addRequiredCoupledVar("porosity", "Porosity auxiliary variable");
+  params.addRequiredCoupledVar(NS::porosity, "Porosity auxiliary variable");
 
   return params;
 }
@@ -35,7 +35,7 @@ PINSFVMomentumPressurePorosityGradient::PINSFVMomentumPressurePorosityGradient(
     const InputParameters & params)
   : FVElementalKernel(params),
     _p(coupledValue(NS::pressure)),
-    _eps_var(dynamic_cast<const MooseVariableFVReal *>(getFieldVar("porosity", 0))),
+    _eps_var(dynamic_cast<const MooseVariableFVReal *>(getFieldVar(NS::porosity, 0))),
     _index(getParam<MooseEnum>("momentum_component"))
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING

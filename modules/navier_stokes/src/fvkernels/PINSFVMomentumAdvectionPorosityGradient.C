@@ -9,6 +9,7 @@
 
 #include "PINSFVMomentumAdvectionPorosityGradient.h"
 #include "PINSFVSuperficialVelocityVariable.h"
+#include "NS.h"
 
 registerMooseObject("NavierStokesApp", PINSFVMomentumAdvectionPorosityGradient);
 
@@ -19,14 +20,14 @@ PINSFVMomentumAdvectionPorosityGradient::validParams()
   params.addClassDescription(
       "Porosity gradient spun from the advection term for the porous media Navier Stokes "
       "momentum equation.");
-  params.addRequiredCoupledVar("porosity", "Porosity auxiliary variable");
+  params.addRequiredCoupledVar(NS::porosity, "Porosity auxiliary variable");
 
   params.addRequiredCoupledVar("u", "The superficial velocity in the x direction.");
   params.addCoupledVar("v", "The superficial velocity in the y direction.");
   params.addCoupledVar("w", "The superficial velocity in the z direction.");
 
-  params.addRequiredParam<Real>("rho", "The value for the density");
-  params.declareControllable("rho");
+  params.addRequiredParam<Real>(NS::density, "The value for the density");
+  params.declareControllable(NS::density);
 
   MooseEnum momentum_component("x=0 y=1 z=2");
   params.addRequiredParam<MooseEnum>(
@@ -41,11 +42,11 @@ PINSFVMomentumAdvectionPorosityGradient::validParams()
 PINSFVMomentumAdvectionPorosityGradient::PINSFVMomentumAdvectionPorosityGradient(
     const InputParameters & params)
   : FVElementalKernel(params),
-    _eps_var(dynamic_cast<const MooseVariableFVReal *>(getFieldVar("porosity", 0))),
+    _eps_var(dynamic_cast<const MooseVariableFVReal *>(getFieldVar(NS::porosity, 0))),
     _u(adCoupledValue("u")),
     _v(params.isParamValid("v") ? adCoupledValue("v") : _ad_zero),
     _w(params.isParamValid("w") ? adCoupledValue("w") : _ad_zero),
-    _rho(getParam<Real>("rho")),
+    _rho(getParam<Real>(NS::density)),
     _index(getParam<MooseEnum>("momentum_component")),
     _smooth_porosity(getParam<bool>("smooth_porosity"))
 {

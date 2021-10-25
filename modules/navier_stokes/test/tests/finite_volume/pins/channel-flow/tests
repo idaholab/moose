@@ -110,4 +110,14 @@
     cli_args = "FVBCs/inactive='no-slip-u no-slip-v' Outputs/file_base='rc-friction-free-slip' -pc_type lu -pc_factor_shift_type NONZERO"
     issues = '#16765 #16756'
   []
+  [rz-by-parts]
+    type = Exodiff
+    input = '2d-rc-rz-by-parts.i'
+    exodiff = '2d-rc-rz-by-parts_out.e'
+    method = "!dbg"
+    requirement = 'The system shall be able to solve the porous flow equations in RZ geometry using an integration by parts of the pressure term.'
+    abs_zero = 1e-9
+    ad_indexing_type = 'global'
+    issues = '#18478'
+  []
 []

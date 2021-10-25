@@ -9,6 +9,7 @@
 
 #include "INSFVMixingLengthReynoldsStress.h"
 #include "INSFVVelocityVariable.h"
+#include "NS.h"
 
 registerMooseObject("NavierStokesApp", INSFVMixingLengthReynoldsStress);
 
@@ -22,7 +23,7 @@ INSFVMixingLengthReynoldsStress::validParams()
   params.addRequiredCoupledVar("u", "The velocity in the x direction.");
   params.addCoupledVar("v", "The velocity in the y direction.");
   params.addCoupledVar("w", "The velocity in the z direction.");
-  params.addRequiredParam<MooseFunctorName>("rho", "fluid density");
+  params.addRequiredParam<MooseFunctorName>(NS::density, "fluid density");
   params.addRequiredParam<MooseFunctorName>("mixing_length", "Turbulent eddy mixing length.");
   MooseEnum momentum_component("x=0 y=1 z=2", "x");
   params.addRequiredParam<MooseEnum>(
@@ -44,7 +45,7 @@ INSFVMixingLengthReynoldsStress::INSFVMixingLengthReynoldsStress(const InputPara
     _w_var(params.isParamValid("w")
                ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("w", 0))
                : nullptr),
-    _rho(getFunctor<ADReal>("rho")),
+    _rho(getFunctor<ADReal>(NS::density)),
     _mixing_len(getFunctor<ADReal>("mixing_length"))
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
@@ -77,12 +78,12 @@ INSFVMixingLengthReynoldsStress::computeQpResidual()
   ADReal symmetric_strain_tensor_norm = 2.0 * Utility::pow<2>(grad_u(0));
   if (_dim >= 2)
   {
-    auto grad_v = _v_var->adGradSln(*_face_info);
+    const auto & grad_v = _v_var->adGradSln(*_face_info);
     symmetric_strain_tensor_norm +=
         2.0 * Utility::pow<2>(grad_v(1)) + Utility::pow<2>(grad_v(0) + grad_u(1));
     if (_dim >= 3)
     {
-      auto grad_w = _w_var->adGradSln(*_face_info);
+      const auto & grad_w = _w_var->adGradSln(*_face_info);
       symmetric_strain_tensor_norm += 2.0 * Utility::pow<2>(grad_w(2)) +
                                       Utility::pow<2>(grad_u(2) + grad_w(0)) +
                                       Utility::pow<2>(grad_v(2) + grad_w(1));

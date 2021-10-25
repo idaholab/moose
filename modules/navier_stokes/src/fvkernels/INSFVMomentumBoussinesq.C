@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "INSFVMomentumBoussinesq.h"
+#include "NS.h"
 
 registerMooseObject("NavierStokesApp", INSFVMomentumBoussinesq);
 
@@ -16,10 +17,10 @@ INSFVMomentumBoussinesq::validParams()
 {
   InputParameters params = FVElementalKernel::validParams();
   params.addClassDescription("Computes a body force for natural convection buoyancy.");
-  params.addRequiredCoupledVar("temperature", "temperature variable");
+  params.addRequiredCoupledVar(NS::T_fluid, "temperature variable");
   params.addRequiredParam<RealVectorValue>("gravity", "Direction of the gravity vector");
   params.addParam<MaterialPropertyName>("alpha_name",
-                                        "alpha",
+                                        NS::alpha_boussinesq,
                                         "The name of the thermal expansion coefficient"
                                         "this is of the form rho = rho*(1-alpha (T-T_ref))");
   params.addRequiredParam<Real>("ref_temperature", "The value for the reference temperature.");
@@ -35,11 +36,11 @@ INSFVMomentumBoussinesq::validParams()
 
 INSFVMomentumBoussinesq::INSFVMomentumBoussinesq(const InputParameters & params)
   : FVElementalKernel(params),
-    _temperature(adCoupledValue("temperature")),
+    _temperature(adCoupledValue(NS::T_fluid)),
     _gravity(getParam<RealVectorValue>("gravity")),
     _alpha(getADMaterialProperty<Real>("alpha_name")),
     _ref_temperature(getParam<Real>("ref_temperature")),
-    _rho(getParam<Real>("rho")),
+    _rho(getParam<Real>(NS::density)),
     _index(getParam<MooseEnum>("momentum_component"))
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
