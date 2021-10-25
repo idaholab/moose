@@ -76,9 +76,6 @@
     max_threads = 1
     # no. of iterations is not recoverable
     recover = false
-    # This test requires a different number of residual evaluations in older PETScs
-    # due to the changes in 3061bbd5d.
-    petsc_version = '>=3.5.0'
     petsc_version_release = true
     compiler = '!INTEL'
 
