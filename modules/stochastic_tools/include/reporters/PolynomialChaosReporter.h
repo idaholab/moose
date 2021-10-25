@@ -46,6 +46,12 @@ private:
 
 void to_json(nlohmann::json & json, const PolynomialChaos * const & pc);
 
+/**
+ * PCStatisticsContext is almost identical to ReporterStatisticsContext with
+ * InType == Outype. Unfortunately, we cannot derive from ReporterStatisticsContext
+ * since that class relies on the construction of a Calculator object, something
+ * that is unnecessary for calculating statistics with polynomial chaos.
+ */
 template <typename OutType>
 class PCStatisticsContext : public ReporterGeneralContext<std::pair<OutType, std::vector<OutType>>>
 {
@@ -66,6 +72,12 @@ private:
   const MooseEnumItem _stat;
 };
 
+/**
+ * PCSobolContext is almost identical to SobolReporterContext with
+ * InType == Outype. Unfortunately, we cannot derive from SobolReporterContext
+ * since that class relies on the construction of a Calculator object, something
+ * that is unnecessary for calculating statistics with polynomial chaos.
+ */
 template <typename OutType>
 class PCSobolContext : public ReporterGeneralContext<
                            std::pair<std::vector<OutType>, std::vector<std::vector<OutType>>>>

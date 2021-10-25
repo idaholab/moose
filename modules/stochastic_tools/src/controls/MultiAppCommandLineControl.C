@@ -101,6 +101,7 @@ MultiAppCommandLineControl::initialSetup()
 void
 MultiAppCommandLineControl::execute()
 {
+  // Gather the original arguments given in the parameter so we can keep them
   if (_orig_args.empty())
   {
     _orig_args = getControllableValueByName<std::vector<std::string>>(
@@ -135,6 +136,8 @@ MultiAppCommandLineControl::execute()
                _param_names.size(),
                ").");
 
+  // Add the parameters that will be modified. The MultiApp will ultimately be
+  // responsible for assigning the values from the sampler.
   std::ostringstream oss;
   for (dof_id_type col = 0; col < _param_names.size(); ++col)
   {
@@ -143,6 +146,7 @@ MultiAppCommandLineControl::execute()
     oss << _param_names[col];
   }
 
+  // Put all the parameters in a single string
   for (auto & clia : cli_args)
     clia += oss.str();
 

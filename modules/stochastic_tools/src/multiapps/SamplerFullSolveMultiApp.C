@@ -247,15 +247,19 @@ SamplerFullSolveMultiApp::sampledCommandLineArgs(const std::vector<Real> & row,
                                                  const std::vector<std::string> & full_args_name)
 {
   std::ostringstream oss;
+
+  // Find parameters that are meant to be assigned by sampler values
   std::vector<std::string> cli_args_name;
   for (const auto & fan : full_args_name)
   {
+    // If it has an '=', then it is not meant to be modified
     if (fan.find("=") == std::string::npos)
       cli_args_name.push_back(fan);
     else
       oss << fan << ";";
   }
 
+  // Make sure the parameters either all have brackets, or none of them do
   bool has_brackets = false;
   if (cli_args_name.size())
   {
@@ -269,21 +273,29 @@ SamplerFullSolveMultiApp::sampledCommandLineArgs(const std::vector<Real> & row,
 
   for (unsigned int i = 0; i < cli_args_name.size(); ++i)
   {
+    // Assign bracketed parameters
     if (has_brackets)
     {
+      // Split param name and vector assignment: "param[0,(3.14),1]" -> {"param", "0,(3.14),1]"}
       const std::vector<std::string> & vector_param = MooseUtils::split(cli_args_name[i], "[");
+      // Get inices of vector: "0,(3.14),1]" -> {"0", "(3.14)", "1"}
       const std::vector<std::string> & index_string =
           MooseUtils::split(vector_param[1].substr(0, vector_param[1].find("]")), ",");
 
+      // Loop through indices and assign parameter: param='row[0] 3.14 row[1]'
       oss << vector_param[0] << "='";
-      std::vector<unsigned int> col_count;
-      for (unsigned j = 0; j < index_string.size(); ++j)
+      std::string sep = "";
+      for (const auto & istr : index_string)
       {
-        if (index_string[j].find("(") != std::string::npos)
-          oss << std::stod(index_string[j].substr(index_string[j].find("(") + 1));
+        oss << sep;
+        sep = " ";
+        // If the value is enclosed in parentheses, then it isn't an index, it's a value
+        if (istr.find("(") != std::string::npos)
+          oss << std::stod(istr.substr(istr.find("(") + 1));
+        // Assign the value from row if it is an index
         else
         {
-          unsigned int index = MooseUtils::stringToInteger(index_string[j]);
+          unsigned int index = MooseUtils::stringToInteger(istr);
           if (index >= row.size())
             ::mooseError("The provided global column index (",
                          index,
@@ -291,14 +303,11 @@ SamplerFullSolveMultiApp::sampledCommandLineArgs(const std::vector<Real> & row,
                          vector_param[0],
                          " is out of bound.");
           oss << Moose::stringify(row[index]);
-          if (std::find(col_count.begin(), col_count.end(), index) == col_count.end())
-            col_count.push_back(index);
         }
-        if (j != index_string.size() - 1)
-          oss << " ";
       }
       oss << "';";
     }
+    // Assign scalar parameters
     else
     {
       oss << cli_args_name[i] << "=" << Moose::stringify(row[i]) << ";";

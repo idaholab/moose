@@ -123,6 +123,8 @@ public:
 
 protected:
   /**
+   * Enum describing the type of parallel communication to perform.
+   *
    * Some routines require specific communication methods that not all processors
    * see, these IDs will determine how that routine is performed:
    *  - NONE routine is not distrubuted and things all can happen locally
