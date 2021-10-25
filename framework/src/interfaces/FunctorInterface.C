@@ -26,24 +26,29 @@ FunctorInterface::FunctorInterface(const MooseObject * const moose_object)
 std::string
 FunctorInterface::deduceFunctorName(const std::string & name, const InputParameters & params)
 {
-  if (params.have_parameter<MooseFunctorName>(name))
-    return params.get<MooseFunctorName>(name);
-  // variables, functor material properties, and functions are also functors
-  else if (params.have_parameter<MaterialPropertyName>(name))
-    return params.get<MaterialPropertyName>(name);
-  else if (params.have_parameter<VariableName>(name))
-    return params.get<VariableName>(name);
-  else if (params.have_parameter<std::vector<VariableName>>(name))
+  if (params.isParamValid(name))
   {
-    const auto & var_names = params.get<std::vector<VariableName>>(name);
-    if (var_names.size() != 1)
-      mooseError("We only support a single variable name for retrieving a functor");
-    return var_names[0];
+    if (params.have_parameter<MooseFunctorName>(name))
+      return params.get<MooseFunctorName>(name);
+    // variables, functor material properties, and functions are also functors
+    else if (params.have_parameter<MaterialPropertyName>(name))
+      return params.get<MaterialPropertyName>(name);
+    else if (params.have_parameter<VariableName>(name))
+      return params.get<VariableName>(name);
+    else if (params.have_parameter<std::vector<VariableName>>(name))
+    {
+      const auto & var_names = params.get<std::vector<VariableName>>(name);
+      if (var_names.size() != 1)
+        mooseError("We only support a single variable name for retrieving a functor");
+      return var_names[0];
+    }
+    else if (params.have_parameter<NonlinearVariableName>(name))
+      return params.get<NonlinearVariableName>(name);
+    else if (params.have_parameter<FunctionName>(name))
+      return params.get<FunctionName>(name);
+    else
+      mooseError("Invalid parameter type for retrieving a functor");
   }
-  else if (params.have_parameter<NonlinearVariableName>(name))
-    return params.get<NonlinearVariableName>(name);
-  else if (params.have_parameter<FunctionName>(name))
-    return params.get<FunctionName>(name);
   else
     return name;
 }

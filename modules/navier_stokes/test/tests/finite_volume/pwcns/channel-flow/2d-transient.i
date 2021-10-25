@@ -1,9 +1,22 @@
-mu=1
-rho=1
-k=1e-3
-cp=1
-v_inlet=1
-T_inlet=200
+# Fluid properties
+mu = 1
+rho = 1
+cp = 1
+k = 1e-3
+
+# Solid properties
+cp_s = 2
+rho_s = 4
+k_s = 1e-2
+h_fs = 10
+
+# Operating conditions
+u_inlet = 1
+T_inlet = 200
+p_outlet = 10
+top_side_temperature = 150
+
+# Numerical scheme
 advected_interp_method='average'
 velocity_interp_method='rc'
 
@@ -12,47 +25,52 @@ velocity_interp_method='rc'
     type = GeneratedMeshGenerator
     dim = 2
     xmin = 0
-    xmax = 2
+    xmax = 10
     ymin = 0
-    ymax = 10
+    ymax = 1
     nx = 20
-    ny = 100
+    ny = 5
   []
 []
 
 [Variables]
   [u]
     type = PINSFVSuperficialVelocityVariable
-    initial_condition = 1e-6
+    initial_condition = ${u_inlet}
   []
   [v]
     type = PINSFVSuperficialVelocityVariable
-    initial_condition = ${v_inlet}
+    initial_condition = 1e-6
   []
   [pressure]
     type = INSFVPressureVariable
+    initial_condition = ${p_outlet}
   []
-  [temperature]
+  [temp_fluid]
     type = INSFVEnergyVariable
+  []
+  [temp_solid]
+    type = MooseVariableFVReal
+    initial_condition = 100
   []
 []
 
 [AuxVariables]
-  [temp_solid]
-    family = 'MONOMIAL'
-    order = 'CONSTANT'
-    fv = true
-    initial_condition = 100
-  []
   [porosity]
-    family = MONOMIAL
-    order = CONSTANT
-    fv = true
-    initial_condition = 0.4
+    type = MooseVariableFVReal
+    initial_condition = 0.5
+  []
+  [velocity_norm]
+    type = MooseVariableFVReal
   []
 []
 
 [FVKernels]
+  [mass_time]
+    type = WCNSFVMassTimeDerivative
+    variable = pressure
+    drho_dt = 'drho_dt'
+  []
   [mass]
     type = PINSFVMassAdvection
     variable = pressure
@@ -67,6 +85,11 @@ velocity_interp_method='rc'
     porosity = porosity
   []
 
+  [u_time]
+    type = INSFVMomentumTimeDerivative
+    variable = u
+    rho = ${rho}
+  []
   [u_advection]
     type = PINSFVMomentumAdvection
     variable = u
@@ -94,26 +117,12 @@ velocity_interp_method='rc'
     pressure = pressure
     porosity = porosity
   []
-  [u_gravity]
-    type = PINSFVMomentumGravity
-    variable = u
-    rho = ${rho}
-    gravity = '0 -9.81 0'
-    momentum_component = 'x'
-    porosity = porosity
-  []
-  [u_boussinesq]
-    type = PINSFVMomentumBoussinesq
-    variable = u
-    T_fluid = 'temperature'
-    rho = ${rho}
-    ref_temperature = 150
-    gravity = '0 -9.81 0'
-    momentum_component = 'x'
-    alpha_name = 'alpha_b'
-    porosity = porosity
-  []
 
+  [v_time]
+    type = INSFVMomentumTimeDerivative
+    variable = v
+    rho = ${rho}
+  []
   [v_advection]
     type = PINSFVMomentumAdvection
     variable = v
@@ -141,29 +150,20 @@ velocity_interp_method='rc'
     pressure = pressure
     porosity = porosity
   []
-  [v_gravity]
-    type = PINSFVMomentumGravity
-    variable = v
-    rho = ${rho}
-    gravity = '-0 -9.81 0'
-    momentum_component = 'y'
-    porosity = porosity
-  []
-  [v_boussinesq]
-    type = PINSFVMomentumBoussinesq
-    variable = v
-    T_fluid = 'temperature'
-    rho = ${rho}
-    ref_temperature = 150
-    gravity = '0 -9.81 0'
-    momentum_component = 'y'
-    alpha_name = 'alpha_b'
-    porosity = porosity
-  []
 
+  [energy_time]
+    type = PINSFVEnergyTimeDerivative
+    variable = temp_fluid
+    cp = ${cp}
+    dcp_dt = 'dcp_dt'
+    rho = ${rho}
+    drho_dt = 'drho_dt'
+    is_solid = false
+    porosity = porosity
+  []
   [energy_advection]
     type = PINSFVEnergyAdvection
-    variable = temperature
+    variable = temp_fluid
     vel = 'velocity'
     velocity_interp_method = ${velocity_interp_method}
     advected_interp_method = ${advected_interp_method}
@@ -176,15 +176,37 @@ velocity_interp_method='rc'
   []
   [energy_diffusion]
     type = PINSFVEnergyDiffusion
+    variable = temp_fluid
     k = ${k}
-    variable = temperature
     porosity = porosity
   []
   [energy_convection]
     type = PINSFVEnergyAmbientConvection
-    variable = temperature
+    variable = temp_fluid
     is_solid = false
-    T_fluid = temperature
+    T_fluid = temp_fluid
+    T_solid = temp_solid
+    h_solid_fluid = 'h_cv'
+  []
+
+  [solid_energy_time]
+    type = PINSFVEnergyTimeDerivative
+    variable = temp_solid
+    cp = ${cp_s}
+    rho = ${rho_s}
+    is_solid = true
+    porosity = porosity
+  []
+  [solid_energy_diffusion]
+    type = FVDiffusion
+    variable = temp_solid
+    coeff = ${k_s}
+  []
+  [solid_energy_convection]
+    type = PINSFVEnergyAmbientConvection
+    variable = temp_solid
+    is_solid = true
+    T_fluid = temp_fluid
     T_solid = temp_solid
     h_solid_fluid = 'h_cv'
   []
@@ -193,39 +215,45 @@ velocity_interp_method='rc'
 [FVBCs]
   [inlet-u]
     type = INSFVInletVelocityBC
-    boundary = 'bottom'
+    boundary = 'left'
     variable = u
-    function = 0
+    function = ${u_inlet}
   []
   [inlet-v]
     type = INSFVInletVelocityBC
-    boundary = 'bottom'
+    boundary = 'left'
     variable = v
-    function = ${v_inlet}
+    function = 0
   []
   [inlet-T]
     type = FVNeumannBC
-    variable = temperature
-    value = ${fparse v_inlet * rho * cp * T_inlet}
-    boundary = 'bottom'
+    variable = temp_fluid
+    value = ${fparse u_inlet * rho * cp * T_inlet}
+    boundary = 'left'
   []
 
   [no-slip-u]
     type = INSFVNoSlipWallBC
-    boundary = 'right'
+    boundary = 'top'
     variable = u
     function = 0
   []
   [no-slip-v]
     type = INSFVNoSlipWallBC
-    boundary = 'right'
+    boundary = 'top'
     variable = v
     function = 0
+  []
+  [heated-side]
+    type = FVDirichletBC
+    boundary = 'top'
+    variable = 'temp_solid'
+    value = ${top_side_temperature}
   []
 
   [symmetry-u]
     type = PINSFVSymmetryVelocityBC
-    boundary = 'left'
+    boundary = 'bottom'
     variable = u
     u = u
     v = v
@@ -235,7 +263,7 @@ velocity_interp_method='rc'
   []
   [symmetry-v]
     type = PINSFVSymmetryVelocityBC
-    boundary = 'left'
+    boundary = 'bottom'
     variable = v
     u = u
     v = v
@@ -245,47 +273,82 @@ velocity_interp_method='rc'
   []
   [symmetry-p]
     type = INSFVSymmetryPressureBC
-    boundary = 'left'
+    boundary = 'bottom'
     variable = pressure
   []
 
   [outlet-p]
     type = INSFVOutletPressureBC
-    boundary = 'top'
+    boundary = 'right'
     variable = pressure
-    function = 0
+    function = ${p_outlet}
+  []
+[]
+
+[Modules]
+  [FluidProperties]
+    [fp]
+      type = FlibeFluidProperties
+    []
   []
 []
 
 [Materials]
   [constants]
     type = ADGenericConstantMaterial
-    prop_names = 'h_cv alpha_b'
-    prop_values = '1e-3 8e-4'
+    prop_names = 'h_cv'
+    prop_values = '${h_fs}'
   []
-  [functor_constants]
-    type = ADGenericConstantFunctorMaterial
-    prop_names = 'cp'
-    prop_values = '${cp}'
-  []
-
   [ins_fv]
     type = INSFVMaterial
     u = 'u'
     v = 'v'
     pressure = 'pressure'
     rho = ${rho}
-    temperature = 'temperature'
+    temperature = 'temp_fluid'
+  []
+  [fluid_props_to_mat_props]
+    type = GeneralFunctorFluidProps
+    fp = fp
+    pressure = 'pressure'
+    T_fluid = 'temp_fluid'
+    speed = 'velocity_norm'
+
+    # To initialize with a high viscosity
+    mu_rampdown = 'mu_rampdown'
+
+    # For porous flow
+    characteristic_length = 1
+    porosity = 'porosity'
+  []
+[]
+
+[Functions]
+  [mu_rampdown]
+    type = PiecewiseLinear
+    x = '1 2 3 4'
+    y = '1e3 1e2 1e1 1'
+  []
+[]
+
+[AuxKernels]
+  [speed]
+    type = ParsedAux
+    variable = 'velocity_norm'
+    args = 'u v porosity'
+    function = 'sqrt(u*u + v*v) / porosity'
   []
 []
 
 [Executioner]
-  type = Steady
+  type = Transient
   solve_type = 'NEWTON'
   petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_pc_type -sub_pc_factor_shift_type'
   petsc_options_value = 'asm      100                lu           NONZERO'
   line_search = 'none'
   nl_rel_tol = 1e-12
+
+  end_time = 0.5
 []
 
 # Some basic Postprocessors to examine the solution
@@ -293,17 +356,21 @@ velocity_interp_method='rc'
   [inlet-p]
     type = SideAverageValue
     variable = pressure
-    boundary = 'top'
+    boundary = 'left'
   []
-  [outlet-v]
+  [outlet-u]
     type = SideAverageValue
-    variable = v
-    boundary = 'top'
+    variable = u
+    boundary = 'right'
   []
   [outlet-temp]
     type = SideAverageValue
-    variable = temperature
-    boundary = 'top'
+    variable = temp_fluid
+    boundary = 'right'
+  []
+  [solid-temp]
+    type = ElementAverageValue
+    variable = temp_solid
   []
 []
 

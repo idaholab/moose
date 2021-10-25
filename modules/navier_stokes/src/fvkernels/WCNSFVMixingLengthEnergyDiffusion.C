@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "WCNSFVMixingLengthEnergyDiffusion.h"
+#include "NS.h"
 
 registerMooseObject("NavierStokesApp", WCNSFVMixingLengthEnergyDiffusion);
 
@@ -25,8 +26,8 @@ WCNSFVMixingLengthEnergyDiffusion::validParams()
       "schmidt_number",
       "The turbulent Schmidt number (or turbulent Prandtl number if the passive scalar is energy) "
       "that relates the turbulent scalar diffusivity to the turbulent momentum diffusivity.");
-  params.addRequiredParam<MaterialPropertyName>("rho", "Density");
-  params.addRequiredParam<MaterialPropertyName>("cp", "Specific heat capacity");
+  params.addRequiredParam<MooseFunctorName>(NS::density, "Density");
+  params.addRequiredParam<MooseFunctorName>(NS::cp, "Specific heat capacity");
 
   params.set<unsigned short>("ghost_layers") = 2;
   return params;
@@ -40,8 +41,8 @@ WCNSFVMixingLengthEnergyDiffusion::WCNSFVMixingLengthEnergyDiffusion(const Input
                              : nullptr),
     _w_var(isParamValid("w") ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("w", 0))
                              : nullptr),
-    _rho(getFunctor<ADReal>("rho")),
-    _cp(getFunctor<ADReal>("cp")),
+    _rho(getFunctor<ADReal>(NS::density)),
+    _cp(getFunctor<ADReal>(NS::cp)),
     _mixing_len(*getVarHelper<MooseVariableFV<Real>>("mixing_length", 0)),
     _schmidt_number(getParam<Real>("schmidt_number"))
 {
@@ -75,12 +76,12 @@ WCNSFVMixingLengthEnergyDiffusion::computeQpResidual()
   ADReal symmetric_strain_tensor_norm = 2.0 * Utility::pow<2>(grad_u(0));
   if (_dim >= 2)
   {
-    auto grad_v = _v_var->adGradSln(*_face_info);
+    const auto & grad_v = _v_var->adGradSln(*_face_info);
     symmetric_strain_tensor_norm +=
         2.0 * Utility::pow<2>(grad_v(1)) + Utility::pow<2>(grad_v(0) + grad_u(1));
     if (_dim >= 3)
     {
-      auto grad_w = _w_var->adGradSln(*_face_info);
+      const auto & grad_w = _w_var->adGradSln(*_face_info);
       symmetric_strain_tensor_norm += 2.0 * Utility::pow<2>(grad_w(2)) +
                                       Utility::pow<2>(grad_u(2) + grad_w(0)) +
                                       Utility::pow<2>(grad_v(2) + grad_w(1));

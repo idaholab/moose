@@ -9,6 +9,7 @@
 
 #include "PINSFVMomentumBoussinesq.h"
 #include "PINSFVSuperficialVelocityVariable.h"
+#include "NS.h"
 
 registerMooseObject("NavierStokesApp", PINSFVMomentumBoussinesq);
 
@@ -18,13 +19,13 @@ PINSFVMomentumBoussinesq::validParams()
   InputParameters params = INSFVMomentumBoussinesq::validParams();
   params.addClassDescription(
       "Computes a body force for natural convection buoyancy in porous media: eps alpha (T-T_0)");
-  params.addRequiredCoupledVar("porosity", "Porosity auxiliary variable");
+  params.addRequiredCoupledVar(NS::porosity, "Porosity auxiliary variable");
 
   return params;
 }
 
 PINSFVMomentumBoussinesq::PINSFVMomentumBoussinesq(const InputParameters & params)
-  : INSFVMomentumBoussinesq(params), _eps(coupledValue("porosity"))
+  : INSFVMomentumBoussinesq(params), _eps(coupledValue(NS::porosity))
 {
   if (!dynamic_cast<PINSFVSuperficialVelocityVariable *>(&_var))
     mooseError("PINSFVMomentumBoussinesq may only be used with a superficial velocity "

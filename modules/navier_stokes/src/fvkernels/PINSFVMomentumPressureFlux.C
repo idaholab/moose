@@ -21,7 +21,7 @@ PINSFVMomentumPressureFlux::validParams()
                              "using the divergence theoreom, in the porous media "
                              "incompressible Navier-Stokes momentum equation. This kernel "
                              "is also executed on boundaries.");
-  params.addRequiredCoupledVar("porosity", "Porosity auxiliary variable");
+  params.addRequiredCoupledVar(NS::porosity, "Porosity auxiliary variable");
   params.addRequiredCoupledVar(NS::pressure, "Pressure variable");
   params.addDeprecatedCoupledVar("p", NS::pressure, "1/1/2022");
   MooseEnum momentum_component("x=0 y=1 z=2");
@@ -34,8 +34,8 @@ PINSFVMomentumPressureFlux::validParams()
 
 PINSFVMomentumPressureFlux::PINSFVMomentumPressureFlux(const InputParameters & params)
   : FVFluxKernel(params),
-    _eps(coupledValue("porosity")),
-    _eps_neighbor(coupledNeighborValue("porosity")),
+    _eps(coupledValue(NS::porosity)),
+    _eps_neighbor(coupledNeighborValue(NS::porosity)),
     _p_elem(adCoupledValue(NS::pressure)),
     _p_neighbor(adCoupledNeighborValue(NS::pressure)),
     _index(getParam<MooseEnum>("momentum_component"))

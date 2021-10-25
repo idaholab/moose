@@ -12,20 +12,20 @@
 #include "FVFluxKernel.h"
 
 /**
- * A flux kernel for diffusing energy in porous media across cell faces, using a scalar
- * isotropic diffusion coefficient, using functor material properties
+ * A flux kernel for diffusion of energy in porous media across cell faces using a
+ * vector diffusion coefficient, to model anisotropy, using functor material properties
  */
-class PINSFVEnergyDiffusion : public FVFluxKernel
+class PINSFVEnergyAnisotropicDiffusion : public FVFluxKernel
 {
 public:
   static InputParameters validParams();
-  PINSFVEnergyDiffusion(const InputParameters & params);
+  PINSFVEnergyAnisotropicDiffusion(const InputParameters & params);
 
 protected:
   ADReal computeQpResidual() override;
 
   /// the thermal conductivity
-  const Moose::Functor<ADReal> & _k;
+  const Moose::Functor<ADRealVectorValue> & _k;
   /// the porosity
   const Moose::Functor<ADReal> & _eps;
   /// whether the diffusivity should be multiplied by porosity

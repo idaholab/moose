@@ -144,16 +144,17 @@ velocity_interp_method='rc'
     porosity = porosity
   []
   [energy_diffusion]
-    type = PINSFVEnergyEffectiveDiffusion
+    type = PINSFVEnergyAnisotropicDiffusion
     kappa = 'kappa'
     variable = temperature
+    porosity = porosity
   []
   [energy_convection]
     type = PINSFVEnergyAmbientConvection
     variable = temperature
     is_solid = false
-    temp_fluid = temperature
-    temp_solid = temp_solid
+    T_fluid = temperature
+    T_solid = temp_solid
     h_solid_fluid = 'h_cv'
   []
 
@@ -166,8 +167,8 @@ velocity_interp_method='rc'
     type = PINSFVEnergyAmbientConvection
     variable = temp_solid
     is_solid = true
-    temp_fluid = temperature
-    temp_solid = temp_solid
+    T_fluid = temperature
+    T_solid = temp_solid
     h_solid_fluid = 'h_cv'
   []
 []
@@ -258,7 +259,7 @@ velocity_interp_method='rc'
     prop_values = '${cp}'
   []
   [kappa]
-    type = ADGenericConstantVectorMaterial
+    type = ADGenericConstantVectorFunctorMaterial
     prop_names = 'kappa'
     prop_values = '1e-3 1e-2 1e-1'
   []

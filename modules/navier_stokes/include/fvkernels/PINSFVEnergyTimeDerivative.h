@@ -11,21 +11,25 @@
 
 #include "FVTimeKernel.h"
 
-class PNSFVEnergyTimeDerivative : public FVTimeKernel
+class PINSFVEnergyTimeDerivative : public FVTimeKernel
 {
 public:
   static InputParameters validParams();
-  PNSFVEnergyTimeDerivative(const InputParameters & params);
+  PINSFVEnergyTimeDerivative(const InputParameters & params);
 
 protected:
   ADReal computeQpResidual() override;
 
   /// the density
-  const ADMaterialProperty<Real> & _rho;
+  const Moose::Functor<ADReal> & _rho;
+  /// the time derivative of the density
+  const Moose::Functor<ADReal> * _rho_dot;
   /// the heat conductivity
-  const ADMaterialProperty<Real> & _cp;
+  const Moose::Functor<ADReal> & _cp;
+  /// the time derivative of the heat conductivity
+  const Moose::Functor<ADReal> * _cp_dot;
   /// the porosity
-  const VariableValue & _eps;
+  const Moose::Functor<ADReal> & _eps;
   /// whether this kernel is being used for a solid or a fluid temperature
   const bool _is_solid;
   /// scales the value of the kernel, used for faster steady state during pseudo transient

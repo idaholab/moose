@@ -7,23 +7,24 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "PINSFVEnergyDiffusion.h"
+#include "PINSFVEnergyAnisotropicDiffusion.h"
 #include "INSFVEnergyVariable.h"
 #include "NS.h"
 
-registerMooseObject("NavierStokesApp", PINSFVEnergyDiffusion);
+registerMooseObject("NavierStokesApp", PINSFVEnergyAnisotropicDiffusion);
 
 InputParameters
-PINSFVEnergyDiffusion::validParams()
+PINSFVEnergyAnisotropicDiffusion::validParams()
 {
   auto params = FVFluxKernel::validParams();
-  params.addClassDescription("Diffusion term in the porous media incompressible Navier-Stokes "
-                             "fluid energy equations :  $-div(eps * k * grad(T))$");
+  params.addClassDescription(
+      "Anisotropic diffusion term in the porous media incompressible Navier-Stokes "
+      "equations : -div(kappa grad(T))");
+  params.addRequiredParam<MooseFunctorName>(NS::kappa, "Vector of effective thermal conductivity");
   params.addRequiredParam<MooseFunctorName>(NS::porosity, "Porosity");
-  params.addRequiredParam<MooseFunctorName>(NS::k, "Thermal conductivity");
   params.addParam<bool>(
       "effective_diffusivity",
-      false,
+      true,
       "Whether the diffusivity should be multiplied by porosity, or whether the provided "
       "diffusivity is an effective diffusivity taking porosity effects into account");
 
@@ -31,27 +32,28 @@ PINSFVEnergyDiffusion::validParams()
   return params;
 }
 
-PINSFVEnergyDiffusion::PINSFVEnergyDiffusion(const InputParameters & params)
+PINSFVEnergyAnisotropicDiffusion::PINSFVEnergyAnisotropicDiffusion(const InputParameters & params)
   : FVFluxKernel(params),
-    _k(getFunctor<ADReal>(NS::k)),
+    _k(getFunctor<ADRealVectorValue>(NS::kappa)),
     _eps(getFunctor<ADReal>(NS::porosity)),
     _porosity_factored_in(getParam<bool>("effective_diffusivity"))
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError("PINSFV is not supported by local AD indexing. In order to use PINSFV, please run "
-             "the configure script in the root MOOSE directory with the configure option "
+  mooseError("PINSFV is not supported by local AD indexing. In order to use PINSFV, please run the "
+             "configure script in the root MOOSE directory with the configure option "
              "'--with-ad-indexing-type=global'");
 #endif
   if (!dynamic_cast<INSFVEnergyVariable *>(&_var))
-    mooseError("PINSFVEnergyDiffusion may only be used with a fluid temperature variable, "
-               "of variable type INSFVEnergyVariable.");
+    mooseError(
+        "PINSFVEnergyAnisotropicDiffusion may only be used with a fluid temperature variable, "
+        "of variable type INSFVEnergyVariable.");
 }
 
 ADReal
-PINSFVEnergyDiffusion::computeQpResidual()
+PINSFVEnergyAnisotropicDiffusion::computeQpResidual()
 {
   // Interpolate thermal conductivity times porosity on the face
-  ADReal k_eps_face;
+  ADRealVectorValue k_eps_face;
   const auto face_elem = elemFromFace();
   const auto face_neighbor = neighborFromFace();
 
@@ -70,8 +72,11 @@ PINSFVEnergyDiffusion::computeQpResidual()
                            *_face_info,
                            true);
 
-  // Compute the temperature gradient dotted with the surface normal
-  auto dTdn = gradUDotNormal();
+  // Compute the temperature gradient times the conductivity tensor
+  ADRealVectorValue kappa_grad_T;
+  const auto & grad_T = _var.adGradSln(*_face_info);
+  for (std::size_t i = 0; i < LIBMESH_DIM; i++)
+    kappa_grad_T(i) = k_eps_face(i) * grad_T(i);
 
-  return -k_eps_face * dTdn;
+  return -kappa_grad_T * _normal;
 }

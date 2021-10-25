@@ -1,18 +1,24 @@
 mu=1.1
-rho=1.1
-advected_interp_method='upwind'
+rho=1
+advected_interp_method='average'
 velocity_interp_method='rc'
 
 [Mesh]
-  [mesh]
-    type = CartesianMeshGenerator
+  [gen]
+    type = GeneratedMeshGenerator
     dim = 2
-    dx = '1 1'
-    dy = '0.5'
-    ix = '30 30'
-    iy = '20'
-    subdomain_id = '1 2'
+    xmin = 0
+    xmax = 5
+    ymin = 0
+    ymax = 1
+    nx = 40
+    ny = 10
   []
+[]
+
+[Problem]
+  coord_type = 'RZ'
+  rz_coord_axis = 'X'
 []
 
 [Variables]
@@ -34,40 +40,12 @@ velocity_interp_method='rc'
     family = MONOMIAL
     order = CONSTANT
     fv = true
-  []
-[]
-
-[ICs]
-  inactive = 'porosity_continuous'
-  [porosity_1]
-    type = ConstantIC
-    variable = porosity
-    block = 1
-    value = 1
-  []
-  [porosity_2]
-    type = ConstantIC
-    variable = porosity
-    block = 2
-    value = 0.5
-  []
-  [porosity_continuous]
-    type = FunctionIC
-    variable = porosity
-    block = '1 2'
-    function = smooth_jump
-  []
-[]
-
-[Functions]
-  [smooth_jump]
-    type = ParsedFunction
-    value = '1 - 0.5 * 1 / (1 + exp(-30*(x-1)))'
+    initial_condition = 0.5
   []
 []
 
 [FVKernels]
-  inactive = 'u_advection_porosity_gradient v_advection_porosity_gradient'
+  inactive = 'v_pressure_volumetric'
   [mass]
     type = PINSFVMassAdvection
     variable = pressure
@@ -101,25 +79,22 @@ velocity_interp_method='rc'
     variable = u
     mu = ${mu}
     porosity = porosity
-
-    momentum_component = 'x'
-    superficial_velocity = 'velocity'
   []
   [u_pressure]
-    type = PINSFVMomentumPressure
+    type = PINSFVMomentumPressureFlux
     variable = u
+    momentum_component = 'x'
     pressure = pressure
     porosity = porosity
-    momentum_component = 'x'
   []
-  [u_advection_porosity_gradient]
-    type = PINSFVMomentumAdvectionPorosityGradient
+  [u_friction]
+    type = PINSFVMomentumFriction
     variable = u
-    u = u
-    v = v
-    rho = ${rho}
-    porosity = porosity
     momentum_component = 'x'
+    porosity = porosity
+    Darcy_name = 'Darcy_coefficient'
+    Forchheimer_name = 'Forchheimer_coefficient'
+    rho = ${rho}
   []
 
   [v_advection]
@@ -141,29 +116,40 @@ velocity_interp_method='rc'
     variable = v
     mu = ${mu}
     porosity = porosity
-
-    momentum_component = 'y'
-    superficial_velocity = 'velocity'
   []
-  [v_pressure]
+  [v_pressure_volumetric]
     type = PINSFVMomentumPressure
+    variable = v
+    momentum_component = 'y'
+    pressure = pressure
+    porosity = porosity
+  []
+  [v_pressure_by_parts_flux]
+    type = PINSFVMomentumPressureFlux
+    variable = v
+    momentum_component = 'y'
+    pressure = pressure
+    porosity = porosity
+  []
+  [v_pressure_by_parts_volume_term]
+    type = PNSFVMomentumPressureFluxRZ
     variable = v
     pressure = pressure
     porosity = porosity
-    momentum_component = 'y'
   []
-  [v_advection_porosity_gradient]
-    type = PINSFVMomentumAdvectionPorosityGradient
+  [v_friction]
+    type = PINSFVMomentumFriction
     variable = v
-    u = u
-    v = v
-    rho = ${rho}
-    porosity = porosity
     momentum_component = 'y'
+    porosity = porosity
+    Darcy_name = 'Darcy_coefficient'
+    Forchheimer_name = 'Forchheimer_coefficient'
+    rho = ${rho}
   []
 []
 
 [FVBCs]
+  inactive = 'free-slip-u free-slip-v'
   [inlet-u]
     type = INSFVInletVelocityBC
     boundary = 'left'
@@ -177,22 +163,59 @@ velocity_interp_method='rc'
     function = 0
   []
 
-  [walls-u]
+  [no-slip-u]
+    type = INSFVNoSlipWallBC
+    boundary = 'top'
+    variable = u
+    function = 0
+  []
+  [no-slip-v]
+    type = INSFVNoSlipWallBC
+    boundary = 'top'
+    variable = v
+    function = 0
+  []
+  [free-slip-u]
     type = INSFVNaturalFreeSlipBC
-    boundary = 'top bottom'
+    boundary = 'top'
     variable = u
   []
-  [walls-v]
+  [free-slip-v]
     type = INSFVNaturalFreeSlipBC
-    boundary = 'top bottom'
+    boundary = 'top'
     variable = v
   []
+  [symmetry-u]
+    type = PINSFVSymmetryVelocityBC
+    boundary = 'bottom'
+    variable = u
+    u = u
+    v = v
+    mu = ${mu}
+    momentum_component = 'x'
+    porosity = porosity
+  []
+  [symmetry-v]
+    type = PINSFVSymmetryVelocityBC
+    boundary = 'bottom'
+    variable = v
+    u = u
+    v = v
+    mu = ${mu}
+    momentum_component = 'y'
+    porosity = porosity
+  []
+  [symmetry-p]
+    type = INSFVSymmetryPressureBC
+    boundary = 'bottom'
+    variable = pressure
+  []
 
-  [outlet_p]
+  [outlet-p]
     type = INSFVOutletPressureBC
     boundary = 'right'
     variable = pressure
-    function = 0.4
+    function = 0
   []
 []
 
@@ -204,20 +227,28 @@ velocity_interp_method='rc'
     pressure = 'pressure'
     rho = ${rho}
   []
+  [darcy]
+    type = ADGenericConstantVectorFunctorMaterial
+    prop_names = 'Darcy_coefficient Forchheimer_coefficient'
+    prop_values = '0.1 0.1 0.1 0.1 0.1 0.1'
+  []
 []
 
 [Executioner]
   type = Steady
   solve_type = 'NEWTON'
   petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_pc_type -sub_pc_factor_shift_type'
-  petsc_options_value = 'asm      100                lu           NONZERO'
+  petsc_options_value = 'asm      200                lu           NONZERO'
   line_search = 'none'
+  nl_rel_tol = 1e-11
+  nl_abs_tol = 1e-14
 []
 
+# Some basic Postprocessors to visually examine the solution
 [Postprocessors]
-  [inlet_p]
+  [inlet-p]
     type = SideAverageValue
-    variable = 'pressure'
+    variable = pressure
     boundary = 'left'
   []
   [outlet-u]
@@ -229,5 +260,4 @@ velocity_interp_method='rc'
 
 [Outputs]
   exodus = true
-  csv = false
 []
