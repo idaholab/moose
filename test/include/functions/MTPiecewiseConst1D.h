@@ -19,4 +19,6 @@ public:
   MTPiecewiseConst1D(const InputParameters & parameters);
 
   virtual Real value(Real t, const Point & p) const;
+
+  virtual RealGradient gradient(Real, const Point &) const { return 0; };
 };
