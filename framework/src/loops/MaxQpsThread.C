@@ -85,9 +85,12 @@ MaxQpsThread::operator()(const ConstElemRange & range)
     // NOTE: user might specify higher order rule for faces, thus possibly ending up with more qps
     // than in the volume
     auto qrule_face = assem.attachQRuleFace(dim, *side_fe);
-    side_fe->reinit(elem, side);
-    if (qrule_face->n_points() > _max)
-      _max = qrule_face->n_points();
+    if (dim > 0) // side reinit in 0D makes no sense, but we may have NodeElems
+    {
+      side_fe->reinit(elem, side);
+      if (qrule_face->n_points() > _max)
+        _max = qrule_face->n_points();
+    }
 
     // In initial conditions nodes are enumerated as pretend quadrature points
     // using the _qp index to access coupled variables. In order to be able to

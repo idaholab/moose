@@ -118,6 +118,12 @@ LIBMESH_OPTIONS = {
   'slepc_subminor' :  { 're_option' : r'#define\s+LIBMESH_DETECTED_SLEPC_VERSION_SUBMINOR\s+(\d+)',
                      'default'   : '1'
                    },
+  'exodus_major' :  { 're_option' : r'#define\s+LIBMESH_DETECTED_EXODUS_VERSION_MAJOR\s+(\d+)',
+                     'default'   : '1'
+                   },
+  'exodus_minor' :  { 're_option' : r'#define\s+LIBMESH_DETECTED_EXODUS_VERSION_MINOR\s+(\d+)',
+                     'default'   : '1'
+                   },
   'dof_id_bytes' : { 're_option' : r'#define\s+LIBMESH_DOF_ID_BYTES\s+(\d+)',
                      'default'   : '4'
                    },
@@ -449,6 +455,15 @@ def getSlepcVersion(libmesh_dir):
 
     return major_version.pop() + '.' + minor_version.pop() + '.' + subminor_version.pop()
 
+def getExodusVersion(libmesh_dir):
+    major_version = getLibMeshConfigOption(libmesh_dir, 'exodus_major')
+    minor_version = getLibMeshConfigOption(libmesh_dir, 'exodus_minor')
+    if len(major_version) != 1 or len(minor_version) != 1:
+      return None
+
+    return major_version.pop() + '.' + minor_version.pop()
+
+
 def checkLogicVersionSingle(checks, iversion, package):
     logic, version = re.search(r'(.*?)(\d\S+)', iversion).groups()
     if logic == '' or logic == '=':
@@ -513,6 +528,21 @@ def checkSlepcVersion(checks, test):
 
     version_string = ' '.join(test['slepc_version'])
     return (checkVersion(checks, version_string, 'slepc_version'), version_string)
+
+# Break down exodus version logic in a new define
+def checkExodusVersion(checks, test):
+    version_string = ' '.join(test['exodus_version'])
+
+    # If any version of Exodus works, return true immediately
+    if 'ALL' in set(test['exodus_version']):
+        return (True, version_string)
+
+    # Exodus not installed or version could not be detected (e.g. old libMesh)
+    if checks['exodus_version'] == None:
+       return (False, version_string)
+
+    return (checkVersion(checks, version_string, 'exodus_version'), version_string)
+
 
 def getIfAsioExists(moose_dir):
     option_set = set(['ALL'])
