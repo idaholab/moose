@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "CreateExecutorAction.h"
+#include "ReadExecutorParamsAction.h"
 #include "Factory.h"
 #include "PetscSupport.h"
 #include "MooseApp.h"
@@ -16,10 +16,10 @@
 #include "FEProblem.h"
 #include "EigenProblem.h"
 
-registerMooseAction("MooseApp", CreateExecutorAction, "setup_executor");
+registerMooseAction("MooseApp", ReadExecutorParamsAction, "read_executor");
 
 InputParameters
-CreateExecutorAction::validParams()
+ReadExecutorParamsAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
   params.addClassDescription("Add an Executor object to the simulation.");
@@ -31,29 +31,24 @@ CreateExecutorAction::validParams()
   return params;
 }
 
-CreateExecutorAction::CreateExecutorAction(InputParameters params)
+ReadExecutorParamsAction::ReadExecutorParamsAction(InputParameters params)
   : MooseObjectAction(params), _auto_preconditioning(getParam<bool>("auto_preconditioning"))
 {
 }
 
 void
-CreateExecutorAction::act()
+ReadExecutorParamsAction::act()
 {
-//  std::shared_ptr<Executor> executor = _factory.create<Executor>(_type, _name, _moose_object_pars);
-
   // If enabled, automatically create a Preconditioner if the [Preconditioning] block is not found
   if (_auto_preconditioning && !_awh.hasActions("add_preconditioning") &&
       _moose_object_pars.isParamValid("solve_type"))
     setupAutoPreconditioning();
 
-  std::cout << "Name: " << _name << std::endl;
-
-//  _app.addExecutor(std::move(executor));
   _app.addExecutorParams(_type, _name, _moose_object_pars);
 }
 
 void
-CreateExecutorAction::setupAutoPreconditioning()
+ReadExecutorParamsAction::setupAutoPreconditioning()
 {
   // If using NEWTON or LINEAR then automatically create SingleMatrixPreconditioner object with
   // full=true

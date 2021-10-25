@@ -321,13 +321,23 @@ public:
    */
   void setExecutioner(std::shared_ptr<Executioner> && executioner) { _executioner = executioner; }
   void setExecutor(std::shared_ptr<Executor> && executor) { _executor = executor; }
-  void addExecutor(std::shared_ptr<Executor> && executor);
+  void addExecutor(const std::string & type, const std::string & name, const InputParameters & params);
 
   /**
    * Adds the parameters for an Executor to the list of parameters.  This is done
    * so that the Executors can be created in _exactly_ the correct order.
    */
   void addExecutorParams(const std::string & type, const std::string & name, const InputParameters & params);
+
+private:
+  /**
+   * Internal function used to recursively create the executor objects.
+   *
+   * Called by createExecutors
+   */
+  void recursivelyCreateExecutors(const ExecutorName & current_executor_name);
+
+public:
 
   /**
    * After adding all of the Executor Params - this function will actually cause all of them to be built

@@ -31,10 +31,10 @@ BinaryTestExecutor::BinaryTestExecutor(const InputParameters & parameters)
   : Executor(parameters),
     _inner1(getParam<ExecutorName>("inner1").empty()
                 ? nullptr
-                : &_fe_problem.getExecutor(getParam<std::string>("inner1"))),
+                : &_fe_problem.getExecutor(getParam<ExecutorName>("inner1"))),
     _inner2(getParam<ExecutorName>("inner2").empty()
                 ? nullptr
-                : &_fe_problem.getExecutor(getParam<std::string>("inner2")))
+                : &_fe_problem.getExecutor(getParam<ExecutorName>("inner2")))
 {
 }
 

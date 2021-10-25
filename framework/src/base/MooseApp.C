@@ -1183,18 +1183,46 @@ MooseApp::feProblem() const
 }
 
 void
-MooseApp::addExecutor(std::shared_ptr<Executor> && executor)
+MooseApp::addExecutor(const std::string & type, const std::string & name, const InputParameters & params)
 {
+  std::shared_ptr<Executor> executor = _factory.create<Executor>(type, name, params);
+
   if (_executors.count(executor->name()) > 0)
     mooseError("an executor with name '", executor->name(), "' already exists");
   _executors[executor->name()] = executor;
-  _executor = executor;
 }
 
 void
 MooseApp::addExecutorParams(const std::string & type, const std::string & name, const InputParameters & params)
 {
   _executor_params[name] = std::make_pair(type, libmesh_make_unique<InputParameters>(params));
+}
+
+
+void
+MooseApp::recursivelyCreateExecutors(const ExecutorName & current_executor_name)
+{
+  // Did we already make this one?
+  if(_executors.find(current_executor_name) != _executors.end())
+    return;
+
+  // Build the dependencies first
+  const auto & params = *_executor_params[current_executor_name].second;
+
+  for (const auto & param : params)
+  {
+    if(dynamic_cast<InputParameters::Parameter<ExecutorName> *>(param.second))
+    {
+      const auto & dependency_name = static_cast<InputParameters::Parameter<ExecutorName> *>(param.second)->get();
+
+      if (!dependency_name.empty())
+        recursivelyCreateExecutors(dependency_name);
+    }
+  }
+
+  // Add this Executor
+  const auto & type = _executor_params[current_executor_name].first;
+  addExecutor(type, current_executor_name, params);
 }
 
 void
@@ -1206,25 +1234,23 @@ MooseApp::createExecutors()
   // What is already built
   std::map<std::string, bool> already_built;
 
+  std::string current_root;
+
   for (const auto & params_entry : _executor_params)
   {
     const auto & name = params_entry.first;
-    const auto & params = *params_entry.second.second;
 
-    std::cout << name << std::endl;
+    // Did we already make this one?
+    if(_executors.find(name) != _executors.end())
+      continue;
 
-    for (const auto & param : params)
-    {
-//      std::cout << "Param: " << param.first << std::endl;
-      if(dynamic_cast<InputParameters::Parameter<ExecutorName> *>(param.second))
-      {
-        const auto & dependency_name = static_cast<InputParameters::Parameter<ExecutorName> *>(param.second)->get();
+    current_root = name;
 
-        if (!dependency_name.empty())
-          std::cout << "Depends on: " << dependency_name << std::endl;
-      }
-    }
+    recursivelyCreateExecutors(name);
   }
+
+  // Set the root executor
+  _executor = _executors[current_root];
 }
 
 Executioner *

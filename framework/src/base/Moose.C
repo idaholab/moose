@@ -93,7 +93,7 @@ addActionTypes(Syntax & syntax)
   /**************************/
   registerMooseObjectTask("create_problem",               Problem,                false);
   registerMooseObjectTask("setup_executioner",            Executioner,            false);
-  registerMooseObjectTask("setup_executor",            Executor,            false);
+  registerMooseObjectTask("read_executor",                Executor,               false);
   registerTask("add_executor", true);
 
   // This task does not construct an object, but it needs all of the parameters that
@@ -276,7 +276,7 @@ addActionTypes(Syntax & syntax)
                            "(setup_postprocessor_data)"
                            "(setup_time_integrator)"
                            "(setup_executioner)"
-                           "(setup_executor)"
+                           "(read_executor)"
                            "(add_executor)"
                            "(check_integrity_early)"
                            "(setup_predictor)"
@@ -482,7 +482,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("AddFieldSplitAction", "Preconditioning/*/*");
 
   registerSyntax("CreateExecutionerAction", "Executioner");
-  registerSyntax("CreateExecutorAction", "Executors/*");
+  registerSyntax("ReadExecutorParamsAction", "Executors/*");
   registerSyntax("SetupTimeStepperAction", "Executioner/TimeStepper");
   registerSyntax("SetupTimeIntegratorAction", "Executioner/TimeIntegrator");
 

@@ -18,7 +18,7 @@ InputParameterWarehouse::InputParameterWarehouse()
 
 InputParameters &
 InputParameterWarehouse::addInputParameters(const std::string & name,
-                                            InputParameters & parameters,
+                                            const InputParameters & parameters,
                                             THREAD_ID tid /* =0 */)
 {
   // Error if the name contains "::"

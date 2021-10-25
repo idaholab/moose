@@ -33,16 +33,16 @@
 []
 
 [Executors]
+  [my_first_executor]
+    type = BinaryTestExecutor
+    inner1 = i1
+    inner2 = i2
+  []
   [i1]
     type = BinaryTestExecutor
   []
   [i2]
     type = BinaryTestExecutor
-  []
-  [my_first_executor]
-    type = BinaryTestExecutor
-    inner1 = i1
-    inner2 = i2
   []
 []
 
