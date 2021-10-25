@@ -48,7 +48,7 @@
     type = FVThermalResistanceBC
     geometry = 'cartesian'
     variable = u
-    # Test setting it separately
+    # Test setting the temperature separately from the variable
     temperature = 'u'
     T_ambient = 14
     htc = 'htc'
