@@ -1,6 +1,8 @@
 #!/bin/bash
-export FCFLAGS="$FFLAGS"
+set -eu
 export PATH=/bin:$PATH
+
+export FCFLAGS="$FFLAGS"
 export CC=$(basename "$CC")
 export CXX=$(basename "$CXX")
 export FC=$(basename "$FC")
@@ -15,24 +17,19 @@ if [[ $HOST == arm64-apple-darwin20.0.0 ]]; then
     done
     ./autogen.sh
 fi
-# avoid recording flags in compilers
-# See Compiler Flags section of MPICH readme
-# TODO: configure ignores MPICHLIB_LDFLAGS
+
 export MPICHLIB_CPPFLAGS=$CPPFLAGS
 export MPICHLIB_CFLAGS=$CFLAGS
 export MPICHLIB_CXXFLAGS=$CXXFLAGS
 export MPICHLIB_LDFLAGS=$LDFLAGS
 export MPICHLIB_FFLAGS=$FFLAGS
 export MPICHLIB_FCFLAGS=$FCFLAGS
-unset CPPFLAGS CFLAGS CXXFLAGS LDFLAGS FFLAGS FCFLAGS F90 F77
-
+unset CPPFLAGS CFLAGS CXXFLAGS FFLAGS FCFLAGS F90 F77
 if [[ $(uname) == Darwin ]]; then
     if [[ $target_platform == osx-arm64 ]]; then
-        export LDFLAGS="-L$PREFIX/lib -Wl,-rpath,$PREFIX/lib"
         export LIBRARY_PATH="$PREFIX/lib"
-        CTUNING="-I$PREFIX/include"
-        FTUNING="-I$PREFIX/include"
-        OPTIONS="--enable-shared --enable-sharedlibs=clang --enable-cxx --enable-fortran --with-device=ch3"
+        TUNING="-I$PREFIX/include"
+        OPTIONS="--disable-opencl --enable-cxx --enable-fortran --with-device=ch3"
         export pac_cv_f77_accepts_F=yes
         export pac_cv_f77_flibs_valid=unknown
         export pac_cv_f77_sizeof_double_precision=8
@@ -79,26 +76,26 @@ if [[ $(uname) == Darwin ]]; then
         export CROSS_F90_INTEGER_MODEL_MAP=' {  2 , 1 , 1 }, {  4 , 2 , 2 }, {  9 , 4 , 4 }, {  18 , 8 , 8 },'
         export pac_MOD='mod'
     else
-        CTUNING="-march=core2 -mtune=haswell"
-        FTUNING=""
-        OPTIONS="--enable-shared --enable-sharedlibs=clang"
+        TUNING="-march=core2 -mtune=haswell"
+        OPTIONS=""
     fi
+    SHARED="clang"
 else
-    CTUNING="-march=nocona -mtune=haswell"
-    FTUNING=""
-    OPTIONS="--enable-shared --enable-sharedlibs=gcc"
+    SHARED="gcc"
+    TUNING="-march=nocona -mtune=haswell"
+    OPTIONS=""
 fi
 
-./configure --prefix=$PREFIX \
+./configure --prefix=${PREFIX} \
+            --enable-shared \
+            --enable-sharedlibs=${SHARED} \
             --enable-fast=O2 \
             --enable-debuginfo \
             --enable-two-level-namespace \
-            --disable-wrapper-rpath \
-            --disable-opencl \
-            ${OPTIONS} \
-            CC=$CC CXX=$CXX FC=$FC F77=$FC F90='' \
-            CFLAGS="${CTUNING}" CXXFLAGS="${CTUNING}" FFLAGS="${FTUNING}" LDFLAGS="${LDFLAGS:-}" \
-            FCFLAGS="${FTUNING}" F90FLAGS='' F77FLAGS=''
+            CC="${CC}" CXX="${CXX}" FC="${FC}" F77="${FC}" F90="" \
+            CFLAGS="${TUNING}" CXXFLAGS="${TUNING}" FFLAGS="${TUNING}" LDFLAGS="${LDFLAGS:-}" \
+            FCFLAGS="${TUNING}" F90FLAGS="" F77FLAGS="" \
+            ${OPTIONS}
 
 make -j"${CPU_COUNT:-1}"
 make install
