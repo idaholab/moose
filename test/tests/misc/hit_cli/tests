@@ -37,7 +37,7 @@
       type = RunCommand
       command = './hit_wrapper.py gold/additional_pattern_negative find -p type!=DirichletBC -- '
                 '\*/value input1.i input2.i'
-      detail = 'parameters with additional pattern constraints.'
+      detail = 'parameters with additional inverted pattern constraints.'
     []
   []
 

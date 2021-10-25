@@ -6,7 +6,7 @@ block hierarchies. To deal with HIT files we provide the `hit` executable, which
 is automatically built under `framework/contrib/hit`. This command line tool
 offers multiple functions for
 
-- Finding parameters across many input files in a contect sensitive way
+- Finding parameters across many input files in a context sensitive way
 - Validating input files
 - Formatting input files according to a user defined style
 - Merging input files
@@ -14,14 +14,14 @@ offers multiple functions for
 - Extracting common portions of input files
 - Subtracting out common portions of input files
 
-## `hit find` - Seaching for parameters
+## `hit find` - Searching for parameters
 
 ```
 hit find [-i] [-v] [-p additional_pattern [...] --] main_pattern files ...
 ```
 
 `hit find` looks for a full parameter path that can be specified with wildcards
-as `main_pattern`. `*` will match an arbitrary set of characters and `?` with
+as `main_pattern`. `*` will match an arbitrary set of characters and `?` will
 match a single character. In the input
 
 ```
@@ -37,7 +37,7 @@ the main pattern `Kernels/*/variable` will match the variable line, as will
 `Kernels/*/variable=a`, `*iable=?`, and `*/diff/*=a`, but `Kernels/*/variable=b`
 will not match.
 
-An `!=` operator is also available for negative matching. In the exaple above
+An `!=` operator is also available for negative matching. In the example above
 `Kernels/*/variable!=b` will match the variable line.
 
 The `-i` option will turn all matching case insensitive (useful to match
@@ -46,7 +46,7 @@ MooseEnum values).
 The `-v` option will list all files that do not have a single match, which can
 be used to check for the absence of patterns.
 
-The `-p` option will match additional parameters inside the blocks mathced by
+The `-p` option will match additional parameters inside the blocks matched by
 the main pattern. For example `hit find -p type=Diffusion -- Kernels/*/variable=a`
 will match the snippet above, and any kernel acting on the variable `a` that has
 `type = Diffusion` (and so would `hit find -p type!=NeumannBC -- Kernels/*/variable=a`)
@@ -179,7 +179,7 @@ common settings into a single input file.
 ## `hit subtract` - Removing common parameters parameters
 
 ```
-hit subtract common_parameters.i simulation_1_full.i > simulation_1.i
+hit subtract simulation_1_full.i common_parameters.i > simulation_1.i
 ```
 
 removes the parameters in `common_parameters.i` from `simulation_1_full.i`,
