@@ -1,0 +1,26 @@
+[Tests]
+  design = 'source/executors/Executor.md'
+  requirement = "MOOSE shall be able to experimentally use the executor system instead of an executioner."
+  issues = '#5229 #18180'
+
+  [test]
+    type = 'RunApp'
+    input = 'test.i'
+    cli_args = "--executor"
+    expect_out = "BinaryTestExecutor my_first_executor BEGIN\nBinaryTestExecutor i1 BEGIN\nBinaryTestExecutor i1 END\nBinaryTestExecutor i2 BEGIN\nBinaryTestExecutor i2 END\nBinaryTestExecutor my_first_executor END"
+  []
+
+  [cycle]
+    type = 'RunException'
+    input = 'test.i'
+    cli_args = 'Executors/i2/inner1=my_first_executor --executor'
+    expect_err = 'Executor cycle detected'
+  []
+
+  [multi_root]
+    type = 'RunException'
+    input = 'test.i'
+    cli_args = 'Executors/i3/type=BinaryTestExecutor --executor'
+    expect_err = 'Multiple Executor roots found'
+  []
+[]

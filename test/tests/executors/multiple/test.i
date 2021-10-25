@@ -1,3 +1,7 @@
+[Problem]
+  solve = false
+[]
+
 [Mesh]
   type = GeneratedMesh
   dim = 2

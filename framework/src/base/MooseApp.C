@@ -1183,7 +1183,9 @@ MooseApp::feProblem() const
 }
 
 void
-MooseApp::addExecutor(const std::string & type, const std::string & name, const InputParameters & params)
+MooseApp::addExecutor(const std::string & type,
+                      const std::string & name,
+                      const InputParameters & params)
 {
   std::shared_ptr<Executor> executor = _factory.create<Executor>(type, name, params);
 
@@ -1193,21 +1195,25 @@ MooseApp::addExecutor(const std::string & type, const std::string & name, const 
 }
 
 void
-MooseApp::addExecutorParams(const std::string & type, const std::string & name, const InputParameters & params)
+MooseApp::addExecutorParams(const std::string & type,
+                            const std::string & name,
+                            const InputParameters & params)
 {
   _executor_params[name] = std::make_pair(type, libmesh_make_unique<InputParameters>(params));
 }
 
-
 void
-MooseApp::recursivelyCreateExecutors(const std::string & current_executor_name, std::list<std::string> & possible_roots, std::list<std::string> & current_branch)
+MooseApp::recursivelyCreateExecutors(const std::string & current_executor_name,
+                                     std::list<std::string> & possible_roots,
+                                     std::list<std::string> & current_branch)
 {
   // Did we already make this one?
-  if(_executors.find(current_executor_name) != _executors.end())
+  if (_executors.find(current_executor_name) != _executors.end())
     return;
 
   // Is this one already on the current branch (i.e. there is a cycle)
-  if(std::find(current_branch.begin(), current_branch.end(), current_executor_name) != current_branch.end())
+  if (std::find(current_branch.begin(), current_branch.end(), current_executor_name) !=
+      current_branch.end())
   {
     std::stringstream exec_names_string;
 
@@ -1215,7 +1221,7 @@ MooseApp::recursivelyCreateExecutors(const std::string & current_executor_name, 
 
     exec_names_string << *branch_it++;
 
-    for(; branch_it != current_branch.end(); ++branch_it)
+    for (; branch_it != current_branch.end(); ++branch_it)
       exec_names_string << ", " << *branch_it;
 
     exec_names_string << ", " << current_executor_name;
@@ -1230,9 +1236,10 @@ MooseApp::recursivelyCreateExecutors(const std::string & current_executor_name, 
 
   for (const auto & param : params)
   {
-    if(dynamic_cast<InputParameters::Parameter<ExecutorName> *>(param.second))
+    if (dynamic_cast<InputParameters::Parameter<ExecutorName> *>(param.second))
     {
-      const auto & dependency_name = static_cast<InputParameters::Parameter<ExecutorName> *>(param.second)->get();
+      const auto & dependency_name =
+          static_cast<InputParameters::Parameter<ExecutorName> *>(param.second)->get();
 
       possible_roots.remove(dependency_name);
 
@@ -1268,7 +1275,7 @@ MooseApp::createExecutors()
     const auto & name = params_entry.first;
 
     // Did we already make this one?
-    if(_executors.find(name) != _executors.end())
+    if (_executors.find(name) != _executors.end())
       continue;
 
     possible_roots.emplace_back(name);

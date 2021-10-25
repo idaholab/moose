@@ -122,8 +122,9 @@ private:
    * This method is private, because only the factories that are creating objects should be
    * able to call this method.
    */
-  InputParameters &
-  addInputParameters(const std::string & name, const InputParameters & parameters, THREAD_ID tid = 0);
+  InputParameters & addInputParameters(const std::string & name,
+                                       const InputParameters & parameters,
+                                       THREAD_ID tid = 0);
 
   /**
    * Allows for the deletion and cleanup of an object while the simulation is running.
@@ -167,8 +168,8 @@ private:
 
   ///@{
   /// The factory is allowed to call addInputParameters and removeInputParameters.
-  friend MooseObjectPtr
-  Factory::create(const std::string &, const std::string &, const InputParameters &, THREAD_ID, bool);
+  friend MooseObjectPtr Factory::create(
+      const std::string &, const std::string &, const InputParameters &, THREAD_ID, bool);
   friend void Factory::releaseSharedObjects(const MooseObject &, THREAD_ID);
   ///@}
 

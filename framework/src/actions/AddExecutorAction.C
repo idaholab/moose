@@ -28,7 +28,5 @@ AddExecutorAction::AddExecutorAction(InputParameters params) : Action(params) {}
 void
 AddExecutorAction::act()
 {
-  std::cout<<"AddExecutorAction"<<std::endl;
-
   _app.createExecutors();
 }
