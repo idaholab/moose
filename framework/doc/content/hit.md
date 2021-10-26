@@ -1,4 +1,4 @@
-the# The `hit` command
+# The `hit` command
 
 *Hierarchial Input Text* (HIT) is the file format that MOOSE input files (and
 `tests` specs) are built upon. HIT is a key-value pair syntax with multilevel
