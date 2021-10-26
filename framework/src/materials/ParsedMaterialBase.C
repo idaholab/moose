@@ -52,16 +52,16 @@ ParsedMaterialBase::validParams()
 
   // Function expression
   params.addRequiredCustomTypeParam<std::string>(
-      "function", "FunctionExpression", "FParser function expression for the parsed material");
+      "function", "FunctionExpression", "FParser function expression for the parsed material property");
 
   return params;
 }
 
-ParsedMaterialBase::ParsedMaterialBase(const InputParameters & parameters),
-  _function(getParam<std::string>("function")),
-  _constant_names(getParam<std::vector<std::string>>("constant_names")),
-  _constant_expressions(getParam<std::vector<std::string>>("constant_expressions")),
-  _tol_names(getParam<std::vector<std::string>>("tol_names")),
-  _tol_values(getParam<std::vector<Real>>("tol_values"))
+ParsedMaterialBase::ParsedMaterialBase(const InputParameters & parameters) :
+  _function(parameters.get<std::string>("function")),
+  _constant_names(parameters.get<std::vector<std::string>>("constant_names")),
+  _constant_expressions(parameters.get<std::vector<std::string>>("constant_expressions")),
+  _tol_names(parameters.get<std::vector<std::string>>("tol_names")),
+  _tol_values(parameters.get<std::vector<Real>>("tol_values"))
 {
 }

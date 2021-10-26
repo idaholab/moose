@@ -15,17 +15,20 @@ FunctionMaterialBase<is_ad>::validParams()
 {
   InputParameters params = Material::validParams();
   params.addClassDescription("Material to provide a function (such as a free energy)");
-  params.addParam<std::string>(
+  params.addDeprecatedParam<std::string>(
       "f_name",
-      "F",
-      "Base name of the free energy function (used to name the material properties)");
+      "Base name of the free energy function (used to name the material properties)",
+      "f_name is deprecated, use prop_name");
+  params.addParam<std::string>("prop_name", "F", "Name of the function material");
+
   return params;
 }
 
 template <bool is_ad>
 FunctionMaterialBase<is_ad>::FunctionMaterialBase(const InputParameters & parameters)
   : DerivativeMaterialInterface<Material>(parameters),
-    _F_name(getParam<std::string>("f_name")),
+    _F_name(isParamValid("f_name") ? getParam<std::string>("f_name")
+                                   : getParam<std::string>("prop_name")),
     _prop_F(&declareGenericProperty<Real, is_ad>(_F_name))
 {
   // fetch names and numbers of all coupled variables
