@@ -2,7 +2,7 @@
 
 #include <vector>
 #include "MooseMesh.h"
-#include "Enums.h"
+#include "SubChannelEnums.h"
 
 /**
  * Base class for subchannel meshes
