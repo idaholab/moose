@@ -43,6 +43,7 @@ template <typename T>
 Real
 FunctionTempl<T>::value(Real /*t*/, const Point & /*p*/) const
 {
+  mooseError("value method not implemented");
   return 0.0;
 }
 
@@ -50,6 +51,7 @@ template <typename T>
 RealGradient
 FunctionTempl<T>::gradient(Real /*t*/, const Point & /*p*/) const
 {
+  mooseError("gradient method not implemented");
   return RealGradient(0, 0, 0);
 }
 
@@ -57,7 +59,7 @@ template <typename T>
 Real
 FunctionTempl<T>::timeDerivative(Real /*t*/, const Point & /*p*/) const
 {
-  mooseError("timeDerivative method not defined for function ", name());
+  mooseError("timeDerivative method not implemented");
   return 0;
 }
 
@@ -65,6 +67,7 @@ template <typename T>
 RealVectorValue
 FunctionTempl<T>::vectorValue(Real /*t*/, const Point & /*p*/) const
 {
+  mooseError("vectorValue method not implemented");
   return RealVectorValue(0, 0, 0);
 }
 
@@ -72,6 +75,7 @@ template <typename T>
 RealVectorValue
 FunctionTempl<T>::vectorCurl(Real /*t*/, const Point & /*p*/) const
 {
+  mooseError("vectorCurl method not implemented");
   return RealVectorValue(0, 0, 0);
 }
 
@@ -79,7 +83,7 @@ template <typename T>
 Real
 FunctionTempl<T>::integral() const
 {
-  mooseError("Integral method not defined for function ", name());
+  mooseError("Integral method not implemented for function ", name());
   return 0;
 }
 
@@ -87,7 +91,7 @@ template <typename T>
 Real
 FunctionTempl<T>::average() const
 {
-  mooseError("Average method not defined for function ", name());
+  mooseError("Average method not implemented for function ", name());
   return 0;
 }
 
