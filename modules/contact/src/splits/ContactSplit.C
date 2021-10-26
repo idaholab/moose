@@ -12,7 +12,6 @@
 #include "FEProblem.h"
 #include "Conversion.h"
 
-#if !PETSC_VERSION_LESS_THAN(3, 3, 0)
 registerMooseObject("ContactApp", ContactSplit);
 
 InputParameters
@@ -114,4 +113,3 @@ ContactSplit::setup(const std::string & prefix)
                         _include_all_contact_nodes ? "yes" : "no");
   Split::setup(prefix);
 }
-#endif // #if !PETSC_VERSION_LESS_THAN(3, 3, 0)

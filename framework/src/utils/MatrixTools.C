@@ -17,10 +17,6 @@
 // PETSc includes
 #include "petscblaslapack.h"
 
-#if PETSC_VERSION_LESS_THAN(3, 5, 0)
-extern "C" void FORTRAN_CALL(dgetri)(...); // matrix inversion routine from LAPACK
-#endif
-
 namespace MatrixTools
 {
 void
@@ -80,16 +76,6 @@ inverse(std::vector<PetscScalar> & A, unsigned int n)
 
   // get the inverse of A
   PetscBLASInt buffer_size = buffer.size();
-#if PETSC_VERSION_LESS_THAN(3, 5, 0)
-  FORTRAN_CALL(dgetri)
-  (reinterpret_cast<PetscBLASInt *>(&n),
-   &A[0],
-   reinterpret_cast<PetscBLASInt *>(&n),
-   &ipiv[0],
-   &buffer[0],
-   &buffer_size,
-   &return_value);
-#else
   LAPACKgetri_(reinterpret_cast<PetscBLASInt *>(&n),
                &A[0],
                reinterpret_cast<PetscBLASInt *>(&n),
@@ -97,7 +83,6 @@ inverse(std::vector<PetscScalar> & A, unsigned int n)
                &buffer[0],
                &buffer_size,
                &return_value);
-#endif
 
   if (return_value != 0)
     throw MooseException(return_value < 0

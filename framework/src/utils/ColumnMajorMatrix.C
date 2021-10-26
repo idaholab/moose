@@ -18,10 +18,6 @@
 #include <petscsys.h>
 #include <petscblaslapack.h>
 
-#if PETSC_VERSION_LESS_THAN(3, 5, 0)
-extern "C" void FORTRAN_CALL(dgetri)(...); // matrix inversion routine from LAPACK
-#endif
-
 template <typename T>
 ColumnMajorMatrixTempl<T>::ColumnMajorMatrixTempl(unsigned int rows, unsigned int cols)
   : _n_rows(rows), _n_cols(cols), _n_entries(rows * cols), _values(rows * cols, 0.0)

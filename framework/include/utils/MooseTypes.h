@@ -750,18 +750,12 @@ enum LineSearchType
   LS_DEFAULT,
   LS_NONE,
   LS_BASIC,
-#if PETSC_VERSION_LESS_THAN(3, 3, 0)
-  LS_CUBIC,
-  LS_QUADRATIC,
-  LS_BASICNONORMS,
-#else
   LS_SHELL,
   LS_CONTACT,
   LS_PROJECT,
   LS_L2,
   LS_BT,
   LS_CP
-#endif
 };
 
 /**

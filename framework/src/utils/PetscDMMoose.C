@@ -10,10 +10,6 @@
 // This only works with petsc-3.3 and above.
 #include "libmesh/petsc_macro.h"
 
-#if !PETSC_VERSION_LESS_THAN(3, 3, 0)
-// Inside these guards we can use PETSC_VERSION_LT, which need not be
-// modified upon transition from dev to a release.
-
 #include "PetscDMMoose.h"
 
 // PETSc includes
@@ -1042,14 +1038,9 @@ DMCreateFieldDecomposition_Moose(
         CHKERRQ(ierr);
         if (dmm->_embedding)
         {
-/* Create a relative embedding into the parent's index space. */
-#if PETSC_VERSION_LT(3, 4, 0)
-          ierr = ISMapFactorRight(dembedding, dmm->_embedding, PETSC_TRUE, &lembedding);
-          CHKERRQ(ierr);
-#else
+          // Create a relative embedding into the parent's index space.
           ierr = ISEmbed(dembedding, dmm->_embedding, PETSC_TRUE, &lembedding);
           CHKERRQ(ierr);
-#endif
           const PetscInt * lindices;
           PetscInt len, dlen, llen, *rindices, off, i;
           ierr = ISGetLocalSize(dembedding, &dlen);
@@ -1130,52 +1121,6 @@ DMCreateDomainDecomposition_Moose(
   PetscFunctionReturn(0);
 }
 
-#if PETSC_VERSION_LT(3, 4, 0)
-#undef __FUNCT__
-#define __FUNCT__ "DMCreateFieldDecompositionDM_Moose"
-PetscErrorCode
-DMCreateFieldDecompositionDM_Moose(DM dm, const char * /*name*/, DM * ddm)
-{
-  PetscErrorCode ierr;
-  PetscBool ismoose;
-
-  PetscFunctionBegin;
-  PetscValidHeaderSpecific(dm, DM_CLASSID, 1);
-  ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
-  CHKERRQ(ierr);
-  /* Return self. */
-  if (*ddm)
-  {
-    ierr = PetscObjectReference((PetscObject)dm);
-    CHKERRQ(ierr);
-    *ddm = dm;
-  }
-  PetscFunctionReturn(0);
-}
-
-#undef __FUNCT__
-#define __FUNCT__ "DMCreateDomainDecompositionDM_Moose"
-PetscErrorCode
-DMCreateDomainDecompositionDM_Moose(DM dm, const char * /*name*/, DM * ddm)
-{
-  PetscErrorCode ierr;
-  PetscBool ismoose;
-
-  PetscFunctionBegin;
-  PetscValidHeaderSpecific(dm, DM_CLASSID, 1);
-  ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
-  CHKERRQ(ierr);
-  /* Return self. */
-  if (*ddm)
-  {
-    ierr = PetscObjectReference((PetscObject)dm);
-    CHKERRQ(ierr);
-    *ddm = dm;
-  }
-  PetscFunctionReturn(0);
-}
-#endif
-
 #undef __FUNCT__
 #define __FUNCT__ "DMMooseFunction"
 static PetscErrorCode
@@ -1250,7 +1195,6 @@ DMMooseFunction(DM dm, Vec x, Vec r)
   PetscFunctionReturn(0);
 }
 
-#if !PETSC_VERSION_LT(3, 4, 0)
 #undef __FUNCT__
 #define __FUNCT__ "SNESFunction_DMMoose"
 static PetscErrorCode
@@ -1264,17 +1208,11 @@ SNESFunction_DMMoose(SNES, Vec x, Vec r, void * ctx)
   CHKERRQ(ierr);
   PetscFunctionReturn(0);
 }
-#endif
 
 #undef __FUNCT__
 #define __FUNCT__ "DMMooseJacobian"
-#if PETSC_VERSION_LT(3, 5, 0)
-static PetscErrorCode
-DMMooseJacobian(DM dm, Vec x, Mat jac, Mat pc, MatStructure * msflag)
-#else
 static PetscErrorCode
 DMMooseJacobian(DM dm, Vec x, Mat jac, Mat pc)
-#endif
 {
   PetscErrorCode ierr;
   NonlinearSystemBase * nl = NULL;
@@ -1352,37 +1290,22 @@ DMMooseJacobian(DM dm, Vec x, Mat jac, Mat pc)
   }
   the_pc.close();
   Jac.close();
-#if PETSC_VERSION_LT(3, 5, 0)
-  *msflag = SAME_NONZERO_PATTERN;
-#endif
   PetscFunctionReturn(0);
 }
 
-#if !PETSC_VERSION_LT(3, 4, 0)
 #undef __FUNCT__
 #define __FUNCT__ "SNESJacobian_DMMoose"
-#if PETSC_VERSION_LT(3, 5, 0)
-static PetscErrorCode
-SNESJacobian_DMMoose(SNES, Vec x, Mat * jac, Mat * pc, MatStructure * flag, void * ctx)
-#else
 static PetscErrorCode
 SNESJacobian_DMMoose(SNES, Vec x, Mat jac, Mat pc, void * ctx)
-#endif
 {
   DM dm = (DM)ctx;
   PetscErrorCode ierr;
 
   PetscFunctionBegin;
-#if PETSC_VERSION_LT(3, 5, 0)
-  ierr = DMMooseJacobian(dm, x, *jac, *pc, flag);
-  CHKERRQ(ierr);
-#else
   ierr = DMMooseJacobian(dm, x, jac, pc);
   CHKERRQ(ierr);
-#endif
   PetscFunctionReturn(0);
 }
-#endif
 
 #undef __FUNCT__
 #define __FUNCT__ "DMVariableBounds_Moose"
@@ -1399,17 +1322,10 @@ DMVariableBounds_Moose(DM dm, Vec xl, Vec xu)
   PetscVector<Number> XL(xl, nl->comm());
   PetscVector<Number> XU(xu, nl->comm());
 
-#if PETSC_VERSION_LESS_THAN(3, 5, 0) && PETSC_VERSION_RELEASE
-  ierr = VecSet(xl, SNES_VI_NINF);
-  CHKERRQ(ierr);
-  ierr = VecSet(xu, SNES_VI_INF);
-  CHKERRQ(ierr);
-#else
   ierr = VecSet(xl, PETSC_NINFINITY);
   CHKERRQ(ierr);
   ierr = VecSet(xu, PETSC_INFINITY);
   CHKERRQ(ierr);
-#endif
   if (nl->nonlinearSolver()->bounds != NULL)
     nl->nonlinearSolver()->bounds(XL, XU, nl->nonlinearSolver()->system());
   else if (nl->nonlinearSolver()->bounds_object != NULL)
@@ -1481,20 +1397,13 @@ DMCreateGlobalVector_Moose(DM dm, Vec * x)
 
 #undef __FUNCT__
 #define __FUNCT__ "DMCreateMatrix_Moose"
-#if PETSC_VERSION_LT(3, 5, 0)
-static PetscErrorCode
-DMCreateMatrix_Moose(DM dm, const MatType type, Mat * A)
-#else
 static PetscErrorCode
 DMCreateMatrix_Moose(DM dm, Mat * A)
-#endif
 {
   PetscErrorCode ierr;
   DM_Moose * dmm = (DM_Moose *)(dm->data);
   PetscBool ismoose;
-#if !PETSC_RELEASE_LESS_THAN(3, 5, 0)
   MatType type;
-#endif
 
   PetscFunctionBegin;
   ierr = PetscObjectTypeCompare((PetscObject)dm, DMMOOSE, &ismoose);
@@ -1507,11 +1416,9 @@ DMCreateMatrix_Moose(DM dm, Mat * A)
              DMMOOSE);
   if (!dmm->_nl)
     SETERRQ(PETSC_COMM_WORLD, PETSC_ERR_ARG_WRONGSTATE, "No Moose system set for DM_Moose");
-// No PETSC_VERSION_GE macro prior to petsc-3.4
-#if !PETSC_VERSION_LT(3, 5, 0)
   ierr = DMGetMatType(dm, &type);
   CHKERRQ(ierr);
-#endif
+
   /*
    The simplest thing for now: compute the sparsity_pattern using dof_map and init the matrix using
    that info.
@@ -2056,17 +1963,10 @@ DMSetUp_Moose(DM dm)
   if (dmm->_all_vars && dmm->_all_blocks && dmm->_nosides && dmm->_nounsides && dmm->_nocontacts &&
       dmm->_nouncontacts)
   {
-#if PETSC_VERSION_LT(3, 4, 0)
-    ierr = DMSetFunction(dm, DMMooseFunction);
-    CHKERRQ(ierr);
-    ierr = DMSetJacobian(dm, DMMooseJacobian);
-    CHKERRQ(ierr);
-#else
     ierr = DMSNESSetFunction(dm, SNESFunction_DMMoose, (void *)dm);
     CHKERRQ(ierr);
     ierr = DMSNESSetJacobian(dm, SNESJacobian_DMMoose, (void *)dm);
     CHKERRQ(ierr);
-#endif
     if (dmm->_nl->nonlinearSolver()->bounds || dmm->_nl->nonlinearSolver()->bounds_object)
       ierr = DMSetVariableBounds(dm, DMVariableBounds_Moose);
     CHKERRQ(ierr);
@@ -2088,11 +1988,14 @@ DMSetUp_Moose(DM dm)
 #undef __FUNCT__
 #define __FUNCT__ "DMSetFromOptions_Moose"
 #if !PETSC_VERSION_LESS_THAN(3, 7, 0)
-PetscErrorCode DMSetFromOptions_Moose(PetscOptionItems * /*options*/, DM dm) // >= 3.7.0
+PetscErrorCode
+DMSetFromOptions_Moose(PetscOptionItems * /*options*/, DM dm) // >= 3.7.0
 #elif !PETSC_RELEASE_LESS_THAN(3, 6, 0)
-PetscErrorCode DMSetFromOptions_Moose(PetscOptions * /*options*/, DM dm) // >= 3.6.0
+PetscErrorCode
+DMSetFromOptions_Moose(PetscOptions * /*options*/, DM dm) // >= 3.6.0
 #else
-PetscErrorCode DMSetFromOptions_Moose(DM dm) // < 3.6.0
+PetscErrorCode
+DMSetFromOptions_Moose(DM dm) // < 3.6.0
 #endif
 {
   PetscErrorCode ierr;
@@ -2552,10 +2455,6 @@ DMCreate_Moose(DM dm)
   dm->ops->createinjection = 0;
 #endif
 
-#if PETSC_VERSION_LT(3, 4, 0)
-  dm->ops->createfielddecompositiondm = DMCreateFieldDecompositionDM_Moose;
-  dm->ops->createdomaindecompositiondm = DMCreateDomainDecompositionDM_Moose;
-#endif
   dm->ops->createfielddecomposition = DMCreateFieldDecomposition_Moose;
   dm->ops->createdomaindecomposition = DMCreateDomainDecomposition_Moose;
 
@@ -2632,15 +2531,9 @@ DMMooseRegisterAll()
   PetscFunctionBegin;
   if (!DMMooseRegisterAllCalled)
   {
-#if PETSC_VERSION_LESS_THAN(3, 4, 0)
-    ierr = DMRegister(DMMOOSE, PETSC_NULL, "DMCreate_Moose", DMCreate_Moose);
-    CHKERRQ(ierr);
-#else
     ierr = DMRegister(DMMOOSE, DMCreate_Moose);
     CHKERRQ(ierr);
-#endif
     DMMooseRegisterAllCalled = PETSC_TRUE;
   }
   PetscFunctionReturn(0);
 }
-#endif // #if !PETSC_VERSION_LESS_THAN(3,3,0)

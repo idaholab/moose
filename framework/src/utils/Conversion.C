@@ -131,18 +131,12 @@ initLineSearchType()
     line_search_type_to_enum["NONE"] = LS_NONE;
     line_search_type_to_enum["BASIC"] = LS_BASIC;
 
-#if PETSC_VERSION_LESS_THAN(3, 3, 0)
-    line_search_type_to_enum["CUBIC"] = LS_CUBIC;
-    line_search_type_to_enum["QUADRATIC"] = LS_QUADRATIC;
-    line_search_type_to_enum["BASICNONORMS"] = LS_BASICNONORMS;
-#else
     line_search_type_to_enum["SHELL"] = LS_SHELL;
     line_search_type_to_enum["L2"] = LS_L2;
     line_search_type_to_enum["BT"] = LS_BT;
     line_search_type_to_enum["CP"] = LS_CP;
     line_search_type_to_enum["CONTACT"] = LS_CONTACT;
     line_search_type_to_enum["PROJECT"] = LS_PROJECT;
-#endif
   }
 }
 

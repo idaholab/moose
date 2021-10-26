@@ -97,12 +97,10 @@
 #include <ios>
 
 #include "petscsnes.h"
-#if !PETSC_VERSION_LESS_THAN(3, 3, 0)
 #include <PetscDMMoose.h>
 EXTERN_C_BEGIN
 extern PetscErrorCode DMCreate_Moose(DM);
 EXTERN_C_END
-#endif
 
 NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
                                          System & sys,
@@ -1870,8 +1868,6 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
 
   auto & jacobian = getMatrix(systemMatrixTag());
 
-#if PETSC_VERSION_LESS_THAN(3, 3, 0)
-#else
   if (!_fe_problem.errorOnJacobianNonzeroReallocation())
     MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
                  MAT_NEW_NONZERO_ALLOCATION_ERR,
@@ -1879,7 +1875,6 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
   if (_fe_problem.ignoreZerosInJacobian())
     MatSetOption(
         static_cast<PetscMatrix<Number> &>(jacobian).mat(), MAT_IGNORE_ZERO_ENTRIES, PETSC_TRUE);
-#endif
 
   std::vector<numeric_index_type> zero_rows;
   std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> * penetration_locators =
@@ -2063,18 +2058,9 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
 
       if (constraints_applied)
       {
-#if PETSC_VERSION_LESS_THAN(3, 0, 0)
-        MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(), MAT_KEEP_ZEROED_ROWS);
-#elif PETSC_VERSION_LESS_THAN(3, 1, 0)
-        // In Petsc 3.0.0, MatSetOption has three args...the third arg
-        // determines whether the option is set (true) or unset (false)
-        MatSetOption(
-            static_cast<PetscMatrix<Number> &>(jacobian).mat(), MAT_KEEP_ZEROED_ROWS, PETSC_TRUE);
-#else
         MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
                      MAT_KEEP_NONZERO_PATTERN, // This is changed in 3.1
                      PETSC_TRUE);
-#endif
 
         jacobian.close();
         jacobian.zero_rows(zero_rows, 0.0);
@@ -2091,19 +2077,9 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
 
     if (constraints_applied)
     {
-// Necessary for speed
-#if PETSC_VERSION_LESS_THAN(3, 0, 0)
-      MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(), MAT_KEEP_ZEROED_ROWS);
-#elif PETSC_VERSION_LESS_THAN(3, 1, 0)
-      // In Petsc 3.0.0, MatSetOption has three args...the third arg
-      // determines whether the option is set (true) or unset (false)
-      MatSetOption(
-          static_cast<PetscMatrix<Number> &>(jacobian).mat(), MAT_KEEP_ZEROED_ROWS, PETSC_TRUE);
-#else
       MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
                    MAT_KEEP_NONZERO_PATTERN, // This is changed in 3.1
                    PETSC_TRUE);
-#endif
 
       jacobian.close();
       jacobian.zero_rows(zero_rows, 0.0);
@@ -2294,19 +2270,9 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
 
   if (constraints_applied)
   {
-// Necessary for speed
-#if PETSC_VERSION_LESS_THAN(3, 0, 0)
-    MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(), MAT_KEEP_ZEROED_ROWS);
-#elif PETSC_VERSION_LESS_THAN(3, 1, 0)
-    // In Petsc 3.0.0, MatSetOption has three args...the third arg
-    // determines whether the option is set (true) or unset (false)
-    MatSetOption(
-        static_cast<PetscMatrix<Number> &>(jacobian).mat(), MAT_KEEP_ZEROED_ROWS, PETSC_TRUE);
-#else
     MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
                  MAT_KEEP_NONZERO_PATTERN, // This is changed in 3.1
                  PETSC_TRUE);
-#endif
 
     jacobian.close();
     jacobian.zero_rows(zero_rows, 0.0);
@@ -2402,22 +2368,12 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
     // Necessary for speed
     if (auto petsc_matrix = dynamic_cast<PetscMatrix<Number> *>(&jacobian))
     {
-#if PETSC_VERSION_LESS_THAN(3, 0, 0)
-      MatSetOption(petsc_matrix->mat(), MAT_KEEP_ZEROED_ROWS);
-#elif PETSC_VERSION_LESS_THAN(3, 1, 0)
-      // In Petsc 3.0.0, MatSetOption has three args...the third arg
-      // determines whether the option is set (true) or unset (false)
-      MatSetOption(petsc_matrix->mat(), MAT_KEEP_ZEROED_ROWS, PETSC_TRUE);
-#else
       MatSetOption(petsc_matrix->mat(),
                    MAT_KEEP_NONZERO_PATTERN, // This is changed in 3.1
                    PETSC_TRUE);
-#endif // PETSC_VERSION
-#if !PETSC_VERSION_LESS_THAN(3, 3, 0)
       if (!_fe_problem.errorOnJacobianNonzeroReallocation())
         MatSetOption(petsc_matrix->mat(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
     }
-#endif // PETSC_VERSION
   }
 
   jacobianSetup();
@@ -2782,26 +2738,13 @@ NonlinearSystemBase::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks
   {
     SparseMatrix<Number> & jacobian = blocks[i]->_jacobian;
 
-// Necessary for speed
-#if PETSC_VERSION_LESS_THAN(3, 0, 0)
-    MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(), MAT_KEEP_ZEROED_ROWS);
-#elif PETSC_VERSION_LESS_THAN(3, 1, 0)
-      // In Petsc 3.0.0, MatSetOption has three args...the third arg
-      // determines whether the option is set (true) or unset (false)
-      MatSetOption(
-          static_cast<PetscMatrix<Number> &>(jacobian).mat(), MAT_KEEP_ZEROED_ROWS, PETSC_TRUE);
-#else
+    MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
+                 MAT_KEEP_NONZERO_PATTERN, // This is changed in 3.1
+                 PETSC_TRUE);
+    if (!_fe_problem.errorOnJacobianNonzeroReallocation())
       MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
-                   MAT_KEEP_NONZERO_PATTERN, // This is changed in 3.1
+                   MAT_NEW_NONZERO_ALLOCATION_ERR,
                    PETSC_TRUE);
-#endif
-#if PETSC_VERSION_LESS_THAN(3, 3, 0)
-#else
-      if (!_fe_problem.errorOnJacobianNonzeroReallocation())
-        MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
-                     MAT_NEW_NONZERO_ALLOCATION_ERR,
-                     PETSC_TRUE);
-#endif
 
     jacobian.zero();
   }
