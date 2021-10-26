@@ -1,7 +1,7 @@
 #include "HeatStructureBase.h"
 #include "SolidMaterialProperties.h"
 #include "ConstantFunction.h"
-#include "Enums.h"
+#include "THMEnums.h"
 #include "THMMesh.h"
 
 const std::map<std::string, HeatStructureSideType> HeatStructureBase::_side_type_to_enum{
