@@ -1,0 +1,79 @@
+[Tests]
+  issues = '#19001'
+  design = 'hit.md'
+
+  [find]
+    requirement = 'The `hit find` command shall be able to find'
+    [parameter_exists]
+      type = RunCommand
+      command = './hit_wrapper.py gold/parameter_exists find Kernels/\*/variable input1.i input2.i'
+      detail = 'files with specific parameters,'
+    []
+    [parameter_does_not_exist]
+      type = RunCommand
+      command = './hit_wrapper.py gold/parameter_does_not_exist find -v Kernels/\*/variable input1.i '
+                'input2.i'
+      detail = 'files not containing a specified parameter,'
+    []
+
+    [positive_pattern]
+      type = RunCommand
+      command = './hit_wrapper.py gold/positive_pattern find Kernels/\*/variable=u input1.i'
+      detail = 'parameters set to an exact specified value,'
+    []
+    [negative_pattern]
+      type = RunCommand
+      command = './hit_wrapper.py gold/positive_pattern find Kernels/\*/variable!=v input1.i'
+      detail = 'parameters not set to an exact specified value,'
+    []
+
+    [additional_pattern]
+      type = RunCommand
+      command = './hit_wrapper.py gold/additional_pattern find -p type=DirichletBC -- \*/value '
+                'input1.i input2.i'
+      detail = 'parameters with additional pattern constraints,'
+    []
+    [additional_pattern_negative]
+      type = RunCommand
+      command = './hit_wrapper.py gold/additional_pattern_negative find -p type!=DirichletBC -- '
+                '\*/value input1.i input2.i'
+      detail = 'parameters with additional inverted pattern constraints.'
+    []
+  []
+
+  [merge]
+    type = RunCommand
+    command = './hit_wrapper.py gold/merge merge -output - input1.i input2.i'
+    requirement = 'The `hit merge` command shall be able to combine input files.'
+  []
+
+  [diff]
+    requirement = 'The `hit diff` command shall be able to'
+    [vanilla]
+      type = RunCommand
+      command = './hit_wrapper.py gold/diff_vanilla diff input1.i input2.i'
+      detail = 'show differences between input files,'
+    []
+    [color]
+      type = RunCommand
+      command = './hit_wrapper.py gold/diff_color diff -color input1.i input2.i'
+      detail = 'show differences between input files marked up using terminal colors,'
+    []
+    [verbose]
+      type = RunCommand
+      command = './hit_wrapper.py gold/diff_verbose diff -v input1.i input2.i'
+      detail = 'show differences between input files with verbose explanations,'
+    []
+    [verbose_color]
+      type = RunCommand
+      command = './hit_wrapper.py gold/diff_verbose_color diff -v -color input1.i input2.i'
+      detail = 'show differences between input files with verbose explanations marked up using '
+               'terminal colors,'
+    []
+    [common]
+      type = RunCommand
+      command = './hit_wrapper.py gold/diff_common diff -common input1.i input2.i'
+      detail = 'show common parameters/value pairs between input files,'
+    []
+  []
+[]

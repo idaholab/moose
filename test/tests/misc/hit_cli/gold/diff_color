@@ -1,0 +1,57 @@
+Left hand side:
+    input1.i
+
+Right hand side:
+    input2.i
+
+Parameters removed left -> right:
+[31m
+        [BCs]
+          [left]
+            type = DirichletBC
+            value = 0
+            variable = u
+          []
+          [right]
+            type = NeumannBC
+            value = 0
+            variable = v
+          []
+        []
+        [Kernels]
+          [diff_u]
+            type = Diffusion
+            variable = u
+          []
+          [diff_v]
+            type = Diffusion
+            variable = v
+          []
+        []
+
+[39mParameters added left -> right:
+[32m
+        [Outputs]
+          [out]
+            type = Exodus
+          []
+        []
+        [PostProcessor]
+          [max]
+            mode = MAX
+            type = Calculation
+            value = 1
+          []
+          [min]
+            mode = min
+            type = Calculation
+            value = 1
+          []
+        []
+
+[39mParameters with differing values:
+
+    [33mPostProcessor/min2/value[34m (input1.i:34)[39m has differing values
+      '[31m0[39m' -> '[32m1[39m'
+
+

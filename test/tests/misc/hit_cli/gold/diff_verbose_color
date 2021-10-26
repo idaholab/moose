@@ -1,0 +1,33 @@
+Left hand side:
+    input1.i
+
+Right hand side:
+    input2.i
+
+Parameters removed left -> right:
+[31m[31mBCs/left/type[34m (input1.i:19)[39m is missing on the right.
+[31mBCs/left/value[34m (input1.i:21)[39m is missing on the right.
+[31mBCs/left/variable[34m (input1.i:20)[39m is missing on the right.
+[31mBCs/right/type[34m (input1.i:24)[39m is missing on the right.
+[31mBCs/right/value[34m (input1.i:26)[39m is missing on the right.
+[31mBCs/right/variable[34m (input1.i:25)[39m is missing on the right.
+[31mKernels/diff_u/type[34m (input1.i:8)[39m is missing on the right.
+[31mKernels/diff_u/variable[34m (input1.i:9)[39m is missing on the right.
+[31mKernels/diff_v/type[34m (input1.i:12)[39m is missing on the right.
+[31mKernels/diff_v/variable[34m (input1.i:13)[39m is missing on the right.
+
+[39mParameters added left -> right:
+[32m[32mOutputs/out/type[34m (input2.i:8)[39m is missing on the left.
+[32mPostProcessor/max/mode[34m (input2.i:15)[39m is missing on the left.
+[32mPostProcessor/max/type[34m (input2.i:14)[39m is missing on the left.
+[32mPostProcessor/max/value[34m (input2.i:16)[39m is missing on the left.
+[32mPostProcessor/min/mode[34m (input2.i:20)[39m is missing on the left.
+[32mPostProcessor/min/type[34m (input2.i:19)[39m is missing on the left.
+[32mPostProcessor/min/value[34m (input2.i:21)[39m is missing on the left.
+
+[39mParameters with differing values:
+
+    [33mPostProcessor/min2/value[34m (input1.i:34)[39m has differing values
+      '[31m0[39m' -> '[32m1[39m'
+
+

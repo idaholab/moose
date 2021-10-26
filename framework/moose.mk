@@ -49,6 +49,9 @@ hit_objects   := $(patsubst %.cc, %.$(obj-suffix), $(hit_srcfiles))
 hit_LIB       := $(HIT_DIR)/libhit-$(METHOD).la
 # dependency files
 hit_deps      := $(patsubst %.cc, %.$(obj-suffix).d, $(hit_srcfiles))
+# hit command line tool
+hit_CLI_srcfiles := $(HIT_DIR)/main.cc
+hit_CLI          := $(HIT_DIR)/hit
 
 #
 # hit python bindings
@@ -85,9 +88,10 @@ else
 endif
 
 
-hit $(pyhit_LIB): $(pyhit_srcfiles)
+hit $(pyhit_LIB) $(hit_CLI): $(pyhit_srcfiles) $(hit_CLI_srcfiles)
 	@echo "Building and linking "$@"..."
 	@bash -c '(cd "$(HIT_DIR)" && $(libmesh_CXX) -std=c++11 -w -fPIC -lstdc++ -shared $^ $(pyhit_COMPILEFLAGS) $(DYNAMIC_LOOKUP) -o $(pyhit_LIB))'
+	@bash -c '(cd "$(HIT_DIR)" && make)'
 
 #
 # gtest
@@ -380,7 +384,7 @@ moose_share_dir = $(share_dir)/moose
 python_install_dir = $(moose_share_dir)/python
 bin_install_dir = $(PREFIX)/bin
 
-install: install_libs install_bin install_harness install_exodiff install_adreal_monolith
+install: install_libs install_bin install_harness install_exodiff install_adreal_monolith install_hit
 
 install_adreal_monolith: ADRealMonolithic.h
 	@ mkdir -p $(moose_include_dir)
@@ -403,6 +407,10 @@ install_harness:
 	@cp -f $(MOOSE_DIR)/framework/include/base/MooseConfig.h $(moose_include_dir)/
 	@cp -f $(HIT_DIR)/hit.so $(python_install_dir)/
 	@echo "libmesh_install_dir = '$(LIBMESH_DIR)'" > $(moose_share_dir)/moose_config.py
+
+install_hit: all
+	@echo "Installing HIT"
+	@cp $(MOOSE_DIR)/framework/contrib/hit/hit $(bin_install_dir)
 
 lib_install_suffix = lib/$(APPLICATION_NAME)
 lib_install_dir = $(PREFIX)/$(lib_install_suffix)
