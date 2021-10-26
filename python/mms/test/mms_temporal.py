@@ -13,7 +13,7 @@ df1 = mms.run_temporal('mms_temporal.i', 4, console=False, executable='../../../
 df2 = mms.run_temporal('mms_temporal.i', 4, 'Executioner/scheme=bdf2', console=False,
                        executable='../../../test')
 
-fig = mms.ConvergencePlot(xlabel='$\Delta t$', ylabel='$L_2$ Error')
+fig = mms.ConvergencePlot(xlabel=r'$\Delta$t', ylabel='$L_2$ Error')
 fig.plot(df1, label='1st Order (Implicit Euler)', marker='o', markersize=8)
 fig.plot(df2, label='2nd Order (Backward Difference)', marker='o', markersize=8)
 fig.save('mms_temporal.png')
