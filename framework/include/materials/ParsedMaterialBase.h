@@ -24,13 +24,13 @@ public:
 
 protected:
   /// function expression
-  std::string _function;
+  const std::string _function;
 
   /// constant vectors
-  std::vector<std::string> _constant_names;
-  std::vector<std::string> _constant_expressions;
+  const std::vector<std::string> _constant_names;
+  const std::vector<std::string> _constant_expressions;
 
   /// tolerance vectors
-  std::vector<std::string> _tol_names;
-  std::vector<Real> _tol_values;
+  const std::vector<std::string> _tol_names;
+  const std::vector<Real> _tol_values;
 };

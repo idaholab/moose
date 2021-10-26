@@ -13,7 +13,10 @@ InputParameters
 ParsedMaterialBase::validParams()
 {
   InputParameters params = emptyInputParameters();
-  params.addCoupledVar("args", "Arguments of F() - use vector coupling");
+
+  // Variables
+  params.addDeprecatedCoupledVar("args", "Arguments of F() - use vector coupling", "args is deprecated, use variables instead");
+  params.addCoupledVar("variables", "List of variable arguments of the parsed function");
 
   // Constants and their values
   params.addParam<std::vector<std::string>>(
@@ -54,16 +57,11 @@ ParsedMaterialBase::validParams()
   return params;
 }
 
-ParsedMaterialBase::ParsedMaterialBase(const InputParameters & parameters)
+ParsedMaterialBase::ParsedMaterialBase(const InputParameters & parameters),
+  _function(getParam<std::string>("function")),
+  _constant_names(getParam<std::vector<std::string>>("constant_names")),
+  _constant_expressions(getParam<std::vector<std::string>>("constant_expressions")),
+  _tol_names(getParam<std::vector<std::string>>("tol_names")),
+  _tol_values(getParam<std::vector<Real>>("tol_values"))
 {
-  // get function expression
-  _function = parameters.get<std::string>("function");
-
-  // get constant vectors
-  _constant_names = parameters.get<std::vector<std::string>>("constant_names");
-  _constant_expressions = parameters.get<std::vector<std::string>>("constant_expressions");
-
-  // get tolerance vectors
-  _tol_names = parameters.get<std::vector<std::string>>("tol_names");
-  _tol_values = parameters.get<std::vector<Real>>("tol_values");
 }
