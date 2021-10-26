@@ -15,7 +15,7 @@ with the pipe.
 
 !alert note
 Once a block is deleted from the mesh, it should not be referred to in the input.
-Variables and materials can no longer be block restricted to a deleted block for example.
+Variables and materials can no longer be block restricted to a deleted block, for example.
 
 ## Example input syntax
 

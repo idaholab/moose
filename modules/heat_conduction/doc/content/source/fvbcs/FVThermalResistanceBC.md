@@ -93,7 +93,7 @@ We specify emissivity, thermal conductivity and convective heat transfer coeffic
 three heat transfer mechanisms where present (they are set to 0 when absent).
 
 The inner iteration parameters are exposed for the `left` boundary. This is only meant to be used
-to fine tune a simulation for performance, or if convergence difficulties are encountered for that
+to fine-tune a simulation for performance, or if convergence difficulties are encountered for that
 boundary.
 
 !listing test/tests/fvbcs/fv_thermal_resistance/test.i block=FVBCs
