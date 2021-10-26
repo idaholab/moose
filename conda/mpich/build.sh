@@ -76,7 +76,9 @@ if [[ $(uname) == Darwin ]]; then
         export CROSS_F90_INTEGER_MODEL_MAP=' {  2 , 1 , 1 }, {  4 , 2 , 2 }, {  9 , 4 , 4 }, {  18 , 8 , 8 },'
         export pac_MOD='mod'
     else
-        TUNING="-march=core2 -mtune=haswell"
+        export LDFLAGS="-L$PREFIX/lib -Wl,-rpath,$PREFIX/lib"
+        export LIBRARY_PATH="$PREFIX/lib"
+        TUNING="-march=core2 -mtune=haswell -I$PREFIX/include"
         OPTIONS=""
     fi
     SHARED="clang"
