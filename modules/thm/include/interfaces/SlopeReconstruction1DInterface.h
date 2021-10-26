@@ -4,7 +4,7 @@
 #include "MooseEnum.h"
 #include "MooseTypes.h"
 #include "InputParameters.h"
-#include "Enums.h"
+#include "THMEnums.h"
 
 #include "libmesh/elem.h"
 #include "libmesh/vector_value.h"

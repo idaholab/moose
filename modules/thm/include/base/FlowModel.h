@@ -3,7 +3,7 @@
 #include "MooseObject.h"
 #include "InputParameters.h"
 #include "NamingInterface.h"
-#include "Enums.h"
+#include "THMEnums.h"
 #include "libmesh/fe_type.h"
 
 class THMProblem;
