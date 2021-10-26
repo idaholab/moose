@@ -1,0 +1,33 @@
+Left hand side:
+    input1.i
+
+Right hand side:
+    input2.i
+
+Parameters removed left -> right:
+BCs/left/type (input1.i:19) is missing on the right.
+BCs/left/value (input1.i:21) is missing on the right.
+BCs/left/variable (input1.i:20) is missing on the right.
+BCs/right/type (input1.i:24) is missing on the right.
+BCs/right/value (input1.i:26) is missing on the right.
+BCs/right/variable (input1.i:25) is missing on the right.
+Kernels/diff_u/type (input1.i:8) is missing on the right.
+Kernels/diff_u/variable (input1.i:9) is missing on the right.
+Kernels/diff_v/type (input1.i:12) is missing on the right.
+Kernels/diff_v/variable (input1.i:13) is missing on the right.
+
+Parameters added left -> right:
+Outputs/out/type (input2.i:8) is missing on the left.
+PostProcessor/max/mode (input2.i:15) is missing on the left.
+PostProcessor/max/type (input2.i:14) is missing on the left.
+PostProcessor/max/value (input2.i:16) is missing on the left.
+PostProcessor/min/mode (input2.i:20) is missing on the left.
+PostProcessor/min/type (input2.i:19) is missing on the left.
+PostProcessor/min/value (input2.i:21) is missing on the left.
+
+Parameters with differing values:
+
+    PostProcessor/min2/value (input1.i:34) has differing values
+      '0' -> '1'
+
+

@@ -57,6 +57,9 @@ namespace hit
 
 const std::string default_indent = "  ";
 
+// lower converts all characters in str to their lower-case versions.
+std::string lower(const std::string & str);
+
 /// toBool converts the given val to a boolean value which is stored in dst.  It returns true if
 /// val was successfully converted to a boolean and returns false otherwise.
 bool toBool(const std::string & val, bool * dst);
@@ -94,7 +97,7 @@ class Error : public std::exception
 {
 public:
   Error(const std::string & msg);
-  virtual const char * what() const throw() override;
+  virtual const char * what() const noexcept override;
   std::string msg;
 };
 
@@ -105,11 +108,13 @@ public:
   ParseError(const std::string & msg);
 };
 
-/// Walker is an interface that can be implemented to perform operations that traverse ag
+/// Walker is an interface that can be implemented to perform operations that traverse a
 /// parsed hit node tree.  Implementing classes are passed to the Node::walk function.
 class Walker
 {
 public:
+  virtual ~Walker() {}
+
   /// walk is called when the walker is passed into a Node::walk function for each relevant node in
   /// the hit (sub)tree.  fullpath is the fully-qualified (absolute) path to the hit node
   /// where each section header is a path-element.  nodepath is the path for the node of interest -

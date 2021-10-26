@@ -20,6 +20,45 @@ int diff(int argc, char ** argv);
 int common(int argc, char ** argv);
 int subtract(int argc, char ** argv);
 
+bool
+globCompare(const std::string & candidate,
+            const std::string & pattern,
+            std::size_t c = 0,
+            std::size_t p = 0)
+{
+  if (p == pattern.size())
+    return c == candidate.size();
+
+  // '*' matches an arbitrary number of characters
+  if (pattern[p] == '*')
+  {
+    for (; c < candidate.size(); ++c)
+      if (globCompare(candidate, pattern, c, p + 1))
+        return true;
+    return globCompare(candidate, pattern, c, p + 1);
+  }
+
+  // '?' matches exactly one character
+  if (pattern[p] != '?' && pattern[p] != candidate[c])
+    return false;
+
+  return globCompare(candidate, pattern, c + 1, p + 1);
+}
+
+std::string
+readInput(const std::string & fname)
+{
+  if (fname == "-")
+    return std::string(std::istreambuf_iterator<char>(std::cin), std::istreambuf_iterator<char>());
+  else
+  {
+    std::ifstream f(fname);
+    if (!f)
+      throw std::runtime_error("Can't open '" + fname + "'");
+    return std::string((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
+  }
+}
+
 int
 main(int argc, char ** argv)
 {
@@ -126,6 +165,13 @@ parseOpts(int argc, char ** argv, Flags & flags)
   for (; i < argc; i++)
   {
     std::string arg = argv[i];
+    // -- marks the start of positional arguments
+    if (arg == "--")
+    {
+      i++;
+      break;
+    }
+
     if (arg[0] != '-')
       break;
     else if (arg.length() == 1)
@@ -136,7 +182,7 @@ parseOpts(int argc, char ** argv, Flags & flags)
       flagname = flagname.substr(1);
 
     if (flags.flags.count(flagname) == 0)
-      throw std::runtime_error("unknown flag '" + arg);
+      throw std::runtime_error("unknown flag '" + arg + "'");
 
     auto & flag = flags.flags[flagname];
     flag.have = true;
@@ -188,53 +234,160 @@ private:
   std::map<std::string, hit::Node *> _have;
 };
 
+struct Pattern
+{
+  std::string param, value;
+  bool negate;
+};
+
+Pattern
+splitParamValue(const std::string & pv)
+{
+  auto equal_sign = pv.find('=');
+  auto not_equal_sign = pv.find("!=");
+
+  if (equal_sign == std::string::npos && not_equal_sign == std::string::npos)
+    return Pattern{pv, "*", false};
+
+  if (not_equal_sign != std::string::npos)
+    return Pattern{std::string(pv, 0, not_equal_sign),
+                   std::string(pv, not_equal_sign + 2, std::string::npos),
+                   true};
+  return Pattern{
+      std::string(pv, 0, equal_sign), std::string(pv, equal_sign + 1, std::string::npos), false};
+}
+
 int
 findParam(int argc, char ** argv)
 {
-  Flags flags("hit find [flags] <parameter-path> <file>...\n  Specify '-' as a file name to accept "
-              "input from stdin.");
+  Flags flags(
+      "hit find [flags] <parameter-pattern> <file>...\n  Specify '-' as a file name to accept "
+      "input from stdin.\n  A pattern has the form param[=value] and wildcards (*,?) may be used");
   flags.add("f", "only show file name");
+  flags.add("i", "case insensitive matches");
+  flags.add("v", "show only files that don't match");
+  flags.addVector(
+      "p",
+      "additional parameter patterns that must match the parent of the matched pattern (e.g. "
+      "-p type=Diffusion variable=u). The -p option must be followed by another option or "
+      "terminated with a double dash '--' followed by the list of filenames.");
+  flags.add("h", "print help");
+  flags.add("help", "print help");
   auto positional = parseOpts(argc, argv, flags);
 
-  if (positional.size() < 2)
+  if (flags.have("p") && positional.empty())
+  {
+    std::cerr << "Add a -- after the values provided to the -p option.";
+    return 1;
+  }
+
+  if (flags.have("h") || flags.have("help") || positional.size() < 2)
   {
     std::cerr << flags.usage();
     return 1;
   }
 
-  std::string srcpath(positional[0]);
+  const bool file_only = flags.have("f");
+  const bool case_insensitive = flags.have("i");
+  const bool invert = flags.have("v");
 
-  int ret = 0;
-  for (int i = 1; i < positional.size(); i++)
+  // parse main search pattern
+  auto pattern = splitParamValue(case_insensitive ? hit::lower(positional[0]) : positional[0]);
+
+  // get additional parameters
+  auto pargs = flags.vecVal("p");
+  std::vector<Pattern> additional_parameters;
+  for (auto & p : pargs)
+    additional_parameters.push_back(splitParamValue(case_insensitive ? hit::lower(p) : p));
+
+  std::size_t n_matches = 0;
+  std::size_t n_misses = 0;
+
+  for (std::size_t i = 1; i < positional.size(); i++)
   {
-    std::string fname(positional[i]);
-    std::istream && f =
-        (fname == "-" ? (std::istream &&) std::cin : (std::istream &&) std::ifstream(fname));
-    std::string input((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
+    auto n_matches_old = n_matches;
 
-    hit::Node * root = nullptr;
+    // load and parse input
+    std::string fname(positional[i]);
+    std::string input = readInput(fname);
+    std::unique_ptr<hit::Node> root;
     try
     {
-      root = hit::parse(fname, input);
+      root.reset(hit::parse(fname, input));
     }
     catch (std::exception & err)
     {
       std::cerr << err.what() << "\n";
-      ret = 1;
       continue;
     }
 
-    auto n = root->find(srcpath);
-    if (n)
+    // gather parameters
+    hit::GatherParamWalker::ParamMap params;
+    hit::GatherParamWalker walker(params);
+    root->walk(&walker);
+
+    // search parameters
+    for (const auto & p : params)
+      if (globCompare(case_insensitive ? hit::lower(p.first) : p.first, pattern.param))
+      {
+        auto n = p.second;
+        auto v = n->strVal();
+
+        // if a value was given, make sure it matches, too
+        if (globCompare(case_insensitive ? hit::lower(v) : v, pattern.value) == pattern.negate)
+          continue;
+
+        // if aditional -p arguments were given, check those, too
+        bool ap_match = true;
+        for (const auto & ap : additional_parameters)
+        {
+          // first check if the parent exists
+          auto parent = n->parent();
+          if (parent)
+          {
+            // look for the parameter name in the parent (and if it exists and a value was given
+            // also match that)
+            auto other_match = parent->find(ap.param);
+            if (!other_match || globCompare(case_insensitive ? hit::lower(other_match->strVal())
+                                                             : other_match->strVal(),
+                                            ap.value) == ap.negate)
+            {
+              ap_match = false;
+              break;
+            }
+          }
+          else if (!ap.negate)
+          {
+            // no parent exists, so this cannot be a match, unless this is a != pattern
+            ap_match = false;
+            break;
+          }
+        }
+        if (!ap_match)
+          break;
+
+        n_matches++;
+
+        if (!invert)
+        {
+          if (file_only)
+            std::cout << n->filename() << "\n";
+          else
+            std::cout << n->filename() << ":" << n->line() << ' ' << p.first << " = " << v << "\n";
+        }
+      }
+
+    if (invert && n_matches_old == n_matches)
     {
-      if (flags.have("f"))
-        std::cout << n->filename() << "\n";
-      else
-        std::cout << n->filename() << ":" << n->line() << "\n";
+      std::cout << positional[i] << "\n";
+      n_misses++;
     }
   }
 
-  return ret;
+  auto num = invert ? n_misses : n_matches;
+  if (!file_only)
+    std::cout << num << (num == 1 ? " match" : " matches") << " found.\n";
+  return num == 0;
 }
 
 // the style file is of the format:
@@ -304,16 +457,8 @@ format(int argc, char ** argv)
   int ret = 0;
   for (int i = 0; i < positional.size(); i++)
   {
-    std::string fname(positional[i]);
-    std::istream && f =
-        (fname == "-" ? (std::istream &&) std::cin : (std::istream &&) std::ifstream(fname));
-    if (!f)
-    {
-      std::cerr << "Can't open '" << fname << "'\n";
-      return 1;
-    }
-    std::string input(std::istreambuf_iterator<char>(f), {});
-
+    const std::string fname(positional[i]);
+    const std::string input = readInput(fname);
     try
     {
       auto fmted = fmt.format(fname, input);
@@ -343,15 +488,7 @@ readMerged(const std::vector<std::string> & input_filenames)
 
   for (auto & input_filename : input_filenames)
   {
-    std::ifstream f(input_filename);
-    if (!f)
-    {
-      std::cerr << "Can't open '" << input_filename << "'\n";
-      return nullptr;
-    }
-
-    std::string input((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
-
+    std::string input = readInput(input_filename);
     std::unique_ptr<hit::Node> root(hit::parse(input_filename, input));
     hit::explode(root.get());
 
@@ -387,23 +524,25 @@ merge(int argc, char ** argv)
     return 1;
   }
 
-  std::string fname(flags.val("output"));
-  std::ofstream output(fname);
-
   hit::Node * root = nullptr;
   for (int i = 0; i < positional.size(); i++)
   {
-    std::string fname(positional[i]);
-    std::istream && f =
-        (fname == "-" ? (std::istream &&) std::cin : (std::istream &&) std::ifstream(fname));
-    std::string input(std::istreambuf_iterator<char>(f), {});
+    const std::string fname(positional[i]);
+    const std::string input = readInput(fname);
     if (root)
       hit::merge(hit::parse(fname, input), root);
     else
       root = hit::parse(fname, input);
   }
 
-  output << root->render();
+  std::string fname(flags.val("output"));
+  if (fname == "-")
+    std::cout << root->render();
+  else
+  {
+    std::ofstream output(fname);
+    output << root->render();
+  }
 
   return 0;
 }
@@ -417,7 +556,7 @@ diff(int argc, char ** argv)
   flags.add("v", "verbose diff");
   flags.add("C", "output color");
   flags.add("color", "output color");
-  flags.add("common", "show common parts on bothe sides");
+  flags.add("common", "show common parts on both sides");
   flags.add("h", "print help");
   flags.add("help", "print help");
   flags.addVector("left", "Left hand inputs");
@@ -438,7 +577,7 @@ diff(int argc, char ** argv)
     return 1;
   }
 
-  bool use_color = flags.have("C");
+  bool use_color = flags.have("C") || flags.have("color");
 
   // terminal colors
   std::string color_red = use_color ? "\33[31m" : "";
@@ -615,8 +754,9 @@ common(int argc, char ** argv)
 int
 subtract(int argc, char ** argv)
 {
-  Flags flags("hit subtract left.i right.i\n  Subtract left.i from right.i by removing all "
-              "parameters listed in left.i from right.i.\n");
+  Flags flags(
+      "hit subtract base.i remove.i\n  Build the input base.i minus remove.i by removing all "
+      "parameters listed in remove.i from base.i.\n");
   flags.add("h", "print help");
   flags.add("help", "print help");
   auto positional = parseOpts(argc, argv, flags);
@@ -633,18 +773,18 @@ subtract(int argc, char ** argv)
   if (!left || !right)
     return 1;
 
-  std::cerr << "Subtracting:\n    " << positional[0] << "\nfrom:\n    " << positional[1] << '\n';
+  std::cerr << "Subtracting:\n    " << positional[1] << "\nfrom:\n    " << positional[0] << '\n';
 
-  hit::GatherParamWalker::ParamMap left_params;
-  hit::GatherParamWalker left_walker(left_params);
-  hit::RemoveParamWalker right_walker(left_params);
-  hit::RemoveEmptySectionWalker right_section_walker;
+  hit::GatherParamWalker::ParamMap right_params;
+  hit::GatherParamWalker right_walker(right_params);
+  hit::RemoveParamWalker left_walker(right_params);
+  hit::RemoveEmptySectionWalker left_section_walker;
 
-  left->walk(&left_walker);
   right->walk(&right_walker);
-  right->walk(&right_section_walker);
+  left->walk(&left_walker);
+  left->walk(&left_section_walker);
 
-  std::cout << right->render();
+  std::cout << left->render();
 
   return 0;
 }
@@ -661,11 +801,8 @@ validate(int argc, char ** argv)
   int ret = 0;
   for (int i = 0; i < argc; i++)
   {
-    std::string fname(argv[i]);
-    std::istream && f =
-        (fname == "-" ? (std::istream &&) std::cin : (std::istream &&) std::ifstream(fname));
-    std::string input((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
-
+    const std::string fname(argv[i]);
+    const std::string input = readInput(fname);
     std::unique_ptr<hit::Node> root;
     try
     {
