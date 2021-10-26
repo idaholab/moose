@@ -73,7 +73,7 @@ protected:
    * Name of the function value material property and used as a base name to
    * concatenate the material property names for the derivatives.
    */
-  std::string _F_name;
+  const std::string _F_name;
 
   /// Flag that indicates if exactly one linear variable is coupled per input file coupling parameter
   bool _mapping_is_unique;
