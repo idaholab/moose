@@ -9,8 +9,18 @@
     exodiff = 'frictionless-mortar-3d_out.e'
     mesh_mode = 'REPLICATED'
     requirement = 'MOOSE shall solve a 3D frictionless bouncing block problem with mortar constraint'
-    allow_test_objects = true
     min_ad_size = 100
+  []
+  [frictionless-mortar-3d-action]
+    type = 'CSVDiff'
+    input = 'frictionless-mortar-3d-action.i'
+    csvdiff = 'frictionless-mortar-3d-action_out_contact-pressure_0002.csv'
+    mesh_mode = 'REPLICATED'
+    requirement = 'MOOSE shall solve a 3D frictionless bouncing block problem with mortar constraint '
+                  'using the contact action'
+    min_ad_size = 100
+    rel_err = 1.0e-5
+    abs_zero = 1.0e-5
   []
   [frictionless-mortar-3d-debug-mesh]
     type = 'Exodiff'
