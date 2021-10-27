@@ -1,14 +1,14 @@
 [Tests]
-[nm]
-  type = CSVDiff
-  input = main.i
-  csvdiff = main_out_temperature_at_observation_points_0001.csv
-  heavy = true
-  cli_args = "Executioner/tao_solver=TAONM"
-  " Executioner/petsc_options_iname='-tao_gatol' "
-  " Executioner/petsc_options_value='0.0001'"
-  requirement = "XXXX shall be able to use Nelder Mead to invert for material properties"
-[]
+  [nm]
+    type = CSVDiff
+    input = main.i
+    csvdiff = main_out_temperature_at_observation_points_0001.csv
+    heavy = true
+    cli_args = "Executioner/tao_solver=TAONM"
+    " Executioner/petsc_options_iname='-tao_gatol' "
+    " Executioner/petsc_options_value='0.0001'"
+    requirement = "XXXX shall be able to use Nelder Mead to invert for material properties"
+  []
   [fd_grad]
     type = CSVDiff
     input = main.i

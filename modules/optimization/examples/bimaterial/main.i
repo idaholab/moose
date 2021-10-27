@@ -3,7 +3,7 @@
 # PETSc-TAO optimisation is used to perform this inversion
 #
 # PETSc-TAO is set to uses "lmvm" and finite-difference approximations to the derivative of the objective function
-# This means that for each PETSc-TAO iteration, 5 runs of model.i are performed: one for the current value of diffusivity_values, and four more for forward and backward finite differences around this point.  (Hence, if there were n diffusivity values, PETSc-TAO would run model.i 1 + 2^n times per iteration).
+# This means that for each PETSc-TAO iteration, 5 runs of model.i are performed: one for the current value of diffusivity_values, and four more for forward and backward finite differences around this point.  (Hence, if there were n diffusivity values, PETSc-TAO would run model.i 1 + 2*n times per iteration).
 #
 # This file passes the diffusivity_values to model.i via the MultiAppReporterTransfer defined below
 # This file retrieves from model.i: the misfit of the temperature predicted by model.i and the experimental observations; the temperature at the observation points; the diffusivity_values (so they can be recorded in the output).  This occurs through the MultiAppReporterTransfer defined below
