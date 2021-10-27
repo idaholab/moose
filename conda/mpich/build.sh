@@ -18,16 +18,12 @@ if [[ $HOST == arm64-apple-darwin20.0.0 ]]; then
     ./autogen.sh
 fi
 
-export MPICHLIB_CPPFLAGS=$CPPFLAGS
-export MPICHLIB_CFLAGS=$CFLAGS
-export MPICHLIB_CXXFLAGS=$CXXFLAGS
-export MPICHLIB_LDFLAGS=$LDFLAGS
-export MPICHLIB_FFLAGS=$FFLAGS
-export MPICHLIB_FCFLAGS=$FCFLAGS
-unset CPPFLAGS CFLAGS CXXFLAGS FFLAGS FCFLAGS F90 F77
+unset LDFLAGS CPPFLAGS CFLAGS CXXFLAGS FFLAGS FCFLAGS F90 F77
+export LDFLAGS="-L$PREFIX/lib -Wl,-rpath,$PREFIX/lib"
+export LIBRARY_PATH="$PREFIX/lib"
+
 if [[ $(uname) == Darwin ]]; then
     if [[ $target_platform == osx-arm64 ]]; then
-        export LIBRARY_PATH="$PREFIX/lib"
         TUNING="-I$PREFIX/include"
         OPTIONS="--disable-opencl --enable-cxx --enable-fortran --with-device=ch3"
         export pac_cv_f77_accepts_F=yes
@@ -57,45 +53,30 @@ if [[ $(uname) == Darwin ]]; then
         export pac_cv_prog_f77_mismatched_args=yes
         export pac_cv_prog_f77_mismatched_args_parm=
         export pac_cv_prog_f77_name_mangle='lower uscore'
-        export CROSS_F77_TRUE_VALUE=1
-        export CROSS_F77_FALSE_VALUE=0
         export pac_cv_prog_fc_and_c_stdio_libs=none
         export pac_cv_prog_fc_int_kind_16=8
         export pac_cv_prog_fc_int_kind_8=4
         export pac_cv_prog_fc_works=yes
-        export CROSS_F90_ADDRESS_KIND=8
-        export CROSS_F90_OFFSET_KIND=8
-        export CROSS_F90_INTEGER_KIND=4
-        export CROSS_F90_SIZEOF_INTEGER=4
-        export CROSS_F90_SIZEOF_REAL=4
-        export CROSS_F90_SIZEOF_DOUBLE_PRECISION=8
-        export CROSS_F90_REAL_MODEL=' 6 , 37'
-        export CROSS_F90_DOUBLE_MODEL=' 15 , 307'
-        export CROSS_F90_INTEGER_MODEL=' 9'
-        export CROSS_F90_ALL_INTEGER_MODELS=' 2 , 1, 4 , 2, 9 , 4, 18 , 8,'
-        export CROSS_F90_INTEGER_MODEL_MAP=' {  2 , 1 , 1 }, {  4 , 2 , 2 }, {  9 , 4 , 4 }, {  18 , 8 , 8 },'
         export pac_MOD='mod'
     else
-        export LDFLAGS="-L$PREFIX/lib -Wl,-rpath,$PREFIX/lib"
-        export LIBRARY_PATH="$PREFIX/lib"
         TUNING="-march=core2 -mtune=haswell -I$PREFIX/include"
         OPTIONS=""
     fi
     SHARED="clang"
 else
     SHARED="gcc"
-    TUNING="-march=nocona -mtune=haswell"
+    TUNING="-march=nocona -mtune=haswell -I$PREFIX/include"
     OPTIONS=""
 fi
 
-./configure --prefix=${PREFIX} \
+./configure --prefix="${PREFIX}" \
             --enable-shared \
-            --enable-sharedlibs=${SHARED} \
+            --enable-sharedlibs="${SHARED}" \
             --enable-fast=O2 \
             --enable-debuginfo \
             --enable-two-level-namespace \
             CC="${CC}" CXX="${CXX}" FC="${FC}" F77="${FC}" F90="" \
-            CFLAGS="${TUNING}" CXXFLAGS="${TUNING}" FFLAGS="${TUNING}" LDFLAGS="${LDFLAGS:-}" \
+            CFLAGS="${TUNING}" CXXFLAGS="${TUNING}" FFLAGS="${TUNING}" LDFLAGS="${LDFLAGS}" \
             FCFLAGS="${TUNING}" F90FLAGS="" F77FLAGS="" \
             ${OPTIONS}
 
