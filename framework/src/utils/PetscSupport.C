@@ -944,6 +944,7 @@ colorAdjacencyMatrix(PetscScalar * adjacency_matrix,
 
   MatDestroy(&A);
   MatColoringDestroy(&mc);
+  ISColoringDestroy(&iscoloring);
 }
 
 void
