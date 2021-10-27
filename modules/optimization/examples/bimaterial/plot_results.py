@@ -44,7 +44,7 @@ plt.xlim([0, plt.xlim()[1]])
 plt.xlabel("Number of model solves")
 plt.ylabel("Objective function")
 plt.title("Comparison of inverse methods for the bimaterial example")
-plt.show()
 plt.savefig("comparison.png", bbox_inches = 'tight')
+plt.show()
 
     
