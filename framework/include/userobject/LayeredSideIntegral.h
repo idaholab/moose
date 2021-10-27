@@ -38,6 +38,8 @@ public:
    */
   virtual Real spatialValue(const Point & p) const override { return integralValue(p); }
 
+  virtual const std::vector<Point> spatialPoints() const override;
+
   virtual void initialize() override;
   virtual void execute() override;
   virtual void finalize() override;
