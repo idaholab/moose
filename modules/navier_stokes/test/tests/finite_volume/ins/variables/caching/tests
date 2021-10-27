@@ -11,7 +11,8 @@
     cli_args = 'pressure_face_gradient_caching=false
                 velocity_face_gradient_caching=false
                 pressure_face_value_caching=false
-                velocity_face_value_caching=false'
+                velocity_face_value_caching=false
+                GlobalParams/two_term_boundary_expansion=false'
   []
   [3d-no-gradient-caching]
     type = 'Exodiff'
@@ -32,7 +33,8 @@
     ad_indexing_type = 'global'
     cli_args = 'velocity_face_gradient_caching=false
                 pressure_face_value_caching=false
-                velocity_face_value_caching=false'
+                velocity_face_value_caching=false
+                GlobalParams/two_term_boundary_expansion=false'
   []
   [3d-all-caching]
     type = 'Exodiff'

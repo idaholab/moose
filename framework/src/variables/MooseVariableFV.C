@@ -48,9 +48,9 @@ MooseVariableFV<OutputType>::validParams()
       "Consequently an implicit solve is used to simultaneously solve for the adjoining cell "
       "center gradient and boundary face value(s).");
   params.template addParam<bool>(
-      "cache_face_gradients", false, "Whether to cache face gradients or re-compute them.");
+      "cache_face_gradients", true, "Whether to cache face gradients or re-compute them.");
   params.template addParam<bool>(
-      "cache_face_values", false, "Whether to cache face values or re-compute them.");
+      "cache_face_values", true, "Whether to cache face values or re-compute them.");
 #endif
   return params;
 }
@@ -78,7 +78,7 @@ MooseVariableFV<OutputType>::MooseVariableFV(const InputParameters & parameters)
                               : false),
     _cache_face_values(this->isParamValid("cache_face_values")
                            ? this->template getParam<bool>("cache_face_values")
-                           : false),
+                           : true),
     // If the user doesn't specify a MooseVariableFV type in the input file, then we won't have
     // these parameters available
     _use_extended_stencil(this->isParamValid("use_extended_stencil")
@@ -800,6 +800,8 @@ MooseVariableFV<OutputType>::adGradSln(const Elem * const elem) const
   mooseError("MooseVariableFV::adGradSln only supported for global AD indexing");
 #endif
 
+  // If not caching elem gradients, this will always fail
+  // TODO: skip it
   const auto it = _elem_to_grad.find(elem);
 
   if (it != _elem_to_grad.end())
@@ -1005,9 +1007,8 @@ MooseVariableFV<OutputType>::adGradSln(const Elem * const elem) const
     // this method may be relying on those values (e.g. if the caller is
     // getExtrapolatedBoundaryFaceValue) so we populate them here with one-term expansion, e.g. we
     // set the boundary face values to the cell centroid value
-    if (_cache_face_values)
-      for (auto * const ebf_face : ebf_faces)
-        _face_to_value.emplace(ebf_face, elem_value);
+    for (auto * const ebf_face : ebf_faces)
+      _face_to_value.emplace(ebf_face, elem_value);
 
     // Two term boundary expansion should only fail at domain corners. We want to keep trying it at
     // other boundary locations

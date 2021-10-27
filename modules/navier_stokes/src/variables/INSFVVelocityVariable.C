@@ -45,21 +45,11 @@ INSFVVelocityVariable::INSFVVelocityVariable(const InputParameters & params) : I
 const VectorValue<ADReal> &
 INSFVVelocityVariable::adGradSln(const Elem * const elem) const
 {
-  VectorValue<ADReal> * grad_pointer = &_temp_face_gradients[_tid];
-  if (_cache_elem_gradients)
-  {
-    auto pr = _elem_to_grad.emplace(elem, 0);
+  const auto it = _elem_to_grad.find(elem);
 
-    if (!pr.second)
-      // Insertion didn't happen...we already have a gradient ready to go
-      return pr.first->second;
-
-    grad_pointer = &pr.first->second;
-  }
-  else
-    _temp_face_gradients[_tid] = 0;
-
-  VectorValue<ADReal> & grad = *grad_pointer;
+  if (it != _elem_to_grad.end())
+    // we already have a gradient ready to go
+    return it->second;
 
   ADReal elem_value = getElemValue(elem);
 
@@ -307,38 +297,35 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem) const
       for (const auto lm_dim_index : make_range(lm_dim))
         grad(lm_dim_index) = x(lm_dim_index);
 
-    // Cache the face value information
-    if (_cache_face_values)
-      for (const auto ebf_index : make_range(num_ebfs))
-        _face_to_value.emplace(ebf_faces[ebf_index].first, x(lm_dim + ebf_index));
+      // Cache the face value information
+      if (_cache_face_values)
+        for (const auto ebf_index : make_range(num_ebfs))
+          _face_to_value.emplace(ebf_faces[ebf_index].first, x(lm_dim + ebf_index));
 
-    if (_cache_face_gradients)
-    {
-      // Cache the extrapolated face gradient information
-      auto it = ebf_faces.begin();
-      for (const auto fdf_index : make_range(num_fdf_faces))
+      if (_cache_face_gradients)
       {
-        it = std::find_if(it, ebf_faces.end(), [](const std::pair<const FaceInfo *, bool> & in) {
-          return in.second;
-        });
-        mooseAssert(it != ebf_faces.end(), "We should have found a fully developed flow face");
+        // Cache the extrapolated face gradient information
+        auto it = ebf_faces.begin();
+        for (const auto fdf_index : make_range(num_fdf_faces))
+        {
+          it = std::find_if(it, ebf_faces.end(), [](const std::pair<const FaceInfo *, bool> & in) {
+            return in.second;
+          });
+          mooseAssert(it != ebf_faces.end(), "We should have found a fully developed flow face");
 
-        const auto starting_index =
-            static_cast<unsigned int>(lm_dim + num_ebfs + lm_dim * fdf_index);
+          const auto starting_index =
+              static_cast<unsigned int>(lm_dim + num_ebfs + lm_dim * fdf_index);
 
-        const auto starting_index =
-            static_cast<unsigned int>(lm_dim + num_ebfs + lm_dim * fdf_index);
+          auto pr = _face_to_unc_grad.emplace(it->first, VectorValue<ADReal>());
+          mooseAssert(pr.second, "We should have inserted a new face gradient");
+          for (const auto lm_index : make_range(lm_dim))
+            pr.first->second(lm_index) = x(starting_index + lm_index);
 
-        auto pr = _face_to_unc_grad.emplace(it->first, VectorValue<ADReal>());
-        mooseAssert(pr.second, "We should have inserted a new face gradient");
-        for (const auto lm_index : make_range(lm_dim))
-          pr.first->second(lm_index) = x(starting_index + lm_index);
-
-        // increment the iterator so we don't find the same element again
-        ++it;
+          // increment the iterator so we don't find the same element again
+          ++it;
+        }
       }
     }
-
     auto pr = _elem_to_grad.emplace(elem, std::move(grad));
     mooseAssert(pr.second, "Insertion should have just happened.");
     return pr.first->second;
@@ -356,8 +343,9 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem) const
     // this method may be relying on those values (e.g. if the caller is
     // getExtrapolatedBoundaryFaceValue) so we populate them here with one-term expansion, e.g. we
     // set the boundary face values to the cell centroid value
-    for (const auto & ebf_face_pr : ebf_faces)
-      _face_to_value.emplace(ebf_face_pr.first, elem_value);
+    if (_cache_face_values)
+      for (const auto & ebf_face_pr : ebf_faces)
+        _face_to_value.emplace(ebf_face_pr.first, elem_value);
 
     // Two term boundary expansion should only fail at domain corners. We want to keep trying it at
     // other boundary locations
