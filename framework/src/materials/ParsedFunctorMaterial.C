@@ -1,0 +1,73 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "ParsedFunctorMaterial.h"
+
+registerMooseObject("MooseApp", ParsedFunctorMaterial);
+registerMooseObject("MooseApp", ADParsedFunctorMaterial);
+
+template <bool is_ad>
+InputParameters
+ParsedFunctorMaterialTempl<is_ad>::validParams()
+{
+  InputParameters params = ParsedFunctorMaterialHelper<is_ad>::validParams();
+  params += ParsedMaterialBase::validParams();
+
+  params.addClassDescription("Parsed Function Material.");
+  return params;
+}
+
+template <bool is_ad>
+ParsedFunctorMaterialTempl<is_ad>::ParsedFunctorMaterialTempl(const InputParameters & parameters)
+  : ParsedFunctorMaterialHelper<is_ad>(parameters, VariableNameMappingMode::USE_MOOSE_NAMES),
+    ParsedMaterialBase(parameters)
+{
+  // Build function and optimize
+  functionParse(_function,
+                _constant_names,
+                _constant_expressions,
+                this->template getParam<std::vector<std::string>>("material_property_names"),
+                this->template getParam<std::vector<PostprocessorName>>("postprocessor_names"),
+                _tol_names,
+                _tol_values);
+
+  // Set functor
+  _property.setFunctor(
+    _mesh, blockIDs(), [this](const auto & r, const auto & t) -> GenericReal<is_ad> {
+
+      // fill the parameter vector with variables, apply tolerances
+      for (unsigned int i = 0; i < _nargs; ++i)
+      {
+        if (_tol[i] < 0.0)
+          _func_params[i] = (*_variables[i])(r, t);
+        else
+        {
+          auto a = (*_variables[i])(r, t);
+          _func_params[i] = a < _tol[i] ? _tol[i] : (a > 1.0 - _tol[i] ? 1.0 - _tol[i] : a);
+        }
+      }
+
+      // insert material property values
+      auto nmat_props = _mat_prop_descriptors.size();
+      for (MooseIndex(_mat_prop_descriptors) i = 0; i < nmat_props; ++i)
+        _func_params[i + _nargs] = _mat_prop_descriptors[i](r, t);
+
+      // insert postprocessor values
+      // these are updated automatically as they are references to their value
+      auto npps = _postprocessor_values.size();
+      for (MooseIndex(_postprocessor_values) i = 0; i < npps; ++i)
+        _func_params[i + _nargs + nmat_props] = *_postprocessor_values[i];
+
+      return evaluate(_func_F);
+    });
+}
+
+// explicit instantiation
+template class ParsedFunctorMaterialTempl<false>;
+template class ParsedFunctorMaterialTempl<true>;

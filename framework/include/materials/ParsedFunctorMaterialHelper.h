@@ -9,7 +9,6 @@
 
 #pragma once
 
-#include "FunctionMaterialBase.h"
 #include "FunctionParserUtils.h"
 #include "FunctionMaterialPropertyDescriptor.h"
 #include "DerivativeMaterialPropertyNameInterface.h"
@@ -28,7 +27,11 @@
   using ParsedFunctorMaterialHelper<T>::_mat_prop_descriptors;                                            \
   using ParsedFunctorMaterialHelper<T>::_tol;                                                             \
   using ParsedFunctorMaterialHelper<T>::_postprocessor_values;                                            \
-  using ParsedFunctorMaterialHelper<T>::_map_mode
+  using ParsedFunctorMaterialHelper<T>::_map_mode;                                                        \
+  using ParsedFunctorMaterialHelper<T>::_property;                                                        \
+  using ParsedFunctorMaterialHelper<T>::_variables;                                                       \
+  using ParsedFunctorMaterialHelper<T>::_nargs;
+
 
 /**
  * Helper class to perform the parsing and optimization of the
@@ -71,9 +74,6 @@ public:
 protected:
   usingFunctionParserUtilsMembers(is_ad);
 
-  /// Coupled variables for function arguments
-  std::vector<const Moose::Functor<ADReal> &> _variables;
-
   /**
    * Name of the function value material property and used as a base name to
    * concatenate the material property names for the derivatives.
@@ -86,14 +86,14 @@ protected:
   /// Flag that indicates if exactly one linear variable is coupled per input file coupling parameter
   bool _mapping_is_unique;
 
+  /// Coupled variables for function arguments
+  std::vector<MooseVariableFieldBase *> _variables;
+
   /// Number of coupled arguments.
   unsigned int _nargs;
 
   /// String vector of all argument names.
   std::vector<std::string> _arg_names;
-
-  /// Vector of all argument MOOSE variable numbers.
-  std::vector<unsigned int> _arg_numbers;
 
   /// String vector of the input file coupling parameter name for each argument.
   std::vector<std::string> _arg_param_names;
@@ -101,15 +101,6 @@ protected:
 
   /// coupled variables with default values
   std::vector<std::string> _arg_constant_defaults;
-
-  // tasks to perform after parsing the primary function
-  virtual void functionsPostParse();
-
-  // run FPOptimizer on the parsed function
-  virtual void functionsOptimize();
-
-  /// The undiffed free energy function parser object.
-  SymFunctionPtr _func_F;
 
   /**
    * Symbol names used in the expression (depends on the map_mode).
@@ -129,6 +120,15 @@ protected:
 
   /// List of coupled Postprocessors
   std::vector<const PostprocessorValue *> _postprocessor_values;
+
+  // tasks to perform after parsing the primary function
+  virtual void functionsPostParse();
+
+  // run FPOptimizer on the parsed function
+  virtual void functionsOptimize();
+
+  /// The undiffed free energy function parser object.
+  SymFunctionPtr _func_F;
 
   /**
    * Flag to indicate if MOOSE nonlinear variable names should be used as FParser variable names.

@@ -40,9 +40,6 @@ ParsedFunctorMaterialHelper<is_ad>::ParsedFunctorMaterialHelper(const InputParam
         this->template getParam<bool>("error_on_missing_material_properties"))
 {
 
-
-////////////////////////////////
-
   // fetch names and numbers of all coupled variables
   _mapping_is_unique = true;
   for (std::set<std::string>::const_iterator it = _pars.coupledVarsBegin();
@@ -74,10 +71,8 @@ ParsedFunctorMaterialHelper<is_ad>::ParsedFunctorMaterialHelper(const InputParam
         mooseError("A nonlinear variable can only be coupled in once.");
 
       // insert the map values
-      // unsigned int number = vars->second[j]->number();
       unsigned int number = coupled(*it, j);
       _arg_names.push_back(vars->second[j]->name());
-      _arg_numbers.push_back(number);
       _arg_param_names.push_back(*it);
       if (_mapping_is_unique)
         _arg_param_numbers.push_back(-1);
@@ -92,14 +87,12 @@ ParsedFunctorMaterialHelper<is_ad>::ParsedFunctorMaterialHelper(const InputParam
       _arg_index[idx] = _variables.size();
 
       // get variable value
-      // _variables.push_back(getFunctor<ADReal>(vars->second[j]->name()));
+      _variables.push_back(vars->second[j]);
     }
   }
 
   _nargs = _arg_names.size();
   _symbol_names.resize(_nargs);
-
-//////////////////////////////////////////////
 }
 
 template <bool is_ad>
