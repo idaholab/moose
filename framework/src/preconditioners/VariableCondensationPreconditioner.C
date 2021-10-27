@@ -118,20 +118,20 @@ VariableCondensationPreconditioner::VariableCondensationPreconditioner(
     paramError("coupled_variable", "coupled_variable should have the same size as the variable.");
 
   // get variable ids from the variable names
-  for (auto var_name : _lm_var_names)
+  for (const auto & var_name : _lm_var_names)
   {
     if (!_nl.system().has_variable(var_name))
       paramError("variable ", var_name, " does not exist in the system");
-    unsigned int id = _nl.system().variable_number(var_name);
+    const unsigned int id = _nl.system().variable_number(var_name);
     _lm_var_ids.push_back(id);
   }
 
   // get coupled variable ids from the coupled variable names
-  for (auto var_name : _primary_var_names)
+  for (const auto & var_name : _primary_var_names)
   {
     if (!_nl.system().has_variable(var_name))
       paramError("coupled_variable ", var_name, " does not exist in the system");
-    unsigned int id = _nl.system().variable_number(var_name);
+    const unsigned int id = _nl.system().variable_number(var_name);
     _primary_var_ids.push_back(id);
   }
 
@@ -147,7 +147,7 @@ VariableCondensationPreconditioner::VariableCondensationPreconditioner(
   // TODO: This part can be refactored together with what are in other classes, e.g.,
   // PhysicsBasedPreconditioner
   std::unique_ptr<CouplingMatrix> cm = libmesh_make_unique<CouplingMatrix>(_n_vars);
-  bool full = getParam<bool>("full");
+  const bool full = getParam<bool>("full");
 
   if (!full)
   {
@@ -157,14 +157,12 @@ VariableCondensationPreconditioner::VariableCondensationPreconditioner(
 
     // off-diagonal entries from the off_diag_row and off_diag_column parameters
     std::vector<std::vector<unsigned int>> off_diag(_n_vars);
-    for (unsigned int i = 0;
-         i < getParam<std::vector<NonlinearVariableName>>("off_diag_row").size();
-         i++)
+    for (const auto & i : index_range(getParam<std::vector<NonlinearVariableName>>("off_diag_row")))
     {
-      unsigned int row =
+      const unsigned int row =
           _nl.getVariable(0, getParam<std::vector<NonlinearVariableName>>("off_diag_row")[i])
               .number();
-      unsigned int column =
+      const unsigned int column =
           _nl.getVariable(0, getParam<std::vector<NonlinearVariableName>>("off_diag_column")[i])
               .number();
       (*cm)(row, column) = 1;
@@ -173,15 +171,15 @@ VariableCondensationPreconditioner::VariableCondensationPreconditioner(
     // off-diagonal entries from the coupled_groups parameters
     std::vector<NonlinearVariableName> groups =
         getParam<std::vector<NonlinearVariableName>>("coupled_groups");
-    for (unsigned int i = 0; i < groups.size(); ++i)
+    for (const auto & i : index_range(groups))
     {
       std::vector<NonlinearVariableName> vars;
       MooseUtils::tokenize<NonlinearVariableName>(groups[i], vars, 1, ",");
-      for (unsigned int j = 0; j < vars.size(); ++j)
+      for (unsigned int j : index_range(vars))
         for (unsigned int k = j + 1; k < vars.size(); ++k)
         {
-          unsigned int row = _nl.getVariable(0, vars[j]).number();
-          unsigned int column = _nl.getVariable(0, vars[k]).number();
+          const unsigned int row = _nl.getVariable(0, vars[j]).number();
+          const unsigned int column = _nl.getVariable(0, vars[k]).number();
           (*cm)(row, column) = 1;
           (*cm)(column, row) = 1;
         }
@@ -221,13 +219,14 @@ VariableCondensationPreconditioner::getDofToCondense()
   NodeRange * active_nodes = _mesh.getActiveNodeRange();
 
   // loop through the variable ids
-  for (auto vn : index_range(_lm_var_ids))
+  for (const auto & vn : index_range(_lm_var_ids))
     for (const auto & node : *active_nodes)
     {
       std::vector<dof_id_type> di;
       std::vector<dof_id_type> cp_di;
-      auto var_id = _lm_var_ids[vn];
-      auto cp_var_id = _primary_var_ids[vn];
+      const auto var_id = _lm_var_ids[vn];
+      // get coupled variable id
+      const auto cp_var_id = _primary_var_ids[vn];
       // get var and cp_var dofs associated with this node
       _dofmap.dof_indices(node, di, var_id);
       // skip when di is empty
@@ -238,7 +237,7 @@ VariableCondensationPreconditioner::getDofToCondense()
         mooseError("variable and coupled variable do not have the same number of dof on node ",
                    node->id(),
                    ".");
-      for (auto i : index_range(di))
+      for (const auto & i : index_range(di))
       {
         // when we have adaptive condensation, skip when di does not contain any indices in
         // _zero_rows
@@ -276,7 +275,7 @@ VariableCondensationPreconditioner::getDofToCondense()
   std::sort(_global_primary_dofs.begin(), _global_primary_dofs.end());
   std::sort(_primary_dofs.begin(), _primary_dofs.end());
 
-  for (auto i : index_range(_global_lm_dofs))
+  for (const auto & i : index_range(_global_lm_dofs))
   {
     auto it = _map_global_lm_primary.find(_global_lm_dofs[i]);
     mooseAssert(it != _map_global_lm_primary.end(), "Index does not exist in the map.");
@@ -387,17 +386,13 @@ VariableCondensationPreconditioner::condenseSystem()
 
   // Compute inverse of D
   if (_is_lm_coupling_diagonal)
-  {
     // when _D is strictly diagonal, we only need to compute the reciprocal number of the diagonal
     // entries
     computeDInverseDiag(_dinv);
-  }
   else
-  {
     // for general cases when _D is not necessarily strict diagonal, we compute the inverse of _D
     // using LU
     computeDInverse(_dinv);
-  }
 
   Mat MdinvK;
   // calculate MdinvK
@@ -439,7 +434,7 @@ VariableCondensationPreconditioner::computeCondensedJacobian(
   std::vector<PetscInt> sub_cols;
   std::vector<PetscScalar> sub_vals;
 
-  for (auto i : index_range(grows))
+  for (const auto & i : index_range(grows))
   {
     PetscInt sub_rid[] = {static_cast<PetscInt>(i)};
     PetscInt rid = static_cast<PetscInt>(grows[i]);
@@ -538,7 +533,7 @@ VariableCondensationPreconditioner::preallocateCondensedJacobian(
   PetscErrorCode ierr = 0;
 
   // Get number of nonzeros from original_mat and block_mat for each row
-  for (auto row_id : _rows)
+  for (const auto & row_id : _rows)
   {
     // get number of non-zeros in the original matrix
     ierr =
@@ -585,7 +580,7 @@ VariableCondensationPreconditioner::preallocateCondensedJacobian(
 
     // Count the nnz for DIAGONAL and OFF-DIAGONAL parts
     unsigned int row_n_nz = 0, row_n_oz = 0;
-    for (auto merged_col : merged_cols)
+    for (const auto & merged_col : merged_cols)
     {
       // find corresponding index in the block mat and skip the cols that do not exist in the
       // condensed system
@@ -623,14 +618,14 @@ VariableCondensationPreconditioner::mergeArrays(const PetscInt * a,
   std::map<PetscInt, bool> mp;
 
   // Inserting values to a map.
-  for (int i = 0; i < na; i++)
+  for (const auto & i : make_range(na))
     mp[a[i]] = true;
 
-  for (int i = 0; i < nb; i++)
+  for (const auto & i : make_range(nb))
     mp[b[i]] = true;
 
   // Save the merged values to c, if only the value also exist in gcols
-  for (auto i : mp)
+  for (const auto & i : mp)
     c.push_back(i.first);
 }
 
@@ -652,7 +647,7 @@ VariableCondensationPreconditioner::setup()
     condenseSystem();
 
     // make sure diagonal entries are not empty
-    for (auto i = _J_condensed->row_start(); i < _J_condensed->row_stop(); ++i)
+    for (const auto & i : make_range(_J_condensed->row_start(), _J_condensed->row_stop()))
       _J_condensed->add(i, i, 0.0);
     _J_condensed->close();
 
@@ -755,13 +750,14 @@ VariableCondensationPreconditioner::getFullSolution(const NumericVector<Number> 
   std::vector<Number> vals;
 
   // save values and indices from _x_hat and _lm_sol_vec
-  for (auto i = _x_hat->first_local_index(); i < _x_hat->last_local_index(); ++i)
+  for (const auto & i : make_range(_x_hat->first_local_index(), _x_hat->last_local_index()))
   {
     dof_indices.push_back(_global_cols[i]);
     vals.push_back((*_x_hat)(i));
   }
 
-  for (auto i = _lm_sol_vec->first_local_index(); i < _lm_sol_vec->last_local_index(); ++i)
+  for (const auto & i :
+       make_range(_lm_sol_vec->first_local_index(), _lm_sol_vec->last_local_index()))
   {
     dof_indices.push_back(_global_lm_dofs[i]);
     vals.push_back((*_lm_sol_vec)(i));
@@ -914,14 +910,14 @@ VariableCondensationPreconditioner::computeDInverseDiag(Mat & dinv)
   // Allocate storage
   diag_D->init(_D->m(), _D->local_m(), false, PARALLEL);
   // Fill entries
-  for (numeric_index_type i = _D->row_start(); i < _D->row_stop(); ++i)
+  for (const auto & i : make_range(_D->row_start(), _D->row_stop()))
   {
     auto it = _map_global_primary_order.find(_global_primary_dofs[i]);
     mooseAssert(it != _map_global_primary_order.end(), "Index does not exist in the map.");
     diag_D->set(it->second, (*_D)(i, it->second));
   }
 
-  for (numeric_index_type i = _D->row_start(); i < _D->row_stop(); ++i)
+  for (const auto & i : make_range(_D->row_start(), _D->row_stop()))
   {
     if (MooseUtils::absoluteFuzzyEqual((*diag_D)(i), 0.0))
       mooseError("Trying to compute reciprocal of 0.");
