@@ -10,6 +10,15 @@
     map = False
     requirement = 'We shall be able to produce the expected result for a gap conductance test case using the mortar method.'
   [../]
+  [./modular]
+    type = Exodiff
+    input = 'modular_gap_heat_transfer_mortar.i'
+    exodiff = 'modular_gap_heat_transfer_mortar_out.e'
+    custom_cmp = 'one-variable-temp.cmp'
+    partial = True
+    map = False
+    requirement = 'We shall be able to produce the expected result for a gap conductance test case using the mortar method using the modular gap flux system.'
+  [../]
 
   [./displaced]
     type = Exodiff
