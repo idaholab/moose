@@ -298,7 +298,7 @@ AzimuthalBlockSplitGenerator::generate()
                                    : _azimuthal_angle_meta[i] - 90.0;
   std::sort(_azimuthal_angle_meta.begin(), _azimuthal_angle_meta.end());
 
-  return dynamic_pointer_cast<MeshBase>(mesh);
+  return mesh;
 }
 
 void

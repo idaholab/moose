@@ -34,7 +34,7 @@ When [!param](/Functions/MultiControlDrumFunction/use_control_drum_id) is true, 
 !media media/functions/multi_cds.png
       style=display: block;margin-left:auto;margin-right:auto;width:40%;
       id=multi_drums
-      caption=An example of control drums simulated by this `MultiControlDrumFunction` object.
+      caption=An example of control drums simulated by this `MultiControlDrumFunction` object (see [input file](modules/reactor/test/tests/functions/multi_control_drum_function/multi_cd.i) here).
 
 ## Example Syntax
 
