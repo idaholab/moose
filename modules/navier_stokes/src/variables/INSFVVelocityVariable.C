@@ -298,9 +298,8 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem) const
         grad(lm_dim_index) = x(lm_dim_index);
 
       // Cache the face value information
-      if (_cache_face_values)
-        for (const auto ebf_index : make_range(num_ebfs))
-          _face_to_value.emplace(ebf_faces[ebf_index].first, x(lm_dim + ebf_index));
+      for (const auto ebf_index : make_range(num_ebfs))
+        _face_to_value.emplace(ebf_faces[ebf_index].first, x(lm_dim + ebf_index));
 
       if (_cache_face_gradients)
       {
@@ -343,9 +342,8 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem) const
     // this method may be relying on those values (e.g. if the caller is
     // getExtrapolatedBoundaryFaceValue) so we populate them here with one-term expansion, e.g. we
     // set the boundary face values to the cell centroid value
-    if (_cache_face_values)
-      for (const auto & ebf_face_pr : ebf_faces)
-        _face_to_value.emplace(ebf_face_pr.first, elem_value);
+    for (const auto & ebf_face_pr : ebf_faces)
+      _face_to_value.emplace(ebf_face_pr.first, elem_value);
 
     // Two term boundary expansion should only fail at domain corners. We want to keep trying it at
     // other boundary locations

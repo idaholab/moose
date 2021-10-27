@@ -5,7 +5,6 @@ rho=1
   vel = 'velocity'
   velocity_interp_method = 'rc'
   advected_interp_method = 'average'
-  cache_face_values = true
 []
 
 [Mesh]

@@ -3,11 +3,6 @@ rho=1
 advected_interp_method='average'
 velocity_interp_method='average'
 
-[GlobalParams]
-  cache_face_values = true
-  cache_face_gradients = true
-[]
-
 [Mesh]
   inactive = 'mesh internal_boundary_bot internal_boundary_top'
   [mesh]

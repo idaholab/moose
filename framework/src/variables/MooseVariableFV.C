@@ -41,16 +41,17 @@ MooseVariableFV<OutputType>::validParams()
   params.template addParam<bool>(
       "two_term_boundary_expansion",
       true,
-      "Whether to use a two-term Taylor expansion to calculate boundary face values. The default "
-      "is to use one-term, e.g. the element centroid value will be used for the boundary face "
-      "value. If the two-term expansion is used, then the boundary face value depends on the "
+      "Whether to use a two-term Taylor expansion to calculate boundary face values. "
+      "If the two-term expansion is used, then the boundary face value depends on the "
       "adjoining cell center gradient, which itself depends on the boundary face value. "
       "Consequently an implicit solve is used to simultaneously solve for the adjoining cell "
       "center gradient and boundary face value(s).");
   params.template addParam<bool>(
-      "cache_face_gradients", true, "Whether to cache face gradients or re-compute them.");
-  params.template addParam<bool>(
-      "cache_face_values", true, "Whether to cache face values or re-compute them.");
+      "cache_face_gradients", false, "Whether to cache face gradients or re-compute them.");
+  params.template addParam<bool>("cache_face_values",
+                                 false,
+                                 "Whether to cache face values or re-compute them. Values for "
+                                 "extrapolated boundary conditions are always cached.");
 #endif
   return params;
 }
@@ -78,7 +79,7 @@ MooseVariableFV<OutputType>::MooseVariableFV(const InputParameters & parameters)
                               : false),
     _cache_face_values(this->isParamValid("cache_face_values")
                            ? this->template getParam<bool>("cache_face_values")
-                           : true),
+                           : false),
     // If the user doesn't specify a MooseVariableFV type in the input file, then we won't have
     // these parameters available
     _use_extended_stencil(this->isParamValid("use_extended_stencil")
@@ -89,12 +90,6 @@ MooseVariableFV<OutputType>::MooseVariableFV(const InputParameters & parameters)
       *this, _sys, _tid, Moose::ElementType::Element, this->_assembly.elem());
   _neighbor_data = libmesh_make_unique<MooseVariableDataFV<OutputType>>(
       *this, _sys, _tid, Moose::ElementType::Neighbor, this->_assembly.neighbor());
-
-  // If we want a two term boundary expansion, we need to cache variables values after
-  // solving for them, otherwise it's too inefficient
-  if (_two_term_boundary_expansion && !_cache_face_values)
-    mooseError(
-        "We currently do not support two term boundary expansions when not caching face values.");
 
   // Resize vectors used when not caching variables
   _temp_face_unc_gradients.resize(libMesh::n_threads());
@@ -800,8 +795,6 @@ MooseVariableFV<OutputType>::adGradSln(const Elem * const elem) const
   mooseError("MooseVariableFV::adGradSln only supported for global AD indexing");
 #endif
 
-  // If not caching elem gradients, this will always fail
-  // TODO: skip it
   const auto it = _elem_to_grad.find(elem);
 
   if (it != _elem_to_grad.end())

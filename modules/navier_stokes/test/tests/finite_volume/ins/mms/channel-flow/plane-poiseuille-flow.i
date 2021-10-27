@@ -26,18 +26,15 @@ two_term_boundary_expansion=true
     type = INSFVVelocityVariable
     initial_condition = 1
     two_term_boundary_expansion = ${two_term_boundary_expansion}
-    cache_face_values = true
   []
   [v]
     type = INSFVVelocityVariable
     initial_condition = 1
     two_term_boundary_expansion = ${two_term_boundary_expansion}
-    cache_face_values = true
   []
   [pressure]
     type = INSFVPressureVariable
     two_term_boundary_expansion = ${two_term_boundary_expansion}
-    cache_face_values = true
   []
 []
 

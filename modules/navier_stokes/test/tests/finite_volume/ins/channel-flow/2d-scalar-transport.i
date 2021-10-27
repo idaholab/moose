@@ -6,10 +6,6 @@ cp=1
 advected_interp_method='average'
 velocity_interp_method='rc'
 
-[GlobalParams]
-  cache_face_values = true
-[]
-
 [Mesh]
   [gen]
     type = GeneratedMeshGenerator

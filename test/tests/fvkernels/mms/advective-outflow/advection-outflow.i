@@ -14,10 +14,6 @@ a=1.1
   [../]
 []
 
-[Problem]
-  kernel_coverage_check = off
-[]
-
 [Variables]
   [./u]
     family = MONOMIAL
@@ -31,7 +27,6 @@ a=1.1
     order = CONSTANT
     fv = true
     two_term_boundary_expansion = true
-    cache_face_values = true
     type = MooseVariableFVReal
   [../]
 []

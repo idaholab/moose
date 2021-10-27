@@ -41,12 +41,6 @@ velocity_interp_method='average'
   fv_bcs_integrity_check = true
 []
 
-[GlobalParams]
-  two_term_boundary_expansion = true
-  cache_face_values = true
-  cache_face_gradients = true
-[]
-
 [Variables]
   [u]
     type = PINSFVSuperficialVelocityVariable

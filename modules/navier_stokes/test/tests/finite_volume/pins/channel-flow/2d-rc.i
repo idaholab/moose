@@ -16,10 +16,6 @@ velocity_interp_method='rc'
   []
 []
 
-[GlobalParams]
-  cache_face_values = true
-[]
-
 [Variables]
   inactive = 'lambda'
   [u]
