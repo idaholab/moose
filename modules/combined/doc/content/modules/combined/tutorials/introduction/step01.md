@@ -20,9 +20,10 @@ like the other physics variables and objects this variable is restricted to
 block 0 (see `GlobalParams`).
 
 The second variable we add is the Lagrange multiplier for the thermal contact.
-This variable will be block restricted to the lower dimensional mortar subdomain
-the `[Contact]` action created for us (the name of that subdomain is the name of
-the contact action subblock with `_secondary_subdomain` appended).
+Its physical meaning is the *heat flux*! This variable will be block restricted
+to the lower dimensional mortar subdomain the `[Contact]` action created for us
+(the name of that subdomain is the name of the contact action subblock with
+`_secondary_subdomain` appended).
 
 This marks the first time we're directly adding variables to an input file. In
 all previous steps all variables were added for us automatically by the tensor
@@ -40,17 +41,17 @@ starting point for the development of more complex gap conductance models
 (taking into account surface roughness and contact pressure for example).
 
 The constraint object acts on the Lagrange multiplier
-[!param](/Constraints/GapConductanceConstraint/variable) `Tlm`, and it effects
+[!param](/Constraints/GapConductanceConstraint/variable) `Tlm`, and it affects
 the [!param](/Constraints/GapConductanceConstraint/secondary_variable) `T`, the
-temperature.
+temperature, enforcing the energy balance.
 
 We make sure to enable the evaluation of the constraint on the *displaced mesh*
-(that is a copy of the mesh that has all nodes moved by their displacement
-variable values) by setting the
+to capture large displacement and deformatio by setting the
 [!param](/Constraints/GapConductanceConstraint/use_displaced_mesh) parameter to
-`true`. Try setting this to false and compare the results (hint the gap distance
-the constraint sees will be computed from the original mesh and will not change
-over time).
+`true`. The displaced mesh is a copy of the mesh that has all nodes moved by
+their displacement variable values. Try setting this parameter to false and
+compare the results (hint the gap distance the constraint sees will be computed
+from the original mesh and will not change over time).
 
 We chose a gap conductance [!param](/Constraints/GapConductanceConstraint/k).
 The heat flux across the gap will be computed as $\frac kl$ where $l$ is the

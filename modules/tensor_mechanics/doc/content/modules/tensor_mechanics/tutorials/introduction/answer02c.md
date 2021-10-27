@@ -16,8 +16,8 @@ Here is the converted input:
 ### TensorMechanics `Master` Action
 
 Adding `use_automatic_differentiation = true` here causes the action to build
-the AD-enabled versions of the materials, kernels, and output objects it sets
-up.
+the automatic differentiation (AD) enabled versions of the materials, kernels,
+and output objects it sets up.
 
 ### `BCs`
 
@@ -26,7 +26,7 @@ in general it is fine to mix AD and non-AD objects, although you might then end
 up with a less than perfect Jacobian. Also keep in mind that you cannot use AD
 and non-AD versions of *material properties* (such as the stiffness tensor or the
 strain) interchangeably. If an object requests an AD property you need to use the
-AD-enable version of the material to provide it.
+AD-enabled version of the material to provide it.
 
 In the `Pressure` action we also supplied `use_automatic_differentiation = true`
 to have the action build the AD-enabled versions of the individual boundary

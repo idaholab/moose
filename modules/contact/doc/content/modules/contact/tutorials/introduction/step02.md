@@ -6,10 +6,9 @@ constraints as well as a better solution quality for contact interface
 quantities like the contact pressure, it is not quite as mature as the node on
 face contact used in the previous step.
 
-Mortar based contact is currently only available in 2D simulations (a 3D
-capability is in development). Edge to edge contact and edge dropping are not
-fully implemented and can lead to artifacts at sharp transitions form in-contact
-to out of contact.
+Mortar based contact for 3D problems is currently in an experimental stage. Edge
+to edge contact and edge dropping are not fully implemented and can lead to
+artifacts at sharp transitions form in-contact to out of contact.
 
 !listing modules/contact/tutorials/introduction/step02.i
 
@@ -17,10 +16,10 @@ Here we show the steps for migrating a node on face contact problem (the penalty
 based contact problem from the previous step) to a mortar formulation. Most of
 the extra work is performed by the Contact action.
 
-The key difference with mortar based contact is the use of Lagrange multipliers
-for the enforcement of the contact constraints. These Lagrange multiplieres are
-additional solution variables (added by the Contact action) that live on lower
-dimensional subdomains along the contact interfaces.
+MOOSE's mortar based contact uses Lagrange multipliers for the enforcement of
+the contact constraints. These Lagrange multiplieres are additional solution
+variables (added by the Contact action) that live on lower dimensional
+subdomains along the contact interfaces.
 
 The Contact action automatically adds these lower dimensional subdomains, *but*
 now that they exist in the simulation we have to be careful not to add any
@@ -66,8 +65,8 @@ improvement compared to penalty contact!
 ### Contact pressure
 
 Note that the `contact_pressure` variable is added but not used with the mortar
-formulation. The physical meaning of the Lagrange multiplier *is* the contact
-pressure.
+formulation. The physical meaning of the Lagrange multiplier *is* the normal
+contact pressure.
 
 > Visualize the contact pressure by plotting the `pillars_normal_lm` variable.
 
@@ -86,6 +85,6 @@ surface it can be helpful to create a line plot of the pressure.
 
 Once you've answered the questions and run this example we will move on to add
 thermal transport and later on thermal contact. You will need to build the
-`combined-opt` executable to follow along
+`combined-opt` executable to follow along.
 
 - [Click here to continue the tutorial](combined/tutorials/introduction/step01.md optional=true)

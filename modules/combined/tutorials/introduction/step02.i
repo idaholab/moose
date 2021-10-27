@@ -165,12 +165,6 @@
     boundary = 'inner_left'
     value = 0
   []
-  # [center_axis_symmetry]
-  #   type = NeumannBC
-  #   variable = disp_y
-  #   boundary = 'inner_left'
-  #   value = 0
-  # []
   [y_translation_fix]
     type = DirichletBC
     variable = disp_y
