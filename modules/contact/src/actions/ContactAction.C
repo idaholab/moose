@@ -131,7 +131,11 @@ ContactAction::validParams()
       "in the solution and obtain the full benefits of a variational enforcement,"
       "use of dual mortar with weighted constraints is strongly recommended. This "
       "input is only intended for advanced users.");
-
+  params.addParam<bool>(
+      "correct_edge_dropping",
+      "Whether to enable correct edge dropping treatment for mortar constraints. When disabled "
+      "any Lagrange Multiplier degree of freedom on a secondary element without full primary "
+      "contributions will be set (strongly) to 0.");
   return params;
 }
 
@@ -152,6 +156,11 @@ ContactAction::ContactAction(const InputParameters & params)
     else
       _use_dual = false;
   }
+
+  if (isParamValid("correct_edge_dropping"))
+    _correct_edge_dropping = getParam<bool>("correct_edge_dropping");
+  else
+    _correct_edge_dropping = false;
 
   if (_boundary_pairs.size() != 1 && _formulation == ContactFormulation::MORTAR)
     paramError("formulation", "When using mortar, a vector of contact pairs cannot be used");
@@ -450,6 +459,7 @@ ContactAction::addMortarContact()
       if (_mortar_approach == MortarApproach::Weighted)
       {
         InputParameters params = _factory.getValidParams("ComputeWeightedGapLMMechanicalContact");
+        params.set<bool>("correct_edge_dropping") = _correct_edge_dropping;
 
         params.set<BoundaryName>("primary_boundary") = _boundary_pairs[0].first;
         params.set<BoundaryName>("secondary_boundary") = _boundary_pairs[0].second;
@@ -506,6 +516,7 @@ ContactAction::addMortarContact()
       {
         InputParameters params =
             _factory.getValidParams("ComputeFrictionalForceLMMechanicalContact");
+        params.set<bool>("correct_edge_dropping") = _correct_edge_dropping;
 
         params.set<BoundaryName>("primary_boundary") = _boundary_pairs[0].first;
         params.set<BoundaryName>("secondary_boundary") = _boundary_pairs[0].second;
@@ -588,6 +599,8 @@ ContactAction::addMortarContact()
             const std::string & constraint_type) //
     {
       InputParameters params = _factory.getValidParams(constraint_type);
+
+      params.set<bool>("correct_edge_dropping") = _correct_edge_dropping;
 
       params.set<BoundaryName>("primary_boundary") = _boundary_pairs[0].first;
       params.set<BoundaryName>("secondary_boundary") = _boundary_pairs[0].second;

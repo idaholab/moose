@@ -98,6 +98,9 @@ protected:
   /// Whether to use the dual Mortar approach
   bool _use_dual;
 
+  /// Whether to use correct edge dropping treatment
+  bool _correct_edge_dropping;
+
 private:
   /**
    * Generate mesh and other Moose objects for Mortar contact
