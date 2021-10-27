@@ -471,13 +471,10 @@ ContactAction::addMortarContact()
 
         params.set<Real>("c") = getParam<Real>("c_normal");
 
-        if (ndisp == 2)
+        if (ndisp > 1)
           params.set<std::vector<VariableName>>("disp_y") = {displacements[1]};
-        else if (ndisp == 3)
-        {
-          params.set<std::vector<VariableName>>("disp_y") = {displacements[1]};
+        if (ndisp > 2)
           params.set<std::vector<VariableName>>("disp_z") = {displacements[2]};
-        }
 
         params.set<bool>("use_displaced_mesh") = true;
 
@@ -529,13 +526,10 @@ ContactAction::addMortarContact()
 
         params.set<std::vector<VariableName>>("disp_x") = {displacements[0]};
 
-        if (ndisp == 2)
+        if (ndisp > 1)
           params.set<std::vector<VariableName>>("disp_y") = {displacements[1]};
-        else if (ndisp == 3)
-        {
-          params.set<std::vector<VariableName>>("disp_y") = {displacements[1]};
+        if (ndisp > 2)
           params.set<std::vector<VariableName>>("disp_z") = {displacements[2]};
-        }
 
         params.set<NonlinearVariableName>("variable") = normal_lagrange_multiplier_name;
         params.set<std::vector<VariableName>>("friction_lm") = {
