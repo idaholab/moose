@@ -14,7 +14,7 @@ A control drum is a common reactivity control approach. It usually has a cylindr
 - If the entire mesh element is within the reflector section, the function value is 0 (percent absorber);
 - If the mesh element is intercepted by the absorber-reflector boundary, the function value is between 0 and 100 and equal to the volume percentage of the absorber part in that mesh element.
 
-!media media/functions/rotate_control_drum.png
+!media reactor/functions/rotate_control_drum.png
       style=display: block;margin-left:auto;margin-right:auto;width:40%;
       id=schematic
       caption=A schematic drawing showing a typical control drum structure and important parameters of this `MultiControlDrumFunction` object.
@@ -31,7 +31,7 @@ By default, rotation of the control drums starts at t = 0 and never ends. Option
 
 When [!param](/Functions/MultiControlDrumFunction/use_control_drum_id) is true, this `MultiControlDrumFunction` can also use the element extra integer `control_drum_id` in the mesh to determine the domain of each control drum. Please refer to [`PatternedHexMeshGenerator`](/PatternedHexMeshGenerator.md) for details on how `control_drum_id`'s are assigned. If [!param](/Functions/MultiControlDrumFunction/use_control_drum_id) is false, the domain of each control drum is determined based on the nearest control drum position.
 
-!media media/functions/multi_cds.png
+!media reactor/functions/multi_cds.png
       style=display: block;margin-left:auto;margin-right:auto;width:40%;
       id=multi_drums
       caption=An example of control drums simulated by this `MultiControlDrumFunction` object (see [input file](modules/reactor/test/tests/functions/multi_control_drum_function/multi_cd.i) here).
