@@ -28,6 +28,9 @@ BicrystalBoundingBoxICAction::validParams()
   params.addRequiredParam<Real>("x2", "The x coordinate of the upper right-hand corner of the box");
   params.addRequiredParam<Real>("y2", "The y coordinate of the upper right-hand corner of the box");
   params.addParam<Real>("z2", 0.0, "The z coordinate of the upper right-hand corner of the box");
+  params.addParam<std::vector<SubdomainName>>("block",
+                                              "Block restriction for the initial condition");
+
   return params;
 }
 
@@ -69,6 +72,9 @@ BicrystalBoundingBoxICAction::act()
       poly_params.set<Real>("inside") = 0.0;
       poly_params.set<Real>("outside") = 1.0;
     }
+    if (isParamValid("block"))
+      poly_params.set<std::vector<SubdomainName>>("block") =
+          getParam<std::vector<SubdomainName>>("block");
 
     // Add initial condition
     _problem->addInitialCondition(

@@ -29,6 +29,9 @@ PolycrystalVoronoiVoidICAction::validParams()
       "",
       "File containing grain centroids, if file_name is provided, the centroids "
       "from the file will be used.");
+  params.addParam<std::vector<SubdomainName>>("block",
+                                              "Block restriction for the initial condition");
+
   return params;
 }
 
@@ -54,6 +57,9 @@ PolycrystalVoronoiVoidICAction::act()
     poly_params.set<MooseEnum>("structure_type") = "grains";
     poly_params.set<UserObjectName>("polycrystal_ic_uo") =
         getParam<UserObjectName>("polycrystal_ic_uo");
+    if (isParamValid("block"))
+      poly_params.set<std::vector<SubdomainName>>("block") =
+          getParam<std::vector<SubdomainName>>("block");
 
     // Add initial condition
     _problem->addInitialCondition(

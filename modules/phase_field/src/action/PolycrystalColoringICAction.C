@@ -23,6 +23,8 @@ PolycrystalColoringICAction::validParams()
   params.addRequiredParam<unsigned int>("op_num", "number of order parameters to create");
   params.addRequiredParam<std::string>("var_name_base", "specifies the base name of the variables");
   params.addRequiredParam<UserObjectName>("polycrystal_ic_uo", "Optional: TODO");
+  params.addParam<std::vector<SubdomainName>>("block",
+                                              "Block restriction for the initial condition");
 
   return params;
 }
@@ -46,6 +48,9 @@ PolycrystalColoringICAction::act()
     poly_params.set<unsigned int>("op_index") = op;
     poly_params.set<UserObjectName>("polycrystal_ic_uo") =
         getParam<UserObjectName>("polycrystal_ic_uo");
+    if (isParamValid("block"))
+      poly_params.set<std::vector<SubdomainName>>("block") =
+          getParam<std::vector<SubdomainName>>("block");
 
     // Add initial condition
     _problem->addInitialCondition(

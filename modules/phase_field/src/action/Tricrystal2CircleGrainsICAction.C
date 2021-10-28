@@ -33,6 +33,8 @@ Tricrystal2CircleGrainsICAction::validParams()
   InputParameters params = Action::validParams();
   params.addRequiredParam<unsigned int>("op_num", "number of order parameters to create");
   params.addRequiredParam<std::string>("var_name_base", "specifies the base name of the variables");
+  params.addParam<std::vector<SubdomainName>>("block",
+                                              "Block restriction for the initial condition");
 
   return params;
 }
@@ -65,6 +67,9 @@ Tricrystal2CircleGrainsICAction::act()
     poly_params.set<VariableName>("variable") = var_name;
     poly_params.set<unsigned int>("op_num") = _op_num;
     poly_params.set<unsigned int>("op_index") = op;
+    if (isParamValid("block"))
+      poly_params.set<std::vector<SubdomainName>>("block") =
+          getParam<std::vector<SubdomainName>>("block");
 
     // Add initial condition
     _problem->addInitialCondition("Tricrystal2CircleGrainsIC",

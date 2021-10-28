@@ -29,6 +29,9 @@ BicrystalCircleGrainICAction::validParams()
       "int_width", 0.0, "The interfacial width of the void surface.  Defaults to sharp interface");
   params.addParam<bool>(
       "3D_sphere", true, "in 3D, whether the smaller grain is a spheres or columnar grain");
+  params.addParam<std::vector<SubdomainName>>("block",
+                                              "Block restriction for the initial condition");
+
   return params;
 }
 
@@ -77,6 +80,9 @@ BicrystalCircleGrainICAction::act()
       poly_params.set<Real>("invalue") = 0.0;
       poly_params.set<Real>("outvalue") = 1.0;
     }
+    if (isParamValid("block"))
+      poly_params.set<std::vector<SubdomainName>>("block") =
+          getParam<std::vector<SubdomainName>>("block");
 
     // Add initial condition
     _problem->addInitialCondition(

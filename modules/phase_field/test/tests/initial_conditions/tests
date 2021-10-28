@@ -359,4 +359,14 @@
       detail = 'Using IsolatedBoundingBoxIC to create overlapping boxes will throw an error.'
     []
   []
+
+  [BlockRestriction]
+    type = Exodiff
+    input = 'BlockRestriction.i'
+    exodiff = 'BlockRestriction_out.e'
+    requirement = 'The system shall be able to block-restrict crystal initial conditions.'
+    issues = '#19193'
+    design = 'BicrystalBoundingBoxICAction.md BicrystalCircleGrainICAction.md PolycrystalColoringICAction.md PolycrystalRandomICAction.md PolycrystalVoronoiVoidICAction.md Tricrystal2CircleGrainsICAction.md'
+    recover = false
+  []
 []
