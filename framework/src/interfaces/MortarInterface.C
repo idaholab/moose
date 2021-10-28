@@ -65,15 +65,21 @@ MortarInterface::MortarInterface(const MooseObject * moose_object)
     _primary_subdomain_id(
         _moi_mesh.getSubdomainID(moose_object->getParam<SubdomainName>("primary_subdomain")))
 {
+  const bool displaced = moose_object->isParamValid("use_displaced_mesh")
+                             ? moose_object->getParam<bool>("use_displaced_mesh")
+                             : false;
   // Create the mortar interface if it hasn't already been created
   _moi_problem.createMortarInterface(std::make_pair(_primary_id, _secondary_id),
                                      std::make_pair(_primary_subdomain_id, _secondary_subdomain_id),
-                                     moose_object->isParamValid("use_displaced_mesh")
-                                         ? moose_object->getParam<bool>("use_displaced_mesh")
-                                         : false,
+                                     displaced,
                                      moose_object->getParam<bool>("periodic"),
                                      moose_object->getParam<bool>("debug_mesh"),
                                      moose_object->getParam<bool>("correct_edge_dropping"));
+
+  _amg = &_moi_problem.getMortarInterface(
+      std::make_pair(_primary_id, _secondary_id),
+      std::make_pair(_primary_subdomain_id, _secondary_subdomain_id),
+      displaced);
 
   const auto & secondary_set = _mortar_data.getHigherDimSubdomainIDs(_secondary_subdomain_id);
   const auto & primary_set = _mortar_data.getHigherDimSubdomainIDs(_primary_subdomain_id);

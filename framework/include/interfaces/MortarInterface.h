@@ -18,6 +18,7 @@ class MooseObject;
 class FEProblemBase;
 class MooseMesh;
 class MortarData;
+class AutomaticMortarGeneration;
 
 /**
  * An interface for accessing mortar mesh data
@@ -44,7 +45,11 @@ protected:
   }
   const std::set<BoundaryID> & getBoundaryIDs() const { return _boundary_ids; }
 
-private:
+  /**
+   * Retrieve the automatic mortar generation object associated with this constraint
+   */
+  const AutomaticMortarGeneration & amg() const;
+
   FEProblemBase & _moi_problem;
 
   /// This mesh corresponds to the reference space mesh always, but
@@ -73,4 +78,14 @@ private:
 
   /// the higher dimensional subdomain ids corresponding to the interior parents
   std::set<SubdomainID> _higher_dim_subdomain_ids;
+
+private:
+  const AutomaticMortarGeneration * _amg;
 };
+
+inline const AutomaticMortarGeneration &
+MortarInterface::amg() const
+{
+  mooseAssert(_amg, "this should have been set in the constructor");
+  return *_amg;
+}

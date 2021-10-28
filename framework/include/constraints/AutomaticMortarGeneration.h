@@ -179,6 +179,11 @@ public:
   std::vector<Point> getNodalNormals(const Elem & secondary_elem) const;
 
   /**
+   * @return The nodal normal associated with the provided \p node
+   */
+  Point getNodalNormal(const Node * node) const;
+
+  /**
    * Compute the normals at given reference points on a secondary element
    * @param secondary_elem The secondary element used to query for associated nodal normals
    * @param xi1_pts The reference points on the secondary element to evaluate the normals at. The

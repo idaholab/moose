@@ -128,12 +128,19 @@ AutomaticMortarGeneration::buildNodeToElemMaps()
   }
 }
 
+Point
+AutomaticMortarGeneration::getNodalNormal(const Node * const node) const
+{
+  return libmesh_map_find(_secondary_node_to_nodal_normal, node);
+}
+
 std::vector<Point>
 AutomaticMortarGeneration::getNodalNormals(const Elem & secondary_elem) const
 {
   std::vector<Point> nodal_normals(secondary_elem.n_nodes());
   for (const auto n : make_range(secondary_elem.n_nodes()))
-    nodal_normals[n] = _secondary_node_to_nodal_normal.at(secondary_elem.node_ptr(n));
+    nodal_normals[n] =
+        libmesh_map_find(_secondary_node_to_nodal_normal, secondary_elem.node_ptr(n));
 
   return nodal_normals;
 }

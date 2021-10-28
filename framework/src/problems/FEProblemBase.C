@@ -5984,21 +5984,21 @@ FEProblemBase::createMortarInterface(
   _has_mortar = true;
 
   if (on_displaced)
-    return _mortar_data.createMortarInterface(primary_secondary_boundary_pair,
-                                              primary_secondary_subdomain_pair,
-                                              *_displaced_problem,
-                                              on_displaced,
-                                              periodic,
-                                              debug,
-                                              correct_edge_dropping);
+    _mortar_data.createMortarInterface(primary_secondary_boundary_pair,
+                                       primary_secondary_subdomain_pair,
+                                       *_displaced_problem,
+                                       on_displaced,
+                                       periodic,
+                                       debug,
+                                       correct_edge_dropping);
   else
-    return _mortar_data.createMortarInterface(primary_secondary_boundary_pair,
-                                              primary_secondary_subdomain_pair,
-                                              *this,
-                                              on_displaced,
-                                              periodic,
-                                              debug,
-                                              correct_edge_dropping);
+    _mortar_data.createMortarInterface(primary_secondary_boundary_pair,
+                                       primary_secondary_subdomain_pair,
+                                       *this,
+                                       on_displaced,
+                                       periodic,
+                                       debug,
+                                       correct_edge_dropping);
 }
 
 const AutomaticMortarGeneration &
