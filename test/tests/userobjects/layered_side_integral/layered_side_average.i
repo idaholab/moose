@@ -60,10 +60,18 @@
   [../]
 []
 
+[VectorPostprocessors]
+  [avg]
+    type = SpatialUserObjectVectorPostprocessor
+    userobject = layered_side_average
+  []
+[]
+
 [Executioner]
   type = Steady
 []
 
 [Outputs]
   exodus = true
+  csv = true
 []

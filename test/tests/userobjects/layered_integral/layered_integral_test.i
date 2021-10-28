@@ -70,6 +70,13 @@
   [../]
 []
 
+[VectorPostprocessors]
+  [int]
+    type = SpatialUserObjectVectorPostprocessor
+    userobject = layered_integral
+  []
+[]
+
 [Executioner]
   type = Steady
 []
@@ -77,4 +84,5 @@
 [Outputs]
   file_base = out
   exodus = true
+  csv = true
 []

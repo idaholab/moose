@@ -1,6 +1,6 @@
 [Tests]
   design = 'LayeredIntegral.md'
-  issues = '#1289 #16099'
+  issues = '#1289 #16099 #19220'
 
   [group]
     requirement = 'The system shall include the ability to computes volume integrals of a variable '
@@ -11,6 +11,13 @@
       input = 'layered_integral_test.i'
       exodiff = 'out.e'
       detail = 'using 3 layers with'
+    []
+
+    [unique_points]
+      type = 'CSVDiff'
+      input = 'layered_integral_test.i'
+      csvdiff = 'out_int_0001.csv'
+      detail = 'automatic specification of points to output unique values and'
     []
 
     [cumulative]

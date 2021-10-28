@@ -57,3 +57,18 @@ LayeredIntegral::threadJoin(const UserObject & y)
   ElementIntegralVariableUserObject::threadJoin(y);
   LayeredBase::threadJoin(y);
 }
+
+const std::vector<Point>
+LayeredIntegral::spatialPoints() const
+{
+  std::vector<Point> points;
+
+  for (const auto & l : _layer_centers)
+  {
+    Point pt(0.0, 0.0, 0.0);
+    pt(_direction) = l;
+    points.push_back(pt);
+  }
+
+  return points;
+}
