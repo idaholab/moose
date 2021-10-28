@@ -15,13 +15,6 @@ fi
 
 unset CFLAGS CPPFLAGS CXXFLAGS FFLAGS LIBS LDFLAGS
 if [[ $(uname) == Darwin ]]; then
-    LDFLAGS="${LDFLAGS:-} -Wl,-headerpad_max_install_names"
-    ADDITIONAL_ARGS="--with-blas-lib=libblas${SHLIB_EXT} --with-lapack-lib=liblapack${SHLIB_EXT}"
-else
-    ADDITIONAL_ARGS="--download-fblaslapack=1"
-fi
-
-if [[ $(uname) == Darwin ]]; then
     if [[ $HOST == arm64-apple-darwin20.0.0 ]]; then
         LDFLAGS="${LDFLAGS:-} -L$PREFIX/lib -Wl,-rpath,$PREFIX/lib"
         CTUNING="-march=armv8.3-a -I$PREFIX/include"
@@ -31,6 +24,7 @@ if [[ $(uname) == Darwin ]]; then
         CTUNING="-march=core2 -mtune=haswell"
         FTUNING="-I$PREFIX/include"
     fi
+    LDFLAGS="${LDFLAGS:-} -Wl,-headerpad_max_install_names"
 else
     CTUNING="-march=nocona -mtune=haswell"
     FTUNING="-I$PREFIX/include"
@@ -58,7 +52,9 @@ BUILD_CONFIG=`cat <<"EOF"
   --download-slepc=1 \
   --download-ptscotch=1 \
   --download-parmetis=1 \
+  --download-strumpack=1 \
   --download-scalapack=1 \
+  --download-fblaslapack=1 \
   --download-superlu_dist=1 \
   --with-fortran-bindings=0 \
   --with-sowing=0 \
@@ -66,7 +62,7 @@ BUILD_CONFIG=`cat <<"EOF"
 EOF
 `
 
-python ./configure ${BUILD_CONFIG} ${ADDITIONAL_ARGS:-} \
+python ./configure ${BUILD_CONFIG} \
        AR="${AR:-ar}" \
        CC="mpicc" \
        CXX="mpicxx" \
