@@ -25,7 +25,7 @@ of using the cube root of the element volume as the filter length, divided by th
 element polynomial degree for the velocity variable. The Smagorinsky constant $C_s$ comes
 from theory [!cite](smagorinsky1963), and is set by default to a reasonable value.
 
-!listing modules/navier_stokes/test/tests/ins/lid_driven/ad_lid_driven_les.i block=Kernels
+!listing modules/navier_stokes/test/tests/finite_element/ins/lid_driven/ad_lid_driven_les.i block=Kernels
 
 !syntax description /Kernels/INSADSmagorinskyEddyViscosity
 

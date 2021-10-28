@@ -7,6 +7,7 @@ provided below.
 
 ## 2021
 
+- [October, 2021](2021_10.md)
 - [September, 2021](2021_09.md)
 - [August, 2021](2021_08.md)
 - [July, 2021](2021_07.md)

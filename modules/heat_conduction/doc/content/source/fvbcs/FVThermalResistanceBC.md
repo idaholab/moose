@@ -86,6 +86,18 @@ or pseudo-steady transients.
 The `emissivity` parameter represents the emissivity of the _surface_, or last layer,
 of the conducting slabs.
 
+## Example input syntax
+
+In this example, we set thermal resistance boundary conditions on the `top` and `left` boundaries.
+We specify emissivity, thermal conductivity and convective heat transfer coefficients to model those
+three heat transfer mechanisms where present (they are set to 0 when absent).
+
+The inner iteration parameters are exposed for the `left` boundary. This is only meant to be used
+to fine-tune a simulation for performance, or if convergence difficulties are encountered for that
+boundary.
+
+!listing test/tests/fvbcs/fv_thermal_resistance/test.i block=FVBCs
+
 !syntax parameters /FVBCs/FVThermalResistanceBC
 
 !syntax inputs /FVBCs/FVThermalResistanceBC

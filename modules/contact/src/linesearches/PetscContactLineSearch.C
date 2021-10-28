@@ -187,4 +187,4 @@ PetscContactLineSearch::lineSearch()
   _old_contact_state = std::move(contact_state_stored);
 }
 
-#endif // !PETSC_VERSION_LESS_THAN(3, 3, 0)
+#endif // !PETSC_VERSION_LESS_THAN(3, 6, 0)

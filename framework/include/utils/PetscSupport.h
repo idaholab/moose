@@ -160,10 +160,6 @@ void disableNonlinearConvergedReason(FEProblemBase & fe_problem);
  */
 void disableLinearConvergedReason(FEProblemBase & fe_problem);
 
-#if PETSC_VERSION_LESS_THAN(3, 4, 0)
-#define SNESGETLINESEARCH SNESGetSNESLineSearch
-#else
 #define SNESGETLINESEARCH SNESGetLineSearch
-#endif
 }
 }

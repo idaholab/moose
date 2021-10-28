@@ -45,6 +45,7 @@
 /framework/*/variables @rwcarlsen
 
 /modules/contact @bwspenc @lindsayad
+/modules/doc/content/newsletter @cticenhour
 /modules/electromagnetics @cticenhour
 /modules/external_petsc_solver @fdkong
 /modules/fluid_properties @rwcarlsen @andrsd

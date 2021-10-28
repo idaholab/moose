@@ -6,7 +6,6 @@
     input = 'pressureAugLag.i'
     exodiff = 'pressureAugLag_out.e'
     custom_cmp = 'pressure.exodiff'
-    petsc_version = '>=3.1'
     max_parallel = 1
     requirement = 'The contact system shall reproduce contact pressure results among various formulation types. Augmented Lagrangian formulation.'
   [../]
