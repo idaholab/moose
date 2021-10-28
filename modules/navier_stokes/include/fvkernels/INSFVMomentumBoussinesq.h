@@ -25,7 +25,7 @@ protected:
   ADReal computeQpResidual() override;
 
   /// Fluid temperature
-  const ADVariableValue & _temperature;
+  const Moose::Functor<ADReal> & _temperature;
   /// The gravity vector
   const RealVectorValue _gravity;
   /// The thermal expansion coefficient
