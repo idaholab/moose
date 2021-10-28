@@ -7,6 +7,7 @@
 #include "ActionWarehouse.h"
 
 registerMooseAction("THMApp", THMCreateMeshAction, "setup_mesh");
+registerMooseAction("THMApp", THMCreateMeshAction, "uniform_refine_mesh");
 
 InputParameters
 THMCreateMeshAction::validParams()
@@ -52,5 +53,10 @@ THMCreateMeshAction::act()
       params.set<bool>("use_nonlinear") = _app.useNonlinear();
       _problem = _factory.create<FEProblemBase>(class_name, "THM:problem", params);
     }
+  }
+  else if (_current_task == "uniform_refine_mesh")
+  {
+    auto level = _app.getParam<unsigned int>("refinements");
+    _mesh->setUniformRefineLevel(level, false);
   }
 }
