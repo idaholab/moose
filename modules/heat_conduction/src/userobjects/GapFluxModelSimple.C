@@ -29,8 +29,8 @@ GapFluxModelSimple::GapFluxModelSimple(const InputParameters & parameters)
   : GapFluxModelBase(parameters),
     _k(getParam<Real>("k")),
     _min_gap(getParam<Real>("min_gap")),
-    _primary_T(coupledNeighborValue("T")),
-    _secondary_T(coupledValue("T"))
+    _primary_T(adCoupledNeighborValue("T")),
+    _secondary_T(adCoupledValue("T"))
 {
 }
 

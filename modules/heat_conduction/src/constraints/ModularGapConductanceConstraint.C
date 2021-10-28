@@ -85,7 +85,7 @@ ModularGapConductanceConstraint::computeQpResidual(Moose::MortarType mortar_type
 
       const auto gap_width = (ad_phys_points_primary - ad_phys_points_secondary) * _normals[_qp];
       ADReal flux = 0.0;
-      for (auto & model : _gap_flux_models)
+      for (const auto & model : _gap_flux_models)
         flux += model->computeFlux(gap_width, _qp);
 
       return (_lambda[_qp] - flux) * _test[_i][_qp];

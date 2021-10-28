@@ -31,15 +31,15 @@ protected:
   const Real _min_gap;
 
   /// Primary surface temperature
-  const VariableValue & _primary_T;
+  const ADVariableValue & _primary_T;
   /// Secondary surface temperature
-  const VariableValue & _secondary_T;
+  const ADVariableValue & _secondary_T;
 
   /// Stefan-Boltzmann constant
   const Real _sigma;
 
   /// Primary surface emissivity
-  const MaterialProperty<Real> & _primary_emissivity;
+  const ADMaterialProperty<Real> & _primary_emissivity;
   /// Secondary surface emissivity
-  const MaterialProperty<Real> & _secondary_emissivity;
+  const ADMaterialProperty<Real> & _secondary_emissivity;
 };

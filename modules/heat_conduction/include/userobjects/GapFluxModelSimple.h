@@ -31,6 +31,6 @@ protected:
   const Real _min_gap;
 
   /// Temperatures
-  const VariableValue & _primary_T;
-  const VariableValue & _secondary_T;
+  const ADVariableValue & _primary_T;
+  const ADVariableValue & _secondary_T;
 };
