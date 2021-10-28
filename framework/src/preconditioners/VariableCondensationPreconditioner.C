@@ -152,12 +152,12 @@ VariableCondensationPreconditioner::VariableCondensationPreconditioner(
   if (!full)
   {
     // put 1s on diagonal
-    for (unsigned int i = 0; i < _n_vars; i++)
+    for (const auto i : make_range(_n_vars))
       (*cm)(i, i) = 1;
 
     // off-diagonal entries from the off_diag_row and off_diag_column parameters
     std::vector<std::vector<unsigned int>> off_diag(_n_vars);
-    for (const auto & i : index_range(getParam<std::vector<NonlinearVariableName>>("off_diag_row")))
+    for (const auto i : index_range(getParam<std::vector<NonlinearVariableName>>("off_diag_row")))
     {
       const unsigned int row =
           _nl.getVariable(0, getParam<std::vector<NonlinearVariableName>>("off_diag_row")[i])
@@ -171,7 +171,7 @@ VariableCondensationPreconditioner::VariableCondensationPreconditioner(
     // off-diagonal entries from the coupled_groups parameters
     std::vector<NonlinearVariableName> groups =
         getParam<std::vector<NonlinearVariableName>>("coupled_groups");
-    for (const auto & i : index_range(groups))
+    for (const auto i : index_range(groups))
     {
       std::vector<NonlinearVariableName> vars;
       MooseUtils::tokenize<NonlinearVariableName>(groups[i], vars, 1, ",");
@@ -426,7 +426,7 @@ VariableCondensationPreconditioner::computeCondensedJacobian(PetscMatrix<Number>
   for (const auto & i : index_range(grows))
   {
     PetscInt sub_rid[] = {static_cast<PetscInt>(i)};
-    PetscInt rid = static_cast<PetscInt>(grows[i]);
+    PetscInt rid = grows[i];
     if (grows[i] >= original_mat.row_start() && grows[i] < original_mat.row_stop())
     {
       // get one row of data from the original matrix
@@ -438,20 +438,17 @@ VariableCondensationPreconditioner::computeCondensedJacobian(PetscMatrix<Number>
       // extract data from certain cols, subtract the value from the block mat, and save the indices
       // and entries sub_cols and sub_vals
       // First, save the submatrix col index and value as a map
-      std::map<unsigned int, PetscScalar> pc_col_map;
-      for (unsigned int pc_idx = 0; pc_idx < static_cast<unsigned int>(pc_ncols); pc_idx++)
+      std::map<PetscInt, PetscScalar> pc_col_map;
+      for (PetscInt pc_idx = 0; pc_idx < pc_ncols; pc_idx++)
       {
         // save only if the col exists in the condensed matrix
-        if (_global_cols_to_idx.find(static_cast<unsigned int>(pc_cols[pc_idx])) !=
-            _global_cols_to_idx.end())
-          pc_col_map.insert(std::make_pair(
-              _global_cols_to_idx[static_cast<unsigned int>(pc_cols[pc_idx])], pc_vals[pc_idx]));
+        if (_global_cols_to_idx.find(pc_cols[pc_idx]) != _global_cols_to_idx.end())
+          pc_col_map.insert(std::make_pair(_global_cols_to_idx[pc_cols[pc_idx]], pc_vals[pc_idx]));
       }
       // Second, check the block cols and calculate new entries for the condensed system
-      for (unsigned int block_idx = 0; block_idx < static_cast<unsigned int>(block_ncols);
-           block_idx++)
+      for (PetscInt block_idx = 0; block_idx < block_ncols; block_idx++)
       {
-        unsigned int block_col = static_cast<unsigned int>(block_cols[block_idx]);
+        PetscInt block_col = block_cols[block_idx];
         PetscScalar block_val = block_vals[block_idx];
         // if the block mat has nonzero at the same column, subtract value
         // otherwise, create a new key and save the negative value from the block matrix
@@ -462,11 +459,11 @@ VariableCondensationPreconditioner::computeCondensedJacobian(PetscMatrix<Number>
       }
 
       // Third, save keys in the sub_cols and values in the sub_vals
-      for (std::map<unsigned int, PetscScalar>::iterator it = pc_col_map.begin();
+      for (std::map<PetscInt, PetscScalar>::iterator it = pc_col_map.begin();
            it != pc_col_map.end();
            ++it)
       {
-        sub_cols.push_back(static_cast<PetscInt>(it->first));
+        sub_cols.push_back(it->first);
         sub_vals.push_back(it->second);
       }
 
@@ -474,7 +471,7 @@ VariableCondensationPreconditioner::computeCondensedJacobian(PetscMatrix<Number>
       ierr = MatSetValues(condensed_mat.mat(),
                           1,
                           sub_rid,
-                          static_cast<PetscInt>(sub_vals.size()),
+                          sub_vals.size(),
                           sub_cols.data(),
                           sub_vals.data(),
                           INSERT_VALUES);
@@ -523,7 +520,7 @@ VariableCondensationPreconditioner::preallocateCondensedJacobian(
   for (const auto & row_id : _rows)
   {
     // get number of non-zeros in the original matrix
-    ierr = MatGetRow(original_mat.mat(), static_cast<PetscInt>(row_id), &ncols, &col_vals, &vals);
+    ierr = MatGetRow(original_mat.mat(), row_id, &ncols, &col_vals, &vals);
     LIBMESH_CHKERR(ierr);
 
     // get number of non-zeros in the block matrix
@@ -534,38 +531,29 @@ VariableCondensationPreconditioner::preallocateCondensedJacobian(
     else
       mooseError("DoF ", row_id, " does not exist in the rows of condensed_mat");
 
-    ierr = MatGetRow(block_mat.mat(),
-                     static_cast<PetscInt>(block_row_id),
-                     &block_ncols,
-                     &block_col_vals,
-                     &block_vals);
+    ierr = MatGetRow(block_mat.mat(), block_row_id, &block_ncols, &block_col_vals, &block_vals);
     LIBMESH_CHKERR(ierr);
 
     // make sure the block index is transformed in terms of the original mat
     block_cols_to_org.clear();
     for (PetscInt i = 0; i < block_ncols; ++i)
     {
-      auto idx = gcols[static_cast<dof_id_type>(block_col_vals[i])];
-      block_cols_to_org.push_back(static_cast<PetscInt>(idx));
+      auto idx = gcols[block_col_vals[i]];
+      block_cols_to_org.push_back(idx);
     }
 
     // Now store nonzero column indices for the condensed Jacobian
     // merge `col_vals` and `block_cols_to_org` and save the common indices in `merged_cols`.
     mergeArrays(col_vals, block_cols_to_org.data(), ncols, block_ncols, merged_cols);
 
-    ierr = MatRestoreRow(block_mat.mat(),
-                         static_cast<PetscInt>(block_row_id),
-                         &block_ncols,
-                         &block_col_vals,
-                         &block_vals);
+    ierr = MatRestoreRow(block_mat.mat(), block_row_id, &block_ncols, &block_col_vals, &block_vals);
     LIBMESH_CHKERR(ierr);
 
-    ierr =
-        MatRestoreRow(original_mat.mat(), static_cast<PetscInt>(row_id), &ncols, &col_vals, &vals);
+    ierr = MatRestoreRow(original_mat.mat(), row_id, &ncols, &col_vals, &vals);
     LIBMESH_CHKERR(ierr);
 
     // Count the nnz for DIAGONAL and OFF-DIAGONAL parts
-    unsigned int row_n_nz = 0, row_n_oz = 0;
+    PetscInt row_n_nz = 0, row_n_oz = 0;
     for (const auto & merged_col : merged_cols)
     {
       // find corresponding index in the block mat and skip the cols that do not exist in the
@@ -774,7 +762,7 @@ VariableCondensationPreconditioner::findZeroDiagonals(SparseMatrix<Number> & mat
   LIBMESH_CHKERR(ierr);
 
   for (PetscInt i = 0; i < nrows; ++i)
-    indices.push_back(static_cast<dof_id_type>(petsc_idx[i]));
+    indices.push_back(petsc_idx[i]);
 
   ISRestoreIndices(zerodiags_all, &petsc_idx);
   LIBMESH_CHKERR(ierr);
@@ -803,28 +791,17 @@ VariableCondensationPreconditioner::computeDInverse(Mat & dinv)
   IS perm, iperm;
   MatFactorInfo info;
 
-  ierr = MatCreateDense(PETSC_COMM_WORLD,
-                        static_cast<PetscInt>(_D->local_n()),
-                        static_cast<PetscInt>(_D->local_m()),
-                        static_cast<PetscInt>(_D->n()),
-                        static_cast<PetscInt>(_D->m()),
-                        NULL,
-                        &dinv_dense);
+  ierr = MatCreateDense(
+      PETSC_COMM_WORLD, _D->local_n(), _D->local_m(), _D->n(), _D->m(), NULL, &dinv_dense);
   LIBMESH_CHKERR(ierr);
 
   // Create an identity matrix as the right-hand-side
-  ierr = MatCreateDense(PETSC_COMM_WORLD,
-                        static_cast<PetscInt>(_D->local_m()),
-                        static_cast<PetscInt>(_D->local_m()),
-                        static_cast<PetscInt>(_D->m()),
-                        static_cast<PetscInt>(_D->m()),
-                        NULL,
-                        &I);
+  ierr = MatCreateDense(PETSC_COMM_WORLD, _D->local_m(), _D->local_m(), _D->m(), _D->m(), NULL, &I);
   LIBMESH_CHKERR(ierr);
 
   for (unsigned int i = 0; i < _D->m(); ++i)
   {
-    ierr = MatSetValue(I, static_cast<PetscInt>(i), static_cast<PetscInt>(i), 1.0, INSERT_VALUES);
+    ierr = MatSetValue(I, i, i, 1.0, INSERT_VALUES);
     LIBMESH_CHKERR(ierr);
   }
 
@@ -881,16 +858,8 @@ VariableCondensationPreconditioner::computeDInverseDiag(Mat & dinv)
   PetscErrorCode ierr;
   auto diag_D = NumericVector<Number>::build(MoosePreconditioner::_communicator);
   // Initialize dinv
-  ierr = MatCreateAIJ(PETSC_COMM_WORLD,
-                      static_cast<PetscInt>(_D->local_n()),
-                      static_cast<PetscInt>(_D->local_m()),
-                      static_cast<PetscInt>(_D->n()),
-                      static_cast<PetscInt>(_D->m()),
-                      1,
-                      NULL,
-                      0,
-                      NULL,
-                      &dinv);
+  ierr = MatCreateAIJ(
+      PETSC_COMM_WORLD, _D->local_n(), _D->local_m(), _D->n(), _D->m(), 1, NULL, 0, NULL, &dinv);
   LIBMESH_CHKERR(ierr);
   // Allocate storage
   diag_D->init(_D->m(), _D->local_m(), false, PARALLEL);
@@ -907,9 +876,9 @@ VariableCondensationPreconditioner::computeDInverseDiag(Mat & dinv)
     if (MooseUtils::absoluteFuzzyEqual((*diag_D)(i), 0.0))
       mooseError("Trying to compute reciprocal of 0.");
     ierr = MatSetValue(dinv,
-                       static_cast<PetscInt>(i),
-                       static_cast<PetscInt>(_map_global_primary_order.at(_global_primary_dofs[i])),
-                       static_cast<PetscScalar>(1.0 / (*diag_D)(i)),
+                       i,
+                       _map_global_primary_order.at(_global_primary_dofs[i]),
+                       1.0 / (*diag_D)(i),
                        INSERT_VALUES);
     LIBMESH_CHKERR(ierr);
   }

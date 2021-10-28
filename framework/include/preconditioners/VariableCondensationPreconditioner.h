@@ -61,7 +61,7 @@ public:
    */
   virtual void clear();
 
-protected:
+private:
   /**
    * Get dofs for the variable to be condensed out
    */
@@ -125,6 +125,17 @@ protected:
    * Assemble the full solution vector
    */
   void getFullSolution(const NumericVector<Number> & y, NumericVector<Number> & x);
+
+  /**
+   * Find the common part of arrays \p a and \p b and save it in \p c. The \p na and \p nb are the
+   * number of entries for the arrays. This function is used in the preallocateCondensedJacobian
+   * step.
+   */
+  void mergeArrays(const PetscInt * a,
+                   const PetscInt * b,
+                   const PetscInt & na,
+                   const PetscInt & nb,
+                   std::vector<PetscInt> & c);
 
   /// The nonlinear system this PC is associated with (convenience reference)
   NonlinearSystemBase & _nl;
@@ -207,16 +218,4 @@ protected:
   /// Timers
   PerfID _init_timer;
   PerfID _apply_timer;
-
-private:
-  /**
-   * Find the common part of arrays \p a and \p b and save it in \p c. The \p na and \p nb are the
-   * number of entries for the arrays. This function is used in the preallocateCondensedJacobian
-   * step.
-   */
-  void mergeArrays(const PetscInt * a,
-                   const PetscInt * b,
-                   const PetscInt & na,
-                   const PetscInt & nb,
-                   std::vector<PetscInt> & c);
 };
