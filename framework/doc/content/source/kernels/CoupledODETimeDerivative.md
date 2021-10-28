@@ -1,33 +1,22 @@
 # CoupledODETimeDerivative
 
-!alert! construction title=Undocumented Class
-The CoupledODETimeDerivative has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# CoupledODETimeDerivative
-
 !syntax description /ScalarKernels/CoupledODETimeDerivative
 
-## Overview
+The `CoupledODETimeDerivative` is similar to the `ODETimeDerivative` scalar kernel, except that the derivative acts on a different variable than the ODE is solved for.
 
-!! Replace these lines with information regarding the CoupledODETimeDerivative object.
+## Example input syntax
 
-## Example Input File Syntax
+In this example, the scalar variables `f` and `f_times_mult` are the solutions to the coupled ODE problem:
 
-!! Describe and include an example of how to use the CoupledODETimeDerivative object.
+!equation
+\dfrac{d f\_times\_mult}{d t} -1 = 0
 
-!syntax parameters /ScalarKernels/CoupledODETimeDerivative
+!equation
+f\_times\_mult -f * g = 0
 
-!syntax inputs /ScalarKernels/CoupledODETimeDerivative
+The time derivative term for the first equation is added using a `CoupledODETimeDerivative` scalar kernel, as the first equation is set to have `f` as its nonlinear variable, even though `f` does not appear in it!
 
-!syntax children /ScalarKernels/CoupledODETimeDerivative
-```
-!alert-end!
-
-!syntax description /ScalarKernels/CoupledODETimeDerivative
+!listing test/tests/kernels/ode/coupled_ode_td.i block=ScalarKernels
 
 !syntax parameters /ScalarKernels/CoupledODETimeDerivative
 
