@@ -49,7 +49,6 @@ offset = 1e-2
 
 [Contact]
   [leftright]
-    mesh = file
     secondary = 10
     primary = 20
     model = frictionless

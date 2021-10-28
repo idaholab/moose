@@ -16,23 +16,23 @@
 [Modules/TensorMechanics/Master]
   [all]
     add_variables = true
+    # we added this in the first exercise problem
     strain = FINITE
+    # enable the use of automatic differentiation objects
     use_automatic_differentiation = true
   []
 []
 
-#
-# Added boundary/loading conditions
-# https://mooseframework.inl.gov/modules/tensor_mechanics/tutorials/introduction/step02.html
-#
 [BCs]
   [bottom_x]
+    # we use the AD version of this boundary condition here...
     type = ADDirichletBC
     variable = disp_x
     boundary = bottom
     value = 0
   []
   [bottom_y]
+    # ...and here
     type = ADDirichletBC
     variable = disp_y
     boundary = bottom
@@ -42,6 +42,7 @@
     [top]
       boundary = top
       function = 1e7*t
+      # make the action add AD versions of the boundary condition objects
       use_automatic_differentiation = true
     []
   []

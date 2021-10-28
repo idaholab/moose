@@ -67,7 +67,6 @@ offset = 1e-2
 
 [Contact]
   [frictional]
-    mesh = file
     primary = 20
     secondary = 10
     formulation = mortar

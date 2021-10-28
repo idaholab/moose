@@ -66,5 +66,5 @@ percent of the element width. It is application dependent whether this amount is
 acceptable.
 
 Once you've answered the questions and run this example we will move on to
-[Step 3](tensor_mechanics/tutorials/introduction/step03.md) which introduces
+[Step 2](contact/tutorials/introduction/step02.md) which introduces
 mortar based contact.

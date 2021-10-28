@@ -1,6 +1,6 @@
 #
-# Switching to mortar based mechanical contact
-# https://mooseframework.inl.gov/modules/contact/tutorials/introduction/step02.html
+# A first attempt at thermo mechanical contact
+# https://mooseframework.inl.gov/modules/combined/tutorials/introduction/step01.html
 #
 
 [GlobalParams]
@@ -27,7 +27,6 @@
     ny = 15
     xmin = 0.1
     xmax = 0.6
-    # avoid edge-to-edge contact (work in progress)
     ymax = 4.999
     bias_y = 0.9
     boundary_name_prefix = pillar2
@@ -39,6 +38,33 @@
   []
 
   patch_update_strategy = iteration
+[]
+
+[Variables]
+  # temperature field variable
+  [T]
+    # initialize to an average temperature
+    initial_condition = 50
+    order = FIRST
+    family = LAGRANGE
+  []
+  # temperature lagrange multiplier
+  [Tlm]
+    block = 'pillars_secondary_subdomain'
+    order = FIRST
+    family = LAGRANGE
+  []
+[]
+
+[Kernels]
+  [heat_conduction]
+    type = HeatConduction
+    variable = T
+  []
+  [dTdt]
+    type = HeatConductionTimeDerivative
+    variable = T
+  []
 []
 
 [Modules/TensorMechanics/Master]
@@ -58,6 +84,21 @@
   []
 []
 
+[Constraints]
+  # thermal contact constraint
+  [Tlm]
+    type = GapConductanceConstraint
+    variable = Tlm
+    secondary_variable = T
+    use_displaced_mesh = true
+    k = 1e-1
+    primary_boundary = pillar1_right
+    primary_subdomain = pillars_primary_subdomain
+    secondary_boundary = pillar2_left
+    secondary_subdomain = pillars_secondary_subdomain
+  []
+[]
+
 [BCs]
   [bottom_x]
     type = DirichletBC
@@ -74,10 +115,22 @@
   [Pressure]
     [sides]
       boundary = 'pillar1_left pillar2_right'
-      # we square time here to get a more progressive loading curve
-      # (more pressure later on once contact is established)
       function = 1e4*t^2
     []
+  []
+
+  # thermal boundary conditions (pillars are heated/cooled from the bottom)
+  [heat_left]
+    type = DirichletBC
+    variable = T
+    boundary = pillar1_bottom
+    value = 100
+  []
+  [cool_right]
+    type = DirichletBC
+    variable = T
+    boundary = pillar2_bottom
+    value = 0
   []
 []
 
@@ -90,16 +143,28 @@
   [stress]
     type = ComputeFiniteStrainElasticStress
   []
+
+  # thermal properties
+  [thermal_conductivity]
+    type = HeatConductionMaterial
+    thermal_conductivity = 100
+    specific_heat = 1
+  []
+  [density]
+    type = Density
+    density = 1
+  []
 []
 
 [Executioner]
   type = Transient
   solve_type = NEWTON
   line_search = none
-  petsc_options_iname = '-pc_type'
-  petsc_options_value = 'lu'
+  # we deal with the saddle point structure of the system by adding a small shift
+  petsc_options_iname = '-pc_type -pc_factor_shift_type'
+  petsc_options_value = 'lu       nonzero'
   end_time = 5
-  dt = 0.5
+  dt = 0.1
   [Predictor]
     type = SimplePredictor
     scale = 1
