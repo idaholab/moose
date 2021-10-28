@@ -1,0 +1,55 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "GapFluxModelRadiative.h"
+#include "libmesh/utility.h"
+
+registerMooseObject("HeatConductionApp", GapFluxModelRadiative);
+
+InputParameters
+GapFluxModelRadiative::validParams()
+{
+  InputParameters params = GapFluxModelBase::validParams();
+  params.addClassDescription("Gap flux model with a constant conductance");
+  params.addCoupledVar("T", "Temperature");
+  params.addRequiredParam<Real>("sigma", 5.670373e-8, "Stefan-Boltzmann constant");
+  params.addRequiredRangeCheckedParam<MaterialPropertyName>(
+      "primary_emissivity",
+      "primary_emissivity>0 && primary_emissivity<=1",
+      "Primary surface emissivity");
+  params.addRequiredRangeCheckedParam<MaterialPropertyName>(
+      "secondary_emissivity",
+      "secondary_emissivity>0 && secondary_emissivity<=1",
+      "Secondary surface emissivity");
+  params.addParam<Real>("min_gap",
+                        1e-6,
+                        "The minimum gap distance allowed. This helps with preventing the heat "
+                        "flux from going to infinity as the gap approaches zero.");
+  return params;
+}
+
+GapFluxModelRadiative::GapFluxModelRadiative(const InputParameters & parameters)
+  : GapFluxModelBase(parameters),
+    _k(getParam<Real>("k")),
+    _min_gap(getParam<Real>("min_gap")),
+    _primary_T(coupledNeighborValue("T")),
+    _secondary_T(coupledValue("T")),
+    _sigma(getParam<Real>("sigma")),
+    _primary_emissivity(getNeighborMaterialProperty<Real>("primary_emissivity")),
+    _secondary_emissivity(getNeighborMaterialProperty<Real>("secondary_emissivity"))
+{
+}
+
+ADReal
+GapFluxModelRadiative::computeFlux(const ADReal & /*gap_width*/, unsigned int qp) const
+{
+  const auto d = (1.0 - _primary_emissivity[qp]) / _primary_emissivity[qp] +
+                 (1.0 - _secondary_emissivity[qp]) / _secondary_emissivity[qp];
+  return _sigma * (Utility::pow<4>(_primary_T[qp]) - Utility::pow<4>(_secondary_T[qp])) / d;
+}
