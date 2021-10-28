@@ -360,7 +360,7 @@
     []
   []
 
-  [block_restriction]
+  [BlockRestriction]
     type = Exodiff
     input = 'BlockRestriction.i'
     exodiff = 'BlockRestriction_out.e'

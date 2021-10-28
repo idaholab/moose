@@ -106,13 +106,15 @@
     type = PolycrystalVoronoi
     rand_seed = 10
     int_width = 0
-    variable = 'voronoi_0 voronoi_1 voronoi_2 voronoi_3 voronoi_4 voronoi_5 voronoi_6 voronoi_7'
+    var_name_base = 'voronoi_'
+    op_num = 8
     grain_num = 4
   []
   [hex_ic]
     type = PolycrystalHex
     coloring_algorithm = bt
-    variable = 'coloring_0 coloring_1 coloring_2 coloring_3 coloring_4 coloring_5 coloring_6 coloring_7'
+    var_name_base = 'coloring_'
+    op_num = 8
     grain_num = 4
   []
 []
