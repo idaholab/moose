@@ -220,23 +220,7 @@ moose_ld64:                                    # [osx]
   - ld64 530 hd2e7500_23                       # [not arm64 and osx]
   - ld64_osx-arm64 530 ha291f0b_23             # [arm64]
 
-#### Support Libraries (PETSc, libMesh)
-moose_libblas:                                 # [osx]
-  - libblas 3.9.0 12_osx64_openblas            # [not arm64 and osx]
-  - libblas 3.9.0 11_osxarm64_openblas         # [arm64]
-
-moose_libcblas:                                # [osx]
-  - libcblas 3.9.0 12_osx64_openblas           # [not arm64 and osx]
-  - libcblas 3.9.0 11_osxarm64_openblas        # [arm64]
-
-moose_liblapack:                               # [osx]
-  - liblapack 3.9.0 12_osx64_openblas          # [not arm64 and osx]
-  - liblapack 3.9.0 11_osxarm64_openblas       # [arm64]
-
-moose_libopenblas:                             # [osx]
-  - libopenblas 0.3.18 openmp_h3351f45_0       # [not arm64 and osx]
-  - libopenblas 0.3.17 openmp_h5dd58f0_1       # [arm64]
-
+#### Support Libraries (libMesh)
 moose_libglu:                                  # [linux]
   - libglu 9.0.0 hf484d3e_1000                 # [linux]
 
