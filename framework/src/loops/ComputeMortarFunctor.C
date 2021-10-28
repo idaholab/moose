@@ -114,11 +114,8 @@ ComputeMortarFunctor::operator()()
     // cleaner way to do this would be with contiguously allocated 2D array but would either
     // need to move into vector for calling
     std::vector<Point> secondary_xi_pts, primary_xi_pts;
-    // secondary_xi_pts.reserve(_qrule_msm->n_points() * n_msm_elems);
-    // primary_xi_pts.reserve(_qrule_msm->n_points() * n_msm_elems);
 
     std::vector<Real> JxW;
-    // JxW.reserve(_qrule_msm->n_points() * n_msm_elems);
 
 #ifndef NDEBUG
     unsigned int expected_length = 0;
