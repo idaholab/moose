@@ -50,6 +50,10 @@ ModularGapConductanceConstraint::ModularGapConductanceConstraint(const InputPara
     for (const auto & var : var_dependencies)
       addMooseVariableDependency(var);
 
+    // pass material property dependencies through
+    const auto & mat_dependencies = gap_model.getMatPropDependencies();
+    _material_property_dependencies.insert(mat_dependencies.begin(), mat_dependencies.end());
+
     // add gap model to list
     _gap_flux_models.push_back(&gap_model);
   }
