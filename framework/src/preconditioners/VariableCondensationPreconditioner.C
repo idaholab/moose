@@ -203,27 +203,23 @@ void
 VariableCondensationPreconditioner::getDofToCondense()
 {
   // clean the containers if we want to update the dofs
-  if (!_global_lm_dofs.empty())
-    _global_lm_dofs.clear();
-  if (!_lm_dofs.empty())
-    _lm_dofs.clear();
-  if (!_global_primary_dofs.empty())
-    _global_primary_dofs.clear();
-  if (!_primary_dofs.empty())
-    _primary_dofs.clear();
-  if (!_map_global_lm_primary.empty())
-    _map_global_lm_primary.clear();
-  if (!_map_global_primary_order.empty())
-    _map_global_primary_order.clear();
+  _global_lm_dofs.clear();
+  _lm_dofs.clear();
+  _global_primary_dofs.clear();
+  _primary_dofs.clear();
+  _map_global_lm_primary.clear();
+  _map_global_primary_order.clear();
 
+  // TODO: this might not work for distributed mesh and needs to be improved
   NodeRange * active_nodes = _mesh.getActiveNodeRange();
 
   // loop through the variable ids
+  std::vector<dof_id_type> di, cp_di;
   for (const auto & vn : index_range(_lm_var_ids))
     for (const auto & node : *active_nodes)
     {
-      std::vector<dof_id_type> di;
-      std::vector<dof_id_type> cp_di;
+      di.clear();
+      cp_di.clear();
       const auto var_id = _lm_var_ids[vn];
       // get coupled variable id
       const auto cp_var_id = _primary_var_ids[vn];
@@ -287,25 +283,17 @@ void
 VariableCondensationPreconditioner::getDofColRow()
 {
   // clean the containers if we want to update the dofs
-  if (!_global_rows.empty())
-    _global_rows.clear();
-  if (!_rows.empty())
-    _rows.clear();
-  if (!_global_cols.empty())
-    _global_cols.clear();
-  if (!_cols.empty())
-    _cols.clear();
-  if (!_global_rows_to_idx.empty())
-    _global_rows_to_idx.clear();
-  if (!_rows_to_idx.empty())
-    _rows_to_idx.clear();
-  if (!_global_cols_to_idx.empty())
-    _global_cols_to_idx.clear();
-  if (!_cols_to_idx.empty())
-    _cols_to_idx.clear();
+  _global_rows.clear();
+  _rows.clear();
+  _global_cols.clear();
+  _cols.clear();
+  _global_rows_to_idx.clear();
+  _rows_to_idx.clear();
+  _global_cols_to_idx.clear();
+  _cols_to_idx.clear();
   // row: all without primary variable dofs
   // col: all without lm variable dofs
-  for (numeric_index_type i = 0; i < _dofmap.n_dofs(); ++i)
+  for (dof_id_type i = 0; i < _dofmap.n_dofs(); ++i)
   {
     if (std::find(_global_primary_dofs.begin(), _global_primary_dofs.end(), i) !=
         _global_primary_dofs.end())
@@ -363,19 +351,22 @@ VariableCondensationPreconditioner::init()
 void
 VariableCondensationPreconditioner::condenseSystem()
 {
+  PetscErrorCode ierr = 0;
 
   // extract _M from the original matrix
   _matrix->create_submatrix(*_M, _rows, _lm_dofs);
 
   // get the row associated with the coupled primary variable
   _K->init(_global_primary_dofs.size(), _global_cols.size(), _primary_dofs.size(), _cols.size());
-  MatSetOption(_K->mat(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
+  // Note: enabling nonzero allocation may be expensive. Improved memeory pre-allocation will be
+  // investigated in the future
+  ierr = MatSetOption(_K->mat(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
+  LIBMESH_CHKERR(ierr);
   // here the _global_cols may not be sorted
   _matrix->create_submatrix_nosort(*_K, _global_primary_dofs, _global_cols);
 
   _matrix->create_submatrix(*_D, _primary_dofs, _lm_dofs);
 
-  PetscErrorCode ierr = 0;
   // clean dinv
   if (_dinv)
   {
@@ -403,11 +394,12 @@ VariableCondensationPreconditioner::condenseSystem()
   // Preallocate memory for _J_condensed
   // memory info is obtained from _matrix and MDinv_K
   // indices are from _global_rows, _global_cols
+  auto pc_original_mat = cast_ptr<PetscMatrix<Number> *>(_matrix);
   preallocateCondensedJacobian(
-      *_J_condensed, *_matrix, _rows, _cols, _global_rows, _global_cols, MDinv_K);
+      *_J_condensed, *pc_original_mat, _rows, _cols, _global_rows, _global_cols, MDinv_K);
 
   // Extract unchanged parts from _matrix and add changed parts (MDinv_K) to _J_condensed
-  computeCondensedJacobian(*_J_condensed, *_matrix, _global_rows, MDinv_K);
+  computeCondensedJacobian(*_J_condensed, *pc_original_mat, _global_rows, MDinv_K);
 
   // Destroy MdinvK here otherwise we will have memory leak
   ierr = MatDestroy(&MdinvK);
@@ -415,14 +407,11 @@ VariableCondensationPreconditioner::condenseSystem()
 }
 
 void
-VariableCondensationPreconditioner::computeCondensedJacobian(
-    PetscMatrix<Number> & condensed_mat,
-    SparseMatrix<Number> & original_mat,
-    const std::vector<numeric_index_type> & grows,
-    PetscMatrix<Number> & block_mat)
+VariableCondensationPreconditioner::computeCondensedJacobian(PetscMatrix<Number> & condensed_mat,
+                                                             PetscMatrix<Number> & original_mat,
+                                                             const std::vector<dof_id_type> & grows,
+                                                             PetscMatrix<Number> & block_mat)
 {
-  auto pc_original_mat = cast_ptr<PetscMatrix<Number> *>(&original_mat);
-
   PetscErrorCode ierr = 0;
 
   // obtain entries from the original matrix
@@ -438,10 +427,10 @@ VariableCondensationPreconditioner::computeCondensedJacobian(
   {
     PetscInt sub_rid[] = {static_cast<PetscInt>(i)};
     PetscInt rid = static_cast<PetscInt>(grows[i]);
-    if (grows[i] >= pc_original_mat->row_start() && grows[i] < pc_original_mat->row_stop())
+    if (grows[i] >= original_mat.row_start() && grows[i] < original_mat.row_stop())
     {
       // get one row of data from the original matrix
-      ierr = MatGetRow(pc_original_mat->mat(), rid, &pc_ncols, &pc_cols, &pc_vals);
+      ierr = MatGetRow(original_mat.mat(), rid, &pc_ncols, &pc_cols, &pc_vals);
       LIBMESH_CHKERR(ierr);
       // get corresponding row of data from the block matrix
       ierr = MatGetRow(block_mat.mat(), i, &block_ncols, &block_cols, &block_vals);
@@ -490,7 +479,7 @@ VariableCondensationPreconditioner::computeCondensedJacobian(
                           sub_vals.data(),
                           INSERT_VALUES);
       LIBMESH_CHKERR(ierr);
-      ierr = MatRestoreRow(pc_original_mat->mat(), rid, &pc_ncols, &pc_cols, &pc_vals);
+      ierr = MatRestoreRow(original_mat.mat(), rid, &pc_ncols, &pc_cols, &pc_vals);
       LIBMESH_CHKERR(ierr);
       ierr = MatRestoreRow(block_mat.mat(), i, &block_ncols, &block_cols, &block_vals);
       LIBMESH_CHKERR(ierr);
@@ -505,15 +494,13 @@ VariableCondensationPreconditioner::computeCondensedJacobian(
 void
 VariableCondensationPreconditioner::preallocateCondensedJacobian(
     PetscMatrix<Number> & condensed_mat,
-    SparseMatrix<Number> & original_mat,
-    const std::vector<numeric_index_type> & rows,
-    const std::vector<numeric_index_type> & cols,
-    const std::vector<numeric_index_type> & grows,
-    const std::vector<numeric_index_type> & gcols,
+    PetscMatrix<Number> & original_mat,
+    const std::vector<dof_id_type> & rows,
+    const std::vector<dof_id_type> & cols,
+    const std::vector<dof_id_type> & grows,
+    const std::vector<dof_id_type> & gcols,
     PetscMatrix<Number> & block_mat)
 {
-  auto pc_original_mat = cast_ptr<PetscMatrix<Number> *>(&original_mat);
-
   // quantities from the original matrix and the block matrix
   PetscInt ncols = 0, block_ncols = 0;
   const PetscInt * col_vals;
@@ -528,7 +515,7 @@ VariableCondensationPreconditioner::preallocateCondensedJacobian(
 
   // number of nonzeros in each row of the DIAGONAL and OFF-DIAGONAL portion of the local
   // condensed matrix
-  std::vector<numeric_index_type> n_nz, n_oz;
+  std::vector<dof_id_type> n_nz, n_oz;
 
   PetscErrorCode ierr = 0;
 
@@ -536,12 +523,11 @@ VariableCondensationPreconditioner::preallocateCondensedJacobian(
   for (const auto & row_id : _rows)
   {
     // get number of non-zeros in the original matrix
-    ierr =
-        MatGetRow(pc_original_mat->mat(), static_cast<PetscInt>(row_id), &ncols, &col_vals, &vals);
+    ierr = MatGetRow(original_mat.mat(), static_cast<PetscInt>(row_id), &ncols, &col_vals, &vals);
     LIBMESH_CHKERR(ierr);
 
     // get number of non-zeros in the block matrix
-    numeric_index_type block_row_id; // row id in the block matrix
+    dof_id_type block_row_id; // row id in the block matrix
 
     if (_global_rows_to_idx.find(row_id) != _global_rows_to_idx.end())
       block_row_id = _global_rows_to_idx[row_id];
@@ -559,7 +545,7 @@ VariableCondensationPreconditioner::preallocateCondensedJacobian(
     block_cols_to_org.clear();
     for (PetscInt i = 0; i < block_ncols; ++i)
     {
-      auto idx = gcols[static_cast<numeric_index_type>(block_col_vals[i])];
+      auto idx = gcols[static_cast<dof_id_type>(block_col_vals[i])];
       block_cols_to_org.push_back(static_cast<PetscInt>(idx));
     }
 
@@ -574,8 +560,8 @@ VariableCondensationPreconditioner::preallocateCondensedJacobian(
                          &block_vals);
     LIBMESH_CHKERR(ierr);
 
-    ierr = MatRestoreRow(
-        pc_original_mat->mat(), static_cast<PetscInt>(row_id), &ncols, &col_vals, &vals);
+    ierr =
+        MatRestoreRow(original_mat.mat(), static_cast<PetscInt>(row_id), &ncols, &col_vals, &vals);
     LIBMESH_CHKERR(ierr);
 
     // Count the nnz for DIAGONAL and OFF-DIAGONAL parts
@@ -587,9 +573,9 @@ VariableCondensationPreconditioner::preallocateCondensedJacobian(
       if (_global_cols_to_idx.find(merged_col) == _global_cols_to_idx.end())
         continue;
 
-      numeric_index_type col_idx = _global_cols_to_idx[merged_col];
+      dof_id_type col_idx = _global_cols_to_idx[merged_col];
       // find the corresponding row index
-      numeric_index_type row_idx = grows[col_idx];
+      dof_id_type row_idx = grows[col_idx];
       // check whether the index is local;
       // yes - DIAGONAL, no - OFF-DIAGONAL
       if (_rows_to_idx.find(row_idx) != _rows_to_idx.end())
@@ -598,8 +584,8 @@ VariableCondensationPreconditioner::preallocateCondensedJacobian(
         row_n_oz++;
     }
 
-    n_nz.push_back(cast_int<numeric_index_type>(row_n_nz));
-    n_oz.push_back(cast_int<numeric_index_type>(row_n_oz));
+    n_nz.push_back(cast_int<dof_id_type>(row_n_nz));
+    n_oz.push_back(cast_int<dof_id_type>(row_n_oz));
   }
   // Then initialize and allocate memory for the condensed system matrix
   condensed_mat.init(grows.size(), gcols.size(), rows.size(), cols.size(), n_nz, n_oz);
@@ -723,7 +709,6 @@ VariableCondensationPreconditioner::getCondensedXY(const NumericVector<Number> &
 void
 VariableCondensationPreconditioner::computeCondensedVariables()
 {
-  // clear the vector
   _lm_sol_vec->clear();
 
   PetscMatrix<Number> Dinv(_dinv, MoosePreconditioner::_communicator);
@@ -746,7 +731,7 @@ void
 VariableCondensationPreconditioner::getFullSolution(const NumericVector<Number> & /*y*/,
                                                     NumericVector<Number> & x)
 {
-  std::vector<numeric_index_type> dof_indices;
+  std::vector<dof_id_type> dof_indices;
   std::vector<Number> vals;
 
   // save values and indices from _x_hat and _lm_sol_vec
@@ -769,7 +754,7 @@ VariableCondensationPreconditioner::getFullSolution(const NumericVector<Number> 
 
 void
 VariableCondensationPreconditioner::findZeroDiagonals(SparseMatrix<Number> & mat,
-                                                      std::vector<numeric_index_type> & indices)
+                                                      std::vector<dof_id_type> & indices)
 {
   indices.clear();
   IS zerodiags, zerodiags_all;
@@ -789,7 +774,7 @@ VariableCondensationPreconditioner::findZeroDiagonals(SparseMatrix<Number> & mat
   LIBMESH_CHKERR(ierr);
 
   for (PetscInt i = 0; i < nrows; ++i)
-    indices.push_back(static_cast<numeric_index_type>(petsc_idx[i]));
+    indices.push_back(static_cast<dof_id_type>(petsc_idx[i]));
 
   ISRestoreIndices(zerodiags_all, &petsc_idx);
   LIBMESH_CHKERR(ierr);

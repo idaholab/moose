@@ -75,7 +75,7 @@ protected:
   /**
    * Check if the original jacobian has zero diagonal entries and save the row indices
    */
-  void findZeroDiagonals(SparseMatrix<Number> & mat, std::vector<numeric_index_type> & indices);
+  void findZeroDiagonals(SparseMatrix<Number> & mat, std::vector<dof_id_type> & indices);
 
   /**
    * Reconstruct the equation system
@@ -86,29 +86,19 @@ protected:
    * Preallocate memory for the condensed Jacobian matrix
    */
   void preallocateCondensedJacobian(PetscMatrix<Number> & condensed_mat,
-                                    SparseMatrix<Number> & original_mat,
-                                    const std::vector<numeric_index_type> & rows,
-                                    const std::vector<numeric_index_type> & cols,
-                                    const std::vector<numeric_index_type> & grows,
-                                    const std::vector<numeric_index_type> & gcols,
+                                    PetscMatrix<Number> & original_mat,
+                                    const std::vector<dof_id_type> & rows,
+                                    const std::vector<dof_id_type> & cols,
+                                    const std::vector<dof_id_type> & grows,
+                                    const std::vector<dof_id_type> & gcols,
                                     PetscMatrix<Number> & block_mat);
-  /**
-   * Find the common part of arrays \p a and \p b and save it in \p c. The \p na and \p nb are the
-   * number of entries for the arrays. This function is used in the preallocateCondensedJacobian
-   * step.
-   */
-  void mergeArrays(const PetscInt * a,
-                   const PetscInt * b,
-                   const PetscInt & na,
-                   const PetscInt & nb,
-                   std::vector<PetscInt> & c);
 
   /**
    * The condensed Jacobian matrix is computed in this function.
    */
   void computeCondensedJacobian(PetscMatrix<Number> & condensed_mat,
-                                SparseMatrix<Number> & original_mat,
-                                const std::vector<numeric_index_type> & grows,
+                                PetscMatrix<Number> & original_mat,
+                                const std::vector<dof_id_type> & grows,
                                 PetscMatrix<Number> & block_mat);
   /**
    * Compute inverse of D using LU. This method is used when _is_lm_coupling_diagonal = false.
@@ -143,7 +133,7 @@ protected:
   MooseMesh & _mesh;
 
   /// DofMap for easy reference
-  DofMap & _dofmap;
+  const DofMap & _dofmap;
 
   /// Whether the coupling is diagonal
   const bool _is_lm_coupling_diagonal;
@@ -152,7 +142,7 @@ protected:
   const bool _adaptive_condensation;
 
   /// Number of variables
-  unsigned int _n_vars;
+  const unsigned int _n_vars;
 
   /// Name and ID of the variables that are to be condensed out (usually the Lagrange multiplier variable)
   const std::vector<std::string> _lm_var_names;
@@ -180,7 +170,7 @@ protected:
 
   /// The row indices that correspond to the zero diagonal entries in the original Jacobian matrix
   /// This is only used when _adaptive_condensation = true
-  std::vector<numeric_index_type> _zero_rows;
+  std::vector<dof_id_type> _zero_rows;
 
   /// Whether the DoFs associated the variable are to be condensed. If the DoF list for the variable
   /// to be condensed is empty, we do not carry out static condensation
@@ -200,22 +190,33 @@ protected:
   ///     primary: the primal variable DoFs that couples with the Lagrange multiplier
   /// Note:
   ///     the global index sets may not be scalable and necessary memory optimization will be investigated later
-  std::vector<numeric_index_type> _global_lm_dofs, _lm_dofs, _global_primary_dofs, _primary_dofs;
+  std::vector<dof_id_type> _global_lm_dofs, _lm_dofs, _global_primary_dofs, _primary_dofs;
 
   /// row and column indices for the condensed system
-  std::vector<numeric_index_type> _global_rows, _rows, _global_cols, _cols;
+  std::vector<dof_id_type> _global_rows, _rows, _global_cols, _cols;
 
   /// Maps to keep track of row and col indices from the original Jacobian matrix to the condensed Jacobian matrix
-  std::unordered_map<numeric_index_type, numeric_index_type> _global_rows_to_idx, _rows_to_idx,
+  std::unordered_map<dof_id_type, dof_id_type> _global_rows_to_idx, _rows_to_idx,
       _global_cols_to_idx, _cols_to_idx;
 
   /// Maps to keep track of the dof orders for keeping nonzero diagonal entries of the condensed system
   /// _map_global_lm_primary: map between _global_lm_dofs and _global_primary_dofs.
   /// _map_global_primary_order: map between _global_primary_dofs and the corresponding row index in _D
-  std::unordered_map<numeric_index_type, numeric_index_type> _map_global_lm_primary,
-      _map_global_primary_order;
+  std::unordered_map<dof_id_type, dof_id_type> _map_global_lm_primary, _map_global_primary_order;
 
   /// Timers
   PerfID _init_timer;
   PerfID _apply_timer;
+
+private:
+  /**
+   * Find the common part of arrays \p a and \p b and save it in \p c. The \p na and \p nb are the
+   * number of entries for the arrays. This function is used in the preallocateCondensedJacobian
+   * step.
+   */
+  void mergeArrays(const PetscInt * a,
+                   const PetscInt * b,
+                   const PetscInt & na,
+                   const PetscInt & nb,
+                   std::vector<PetscInt> & c);
 };
