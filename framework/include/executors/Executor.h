@@ -10,6 +10,7 @@
 #pragma once
 
 #include "Executioner.h"
+#include "ExecutorInterface.h"
 
 #include <string>
 
@@ -22,7 +23,7 @@ class Executor;
 /// the same pattern as with mesh generators.  Subclass here and implement your
 /// own run function if you need special or fancy functionality that
 /// isn't supported by the default executors available.
-class Executor : public Executioner
+class Executor : public Executioner, public ExecutorInterface
 {
 public:
   /// This object tracks the success/failure state of the executor system as

@@ -49,6 +49,7 @@
 #include "MooseApp.h"
 #include "CommonOutputAction.h"
 #include "CastUniquePointer.h"
+#include "NullExecutor.h"
 
 // Regular expression includes
 #include "pcrecpp.h"
@@ -330,6 +331,7 @@ MooseApp::MooseApp(InputParameters parameters)
     _action_warehouse(*this, _syntax, _action_factory),
     _parser(*this, _action_warehouse),
     _use_executor(parameters.get<bool>("use_executor")),
+    _null_executor(NULL),
     _use_nonlinear(true),
     _use_eigen_value(false),
     _enable_unused_check(WARN_UNUSED),
@@ -1258,6 +1260,10 @@ MooseApp::recursivelyCreateExecutors(const std::string & current_executor_name,
 void
 MooseApp::createExecutors()
 {
+  // Do we have any?
+  if (_executor_params.empty())
+    return;
+
   // Holds the names of Executors that may be the root executor
   std::list<std::string> possibly_root;
 
@@ -1269,6 +1275,12 @@ MooseApp::createExecutors()
 
   // The current line of dependencies - used for finding cycles
   std::list<std::string> current_branch;
+
+  // Build the NullExecutor
+  {
+    auto params = _factory.getValidParams("NullExecutor");
+    _null_executor = _factory.create<NullExecutor>("NullExecutor", "_null_executor", params);
+  }
 
   for (const auto & params_entry : _executor_params)
   {
@@ -1300,6 +1312,20 @@ MooseApp::createExecutors()
 
   // Set the root executor
   _executor = _executors[possible_roots.front()];
+}
+
+Executor &
+MooseApp::getExecutor(const std::string & name, bool fail_if_not_found)
+{
+  auto it = _executors.find(name);
+
+  if (it != _executors.end())
+    return *it->second;
+
+  if (fail_if_not_found)
+    mooseError("Executor not found: ", name);
+
+  return *_null_executor;
 }
 
 Executioner *

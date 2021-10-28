@@ -15,8 +15,8 @@ InputParameters
 BinaryTestExecutor::validParams()
 {
   InputParameters params = Executor::validParams();
-  params.addParam<ExecutorName>("inner1", "", "inner executor name to run");
-  params.addParam<ExecutorName>("inner2", "", "another inner executor name to run");
+  params.addParam<ExecutorName>("inner1", "inner executor name to run");
+  params.addParam<ExecutorName>("inner2", "another inner executor name to run");
   params.addParam<bool>(
       "fail_early", false, "true to cause executor to fail execution before inner executors run");
   params.addParam<bool>(
@@ -28,13 +28,7 @@ BinaryTestExecutor::validParams()
 }
 
 BinaryTestExecutor::BinaryTestExecutor(const InputParameters & parameters)
-  : Executor(parameters),
-    _inner1(getParam<ExecutorName>("inner1").empty()
-                ? nullptr
-                : &_fe_problem.getExecutor(getParam<ExecutorName>("inner1"))),
-    _inner2(getParam<ExecutorName>("inner2").empty()
-                ? nullptr
-                : &_fe_problem.getExecutor(getParam<ExecutorName>("inner2")))
+  : Executor(parameters), _inner1(getExecutor("inner1")), _inner2(getExecutor("inner2"))
 {
 }
 
@@ -51,9 +45,9 @@ BinaryTestExecutor::run()
     return result;
   }
 
-  if (_inner1)
+  if (isParamValid("inner1"))
   {
-    bool converged = result.record("inner1", _inner1->exec());
+    bool converged = result.record("inner1", _inner1.exec());
     if (getParam<bool>("return_early_inner_fail") && !converged)
     {
       _console << "BinaryTestExecutor " << name() << " END EARLY\n" << std::flush;
@@ -61,8 +55,8 @@ BinaryTestExecutor::run()
     }
   }
 
-  if (_inner2)
-    result.record("inner2", _inner2->exec());
+  if (isParamValid("inner2"))
+    result.record("inner2", _inner2.exec());
 
   if (getParam<bool>("fail_late"))
     result.fail("manual late fail");

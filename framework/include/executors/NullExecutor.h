@@ -11,18 +11,15 @@
 
 #include "Executor.h"
 
-class BinaryTestExecutor : public Executor
+class NullExecutor : public Executor
 {
 public:
-  BinaryTestExecutor(const InputParameters & parameters);
+  NullExecutor(const InputParameters & parameters);
 
-  virtual ~BinaryTestExecutor() {}
+  virtual ~NullExecutor() {}
 
   static InputParameters validParams();
 
 protected:
   virtual Result run() override;
-
-  Executor & _inner1;
-  Executor & _inner2;
 };

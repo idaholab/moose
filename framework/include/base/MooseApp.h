@@ -36,6 +36,7 @@
 // Forward declarations
 class Executioner;
 class Executor;
+class NullExecutor;
 class MooseApp;
 class Backup;
 class FEProblemBase;
@@ -313,6 +314,7 @@ public:
    */
   Executioner * getExecutioner() const;
   Executor * getExecutor() const { return _executor.get(); }
+  NullExecutor * getNullExecutor() const { return _null_executor.get(); }
   bool useExecutor() const { return _use_executor; }
   FEProblemBase & feProblem() const;
 
@@ -352,7 +354,14 @@ public:
    */
   void createExecutors();
 
-  Executor & getExecutor(const std::string & name) { return *_executors[name]; }
+  /**
+   * Get an Executor
+   *
+   * @param name The name of the Executor
+   * @param fail_if_not_found Whether or not to fail if the executor doesn't exist.  If this is
+   * false then this function wll return a NullExecutor
+   */
+  Executor & getExecutor(const std::string & name, bool fail_if_not_found = true);
 
   /**
    * This info is stored here because we need a "globalish" place to put it in
@@ -1007,6 +1016,9 @@ protected:
   FixedPointConfig _fixed_point_config;
 
   const bool _use_executor = false;
+
+  /// Used to return an executor that does nothing
+  std::shared_ptr<NullExecutor> _null_executor;
 
   /// Boolean to indicate whether to use a Nonlinear or EigenSystem (inspected by actions)
   bool _use_nonlinear;

@@ -26,6 +26,7 @@ Executor::validParams()
 
 Executor::Executor(const InputParameters & parameters)
   : Executioner(parameters, false),
+    ExecutorInterface(this),
     _begin_flag(getParam<ExecFlagType>("begin_exec_flag")),
     _end_flag(getParam<ExecFlagType>("end_exec_flag"))
 {
