@@ -24,10 +24,12 @@ public:
 protected:
   ADReal computeQpResidual() override;
 
+  /// Fluid temperature
   const ADVariableValue & _temperature;
+  /// The gravity vector
   const RealVectorValue _gravity;
   /// The thermal expansion coefficient
-  const ADMaterialProperty<Real> & _alpha;
+  const Moose::Functor<ADReal> & _alpha;
   /// Reference temperature at which the value of _rho was measured
   const Real _ref_temperature;
   /// the density

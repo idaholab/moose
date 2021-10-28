@@ -19,10 +19,10 @@ PINSFVMomentumFriction::validParams()
   params.addClassDescription(
       "Computes a friction force term on fluid in porous media in the "
       "Navier Stokes i-th momentum equation in Rhie-Chow (incompressible) contexts.");
-  params.addParam<MaterialPropertyName>("Darcy_name",
-                                        "Name of the Darcy coefficients material property.");
-  params.addParam<MaterialPropertyName>("Forchheimer_name",
-                                        "Name of the Forchheimer coefficients material property.");
+  params.addParam<MooseFunctorName>("Darcy_name",
+                                    "Name of the Darcy coefficients material property.");
+  params.addParam<MooseFunctorName>("Forchheimer_name",
+                                    "Name of the Forchheimer coefficients material property.");
   params.addParam<MooseFunctorName>(NS::porosity, NS::porosity, "Porosity variable.");
   params.addRequiredParam<MooseFunctorName>(NS::density, "The density.");
   MooseEnum momentum_component("x=0 y=1 z=2");

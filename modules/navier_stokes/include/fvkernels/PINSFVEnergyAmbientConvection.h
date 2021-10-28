@@ -25,7 +25,7 @@ protected:
   ADReal computeQpResidual() override;
 
   /// the convective heat transfer coefficient
-  const ADMaterialProperty<Real> & _h_solid_fluid;
+  const Moose::Functor<ADReal> & _h_solid_fluid;
   /// fluid temperature
   const ADVariableValue & _temp_fluid;
   /// solid temperature

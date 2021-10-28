@@ -27,10 +27,8 @@ PINSFVEnergyTimeDerivative::validParams()
   params.addRequiredParam<MooseFunctorName>(NS::cp, "Specific heat capacity");
   params.addParam<MooseFunctorName>(NS::time_deriv(NS::cp),
                                     "Specific heat capacity time derivative functor");
+  params.addRequiredParam<MooseFunctorName>(NS::porosity, "Porosity");
 
-  params.addRequiredParam<MooseFunctorName>(NS::porosity, "Porosity variable");
-  params.addParam<MaterialPropertyName>("porosity_prop_name",
-                                        "A name for a porosity material property.");
   params.addRequiredParam<bool>("is_solid", "Whether this kernel acts on the solid temperature");
   params.addRangeCheckedParam<Real>("scaling",
                                     1,
