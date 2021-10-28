@@ -25,7 +25,7 @@ requirements:
 
   run:
     - {{ moose_cxx }}
-    - {{ moose_python }}
+    - python
 
 test:
   imports:

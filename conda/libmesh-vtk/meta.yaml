@@ -22,7 +22,7 @@ requirements:
   build:
     - {{ compiler('cxx') }}
     - {{ moose_cxx }}
-    - moose-mpich {{ moose_mpich }}
+    - {{ moose_mpich }}
     - cmake
     - ninja
     - {{ moose_libglu }}                # [linux]
@@ -36,7 +36,7 @@ requirements:
     - {{ cdt('xorg-x11-proto-devel') }} # [linux]
 
   run:
-    - moose-mpich
+    - {{ moose_mpich }}
     - {{ moose_libglu }}                # [linux]
     - {{ moose_mesalib }}               # [linux]
     - {{ cdt('libxt-devel') }}          # [linux]

@@ -22,21 +22,21 @@ build:
 
 requirements:
   build:
-    - moose-mpich {{ moose_mpich }}
+    - {{ moose_mpich }}
     - pkg-config
 
   host:
     - cmake
-    - moose-mpich {{ moose_mpich }}
+    - {{ moose_mpich }}
 
   run:
     - cmake
-    - moose-mpich {{ moose_mpich }}
+    - {{ moose_mpich }}
 
 test:
   requires:
     - pkg-config
-    - moose-mpich {{ moose_mpich }}
+    - {{ moose_mpich }}
 
   files:
     - tests/ex1.c

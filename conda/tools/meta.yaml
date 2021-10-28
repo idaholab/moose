@@ -13,7 +13,7 @@ build:
 
 requirements:
   build:
-    - python {{ moose_python }}
+    - {{ moose_python }}
 
   run:
     - {{ moose_cc }}
