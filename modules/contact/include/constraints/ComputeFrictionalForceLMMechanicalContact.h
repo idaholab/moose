@@ -21,7 +21,6 @@ public:
 
   ComputeFrictionalForceLMMechanicalContact(const InputParameters & parameters);
   void residualSetup() override;
-  void jacobianSetup() override;
   void post() override;
 
   /**

@@ -107,12 +107,6 @@ ComputeFrictionalForceLMMechanicalContact::residualSetup()
 }
 
 void
-ComputeFrictionalForceLMMechanicalContact::jacobianSetup()
-{
-  residualSetup();
-}
-
-void
 ComputeFrictionalForceLMMechanicalContact::post()
 {
   // Enforce frictional complementarity constraints
