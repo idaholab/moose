@@ -42,7 +42,17 @@ ModularGapConductanceConstraint::ModularGapConductanceConstraint(const InputPara
   }
 
   for (const auto & name : _gap_flux_model_names)
-    _gap_flux_models.push_back(&getUserObjectByName<GapFluxModelBase>(name));
+  {
+    const auto & gap_model = getUserObjectByName<GapFluxModelBase>(name);
+
+    // pass variable dependencies through
+    const auto & var_dependencies = gap_model.getMooseVariableDependencies();
+    for (const auto & var : var_dependencies)
+      addMooseVariableDependency(var);
+
+    // add gap model to list
+    _gap_flux_models.push_back(&gap_model);
+  }
 }
 
 ADReal

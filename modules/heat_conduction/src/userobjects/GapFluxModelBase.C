@@ -12,12 +12,12 @@
 InputParameters
 GapFluxModelBase::validParams()
 {
-  InputParameters params = InterfaceUserObject::validParams();
+  InputParameters params = InterfaceUserObjectBase::validParams();
   params.addClassDescription("Gap flux model base class");
   return params;
 }
 
 GapFluxModelBase::GapFluxModelBase(const InputParameters & parameters)
-  : InterfaceUserObject(parameters)
+  : InterfaceUserObjectBase(parameters)
 {
 }

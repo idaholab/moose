@@ -9,12 +9,12 @@
 
 #pragma once
 
-#include "InterfaceUserObject.h"
+#include "InterfaceUserObjectBase.h"
 
 /**
  * Base class for gap flux models used by ModularGapConductanceConstraint
  */
-class GapFluxModelBase : public InterfaceUserObject
+class GapFluxModelBase : public InterfaceUserObjectBase
 {
 public:
   static InputParameters validParams();
