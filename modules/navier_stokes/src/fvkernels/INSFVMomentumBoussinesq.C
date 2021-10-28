@@ -17,7 +17,7 @@ INSFVMomentumBoussinesq::validParams()
 {
   InputParameters params = FVElementalKernel::validParams();
   params.addClassDescription("Computes a body force for natural convection buoyancy.");
-  params.addRequiredParam<MooseFunctorName>(NS::T_fluid, "temperature variable");
+  params.addRequiredParam<MooseFunctorName>(NS::T_fluid, "the fluid temperature");
   params.addRequiredParam<RealVectorValue>("gravity", "Direction of the gravity vector");
   params.addParam<MooseFunctorName>("alpha_name",
                                     NS::alpha_boussinesq,
