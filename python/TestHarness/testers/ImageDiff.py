@@ -38,29 +38,39 @@ class ImageDiff(FileTester):
         """
 
         # Call base class processResults
-        output = FileTester.processResults(self, moose_dir, options, output)
+        output += FileTester.processResults(self, moose_dir, options, output)
         if self.isFail():
             return output
 
         # Loop through files
         specs = self.specs
         for filename in specs['imagediff']:
-            gold = os.path.join(self.getTestDir(), specs['gold_dir'], filename)
-            test = os.path.join(self.getTestDir(), filename)
 
-            if sys.platform in ['linux', 'linux2']:
-                name = 'allowed_linux'
-            elif sys.platform == 'darwin':
-                name = 'allowed_darwin'
-            allowed = specs[name] if specs.isValid(name) else specs['allowed']
-            differ = ImageDiffer(gold, test, allowed=allowed)
-
-            # Update golds (e.g., uncomment this to re-gold for new system or new defaults)
-            #import shutil; shutil.copy(test, gold)
-
-            output += differ.message()
-            if differ.fail():
-                self.setStatus(self.diff, 'IMAGEDIFF')
+            # Error if gold file does not exist
+            if not os.path.exists(os.path.join(self.getTestDir(), specs['gold_dir'], filename)):
+                output += "File Not Found: " + os.path.join(self.getTestDir(), specs['gold_dir'], filename)
+                self.setStatus(self.fail, 'MISSING GOLD FILE')
                 break
+
+            # Perform diff
+            else:
+                output = 'Running ImageDiffer.py'
+                gold = os.path.join(self.getTestDir(), specs['gold_dir'], filename)
+                test = os.path.join(self.getTestDir(), filename)
+
+                if sys.platform in ['linux', 'linux2']:
+                    name = 'allowed_linux'
+                elif sys.platform == 'darwin':
+                    name = 'allowed_darwin'
+                allowed = specs[name] if specs.isValid(name) else specs['allowed']
+                differ = ImageDiffer(gold, test, allowed=allowed)
+
+                # Update golds (e.g., uncomment this to re-gold for new system or new defaults)
+                #import shutil; shutil.copy(test, gold)
+
+                output += differ.message()
+                if differ.fail():
+                    self.setStatus(self.diff, 'IMAGEDIFF')
+                    break
 
         return output

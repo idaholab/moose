@@ -32,8 +32,8 @@ class CheckFiles(FileTester):
         return self.specs['check_files'] + self.specs['check_not_exists']
 
     def processResults(self, moose_dir, options, output):
-        output = FileTester.testFileOutput(self, moose_dir, options, output)
-        output = FileTester.testExitCodes(self, moose_dir, options, output)
+        output += FileTester.processResults(self, moose_dir, options, output)
+
         specs = self.specs
 
         if self.isFail() or specs['skip_checks']:
