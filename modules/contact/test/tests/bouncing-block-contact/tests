@@ -287,4 +287,14 @@
     method = "!dbg"
     valgrind = 'heavy'
   []
+  [mixed_inactive_nodes]
+    type = 'Exodiff'
+    input = 'mixed-weighted-gap-swapped.i'
+    exodiff = 'mixed-weighted-gap-swapped_out.e'
+    requirement = 'The system shall not attempt to zero Lagrange multipliers that do not exist on inactive nodes.'
+    method = "!dbg"
+    valgrind = 'heavy'
+    ad_indexing_type = 'global'
+    min_ad_size = '100'
+  []
 []
