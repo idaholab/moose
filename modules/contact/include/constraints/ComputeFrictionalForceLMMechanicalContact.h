@@ -49,6 +49,11 @@ protected:
    */
   virtual void enforceConstraintOnDof(const DofObject * const dof) override;
 
+  /**
+   * Communicate weighted velocities to the owning process
+   */
+  void communicateVelocities();
+
   /// A map from node to weighted gap
   std::unordered_map<const DofObject *, ADReal> _dof_to_weighted_tangential_velocity;
 
