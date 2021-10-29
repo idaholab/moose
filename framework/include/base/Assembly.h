@@ -900,16 +900,6 @@ public:
                                 const std::vector<dof_id_type> & jdof_indices);
 
   /**
-   * Add *all* portions of the Jacobian, e.g. LowerLower, LowerSecondary, LowerPrimary,
-   * SecondaryLower, SecondarySecondary, SecondaryPrimary, PrimaryLower, PrimarySecondary,
-   * PrimaryPrimary for mortar-like objects. Primary indicates the interior parent element on the
-   * primary side of the mortar interface. Secondary indicates the interior parent element on the
-   * secondary side of the interface. Lower denotes the lower-dimensional element living on the
-   * secondary side of the mortar interface; it's the boundary face of the \p Secondary element.
-   */
-  void addJacobianMortar();
-
-  /**
    * Add *all* portions of the Jacobian except PrimaryPrimary, e.g. LowerLower, LowerSecondary,
    * LowerPrimary, SecondaryLower, SecondarySecondary, SecondaryPrimary, PrimaryLower,
    * PrimarySecondary, for mortar-like objects. Primary indicates the interior parent element on the
