@@ -268,7 +268,7 @@ endif
 
 # compile with gcov support if using the gcc compiler suite
 ifeq ($(coverage),true)
-	libmesh_CXXFLAGS += -fprofile-arcs -ftest-coverage
+	libmesh_CXXFLAGS += -DCOVERAGE_ENABLED -fprofile-arcs -ftest-coverage
 	ifeq (,$(findstring clang++,$(cxx_compiler)))
 		libmesh_LDFLAGS += -lgcov
 		libmesh_LIBS += -lgcov
