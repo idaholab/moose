@@ -136,11 +136,7 @@ class RunApp(Tester):
 
         # Just return an arbitrary command if one is supplied
         if specs.isValid('command'):
-            return os.path.join('%s%s:%s; %s %s' % ('PATH=',
-                                                    specs['test_dir'],
-                                                    os.getenv('PATH'),
-                                                    specs['command'],
-                                                    ' '.join(specs['cli_args'])))
+            return os.path.join(specs['test_dir'], specs['command']) + ' ' + ' '.join(specs['cli_args'])
 
         # Create the additional command line arguments list
         cli_args = list(specs['cli_args'])
@@ -205,5 +201,96 @@ class RunApp(Tester):
 
         return command
 
+    def testFileOutput(self, moose_dir, options, output):
+        """ Set a failure status for expressions found in output """
+        reason = ''
+        errors = ''
+        specs = self.specs
+
+        params_and_msgs = {'expect_err':
+                              {'error_missing': True,
+                               'modes': ['ALL'],
+                               'reason': "EXPECTED ERROR MISSING",
+                               'message': "Unable to match the following {} against the program's output:"},
+                           'expect_assert':
+                              {'error_missing': True,
+                               'modes': ['dbg', 'devel'],
+                               'reason': "EXPECTED ASSERT MISSING",
+                               'message': "Unable to match the following {} against the program's output:"},
+                           'expect_out':
+                               {'error_missing': True,
+                                'modes': ['ALL'],
+                                'reason': "EXPECTED OUTPUT MISSING",
+                                'message': "Unable to match the following {} against the program's output:"},
+                           'absent_out':
+                               {'error_missing': False,
+                                'modes': ['ALL'],
+                                'reason': "OUTPUT NOT ABSENT",
+                                'message': "Matched the following {}, which we did NOT expect:"}
+                           }
+
+        for param,attr in params_and_msgs.items():
+            if specs.isValid(param) and (options.method in attr['modes'] or attr['modes'] == ['ALL']):
+                match_type = ""
+                if specs['match_literal']:
+                    have_expected_out = util.checkOutputForLiteral(output, specs[param])
+                    match_type = 'literal'
+                else:
+                    have_expected_out = util.checkOutputForPattern(output, specs[param])
+                    match_type = 'pattern'
+
+                # Exclusive OR test
+                if attr['error_missing'] ^ have_expected_out:
+                    reason = attr['reason']
+                    errors += "#"*80 + "\n\n" + attr['message'].format(match_type) + "\n\n" + specs[param] + "\n"
+                    break
+
+        if reason != '':
+            self.setStatus(self.fail, reason)
+
+        return errors
+
+    def testExitCodes(self, moose_dir, options, output):
+        # Don't do anything if we already have a status set
+        reason = ''
+        if self.isNoStatus():
+            specs = self.specs
+            # We won't pay attention to the ERROR strings if EXPECT_ERR is set (from the derived class)
+            # since a message to standard error might actually be a real error.  This case should be handled
+            # in the derived class.
+            if options.valgrind_mode == '' and not specs.isValid('expect_err') and len( [x for x in filter( lambda x: x in output, specs['errors'] )] ) > 0:
+                reason = 'ERRMSG'
+            elif self.exit_code == 0 and specs['should_crash'] == True:
+                reason = 'NO CRASH'
+            elif self.exit_code != 0 and specs['should_crash'] == False:
+                # Let's look at the error code to see if we can perhaps further split this out later with a post exam
+                reason = 'CRASH'
+            # Valgrind runs
+            elif self.exit_code == 0 and self.shouldExecute() and options.valgrind_mode != '' and 'ERROR SUMMARY: 0 errors' not in output:
+                reason = 'MEMORY ERROR'
+
+            if reason != '':
+                self.setStatus(self.fail, str(reason))
+                return "\n\nExit Code: " + str(self.exit_code)
+
+        # Return anything extra here that we want to tack onto the Output for when it gets printed later
+        return ''
+
     def processResults(self, moose_dir, options, output):
+        """
+        Wrapper method for testFileOutput.
+
+        testFileOutput does not set a success status, while processResults does.
+        For testers that are RunApp types, they will call this method (processResults).
+
+        Other tester types (like exodiff) will call testFileOutput. This is to prevent
+        derived testers from having a successfull status set, before actually running
+        the derived processResults method.
+
+        # TODO: because RunParallel is now setting every successful status message,
+                refactor testFileOutput and processResults.
+        """
+        output += self.testFileOutput(moose_dir, options, output)
+        output += self.testExitCodes(moose_dir, options, output)
+
         return output
