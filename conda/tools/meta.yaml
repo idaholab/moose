@@ -46,6 +46,7 @@ requirements:
     - {{ moose_jinja2 }}
     - {{ moose_mako }}
     - {{ moose_sympy }}
+    - deepdiff
     - clang-tools
     - python
 
@@ -66,6 +67,7 @@ test:
     - vtk
     - pylatexenc
     - jinja2
+    - deepdiff
 
 about:
   home: https://mooseframework.org/
