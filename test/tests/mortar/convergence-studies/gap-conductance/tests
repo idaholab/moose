@@ -9,6 +9,7 @@
     method = '!dbg'
     required_python_packages = 'sympy pandas matplotlib'
     heavy = True
+    ad_mode = 'sparse'
   []
   [p2p1]
     type = PythonUnitTest
@@ -18,6 +19,7 @@
     method = '!dbg'
     required_python_packages = 'sympy pandas matplotlib'
     heavy = True
+    ad_mode = 'sparse'
   []
   [p2p0]
     type = PythonUnitTest
@@ -27,6 +29,7 @@
     method = '!dbg'
     required_python_packages = 'sympy pandas matplotlib'
     heavy = True
+    ad_mode = 'sparse'
   []
   [p1p1]
     type = PythonUnitTest
@@ -36,6 +39,7 @@
     method = '!dbg'
     required_python_packages = 'sympy pandas matplotlib'
     heavy = True
+    ad_mode = 'sparse'
   []
   [p1p0]
     type = PythonUnitTest
@@ -45,5 +49,6 @@
     method = '!dbg'
     required_python_packages = 'sympy pandas matplotlib'
     heavy = True
+    ad_mode = 'sparse'
   []
 []
