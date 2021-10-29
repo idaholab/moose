@@ -14,7 +14,7 @@
 > correction (with QUAD4 elements), and compare the result for different levels
 > of uniform refinement (1, 2, 3, 4).
 
-!listing modules/tensor_mechanics/tutorials/introduction/step04.i
+!listing modules/tensor_mechanics/tutorials/introduction/step04a.i
 
 We can run the various combinations of first/second order elements,
 active/deactivated volumetric locking correction, and levels of refinement

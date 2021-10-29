@@ -31,17 +31,30 @@ GeneratedMeshGenerator sets up (`left`, `right`, `top`, `bottom` (for >=2D),
 `front`, and `back` (for 3D)). The `generated` block will create a mesh with the
 boundaries `pillar1_left`, `pillar1_right`, `pillar1_top`, and `pillar1_bottom`.
 
-The `generated2` generator will set up the second pillar and works very much like the first, except that we are also adding the [!param](/Mesh/GeneratedMeshGenerator/boundary_id_offset) to ensure that the boundaries of the second pillar have their own unique IDs (this is done by shifting the default IDs of the four boundaries by 4 so they don't overlap with the IDs of pillar1).
+The `generated2` generator will set up the second pillar and works very much
+like the first, except that we are also adding the
+[!param](/Mesh/GeneratedMeshGenerator/boundary_id_offset) to ensure that the
+boundaries of the second pillar have their own unique IDs (this is done by
+shifting the default IDs of the four boundaries by 4 so they don't overlap with
+the IDs of pillar1).
 
 !alert note
 When modeling the deformation/bending of walls with solid elements make sure to
 mesh at least about *five* elements through the wall thickness!
 
-The [`MeshCollectionGenerator`](MeshCollectionGenerator.md) then combines the two separate pillar mesh objects into a single mesh object that contains all elements from both meshes. Note that this does **not** mean the two meshes are glued together or connected in any way! Also, in contrast to the previous step the mesh generators do not form a *chain*, but they form a tree structure. The important thing for MOOSE is that a single generator sits at the end of such a chain or root of such a tree (otherwise MOOSE will complain with an error message).
+The [`MeshCollectionGenerator`](MeshCollectionGenerator.md) then combines the
+two separate pillar mesh objects into a single mesh object that contains all
+elements from both meshes. Note that this does **not** mean the two meshes are
+glued together or connected in any way! Also, in contrast to the previous step
+the mesh generators do not form a *chain*, but they form a tree structure. The
+important thing for MOOSE is that a single generator sits at the end of such a
+chain or root of such a tree (otherwise MOOSE will complain with an error
+message).
 
 ### TensorMechanics `Master` Action
 
-As discussed previously, when we expect large deformation we need to make sure we select the correct strain formulation. So here we select finite strain.
+As discussed previously, when we expect large deformation we need to make sure
+we select the correct strain formulation. So here we select finite strain.
 
 ### `BCs`
 
@@ -68,6 +81,8 @@ Some more tweaks are made to the Executioner block:
 First off, run the simulation and look at the result.
 
 > What do you observe (does it meet your expectations)?
+
+[Click here for the answer.](tensor_mechanics/tutorials/introduction/answer04a.md)
 
 ### Convergence
 
@@ -114,7 +129,7 @@ the `[Outputs]` block.
 > variable. Take a look at [NodalExtremeValue](NodalExtremeValue.md) and try to
 > set it up to output the maximum positive x deflection.
 
-[Click here for the answer.](tensor_mechanics/tutorials/introduction/answer04a.md)
+[Click here for the answer.](tensor_mechanics/tutorials/introduction/answer04b.md)
 
 ### Sidebar: Volumetric locking
 

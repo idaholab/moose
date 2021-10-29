@@ -1,6 +1,6 @@
 #
-# A first attempt at mechanical contact
-# https://mooseframework.inl.gov/modules/contact/tutorials/introduction/step01.html
+# Switching to mortar based mechanical contact
+# https://mooseframework.inl.gov/modules/contact/tutorials/introduction/step02.html
 #
 
 [GlobalParams]
@@ -55,7 +55,6 @@
     secondary = pillar2_left
     model = frictionless
     formulation = mortar
-    mesh = collect_meshes
   []
 []
 

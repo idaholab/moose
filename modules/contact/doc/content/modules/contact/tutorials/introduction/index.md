@@ -9,4 +9,4 @@ in the tensor mechanics tutorial we add a first attempt at mechanical contact.
 
 ## [Mortar Contact](contact/tutorials/introduction/step02.md)
 
-We learn how to how to use the mortar formulation for mechanical contact.
+We learn how to use the mortar formulation for mechanical contact.

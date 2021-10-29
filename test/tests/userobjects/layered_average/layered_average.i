@@ -57,6 +57,13 @@
   [../]
 []
 
+[VectorPostprocessors]
+  [avg]
+    type = SpatialUserObjectVectorPostprocessor
+    userobject = average
+  []
+[]
+
 [Executioner]
   type = Steady
 
@@ -68,4 +75,5 @@
 
 [Outputs]
   exodus = true
+  csv = true
 []

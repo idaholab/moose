@@ -1,12 +1,19 @@
 [Tests]
   design = 'userobject/LayeredSideIntegral.md userobject/LayeredSideAverage.md'
-  issues = '#1289 #16099'
+  issues = '#1289 #16099 #19220'
   [./test]
     type = 'Exodiff'
     input = 'layered_side_integral.i'
     exodiff = 'layered_side_integral_out.e'
     requirement = "MOOSE shall correctly compute layered integrals along a specified boundary."
   [../]
+
+  [unique_points]
+    type = 'CSVDiff'
+    input = 'layered_side_integral.i'
+    csvdiff = 'layered_side_integral_out_int_0001.csv'
+    requirement = "MOOSE shall allow automatic specification of points to output the unique user object values for a layered integral."
+  []
 
   [./fv_test]
     type = 'Exodiff'
@@ -22,6 +29,13 @@
     exodiff = 'layered_side_average_out.e'
     requirement = "MOOSE shall allow taking averages of variables along a coordinate axis in layers on a boundary."
   [../]
+
+  [average_unique_points]
+    type = 'CSVDiff'
+    input = 'layered_side_average.i'
+    csvdiff = 'layered_side_average_out_avg_0001.csv'
+    requirement = "MOOSE shall allow automatic specification of points to output the unique user object values for a layered average."
+  []
 
   [./diffusive_flux_average]
     type = 'Exodiff'

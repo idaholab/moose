@@ -10,12 +10,12 @@ cantilever.
 
 ### `Mesh`
 
-Note how we supply the lower _and_ upper x extent here. The origin will lie in
-the center of the bottom boundary of this generated mesh.
+Note the xmin and xmax upper *and* lower x-dimension extents are supplied here.
+The origin will lie in the center of the bottom boundary of this generated mesh.
 
 New is the [`ExtraNodesetGenerator`](ExtraNodesetGenerator.md) which we append
 to the existing chain of mesh generators. This generator allows us to create a
-new nodeset containing nodes at a list of coordinates specified in
+new nodeset containing all nodes located at the coordinates the user specified in
 [!param](/Mesh/ExtraNodesetGenerator/coord). Here we create a nodeset containing
 the single node at the origin. You need to make sure that a node actually exists
 at each specified coordinate! We call this nodeset `pin` for obvious reasons and
@@ -27,7 +27,7 @@ We introduce a new auxiliary variable `T` (for temperature). Auxiliary variables
 are variables we're not solving for, but are computing directly. To simplify
 this step we are not solving a heat conduction problem, but instead just
 prescribing a global temperature that is rising with time (see next section).
-Auxiliary variables can be coupled in everywhere regular (so called _nonlinear_)
+Auxiliary variables can be coupled in everywhere regular (so called *nonlinear*)
 variables are coupled. They are a great tool for simplifying a model during
 development.
 
@@ -88,7 +88,7 @@ thermal expansion). Yet we still remove all rigid body modes
 
 Pinning nodes to remove rigid body modes is an important tool to create
 mechanics simulations that converge. The presence of rigid body modes will lead
-to non-convergence. BCs on single nodes rather than whole boundaries can help
+to **non-convergence**. BCs on single nodes rather than whole boundaries can help
 avoid overconstraining your problems. Keep in mind that to remove all 6 rigid
 body modes in a 3D simulation you need to apply BCs on at least 3 nodes (which
 cannot be co-linear). One node will have to be constrained in 3 direction, one

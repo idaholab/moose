@@ -31,7 +31,7 @@ Note how the stiffness of the right hand side is only half that of the left hand
 We make a few changes in the Executioner block here, and you should try playing with some of the settings later on.
 
 - We select NEWTON as our [!param](/Executioner/Transient/solve_type). This is a good (fast) option whenever we have a complete Jacobian for the system. It should give us 1-2 linear iterations for every non-linear iteration. Note that for NEWTON solves MOOSE automatically sets up an [`SMP`](SingleMatrixPreconditioner.md) with the [!param](/Preconditioning/SMP/full) option set to `true` (this can be disabled by setting [!param](/Executioner/auto_preconditioning) to `false`).
-- We use LU decomposition to solve the linear problem, this preconditioner is very effective on a small problem like this.
+- We use LU decomposition to solve the linear problem, this preconditioner is very effective on a small problem like this. (For a more scalable preconditioner for large problems take a look at [HYPRE](application_development/hypre.md optional=true).)
 
 ## Questions
 
@@ -54,7 +54,7 @@ easy.
 > internal changes of a material. One common effect is the thermal expansion (or
 > contraction) under temperature changes.
 
-[Click here for the sidebar on thermal expansion.](tensor_mechanics/tutorials/introduction/answer03a.md)
+[Click here for the sidebar on thermal expansion.](tensor_mechanics/tutorials/introduction/step03a.md)
 
 Once you've answered the questions and run this example we will move on to
 [Step 4](tensor_mechanics/tutorials/introduction/step04.md) and setup a cantilever problem that prepares us

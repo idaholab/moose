@@ -24,7 +24,7 @@ constant monomial functions. The
 and
 [!param](/Modules/TensorMechanics/Master/TensorMechanicsAction/material_output_order)
 parameters allow to to select higher order monomials and even nodal variables
-for smooth material property output. For not let's just try a second order
+for smooth material property output. For now let's just try a second order
 monomial with
 
 ```

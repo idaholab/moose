@@ -92,7 +92,6 @@ name = 'finite_rr'
 
 [Contact]
   [frictionless]
-    mesh = block_rename
     primary = plank_right
     secondary = block_left
     formulation = mortar
