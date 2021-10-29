@@ -649,13 +649,13 @@ protected:
   /// Whether to use a two term expansion for computing boundary face values
   bool _two_term_boundary_expansion;
 
-  /// A vector to hold the uncorrected face gradients when not caching them
+  /// A threaded vector to hold the uncorrected face gradients when not caching them, used to return a reference
   mutable std::vector<VectorValue<ADReal>> _temp_face_unc_gradients;
 
-  /// A vector to hold the face gradients when not caching them
+  /// A threaded vector to hold the face gradients when not caching them, used to return a reference
   mutable std::vector<VectorValue<ADReal>> _temp_face_gradients;
 
-  /// A vector to hold the face values when not caching them
+  /// A threaded vector to hold the face values when not caching them, used to return a reference
   mutable std::vector<ADReal> _temp_face_values;
 
   /// Whether to cache the gradients the first time they are computed on a cell face. Caching avoids

@@ -625,8 +625,6 @@ MooseVariableFV<OutputType>::getInternalFaceValue(const Elem * const neighbor,
 
     value_pointer = &pr.first->second;
   }
-  else
-    _temp_face_values[_tid] = 0;
 
   ADReal & value = *value_pointer;
 
@@ -689,8 +687,6 @@ MooseVariableFV<OutputType>::getDirichletBoundaryFaceValue(const FaceInfo & fi) 
 
     value_pointer = &pr.first->second;
   }
-  else
-    _temp_face_values[_tid] = 0;
 
   ADReal & value = *value_pointer;
 
@@ -809,7 +805,7 @@ MooseVariableFV<OutputType>::adGradSln(const Elem * const elem) const
 
   try
   {
-    VectorValue<ADReal> grad = 0;
+    VectorValue<ADReal> grad;
 
     bool volume_set = false;
     Real volume = 0;
