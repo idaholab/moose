@@ -21,14 +21,5 @@
       ad_indexing_type = 'global'
       valgrind = HEAVY
     []
-    [ray_1pt4e5]
-      type = RunApp
-      input = average-boussinesq.i
-      cli_args = 'Mesh/gen/xmax=2e-2 Mesh/gen/ymax=2e-2 Outputs/file_base=ra-1e5'
-      detail = '1.4e5'
-      strumpack = true
-      ad_indexing_type = 'global'
-      valgrind = HEAVY
-    []
   []
 []
