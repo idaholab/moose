@@ -96,7 +96,7 @@ velocity_interp_method='rc'
     mu = ${mu}
     porosity = porosity
     smooth_porosity = false
-    vel = 'velocity'
+    superficial_velocity = 'velocity'
     momentum_component = 'x'
   []
   # Option 1: eps * pressure gradient
@@ -149,7 +149,7 @@ velocity_interp_method='rc'
     mu = ${mu}
     porosity = porosity
     smooth_porosity = false
-    vel = 'velocity'
+    superficial_velocity = 'velocity'
     momentum_component = 'y'
   []
   # Option 1: eps * pressure gradient
