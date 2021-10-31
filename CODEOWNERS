@@ -60,5 +60,6 @@
 /modules/xfem @bwspenc @jiangwen84
 
 /scripts/hpc_proxy.pac @loganharbour
+/scripts/configure_petsc.sh @fdkong
 /scripts/update_and_rebuild_petsc.sh @fdkong
 /scripts/update_and_rebuild_petsc_alt.sh @fdkong

@@ -40,29 +40,12 @@ BUILD_CONFIG=`cat <<"EOF"
   --CXXOPTFLAGS=-O3 \
   --FOPTFLAGS=-O3 \
   --with-x=0 \
-  --with-mpi=1 \
   --with-ssl=0 \
-  --with-openmp=1 \
-  --with-debugging=0 \
-  --with-cxx-dialect=C++11 \
-  --with-shared-libraries=1 \
-  --download-mumps=1 \
-  --download-hypre=1 \
-  --download-metis=1 \
-  --download-slepc=1 \
-  --download-ptscotch=1 \
-  --download-parmetis=1 \
-  --download-strumpack=1 \
-  --download-scalapack=1 \
-  --download-fblaslapack=1 \
-  --download-superlu_dist=1 \
-  --with-fortran-bindings=0 \
-  --with-sowing=0 \
-  --with-64-bit-indices \
 EOF
 `
 
-python ./configure ${BUILD_CONFIG} \
+source $PETSC_DIR/../scripts/configure_petsc.sh
+configure_petsc ${BUILD_CONFIG} \
        AR="${AR:-ar}" \
        CC="mpicc" \
        CXX="mpicxx" \
