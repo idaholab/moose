@@ -1,33 +1,19 @@
 # ElementAverageValue
 
-!alert! construction title=Undocumented Class
-The ElementAverageValue has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# ElementAverageValue
-
 !syntax description /Postprocessors/ElementAverageValue
 
-## Overview
+The element average of a variable is defined as the ratio of its integral over the volume of the domain:
 
-!! Replace these lines with information regarding the ElementAverageValue object.
+!equation
+\bar{u} = \dfrac{\int_{\Omega} u d\Omega}{\int_{\Omega} d\Omega}
 
-## Example Input File Syntax
+This average may be taken over a restriction of blocks, but for taking an average over boundaries, a [SideAverageValue.md] should be used.
 
-!! Describe and include an example of how to use the ElementAverageValue object.
+## Example input syntax
 
-!syntax parameters /Postprocessors/ElementAverageValue
+In this example, we compute the average of a variable $u$ over the whole domain.
 
-!syntax inputs /Postprocessors/ElementAverageValue
-
-!syntax children /Postprocessors/ElementAverageValue
-```
-!alert-end!
-
-!syntax description /Postprocessors/ElementAverageValue
+!listing test/tests/postprocessors/element_average_value/element_average_value_test.i block=Postprocessors
 
 !syntax parameters /Postprocessors/ElementAverageValue
 

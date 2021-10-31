@@ -1,33 +1,24 @@
 # ElementL2Norm
 
-!alert! construction title=Undocumented Class
-The ElementL2Norm has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# ElementL2Norm
-
 !syntax description /Postprocessors/ElementL2Norm
 
-## Overview
+The element $L_2$ norm is defined as:
 
-!! Replace these lines with information regarding the ElementL2Norm object.
+!equation
+||u||_{L_2} = \sqrt{\int_{\Omega} u^2 d\Omega}
 
-## Example Input File Syntax
+The element $L_2$ norm of a variable $u$ is computed as:
 
-!! Describe and include an example of how to use the ElementL2Norm object.
+!equation
+||u||_{L_2} = \sqrt{\sum_{\text{mesh elements}} \sum_{\text{quadrature point qp} J[qp] W[qp] c[qp] u(qp)^2}
 
-!syntax parameters /Postprocessors/ElementL2Norm
+The $J$ term accounts for the geometry/volume of the element, the $W$ for the weight in the quadrature, $c$ for an eventual coordinate change (cylindrical, spherical) and $u(qp)$ is the value of the variable at the quadrature point.
 
-!syntax inputs /Postprocessors/ElementL2Norm
+## Example input syntax
 
-!syntax children /Postprocessors/ElementL2Norm
-```
-!alert-end!
+In this example, we compute the L2 norm for a variety of auxiliary variable types using `ElementL2Norm` postprocessors.
 
-!syntax description /Postprocessors/ElementL2Norm
+!listing test/tests/auxkernels/element_aux_var/l2_element_aux_var_test.i block=Postprocessors
 
 !syntax parameters /Postprocessors/ElementL2Norm
 

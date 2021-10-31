@@ -1,33 +1,21 @@
 # ElementL2Difference
 
-!alert! construction title=Undocumented Class
-The ElementL2Difference has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# ElementL2Difference
-
 !syntax description /Postprocessors/ElementL2Difference
 
-## Overview
+The element $L_2$ difference between two variables $u$ and $v$ is computed as:
 
-!! Replace these lines with information regarding the ElementL2Difference object.
+!equation
+||u - v||_{L_2} = \sqrt{\sum_{\text{mesh elements}} \sum_{\text{quadrature point qp} J[qp] W[qp] c[qp] (u(qp) - v(qp))^2}
 
-## Example Input File Syntax
+The $J$ term accounts for the geometry/volume of the element, the $W$ for the weight in the quadrature, $c$ for an eventual coordinate change (cylindrical, spherical) and $u(qp)$ and $v(qp)$ are the values of the variable at the quadrature point.
 
-!! Describe and include an example of how to use the ElementL2Difference object.
+TODO: document behavior if variables are of a different type
 
-!syntax parameters /Postprocessors/ElementL2Difference
+## Example input syntax
 
-!syntax inputs /Postprocessors/ElementL2Difference
+In this example, we compute the L2 difference between two variables that are solution of the same problem, but of different order, using `ElementL2Difference` postprocessors. $u$ is a linear lagrange variable while $v$ is a second order lagrange variable. We can verify by refining the mesh that their difference goes to 0.
 
-!syntax children /Postprocessors/ElementL2Difference
-```
-!alert-end!
-
-!syntax description /Postprocessors/ElementL2Difference
+!listing test/tests/postprocessors/element_l2_difference/element_l2_difference.i block=Variables Postprocessors
 
 !syntax parameters /Postprocessors/ElementL2Difference
 
