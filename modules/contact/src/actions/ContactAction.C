@@ -175,9 +175,6 @@ ContactAction::ContactAction(const InputParameters & params)
           "2021. Instead, select the default option based on weighted quantities and dual bases");
     }
 
-    if (isParamValid("correct_edge_dropping"))
-      _correct_edge_dropping = getParam<bool>("correct_edge_dropping");
-
     // use dual basis function for Lagrange multipliers?
     if (isParamValid("use_dual"))
       _use_dual = getParam<bool>("use_dual");

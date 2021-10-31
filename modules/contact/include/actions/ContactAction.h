@@ -99,7 +99,7 @@ protected:
   bool _use_dual;
 
   /// Whether to use correct edge dropping treatment
-  bool _correct_edge_dropping;
+  const bool _correct_edge_dropping;
 
 private:
   /**
