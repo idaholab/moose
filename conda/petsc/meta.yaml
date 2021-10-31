@@ -9,9 +9,10 @@ package:
   version: {{ version }}
 
 source:
-  path: ../../petsc
-  patches:
-    - arm64_framework.patch           # [arm64]
+  - path: ../../petsc
+  - path: ../../scripts/configure_petsc.sh
+  - patches:
+      - arm64_framework.patch           # [arm64]
 
 build:
   number: {{ build }}

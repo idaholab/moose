@@ -24,7 +24,7 @@ if [[ $(uname) == Darwin ]]; then
         CTUNING="-march=core2 -mtune=haswell"
         FTUNING="-I$PREFIX/include"
     fi
-    LDFLAGS="${LDFLAGS:-} -Wl,-headerpad_max_install_names"
+    LDFLAGS="${LDFLAGS:-} -Wl,-headerpad-max-install-names"
 else
     CTUNING="-march=nocona -mtune=haswell"
     FTUNING="-I$PREFIX/include"
@@ -35,17 +35,13 @@ export C_INCLUDE_PATH=$PREFIX/include
 export CPLUS_INCLUDE_PATH=$PREFIX/include
 export FPATH_INCLUDE_PATH=$PREFIX/include
 
-BUILD_CONFIG=`cat <<"EOF"
-  --COPTFLAGS=-O3 \
-  --CXXOPTFLAGS=-O3 \
-  --FOPTFLAGS=-O3 \
-  --with-x=0 \
-  --with-ssl=0 \
-EOF
-`
-
-source $PETSC_DIR/../scripts/configure_petsc.sh
-configure_petsc ${BUILD_CONFIG} \
+source $PETSC_DIR/configure_petsc.sh
+configure_petsc \
+       --COPTFLAGS=-O3 \
+       --CXXOPTFLAGS=-O3 \
+       --FOPTFLAGS=-O3 \
+       --with-x=0 \
+       --with-ssl=0 \
        AR="${AR:-ar}" \
        CC="mpicc" \
        CXX="mpicxx" \
