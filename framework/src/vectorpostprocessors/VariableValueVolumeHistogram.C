@@ -7,19 +7,23 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "VolumeHistogram.h"
+#include "VariableValueVolumeHistogram.h"
 
 // MOOSE includes
 #include "MooseVariableFE.h"
 
 #include "libmesh/quadrature.h"
 
-registerMooseObject("MooseApp", VolumeHistogram);
+registerMooseObject("MooseApp", VariableValueVolumeHistogram);
+registerMooseObjectRenamed("MooseApp",
+                           VolumeHistogram,
+                           "06/30/2022 24:00",
+                           VariableValueVolumeHistogram);
 
-defineLegacyParams(VolumeHistogram);
+defineLegacyParams(VariableValueVolumeHistogram);
 
 InputParameters
-VolumeHistogram::validParams()
+VariableValueVolumeHistogram::validParams()
 {
   InputParameters params = ElementVectorPostprocessor::validParams();
   params.addClassDescription(
@@ -31,7 +35,7 @@ VolumeHistogram::validParams()
   return params;
 }
 
-VolumeHistogram::VolumeHistogram(const InputParameters & parameters)
+VariableValueVolumeHistogram::VariableValueVolumeHistogram(const InputParameters & parameters)
   : ElementVectorPostprocessor(parameters),
     _nbins(getParam<unsigned int>("bin_number")),
     _min_value(getParam<Real>("min_value")),
@@ -42,7 +46,7 @@ VolumeHistogram::VolumeHistogram(const InputParameters & parameters)
     _volume(declareVector("n"))
 {
   if (coupledComponents("variable") != 1)
-    mooseError("VolumeHistogram works on exactly one coupled variable");
+    mooseError("VariableValueVolumeHistogram works on exactly one coupled variable");
 
   // initialize the bin center value vector
   _bin_center.resize(_nbins);
@@ -51,14 +55,14 @@ VolumeHistogram::VolumeHistogram(const InputParameters & parameters)
 }
 
 void
-VolumeHistogram::initialize()
+VariableValueVolumeHistogram::initialize()
 {
   // reset the histogram
   _volume.assign(_nbins, 0.0);
 }
 
 void
-VolumeHistogram::execute()
+VariableValueVolumeHistogram::execute()
 {
   // loop over quadrature points
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
@@ -73,15 +77,15 @@ VolumeHistogram::execute()
 }
 
 void
-VolumeHistogram::finalize()
+VariableValueVolumeHistogram::finalize()
 {
   gatherSum(_volume);
 }
 
 void
-VolumeHistogram::threadJoin(const UserObject & y)
+VariableValueVolumeHistogram::threadJoin(const UserObject & y)
 {
-  const VolumeHistogram & uo = static_cast<const VolumeHistogram &>(y);
+  const VariableValueVolumeHistogram & uo = static_cast<const VariableValueVolumeHistogram &>(y);
   mooseAssert(uo._volume.size() == _volume.size(),
               "Inconsistent volume vector lengths across threads.");
 
@@ -90,7 +94,7 @@ VolumeHistogram::threadJoin(const UserObject & y)
 }
 
 Real
-VolumeHistogram::computeVolume()
+VariableValueVolumeHistogram::computeVolume()
 {
   // overwrite this method to multiply with phase fraction order parameters etc.
   return _JxW[_qp] * _coord[_qp];

@@ -5,7 +5,7 @@
 This ODE is solved at every node.
 The [!param](/NodalKernels/ConstantRate/rate) parameter is controllable, so the [Control system](syntax/Controls/index.md) may be leveraged to dynamically control the rate during the simulation.
 
-A more flexible alternative to controlling the rate with Controls is to use a [UserForcingFunctionNodalKernel.md] which has a rate that depends on space and time based on a [Function](Functions/syntax/index.md).
+A more flexible alternative to controlling the rate with Controls is to use a [UserForcingFunctionNodalKernel.md] which has a rate that depends on space and time based on a [Function](syntax/Functions/index.md).
 
 ## Example input syntax
 

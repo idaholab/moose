@@ -2,7 +2,7 @@
 
 !syntax description /NodalKernels/UserForcingFunctionNodalKernel
 
-The forcing function is a space and time dependent [Function](Functions/syntax/index.md).
+The forcing function is a space and time dependent [Function](syntax/Functions/index.md).
 
 The contribution to the Jacobian from this nodal kernel is 0, as
 the function is deemed to not have any dependence on nonlinear variables, as functions generally do not.
