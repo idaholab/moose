@@ -2,7 +2,7 @@
 
 !syntax description /ICs/FunctionIC
 
-Setting the initial condition using a function may be done for the whole variable domain, or restricted to particular blocks or boundaries.
+Sets an initial condition via a [Function](syntax/Functions/index.md) described by parameter [!param](/ICs/FunctionIC/function). It can be restricted to particular blocks and boundaries using the [!param](/ICs/FunctionIC/block) and [!param](/ICs/FunctionIC/boundary) parameters, respectively.
 
 ## Example input syntax
 

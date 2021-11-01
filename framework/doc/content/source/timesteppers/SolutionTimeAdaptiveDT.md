@@ -22,7 +22,7 @@ The sign of the update is chosen as explained above.
 
 ## Example input syntax
 
-TODO: not tested
+!listing test/tests/executioners/executioner/sln-time-adapt.i block=Executioner
 
 !syntax parameters /Executioner/TimeStepper/SolutionTimeAdaptiveDT
 

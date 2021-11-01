@@ -2,7 +2,7 @@
 
 !syntax description /ICs/ConstantIC
 
-This constant value may be set for the whole variable domain, or restricted to particular blocks or boundaries.
+Sets a constant initial condition described by parameter [!param](/ICs/ConstantIC/value). It can be restricted to particular blocks and boundaries using the [!param](/ICs/ConstantIC/block) and [!param](/ICs/ConstantIC/boundary) parameters, respectively.
 
 ## Example input syntax
 

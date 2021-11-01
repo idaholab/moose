@@ -13,15 +13,15 @@ of the error. Based on the error, detailed below, and the user set acceptable er
 or rejected.
 
 !equation
-error = \dfrac{||u_{dt} - u_{2dt/2}||_2}{max(||u_{dt}||_2, ||u_{2dt/2}||_2) dt}
+error = \dfrac{||u_{dt} - u_{2dt/2}||_{L_2}}{max(||u_{dt}||_{L_2}, ||u_{2dt/2}||_{L_2}) dt}
 
 where $u$ is the solution and $dt$ the time step size.
 If the time step is accepted, then the time step is increased to
 
 !equation
-dt^{n+1} = dt^n \left(\dfrac{e_tol}{error} \right)^{1/order}
+dt^{n+1} = dt^n \left(\dfrac{e_{tol}}{error} \right)^{1/order}
 
-where $e_tol$ is the user set tolerance on the error and $order$ is the accuracy order
+where $e_{tol}$ is the user set tolerance on the error and $order$ is the accuracy order
 of the time integration scheme.
 
 If the step is rejected, both the non linear and auxiliary systems are reset, and the
