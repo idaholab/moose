@@ -34,6 +34,11 @@ ModularGapConductanceConstraint::ModularGapConductanceConstraint(const InputPara
     _disp_secondary(_n_disp),
     _disp_primary(_n_disp)
 {
+#ifndef MOOSE_GLOBAL_AD_INDEXING
+  mooseError("ModularGapConductanceConstraint relies on use of the global indexing container "
+             "in order to make its implementation feasible");
+#endif
+
   for (unsigned int i = 0; i < _n_disp; ++i)
   {
     auto & disp_var = _subproblem.getStandardVariable(_tid, _disp_name[i]);

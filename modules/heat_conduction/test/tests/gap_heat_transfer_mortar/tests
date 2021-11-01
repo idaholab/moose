@@ -20,6 +20,7 @@
     design = 'ModularGapConductanceConstraint.md'
     issues = '#19229'
     requirement = 'We shall be able to produce the expected result for a gap conductance test case using the mortar method using the modular gap flux system.'
+    ad_indexing_type = 'global'
   [../]
   [./modular_multiple]
     type = 'Exodiff'
@@ -29,6 +30,7 @@
     design = 'ModularGapConductanceConstraint.md'
     issues = '#19229'
     requirement = 'We shall be able to produce the expected result for a combined gap conductance and radiative heat transfer test case using the mortar method using the modular gap flux system'
+    ad_indexing_type = 'global'
   [../]
 
   [./displaced]
