@@ -367,7 +367,18 @@ void
 ContactAction::addRelationshipManagers(Moose::RelationshipManagerType input_rm_type)
 {
   if (_formulation == ContactFormulation::MORTAR)
-    addRelationshipManagers(input_rm_type, _pars);
+  {
+    auto params = MortarConstraintBase::validParams();
+    params.set<bool>("use_displaced_mesh") = true;
+    std::string action_name = MooseUtils::shortName(name());
+    const std::string primary_subdomain_name = action_name + "_primary_subdomain";
+    const std::string secondary_subdomain_name = action_name + "_secondary_subdomain";
+    params.set<BoundaryName>("primary_boundary") = _boundary_pairs[0].first;
+    params.set<BoundaryName>("secondary_boundary") = _boundary_pairs[0].second;
+    params.set<SubdomainName>("primary_subdomain") = primary_subdomain_name;
+    params.set<SubdomainName>("secondary_subdomain") = secondary_subdomain_name;
+    addRelationshipManagers(input_rm_type, params);
+  }
 }
 
 void
