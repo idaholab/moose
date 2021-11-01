@@ -29,10 +29,12 @@ function configure_libmesh()
     exit 1
   fi
 
+  # Preserves capability in update_and_rebuild_libmesh.sh, but this is set in
+  # conda/libmesh/build.sh. If not, conda considers it an "unbound variable"
   if [[ -n "$INSTALL_BINARY" ]]; then
     echo "INFO: INSTALL_BINARY set"
   else
-    export INSTALL_BINARY="${SCRIPT_DIR}/../libmesh/build-aux/install-sh -C"
+    export INSTALL_BINARY="${SRC_DIR}/build-aux/install-sh -C"
   fi
 
   cd ${SRC_DIR}/build
