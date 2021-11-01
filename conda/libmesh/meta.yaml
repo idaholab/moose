@@ -8,7 +8,8 @@ package:
   version: {{ version }}
 
 source:
-  path: ../../libmesh
+  - path: ../../libmesh
+  - path: ../../scripts/configure_libmesh.sh
 
 build:
   number: {{ build }}

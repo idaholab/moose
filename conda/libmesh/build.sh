@@ -72,24 +72,12 @@ elif [[ $mpi == "moose-mpich" ]]; then
   export HYDRA_LAUNCHER=fork
 fi
 
-BUILD_CONFIG=`cat <<EOF
---enable-silent-rules \
---enable-unique-id \
---disable-warnings \
---enable-glibcxx-debugging \
---with-thread-model=openmp \
---disable-maintainer-mode \
---enable-petsc-hypre-required \
---enable-metaphysicl-required
-EOF`
-
-../configure ${BUILD_CONFIG} \
-                     --prefix=${PREFIX}/libmesh \
-                     --with-vtk-lib=${BUILD_PREFIX}/libmesh-vtk/lib \
-                     --with-vtk-include=${BUILD_PREFIX}/libmesh-vtk/include/vtk-${SHORT_VTK_NAME} \
-                     --with-methods="opt oprof devel dbg" \
-                     --without-gdb-command \
-                     --with-cxx-std-min=2014
+source $SRC_DIR/configure_libmesh.sh
+METHODS="opt oprof devel dbg" configure_libmesh --prefix=${PREFIX}/libmesh \
+                                                --with-vtk-lib=${BUILD_PREFIX}/libmesh-vtk/lib \
+                                                --with-vtk-include=${BUILD_PREFIX}/libmesh-vtk/include/vtk-${SHORT_VTK_NAME} \
+                                                --without-gdb-command \
+                                                $*
 
 make -j $CPU_COUNT
 make install
