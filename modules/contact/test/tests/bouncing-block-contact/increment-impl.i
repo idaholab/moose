@@ -149,7 +149,7 @@ offset = 1e-2
 
 [Constraints]
   [weighted_gap_lm]
-    type = ComputeWeightedGapLMMechanicalContact
+    type = IncrementalWeightedGapLMMechanicalContact
     primary_boundary = 20
     secondary_boundary = 10
     primary_subdomain = 4
