@@ -63,10 +63,6 @@ FaceInfo::FaceInfo(const Elem * elem, unsigned int side, const Elem * neighbor)
   _r_int =
       _elem_centroid + (((_face_centroid - _elem_centroid) * _normal) / (_e_cf * _normal)) * _e_cf;
 
-  // Decide if the element-pair is skewed (i.e. if it needs correction)
-  _skewed = ((_face_centroid - _r_int).norm() / _d_cf_mag) > 0.05;
-
-  // If not skewed use the regular compact stencil coefficients, if skewed use
-  // the modified ones
+  // Interpolation coefficients for skewness correction
   _gc_skewed = (_neighbor_centroid - _r_int).norm() / _d_cf_mag;
 }

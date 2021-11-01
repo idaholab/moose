@@ -283,7 +283,8 @@ public:
    * @param elem The element for which to retrieve the gradient
    * @return The gradient at the element centroid
    */
-  virtual const VectorValue<ADReal> & adGradSln(const Elem * const elem) const;
+  virtual const VectorValue<ADReal> & adGradSln(const Elem * const elem,
+                                                const bool correct_skewness = true) const;
 
   /**
    * Retrieve (or potentially compute) a cross-diffusion-corrected gradient on the provided face.
@@ -292,7 +293,8 @@ public:
    * gradients does
    * @param face The face for which to retrieve the gradient.
    */
-  const VectorValue<ADReal> & adGradSln(const FaceInfo & fi) const;
+  const VectorValue<ADReal> & adGradSln(const FaceInfo & fi,
+                                        const bool correct_skewness = true) const;
 
   /**
    * Retrieve (or potentially compute) the uncorrected gradient on the provided face. This
@@ -303,7 +305,8 @@ public:
    * is done in \p adGradSln(const FaceInfo & fi)
    * @param face The face for which to retrieve the gradient
    */
-  const VectorValue<ADReal> & uncorrectedAdGradSln(const FaceInfo & fi) const;
+  const VectorValue<ADReal> & uncorrectedAdGradSln(const FaceInfo & fi,
+                                                   const bool correct_skewness = true) const;
 
   /**
    * Retrieve the solution value at a boundary face. If we're using a one term Taylor series
@@ -479,7 +482,8 @@ public:
    */
   const ADReal & getInternalFaceValue(const Elem * const neighbor,
                                       const FaceInfo & fi,
-                                      const ADReal & elem_value) const;
+                                      const ADReal & elem_value,
+                                      const bool correct_skewness = true) const;
 
   using FunctorArg = typename Moose::ADType<OutputType>::type;
   using typename Moose::Functor<FunctorArg>::FaceArg;
@@ -686,11 +690,10 @@ private:
   /// A cache that maps from mesh vertices to interpolated finite volume solutions at those vertices
   mutable std::unordered_map<const Node *, ADReal> _vertex_to_value;
 
-  /// Whether to use an extended stencil for interpolating the solution to face centers. If this is
-  /// true then the face center value is computed as a weighted average of connected vertices. If it
-  /// is false, then the face center value is simply a linear interpolation betweeh the two
-  /// neighboring cell center values
-  const bool _use_extended_stencil;
+  /// Decides if a vertex-based, average or skewed corrected average is used for the
+  /// face interpolation. Other options are not taken into account here,
+  /// but at higher, kernel-based levels.
+  Moose::FV::InterpMethod _face_interp_method;
 };
 
 template <typename OutputType>

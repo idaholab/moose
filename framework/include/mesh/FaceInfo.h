@@ -65,14 +65,11 @@ public:
   /// Returns true if this face resides on the mesh boundary.
   bool isBoundary() const { return (_neighbor == nullptr); }
 
-  /// Returns true if the element connection is skewed.
-  /// Used for cases with skewness correction.
-  bool isSkewed() const { return _skewed; }
-
   /// Returns the coordinates of the face centroid.
   const Point & faceCentroid() const { return _face_centroid; }
 
-  /// Returns the coordinates of the face centroid.
+  /// Returns the coordinates of the approximate face centroid
+  /// in case of skewed meshes.
   Point rInt() const { return _r_int; }
 
   ///@{
@@ -253,17 +250,11 @@ private:
   /// Geometric weighting factor for face value interpolation
   Real _gc;
 
-  /// The vector to the intersection of d_{CF} and the face. Not constant
-  /// because the surface normal needs to be used for the computation.
+  /// The vector to the intersection of d_{CF} and the face.
   RealVectorValue _r_int;
 
-  /// Bool describing skewed elements connected with this face.
-  /// If ||r_f-r_{f'}\\ > 0.05*||d_cf||, then this is a skewed connection
-  /// and will need correction. The criterium may change in the future.
-  /// Not constant since _r_int is used for the computation.
-  bool _skewed;
-
-  /// Geometric weighting factor for face value interpolation
+  /// Geometric weighting factor for face value interpolation in case of skewed
+  /// cell-connections
   Real _gc_skewed;
 
   /// cached locations of variables in solution vectors
