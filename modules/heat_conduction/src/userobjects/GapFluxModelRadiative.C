@@ -27,17 +27,11 @@ GapFluxModelRadiative::validParams()
       "secondary_emissivity",
       "secondary_emissivity>0 && secondary_emissivity<=1",
       "Secondary surface emissivity");
-  params.addParam<Real>("min_gap",
-                        1e-6,
-                        "The minimum gap distance allowed. This helps with preventing the heat "
-                        "flux from going to infinity as the gap approaches zero.");
   return params;
 }
 
 GapFluxModelRadiative::GapFluxModelRadiative(const InputParameters & parameters)
   : GapFluxModelBase(parameters),
-    _k(getParam<Real>("k")),
-    _min_gap(getParam<Real>("min_gap")),
     _primary_T(adCoupledNeighborValue("T")),
     _secondary_T(adCoupledValue("T")),
     _sigma(getParam<Real>("sigma")),
@@ -49,7 +43,6 @@ GapFluxModelRadiative::GapFluxModelRadiative(const InputParameters & parameters)
 ADReal
 GapFluxModelRadiative::computeFlux(const ADReal & /*gap_width*/, unsigned int qp) const
 {
-  const auto d = (1.0 - _primary_emissivity[qp]) / _primary_emissivity[qp] +
-                 (1.0 - _secondary_emissivity[qp]) / _secondary_emissivity[qp];
-  return _sigma * (Utility::pow<4>(_primary_T[qp]) - Utility::pow<4>(_secondary_T[qp])) / d;
+  const auto Fe = 1.0 / (1.0 / _primary_emissivity[qp] + 1.0 / _secondary_emissivity[qp] - 1.0);
+  return _sigma * Fe * (Utility::pow<4>(_primary_T[qp]) - Utility::pow<4>(_secondary_T[qp]));
 }

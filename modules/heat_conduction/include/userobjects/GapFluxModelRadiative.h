@@ -24,12 +24,6 @@ public:
   ADReal computeFlux(const ADReal & gap_width, unsigned int qp) const override;
 
 protected:
-  /// Thermal conductivity of the gap medium (e.g. air).
-  const Real _k;
-
-  /// Minimum gap distance allowed
-  const Real _min_gap;
-
   /// Primary surface temperature
   const ADVariableValue & _primary_T;
   /// Secondary surface temperature

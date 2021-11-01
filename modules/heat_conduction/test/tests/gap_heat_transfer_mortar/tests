@@ -17,7 +17,18 @@
     custom_cmp = 'one-variable-temp.cmp'
     partial = True
     map = False
+    design = 'ModularGapConductanceConstraint.md'
+    issues = '#19229'
     requirement = 'We shall be able to produce the expected result for a gap conductance test case using the mortar method using the modular gap flux system.'
+  [../]
+  [./modular_multiple]
+    type = 'Exodiff'
+    input = 'gap_heat_transfer_radiation_test.i'
+    exodiff = 'gap_heat_transfer_radiation_test_out.e'
+    abs_zero = 1e-06
+    design = 'ModularGapConductanceConstraint.md'
+    issues = '#19229'
+    requirement = 'We shall be able to produce the expected result for a combined gap conductance and radiative heat transfer test case using the mortar method using the modular gap flux system'
   [../]
 
   [./displaced]

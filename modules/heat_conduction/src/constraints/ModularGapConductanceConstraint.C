@@ -45,6 +45,14 @@ ModularGapConductanceConstraint::ModularGapConductanceConstraint(const InputPara
   {
     const auto & gap_model = getUserObjectByName<GapFluxModelBase>(name);
 
+    // This constraint explicitly calls the gap flux model user objects to
+    // obtain contributions to its residuals. It therefore depends on all
+    // variables and material properties, that these gap flux models use, to be
+    // computed and up to date. To ensure that we collect all variable and
+    // material property dependencies of these models and declare them as
+    // dependencies of this constraint object. This turns an implicit, hidden
+    // dependency into an explicit dependency that MOOSE will automatically fulfill.
+
     // pass variable dependencies through
     const auto & var_dependencies = gap_model.getMooseVariableDependencies();
     for (const auto & var : var_dependencies)
@@ -83,11 +91,15 @@ ModularGapConductanceConstraint::computeQpResidual(Moose::MortarType mortar_type
           ad_phys_points_secondary(i).derivatives() = (*_disp_secondary[i])[_qp].derivatives();
         }
 
+      // compute an ADReal gap width to pass to each gap flux model
       const auto gap_width = (ad_phys_points_primary - ad_phys_points_secondary) * _normals[_qp];
+
+      // sum up all flux contributions from all supplied gap flux models
       ADReal flux = 0.0;
       for (const auto & model : _gap_flux_models)
         flux += model->computeFlux(gap_width, _qp);
 
+      // the Lagrange multiplier _is_ the gap flux
       return (_lambda[_qp] - flux) * _test[_i][_qp];
     }
 
