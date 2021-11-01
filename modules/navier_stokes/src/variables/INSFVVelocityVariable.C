@@ -301,26 +301,30 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem) const
       for (const auto ebf_index : make_range(num_ebfs))
         _face_to_value.emplace(ebf_faces[ebf_index].first, x(lm_dim + ebf_index));
 
-      // Cache the extrapolated face gradient information
-      auto it = ebf_faces.begin();
-      for (const auto fdf_index : make_range(num_fdf_faces))
+      if (_cache_face_gradients)
       {
-        it = std::find_if(it, ebf_faces.end(), [](const std::pair<const FaceInfo *, bool> & in) {
-          return in.second;
-        });
-        mooseAssert(it != ebf_faces.end(), "We should have found a fully developed flow face");
-        const auto starting_index =
-            static_cast<unsigned int>(lm_dim + num_ebfs + lm_dim * fdf_index);
-        auto pr = _face_to_unc_grad.emplace(it->first, VectorValue<ADReal>());
-        mooseAssert(pr.second, "We should have inserted a new face gradient");
-        for (const auto lm_index : make_range(lm_dim))
-          pr.first->second(lm_index) = x(starting_index + lm_index);
+        // Cache the extrapolated face gradient information
+        auto it = ebf_faces.begin();
+        for (const auto fdf_index : make_range(num_fdf_faces))
+        {
+          it = std::find_if(it, ebf_faces.end(), [](const std::pair<const FaceInfo *, bool> & in) {
+            return in.second;
+          });
+          mooseAssert(it != ebf_faces.end(), "We should have found a fully developed flow face");
 
-        // increment the iterator so we don't find the same element again
-        ++it;
+          const auto starting_index =
+              static_cast<unsigned int>(lm_dim + num_ebfs + lm_dim * fdf_index);
+
+          auto pr = _face_to_unc_grad.emplace(it->first, VectorValue<ADReal>());
+          mooseAssert(pr.second, "We should have inserted a new face gradient");
+          for (const auto lm_index : make_range(lm_dim))
+            pr.first->second(lm_index) = x(starting_index + lm_index);
+
+          // increment the iterator so we don't find the same element again
+          ++it;
+        }
       }
     }
-
     auto pr = _elem_to_grad.emplace(elem, std::move(grad));
     mooseAssert(pr.second, "Insertion should have just happened.");
     return pr.first->second;

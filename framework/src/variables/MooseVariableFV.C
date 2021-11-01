@@ -41,12 +41,17 @@ MooseVariableFV<OutputType>::validParams()
   params.template addParam<bool>(
       "two_term_boundary_expansion",
       true,
-      "Whether to use a two-term Taylor expansion to calculate boundary face values. If set to "
-      "false, the element centroid value will be used for the boundary face value. If the two-term "
-      "expansion is used, then the boundary face value depends on the adjoining cell center "
-      "gradient, which itself depends on the boundary face value. Consequently an implicit solve "
-      "is used to simultaneously solve for the adjoining cell center gradient and boundary face "
-      "value(s).");
+      "Whether to use a two-term Taylor expansion to calculate boundary face values. "
+      "If the two-term expansion is used, then the boundary face value depends on the "
+      "adjoining cell center gradient, which itself depends on the boundary face value. "
+      "Consequently an implicit solve is used to simultaneously solve for the adjoining cell "
+      "center gradient and boundary face value(s).");
+  params.template addParam<bool>(
+      "cache_face_gradients", false, "Whether to cache face gradients or re-compute them.");
+  params.template addParam<bool>("cache_face_values",
+                                 false,
+                                 "Whether to cache face values or re-compute them. Values for "
+                                 "extrapolated boundary conditions are always cached.");
 #endif
   return params;
 }
@@ -69,6 +74,12 @@ MooseVariableFV<OutputType>::MooseVariableFV(const InputParameters & parameters)
     _two_term_boundary_expansion(this->isParamValid("two_term_boundary_expansion")
                                      ? this->template getParam<bool>("two_term_boundary_expansion")
                                      : false),
+    _cache_face_gradients(this->isParamValid("cache_face_gradients")
+                              ? this->template getParam<bool>("cache_face_gradients")
+                              : false),
+    _cache_face_values(this->isParamValid("cache_face_values")
+                           ? this->template getParam<bool>("cache_face_values")
+                           : false),
     // If the user doesn't specify a MooseVariableFV type in the input file, then we won't have
     // these parameters available
     _use_extended_stencil(this->isParamValid("use_extended_stencil")
@@ -79,6 +90,11 @@ MooseVariableFV<OutputType>::MooseVariableFV(const InputParameters & parameters)
       *this, _sys, _tid, Moose::ElementType::Element, this->_assembly.elem());
   _neighbor_data = libmesh_make_unique<MooseVariableDataFV<OutputType>>(
       *this, _sys, _tid, Moose::ElementType::Neighbor, this->_assembly.neighbor());
+
+  // Resize vectors used when not caching variables
+  _temp_face_unc_gradients.resize(libMesh::n_threads());
+  _temp_face_gradients.resize(libMesh::n_threads());
+  _temp_face_values.resize(libMesh::n_threads());
 }
 
 template <typename OutputType>
@@ -598,13 +614,19 @@ MooseVariableFV<OutputType>::getInternalFaceValue(const Elem * const neighbor,
 
   mooseAssert(isInternalFace(fi), "This function only be called on internal faces.");
 
-  auto pr = _face_to_value.emplace(&fi, 0);
+  ADReal * value_pointer = &_temp_face_values[_tid];
+  if (_cache_face_values)
+  {
+    auto pr = _face_to_value.emplace(&fi, 0);
 
-  if (!pr.second)
-    // Insertion didn't happen...we already have a value ready to go
-    return pr.first->second;
+    if (!pr.second)
+      // Insertion didn't happen...we already have a value ready to go
+      return pr.first->second;
 
-  ADReal & value = pr.first->second;
+    value_pointer = &pr.first->second;
+  }
+
+  ADReal & value = *value_pointer;
 
   if (_use_extended_stencil)
   {
@@ -654,13 +676,19 @@ MooseVariableFV<OutputType>::getDirichletBoundaryFaceValue(const FaceInfo & fi) 
   mooseAssert(isDirichletBoundaryFace(fi),
               "This function should only be called on Dirichlet boundary faces.");
 
-  auto pr = _face_to_value.emplace(&fi, 0);
+  ADReal * value_pointer = &_temp_face_values[_tid];
+  if (_cache_face_values)
+  {
+    auto pr = _face_to_value.emplace(&fi, 0);
 
-  if (!pr.second)
-    // Insertion didn't happen...we already have a value ready to go
-    return pr.first->second;
+    if (!pr.second)
+      // Insertion didn't happen...we already have a value ready to go
+      return pr.first->second;
 
-  ADReal & value = pr.first->second;
+    value_pointer = &pr.first->second;
+  }
+
+  ADReal & value = *value_pointer;
 
   const auto & diri_pr = getDirichletBC(fi);
 
@@ -715,9 +743,17 @@ MooseVariableFV<OutputType>::getExtrapolatedBoundaryFaceValue(const FaceInfo & f
   else
   {
     // We are doing a one-term Taylor expansion and the face value is simply the centroid value
-    const auto & pr = _face_to_value.emplace(&fi, getElemValue(elem));
-    mooseAssert(pr.second, "This should have inserted a new key-value pair");
-    return pr.first->second;
+    if (_cache_face_values)
+    {
+      const auto & pr = _face_to_value.emplace(&fi, getElemValue(elem));
+      mooseAssert(pr.second, "This should have inserted a new key-value pair");
+      return pr.first->second;
+    }
+    else
+    {
+      _temp_face_values[_tid] = getElemValue(elem);
+      return _temp_face_values[_tid];
+    }
   }
 }
 
@@ -731,10 +767,13 @@ MooseVariableFV<OutputType>::getBoundaryFaceValue(const FaceInfo & fi) const
 
   mooseAssert(!isInternalFace(fi), "A boundary face value has been requested on an internal face.");
 
-  // Check to see whether it's already in our cache
-  auto it = _face_to_value.find(&fi);
-  if (it != _face_to_value.end())
-    return it->second;
+  if (_cache_face_values)
+  {
+    // Check to see whether it's already in our cache
+    auto it = _face_to_value.find(&fi);
+    if (it != _face_to_value.end())
+      return it->second;
+  }
 
   if (isDirichletBoundaryFace(fi))
     return getDirichletBoundaryFaceValue(fi);
@@ -766,7 +805,7 @@ MooseVariableFV<OutputType>::adGradSln(const Elem * const elem) const
 
   try
   {
-    VectorValue<ADReal> grad = 0;
+    VectorValue<ADReal> grad;
 
     bool volume_set = false;
     Real volume = 0;
@@ -975,10 +1014,13 @@ MooseVariableFV<OutputType>::uncorrectedAdGradSln(const FaceInfo & fi) const
   mooseError("MooseVariableFV::uncorrectedAdGradSln only supported for global AD indexing");
 #endif
 
-  auto it = _face_to_unc_grad.find(&fi);
+  if (_cache_face_gradients)
+  {
+    auto it = _face_to_unc_grad.find(&fi);
 
-  if (it != _face_to_unc_grad.end())
-    return it->second;
+    if (it != _face_to_unc_grad.end())
+      return it->second;
+  }
 
   auto tup = Moose::FV::determineElemOneAndTwo(fi, *this);
   const Elem * const elem_one = std::get<0>(tup);
@@ -987,13 +1029,22 @@ MooseVariableFV<OutputType>::uncorrectedAdGradSln(const FaceInfo & fi) const
 
   const VectorValue<ADReal> & elem_one_grad = adGradSln(elem_one);
 
-  // Returns a pair with the first being an iterator pointing to the key-value pair and the second
-  // a boolean denoting whether a new insertion took place
-  auto emplace_ret = _face_to_unc_grad.emplace(&fi, elem_one_grad);
+  VectorValue<ADReal> * unc_face_grad_pointer = &_temp_face_unc_gradients[_tid];
 
-  mooseAssert(emplace_ret.second, "We should have inserted a new key-value pair");
+  if (_cache_face_gradients)
+  {
+    // Returns a pair with the first being an iterator pointing to the key-value pair and the second
+    // a boolean denoting whether a new insertion took place
+    auto emplace_ret = _face_to_unc_grad.emplace(&fi, elem_one_grad);
 
-  VectorValue<ADReal> & unc_face_grad = emplace_ret.first->second;
+    mooseAssert(emplace_ret.second, "We should have inserted a new key-value pair");
+
+    unc_face_grad_pointer = &emplace_ret.first->second;
+  }
+  else
+    *unc_face_grad_pointer = elem_one_grad;
+
+  VectorValue<ADReal> & unc_face_grad = *unc_face_grad_pointer;
 
   // If we have a neighbor then we interpolate between the two to the face. If we do not, then we
   // apply a zero Hessian assumption and use the element centroid gradient as the uncorrected face
@@ -1018,18 +1069,27 @@ MooseVariableFV<OutputType>::adGradSln(const FaceInfo & fi) const
   mooseError("MooseVariableFV::adGradSln only supported for global AD indexing");
 #endif
 
-  auto it = _face_to_grad.find(&fi);
+  // Use a pointer to choose the right reference
+  VectorValue<ADReal> * face_grad_pointer = &_temp_face_gradients[_tid];
+  if (_cache_face_gradients)
+  {
+    auto it = _face_to_grad.find(&fi);
 
-  if (it != _face_to_grad.end())
-    return it->second;
+    if (it != _face_to_grad.end())
+      return it->second;
 
-  // Returns a pair with the first being an iterator pointing to the key-value pair and the second
-  // a boolean denoting whether a new insertion took place
-  auto emplace_ret = _face_to_grad.emplace(&fi, uncorrectedAdGradSln(fi));
+    // Returns a pair with the first being an iterator pointing to the key-value pair and the second
+    // a boolean denoting whether a new insertion took place
+    auto emplace_ret = _face_to_grad.emplace(&fi, uncorrectedAdGradSln(fi));
 
-  mooseAssert(emplace_ret.second, "We should have inserted a new key-value pair");
+    mooseAssert(emplace_ret.second, "We should have inserted a new key-value pair");
 
-  VectorValue<ADReal> & face_grad = emplace_ret.first->second;
+    face_grad_pointer = &emplace_ret.first->second;
+  }
+  else
+    *face_grad_pointer = uncorrectedAdGradSln(fi);
+
+  VectorValue<ADReal> & face_grad = *face_grad_pointer;
 
   auto tup = Moose::FV::determineElemOneAndTwo(fi, *this);
   const Elem * const elem_one = std::get<0>(tup);

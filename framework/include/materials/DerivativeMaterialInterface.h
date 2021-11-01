@@ -72,7 +72,7 @@ public:
 
   ///@{
   /**
-   * Methods for retreiving derivative material properties
+   * Methods for retrieving derivative material properties
    * @tparam U The material property type
    * @param base The name of the property to take the derivative of
    * @param c The variable(s) to take the derivatives with respect to
@@ -94,7 +94,7 @@ public:
   ///@}
 
   /**
-   *@{ Convenience methods fro retrieving derivative material properties based
+   *@{ Convenience methods for retrieving derivative material properties based
    *   on a mix of variable names `c` and indices `v` into the
    *   _coupled_standard_moose_vars vector.
    */
@@ -115,7 +115,7 @@ public:
 
   ///@{
   /**
-   * Methods for retreiving derivative material properties
+   * Methods for retrieving derivative material properties
    * @tparam U The material property type
    * @param base The name of the property to take the derivative of
    * @param c The variable(s) to take the derivatives with respect to
