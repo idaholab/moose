@@ -35,4 +35,12 @@ Real computeSTD(const std::vector<Real> & data, const unsigned int & start_index
  */
 Real computeMean(const std::vector<Real> & data, const unsigned int & start_index);
 
+std::vector<Real> sortINPUT(const std::vector<Real> & inputs, const std::vector<Real> & outputs, const int & samplessub, const unsigned int & subset, const Real & subset_prob);
+
+std::vector<Real> sortOUTPUT(const std::vector<Real> & outputs, const int & samplessub, const unsigned int & subset, const Real & subset_prob);
+
+Real computeMIN(const std::vector<Real> & data);
+
+std::vector<Real> computeVectorABS(const std::vector<Real> & data);
+
 } // namespace AdaptiveMonteCarloUtils
