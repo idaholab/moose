@@ -145,11 +145,13 @@ if [ -z "$go_fast" ]; then
   mkdir -p $LIBMESH_BUILD_DIR
   cd $LIBMESH_BUILD_DIR
 
-  if [[ -n "$INSTALL_BINARY" ]]; then
-    echo "INFO: INSTALL_BINARY set"
-  else
-    export INSTALL_BINARY="${SCRIPT_DIR}/../libmesh/build-aux/install-sh -C"
-  fi
+  # The definition of INSTALL_BINARY, previously located here, is now located within the `configure_libmesh.sh`
+  # script used below. This change was made to fixup a netCDF configure error related to supposed changes
+  # in the environment from a previous run (even if the configure was the first performed). That was somehow
+  # resolved by placing the INSTALL configure argument at the end of the configure line within the script. It
+  # was determined that the INSTALL_BINARY definition should be placed within the function, to lessen confusion,
+  # and that an explanation for longtime users be placed here for future reference. See #19230 for an example of
+  # the error.
 
   # This is a temprorary fix, see #15120
   if [[ -n "$CPPFLAGS" ]]; then
@@ -161,8 +163,7 @@ if [ -z "$go_fast" ]; then
   fi
 
   source $SCRIPT_DIR/configure_libmesh.sh
-  SRC_DIR=${SCRIPT_DIR}/../libmesh configure_libmesh INSTALL="${INSTALL_BINARY}" \
-                                                     --prefix=$LIBMESH_DIR \
+  SRC_DIR=${SCRIPT_DIR}/../libmesh configure_libmesh --prefix=$LIBMESH_DIR \
                                                      $DISABLE_TIMESTAMPS \
                                                      $VTK_OPTIONS \
                                                      $* | tee -a "$SCRIPT_DIR/$DIAGNOSTIC_LOG" || exit 1

@@ -29,6 +29,12 @@ function configure_libmesh()
     exit 1
   fi
 
+  if [[ -n "$INSTALL_BINARY" ]]; then
+    echo "INFO: INSTALL_BINARY set"
+  else
+    export INSTALL_BINARY="${SCRIPT_DIR}/../libmesh/build-aux/install-sh -C"
+  fi
+
   cd ${SRC_DIR}/build
   ../configure --enable-silent-rules \
                --enable-unique-id \
@@ -40,6 +46,7 @@ function configure_libmesh()
                --enable-metaphysicl-required \
                --with-cxx-std-min=2014 \
                --with-methods="${METHODS}" \
+               INSTALL="${INSTALL_BINARY}" \
                $*
 
   return $?
