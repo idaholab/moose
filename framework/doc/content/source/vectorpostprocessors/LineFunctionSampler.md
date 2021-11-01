@@ -1,33 +1,21 @@
 # LineFunctionSampler
 
-!alert! construction title=Undocumented Class
-The LineFunctionSampler has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# LineFunctionSampler
-
 !syntax description /VectorPostprocessors/LineFunctionSampler
 
-## Overview
+The output to CSV is by default ordered as follows:
 
-!! Replace these lines with information regarding the LineFunctionSampler object.
+- rows are ordered by point sampled along the line
 
-## Example Input File Syntax
+- columns are ordered by alphabetical order of the functions sampled. The distance along the sampled line, and the x, y and z coordinates of the sampled points are added to the output as additional columns.
 
-!! Describe and include an example of how to use the LineFunctionSampler object.
 
-!syntax parameters /VectorPostprocessors/LineFunctionSampler
+The order can be changed using the `sort_by` parameter.
 
-!syntax inputs /VectorPostprocessors/LineFunctionSampler
+## Example input syntax
 
-!syntax children /VectorPostprocessors/LineFunctionSampler
-```
-!alert-end!
+In this example, the `LineFunctionSampler` is used to sample two functions across a line from '0 0 0' to '1 1 0'. The functions are specified directly in the `functions` parameter as their simple definition in terms of the x and y coordinates can be parsed directly. Functions are usually specified in the `[Functions]` block.
 
-!syntax description /VectorPostprocessors/LineFunctionSampler
+!listing test/tests/vectorpostprocessors/line_function_sampler/line_function_sampler.i block=VectorPostprocessors
 
 !syntax parameters /VectorPostprocessors/LineFunctionSampler
 

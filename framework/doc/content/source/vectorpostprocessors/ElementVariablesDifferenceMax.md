@@ -1,33 +1,28 @@
 # ElementVariablesDifferenceMax
 
-!alert! construction title=Undocumented Class
-The ElementVariablesDifferenceMax has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# ElementVariablesDifferenceMax
-
 !syntax description /VectorPostprocessors/ElementVariablesDifferenceMax
 
-## Overview
+This postprocessor can find the maximum of the difference or the absolute difference depending on the `furthest_from_zero` parameter.
+This vector postprocessor returns the following information, in this order:
 
-!! Replace these lines with information regarding the ElementVariablesDifferenceMax object.
+- the maximum difference between the two variables
 
-## Example Input File Syntax
+- the value of variable A at the location of the maximum difference
 
-!! Describe and include an example of how to use the ElementVariablesDifferenceMax object.
+- the value of variable B at the location of the maximum difference
 
-!syntax parameters /VectorPostprocessors/ElementVariablesDifferenceMax
+- the first (X in Cartesian) coordinate of the location of the maximum difference
 
-!syntax inputs /VectorPostprocessors/ElementVariablesDifferenceMax
+- the second (X in Cartesian) coordinate of the location of the maximum difference
 
-!syntax children /VectorPostprocessors/ElementVariablesDifferenceMax
-```
-!alert-end!
+- the third (X in Cartesian) coordinate of the location of the maximum difference
 
-!syntax description /VectorPostprocessors/ElementVariablesDifferenceMax
+
+## Example input syntax
+
+In this example, we compare variable `u` and `v` using a `ElementVariablesDifferenceMax` vector postprocessor.
+
+!listing test/tests/vectorpostprocessors/element_variables_difference_max/element_variables_difference_max.i block=VectorPostprocessors
 
 !syntax parameters /VectorPostprocessors/ElementVariablesDifferenceMax
 

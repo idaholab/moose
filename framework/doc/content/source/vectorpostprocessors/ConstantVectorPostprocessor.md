@@ -1,33 +1,16 @@
 # ConstantVectorPostprocessor
 
-!alert! construction title=Undocumented Class
-The ConstantVectorPostprocessor has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# ConstantVectorPostprocessor
-
 !syntax description /VectorPostprocessors/ConstantVectorPostprocessor
 
-## Overview
+The constant data is specified with a vector names, and a vector of vectors of values for each name. The vectors of values are separated by semicolons.
 
-!! Replace these lines with information regarding the ConstantVectorPostprocessor object.
+A constant vector postprocessor is not generally used for output or postprocessing, but more to isolate part of the system using constant inputs. For example, if a subapp communicates with the main app by transfering a vector postprocessor, a `ConstantVectorPostprocessor` may be used to replace that transfer for debugging or parametric study purposes.
 
-## Example Input File Syntax
+## Example input syntax
 
-!! Describe and include an example of how to use the ConstantVectorPostprocessor object.
+In this example, two `ConstantVectorPostprocessor` are used to specify three vectors `a b c`. They are tied to each vector postprocessor, so the two do not conflict despite their similar name.
 
-!syntax parameters /VectorPostprocessors/ConstantVectorPostprocessor
-
-!syntax inputs /VectorPostprocessors/ConstantVectorPostprocessor
-
-!syntax children /VectorPostprocessors/ConstantVectorPostprocessor
-```
-!alert-end!
-
-!syntax description /VectorPostprocessors/ConstantVectorPostprocessor
+!listing test/tests/transfers/reporter_transfer/main.i block=VectorPostprocessors
 
 !syntax parameters /VectorPostprocessors/ConstantVectorPostprocessor
 

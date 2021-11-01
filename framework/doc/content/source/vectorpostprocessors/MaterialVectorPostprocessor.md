@@ -1,33 +1,22 @@
 # MaterialVectorPostprocessor
 
-!alert! construction title=Undocumented Class
-The MaterialVectorPostprocessor has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# MaterialVectorPostprocessor
-
 !syntax description /VectorPostprocessors/MaterialVectorPostprocessor
 
-## Overview
+The `MaterialVectorPostprocessor` output to CSV is sorted as follows:
 
-!! Replace these lines with information regarding the MaterialVectorPostprocessor object.
+- the first column is the element ID, the last column is the quadrature point, and the columns in between are all the material properties from the requested [`Material`](syntax/Materials/index.md).
 
-## Example Input File Syntax
+- the rows are major (outer) sorted by element ID and minor (inner) sorted by quadrature point. Quadrature points are sorted by increasing order. Element IDs are also sorted by increasing order, with no regards to the user ordering in the `elem_ids` parameter.
 
-!! Describe and include an example of how to use the MaterialVectorPostprocessor object.
 
-!syntax parameters /VectorPostprocessors/MaterialVectorPostprocessor
+!alert note
+Only scalar variables (floating point and integer-valued) are supported by the vector postprocessor. Vector-valued material properties are not currently supported, though this addition would not be difficult and would be a welcome contribution.
 
-!syntax inputs /VectorPostprocessors/MaterialVectorPostprocessor
+## Example input syntax
 
-!syntax children /VectorPostprocessors/MaterialVectorPostprocessor
-```
-!alert-end!
+In this example, we request in a `MaterialVectorPostprocessor` the output of the three material properties defined by the `mat` material.
 
-!syntax description /VectorPostprocessors/MaterialVectorPostprocessor
+!listing test/tests/vectorpostprocessors/material_vector_postprocessor/basic.i block=VectorPostprocessors
 
 !syntax parameters /VectorPostprocessors/MaterialVectorPostprocessor
 
