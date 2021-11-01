@@ -108,6 +108,9 @@ public:
   void zeroInactiveLMDofs(const std::unordered_set<const Node *> & inactive_lm_nodes,
                           const std::unordered_set<const Elem *> & inactive_lm_elems);
 
+protected:
+  const FEProblemBase & feProblem() const { return _fe_problem; }
+
 private:
   /// Reference to the finite element problem
   FEProblemBase & _fe_problem;

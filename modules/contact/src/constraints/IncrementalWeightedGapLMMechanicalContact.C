@@ -14,6 +14,8 @@
 #include "libmesh/mesh_base.h"
 #include "libmesh/system.h"
 #include "libmesh/node.h"
+#include "libmesh/petsc_matrix.h"
+#include <petscmat.h>
 
 registerMooseObject("ContactApp", IncrementalWeightedGapLMMechanicalContact);
 
@@ -147,6 +149,9 @@ IncrementalWeightedGapLMMechanicalContact::residualSetup()
 {
   _D.zero();
   _M.zero();
+  if (!feProblem().errorOnJacobianNonzeroReallocation())
+    MatSetOption(
+        static_cast<PetscMatrix<Number> &>(_M).mat(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
   ComputeWeightedGapLMMechanicalContact::residualSetup();
 }
 
@@ -209,8 +214,8 @@ IncrementalWeightedGapLMMechanicalContact::initialSetup()
     const auto global_dof = pr.first;
     const auto node_id = pr.second;
     _rows[i] = global_dof;
-    _node_id_to_mortar_disp_indices[node_id][disp_num] = i;
-    disp_num = ++disp_num % _n_disp;
+    _node_id_to_mortar_disp_indices[node_id][disp_num++] = i;
+    disp_num %= _n_disp;
   }
 }
 
@@ -236,10 +241,13 @@ IncrementalWeightedGapLMMechanicalContact::buildIncrements()
   u_old.create_subvector(*d_primary_old, _cols);
 
   // Convert into increment vectors
+  _delta_d->close();
+  d_primary->close();
   (*_delta_d) -= *d_secondary_old;
   (*d_primary) -= *d_primary_old;
 
   // Compute inverse of D
+  _sub_D->close();
   auto D_inv = _sub_D->clone();
   D_inv->reciprocal();
 
@@ -253,6 +261,7 @@ IncrementalWeightedGapLMMechanicalContact::buildIncrements()
   D_inv_mat->close();
 
   // Form Mhat
+  sub_M->close();
   auto Mhat = SparseMatrix<Number>::build(_M.comm());
   D_inv_mat->matrix_matrix_mult(*sub_M, *Mhat, /*reuse=*/false);
 
@@ -263,6 +272,7 @@ IncrementalWeightedGapLMMechanicalContact::buildIncrements()
 
   // finish off increment computation. Hartmann equation 31
   (*_delta_d) -= *work_vec;
+  _delta_d->close();
 }
 
 void
