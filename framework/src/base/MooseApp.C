@@ -2263,6 +2263,11 @@ MooseApp::attachRelationshipManagers(MeshBase & mesh, MooseMesh & moose_mesh)
   {
     if (rm->isType(Moose::RelationshipManagerType::GEOMETRIC))
     {
+      // If the RM requires the displaced mesh to function properly, then we must tell it to attach
+      // later because we do not have the displaced mesh available yet
+      if (rm->useDisplacedMesh() && rm->attachGeometricEarly())
+        rm->attachGeometricEarly(false);
+
       if (rm->attachGeometricEarly())
         mesh.add_ghosting_functor(createRMFromTemplateAndInit(*rm, mesh));
       else
@@ -2301,8 +2306,19 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type,
 
     if (rm_type == Moose::RelationshipManagerType::GEOMETRIC)
     {
+      // If the RM requires the displaced mesh to function properly, then we must tell it to attach
+      // later because we do not have the displaced mesh available yet
+      if (rm->useDisplacedMesh() && rm->attachGeometricEarly())
+        rm->attachGeometricEarly(false);
+
       // The problem is not built yet - so the ActionWarehouse currently owns the mesh
       MooseMesh * const mesh = _action_warehouse.mesh().get();
+
+      // We have four scenarios:
+      // rm wants attachment early && app doing late attachments -> covered
+      // rm doesn't want attachment early && app doing late attachments -> uncovered
+      // rm wants attachment early && app not doing late attachments -> uncovered
+      // rm doesn't want attachment early && app not doing late attachments -> uncovered
 
       // "attach_geometric_rm_final = true" inidicate that it is the last chance to attach
       // geometric RMs. Therefore, we need to attach them.
@@ -2314,18 +2330,46 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type,
           mooseError("We should have attached a MeshBase object to the mesh by now");
 
         mesh->allowRemoteElementRemoval(false);
+
+        continue;
       }
-      else
-      {
+
+      // Update:
+      // rm wants attachment early && app doing late attachments -> covered
+      // rm doesn't want attachment early && app doing late attachments -> uncovered
+      // rm wants attachment early && app not doing late attachments -> uncovered
+      // rm doesn't want attachment early && app not doing late attachments -> covered
+
+      auto add_geo_rm_to_undisplaced = [this, mesh, &rm]() {
         MeshBase & undisp_mesh_base = mesh->getMesh();
         const DofMap * const undisp_nl_dof_map =
             _executioner ? &_executioner->feProblem().systemBaseNonlinear().dofMap() : nullptr;
         undisp_mesh_base.add_ghosting_functor(
             createRMFromTemplateAndInit(*rm, undisp_mesh_base, undisp_nl_dof_map));
+      };
 
-        // In the final stage, if there is a displaced mesh, we need to
-        // clone ghosting functors for displacedMesh
-        if (attach_geometric_rm_final && _action_warehouse.displacedMesh())
+      if (rm->attachGeometricEarly())
+      {
+        // If we got inside here, then we are in the early geometric attachment stage, and we are
+        // not an RM that is supposed to act on the displaced mesh (because we mark those as
+        // requiring late attachment)
+        add_geo_rm_to_undisplaced();
+        continue;
+      }
+
+      // Update:
+      // rm wants attachment early && app doing late attachments -> covered
+      // rm doesn't want attachment early && app doing late attachments -> uncovered
+      // rm wants attachment early && app not doing late attachments -> covered
+      // rm doesn't want attachment early && app not doing late attachments -> covered
+
+      // Let's check if we really have covered the cases we think we've covered
+      mooseAssert(attach_geometric_rm_final && !rm->attachGeometricEarly(),
+                  "Our assumptions about RMs are wrong!!");
+
+      if (rm->useDisplacedMesh())
+      {
+        if (_action_warehouse.displacedMesh())
         {
           MeshBase & disp_mesh_base = _action_warehouse.displacedMesh()->getMesh();
           const DofMap * disp_nl_dof_map = nullptr;
@@ -2334,11 +2378,18 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type,
                 &_executioner->feProblem().getDisplacedProblem()->systemBaseNonlinear().dofMap();
           disp_mesh_base.add_ghosting_functor(
               createRMFromTemplateAndInit(*rm, disp_mesh_base, disp_nl_dof_map));
+          continue;
         }
-        else if (_action_warehouse.displacedMesh())
-          mooseError("The displaced mesh should not yet exist at the time that we are attaching "
-                     "early geometric relationship managers.");
+        else
+          // It's late in the game. At this stage in the MOOSE task list we're well past the time
+          // when a displaced mesh and problem would have been created. So we should tell the RM
+          // that you shouldn't *actually* use the displaced mesh
+          rm->useDisplacedMesh(false);
       }
+
+      mooseAssert(!rm->useDisplacedMesh(),
+                  "We should only be dealing with RMs that wanted the reference mesh now.");
+      add_geo_rm_to_undisplaced();
     }
     else // rm_type is algebraic or coupling
     {

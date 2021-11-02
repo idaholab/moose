@@ -25,6 +25,7 @@
 #include "libmesh/parallel.h"
 #include "libmesh/error_vector.h"
 #include "libmesh/distributed_mesh.h"
+#include "libmesh/mesh_tools.h"
 
 #ifdef LIBMESH_ENABLE_AMR
 
@@ -221,21 +222,88 @@ Adaptivity::adaptMesh(std::string marker_name /*=std::string()*/)
     _mesh_refinement->make_flags_parallel_consistent();
 
   // Perform refinement and coarsening
+  auto & lm_mesh = _mesh_refinement->get_mesh();
+  const auto old_removal_flag = lm_mesh.allow_remote_element_removal();
+  const auto old_renumbering_flag = lm_mesh.allow_renumbering();
+  if (_displaced_problem)
+  {
+    // If we have both reference and displaced meshes, then we have to be very careful to keep them
+    // in sync. We have proxy relationship managers that rely on matching ghosted elements via
+    // unique id, so given that, we must make sure that we do not try to delete elements or renumber
+    // them (changing their unique id) at the stage that only one mesh has been refined. We must
+    // wait until both meshes have been refined
+    lm_mesh.allow_remote_element_removal(false);
+    lm_mesh.allow_renumbering(false);
+  }
   mesh_changed = _mesh_refinement->refine_and_coarsen_elements();
 
-  if (_displaced_problem && mesh_changed)
+  if (_displaced_problem)
   {
-    // If markers are added to only local elements,
-    // we sync them here.
-    if (distributed_adaptivity)
-      _displaced_mesh_refinement->make_flags_parallel_consistent();
-#ifndef NDEBUG
-    bool displaced_mesh_changed =
-#endif
-        _displaced_mesh_refinement->refine_and_coarsen_elements();
+    if (mesh_changed)
+    {
+      // If markers are added to only local elements,
+      // we sync them here.
+      if (distributed_adaptivity)
+        _displaced_mesh_refinement->make_flags_parallel_consistent();
 
-    // Since the undisplaced mesh changed, the displaced mesh better have changed!
-    mooseAssert(displaced_mesh_changed, "Undisplaced mesh changed, but displaced mesh did not!");
+      auto & disp_lm_mesh = _displaced_mesh_refinement->get_mesh();
+      mooseAssert(disp_lm_mesh.allow_remote_element_removal() == old_removal_flag,
+                  "Reference and displaced meshes out of sync.");
+      mooseAssert(disp_lm_mesh.allow_renumbering() == old_renumbering_flag,
+                  "Reference and displaced meshes out of sync.");
+      disp_lm_mesh.allow_remote_element_removal(false);
+      disp_lm_mesh.allow_renumbering(false);
+
+#ifndef NDEBUG
+      bool displaced_mesh_changed =
+#endif
+          _displaced_mesh_refinement->refine_and_coarsen_elements();
+
+      // Since the undisplaced mesh changed, the displaced mesh better have changed!
+      mooseAssert(displaced_mesh_changed, "Undisplaced mesh changed, but displaced mesh did not!");
+
+      //
+      // During the prepare_for_use that occurred during each mesh refinement's
+      // refine_and_coarsen_element calls, we did not allow remote element removal or renumbering
+      // because of sync concerns. Now that we've refined both meshes, we can march forward
+      //
+
+      lm_mesh.allow_remote_element_removal(old_removal_flag);
+      disp_lm_mesh.allow_remote_element_removal(old_removal_flag);
+      if (old_removal_flag)
+      {
+        lm_mesh.delete_remote_elements();
+        disp_lm_mesh.delete_remote_elements();
+      }
+
+      auto finish_processing_mesh = [old_renumbering_flag](MeshBase & mesh) {
+        //
+        // This code comes from the latter half of MeshBase::prepare_for_use
+        //
+        mesh.get_boundary_info().regenerate_id_sets();
+
+        mesh.allow_renumbering(old_renumbering_flag);
+        if (old_renumbering_flag)
+          mesh.renumber_nodes_and_elements();
+
+        mooseAssert(mesh.is_prepared(),
+                    "Did any of these processing calls register the mesh as unprepared?");
+
+#if defined(DEBUG) && defined(LIBMESH_ENABLE_UNIQUE_ID)
+        MeshTools::libmesh_assert_valid_boundary_ids(mesh);
+        MeshTools::libmesh_assert_valid_unique_ids(mesh);
+#endif
+      };
+
+      finish_processing_mesh(lm_mesh);
+      finish_processing_mesh(disp_lm_mesh);
+    }
+    else
+    {
+      // We toggled these to false earlier so we must make sure to toggle them back
+      lm_mesh.allow_remote_element_removal(old_removal_flag);
+      lm_mesh.allow_renumbering(old_renumbering_flag);
+    }
   }
 
   if (mesh_changed && _print_mesh_changed)
