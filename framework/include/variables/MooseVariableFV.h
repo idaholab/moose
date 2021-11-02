@@ -207,6 +207,8 @@ public:
     return _neighbor_data->dofIndices();
   }
 
+  virtual Moose::FV::InterpMethod faceInterpolationMethod() const { return _face_interp_method; }
+
   void clearAllDofIndices() final;
 
   const DoFValue & nodalVectorTagValue(TagID) const override
@@ -284,7 +286,7 @@ public:
    * @return The gradient at the element centroid
    */
   virtual const VectorValue<ADReal> & adGradSln(const Elem * const elem,
-                                                const bool correct_skewness = true) const;
+                                                const bool correct_skewness = false) const;
 
   /**
    * Retrieve (or potentially compute) a cross-diffusion-corrected gradient on the provided face.
@@ -294,7 +296,7 @@ public:
    * @param face The face for which to retrieve the gradient.
    */
   const VectorValue<ADReal> & adGradSln(const FaceInfo & fi,
-                                        const bool correct_skewness = true) const;
+                                        const bool correct_skewness = false) const;
 
   /**
    * Retrieve (or potentially compute) the uncorrected gradient on the provided face. This
@@ -306,7 +308,7 @@ public:
    * @param face The face for which to retrieve the gradient
    */
   const VectorValue<ADReal> & uncorrectedAdGradSln(const FaceInfo & fi,
-                                                   const bool correct_skewness = true) const;
+                                                   const bool correct_skewness = false) const;
 
   /**
    * Retrieve the solution value at a boundary face. If we're using a one term Taylor series
@@ -483,7 +485,7 @@ public:
   const ADReal & getInternalFaceValue(const Elem * const neighbor,
                                       const FaceInfo & fi,
                                       const ADReal & elem_value,
-                                      const bool correct_skewness = true) const;
+                                      const bool correct_skewness = false) const;
 
   using FunctorArg = typename Moose::ADType<OutputType>::type;
   using typename Moose::Functor<FunctorArg>::FaceArg;
@@ -653,6 +655,10 @@ protected:
   /// Whether to use a two term expansion for computing boundary face values
   bool _two_term_boundary_expansion;
 
+  /// A threaded vector to hold the cell gradients when not caching them, used to return
+  /// a reference (due to expensive ADReal copy)
+  mutable std::vector<VectorValue<ADReal>> _temp_cell_gradients;
+
   /// A threaded vector to hold the uncorrected face gradients when not caching them, used to return a reference
   mutable std::vector<VectorValue<ADReal>> _temp_face_unc_gradients;
 
@@ -668,6 +674,11 @@ protected:
 
   /// Whether to cache face values or re-compute them every time
   const bool _cache_face_values;
+
+  /// Decides if a vertex-based, average or skewed corrected average is used for the
+  /// face interpolation. Other options are not taken into account here,
+  /// but at higher, kernel-based levels.
+  Moose::FV::InterpMethod _face_interp_method;
 
 private:
   /**
@@ -689,11 +700,6 @@ private:
 
   /// A cache that maps from mesh vertices to interpolated finite volume solutions at those vertices
   mutable std::unordered_map<const Node *, ADReal> _vertex_to_value;
-
-  /// Decides if a vertex-based, average or skewed corrected average is used for the
-  /// face interpolation. Other options are not taken into account here,
-  /// but at higher, kernel-based levels.
-  Moose::FV::InterpMethod _face_interp_method;
 };
 
 template <typename OutputType>

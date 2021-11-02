@@ -34,7 +34,10 @@ gradUDotNormal(const T &
 )
 {
 #ifdef MOOSE_GLOBAL_AD_INDEXING
-  return fv_var.adGradSln(face_info) * face_info.normal();
+  bool correct_skewness =
+      (fv_var.faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage);
+
+  return fv_var.adGradSln(face_info, correct_skewness) * face_info.normal();
 #else
 
   // Orthogonal contribution

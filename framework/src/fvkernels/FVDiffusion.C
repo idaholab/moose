@@ -17,7 +17,7 @@ FVDiffusion::validParams()
   InputParameters params = FVFluxKernel::validParams();
   params.addClassDescription("Computes residual for diffusion operator for finite volume method.");
   params.addRequiredParam<MooseFunctorName>("coeff", "diffusion coefficient");
-  params.set<unsigned short>("ghost_layers") = 2;
+  params.set<unsigned short>("ghost_layers") = 3;
   return params;
 }
 

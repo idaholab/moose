@@ -19,7 +19,9 @@ diff=1.1
     fv = true
     initial_condition = 1
     type = MooseVariableFVReal
-    interp_method = 'skewness-corrected'
+    face_interp_method = 'skewness-corrected'
+    cache_face_gradients = false
+    cache_face_values = true
   [../]
 []
 
@@ -60,11 +62,9 @@ diff=1.1
 
 [Executioner]
   type = Steady
-  solve_type = 'FD'
-  # nl_forced_its = 4
-  custom_rel_tol = 1e-6
-  # petsc_options_iname = '-pc_type'
-  # petsc_options_value = 'hypre'
+  solve_type = 'NEWTON'
+  petsc_options_iname = '-pc_type -pc_hypre_type'
+  petsc_options_value = 'hypre boomeramg'
 []
 
 [Outputs]
