@@ -1,0 +1,69 @@
+[Tests]
+  issues = '#15215'
+  design = 'ContactAction.md VariableCondensationPreconditioner.md'
+  [dm_contact]
+    type = 'CSVDiff'
+    input = 'dm_mechanical_contact.i'
+    csvdiff = 'dual_mortar_frictionless_contact_out.csv'
+    rel_err = 1e-4
+    cli_args = 'Contact/leftright/use_dual=true '
+               'Outputs/file_base=dual_mortar_frictionless_contact_out'
+    requirement = 'The system shall converge and match the solution produced by standard mortar '
+                  'contact.'
+    allow_warnings = true
+    mesh_mode = REPLICATED
+    ad_indexing_type = 'global'
+  []
+  [std_contact]
+    type = 'CSVDiff'
+    input = 'dm_mechanical_contact.i'
+    csvdiff = 'std_mortar_frictionless_contact_out.csv'
+    rel_err = 1e-4
+    cli_args = 'Contact/leftright/use_dual=false '
+               'Outputs/file_base=std_mortar_frictionless_contact_out'
+    requirement = 'The system shall converge and match the solution produced by dual mortar contact.'
+    allow_warnings = true
+    mesh_mode = REPLICATED
+    ad_indexing_type = 'global'
+  []
+  [dm_contact_precon]
+    type = 'CSVDiff'
+    input = 'dm_mechanical_contact_precon.i'
+    csvdiff = 'dual_mortar_frictionless_contact_out.csv'
+    rel_err = 1e-4
+    cli_args = 'Outputs/file_base=dual_mortar_frictionless_contact_out '
+               'Preconditioning/vcp/adaptive_condensation=true'
+    requirement = 'The system shall converge and match the solution with the standard methods using '
+                  'variable condenstation with AMG.'
+    allow_warnings = true
+    mesh_mode = REPLICATED
+    ad_indexing_type = 'global'
+  []
+  [dm_contact_precon_no_adaptivity]
+    type = 'CSVDiff'
+    input = 'dm_mechanical_contact_precon.i'
+    csvdiff = 'dual_mortar_frictionless_contact_out.csv'
+    rel_err = 1e-4
+    cli_args = 'Outputs/file_base=dual_mortar_frictionless_contact_out '
+               'Preconditioning/vcp/adaptive_condensation=false'
+    requirement = 'The system shall converge and match the solution with the standard methods using '
+                  'variable condenstation with AMG, by always condensing out the LMs.'
+    allow_warnings = true
+    mesh_mode = REPLICATED
+    ad_indexing_type = 'global'
+  []
+  [dm_contact_precon_full_dinv]
+    type = 'CSVDiff'
+    input = 'dm_mechanical_contact_precon.i'
+    csvdiff = 'dual_mortar_frictionless_contact_out.csv'
+    rel_err = 1e-4
+    cli_args = 'Outputs/file_base=dual_mortar_frictionless_contact_out '
+               'Preconditioning/vcp/is_lm_coupling_diagonal=false'
+    requirement = 'The system shall converge and match the solution with the standard methods using '
+                  'variable condenstation with AMG, by using LU to solve for the LM variable (not '
+                  'assuming diagonal coupling with the primal variable).'
+    allow_warnings = true
+    mesh_mode = REPLICATED
+    ad_indexing_type = 'global'
+  []
+[]

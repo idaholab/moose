@@ -43,4 +43,17 @@
     requirement = 'The system shall be able to prolong and restrict stateful material properties because of mesh adaptivity in the presense of lower dimensional subdomains that do not have materials and when stateful properties are needed on boundaries (because of integrated boundary conditions)'
     max_threads = 1 # periodic failure with threads. will need more investigation
   []
+  [vcp]
+    type = 'Exodiff'
+    input = 'dual-soln-continuity-vcp.i'
+    exodiff = 'dual-soln-continuity_out.e'
+    requirement = 'We shall be able to produce the expected result for a solution continuity test case with the first order dual basis using VCP.'
+  []
+  [vcp-2nd-order]
+    type = 'Exodiff'
+    input = 'dual-soln-continuity-vcp.i'
+    exodiff = 'dual-soln-continuity-2nd-order_out.e'
+    cli_args = 'Mesh/second_order=true Variables/T/order=SECOND Variables/lambda/order=SECOND Outputs/file_base=dual-soln-continuity-2nd-order_out'
+    requirement = 'We shall be able to produce the expected result for a solution continuity test case with the second order dual basis using VCP.'
+  []
 []
