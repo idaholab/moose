@@ -27,14 +27,14 @@ FlowChannelAlignment::build(
 
     master_elem_ids.push_back(elem_id);
     master_elem_sides.push_back(side_id);
-    _master_points.push_back(elem->centroid());
+    _master_points.push_back(elem->vertex_average());
     _nearest_elem_side.insert(std::pair<dof_id_type, unsigned int>(elem_id, side_id));
   }
 
   for (auto & elem_id : _slave_elem_ids)
   {
     const Elem * elem = _mesh.elemPtr(elem_id);
-    _slave_points.push_back(elem->centroid());
+    _slave_points.push_back(elem->vertex_average());
   }
 
   if (_master_points.size() > 0 && _slave_points.size() > 0)
@@ -72,13 +72,13 @@ FlowChannelAlignment::check(const std::vector<dof_id_type> & fch_elem_ids) const
     for (const auto & elem_id : fch_elem_ids)
     {
       const Elem * elem = _mesh.elemPtr(elem_id);
-      Point center_pt = elem->centroid();
+      Point center_pt = elem->vertex_average();
 
       const dof_id_type & hs_elem_id = _nearest_elem_ids.at(elem_id);
       const unsigned int & hs_elem_side = _nearest_elem_side.at(hs_elem_id);
       const Elem * neighbor = _mesh.elemPtr(hs_elem_id);
       const Elem * neighbor_side_elem = neighbor->build_side_ptr(hs_elem_side).release();
-      const Point hs_pt = neighbor_side_elem->centroid();
+      const Point hs_pt = neighbor_side_elem->vertex_average();
       delete neighbor_side_elem;
 
       if (!set_translation_vec)

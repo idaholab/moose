@@ -143,7 +143,7 @@ SlopeReconstruction1DInterface<is_ad>::getElementSlopes(const Elem * elem) const
     neighbors[i_side] = elem->neighbor_ptr(i_side);
 
   // get this element's position and solution
-  const Point x_elem = elem->centroid();
+  const Point x_elem = elem->vertex_average();
   const auto W_elem = computeElementPrimitiveVariables(elem);
 
   // get the number of slopes to be stored
@@ -165,7 +165,7 @@ SlopeReconstruction1DInterface<is_ad>::getElementSlopes(const Elem * elem) const
   {
     if (neighbors[i_side] != nullptr)
     {
-      x_neighbor[i_side] = neighbors[i_side]->centroid();
+      x_neighbor[i_side] = neighbors[i_side]->vertex_average();
       W_neighbor[i_side] = computeElementPrimitiveVariables(neighbors[i_side]);
 
       // compute change in position along flow channel direction
