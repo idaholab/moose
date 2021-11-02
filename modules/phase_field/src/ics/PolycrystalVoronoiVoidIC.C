@@ -64,8 +64,8 @@ PolycrystalVoronoiVoidIC::PolycrystalVoronoiVoidIC(const InputParameters & param
     _file_name(getParam<FileName>("file_name"))
 {
   if (_invalue < _outvalue)
-    mooseError("PolycrystalVoronoiVoidIC requires that the voids be "
-               "represented with invalue > outvalue");
+    mooseWarning("Detected invalue < outvalue in PolycrystalVoronoiVoidIC. Please make sure that's "
+                 "the intended usage for representing voids.");
   if (_numbub == 0)
     mooseError("PolycrystalVoronoiVoidIC requires numbub > 0. If you want no voids to "
                "be "
