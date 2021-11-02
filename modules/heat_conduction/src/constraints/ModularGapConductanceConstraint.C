@@ -39,6 +39,11 @@ ModularGapConductanceConstraint::ModularGapConductanceConstraint(const InputPara
              "in order to make its implementation feasible");
 #endif
 
+  if (_n_disp && !getParam<bool>("use_displaced_mesh"))
+    paramWarning("displacements",
+                 "You are coupling displacement variables but are evaluating the gap width on the "
+                 "undisplaced mesh. This is probably a mistake.");
+
   for (unsigned int i = 0; i < _n_disp; ++i)
   {
     auto & disp_var = _subproblem.getStandardVariable(_tid, _disp_name[i]);

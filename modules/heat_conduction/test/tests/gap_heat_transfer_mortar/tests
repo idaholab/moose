@@ -42,6 +42,18 @@
     map = False
     requirement = 'We shall be able to run the mortar method on a displaced mesh, supplying the displacements with **constant** auxiliary variables'
   [../]
+  [./modular_displaced]
+    type = Exodiff
+    input = 'modular_gap_heat_transfer_mortar_displaced.i'
+    exodiff = 'modular_gap_heat_transfer_mortar_displaced_out.e'
+    custom_cmp = 'one-variable-temp.cmp'
+    partial = True
+    map = False
+    design = 'ModularGapConductanceConstraint.md'
+    issues = '#19229'
+    requirement = 'We shall be able to produce the expected result for a gap conductance test case using the mortar method using the modular gap flux system with a displaced mesh.'
+    ad_indexing_type = 'global'
+  [../]
 
   [displaced_rz]
     type = Exodiff
