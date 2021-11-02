@@ -4,7 +4,7 @@ from mooseutils import fuzzyEqual
 
 class TestAverageStencil(unittest.TestCase):
     def test(self):
-        df1 = mms.run_spatial('skewed.i', 4, 'Variables/v/interp_method=average', mpi=1)
+        df1 = mms.run_spatial('skewed.i', 5, 'Variables/v/face_interp_method=average', mpi=1)
 
         fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
         fig.plot(df1,
@@ -16,11 +16,11 @@ class TestAverageStencil(unittest.TestCase):
         fig.save('average.png')
 
         for _,value in fig.label_to_slope.items():
-            self.assertTrue(fuzzyEqual(value, 2., .05))
+            self.assertTrue(fuzzyEqual(value, 1., .05))
 
 class TestSkewnessCorrectedStencil(unittest.TestCase):
     def test(self):
-        df1 = mms.run_spatial('skewed.i', 4, 'Variables/v/interp_method=skewness-corrected', mpi=1)
+        df1 = mms.run_spatial('skewed.i', 5, 'Variables/v/face_interp_method=skewness-corrected', mpi=1)
 
         fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
         fig.plot(df1,

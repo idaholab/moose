@@ -14,7 +14,7 @@
     family = MONOMIAL
     fv = true
     type = MooseVariableFVReal
-    use_extended_stencil = true
+    face_interp_method = 'vertex-based'
   []
 []
 

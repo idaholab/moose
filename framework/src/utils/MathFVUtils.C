@@ -34,6 +34,9 @@ gradUDotNormal(const T &
 )
 {
 #ifdef MOOSE_GLOBAL_AD_INDEXING
+
+  // Ultimately this will be passed as an input parameter when the
+  // face interpolation technique is defined on the kernels.
   bool correct_skewness =
       (fv_var.faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage);
 

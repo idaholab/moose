@@ -10,6 +10,7 @@
 #pragma once
 
 #include "FVFluxKernel.h"
+#include "Kernel.h"
 
 /// FVDiffusion implements a standard diffusion term:
 ///
