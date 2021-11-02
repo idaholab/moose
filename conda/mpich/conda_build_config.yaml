@@ -134,6 +134,9 @@ moose_sympy:
   - sympy 1.9 py39h2804cbe_0                   # [arm64]
   - sympy 1.9 py38h10201cd_0                   # [arm64]
 
+moose_deepdiff:
+  - deepdiff 5.5.0 pyhd8ed1ab_0
+
 moose_beautifulsoup4:
   - beautifulsoup4 4.9.3 pyhb0f4dca_0
 

@@ -46,7 +46,7 @@ requirements:
     - {{ moose_jinja2 }}
     - {{ moose_mako }}
     - {{ moose_sympy }}
-    - deepdiff
+    - {{ moose_deepdiff }}
     - clang-tools
     - python
 
