@@ -14,7 +14,6 @@
   [diff]
     type = Diffusion
     variable = u
-    #    coef = 0.1
   []
   [time]
     type = TimeDerivative
@@ -57,9 +56,4 @@
   [stochastic]
     type = SamplerReceiver
   []
-[]
-
-[Outputs]
-  # perf_graph = false
-  exodus = true
 []
