@@ -13,7 +13,6 @@
 /conf_vars.mk.in @lindsayad
 /configure @lindsayad
 /configure.ac @lindsayad
-/package_version @milljm
 
 /.github @permcody
 
