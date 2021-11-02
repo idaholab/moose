@@ -597,9 +597,10 @@ public:
                              const std::vector<Point> * const pts,
                              const std::vector<Real> * const weights = nullptr);
 
-  void reinitDual(const Elem * elem,
-                  const std::vector<Point> & pts,
-                  const std::vector<Real> & JxW);
+  /**
+   * Reintialize dual basis coefficients based on a customized quadrature rule
+   */
+  void reinitDual(const Elem * elem, const std::vector<Point> & pts, const std::vector<Real> & JxW);
 
   /**
    * Reinitialize FE data for a lower dimenesional element with a given set of reference points
