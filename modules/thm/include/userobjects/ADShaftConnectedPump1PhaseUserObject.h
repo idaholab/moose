@@ -2,6 +2,7 @@
 
 #include "ADVolumeJunction1PhaseUserObject.h"
 #include "ADShaftConnectableUserObjectInterface.h"
+#include "ADWeightedTransition.h"
 
 class SinglePhaseFluidProperties;
 class ADNumericalFlux3EqnBase;
@@ -69,8 +70,12 @@ protected:
   const Function & _torque_hydraulic;
   /// Pump name
   const std::string & _pump_name;
-
+  /// Shaft speed
   const ADVariableValue & _omega;
+  /// Transition width for the sign of the frictional torque when speed is 0
+  const Real & _transition_width;
+  /// Transition for the sign of the frictional torque when speed is 0
+  const ADWeightedTransition _transition_friction;
 
   /// Pump hydraulic torque
   ADReal _hydraulic_torque;

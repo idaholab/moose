@@ -35,6 +35,10 @@ ShaftConnectedPump1Phase::validParams()
   params.addRequiredParam<FunctionName>("head", "Function to compute data for pump head [-]");
   params.addRequiredParam<FunctionName>("torque_hydraulic",
                                         "Function to compute data for pump torque [-]");
+  params.addParam<Real>(
+      "transition_width",
+      1e-3,
+      "Transition width for sign of the frictional torque at 0 speed over rated speed ratio.");
 
   params.addClassDescription("1-phase pump that must be connected to a Shaft component. Pump speed "
                              "is controlled by the connected shaft; Hydraulic torque and head are "
@@ -64,7 +68,8 @@ ShaftConnectedPump1Phase::ShaftConnectedPump1Phase(const InputParameters & param
     _head_var_name(genName(name(), "head")),
     _hydraulic_torque_var_name(genName(name(), "hydraulic_torque")),
     _friction_torque_var_name(genName(name(), "friction_torque")),
-    _moi_var_name(genName(name(), "moment_of_inertia"))
+    _moi_var_name(genName(name(), "moment_of_inertia")),
+    _transition_width(getParam<Real>("transition_width"))
 {
   // this determines connection ordering
   addConnection(_inlet);
@@ -128,6 +133,7 @@ ShaftConnectedPump1Phase::buildVolumeJunctionUserObject()
     params.set<std::vector<Real>>("tau_fr_coeff") = _tau_fr_coeff;
     params.set<Real>("speed_cr_I") = _speed_cr_I;
     params.set<Real>("inertia_const") = _inertia_const;
+    params.set<Real>("transition_width") = _transition_width;
     params.set<std::vector<Real>>("inertia_coeff") = _inertia_coeff;
     params.set<FunctionName>("head") = _head;
     params.set<FunctionName>("torque_hydraulic") = _torque_hydraulic;

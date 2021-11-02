@@ -20,6 +20,16 @@
     max_parallel = 1
   []
 
+  [phy:coastdown]
+    type = 'Exodiff'
+    input = 'pump_coastdown.i'
+    exodiff = 'pump_coastdown_out.e'
+    rel_err = 1e-3
+    abs_zero = 1e-9
+    heavy = true
+    max_parallel = 1
+  []
+
   # jacobian test
   [jacobian]
     type = 'PetscJacobianTester'
