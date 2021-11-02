@@ -18,7 +18,6 @@
   [sample]
     type = AdaptiveImportance
     distributions = 'mu1 mu2'
-    execute_on = 'PRE_MULTIAPP_SETUP'
     proposal_std = '0.15 0.15'
     output_limit = 0.45
     num_samples_train = 5
