@@ -38,11 +38,13 @@
     order = FIRST
     family = LAGRANGE
     initial_condition = 100
+    scaling = 1e-8
   []
   [lm]
     order = FIRST
     family = LAGRANGE
     block = 'secondary_lower'
+    scaling = 1e-1
   []
 []
 

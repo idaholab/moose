@@ -34,11 +34,6 @@ ModularGapConductanceConstraint::ModularGapConductanceConstraint(const InputPara
     _disp_secondary(_n_disp),
     _disp_primary(_n_disp)
 {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError("ModularGapConductanceConstraint relies on use of the global indexing container "
-             "in order to make its implementation feasible");
-#endif
-
   if (_n_disp && !getParam<bool>("use_displaced_mesh"))
     paramWarning("displacements",
                  "You are coupling displacement variables but are evaluating the gap width on the "
