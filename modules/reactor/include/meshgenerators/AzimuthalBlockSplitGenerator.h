@@ -114,16 +114,14 @@ protected:
    * @param term_angle azimuthal angle value at the starting or ending position
    * @param external_block_change whether the nodes of the outermost block need to be modified
    * @param rad_tol tolerance of the radii of nodes
-   * @return a mesh with nodes modified to the new azimuthal positions
    */
-  std::unique_ptr<MeshBase>
-  nodeModifier(std::unique_ptr<MeshBase> mesh,
-               const std::vector<std::pair<Real, dof_id_type>> & node_id_mod,
-               const std::vector<std::pair<Real, dof_id_type>> & node_id_keep,
-               std::vector<Real> & circular_rad_list,
-               std::vector<Real> & non_circular_rad_list,
-               const std::vector<std::tuple<dof_id_type, boundary_id_type>> & node_list,
-               const Real & term_angle,
-               const bool & external_block_change,
-               const Real & rad_tol);
+  void nodeModifier(ReplicatedMesh & mesh,
+                    const std::vector<std::pair<Real, dof_id_type>> & node_id_mod,
+                    const std::vector<std::pair<Real, dof_id_type>> & node_id_keep,
+                    std::vector<Real> & circular_rad_list,
+                    std::vector<Real> & non_circular_rad_list,
+                    const std::vector<std::tuple<dof_id_type, boundary_id_type>> & node_list,
+                    const Real & term_angle,
+                    const bool & external_block_change,
+                    const Real & rad_tol);
 };

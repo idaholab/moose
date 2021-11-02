@@ -1109,21 +1109,21 @@ PolygonMeshGeneratorBase::fourPointIntercept(const std::pair<Real, Real> p1,
 }
 
 std::vector<Real>
-PolygonMeshGeneratorBase::azimuthalAnglesCollector(const std::unique_ptr<ReplicatedMesh> mesh,
+PolygonMeshGeneratorBase::azimuthalAnglesCollector(ReplicatedMesh & mesh,
                                                    const Real lower_azi,
                                                    const Real upper_azi,
                                                    const unsigned int return_type,
                                                    const bool calculate_origin,
                                                    const Real input_origin_x,
                                                    const Real input_origin_y,
-                                                   const Real tol)
+                                                   const Real tol) const
 {
   std::vector<Real> azimuthal_output;
   std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>> side_list =
-      mesh->get_boundary_info().build_side_list();
-  mesh->get_boundary_info().build_node_list_from_side_list();
+      mesh.get_boundary_info().build_side_list();
+  mesh.get_boundary_info().build_node_list_from_side_list();
   std::vector<std::tuple<dof_id_type, boundary_id_type>> node_list =
-      mesh->get_boundary_info().build_node_list();
+      mesh.get_boundary_info().build_node_list();
 
   std::vector<Real> bd_x_list;
   std::vector<Real> bd_y_list;
@@ -1134,25 +1134,22 @@ PolygonMeshGeneratorBase::azimuthalAnglesCollector(const std::unique_ptr<Replica
   const Real mid_azi = lower_azi <= upper_azi ? (lower_azi + upper_azi) / 2.0
                                               : (lower_azi + upper_azi + 360.0) / 2.0;
   for (unsigned int i = 0; i < node_list.size(); ++i)
-  {
     if (std::get<1>(node_list[i]) == OUTER_SIDESET_ID)
     {
-      bd_x_list.push_back((*mesh->node_ptr(std::get<0>(node_list[i])))(0));
-      bd_y_list.push_back((*mesh->node_ptr(std::get<0>(node_list[i])))(1));
+      bd_x_list.push_back((mesh.node_ref(std::get<0>(node_list[i])))(0));
+      bd_y_list.push_back((mesh.node_ref(std::get<0>(node_list[i])))(1));
     }
-  }
 
   if (calculate_origin)
   {
     // Iterate through elements to calculate the center of mass of the mesh, which is used as the
     // origin.
-    for (libMesh::ReplicatedMesh::element_iterator elem_it = mesh->elements_begin();
-         elem_it != mesh->elements_end();
-         elem_it++)
+    for (const auto & elem : as_range(mesh.elements_begin(), mesh.elements_end()))
     {
-      origin_x += ((*elem_it)->true_centroid())(0) * ((*elem_it)->volume());
-      origin_y += ((*elem_it)->true_centroid())(1) * ((*elem_it)->volume());
-      vol_tmp += (*elem_it)->volume();
+      const auto volume = elem->volume();
+      origin_x += elem->true_centroid()(0) * volume;
+      origin_y += elem->true_centroid()(1) * volume;
+      vol_tmp += volume;
     }
     origin_x /= vol_tmp;
     origin_y /= vol_tmp;

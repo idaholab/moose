@@ -70,26 +70,28 @@ AzimuthalBlockSplitGenerator::AzimuthalBlockSplitGenerator(const InputParameters
 std::unique_ptr<MeshBase>
 AzimuthalBlockSplitGenerator::generate()
 {
-  auto mesh = dynamic_pointer_cast<MeshBase>(_mesh);
+  auto replicated_mesh_ptr = dynamic_cast<ReplicatedMesh *>(_mesh.get());
+  if (!replicated_mesh_ptr)
+    paramError("input", "Input is not a replicated mesh, which is required");
+
+  ReplicatedMesh & mesh = *replicated_mesh_ptr;
 
   _old_block_ids =
-      MooseMeshUtils::getSubdomainIDs(*mesh, getParam<std::vector<SubdomainName>>("old_blocks"));
+      MooseMeshUtils::getSubdomainIDs(mesh, getParam<std::vector<SubdomainName>>("old_blocks"));
   if (_old_block_ids.size() != _new_block_ids.size())
     paramError("new_block_ids", "This parameter must have the same size as old_blocks.");
 
   // Check that the block ids/names exist in the mesh
   std::set<SubdomainID> mesh_blocks;
-  mesh->subdomain_ids(mesh_blocks);
+  mesh.subdomain_ids(mesh_blocks);
 
   for (unsigned int i = 0; i < _old_block_ids.size(); i++)
     if (_old_block_ids[i] == Moose::INVALID_BLOCK_ID || !mesh_blocks.count(_old_block_ids[i]))
       paramError("old_blocks",
                  "This parameter contains blocks that do not exist in the input mesh.");
 
-  MeshTools::Modification::rotate(*mesh, 90.0, 0.0, 0.0);
-  auto meshes_dup = mesh->clone();
-  _azimuthal_angle_meta = azimuthalAnglesCollector(
-      dynamic_pointer_cast<ReplicatedMesh>(meshes_dup), -180.0, 180.0, ANGLE_DEGREE);
+  MeshTools::Modification::rotate(mesh, 90.0, 0.0, 0.0);
+  _azimuthal_angle_meta = azimuthalAnglesCollector(mesh, -180.0, 180.0, ANGLE_DEGREE);
   // So that this class works for both derived classes of PolygonMeshGeneratorBase
   _pattern_pitch_meta = std::max(getMeshProperty<Real>("pitch_meta", _input_name),
                                  getMeshProperty<Real>("pattern_pitch_meta", _input_name));
@@ -168,7 +170,7 @@ AzimuthalBlockSplitGenerator::generate()
   Real radiusCorrectionFactor_mod =
       _preserve_volumes ? radiusCorrectionFactor(_azimuthal_angle_meta) : 1.0;
 
-  const auto & side_list = mesh->get_boundary_info().build_side_list();
+  const auto & side_list = mesh.get_boundary_info().build_side_list();
 
   // See if the block that contains the external boundary is modified or not
   bool external_block_change(false);
@@ -176,16 +178,16 @@ AzimuthalBlockSplitGenerator::generate()
   {
     if (std::get<2>(side_list[i]) == OUTER_SIDESET_ID)
     {
-      dof_id_type block_id_tmp = (*mesh->elem_ptr(std::get<0>(side_list[i]))).subdomain_id();
+      dof_id_type block_id_tmp = mesh.elem_ref(std::get<0>(side_list[i])).subdomain_id();
       if (std::find(_old_block_ids.begin(), _old_block_ids.end(), block_id_tmp) !=
           _old_block_ids.end())
         external_block_change = true;
     }
   }
 
-  mesh->get_boundary_info().build_node_list_from_side_list();
+  mesh.get_boundary_info().build_node_list_from_side_list();
   std::vector<std::tuple<dof_id_type, boundary_id_type>> node_list =
-      mesh->get_boundary_info().build_node_list();
+      mesh.get_boundary_info().build_node_list();
 
   std::vector<std::pair<Real, dof_id_type>> node_id_keep_start;
   std::vector<std::pair<Real, dof_id_type>> node_id_mod_start;
@@ -194,24 +196,23 @@ AzimuthalBlockSplitGenerator::generate()
 
   // Determine which nodes are involved in the elements that are intercepted by the starting/ending
   // angles
-  for (libMesh::MeshBase::node_iterator node_it = mesh->nodes_begin(); node_it != mesh->nodes_end();
-       node_it++)
+  for (const auto & node_ptr : as_range(mesh.nodes_begin(), mesh.nodes_end()))
   {
-    Point pt_tmp = *mesh->node_ptr((*node_it)->id());
-    Real node_azi = atan2(pt_tmp(1), pt_tmp(0)) * 180.0 / M_PI;
-    Real node_rad = std::sqrt(pt_tmp(0) * pt_tmp(0) + pt_tmp(1) * pt_tmp(1));
+    const Node & node = *node_ptr;
+    Real node_azi = atan2(node(1), node(0)) * 180.0 / M_PI;
+    Real node_rad = std::sqrt(node(0) * node(0) + node(1) * node(1));
     if (node_rad > rad_tol && (std::abs(node_azi - azi_to_mod_start) < azi_tol ||
                                std::abs(std::abs(node_azi - azi_to_mod_start) - 360.0) < azi_tol))
-      node_id_mod_start.push_back(std::make_pair(node_rad, (*node_it)->id()));
+      node_id_mod_start.push_back(std::make_pair(node_rad, node.id()));
     if (node_rad > rad_tol && (std::abs(node_azi - azi_to_keep_start) < azi_tol ||
                                std::abs(std::abs(node_azi - azi_to_keep_start) - 360.0) < azi_tol))
-      node_id_keep_start.push_back(std::make_pair(node_rad, (*node_it)->id()));
+      node_id_keep_start.push_back(std::make_pair(node_rad, node.id()));
     if (node_rad > rad_tol && (std::abs(node_azi - azi_to_mod_end) < azi_tol ||
                                std::abs(std::abs(node_azi - azi_to_mod_end) - 360.0) < azi_tol))
-      node_id_mod_end.push_back(std::make_pair(node_rad, (*node_it)->id()));
+      node_id_mod_end.push_back(std::make_pair(node_rad, node.id()));
     if (node_rad > rad_tol && (std::abs(node_azi - azi_to_keep_end) < azi_tol ||
                                std::abs(std::abs(node_azi - azi_to_keep_end) - 360.0) < azi_tol))
-      node_id_keep_end.push_back(std::make_pair(node_rad, (*node_it)->id()));
+      node_id_keep_end.push_back(std::make_pair(node_rad, node.id()));
   }
   // Sort the involved nodes using radius as the key; this facilitates the determination of circular
   // regions nodes
@@ -223,24 +224,24 @@ AzimuthalBlockSplitGenerator::generate()
   std::vector<Real> non_circular_rad_list;
 
   // Modify the nodes with the azimuthal angles identified before.
-  mesh = nodeModifier(dynamic_pointer_cast<MeshBase>(mesh),
-                      node_id_mod_start,
-                      node_id_keep_start,
-                      circular_rad_list,
-                      non_circular_rad_list,
-                      node_list,
-                      _start_angle,
-                      external_block_change,
-                      rad_tol);
-  mesh = nodeModifier(dynamic_pointer_cast<MeshBase>(mesh),
-                      node_id_mod_end,
-                      node_id_keep_end,
-                      circular_rad_list,
-                      non_circular_rad_list,
-                      node_list,
-                      _end_angle,
-                      external_block_change,
-                      rad_tol);
+  nodeModifier(mesh,
+               node_id_mod_start,
+               node_id_keep_start,
+               circular_rad_list,
+               non_circular_rad_list,
+               node_list,
+               _start_angle,
+               external_block_change,
+               rad_tol);
+  nodeModifier(mesh,
+               node_id_mod_end,
+               node_id_keep_end,
+               circular_rad_list,
+               non_circular_rad_list,
+               node_list,
+               _end_angle,
+               external_block_change,
+               rad_tol);
 
   const Real max_circular_radius =
       *std::max_element(circular_rad_list.begin(), circular_rad_list.end());
@@ -255,50 +256,46 @@ AzimuthalBlockSplitGenerator::generate()
       mooseError("In AzimuthalBlockSplitGenerator ",
                  _name,
                  ": the circular region is overlapped with background region after correction.");
-    for (libMesh::MeshBase::node_iterator node_it = mesh->nodes_begin();
-         node_it != mesh->nodes_end();
-         node_it++)
+    for (Node * node_ptr : as_range(mesh.nodes_begin(), mesh.nodes_end()))
     {
-      Point pt_tmp = *mesh->node_ptr((*node_it)->id());
-      Real node_rad = std::sqrt(pt_tmp(0) * pt_tmp(0) + pt_tmp(1) * pt_tmp(1));
+      Node & node = *node_ptr;
+      Real node_rad = std::sqrt(node(0) * node(0) + node(1) * node(1));
       // Any nodes with radii smaller than the threshold belong to circular regions
       if (node_rad > rad_tol && node_rad <= max_circular_radius + rad_tol)
       {
-        const Real node_azi = atan2(pt_tmp(1), pt_tmp(0));
+        const Real node_azi = atan2(node(1), node(0));
         const Real node_rad_corr =
             node_rad / radiusCorrectionFactor_original * radiusCorrectionFactor_mod;
-        pt_tmp(1) = node_rad_corr * std::sin(node_azi);
-        pt_tmp(0) = node_rad_corr * std::cos(node_azi);
-        mesh->add_point(pt_tmp, (*node_it)->id());
+        node(0) = node_rad_corr * std::cos(node_azi);
+        node(1) = node_rad_corr * std::sin(node_azi);
       }
     }
   }
   // Assign New Block IDs
   for (unsigned int block_id_index = 0; block_id_index < _old_block_ids.size(); block_id_index++)
-    for (libMesh::MeshBase::element_iterator elem_it =
-             mesh->active_subdomain_elements_begin(_old_block_ids[block_id_index]);
-         elem_it != mesh->active_subdomain_elements_end(_old_block_ids[block_id_index]);
-         elem_it++)
+    for (auto & elem :
+         as_range(mesh.active_subdomain_elements_begin(_old_block_ids[block_id_index]),
+                  mesh.active_subdomain_elements_end(_old_block_ids[block_id_index])))
     {
-      auto p_cent = (*elem_it)->true_centroid();
+      auto p_cent = elem->true_centroid();
       auto p_cent_azi = atan2(p_cent(1), p_cent(0)) * 180.0 / M_PI;
       if (_start_angle < _end_angle && p_cent_azi >= _start_angle && p_cent_azi <= _end_angle)
-        (*elem_it)->subdomain_id() = _new_block_ids[block_id_index];
+        elem->subdomain_id() = _new_block_ids[block_id_index];
       else if (_start_angle > _end_angle &&
                (p_cent_azi >= _start_angle || p_cent_azi <= _end_angle))
-        (*elem_it)->subdomain_id() = _new_block_ids[block_id_index];
+        elem->subdomain_id() = _new_block_ids[block_id_index];
     }
   // Assign new Block Names if applicable
   for (unsigned int i = 0; i < _new_block_names.size(); i++)
-    mesh->subdomain_name(_new_block_ids[i]) = _new_block_names[i];
-  MeshTools::Modification::rotate(*mesh, -90.0, 0.0, 0.0);
+    mesh.subdomain_name(_new_block_ids[i]) = _new_block_names[i];
+  MeshTools::Modification::rotate(mesh, -90.0, 0.0, 0.0);
   for (unsigned int i = 0; i < _azimuthal_angle_meta.size(); i++)
     _azimuthal_angle_meta[i] = (_azimuthal_angle_meta[i] - 90.0 <= -180.0)
                                    ? (_azimuthal_angle_meta[i] + 270.0)
                                    : _azimuthal_angle_meta[i] - 90.0;
   std::sort(_azimuthal_angle_meta.begin(), _azimuthal_angle_meta.end());
 
-  return mesh;
+  return std::move(_mesh);
 }
 
 void
@@ -388,9 +385,9 @@ AzimuthalBlockSplitGenerator::angleModifier(const Real & side_angular_shift,
   }
 }
 
-std::unique_ptr<MeshBase>
+void
 AzimuthalBlockSplitGenerator::nodeModifier(
-    std::unique_ptr<MeshBase> mesh,
+    ReplicatedMesh & mesh,
     const std::vector<std::pair<Real, dof_id_type>> & node_id_mod,
     const std::vector<std::pair<Real, dof_id_type>> & node_id_keep,
     std::vector<Real> & circular_rad_list,
@@ -405,11 +402,10 @@ AzimuthalBlockSplitGenerator::nodeModifier(
     // Circular regions, radius is not altered
     if (std::abs(node_id_mod[i].first - node_id_keep[i].first) < rad_tol)
     {
-      Point pt_tmp = *mesh->node_ptr(node_id_mod[i].second);
+      Node & node_mod = mesh.node_ref(node_id_mod[i].second);
       circular_rad_list.push_back(node_id_mod[i].first);
-      pt_tmp(1) = node_id_mod[i].first * std::sin(term_angle * M_PI / 180.0);
-      pt_tmp(0) = node_id_mod[i].first * std::cos(term_angle * M_PI / 180.0);
-      mesh->add_point(pt_tmp, node_id_mod[i].second);
+      node_mod(0) = node_id_mod[i].first * std::cos(term_angle * M_PI / 180.0);
+      node_mod(1) = node_id_mod[i].first * std::sin(term_angle * M_PI / 180.0);
     }
     else
     {
@@ -422,20 +418,17 @@ AzimuthalBlockSplitGenerator::nodeModifier(
                     std::make_tuple(node_id_mod[i].second, OUTER_SIDESET_ID)) == node_list.end() ||
           external_block_change)
       {
-        Point pt_1 = *mesh->node_ptr(node_id_mod[i].second);
-        Point pt_2 = *mesh->node_ptr(node_id_keep[i].second);
+        Node & node_mod = mesh.node_ref(node_id_mod[i].second);
+        const Node & node_keep = mesh.node_ref(node_id_keep[i].second);
         std::pair<Real, Real> pair_tmp = fourPointIntercept(
-            std::make_pair(pt_1(0), pt_1(1)),
-            std::make_pair(pt_2(0), pt_2(1)),
+            std::make_pair(node_mod(0), node_mod(1)),
+            std::make_pair(node_keep(0), node_keep(1)),
             std::make_pair(0.0, 0.0),
             std::make_pair(2.0 * node_id_mod[i].first * std::cos(term_angle * M_PI / 180.0),
                            2.0 * node_id_mod[i].first * std::sin(term_angle * M_PI / 180.0)));
-        Point pt_tmp = *mesh->node_ptr(node_id_mod[i].second);
-        pt_tmp(1) = pair_tmp.second;
-        pt_tmp(0) = pair_tmp.first;
-        mesh->add_point(pt_tmp, node_id_mod[i].second);
+        node_mod(0) = pair_tmp.first;
+        node_mod(1) = pair_tmp.second;
       }
     }
   }
-  return mesh;
 }

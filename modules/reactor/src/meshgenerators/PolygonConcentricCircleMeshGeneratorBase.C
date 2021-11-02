@@ -251,6 +251,16 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
 std::unique_ptr<MeshBase>
 PolygonConcentricCircleMeshGeneratorBase::generate()
 {
+  std::vector<ReplicatedMesh *> input;
+  for (const auto & mesh : _input_ptrs)
+  {
+    mooseAssert(mesh && (*mesh).get(), "nullptr mesh");
+    auto replicated_mesh = dynamic_cast<ReplicatedMesh *>((*mesh).get());
+    if (!replicated_mesh)
+      mooseError("A non-replicated mesh input was supplied but replicated meshes are required.");
+    input.push_back(replicated_mesh);
+  }
+
   unsigned int mesh_input_counter = 0;
   // azimuthal array used for radius radius_correction
   std::vector<Real> azimuthal_list;
@@ -267,10 +277,8 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
       // The following lines only work for hexagon; and only a hexagon needs such functionality.
       Real lower_azi = (Real)mesh_index * 60.0 - 150.0;
       Real upper_azi = (Real)((mesh_index + 1) % 6) * 60.0 - 150.0;
-      _azimuthal_angles_array.push_back(azimuthalAnglesCollector(
-          dynamic_pointer_cast<ReplicatedMesh>(*_input_ptrs[mesh_input_counter]),
-          lower_azi,
-          upper_azi));
+      _azimuthal_angles_array.push_back(
+          azimuthalAnglesCollector(*input[mesh_input_counter], lower_azi, upper_azi));
       // loop over the _azimuthal_angles_array just collected to convert tangent to azimuthal
       // angles.
       for (unsigned int i = 1; i < _azimuthal_angles_array.back().size(); i++)
@@ -368,9 +376,7 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
 
   if (!_is_general_polygon)
   {
-    auto mesh0_dup = mesh0->clone();
-    _azimuthal_angle_meta = azimuthalAnglesCollector(
-        dynamic_pointer_cast<ReplicatedMesh>(mesh0_dup), -180.0, 180.0, ANGLE_DEGREE);
+    _azimuthal_angle_meta = azimuthalAnglesCollector(*mesh0, -180.0, 180.0, ANGLE_DEGREE);
     _pattern_pitch_meta = _pitch;
   }
 

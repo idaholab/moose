@@ -421,12 +421,12 @@ protected:
    * @return the list of azimuthal angles of all the nodes on the external grain boundary within the
    * given range
    */
-  std::vector<Real> azimuthalAnglesCollector(const std::unique_ptr<ReplicatedMesh> mesh,
+  std::vector<Real> azimuthalAnglesCollector(ReplicatedMesh & mesh,
                                              const Real lower_azi = -30.0,
                                              const Real upper_azi = 30.0,
                                              const unsigned int return_type = ANGLE_TANGENT,
                                              const bool calculate_origin = true,
                                              const Real input_origin_x = 0.0,
                                              const Real input_origin_y = 0.0,
-                                             const Real tol = 1.0E-10);
+                                             const Real tol = 1.0E-10) const;
 };
