@@ -35,9 +35,9 @@ GapFluxModelSimple::GapFluxModelSimple(const InputParameters & parameters)
 }
 
 ADReal
-GapFluxModelSimple::computeFlux(const ADReal & gap_width, unsigned int qp) const
+GapFluxModelSimple::computeFlux() const
 {
-  const auto l = std::max(gap_width, _min_gap);
+  const auto l = std::max(_gap_width, _min_gap);
 
-  return _k * (_primary_T[qp] - _secondary_T[qp]) / l;
+  return _k * (_primary_T[_qp] - _secondary_T[_qp]) / l;
 }

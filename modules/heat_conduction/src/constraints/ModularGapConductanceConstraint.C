@@ -32,7 +32,8 @@ ModularGapConductanceConstraint::ModularGapConductanceConstraint(const InputPara
     _disp_name(parameters.getVecMooseType("displacements")),
     _n_disp(_disp_name.size()),
     _disp_secondary(_n_disp),
-    _disp_primary(_n_disp)
+    _disp_primary(_n_disp),
+	_gap_width(0.0)
 {
   if (_n_disp && !getParam<bool>("use_displaced_mesh"))
     paramWarning("displacements",
@@ -97,12 +98,12 @@ ModularGapConductanceConstraint::computeQpResidual(Moose::MortarType mortar_type
         }
 
       // compute an ADReal gap width to pass to each gap flux model
-      const auto gap_width = (ad_phys_points_primary - ad_phys_points_secondary) * _normals[_qp];
+      _gap_width = (ad_phys_points_primary - ad_phys_points_secondary) * _normals[_qp];
 
       // sum up all flux contributions from all supplied gap flux models
       ADReal flux = 0.0;
       for (const auto & model : _gap_flux_models)
-        flux += model->computeFlux(gap_width, _qp);
+        flux += model->computeFluxInternal(*this);
 
       // the Lagrange multiplier _is_ the gap flux
       return (_lambda[_qp] - flux) * _test[_i][_qp];

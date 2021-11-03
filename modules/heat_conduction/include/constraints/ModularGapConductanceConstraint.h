@@ -10,6 +10,7 @@
 #pragma once
 
 #include "ADMortarConstraint.h"
+#include "ModularGapConductanceConstraint.h"
 
 class GapFluxModelBase;
 
@@ -43,4 +44,9 @@ protected:
   std::vector<const ADVariableValue *> _disp_secondary;
   std::vector<const ADVariableValue *> _disp_primary;
   ///@}
+
+private:
+  ADReal _gap_width;
+
+  friend class GapFluxModelBase;
 };

@@ -21,7 +21,7 @@ public:
 
   GapFluxModelRadiative(const InputParameters & parameters);
 
-  ADReal computeFlux(const ADReal & gap_width, unsigned int qp) const override;
+  ADReal computeFlux() const override;
 
 protected:
   /// Primary surface temperature

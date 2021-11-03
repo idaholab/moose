@@ -21,7 +21,7 @@ public:
 
   GapFluxModelSimple(const InputParameters & parameters);
 
-  ADReal computeFlux(const ADReal & gap_width, unsigned int qp) const override;
+  ADReal computeFlux() const override;
 
 protected:
   /// Thermal conductivity of the gap medium (e.g. air).
