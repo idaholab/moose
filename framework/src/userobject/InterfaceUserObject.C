@@ -17,50 +17,17 @@
 InputParameters
 InterfaceUserObject::validParams()
 {
-  InputParameters params = UserObject::validParams();
-  params += BoundaryRestrictableRequired::validParams();
-  params += TwoMaterialPropertyInterface::validParams();
-  params += TransientInterface::validParams();
+  InputParameters params = InterfaceUserObjectBase::validParams();
   params.addClassDescription("Basic UO class to perform computation across an interface");
-
-  // Need one layer of ghosting
-  params.addRelationshipManager("ElementSideNeighborLayers",
-                                Moose::RelationshipManagerType::GEOMETRIC |
-                                    Moose::RelationshipManagerType::ALGEBRAIC);
   return params;
 }
 
 InterfaceUserObject::InterfaceUserObject(const InputParameters & parameters)
-  : UserObject(parameters),
-    BoundaryRestrictableRequired(this, false), // false for applying to sidesets
-    TwoMaterialPropertyInterface(this, Moose::EMPTY_BLOCK_IDS, boundaryIDs()),
-    NeighborCoupleable(this, false, false),
-    MooseVariableDependencyInterface(),
-    TransientInterface(this),
-    ElementIDInterface(this),
-    _mesh(_subproblem.mesh()),
-    _q_point(_assembly.qPointsFace()),
-    _qrule(_assembly.qRuleFace()),
-    _JxW(_assembly.JxWFace()),
-    _coord(_assembly.coordTransformation()),
-    _normals(_assembly.normals()),
-    _current_elem(_assembly.elem()),
-    _current_elem_volume(_assembly.elemVolume()),
-    _current_side(_assembly.side()),
-    _current_side_elem(_assembly.sideElem()),
-    _current_side_volume(_assembly.sideElemVolume()),
-    _neighbor_elem(_assembly.neighbor()),
-    _current_neighbor_volume(_assembly.neighborVolume()),
-    _fi(nullptr)
+  : InterfaceUserObjectBase(parameters), _has_fv_vars(false), _fi(nullptr)
 {
-  // Keep track of which variables are coupled so we know what we depend on
-  const std::vector<MooseVariableFEBase *> & coupled_vars = getCoupledMooseVars();
-  for (const auto & var : coupled_vars)
-    addMooseVariableDependency(var);
-
   // Check for finite volume variables
-  _has_fv_vars = false;
-  for (const auto & var : coupled_vars)
+  // const std::vector<MooseVariableFEBase *> & coupled_vars = getCoupledMooseVars();
+  for (const auto & var : _coupled_moose_vars)
     if (var->isFV())
       _has_fv_vars = true;
 }
