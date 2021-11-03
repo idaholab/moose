@@ -154,7 +154,6 @@
       function = pull
     []
   []
-
 []
 
 [Executioner]
