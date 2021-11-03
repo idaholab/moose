@@ -19,13 +19,13 @@ FlowChannel3DAlignment::build(
     auto elem_id = std::get<0>(t);
     const Elem * elem = _mesh.elemPtr(elem_id);
     _hs_elem_ids.push_back(elem_id);
-    _hs_points.push_back(elem->centroid());
+    _hs_points.push_back(elem->vertex_average());
   }
 
   for (auto & elem_id : _fch_elem_ids)
   {
     const Elem * elem = _mesh.elemPtr(elem_id);
-    _fch_points.push_back(elem->centroid());
+    _fch_points.push_back(elem->vertex_average());
   }
 
   if (_hs_points.size() > 0 && _fch_points.size() > 0)

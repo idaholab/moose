@@ -70,7 +70,7 @@ ADRDG3EqnMaterial::computeQpProperties()
   const ADReal T_avg = _fp.T_from_v_e(v_avg, e_avg);
 
   // apply slopes to primitive variables
-  const ADReal delta_x = (_q_point[_qp] - _current_elem->centroid()) * _dir[_qp];
+  const ADReal delta_x = (_q_point[_qp] - _current_elem->vertex_average()) * _dir[_qp];
   const ADReal p = p_avg + p_slope * delta_x;
   const ADReal vel = vel_avg + vel_slope * delta_x;
   const ADReal T = T_avg + T_slope * delta_x;

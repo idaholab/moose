@@ -46,7 +46,7 @@ LayeredFlowAreaChange::initialize()
 void
 LayeredFlowAreaChange::execute()
 {
-  unsigned int layer = getLayer(_current_elem->centroid());
+  unsigned int layer = getLayer(_current_elem->vertex_average());
   Real height = _interval_based ? (_direction_max - _direction_min) / _num_layers
                                 : _layer_bounds[layer + 1] - _layer_bounds[layer];
   Real integral_value = computeIntegral() / height;

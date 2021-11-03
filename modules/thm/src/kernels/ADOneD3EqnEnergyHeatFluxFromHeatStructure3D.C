@@ -31,6 +31,6 @@ ADOneD3EqnEnergyHeatFluxFromHeatStructure3D::ADOneD3EqnEnergyHeatFluxFromHeatStr
 ADReal
 ADOneD3EqnEnergyHeatFluxFromHeatStructure3D::computeQpResidual()
 {
-  const Real T_wall = _user_object.spatialValue(_current_elem->centroid());
+  const Real T_wall = _user_object.spatialValue(_current_elem->vertex_average());
   return _Hw[_qp] * (_T[_qp] - T_wall) * _P_hf[_qp] * _test[_i][_qp];
 }
