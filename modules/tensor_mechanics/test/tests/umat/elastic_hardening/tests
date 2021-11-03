@@ -45,7 +45,7 @@
   [elastic_incremental]
     type = 'Exodiff'
     input = 'elastic.i'
-    cli_args = "Materials/active='umat' Materials/umat/plugin='../../plugins/elastic_incremental'"
+    cli_args = "Materials/active='umat' Materials/umat/plugin='../../../plugins/elastic_incremental'"
     exodiff = 'elastic_out.e'
     library_mode = 'DYNAMIC'
     valgrind = 'NONE'

@@ -101,9 +101,9 @@ umat_(double * stress,
   // Print out eigenvalue using Eigen matrix
   auto eigenvalues = C.eigenvalues();
 
-  if (*npt == 7 && time[0] == 10.0)
+  if (*npt == 7 && time[0] == 0.0)
     for (int index_i = 0; index_i < *ntens; index_i++)
-      Moose::out << "Eigenvalues " << index_i << " " << eigenvalues(index_i).real() << "\n";
+      Moose::out << "Eigenvalues " << index_i << " " << eigenvalues(index_i).real() << std::endl;
 }
 
 #pragma GCC diagnostic pop

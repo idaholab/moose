@@ -24,8 +24,12 @@
 
 [AuxVariables]
   [strain_xy]
+    family = MONOMIAL
+    order = FIRST
   []
   [strain_yy]
+    family = MONOMIAL
+    order = FIRST
   []
 []
 

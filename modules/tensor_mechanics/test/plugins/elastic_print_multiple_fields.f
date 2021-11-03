@@ -45,7 +45,7 @@ C     ELASTIC PROPERTIES AT START OF INCREMENT
 C
       EMOD=PROPS(1)
       ENU=PROPS(2)
-      EMOD=EMOD/(1.D0+PREDEF(1)+PREDEF(2))
+      EMOD=EMOD/(1.D0+PREDEF(1)+DPRED(1)+PREDEF(2)+DPRED(2))
       EBULK3=EMOD/(ONE-TWO*ENU)
       EG2=EMOD/(ONE+ENU)
       EG=EG2/TWO
@@ -65,14 +65,14 @@ C
       END DO
 
 C     CALCULATE STRESS, ELASTIC STRAIN AND THERMAL STRAIN
+C     compute stress using the total strain
 C
       DO K1=1, NTENS
-         STRESS(K1)=0.D0
+         STRESS(K1)=0
       END DO
-
       DO K1=1, NTENS
          DO K2=1, NTENS
-            STRESS(K1)=STRESS(K1)+DDSDDE(K2, K1)*STRAN(K2)
+            STRESS(K1)=STRESS(K1)+DDSDDE(K2, K1)*(STRAN(K2)+DSTRAN(K2))
          END DO
       END DO
 
@@ -122,6 +122,8 @@ C
         WRITE(*,195) KINC
         WRITE(*,200) PREDEF(1)
         WRITE(*,205) PREDEF(2)
+        WRITE(*,210) DPRED(1)
+        WRITE(*,215) DPRED(2)
       ENDIF
 
 
@@ -144,5 +146,7 @@ C
 195   FORMAT ( 1X 'KINC_', :,  2I2 )
 200   FORMAT ( 1X 'FIELD1_', :,  2F10.7 )
 205   FORMAT ( 1X 'FIELD2_', :,  2F10.7 )
+210   FORMAT ( 1X 'DFIELD1_', :,  2F10.7 )
+215   FORMAT ( 1X 'DFIELD2_', :,  2F10.7 )
       RETURN
       END

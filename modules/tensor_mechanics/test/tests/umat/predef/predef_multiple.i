@@ -30,8 +30,12 @@
 
 [AuxVariables]
   [strain_yy]
+    family = MONOMIAL
+    order = FIRST
   []
   [strain_xx]
+    family = MONOMIAL
+    order = FIRST
   []
 []
 
@@ -65,8 +69,6 @@
       boundary = top
       function = top_pull
     []
-  []
-  [Pressure]
     [bc_presssure_right]
       boundary = right
       function = right_pull

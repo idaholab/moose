@@ -26,6 +26,8 @@
 
 [AuxVariables]
   [strain_yy]
+    family = MONOMIAL
+    order = FIRST
   []
 []
 
@@ -99,7 +101,7 @@
   nl_abs_tol = 1e-10
   l_tol = 1e-9
   start_time = 0.0
-  end_time = 10
+  end_time = 20
 
   dt = 10.0
 []

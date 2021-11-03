@@ -64,15 +64,16 @@ C
          DDSDDE(K1 ,K1)=EG
       END DO
 
+C
 C     CALCULATE STRESS, ELASTIC STRAIN AND THERMAL STRAIN
+C     compute stress using the total strain
 C
       DO K1=1, NTENS
-         STRESS(K1)=0.D0
+         STRESS(K1)=0
       END DO
-
       DO K1=1, NTENS
          DO K2=1, NTENS
-            STRESS(K1)=STRESS(K1)+DDSDDE(K2, K1)*STRAN(K2)
+            STRESS(K1)=STRESS(K1)+DDSDDE(K2, K1)*(STRAN(K2)+DSTRAN(K2))
          END DO
       END DO
 

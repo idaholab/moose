@@ -12,6 +12,7 @@
 #include "MooseMesh.h"
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
+#include "libmesh/int_range.h"
 #include <string.h>
 #include <algorithm>
 
@@ -34,7 +35,7 @@ AbaqusUMATStress::validParams()
 
   params.addCoupledVar("external_fields",
                        "The external fields that can be used in the UMAT subroutine");
-
+  params.addParam<std::vector<MaterialPropertyName>>("external_properties", "");
   return params;
 }
 
@@ -68,8 +69,19 @@ AbaqusUMATStress::AbaqusUMATStress(const InputParameters & parameters)
     _temperature_old(coupledValueOld("temperature")),
     _external_fields(coupledValues("external_fields")),
     _external_fields_old(coupledValuesOld("external_fields")),
-    _number_external_fields(_external_fields.size())
+    _number_external_fields(_external_fields.size()),
+    _external_property_names(getParam<std::vector<MaterialPropertyName>>("external_properties")),
+    _number_external_properties(_external_property_names.size()),
+    _external_properties(_number_external_properties),
+    _external_properties_old(_number_external_properties)
 {
+  // get material properties
+  for (std::size_t i = 0; i < _number_external_properties; ++i)
+  {
+    _external_properties[i] = &getMaterialProperty<Real>(_external_property_names[i]);
+    _external_properties_old[i] = &getMaterialPropertyOld<Real>(_external_property_names[i]);
+  }
+
   // Read mesh dimension and size UMAT arrays (we always size for full 3D)
   _aqNTENS = 6; // Size of the stress or strain component array (NDI+NSHR)
   _aqNSHR = 3;  // Number of engineering shear stress components
@@ -84,8 +96,8 @@ AbaqusUMATStress::AbaqusUMATStress(const InputParameters & parameters)
   _aqSTRESS.resize(_aqNTENS);
   _aqDDSDDE.resize(_aqNTENS * _aqNTENS);
   _aqDSTRAN.resize(_aqNTENS);
-  _aqPREDEF.resize(_number_external_fields);
-  _aqDPRED.resize(_number_external_fields);
+  _aqPREDEF.resize(_number_external_fields + _number_external_properties);
+  _aqDPRED.resize(_number_external_fields + _number_external_properties);
 }
 
 void
@@ -110,9 +122,9 @@ AbaqusUMATStress::computeProperties()
 
   // For now, total time and step time mean the exact same thing
   // Value of step time at the beginning of the current increment
-  _aqTIME[0] = _t;
+  _aqTIME[0] = _t - _dt;
   // Value of total time at the beginning of the current increment
-  _aqTIME[1] = _t;
+  _aqTIME[1] = _t - _dt;
 
   // Time increment
   _aqDTIME = _dt;
@@ -169,18 +181,28 @@ AbaqusUMATStress::computeQpStress()
   _aqPNEWDT = std::numeric_limits<Real>::max();
 
   // Temperature
-  _aqTEMP = _temperature[_qp];
+  _aqTEMP = _temperature_old[_qp];
 
   // Temperature increment
   _aqDTEMP = _temperature[_qp] - _temperature_old[_qp];
 
-  for (unsigned int i = 0; i < _number_external_fields; i++)
+  for (const auto i : make_range(_number_external_fields))
   {
     // External field at this step
-    _aqPREDEF[i] = (*_external_fields[i])[_qp];
+    _aqPREDEF[i] = (*_external_fields_old[i])[_qp];
 
     // External field increments
     _aqDPRED[i] = (*_external_fields[i])[_qp] - (*_external_fields_old[i])[_qp];
+  }
+
+  for (const auto i : make_range(_number_external_properties))
+  {
+    // External property at this step
+    _aqPREDEF[i + _number_external_fields] = (*_external_properties_old[i])[_qp];
+
+    // External property increments
+    _aqDPRED[i + _number_external_fields] =
+        (*_external_properties[i])[_qp] - (*_external_properties_old[i])[_qp];
   }
 
   // Layer number (not supported)
@@ -244,6 +266,9 @@ AbaqusUMATStress::computeQpStress()
   // Get new stress tensor - UMAT should update stress
   _stress[_qp] = RankTwoTensor(
       _aqSTRESS[0], _aqSTRESS[1], _aqSTRESS[2], _aqSTRESS[3], _aqSTRESS[4], _aqSTRESS[5]);
+
+  // Rotate the stress state to the current configuration
+  _stress[_qp].rotate(_rotation_increment[_qp]);
 
   // use DDSDDE as Jacobian mult
   _jacobian_mult[_qp].fillSymmetric21FromInputVector(std::array<Real, 21>{{

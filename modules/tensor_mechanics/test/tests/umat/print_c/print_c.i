@@ -26,6 +26,8 @@
 
 [AuxVariables]
   [strain_yy]
+    family = MONOMIAL
+    order = FIRST
   []
 []
 

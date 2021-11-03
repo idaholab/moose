@@ -226,5 +226,10 @@ protected:
   std::vector<VariableName> _external_field_names;
 
   // Number of external fields provided by the user
-  const unsigned int _number_external_fields;
+  const std::size_t _number_external_fields;
+
+  const std::vector<MaterialPropertyName> _external_property_names;
+  const std::size_t _number_external_properties;
+  std::vector<const MaterialProperty<Real> *> _external_properties;
+  std::vector<const MaterialProperty<Real> *> _external_properties_old;
 };

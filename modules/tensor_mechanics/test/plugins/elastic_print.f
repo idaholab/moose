@@ -64,14 +64,11 @@ C
       END DO
 
 C     CALCULATE STRESS, ELASTIC STRAIN AND THERMAL STRAIN
+C     compute stress using a stress increment from a strain increment
 C
       DO K1=1, NTENS
-         STRESS(K1)=0.D0
-      END DO
-
-      DO K1=1, NTENS
          DO K2=1, NTENS
-            STRESS(K1)=STRESS(K1)+DDSDDE(K2, K1)*STRAN(K2)
+            STRESS(K1)=STRESS(K1)+DDSDDE(K2, K1)*DSTRAN(K2)
          END DO
       END DO
 
