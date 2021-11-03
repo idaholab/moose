@@ -9,7 +9,7 @@
 
 Here is the converted input:
 
-!listing modules/tensor_mechanics/tutorials/introduction/step02a.i
+!listing modules/tensor_mechanics/tutorials/introduction/mech_step02a.i
 
 ## Input file
 

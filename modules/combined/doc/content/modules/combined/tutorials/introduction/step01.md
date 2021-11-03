@@ -4,7 +4,7 @@ Continuing from the [final step](contact/tutorials/introduction/step02.md) in
 the mechanical contact tutorial we add a first attempt at thermal contact
 staying within the mortar method.
 
-!listing modules/combined/tutorials/introduction/step01.i
+!listing modules/combined/tutorials/introduction/thermal_mechanical_contact/thermomech_cont_step01.i
 
 Note that we do not have a "thermal contact action", so we need to add all
 objects required for mortar based thermal contact manually.

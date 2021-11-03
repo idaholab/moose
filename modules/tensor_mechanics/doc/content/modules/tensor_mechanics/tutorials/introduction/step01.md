@@ -2,7 +2,7 @@
 
 Let's get started with a minimal input file.
 
-!listing modules/tensor_mechanics/tutorials/introduction/step01.i
+!listing modules/tensor_mechanics/tutorials/introduction/mech_step01.i
 
 ## Input file
 

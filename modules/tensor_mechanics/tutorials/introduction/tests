@@ -1,37 +1,37 @@
 [Tests]
-  [step01]
+  [mech_step01]
     type = RunApp
-    input = step01.i
+    input = mech_step01.i
     check_input = True
   []
-  [step02]
+  [mech_step02]
     type = RunApp
-    input = step02.i
+    input = mech_step02.i
     check_input = True
   []
-  [step02a]
+  [mech_step02a]
     type = RunApp
-    input = step02a.i
+    input = mech_step02a.i
     check_input = True
   []
-  [step03]
+  [mech_step03]
     type = RunApp
-    input = step03.i
+    input = mech_step03.i
     check_input = True
   []
-  [step03a]
+  [mech_step03a]
     type = RunApp
-    input = step03a.i
+    input = mech_step03a.i
     check_input = True
   []
-  [step04]
+  [mech_step04]
     type = RunApp
-    input = step04.i
+    input = mech_step04.i
     check_input = True
   []
-  [step04a]
+  [mech_step04a]
     type = RunApp
-    input = step04a.i
+    input = mech_step04a.i
     check_input = True
   []
 []
