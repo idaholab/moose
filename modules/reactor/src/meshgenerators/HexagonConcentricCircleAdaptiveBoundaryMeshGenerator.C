@@ -55,8 +55,7 @@ HexagonConcentricCircleAdaptiveBoundaryMeshGenerator::
 {
   if (_sides_to_adapt.size() != _input_names.size())
     paramError("sides_to_adapt", "This parameter and inputs must have the same length.");
-  for (unsigned int i = 0; i < _sides_to_adapt.size(); i++)
-    _input_ptrs.push_back(&getMeshByName(_input_names[i]));
+  _input_ptrs = getMeshes("inputs");
   _is_control_drum_meta = getParam<bool>("is_control_drum");
   _is_general_polygon = false;
 }

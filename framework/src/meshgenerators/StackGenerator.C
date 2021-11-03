@@ -54,13 +54,10 @@ StackGenerator::validParams()
 StackGenerator::StackGenerator(const InputParameters & parameters)
   : MeshGenerator(parameters),
     _dim(getParam<MooseEnum>("dim")),
+    _mesh_ptrs(getMeshes("inputs")),
     _input_names(getParam<std::vector<MeshGeneratorName>>("inputs")),
     _bottom_height(getParam<Real>("bottom_height"))
 {
-  // Grab the input meshes
-  _mesh_ptrs.reserve(_input_names.size());
-  for (auto & input_name : _input_names)
-    _mesh_ptrs.push_back(&getMeshByName(input_name));
 }
 
 std::unique_ptr<MeshBase>

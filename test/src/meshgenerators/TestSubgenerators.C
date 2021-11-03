@@ -23,8 +23,10 @@ TestSubgenerators::validParams()
   InputParameters params = StitchedMeshGenerator::validParams();
 
   params.makeParamNotRequired<std::vector<MeshGeneratorName>>("inputs");
+  params.set<std::vector<MeshGeneratorName>>("inputs") = {};
 
   params.addRequiredParam<std::vector<std::string>>("input_files", "The input mesh filenames");
+
   return params;
 }
 

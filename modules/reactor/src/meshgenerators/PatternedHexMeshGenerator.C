@@ -109,6 +109,7 @@ PatternedHexMeshGenerator::validParams()
 
 PatternedHexMeshGenerator::PatternedHexMeshGenerator(const InputParameters & parameters)
   : PolygonMeshGeneratorBase(parameters),
+    _mesh_ptrs(getMeshes("inputs")),
     _input_names(getParam<std::vector<MeshGeneratorName>>("inputs")),
     _pattern(getParam<std::vector<std::vector<unsigned int>>>("pattern")),
     _pattern_boundary(getParam<MooseEnum>("pattern_boundary")),
@@ -180,9 +181,6 @@ PatternedHexMeshGenerator::PatternedHexMeshGenerator(const InputParameters & par
                                   std::unique(pattern_1d.begin(), pattern_1d.end())) <
       _input_names.size())
     paramError("pattern", "All the meshes provided in inputs must be used here.");
-  _mesh_ptrs.reserve(_input_names.size());
-  for (auto & input_name : _input_names)
-    _mesh_ptrs.push_back(&getMeshByName(input_name));
 
   if (isParamValid("background_block_id"))
   {

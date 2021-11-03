@@ -29,15 +29,13 @@ MeshCollectionGenerator::validParams()
 }
 
 MeshCollectionGenerator::MeshCollectionGenerator(const InputParameters & parameters)
-  : MeshGenerator(parameters), _input_names(getParam<std::vector<MeshGeneratorName>>("inputs"))
+  : MeshGenerator(parameters),
+    _input_names(getParam<std::vector<MeshGeneratorName>>("inputs")),
+    _meshes(getMeshes("inputs"))
 {
   // error check
   if (_input_names.empty())
     paramError("input_names", "You need to specify at least one MeshGenerator as an input.");
-
-  // Grab the input mesh references as pointers
-  for (auto & input_name : _input_names)
-    _meshes.push_back(&getMeshByName(input_name));
 }
 
 std::unique_ptr<MeshBase>
