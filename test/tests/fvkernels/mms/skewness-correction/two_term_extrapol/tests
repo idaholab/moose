@@ -5,7 +5,7 @@
     type = PythonUnitTest
     input = 'test.py'
     test_case = TestAverageStencil
-    requirement = 'The system shall display first order convergence witch face averaging in an advection diffusion problem with extrapolated BCs.'
+    requirement = 'The system shall display first order convergence, when averaging face side neighbors to compute face midpoint values during gradient reconstruction.'
     method = '!dbg'
     min_parallel = 1
     ad_indexing_type = 'global'
@@ -16,7 +16,7 @@
     type = PythonUnitTest
     input = 'test.py'
     test_case = TestSkewnessCorrectedStencil
-    requirement = 'The system shall display second order convergence witch skew-corrected face averaging in an advection diffusion problem with extrapolated BCs.'
+    requirement = 'The system shall display second order convergence, when skewness-corrected averaging to compute face midpoint values during gradient reconstruction.'
     method = '!dbg'
     min_parallel = 1
     ad_indexing_type = 'global'

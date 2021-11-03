@@ -4,7 +4,7 @@ diff=1.1
 [Mesh]
   [gen_mesh]
     type = FileMeshGenerator
-    file = skewed-0.msh
+    file = skewed.msh
   []
 []
 
