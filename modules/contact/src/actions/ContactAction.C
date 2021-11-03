@@ -96,12 +96,13 @@ ContactAction::validParams()
   params.addParam<Real>(
       "c_normal",
       1e6,
-      "Parameter for balancing the size of the gap and contact pressure. This purely numerical "
+      "Parameter for balancing the size of the gap and contact pressure for a mortar formulation. "
+      "This purely numerical "
       "parameter affects convergence behavior and, in general, should be larger for stiffer "
       "materials. It is recommended that the user tries out various orders of magnitude for this "
       "parameter if the default value generates poor contact convergence.");
   params.addParam<Real>(
-      "c_tangential", 1, "Numerical parameter for nonlinear frictional constraints");
+      "c_tangential", 1, "Numerical parameter for nonlinear mortar frictional constraints");
   params.addParam<bool>("ping_pong_protection",
                         false,
                         "Whether to protect against ping-ponging, e.g. the oscillation of the "
@@ -109,13 +110,18 @@ ContactAction::validParams()
                         "different primary faces, by tying the secondary node to the "
                         "edge between the involved primary faces");
   params.addParam<Real>(
-      "normal_lm_scaling", 1., "Scaling factor to apply to the normal LM variable");
+      "normal_lm_scaling",
+      1.,
+      "Scaling factor to apply to the normal LM variable for a mortar formulation");
   params.addParam<Real>(
-      "tangential_lm_scaling", 1., "Scaling factor to apply to the tangential LM variable");
+      "tangential_lm_scaling",
+      1.,
+      "Scaling factor to apply to the tangential LM variable for a mortar formulation");
   params.addParam<bool>(
       "interpolate_normals",
       true,
-      "Whether to interpolate the nodal normals (e.g. classic idea of evaluating field at "
+      "Whether to interpolate the nodal normals for a mortar contact constraint (e.g. classic "
+      "idea of evaluating field at "
       "quadrature points). If this is set to false, then non-interpolated nodal normals will be "
       "used, and then the _normals member should be indexed with _i instead of _qp. This input "
       "parameter is intended for developers.");
@@ -126,12 +132,18 @@ ContactAction::validParams()
   params.addClassDescription("Sets up all objects needed for mechanical contact enforcement");
   params.addParam<bool>(
       "use_dual",
-      "Whether to use the dual mortar approach. It is defaulted to true for "
+      "Whether to use the dual mortar approach within a mortar formulation. It is defaulted to "
+      "true for "
       "weighted quantity approach, and to false for the legacy approach. To avoid instabilities "
       "in the solution and obtain the full benefits of a variational enforcement,"
       "use of dual mortar with weighted constraints is strongly recommended. This "
       "input is only intended for advanced users.");
-
+  params.addParam<bool>(
+      "correct_edge_dropping",
+      false,
+      "Whether to enable correct edge dropping treatment for mortar constraints. When disabled "
+      "any Lagrange Multiplier degree of freedom on a secondary element without full primary "
+      "contributions will be set (strongly) to 0.");
   return params;
 }
 
@@ -140,18 +152,9 @@ ContactAction::ContactAction(const InputParameters & params)
     _boundary_pairs(getParam<BoundaryName, BoundaryName>("primary", "secondary")),
     _model(getParam<MooseEnum>("model").getEnum<ContactModel>()),
     _formulation(getParam<MooseEnum>("formulation").getEnum<ContactFormulation>()),
-    _mortar_approach(getParam<MooseEnum>("mortar_approach").getEnum<MortarApproach>())
+    _mortar_approach(getParam<MooseEnum>("mortar_approach").getEnum<MortarApproach>()),
+    _correct_edge_dropping(getParam<bool>("correct_edge_dropping"))
 {
-  // use dual basis function for Lagrange multipliers?
-  if (isParamValid("use_dual"))
-    _use_dual = getParam<bool>("use_dual");
-  else
-  {
-    if (_formulation == ContactFormulation::MORTAR && _mortar_approach != MortarApproach::Legacy)
-      _use_dual = true;
-    else
-      _use_dual = false;
-  }
 
   if (_boundary_pairs.size() != 1 && _formulation == ContactFormulation::MORTAR)
     paramError("formulation", "When using mortar, a vector of contact pairs cannot be used");
@@ -171,12 +174,38 @@ ContactAction::ContactAction(const InputParameters & params)
           "Use of legacy mortar contact approach is deprecated and will be removed by December "
           "2021. Instead, select the default option based on weighted quantities and dual bases");
     }
+
+    // use dual basis function for Lagrange multipliers?
+    if (isParamValid("use_dual"))
+      _use_dual = getParam<bool>("use_dual");
+    else
+    {
+      if (_formulation == ContactFormulation::MORTAR && _mortar_approach != MortarApproach::Legacy)
+        _use_dual = true;
+      else
+        _use_dual = false;
+    }
   }
-  else if (params.isParamSetByUser("mortar_approach"))
-    paramError("mortar_approach",
-               "The 'mortar_approach' option can only be used with the 'mortar' formulation");
-  else if (params.isParamValid("use_dual"))
-    paramError("use_dual", "The 'use_dual' option can only be used with the 'mortar' formulation");
+  else
+  {
+    if (params.isParamSetByUser("correct_edge_dropping"))
+      paramError(
+          "correct_edge_dropping",
+          "The 'correct_edge_dropping' option can only be used with the 'mortar' formulation "
+          "(weighted)");
+    else if (params.isParamSetByUser("mortar_approach"))
+      paramError("mortar_approach",
+                 "The 'mortar_approach' option can only be used with the 'mortar' formulation");
+    else if (params.isParamSetByUser("use_dual"))
+      paramError("use_dual",
+                 "The 'use_dual' option can only be used with the 'mortar' formulation");
+    else if (params.isParamSetByUser("c_normal"))
+      paramError("c_normal",
+                 "The 'c_normal' option can only be used with the 'mortar' formulation");
+    else if (params.isParamSetByUser("c_tangential"))
+      paramError("c_tangential",
+                 "The 'c_tangential' option can only be used with the 'mortar' formulation");
+  }
 
   if (_formulation == ContactFormulation::RANFS)
   {
@@ -450,6 +479,7 @@ ContactAction::addMortarContact()
       if (_mortar_approach == MortarApproach::Weighted)
       {
         InputParameters params = _factory.getValidParams("ComputeWeightedGapLMMechanicalContact");
+        params.set<bool>("correct_edge_dropping") = _correct_edge_dropping;
 
         params.set<BoundaryName>("primary_boundary") = _boundary_pairs[0].first;
         params.set<BoundaryName>("secondary_boundary") = _boundary_pairs[0].second;
@@ -463,6 +493,9 @@ ContactAction::addMortarContact()
 
         if (ndisp > 1)
           params.set<std::vector<VariableName>>("disp_y") = {displacements[1]};
+        if (ndisp > 2)
+          params.set<std::vector<VariableName>>("disp_z") = {displacements[2]};
+
         params.set<bool>("use_displaced_mesh") = true;
 
         _problem->addConstraint("ComputeWeightedGapLMMechanicalContact",
@@ -500,6 +533,7 @@ ContactAction::addMortarContact()
       {
         InputParameters params =
             _factory.getValidParams("ComputeFrictionalForceLMMechanicalContact");
+        params.set<bool>("correct_edge_dropping") = _correct_edge_dropping;
 
         params.set<BoundaryName>("primary_boundary") = _boundary_pairs[0].first;
         params.set<BoundaryName>("secondary_boundary") = _boundary_pairs[0].second;
@@ -511,8 +545,11 @@ ContactAction::addMortarContact()
         params.set<bool>("compute_primal_residuals") = false;
 
         params.set<std::vector<VariableName>>("disp_x") = {displacements[0]};
+
         if (ndisp > 1)
           params.set<std::vector<VariableName>>("disp_y") = {displacements[1]};
+        if (ndisp > 2)
+          params.set<std::vector<VariableName>>("disp_z") = {displacements[2]};
 
         params.set<NonlinearVariableName>("variable") = normal_lagrange_multiplier_name;
         params.set<std::vector<VariableName>>("friction_lm") = {
@@ -577,6 +614,8 @@ ContactAction::addMortarContact()
     {
       InputParameters params = _factory.getValidParams(constraint_type);
 
+      params.set<bool>("correct_edge_dropping") = _correct_edge_dropping;
+
       params.set<BoundaryName>("primary_boundary") = _boundary_pairs[0].first;
       params.set<BoundaryName>("secondary_boundary") = _boundary_pairs[0].second;
       params.set<SubdomainName>("primary_subdomain") = primary_subdomain_name;
@@ -601,6 +640,7 @@ ContactAction::addMortarContact()
     addMechanicalContactConstraints(normal_lagrange_multiplier_name,
                                     action_name + "_normal_constraint_",
                                     "NormalMortarMechanicalContact");
+
     if (_model == ContactModel::COULOMB)
       addMechanicalContactConstraints(tangential_lagrange_multiplier_name,
                                       action_name + "_tangential_constraint_",

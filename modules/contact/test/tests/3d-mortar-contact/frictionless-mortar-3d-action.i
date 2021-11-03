@@ -117,20 +117,6 @@ offset = 0.00
     block = bottom_block
     normal = '0 -1 0'
   []
-  [secondary]
-    input = bottom_back_sideset
-    type = LowerDBlockFromSidesetGenerator
-    sidesets = 'top_bottom' # top_back top_left'
-    new_block_id = '10001'
-    new_block_name = 'secondary_lower'
-  []
-  [primary]
-    input = secondary
-    type = LowerDBlockFromSidesetGenerator
-    sidesets = 'bottom_top'
-    new_block_id = '10000'
-    new_block_name = 'primary_lower'
-  []
 []
 
 [Variables]
@@ -142,10 +128,6 @@ offset = 0.00
   []
   [disp_z]
     block = '1 2'
-  []
-  [mortar_normal_lm]
-    block = 'secondary_lower'
-    use_dual = true
   []
 []
 
@@ -185,54 +167,12 @@ offset = 0.00
   []
 []
 
-[Constraints]
-  [normal_lm]
-    type = ComputeWeightedGapLMMechanicalContact
-    primary_boundary = 'bottom_top'
-    secondary_boundary = 'top_bottom'
-    primary_subdomain = 'primary_lower'
-    secondary_subdomain = 'secondary_lower'
-    variable = mortar_normal_lm
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-    use_displaced_mesh = true
-  []
-  [normal_x]
-    type = NormalMortarMechanicalContact
-    primary_boundary = 'bottom_top'
-    secondary_boundary = 'top_bottom'
-    primary_subdomain = 'primary_lower'
-    secondary_subdomain = 'secondary_lower'
-    variable = mortar_normal_lm
-    secondary_variable = disp_x
-    component = x
-    use_displaced_mesh = true
-    compute_lm_residuals = false
-  []
-  [normal_y]
-    type = NormalMortarMechanicalContact
-    primary_boundary = 'bottom_top'
-    secondary_boundary = 'top_bottom'
-    primary_subdomain = 'primary_lower'
-    secondary_subdomain = 'secondary_lower'
-    variable = mortar_normal_lm
-    secondary_variable = disp_y
-    component = y
-    use_displaced_mesh = true
-    compute_lm_residuals = false
-  []
-  [normal_z]
-    type = NormalMortarMechanicalContact
-    primary_boundary = 'bottom_top'
-    secondary_boundary = 'top_bottom'
-    primary_subdomain = 'primary_lower'
-    secondary_subdomain = 'secondary_lower'
-    variable = mortar_normal_lm
-    secondary_variable = disp_z
-    component = z
-    use_displaced_mesh = true
-    compute_lm_residuals = false
+[Contact]
+  [mortar]
+    primary = 'bottom_top'
+    secondary = 'top_bottom'
+    formulation = mortar
+    model = frictionless
   []
 []
 
@@ -321,7 +261,7 @@ offset = 0.00
   [contact]
     type = ContactDOFSetSize
     variable = mortar_normal_lm
-    subdomain = 'secondary_lower'
+    subdomain = 'mortar_secondary_subdomain'
     execute_on = 'nonlinear timestep_end'
   []
 []
@@ -329,9 +269,10 @@ offset = 0.00
 [VectorPostprocessors]
   [contact-pressure]
     type = NodalValueSampler
-    block = secondary_lower
+    block = mortar_secondary_subdomain
     variable = mortar_normal_lm
     sort_by = 'id'
     execute_on = NONLINEAR
+
   []
 []
