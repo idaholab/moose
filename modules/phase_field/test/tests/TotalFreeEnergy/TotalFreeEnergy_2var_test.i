@@ -142,7 +142,7 @@
   l_tol = 1.0e-4
   l_max_its = 30
   nl_max_its = 30
-  nl_rel_tol = 1.0e-9
+  nl_rel_tol = 1.0e-10
   start_time = 0.0
   num_steps = 7
   dt = 80.0

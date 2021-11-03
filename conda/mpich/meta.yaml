@@ -1,4 +1,4 @@
-{% set build = 7 %}
+{% set build = 8 %}
 {% set strbuild = "build_" + build|string %}
 {% set version = "3.3.2" %}
 
@@ -20,41 +20,43 @@ build:
 
 requirements:
   build:
-    - gcc_linux-64 {{ gcc }}                 # [linux]
-    - gxx_linux-64 {{ gxx }}                 # [linux]
-    - gfortran_linux-64 {{ fortran }}        # [linux]
-    - gcc_impl_linux-64 {{ gccimpl }}        # [linux]
-    - clang {{ clang }}                      # [osx]
-    - clang_osx-64 {{ clangosx }}            # [osx]
-    - clangxx {{ clangxx }}                  # [osx]
-    - clangxx_osx-64 {{ clangxxosx }}        # [osx]
-    - compiler-rt {{ compilerrt }}           # [osx]
-    - compiler-rt_osx-64 {{ compilerrtosx }} # [osx]
-    - libllvm11 {{ libllvm }}                # [osx]
-    - clang-tools                            # [osx]
-    - llvm-openmp {{ llvmopenmp }}           # [osx]
-    - gfortran_osx-64 {{ osxfortran }}       # [osx]
-    - libclang {{ libclang }}                # [osx]
-    - libcxx {{ libcxx }}                    # [osx]
-    - make  # [unix]
+    - {{ moose_cc }}
+    - {{ moose_cxx }}
+    - {{ moose_fortran }}
+    - {{ moose_impl }}          # [linux]
+    - {{ moose_impl_xx }}       # [linux]
+    - {{ moose_libgcc }}        # [linux]
+    - {{ moose_libstd }}        # [linux]
+    - {{ moose_libcxx }}        # [osx]
+    - {{ moose_libclang }}      # [osx]
+    - {{ moose_openmp }}        # [osx]
+    - {{ moose_llvm_tools }}    # [osx]
+    - {{ moose_ld64 }}          # [osx]
+    - {{ moose_cctools }}       # [osx]
+    - autoconf                  # [unix]
+    - automake                  # [unix]
+    - libtool                   # [unix]
+    - make                      # [unix]
+    - gnuconfig                 # [arm64]
   host: []
   run:
-    - gcc_linux-64 {{ gcc }}                 # [linux]
-    - gxx_linux-64 {{ gxx }}                 # [linux]
-    - gfortran_linux-64 {{ fortran }}        # [linux]
-    - gcc_impl_linux-64 {{ gccimpl }}        # [linux]
-    - clang {{ clang }}                      # [osx]
-    - clang_osx-64 {{ clangosx }}            # [osx]
-    - clangxx {{ clangxx }}                  # [osx]
-    - clangxx_osx-64 {{ clangxxosx }}        # [osx]
-    - compiler-rt {{ compilerrt }}           # [osx]
-    - compiler-rt_osx-64 {{ compilerrtosx }} # [osx]
-    - libllvm11 {{ libllvm }}                # [osx]
-    - clang-tools                            # [osx]
-    - llvm-openmp {{ llvmopenmp }}           # [osx]
-    - gfortran_osx-64 {{ osxfortran }}       # [osx]
-    - libclang {{ libclang }}                # [osx]
-    - libcxx {{ libcxx }}                    # [osx]
+    - {{ moose_cc }}
+    - {{ moose_cxx }}
+    - {{ moose_fortran }}
+    - {{ moose_impl }}          # [linux]
+    - {{ moose_impl_xx }}       # [linux]
+    - {{ moose_libgcc }}        # [linux]
+    - {{ moose_libstd }}        # [linux]
+    - {{ moose_libcxx }}        # [osx]
+    - {{ moose_libclang }}      # [osx]
+    - {{ moose_openmp }}        # [osx]
+    - {{ moose_llvm_tools }}    # [osx]
+    - {{ moose_ld64 }}          # [osx]
+    - {{ moose_cctools }}       # [osx]
+    - autoconf                  # [osx]
+    - automake                  # [osx]
+    - libtool                   # [osx]
+    - make                      # [osx]
     - mpi 1.0 mpich
 test:
   script: run_test.sh

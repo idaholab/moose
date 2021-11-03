@@ -1,5 +1,5 @@
 # Do not use jinja templating (A physical change to this file is required to trigger a build)
-{% set build = 7 %}
+{% set build = 8 %}
 {% set strbuild = "build_" + build|string %}
 {% set vtk_version = "6.3.0" %}
 {% set friendly_version = "6.3" %}
@@ -21,11 +21,12 @@ build:
 requirements:
   build:
     - {{ compiler('cxx') }}
-    - moose-mpich {{ moose_mpich }}
+    - {{ moose_cxx }}
+    - {{ moose_mpich }}
     - cmake
     - ninja
-    - libglu  {{ libglu }}              # [linux]
-    - mesalib {{ mesalib }}             # [linux]
+    - {{ moose_libglu }}                # [linux]
+    - {{ moose_mesalib }}               # [linux]
     - {{ cdt('libxt-devel') }}          # [linux]
     - {{ cdt('libsm-devel') }}          # [linux]
     - {{ cdt('libx11-devel') }}         # [linux]
@@ -35,9 +36,9 @@ requirements:
     - {{ cdt('xorg-x11-proto-devel') }} # [linux]
 
   run:
-    - moose-mpich
-    - libglu  {{ libglu }}              # [linux]
-    - mesalib {{ mesalib }}             # [linux]
+    - {{ moose_mpich }}
+    - {{ moose_libglu }}                # [linux]
+    - {{ moose_mesalib }}               # [linux]
     - {{ cdt('libxt-devel') }}          # [linux]
     - {{ cdt('libsm-devel') }}          # [linux]
     - {{ cdt('libx11-devel') }}         # [linux]
