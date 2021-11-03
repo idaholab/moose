@@ -83,12 +83,4 @@ protected:
   std::vector<subdomain_id_type> _peripheral_block_ids;
   /// Subdomain Names of the peripheral regions
   std::vector<SubdomainName> _peripheral_block_names;
-  /// Input meshes
-  std::vector<std::unique_ptr<ReplicatedMesh>> _meshes;
-  /// Output mesh <MeshBase>
-  std::unique_ptr<MeshBase> _out_meshes_ptrs;
-  /// Output mesh <ReplicatedMesh>
-  std::unique_ptr<ReplicatedMesh> _out_meshes;
-  /// Temporary peripheral mesh
-  std::unique_ptr<ReplicatedMesh> _tmp_peripheral_mesh;
 };

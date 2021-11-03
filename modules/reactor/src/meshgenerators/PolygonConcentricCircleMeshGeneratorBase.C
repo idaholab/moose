@@ -319,10 +319,8 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
                  "Elements of this parameter must be smaller than polygon apothem (after volume "
                  "preserve correction if applicable).");
   }
-  auto mesh = buildReplicatedMesh(2);
   // build the first slice of the polygon.
-  auto mesh0 = buildSimpleSlice(dynamic_pointer_cast<ReplicatedMesh>(mesh),
-                                ring_radii_corr,
+  auto mesh0 = buildSimpleSlice(ring_radii_corr,
                                 _ring_intervals,
                                 _duct_sizes,
                                 _duct_intervals,
@@ -331,7 +329,7 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
                                 _pitch,
                                 _num_sectors_per_side[0],
                                 _background_intervals,
-                                &_node_id_background_meta,
+                                _node_id_background_meta,
                                 _num_sides,
                                 1,
                                 _azimuthal_angles_array[0],
@@ -341,9 +339,7 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
   // This loop builds add-on slices and stitches them to the first slice
   for (unsigned int mesh_index = 1; mesh_index < _num_sides; mesh_index++)
   {
-    auto mesh_tmp0 = buildReplicatedMesh(2);
-    auto mesh_tmp = buildSimpleSlice(dynamic_pointer_cast<ReplicatedMesh>(mesh_tmp0),
-                                     ring_radii_corr,
+    auto mesh_tmp = buildSimpleSlice(ring_radii_corr,
                                      _ring_intervals,
                                      _duct_sizes,
                                      _duct_intervals,
@@ -352,7 +348,7 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
                                      _pitch,
                                      _num_sectors_per_side[mesh_index],
                                      _background_intervals,
-                                     &_node_id_background_meta,
+                                     _node_id_background_meta,
                                      _num_sides,
                                      mesh_index + 1,
                                      _azimuthal_angles_array[mesh_index],
@@ -414,9 +410,8 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
                                   1.0 / std::tan(M_PI / (Real)_num_sides));
         Real x_tmp = _pitch / 2.0;
         Real y_tmp = x_tmp * std::tan(azi_corr_tmp);
-        nodeCoordRotate(&x_tmp,
-                        &y_tmp,
-                        (Real)i * 360.0 / (Real)_num_sides - (180.0 - 180.0 / (Real)_num_sides));
+        nodeCoordRotate(
+            x_tmp, y_tmp, (Real)i * 360.0 / (Real)_num_sides - (180.0 - 180.0 / (Real)_num_sides));
         Point p_tmp = Point(x_tmp, y_tmp, 0.0);
         mesh0->add_point(
             p_tmp,
