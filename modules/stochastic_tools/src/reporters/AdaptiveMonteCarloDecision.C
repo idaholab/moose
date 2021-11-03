@@ -37,7 +37,8 @@ AdaptiveMonteCarloDecision::AdaptiveMonteCarloDecision(const InputParameters & p
     _inputs(declareValue<std::vector<Real>>("inputs")),
     _step(getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")->timeStep()),
     _sampler(getSampler("sampler")),
-    _ais(dynamic_cast<const AdaptiveImportanceSampler *>(&_sampler))
+    _ais(dynamic_cast<const AdaptiveImportanceSampler *>(&_sampler)),
+    _check_step(std::numeric_limits<int>::max())
 {
 
   // Check whether the selected sampler is an adaptive sampler or not
