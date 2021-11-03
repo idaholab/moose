@@ -31,7 +31,7 @@ LayeredAverageRZ::execute()
     current_elem_volume += _JxW[qp] * circumference;
   }
 
-  unsigned int layer = getLayer(_current_elem->centroid());
+  unsigned int layer = getLayer(_current_elem->vertex_average());
   _layer_volumes[layer] += current_elem_volume;
 }
 

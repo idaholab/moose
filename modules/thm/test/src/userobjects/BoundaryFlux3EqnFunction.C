@@ -40,7 +40,7 @@ BoundaryFlux3EqnFunction::calcFlux(unsigned int /*iside*/,
                                    const RealVectorValue & /*normal*/,
                                    std::vector<ADReal> & flux) const
 {
-  const Point & q_point = _assembly.sideElem()->centroid();
+  const Point & q_point = _assembly.sideElem()->vertex_average();
   const Real rho = _rho_fn.value(_t, q_point);
   const Real vel = _vel_fn.value(_t, q_point);
   const Real p = _p_fn.value(_t, q_point);
