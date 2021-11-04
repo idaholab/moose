@@ -1,0 +1,7 @@
+[Tests]
+  [thermomech_step01]
+    type = Exodiff
+    input = thermomech_step01.i
+    exodiff = thermomech_step01_out.e
+  []
+[]
