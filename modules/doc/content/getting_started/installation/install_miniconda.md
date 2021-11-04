@@ -31,3 +31,14 @@ conda config --add channels https://conda.software.inl.gov/public
 
 !alert warning title=sudo conda
 If you find yourself using `sudo conda`... something's not right. The most common reason for needing sudo, is due to an improper Conda installation. Conda *should* be installed to your home directory, without any use of `sudo`.
+
+While in the `base` conda environment, we also encourage the usage of
+[Mamba](https://github.com/mamba-org/mamba), a drop-in re-implementation of the conda
+package manager that takes advantage of parallelization. This will lead to faster
+installation of conda packages. To install mamba, simply perform:
+
+```
+conda install mamba
+```
+
+Now `mamba` can be used instead of `conda` for installing packages.

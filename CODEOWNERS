@@ -44,6 +44,7 @@
 /framework/*/variables @rwcarlsen
 
 /modules/contact @bwspenc @lindsayad
+/modules/doc/content/getting_started/installation @milljm @loganharbour @cticenhour
 /modules/doc/content/newsletter @cticenhour
 /modules/electromagnetics @cticenhour
 /modules/external_petsc_solver @fdkong
