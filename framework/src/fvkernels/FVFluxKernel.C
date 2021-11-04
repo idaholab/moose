@@ -298,7 +298,12 @@ FVFluxKernel::computeJacobian(const FaceInfo & fi)
 ADReal
 FVFluxKernel::gradUDotNormal() const
 {
-  return Moose::FV::gradUDotNormal(_u_elem[_qp], _u_neighbor[_qp], *_face_info, _var);
+  // Utlimately this will be a property of the kernel
+  bool correct_skewness =
+      (_var.faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage);
+
+  return Moose::FV::gradUDotNormal(
+      _u_elem[_qp], _u_neighbor[_qp], *_face_info, _var, correct_skewness);
 }
 
 std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID>

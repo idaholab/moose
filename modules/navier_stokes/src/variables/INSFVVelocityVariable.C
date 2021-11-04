@@ -43,7 +43,7 @@ INSFVVelocityVariable::INSFVVelocityVariable(const InputParameters & params) : I
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
 const VectorValue<ADReal> &
-INSFVVelocityVariable::adGradSln(const Elem * const elem) const
+INSFVVelocityVariable::adGradSln(const Elem * const elem, bool /*correct_skewness*/) const
 {
   const auto it = _elem_to_grad.find(elem);
 

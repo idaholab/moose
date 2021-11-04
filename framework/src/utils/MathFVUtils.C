@@ -31,14 +31,10 @@ gradUDotNormal(const T &
 #ifdef MOOSE_GLOBAL_AD_INDEXING
                    fv_var
 #endif
-)
+               ,
+               bool correct_skewness)
 {
 #ifdef MOOSE_GLOBAL_AD_INDEXING
-
-  // Ultimately this will be passed as an input parameter when the
-  // face interpolation technique is defined on the kernels.
-  bool correct_skewness =
-      (fv_var.faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage);
 
   return fv_var.adGradSln(face_info, correct_skewness) * face_info.normal();
 #else
@@ -50,9 +46,9 @@ gradUDotNormal(const T &
 #endif
 }
 
+template ADReal gradUDotNormal(
+    const ADReal &, const ADReal &, const FaceInfo &, const MooseVariableFV<Real> &, bool);
 template ADReal
-gradUDotNormal(const ADReal &, const ADReal &, const FaceInfo &, const MooseVariableFV<Real> &);
-template ADReal
-gradUDotNormal(const ADReal &, const Real &, const FaceInfo &, const MooseVariableFV<Real> &);
+gradUDotNormal(const ADReal &, const Real &, const FaceInfo &, const MooseVariableFV<Real> &, bool);
 }
 }

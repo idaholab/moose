@@ -240,7 +240,8 @@ template <typename T, typename T2>
 ADReal gradUDotNormal(const T & elem_value,
                       const T2 & neighbor_value,
                       const FaceInfo & face_info,
-                      const MooseVariableFV<Real> & fv_var);
+                      const MooseVariableFV<Real> & fv_var,
+                      bool correct_skewness = false);
 
 /**
  * From Moukalled 12.30

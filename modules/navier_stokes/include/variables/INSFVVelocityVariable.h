@@ -23,6 +23,7 @@ public:
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
   using INSFVVariable::adGradSln;
-  const VectorValue<ADReal> & adGradSln(const Elem * const elem) const override;
+  const VectorValue<ADReal> & adGradSln(const Elem * const elem,
+                                        bool correct_skewness = false) const override;
 #endif
 };
