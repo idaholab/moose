@@ -1,0 +1,52 @@
+[Tests]
+  design = 'meshgenerators/TransitionLayerConnector.md'
+  issues = '#20641'
+  [squares]
+    type = 'Exodiff'
+    input = 'squares.i'
+    exodiff = 'squares_in.e'
+    requirement = "The system shall generator a connector transition layer based on the two input meshes and boundaries."
+    cli_args = '--mesh-only'
+    recover = false
+    mesh_mode = 'REPLICATED'
+  []
+  [squares_stitched]
+    type = 'Exodiff'
+    input = 'squares.i'
+    exodiff = 'squares_squares_stitched_in.e'
+    requirement = "The system shall generator a connector transition layer based on the two input meshes and boundaries and stitch it with the input meshes."
+    cli_args = '--mesh-only squares_squares_stitched_in.e
+                Mesh/tlc/keep_inputs=true'
+    recover = false
+    mesh_mode = 'REPLICATED'
+  []
+  [squares_bias]
+    type = 'Exodiff'
+    input = 'squares.i'
+    exodiff = 'squares_bias_in.e'
+    requirement = "The system shall generator a connector transition layer with manual biasing based on the two input meshes and boundaries."
+    cli_args = '--mesh-only squares_bias_in.e
+                Mesh/tlc/bias_parameter=1.2'
+    recover = false
+    mesh_mode = 'REPLICATED'
+  []
+  [squares_auto_bias]
+    type = 'Exodiff'
+    input = 'squares.i'
+    exodiff = 'squares_auto_bias_in.e'
+    requirement = "The system shall generator a connector transition layer with automatic biasing based on the two input meshes and boundaries."
+    cli_args = '--mesh-only squares_auto_bias_in.e
+                Mesh/tlc/bias_parameter=0.0'
+    recover = false
+    mesh_mode = 'REPLICATED'
+  []
+  [err_multiseg_boundary]
+    type = 'RunException'
+    input = 'squares.i'
+    cli_args = '--mesh-only squares_err.e
+               Mesh/tlc/boundary_1="top bottom"'
+    expect_err = 'The provided boundary is not a single-segment boundary.'
+    requirement ="The system shall throw an error if the input boundary has multiple segments."
+    mesh_mode = 'REPLICATED'
+  []
+[]

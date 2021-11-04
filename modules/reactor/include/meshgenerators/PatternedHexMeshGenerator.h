@@ -79,6 +79,8 @@ protected:
   std::vector<std::vector<Real>> & _control_drums_azimuthal_meta;
   /// Filename of the text file containing the control drum positions
   const std::string _position_file_name;
+  /// a Boolean flag to tell PeripheralModifyGenerator that the input is valid
+  const bool & _peripheral_modifier_compatible;
   /// Subdomain IDs of the peripheral regions
   std::vector<subdomain_id_type> _peripheral_block_ids;
   /// Subdomain Names of the peripheral regions
