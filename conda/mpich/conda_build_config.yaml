@@ -2,10 +2,10 @@
 ## Any changes made will require additional changes to any item above that.
 
 moose_libmesh:
-  - 2021.10.27 build_0
+  - moose-libmesh 2021.10.27 build_1
 
 moose_petsc:
-  - 3.15.1 build_2
+  - moose-petsc 3.15.1 build_3
 
 SHORT_VTK_NAME:
   - 6.3
@@ -14,255 +14,253 @@ vtk_version:
   - 6.3.0
 
 moose_libmesh_vtk:
-  - 6.3.0 build_7
+  - moose-libmesh-vtk 6.3.0 build_8
 
 moose_mpich:
-  - 3.3.2 build_7
+  - moose-mpich 3.3.2 build_8
 
 #### MOOSE_TOOLS stuff (order is important, must match python version order)
-python:
-  - 3.9
-  - 3.8
-  - 3.7
-  - 3.6
+moose_python:
+  - python 3.9                                 # [linux or arm64]
+  - python 3.8                                 # [linux or arm64]
+  - python 3.7                                 # [not arm64]
+  - python 3.6                                 # [not arm64]
 
-vtk:
-  - 9.0.1 no_osmesa_py39h3dd132e_102 # [osx]
-  - 9.0.1 no_osmesa_py38h523a0c9_102 # [osx]
-  - 9.0.1 no_osmesa_py37hc0470e1_102 # [osx]
-  - 9.0.1 no_osmesa_py36hc362858_102 # [osx]
-  - 9.0.3 no_osmesa_py39h801044d_100 # [linux]
-  - 9.0.3 no_osmesa_py38h3850a3d_100 # [linux]
-  - 9.0.3 no_osmesa_py37h7b56ff3_100 # [linux]
-  - 9.0.3 no_osmesa_py36hfa3a401_100 # [linux]
+moose_vtk:
+  - vtk 9.0.1 no_osmesa_py37h009ab58_107       # [not arm64 and osx]
+  - vtk 9.0.1 no_osmesa_py36h9e7c41b_107       # [not arm64 and osx]
+  - vtk 9.0.3 no_osmesa_py39h801044d_100       # [linux]
+  - vtk 9.0.3 no_osmesa_py38h3850a3d_100       # [linux]
+  - vtk 9.0.3 no_osmesa_py37h7b56ff3_100       # [linux]
+  - vtk 9.0.3 no_osmesa_py36hfa3a401_100       # [linux]
+  - vtk 9.0.3 no_osmesa_py39h8e4790f_105       # [arm64]
+  - vtk 9.0.3 no_osmesa_py38hb8cbb7a_105       # [arm64]
 
-numpy:
-  - 1.21.0 py39h7eed0ac_0      # [osx]
-  - 1.21.0 py38had91d27_0      # [osx]
-  - 1.21.0 py37h84c02c4_0      # [osx]
-  - 1.19.5 py36h08dc641_1      # [osx]
-  - 1.21.0 py39hdbf815f_0      # [linux]
-  - 1.21.0 py38h9894fe3_0      # [linux]
-  - 1.21.0 py37h038b26d_0      # [linux]
-  - 1.19.5 py36h2aa4a07_1      # [linux]
+moose_numpy:
+  - numpy 1.21.3 py37haefe36b_0                # [not arm64 and osx]
+  - numpy 1.19.5 py36h08b5fde_2                # [not arm64 and osx]
+  - numpy 1.21.1 py39hdbf815f_0                # [linux]
+  - numpy 1.21.1 py38h9894fe3_0                # [linux]
+  - numpy 1.21.1 py37h038b26d_0                # [linux]
+  - numpy 1.19.5 py36hfc0c790_2                # [linux]
+  - numpy 1.21.3 py39h1f3b974_0                # [arm64]
+  - numpy 1.21.3 py38hbf7bb01_0                # [arm64]
 
-pyqt:
-  - 5.12.3 py39h6e9494a_7      # [osx]
-  - 5.12.3 py38h50d1736_7      # [osx]
-  - 5.12.3 py37hf985489_7      # [osx]
-  - 5.12.3 py36h79c6626_7      # [osx]
-  - 5.12.3 py39hf3d152e_7      # [linux]
-  - 5.12.3 py38h578d9bd_7      # [linux]
-  - 5.12.3 py37h89c1867_7      # [linux]
-  - 5.12.3 py36h5fab9bb_7      # [linux]
+moose_pyqt:                                    # [not arm64]
+  - pyqt 5.9.2 py37h2a560b1_4                  # [not arm64 and osx]
+  - pyqt 5.9.2 py36h2a560b1_4                  # [not arm64 and osx]
+  - pyqt 5.12.3 py39hf3d152e_7                 # [linux]
+  - pyqt 5.12.3 py38h578d9bd_7                 # [linux]
+  - pyqt 5.12.3 py37h89c1867_7                 # [linux]
+  - pyqt 5.12.3 py36h5fab9bb_7                 # [linux]
 
-matplotlib:
-  - 3.3.3 py39h6e9494a_0       # [osx]
-  - 3.3.3 py38h50d1736_0       # [osx]
-  - 3.3.3 py37hf985489_0       # [osx]
-  - 3.3.3 py36h79c6626_0       # [osx]
-  - 3.4.2 py39hf3d152e_0       # [linux]
-  - 3.4.2 py38h578d9bd_0       # [linux]
-  - 3.4.2 py37h89c1867_0       # [linux]
-  - 3.3.4 py36h5fab9bb_0       # [linux]
+moose_matplotlib:
+  - matplotlib 3.4.3 py37hf985489_1            # [not arm64 and osx]
+  - matplotlib 3.3.4 py36h79c6626_0            # [not arm64 and osx]
+  - matplotlib 3.4.2 py39hf3d152e_0            # [linux]
+  - matplotlib 3.4.2 py38h578d9bd_0            # [linux]
+  - matplotlib 3.4.2 py37h89c1867_0            # [linux]
+  - matplotlib 3.3.4 py36h5fab9bb_0            # [linux]
+  - matplotlib 3.4.3 py39hdf13c20_0            # [arm64]
+  - matplotlib 3.4.3 py38h150bfb4_0            # [arm64]
 
-pandas:
-  - 1.2.1 py39h089d6f7_0       # [osx]
-  - 1.2.1 py38he9f00de_0       # [osx]
-  - 1.2.1 py37h010c265_0       # [osx]
-  - 1.1.5 py36h2be6da3_0       # [osx]
-  - 1.3.0 py39hde0f152_0       # [linux]
-  - 1.3.0 py38h1abd341_0       # [linux]
-  - 1.3.0 py37h219a48f_0       # [linux]
-  - 1.1.5 py36h284efc9_0       # [linux]
+moose_pandas:
+  - pandas 1.3.4 py37h5b83a90_0                # [not arm64 and osx]
+  - pandas 1.1.5 py36h2be6da3_0                # [not arm64 and osx]
+  - pandas 1.3.1 py39hde0f152_0                # [linux]
+  - pandas 1.3.1 py38h1abd341_0                # [linux]
+  - pandas 1.3.1 py37h219a48f_0                # [linux]
+  - pandas 1.1.5 py36h284efc9_0                # [linux]
+  - pandas 1.3.4 py39h7f752ed_0                # [arm64]
+  - pandas 1.3.4 py38h3777fb4_0                # [arm64]
 
-pyyaml:
-  - 5.4.1 py39hcbf5805_0       # [osx]
-  - 5.4.1 py38h5406a74_0       # [osx]
-  - 5.4.1 py37hf967b71_0       # [osx]
-  - 5.4.1 py36h20b66c6_0       # [osx]
-  - 5.4.1 py39h3811e60_0       # [linux]
-  - 5.4.1 py38h497a2fe_0       # [linux]
-  - 5.4.1 py37h5e8e339_0       # [linux]
-  - 5.4.1 py36h8f6f2f9_0       # [linux]
+moose_pyyaml:
+  - pyyaml 6.0 py37h271585c_0                  # [not arm64 and osx]
+  - pyyaml 5.4.1 py36hfa26744_1                # [not arm64 and osx]
+  - pyyaml 5.4.1 py39h3811e60_0                # [linux]
+  - pyyaml 5.4.1 py38h497a2fe_0                # [linux]
+  - pyyaml 5.4.1 py37h5e8e339_0                # [linux]
+  - pyyaml 5.4.1 py36h8f6f2f9_0                # [linux]
+  - pyyaml 6.0 py39h5161555_0                  # [arm64]
+  - pyyaml 6.0 py38hea4295b_0                  # [arm64]
 
-pybtex:
-  - 0.24.0 py39h6e9494a_0      # [osx]
-  - 0.24.0 py38h50d1736_0      # [osx]
-  - 0.24.0 py37hf985489_0      # [osx]
-  - 0.24.0 py36h79c6626_0      # [osx]
-  - 0.24.0 py39hf3d152e_0      # [linux]
-  - 0.24.0 py38h578d9bd_0      # [linux]
-  - 0.24.0 py37h89c1867_0      # [linux]
-  - 0.24.0 py36h5fab9bb_0      # [linux]
+moose_pybtex:
+  - pybtex 0.24.0 py37hf985489_0               # [not arm64 and osx]
+  - pybtex 0.24.0 py36h79c6626_0               # [not arm64 and osx]
+  - pybtex 0.24.0 py39hf3d152e_0               # [linux]
+  - pybtex 0.24.0 py38h578d9bd_0               # [linux]
+  - pybtex 0.24.0 py37h89c1867_0               # [linux]
+  - pybtex 0.24.0 py36h5fab9bb_0               # [linux]
+  - pybtex 0.24.0 py39h2804cbe_0               # [arm64]
+  - pybtex 0.24.0 py38h10201cd_0               # [arm64]
 
-mock:
-  - 4.0.3 py39h6e9494a_1       # [osx]
-  - 4.0.3 py38h50d1736_1       # [osx]
-  - 4.0.3 py37hf985489_1       # [osx]
-  - 4.0.3 py36h79c6626_1       # [osx]
-  - 4.0.3 py39hf3d152e_1       # [linux]
-  - 4.0.3 py38h578d9bd_1       # [linux]
-  - 4.0.3 py37h89c1867_1       # [linux]
-  - 4.0.3 py36h5fab9bb_1       # [linux]
+moose_mock:
+  - mock 4.0.3 py37hf985489_1                  # [not arm64 and osx]
+  - mock 4.0.3 py36h79c6626_1                  # [not arm64 and osx]
+  - mock 4.0.3 py39hf3d152e_1                  # [linux]
+  - mock 4.0.3 py38h578d9bd_1                  # [linux]
+  - mock 4.0.3 py37h89c1867_1                  # [linux]
+  - mock 4.0.3 py36h5fab9bb_1                  # [linux]
+  - mock 4.0.3 py39h2804cbe_1                  # [arm64]
+  - mock 4.0.3 py38h10201cd_1                  # [arm64]
 
-lxml:
-  - 4.6.3 py39hf41e7f8_0       # [osx]
-  - 4.6.3 py38h6ea4786_0       # [osx]
-  - 4.6.3 py37h250624f_0       # [osx]
-  - 4.6.3 py36habcf893_0       # [osx]
-  - 4.6.3 py39h107f48f_0       # [linux]
-  - 4.6.3 py38hf1fe3a4_0       # [linux]
-  - 4.6.3 py37h77fd288_0       # [linux]
-  - 4.6.3 py36h04a5ba7_0       # [linux]
+moose_lxml:
+  - lxml 4.6.3 py37h250624f_0                  # [not arm64 and osx]
+  - lxml 4.6.3 py36habcf893_0                  # [not arm64 and osx]
+  - lxml 4.6.3 py39h107f48f_0                  # [linux]
+  - lxml 4.6.3 py38hf1fe3a4_0                  # [linux]
+  - lxml 4.6.3 py37h77fd288_0                  # [linux]
+  - lxml 4.6.3 py36h04a5ba7_0                  # [linux]
+  - lxml 4.6.3 py39h3757d6e_0                  # [arm64]
+  - lxml 4.6.3 py38hd4105a3_0                  # [arm64]
 
-scikit_image:
-  - 0.18.1 py39h089d6f7_0      # [osx]
-  - 0.18.1 py38he9f00de_0      # [osx]
-  - 0.18.1 py37h010c265_0      # [osx]
-  - 0.17.2 py36h2be6da3_4      # [osx]
-  - 0.18.2 py39hde0f152_0      # [linux]
-  - 0.18.2 py38h1abd341_0      # [linux]
-  - 0.18.2 py37h219a48f_0      # [linux]
-  - 0.17.2 py36h284efc9_4      # [linux]
+moose_scikit_image:
+  - scikit-image 0.18.3 py37h5b83a90_0         # [not arm64 and osx]
+  - scikit-image 0.17.2 py36h2be6da3_4         # [not arm64 and osx]
+  - scikit-image 0.18.2 py39hde0f152_0         # [linux]
+  - scikit-image 0.18.2 py38h1abd341_0         # [linux]
+  - scikit-image 0.18.2 py37h219a48f_0         # [linux]
+  - scikit-image 0.17.2 py36h284efc9_4         # [linux]
+  - scikit-image 0.18.3 py39h7f752ed_0         # [arm64]
+  - scikit-image 0.18.3 py38h3777fb4_0         # [arm64]
 
-beautifulsoup4:
-  - 4.9.3 pyhb0f4dca_0         # [linux]
-  - 4.9.3 pyhb0f4dca_0         # [osx]
+moose_sympy:
+  - sympy 1.9 py37hf985489_0                   # [not arm64 and osx]
+  - sympy 1.8 py36h79c6626_0                   # [not arm64 and osx]
+  - sympy 1.9 py39hf3d152e_0                   # [linux]
+  - sympy 1.9 py38h578d9bd_0                   # [linux]
+  - sympy 1.9 py37h89c1867_0                   # [linux]
+  - sympy 1.8 py36h5fab9bb_0                   # [linux]
+  - sympy 1.9 py39h2804cbe_0                   # [arm64]
+  - sympy 1.9 py38h10201cd_0                   # [arm64]
 
-pylatexenc:
-  - 2.10 pyhd8ed1ab_0          # [linux]
-  - 2.10 pyhd8ed1ab_0          # [osx]
+moose_deepdiff:
+  - deepdiff 5.5.0 pyhd8ed1ab_0
 
-jinja2:
-  - 3.0.1 pyhd8ed1ab_0         # [linux]
-  - 3.0.1 pyhd8ed1ab_0         # [osx]
+moose_beautifulsoup4:
+  - beautifulsoup4 4.9.3 pyhb0f4dca_0
 
-mako:
-  - 1.1.4 pyh44b312d_0         # [linux]
-  - 1.1.4 pyh44b312d_0         # [osx]
+moose_pylatexenc:
+  - pylatexenc 2.10 pyhd8ed1ab_0
 
-livereload:
-  - 2.6.3 pyh9f0ad1d_0         # [linux]
-  - 2.6.3 pyh9f0ad1d_0         # [osx]
+moose_jinja2:
+  - jinja2 3.0.1 pyhd8ed1ab_0
 
-yaml:
-  - 0.2.5 h516909a_0           # [linux]
-  - 0.2.5 haf1e3a3_0           # [osx]
+moose_mako:
+  - mako 1.1.4 pyh44b312d_0
 
-sympy:
-  - 1.9 py39h6e9494a_0         # [osx]
-  - 1.9 py38h50d1736_0         # [osx]
-  - 1.9 py37hf985489_0         # [osx]
-  - 1.8 py36h79c6626_0         # [osx]
-  - 1.9 py39hf3d152e_0         # [linux]
-  - 1.9 py38h578d9bd_0         # [linux]
-  - 1.9 py37h89c1867_0         # [linux]
-  - 1.8 py36h5fab9bb_0         # [linux]
+moose_livereload:
+  - livereload 2.6.3 pyh9f0ad1d_0
+
+moose_yaml:
+  - yaml 0.2.5 h516909a_0                      # [linux]
+  - yaml 0.2.5 haf1e3a3_0                      # [not arm64 and osx]
+  - yaml 0.2.5 h642e427_0                      # [arm64]
 
 zip_keys:
-  - python
-  - vtk
-  - numpy
-  - sympy
-  - pyqt
-  - matplotlib
-  - pandas
-  - pyyaml
-  - pybtex
-  - mock
-  - lxml
-  - scikit_image
+  - moose_python
+  - moose_vtk
+  - moose_numpy
+  - moose_pyqt                                 # [not arm64]
+  - moose_matplotlib
+  - moose_pandas
+  - moose_pyyaml
+  - moose_pybtex
+  - moose_mock
+  - moose_lxml
+  - moose_scikit_image
+  - moose_sympy
 
-#### Changes to the following require extensive testing
-libllvm:
-  - 11.0.0 hf85e3d2_0
+#### Compilers
+moose_cc:                                      # [unix]
+  - gcc_linux-64 9.3.0 h7247604_29             # [linux]
+  - clang_osx-64 12.0.1 hb91bd55_1             # [not arm64 and osx]
+  - clang_osx-arm64 12.0.1 h54d7cd3_0          # [arm64]
 
-libclang:
-  - 11.0.0 default_h9e6edd0_2
+moose_cxx:                                     # [unix]
+  - gxx_linux-64 9.3.0 h0d07fa4_29             # [linux]
+  - clangxx_osx-64 12.0.1 h7e1b574_1           # [not arm64 and osx]
+  - clangxx_osx-arm64 12.0.1 hb84c830_0        # [arm64]
 
-compilerrt:
-  - 11.0.0 h01488ec_2
+moose_fortran:                                 # [unix]
+  - gfortran_linux-64 9.3.0 ha1c937c_29        # [linux]
+  - gfortran_osx-64 9.3.0 h18f7dce_14          # [not arm64 and osx]
+  - gfortran_osx-arm64 11.0.1.dev0 h57527a5_14 # [arm64]
 
-compilerrtosx:
-  - 11.0.0 hd3c4e95_2
+moose_impl:                                    # [linux]
+  - gcc_impl_linux-64 9.3.0 h70c0ae5_19        # [linux]
 
-clangxx:
-  - 11.0.0 default_h9e6edd0_2
+moose_impl_xx:                                 # [linux]
+  - gxx_impl_linux-64 9.3.0 hd87eabc_19        # [linux]
 
-clangosx:
-  - 11.0.0 hb91bd55_5
+moose_libgcc:                                  # [linux]
+  - libgcc-devel_linux-64 9.3.0 h7864c58_19    # [linux]
 
-clangxxosx:
-  - 11.0.0 h7e1b574_5
+moose_libstd:                                  # [linux]
+  - libstdcxx-devel_linux-64 9.3.0 hb016644_19 # [linux]
 
-clang:
-  - 11.0.0 h694c41f_2
+moose_libcxx:                                  # [osx]
+  - libcxx 12.0.1 habf9029_0                   # [not arm64 and osx]
+  - libcxx 12.0.1 h168391b_0                   # [arm64]
 
-llvmopenmp:
-  - 11.0.0 h73239a0_1
+moose_libclang:                                # [osx]
+  - libclang 12.0.1 default_he082bbe_4         # [not arm64 and osx]
+  - libclang 12.0.1 default_h2cfa9b4_4         # [arm64]
 
-osxfortran:
-  - 7.3.0 h22b1bf0_7
+moose_openmp:                                  # [osx]
+  - llvm-openmp 12.0.1 hda6cdc1_1              # [not arm64 and osx]
+  - llvm-openmp 12.0.1 hf3c4609_1              # [arm64]
 
-libcxx:
-  - 11.0.0 h4c3b8ed_1
+moose_llvm_tools:                              # [osx]
+  - llvm-tools 12.0.1 hd011deb_2               # [not arm64 and osx]
+  - llvm-tools 12.0.1 h93073aa_2               # [arm64]
 
-gcc:
-  - 9.3.0 h7247604_29
+moose_cctools:                                 # [osx]
+  - cctools 949.0.1 hd9211c8_23                # [not arm64 and osx]
+  - cctools_osx-arm64 949.0.1 h92b3a8a_23      # [arm64]
 
-gxx:
-  - 9.3.0 h0d07fa4_29
+moose_ld64:                                    # [osx]
+  - ld64 530 hd2e7500_23                       # [not arm64 and osx]
+  - ld64_osx-arm64 530 ha291f0b_23             # [arm64]
 
-fortran:
-  - 9.3.0 ha1c937c_29
+#### Support Libraries (libMesh)
+moose_libglu:                                  # [linux]
+  - libglu 9.0.0 hf484d3e_1000                 # [linux]
 
-gccimpl:
-  - 9.3.0 h28f5a38_17
+moose_mesalib:                                 # [linux]
+  - mesalib 18.3.1 h590aaf7_0                  # [linux]
 
-libblas:
-  - 3.9.0 8_openblas
+moose_libpng:                                  # [unix]
+  - libpng 1.6.37 h7cec526_2                   # [not arm64 and osx]
+  - libpng 1.6.37 hed695b0_2                   # [linux]
+  - libpng 1.6.37 hf7e6567_2                   # [arm64]
 
-libcblas:
-  - 3.9.0 8_openblas
-
-liblapack:
-  - 3.9.0 8_openblas
-
-libopenblas:
-  - 0.3.12 openmp_h63d9170_1
-
-libglu:
-  - 9.0.0 hf484d3e_1000
-
-mesalib:
-  - 18.3.1 h590aaf7_0
-
-libpng:
-  - 1.6.37 h7cec526_2          # [osx]
-  - 1.6.37 hed695b0_2          # [linux]
-
-# You simply _never_ change the following
+#### build/run pining
 mpi:
   - moose-mpich
 
 pin_run_as_build:
   moose_mpich: x.x.x
-  libblas: x.x.x
-  libcblas: x.x.x
-  liblapack: x.x.x
+  moose_libblas: x.x.x
+  moose_libcblas: x.x.x
+  moose_liblapack: x.x.x
   moose_petsc: x.x.x
   moose_libmesh_vtk: x.x.x
-  python: x.x
+  moose_python: x.x
 
-CONDA_BUILD_SYSROOT:           # [osx]
-  - /opt/MacOSX10.9.sdk        # [osx]
+#### Darwin SDK SYSROOT
+CONDA_BUILD_SYSROOT:                           # [osx]
+  - /opt/MacOSX10.9.sdk                        # [not arm64 and osx]
+  - /opt/MacOSX11.3.sdk                        # [arm64]
 
-macos_min_version:             # [osx]
-  - 10.9                       # [osx]
+macos_min_version:                             # [osx]
+  - 10.9                                       # [not arm64 and osx]
+  - 11.3                                       # [arm64]
 
-macos_machine:                 # [osx]
-  - x86_64-apple-darwin13.4.0  # [osx]
+macos_machine:                                 # [osx]
+  - x86_64-apple-darwin13.4.0                  # [not arm64 and osx]
+  - arm64-apple-darwin20.0.0                   # [arm64]
 
-MACOSX_DEPLOYMENT_TARGET:      # [osx]
-  - 10.9                       # [osx]
+MACOSX_DEPLOYMENT_TARGET:                      # [osx]
+  - 10.9                                       # [not arm64 and osx]
+  - 11.3                                       # [arm64]

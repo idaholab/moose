@@ -13,18 +13,21 @@ elif [[ $mpi == "moose-mpich" ]]; then
   export HYDRA_LAUNCHER=fork
 fi
 
-unset CFLAGS CPPFLAGS CXXFLAGS FFLAGS LIBS
+unset CFLAGS CPPFLAGS CXXFLAGS FFLAGS LIBS LDFLAGS
 if [[ $(uname) == Darwin ]]; then
-    export LDFLAGS="${LDFLAGS:-} -Wl,-headerpad_max_install_names"
-    ADDITIONAL_ARGS="--with-blas-lib=libblas${SHLIB_EXT} --with-lapack-lib=liblapack${SHLIB_EXT}"
+    if [[ $HOST == arm64-apple-darwin20.0.0 ]]; then
+        LDFLAGS="${LDFLAGS:-} -L$PREFIX/lib -Wl,-rpath,$PREFIX/lib"
+        CTUNING="-march=armv8.3-a -I$PREFIX/include"
+        FTUNING="-march=armv8.3-a -I$PREFIX/include"
+        export LIBRARY_PATH="$PREFIX/lib"
+    else
+        CTUNING="-march=core2 -mtune=haswell"
+        FTUNING="-I$PREFIX/include"
+    fi
+    LDFLAGS="${LDFLAGS:-} -Wl,-headerpad-max-install-names"
 else
-    ADDITIONAL_ARGS="--download-fblaslapack=1"
-fi
-
-if [[ $(uname) == Darwin ]]; then
-    TUNING="-march=core2 -mtune=haswell"
-else
-    TUNING="-march=nocona -mtune=haswell"
+    CTUNING="-march=nocona -mtune=haswell"
+    FTUNING="-I$PREFIX/include"
 fi
 
 # for MPI discovery
@@ -32,41 +35,23 @@ export C_INCLUDE_PATH=$PREFIX/include
 export CPLUS_INCLUDE_PATH=$PREFIX/include
 export FPATH_INCLUDE_PATH=$PREFIX/include
 
-BUILD_CONFIG=`cat <<"EOF"
-  --COPTFLAGS=-O3 \
-  --CXXOPTFLAGS=-O3 \
-  --FOPTFLAGS=-O3 \
-  --with-x=0 \
-  --with-mpi=1 \
-  --with-ssl=0 \
-  --with-openmp=1 \
-  --with-debugging=0 \
-  --with-cxx-dialect=C++11 \
-  --with-shared-libraries=1 \
-  --download-mumps=1 \
-  --download-strumpack=1 \
-  --download-hypre=1 \
-  --download-metis=1 \
-  --download-slepc=1 \
-  --download-ptscotch=1 \
-  --download-parmetis=1 \
-  --download-scalapack=1 \
-  --download-superlu_dist=1 \
-  --with-fortran-bindings=0 \
-  --with-sowing=0 \
-  --with-64-bit-indices \
-EOF
-`
-
-python ./configure ${BUILD_CONFIG} ${ADDITIONAL_ARGS:-} \
+source $PETSC_DIR/configure_petsc.sh
+configure_petsc \
+       --COPTFLAGS=-O3 \
+       --CXXOPTFLAGS=-O3 \
+       --FOPTFLAGS=-O3 \
+       --with-x=0 \
+       --with-ssl=0 \
        AR="${AR:-ar}" \
        CC="mpicc" \
        CXX="mpicxx" \
        FC="mpifort" \
        F90="mpifort" \
        F77="mpifort" \
-       CFLAGS="${TUNING}" \
-       CXXFLAGS="${TUNING}" \
+       CFLAGS="${CTUNING}" \
+       CXXFLAGS="${CTUNING}" \
+       FFLAGS="${FTUNING}" \
+       FCFLAGS="${FTUNING}" \
        LDFLAGS="${LDFLAGS:-}" \
        --prefix=$PREFIX || (cat configure.log && exit 1)
 

@@ -236,7 +236,7 @@
   l_max_its = 30
   l_tol = 1e-4
   nl_max_its = 40
-  nl_rel_tol = 1e-10
+  nl_rel_tol = 1e-11
   dt = 25
   num_steps = 1
 []
