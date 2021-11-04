@@ -42,4 +42,9 @@ The documentation for the SQA releases can be found using the following links:
 - [2021-05-18](https://mooseframework.org/releases/moose/2021-05-18)
 - [v1.0.0](https://mooseframework.org/releases/moose/v1.0.0)
 
+## Github Backups
+
+[Information on Github Backups for MOOSE, Mastodon, TMAP8, and blackbear](sqa/github_backup.md)
+
 !sqa report
+
