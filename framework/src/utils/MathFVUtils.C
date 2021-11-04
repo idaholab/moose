@@ -32,7 +32,12 @@ gradUDotNormal(const T &
                    fv_var
 #endif
                ,
-               bool correct_skewness)
+               bool
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+                   correct_skewness
+#endif
+)
+
 {
 #ifdef MOOSE_GLOBAL_AD_INDEXING
 
