@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "Function.h"
+#include "PiecewiseTabularBase.h"
 #include "SplineInterpolation.h"
 
 class SplineFunction;
@@ -20,7 +20,7 @@ InputParameters validParams<SplineFunction>();
 /**
  * Function that uses spline interpolation
  */
-class SplineFunction : public Function
+class SplineFunction : public PiecewiseTabularBase
 {
 public:
   static InputParameters validParams();

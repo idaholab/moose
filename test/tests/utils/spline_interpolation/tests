@@ -9,6 +9,13 @@
 
     requirement = 'The system shall include a utility for computing spline functions.'
   []
+  [regular_spline]
+    type = 'Exodiff'
+    input = 'spline_interpolation_file.i'
+    exodiff = 'spline_interpolation_file_out.e'
+
+    requirement = 'The system shall include a utility for computing spline functions. The utility shall be able to read from a file or user input.'
+  []
 
   [bicubic]
     requirement = 'The system shall include a utility for computing bicubic spline functions'
