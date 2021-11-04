@@ -64,7 +64,7 @@ entire simulation domain.
 
 ### `Executioner`
 
-In the [`[Executioner]`](Executioner/index.md) block all parameters relevant to the sole of the current
+In the [`[Executioner]`](Executioner/index.md) block all parameters relevant to the solution of the current
 problem are set. [`type = Transient`](Transient.md) selects a time-dependent simulation (as
 opposed to [`type = Steady`](Steady.md)). We chose to run for five simulation steps; with a
 timestep of `1`.
