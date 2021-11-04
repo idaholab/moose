@@ -9,7 +9,7 @@
 
     requirement = 'The system shall include a utility for computing spline functions.'
   []
-  [regular_spline]
+  [regular_spline_file]
     type = 'Exodiff'
     input = 'spline_interpolation_file.i'
     exodiff = 'spline_interpolation_file_out.e'
