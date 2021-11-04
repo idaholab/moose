@@ -103,15 +103,15 @@ ModularGapConductanceConstraint::initialSetup()
   const auto & subdomainIDs = _mesh.meshSubdomains();
 
   // make sure all subdomains are using the same coordinate system
-  Moose::CoordinateSystemType coord_system = _fe_problem.getCoordSystem(*subdomainIDs.begin());
+  Moose::CoordinateSystemType coord_system = feProblem().getCoordSystem(*subdomainIDs.begin());
   for (auto subdomain : subdomainIDs)
-    if (_fe_problem.getCoordSystem(subdomain) != coord_system)
+    if (feProblem().getCoordSystem(subdomain) != coord_system)
       mooseError("ModularGapConductanceConstraint requires all subdomains to have the same "
                  "coordinate system.");
 
   // Select proper coordinate system and geometry (plate, cylinder, sphere)
   setGapGeometryParameters(
-      _pars, coord_system, _fe_problem.getAxisymmetricRadialCoord(), _gap_geometry_type, _p1, _p2);
+      _pars, coord_system, feProblem().getAxisymmetricRadialCoord(), _gap_geometry_type, _p1, _p2);
 }
 
 void
