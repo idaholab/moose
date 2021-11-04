@@ -363,7 +363,7 @@ SMALocalFloatArrayDelete(int id)
 
 // Mutex handling
 
-std::array<std::unique_ptr<Threads::spin_mutex>, 101> AbaqusUtils::_mutex = {nullptr};
+std::array<std::unique_ptr<Threads::spin_mutex>, 101> AbaqusUtils::_mutex = {{nullptr}};
 
 void
 AbaqusUtils::mutexInit(std::size_t n)

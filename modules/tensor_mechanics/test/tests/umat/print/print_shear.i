@@ -24,12 +24,12 @@
 
 [AuxVariables]
   [strain_xy]
-    # family = MONOMIAL
-    # order = SECOND
+    family = MONOMIAL
+    order = SECOND
   []
   [strain_yy]
-    # family = MONOMIAL
-    # order = SECOND
+    family = MONOMIAL
+    order = SECOND
   []
 []
 

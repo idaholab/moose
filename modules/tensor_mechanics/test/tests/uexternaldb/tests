@@ -118,7 +118,7 @@
       cli_args = 'UserObjects/uexternaldb/abaqus_step=4 UserObjects/uexternaldb/execute_on=INITIAL'
       expect_err = '\*\*\* ERROR \*\*\*\nInline message 1 2 0.100000 0.200000 0.300000 ONE      TWO  '
                    '   !'
-      detail = 'non-fatal error level.'
+      detail = 'fatal error level.'
     []
   []
 
@@ -175,7 +175,7 @@
       min_threads = 2
       max_threads = 2
       expect_out = '3lop 40.5 1950'
-      detail = 'supporting single threaded execution.'
+      detail = 'supporting two threaded execution.'
     []
     [four_threads]
       type = 'RunApp'
@@ -185,7 +185,7 @@
       min_threads = 4
       max_threads = 4
       expect_out = '3lop 40.5 1950'
-      detail = 'supporting single threaded execution.'
+      detail = 'supporting four threaded execution.'
     []
   []
 []
