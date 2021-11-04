@@ -29,10 +29,7 @@ SplineFunction::validParams()
 
 SplineFunction::SplineFunction(const InputParameters & parameters)
   : PiecewiseTabularBase(parameters),
-    _ipol(_raw_x,
-          _raw_y,
-          getParam<Real>("yp1"),
-          getParam<Real>("ypn"))
+    _ipol(_raw_x, _raw_y, getParam<Real>("yp1"), getParam<Real>("ypn"))
 {
 }
 

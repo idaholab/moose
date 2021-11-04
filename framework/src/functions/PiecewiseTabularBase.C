@@ -19,7 +19,10 @@ PiecewiseTabularBase::validParams()
 
   MooseEnum axis("x=0 y=1 z=2");
   params.addDeprecatedParam<MooseEnum>(
-      "component", axis, "The axis used (x, y, or z) if this is to be a function of position.","This option is a deprecated alias for axis, use axis instead.");
+      "component",
+      axis,
+      "The axis used (x, y, or z) if this is to be a function of position.",
+      "This option is a deprecated alias for axis, use axis instead.");
   params.addParam<MooseEnum>(
       "axis", axis, "The axis used (x, y, or z) if this is to be a function of position");
   params.addParam<std::vector<Real>>("xy_data",
