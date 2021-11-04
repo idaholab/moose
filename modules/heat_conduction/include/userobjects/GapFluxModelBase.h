@@ -25,7 +25,8 @@ public:
   /**
    * Cache geometry-related information from the mortar constraint
    */
-  virtual const ADReal computeFluxInternal(const ModularGapConductanceConstraint & mortar_constraint) const;
+  virtual const ADReal
+  computeFluxInternal(const ModularGapConductanceConstraint & mortar_constraint) const;
 
   /**
    * Compute gap physics used cache information in GapFluxModelBase
@@ -38,4 +39,5 @@ public:
 protected:
   mutable unsigned int _qp;
   mutable ADReal _gap_width;
+  mutable ADReal _surface_integration_factor;
 };

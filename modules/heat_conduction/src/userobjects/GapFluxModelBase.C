@@ -24,12 +24,15 @@ GapFluxModelBase::GapFluxModelBase(const InputParameters & parameters)
 }
 
 const ADReal
-GapFluxModelBase::computeFluxInternal(const ModularGapConductanceConstraint & mortar_constraint) const
+GapFluxModelBase::computeFluxInternal(
+    const ModularGapConductanceConstraint & mortar_constraint) const
 {
   // Cache general geometry information
   // This allows derived user object to compute gap physics without external dependencies
+
   _qp = mortar_constraint._qp;
   _gap_width = mortar_constraint._gap_width;
+  _surface_integration_factor = mortar_constraint._surface_integration_factor;
 
   return computeFlux();
 }
