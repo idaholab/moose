@@ -88,7 +88,7 @@ if [[ -n "$VTKLIB_DIR" && -n "$VTKINCLUDE_DIR" ]]; then
 fi
 
 # Finally, if METHODS is still not set, set a default value.
-export METHODS=${METHODS:="opt oprof dbg devel"}
+export METHODS=${METHODS:="opt oprof dbg"}
 
 cd $SCRIPT_DIR/..
 
