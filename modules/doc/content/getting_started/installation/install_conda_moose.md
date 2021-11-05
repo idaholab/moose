@@ -1,5 +1,18 @@
 ## Install MOOSE Conda Packages id=moosepackages
 
+!alert! note
+If conda was installed previously, and the [install_miniconda.md] instructions were skipped,
+we highly encourage the use of [Mamba](https://github.com/mamba-org/mamba) to install
+packages, due to speed. We recommend that you perform:
+
+```
+conda deactivate
+conda install mamba
+```
+
+in your base environment.
+!alert-end!
+
 Begin by creating the moose environment within conda, and attempt to activate it:
 
 ```bash
@@ -43,8 +56,8 @@ conda init SHELL_NAME
 Where SHELL_NAME is the shell you discovered in the previous step. Once complete, close any terminals you have opened, and re-open them. Then run `conda activate moose` again. If successful proceed to installing packages:
 
 ```bash
-conda install moose-tools
-conda install moose-libmesh
+mamba install moose-tools
+mamba install moose-libmesh
 ```
 
 If you are running into additional errors, please see our [troubleshooting guide for Conda](troubleshooting.md#condaissues optional=True).
