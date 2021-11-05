@@ -9,11 +9,14 @@ The variation of the solution as stored in the Exodus file can be visualized
 along a line using tools like Paraview, but MOOSE also offers a way of directly
 outputing values sampled along a line to a comma-separate value (CSV) file. 
 Benefits of doing this include:
-- If a calculation is repeated many times, plotting of key quantities can
+
+ - If a calculation is repeated many times, plotting of key quantities can
 be automated.
-- The solution is sampled from the finite element interpolation used internally
+
+ - The solution is sampled from the finite element interpolation used internally
 by MOOSE, which provides the most accurate description of the solution.
-- The values sampled along the line could be used for other computations within
+
+ - The values sampled along the line could be used for other computations within
 the MOOSE simulation.
 
 To sample the values along a line, the MOOSE `VectorPostprocessor` system is used.
@@ -36,6 +39,8 @@ are sorted by the `x` value since the line is oriented along the $x$ axis.
 For lines that are not oriented along one of the Cartesian axes, the `sort_by = id`
 option can be used to sort by the position along the line.
 
+!listing modules/heat_conduction/tutorials/introduction/therm_step02a.i block=VectorPostprocessors
+
 ### `Outputs`
 
 Adding the `LineValueSampler` block will result in values being computed,
@@ -47,6 +52,8 @@ to make the output more manageable. The `file_base` parameter permits controllin
 the base name for the output file. By default a separate CSV file will be output
 for each time step. To limit the amount of output, the `execute_on = final` parameter
 makes the system only output a CSV file for the last time step.
+
+!listing modules/heat_conduction/tutorials/introduction/therm_step02a.i block=Outputs
 
 ## Exercises
 

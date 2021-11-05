@@ -15,6 +15,8 @@ sidesets) of the simulation domain. In all boundary condition objects you will
 see the mandatory `boundary` parameter, which expects a list of sideset names or
 IDs.
 
+!listing modules/heat_conduction/tutorials/introduction/therm_step02.i block=BCs
+
 #### `DirichletBC`
 
 The two Dirichlet boundary conditions are set on the

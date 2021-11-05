@@ -41,6 +41,8 @@ is the temperature. The name of the variable is defined by the name in the openi
 brackets of the block (`[T]`). There is no content in the block in this case because
 only the default parameters are used.
 
+!listing modules/heat_conduction/tutorials/introduction/therm_step01.i block=Variables
+
 ### `Kernels`
 
 This top-level block is used to define the kernels that provide volume integrals
@@ -65,6 +67,8 @@ defines the variable that the kernel is operating on. There is only one variable
 of this model, but in a multiphysics simulation, individual kernels would be assigned
 to operate on specific variables.
 
+!listing modules/heat_conduction/tutorials/introduction/therm_step01.i block=Kernels
+
 ### `Materials`
 
 The `Materials` block is used to define material properties, which are evaluated at
@@ -76,6 +80,8 @@ The `HeatConductionMaterial` is a model that provides basic properties used for
 the terms in the heat equation. In this case, the only property needed is the thermal
 conductivity, which is defined with a constant value.
 
+!listing modules/heat_conduction/tutorials/introduction/therm_step01.i block=Materials
+
 ### `Executioner`
 
 In the [`[Executioner]`](Executioner/index.md) block all parameters relevant to the solution of the current
@@ -83,11 +89,15 @@ problem are set. [`type = Transient`](Transient.md) selects a time-dependent sim
 opposed to [`type = Steady`](Steady.md)). We chose to run for five simulation steps; with a
 timestep of `1`.
 
+!listing modules/heat_conduction/tutorials/introduction/therm_step01.i block=Executioner
+
 ### `Outputs`
 
 We use the `exodus = true` shorthand to setup an output object of type `Exodus` to write
 an Exodus II mesh and solution file to the disk. You can visualize these outputs using
 [Paraview](https://www.paraview.org).
+
+!listing modules/heat_conduction/tutorials/introduction/therm_step01.i block=Outputs
 
 ## Questions
 

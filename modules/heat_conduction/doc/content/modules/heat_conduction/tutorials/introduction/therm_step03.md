@@ -29,12 +29,16 @@ effect on the transient solution. The `initial_condition` parameter is set
 for the `T` variable to 300. Units of Kelvin are used here, and this is close
 to room temperature.
 
+!listing modules/heat_conduction/tutorials/introduction/therm_step03.i block=Variables
+
 ### `Kernels`
 
 An additional block is added under the `Kernels` top level block to include the
 time dependent term $\rho(t, \vec{x}) c(t, \vec{x})\frac{\partial T}{\partial t}$
 in the heat equation. The Kernel that provides this term is named `HeatConductionTimeDerivative`
 because this term has a dependence on the time derivative of the temperature.
+
+!listing modules/heat_conduction/tutorials/introduction/therm_step03.i block=Kernels
 
 ### `Materials`
 
@@ -51,6 +55,8 @@ in the present simulation, so a constant property can be used. The `GenericConst
 is a material model that can be used to define one or more properties by providing
 the name of the property and the constant value. This is used here as a simple way
 to define the density.
+
+!listing modules/heat_conduction/tutorials/introduction/therm_step03.i block=Materials
 
 ## Questions
 
@@ -90,10 +96,6 @@ available in your Python installation. It is executed by typing:
 ```
 ./therm_soln_compare.py
 ```
+
 from the directory where the problems are run. It will generate an image called
 `therm_soln_compare.png` with line plots for these three cases.
-
-
-We have now run all of the problems in this tutorial series. A logical next step
-is to solve the heat equation coupled with mechanics, which is described in
-[this tutorial](combined/tutorials/introduction/thermal_mechanical/thermomech_step01.md).

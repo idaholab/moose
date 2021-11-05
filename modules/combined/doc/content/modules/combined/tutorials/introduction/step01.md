@@ -1,7 +1,7 @@
 # Step 1 - First Thermal Mortar Contact
 
 Continuing from the [final step](contact/tutorials/introduction/step02.md) in
-the mechanical contact tutorial we add a first attempt at thermal contact
+the mechanical contact tutorial, for the first time we incorporate thermal contact,
 staying within the mortar method.
 
 !listing modules/combined/tutorials/introduction/thermal_mechanical_contact/thermomech_cont_step01.i
@@ -25,9 +25,7 @@ to the lower dimensional mortar subdomain the `[Contact]` action created for us
 (the name of that subdomain is the name of the contact action subblock with
 `_secondary_subdomain` appended).
 
-This marks the first time we're directly adding variables to an input file. In
-all previous steps all variables were added for us automatically by the tensor
-mechanics master action and the contact action. The [!param](/Variables/MooseVariable/family)
+The [!param](/Variables/MooseVariable/family)
 and [!param](/Variables/MooseVariable/order) parameters define the shape function
 family and element order. First order Lagrange (no connection to "Lagrange multiplier!")
 are the MOOSE default settings. In future inputs you might see those parameters

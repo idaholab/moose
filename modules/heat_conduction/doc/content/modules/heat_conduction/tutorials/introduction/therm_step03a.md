@@ -24,6 +24,8 @@ in nature to a boundary condition. However, volume integrals are prescribed as
 Kernels in MOOSE, regardless of whether they are source terms or terms that
 depend on a derivative of the solution.
 
+!listing modules/heat_conduction/tutorials/introduction/therm_step03a.i block=Kernels
+
 ## Questions
 
 Before running the model, consider how the solution should change with the
