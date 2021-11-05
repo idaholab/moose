@@ -1,20 +1,24 @@
 [Tests]
   design = 'SplineFunction.md'
-  issues = '#10918'
+  issues = '#10918 #19299'
 
   [regular_spline]
-    type = 'Exodiff'
-    input = 'spline_interpolation.i'
-    exodiff = 'spline_interpolation_out.e'
-
     requirement = 'The system shall include a utility for computing spline functions.'
-  []
-  [regular_spline_file]
-    type = 'Exodiff'
-    input = 'spline_interpolation_file.i'
-    exodiff = 'spline_interpolation_file_out.e'
+    
+    [param]
+      type = 'Exodiff'
+      input = 'spline_interpolation.i'
+      exodiff = 'spline_interpolation_out.e'
+      detail = 'parameters'
+    []
 
-    requirement = 'The system shall include a utility for computing spline functions. The utility shall be able to read from a file or user input.'
+    [file]
+      type = 'Exodiff'
+      input = 'spline_interpolation_file.i'
+      exodiff = 'spline_interpolation_file_out.e'
+      param = 'and by file'
+    []
+
   []
 
   [bicubic]
