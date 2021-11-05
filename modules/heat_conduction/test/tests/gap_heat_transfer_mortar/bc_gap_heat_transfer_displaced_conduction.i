@@ -7,6 +7,7 @@
     type = FileMeshGenerator
     file = 2blk-gap.e
   []
+  allow_renumbering = false
 []
 
 [Problem]
@@ -141,7 +142,7 @@
 [VectorPostprocessors]
   [NodalTemperature]
     type = NodalValueSampler
-    sort_by = x
+    sort_by = id
     boundary = '100 101'
     variable = 'temp'
   []

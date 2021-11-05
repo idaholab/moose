@@ -31,6 +31,7 @@ sphere_outer_Tinf = 300 # K
     new_block_name = 'primary_lower'
     input = secondary
   []
+  allow_renumbering = false
 []
 
 [Functions]
@@ -150,7 +151,7 @@ sphere_outer_Tinf = 300 # K
 [VectorPostprocessors]
   [NodalTemperature]
     type = NodalValueSampler
-    sort_by = x
+    sort_by = id
     boundary = '2 3'
     variable = temp
   []

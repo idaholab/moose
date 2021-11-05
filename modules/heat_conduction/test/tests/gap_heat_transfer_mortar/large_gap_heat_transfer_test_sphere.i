@@ -15,6 +15,7 @@ sphere_outer_Tinf = 300 # K
     type = FileMeshGenerator
     file = cyl2D.e
   []
+  allow_renumbering = false
 []
 
 [Functions]
@@ -101,7 +102,7 @@ sphere_outer_Tinf = 300 # K
 [VectorPostprocessors]
   [NodalTemperature]
     type = NodalValueSampler
-    sort_by = x
+    sort_by = id
     boundary = '2 3'
     variable = temp
   []

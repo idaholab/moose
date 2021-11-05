@@ -56,6 +56,7 @@ rpv_blocks = '3'
     input = rename_inner_rpv_bdy
     block = 0
   []
+  allow_renumbering = false
 []
 
 [Problem]
@@ -188,7 +189,7 @@ rpv_blocks = '3'
 [VectorPostprocessors]
   [NodalTemperature]
     type = NodalValueSampler
-    sort_by = x
+    sort_by = id
     boundary = 'rpv_inner core_outer'
     variable = Tsolid
   []

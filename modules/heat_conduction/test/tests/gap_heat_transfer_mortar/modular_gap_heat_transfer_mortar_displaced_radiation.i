@@ -21,6 +21,7 @@
     new_block_name = 'primary_lower'
     input = secondary
   []
+  allow_renumbering = false
 []
 
 [Problem]
@@ -172,7 +173,7 @@
 [VectorPostprocessors]
   [NodalTemperature]
     type = NodalValueSampler
-    sort_by = x
+    sort_by = id
     boundary = '100 101'
     variable = 'temp'
   []
