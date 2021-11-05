@@ -4,7 +4,7 @@ In the previous step we set up a basic small strain mechanics simulation that
 did... nothing. In this step we're adding a load to the top and we'll fix the
 displacements on the bottom surface of our block.
 
-!listing modules/tensor_mechanics/tutorials/introduction/step02.i
+!listing modules/tensor_mechanics/tutorials/introduction/mech_step02.i
 
 ## Input file
 

@@ -3,6 +3,10 @@
 Heat is transferred by three mechanisms: conduction, convection, and radiation. The heat conduction module allows modeling conduction, radiation between gray, diffuse surfaces, and it contains
 provisions to couple temperature fields to fluid domains through boundary conditions.
 
+## Tutorial Problems
+
+A [tutorial](modules/heat_conduction/tutorials/introduction/index.md) for the Heat Condiction module is available to show the steps for setting up a basic model.
+
 ## Basic Theory of Heat Conduction
 
 The heat conduction equation describes the diffusion of heat in a solid or stationary fluid:

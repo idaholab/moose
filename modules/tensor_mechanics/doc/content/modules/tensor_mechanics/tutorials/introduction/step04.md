@@ -4,7 +4,7 @@ As a final step in the tensor mechanics section of this tutorial we'll set up a
 pair of separate mesh blocks - two cantilevers side by side, fixed at the
 bottom, that will be pushed towards each other with pressure boundary conditions.
 
-!listing modules/tensor_mechanics/tutorials/introduction/step04.i
+!listing modules/tensor_mechanics/tutorials/introduction/mech_step04.i
 
 ## Input file
 

@@ -3,7 +3,7 @@
 In this step we'll be setting up two subdomains (regions of our sample) with
 differing material properties.
 
-!listing modules/tensor_mechanics/tutorials/introduction/step03.i
+!listing modules/tensor_mechanics/tutorials/introduction/mech_step03.i
 
 ## Input file
 

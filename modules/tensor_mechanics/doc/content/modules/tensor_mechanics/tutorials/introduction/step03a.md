@@ -4,7 +4,7 @@ In this sidebar we'll introduce a thermal expansion eigenstrain. To demonstrate
 the effect we reshape the domain from step 3 and make it narrow like a
 cantilever.
 
-!listing modules/tensor_mechanics/tutorials/introduction/step03a.i
+!listing modules/tensor_mechanics/tutorials/introduction/mech_step03a.i
 
 ## Input file
 

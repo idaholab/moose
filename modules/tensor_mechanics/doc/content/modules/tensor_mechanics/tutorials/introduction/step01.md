@@ -2,7 +2,7 @@
 
 Let's get started with a minimal input file.
 
-!listing modules/tensor_mechanics/tutorials/introduction/step01.i
+!listing modules/tensor_mechanics/tutorials/introduction/mech_step01.i
 
 ## Input file
 
@@ -64,7 +64,7 @@ entire simulation domain.
 
 ### `Executioner`
 
-In the [`[Executioner]`](Executioner/index.md) block all parameters relevant to the sole of the current
+In the [`[Executioner]`](Executioner/index.md) block all parameters relevant to the solution of the current
 problem are set. [`type = Transient`](Transient.md) selects a time-dependent simulation (as
 opposed to [`type = Steady`](Steady.md)). We chose to run for five simulation steps; with a
 timestep of `1`.
