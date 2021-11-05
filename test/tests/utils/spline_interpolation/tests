@@ -16,7 +16,7 @@
       type = 'Exodiff'
       input = 'spline_interpolation_file.i'
       exodiff = 'spline_interpolation_file_out.e'
-      param = 'and by file'
+      detail = 'and by file'
     []
 
   []
