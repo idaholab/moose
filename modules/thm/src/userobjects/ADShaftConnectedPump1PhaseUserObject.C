@@ -31,6 +31,10 @@ ADShaftConnectedPump1PhaseUserObject::validParams()
   params.addRequiredParam<FunctionName>("torque_hydraulic",
                                         "Function to compute data for pump torque [-]");
   params.addRequiredParam<std::string>("pump_name", "Name of the instance of this pump component");
+  params.addParam<Real>(
+      "transition_width",
+      1e-3,
+      "Transition width for sign of the frictional torque at 0 speed over rated speed ratio.");
   params.addRequiredCoupledVar("omega", "Shaft rotational speed [rad/s]");
 
   params.addClassDescription(
@@ -61,7 +65,9 @@ ADShaftConnectedPump1PhaseUserObject::ADShaftConnectedPump1PhaseUserObject(
     _head(getFunction("head")),
     _torque_hydraulic(getFunction("torque_hydraulic")),
     _pump_name(getParam<std::string>("pump_name")),
-    _omega(adCoupledScalarValue("omega"))
+    _omega(adCoupledScalarValue("omega")),
+    _transition_width(getParam<Real>("transition_width")),
+    _transition_friction(0, _transition_width)
 {
 }
 
@@ -156,11 +162,13 @@ ADShaftConnectedPump1PhaseUserObject::computeFluxesAndResiduals(const unsigned i
     }
 
     // friction torque
-    Real sign;
-    if (_omega[0] >= 0)
+    ADReal sign;
+    if (alpha > _transition_friction.rightEnd())
       sign = -1;
-    else
+    else if (alpha < _transition_friction.leftEnd())
       sign = 1;
+    else
+      sign = _transition_friction.value(alpha, 1, -1);
 
     if (alpha < _speed_cr_fr)
     {
