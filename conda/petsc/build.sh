@@ -16,15 +16,15 @@ fi
 unset CFLAGS CPPFLAGS CXXFLAGS FFLAGS LIBS LDFLAGS
 if [[ $(uname) == Darwin ]]; then
     if [[ $HOST == arm64-apple-darwin20.0.0 ]]; then
-        LDFLAGS="${LDFLAGS:-} -L$PREFIX/lib -Wl,-rpath,$PREFIX/lib"
-        CTUNING="-march=armv8.3-a -I$PREFIX/include"
-        FTUNING="-march=armv8.3-a -I$PREFIX/include"
-        export LIBRARY_PATH="$PREFIX/lib"
+        LDFLAGS="-Wl,-rpath,$PREFIX/lib"
+        CTUNING="-mcpu=apple-a12"
+        FTUNING="-march=armv8.3-a"
     else
         CTUNING="-march=core2 -mtune=haswell"
         FTUNING="-I$PREFIX/include"
     fi
     LDFLAGS="${LDFLAGS:-} -Wl,-headerpad-max-install-names"
+    export LIBRARY_PATH="$PREFIX/lib"
 else
     CTUNING="-march=nocona -mtune=haswell"
     FTUNING="-I$PREFIX/include"
@@ -37,6 +37,7 @@ export FPATH_INCLUDE_PATH=$PREFIX/include
 
 source $PETSC_DIR/configure_petsc.sh
 configure_petsc \
+       --download-slepc=0 \
        --COPTFLAGS=-O3 \
        --CXXOPTFLAGS=-O3 \
        --FOPTFLAGS=-O3 \
@@ -53,7 +54,8 @@ configure_petsc \
        FFLAGS="${FTUNING}" \
        FCFLAGS="${FTUNING}" \
        LDFLAGS="${LDFLAGS:-}" \
-       --prefix=$PREFIX || (cat configure.log && exit 1)
+       --prefix=$PREFIX \
+       $* || (cat configure.log && exit 1)
 
 # Verify that gcc_ext isn't linked
 for f in $PETSC_ARCH/lib/petsc/conf/petscvariables $PETSC_ARCH/lib/pkgconfig/PETSc.pc; do
