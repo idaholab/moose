@@ -40,4 +40,5 @@ protected:
   mutable unsigned int _qp;
   mutable ADReal _gap_width;
   mutable ADReal _surface_integration_factor;
+  mutable ADReal _adjusted_length;
 };

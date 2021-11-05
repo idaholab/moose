@@ -216,6 +216,7 @@ ModularGapConductanceConstraint::computeSurfaceIntegrationFactor() const
 ADReal
 ModularGapConductanceConstraint::computeGapLength() const
 {
+
   if (_gap_geometry_type == GapGeometry::CYLINDER)
   {
     const auto & denominator = _radius * std::log(_r2 / _r1);
@@ -231,10 +232,9 @@ ModularGapConductanceConstraint::computeGapLength() const
 }
 
 void
-ModularGapConductanceConstraint::computeGapRadii()
+ModularGapConductanceConstraint::computeGapRadii(const ADReal & gap_length)
 {
   const Point current_point(_q_point[_qp]);
-
   if (_gap_geometry_type == GapGeometry::CYLINDER)
   {
     // The vector _p1 + t*(_p2-_p1) defines the cylindrical axis.  The point along this
@@ -253,17 +253,17 @@ ModularGapConductanceConstraint::computeGapRadii()
     if (rad_dot_norm > 0)
     {
       _r1 = rad;
-      _r2 = rad - _gap_width; // note, gap_distance is negative
+      _r2 = rad + gap_length;
       _radius = _r1;
     }
     else if (rad_dot_norm < 0)
     {
-      _r1 = rad + _gap_width;
+      _r1 = rad - gap_length;
       _r2 = rad;
       _radius = _r2;
     }
     else
-      mooseError("Issue with cylindrical flux calculation normal vectors.\n");
+      mooseError("Issue with cylindrical flux calculation normals.\n");
   }
   else if (_gap_geometry_type == GapGeometry::SPHERE)
   {
@@ -273,21 +273,21 @@ ModularGapConductanceConstraint::computeGapRadii()
     if (normal_dot > 0) // on inside surface
     {
       _r1 = curr_point_radius;
-      _r2 = curr_point_radius - _gap_width; // gap_distance is negative
+      _r2 = curr_point_radius + gap_length;
       _radius = _r1;
     }
     else if (normal_dot < 0) // on outside surface
     {
-      _r1 = curr_point_radius + _gap_width; // gap_distance is negative
+      _r1 = curr_point_radius - gap_length;
       _r2 = curr_point_radius;
       _radius = _r2;
     }
     else
-      mooseError("Issue with spherical flux calc. normals. \n");
+      mooseError("Issue with spherical flux calculation normals. \n");
   }
-  else // Plate or flat geometry
+  else
   {
-    _r2 = -_gap_width;
+    _r2 = gap_length;
     _r1 = 0;
     _radius = 0;
   }
@@ -321,20 +321,20 @@ ModularGapConductanceConstraint::computeQpResidual(Moose::MortarType mortar_type
       _gap_width = (ad_phys_points_primary - ad_phys_points_secondary) * _normals[_qp];
 
       // First, compute radii with _gap_width
-      computeGapRadii();
+      computeGapRadii(_gap_width);
 
       // With radii, compute adjusted gap length for conduction
       _adjusted_length = computeGapLength();
 
-      // Ensure energy balance for non-flat (non-PLATE) general geometries
+      // Ensure energy balance for non-flat (non-PLATE) general geometries when using radiation
       _surface_integration_factor = computeSurfaceIntegrationFactor();
 
-      // sum up all flux contributions from all supplied gap flux models
+      // Sum up all flux contributions from all supplied gap flux models
       ADReal flux = 0.0;
       for (const auto & model : _gap_flux_models)
         flux += model->computeFluxInternal(*this);
 
-      // the Lagrange multiplier _is_ the gap flux
+      // The Lagrange multiplier _is_ the gap flux
       return (_lambda[_qp] - flux) * _test[_i][_qp];
     }
 

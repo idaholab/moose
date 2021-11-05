@@ -61,7 +61,7 @@ private:
   /**
    * Computes radii as a function of point and geometry
    */
-  void computeGapRadii();
+  void computeGapRadii(const ADReal & gap_length);
 
   virtual void setGapGeometryParameters(const InputParameters & params,
                                         const Moose::CoordinateSystemType coord_sys,

@@ -19,14 +19,14 @@ GapFluxModelRadiation::validParams()
   params.addClassDescription("Gap flux model with a constant conductance");
   params.addCoupledVar("T", "Temperature");
   params.addParam<Real>("stefan_boltzmann", 5.670373e-8, "Stefan-Boltzmann constant");
-  params.addRequiredRangeCheckedParam<MaterialPropertyName>(
-      "primary_emissivity",
-      "primary_emissivity>0 && primary_emissivity<=1",
-      "Primary surface emissivity");
-  params.addRequiredRangeCheckedParam<MaterialPropertyName>(
-      "secondary_emissivity",
-      "secondary_emissivity>0 && secondary_emissivity<=1",
-      "Secondary surface emissivity");
+  params.addRangeCheckedParam<Real>("primary_emissivity",
+                                    1,
+                                    "primary_emissivity>=0 & primary_emissivity<=1",
+                                    "The emissivity of the primary surface");
+  params.addRangeCheckedParam<Real>("secondary_emissivity",
+                                    1,
+                                    "secondary_emissivity>=0 & secondary_emissivity<=1",
+                                    "The emissivity of the secondary surface");
   return params;
 }
 
@@ -75,5 +75,6 @@ GapFluxModelRadiation::computeFlux() const
       (_primary_T[_qp] * _primary_T[_qp] + _secondary_T[_qp] * _secondary_T[_qp]) *
       (_primary_T[_qp] + _secondary_T[_qp]);
 
-  return _stefan_boltzmann * temp_func / _emissivity * _surface_integration_factor;
+  return (_primary_T[_qp] - _secondary_T[_qp]) * _stefan_boltzmann * temp_func / _emissivity *
+         _surface_integration_factor;
 }
