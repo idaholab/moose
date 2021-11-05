@@ -63,6 +63,8 @@ protected:
   const VariableName _moi_var_name;
   /// Directions at each connection
   std::vector<RealVectorValue> _directions;
+  /// Transition width for the sign of the frictional torque when speed is 0
+  const Real & _transition_width;
 
 public:
   static InputParameters validParams();
