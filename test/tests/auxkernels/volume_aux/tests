@@ -1,0 +1,32 @@
+[Tests]
+  issues = '#19307'
+  design = 'VolumeAux.md'
+
+  [test]
+    requirement = 'The system shall include the ability to sample'
+
+    [element]
+      type = Exodiff
+      input = 'element.i'
+      exodiff = 'element_out.e'
+
+      detail = 'elemental'
+    []
+    [side]
+      type = Exodiff
+      input = 'side.i'
+      exodiff = 'side_out.e'
+
+      detail = 'and side volumes'
+    []
+  []
+
+  [incorrect_type]
+    type = RunException
+    input = 'element.i'
+    cli_args = 'AuxVariables/volume/order=FIRST'
+    expect_err = 'Must be of type CONSTANT MONOMIAL'
+
+    requirement = 'The system shall report a reasonable error when trying to sample element volumes into a non constant monomial variable'
+  []
+[]
