@@ -1,20 +1,19 @@
 > Before you run this first input file take a moment to think about what you
 > expect to happen.
 
-We have specified no boundary conditions and no loading. No forces act on any of
-the elements. All initial conditions default to zero and we only have
-displacement variables in the system.
+We have specified no boundary conditions, so no heat flux is prescribed.
+All initial conditions default to zero.
 
-The zero displacement initial condition should already be a solution to the
+The zero temperature initial condition should already be a solution to the
 given problem. We expect the residual norm to be zero and each timestep to
 instantly converge.
 
 #### Running the input
 
-If you have not done so already, compile the `tensor_mechanics-opt` executable by running `make -j N` (where `N` is the number of CPU cores you have available) in `moose/modules/tensor_mechanics/`. Then run the first tutorial input by typing
+If you have not done so already, compile the `heat_conduction-opt` executable by running `make -j N` (where `N` is the number of CPU cores you have available) in `moose/modules/heat_conduction/`. Then run the first tutorial input by typing
 
 ```
-./tensor_mechanics-opt -i tutorials/introduction/mech_step01.i
+./heat_conduction-opt -i tutorials/introduction/therm_step01.i
 ```
 
 You should see some Framework information output, info on your mesh, and the non-linear system that is being solved, followed by the convergence history:
