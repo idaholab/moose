@@ -102,4 +102,16 @@
     issues = '#13959'
     mesh_mode = 'REPLICATED'
   []
+
+  [with_subdomain_ids_test]
+    type = 'Exodiff'
+    input = 'gmg_with_subdomain.i'
+    cli_args = '--mesh-only'
+    exodiff = 'gmg_with_subdomain_in.e'
+    exodiff_opts = '-pedantic'
+    requirement = 'MOOSE shall be able to assign subdomain IDs for the (cartesian) generated mesh generator.'
+    design = 'meshgenerators/GeneratedMeshGenerator.md'
+    issues = '#19297'
+    recover = false
+  []
 []
