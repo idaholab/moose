@@ -1,0 +1,11 @@
+[Tests]
+  [./copy_element_id_test]
+    type = 'Exodiff'
+    input = 'copy_elem_id_test.i'
+    exodiff = 'copy_elem_id_test_out.e'
+    requirement = 'The system shall include the ability to copy an element ID to other element IDs.'
+    design = 'meshgenerators/ExtraElementIDCopyGenerator.md'
+    issues = '#19297'
+    recover = false
+  [../]
+[]
