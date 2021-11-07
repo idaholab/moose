@@ -1,0 +1,29 @@
+[Tests]
+  [./coarse_element_id_test]
+    type = 'Exodiff'
+    input = 'coarse_elem_id.i'
+    exodiff = 'coarse_elem_id_out.e'
+    requirement = 'The system shall include the ability to assign coarse element IDs based on a coarse mesh for elements of a fine mesh.'
+    design = 'meshgenerators/CoarseMeshExtraElementIDGenerator.md'
+    issues = '#19297'
+    recover = false
+  [../]
+  [./coarse_element_subdomain_id_test]
+    type = 'Exodiff'
+    input = 'coarse_elem_subdomain_id.i'
+    exodiff = 'coarse_elem_subdomain_id_out.e'
+    requirement = 'The system shall include the ability to assign extra element IDs based on the subdomain ID of a coarse mesh for elements of a fine mesh.'
+    design = 'meshgenerators/CoarseMeshExtraElementIDGenerator.md'
+    issues = '#19297'
+    recover = false
+  [../]
+  [./coarse_element_extra_elem_id_test]
+    type = 'Exodiff'
+    input = 'coarse_elem_extra_elem_id.i'
+    exodiff = 'coarse_elem_extra_elem_id_out.e'
+    requirement = 'The system shall include the ability to assign extra element IDs based on an extra element ID of a coarse mesh for elements of a fine mesh.'
+    design = 'meshgenerators/CoarseMeshExtraElementIDGenerator.md'
+    issues = '#19297'
+    recover = false
+  [../]
+[]
