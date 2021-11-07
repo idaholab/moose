@@ -95,6 +95,7 @@ WORKDIR ${MOOSE_DIR}
 ARG PETSC_REV
 ARG PETSC_OPTIONS
 COPY scripts/update_and_rebuild_petsc.sh ${MOOSE_DIR}/scripts/update_and_rebuild_petsc.sh
+COPY scripts/configure_petsc.sh ${MOOSE_DIR}/scripts/configure_petsc.sh
 RUN git clone https://gitlab.com/petsc/petsc.git ; \
 cd petsc && git checkout ${PETSC_REV} && cd .. ; \
 PETSC_PREFIX=/usr/local ./scripts/update_and_rebuild_petsc.sh ${PETSC_OPTIONS} ; \
@@ -112,6 +113,7 @@ ENV LIBMESH_DIR=/usr/local \
 libmesh_CPPFLAGS="-D LIBMESH_HAVE_XDR"
 
 COPY scripts/update_and_rebuild_libmesh.sh ${MOOSE_DIR}/scripts/update_and_rebuild_libmesh.sh
+COPY scripts/configure_libmesh.sh ${MOOSE_DIR}/scripts/configure_libmesh.sh
 
 RUN git clone https://github.com/libMesh/libmesh.git ; \
 cd libmesh ; \
