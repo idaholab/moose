@@ -15,13 +15,14 @@
 # involve MOOSE, leading to unneccessary, redundant use of computing
 # resources, bandwidth, and storage.
 #
-# To build a MOOSE image, there is one optional argument and two required
+# To build a MOOSE image, there are eight optional arguments and two required
 # arguments to be set using the --build-arg flag.
 #
 # DISTRO_NAME: Optional.  Linux distribution (ubuntu, centos)
 # DISTRO_VERSION: Optional with above (20.04, 8 respectively)
+# LIBMESH_METHODS: Optional. Methods with which to build libmesh; defaults to opt dbg.
 # MOOSE_JOBS: Optional.  Sets number of cores for running make.
-# METHODS: Optional. Methods with which to build; defaults to opt.
+# MOOSE_METHODS: Optional. Methods with which to build MOOSE; defaults to opt.
 # PETSC_REV: Commit hash of submodule petsc.
 # PETSC_OPTIONS: Optional. Options to pass to update_and_rebuild_petsc.sh.
 # LIBMESH_REV: Commit hash of submodule libmesh.
@@ -36,7 +37,6 @@ FROM ${DISTRO_NAME}:${DISTRO_VERSION}
 WORKDIR /opt
 
 ARG MOOSE_JOBS=1
-ARG METHODS=opt
 
 #-----------------------------------------------------------------------------#
 # Add user dev
@@ -95,6 +95,7 @@ WORKDIR ${MOOSE_DIR}
 ARG PETSC_REV
 ARG PETSC_OPTIONS
 COPY scripts/update_and_rebuild_petsc.sh ${MOOSE_DIR}/scripts/update_and_rebuild_petsc.sh
+COPY scripts/configure_petsc.sh ${MOOSE_DIR}/scripts/configure_petsc.sh
 RUN git clone https://gitlab.com/petsc/petsc.git ; \
 cd petsc && git checkout ${PETSC_REV} && cd .. ; \
 PETSC_PREFIX=/usr/local ./scripts/update_and_rebuild_petsc.sh ${PETSC_OPTIONS} ; \
@@ -107,17 +108,19 @@ ENV PETSC_DIR=/usr/local
 #-----------------------------------------------------------------------------#
 ARG LIBMESH_REV
 ARG LIBMESH_OPTIONS
+ARG LIBMESH_METHODS=opt dbg
 ENV LIBMESH_DIR=/usr/local \
 libmesh_CPPFLAGS="-D LIBMESH_HAVE_XDR"
 
 COPY scripts/update_and_rebuild_libmesh.sh ${MOOSE_DIR}/scripts/update_and_rebuild_libmesh.sh
+COPY scripts/configure_libmesh.sh ${MOOSE_DIR}/scripts/configure_libmesh.sh
 
 RUN git clone https://github.com/libMesh/libmesh.git ; \
 cd libmesh ; \
 git checkout ${LIBMESH_REV} ; \
 git submodule update --init ; \
 cd .. ; \
-./scripts/update_and_rebuild_libmesh.sh ${LIBMESH_OPTIONS} ; \
+METHODS="${LIBMESH_METHODS}" ./scripts/update_and_rebuild_libmesh.sh ${LIBMESH_OPTIONS} ; \
 rm -rf libmesh/* libmesh/.* || true
 
 #-----------------------------------------------------------------------------#
@@ -129,6 +132,7 @@ USER dev
 COPY --chown=dev:dev . ${MOOSE_DIR}
 
 ARG BUILD_MODULES
+ARG MOOSE_METHODS=opt
 RUN ./docker_ci/build_moose.sh
 
 #-----------------------------------------------------------------------------#

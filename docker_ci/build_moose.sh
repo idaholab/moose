@@ -21,7 +21,7 @@
 # and any additional arguments
 function make_pwd()
 {
-  for method in $METHODS; do
+  for method in $MOOSE_METHODS; do
     METHOD=$method make -j $MOOSE_JOBS $*
   done
 }
