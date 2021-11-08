@@ -24,12 +24,13 @@ SplineFunction::validParams()
       "yp1", 1e30, "The value of the first derivative of the interpolating function at point 1");
   params.addParam<Real>(
       "ypn", 1e30, "The value of the first derivative of the interpolating function at point n");
-  params.setDocString("axis", "The axis used (x, y, or z) if this is to be a function of position. "
-                    "If this is to be a time-dependent function, t may also be specified "
-                    "or omitted. The default value is x");
-  axis="x";
-  params.setParameters("axis",axis);
-//  params.setParameters("axis",axis);
+  params.setDocString("axis",
+                      "The axis used (x, y, or z) if this is to be a function of position. "
+                      "If this is to be a time-dependent function, t may also be specified "
+                      "or omitted. The default value is x");
+  axis = "x";
+  params.setParameters("axis", axis);
+  //  params.setParameters("axis",axis);
   return params;
 }
 
