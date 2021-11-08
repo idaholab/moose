@@ -14,6 +14,7 @@
 #include "SubblockIndexProvider.h"
 #include "ADRankTwoTensorForward.h"
 #include "ADRankFourTensorForward.h"
+#include "ElementIntegralUserObject.h"
 
 class GeneralizedPlaneStrainOffDiag : public DerivativeMaterialInterface<Kernel>
 {

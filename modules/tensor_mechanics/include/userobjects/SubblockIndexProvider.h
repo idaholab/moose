@@ -9,24 +9,23 @@
 
 #pragma once
 
-#include "GeneralUserObject.h"
-
+namespace libMesh
+{
+class Elem;
+}
 /**
  * Abstract base class for user objects that provide an index for a given element that is
  * independent of the block id, so that behavior can be different on subsets of element blocks.
  * This is used to apply independent generalized plane constraints to subsets of element blocks.
  */
-class SubblockIndexProvider : public GeneralUserObject
+class SubblockIndexProvider
 {
 public:
-  static InputParameters validParams();
-
-  SubblockIndexProvider(const InputParameters & params) : GeneralUserObject(params) {}
-
+  virtual ~SubblockIndexProvider(){};
   /**
    * The index of subblock this element is on.
    */
-  virtual unsigned int getSubblockIndex(const Elem & /* elem */) const = 0;
+  virtual unsigned int getSubblockIndex(const libMesh::Elem & /* elem */) const = 0;
 
   /**
    * The max index of subblock.

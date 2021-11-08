@@ -8,9 +8,3 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SubblockIndexProvider.h"
-
-InputParameters
-SubblockIndexProvider::validParams()
-{
-  return GeneralUserObject::validParams();
-}
