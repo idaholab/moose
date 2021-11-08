@@ -36,7 +36,7 @@ SplineFunction::SplineFunction(const InputParameters & parameters)
 Real
 SplineFunction::value(Real /*t*/, const Point & p) const
 {
-  return _ipol.sample(p(_axis));
+  return _ipol.sample(_has_axis ? p(_axis) : t);
 }
 
 RealGradient
