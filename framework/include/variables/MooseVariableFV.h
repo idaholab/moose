@@ -207,7 +207,7 @@ public:
     return _neighbor_data->dofIndices();
   }
 
-  virtual Moose::FV::InterpMethod faceInterpolationMethod() const { return _face_interp_method; }
+  Moose::FV::InterpMethod faceInterpolationMethod() const { return _face_interp_method; }
 
   void clearAllDofIndices() final;
 

@@ -893,7 +893,7 @@ MooseVariableFV<OutputType>::adGradSln(const Elem * const elem, const bool corre
                            &ebf_b,
                            &grad_ebf_coeffs,
                            &grad_b,
-                           &correct_skewness,
+                           correct_skewness,
                            this](const Elem & functor_elem,
                                  const Elem * const neighbor,
                                  const FaceInfo * const fi,

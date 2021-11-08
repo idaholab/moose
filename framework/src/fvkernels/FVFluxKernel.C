@@ -299,7 +299,7 @@ ADReal
 FVFluxKernel::gradUDotNormal() const
 {
   // Utlimately this will be a property of the kernel
-  bool correct_skewness =
+  const bool correct_skewness =
       (_var.faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage);
 
   return Moose::FV::gradUDotNormal(
