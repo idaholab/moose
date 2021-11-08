@@ -11,6 +11,7 @@
   [./spline_fn]
     type = SplineFunction
     data_file = spline_function_rows.csv
+    axis = x
   [../]
 []
 

@@ -12,6 +12,7 @@
     type = SplineFunction
     x = '-1  0 3'
     y = '0.5 0 3'
+    axis = x
   [../]
 []
 

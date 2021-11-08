@@ -17,14 +17,15 @@ PiecewiseTabularBase::validParams()
 {
   InputParameters params = PiecewiseBase::validParams();
 
-  MooseEnum axis("x=0 y=1 z=2");
-  params.addDeprecatedParam<MooseEnum>(
-      "component",
+  MooseEnum axis("x=0 y=1 z=2 t=3");
+  params.addDeprecatedParam<MooseEnum>("component",
       axis,
       "The axis used (x, y, or z) if this is to be a function of position.",
       "This option is a deprecated alias for axis, use axis instead.");
   params.addParam<MooseEnum>(
-      "axis", axis, "The axis used (x, y, or z) if this is to be a function of position");
+      "axis", axis, "The axis used (x, y, or z) if this is to be a function of position. "
+                    "If this is to be a time-dependent function, t may also be specified "
+                    "or omitted. ");
   params.addParam<std::vector<Real>>("xy_data",
                                      "All function data, supplied in abscissa, ordinate pairs");
   params.addParam<std::vector<Real>>("x", "The abscissa values");
@@ -45,13 +46,10 @@ PiecewiseTabularBase::validParams()
 
 PiecewiseTabularBase::PiecewiseTabularBase(const InputParameters & parameters)
   : PiecewiseBase(parameters),
-    _scale_factor(getParam<Real>("scale_factor")),
-    _has_axis(isParamValid("axis"))
+    _scale_factor(getParam<Real>("scale_factor"))
+    //_has_axis(isParamValid("axis")),
+    //_axis(_has_axis ? getParam<MooseEnum>("axis") : std::numeric_limits<int>::min())
 {
-  // determine function argument
-  if (_has_axis)
-    _axis = getParam<MooseEnum>("axis");
-
   // determine data source and check parameter consistency
   if (isParamValid("data_file") && !isParamValid("x") && !isParamValid("y") &&
       !isParamValid("xy_data"))
@@ -66,6 +64,16 @@ PiecewiseTabularBase::PiecewiseTabularBase(const InputParameters & parameters)
     mooseError("In ",
                _name,
                ": Either 'data_file', 'x' and 'y', or 'xy_data' must be specified exclusively.");
+  if (isParamValid("component") && isParamValid("axis"))
+    mooseError("In ",
+               _name,
+               ": 'component' and 'axis' cannot be set at the same time. Use 'axis'");
+  if ( isParamValid("axis") && getParam<MooseEnum>("axis") == "t")
+      _has_axis = false;
+  if (_has_axis)
+    _axis = getParam<MooseEnum>("axis");
+  else
+    _axis = std::numeric_limits<int>::min();
 }
 
 void
