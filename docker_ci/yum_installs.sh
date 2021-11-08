@@ -49,7 +49,8 @@ yum install -y \
   libtirpc-devel \
   emacs \
   gtest \
-  sudo
+  sudo \
+  file
 
 # Clear cache
 yum clean all
