@@ -841,8 +841,6 @@ MooseVariableFV<OutputType>::adGradSln(const Elem * const elem, const bool corre
     value_pointer = &pr.first->second;
   }
 
-  VectorValue<ADReal> & value = *value_pointer;
-
   ADReal elem_value = getElemValue(elem);
 
   // We'll save off the extrapolated boundary faces (ebf) for later assignment to the cache (these
@@ -851,7 +849,7 @@ MooseVariableFV<OutputType>::adGradSln(const Elem * const elem, const bool corre
 
   try
   {
-    VectorValue<ADReal> grad;
+    VectorValue<ADReal> & grad = *value_pointer;
 
     bool volume_set = false;
     Real volume = 0;
@@ -980,7 +978,7 @@ MooseVariableFV<OutputType>::adGradSln(const Elem * const elem, const bool corre
 
     // test for simple case
     if (num_ebfs == 0)
-      value = grad_b;
+      grad = grad_b;
     else
     {
       // We have to solve a system
@@ -1020,14 +1018,14 @@ MooseVariableFV<OutputType>::adGradSln(const Elem * const elem, const bool corre
 
       A.lu_solve(b, x);
       for (const auto i : make_range(unsigned(LIBMESH_DIM)))
-        value(i) = x(i);
+        grad(i) = x(i);
 
       // Cache the face value information
       for (const auto j : make_range(num_ebfs))
         _face_to_value.emplace(ebf_faces[j], x(LIBMESH_DIM + j));
     }
 
-    return value;
+    return grad;
   }
   catch (libMesh::LogicError &)
   {

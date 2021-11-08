@@ -43,8 +43,12 @@ INSFVVelocityVariable::INSFVVelocityVariable(const InputParameters & params) : I
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
 const VectorValue<ADReal> &
-INSFVVelocityVariable::adGradSln(const Elem * const elem, bool /*correct_skewness*/) const
+INSFVVelocityVariable::adGradSln(const Elem * const elem, bool correct_skewness) const
 {
+
+  mooseAssert(!correct_skewness,
+              "INSFVelocityVariable does not support skewness-correction at this point!");
+
   const auto it = _elem_to_grad.find(elem);
 
   if (it != _elem_to_grad.end())

@@ -113,6 +113,10 @@ linearInterpolation(const T & value1,
                     const bool one_is_elem,
                     const InterpMethod interp_method = InterpMethod::Average)
 {
+  mooseAssert(interp_method = InterpMethod::Average || interp_method =
+                                  InterpMethod::SkewCorrectedAverage,
+              "The selected interpolation function only works with average or skewness-corrected "
+              "average options!");
   const auto coeffs = interpCoeffs(interp_method, fi, one_is_elem);
   return coeffs.first * value1 + coeffs.second * value2;
 }

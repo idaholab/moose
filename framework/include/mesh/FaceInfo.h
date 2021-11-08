@@ -248,7 +248,7 @@ private:
   const RealVectorValue _e_cf;
 
   /// Geometric weighting factor for face value interpolation
-  Real _gc;
+  const Real _gc;
 
   /// The vector to the intersection of d_{CF} and the face.
   RealVectorValue _r_int;
