@@ -25,6 +25,9 @@
     type = ParsedVectorFunction
     value_y = 1.0
   [../]
+  [./curr_imag] # defaults to '0.0 0.0 0.0'
+    type = ParsedVectorFunction
+  [../]
 []
 
 [Variables]
@@ -54,7 +57,7 @@
     variable = E_real
     component = real
     source_real = curr_real
-    source_imag = 0.0
+    source_imag = curr_imag
     function_coefficient = omegaMu
     block = source
   [../]
@@ -73,7 +76,7 @@
     variable = E_imag
     component = imaginary
     source_real = curr_real
-    source_imag = 0.0
+    source_imag = curr_imag
     function_coefficient = omegaMu
     block = source
   [../]
