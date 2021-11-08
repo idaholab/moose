@@ -50,7 +50,7 @@ SplineFunction::gradient(Real /*t*/, const Point & p) const
 Real
 SplineFunction::derivative(const Point & p) const
 {
-  return _ipol.sampleDerivative(p(_axis));
+  return _ipol.sampleDerivative(_has_axis ? p(_axis) : t);
 }
 
 Real
