@@ -1,33 +1,24 @@
 # SideValueSampler
 
-!alert! construction title=Undocumented Class
-The SideValueSampler has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# SideValueSampler
-
 !syntax description /VectorPostprocessors/SideValueSampler
 
-## Overview
+The data output to CSV is output with the following columns:
 
-!! Replace these lines with information regarding the SideValueSampler object.
+- the id of the element the quadrature point, on the side, belongs to
 
-## Example Input File Syntax
+- the values of the requested variables
 
-!! Describe and include an example of how to use the SideValueSampler object.
+- the X, Y, Z coordinates of the quadrature points on the side
 
-!syntax parameters /VectorPostprocessors/SideValueSampler
 
-!syntax inputs /VectorPostprocessors/SideValueSampler
+!alert note
+When this VectorPostprocessor is executed on an internal boundary, the nodes are shared by more than one element, which each have a quadrature point on them. A value is output for every quadrature point.
 
-!syntax children /VectorPostprocessors/SideValueSampler
-```
-!alert-end!
+## Example input syntax
 
-!syntax description /VectorPostprocessors/SideValueSampler
+In this example, variable `u` and `v` are the solutions of two boundary value diffusion problems. Their value along the `top` boundary and along the `center` internal sidesets are reported using two `SideValueSampler`. The rows in the CSV output are sorted according the `x` coordinate along the boundary for the former, and the element `id` for the latter.
+
+!listing test/tests/vectorpostprocessors/side_value_sampler/side_value_sampler.i block=VectorPostprocessor
 
 !syntax parameters /VectorPostprocessors/SideValueSampler
 
