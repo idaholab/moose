@@ -1,0 +1,366 @@
+:root{
+    --object-shadow: rgba(0, 0, 0, 0.25) 0px 14px 28px, rgba(0, 0, 0, 0.22) 0px 10px 10px;
+    --alert-error: rgba(153, 0, 0, 1.0);
+    --alert-error-content: rgba(153, 0, 0, 0.2);
+    --alert-note: rgba(0, 88, 151, 1.0);
+    --alert-note-content: rgba(0, 88, 151, 0.2);
+    --alert-warning: rgba(255, 255, 51, 1.0);
+    --alert-warning-content: rgba(255, 255, 51, 0.2);
+    --alert-construction: rgba(255, 114, 33, 1.0);
+    --alert-construction-content: rgba(255, 114, 33, 0.2);
+    --alert-tip: rgba(0, 128, 21, 1.0);
+    --alert-tip-content: rgba(0, 128, 21, 0.2);
+    /* darkmode */
+    --alert-error-dark: rgba(153, 0, 0, 1.0);
+    --alert-error-content-dark: rgba(153, 0, 0, 0.2);
+    --alert-note-dark: rgba(29, 53, 89, 1.0);
+    --alert-note-content-dark: rgba(1, 0, 32, 1.0);
+    --alert-links-dark: rgba(153, 193, 255, 1.0);
+    --alert-warning-dark: rgba(187, 170, 78, 1.0);
+    --alert-warning-content-dark: rgba(36, 34, 10, 1.0);
+    --alert-construction-dark: rgba(210, 72, 0, 1.0);
+    --alert-construction-content-dark: rgba(34, 10, 0, 1.0);
+    --alert-tip-dark: rgba(0, 128, 21, 1.0);
+    --alert-tip-content-dark: rgba(0, 128, 21, 0.2);
+}
+
+/* fallback */
+@font-face {
+  font-family: 'Material Icons';
+  font-style: normal;
+  font-weight: 400;
+  src: url('../contrib/fonts/material-icons/material-icons.woff2') format('woff2');
+}
+
+/*
+  Do we even do anything with material icons in MooseDocs slidesets? The '!icon' command only
+  works for Materialize renderers. [crswong888]
+*/
+.material-icons{
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+}
+
+@font-face {
+    font-family: 'Roboto';
+    src: url('../contrib/fonts/roboto/Roboto-Thin.woff2') format('woff2');
+    font-weight: 100;
+}
+
+@font-face {
+    font-family: 'Roboto';
+    src: url('../contrib/fonts/roboto/Roboto-Light.woff2') format('woff2');
+    font-weight: 200;
+}
+
+@font-face {
+    font-family: 'Roboto';
+    src: url('../contrib/fonts/roboto/Roboto-Regular.woff2') format('woff2');
+    font-weight: 300;
+}
+
+@font-face {
+    font-family: 'Roboto';
+    src: url('../contrib/fonts/roboto/Roboto-Medium.woff2') format('woff2');
+    font-weight: 400;
+}
+
+@font-face {
+    font-family: 'Roboto';
+    src: url('../contrib/fonts/roboto/Roboto-Bold.woff2') format('woff2');
+    font-weight: 500;
+}
+
+.reveal{
+    font-family: 'Roboto', sans-serif;
+    font-weight:300;
+    font-size:16pt;
+}
+
+.reveal .slides{
+    text-align:left;
+}
+
+.reveal .katex{
+    font-family: KaTeX_Main;
+}
+
+.reveal .moose-katex-block-equation{
+  display: flex;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+.reveal strong{
+    font-weight: 500;
+}
+
+.reveal h1 {
+    font-size: 42pt;
+    font-weight: 500;
+    text-transform: none;
+}
+
+.reveal h2 {
+    font-size:36pt;
+    text-transform: none;
+}
+
+.reveal h3 {
+    font-size:28pt;
+}
+
+.reveal h4,
+.reveal h5,
+.reveal h6{
+    font-size:24pt;
+}
+
+.reveal h1,
+.reveal h2,
+.reveal h3,
+.reveal h4,
+.reveal h5,
+.reveal h6{
+    text-align: center;
+}
+
+.reveal p{
+    margin-bottom:5pt;
+}
+
+.reveal ul,
+.reveal ol{
+    margin-left:48pt;
+    margin-top:9pt;
+}
+
+.reveal li > p{
+    margin-top:0;
+}
+
+.reveal section img,
+.reveal section iframe{
+    background: none;
+    border: none;
+    box-shadow: var(--object-shadow);
+}
+
+/*
+  Copying the width/height constraints from the simple reveal theme for the video containter.
+  Padding is added so that the video controls render properly in the presence of a box-shadow.
+*/
+.reveal section .moose-video-div{
+    padding: 1%;
+    max-width: 95%;
+    max-height: 95%;
+}
+
+/* Unsetting max-width/height here since the div container already enforces it. */
+.reveal section .moose-video-div video.moose-video{
+    display: block;
+    max-width: unset;
+    max-height: unset;
+    box-shadow: var(--object-shadow);
+}
+
+.reveal pre code{
+    max-height:500px;
+}
+
+.reveal pre {
+    max-width: 97.5%;
+}
+
+.reveal .moose-bibliography{
+    overflow-y:scroll;
+    height:45vh;
+    background-color: rgba(0, 88, 151, 0.1);
+    box-shadow: var(--object-shadow);
+}
+
+.reveal .moose-bibliography li{
+    font-size:medium;
+    font-weight:100;
+    margin-right: 2em;
+}
+
+.reveal .moose-table-div table{
+    background-color: white;
+    box-shadow: var(--object-shadow);
+}
+
+.reveal .moose-syntax-list-item-syntax{
+    color: black;
+    font-weight:400;
+}
+
+.reveal .moose-syntax-list-item-details{
+    color: black;
+    font-weight:200;
+}
+
+.reveal .moose-syntax-list{
+    max-height:500px;
+    overflow-y:scroll;
+}
+
+.reveal .moose-scroll-indicator{
+    font-size: 48pt;
+    color:gray;
+}
+
+.reveal pre{
+    width:100%;
+}
+
+.reveal .moose-parameter-name{
+    font-weight:500;
+    display: block;
+}
+
+.reveal .moose-parameter-description-title,
+.reveal .moose-parameter-options-title,
+.reveal .moose-parameter-default-title,
+.reveal .moose-parameter-cpptype-title{
+    font-style:italic;
+    font-weight: 200;
+}
+
+@-moz-keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    -moz-transform: translateY(0);
+    transform: translateY(0);
+  }
+  40% {
+    -moz-transform: translateY(-30px);
+    transform: translateY(-30px);
+  }
+  60% {
+    -moz-transform: translateY(-15px);
+    transform: translateY(-15px);
+  }
+}
+@-webkit-keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+  }
+  40% {
+    -webkit-transform: translateY(-30px);
+    transform: translateY(-30px);
+  }
+  60% {
+    -webkit-transform: translateY(-15px);
+    transform: translateY(-15px);
+  }
+}
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    -moz-transform: translateY(0);
+    -ms-transform: translateY(0);
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+  }
+  40% {
+    -moz-transform: translateY(-30px);
+    -ms-transform: translateY(-30px);
+    -webkit-transform: translateY(-30px);
+    transform: translateY(-30px);
+  }
+  60% {
+    -moz-transform: translateY(-15px);
+    -ms-transform: translateY(-15px);
+    -webkit-transform: translateY(-15px);
+    transform: translateY(-15px);
+  }
+}
+
+.moose-arrow {
+  position: absolute;
+  bottom: -48px;
+  left: 50%;
+  margin-left: -20px;
+  width: 40px;
+  height: 60px; /*change with size of arrow to make sit on bottom */
+/*   background-image: url(); */
+/*   background-size: contain; */
+}
+
+.moose-bounce {
+  -moz-animation: bounce 2s 3;
+  -webkit-animation: bounce 2s 3;
+  animation: bounce 2s 3;
+}
+
+.reveal .moose-alert-title {
+    padding-left:4px;
+    padding-top:4px;
+    padding-bottom:4px;
+}
+
+.reveal .moose-alert .moose-alert-content {
+    padding-left:4px;
+    padding-top:4px;
+    padding-bottom:4px;
+}
+
+.reveal .moose-alert-content > p {
+    margin: 5px;
+}
+
+.reveal .moose-alert-error .moose-alert-title{
+  color: white;
+  background-color: var(--alert-error);
+}
+
+.reveal .moose-alert-error .moose-alert-content{
+  background-color: var(--alert-error-content);
+}
+
+.reveal .moose-alert-warning .moose-alert-title{
+  color: black;
+  background-color: var(--alert-warning);
+}
+
+.reveal .moose-alert-warning .moose-alert-content{
+  background-color: var(--alert-warning-content);
+}
+
+.reveal .moose-alert-note .moose-alert-title{
+  color: white;
+  background-color: var(--alert-note);
+}
+
+.reveal .moose-alert-note .moose-alert-content{
+  background-color: var(--alert-note-content);
+}
+
+.reveal .moose-alert-tip .moose-alert-title{
+  color: white;
+  background-color: var(--alert-tip);
+}
+
+.reveal .moose-alert-tip .moose-alert-content{
+  background-color: var(--alert-tip-content);
+}
+
+.reveal .moose-alert-construction .moose-alert-title{
+  color: white;
+  background-color: var(--alert-construction);
+}
+
+.reveal .moose-alert-construction .moose-alert-content{
+  background-color: var(--alert-construction-content);
+}

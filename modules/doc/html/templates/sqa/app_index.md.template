@@ -1,0 +1,9 @@
+# {{app}} Software Quality Assurance
+
+!template! field key=sqa-records required=False
+!sqa records category=_empty_
+!template-end!
+
+!template! field key=sqa-report required=False
+!sqa report category=_empty_
+!template-end!

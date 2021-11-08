@@ -1,0 +1,145 @@
+# {{project}} Software Test Plan
+
+*This template follows [!ac](INL) template TEM-141, "Software Test Plan."*
+
+!template field key=pre-intro required=False
+
+## Test Scope id=test-scope
+
+!template! field key=test-scope
+Summarize the overall purpose and scope of the test plan. Scope must clearly define
+when and how Static and Dynamic testing techniques should be utilized.
+
++Dynamic testing techniques+: There are two types of dynamic testing: black box and
+white box. Black box techniques attempt to identify defects without regard to the inner
+workings of the service. White box techniques specifically examine inner workings of the
+service. System and Acceptance testing are commonly used for this type of technique.
+
++Static testing techniques+ are those activities performed with the purpose of identifying
+defects without actual execution of services (modules). Formal walkthroughs and peer
+reviews are commonly used in this type of technique.
+
+!template-end!
+
+## Test Objectives id=test-objectives
+
+!template field key=test-objectives
+This section outlines the objectives for each type of test.
+
+## Assumptions
+
+!template field key=assumptions
+Outline all the assumptions being made while developing this test plan.
+
+## Constraints
+
+!template field key=constraints
+List all constraints in this section as it relates to the testing.
+
+## Types of Tests to be Executed id=test-types
+
+!template! field key=test-types
+Clearly articulate what types of testing needs to be done (unit, component, system,
+integration, performance/stress, and user acceptance test). This will primarily depend on
+the scope of the applications/services, Service Level Agreement, user population, and
+production environment.
+Acceptance testing must be conducted and must include test cases for negative testing.
+Acceptance testing shall demonstrate, as appropriate, that the computer program:
+
+- a) properly handles abnormal conditions and events as well as credible failures;
+- b) does not perform adverse unintended functions; and
+- c) does not degrade the system either by itself, or in combination with other functions or configuration items.
+
+!template-end!
+
+## Approval Requirements
+
+!template! field key=approval-requirements
+This section clearly defines the roles who will sign off on the test cases and the test
+results. Without a formal sign-off, services (e.g., code) will not be released to the
+production environment. Please note that for the unit test case(s) the reviewers are usually
+members of the project or maintenance and operations staff. For component/service,
+integration, and system testing, both the project staff and the IT asset owner are involved.
+For Acceptance testing, an independent reviewer must review the test case(s). The
+software owner must then approve the test case(s). Please note that for a given project not
+all the various types of testing are applicable. The following is an example:
+
+| Activity | Authorized Role  |
+| :- | :- |
+| System Test Case Reviewer(s): | Technical Lead, Independent Reviewer |
+| System Test Result Reviewer(s): | Technical Lead, Independent Reviewer |
+| System Test Result Approver: | Technical Lead, IT Project or M&O Manager |
+| User Acceptance Test Case Reviewer(s): | Independent Reviewer |
+| User Acceptance Result Reviewer(s): | Independent Reviewer |
+| User Acceptance Result Approver: | Technical Lead, IT Project or M&O Manager |
+
+!template-end!
+
+## Test Iteration
+
+!template! field key=test-iteration
+In this section the test planner needs to clearly define the number of test iterations or
+phases that must be conducted. For a small-scale project, two iterations should be
+sufficient, but for a large-scale effort more iterations will be required.
+
+| Phase | Scope Summary |
+| :- | :- |
+| Alpha | <scope> |
+| Beta | <scope> |
+
+!template-end!
+
+## Test Automation (Scripting) id=test-automation
+
+!template field key=test-automation
+If testing tools can be used, then in this section it needs to be clearly defined how and to
+what extent testing tools will be utilized. It also should be defined how and where the
+testing automation scripts should be stored for future use.
+
+## Resource Requirement
+
+!template! field key=resource-requirement required=False
+This section must clearly articulate what type of skill set is required for all the planned
+testing and when and for how long the resources are required.
+
+In this section, the test planner must also identify the testing environment requirements,
+such as storage, servers, number of licenses for test automation tools...
+
+!template-end!
+
+### Human Resources
+
+!template field key=human-resources required=False
+List required human resources.
+
+### Hardware/Software Resources
+
+!template field key=hardware-software-resources
+List required hardware and software resources.
+
+### Services/Applications
+
+!template field key=services-applications
+This section should list the other services and applications required to conduct
+the Integration, Performance, and Operation Readiness testing.
+
+## Tasks and Responsibilities
+
+!template! field key=task-responsibilities
+This section should list the tasks and associated roles with the responsibility for the task.
+An example is shown below:
+
+| Tasks | Responsibility |
+| :- | :- |
+| 1. Complete programming and unit test | Developer assigned to each service |
+| 2. Test data creation | Independent testers |
+| 3. Set up test environment | System administrator |
+| 4. Migrate services to test environment | System administrator |
+| 5. Set up test database | Database administrator |
+| 6. Prepare test cases | Business analysts/testers with help from the service developers |
+| 7. Conduct test, record results, and communicate to the developers | Independent testers |
+| 8. Make corrections and updates to the processes | Developers assigned to each process |
+| 9. Repeat Step 2--8 (for each iteration) | (blank) |
+| 10. Review and approve final results of the test | Reviewers and approvers as defined in Section 3 |
+
+!template-end!

@@ -1,0 +1,30 @@
+!template load file=framework_rtm.md project={{app}}
+
+!template! item key=pre-intro
+!alert! note
+This document serves as an addendum to [framework_rtm.md] and captures information for
+[!ac](RTM) specific to the {{app}} application.
+
+!sqa dependencies suffix=rtm category={{category}}
+!alert-end!
+!template-end!
+
+!template item key=assumptions-and-dependencies
+The {{app}} application is developed using MOOSE and is based on various modules, as such
+the [!ac](RTM) for {{app}} is dependent upon the files listed at the beginning of this document.
+
+!template! item key=functional-requirements
+!sqa requirements link=True collections=FUNCTIONAL category={{category}}
+!template-end!
+
+!template! item key=usability-requirements
+!sqa requirements link=True collections=USABILITY category={{category}}
+!template-end!
+
+!template! item key=performance-requirements
+!sqa requirements link=True collections=PERFORMANCE category={{category}}
+!template-end!
+
+!template! item key=system-interfaces-requirements
+!sqa requirements link=True collections=SYSTEM category={{category}}
+!template-end!

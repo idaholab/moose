@@ -1,0 +1,153 @@
+:root {
+    --alert-error: rgba(153, 0, 0, 1.0);
+    --alert-error-content: rgba(153, 0, 0, 0.2);
+    --alert-note: rgba(0, 88, 151, 1.0);
+    --alert-note-content: rgba(0, 88, 151, 0.2);
+    --alert-warning: rgba(255, 255, 51, 1.0);
+    --alert-warning-content: rgba(255, 255, 51, 0.2);
+    --alert-construction: rgba(255, 114, 33, 1.0);
+    --alert-construction-content: rgba(255, 114, 33, 0.2);
+    --alert-tip: rgba(0, 128, 21, 1.0);
+    --alert-tip-content: rgba(0, 128, 21, 0.2);
+    /* darkmode */
+    --alert-error-dark: rgba(153, 0, 0, 1.0);
+    --alert-error-content-dark: rgba(153, 0, 0, 0.2);
+    --alert-note-dark: rgba(29, 53, 89, 1.0);
+    --alert-note-content-dark: rgba(1, 0, 32, 1.0);
+    --alert-links-dark: rgba(153, 193, 255, 1.0);
+    --alert-warning-dark: rgba(187, 170, 78, 1.0);
+    --alert-warning-content-dark: rgba(36, 34, 10, 1.0);
+    --alert-construction-dark: rgba(210, 72, 0, 1.0);
+    --alert-construction-content-dark: rgba(34, 10, 0, 1.0);
+    --alert-tip-dark: rgba(0, 128, 21, 1.0);
+    --alert-tip-content-dark: rgba(0, 128, 21, 0.2);
+}
+
+.moose-alert-title a{
+    color:white;
+}
+
+/* ALERTS */
+.moose-alert .card-content{
+  padding:0;
+}
+
+.moose-alert .card-content .card-title{
+  margin: 0;
+  margin-bottom: 0;
+}
+
+.moose-alert-title, .moose-alert-content{
+    padding:5pt 5pt 10pt 10pt;
+}
+
+
+.moose-alert-error .moose-alert-title{
+  color: white;
+  background-color: var(--alert-error);
+}
+
+.moose-alert-error .moose-alert-content{
+  background-color: var(--alert-error-content);
+}
+
+.moose-alert-warning .moose-alert-title{
+  color: black;
+  background-color: var(--alert-warning);
+}
+
+.moose-alert-warning .moose-alert-content{
+  background-color: var(--alert-warning-content);
+}
+
+.moose-alert-note .moose-alert-title{
+  color: white;
+  background-color: var(--alert-note);
+}
+
+.moose-alert-note .moose-alert-content{
+  background-color: var(--alert-note-content);
+}
+
+.moose-alert-tip .moose-alert-title{
+  color: white;
+  background-color: var(--alert-tip);
+}
+
+.moose-alert-tip .moose-alert-content{
+  background-color: var(--alert-tip-content);
+}
+
+.moose-alert-construction .moose-alert-title{
+  color: white;
+  background-color: var(--alert-construction);
+}
+
+.moose-alert-construction .moose-alert-content{
+  background-color: var(--alert-construction-content);
+}
+
+.moose-alert-title-brand{
+  text-transform: uppercase;
+  padding-right: 1ex;
+  font-weight: 100;
+}
+
+/*
+  Set a margin between <p> tags, if two or more paragraphs exist within an alert
+ */
+.card .card-content p + p
+{
+  margin-top:5px;
+}
+
+.moose-alert{
+    box-shadow: none;
+}
+
+.moose-alert-title{
+    padding-top:2px;
+    padding-bottom:2px;
+}
+
+.moose-alert-title .moose-inline-icon{
+    vertical-align: middle;
+    padding-right:5pt;
+    margin-bottom:3pt;
+}
+
+/* Text and background color for dark mode */
+@media (prefers-color-scheme: dark), (prefers-dark-interface) {
+ .moose-alert-note .moose-alert-title {
+    color: white;
+    background-color: var(--alert-note-dark);
+ }
+ .moose-alert-note .moose-alert-content {
+    background-color: var(--alert-note-content-dark);
+ }
+ .moose-alert-warning .moose-alert-title {
+    color: black;
+    background-color: var(--alert-warning-dark);
+ }
+ .moose-alert-warning .moose-alert-content {
+    background-color: var(--alert-warning-content-dark);
+ }
+ .moose-alert-tip .moose-alert-title {
+    color: white;
+    background-color: var(--alert-tip-dark);
+ }
+ .moose-alert-tip .moose-alert-content {
+    background-color: var(--alert-tip-content-dark);
+ }
+ .moose-alert-construction .moose-alert-title{
+   color: black;
+   background-color: var(--alert-construction-dark);
+ }
+ .moose-alert-construction .moose-alert-content{
+   background-color: var(--alert-construction-content-dark);
+ }
+
+ .moose-alert-note a {
+     color: var(--alert-links-dark);
+ }
+}

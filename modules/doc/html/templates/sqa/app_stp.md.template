@@ -1,0 +1,10 @@
+!template load file=framework_stp.md project={{app}}
+
+!template! item key=pre-intro
+!alert! note
+This document serves as an addendum to [framework_stp.md] and captures information for
+[!ac](STP) specific to the {{app}} application.
+
+!sqa dependencies suffix=stp category={{category}}
+!alert-end!
+!template-end!

@@ -1,0 +1,74 @@
+:root {
+    --badge-ok: rgba(0, 153, 0, 0.75);
+    --badge-fail: rgba(153, 0, 0, 0.75);
+    --badge-diff: rgba(204, 204, 0, 0.75);
+    --badge-timeout: rgba(255, 114, 33, 0.75);
+    --requirement-fail: rgba(255, 0, 0, 0.1);
+}
+
+.moose-civet-badges span{
+    margin-left:0;
+}
+
+.moose-civet-badges span.badge{
+    font-weight:600;
+    color:black;
+    margin-right:4px;
+}
+
+.moose-civet-badges span.badge[data-status=ok]{
+    background-color:var(--badge-ok);
+}
+
+.moose-civet-badges span.badge[data-status=fail]{
+    background-color:var(--badge-fail);
+}
+
+.moose-civet-badges span.badge[data-status=diff]{
+    background-color:var(--badge-diff);
+}
+
+.moose-civet-badges span.badge[data-status=timeout]{
+    background-color:var(--badge-timeout);
+}
+
+.moose-civet-requirements.collection .collection-item.moose-civet-fail{
+    background-color:var(--requirement-fail);
+}
+
+div.moose-civet-civet-results > span{
+    font-size:180%;
+    font-weight:400;
+    padding-bottom: 0;
+    margin-bottom: 0;
+}
+
+div.moose-civet-test-report > table{
+    margin-top:10px;
+    margin-bottom:30px;
+}
+
+div.moose-civet-test-report td{
+    padding-top: 3px;
+    padding-bottom: 3px;
+}
+
+div.moose-civet-test-report td[data-status=ok]{
+    color:var(--badge-ok);
+    font-weight:600;
+}
+
+div.moose-civet-test-report td[data-status=timeout]{
+    color:var(--badge-timeout);
+    font-weight:600;
+}
+
+div.moose-civet-test-report td[data-status=fail]{
+    color:var(--badge-fail);
+    font-weight:600;
+}
+
+div.moose-civet-test-report td[data-status=diff]{
+    color:var(--badge-diff);
+    font-weight:600;
+}

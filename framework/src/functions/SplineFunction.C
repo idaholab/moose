@@ -28,8 +28,7 @@ SplineFunction::validParams()
                       "The axis used (x, y, or z) if this is to be a function of position. "
                       "If this is to be a time-dependent function, t may also be specified "
                       "or omitted. The default value is x");
-  axis = "x";
-  params.setParameters("axis", axis);
+  params.set<MooseEnum>("axis", "x");
   //  params.setParameters("axis",axis);
   return params;
 }

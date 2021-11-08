@@ -1,0 +1,45 @@
+:root {
+    --badge-ok: rgba(0, 153, 0, 0.75);
+    --badge-fail: rgba(153, 0, 0, 0.75);
+    --badge-diff: rgba(204, 204, 0, 0.75);
+    --badge-timeout: rgba(255, 114, 33, 0.75);
+    --requirement-fail: rgba(255, 0, 0, 0.1);
+}
+
+.moose-sqa-requirement-number
+{
+    font-weight: 600;
+    margin-right:1ex;
+}
+
+.moose-sqa-requirement-number:after{
+    content:":";
+}
+
+.moose-sqa-requirement-unsatisfied{
+    color:red;
+}
+
+.moose-sqa-items *:not(:last-child):after{
+    content:"; "
+}
+
+.moose-sqa-requirements.collection.with-header .collection-header{
+    color:white;
+    background-color: var(--inl-blue);
+    font-size:larger;
+    font-weight:100;
+}
+
+.moose-sqa-requirements.collection .collection-item{
+    display:flex;
+}
+
+.moose-sqa-details-list{
+    list-style-type:lower-alpha;
+}
+
+p.moose-sqa-document,
+p.moose-sqa-dependency{
+    color:var(--error);
+}

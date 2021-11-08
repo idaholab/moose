@@ -1,0 +1,118 @@
+# {{project}} Requirements Traceability Matrix
+
+*This template follows [!ac](INL) template TEM-214, "IT System Requirements Traceability Matrix."*
+
+!template field key=pre-intro required=False
+
+
+## Introduction id=introduction
+
+!template! field key=minimum_requirements
+1. The software requirements shall include technical requirements including operating system,
+   function, interfaces, performance, and security requirements, installation considerations, design
+   inputs, and any design constraints.
+1. Identify applicable reference drawings, specifications, codes, standards, regulations, procedures,
+   or instructions that establish software requirement test, inspection, and acceptance criteria.
+1. Software requirements shall be traceable throughout the life cycle.
+1. Security requirements shall be specified commensurate with the risk from unauthorized access or
+   use.
+
+The software test plan as part of the requirements traceability matrix document must include, as
+applicable:
+
+1. Required tests and test sequence.
+1. Required ranges of input parameters.
+1. Identification of stages when testing is required.
+1. Criteria for establishing test cases.
+1. Requirements for testing logic branches.
+1. Requirements for hardware integration.
+1. Expected results.
+1. Acceptance criteria.
+1. Reports, records, standard formatting, and conventions.
+1. Disposition unexpected results. Performance of system test is by personnel other than the
+   development staff.
+
+!alert! note
+Software test records shall include:
+
+1. Computer program tested and support software used
+1. Computer hardware used
+1. Test equipment and calibrations, where applicable
+1. Date of test
+1. Tester or data recorder
+1. Simulation models used, where applicable
+1. Test problems. Results and applicability
+1. Action taken in connection with any deviations
+1. Person evaluating the test results
+1. Customer approval
+!alert-end!
+!template-end!
+
+### System Purpose id=system-purpose
+
+!template field key=system-purpose
+Summarize the reason(s) for the system being developed or modified.
+
+### System Scope id=system-scope
+
+!template! field key=system-scope
+Delineate the following:
+
+1. Identify the product(s) to be produced by name (Network Infrastructure, Host DBMS, Report
+   Generator, HPC Server, etc.)
+1. Explain what the product(s) will, and, if necessary, will not do
+1. Describe the application of the product being specified, including relevant benefits, objectives,
+   and goals.
+
+!alert note
+Be consistent with similar statements in higher level specifications (e.g., business requirements
+specification).
+!template-end!
+
+### Assumptions and Dependencies id=assumptions-and-dependencies
+
+!template field key=assumptions-and-dependencies
+List each of the factors that affect the requirements and should be taken into consideration for
+derivation of lower level requirements and design. These factors should include design inputs, design
+constraints, and installation considerations. Changes to these can affect the requirements in the
+specification. For example, an assumption may be that a specific operating system will be available
+on the hardware designated for the product. If, in fact, the operating system is not available, the
+specification would then have to change accordingly.
+
+### Pre-test Instructions/Environment/Setup id=pre-test
+
+!template! field key=pre-test
+Provide a clear description of the test environment and any required instructions for setup. This
+includes:
+
+- Pre-test environment and setup requirements including computer hardware and system software used
+- How the test data is created and required ranges for input parameters
+- How the test case is executed (i.e., manual/automated tool)
+- The steps to validate the test result including any acceptance criteria.
+!template-end!
+
+## System Requirements Traceability id=system-requirements
+
+### Functional Requirements id=functional-requirements
+
+!template field key=functional-requirements
+Include the tracebility matrix for functional requirements.
+
+### Usability Requirements id=usability-requirements
+
+!template field key=usability-requirements
+Include the tracebility matrix for usability requirements.
+
+### Performance Requirements id=performance-requirements
+
+!template field key=performance-requirements
+Include the tracebility matrix for performance requirements.
+
+### System Interface Requirements id=performance-requirements
+
+!template field key=system-interfaces-requirements
+Include the tracebility matrix for system interface requirements.
+
+## References id=references
+
+!bibtex bibliography title=None

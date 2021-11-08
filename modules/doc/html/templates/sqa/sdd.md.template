@@ -1,0 +1,191 @@
+# {{project}} System Design Description
+
+*This template follows [!ac](INL) template TEM-140, "IT System Design Description."*
+
+!template field key=pre-intro required=False
+
+## Introduction id=introduction
+
+!template field key=introduction
+
+### System Purpose id=system-purpose
+
+!template field key=system-purpose
+Briefly describe the objectives and rationale of the System Design Description (e.g., describing the
+system design in the user's terminology, providing a guide for a more technical design document, or
+ensuring that customers and technical staff have a common understanding of the system
+design). Explain how this document might evolve throughout the product life cycle.
+
+### System Scope id=system-scope
+
+!template! field key=system-scope
+
+Delineate the following:
+
+1. Identify the product(s) to be produced by name (Network Infrastructure, Host DBMS, Report
+   Generator, HPC Server, etc.)
+1. Explain what the product(s) will, and, if necessary, will not do.
+1. Describe the application of the  product being specified, including relevant benefits,
+   objectives, and goals.
+
+!alert note
+Be consistent with similar statements in higher level specifications (e.g., business requirements
+specification).
+
+!template-end!
+
+### Dependencies and Limitations id=dependencies-and-limitations
+
+!template field key=dependencies-and-limitations
+List the dependencies or limitations that may affect the design of the system. Examples include
+budget and schedule constraints, staffing issues, availability of components, etc. Describe how each
+factor will affect the functional design.
+
+
+## References id=references
+
+!bibtex bibliography title=None
+
+
+## Definitions and Acronyms id=definitions-and-acronyms
+
+!template field key=definitions-and-acronyms required=False
+This section defines, or provides the definition of, all terms and acronyms required to properly
+understand this specification.
+
+
+### Definitions id=definitions
+
+!template! field key=definitions
+Add or revise spcific defintions.
+
+- +Baseline+: A specification or product (e.g., project plan, maintenance and operations (M&O) plan,
+  requirements, or design) that has been formally reviewed and agreed upon, that thereafter serves as
+  the basis for use and further development, and that can be changed only by using an approved change
+  control process [!citep](ASME-NQA-1-2008).
+
+- +Validation+: Confirmation, through the provision of objective evidence (e.g., acceptance test),
+  that the requirements for a specific intended use or application have been fulfilled
+  [!citep](ISO-systems-software).
+
+- +Verification+: (1) The process of: evaluating a system or component to determine whether the
+  products of a given development phase satisfy the conditions imposed at the start of that
+  phase. (2) Formal proof of program correctness (e.g., requirements, design, implementation reviews,
+  system tests) [!citep](ISO-systems-software).
+
+!template-end!
+
+
+### Acronyms id=acronyms
+
+!template! field key=acronyms
+Define specific acronyms.
+
+| Acronym | Description |
+| - | - |
+| ASME | American Society of Mechanical Engineers |
+| DOE | Department of Energy |
+
+!template-end!
+
+
+## Design Stakeholders and Concerns id=design-stakeholders-and-concerns
+
+!template field key=design-stakeholders-and-concerns required=False
+
+### Design Stakeholders id=design-stakeholders
+
+!template field key=design-stakeholders
+Identify the stakeholders of the IT system design.
+
+### Stakeholder Design Concerns id=stakeholder-design-concerns
+
+!template field key=stakeholder-design-concerns
+Identify and address each design concern including measures to mitigate consequences of
+problems. Reference risk management plan as appropriate.
+
+## System Design id=system-design
+
+!template! field key=system-design
+For this section, detail should be commensurate with the level of risk and demonstrate the
+fulfillment of requirements providing guidance for implementation.
+
+For custom developed software (see def. in LWP-13620) activities, the following is required:
+
+The documented design shall include, as applicable:
+
+- Numerical methods
+- Mathematical models
+- Physical models
+- Control flow
+- Control logic
+- Data flow
+- Process flow
+- Data structures
+- Process structures
+- Applicable relationships between data structures and process structures
+
+In addition, for safety software consider:
+
+Principles of simplicity, decoupling, and isolation to eliminate hazards. Safety features should be
+separate from nonsafety modules minimizing the impact of failure of one module on another.
+Techniques, such as failure modes and effects analysis, fault-tree modeling, event-tree modeling,
+cause-consequence diagrams, hazard and operability analysis, and interface analysis.
+
+!template-end!
+
+
+### System Structure id=system-structure
+
+!template field key=system-structure
+Decompose the system into design entities or objects that will interact with and transform data to
+perform the required system objectives. Assign a unique name to each design entity, and group
+entities by type (e.g., class, object, procedure). Describe how each design entity satisfies system
+requirements. In user terminology, specify the inputs, outputs, and transformation rules for each
+design entity. Depict how design entities depend on one another.
+
+### Data Design and Control id=data-design-and-control
+
+!template! field key=data-design-and-control
+Using a data modeling technique identify specific data elements and logical data groupings that are
+stored and processed by the design entities in Section 5.1, "System Structure." Outline data
+dependencies, relationships, and integrity rules in a data dictionary. Specify the format and
+attributes of all data elements or data groupings. Contact the laboratory Enterprise Architect for
+assistance with data dictionary development and data management standards. See GDE-4, Data Management
+Guide, for additional guidance.
+
+Develop a logical model of data flow through the system by depicting how design elements transform
+input data into outputs.
+!template-end!
+
+
+### Human-Machine Interface Design id=human-machine-interface-design
+
+!template field key=human-machine-interface-design
+Describe the user interface and the operating environment, including the menu hierarchy, data entry
+screens, display screens, online help, and system messages. Specify where in this environment the
+necessary inputs are made, and list the methods of data outputs (e.g., printer, screen, file). Note
+any design standards to be applied. If project human-machine interface design standards have been
+developed, discuss them in this section.
+
+
+### System Design Interface id=system-design-interface
+
+!template field key=system-design-interface
+Specify how the product will interface with other systems. For each interface, describe the inputs
+and outputs for the interacting systems. Explain how data is formatted for transmission and validated
+upon arrival. Note the frequency of data exchange.
+
+### Security Structure id=security-structure
+
+!template field key=security-structure
+Describe the software functionality supporting the security architecture of the system design. This
+would list features such as user privilege restrictions, logging of auditable events, and the
+encryption technology for securing data in storage or transmission.
+
+## Requirements Cross-Reference id=requirements-cross-reference
+
+!template field key=requirements-cross-reference
+For each numbered system requirement, identify the section(s) of this document that specify how the
+functional design will meet the requirement. A separate requirements traceability matrix may be
+referenced for this section (see TEM-214).

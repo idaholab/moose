@@ -1,0 +1,78 @@
+.moose-table-of-contents{
+    text-align:center;
+}
+
+.moose-source-item{
+    font-weight:400;
+    margin-top:0;
+    margin-bottom: 8px;
+}
+
+h1.moose-a-to-z,
+h2.moose-a-to-z,
+h3.moose-a-to-z,
+h4.moose-a-to-z,
+h5.moose-a-to-z
+h6.moose-a-to-z{
+    /*color: var(--inl-blue);*/
+    font-size: 200%;
+    font-weight: 600;
+}
+
+ul.moose-a-to-z{
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.moose-a-to-z-button{
+    width:2em;
+    padding-right: 8px;
+    padding-left: 8px;
+    margin-right: 2px;
+    margin-top: 2px;
+}
+
+ul.moose-a-to-z a{
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* MOOSE Pagination (Next/Previous Buttons) Formatting */
+.moose-content-pagination{
+    display: inline-block;
+    width: 100%;
+}
+.moose-content-next{
+    float: right;
+}
+.moose-content-previous.btn, .moose-content-next.btn{
+    text-transform: none;
+}
+
+/* MOOSE Outline Counters
+http://jsfiddle.net/PTbGc/
+*/
+div.moose-outline ol {
+    counter-reset: item;
+    padding-left: 10px;
+}
+div.moose-outline li {
+    display: block
+}
+div.moose-outline li:before {
+    content: counters(item, ".") ".";
+    counter-increment: item;
+    padding-right: 12px;
+}
+div.moose-outline li.moose-outline-no-prefix:before {
+    content: "";
+    padding-right: 0px;
+}
+div.moose-outline li.moose-outline-no-count:before,
+li.moose-outline-no-count li:before {
+    content: none;
+    counter-increment: none;
+    padding-right: 0px;
+}
