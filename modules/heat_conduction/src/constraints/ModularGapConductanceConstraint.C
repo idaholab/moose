@@ -219,12 +219,12 @@ ModularGapConductanceConstraint::computeGapLength() const
 
   if (_gap_geometry_type == GapGeometry::CYLINDER)
   {
-    const auto & denominator = _radius * std::log(_r2 / _r1);
+    const auto denominator = _radius * std::log(_r2 / _r1);
     return std::min(denominator, _max_gap);
   }
   else if (_gap_geometry_type == GapGeometry::SPHERE)
   {
-    const auto & denominator = _radius * _radius * ((1.0 / _r1) - (1.0 / _r2));
+    const auto denominator = _radius * _radius * ((1.0 / _r1) - (1.0 / _r2));
     return std::min(denominator, _max_gap);
   }
   else
