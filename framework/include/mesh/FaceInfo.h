@@ -238,6 +238,9 @@ private:
   const Point _neighbor_centroid;
   const Real _neighbor_volume;
 
+  /// Geometric weighting factor for face value interpolation
+  const Real _gc;
+
   /// the distance vector between neighbor and element centroids
   const RealVectorValue _d_cf;
 
@@ -246,9 +249,6 @@ private:
 
   /// The unit normal vector pointing from element center C to element center F
   const RealVectorValue _e_cf;
-
-  /// Geometric weighting factor for face value interpolation
-  const Real _gc;
 
   /// The vector to the intersection of d_{CF} and the face.
   RealVectorValue _r_int;

@@ -1,0 +1,9 @@
+[Tests]
+  issues = '#16239'
+  design = 'navier_stokes/insfv.md'
+  [skewness-error]
+    type = RunException
+    input = 2d-rc.i
+    expect_err = "INSFVelocityVariable does not support skewness-correction at this point!"
+  []
+[]
