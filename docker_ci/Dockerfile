@@ -108,7 +108,7 @@ ENV PETSC_DIR=/usr/local
 #-----------------------------------------------------------------------------#
 ARG LIBMESH_REV
 ARG LIBMESH_OPTIONS
-ARG LIBMESH_METHODS=opt dbg
+ARG LIBMESH_METHODS="opt dbg"
 ENV LIBMESH_DIR=/usr/local \
 libmesh_CPPFLAGS="-D LIBMESH_HAVE_XDR"
 
