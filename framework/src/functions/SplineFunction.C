@@ -56,5 +56,5 @@ SplineFunction::derivative(const Point & p) const
 Real
 SplineFunction::secondDerivative(const Point & p) const
 {
-  return _ipol.sample2ndDerivative(p(_axis));
+  return _ipol.sample2ndDerivative(_has_axis ? p(_axis) : t);
 }
