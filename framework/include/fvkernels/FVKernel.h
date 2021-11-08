@@ -48,6 +48,9 @@ class FVKernel : public MooseObject,
 {
 public:
   static InputParameters validParams();
+  static void setRMParams(const InputParameters & obj_params,
+                          InputParameters & rm_params,
+                          unsigned short ghost_layers);
   FVKernel(const InputParameters & params);
 
   const SubProblem & subProblem() const { return _subproblem; }
