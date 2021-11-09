@@ -25,7 +25,8 @@ FVDiffusion::validParams()
 FVDiffusion::FVDiffusion(const InputParameters & params)
   : FVFluxKernel(params), _coeff(getFunctor<ADReal>("coeff"))
 {
-  if (_var.faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage)
+  if ((_var.faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage) &&
+      (_tid == 0))
   {
     auto & factory = _app.getFactory();
 
