@@ -99,8 +99,8 @@ pipeline {
                 try {
                     // Send message build was successful
                     slackSend color: 'good', message: "Successful build of ${SLACK_SFX}"
-                } catch (Exception e) {
-                    echo "${SLACK_ERR}" + e.toString() // Slack not required to build
+                } catch (java.lang.NoSuchMethodError ex) {
+                    echo "${SLACK_ERR}" // Slack not required to build
                 }
             }
         }
@@ -115,8 +115,8 @@ pipeline {
 
                     // Send message build failed
                     slackSend color: 'danger', message: "Failed to build ${SLACK_SFX}"
-                } catch (Exception e) {
-                    echo "${SLACK_ERR}" + e.toString() // Slack not required to build
+                } catch (java.lang.NoSuchMethodError ex) {
+                    echo "${SLACK_ERR}" // Slack not required to build
                 }
             }
         }
