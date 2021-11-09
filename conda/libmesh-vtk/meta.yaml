@@ -1,9 +1,9 @@
 # Do not use jinja templating (A physical change to this file is required to trigger a build)
-{% set build = 8 %}
+{% set build = 0 %}
 {% set strbuild = "build_" + build|string %}
-{% set vtk_version = "6.3.0" %}
-{% set friendly_version = "6.3" %}
-{% set sha256 = "92a493354c5fa66bea73b5fc014154af5d9f3f6cee8d20a826f4cd5d4b0e8a5e" %}
+{% set vtk_version = "9.1.0" %}
+{% set friendly_version = "9.1" %}
+{% set sha256 = "8fed42f4f8f1eb8083107b68eaa9ad71da07110161a3116ad807f43e5ca5ce96" %}
 
 package:
   name: moose-libmesh-vtk

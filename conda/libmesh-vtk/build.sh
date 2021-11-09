@@ -19,18 +19,23 @@ cmake .. -G "Ninja" \
     -DCMAKE_PREFIX_PATH:PATH=${VTK_PREFIX} \
     -DCMAKE_INSTALL_PREFIX:PATH=${VTK_PREFIX} \
     -DCMAKE_INSTALL_RPATH:PATH=${VTK_PREFIX}/lib \
-    -DBUILD_DOCUMENTATION:BOOL=OFF \
-    -DBUILD_TESTING:BOOL=OFF \
-    -DBUILD_EXAMPLES:BOOL=OFF \
+    -DVTK_BUILD_DOCUMENTATION:BOOL=OFF \
+    -DVTK_BUILD_TESTING:BOOL=OFF \
+    -DVTK_BUILD_EXAMPLES:BOOL=OFF \
     -DBUILD_SHARED_LIBS:BOOL=ON \
-    -DVTK_Group_MPI:BOOL=ON \
-    -DVTK_Group_Rendering:BOOL=OFF \
-    -DVTK_Group_Qt:BOOL=OFF \
-    -DVTK_Group_Views:BOOL=OFF \
-    -DVTK_Group_Web:BOOL=OFF \
+    -DVTK_USE_MPI:BOOL=ON \
+    -DVTK_GROUP_ENABLE_Rendering:STRING=DONT_WANT \
+    -DVTK_GROUP_ENABLE_Qt::STRING=NO \
+    -DVTK_GROUP_ENABLE_Views:STRING=NO \
+    -DVTK_GROUP_ENABLE_Web:STRING=NO \
     -DCMAKE_OSX_SYSROOT=${CONDA_BUILD_SYSROOT}
 
 ninja install -v
+
+# VTK 9.1 now places libs in lib64 when installed on linux, linking to the "expected" location of lib
+if [[ $(uname) == Linux ]]; then
+    ln -s ${VTK_PREFIX}/lib64 ${VTK_PREFIX}/lib
+fi
 
 # Set LIBMESH_DIR environment variable for those that need it
 mkdir -p "${PREFIX}/etc/conda/activate.d" "${PREFIX}/etc/conda/deactivate.d"
