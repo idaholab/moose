@@ -20,15 +20,17 @@
  *   Eq.(67) in the reference
  */
 
-class TWSDoubleObstacle : public ADKernelValue
+class TWSDoubleObstacle : public KernelValue
 {
 public:
   static InputParameters validParams();
   TWSDoubleObstacle(const InputParameters & parameters);
 
 protected:
-  virtual ADReal precomputeQpResidual() override;
-  const ADMaterialProperty<Real> & _sigma;
-  const ADMaterialProperty<Real> & _eta;
-  const ADMaterialProperty<Real> & _delta_g;
+  virtual Real precomputeQpResidual() override;
+  virtual Real precomputeQpJacobian() override;
+
+  const MaterialProperty<Real> & _sigma;
+  const MaterialProperty<Real> & _eta;
+  const MaterialProperty<Real> & _delta_g;
 };

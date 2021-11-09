@@ -99,7 +99,7 @@
 
 [Materials]
   [./sim_params]
-    type = ADGenericConstantMaterial
+    type = GenericConstantMaterial
     prop_names  = 'dg  mu sigma eta pi'
     prop_values = '1.0 1.0 1.0 6.0 3.14159265'
   [../]
