@@ -214,8 +214,7 @@ protected:
    * Defines general quad elements for the polygon.
    * @param mesh input mesh to create the elements onto
    * @param num_sectors_per_side number of azimuthal intervals
-   * @param subdomain_rings numbers of radial intervals of all involbuildPeripheralMeshsubdomain
-   * layers
+   * @param subdomain_rings numbers of radial intervals of all involved subdomain layers
    * @param side_index index of the polygon side
    * @param azimuthal_tangent vector of tangent values of the azimuthal angles as reference for
    * adaptive boundary matching
