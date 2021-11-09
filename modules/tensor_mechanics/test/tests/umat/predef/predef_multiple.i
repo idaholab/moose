@@ -135,7 +135,6 @@
   petsc_options = '-snes_ksp_ew'
   petsc_options_iname = '-ksp_gmres_restart'
   petsc_options_value = '101'
-
   line_search = 'none'
 
   l_max_its = 100
@@ -143,9 +142,9 @@
   nl_rel_tol = 1e-12
   nl_abs_tol = 1e-10
   l_tol = 1e-9
+
   start_time = 0.0
   end_time = 30
-
   dt = 1.0
 []
 

@@ -154,7 +154,6 @@
     block = '1 2'
     density = 1.0
   []
-
 []
 
 [Executioner]
