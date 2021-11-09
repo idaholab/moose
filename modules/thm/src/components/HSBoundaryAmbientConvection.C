@@ -15,6 +15,8 @@ HSBoundaryAmbientConvection::validParams()
   params.addParam<PostprocessorName>("scale_pp",
                                      "Post-processor by which to scale boundary condition");
 
+  params.addClassDescription("Applies a convective boundary condition to a heat structure");
+
   return params;
 }
 

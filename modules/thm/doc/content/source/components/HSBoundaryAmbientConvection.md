@@ -1,18 +1,28 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # HSBoundaryAmbientConvection
 
-!alert construction title=Undocumented Class
-The HSBoundaryAmbientConvection has not been documented. The content contained on this page includes the
-typical automatic documentation associated with a MooseObject; however, what is contained is
-ultimately determined by what is necessary to make the documentation clear for users.
+This component applies convective heat transfer boundary conditions to a heat
+structure boundary.
 
-!syntax description /Components/HSBoundaryAmbientConvection
+## Usage
+
+The parameter [!param](/Components/HSBoundaryAmbientConvection/T_ambient) gives the ambient temperature $T_\infty$, and
+[!param](/Components/HSBoundaryAmbientConvection/htc_ambient) gives the heat transfer coefficient $\mathcal{H}$.
 
 !syntax parameters /Components/HSBoundaryAmbientConvection
+
+## Formulation
+
+The boundary heat flux $q_b$ is computed as
+
+!equation
+q_b = \mathcal{H} (T - T_\infty) \eqc
+
+where
+
+- $\mathcal{H}$ is the heat transfer coefficient,
+- $T$ is the temperature of the surface, and
+- $T_\infty$ is the ambient temperature.
 
 !syntax inputs /Components/HSBoundaryAmbientConvection
 
 !syntax children /Components/HSBoundaryAmbientConvection
-
-!bibtex bibliography
