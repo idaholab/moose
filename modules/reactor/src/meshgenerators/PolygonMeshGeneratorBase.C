@@ -272,30 +272,23 @@ PolygonMeshGeneratorBase::ringNodes(ReplicatedMesh & mesh,
                                     const Real corner_to_corner,
                                     const std::vector<Real> azimuthal_tangent) const
 {
-  unsigned int angle_number =
+  const unsigned int angle_number =
       azimuthal_tangent.size() == 0 ? num_sectors_per_side : (azimuthal_tangent.size() - 1);
+
   // Add nodes in pins regions
-  std::vector<Real> pin_radius_interval_length(rings.size());
-  Real bin_radial_distance;
   for (unsigned int l = 0; l < rings.size(); l++)
   {
-    if (l == 0)
-      pin_radius_interval_length[l] =
-          ring_radii[l] / rings[l]; // the pin radius interval for each ring_radii/subdomain
-    else
-      pin_radius_interval_length[l] =
-          (ring_radii[l] - ring_radii[l - 1]) /
-          rings[l]; // the pin radius interval for each ring_radii/subdomain
+    // the pin radius interval for each ring_radii/subdomain
+    const Real pin_radius_interval_length =
+        l == 0 ? ring_radii[l] / rings[l] : (ring_radii[l] - ring_radii[l - 1]) / rings[l];
 
     // add rings in each pin subdomain
     for (unsigned int k = 0; k < rings[l]; k++)
     {
-      if (l == 0)
-        bin_radial_distance =
-            ((k + 1) * pin_radius_interval_length[l]); // this is from the cell/pin center to
-                                                       // the first circle
-      else
-        bin_radial_distance = (ring_radii[l - 1] + (k + 1) * pin_radius_interval_length[l]);
+      const Real bin_radial_distance =
+          l == 0 ? ((k + 1) * pin_radius_interval_length) // this is from the cell/pin center to
+                                                          // the first circle
+                 : (ring_radii[l - 1] + (k + 1) * pin_radius_interval_length);
       const Real pin_corner_p_x = corner_p[0][0] * bin_radial_distance / (0.5 * corner_to_corner);
       const Real pin_corner_p_y = corner_p[0][1] * bin_radial_distance / (0.5 * corner_to_corner);
 
