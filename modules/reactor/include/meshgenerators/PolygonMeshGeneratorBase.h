@@ -317,7 +317,7 @@ protected:
    * @param d_positions_outer key inremental positions of the outer side of the peripheral region
    * @param extra_dist_in extra distance applied to the inner side
    * @param extra_dist_out extra distance applied to the outer side
-   * @param pitch pitch size of the involbuildPeripheralMeshhexagon mesh
+   * @param pitch pitch size of the involved hexagon mesh
    * @param radial_index radial layer index
    * @return n/a
    */
