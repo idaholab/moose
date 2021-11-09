@@ -23,20 +23,17 @@ if [[ $HOST == arm64-apple-darwin20.0.0 ]]; then
     CXXFLAGS="${CXXFLAGS} -mcpu=apple-a12"
     FFLAGS="${FFLAGS} -march=armv8.3-a"
     FCFLAGS="${FCFLAGS} -march=armv8.3-a"
-    shared=0
 elif [[ $(uname) == Darwin ]]; then
     CFLAGS="${CFLAGS} -march=core2 -mtune=haswell"
     CXXFLAGS="${CXXFLAGS} -march=core2 -mtune=haswell"
     FFLAGS="${FFLAGS} -I$PREFIX/include"
     FCFLAGS="${FCFLAGS} -I$PREFIX/include"
     LDFLAGS="${LDFLAGS} -Wl,-headerpad-max-install-names"
-    shared=1
 else
     CFLAGS="${CFLAGS} -march=nocona -mtune=haswell"
     CXXFLAGS="${CXXFLAGS} -march=nocona -mtune=haswell"
     FFLAGS="${FFLAGS} -I$PREFIX/include"
     FCFLAGS="${FCFLAGS} -I$PREFIX/include"
-    shared=1
 fi
 
 source $PETSC_DIR/configure_petsc.sh
@@ -47,7 +44,6 @@ configure_petsc \
     --FOPTFLAGS=-O3 \
     --with-x=0 \
     --with-ssl=0 \
-    --with-shared-libraries=$shared \
     CC="$CC" \
     CXX="$CXX" \
     FC="$FC" \
