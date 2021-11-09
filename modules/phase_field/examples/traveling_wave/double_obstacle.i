@@ -1,4 +1,4 @@
-# example of traveling wave solution for double obstacle poetential
+# example of a traveling wave solution for the double obstacle potetential
 # governing equation:
 #   tao * phi_dot = epsilon * laplace(phi) + gamma * (phi - 0.5) + sqrt(phi * (1 - phi)) * m;
 # coefficients:
