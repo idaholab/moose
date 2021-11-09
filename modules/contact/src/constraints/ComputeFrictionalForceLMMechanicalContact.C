@@ -13,12 +13,6 @@
 
 #include "DualRealOps.h"
 
-#include "metaphysicl/dualsemidynamicsparsenumberarray.h"
-#include "metaphysicl/parallel_dualnumber.h"
-#include "metaphysicl/parallel_dynamic_std_array_wrapper.h"
-#include "metaphysicl/parallel_semidynamicsparsenumberarray.h"
-#include "timpi/parallel_sync.h"
-
 registerMooseObject("ContactApp", ComputeFrictionalForceLMMechanicalContact);
 
 InputParameters
@@ -113,59 +107,20 @@ ComputeFrictionalForceLMMechanicalContact::residualSetup()
 }
 
 void
-ComputeFrictionalForceLMMechanicalContact::communicateVelocities()
+ComputeFrictionalForceLMMechanicalContact::jacobianSetup()
 {
-#ifdef MOOSE_SPARSE_AD
-  // We may have weighted gap information that should go to other processes that own the dofs
-  using Datum = std::pair<dof_id_type, ADReal>;
-  std::unordered_map<processor_id_type, std::vector<Datum>> push_data;
-
-  for (auto & pr : _dof_to_weighted_tangential_velocity)
-  {
-    const auto * const dof_object = pr.first;
-    const auto proc_id = dof_object->processor_id();
-    if (proc_id == this->processor_id())
-      continue;
-
-    push_data[proc_id].push_back(std::make_pair(dof_object->id(), std::move(pr.second)));
-  }
-
-  const auto & lm_mesh = _mesh.getMesh();
-
-  auto action_functor = [this, &lm_mesh](const processor_id_type libmesh_dbg_var(pid),
-                                         const std::vector<Datum> & sent_data) {
-    mooseAssert(pid != this->processor_id(), "We do not send messages to ourself here");
-    for (auto & pr : sent_data)
-    {
-      const auto dof_id = pr.first;
-      const auto * const dof_object =
-          _nodal ? static_cast<const DofObject *>(lm_mesh.node_ptr(dof_id))
-                 : static_cast<const DofObject *>(lm_mesh.elem_ptr(dof_id));
-      mooseAssert(dof_object, "This should be non-null");
-      _dof_to_weighted_tangential_velocity[dof_object] += std::move(pr.second);
-    }
-  };
-  TIMPI::push_parallel_vector_data(_communicator, push_data, action_functor);
-#endif
+  residualSetup();
 }
 
 void
 ComputeFrictionalForceLMMechanicalContact::post()
 {
-  communicateGaps();
-  communicateVelocities();
-
   // Enforce frictional complementarity constraints
   for (const auto & pr : _dof_to_weighted_tangential_velocity)
   {
     const DofObject * const dof = pr.first;
 
-    if (dof->processor_id() != this->processor_id())
-      continue;
-
-    auto & weighted_gap_pr = _dof_to_weighted_gap[dof];
-    _weighted_gap_ptr = &weighted_gap_pr.first;
-    _normalization_ptr = &weighted_gap_pr.second;
+    _weighted_gap_ptr = &_dof_to_weighted_gap[dof].first;
     _tangential_vel_ptr = &pr.second;
 
     enforceConstraintOnDof(dof);
@@ -176,18 +131,14 @@ void
 ComputeFrictionalForceLMMechanicalContact::incorrectEdgeDroppingPost(
     const std::unordered_set<const Node *> & inactive_lm_nodes)
 {
-  communicateGaps();
-  communicateVelocities();
-
   // Enforce frictional complementarity constraints
   for (const auto & pr : _dof_to_weighted_tangential_velocity)
   {
-    const DofObject * const dof = pr.first;
-
     // If node inactive, skip
-    if ((inactive_lm_nodes.find(static_cast<const Node *>(dof)) != inactive_lm_nodes.end()) ||
-        (dof->processor_id() != this->processor_id()))
+    if (inactive_lm_nodes.find(static_cast<const Node *>(pr.first)) != inactive_lm_nodes.end())
       continue;
+
+    const DofObject * const dof = pr.first;
 
     _weighted_gap_ptr = &_dof_to_weighted_gap[dof].first;
     _tangential_vel_ptr = &pr.second;

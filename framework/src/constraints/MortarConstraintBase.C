@@ -187,24 +187,18 @@ MortarConstraintBase::zeroInactiveLMDofs(const std::unordered_set<const Node *> 
   if (!_var)
     return;
 
-  const auto sn = _sys.number();
-  const auto vn = _var->number();
-
   if (_subproblem.currentlyComputingJacobian())
-    prepareMatrixTagLower(_assembly, vn, vn, Moose::ConstraintJacobianType::LowerLower);
+    prepareMatrixTagLower(
+        _assembly, _var->number(), _var->number(), Moose::ConstraintJacobianType::LowerLower);
   else
-    prepareVectorTagLower(_assembly, vn);
+    prepareVectorTagLower(_assembly, _var->number());
 
   // If variable is nodal, zero DoFs based on inactive LM nodes
   if (_var->isNodal())
   {
     for (const auto node : inactive_lm_nodes)
     {
-      // Allow mixed Lagrange orders between primal and LM
-      if (!node->n_comp(sn, vn))
-        continue;
-
-      const auto dof_index = node->dof_number(sn, vn, 0);
+      const auto dof_index = node->dof_number(_sys.number(), _var->number(), 0);
       if (_subproblem.currentlyComputingJacobian())
         _assembly.cacheJacobian(dof_index, dof_index, 1., _matrix_tags);
       else
@@ -219,11 +213,11 @@ MortarConstraintBase::zeroInactiveLMDofs(const std::unordered_set<const Node *> 
   {
     for (const auto el : inactive_lm_elems)
     {
-      const auto n_comp = el->n_comp(sn, vn);
+      const auto n_comp = el->n_comp(_sys.number(), _var->number());
 
       for (const auto comp : make_range(n_comp))
       {
-        const auto dof_index = el->dof_number(sn, vn, comp);
+        const auto dof_index = el->dof_number(_sys.number(), _var->number(), comp);
         // Insert to system
         if (_subproblem.currentlyComputingJacobian())
           _assembly.cacheJacobian(dof_index, dof_index, 1., _matrix_tags);

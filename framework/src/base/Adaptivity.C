@@ -25,7 +25,6 @@
 #include "libmesh/parallel.h"
 #include "libmesh/error_vector.h"
 #include "libmesh/distributed_mesh.h"
-#include "libmesh/mesh_tools.h"
 
 #ifdef LIBMESH_ENABLE_AMR
 
@@ -222,76 +221,21 @@ Adaptivity::adaptMesh(std::string marker_name /*=std::string()*/)
     _mesh_refinement->make_flags_parallel_consistent();
 
   // Perform refinement and coarsening
-  auto & lm_mesh = _mesh_refinement->get_mesh();
-  const auto old_removal_flag = lm_mesh.allow_remote_element_removal();
-  if (_displaced_problem)
-    // If we have both reference and displaced meshes, then we have to be very careful to keep them
-    // in sync. We have proxy relationship managers that rely on matching ghosted elements via
-    // unique id, so given that, we must make sure that we do not try to delete elements at the
-    // stage that only one mesh has been refined. We must wait until both meshes have been refined
-    lm_mesh.allow_remote_element_removal(false);
   mesh_changed = _mesh_refinement->refine_and_coarsen_elements();
 
-  if (_displaced_problem)
+  if (_displaced_problem && mesh_changed)
   {
-    if (mesh_changed)
-    {
-      // If markers are added to only local elements,
-      // we sync them here.
-      if (distributed_adaptivity)
-        _displaced_mesh_refinement->make_flags_parallel_consistent();
-
-      auto & disp_lm_mesh = _displaced_mesh_refinement->get_mesh();
-      mooseAssert(disp_lm_mesh.allow_remote_element_removal() == old_removal_flag,
-                  "Reference and displaced meshes out of sync.");
-      disp_lm_mesh.allow_remote_element_removal(false);
-
+    // If markers are added to only local elements,
+    // we sync them here.
+    if (distributed_adaptivity)
+      _displaced_mesh_refinement->make_flags_parallel_consistent();
 #ifndef NDEBUG
-      bool displaced_mesh_changed =
+    bool displaced_mesh_changed =
 #endif
-          _displaced_mesh_refinement->refine_and_coarsen_elements();
+        _displaced_mesh_refinement->refine_and_coarsen_elements();
 
-      // Since the undisplaced mesh changed, the displaced mesh better have changed!
-      mooseAssert(displaced_mesh_changed, "Undisplaced mesh changed, but displaced mesh did not!");
-
-      //
-      // During the prepare_for_use that occurred during each mesh refinement's
-      // refine_and_coarsen_element calls, we did not allow remote element removal
-      // because of sync concerns. Now that we've refined both meshes, we can march forward
-      //
-
-      lm_mesh.allow_remote_element_removal(old_removal_flag);
-      disp_lm_mesh.allow_remote_element_removal(old_removal_flag);
-      if (old_removal_flag && !lm_mesh.is_replicated())
-      {
-        lm_mesh.delete_remote_elements();
-        disp_lm_mesh.delete_remote_elements();
-
-        auto finish_processing_mesh = [](MeshBase & mesh) {
-          //
-          // This code comes from the latter half of MeshBase::prepare_for_use
-          //
-          mesh.get_boundary_info().regenerate_id_sets();
-
-          if (mesh.allow_renumbering())
-            mesh.renumber_nodes_and_elements();
-
-          mooseAssert(mesh.is_prepared(),
-                      "Did any of these processing calls register the mesh as unprepared?");
-
-#if defined(DEBUG) && defined(LIBMESH_ENABLE_UNIQUE_ID)
-          MeshTools::libmesh_assert_valid_boundary_ids(mesh);
-          MeshTools::libmesh_assert_valid_unique_ids(mesh);
-#endif
-        };
-
-        finish_processing_mesh(lm_mesh);
-        finish_processing_mesh(disp_lm_mesh);
-      }
-    }
-    else
-      // We toggled this to false earlier so we must make sure to toggle it back
-      lm_mesh.allow_remote_element_removal(old_removal_flag);
+    // Since the undisplaced mesh changed, the displaced mesh better have changed!
+    mooseAssert(displaced_mesh_changed, "Undisplaced mesh changed, but displaced mesh did not!");
   }
 
   if (mesh_changed && _print_mesh_changed)
