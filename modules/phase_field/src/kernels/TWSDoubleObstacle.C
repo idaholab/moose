@@ -16,12 +16,9 @@ TWSDoubleObstacle::validParams()
 
 TWSDoubleObstacle::TWSDoubleObstacle(const InputParameters & parameters)
   : ADKernelValue(parameters),
-    _sigma_name(getParam<std::string>("sigma")),
-    _sigma(getADMaterialProperty<Real>(_sigma_name)),
-    _eta_name(getParam<std::string>("eta")),
-    _eta(getADMaterialProperty<Real>(_eta_name)),
-    _delta_g_name(getParam<std::string>("delta_g")),
-    _delta_g(getADMaterialProperty<Real>(_delta_g_name))
+    _sigma(getADMaterialProperty<Real>("sigma")),
+    _eta(getADMaterialProperty<Real>("eta")),
+    _delta_g(getADMaterialProperty<Real>("delta_g"))
 {
 }
 
