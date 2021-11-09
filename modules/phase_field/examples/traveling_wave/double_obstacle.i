@@ -103,12 +103,12 @@
     prop_names  = 'dg  mu sigma eta pi'
     prop_values = '1.0 1.0 1.0 6.0 3.14159265'
   [../]
-  [./tao]
-    type = ADParsedMaterial 
+  [tao]
+    type = ParsedMaterial 
     f_name = tao
     function = '8.0 * eta / mu / pi / pi'
     material_property_names = 'eta mu pi'
-  [../]
+  []
   [./epsilon]
     type = ADParsedMaterial 
     f_name = epsilon
