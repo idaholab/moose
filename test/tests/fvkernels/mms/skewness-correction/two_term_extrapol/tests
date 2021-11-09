@@ -1,15 +1,6 @@
 [Tests]
   design = 'fv_design.md'
   issues = '#16239'
-  [average]
-    type = PythonUnitTest
-    input = 'test.py'
-    test_case = TestAverageStencil
-    requirement = 'The system shall display first order convergence when using an average-based face-interpolation together with extrapolated BCs.'
-    method = '!dbg'
-    ad_indexing_type = 'global'
-    required_python_packages = 'pandas matplotlib'
-  []
   [skewcorrected]
     type = PythonUnitTest
     input = 'test.py'

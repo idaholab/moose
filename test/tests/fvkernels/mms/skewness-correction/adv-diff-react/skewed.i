@@ -14,9 +14,6 @@ diff=1.1
 
 [Variables]
   [v]
-    family = MONOMIAL
-    order = CONSTANT
-    fv = true
     initial_condition = 1
     type = MooseVariableFVReal
     face_interp_method = 'skewness-corrected'
