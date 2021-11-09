@@ -69,8 +69,9 @@ public:
   const Point & faceCentroid() const { return _face_centroid; }
 
   /// Returns the coordinates of the approximate face centroid
+  /// (intersection of the face and the line between the cell centroids)
   /// in case of skewed meshes.
-  Point rInt() const { return _r_int; }
+  Point rIntersection() const { return _r_intersection; }
 
   ///@{
   /// Returns the elem and neighbor elements adjacent to the face.
@@ -251,7 +252,7 @@ private:
   const RealVectorValue _e_cf;
 
   /// The vector to the intersection of d_{CF} and the face.
-  RealVectorValue _r_int;
+  RealVectorValue _r_intersection;
 
   /// Geometric weighting factor for face value interpolation in case of skewed
   /// cell-connections

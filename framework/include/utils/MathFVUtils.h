@@ -138,7 +138,7 @@ skewCorrectedlinearInterpolation(const T & value1,
   const auto coeffs = interpCoeffs(InterpMethod::SkewCorrectedAverage, fi, one_is_elem);
 
   auto value = (coeffs.first * value1 + coeffs.second * value2) +
-               face_gradient * (fi.faceCentroid() - fi.rInt());
+               face_gradient * (fi.faceCentroid() - fi.rIntersection());
   return value;
 }
 
