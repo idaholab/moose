@@ -8,15 +8,9 @@ diff=1.1
   [../]
 []
 
-[Problem]
-  kernel_coverage_check = off
-[]
 
 [Variables]
   [./v]
-    family = MONOMIAL
-    order = CONSTANT
-    fv = true
     initial_condition = 1
     type = MooseVariableFVReal
     face_interp_method = 'skewness-corrected'
@@ -48,16 +42,16 @@ diff=1.1
 []
 
 [Functions]
-[exact]
-  type = ParsedFunction
-  value = 'sin(x)*cos(y)'
-[]
-[forcing]
-  type = ParsedFunction
-  value = '2*diff*sin(x)*cos(y)'
-  vars = 'a diff'
-  vals = '${a} ${diff}'
-[]
+  [exact]
+    type = ParsedFunction
+    value = 'sin(x)*cos(y)'
+  []
+  [forcing]
+    type = ParsedFunction
+    value = '2*diff*sin(x)*cos(y)'
+    vars = 'a diff'
+    vals = '${a} ${diff}'
+  []
 []
 
 [Executioner]
@@ -78,11 +72,9 @@ diff=1.1
     variable = v
     function = exact
     outputs = 'console csv'
-    execute_on = 'timestep_end'
   [../]
   [h]
     type = AverageElementSize
     outputs = 'console csv'
-    execute_on = 'timestep_end'
   []
 []

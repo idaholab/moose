@@ -14,10 +14,6 @@ a=1
 
 [Variables]
   [./v]
-    family = MONOMIAL
-    order = CONSTANT
-    fv = true
-    two_term_boundary_expansion = true
     type = MooseVariableFVReal
     face_interp_method = 'skewness-corrected'
     cache_face_gradients = false

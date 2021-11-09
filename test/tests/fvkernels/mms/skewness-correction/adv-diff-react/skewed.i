@@ -78,7 +78,6 @@ diff=1.1
 []
 
 [Outputs]
-  exodus = true
   csv = true
 []
 
@@ -88,11 +87,9 @@ diff=1.1
     variable = v
     function = exact
     outputs = 'console csv'
-    execute_on = 'timestep_end'
   [../]
   [h]
     type = AverageElementSize
     outputs = 'console csv'
-    execute_on = 'timestep_end'
   []
 []
