@@ -3,7 +3,7 @@
 #include "ADKernelValue.h"
 
 /**
- * TWSDoubleObstacle is the traveling wave kenel for double obstacle potential
+ * TWSDoubleObstacle is the traveling wave kernel for double obstacle potentials
  * governing equation:
  *   tao * phi_dot = epsilon * laplace(phi) + gamma * (phi - 0.5) + sqrt(phi * (1 - phi)) * m;
  * coefficients:
