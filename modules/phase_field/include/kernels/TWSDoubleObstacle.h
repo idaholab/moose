@@ -28,12 +28,7 @@ public:
 
 protected:
   virtual ADReal precomputeQpResidual() override;
-  const std::string & _sigma_name;
   const ADMaterialProperty<Real> & _sigma;
-
-  const std::string & _eta_name;
   const ADMaterialProperty<Real> & _eta;
-
-  const std::string & _delta_g_name;
   const ADMaterialProperty<Real> & _delta_g;
 };
