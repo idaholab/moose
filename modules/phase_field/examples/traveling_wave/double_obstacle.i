@@ -1,9 +1,9 @@
 # example of a traveling wave solution for the double obstacle potential
 # governing equation:
-#   tao * phi_dot = epsilon * laplace(phi) + gamma * (phi - 0.5) + sqrt(phi * (1 - phi)) * m;
+#   tau * phi_dot = epsilon * laplace(phi) + gamma * (phi - 0.5) + sqrt(phi * (1 - phi)) * m;
 # coefficients:
 #   epsilon = 8 * sigma * eta / pi / pi, gamma = 8 * sigma / eta,
-#   tao = 8 * eta / mu / pi / pi,        m = -8 / pi * delta_g
+#   tau = 8 * eta / mu / pi / pi,        m = -8 / pi * delta_g
 # parameters:
 #   delta_g = 1.0, eta = 6.0, mu = 1.0, sigma = 1.0
 # reference:
@@ -45,7 +45,7 @@
   [tws_time_derivative]
     type = SusceptibilityTimeDerivative
     variable = phi
-    f_name = tao
+    f_name = tau
   []
   [./tws_drift]
     type = TWSDoubleObstacle
@@ -105,12 +105,12 @@
   [../]
   [tao]
     type = ParsedMaterial 
-    f_name = tao
+    f_name = tau
     function = '8.0 * eta / mu / pi / pi'
     material_property_names = 'eta mu pi'
   []
   [./epsilon]
-    type = ADParsedMaterial 
+    type = ParsedMaterial 
     f_name = epsilon
     function = '8.0 * sigma * eta / pi / pi'
     material_property_names = 'eta sigma pi'
