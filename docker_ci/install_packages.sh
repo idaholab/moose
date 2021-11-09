@@ -22,6 +22,12 @@ for MGR in "${MGR_ARY[@]}"; do
     fi
 done
 
+# Installing python-pillow on Red Hat distros seems to fail
+# due to an old version of pip; so forcefully reinstall it
+if [ $(command -v yum | grep -c yum) -gt 0 ]; then
+  pip3 --no-cache-dir install -U --force-reinstall pip
+fi
+
 # Do pip3 installs
 pip3 --no-cache-dir install \
     python-consul \
