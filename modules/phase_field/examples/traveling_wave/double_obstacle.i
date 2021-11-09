@@ -37,16 +37,16 @@
 []
 
 [Kernels]
-  [./tws_diffusion]
-    type = NonlinearDiffusion
+  [tws_diffusion]
+    type = MatDiffusion
     variable = phi
-    D = epsilon
-  [../]
-  [./tws_time_derivative]
-    type = NonlinearTimeDerivative
+    diffusivity = epsilon
+  []
+  [tws_time_derivative]
+    type = SusceptibilityTimeDerivative
     variable = phi
-    coefficient = tao
-  [../]
+    f_name = tao
+  []
   [./tws_drift]
     type = TWSDoubleObstacle
     variable = phi
