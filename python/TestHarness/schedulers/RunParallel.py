@@ -7,6 +7,8 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
+import traceback
+
 from TestHarness.schedulers.Scheduler import Scheduler
 from TestHarness import util
 
@@ -25,6 +27,7 @@ class RunParallel(Scheduler):
 
     def run(self, job):
         """ Run a tester command """
+
         tester = job.getTester()
 
         # Do not execute app, and do not processResults
@@ -32,38 +35,43 @@ class RunParallel(Scheduler):
             self.setSuccessfulMessage(tester)
             return
 
-        # Launch and wait for the command to finish
-        job.run()
+        output = ''
 
-        # Was this job already considered finished? (Timeout, Crash, etc)
-        if job.isFinished():
-            return
+        # Anything that throws while running or processing a job should be caught
+        # and the job should fail
+        try:
+            # Launch and wait for the command to finish
+            job.run()
 
-        # Allow derived proccessResults to process the output and set a failing status (if it failed)
-        job_output = job.getOutput()
-        output = tester.processResults(tester.getMooseDir(), self.options, job_output)
+            # Was this job already considered finished? (Timeout, Crash, etc)
+            if job.isFinished():
+                return
 
-        # If the tester has not yet failed, append additional information to output
-        if not tester.isFail():
-            # Read the output either from the temporary file or redirected files
-            if tester.hasRedirectedOutput(self.options):
-                redirected_output = util.getOutputFromFiles(tester, self.options)
-                output += redirected_output
+            # Allow derived proccessResults to process the output and set a failing status (if it failed)
+            job_output = job.getOutput()
+            output = tester.processResults(tester.getMooseDir(), self.options, job_output)
 
-                # If we asked for redirected output but none was found, we'll call that a failure
-                if redirected_output == '':
-                    tester.setStatus(tester.fail, 'FILE TIMEOUT')
-                    output += '\n' + "#"*80 + '\nTester failed, reason: ' + tester.getStatusMessage() + '\n'
+            # If the tester has not yet failed, append additional information to output
+            if not tester.isFail():
+                # Read the output either from the temporary file or redirected files
+                if tester.hasRedirectedOutput(self.options):
+                    redirected_output = util.getOutputFromFiles(tester, self.options)
+                    output += redirected_output
 
-        else:
-            output += '\n' + "#"*80 + '\nTester failed, reason: ' + tester.getStatusMessage() + '\n'
+                    # If we asked for redirected output but none was found, we'll call that a failure
+                    if redirected_output == '':
+                        tester.setStatus(tester.fail, 'FILE TIMEOUT')
+                        output += '\n' + "#"*80 + '\nTester failed, reason: ' + tester.getStatusMessage() + '\n'
+
+                self.setSuccessfulMessage(tester)
+            else:
+                output += '\n' + "#"*80 + '\nTester failed, reason: ' + tester.getStatusMessage() + '\n'
+        except Exception as e:
+            output += 'Python exception encountered:\n\n' + traceback.format_exc()
+            tester.setStatus(tester.error, 'PYTHON EXCEPTION')
 
         # Set testers output with modifications made above so it prints the way we want it
         job.setOutput(output)
-
-        # Test has not yet failed and we are finished... therfor it is a passing test
-        if not tester.isFail():
-            self.setSuccessfulMessage(tester)
 
     def setSuccessfulMessage(self, tester):
         """ properly set a finished successful message for tester """

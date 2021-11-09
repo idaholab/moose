@@ -28,6 +28,10 @@ class ImageDiff(FileTester):
 
     def __init__(self, name, params):
         FileTester.__init__(self, name, params)
+        if self.specs['required_python_packages'] is None:
+             self.specs['required_python_packages'] = 'skimage'
+        elif 'skimage' not in self.specs['required_python_packages']:
+            self.specs['required_python_packages'] += ' skimage'
 
     def getOutputFiles(self):
         return self.specs['imagediff']
