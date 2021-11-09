@@ -112,11 +112,7 @@ public:
    *
    * Note: this is unused if this RM is purely Algebraic
    */
-  bool attachGeometricEarly() const { return _attach_geometric_early; }
-  void attachGeometricEarly(const bool attach_geometric_early)
-  {
-    _attach_geometric_early = attach_geometric_early;
-  }
+  bool attachGeometricEarly() { return _attach_geometric_early; }
 
   /**
    * Whether this should be placed on the undisplaced or displaced systems
@@ -125,7 +121,6 @@ public:
    * in MOOSE.  If this thing is algebraic then it's going to the DofMap
    */
   bool useDisplacedMesh() const { return _use_displaced_mesh; }
-  void useDisplacedMesh(const bool use_displaced_mesh) { _use_displaced_mesh = use_displaced_mesh; }
 
   const DofMap * dofMap() { return _dof_map; }
 
@@ -148,8 +143,8 @@ protected:
 
   /// Boolean indicating whether this RM can be attached early (e.g. all parameters are known
   /// without the need for inspecting things like variables or other parts of the system that
-  /// are not available.)
-  bool _attach_geometric_early;
+  /// are not available.
+  const bool _attach_geometric_early;
 
   /// The type of RM this object is. Note that the underlying enum is capable of holding
   /// multiple values simultaneously, so you must use bitwise operators to test values.
@@ -158,8 +153,8 @@ protected:
   /// The name of the object that requires this RelationshipManager
   std::vector<std::string> _for_whom;
 
-  /// Which mesh/systems this should go to (undisplaced or displaced)
-  bool _use_displaced_mesh;
+  /// Which system this should go to (undisplaced or displaced)
+  const bool _use_displaced_mesh;
 
 public:
   /**
