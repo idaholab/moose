@@ -5,10 +5,10 @@
 /**
  * TWSDoubleObstacle is the traveling wave kernel for double obstacle potentials
  * governing equation:
- *   tao * phi_dot = epsilon * laplace(phi) + gamma * (phi - 0.5) + sqrt(phi * (1 - phi)) * m;
+ *   tau * phi_dot = epsilon * laplace(phi) + gamma * (phi - 0.5) + sqrt(phi * (1 - phi)) * m;
  * coefficients:
  *   epsilon = 8 * sigma * eta / pi / pi, gamma = 8 * sigma / eta,
- *   tao = 8 * eta / mu / pi / pi,        m = -8 / pi * delta_g
+ *   tau = 8 * eta / mu / pi / pi,        m = -8 / pi * delta_g
  * parameters:
  *   delta_g = 1.0, eta = 6.0, mu = 1.0, sigma = 1.0
  * this kernel:
@@ -36,6 +36,4 @@ protected:
 
   const std::string & _delta_g_name;
   const ADMaterialProperty<Real> & _delta_g;
-
-  const double _pi = 3.14159265358979323846;
 };
