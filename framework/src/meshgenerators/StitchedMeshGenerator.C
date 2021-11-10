@@ -44,16 +44,13 @@ StitchedMeshGenerator::validParams()
 
 StitchedMeshGenerator::StitchedMeshGenerator(const InputParameters & parameters)
   : MeshGenerator(parameters),
+    _mesh_ptrs(getMeshes("inputs")),
     _input_names(getParam<std::vector<MeshGeneratorName>>("inputs")),
     _clear_stitched_boundary_ids(getParam<bool>("clear_stitched_boundary_ids")),
     _stitch_boundaries_pairs(
         getParam<std::vector<std::vector<std::string>>>("stitch_boundaries_pairs")),
     _algorithm(parameters.get<MooseEnum>("algorithm"))
 {
-  // Grab the input meshes
-  _mesh_ptrs.reserve(_input_names.size());
-  for (auto & input_name : _input_names)
-    _mesh_ptrs.push_back(&getMeshByName(input_name));
 }
 
 std::unique_ptr<MeshBase>
@@ -63,14 +60,14 @@ StitchedMeshGenerator::generate()
   std::unique_ptr<ReplicatedMesh> mesh = dynamic_pointer_cast<ReplicatedMesh>(*_mesh_ptrs[0]);
 
   // Reserve spaces for the other meshes (no need to store the first one another time)
-  _meshes.reserve(_mesh_ptrs.size() - 1);
+  std::vector<std::unique_ptr<ReplicatedMesh>> meshes(_mesh_ptrs.size() - 1);
 
   // Read in all of the other meshes
   for (MooseIndex(_mesh_ptrs) i = 1; i < _mesh_ptrs.size(); ++i)
-    _meshes.push_back(dynamic_pointer_cast<ReplicatedMesh>(*_mesh_ptrs[i]));
+    meshes[i - 1] = dynamic_pointer_cast<ReplicatedMesh>(*_mesh_ptrs[i]);
 
   // Stitch all the meshes to the first one
-  for (MooseIndex(_meshes) i = 0; i < _meshes.size(); i++)
+  for (MooseIndex(meshes) i = 0; i < meshes.size(); i++)
   {
     auto boundary_pair = _stitch_boundaries_pairs[i];
 
@@ -108,11 +105,11 @@ StitchedMeshGenerator::generate()
     }
     catch (...)
     {
-      second = _meshes[i]->get_boundary_info().get_id_by_name(boundary_pair[1]);
+      second = meshes[i]->get_boundary_info().get_id_by_name(boundary_pair[1]);
 
       if (second == BoundaryInfo::invalid_id)
       {
-        _meshes[i]->print_info();
+        meshes[i]->print_info();
 
         std::stringstream error;
 
@@ -121,7 +118,7 @@ StitchedMeshGenerator::generate()
         error << "Boundary names that do exist: \n";
         error << " ID : Name\n";
 
-        auto & sideset_id_name_map = _meshes[i]->get_boundary_info().get_sideset_name_map();
+        auto & sideset_id_name_map = meshes[i]->get_boundary_info().get_sideset_name_map();
 
         for (auto & ss_name_map_pair : sideset_id_name_map)
           error << " " << ss_name_map_pair.first << " : " << ss_name_map_pair.second << "\n";
@@ -132,7 +129,7 @@ StitchedMeshGenerator::generate()
 
     const bool use_binary_search = (_algorithm == "BINARY");
 
-    mesh->stitch_meshes(*_meshes[i],
+    mesh->stitch_meshes(*meshes[i],
                         first,
                         second,
                         TOLERANCE,

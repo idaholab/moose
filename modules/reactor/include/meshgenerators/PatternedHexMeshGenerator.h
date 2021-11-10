@@ -26,6 +26,8 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
+  /// The input meshes
+  const std::vector<std::unique_ptr<MeshBase> *> _mesh_ptrs;
   /// Names of input meshes
   const std::vector<MeshGeneratorName> & _input_names;
   /// 2D vector of the hexagonal pattern
@@ -77,18 +79,8 @@ protected:
   std::vector<std::vector<Real>> & _control_drums_azimuthal_meta;
   /// Filename of the text file containing the control drum positions
   const std::string _position_file_name;
-  /// Pointers of input mesh pointers
-  std::vector<std::unique_ptr<MeshBase> *> _mesh_ptrs;
   /// Subdomain IDs of the peripheral regions
   std::vector<subdomain_id_type> _peripheral_block_ids;
   /// Subdomain Names of the peripheral regions
   std::vector<SubdomainName> _peripheral_block_names;
-  /// Input meshes
-  std::vector<std::unique_ptr<ReplicatedMesh>> _meshes;
-  /// Output mesh <MeshBase>
-  std::unique_ptr<MeshBase> _out_meshes_ptrs;
-  /// Output mesh <ReplicatedMesh>
-  std::unique_ptr<ReplicatedMesh> _out_meshes;
-  /// Temporary peripheral mesh
-  std::unique_ptr<ReplicatedMesh> _tmp_peripheral_mesh;
 };

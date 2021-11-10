@@ -1,0 +1,88 @@
+[Tests]
+  design = 'meshgenerators/AzimuthalBlockSplitGenerator.md'
+  issues = '#19100'
+  [test]
+    requirement = 'The system should modify the azimuthal blocks '
+    [block_id_in]
+      type = 'Exodiff'
+      input = 'azi_block_id_mod.i'
+      exodiff = 'azi_block_id_mod_id_in.e'
+      cli_args = '--mesh-only "azi_block_id_mod_id_in.e"'
+      recover = false
+      detail = '(without the external block) based on the given angle range.'
+    []
+    [block_id_ext]
+      type = 'Exodiff'
+      input = 'azi_block_id_mod.i'
+      exodiff = 'azi_block_id_mod_id_ext.e'
+      cli_args = 'Mesh/cd_azi_define/old_blocks="10 15 30"
+                 --mesh-only "azi_block_id_mod_id_ext.e"'
+      recover = false
+      detail = '(with the external block) based on the given angle range.'
+    []
+    [block_name_in]
+      type = 'Exodiff'
+      input = 'azi_block_id_mod.i'
+      exodiff = 'azi_block_id_mod_name_in.e'
+      cli_args = 'Mesh/cd_azi_define/old_blocks="center_tri center cd_ring"
+                 --mesh-only "azi_block_id_mod_name_in.e"'
+      recover = false
+      detail = '(based on block names) based on the given angle range.'
+    []
+  []
+  [errors]
+    requirement = 'The system shall throw an error '
+    [err_diff_block_size_id]
+      type = 'RunException'
+      input = 'azi_block_id_mod.i'
+      cli_args = 'Mesh/cd_azi_define/old_blocks="10 15"
+                  --mesh-only "azi_block_id_mod_err.e"'
+      expect_err = 'This parameter must have the same size as old_blocks.'
+      detail = "if old_blocks given as block ids and new_block_ids have different sizes."
+    []
+    [err_diff_block_size_name]
+      type = 'RunException'
+      input = 'azi_block_id_mod.i'
+      cli_args = 'Mesh/cd_azi_define/old_blocks="center_tri center"
+                  --mesh-only "azi_block_id_mod_err.e"'
+      expect_err = 'This parameter must have the same size as old_blocks.'
+      detail = "if old_blocks given as block names and new_block_ids have different sizes."
+    []
+    [err_diff_new_block_name_id]
+      type = 'RunException'
+      input = 'azi_block_id_mod.i'
+      cli_args = 'Mesh/cd_azi_define/new_block_names="center_tri_new center_new"
+                  --mesh-only "azi_block_id_mod_err.e"'
+      expect_err = 'if provided, must have the same size as new_block_ids.'
+      detail = "if new_block_names and new_block_ids have different sizes."
+    []
+    [err_non_exist_block_name]
+      type = 'RunException'
+      input = 'azi_block_id_mod.i'
+      cli_args = 'Mesh/cd_azi_define/old_blocks="center_tri center dummy"
+                  --mesh-only "azi_block_id_mod_err.e"'
+      expect_err = 'This parameter contains blocks that do not exist in the input mesh.'
+      detail = "if old_blocks contains blocks that do not exist in the input mesh."
+    []
+    [err_overlapped_circular_regions]
+      type = 'RunException'
+      input = 'azi_block_id_mod.i'
+      cli_args = 'Mesh/cd/ring_radii="4.2 4.97"
+                  Mesh/cd_azi_define/start_angle=0
+                  Mesh/cd_azi_define/angle_range=29.5
+                  --mesh-only "azi_block_id_mod_err.e"'
+      expect_err = 'the circular region is overlapped with background region after correction.'
+      detail = "if the circular region is overlapped with background region after radius correction."
+    []
+    [err_too_coarse_input_mesh]
+      type = 'RunException'
+      input = 'azi_block_id_mod.i'
+      cli_args = 'Mesh/cd/num_sectors_per_side="2 2 2 2 2 2"
+                  Mesh/cd_azi_define/start_angle=15
+                  Mesh/cd_azi_define/angle_range=5
+                  --mesh-only "azi_block_id_mod_err.e"'
+      expect_err = 'The azimuthal intervals of the input mesh are too coarse for this parameter.'
+      detail = "if the mesh is too corase for the absorber."
+    []
+  []
+[]

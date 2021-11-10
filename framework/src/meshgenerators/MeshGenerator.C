@@ -34,51 +34,83 @@ MeshGenerator::MeshGenerator(const InputParameters & parameters)
 }
 
 std::unique_ptr<MeshBase> &
-MeshGenerator::getMesh(const std::string & input_mesh_generator_parameter_name)
+MeshGenerator::getMesh(const std::string & param_name, const bool allow_invalid /* = false */)
 {
-  if (isParamValid(input_mesh_generator_parameter_name))
+  const auto valid_param = isParamValid(param_name);
+  if (!allow_invalid)
   {
-    auto name = getParam<MeshGeneratorName>(input_mesh_generator_parameter_name);
-
-    _depends_on.push_back(name);
-
-    return _app.getMeshGeneratorOutput(name);
+    if (!valid_param)
+      mooseError("Failed to get a parameter with the name \"",
+                 param_name,
+                 "\" when getting a MeshGenerator.",
+                 "\n\nKnown parameters:\n",
+                 _pars);
+    if (!_pars.isType<MeshGeneratorName>(param_name))
+      paramError(param_name,
+                 "Parameter of type \"",
+                 _pars.type(param_name),
+                 "\" is not an expected type for getting a MeshGenerator (should be of type "
+                 "\"MeshGeneratorName\")");
   }
-  else
+  else if (!valid_param)
     return _null_mesh;
+
+  return getMeshByName(getParam<MeshGeneratorName>(param_name));
+}
+
+std::vector<std::unique_ptr<MeshBase> *>
+MeshGenerator::getMeshes(const std::string & param_name)
+{
+  if (!isParamValid(param_name))
+    mooseError("Failed to get a parameter with the name \"",
+               param_name,
+               "\" when getting MeshGenerators.",
+               "\n\nKnown parameters:\n",
+               _pars);
+  if (!_pars.isType<std::vector<MeshGeneratorName>>(param_name))
+    paramError(param_name,
+               "Parameter of type \"",
+               _pars.type(param_name),
+               "\" is not an expected type for getting MeshGenerators (should be of type "
+               "\"std::vector<MeshGeneratorName>\")");
+
+  return getMeshesByName(getParam<std::vector<MeshGeneratorName>>(param_name));
 }
 
 std::unique_ptr<MeshBase> &
-MeshGenerator::getMeshByName(const MeshGeneratorName & input_mesh_generator)
+MeshGenerator::getMeshByName(const MeshGeneratorName & mesh_generator_name)
 {
-  _depends_on.push_back(input_mesh_generator);
-  return _app.getMeshGeneratorOutput(input_mesh_generator);
+  _depends_on.push_back(mesh_generator_name);
+  return _app.getMeshGeneratorOutput(mesh_generator_name);
+}
+
+std::vector<std::unique_ptr<MeshBase> *>
+MeshGenerator::getMeshesByName(const std::vector<MeshGeneratorName> & mesh_generator_names)
+{
+  std::vector<std::unique_ptr<MeshBase> *> meshes;
+  for (const auto & name : mesh_generator_names)
+    meshes.push_back(&getMeshByName(name));
+  return meshes;
 }
 
 std::unique_ptr<MeshBase>
 MeshGenerator::buildMeshBaseObject(unsigned int dim)
 {
-  if (!_mesh)
-    mooseError("We need a MooseMesh object in order to build ReplicatedMesh objects through the "
-               "buildReplicatedMesh API");
+  mooseAssert(_mesh, "Need a MooseMesh object");
   return _mesh->buildMeshBaseObject(dim);
 }
 
 std::unique_ptr<ReplicatedMesh>
 MeshGenerator::buildReplicatedMesh(unsigned int dim)
 {
-  if (!_mesh)
-    mooseError("We need a MooseMesh object in order to build ReplicatedMesh objects through the "
-               "buildReplicatedMesh API");
+  mooseAssert(_mesh, "Need a MooseMesh object");
   return _mesh->buildTypedMesh<ReplicatedMesh>(dim);
 }
 
 std::unique_ptr<DistributedMesh>
 MeshGenerator::buildDistributedMesh(unsigned int dim)
 {
-  if (!_mesh)
-    mooseError("We need a MooseMesh object in order to build DistributedMesh objects through the "
-               "buildDistributedMesh API");
+  mooseAssert(_mesh, "Need a MooseMesh object");
   return _mesh->buildTypedMesh<DistributedMesh>(dim);
 }
 

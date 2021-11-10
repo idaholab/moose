@@ -251,6 +251,16 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
 std::unique_ptr<MeshBase>
 PolygonConcentricCircleMeshGeneratorBase::generate()
 {
+  std::vector<ReplicatedMesh *> input;
+  for (const auto & mesh : _input_ptrs)
+  {
+    mooseAssert(mesh && (*mesh).get(), "nullptr mesh");
+    auto replicated_mesh = dynamic_cast<ReplicatedMesh *>((*mesh).get());
+    if (!replicated_mesh)
+      mooseError("A non-replicated mesh input was supplied but replicated meshes are required.");
+    input.push_back(replicated_mesh);
+  }
+
   unsigned int mesh_input_counter = 0;
   // azimuthal array used for radius radius_correction
   std::vector<Real> azimuthal_list;
@@ -267,10 +277,8 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
       // The following lines only work for hexagon; and only a hexagon needs such functionality.
       Real lower_azi = (Real)mesh_index * 60.0 - 150.0;
       Real upper_azi = (Real)((mesh_index + 1) % 6) * 60.0 - 150.0;
-      _azimuthal_angles_array.push_back(azimuthalAnglesCollector(
-          dynamic_pointer_cast<ReplicatedMesh>(*_input_ptrs[mesh_input_counter]),
-          lower_azi,
-          upper_azi));
+      _azimuthal_angles_array.push_back(
+          azimuthalAnglesCollector(*input[mesh_input_counter], lower_azi, upper_azi));
       // loop over the _azimuthal_angles_array just collected to convert tangent to azimuthal
       // angles.
       for (unsigned int i = 1; i < _azimuthal_angles_array.back().size(); i++)
@@ -311,10 +319,8 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
                  "Elements of this parameter must be smaller than polygon apothem (after volume "
                  "preserve correction if applicable).");
   }
-  auto mesh = buildReplicatedMesh(2);
   // build the first slice of the polygon.
-  auto mesh0 = buildSimpleSlice(dynamic_pointer_cast<ReplicatedMesh>(mesh),
-                                ring_radii_corr,
+  auto mesh0 = buildSimpleSlice(ring_radii_corr,
                                 _ring_intervals,
                                 _duct_sizes,
                                 _duct_intervals,
@@ -323,7 +329,7 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
                                 _pitch,
                                 _num_sectors_per_side[0],
                                 _background_intervals,
-                                &_node_id_background_meta,
+                                _node_id_background_meta,
                                 _num_sides,
                                 1,
                                 _azimuthal_angles_array[0],
@@ -333,9 +339,7 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
   // This loop builds add-on slices and stitches them to the first slice
   for (unsigned int mesh_index = 1; mesh_index < _num_sides; mesh_index++)
   {
-    auto mesh_tmp0 = buildReplicatedMesh(2);
-    auto mesh_tmp = buildSimpleSlice(dynamic_pointer_cast<ReplicatedMesh>(mesh_tmp0),
-                                     ring_radii_corr,
+    auto mesh_tmp = buildSimpleSlice(ring_radii_corr,
                                      _ring_intervals,
                                      _duct_sizes,
                                      _duct_intervals,
@@ -344,7 +348,7 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
                                      _pitch,
                                      _num_sectors_per_side[mesh_index],
                                      _background_intervals,
-                                     &_node_id_background_meta,
+                                     _node_id_background_meta,
                                      _num_sides,
                                      mesh_index + 1,
                                      _azimuthal_angles_array[mesh_index],
@@ -368,9 +372,7 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
 
   if (!_is_general_polygon)
   {
-    auto mesh0_dup = mesh0->clone();
-    _azimuthal_angle_meta = azimuthalAnglesCollector(
-        dynamic_pointer_cast<ReplicatedMesh>(mesh0_dup), -180.0, 180.0, ANGLE_DEGREE);
+    _azimuthal_angle_meta = azimuthalAnglesCollector(*mesh0, -180.0, 180.0, ANGLE_DEGREE);
     _pattern_pitch_meta = _pitch;
   }
 
@@ -408,9 +410,8 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
                                   1.0 / std::tan(M_PI / (Real)_num_sides));
         Real x_tmp = _pitch / 2.0;
         Real y_tmp = x_tmp * std::tan(azi_corr_tmp);
-        nodeCoordRotate(&x_tmp,
-                        &y_tmp,
-                        (Real)i * 360.0 / (Real)_num_sides - (180.0 - 180.0 / (Real)_num_sides));
+        nodeCoordRotate(
+            x_tmp, y_tmp, (Real)i * 360.0 / (Real)_num_sides - (180.0 - 180.0 / (Real)_num_sides));
         Point p_tmp = Point(x_tmp, y_tmp, 0.0);
         mesh0->add_point(
             p_tmp,

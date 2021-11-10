@@ -14,7 +14,7 @@ In order to generate the hexagonal patterned mesh, three fundamental parameters 
 - [!param](/Mesh/PatternedHexMeshGenerator/pattern): a two-dimensional vector that represents the pattern of mesh to be generated. The elements must be integers from 0 to N-1, where N is the length of vector parameter [!param](/Mesh/PatternedHexMeshGenerator/inputs).
 - [!param](/Mesh/PatternedHexMeshGenerator/pattern_boundary): a MooseEnum parameter that can be either `hexagon` or `none`. When `none` is selected, this object only stitches [!param](/Mesh/PatternedHexMeshGenerator/inputs) meshes into a patterned mesh without extraneous geometry, resulting in an outer boundary with a zig-zag edge. When `hexagon` is selected, a background region is added so that the generated mesh has a hexagonal shape instead of a zig-zag one. Concentric duct regions may also be optionally added to the hexagon periphery when this parameter is `hexagon`. The user can refer to [Figure 1](#pattern_hex) for more details.
 
-!media media/meshgenerators/pattern_hex.png
+!media reactor/meshgenerators/pattern_hex.png
       style=display: block;margin-left:auto;margin-right:auto;width:40%;
       id=pattern_hex
       caption=A schematic showing the difference between `none` and `hexagon` `pattern_boundary`.
@@ -31,12 +31,12 @@ One of the applications of this object is to generate meshes for prismatic react
 
 In addition, [!param](/Mesh/PatternedHexMeshGenerator/assign_control_drum_id) can be set as true so that the control drum [!param](/Mesh/PatternedHexMeshGenerator/inputs) meshes can be indexed using an element extra integer called `control_drum_id`. As illustrated in [Figure 2](#cd_id), the `control_drum_id` is indexed based on the azimuthal angles of the control drums.
 
-!media media/functions/azi_cd_id.png
+!media reactor/functions/azi_cd_id.png
       style=display: block;margin-left:auto;margin-right:auto;width:40%;
       id=cd_id
       caption=A schematic drawing the indexing rule of `control_drum_id` in the `PatternedHexMeshGenerator` object.
 
-These `MeshMetaData` as well as `control_drum_id` can be used by other MOOSE objects to simulate control drums rotation during power transients.
+These `MeshMetaData` as well as `control_drum_id` can be used by other MOOSE objects such as [`MultiControlDrumFunction`](/MultiControlDrumFunction.md) to simulate control drums rotation during power transients.
 
 
 ## Example Syntax

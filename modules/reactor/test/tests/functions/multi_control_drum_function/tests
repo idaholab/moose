@@ -1,0 +1,54 @@
+[Tests]
+  design = 'functions/MultiControlDrumFunction.md'
+  issues = '#19100'
+  [test]
+    requirement = 'The system shall include a function that describes the rotation of multiple control drums '
+    [multi_cd_func]
+      type = 'Exodiff'
+      input = 'multi_cd.i'
+      exodiff = 'multi_cd_default.e'
+      detail = 'using control_drum_id.'
+      mesh_mode = 'REPLICATED'
+    []
+    [multi_cd_func_noid]
+      type = 'Exodiff'
+      input = 'multi_cd_noid.i'
+      exodiff = 'multi_cd_noid_nocdid.e'
+      detail = 'without using control_drum_id.'
+      mesh_mode = 'REPLICATED'
+    []
+  []
+  [errors]
+    requirement = 'The function that describes control drums shall throw an error '
+    [err_diff_start_angles_size]
+      type = RunException
+      input = 'multi_cd.i'
+      cli_args = 'Functions/cd_param_func/start_angles="0"'
+      expect_err = "the size of 'start_angles' must be identical to the size of 'angular_speeds'"
+      detail = "if start_angles and angular_speeds have different lengths."
+    []
+    [err_diff_angle_ranges_size]
+      type = RunException
+      input = 'multi_cd.i'
+      cli_args = 'Functions/cd_param_func/angle_ranges="90"'
+      expect_err = "the size of 'angle_ranges' must be identical to the size of 'angular_speeds'"
+      detail = "if angle_ranges and angular_speeds have different lengths."
+    []
+    [err_diff_metadata_size]
+      type = RunException
+      input = 'multi_cd.i'
+      cli_args = 'Functions/cd_param_func/start_angles="0"
+                  Functions/cd_param_func/angular_speeds="90"
+                  Functions/cd_param_func/angle_ranges="90"'
+      expect_err = "the size of this parameter must be identical to the control drum number recorded in the MeshMetaData."
+      detail = "if input control drum parameters are not compatible with MeshMetaData."
+    []
+    [err_end_before_start]
+      type = RunException
+      input = 'multi_cd.i'
+      cli_args = 'Functions/cd_param_func/rotation_end_time=-1.0'
+      expect_err = "this parameter must be larger than rotation_start_time."
+      detail = "if rotation_end_time is smaller than rotation_start_time."
+    []
+  []
+[]
