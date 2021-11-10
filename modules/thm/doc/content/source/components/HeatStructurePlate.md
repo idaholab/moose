@@ -1,18 +1,15 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # HeatStructurePlate
 
-!alert construction title=Undocumented Class
-The HeatStructurePlate has not been documented. The content contained on this page includes the
-typical automatic documentation associated with a MooseObject; however, what is contained is
-ultimately determined by what is necessary to make the documentation clear for users.
+This component is a [2D heat structure](component_groups/heat_structure_2d.md)
+that has a plate/brick/box shape.
 
-!syntax description /Components/HeatStructurePlate
+## Usage
+
+The component is 2D but has a finite depth in the third dimension, which is
+specified via [!param](/Components/HeatStructurePlate/depth).
 
 !syntax parameters /Components/HeatStructurePlate
 
 !syntax inputs /Components/HeatStructurePlate
 
 !syntax children /Components/HeatStructurePlate
-
-!bibtex bibliography
