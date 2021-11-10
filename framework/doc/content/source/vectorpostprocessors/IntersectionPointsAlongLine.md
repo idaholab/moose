@@ -5,7 +5,7 @@
 The CSV output consists of the X, Y and Z coordinates of the intersection points between the faces/sides of the elements and the line.
 
 !alert note
-This object only supports replicated meshes. A distributed version of this object may be created using the [ray tracing module](modules/ray_tracing/index.md).
+This object only supports replicated meshes. A distributed version of this object may be created using the [ray tracing module](modules/ray_tracing/index.md optional=True).
 
 !syntax parameters /VectorPostprocessors/IntersectionPointsAlongLine
 

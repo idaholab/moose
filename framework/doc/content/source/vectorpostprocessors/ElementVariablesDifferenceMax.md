@@ -2,8 +2,9 @@
 
 !syntax description /VectorPostprocessors/ElementVariablesDifferenceMax
 
-This postprocessor can find the maximum of the difference or the absolute difference depending on the `furthest_from_zero` parameter.
-This vector postprocessor returns the following information, in this order:
+This postprocessor can find the maximum of the difference or the absolute difference if the
+[!param](/VectorPostprocessors/ElementVariablesDifferenceMax/furthest_from_zero) parameter is set to `true`.
+This vector postprocessor output to CSV has the following columns, in this order:
 
 - the maximum difference between the two variables
 
@@ -13,9 +14,9 @@ This vector postprocessor returns the following information, in this order:
 
 - the first (X in Cartesian) coordinate of the location of the maximum difference
 
-- the second (X in Cartesian) coordinate of the location of the maximum difference
+- the second (Y in Cartesian) coordinate of the location of the maximum difference
 
-- the third (X in Cartesian) coordinate of the location of the maximum difference
+- the third (Z in Cartesian) coordinate of the location of the maximum difference
 
 
 ## Example input syntax

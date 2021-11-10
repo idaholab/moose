@@ -10,9 +10,11 @@ The element $L_2$ norm is defined as:
 The element $L_2$ norm of a variable $u$ is computed as:
 
 !equation
-||u||_{L_2} = \sqrt{\sum_{\text{mesh elements}} \sum_{\text{quadrature point qp} J[qp] W[qp] c[qp] u(qp)^2}
+||u||_{L_2} = \sqrt{\sum_{\text{mesh elements}} \sum_{\text{quadrature point qp}} J[qp] W[qp] c[qp] u(qp)^2}
 
-The $J$ term accounts for the geometry/volume of the element, the $W$ for the weight in the quadrature, $c$ for an eventual coordinate change (cylindrical, spherical) and $u(qp)$ is the value of the variable at the quadrature point.
+The $J$ term accounts for the geometry/volume of the element, the $W$ for the weight in the
+[quadrature](syntax/Executioner/Quadrature/index.md), $c$ for an eventual coordinate change
+(cylindrical, spherical) and $u(qp)$ is the value of the variable at the quadrature point.
 
 ## Example input syntax
 

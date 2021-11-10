@@ -7,7 +7,8 @@ The element average of a variable is defined as the ratio of its integral over t
 !equation
 \bar{u} = \dfrac{\int_{\Omega} u d\Omega}{\int_{\Omega} d\Omega}
 
-This average may be taken over a restriction of blocks, but for taking an average over boundaries, a [SideAverageValue.md] should be used.
+This average may be taken over a restriction of blocks, but for taking an average over boundaries,
+a [SideAverageValue.md] should be used instead.
 
 ## Example input syntax
 

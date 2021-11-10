@@ -5,11 +5,10 @@
 The element $L_2$ difference between two variables $u$ and $v$ is computed as:
 
 !equation
-||u - v||_{L_2} = \sqrt{\sum_{\text{mesh elements}} \sum_{\text{quadrature point qp} J[qp] W[qp] c[qp] (u(qp) - v(qp))^2}
+||u - v||_{L_2} = \sqrt{\sum_{\text{mesh elements}} \sum_{\text{quadrature point qp}} J[qp] W[qp] c[qp] (u(qp) - v(qp))^2}
 
-The $J$ term accounts for the geometry/volume of the element, the $W$ for the weight in the quadrature, $c$ for an eventual coordinate change (cylindrical, spherical) and $u(qp)$ and $v(qp)$ are the values of the variable at the quadrature point.
-
-TODO: document behavior if variables are of a different type
+The $J$ term accounts for the geometry/volume of the element, the $W$ for the weight in the [quadrature](syntax/Executioner/Quadrature/index.md),
+$c$ for an eventual coordinate change (cylindrical, spherical) and $u(qp)$ and $v(qp)$ are the values of the variable at the quadrature point.
 
 ## Example input syntax
 

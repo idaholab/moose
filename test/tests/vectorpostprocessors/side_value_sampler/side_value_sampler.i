@@ -16,7 +16,7 @@
     input = 'mesh'
   []
   # this keeps numbering continuous so tests dont fail on different ids in CSV
-  allow_renumbering = true
+  allow_renumbering = false
 []
 
 [Variables]
