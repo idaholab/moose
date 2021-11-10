@@ -55,7 +55,8 @@ FunctorThermalResistanceBC::FunctorThermalResistanceBC(const InputParameters & p
     _geometry(getParam<MooseEnum>("geometry").getEnum<Moose::CoordinateSystemType>()),
     _inner_radius(
         _geometry == Moose::CoordinateSystemType::COORD_RZ ? getParam<Real>("inner_radius") : 1.0),
-    _T(isParamValid("temperature") ? getFunctor<ADReal>("temperature") : getFunctor<ADReal>("variable")),
+    _T(isParamValid("temperature") ? getFunctor<ADReal>("temperature")
+                                   : getFunctor<ADReal>("variable")),
     _T_ambient(getParam<Real>(HeatConduction::T_ambient)),
     _k(getParam<std::vector<Real>>("thermal_conductivities")),
     _dx(getParam<std::vector<Real>>("conduction_thicknesses")),
@@ -157,7 +158,8 @@ FunctorThermalResistanceBC::computeQpResidual()
   // resistance to find the overall heat flux. For Cartesian, dividing by the
   // 'inner_radius' has no effect, but it is required for correct normalization
   // for cylindrical geometries.
-  flux = (_T(&_face_info->elem()) - _T_ambient) / (_conduction_resistance + _parallel_resistance) / _inner_radius;
+  flux = (_T(&_face_info->elem()) - _T_ambient) / (_conduction_resistance + _parallel_resistance) /
+         _inner_radius;
   return flux;
 }
 

@@ -1,0 +1,1 @@
+../../FVHeatFluxBC/gold/global_kappa_out.e
