@@ -1,33 +1,22 @@
 # UserForcingFunctionNodalKernel
 
-!alert! construction title=Undocumented Class
-The UserForcingFunctionNodalKernel has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# UserForcingFunctionNodalKernel
-
 !syntax description /NodalKernels/UserForcingFunctionNodalKernel
 
-## Overview
+The forcing function is a space and time dependent [Function](syntax/Functions/index.md).
 
-!! Replace these lines with information regarding the UserForcingFunctionNodalKernel object.
+The contribution to the Jacobian from this nodal kernel is 0, as
+the function is deemed to not have any dependence on nonlinear variables, as functions generally do not.
 
-## Example Input File Syntax
+## Example input syntax
 
-!! Describe and include an example of how to use the UserForcingFunctionNodalKernel object.
+In this example, the nodal scalar variable `v`, which lives independently on each node, is the solution to the following equation:
 
-!syntax parameters /NodalKernels/UserForcingFunctionNodalKernel
+!equation
+\dfrac{d v}{dt} = \dfrac{1}{4} (16*t + t^4)
 
-!syntax inputs /NodalKernels/UserForcingFunctionNodalKernel
+The time dependent term on the right is specified using a `UserForcingFunctionNodalKernel`.
 
-!syntax children /NodalKernels/UserForcingFunctionNodalKernel
-```
-!alert-end!
-
-!syntax description /NodalKernels/UserForcingFunctionNodalKernel
+!listing test/tests/nodalkernels/high_order_time_integration/high_order_time_integration.i block=NodalKernels
 
 !syntax parameters /NodalKernels/UserForcingFunctionNodalKernel
 

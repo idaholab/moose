@@ -1,33 +1,19 @@
 # VectorOfPostprocessors
 
-!alert! construction title=Undocumented Class
-The VectorOfPostprocessors has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# VectorOfPostprocessors
-
 !syntax description /VectorPostprocessors/VectorOfPostprocessors
 
-## Overview
+This vector postprocessor is mainly used for two purposes:
 
-!! Replace these lines with information regarding the VectorOfPostprocessors object.
+- to output only a selection of postprocessors to a desired CSV file, similarly to a `CSV` output. The CSV output of the `VectorOfPostprocessors` is then column-ordered by the order of postprocessor specified in the `postprocessors` parameter.
 
-## Example Input File Syntax
+- to combine postprocessors to match the expected vector postprocessor input of a kernel, a user object, etc
 
-!! Describe and include an example of how to use the VectorOfPostprocessors object.
 
-!syntax parameters /VectorPostprocessors/VectorOfPostprocessors
+## Example input syntax
 
-!syntax inputs /VectorPostprocessors/VectorOfPostprocessors
+In this example, the `min` and `max` postprocessors are combined in the `min_max` `VectorOfPostprocessors`.
 
-!syntax children /VectorPostprocessors/VectorOfPostprocessors
-```
-!alert-end!
-
-!syntax description /VectorPostprocessors/VectorOfPostprocessors
+!listing test/tests/vectorpostprocessors/vector_of_postprocessors/vector_of_postprocessors.i block=VectorPostprocessors
 
 !syntax parameters /VectorPostprocessors/VectorOfPostprocessors
 

@@ -1,33 +1,14 @@
 # ElementW1pError
 
-!alert! construction title=Undocumented Class
-The ElementW1pError has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
+The W1_p error between variable $u$ and function $f$ is equal to:
 
-```markdown
-# ElementW1pError
+!equation
+||u - f||_{W1_p} = \left( \int_{\Omega} (u-f)^p + (\vec{\nabla} u - \vec{\nabla} f)^p d \Omega \right)^{\dfrac{1}{p}}
 
-!syntax description /Postprocessors/ElementW1pError
+The gradient difference term is computed as below:
 
-## Overview
-
-!! Replace these lines with information regarding the ElementW1pError object.
-
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the ElementW1pError object.
-
-!syntax parameters /Postprocessors/ElementW1pError
-
-!syntax inputs /Postprocessors/ElementW1pError
-
-!syntax children /Postprocessors/ElementW1pError
-```
-!alert-end!
-
-!syntax description /Postprocessors/ElementW1pError
+!equation
+(\vec{\nabla} u - \vec{\nabla} f)^p = \sum_{\text{dimension i}} (\dfrac{du}{dx_i} - \dfrac{df}{dx_i})^p
 
 !syntax parameters /Postprocessors/ElementW1pError
 

@@ -17,6 +17,7 @@ InputParameters
 ElementAverageValue::validParams()
 {
   InputParameters params = ElementIntegralVariablePostprocessor::validParams();
+  params.addClassDescription("Computes the volumetric average of a variable");
   return params;
 }
 

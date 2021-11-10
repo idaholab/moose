@@ -10,7 +10,10 @@ value over a time step or over the entire transient. The change is computed as
 where $(\Delta y)^n$ is the relative change at time index $n$, $y^n$ is the
 value of post-processor $y$ at time index $n$, and $y_{ref}$ is the reference
 value for the change (either the previous time value, $y^{n-1}$, or the initial
-value, $y^0$. Relative change is computed as
+value, $y^0$). The relative change, which may be requested instead using the
+[!param](/Postprocessors/ChangeOverTimePostprocessor/compute_relative_change)
+parameter is computed as
+
 \begin{equation}
   (\Delta y)^n = \frac{y^n - y_{ref}}{y_{ref}} \,.
 \end{equation}

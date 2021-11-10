@@ -1,36 +1,24 @@
 # PointValueSampler
 
-!alert! construction title=Undocumented Class
-The PointValueSampler has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# PointValueSampler
-
-!syntax description /VectorPostprocessors/PointValueSampler
-
-## Overview
-
-!! Replace these lines with information regarding the PointValueSampler object.
-
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the PointValueSampler object.
-
-!syntax parameters /VectorPostprocessors/PointValueSampler
-
-!syntax inputs /VectorPostprocessors/PointValueSampler
-
-!syntax children /VectorPostprocessors/PointValueSampler
-```
-!alert-end!
-
 !syntax description /VectorPostprocessors/PointValueSampler
 
 !alert note
 If the point value sampler is used with a discontinuous variable on the edge/face of a 2D/3D element, then the value from the element with the lowest ID will be returned.
+
+The CSV output, with rows for each sampled point, contains the following columns:
+
+- the id of the elements containing the sampled points, with the convention mentioned above
+
+- the values of the variable(s) requested
+
+- the x, y and z coordinates of the requested sampled points
+
+
+## Example input syntax
+
+In this example, the variables `u` and `v` are sampled at three points, `(0.1 0.1 0)`, `(0.23 0.4 0)` and `(0.78 0.2 0)` using a `PointValueSampler`.
+
+!listing test/tests/vectorpostprocessors/point_value_sampler/point_value_sampler.i block=VectorPostprocessors
 
 !syntax parameters /VectorPostprocessors/PointValueSampler
 

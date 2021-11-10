@@ -21,7 +21,7 @@ InputParameters
 LineFunctionSampler::validParams()
 {
   InputParameters params = GeneralVectorPostprocessor::validParams();
-  params.addClassDescription("Sample a function along a line.");
+  params.addClassDescription("Sample one or more functions along a line.");
   params += SamplerBase::validParams();
 
   params.addRequiredParam<Point>("start_point", "The beginning of the line");

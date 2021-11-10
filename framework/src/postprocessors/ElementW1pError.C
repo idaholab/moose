@@ -20,6 +20,8 @@ ElementW1pError::validParams()
   InputParameters params = ElementIntegralVariablePostprocessor::validParams();
   params.addRangeCheckedParam<Real>("p", 2.0, "p>=1", "The exponent used in the norm.");
   params.addRequiredParam<FunctionName>("function", "The analytic solution to compare against");
+  params.addClassDescription("Computes the W1p norm of the difference between a variable and an "
+                             "analytic solution, as a function");
   return params;
 }
 
