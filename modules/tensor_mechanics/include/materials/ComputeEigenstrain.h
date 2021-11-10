@@ -17,17 +17,24 @@
  * ComputeEigenstrain computes an Eigenstrain that is a function of a single variable defined by a
  * base tensor and a scalar function defined in a Derivative Material.
  */
-class ComputeEigenstrain : public ComputeEigenstrainBase
+template <bool is_ad>
+class ComputeEigenstrainTempl : public ComputeEigenstrainBaseTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  ComputeEigenstrain(const InputParameters & parameters);
+  ComputeEigenstrainTempl(const InputParameters & parameters);
 
 protected:
-  virtual void computeQpEigenstrain();
+  virtual void computeQpEigenstrain() override;
 
-  const MaterialProperty<Real> & _prefactor;
+  const GenericMaterialProperty<Real, is_ad> & _prefactor;
 
   RankTwoTensor _eigen_base_tensor;
+
+  using Material::_qp;
+  using ComputeEigenstrainBaseTempl<is_ad>::_eigenstrain;
 };
+
+typedef ComputeEigenstrainTempl<false> ComputeEigenstrain;
+typedef ComputeEigenstrainTempl<true> ADComputeEigenstrain;
