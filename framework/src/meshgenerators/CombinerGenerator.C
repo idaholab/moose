@@ -50,7 +50,9 @@ CombinerGenerator::validParams()
 }
 
 CombinerGenerator::CombinerGenerator(const InputParameters & parameters)
-  : MeshGenerator(parameters), _input_names(getParam<std::vector<MeshGeneratorName>>("inputs"))
+  : MeshGenerator(parameters),
+    _meshes(getMeshes("inputs")),
+    _input_names(getParam<std::vector<MeshGeneratorName>>("inputs"))
 {
   if (_input_names.empty())
     paramError("input_names", "You need to specify at least one MeshGenerator as an input.");
@@ -65,10 +67,6 @@ CombinerGenerator::CombinerGenerator(const InputParameters & parameters)
       paramError("positions",
                  "If only one input mesh is given, then 'positions' or 'positions_file' must also "
                  "be supplied");
-
-  // Grab the input mesh references as pointers
-  for (auto & input_name : _input_names)
-    _meshes.push_back(&getMeshByName(input_name));
 }
 
 void

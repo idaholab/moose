@@ -36,5 +36,5 @@ protected:
   const std::vector<MeshGeneratorName> & _input_names;
 
   // Holds pointers to the mesh smart pointers (to be populated later).
-  std::vector<std::unique_ptr<MeshBase> *> _meshes;
+  const std::vector<std::unique_ptr<MeshBase> *> _meshes;
 };

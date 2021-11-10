@@ -57,6 +57,7 @@ PatternedMeshGenerator::validParams()
 PatternedMeshGenerator::PatternedMeshGenerator(const InputParameters & parameters)
   : MeshGenerator(parameters),
     _input_names(getParam<std::vector<MeshGeneratorName>>("inputs")),
+    _mesh_ptrs(getMeshes("inputs")),
     _pattern(getParam<std::vector<std::vector<unsigned int>>>("pattern")),
     _x_width(getParam<Real>("x_width")),
     _y_width(getParam<Real>("y_width")),
@@ -69,10 +70,6 @@ PatternedMeshGenerator::PatternedMeshGenerator(const InputParameters & parameter
                    "Index " + Moose::stringify(_pattern[i][j]) +
                        " is larger than the the maximum possible index, which is determined by the "
                        "number of MeshGenerators provided in inputs");
-
-  _mesh_ptrs.reserve(_input_names.size());
-  for (auto & input_name : _input_names)
-    _mesh_ptrs.push_back(&getMeshByName(input_name));
 }
 
 std::unique_ptr<MeshBase>
