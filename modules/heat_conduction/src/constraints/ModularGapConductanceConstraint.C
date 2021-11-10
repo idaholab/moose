@@ -143,7 +143,8 @@ ModularGapConductanceConstraint::setGapGeometryParameters(
   if (gap_geometry_type == GapGeometry::PLATE)
   {
     if (coord_sys == Moose::COORD_RSPHERICAL)
-      mooseError("'gap_geometry_type = PLATE' cannot be used with models having a spherical "
+      paramError("gap_geometry_type",
+                 "'gap_geometry_type = PLATE' cannot be used with models having a spherical "
                  "coordinate system.");
   }
   else if (gap_geometry_type == GapGeometry::CYLINDER)
@@ -152,7 +153,8 @@ ModularGapConductanceConstraint::setGapGeometryParameters(
     {
       if (!params.isParamValid("cylinder_axis_point_1") ||
           !params.isParamValid("cylinder_axis_point_2"))
-        mooseError("For 'gap_geometry_type = CYLINDER' to be used with a Cartesian model, "
+        paramError("gap_geometry_type",
+                   "For 'gap_geometry_type = CYLINDER' to be used with a Cartesian model, "
                    "'cylinder_axis_point_1' and 'cylinder_axis_point_2' must be specified.");
       p1 = params.get<RealVectorValue>("cylinder_axis_point_1");
       p2 = params.get<RealVectorValue>("cylinder_axis_point_2");
@@ -161,7 +163,8 @@ ModularGapConductanceConstraint::setGapGeometryParameters(
     {
       if (params.isParamValid("cylinder_axis_point_1") ||
           params.isParamValid("cylinder_axis_point_2"))
-        mooseError("The 'cylinder_axis_point_1' and 'cylinder_axis_point_2' cannot be specified "
+        paramError("cylinder_axis_point_1",
+                   "The 'cylinder_axis_point_1' and 'cylinder_axis_point_2' cannot be specified "
                    "with axisymmetric models.  The y-axis is used as the cylindrical axis of "
                    "symmetry.");
 
@@ -177,7 +180,8 @@ ModularGapConductanceConstraint::setGapGeometryParameters(
       }
     }
     else if (coord_sys == Moose::COORD_RSPHERICAL)
-      mooseError("'gap_geometry_type = CYLINDER' cannot be used with models having a spherical "
+      paramError("gap_geometry_type",
+                 "'gap_geometry_type = CYLINDER' cannot be used with models having a spherical "
                  "coordinate system.");
   }
   else if (gap_geometry_type == GapGeometry::SPHERE)
@@ -185,14 +189,16 @@ ModularGapConductanceConstraint::setGapGeometryParameters(
     if (coord_sys == Moose::COORD_XYZ || coord_sys == Moose::COORD_RZ)
     {
       if (!params.isParamValid("sphere_origin"))
-        mooseError("For 'gap_geometry_type = SPHERE' to be used with a Cartesian or axisymmetric "
+        paramError("gap_geometry_type",
+                   "For 'gap_geometry_type = SPHERE' to be used with a Cartesian or axisymmetric "
                    "model, 'sphere_origin' must be specified.");
       p1 = params.get<RealVectorValue>("sphere_origin");
     }
     else if (coord_sys == Moose::COORD_RSPHERICAL)
     {
       if (params.isParamValid("sphere_origin"))
-        mooseError("The 'sphere_origin' cannot be specified with spherical models.  x=0 is used "
+        paramError("sphere_origin",
+                   "The 'sphere_origin' cannot be specified with spherical models.  x=0 is used "
                    "as the spherical origin.");
       p1 = Point(0, 0, 0);
     }
@@ -234,7 +240,8 @@ ModularGapConductanceConstraint::computeGapLength() const
 void
 ModularGapConductanceConstraint::computeGapRadii(const ADReal & gap_length)
 {
-  const Point current_point(_q_point[_qp]);
+  const Point & current_point = _q_point[_qp];
+
   if (_gap_geometry_type == GapGeometry::CYLINDER)
   {
     // The vector _p1 + t*(_p2-_p1) defines the cylindrical axis.  The point along this
