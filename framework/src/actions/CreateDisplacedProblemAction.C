@@ -54,6 +54,13 @@ CreateDisplacedProblemAction::addProxyRelationshipManagers(SystemBase & to,
                                                            Moose::RelationshipManagerType rm_type,
                                                            std::string type)
 {
+  // We do not need to create a geometric proxy RM. There are two reasons:
+  // 1. Based on the old logic, a 'attach_geometric_early=false' geometric RM
+  // never be attached to libMesh side
+  // 2. There is always an algebraic version of this RM.
+  if (rm_type == Moose::RelationshipManagerType::GEOMETRIC)
+    return;
+
   auto rm_params = _factory.getValidParams("ProxyRelationshipManager");
 
   rm_params.set<bool>("attach_geometric_early") = false;
