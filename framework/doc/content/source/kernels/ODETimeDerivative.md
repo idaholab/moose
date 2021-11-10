@@ -1,33 +1,22 @@
 # ODETimeDerivative
 
-!alert! construction title=Undocumented Class
-The ODETimeDerivative has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# ODETimeDerivative
-
 !syntax description /ScalarKernels/ODETimeDerivative
 
-## Overview
+A scalar variable can be set to the solution of an ordinary differential equation (ODE), as specified in [the Scalar Kernels syntax page](syntax/ScalarKernels/index.md). This kernel adds a time derivative term. The time integration scheme will be shared with the other non-linear variables. To use a different time integrating scheme, the `ODETimeDerivative` scalar kernel should be replaced with a custom implementation.
 
-!! Replace these lines with information regarding the ODETimeDerivative object.
+## Example input syntax
 
-## Example Input File Syntax
+In this example, the scalar variables `x` and `y` are the solutions to the coupled ODE problem:
 
-!! Describe and include an example of how to use the ODETimeDerivative object.
+!equation
+\dfrac{d x}{d t} -3*x - 2*y = 0
 
-!syntax parameters /ScalarKernels/ODETimeDerivative
+!equation
+\dfrac{d y}{d t} -4*x - y = 0
 
-!syntax inputs /ScalarKernels/ODETimeDerivative
+The time derivative terms are added for each variable using two `ODETimeDerivative` scalar kernels.
 
-!syntax children /ScalarKernels/ODETimeDerivative
-```
-!alert-end!
-
-!syntax description /ScalarKernels/ODETimeDerivative
+!listing test/tests/kernels/ode/parsedode_sys_impl_test.i block=ScalarKernels
 
 !syntax parameters /ScalarKernels/ODETimeDerivative
 
