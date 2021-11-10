@@ -58,11 +58,15 @@ ImageSampler::validParams()
 ImageSampler::ImageSampler(const InputParameters & parameters)
   : FileRangeBuilder(parameters),
 #ifdef LIBMESH_HAVE_VTK
-    _data(NULL),
-    _algorithm(NULL),
+    _data(nullptr),
+    _algorithm(nullptr),
 #endif
     _is_pars(parameters),
-    _is_console((parameters.getCheckedPointerParam<MooseApp *>("_moose_app"))->getOutputWarehouse())
+    _is_console(
+        (parameters.getCheckedPointerParam<MooseApp *>("_moose_app"))->getOutputWarehouse()),
+    _flip({{_is_pars.get<bool>("flip_x"),
+            _is_pars.get<bool>("flip_y"),
+            _is_pars.get<bool>("flip_z")}})
 
 {
 #ifndef LIBMESH_HAVE_VTK
@@ -207,7 +211,6 @@ ImageSampler::setupImageSampler(MooseMesh & mesh)
   vtkMagnitude();
   vtkShiftAndScale();
   vtkThreshold();
-  vtkFlip();
 #endif
 }
 
@@ -225,16 +228,17 @@ ImageSampler::sample(const Point & p) const
   for (int i = 0; i < LIBMESH_DIM; ++i)
   {
     // Compute position, only if voxel size is greater than zero
-    if (_voxel[i] == 0)
-      x[i] = 0;
-
-    else
+    if (_voxel[i] != 0)
     {
       x[i] = std::floor((p(i) - _origin(i)) / _voxel[i]);
 
       // If the point falls on the mesh extents the index needs to be decreased by one
       if (x[i] == _dims[i])
         x[i]--;
+
+      // flip
+      if (_flip[i])
+        x[i] = _dims[i] - x[i] - 1;
     }
   }
 
@@ -328,44 +332,3 @@ ImageSampler::vtkThreshold()
   _algorithm = _image_threshold->GetOutputPort();
 #endif
 }
-
-void
-ImageSampler::vtkFlip()
-{
-#ifdef LIBMESH_HAVE_VTK
-  // Convert boolean values into an integer array, then loop over it
-  int mask[3] = {
-      _is_pars.get<bool>("flip_x"), _is_pars.get<bool>("flip_y"), _is_pars.get<bool>("flip_z")};
-
-  for (int dim = 0; dim < 3; ++dim)
-  {
-    if (mask[dim])
-    {
-      _flip_filter = imageFlip(dim);
-
-      // Update pointers
-      _data = _flip_filter->GetOutput();
-      _algorithm = _flip_filter->GetOutputPort();
-    }
-  }
-#endif
-}
-
-#ifdef LIBMESH_HAVE_VTK
-vtkSmartPointer<vtkImageFlip>
-ImageSampler::imageFlip(const int & axis)
-{
-  vtkSmartPointer<vtkImageFlip> flip_image = vtkSmartPointer<vtkImageFlip>::New();
-
-  flip_image->SetFilteredAxis(axis);
-
-  // Set the data source
-  flip_image->SetInputConnection(_algorithm);
-
-  // Perform the flip
-  flip_image->Update();
-
-  // Return the flip filter pointer
-  return flip_image;
-}
-#endif

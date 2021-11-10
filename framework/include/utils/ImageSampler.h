@@ -14,6 +14,7 @@
 #include "ConsoleStream.h"
 
 #include "libmesh/bounding_box.h"
+#include <array>
 
 // VTK includes
 #ifdef LIBMESH_HAVE_VTK
@@ -92,13 +93,6 @@ protected:
    */
   void vtkMagnitude();
 
-  /**
-   * Perform image flipping
-   *
-   * Flip the image along the x, y, and/or z axis. If multiple flips occur, they happen in order.
-   */
-  void vtkFlip();
-
 private:
 #ifdef LIBMESH_HAVE_VTK
 
@@ -122,18 +116,6 @@ private:
 
   /// Pointer to the magnitude filter
   vtkSmartPointer<vtkImageMagnitude> _magnitude_filter;
-
-  /// Pointers to image flipping filter.  May be used for x, y, or z.
-  vtkSmartPointer<vtkImageFlip> _flip_filter;
-#endif
-
-/**
- * Helper method for flipping image
- * @param axis Flag for determing the flip axis: "x=0", "y=1", "z=2"
- * @return A smart pointer the flipping filter
- */
-#ifdef LIBMESH_HAVE_VTK
-  vtkSmartPointer<vtkImageFlip> imageFlip(const int & axis);
 #endif
 
   /// Origin of image
@@ -161,4 +143,7 @@ private:
 
   /// Create a console stream object for this helper class
   ConsoleStream _is_console;
+
+  /// image flip
+  std::array<bool, 3> _flip;
 };
