@@ -410,4 +410,4 @@ class PerfGraphReporterReader:
             raise TypeError('"num" should be an int')
         if num < 1:
             raise ValueError('"num" should be >= 1')
-        return sorted(self.sections(), key=lambda section: section.totalMemory() if memory else section.selfTime(), reverse=True)[0:num]
+        return sorted(self.sections(), key=lambda section: section.selfMemory() if memory else section.selfTime(), reverse=True)[0:num]

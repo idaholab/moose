@@ -18,7 +18,7 @@ class TestPerfGraphReporterReader(unittest.TestCase):
     """
 
     def setUp(self):
-        self._file = os.path.abspath('../../../test/tests/reporters/perf_graph_reporter/perf_graph_reporter_json.json')
+        self._file = os.path.abspath('../../../test/tests/reporters/perf_graph_reporter/gold/perf_graph_reporter_json.json')
 
         reader = ReporterReader(self._file)
         reader.update(reader.times()[-1])
@@ -127,23 +127,23 @@ class TestPerfGraphReporterReader(unittest.TestCase):
 
         heaviest_nodes = pgrr.heaviestNodes(2)
         self.assertEqual(len(heaviest_nodes), 2)
-        self.assertEqual(heaviest_nodes[0].name(), 'NonlinearSystemBase::Kernels')
-        self.assertEqual(heaviest_nodes[1].name(), 'FEProblem::EquationSystems::Init')
+        self.assertEqual(heaviest_nodes[0].name(), 'MooseApp::setupOptions')
+        self.assertEqual(heaviest_nodes[1].name(), 'MooseTestApp (main)')
 
         heaviest_mem_nodes = pgrr.heaviestNodes(2, memory=True)
         self.assertEqual(len(heaviest_mem_nodes), 2)
-        self.assertEqual(heaviest_mem_nodes[0].name(), 'FEProblem::solve')
-        self.assertEqual(heaviest_mem_nodes[1].name(), 'FEProblem::EquationSystems::Init')
+        self.assertEqual(heaviest_mem_nodes[0].name(), 'MooseTestApp (main)')
+        self.assertEqual(heaviest_mem_nodes[1].name(), 'FEProblem::solve')
 
         heaviest_sections = pgrr.heaviestSections(2)
         self.assertEqual(len(heaviest_sections), 2)
-        self.assertEqual(heaviest_sections[0].name(), 'NonlinearSystemBase::Kernels')
-        self.assertEqual(heaviest_sections[1].name(), 'FEProblem::EquationSystems::Init')
+        self.assertEqual(heaviest_sections[0].name(), 'MooseApp::setupOptions')
+        self.assertEqual(heaviest_sections[1].name(), 'MooseTestApp (main)')
 
         heaviest_mem_sections = pgrr.heaviestSections(2, memory=True)
         self.assertEqual(len(heaviest_sections), 2)
         self.assertEqual(heaviest_mem_sections[0].name(), 'MooseTestApp (main)')
-        self.assertEqual(heaviest_mem_sections[1].name(), 'MooseApp::run')
+        self.assertEqual(heaviest_mem_sections[1].name(), 'Console::outputStep')
 
     def testExceptions(self):
         pgrr = PerfGraphReporterReader(self._file)
