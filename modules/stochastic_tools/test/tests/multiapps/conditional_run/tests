@@ -1,0 +1,21 @@
+[Tests]
+  design = 'SamplerFullSolveMultiApp.md ConditionalSampleReporter.md'
+  issues = '#19350'
+
+  [conditional]
+    requirement = "The system shall be able to control whether a sub-app is run for a certain sample"
+    [function]
+      type = JSONDiff
+      input = conditional_main.i
+      jsondiff = 'conditional_main_out.json'
+      detail = 'with a parsed function dependent on time and sampler values;'
+    []
+    [error]
+      type = RunException
+      input = conditional_main.i
+      cli_args = MultiApps/runner/mode=normal
+      expect_err = "Conditionally run sampler multiapp only works in batch modes."
+      detail = 'error if running in normal mode.'
+    []
+  []
+[]
