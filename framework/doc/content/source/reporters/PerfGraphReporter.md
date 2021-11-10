@@ -15,7 +15,7 @@ The remaining entries represent key value pairs for each of the children to said
 
 When an application is run with multiple processes, the graph for each individual process is reported.
 
-The [PerfGraphReporterReader.md] is a Python utility which can be used to rebuild and traverse the graph built by this reporter.
+The [PerfGraphReporterReader](PerfGraphReporterReader.md optional=True) is a Python utility which can be used to rebuild and traverse the graph built by this reporter.
 
 !syntax parameters /Reporters/PerfGraphReporter
 
