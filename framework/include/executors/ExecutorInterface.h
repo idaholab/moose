@@ -21,6 +21,7 @@ class InputParameters;
 class PostprocessorName;
 class MooseObject;
 class Executor;
+class MooseApp;
 
 /**
  * Interface class for classes which interact with Postprocessors.

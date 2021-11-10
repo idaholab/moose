@@ -13,6 +13,7 @@
 #include "MooseObject.h"
 #include "NullExecutor.h"
 #include "Executor.h"
+#include "MooseApp.h"
 
 InputParameters
 ExecutorInterface::validParams()
