@@ -77,8 +77,10 @@ ProxyRelationshipManager::operator()(const MeshBase::const_element_iterator & /*
   // Build unique_id to elem map
   std::map<dof_id_type, const Elem *> unique_id_to_elem_map;
 
-  for (auto elem_it = _moose_mesh->getMesh().active_elements_begin();
-       elem_it != _moose_mesh->getMesh().active_elements_end();
+  // We have to use all elements because the ghosted elements from the other mesh may very well
+  // include inactive ancestors and things of that sort
+  for (auto elem_it = _moose_mesh->getMesh().elements_begin();
+       elem_it != _moose_mesh->getMesh().elements_end();
        ++elem_it)
     unique_id_to_elem_map[(*elem_it)->unique_id()] = *elem_it;
 
