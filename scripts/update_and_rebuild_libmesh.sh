@@ -164,6 +164,7 @@ if [ -z "$go_fast" ]; then
 
   source $SCRIPT_DIR/configure_libmesh.sh
   SRC_DIR=${SCRIPT_DIR}/../libmesh configure_libmesh --prefix=$LIBMESH_DIR \
+                                                     --with-future-timpi-dir=$LIBMESH_DIR \
                                                      $DISABLE_TIMESTAMPS \
                                                      $VTK_OPTIONS \
                                                      $* | tee -a "$SCRIPT_DIR/$DIAGNOSTIC_LOG" || exit 1
