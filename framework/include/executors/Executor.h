@@ -158,9 +158,17 @@ protected:
   /// code.
   virtual Result run() = 0;
 
+  /// The execute-on flag to associate with the beginning of this executor's execution.
+  /// This allows the framework and users to trigger other object execution by
+  /// associating other objects with this flag.
   ExecFlagType _begin_flag;
+  /// The execute-on flag to associate with the end of this executor's execution.
+  /// This allows the framework and users to trigger other object execution by
+  /// associating other objects with this flag.
   ExecFlagType _end_flag;
 
 private:
+  /// Stores the result representing the outcome from the run function.  It is
+  /// a local member variable here to facilitate restart capability.
   Result _result;
 };

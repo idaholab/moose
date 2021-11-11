@@ -23,7 +23,17 @@ SecantSolve::validParams()
   return params;
 }
 
-SecantSolve::SecantSolve(Executioner & ex) : FixedPointSolve(ex) { allocateStorage(true); }
+SecantSolve::SecantSolve(Executioner & ex) : FixedPointSolve(ex)
+{
+  allocateStorage(true);
+
+  _transformed_pps_values.resize(_transformed_pps.size());
+  for (size_t i = 0; i < _transformed_pps.size(); i++)
+    _transformed_pps_values[i].resize(4);
+  _secondary_transformed_pps_values.resize(_secondary_transformed_pps.size());
+  for (size_t i = 0; i < _secondary_transformed_pps.size(); i++)
+    _secondary_transformed_pps_values[i].resize(4);
+}
 
 void
 SecantSolve::allocateStorage(const bool primary)
@@ -102,25 +112,8 @@ SecantSolve::saveVariableValues(const bool primary)
 }
 
 void
-SecantSolve::initPostprocessorValues()
-{
-  if (!_need_pp_values_init)
-    return;
-  _need_pp_values_init = false;
-
-  _transformed_pps_values.resize(_transformed_pps.size());
-  for (size_t i = 0; i < _transformed_pps.size(); i++)
-    _transformed_pps_values[i].resize(4);
-  _secondary_transformed_pps_values.resize(_secondary_transformed_pps.size());
-  for (size_t i = 0; i < _secondary_transformed_pps.size(); i++)
-    _secondary_transformed_pps_values[i].resize(4);
-}
-
-void
 SecantSolve::savePostprocessorValues(const bool primary)
 {
-  initPostprocessorValues();
-
   const std::vector<PostprocessorName> * transformed_pps;
   std::vector<std::vector<PostprocessorValue>> * transformed_pps_values;
   if (primary)
@@ -164,8 +157,6 @@ SecantSolve::useFixedPointAlgorithmUpdateInsteadOfPicard(const bool primary)
 void
 SecantSolve::transformPostprocessors(const bool primary)
 {
-  initPostprocessorValues();
-
   Real relaxation_factor;
   const std::vector<PostprocessorName> * transformed_pps;
   std::vector<std::vector<PostprocessorValue>> * transformed_pps_values;

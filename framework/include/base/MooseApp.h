@@ -68,11 +68,19 @@ class MooseApp : public ConsoleStreamInterface,
                  public libMesh::ParallelObject
 {
 public:
+  /**
+   * Stores configuration options relating to the fixed-point solving
+   * capability.  This is used for communicating input-file-based config from
+   * the MultiApp object/syntax to the execution (e.g. executor) system.
+   */
   struct FixedPointConfig
   {
     FixedPointConfig() : sub_relaxation_factor(1.0) {}
+    /// relaxation factor to be used for a MultiApp's subapps.
     Real sub_relaxation_factor;
+    /// The names of variables to transform for fixed point solve algorithms (e.g. secant, etc.).
     std::vector<std::string> sub_transformed_vars;
+    /// The names of postprocessors to transform for fixed point solve algorithms (e.g. secant, etc.).
     std::vector<PostprocessorName> sub_transformed_pps;
   };
 
@@ -1013,8 +1021,12 @@ protected:
   std::unordered_map<std::string, std::pair<std::string, std::unique_ptr<InputParameters>>>
       _executor_params;
 
+  /// Multiapp-related fixed point algorithm configuration details
+  /// primarily intended  to be passed to and used by the executioner/executor system.
   FixedPointConfig _fixed_point_config;
 
+  /// Indicates whether we are operating in the new/experimental executor mode
+  /// instead of using the legacy executioner system.
   const bool _use_executor = false;
 
   /// Used to return an executor that does nothing
