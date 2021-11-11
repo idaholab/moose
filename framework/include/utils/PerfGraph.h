@@ -49,7 +49,7 @@ public:
   /**
    * For retrieving values
    */
-  enum TimeType : char
+  enum DataType
   {
     SELF,
     CHILDREN,
@@ -62,8 +62,20 @@ public:
     TOTAL_PERCENT,
     SELF_MEMORY,
     CHILDREN_MEMORY,
-    TOTAL_MEMORY
+    TOTAL_MEMORY,
+    CALLS
   };
+
+  /**
+   * DataType in a MooseEnum for use in InputParameters in objects that query
+   * the PerfGraph with sectionData.
+   */
+  static MooseEnum dataTypeEnum()
+  {
+    return MooseEnum(
+        "SELF CHILDREN TOTAL SELF_AVG CHILDREN_AVG TOTAL_AVG SELF_PERCENT CHILDREN_PERCENT "
+        "TOTAL_PERCENT SELF_MEMORY CHILDREN_MEMORY TOTAL_MEMORY CALLS");
+  }
 
   /**
    * Create a new PerfGraph
@@ -143,80 +155,15 @@ public:
   void setLiveMemoryLimit(unsigned int mem_limit) { _live_print_mem_limit = mem_limit; }
 
   /**
-   * Get the number of calls for a section
+   * Gets a PerfGraph result pertaining to a section
+   * @param type The result type to retrieve
+   * @param section_name The name of the section
+   * @param must_exist Whether not the section must exist; if false and the
+   * section does not exist, returns 0, if true and the section does not exist,
+   * exit with an error
    */
-  unsigned long int getNumCalls(const std::string & section_name);
-
-  /**
-   * Get a reference to the time for a section
-   */
-  Real getTime(const TimeType type, const std::string & section_name);
-
-  /**
-   * Get a reference to the self time for a section
-   *
-   * This reference can be held onto and the value
-   * will be updated anytime update() is called.
-   */
-  const Real & getSelfTime(const std::string & section_name)
-  {
-    return _cumulative_section_info[section_name]._self;
-  }
-
-  /**
-   * Get a reference to the children time for a section
-   *
-   * This reference can be held onto and the value
-   * will be updated anytime update() is called.
-   */
-  const Real & getChildrenTime(const std::string & section_name)
-  {
-    return _cumulative_section_info[section_name]._children;
-  }
-
-  /**
-   * Get a reference to the total time for a section
-   *
-   * This reference can be held onto and the value
-   * will be updated anytime update() is called.
-   */
-  const Real & getTotalTime(const std::string & section_name)
-  {
-    return _cumulative_section_info[section_name]._total;
-  }
-
-  /**
-   * Get a reference to the self memory usage for a section
-   *
-   * This reference can be held onto and the value
-   * will be updated anyting update() is called
-   */
-  const long int & getSelfMemory(const std::string & section_name)
-  {
-    return _cumulative_section_info[section_name]._self_memory;
-  }
-
-  /**
-   * Get a reference to the children memory usage for a section
-   *
-   * This reference can be held onto and the value
-   * will be updated anyting update() is called
-   */
-  const long int & getChildrenMemory(const std::string & section_name)
-  {
-    return _cumulative_section_info[section_name]._children_memory;
-  }
-
-  /**
-   * Get a reference to the total memory usage for a section
-   *
-   * This reference can be held onto and the value
-   * will be updated anyting update() is called
-   */
-  const long int & getTotalMemory(const std::string & section_name)
-  {
-    return _cumulative_section_info[section_name]._total_memory;
-  }
+  Real
+  sectionData(const DataType type, const std::string & section_name, const bool must_exist = true);
 
   /**
    * Updates the time section_time and time for all currently running nodes

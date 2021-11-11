@@ -49,6 +49,24 @@ The `PerfGraph` relies on loggging "levels" to determine how verbose the output 
 - 5: Fairly unimportant, or less used routines
 - 6: Routines that rarely take up much time
 
+## Performance Data Types
+
+The data provided in regards to a section or a node in the `PerfGraph` is as follows:
+
+- `SELF`: The time taken (not including children) in seconds
+- `CHILDREN`: The time taken by children in seconds
+- `TOTAL` The total (self plus children) time taken in seconds
+- `SELF_AVG`: The average time taken (not including children) in seconds over all calls
+- `CHILDREN_AVG`: The average time taken by children in seconds over all calls
+- `TOTAL_AVG`: The total time taken (self plus children) in seconds over all calls
+- `SELF_PERCENT`: The percentage of time taken (not including children) relative to the total application time
+- `CHILDREN_PERCENT`: The percentage of time taken by children relative to the total application time
+- `TOTAL_PERCENT`: The percentage of time taken (self plus children) relative to the total application time
+- `SELF_MEMORY`: The memory added (not including children) in Megabytes
+- `CHILDREN_MEMORY`: The memory added by children in Megabytes
+- `TOTAL_MEMORY`: The total memory added (self plus children) in Megabytes
+- `CALLS`: The number of calls
+
 ## Timing a Section
 
 There are two different methods for timing: on-the-fly registration and pre-registration.  On-the-fly registration is the preferred method and should be used whenever possible.
@@ -87,6 +105,14 @@ Dog::clean()
 ```
 
 What `TIME_SECTION` is doing is creating a static variable to hold a `PerfID` that is initialized by registering the section with the `PerfGraphRegistry`.  Since this is a static variable the registration only happens the very first time that line of code is hit .  Every time after that it simply creates `PerfGuard` object using the passed in `PerfID`.  The `PerfGuard` tells the `PerfGraph` about the new scope and the timing is then started for that section.  At the end of the function the `PerfGuard` dies and in the destructor it tells the `PerfGraph` to remove that scope.  Timing this way means that it is exception safe and impossible to "foul up" because there are no "push/pop" methods to match.
+
+#### Early Retrieval
+
+Sections that are registered using the on-the-fly timing method described above (which are the overwhelming majority of sections in the MOOSE framework and modules) are not registered in the `PerfGraph` until the moment they are ran.
+
+This poses a challenge when obtaining data pertaining to said sections: error checking on whether or not a section exists is dependent on whether or not the section has ran yet. The default behavior for obtaining `PerfGraph` section data via `PerfGraph::sectionData()` is to error if a section with that name has not been found.
+
+Let's say you are trying to time Jacobian evaluation time after every timestep, which is stored in the section `FEProblem::computeJacobianInternal`. But, your system only evaluates the Jacobian after the second timestep. If you try to pull section data on `FEProblem::computeJacobianInternal` on `TIMESTEP_END`, the system will error by default after the first evaluation because such a section has not ran (even though it is a valid section). With this, `Perfgraph::sectionData()` takes an optional boolean argument `must_exist` (which defaults to `true`). Setting `must_exist = false` will return zero if the section is not found.
 
 ### Pre-registered Timing
 
@@ -127,15 +153,15 @@ void slowFunction()
 
 What `TIME_SECTION` is doing is creating a `PerfGuard` object using the passed in `PerfID`.  The `PerfGuard` tells the `PerfGraph` about the new scope and the timing is then started for that section.  At the end of the function the `PerfGuard` dies and in the destructor it tells the `PerfGraph` to remove that scope.  Timing this way means that it is exception safe and impossible to "foul up" because there are no "push/pop" methods to match.
 
-## Retrieving Time
+## Retrieving Section Data
 
-An object that inherits from `PerfGraphInterface` can retrieve the time for a registered section by calling `_perf_graph.getTime()` (or `_perf_graph.getSelf`/`Children`/`TotalTime()`).  These functions return a reference to where the time will be updated for that particular section.  In the normal MOOSE way, the object should hold onto that reference and just use the value of it when it needs to know the time a section has taken.  There is one small issue though... `_perf_graph.update()` should be called to ensure that the time held by the reference is up to date.
+An object that inherits from `PerfGraphInterface` can retrieve the data pertaining to a registered section by calling `perfGraph().sectionData()`. Note the various available data types in [#performance-data-types].
 
 ## The `PerfGraph` Internals
 
-The `PerfGraph` object's main purpose is to store the complete call-graph of `PerfNode`s and the current call-stack of `PerfNode`s.  The graph is held by holding onto the `_root_node`.  All other scopes that are pushed into the graph are then children/descendents of the `_root_node`.
+The `PerfGraph` object's main purpose is to store the complete call-graph of `PerfNode`s and the current call-stack of `PerfNode`s.  The graph is held by holding onto the `_root_node`.  All other scopes that are pushed into the graph are then children/descendants of the `_root_node`.
 
-The call-stack is held within the `_stack` variable.  The `_stack` is statically allocated to `MAX_STACK_SIZE` and `_current_position` is used to point at the most recent node on the stack.  When a `PerfGuard` tells the `PerfStack` about a new scope, the new scope is added a child to the `PerfNode` that is in the `_current_position`.  `_current_position` is then incremented and the new `PerfNode` is put there. When a scope is removed by the `PerfGuard` the `_current_position` is simply decremented - with no other action being necessrry.
+The call-stack is held within the `_stack` variable.  The `_stack` is statically allocated to `MAX_STACK_SIZE` and `_current_position` is used to point at the most recent node on the stack.  When a `PerfGuard` tells the `PerfStack` about a new scope, the new scope is added a child to the `PerfNode` that is in the `_current_position`.  `_current_position` is then incremented and the new `PerfNode` is put there. When a scope is removed by the `PerfGuard` the `_current_position` is simply decremented - with no other action being necessary.
 
 In addition, the `_execution_list` is keeping a running list of every section that executes.  This is utilized by `PerfGraphLivePrint` to print messages out that are multiple levels deep.
 

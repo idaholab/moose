@@ -71,3 +71,9 @@ PerfGraphInterface::registerTimedSection(const std::string & section_name,
     return moose::internal::getPerfGraphRegistry().registerSection(
         section_name, level, live_message, print_dots);
 }
+
+PerfGraph &
+PerfGraphInterface::perfGraph()
+{
+  return _pg_moose_app.perfGraph();
+}

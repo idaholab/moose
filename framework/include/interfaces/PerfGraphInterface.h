@@ -78,6 +78,11 @@ public:
 
   virtual ~PerfGraphInterface() = default;
 
+  /**
+   * Get the PerfGraph
+   */
+  PerfGraph & perfGraph();
+
 protected:
   /**
    * Call to register a named section for timing.
