@@ -359,7 +359,7 @@ public:
    *
    * @param name The name of the Executor
    * @param fail_if_not_found Whether or not to fail if the executor doesn't exist.  If this is
-   * false then this function wll return a NullExecutor
+   * false then this function will return a NullExecutor
    */
   Executor & getExecutor(const std::string & name, bool fail_if_not_found = true);
 
