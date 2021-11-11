@@ -11,11 +11,6 @@
 
 #include "Action.h"
 
-class AddExecutorAction;
-
-template <>
-InputParameters validParams<AddExecutorAction>();
-
 class AddExecutorAction : public Action
 {
 public:
