@@ -106,19 +106,23 @@ NSFVFunctorHeatFluxBC::computeQpResidual()
   ADReal fraction = 0.0;
   ADReal tol = NS_DEFAULT_VALUES::k_epsilon;
 
+  // Get the element from the FaceInfo, making sure to be on the right side of the
+  // boundary if the boundary condition is internal to the mesh
+  const auto elem = ;
+
   if (_locality == NS::settings::local)
   {
     switch (_split_type)
     {
       case NS::splitting::porosity:
       {
-        fraction = (*_eps)(&_face_info->elem());
+        fraction = (*_eps)(elem);
         break;
       }
       case NS::splitting::thermal_conductivity:
       {
-        ADReal d = (*_k_f)(&_face_info->elem()) + (*_k_s)(&_face_info->elem());
-        fraction = d > tol ? (*_k_f)(&_face_info->elem()) / d : 0.5;
+        ADReal d = (*_k_f)(elem) + (*_k_s)(elem);
+        fraction = d > tol ? (*_k_f)(elem) / d : 0.5;
         break;
       }
       case NS::splitting::effective_thermal_conductivity:
@@ -130,15 +134,15 @@ NSFVFunctorHeatFluxBC::computeQpResidual()
         // division by sqrt(3) ensures equivalence with a non-vector form of kappa with
         // 3 components
         ADReal kappa;
-        if ((MooseUtils::absoluteFuzzyEqual((*_kappa)(&_face_info->elem())(0), 0)) &&
-            (MooseUtils::absoluteFuzzyEqual((*_kappa)(&_face_info->elem())(1), 0)) &&
-            (MooseUtils::absoluteFuzzyEqual((*_kappa)(&_face_info->elem())(2), 0)))
+        if ((MooseUtils::absoluteFuzzyEqual((*_kappa)(elem)(0), 0)) &&
+            (MooseUtils::absoluteFuzzyEqual((*_kappa)(elem)(1), 0)) &&
+            (MooseUtils::absoluteFuzzyEqual((*_kappa)(elem)(2), 0)))
           kappa = 1e-42;
         else
-          kappa = (*_kappa)(&_face_info->elem()).norm() / std::sqrt(3.0);
+          kappa = (*_kappa)(elem).norm() / std::sqrt(3.0);
 
-        ADReal d = (*_eps)(&_face_info->elem()) * kappa + (*_kappa_s)(&_face_info->elem());
-        fraction = d > tol ? (*_eps)(&_face_info->elem()) * kappa / d : 0.5;
+        ADReal d = (*_eps)(elem) * kappa + (*_kappa_s)(elem);
+        fraction = d > tol ? (*_eps)(elem) * kappa / d : 0.5;
         break;
       }
     }
