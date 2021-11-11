@@ -2,7 +2,7 @@
 ## Any changes made will require additional changes to any item above that.
 
 moose_libmesh:
-  - moose-libmesh 2022.03.02 build_0
+  - moose-libmesh 2022.03.02 build_1
 
 SHORT_VTK_NAME:
   - 9.1
@@ -14,7 +14,7 @@ moose_libmesh_vtk:
   - moose-libmesh-vtk 9.1.0 build_4
 
 moose_petsc:
-  - moose-petsc 3.15.1 build_7
+  - moose-petsc 3.16.5 build_0
 
 moose_mpich:
   - moose-mpich 3.4.2 build_3
