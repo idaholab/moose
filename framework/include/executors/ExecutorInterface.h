@@ -46,7 +46,6 @@ public:
    * Get an Executor based on its actual name
    *
    * @param executor_name the actual name of the Executor
-   * @param index Only used for vectors of executor names
    */
   Executor & getExecutorByName(const ExecutorName & executor_name) const;
 
