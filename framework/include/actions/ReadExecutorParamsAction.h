@@ -26,5 +26,6 @@ protected:
   virtual void setupAutoPreconditioning();
 
 private:
+  /// Whether to automatically add a preconditioner
   const bool _auto_preconditioning;
 };
