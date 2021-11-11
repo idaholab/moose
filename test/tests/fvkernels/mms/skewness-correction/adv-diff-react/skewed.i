@@ -8,9 +8,6 @@ diff=1.1
   []
 []
 
-[Problem]
-  kernel_coverage_check = off
-[]
 
 [Variables]
   [v]
