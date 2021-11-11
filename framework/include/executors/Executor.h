@@ -45,7 +45,7 @@ public:
     /// to recursively determine if there was any descendant executor failure.
     bool converged = true;
 
-    /// Optional message detailing why a executor passed or failed (i.e. failed to converge).
+    /// Optional message detailing why an executor passed or failed (i.e. failed to converge).
     std::string reason;
 
     /// Maps a name/label of a executor's internal/sub executors to the result
