@@ -68,10 +68,12 @@ public:
   /// Returns the coordinates of the face centroid.
   const Point & faceCentroid() const { return _face_centroid; }
 
+  ///@{
   /// Returns the coordinates of the approximate face centroid
   /// (intersection of the face and the line between the cell centroids)
   /// in case of skewed meshes.
   Point rIntersection() const { return _r_intersection; }
+  ///@}
 
   ///@{
   /// Returns the elem and neighbor elements adjacent to the face.

@@ -14,7 +14,7 @@ FV method implementation in MOOSE, a new set of FV-specific systems was built
 along-side the MOOSE FE infrastructure.  As a new set of systems being created
 after MOOSE has received powerful automatic differentiation (AD) support, the
 FV systems (at least initially) are only being created with AD support in
-mind, and non-AD (manual jacobian) versions will only be supported if a
+mind, and non-AD (manual Jacobian) versions will only be supported if a
 pressing need arises.
 
 ## Variables
@@ -179,11 +179,11 @@ order convergence. Additionally, a skewness-correction is available for the comp
 stencil which uses the following equation:
 
 \begin{equation}
-\phi_f = \phi_{f^'} + \nabla \phi_{f^'} (\vec{r}_{f'}-\vec{r}_f),
+\phi_f = \phi_{f'} + \nabla \phi_{f'} (\vec{r}_{f'}-\vec{r}_f),
 \end{equation}
 
 meaning that the approximate face value ($\phi_{f^'}$) at the intersection of
-the line connecting the cell centroids and the face ($\vec{r}_{f^'}$) is corrected using the
+the line connecting the cell centroids and the face ($\vec{r}_{f'}$) is corrected using the
 approximate gradient at that point and a correction vector $(\vec{r}_{f'}-\vec{r}_f)$.
 This yields second order convergence on [skewed](skewness-correction/adv-diff-react/skewed.i)
 meshes where the compact stencil falls back to first order. However, this
@@ -195,8 +195,8 @@ convergence properties, we generally recommend use of the compact stencil. The
 vertex-based extended stencil is supposed to be more accurate [!cite](moukalled2016finite),
 so perhaps there is a bug in the implementation that needs to be found. The
 skewness-corrected stencil is demonstrated to be more accurate, however it
-considerably slows down the assembly process due to the
-fact that additional face gradients need to be computed.
+considerably slows (a factor of approx. 2-3 depending on the caching options) 
+down the assembly process due to the fact that additional face gradients need to be computed.
 
 On regular, orthogonal grids, the face gradient $\nabla \phi_f$ can be computed
 using a simple linear interpolation between neighboring cell gradients,

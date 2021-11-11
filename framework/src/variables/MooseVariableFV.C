@@ -626,6 +626,9 @@ MooseVariableFV<OutputType>::getInternalFaceValue(const Elem * const neighbor,
   mooseAssert(isInternalFace(fi), "This function only be called on internal faces.");
 
   ADReal * value_pointer = &_temp_face_values[_tid];
+
+  // We ensure that no caching takes place when we compute skewness-corrected
+  // quantities.
   if (_cache_face_values & !correct_skewness)
   {
     auto pr = _face_to_value.emplace(&fi, 0);
@@ -831,6 +834,8 @@ MooseVariableFV<OutputType>::adGradSln(const Elem * const elem, const bool corre
 
   VectorValue<ADReal> * value_pointer = &_temp_cell_gradients[_tid];
 
+  // We ensure that no caching takes place when we compute skewness-corrected
+  // quantities.
   if (_cache_face_values && !correct_skewness)
   {
     auto pr = _elem_to_grad.emplace(elem, VectorValue<ADReal>());
@@ -1059,6 +1064,8 @@ MooseVariableFV<OutputType>::uncorrectedAdGradSln(const FaceInfo & fi,
   mooseError("MooseVariableFV::uncorrectedAdGradSln only supported for global AD indexing");
 #endif
 
+  // We ensure that no caching takes place when we compute skewness-corrected
+  // quantities.
   if (_cache_face_gradients && !correct_skewness)
   {
     auto it = _face_to_unc_grad.find(&fi);
@@ -1076,6 +1083,8 @@ MooseVariableFV<OutputType>::uncorrectedAdGradSln(const FaceInfo & fi,
 
   VectorValue<ADReal> * unc_face_grad_pointer = &_temp_face_unc_gradients[_tid];
 
+  // We ensure that no caching takes place when we compute skewness-corrected
+  // quantities.
   if (_cache_face_gradients && !correct_skewness)
   {
     // Returns a pair with the first being an iterator pointing to the key-value pair and the second
@@ -1122,6 +1131,9 @@ MooseVariableFV<OutputType>::adGradSln(const FaceInfo & fi, const bool correct_s
 
   // Use a pointer to choose the right reference
   VectorValue<ADReal> * face_grad_pointer = &_temp_face_gradients[_tid];
+
+  // We ensure that no caching takes place when we compute skewness-corrected
+  // quantities.
   if (_cache_face_gradients && !correct_skewness)
   {
     auto it = _face_to_grad.find(&fi);
