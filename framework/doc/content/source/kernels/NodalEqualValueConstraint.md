@@ -1,33 +1,19 @@
 # NodalEqualValueConstraint
 
-!alert! construction title=Undocumented Class
-The NodalEqualValueConstraint has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# NodalEqualValueConstraint
-
 !syntax description /ScalarKernels/NodalEqualValueConstraint
 
-## Overview
+The constraint is imposed using a lagrange multiplier variable. The `NodalEqualValueConstraint` forms (part of) the equation for that variable, so its `variable` parameter is set to the lagrange multiplier scalar variable.
 
-!! Replace these lines with information regarding the NodalEqualValueConstraint object.
+Constraining two nodes can be used to impose continuity conditions or to pin
+two independent systems on disjoint meshes together. The limitation to two
+nodes means that this kernel is not designed to work on sidesets or interfaces, except in 1D.
+To impose an equal value constraint on a sideset, please prefer the [EqualValueConstraint.md].
 
-## Example Input File Syntax
+## Example input syntax
 
-!! Describe and include an example of how to use the NodalEqualValueConstraint object.
+In this input file, a `NodalEqualValueConstraint` is used to impose an equality constraint between two disjoint line meshes.
 
-!syntax parameters /ScalarKernels/NodalEqualValueConstraint
-
-!syntax inputs /ScalarKernels/NodalEqualValueConstraint
-
-!syntax children /ScalarKernels/NodalEqualValueConstraint
-```
-!alert-end!
-
-!syntax description /ScalarKernels/NodalEqualValueConstraint
+!listing test/tests/mortar/1d/1d.i block=ScalarKernels
 
 !syntax parameters /ScalarKernels/NodalEqualValueConstraint
 

@@ -21,7 +21,7 @@ NullKernel::validParams()
   params.addParam<Real>(
       "jacobian_fill",
       1e-9,
-      "On diagonal Jacobian fill term to retain an invertable matrix for the preconditioner");
+      "On diagonal Jacobian fill term to retain an invertible matrix for the preconditioner");
   return params;
 }
 

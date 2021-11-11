@@ -24,7 +24,7 @@ MeshGeneratorMesh::validParams()
 
   params.addParam<std::string>("final_generator",
                                "The name of the mesh generator output to use for the final Mesh");
-  params.addClassDescription("Mesh generated from parameters");
+  params.addClassDescription("Mesh generated using mesh generators");
   return params;
 }
 

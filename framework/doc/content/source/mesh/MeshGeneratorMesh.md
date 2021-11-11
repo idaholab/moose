@@ -1,33 +1,16 @@
 # MeshGeneratorMesh
 
-!alert! construction title=Undocumented Class
-The MeshGeneratorMesh has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# MeshGeneratorMesh
-
 !syntax description /Mesh/MeshGeneratorMesh
 
-## Overview
+The `MeshGeneratorMesh` is a `MooseMesh` object on which the mesh generators will build. They may
+not act directly on this mesh, but eventually, after possibly multiple mesh generators were chained
+together, their contribution should be merged into this mesh.
 
-!! Replace these lines with information regarding the MeshGeneratorMesh object.
-
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the MeshGeneratorMesh object.
-
-!syntax parameters /Mesh/MeshGeneratorMesh
-
-!syntax inputs /Mesh/MeshGeneratorMesh
-
-!syntax children /Mesh/MeshGeneratorMesh
-```
-!alert-end!
-
-!syntax description /Mesh/MeshGeneratorMesh
+!alert note
+The [!param](/Mesh/MeshGeneratorMesh/final_generator) is used when there is an ambiguity as to which
+constructed mesh should be used by the simulation. A warning is output if this parameter is not provided
+when an ambiguity is detected. However, in most cases, this parameter is not required and the warning
+is really indicating an issue with the chaining of mesh generators.
 
 !syntax parameters /Mesh/MeshGeneratorMesh
 
