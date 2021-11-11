@@ -38,7 +38,6 @@ public:
    * Get an Executor based on a parameter name
    *
    * @param param_name The name of the parameter
-   * @param index Only used for vectors of executor names
    */
   Executor & getExecutor(const std::string & param_name) const;
 
