@@ -13,7 +13,6 @@
 
 registerMooseAction("MooseApp", AddExecutorAction, "add_executor");
 
-defineLegacyParams(AddExecutorAction);
 
 InputParameters
 AddExecutorAction::validParams()
