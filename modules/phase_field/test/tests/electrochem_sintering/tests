@@ -1,0 +1,7 @@
+[Tests]
+  [./ElectrochemicalSintering]
+    type = 'Exodiff'
+    input = 'ElectrochemicalSintering_test.i'
+    exodiff = 'ElectrochemicalSintering_test_out.e'
+  [../]
+[]
