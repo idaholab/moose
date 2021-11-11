@@ -1,12 +1,11 @@
 [Tests]
   design = 'meshgenerators/SimpleHexagonGenerator.md'
-  requirement = 'MOOSE shall be able to create a simple hexagon mesh '
   [simple_hexagon_generator_tri]
     type = 'Exodiff'
     input = 'sim_hex.i'
     cli_args = '--mesh-only sim_hex_tri_in.e'
     exodiff = 'sim_hex_tri_in.e'
-    detail = 'with TRI elements.'
+    requirement = 'MOOSE shall be able to create a simple hexagon mesh with TRI elements.'
     issues = '#18628'
     recover = false
   []
@@ -16,7 +15,7 @@
     cli_args = 'Mesh/shg/element_type=QUAD
                 --mesh-only sim_hex_quad_in.e'
     exodiff = 'sim_hex_quad_in.e'
-    detail = 'with QUAD elements.'
+    requirement = 'MOOSE shall be able to create a simple hexagon mesh with QUAD elements.'
     issues = '#19352'
     recover = false
   []
