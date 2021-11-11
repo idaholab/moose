@@ -1,3 +1,8 @@
+#
+# Build system component for multi-file plugins (e.g. UMAT, UEXTERNALDB)
+# Check modules/tensor_mechanics/examples/umat_build/Makefile for an example use
+#
+
 # make sure MOOSE_DIR is set
 ifeq (x$(MOOSE_DIR),x)
   $(error Set the MOOSE_DIR environment variable to point to the root of the Moose repository.)

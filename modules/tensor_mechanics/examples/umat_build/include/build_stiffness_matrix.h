@@ -11,6 +11,10 @@
 
 #include <Eigen/Eigen>
 
+/**
+ * build a 6x6 representation of the stiffness tensor in C from the
+ * shear modulus G and Lame's first parameter lambda.
+ */
 void buildStiffnessMatrix(Eigen::Ref<Eigen::Matrix<double, 6, 6>> C,
                           const double & G,
                           const double & lambda);

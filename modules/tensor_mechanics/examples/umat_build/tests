@@ -5,7 +5,7 @@
   [build]
     type = 'RunCommand'
     command = 'make'
-    requirement = "The multi-file UMAT build system shall successfully compile UMAT plugins."
+    requirement = "The multi-file UMAT build system shall compile UMAT plugins."
   []
   [test]
     type = 'RunApp'

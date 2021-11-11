@@ -11,6 +11,11 @@
 
 #include "ParallelUniqueId.h"
 
+/**
+ * Utility class to interface between the object oriented MOOSE app structure and
+ * global Abaqus utility functions. The class encapsulates static members for
+ * intermediate data storage.
+ */
 class AbaqusUtils
 {
 public:
