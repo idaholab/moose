@@ -62,14 +62,14 @@ Real
 MaskedExponential::computeQpResidual()
 {
   return _mask[_qp] * _z * _e * _n_eq[_qp] * _test[_i][_qp] *
-         exp((_w[_qp] - _z * _e * _u[_qp]) / _kB / _temp[_qp]);
+         std::exp((_w[_qp] - _z * _e * _u[_qp]) / _kB / _temp[_qp]);
 }
 
 Real
 MaskedExponential::computeQpJacobian()
 {
   return -_mask[_qp] * _z * _z * _e * _e / _kB / _temp[_qp] * _n_eq[_qp] * _test[_i][_qp] *
-         _phi[_j][_qp] * exp((_w[_qp] - _z * _e * _u[_qp]) / _kB / _temp[_qp]);
+         _phi[_j][_qp] * std::exp((_w[_qp] - _z * _e * _u[_qp]) / _kB / _temp[_qp]);
 }
 
 Real
@@ -78,11 +78,12 @@ MaskedExponential::computeQpOffDiagJacobian(unsigned int jvar)
   // Handle chemical potential explicitly since it appears in the residual
   if (jvar == _w_var)
     return _mask[_qp] * _z * _e * _n_eq[_qp] / _kB / _temp[_qp] *
-           exp((_w[_qp] - _z * _e * _u[_qp]) / _kB / _temp[_qp]) * _phi[_j][_qp] * _test[_i][_qp];
+           std::exp((_w[_qp] - _z * _e * _u[_qp]) / _kB / _temp[_qp]) * _phi[_j][_qp] *
+           _test[_i][_qp];
 
   // Handle temperature explicitly since it appears in the residual
   if (jvar == _temp_var)
-    return _mask[_qp] * _z * _e * exp((_w[_qp] - _z * _e * _u[_qp]) / _kB / _temp[_qp]) *
+    return _mask[_qp] * _z * _e * std::exp((_w[_qp] - _z * _e * _u[_qp]) / _kB / _temp[_qp]) *
            (_prop_dn_eqdT[_qp] -
             _n_eq[_qp] * (_w[_qp] - _z * _e * _u[_qp]) / _kB / _temp[_qp] / _temp[_qp]) *
            _phi[_j][_qp] * _test[_i][_qp];
@@ -91,7 +92,7 @@ MaskedExponential::computeQpOffDiagJacobian(unsigned int jvar)
   //  for all other vars get the coupled variable jvar is referring to
   const unsigned int cvar = mapJvarToCvar(jvar);
 
-  return _z * _e * exp((_w[_qp] - _z * _e * _u[_qp]) / _kB / _temp[_qp]) *
+  return _z * _e * std::exp((_w[_qp] - _z * _e * _u[_qp]) / _kB / _temp[_qp]) *
          ((*_prop_dmaskdarg[cvar])[_qp] + (*_prop_dn_eqdarg[cvar])[_qp]) * _test[_i][_qp] *
          _phi[_j][_qp];
 }

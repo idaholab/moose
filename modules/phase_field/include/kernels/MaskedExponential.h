@@ -13,8 +13,6 @@
 #include "JvarMapInterface.h"
 #include "DerivativeMaterialInterface.h"
 
-// Forward Declaration
-
 /**
  * This kernel implements a term in the variationally-derived equivalent form of Poisson's equation
  * for the electrochemical grand potential sintering model with dilute solution energetics.
@@ -33,11 +31,11 @@ protected:
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  // Chemical potential
+  /// Chemical potential
   unsigned int _w_var;
   const VariableValue & _w;
 
-  // Temperature
+  /// Temperature
   std::string _temp_name;
   unsigned int _temp_var;
   const VariableValue & _temp;

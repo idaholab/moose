@@ -40,11 +40,13 @@ ElectrochemicalSinteringMaterial::validParams()
   params.addParam<Real>(
       "grainboundary_energy", 9.86, "Grain boundary energy in units of problem (energy/area)");
   params.addParam<Real>("int_width", 1, "Interface width in units of problem (length)");
-  params.addParam<Real>("surface_switch_value",
-                        0.3,
-                        "Value between 0 and 1 that determines when the interface begins to switch "
-                        "from surface to GB. Small values give less error while large values "
-                        "converge better.");
+  params.addRangeCheckedParam<Real>(
+      "surface_switch_value",
+      0.3,
+      "surface_switch_value >= 0 & surface_switch_value <= 1.0",
+      "Value between 0 and 1 that determines when the interface begins to switch "
+      "from surface to GB. Small values give less error while large values "
+      "converge better.");
   params.addRequiredParam<std::vector<MaterialPropertyName>>(
       "min_vacancy_concentrations_solid",
       "Vector of names of materials that determine the minimum in energy wrt defect concentrations "
@@ -126,9 +128,6 @@ ElectrochemicalSinteringMaterial::ElectrochemicalSinteringMaterial(
     _eps_r(getParam<Real>("solid_relative_permittivity")),
     _nv_min(getParam<std::vector<Real>>("min_vacancy_concentrations_void"))
 {
-  if ((_switch > 1.0) || (_switch < 0.0))
-    mooseError("ElectrochemicalSinteringMaterial: surface_switch_value should be between 0 and 1");
-
   if (_ndefects != _z.size())
     paramError("defect_charges", "Need to pass in as many defect_charges as chemical_potentials");
   if (_ndefects != _ns_min_names.size())
@@ -176,10 +175,8 @@ ElectrochemicalSinteringMaterial::ElectrochemicalSinteringMaterial(
     _d2omegasdetadeta[i].resize(_neta);
 
     for (unsigned int j = 0; j <= i; ++j)
-    {
       _d2omegasdetadeta[j][i] = _d2omegasdetadeta[i][j] =
           &declarePropertyDerivative<Real>("omegas", _eta_name[j], _eta_name[i]);
-    }
   }
 
   for (unsigned int i = 0; i < _ndefects; ++i)

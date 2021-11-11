@@ -1,7 +1,10 @@
 [Tests]
-  [./ElectrochemicalSintering]
+  [ElectrochemicalSintering]
     type = 'Exodiff'
     input = 'ElectrochemicalSintering_test.i'
     exodiff = 'ElectrochemicalSintering_test_out.e'
-  [../]
+    issues = '#19339'
+    design = '/ElectrochemicalSinteringMaterial.md'
+    requirement = 'MOOSE shall provide a Grand Potential based electrochemical sintering model'
+  []
 []
