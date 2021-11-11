@@ -12,16 +12,16 @@
 #include "ComputeLagrangianStressBase.h"
 
 /// Native interface for providing the 1st Piola Kirchhoff stress
-//
-//    This class *implements* the 1st PK stress update, providing:
-//      1) The 1st PK stress
-//      2) The derivative of the 1st PK stress wrt the deformation gradient
-//
-//    and wraps these to provide:
-//      1) The Cauchy stress
-//      2) The derivative of the increment in the Cauchy stress wrt the
-//         increment in the spatial velocity gradient
-//
+///
+/// This class *implements* the 1st PK stress update, providing:
+///   1) The 1st PK stress
+///   2) The derivative of the 1st PK stress wrt the deformation gradient
+///
+/// and wraps these to provide:
+///   1) The Cauchy stress
+///   2) The derivative of the increment in the Cauchy stress wrt the
+///      increment in the spatial velocity gradient
+///
 class ComputeLagrangianStressPK1 : public ComputeLagrangianStressBase
 {
 public:

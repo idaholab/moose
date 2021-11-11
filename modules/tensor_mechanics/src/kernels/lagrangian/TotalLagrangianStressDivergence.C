@@ -20,7 +20,8 @@ TotalLagrangianStressDivergence::TotalLagrangianStressDivergence(const InputPara
     _pk1(getMaterialPropertyByName<RankTwoTensor>(_base_name + "pk1_stress")),
     _dpk1(getMaterialPropertyByName<RankFourTensor>(_base_name + "pk1_jacobian")),
     _avg_grad_trial(_grad_phi.size()),
-    _uF(getMaterialPropertyByName<RankTwoTensor>(_base_name + "unstabilized_deformation_gradient")),
+    _unstabilized_def_grad(
+        getMaterialPropertyByName<RankTwoTensor>(_base_name + "unstabilized_deformation_gradient")),
     _aF(getMaterialPropertyByName<RankTwoTensor>(_base_name + "avg_deformation_gradient"))
 {
 }
@@ -63,12 +64,12 @@ TotalLagrangianStressDivergence::stabilizeGrad(const RankTwoTensor & Gb, const R
   // Stabilization depends on the kinematics
   if (_large_kinematics)
   {
-    // Horrible thing, see the documentation
-    Real dratio = std::pow(_aF[_qp].det() / _uF[_qp].det(), 1.0 / 3.0);
-    Real fact = (_aF[_qp].inverse().transpose().doubleContraction(Ga) -
-                 _uF[_qp].inverse().transpose().doubleContraction(Gb)) /
-                3.0;
-    return dratio * (Gb + fact * _uF[_qp]);
+    // Horrible thing, see the documentation for how we get here
+    const Real dratio = std::pow(_aF[_qp].det() / _unstabilized_def_grad[_qp].det(), 1.0 / 3.0);
+    const Real fact = (_aF[_qp].inverse().transpose().doubleContraction(Ga) -
+                       _unstabilized_def_grad[_qp].inverse().transpose().doubleContraction(Gb)) /
+                      3.0;
+    return dratio * (Gb + fact * _unstabilized_def_grad[_qp]);
   }
   // Small strain modification is linear
   return Gb + (Ga.trace() - Gb.trace()) / 3.0 * RankTwoTensor::Identity();

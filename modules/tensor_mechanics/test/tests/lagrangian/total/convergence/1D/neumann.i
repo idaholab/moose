@@ -6,12 +6,12 @@
 []
 
 [Variables]
-      [./disp_x]
-      [../]
+  [disp_x]
+  []
 []
 
 [Mesh]
-  [./msh]
+  [msh]
     type = GeneratedMeshGenerator
     dim = 1
     nx = 10
@@ -19,55 +19,55 @@
 []
 
 [Kernels]
-  [./sdx]
-      type = TotalLagrangianStressDivergence
-      variable = disp_x
-      component = 0
-  [../]
+  [sdx]
+    type = TotalLagrangianStressDivergence
+    variable = disp_x
+    component = 0
+  []
 []
 
 [Functions]
-  [./pull]
+  [pull]
     type = ParsedFunction
-    value ='200 * t'
-  [../]
+    value = '200 * t'
+  []
 []
 
 [BCs]
-  [./leftx]
+  [leftx]
     type = DirichletBC
-     preset = true
+    preset = true
     boundary = right
     variable = disp_x
     value = 0.0
-  [../]
-  [./pull]
+  []
+  [pull]
     type = FunctionNeumannBC
     boundary = left
     variable = disp_x
     function = pull
-  [../]
+  []
 []
 
 [Materials]
-  [./elastic_tensor]
+  [elastic_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 100000.0
     poissons_ratio = 0.3
-  [../]
-  [./compute_stress]
+  []
+  [compute_stress]
     type = ComputeLagrangianElasticSmallStress
-  [../]
-  [./compute_strain]
+  []
+  [compute_strain]
     type = ComputeLagrangianStrain
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -92,9 +92,9 @@
 []
 
 [Postprocessors]
-  [./nonlin]
+  [nonlin]
     type = NumNonlinearIterations
-  [../]
+  []
 []
 
 [Outputs]

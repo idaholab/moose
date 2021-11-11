@@ -6,16 +6,16 @@
 []
 
 [Variables]
-      [./disp_x]
-      [../]
-      [./disp_y]
-      [../]
-      [./disp_z]
-      [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
 []
 
 [Mesh]
-  [./msh]
+  [msh]
     type = GeneratedMeshGenerator
     dim = 3
     nx = 1
@@ -25,287 +25,287 @@
 []
 
 [Kernels]
-  [./sdx]
-      type = TotalLagrangianStressDivergence
-      variable = disp_x
-      component = 0
-  [../]
-  [./sdy]
-      type = TotalLagrangianStressDivergence
-      variable = disp_y
-      component = 1
-  [../]
-  [./sdz]
-      type = TotalLagrangianStressDivergence
-      variable = disp_z
-      component = 2
-  [../]
+  [sdx]
+    type = TotalLagrangianStressDivergence
+    variable = disp_x
+    component = 0
+  []
+  [sdy]
+    type = TotalLagrangianStressDivergence
+    variable = disp_y
+    component = 1
+  []
+  [sdz]
+    type = TotalLagrangianStressDivergence
+    variable = disp_z
+    component = 2
+  []
 []
 
 [Functions]
-  [./strain]
+  [strain]
     type = ParsedFunction
-    value ='t'
-  [../]
+    value = 't'
+  []
 []
 
 [BCs]
-  [./leftx]
+  [leftx]
     type = DirichletBC
     preset = true
     boundary = left
     variable = disp_x
     value = 0.0
-  [../]
-  [./boty]
+  []
+  [boty]
     type = DirichletBC
     preset = true
     boundary = bottom
     variable = disp_y
     value = 0.0
-  [../]
-  [./backz]
+  []
+  [backz]
     type = DirichletBC
     preset = true
     boundary = back
     variable = disp_z
     value = 0.0
-  [../]
+  []
 
-  [./pull_x]
+  [pull_x]
     type = FunctionDirichletBC
     boundary = right
     variable = disp_x
     function = strain
-  [../]
+  []
 []
 
 [Materials]
-  [./elastic_tensor]
+  [elastic_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 100000.0
     poissons_ratio = 0.3
-  [../]
-  [./compute_stress]
+  []
+  [compute_stress]
     type = ComputeLagrangianElasticSmallStress
-  [../]
-  [./compute_strain]
+  []
+  [compute_strain]
     type = ComputeLagrangianStrain
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./sxx]
+  [sxx]
     type = ElementAverageValue
     variable = sxx
     execute_on = 'initial timestep_end'
-  [../]
-  [./syy]
+  []
+  [syy]
     type = ElementAverageValue
     variable = syy
     execute_on = 'initial timestep_end'
-  [../]
-  [./sxy]
+  []
+  [sxy]
     type = ElementAverageValue
     variable = sxy
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
-  [./szz]
+  [szz]
     type = ElementAverageValue
     variable = szz
     execute_on = 'initial timestep_end'
-  [../]
-  [./syz]
+  []
+  [syz]
     type = ElementAverageValue
     variable = syz
     execute_on = 'initial timestep_end'
-  [../]
-  [./sxz]
+  []
+  [sxz]
     type = ElementAverageValue
     variable = sxz
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
-  [./exx]
+  [exx]
     type = ElementAverageValue
     variable = exx
     execute_on = 'initial timestep_end'
-  [../]
-  [./eyy]
+  []
+  [eyy]
     type = ElementAverageValue
     variable = eyy
     execute_on = 'initial timestep_end'
-  [../]
-  [./exy]
+  []
+  [exy]
     type = ElementAverageValue
     variable = exy
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
-  [./ezz]
+  [ezz]
     type = ElementAverageValue
     variable = ezz
     execute_on = 'initial timestep_end'
-  [../]
-  [./eyz]
+  []
+  [eyz]
     type = ElementAverageValue
     variable = eyz
     execute_on = 'initial timestep_end'
-  [../]
-  [./exz]
+  []
+  [exz]
     type = ElementAverageValue
     variable = exz
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./sxx]
+  [sxx]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./syy]
+  []
+  [syy]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./sxy]
+  []
+  [sxy]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./szz]
+  []
+  [szz]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./syz]
+  []
+  [syz]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./sxz]
+  []
+  [sxz]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./exx]
+  []
+  [exx]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./eyy]
+  []
+  [eyy]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./exy]
+  []
+  [exy]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./ezz]
+  []
+  [ezz]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./eyz]
+  []
+  [eyz]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./exz]
+  []
+  [exz]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./sxx]
+  [sxx]
     type = RankTwoAux
     variable = sxx
     rank_two_tensor = cauchy_stress
     index_i = 0
     index_j = 0
-  [../]
-  [./syy]
+  []
+  [syy]
     type = RankTwoAux
     variable = syy
     rank_two_tensor = cauchy_stress
     index_i = 1
     index_j = 1
-  [../]
-  [./sxy]
+  []
+  [sxy]
     type = RankTwoAux
     variable = sxy
     rank_two_tensor = cauchy_stress
     index_i = 0
     index_j = 1
-  [../]
+  []
 
-  [./zz]
+  [zz]
     type = RankTwoAux
     variable = szz
     rank_two_tensor = cauchy_stress
     index_i = 2
     index_j = 2
-  [../]
-  [./syz]
+  []
+  [syz]
     type = RankTwoAux
     variable = syz
     rank_two_tensor = cauchy_stress
     index_i = 1
     index_j = 2
-  [../]
-  [./sxz]
+  []
+  [sxz]
     type = RankTwoAux
     variable = sxz
     rank_two_tensor = cauchy_stress
     index_i = 0
     index_j = 2
-  [../]
+  []
 
-  [./exx]
+  [exx]
     type = RankTwoAux
     variable = exx
     rank_two_tensor = mechanical_strain
     index_i = 0
     index_j = 0
-  [../]
-  [./eyy]
+  []
+  [eyy]
     type = RankTwoAux
     variable = eyy
     rank_two_tensor = mechanical_strain
     index_i = 1
     index_j = 1
-  [../]
-  [./exy]
+  []
+  [exy]
     type = RankTwoAux
     variable = exy
     rank_two_tensor = mechanical_strain
     index_i = 0
     index_j = 1
-  [../]
+  []
 
-  [./ezz]
+  [ezz]
     type = RankTwoAux
     variable = ezz
     rank_two_tensor = mechanical_strain
     index_i = 2
     index_j = 2
-  [../]
-  [./eyz]
+  []
+  [eyz]
     type = RankTwoAux
     variable = eyz
     rank_two_tensor = mechanical_strain
     index_i = 1
     index_j = 2
-  [../]
-  [./exz]
+  []
+  [exz]
     type = RankTwoAux
     variable = exz
     rank_two_tensor = mechanical_strain
     index_i = 0
     index_j = 2
-  [../]
+  []
 []
 
 [Executioner]

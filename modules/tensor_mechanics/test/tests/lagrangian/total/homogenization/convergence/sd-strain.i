@@ -9,430 +9,431 @@
 []
 
 [Mesh]
-  [./base]
+  [base]
     type = FileMeshGenerator
     file = '3d.exo'
-  [../]
+  []
 
-  [./sidesets]
+  [sidesets]
     type = SideSetsFromNormalsGenerator
     input = base
     normals = '-1 0 0
                 1 0 0
                 0 -1 0
                 0 1 0
-                0 0 -1
+            '
+              '    0 0 -1
                 0 0 1'
     fixed_normal = true
     new_boundary = 'left right bottom top back front'
-  [../]
+  []
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
- [./hvar]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
+  [hvar]
     family = SCALAR
     order = SIXTH
-  [../]
+  []
 []
 
 [ICs]
-  [./disp_x]
+  [disp_x]
     type = RandomIC
     variable = disp_x
     min = -0.1
     max = 0.1
-  [../]
-  [./disp_y]
+  []
+  [disp_y]
     type = RandomIC
     variable = disp_y
     min = -0.1
     max = 0.1
-  [../]
-  [./disp_z]
+  []
+  [disp_z]
     type = RandomIC
     variable = disp_z
     min = -0.1
     max = 0.1
-  [../]
-  [./hvar]
+  []
+  [hvar]
     type = ScalarConstantIC
     variable = hvar
     value = 0.1
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./sxx]
+  [sxx]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./syy]
+  []
+  [syy]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./sxy]
+  []
+  [sxy]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./szz]
+  []
+  [szz]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./syz]
+  []
+  [syz]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./sxz]
+  []
+  [sxz]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./exx]
+  []
+  [exx]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./eyy]
+  []
+  [eyy]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./exy]
+  []
+  [exy]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./ezz]
+  []
+  [ezz]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./eyz]
+  []
+  [eyz]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./exz]
+  []
+  [exz]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./sxx]
+  [sxx]
     type = RankTwoAux
     variable = sxx
     rank_two_tensor = pk1_stress
     index_i = 0
     index_j = 0
-  [../]
-  [./syy]
+  []
+  [syy]
     type = RankTwoAux
     variable = syy
     rank_two_tensor = pk1_stress
     index_i = 1
     index_j = 1
-  [../]
-  [./sxy]
+  []
+  [sxy]
     type = RankTwoAux
     variable = sxy
     rank_two_tensor = pk1_stress
     index_i = 0
     index_j = 1
-  [../]
+  []
 
-  [./zz]
+  [zz]
     type = RankTwoAux
     variable = szz
     rank_two_tensor = pk1_stress
     index_i = 2
     index_j = 2
-  [../]
-  [./syz]
+  []
+  [syz]
     type = RankTwoAux
     variable = syz
     rank_two_tensor = pk1_stress
     index_i = 1
     index_j = 2
-  [../]
-  [./sxz]
+  []
+  [sxz]
     type = RankTwoAux
     variable = sxz
     rank_two_tensor = pk1_stress
     index_i = 0
     index_j = 2
-  [../]
+  []
 
-  [./exx]
+  [exx]
     type = RankTwoAux
     variable = exx
     rank_two_tensor = mechanical_strain
     index_i = 0
     index_j = 0
-  [../]
-  [./eyy]
+  []
+  [eyy]
     type = RankTwoAux
     variable = eyy
     rank_two_tensor = mechanical_strain
     index_i = 1
     index_j = 1
-  [../]
-  [./exy]
+  []
+  [exy]
     type = RankTwoAux
     variable = exy
     rank_two_tensor = mechanical_strain
     index_i = 0
     index_j = 1
-  [../]
+  []
 
-  [./ezz]
+  [ezz]
     type = RankTwoAux
     variable = ezz
     rank_two_tensor = mechanical_strain
     index_i = 2
     index_j = 2
-  [../]
-  [./eyz]
+  []
+  [eyz]
     type = RankTwoAux
     variable = eyz
     rank_two_tensor = mechanical_strain
     index_i = 1
     index_j = 2
-  [../]
-  [./exz]
+  []
+  [exz]
     type = RankTwoAux
     variable = exz
     rank_two_tensor = mechanical_strain
     index_i = 0
     index_j = 2
-  [../]
+  []
 []
 
 [UserObjects]
-  [./integrator]
+  [integrator]
     type = HomogenizationConstraintIntegral
     targets = 'strain11 strain22 strain33 strain23 strain13 strain12'
     execute_on = 'initial linear'
-  [../]
+  []
 []
 
 [Kernels]
-  [./sdx]
-      type = HomogenizedTotalLagrangianStressDivergence
-      variable = disp_x
-      component = 0
-  [../]
-  [./sdy]
-      type = HomogenizedTotalLagrangianStressDivergence
-      variable = disp_y
-      component = 1
-  [../]
-  [./sdz]
-      type = HomogenizedTotalLagrangianStressDivergence
-      variable = disp_z
-      component = 2
-  [../]
+  [sdx]
+    type = HomogenizedTotalLagrangianStressDivergence
+    variable = disp_x
+    component = 0
+  []
+  [sdy]
+    type = HomogenizedTotalLagrangianStressDivergence
+    variable = disp_y
+    component = 1
+  []
+  [sdz]
+    type = HomogenizedTotalLagrangianStressDivergence
+    variable = disp_z
+    component = 2
+  []
 []
 
 [ScalarKernels]
-  [./enforce]
+  [enforce]
     type = HomogenizationConstraintScalarKernel
     variable = hvar
     integrator = integrator
-  [../]
+  []
 []
 
 [Functions]
-  [./strain11]
+  [strain11]
     type = ParsedFunction
     value = '4.0e-2*t'
-  [../]
-  [./strain22]
+  []
+  [strain22]
     type = ParsedFunction
     value = '-2.0e-2*t'
-  [../]
-  [./strain33]
+  []
+  [strain33]
     type = ParsedFunction
     value = '8.0e-2*t'
-  [../]
-  [./strain23]
+  []
+  [strain23]
     type = ParsedFunction
     value = '2.0e-2*t'
-  [../]
-  [./strain13]
+  []
+  [strain13]
     type = ParsedFunction
     value = '-7.0e-2*t'
-  [../]
-  [./strain12]
+  []
+  [strain12]
     type = ParsedFunction
     value = '1.0e-2*t'
-  [../]
+  []
 []
 
 [BCs]
-  [./Periodic]
-    [./x]
+  [Periodic]
+    [x]
       variable = disp_x
       auto_direction = 'x y z'
-    [../]
-    [./y]
+    []
+    [y]
       variable = disp_y
       auto_direction = 'x y z'
-    [../]
-    [./z]
+    []
+    [z]
       variable = disp_z
       auto_direction = 'x y z'
-    [../]
-  [../]
+    []
+  []
 
-  [./fix1_x]
+  [fix1_x]
     type = DirichletBC
     boundary = "fix_all"
     variable = disp_x
     value = 0
-  [../]
-  [./fix1_y]
+  []
+  [fix1_y]
     type = DirichletBC
     boundary = "fix_all"
     variable = disp_y
     value = 0
-  [../]
-  [./fix1_z]
+  []
+  [fix1_z]
     type = DirichletBC
     boundary = "fix_all"
     variable = disp_z
     value = 0
-  [../]
+  []
 
-  [./fix2_x]
+  [fix2_x]
     type = DirichletBC
     boundary = "fix_xy"
     variable = disp_x
     value = 0
-  [../]
-  [./fix2_y]
+  []
+  [fix2_y]
     type = DirichletBC
     boundary = "fix_xy"
     variable = disp_y
     value = 0
-  [../]
+  []
 
-  [./fix3_z]
+  [fix3_z]
     type = DirichletBC
     boundary = "fix_z"
     variable = disp_z
     value = 0
-  [../]
+  []
 []
 
 [Materials]
-  [./elastic_tensor_1]
+  [elastic_tensor_1]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 100000.0
     poissons_ratio = 0.3
     block = '1'
-  [../]
-  [./elastic_tensor_2]
+  []
+  [elastic_tensor_2]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 120000.0
     poissons_ratio = 0.21
     block = '2'
-  [../]
-  [./elastic_tensor_3]
+  []
+  [elastic_tensor_3]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 80000.0
     poissons_ratio = 0.4
     block = '3'
-  [../]
-  [./elastic_tensor_4]
+  []
+  [elastic_tensor_4]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 76000.0
     poissons_ratio = 0.11
     block = '4'
-  [../]
-  [./compute_stress]
+  []
+  [compute_stress]
     type = ComputeLagrangianElasticSmallStress
-  [../]
-  [./compute_strain]
+  []
+  [compute_strain]
     type = ComputeLagrangianStrain
     homogenization_gradient_names = 'homogenization_gradient'
-  [../]
-  [./compute_homogenization_gradient]
+  []
+  [compute_homogenization_gradient]
     type = ComputeHomogenizedLagrangianStrain
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./sxx]
+  [sxx]
     type = ElementAverageValue
     variable = sxx
     execute_on = 'initial timestep_end'
-  [../]
-  [./syy]
+  []
+  [syy]
     type = ElementAverageValue
     variable = syy
     execute_on = 'initial timestep_end'
-  [../]
-  [./sxy]
+  []
+  [sxy]
     type = ElementAverageValue
     variable = sxy
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
-  [./szz]
+  [szz]
     type = ElementAverageValue
     variable = szz
     execute_on = 'initial timestep_end'
-  [../]
-  [./syz]
+  []
+  [syz]
     type = ElementAverageValue
     variable = syz
     execute_on = 'initial timestep_end'
-  [../]
-  [./sxz]
+  []
+  [sxz]
     type = ElementAverageValue
     variable = sxz
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
-  [./exx]
+  [exx]
     type = ElementAverageValue
     variable = exx
     execute_on = 'initial timestep_end'
-  [../]
-  [./eyy]
+  []
+  [eyy]
     type = ElementAverageValue
     variable = eyy
     execute_on = 'initial timestep_end'
-  [../]
-  [./exy]
+  []
+  [exy]
     type = ElementAverageValue
     variable = exy
     execute_on = 'initial timestep_end'
-  [../]
+  []
 
-  [./ezz]
+  [ezz]
     type = ElementAverageValue
     variable = ezz
     execute_on = 'initial timestep_end'
-  [../]
-  [./eyz]
+  []
+  [eyz]
     type = ElementAverageValue
     variable = eyz
     execute_on = 'initial timestep_end'
-  [../]
-  [./exz]
+  []
+  [exz]
     type = ElementAverageValue
     variable = exz
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Executioner]

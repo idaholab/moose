@@ -15,14 +15,15 @@
 #include "libmesh/vector_value.h"
 
 /// Base class of the "Lagrangian" kernel system
-//    This class provides a common structure for the "new" tensor_mechanics
-//    kernel system.  The goals for this new system are
-//      1) Always-correct jacobians
-//      2) A cleaner material interface
-//
-//    This class provides common input properties and helper methods,
-//    most of the math has to be done in the subclasses
-//
+///
+/// This class provides a common structure for the "new" tensor_mechanics
+/// kernel system.  The goals for this new system are
+///   1) Always-correct jacobians
+///   2) A cleaner material interface
+///
+/// This class provides common input properties and helper methods,
+/// most of the math has to be done in the subclasses
+///
 class LagrangianStressDivergenceBase : public Kernel
 {
 public:

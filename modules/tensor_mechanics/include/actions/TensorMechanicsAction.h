@@ -138,7 +138,7 @@ protected:
   /// New or old kernel system
   const bool _lagrangian_kernels;
 
-  /// Simplified flag for small/large deformations
+  /// Simplified flag for small/large deformations, Lagrangian kernel system
   const bool _lk_large_kinematics;
 
   /// New kernel system kinematics types
@@ -152,7 +152,7 @@ protected:
   /// Simplified volumetric locking correction flag for new kernels
   bool _lk_locking;
 
-  /// Flag indicating if the homogenization system is present
+  /// Flag indicating if the homogenization system is present for new kernels
   bool _lk_homogenization;
 
   // Helper to translate into MOOSE talk

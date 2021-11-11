@@ -9,419 +9,420 @@
 []
 
 [Mesh]
-  [./base]
+  [base]
     type = FileMeshGenerator
     file = '3d.exo'
-  [../]
+  []
 
-  [./sidesets]
+  [sidesets]
     type = SideSetsFromNormalsGenerator
     input = base
     normals = '-1 0 0
                 1 0 0
                 0 -1 0
                 0 1 0
-                0 0 -1
+            '
+              '    0 0 -1
                 0 0 1'
     fixed_normal = true
     new_boundary = 'left right bottom top back front'
-  [../]
+  []
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
- [./hvar]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
+  [hvar]
     family = SCALAR
     order = NINTH
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./pk1_stress_xx]
+  [pk1_stress_xx]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./pk1_stress_yx]
+  []
+  [pk1_stress_yx]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./pk1_stress_zx]
+  []
+  [pk1_stress_zx]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./pk1_stress_xy]
+  []
+  [pk1_stress_xy]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./pk1_stress_yy]
+  []
+  [pk1_stress_yy]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./pk1_stress_zy]
+  []
+  [pk1_stress_zy]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./pk1_stress_xz]
+  []
+  [pk1_stress_xz]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./pk1_stress_yz]
+  []
+  [pk1_stress_yz]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./pk1_stress_zz]
+  []
+  [pk1_stress_zz]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 
-  [./deformation_gradient_xx]
+  [deformation_gradient_xx]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./deformation_gradient_yx]
+  []
+  [deformation_gradient_yx]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./deformation_gradient_zx]
+  []
+  [deformation_gradient_zx]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./deformation_gradient_xy]
+  []
+  [deformation_gradient_xy]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./deformation_gradient_yy]
+  []
+  [deformation_gradient_yy]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./deformation_gradient_zy]
+  []
+  [deformation_gradient_zy]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./deformation_gradient_xz]
+  []
+  [deformation_gradient_xz]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./deformation_gradient_yz]
+  []
+  [deformation_gradient_yz]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./deformation_gradient_zz]
+  []
+  [deformation_gradient_zz]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./pk1_stress_xx]
+  [pk1_stress_xx]
     type = RankTwoAux
     variable = pk1_stress_xx
     rank_two_tensor = pk1_stress
     index_i = 0
     index_j = 0
-  [../]
-  [./pk1_stress_yx]
+  []
+  [pk1_stress_yx]
     type = RankTwoAux
     variable = pk1_stress_yx
     rank_two_tensor = pk1_stress
     index_i = 1
     index_j = 0
-  [../]
-  [./pk1_stress_zx]
+  []
+  [pk1_stress_zx]
     type = RankTwoAux
     variable = pk1_stress_zx
     rank_two_tensor = pk1_stress
     index_i = 2
     index_j = 0
-  [../]
-  [./pk1_stress_xy]
+  []
+  [pk1_stress_xy]
     type = RankTwoAux
     variable = pk1_stress_xy
     rank_two_tensor = pk1_stress
     index_i = 0
     index_j = 1
-  [../]
-  [./pk1_stress_yy]
+  []
+  [pk1_stress_yy]
     type = RankTwoAux
     variable = pk1_stress_yy
     rank_two_tensor = pk1_stress
     index_i = 1
     index_j = 1
-  [../]
-  [./pk1_stress_zy]
+  []
+  [pk1_stress_zy]
     type = RankTwoAux
     variable = pk1_stress_zy
     rank_two_tensor = pk1_stress
     index_i = 2
     index_j = 1
-  [../]
-  [./pk1_stress_xz]
+  []
+  [pk1_stress_xz]
     type = RankTwoAux
     variable = pk1_stress_xz
     rank_two_tensor = pk1_stress
     index_i = 0
     index_j = 2
-  [../]
-  [./pk1_stress_yz]
+  []
+  [pk1_stress_yz]
     type = RankTwoAux
     variable = pk1_stress_yz
     rank_two_tensor = pk1_stress
     index_i = 1
     index_j = 2
-  [../]
-  [./pk1_stress_zz]
+  []
+  [pk1_stress_zz]
     type = RankTwoAux
     variable = pk1_stress_zz
     rank_two_tensor = pk1_stress
     index_i = 2
     index_j = 2
-  [../]
+  []
 
-  [./deformation_gradient_xx]
+  [deformation_gradient_xx]
     type = RankTwoAux
     variable = deformation_gradient_xx
     rank_two_tensor = deformation_gradient
     index_i = 0
     index_j = 0
-  [../]
-  [./deformation_gradient_yx]
+  []
+  [deformation_gradient_yx]
     type = RankTwoAux
     variable = deformation_gradient_yx
     rank_two_tensor = deformation_gradient
     index_i = 1
     index_j = 0
-  [../]
-  [./deformation_gradient_zx]
+  []
+  [deformation_gradient_zx]
     type = RankTwoAux
     variable = deformation_gradient_zx
     rank_two_tensor = deformation_gradient
     index_i = 2
     index_j = 0
-  [../]
-  [./deformation_gradient_xy]
+  []
+  [deformation_gradient_xy]
     type = RankTwoAux
     variable = deformation_gradient_xy
     rank_two_tensor = deformation_gradient
     index_i = 0
     index_j = 1
-  [../]
-  [./deformation_gradient_yy]
+  []
+  [deformation_gradient_yy]
     type = RankTwoAux
     variable = deformation_gradient_yy
     rank_two_tensor = deformation_gradient
     index_i = 1
     index_j = 1
-  [../]
-  [./deformation_gradient_zy]
+  []
+  [deformation_gradient_zy]
     type = RankTwoAux
     variable = deformation_gradient_zy
     rank_two_tensor = deformation_gradient
     index_i = 2
     index_j = 1
-  [../]
-  [./deformation_gradient_xz]
+  []
+  [deformation_gradient_xz]
     type = RankTwoAux
     variable = deformation_gradient_xz
     rank_two_tensor = deformation_gradient
     index_i = 0
     index_j = 2
-  [../]
-  [./deformation_gradient_yz]
+  []
+  [deformation_gradient_yz]
     type = RankTwoAux
     variable = deformation_gradient_yz
     rank_two_tensor = deformation_gradient
     index_i = 1
     index_j = 2
-  [../]
-  [./deformation_gradient_zz]
+  []
+  [deformation_gradient_zz]
     type = RankTwoAux
     variable = deformation_gradient_zz
     rank_two_tensor = deformation_gradient
     index_i = 2
     index_j = 2
-  [../]
+  []
 []
 
 [UserObjects]
-  [./integrator]
+  [integrator]
     type = HomogenizationConstraintIntegral
     targets = 'stress11 strain21 strain31 strain12 stress22 strain32 strain13 strain23 strain33'
     execute_on = 'initial linear'
-  [../]
+  []
 []
 
 [Kernels]
-  [./sdx]
-      type = HomogenizedTotalLagrangianStressDivergence
-      variable = disp_x
-      component = 0
-  [../]
-  [./sdy]
-      type = HomogenizedTotalLagrangianStressDivergence
-      variable = disp_y
-      component = 1
-  [../]
-  [./sdz]
-      type = HomogenizedTotalLagrangianStressDivergence
-      variable = disp_z
-      component = 2
-  [../]
+  [sdx]
+    type = HomogenizedTotalLagrangianStressDivergence
+    variable = disp_x
+    component = 0
+  []
+  [sdy]
+    type = HomogenizedTotalLagrangianStressDivergence
+    variable = disp_y
+    component = 1
+  []
+  [sdz]
+    type = HomogenizedTotalLagrangianStressDivergence
+    variable = disp_z
+    component = 2
+  []
 []
 
 [ScalarKernels]
-  [./enforce]
+  [enforce]
     type = HomogenizationConstraintScalarKernel
     variable = hvar
     integrator = integrator
-  [../]
+  []
 []
 
 [Functions]
-  [./stress11]
+  [stress11]
     type = ParsedFunction
     value = '120.0*t'
-  [../]
-  [./stress22]
+  []
+  [stress22]
     type = ParsedFunction
     value = '65*t'
-  [../]
-  [./strain33]
+  []
+  [strain33]
     type = ParsedFunction
     value = '8.0e-2*t'
-  [../]
-  [./strain23]
+  []
+  [strain23]
     type = ParsedFunction
     value = '2.0e-2*t'
-  [../]
-  [./strain13]
+  []
+  [strain13]
     type = ParsedFunction
     value = '-7.0e-2*t'
-  [../]
-  [./strain12]
+  []
+  [strain12]
     type = ParsedFunction
     value = '1.0e-2*t'
-  [../]
-  [./strain32]
+  []
+  [strain32]
     type = ParsedFunction
     value = '1.0e-2*t'
-  [../]
-  [./strain31]
+  []
+  [strain31]
     type = ParsedFunction
     value = '2.0e-2*t'
-  [../]
-  [./strain21]
+  []
+  [strain21]
     type = ParsedFunction
     value = '-1.5e-2*t'
-  [../]
-  [./zero]
+  []
+  [zero]
     type = ConstantFunction
     value = 0
-  [../]
+  []
 []
 
 [BCs]
-  [./Periodic]
-    [./x]
+  [Periodic]
+    [x]
       variable = disp_x
       auto_direction = 'x y z'
-    [../]
-    [./y]
+    []
+    [y]
       variable = disp_y
       auto_direction = 'x y z'
-    [../]
-    [./z]
+    []
+    [z]
       variable = disp_z
       auto_direction = 'x y z'
-    [../]
-  [../]
+    []
+  []
 
-  [./fix1_x]
+  [fix1_x]
     type = DirichletBC
     boundary = "fix_all"
     variable = disp_x
     value = 0
-  [../]
-  [./fix1_y]
+  []
+  [fix1_y]
     type = DirichletBC
     boundary = "fix_all"
     variable = disp_y
     value = 0
-  [../]
-  [./fix1_z]
+  []
+  [fix1_z]
     type = DirichletBC
     boundary = "fix_all"
     variable = disp_z
     value = 0
-  [../]
+  []
 
-  [./fix2_x]
+  [fix2_x]
     type = DirichletBC
     boundary = "fix_xy"
     variable = disp_x
     value = 0
-  [../]
-  [./fix2_y]
+  []
+  [fix2_y]
     type = DirichletBC
     boundary = "fix_xy"
     variable = disp_y
     value = 0
-  [../]
+  []
 
-  [./fix3_z]
+  [fix3_z]
     type = DirichletBC
     boundary = "fix_z"
     variable = disp_z
     value = 0
-  [../]
+  []
 []
 
 [Materials]
-  [./elastic_tensor_1]
+  [elastic_tensor_1]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 100000.0
     poissons_ratio = 0.3
     block = '1'
-  [../]
-  [./elastic_tensor_2]
+  []
+  [elastic_tensor_2]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 120000.0
     poissons_ratio = 0.21
     block = '2'
-  [../]
-  [./elastic_tensor_3]
+  []
+  [elastic_tensor_3]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 80000.0
     poissons_ratio = 0.4
     block = '3'
-  [../]
-  [./elastic_tensor_4]
+  []
+  [elastic_tensor_4]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 76000.0
     poissons_ratio = 0.11
     block = '4'
-  [../]
-  [./compute_stress]
+  []
+  [compute_stress]
     type = ComputeLagrangianElasticSmallStress
-  [../]
-  [./compute_strain]
+  []
+  [compute_strain]
     type = ComputeLagrangianStrain
     homogenization_gradient_names = 'homogenization_gradient'
-  [../]
-  [./compute_homogenization_gradient]
+  []
+  [compute_homogenization_gradient]
     type = ComputeHomogenizedLagrangianStrain
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

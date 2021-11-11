@@ -39,12 +39,12 @@ ComputeStVenantKirchhoffStress::computeQpPK2Stress()
   // This is because we need to drop quadratic terms for the linear update to
   // use a linear strain measure
 
-  // Jacobian is the same for both
+  // Jacobian is the same for both the small and Green-Lagrange strains
   _C[_qp] = _elasticity_tensor[_qp];
 
   // Get the right strain
   RankTwoTensor strain;
-  if (_large_kinematics) // Large deformations = nonlinear strain
+  if (_large_kinematics) // Large deformations = Green-Lagrange strain
     strain = _E[_qp];
   else // Small deformations = linear strain
     strain = 0.5 * (_F[_qp] + _F[_qp].transpose());

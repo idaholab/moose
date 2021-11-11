@@ -54,7 +54,7 @@ HomogenizedTotalLagrangianStressDivergence::computeOffDiagJacobianScalar(unsigne
 
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     {
-      Real dV = _JxW[_qp] * _coord[_qp];
+      const Real dV = _JxW[_qp] * _coord[_qp];
       for (_h = 0; _h < _mg_order; _h++)
       {
         for (_i = 0; _i < _test.size(); _i++)

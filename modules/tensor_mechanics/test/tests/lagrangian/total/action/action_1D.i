@@ -6,12 +6,12 @@
 []
 
 [Variables]
-      [./disp_x]
-      [../]
+  [disp_x]
+  []
 []
 
 [Mesh]
-  [./msh]
+  [msh]
     type = GeneratedMeshGenerator
     dim = 1
     nx = 10
@@ -19,59 +19,59 @@
 []
 
 [Modules]
-  [./TensorMechanics]
-    [./Master]
-      [./all]
+  [TensorMechanics]
+    [Master]
+      [all]
         strain = FINITE
         add_variables = true
         new_system = true
         formulation = TOTAL
         volumetric_locking_correction = false
-      [../]
-    [../]
-  [../]
+      []
+    []
+  []
 []
 
 [Functions]
-  [./pull]
+  [pull]
     type = ParsedFunction
-    value ='0.06 * t'
-  [../]
+    value = '0.06 * t'
+  []
 []
 
 [BCs]
-  [./leftx]
+  [leftx]
     type = DirichletBC
     preset = true
     boundary = right
     variable = disp_x
     value = 0.0
-  [../]
-  [./pull]
+  []
+  [pull]
     type = FunctionDirichletBC
     boundary = left
     variable = disp_x
     function = pull
     preset = true
-  [../]
+  []
 []
 
 [Materials]
-  [./elastic_tensor]
+  [elastic_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 100000.0
     poissons_ratio = 0.3
-  [../]
-  [./stress_base]
+  []
+  [stress_base]
     type = ComputeLagrangianElasticSmallStress
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

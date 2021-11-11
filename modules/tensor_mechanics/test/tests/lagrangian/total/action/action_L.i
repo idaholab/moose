@@ -8,78 +8,80 @@
 []
 
 [Modules]
-  [./TensorMechanics]
-    [./Master]
-      [./all]
+  [TensorMechanics]
+    [Master]
+      [all]
         strain = SMALL
         add_variables = true
         new_system = true
         formulation = TOTAL
         volumetric_locking_correction = true
-        generate_output = 'cauchy_stress_xx cauchy_stress_yy cauchy_stress_zz cauchy_stress_xy cauchy_stress_xz cauchy_stress_yz strain_xx strain_yy strain_zz strain_xy strain_xz strain_yz'
-      [../]
-    [../]
-  [../]
+        generate_output = 'cauchy_stress_xx cauchy_stress_yy cauchy_stress_zz cauchy_stress_xy '
+                          'cauchy_stress_xz cauchy_stress_yz strain_xx strain_yy strain_zz strain_xy '
+                          'strain_xz strain_yz'
+      []
+    []
+  []
 []
 
 [Functions]
-  [./pfn]
+  [pfn]
     type = PiecewiseLinear
     x = '0    1    2'
     y = '0.00 0.3 0.5'
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
-     type = DirichletBC
-     preset = true
-     variable = disp_x
-     boundary = fix
-     value = 0.0
-  [../]
+  [left]
+    type = DirichletBC
+    preset = true
+    variable = disp_x
+    boundary = fix
+    value = 0.0
+  []
 
-  [./bottom]
+  [bottom]
     type = DirichletBC
     preset = true
     variable = disp_y
     boundary = fix
     value = 0.0
-  [../]
+  []
 
-  [./back]
+  [back]
     type = DirichletBC
     preset = true
     variable = disp_z
     boundary = fix
     value = 0.0
-  [../]
+  []
 
-  [./front]
+  [front]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = pull
     function = pfn
     preset = true
-  [../]
+  []
 []
 
 [Materials]
-  [./elastic_tensor]
+  [elastic_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 100000.0
     poissons_ratio = 0.25
-  [../]
-  [./compute_stress]
+  []
+  [compute_stress]
     type = ComputeLagrangianElasticSmallStress
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -99,8 +101,8 @@
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = Exodus
     file_base = 'blah'
-  [../]
+  []
 []

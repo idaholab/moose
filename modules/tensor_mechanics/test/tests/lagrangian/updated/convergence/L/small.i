@@ -9,93 +9,93 @@
 []
 
 [Variables]
-      [./disp_x]
-      [../]
-      [./disp_y]
-      [../]
-      [./disp_z]
-      [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
 []
 
 [Functions]
-  [./pfn]
+  [pfn]
     type = PiecewiseLinear
     x = '0    1    2'
     y = '0.00 0.3 0.5'
-  [../]
+  []
 []
 
 [Kernels]
-  [./sdx]
-      type = UpdatedLagrangianStressDivergence
-      variable = disp_x
-      component = 0
-  [../]
-  [./sdy]
-      type = UpdatedLagrangianStressDivergence
-      variable = disp_y
-      component = 1
-  [../]
-  [./sdz]
-      type = UpdatedLagrangianStressDivergence
-      variable = disp_z
-      component = 2
-  [../]
+  [sdx]
+    type = UpdatedLagrangianStressDivergence
+    variable = disp_x
+    component = 0
+  []
+  [sdy]
+    type = UpdatedLagrangianStressDivergence
+    variable = disp_y
+    component = 1
+  []
+  [sdz]
+    type = UpdatedLagrangianStressDivergence
+    variable = disp_z
+    component = 2
+  []
 []
 
 [BCs]
-  [./left]
-     type = DirichletBC
-     preset = true
-     variable = disp_x
-     boundary = fix
-     value = 0.0
-  [../]
+  [left]
+    type = DirichletBC
+    preset = true
+    variable = disp_x
+    boundary = fix
+    value = 0.0
+  []
 
-  [./bottom]
+  [bottom]
     type = DirichletBC
     preset = true
     variable = disp_y
     boundary = fix
     value = 0.0
-  [../]
+  []
 
-  [./back]
+  [back]
     type = DirichletBC
     preset = true
     variable = disp_z
     boundary = fix
     value = 0.0
-  [../]
+  []
 
-  [./front]
+  [front]
     type = FunctionDirichletBC
     variable = disp_z
     boundary = pull
     function = pfn
     preset = true
-  [../]
+  []
 []
 
 [Materials]
-  [./elastic_tensor]
+  [elastic_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 100000.0
     poissons_ratio = 0.25
-  [../]
-  [./compute_stress]
+  []
+  [compute_stress]
     type = ComputeLagrangianElasticSmallStress
-  [../]
-  [./compute_strain]
+  []
+  [compute_strain]
     type = ComputeLagrangianStrain
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -115,9 +115,9 @@
 []
 
 [Postprocessors]
-  [./nonlin]
+  [nonlin]
     type = NumNonlinearIterations
-  [../]
+  []
 []
 
 [Outputs]

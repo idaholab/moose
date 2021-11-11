@@ -12,7 +12,7 @@ class's role in greater detail, the following gives a brief description.
 The class calculates the strain measures available for the constitutive models to 
 use to define the stress update and the kinematic tenors required to setup
 the stress equilibrium problem for large deformation simulations.
-The `stabilize_strain` averages the volumetric/dilitational part
+The `stabilize_strain` averages the volumetric/dilatational part
 of these strain measures  using an [$\bar{F}$ stabilization](Stabilization.md) approach
 to prevent locking of linear quad and hex elements for problems experiencing incompressible
 deformation.  This class also adds in the extra deformation gradient imposed by the
@@ -22,7 +22,7 @@ The calculations differ somewhat between small and large deformation kinematic t
 The `large_kinematics` flag selects between the two theories.
 This flag should be consistent between the strain calculator and the kernels.
 The
-`stabilize_strain` flag determines if the calculator uses the $\bar{F}$ stabilization.
+`stabilize_strain` flag determines if the calculator uses the $\bar{F}$ stabilization [!cite](de1996design).
 
 Step-by-step the class:
 

@@ -16,11 +16,12 @@
 #include "Assembly.h"
 
 /// Total Lagrangian formulation with cross-jacobian homogenization terms
-//    The total Lagrangian formulation can interact with the homogenization
-//    system defined by the HomogenizationConstraintScalarKernel and
-//    HomogenizationConstraintIntegral user object by providing the
-//    correct off-diagonal Jacobian entries.
-//
+///
+///  The total Lagrangian formulation can interact with the homogenization
+///  system defined by the HomogenizationConstraintScalarKernel and
+///  HomogenizationConstraintIntegral user object by providing the
+///  correct off-diagonal Jacobian entries.
+///
 class HomogenizedTotalLagrangianStressDivergence : public TotalLagrangianStressDivergence
 {
 public:
@@ -52,7 +53,7 @@ private:
 
 protected:
   /// The scalar variable used to enforce the homogenization constraints
-  unsigned int _macro_gradient_num;
+  const unsigned int _macro_gradient_num;
   /// Order of the homogenization variable, used in several places
   const unsigned int _mg_order;
 

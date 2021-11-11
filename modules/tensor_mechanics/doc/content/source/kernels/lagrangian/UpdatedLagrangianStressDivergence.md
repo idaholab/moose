@@ -66,6 +66,24 @@ For this kernel `use_displaced_mesh` must be set to `true` if
 `large_kinematics` is `true` so that the volume integrals and
 gradients are with respect to the current coordinates.
 
+For the Jacobian the small deformation
+\begin{equation}
+      \phi_{i,j}^{\alpha}C_{ijkl}g_{kl}^{\beta}
+\end{equation}
+term and the large deformation term
+\begin{equation}
+      T_{ijkl}\phi_{i,j}^{\alpha}f_{km}g_{ml}^{\beta}
+\end{equation}
+are identical (assuming the incremental deformation gradient is the identity and the deformation gradient
+degenerates to the small strain for the small deformation case) and involve
+the constitutive model.  These are then called the "material" part of the Jacobian.  The remaining
+large deformation term
+\begin{equation}
+      \sigma_{ij}\left(\phi_{k,k}^{\alpha}\psi_{ij}^{\beta}-\phi_{k,j}^{\alpha}\psi_{ik}^{\beta}\right)
+\end{equation}
+involves the current stress and the updated geometry and so it is called the "geometric" part of the
+Jacobian.
+
 The constitutive model needs to provide the Cauchy stress and the derivative of
 that stress with respect to the increment in the spatial velocity gradient.
 However, the [material system](tensor_mechanics/NewMaterialSystem.md)

@@ -12,19 +12,20 @@
 #include "LagrangianStressDivergenceBase.h"
 
 /// Enforce equilibrium with an updated Lagrangian formulation
-//    This class enforces equilibrium when  used in conjunction with
-//    the corresponding strain calculator (CalculateStrainLagrangianKernel)
-//    and with either a stress calculator that provides the
-//    Cauchy stress ("stress") and the appropriate "cauchy_jacobian",
-//    which needs to be the derivative of the increment in Cauchy stress
-//    with respect to the increment in the spatial velocity gradient.
-//
-//    This kernel should be used with the new "ComputeLagrangianStressBase"
-//    stress update system and the "ComputeLagrangianStrain" system for strains.
-//
-//    use_displaced_mesh must be true for large deformation kinematics
-//    The kernel enforces this with an error
-//
+///
+/// This class enforces equilibrium when  used in conjunction with
+/// the corresponding strain calculator (CalculateStrainLagrangianKernel)
+/// and with either a stress calculator that provides the
+/// Cauchy stress ("stress") and the appropriate "cauchy_jacobian",
+/// which needs to be the derivative of the increment in Cauchy stress
+/// with respect to the increment in the spatial velocity gradient.
+///
+/// This kernel should be used with the new "ComputeLagrangianStressBase"
+/// stress update system and the "ComputeLagrangianStrain" system for strains.
+///
+/// use_displaced_mesh must be true for large deformation kinematics
+/// The kernel enforces this with an error
+///
 class UpdatedLagrangianStressDivergence : public LagrangianStressDivergenceBase
 {
 public:
@@ -84,5 +85,5 @@ protected:
   /// The derivative of the increment in Cauchy stress wrt the increment in the spatial velocity gradient
   const MaterialProperty<RankFourTensor> & _material_jacobian;
   /// The inverse incremental deformation gradient
-  const MaterialProperty<RankTwoTensor> & _df;
+  const MaterialProperty<RankTwoTensor> & _inv_inc_def_grad;
 };

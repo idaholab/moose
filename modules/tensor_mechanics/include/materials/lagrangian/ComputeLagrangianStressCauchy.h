@@ -12,15 +12,16 @@
 #include "ComputeLagrangianStressBase.h"
 
 /// Native interface for providing the Cauchy stress
-//    This class *implements* the Cauchy stress update, providing
-//      1) the Cauchy stress
-//      2) the derivative of the increment in Cauchy stress wrt the
-//         increment in the spatial velocity gradient
-//
-//    And wraps these quantities to provide
-//      1) the 1st PK stress
-//      2) the derivative of the 1st PK stress wrt the deformation gradient
-//
+///
+/// This class *implements* the Cauchy stress update, providing
+///   1) the Cauchy stress
+///   2) the derivative of the increment in Cauchy stress wrt the
+///      increment in the spatial velocity gradient
+///
+/// And wraps these quantities to provide
+///   1) the 1st PK stress
+///   2) the derivative of the 1st PK stress wrt the deformation gradient
+///
 class ComputeLagrangianStressCauchy : public ComputeLagrangianStressBase
 {
 public:

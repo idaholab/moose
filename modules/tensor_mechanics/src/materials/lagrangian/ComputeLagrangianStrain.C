@@ -47,7 +47,7 @@ ComputeLagrangianStrain::ComputeLagrangianStrain(const InputParameters & paramet
     _unstabilized_def_grad(
         declareProperty<RankTwoTensor>(_base_name + "unstabilized_deformation_gradient")),
     _avg_def_grad(declareProperty<RankTwoTensor>(_base_name + "avg_deformation_gradient")),
-    _inv_df(declareProperty<RankTwoTensor>(_base_name + "inv_inc_def_grad")),
+    _inv_inv_inc_def_grad(declareProperty<RankTwoTensor>(_base_name + "inv_inc_def_grad")),
     _inv_def_grad(declareProperty<RankTwoTensor>(_base_name + "inv_def_grad")),
     _detJ(declareProperty<Real>(_base_name + "detJ")),
     _homogenization_gradient_names(
@@ -68,10 +68,8 @@ ComputeLagrangianStrain::ComputeLagrangianStrain(const InputParameters & paramet
 
   // Setup homogenization contributions
   for (unsigned int i = 0; i < _homogenization_gradient_names.size(); i++)
-  {
     _homogenization_contributions[i] =
         &getMaterialProperty<RankTwoTensor>(_homogenization_gradient_names[i]);
-  }
 }
 
 void
@@ -127,15 +125,15 @@ ComputeLagrangianStrain::computeQpProperties()
   {
     _inv_def_grad[_qp] = _def_grad[_qp].inverse();
     _detJ[_qp] = _def_grad[_qp].det();
-    _inv_df[_qp] = _def_grad_old[_qp] * _inv_def_grad[_qp];
-    L = RankTwoTensor::Identity() - _inv_df[_qp];
+    _inv_inv_inc_def_grad[_qp] = _def_grad_old[_qp] * _inv_def_grad[_qp];
+    L = RankTwoTensor::Identity() - _inv_inv_inc_def_grad[_qp];
   }
   // For small deformations we just provide the identity
   else
   {
     _inv_def_grad[_qp] = RankTwoTensor::Identity();
     _detJ[_qp] = 1.0;
-    _inv_df[_qp] = RankTwoTensor::Identity();
+    _inv_inv_inc_def_grad[_qp] = RankTwoTensor::Identity();
     L = _def_grad[_qp] - _def_grad_old[_qp];
   }
 

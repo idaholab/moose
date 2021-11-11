@@ -1,10 +1,10 @@
 [Tests]
+  issues = '#17472'
   [./cauchy-elastic]
     type = CSVDiff
     input = cauchy-elastic.i
     csvdiff = 'cauchy-elastic_out.csv'
     requirement = 'Stress matches elastic solution (xx=1e4, rest zero)'
-    issues = '#17472'
     design = 'source/materials/lagrangian/ComputeLagrangianElasticSmallStress.md'
   [../]
   [./stvenantkirchhoff]
@@ -12,7 +12,6 @@
     input = stvenantkirchhoff.i
     csvdiff = 'stvenantkirchhoff_out.csv'
     requirement = 'Stress matches exact solution (xx=1.6144e3, rest zero)'
-    issues = '#17472'
     design = 'source/materials/lagrangian/ComputeStVenantKirchhoffStress.md'
   [../]
   [./neohookean]
@@ -21,7 +20,6 @@
     csvdiff = 'neohookean_out.csv'
     abs_zero = 1e-9
     requirement = 'Stress matches exact analytic solution, rest zero'
-    issues = '#17472'
     design = 'source/materials/lagrangian/ComputeNeoHookeanStress.md'
   [../]
 []

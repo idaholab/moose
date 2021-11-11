@@ -12,12 +12,12 @@
 #include "ComputeLagrangianStressPK2.h"
 
 /// Compressible Neo-Hookean hyperelasticity
-//
-//    Model follows from W = lambda / 2 * (ln J)^2 - mu * ln J + 1/2 * mu *
-//    (tr(C)- I)
-//
-//    with C = 1/2*(F.T*F-I) and J = det(F)
-//
+///
+///  Model follows from W = lambda / 2 * (ln J)^2 - mu * ln J + 1/2 * mu *
+///  (tr(C)- I)
+///
+///  with C = 1/2*(F.T*F-I) and J = det(F)
+///
 class ComputeNeoHookeanStress : public ComputeLagrangianStressPK2
 {
 public:

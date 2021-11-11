@@ -7,21 +7,21 @@
 []
 
 [Variables]
-      [./disp_x]
-      [../]
+  [disp_x]
+  []
 []
 
 [ICs]
-  [./disp_x]
+  [disp_x]
     type = RandomIC
     variable = disp_x
     min = -0.1
     max = 0.1
-  [../]
+  []
 []
 
 [Mesh]
-  [./msh]
+  [msh]
     type = GeneratedMeshGenerator
     dim = 1
     nx = 10
@@ -29,56 +29,56 @@
 []
 
 [Kernels]
-  [./sdx]
-      type = TotalLagrangianStressDivergence
-      variable = disp_x
-      component = 0
-  [../]
+  [sdx]
+    type = TotalLagrangianStressDivergence
+    variable = disp_x
+    component = 0
+  []
 []
 
 [Functions]
-  [./pull]
+  [pull]
     type = ParsedFunction
-    value ='0.06 * t'
-  [../]
+    value = '0.06 * t'
+  []
 []
 
 [BCs]
-  [./leftx]
+  [leftx]
     type = DirichletBC
     preset = true
     boundary = right
     variable = disp_x
     value = 0.0
-  [../]
-  [./pull]
+  []
+  [pull]
     type = FunctionDirichletBC
     boundary = left
     variable = disp_x
     function = pull
     preset = true
-  [../]
+  []
 []
 
 [Materials]
-  [./elastic_tensor]
+  [elastic_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 100000.0
     poissons_ratio = 0.3
-  [../]
-  [./compute_stress]
+  []
+  [compute_stress]
     type = ComputeLagrangianElasticSmallStress
-  [../]
-  [./compute_strain]
+  []
+  [compute_strain]
     type = ComputeLagrangianStrain
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

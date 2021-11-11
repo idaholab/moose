@@ -6,243 +6,243 @@
 []
 
 [Variables]
-      [./disp_x]
-      [../]
-      [./disp_y]
-      [../]
-      [./disp_z]
-      [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
 []
 
 [Mesh]
-  [./msh]
-  type = GeneratedMeshGenerator
-  dim = 3
-  nx = 1
-  ny = 1
-  nz = 1
-  xmin = -0.5
-  xmax = 0.5
-  ymin = -0.5
-  ymax = 0.5
-  zmin = -0.5
-  zmax = 0.5
+  [msh]
+    type = GeneratedMeshGenerator
+    dim = 3
+    nx = 1
+    ny = 1
+    nz = 1
+    xmin = -0.5
+    xmax = 0.5
+    ymin = -0.5
+    ymax = 0.5
+    zmin = -0.5
+    zmax = 0.5
   []
 []
 
 [Kernels]
-  [./sdx]
-      type = TotalLagrangianStressDivergence
-      variable = disp_x
-      component = 0
-  [../]
-  [./sdy]
-      type = TotalLagrangianStressDivergence
-      variable = disp_y
-      component = 1
-  [../]
-  [./sdz]
-      type = TotalLagrangianStressDivergence
-      variable = disp_z
-      component = 2
-  [../]
+  [sdx]
+    type = TotalLagrangianStressDivergence
+    variable = disp_x
+    component = 0
+  []
+  [sdy]
+    type = TotalLagrangianStressDivergence
+    variable = disp_y
+    component = 1
+  []
+  [sdz]
+    type = TotalLagrangianStressDivergence
+    variable = disp_z
+    component = 2
+  []
 []
 
 [AuxVariables]
-  [./stress_xx]
+  [stress_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_zz]
+  []
+  [stress_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_xy]
+  []
+  [stress_xy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_yz]
+  []
+  [stress_yz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_xz]
+  []
+  [stress_xz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Functions]
-  [./angles]
+  [angles]
     type = PiecewiseLinear
     x = '0 1 2'
     y = '0 0 1.5707963'
-  [../]
+  []
 
-  [./stretch]
+  [stretch]
     type = PiecewiseLinear
     x = '0 1 2'
     y = '0 0.1 0.1'
-  [../]
+  []
 
-  [./move_y]
+  [move_y]
     type = ParsedFunction
     value = 'y*cos(theta) - z * (1 + a)*sin(theta) - y'
     vars = 'a theta'
     vals = 'stretch angles'
-  [../]
+  []
 
-  [./move_z]
+  [move_z]
     type = ParsedFunction
     value = 'y*sin(theta) + z*(1+a)*cos(theta) - z'
     vars = 'a theta'
     vals = 'stretch angles'
-  [../]
+  []
 []
 
 [BCs]
-  [./fix]
+  [fix]
     type = DirichletBC
     preset = true
     value = 0.0
     boundary = left
     variable = disp_x
-  [../]
+  []
 
-  [./front_y]
+  [front_y]
     type = FunctionDirichletBC
     boundary = front
     variable = disp_y
     function = move_y
     preset = true
-  [../]
+  []
 
-  [./back_y]
+  [back_y]
     type = FunctionDirichletBC
     boundary = back
     variable = disp_y
     function = move_y
     preset = true
-  [../]
+  []
 
-  [./front_z]
+  [front_z]
     type = FunctionDirichletBC
     boundary = front
     variable = disp_z
     function = move_z
     preset = true
-  [../]
+  []
 
-  [./back_z]
+  [back_z]
     type = FunctionDirichletBC
     boundary = back
     variable = disp_z
     function = move_z
     preset = true
-  [../]
+  []
 
 []
 
 [AuxKernels]
-  [./stress_xx]
+  [stress_xx]
     type = RankTwoAux
     rank_two_tensor = cauchy_stress
     variable = stress_xx
     index_i = 0
     index_j = 0
     execute_on = timestep_end
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     type = RankTwoAux
     rank_two_tensor = cauchy_stress
     variable = stress_yy
     index_i = 1
     index_j = 1
     execute_on = timestep_end
-  [../]
-  [./stress_zz]
+  []
+  [stress_zz]
     type = RankTwoAux
     rank_two_tensor = cauchy_stress
     variable = stress_zz
     index_i = 2
     index_j = 2
     execute_on = timestep_end
-  [../]
-  [./stress_xy]
+  []
+  [stress_xy]
     type = RankTwoAux
     rank_two_tensor = cauchy_stress
     variable = stress_xy
     index_i = 0
     index_j = 1
     execute_on = timestep_end
-  [../]
-  [./stress_xz]
+  []
+  [stress_xz]
     type = RankTwoAux
     rank_two_tensor = cauchy_stress
     variable = stress_xz
     index_i = 0
     index_j = 2
     execute_on = timestep_end
-  [../]
-  [./stress_yz]
+  []
+  [stress_yz]
     type = RankTwoAux
     rank_two_tensor = cauchy_stress
     variable = stress_yz
     index_i = 1
     index_j = 2
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [Materials]
-  [./elastic_tensor]
+  [elastic_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1000.0
     poissons_ratio = 0.25
-  [../]
-  [./compute_stress]
+  []
+  [compute_stress]
     type = ComputeLagrangianElasticSmallStress
-  [../]
-  [./compute_strain]
+  []
+  [compute_strain]
     type = ComputeLagrangianStrain
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./sxx]
+  [sxx]
     type = ElementAverageValue
     variable = stress_xx
-  [../]
-  [./syy]
+  []
+  [syy]
     type = ElementAverageValue
     variable = stress_yy
-  [../]
-  [./szz]
+  []
+  [szz]
     type = ElementAverageValue
     variable = stress_zz
-  [../]
-  [./syz]
+  []
+  [syz]
     type = ElementAverageValue
     variable = stress_yz
-  [../]
-  [./sxz]
+  []
+  [sxz]
     type = ElementAverageValue
     variable = stress_xz
-  [../]
-  [./sxy]
+  []
+  [sxy]
     type = ElementAverageValue
     variable = stress_xy
-  [../]
+  []
 []
 
 [Executioner]
@@ -262,12 +262,12 @@
 
   start_time = 0.0
   end_time = 2.0
-  [./TimeStepper]
+  [TimeStepper]
     type = FunctionDT
     time_t = '0 1 2'
     time_dt = '0.1 0.001 0.001'
     interpolate = False
-  [../]
+  []
 []
 
 [Outputs]

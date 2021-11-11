@@ -1,19 +1,20 @@
 [Mesh]
-  [./base]
+  [base]
     type = FileMeshGenerator
     file = 'patch.xda'
-  [../]
-  [./sets]
+  []
+  [sets]
     input = base
     type = SideSetsFromPointsGenerator
     new_boundary = 'left right bottom top back front'
     points = '    0 0.5 0.5
                   1 0.5 0.5
                   0.5 0.0 0.5
-                  0.5 1.0 0.5
+               '
+             '   0.5 1.0 0.5
                   0.5 0.5 0.0
                   0.5 0.5 1.0'
-  [../]
+  []
 []
 
 [GlobalParams]
@@ -21,248 +22,248 @@
 []
 
 [Variables]
-      [./disp_x]
-      [../]
-      [./disp_y]
-      [../]
-      [./disp_z]
-      [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
 []
 
 [Kernels]
-  [./sdx]
-      type = UpdatedLagrangianStressDivergence
-      variable = disp_x
-      displacements = 'disp_x disp_y disp_z'
-      component = 0
-      use_displaced_mesh = true
-      large_kinematics = true
-  [../]
-  [./sdy]
-      type = UpdatedLagrangianStressDivergence
-      variable = disp_y
-      displacements = 'disp_x disp_y disp_z'
-      component = 1
-      use_displaced_mesh = true
-      large_kinematics = true
-  [../]
-  [./sdz]
-      type = UpdatedLagrangianStressDivergence
-      variable = disp_z
-      displacements = 'disp_x disp_y disp_z'
-      component = 2
-      use_displaced_mesh = true
-      large_kinematics = true
-  [../]
+  [sdx]
+    type = UpdatedLagrangianStressDivergence
+    variable = disp_x
+    displacements = 'disp_x disp_y disp_z'
+    component = 0
+    use_displaced_mesh = true
+    large_kinematics = true
+  []
+  [sdy]
+    type = UpdatedLagrangianStressDivergence
+    variable = disp_y
+    displacements = 'disp_x disp_y disp_z'
+    component = 1
+    use_displaced_mesh = true
+    large_kinematics = true
+  []
+  [sdz]
+    type = UpdatedLagrangianStressDivergence
+    variable = disp_z
+    displacements = 'disp_x disp_y disp_z'
+    component = 2
+    use_displaced_mesh = true
+    large_kinematics = true
+  []
 []
 
 [AuxVariables]
-  [./strain_xx]
+  [strain_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./strain_yy]
+  []
+  [strain_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./strain_zz]
+  []
+  [strain_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./strain_xy]
+  []
+  [strain_xy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./strain_xz]
+  []
+  [strain_xz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./strain_yz]
+  []
+  [strain_yz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_xx]
+  []
+  [stress_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_zz]
+  []
+  [stress_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_xy]
+  []
+  [stress_xy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_yz]
+  []
+  [stress_yz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_xz]
+  []
+  [stress_xz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./stress_xx]
+  [stress_xx]
     type = RankTwoAux
     rank_two_tensor = cauchy_stress
     variable = stress_xx
     index_i = 0
     index_j = 0
     execute_on = timestep_end
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     type = RankTwoAux
     rank_two_tensor = cauchy_stress
     variable = stress_yy
     index_i = 1
     index_j = 1
     execute_on = timestep_end
-  [../]
-  [./stress_zz]
+  []
+  [stress_zz]
     type = RankTwoAux
     rank_two_tensor = cauchy_stress
     variable = stress_zz
     index_i = 2
     index_j = 2
     execute_on = timestep_end
-  [../]
-  [./stress_xy]
+  []
+  [stress_xy]
     type = RankTwoAux
     rank_two_tensor = cauchy_stress
     variable = stress_xy
     index_i = 0
     index_j = 1
     execute_on = timestep_end
-  [../]
-  [./stress_xz]
+  []
+  [stress_xz]
     type = RankTwoAux
     rank_two_tensor = cauchy_stress
     variable = stress_xz
     index_i = 0
     index_j = 2
     execute_on = timestep_end
-  [../]
-  [./stress_yz]
+  []
+  [stress_yz]
     type = RankTwoAux
     rank_two_tensor = cauchy_stress
     variable = stress_yz
     index_i = 1
     index_j = 2
     execute_on = timestep_end
-  [../]
+  []
 
-  [./strain_xx]
+  [strain_xx]
     type = RankTwoAux
     rank_two_tensor = mechanical_strain
     variable = strain_xx
     index_i = 0
     index_j = 0
     execute_on = timestep_end
-  [../]
-  [./strain_yy]
+  []
+  [strain_yy]
     type = RankTwoAux
     rank_two_tensor = mechanical_strain
     variable = strain_yy
     index_i = 1
     index_j = 1
     execute_on = timestep_end
-  [../]
-  [./strain_zz]
+  []
+  [strain_zz]
     type = RankTwoAux
     rank_two_tensor = mechanical_strain
     variable = strain_zz
     index_i = 2
     index_j = 2
     execute_on = timestep_end
-  [../]
-  [./strain_xy]
+  []
+  [strain_xy]
     type = RankTwoAux
     rank_two_tensor = mechanical_strain
     variable = strain_xy
     index_i = 0
     index_j = 1
     execute_on = timestep_end
-  [../]
-  [./strain_xz]
+  []
+  [strain_xz]
     type = RankTwoAux
     rank_two_tensor = mechanical_strain
     variable = strain_xz
     index_i = 0
     index_j = 2
     execute_on = timestep_end
-  [../]
-  [./strain_yz]
+  []
+  [strain_yz]
     type = RankTwoAux
     rank_two_tensor = mechanical_strain
     variable = strain_yz
     index_i = 1
     index_j = 2
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
-     type = DirichletBC
-     preset = true
-     variable = disp_x
-     boundary = left
-     value = 0.0
-  [../]
+  [left]
+    type = DirichletBC
+    preset = true
+    variable = disp_x
+    boundary = left
+    value = 0.0
+  []
 
-  [./bottom]
+  [bottom]
     type = DirichletBC
     preset = true
     variable = disp_y
     boundary = bottom
     value = 0.0
-  [../]
+  []
 
-  [./back]
+  [back]
     type = DirichletBC
-     preset = true
+    preset = true
     variable = disp_z
     boundary = back
     value = 0.0
-  [../]
+  []
 
-  [./front]
+  [front]
     type = DirichletBC
     preset = true
     variable = disp_z
     boundary = front
     value = 0.1
-  [../]
+  []
 []
 
 [Materials]
-  [./elastic_tensor]
+  [elastic_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1000.0
     poissons_ratio = 0.25
-  [../]
-  [./compute_stress]
+  []
+  [compute_stress]
     type = ComputeLagrangianElasticSmallStress
     large_kinematics = true
-  [../]
-  [./compute_strain]
+  []
+  [compute_strain]
     type = ComputeLagrangianStrain
     displacements = 'disp_x disp_y disp_z'
     large_kinematics = true
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

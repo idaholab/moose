@@ -135,6 +135,6 @@ However, right now the new kernels have some major limitations:
 
 - The new kernels only work for Cartesian coordinates, not cylindrical or spherical
 - The new material system is only partly integrated into the existing Tensor Mechanics constitutive models
-- The new kernels are not fully compatible with other MOOSE modules.  In  particular, modules excepting to couple to the `stress` material property, which represented the Cauchy stress in the old material system, should now couple to `cauchy_stress` or `pk1_stress` instead.
+- The new kernels are not fully compatible with other MOOSE modules.  In  particular, modules expecting to couple to the `stress` material property, which represented the Cauchy stress in the old material system, should now couple to `cauchy_stress` or `pk1_stress` instead.
 
 We expect to resolve these limitations as users switch to the new kernels.

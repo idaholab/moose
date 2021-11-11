@@ -13,15 +13,15 @@
 #include "GuaranteeConsumer.h"
 
 /// St. Venant-Kirchhoff hyperelasticity
-//
-//    St. Venant-Kirchhoff hyperelasticity derivative from the
-//    strain energy function W = lambda / 2 tr(E)^2 + mu tr(E^2)i
-//
-//    This is basically "linear elasticity with the Green-Lagrange strain"
-//    Therefore, we use the ComputeElasticityTensor system to get the
-//    tensor but enforce it to be isotropic with the Guarantee system
-//    as this is only a hyperelastic model for an isotropic tensor.
-//
+///
+/// St. Venant-Kirchhoff hyperelasticity derivative from the
+/// strain energy function W = lambda / 2 tr(E)^2 + mu tr(E^2)i
+///
+/// This is basically "linear elasticity with the Green-Lagrange strain"
+/// Therefore, we use the ComputeElasticityTensor system to get the
+/// tensor but enforce it to be isotropic with the Guarantee system
+/// as this is only a hyperelastic model for an isotropic tensor.
+///
 class ComputeStVenantKirchhoffStress : public ComputeLagrangianStressPK2, public GuaranteeConsumer
 {
 public:

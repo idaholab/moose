@@ -12,16 +12,16 @@
 #include "LagrangianStressDivergenceBase.h"
 
 /// Enforce equilibrium with a total Lagrangian formulation
-//    This class enforces equilibrium when used in conjunction with
-//    the corresponding strain calculator (CalculateStrainLagrangianKernel)
-//    and with either a stress calculator that provides the
-//    1st PK stress ("pk1_stress") and the derivative of the 1st PK stress
-//    with respect to the deformation gradient ("pk1_jacobian")
-//
-//    This kernel should be used with the new "ComputeLagrangianStressBase"
-//    stress update system and the "ComputeLagrangianStrain" system for strains.
-//
-//
+///
+/// This class enforces equilibrium when used in conjunction with
+/// the corresponding strain calculator (CalculateStrainLagrangianKernel)
+/// and with either a stress calculator that provides the
+/// 1st PK stress ("pk1_stress") and the derivative of the 1st PK stress
+/// with respect to the deformation gradient ("pk1_jacobian")
+///
+/// This kernel should be used with the new "ComputeLagrangianStressBase"
+/// stress update system and the "ComputeLagrangianStrain" system for strains.
+///
 class TotalLagrangianStressDivergence : public LagrangianStressDivergenceBase
 {
 public:
@@ -71,7 +71,7 @@ protected:
   std::vector<RealVectorValue> _avg_grad_trial;
 
   /// The unmodified deformation gradient
-  const MaterialProperty<RankTwoTensor> & _uF;
+  const MaterialProperty<RankTwoTensor> & _unstabilized_def_grad;
 
   /// The element-average deformation gradient
   const MaterialProperty<RankTwoTensor> & _aF;

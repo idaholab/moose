@@ -20,7 +20,7 @@ UpdatedLagrangianStressDivergence::UpdatedLagrangianStressDivergence(
     _aF(getMaterialPropertyByName<RankTwoTensor>(_base_name + "avg_deformation_gradient")),
     _stress(getMaterialPropertyByName<RankTwoTensor>(_base_name + "cauchy_stress")),
     _material_jacobian(getMaterialPropertyByName<RankFourTensor>(_base_name + "cauchy_jacobian")),
-    _df(getMaterialPropertyByName<RankTwoTensor>(_base_name + "inv_inc_def_grad"))
+    _inv_inc_def_grad(getMaterialPropertyByName<RankTwoTensor>(_base_name + "inv_inc_def_grad"))
 {
   // This kernel requires used_displaced_mesh to be true if large kinematics
   // is on
@@ -48,7 +48,7 @@ UpdatedLagrangianStressDivergence::computeQpJacobian()
   Real value = matJacobianComponent(_material_jacobian[_qp],
                                     testGrad(_component),
                                     trialGrad(_component, _stabilize_strain),
-                                    _df[_qp]);
+                                    _inv_inc_def_grad[_qp]);
 
   if (_large_kinematics)
     value +=
@@ -69,7 +69,7 @@ UpdatedLagrangianStressDivergence::computeQpOffDiagJacobian(unsigned int jvar)
       value += matJacobianComponent(_material_jacobian[_qp],
                                     testGrad(_component),
                                     trialGrad(cc, _stabilize_strain),
-                                    _df[_qp]);
+                                    _inv_inc_def_grad[_qp]);
       if (_large_kinematics)
         value += geomJacobianComponent(testGrad(_component), trialGrad(cc, false), _stress[_qp]);
       break;

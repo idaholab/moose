@@ -14,27 +14,28 @@
 #include "RankTwoTensorForward.h"
 
 /// Calculate strains to use the MOOSE materials with the Lagrangian kernels
-//    This class calculates strain measures used by ComputeLagrangianStress
-//    derived materials and used with
-//    UpdatedLagrangianStressDivergence and TotalLagrangianStressDivergence
-//    kernels
-//
-//    It has two basic jobs
-//    1) Calculate the deformation gradient at time steps n+1 and n
-//       (the MOOSE material system doesn't bother for the SmallStrain case)
-//       This includes including F_bar stabilization, if requested
-//    2) Calculate the kinematic quantities needed by the kernels:
-//      a) The incremental inverse deformation gradient
-//      b) The inverse deformation gradient
-//      c) The determinant of the current deformation gradient
-//
-//    If required by the stabilize_strain flag it averages the pressure parts
-//    of the deformation gradient.
-//
-//    This object cooperates with the homogenization constraint system by
-//    adding in the scalar field representing the macroscale displacement
-//    gradient before calculating strains.
-//
+///
+/// This class calculates strain measures used by ComputeLagrangianStress
+/// derived materials and used with
+/// UpdatedLagrangianStressDivergence and TotalLagrangianStressDivergence
+/// kernels
+///
+/// It has two basic jobs
+/// 1) Calculate the deformation gradient at time steps n+1 and n
+///    (the MOOSE material system doesn't bother for the SmallStrain case)
+///    This includes including F_bar stabilization, if requested
+/// 2) Calculate the kinematic quantities needed by the kernels:
+///   a) The incremental inverse deformation gradient
+///   b) The inverse deformation gradient
+///   c) The determinant of the current deformation gradient
+///
+/// If required by the stabilize_strain flag it averages the pressure parts
+/// of the deformation gradient.
+///
+/// This object cooperates with the homogenization constraint system by
+/// adding in the scalar field representing the macroscale displacement
+/// gradient before calculating strains.
+///
 class ComputeLagrangianStrain : public Material
 {
 public:
@@ -98,7 +99,7 @@ protected:
   MaterialProperty<RankTwoTensor> & _avg_def_grad;
 
   /// Inverse incremental deformation gradient
-  MaterialProperty<RankTwoTensor> & _inv_df;
+  MaterialProperty<RankTwoTensor> & _inv_inv_inc_def_grad;
   /// Inverse deformation gradient
   MaterialProperty<RankTwoTensor> & _inv_def_grad;
   /// Volume change

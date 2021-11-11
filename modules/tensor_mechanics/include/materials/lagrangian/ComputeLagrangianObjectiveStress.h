@@ -12,17 +12,18 @@
 #include "ComputeLagrangianStressCauchy.h"
 
 /// Provide the Cauchy stress via an objective integration of a small stress
-//
-//    This class provides the Cauchy stress and associated Jacobian through
-//    an objective integration of the small strain constitutive model.
-//
-//    The small strain model implements the computeQpSmallStress()
-//    which must provide the _small_stress and _small_jacobian
-//    properties.
-//
-//    This class is then responsible for completing the cauchy stress
-//    update with an objective integration, providing _cauchy_stress
-//    and _cauchy_jacobian properties
+///
+/// This class provides the Cauchy stress and associated Jacobian through
+/// an objective integration of the small strain constitutive model.
+///
+/// The small strain model implements the computeQpSmallStress()
+/// which must provide the _small_stress and _small_jacobian
+/// properties.
+///
+/// This class is then responsible for completing the cauchy stress
+/// update with an objective integration, providing _cauchy_stress
+/// and _cauchy_jacobian properties
+///
 class ComputeLagrangianObjectiveStress : public ComputeLagrangianStressCauchy
 {
 public:
@@ -44,7 +45,7 @@ private:
   /// Actually do the objective integration
   void computeQpObjectiveUpdate();
 
-  /// Update tensor
+  /// Make the tensor used to advect the stress
   RankFourTensor updateTensor(const RankTwoTensor & Q);
 
   /// Jacobian tensor for the Truesdell rate

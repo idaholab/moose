@@ -14,25 +14,25 @@
 #include "HomogenizationConstraintIntegral.h"
 
 /// Enforces a cell-average constraint
-//
-//    This kernel enforces a cell-average constraint of the type
-//    \int_{V}\left(X_{ij}-\hat{X}_{ij}\right)dV, where $X$
-//    is some stress or strain quantity by changing the value
-//    of a scalar variable, imposed by CalculateStrainLagrangianKernel
-//    as an "extra" additional strain or deformation gradient contribution
-//
-//    It only works with the TotalLagrangianStressDivergence kernel
-//    but works for both large and small deformations
-//
-//    It relies on the HomogenizationConstraintIntegral to actually
-//    calculate the residual and jacobian, as they are volume integrals over
-//    the domain.
-//
-//    Also: the scalar-displacement off-diagonal entry, which would be
-//    included in this object ideally, instead is implemented in
-//    the TotalLagrangianStressDivergence because it varies element by
-//    element (and that kernel is already visiting each quadrature point)
-//
+///
+///  This kernel enforces a cell-average constraint of the type
+///  \int_{V}\left(X_{ij}-\hat{X}_{ij}\right)dV, where $X$
+///  is some stress or strain quantity by changing the value
+///  of a scalar variable, imposed by CalculateStrainLagrangianKernel
+///  as an "extra" additional strain or deformation gradient contribution
+///
+///  It only works with the TotalLagrangianStressDivergence kernel
+///  but works for both large and small deformations
+///
+///  It relies on the HomogenizationConstraintIntegral to actually
+///  calculate the residual and jacobian, as they are volume integrals over
+///  the domain.
+///
+///  Also: the scalar-displacement off-diagonal entry, which would be
+///  included in this object ideally, instead is implemented in
+///  the TotalLagrangianStressDivergence because it varies element by
+///  element (and that kernel is already visiting each quadrature point)
+///
 class HomogenizationConstraintScalarKernel : public ScalarKernel
 {
 public:

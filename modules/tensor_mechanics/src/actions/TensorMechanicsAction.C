@@ -929,6 +929,11 @@ TensorMechanicsAction::actLagrangianKernelStrain()
 
   params.set<bool>("large_kinematics") = _lk_large_kinematics;
 
+  // Error if volumetric locking correction is on for higher-order elements
+  if (_problem->mesh().hasSecondOrderElements())
+    mooseError("Volumetric locking correction should not be used for "
+               "higher-order elements.");
+
   params.set<bool>("stabilize_strain") = _lk_locking;
 
   if (_lk_homogenization)
@@ -1090,9 +1095,7 @@ TensorMechanicsAction::getKernelParameters(std::string type)
     params.set<bool>("stabilize_strain") = _lk_locking;
   }
   else
-  {
     params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
-  }
 
   return params;
 }

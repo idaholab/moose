@@ -9,12 +9,12 @@
 []
 
 [Mesh]
-  [./base]
+  [base]
     type = FileMeshGenerator
     file = '2d.exo'
-  [../]
+  []
 
-  [./sidesets]
+  [sidesets]
     type = SideSetsFromNormalsGenerator
     input = base
     normals = '-1 0 0
@@ -23,239 +23,239 @@
                 0 1 0'
     fixed_normal = true
     new_boundary = 'left right bottom top'
-  [../]
+  []
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
- [./hvar]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [hvar]
     family = SCALAR
     order = THIRD
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./sxx]
+  [sxx]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./syy]
+  []
+  [syy]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./sxy]
+  []
+  [sxy]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./exx]
+  []
+  [exx]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./eyy]
+  []
+  [eyy]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./exy]
+  []
+  [exy]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./sxx]
+  [sxx]
     type = RankTwoAux
     variable = sxx
     rank_two_tensor = pk1_stress
     index_i = 0
     index_j = 0
-  [../]
-  [./syy]
+  []
+  [syy]
     type = RankTwoAux
     variable = syy
     rank_two_tensor = pk1_stress
     index_i = 1
     index_j = 1
-  [../]
-  [./sxy]
+  []
+  [sxy]
     type = RankTwoAux
     variable = sxy
     rank_two_tensor = pk1_stress
     index_i = 0
     index_j = 1
-  [../]
-  [./exx]
+  []
+  [exx]
     type = RankTwoAux
     variable = exx
     rank_two_tensor = mechanical_strain
     index_i = 0
     index_j = 0
-  [../]
-  [./eyy]
+  []
+  [eyy]
     type = RankTwoAux
     variable = eyy
     rank_two_tensor = mechanical_strain
     index_i = 1
     index_j = 1
-  [../]
-  [./exy]
+  []
+  [exy]
     type = RankTwoAux
     variable = exy
     rank_two_tensor = mechanical_strain
     index_i = 0
     index_j = 1
-  [../]
+  []
 []
 
 [UserObjects]
-  [./integrator]
+  [integrator]
     type = HomogenizationConstraintIntegral
     targets = 'strain11 strain22 strain12'
     execute_on = 'initial linear'
-  [../]
+  []
 []
 
 [Kernels]
-  [./sdx]
-      type = HomogenizedTotalLagrangianStressDivergence
-      variable = disp_x
-      component = 0
-  [../]
-  [./sdy]
-      type = HomogenizedTotalLagrangianStressDivergence
-      variable = disp_y
-      component = 1
-  [../]
+  [sdx]
+    type = HomogenizedTotalLagrangianStressDivergence
+    variable = disp_x
+    component = 0
+  []
+  [sdy]
+    type = HomogenizedTotalLagrangianStressDivergence
+    variable = disp_y
+    component = 1
+  []
 []
 
 [ScalarKernels]
-  [./enforce]
+  [enforce]
     type = HomogenizationConstraintScalarKernel
     variable = hvar
     integrator = integrator
-  [../]
+  []
 []
 
 [Functions]
-  [./strain11]
+  [strain11]
     type = ParsedFunction
     value = '4.0e-2*t'
-  [../]
-  [./strain22]
+  []
+  [strain22]
     type = ParsedFunction
     value = '-2.0e-2*t'
-  [../]
-  [./strain12]
+  []
+  [strain12]
     type = ParsedFunction
     value = '1.0e-2*t'
-  [../]
+  []
 []
 
 [BCs]
-  [./Periodic]
-    [./x]
+  [Periodic]
+    [x]
       variable = disp_x
       auto_direction = 'x y'
-    [../]
-    [./y]
+    []
+    [y]
       variable = disp_y
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 
-  [./fix1_x]
+  [fix1_x]
     type = DirichletBC
     boundary = "fix1"
     variable = disp_x
     value = 0
-  [../]
-  [./fix1_y]
+  []
+  [fix1_y]
     type = DirichletBC
     boundary = "fix1"
     variable = disp_y
     value = 0
-  [../]
+  []
 
-  [./fix2_y]
+  [fix2_y]
     type = DirichletBC
     boundary = "fix2"
     variable = disp_y
     value = 0
-  [../]
+  []
 
 []
 
 [Materials]
-  [./elastic_tensor_1]
+  [elastic_tensor_1]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 100000.0
     poissons_ratio = 0.3
     block = '1'
-  [../]
-  [./elastic_tensor_2]
+  []
+  [elastic_tensor_2]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 120000.0
     poissons_ratio = 0.21
     block = '2'
-  [../]
-  [./elastic_tensor_3]
+  []
+  [elastic_tensor_3]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 80000.0
     poissons_ratio = 0.4
     block = '3'
-  [../]
-  [./compute_stress]
+  []
+  [compute_stress]
     type = ComputeLagrangianElasticSmallStress
-  [../]
-  [./compute_strain]
+  []
+  [compute_strain]
     type = ComputeLagrangianStrain
     homogenization_gradient_names = 'homogenization_gradient'
-  [../]
-  [./compute_homogenization_gradient]
+  []
+  [compute_homogenization_gradient]
     type = ComputeHomogenizedLagrangianStrain
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./sxx]
+  [sxx]
     type = ElementAverageValue
     variable = sxx
     execute_on = 'initial timestep_end'
-  [../]
-  [./syy]
+  []
+  [syy]
     type = ElementAverageValue
     variable = syy
     execute_on = 'initial timestep_end'
-  [../]
-  [./sxy]
+  []
+  [sxy]
     type = ElementAverageValue
     variable = sxy
     execute_on = 'initial timestep_end'
-  [../]
-  [./exx]
+  []
+  [exx]
     type = ElementAverageValue
     variable = exx
     execute_on = 'initial timestep_end'
-  [../]
-  [./eyy]
+  []
+  [eyy]
     type = ElementAverageValue
     variable = eyy
     execute_on = 'initial timestep_end'
-  [../]
-  [./exy]
+  []
+  [exy]
     type = ElementAverageValue
     variable = exy
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Executioner]

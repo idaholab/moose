@@ -12,10 +12,10 @@
 #include "ComputeLagrangianObjectiveStress.h"
 
 /// Calculate a small strain elastic stress update
-//
-//  small_stress = C : mechanical_strain
-//  with C the elasticity tensor
-//
+///
+/// small_stress = C : mechanical_strain
+/// with C the elasticity tensor
+///
 class ComputeLagrangianElasticSmallStress : public ComputeLagrangianObjectiveStress
 {
 public:

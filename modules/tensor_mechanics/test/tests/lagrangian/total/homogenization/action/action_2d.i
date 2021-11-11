@@ -5,12 +5,12 @@
 []
 
 [Mesh]
-  [./base]
+  [base]
     type = FileMeshGenerator
     file = '2d.exo'
-  [../]
+  []
 
-  [./sidesets]
+  [sidesets]
     type = SideSetsFromNormalsGenerator
     input = base
     normals = '-1 0 0
@@ -19,13 +19,13 @@
                 0 1 0'
     fixed_normal = true
     new_boundary = 'left right bottom top'
-  [../]
+  []
 []
 
 [Modules]
-  [./TensorMechanics]
-    [./Master]
-      [./all]
+  [TensorMechanics]
+    [Master]
+      [all]
         strain = SMALL
         add_variables = true
         new_system = true
@@ -33,89 +33,93 @@
         volumetric_locking_correction = false
         constraint_types = 'stress strain stress'
         targets = 'stress11 strain22 stress12'
-        generate_output = 'pk1_stress_xx pk1_stress_xy pk1_stress_xz pk1_stress_yx pk1_stress_yy pk1_stress_yz pk1_stress_zx pk1_stress_zy pk1_stress_zz deformation_gradient_xx deformation_gradient_xy deformation_gradient_xz deformation_gradient_yx deformation_gradient_yy deformation_gradient_yz deformation_gradient_zx deformation_gradient_zy deformation_gradient_zz'
-      [../]
-    [../]
-  [../]
+        generate_output = 'pk1_stress_xx pk1_stress_xy pk1_stress_xz pk1_stress_yx pk1_stress_yy '
+                          'pk1_stress_yz pk1_stress_zx pk1_stress_zy pk1_stress_zz '
+                          'deformation_gradient_xx deformation_gradient_xy deformation_gradient_xz '
+                          'deformation_gradient_yx deformation_gradient_yy deformation_gradient_yz '
+                          'deformation_gradient_zx deformation_gradient_zy deformation_gradient_zz'
+      []
+    []
+  []
 []
 
 [Functions]
-  [./stress11]
+  [stress11]
     type = ParsedFunction
     value = '400*t'
-  [../]
-  [./strain22]
+  []
+  [strain22]
     type = ParsedFunction
     value = '-2.0e-2*t'
-  [../]
-  [./stress12]
+  []
+  [stress12]
     type = ParsedFunction
     value = '100*t'
-  [../]
+  []
 []
 
 [BCs]
-  [./Periodic]
-    [./x]
+  [Periodic]
+    [x]
       variable = disp_x
       auto_direction = 'x y'
-    [../]
-    [./y]
+    []
+    [y]
       variable = disp_y
       auto_direction = 'x y'
-    [../]
-  [../]
+    []
+  []
 
-  [./fix1_x]
+  [fix1_x]
     type = DirichletBC
     boundary = "fix1"
     variable = disp_x
     value = 0
-  [../]
-  [./fix1_y]
+  []
+  [fix1_y]
     type = DirichletBC
     boundary = "fix1"
     variable = disp_y
     value = 0
-  [../]
+  []
 
-  [./fix2_y]
+  [fix2_y]
     type = DirichletBC
     boundary = "fix2"
     variable = disp_y
     value = 0
-  [../]
+  []
 []
 
 [Materials]
-  [./elastic_tensor_1]
+  [elastic_tensor_1]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 100000.0
     poissons_ratio = 0.3
     block = '1'
-  [../]
-  [./elastic_tensor_2]
+  []
+  [elastic_tensor_2]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 120000.0
     poissons_ratio = 0.21
     block = '2'
-  [../]
-  [./elastic_tensor_3]
+  []
+  [elastic_tensor_3]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 80000.0
     poissons_ratio = 0.4
     block = '3'
-  [../]
-  [./compute_stress]
+  []
+  [compute_stress]
     type = ComputeLagrangianElasticSmallStress
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -140,8 +144,8 @@
 []
 
 [Outputs]
-  [./out]
+  [out]
     type = Exodus
     file_base = '2d'
-  [../]
+  []
 []

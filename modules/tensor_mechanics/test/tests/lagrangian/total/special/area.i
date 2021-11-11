@@ -6,150 +6,150 @@
 []
 
 [Variables]
-      [./disp_x]
-      [../]
-      [./disp_y]
-      [../]
-      [./disp_z]
-      [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
 []
 
 [Mesh]
-  [./msh]
-  type = GeneratedMeshGenerator
-  dim = 3
-  nx = 1
-  ny = 1
-  nz = 1
+  [msh]
+    type = GeneratedMeshGenerator
+    dim = 3
+    nx = 1
+    ny = 1
+    nz = 1
   []
 []
 
 [Kernels]
-  [./sdx]
-      type = TotalLagrangianStressDivergence
-      variable = disp_x
-      component = 0
-  [../]
-  [./sdy]
-      type = TotalLagrangianStressDivergence
-      variable = disp_y
-      component = 1
-  [../]
-  [./sdz]
-      type = TotalLagrangianStressDivergence
-      variable = disp_z
-      component = 2
-  [../]
+  [sdx]
+    type = TotalLagrangianStressDivergence
+    variable = disp_x
+    component = 0
+  []
+  [sdy]
+    type = TotalLagrangianStressDivergence
+    variable = disp_y
+    component = 1
+  []
+  [sdz]
+    type = TotalLagrangianStressDivergence
+    variable = disp_z
+    component = 2
+  []
 []
 
 [AuxVariables]
-  [./stress_zz]
+  [stress_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Functions]
-  [./zstress]
+  [zstress]
     type = PiecewiseLinear
     x = '0 1'
     y = '0 500'
-  [../]
-  [./constant]
+  []
+  [constant]
     type = ConstantFunction
     value = 1.0
-  [../]
-  [./ratio]
+  []
+  [ratio]
     type = ParsedFunction
     vars = 'sd su'
     vals = 's_def s_undef'
     value = 'sd / su'
-  [../]
+  []
 []
 
 [BCs]
-  [./leftx]
+  [leftx]
     type = DirichletBC
     preset = true
     boundary = left
     variable = disp_x
     value = 0.0
-  [../]
-  [./boty]
+  []
+  [boty]
     type = DirichletBC
     preset = true
     boundary = bottom
     variable = disp_y
     value = 0.0
-  [../]
-  [./backz]
+  []
+  [backz]
     type = DirichletBC
     preset = true
     boundary = back
     variable = disp_z
     value = 0.0
-  [../]
-  [./pull_z]
+  []
+  [pull_z]
     type = FunctionNeumannBC
     boundary = front
     variable = disp_z
     function = zstress
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./stress_zz]
+  [stress_zz]
     type = RankTwoAux
     rank_two_tensor = cauchy_stress
     variable = stress_zz
     index_i = 2
     index_j = 2
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [Materials]
-  [./elastic_tensor]
+  [elastic_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1000.0
     poissons_ratio = 0.25
-  [../]
-  [./compute_stress]
+  []
+  [compute_stress]
     type = ComputeLagrangianElasticSmallStress
-  [../]
-  [./compute_strain]
+  []
+  [compute_strain]
     type = ComputeLagrangianStrain
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./s_undef]
+  [s_undef]
     type = SideIntegralVariablePostprocessor
     variable = stress_zz
     boundary = front
-  [../]
-  [./s_def]
+  []
+  [s_def]
     type = SideIntegralVariablePostprocessor
     variable = stress_zz
     boundary = front
     use_displaced_mesh = true
-  [../]
-  [./area_calc]
+  []
+  [area_calc]
     type = FunctionValuePostprocessor
     function = ratio
-  [../]
-  [./area]
+  []
+  [area]
     type = AreaPostprocessor
     boundary = front
     use_displaced_mesh = true
-  [../]
+  []
 []
 
 [Executioner]

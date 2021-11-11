@@ -187,9 +187,7 @@ HomogenizationConstraintIntegral::computeJacobian()
       unsigned int a = _indices[_hh].first;
       unsigned int b = _indices[_hh].second;
       if (_ctypes[_h] == HomogenizationConstants::ConstraintType::Stress)
-      {
         res(i, j, a, b) = stressJacobian(i, j, a, b);
-      }
       else if (_ctypes[_h] == HomogenizationConstants::ConstraintType::Strain)
       {
         if (_large_kinematics)
@@ -198,9 +196,7 @@ HomogenizationConstraintIntegral::computeJacobian()
           res(i, j, a, b) = sdStrainJacobian(i, j, a, b);
       }
       else
-      {
         mooseError("Unknown constraint type in Jacobian calculator!");
-      }
     }
   }
 

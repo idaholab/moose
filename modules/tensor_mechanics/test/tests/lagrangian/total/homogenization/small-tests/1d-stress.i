@@ -9,162 +9,162 @@
 []
 
 [Mesh]
-  [./base]
+  [base]
     type = FileMeshGenerator
     file = '1d.exo'
-  [../]
-  [./ss]
+  []
+  [ss]
     type = SideSetsFromPointsGenerator
     input = base
     points = '-1 0 0
                7 0 0'
     new_boundary = 'left right'
-  [../]
+  []
 []
 
 [Variables]
-  [./disp_x]
-  [../]
- [./hvar]
+  [disp_x]
+  []
+  [hvar]
     family = SCALAR
     order = FIRST
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./sxx]
+  [sxx]
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./exx]
+  []
+  [exx]
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./sxx]
+  [sxx]
     type = RankTwoAux
     variable = sxx
     rank_two_tensor = pk1_stress
     index_i = 0
     index_j = 0
-  [../]
-  [./exx]
+  []
+  [exx]
     type = RankTwoAux
     variable = exx
     rank_two_tensor = mechanical_strain
     index_i = 0
     index_j = 0
-  [../]
+  []
 []
 
 [UserObjects]
-  [./integrator]
+  [integrator]
     type = HomogenizationConstraintIntegral
     targets = 'func_stress'
     execute_on = 'initial linear'
-  [../]
+  []
 []
 
 [Kernels]
-  [./sdx]
-      type = HomogenizedTotalLagrangianStressDivergence
-      variable = disp_x
-      component = 0
-  [../]
+  [sdx]
+    type = HomogenizedTotalLagrangianStressDivergence
+    variable = disp_x
+    component = 0
+  []
 []
 
 [ScalarKernels]
-  [./enforce]
+  [enforce]
     type = HomogenizationConstraintScalarKernel
     variable = hvar
     integrator = integrator
-  [../]
+  []
 []
 
 [Functions]
-  [./func_stress]
+  [func_stress]
     type = ParsedFunction
     value = '1800*t'
-  [../]
-  [./func_strain]
+  []
+  [func_strain]
     type = ParsedFunction
     value = '1.0e-2*t'
-  [../]
+  []
 []
 
 [BCs]
-  [./Periodic]
-    [./all]
+  [Periodic]
+    [all]
       variable = disp_x
       auto_direction = 'x'
-    [../]
-  [../]
+    []
+  []
 
-  [./centerfix_x]
+  [centerfix_x]
     type = DirichletBC
     boundary = "fixme"
     variable = disp_x
     value = 0
-  [../]
+  []
 []
 
 [Materials]
-  [./elastic_tensor_1]
+  [elastic_tensor_1]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 100000.0
     poissons_ratio = 0.3
     block = '1'
-  [../]
-  [./elastic_tensor_2]
+  []
+  [elastic_tensor_2]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 120000.0
     poissons_ratio = 0.21
     block = '2'
-  [../]
-  [./elastic_tensor_3]
+  []
+  [elastic_tensor_3]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 80000.0
     poissons_ratio = 0.4
     block = '3'
-  [../]
-  [./elastic_tensor_4]
+  []
+  [elastic_tensor_4]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 76000.0
     poissons_ratio = 0.11
     block = '4'
-  [../]
-  [./compute_stress]
+  []
+  [compute_stress]
     type = ComputeLagrangianElasticSmallStress
-  [../]
-  [./compute_strain]
+  []
+  [compute_strain]
     type = ComputeLagrangianStrain
     homogenization_gradient_names = 'homogenization_gradient'
-  [../]
-  [./compute_homogenization_gradient]
+  []
+  [compute_homogenization_gradient]
     type = ComputeHomogenizedLagrangianStrain
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./sxx]
+  [sxx]
     type = ElementAverageValue
     variable = sxx
     execute_on = 'initial timestep_end'
-  [../]
-  [./exx]
+  []
+  [exx]
     type = ElementAverageValue
     variable = exx
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Executioner]

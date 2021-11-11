@@ -7,29 +7,29 @@
 []
 
 [Variables]
-      [./disp_x]
-      [../]
-      [./disp_y]
-      [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
 []
 
 [ICs]
-  [./disp_x]
+  [disp_x]
     type = RandomIC
     variable = disp_x
     min = -0.01
     max = 0.01
-  [../]
-  [./disp_y]
+  []
+  [disp_y]
     type = RandomIC
     variable = disp_y
     min = -0.01
     max = 0.01
-  [../]
+  []
 []
 
 [Mesh]
-  [./msh]
+  [msh]
     type = GeneratedMeshGenerator
     dim = 2
     nx = 4
@@ -38,77 +38,77 @@
 []
 
 [Kernels]
-  [./sdx]
-      type = TotalLagrangianStressDivergence
-      variable = disp_x
-      component = 0
-  [../]
-  [./sdy]
-      type = TotalLagrangianStressDivergence
-      variable = disp_y
-      component = 1
-  [../]
+  [sdx]
+    type = TotalLagrangianStressDivergence
+    variable = disp_x
+    component = 0
+  []
+  [sdy]
+    type = TotalLagrangianStressDivergence
+    variable = disp_y
+    component = 1
+  []
 []
 
 [Functions]
-  [./pullx]
+  [pullx]
     type = ParsedFunction
-    value ='50000 * t'
-  [../]
-  [./pully]
+    value = '50000 * t'
+  []
+  [pully]
     type = ParsedFunction
-    value ='-30000 * t'
-  [../]
+    value = '-30000 * t'
+  []
 []
 
 [BCs]
-  [./leftx]
+  [leftx]
     type = DirichletBC
-     preset = true
+    preset = true
     boundary = left
     variable = disp_x
     value = 0.0
-  [../]
-  [./lefty]
+  []
+  [lefty]
     type = DirichletBC
-     preset = true
+    preset = true
     boundary = left
     variable = disp_y
     value = 0.0
-  [../]
-  [./pull_x]
+  []
+  [pull_x]
     type = FunctionNeumannBC
     boundary = right
     variable = disp_x
     function = pullx
-  [../]
-  [./pull_y]
+  []
+  [pull_y]
     type = FunctionNeumannBC
     boundary = top
     variable = disp_y
     function = pully
-  [../]
+  []
 []
 
 [Materials]
-  [./elastic_tensor]
+  [elastic_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 100000.0
     poissons_ratio = 0.3
-  [../]
-  [./compute_stress]
+  []
+  [compute_stress]
     type = ComputeLagrangianElasticSmallStress
-  [../]
-  [./compute_strain]
+  []
+  [compute_strain]
     type = ComputeLagrangianStrain
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -131,5 +131,4 @@
   dtmin = 1.0
   end_time = 1.0
 []
-
 

@@ -15,9 +15,10 @@
 namespace HomogenizationConstants
 {
 /// Which tensor indices correspond to each constraint number
-//    These are different for large displacements (n^2 constraints)
-//    and small displacements (n(n-1)/2 constraints)
-//    and different depending on the problem dimension
+///
+///  These are different for large displacements (n^2 constraints)
+///  and small displacements (n(n-1)/2 constraints)
+///  and different depending on the problem dimension
 typedef std::vector<std::pair<unsigned int, unsigned int>> index_list;
 const std::map<bool, std::vector<index_list>> indices{
     {true,
@@ -29,7 +30,6 @@ const std::map<bool, std::vector<index_list>> indices{
 
 /// Total number of required constraints for large/small deformations and the
 /// problem dimension
-//    Used to validate user input
 const std::map<bool, std::vector<unsigned int>> required{{true, {1, 4, 9}}, {false, {1, 3, 6}}};
 /// Moose constraint type, for input
 const MultiMooseEnum mooseConstraintType("strain stress");
@@ -42,12 +42,13 @@ enum class ConstraintType
 }
 
 /// Computes $\int_{V}\left(X_{ij}-\hat{X}_{ij}\right)dV$
-//    Calculates the volume integral of the difference between some
-//    quantity and a target, given as a MOOSE function
-//
-//    This is used by the HomogenizationConstraintScalarKernel
-//    to enforce cell-average constraints on a simulation domain
-//
+///
+/// Calculates the volume integral of the difference between some
+/// quantity and a target, given as a MOOSE function
+///
+/// This is used by the HomogenizationConstraintScalarKernel
+/// to enforce cell-average constraints on a simulation domain
+///
 class HomogenizationConstraintIntegral : public ElementUserObject
 {
 public:
@@ -80,9 +81,9 @@ protected:
   /// If true use large displacement kinematics
   const bool _large_kinematics;
   /// Problem dimension
-  unsigned int _ndisp;
+  const unsigned int _ndisp;
   /// Number of constraints
-  unsigned int _ncomps;
+  const unsigned int _ncomps;
 
   /// Prepend to the material properties
   const std::string _base_name;
@@ -109,7 +110,7 @@ protected:
   unsigned int _hh;
 
   /// Map between the flat list of constraints and the tensor index
-  HomogenizationConstants::index_list _indices;
+  const HomogenizationConstants::index_list _indices;
 
   /// The assembled tensor residual
   RankTwoTensor _residual;

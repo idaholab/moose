@@ -131,6 +131,9 @@ and the associated derivative tensor
       U_{mnkl}=\frac{1}{2}\left(\delta_{ml}\sigma_{kn}+\delta_{nl}\sigma_{mk}-\delta_{mk}\sigma_{ln}-\delta_{nk}\sigma_{ml}\right)
 \end{equation}
 
+Applying the method is equivalent to updating the stress with the Hughes-Winget
+method [!cite](hughes1980finite).
+
 ## Problems With Objective Rates
 
 There are several well-known problems associated with integrating objective rates to provide large deformation constitutive models

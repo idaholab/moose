@@ -7,37 +7,37 @@
 []
 
 [Variables]
-      [./disp_x]
-      [../]
-      [./disp_y]
-      [../]
-      [./disp_z]
-      [../]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
 []
 
 [ICs]
-  [./disp_x]
+  [disp_x]
     type = RandomIC
     variable = disp_x
     min = -0.02
     max = 0.02
-  [../]
-  [./disp_y]
+  []
+  [disp_y]
     type = RandomIC
     variable = disp_y
     min = -0.02
     max = 0.02
-  [../]
-  [./disp_z]
+  []
+  [disp_z]
     type = RandomIC
     variable = disp_z
     min = -0.02
     max = 0.02
-  [../]
+  []
 []
 
 [Mesh]
-  [./msh]
+  [msh]
     type = GeneratedMeshGenerator
     dim = 3
     nx = 4
@@ -47,102 +47,102 @@
 []
 
 [Kernels]
-  [./sdx]
-      type = TotalLagrangianStressDivergence
-      variable = disp_x
-      component = 0
-  [../]
-  [./sdy]
-      type = TotalLagrangianStressDivergence
-      variable = disp_y
-      component = 1
-  [../]
-  [./sdz]
-      type = TotalLagrangianStressDivergence
-      variable = disp_z
-      component = 2
-  [../]
+  [sdx]
+    type = TotalLagrangianStressDivergence
+    variable = disp_x
+    component = 0
+  []
+  [sdy]
+    type = TotalLagrangianStressDivergence
+    variable = disp_y
+    component = 1
+  []
+  [sdz]
+    type = TotalLagrangianStressDivergence
+    variable = disp_z
+    component = 2
+  []
 []
 
 [Functions]
-  [./pullx]
+  [pullx]
     type = ParsedFunction
-    value ='0.4 * t'
-  [../]
-  [./pully]
+    value = '0.4 * t'
+  []
+  [pully]
     type = ParsedFunction
-    value ='-0.2 * t'
-  [../]
-  [./pullz]
+    value = '-0.2 * t'
+  []
+  [pullz]
     type = ParsedFunction
-    value ='0.3 * t'
-  [../]
+    value = '0.3 * t'
+  []
 []
 
 [BCs]
-  [./leftx]
+  [leftx]
     type = DirichletBC
     preset = true
     boundary = left
     variable = disp_x
     value = 0.0
-  [../]
-  [./lefty]
+  []
+  [lefty]
     type = DirichletBC
     preset = true
     boundary = left
     variable = disp_y
     value = 0.0
-  [../]
-  [./leftz]
+  []
+  [leftz]
     type = DirichletBC
     preset = true
     boundary = left
     variable = disp_z
     value = 0.0
-  [../]
-  [./pull_x]
+  []
+  [pull_x]
     type = FunctionDirichletBC
     boundary = right
     variable = disp_x
     function = pullx
     preset = true
-  [../]
-  [./pull_y]
+  []
+  [pull_y]
     type = FunctionDirichletBC
     boundary = top
     variable = disp_y
     function = pully
     preset = true
-  [../]
-  [./pull_z]
+  []
+  [pull_z]
     type = FunctionDirichletBC
     boundary = right
     variable = disp_z
     function = pullz
     preset = true
-  [../]
+  []
 []
 
 [Materials]
-  [./elastic_tensor]
+  [elastic_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 100000.0
     poissons_ratio = 0.3
-  [../]
-  [./compute_stress]
+  []
+  [compute_stress]
     type = ComputeLagrangianElasticSmallStress
-  [../]
-  [./compute_strain]
+  []
+  [compute_strain]
     type = ComputeLagrangianStrain
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

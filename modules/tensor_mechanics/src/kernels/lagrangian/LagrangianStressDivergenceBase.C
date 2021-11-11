@@ -33,11 +33,9 @@ LagrangianStressDivergenceBase::LagrangianStressDivergenceBase(const InputParame
 {
   // Do the vector coupling of the displacements
   for (unsigned int i = 0; i < _ndisp; i++)
-  {
     _disp_nums[i] = coupled("displacements", i);
-  }
 
-  // We need to use identical discriminations for all displacement components
+  // We need to use identical discretizations for all displacement components
   auto order_x = getVar("displacements", 0)->order();
   for (unsigned int i = 1; i < _ndisp; i++)
   {

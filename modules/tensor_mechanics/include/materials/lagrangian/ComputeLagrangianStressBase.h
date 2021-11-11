@@ -14,42 +14,43 @@
 #include "RankFourTensorForward.h"
 
 /// Provide stresses in the form required for the Lagrangian kernels
-//    This base class represents a material interface "contract"
-//
-//    As input it takes the deformation measures provided by
-//    ComputeLagrangianStrain:
-//      1) "deformation_gradient" -- the deformation gradient
-//      2) "inv_inc_def_grad" -- the inverse incremental deformation gradient
-//      3) "inv_def_grad" -- the inverse deformation gradient
-//      4) "mechanical_strain" -- the integrated deformation rate (log strain)
-//      5) "strain_inc" -- the increment in the deformation rate
-//
-//    Additional strain measures could be defined by subclassing
-//    ComputeLagrangianStrain
-//
-//    And return:
-//      1) "stress" -- the cauchy stress
-//      2) "cauchy_jacobian" -- the derivative of the increment in the
-//                              cauchy stress with respect to the increment
-//                              in the spatial velocity gradient
-//      3) "pk1_stress" -- the first Piola-Kirchhoff stress
-//      4) "pk1_jacobian" -- the derivative of the first PK stress with respect
-//                           to the deformation gradient
-//
-//    Both stress measures and derivatives are required to interface
-//    with both the total and updated Lagrangian kernels.
-//
-//    The class takes the "large_kinematics" flag as input
-//
-//    If true then the above stress and strain measures will be different
-//    and the class is required to use correct large deformation kinematics
-//
-//    If false all the stress measures and all the strain measures except
-//    the deformation gradient are equivalent and the stress update can use
-//    small deformation kinematics.  The deformation gradient is the identity
-//    for small deformation kinematics, as we use it as a push-forward in the
-//    kernel.
-//
+///
+/// This base class represents a material interface "contract"
+///
+/// As input it takes the deformation measures provided by
+/// ComputeLagrangianStrain:
+///   1) "deformation_gradient" -- the deformation gradient
+///   2) "inv_inc_def_grad" -- the inverse incremental deformation gradient
+///   3) "inv_def_grad" -- the inverse deformation gradient
+///   4) "mechanical_strain" -- the integrated deformation rate (log strain)
+///   5) "strain_inc" -- the increment in the deformation rate
+///
+/// Additional strain measures could be defined by subclassing
+/// ComputeLagrangianStrain
+///
+/// And return:
+///   1) "stress" -- the cauchy stress
+///   2) "cauchy_jacobian" -- the derivative of the increment in the
+///                           cauchy stress with respect to the increment
+///                           in the spatial velocity gradient
+///   3) "pk1_stress" -- the first Piola-Kirchhoff stress
+///   4) "pk1_jacobian" -- the derivative of the first PK stress with respect
+///                           to the deformation gradient
+///
+/// Both stress measures and derivatives are required to interface
+/// with both the total and updated Lagrangian kernels.
+///
+/// The class takes the "large_kinematics" flag as input
+///
+/// If true then the above stress and strain measures will be different
+/// and the class is required to use correct large deformation kinematics
+///
+/// If false all the stress measures and all the strain measures except
+/// the deformation gradient are equivalent and the stress update can use
+/// small deformation kinematics.  The deformation gradient is the identity
+/// for small deformation kinematics, as we use it as a push-forward in the
+/// kernel.
+///
 class ComputeLagrangianStressBase : public Material
 {
 public:
