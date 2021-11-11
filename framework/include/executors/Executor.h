@@ -102,7 +102,7 @@ public:
 
     /// Returns false if any single executor in the current hierarchy of results
     /// (i.e. including all child results accumulated recursively via record)
-    /// had a faild/unconverged return state.  Returns true otherwise.  This
+    /// had a failed/unconverged return state.  Returns true otherwise.  This
     /// is how convergence should generally be checked/tracked by executors -
     /// rather than accessing e.g. the converged member directly.
     bool convergedAll() const
