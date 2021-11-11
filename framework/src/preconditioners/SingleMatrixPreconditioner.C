@@ -61,7 +61,7 @@ SingleMatrixPreconditioner::SingleMatrixPreconditioner(const InputParameters & p
 {
   NonlinearSystemBase & nl = _fe_problem.getNonlinearSystemBase();
   unsigned int n_vars = nl.nVariables();
-  auto cm = libmesh_make_unique<CouplingMatrix>(n_vars);
+  auto cm = std::make_unique<CouplingMatrix>(n_vars);
 
   if (!getParam<bool>("full"))
   {

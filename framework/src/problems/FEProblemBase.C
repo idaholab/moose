@@ -361,7 +361,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
   _bnd_mat_side_cache.resize(n_threads);
   _interface_mat_side_cache.resize(n_threads);
 
-  _restart_io = libmesh_make_unique<RestartableDataIO>(*this);
+  _restart_io = std::make_unique<RestartableDataIO>(*this);
 
   _eq.parameters.set<FEProblemBase *>("_fe_problem_base") = this;
 
@@ -444,7 +444,7 @@ FEProblemBase::newAssemblyArray(NonlinearSystemBase & nl)
 
   _assembly.resize(n_threads);
   for (unsigned int i = 0; i < n_threads; ++i)
-    _assembly[i] = libmesh_make_unique<Assembly>(nl, i);
+    _assembly[i] = std::make_unique<Assembly>(nl, i);
 }
 
 void
@@ -604,8 +604,8 @@ FEProblemBase::getEvaluableElementRange()
   if (!_evaluable_local_elem_range)
   {
     _evaluable_local_elem_range =
-        libmesh_make_unique<ConstElemRange>(_mesh.getMesh().evaluable_elements_begin(_nl->dofMap()),
-                                            _mesh.getMesh().evaluable_elements_end(_nl->dofMap()));
+        std::make_unique<ConstElemRange>(_mesh.getMesh().evaluable_elements_begin(_nl->dofMap()),
+                                         _mesh.getMesh().evaluable_elements_end(_nl->dofMap()));
   }
   return *_evaluable_local_elem_range;
 }
@@ -1111,7 +1111,7 @@ FEProblemBase::timestepSetup()
     MeshRefinement mesh_refinement(_mesh);
     std::unique_ptr<MeshRefinement> displaced_mesh_refinement(nullptr);
     if (_displaced_mesh)
-      displaced_mesh_refinement = libmesh_make_unique<MeshRefinement>(*_displaced_mesh);
+      displaced_mesh_refinement = std::make_unique<MeshRefinement>(*_displaced_mesh);
 
     for (MooseIndex(_num_grid_steps) i = 0; i < _num_grid_steps; ++i)
     {
@@ -4954,7 +4954,7 @@ FEProblemBase::init()
     switch (_coupling)
     {
       case Moose::COUPLING_DIAG:
-        _cm = libmesh_make_unique<CouplingMatrix>(n_vars);
+        _cm = std::make_unique<CouplingMatrix>(n_vars);
         for (unsigned int i = 0; i < n_vars; i++)
           for (unsigned int j = 0; j < n_vars; j++)
             (*_cm)(i, j) = (i == j ? 1 : 0);
@@ -4962,7 +4962,7 @@ FEProblemBase::init()
 
         // for full jacobian
       case Moose::COUPLING_FULL:
-        _cm = libmesh_make_unique<CouplingMatrix>(n_vars);
+        _cm = std::make_unique<CouplingMatrix>(n_vars);
         for (unsigned int i = 0; i < n_vars; i++)
           for (unsigned int j = 0; j < n_vars; j++)
             (*_cm)(i, j) = 1;
@@ -6843,7 +6843,7 @@ void
 FEProblemBase::registerRandomInterface(RandomInterface & random_interface, const std::string & name)
 {
   auto insert_pair = moose_try_emplace(
-      _random_data_objects, name, libmesh_make_unique<RandomData>(*this, random_interface));
+      _random_data_objects, name, std::make_unique<RandomData>(*this, random_interface));
 
   auto random_data_ptr = insert_pair.first->second.get();
   random_interface.setRandomDataPointer(random_data_ptr);

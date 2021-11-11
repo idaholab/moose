@@ -46,7 +46,7 @@ ElementPointNeighborLayers::ElementPointNeighborLayers(const ElementPointNeighbo
 std::unique_ptr<GhostingFunctor>
 ElementPointNeighborLayers::clone() const
 {
-  return libmesh_make_unique<ElementPointNeighborLayers>(*this);
+  return std::make_unique<ElementPointNeighborLayers>(*this);
 }
 
 std::string
@@ -73,7 +73,7 @@ ElementPointNeighborLayers::operator>=(const RelationshipManager & rhs) const
 void
 ElementPointNeighborLayers::internalInitWithMesh(const MeshBase &)
 {
-  auto functor = libmesh_make_unique<PointNeighborCoupling>();
+  auto functor = std::make_unique<PointNeighborCoupling>();
   functor->set_n_levels(_layers);
 
   _functor = std::move(functor);

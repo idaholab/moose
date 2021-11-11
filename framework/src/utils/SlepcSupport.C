@@ -23,7 +23,7 @@
 #include "libmesh/petsc_vector.h"
 #include "libmesh/petsc_matrix.h"
 #include "libmesh/slepc_macro.h"
-#include "libmesh/auto_ptr.h"
+#include <memory>
 
 namespace Moose
 {
@@ -524,7 +524,7 @@ moosePetscSNESFormMatricesTags(
 
   for (auto & mat : mats)
   {
-    jacobians.emplace_back(libmesh_make_unique<PetscMatrix<Number>>(mat, sys.comm()));
+    jacobians.emplace_back(std::make_unique<PetscMatrix<Number>>(mat, sys.comm()));
     jacobians.back()->attach_dof_map(sys.get_dof_map());
     jacobians.back()->zero();
   }

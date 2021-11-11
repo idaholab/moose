@@ -52,7 +52,7 @@ public:
    */
   virtual std::unique_ptr<GhostingFunctor> clone() const override
   {
-    return libmesh_make_unique<AugmentSparsityOnInterface>(*this);
+    return std::make_unique<AugmentSparsityOnInterface>(*this);
   }
 
   /**

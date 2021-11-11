@@ -94,7 +94,7 @@ public:
   template <typename... Params>
   RestartableData(std::string name, void * context, Params &&... args)
     : RestartableDataValue(name, context),
-      _value_ptr(libmesh_make_unique<T>(std::forward<Params>(args)...))
+      _value_ptr(std::make_unique<T>(std::forward<Params>(args)...))
   {
   }
 

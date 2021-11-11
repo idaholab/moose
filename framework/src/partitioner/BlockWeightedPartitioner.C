@@ -66,7 +66,7 @@ BlockWeightedPartitioner::BlockWeightedPartitioner(const InputParameters & param
 std::unique_ptr<Partitioner>
 BlockWeightedPartitioner::clone() const
 {
-  return libmesh_make_unique<BlockWeightedPartitioner>(_pars);
+  return std::make_unique<BlockWeightedPartitioner>(_pars);
 }
 
 dof_id_type

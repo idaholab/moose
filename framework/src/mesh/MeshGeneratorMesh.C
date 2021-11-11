@@ -37,7 +37,7 @@ MeshGeneratorMesh::MeshGeneratorMesh(const InputParameters & parameters) : Moose
 std::unique_ptr<MooseMesh>
 MeshGeneratorMesh::safeClone() const
 {
-  return libmesh_make_unique<MeshGeneratorMesh>(*this);
+  return std::make_unique<MeshGeneratorMesh>(*this);
 }
 
 void

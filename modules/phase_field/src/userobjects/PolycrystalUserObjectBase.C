@@ -404,7 +404,7 @@ PolycrystalUserObjectBase::buildGrainAdjacencyMatrix()
 {
   mooseAssert(_is_primary, "This routine should only be called on the primary rank");
 
-  _adjacency_matrix = libmesh_make_unique<DenseMatrix<Real>>(_feature_count, _feature_count);
+  _adjacency_matrix = std::make_unique<DenseMatrix<Real>>(_feature_count, _feature_count);
   for (MooseIndex(_feature_sets) i = 0; i < _feature_sets.size(); ++i)
   {
     for (MooseIndex(_feature_sets) j = i + 1; j < _feature_sets.size(); ++j)

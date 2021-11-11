@@ -69,8 +69,7 @@ FunctorInterface::defaultFunctor(const std::string & name)
   // check if the string parsed cleanly into a Real number
   if (ss >> real_value && ss.eof())
   {
-    _default_real_functors.emplace_back(
-        libmesh_make_unique<Moose::ConstantFunctor<Real>>(real_value));
+    _default_real_functors.emplace_back(std::make_unique<Moose::ConstantFunctor<Real>>(real_value));
     auto & default_property = _default_real_functors.back();
     return default_property.get();
   }
@@ -89,7 +88,7 @@ FunctorInterface::defaultFunctor(const std::string & name)
   if (ss >> real_value && ss.eof())
   {
     _default_ad_real_functors.emplace_back(
-        libmesh_make_unique<Moose::ConstantFunctor<ADReal>>(real_value));
+        std::make_unique<Moose::ConstantFunctor<ADReal>>(real_value));
     auto & default_property = _default_ad_real_functors.back();
     return default_property.get();
   }

@@ -297,7 +297,7 @@ TabulatedFluidProperties::initialSetup()
   {
     reshapeData2D(_num_p, _num_T, _properties[i], data_matrix);
     _property_ipol[i] =
-        libmesh_make_unique<BicubicInterpolation>(_pressure, _temperature, data_matrix);
+        std::make_unique<BicubicInterpolation>(_pressure, _temperature, data_matrix);
   }
 }
 

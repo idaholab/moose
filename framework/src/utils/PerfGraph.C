@@ -20,11 +20,9 @@
 // don't want to expose to EVERY file in MOOSE...
 #include "VariadicTable.h"
 
-// libMesh Includes
-#include "libmesh/auto_ptr.h"
-
 // System Includes
 #include <chrono>
+#include <memory>
 
 PerfGraph::PerfGraph(const std::string & root_name,
                      MooseApp & app,
@@ -38,7 +36,7 @@ PerfGraph::PerfGraph(const std::string & root_name,
     _pid(app.comm().rank()),
     _root_name(root_name),
     _root_node_id(_perf_graph_registry.registerSection(root_name, 0)),
-    _root_node(libmesh_make_unique<PerfNode>(_root_node_id)),
+    _root_node(std::make_unique<PerfNode>(_root_node_id)),
     _current_position(-1),
     _stack(),
     _execution_list_begin(0),

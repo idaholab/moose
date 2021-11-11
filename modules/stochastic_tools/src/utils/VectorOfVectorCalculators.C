@@ -48,7 +48,7 @@ BootstrapCalculatorBuilder<std::vector<std::vector<InType>>, std::vector<std::ve
       BootstrapCalculator<std::vector<std::vector<InType>>, std::vector<std::vector<OutType>>>>
       ptr = nullptr;
   if (item == "percentile")
-    ptr = libmesh_make_unique<
+    ptr = std::make_unique<
         Percentile<std::vector<std::vector<InType>>, std::vector<std::vector<OutType>>>>(
         other, item, levels, replicates, seed, calc);
   else

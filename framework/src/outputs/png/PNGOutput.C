@@ -101,16 +101,16 @@ PNGOutput::makeMeshFunc()
   // Set up the mesh_function
   if (_use_aux)
     _mesh_function =
-        libmesh_make_unique<MeshFunction>(*_es_ptr,
-                                          _problem_ptr->getAuxiliarySystem().serializedSolution(),
-                                          _problem_ptr->getAuxiliarySystem().dofMap(),
-                                          var_nums);
+        std::make_unique<MeshFunction>(*_es_ptr,
+                                       _problem_ptr->getAuxiliarySystem().serializedSolution(),
+                                       _problem_ptr->getAuxiliarySystem().dofMap(),
+                                       var_nums);
   else
     _mesh_function =
-        libmesh_make_unique<MeshFunction>(*_es_ptr,
-                                          _problem_ptr->getNonlinearSystem().serializedSolution(),
-                                          _problem_ptr->getNonlinearSystem().dofMap(),
-                                          var_nums);
+        std::make_unique<MeshFunction>(*_es_ptr,
+                                       _problem_ptr->getNonlinearSystem().serializedSolution(),
+                                       _problem_ptr->getNonlinearSystem().dofMap(),
+                                       var_nums);
   _mesh_function->init();
 
   // Need to enable out of mesh with the given control color scaled in reverse

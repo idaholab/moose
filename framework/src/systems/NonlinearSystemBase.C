@@ -331,9 +331,9 @@ NonlinearSystemBase::initialSetup()
   if (_automatic_scaling)
   {
     if (_off_diagonals_in_auto_scaling)
-      _scaling_matrix = libmesh_make_unique<OffDiagonalScalingMatrix<Number>>(_communicator);
+      _scaling_matrix = std::make_unique<OffDiagonalScalingMatrix<Number>>(_communicator);
     else
-      _scaling_matrix = libmesh_make_unique<DiagonalMatrix<Number>>(_communicator);
+      _scaling_matrix = std::make_unique<DiagonalMatrix<Number>>(_communicator);
   }
 }
 

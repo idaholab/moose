@@ -60,7 +60,7 @@ VectorPostprocessorFunction::VectorPostprocessorFunction(const InputParameters &
 
   try
   {
-    _linear_interp = libmesh_make_unique<LinearInterpolation>(_argument_column, _value_column);
+    _linear_interp = std::make_unique<LinearInterpolation>(_argument_column, _value_column);
   }
   catch (std::domain_error & e)
   {

@@ -10,11 +10,11 @@
 #pragma once
 #include "MooseRandom.h"
 #include "libmesh/communicator.h"
-#include "libmesh/auto_ptr.h"
 #include "libmesh/parallel.h"
 #include "libmesh/parallel_sync.h"
 #include "libmesh/libmesh_common.h"
 #include <list>
+#include <memory>
 #include <iterator>
 #include <algorithm>
 

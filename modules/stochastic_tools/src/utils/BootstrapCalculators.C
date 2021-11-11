@@ -131,10 +131,10 @@ BootstrapCalculatorBuilder<InType, OutType>::build(
 {
   std::unique_ptr<BootstrapCalculator<InType, OutType>> ptr = nullptr;
   if (item == "percentile")
-    ptr = libmesh_make_unique<Percentile<InType, OutType>>(
-        other, item, levels, replicates, seed, calc);
+    ptr =
+        std::make_unique<Percentile<InType, OutType>>(other, item, levels, replicates, seed, calc);
   else if (item == "bca")
-    ptr = libmesh_make_unique<BiasCorrectedAccelerated<InType, OutType>>(
+    ptr = std::make_unique<BiasCorrectedAccelerated<InType, OutType>>(
         other, item, levels, replicates, seed, calc);
 
   if (!ptr)

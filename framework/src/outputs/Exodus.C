@@ -190,7 +190,7 @@ Exodus::outputSetup()
   }
 
   // Create the ExodusII_IO object
-  _exodus_io_ptr = libmesh_make_unique<ExodusII_IO>(_es_ptr->get_mesh());
+  _exodus_io_ptr = std::make_unique<ExodusII_IO>(_es_ptr->get_mesh());
   _exodus_initialized = false;
 
   // Increment file number and set appending status, append if all the following conditions are met:

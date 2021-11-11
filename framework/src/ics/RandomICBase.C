@@ -69,9 +69,9 @@ RandomICBase::RandomICBase(const InputParameters & parameters)
   else
   {
     _elem_random_data =
-        libmesh_make_unique<RandomData>(_fe_problem, false, EXEC_INITIAL, MooseRandom::randl());
+        std::make_unique<RandomData>(_fe_problem, false, EXEC_INITIAL, MooseRandom::randl());
     _node_random_data =
-        libmesh_make_unique<RandomData>(_fe_problem, true, EXEC_INITIAL, MooseRandom::randl());
+        std::make_unique<RandomData>(_fe_problem, true, EXEC_INITIAL, MooseRandom::randl());
 
     _elem_random_generator = &_elem_random_data->getGenerator();
     _node_random_generator = &_node_random_data->getGenerator();

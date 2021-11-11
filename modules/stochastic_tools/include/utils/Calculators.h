@@ -13,10 +13,10 @@
 #include "MultiMooseEnum.h"
 #include "MathUtils.h"
 
-#include "libmesh/auto_ptr.h"
 #include "libmesh/parallel.h"
 
 #include <vector>
+#include <memory>
 #include <numeric>
 
 class MooseEnumItem;

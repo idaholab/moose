@@ -84,7 +84,7 @@ InterfaceMeshCutUserObjectBase::initialSetup()
 
   if (_output_exodus)
   {
-    _equation_systems = libmesh_make_unique<EquationSystems>(*_cutter_mesh);
+    _equation_systems = std::make_unique<EquationSystems>(*_cutter_mesh);
     _explicit_system = &(_equation_systems->add_system<ExplicitSystem>("InterfaceMeshSystem"));
 
     _explicit_system->add_variable("disp_x");

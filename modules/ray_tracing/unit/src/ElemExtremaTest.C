@@ -19,7 +19,7 @@
 TEST(ElemExtremaTest, Test)
 {
   Parallel::Communicator comm;
-  std::unique_ptr<UnstructuredMesh> mesh = libmesh_make_unique<ReplicatedMesh>(comm);
+  std::unique_ptr<UnstructuredMesh> mesh = std::make_unique<ReplicatedMesh>(comm);
   MeshTools::Generation::build_cube(*mesh, 2, 2, 2);
 
   const Elem * elem = mesh->query_elem_ptr(0);

@@ -67,7 +67,7 @@ SpiralAnnularMesh::SpiralAnnularMesh(const InputParameters & parameters)
 std::unique_ptr<MooseMesh>
 SpiralAnnularMesh::safeClone() const
 {
-  return libmesh_make_unique<SpiralAnnularMesh>(*this);
+  return std::make_unique<SpiralAnnularMesh>(*this);
 }
 
 void

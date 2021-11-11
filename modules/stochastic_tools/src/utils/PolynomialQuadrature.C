@@ -11,7 +11,6 @@
 
 #include "MooseError.h"
 #include "DataIO.h"
-#include "libmesh/auto_ptr.h"
 
 // For computing legendre quadrature
 #include "libmesh/dense_matrix_impl.h"
@@ -26,6 +25,7 @@
 #endif
 
 #include <cmath>
+#include <memory>
 
 namespace PolynomialQuadrature
 {
@@ -35,13 +35,13 @@ makePolynomial(const Distribution * dist)
 {
   const Uniform * u_dist = dynamic_cast<const Uniform *>(dist);
   if (u_dist)
-    return libmesh_make_unique<const Legendre>(dist->getParam<Real>("lower_bound"),
-                                               dist->getParam<Real>("upper_bound"));
+    return std::make_unique<const Legendre>(dist->getParam<Real>("lower_bound"),
+                                            dist->getParam<Real>("upper_bound"));
 
   const Normal * n_dist = dynamic_cast<const Normal *>(dist);
   if (n_dist)
-    return libmesh_make_unique<const Hermite>(dist->getParam<Real>("mean"),
-                                              dist->getParam<Real>("standard_deviation"));
+    return std::make_unique<const Hermite>(dist->getParam<Real>("mean"),
+                                           dist->getParam<Real>("standard_deviation"));
 
   ::mooseError("Polynomials for '", dist->type(), "' distributions have not been implemented.");
   return nullptr;
@@ -419,7 +419,7 @@ TensorGrid::TensorGrid(const std::vector<unsigned int> & npoints,
   for (unsigned int d = 0; d < poly.size(); ++d)
     poly[d]->gaussQuadrature(npoints[d] - 1, qpoints_1D[d], qweights_1D[d]);
 
-  _quad = libmesh_make_unique<const StochasticTools::WeightedCartesianProduct<Real, Real>>(
+  _quad = std::make_unique<const StochasticTools::WeightedCartesianProduct<Real, Real>>(
       qpoints_1D, qweights_1D);
 }
 
@@ -455,9 +455,8 @@ SmolyakGrid::SmolyakGrid(const unsigned int max_order,
       for (unsigned int d = 0; d < poly.size(); ++d)
         poly[d]->gaussQuadrature(dorder[d], qpoints_1D[d], qweights_1D[d]);
 
-      _quad.push_back(
-          libmesh_make_unique<const StochasticTools::WeightedCartesianProduct<Real, Real>>(
-              qpoints_1D, qweights_1D));
+      _quad.push_back(std::make_unique<const StochasticTools::WeightedCartesianProduct<Real, Real>>(
+          qpoints_1D, qweights_1D));
       _npoints.push_back(_npoints.back() + _quad.back()->numRows());
     }
   }
@@ -564,14 +563,14 @@ dataLoad(std::istream & stream,
     Real lower_bound, upper_bound;
     dataLoad(stream, lower_bound, context);
     dataLoad(stream, upper_bound, context);
-    ptr = libmesh_make_unique<const PolynomialQuadrature::Legendre>(lower_bound, upper_bound);
+    ptr = std::make_unique<const PolynomialQuadrature::Legendre>(lower_bound, upper_bound);
   }
   else if (poly_type == "Hermite")
   {
     Real mean, stddev;
     dataLoad(stream, mean, context);
     dataLoad(stream, stddev, context);
-    ptr = libmesh_make_unique<const PolynomialQuadrature::Hermite>(mean, stddev);
+    ptr = std::make_unique<const PolynomialQuadrature::Hermite>(mean, stddev);
   }
   else
     ::mooseError("Unknown Polynomaial type: ", poly_type);
