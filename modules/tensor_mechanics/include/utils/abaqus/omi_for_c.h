@@ -11,3 +11,14 @@
 
 /// macro for source compatibility with UMAT plugins developed for a commercial code
 #define FOR_NAME(lower, UPPER) lower##_
+#define CALL_NAME(lower, UPPER) lower##_
+
+typedef char * Character;
+typedef int Length;
+#define PTR(id) id
+#define LEN(id, len) len
+#define GETLEN(id) id##_len
+#define CHNAME(id) Character id
+#define CHNAME_C(id) id
+#define CHLEN(id) , const Length id##_len
+#define CHLEN_C(id) , id##_len

@@ -3,13 +3,14 @@
 ***************************************************************************************/
 
 #include "SMAAspUserSubroutines.h"
+#include "SMAAspUserUtilities.h"
 #include "MooseError.h"
 
 extern "C" void
 uexternaldb_(
     int * LOP, int * /* LRESTART */, Real /* TIME */[], Real * /* DTIME */, int * KSTEP, int * KINC)
 {
-  const bool threaded = getnumthreads() > 1;
+  const bool threaded = getnumthreads_() > 1;
 
   switch (*LOP)
   {
@@ -18,7 +19,7 @@ uexternaldb_(
     {
       Real * fa = threaded ? SMALocalFloatArrayCreate(7, 5, 1.1) : SMAFloatArrayCreate(7, 5, 1.1);
       Real fasum = 0.0;
-      for (unsigned int i = 0; i < 5; ++i)
+      for (int i = 0; i < 5; ++i)
         fasum += fa[i];
 
       // test wrong handle error based on kstep setting
@@ -29,7 +30,7 @@ uexternaldb_(
 
       int * ia = threaded ? SMALocalIntArrayCreate(67, 39, 9) : SMAIntArrayCreate(67, 39, 9);
       int iasum = 0;
-      for (unsigned int i = 0; i < 39; ++i)
+      for (int i = 0; i < 39; ++i)
         iasum += ia[i];
 
       // test wrong handle error based on kstep setting
@@ -38,7 +39,7 @@ uexternaldb_(
       if (ia != ia2)
         mooseError("Mismatching pointers");
 
-      if (get_thread_id() == 0)
+      if (get_thread_id_() == 0)
         Moose::out << *LOP << "lop " << fasum << ' '
                    << (threaded ? SMALocalFloatArraySize(7) : SMAFloatArraySize(7)) << ' ' << iasum
                    << ' ' << (threaded ? SMALocalIntArraySize(67) : SMAIntArraySize(67)) << '\n';
@@ -49,12 +50,11 @@ uexternaldb_(
     case 1:
     {
       Real * fa = threaded ? SMALocalFloatArrayAccess(7) : SMAFloatArrayAccess(7);
-      for (unsigned int i = 0; i < (threaded ? SMALocalFloatArraySize(7) : SMAFloatArraySize(7));
-           ++i)
+      for (int i = 0; i < (threaded ? SMALocalFloatArraySize(7) : SMAFloatArraySize(7)); ++i)
         fa[i] += i + *KINC;
 
       int * ia = threaded ? SMALocalIntArrayAccess(67) : SMAIntArrayAccess(67);
-      for (unsigned int i = 0; i < (threaded ? SMALocalIntArraySize(67) : SMAIntArraySize(67)); ++i)
+      for (int i = 0; i < (threaded ? SMALocalIntArraySize(67) : SMAIntArraySize(67)); ++i)
         ia[i] += i + *KINC;
       break;
     }
@@ -64,8 +64,7 @@ uexternaldb_(
     {
       Real * fa = threaded ? SMALocalFloatArrayAccess(7) : SMAFloatArrayAccess(7);
       Real fasum = 0.0;
-      for (unsigned int i = 0; i < (threaded ? SMALocalFloatArraySize(7) : SMAFloatArraySize(7));
-           ++i)
+      for (int i = 0; i < (threaded ? SMALocalFloatArraySize(7) : SMAFloatArraySize(7)); ++i)
         fasum += fa[i] + 0;
       if (threaded)
         SMALocalFloatArrayDelete(7);
@@ -74,7 +73,7 @@ uexternaldb_(
 
       int iasum = 0;
       int * ia = threaded ? SMALocalIntArrayAccess(67) : SMAIntArrayAccess(67);
-      for (unsigned int i = 0; i < (threaded ? SMALocalIntArraySize(67) : SMAIntArraySize(67)); ++i)
+      for (int i = 0; i < (threaded ? SMALocalIntArraySize(67) : SMAIntArraySize(67)); ++i)
         iasum += ia[i];
 
       if (threaded)
@@ -82,7 +81,7 @@ uexternaldb_(
       else
         SMAIntArrayDelete(67);
 
-      if (get_thread_id() == 0)
+      if (get_thread_id_() == 0)
         Moose::out << *LOP << "lop " << fasum << ' ' << iasum << ' ' << '\n';
       break;
     }

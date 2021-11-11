@@ -1,0 +1,16 @@
+[Tests]
+  issues = '#19249'
+  design = 'AbaqusUExternalDB.md'
+
+  [build]
+    type = 'RunCommand'
+    command = 'make'
+    requirement = "The multi-file UMAT build system shall compile UEXTERNALDB plugins."
+  []
+  [test]
+    type = 'RunApp'
+    input = 'test.i'
+    valgrind = NONE
+    requirement = "The system shall permit data exchange between UMAT and UEXTERNALDB plugins."
+  []
+[]

@@ -3,6 +3,7 @@
 ***************************************************************************************/
 
 #include "SMAAspUserSubroutines.h"
+#include "SMAAspUserUtilities.h"
 #include "MooseError.h"
 
 Real mutex_test_global_thread_counter;
@@ -42,7 +43,7 @@ uexternaldb_(int * LOP,
     // end of the simulation
     case 3:
     {
-      if (get_thread_id() == 0)
+      if (get_thread_id_() == 0)
         Moose::out << "sum = " << mutex_test_global_thread_counter << ".\n";
       break;
     }
