@@ -38,13 +38,13 @@
 
 [AuxKernels]
   [element_extra_integer_1]
-    type = ElemExtraIDAux
+    type = ExtraElementIDAux
     variable = element_extra_integer_1
     extra_id_name = element_extra_integer_1
     execute_on = 'initial'
   []
   [element_extra_integer_2]
-    type = ElemExtraIDAux
+    type = ExtraElementIDAux
     variable = element_extra_integer_2
     extra_id_name = element_extra_integer_2
     execute_on = 'initial'

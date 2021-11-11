@@ -147,7 +147,7 @@
     execute_on = 'initial linear timestep_end'
   []
   [set_cd_id]
-    type = ElemExtraIDAux
+    type = ExtraElementIDAux
     variable = cd_id
     extra_id_name = control_drum_id
     execute_on = 'initial timestep_end'
