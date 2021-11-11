@@ -5235,11 +5235,15 @@ FEProblemBase::outputStep(ExecFlagType type)
 {
   TIME_SECTION("outputStep", 1, "Outputting");
 
+  setCurrentExecuteOnFlag(type);
+
   _nl->update();
   _aux->update();
   if (_displaced_problem)
     _displaced_problem->syncSolutions();
   _app.getOutputWarehouse().outputStep(type);
+
+  setCurrentExecuteOnFlag(EXEC_NONE);
 }
 
 void

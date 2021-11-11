@@ -89,10 +89,13 @@ public:
    * Constructor
    * @param name The full (unique) name for this piece of data.
    * @param context 'typeless' pointer to user-specific data.
+   * @param arg Forwarded arguments that are passed to the constructor of the data.
    */
-  RestartableData(std::string name, void * context) : RestartableDataValue(name, context)
+  template <typename... Params>
+  RestartableData(std::string name, void * context, Params &&... args)
+    : RestartableDataValue(name, context),
+      _value_ptr(libmesh_make_unique<T>(std::forward<Params>(args)...))
   {
-    _value_ptr = libmesh_make_unique<T>();
   }
 
   /**
@@ -137,7 +140,7 @@ public:
 
 private:
   /// Stored value.
-  std::unique_ptr<T> _value_ptr;
+  const std::unique_ptr<T> _value_ptr;
 };
 
 // ------------------------------------------------------------

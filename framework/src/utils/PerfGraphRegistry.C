@@ -1,5 +1,7 @@
 #include "PerfGraphRegistry.h"
 
+#include "DataIO.h"
+
 namespace moose
 {
 namespace internal
@@ -89,7 +91,7 @@ PerfGraphRegistry::sectionID(const std::string & section_name) const
   }
 }
 
-const PerfGraphRegistry::SectionInfo &
+const PerfGraphSectionInfo &
 PerfGraphRegistry::sectionInfo(const PerfID section_id) const
 {
   std::lock_guard<std::mutex> lock(_id_to_section_info_mutex);
@@ -128,11 +130,31 @@ PerfGraphRegistry::numSections() const
   return _id_to_section_info.size();
 }
 
-const PerfGraphRegistry::SectionInfo &
+const PerfGraphSectionInfo &
 PerfGraphRegistry::readSectionInfo(PerfID section_id)
 {
   return _id_to_section_info[section_id];
 }
 
 }
+}
+
+void
+dataStore(std::ostream & stream, moose::internal::PerfGraphSectionInfo & info, void * context)
+{
+  dataStore(stream, info._id, context);
+  dataStore(stream, info._name, context);
+  dataStore(stream, info._level, context);
+  dataStore(stream, info._live_message, context);
+  dataStore(stream, info._print_dots, context);
+}
+
+void
+dataLoad(std::istream & stream, moose::internal::PerfGraphSectionInfo & info, void * context)
+{
+  dataLoad(stream, info._id, context);
+  dataLoad(stream, info._name, context);
+  dataLoad(stream, info._level, context);
+  dataLoad(stream, info._live_message, context);
+  dataLoad(stream, info._print_dots, context);
 }
