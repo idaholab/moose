@@ -91,7 +91,7 @@ public:
 
     /// Records results from sub/internal executors in a executor's result.  When
     /// child-executors return a result object following their execution, this
-    /// function should be called to add that info into the result heirarchy.
+    /// function should be called to add that info into the result hierarchy.
     /// If the child executor was identified by a label/text from the input file
     /// (e.g. via sub_solve1=foo_executor) - then "name" should be "sub_solve1".
     bool record(const std::string & name, const Result & r)
