@@ -73,13 +73,13 @@ PerfGraphOutput::output(const ExecFlagType & /*type*/)
   {
     _console << '\n';
 
-    _app.perfGraph().print(_console, _level);
+    perfGraph().print(_console, _level);
 
     if (_heaviest_branch)
-      _app.perfGraph().printHeaviestBranch(_console);
+      perfGraph().printHeaviestBranch(_console);
 
     if (_heaviest_sections)
-      _app.perfGraph().printHeaviestSections(_console, _heaviest_sections);
+      perfGraph().printHeaviestSections(_console, _heaviest_sections);
 
     _console << std::flush;
   }

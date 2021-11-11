@@ -1,0 +1,41 @@
+[Tests]
+  issues = '#15444'
+  design = 'PerfGraph.md'
+
+  [errors]
+    requirement = 'The PerfGraph shall report a reasonable error when'
+
+    [register_no_section]
+      type = RunException
+      input = 'perf_graph.i'
+      cli_args = 'UserObjects/test/register_no_section=true'
+      expect_err = 'Section name not provided when registering timed section'
+
+      detail = 'registering a section without a name'
+    []
+    [register_no_live_message]
+      type = RunException
+      input = 'perf_graph.i'
+      cli_args = 'UserObjects/test/register_no_live_message=true'
+      expect_err = 'Live message not provided when registering timed section'
+
+      detail = 'registering a section without a live message'
+    []
+    [section_id_missing]
+      type = RunException
+      input = 'perf_graph.i'
+      cli_args = 'UserObjects/test/section_id_missing=true'
+      expect_err = 'Section Name Not Found: foo'
+
+      detail = 'requesting the ID of a section that does not exist'
+    []
+    [section_info_missing]
+      type = RunException
+      input = 'perf_graph.i'
+      cli_args = 'UserObjects/test/section_info_missing=true'
+      expect_err = 'ID Not Found: 1000000'
+
+      detail = 'requesting the section info for a section that does not exist'
+    []
+  []
+[]

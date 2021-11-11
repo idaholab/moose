@@ -29,8 +29,7 @@ PerfGraphReporter::validParams()
 
 PerfGraphReporter::PerfGraphReporter(const InputParameters & parameters)
   : GeneralReporter(parameters),
-    _graph(declareValueByName<const PerfGraph *>(
-        "graph", REPORTER_MODE_DISTRIBUTED, &_app.perfGraph()))
+    _graph(declareValueByName<const PerfGraph *>("graph", REPORTER_MODE_DISTRIBUTED, &perfGraph()))
 {
 }
 
