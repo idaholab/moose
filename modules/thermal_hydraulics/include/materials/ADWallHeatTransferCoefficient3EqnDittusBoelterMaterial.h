@@ -40,6 +40,8 @@ protected:
   const ADMaterialProperty<Real> & _T;
   /// Wall temperature
   const ADMaterialProperty<Real> & _T_wall;
+  /// Nusselt number scaling factor
+  const Real & _nu_scale;
 
 public:
   static InputParameters validParams();

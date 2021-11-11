@@ -29,6 +29,8 @@ ADWallHeatTransferCoefficient3EqnDittusBoelterMaterial::validParams()
   params.addRequiredParam<MaterialPropertyName>("k", "Heat conductivity of the fluid");
   params.addRequiredParam<MaterialPropertyName>("T", "Fluid temperature");
   params.addRequiredParam<MaterialPropertyName>("T_wall", "Wall temperature");
+  params.addParam<Real>(
+      "Nu_scale", 1.0, "Scale Nusselt number due of the roughness of a pipe wall");
   params.addClassDescription(
       "Computes wall heat transfer coefficient using Dittus-Boelter equation");
   return params;
@@ -45,7 +47,8 @@ ADWallHeatTransferCoefficient3EqnDittusBoelterMaterial::
     _mu(getADMaterialProperty<Real>("mu")),
     _cp(getADMaterialProperty<Real>("cp")),
     _T(getADMaterialProperty<Real>("T")),
-    _T_wall(getADMaterialProperty<Real>("T_wall"))
+    _T_wall(getADMaterialProperty<Real>("T_wall")),
+    _nu_scale(getParam<Real>("Nu_scale"))
 {
 }
 
@@ -56,6 +59,7 @@ ADWallHeatTransferCoefficient3EqnDittusBoelterMaterial::computeQpProperties()
   ADReal Re = std::max(1.0, THM::Reynolds(1., _rho[_qp], _vel[_qp], _D_h[_qp], _mu[_qp]));
   ADReal n = (_T[_qp] < _T_wall[_qp]) ? 0.4 : 0.3;
   ADReal Nu = 0.023 * std::pow(Re, 4. / 5.) * std::pow(Pr, n);
+  Nu *= _nu_scale;
 
   _Hw[_qp] = THM::wallHeatTransferCoefficient(Nu, _k[_qp], _D_h[_qp]);
 }
