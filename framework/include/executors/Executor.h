@@ -149,6 +149,7 @@ public:
     return _result;
   }
 
+  /// Whether the executor and all its sub-executors passed / converged
   virtual bool lastSolveConverged() const override { return _result.convergedAll(); }
 
 protected:
