@@ -3694,7 +3694,7 @@ FEProblemBase::setCurrentExecuteOnFlag(const ExecFlagType & flag)
 }
 
 void
-FEProblemBase::executeAllObjects(const ExecFlagType & exec_type)
+FEProblemBase::executeAllObjects(const ExecFlagType & /*exec_type*/)
 {
 }
 
