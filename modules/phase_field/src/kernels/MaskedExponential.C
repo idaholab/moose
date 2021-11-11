@@ -9,7 +9,7 @@
 
 #include "MaskedExponential.h"
 
-registerMooseObject("MarmotApp", MaskedExponential);
+registerMooseObject("PhaseFieldApp", MaskedExponential);
 
 InputParameters
 MaskedExponential::validParams()
