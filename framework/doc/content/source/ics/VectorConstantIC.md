@@ -13,5 +13,3 @@ defaulted to zero.
 !syntax inputs /ICs/VectorConstantIC
 
 !syntax children /ICs/VectorConstantIC
-
-!bibtex bibliography

@@ -1,0 +1,17 @@
+[Tests]
+  issues = '#6881'
+  design = 'ArrayConstantIC.md'
+  [array_constant_ic]
+    type = 'Exodiff'
+    input = 'array_constant_ic_test.i'
+    exodiff = 'array_constant_ic_test_out.e'
+    requirement = 'The system shall allow to set constant initial conditions for an array variable.'
+  []
+  [size_error]
+    type = RunException
+    expect_err = "'value' size is inconsistent to the number of components of the array variable"
+    input = 'array_constant_ic_test.i'
+    cli_args = "ICs/vic/value='1 2'"
+    requirement = 'The system shall error if the wrong number of components are provided in a constant initial condition for array variables.'
+  []
+[]

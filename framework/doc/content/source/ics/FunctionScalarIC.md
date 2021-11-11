@@ -1,33 +1,14 @@
 # FunctionScalarIC
 
-!alert! construction title=Undocumented Class
-The FunctionScalarIC has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# FunctionScalarIC
-
 !syntax description /ICs/FunctionScalarIC
 
-## Overview
+The function is evaluated at the simulation start time and at the point of coordinate (0, 0, 0).
 
-!! Replace these lines with information regarding the FunctionScalarIC object.
+## Example input syntax
 
-## Example Input File Syntax
+In this example, the scalar variable `n`, solution of a first order ODE, is initialized using function `f`. Since the start time of the simulation is 0, `f` is evaluated to `cos(0)=1`.
 
-!! Describe and include an example of how to use the FunctionScalarIC object.
-
-!syntax parameters /ICs/FunctionScalarIC
-
-!syntax inputs /ICs/FunctionScalarIC
-
-!syntax children /ICs/FunctionScalarIC
-```
-!alert-end!
-
-!syntax description /ICs/FunctionScalarIC
+!listing test/tests/ics/function_scalar_ic/function_scalar_ic.i block=ICs Functions
 
 !syntax parameters /ICs/FunctionScalarIC
 
