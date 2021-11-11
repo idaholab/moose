@@ -182,7 +182,7 @@ stencil which uses the following equation:
 \phi_f = \phi_{f'} + \nabla \phi_{f'} (\vec{r}_{f'}-\vec{r}_f),
 \end{equation}
 
-meaning that the approximate face value ($\phi_{f^'}$) at the intersection of
+meaning that the approximate face value ($\phi_{f'}$) at the intersection of
 the line connecting the cell centroids and the face ($\vec{r}_{f'}$) is corrected using the
 approximate gradient at that point and a correction vector $(\vec{r}_{f'}-\vec{r}_f)$.
 This yields second order convergence on [skewed](skewness-correction/adv-diff-react/skewed.i)
@@ -195,7 +195,7 @@ convergence properties, we generally recommend use of the compact stencil. The
 vertex-based extended stencil is supposed to be more accurate [!cite](moukalled2016finite),
 so perhaps there is a bug in the implementation that needs to be found. The
 skewness-corrected stencil is demonstrated to be more accurate, however it
-considerably slows (a factor of approx. 2-3 depending on the caching options) 
+considerably slows (a factor of approx. 2-3 depending on the caching options)
 down the assembly process due to the fact that additional face gradients need to be computed.
 
 On regular, orthogonal grids, the face gradient $\nabla \phi_f$ can be computed
