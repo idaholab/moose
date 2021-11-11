@@ -962,6 +962,11 @@ MooseVariableDataFV<OutputType>::setDofValue(const OutputData & value, unsigned 
   if (_need_ad_u)
     for (const auto qp : make_range(_ad_u.size()))
       _ad_u[qp] = value;
+
+  // We need to update the current local solution such that aux kernels that use on-the-fly
+  // evaluation of aux variables have up-to-date solution vector information
+  if (_var.kind() == Moose::VAR_AUXILIARY)
+    insert(const_cast<NumericVector<Number> &>(*_sys.currentSolution()));
 }
 
 template <typename OutputType>
