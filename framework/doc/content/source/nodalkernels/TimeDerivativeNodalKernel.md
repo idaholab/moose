@@ -1,33 +1,22 @@
 # TimeDerivativeNodalKernel
 
-!alert! construction title=Undocumented Class
-The TimeDerivativeNodalKernel has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# TimeDerivativeNodalKernel
-
 !syntax description /NodalKernels/TimeDerivativeNodalKernel
 
-## Overview
+This kernel will use the same time stepping scheme as specified for
+other nonlinear variables in the [Executioner](syntax/Executioner/index.md).
 
-!! Replace these lines with information regarding the TimeDerivativeNodalKernel object.
+## Example input syntax
 
-## Example Input File Syntax
+In this input file, the variable `lower` is the solution to the ordinary differential equation:
 
-!! Describe and include an example of how to use the TimeDerivativeNodalKernel object.
+!equation
+\dfrac{d lower}{d t} = -1
 
-!syntax parameters /NodalKernels/TimeDerivativeNodalKernel
+which is solved at every node on the block `lower`, which is a lower
+dimensional subset of the square mesh. The time derivative term is
+added using a `TimeDerivativeNodalKernel`.
 
-!syntax inputs /NodalKernels/TimeDerivativeNodalKernel
-
-!syntax children /NodalKernels/TimeDerivativeNodalKernel
-```
-!alert-end!
-
-!syntax description /NodalKernels/TimeDerivativeNodalKernel
+!listing test/tests/bcs/ad_coupled_lower_value/test.i block=NodalKernels
 
 !syntax parameters /NodalKernels/TimeDerivativeNodalKernel
 

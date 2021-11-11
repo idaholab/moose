@@ -1,33 +1,24 @@
 # ConstantRate
 
-!alert! construction title=Undocumented Class
-The ConstantRate has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# ConstantRate
-
 !syntax description /NodalKernels/ConstantRate
 
-## Overview
+This ODE is solved at every node.
+The [!param](/NodalKernels/ConstantRate/rate) parameter is controllable, so the [Control system](syntax/Controls/index.md) may be leveraged to dynamically control the rate during the simulation.
 
-!! Replace these lines with information regarding the ConstantRate object.
+A more flexible alternative to controlling the rate with Controls is to use a [UserForcingFunctionNodalKernel.md] which has a rate that depends on space and time based on a [Function](syntax/Functions/index.md).
 
-## Example Input File Syntax
+## Example input syntax
 
-!! Describe and include an example of how to use the ConstantRate object.
+In this input file, the variable `lower` is the solution to the ordinary differential equation:
 
-!syntax parameters /NodalKernels/ConstantRate
+!equation
+\dfrac{d lower}{d t} = -1
 
-!syntax inputs /NodalKernels/ConstantRate
+which is solved at every node on the block `lower`, which is a lower
+dimensional subset of the square mesh. The constant rate term, $-1$ is
+added using a `ConstantRate` nodal kernel.
 
-!syntax children /NodalKernels/ConstantRate
-```
-!alert-end!
-
-!syntax description /NodalKernels/ConstantRate
+!listing test/tests/bcs/ad_coupled_lower_value/test.i block=NodalKernels
 
 !syntax parameters /NodalKernels/ConstantRate
 

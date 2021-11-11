@@ -1,33 +1,16 @@
 # NodalL2Norm
 
-!alert! construction title=Undocumented Class
-The NodalL2Norm has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# NodalL2Norm
-
 !syntax description /Postprocessors/NodalL2Norm
 
-## Overview
+!equation
+||u||_{L_2} = \sqrt{\sum_{\text{nodes n}} u(n)^2}
 
-!! Replace these lines with information regarding the NodalL2Norm object.
+## Example input syntax
 
-## Example Input File Syntax
+In this example, the L2 norm of the variable `saved` is computed on
+block 0 at the end of every time step using a `NodalL2Norm` postprocessor.
 
-!! Describe and include an example of how to use the NodalL2Norm object.
-
-!syntax parameters /Postprocessors/NodalL2Norm
-
-!syntax inputs /Postprocessors/NodalL2Norm
-
-!syntax children /Postprocessors/NodalL2Norm
-```
-!alert-end!
-
-!syntax description /Postprocessors/NodalL2Norm
+!listing test/tests/misc/save_in/diag_save_in_soln_var_err_test.i block=Postprocessors
 
 !syntax parameters /Postprocessors/NodalL2Norm
 

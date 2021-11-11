@@ -1,33 +1,24 @@
 # SphericalAverage
 
-!alert! construction title=Undocumented Class
-The SphericalAverage has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# SphericalAverage
-
 !syntax description /VectorPostprocessors/SphericalAverage
 
-## Overview
+The distance computed for the binning is based on the location of the quadrature points.
 
-!! Replace these lines with information regarding the SphericalAverage object.
+!alert warning
+The average is an average over quadrature points! The specific weight / volume associated with each quadrature point is not taken into account. The `SpatialAverageBase::execute` routine should be modified for that purpose.
 
-## Example Input File Syntax
+The CSV data output consists of the following columns, ordered by column name:
 
-!! Describe and include an example of how to use the SphericalAverage object.
+- variable average value
 
-!syntax parameters /VectorPostprocessors/SphericalAverage
+- average of inner and outer radius of each shell of the sphere
 
-!syntax inputs /VectorPostprocessors/SphericalAverage
 
-!syntax children /VectorPostprocessors/SphericalAverage
-```
-!alert-end!
+## Example input syntax
 
-!syntax description /VectorPostprocessors/SphericalAverage
+In this example, the average of the variable `c` is computed for `10` layers (=bins) of a sphere of radius `5` around the origin `0 0 0` (default).
+
+!listing test/tests/vectorpostprocessors/spherical_average/spherical_average.i block=VectorPostprocessors
 
 !syntax parameters /VectorPostprocessors/SphericalAverage
 

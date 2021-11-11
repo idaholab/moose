@@ -11,22 +11,22 @@
 
 #include "ElementVectorPostprocessor.h"
 
-class VolumeHistogram;
+class VariableValueVolumeHistogram;
 
 template <>
-InputParameters validParams<VolumeHistogram>();
+InputParameters validParams<VariableValueVolumeHistogram>();
 
 /**
  * Compute a histogram of volume fractions binned according to variable values.
  * This VectorPostprocessor lets you tabulate the volumes in the simulation domain
  * where a given variable has certain values.
  */
-class VolumeHistogram : public ElementVectorPostprocessor
+class VariableValueVolumeHistogram : public ElementVectorPostprocessor
 {
 public:
   static InputParameters validParams();
 
-  VolumeHistogram(const InputParameters & parameters);
+  VariableValueVolumeHistogram(const InputParameters & parameters);
 
   virtual void initialize() override;
   virtual void execute() override;
@@ -61,4 +61,3 @@ protected:
   /// aggregated volume for the given bin
   VectorPostprocessorValue & _volume;
 };
-
