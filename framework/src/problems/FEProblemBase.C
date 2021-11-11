@@ -3696,48 +3696,6 @@ FEProblemBase::setCurrentExecuteOnFlag(const ExecFlagType & flag)
 void
 FEProblemBase::executeAllObjects(const ExecFlagType & exec_type)
 {
-  // Set the current flag
-  setCurrentExecuteOnFlag(exec_type);
-  if (exec_type == EXEC_NONLINEAR)
-  {
-    _currently_computing_jacobian = true;
-    if (_displaced_problem)
-      _displaced_problem->setCurrentlyComputingJacobian(true);
-  }
-
-  // Samplers; EXEC_INITIAL is not called because the Sampler::init() method that is called after
-  // construction makes the first Sampler::execute() call. This ensures that the random number
-  // generator object is the correct state prior to any other object (e.g., Transfers) attempts to
-  // extract data from the Sampler. That is, if the Sampler::execute() call is delayed to here
-  // then it is not in the correct state for other objects.
-  if (exec_type != EXEC_INITIAL)
-    executeSamplers(exec_type);
-
-  computeUserObjects(exec_type, Moose::PRE_AUX);
-
-  // TODO: this triggers execute warehouse errors when there are no objects
-  // for the dynamic/custom executor execute on flags.  Figure out how to
-  // fix this.
-  // computeAuxiliaryKernels(exec_type);
-
-  computeUserObjects(exec_type, Moose::POST_AUX);
-
-  if (exec_type != EXEC_INITIAL)
-  {
-    // Pre-ic UserObjects should execute along with the Post-aux group except on EXEC_INITIAL
-    computeUserObjects(exec_type, Moose::PRE_IC);
-    if (_control_warehouse.hasExecType(exec_type))
-      executeControls(exec_type);
-  }
-
-  // Return the current flag to None
-  setCurrentExecuteOnFlag(EXEC_NONE);
-  _currently_computing_jacobian = false;
-  if (_displaced_problem)
-    _displaced_problem->setCurrentlyComputingJacobian(false);
-
-  if (_control_warehouse.hasExecType(exec_type))
-    executeControls(exec_type);
 }
 
 void
