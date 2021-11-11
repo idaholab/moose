@@ -70,8 +70,6 @@ umat_(double * stress,
   double eps[6];
   double eps_trace;
 
-  // Build stress as in
-  // https://github.com/michael-schw/Abaqus-UMAT-Cpp-Subroutine/blob/main/umat.cpp
   for (int i = 0; i < 6; i++)
     eps[i] = stran[i] + dstran[i];
 
