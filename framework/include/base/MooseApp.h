@@ -918,8 +918,17 @@ protected:
   /// OutputWarehouse object for this App
   OutputWarehouse _output_warehouse;
 
-  /// The PerfGraph object for this application
-  PerfGraph _perf_graph;
+  /// Where the restartable data is held (indexed on tid)
+  RestartableDataMaps _restartable_data;
+
+  /**
+   * Data names that will only be read from the restart file during RECOVERY.
+   * e.g. these names are _excluded_ during restart.
+   */
+  DataNames _recoverable_data_names;
+
+  /// The PerfGraph object for this application (recoverable)
+  PerfGraph & _perf_graph;
 
   /// The RankMap is a useful object for determining how the processes are laid out on the physical hardware
   const RankMap _rank_map;
@@ -1073,18 +1082,17 @@ private:
                                                     MeshBase & mesh,
                                                     const DofMap * dof_map = nullptr);
 
-  /// Where the restartable data is held (indexed on tid)
-  RestartableDataMaps _restartable_data;
+  /**
+   * Creates a recoverable PerfGraph.
+   *
+   * This is a separate method so that it can be used in the constructor (multiple calls
+   * are required to declare it).
+   */
+  PerfGraph & createRecoverablePerfGraph();
 
   /// General storage for custom RestartableData that can be added to from outside applications
   std::unordered_map<RestartableDataMapName, std::pair<RestartableDataMap, std::string>>
       _restartable_meta_data;
-
-  /**
-   * Data names that will only be read from the restart file during RECOVERY.
-   * e.g. these names are _excluded_ during restart.
-   */
-  DataNames _recoverable_data_names;
 
   /// Enumeration for holding the valid types of dynamic registrations allowed
   enum RegistrationType

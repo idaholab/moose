@@ -23,4 +23,23 @@ public:
 
   // These objects are not threaded
   void threadJoin(const UserObject &) final {}
+
+  /**
+   * @returns Whether or not this Reporter should store its value at this specific time.
+   *
+   * If the private parameter '_always_store' is true, this will always return true.
+   * Otherwise, it will return true if the current execute flag matches a flag
+   * that this GeneralReporter has in its 'execute_on' parameter. Otherwise, it will
+   * return false.
+   *
+   * This enables GeneralReporter objects that do not fill information ahead of time in
+   * execute() but instead fill their information in the to_json implementation.
+   * Without this, said GeneralReporters would always output their information even though
+   * the user requested that they do not execute on a specific flag.
+   */
+  bool shouldStore() const override final;
+
+private:
+  /// Whether or not this GeneralReporter should always store its information; see shouldStore()
+  const bool _always_store;
 };

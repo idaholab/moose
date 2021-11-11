@@ -1,0 +1,834 @@
+{
+    "app_name": "main",
+    "current_time": "Sun Oct 24 18:23:11 2021",
+    "executable": "/Users/harblh/projects/moose/test/moose_test-opt",
+    "executable_time": "Fri Oct 22 21:54:29 2021",
+    "libmesh_version": "",
+    "moose_version": "git commit 2cc226e6cf on 2021-10-12",
+    "petsc_version": "3.15.1",
+    "reporters": {
+        "perf_graph": {
+            "type": "PerfGraphReporter",
+            "values": {
+                "graph": {
+                    "type": "PerfGraph const*"
+                }
+            }
+        }
+    },
+    "slepc_version": "3.15.1",
+    "time_steps": [
+        {
+            "perf_graph": {
+                "graph": {
+                    "MooseTestApp (main)": {
+                        "MooseApp::run": {
+                            "MooseApp::execute": {
+                                "MooseApp::executeExecutioner": {
+                                    "FEProblem::advanceState": {
+                                        "level": 5,
+                                        "memory": 0,
+                                        "num_calls": 1,
+                                        "time": 1.187e-06
+                                    },
+                                    "FEProblem::initialSetup": {
+                                        "AuxiliarySystem::initialSetup": {
+                                            "level": 3,
+                                            "memory": 0,
+                                            "num_calls": 1,
+                                            "time": 1.5221e-05
+                                        },
+                                        "FEProblem::ICiniitalSetup": {
+                                            "level": 5,
+                                            "memory": 0,
+                                            "num_calls": 1,
+                                            "time": 5.85e-06
+                                        },
+                                        "FEProblem::assignMaxDofs": {
+                                            "level": 5,
+                                            "memory": 0,
+                                            "num_calls": 1,
+                                            "time": 1.1e-07
+                                        },
+                                        "FEProblem::checkNonlocalCoupling": {
+                                            "level": 5,
+                                            "memory": 0,
+                                            "num_calls": 1,
+                                            "time": 7.34e-07
+                                        },
+                                        "FEProblem::computingMaxDofs": {
+                                            "level": 3,
+                                            "memory": 0,
+                                            "num_calls": 1,
+                                            "time": 1.4656e-05
+                                        },
+                                        "FEProblem::copySolutionsBackwards": {
+                                            "level": 3,
+                                            "memory": 0,
+                                            "num_calls": 1,
+                                            "time": 1.807e-06
+                                        },
+                                        "FEProblem::initialSetupTransfers": {
+                                            "level": 2,
+                                            "memory": 0,
+                                            "num_calls": 1,
+                                            "time": 2.77e-07
+                                        },
+                                        "FEProblem::initializingFunctions": {
+                                            "FEProblem::reinitScalars": {
+                                                "level": 3,
+                                                "memory": 0,
+                                                "num_calls": 1,
+                                                "time": 2.012e-06
+                                            },
+                                            "level": 5,
+                                            "memory": 0,
+                                            "num_calls": 1,
+                                            "time": 1.3281e-05
+                                        },
+                                        "FEProblem::initializingRandomObjects": {
+                                            "level": 5,
+                                            "memory": 0,
+                                            "num_calls": 1,
+                                            "time": 1.11e-07
+                                        },
+                                        "FEProblem::lineSearchInitialSetup": {
+                                            "level": 5,
+                                            "memory": 0,
+                                            "num_calls": 1,
+                                            "time": 7.5e-08
+                                        },
+                                        "FEProblem::projectSolution": {
+                                            "level": 2,
+                                            "memory": 0,
+                                            "num_calls": 1,
+                                            "time": 9.6771e-05
+                                        },
+                                        "FEProblem::reinitBecauseOfGhostingOrNewGeomObjects": {
+                                            "level": 3,
+                                            "memory": 0,
+                                            "num_calls": 1,
+                                            "time": 1.94e-07
+                                        },
+                                        "FEProblem::reinitScalars": {
+                                            "level": 3,
+                                            "memory": 0,
+                                            "num_calls": 2,
+                                            "time": 2.98e-07
+                                        },
+                                        "FEProblem::resizingVarValues": {
+                                            "level": 5,
+                                            "memory": 0,
+                                            "num_calls": 1,
+                                            "time": 3.793e-06
+                                        },
+                                        "FEProblem::settingRequireDerivativeSize": {
+                                            "level": 5,
+                                            "memory": 0,
+                                            "num_calls": 1,
+                                            "time": 9.3e-08
+                                        },
+                                        "FEProblem::updateGeometricSearch": {
+                                            "level": 3,
+                                            "memory": 0,
+                                            "num_calls": 2,
+                                            "time": 2.88e-07
+                                        },
+                                        "FEProblem::updateMortarMesh": {
+                                            "level": 5,
+                                            "memory": 0,
+                                            "num_calls": 1,
+                                            "time": 2.884e-06
+                                        },
+                                        "MeshGeneratorMesh::updateActiveSemiLocalNodeRange": {
+                                            "level": 5,
+                                            "memory": 0,
+                                            "num_calls": 1,
+                                            "time": 1.261e-06
+                                        },
+                                        "MooseApp::MooseApp::checkRegistryLabels": {
+                                            "level": 5,
+                                            "memory": 0,
+                                            "num_calls": 1,
+                                            "time": 9.93e-07
+                                        },
+                                        "NonlinearSystemBase::nlInitialSetup": {
+                                            "NonlinearSystemBase::kernelsInitialSetup": {
+                                                "level": 2,
+                                                "memory": 0,
+                                                "num_calls": 1,
+                                                "time": 9.49e-07
+                                            },
+                                            "NonlinearSystemBase::mortarSetup": {
+                                                "level": 2,
+                                                "memory": 0,
+                                                "num_calls": 1,
+                                                "time": 2.16e-07
+                                            },
+                                            "level": 2,
+                                            "memory": 0,
+                                            "num_calls": 1,
+                                            "time": 2.6496e-05
+                                        },
+                                        "OutputWarehouse::initialSetup": {
+                                            "level": 5,
+                                            "memory": 0,
+                                            "num_calls": 1,
+                                            "time": 0.000223961
+                                        },
+                                        "level": 2,
+                                        "memory": 0,
+                                        "num_calls": 1,
+                                        "time": 0.000420916
+                                    },
+                                    "FEProblem::outputStep": {
+                                        "Console::outputStep": {
+                                            "level": 2,
+                                            "memory": 0,
+                                            "num_calls": 3,
+                                            "time": 0.000327177
+                                        },
+                                        "level": 1,
+                                        "memory": 0,
+                                        "num_calls": 2,
+                                        "time": 5.6415e-05
+                                    },
+                                    "Steady::PicardSolve": {
+                                        "FEProblem::outputStep": {
+                                            "Console::outputStep": {
+                                                "level": 2,
+                                                "memory": 0,
+                                                "num_calls": 1,
+                                                "time": 3.195e-06
+                                            },
+                                            "level": 1,
+                                            "memory": 0,
+                                            "num_calls": 1,
+                                            "time": 2.1216e-05
+                                        },
+                                        "FEProblem::solve": {
+                                            "Console::outputStep": {
+                                                "level": 2,
+                                                "memory": 0,
+                                                "num_calls": 1,
+                                                "time": 3.4072e-05
+                                            },
+                                            "FEProblem::checkNonlinearConvergence": {
+                                                "level": 5,
+                                                "memory": 0,
+                                                "num_calls": 1,
+                                                "time": 2.766e-06
+                                            },
+                                            "FEProblem::computeResidualSys": {
+                                                "FEProblem::computeResidualInternal": {
+                                                    "FEProblem::computeResidualTags": {
+                                                        "FEProblem::reinitScalars": {
+                                                            "level": 3,
+                                                            "memory": 0,
+                                                            "num_calls": 1,
+                                                            "time": 2.72e-07
+                                                        },
+                                                        "NonlinearSystemBase::nl::computeResidualTags": {
+                                                            "FEProblem::checkExceptionAndStopSolve": {
+                                                                "level": 5,
+                                                                "memory": 0,
+                                                                "num_calls": 1,
+                                                                "time": 6.8e-08
+                                                            },
+                                                            "NonlinearSystemBase::NodalBCs": {
+                                                                "level": 3,
+                                                                "memory": 0,
+                                                                "num_calls": 1,
+                                                                "time": 2.486e-06
+                                                            },
+                                                            "NonlinearSystemBase::computeResidualInternal": {
+                                                                "FEProblem::checkExceptionAndStopSolve": {
+                                                                    "level": 5,
+                                                                    "memory": 0,
+                                                                    "num_calls": 5,
+                                                                    "time": 4.01e-07
+                                                                },
+                                                                "FEProblem::reinitScalars": {
+                                                                    "level": 3,
+                                                                    "memory": 0,
+                                                                    "num_calls": 1,
+                                                                    "time": 1.23e-07
+                                                                },
+                                                                "NonlinearSystemBase::Kernels": {
+                                                                    "level": 3,
+                                                                    "memory": 0,
+                                                                    "num_calls": 1,
+                                                                    "time": 1.2351e-05
+                                                                },
+                                                                "NonlinearSystemBase::computeResidualInternal": {
+                                                                    "level": 3,
+                                                                    "memory": 0,
+                                                                    "num_calls": 1,
+                                                                    "time": 5.55e-07
+                                                                },
+                                                                "level": 3,
+                                                                "memory": 0,
+                                                                "num_calls": 1,
+                                                                "time": 7.3809e-05
+                                                            },
+                                                            "level": 5,
+                                                            "memory": 0,
+                                                            "num_calls": 1,
+                                                            "time": 5.3045e-05
+                                                        },
+                                                        "level": 5,
+                                                        "memory": 0,
+                                                        "num_calls": 1,
+                                                        "time": 4.4967e-05
+                                                    },
+                                                    "level": 1,
+                                                    "memory": 0,
+                                                    "num_calls": 1,
+                                                    "time": 1.4167e-05
+                                                },
+                                                "level": 5,
+                                                "memory": 0,
+                                                "num_calls": 1,
+                                                "time": 1.0468e-05
+                                            },
+                                            "NonlinearSystemBase::initialBCs": {
+                                                "level": 2,
+                                                "memory": 0,
+                                                "num_calls": 1,
+                                                "time": 1.673e-06
+                                            },
+                                            "NonlinearSystemBase::nlInitialResidual": {
+                                                "FEProblem::computeResidualSys": {
+                                                    "FEProblem::computeResidualInternal": {
+                                                        "FEProblem::computeResidualTags": {
+                                                            "FEProblem::reinitScalars": {
+                                                                "level": 3,
+                                                                "memory": 0,
+                                                                "num_calls": 1,
+                                                                "time": 4.25e-07
+                                                            },
+                                                            "NonlinearSystemBase::nl::computeResidualTags": {
+                                                                "FEProblem::checkExceptionAndStopSolve": {
+                                                                    "level": 5,
+                                                                    "memory": 0,
+                                                                    "num_calls": 1,
+                                                                    "time": 6.8e-08
+                                                                },
+                                                                "NonlinearSystemBase::NodalBCs": {
+                                                                    "level": 3,
+                                                                    "memory": 0,
+                                                                    "num_calls": 1,
+                                                                    "time": 1.0742e-05
+                                                                },
+                                                                "NonlinearSystemBase::computeResidualInternal": {
+                                                                    "FEProblem::checkExceptionAndStopSolve": {
+                                                                        "level": 5,
+                                                                        "memory": 0,
+                                                                        "num_calls": 5,
+                                                                        "time": 1.728e-06
+                                                                    },
+                                                                    "FEProblem::reinitScalars": {
+                                                                        "level": 3,
+                                                                        "memory": 0,
+                                                                        "num_calls": 1,
+                                                                        "time": 1.61e-07
+                                                                    },
+                                                                    "NonlinearSystemBase::Kernels": {
+                                                                        "level": 3,
+                                                                        "memory": 0,
+                                                                        "num_calls": 1,
+                                                                        "time": 4.4619e-05
+                                                                    },
+                                                                    "NonlinearSystemBase::computeResidualInternal": {
+                                                                        "level": 3,
+                                                                        "memory": 0,
+                                                                        "num_calls": 1,
+                                                                        "time": 1.08e-06
+                                                                    },
+                                                                    "level": 3,
+                                                                    "memory": 0,
+                                                                    "num_calls": 1,
+                                                                    "time": 8.68e-05
+                                                                },
+                                                                "level": 5,
+                                                                "memory": 0,
+                                                                "num_calls": 1,
+                                                                "time": 7.9976e-05
+                                                            },
+                                                            "level": 5,
+                                                            "memory": 0,
+                                                            "num_calls": 1,
+                                                            "time": 5.7923e-05
+                                                        },
+                                                        "level": 1,
+                                                        "memory": 0,
+                                                        "num_calls": 1,
+                                                        "time": 1.7035e-05
+                                                    },
+                                                    "level": 5,
+                                                    "memory": 0,
+                                                    "num_calls": 1,
+                                                    "time": 1.5068e-05
+                                                },
+                                                "level": 3,
+                                                "memory": 0,
+                                                "num_calls": 1,
+                                                "time": 1.9738e-05
+                                            },
+                                            "level": 1,
+                                            "memory": 1,
+                                            "num_calls": 1,
+                                            "time": 0.001715174
+                                        },
+                                        "FEProblem::updateActiveObjects": {
+                                            "level": 5,
+                                            "memory": 0,
+                                            "num_calls": 1,
+                                            "time": 4.232e-05
+                                        },
+                                        "level": 1,
+                                        "memory": 0,
+                                        "num_calls": 1,
+                                        "time": 0.000130484
+                                    },
+                                    "Steady::final": {
+                                        "FEProblem::computeUserObjects": {
+                                            "level": 1,
+                                            "memory": 0,
+                                            "num_calls": 1,
+                                            "time": 1.3082e-05
+                                        },
+                                        "FEProblem::outputStep": {
+                                            "Console::outputStep": {
+                                                "level": 2,
+                                                "memory": 1,
+                                                "num_calls": 1,
+                                                "time": 5.9233e-05
+                                            },
+                                            "level": 1,
+                                            "memory": 0,
+                                            "num_calls": 1,
+                                            "time": 1.1261e-05
+                                        },
+                                        "level": 1,
+                                        "memory": 0,
+                                        "num_calls": 1,
+                                        "time": 6.0557e-05
+                                    },
+                                    "level": 3,
+                                    "memory": 0,
+                                    "num_calls": 1,
+                                    "time": 0.00017374
+                                },
+                                "level": 2,
+                                "memory": 0,
+                                "num_calls": 1,
+                                "time": 1.0576e-05
+                            },
+                            "MooseApp::setup": {
+                                "MooseApp::runInputFile": {
+                                    "Action::AddBCAction::left::add_bc::act": {
+                                        "level": 4,
+                                        "memory": 1,
+                                        "num_calls": 1,
+                                        "time": 0.000229365
+                                    },
+                                    "Action::AddBCAction::right::add_bc::act": {
+                                        "level": 4,
+                                        "memory": 0,
+                                        "num_calls": 1,
+                                        "time": 0.000172241
+                                    },
+                                    "Action::AddExternalAuxVariableAction::act": {
+                                        "level": 4,
+                                        "memory": 0,
+                                        "num_calls": 1,
+                                        "time": 1.636e-06
+                                    },
+                                    "Action::AddKernelAction::diff::add_kernel::act": {
+                                        "level": 4,
+                                        "memory": 0,
+                                        "num_calls": 1,
+                                        "time": 0.000207773
+                                    },
+                                    "Action::AddMeshGeneratorAction::gmg::act": {
+                                        "level": 4,
+                                        "memory": 0,
+                                        "num_calls": 1,
+                                        "time": 0.000276237
+                                    },
+                                    "Action::AddOutputAction::console::act": {
+                                        "level": 4,
+                                        "memory": 0,
+                                        "num_calls": 1,
+                                        "time": 0.000830544
+                                    },
+                                    "Action::AddOutputAction::json::act": {
+                                        "level": 4,
+                                        "memory": 0,
+                                        "num_calls": 1,
+                                        "time": 0.000501028
+                                    },
+                                    "Action::AddRelationshipManager::act": {
+                                        "level": 4,
+                                        "memory": 0,
+                                        "num_calls": 7,
+                                        "time": 0.000460856
+                                    },
+                                    "Action::AddReporterAction::perf_graph::act": {
+                                        "level": 4,
+                                        "memory": 0,
+                                        "num_calls": 1,
+                                        "time": 0.000220086
+                                    },
+                                    "Action::AddVariableAction::u::act": {
+                                        "level": 4,
+                                        "memory": 0,
+                                        "num_calls": 1,
+                                        "time": 0.000296521
+                                    },
+                                    "Action::CheckIntegrityAction::act": {
+                                        "FEProblem::notifyWhenMeshChanges": {
+                                            "level": 5,
+                                            "memory": 0,
+                                            "num_calls": 1,
+                                            "time": 3.178e-05
+                                        },
+                                        "level": 4,
+                                        "memory": 0,
+                                        "num_calls": 2,
+                                        "time": 1.4713e-05
+                                    },
+                                    "Action::CheckOutputAction::act": {
+                                        "level": 4,
+                                        "memory": 0,
+                                        "num_calls": 1,
+                                        "time": 6.768e-06
+                                    },
+                                    "Action::CommonOutputAction::Outputs::act": {
+                                        "level": 4,
+                                        "memory": 1,
+                                        "num_calls": 2,
+                                        "time": 0.000521542
+                                    },
+                                    "Action::CopyNodalVarsAction::act": {
+                                        "level": 4,
+                                        "memory": 0,
+                                        "num_calls": 3,
+                                        "time": 2.142e-06
+                                    },
+                                    "Action::CopyNodalVarsAction::u::check_copy_nodal_vars::act": {
+                                        "level": 4,
+                                        "memory": 0,
+                                        "num_calls": 1,
+                                        "time": 2.284e-06
+                                    },
+                                    "Action::CopyNodalVarsAction::u::copy_nodal_vars::act": {
+                                        "level": 4,
+                                        "memory": 0,
+                                        "num_calls": 1,
+                                        "time": 1.606e-06
+                                    },
+                                    "Action::CouplingFunctorCheckAction::act": {
+                                        "level": 4,
+                                        "memory": 0,
+                                        "num_calls": 1,
+                                        "time": 3.89e-07
+                                    },
+                                    "Action::CreateDisplacedProblemAction::Mesh::act": {
+                                        "level": 4,
+                                        "memory": 0,
+                                        "num_calls": 4,
+                                        "time": 4.837e-06
+                                    },
+                                    "Action::CreateExecutionerAction::Executioner::act": {
+                                        "level": 4,
+                                        "memory": 1,
+                                        "num_calls": 1,
+                                        "time": 0.000751567
+                                    },
+                                    "Action::CreateProblemDefaultAction::act": {
+                                        "FEProblem::initNullSpaceVectors": {
+                                            "level": 5,
+                                            "memory": 0,
+                                            "num_calls": 1,
+                                            "time": 1.729e-06
+                                        },
+                                        "FEProblem::setCoordSystem": {
+                                            "level": 5,
+                                            "memory": 0,
+                                            "num_calls": 1,
+                                            "time": 2.462e-06
+                                        },
+                                        "level": 4,
+                                        "memory": 1,
+                                        "num_calls": 2,
+                                        "time": 0.001184215
+                                    },
+                                    "Action::DisplayGhostingAction::Mesh::act": {
+                                        "level": 4,
+                                        "memory": 0,
+                                        "num_calls": 3,
+                                        "time": 5.42e-07
+                                    },
+                                    "Action::EmptyAction::act": {
+                                        "level": 4,
+                                        "memory": 0,
+                                        "num_calls": 3,
+                                        "time": 1.887e-06
+                                    },
+                                    "Action::ExecuteMeshGenerators::act": {
+                                        "MooseApp::executeMeshGenerators": {
+                                            "level": 1,
+                                            "memory": 0,
+                                            "num_calls": 1,
+                                            "time": 9.664e-06
+                                        },
+                                        "level": 4,
+                                        "memory": 0,
+                                        "num_calls": 1,
+                                        "time": 0.000259706
+                                    },
+                                    "Action::InitProblemAction::act": {
+                                        "FEProblem::init": {
+                                            "FEProblem::EquationSystems::Init": {
+                                                "level": 2,
+                                                "memory": 0,
+                                                "num_calls": 1,
+                                                "time": 0.000628918
+                                            },
+                                            "FEProblem::fillCouplingMatrix": {
+                                                "level": 3,
+                                                "memory": 0,
+                                                "num_calls": 1,
+                                                "time": 2.878e-06
+                                            },
+                                            "FEProblem::ghostGhostedBoundaries": {
+                                                "level": 3,
+                                                "memory": 0,
+                                                "num_calls": 1,
+                                                "time": 1.42e-07
+                                            },
+                                            "MeshGeneratorMesh::meshChanged": {
+                                                "MeshGeneratorMesh::getActiveLocalElementRange": {
+                                                    "level": 5,
+                                                    "memory": 0,
+                                                    "num_calls": 1,
+                                                    "time": 7.609e-06
+                                                },
+                                                "MeshGeneratorMesh::getActiveNodeRange": {
+                                                    "level": 5,
+                                                    "memory": 0,
+                                                    "num_calls": 1,
+                                                    "time": 8.972e-06
+                                                },
+                                                "MeshGeneratorMesh::getBoundaryElementRange": {
+                                                    "level": 5,
+                                                    "memory": 0,
+                                                    "num_calls": 1,
+                                                    "time": 5.219e-06
+                                                },
+                                                "MeshGeneratorMesh::getBoundaryNodeRange": {
+                                                    "level": 5,
+                                                    "memory": 0,
+                                                    "num_calls": 1,
+                                                    "time": 7.173e-06
+                                                },
+                                                "MeshGeneratorMesh::getLocalNodeRange": {
+                                                    "level": 5,
+                                                    "memory": 0,
+                                                    "num_calls": 1,
+                                                    "time": 1.1406e-05
+                                                },
+                                                "MeshGeneratorMesh::update": {
+                                                    "MeshGeneratorMesh::buildBndElemList": {
+                                                        "level": 5,
+                                                        "memory": 0,
+                                                        "num_calls": 1,
+                                                        "time": 3.872e-06
+                                                    },
+                                                    "MeshGeneratorMesh::buildNodeList": {
+                                                        "level": 5,
+                                                        "memory": 0,
+                                                        "num_calls": 1,
+                                                        "time": 6.857e-06
+                                                    },
+                                                    "MeshGeneratorMesh::cacheInfo": {
+                                                        "level": 3,
+                                                        "memory": 0,
+                                                        "num_calls": 1,
+                                                        "time": 9.689e-06
+                                                    },
+                                                    "level": 3,
+                                                    "memory": 0,
+                                                    "num_calls": 1,
+                                                    "time": 4.7124e-05
+                                                },
+                                                "level": 3,
+                                                "memory": 0,
+                                                "num_calls": 1,
+                                                "time": 7.0204e-05
+                                            },
+                                            "level": 2,
+                                            "memory": 1,
+                                            "num_calls": 1,
+                                            "time": 0.000188372
+                                        },
+                                        "level": 4,
+                                        "memory": 0,
+                                        "num_calls": 1,
+                                        "time": 1.8371e-05
+                                    },
+                                    "Action::MaterialOutputAction::act": {
+                                        "level": 4,
+                                        "memory": 0,
+                                        "num_calls": 2,
+                                        "time": 0.000134398
+                                    },
+                                    "Action::SetupDampersAction::act": {
+                                        "level": 4,
+                                        "memory": 0,
+                                        "num_calls": 1,
+                                        "time": 2.046e-06
+                                    },
+                                    "Action::SetupMeshAction::Mesh::act": {
+                                        "Action::SetupMeshAction::Mesh::SetupMeshAction::act::set_mesh_base": {
+                                            "MeshGeneratorMesh::init": {
+                                                "level": 2,
+                                                "memory": 0,
+                                                "num_calls": 1,
+                                                "time": 2.691e-06
+                                            },
+                                            "level": 1,
+                                            "memory": 0,
+                                            "num_calls": 2,
+                                            "time": 2.733e-05
+                                        },
+                                        "Action::SetupMeshAction::Mesh::SetupMeshAction::act::setup_mesh": {
+                                            "level": 1,
+                                            "memory": 0,
+                                            "num_calls": 1,
+                                            "time": 0.000387782
+                                        },
+                                        "level": 4,
+                                        "memory": 0,
+                                        "num_calls": 3,
+                                        "time": 4.7104e-05
+                                    },
+                                    "Action::SetupMeshCompleteAction::Mesh::act": {
+                                        "Action::SetupMeshCompleteAction::Mesh::completeSetupUndisplaced": {
+                                            "MeshGeneratorMesh::prepare": {
+                                                "MeshGeneratorMesh::detectOrthogonalDimRanges": {
+                                                    "level": 5,
+                                                    "memory": 0,
+                                                    "num_calls": 1,
+                                                    "time": 1.9899e-05
+                                                },
+                                                "MeshGeneratorMesh::update": {
+                                                    "MeshGeneratorMesh::buildBndElemList": {
+                                                        "level": 5,
+                                                        "memory": 0,
+                                                        "num_calls": 1,
+                                                        "time": 8.009e-06
+                                                    },
+                                                    "MeshGeneratorMesh::buildNodeList": {
+                                                        "level": 5,
+                                                        "memory": 0,
+                                                        "num_calls": 1,
+                                                        "time": 1.3082e-05
+                                                    },
+                                                    "MeshGeneratorMesh::cacheInfo": {
+                                                        "level": 3,
+                                                        "memory": 0,
+                                                        "num_calls": 1,
+                                                        "time": 1.5868e-05
+                                                    },
+                                                    "level": 3,
+                                                    "memory": 0,
+                                                    "num_calls": 1,
+                                                    "time": 5.8315e-05
+                                                },
+                                                "level": 2,
+                                                "memory": 0,
+                                                "num_calls": 2,
+                                                "time": 5.1018e-05
+                                            },
+                                            "level": 2,
+                                            "memory": 0,
+                                            "num_calls": 2,
+                                            "time": 2.3878e-05
+                                        },
+                                        "Action::SetupMeshCompleteAction::Mesh::deleteRemoteElems": {
+                                            "level": 2,
+                                            "memory": 0,
+                                            "num_calls": 1,
+                                            "time": 1.47e-07
+                                        },
+                                        "Action::SetupMeshCompleteAction::Mesh::uniformRefine": {
+                                            "level": 2,
+                                            "memory": 0,
+                                            "num_calls": 1,
+                                            "time": 1.301e-06
+                                        },
+                                        "level": 4,
+                                        "memory": 0,
+                                        "num_calls": 4,
+                                        "time": 5.5583e-05
+                                    },
+                                    "Action::SetupQuadratureAction::act": {
+                                        "MeshGeneratorMesh::getActiveLocalElementRange": {
+                                            "level": 5,
+                                            "memory": 0,
+                                            "num_calls": 1,
+                                            "time": 1.1286e-05
+                                        },
+                                        "level": 4,
+                                        "memory": 0,
+                                        "num_calls": 1,
+                                        "time": 0.000169087
+                                    },
+                                    "Action::SetupRecoverFileBaseAction::act": {
+                                        "level": 4,
+                                        "memory": 0,
+                                        "num_calls": 2,
+                                        "time": 5.056e-06
+                                    },
+                                    "level": 3,
+                                    "memory": 0,
+                                    "num_calls": 1,
+                                    "time": 0.000669553
+                                },
+                                "MooseApp::setupOptions": {
+                                    "level": 5,
+                                    "memory": 1,
+                                    "num_calls": 1,
+                                    "time": 0.020355419
+                                },
+                                "level": 2,
+                                "memory": 0,
+                                "num_calls": 1,
+                                "time": 5.0514e-05
+                            },
+                            "level": 3,
+                            "memory": 0,
+                            "num_calls": 1,
+                            "time": 2.4591e-05
+                        },
+                        "RankMap::construct": {
+                            "level": 2,
+                            "memory": 0,
+                            "num_calls": 1,
+                            "time": 3.9671e-05
+                        },
+                        "level": 0,
+                        "memory": 2,
+                        "num_calls": 1,
+                        "time": 0.009138843
+                    }
+                }
+            },
+            "time": 2.0,
+            "time_step": 2
+        }
+    ]
+}

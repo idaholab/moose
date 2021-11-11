@@ -44,7 +44,7 @@ class PerfGraph : protected ConsoleStreamInterface
 {
 public:
   using PerfGraphRegistry = moose::internal::PerfGraphRegistry;
-  using SectionInfo = PerfGraphRegistry::SectionInfo;
+  using PerfGraphSectionInfo = moose::internal::PerfGraphSectionInfo;
 
   /**
    * For retrieving values
@@ -106,11 +106,6 @@ public:
   void printHeaviestSections(const ConsoleStream & console, const unsigned int num_sections);
 
   /**
-   * Grab the name of a section
-   */
-  const std::string & sectionName(const PerfID id) const;
-
-  /**
    * Whether or not timing is active
    *
    * When not active no timing information will be kept
@@ -161,72 +156,87 @@ public:
    * Get a reference to the self time for a section
    *
    * This reference can be held onto and the value
-   * will be updated anytime updateTiming() is called.
+   * will be updated anytime update() is called.
    */
   const Real & getSelfTime(const std::string & section_name)
   {
-    return _section_time[section_name]._self;
+    return _cumulative_section_info[section_name]._self;
   }
 
   /**
    * Get a reference to the children time for a section
    *
    * This reference can be held onto and the value
-   * will be updated anytime updateTiming() is called.
+   * will be updated anytime update() is called.
    */
   const Real & getChildrenTime(const std::string & section_name)
   {
-    return _section_time[section_name]._children;
+    return _cumulative_section_info[section_name]._children;
   }
 
   /**
    * Get a reference to the total time for a section
    *
    * This reference can be held onto and the value
-   * will be updated anytime updateTiming() is called.
+   * will be updated anytime update() is called.
    */
   const Real & getTotalTime(const std::string & section_name)
   {
-    return _section_time[section_name]._total;
+    return _cumulative_section_info[section_name]._total;
   }
 
   /**
    * Get a reference to the self memory usage for a section
    *
    * This reference can be held onto and the value
-   * will be updated anyting updateTiming() is called
+   * will be updated anyting update() is called
    */
   const long int & getSelfMemory(const std::string & section_name)
   {
-    return _section_time[section_name]._self_memory;
+    return _cumulative_section_info[section_name]._self_memory;
   }
 
   /**
    * Get a reference to the children memory usage for a section
    *
    * This reference can be held onto and the value
-   * will be updated anyting updateTiming() is called
+   * will be updated anyting update() is called
    */
   const long int & getChildrenMemory(const std::string & section_name)
   {
-    return _section_time[section_name]._children_memory;
+    return _cumulative_section_info[section_name]._children_memory;
   }
 
   /**
    * Get a reference to the total memory usage for a section
    *
    * This reference can be held onto and the value
-   * will be updated anyting updateTiming() is called
+   * will be updated anyting update() is called
    */
   const long int & getTotalMemory(const std::string & section_name)
   {
-    return _section_time[section_name]._total_memory;
+    return _cumulative_section_info[section_name]._total_memory;
   }
 
   /**
-   * Udates the time section_time and time for all currently running nodes
+   * Updates the time section_time and time for all currently running nodes
    */
-  void updateTiming();
+  void update();
+
+  /**
+   * @returns The MooseApp
+   */
+  MooseApp & mooseApp() { return _moose_app; }
+
+  /**
+   * @returns A constant reference to the root node
+   */
+  const PerfNode & rootNode() const { return *_root_node; }
+
+  template <typename Functor>
+  void treeRecurse(const Functor & act,
+                   const unsigned int level = MAX_STACK_SIZE,
+                   const bool heaviest = false) const;
 
 protected:
   typedef VariadicTable<std::string,
@@ -244,11 +254,12 @@ protected:
   typedef VariadicTable<std::string, unsigned long int, Real, Real, Real, long int> HeaviestTable;
 
   /**
-   * Use to hold the time for each section
+   * Use to hold the cumulative time and memory for each section, which comes
+   * from all of the PerfNodes that contribute to said section
    *
-   * These will be filled by updateTiming()
+   * These will be filled by update()
    */
-  struct SectionTime
+  struct CumulativeSectionInfo
   {
     /// Amount of time used within this section (without children)
     Real _self = 0.;
@@ -354,44 +365,18 @@ protected:
   void pop();
 
   /**
-   * Helper for printing out the graph
+   * Updates the cumulative self/children/total time and memory for each section
+   * across all nodes that contribute to said section in _cumulative_section_info
    *
-   * @param current_node The node to be working on right now
-   * @param console Where to print to
-   * @param level The level to print out below (<=)
-   * @param current_depth - Used in the recursion
-   */
-  void recursivelyPrintGraph(PerfNode * current_node,
-                             FullTable & vtable,
-                             unsigned int level,
-                             unsigned int current_depth = 0);
-
-  /**
-   * Helper for printing out the trace that has taken the most time
-   *
-   * @param current_node The node to be working on right now
-   * @param console Where to print to
-   * @param current_depth - Used in the recursion
-   */
-  void recursivelyPrintHeaviestGraph(PerfNode * current_node,
-                                     FullTable & vtable,
-                                     unsigned int current_depth = 0);
-
-  /**
-   * Updates the cumulative self/children/total time
-   *
-   * Note: requires that self/children/total time are resized and zeroed before calling.
+   * Note: requires that the contents in each CumulativeSectionInfo in
+   * _cumulative_section_info be initially resized and zeroed
    *
    * @param current_node The current node to work on
    */
-  void recursivelyFillTime(PerfNode * current_node);
+  void recursivelyUpdate(const PerfNode & current_node);
 
-  /**
-   * Helper for printing out the heaviest sections
-   *
-   * @param console Where to print to
-   */
-  void printHeaviestSections(const ConsoleStream & console);
+  /// The MooseApp
+  MooseApp & _moose_app;
 
   /// Whether or not to put everything in the perf graph
   bool _live_print_all;
@@ -405,14 +390,14 @@ protected:
   /// This processor id
   const processor_id_type _pid;
 
-  /// The root node of the graph
-  std::unique_ptr<PerfNode> _root_node;
-
   /// Name of the root node
-  std::string _root_name;
+  const std::string _root_name;
 
   /// The id for the root node
-  PerfID _root_node_id;
+  const PerfID _root_node_id;
+
+  /// The root node of the graph
+  const std::unique_ptr<PerfNode> _root_node;
 
   /// The current node position in the stack
   int _current_position;
@@ -429,8 +414,8 @@ protected:
   /// Where the print thread should stop reading the execution list
   std::atomic<unsigned int> _execution_list_end;
 
-  /// The time for each section.  This is updated on updateTiming()
-  /// Note that this is _total_ cumulative time across every place
+  /// The cumulative time and memory for each section.  This is updated on update()
+  /// Note that this is _total_ cumulative time/memory across every place
   /// that section is in the graph
   ///
   /// I'm making this a map so that we can give out references to the values
@@ -438,13 +423,13 @@ protected:
   /// The map is on std::string because we might need to be able to retrieve
   /// timing values in a "late binding" situation _before_ the section
   /// has been registered.
-  std::unordered_map<std::string, SectionTime> _section_time;
+  std::unordered_map<std::string, CumulativeSectionInfo> _cumulative_section_info;
 
-  /// Pointers into _section_time indexed on PerfID
+  /// Pointers into _cumulative_section_info indexed on PerfID
   /// This is here for convenience and speed so we don't need
   /// to iterate over the above map much - and it makes it
   /// easier to sort
-  std::vector<SectionTime *> _section_time_ptrs;
+  std::vector<CumulativeSectionInfo *> _cumulative_section_info_ptrs;
 
   /// Whether or not timing is active
   bool _active;
@@ -471,7 +456,7 @@ protected:
   unsigned int _live_print_mem_limit;
 
   /// The object that is doing live printing
-  std::unique_ptr<PerfGraphLivePrint> _live_print;
+  const std::unique_ptr<PerfGraphLivePrint> _live_print;
 
   /// The thread for printing sections as they execute
   std::thread _print_thread;
@@ -479,4 +464,73 @@ protected:
   // Here so PerfGuard is the only thing that can call push/pop
   friend class PerfGuard;
   friend class PerfGraphLivePrint;
+  friend void dataStore(std::ostream &, PerfGraph &, void *);
+  friend void dataLoad(std::istream &, PerfGraph &, void *);
+
+private:
+  /**
+   * Helper for building a VariadicTable that represents the tree.
+   *
+   * @param level The level to print out below (<=)
+   * @param heaviest Show only the heaviest branch
+   */
+  FullTable treeTable(const unsigned int level, const bool heaviest = false);
+
+  template <typename Functor>
+  void treeRecurseInternal(const PerfNode & node,
+                           const Functor & act,
+                           const unsigned int level,
+                           const bool heaviest,
+                           unsigned int current_depth) const;
 };
+
+template <typename Functor>
+void
+PerfGraph::treeRecurseInternal(const PerfNode & node,
+                               const Functor & act,
+                               const unsigned int level,
+                               const bool heaviest,
+                               unsigned int current_depth) const
+{
+  mooseAssert(_perf_graph_registry.sectionExists(node.id()), "Unable to find section name!");
+
+  const auto & current_section_info = _perf_graph_registry.readSectionInfo(node.id());
+  if (current_section_info._level <= level)
+  {
+    mooseAssert(!_cumulative_section_info_ptrs.empty(), "update() must be run before treeRecurse!");
+    act(node, current_section_info, current_depth++);
+  }
+
+  if (heaviest)
+  {
+    const PerfNode * heaviest_child = nullptr;
+    for (const auto & child_it : node.children())
+    {
+      const auto & current_child = *child_it.second;
+
+      if (!heaviest_child || (current_child.totalTime() > heaviest_child->totalTime()))
+        heaviest_child = &current_child;
+    }
+
+    if (heaviest_child)
+      treeRecurseInternal(*heaviest_child, act, level, true, current_depth);
+  }
+  else
+  {
+    for (const auto & child_it : node.children())
+      treeRecurseInternal(*child_it.second, act, level, false, current_depth);
+  }
+}
+
+template <typename Functor>
+void
+PerfGraph::treeRecurse(const Functor & act,
+                       const unsigned int level /* = MAX_STACK_SIZE */,
+                       const bool heaviest /* = false */) const
+{
+  mooseAssert(_root_node, "Root node does not exist; calling this too early");
+  treeRecurseInternal(*_root_node, act, level, heaviest, 0);
+}
+
+void dataStore(std::ostream & stream, PerfGraph & perf_graph, void * context);
+void dataLoad(std::istream & stream, PerfGraph & perf_graph, void * context);

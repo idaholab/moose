@@ -51,6 +51,14 @@ public:
   virtual ~Reporter() = default;
   virtual void store(nlohmann::json & json) const;
 
+  /**
+   * @returns Whether or not this Reporter should store its value at this specific time.
+   *
+   * Basic Reporters (those that are not GeneralReporters) will store at all times
+   * when requested.
+   */
+  virtual bool shouldStore() const { return true; }
+
 protected:
   ///@{
   /**

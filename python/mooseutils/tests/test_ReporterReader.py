@@ -25,6 +25,7 @@ class TestReporterReader(unittest.TestCase):
         self._basicfile = os.path.abspath('../../../test/tests/reporters/constant_reporter/gold/constant_reporter_out.json')
         self._timefile = os.path.abspath('../../../test/tests/reporters/accumulated_reporter/gold/accumulate_reporter_out.json')
         self._onepertimefile = os.path.abspath('../../../test/tests/outputs/json/one_file_per_timestep/gold/json_out_*.json')
+        self._partsfile = os.path.abspath('../../../test/tests/reporters/mesh_info/gold/mesh_info_out.json')
 
     def testBasic(self):
         """
@@ -106,6 +107,17 @@ class TestReporterReader(unittest.TestCase):
         data = mooseutils.ReporterReader(self._onepertimefile)
         self.assertEqual(data.times(), [0.0, 1.0, 2.0, 3.0])
 
+    def testParts(self):
+        """
+        Test functionality for reading different parts
+        """
+
+        data = mooseutils.ReporterReader(self._partsfile)
+        self.assertEqual(data._data['number_of_parts'], 2)
+        self.assertEqual(data._data['part'], 0)
+
+        data.update(part=1)
+        self.assertEqual(data._data['part'], 1)
 
 if __name__ == '__main__':
     unittest.main(module=__name__, verbosity=2, buffer=True)

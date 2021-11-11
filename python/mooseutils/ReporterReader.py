@@ -64,6 +64,20 @@ class ReporterReader(object):
         """
         return self._filename
 
+    def partFilename(self, part):
+        """
+        Gets the filename assocated with the given part
+
+        Args:
+
+        - part\[int\]: The part
+        """
+        if part >= self.numParts():
+            message.mooseError('Cannot load part {}; only {} parts exist'.format(part, self.numParts()))
+        if part == 0:
+            return self._filename
+        return self._filename + '.' + '{}'.format(part).zfill(len(str(self.numParts())))
+
     def __getitem__(self, keys):
         """
         Operator[] returns the data for the current time.
@@ -120,6 +134,12 @@ class ReporterReader(object):
         Returns the list of available time indices contained in the data.
         """
         return [ts['time'] for ts in self._data['time_steps']]
+
+    def numParts(self):
+        """
+        Returns the number of parts available
+        """
+        return self._data.get('number_of_parts', 1)
 
     def clear(self):
         """
@@ -183,13 +203,14 @@ class ReporterReader(object):
 
         return info
 
-    def update(self, time=None):
+    def update(self, time=None, part=0):
         """
         Update data by reading/re-reading files.
 
         Args:
 
         - time\[float\]: The time at which the data should be returned.
+        - part\[int\]: The part of which the data should be returned.
 
         ```python
             data = ReporterReader('file.json')
@@ -205,11 +226,12 @@ class ReporterReader(object):
         ```
         """
 
-        if '*' in self._filename:
-            filenames = glob.glob(self._filename)
+        filename = self.partFilename(part)
+        if '*' in filename:
+            filenames = glob.glob(filename)
             if not len(filenames):
                 self.clear()
-                message.mooseDebug("Could not find any json files with pattern {}.".format(self._filename))
+                message.mooseDebug("Could not find any json files with pattern {}.".format(filename))
 
             for fname in sorted(filenames):
                 with open(fname, 'r', encoding='utf-8') as fid:
@@ -219,12 +241,12 @@ class ReporterReader(object):
                             self._data[key] = tmp[key]
                     self._data['time_steps'].extend(tmp['time_steps'])
 
-        elif not os.path.exists(self._filename):
+        elif not os.path.exists(filename):
             self.clear()
-            message.mooseDebug("Could not json file {}.".format(self._filename))
+            message.mooseDebug("Could not json file {}.".format(filename))
 
         else:
-            with open(self._filename, 'r', encoding='utf-8') as fid:
+            with open(filename, 'r', encoding='utf-8') as fid:
                 self._data = json.load(fid)
 
         self._data['time_steps'].sort(key=lambda ts : ts['time'])
