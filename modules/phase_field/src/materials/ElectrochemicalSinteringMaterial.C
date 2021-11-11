@@ -268,7 +268,8 @@ ElectrochemicalSinteringMaterial::computeQpProperties()
         Real sum_domegasdeta = 0.0;
         for (unsigned int j = 0; j < _ndefects; ++j)
         {
-          sum_domegasdeta += -(*_dns_min[j][i])[_qp] * ((*_w[j])[_qp] - _z[j] * _e * _v[_qp] * _v_scale);
+          sum_domegasdeta +=
+              -(*_dns_min[j][i])[_qp] * ((*_w[j])[_qp] - _z[j] * _e * _v[_qp] * _v_scale);
           (*_d2omegasdwdeta[j][i])[_qp] = -(*_dns_min[j][i])[_qp];
         }
         (*_domegasdeta[i])[_qp] = sum_domegasdeta;
@@ -294,7 +295,7 @@ ElectrochemicalSinteringMaterial::computeQpProperties()
         Real n_exp = std::exp(((*_w[i])[_qp] - _z[i] * _e * _v[_qp] * _v_scale) / _kB / _temp[_qp]);
         sum_omega_s += -_kB * _temp[_qp] * (*_ns_min[i])[_qp] * n_exp;
         (*_domegasdw[i])[_qp] = -(*_ns_min[i])[_qp] * n_exp;
-        (*_d2omegasdw2[i])[_qp] = -(*_ns_min[i])[_qp] * n_exp /  _kB / _temp[_qp];
+        (*_d2omegasdw2[i])[_qp] = -(*_ns_min[i])[_qp] * n_exp / _kB / _temp[_qp];
       }
 
       _omegas[_qp] = sum_omega_s - 0.5 * _eps_r * eps_0 * _grad_V[_qp] * _grad_V[_qp];

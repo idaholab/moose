@@ -138,7 +138,7 @@ ElectrochemicalDefectMaterial::computeQpProperties()
   _dnvdw[_qp] = 1.0 / _kv[_qp]; // susceptibility
 
   // Calculate solid phase density and derivatives
-  Real d3nsdw3;
+  Real d3nsdw3 = 0.0;
   switch (_solid_energy)
   {
     case 0: // PARABOLIC
