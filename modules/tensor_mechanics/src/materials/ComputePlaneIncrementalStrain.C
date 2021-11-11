@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ComputePlaneIncrementalStrain.h"
+#include "UserObject.h"
 
 registerMooseObject("TensorMechanicsApp", ComputePlaneIncrementalStrain);
 

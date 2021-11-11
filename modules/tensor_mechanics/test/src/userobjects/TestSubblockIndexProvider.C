@@ -14,13 +14,13 @@ registerMooseObject("TensorMechanicsTestApp", TestSubblockIndexProvider);
 InputParameters
 TestSubblockIndexProvider::validParams()
 {
-  InputParameters params = ElementIntegralUserObject::validParams();
+  InputParameters params = GeneralUserObject::validParams();
   params.set<ExecFlagEnum>("execute_on") = EXEC_INITIAL;
   return params;
 }
 
-TestSubblockIndexProvider::TestSubblockIndexProvider(const InputParameters & parameters)
-  : ElementIntegralUserObject(parameters)
+TestSubblockIndexProvider::TestSubblockIndexProvider(const InputParameters & params)
+  : GeneralUserObject(params)
 {
 }
 

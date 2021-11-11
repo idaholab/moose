@@ -8,11 +8,10 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #pragma once
+#include "libmesh/elem.h"
 
-namespace libMesh
-{
-class Elem;
-}
+using libMesh::Elem;
+
 /**
  * Abstract base class for user objects that provide an index for a given element that is
  * independent of the block id, so that behavior can be different on subsets of element blocks.
@@ -25,8 +24,7 @@ public:
   /**
    * The index of subblock this element is on.
    */
-  virtual unsigned int getSubblockIndex(const libMesh::Elem & /* elem */) const = 0;
-
+  virtual unsigned int getSubblockIndex(const Elem & /* elem */) const = 0;
   /**
    * The max index of subblock.
    */
