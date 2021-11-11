@@ -676,7 +676,8 @@ MooseVariableFV<OutputType>::getInternalFaceValue(const Elem * const neighbor,
       if (correct_skewness)
       {
         // We overwrite the surface gradient for the skew-corrected interpolation.
-        // This gradient is not corrected.
+        // This gradient is not corrected. We use the corrected face gradient,
+        // unlike the method suggested in Moukalled Ch. 9. 
         surface_gradient = adGradSln(fi, false);
       }
 
