@@ -22,28 +22,26 @@ PerfGraphInterface::validParams()
 }
 
 PerfGraphInterface::PerfGraphInterface(const MooseObject * moose_object)
-  : _pg_params(&moose_object->parameters()),
-    _pg_moose_app(*_pg_params->getCheckedPointerParam<MooseApp *>(
+  : _pg_moose_app(*moose_object->parameters().getCheckedPointerParam<MooseApp *>(
         "_moose_app", "PerfGraphInterface is unable to retrieve the MooseApp pointer!")),
     _prefix(moose_object->type())
 {
 }
 
 PerfGraphInterface::PerfGraphInterface(const MooseObject * moose_object, const std::string prefix)
-  : _pg_params(&moose_object->parameters()),
-    _pg_moose_app(*_pg_params->getCheckedPointerParam<MooseApp *>(
+  : _pg_moose_app(*moose_object->parameters().getCheckedPointerParam<MooseApp *>(
         "_moose_app", "PerfGraphInterface is unable to retrieve the MooseApp pointer!")),
     _prefix(prefix)
 {
 }
 
 PerfGraphInterface::PerfGraphInterface(MooseApp & moose_app, const std::string prefix)
-  : _pg_params(nullptr), _pg_moose_app(moose_app), _prefix(prefix)
+  : _pg_moose_app(moose_app), _prefix(prefix)
 {
 }
 
 PerfGraphInterface::PerfGraphInterface(PerfGraph & perf_graph, const std::string prefix)
-  : _pg_params(nullptr), _pg_moose_app(perf_graph.mooseApp()), _prefix(prefix)
+  : _pg_moose_app(perf_graph.mooseApp()), _prefix(prefix)
 {
 }
 

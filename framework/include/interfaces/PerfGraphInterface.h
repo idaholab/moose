@@ -107,9 +107,6 @@ protected:
                               const std::string & live_message,
                               const bool print_dots = true) const;
 
-  /// Params
-  const InputParameters * const _pg_params;
-
   /// The MooseApp that owns the PerfGraph
   MooseApp & _pg_moose_app;
 
