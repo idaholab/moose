@@ -41,8 +41,8 @@ GapFluxModelRadiative::GapFluxModelRadiative(const InputParameters & parameters)
 }
 
 ADReal
-GapFluxModelRadiative::computeFlux(const ADReal & /*gap_width*/, unsigned int qp) const
+GapFluxModelRadiative::computeFlux() const
 {
-  const auto Fe = 1.0 / (1.0 / _primary_emissivity[qp] + 1.0 / _secondary_emissivity[qp] - 1.0);
-  return _sigma * Fe * (Utility::pow<4>(_primary_T[qp]) - Utility::pow<4>(_secondary_T[qp]));
+  const auto Fe = 1.0 / (1.0 / _primary_emissivity[_qp] + 1.0 / _secondary_emissivity[_qp] - 1.0);
+  return _sigma * Fe * (Utility::pow<4>(_primary_T[_qp]) - Utility::pow<4>(_secondary_T[_qp]));
 }

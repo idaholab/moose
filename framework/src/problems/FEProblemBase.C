@@ -3516,7 +3516,7 @@ FEProblemBase::addUserObject(const std::string & user_object_name,
     auto euo = std::dynamic_pointer_cast<ElementUserObject>(user_object);
     auto suo = std::dynamic_pointer_cast<SideUserObject>(user_object);
     auto isuo = std::dynamic_pointer_cast<InternalSideUserObject>(user_object);
-    auto iuo = std::dynamic_pointer_cast<InterfaceUserObject>(user_object);
+    auto iuob = std::dynamic_pointer_cast<InterfaceUserObjectBase>(user_object);
     auto nuo = std::dynamic_pointer_cast<NodalUserObject>(user_object);
     auto guo = std::dynamic_pointer_cast<GeneralUserObject>(user_object);
     auto tguo = std::dynamic_pointer_cast<ThreadedGeneralUserObject>(user_object);
@@ -3529,7 +3529,7 @@ FEProblemBase::addUserObject(const std::string & user_object_name,
       else if (suo)
         // shouldn't we add isuo
         _reinit_displaced_face = true;
-      else if (iuo)
+      else if (iuob)
         _reinit_displaced_neighbor = true;
     }
 
