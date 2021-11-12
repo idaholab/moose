@@ -1,22 +1,24 @@
 [Tests]
   design = 'meshgenerators/SimpleHexagonGenerator.md'
-  [simple_hexagon_generator_tri]
-    type = 'Exodiff'
-    input = 'sim_hex.i'
-    cli_args = '--mesh-only sim_hex_tri_in.e'
-    exodiff = 'sim_hex_tri_in.e'
-    requirement = 'MOOSE shall be able to create a simple hexagon mesh with TRI elements.'
-    issues = '#18628'
-    recover = false
-  []
-  [simple_hexagon_generator_quad]
-    type = 'Exodiff'
-    input = 'sim_hex.i'
-    cli_args = 'Mesh/shg/element_type=QUAD
-                --mesh-only sim_hex_quad_in.e'
-    exodiff = 'sim_hex_quad_in.e'
-    requirement = 'MOOSE shall be able to create a simple hexagon mesh with QUAD elements.'
-    issues = '#19352'
-    recover = false
+  issues = '#18628 #19352'
+  [test]
+    requirement = 'The system shall include the ability to create a simple hexagon mesh '
+    [tri]
+      type = 'Exodiff'
+      input = 'sim_hex.i'
+      cli_args = '--mesh-only sim_hex_tri_in.e'
+      exodiff = 'sim_hex_tri_in.e'
+      recover = false
+      detail = 'with TRI elements'
+    []
+    [quad]
+      type = 'Exodiff'
+      input = 'sim_hex.i'
+      cli_args = 'Mesh/shg/element_type=QUAD 
+                  --mesh-only sim_hex_quad_in.e'
+      exodiff = 'sim_hex_quad_in.e'
+      recover = false
+      detail = 'with QUAD elements'
+    []
   []
 []
