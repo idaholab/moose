@@ -33,6 +33,15 @@ NSFVFunctorHeatFluxBC::validParams()
   params.addCoupledVar(NS::porosity, "porosity");
   params.addParam<PostprocessorName>("average_porosity",
                                      "postprocessor that provides domain-averaged proosity");
+
+  // Name of the material properties, useful if not following the NS namespace conventions
+  params.addParam<MooseFunctorName>(NS::k, NS::k, "Fluid phase thermal conductivity");
+  params.addParam<MooseFunctorName>(NS::k_s, NS::k_s, "Solid phase thermal conductivity");
+  params.addParam<MooseFunctorName>(
+      NS::kappa, NS::kappa, "Fluid phase effective thermal conductivity");
+  params.addParam<MooseFunctorName>(
+      NS::kappa_s, NS::kappa_s, "Solid phase effective thermal conductivity");
+
   params.addParam<PostprocessorName>(
       "average_k_fluid", "postprocessor that provides domain-averaged fluid thermal conductivity");
   params.addParam<PostprocessorName>(
@@ -106,9 +115,8 @@ NSFVFunctorHeatFluxBC::computeQpResidual()
   ADReal fraction = 0.0;
   ADReal tol = NS_DEFAULT_VALUES::k_epsilon;
 
-  // Get the element from the FaceInfo, making sure to be on the right side of the
-  // boundary if the boundary condition is internal to the mesh
-  const auto elem_arg = elemFromFace();
+  // Get the functor argument for the face
+  const auto face_arg = singleSidedFaceArg();
 
   if (_locality == NS::settings::local)
   {
@@ -116,13 +124,13 @@ NSFVFunctorHeatFluxBC::computeQpResidual()
     {
       case NS::splitting::porosity:
       {
-        fraction = (*_eps)(elem_arg);
+        fraction = (*_eps)(face_arg);
         break;
       }
       case NS::splitting::thermal_conductivity:
       {
-        ADReal d = (*_k_f)(elem_arg) + (*_k_s)(elem_arg);
-        fraction = d > tol ? (*_k_f)(elem_arg) / d : 0.5;
+        ADReal d = (*_k_f)(face_arg) + (*_k_s)(face_arg);
+        fraction = d > tol ? (*_k_f)(face_arg) / d : 0.5;
         break;
       }
       case NS::splitting::effective_thermal_conductivity:
@@ -134,15 +142,15 @@ NSFVFunctorHeatFluxBC::computeQpResidual()
         // division by sqrt(3) ensures equivalence with a non-vector form of kappa with
         // 3 components
         ADReal kappa;
-        if ((MooseUtils::absoluteFuzzyEqual((*_kappa)(elem_arg)(0), 0)) &&
-            (MooseUtils::absoluteFuzzyEqual((*_kappa)(elem_arg)(1), 0)) &&
-            (MooseUtils::absoluteFuzzyEqual((*_kappa)(elem_arg)(2), 0)))
+        if ((MooseUtils::absoluteFuzzyEqual((*_kappa)(face_arg)(0), 0)) &&
+            (MooseUtils::absoluteFuzzyEqual((*_kappa)(face_arg)(1), 0)) &&
+            (MooseUtils::absoluteFuzzyEqual((*_kappa)(face_arg)(2), 0)))
           kappa = 1e-42;
         else
-          kappa = (*_kappa)(elem_arg).norm() / std::sqrt(3.0);
+          kappa = (*_kappa)(face_arg).norm() / std::sqrt(3.0);
 
-        ADReal d = (*_eps)(elem_arg)*kappa + (*_kappa_s)(elem_arg);
-        fraction = d > tol ? (*_eps)(elem_arg)*kappa / d : 0.5;
+        ADReal d = (*_eps)(face_arg)*kappa + (*_kappa_s)(face_arg);
+        fraction = d > tol ? (*_eps)(face_arg)*kappa / d : 0.5;
         break;
       }
     }

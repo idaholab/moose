@@ -264,18 +264,13 @@ FVFluxBC::faceArgSubdomains() const
 }
 
 std::tuple<const FaceInfo *, Moose::FV::LimiterType, bool, SubdomainID>
-FVFluxBC::singleSidedFaceArg(Moose::FV::LimiterType limiter_type = Moose::FV::LimiterType::CentralDifference) const
+FVFluxBC::singleSidedFaceArg(Moose::FV::LimiterType limiter_type) const
 {
   const bool use_elem = _face_info->faceType(_var.name()) == FaceInfo::VarFaceNeighbors::ELEM;
 
   if (use_elem)
-    return std::make_tuple(_face_info,
-                           limiter_type,
-                           true,
-                           _face_info->elem().subdomain_id());
+    return std::make_tuple(_face_info, limiter_type, true, _face_info->elem().subdomain_id());
   else
-    return std::make_tuple(_face_info,
-                           limiter_type,
-                           true,
-                           _face_info->neighborPtr()->subdomain_id());
+    return std::make_tuple(
+        _face_info, limiter_type, true, _face_info->neighborPtr()->subdomain_id());
 }

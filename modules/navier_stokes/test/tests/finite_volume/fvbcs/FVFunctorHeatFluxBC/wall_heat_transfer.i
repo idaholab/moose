@@ -1,7 +1,7 @@
 flux=10
 
 [GlobalParams]
-  porosity = 'porosity_var'
+  porosity = 'porosity'
   splitting = 'porosity'
   locality = 'global'
   average_porosity = 'average_eps'
@@ -32,19 +32,19 @@ flux=10
 []
 
 [AuxVariables]
-  [k_var]
+  [k]
     type = MooseVariableFVReal
   []
-  [kappa_var]
+  [kappa]
     type = MooseVariableFVReal
   []
-  [k_s_var]
+  [k_s]
     type = MooseVariableFVReal
   []
-  [kappa_s_var]
+  [kappa_s]
     type = MooseVariableFVReal
   []
-  [porosity_var]
+  [porosity]
     type = MooseVariableFVReal
     initial_condition = 0.2
   []
@@ -89,6 +89,10 @@ flux=10
     boundary = 'left'
     phase = 'solid'
     value = ${flux}
+    k = 'k_mat'
+    k_s = 'k_s_mat'
+    kappa = 'kappa_mat'
+    kappa_s = 'kappa_s_mat'
   []
   [right_Ts]
     type = FVDirichletBC
@@ -102,6 +106,10 @@ flux=10
     boundary = 'left'
     phase = 'fluid'
     value = ${flux}
+    k = 'k_mat'
+    k_s = 'k_s_mat'
+    kappa = 'kappa_mat'
+    kappa_s = 'kappa_s_mat'
   []
   [right_Tf]
     type = FVDirichletBC
@@ -114,40 +122,40 @@ flux=10
 [AuxKernels]
   [k]
     type = FunctorADMatPropElementalAux
-    variable = k_var
-    mat_prop = 'k'
+    variable = k
+    mat_prop = 'k_mat'
   []
   [k_s]
     type = FunctorADMatPropElementalAux
-    variable = k_s_var
-    mat_prop = 'k_s'
+    variable = k_s
+    mat_prop = 'k_s_mat'
   []
   [kappa_s]
     type = FunctorADMatPropElementalAux
-    variable = kappa_s_var
-    mat_prop = 'kappa_s'
+    variable = kappa_s
+    mat_prop = 'kappa_s_mat'
   []
 []
 
 [Materials]
   [thermal_conductivities_k]
     type = ADGenericFunctionFunctorMaterial
-    prop_names = 'k'
+    prop_names = 'k_mat'
     prop_values = 'k_function'
   []
   [thermal_conductivities_k_s]
     type = ADGenericFunctionFunctorMaterial
-    prop_names = 'k_s'
+    prop_names = 'k_s_mat'
     prop_values = 'k_s_function'
   []
   [thermal_conductivities_kappa]
     type = ADGenericConstantVectorFunctorMaterial
-    prop_names = 'kappa'
+    prop_names = 'kappa_mat'
     prop_values = '0.1 0.2 .03'
   []
   [thermal_conductivities_kappa_s]
     type = ADGenericFunctionFunctorMaterial
-    prop_names = 'kappa_s'
+    prop_names = 'kappa_s_mat'
     prop_values = 'kappa_s_function'
   []
 []
@@ -155,22 +163,22 @@ flux=10
 [Postprocessors]
   [average_eps]
     type = ElementAverageValue
-    variable = porosity_var
+    variable = porosity
 
     # because porosity is constant in time, we evaluate this only once
     execute_on = 'initial'
   []
   [average_k_fluid]
     type = ElementAverageValue
-    variable = k_var
+    variable = k
   []
   [average_k_solid]
     type = ElementAverageValue
-    variable = k_s_var
+    variable = k_s
   []
   [average_kappa_solid]
     type = ElementAverageValue
-    variable = kappa_s_var
+    variable = kappa_s
   []
 []
 
@@ -180,5 +188,5 @@ flux=10
 
 [Outputs]
   exodus = true
-  hide = 'porosity_var average_eps'
+  hide = 'porosity average_eps'
 []

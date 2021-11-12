@@ -78,8 +78,8 @@ protected:
    * @param limiter_type the limiter type, to be specified if more than the default average
    *        interpolation is required for the parameters of the functor
    */
-  std::tuple<const FaceInfo *, Moose::FV::LimiterType, bool, SubdomainID>
-  singleSidedFaceArg(Moose::FV::LimiterType limiter_type) const;
+  std::tuple<const FaceInfo *, Moose::FV::LimiterType, bool, SubdomainID> singleSidedFaceArg(
+      Moose::FV::LimiterType limiter_type = Moose::FV::LimiterType::CentralDifference) const;
 
 private:
   /**
