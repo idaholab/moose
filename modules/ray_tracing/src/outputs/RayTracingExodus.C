@@ -39,7 +39,7 @@ RayTracingExodus::outputMesh()
 
   // Build the Exodus IO object if it hasn't been built yet
   if (!_exodus_io)
-    _exodus_io = libmesh_make_unique<ExodusII_IO>(*_segment_mesh);
+    _exodus_io = std::make_unique<ExodusII_IO>(*_segment_mesh);
 
   // With nodal data, we need to output these variables in write_timestep
   if (_output_data_nodal)

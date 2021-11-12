@@ -19,15 +19,15 @@ template <typename OutputType>
 MooseVariableFE<OutputType>::MooseVariableFE(const InputParameters & parameters)
   : MooseVariableField<OutputType>(parameters)
 {
-  _element_data = libmesh_make_unique<MooseVariableData<OutputType>>(*this,
-                                                                     _sys,
-                                                                     _tid,
-                                                                     Moose::ElementType::Element,
-                                                                     this->_assembly.qRule(),
-                                                                     this->_assembly.qRuleFace(),
-                                                                     this->_assembly.node(),
-                                                                     this->_assembly.elem());
-  _neighbor_data = libmesh_make_unique<MooseVariableData<OutputType>>(
+  _element_data = std::make_unique<MooseVariableData<OutputType>>(*this,
+                                                                  _sys,
+                                                                  _tid,
+                                                                  Moose::ElementType::Element,
+                                                                  this->_assembly.qRule(),
+                                                                  this->_assembly.qRuleFace(),
+                                                                  this->_assembly.node(),
+                                                                  this->_assembly.elem());
+  _neighbor_data = std::make_unique<MooseVariableData<OutputType>>(
       *this,
       _sys,
       _tid,
@@ -36,15 +36,15 @@ MooseVariableFE<OutputType>::MooseVariableFE(const InputParameters & parameters)
       this->_assembly.qRuleNeighbor(),
       this->_assembly.nodeNeighbor(),
       this->_assembly.neighbor());
-  _lower_data = libmesh_make_unique<MooseVariableData<OutputType>>(
-      *this,
-      _sys,
-      _tid,
-      Moose::ElementType::Lower,
-      this->_assembly.qRuleFace(),
-      this->_assembly.qRuleFace(), // Place holder
-      this->_assembly.node(),      // Place holder
-      this->_assembly.lowerDElem());
+  _lower_data =
+      std::make_unique<MooseVariableData<OutputType>>(*this,
+                                                      _sys,
+                                                      _tid,
+                                                      Moose::ElementType::Lower,
+                                                      this->_assembly.qRuleFace(),
+                                                      this->_assembly.qRuleFace(), // Place holder
+                                                      this->_assembly.node(),      // Place holder
+                                                      this->_assembly.lowerDElem());
 }
 
 template <typename OutputType>

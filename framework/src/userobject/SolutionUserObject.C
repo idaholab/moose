@@ -174,7 +174,7 @@ SolutionUserObject::readXda()
   _mesh->read(_mesh_file);
 
   // Create the libmesh::EquationSystems
-  _es = libmesh_make_unique<EquationSystems>(*_mesh);
+  _es = std::make_unique<EquationSystems>(*_mesh);
 
   // Use new read syntax (binary)
   if (_file_type == "xdr")
@@ -208,7 +208,7 @@ SolutionUserObject::readExodusII()
     _system_name = "SolutionUserObjectSystem";
 
   // Read the Exodus file
-  _exodusII_io = libmesh_make_unique<ExodusII_IO>(*_mesh);
+  _exodusII_io = std::make_unique<ExodusII_IO>(*_mesh);
   _exodusII_io->read(_mesh_file);
   _exodus_times = &_exodusII_io->get_time_steps();
 
@@ -251,7 +251,7 @@ SolutionUserObject::readExodusII()
   }
 
   // Create EquationSystems object for solution
-  _es = libmesh_make_unique<EquationSystems>(*_mesh);
+  _es = std::make_unique<EquationSystems>(*_mesh);
   _es->add_system<ExplicitSystem>(_system_name);
   _system = &_es->get_system(_system_name);
 
@@ -298,7 +298,7 @@ SolutionUserObject::readExodusII()
   if (_interpolate_times)
   {
     // Create a second equation system
-    _es2 = libmesh_make_unique<EquationSystems>(*_mesh);
+    _es2 = std::make_unique<EquationSystems>(*_mesh);
     _es2->add_system<ExplicitSystem>(_system_name);
     _system2 = &_es2->get_system(_system_name);
 
@@ -446,7 +446,7 @@ SolutionUserObject::initialSetup()
   // .) We don't know if directValue will be used, which may request
   //    a value on a Node we don't have.
   // We force the Mesh used here to be a ReplicatedMesh.
-  _mesh = libmesh_make_unique<ReplicatedMesh>(_communicator);
+  _mesh = std::make_unique<ReplicatedMesh>(_communicator);
 
   // ExodusII mesh file supplied
   if (MooseUtils::hasExtension(_mesh_file, "e", /*strip_exodus_ext =*/true))
@@ -498,8 +498,8 @@ SolutionUserObject::initialSetup()
   }
 
   // Create the MeshFunction for working with the solution data
-  _mesh_function = libmesh_make_unique<MeshFunction>(
-      *_es, *_serialized_solution, _system->get_dof_map(), var_nums);
+  _mesh_function =
+      std::make_unique<MeshFunction>(*_es, *_serialized_solution, _system->get_dof_map(), var_nums);
   _mesh_function->init();
 
   // Tell the MeshFunctions that we might be querying them outside the
@@ -518,7 +518,7 @@ SolutionUserObject::initialSetup()
     _system2->solution->localize(*_serialized_solution2);
 
     // Create the MeshFunction for the second copy of the data
-    _mesh_function2 = libmesh_make_unique<MeshFunction>(
+    _mesh_function2 = std::make_unique<MeshFunction>(
         *_es2, *_serialized_solution2, _system2->get_dof_map(), var_nums);
     _mesh_function2->init();
     _mesh_function2->enable_out_of_mesh_mode(default_values);

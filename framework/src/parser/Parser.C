@@ -799,10 +799,10 @@ Parser::initSyntaxFormatter(SyntaxFormatterType type, bool dump_mode)
   switch (type)
   {
     case INPUT_FILE:
-      _syntax_formatter = libmesh_make_unique<InputFileFormatter>(dump_mode);
+      _syntax_formatter = std::make_unique<InputFileFormatter>(dump_mode);
       break;
     case YAML:
-      _syntax_formatter = libmesh_make_unique<YAMLFormatter>(dump_mode);
+      _syntax_formatter = std::make_unique<YAMLFormatter>(dump_mode);
       break;
     default:
       mooseError("Unrecognized Syntax Formatter requested");

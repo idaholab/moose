@@ -45,11 +45,6 @@ private:
                   PerfGraph::SectionIncrement & section_increment_finish);
 
   /**
-   * Print everything in the stack
-   */
-  void printStack();
-
-  /**
    * Print everything underneath the current top of the stack
    */
   void printStackUpToLast();

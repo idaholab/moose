@@ -76,7 +76,7 @@ StitchedMesh::StitchedMesh(const StitchedMesh & other_mesh)
 std::unique_ptr<MooseMesh>
 StitchedMesh::safeClone() const
 {
-  return libmesh_make_unique<StitchedMesh>(*this);
+  return std::make_unique<StitchedMesh>(*this);
 }
 
 void
@@ -93,7 +93,7 @@ StitchedMesh::buildMesh()
   // Read in all of the other meshes
   for (MooseIndex(_files) i = 1; i < _files.size(); ++i)
   {
-    _meshes.emplace_back(libmesh_make_unique<ReplicatedMesh>(_communicator));
+    _meshes.emplace_back(std::make_unique<ReplicatedMesh>(_communicator));
     auto & mesh = _meshes.back();
 
     mesh->read(_files[i]);

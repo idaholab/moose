@@ -57,7 +57,7 @@ PETScDMDAMesh::PETScDMDAMesh(const InputParameters & parameters) : MooseMesh(par
 std::unique_ptr<MooseMesh>
 PETScDMDAMesh::safeClone() const
 {
-  return libmesh_make_unique<PETScDMDAMesh>(*this);
+  return std::make_unique<PETScDMDAMesh>(*this);
 }
 
 inline dof_id_type

@@ -10,7 +10,7 @@
 #include "CompositeSeriesBasisInterface.h"
 #include "Legendre.h"
 
-#include "libmesh/auto_ptr.h"
+#include <memory>
 
 /*
  * Default constructor creates a functional basis with one term. In order for the _series member to
@@ -19,7 +19,7 @@
 CompositeSeriesBasisInterface::CompositeSeriesBasisInterface(const std::string & who_is_using_me)
   : FunctionalBasisInterface(1), _who_is_using_me(who_is_using_me)
 {
-  _series.push_back(libmesh_make_unique<Legendre>());
+  _series.push_back(std::make_unique<Legendre>());
 }
 
 /*

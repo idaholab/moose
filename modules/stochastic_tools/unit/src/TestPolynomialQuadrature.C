@@ -128,7 +128,7 @@ TEST(PolynomialQuadrature, dataStoreLoad_legendre)
   const Real lower_bound = 0.7;
   const Real upper_bound = 17.3;
   std::unique_ptr<const Polynomial> ptr0 =
-      libmesh_make_unique<const Legendre>(lower_bound, upper_bound);
+      std::make_unique<const Legendre>(lower_bound, upper_bound);
 
   std::stringbuf buffer;
   std::iostream stream(&buffer);
@@ -145,7 +145,7 @@ TEST(PolynomialQuadrature, dataStoreLoad_hermite)
   using namespace PolynomialQuadrature;
   const Real mu = 4.7518;
   const Real sig = 0.9438;
-  std::unique_ptr<const Polynomial> ptr0 = libmesh_make_unique<const Hermite>(mu, sig);
+  std::unique_ptr<const Polynomial> ptr0 = std::make_unique<const Hermite>(mu, sig);
 
   std::stringbuf buffer;
   std::iostream stream(&buffer);

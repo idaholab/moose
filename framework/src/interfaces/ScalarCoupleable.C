@@ -110,8 +110,8 @@ ScalarCoupleable::getDefaultValue(const std::string & var_name) const
   auto default_value_it = _default_value.find(var_name);
   if (default_value_it == _default_value.end())
   {
-    auto value = libmesh_make_unique<VariableValue>(_sc_fe_problem.getMaxScalarOrder(),
-                                                    _sc_parameters.defaultCoupledValue(var_name));
+    auto value = std::make_unique<VariableValue>(_sc_fe_problem.getMaxScalarOrder(),
+                                                 _sc_parameters.defaultCoupledValue(var_name));
     default_value_it = _default_value.insert(std::make_pair(var_name, std::move(value))).first;
   }
 
@@ -167,8 +167,8 @@ ScalarCoupleable::getADDefaultValue(const std::string & var_name) const
   auto default_value_it = _dual_default_value.find(var_name);
   if (default_value_it == _dual_default_value.end())
   {
-    auto value = libmesh_make_unique<ADVariableValue>(_sc_fe_problem.getMaxScalarOrder(),
-                                                      _sc_parameters.defaultCoupledValue(var_name));
+    auto value = std::make_unique<ADVariableValue>(_sc_fe_problem.getMaxScalarOrder(),
+                                                   _sc_parameters.defaultCoupledValue(var_name));
     default_value_it = _dual_default_value.insert(std::make_pair(var_name, std::move(value))).first;
   }
 

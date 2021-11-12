@@ -159,7 +159,7 @@ RayTracingStudy::RayTracingStudy(const InputParameters & parameters)
     _threaded_cached_normals(libMesh::n_threads()),
     _threaded_next_ray_id(libMesh::n_threads()),
 
-    _parallel_ray_study(libmesh_make_unique<ParallelRayStudy>(*this, _threaded_trace_ray)),
+    _parallel_ray_study(std::make_unique<ParallelRayStudy>(*this, _threaded_trace_ray)),
 
     _local_trace_ray_results(TraceRay::FAILED_TRACES + 1, 0),
 

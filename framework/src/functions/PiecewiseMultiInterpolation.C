@@ -36,7 +36,7 @@ PiecewiseMultiInterpolation::validParams()
 
 PiecewiseMultiInterpolation::PiecewiseMultiInterpolation(const InputParameters & parameters)
   : Function(parameters),
-    _gridded_data(libmesh_make_unique<GriddedData>(getParam<FileName>("data_file"))),
+    _gridded_data(std::make_unique<GriddedData>(getParam<FileName>("data_file"))),
     _dim(_gridded_data->getDim())
 {
   _gridded_data->getAxes(_axes);

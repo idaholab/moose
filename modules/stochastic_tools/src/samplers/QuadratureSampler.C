@@ -45,19 +45,19 @@ QuadratureSampler::QuadratureSampler(const InputParameters & parameters) : Sampl
   {
     case 0:
     {
-      _grid = libmesh_make_unique<const PolynomialQuadrature::TensorGrid>(
+      _grid = std::make_unique<const PolynomialQuadrature::TensorGrid>(
           getParam<unsigned int>("order") + 1, poly_1d);
       break;
     }
     case 1:
     {
-      _grid = libmesh_make_unique<const PolynomialQuadrature::SmolyakGrid>(
+      _grid = std::make_unique<const PolynomialQuadrature::SmolyakGrid>(
           getParam<unsigned int>("order"), poly_1d);
       break;
     }
     case 2:
     {
-      _grid = libmesh_make_unique<const PolynomialQuadrature::ClenshawCurtisGrid>(
+      _grid = std::make_unique<const PolynomialQuadrature::ClenshawCurtisGrid>(
           getParam<unsigned int>("order"), poly_1d);
       break;
     }

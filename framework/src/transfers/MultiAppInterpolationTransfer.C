@@ -417,11 +417,11 @@ MultiAppInterpolationTransfer::execute()
   switch (_interp_type)
   {
     case 0:
-      idi = libmesh_make_unique<InverseDistanceInterpolation<LIBMESH_DIM>>(
+      idi = std::make_unique<InverseDistanceInterpolation<LIBMESH_DIM>>(
           fe_problem.comm(), _num_points, _power);
       break;
     case 1:
-      idi = libmesh_make_unique<RadialBasisInterpolation<LIBMESH_DIM>>(fe_problem.comm(), _radius);
+      idi = std::make_unique<RadialBasisInterpolation<LIBMESH_DIM>>(fe_problem.comm(), _radius);
       break;
     default:
       mooseError("Unknown interpolation type!");

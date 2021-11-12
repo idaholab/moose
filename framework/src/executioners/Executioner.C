@@ -70,11 +70,11 @@ Executioner::Executioner(const InputParameters & parameters)
 
   // Instantiate the SolveObject for the fixed point iteration algorithm
   if (_iteration_method == "picard")
-    _fixed_point_solve = libmesh_make_unique<PicardSolve>(*this);
+    _fixed_point_solve = std::make_unique<PicardSolve>(*this);
   else if (_iteration_method == "secant")
-    _fixed_point_solve = libmesh_make_unique<SecantSolve>(*this);
+    _fixed_point_solve = std::make_unique<SecantSolve>(*this);
   else if (_iteration_method == "steffensen")
-    _fixed_point_solve = libmesh_make_unique<SteffensenSolve>(*this);
+    _fixed_point_solve = std::make_unique<SteffensenSolve>(*this);
 }
 
 Problem &

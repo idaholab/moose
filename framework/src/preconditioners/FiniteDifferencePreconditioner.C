@@ -67,7 +67,7 @@ FiniteDifferencePreconditioner::FiniteDifferencePreconditioner(const InputParame
   NonlinearSystemBase & nl = _fe_problem.getNonlinearSystemBase();
   unsigned int n_vars = nl.nVariables();
 
-  std::unique_ptr<CouplingMatrix> cm = libmesh_make_unique<CouplingMatrix>(n_vars);
+  std::unique_ptr<CouplingMatrix> cm = std::make_unique<CouplingMatrix>(n_vars);
 
   bool full = getParam<bool>("full");
 

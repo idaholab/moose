@@ -80,7 +80,7 @@ MeshExtruderGenerator::generate()
 
   std::unique_ptr<QueryElemSubdomainID> elem_subdomain_id;
   if (_existing_subdomains.size() > 0)
-    elem_subdomain_id = libmesh_make_unique<QueryElemSubdomainID>(
+    elem_subdomain_id = std::make_unique<QueryElemSubdomainID>(
         _existing_subdomains, _layers, _new_ids, _num_layers);
 
   MeshTools::Generation::build_extrusion(dynamic_cast<libMesh::UnstructuredMesh &>(*dest_mesh),

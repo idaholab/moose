@@ -86,7 +86,7 @@ ExplicitTimeIntegrator::meshChanged()
 
   if (_solve_type == LUMP_PRECONDITIONED)
   {
-    _preconditioner = libmesh_make_unique<LumpedPreconditioner>(_mass_matrix_diag);
+    _preconditioner = std::make_unique<LumpedPreconditioner>(_mass_matrix_diag);
     _linear_solver->attach_preconditioner(_preconditioner.get());
     _linear_solver->init();
   }

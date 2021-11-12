@@ -548,7 +548,7 @@ storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
           mooseError("Currently the MOOSE line searches all use Petsc, so you "
                      "must use Petsc as your non-linear solver.");
         petsc_nonlinear_solver->linesearch_object =
-            libmesh_make_unique<ComputeLineSearchObjectWrapper>(fe_problem);
+            std::make_unique<ComputeLineSearchObjectWrapper>(fe_problem);
       }
     }
   }

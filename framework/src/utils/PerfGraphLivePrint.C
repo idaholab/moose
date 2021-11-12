@@ -187,31 +187,6 @@ PerfGraphLivePrint::printStats(PerfGraph::SectionIncrement & section_increment_s
 }
 
 void
-PerfGraphLivePrint::printStack()
-{
-  _console << "\n\n-------\n";
-
-  _console << "stack_level: " << _stack_level << std::endl;
-
-  if (_stack_level < 1)
-  {
-    _console << "-------\n" << std::endl;
-    return;
-  }
-
-  for (unsigned int s = 0; s < _stack_level; s++)
-  {
-    auto & section = _print_thread_stack[s];
-
-    auto & section_info = _perf_graph_registry.sectionInfo(section._id);
-
-    _console << std::string(s * 2, ' ') << section_info._live_message << '\n';
-  }
-
-  _console << "-------\n" << std::endl;
-}
-
-void
 PerfGraphLivePrint::printStackUpToLast()
 {
   if (_stack_level < 1)

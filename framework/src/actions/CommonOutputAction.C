@@ -231,12 +231,12 @@ CommonOutputAction::act()
       create("PerfGraphOutput");
 
     if (!_app.getParam<bool>("no_timing") && getParam<bool>("perf_graph_live"))
-      _app.perfGraph().setLivePrintActive(true);
+      perfGraph().setLivePrintActive(true);
     else
-      _app.perfGraph().setLivePrintActive(false);
+      perfGraph().setLivePrintActive(false);
 
-    _app.perfGraph().setLiveTimeLimit(getParam<Real>("perf_graph_live_time_limit"));
-    _app.perfGraph().setLiveMemoryLimit(getParam<unsigned int>("perf_graph_live_mem_limit"));
+    perfGraph().setLiveTimeLimit(getParam<Real>("perf_graph_live_time_limit"));
+    perfGraph().setLiveMemoryLimit(getParam<unsigned int>("perf_graph_live_mem_limit"));
 
     if (!getParam<bool>("color"))
       Moose::setColorConsole(false);

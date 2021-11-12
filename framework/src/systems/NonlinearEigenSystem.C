@@ -118,8 +118,7 @@ NonlinearEigenSystem::NonlinearEigenSystem(EigenProblem & eigen_problem, const s
     mooseError("A slepc eigen solver is required");
 
   // setup of our class @SlepcSolverConfiguration
-  _solver_configuration =
-      libmesh_make_unique<SlepcEigenSolverConfiguration>(eigen_problem, *solver);
+  _solver_configuration = std::make_unique<SlepcEigenSolverConfiguration>(eigen_problem, *solver);
 
   solver->set_solver_configuration(*_solver_configuration);
 

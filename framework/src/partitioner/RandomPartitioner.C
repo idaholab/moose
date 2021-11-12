@@ -42,7 +42,7 @@ RandomPartitioner::~RandomPartitioner() {}
 std::unique_ptr<Partitioner>
 RandomPartitioner::clone() const
 {
-  return libmesh_make_unique<RandomPartitioner>(_pars);
+  return std::make_unique<RandomPartitioner>(_pars);
 }
 
 void

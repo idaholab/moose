@@ -20,11 +20,9 @@
 // don't want to expose to EVERY file in MOOSE...
 #include "VariadicTable.h"
 
-// libMesh Includes
-#include "libmesh/auto_ptr.h"
-
 // System Includes
 #include <chrono>
+#include <memory>
 
 PerfGraph::PerfGraph(const std::string & root_name,
                      MooseApp & app,
@@ -38,7 +36,7 @@ PerfGraph::PerfGraph(const std::string & root_name,
     _pid(app.comm().rank()),
     _root_name(root_name),
     _root_node_id(_perf_graph_registry.registerSection(root_name, 0)),
-    _root_node(libmesh_make_unique<PerfNode>(_root_node_id)),
+    _root_node(std::make_unique<PerfNode>(_root_node_id)),
     _current_position(-1),
     _stack(),
     _execution_list_begin(0),
@@ -87,79 +85,64 @@ PerfGraph::disableLivePrint()
   }
 }
 
-unsigned long int
-PerfGraph::getNumCalls(const std::string & section_name)
-{
-  update();
-
-  auto section_it =
-      _cumulative_section_info.find(section_name == "Root" ? _root_name : section_name);
-
-  if (section_it == _cumulative_section_info.end())
-  {
-    // The section exists but has not ran yet, in which case we can return zero
-    if (_perf_graph_registry.sectionExists(section_name))
-      return 0;
-
-    mooseError(
-        "Unknown section_name: ",
-        section_name,
-        " in PerfGraph::getNumCalls()\nIf you are attempting to retrieve the root use \"Root\".");
-  }
-
-  return section_it->second._num_calls;
-}
-
 Real
-PerfGraph::getTime(const TimeType type, const std::string & section_name)
+PerfGraph::sectionData(const DataType type,
+                       const std::string & section_name,
+                       const bool must_exist /* = true */)
 {
   update();
 
-  auto section_it =
+  const auto section_it =
       _cumulative_section_info.find(section_name == "Root" ? _root_name : section_name);
 
   if (section_it == _cumulative_section_info.end())
   {
-    // The section exists but has not ran yet, in which case we can return zero
-    if (_perf_graph_registry.sectionExists(section_name))
+    if (!must_exist ||                                   // isn't required to exist
+        _perf_graph_registry.sectionExists(section_name) // or, is required to exist and it does
+    )
       return 0;
 
-    mooseError(
-        "Unknown section_name: ",
-        section_name,
-        " in PerfGraph::getTime()\nIf you are attempting to retrieve the root use \"Root\".");
+    mooseError("Unknown PerfGraph section name \"",
+               section_name,
+               "\" in PerfGraph::sectionData().\nIf you are attempting to retrieve the root use "
+               "\"Root\".");
   }
 
-  auto app_time = _cumulative_section_info_ptrs[_root_node_id]->_total;
+  const CumulativeSectionInfo & section_info = section_it->second;
+
+  if (type == CALLS)
+    return section_info._num_calls;
+
+  const auto app_time = _cumulative_section_info_ptrs[_root_node_id]->_total;
 
   switch (type)
   {
     case SELF:
-      return section_it->second._self;
+      return section_info._self;
     case CHILDREN:
-      return section_it->second._children;
+      return section_info._children;
     case TOTAL:
-      return section_it->second._total;
+      return section_info._total;
     case SELF_AVG:
-      return section_it->second._self / static_cast<Real>(section_it->second._num_calls);
+      return section_info._self / static_cast<Real>(section_info._num_calls);
     case CHILDREN_AVG:
-      return section_it->second._children / static_cast<Real>(section_it->second._num_calls);
+      return section_info._children / static_cast<Real>(section_info._num_calls);
     case TOTAL_AVG:
-      return section_it->second._total / static_cast<Real>(section_it->second._num_calls);
+      return section_info._total / static_cast<Real>(section_info._num_calls);
     case SELF_PERCENT:
-      return 100. * (section_it->second._self / app_time);
+      return 100. * (section_info._self / app_time);
     case CHILDREN_PERCENT:
-      return 100. * (section_it->second._children / app_time);
+      return 100. * (section_info._children / app_time);
     case TOTAL_PERCENT:
-      return 100. * (section_it->second._total / app_time);
+      return 100. * (section_info._total / app_time);
     case SELF_MEMORY:
-      return section_it->second._self_memory;
+      return section_info._self_memory;
     case CHILDREN_MEMORY:
-      return section_it->second._children_memory;
+      return section_info._children_memory;
     case TOTAL_MEMORY:
-      return section_it->second._total_memory;
+      return section_info._total_memory;
     default:
-      ::mooseError("Unknown TimeType");
+      ::mooseError("Unknown DataType");
   }
 }
 

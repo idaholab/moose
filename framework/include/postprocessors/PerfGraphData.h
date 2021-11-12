@@ -14,13 +14,6 @@
 // Forward Declarations
 class PerfGraphData;
 
-// libMesh forward declarations
-namespace libMesh
-{
-class System;
-class EquationSystems;
-}
-
 template <>
 InputParameters validParams<PerfGraphData>();
 
@@ -36,8 +29,12 @@ public:
   virtual Real getValue() override;
 
 protected:
+  /// The data type to request in regards to the PerfGraph section
   const int _data_type;
 
+  /// The section name in the PerfGraph to query
   const std::string & _section_name;
-};
 
+  /// Whether or not the section must exist (if it does not, 0 is returned)
+  const bool _must_exist;
+};

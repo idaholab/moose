@@ -56,7 +56,7 @@ CartesianProductSampler::CartesianProductSampler(const InputParameters & paramet
       grid_items.back()[j] = items[i] + j * items[i + 1];
   }
 
-  _cp_ptr = libmesh_make_unique<const StochasticTools::CartesianProduct<Real>>(grid_items);
+  _cp_ptr = std::make_unique<const StochasticTools::CartesianProduct<Real>>(grid_items);
   setNumberOfRows(_cp_ptr->numRows());
   setNumberOfCols(_cp_ptr->numCols());
 }

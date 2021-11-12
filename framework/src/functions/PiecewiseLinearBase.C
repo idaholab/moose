@@ -37,7 +37,7 @@ PiecewiseLinearBase::buildInterpolation()
   // try building a linear interpolation object
   try
   {
-    _linear_interp = libmesh_make_unique<LinearInterpolation>(_raw_x, _raw_y);
+    _linear_interp = std::make_unique<LinearInterpolation>(_raw_x, _raw_y);
   }
   catch (std::domain_error & e)
   {

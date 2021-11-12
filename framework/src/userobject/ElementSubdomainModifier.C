@@ -296,7 +296,7 @@ ElementSubdomainModifier::buildMovedElemsRange()
   const auto elems_end = MeshBase::const_element_iterator(
       elem_itr_end, elem_itr_end, Predicates::NotNull<Elem * const *>());
 
-  _moved_elems_range = libmesh_make_unique<ConstElemRange>(elems_begin, elems_end);
+  _moved_elems_range = std::make_unique<ConstElemRange>(elems_begin, elems_end);
 }
 
 void
@@ -329,7 +329,7 @@ ElementSubdomainModifier::buildMovedBndNodesRange()
   const auto bnd_nodes_end = MooseMesh::const_bnd_node_iterator(
       bnd_node_itr_end, bnd_node_itr_end, Predicates::NotNull<const BndNode * const *>());
 
-  _moved_bnd_nodes_range = libmesh_make_unique<ConstBndNodeRange>(bnd_nodes_begin, bnd_nodes_end);
+  _moved_bnd_nodes_range = std::make_unique<ConstBndNodeRange>(bnd_nodes_begin, bnd_nodes_end);
 }
 
 void

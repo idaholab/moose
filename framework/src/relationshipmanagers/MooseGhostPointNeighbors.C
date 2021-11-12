@@ -44,7 +44,7 @@ MooseGhostPointNeighbors::MooseGhostPointNeighbors(const MooseGhostPointNeighbor
 std::unique_ptr<GhostingFunctor>
 MooseGhostPointNeighbors::clone() const
 {
-  return libmesh_make_unique<MooseGhostPointNeighbors>(*this);
+  return std::make_unique<MooseGhostPointNeighbors>(*this);
 }
 
 std::string
@@ -70,7 +70,7 @@ MooseGhostPointNeighbors::operator>=(const RelationshipManager & rhs) const
 void
 MooseGhostPointNeighbors::internalInitWithMesh(const MeshBase & mesh)
 {
-  auto functor = libmesh_make_unique<GhostPointNeighbors>(mesh);
+  auto functor = std::make_unique<GhostPointNeighbors>(mesh);
 
   _functor = std::move(functor);
 }

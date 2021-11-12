@@ -67,10 +67,10 @@ MooseParsedVectorFunction::initialSetup()
     tid = getParam<THREAD_ID>("_tid");
 
   if (!_function_ptr)
-    _function_ptr = libmesh_make_unique<MooseParsedFunctionWrapper>(
+    _function_ptr = std::make_unique<MooseParsedFunctionWrapper>(
         _pfb_feproblem, _vector_value, _vars, _vals, tid);
 
   if (!_curl_function_ptr)
-    _curl_function_ptr = libmesh_make_unique<MooseParsedFunctionWrapper>(
+    _curl_function_ptr = std::make_unique<MooseParsedFunctionWrapper>(
         _pfb_feproblem, _curl_value, _vars, _vals, tid);
 }

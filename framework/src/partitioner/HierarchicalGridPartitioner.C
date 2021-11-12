@@ -65,7 +65,7 @@ HierarchicalGridPartitioner::~HierarchicalGridPartitioner() {}
 std::unique_ptr<Partitioner>
 HierarchicalGridPartitioner::clone() const
 {
-  return libmesh_make_unique<HierarchicalGridPartitioner>(_pars);
+  return std::make_unique<HierarchicalGridPartitioner>(_pars);
 }
 
 void
@@ -109,7 +109,7 @@ HierarchicalGridPartitioner::_do_partition(MeshBase & mesh, const unsigned int /
   const auto & nodes_max = nodes_bounding_box.max();
 
   // Bound the coarse mesh (n_nodes * n_nodes)
-  auto nodes_mesh = libmesh_make_unique<ReplicatedMesh>(this->_communicator);
+  auto nodes_mesh = std::make_unique<ReplicatedMesh>(this->_communicator);
   nodes_mesh->partitioner().reset(new LinearPartitioner);
 
   if (mesh.spatial_dimension() == 2)
@@ -162,7 +162,7 @@ HierarchicalGridPartitioner::_do_partition(MeshBase & mesh, const unsigned int /
       max(2) = std::max(max(2), node(2));
     }
 
-    auto procs_mesh = libmesh_make_unique<ReplicatedMesh>(this->_communicator);
+    auto procs_mesh = std::make_unique<ReplicatedMesh>(this->_communicator);
     procs_mesh->partitioner().reset(new LinearPartitioner);
 
     if (mesh.spatial_dimension() == 2)

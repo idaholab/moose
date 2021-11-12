@@ -13,7 +13,7 @@
 #include "InputParameters.h"
 #include "MooseError.h"
 
-#include "libmesh/auto_ptr.h"
+#include <memory>
 
 defineLegacyParams(OrientedBoxInterface);
 
@@ -48,7 +48,7 @@ OrientedBoxInterface::OrientedBoxInterface(const InputParameters & parameters)
   Point bottom_left(-xmax, -ymax, -zmax);
   Point top_right(xmax, ymax, zmax);
 
-  _bounding_box = libmesh_make_unique<BoundingBox>(bottom_left, top_right);
+  _bounding_box = std::make_unique<BoundingBox>(bottom_left, top_right);
 
   /*
    * now create the rotation matrix that rotates the oriented
@@ -76,7 +76,7 @@ OrientedBoxInterface::OrientedBoxInterface(const InputParameters & parameters)
     mooseError("width_direction and length_direction are not perpendicular in ", name);
 
   // The rotation matrix!
-  _rot_matrix = libmesh_make_unique<RealTensorValue>(w, l, w.cross(l));
+  _rot_matrix = std::make_unique<RealTensorValue>(w, l, w.cross(l));
 }
 
 bool

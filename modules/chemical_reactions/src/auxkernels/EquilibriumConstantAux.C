@@ -39,13 +39,13 @@ EquilibriumConstantAux::EquilibriumConstantAux(const InputParameters & parameter
   if (_temperature_points.size() >= 5)
   {
     // If there at least 5 values, then use the Maier-Kelley fit
-    _logk = libmesh_make_unique<EquilibriumConstantFit>(_temperature_points, _logk_points);
+    _logk = std::make_unique<EquilibriumConstantFit>(_temperature_points, _logk_points);
     _logk->generate();
   }
   else if ((_temperature_points.size() >= 2) && (_temperature_points.size() <= 4))
   {
     // If between 2 and 4 values are provided, use a linear fit
-    _linear_logk = libmesh_make_unique<PolynomialFit>(_temperature_points, _logk_points, 1);
+    _linear_logk = std::make_unique<PolynomialFit>(_temperature_points, _logk_points, 1);
     _linear_logk->generate();
   }
 }

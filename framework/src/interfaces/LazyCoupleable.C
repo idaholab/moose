@@ -25,7 +25,7 @@ LazyCoupleable::LazyCoupleable(const MooseObject * moose_object)
 {
   for (const auto & var_name :
        as_range(std::make_pair(_l_parameters.coupledVarsBegin(), _l_parameters.coupledVarsEnd())))
-    _coupled_var_numbers[var_name] = libmesh_make_unique<unsigned int>(0);
+    _coupled_var_numbers[var_name] = std::make_unique<unsigned int>(0);
 }
 
 void
