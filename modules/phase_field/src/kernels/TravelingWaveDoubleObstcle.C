@@ -36,6 +36,7 @@ TravelingWaveDoubleObstcle::precomputeQpJacobian()
 {
   Real jac = -8.0 * _sigma[_qp] / _eta[_qp] * _phi[_j][_qp];
   if (_u[_qp] * (1.0 - _u[_qp]) > 1.0e-16)
-    jac -= -4.0 / libMesh::pi / _delta_g[_qp] * (1.0 - 2 * _u[_qp]) * _phi[_j][_qp] / std::sqrt(_u[_qp] * (1.0 - _u[_qp]));
+    jac -= -4.0 / libMesh::pi / _delta_g[_qp] * (1.0 - 2 * _u[_qp]) * _phi[_j][_qp] /
+           std::sqrt(_u[_qp] * (1.0 - _u[_qp]));
   return jac;
 }
