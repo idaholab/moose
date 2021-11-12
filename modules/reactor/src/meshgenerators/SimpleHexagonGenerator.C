@@ -19,8 +19,9 @@ SimpleHexagonGenerator::validParams()
 {
   InputParameters params = PolygonMeshGeneratorBase::validParams();
   MooseEnum element_type("TRI QUAD", "TRI");
-  params.addParam<MooseEnum>(
-      "element_type", element_type, "Whether the simple hexagon mesh is made of TRI or QUAD elements.");
+  params.addParam<MooseEnum>("element_type",
+                             element_type,
+                             "Whether the simple hexagon mesh is made of TRI or QUAD elements.");
   params.addRequiredRangeCheckedParam<Real>(
       "hexagon_size", "hexagon_size>0.0", "Size of the hexagon to be generated.");
   MooseEnum hexagon_size_style("apothem radius", "apothem");
