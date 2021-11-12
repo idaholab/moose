@@ -31,10 +31,17 @@ gradUDotNormal(const T &
 #ifdef MOOSE_GLOBAL_AD_INDEXING
                    fv_var
 #endif
+               ,
+               bool
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+                   correct_skewness
+#endif
 )
+
 {
 #ifdef MOOSE_GLOBAL_AD_INDEXING
-  return fv_var.adGradSln(face_info) * face_info.normal();
+
+  return fv_var.adGradSln(face_info, correct_skewness) * face_info.normal();
 #else
 
   // Orthogonal contribution
@@ -44,9 +51,9 @@ gradUDotNormal(const T &
 #endif
 }
 
+template ADReal gradUDotNormal(
+    const ADReal &, const ADReal &, const FaceInfo &, const MooseVariableFV<Real> &, bool);
 template ADReal
-gradUDotNormal(const ADReal &, const ADReal &, const FaceInfo &, const MooseVariableFV<Real> &);
-template ADReal
-gradUDotNormal(const ADReal &, const Real &, const FaceInfo &, const MooseVariableFV<Real> &);
+gradUDotNormal(const ADReal &, const Real &, const FaceInfo &, const MooseVariableFV<Real> &, bool);
 }
 }

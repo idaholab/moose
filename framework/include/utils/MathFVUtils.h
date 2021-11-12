@@ -32,6 +32,10 @@ enum class InterpMethod
 {
   /// (elem+neighbor)/2
   Average,
+  /// (gc*elem+(1-gc)*neighbor)+gradient*(rf-rf')
+  SkewCorrectedAverage,
+  /// Extended stencil using the vertex values
+  VertexBased,
   /// weighted
   Upwind,
   // Rhie-Chow
@@ -75,6 +79,14 @@ interpCoeffs(const InterpMethod m,
         return std::make_pair(1. - fi.gC(), fi.gC());
     }
 
+    case InterpMethod::SkewCorrectedAverage:
+    {
+      if (one_is_elem)
+        return std::make_pair(fi.gCSkewed(), 1. - fi.gCSkewed());
+      else
+        return std::make_pair(1. - fi.gCSkewed(), fi.gCSkewed());
+    }
+
     case InterpMethod::Upwind:
     {
       if ((advector * fi.normal() > 0) == one_is_elem)
@@ -98,10 +110,36 @@ typename libMesh::CompareTypes<T, T2>::supertype
 linearInterpolation(const T & value1,
                     const T2 & value2,
                     const FaceInfo & fi,
-                    const bool one_is_elem)
+                    const bool one_is_elem,
+                    const InterpMethod interp_method = InterpMethod::Average)
 {
-  const auto coeffs = interpCoeffs(InterpMethod::Average, fi, one_is_elem);
+  mooseAssert(interp_method == InterpMethod::Average ||
+                  interp_method == InterpMethod::SkewCorrectedAverage,
+              "The selected interpolation function only works with average or skewness-corrected "
+              "average options!");
+  const auto coeffs = interpCoeffs(interp_method, fi, one_is_elem);
   return coeffs.first * value1 + coeffs.second * value2;
+}
+
+/**
+ * Linear interpolation with skewness correction using the face gradient.
+ * See more info in Moukalled Chapter 9. The correction involves a first order
+ * Taylor expansion around the intersection of the cell face and the line
+ * connecting the two cell centers.
+ */
+template <typename T, typename T2, typename T3>
+typename libMesh::CompareTypes<T, T2>::supertype
+skewCorrectedlinearInterpolation(const T & value1,
+                                 const T2 & value2,
+                                 const T3 & face_gradient,
+                                 const FaceInfo & fi,
+                                 const bool one_is_elem)
+{
+  const auto coeffs = interpCoeffs(InterpMethod::SkewCorrectedAverage, fi, one_is_elem);
+
+  auto value = (coeffs.first * value1 + coeffs.second * value2) +
+               face_gradient * (fi.faceCentroid() - fi.rIntersection());
+  return value;
 }
 
 /// Provides interpolation of face values for non-advection-specific purposes (although it can/will
@@ -206,7 +244,8 @@ template <typename T, typename T2>
 ADReal gradUDotNormal(const T & elem_value,
                       const T2 & neighbor_value,
                       const FaceInfo & face_info,
-                      const MooseVariableFV<Real> & fv_var);
+                      const MooseVariableFV<Real> & fv_var,
+                      bool correct_skewness = false);
 
 /**
  * From Moukalled 12.30
