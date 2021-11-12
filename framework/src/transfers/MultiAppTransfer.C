@@ -111,6 +111,11 @@ MultiAppTransfer::getAppInfo()
   _to_meshes.clear();
   _to_positions.clear();
   _from_positions.clear();
+  // Clear up this map since we built it from scratch every time
+  // Otherwise, this will cause two issues: 1) increasing memory usage
+  // for a simulation that requires many transfers, 2) producing wrong results
+  // when we do collective communication on this vector.
+  _local2global_map.clear();
 
   // Build the vectors for to problems, from problems, and subapps positions.
   switch (_direction)
