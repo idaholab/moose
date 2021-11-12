@@ -22,7 +22,10 @@ PostprocessorDT::validParams()
                                              "The name of the postprocessor that computes the dt");
   params.addParam<Real>("dt", "Initial value of dt");
   params.addParam<Real>("scale", 1, "Multiple scale and supplied postprocessor value.");
-  params.addParam<Real>("factor", 0, "Add a factor to the supplied postprocessor value.");
+  params.addParam<Real>("offset", 0, "Add an offset to the supplied postprocessor value.");
+  params.addDeprecatedParam<Real>("factor",
+                                  "Add an offset to the supplied postprocessor value",
+                                  "offset has replaced factor for that same purpose");
   return params;
 }
 
@@ -33,7 +36,7 @@ PostprocessorDT::PostprocessorDT(const InputParameters & parameters)
     _has_initial_dt(isParamValid("dt")),
     _initial_dt(_has_initial_dt ? getParam<Real>("dt") : 0.),
     _scale(getParam<Real>("scale")),
-    _factor(getParam<Real>("factor"))
+    _offset(isParamValid("offset") ? getParam<Real>("offset") : getParam<Real>("factor"))
 {
 }
 
@@ -49,5 +52,5 @@ PostprocessorDT::computeInitialDT()
 Real
 PostprocessorDT::computeDT()
 {
-  return _scale * _pps_value + _factor;
+  return _scale * _pps_value + _offset;
 }

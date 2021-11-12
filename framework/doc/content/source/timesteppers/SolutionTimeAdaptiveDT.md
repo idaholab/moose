@@ -1,33 +1,28 @@
 # SolutionTimeAdaptiveDT
 
-!alert! construction title=Undocumented Class
-The SolutionTimeAdaptiveDT has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# SolutionTimeAdaptiveDT
-
 !syntax description /Executioner/TimeStepper/SolutionTimeAdaptiveDT
 
-## Overview
+The idea is to find the simulation time step such as the computational cost of a step is the lowest.
+The computational cost of a time step solve depends on many factors, this time stepper studies the
+time step dependence.
 
-!! Replace these lines with information regarding the SolutionTimeAdaptiveDT object.
+This time stepper tries to decrease the simulation time in every time step by reacting
+to changes in computational time. If the computational cost of a time step increases two steps
+in a row, then it will either lower or increase the time step, depending on what it did for those
+two previous steps. For example, if it increased the time steps twice in a row and the solve time
+increased, then it will attempt to decrease the time steps, for at least two steps, until the
+dynamic is reversed.
 
-## Example Input File Syntax
+When changing the time step, it is modified using this equation
 
-!! Describe and include an example of how to use the SolutionTimeAdaptiveDT object.
+!equation
+dt^{n+1}= dt^n ( 1 + \text{percent change} * \pm 1)
 
-!syntax parameters /Executioner/TimeStepper/SolutionTimeAdaptiveDT
+The sign of the update is chosen as explained above.
 
-!syntax inputs /Executioner/TimeStepper/SolutionTimeAdaptiveDT
+## Example input syntax
 
-!syntax children /Executioner/TimeStepper/SolutionTimeAdaptiveDT
-```
-!alert-end!
-
-!syntax description /Executioner/TimeStepper/SolutionTimeAdaptiveDT
+!listing test/tests/executioners/executioner/sln-time-adapt.i block=Executioner
 
 !syntax parameters /Executioner/TimeStepper/SolutionTimeAdaptiveDT
 

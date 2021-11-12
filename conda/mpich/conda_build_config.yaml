@@ -2,19 +2,19 @@
 ## Any changes made will require additional changes to any item above that.
 
 moose_libmesh:
-  - moose-libmesh 2021.10.27 build_3
+  - moose-libmesh 2021.10.27 build_4
+
+SHORT_VTK_NAME:
+  - 9.1
+
+vtk_version:
+  - 9.1.0
+
+moose_libmesh_vtk:
+  - moose-libmesh-vtk 9.1.0 build_0
 
 moose_petsc:
   - moose-petsc 3.15.1 build_3
-
-SHORT_VTK_NAME:
-  - 6.3
-
-vtk_version:
-  - 6.3.0
-
-moose_libmesh_vtk:
-  - moose-libmesh-vtk 6.3.0 build_8
 
 moose_mpich:
   - moose-mpich 3.3.2 build_8

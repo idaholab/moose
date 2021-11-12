@@ -1,33 +1,14 @@
 # ConstantIC
 
-!alert! construction title=Undocumented Class
-The ConstantIC has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# ConstantIC
-
 !syntax description /ICs/ConstantIC
 
-## Overview
+Sets a constant initial condition described by parameter [!param](/ICs/ConstantIC/value). It can be restricted to particular blocks and boundaries using the [!param](/ICs/ConstantIC/block) and [!param](/ICs/ConstantIC/boundary) parameters, respectively.
 
-!! Replace these lines with information regarding the ConstantIC object.
+## Example input syntax
 
-## Example Input File Syntax
+In this example, constant initial conditions are set for variable `u` and auxiliary array variable `u_aux`. The values of `u_aux` in block 1 and 2 are set differently by two `ConstantIC` objects.
 
-!! Describe and include an example of how to use the ConstantIC object.
-
-!syntax parameters /ICs/ConstantIC
-
-!syntax inputs /ICs/ConstantIC
-
-!syntax children /ICs/ConstantIC
-```
-!alert-end!
-
-!syntax description /ICs/ConstantIC
+!listing test/tests/ics/constant_ic/subdomain_constant_ic_test.i block=ICs
 
 !syntax parameters /ICs/ConstantIC
 

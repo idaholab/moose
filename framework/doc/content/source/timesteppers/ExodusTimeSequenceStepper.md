@@ -1,33 +1,16 @@
 # ExodusTimeSequenceStepper
 
-!alert! construction title=Undocumented Class
-The ExodusTimeSequenceStepper has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# ExodusTimeSequenceStepper
-
 !syntax description /Executioner/TimeStepper/ExodusTimeSequenceStepper
 
-## Overview
+The Exodus file is read by the first process (rank 0), and the time step sequence is then broadcast to all other processes.
 
-!! Replace these lines with information regarding the ExodusTimeSequenceStepper object.
+If the solve fails to converge during a time step, the behavior of the `ExodusTimeSequenceStepper` is the same as the [TimeSequenceStepper.md]. The time step will be cut then the time stepper will attempt to return to the original sequence.
 
-## Example Input File Syntax
+## Example input file
 
-!! Describe and include an example of how to use the ExodusTimeSequenceStepper object.
+In this example, the time stepper extracts the time sequence from an exodus output file. This exodus file may not necessarily have been generated using the same input file. The starting and end time of the simulation may still be set independently.
 
-!syntax parameters /Executioner/TimeStepper/ExodusTimeSequenceStepper
-
-!syntax inputs /Executioner/TimeStepper/ExodusTimeSequenceStepper
-
-!syntax children /Executioner/TimeStepper/ExodusTimeSequenceStepper
-```
-!alert-end!
-
-!syntax description /Executioner/TimeStepper/ExodusTimeSequenceStepper
+!listing test/tests/time_steppers/timesequence_stepper/exodustimesequence.i block=Executioner
 
 !syntax parameters /Executioner/TimeStepper/ExodusTimeSequenceStepper
 
