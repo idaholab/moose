@@ -40,6 +40,7 @@
   poissons_ratio = 0.3
   output_q = false
   incremental = true
+  equivalent_k = true
 []
 
 [Modules/TensorMechanics/Master]
