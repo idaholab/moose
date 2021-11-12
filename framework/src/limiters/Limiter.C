@@ -16,7 +16,7 @@
 #include "QUICKLimiter.h"
 #include "MooseError.h"
 
-#include "libmesh/auto_ptr.h"
+#include <memory>
 
 namespace Moose
 {
@@ -32,22 +32,22 @@ Limiter<T>::build(const LimiterType limiter)
   switch (limiter)
   {
     case LimiterType::VanLeer:
-      return libmesh_make_unique<VanLeerLimiter<T>>();
+      return std::make_unique<VanLeerLimiter<T>>();
 
     case LimiterType::Upwind:
-      return libmesh_make_unique<UpwindLimiter<T>>();
+      return std::make_unique<UpwindLimiter<T>>();
 
     case LimiterType::CentralDifference:
-      return libmesh_make_unique<CentralDifferenceLimiter<T>>();
+      return std::make_unique<CentralDifferenceLimiter<T>>();
 
     case LimiterType::MinMod:
-      return libmesh_make_unique<MinModLimiter<T>>();
+      return std::make_unique<MinModLimiter<T>>();
 
     case LimiterType::SOU:
-      return libmesh_make_unique<SOULimiter<T>>();
+      return std::make_unique<SOULimiter<T>>();
 
     case LimiterType::QUICK:
-      return libmesh_make_unique<QUICKLimiter<T>>();
+      return std::make_unique<QUICKLimiter<T>>();
 
     default:
       mooseError("Unrecognized limiter type ", unsigned(limiter));

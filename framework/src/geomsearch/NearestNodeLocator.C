@@ -96,7 +96,7 @@ NearestNodeLocator::findNodes()
         distance(i) = inflation[i];
 
       my_inflated_box =
-          libmesh_make_unique<BoundingBox>(my_box.first - distance, my_box.second + distance);
+          std::make_unique<BoundingBox>(my_box.first - distance, my_box.second + distance);
     }
 
     // Data structures to hold the boundary nodes
@@ -257,7 +257,7 @@ NearestNodeLocator::updatePatch(std::vector<dof_id_type> & secondary_nodes)
       distance(i) = inflation[i];
 
     my_inflated_box =
-        libmesh_make_unique<BoundingBox>(my_box.first - distance, my_box.second + distance);
+        std::make_unique<BoundingBox>(my_box.first - distance, my_box.second + distance);
   }
 
   // Data structures to hold the boundary nodes

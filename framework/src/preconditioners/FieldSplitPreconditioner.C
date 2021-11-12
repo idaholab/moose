@@ -61,7 +61,7 @@ FieldSplitPreconditioner::FieldSplitPreconditioner(const InputParameters & param
   // the fieldSplit preconditioner
   bool full = getParam<bool>("full");
   // how variables couple
-  std::unique_ptr<CouplingMatrix> cm = libmesh_make_unique<CouplingMatrix>(n_vars);
+  std::unique_ptr<CouplingMatrix> cm = std::make_unique<CouplingMatrix>(n_vars);
   if (!full)
   {
     // put 1s on diagonal

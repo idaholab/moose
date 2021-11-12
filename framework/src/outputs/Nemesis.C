@@ -73,7 +73,7 @@ Nemesis::meshChanged()
   _nemesis_num = 1;
 
   // Create the new NemesisIO object
-  _nemesis_io_ptr = libmesh_make_unique<Nemesis_IO>(_problem_ptr->mesh().getMesh());
+  _nemesis_io_ptr = std::make_unique<Nemesis_IO>(_problem_ptr->mesh().getMesh());
   _nemesis_initialized = false;
 }
 

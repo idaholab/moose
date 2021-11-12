@@ -265,10 +265,10 @@ RayTracingMeshOutput::buildSegmentMesh()
   if (!_segment_mesh)
   {
     if (_communicator.size() == 1)
-      _segment_mesh = libmesh_make_unique<ReplicatedMesh>(_communicator, _mesh_ptr->dimension());
+      _segment_mesh = std::make_unique<ReplicatedMesh>(_communicator, _mesh_ptr->dimension());
     else
     {
-      _segment_mesh = libmesh_make_unique<DistributedMesh>(_communicator, _mesh_ptr->dimension());
+      _segment_mesh = std::make_unique<DistributedMesh>(_communicator, _mesh_ptr->dimension());
       _segment_mesh->set_distributed();
     }
 
@@ -442,7 +442,7 @@ RayTracingMeshOutput::setupEquationSystem()
 {
   TIME_SECTION("setupEquationSystem", 3, "Setting Up Ray Tracing MeshOutput Equation System");
 
-  _es = libmesh_make_unique<EquationSystems>(*_segment_mesh);
+  _es = std::make_unique<EquationSystems>(*_segment_mesh);
   _sys = &_es->add_system<libMesh::ExplicitSystem>("sys");
 
   // Add variables for the basic properties if enabled

@@ -132,7 +132,7 @@ ViewFactorRayStudy::ViewFactorRayStudy(const InputParameters & parameters)
   }
   else
   {
-    _3d_aq = libmesh_make_unique<RayTracingAngularQuadrature>(
+    _3d_aq = std::make_unique<RayTracingAngularQuadrature>(
         _mesh.dimension(),
         getParam<unsigned int>("polar_quad_order"),
         4 * getParam<unsigned int>("azimuthal_quad_order"),

@@ -145,7 +145,7 @@ OversampleOutput::initOversample()
   _mesh_ptr->getMesh().allow_renumbering(false);
 
   // Create the new EquationSystems
-  _oversample_es = libmesh_make_unique<EquationSystems>(_mesh_ptr->getMesh());
+  _oversample_es = std::make_unique<EquationSystems>(_mesh_ptr->getMesh());
   _es_ptr = _oversample_es.get();
 
   // Reference the system from which we are copying
@@ -236,7 +236,7 @@ OversampleOutput::updateOversample()
         // If the mesh has change the MeshFunctions need to be re-built, otherwise simply clear it
         // for re-initialization
         if (!_mesh_functions[sys_num][var_num] || _oversample_mesh_changed)
-          _mesh_functions[sys_num][var_num] = libmesh_make_unique<MeshFunction>(
+          _mesh_functions[sys_num][var_num] = std::make_unique<MeshFunction>(
               source_es, *_serialized_solution, source_sys.get_dof_map(), var_num);
         else
           _mesh_functions[sys_num][var_num]->clear();
@@ -274,7 +274,7 @@ OversampleOutput::cloneMesh()
     mesh_params.set<bool>("nemesis") = false;
     mesh_params.set<bool>("skip_partitioning") = false;
     mesh_params.set<std::string>("_object_name") = "output_problem_mesh";
-    _cloned_mesh_ptr = libmesh_make_unique<FileMesh>(mesh_params);
+    _cloned_mesh_ptr = std::make_unique<FileMesh>(mesh_params);
     _cloned_mesh_ptr->allowRecovery(false); // We actually want to reread the initial mesh
     _cloned_mesh_ptr->init();
     _cloned_mesh_ptr->prepare();

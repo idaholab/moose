@@ -18,7 +18,7 @@ std::unique_ptr<UnstructuredMesh>
 traceRayToolsTestMesh(const int type)
 {
   Parallel::Communicator comm;
-  std::unique_ptr<UnstructuredMesh> mesh = libmesh_make_unique<ReplicatedMesh>(comm);
+  std::unique_ptr<UnstructuredMesh> mesh = std::make_unique<ReplicatedMesh>(comm);
 
   const unsigned int n = 2;
   const Real min = 0;

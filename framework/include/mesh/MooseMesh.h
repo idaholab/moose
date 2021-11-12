@@ -1578,7 +1578,7 @@ MooseMesh::buildTypedMesh(unsigned int dim)
   if (dim == libMesh::invalid_uint)
     dim = getParam<MooseEnum>("dim");
 
-  auto mesh = libmesh_make_unique<T>(_communicator, dim);
+  auto mesh = std::make_unique<T>(_communicator, dim);
 
   if (!getParam<bool>("allow_renumbering"))
     mesh->allow_renumbering(false);

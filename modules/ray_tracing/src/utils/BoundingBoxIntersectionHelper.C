@@ -21,7 +21,7 @@ using namespace libMesh;
 
 BoundingBoxIntersectionHelper::BoundingBoxIntersectionHelper(const BoundingBox & bbox,
                                                              const unsigned int dim)
-  : _comm(), _mesh(libmesh_make_unique<Mesh>(_comm, dim))
+  : _comm(), _mesh(std::make_unique<Mesh>(_comm, dim))
 {
   // Add the nodes that represent our bounding box
   _mesh->add_point(Point(bbox.min()(0), bbox.min()(1), bbox.min()(2)), 0, 0);

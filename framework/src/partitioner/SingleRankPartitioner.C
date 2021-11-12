@@ -35,7 +35,7 @@ SingleRankPartitioner::SingleRankPartitioner(const InputParameters & params)
 std::unique_ptr<Partitioner>
 SingleRankPartitioner::clone() const
 {
-  return libmesh_make_unique<SingleRankPartitioner>(_pars);
+  return std::make_unique<SingleRankPartitioner>(_pars);
 }
 
 void

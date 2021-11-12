@@ -66,7 +66,7 @@ RinglebMesh::RinglebMesh(const InputParameters & parameters)
 std::unique_ptr<MooseMesh>
 RinglebMesh::safeClone() const
 {
-  return libmesh_make_unique<RinglebMesh>(*this);
+  return std::make_unique<RinglebMesh>(*this);
 }
 
 std::vector<Real>

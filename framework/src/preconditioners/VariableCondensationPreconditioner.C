@@ -101,11 +101,11 @@ VariableCondensationPreconditioner::VariableCondensationPreconditioner(
     _n_vars(_nl.nVariables()),
     _lm_var_names(getParam<std::vector<std::string>>("lm_variable")),
     _primary_var_names(getParam<std::vector<std::string>>("primary_variable")),
-    _D(libmesh_make_unique<PetscMatrix<Number>>(MoosePreconditioner::_communicator)),
-    _M(libmesh_make_unique<PetscMatrix<Number>>(MoosePreconditioner::_communicator)),
-    _K(libmesh_make_unique<PetscMatrix<Number>>(MoosePreconditioner::_communicator)),
+    _D(std::make_unique<PetscMatrix<Number>>(MoosePreconditioner::_communicator)),
+    _M(std::make_unique<PetscMatrix<Number>>(MoosePreconditioner::_communicator)),
+    _K(std::make_unique<PetscMatrix<Number>>(MoosePreconditioner::_communicator)),
     _dinv(nullptr),
-    _J_condensed(libmesh_make_unique<PetscMatrix<Number>>(MoosePreconditioner::_communicator)),
+    _J_condensed(std::make_unique<PetscMatrix<Number>>(MoosePreconditioner::_communicator)),
     _x_hat(NumericVector<Number>::build(MoosePreconditioner::_communicator)),
     _y_hat(NumericVector<Number>::build(MoosePreconditioner::_communicator)),
     _primary_rhs_vec(NumericVector<Number>::build(MoosePreconditioner::_communicator)),
@@ -146,7 +146,7 @@ VariableCondensationPreconditioner::VariableCondensationPreconditioner(
   // The following obtains and sets the coupling matrix.
   // TODO: This part can be refactored together with what are in other classes, e.g.,
   // PhysicsBasedPreconditioner
-  std::unique_ptr<CouplingMatrix> cm = libmesh_make_unique<CouplingMatrix>(_n_vars);
+  std::unique_ptr<CouplingMatrix> cm = std::make_unique<CouplingMatrix>(_n_vars);
   const bool full = getParam<bool>("full");
 
   if (!full)

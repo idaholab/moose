@@ -67,7 +67,7 @@ PetscExternalPartitioner::PetscExternalPartitioner(const InputParameters & param
 std::unique_ptr<Partitioner>
 PetscExternalPartitioner::clone() const
 {
-  return libmesh_make_unique<PetscExternalPartitioner>(_pars);
+  return std::make_unique<PetscExternalPartitioner>(_pars);
 }
 
 void

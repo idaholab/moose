@@ -86,9 +86,9 @@ MooseVariableFV<OutputType>::MooseVariableFV(const InputParameters & parameters)
                               ? this->template getParam<bool>("use_extended_stencil")
                               : false)
 {
-  _element_data = libmesh_make_unique<MooseVariableDataFV<OutputType>>(
+  _element_data = std::make_unique<MooseVariableDataFV<OutputType>>(
       *this, _sys, _tid, Moose::ElementType::Element, this->_assembly.elem());
-  _neighbor_data = libmesh_make_unique<MooseVariableDataFV<OutputType>>(
+  _neighbor_data = std::make_unique<MooseVariableDataFV<OutputType>>(
       *this, _sys, _tid, Moose::ElementType::Neighbor, this->_assembly.neighbor());
 
   // Resize vectors used when not caching variables

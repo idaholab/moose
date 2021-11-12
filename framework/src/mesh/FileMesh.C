@@ -48,7 +48,7 @@ FileMesh::~FileMesh() {}
 std::unique_ptr<MooseMesh>
 FileMesh::safeClone() const
 {
-  return libmesh_make_unique<FileMesh>(*this);
+  return std::make_unique<FileMesh>(*this);
 }
 
 void

@@ -71,9 +71,9 @@ AutomaticMortarGeneration::AutomaticMortarGeneration(
   _secondary_boundary_subdomain_ids.insert(subdomain_key.second);
 
   if (_distributed)
-    _mortar_segment_mesh = libmesh_make_unique<DistributedMesh>(_mesh.comm());
+    _mortar_segment_mesh = std::make_unique<DistributedMesh>(_mesh.comm());
   else
-    _mortar_segment_mesh = libmesh_make_unique<ReplicatedMesh>(_mesh.comm());
+    _mortar_segment_mesh = std::make_unique<ReplicatedMesh>(_mesh.comm());
 }
 
 void

@@ -93,7 +93,7 @@ CrackMeshCut3DUserObject::CrackMeshCut3DUserObject(const InputParameters & param
 
   // only the xda type is currently supported
   MeshFileName xfem_cut_mesh_file = getParam<MeshFileName>("mesh_file");
-  _cut_mesh = libmesh_make_unique<ReplicatedMesh>(_communicator);
+  _cut_mesh = std::make_unique<ReplicatedMesh>(_communicator);
   _cut_mesh->read(xfem_cut_mesh_file);
 
   // test element type; only tri3 elements are allowed

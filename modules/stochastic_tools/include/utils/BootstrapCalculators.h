@@ -19,10 +19,10 @@
 #include "MooseError.h"
 #include "MooseRandom.h"
 
-#include "libmesh/auto_ptr.h"
 #include "libmesh/parallel.h"
 #include "libmesh/parallel_sync.h"
 
+#include <memory>
 #include <vector>
 
 class MooseEnum;

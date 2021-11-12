@@ -80,7 +80,7 @@ MaterialPropertyInterface::defaultMaterialProperty(const std::string & name)
   // check if the string parsed cleanly into a Real number
   if (ss >> real_value && ss.eof())
   {
-    _default_real_properties.emplace_back(libmesh_make_unique<MaterialProperty<Real>>());
+    _default_real_properties.emplace_back(std::make_unique<MaterialProperty<Real>>());
     auto & default_property = _default_real_properties.back();
 
     // resize to accommodate maximum number of qpoints
@@ -108,7 +108,7 @@ MaterialPropertyInterface::defaultADMaterialProperty(const std::string & name)
   // check if the string parsed cleanly into a Real number
   if (ss >> real_value && ss.eof())
   {
-    _default_ad_real_properties.emplace_back(libmesh_make_unique<ADMaterialProperty<Real>>());
+    _default_ad_real_properties.emplace_back(std::make_unique<ADMaterialProperty<Real>>());
     auto & default_property = _default_ad_real_properties.back();
 
     // resize to accommodate maximum number of qpoints
@@ -142,7 +142,7 @@ MaterialPropertyInterface::defaultMaterialProperty(const std::string & name)
   if (ss >> real_value && ss.eof())
   {
     _default_real_vector_properties.emplace_back(
-        libmesh_make_unique<MaterialProperty<RealVectorValue>>());
+        std::make_unique<MaterialProperty<RealVectorValue>>());
     auto & default_property = _default_real_vector_properties.back();
 
     // resize to accomodate maximum number obf qpoints
@@ -171,7 +171,7 @@ MaterialPropertyInterface::defaultADMaterialProperty(const std::string & name)
   if (ss >> real_value && ss.eof())
   {
     _default_ad_real_vector_properties.emplace_back(
-        libmesh_make_unique<ADMaterialProperty<RealVectorValue>>());
+        std::make_unique<ADMaterialProperty<RealVectorValue>>());
     auto & default_property = _default_ad_real_vector_properties.back();
 
     // resize to accomodate maximum number obf qpoints

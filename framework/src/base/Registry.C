@@ -12,15 +12,16 @@
 #include "Factory.h"
 #include "ActionFactory.h"
 
-#include "libmesh/auto_ptr.h"
 #include "libmesh/libmesh_common.h"
+
+#include <memory>
 
 static Registry &
 getRegistry()
 {
   static std::unique_ptr<Registry> _singleton;
   if (!_singleton)
-    _singleton = libmesh_make_unique<Registry>();
+    _singleton = std::make_unique<Registry>();
   return *_singleton;
 }
 

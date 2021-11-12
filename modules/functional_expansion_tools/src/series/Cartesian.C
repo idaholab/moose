@@ -10,7 +10,7 @@
 #include "Cartesian.h"
 #include "Legendre.h"
 
-#include "libmesh/auto_ptr.h"
+#include <memory>
 
 Cartesian::Cartesian(const std::string & who_is_using_me)
   : CompositeSeriesBasisInterface(who_is_using_me)
@@ -31,8 +31,8 @@ Cartesian::Cartesian(const std::vector<MooseEnum> & domains,
     {
       std::vector<MooseEnum> local_domain = {domains[i]};
       std::vector<std::size_t> local_order = {orders[i]};
-      _series.push_back(libmesh_make_unique<Legendre>(
-          local_domain, local_order, expansion_type, generation_type));
+      _series.push_back(
+          std::make_unique<Legendre>(local_domain, local_order, expansion_type, generation_type));
     }
     else
       mooseError("Cartesian: No other linear series implemented except Legendre!");

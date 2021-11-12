@@ -216,7 +216,7 @@ InputParameterWarehouse::addControllableParameterAlias(const MooseObjectParamete
 
     for (auto secondary_ptr : secondaries)
       _controllable_items[tid].emplace_back(
-          libmesh_make_unique<ControllableAlias>(alias, secondary_ptr));
+          std::make_unique<ControllableAlias>(alias, secondary_ptr));
   }
 }
 

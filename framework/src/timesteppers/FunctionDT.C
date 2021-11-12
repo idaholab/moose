@@ -74,7 +74,7 @@ FunctionDT::FunctionDT(const InputParameters & parameters)
   {
     try
     {
-      _time_ipol = libmesh_make_unique<LinearInterpolation>(_time_t, _time_dt);
+      _time_ipol = std::make_unique<LinearInterpolation>(_time_t, _time_dt);
     }
     catch (std::domain_error & e)
     {

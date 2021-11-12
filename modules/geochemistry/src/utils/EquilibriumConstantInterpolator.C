@@ -11,7 +11,7 @@
 #include "MooseError.h"
 #include "MooseUtils.h"
 #include "libmesh/utility.h"
-#include "libmesh/auto_ptr.h" // libmesh_make_unique
+#include <memory> // std::make_unique
 
 EquilibriumConstantInterpolator::EquilibriumConstantInterpolator(
     const std::vector<Real> & temperature,
@@ -46,7 +46,7 @@ EquilibriumConstantInterpolator::EquilibriumConstantInterpolator(
     _fit_type = FitTypeEnum::PIECEWISELINEAR;
     try
     {
-      _linear_interp = libmesh_make_unique<LinearInterpolation>(useful_temperature, useful_logk);
+      _linear_interp = std::make_unique<LinearInterpolation>(useful_temperature, useful_logk);
     }
     catch (std::domain_error & e)
     {

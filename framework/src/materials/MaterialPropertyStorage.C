@@ -60,11 +60,11 @@ MaterialPropertyStorage::MaterialPropertyStorage()
   : _has_stateful_props(false), _has_older_prop(false)
 {
   _props_elem =
-      libmesh_make_unique<HashMap<const Elem *, HashMap<unsigned int, MaterialProperties>>>();
+      std::make_unique<HashMap<const Elem *, HashMap<unsigned int, MaterialProperties>>>();
   _props_elem_old =
-      libmesh_make_unique<HashMap<const Elem *, HashMap<unsigned int, MaterialProperties>>>();
+      std::make_unique<HashMap<const Elem *, HashMap<unsigned int, MaterialProperties>>>();
   _props_elem_older =
-      libmesh_make_unique<HashMap<const Elem *, HashMap<unsigned int, MaterialProperties>>>();
+      std::make_unique<HashMap<const Elem *, HashMap<unsigned int, MaterialProperties>>>();
 }
 
 MaterialPropertyStorage::~MaterialPropertyStorage() { releaseProperties(); }

@@ -98,7 +98,7 @@ template <typename T>
 RestartableData<T> &
 SurrogateModel::getModelDataHelper(const std::string & data_name) const
 {
-  auto data_ptr = libmesh_make_unique<RestartableData<T>>(data_name, nullptr);
+  auto data_ptr = std::make_unique<RestartableData<T>>(data_name, nullptr);
   RestartableDataValue & value =
       _app.registerRestartableData(data_name, std::move(data_ptr), 0, true, _model_meta_data_name);
   RestartableData<T> & data_ref = static_cast<RestartableData<T> &>(value);

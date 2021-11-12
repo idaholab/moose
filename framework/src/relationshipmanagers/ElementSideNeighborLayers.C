@@ -59,7 +59,7 @@ ElementSideNeighborLayers::ElementSideNeighborLayers(const ElementSideNeighborLa
 std::unique_ptr<GhostingFunctor>
 ElementSideNeighborLayers::clone() const
 {
-  return libmesh_make_unique<ElementSideNeighborLayers>(*this);
+  return std::make_unique<ElementSideNeighborLayers>(*this);
 }
 
 std::string
@@ -111,13 +111,13 @@ ElementSideNeighborLayers::internalInitWithMesh(const MeshBase &)
 {
   if (_use_point_neighbors)
   {
-    auto functor = libmesh_make_unique<PointNeighborCoupling>();
+    auto functor = std::make_unique<PointNeighborCoupling>();
     initFunctor(*functor);
     _functor = std::move(functor);
   }
   else
   {
-    auto functor = libmesh_make_unique<DefaultCoupling>();
+    auto functor = std::make_unique<DefaultCoupling>();
     initFunctor(*functor);
     _functor = std::move(functor);
   }

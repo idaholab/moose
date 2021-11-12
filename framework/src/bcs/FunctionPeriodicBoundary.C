@@ -77,7 +77,7 @@ FunctionPeriodicBoundary::clone(TransformationType t) const
   if (t == INVERSE)
     mooseError("No way to automatically clone() an inverse FunctionPeriodicBoundary object");
 
-  return libmesh_make_unique<FunctionPeriodicBoundary>(*this);
+  return std::make_unique<FunctionPeriodicBoundary>(*this);
 }
 
 void

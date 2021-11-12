@@ -191,7 +191,7 @@ MeshGenerator::declareMeshProperty(const std::string & data_name)
   // If it's already in use, the App will return a reference to the existing instance and we'll
   // return that one instead. We might refactor this to have the app create the RestartableData
   // at a later date.
-  auto data_ptr = libmesh_make_unique<RestartableData<T>>(full_name, nullptr);
+  auto data_ptr = std::make_unique<RestartableData<T>>(full_name, nullptr);
   auto & restartable_data_ref = static_cast<RestartableData<T> &>(_app.registerRestartableData(
       full_name, std::move(data_ptr), 0, false, MooseApp::MESH_META_DATA));
 

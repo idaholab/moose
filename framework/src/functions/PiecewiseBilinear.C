@@ -108,7 +108,7 @@ PiecewiseBilinear::PiecewiseBilinear(const InputParameters & parameters)
       }
   }
 
-  _bilinear_interp = libmesh_make_unique<BilinearInterpolation>(x, y, z);
+  _bilinear_interp = std::make_unique<BilinearInterpolation>(x, y, z);
 }
 
 PiecewiseBilinear::~PiecewiseBilinear() {}

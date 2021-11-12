@@ -239,7 +239,7 @@ T &
 Restartable::declareRestartableDataWithContext(const std::string & data_name, void * context)
 {
   std::string full_name = _restartable_system_name + "/" + _restartable_name + "/" + data_name;
-  auto data_ptr = libmesh_make_unique<RestartableData<T>>(full_name, context);
+  auto data_ptr = std::make_unique<RestartableData<T>>(full_name, context);
 
   // See comment in overloaded version of this function with "init_value"
   auto & restartable_data_ref = static_cast<RestartableData<T> &>(
@@ -260,7 +260,7 @@ Restartable::declareRestartableDataWithContext(const std::string & data_name,
   // If it's already in use, the App will return a reference to the existing instance and we'll
   // return that one instead. We might refactor this to have the app create the RestartableData
   // at a later date.
-  auto data_ptr = libmesh_make_unique<RestartableData<T>>(full_name, context);
+  auto data_ptr = std::make_unique<RestartableData<T>>(full_name, context);
   auto & restartable_data_ref = static_cast<RestartableData<T> &>(
       registerRestartableDataOnApp(full_name, std::move(data_ptr), _restartable_tid));
 

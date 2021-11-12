@@ -20,7 +20,6 @@
 #include "RankFourTensor.h"
 #include "ColumnMajorMatrix.h"
 
-#include "libmesh/auto_ptr.h" // libmesh_make_unique
 #include "libmesh/parallel.h"
 #include "libmesh/parameters.h"
 

@@ -58,7 +58,7 @@ AccumulateReporter::declareAccumulateHelper(const ReporterName & rname)
   std::vector<T> & acc_val =
       declareValueByName<std::vector<T>>(rname.getObjectName() + ":" + rname.getValueName(), rmode);
 
-  _accumulated_values.push_back(libmesh_make_unique<AccumulatedValue<T>>(val, acc_val));
+  _accumulated_values.push_back(std::make_unique<AccumulatedValue<T>>(val, acc_val));
   return true;
 }
 

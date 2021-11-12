@@ -440,7 +440,7 @@ MooseApp::MooseApp(InputParameters parameters)
   Registry::addKnownLabel(_type);
   Moose::registerAll(_factory, _action_factory, _syntax);
 
-  _the_warehouse = libmesh_make_unique<TheWarehouse>();
+  _the_warehouse = std::make_unique<TheWarehouse>();
   _the_warehouse->registerAttribute<AttribMatrixTags>("matrix_tags", 0);
   _the_warehouse->registerAttribute<AttribVectorTags>("vector_tags", 0);
   _the_warehouse->registerAttribute<AttribExecOns>("exec_ons", 0);
@@ -461,7 +461,7 @@ MooseApp::MooseApp(InputParameters parameters)
     int argc = getParam<int>("_argc");
     char ** argv = getParam<char **>("_argv");
 
-    _sys_info = libmesh_make_unique<SystemInfo>(argc, argv);
+    _sys_info = std::make_unique<SystemInfo>(argc, argv);
   }
   if (isParamValid("_command_line"))
     _command_line = getParam<std::shared_ptr<CommandLine>>("_command_line");
@@ -2526,12 +2526,12 @@ MooseApp::createRecoverablePerfGraph()
   registerRestartableNameWithFilter("perf_graph", Moose::RESTARTABLE_FILTER::RECOVERABLE);
 
   auto perf_graph =
-      libmesh_make_unique<RestartableData<PerfGraph>>("perf_graph",
-                                                      this,
-                                                      type() + " (" + name() + ')',
-                                                      *this,
-                                                      getParam<bool>("perf_graph_live_all"),
-                                                      !getParam<bool>("disable_perf_graph_live"));
+      std::make_unique<RestartableData<PerfGraph>>("perf_graph",
+                                                   this,
+                                                   type() + " (" + name() + ')',
+                                                   *this,
+                                                   getParam<bool>("perf_graph_live_all"),
+                                                   !getParam<bool>("disable_perf_graph_live"));
 
   return dynamic_cast<RestartableData<PerfGraph> &>(
              registerRestartableData("perf_graph", std::move(perf_graph), 0, false))

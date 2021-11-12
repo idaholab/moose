@@ -18,8 +18,6 @@
 
 #include "DualRealOps.h"
 
-#include "libmesh/auto_ptr.h" // libmesh_make_unique
-
 #include <limits>
 #include <string>
 #include <cmath>
@@ -98,7 +96,7 @@ ADSingleVariableReturnMappingSolution::returnMappingSolve(const ADReal & effecti
   // construct the stringstream here only if the debug level is set to ALL
   std::unique_ptr<std::stringstream> iter_output =
       (_internal_solve_output_on == InternalSolveOutput::ALWAYS)
-          ? libmesh_make_unique<std::stringstream>()
+          ? std::make_unique<std::stringstream>()
           : nullptr;
 
   // do the internal solve and capture iteration info during the first round
@@ -116,7 +114,7 @@ ADSingleVariableReturnMappingSolution::returnMappingSolve(const ADReal & effecti
 
     // user expects some kind of output, if necessary setup output stream now
     if (!iter_output)
-      iter_output = libmesh_make_unique<std::stringstream>();
+      iter_output = std::make_unique<std::stringstream>();
 
     // add the appropriate error message to the output
     switch (solve_state)
