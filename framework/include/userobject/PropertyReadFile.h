@@ -21,7 +21,8 @@ enum class ReadTypeEnum
   ELEMENT = 0,
   VORONOI = 1,
   BLOCK = 2,
-  NODE = 3
+  NODE = 3,
+  GRAIN = 1
 };
 
 /**

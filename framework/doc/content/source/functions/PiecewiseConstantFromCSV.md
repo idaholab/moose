@@ -5,7 +5,7 @@
 ## Description
 
 The `PiecewiseConstantFromCSV` function is used to load data from a CSV file into a function. The
-[ElementPropertyReadFile.md] user object takes care of reading the CSV file, and the function queries
+[PropertyReadFile.md] user object takes care of reading the CSV file, and the function queries
 information from it.
 
 It can assume CSV data

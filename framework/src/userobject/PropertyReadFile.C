@@ -33,7 +33,7 @@ PropertyReadFile::validParams()
       "ngrain", "Number of grains.", "ngrain is deprecated, use nvoronoi instead");
   params.addParam<unsigned int>("nblock", 0, "Number of blocks");
   params.addRequiredParam<MooseEnum>("read_type",
-                                     MooseEnum("element voronoi block node"),
+                                     MooseEnum("element voronoi block node grain"),
                                      "Type of property distribution: "
                                      "element:by element "
                                      "node: by node "
