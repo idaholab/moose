@@ -47,8 +47,8 @@ C     ELASTIC PROPERTIES
       EBULK3=EMOD/(ONE-TWO*ENU)
       EG2=EMOD/(ONE+ENU)
       EG=EG2/TWO
+      EG3=THREE*EG
       ELAM=(EBULK3-EG2)/THREE
-
 C
 C     ELASTIC STIFFNESS
 C
@@ -63,7 +63,6 @@ C
       END DO
 C
 C     CALCULATE STRESS
-C     compute stress using a stress increment from a strain increment
 C
       DO K1=1, NTENS
          DO K2=1, NTENS
@@ -71,5 +70,14 @@ C
          END DO
       END DO
 C
+C     CONTROL TIME STEP
+C
+      TIME_STEP_REF = 0.75D0
+      IF (DTIME>TIME_STEP_REF) THEN
+        PNEWDT = 0.5D0
+      ELSE
+        PNEWDT = 2.0D0
+      ENDIF
+
       RETURN
       END

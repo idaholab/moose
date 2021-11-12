@@ -1,0 +1,26 @@
+[Tests]
+  issues = '#14974'
+  design = 'AbaqusUMATStress.md'
+  [gap_heat_transfer_umat]
+    type = 'Exodiff'
+    input = 'gap_heat_transfer_umat.i'
+    cli_args = "Materials/active='umat heat density'"
+    exodiff = 'gap_heat_transfer_umat_out.e'
+    library_mode = 'DYNAMIC'
+    valgrind = 'NONE'
+    requirement = 'The Abaqus UMAT interface shall produce the same results (stress, strain, '
+                  'displacements, and temperature) as the built-in MOOSE capabilities for a '
+                  'thermomechanical problem where temperature is a variable and affects material '
+                  'stiffness significantly '
+  []
+  [gap_heat_transfer_umat_reference]
+    type = 'Exodiff'
+    input = 'gap_heat_transfer_umat.i'
+    cli_args = "Materials/active='elasticity_tensor temp_dependent_elasticity_tensor stress "
+               "prefactor_material_block heat density'"
+    exodiff = 'gap_heat_transfer_umat_out.e'
+    requirement = 'MOOSE shall avoid regression in a simple thermomechanical problem where '
+                  'temperature is a variable, which is used as a reference for verification of the '
+                  'UMAT interface'
+  []
+[]

@@ -1,4 +1,4 @@
-# Testing the UMAT Interface - creep linear strain hardening model using the finite strain formulation - visco-plastic material.
+# Testing the UMAT Interface - linear elastic model using the large strain formulation.
 
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
@@ -59,12 +59,25 @@
 []
 
 [Materials]
-  [constant]
+  # this input file is used to compare the MOOSE and UMAT models, activating
+  # specific ones with cli args.
+
+  # 1. active for umat calculation
+  [umat]
     type = AbaqusUMATStress
-    #                      Young's modulus,  Poisson's Ratio, Yield, Hardening
-    constant_properties = '1000 0.3 10 100'
-    plugin = ../../plugins/linear_strain_hardening
-    num_state_vars = 3
+    constant_properties = '1000 0.3'
+    plugin = '../../../plugins/elastic'
+    num_state_vars = 0
+  []
+
+  # 2. active for moose built-in finite strain elasticity reference
+  [elastic]
+    type = ComputeIsotropicElasticityTensor
+    youngs_modulus = 1000
+    poissons_ratio = 0.3
+  []
+  [stress]
+    type = ComputeFiniteStrainElasticStress
   []
 []
 
@@ -96,8 +109,5 @@
 []
 
 [Outputs]
-  [out]
-    type = Exodus
-    elemental_as_nodal = true
-  []
+  exodus = true
 []

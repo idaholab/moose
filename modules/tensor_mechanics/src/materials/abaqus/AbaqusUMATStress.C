@@ -12,10 +12,9 @@
 #include "MooseMesh.h"
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
-
-#ifdef LIBMESH_HAVE_DLOPEN
-#include <dlfcn.h>
-#endif
+#include "libmesh/int_range.h"
+#include <string.h>
+#include <algorithm>
 
 #define QUOTE(macro) stringifyName(macro)
 
@@ -32,12 +31,23 @@ AbaqusUMATStress::validParams()
       "constant_properties", "Constant mechanical and thermal material properties (PROPS)");
   params.addRequiredParam<unsigned int>("num_state_vars",
                                         "The number of state variables this UMAT is going to use");
+  params.addCoupledVar("temperature", 0.0, "Coupled temperature");
+
+  params.addCoupledVar("external_fields",
+                       "The external fields that can be used in the UMAT subroutine");
+  params.addParam<std::vector<MaterialPropertyName>>("external_properties", "");
   return params;
 }
+
+#ifndef METHOD
+#error "The METHOD preprocessor symbol must be supplied by the build system."
+#endif
 
 AbaqusUMATStress::AbaqusUMATStress(const InputParameters & parameters)
   : ComputeStressBase(parameters),
     _plugin(getParam<FileName>("plugin")),
+    _library(_plugin + std::string("-") + QUOTE(METHOD) + ".plugin"),
+    _umat(_library.getFunction<umat_t>("umat_")),
     _aqNSTATV(getParam<unsigned int>("num_state_vars")),
     _aqSTATEV(_aqNSTATV),
     _aqPROPS(getParam<std::vector<Real>>("constant_properties")),
@@ -53,12 +63,24 @@ AbaqusUMATStress::AbaqusUMATStress(const InputParameters & parameters)
     _elastic_strain_energy(declareProperty<Real>(_base_name + "elastic_strain_energy")),
     _plastic_dissipation(declareProperty<Real>(_base_name + "plastic_dissipation")),
     _creep_dissipation(declareProperty<Real>(_base_name + "creep_dissipation")),
-    _material_timestep(declareProperty<Real>(_base_name + "material_timestep_limit"))
+    _material_timestep(declareProperty<Real>(_base_name + "material_timestep_limit")),
+    _rotation_increment(getMaterialProperty<RankTwoTensor>(_base_name + "rotation_increment")),
+    _temperature(coupledValue("temperature")),
+    _temperature_old(coupledValueOld("temperature")),
+    _external_fields(coupledValues("external_fields")),
+    _external_fields_old(coupledValuesOld("external_fields")),
+    _number_external_fields(_external_fields.size()),
+    _external_property_names(getParam<std::vector<MaterialPropertyName>>("external_properties")),
+    _number_external_properties(_external_property_names.size()),
+    _external_properties(_number_external_properties),
+    _external_properties_old(_number_external_properties)
 {
-#ifndef METHOD
-#error "The METHOD preprocessor symbol must be supplied by the build system."
-#endif
-  _plugin += std::string("-") + QUOTE(METHOD) + ".plugin";
+  // get material properties
+  for (std::size_t i = 0; i < _number_external_properties; ++i)
+  {
+    _external_properties[i] = &getMaterialProperty<Real>(_external_property_names[i]);
+    _external_properties_old[i] = &getMaterialPropertyOld<Real>(_external_property_names[i]);
+  }
 
   // Read mesh dimension and size UMAT arrays (we always size for full 3D)
   _aqNTENS = 6; // Size of the stress or strain component array (NDI+NSHR)
@@ -70,50 +92,19 @@ AbaqusUMATStress::AbaqusUMATStress(const InputParameters & parameters)
   _aqSTRAN.resize(_aqNTENS);
   _aqDFGRD0.resize(9);
   _aqDFGRD1.resize(9);
+  _aqDROT.resize(9);
   _aqSTRESS.resize(_aqNTENS);
   _aqDDSDDE.resize(_aqNTENS * _aqNTENS);
   _aqDSTRAN.resize(_aqNTENS);
-
-  // Open the library
-#ifdef LIBMESH_HAVE_DLOPEN
-  _handle = dlopen(_plugin.c_str(), RTLD_LAZY);
-
-  if (!_handle)
-    paramError("plugin", "Cannot open library: ", dlerror());
-
-  // Reset errors
-  dlerror();
-
-  // Snag the function pointer from the library
-  {
-    void * pointer = dlsym(_handle, "umat_");
-    _umat = *reinterpret_cast<umat_t *>(&pointer);
-  }
-
-  // Catch errors
-  const char * dlsym_error = dlerror();
-  if (dlsym_error)
-  {
-    dlclose(_handle);
-    paramError("plugin", "Cannot load symbol 'umat_': ", dlsym_error);
-  }
-#else
-  paramError("plugin",
-             "AbaqusUMATStress requires an operating system with support for the POSIX function "
-             "'dlopen' to dynamically load UMAT plugins.");
-#endif
-}
-
-AbaqusUMATStress::~AbaqusUMATStress()
-{
-#ifdef LIBMESH_HAVE_DLOPEN
-  dlclose(_handle);
-#endif
+  _aqPREDEF.resize(_number_external_fields + _number_external_properties);
+  _aqDPRED.resize(_number_external_fields + _number_external_properties);
 }
 
 void
 AbaqusUMATStress::initQpStatefulProperties()
 {
+  ComputeStressBase::initQpStatefulProperties();
+
   // Initialize state variable vector
   _state_var[_qp].resize(_aqNSTATV);
   for (int i = 0; i < _aqNSTATV; ++i)
@@ -127,16 +118,20 @@ AbaqusUMATStress::computeProperties()
   _aqNOEL = _current_elem->id();
 
   // characteristic element length
-  // TODO: check what Abaqus actually passes in here (likely ~ element_volume^(1/element_dim))
-  _aqCELENT = std::numeric_limits<Real>::signaling_NaN();
+  _aqCELENT = std::pow(_current_elem->volume(), 1.0 / _current_elem->dim());
 
-  // Value of step time at the beginning of the current increment - Check
-  _aqTIME[0] = _t;
-  // Value of total time at the beginning of the current increment - Check
+  // For now, total time and step time mean the exact same thing
+  // Value of step time at the beginning of the current increment
+  _aqTIME[0] = _t - _dt;
+  // Value of total time at the beginning of the current increment
   _aqTIME[1] = _t - _dt;
 
   // Time increment
   _aqDTIME = _dt;
+
+  // Fill unused characters with spaces (Fortran)
+  std::fill(_aqCMNAME, _aqCMNAME + 80, ' ');
+  std::memcpy(_aqCMNAME, name().c_str(), name().size());
 
   ComputeStressBase::computeProperties();
 }
@@ -146,11 +141,14 @@ AbaqusUMATStress::computeQpStress()
 {
   const Real * myDFGRD0 = &(_Fbar_old[_qp](0, 0));
   const Real * myDFGRD1 = &(_Fbar[_qp](0, 0));
+  const Real * myDROT = &(_rotation_increment[_qp](0, 0));
+
   // copy because UMAT does not guarantee constness
   for (unsigned int i = 0; i < 9; ++i)
   {
     _aqDFGRD0[i] = myDFGRD0[i];
     _aqDFGRD1[i] = myDFGRD1[i];
+    _aqDROT[i] = myDROT[i];
   }
 
   // Recover "old" state variables
@@ -161,6 +159,7 @@ AbaqusUMATStress::computeQpStress()
   static const std::array<Real, 6> strain_factor{{1, 1, 1, 2, 2, 2}};
   static const std::array<std::pair<unsigned int, unsigned int>, 6> component{
       {{0, 0}, {1, 1}, {2, 2}, {1, 2}, {0, 2}, {0, 1}}};
+
   for (int i = 0; i < _aqNTENS; ++i)
   {
     _aqSTRESS[i] = _stress_old[_qp](component[i].first, component[i].second);
@@ -178,8 +177,43 @@ AbaqusUMATStress::computeQpStress()
   for (int i = 0; i < _aqNTENS * _aqNTENS; ++i)
     _aqDDSDDE[i] = 0.0;
 
-  // set PNEWDT to a large value
+  // Set PNEWDT initially to a large value
   _aqPNEWDT = std::numeric_limits<Real>::max();
+
+  // Temperature
+  _aqTEMP = _temperature_old[_qp];
+
+  // Temperature increment
+  _aqDTEMP = _temperature[_qp] - _temperature_old[_qp];
+
+  for (const auto i : make_range(_number_external_fields))
+  {
+    // External field at this step
+    _aqPREDEF[i] = (*_external_fields_old[i])[_qp];
+
+    // External field increments
+    _aqDPRED[i] = (*_external_fields[i])[_qp] - (*_external_fields_old[i])[_qp];
+  }
+
+  for (const auto i : make_range(_number_external_properties))
+  {
+    // External property at this step
+    _aqPREDEF[i + _number_external_fields] = (*_external_properties_old[i])[_qp];
+
+    // External property increments
+    _aqDPRED[i + _number_external_fields] =
+        (*_external_properties[i])[_qp] - (*_external_properties_old[i])[_qp];
+  }
+
+  // Layer number (not supported)
+  _aqLAYER = -1;
+
+  // Section point number within the layer (not supported)
+  _aqKSPT = -1;
+
+  // Increment number
+  _aqKINC = _t_step;
+  _aqKSTEP = 1;
 
   // Connection to extern statement
   _umat(_aqSTRESS.data(),
@@ -198,8 +232,8 @@ AbaqusUMATStress::computeQpStress()
         &_aqDTIME,
         &_aqTEMP,
         &_aqDTEMP,
-        &_aqPREDEF,
-        &_aqDPRED,
+        _aqPREDEF.data(),
+        _aqDPRED.data(),
         _aqCMNAME,
         &_aqNDI,
         &_aqNSHR,
@@ -217,19 +251,24 @@ AbaqusUMATStress::computeQpStress()
         &_qp,
         &_aqLAYER,
         &_aqKSPT,
-        &_t_step,
+        &_aqKSTEP,
         &_aqKINC);
 
   // Update state variables
   for (int i = 0; i < _aqNSTATV; ++i)
     _state_var[_qp][i] = _aqSTATEV[i];
 
-  // determine the material timestep
-  _material_timestep[_qp] = _aqPNEWDT < 1.0 ? _aqPNEWDT * _dt : std::numeric_limits<Real>::max();
+  // Here, we apply UMAT convention: Always multiply _dt by PNEWDT to determine the material time
+  // step MOOSE time stepper will choose the most limiting of all material time step increments
+  // provided
+  _material_timestep[_qp] = _aqPNEWDT * _dt;
 
   // Get new stress tensor - UMAT should update stress
   _stress[_qp] = RankTwoTensor(
       _aqSTRESS[0], _aqSTRESS[1], _aqSTRESS[2], _aqSTRESS[3], _aqSTRESS[4], _aqSTRESS[5]);
+
+  // Rotate the stress state to the current configuration
+  _stress[_qp].rotate(_rotation_increment[_qp]);
 
   // use DDSDDE as Jacobian mult
   _jacobian_mult[_qp].fillSymmetric21FromInputVector(std::array<Real, 21>{{

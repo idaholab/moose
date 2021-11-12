@@ -10,44 +10,7 @@
 #pragma once
 
 #include "ComputeStressBase.h"
-
-typedef void (*umat_t)(Real STRESS[],
-                       Real STATEV[],
-                       Real DDSDDE[],
-                       Real * SSE,
-                       Real * SPD,
-                       Real * SCD,
-                       Real * RPL,
-                       Real DDSDDT[],
-                       Real DRPLDE[],
-                       Real * DRPLDT,
-                       Real STRAN[],
-                       Real DSTRAN[],
-                       Real TIME[],
-                       Real * DTIME,
-                       Real * TEMP,
-                       Real * DTEMP,
-                       Real PREDEF[],
-                       Real DPRED[],
-                       char * CMNAME,
-                       int * NDI,
-                       int * NSHR,
-                       int * NTENS,
-                       int * NSTATV,
-                       Real PROPS[],
-                       int * NPROPS,
-                       Real COORDS[],
-                       Real DROT[],
-                       Real * PNEWDT,
-                       Real * CELENT,
-                       Real DFGRD0[],
-                       Real DFGRD1[],
-                       int * NOEL,
-                       unsigned int * NPT,
-                       int * LAYER,
-                       int * KSPT,
-                       int * KSTEP,
-                       int * KINC);
+#include "DynamicLibraryLoader.h"
 
 /**
  * Coupling material to use Abaqus UMAT models in MOOSE
@@ -58,17 +21,55 @@ public:
   static InputParameters validParams();
 
   AbaqusUMATStress(const InputParameters & parameters);
-  virtual ~AbaqusUMATStress();
 
   /// perform per-element computation/initialization
   void computeProperties() override;
 
 protected:
+  /// function type for the external UMAT function
+  typedef void (*umat_t)(Real STRESS[],
+                         Real STATEV[],
+                         Real DDSDDE[],
+                         Real * SSE,
+                         Real * SPD,
+                         Real * SCD,
+                         Real * RPL,
+                         Real DDSDDT[],
+                         Real DRPLDE[],
+                         Real * DRPLDT,
+                         Real STRAN[],
+                         Real DSTRAN[],
+                         Real TIME[],
+                         Real * DTIME,
+                         Real * TEMP,
+                         Real * DTEMP,
+                         Real PREDEF[],
+                         Real DPRED[],
+                         char * CMNAME,
+                         int * NDI,
+                         int * NSHR,
+                         int * NTENS,
+                         int * NSTATV,
+                         Real PROPS[],
+                         int * NPROPS,
+                         Real COORDS[],
+                         Real DROT[],
+                         Real * PNEWDT,
+                         Real * CELENT,
+                         Real DFGRD0[],
+                         Real DFGRD1[],
+                         int * NOEL,
+                         unsigned int * NPT,
+                         int * LAYER,
+                         int * KSPT,
+                         int * KSTEP,
+                         int * KINC);
+
   // The plugin file name
   FileName _plugin;
 
-  // The plugin library handle
-  void * _handle;
+  // The plugin library wrapper
+  DynamicLibraryLoader _library;
 
   // Function pointer to the dynamically loaded function
   umat_t _umat;
@@ -104,7 +105,7 @@ protected:
   /// Characteristic element length, which is a typical length of a line across an element for a first-order element (unused, set to 1)
   Real _aqCELENT;
 
-  /// model name buffer
+  /// Model name buffer
   char _aqCMNAME[80];
 
   /// Number of direct stress components at this point
@@ -122,13 +123,17 @@ protected:
   /// Element number
   int _aqNOEL;
 
-  /// Layer number (for composite shells and layered solids). (unused)
+  /// Layer number (for composite shells and layered solids). (not supported)
   int _aqLAYER;
 
-  /// Section point number within the current layer. (unused)
+  /// Section point number within the current layer. (not supported)
   int _aqKSPT;
 
-  /// Increment number (unused)
+  /// The step number (as per Abaqus definition) can be set by the user
+  int _aqKSTEP;
+
+  /// Increment number (_t_step). This can be supported. The step number (as per Abaqus definition)
+  /// is not supported by MOOSE.
   int _aqKINC;
 
   // An array containing the solution-dependent state variables
@@ -172,16 +177,16 @@ protected:
   std::array<Real, 3> _aqCOORDS;
 
   /// Rotation increment matrix
-  std::array<Real, 3 * 3> _aqDROT;
+  std::vector<Real> _aqDROT;
 
   /// User-defined number of material constants associated with this user material.
   int _aqNPROPS;
 
   /// Array of interpolated values of predefined field variables at this point at the start of the increment, based on the values read in at the nodes.
-  Real _aqPREDEF;
+  std::vector<Real> _aqPREDEF;
 
   /// Array of increments of predefined field variables
-  Real _aqDPRED;
+  std::vector<Real> _aqDPRED;
 
   void initQpStatefulProperties() override;
   void computeQpStress() override;
@@ -205,4 +210,26 @@ protected:
 
   /// recommended maximum timestep for this model under the current conditions
   MaterialProperty<Real> & _material_timestep;
+
+  // Time step rotation increment
+  const MaterialProperty<RankTwoTensor> & _rotation_increment;
+
+  // Coupled temperature field
+  const VariableValue & _temperature;
+  const VariableValue & _temperature_old;
+
+  // Coupled user-defined field
+  const std::vector<const VariableValue *> _external_fields;
+  const std::vector<const VariableValue *> _external_fields_old;
+
+  // External field names
+  std::vector<VariableName> _external_field_names;
+
+  // Number of external fields provided by the user
+  const std::size_t _number_external_fields;
+
+  const std::vector<MaterialPropertyName> _external_property_names;
+  const std::size_t _number_external_properties;
+  std::vector<const MaterialProperty<Real> *> _external_properties;
+  std::vector<const MaterialProperty<Real> *> _external_properties_old;
 };
