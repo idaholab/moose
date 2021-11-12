@@ -49,10 +49,14 @@ protected:
   RankTwoTensor trialGrad(unsigned int k);
 
 private:
-  // *** Base kernel ***
-
   /// The material part of the Jacobian
   Real materialJacobian(const RankTwoTensor & grad_test, const RankTwoTensor & grad_trial);
+
+  /// Off diagonal Jacobian coming through eigenstrain
+  Real eigenstrainJacobianComponent(unsigned int cvar,
+                                    const RankFourTensor & C,
+                                    const RankTwoTensor & grad_test,
+                                    const Real & phi);
 
   /// Calculate the average gradient of some type (test or trial)
   void avgGrad(const VariablePhiGradient & grads, std::vector<RealVectorValue> & res);
@@ -75,4 +79,10 @@ protected:
 
   /// The element-average deformation gradient
   const MaterialProperty<RankTwoTensor> & _aF;
+
+  /// The inverse increment deformation gradient
+  const MaterialProperty<RankTwoTensor> & _inv_inc_def_grad;
+
+  /// The actual (stabilized) deformation gradient
+  const MaterialProperty<RankTwoTensor> & _def_grad;
 };

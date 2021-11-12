@@ -72,11 +72,19 @@ UpdatedLagrangianStressDivergence::computeQpOffDiagJacobian(unsigned int jvar)
                                     _inv_inc_def_grad[_qp]);
       if (_large_kinematics)
         value += geomJacobianComponent(testGrad(_component), trialGrad(cc, false), _stress[_qp]);
-      break;
+      return value;
     }
   }
 
-  return value;
+  // Bail if jvar not coupled
+  if (getJvarMap()[jvar] < 0)
+    return 0.0;
+
+  // Off diagonal temperature term due to eigenstrain
+  return eigenstrainJacobianComponent(mapJvarToCvar(jvar),
+                                      _material_jacobian[_qp],
+                                      testGrad(_component),
+                                      _temperature->phi()[_j][_qp]);
 }
 
 void
@@ -102,6 +110,22 @@ UpdatedLagrangianStressDivergence::geomJacobianComponent(const RankTwoTensor & g
 {
   return stress.doubleContraction(grad_test) * grad_trial.trace() -
          stress.doubleContraction(grad_test * grad_trial);
+}
+
+Real
+UpdatedLagrangianStressDivergence::eigenstrainJacobianComponent(unsigned int cvar,
+                                                                const RankFourTensor & C,
+                                                                const RankTwoTensor & grad_test,
+                                                                const Real & phi)
+{
+  // Multiple eigenstrains may depend on the same coupled var
+  RankTwoTensor total_deigen;
+  for (const auto deigen_darg : _deigenstrain_dargs[cvar])
+    total_deigen += (*deigen_darg)[_qp];
+
+  // This one is the same for both small and large deformations
+  RankFourTensor Csym = 0.5 * (C + C.transposeMajor().transposeIj().transposeMajor());
+  return -(Csym * total_deigen).doubleContraction(grad_test) * phi;
 }
 
 RankTwoTensor

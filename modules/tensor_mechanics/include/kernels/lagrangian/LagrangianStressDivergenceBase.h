@@ -10,6 +10,8 @@
 #pragma once
 
 #include "Kernel.h"
+#include "DerivativeMaterialInterface.h"
+#include "JvarMapInterface.h"
 #include "RankFourTensorForward.h"
 #include "RankTwoTensorForward.h"
 #include "libmesh/vector_value.h"
@@ -24,7 +26,8 @@
 /// This class provides common input properties and helper methods,
 /// most of the math has to be done in the subclasses
 ///
-class LagrangianStressDivergenceBase : public Kernel
+class LagrangianStressDivergenceBase
+  : public JvarMapKernelInterface<DerivativeMaterialInterface<Kernel>>
 {
 public:
   static InputParameters validParams();
@@ -73,4 +76,10 @@ protected:
 
   /// The displacement numbers
   std::vector<unsigned int> _disp_nums;
+
+  /// Temperature, if provided.  This is used only to get the trial functions
+  MooseVariable * _temperature;
+
+  /// Eigenstrain derivatives wrt generate coupleds
+  std::vector<std::vector<const MaterialProperty<RankTwoTensor> *>> _deigenstrain_dargs;
 };

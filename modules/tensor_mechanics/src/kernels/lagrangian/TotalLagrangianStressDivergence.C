@@ -22,7 +22,9 @@ TotalLagrangianStressDivergence::TotalLagrangianStressDivergence(const InputPara
     _avg_grad_trial(_grad_phi.size()),
     _unstabilized_def_grad(
         getMaterialPropertyByName<RankTwoTensor>(_base_name + "unstabilized_deformation_gradient")),
-    _aF(getMaterialPropertyByName<RankTwoTensor>(_base_name + "avg_deformation_gradient"))
+    _aF(getMaterialPropertyByName<RankTwoTensor>(_base_name + "avg_deformation_gradient")),
+    _inv_inc_def_grad(getMaterialPropertyByName<RankTwoTensor>(_base_name + "inv_inc_def_grad")),
+    _def_grad(getMaterialPropertyByName<RankTwoTensor>(_base_name + "deformation_gradient"))
 {
 }
 
@@ -45,7 +47,13 @@ TotalLagrangianStressDivergence::computeQpOffDiagJacobian(unsigned int jvar)
     if (jvar == _disp_nums[cc])
       return materialJacobian(testGrad(_component), trialGrad(cc));
 
-  return 0;
+  // Bail if jvar not coupled
+  if (getJvarMap()[jvar] < 0)
+    return 0.0;
+
+  // Off diagonal temperature term due to eigenstrain
+  return eigenstrainJacobianComponent(
+      mapJvarToCvar(jvar), _dpk1[_qp], testGrad(_component), _temperature->phi()[_j][_qp]);
 }
 
 void
@@ -80,6 +88,36 @@ TotalLagrangianStressDivergence::materialJacobian(const RankTwoTensor & grad_tes
                                                   const RankTwoTensor & grad_trial)
 {
   return grad_test.doubleContraction(_dpk1[_qp] * grad_trial);
+}
+
+Real
+TotalLagrangianStressDivergence::eigenstrainJacobianComponent(unsigned int cvar,
+                                                              const RankFourTensor & C,
+                                                              const RankTwoTensor & grad_test,
+                                                              const Real & phi)
+{
+  // Multiple eigenstrains may depend on the same coupled var
+  RankTwoTensor total_deigen;
+  for (const auto deigen_darg : _deigenstrain_dargs[cvar])
+    total_deigen += (*deigen_darg)[_qp];
+
+  // This kernel needs a switch on large versus small deformations
+  RankTwoTensor A;
+  RankTwoTensor B;
+  if (_large_kinematics)
+  {
+    A = RankTwoTensor::Identity();
+    B = RankTwoTensor::Identity();
+  }
+  else
+  {
+    A = _inv_inc_def_grad[_qp].inverse();
+    B = _def_grad[_qp];
+  }
+
+  RankFourTensor U = 0.5 * (A.mixedProductIkJl(B.transpose()) + A.mixedProductIlJk(B.transpose()));
+
+  return -(C * U * total_deigen).doubleContraction(grad_test) * phi;
 }
 
 RankTwoTensor

@@ -150,6 +150,8 @@ ComputeLagrangianStrain::calculateIncrementalStrains(const RankTwoTensor & L)
   _total_strain[_qp] = _total_strain_old[_qp] + _strain_increment[_qp];
 
   // Get rid of the eigenstrains
+  // Note we currently do not alter the deformation gradient -- this will be
+  // needed in the future for a "complete" system
   subtractEigenstrainIncrement(_strain_increment[_qp]);
 
   // Increment the mechanical strain

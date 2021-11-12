@@ -64,6 +64,12 @@ private:
                              const RankTwoTensor & grad_trial,
                              const RankTwoTensor & stress);
 
+  /// Off diagonal Jacobian coming through eigenstrain
+  Real eigenstrainJacobianComponent(unsigned int cvar,
+                                    const RankFourTensor & C,
+                                    const RankTwoTensor & grad_test,
+                                    const Real & phi);
+
   /// Compute the average trial function gradient
   void computeAverageGradTrial();
 

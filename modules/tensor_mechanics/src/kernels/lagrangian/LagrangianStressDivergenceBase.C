@@ -18,12 +18,21 @@ LagrangianStressDivergenceBase::validParams()
                                                     "An integer corresponding to the direction "
                                                     "the variable this kernel acts in. (0 for x, "
                                                     "1 for y, 2 for z)");
+  params.addCoupledVar("temperature",
+                       "The name of the temperature variable used in the "
+                       "ComputeThermalExpansionEigenstrain.  (Not required for "
+                       "simulations without temperature coupling.)");
+
+  params.addParam<std::vector<MaterialPropertyName>>(
+      "eigenstrain_names",
+      "List of eigenstrains used in the strain calculation. Used for computing their derivatives "
+      "for off-diagonal Jacobian terms.");
 
   return params;
 }
 
 LagrangianStressDivergenceBase::LagrangianStressDivergenceBase(const InputParameters & parameters)
-  : Kernel(parameters),
+  : JvarMapKernelInterface<DerivativeMaterialInterface<Kernel>>(parameters),
     _large_kinematics(getParam<bool>("large_kinematics")),
     _stabilize_strain(getParam<bool>("stabilize_strain")),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
@@ -43,6 +52,18 @@ LagrangianStressDivergenceBase::LagrangianStressDivergenceBase(const InputParame
       mooseError("The Lagrangian StressDivergence kernels require equal "
                  "order interpolation for all displacements.");
   }
+
+  // Get the temperature, if coupled
+  if (isCoupled("temperature"))
+    _temperature = getVar("temperature", 0);
+
+  // fetch eigenstrain derivatives
+  const auto nvar = _coupled_moose_vars.size();
+  _deigenstrain_dargs.resize(nvar);
+  for (std::size_t i = 0; i < nvar; ++i)
+    for (auto eigenstrain_name : getParam<std::vector<MaterialPropertyName>>("eigenstrain_names"))
+      _deigenstrain_dargs[i].push_back(&getMaterialPropertyDerivative<RankTwoTensor>(
+          eigenstrain_name, _coupled_moose_vars[i]->name()));
 }
 
 void
