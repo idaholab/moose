@@ -22,6 +22,15 @@ public:
 
   ParallelSubsetSimulation(const InputParameters & parameters);
 
+  /// Access the number samples per subset
+  const int & getNumSamplesSub() const;
+
+  /// Access use absolute value bool
+  const bool & getUseAbsoluteValue() const;
+
+  /// Access the subset probability
+  const Real & getSubsetProbability() const;
+
 protected:
   /// Return the sample for the given row and column
   virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) override;
@@ -29,32 +38,22 @@ protected:
   /// Storage for distribution objects to be utilized
   std::vector<Distribution const *> _distributions;
 
-  /// Distribution names
-  const std::vector<DistributionName> & _distribution_names;
-
-  // const std::vector<ReporterName> & _inputs_names;
-
   const int & _num_samplessub;
 
   const bool & _use_absolute_value;
+
   const Real & _subset_probability;
+
+  /// Initialize a certain number of random seeds. Change from the default only if you have to.
+  const unsigned int & _num_random_seeds;
+
+private:
 
   std::vector<std::vector<Real>> _inputs_sto;
 
   std::vector<Real> _outputs_sto;
 
-private:
-
-  // std::vector<Real> _data_rep;
-
-  // const std::vector<Real> & _vector;
-
-  // std::vector<Real> _new_sample_vec;
   std::vector<std::vector<Real>> _new_sample_vec;
-
-  std::vector<Real> _proposal_std;
-
-  Real count2;
 
   Real _acceptance_ratio;
 
@@ -67,19 +66,19 @@ private:
   unsigned int _seed_value;
 
   int _ind_sto;
-  // std::vector<Real> _markov_seed;
+
   std::vector<std::vector<Real>> _markov_seed;
+
   unsigned int _count;
-  int _check_even;
+
+  int _check_step;
+
   unsigned int _count_max;
-  std::vector<Real> _output_sorted;
+
   std::vector<std::vector<Real>> _inputs_sorted;
 
   /// Storage of the previous sample to propose the next sample
   std::vector<Real> _prev_val;
 
   std::vector<Real> _output_limits;
-
-  /// PerfGraph timer
-  const PerfID _perf_compute_sample;
 };
