@@ -1,0 +1,9 @@
+[Tests]
+  [./traveling_wave_test]
+    type = Exodiff
+    input = double_obstacle_test.i
+    exodiff = double_obstacle_test_out.e
+    max_parallel = 1
+    issues = '#19302'
+  [../]
+[]

@@ -122,7 +122,7 @@
   solve_type = PJFNK
   petsc_options_iname = '-pc_type  -snes_type'
   petsc_options_value = 'lu vinewtonrsls'
-  end_time = 10
+  end_time = 1
   dt = 0.1
 []
 
