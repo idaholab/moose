@@ -11,6 +11,7 @@
 
 #include "GeneralReporter.h"
 #include "AdaptiveImportanceSampler.h"
+#include "ParallelSubsetSimulation.h"
 
 /**
  * AdaptiveMonteCarloDecision will help make sample accept/reject decisions in adaptive Monte Carlo
@@ -33,7 +34,7 @@ protected:
   std::vector<Real> & _output_required;
 
   /// Model input data that is uncertain
-  std::vector<Real> & _inputs;
+  std::vector<std::vector<Real>> & _inputs; // std::vector<Real> & _inputs;
 
 private:
   /// Track the current step of the main App
@@ -42,14 +43,43 @@ private:
   /// The adaptive Monte Carlo sampler
   Sampler & _sampler;
 
+  /// Adaptive Importance Sampler
   const AdaptiveImportanceSampler * const _ais;
+
+  /// Parallel Subset Simulation sampler
+  const ParallelSubsetSimulation * const _pss;
 
   /// Ensure that the MCMC algorithm proceeds in a sequential fashion
   int _check_step;
 
   /// Storage for previously accepted input values. This helps in making decision on the next proposed inputs.
-  std::vector<Real> _prev_val;
+  std::vector<std::vector<Real>> _prev_val; // std::vector<Real> _prev_val;
 
   /// Storage for previously accepted output value.
-  Real _prev_val_out;
+  std::vector<Real> _prev_val_out; // Real _prev_val_out;
+
+
+  // Begin SS variables
+
+  std::vector<Real> _Tmp;
+
+  int _ind_sto;
+
+  std::vector<Real> _markov_seed;
+
+  unsigned int _count;
+
+  unsigned int _count_max;
+
+  std::vector<Real> _output_sorted;
+
+  std::vector<std::vector<Real>> _inputs_sorted;
+
+  std::vector<std::vector<Real>> _inputs_sto;
+
+  std::vector<Real> _outputs_sto;
+
+  unsigned int _subset;
+
+  std::vector<Real> _output_limits;
 };

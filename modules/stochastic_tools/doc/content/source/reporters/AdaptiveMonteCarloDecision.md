@@ -24,6 +24,14 @@ The following adaptive Monte Carlo samplers have been implemented in MOOSE:
   scheme to sample sufficiently in the failure region given a model. See [AdaptiveImportanceSampler](AdaptiveImportanceSampler.md)
   for more information.
 
+- +Parallel Subset Simulation (PSS)+
+
+  PSS can be used for characterizing probabilistic failure or performing optimization under uncertainty
+  efficiently when dealing with expensive finite element models. This method works
+  by creating intermediate failure thresholds and using hundreds of Markov chains to
+  efficiently propagate to regions of the input parameter space that are most significant
+  for either failure characterization or optimization. See [ParallelSubsetSimulation](ParallelSubsetSimulation.md) for more information.
+
 !syntax parameters /Reporters/AdaptiveMonteCarloDecision
 
 !syntax inputs /Reporters/AdaptiveMonteCarloDecision
