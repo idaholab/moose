@@ -15,6 +15,8 @@ InputParameters
 NullExecutor::validParams()
 {
   InputParameters params = Executor::validParams();
+  params.addClassDescription(
+      "Dummy executor that does nothing. Useful for testing among other things.");
   return params;
 }
 
