@@ -837,7 +837,7 @@ MooseVariableFV<OutputType>::adGradSln(const Elem * const elem, const bool corre
 
   // We ensure that no caching takes place when we compute skewness-corrected
   // quantities.
-  if (_cache_face_values && !correct_skewness)
+  if (!correct_skewness)
   {
     auto pr = _elem_to_grad.emplace(elem, VectorValue<ADReal>());
 
