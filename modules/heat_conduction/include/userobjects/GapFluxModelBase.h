@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "ModularGapConductanceConstraint.h"
 #include "InterfaceUserObjectBase.h"
 
 /**
@@ -21,8 +22,23 @@ public:
 
   GapFluxModelBase(const InputParameters & parameters);
 
-  virtual ADReal computeFlux(const ADReal & gap_width, unsigned int qp) const = 0;
+  /**
+   * Cache geometry-related information from the mortar constraint
+   */
+  virtual const ADReal
+  computeFluxInternal(const ModularGapConductanceConstraint & mortar_constraint) const;
+
+  /**
+   * Compute gap physics used cache information in GapFluxModelBase
+   */
+  virtual ADReal computeFlux() const = 0;
 
   virtual void finalize() final{};
   virtual void threadJoin(const UserObject &) final{};
+
+protected:
+  mutable unsigned int _qp;
+  mutable ADReal _gap_width;
+  mutable ADReal _surface_integration_factor;
+  mutable ADReal _adjusted_length;
 };

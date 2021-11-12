@@ -13,6 +13,13 @@
 
 class GapFluxModelBase;
 
+enum class GapGeometry
+{
+  PLATE,
+  CYLINDER,
+  SPHERE,
+};
+
 /**
  * This Constraint implements thermal contact using a "gap
  * conductance" model in which the flux is represented by an
@@ -24,6 +31,8 @@ public:
   static InputParameters validParams();
 
   ModularGapConductanceConstraint(const InputParameters & parameters);
+
+  virtual void initialSetup() override;
 
 protected:
   /**
@@ -43,4 +52,47 @@ protected:
   std::vector<const ADVariableValue *> _disp_secondary;
   std::vector<const ADVariableValue *> _disp_primary;
   ///@}
+
+private:
+  virtual ADReal computeSurfaceIntegrationFactor() const;
+
+  virtual ADReal computeGapLength() const;
+
+  /**
+   * Computes radii as a function of point and geometry
+   */
+  void computeGapRadii(const ADReal & gap_length);
+
+  virtual void setGapGeometryParameters(const InputParameters & params,
+                                        const Moose::CoordinateSystemType coord_sys,
+                                        unsigned int axisymmetric_radial_coord,
+                                        GapGeometry & gap_geometry_type,
+                                        Point & p1,
+                                        Point & p2);
+
+  /// Gap width to pass into flux models
+  ADReal _gap_width;
+
+  /// Gap geometry (user input or internally overwritten)
+  GapGeometry _gap_geometry_type;
+
+  /// Factor to preserve energy balance (due to mismatch in primary/secondary differential surface sizes)
+  ADReal _surface_integration_factor;
+
+  ///@{ Points for geometric definitions
+  Point & _p1;
+  Point & _p2;
+  ///@}
+
+  ///@{ Radii for quadrature points
+  ADReal _r1;
+  ADReal _r2;
+  ADReal _radius;
+  ///@}
+
+  const Real _max_gap;
+
+  ADReal _adjusted_length;
+
+  friend class GapFluxModelBase;
 };

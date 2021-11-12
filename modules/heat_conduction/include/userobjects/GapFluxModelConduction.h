@@ -14,14 +14,16 @@
 /**
  * Base class for gap flux models used by ModularGapConductanceConstraint
  */
-class GapFluxModelRadiative : public GapFluxModelBase
+class GapFluxModelConduction : public GapFluxModelBase
 {
 public:
   static InputParameters validParams();
 
-  GapFluxModelRadiative(const InputParameters & parameters);
+  GapFluxModelConduction(const InputParameters & parameters);
 
-  ADReal computeFlux() const override;
+  virtual ADReal computeFlux() const override;
+
+  virtual ADReal gapAttenuation() const;
 
 protected:
   /// Primary surface temperature
@@ -29,11 +31,13 @@ protected:
   /// Secondary surface temperature
   const ADVariableValue & _secondary_T;
 
-  /// Stefan-Boltzmann constant
-  const Real _sigma;
+  /// Gap conductivity constant
+  const Real _gap_conductivity;
 
-  /// Primary surface emissivity
-  const ADMaterialProperty<Real> & _primary_emissivity;
-  /// Secondary surface emissivity
-  const ADMaterialProperty<Real> & _secondary_emissivity;
+  const Function * const _gap_conductivity_function;
+  const VariableValue * const _gap_conductivity_function_variable;
+
+  const Real _min_gap;
+
+  const unsigned int _min_gap_order;
 };
