@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ADKernelValue.h"
+#include "KernelValue.h"
 
 /**
  * TravelingWaveDoubleObstcle is the traveling wave kernel for double obstacle potentials
@@ -15,8 +15,8 @@
  *      -gamma * (phi - 0.5) - sqrt(phi * (1 - phi)) * m;
  * reference:
  *   I. Steinbach, Modelling and Simulation in Materials Science and Engineering. 17(7) (2009)
- *   073001. website: https://iopscience.iop.org/article/10.1088/0965-0393/17/7/073001/pdf analytical
- * solution: Eq.(67) in the reference
+ *   073001. website: https://iopscience.iop.org/article/10.1088/0965-0393/17/7/073001/pdf
+ * analytical solution: Eq.(67) in the reference
  */
 
 class TravelingWaveDoubleObstcle : public KernelValue
