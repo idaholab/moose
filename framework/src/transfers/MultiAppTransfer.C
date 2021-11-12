@@ -111,7 +111,7 @@ MultiAppTransfer::getAppInfo()
   _to_meshes.clear();
   _to_positions.clear();
   _from_positions.clear();
-  // Clear up this map since we built it from scratch every time
+  // Clear this map since we build it from scratch every time we transfer
   // Otherwise, this will cause two issues: 1) increasing memory usage
   // for a simulation that requires many transfers, 2) producing wrong results
   // when we do collective communication on this vector.
