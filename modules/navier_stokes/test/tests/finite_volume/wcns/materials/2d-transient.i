@@ -269,11 +269,12 @@ inlet_v = 0.001
   []
   end_time = 15
 
-  nl_abs_tol = 1e-9
+  nl_abs_tol = 1e-12
   nl_max_its = 50
   line_search = 'none'
 
   automatic_scaling = true
+  off_diagonals_in_auto_scaling = true
 []
 
 [Outputs]
