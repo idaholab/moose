@@ -13,7 +13,7 @@
 #include "PropertyReadFile.h"
 
 /**
- * Function which provides a piecewise constant field from a CSV file
+ * Function which provides a piecewise constant, in space, field from a CSV file
  */
 class PiecewiseConstantFromCSV : public Function
 {
@@ -23,10 +23,10 @@ public:
   PiecewiseConstantFromCSV(const InputParameters & parameters);
 
   /**
-   * Get the value of the function (based on time only)
-   * \param t The time
-   * \param pt The point in space (x,y,z) (unused)
-   * \return The value of the function at the specified time
+   * Get the value of the function based on the data in the CSV file
+   * \param t The time (unused)
+   * \param pt The point in space (x,y,z)
+   * \return The value of the function
    */
   virtual Real value(Real t, const Point & pt) const override;
 

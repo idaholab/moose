@@ -229,7 +229,7 @@ PropertyReadFile::getBlockData(const Elem * elem, unsigned int prop_num) const
 }
 
 Real
-PropertyReadFile::getVoronoiData(const Point centroid, unsigned int prop_num) const
+PropertyReadFile::getVoronoiData(const Point point, unsigned int prop_num) const
 {
   Real min_dist = _max_range;
   unsigned int ivoronoi = 0;
@@ -242,13 +242,13 @@ PropertyReadFile::getVoronoiData(const Point centroid, unsigned int prop_num) co
       case 0:
         // Calculates minimum periodic distance when "periodic" is specified
         // for rve_type
-        dist = minPeriodicDistance(_center[i], centroid);
+        dist = minPeriodicDistance(_center[i], point);
         break;
 
       default:
         // Calculates minimum distance when nothing is specified
         // for rve_type
-        Point dist_vec = _center[i] - centroid;
+        Point dist_vec = _center[i] - point;
         dist = dist_vec.norm();
     }
 
@@ -263,7 +263,7 @@ PropertyReadFile::getVoronoiData(const Point centroid, unsigned int prop_num) co
 
 // TODO: this should probably use the built-in min periodic distance!
 Real
-PropertyReadFile::minPeriodicDistance(Point c, Point p) const
+PropertyReadFile::minPeriodicDistance(const Point & c, const Point & p) const
 {
   Point dist_vec = c - p;
   Real min_dist = dist_vec.norm();

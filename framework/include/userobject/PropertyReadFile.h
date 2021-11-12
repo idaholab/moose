@@ -82,10 +82,10 @@ public:
   /**
    * This function assign properties to element read from file with nearest neighbor / grain based
    * properties Voronoi centers distribution in the RVE can be Periodic or non-periodic (default)
-   * @param centroid the centroid of the element to get data for
+   * @param point the location to get data for
    * @param prop_num the column index of the property we want to retrieve
    */
-  Real getVoronoiData(const Point centroid, unsigned int prop_num) const;
+  Real getVoronoiData(const Point point, unsigned int prop_num) const;
 
   /**
    * This function assigns properties to elements read from file with block  based properties
@@ -98,7 +98,7 @@ public:
    * This function calculates minimum distance between 2 points
    * considering periodicity of the simulation volume
    */
-  Real minPeriodicDistance(Point, Point) const;
+  Real minPeriodicDistance(const Point &, const Point &) const;
 
   /**
    * Returns the ordering of data expected in the CSV file
@@ -118,6 +118,8 @@ protected:
   const unsigned int _nblock;
   /// Type of read - element, grain, or block
   const ReadTypeEnum _read_type;
+
+  /// Parameters for the nearest neighbor / grain interpolation
   /// Whether to use a random tesselation for the Voronoi/grain type
   const bool _use_random_tesselation;
   /// Random seed - used for generating grain centers
