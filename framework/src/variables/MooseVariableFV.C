@@ -53,6 +53,9 @@ MooseVariableFV<OutputType>::validParams()
                                  false,
                                  "Whether to cache face values or re-compute them. Values for "
                                  "extrapolated boundary conditions are always cached.");
+  params.template addParam<bool>("cache_cell_gradients",
+                                 true,
+                                 "Whether to cache cell gradients or re-compute them.");
 #endif
   return params;
 }
@@ -80,7 +83,10 @@ MooseVariableFV<OutputType>::MooseVariableFV(const InputParameters & parameters)
                               : false),
     _cache_face_values(this->isParamValid("cache_face_values")
                            ? this->template getParam<bool>("cache_face_values")
-                           : false)
+                           : false),
+    _cache_cell_gradients(this->isParamValid("cache_cell_gradients")
+                              ? this->template getParam<bool>("cache_cell_gradients")
+                              : true)
 {
   _element_data = std::make_unique<MooseVariableDataFV<OutputType>>(
       *this, _sys, _tid, Moose::ElementType::Element, this->_assembly.elem());
@@ -837,7 +843,7 @@ MooseVariableFV<OutputType>::adGradSln(const Elem * const elem, const bool corre
 
   // We ensure that no caching takes place when we compute skewness-corrected
   // quantities.
-  if (!correct_skewness)
+  if (_cache_cell_gradients && !correct_skewness)
   {
     auto pr = _elem_to_grad.emplace(elem, VectorValue<ADReal>());
 
@@ -1023,6 +1029,7 @@ MooseVariableFV<OutputType>::adGradSln(const Elem * const elem, const bool corre
       }
 
       A.lu_solve(b, x);
+
       for (const auto i : make_range(unsigned(LIBMESH_DIM)))
         grad(i) = x(i);
 

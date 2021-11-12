@@ -675,6 +675,9 @@ protected:
   /// Whether to cache face values or re-compute them every time
   const bool _cache_face_values;
 
+  /// Whether to cache cell gradients
+  const bool _cache_cell_gradients;
+
   /// Decides if a vertex-based, average or skewed corrected average is used for the
   /// face interpolation. Other options are not taken into account here,
   /// but at higher, kernel-based levels.
