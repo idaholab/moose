@@ -71,6 +71,16 @@ protected:
    */
   std::pair<SubdomainID, SubdomainID> faceArgSubdomains() const;
 
+  /**
+   * Determine the single sided face argument when evaluating a functor on a face.
+   * This is used to perform evluations of material properties with the actual face values of
+   * their dependences, rather than interpolate the material property to the boundary.
+   * @param limiter_type the limiter type, to be specified if more than the default average
+   *        interpolation is required for the parameters of the functor
+   */
+  std::tuple<const FaceInfo *, Moose::FV::LimiterType, bool, SubdomainID>
+  singleSidedFaceArg(Moose::FV::LimiterType limiter_type) const;
+
 private:
   /**
    * This creates a tuple of an element, \p FaceInfo, and subdomain ID. The element returned will
