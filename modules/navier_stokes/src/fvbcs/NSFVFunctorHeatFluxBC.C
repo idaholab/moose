@@ -108,7 +108,7 @@ NSFVFunctorHeatFluxBC::computeQpResidual()
 
   // Get the element from the FaceInfo, making sure to be on the right side of the
   // boundary if the boundary condition is internal to the mesh
-  const auto elem = ;
+  const auto elem_arg = elemFromFace();
 
   if (_locality == NS::settings::local)
   {
@@ -116,13 +116,13 @@ NSFVFunctorHeatFluxBC::computeQpResidual()
     {
       case NS::splitting::porosity:
       {
-        fraction = (*_eps)(elem);
+        fraction = (*_eps)(elem_arg);
         break;
       }
       case NS::splitting::thermal_conductivity:
       {
-        ADReal d = (*_k_f)(elem) + (*_k_s)(elem);
-        fraction = d > tol ? (*_k_f)(elem) / d : 0.5;
+        ADReal d = (*_k_f)(elem_arg) + (*_k_s)(elem_arg);
+        fraction = d > tol ? (*_k_f)(elem_arg) / d : 0.5;
         break;
       }
       case NS::splitting::effective_thermal_conductivity:
@@ -134,15 +134,15 @@ NSFVFunctorHeatFluxBC::computeQpResidual()
         // division by sqrt(3) ensures equivalence with a non-vector form of kappa with
         // 3 components
         ADReal kappa;
-        if ((MooseUtils::absoluteFuzzyEqual((*_kappa)(elem)(0), 0)) &&
-            (MooseUtils::absoluteFuzzyEqual((*_kappa)(elem)(1), 0)) &&
-            (MooseUtils::absoluteFuzzyEqual((*_kappa)(elem)(2), 0)))
+        if ((MooseUtils::absoluteFuzzyEqual((*_kappa)(elem_arg)(0), 0)) &&
+            (MooseUtils::absoluteFuzzyEqual((*_kappa)(elem_arg)(1), 0)) &&
+            (MooseUtils::absoluteFuzzyEqual((*_kappa)(elem_arg)(2), 0)))
           kappa = 1e-42;
         else
-          kappa = (*_kappa)(elem).norm() / std::sqrt(3.0);
+          kappa = (*_kappa)(elem_arg).norm() / std::sqrt(3.0);
 
-        ADReal d = (*_eps)(elem) * kappa + (*_kappa_s)(elem);
-        fraction = d > tol ? (*_eps)(elem) * kappa / d : 0.5;
+        ADReal d = (*_eps)(elem_arg)*kappa + (*_kappa_s)(elem_arg);
+        fraction = d > tol ? (*_eps)(elem_arg)*kappa / d : 0.5;
         break;
       }
     }

@@ -37,8 +37,10 @@ public:
 protected:
   virtual ADReal computeQpResidual() override;
 
+  /// Computes the parallel heat flux resistance for a combined radiation-convection boundary
   void computeParallelResistance();
 
+  /// Computes the serial resistance of multiple conductive layers
   void computeConductionResistance();
 
   /// Whether to use a `cylindrical` or `cartesian` form for the thermal resistances.

@@ -71,8 +71,9 @@ FunctorThermalResistanceBC::FunctorThermalResistanceBC(const InputParameters & p
     _parallel_resistance(0.0)
 {
   if (_k.size() != _dx.size())
-    mooseError("Number of specified thermal conductivities must match the number "
-               "of conduction layers!");
+    paramError("conduction_thicknesses",
+               "Number of specified thermal conductivities must match "
+               "the number of conduction layers!");
 
   if (_geometry == Moose::CoordinateSystemType::COORD_RZ)
     for (const auto & d : _dx)
@@ -88,7 +89,7 @@ FunctorThermalResistanceBC::computeConductionResistance()
 {
   Real r = _inner_radius;
 
-  for (std::size_t i = 0; i < _k.size(); ++i)
+  for (const auto i : index_range(_k))
   {
     switch (_geometry)
     {
@@ -110,11 +111,15 @@ FunctorThermalResistanceBC::computeConductionResistance()
 ADReal
 FunctorThermalResistanceBC::computeQpResidual()
 {
+  // Get the element from the FaceInfo, making sure to be on the right side of the
+  // boundary if the boundary condition is internal to the mesh
+  const auto elem_arg = elemFromFace();
+
   // radiation resistance has to be solved iteratively, since we don't know the
   // surface temperature. We do know that the heat flux in the conduction layers
   // must match the heat flux in the parallel convection-radiation segment. For a
   // first guess, take the surface temperature as the average of _T and T_ambient.
-  _T_surface = 0.5 * (_T(&_face_info->elem()) + _T_ambient);
+  _T_surface = 0.5 * (_T(elem_arg) + _T_ambient);
 
   // total flux perpendicular to boundary
   ADReal flux;
@@ -136,7 +141,7 @@ FunctorThermalResistanceBC::computeQpResidual()
       T_surface_previous = _T_surface;
 
       // compute the flux based on the conduction part of the circuit
-      flux = (_T(&_face_info->elem()) - _T_surface) / _conduction_resistance;
+      flux = (_T(elem_arg) - _T_surface) / _conduction_resistance;
 
       computeParallelResistance();
 
@@ -158,14 +163,16 @@ FunctorThermalResistanceBC::computeQpResidual()
   // resistance to find the overall heat flux. For Cartesian, dividing by the
   // 'inner_radius' has no effect, but it is required for correct normalization
   // for cylindrical geometries.
-  flux = (_T(&_face_info->elem()) - _T_ambient) / (_conduction_resistance + _parallel_resistance) /
-         _inner_radius;
+  flux =
+      (_T(elem_arg) - _T_ambient) / (_conduction_resistance + _parallel_resistance) / _inner_radius;
   return flux;
 }
 
 void
 FunctorThermalResistanceBC::computeParallelResistance()
 {
+  const auto elem_arg = elemFromFace();
+
   // compute the parallel convection and radiation resistances, assuming they
   // act on the same surface area size
   ADReal hr = _emissivity * HeatConduction::Constants::sigma *
@@ -173,5 +180,5 @@ FunctorThermalResistanceBC::computeParallelResistance()
 
   // for Cartesian, dividing by the 'outer_radius' has no effect, but it is
   // required for correct normalization for cylindrical geometries
-  _parallel_resistance = 1.0 / (hr + _h(&_face_info->elem())) / _outer_radius;
+  _parallel_resistance = 1.0 / (hr + _h(elem_arg)) / _outer_radius;
 }

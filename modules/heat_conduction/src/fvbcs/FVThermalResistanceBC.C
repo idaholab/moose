@@ -70,8 +70,9 @@ FVThermalResistanceBC::FVThermalResistanceBC(const InputParameters & parameters)
     _parallel_resistance(0.0)
 {
   if (_k.size() != _dx.size())
-    mooseError("Number of specified thermal conductivities must match the number "
-               "of conduction layers!");
+    paramError("conduction_thicknesses",
+               "Number of specified thermal conductivities must match "
+               "the number of conduction layers!");
 
   if (_geometry == Moose::CoordinateSystemType::COORD_RZ)
     for (const auto & d : _dx)
@@ -87,7 +88,7 @@ FVThermalResistanceBC::computeConductionResistance()
 {
   Real r = _inner_radius;
 
-  for (std::size_t i = 0; i < _k.size(); ++i)
+  for (const auto i : index_range(_k))
   {
     switch (_geometry)
     {
