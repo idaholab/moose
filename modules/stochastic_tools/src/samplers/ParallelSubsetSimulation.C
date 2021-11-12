@@ -27,8 +27,8 @@ ParallelSubsetSimulation::validParams()
       "output_reporter", "Reporter with results of samples created by trainer.");
   params.addRequiredParam<ReporterName>(
       "inputs_reporter", "Reporter with input parameters.");
-  params.addRequiredRangeCheckedParam<Real>(
-      "subset_probability", "subset_probability>0 && subset_probability<=1",
+  params.addRangeCheckedParam<Real>(
+      "subset_probability", 0.1, "subset_probability>0 & subset_probability<=1",
       "Conditional probability of each subset");
   params.addRequiredParam<int>(
       "num_samplessub",
@@ -123,10 +123,10 @@ ParallelSubsetSimulation::computeSample(dof_id_type row_index, dof_id_type col_i
   if (_step <= (int)(_num_samplessub / n_processors()))
   {
     // This is the first subset which uses a simple Monte Carlo sampling scheme
+    _seed_value = _step * n_processors();
     _subset = std::floor((_step * n_processors()) / _num_samplessub);
     if (sample)
     {
-      _seed_value = _step * n_processors();
       for (dof_id_type j = 0; j < _distributions.size(); ++j)
       {
         for (dof_id_type ss = 0; ss < n_processors(); ++ss)

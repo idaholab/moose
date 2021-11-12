@@ -65,6 +65,7 @@ AdaptiveMonteCarloDecision::AdaptiveMonteCarloDecision(const InputParameters & p
     auto rows = _sampler.getNumberOfRows();
     _inputs_sto.resize(cols);
     _inputs.resize(cols);
+    _prev_val.resize(cols);
     for (dof_id_type i = 0; i < cols; ++i)
     {
       _inputs[i].resize(rows);
@@ -73,7 +74,6 @@ AdaptiveMonteCarloDecision::AdaptiveMonteCarloDecision(const InputParameters & p
     _inputs_sorted.resize(cols);
     _subset = 0;
     _count = 0;
-    _prev_val.resize(cols);
     _prev_val_out.resize(rows);
     _output_required.resize(rows);
   }
