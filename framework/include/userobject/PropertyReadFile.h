@@ -22,7 +22,7 @@ enum class ReadTypeEnum
   VORONOI = 1,
   BLOCK = 2,
   NODE = 3,
-  GRAIN = 1
+  GRAIN = 4
 };
 
 /**

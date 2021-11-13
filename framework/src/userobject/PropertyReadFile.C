@@ -38,7 +38,8 @@ PropertyReadFile::validParams()
                                      "element:by element "
                                      "node: by node "
                                      "voronoi:nearest neighbor / voronoi grain structure "
-                                     "block:by mesh block");
+                                     "block:by mesh block "
+                                     "grain: deprecated, use voronoi");
   params.addParam<bool>("use_random_voronoi",
                         false,
                         "Wether to generate random positions for the Voronoi tesselation");
@@ -116,6 +117,13 @@ PropertyReadFile::readData()
       nobjects = _nvoronoi;
       break;
 
+    // TODO Delete after Grizzly update
+    case ReadTypeEnum::GRAIN:
+      if (_nvoronoi <= 0)
+        paramError("ngrain", "Provide non-zero number of voronoi tesselations/grains.");
+      nobjects = _nvoronoi;
+      break;
+
     case ReadTypeEnum::BLOCK:
       if (_nblock <= 0)
         paramError("nblock", "Provide non-zero number of blocks.");
@@ -137,7 +145,7 @@ PropertyReadFile::readData()
     if (_reader.getData(i).size() < _nprop)
       mooseError("Row ", i, " in ", _prop_file_name, " has number of data less than ", _nprop);
 
-  if (_read_type == ReadTypeEnum::VORONOI)
+  if (_read_type == ReadTypeEnum::VORONOI || _read_type == ReadTypeEnum::GRAIN)
     initVoronoiCenterPoints();
 }
 
@@ -178,6 +186,11 @@ PropertyReadFile::getData(const Elem * elem, unsigned int prop_num) const
       break;
 
     case ReadTypeEnum::VORONOI:
+      data = getVoronoiData(elem->centroid(), prop_num);
+      break;
+
+    // TODO: Delete after Grizzly update
+    case ReadTypeEnum::GRAIN:
       data = getVoronoiData(elem->centroid(), prop_num);
       break;
 
