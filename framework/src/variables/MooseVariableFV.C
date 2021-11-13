@@ -987,7 +987,7 @@ MooseVariableFV<OutputType>::adGradSln(const Elem * const elem, const bool corre
 
     // test for simple case
     if (num_ebfs == 0)
-      grad = grad_b; 
+      grad = grad_b;
     else
     {
       // We have to solve a system
