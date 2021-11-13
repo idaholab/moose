@@ -92,6 +92,18 @@ ADPowerLawCreepStressUpdate::computeStrainEnergyRateDensity(
   return MetaPhysicL::raw_value(creep_factor * stress[_qp].doubleContraction((strain_rate)[_qp]));
 }
 
+void
+ADPowerLawCreepStressUpdate::computeStressFinalize(const ADRankTwoTensor & plastic_strain_increment)
+{
+  _creep_strain[_qp] += plastic_strain_increment;
+}
+
+void
+ADPowerLawCreepStressUpdate::zeroOutIncrementalMaterialProperties()
+{
+  _creep_strain[_qp] = _creep_strain_old[_qp];
+}
+
 bool
 ADPowerLawCreepStressUpdate::substeppingCapabilityEnabled()
 {

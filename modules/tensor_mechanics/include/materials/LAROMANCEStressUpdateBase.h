@@ -34,6 +34,9 @@ public:
 
   LAROMANCEStressUpdateBaseTempl(const InputParameters & parameters);
 
+  virtual void zeroOutIncrementalMaterialProperties() override;
+  virtual void storeIncrementalMaterialProperties() override;
+
 protected:
   virtual void initialSetup() override;
 
@@ -526,6 +529,14 @@ protected:
 
   /// Unit conversion factors required to convert from the specified unit to MPa
   Real _stress_ucf;
+
+  ///@{Material properties accumulated at substeps
+  GenericMaterialProperty<Real, is_ad> & _wall_dislocations_step;
+  GenericMaterialProperty<Real, is_ad> & _cell_dislocations_step;
+  ///@}
+
+  /// Total plastic strain increment in step (summing substep contributions)
+  RankTwoTensor _plastic_strain_increment;
 };
 
 typedef LAROMANCEStressUpdateBaseTempl<false> LAROMANCEStressUpdateBase;

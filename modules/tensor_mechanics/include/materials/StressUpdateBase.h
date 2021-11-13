@@ -158,6 +158,11 @@ public:
   virtual void storeIncrementalMaterialProperties(){};
 
   /**
+   * Zero out material properties. Useful for substepping with inelastic models.
+   */
+  virtual void zeroOutIncrementalMaterialProperties(){};
+
+  /**
    * Compute the strain energy rate density for this inelastic model for the current step.
    * @param stress The stress tensor at the end of the step
    * @param strain_rate The strain rate at the end of the step

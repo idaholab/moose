@@ -25,6 +25,7 @@ protected:
   virtual std::vector<std::vector<std::vector<Real>>> getInputLimits() override;
   virtual std::vector<std::vector<std::vector<Real>>> getCoefs() override;
 
+  virtual bool substeppingCapabilityEnabled() override;
   virtual Real romStrainCutoff() override { return 1.0e-10; }
 };
 

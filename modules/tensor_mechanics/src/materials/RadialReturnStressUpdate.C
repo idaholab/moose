@@ -38,6 +38,10 @@ RadialReturnStressUpdateTempl<is_ad>::validParams()
   params.addParam<bool>("apply_strain", true, "Flag to apply strain. Used for testing.");
   params.addParamNamesToGroup(
       "effective_inelastic_strain_name substep_strain_tolerance apply_strain", "Advanced");
+  params.addParam<bool>("use_substep_integration_error",
+                        false,
+                        "If true, it establishes a substep size that will yield, at most,"
+                        "the creep numerical integration error given by substep_strain_tolerance.");
   return params;
 }
 
@@ -58,7 +62,10 @@ RadialReturnStressUpdateTempl<is_ad>::RadialReturnStressUpdateTempl(
     _identity_symmetric_four(RankFourTensor::initIdentitySymmetricFour),
     _deviatoric_projection_four(_identity_symmetric_four -
                                 _identity_two.outerProduct(_identity_two) / 3.0),
-    _apply_strain(this->template getParam<bool>("apply_strain"))
+    _apply_strain(this->template getParam<bool>("apply_strain")),
+    _number_of_substeps(
+        this->template declareProperty<Real>(this->_base_name + "number_of_substeps")),
+    _use_substep_integration_error(this->template getParam<bool>("use_substep_integration_error"))
 {
 }
 
@@ -81,7 +88,7 @@ int
 RadialReturnStressUpdateTempl<is_ad>::calculateNumberSubsteps(
     const GenericRankTwoTensor<is_ad> & strain_increment)
 {
-  unsigned int substep_number = 1;
+  unsigned int number_of_substeps = 1;
   // compute an effective elastic strain measure
   const GenericReal<is_ad> contracted_elastic_strain =
       strain_increment.doubleContraction(strain_increment);
@@ -90,13 +97,24 @@ RadialReturnStressUpdateTempl<is_ad>::calculateNumberSubsteps(
 
   if (!MooseUtils::absoluteFuzzyEqual(effective_elastic_strain, 0.0))
   {
-    const Real ratio = effective_elastic_strain / _max_inelastic_increment;
 
-    if (ratio > _substep_tolerance)
-      substep_number = std::ceil(ratio / _substep_tolerance);
+    if (!_use_substep_integration_error)
+    {
+      const Real ratio = effective_elastic_strain / _max_inelastic_increment;
+
+      if (ratio > _substep_tolerance)
+        number_of_substeps = std::ceil(ratio / _substep_tolerance);
+    }
+    else
+    {
+      const Real accurate_time_step = _dt * _substep_tolerance / effective_elastic_strain;
+
+      if (_dt > accurate_time_step)
+        number_of_substeps = std::ceil(_dt / accurate_time_step);
+    }
   }
 
-  return substep_number;
+  return number_of_substeps;
 }
 
 template <bool is_ad>
@@ -219,6 +237,7 @@ RadialReturnStressUpdateTempl<true>::updateState(
     bool /*compute_full_tangent_operator = false*/,
     RankFourTensor & /*tangent_operator = _identityTensor*/)
 {
+
   // compute the deviatoric trial stress and trial strain from the current intermediate
   // configuration
   ADRankTwoTensor deviatoric_trial_stress = stress_new.deviatoric();
@@ -277,6 +296,9 @@ RadialReturnStressUpdateTempl<false>::updateStateSubstep(RankTwoTensor & strain_
                                                          RankFourTensor & tangent_operator)
 {
   const unsigned int total_substeps = calculateNumberSubsteps(strain_increment);
+  _number_of_substeps[_qp] = total_substeps;
+
+  Moose::out << "Number of substeps: " << total_substeps << "\n";
 
   // if only one substep is needed, then call the original update state method
   if (total_substeps == 1)
@@ -290,6 +312,8 @@ RadialReturnStressUpdateTempl<false>::updateStateSubstep(RankTwoTensor & strain_
                 elastic_strain_old,
                 compute_full_tangent_operator,
                 tangent_operator);
+    storeIncrementalMaterialProperties();
+
     return;
   }
   // Store original _dt; Reset at the end of solve
@@ -302,7 +326,6 @@ RadialReturnStressUpdateTempl<false>::updateStateSubstep(RankTwoTensor & strain_
   RankTwoTensor sub_stress_new = elasticity_tensor * elastic_strain_old;
 
   RankTwoTensor sub_elastic_strain_old = elastic_strain_old;
-  RankTwoTensor sub_inelastic_strain_increment = inelastic_strain_increment;
 
   Real sub_scalar_effective_inelastic_strain = 0;
 
@@ -310,6 +333,7 @@ RadialReturnStressUpdateTempl<false>::updateStateSubstep(RankTwoTensor & strain_
   MathUtils::mooseSetToZero(strain_increment);
   MathUtils::mooseSetToZero(inelastic_strain_increment);
   MathUtils::mooseSetToZero(stress_new);
+  RankTwoTensor sub_inelastic_strain_increment = inelastic_strain_increment;
 
   for (unsigned int step = 0; step < total_substeps; ++step)
   {
@@ -339,12 +363,12 @@ RadialReturnStressUpdateTempl<false>::updateStateSubstep(RankTwoTensor & strain_
     sub_stress_new = elasticity_tensor * sub_elastic_strain_old;
     // accumulate scalar_effective_inelastic_strain
     sub_scalar_effective_inelastic_strain += _scalar_effective_inelastic_strain;
-    computeStressFinalize(inelastic_strain_increment);
     computeTangentOperator(
         effective_sub_stress_new, sub_stress_new, compute_full_tangent_operator, tangent_operator);
     // store incremental material properties for this step
     storeIncrementalMaterialProperties();
   }
+
   // update stress
   stress_new = sub_stress_new;
   // update effective inelastic strain
@@ -370,6 +394,10 @@ RadialReturnStressUpdateTempl<true>::updateStateSubstep(
 {
   const unsigned int total_substeps = calculateNumberSubsteps(strain_increment);
 
+  _number_of_substeps[_qp] = total_substeps;
+
+  Moose::out << "Number of substeps: " << total_substeps << "\n";
+
   // if only one substep is needed, then call the original update state method
   if (total_substeps == 1)
   {
@@ -380,6 +408,9 @@ RadialReturnStressUpdateTempl<true>::updateStateSubstep(
                 stress_old,
                 elasticity_tensor,
                 elastic_strain_old);
+
+    storeIncrementalMaterialProperties();
+
     return;
   }
   // Store original _dt; Reset at the end of solve
@@ -422,7 +453,6 @@ RadialReturnStressUpdateTempl<true>::updateStateSubstep(
     sub_stress_new = elasticity_tensor * sub_elastic_strain_old;
     // accumulate scalar_effective_inelastic_strain
     sub_scalar_effective_inelastic_strain += _scalar_effective_inelastic_strain;
-    computeStressFinalize(inelastic_strain_increment);
     // store incremental material properties for this step
     storeIncrementalMaterialProperties();
   }
