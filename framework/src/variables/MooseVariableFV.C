@@ -987,17 +987,7 @@ MooseVariableFV<OutputType>::adGradSln(const Elem * const elem, const bool corre
 
     // test for simple case
     if (num_ebfs == 0)
-    {
-      if (_cache_cell_gradients && !correct_skewness)
-      {
-        auto pr = _elem_to_grad.emplace(elem, grad_b);
-        mooseAssert(pr.second, "We should have inserted a new cell-gradient key-value pair");
-
-        grad = pr.first->second;
-      }
-      else
-        grad = grad_b;
-    }
+      grad = grad_b; 
     else
     {
       // We have to solve a system
@@ -1043,15 +1033,6 @@ MooseVariableFV<OutputType>::adGradSln(const Elem * const elem, const bool corre
       // Cache the face value information
       for (const auto j : make_range(num_ebfs))
         _face_to_value.emplace(ebf_faces[j], x(LIBMESH_DIM + j));
-
-      // Cache cell gradients if required
-      if (_cache_cell_gradients && !correct_skewness)
-      {
-        auto pr = _elem_to_grad.emplace(elem, grad);
-        mooseAssert(pr.second, "We should have inserted a new cell-gradient key-value pair");
-
-        grad = pr.first->second;
-      }
     }
 
     return grad;
