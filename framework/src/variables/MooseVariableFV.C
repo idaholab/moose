@@ -1035,7 +1035,14 @@ MooseVariableFV<OutputType>::adGradSln(const Elem * const elem, const bool corre
         _face_to_value.emplace(ebf_faces[j], x(LIBMESH_DIM + j));
     }
 
-    return grad;
+    if (_cache_cell_gradients && !correct_skewness)
+    {
+      auto pr = _elem_to_grad.emplace(elem, std::move(grad));
+      mooseAssert(pr.second, "Insertion should have just happened.");
+      return pr.first->second;
+    }
+    else
+      return grad;
   }
   catch (libMesh::LogicError &)
   {
@@ -1056,6 +1063,7 @@ MooseVariableFV<OutputType>::adGradSln(const Elem * const elem, const bool corre
     // Two term boundary expansion should only fail at domain corners. We want to keep trying it at
     // other boundary locations
     const_cast<MooseVariableFV<OutputType> *>(this)->_two_term_boundary_expansion = true;
+
     return grad;
   }
 }
