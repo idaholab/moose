@@ -19,8 +19,14 @@ function configure_libmesh()
     echo "SRC_DIR is not set for configure_libmesh"
     exit 1
   fi
+
   if [ ! -d "$SRC_DIR" ]; then
     echo "$SRC_DIR=SRC_DIR does not exist"
+    exit 1
+  fi
+
+  if [ -z "$LIBMESH_DIR" ]; then
+    echo "$LIBMESH_DIR is not set for configure_libmesh"
     exit 1
   fi
 
@@ -49,6 +55,8 @@ function configure_libmesh()
                --with-cxx-std-min=2014 \
                --without-gdb-command \
                --with-methods="${METHODS}" \
+               --prefix="${LIBMESH_DIR}" \
+               --with-future-timpi-dir="${LIBMESH_DIR}" \
                INSTALL="${INSTALL_BINARY}" \
                $*
 

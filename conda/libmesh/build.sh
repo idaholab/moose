@@ -74,10 +74,10 @@ fi
 
 source $SRC_DIR/configure_libmesh.sh
 export INSTALL_BINARY="${SRC_DIR}/build-aux/install-sh -C"
-METHODS="opt oprof devel dbg" configure_libmesh --prefix=${PREFIX}/libmesh \
-                                                --with-vtk-lib=${BUILD_PREFIX}/libmesh-vtk/lib \
-                                                --with-vtk-include=${BUILD_PREFIX}/libmesh-vtk/include/vtk-${SHORT_VTK_NAME} \
-                                                $*
+LIBMESH_DIR=${PREFIX}/libmesh METHODS="opt oprof devel dbg" \
+  configure_libmesh --with-vtk-lib=${BUILD_PREFIX}/libmesh-vtk/lib \
+                    --with-vtk-include=${BUILD_PREFIX}/libmesh-vtk/include/vtk-${SHORT_VTK_NAME} \
+                    $*
 
 make -j $CPU_COUNT
 make install
