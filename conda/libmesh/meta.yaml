@@ -1,7 +1,7 @@
 # Do not use jinja templating (A physical change to this file is required to trigger a build)
-{% set build = 4 %}
+{% set build = 0 %}
 {% set strbuild = "build_" + build|string %}
-{% set version = "2021.10.27" %}
+{% set version = "2021.11.11" %}
 
 package:
   name: moose-libmesh

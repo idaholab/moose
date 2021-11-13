@@ -20,7 +20,24 @@
 [Functions]
   [top_pull]
     type = ParsedFunction
-    value = t/100
+    value = -t*10
+  []
+[]
+
+[AuxVariables]
+  [strain_yy]
+    family = MONOMIAL
+    order = FIRST
+  []
+[]
+
+[AuxKernels]
+  [strain_yy]
+    type = RankTwoAux
+    rank_two_tensor = total_strain
+    variable = strain_yy
+    index_i = 1
+    index_j = 1
   []
 []
 
@@ -32,11 +49,11 @@
 []
 
 [BCs]
-  [y_pull_function]
-    type = FunctionDirichletBC
-    variable = disp_y
-    boundary = top
-    function = top_pull
+  [Pressure]
+    [bc_presssure]
+      boundary = top
+      function = top_pull
+    []
   []
   [x_bot]
     type = DirichletBC
@@ -59,22 +76,33 @@
 []
 
 [Materials]
-  # this input file is used to compare the MOOSE and UMAT models, activating
-  # specific ones with cli args.
-
-  # 1. active for umat calculation
+  # Active for
   [umat]
     type = AbaqusUMATStress
     constant_properties = '1000 0.3'
-    plugin = '../../plugins/elastic'
+    plugin = '../../../plugins/elastic_predef'
     num_state_vars = 0
+    external_fields = 'strain_yy'
   []
 
-  # 2. active for moose built-in finite strain elasticity reference
-  [elastic]
+  #  2. Active for reference MOOSE computations
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
-    youngs_modulus = 1000
+    base_name = 'base'
+    youngs_modulus = 1e3
     poissons_ratio = 0.3
+  []
+  [strain_dependent_elasticity_tensor]
+    type = CompositeElasticityTensor
+    args = strain_yy
+    tensors = 'base'
+    weights = 'prefactor_material'
+  []
+  [prefactor_material_block]
+    type = DerivativeParsedMaterial
+    f_name = prefactor_material
+    args = strain_yy
+    function = '1.0/(1.0 + strain_yy)'
   []
   [stress]
     type = ComputeFiniteStrainElasticStress
@@ -97,7 +125,8 @@
   nl_abs_tol = 1e-10
   l_tol = 1e-9
   start_time = 0.0
-  num_steps = 30
+  end_time = 30
+
   dt = 1.0
 []
 

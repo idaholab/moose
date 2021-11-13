@@ -16,6 +16,7 @@
     method = "!dbg"
     requirement = 'The system shall be able to model free-slip conditions in a channel; specifically the tangential velocity shall have a uniform value of unity, the normal velocity shall have a uniform value of zero, and the pressure shall not change.'
     ad_indexing_type = 'global'
+    valgrind = HEAVY
   []
   [no-slip]
     type = 'Exodiff'
@@ -26,6 +27,7 @@
     abs_zero = 1e-9
     ad_indexing_type = 'global'
     cli_args = '-pc_type lu -pc_factor_shift_type NONZERO'
+    valgrind = HEAVY
   []
   [scalar-transport]
     type = 'Exodiff'

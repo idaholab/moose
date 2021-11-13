@@ -1,0 +1,11 @@
+[Tests]
+  issues = '#16239'
+  design = 'navier_stokes/insfv.md'
+  [skewness-error]
+    type = RunException
+    input = 2d-rc.i
+    ad_indexing_type = 'global'
+    requirement = "The system shall trow an error if the cell gradient is computed with skewness-correction in the INSFVVelocity variable."
+    expect_err = "INSFVelocityVariable does not support skewness-correction at this point!"
+  []
+[]

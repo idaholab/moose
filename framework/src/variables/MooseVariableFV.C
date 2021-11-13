@@ -35,9 +35,10 @@ MooseVariableFV<OutputType>::validParams()
   params.set<MooseEnum>("family") = "MONOMIAL";
   params.set<MooseEnum>("order") = "CONSTANT";
 #ifdef MOOSE_GLOBAL_AD_INDEXING
-  params.template addParam<bool>("use_extended_stencil",
-                                 false,
-                                 "Whether to use an extended stencil for gradient computation.");
+  MooseEnum face_interp_method("average skewness-corrected vertex-based", "average");
+  params.template addParam<MooseEnum>("face_interp_method",
+                                      face_interp_method,
+                                      "Switch that can select between face interpoaltion methods.");
   params.template addParam<bool>(
       "two_term_boundary_expansion",
       true,
@@ -52,6 +53,8 @@ MooseVariableFV<OutputType>::validParams()
                                  false,
                                  "Whether to cache face values or re-compute them. Values for "
                                  "extrapolated boundary conditions are always cached.");
+  params.template addParam<bool>(
+      "cache_cell_gradients", true, "Whether to cache cell gradients or re-compute them.");
 #endif
   return params;
 }
@@ -80,11 +83,9 @@ MooseVariableFV<OutputType>::MooseVariableFV(const InputParameters & parameters)
     _cache_face_values(this->isParamValid("cache_face_values")
                            ? this->template getParam<bool>("cache_face_values")
                            : false),
-    // If the user doesn't specify a MooseVariableFV type in the input file, then we won't have
-    // these parameters available
-    _use_extended_stencil(this->isParamValid("use_extended_stencil")
-                              ? this->template getParam<bool>("use_extended_stencil")
-                              : false)
+    _cache_cell_gradients(this->isParamValid("cache_cell_gradients")
+                              ? this->template getParam<bool>("cache_cell_gradients")
+                              : true)
 {
   _element_data = std::make_unique<MooseVariableDataFV<OutputType>>(
       *this, _sys, _tid, Moose::ElementType::Element, this->_assembly.elem());
@@ -92,9 +93,23 @@ MooseVariableFV<OutputType>::MooseVariableFV(const InputParameters & parameters)
       *this, _sys, _tid, Moose::ElementType::Neighbor, this->_assembly.neighbor());
 
   // Resize vectors used when not caching variables
+  _temp_cell_gradients.resize(libMesh::n_threads());
   _temp_face_unc_gradients.resize(libMesh::n_threads());
   _temp_face_gradients.resize(libMesh::n_threads());
   _temp_face_values.resize(libMesh::n_threads());
+
+  if (this->isParamValid("face_interp_method"))
+  {
+    const auto & interp_method = this->template getParam<MooseEnum>("face_interp_method");
+    if (interp_method == "average")
+      _face_interp_method = Moose::FV::InterpMethod::Average;
+    else if (interp_method == "skewness-corrected")
+      _face_interp_method = Moose::FV::InterpMethod::SkewCorrectedAverage;
+    else if (interp_method == "vertex-based")
+      _face_interp_method = Moose::FV::InterpMethod::VertexBased;
+  }
+  else
+    _face_interp_method = Moose::FV::InterpMethod::Average;
 }
 
 template <typename OutputType>
@@ -606,7 +621,8 @@ template <typename OutputType>
 const ADReal &
 MooseVariableFV<OutputType>::getInternalFaceValue(const Elem * const neighbor,
                                                   const FaceInfo & fi,
-                                                  const ADReal & elem_value) const
+                                                  const ADReal & elem_value,
+                                                  const bool correct_skewness) const
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError("MooseVariableFV::getInternalFaceValue only supported for global AD indexing");
@@ -615,7 +631,10 @@ MooseVariableFV<OutputType>::getInternalFaceValue(const Elem * const neighbor,
   mooseAssert(isInternalFace(fi), "This function only be called on internal faces.");
 
   ADReal * value_pointer = &_temp_face_values[_tid];
-  if (_cache_face_values)
+
+  // We ensure that no caching takes place when we compute skewness-corrected
+  // quantities.
+  if (_cache_face_values && !correct_skewness)
   {
     auto pr = _face_to_value.emplace(&fi, 0);
 
@@ -628,7 +647,7 @@ MooseVariableFV<OutputType>::getInternalFaceValue(const Elem * const neighbor,
 
   ADReal & value = *value_pointer;
 
-  if (_use_extended_stencil)
+  if (_face_interp_method == Moose::FV::InterpMethod::VertexBased)
   {
     ADReal numerator = 0, denominator = 0;
 
@@ -644,11 +663,39 @@ MooseVariableFV<OutputType>::getInternalFaceValue(const Elem * const neighbor,
   }
   else
   {
-    // Compact stencil
+    // We need the solution in the neighboring cell the interpolate
+    // to the face
     ADReal neighbor_value = getElemValue(neighbor);
 
-    value = Moose::FV::linearInterpolation(
-        elem_value, neighbor_value, fi, neighbor == fi.neighborPtr());
+    // We check if we need skewness correction for the interpolation
+    if (_face_interp_method == Moose::FV::InterpMethod::SkewCorrectedAverage)
+    {
+      // Creating container for the uncorrected face gradient at the
+      // skwed cell center
+      VectorValue<ADReal> surface_gradient;
+
+      // This condition ensures that the recursive algorithm (face_center->
+      // cell_gradient -> face_gradient -> face_center -> ...) terminates after
+      // one loop. It is hardcoded to one loop at this point since it yields
+      // 2nd order accuracy on skewed meshes with the minimum additional effort.
+      if (correct_skewness)
+      {
+        // We overwrite the surface gradient for the skew-corrected interpolation.
+        // This gradient is not corrected. We use the corrected face gradient,
+        // unlike the method suggested in Moukalled Ch. 9.
+        surface_gradient = adGradSln(fi, false);
+      }
+
+      value = Moose::FV::skewCorrectedlinearInterpolation(
+          elem_value, neighbor_value, surface_gradient, fi, neighbor == fi.neighborPtr());
+    }
+    else
+    {
+      // If the skew-correction isn't needed, we just proceed with simple linear
+      // interpolation
+      value = Moose::FV::linearInterpolation(
+          elem_value, neighbor_value, fi, neighbor == fi.neighborPtr());
+    }
   }
 
   return value;
@@ -785,17 +832,23 @@ MooseVariableFV<OutputType>::getBoundaryFaceValue(const FaceInfo & fi) const
 
 template <typename OutputType>
 const VectorValue<ADReal> &
-MooseVariableFV<OutputType>::adGradSln(const Elem * const elem) const
+MooseVariableFV<OutputType>::adGradSln(const Elem * const elem, const bool correct_skewness) const
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError("MooseVariableFV::adGradSln only supported for global AD indexing");
 #endif
 
-  const auto it = _elem_to_grad.find(elem);
+  VectorValue<ADReal> * value_pointer = &_temp_cell_gradients[_tid];
 
-  if (it != _elem_to_grad.end())
-    // we already have a gradient ready to go
-    return it->second;
+  // We ensure that no caching takes place when we compute skewness-corrected
+  // quantities.
+  if (_cache_cell_gradients && !correct_skewness)
+  {
+    auto it = _elem_to_grad.find(elem);
+
+    if (it != _elem_to_grad.end())
+      return it->second;
+  }
 
   ADReal elem_value = getElemValue(elem);
 
@@ -805,7 +858,7 @@ MooseVariableFV<OutputType>::adGradSln(const Elem * const elem) const
 
   try
   {
-    VectorValue<ADReal> grad;
+    VectorValue<ADReal> & grad = *value_pointer;
 
     bool volume_set = false;
     Real volume = 0;
@@ -847,6 +900,7 @@ MooseVariableFV<OutputType>::adGradSln(const Elem * const elem) const
                            &ebf_b,
                            &grad_ebf_coeffs,
                            &grad_b,
+                           correct_skewness,
                            this](const Elem & functor_elem,
                                  const Elem * const neighbor,
                                  const FaceInfo * const fi,
@@ -879,7 +933,8 @@ MooseVariableFV<OutputType>::adGradSln(const Elem * const elem) const
           grad_b += surface_vector * elem_value;
       }
       else if (isInternalFace(*fi))
-        grad_b += surface_vector * getInternalFaceValue(neighbor, *fi, elem_value);
+        grad_b +=
+            surface_vector * getInternalFaceValue(neighbor, *fi, elem_value, correct_skewness);
       else
       {
         mooseAssert(isDirichletBoundaryFace(*fi), "We've run out of face types");
@@ -971,6 +1026,7 @@ MooseVariableFV<OutputType>::adGradSln(const Elem * const elem) const
       }
 
       A.lu_solve(b, x);
+
       for (const auto i : make_range(unsigned(LIBMESH_DIM)))
         grad(i) = x(i);
 
@@ -979,9 +1035,14 @@ MooseVariableFV<OutputType>::adGradSln(const Elem * const elem) const
         _face_to_value.emplace(ebf_faces[j], x(LIBMESH_DIM + j));
     }
 
-    auto pr = _elem_to_grad.emplace(elem, std::move(grad));
-    mooseAssert(pr.second, "Insertion should have just happened.");
-    return pr.first->second;
+    if (_cache_cell_gradients && !correct_skewness)
+    {
+      auto pr = _elem_to_grad.emplace(elem, std::move(grad));
+      mooseAssert(pr.second, "Insertion should have just happened.");
+      return pr.first->second;
+    }
+    else
+      return grad;
   }
   catch (libMesh::LogicError &)
   {
@@ -1002,19 +1063,23 @@ MooseVariableFV<OutputType>::adGradSln(const Elem * const elem) const
     // Two term boundary expansion should only fail at domain corners. We want to keep trying it at
     // other boundary locations
     const_cast<MooseVariableFV<OutputType> *>(this)->_two_term_boundary_expansion = true;
+
     return grad;
   }
 }
 
 template <typename OutputType>
 const VectorValue<ADReal> &
-MooseVariableFV<OutputType>::uncorrectedAdGradSln(const FaceInfo & fi) const
+MooseVariableFV<OutputType>::uncorrectedAdGradSln(const FaceInfo & fi,
+                                                  const bool correct_skewness) const
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError("MooseVariableFV::uncorrectedAdGradSln only supported for global AD indexing");
 #endif
 
-  if (_cache_face_gradients)
+  // We ensure that no caching takes place when we compute skewness-corrected
+  // quantities.
+  if (_cache_face_gradients && !correct_skewness)
   {
     auto it = _face_to_unc_grad.find(&fi);
 
@@ -1027,11 +1092,13 @@ MooseVariableFV<OutputType>::uncorrectedAdGradSln(const FaceInfo & fi) const
   const Elem * const elem_two = std::get<1>(tup);
   const bool elem_one_is_fi_elem = std::get<2>(tup);
 
-  const VectorValue<ADReal> & elem_one_grad = adGradSln(elem_one);
+  const VectorValue<ADReal> elem_one_grad = adGradSln(elem_one, correct_skewness);
 
   VectorValue<ADReal> * unc_face_grad_pointer = &_temp_face_unc_gradients[_tid];
 
-  if (_cache_face_gradients)
+  // We ensure that no caching takes place when we compute skewness-corrected
+  // quantities.
+  if (_cache_face_gradients && !correct_skewness)
   {
     // Returns a pair with the first being an iterator pointing to the key-value pair and the second
     // a boolean denoting whether a new insertion took place
@@ -1051,11 +1118,17 @@ MooseVariableFV<OutputType>::uncorrectedAdGradSln(const FaceInfo & fi) const
   // gradient
   if (elem_two && this->hasBlocks(elem_two->subdomain_id()))
   {
-    const VectorValue<ADReal> & elem_two_grad = adGradSln(elem_two);
+    const VectorValue<ADReal> & elem_two_grad = adGradSln(elem_two, correct_skewness);
+
+    const auto interp_method =
+        (_face_interp_method == Moose::FV::InterpMethod::Average ||
+         _face_interp_method == Moose::FV::InterpMethod::SkewCorrectedAverage)
+            ? _face_interp_method
+            : Moose::FV::InterpMethod::Average;
 
     // Uncorrected gradient value
-    unc_face_grad =
-        Moose::FV::linearInterpolation(elem_one_grad, elem_two_grad, fi, elem_one_is_fi_elem);
+    unc_face_grad = Moose::FV::linearInterpolation(
+        elem_one_grad, elem_two_grad, fi, elem_one_is_fi_elem, interp_method);
   }
 
   return unc_face_grad;
@@ -1063,7 +1136,7 @@ MooseVariableFV<OutputType>::uncorrectedAdGradSln(const FaceInfo & fi) const
 
 template <typename OutputType>
 const VectorValue<ADReal> &
-MooseVariableFV<OutputType>::adGradSln(const FaceInfo & fi) const
+MooseVariableFV<OutputType>::adGradSln(const FaceInfo & fi, const bool correct_skewness) const
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError("MooseVariableFV::adGradSln only supported for global AD indexing");
@@ -1071,7 +1144,10 @@ MooseVariableFV<OutputType>::adGradSln(const FaceInfo & fi) const
 
   // Use a pointer to choose the right reference
   VectorValue<ADReal> * face_grad_pointer = &_temp_face_gradients[_tid];
-  if (_cache_face_gradients)
+
+  // We ensure that no caching takes place when we compute skewness-corrected
+  // quantities.
+  if (_cache_face_gradients && !correct_skewness)
   {
     auto it = _face_to_grad.find(&fi);
 
@@ -1080,14 +1156,14 @@ MooseVariableFV<OutputType>::adGradSln(const FaceInfo & fi) const
 
     // Returns a pair with the first being an iterator pointing to the key-value pair and the second
     // a boolean denoting whether a new insertion took place
-    auto emplace_ret = _face_to_grad.emplace(&fi, uncorrectedAdGradSln(fi));
+    auto emplace_ret = _face_to_grad.emplace(&fi, uncorrectedAdGradSln(fi, correct_skewness));
 
     mooseAssert(emplace_ret.second, "We should have inserted a new key-value pair");
 
     face_grad_pointer = &emplace_ret.first->second;
   }
   else
-    *face_grad_pointer = uncorrectedAdGradSln(fi);
+    *face_grad_pointer = uncorrectedAdGradSln(fi, correct_skewness);
 
   VectorValue<ADReal> & face_grad = *face_grad_pointer;
 

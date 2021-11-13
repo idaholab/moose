@@ -1,0 +1,16 @@
+[Tests]
+  issues = '#18865'
+  design = 'AbaqusUMATStress.md'
+
+  [build]
+    type = 'RunCommand'
+    command = 'make'
+    requirement = "The multi-file UMAT build system shall compile UMAT plugins."
+  []
+  [test]
+    type = 'RunApp'
+    input = 'test.i'
+    valgrind = NONE
+    requirement = "The compiled UMAT plugins shall be dynamically linked to enable their use in MOOSE simulations."
+  []
+[]

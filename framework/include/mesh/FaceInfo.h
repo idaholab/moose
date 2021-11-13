@@ -69,6 +69,13 @@ public:
   const Point & faceCentroid() const { return _face_centroid; }
 
   ///@{
+  /// Returns the coordinates of the approximate face centroid
+  /// (intersection of the face and the line between the cell centroids)
+  /// in case of skewed meshes.
+  const Point & rIntersection() const { return _r_intersection; }
+  ///@}
+
+  ///@{
   /// Returns the elem and neighbor elements adjacent to the face.
   /// If a face is on a mesh boundary, the neighborPtr
   /// will return nullptr - the elem will never be null.
@@ -158,6 +165,9 @@ public:
   /// Return the geometric weighting factor
   Real gC() const { return _gc; }
 
+  /// Return the weighting factor for skewed element-pairs
+  Real gCSkewed() const { return _gc_skewed; }
+
   /**
    * @return the distance vector drawn from centroid C to F, or in terms of MOOSE implementation,
    * the distance vector obtained from subtracting the element centroid from the neighbor centroid
@@ -231,15 +241,24 @@ private:
   const Point _neighbor_centroid;
   const Real _neighbor_volume;
 
-  /// Geometric weighting factor
+  /// Geometric weighting factor for face value interpolation
   const Real _gc;
 
   /// the distance vector between neighbor and element centroids
   const RealVectorValue _d_cf;
+
   /// the distance norm between neighbor and element centroids
   const Real _d_cf_mag;
+
   /// The unit normal vector pointing from element center C to element center F
   const RealVectorValue _e_cf;
+
+  /// The vector to the intersection of d_{CF} and the face.
+  Point _r_intersection;
+
+  /// Geometric weighting factor for face value interpolation in case of skewed
+  /// cell-connections
+  Real _gc_skewed;
 
   /// cached locations of variables in solution vectors
   /// TODO: make this more efficient by not using a map if possible

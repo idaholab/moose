@@ -54,6 +54,7 @@
     issues = '#13025'
     requirement = 'We shall be able to reproduce the hand-coded stabilized results with automatic differentiation objects.'
     recover = false # Same output as lid_driven_stabilized
+    valgrind = HEAVY
   [../]
   [./ad_lid_driven_stabilized_jacobian]
     type = 'PetscJacobianTester'
@@ -121,6 +122,7 @@
     issues = '#15159'
     requirement = 'The system shall be able to reproduce stabilized incompressible Navier-Stokes results with auto-differentiation using a customized and condensed action syntax.'
     recover = false # Same output as lid_driven_stabilized
+    valgrind = HEAVY
   [../]
   [ad_stabilized_energy_steady]
     type = 'Exodiff'
