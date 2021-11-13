@@ -28,7 +28,7 @@ findUStar(const ADReal mu, const ADReal rho, ADReal u, const Real dist)
     ADReal deriv = (1 + std::log(u_star * dist / (0.111 * nu))) / von_karman;
     ADReal new_u_star = u_star - residual / deriv;
 
-    ADReal rel_err = std::abs(new_u_star - u_star) / new_u_star;
+    Real rel_err = std::abs((new_u_star.value() - u_star.value()) / new_u_star.value());
     u_star = new_u_star;
     if (rel_err < REL_TOLERANCE)
       return u_star;

@@ -2,6 +2,7 @@
   issues = '#18626'
   [thermal_resistance]
     requirement = 'The system shall be able to solve a heat conduction problem with diffusion/conduction/radiation combined thermal resistance boundary conditions'
+    design = 'FVThermalResistanceBC.md'
     [matprop]
       type = Exodiff
       input = test.i
@@ -9,17 +10,14 @@
       allow_warnings = true # thermal resistance bc has an inner solve that may not always converge enough
       ad_indexing_type = 'global'
       detail = 'using regular material properties.'
-      design = 'FVThermalResistanceBC.md'
     []
     [functor_matprop]
       type = Exodiff
       input = test_functor.i
-      exodiff = 'functor_out.e'
+      exodiff = 'test_functor_out.e'
       allow_warnings = true # thermal resistance bc has an inner solve that may not always converge enough
       ad_indexing_type = 'global'
       detail = 'using functor material properties.'
-      design = 'FunctorThermalResistanceBC.md'
-      cli_args = 'Outputs/file_base=functor_out'
     []
   []
 []
