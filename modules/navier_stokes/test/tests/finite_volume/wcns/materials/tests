@@ -11,6 +11,7 @@
     abs_zero = 1e-9
     rel_err = 1e-5
     recover = false # see #19126
+    valgrind = HEAVY
   []
   [fluidprops]
     type = 'Exodiff'

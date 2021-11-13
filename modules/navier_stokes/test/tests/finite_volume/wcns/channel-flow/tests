@@ -22,5 +22,6 @@
     mesh_mode = REPLICATED
     abs_zero = 1e-9
     recover = false # see #19126
+    valgrind = HEAVY
   []
 []
