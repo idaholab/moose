@@ -24,7 +24,7 @@ ViewFactorRayBC::validParams()
 
 ViewFactorRayBC::ViewFactorRayBC(const InputParameters & params)
   : GeneralRayBC(params),
-    _vf_study(RayTracingStudy::castFromStudy<ViewFactorRayStudy>(params)),
+    _vf_study(getStudy<ViewFactorRayStudy>()),
     _ray_index_start_bnd_id(_vf_study.rayIndexStartBndID()),
     _ray_index_start_total_weight(_vf_study.rayIndexStartTotalWeight())
 {
