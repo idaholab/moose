@@ -51,8 +51,8 @@
 
   [./rename]
     type = RenameBlockGenerator
-    old_block_id = '1 2 3 4'
-    new_block_id = '0 0 0 0'
+    old_block = '1 2 3 4'
+    new_block = '0 0 0 0'
     input = inner_top
   [../]
 []
