@@ -124,7 +124,7 @@ FVThermalResistanceBC::computeQpResidual()
   computeParallelResistance();
 
   // other iteration requirements
-  Real iteration = 0;
+  unsigned int iteration = 0;
   ADReal norm = 2 * _tolerance;
   ADReal T_surface_previous;
 
