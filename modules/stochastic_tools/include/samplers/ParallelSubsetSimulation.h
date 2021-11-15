@@ -23,7 +23,7 @@ public:
   ParallelSubsetSimulation(const InputParameters & parameters);
 
   /// Access the number samples per subset
-  const int & getNumSamplesSub() const;
+  const unsigned int & getNumSamplesSub() const;
 
   /// Access use absolute value bool
   const bool & getUseAbsoluteValue() const;
@@ -39,7 +39,7 @@ protected:
   std::vector<Distribution const *> _distributions;
 
   /// Number of samples per subset
-  const int & _num_samplessub;
+  const unsigned int & _num_samplessub;
 
   /// Absolute value of the model result. Use this when failure is defined as a non-exceedance rather than an exceedance.
   const bool & _use_absolute_value;
@@ -51,7 +51,6 @@ protected:
   const unsigned int & _num_random_seeds;
 
 private:
-
   /// Storage for the previously accepted sample inputs across all the subsets
   std::vector<std::vector<Real>> _inputs_sto;
 

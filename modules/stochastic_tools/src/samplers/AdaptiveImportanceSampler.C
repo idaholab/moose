@@ -53,7 +53,7 @@ AdaptiveImportanceSampler::AdaptiveImportanceSampler(const InputParameters & par
     _use_absolute_value(getParam<bool>("use_absolute_value")),
     _num_random_seeds(getParam<unsigned int>("num_random_seeds")),
     _step(getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")->timeStep()),
-    _inputs(getReporterValue<std::vector<Real>>("inputs_reporter"))
+    _inputs(getReporterValue<std::vector<std::vector<Real>>>("inputs_reporter"))
 {
   // Filling the `distributions` vector with the user-provided distributions.
   for (const DistributionName & name : getParam<std::vector<DistributionName>>("distributions"))
@@ -134,7 +134,7 @@ AdaptiveImportanceSampler::computeSample(dof_id_type /*row_index*/, dof_id_type 
     if (sample)
     {
       for (dof_id_type j = 0; j < _distributions.size(); ++j)
-        _prev_value[j] = Normal::quantile(_distributions[j]->cdf(_inputs[j]), 0, 1);
+        _prev_value[j] = Normal::quantile(_distributions[j]->cdf(_inputs[0][j]), 0, 1);
       Real acceptance_ratio = 0.0;
       for (dof_id_type i = 0; i < _distributions.size(); ++i)
         acceptance_ratio += std::log(Normal::pdf(_prev_value[i], 0, 1)) -

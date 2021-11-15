@@ -60,7 +60,8 @@ AdaptiveMonteCarloDecision::AdaptiveMonteCarloDecision(const InputParameters & p
     _prev_val_out.resize(1);
     _prev_val_out[0] = 1.0;
     _output_required.resize(1);
-  } else if (_pss)
+  }
+  else if (_pss)
   {
     auto rows = _sampler.getNumberOfRows();
     _inputs_sto.resize(cols);
@@ -113,7 +114,8 @@ AdaptiveMonteCarloDecision::execute()
       _inputs[0] = _sampler.getNextLocalRow();
       _prev_val_out[0] = tmp;
     }
-  } else if (_pss)
+  }
+  else if (_pss)
   {
     std::vector<Real> data_in;
     data_in.resize(_sampler.getNumberOfRows());
@@ -130,27 +132,37 @@ AdaptiveMonteCarloDecision::execute()
       {
         for (dof_id_type i = 0; i < _sampler.getNumberOfCols(); ++i)
         {
-          _inputs_sto[i].push_back(data_in[(_sampler.getNumberOfCols())*ss+i]);
-          _inputs[i][ss] = data_in[(_sampler.getNumberOfCols())*ss+i];
+          _inputs_sto[i].push_back(data_in[(_sampler.getNumberOfCols()) * ss + i]);
+          _inputs[i][ss] = data_in[(_sampler.getNumberOfCols()) * ss + i];
         }
       }
-      _output_required = (_pss->getUseAbsoluteValue()) ? AdaptiveMonteCarloUtils::computeVectorABS(_output_value) : _output_value;
+      _output_required = (_pss->getUseAbsoluteValue())
+                             ? AdaptiveMonteCarloUtils::computeVectorABS(_output_value)
+                             : _output_value;
       _communicator.allgather(_output_required);
       for (dof_id_type ss = 0; ss < _output_required.size(); ++ss)
         _outputs_sto.push_back(_output_required[ss]);
-    } else
+    }
+    else
     {
-      _subset = std::floor(((_step-1) * _sampler.getNumberOfRows()) / _pss->getNumSamplesSub());
+      _subset = std::floor(((_step - 1) * _sampler.getNumberOfRows()) / _pss->getNumSamplesSub());
       _count_max = std::floor(1 / _pss->getSubsetProbability());
-      if (_subset > (std::floor(((_step-2) * _sampler.getNumberOfRows()) /  _pss->getNumSamplesSub())))
+      if (_subset >
+          (std::floor(((_step - 2) * _sampler.getNumberOfRows()) / _pss->getNumSamplesSub())))
       {
         _ind_sto = -1;
         _count = INT_MAX;
-        _output_sorted = AdaptiveMonteCarloUtils::sortOUTPUT(_outputs_sto, _pss->getNumSamplesSub(), _subset, _pss->getSubsetProbability());
+        _output_sorted = AdaptiveMonteCarloUtils::sortOUTPUT(
+            _outputs_sto, _pss->getNumSamplesSub(), _subset, _pss->getSubsetProbability());
         for (dof_id_type j = 0; j < _sampler.getNumberOfCols(); ++j)
         {
-          _inputs_sorted[j].resize(std::floor(_pss->getNumSamplesSub() * _pss->getSubsetProbability()));
-          _inputs_sorted[j] = AdaptiveMonteCarloUtils::sortINPUT(_inputs_sto[j], _outputs_sto, _pss->getNumSamplesSub(), _subset, _pss->getSubsetProbability());
+          _inputs_sorted[j].resize(
+              std::floor(_pss->getNumSamplesSub() * _pss->getSubsetProbability()));
+          _inputs_sorted[j] = AdaptiveMonteCarloUtils::sortINPUT(_inputs_sto[j],
+                                                                 _outputs_sto,
+                                                                 _pss->getNumSamplesSub(),
+                                                                 _subset,
+                                                                 _pss->getSubsetProbability());
         }
         _output_limits.push_back(AdaptiveMonteCarloUtils::computeMIN(_output_sorted));
       }
@@ -164,13 +176,15 @@ AdaptiveMonteCarloDecision::execute()
           _prev_val_out[jj] = _output_sorted[_ind_sto];
         }
         _count = 0;
-      } else
+      }
+      else
       {
         for (dof_id_type jj = 0; jj < _sampler.getNumberOfRows(); ++jj)
         {
           for (dof_id_type k = 0; k < _sampler.getNumberOfCols(); ++k)
-            _prev_val[k][jj] = _inputs_sto[k][_inputs_sto[k].size()-_sampler.getNumberOfRows()+jj];
-          _prev_val_out[jj] = _outputs_sto[_outputs_sto.size()-_sampler.getNumberOfRows()+jj];
+            _prev_val[k][jj] =
+                _inputs_sto[k][_inputs_sto[k].size() - _sampler.getNumberOfRows() + jj];
+          _prev_val_out[jj] = _outputs_sto[_outputs_sto.size() - _sampler.getNumberOfRows() + jj];
         }
       }
       ++_count;
@@ -180,25 +194,28 @@ AdaptiveMonteCarloDecision::execute()
         data_in = data;
         _communicator.allgather(data_in);
       }
-      _output_required = (_pss->getUseAbsoluteValue()) ? AdaptiveMonteCarloUtils::computeVectorABS(_output_value) :  _output_value;
+      _output_required = (_pss->getUseAbsoluteValue())
+                             ? AdaptiveMonteCarloUtils::computeVectorABS(_output_value)
+                             : _output_value;
       _communicator.allgather(_output_required);
       std::vector<Real> Tmp2 = _output_required;
       for (dof_id_type ss = 0; ss < _sampler.getNumberOfRows(); ++ss)
       {
-        if (Tmp2[ss] >= _output_limits[_subset-1])
+        if (Tmp2[ss] >= _output_limits[_subset - 1])
         {
           for (dof_id_type i = 0; i < _sampler.getNumberOfCols(); ++i)
           {
-            _inputs[i][ss] = data_in[(_sampler.getNumberOfCols())*ss+i];
+            _inputs[i][ss] = data_in[(_sampler.getNumberOfCols()) * ss + i];
             _inputs_sto[i].push_back(_inputs[i][ss]);
           }
           _outputs_sto.push_back(Tmp2[ss]);
-        } else
+        }
+        else
         {
           for (dof_id_type i = 0; i < _sampler.getNumberOfCols(); ++i)
           {
             _inputs[i][ss] = _prev_val[i][ss];
-            data_in[(_sampler.getNumberOfCols())*ss+i] = _inputs[i][ss];
+            data_in[(_sampler.getNumberOfCols()) * ss + i] = _inputs[i][ss];
             _inputs_sto[i].push_back(_inputs[i][ss]);
           }
           Tmp2[ss] = _prev_val_out[ss];

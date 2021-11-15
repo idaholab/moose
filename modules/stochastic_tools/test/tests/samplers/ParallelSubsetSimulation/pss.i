@@ -20,7 +20,7 @@
     distributions = 'mu1 mu2'
     output_reporter = 'constant/reporter_transfer:average:value'
     inputs_reporter = 'adaptive_MC/inputs'
-    num_samplessub = 250
+    num_samplessub = 20
     use_absolute_value = true
     seed = 1012
   []
@@ -65,7 +65,7 @@
 
 [Executioner]
   type = Transient
-  num_steps = 1000
+  num_steps = 20
 []
 
 [Outputs]

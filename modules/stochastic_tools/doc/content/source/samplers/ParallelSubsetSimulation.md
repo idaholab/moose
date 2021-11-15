@@ -35,7 +35,7 @@ through the equation:
 P_f= P_1~\prod_{i=2}^{N_s}~P_{i|i-1}
 \end{equation}
 
-where, $P_f$ is the failure probability of interest, $P_1$ and $P_{i|i-1}~~(i \to \{2,\dots,N_s\})$
+where, $P_f$ is the failure probability of interest, $P_1$ and $P_{i|i-1}~~(i \in \{2,\dots,N_s\})$
 are the intermediate failure probabilities defining the intermediate failure thresholds, and
 $N_s$ is the number of subsets. Through the intermediate failure probabilities $P_1$ and $P_{i|i-1}$
 PSS creates intermediate failure thresholds that allow to efficiently transition to sampling
@@ -60,9 +60,12 @@ fixed to $p_o$ instead of 0.1, there will be $p_o~M$ Markov chains, with each ch
 simulating $1/p_o$ samples. Once $M$ samples are generated from $p_o~M$
  Markov chains, the second intermediate failure threshold ${F}_2$ is the $(1-p_o) \times 100$
  percentile value of all the samples' outputs. Samples between ${F}_1$ and ${F}_2$ comprise the second subset.
- A similar procedure of simulating $p_o~M$ Markov chains is repeated for determining
+ A similar procedure of simulating $(p_o~M)$ Markov chains is repeated for determining
  the subsequent failure thresholds until the final required failure threshold $F$ is reached.
  More details on the practical implementation of the PSS method are presented in [!cite](li2016pss).
+ Figure [pss_sch] presents a schematic of the PSS method.
+
+ !media Parallel_Subset_Simulation_Sampler.svg style=width:50%; id=pss_sch caption=Schematic of the PSS method
 
 ## Parallelization of Parallel Subset Simulation: An example
 
@@ -129,7 +132,7 @@ Third, the `Executioner` block is presented below:
 
 where, it is noticed that unlike some other sampler classes, the `type` is transient.
  `num_steps` in the above code block are the total number of samples required per processor.
-This value should not be less than $1/p_o~N_s$ (i.e., one over the subset probability
+This value should not be less than $(1/p_o~N_s)$ (i.e., one over the subset probability
 times the number of subsets).
 
 !alert note title=Fixing the total number of samples or FE model evaluations

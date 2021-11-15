@@ -34,7 +34,7 @@ protected:
   std::vector<Real> & _output_required;
 
   /// Model input data that is uncertain
-  std::vector<std::vector<Real>> & _inputs; // std::vector<Real> & _inputs;
+  std::vector<std::vector<Real>> & _inputs;
 
 private:
   /// Track the current step of the main App
@@ -53,10 +53,10 @@ private:
   int _check_step;
 
   /// Storage for previously accepted input values. This helps in making decision on the next proposed inputs.
-  std::vector<std::vector<Real>> _prev_val; // std::vector<Real> _prev_val;
+  std::vector<std::vector<Real>> _prev_val;
 
   /// Storage for previously accepted output value.
-  std::vector<Real> _prev_val_out; // Real _prev_val_out;
+  std::vector<Real> _prev_val_out;
 
   /// Aid in proposing the next sample inputs across several processors in parallel
   int _ind_sto;

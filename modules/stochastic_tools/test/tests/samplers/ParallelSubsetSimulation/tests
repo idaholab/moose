@@ -1,0 +1,14 @@
+[Tests]
+  issues = '#19398'
+  design = 'ParallelSubsetSimulation.md'
+
+  [pss1]
+    requirement = 'The system shall include an Parallel Subset Simulation method for sampling distribution data.'
+    type = 'JSONDiff'
+    skip_keys = 'number_of_parts part'
+    input = 'pss.i'
+    jsondiff = 'pss_out.json'
+    min_parallel = 2
+    max_parallel = 2
+  []
+[]

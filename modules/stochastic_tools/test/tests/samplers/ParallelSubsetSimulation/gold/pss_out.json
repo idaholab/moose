@@ -1,0 +1,622 @@
+{
+    "number_of_parts": 2,
+    "part": 0,
+    "reporters": {
+        "adaptive_MC": {
+            "type": "AdaptiveMonteCarloDecision",
+            "values": {
+                "inputs": {
+                    "type": "std::vector<std::vector<double>>"
+                },
+                "output_required": {
+                    "type": "std::vector<double>"
+                }
+            }
+        },
+        "constant": {
+            "type": "StochasticReporter",
+            "values": {
+                "reporter_transfer:average:value": {
+                    "row_begin": 0,
+                    "row_end": 1,
+                    "type": "std::vector<double>"
+                },
+                "reporter_transfer:converged": {
+                    "row_begin": 0,
+                    "row_end": 1,
+                    "type": "std::vector<bool>"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "adaptive_MC": {
+                "inputs": [
+                    [
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.0,
+                        0.0
+                    ]
+                ],
+                "output_required": [
+                    0.0,
+                    0.0
+                ]
+            },
+            "constant": {
+                "reporter_transfer:average:value": [
+                    0.0
+                ],
+                "reporter_transfer:converged": [
+                    false
+                ]
+            },
+            "time": 0.0,
+            "time_step": 0
+        },
+        {
+            "adaptive_MC": {
+                "inputs": [
+                    [
+                        -0.973065393128977,
+                        -0.29604243943083874
+                    ],
+                    [
+                        0.7161483075376942,
+                        0.9412827492795419
+                    ]
+                ],
+                "output_required": [
+                    0.12516475803407015,
+                    0.3143479036057473
+                ]
+            },
+            "constant": {
+                "reporter_transfer:average:value": [
+                    -0.12516475803407015
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "time": 1.0,
+            "time_step": 1
+        },
+        {
+            "adaptive_MC": {
+                "inputs": [
+                    [
+                        -0.10527992085669924,
+                        -0.9010028396437871
+                    ],
+                    [
+                        0.9592097585906723,
+                        1.0365724222109245
+                    ]
+                ],
+                "output_required": [
+                    0.4160171802983967,
+                    0.06604673239128403
+                ]
+            },
+            "constant": {
+                "reporter_transfer:average:value": [
+                    0.4160171802983967
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "time": 2.0,
+            "time_step": 2
+        },
+        {
+            "adaptive_MC": {
+                "inputs": [
+                    [
+                        0.3530948485707533,
+                        -0.5122425735339009
+                    ],
+                    [
+                        1.2150244132039305,
+                        1.0788664049848204
+                    ]
+                ],
+                "output_required": [
+                    0.7639556844459852,
+                    0.2760475606235183
+                ]
+            },
+            "constant": {
+                "reporter_transfer:average:value": [
+                    0.7639556844459852
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "time": 3.0,
+            "time_step": 3
+        },
+        {
+            "adaptive_MC": {
+                "inputs": [
+                    [
+                        0.7150709035268865,
+                        0.18139854484620566
+                    ],
+                    [
+                        0.8523698005486131,
+                        0.48361381806487036
+                    ]
+                ],
+                "output_required": [
+                    0.7636251049900106,
+                    0.3239804441261827
+                ]
+            },
+            "constant": {
+                "reporter_transfer:average:value": [
+                    0.7636251049900106
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "time": 4.0,
+            "time_step": 4
+        },
+        {
+            "adaptive_MC": {
+                "inputs": [
+                    [
+                        -0.0960132060928327,
+                        -0.1881175962353685
+                    ],
+                    [
+                        1.1345679621493954,
+                        0.7011785036987249
+                    ]
+                ],
+                "output_required": [
+                    0.5059626705943967,
+                    0.2499527977739232
+                ]
+            },
+            "constant": {
+                "reporter_transfer:average:value": [
+                    0.5059626705943967
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "time": 5.0,
+            "time_step": 5
+        },
+        {
+            "adaptive_MC": {
+                "inputs": [
+                    [
+                        -0.11509187756985129,
+                        0.517241399750267
+                    ],
+                    [
+                        0.805969929178794,
+                        1.4778031159916283
+                    ]
+                ],
+                "output_required": [
+                    0.33658167950133655,
+                    0.971944950665619
+                ]
+            },
+            "constant": {
+                "reporter_transfer:average:value": [
+                    0.33658167950133655
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "time": 6.0,
+            "time_step": 6
+        },
+        {
+            "adaptive_MC": {
+                "inputs": [
+                    [
+                        -0.0055910923895931,
+                        0.5993098445506496
+                    ],
+                    [
+                        0.8574960073700434,
+                        1.3286378018918115
+                    ]
+                ],
+                "output_required": [
+                    0.41503067928059584,
+                    0.9392567260134137
+                ]
+            },
+            "constant": {
+                "reporter_transfer:average:value": [
+                    0.41503067928059584
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "time": 7.0,
+            "time_step": 7
+        },
+        {
+            "adaptive_MC": {
+                "inputs": [
+                    [
+                        -0.7453574717463827,
+                        -0.33178137749813313
+                    ],
+                    [
+                        1.500258920921191,
+                        1.4222493012921373
+                    ]
+                ],
+                "output_required": [
+                    0.3677725714821252,
+                    0.5312537058858486
+                ]
+            },
+            "constant": {
+                "reporter_transfer:average:value": [
+                    0.3677725714821252
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "time": 8.0,
+            "time_step": 8
+        },
+        {
+            "adaptive_MC": {
+                "inputs": [
+                    [
+                        0.1109635102693064,
+                        -0.592016306147952
+                    ],
+                    [
+                        0.8917288856510626,
+                        1.4927270788839804
+                    ]
+                ],
+                "output_required": [
+                    0.48849126102040047,
+                    0.4388078965974893
+                ]
+            },
+            "constant": {
+                "reporter_transfer:average:value": [
+                    0.48849126102040047
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "time": 9.0,
+            "time_step": 9
+        },
+        {
+            "adaptive_MC": {
+                "inputs": [
+                    [
+                        -0.1422408180750021,
+                        0.6730427555380012
+                    ],
+                    [
+                        0.6600980689017069,
+                        0.5942934539565934
+                    ]
+                ],
+                "output_required": [
+                    0.2522894783228597,
+                    0.6174203231528446
+                ]
+            },
+            "constant": {
+                "reporter_transfer:average:value": [
+                    0.2522894783228597
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "time": 10.0,
+            "time_step": 10
+        },
+        {
+            "adaptive_MC": {
+                "inputs": [
+                    [
+                        0.5993098445506496,
+                        0.517241399750267
+                    ],
+                    [
+                        1.3286378018918115,
+                        1.4778031159916283
+                    ]
+                ],
+                "output_required": [
+                    0.9392567260134137,
+                    0.971944950665619
+                ]
+            },
+            "constant": {
+                "reporter_transfer:average:value": [
+                    0.44030069788722603
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "time": 11.0,
+            "time_step": 11
+        },
+        {
+            "adaptive_MC": {
+                "inputs": [
+                    [
+                        0.4756234757587354,
+                        0.517241399750267
+                    ],
+                    [
+                        1.6069412882448921,
+                        1.4778031159916283
+                    ]
+                ],
+                "output_required": [
+                    1.0145830285171529,
+                    0.971944950665619
+                ]
+            },
+            "constant": {
+                "reporter_transfer:average:value": [
+                    1.0145830285171529
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "time": 12.0,
+            "time_step": 12
+        },
+        {
+            "adaptive_MC": {
+                "inputs": [
+                    [
+                        0.4756234757587354,
+                        0.517241399750267
+                    ],
+                    [
+                        1.6069412882448921,
+                        1.4778031159916283
+                    ]
+                ],
+                "output_required": [
+                    1.0145830285171529,
+                    0.971944950665619
+                ]
+            },
+            "constant": {
+                "reporter_transfer:average:value": [
+                    0.7519210785435437
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "time": 13.0,
+            "time_step": 13
+        },
+        {
+            "adaptive_MC": {
+                "inputs": [
+                    [
+                        0.47562346092947255,
+                        0.517241399750267
+                    ],
+                    [
+                        1.7237977598085366,
+                        1.4778031159916283
+                    ]
+                ],
+                "output_required": [
+                    1.0715131081117226,
+                    0.971944950665619
+                ]
+            },
+            "constant": {
+                "reporter_transfer:average:value": [
+                    1.0715131081117226
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "time": 14.0,
+            "time_step": 14
+        },
+        {
+            "adaptive_MC": {
+                "inputs": [
+                    [
+                        0.6294843771749885,
+                        0.517241399750267
+                    ],
+                    [
+                        1.6331731802910776,
+                        1.4778031159916283
+                    ]
+                ],
+                "output_required": [
+                    1.1023205601236452,
+                    0.971944950665619
+                ]
+            },
+            "constant": {
+                "reporter_transfer:average:value": [
+                    1.1023205601236452
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "time": 15.0,
+            "time_step": 15
+        },
+        {
+            "adaptive_MC": {
+                "inputs": [
+                    [
+                        0.6294843771749885,
+                        0.5172413852737283
+                    ],
+                    [
+                        1.6331731802910776,
+                        1.4778031011292225
+                    ]
+                ],
+                "output_required": [
+                    1.1023205601236452,
+                    0.9719449363722816
+                ]
+            },
+            "constant": {
+                "reporter_transfer:average:value": [
+                    0.7223082820731129
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "time": 16.0,
+            "time_step": 16
+        },
+        {
+            "adaptive_MC": {
+                "inputs": [
+                    [
+                        0.6294843771749885,
+                        0.3755646470226146
+                    ],
+                    [
+                        1.6331731802910776,
+                        1.5721956562839479
+                    ]
+                ],
+                "output_required": [
+                    1.1023205601236452,
+                    0.9489090478779318
+                ]
+            },
+            "constant": {
+                "reporter_transfer:average:value": [
+                    0.8122846573749496
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "time": 17.0,
+            "time_step": 17
+        },
+        {
+            "adaptive_MC": {
+                "inputs": [
+                    [
+                        0.732030178707445,
+                        0.3755646470226146
+                    ],
+                    [
+                        1.6331731748299185,
+                        1.5721956562839479
+                    ]
+                ],
+                "output_required": [
+                    1.1522787780564305,
+                    0.9489090478779318
+                ]
+            },
+            "constant": {
+                "reporter_transfer:average:value": [
+                    1.1522787780564305
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "time": 18.0,
+            "time_step": 18
+        },
+        {
+            "adaptive_MC": {
+                "inputs": [
+                    [
+                        0.7320301838559187,
+                        0.3755646470226146
+                    ],
+                    [
+                        1.3391495843731742,
+                        1.5721956562839479
+                    ]
+                ],
+                "output_required": [
+                    1.0090364910486074,
+                    0.9489090478779318
+                ]
+            },
+            "constant": {
+                "reporter_transfer:average:value": [
+                    1.0090364910486074
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "time": 19.0,
+            "time_step": 19
+        },
+        {
+            "adaptive_MC": {
+                "inputs": [
+                    [
+                        0.7320301838559187,
+                        0.4579845687063668
+                    ],
+                    [
+                        1.3391495843731742,
+                        1.5721956449847716
+                    ]
+                ],
+                "output_required": [
+                    1.0090364910486074,
+                    0.9890623452605423
+                ]
+            },
+            "constant": {
+                "reporter_transfer:average:value": [
+                    0.7929673663103923
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "time": 20.0,
+            "time_step": 20
+        }
+    ]
+}

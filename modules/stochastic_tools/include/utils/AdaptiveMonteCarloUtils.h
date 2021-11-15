@@ -46,7 +46,11 @@ Real computeMean(const std::vector<Real> & data, const unsigned int & start_inde
  * @param the subset index
  * @param the subset intermediate failure probability
  */
-std::vector<Real> sortINPUT(const std::vector<Real> & inputs, const std::vector<Real> & outputs, const int & samplessub, const unsigned int & subset, const Real & subset_prob);
+std::vector<Real> sortINPUT(const std::vector<Real> & inputs,
+                            const std::vector<Real> & outputs,
+                            const int & samplessub,
+                            const unsigned int & subset,
+                            const Real & subset_prob);
 
 /**
  * return the largest po percentile output values.
@@ -58,7 +62,10 @@ std::vector<Real> sortINPUT(const std::vector<Real> & inputs, const std::vector<
  * @param the subset index
  * @param the subset intermediate failure probability
  */
-std::vector<Real> sortOUTPUT(const std::vector<Real> & outputs, const int & samplessub, const unsigned int & subset, const Real & subset_prob);
+std::vector<Real> sortOUTPUT(const std::vector<Real> & outputs,
+                             const int & samplessub,
+                             const unsigned int & subset,
+                             const Real & subset_prob);
 
 /**
  * return the minimum value in a vector.
