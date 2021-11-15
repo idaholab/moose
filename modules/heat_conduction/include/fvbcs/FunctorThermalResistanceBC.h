@@ -28,10 +28,10 @@
  * radiative heat transfer depends on the surface temperature. This iteration is
  * performed with a simple underrelaxation method.
  */
-class FVThermalResistanceBC : public FVFluxBC
+class FunctorThermalResistanceBC : public FVFluxBC
 {
 public:
-  FVThermalResistanceBC(const InputParameters & parameters);
+  FunctorThermalResistanceBC(const InputParameters & parameters);
   static InputParameters validParams();
 
 protected:
@@ -51,7 +51,7 @@ protected:
   const Real _inner_radius;
 
   /// temperature variable
-  const ADVariableValue & _T;
+  const Moose::Functor<ADReal> & _T;
 
   /// ambient temperature for convection and radiation heat transfer
   const Real _T_ambient;
@@ -64,7 +64,7 @@ protected:
   const std::vector<Real> & _dx;
 
   /// convective heat transfer coefficient
-  const ADMaterialProperty<Real> & _h;
+  const Moose::Functor<ADReal> & _h;
 
   /// boundary emissivity
   const Real & _emissivity;
