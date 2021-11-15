@@ -132,7 +132,7 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
     _displaced(getParam<bool>("use_displaced_mesh")),
     _interpolate_normals(getParam<bool>("interpolate_normals"))
 {
-  if (_var->useDual())
+  if (_use_dual)
     _assembly.activateDual();
 
   // Note parameter is discretization order, we then convert to quadrature order
