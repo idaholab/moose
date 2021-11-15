@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CartesianIDPatternedMeshGenerator.h"
-#include "libmesh/elem.h"
+#include "ReportingIDGeneratorUtils.h"
 
 registerMooseObject("ReactorApp", CartesianIDPatternedMeshGenerator);
 
@@ -68,88 +68,29 @@ std::unique_ptr<MeshBase>
 CartesianIDPatternedMeshGenerator::generate()
 {
   auto mesh = PatternedMeshGenerator::generate();
-  // assumes that the entire mesh has elements of each individual mesh sequentially ordered.
-  std::vector<dof_id_type> integer_ids;
-  if (_assign_type == "cell")
-    integer_ids = getCellwiseIntegerIDs();
-  else if (_assign_type == "pattern")
-    integer_ids = getPatternIntegerIDs();
-  else if (_assign_type == "manual")
-    integer_ids = getManualIntegerIDs();
 
-  unsigned int extra_id_index = 0;
+  unsigned int extra_id_index;
   if (!mesh->has_elem_integer(_element_id_name))
     extra_id_index = mesh->add_elem_integer(_element_id_name);
   else
+  {
     extra_id_index = mesh->get_elem_integer_index(_element_id_name);
-  unsigned int i = 0;
-  for (auto & elem : mesh->element_ptr_range())
-    elem->set_extra_integer(extra_id_index, integer_ids[i++]);
+    paramWarning(
+        "id_name", "An element integer with the name '", _element_id_name, "' already exists");
+  }
+
+  // patternedMeshGenerator for Carterisan lattice does not support duct structures
+  const bool has_assembly_duct = false;
+  // asssign reporting IDs to individual elements
+  ReportingIDGeneratorUtils::assignReportingIDs(mesh,
+                                                extra_id_index,
+                                                _assign_type,
+                                                _use_exclude_id,
+                                                _exclude_ids,
+                                                has_assembly_duct,
+                                                _meshes,
+                                                _pattern,
+                                                _id_pattern);
+
   return mesh;
-}
-
-std::vector<dof_id_type>
-CartesianIDPatternedMeshGenerator::getCellwiseIntegerIDs() const
-{
-  std::vector<dof_id_type> integer_ids;
-  dof_id_type id = 0;
-  for (MooseIndex(_pattern) i = 0; i < _pattern.size(); ++i)
-  {
-    for (MooseIndex(_pattern[i]) j = 0; j < _pattern[i].size(); ++j)
-    {
-      const ReplicatedMesh & cell_mesh = *_meshes[_pattern[i][j]];
-      unsigned int n_cell_elem = cell_mesh.n_elem();
-      bool exclude_id = false;
-      if (_use_exclude_id)
-        if (_exclude_ids[_pattern[i][j]])
-          exclude_id = true;
-      if (!exclude_id)
-      {
-        for (unsigned int k = 0; k < n_cell_elem; ++k)
-          integer_ids.push_back(id);
-        ++id;
-      }
-      else
-      {
-        for (unsigned int k = 0; k < n_cell_elem; ++k)
-          integer_ids.push_back(DofObject::invalid_id);
-      }
-    }
-  }
-  return integer_ids;
-}
-
-std::vector<dof_id_type>
-CartesianIDPatternedMeshGenerator::getPatternIntegerIDs() const
-{
-  std::vector<dof_id_type> integer_ids;
-  for (MooseIndex(_pattern) i = 0; i < _pattern.size(); ++i)
-  {
-    for (MooseIndex(_pattern[i]) j = 0; j < _pattern[i].size(); ++j)
-    {
-      const ReplicatedMesh & cell_mesh = *_meshes[_pattern[i][j]];
-      unsigned int n_cell_elem = cell_mesh.n_elem();
-      for (unsigned int k = 0; k < n_cell_elem; ++k)
-        integer_ids.push_back(_pattern[i][j]);
-    }
-  }
-  return integer_ids;
-}
-
-std::vector<dof_id_type>
-CartesianIDPatternedMeshGenerator::getManualIntegerIDs() const
-{
-  std::vector<dof_id_type> integer_ids;
-  for (MooseIndex(_pattern) i = 0; i < _pattern.size(); ++i)
-  {
-    for (MooseIndex(_pattern[i]) j = 0; j < _pattern[i].size(); ++j)
-    {
-      dof_id_type id = _id_pattern[i][j];
-      const ReplicatedMesh & cell_mesh = *_meshes[_pattern[i][j]];
-      unsigned int n_cell_elem = cell_mesh.n_elem();
-      for (unsigned int k = 0; k < n_cell_elem; ++k)
-        integer_ids.push_back(id);
-    }
-  }
-  return integer_ids;
 }

@@ -1,5 +1,14 @@
-#include "PatternedHexMeshGenerator.h"
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #include "HexIDPatternedMeshGenerator.h"
+#include "ReportingIDGeneratorUtils.h"
 
 registerMooseObject("ReactorApp", HexIDPatternedMeshGenerator);
 
@@ -60,161 +69,36 @@ std::unique_ptr<MeshBase>
 HexIDPatternedMeshGenerator::generate()
 {
   auto mesh = PatternedHexMeshGenerator::generate();
-  std::vector<dof_id_type> integer_ids;
-  if (_assign_type == "cell")
-    integer_ids = getCellwiseIntegerIDs();
-  else if (_assign_type == "pattern")
-    integer_ids = getPatternIntegerIDs();
-  else if (_assign_type == "manual")
-    integer_ids = getManualIntegerIDs();
 
-  std::set<SubdomainID> blks = getCellBlockIDs();
-  unsigned int duct_boundary_id = *std::max_element(integer_ids.begin(), integer_ids.end()) + 1;
-
-  std::map<SubdomainID, unsigned int> blks_duct = getDuckBlockIDs(mesh, blks);
-
-  unsigned int extra_id_index = mesh->add_elem_integer(_element_id_name);
-
-  unsigned int i = 0;
-  unsigned int id = integer_ids[i];
-  unsigned old_id = id;
-  for (auto elem : mesh->element_ptr_range())
+  unsigned int extra_id_index;
+  if (!mesh->has_elem_integer(_element_id_name))
+    extra_id_index = mesh->add_elem_integer(_element_id_name);
+  else
   {
-    auto blk = elem->subdomain_id();
-    auto it = blks.find(blk);
-    if (it == blks.end())
-    {
-      if (_has_assembly_duct)
-      {
-        auto it2 = blks_duct.find(blk);
-        if (it2 == blks_duct.end())
-          elem->set_extra_integer(extra_id_index, old_id);
-        else
-          elem->set_extra_integer(extra_id_index, duct_boundary_id + it2->second);
-      }
-      else
-        elem->set_extra_integer(extra_id_index, old_id);
-    }
-    else
-    {
-      elem->set_extra_integer(extra_id_index, id);
-      ++i;
-      old_id = id;
-      id = integer_ids[i];
-    }
+    extra_id_index = mesh->get_elem_integer_index(_element_id_name);
+    paramWarning(
+        "id_name", "An element integer with the name '", _element_id_name, "' already exists");
   }
+
+  std::vector<std::unique_ptr<ReplicatedMesh>> meshes;
+  meshes.reserve(_input_names.size());
+  for (MooseIndex(_input_names) i = 0; i < _input_names.size(); ++i)
+  {
+    std::unique_ptr<ReplicatedMesh> cell_mesh =
+        dynamic_pointer_cast<ReplicatedMesh>(*_mesh_ptrs[i]);
+    meshes.push_back(std::move(cell_mesh));
+  }
+
+  // asssign reporting IDs to individual elements
+  ReportingIDGeneratorUtils::assignReportingIDs(mesh,
+                                                extra_id_index,
+                                                _assign_type,
+                                                _use_exclude_id,
+                                                _exclude_ids,
+                                                _has_assembly_duct,
+                                                meshes,
+                                                _pattern,
+                                                _id_pattern);
+
   return dynamic_pointer_cast<MeshBase>(mesh);
-}
-
-std::vector<dof_id_type>
-HexIDPatternedMeshGenerator::getCellwiseIntegerIDs() const
-{
-  std::vector<dof_id_type> integer_ids;
-  dof_id_type id = 0;
-  for (MooseIndex(_pattern) i = 0; i < _pattern.size(); ++i)
-  {
-    for (MooseIndex(_pattern[i]) j = 0; j < _pattern[i].size(); ++j)
-    {
-      // ReplicatedMesh & cell_mesh = *_meshes[_pattern[i][j]];
-      const ReplicatedMesh * cell_mesh =
-          dynamic_cast<ReplicatedMesh *>((*_mesh_ptrs[_pattern[i][j]]).get());
-      unsigned int n_cell_elem = cell_mesh->n_elem();
-      bool exclude_id = false;
-      if (_use_exclude_id)
-        if (_exclude_ids[_pattern[i][j]])
-          exclude_id = true;
-      if (!exclude_id)
-      {
-        for (unsigned int k = 0; k < n_cell_elem; ++k)
-          integer_ids.push_back(id);
-        ++id;
-      }
-      else
-        for (unsigned int k = 0; k < n_cell_elem; ++k)
-          integer_ids.push_back(DofObject::invalid_id);
-    }
-  }
-  return integer_ids;
-}
-
-std::vector<dof_id_type>
-HexIDPatternedMeshGenerator::getPatternIntegerIDs() const
-{
-  std::vector<dof_id_type> integer_ids;
-  for (MooseIndex(_pattern) i = 0; i < _pattern.size(); ++i)
-  {
-    for (MooseIndex(_pattern[i]) j = 0; j < _pattern[i].size(); ++j)
-    {
-      const ReplicatedMesh * cell_mesh =
-          dynamic_cast<ReplicatedMesh *>((*_mesh_ptrs[_pattern[i][j]]).get());
-      unsigned int n_cell_elem = cell_mesh->n_elem();
-      for (unsigned int k = 0; k < n_cell_elem; ++k)
-        integer_ids.push_back(_pattern[i][j]);
-    }
-  }
-  return integer_ids;
-}
-std::vector<dof_id_type>
-HexIDPatternedMeshGenerator::getManualIntegerIDs() const
-{
-  std::vector<dof_id_type> integer_ids;
-  for (MooseIndex(_pattern) i = 0; i < _pattern.size(); ++i)
-  {
-    for (MooseIndex(_pattern[i]) j = 0; j < _pattern[i].size(); ++j)
-    {
-      unsigned int id = _id_pattern[i][j];
-      const ReplicatedMesh * cell_mesh =
-          dynamic_cast<ReplicatedMesh *>((*_mesh_ptrs[_pattern[i][j]]).get());
-      unsigned int n_cell_elem = cell_mesh->n_elem();
-      for (unsigned int k = 0; k < n_cell_elem; ++k)
-        integer_ids.push_back(id);
-    }
-  }
-  return integer_ids;
-}
-
-std::set<SubdomainID>
-HexIDPatternedMeshGenerator::getCellBlockIDs() const
-{
-  std::set<SubdomainID> blks;
-  for (MooseIndex(_pattern) i = 0; i < _pattern.size(); ++i)
-  {
-    for (MooseIndex(_pattern[i]) j = 0; j < _pattern[i].size(); ++j)
-    {
-      const ReplicatedMesh * cell_mesh =
-          dynamic_cast<ReplicatedMesh *>((*_mesh_ptrs[_pattern[i][j]]).get());
-      for (auto elem : cell_mesh->element_ptr_range())
-      {
-        auto blk = elem->subdomain_id();
-        auto it = blks.find(blk);
-        if (it == blks.end())
-          blks.insert(blk);
-      }
-    }
-  }
-  return blks;
-}
-
-std::map<SubdomainID, unsigned int>
-HexIDPatternedMeshGenerator::getDuckBlockIDs(std::unique_ptr<MeshBase> & mesh,
-                                             std::set<SubdomainID> & blks) const
-{
-  unsigned int i = 0;
-  std::map<SubdomainID, unsigned int> blks_duct;
-  if (_has_assembly_duct)
-  {
-    for (auto elem : mesh->element_ptr_range())
-    {
-      auto blk = elem->subdomain_id();
-      auto it1 = blks.find(blk);
-      if (it1 == blks.end())
-      {
-        auto it2 = blks_duct.find(blk);
-        if (it2 == blks_duct.end())
-          blks_duct[blk] = i++;
-      }
-    }
-    blks_duct.erase(blks_duct.begin());
-  }
-  return blks_duct;
 }

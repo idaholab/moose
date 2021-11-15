@@ -25,12 +25,6 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
-  /// assign IDs for each component in lattice in sequential order
-  std::vector<dof_id_type> getCellwiseIntegerIDs() const;
-  /// assign IDs for each input component type
-  std::vector<dof_id_type> getPatternIntegerIDs() const;
-  /// Assign IDs based on user-defined mapping defined in id_pattern
-  std::vector<dof_id_type> getManualIntegerIDs() const;
   /// name of integer ID.
   const std::string _element_id_name;
   /// integer ID assignment type
