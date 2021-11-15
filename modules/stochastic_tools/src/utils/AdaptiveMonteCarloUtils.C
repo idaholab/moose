@@ -32,7 +32,6 @@ computeSTD(const std::vector<Real> & data, const unsigned int & start_index)
   }
 }
 
-// Compute mean of a data vector by ignoring some values in the vector at the beginning
 Real
 computeMean(const std::vector<Real> & data, const unsigned int & start_index)
 {
