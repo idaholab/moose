@@ -21,12 +21,12 @@ public:
 
   static InputParameters validParams();
 
-  virtual void act();
+  void act() override final;
 
-private:
+protected:
   /**
-   * Gets a RayTracingStudy to associate with a RayTracingObject and sets it as the
-   * '_ray_tracing_study' private parameter.
+   * Calls addObject on the problem to add the desired object after
+   * _ray_tracing_study is set in _moose_object_pars
    */
-  void setRayTracingStudy();
+  virtual void addRayTracingObject() = 0;
 };
