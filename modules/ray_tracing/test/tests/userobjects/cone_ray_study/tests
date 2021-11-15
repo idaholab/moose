@@ -19,7 +19,7 @@
   []
 
   [errors]
-    requirement = 'The ConeRayStudy shall repot a useful error when'
+    requirement = 'The ConeRayStudy shall report a useful error when'
     [direction_size]
       type = 'RunException'
       input = 'cone_ray_study_errors.i'
