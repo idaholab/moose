@@ -12,6 +12,8 @@
 #include "libmesh/parallel_sync.h"
 
 registerMooseObject("RayTracingTestApp", RayTracingStudyTest);
+registerMooseObject("RayTracingTestApp", RayTracingStudyNoBankingTest);
+registerMooseObject("RayTracingTestApp", RayTracingStudyWithRegistrationTest);
 
 InputParameters
 RayTracingStudyTest::validParams()
@@ -80,6 +82,45 @@ RayTracingStudyTest::validParams()
   params.addParam<bool>(
       "ray_reset_counters", false, "Tests resetting a Ray's counters after it has began tracing");
 
+  params.addParam<bool>(
+      "register_ray_data_late", false, "Tests registering data late in registerRayDataInternal()");
+  params.addParam<bool>(
+      "register_ray_data_same_name",
+      false,
+      "Tests registering ray data with the same name in registerRayDataInternal()");
+  params.addParam<bool>("ray_data_index_bad_name",
+                        false,
+                        "Tests requesting ray data index for a name that does not exist in "
+                        "getRayDataIndexInternal()");
+  params.addParam<bool>("ray_data_name_bad_index",
+                        false,
+                        "Tests requesting ray data name for an index that does not exist in "
+                        "getRayDataNameInternal()");
+
+  params.addParam<bool>(
+      "get_ray_kernels_early", false, "Tests getting ray kernels early with getRayKernels()");
+  params.addParam<bool>("get_ray_bcs_early", false, "Tests getting ray bcs early with getRayBCs()");
+
+  params.addParam<bool>(
+      "get_ray_bank_generating", false, "Tests getting the ray bank when it is not available");
+
+  params.addParam<bool>("register_ray_no_registration",
+                        false,
+                        "Tests registering a Ray with Ray registration disabled");
+  params.addParam<bool>("registered_ray_id_no_registration",
+                        false,
+                        "Tests getting a registered ray id with registration disabled");
+  params.addParam<bool>("registered_ray_name_no_registration",
+                        false,
+                        "Tests getting a registered ray name with registration disabled");
+
+  params.addParam<bool>(
+      "reserve_bad", false, "Tests reserving space in the ray buffer outside of registration");
+
+  params.addParam<bool>("subdomain_hmax_missing",
+                        false,
+                        "Tests requesting the subdomain hmax for an invalid subdomain");
+
   params.set<bool>("_use_ray_registration") = false;
 
   return params;
@@ -88,6 +129,31 @@ RayTracingStudyTest::validParams()
 RayTracingStudyTest::RayTracingStudyTest(const InputParameters & parameters)
   : RayTracingStudy(parameters)
 {
+  if (getParam<bool>("register_ray_data_same_name"))
+  {
+    registerRayData("foo");
+    registerRayAuxData("foo");
+  }
+  if (getParam<bool>("ray_data_index_bad_name"))
+    getRayDataIndex("foo");
+  if (getParam<bool>("ray_data_name_bad_index"))
+    getRayDataName(123);
+  if (getParam<bool>("get_ray_kernels_early"))
+  {
+    std::vector<RayKernelBase *> rks;
+    getRayKernels(rks, 0, 0);
+  }
+  if (getParam<bool>("get_ray_bcs_early"))
+  {
+    std::vector<RayBoundaryConditionBase *> rbcs;
+    getRayBCs(rbcs, 0, 0);
+  }
+  if (getParam<bool>("registered_ray_id_no_registration"))
+    registeredRayID("foo");
+  if (getParam<bool>("registered_ray_name_no_registration"))
+    registeredRayName(0);
+  if (getParam<bool>("reserve_bad"))
+    reserveRayBuffer(0);
 }
 
 void
@@ -208,6 +274,18 @@ RayTracingStudyTest::generateRays()
 
   if (getParam<bool>("ray_error_if_tracing") || getParam<bool>("ray_reset_counters"))
     moveRayToBuffer(ray);
+
+  if (getParam<bool>("register_ray_data_late"))
+    registerRayData("foo");
+
+  if (getParam<bool>("get_ray_bank_generating"))
+    rayBank();
+
+  if (getParam<bool>("register_ray_no_registration"))
+    acquireRegisteredRay("foo");
+
+  if (getParam<bool>("subdomain_hmax_missing"))
+    subdomainHmax(1337);
 }
 
 void
@@ -220,4 +298,39 @@ RayTracingStudyTest::postExecuteStudy()
   if (getParam<bool>("ray_reset_counters"))
     for (auto & ray : rayBank())
       ray->resetCounters();
+}
+
+RayTracingStudyNoBankingTest::RayTracingStudyNoBankingTest(const InputParameters & params)
+  : RayTracingStudy(params)
+{
+  rayBank();
+}
+
+InputParameters
+RayTracingStudyNoBankingTest::validParams()
+{
+  auto params = RayTracingStudy::validParams();
+  params.set<bool>("_bank_rays_on_completion") = false;
+  return params;
+}
+
+InputParameters
+RayTracingStudyWithRegistrationTest::validParams()
+{
+  auto params = RayTracingStudy::validParams();
+  params.addParam<bool>(
+      "registered_ray_id_missing", false, "Tests registeredRayID() with an invalid id");
+  params.addParam<bool>(
+      "registered_ray_name_missing", false, "Tests registeredRayName() with an invalid name");
+  return params;
+}
+
+RayTracingStudyWithRegistrationTest::RayTracingStudyWithRegistrationTest(
+    const InputParameters & params)
+  : RayTracingStudy(params)
+{
+  if (getParam<bool>("registered_ray_id_missing"))
+    registeredRayID("foo");
+  if (getParam<bool>("registered_ray_name_missing"))
+    registeredRayName(0);
 }

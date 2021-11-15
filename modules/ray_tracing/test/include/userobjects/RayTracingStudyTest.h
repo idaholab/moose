@@ -20,6 +20,27 @@ public:
 
 protected:
   void generateRays() override;
-
   void postExecuteStudy() override;
+};
+
+class RayTracingStudyNoBankingTest : public RayTracingStudy
+{
+public:
+  RayTracingStudyNoBankingTest(const InputParameters & parameters);
+
+  static InputParameters validParams();
+
+protected:
+  void generateRays() override {}
+};
+
+class RayTracingStudyWithRegistrationTest : public RayTracingStudy
+{
+public:
+  RayTracingStudyWithRegistrationTest(const InputParameters & parameters);
+
+  static InputParameters validParams();
+
+protected:
+  void generateRays() override {}
 };
