@@ -11,12 +11,13 @@
 
 #include "LotsOfRaysRayStudy.h"
 
-class TestRayGetInfoStudy : public LotsOfRaysRayStudy
+class TestRay : public LotsOfRaysRayStudy
 {
 public:
-  TestRayGetInfoStudy(const InputParameters & parameters);
+  TestRay(const InputParameters & parameters);
 
   static InputParameters validParams();
 
-  void onCompleteRay(const std::shared_ptr<Ray> & ray) override;
+protected:
+  void postExecuteStudy() override final;
 };

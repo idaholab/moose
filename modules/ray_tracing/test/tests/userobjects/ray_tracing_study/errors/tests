@@ -400,5 +400,19 @@
       method = opt
       detail = 'building an element extrema edge for invalid vertices'
     []
+    [ray_start_inactive]
+      type = RunException
+      input = 'errors.i'
+      cli_args = 'UserObjects/study/ray_start_inactive=true
+                  Adaptivity/steps=1
+                  Adaptivity/marker=uniform
+                  Adaptivity/max_h_level=2
+                  Adaptivity/initial_steps=2
+                  Adaptivity/Markers/uniform/type=UniformMarker
+                  Adaptivity/Markers/uniform/mark=refine'
+      expect_err = 'Starting element is not active'
+      allow_test_objects = true
+      detail = 'setting the starting element for a ray to an inactive element'
+    []
   []
 []

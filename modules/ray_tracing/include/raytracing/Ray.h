@@ -27,6 +27,7 @@ class Elem;
 class RayTracingStudy;
 // Friend access to Ray
 class TraceRay;
+class TestRay;
 // Friend access to ChangeDirectionKey for accessing changeDirection()
 class RayBoundaryConditionBase;
 // Friend access to ChangeStartDirectionKey for accessing changeStartDirection()
@@ -87,6 +88,7 @@ public:
   {
     friend class RayTracingStudy;
     friend class MooseUtils::SharedPool<Ray>;
+    friend class TestRay;
     ConstructRayKey() {}
     ConstructRayKey(const ConstructRayKey &) {}
   };
@@ -186,13 +188,13 @@ public:
    *
    * This will perform "fuzzy" equals checks on the points and data.
    */
-  bool operator==(const Ray & other) const;
+  bool operator==(const Ray & other) const { return equalityHelper(other, true); }
   /**
    * Non-equal operator.
    *
    * This will perform "fuzzy" equals checks on the points and data.
    */
-  bool operator!=(const Ray & other) const;
+  bool operator!=(const Ray & other) const { return equalityHelper(other, false); }
 
   /// Invalid index into a Ray's data
   static const RayDataIndex INVALID_RAY_DATA_INDEX = static_cast<RayDataIndex>(-1);
@@ -711,6 +713,8 @@ private:
   friend class TraceRay;
   // Packing needs access to changing the internal counters during the trace
   friend class Parallel::Packing<std::shared_ptr<Ray>>;
+  // Allows for testing of equality methods
+  friend class TestRay;
   // Data helpers needs to be able to access the internal methods for a Ray for store/load
   friend void dataStore(std::ostream & stream, std::shared_ptr<Ray> & ray, void * context);
   friend void dataLoad(std::istream & stream, std::shared_ptr<Ray> & ray, void * context);

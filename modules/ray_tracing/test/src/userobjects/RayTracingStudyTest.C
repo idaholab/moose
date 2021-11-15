@@ -77,6 +77,8 @@ RayTracingStudyTest::validParams()
   params.addParam<bool>("ray_set_distance_with_end",
                         false,
                         "Test setting a Ray's max distance after its end point has been set");
+  params.addParam<bool>(
+      "ray_start_inactive", false, "Tests setting a Ray's starting element to an inactive element");
 
   params.addParam<bool>("ray_error_if_tracing", false, "Tests Ray::errorIfTracing()");
   params.addParam<bool>(
@@ -199,6 +201,12 @@ RayTracingStudyTest::generateRays()
     if (!another_elem)
       another_elem = elem->neighbor_ptr(1);
     ray->setStart(elem->vertex_average(), another_elem);
+  }
+  else if (getParam<bool>("ray_start_inactive"))
+  {
+    for (const auto & inactive_elem : meshBase().element_ptr_range())
+      if (!inactive_elem->active())
+        ray->setStart(inactive_elem->true_centroid(), inactive_elem);
   }
   else
     ray->setStart(elem->vertex_average(), elem);

@@ -121,18 +121,6 @@ Ray::reset(const Ray * const other, const ConstructRayKey &)
 }
 
 bool
-Ray::operator==(const Ray & other) const
-{
-  return equalityHelper(other, true);
-}
-
-bool
-Ray::operator!=(const Ray & other) const
-{
-  return equalityHelper(other, false);
-}
-
-bool
 Ray::equalityHelper(const Ray & other, const bool equal) const
 {
   if (this == &other)
@@ -248,8 +236,8 @@ Ray::setStart(const Point & starting_point,
       errorWhenInitializing("Mesh does not contain starting point.");
     if (starting_elem)
     {
-      if (_study.meshBase().query_elem_ptr(starting_elem->id()) != starting_elem)
-        errorWhenInitializing("Starting element is not owned by the mesh.");
+      mooseAssert(_study.meshBase().query_elem_ptr(starting_elem->id()) == starting_elem,
+                  "Element is not owned by the mesh");
       if (!starting_elem->active())
         errorWhenInitializing("Starting element is not active.");
     }
@@ -464,8 +452,8 @@ Ray::getInfo() const
 {
   std::ostringstream oss;
 
-  oss << "Ray information with study '" << _study.name() << "' on pid " << _study.comm().rank()
-      << "\n";
+  oss << "Ray information with " << _study.type() << " '" << _study.name() << "' on pid "
+      << _study.comm().rank() << "\n";
   oss << "  this = " << this << "\n";
   oss << "  id() = " << id() << "\n";
   if (_study.useRayRegistration() && !invalidID())
@@ -692,11 +680,8 @@ Packing<std::shared_ptr<Ray>>::pack(const std::shared_ptr<Ray> & ray,
 void
 dataStore(std::ostream & stream, std::shared_ptr<Ray> & ray, void * context)
 {
-  if (!ray)
-    mooseError("Cannot store a Ray that is nullptr!");
-
-  if (!context)
-    mooseError("Can only store Ray objects using a RayTracingStudy context!");
+  mooseAssert(ray, "Null ray");
+  mooseAssert(context, "Missing RayTracingStudy context");
   mooseAssert(static_cast<RayTracingStudy *>(context) == &ray->study(), "Different study");
 
   storeHelper(stream, ray->_id, context);
@@ -720,9 +705,7 @@ dataStore(std::ostream & stream, std::shared_ptr<Ray> & ray, void * context)
 void
 dataLoad(std::istream & stream, std::shared_ptr<Ray> & ray, void * context)
 {
-  if (!context)
-    mooseError("Can only store Ray objects using a RayTracingStudy context!");
-
+  mooseAssert(context, "Missing RayTracingStudy context");
   RayTracingStudy * study = static_cast<RayTracingStudy *>(context);
 
   RayID id;
@@ -750,8 +733,8 @@ dataLoad(std::istream & stream, std::shared_ptr<Ray> & ray, void * context)
   loadHelper(stream, ray->_data, context);
   loadHelper(stream, ray->_aux_data, context);
 
-  if (ray->hasTraced() && (study->currentlyGenerating() || study->currentlyPropagating()))
-    mooseError("Cannot use dataLoad() to load Rays that have already traced for use during\n"
-               "generation or propagation.\n\n",
-               "To re-use Rays, you must reset their counters before calling dataStore().");
+  if (ray->hasTraced())
+    mooseAssert(!study->currentlyGenerating() && !study->currentlyPropagating(),
+                "Cannot not load a Ray that has already traced during generation or propagation; "
+                "reset the Ray first");
 }
