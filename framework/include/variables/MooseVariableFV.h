@@ -655,18 +655,18 @@ protected:
   /// Whether to use a two term expansion for computing boundary face values
   bool _two_term_boundary_expansion;
 
-  /// A threaded vector to hold the cell gradients when not caching them, used to return
-  /// a reference (due to expensive ADReal copy)
-  mutable std::vector<VectorValue<ADReal>> _temp_cell_gradients;
+  /// A member to hold the cell gradient when not caching, used to return a reference (due to
+  /// expensive ADReal copy)
+  mutable VectorValue<ADReal> _temp_cell_gradient;
 
-  /// A threaded vector to hold the uncorrected face gradients when not caching them, used to return a reference
-  mutable std::vector<VectorValue<ADReal>> _temp_face_unc_gradients;
+  /// A member to hold the uncorrected face gradient when not caching, used to return a reference
+  mutable VectorValue<ADReal> _temp_face_unc_gradient;
 
-  /// A threaded vector to hold the face gradients when not caching them, used to return a reference
-  mutable std::vector<VectorValue<ADReal>> _temp_face_gradients;
+  /// A member to hold the face gradient when not caching, used to return a reference
+  mutable VectorValue<ADReal> _temp_face_gradient;
 
-  /// A threaded vector to hold the face values when not caching them, used to return a reference
-  mutable std::vector<ADReal> _temp_face_values;
+  /// A member to hold the face value when not caching, used to return a reference
+  mutable ADReal _temp_face_value;
 
   /// Whether to cache the gradients the first time they are computed on a cell face. Caching avoids
   /// redundant calculation, but can increase the memory cost substantially

@@ -92,12 +92,6 @@ MooseVariableFV<OutputType>::MooseVariableFV(const InputParameters & parameters)
   _neighbor_data = std::make_unique<MooseVariableDataFV<OutputType>>(
       *this, _sys, _tid, Moose::ElementType::Neighbor, this->_assembly.neighbor());
 
-  // Resize vectors used when not caching variables
-  _temp_cell_gradients.resize(libMesh::n_threads());
-  _temp_face_unc_gradients.resize(libMesh::n_threads());
-  _temp_face_gradients.resize(libMesh::n_threads());
-  _temp_face_values.resize(libMesh::n_threads());
-
   if (this->isParamValid("face_interp_method"))
   {
     const auto & interp_method = this->template getParam<MooseEnum>("face_interp_method");
@@ -630,7 +624,7 @@ MooseVariableFV<OutputType>::getInternalFaceValue(const Elem * const neighbor,
 
   mooseAssert(isInternalFace(fi), "This function only be called on internal faces.");
 
-  ADReal * value_pointer = &_temp_face_values[_tid];
+  ADReal * value_pointer = &_temp_face_value;
 
   // We ensure that no caching takes place when we compute skewness-corrected
   // quantities.
@@ -723,7 +717,7 @@ MooseVariableFV<OutputType>::getDirichletBoundaryFaceValue(const FaceInfo & fi) 
   mooseAssert(isDirichletBoundaryFace(fi),
               "This function should only be called on Dirichlet boundary faces.");
 
-  ADReal * value_pointer = &_temp_face_values[_tid];
+  ADReal * value_pointer = &_temp_face_value;
   if (_cache_face_values)
   {
     auto pr = _face_to_value.emplace(&fi, 0);
@@ -798,8 +792,8 @@ MooseVariableFV<OutputType>::getExtrapolatedBoundaryFaceValue(const FaceInfo & f
     }
     else
     {
-      _temp_face_values[_tid] = getElemValue(elem);
-      return _temp_face_values[_tid];
+      _temp_face_value = getElemValue(elem);
+      return _temp_face_value;
     }
   }
 }
@@ -838,7 +832,7 @@ MooseVariableFV<OutputType>::adGradSln(const Elem * const elem, const bool corre
   mooseError("MooseVariableFV::adGradSln only supported for global AD indexing");
 #endif
 
-  VectorValue<ADReal> * value_pointer = &_temp_cell_gradients[_tid];
+  VectorValue<ADReal> * value_pointer = &_temp_cell_gradient;
 
   // We ensure that no caching takes place when we compute skewness-corrected
   // quantities.
@@ -1094,7 +1088,7 @@ MooseVariableFV<OutputType>::uncorrectedAdGradSln(const FaceInfo & fi,
 
   const VectorValue<ADReal> elem_one_grad = adGradSln(elem_one, correct_skewness);
 
-  VectorValue<ADReal> * unc_face_grad_pointer = &_temp_face_unc_gradients[_tid];
+  VectorValue<ADReal> * unc_face_grad_pointer = &_temp_face_unc_gradient;
 
   // We ensure that no caching takes place when we compute skewness-corrected
   // quantities.
@@ -1143,7 +1137,7 @@ MooseVariableFV<OutputType>::adGradSln(const FaceInfo & fi, const bool correct_s
 #endif
 
   // Use a pointer to choose the right reference
-  VectorValue<ADReal> * face_grad_pointer = &_temp_face_gradients[_tid];
+  VectorValue<ADReal> * face_grad_pointer = &_temp_face_gradient;
 
   // We ensure that no caching takes place when we compute skewness-corrected
   // quantities.
