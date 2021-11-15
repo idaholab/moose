@@ -1,0 +1,56 @@
+[Tests]
+  [constiutive_model]
+    issues = '#18846'
+    design = '/CrystalPlasticityTwinningKalidindiUpdate.md'
+    requirement = 'The crystal plasticity model for twin propagation in FCC materials, '
+                   'using the Kalidindi (2001) constiutive model, shall:'
+    [only_twinning_fcc]
+      type = 'CSVDiff'
+      input = 'only_twinning_fcc.i'
+      csvdiff = 'only_twinning_fcc_out.csv'
+      allow_warnings = true
+      detail = 'compute the plastic shear due to twinning as a function of the '
+               'applied shear stress and resistance to twin propagation, the '
+               'corresponding twin volume fraction per twin system, and the total '
+               'value of the twin volume fraction across all twin systems.'
+    []
+    [check_direction_twin_propagation]
+      type = 'CSVDiff'
+      input = 'check_direction_twin_propagation.i'
+      csvdiff = 'check_direction_twin_propagation_out.csv'
+      allow_warnings = true
+      detail = 'compute a non-zero twin volume fraction, and associate plastic '
+               'shear increment, for only postive applied shear stress values.'
+    []
+    [coplanar_twin_hardening]
+      type = 'CSVDiff'
+      input = 'coplanar_twin_hardening.i'
+      csvdiff = 'coplanar_twin_hardening_out.csv'
+      detail = 'calculate the coplanar twin propogation resistance contribution '
+               'as a function of the twin volume fractions on coplanar systems alone.'
+    []
+    [non_coplanar_twin_hardening]
+      type = 'CSVDiff'
+      input = 'non_coplanar_twin_hardening.i'
+      csvdiff = 'non_coplanar_twin_hardening_out.csv'
+      detail = 'calculate the contribution to twin propagation resistance from '
+               'non-coplanar systems as a function of only the twin volume fraction '
+               'on non-coplanar twin systems.'
+    []
+    [upper_twin_fraction_limit]
+      type = RunException
+      input = 'upper_twin_fraction_limit.i'
+      expect_err = 'Maximum allowable twin volume fraction limit exceeded with a value of'
+      detail = 'prevent the accumulation of a total twin volume fraction above the '
+               'user-defined limit.'
+    []
+    [strain_increment_upper_limit]
+      type = RunException
+      input = 'upper_twin_fraction_limit.i'
+      cli_args = 'BCs/tdisp/function=5.0e-3*t'
+      expect_err = 'Maximum allowable plastic slip increment due to twinning exceeded'
+      detail = 'prevent the calculation of a plastic shear increment in excess of '
+               'the user-defined tolerance value.'
+    []
+  []
+[]
