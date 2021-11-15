@@ -121,6 +121,13 @@ RayTracingStudyTest::validParams()
                         false,
                         "Tests requesting the subdomain hmax for an invalid subdomain");
 
+  params.addParam<bool>(
+      "get_elem_normals_unimplemented", false, "Tests getElemNormals not being overridden");
+
+  params.addParam<bool>("elem_extrema_build_edge",
+                        false,
+                        "Tests building an edge from extrema when the vertices are incorrect");
+
   params.set<bool>("_use_ray_registration") = false;
 
   return params;
@@ -154,6 +161,13 @@ RayTracingStudyTest::RayTracingStudyTest(const InputParameters & parameters)
     registeredRayName(0);
   if (getParam<bool>("reserve_bad"))
     reserveRayBuffer(0);
+  if (getParam<bool>("get_elem_normals_unimplemented"))
+    getElemNormals(meshBase().elem_ptr(0), 0);
+  if (getParam<bool>("elem_extrema_build_edge"))
+  {
+    ElemExtrema extrema(1337, 1338);
+    extrema.buildEdge(meshBase().elem_ptr(0));
+  }
 }
 
 void
