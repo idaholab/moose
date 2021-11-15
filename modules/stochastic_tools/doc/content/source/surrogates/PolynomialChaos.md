@@ -148,23 +148,23 @@ where the QoI is the integrated average of $u(x)$.
 
 After the sub-app is set with the diffusion-reaction problem, distributions are set for each uncertain parameter:
 
-!listing poly_chaos/master_2d_quad.i block=Distributions
+!listing poly_chaos/main_2d_quad.i block=Distributions
 
 A sampler is then defined, either using Monte Carlo,
 
-!listing poly_chaos/master_2d_mc.i block=Samplers Trainers
+!listing poly_chaos/main_2d_mc.i block=Samplers Trainers
 
 or quadrature,
 
-!listing poly_chaos/master_2d_quad.i block=Samplers/quadrature
+!listing poly_chaos/main_2d_quad.i block=Samplers/quadrature
 
 It is important that the order in the quadrature sampler input matches the order in the PolynomialChaos input. The sampler is then used by the MultiApp and Transfers to sample the sub-app, the QoI from the app is then put in a reporter:
 
-!listing poly_chaos/master_2d_quad.i block=Reporters
+!listing poly_chaos/main_2d_quad.i block=Reporters
 
 All this information is ready to be sent to the PolynomialChaos trainer:
 
-!listing poly_chaos/master_2d_quad.i block=Surrogates Trainers
+!listing poly_chaos/main_2d_quad.i block=Surrogates Trainers
 
 !syntax parameters /Surrogates/PolynomialChaos
 

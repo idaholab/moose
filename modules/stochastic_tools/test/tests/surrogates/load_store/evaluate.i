@@ -6,14 +6,15 @@
     filename = 'train_out_poly_chaos.rd'
 []
 
-[VectorPostprocessors/pc_moments]
-    type = PolynomialChaosStatistics
+[Reporters/pc_data]
+    type = PolynomialChaosReporter
     pc_name = poly_chaos
-    compute = 'mean stddev skewness kurtosis'
+    include_data = true
     execute_on = final
 []
 
 [Outputs/out]
-    type = CSV
+    type = JSON
+    execute_system_information_on = none
     execute_on = FINAL
 []

@@ -81,30 +81,35 @@
     check_multiapp_execute_on = false
   []
   [data]
-    type = SamplerPostprocessorTransfer
+    type = SamplerReporterTransfer
     multi_app = sub
     sampler = sample
-    to_vector_postprocessor = storage
-    from_postprocessor = 'temp_center_inner  temp_center_outer  temp_end_inner  temp_end_outer
-                          dispx_center_inner dispx_center_outer dispx_end_inner dispx_end_outer
-                          dispz_inner dispz_outer'
+    stochastic_reporter = storage
+    from_reporter = 'temp_center_inner/value  temp_center_outer/value  temp_end_inner/value  temp_end_outer/value
+                     dispx_center_inner/value dispx_center_outer/value dispx_end_inner/value dispx_end_outer/value
+                     dispz_inner/value dispz_outer/value'
   []
 []
 
-[VectorPostprocessors]
+[Reporters]
   [storage]
-    type = StochasticResults
+    type = StochasticReporter
+    parallel_type = ROOT
   []
   [stats]
-    type = Statistics
-    vectorpostprocessors = 'storage'
+    type = StatisticsReporter
+    reporters = 'storage/data:temp_center_inner:value  storage/data:temp_center_outer:value  storage/data:temp_end_inner:value  storage/data:temp_end_outer:value
+                 storage/data:dispx_center_inner:value storage/data:dispx_center_outer:value storage/data:dispx_end_inner:value storage/data:dispx_end_outer:value
+                 storage/data:dispz_inner:value storage/data:dispz_outer:value'
     compute = 'mean stddev'
     ci_method = 'percentile'
-    ci_levels = '0.05'
+    ci_levels = '0.05 0.95'
   []
 []
 
 [Outputs]
-  csv = true
+  [out]
+    type = JSON
+  []
   execute_on = TIMESTEP_END
 []

@@ -62,19 +62,16 @@
     reporters = 'pr_max_res/pr_max'
     compute = 'mean stddev'
   []
-[]
-
-[VectorPostprocessors]
   [pc_max_stats]
-    type = PolynomialChaosStatistics
+    type = PolynomialChaosReporter
     pc_name = 'pc_max'
-    compute = 'mean stddev'
+    statistics = 'mean stddev'
   []
 []
 
 [Outputs]
   [out]
     type = JSON
+    execute_on = timestep_end
   []
-  csv = true
 []

@@ -54,6 +54,13 @@ Polynomial::store(std::ostream & /*stream*/, void * /*context*/) const
   ::mooseError("Polynomial child class must override this method.");
 }
 
+void
+Polynomial::store(nlohmann::json & /*json*/) const
+{
+  // Cannot be pure virtual because for dataLoad operations the base class must be constructed
+  ::mooseError("Polynomial child class must override this method.");
+}
+
 Real
 Polynomial::compute(const unsigned int /*order*/, const Real /*x*/, const bool /*normalize*/) const
 {
@@ -119,6 +126,14 @@ Legendre::store(std::ostream & stream, void * context) const
   dataStore(stream, type, context);
   dataStore(stream, _lower_bound, context);
   dataStore(stream, _upper_bound, context);
+}
+
+void
+Legendre::store(nlohmann::json & json) const
+{
+  json["type"] = "Legendre";
+  json["lower_bound"] = _lower_bound;
+  json["upper_bound"] = _upper_bound;
 }
 
 Real
@@ -237,6 +252,14 @@ Hermite::store(std::ostream & stream, void * context) const
   dataStore(stream, type, context);
   dataStore(stream, _mu, context);
   dataStore(stream, _sig, context);
+}
+
+void
+Hermite::store(nlohmann::json & json) const
+{
+  json["type"] = "Hermite";
+  json["mu"] = _mu;
+  json["sig"] = _sig;
 }
 
 Real

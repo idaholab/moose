@@ -2,44 +2,46 @@
   design = combined_example_2d_trans_diff.md
   issues = '#15672'
 
-  requirement = "The system shall include an example demonstrating a combined surrogate-based uncertainty quantification "
+  [transient_surrogate]
+    requirement = "The system shall include an example demonstrating a combined surrogate-based uncertainty quantification "
 
-  [reference]
-    type = CSVDiff
-    input = trans_diff_main.i
-    cli_args = "Samplers/hypercube/num_rows=3
-                runner:Mesh/msh/nx=10
-                runner:Mesh/msh/ny=10
-                runner:Executioner/num_steps=2"
-    csvdiff = 'trans_diff_main_out_results_0001.csv trans_diff_main_out_stats_0001.csv'
-    abs_zero = 1e-5
+    [reference]
+      type = CSVDiff
+      input = trans_diff_main.i
+      cli_args = "Samplers/hypercube/num_rows=3
+                  runner:Mesh/msh/nx=10
+                  runner:Mesh/msh/ny=10
+                  runner:Executioner/num_steps=2"
+      csvdiff = 'trans_diff_main_out_results_0001.csv trans_diff_main_out_stats_0001.csv'
+      abs_zero = 1e-5
 
-    detail = "with computing reference solutions "
-  []
-  [train]
-    type = CheckFiles
-    input = trans_diff_trainer.i
-    cli_args = "Samplers/sample/order=1
-                Trainers/pc_max/order=1
-                Trainers/pc_min/order=1
-                Trainers/pr_max/max_degree=1
-                Trainers/pr_min/max_degree=1
-                runner:Mesh/msh/nx=10
-                runner:Mesh/msh/ny=10
-                runner:Executioner/num_steps=2"
-    check_files = 'trans_diff_trainer_out_np_max.rd trans_diff_trainer_out_np_min.rd
-                   trans_diff_trainer_out_pc_max.rd trans_diff_trainer_out_pc_min.rd
-                   trans_diff_trainer_out_pr_max.rd trans_diff_trainer_out_pr_min.rd'
+      detail = "with computing reference solutions "
+    []
+    [train]
+      type = CheckFiles
+      input = trans_diff_trainer.i
+      cli_args = "Samplers/sample/order=1
+                  Trainers/pc_max/order=1
+                  Trainers/pc_min/order=1
+                  Trainers/pr_max/max_degree=1
+                  Trainers/pr_min/max_degree=1
+                  runner:Mesh/msh/nx=10
+                  runner:Mesh/msh/ny=10
+                  runner:Executioner/num_steps=2"
+      check_files = 'trans_diff_trainer_out_np_max.rd trans_diff_trainer_out_np_min.rd
+                     trans_diff_trainer_out_pc_max.rd trans_diff_trainer_out_pc_min.rd
+                     trans_diff_trainer_out_pr_max.rd trans_diff_trainer_out_pr_min.rd'
 
-    detail = "then training surrogate models "
-  []
-  [evaluate]
-    type = CSVDiff
-    input = trans_diff_surr.i
-    cli_args = "Samplers/sample/num_rows=10 Outputs/csv=true"
-    csvdiff = 'trans_diff_surr_out_eval_surr_0001.csv'
-    prereq = train
+      detail = "then training surrogate models "
+    []
+    [evaluate]
+      type = CSVDiff
+      input = trans_diff_surr.i
+      cli_args = "Samplers/sample/num_rows=10 Outputs/csv=true"
+      csvdiff = 'trans_diff_surr_out_eval_surr_0001.csv'
+      prereq = transient_surrogate/train
 
-    detail = "and evaluating the surrogate models"
+      detail = "and evaluating the surrogate models"
+    []
   []
 []

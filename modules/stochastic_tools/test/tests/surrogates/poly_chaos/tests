@@ -5,65 +5,64 @@
     requirement = 'The system shall compute polynomial chaos coefficents using '
     [monte_carlo_integration]
       type = CSVDiff
-      input = master_2d_mc.i
+      input = main_2d_mc.i
       allow_test_objects = true
-      csvdiff = 'master_2d_mc_out_pc_samp_0002.csv'
+      csvdiff = 'main_2d_mc_out_pc_samp_0002.csv'
       detail = 'MonteCarlo sampler with Uniform distribution, '
     []
     [gauss_legendre_integration]
       type = CSVDiff
-      input = master_2d_quad.i
+      input = main_2d_quad.i
       allow_test_objects = true
-      csvdiff = 'master_2d_quad_out_pc_samp_0002.csv'
+      csvdiff = 'main_2d_quad_out_pc_samp_0002.csv'
       detail = 'Quadrature sampler with Uniform distribution, and '
     []
     [gauss_hermite]
       type = CSVDiff
-      input = master_2dnorm_quad.i
+      input = main_2dnorm_quad.i
       allow_test_objects = true
-      csvdiff = 'master_2dnorm_quad_out_pc_samp_0002.csv'
+      csvdiff = 'main_2dnorm_quad_out_pc_samp_0002.csv'
       detail = 'Quadrature sampler with Normal distribution.'
     []
   []
   [statistics]
     issues = '#14836'
-    design = 'PolynomialChaosStatistics.md PolynomialChaosLocalSensitivity.md '
-             'PolynomialChaosSobolStatistics.md'
+    design = 'PolynomialChaosReporter.md'
     requirement = 'The system shall compute relevant statistics with polynomial chaos expansion '
                   'including '
     [legendre_moment_calculation]
-      type = CSVDiff
-      input = master_2d_quad_moment.i
+      type = JSONDiff
+      input = main_2d_quad_moment.i
       allow_test_objects = true
-      csvdiff = 'master_2d_quad_moment_out_pc_moments_0002.csv'
+      jsondiff = 'main_2d_quad_moment_out.json'
       detail = 'statistical moments with Legendre polynomials, '
     []
     [hermite_moment_calculation]
-      type = CSVDiff
-      input = master_2dnorm_quad_moment.i
+      type = JSONDiff
+      input = main_2dnorm_quad_moment.i
       allow_test_objects = true
-      csvdiff = 'master_2dnorm_quad_moment_out_pc_moments_0002.csv'
+      jsondiff = 'main_2dnorm_quad_moment_out.json'
       detail = 'statistical moments with Hermite polynomials, '
     []
     [legendre_local_sensitivity]
-      type = CSVDiff
-      input = master_2d_quad_locs.i
+      type = JSONDiff
+      input = main_2d_quad_locs.i
       allow_test_objects = true
-      csvdiff = 'master_2d_quad_locs_out_local_sense_0002.csv'
+      jsondiff = 'main_2d_quad_locs_out.json'
       detail = 'sampler and user defined local sensitivities with Legendre polynomials, '
     []
     [hermite_local_sensitivity]
-      type = CSVDiff
-      input = master_2dnorm_quad_locs.i
+      type = JSONDiff
+      input = main_2dnorm_quad_locs.i
       allow_test_objects = true
-      csvdiff = 'master_2dnorm_quad_locs_out_local_sense_0002.csv'
+      jsondiff = 'main_2dnorm_quad_locs_out.json'
       detail = 'sampler and user defined local sensitivities with Hermite polynomials, and '
     []
     [sobol]
-      type = CSVDiff
+      type = JSONDiff
       input = sobol.i
       allow_test_objects = true
-      csvdiff = 'sobol_out_sobol_0002.csv'
+      jsondiff = 'sobol_out.json'
       detail = 'Sobol sensitivity indices.'
     []
   []
@@ -73,19 +72,19 @@
     requirement = 'The system shall include the ability to use sparse grid methods to evaluate '
                   'polynomial chaos expansion coefficients including '
     [smolyak_sobol]
-      type = CSVDiff
+      type = JSONDiff
       input = sobol.i
       allow_test_objects = true
       cli_args = 'Samplers/sample/sparse_grid=smolyak Outputs/file_base=smolyak'
-      csvdiff = 'smolyak_sobol_0002.csv'
+      jsondiff = 'smolyak.json'
       detail = 'Smolyak and '
     []
     [clenshaw_curtis_sobol]
-      type = CSVDiff
+      type = JSONDiff
       input = sobol.i
       allow_test_objects = true
       cli_args = 'Samplers/sample/sparse_grid=clenshaw-curtis Outputs/file_base=clenshaw_curtis'
-      csvdiff = 'clenshaw_curtis_sobol_0002.csv'
+      jsondiff = 'clenshaw_curtis.json'
       detail = 'Clenshaw-Curtis methods.'
     []
   []

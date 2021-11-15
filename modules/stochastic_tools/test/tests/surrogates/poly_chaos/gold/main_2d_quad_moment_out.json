@@ -1,0 +1,49 @@
+{
+    "reporters": {
+        "pc_moments": {
+            "type": "PolynomialChaosReporter",
+            "values": {
+                "poly_chaos_KURTOSIS": {
+                    "stat": "KURTOSIS",
+                    "type": "std::pair<double, std::vector<double> >"
+                },
+                "poly_chaos_MEAN": {
+                    "stat": "MEAN",
+                    "type": "std::pair<double, std::vector<double> >"
+                },
+                "poly_chaos_SKEWNESS": {
+                    "stat": "SKEWNESS",
+                    "type": "std::pair<double, std::vector<double> >"
+                },
+                "poly_chaos_STDDEV": {
+                    "stat": "STDDEV",
+                    "type": "std::pair<double, std::vector<double> >"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "pc_moments": {
+                "poly_chaos_KURTOSIS": [
+                    2.5590350794314545,
+                    []
+                ],
+                "poly_chaos_MEAN": [
+                    0.1707372297942489,
+                    []
+                ],
+                "poly_chaos_SKEWNESS": [
+                    0.7341206540535808,
+                    []
+                ],
+                "poly_chaos_STDDEV": [
+                    0.04802629346343701,
+                    []
+                ]
+            },
+            "time": 2.0,
+            "time_step": 2
+        }
+    ]
+}
