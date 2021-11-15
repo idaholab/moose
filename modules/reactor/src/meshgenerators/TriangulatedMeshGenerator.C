@@ -137,9 +137,6 @@ TriangulatedMeshGenerator::generate()
 
   // POLYLINE NEEDS TO BE DIRECTED
 
-  // DEBUG
-  // std::cout << "Created Inner Polyline" << std::endl;
-
   for (Node* node : inner_boundary_nodes) {
     // extract (x, y) coords
     Real x = (*node)(0);
@@ -150,17 +147,11 @@ TriangulatedMeshGenerator::generate()
     inner_polyline.push_back(point);
     // add to association map
     point_node_map[point] = node;
-
-    // DEBUG
-    // std::cout << *node << std::endl;
   }
 
   //
   // Outer P2T boundary; create circle from input parameters
   //
-
-  // DEBUG
-  // std::cout << "Creating Outer Polyline" << std::endl;
 
   // radial spacing
   Real d_theta = 2.0 * M_PI / _outer_circle_num_segments;
@@ -180,18 +171,11 @@ TriangulatedMeshGenerator::generate()
     Node *node = mesh->add_point(Point(x, y, 0.0));
     // add to association map
     point_node_map[point] = node;
-
-    // DEBUG
-    // std::cout << *node << std::endl;
-
   }
 
   //
   // Additional Steiner points; create additional circles of Steiner points between inner and outer boundaries.
   //
-
-  // DEBUG
-  // std::cout << "Creating Steiner points" << std::endl;
 
   for (std::vector<unsigned int>::size_type idx = 0; idx < _extra_circle_radii.size(); idx++) {
     // extract Steiner point circle parameters
@@ -216,10 +200,6 @@ TriangulatedMeshGenerator::generate()
       Node *node = mesh->add_point(Point(x, y, 0.0));
       // add to association map
       point_node_map[point] = node;
-
-      // DEBUG
-      // std::cout << *node << std::endl;
-
     }
   }
 
@@ -238,15 +218,8 @@ TriangulatedMeshGenerator::generate()
     cdt->AddPoint(point);
   }
 
-  // DEBUG
-  // std::cout << "Triangulating" << std::endl;
-
   // Triangulate!
   cdt->Triangulate();
-
-  // DEBUG
-  // std::cout << "Triangulating complete" << std::endl;
-
 
   //
   // Translate triangulated C2T points/triangles to libMesh nodes/Tri3s
