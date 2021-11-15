@@ -35,6 +35,8 @@
 
 // Forward declarations
 class Executioner;
+class Executor;
+class NullExecutor;
 class MooseApp;
 class Backup;
 class FEProblemBase;
@@ -66,6 +68,22 @@ class MooseApp : public ConsoleStreamInterface,
                  public libMesh::ParallelObject
 {
 public:
+  /**
+   * Stores configuration options relating to the fixed-point solving
+   * capability.  This is used for communicating input-file-based config from
+   * the MultiApp object/syntax to the execution (e.g. executor) system.
+   */
+  struct FixedPointConfig
+  {
+    FixedPointConfig() : sub_relaxation_factor(1.0) {}
+    /// relaxation factor to be used for a MultiApp's subapps.
+    Real sub_relaxation_factor;
+    /// The names of variables to transform for fixed point solve algorithms (e.g. secant, etc.).
+    std::vector<std::string> sub_transformed_vars;
+    /// The names of postprocessors to transform for fixed point solve algorithms (e.g. secant, etc.).
+    std::vector<PostprocessorName> sub_transformed_pps;
+  };
+
   static const RestartableDataMapName MESH_META_DATA;
 
   static InputParameters validParams();
@@ -302,12 +320,65 @@ public:
   /**
    * Retrieve the Executioner for this App
    */
-  Executioner * getExecutioner() const { return _executioner.get(); }
+  Executioner * getExecutioner() const;
+  Executor * getExecutor() const { return _executor.get(); }
+  NullExecutor * getNullExecutor() const { return _null_executor.get(); }
+  bool useExecutor() const { return _use_executor; }
+  FEProblemBase & feProblem() const;
 
   /**
    * Set the Executioner for this App
    */
   void setExecutioner(std::shared_ptr<Executioner> && executioner) { _executioner = executioner; }
+  void setExecutor(std::shared_ptr<Executor> && executor) { _executor = executor; }
+  void
+  addExecutor(const std::string & type, const std::string & name, const InputParameters & params);
+
+  /**
+   * Adds the parameters for an Executor to the list of parameters.  This is done
+   * so that the Executors can be created in _exactly_ the correct order.
+   */
+  void addExecutorParams(const std::string & type,
+                         const std::string & name,
+                         const InputParameters & params);
+
+private:
+  /**
+   * Internal function used to recursively create the executor objects.
+   *
+   * Called by createExecutors
+   *
+   * @param current_executor_name The name of the executor currently needing to be built
+   * @param possible_roots The names of executors that are currently candidates for being the root
+   */
+  void recursivelyCreateExecutors(const std::string & current_executor_name,
+                                  std::list<std::string> & possible_roots,
+                                  std::list<std::string> & current_branch);
+
+public:
+  /**
+   * After adding all of the Executor Params - this function will actually cause all of them to be
+   * built
+   */
+  void createExecutors();
+
+  /**
+   * Get an Executor
+   *
+   * @param name The name of the Executor
+   * @param fail_if_not_found Whether or not to fail if the executor doesn't exist.  If this is
+   * false then this function will return a NullExecutor
+   */
+  Executor & getExecutor(const std::string & name, bool fail_if_not_found = true);
+
+  /**
+   * This info is stored here because we need a "globalish" place to put it in
+   * order to allow communication between a multiapp and solver-specific
+   * internals (i.e. relating to fixed-point inner loops like picard, etc.)
+   * for handling subapp-specific modifications necessary for those solve
+   * processes.
+   */
+  FixedPointConfig & fixedPointConfig() { return _fixed_point_config; }
 
   /**
    * Returns a writable Boolean indicating whether this app will use a Nonlinear or Eigen System.
@@ -947,6 +1018,28 @@ protected:
 
   /// Pointer to the executioner of this run (typically build by actions)
   std::shared_ptr<Executioner> _executioner;
+
+  /// Pointer to the Executor of this run
+  std::shared_ptr<Executor> _executor;
+
+  /// Pointers to all of the Executors for this run
+  std::map<std::string, std::shared_ptr<Executor>> _executors;
+
+  /// Used in building the Executors
+  /// Maps the name of the Executor block to the <type, params>
+  std::unordered_map<std::string, std::pair<std::string, std::unique_ptr<InputParameters>>>
+      _executor_params;
+
+  /// Multiapp-related fixed point algorithm configuration details
+  /// primarily intended  to be passed to and used by the executioner/executor system.
+  FixedPointConfig _fixed_point_config;
+
+  /// Indicates whether we are operating in the new/experimental executor mode
+  /// instead of using the legacy executioner system.
+  const bool _use_executor = false;
+
+  /// Used to return an executor that does nothing
+  std::shared_ptr<NullExecutor> _null_executor;
 
   /// Boolean to indicate whether to use a Nonlinear or EigenSystem (inspected by actions)
   bool _use_nonlinear;

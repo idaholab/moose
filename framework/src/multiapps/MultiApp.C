@@ -874,20 +874,22 @@ MultiApp::createApp(unsigned int i, Real start_time)
   if (app->getOutputFileBase().empty())
     app->setOutputFileBase(_app.getOutputFileBase() + "_" + multiapp_name.str());
   preRunInputFile();
-  app->runInputFile();
 
   // Transfer coupling relaxation information to the subapps
-  auto fixed_point_solve = &(_apps[i]->getExecutioner()->fixedPointSolve());
-  fixed_point_solve->setMultiAppRelaxationFactor(getParam<Real>("relaxation_factor"));
-  fixed_point_solve->setMultiAppTransformedVariables(
-      getParam<std::vector<std::string>>("transformed_variables"));
+  _apps[i]->fixedPointConfig().sub_relaxation_factor = getParam<Real>("relaxation_factor");
+  _apps[i]->fixedPointConfig().sub_transformed_vars =
+      getParam<std::vector<std::string>>("transformed_variables");
   // Handle deprecated parameter
   if (!parameters().isParamSetByAddParam("relaxed_variables"))
-    fixed_point_solve->setMultiAppTransformedVariables(
-        getParam<std::vector<std::string>>("relaxed_variables"));
-  fixed_point_solve->setMultiAppTransformedPostprocessors(
-      getParam<std::vector<PostprocessorName>>("transformed_postprocessors"));
-  fixed_point_solve->allocateStorage(false);
+    _apps[i]->fixedPointConfig().sub_transformed_vars =
+        getParam<std::vector<std::string>>("relaxed_variables");
+  _apps[i]->fixedPointConfig().sub_transformed_pps =
+      getParam<std::vector<PostprocessorName>>("transformed_postprocessors");
+
+  app->runInputFile();
+  auto fixed_point_solve = &(_apps[i]->getExecutioner()->fixedPointSolve());
+  if (fixed_point_solve)
+    fixed_point_solve->allocateStorage(false);
 }
 
 std::string

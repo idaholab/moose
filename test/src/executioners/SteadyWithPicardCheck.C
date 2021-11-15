@@ -29,22 +29,6 @@ SteadyWithPicardCheck::SteadyWithPicardCheck(const InputParameters & parameters)
 {
 }
 
-bool
-SteadyWithPicardCheck::augmentedFixedPointConvergenceCheck() const
-{
-  Real rel_err = std::abs((_pp_value - _pp_value_old) / _pp_value);
-
-  std::ostringstream os;
-  os << std::setprecision(10);
-  os << " Old: " << _pp_value_old << " New: " << _pp_value;
-  os << std::scientific << std::setprecision(3) << " Error: " << rel_err;
-  _console << COLOR_MAGENTA << os.str() << COLOR_DEFAULT << std::endl;
-  if (rel_err < _pp_step_tol)
-    return true;
-  else
-    return false;
-}
-
 void
 SteadyWithPicardCheck::preSolve()
 {

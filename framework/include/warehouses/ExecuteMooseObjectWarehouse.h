@@ -92,6 +92,8 @@ public:
    */
   void sort(THREAD_ID tid = 0);
 
+  bool hasExecType(const ExecFlagType & exec_flag) { return _execute_objects.count(exec_flag) > 0; }
+
 protected:
   // Map of execute objects to storage containers for MooseObjects
   std::map<ExecFlagType, MooseObjectWarehouse<T>> _execute_objects;

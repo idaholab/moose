@@ -169,6 +169,13 @@ FixedPointSolve::FixedPointSolve(Executioner & ex)
     mooseWarning(
         "Both variable and postprocessor transformation are active. If the two share dofs, the "
         "transformation will not be correct.");
+
+  if (!_app.isUltimateMaster())
+  {
+    _secondary_relaxation_factor = _app.fixedPointConfig().sub_relaxation_factor;
+    _secondary_transformed_variables = _app.fixedPointConfig().sub_transformed_vars;
+    _secondary_transformed_pps = _app.fixedPointConfig().sub_transformed_pps;
+  }
 }
 
 bool
@@ -480,11 +487,6 @@ FixedPointSolve::examineFixedPointConvergence(bool & converged)
       _fixed_point_status = MooseFixedPointConvergenceReason::CONVERGED_RELATIVE;
       return true;
     }
-  }
-  if (_executioner.augmentedFixedPointConvergenceCheck())
-  {
-    _fixed_point_status = MooseFixedPointConvergenceReason::CONVERGED_CUSTOM;
-    return true;
   }
   if (std::abs(_pp_new - _pp_old) < _custom_abs_tol)
   {

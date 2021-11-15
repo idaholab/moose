@@ -23,7 +23,17 @@ SecantSolve::validParams()
   return params;
 }
 
-SecantSolve::SecantSolve(Executioner & ex) : FixedPointSolve(ex) { allocateStorage(true); }
+SecantSolve::SecantSolve(Executioner & ex) : FixedPointSolve(ex)
+{
+  allocateStorage(true);
+
+  _transformed_pps_values.resize(_transformed_pps.size());
+  for (size_t i = 0; i < _transformed_pps.size(); i++)
+    _transformed_pps_values[i].resize(4);
+  _secondary_transformed_pps_values.resize(_secondary_transformed_pps.size());
+  for (size_t i = 0; i < _secondary_transformed_pps.size(); i++)
+    _secondary_transformed_pps_values[i].resize(4);
+}
 
 void
 SecantSolve::allocateStorage(const bool primary)
@@ -32,16 +42,12 @@ SecantSolve::allocateStorage(const bool primary)
   TagID xn_m1_tagid;
   TagID fxn_m2_tagid;
   TagID xn_m2_tagid;
-  const std::vector<PostprocessorName> * transformed_pps;
-  std::vector<std::vector<PostprocessorValue>> * transformed_pps_values;
   if (primary)
   {
     xn_m1_tagid = _problem.addVectorTag("xn_m1", Moose::VECTOR_TAG_SOLUTION);
     fxn_m1_tagid = _problem.addVectorTag("fxn_m1", Moose::VECTOR_TAG_SOLUTION);
     xn_m2_tagid = _problem.addVectorTag("xn_m2", Moose::VECTOR_TAG_SOLUTION);
     fxn_m2_tagid = _problem.addVectorTag("fxn_m2", Moose::VECTOR_TAG_SOLUTION);
-    transformed_pps = &_transformed_pps;
-    transformed_pps_values = &_transformed_pps_values;
     _xn_m1_tagid = xn_m1_tagid;
     _fxn_m1_tagid = fxn_m1_tagid;
     _xn_m2_tagid = xn_m2_tagid;
@@ -53,8 +59,6 @@ SecantSolve::allocateStorage(const bool primary)
     fxn_m1_tagid = _problem.addVectorTag("secondary_fxn_m1", Moose::VECTOR_TAG_SOLUTION);
     xn_m2_tagid = _problem.addVectorTag("secondary_xn_m2", Moose::VECTOR_TAG_SOLUTION);
     fxn_m2_tagid = _problem.addVectorTag("secondary_fxn_m2", Moose::VECTOR_TAG_SOLUTION);
-    transformed_pps = &_secondary_transformed_pps;
-    transformed_pps_values = &_secondary_transformed_pps_values;
     _secondary_xn_m1_tagid = xn_m1_tagid;
     _secondary_fxn_m1_tagid = fxn_m1_tagid;
     _secondary_xn_m2_tagid = xn_m2_tagid;
@@ -68,11 +72,6 @@ SecantSolve::allocateStorage(const bool primary)
   _nl.addVector(fxn_m1_tagid, false, PARALLEL);
   _nl.addVector(xn_m2_tagid, false, PARALLEL);
   _nl.addVector(fxn_m2_tagid, false, PARALLEL);
-
-  // Allocate storage for the previous values of the postprocessors to transform
-  (*transformed_pps_values).resize((*transformed_pps).size());
-  for (size_t i = 0; i < (*transformed_pps).size(); i++)
-    (*transformed_pps_values)[i].resize(4);
 }
 
 void

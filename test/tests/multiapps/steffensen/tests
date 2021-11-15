@@ -9,6 +9,7 @@
       csvdiff = 'steady_main_out.csv steady_main_out_sub0.csv'
       recover = false
       detail = 'with a steady state multiapp'
+      deleted = 'This test was confirmed to have erroneous config and results. See #18990.'
     []
     [steady_with_pseudo_transient_sub]
       type = 'CSVDiff'

@@ -21,6 +21,7 @@
 #include "MooseSyntax.h"
 #include "MooseInit.h"
 #include "Executioner.h"
+#include "Executor.h"
 #include "PetscSupport.h"
 #include "Conversion.h"
 #include "CommandLine.h"
@@ -48,6 +49,7 @@
 #include "MooseApp.h"
 #include "CommonOutputAction.h"
 #include "CastUniquePointer.h"
+#include "NullExecutor.h"
 
 // Regular expression includes
 #include "pcrecpp.h"
@@ -125,6 +127,8 @@ MooseApp::validParams()
       "registry", "--registry", "Lists all known objects and actions.");
   params.addCommandLineParam<bool>(
       "registry_hit", "--registry-hit", "Lists all known objects and actions in hit format.");
+  params.addCommandLineParam<bool>(
+      "use_executor", "--executor", "Use the new Executor system instead of Executioners");
 
   params.addCommandLineParam<bool>(
       "apptype", "--type", false, "Return the name of the application object.");
@@ -324,6 +328,8 @@ MooseApp::MooseApp(InputParameters parameters)
     _action_factory(*this),
     _action_warehouse(*this, _syntax, _action_factory),
     _parser(*this, _action_warehouse),
+    _use_executor(parameters.get<bool>("use_executor")),
+    _null_executor(NULL),
     _use_nonlinear(true),
     _use_eigen_value(false),
     _enable_unused_check(WARN_UNUSED),
@@ -1036,7 +1042,7 @@ MooseApp::errorCheck()
 
   _parser.errorCheck(*_comm, warn, err);
 
-  auto apps = _executioner->feProblem().getMultiAppWarehouse().getObjects();
+  auto apps = feProblem().getMultiAppWarehouse().getObjects();
   for (auto app : apps)
     for (unsigned int i = 0; i < app->numLocalApps(); i++)
       app->localApp(i)->errorCheck();
@@ -1052,10 +1058,19 @@ MooseApp::executeExecutioner()
     return;
 
   // run the simulation
-  if (_executioner)
+  if (_use_executor && _executor)
   {
     Moose::PetscSupport::petscSetupOutput(_command_line.get());
 
+    _executor->init();
+    errorCheck();
+    auto result = _executor->exec();
+    if (!result.convergedAll())
+      mooseError(result.str());
+  }
+  else if (_executioner)
+  {
+    Moose::PetscSupport::petscSetupOutput(_command_line.get());
     _executioner->init();
     errorCheck();
     _executioner->execute();
@@ -1121,7 +1136,7 @@ std::shared_ptr<Backup>
 MooseApp::backup()
 {
   mooseAssert(_executioner, "Executioner is nullptr");
-  FEProblemBase & fe_problem = _executioner->feProblem();
+  FEProblemBase & fe_problem = feProblem();
 
   RestartableDataIO rdio(fe_problem);
   return rdio.createBackup();
@@ -1133,7 +1148,7 @@ MooseApp::restore(std::shared_ptr<Backup> backup, bool for_restart)
   TIME_SECTION("restore", 2, "Restoring Application");
 
   mooseAssert(_executioner, "Executioner is nullptr");
-  FEProblemBase & fe_problem = _executioner->feProblem();
+  FEProblemBase & fe_problem = feProblem();
 
   RestartableDataIO rdio(fe_problem);
   rdio.restoreBackup(backup, for_restart);
@@ -1158,6 +1173,162 @@ void
 MooseApp::disableCheckUnusedFlag()
 {
   _enable_unused_check = OFF;
+}
+
+FEProblemBase &
+MooseApp::feProblem() const
+{
+  return _executor.get() ? _executor->feProblem() : _executioner->feProblem();
+}
+
+void
+MooseApp::addExecutor(const std::string & type,
+                      const std::string & name,
+                      const InputParameters & params)
+{
+  std::shared_ptr<Executor> executor = _factory.create<Executor>(type, name, params);
+
+  if (_executors.count(executor->name()) > 0)
+    mooseError("an executor with name '", executor->name(), "' already exists");
+  _executors[executor->name()] = executor;
+}
+
+void
+MooseApp::addExecutorParams(const std::string & type,
+                            const std::string & name,
+                            const InputParameters & params)
+{
+  _executor_params[name] = std::make_pair(type, libmesh_make_unique<InputParameters>(params));
+}
+
+void
+MooseApp::recursivelyCreateExecutors(const std::string & current_executor_name,
+                                     std::list<std::string> & possible_roots,
+                                     std::list<std::string> & current_branch)
+{
+  // Did we already make this one?
+  if (_executors.find(current_executor_name) != _executors.end())
+    return;
+
+  // Is this one already on the current branch (i.e. there is a cycle)
+  if (std::find(current_branch.begin(), current_branch.end(), current_executor_name) !=
+      current_branch.end())
+  {
+    std::stringstream exec_names_string;
+
+    auto branch_it = current_branch.begin();
+
+    exec_names_string << *branch_it++;
+
+    for (; branch_it != current_branch.end(); ++branch_it)
+      exec_names_string << ", " << *branch_it;
+
+    exec_names_string << ", " << current_executor_name;
+
+    mooseError("Executor cycle detected: ", exec_names_string.str());
+  }
+
+  current_branch.push_back(current_executor_name);
+
+  // Build the dependencies first
+  const auto & params = *_executor_params[current_executor_name].second;
+
+  for (const auto & param : params)
+  {
+    if (dynamic_cast<InputParameters::Parameter<ExecutorName> *>(param.second))
+    {
+      const auto & dependency_name =
+          static_cast<InputParameters::Parameter<ExecutorName> *>(param.second)->get();
+
+      possible_roots.remove(dependency_name);
+
+      if (!dependency_name.empty())
+        recursivelyCreateExecutors(dependency_name, possible_roots, current_branch);
+    }
+  }
+
+  // Add this Executor
+  const auto & type = _executor_params[current_executor_name].first;
+  addExecutor(type, current_executor_name, params);
+
+  current_branch.pop_back();
+}
+
+void
+MooseApp::createExecutors()
+{
+  // Do we have any?
+  if (_executor_params.empty())
+    return;
+
+  // Holds the names of Executors that may be the root executor
+  std::list<std::string> possibly_root;
+
+  // What is already built
+  std::map<std::string, bool> already_built;
+
+  // The Executors that are currently candidates for being roots
+  std::list<std::string> possible_roots;
+
+  // The current line of dependencies - used for finding cycles
+  std::list<std::string> current_branch;
+
+  // Build the NullExecutor
+  {
+    auto params = _factory.getValidParams("NullExecutor");
+    _null_executor = _factory.create<NullExecutor>("NullExecutor", "_null_executor", params);
+  }
+
+  for (const auto & params_entry : _executor_params)
+  {
+    const auto & name = params_entry.first;
+
+    // Did we already make this one?
+    if (_executors.find(name) != _executors.end())
+      continue;
+
+    possible_roots.emplace_back(name);
+
+    recursivelyCreateExecutors(name, possible_roots, current_branch);
+  }
+
+  // If there is more than one possible root - error
+  if (possible_roots.size() > 1)
+  {
+    auto root_string_it = possible_roots.begin();
+
+    std::stringstream roots_string;
+
+    roots_string << *root_string_it++;
+
+    for (; root_string_it != possible_roots.end(); ++root_string_it)
+      roots_string << ", " << *root_string_it;
+
+    mooseError("Multiple Executor roots found: ", roots_string.str());
+  }
+
+  // Set the root executor
+  _executor = _executors[possible_roots.front()];
+}
+
+Executor &
+MooseApp::getExecutor(const std::string & name, bool fail_if_not_found)
+{
+  auto it = _executors.find(name);
+
+  if (it != _executors.end())
+    return *it->second;
+
+  if (fail_if_not_found)
+    mooseError("Executor not found: ", name);
+
+  return *_null_executor;
+}
+
+Executioner *
+MooseApp::getExecutioner() const
+{
+  return _executioner.get() ? _executioner.get() : _executor.get();
 }
 
 void
@@ -2201,7 +2372,7 @@ MooseApp::removeRelationshipManager(std::shared_ptr<RelationshipManager> rm)
 
   if (_executioner)
   {
-    auto & problem = _executioner->feProblem();
+    auto & problem = feProblem();
     if (undisp_clone)
     {
       problem.removeAlgebraicGhostingFunctor(*undisp_clone);
@@ -2316,7 +2487,7 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type,
       {
         MeshBase & undisp_mesh_base = mesh->getMesh();
         const DofMap * const undisp_nl_dof_map =
-            _executioner ? &_executioner->feProblem().systemBaseNonlinear().dofMap() : nullptr;
+            _executioner ? &feProblem().systemBaseNonlinear().dofMap() : nullptr;
         undisp_mesh_base.add_ghosting_functor(
             createRMFromTemplateAndInit(*rm, undisp_mesh_base, undisp_nl_dof_map));
 
@@ -2326,9 +2497,8 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type,
         {
           MeshBase & disp_mesh_base = _action_warehouse.displacedMesh()->getMesh();
           const DofMap * disp_nl_dof_map = nullptr;
-          if (_executioner && _executioner->feProblem().getDisplacedProblem())
-            disp_nl_dof_map =
-                &_executioner->feProblem().getDisplacedProblem()->systemBaseNonlinear().dofMap();
+          if (_executioner && feProblem().getDisplacedProblem())
+            disp_nl_dof_map = &feProblem().getDisplacedProblem()->systemBaseNonlinear().dofMap();
           disp_mesh_base.add_ghosting_functor(
               createRMFromTemplateAndInit(*rm, disp_mesh_base, disp_nl_dof_map));
         }
@@ -2339,12 +2509,12 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type,
     }
     else // rm_type is algebraic or coupling
     {
-      if (!_executioner)
+      if (!_executioner && !_executor)
         mooseError("We must have an executioner by now or else we do not have to data to add "
                    "algebraic or coupling functors to in MooseApp::attachRelationshipManagers");
 
       // Now we've built the problem, so we can use it
-      auto & problem = _executioner->feProblem();
+      auto & problem = feProblem();
       auto & undisp_nl = problem.systemBaseNonlinear();
       auto & undisp_nl_dof_map = undisp_nl.dofMap();
       auto & undisp_mesh = problem.mesh().getMesh();
