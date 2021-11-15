@@ -122,6 +122,22 @@ public:
   }
 
 protected:
+  /**
+   * Enum describing the type of parallel communication to perform.
+   *
+   * Some routines require specific communication methods that not all processors
+   * see, these IDs will determine how that routine is performed:
+   *  - NONE routine is not distrubuted and things all can happen locally
+   *  - LOCAL routine is distributed on all processors
+   *  - SEMI_LOCAL routine is distributed only on processors that own rows
+   */
+  enum CommMethod
+  {
+    NONE = 0,
+    LOCAL = 1,
+    SEMI_LOCAL = 2
+  };
+
   // The following methods are the basic methods that should be utilized my most application
   // developers that are creating a custom Sampler.
 
@@ -223,7 +239,9 @@ protected:
    * NOTE: This will advance the generator by the size of the supplied vector.
    */
   template <typename T>
-  void shuffle(std::vector<T> & data, const std::size_t seed_index = 0, bool is_distributed = true);
+  void shuffle(std::vector<T> & data,
+               const std::size_t seed_index = 0,
+               const CommMethod method = CommMethod::LOCAL);
 
   //@{
   /**
@@ -247,6 +265,9 @@ protected:
   const dof_id_type _min_procs_per_row;
   /// The maximum number of processors that are associated with a set of rows
   const dof_id_type _max_procs_per_row;
+
+  /// Communicator that was split based on samples that have rows
+  libMesh::Parallel::Communicator _local_comm;
 
 private:
   ///@{
@@ -341,7 +362,12 @@ private:
 
 template <typename T>
 void
-Sampler::shuffle(std::vector<T> & data, const std::size_t seed_index, bool is_distributed)
+Sampler::shuffle(std::vector<T> & data, const std::size_t seed_index, const CommMethod method)
 {
-  MooseUtils::shuffle<T>(data, _generator, seed_index, is_distributed ? &_communicator : nullptr);
+  if (method == CommMethod::NONE)
+    MooseUtils::shuffle<T>(data, _generator, seed_index, nullptr);
+  else if (method == CommMethod::LOCAL)
+    MooseUtils::shuffle<T>(data, _generator, seed_index, &_communicator);
+  else if (method == CommMethod::SEMI_LOCAL)
+    MooseUtils::shuffle<T>(data, _generator, seed_index, &_local_comm);
 }

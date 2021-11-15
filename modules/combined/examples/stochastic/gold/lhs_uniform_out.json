@@ -1,0 +1,440 @@
+{
+    "reporters": {
+        "stats": {
+            "confidence_intervals": {
+                "levels": [
+                    0.05,
+                    0.95
+                ],
+                "method": "percentile",
+                "replicates": 10000,
+                "seed": 1
+            },
+            "type": "StatisticsReporter",
+            "values": {
+                "storage_data:dispx_center_inner:value_MEAN": {
+                    "stat": "MEAN",
+                    "type": "std::pair<double, std::vector<double> >"
+                },
+                "storage_data:dispx_center_inner:value_STDDEV": {
+                    "stat": "STDDEV",
+                    "type": "std::pair<double, std::vector<double> >"
+                },
+                "storage_data:dispx_center_outer:value_MEAN": {
+                    "stat": "MEAN",
+                    "type": "std::pair<double, std::vector<double> >"
+                },
+                "storage_data:dispx_center_outer:value_STDDEV": {
+                    "stat": "STDDEV",
+                    "type": "std::pair<double, std::vector<double> >"
+                },
+                "storage_data:dispx_end_inner:value_MEAN": {
+                    "stat": "MEAN",
+                    "type": "std::pair<double, std::vector<double> >"
+                },
+                "storage_data:dispx_end_inner:value_STDDEV": {
+                    "stat": "STDDEV",
+                    "type": "std::pair<double, std::vector<double> >"
+                },
+                "storage_data:dispx_end_outer:value_MEAN": {
+                    "stat": "MEAN",
+                    "type": "std::pair<double, std::vector<double> >"
+                },
+                "storage_data:dispx_end_outer:value_STDDEV": {
+                    "stat": "STDDEV",
+                    "type": "std::pair<double, std::vector<double> >"
+                },
+                "storage_data:dispz_inner:value_MEAN": {
+                    "stat": "MEAN",
+                    "type": "std::pair<double, std::vector<double> >"
+                },
+                "storage_data:dispz_inner:value_STDDEV": {
+                    "stat": "STDDEV",
+                    "type": "std::pair<double, std::vector<double> >"
+                },
+                "storage_data:dispz_outer:value_MEAN": {
+                    "stat": "MEAN",
+                    "type": "std::pair<double, std::vector<double> >"
+                },
+                "storage_data:dispz_outer:value_STDDEV": {
+                    "stat": "STDDEV",
+                    "type": "std::pair<double, std::vector<double> >"
+                },
+                "storage_data:temp_center_inner:value_MEAN": {
+                    "stat": "MEAN",
+                    "type": "std::pair<double, std::vector<double> >"
+                },
+                "storage_data:temp_center_inner:value_STDDEV": {
+                    "stat": "STDDEV",
+                    "type": "std::pair<double, std::vector<double> >"
+                },
+                "storage_data:temp_center_outer:value_MEAN": {
+                    "stat": "MEAN",
+                    "type": "std::pair<double, std::vector<double> >"
+                },
+                "storage_data:temp_center_outer:value_STDDEV": {
+                    "stat": "STDDEV",
+                    "type": "std::pair<double, std::vector<double> >"
+                },
+                "storage_data:temp_end_inner:value_MEAN": {
+                    "stat": "MEAN",
+                    "type": "std::pair<double, std::vector<double> >"
+                },
+                "storage_data:temp_end_inner:value_STDDEV": {
+                    "stat": "STDDEV",
+                    "type": "std::pair<double, std::vector<double> >"
+                },
+                "storage_data:temp_end_outer:value_MEAN": {
+                    "stat": "MEAN",
+                    "type": "std::pair<double, std::vector<double> >"
+                },
+                "storage_data:temp_end_outer:value_STDDEV": {
+                    "stat": "STDDEV",
+                    "type": "std::pair<double, std::vector<double> >"
+                }
+            }
+        },
+        "storage": {
+            "type": "StochasticReporter",
+            "values": {
+                "data:converged": {
+                    "row_begin": 0,
+                    "row_end": 10,
+                    "type": "std::vector<bool>"
+                },
+                "data:dispx_center_inner:value": {
+                    "row_begin": 0,
+                    "row_end": 10,
+                    "type": "std::vector<double>"
+                },
+                "data:dispx_center_outer:value": {
+                    "row_begin": 0,
+                    "row_end": 10,
+                    "type": "std::vector<double>"
+                },
+                "data:dispx_end_inner:value": {
+                    "row_begin": 0,
+                    "row_end": 10,
+                    "type": "std::vector<double>"
+                },
+                "data:dispx_end_outer:value": {
+                    "row_begin": 0,
+                    "row_end": 10,
+                    "type": "std::vector<double>"
+                },
+                "data:dispz_inner:value": {
+                    "row_begin": 0,
+                    "row_end": 10,
+                    "type": "std::vector<double>"
+                },
+                "data:dispz_outer:value": {
+                    "row_begin": 0,
+                    "row_end": 10,
+                    "type": "std::vector<double>"
+                },
+                "data:temp_center_inner:value": {
+                    "row_begin": 0,
+                    "row_end": 10,
+                    "type": "std::vector<double>"
+                },
+                "data:temp_center_outer:value": {
+                    "row_begin": 0,
+                    "row_end": 10,
+                    "type": "std::vector<double>"
+                },
+                "data:temp_end_inner:value": {
+                    "row_begin": 0,
+                    "row_end": 10,
+                    "type": "std::vector<double>"
+                },
+                "data:temp_end_outer:value": {
+                    "row_begin": 0,
+                    "row_end": 10,
+                    "type": "std::vector<double>"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "stats": {
+                "storage_data:dispx_center_inner:value_MEAN": [
+                    0.0004041088326939742,
+                    [
+                        0.0003475650268654479,
+                        0.0004602982259363247
+                    ]
+                ],
+                "storage_data:dispx_center_inner:value_STDDEV": [
+                    0.00011325320096136419,
+                    [
+                        7.720749221977145e-05,
+                        0.0001310562596258069
+                    ]
+                ],
+                "storage_data:dispx_center_outer:value_MEAN": [
+                    0.0005005278884678082,
+                    [
+                        0.0004307723669538546,
+                        0.0005698572085465
+                    ]
+                ],
+                "storage_data:dispx_center_outer:value_STDDEV": [
+                    0.0001396000343509728,
+                    [
+                        9.59873209101824e-05,
+                        0.00016082819136304936
+                    ]
+                ],
+                "storage_data:dispx_end_inner:value_MEAN": [
+                    0.00042220354757272133,
+                    [
+                        0.00036292320598971966,
+                        0.0004802587113100682
+                    ]
+                ],
+                "storage_data:dispx_end_inner:value_STDDEV": [
+                    0.00011844657310725845,
+                    [
+                        8.535402956935216e-05,
+                        0.00013274621968998056
+                    ]
+                ],
+                "storage_data:dispx_end_outer:value_MEAN": [
+                    0.00047962107356400564,
+                    [
+                        0.0004125871750576709,
+                        0.000545381397451829
+                    ]
+                ],
+                "storage_data:dispx_end_outer:value_STDDEV": [
+                    0.00013380321010556805,
+                    [
+                        9.6305339777295e-05,
+                        0.00014996019731950406
+                    ]
+                ],
+                "storage_data:dispz_inner:value_MEAN": [
+                    0.0006146068176996869,
+                    [
+                        0.0005300775586408571,
+                        0.0006992740716849042
+                    ]
+                ],
+                "storage_data:dispz_inner:value_STDDEV": [
+                    0.00017027670413966923,
+                    [
+                        0.00012044010646104734,
+                        0.00019300687360948143
+                    ]
+                ],
+                "storage_data:dispz_outer:value_MEAN": [
+                    0.0005005156786648756,
+                    [
+                        0.00043066882825271694,
+                        0.0005704696368521462
+                    ]
+                ],
+                "storage_data:dispz_outer:value_STDDEV": [
+                    0.00014087023142696987,
+                    [
+                        9.290413972833959e-05,
+                        0.00016492574440657714
+                    ]
+                ],
+                "storage_data:temp_center_inner:value_MEAN": [
+                    610.5628540993606,
+                    [
+                        601.4597169566683,
+                        619.4794653727993
+                    ]
+                ],
+                "storage_data:temp_center_inner:value_STDDEV": [
+                    18.165099228353984,
+                    [
+                        11.671825120072699,
+                        21.742552655148465
+                    ]
+                ],
+                "storage_data:temp_center_outer:value_MEAN": [
+                    587.4326433590322,
+                    [
+                        579.269533685599,
+                        595.4636082303919
+                    ]
+                ],
+                "storage_data:temp_center_outer:value_STDDEV": [
+                    16.308996785531754,
+                    [
+                        10.684473709401669,
+                        19.283828989430948
+                    ]
+                ],
+                "storage_data:temp_end_inner:value_MEAN": [
+                    506.8564649738913,
+                    [
+                        500.392013609816,
+                        513.1751535428559
+                    ]
+                ],
+                "storage_data:temp_end_inner:value_STDDEV": [
+                    12.853657614875713,
+                    [
+                        8.78622021322239,
+                        14.833566240217383
+                    ]
+                ],
+                "storage_data:temp_end_outer:value_MEAN": [
+                    508.47237817382285,
+                    [
+                        501.90220135914876,
+                        514.9169755781419
+                    ]
+                ],
+                "storage_data:temp_end_outer:value_STDDEV": [
+                    13.115423104548583,
+                    [
+                        8.99851193998505,
+                        15.079206732132011
+                    ]
+                ]
+            },
+            "storage": {
+                "data:converged": [
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true
+                ],
+                "data:dispx_center_inner:value": [
+                    0.00031363226081832906,
+                    0.00046314744182851324,
+                    0.0005578790700146324,
+                    0.0004466455468283186,
+                    0.00025164809887231906,
+                    0.0005619810670246544,
+                    0.0003321998655771603,
+                    0.0004764929932546654,
+                    0.0002679701460826264,
+                    0.0003694918366385232
+                ],
+                "data:dispx_center_outer:value": [
+                    0.00039007796096579876,
+                    0.0005721817754612002,
+                    0.0006906442852520142,
+                    0.0005578018776166988,
+                    0.00031590976554571256,
+                    0.0006902865047438329,
+                    0.00040736815174151537,
+                    0.000594125300476326,
+                    0.00032953084432749965,
+                    0.0004573524185474833
+                ],
+                "data:dispx_end_inner:value": [
+                    0.0003386109057653879,
+                    0.0004776774463142722,
+                    0.0005703490275139105,
+                    0.000489549934994763,
+                    0.0002961856794561002,
+                    0.0005499929979688582,
+                    0.00030184489221078123,
+                    0.0005477621572643871,
+                    0.00026033240306902233,
+                    0.000389730031169731
+                ],
+                "data:dispx_end_outer:value": [
+                    0.0003832897361658128,
+                    0.0005435166247736728,
+                    0.0006492206468518778,
+                    0.0005527511539334857,
+                    0.0003338080486335381,
+                    0.000629910123602057,
+                    0.00034827219243992413,
+                    0.000615519734518557,
+                    0.00029912505807139694,
+                    0.00044079741664973445
+                ],
+                "data:dispz_inner:value": [
+                    0.0004849930035452236,
+                    0.0006996066042135606,
+                    0.0008405669756379178,
+                    0.0006964285954910709,
+                    0.00040807722872690305,
+                    0.0008273206267010179,
+                    0.0004744319281438018,
+                    0.0007575882345318739,
+                    0.0003944429634976787,
+                    0.0005626120165078207
+                ],
+                "data:dispz_outer:value": [
+                    0.0003844990050025078,
+                    0.0005754663118445223,
+                    0.0006921054744473546,
+                    0.0005456936976088935,
+                    0.00030682808169199316,
+                    0.0007107877508142916,
+                    0.00042324306409111627,
+                    0.0005732230093742781,
+                    0.0003409147820008975,
+                    0.00045239560977290065
+                ],
+                "data:temp_center_inner:value": [
+                    594.2121709866562,
+                    599.9654579842744,
+                    614.1781775288391,
+                    639.7442726531654,
+                    618.130643184775,
+                    620.3744430945519,
+                    591.5035410041094,
+                    583.1464818075847,
+                    631.8505780366875,
+                    612.5227747129634
+                ],
+                "data:temp_center_outer:value": [
+                    574.4765910423428,
+                    577.0911877373549,
+                    592.3301494759811,
+                    610.7499920585425,
+                    597.8038831448066,
+                    594.6663425552805,
+                    570.2663148871761,
+                    562.0595102501878,
+                    608.6806634819798,
+                    586.2017989566704
+                ],
+                "data:temp_end_inner:value": [
+                    497.13387452581577,
+                    499.4986281315729,
+                    508.5611379369053,
+                    520.6591874419493,
+                    520.0456806536757,
+                    513.9836396523988,
+                    491.3539969015167,
+                    489.2217336141991,
+                    525.5687538073399,
+                    502.53801707354006
+                ],
+                "data:temp_end_outer:value": [
+                    497.80129128717164,
+                    501.2860588040267,
+                    509.41450736964026,
+                    523.4391174714061,
+                    521.0831922151989,
+                    516.54558414065,
+                    492.3480052448308,
+                    490.7849811920915,
+                    527.1241805008187,
+                    504.8968635123939
+                ]
+            },
+            "time": 1.0,
+            "time_step": 1
+        }
+    ]
+}

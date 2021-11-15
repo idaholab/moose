@@ -77,6 +77,24 @@ Executioner::Executioner(const InputParameters & parameters)
     _fixed_point_solve = std::make_unique<SteffensenSolve>(*this);
 }
 
+Executioner::Executioner(const InputParameters & parameters, bool)
+  : MooseObject(parameters),
+    Reporter(this),
+    ReporterInterface(this),
+    UserObjectInterface(this),
+    PostprocessorInterface(this),
+    Restartable(this, "Executioners"),
+    PerfGraphInterface(this),
+    _fe_problem(*getCheckedPointerParam<FEProblemBase *>(
+        "_fe_problem_base", "This might happen if you don't have a mesh")),
+    _iteration_method(getParam<MooseEnum>("fixed_point_algorithm")),
+    _restart_file_base(getParam<FileNameNoExtension>("restart_file_base")),
+    _verbose(getParam<bool>("verbose"))
+{
+  if (!_restart_file_base.empty())
+    _fe_problem.setRestartFile(_restart_file_base);
+}
+
 Problem &
 Executioner::problem()
 {

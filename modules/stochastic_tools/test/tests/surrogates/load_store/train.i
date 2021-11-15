@@ -41,18 +41,18 @@
     to_control = 'stochastic'
   []
   [data]
-    type = SamplerPostprocessorTransfer
+    type = SamplerReporterTransfer
     multi_app = quad_sub
     sampler = quadrature
-    to_vector_postprocessor = storage
-    from_postprocessor = avg
+    stochastic_reporter = storage
+    from_reporter = avg/value
   []
 []
 
-[VectorPostprocessors]
+[Reporters]
   [storage]
-    type = StochasticResults
-    parallel_type = REPLICATED
+    type = StochasticReporter
+    parallel_type = ROOT
   []
 []
 
@@ -63,7 +63,7 @@
     order = 5
     distributions = 'D_dist S_dist'
     sampler = quadrature
-    response = storage/data:avg
+    response = storage/data:avg:value
   []
 []
 

@@ -28,7 +28,7 @@ public:
   using ADMortarConstraint::computeJacobian;
   void computeJacobian(Moose::MortarType mortar_type) override;
   void residualSetup() override;
-  void jacobianSetup() override;
+  void jacobianSetup() override final;
   void post() override;
 
   /**
@@ -58,6 +58,11 @@ protected:
    * information into the system residual and Jacobian
    */
   virtual void enforceConstraintOnDof(const DofObject * const dof);
+
+  /**
+   * Communicate weighted gaps to the owning process
+   */
+  void communicateGaps();
 
   /// x-displacement on the secondary face
   const ADVariableValue & _secondary_disp_x;
@@ -90,6 +95,9 @@ protected:
 
   /// Whether to normalize weighted gap by weighting function norm
   bool _normalize_c;
+
+  /// Whether the dof objects are nodal; if they're not, then they're elemental
+  const bool _nodal;
 
   /// A map from node to weighted gap and normalization (if requested)
   std::unordered_map<const DofObject *, std::pair<ADReal, Real>> _dof_to_weighted_gap;

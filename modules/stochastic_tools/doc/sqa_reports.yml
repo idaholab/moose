@@ -7,7 +7,6 @@ Applications:
         remove:
             - ${MOOSE_DIR}/framework/doc/remove.yml
             - ${MOOSE_DIR}/modules/stochastic_tools/doc/remove.yml
-        log_stub_files: WARNING
 
 Documents:
     software_quality_plan: sqa/inl_records.md#software_quality_plan
@@ -26,14 +25,10 @@ Documents:
     software_library_list: sqa/stochastic_tools_sll.md
     communication_and_contact_information: sqa/framework_cci.md
     software_coding_standards: sqa/framework_scs.md
-    log_user_manual: WARNING
-    log_theory_manual: WARNING
+    user_manual: modules/stochastic_tools/index.md
+    theory_manual: modules/stochastic_tools/index.md
 
 Requirements:
     stochastic_tools:
         directories:
             - ${MOOSE_DIR}/modules/stochastic_tools
-        log_missing: WARNING
-        log_missing_requirement: WARNING
-        log_top_level_detail: WARNING
-        log_testable: WARNING

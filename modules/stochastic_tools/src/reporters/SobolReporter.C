@@ -228,9 +228,19 @@ template <typename InType, typename OutType>
 void
 SobolReporterContext<InType, OutType>::store(nlohmann::json & json) const
 {
+  storeSobol(json, this->_state.value(), _sampler.getNumberOfCols());
+}
+
+template <typename InType, typename OutType>
+void
+SobolReporterContext<InType, OutType>::storeSobol(nlohmann::json & json,
+                                                  const SobolState<OutType> & val,
+                                                  unsigned int nparam)
+{
+  if (val.first.empty())
+    return;
+
   // Convenience
-  const auto & val = this->_state.value();
-  const unsigned int nparam = _sampler.getNumberOfCols();
   const unsigned int nlevels = val.second.size();
 
   std::pair<std::vector<OutType>, std::vector<std::vector<OutType>>> first_order;
@@ -238,7 +248,7 @@ SobolReporterContext<InType, OutType>::store(nlohmann::json & json) const
 
   first_order.first.assign(val.first.begin(), val.first.begin() + nparam);
   total.first.assign(val.first.begin() + nparam, val.first.begin() + nparam + nparam);
-  if (_ci_calc_ptr)
+  if (nlevels > 0)
   {
     first_order.second.resize(nlevels);
     total.second.resize(nlevels);
@@ -268,7 +278,7 @@ SobolReporterContext<InType, OutType>::store(nlohmann::json & json) const
         second_order.first[j][i] = second_order.first[i][j];
       }
 
-    if (_ci_calc_ptr)
+    if (nlevels > 0)
     {
       second_order.second.resize(nlevels, second_order.first);
 

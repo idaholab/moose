@@ -83,15 +83,9 @@ ConeRayStudy::ConeRayStudy(const InputParameters & parameters)
 
   if (_polar_quad_orders.size() != _start_points.size())
     paramError("polar_quad_orders", "Not the same size as start_points.");
-  for (const auto val : _polar_quad_orders)
-    if (val == 0)
-      paramError("polar_quad_orders", "Must be positive.");
 
   if (_azimuthal_quad_orders.size() != _start_points.size())
     paramError("azimuthal_quad_orders", "Not the same size as start_points.");
-  for (const auto val : _azimuthal_quad_orders)
-    if (val == 0)
-      paramError("azimuthal_quad_orders", "Must be positive.");
 
   if (_mesh.dimension() == 1)
     mooseError("Does not support 1D.");

@@ -74,7 +74,7 @@ The following input file snippet adds a
 [PolynomialChaosTrainer.md] object for training. Please refer to the documentation on the
 individual models for more details.
 
-!listing poly_chaos/master_2d_mc.i block=Trainers
+!listing poly_chaos/main_2d_mc.i block=Trainers
 
 !syntax list /Trainers objects=True actions=False subsystems=False
 

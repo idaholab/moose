@@ -89,27 +89,17 @@ Evaluating a polynomial chaos surrogate model is exactly the same as any other t
 
 !listing examples/surrogates/poly_chaos_normal.i block=Distributions Samplers caption=Defining sampler for evaluation -- Normal distributions
 
-!listing examples/surrogates/poly_chaos_uniform.i block=samp_avg samp_max caption=Evaluating surrogate with [EvaluateSurrogate](EvaluateSurrogate.C)
+!listing examples/surrogates/poly_chaos_uniform.i block=samp caption=Evaluating surrogate with [EvaluateSurrogate](EvaluateSurrogate.C)
 
-### Statistical Moments
+### Statistics and Sensitivities
 
-[PolynomialChaos](PolynomialChaos.md) has the ability to compute statistical moments analytically. These are computed using [PolynomialChaosStatistics](PolynomialChaosStatistics.md). The implemented moments include mean, standard deviation, skewness, and kurtosis. The type of moment is specified by the [!param](/VectorPostprocessors/PolynomialChaosStatistics/compute) parameter, which can be a combination of `mean`, `stddev`, `skewness`, and `kurtosis`. This example computes mean and standard deviation.
+[PolynomialChaos](PolynomialChaos.md) has the ability to compute statistical moments, local sensitivity, and sobol indices analytically. These are computed using [PolynomialChaosReporter](PolynomialChaosReporter.md). The implemented moments include mean, standard deviation, skewness, and kurtosis. The type of moment is specified by the [!param](/Reporters/PolynomialChaosReporter/statistics) parameter, which can be a combination of `mean`, `stddev`, `skewness`, and `kurtosis`. This example computes mean and standard deviation. It should be noted that computing skewness and kurtosis can be very computationally demanding using the analytical technique. Therefore, it might be better to sample the surrogate model and compute these quantities with the result.
 
-!listing examples/surrogates/poly_chaos_uniform.i block=stats_avg stats_max
+The points to compute the sensitivity can be defined explicitly by specifying the [!param](/Reporters/PolynomialChaosReporter/local_sensitivity_points) parameter, and/or using a sampler by specifying the [!param](/Reporters/PolynomialChaosReporter/local_sensitivity_sampler). It is vital that the columns of the points match with the distributions defined from the original trainer.
 
-It should be noted that computing skewness and kurtosis can be very computationally demanding using the analytical technique. Therefore, it might be better to sample the surrogate model and compute these quantities with the result.
+Sobol statistics are a metric of the global sensitivity of each parameter, or a combination of parameters, see [SobolReporter.md] for more details. These are computed by setting the [!param](/Reporters/PolynomialChaosReporter/include_sobol) parameter to `true`. This will compute total, first-, and second-order Sobol indicies.
 
-### Local Sensitivity
-
-[PolynomialChaos](PolynomialChaos.md) has the ability to compute local sensitivities analytically. These are computed using [PolynomialChaosLocalSensitivity](PolynomialChaosLocalSensitivity.md). The points to compute the sensitivity can be defined explicitly by specifying the [!param](/VectorPostprocessors/PolynomialChaosLocalSensitivity/local_points) parameter, and/or using a sampler by specifying the [!param](/VectorPostprocessors/PolynomialChaosLocalSensitivity/local_points_sampler). It is vital that the columns of the points match with the distributions defined from the original trainer.
-
-!listing examples/surrogates/poly_chaos_uniform.i block=sense_avg sense_max
-
-### Sobol Statistics
-
-Sobol statistics are a metric of the global sensitivity of each parameter, or a combination of parameters, see [SobolStatistics.md] for more details. [PolynomialChaos](PolynomialChaos.md) has the ability to compute Sobol statistics analytically. These are computed using [PolynomialChaosSobolStatistics](PolynomialChaosSobolStatistics.md). This vector postprocessor has the ability to compute all Sobol indicies, including total sensitivities, which is specified by the [!param](/VectorPostprocessors/PolynomialChaosSobolStatistics/sensitivity_order) parameter. This examples computes the first and second order indicies for all the parameters.
-
-!listing examples/surrogates/poly_chaos_uniform.i block=sobol_avg sobol_max
+!listing examples/surrogates/poly_chaos_uniform.i block=stats
 
 ### Example Input Files
 

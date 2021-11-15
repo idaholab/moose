@@ -26,7 +26,7 @@ def get_args():
     parser.add_argument('--memory-levels', default=6, type=int, help="Number of levels to perform for memory/timing runs, n in [base*2^0, ..., base*2^n-1].")
     parser.add_argument('--memory-cores', default=32, type=int, help="Number of processors to use for memory/timing runs.")
     parser.add_argument('--weak-levels', default=7, type=int, help="Number of processor levels to perform for weak scaling, n in [2^0,...,2^n-1].")
-    parser.add_argument('--write', default=True, type=bool, help="Toggle writing to results directory when --run is used.")
+    parser.add_argument('--write', default=1, type=int, help="Toggle writing to results directory when --run is used.")
     return parser.parse_args()
 
 def execute(infile, outfile, mode, samples, mpi=None, replicates=1, write=True):

@@ -26,11 +26,6 @@ public:
    */
   virtual void preSolve() override;
 
-  /**
-   * Additional convergence check to be honored by PicardSolve
-   */
-  virtual bool augmentedFixedPointConvergenceCheck() const override;
-
 private:
   /// Absolute step tolerance on a designated postprocessor
   Real _pp_step_tol;

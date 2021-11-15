@@ -45,54 +45,24 @@
 []
 
 [Reporters]
-  [samp_avg]
+  [samp]
     type = EvaluateSurrogate
-    model = poly_chaos_avg
+    model = 'poly_chaos_avg poly_chaos_max'
     sampler = sample
     parallel_type = ROOT
   []
-  [samp_max]
-    type = EvaluateSurrogate
-    model = poly_chaos_max
-    sampler = sample
-    parallel_type = ROOT
-  []
-[]
-
-# Computing statistics
-[VectorPostprocessors]
-  [stats_avg]
-    type = PolynomialChaosStatistics
-    pc_name = 'poly_chaos_avg'
-    compute = 'mean stddev'
-  []
-  [stats_max]
-    type = PolynomialChaosStatistics
-    pc_name = 'poly_chaos_max'
-    compute = 'mean stddev'
-  []
-  [sense_avg]
-    type = PolynomialChaosLocalSensitivity
-    pc_name = 'poly_chaos_avg'
-    local_points = '5 10000 0.03 300'
-  []
-  [sense_max]
-    type = PolynomialChaosLocalSensitivity
-    pc_name = 'poly_chaos_max'
-    local_points = '5 10000 0.03 300'
-  []
-  [sobol_avg]
-    type = PolynomialChaosSobolStatistics
-    pc_name = 'poly_chaos_avg'
-    sensitivity_order = 'first second'
-  []
-  [sobol_max]
-    type = PolynomialChaosSobolStatistics
-    pc_name = 'poly_chaos_max'
-    sensitivity_order = 'first second'
+  [stats]
+    type = PolynomialChaosReporter
+    pc_name = 'poly_chaos_avg poly_chaos_max'
+    statistics = 'mean stddev'
+    local_sensitivity_points = '5 10000 0.03 300; 5 10000 0.03 300'
+    include_sobol = true
   []
 []
 
 [Outputs]
-  csv = true
+  [out]
+    type = JSON
+    execute_on = final
+  []
 []

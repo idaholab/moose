@@ -1,0 +1,69 @@
+[Tests]
+  issues = '#19105'
+
+  [full_solve]
+    design = 'SamplerFullSolveMultiApp.md'
+    requirement = 'The system shall be able to perform stochastic simulations of steady-state models while obeying unperturbed command line arguements with:'
+
+    [cmdline_normal]
+      type = CSVDiff
+      input = main_full_solve.i
+      csvdiff = main_full_solve_out_storage_0001.csv
+      detail = 'command line control in normal mode;'
+    []
+    [cmdline_batch]
+      type = CSVDiff
+      input = main_full_solve.i
+      cli_args = "MultiApps/sub/mode=batch-reset"
+      csvdiff = main_full_solve_out_storage_0001.csv
+      detail = 'command line control in batch mode;'
+    []
+    [transfer_normal]
+      type = CSVDiff
+      input = main_full_solve.i
+      cli_args = "Transfers/inactive='' Controls/active=''"
+      csvdiff = main_full_solve_out_storage_0001.csv
+      detail = 'parameter transfer in normal mode;'
+    []
+    [transfer_batch_reset]
+      type = CSVDiff
+      input = main_full_solve.i
+      cli_args = "MultiApps/sub/mode=batch-reset Transfers/inactive='' Controls/active=''"
+      csvdiff = main_full_solve_out_storage_0001.csv
+      detail = 'parameter transfer in batch-reset mode;'
+    []
+    [transfer_batch_restore]
+      type = CSVDiff
+      input = main_full_solve.i
+      cli_args = "MultiApps/sub/mode=batch-restore Transfers/inactive='' Controls/active=''"
+      csvdiff = main_full_solve_out_storage_0001.csv
+      detail = 'parameter transfer in batch-restore mode;'
+    []
+  []
+
+  [transient]
+    design = 'SamplerTransientMultiApp.md'
+    requirement = 'The system shall be able to perform stochastic simulations of transient models while obeying unperturbed command line arguements with:'
+
+    [cmdline]
+      type = CSVDiff
+      input = main_transient.i
+      csvdiff = 'main_transient_out_storage_0001.csv main_transient_out_storage_0002.csv main_transient_out_storage_0003.csv'
+      detail = 'command line control;'
+    []
+    [transfer_normal]
+      type = CSVDiff
+      input = main_transient.i
+      cli_args = "Transfers/inactive='' Controls/active=''"
+      csvdiff = 'main_transient_out_storage_0001.csv main_transient_out_storage_0002.csv main_transient_out_storage_0003.csv'
+      detail = 'parameter transfer in normal mode;'
+    []
+    [transfer_batch]
+      type = CSVDiff
+      input = main_transient.i
+      cli_args = "MultiApps/sub/mode=batch-restore Transfers/inactive='' Controls/active=''"
+      csvdiff = 'main_transient_out_storage_0001.csv main_transient_out_storage_0002.csv main_transient_out_storage_0003.csv'
+      detail = 'parameter transfer in batch mode;'
+    []
+  []
+[]

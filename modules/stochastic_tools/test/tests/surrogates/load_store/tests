@@ -13,9 +13,9 @@
       detail = "trained with replicated stochastic data and"
     []
     [evaluate]
-      type = CSVDiff
+      type = JSONDiff
       input = evaluate.i
-      csvdiff = evaluate_out_pc_moments_0002.csv
+      jsondiff = evaluate_out.json
       prereq = surrogate/train # Creates data files that this test uses
       allow_warnings = true
       detail = "evaluated separately (with replicated data);"
@@ -24,7 +24,7 @@
     [train_distributed]
       type = CheckFiles
       input = train.i
-      cli_args = VectorPostprocessors/storage/parallel_type=DISTRIBUTED
+      cli_args = Reporters/storage/parallel_type=DISTRIBUTED
       check_files = 'train_out_poly_chaos.rd'
       prereq = surrogate/evaluate
       allow_test_objects = true
@@ -32,9 +32,9 @@
       detail = "trained with distributed stochastic data and"
     []
     [evaluate_distributed]
-      type = CSVDiff
+      type = JSONDiff
       input = evaluate.i
-      csvdiff = evaluate_out_pc_moments_0002.csv
+      jsondiff = evaluate_out.json
       prereq = surrogate/train_distributed # Creates data files that this test uses
       allow_warnings = true
       detail = "evaluated separately (with distributed data);"
@@ -43,7 +43,7 @@
     [train_three_ranks]
       type = CheckFiles
       input = train.i
-      cli_args = VectorPostprocessors/storage/parallel_type=DISTRIBUTED
+      cli_args = Reporters/storage/parallel_type=DISTRIBUTED
       check_files = 'train_out_poly_chaos.rd'
       prereq = surrogate/evaluate_distributed
       allow_test_objects = true
@@ -52,18 +52,19 @@
       detail = "trained with distributed stochastic data;"
     []
     [evaluate_two_ranks]
-      type = CSVDiff
+      type = JSONDiff
       input = evaluate.i
-      csvdiff = evaluate_out_pc_moments_0002.csv
+      jsondiff = evaluate_out.json
       prereq = surrogate/train_three_ranks # Creates data files that this test uses
       max_parallel = 2
 
       detail = "evaluated separately with a different number of processors;"
     []
     [evaluate_and_train]
-      type = CSVDiff
+      type = JSONDiff
       input = train_and_evaluate.i
-      csvdiff = train_and_evaluate_out_pc_moments_0002.csv
+      cli_args = 'Outputs/file_base=evaluate_out'
+      jsondiff = evaluate_out.json
       allow_test_objects = true
 
       detail = "and be trained and evaluated in memory with a single input file."

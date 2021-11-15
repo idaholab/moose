@@ -24,6 +24,8 @@ public:
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
+  /// Type of elements to build the mesh
+  const enum class ElemType { TRI, QUAD } _element_type;
   /// Size parameter of the hexagon
   const Real _hexagon_size;
   /// Style of the size parameter

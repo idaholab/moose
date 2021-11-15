@@ -1,0 +1,185 @@
+# Executor
+
+The Executor controls the "execution" behavior of the simulation. They direct
+the flow of solves, stepping, output recording, etc.  Executors are similar to
+the original Executioner system in that they have one primary virtual function
+that each executor implements that defines its behavior.  However, executors
+differ in that they are designed to be composed into arbitrary tree structures
+both in-code and by users via input files - similar to how the MeshGenerator
+system works.  The Executor system is currently highly experimental and has not
+yet stabilized and been fully implemented.  For this reason, MOOSE will only
+run in this mode if given the `--executor` flag on the command line.  The system
+name may change, input syntax may change, etc.  YOU WERE WARNED!
+
+## Using Executors from input files
+
+When using executors, you must remember to pass in the `--executor` flag on the
+cli when you run your application binary.  This allows the Executioner block
+to be omitted and causes MOOSE to ignore it if present.  Support for a new
+`[Executor]` block has been added to input files.  Users will populate this
+block with equivalent content that normally was present in the `[Executioner]` block.
+A hypothetical example is this:
+
+```
+[Executor]
+  [solve]
+    type = FooSolver
+    max_its = 42
+    ...
+  []
+  [refine]
+    type = Refine
+    inner = solve
+  []
+  [init]
+    type = Init
+    inner = refine
+    petsc_options = ...
+  []
+[]
+```
+
+Which might perform the equivalent of something like the current `Steady`
+executioner.  In this example, "init" becomes the primary executor which does
+some things to set up and tear down the simulation.  Inside its setup and
+tear-down, it executes an inner executor that has been set to "refine".  The
+"refine" executor does some mesh refinement things and then executes an inner
+executor - which here has been set to "solve". This allows refinement to be
+wrapped/inserted into arbitrary areas of the simulation execution process.
+
+The new system, is also capable of providing alias-like executors that generate
+equivalent executor trees programmatically in order to replicate the current
+`Steady` or `Transient` behavior like users currently expect now:
+
+```
+[Executor]
+  [steady]
+    type = FauxSteady
+    solve_type = 'PJFNK'
+    petsc_options_iname = '-pc_type -pc_hypre_type'
+    petsc_options_value = 'hypre boomeramg'
+    ...
+  []
+[]
+```
+
+This executor would simply generate the init+solve+refine trio of executors
+programmatically - hiding the executor structure from the user.  By default the
+last executor listed in the `Executor` block becomes the master/primary executor.
+MOOSE only directly executes this executor; all other executors are executed if/when
+execution reaches them within the executor tree starting from the master executor.
+
+By default, an executor has automatically generated execute-on flags created for
+it.  These flags are executed right before and right after the executor executes
+and are named `exec_[obj-name]_begin` and `exec_[obj-name]_end` respectively
+where `[obj-name]` is the name given to an object by its block header in an
+input file - e.g. `[foo] type = FooExecutor []` has an object name of `foo`.
+Other objects (e.g. user objects, materials, etc.) can be assigned to execute at
+these execute-on flags/times within the input file.  This behavior is NOT
+fully implemented and will almost certainly not work right - so you should
+definitely not try to use it (yet).  The names of these flags can also be
+modified from within the input file via an executor's `begin_exec_flag` and
+`end_exec_flag` input parameters.
+
+## Writing Custom Executors
+
+Executors have one primary function - `virtual Result run()` that must
+be implemented.  If an executor has any internal executors, it will call these
+executors' `Result exec()` functions - NOT their run functions.
+
+All executors' "exec" and "run" functions return a `Result` value containing
+information about how execution turned out within the executor tree.  Each
+executor is responsible for recording how convergence/success occurs within it.
+This should generally be accomplished using the `Result::pass(msg)` and
+`Result::fail(msg)` functions on a result object created and initialized
+by calling the `newResult()` member function:
+
+```
+Result
+FooExecutor::run()
+{
+  Result & r = newResult(); // MUST catch this return value by reference
+
+  ...
+  bool success = ... // do some solve stuff
+
+  if (!success)
+    r.fail("the foo didn't work right with the bar");
+  else
+  {
+    // by default, a result is considered successful/converged - so we only need
+    // to call fail on failure - and calling pass on success is optional.
+    r.pass("runnin' like a well oiled machine");
+  }
+
+  ...
+
+  return r;
+}
+```
+
+Some executors will have internal/sub executors that they need to execute.  They
+are both responsible for initiating this execution as well as recording the
+result value generated by these executors using the `Result::record` function:
+
+```
+
+InputParameters
+Steady2::validParams()
+{
+  InputParameters params = Executor::validParams();
+  // create input parameters for our sub/internal solve executors
+  params.addRequiredParam<std::string>("solve1", "the first solve");
+  params.addRequiredParam<std::string>("solve2", "the second solve");
+  return params;
+}
+
+FooExecutor::FooExecutor(InputParameters & params)
+  : _inner_solve1(&_fe_problem.getExecutor(getParam<std::string>("solve1"))), // retrieve inner executor objects
+    _inner_solve2(&_fe_problem.getExecutor(getParam<std::string>("solve2")))
+{
+}
+
+Result
+FooExecutor::run()
+{
+  Result & r = newResult();
+  ...
+  // When we record an inner/sub executor's result, we give it a label - which
+  // helps identify its placement/role within the executor heirarchy.
+  r.record("solve1", _inner_solve1->exec());
+  r.record("solve2", _inner_solve2->exec());
+  ...
+  return r;
+}
+```
+
+Result values provide a convenience `bool convergedAll()`function for
+recursively determining if *any* single executor result within the currently
+executed portion of the tree has failed to converge.  When checking for
+convergence within an executor, this is usually the mechanism that should be
+used:
+
+```
+Result
+FooExecutor::run()
+{
+  Result & r = newResult();
+  ...
+  // When we record an inner/sub executor's result, we give it a label - which
+  // helps identify its placement/role within the executor heirarchy.
+  r.record("solve1", _inner_solve1->exec());
+  r.record("solve2", _inner_solve2->exec());
+
+  // something inside _inner_solve1 or _inner_solve2 may have failed to converge
+  if (!r.convergedAll())
+  {
+    r.fail("foo iterations didn't work right"); // maybe add additional error msg context
+    return r; // maybe you want to bail early
+  }
+
+  r.record("solve3", _inner_solve3->exec());
+  ...
+  return r;
+}
+```

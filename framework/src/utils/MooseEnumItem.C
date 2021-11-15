@@ -11,6 +11,8 @@
 #include "MooseEnumItem.h"
 #include "MooseUtils.h"
 
+MooseEnumItem::MooseEnumItem() : _raw_name("INVALID"), _name("INVALID"), _id(INVALID_ID) {}
+
 MooseEnumItem::MooseEnumItem(const std::string & name, const int & id)
   : _raw_name(MooseUtils::trim(name)), _name(MooseUtils::toUpper(_raw_name)), _id(id)
 {

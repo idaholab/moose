@@ -30,7 +30,7 @@ CheckIntegrityAction::act()
 {
   if (_current_task == "check_integrity_early")
   {
-    if (!_app.getExecutioner())
+    if (!_app.getExecutioner() && !_app.getExecutor())
       mooseError("\"Executioner\" does not exist, make sure your input file contains an "
                  "[Executioner] block or your simulation adds an Executioner through an Action.");
 

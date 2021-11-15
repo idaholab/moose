@@ -10,6 +10,7 @@
 #include "RepeatableRayStudyBaseTest.h"
 
 registerMooseObject("RayTracingTestApp", RepeatableRayStudyBaseTest);
+registerMooseObject("RayTracingTestApp", RepeatableRayStudyDefineNoClaimTest);
 
 InputParameters
 RepeatableRayStudyBaseTest::validParams()
@@ -29,6 +30,8 @@ RepeatableRayStudyBaseTest::validParams()
 
   params.addParam<bool>("define_no_rays", false, "Test defining no rays");
   params.addParam<bool>("define_nullptr_ray", false, "Test defining a nullptr ray");
+  params.addParam<bool>(
+      "define_ray_with_starting_elem", false, "Test defining a ray with a starting element");
 
   params.suppressParameter<std::vector<Real>>("max_distances");
   params.suppressParameter<std::vector<Point>>("end_points");
@@ -36,7 +39,21 @@ RepeatableRayStudyBaseTest::validParams()
   return params;
 }
 
+InputParameters
+RepeatableRayStudyDefineNoClaimTest::validParams()
+{
+  auto params = RepeatableRayStudy::validParams();
+  params.set<bool>("_claim_after_define_rays") = false;
+  return params;
+}
+
 RepeatableRayStudyBaseTest::RepeatableRayStudyBaseTest(const InputParameters & parameters)
+  : RepeatableRayStudy(parameters)
+{
+}
+
+RepeatableRayStudyDefineNoClaimTest::RepeatableRayStudyDefineNoClaimTest(
+    const InputParameters & parameters)
   : RepeatableRayStudy(parameters)
 {
 }
@@ -94,5 +111,13 @@ RepeatableRayStudyBaseTest::defineRays()
 
     if (pid == _pid)
       _rays[0]->setStartingMaxDistance(1);
+  }
+
+  if (getParam<bool>("define_ray_with_starting_elem"))
+  {
+    auto ray = acquireRegisteredRay("starting_elem_ray");
+    ray->setStart(Point(0, 0, 0), _mesh.queryElemPtr(0));
+    ray->setStartingDirection(Point(1, 0, 0));
+    _rays.push_back(ray);
   }
 }

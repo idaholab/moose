@@ -236,3 +236,19 @@ PolynomialChaos::linearPartitionCoefficients() const
                                      _local_coeff_begin,
                                      _local_coeff_end);
 }
+
+void
+PolynomialChaos::store(nlohmann::json & json) const
+{
+  json["order"] = _order;
+  json["ndim"] = getNumberOfParameters();
+  json["ncoeff"] = getNumberofCoefficients();
+  json["tuple"] = getPolynomialOrders();
+  json["coeff"] = getCoefficients();
+  for (const auto & p : _poly)
+  {
+    nlohmann::json jsonp;
+    p->store(jsonp);
+    json["poly"].push_back(jsonp);
+  }
+}
