@@ -7,20 +7,20 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "GenericFunctionFunctorMaterial.h"
+#include "GenericFunctionVectorFunctorMaterial.h"
 #include "Function.h"
 
-registerMooseObject("MooseApp", GenericFunctionFunctorMaterial);
-registerMooseObject("MooseApp", ADGenericFunctionFunctorMaterial);
+registerMooseObject("MooseApp", GenericFunctionVectorFunctorMaterial);
+registerMooseObject("MooseApp", ADGenericFunctionVectorFunctorMaterial);
 
 template <bool is_ad>
 InputParameters
-GenericFunctionFunctorMaterialTempl<is_ad>::validParams()
+GenericFunctionVectorFunctorMaterialTempl<is_ad>::validParams()
 {
   InputParameters params = FunctorMaterial::validParams();
   params += SetupInterface::validParams();
   params.addClassDescription(
-      "FunctorMaterial object for declaring properties that are populated by "
+      "FunctorMaterial object for declaring vector properties that are populated by "
       "evaluation of Function object.");
   params.addParam<std::vector<std::string>>("prop_names",
                                             "The names of the properties this material will have");
@@ -32,7 +32,7 @@ GenericFunctionFunctorMaterialTempl<is_ad>::validParams()
 }
 
 template <bool is_ad>
-GenericFunctionFunctorMaterialTempl<is_ad>::GenericFunctionFunctorMaterialTempl(
+GenericFunctionVectorFunctorMaterialTempl<is_ad>::GenericFunctionVectorFunctorMaterialTempl(
     const InputParameters & parameters)
   : FunctorMaterial(parameters),
     _prop_names(getParam<std::vector<std::string>>("prop_names")),
@@ -41,27 +41,29 @@ GenericFunctionFunctorMaterialTempl<is_ad>::GenericFunctionFunctorMaterialTempl(
   unsigned int num_names = _prop_names.size();
   unsigned int num_values = _prop_values.size();
 
-  if (num_names != num_values)
-    mooseError("Number of prop_names must match the number of prop_values for a "
-               "GenericFunctionFunctorMaterial!");
+  if (num_names * LIBMESH_DIM != num_values)
+    mooseError("Number of prop_names times three must match the number of prop_values for a "
+               "GenericFunctionVectorFunctorMaterial!");
 
   _num_props = num_names;
-  _functions.resize(num_names);
+  _functions.resize(num_values);
 
-  for (const auto i : make_range(_num_props))
+  for (const auto i : make_range(num_values))
     _functions[i] = &getFunctionByName(_prop_values[i]);
 
   const std::set<ExecFlagType> clearance_schedule(_execute_enum.begin(), _execute_enum.end());
   for (const auto i : make_range(_num_props))
   {
-    auto & prop = declareFunctorProperty<GenericReal<is_ad>>(_prop_names[i]);
+    auto & prop = declareFunctorProperty<GenericRealVectorValue<is_ad>>(_prop_names[i]);
     prop.setFunctor(
-        _mesh, blockIDs(), [this, i](const auto & r, const auto & t) -> GenericReal<is_ad> {
-          return (*_functions[i])(r, t);
+        _mesh, blockIDs(), [this, i](const auto & r, const auto & t) -> GenericRealVectorValue<is_ad> {
+          return {(*_functions[LIBMESH_DIM * i])(r, t),
+                  (*_functions[LIBMESH_DIM * i + 1])(r, t),
+                  (*_functions[LIBMESH_DIM * i + 2])(r, t)};
         });
     prop.setCacheClearanceSchedule(clearance_schedule);
   }
 }
 
-template class GenericFunctionFunctorMaterialTempl<false>;
-template class GenericFunctionFunctorMaterialTempl<true>;
+template class GenericFunctionVectorFunctorMaterialTempl<false>;
+template class GenericFunctionVectorFunctorMaterialTempl<true>;
