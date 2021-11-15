@@ -1036,7 +1036,7 @@ protected:
 
   /// Indicates whether we are operating in the new/experimental executor mode
   /// instead of using the legacy executioner system.
-  const bool _use_executor = false;
+  const bool _use_executor;
 
   /// Used to return an executor that does nothing
   std::shared_ptr<NullExecutor> _null_executor;

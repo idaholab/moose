@@ -128,7 +128,7 @@ MooseApp::validParams()
   params.addCommandLineParam<bool>(
       "registry_hit", "--registry-hit", "Lists all known objects and actions in hit format.");
   params.addCommandLineParam<bool>(
-      "use_executor", "--executor", "Use the new Executor system instead of Executioners");
+      "use_executor", "--executor", false, "Use the new Executor system instead of Executioners");
 
   params.addCommandLineParam<bool>(
       "apptype", "--type", false, "Return the name of the application object.");
