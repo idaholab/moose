@@ -1,6 +1,6 @@
 [Tests]
   design = 'RayTracingStudy.md'
-  issues = '#16848'
+  issues = '#16028'
 
   parallel_scheduling = true
 
