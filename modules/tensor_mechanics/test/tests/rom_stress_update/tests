@@ -70,6 +70,28 @@
       allow_test_objects = true
       detail = 'below the lower temperature limit and extrapolate correctly.'
     []
+    [creep_ramp_sub_false]
+      type = 'CSVDiff'
+      input = creep_ramp_sub_false.i
+      csvdiff = creep_ramp_sub_false_out.csv
+      allow_test_objects = true
+      detail = 'when substepping is off and the time step size does not guarantee the most accurate results.'
+    []
+    [creep_ramp_sub_false_more_steps]
+      type = 'CSVDiff'
+      input = creep_ramp_sub_false_more_steps.i
+      csvdiff = creep_ramp_sub_false_more_steps_out.csv
+      allow_test_objects = true
+      detail = 'when substepping is off and the time step size guarantees accurate results.'
+    []
+    [creep_ramp_sub_true]
+      type = 'CSVDiff'
+      input = creep_ramp_sub_true.i
+      csvdiff = creep_ramp_sub_true_out.csv
+      allow_test_objects = true
+      allow_warnings = true
+      detail = 'when substepping is on and the numerical integration error selected by the user guarantees accurate results.'
+    []
   []
   [ADrom]
     issues = '#14046'
