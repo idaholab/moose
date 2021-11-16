@@ -32,6 +32,14 @@
       ad_indexing_type = 'global'
     []
   []
+  [vector-functor]
+    type = Exodiff
+    input = 'functor-vector-mat-props.i'
+    exodiff = 'functor-vector-mat-props_out.e'
+    design = 'FunctorVectorMatPropElementalAux.md'
+    ad_indexing_type = 'global'
+    requirement = 'The system shall be able to transfer vector material properties to an auxiliary variable, on a per-component basis.'
+  []
   [prop_caching]
     requirement = 'The system shall be able to evaluate, cache, and then clear functor material property evaluations'
     [on_timestep_begin]

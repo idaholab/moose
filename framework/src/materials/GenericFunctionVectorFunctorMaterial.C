@@ -55,12 +55,13 @@ GenericFunctionVectorFunctorMaterialTempl<is_ad>::GenericFunctionVectorFunctorMa
   for (const auto i : make_range(_num_props))
   {
     auto & prop = declareFunctorProperty<GenericRealVectorValue<is_ad>>(_prop_names[i]);
-    prop.setFunctor(
-        _mesh, blockIDs(), [this, i](const auto & r, const auto & t) -> GenericRealVectorValue<is_ad> {
-          return {(*_functions[LIBMESH_DIM * i])(r, t),
-                  (*_functions[LIBMESH_DIM * i + 1])(r, t),
-                  (*_functions[LIBMESH_DIM * i + 2])(r, t)};
-        });
+    prop.setFunctor(_mesh,
+                    blockIDs(),
+                    [this, i](const auto & r, const auto & t) -> GenericRealVectorValue<is_ad> {
+                      return {(*_functions[LIBMESH_DIM * i])(r, t),
+                              (*_functions[LIBMESH_DIM * i + 1])(r, t),
+                              (*_functions[LIBMESH_DIM * i + 2])(r, t)};
+                    });
     prop.setCacheClearanceSchedule(clearance_schedule);
   }
 }
