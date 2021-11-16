@@ -31,7 +31,7 @@ bibliography: paper.bib
 
 Geochemical models are used to understand the chemistry of natural waters and other aqueous solutions and their interaction with minerals in many areas of practical interest, for example, geothermal wells and reservoirs, contaminant flow through aquifers, ore creation and mining techniques, petroleum and gas exploitation, and rock diagenesis.  The models are frequently extremely complicated, with thousands of interacting chemical species, and often require computer software to find the chemical concentrations.
 
-Reactive transport simulations involve predicting the transport of chemical-species and temperature in a spatial domain (such as an aquifer) in addition to solving a chemical model at each point, at each time, in the domain.  Such models are used to explore spatio-temporal dependence of concentration, precipitation, dissolution, sorption, etc, and often require significant computational resources.  The complexity of simulations is greatly increased when deformation of the subsurface is also modelled: deformation may occur through flow processes (e.g., via thermal expansion) or chemical changes (e.g., via dissolution weakening the rock).
+Reactive transport simulations involve predicting the transport of chemical-species and temperature in a spatial domain (such as an aquifer) in addition to solving a chemical model at each point, at each time, in the domain.  Such models are used to explore spatio-temporal dependence of concentration, precipitation, dissolution, sorption, etc., and often require significant computational resources.  The complexity of simulations is greatly increased when deformation of the subsurface is also modelled: deformation may occur through flow processes (e.g., via thermal expansion) or chemical changes (e.g., via dissolution weakening the rock).
 
 The MOOSE geochemistry module enables users to solve such models.
 
@@ -126,14 +126,14 @@ The geochemistry module's functionality allows it to handle most common modellin
 One of the notable features of the MOOSE framework is the ability to couple different physics together.  Different types of couplings are available: tight (full) coupling; operator-splitting; etc.  To perform reactive-transport simulations using the geochemistry module, an operator-splitting approach must be used, in a sequential iterative or non-iterative approach (SIA or SNIA).  Users must therefore be careful with time-step sizes [@steefel2015].  Usually, MOOSE's PorousFlow module [@Wilkins2020] will be employed to simulate the transport (and any other non-geochemistry physics such as mechanics).  This means that each time-step involves a two-step process:
 
 1. The PorousFlow module transports the solutes in the aqueous phase, as well as the temperature distribution.  A fully-implicit approach is used to solve the transport, but note that the chemical reactions are held fixed during this stage.  The result provides the temperature and extra chemical source terms (to be added to the geochemical equations) at each point in the spatial domain.  The extra source terms are the total component concentrations of the transporting species.
-2. With these sources, the geochemistry module solves for the mole numbers of each species at each point in the spatial domain, using the Newton-Raphson method mentioned in the previous section.  During this stage, the non-geochemistry physics (transport, mechanics, etc) is held fixed.
+2. With these sources, the geochemistry module solves for the mole numbers of each species at each point in the spatial domain, using the Newton-Raphson method mentioned in the previous section.  During this stage, the non-geochemistry physics (transport, mechanics, etc.) is held fixed.
 
 It is easy to use multiple sub-steps within (1) and/or (2), which may be necessary if the time-scales of the transport and chemical reactions are very different.  It is also possible to iterate (1) and (2) in a "SIA" approach [@steefel2015].  The operator-split approach is also used by other reactive-transport solvers, such as the [Geochemist's Workbench](https://www.gwb.com/).
 
 The PorousFlow module is a sophisticated multi-component, multi-phase transport code, and employing it means:
 
 - pressure and temperature are tightly coupled with fluid flows
-- densities, viscosities, etc, may depend on solute concentrations, temperature and pressure
+- densities, viscosities, etc., may depend on solute concentrations, temperature and pressure
 - porosity and permeability can change with precipitation and dissolution
 - multiphase flows can be used
 - coupling with sophisticated geomechanics (including plasticity [@adhikary2016robust; @wilkins2020method], fracture and large strains) is straightforward
@@ -151,7 +151,7 @@ Spatially-varying geochemistry simulations use a large amount of memory since th
 
 Building the geochemistry module is a two-step process:
 
-1. Download and install the entire MOOSE package.  Detailed instructions are at the [MOOSE website](https://mooseframework.inl.gov/getting_started/installation/index.html).  Even if only geochemistry is of interest (without transport, solid mechanics, etc) MOOSE comes as a complete package, so needs to be installed in its entirety.  Depending on the computer setup, this can be straightfoward (on a personal Mac computer) or complicated (on an administered supercomputer).
+1. Download and install the entire MOOSE package.  Detailed instructions are at the [MOOSE website](https://mooseframework.inl.gov/getting_started/installation/index.html).  Even if only geochemistry is of interest (without transport, solid mechanics, etc.) MOOSE comes as a complete package, so needs to be installed in its entirety.  Depending on the computer setup, this can be straightfoward (on a personal Mac computer) or complicated (on an administered supercomputer).
 
 2. During the installation of MOOSE in part 1, only the "framework" will have been compiled.  To compile any of the physics modules, including the geochemistry module, use the following instructions run from the command line:
 ```
@@ -207,7 +207,7 @@ The 3D MOOSE model involves coupling 3 models representing: (1) the heat exchang
 
 # Acknowledgements
 
-The authors thank the MOOSE framework team, past and present, for providing the MOOSE framework and auxiliary functionality (quality control, test harnesses, documentation scaffolds, build scripts, etc). The manuscript review provided by Ghanashyam (Hari) Neupane and the two CSIRO internal reviewers is also greatly appreciated.
+The authors thank the MOOSE framework team, past and present, for providing the MOOSE framework and auxiliary functionality (quality control, test harnesses, documentation scaffolds, build scripts, etc.). The manuscript review provided by Ghanashyam (Hari) Neupane and the two CSIRO internal reviewers is also greatly appreciated.
 
 This research made use of the resources of the High Performance Computing Center at Idaho National Laboratory, which is supported by the Office of Nuclear Energy of the U.S. Department of Energy and the Nuclear Science User Facilities under Contract No. DE-AC07-05ID14517.
 
