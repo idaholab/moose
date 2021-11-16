@@ -17,11 +17,19 @@
 []
 
 [AuxVariables]
+  # cant use nodal variables because of the two blocks, which material to use
+  # there is undefined
   [mat_x]
+    family = MONOMIAL
+    order = CONSTANT
   []
   [mat_y]
+    family = MONOMIAL
+    order = CONSTANT
   []
   [mat_z]
+    family = MONOMIAL
+    order = CONSTANT
   []
 []
 
