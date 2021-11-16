@@ -13,6 +13,8 @@
 #include "MaterialBase.h"
 #include "Coupleable.h"
 #include "MaterialPropertyInterface.h"
+#include "OptionalMaterialPropertyProxyForward.h"
+#include "FEProblemBase.h"
 
 // forward declarations
 class Material;
@@ -84,6 +86,14 @@ public:
    * Retrieve the property through a given input parameter key with a fallback
    * to getting it by name
    */
+  template <typename T>
+  const MaterialProperty<T> & getMaterialProperty(const std::string & name);
+  template <typename T>
+  const ADMaterialProperty<T> & getADMaterialProperty(const std::string & name);
+  template <typename T>
+  const MaterialProperty<T> & getMaterialPropertyOld(const std::string & name);
+  template <typename T>
+  const MaterialProperty<T> & getMaterialPropertyOlder(const std::string & name);
   template <typename T, bool is_ad, typename std::enable_if<is_ad, int>::type = 0>
   const ADMaterialProperty<T> & getGenericMaterialProperty(const std::string & name)
   {
@@ -94,14 +104,23 @@ public:
   {
     return getMaterialProperty<T>(name);
   }
+  ///@}
+
+  ///@{ Optional material property getters
   template <typename T>
-  const MaterialProperty<T> & getMaterialProperty(const std::string & name);
+  const MaterialProperty<T> * const & getOptionalMaterialProperty(const std::string & name);
   template <typename T>
-  const ADMaterialProperty<T> & getADMaterialProperty(const std::string & name);
-  template <typename T>
-  const MaterialProperty<T> & getMaterialPropertyOld(const std::string & name);
-  template <typename T>
-  const MaterialProperty<T> & getMaterialPropertyOlder(const std::string & name);
+  const ADMaterialProperty<T> * const & getOptionalADMaterialProperty(const std::string & name);
+  template <typename T, bool is_ad, typename std::enable_if<is_ad, int>::type = 0>
+  const ADMaterialProperty<T> * const & getGenericOptionalMaterialProperty(const std::string & name)
+  {
+    return getOptionalADMaterialProperty<T>(name);
+  }
+  template <typename T, bool is_ad, typename std::enable_if<!is_ad, int>::type = 0>
+  const MaterialProperty<T> * const & getGenericOptionalMaterialProperty(const std::string & name)
+  {
+    return getOptionalMaterialProperty<T>(name);
+  }
   ///@}
 
   ///@{
@@ -297,4 +316,28 @@ Material::getMaterialPropertyOlderByName(const std::string & prop_name_in)
           : MooseUtils::join(std::vector<std::string>({prop_name_in, _get_suffix}), "_");
   registerPropName(prop_name, true, Material::OLDER);
   return MaterialPropertyInterface::getMaterialPropertyOlderByName<T>(prop_name_in);
+}
+
+#include "OptionalMaterialPropertyProxy.h"
+
+template <typename T>
+const MaterialProperty<T> * const &
+Material::getOptionalMaterialProperty(const std::string & name)
+{
+  auto proxy = new OptionalMaterialPropertyProxy<T>(name, this);
+  auto & pointer = proxy->value();
+  // lifetime management of the proxy object is performed by _fe_problem
+  _fe_problem.addOptionalMaterialPropertyProxy(proxy);
+  return pointer;
+}
+
+template <typename T>
+const ADMaterialProperty<T> * const &
+Material::getOptionalADMaterialProperty(const std::string & name)
+{
+  auto proxy = new OptionalADMaterialPropertyProxy<T>(name, this);
+  auto & pointer = proxy->value();
+  // lifetime management of the proxy object is performed by _fe_problem
+  _fe_problem.addOptionalMaterialPropertyProxy(proxy);
+  return pointer;
 }

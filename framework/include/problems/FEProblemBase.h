@@ -31,6 +31,7 @@
 #include "PerfGraphInterface.h"
 #include "Attributes.h"
 #include "MooseObjectWarehouse.h"
+#include "OptionalMaterialPropertyProxyForward.h"
 
 #include "libmesh/enum_quadrature_type.h"
 #include "libmesh/equation_systems.h"
@@ -1585,6 +1586,12 @@ public:
    */
   std::shared_ptr<MaterialData> getMaterialData(Moose::MaterialDataType type, THREAD_ID tid = 0);
 
+  void addOptionalMaterialPropertyProxy(OptionalMaterialPropertyProxyBase * proxy)
+  {
+    _optional_property_proxies.emplace_back(proxy);
+  }
+  void resolveOptionalMaterialProperties();
+
   /**
    * Will return True if the user wants to get an error when
    * a nonzero is reallocated in the Jacobian by PETSc
@@ -2297,6 +2304,9 @@ private:
 
   /// Flag used to indicate whether we are computing the scaling Residual
   bool _computing_scaling_residual = false;
+
+  /// optional material properties
+  std::vector<std::unique_ptr<OptionalMaterialPropertyProxyBase>> _optional_property_proxies;
 };
 
 template <typename T>

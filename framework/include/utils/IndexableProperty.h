@@ -29,25 +29,14 @@ public:
                     const std::string & property_param = "property",
                     const std::string & component_param = "component");
 
-  /// getthe selected component value for the given quadrature point
+  /// get the selected component value for the given quadrature point
   GenericReal<is_ad> operator[](int qp) const;
 
-  /// returns true if a supported material property has been found and can be evaluated
-  operator bool() const;
+  /// integrity check
+  void check() const;
 
 protected:
-  template <typename P>
-  void getPropertyHelper(const GenericMaterialProperty<P, is_ad> *& pointer,
-                         unsigned int components);
-
-  ///@{ only one of those pointers will be non-null and pointing to the selected property
-  const GenericMaterialProperty<Real, is_ad> * _property_real;
-  const GenericMaterialProperty<std::vector<Real>, is_ad> * _property_std_vector;
-  const GenericMaterialProperty<RealVectorValue, is_ad> * _property_real_vector_value;
-  const GenericMaterialProperty<RankTwoTensor, is_ad> * _property_rank_two_tensor;
-  const GenericMaterialProperty<RankThreeTensor, is_ad> * _property_rank_three_tensor;
-  const GenericMaterialProperty<RankFourTensor, is_ad> * _property_rank_four_tensor;
-  ///@}
+  void checkComponents(unsigned int components);
 
   /// pointer to the host object
   T * _host;
@@ -61,6 +50,15 @@ protected:
 
   /// Index of the selected scalar component of the material property
   const std::vector<unsigned int> _component;
+
+  ///@{ only one of those pointers will be non-null and pointing to the selected property
+  const GenericMaterialProperty<Real, is_ad> * const & _property_real;
+  const GenericMaterialProperty<std::vector<Real>, is_ad> * const & _property_std_vector;
+  const GenericMaterialProperty<RealVectorValue, is_ad> * const & _property_real_vector_value;
+  const GenericMaterialProperty<RankTwoTensor, is_ad> * const & _property_rank_two_tensor;
+  const GenericMaterialProperty<RankThreeTensor, is_ad> * const & _property_rank_three_tensor;
+  const GenericMaterialProperty<RankFourTensor, is_ad> * const & _property_rank_four_tensor;
+  ///@}
 };
 
 template <typename T, bool is_ad>
@@ -85,21 +83,23 @@ IndexableProperty<T, is_ad>::IndexableProperty(T * host,
     _property_param(property_param),
     _property_name(_host->template getParam<MaterialPropertyName>(_property_param)),
     _component_param(component_param),
-    _component(host->template getParam<std::vector<unsigned int>>(_component_param))
+    _component(host->template getParam<std::vector<unsigned int>>(_component_param)),
+    _property_real(
+        _host->template getGenericOptionalMaterialProperty<Real, is_ad>(_property_param)),
+    _property_std_vector(
+        _host->template getGenericOptionalMaterialProperty<std::vector<Real>, is_ad>(
+            _property_param)),
+    _property_real_vector_value(
+        _host->template getGenericOptionalMaterialProperty<RealVectorValue, is_ad>(
+            _property_param)),
+    _property_rank_two_tensor(
+        _host->template getGenericOptionalMaterialProperty<RankTwoTensor, is_ad>(_property_param)),
+    _property_rank_three_tensor(
+        _host->template getGenericOptionalMaterialProperty<RankThreeTensor, is_ad>(
+            _property_param)),
+    _property_rank_four_tensor(
+        _host->template getGenericOptionalMaterialProperty<RankFourTensor, is_ad>(_property_param))
 {
-  getPropertyHelper<Real>(_property_real, 0);
-  getPropertyHelper<RealVectorValue>(_property_real_vector_value, 1);
-  getPropertyHelper<std::vector<Real>>(_property_std_vector, 1);
-  getPropertyHelper<RankTwoTensor>(_property_rank_two_tensor, 2);
-  getPropertyHelper<RankThreeTensor>(_property_rank_three_tensor, 3);
-  getPropertyHelper<RankFourTensor>(_property_rank_four_tensor, 4);
-
-  if (!*this)
-    mooseError("The ",
-               is_ad ? "AD" : "non-AD",
-               " material property '",
-               _property_name,
-               "' does not exist");
 }
 
 template <typename T, bool is_ad>
@@ -123,32 +123,40 @@ IndexableProperty<T, is_ad>::operator[](int qp) const
 }
 
 template <typename T, bool is_ad>
-IndexableProperty<T, is_ad>::operator bool() const
+void
+IndexableProperty<T, is_ad>::check() const
 {
-  return _property_real || _property_std_vector || _property_real_vector_value ||
-         _property_rank_two_tensor || _property_rank_three_tensor || _property_rank_four_tensor;
+  if (_property_real)
+    checkComponents(0);
+  else if (_property_std_vector)
+    checkComponents(1);
+  else if (_property_real_vector_value)
+    checkComponents(1);
+  else if (_property_rank_two_tensor)
+    checkComponents(2);
+  else if (_property_rank_three_tensor)
+    checkComponents(3);
+  else if (_property_rank_four_tensor)
+    checkComponents(4);
+  else
+    mooseError("The ",
+               is_ad ? "AD" : "non-AD",
+               " material property '",
+               _property_name,
+               "' does not exist");
 }
 
 template <typename T, bool is_ad>
-template <typename P>
 void
-IndexableProperty<T, is_ad>::getPropertyHelper(const GenericMaterialProperty<P, is_ad> *& pointer,
-                                               unsigned int components)
+IndexableProperty<T, is_ad>::checkComponents(unsigned int components)
 {
-  if (_host->template hasGenericMaterialProperty<P, is_ad>(_property_param))
-  {
-    pointer = &_host->template getGenericMaterialProperty<P, is_ad>(_property_param);
-
-    if (_component.size() != components)
-      mooseError("Material property '",
-                 _property_name,
-                 "' is ",
-                 components,
-                 " dimensional, but an index vector of size ",
-                 _component.size(),
-                 " was supplied to select a component. It looks like you were expecting the "
-                 "material property to have a different type.");
-  }
-  else
-    pointer = nullptr;
+  if (_component.size() != components)
+    mooseError("Material property '",
+               _property_name,
+               "' is ",
+               components,
+               " dimensional, but an index vector of size ",
+               _component.size(),
+               " was supplied to select a component. It looks like you were expecting the "
+               "material property to have a different type.");
 }

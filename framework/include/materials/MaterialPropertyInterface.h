@@ -18,6 +18,8 @@
 #include "InputParameters.h"
 #include "SubProblem.h"
 
+#include <list>
+
 // Forward declarations
 class MaterialPropertyInterface;
 class MooseObject;
@@ -99,6 +101,23 @@ public:
   const MaterialProperty<T> & getMaterialPropertyOldByName(const MaterialPropertyName & name);
   template <typename T>
   const MaterialProperty<T> & getMaterialPropertyOlderByName(const MaterialPropertyName & name);
+  ///@}
+
+  ///@{ Optional material property getters
+  template <typename T>
+  const MaterialProperty<T> * const & getOptionalMaterialProperty(const std::string & name);
+  template <typename T>
+  const ADMaterialProperty<T> * const & getOptionalADMaterialProperty(const std::string & name);
+  template <typename T, bool is_ad, typename std::enable_if<is_ad, int>::type = 0>
+  const ADMaterialProperty<T> * const & getGenericOptionalMaterialProperty(const std::string & name)
+  {
+    return getOptionalADMaterialProperty<T>(name);
+  }
+  template <typename T, bool is_ad, typename std::enable_if<!is_ad, int>::type = 0>
+  const MaterialProperty<T> * const & getGenericOptionalMaterialProperty(const std::string & name)
+  {
+    return getOptionalMaterialProperty<T>(name);
+  }
   ///@}
 
   /**
@@ -369,6 +388,9 @@ private:
 
   /// Storage for the boundary ids created by BoundaryRestrictable
   const std::set<BoundaryID> & _mi_boundary_ids;
+
+  /// address stable pointer storage to enable returning optional property pointers via reference
+  std::list<const PropertyValue *> _optional_material_pointer_storage;
 };
 
 template <typename T>
@@ -680,4 +702,26 @@ MaterialPropertyInterface::hasADMaterialPropertyByName(const std::string & name_
                         ? name_in
                         : MooseUtils::join(std::vector<std::string>({name_in, _get_suffix}), "_");
   return _material_data->haveADProperty<T>(name);
+}
+
+template <typename T>
+const MaterialProperty<T> * const &
+MaterialPropertyInterface::getOptionalMaterialProperty(const std::string & name)
+{
+  _optional_material_pointer_storage.push_back(nullptr);
+  auto & new_pointer = _optional_material_pointer_storage.back();
+  if (hasMaterialProperty<T>(name))
+    new_pointer = &getMaterialProperty<T>(name);
+  return reinterpret_cast<const MaterialProperty<T> *&>(new_pointer);
+}
+
+template <typename T>
+const ADMaterialProperty<T> * const &
+MaterialPropertyInterface::getOptionalADMaterialProperty(const std::string & name)
+{
+  _optional_material_pointer_storage.push_back(nullptr);
+  auto & new_pointer = _optional_material_pointer_storage.back();
+  if (hasADMaterialProperty<T>(name))
+    new_pointer = &getADMaterialProperty<T>(name);
+  return reinterpret_cast<const ADMaterialProperty<T> *&>(new_pointer);
 }

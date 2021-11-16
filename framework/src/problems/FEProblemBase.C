@@ -98,6 +98,7 @@
 #include "Reporter.h"
 #include "ADUtils.h"
 #include "Executioner.h"
+#include "OptionalMaterialPropertyProxy.h"
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature.h"
@@ -7220,6 +7221,13 @@ FEProblemBase::jacobianSetup()
   SubProblem::jacobianSetup();
   if (_displaced_problem)
     _displaced_problem->jacobianSetup();
+}
+
+void
+FEProblemBase::resolveOptionalMaterialProperties()
+{
+  for (auto & proxy : _optional_property_proxies)
+    proxy->resolve();
 }
 
 template <typename T>
