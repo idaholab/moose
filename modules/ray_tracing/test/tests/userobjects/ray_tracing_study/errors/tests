@@ -424,5 +424,21 @@
       allow_test_objects = true
       detail = 'setting the starting element for a ray to an inactive element'
     []
+    [ray_data_index_other_exists]
+      type = RunException
+      input = 'errors.i'
+      cli_args = 'UserObjects/study/ray_data_index_other_exists=true'
+      expect_err = 'However, Ray aux data with said name was found.'
+      allow_test_objects = true
+      detail = 'getting the index of ray data when aux data with the same name exists'
+    []
+    [ray_data_aux_index_other_exists]
+      type = RunException
+      input = 'errors.i'
+      cli_args = 'UserObjects/study/ray_data_aux_index_other_exists=true'
+      expect_err = 'However, Ray non-aux data with said name was found.'
+      allow_test_objects = true
+      detail = 'getting the index of ray aux data when data with the same name exists'
+    []
   []
 []

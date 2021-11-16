@@ -1003,7 +1003,7 @@ RayTracingStudy::getRayDataIndexInternal(const std::string & name,
                name,
                "' was not found.\n\n",
                "However, Ray ",
-               (aux ? "(non-aux)" : "aux"),
+               (aux ? "non-aux" : "aux"),
                " data with said name was found.\n",
                "Did you mean to use ",
                (aux ? "getRayDataIndex()/getRayDataIndices()?"

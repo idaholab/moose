@@ -130,6 +130,13 @@ RayTracingStudyTest::validParams()
                         false,
                         "Tests building an edge from extrema when the vertices are incorrect");
 
+  params.addParam<bool>("ray_data_index_other_exists",
+                        false,
+                        "Tests getting a Ray data index when aux data with the same name exists");
+  params.addParam<bool>("ray_data_aux_index_other_exists",
+                        false,
+                        "Tests getting a Ray aux data index when data with the same name exists");
+
   params.set<bool>("_use_ray_registration") = false;
 
   return params;
@@ -169,6 +176,16 @@ RayTracingStudyTest::RayTracingStudyTest(const InputParameters & parameters)
   {
     ElemExtrema extrema(1337, 1338);
     extrema.buildEdge(meshBase().elem_ptr(0));
+  }
+  if (getParam<bool>("ray_data_index_other_exists"))
+  {
+    registerRayAuxData("foo");
+    getRayDataIndex("foo");
+  }
+  if (getParam<bool>("ray_data_aux_index_other_exists"))
+  {
+    registerRayData("foo");
+    getRayAuxDataIndex("foo");
   }
 }
 
