@@ -175,127 +175,130 @@ RayTracingStudyTest::RayTracingStudyTest(const InputParameters & parameters)
 void
 RayTracingStudyTest::generateRays()
 {
-  mooseAssert(_mesh.getMesh().n_local_elem(), "Local mesh does not have an element");
-  const Elem * elem = *_mesh.getActiveLocalElementRange()->begin();
-
-  auto ray = acquireRay();
-
-  if (getParam<bool>("ray_set_direction_before_start"))
-    ray->setStartingDirection(Point(1, 0, 0));
-  if (getParam<bool>("ray_set_end_before_start"))
-    ray->setStartingEndPoint(elem->point(0));
-  if (getParam<bool>("ray_set_distance_before_start"))
-    ray->setStartingMaxDistance(1);
-
-  if (getParam<bool>("ray_set_side_without_elem"))
-    ray->setStart(elem->vertex_average(), nullptr, 0);
-  else if (getParam<bool>("ray_set_invalid_side"))
-    ray->setStart(elem->vertex_average(), elem, 100);
-  else if (getParam<bool>("ray_set_bad_side"))
-    ray->setStart(elem->vertex_average(), elem, 0);
-  else if (getParam<bool>("ray_set_start_fail_bbox"))
-    ray->setStart(Point(1e6, 1e6, 1e6));
-  else if (getParam<bool>("ray_set_bad_start"))
+  if (_mesh.getMesh().n_local_elem() != 0)
   {
-    const Elem * another_elem = elem->neighbor_ptr(0);
-    if (!another_elem)
-      another_elem = elem->neighbor_ptr(1);
-    ray->setStart(elem->vertex_average(), another_elem);
-  }
-  else if (getParam<bool>("ray_start_inactive"))
-  {
-    for (const auto & inactive_elem : meshBase().element_ptr_range())
-      if (!inactive_elem->active())
-        ray->setStart(inactive_elem->true_centroid(), inactive_elem);
-  }
-  else
-    ray->setStart(elem->vertex_average(), elem);
+    const Elem * elem = *_mesh.getActiveLocalElementRange()->begin();
 
-  if (getParam<bool>("ray_set_end_with_distance"))
-  {
-    ray->setStartingMaxDistance(1);
-    ray->setStartingEndPoint(elem->point(0));
-  }
+    auto ray = acquireRay();
 
-  if (!getParam<bool>("ray_at_end_without_set") && !getParam<bool>("ray_end_point_without_set") &&
-      !getParam<bool>("ray_set_direction_again") && !getParam<bool>("ray_set_zero_direction") &&
-      !getParam<bool>("ray_set_end_equal_start") && !getParam<bool>("ray_set_end_with_direction") &&
-      !getParam<bool>("ray_set_end_fail_bbox"))
-    ray->setStartingEndPoint(elem->point(0));
+    if (getParam<bool>("ray_set_direction_before_start"))
+      ray->setStartingDirection(Point(1, 0, 0));
+    if (getParam<bool>("ray_set_end_before_start"))
+      ray->setStartingEndPoint(elem->point(0));
+    if (getParam<bool>("ray_set_distance_before_start"))
+      ray->setStartingMaxDistance(1);
 
-  if (getParam<bool>("ray_set_distance_with_end"))
-    ray->setStartingMaxDistance(1);
-  if (getParam<bool>("ray_set_end_equal_start"))
-    ray->setStartingEndPoint(ray->currentPoint());
-  if (getParam<bool>("ray_set_end_fail_bbox"))
-    ray->setStartingEndPoint(Point(1e6, 1e6, 1e6));
-
-  if (getParam<bool>("ray_set_direction_again"))
-  {
-    ray->setStartingDirection(Point(1, 0, 0));
-    ray->setStartingDirection(Point(-1, 0, 0));
-  }
-  if (getParam<bool>("ray_set_zero_direction"))
-    ray->setStartingDirection(Point(0, 0, 0));
-  if (getParam<bool>("ray_set_end_with_direction"))
-  {
-    ray->setStartingDirection(Point(1, 0, 0));
-    ray->setStartingEndPoint(elem->point(0));
-  }
-
-  if (getParam<bool>("ray_set_distance_negative"))
-    ray->setStartingMaxDistance(-1);
-  if (getParam<bool>("ray_set_distance_with_end"))
-    ray->setStartingMaxDistance(1);
-
-  if (getParam<bool>("add_duplicate_ray"))
-  {
-    std::shared_ptr<Ray> duplicate_ray = ray;
-    moveRayToBuffer(ray);
-    moveRayToBuffer(duplicate_ray);
-  }
-
-  if (getParam<bool>("add_local_non_unique_id_ray"))
-  {
-    std::shared_ptr<Ray> other_ray = acquireCopiedRay(*ray);
-    moveRayToBuffer(ray);
-    moveRayToBuffer(other_ray);
-  }
-
-  if (getParam<bool>("add_global_non_unique_id_ray"))
-  {
-    mooseAssert(n_processors() > 1, "Needs multiple ranks");
-
-    std::map<processor_id_type, std::vector<std::shared_ptr<Ray>>> send_map;
-    if (_pid == 0)
+    if (getParam<bool>("ray_set_side_without_elem"))
+      ray->setStart(elem->vertex_average(), nullptr, 0);
+    else if (getParam<bool>("ray_set_invalid_side"))
+      ray->setStart(elem->vertex_average(), elem, 100);
+    else if (getParam<bool>("ray_set_bad_side"))
+      ray->setStart(elem->vertex_average(), elem, 0);
+    else if (getParam<bool>("ray_set_start_fail_bbox"))
+      ray->setStart(Point(1e6, 1e6, 1e6));
+    else if (getParam<bool>("ray_set_bad_start"))
     {
-      for (processor_id_type pid = 1; pid < n_processors(); ++pid)
-        send_map[pid].push_back(ray);
-      moveRayToBuffer(ray);
+      const Elem * another_elem = elem->neighbor_ptr(0);
+      if (!another_elem)
+        another_elem = elem->neighbor_ptr(1);
+      ray->setStart(elem->vertex_average(), another_elem);
+    }
+    else if (getParam<bool>("ray_start_inactive"))
+    {
+      for (const auto & inactive_elem : meshBase().element_ptr_range())
+        if (!inactive_elem->active())
+          ray->setStart(inactive_elem->true_centroid(), inactive_elem);
+    }
+    else
+      ray->setStart(elem->vertex_average(), elem);
+
+    if (getParam<bool>("ray_set_end_with_distance"))
+    {
+      ray->setStartingMaxDistance(1);
+      ray->setStartingEndPoint(elem->point(0));
     }
 
-    auto add_ray_functor = [&](processor_id_type, const std::vector<std::shared_ptr<Ray>> & rays) {
-      std::shared_ptr<Ray> ray = rays[0];
-      ray->clearStartingInfo();
-      ray->setStart(elem->vertex_average());
+    if (!getParam<bool>("ray_at_end_without_set") && !getParam<bool>("ray_end_point_without_set") &&
+        !getParam<bool>("ray_set_direction_again") && !getParam<bool>("ray_set_zero_direction") &&
+        !getParam<bool>("ray_set_end_equal_start") &&
+        !getParam<bool>("ray_set_end_with_direction") && !getParam<bool>("ray_set_end_fail_bbox"))
       ray->setStartingEndPoint(elem->point(0));
+
+    if (getParam<bool>("ray_set_distance_with_end"))
+      ray->setStartingMaxDistance(1);
+    if (getParam<bool>("ray_set_end_equal_start"))
+      ray->setStartingEndPoint(ray->currentPoint());
+    if (getParam<bool>("ray_set_end_fail_bbox"))
+      ray->setStartingEndPoint(Point(1e6, 1e6, 1e6));
+
+    if (getParam<bool>("ray_set_direction_again"))
+    {
+      ray->setStartingDirection(Point(1, 0, 0));
+      ray->setStartingDirection(Point(-1, 0, 0));
+    }
+    if (getParam<bool>("ray_set_zero_direction"))
+      ray->setStartingDirection(Point(0, 0, 0));
+    if (getParam<bool>("ray_set_end_with_direction"))
+    {
+      ray->setStartingDirection(Point(1, 0, 0));
+      ray->setStartingEndPoint(elem->point(0));
+    }
+
+    if (getParam<bool>("ray_set_distance_negative"))
+      ray->setStartingMaxDistance(-1);
+    if (getParam<bool>("ray_set_distance_with_end"))
+      ray->setStartingMaxDistance(1);
+
+    if (getParam<bool>("add_duplicate_ray"))
+    {
+      std::shared_ptr<Ray> duplicate_ray = ray;
       moveRayToBuffer(ray);
-    };
+      moveRayToBuffer(duplicate_ray);
+    }
 
-    Parallel::push_parallel_packed_range(comm(), send_map, parallelStudy(), add_ray_functor);
+    if (getParam<bool>("add_local_non_unique_id_ray"))
+    {
+      std::shared_ptr<Ray> other_ray = acquireCopiedRay(*ray);
+      moveRayToBuffer(ray);
+      moveRayToBuffer(other_ray);
+    }
+
+    if (getParam<bool>("add_global_non_unique_id_ray"))
+    {
+      mooseAssert(n_processors() > 1, "Needs multiple ranks");
+
+      std::map<processor_id_type, std::vector<std::shared_ptr<Ray>>> send_map;
+      if (_pid == 0)
+      {
+        for (processor_id_type pid = 1; pid < n_processors(); ++pid)
+          send_map[pid].push_back(ray);
+        moveRayToBuffer(ray);
+      }
+
+      auto add_ray_functor = [&](processor_id_type,
+                                 const std::vector<std::shared_ptr<Ray>> & rays) {
+        std::shared_ptr<Ray> ray = rays[0];
+        ray->clearStartingInfo();
+        ray->setStart(elem->vertex_average());
+        ray->setStartingEndPoint(elem->point(0));
+        moveRayToBuffer(ray);
+      };
+
+      Parallel::push_parallel_packed_range(comm(), send_map, parallelStudy(), add_ray_functor);
+    }
+
+    if (getParam<bool>("ray_at_end_without_set"))
+      _console << ray->atEnd() << std::endl;
+
+    if (getParam<bool>("ray_end_point_without_set"))
+      _console << ray->endPoint() << std::endl;
+
+    if (getParam<bool>("ray_set_start_again"))
+      ray->setStart(1.01 * elem->vertex_average());
+
+    if (getParam<bool>("ray_error_if_tracing") || getParam<bool>("ray_reset_counters"))
+      moveRayToBuffer(ray);
   }
-
-  if (getParam<bool>("ray_at_end_without_set"))
-    _console << ray->atEnd() << std::endl;
-
-  if (getParam<bool>("ray_end_point_without_set"))
-    _console << ray->endPoint() << std::endl;
-
-  if (getParam<bool>("ray_set_start_again"))
-    ray->setStart(1.01 * elem->vertex_average());
-
-  if (getParam<bool>("ray_error_if_tracing") || getParam<bool>("ray_reset_counters"))
-    moveRayToBuffer(ray);
 
   if (getParam<bool>("register_ray_data_late"))
     registerRayData("foo");

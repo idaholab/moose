@@ -17,7 +17,8 @@
     [local_non_unique_id]
       type = 'RunException'
       input = 'errors.i'
-      cli_args = 'UserObjects/study/add_local_non_unique_id_ray=true'
+      cli_args = 'UserObjects/study/add_local_non_unique_id_ray=true
+                  Mesh/gmg/nx=50'
       allow_test_objects = true
       expect_err = 'Multiple Rays exist with ID 0 on processor'
       detail = 'when local rays that have the same ID are added to be traced,'
@@ -25,7 +26,8 @@
     [global_non_unique_id]
       type = 'RunException'
       input = 'errors.i'
-      cli_args = 'UserObjects/study/add_global_non_unique_id_ray=true'
+      cli_args = 'UserObjects/study/add_global_non_unique_id_ray=true
+                  Mesh/gmg/nx=50'
       allow_test_objects = true
       min_parallel = 2
       expect_err = 'Ray with ID 0 exists on ranks'
