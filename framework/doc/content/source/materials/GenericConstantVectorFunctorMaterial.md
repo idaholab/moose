@@ -2,7 +2,7 @@
 
 !syntax description /Materials/GenericConstantVectorFunctorMaterial
 
-The functor version of [GenericConstantVectorFunctorMaterial.md], this can be
+The functor version of [GenericConstantFunctorMaterial.md], this can be
 used to quickly create simple constant anisotropic material properties, for
 testing, for initial survey of a problem or simply because the material
 properties do not vary much over the domain explored by the simulation.
