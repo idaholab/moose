@@ -16,26 +16,20 @@
 
 /.github @permcody
 
-/framework/*/constraints @lindsayad
 /framework/*/dgkernels @lindsayad
 /framework/*/executioners/*Solve* @GiudGiud
 /framework/*/fv* @rwcarlsen @lindsayad
 /framework/*/interfacekernels @lindsayad
-/framework/*/interfaces @lindsayad
 /framework/*/linesearches @lindsayad
-/framework/*/loops @lindsayad
 /framework/*/materials @rwcarlsen
 /framework/*/materials/Derivative* @dschwen
 /framework/*/materials/Parsed* @dschwen
-/framework/*/nodalkernels @lindsayad
 /framework/*/parser @rwcarlsen
 /framework/*/preconditioners @fdkong
-/framework/*/problems @lindsayad
 /framework/*/problems/EigenProblem* @fdkong
 /framework/*/relationshipmanagers @lindsayad
 /framework/*/reporters @loganharbour @zachmprince
 /framework/*/samplers @zachmprince
-/framework/*/systems @lindsayad
 /framework/*/systems/NonlinearEigenSystem* @fdkong
 /framework/*/transfers @fdkong
 /framework/*/utils/PetscSupport* @fdkong

@@ -30,7 +30,7 @@ ReporterSpecialTypeTest::ReporterSpecialTypeTest(const InputParameters & params)
   getReporterValue<Real>("pp_reporter");
   getReporterValue<VectorPostprocessorValue>("vpp_reporter");
 
-  for (const std::string & name : {"pp_reporter", "vpp_reporter"})
+  for (const auto & name : {"pp_reporter", "vpp_reporter"})
     if (isPostprocessor(name) || isVectorPostprocessor(name))
       mooseError("Is a special type");
 }
