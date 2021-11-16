@@ -12,6 +12,7 @@
 ADReal
 findUStar(const ADReal mu, const ADReal rho, ADReal u, const Real dist)
 {
+  // usually takes about 3-4 iterations
   constexpr int MAX_ITERS{50};
   constexpr Real REL_TOLERANCE{1e-6};
 
@@ -26,21 +27,22 @@ findUStar(const ADReal mu, const ADReal rho, ADReal u, const Real dist)
   {
     ADReal residual = u_star / von_karman * std::log(u_star * dist / (0.111 * nu)) - u;
     ADReal deriv = (1 + std::log(u_star * dist / (0.111 * nu))) / von_karman;
-    ADReal new_u_star = u_star - residual / deriv;
+    ADReal new_u_star = std::max(1e-20, u_star - residual / deriv);
 
-    ADReal rel_err = std::abs(new_u_star - u_star) / new_u_star;
+    Real rel_err = std::abs((new_u_star.value() - u_star.value()) / new_u_star.value());
+
     u_star = new_u_star;
     if (rel_err < REL_TOLERANCE)
       return u_star;
   }
 
-  mooseError("Could not find the wall friction velocity (mu: ",
-             mu,
-             " rho: ",
-             rho,
-             " velocity: ",
-             u,
-             " wall distance: ",
-             dist,
-             ")");
+  mooseException("Could not find the wall friction velocity (mu: ",
+                 mu,
+                 " rho: ",
+                 rho,
+                 " velocity: ",
+                 u,
+                 " wall distance: ",
+                 dist,
+                 ")");
 }

@@ -1,58 +1,61 @@
 [Tests]
-  design = 'NSFVHeatFluxBC.md'
+  design = 'NSFVFunctorHeatFluxBC.md'
   issues = '#18434'
-  [./local_porosity]
+  [local_porosity]
     type = Exodiff
     input = wall_heat_transfer.i
     exodiff = local_porosity_out.e
     abs_zero = 1e-9
     cli_args = "Outputs/file_base=local_porosity_out GlobalParams/splitting='porosity' GlobalParams/locality='local'"
     requirement = "The system shall provide a boundary condition to split a constant heat flux according to local values "
-                  "of porosity."
-  [../]
-  [./global_porosity]
+                  "of porosity, using functor material properties."
+    ad_indexing_type = 'global'
+  []
+  [global_porosity]
     type = Exodiff
     input = wall_heat_transfer.i
     exodiff = global_porosity_out.e
     abs_zero = 1e-9
     cli_args = "Outputs/file_base=global_porosity_out GlobalParams/splitting='porosity' GlobalParams/locality='global'"
     requirement = "The system shall provide a boundary condition to split a constant heat flux according to domain-averaged values "
-                  "of porosity."
-  [../]
-  [./local_k]
+                  "of porosity, using functor material properties."
+  []
+  [local_k]
     type = Exodiff
     input = wall_heat_transfer.i
     exodiff = local_k_out.e
     abs_zero = 1e-9
     cli_args = "Outputs/file_base=local_k_out GlobalParams/splitting='thermal_conductivity' GlobalParams/locality='local'"
     requirement = "The system shall provide a boundary condition to split a constant heat flux according to local values "
-                  "of thermal conductivity."
-  [../]
-  [./global_k]
+                  "of thermal conductivity, using functor material properties."
+    ad_indexing_type = 'global'
+  []
+  [global_k]
     type = Exodiff
     input = wall_heat_transfer.i
     exodiff = global_k_out.e
     abs_zero = 1e-9
     cli_args = "Outputs/file_base=global_k_out GlobalParams/splitting='thermal_conductivity' GlobalParams/locality='global'"
     requirement = "The system shall provide a boundary condition to split a constant heat flux according to domain-averaged values "
-                  "of thermal conductivity."
-  [../]
-  [./local_kappa]
+                  "of thermal conductivity, using functor material properties."
+  []
+  [local_kappa]
     type = Exodiff
     input = wall_heat_transfer.i
     exodiff = local_kappa_out.e
     abs_zero = 1e-9
     cli_args = "Outputs/file_base=local_kappa_out GlobalParams/splitting='effective_thermal_conductivity' GlobalParams/locality='local'"
     requirement = "The system shall provide a boundary condition to split a constant heat flux according to local values "
-                  "of effective thermal conductivity."
-  [../]
-  [./global_kappa]
+                  "of effective thermal conductivity, using functor material properties."
+    ad_indexing_type = 'global'
+  []
+  [global_kappa]
     type = Exodiff
     input = wall_heat_transfer.i
     exodiff = global_kappa_out.e
     abs_zero = 1e-9
     cli_args = "Outputs/file_base=global_kappa_out GlobalParams/splitting='effective_thermal_conductivity' GlobalParams/locality='global'"
     requirement = "The system shall provide a boundary condition to split a constant heat flux according to domain-averaged values "
-                  "of effective thermal conductivity."
-  [../]
+                  "of effective thermal conductivity, using functor material properties."
+  []
 []

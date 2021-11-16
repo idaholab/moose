@@ -1,12 +1,45 @@
 [Tests]
+  issues = '#18626'
   [thermal_resistance]
-    issues = '#18626'
+    requirement = 'The system shall be able to solve a heat conduction problem with diffusion/conduction/radiation combined thermal resistance boundary conditions'
     design = 'FVThermalResistanceBC.md'
-    requirement = 'The system shall be able to solve a heat conduction problem with diffusion/conduction/radiation combined thermal resistance boundary conditions.'
-    type = Exodiff
-    input = test.i
-    exodiff = 'test_out.e'
-    allow_warnings = true # thermal resistance bc has an inner solve that may not always converge enough
-    ad_indexing_type = 'global'
+    [matprop]
+      type = Exodiff
+      input = test.i
+      exodiff = 'test_out.e'
+      allow_warnings = true # thermal resistance bc has an inner solve that may not always converge enough
+      ad_indexing_type = 'global'
+      detail = 'using regular material properties.'
+    []
+    [matprop_rz]
+      type = Exodiff
+      input = test.i
+      exodiff = 'test_rz_out.e'
+      allow_warnings = true # thermal resistance bc has an inner solve that may not always converge enough
+      ad_indexing_type = 'global'
+      detail = 'using regular material properties in RZ geometry.'
+      # We remove the thermal resistance BC from the top, since the conduction formulation there
+      # is incorrect. We also move the thermal resistance BC to the outer cylinder, makes more sense than at r=0
+      cli_args = "Problem/coord_type=RZ FVBCs/left/boundary=right FVBCs/left/geometry=cylindrical FVBCs/left/inner_radius=2 FVBCs/other/boundary='left bottom' Outputs/file_base=test_rz_out"
+    []
+    [functor_matprop]
+      type = Exodiff
+      input = test_functor.i
+      exodiff = 'test_functor_out.e'
+      allow_warnings = true # thermal resistance bc has an inner solve that may not always converge enough
+      ad_indexing_type = 'global'
+      detail = 'using functor material properties.'
+    []
+    [functor_matprop_rz]
+      type = Exodiff
+      input = test_functor.i
+      exodiff = 'test_functor_rz_out.e'
+      allow_warnings = true # thermal resistance bc has an inner solve that may not always converge enough
+      ad_indexing_type = 'global'
+      detail = 'using functor material properties in RZ geometry.'
+      # We remove the thermal resistance BC from the top, since the conduction formulation there
+      # is incorrect. We also move the thermal resistance BC to the outer cylinder, makes more sense than at r=0
+      cli_args = "Problem/coord_type=RZ FVBCs/left/boundary=right FVBCs/left/geometry=cylindrical FVBCs/left/inner_radius=2 FVBCs/other/boundary='left bottom' Outputs/file_base=test_functor_rz_out"
+    []
   []
 []

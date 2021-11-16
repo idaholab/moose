@@ -7,18 +7,18 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "FVThermalResistanceBC.h"
+#include "FunctorThermalResistanceBC.h"
 #include "HeatConductionNames.h"
 
-registerMooseObject("HeatConductionApp", FVThermalResistanceBC);
+registerMooseObject("HeatConductionApp", FunctorThermalResistanceBC);
 
 InputParameters
-FVThermalResistanceBC::validParams()
+FunctorThermalResistanceBC::validParams()
 {
   auto params = FVFluxBC::validParams();
-  params.addCoupledVar("temperature", "temperature variable");
+  params.addParam<MooseFunctorName>("temperature", "temperature variable");
   params.addRequiredParam<Real>(HeatConduction::T_ambient, "constant ambient temperature");
-  params.addRequiredParam<MaterialPropertyName>("htc", "heat transfer coefficient");
+  params.addRequiredParam<MooseFunctorName>("htc", "heat transfer coefficient");
 
   params.addRequiredRangeCheckedParam<Real>(HeatConduction::emissivity,
                                             HeatConduction::emissivity + " >= 0.0 & " +
@@ -45,21 +45,22 @@ FVThermalResistanceBC::validParams()
 
   params.addRangeCheckedParam<Real>(
       "tolerance", 1E-3, "tolerance > 0.0", "tolerance to converge iterations");
-  params.addClassDescription("Thermal resistance Heat flux boundary condition for the "
+  params.addClassDescription("Thermal resistance heat flux boundary condition for the "
                              "fluid and solid energy equations");
   return params;
 }
 
-FVThermalResistanceBC::FVThermalResistanceBC(const InputParameters & parameters)
+FunctorThermalResistanceBC::FunctorThermalResistanceBC(const InputParameters & parameters)
   : FVFluxBC(parameters),
     _geometry(getParam<MooseEnum>("geometry").getEnum<Moose::CoordinateSystemType>()),
     _inner_radius(
         _geometry == Moose::CoordinateSystemType::COORD_RZ ? getParam<Real>("inner_radius") : 1.0),
-    _T(isParamValid("temperature") ? adCoupledValue("temperature") : _u),
+    _T(isParamValid("temperature") ? getFunctor<ADReal>("temperature")
+                                   : getFunctor<ADReal>("variable")),
     _T_ambient(getParam<Real>(HeatConduction::T_ambient)),
     _k(getParam<std::vector<Real>>("thermal_conductivities")),
     _dx(getParam<std::vector<Real>>("conduction_thicknesses")),
-    _h(getADMaterialPropertyByName<Real>(getParam<MaterialPropertyName>("htc"))),
+    _h(getFunctor<ADReal>(getParam<MooseFunctorName>("htc"))),
     _emissivity(getParam<Real>(HeatConduction::emissivity)),
     _max_iterations(getParam<unsigned int>("max_iterations")),
     _tolerance(getParam<Real>("tolerance")),
@@ -84,7 +85,7 @@ FVThermalResistanceBC::FVThermalResistanceBC(const InputParameters & parameters)
 }
 
 void
-FVThermalResistanceBC::computeConductionResistance()
+FunctorThermalResistanceBC::computeConductionResistance()
 {
   Real r = _inner_radius;
 
@@ -102,19 +103,22 @@ FVThermalResistanceBC::computeConductionResistance()
         break;
       }
       default:
-        mooseError("Unhandled 'GeometryEnum' in 'FVThermalResistanceBC'!");
+        mooseError("Unhandled 'GeometryEnum' in 'FunctorThermalResistanceBC'!");
     }
   }
 }
 
 ADReal
-FVThermalResistanceBC::computeQpResidual()
+FunctorThermalResistanceBC::computeQpResidual()
 {
+  // Evaluate material properties on the face
+  const auto face_arg = singleSidedFaceArg();
+
   // radiation resistance has to be solved iteratively, since we don't know the
   // surface temperature. We do know that the heat flux in the conduction layers
   // must match the heat flux in the parallel convection-radiation segment. For a
   // first guess, take the surface temperature as the average of _T and T_ambient.
-  _T_surface = 0.5 * (_T[_qp] + _T_ambient);
+  _T_surface = 0.5 * (_T(face_arg) + _T_ambient);
 
   // total flux perpendicular to boundary
   ADReal flux;
@@ -136,7 +140,7 @@ FVThermalResistanceBC::computeQpResidual()
       T_surface_previous = _T_surface;
 
       // compute the flux based on the conduction part of the circuit
-      flux = (_T[_qp] - _T_surface) / _conduction_resistance;
+      flux = (_T(face_arg) - _T_surface) / _conduction_resistance;
 
       computeParallelResistance();
 
@@ -147,7 +151,7 @@ FVThermalResistanceBC::computeQpResidual()
 
       if (iteration == _max_iterations)
       {
-        mooseWarning("Maximum number of iterations reached in 'FVThermalResistanceBC'!");
+        mooseWarning("Maximum number of iterations reached in 'FunctorThermalResistanceBC'!");
         break;
       }
       else
@@ -158,13 +162,16 @@ FVThermalResistanceBC::computeQpResidual()
   // resistance to find the overall heat flux. For Cartesian, dividing by the
   // 'inner_radius' has no effect, but it is required for correct normalization
   // for cylindrical geometries.
-  flux = (_T[_qp] - _T_ambient) / (_conduction_resistance + _parallel_resistance) / _inner_radius;
+  flux =
+      (_T(face_arg) - _T_ambient) / (_conduction_resistance + _parallel_resistance) / _inner_radius;
   return flux;
 }
 
 void
-FVThermalResistanceBC::computeParallelResistance()
+FunctorThermalResistanceBC::computeParallelResistance()
 {
+  const auto face_arg = singleSidedFaceArg();
+
   // compute the parallel convection and radiation resistances, assuming they
   // act on the same surface area size
   ADReal hr = _emissivity * HeatConduction::Constants::sigma *
@@ -172,5 +179,5 @@ FVThermalResistanceBC::computeParallelResistance()
 
   // for Cartesian, dividing by the 'outer_radius' has no effect, but it is
   // required for correct normalization for cylindrical geometries
-  _parallel_resistance = 1.0 / (hr + _h[_qp]) / _outer_radius;
+  _parallel_resistance = 1.0 / (hr + _h(face_arg)) / _outer_radius;
 }
