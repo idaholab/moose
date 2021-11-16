@@ -9,15 +9,15 @@
 
 #pragma once
 
-#include "RayTracingStudy.h"
+#include "LotsOfRaysRayStudy.h"
 
-class TestRay : public RayTracingStudy
+class TestRayLots : public LotsOfRaysRayStudy
 {
 public:
-  TestRay(const InputParameters & parameters);
+  TestRayLots(const InputParameters & parameters);
 
   static InputParameters validParams();
 
 protected:
-  void generateRays() override final;
+  void postExecuteStudy() override final;
 };

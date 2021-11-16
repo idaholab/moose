@@ -14,129 +14,136 @@ registerMooseObject("RayTracingTestApp", TestRay);
 InputParameters
 TestRay::validParams()
 {
-  auto params = LotsOfRaysRayStudy::validParams();
+  auto params = RayTracingStudy::validParams();
 
-  params.addParam<bool>("get_info", false, "Tests Ray::getInfo()");
-  params.addParam<bool>("equality", false, "Tests the equality and inequality operators for Ray");
+  params.addParam<bool>("at_end_without_set", false, "Test Ray::atEnd() without the end being set");
+  params.addParam<bool>(
+      "end_point_without_set", false, "Test Ray::endPoint() without the end being set");
+  params.addParam<bool>(
+      "set_start_again", false, "Test setting a Ray's start point multiple times");
+  params.addParam<bool>(
+      "set_direction_again", false, "Test setting a Ray's direction multiple times");
+  params.addParam<bool>("set_start_fail_bbox",
+                        false,
+                        "Test setting a Ray's start point to a point that fails the bbox check");
+  params.addParam<bool>("set_side_without_elem",
+                        false,
+                        "Test setting a Ray's incoming side without a starting element");
+  params.addParam<bool>(
+      "set_invalid_side", false, "Test setting a Ray's incoming side to an invalid one");
+  params.addParam<bool>(
+      "set_bad_side", false, "Test setting a Ray's incoming side to a wrong side");
+  params.addParam<bool>(
+      "set_bad_start",
+      false,
+      "Test setting a Ray's start point to one that is not within the starting element");
+  params.addParam<bool>(
+      "set_direction_before_start", false, "Test setting a Ray's direction before its start point");
+  params.addParam<bool>(
+      "set_zero_direction", false, "Test setting a Ray's direction to the zero vector");
+  params.addParam<bool>(
+      "set_end_before_start", false, "Test setting a Ray's end point before its start point");
+  params.addParam<bool>(
+      "set_end_equal_start", false, "Test setting a Ray's end point to its start point");
+  params.addParam<bool>("set_end_with_direction",
+                        false,
+                        "Test setting a Ray's end point after setting its direction");
+  params.addParam<bool>("set_distance_with_end",
+                        false,
+                        "Test setting a Ray's max distance after setting its end point");
+  params.addParam<bool>("set_end_with_distance",
+                        false,
+                        "Test setting a Ray's end point after setting its max distance");
+  params.addParam<bool>("set_end_fail_bbox",
+                        false,
+                        "Test setting a Ray's end point to a point that fails the bbox check");
+  params.addParam<bool>("set_distance_before_start",
+                        false,
+                        "Test setting a Ray's max distance before its start point");
+  params.addParam<bool>(
+      "set_distance_negative", false, "Test setting a Ray's max distance to a negative value");
+  params.addParam<bool>(
+      "set_start_inactive", false, "Tests setting a Ray's starting element to an inactive element");
+
+  params.set<bool>("_use_ray_registration") = false;
 
   return params;
 }
 
-TestRay::TestRay(const InputParameters & parameters) : LotsOfRaysRayStudy(parameters)
-{
-  registerRayData("data");
-  registerRayAuxData("aux_data");
-}
+TestRay::TestRay(const InputParameters & parameters) : RayTracingStudy(parameters) {}
 
 void
-TestRay::postExecuteStudy()
+TestRay::generateRays()
 {
-  if (getParam<bool>("get_info"))
-    for (const auto & ray : rayBank())
-      libMesh::err << ray->getInfo() << std::endl;
-
-  if (getParam<bool>("equality"))
+  if (_mesh.getMesh().n_local_elem() != 0)
   {
-    std::size_t passes = 0;
+    const Elem * elem = *_mesh.getActiveLocalElementRange()->begin();
 
-    std::vector<UserObject *> uos;
-    _fe_problem.theWarehouse().query().condition<AttribSystem>("UserObject").queryInto(uos);
-    RayTracingStudy * other_study = nullptr;
-    for (auto & uo : uos)
-      if (auto study = dynamic_cast<RayTracingStudy *>(uo))
-        if (study != this)
-        {
-          other_study = study;
-          break;
-        }
-    mooseAssert(other_study, "Failed to find other study");
+    auto ray = acquireRay();
 
-    for (const auto & ray : rayBank())
+    if (getParam<bool>("set_distance_before_start"))
+      ray->setStartingMaxDistance(1);
+    if (getParam<bool>("at_end_without_set"))
+      ray->atEnd();
+    if (getParam<bool>("end_point_without_set"))
+      ray->endPoint();
+    if (getParam<bool>("set_start_fail_bbox"))
+      ray->setStart(Point(1e6, 1e6, 1e6));
+    if (getParam<bool>("set_side_without_elem"))
+      ray->setStart(elem->vertex_average(), nullptr, 0);
+    if (getParam<bool>("set_invalid_side"))
+      ray->setStart(elem->vertex_average(), elem, 100);
+    if (getParam<bool>("set_bad_side"))
+      ray->setStart(elem->vertex_average(), elem, 0);
+    if (getParam<bool>("set_direction_before_start"))
+      ray->setStartingDirection(Point(1, 0, 0));
+    if (getParam<bool>("set_bad_start"))
     {
-      std::vector<std::shared_ptr<Ray>> duplicate_rays;
-
-      auto duplicate_ray = [&ray, &duplicate_rays](RayTracingStudy * study = nullptr) {
-        auto duplicate = std::make_shared<Ray>(study != nullptr ? study : &ray->_study,
-                                               ray->id(),
-                                               ray->data().size(),
-                                               ray->auxData().size(),
-                                               false,
-                                               Ray::ConstructRayKey());
-        duplicate->_current_point = ray->_current_point;
-        duplicate->_direction = ray->_direction;
-        duplicate->_current_elem = ray->_current_elem;
-        duplicate->_current_incoming_side = ray->_current_incoming_side;
-        duplicate->_end_set = ray->_end_set;
-        duplicate->_processor_crossings = ray->_processor_crossings;
-        duplicate->_intersections = ray->_intersections;
-        duplicate->_trajectory_changes = ray->_trajectory_changes;
-        duplicate->_trajectory_changed = ray->_trajectory_changed;
-        duplicate->_distance = ray->_distance;
-        duplicate->_max_distance = ray->_max_distance;
-        duplicate->_should_continue = ray->_should_continue;
-        duplicate->_data = ray->_data;
-        duplicate->_aux_data = ray->_aux_data;
-
-        duplicate_rays.push_back(duplicate);
-
-        return duplicate;
-      };
-
-      if (*ray != *ray || !(*ray == *ray))
-        mooseError("Same ray equality failed");
-      else
-        ++passes;
-
-      ++duplicate_ray()->_id;
-      duplicate_ray()->_current_point = RayTracingCommon::invalid_point;
-      duplicate_ray()->_direction = RayTracingCommon::invalid_point;
-      for (const auto & elem : meshBase().active_local_element_ptr_range())
-        if (elem != ray->currentElem())
-        {
-          duplicate_ray()->_current_elem = elem;
-          break;
-        }
-      if (ray->invalidCurrentIncomingSide())
-        duplicate_ray()->_current_incoming_side = 0;
-      else
-        ++duplicate_ray()->_current_incoming_side;
-      duplicate_ray()->_end_set = !ray->_end_set;
-      ++duplicate_ray()->_processor_crossings;
-      ++duplicate_ray()->_intersections;
-      ++duplicate_ray()->_trajectory_changes;
-      duplicate_ray()->_trajectory_changed = !ray->_trajectory_changed;
-      duplicate_ray()->_distance += 1;
-      duplicate_ray()->_max_distance = 0;
-      duplicate_ray()->_should_continue = !ray->_should_continue;
-      duplicate_ray()->_data.resize(ray->_data.size() + 1);
-      duplicate_ray()->_data[0] += 1;
-      duplicate_ray()->_aux_data.resize(ray->_aux_data.size() + 1);
-      duplicate_ray()->_aux_data[0] += 1;
-      duplicate_ray(other_study);
-
-      for (const auto & duplicate : duplicate_rays)
-      {
-        const auto equal = *duplicate == *ray;
-        if (equal)
-          mooseError("Unequal rays are equal");
-        else
-          ++passes;
-
-        const auto inequal = *duplicate != *ray;
-        if (!inequal)
-          mooseError("Unequal rays are not unequal");
-        else
-          ++passes;
-
-        if (equal != !inequal)
-          mooseError("Ray Equality != !inequality");
-        else
-          ++passes;
-      }
+      const Elem * another_elem = elem->neighbor_ptr(0);
+      if (!another_elem)
+        another_elem = elem->neighbor_ptr(1);
+      ray->setStart(elem->vertex_average(), another_elem);
+    }
+    if (getParam<bool>("set_end_before_start"))
+      ray->setStartingEndPoint(elem->point(0));
+    if (getParam<bool>("set_start_inactive"))
+    {
+      for (const auto & inactive_elem : meshBase().element_ptr_range())
+        if (!inactive_elem->active())
+          ray->setStart(inactive_elem->true_centroid(), inactive_elem);
     }
 
-    comm().sum(passes);
-    if (processor_id() == 0)
-      libMesh::err << "Ray equality test passed " << passes << " checks" << std::endl;
+    ray->setStart(elem->vertex_average(), elem);
+
+    if (getParam<bool>("set_start_again"))
+      ray->setStart(1.01 * elem->vertex_average());
+    if (getParam<bool>("set_direction_again"))
+    {
+      ray->setStartingDirection(Point(1, 0, 0));
+      ray->setStartingDirection(Point(-1, 0, 0));
+    }
+    if (getParam<bool>("set_zero_direction"))
+      ray->setStartingDirection(Point(0, 0, 0));
+    if (getParam<bool>("set_end_equal_start"))
+      ray->setStartingEndPoint(ray->currentPoint());
+    if (getParam<bool>("set_end_with_direction"))
+    {
+      ray->setStartingDirection(Point(1, 0, 0));
+      ray->setStartingEndPoint(elem->point(0));
+    }
+    if (getParam<bool>("set_distance_with_end"))
+    {
+      ray->setStartingEndPoint(elem->point(0));
+      ray->setStartingMaxDistance(1);
+    }
+    if (getParam<bool>("set_end_with_distance"))
+    {
+      ray->setStartingMaxDistance(1);
+      ray->setStartingEndPoint(elem->point(0));
+    }
+    if (getParam<bool>("set_end_fail_bbox"))
+      ray->setStartingEndPoint(Point(1e6, 1e6, 1e6));
+    if (getParam<bool>("set_distance_negative"))
+      ray->setStartingMaxDistance(-1);
   }
 }

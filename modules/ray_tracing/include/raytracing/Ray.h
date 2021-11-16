@@ -27,7 +27,7 @@ class Elem;
 class RayTracingStudy;
 // Friend access to Ray
 class TraceRay;
-class TestRay;
+class TestRayLots;
 // Friend access to ChangeDirectionKey for accessing changeDirection()
 class RayBoundaryConditionBase;
 // Friend access to ChangeStartDirectionKey for accessing changeStartDirection()
@@ -88,7 +88,7 @@ public:
   {
     friend class RayTracingStudy;
     friend class MooseUtils::SharedPool<Ray>;
-    friend class TestRay;
+    friend class TestRayLots;
     ConstructRayKey() {}
     ConstructRayKey(const ConstructRayKey &) {}
   };
@@ -714,7 +714,7 @@ private:
   // Packing needs access to changing the internal counters during the trace
   friend class Parallel::Packing<std::shared_ptr<Ray>>;
   // Allows for testing of equality methods
-  friend class TestRay;
+  friend class TestRayLots;
   // Data helpers needs to be able to access the internal methods for a Ray for store/load
   friend void dataStore(std::ostream & stream, std::shared_ptr<Ray> & ray, void * context);
   friend void dataLoad(std::istream & stream, std::shared_ptr<Ray> & ray, void * context);

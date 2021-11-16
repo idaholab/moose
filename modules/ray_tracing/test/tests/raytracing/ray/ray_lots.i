@@ -15,7 +15,7 @@
 
 [UserObjects]
   [study]
-    type = TestRay
+    type = TestRayLots
     execute_on = initial
 
     vertex_to_vertex = true
