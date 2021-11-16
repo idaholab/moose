@@ -239,22 +239,12 @@ ClaimRays::verifyClaiming()
       // Try to insert into the map
       auto emplace_pair = local_map.emplace(id, claimed_rays);
 
-      // Already existed in the map
-      if (!emplace_pair.second)
+      // If it already exists but has not been claimed yet, set it to being claimed
+      if (!emplace_pair.second && claimed_rays)
       {
-        // If it already exists but has not been claimed yet, set it to being claimed
-        if (claimed_rays && !emplace_pair.first->second)
-          emplace_pair.first->second = true;
-        // Otherwise, it is being doubly generated/claimed
-        else
-          _study.mooseError("Ray with ID ",
-                            id,
-                            " was ",
-                            claimed_rays ? "claimed" : "generated",
-                            " multiple times on pid ",
-                            _pid,
-                            "\n\n",
-                            ray->getInfo());
+        mooseAssert(!emplace_pair.first->second,
+                    "Ray was claimed more than once on a single processor");
+        emplace_pair.first->second = true;
       }
     }
   };
@@ -297,14 +287,7 @@ ClaimRays::verifyClaiming()
           claimed_pids.push_back(pid_claimed_pair.first);
 
       if (claimed_pids.size() == 0)
-        mooseError("ClaimRays for ", _study.name(), ": Failed to claim the Ray with ID ", id);
-      if (claimed_pids.size() > 1)
-      {
-        std::stringstream oss;
-        oss << "ClaimRays for " << _study.name() << ": The Ray with ID " << id
-            << " was claimed on processors ";
-        std::copy(claimed_pids.begin(), claimed_pids.end(), std::ostream_iterator<RayID>(oss, " "));
-        mooseError(oss.str());
-      }
+        _study.mooseError("Failed to claim the Ray with ID ", id);
+      mooseAssert(claimed_pids.size() == 1, "Ray was claimed on multiple processors");
     }
 }
