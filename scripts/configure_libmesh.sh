@@ -52,7 +52,7 @@ function configure_libmesh()
                --disable-maintainer-mode \
                --enable-petsc-hypre-required \
                --enable-metaphysicl-required \
-               --with-cxx-std-min=2014 \
+               --with-cxx-std-min=2017 \
                --without-gdb-command \
                --with-methods="${METHODS}" \
                --prefix="${LIBMESH_DIR}" \
