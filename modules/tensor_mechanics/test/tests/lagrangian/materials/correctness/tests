@@ -5,7 +5,7 @@
     input = cauchy-elastic.i
     csvdiff = 'cauchy-elastic_out.csv'
     requirement = 'Stress matches elastic solution (xx=1e4, rest zero)'
-    design = 'source/materials/lagrangian/ComputeLagrangianElasticSmallStress.md'
+    design = 'source/materials/lagrangian/ComputeLagrangianElasticEngineeringStress.md'
   [../]
   [./stvenantkirchhoff]
     type = CSVDiff

@@ -211,7 +211,7 @@
     poissons_ratio = 0.4999999
   []
   [compute_stress]
-    type = ComputeLagrangianElasticSmallStress
+    type = ComputeLagrangianElasticEngineeringStress
   []
   [compute_strain]
     type = ComputeLagrangianStrain

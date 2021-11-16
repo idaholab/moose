@@ -1,9 +1,9 @@
-#include "ComputeLagrangianElasticSmallStress.h"
+#include "ComputeLagrangianElasticEngineeringStress.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeLagrangianElasticSmallStress);
+registerMooseObject("TensorMechanicsApp", ComputeLagrangianElasticEngineeringStress);
 
 InputParameters
-ComputeLagrangianElasticSmallStress::validParams()
+ComputeLagrangianElasticEngineeringStress::validParams()
 {
   InputParameters params = ComputeLagrangianObjectiveStress::validParams();
 
@@ -13,7 +13,7 @@ ComputeLagrangianElasticSmallStress::validParams()
   return params;
 }
 
-ComputeLagrangianElasticSmallStress::ComputeLagrangianElasticSmallStress(
+ComputeLagrangianElasticEngineeringStress::ComputeLagrangianElasticEngineeringStress(
     const InputParameters & parameters)
   : ComputeLagrangianObjectiveStress(parameters),
     _elasticity_tensor(
@@ -22,7 +22,7 @@ ComputeLagrangianElasticSmallStress::ComputeLagrangianElasticSmallStress(
 }
 
 void
-ComputeLagrangianElasticSmallStress::computeQpSmallStress()
+ComputeLagrangianElasticEngineeringStress::computeQpSmallStress()
 {
   _small_stress[_qp] = _elasticity_tensor[_qp] * _mechanical_strain[_qp];
   _small_jacobian[_qp] = _elasticity_tensor[_qp];

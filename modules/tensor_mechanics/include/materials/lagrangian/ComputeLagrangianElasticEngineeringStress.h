@@ -16,11 +16,11 @@
 /// small_stress = C : mechanical_strain
 /// with C the elasticity tensor
 ///
-class ComputeLagrangianElasticSmallStress : public ComputeLagrangianObjectiveStress
+class ComputeLagrangianElasticEngineeringStress : public ComputeLagrangianObjectiveStress
 {
 public:
   static InputParameters validParams();
-  ComputeLagrangianElasticSmallStress(const InputParameters & parameters);
+  ComputeLagrangianElasticEngineeringStress(const InputParameters & parameters);
 
 protected:
   /// Implement the elastic small stress update

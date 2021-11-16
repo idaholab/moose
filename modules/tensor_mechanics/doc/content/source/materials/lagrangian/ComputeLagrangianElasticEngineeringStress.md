@@ -1,6 +1,6 @@
-# ComputeLagrangianElasticSmallStress
+# ComputeLagrangianElasticEngineeringStress
 
-!syntax description /Materials/ComputeLagrangianElasticSmallStress
+!syntax description /Materials/ComputeLagrangianElasticEngineeringStress
 
 ## Overview
 
@@ -29,8 +29,8 @@ The following example sets up a hypoelastic, large deformation model based on th
 !listing modules/tensor_mechanics/test/tests/lagrangian/updated/patch/large_patch.i
          block=Materials
 
-!syntax parameters /Materials/ComputeLagrangianElasticSmallStress
+!syntax parameters /Materials/ComputeLagrangianElasticEngineeringStress
 
-!syntax inputs /Materials/ComputeLagrangianElasticSmallStress
+!syntax inputs /Materials/ComputeLagrangianElasticEngineeringStress
 
-!syntax children /Materials/ComputeLagrangianElasticSmallStress
+!syntax children /Materials/ComputeLagrangianElasticEngineeringStress

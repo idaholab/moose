@@ -389,18 +389,38 @@ RankFourTensorTempl<Real>::invSymm() const
 
 template <typename T>
 RankFourTensorTempl<T>
-RankFourTensorTempl<T>::inverse()
+RankFourTensorTempl<T>::inverse() const
+{
+  mooseError("The inverse operation calls to LAPACK and only supports plain Real type tensors.");
+}
+
+template <>
+RankFourTensorTempl<Real>
+RankFourTensorTempl<Real>::inverse() const
 {
   // The inverse of a 3x3x3x3 in the C_ijkl*A_klmn = de_im de_jn sense is
   // simply the inverse of the 9x9 matrix of the tensor entries.
   // So all we need to do is inverse _vals (with the appropriate row-major
   // storage)
 
-  RankFourTensorTempl<T> ret;
-  Eigen::Map<Eigen::Matrix<T, 9, 9, Eigen::RowMajor>>(ret._vals, 9, 9) =
-      Eigen::Map<Eigen::Matrix<T, 9, 9, Eigen::RowMajor>>(_vals, 9, 9).inverse();
+  // Note the following Eigen code works
+  // RankFourTensorTempl<T> ret;
+  // Eigen::Map<Eigen::Matrix<T, 9, 9, Eigen::RowMajor>>(ret._vals, 9, 9) =
+  //    Eigen::Map<Eigen::Matrix<T, 9, 9, Eigen::RowMajor>>(_vals, 9, 9).inverse();
+  //
+  // return ret;
+  //
+  // But exceeds the stack limit for large AD types
 
-  return ret;
+  // Setup 9x9
+  std::vector<PetscScalar> mat(N4);
+  std::copy(_vals, _vals + N4, mat.begin());
+
+  // LAPACK inverse
+  MatrixTools::inverse(mat, 9);
+
+  // The result is just the vector in row-major
+  return RankFourTensor(mat, RankFourTensor::general);
 }
 
 template <typename T>
