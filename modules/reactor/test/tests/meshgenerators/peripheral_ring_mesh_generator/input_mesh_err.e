@@ -1,0 +1,1 @@
+../patterned_hex_mesh_generator/gold/patterned_hex.e

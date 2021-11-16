@@ -995,6 +995,7 @@ PolygonMeshGeneratorBase::azimuthalAnglesCollector(ReplicatedMesh & mesh,
                                                    const Real lower_azi,
                                                    const Real upper_azi,
                                                    const unsigned int return_type,
+                                                   const boundary_id_type bid,
                                                    const bool calculate_origin,
                                                    const Real input_origin_x,
                                                    const Real input_origin_y,
@@ -1011,12 +1012,11 @@ PolygonMeshGeneratorBase::azimuthalAnglesCollector(ReplicatedMesh & mesh,
   std::vector<Real> bd_y_list;
   Real origin_x = 0.0;
   Real origin_y = 0.0;
-  Real vol_tmp = 0.0;
   Real tmp_azi;
   const Real mid_azi = lower_azi <= upper_azi ? (lower_azi + upper_azi) / 2.0
                                               : (lower_azi + upper_azi + 360.0) / 2.0;
   for (unsigned int i = 0; i < node_list.size(); ++i)
-    if (std::get<1>(node_list[i]) == OUTER_SIDESET_ID)
+    if (std::get<1>(node_list[i]) == bid)
     {
       bd_x_list.push_back((mesh.node_ref(std::get<0>(node_list[i])))(0));
       bd_y_list.push_back((mesh.node_ref(std::get<0>(node_list[i])))(1));
@@ -1024,17 +1024,9 @@ PolygonMeshGeneratorBase::azimuthalAnglesCollector(ReplicatedMesh & mesh,
 
   if (calculate_origin)
   {
-    // Iterate through elements to calculate the center of mass of the mesh, which is used as the
-    // origin.
-    for (const auto & elem : as_range(mesh.elements_begin(), mesh.elements_end()))
-    {
-      const auto volume = elem->volume();
-      origin_x += elem->true_centroid()(0) * volume;
-      origin_y += elem->true_centroid()(1) * volume;
-      vol_tmp += volume;
-    }
-    origin_x /= vol_tmp;
-    origin_y /= vol_tmp;
+    const Point origin_pt = meshCentroidCalculator(mesh);
+    origin_x = origin_pt(0);
+    origin_y = origin_pt(1);
   }
   else
   {
@@ -1057,4 +1049,20 @@ PolygonMeshGeneratorBase::azimuthalAnglesCollector(ReplicatedMesh & mesh,
   std::sort(azimuthal_output.begin(), azimuthal_output.end());
 
   return azimuthal_output;
+}
+
+Point
+PolygonMeshGeneratorBase::meshCentroidCalculator(ReplicatedMesh & mesh) const
+{
+  Point origin_pt = Point(0.0, 0.0, 0.0);
+  Real vol_tmp = 0.0;
+  // Iterate through elements to calculate the center of mass of the mesh, which is used as the
+  // origin.
+  for (const auto & elem : as_range(mesh.elements_begin(), mesh.elements_end()))
+  {
+    origin_pt += (elem->true_centroid()) * (elem->volume());
+    vol_tmp += elem->volume();
+  }
+  origin_pt /= vol_tmp;
+  return origin_pt;
 }

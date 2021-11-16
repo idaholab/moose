@@ -587,19 +587,9 @@ PatternedHexMeshGenerator::generate()
   std::vector<Real> bd_x_list;
   std::vector<Real> bd_y_list;
   std::vector<std::pair<Real, unsigned int>> node_azi_list;
-  Real origin_x;
-  Real origin_y;
-
-  for (unsigned int i = 0; i < node_list.size(); ++i)
-  {
-    if (std::get<1>(node_list[i]) == OUTER_SIDESET_ID)
-    {
-      bd_x_list.push_back(out_mesh->node_ref(std::get<0>(node_list[i]))(0));
-      bd_y_list.push_back(out_mesh->node_ref(std::get<0>(node_list[i]))(1));
-    }
-  }
-  origin_x = std::accumulate(bd_x_list.begin(), bd_x_list.end(), 0.0) / bd_x_list.size();
-  origin_y = std::accumulate(bd_y_list.begin(), bd_y_list.end(), 0.0) / bd_y_list.size();
+  const Point orign_pt = meshCentroidCalculator(*out_mesh);
+  const Real origin_x = orign_pt(0);
+  const Real origin_y = orign_pt(1);
 
   MeshTools::Modification::translate(*out_mesh, -origin_x, -origin_y, 0);
 

@@ -1,0 +1,46 @@
+[Tests]
+  design = 'meshgenerators/PeripheralRingMeshGenerator.md'
+  issues = '#19978'
+  [core_peripheral_ring_nonpreserved]
+    type = 'Exodiff'
+    input = 'core_ring.i'
+    exodiff = 'core_ring_in.e'
+    cli_args = 'Mesh/pr/preserve_volumes=false
+                --mesh-only'
+    requirement ='The system shall add a peripheral ring to to the input mesh without preserving volumes due to polygonization.'
+    recover = false
+  []
+  [core_peripheral_ring_preserved]
+    type = 'Exodiff'
+    input = 'core_ring.i'
+    exodiff = 'core_ring_preserved_in.e'
+    cli_args = '--mesh-only core_ring_preserved_in.e'
+    requirement ='The system shall add a peripheral ring to to the input mesh with preserving volumes due to polygonization.'
+    recover = false
+  []
+  [err_invalid_boundary]
+    type = 'RunException'
+    input = 'core_ring.i'
+    cli_args = 'Mesh/pr/input_mesh_external_boundary=1
+                --mesh-only'
+    expect_err = 'This mesh generator does not work for the provided boundary.'
+    requirement ='The system shall threw an error if the given boundary of the input mesh is not valid.'
+  []
+  [err_small_radius]
+    type = 'RunException'
+    input = 'core_ring.i'
+    cli_args = 'Mesh/pr/peripheral_ring_radius=20
+                --mesh-only'
+    expect_err = 'The peripheral ring to be generated must be large enough to cover the entire input mesh.'
+    requirement ='The system shall threw an error if the given peripheral ring radius is not enough to cover the input mesh.'
+  []
+  [err_internal_boundary]
+    type = 'RunException'
+    input = 'core_ring.i'
+    cli_args = 'Mesh/fmg/file=input_mesh_err.e
+                Mesh/pr/input_mesh_external_boundary=30500
+                --mesh-only'
+    expect_err = 'The boundary provided is not an external boundary.'
+    requirement ='The system shall threw an error if the given external boundary is actually an internal boundary of the input mesh.'
+  []
+[]

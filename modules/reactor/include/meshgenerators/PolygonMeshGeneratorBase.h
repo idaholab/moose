@@ -387,8 +387,16 @@ protected:
                                              const Real lower_azi = -30.0,
                                              const Real upper_azi = 30.0,
                                              const unsigned int return_type = ANGLE_TANGENT,
+                                             const boundary_id_type bid = OUTER_SIDESET_ID,
                                              const bool calculate_origin = true,
                                              const Real input_origin_x = 0.0,
                                              const Real input_origin_y = 0.0,
                                              const Real tol = 1.0E-10) const;
+
+  /**
+   * Calculates the origin coordinates of a ReplicatedMesh.
+   * @param mesh input mesh whose origin needs to be calculated
+   * @return a Point data containing the mesh origin position
+   */
+  Point meshCentroidCalculator(ReplicatedMesh & mesh) const;
 };
