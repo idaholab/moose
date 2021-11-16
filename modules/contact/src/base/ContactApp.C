@@ -74,11 +74,6 @@ ContactApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 }
 
 void
-ContactApp::registerExecFlags(Factory & /*factory*/)
-{
-}
-
-void
 ContactApp::registerObjectDepends(Factory & factory)
 {
   mooseDeprecated("use registerAll instead of registerObjectsDepends");
