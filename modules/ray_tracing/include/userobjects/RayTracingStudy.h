@@ -530,7 +530,7 @@ public:
    */
   virtual const Point * getElemNormals(const Elem * /* elem */, const THREAD_ID /* tid */)
   {
-    mooseError("Not implemented");
+    mooseError("Unimplemented element normal caching in ", type(), "::getElemNormals()");
   }
 
   /**

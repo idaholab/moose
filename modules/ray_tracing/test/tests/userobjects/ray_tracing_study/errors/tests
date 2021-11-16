@@ -402,6 +402,14 @@
       method = opt
       detail = 'building an element extrema edge for invalid vertices'
     []
+    [get_elem_normals_unimplemented]
+      type = RunException
+      input = 'errors.i'
+      cli_args = 'UserObjects/study/get_elem_normals_unimplemented=true'
+      expect_err = 'Unimplemented element normal caching in RayTracingStudyTest::getElemNormals\(\)'
+      allow_test_objects = true
+      detail = 'requesting cached element normals when element normal caching has not been setup'
+    []
     [ray_start_inactive]
       type = RunException
       input = 'errors.i'
