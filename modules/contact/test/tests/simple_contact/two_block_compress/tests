@@ -10,6 +10,7 @@
                   'same height come into contact using the dual basis'
     allow_test_objects = true
     min_ad_size = 100
+    abs_zero = 1.0e-8
   []
   [frictionless-compress-2d-nondual]
     type = 'CSVDiff'
@@ -22,6 +23,7 @@
                'Outputs/file_base="two_equal_blocks_compress_2d_nondual_out"'
     allow_test_objects = true
     min_ad_size = 100
+    abs_zero = 1.0e-8
   []
   [frictionless-compress-3d]
     type = 'CSVDiff'
@@ -32,6 +34,7 @@
                   'same height come into contact using the dual basis'
     allow_test_objects = true
     min_ad_size = 100
+    abs_zero = 1.0e-8
   []
   [frictionless-compress-3d-nondual]
     type = 'CSVDiff'
@@ -44,6 +47,7 @@
                'Outputs/file_base="two_equal_blocks_compress_3d_nondual_out"'
     allow_test_objects = true
     min_ad_size = 100
+    abs_zero = 1.0e-8
   []
 
 []

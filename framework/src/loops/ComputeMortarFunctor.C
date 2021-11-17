@@ -181,15 +181,15 @@ ComputeMortarFunctor::operator()()
     if (_assembly.needDual())
       _assembly.reinitDual(secondary_face_elem, secondary_xi_pts, JxW);
 
-    // These will hold quadrature points for each segment
-    std::vector<Point> xi1_pts, xi2_pts;
-
     unsigned int n_segment = 0;
 
     // Loop through contributing msm elements, computing residual and Jacobian this time
     for (const auto msm_elem : msm_elems)
     {
       n_segment++;
+
+      // These will hold quadrature points for each segment
+      std::vector<Point> xi1_pts, xi2_pts;
 
       // Get a reference to the MortarSegmentInfo for this Elem.
       const MortarSegmentInfo & msinfo = _amg.mortarSegmentMeshElemToInfo().at(msm_elem);
