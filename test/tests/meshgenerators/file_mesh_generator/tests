@@ -29,7 +29,7 @@
     recover = false
     exodus_version = '>=8.0'
 
-    requirement = 'The system shall have the ability to read IsoGeometric Analysis meshes in ExodusII format.'
+    requirement = 'The system shall have the ability to read IsoGeometric Analysis meshes with rational bases in ExodusII format.'
     design = 'meshgenerators/FileMeshGenerator.md'
     issues = '#18768'
   []
@@ -41,7 +41,7 @@
     recover = false
     exodus_version = '>=8.0'
 
-    requirement = 'The system shall have the ability to read IsoGeometric Analysis meshes in ExodusII format.'
+    requirement = 'The system shall have the ability to read IsoGeometric Analysis meshes with 3D elements and sidesets in ExodusII format.'
     design = 'meshgenerators/FileMeshGenerator.md'
     issues = '#18768'
   []
