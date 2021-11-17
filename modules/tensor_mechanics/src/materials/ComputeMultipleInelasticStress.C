@@ -179,6 +179,15 @@ ComputeMultipleInelasticStress::initialSetup()
     paramError("damage_model",
                "Damage Model " + _damage_model->name() +
                    " is not compatible with ComputeMultipleInelasticStress");
+
+  // This check prevents the hierarchy from silently skipping substepping without informing the user
+  for (unsigned int model_number = 0; model_number < _num_models; ++model_number)
+  {
+    const bool use_substep = _models[model_number]->substeppingCapabilityRequested();
+    if (use_substep && _models[model_number]->substeppingCapabilityEnabled() == false)
+      mooseError("Usage of substepping has been requested, but this inelastic model does not "
+                 "implement substepping yet.");
+  }
 }
 
 void

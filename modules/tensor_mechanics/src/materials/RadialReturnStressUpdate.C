@@ -63,7 +63,9 @@ RadialReturnStressUpdateTempl<is_ad>::RadialReturnStressUpdateTempl(
     _deviatoric_projection_four(_identity_symmetric_four -
                                 _identity_two.outerProduct(_identity_two) / 3.0),
     _apply_strain(this->template getParam<bool>("apply_strain")),
+    _use_substep(this->template getParam<bool>("use_substep")),
     _use_substep_integration_error(this->template getParam<bool>("use_substep_integration_error"))
+
 {
 }
 

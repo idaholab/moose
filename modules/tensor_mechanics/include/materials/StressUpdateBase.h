@@ -142,6 +142,13 @@ public:
   virtual bool substeppingCapabilityEnabled() { return false; }
 
   /**
+   * Has the user requested usage of (possibly) implemented substepping capability for inelastic
+   * models.
+   *
+   */
+  virtual bool substeppingCapabilityRequested() { return false; }
+
+  /**
    * Given the elastic strain increment compute the number of substeps required
    * to bring a substepped trial stress guess distance from the yield surface
    * into the tolerance specified in the individual child class.
