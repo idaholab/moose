@@ -35,6 +35,7 @@ GenericFunctorMaterialTempl<is_ad>::validParams()
 {
   InputParameters params = FunctorMaterial::validParams();
   params += SetupInterface::validParams();
+  params.set<ExecFlagEnum>("execute_on") = {EXEC_LINEAR, EXEC_NONLINEAR};
   params.addClassDescription(
       "FunctorMaterial object for declaring properties that are populated by evaluation of a "
       "Functor (a constant, variable, function or functor material property) objects.");
@@ -74,6 +75,7 @@ GenericFunctorMaterialTempl<is_ad>::GenericFunctorMaterialTempl(const InputParam
         _mesh, blockIDs(), [this, i](const auto & r, const auto & t) -> GenericReal<is_ad> {
           return (*_functors[i])(r, t);
         });
+
     prop.setCacheClearanceSchedule(clearance_schedule);
   }
 }

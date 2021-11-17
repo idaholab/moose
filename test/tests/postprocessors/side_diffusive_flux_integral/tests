@@ -43,7 +43,7 @@
     exodiff = vector_functor_prop_out.e
     ad_indexing_type = 'global'
     requirement = 'The system shall yield equivalent results when vector material properties are computed with pre-initialized data or computed on-the-fly.'
-    design = 'GenericConstantVectorFunctorMaterial.md'
+    design = 'GenericVectorFunctorMaterial.md'
     issues = '#16809'
   []
 []

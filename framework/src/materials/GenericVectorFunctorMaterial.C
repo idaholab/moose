@@ -27,6 +27,7 @@ GenericVectorFunctorMaterialTempl<is_ad>::validParams()
 {
   InputParameters params = FunctorMaterial::validParams();
   params += SetupInterface::validParams();
+  params.set<ExecFlagEnum>("execute_on") = {EXEC_LINEAR, EXEC_NONLINEAR};
   params.addClassDescription(
       "FunctorMaterial object for declaring vector properties that are populated by "
       "evaluation of functor (constants, functions, variables, matprops) object.");

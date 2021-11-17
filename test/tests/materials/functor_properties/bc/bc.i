@@ -36,6 +36,7 @@
     type = ADGenericFunctorMaterial
     prop_names = 'prop'
     prop_values = 'v'
+    execute_on = 'LINEAR NONLINEAR'
   []
 []
 
