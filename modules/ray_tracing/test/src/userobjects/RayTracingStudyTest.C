@@ -232,10 +232,14 @@ InputParameters
 RayTracingStudyWithRegistrationTest::validParams()
 {
   auto params = RayTracingStudy::validParams();
+
   params.addParam<bool>(
       "registered_ray_id_missing", false, "Tests registeredRayID() with an invalid id");
   params.addParam<bool>(
       "registered_ray_name_missing", false, "Tests registeredRayName() with an invalid name");
+  params.addParam<bool>(
+      "register_ray_again", false, "Tests registering a Ray with the same name multiple times");
+
   return params;
 }
 
@@ -247,4 +251,14 @@ RayTracingStudyWithRegistrationTest::RayTracingStudyWithRegistrationTest(
     registeredRayID("foo");
   if (getParam<bool>("registered_ray_name_missing"))
     registeredRayName(0);
+}
+
+void
+RayTracingStudyWithRegistrationTest::generateRays()
+{
+  if (getParam<bool>("register_ray_again"))
+  {
+    acquireRegisteredRay("foo");
+    acquireRegisteredRay("foo");
+  }
 }

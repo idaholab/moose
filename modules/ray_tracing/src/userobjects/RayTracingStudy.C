@@ -1308,9 +1308,8 @@ RayTracingStudy::registerRay(const std::string & name)
   // the unique IDs, but it would require a sync point which isn't there right now
   libmesh_parallel_only(comm());
 
-  const auto search = _registered_ray_map.find(name);
-  if (search != _registered_ray_map.end())
-    return search->second;
+  if (_registered_ray_map.count(name))
+    mooseError("A ray with the name \"", name, "\" is already registered");
 
   const auto next_id = _threaded_ray_object_registration[0].size();
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
