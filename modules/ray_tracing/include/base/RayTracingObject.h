@@ -131,18 +131,16 @@ RayTracingObject::getStudy()
 {
   static_assert(std::is_base_of<RayTracingStudy, T>::value, "Not derived from a RayTracingStudy");
 
-  T * other_study = dynamic_cast<T *>(&_study);
-  if (!other_study)
-  {
-    std::stringstream err;
-    err << "Supplied study of type " << _study.type() << " is not the required study type "
-        << MooseUtils::prettyCppType<T>();
-    if (isParamValid("study"))
-      paramError("study", err.str());
-    else
-      mooseError(err.str());
-  }
-  return *other_study;
+  if (T * cast_study = dynamic_cast<T *>(&_study))
+    return *cast_study;
+
+  std::stringstream err;
+  err << "Supplied study of type " << _study.type() << " is not the required study type "
+      << MooseUtils::prettyCppType<T>();
+  if (isParamValid("study"))
+    paramError("study", err.str());
+  else
+    mooseError(err.str());
 }
 
 #define usingRayTracingObjectMembers                                                               \
