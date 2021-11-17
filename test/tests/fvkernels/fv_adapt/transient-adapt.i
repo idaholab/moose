@@ -93,10 +93,6 @@
   solve_type = 'NEWTON'
 []
 
-[Problem]
-  kernel_coverage_check = false
-[]
-
 [Adaptivity]
   marker = box
   initial_steps = 1

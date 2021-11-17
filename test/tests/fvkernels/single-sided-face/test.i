@@ -98,10 +98,6 @@
   []
 []
 
-[Problem]
-  kernel_coverage_check = off
-[]
-
 [Executioner]
   type = Transient
   num_steps = 2

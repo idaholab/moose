@@ -14,7 +14,6 @@
 []
 
 [Problem]
-  kernel_coverage_check = false
   coord_type = 'RZ'
 []
 

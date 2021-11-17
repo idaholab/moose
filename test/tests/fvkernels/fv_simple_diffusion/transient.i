@@ -52,10 +52,6 @@
   []
 []
 
-[Problem]
-  kernel_coverage_check = off
-[]
-
 [Executioner]
   type = Transient
   solve_type = 'PJFNK'

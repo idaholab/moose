@@ -14,10 +14,6 @@
   []
 []
 
-[Problem]
-  kernel_coverage_check = false
-[]
-
 [FVKernels]
   [diff_v]
     type = FVDiffusion
