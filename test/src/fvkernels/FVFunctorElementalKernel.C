@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "FVFunctorElementalKernel.h"
-#include "FunctorMaterialProperty.h"
 
 registerMooseObject("MooseTestApp", FVFunctorElementalKernel);
 
@@ -17,17 +16,18 @@ FVFunctorElementalKernel::validParams()
 {
   InputParameters params = FVElementalKernel::validParams();
   params.addRequiredParam<MooseFunctorName>(
-      "mat_prop_name", "The name of the functor material property that will provide the residual");
+      "functor_name", "The name of the functor (material property for example) that will provide "
+      "the residual");
   return params;
 }
 
 FVFunctorElementalKernel::FVFunctorElementalKernel(const InputParameters & params)
-  : FVElementalKernel(params), _functor_prop(getFunctor<ADReal>("mat_prop_name"))
+  : FVElementalKernel(params), _functor(getFunctor<ADReal>("functor_name"))
 {
 }
 
 ADReal
 FVFunctorElementalKernel::computeQpResidual()
 {
-  return _functor_prop(_current_elem);
+  return _functor(_current_elem);
 }

@@ -17,20 +17,26 @@
  * for those properties.
  */
 template <bool is_ad>
-class GenericFunctionFunctorMaterialTempl : public FunctorMaterial
+class GenericVectorFunctorMaterialTempl : public FunctorMaterial
 {
 public:
   static InputParameters validParams();
 
-  GenericFunctionFunctorMaterialTempl(const InputParameters & parameters);
+  GenericVectorFunctorMaterialTempl(const InputParameters & parameters);
 
 protected:
+  /// Names of the functor vector material properties to define
   std::vector<std::string> _prop_names;
-  std::vector<FunctionName> _prop_values;
 
+  /// Names of the functors to evaluate for the component of these vector properties
+  std::vector<MooseFunctorName> _prop_values;
+
+  /// Number of properties to define
   unsigned int _num_props;
-  std::vector<const Function *> _functions;
+
+  /// Vector of the functors, inner-ordering per vector component
+  std::vector<const Moose::Functor<GenericReal<is_ad>> * > _functors;
 };
 
-typedef GenericFunctionFunctorMaterialTempl<false> GenericFunctionFunctorMaterial;
-typedef GenericFunctionFunctorMaterialTempl<true> ADGenericFunctionFunctorMaterial;
+typedef GenericVectorFunctorMaterialTempl<false> GenericVectorFunctorMaterial;
+typedef GenericVectorFunctorMaterialTempl<true> ADGenericVectorFunctorMaterial;

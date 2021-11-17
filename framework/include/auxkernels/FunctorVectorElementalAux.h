@@ -12,26 +12,26 @@
 #include "AuxKernel.h"
 
 /**
- * Evaluate a functor vector material property with the element as the functor argument
+ * Evaluate a functor vector (material property usually) with the element as the functor argument
  * and save one component to an auxiliary variable
  */
 template <bool is_ad>
-class FunctorVectorMatPropElementalAuxTempl : public AuxKernel
+class FunctorVectorElementalAuxTempl : public AuxKernel
 {
 public:
   static InputParameters validParams();
 
-  FunctorVectorMatPropElementalAuxTempl(const InputParameters & parameters);
+  FunctorVectorElementalAuxTempl(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue() override;
 
   /// Reference to the material property
-  const Moose::Functor<GenericRealVectorValue<is_ad>> & _mat_prop;
+  const Moose::Functor<GenericRealVectorValue<is_ad>> & _functor;
 
   /// The component to retrieve
   const unsigned int _component;
 };
 
-typedef FunctorVectorMatPropElementalAuxTempl<false> FunctorVectorMatPropElementalAux;
-typedef FunctorVectorMatPropElementalAuxTempl<true> FunctorADVectorMatPropElementalAux;
+typedef FunctorVectorElementalAuxTempl<false> FunctorVectorElementalAux;
+typedef FunctorVectorElementalAuxTempl<true> ADFunctorVectorElementalAux;

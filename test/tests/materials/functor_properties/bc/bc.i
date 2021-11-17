@@ -33,9 +33,9 @@
 
 [Materials]
   [functor]
-    type = VarFunctorMaterial
-    mat_prop_name = 'prop'
-    var = 'v'
+    type = ADGenericFunctorMaterial
+    prop_names = 'prop'
+    prop_values = 'v'
   []
 []
 

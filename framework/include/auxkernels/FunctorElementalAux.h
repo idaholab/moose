@@ -12,21 +12,22 @@
 #include "AuxKernel.h"
 
 /**
- * Evaluate a functor material property with the element as the functor argument
+ * Evaluate a functor (functor material property, function or variable) with the element as the functor argument
  */
 template <bool is_ad>
-class FunctorMatPropElementalAuxTempl : public AuxKernel
+class FunctorElementalAuxTempl : public AuxKernel
 {
 public:
   static InputParameters validParams();
 
-  FunctorMatPropElementalAuxTempl(const InputParameters & parameters);
+  FunctorElementalAuxTempl(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue() override;
 
-  const Moose::Functor<GenericReal<is_ad>> & _mat_prop;
+  /// Functor to evaluate with the element argument
+  const Moose::Functor<GenericReal<is_ad>> & _functor;
 };
 
-typedef FunctorMatPropElementalAuxTempl<false> FunctorMatPropElementalAux;
-typedef FunctorMatPropElementalAuxTempl<true> FunctorADMatPropElementalAux;
+typedef FunctorElementalAuxTempl<false> FunctorElementalAux;
+typedef FunctorElementalAuxTempl<true> ADFunctorElementalAux;

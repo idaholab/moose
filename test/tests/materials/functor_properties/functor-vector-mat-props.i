@@ -35,34 +35,34 @@
 
 [AuxKernels]
   [matprop_to_aux_x]
-    type = FunctorADVectorMatPropElementalAux
+    type = FunctorVectorElementalAux
     variable = mat_x
-    mat_prop = 'matprop'
+    functor = 'matprop'
     component = '0'
   []
   [matprop_to_aux_y]
-    type = FunctorADVectorMatPropElementalAux
+    type = FunctorVectorElementalAux
     variable = mat_y
-    mat_prop = 'matprop'
+    functor = 'matprop'
     component = '1'
   []
   [matprop_to_aux_z]
-    type = FunctorADVectorMatPropElementalAux
+    type = FunctorVectorElementalAux
     variable = mat_z
-    mat_prop = 'matprop'
+    functor = 'matprop'
     component = '2'
   []
 []
 
 [Materials]
   [block0]
-    type = ADGenericConstantVectorFunctorMaterial
+    type = GenericVectorFunctorMaterial
     block = '0'
     prop_names = 'matprop'
     prop_values = '4 2 1'
   []
   [block1]
-    type = ADGenericFunctionVectorFunctorMaterial
+    type = GenericVectorFunctorMaterial
     block = '1'
     prop_names = 'matprop'
     prop_values = 'f_x f_x f_z'

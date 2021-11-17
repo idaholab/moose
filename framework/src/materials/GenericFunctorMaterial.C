@@ -1,0 +1,83 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "GenericFunctorMaterial.h"
+#include "Function.h"
+
+registerMooseObject("MooseApp", GenericFunctorMaterial);
+registerMooseObject("MooseApp", ADGenericFunctorMaterial);
+registerMooseObjectRenamed("MooseApp",
+                           GenericConstantFunctorMaterial,
+                           "06/30/2022 24:00",
+                           GenericFunctorMaterial);
+registerMooseObjectRenamed("MooseApp",
+                           ADGenericConstantFunctorMaterial,
+                           "06/30/2022 24:00",
+                           ADGenericFunctorMaterial);
+registerMooseObjectRenamed("MooseApp",
+                           GenericFunctionFunctorMaterial,
+                           "06/30/2022 24:00",
+                           GenericFunctorMaterial);
+registerMooseObjectRenamed("MooseApp",
+                           ADGenericFunctionFunctorMaterial,
+                           "06/30/2022 24:00",
+                           ADGenericFunctorMaterial);
+
+template <bool is_ad>
+InputParameters
+GenericFunctorMaterialTempl<is_ad>::validParams()
+{
+  InputParameters params = FunctorMaterial::validParams();
+  params += SetupInterface::validParams();
+  params.addClassDescription(
+      "FunctorMaterial object for declaring properties that are populated by evaluation of a "
+      "Functor (a constant, variable, function or functor material property) objects.");
+  params.addParam<std::vector<std::string>>("prop_names",
+                                            "The names of the properties this material will have");
+  params.addParam<std::vector<MooseFunctorName>>("prop_values",
+                                                 "The corresponding names of the "
+                                                 "functors that are going to provide "
+                                                 "the values for the variables");
+  return params;
+}
+
+template <bool is_ad>
+GenericFunctorMaterialTempl<is_ad>::GenericFunctorMaterialTempl(
+    const InputParameters & parameters)
+  : FunctorMaterial(parameters),
+    _prop_names(getParam<std::vector<std::string>>("prop_names")),
+    _prop_values(getParam<std::vector<MooseFunctorName>>("prop_values"))
+{
+  unsigned int num_names = _prop_names.size();
+  unsigned int num_values = _prop_values.size();
+
+  if (num_names != num_values)
+    mooseError("Number of prop_names must match the number of prop_values for a "
+               "GenericFunctorMaterial!");
+
+  _num_props = num_names;
+  _functors.resize(num_names);
+
+  for (const auto i : make_range(_num_props))
+    _functors[i] = &getFunctor<GenericReal<is_ad>>(_prop_values[i]);
+
+  const std::set<ExecFlagType> clearance_schedule(_execute_enum.begin(), _execute_enum.end());
+  for (const auto i : make_range(_num_props))
+  {
+    auto & prop = declareFunctorProperty<GenericReal<is_ad>>(_prop_names[i]);
+    prop.setFunctor(
+        _mesh, blockIDs(), [this, i](const auto & r, const auto & t) -> GenericReal<is_ad> {
+          return (*_functors[i])(r, t);
+        });
+    prop.setCacheClearanceSchedule(clearance_schedule);
+  }
+}
+
+template class GenericFunctorMaterialTempl<false>;
+template class GenericFunctorMaterialTempl<true>;

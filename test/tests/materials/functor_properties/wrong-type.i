@@ -39,7 +39,7 @@
     retrieved_prop_name = 'prop'
   []
   [declare_regular]
-    type = GenericConstantFunctorMaterial
+    type = GenericFunctorMaterial
     prop_names = 'prop'
     prop_values = '1'
   []

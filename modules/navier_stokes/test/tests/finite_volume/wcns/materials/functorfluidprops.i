@@ -142,7 +142,7 @@ inlet_v = 4
 
   # To output the functor material properties
   [rho_out]
-    type = FunctorADMatPropElementalAux
+    type = ADFunctorElementalAux
     mat_prop = 'rho'
     variable = 'rho_var'
     execute_on = 'timestep_begin'
@@ -160,13 +160,13 @@ inlet_v = 4
     execute_on = 'timestep_begin'
   []
   [drho_dt_out]
-    type = FunctorADMatPropElementalAux
+    type = ADFunctorElementalAux
     mat_prop = 'drho_dt'
     variable = 'rho_dot_var'
     execute_on = 'timestep_begin'
   []
   [cp_out]
-    type = FunctorADMatPropElementalAux
+    type = ADFunctorElementalAux
     mat_prop = 'cp'
     variable = 'cp_var'
     execute_on = 'timestep_begin'
@@ -184,19 +184,19 @@ inlet_v = 4
     execute_on = 'timestep_begin'
   []
   [dcp_dt_out]
-    type = FunctorADMatPropElementalAux
+    type = ADFunctorElementalAux
     mat_prop = 'dcp_dt'
     variable = 'cp_dot_var'
     execute_on = 'timestep_begin'
   []
   [cv_out]
-    type = FunctorADMatPropElementalAux
+    type = ADFunctorElementalAux
     mat_prop = 'cv'
     variable = 'cv_var'
     execute_on = 'timestep_begin'
   []
   [mu_out]
-    type = FunctorADMatPropElementalAux
+    type = ADFunctorElementalAux
     mat_prop = 'mu'
     variable = 'mu_var'
     execute_on = 'timestep_begin'
@@ -214,7 +214,7 @@ inlet_v = 4
     execute_on = 'timestep_begin'
   []
   [k_out]
-    type = FunctorADMatPropElementalAux
+    type = ADFunctorElementalAux
     mat_prop = 'k'
     variable = 'k_var'
     execute_on = 'timestep_begin'
@@ -232,7 +232,7 @@ inlet_v = 4
     execute_on = 'timestep_begin'
   []
   [Pr_out]
-    type = FunctorADMatPropElementalAux
+    type = ADFunctorElementalAux
     mat_prop = 'Pr'
     variable = 'Pr_var'
     execute_on = 'timestep_begin'
@@ -250,7 +250,7 @@ inlet_v = 4
     execute_on = 'timestep_begin'
   []
   [Re_out]
-    type = FunctorADMatPropElementalAux
+    type = ADFunctorElementalAux
     mat_prop = 'Re'
     variable = 'Re_var'
     execute_on = 'timestep_begin'
@@ -268,13 +268,13 @@ inlet_v = 4
     execute_on = 'timestep_begin'
   []
   [Re_h_out]
-    type = FunctorADMatPropElementalAux
+    type = ADFunctorElementalAux
     mat_prop = 'Re_h'
     variable = 'Re_h_var'
     execute_on = 'timestep_begin'
   []
   [Re_i_out]
-    type = FunctorADMatPropElementalAux
+    type = ADFunctorElementalAux
     mat_prop = 'Re_i'
     variable = 'Re_i_var'
     execute_on = 'timestep_begin'
