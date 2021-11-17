@@ -2,13 +2,13 @@
 
 #include "SolveObject.h"
 
-#include "FormFunction.h"
+#include "OptimizationReporter.h"
 #include "ExecFlagEnum.h"
 #include <petsctao.h>
 #include "libmesh/petsc_vector.h"
 #include "libmesh/petsc_matrix.h"
 
-class FormFunction;
+class OptimizationReporter;
 
 class OptimizeSolve : public SolveObject
 {
@@ -18,7 +18,7 @@ public:
 
   virtual bool solve() override;
 
-  const FormFunction & getFormFunction() const { return *_form_function; }
+  const OptimizationReporter & getOptimizationReporter() const { return *_form_function; }
 
   // fixme lynn I wish this were all a struct
   void getTaoSolutionStatus(std::vector<int> & tot_iters,
@@ -50,7 +50,7 @@ protected:
   const ExecFlagEnum & _solve_on;
 
   /// Form function defining objective, gradient, and hessian
-  FormFunction * _form_function = nullptr;
+  OptimizationReporter * _form_function = nullptr;
 
   /// Tao optimization object
   Tao _tao;

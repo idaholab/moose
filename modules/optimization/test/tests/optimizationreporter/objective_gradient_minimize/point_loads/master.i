@@ -4,23 +4,16 @@
 [OptimizationReporter]
   type = ObjectiveGradientMinimize
   parameter_names = 'parameter_results'
-  num_values = '8'
-
-  misfit_name = misfit
-  adjoint_data_name = adjoint
+  num_values = '3'
+  misfit_name = 'misfit'
+  adjoint_data_name = 'adjoint'
 []
 
 [Executioner]
   type = Optimize
-  # tao_solver = taonm
-  # petsc_options_iname='-tao_gatol'
-  # petsc_options_value='1e-2'
-  tao_solver = taolmvm #TAOOWLQN #TAOBMRM #taolmvm #taobncg
-  petsc_options_iname = '-tao_gatol'# -tao_cg_delta_max'
-  petsc_options_value = '1e-2'
-  # tao_solver = taontr
-  # petsc_options_iname='-tao_fd_hessian -tao_fd_delta -tao_ntr_min_radius -tao_ntr_max_radius -tao_ntr_init_type -tao_gatol'
-  # petsc_options_value='true 0.000001 0 1e16 constant 1e-2'
+  tao_solver = taobncg
+  petsc_options_iname = '-tao_gatol -tao_max_it'
+  petsc_options_value = '1e-1 50'
   verbose = true
 []
 
@@ -49,8 +42,8 @@
     type = MultiAppReporterTransfer
     multi_app = forward
     direction = from_multiapp
-    from_reporters = 'dr/temperature_difference dr/temperature'
-    to_reporters = 'OptimizationReporter/misfit measured/values'
+    from_reporters = 'data_pt/temperature_difference data_pt/temperature'
+    to_reporters = 'OptimizationReporter/misfit receiver/measured'
   []
 
   [toadjoint]
@@ -64,19 +57,25 @@
     type = MultiAppReporterTransfer
     multi_app = adjoint
     direction = from_multiapp
-    from_reporters = 'ar/temperature'
+    from_reporters = 'data_pt/temperature'
     to_reporters = 'OptimizationReporter/adjoint'
   []
 []
 
 [Reporters]
-  [measured]
+  [receiver]
     type = ConstantReporter
-    real_vector_names = values
-    real_vector_values = '0'
+    real_vector_names = measured
+    real_vector_values = '0 0 0 0'
+  []
+  [optInfo]
+    type = OptimizationInfo
+    #items = 'current_iterate'
+    #execute_on=timestep_end
   []
 []
 
 [Outputs]
+  console = true
   csv=true
 []

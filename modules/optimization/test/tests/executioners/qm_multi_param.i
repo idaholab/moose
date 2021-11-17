@@ -1,7 +1,7 @@
 [StochasticTools]
 []
 
-[FormFunction]
+[OptimizationReporter]
   type = QuadraticMinimize
   parameter_names = 'result1 result2 result3'
   num_values = '3 2 2'

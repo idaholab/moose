@@ -24,13 +24,13 @@ private:
    */
   ControlsReceiver * getReceiver(unsigned int app_index);
 
-  /// Value names from FormFunction
+  /// Value names from OptimizationReporter
   const std::vector<ReporterValueName> & _value_names;
   /// Parameter names in sub-application
   const std::vector<std::string> & _parameters;
   /// The name of the ControlsReceiver Control object on the sub-application
   const std::string & _receiver_name;
 
-  /// Parameter values from FormFunction
+  /// Parameter values from OptimizationReporter
   std::vector<const std::vector<Real> *> _values;
 };

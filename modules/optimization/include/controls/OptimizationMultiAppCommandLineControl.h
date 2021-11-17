@@ -29,7 +29,7 @@ public:
 protected:
   /// The MultiApp this Transfer is transferring data to or from
   std::shared_ptr<MultiApp> _multi_app;
-  /// Value names from FormFunction
+  /// Value names from OptimizationReporter
   const std::vector<ReporterValueName> & _value_names;
   /// Parameter names in sub-application
   const std::vector<std::string> & _parameters;

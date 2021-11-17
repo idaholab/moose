@@ -1,9 +1,0 @@
-[Tests]
-  [material]
-    type = CSVDiff
-    rel_err = 0.01
-    abs_zero = 1e-6
-    input = master.i
-    csvdiff = master_FormFunction_0001.csv
-  []
-[]

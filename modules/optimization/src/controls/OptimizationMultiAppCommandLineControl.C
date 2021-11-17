@@ -18,7 +18,7 @@ OptimizationMultiAppCommandLineControl::validParams()
   params.addRequiredParam<MultiAppName>("multi_app", "The name of the MultiApp to control.");
 
   params.addRequiredParam<std::vector<ReporterValueName>>(
-      "value_names", "Name of parameter values from FormFunction.");
+      "value_names", "Name of parameter values from OptimizationReporter.");
   params.addRequiredParam<std::vector<std::string>>(
       "parameters",
       "A list of parameters (on the sub application) to control with values from "
@@ -57,7 +57,7 @@ OptimizationMultiAppCommandLineControl::execute()
   std::ostringstream oss;
   for (unsigned int i = 0; i < _parameters.size(); ++i)
   {
-    ReporterName rname("FormFunction", _value_names[i]);
+    ReporterName rname("OptimizationReporter", _value_names[i]);
     const std::vector<Real> & value =
         getReporterValueByName<std::vector<Real>>(rname, REPORTER_MODE_REPLICATED);
 

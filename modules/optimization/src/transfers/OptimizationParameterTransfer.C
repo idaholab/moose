@@ -12,7 +12,7 @@ OptimizationParameterTransfer::validParams()
   params.addClassDescription("Copies optimization data to a ControlsReceiver object.");
 
   params.addRequiredParam<std::vector<ReporterValueName>>(
-      "value_names", "Name of parameter values from FormFunction.");
+      "value_names", "Name of parameter values from OptimizationReporter.");
   params.addRequiredParam<std::vector<std::string>>(
       "parameters",
       "A list of parameters (on the sub application) to control with values from "
@@ -44,7 +44,7 @@ OptimizationParameterTransfer::initialSetup()
   _values.reserve(_value_names.size());
   for (const auto & name : _value_names)
   {
-    ReporterName rname("FormFunction", name);
+    ReporterName rname("OptimizationReporter", name);
     _values.push_back(&getReporterValueByName<std::vector<Real>>(rname, REPORTER_MODE_REPLICATED));
   }
 }

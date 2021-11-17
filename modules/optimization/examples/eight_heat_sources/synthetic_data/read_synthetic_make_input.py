@@ -13,7 +13,7 @@ print('df names=', list(df.columns),'   df shape=',list(df.shape))
 
 print("\n\n****************  master.i  ***************\n\n")
 
-#    [FormFunction]
+#    [OptimizationReporter]
 #      type = ObjectiveGradientMinimize
 #      adjoint_vpp = 'adjoint_results'
 #      adjoint_data_computed = 'adjoint_rec_0 adjoint_rec_1 adjoint_rec_2'
@@ -22,7 +22,7 @@ print("\n\n****************  master.i  ***************\n\n")
 #      data_target = '
 #    []
 
-print("[FormFunction]")
+print("[OptimizationReporter]")
 print("  type = ObjectiveGradientMinimize")
 print("  adjoint_vpp = \'adjoint_results\'")
 print("  adjoint_data_computed = \'ar00 ar01 ar02 ar03 ar04 ar05 ar06 ar07\'")

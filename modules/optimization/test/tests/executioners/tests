@@ -4,7 +4,7 @@
     rel_err = 1.0e-4
     cli_args = "Executioner/tao_solver=TAONM"
     input = quadratic_minimize.i
-    csvdiff = quadratic_minimize_out_FormFunction_0001.csv
+    csvdiff = quadratic_minimize_out_OptimizationReporter_0001.csv
     requirement = "Use TAONM solver, not as accurate"
   []
   [quadratic_taobncg]
@@ -14,7 +14,7 @@
     " Executioner/petsc_options_iname='-tao_gatol -tao_cg_delta_max'"
     " Executioner/petsc_options_value='1e-4 1e-2'"
     input = quadratic_minimize.i
-    csvdiff = quadratic_minimize_out_FormFunction_0001.csv
+    csvdiff = quadratic_minimize_out_OptimizationReporter_0001.csv
     requirement = "Use bounded conjugate gradient solver"
   []
   [quadratic_taontr]
@@ -23,14 +23,14 @@
     " Executioner/petsc_options_iname='-tao_ntr_min_radius -tao_ntr_max_radius -tao_ntr_init_type'"
     " Executioner/petsc_options_value='0 1e16 constant'"
     input = quadratic_minimize.i
-    csvdiff = quadratic_minimize_out_FormFunction_0001.csv
+    csvdiff = quadratic_minimize_out_OptimizationReporter_0001.csv
     requirement = "Use TAONTR solver, exact"
   []
   [quadratic_multi]
     type = CSVDiff
     rel_err = 1.0e-4
     input = qm_multi_param.i
-    csvdiff = qm_multi_param_out_FormFunction_0001.csv
+    csvdiff = qm_multi_param_out_OptimizationReporter_0001.csv
     requirement = "Solve with multiple parameters."
   []
 []

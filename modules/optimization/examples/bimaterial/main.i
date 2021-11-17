@@ -10,7 +10,7 @@
 [StochasticTools]
 []
 
-[FormFunction]
+[OptimizationReporter]
   type = ObjectiveMinimize
   parameter_names = diffusivity_values
   num_values = 2 # diffusivity in the bottom material and in the top material of model.i
@@ -44,7 +44,7 @@
     type = MultiAppReporterTransfer
     multi_app = model
     direction = to_multiapp
-    from_reporters = 'FormFunction/diffusivity_values'
+    from_reporters = 'OptimizationReporter/diffusivity_values'
     to_reporters = 'vector_pp/diffusivity_values'
   []
 
@@ -53,7 +53,7 @@
     multi_app = model
     direction = from_multiapp
     from_reporters = 'experimental_observations/temperature_difference experimental_observations/temperature vector_pp/diffusivity_values'
-    to_reporters = 'FormFunction/temperature_misfit temperature_at_observation_points/values diffusivities/values'
+    to_reporters = 'OptimizationReporter/temperature_misfit temperature_at_observation_points/values diffusivities/values'
   []
 []
 
