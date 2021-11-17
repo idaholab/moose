@@ -155,7 +155,8 @@ public:
    * Properly set up the incremental calculation storage of the stateful material
    * properties in the inheriting classes
    */
-  virtual void storeIncrementalMaterialProperties(){};
+  virtual void
+  storeIncrementalMaterialProperties(const unsigned int /*total_number_of_substeps*/){};
 
   /**
    * Zero out material properties. Useful for substepping with inelastic models.

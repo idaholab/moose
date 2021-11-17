@@ -219,11 +219,6 @@ protected:
   const bool _apply_strain;
 
   /**
-   * Number of substeps when substepping strategy is used
-   */
-  MaterialProperty<Real> & _number_of_substeps;
-
-  /**
    * Used to calculate the number of substeps taken in the radial return algorithm,
    * when substepping is enabled, based on the maximum creep numerical integration error
    */

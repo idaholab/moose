@@ -161,11 +161,11 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::LAROMANCEStressUpdateBaseTempl(
         this->_base_name + "wall_dislocations_step")),
     _cell_dislocations_step(this->template declareGenericProperty<Real, is_ad>(
         this->_base_name + "cell_dislocations_step")),
-    _plastic_strain_increment(RankTwoTensor::Identity())
+    _plastic_strain_increment(RankTwoTensor::Identity()),
+    _number_of_substeps(
+        this->template declareProperty<Real>(this->_base_name + "number_of_substeps"))
 {
-  for (int i = 0; i < 3; i++)
-    for (int j = 0; j < 3; j++)
-      _plastic_strain_increment(i, j) = 0.0;
+  _plastic_strain_increment.zero();
 
   this->_check_range = true;
 
@@ -366,9 +366,7 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::zeroOutIncrementalMaterialProperties()
   _cell_dislocation_increment = 0.0;
   _wall_dislocation_increment = 0.0;
 
-  for (int i = 0; i < 3; i++)
-    for (int j = 0; j < 3; j++)
-      _plastic_strain_increment(i, j) = 0.0;
+  _plastic_strain_increment.zero();
 
   _wall_dislocations_step[_qp] = 0.0;
   _cell_dislocations_step[_qp] = 0.0;
@@ -376,10 +374,12 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::zeroOutIncrementalMaterialProperties()
 
 template <bool is_ad>
 void
-LAROMANCEStressUpdateBaseTempl<is_ad>::storeIncrementalMaterialProperties()
+LAROMANCEStressUpdateBaseTempl<is_ad>::storeIncrementalMaterialProperties(
+    const unsigned int total_number_of_substeps)
 {
   _wall_dislocations_step[_qp] += _wall_dislocation_increment;
   _cell_dislocations_step[_qp] += _cell_dislocation_increment;
+  _number_of_substeps[_qp] = total_number_of_substeps;
 }
 
 template <bool is_ad>
@@ -909,11 +909,12 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::computeStressFinalize(
     const Real negative_wall_dislocations = MetaPhysicL::raw_value(_wall_dislocations[_qp]);
     _cell_dislocations[_qp] = _old_input_values[_cell_output_index];
     _wall_dislocations[_qp] = _old_input_values[_wall_output_index];
-    mooseError("The negative values of the cell dislocation density, ",
-               negative_cell_dislocations,
-               ", and/or wall dislocation density, ",
-               negative_wall_dislocations,
-               ". Cutting timestep.");
+
+    mooseException("The negative values of the cell dislocation density, ",
+                   negative_cell_dislocations,
+                   ", and/or wall dislocation density, ",
+                   negative_wall_dislocations,
+                   ". Cutting timestep.");
   }
 
   if (_verbose)

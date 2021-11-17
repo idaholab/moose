@@ -63,8 +63,6 @@ RadialReturnStressUpdateTempl<is_ad>::RadialReturnStressUpdateTempl(
     _deviatoric_projection_four(_identity_symmetric_four -
                                 _identity_two.outerProduct(_identity_two) / 3.0),
     _apply_strain(this->template getParam<bool>("apply_strain")),
-    _number_of_substeps(
-        this->template declareProperty<Real>(this->_base_name + "number_of_substeps")),
     _use_substep_integration_error(this->template getParam<bool>("use_substep_integration_error"))
 {
 }
@@ -107,10 +105,10 @@ RadialReturnStressUpdateTempl<is_ad>::calculateNumberSubsteps(
     }
     else
     {
-      const Real accurate_time_step = _dt * _substep_tolerance / effective_elastic_strain;
+      const Real accurate_time_step_ratio = _substep_tolerance / effective_elastic_strain;
 
-      if (_dt > accurate_time_step)
-        number_of_substeps = std::ceil(_dt / accurate_time_step);
+      if (accurate_time_step_ratio < 1.0)
+        number_of_substeps = std::ceil(1.0 / accurate_time_step_ratio);
     }
   }
 
@@ -237,7 +235,6 @@ RadialReturnStressUpdateTempl<true>::updateState(
     bool /*compute_full_tangent_operator = false*/,
     RankFourTensor & /*tangent_operator = _identityTensor*/)
 {
-
   // compute the deviatoric trial stress and trial strain from the current intermediate
   // configuration
   ADRankTwoTensor deviatoric_trial_stress = stress_new.deviatoric();
@@ -295,13 +292,10 @@ RadialReturnStressUpdateTempl<false>::updateStateSubstep(RankTwoTensor & strain_
                                                          bool compute_full_tangent_operator,
                                                          RankFourTensor & tangent_operator)
 {
-  const unsigned int total_substeps = calculateNumberSubsteps(strain_increment);
-  _number_of_substeps[_qp] = total_substeps;
-
-  Moose::out << "Number of substeps: " << total_substeps << "\n";
+  const unsigned int total_number_steps = calculateNumberSubsteps(strain_increment);
 
   // if only one substep is needed, then call the original update state method
-  if (total_substeps == 1)
+  if (total_number_steps == 1)
   {
     updateState(strain_increment,
                 inelastic_strain_increment,
@@ -312,17 +306,17 @@ RadialReturnStressUpdateTempl<false>::updateStateSubstep(RankTwoTensor & strain_
                 elastic_strain_old,
                 compute_full_tangent_operator,
                 tangent_operator);
-    storeIncrementalMaterialProperties();
+    storeIncrementalMaterialProperties(total_number_steps);
 
     return;
   }
   // Store original _dt; Reset at the end of solve
   Real dt_original = _dt;
   // cut the original timestep
-  _dt = dt_original / total_substeps;
+  _dt = dt_original / total_number_steps;
 
   // initialize the inputs
-  const RankTwoTensor strain_increment_per_step = strain_increment / total_substeps;
+  const RankTwoTensor strain_increment_per_step = strain_increment / total_number_steps;
   RankTwoTensor sub_stress_new = elasticity_tensor * elastic_strain_old;
 
   RankTwoTensor sub_elastic_strain_old = elastic_strain_old;
@@ -335,7 +329,7 @@ RadialReturnStressUpdateTempl<false>::updateStateSubstep(RankTwoTensor & strain_
   MathUtils::mooseSetToZero(stress_new);
   RankTwoTensor sub_inelastic_strain_increment = inelastic_strain_increment;
 
-  for (unsigned int step = 0; step < total_substeps; ++step)
+  for (unsigned int step = 0; step < total_number_steps; ++step)
   {
     // set up input for this substep
     RankTwoTensor sub_strain_increment = strain_increment_per_step;
@@ -366,7 +360,7 @@ RadialReturnStressUpdateTempl<false>::updateStateSubstep(RankTwoTensor & strain_
     computeTangentOperator(
         effective_sub_stress_new, sub_stress_new, compute_full_tangent_operator, tangent_operator);
     // store incremental material properties for this step
-    storeIncrementalMaterialProperties();
+    storeIncrementalMaterialProperties(total_number_steps);
   }
 
   // update stress
@@ -392,14 +386,10 @@ RadialReturnStressUpdateTempl<true>::updateStateSubstep(
     bool /*compute_full_tangent_operator*/,
     RankFourTensor & /*tangent_operator*/)
 {
-  const unsigned int total_substeps = calculateNumberSubsteps(strain_increment);
-
-  _number_of_substeps[_qp] = total_substeps;
-
-  Moose::out << "Number of substeps: " << total_substeps << "\n";
+  const unsigned int total_number_steps = calculateNumberSubsteps(strain_increment);
 
   // if only one substep is needed, then call the original update state method
-  if (total_substeps == 1)
+  if (total_number_steps == 1)
   {
     updateState(strain_increment,
                 inelastic_strain_increment,
@@ -409,17 +399,17 @@ RadialReturnStressUpdateTempl<true>::updateStateSubstep(
                 elasticity_tensor,
                 elastic_strain_old);
 
-    storeIncrementalMaterialProperties();
+    storeIncrementalMaterialProperties(total_number_steps);
 
     return;
   }
   // Store original _dt; Reset at the end of solve
   Real dt_original = _dt;
   // cut the original timestep
-  _dt = dt_original / total_substeps;
+  _dt = dt_original / total_number_steps;
 
   // initialize the inputs
-  const ADRankTwoTensor strain_increment_per_step = strain_increment / total_substeps;
+  const ADRankTwoTensor strain_increment_per_step = strain_increment / total_number_steps;
   ADRankTwoTensor sub_stress_new = elasticity_tensor * elastic_strain_old;
 
   ADRankTwoTensor sub_elastic_strain_old = elastic_strain_old;
@@ -432,7 +422,7 @@ RadialReturnStressUpdateTempl<true>::updateStateSubstep(
   MathUtils::mooseSetToZero(inelastic_strain_increment);
   MathUtils::mooseSetToZero(stress_new);
 
-  for (unsigned int step = 0; step < total_substeps; ++step)
+  for (unsigned int step = 0; step < total_number_steps; ++step)
   {
     // set up input for this substep
     ADRankTwoTensor sub_strain_increment = strain_increment_per_step;
@@ -454,7 +444,7 @@ RadialReturnStressUpdateTempl<true>::updateStateSubstep(
     // accumulate scalar_effective_inelastic_strain
     sub_scalar_effective_inelastic_strain += _scalar_effective_inelastic_strain;
     // store incremental material properties for this step
-    storeIncrementalMaterialProperties();
+    storeIncrementalMaterialProperties(total_number_steps);
   }
   // update stress
   stress_new = sub_stress_new;

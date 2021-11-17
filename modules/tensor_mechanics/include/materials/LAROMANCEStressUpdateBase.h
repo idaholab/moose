@@ -35,7 +35,8 @@ public:
   LAROMANCEStressUpdateBaseTempl(const InputParameters & parameters);
 
   virtual void zeroOutIncrementalMaterialProperties() override;
-  virtual void storeIncrementalMaterialProperties() override;
+  virtual void
+  storeIncrementalMaterialProperties(const unsigned int total_number_substeps) override;
 
 protected:
   virtual void initialSetup() override;
@@ -537,6 +538,9 @@ protected:
 
   /// Total plastic strain increment in step (summing substep contributions)
   RankTwoTensor _plastic_strain_increment;
+
+  /// Material capturing number of substeps. If substepping isn't used will default to one.
+  MaterialProperty<Real> & _number_of_substeps;
 };
 
 typedef LAROMANCEStressUpdateBaseTempl<false> LAROMANCEStressUpdateBase;
