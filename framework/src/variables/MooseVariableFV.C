@@ -1045,7 +1045,7 @@ MooseVariableFV<OutputType>::adGradSln(const Elem * const elem, const bool corre
                 "I believe we should only get singular systems when two-term boundary expansion is "
                 "being used");
     const_cast<MooseVariableFV<OutputType> *>(this)->_two_term_boundary_expansion = false;
-    const auto & grad = adGradSln(elem);
+    const auto & grad = adGradSln(elem, correct_skewness);
 
     // We failed to compute the extrapolated boundary faces with two-term expansion and callers of
     // this method may be relying on those values (e.g. if the caller is
