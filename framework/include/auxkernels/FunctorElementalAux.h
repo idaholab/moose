@@ -12,7 +12,8 @@
 #include "AuxKernel.h"
 
 /**
- * Evaluate a functor (functor material property, function or variable) with the element as the functor argument
+ * Evaluate a functor (functor material property, function or variable) with the element as the
+ * functor argument
  */
 template <bool is_ad>
 class FunctorElementalAuxTempl : public AuxKernel

@@ -34,8 +34,7 @@ FunctorElementalAuxTempl<is_ad>::validParams()
 }
 
 template <bool is_ad>
-FunctorElementalAuxTempl<is_ad>::FunctorElementalAuxTempl(
-    const InputParameters & parameters)
+FunctorElementalAuxTempl<is_ad>::FunctorElementalAuxTempl(const InputParameters & parameters)
   : AuxKernel(parameters), _functor(getFunctor<GenericReal<is_ad>>("functor"))
 {
 }

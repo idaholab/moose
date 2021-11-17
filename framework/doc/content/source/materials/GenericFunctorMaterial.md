@@ -9,15 +9,14 @@ This object creates
 that get evaluated on-the-fly, as opposed to traditional "static" material
 properties, e.g. material properties that are pre-evaluated.
 
-This class template is the functor material property version of
+This class is the functor material property (combined) equivalent of
 [GenericConstantMaterial.md], [GenericFunctionMaterial.md] and a `variable material`
-(material that converts variables to material properties). It evaluates the function at the requested location,
+(material that converts variables to material properties). It evaluates the functor at the requested location,
 which can be the element centroid, an element face centroid, a quadrature point,
 or any defined overload of the functor argument.
 
-By default this class caches function evaluations
-and clears the cache at the beginning of every time step. Cache clearing behavior can be
-controlled by setting the `execute_on` parameter.
+By default this class caches functor evaluations and clears the cache at the beginning
+of every time step. Cache clearing behavior can be controlled by setting the `execute_on` parameter.
 
 !alert note
 All AD-types of the properties defined in this material must match. Variables are automatically

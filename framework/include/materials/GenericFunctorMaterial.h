@@ -35,7 +35,7 @@ protected:
   unsigned int _num_props;
 
   /// Vector of the functors
-  std::vector<const Moose::Functor<GenericReal<is_ad>> * > _functors;
+  std::vector<const Moose::Functor<GenericReal<is_ad>> *> _functors;
 };
 
 typedef GenericFunctorMaterialTempl<false> GenericFunctorMaterial;

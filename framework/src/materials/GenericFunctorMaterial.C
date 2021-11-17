@@ -48,8 +48,7 @@ GenericFunctorMaterialTempl<is_ad>::validParams()
 }
 
 template <bool is_ad>
-GenericFunctorMaterialTempl<is_ad>::GenericFunctorMaterialTempl(
-    const InputParameters & parameters)
+GenericFunctorMaterialTempl<is_ad>::GenericFunctorMaterialTempl(const InputParameters & parameters)
   : FunctorMaterial(parameters),
     _prop_names(getParam<std::vector<std::string>>("prop_names")),
     _prop_values(getParam<std::vector<MooseFunctorName>>("prop_values"))

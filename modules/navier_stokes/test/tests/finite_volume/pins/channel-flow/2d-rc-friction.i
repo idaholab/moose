@@ -222,7 +222,7 @@ velocity_interp_method='rc'
     rho = ${rho}
   []
   [darcy]
-    type = ADGenericConstantVectorFunctorMaterial
+    type = ADGenericVectorFunctorMaterial
     prop_names = 'Darcy_coefficient Forchheimer_coefficient'
     prop_values = '0.1 0.1 0.1 0.1 0.1 0.1'
   []

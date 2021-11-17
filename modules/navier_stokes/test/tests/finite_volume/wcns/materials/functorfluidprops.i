@@ -143,139 +143,139 @@ inlet_v = 4
   # To output the functor material properties
   [rho_out]
     type = ADFunctorElementalAux
-    mat_prop = 'rho'
+    functor = 'rho'
     variable = 'rho_var'
     execute_on = 'timestep_begin'
   []
   [drho_dp_out]
-    type = FunctorMatPropElementalAux
-    mat_prop = 'drho/dpressure'
+    type = FunctorElementalAux
+    functor = 'drho/dpressure'
     variable = 'drho_dp_var'
     execute_on = 'timestep_begin'
   []
   [drho_dT_out]
-    type = FunctorMatPropElementalAux
-    mat_prop = 'drho/dT_fluid'
+    type = FunctorElementalAux
+    functor = 'drho/dT_fluid'
     variable = 'drho_dT_var'
     execute_on = 'timestep_begin'
   []
   [drho_dt_out]
     type = ADFunctorElementalAux
-    mat_prop = 'drho_dt'
+    functor = 'drho_dt'
     variable = 'rho_dot_var'
     execute_on = 'timestep_begin'
   []
   [cp_out]
     type = ADFunctorElementalAux
-    mat_prop = 'cp'
+    functor = 'cp'
     variable = 'cp_var'
     execute_on = 'timestep_begin'
   []
   [dcp_dp_out]
-    type = FunctorMatPropElementalAux
-    mat_prop = 'dcp/dpressure'
+    type = FunctorElementalAux
+    functor = 'dcp/dpressure'
     variable = 'dcp_dp_var'
     execute_on = 'timestep_begin'
   []
   [dcp_dT_out]
-    type = FunctorMatPropElementalAux
-    mat_prop = 'dcp/dT_fluid'
+    type = FunctorElementalAux
+    functor = 'dcp/dT_fluid'
     variable = 'dcp_dT_var'
     execute_on = 'timestep_begin'
   []
   [dcp_dt_out]
     type = ADFunctorElementalAux
-    mat_prop = 'dcp_dt'
+    functor = 'dcp_dt'
     variable = 'cp_dot_var'
     execute_on = 'timestep_begin'
   []
   [cv_out]
     type = ADFunctorElementalAux
-    mat_prop = 'cv'
+    functor = 'cv'
     variable = 'cv_var'
     execute_on = 'timestep_begin'
   []
   [mu_out]
     type = ADFunctorElementalAux
-    mat_prop = 'mu'
+    functor = 'mu'
     variable = 'mu_var'
     execute_on = 'timestep_begin'
   []
   [dmu_dp_out]
-    type = FunctorMatPropElementalAux
-    mat_prop = 'dmu/dpressure'
+    type = FunctorElementalAux
+    functor = 'dmu/dpressure'
     variable = 'dmu_dp_var'
     execute_on = 'timestep_begin'
   []
   [dmu_dT_out]
-    type = FunctorMatPropElementalAux
-    mat_prop = 'dmu/dT_fluid'
+    type = FunctorElementalAux
+    functor = 'dmu/dT_fluid'
     variable = 'dmu_dT_var'
     execute_on = 'timestep_begin'
   []
   [k_out]
     type = ADFunctorElementalAux
-    mat_prop = 'k'
+    functor = 'k'
     variable = 'k_var'
     execute_on = 'timestep_begin'
   []
   [dk_dp_out]
-    type = FunctorMatPropElementalAux
-    mat_prop = 'dk/dpressure'
+    type = FunctorElementalAux
+    functor = 'dk/dpressure'
     variable = 'dk_dp_var'
     execute_on = 'timestep_begin'
   []
   [dk_dT_out]
-    type = FunctorMatPropElementalAux
-    mat_prop = 'dk/dT_fluid'
+    type = FunctorElementalAux
+    functor = 'dk/dT_fluid'
     variable = 'dk_dT_var'
     execute_on = 'timestep_begin'
   []
   [Pr_out]
     type = ADFunctorElementalAux
-    mat_prop = 'Pr'
+    functor = 'Pr'
     variable = 'Pr_var'
     execute_on = 'timestep_begin'
   []
   [dPr_dp_out]
-    type = FunctorMatPropElementalAux
-    mat_prop = 'dPr/dpressure'
+    type = FunctorElementalAux
+    functor = 'dPr/dpressure'
     variable = 'dPr_dp_var'
     execute_on = 'timestep_begin'
   []
   [dPr_dT_out]
-    type = FunctorMatPropElementalAux
-    mat_prop = 'dPr/dT_fluid'
+    type = FunctorElementalAux
+    functor = 'dPr/dT_fluid'
     variable = 'dPr_dT_var'
     execute_on = 'timestep_begin'
   []
   [Re_out]
     type = ADFunctorElementalAux
-    mat_prop = 'Re'
+    functor = 'Re'
     variable = 'Re_var'
     execute_on = 'timestep_begin'
   []
   [dRe_dp_out]
-    type = FunctorMatPropElementalAux
-    mat_prop = 'dRe/dpressure'
+    type = FunctorElementalAux
+    functor = 'dRe/dpressure'
     variable = 'dRe_dp_var'
     execute_on = 'timestep_begin'
   []
   [dRe_dT_out]
-    type = FunctorMatPropElementalAux
-    mat_prop = 'dRe/dT_fluid'
+    type = FunctorElementalAux
+    functor = 'dRe/dT_fluid'
     variable = 'dRe_dT_var'
     execute_on = 'timestep_begin'
   []
   [Re_h_out]
     type = ADFunctorElementalAux
-    mat_prop = 'Re_h'
+    functor = 'Re_h'
     variable = 'Re_h_var'
     execute_on = 'timestep_begin'
   []
   [Re_i_out]
     type = ADFunctorElementalAux
-    mat_prop = 'Re_i'
+    functor = 'Re_i'
     variable = 'Re_i_var'
     execute_on = 'timestep_begin'
   []

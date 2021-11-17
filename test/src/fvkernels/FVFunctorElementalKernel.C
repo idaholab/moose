@@ -16,7 +16,8 @@ FVFunctorElementalKernel::validParams()
 {
   InputParameters params = FVElementalKernel::validParams();
   params.addRequiredParam<MooseFunctorName>(
-      "functor_name", "The name of the functor (material property for example) that will provide "
+      "functor_name",
+      "The name of the functor (material property for example) that will provide "
       "the residual");
   return params;
 }

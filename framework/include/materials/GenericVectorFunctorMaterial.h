@@ -13,8 +13,8 @@
 
 /**
  * This material automatically declares as functor material properties whatever is passed to it
- * through the parameters 'prop_names' and uses the Functions from 'prop_values' as the values
- * for those properties.
+ * through the parameters 'prop_names' and uses the Functors from 'prop_values' as the values
+ * for the components of those vector properties.
  */
 template <bool is_ad>
 class GenericVectorFunctorMaterialTempl : public FunctorMaterial
@@ -35,7 +35,7 @@ protected:
   unsigned int _num_props;
 
   /// Vector of the functors, inner-ordering per vector component
-  std::vector<const Moose::Functor<GenericReal<is_ad>> * > _functors;
+  std::vector<const Moose::Functor<GenericReal<is_ad>> *> _functors;
 };
 
 typedef GenericVectorFunctorMaterialTempl<false> GenericVectorFunctorMaterial;

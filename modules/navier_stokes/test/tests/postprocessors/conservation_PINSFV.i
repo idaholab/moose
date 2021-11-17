@@ -252,7 +252,7 @@ velocity_interp_method='average'
     rho = ${rho}
   []
   [advected_material_property]
-    type = ADGenericConstantFunctorMaterial
+    type = ADGenericFunctorMaterial
     prop_names = 'advected_rho cp'
     prop_values ='${rho} 1'
   []
