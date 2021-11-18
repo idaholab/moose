@@ -43,7 +43,7 @@
       cli_args = 'UserObjects/test/mu_max_too_big=true'
       allow_test_objects = true
       expect_err = 'mu_max must be <= 1 in RayTracingAngularQuadrature'
-      detail = 'the maximum polar cosine is greater than negative one'
+      detail = 'the maximum polar cosine is greater than one'
     []
     [dim1]
       type = 'RunException'

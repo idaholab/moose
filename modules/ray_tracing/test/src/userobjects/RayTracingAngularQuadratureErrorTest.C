@@ -25,11 +25,11 @@ RayTracingAngularQuadratureErrorTest::validParams()
   params.addParam<bool>("mu_max_too_big", false, "Tests mu_max > 1");
   params.addParam<bool>("dim1", false, "Tests dimension 1");
   params.addParam<bool>(
-      "non_positive_gauss_legendre_order", false, "Tests non-positive order in guass legendre");
+      "non_positive_gauss_legendre_order", false, "Tests non-positive order in gauss-legendre quadrature");
   params.addParam<bool>("check_direction", false, "Checks for a non-valid direction index");
   params.addParam<bool>("orthonormal_vector_zero",
                         false,
-                        "Tests getting an orghonormal vector to a vector that has a zero norm");
+                        "Tests getting an orthonormal vector to a vector that has a zero norm");
 
   return params;
 }
