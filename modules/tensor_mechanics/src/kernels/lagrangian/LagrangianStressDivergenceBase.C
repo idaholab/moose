@@ -1,3 +1,12 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #include "LagrangianStressDivergenceBase.h"
 
 InputParameters
@@ -38,7 +47,8 @@ LagrangianStressDivergenceBase::LagrangianStressDivergenceBase(const InputParame
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _component(getParam<unsigned int>("component")),
     _ndisp(coupledComponents("displacements")),
-    _disp_nums(_ndisp)
+    _disp_nums(_ndisp),
+    _temperature(isCoupled("temperature") ? getVar("temperature", 0) : nullptr)
 {
   // Do the vector coupling of the displacements
   for (unsigned int i = 0; i < _ndisp; i++)
@@ -52,10 +62,6 @@ LagrangianStressDivergenceBase::LagrangianStressDivergenceBase(const InputParame
       mooseError("The Lagrangian StressDivergence kernels require equal "
                  "order interpolation for all displacements.");
   }
-
-  // Get the temperature, if coupled
-  if (isCoupled("temperature"))
-    _temperature = getVar("temperature", 0);
 
   // fetch eigenstrain derivatives
   const auto nvar = _coupled_moose_vars.size();

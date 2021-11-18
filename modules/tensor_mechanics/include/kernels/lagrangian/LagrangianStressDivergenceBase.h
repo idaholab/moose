@@ -12,9 +12,6 @@
 #include "Kernel.h"
 #include "DerivativeMaterialInterface.h"
 #include "JvarMapInterface.h"
-#include "RankFourTensorForward.h"
-#include "RankTwoTensorForward.h"
-#include "libmesh/vector_value.h"
 
 /// Base class of the "Lagrangian" kernel system
 ///
@@ -78,7 +75,7 @@ protected:
   std::vector<unsigned int> _disp_nums;
 
   /// Temperature, if provided.  This is used only to get the trial functions
-  MooseVariable * _temperature;
+  const MooseVariable * _temperature;
 
   /// Eigenstrain derivatives wrt generate coupleds
   std::vector<std::vector<const MaterialProperty<RankTwoTensor> *>> _deigenstrain_dargs;
