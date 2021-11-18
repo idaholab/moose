@@ -105,6 +105,7 @@ RenameBlockGenerator::RenameBlockGenerator(const InputParameters & parameters)
     _old_block_param_name = "old_block_name";
   }
 
+  std::string new_block_param_name;
   if (isParamValid("new_block"))
   {
     if (isParamValid("new_block_id"))
@@ -116,22 +117,22 @@ RenameBlockGenerator::RenameBlockGenerator(const InputParameters & parameters)
                  "Cannot use with 'new_block'. Use only 'new_block'; 'new_block_name' is "
                  "deprecated.");
     _new_block = getParam<std::vector<SubdomainName>>("new_block");
-    _new_block_param_name = "new_block";
+    new_block_param_name = "new_block";
   }
   else if (isParamValid("new_block_id"))
   {
     for (const auto id : getParam<std::vector<SubdomainID>>("new_block_id"))
       _new_block.push_back(std::to_string(id));
-    _new_block_param_name = "new_block_id";
+    new_block_param_name = "new_block_id";
   }
   else
   {
     _new_block = getParam<std::vector<SubdomainName>>("new_block_name");
-    _new_block_param_name = "new_block_name";
+    new_block_param_name = "new_block_name";
   }
 
   if (_old_block.size() != _new_block.size())
-    paramError(_new_block_param_name, "Must be the same length as '", _old_block_param_name, "'");
+    paramError(new_block_param_name, "Must be the same length as '", _old_block_param_name, "'");
 }
 
 std::unique_ptr<MeshBase>

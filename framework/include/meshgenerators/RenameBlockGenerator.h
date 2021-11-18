@@ -39,6 +39,4 @@ private:
   std::vector<SubdomainName> _new_block;
   /// The name of the parameter that specifies the old blocks
   std::string _old_block_param_name;
-  /// The name of the parameter that specifies the new blocks
-  std::string _new_block_param_name;
 };
