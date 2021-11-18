@@ -248,7 +248,7 @@ RenameBlockGenerator::generate()
   }
 
   // Create temproraries if needed; recall that this generator is independent
-  // of input ordering and does _not_ merge sidesets.
+  // of input ordering and does _not_ merge subdomains.
   //
   // Take the example where we want to move 0 -> 1 and 1 -> 2. If we just
   // move them in order, we will actually end up with (0, 1) -> 2. This is
