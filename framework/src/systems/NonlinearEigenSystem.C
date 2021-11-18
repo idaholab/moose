@@ -384,7 +384,7 @@ NonlinearEigenSystem::getEPS()
       cast_ptr<SlepcEigenSolver<Number> *>(&(*_eigen_sys.eigen_solver));
 
   if (!solver)
-    mooseError("There is no a eigen solver");
+    mooseError("Unable to retrieve eigen solver");
 
   return solver->eps();
 }

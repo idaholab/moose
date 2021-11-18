@@ -19,7 +19,6 @@
 #include "EigenProblem.h"
 #include "FEProblemBase.h"
 #include "NonlinearEigenSystem.h"
-// libMesh
 #include "libmesh/petsc_vector.h"
 #include "libmesh/petsc_matrix.h"
 #include "libmesh/slepc_macro.h"
@@ -229,7 +228,7 @@ setEigenProblemSolverParams(EigenProblem & eigen_problem, const InputParameters 
     eigen_problem.solverParams()._precond_matrix_free = false;
     eigen_problem.solverParams()._eigen_matrix_vector_mult = true;
     // By default, we need to form full matrices, otherwise residual
-    // evaluations will be not accurate
+    // evaluations will not be accurate
     eigen_problem.setCoupling(Moose::COUPLING_FULL);
   }
 }
@@ -612,7 +611,7 @@ mooseSlepcEigenFormJacobianA(SNES snes, Vec x, Mat jac, Mat pc, void * ctx)
     ST st;
     Mat A, B;
     PetscBool aisshell, bisshell;
-    // Rest ST state so that we can restrieve matrices
+    // Rest ST state so that we can retrieve matrices
     ierr = EPSGetST(eps, &st);
     CHKERRQ(ierr);
     ierr = STResetMatrixState(st);
@@ -835,9 +834,7 @@ mooseSlepcEigenFormFunctionB(SNES snes, Vec x, Vec r, void * ctx)
     CHKERRQ(ierr);
   }
   else
-  {
     moosePetscSNESFormFunction(snes, x, r, ctx, eigen_nl.eigenVectorTag());
-  }
 
   if (eigen_problem->negativeSignEigenKernel())
     VecScale(r, -1.);
