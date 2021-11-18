@@ -7,9 +7,9 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MooseMesh.h"
-
 #include "LibmeshPartitioner.h"
+
+#include "MooseMeshUtils.h"
 #include "libmesh/linear_partitioner.h"
 #include "libmesh/centroid_partitioner.h"
 #include "libmesh/parmetis_partitioner.h"
@@ -46,8 +46,7 @@ LibmeshPartitioner::validParams()
 LibmeshPartitioner::LibmeshPartitioner(const InputParameters & params)
   : MoosePartitioner(params),
     _partitioner_name(getParam<MooseEnum>("partitioner")),
-    _subdomain_blocks(getParam<std::vector<std::vector<SubdomainName>>>("blocks")),
-    _mesh(*getParam<MooseMesh *>("mesh"))
+    _subdomain_blocks(getParam<std::vector<std::vector<SubdomainName>>>("blocks"))
 {
   switch (_partitioner_name)
   {
@@ -143,24 +142,27 @@ LibmeshPartitioner::clone() const
 }
 
 void
-LibmeshPartitioner::prepare_blocks_for_subdomain_partitioner(
-    SubdomainPartitioner & subdomain_partitioner)
+LibmeshPartitioner::prepareBlocksForSubdomainPartitioner(
+    const MeshBase & mesh, SubdomainPartitioner & subdomain_partitioner)
 {
-  auto group_begin = _subdomain_blocks.begin();
-  auto group_end = _subdomain_blocks.end();
+  // For making sure all of the blocks exist
+  std::set<subdomain_id_type> mesh_subdomain_ids;
+  mesh.subdomain_ids(mesh_subdomain_ids);
 
+  // Clear chunks before filling
   subdomain_partitioner.chunks.clear();
-  for (auto group = group_begin; group != group_end; ++group)
+
+  // Insert each chunk
+  for (const auto & group : _subdomain_blocks)
   {
-    std::set<subdomain_id_type> subdomain_ids;
-    auto subdomain_ids_vec = _mesh.getSubdomainIDs(*group);
-    auto subdomain_begin = subdomain_ids_vec.begin();
-    auto subdomain_end = subdomain_ids_vec.end();
-    for (auto subdomain_id = subdomain_begin; subdomain_id != subdomain_end; ++subdomain_id)
-    {
-      subdomain_ids.insert(*subdomain_id);
-    }
-    subdomain_partitioner.chunks.push_back(subdomain_ids);
+    const auto subdomain_ids = MooseMeshUtils::getSubdomainIDs(mesh, group);
+    for (const auto id : subdomain_ids)
+      if (!mesh_subdomain_ids.count(id))
+        paramError("blocks", "The block ", id, " was not found on the mesh");
+
+    std::set<subdomain_id_type> subdomain_ids_set(subdomain_ids.begin(), subdomain_ids.end());
+
+    subdomain_partitioner.chunks.push_back(subdomain_ids_set);
   }
 }
 
@@ -170,8 +172,8 @@ LibmeshPartitioner::partition(MeshBase & mesh, const unsigned int n)
   if (_partitioner_name == "subdomain_partitioner")
   {
     mooseAssert(_partitioner.get(), "Paritioner is a NULL object");
-    prepare_blocks_for_subdomain_partitioner(
-        static_cast<SubdomainPartitioner &>(*_partitioner.get()));
+    prepareBlocksForSubdomainPartitioner(mesh,
+                                         static_cast<SubdomainPartitioner &>(*_partitioner.get()));
   }
 
   _partitioner->partition(mesh, n);
@@ -183,8 +185,8 @@ LibmeshPartitioner::partition(MeshBase & mesh)
   if (_partitioner_name == "subdomain_partitioner")
   {
     mooseAssert(_partitioner.get(), "Paritioner is a NULL object");
-    prepare_blocks_for_subdomain_partitioner(
-        static_cast<SubdomainPartitioner &>(*_partitioner.get()));
+    prepareBlocksForSubdomainPartitioner(mesh,
+                                         static_cast<SubdomainPartitioner &>(*_partitioner.get()));
   }
 
   _partitioner->partition(mesh);
