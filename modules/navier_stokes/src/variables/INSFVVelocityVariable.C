@@ -45,7 +45,7 @@ INSFVVelocityVariable::INSFVVelocityVariable(const InputParameters & params) : I
 const VectorValue<ADReal> &
 INSFVVelocityVariable::adGradSln(const Elem * const elem, bool correct_skewness) const
 {
-  VectorValue<ADReal> * value_pointer = &_temp_cell_gradients[_tid];
+  VectorValue<ADReal> * value_pointer = &_temp_cell_gradient;
 
   // We ensure that no caching takes place when we compute skewness-corrected
   // quantities.

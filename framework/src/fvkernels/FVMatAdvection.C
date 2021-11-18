@@ -23,7 +23,7 @@ FVMatAdvection::validParams()
       "is not specified, then the advected quantity will simply be the variable that this object "
       "is acting on");
 
-  MooseEnum advected_interp_method("average upwind", "upwind");
+  MooseEnum advected_interp_method("average upwind skewness-corrected", "upwind");
 
   params.addParam<MooseEnum>("advected_interp_method",
                              advected_interp_method,
@@ -44,6 +44,8 @@ FVMatAdvection::FVMatAdvection(const InputParameters & params)
   const auto & advected_interp_method = getParam<MooseEnum>("advected_interp_method");
   if (advected_interp_method == "average")
     _advected_interp_method = InterpMethod::Average;
+  else if (advected_interp_method == "skewness-corrected")
+    _advected_interp_method = Moose::FV::InterpMethod::SkewCorrectedAverage;
   else if (advected_interp_method == "upwind")
     _advected_interp_method = InterpMethod::Upwind;
   else

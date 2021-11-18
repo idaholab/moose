@@ -162,6 +162,19 @@ interpolate(InterpMethod m,
     case InterpMethod::Average:
       result = linearInterpolation(value1, value2, fi, one_is_elem);
       break;
+    case InterpMethod::SkewCorrectedAverage:
+    {
+      // We create a zero gradient to ensure that the skewness-corrected
+      // weights are used, but no correction is applied. This will change when the
+      // old weights are replaced by the ones used with skewness-correction
+      typename TensorTools::IncrementRank<T2>::type surface_gradient;
+      result = skewCorrectedlinearInterpolation(value1,
+                                                value2,
+                                                surface_gradient,
+                                                fi,
+                                                one_is_elem);
+      break;
+    }
     default:
       mooseError("unsupported interpolation method for FVFaceInterface::interpolate");
   }
@@ -194,6 +207,19 @@ interpolate(InterpMethod m,
                                    fi,
                                    true);
       break;
+    case InterpMethod::SkewCorrectedAverage:
+    {
+      // We create a zero gradient to ensure that the skewness-corrected
+      // weights are used, but no correction is applied. This will change when the
+      // old weights are replaced by the ones used with skewness-correction
+      typename TensorTools::IncrementRank<T2>::type surface_gradient;
+      result = skewCorrectedlinearInterpolation(fi_elem_advected * fi_elem_advector,
+                                                fi_neighbor_advected * fi_neighbor_advector,
+                                                surface_gradient,
+                                                fi,
+                                                true);
+      break;
+    }
     case InterpMethod::Upwind:
     {
       const auto face_advector = linearInterpolation(MetaPhysicL::raw_value(fi_elem_advector),

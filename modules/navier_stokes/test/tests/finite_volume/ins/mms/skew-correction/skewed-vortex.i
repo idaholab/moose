@@ -3,6 +3,7 @@ rho=1.0
 
 [Problem]
   coord_type = 'XYZ'
+  error_on_jacobian_nonzero_reallocation=true
 []
 
 [Mesh]
@@ -37,7 +38,7 @@ rho=1.0
   [mass]
     type = INSFVMassAdvection
     variable = pressure
-    advected_interp_method = 'average'
+    advected_interp_method = 'skewness-corrected'
     velocity_interp_method = 'rc'
     vel = 'velocity'
     pressure = pressure
@@ -57,7 +58,7 @@ rho=1.0
     variable = vel_x
     advected_quantity = 'rhou'
     vel = 'velocity'
-    advected_interp_method = 'average'
+    advected_interp_method = 'skewness-corrected'
     velocity_interp_method = 'rc'
     pressure = pressure
     u = vel_x
@@ -87,7 +88,7 @@ rho=1.0
     variable = vel_y
     advected_quantity = 'rhov'
     vel = 'velocity'
-    advected_interp_method = 'average'
+    advected_interp_method = 'skewness-corrected'
     velocity_interp_method = 'rc'
     pressure = pressure
     u = vel_x
