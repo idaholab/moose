@@ -17,7 +17,7 @@ InputParameters
 OneDEqualValueConstraintBC::validParams()
 {
   InputParameters params = IntegratedBC::validParams();
-  params.addClassDescription("Computes the \\f$ \\int \\lambda dg\\f$ term from the mortar method "
+  params.addClassDescription("Computes the $ \int \lambda dg$ term from the mortar method "
                              "(for two 1D domains only).");
   params.addRequiredCoupledVar("lambda", "Lagrange multiplier");
   params.addRequiredParam<unsigned int>("component", "Component of the Lagrange multiplier");

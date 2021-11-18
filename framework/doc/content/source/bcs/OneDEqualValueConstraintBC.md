@@ -10,7 +10,7 @@ More information about the mortar method may be found in the
 ## Example input syntax
 
 In this example, two 1D lines are connected using the `OneDEqualValueConstraintBC` as a mortar constraint.
-The sign to impose on the variable value on the boundary nodes is specified with the `vg` parameter.
+The sign to impose on the variable value on the boundary nodes is specified with the [!param](/BCs/OneDEqualValueConstraintBC/vg) parameter.
 The Lagrange multiplier, `lm`, is also subjected to a `NodalEqualValueConstraint` to achieve the continuity
 at the interface.
 
