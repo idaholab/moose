@@ -63,7 +63,7 @@ require_total = 89
 require_total = 96
 
 [ray_tracing]
-require_total = 93
+require_total = 94
 
 [rdg]
 require_total = 65
