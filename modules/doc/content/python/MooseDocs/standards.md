@@ -34,11 +34,12 @@ information is already provided in the Doxygen link provided automatically by th
 
 - Use the actual name of the class as the title for the documentation page.
 - Use second level headings (denoted with `##`) to aid in page navigation:
-    - Begin the markdown file documentation with the heading `## Description`,
-    - Immediately before including the example syntax from an input file, use the heading
-      `## Example Input File Syntax`,
-    - Begin the reference citation section at the end of the file with the heading `## References`,
-    - See the template documentation stub file for placement examples of these headings.
+
+  - Begin the markdown file documentation with the heading `## Description`,
+  - Immediately before including the example syntax from an input file, use the heading
+    `## Example Input File Syntax`,
+  - Begin the reference citation section at the end of the file with the heading `## References`,
+  - See the template documentation stub file for placement examples of these headings.
 - Use the actual name of the class (`CodeClassName`), without spaces, within the first text
   paragraph under the `## Description` heading.
 - If additional blocks in the input file are required to run the class being documented (e.g. an
