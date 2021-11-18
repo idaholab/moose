@@ -473,9 +473,6 @@ INSFVMomentumAdvection::interpolate(Moose::FV::InterpMethod m, ADRealVectorValue
     return;
   }
 
-  const auto elem_face = elemFromFace();
-  const auto neighbor_face = neighborFromFace();
-
   // Check if skewness-correction is necessary
   bool correct_skewness =
       (_u_var->faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage);
