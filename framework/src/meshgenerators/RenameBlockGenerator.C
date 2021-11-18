@@ -213,7 +213,7 @@ RenameBlockGenerator::generate()
       new_block_ids[i] = id;
 
       // In the case that this is a new block ID, keep track of it so that we
-      // don't reuse it if we have to create temproraries
+      // don't reuse it if we have to create temporaries
       block_ids.insert(id);
 
       // Preserve the old block name if there was one
@@ -248,16 +248,16 @@ RenameBlockGenerator::generate()
     }
   }
 
-  // Create temproraries if needed; recall that this generator is independent
+  // Create temporaries if needed; recall that this generator is independent
   // of input ordering and does _not_ merge subdomains.
   //
   // Take the example where we want to move 0 -> 1 and 1 -> 2. If we just
   // move them in order, we will actually end up with (0, 1) -> 2. This is
-  // bad. In this case, we want to first make a temprorary for 1 (call it 3).
+  // bad. In this case, we want to first make a temporary for 1 (call it 3).
   // We then do: 0 -> 3, 1 -> 2, 3 -> 1 in order to get the desired behavior.
-  // We will accomplish this by creating temproraries as needed, modifying
-  // the initial move to the temproraries as needed, and then moving the
-  // temproraries back. temp_change_ids here are the (from -> to) pairs
+  // We will accomplish this by creating temporaries as needed, modifying
+  // the initial move to the temporaries as needed, and then moving the
+  // temporaries back. temp_change_ids here are the (from -> to) pairs
   // that we will move at the end.
   auto temp_new_block_ids = new_block_ids;
   std::vector<std::pair<SubdomainID, SubdomainID>> temp_change_ids;
@@ -265,7 +265,7 @@ RenameBlockGenerator::generate()
   for (const auto new_i : make_range(num_blocks))
   {
     // Look at all of the old IDs that will be moved after the move to the new ID.
-    // If any of the old IDs after are IDs that we are moving to, create a temprorary
+    // If any of the old IDs after are IDs that we are moving to, create a temporary
     // and keep track of it so we can move it back at the end.
     for (const auto old_i : make_range(new_i + 1, num_blocks))
       if (new_block_ids[new_i] == old_block_ids[old_i])
@@ -280,7 +280,7 @@ RenameBlockGenerator::generate()
   // First pass through changing the block ids
   for (const auto i : make_range(num_blocks))
     MeshTools::Modification::change_subdomain_id(*mesh, old_block_ids[i], temp_new_block_ids[i]);
-  // Pass through moving the temproraries to the actual blocks, if necessary
+  // Pass through moving the temporaries to the actual blocks, if necessary
   for (const auto & pair : temp_change_ids)
     MeshTools::Modification::change_subdomain_id(*mesh, pair.first, pair.second);
 

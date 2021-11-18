@@ -244,7 +244,7 @@ dataLoad(std::istream & stream, MeshInfo::SidesetInfo & sideset_info, void * con
 void
 MeshInfo::possiblyAddSubdomainInfo()
 {
-  // Helper for adding the sideset names to a given map of sidesets
+  // Helper for adding the subdomain names to a given map of subdomains
   auto add_subdomain_names = [&](std::map<SubdomainID, SubdomainInfo> & subdomains) {
     for (auto & pair : subdomains)
       pair.second.name = _mesh.subdomain_name(pair.second.id);

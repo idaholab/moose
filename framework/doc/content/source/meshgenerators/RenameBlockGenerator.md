@@ -12,7 +12,7 @@ The following will change the name for the block "meaningless" to "inside" and w
 [rename]
   type = RenameBlockGenerator
   input = some_mesh
-  old_block = 'meainingless 5'
+  old_block = 'meaningless 5'
   new_block = 'inside outside'
 []
 ```
