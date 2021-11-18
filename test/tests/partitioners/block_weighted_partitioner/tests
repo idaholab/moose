@@ -16,7 +16,7 @@
       mesh_mode = REPLICATED
       parmetis = true
       # Parmetis generates different results when using 32 bit or 64 bit integers
-      dof_id_bytes = 4
+      dof_id_bytes = 8
       detail = 'when using ReplicatedMesh'
     []
 
@@ -31,7 +31,7 @@
       # different mode generates different partition
       mesh_mode = DISTRIBUTED
       parmetis = true
-      dof_id_bytes = 4
+      dof_id_bytes = 8
       detail = 'and when using DistributedMesh.'
     []
   []
