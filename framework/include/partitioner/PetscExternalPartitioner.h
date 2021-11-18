@@ -53,6 +53,11 @@ public:
                              const std::string & part_package,
                              std::vector<dof_id_type> & partition);
 
+  /**
+   * Called immediately before partitioning
+   */
+  virtual void initialize(MeshBase & /* mesh */){};
+
 protected:
   virtual void _do_partition(MeshBase & mesh, const unsigned int n) override;
 
