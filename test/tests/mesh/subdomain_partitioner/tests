@@ -6,7 +6,7 @@
     type = 'Exodiff'
     input = 'subdomain_partitioner.i'
     exodiff = 'subdomain_partitioner_out.e'
-    dof_id_bytes = 4
+    dof_id_bytes = 8
     min_parallel = 4
     max_parallel = 4
     petsc_version = '>=3.8.0'
