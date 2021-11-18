@@ -253,7 +253,7 @@ inlet_v = 0.001
 
 [Materials]
   [const_functor]
-    type = ADGenericConstantFunctorMaterial
+    type = ADGenericFunctorMaterial
     prop_names = 'cp k dcp_dt'
     prop_values = '${cp} ${k} 0'
   []

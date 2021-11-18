@@ -42,7 +42,7 @@
 
 [Materials]
   [./mat_props_vector_functor]
-    type = ADGenericConstantVectorFunctorMaterial
+    type = ADGenericVectorFunctorMaterial
     prop_names = diffusivity_vec
     prop_values = '1 1.5 1'
   [../]

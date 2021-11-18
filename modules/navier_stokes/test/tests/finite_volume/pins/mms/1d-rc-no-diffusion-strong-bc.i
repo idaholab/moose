@@ -150,7 +150,7 @@ velocity_interp_method='rc'
 
 [Materials]
   [const]
-    type = ADGenericConstantFunctorMaterial
+    type = ADGenericFunctorMaterial
     prop_names = 'rho'
     prop_values = '${rho}'
   []

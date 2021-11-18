@@ -7,14 +7,22 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "FVPropValPerSubdomainMaterial.h"
+#include "PiecewiseConstantByBlockMaterial.h"
 
-registerMooseObject("MooseApp", FVPropValPerSubdomainMaterial);
-registerMooseObject("MooseApp", FVADPropValPerSubdomainMaterial);
+registerMooseObject("MooseApp", PiecewiseConstantByBlockMaterial);
+registerMooseObject("MooseApp", ADPiecewiseConstantByBlockMaterial);
+registerMooseObjectRenamed("MooseApp",
+                           FVPropValPerSubdomainMaterial,
+                           "06/30/2022 24:00",
+                           PiecewiseConstantByBlockMaterial);
+registerMooseObjectRenamed("MooseApp",
+                           FVADPropValPerSubdomainMaterial,
+                           "06/30/2022 24:00",
+                           ADPiecewiseConstantByBlockMaterial);
 
 template <bool is_ad>
 InputParameters
-FVPropValPerSubdomainMaterialTempl<is_ad>::validParams()
+PiecewiseConstantByBlockMaterialTempl<is_ad>::validParams()
 {
   auto params = FunctorMaterial::validParams();
   params.addClassDescription("Computes a property value on a per-subdomain basis");
@@ -27,7 +35,7 @@ FVPropValPerSubdomainMaterialTempl<is_ad>::validParams()
 }
 
 template <bool is_ad>
-FVPropValPerSubdomainMaterialTempl<is_ad>::FVPropValPerSubdomainMaterialTempl(
+PiecewiseConstantByBlockMaterialTempl<is_ad>::PiecewiseConstantByBlockMaterialTempl(
     const InputParameters & params)
   : FunctorMaterial(params), _prop(declareFunctorProperty<GenericReal<is_ad>>("prop_name"))
 {
@@ -41,5 +49,5 @@ FVPropValPerSubdomainMaterialTempl<is_ad>::FVPropValPerSubdomainMaterialTempl(
   }
 }
 
-template class FVPropValPerSubdomainMaterialTempl<false>;
-template class FVPropValPerSubdomainMaterialTempl<true>;
+template class PiecewiseConstantByBlockMaterialTempl<false>;
+template class PiecewiseConstantByBlockMaterialTempl<true>;

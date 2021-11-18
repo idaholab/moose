@@ -45,7 +45,7 @@
 
 [Materials]
   [coeff_mat]
-    type = FVADPropValPerSubdomainMaterial
+    type = ADPiecewiseConstantByBlockMaterial
     prop_name = 'coeff'
     subdomain_to_prop_value = '0 4
                                1 2'

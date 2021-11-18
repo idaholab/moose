@@ -166,7 +166,7 @@ cp=${fparse gamma*R_specific/(gamma-1)}
 
 [Materials]
   [const_functor]
-    type = ADGenericConstantFunctorMaterial
+    type = ADGenericFunctorMaterial
     prop_names = 'cp'
     prop_values = '${cp}'
   []

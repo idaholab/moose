@@ -150,7 +150,7 @@ rho=1
     rho = ${rho}
   []
   [mu]
-    type = ADGenericConstantFunctorMaterial
+    type = ADGenericFunctorMaterial
     prop_names = 'mu'
     prop_values = '${mu}'
   []
