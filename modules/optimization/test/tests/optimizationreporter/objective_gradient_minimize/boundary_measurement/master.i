@@ -6,7 +6,6 @@
   parameter_names = 'parameter_results'
   num_values = '3'
 
-  misfit_name = 'misfit'
   adjoint_data_name = 'adjoint'
 []
 

@@ -6,7 +6,6 @@
   parameter_names = 'parameter_results'
   num_values = '1'
   initial_condition = '1000'
-  misfit_name = 'misfit'
   lower_bounds = '0'
   upper_bounds = '2000'
 []

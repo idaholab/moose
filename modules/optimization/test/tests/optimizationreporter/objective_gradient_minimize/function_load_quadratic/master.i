@@ -7,7 +7,6 @@
   num_values = '3'
   initial_condition = '1 1 1'
 
-  misfit_name = 'misfit'
   adjoint_data_name = 'adjoint'
 []
 

@@ -4,17 +4,14 @@ InputParameters
 OptimizationReporter::validParams()
 {
   InputParameters params = GeneralReporter::validParams();
-
+  params.addClassDescription("Base class for reporter holding optimization information.");
   params.addRequiredParam<std::vector<ReporterValueName>>(
       "parameter_names", "List of parameter names, one for each group of parameters.");
   params.addRequiredParam<std::vector<dof_id_type>>(
       "num_values",
       "Number of parameter values associated with each parameter group in 'parameter_names'.");
-  params.addParam<ReporterName>(
-      "misfit_computed",
-      "Name of reporter value containing difference between measured and calculated point values.");
   params.addParam<ReporterValueName>(
-      "misfit_name", "Reporter value to create if 'misfit_computed' does not exist.");
+      "misfit_name", "misfit", "Reporter value to create containing misfit point data.");
   params.addParam<std::vector<Real>>("initial_condition",
                                      "Initial condition for each parameter values, default is 0.");
   params.addParam<std::vector<Real>>(
@@ -32,7 +29,7 @@ OptimizationReporter::OptimizationReporter(const InputParameters & parameters)
     _ndof(std::accumulate(_nvalues.begin(), _nvalues.end(), 0)),
     _lower_bounds(getParam<std::vector<Real>>("lower_bounds")),
     _upper_bounds(getParam<std::vector<Real>>("upper_bounds")),
-    _misfit(getDataValueHelper("misfit_computed", "misfit_name"))
+    _misfit(declareValue<std::vector<Real>>("misfit_name", REPORTER_MODE_REPLICATED))
 {
   if (_parameter_names.size() != _nvalues.size())
     paramError("num_parameters",
@@ -85,19 +82,6 @@ OptimizationReporter::updateParameters(const libMesh::PetscVector<Number> & x)
   for (auto & param : _parameters)
     for (auto & val : *param)
       val = x(n++);
-}
-
-const std::vector<Real> &
-OptimizationReporter::getDataValueHelper(const std::string & get_param, const std::string & declare_param)
-{
-  if (!isParamValid(get_param) && !isParamValid(declare_param))
-    mooseError("Must provide either ", get_param, " or ", declare_param, " in ", type());
-  else if (isParamValid(get_param) && isParamValid(declare_param))
-    paramError(declare_param, "Cannot specify both ", get_param, " and ", declare_param);
-  else if (isParamValid(get_param))
-    return getReporterValue<std::vector<Real>>(get_param, REPORTER_MODE_REPLICATED);
-  else
-    return declareValue<std::vector<Real>>(declare_param, REPORTER_MODE_REPLICATED);
 }
 
 std::vector<Real>

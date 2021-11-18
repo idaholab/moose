@@ -28,7 +28,6 @@
   type = ObjectiveGradientMinimize
   parameter_names = 'p1 p2'
   num_values = '1 1'
-  misfit_name = 'misfit'
   adjoint_data_name = 'adjoint'
   initial_condition = '0 500'
   upper_bounds = '2 1500'

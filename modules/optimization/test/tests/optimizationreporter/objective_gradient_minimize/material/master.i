@@ -15,7 +15,6 @@
   parameter_names = 'p1'
   num_values = '1'
   initial_condition = '7'
-  misfit_name = 'misfit'
   adjoint_data_name = 'adjoint'
   lower_bounds = '0'
   upper_bounds = '10'

@@ -17,7 +17,6 @@
   type = ObjectiveGradientMinimize
   parameter_names = 'bc_left bc_right'
   num_values = '1 1'
-  misfit_name = 'misfit'
   adjoint_data_name = 'adjoint'
 []
 
