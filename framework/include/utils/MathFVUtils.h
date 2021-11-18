@@ -168,11 +168,7 @@ interpolate(InterpMethod m,
       // weights are used, but no correction is applied. This will change when the
       // old weights are replaced by the ones used with skewness-correction
       typename TensorTools::IncrementRank<T2>::type surface_gradient;
-      result = skewCorrectedlinearInterpolation(value1,
-                                                value2,
-                                                surface_gradient,
-                                                fi,
-                                                one_is_elem);
+      result = skewCorrectedlinearInterpolation(value1, value2, surface_gradient, fi, one_is_elem);
       break;
     }
     default:
