@@ -171,7 +171,8 @@ rho=1.0
   type = Steady
   solve_type = 'NEWTON'
   petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_pc_type -sub_pc_factor_shift_type'
-  petsc_options_value = 'asm      30                 lu           NONZERO'
+  petsc_options_value = 'bjacobi      30                 lu           NONZERO'
+  line_search = 'none'
   nl_rel_tol = 1e-8
 []
 

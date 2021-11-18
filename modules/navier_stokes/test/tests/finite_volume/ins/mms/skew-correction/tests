@@ -10,6 +10,6 @@
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations on triangular meshes, using a Rhie-Chow scheme and skewness-correction, Dirichlet boundary conditions for the velocity, and demonstrate second order convergence for the velocity and first order convergence for pressure.'
     ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
-    # heavy = true
+    heavy = true
   []
 []
