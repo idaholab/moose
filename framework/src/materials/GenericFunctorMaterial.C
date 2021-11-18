@@ -35,7 +35,7 @@ GenericFunctorMaterialTempl<is_ad>::validParams()
 {
   InputParameters params = FunctorMaterial::validParams();
   params += SetupInterface::validParams();
-  params.set<ExecFlagEnum>("execute_on") = {EXEC_LINEAR, EXEC_NONLINEAR};
+  params.set<ExecFlagEnum>("execute_on") = {EXEC_ALWAYS};
   params.addClassDescription(
       "FunctorMaterial object for declaring properties that are populated by evaluation of a "
       "Functor (a constant, variable, function or functor material property) objects.");
