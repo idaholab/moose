@@ -174,7 +174,7 @@ velocity_interp_method='rc'
     prop_values = '1'
   []
   [const_functor]
-    type = ADGenericConstantFunctorMaterial
+    type = ADGenericFunctorMaterial
     prop_names = 'cp'
     prop_values = '${cp}'
   []

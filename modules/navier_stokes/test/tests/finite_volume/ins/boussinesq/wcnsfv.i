@@ -104,8 +104,8 @@ hot_temp=310
     args = 'T'
   []
   [rho_out]
-    type = FunctorADMatPropElementalAux
-    mat_prop = 'rho'
+    type = ADFunctorElementalAux
+    functor = 'rho'
     variable = 'rho_out'
     execute_on = 'initial timestep_end'
   []
@@ -259,7 +259,7 @@ hot_temp=310
     prop_values = '${alpha}'
   []
   [const_functor]
-    type = ADGenericConstantFunctorMaterial
+    type = ADGenericFunctorMaterial
     prop_names = 'cp k'
     prop_values = '${cp} ${k}'
   []

@@ -251,7 +251,7 @@ hot_temp=310
 
 [Materials]
   [const_functor]
-    type = ADGenericConstantFunctorMaterial
+    type = ADGenericFunctorMaterial
     prop_names = 'cp k'
     prop_values = '${cp} ${k}'
   []

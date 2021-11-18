@@ -11,31 +11,31 @@ n=5
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff_u]
+  [diff_u]
     type = FunctorMatDiffusion
     variable = u
     diffusivity = 'slow_prop'
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 'left'
     value = 1
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = 'right'
     value = 0
-  [../]
+  []
 []
 
 [Materials]

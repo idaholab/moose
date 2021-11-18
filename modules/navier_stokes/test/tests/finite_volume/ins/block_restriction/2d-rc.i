@@ -257,7 +257,7 @@ restricted_blocks = '1'
     block = ${restricted_blocks}
   []
   [const]
-    type = ADGenericConstantFunctorMaterial
+    type = ADGenericFunctorMaterial
     prop_names = 'cp'
     prop_values = '2'
   []

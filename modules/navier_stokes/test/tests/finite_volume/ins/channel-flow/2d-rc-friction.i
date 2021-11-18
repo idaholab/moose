@@ -162,7 +162,7 @@ velocity_interp_method='rc'
     rho = ${rho}
   []
   [friction_coefficient]
-    type = ADGenericConstantFunctorMaterial
+    type = ADGenericFunctorMaterial
     prop_names = 'friction_coefficient'
     prop_values = '25'
   []

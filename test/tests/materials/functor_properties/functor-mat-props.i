@@ -5,71 +5,71 @@
     nx = 10
     xmax = 2
   []
-  [./subdomain1]
+  [subdomain1]
     input = gen
     type = SubdomainBoundingBoxGenerator
     bottom_left = '1.0 0 0'
     block_id = 1
     top_right = '2.0 1.0 0'
-  [../]
-  [./interface]
+  []
+  [interface]
     input = subdomain1
     type = SideSetsBetweenSubdomainsGenerator
     primary_block = '0'
     paired_block = '1'
     new_boundary = 'primary0_interface'
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff_u]
+  [diff_u]
     type = FunctorMatDiffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 'left'
     value = 1
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = 'right'
     value = 0
-  [../]
+  []
 []
 
 [Materials]
-  [./block0]
-    type = GenericConstantFunctorMaterial
+  [block0]
+    type = GenericFunctorMaterial
     block = '0'
     prop_names = 'D'
     prop_values = '4'
-  [../]
-  [./block1]
-    type = GenericConstantFunctorMaterial
+  []
+  [block1]
+    type = GenericFunctorMaterial
     block = '1'
     prop_names = 'D'
     prop_values = '2'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

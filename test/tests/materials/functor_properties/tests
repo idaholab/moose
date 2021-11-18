@@ -1,5 +1,5 @@
 [Tests]
-  design = VarFunctorMaterial.md
+  design = GenericFunctorMaterial.md
   issues = '#16809'
   [exo]
     type = Exodiff
@@ -31,6 +31,14 @@
       exodiff = functor-mat-props_out.e
       ad_indexing_type = 'global'
     []
+  []
+  [vector-functor]
+    type = Exodiff
+    input = 'functor-vector-mat-props.i'
+    exodiff = 'functor-vector-mat-props_out.e'
+    design = 'FunctorVectorElementalAux.md'
+    ad_indexing_type = 'global'
+    requirement = 'The system shall be able to transfer vector material properties to an auxiliary variable, on a per-component basis.'
   []
   [prop_caching]
     requirement = 'The system shall be able to evaluate, cache, and then clear functor material property evaluations'

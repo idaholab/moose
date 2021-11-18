@@ -249,17 +249,17 @@ velocity_interp_method='rc'
 
 [Materials]
   [constants]
-    type = ADGenericConstantFunctorMaterial
+    type = ADGenericFunctorMaterial
     prop_names = 'h_cv'
     prop_values = '1'
   []
   [functor_constants]
-    type = ADGenericConstantFunctorMaterial
+    type = ADGenericFunctorMaterial
     prop_names = 'cp'
     prop_values = '${cp}'
   []
   [kappa]
-    type = ADGenericConstantVectorFunctorMaterial
+    type = ADGenericVectorFunctorMaterial
     prop_names = 'kappa'
     prop_values = '1e-3 1e-2 1e-1'
   []

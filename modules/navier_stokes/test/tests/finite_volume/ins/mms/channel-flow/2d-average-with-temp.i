@@ -188,7 +188,7 @@ velocity='velocity'
 
 [Materials]
   [const]
-    type = ADGenericConstantFunctorMaterial
+    type = ADGenericFunctorMaterial
     prop_names = 'k cp'
     prop_values = '${k} ${cp}'
   []
