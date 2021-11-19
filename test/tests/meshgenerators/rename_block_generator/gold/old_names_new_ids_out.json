@@ -1,0 +1,69 @@
+{
+    "reporters": {
+        "mesh_info": {
+            "type": "MeshInfo",
+            "values": {
+                "subdomain_elems": {
+                    "type": "std::map<unsigned short, MeshInfo::SubdomainInfo, std::less<unsigned short>, std::allocator<std::pair<unsigned short const, MeshInfo::SubdomainInfo> > >"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "mesh_info": {
+                "subdomain_elems": null
+            },
+            "time": 0.0,
+            "time_step": 0
+        },
+        {
+            "mesh_info": {
+                "subdomain_elems": [
+                    {
+                        "elems": [
+                            2,
+                            3,
+                            6,
+                            7
+                        ],
+                        "id": 0,
+                        "name": "block1"
+                    },
+                    {
+                        "elems": [
+                            8,
+                            9,
+                            12,
+                            13
+                        ],
+                        "id": 2,
+                        "name": "block2"
+                    },
+                    {
+                        "elems": [
+                            10,
+                            11,
+                            14,
+                            15
+                        ],
+                        "id": 3,
+                        "name": "block3"
+                    },
+                    {
+                        "elems": [
+                            0,
+                            1,
+                            4,
+                            5
+                        ],
+                        "id": 10,
+                        "name": "block0"
+                    }
+                ]
+            },
+            "time": 1.0,
+            "time_step": 1
+        }
+    ]
+}

@@ -72,8 +72,8 @@ offset = 0.00
   [block_rename]
     type = RenameBlockGenerator
     input = combined
-    old_block_id = '1 2'
-    new_block_name = 'top_block bottom_block'
+    old_block = '1 2'
+    new_block = 'top_block bottom_block'
   []
   [bottom_right_sideset]
     type = SideSetsAroundSubdomainGenerator

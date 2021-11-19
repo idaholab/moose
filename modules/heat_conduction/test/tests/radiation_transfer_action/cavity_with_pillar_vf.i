@@ -123,8 +123,8 @@
 
   [rename_block]
     type = RenameBlockGenerator
-    old_block_id = '2 11 12 13 14 15 16 101 102 103 104 105'
-    new_block_id = '2 1  1  1  1  1  1  0   0   0   0   0'
+    old_block = '2 11 12 13 14 15 16 101 102 103 104 105'
+    new_block = '2 1  1  1  1  1  1  0   0   0   0   0'
     input = 'pillar_back'
   []
 []

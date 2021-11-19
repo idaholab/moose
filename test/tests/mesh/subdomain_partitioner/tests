@@ -2,60 +2,24 @@
   issues = "#8672 #8747 #8950 #8956"
   design = 'Partitioner/index.md'
 
-  [./subdomain_partitioner]
-    # The METIS partitioner's random number generator changed (became
-    # portable) in PETSc 3.8.0, so this test is no longer valid on
-    # newer PETScs and there is no reason to have platform specific
-    # tests for new PETScs.
+  [test]
     type = 'Exodiff'
     input = 'subdomain_partitioner.i'
     exodiff = 'subdomain_partitioner_out.e'
-    platform = DARWIN
-    dof_id_bytes = 4
-    min_parallel = 4
-    max_parallel = 4
-    # do not run this test against development version of PETSc
-    # metis and parmetis will generate different partitions
-    petsc_version_release = true
-    petsc_version = '>=3.5.0&&<3.8.0'
-
-    requirement = 'The system shall produce a parallel partition based on mesh subdomains for the Mac platform.'
-  [../]
-
-  [./subdomain_partitioner_new_petsc]
-    # PETSc 3.8.0 is the first release where the PETSc team started
-    # using a portable random number generator in METIS (-DUSE_GKRAND)
-    # so the same gold file can be used on both Linux and Mac. This
-    # test specifically tests for that, as it is not restricted by
-    # platform, only by PETSc version.
-    type = 'Exodiff'
-    input = 'subdomain_partitioner.i'
-    exodiff = 'subdomain_partitioner_out_new_petsc.e'
-    cli_args = 'Outputs/file_base=subdomain_partitioner_out_new_petsc'
-    dof_id_bytes = 4
+    dof_id_bytes = 8
     min_parallel = 4
     max_parallel = 4
     petsc_version = '>=3.8.0'
 
-    requirement = 'The system shall produce a parallel partition based on mesh subdomains agnostic of platform.'
-  [../]
+    requirement = 'The system shall provide a parallel partition based on mesh subdomains'
+  []
 
-  [./subdomain_partitioner_linux]
-    # The METIS partitioner's random number generator changed (became
-    # portable) in PETSc 3.8.0, so this test is no longer valid on
-    # newer PETScs and there is no reason to have platform specific
-    # tests for new PETScs.
-    type = 'Exodiff'
+  [missing_block]
+    type = RunException
     input = 'subdomain_partitioner.i'
-    exodiff = 'subdomain_partitioner_out_linux.e'
-    cli_args = 'Outputs/file_base=subdomain_partitioner_out_linux'
-    platform = LINUX
-    dof_id_bytes = 4
-    min_parallel = 4
-    max_parallel = 4
-    petsc_version_release = true
-    petsc_version = '>=3.5.0&&<3.8.0'
+    cli_args = 'Mesh/Partitioner/blocks=1337'
+    expect_err = '\(Mesh/Partitioner/blocks\):.*The block 1337 was not found on the mesh'
 
-    requirement = 'The system shall produce a parallel partition based on mesh subdomains for the Linux platform.'
-  [../]
+    requirement = 'The parallel partitioning capability by subdomain shall report a reasonable error when a given subdomain does not exist'
+  []
 []

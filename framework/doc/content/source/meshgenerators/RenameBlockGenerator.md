@@ -2,55 +2,83 @@
 
 !syntax description /Mesh/RenameBlockGenerator
 
-## Overview
+## Renaming or Setting Block Names
 
-`RenameBlockGenerator` is usually used to provide meaningful names to blocks so that input files are easier to
-read.  For instance
+When using the `RenameBlockGenerator` to change block names, the result is independent of ordering.
 
-```text
-old_block_id = '1 2 3'
-new_block_name = 'wheel engine axle'
-```
-
-Then the MOOSE input file can employ `block = wheel` rather than `block = 1`.  `RenameBlockGenerator` may also
-be to provide more meaningful names to mesh blocks that are already named.  For instance
-
-```text
-old_block_name = 'silly meaningless crazy'
-new_block_name = 'wheel engine axle'
-```
-
-Then the MOOSE input file can employ `block = axle` rather than `block = crazy`.
-
-!alert warning
-`RenameBlockGenerator` may also be used to merge blocks, but care must be taken.
-
-For instance
+The following will change the name for the block `meaningless` to `inside` and will set the name for block `5` to `outside`:
 
 ```
-old_block_id = '1 2 3'
-new_block_id = '4 4 4'
+[rename]
+  type = RenameBlockGenerator
+  input = some_mesh
+  old_block = 'meaningless 5'
+  new_block = 'inside outside'
+[]
 ```
 
-Then blocks 1, 2 and 3 will be merged together into one block that may be used in the remainder of
-the input file.  However, when merging blocks problems and even inconsistencies can occur.
+## Merging Blocks
 
-Firstly, in the example just given, what if the blocks 1, 2 and 3 were named?  What should the name
-of the block 4 be?  The convention is that it is the name of the first old block that is given the
-block ID of 4, which is the name of the old block 1 in this case.  The user needs to be aware of this
-convention.  Similarly, if `old_block_name = 'oldA oldB'` and `new_block_name = 'new1 new1'`, then
-the block ID of new1 is the block ID of oldA.
+The `RenameBlockGenerator` can be used to merge blocks together. The result is independent of ordering when [!param](/Mesh/RenameBlockGenerator/new_block) contains only block IDs. When [!param](/Mesh/RenameBlockGenerator/new_block) contains block names, the result is not necessarily independent of ordering.
 
-Secondly, in the example above, what if block 4 already existed?  An inconsistency could arise in the
-input file, because block 4 is now given the name of the old block 1.
+The following will result in the merging of the elements in blocks `1`, `2`, and `3` into block `0`:
 
-Thirdly, in this example `old_block_id = '1 2'` and `new_block_name = 'wheel wheel'`. What if another
-block, with a different ID, already had the name "wheel"?  This can lead to great confusion in the MOOSE input file.
+```
+[merge]
+  type = RenameBlockGenerator
+  input = some_mesh
+  old_block = '1 2 3'
+  new_block = '0 0 0'
+[]
+```
 
-!alert note
-Given all these potential problems, when merging blocks it is strongly recommended to use just
-*one* `RenameBlock` that includes the names or IDs of *all* the blocks involved in the merging.
-This will make the new block IDs and new block names unequivocally obvious.
+As discussed previously, when providing names in [!param](/Mesh/RenameBlockGenerator/new_block), the result may be ordering-dependent. If a name is provided in [!param](/Mesh/RenameBlockGenerator/new_block) that does not already exist in the mesh, it will take the ID of the first rename.
+
+Take the following examples (assuming that the block `some_block` does not exist yet):
+
+```
+[mergename0]
+  type = RenameBlockGenerator
+  input = some_mesh
+  old_block = '0 1'
+  new_block = 'some_block some_block'
+[]
+```
+
+```
+[mergename1]
+  type = RenameBlockGenerator
+  input = some_mesh
+  old_block = '1 0'
+  new_block = 'some_block some_block'
+[]
+```
+
+The result of each will be a block named `some_block` that contains elements that were in blocks `0` and `1`. However, because the block `some_block` takes the ID of the first rename execution, the ID of `some_block` will be `0` in the case of the generator `mergename0` and `1` in the case of the generator `mergename1`.
+
+In the case of providing [!param](/Mesh/RenameBlockGenerator/new_block) by ID, the following examples (assuming that the block `2` does not exist yet) will have the same result:
+
+```
+[mergeblock0]
+  type = RenameBlockGenerator
+  input = some_mesh
+  old_block = '0 1'
+  new_block = '2 2'
+[]
+```
+
+```
+[mergeblock1]
+  type = RenameBlockGenerator
+  input = some_mesh
+  old_block = '1 0'
+  new_block = '2 2'
+[]
+```
+
+That is, a block will be created with the ID `2` that contains the elements previously in blocks `0` and `1`.
+
+In summary, the possibility of ordering-dependent results with the `RenameBlockGenerator` depends on whether or not name(s) are provided in [!param](/Mesh/RenameBlockGenerator/new_block) and said name(s) do not exist yet.
 
 !syntax parameters /Mesh/RenameBlockGenerator
 
