@@ -11,12 +11,6 @@
 
 #include "Kernel.h"
 
-// Forward Declaration
-class ExponentialReaction;
-
-template <>
-InputParameters validParams<ExponentialReaction>();
-
 class ExponentialReaction : public Kernel
 {
 public:

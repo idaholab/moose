@@ -16,10 +16,6 @@
 // Forward declarations
 class SurrogateModel;
 class SurrogateTrainerBase;
-class SurrogateModelInterface;
-
-template <>
-InputParameters validParams<SurrogateModelInterface>();
 
 /**
  * Interface for objects that need to use samplers.

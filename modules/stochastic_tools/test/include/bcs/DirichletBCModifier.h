@@ -11,10 +11,6 @@
 
 #include "DirichletBCBase.h"
 
-class DirichletBCModifier;
-
-template <>
-InputParameters validParams<DirichletBCModifier>();
 
 /**
  * Boundary condition of a Dirichlet type
