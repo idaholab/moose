@@ -11,8 +11,6 @@
 
 registerMooseObject("MooseTestApp", WindingOrder);
 
-defineLegacyParams(WindingOrder);
-
 InputParameters
 WindingOrder::validParams()
 {
