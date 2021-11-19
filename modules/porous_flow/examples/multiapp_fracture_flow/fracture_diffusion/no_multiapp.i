@@ -24,8 +24,8 @@
   [matrix_subdomain]
     type = RenameBlockGenerator
     input = generate
-    old_block_id = 0
-    new_block_name = matrix
+    old_block = 0
+    new_block = matrix
   []
   [fracture_sideset]
     type = ParsedGenerateSideset

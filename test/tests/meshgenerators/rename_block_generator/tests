@@ -1,28 +1,185 @@
 [Tests]
-  [rename_blocks]
-    issues = '#11640'
-    design = 'meshgenerators/RenameBlockGenerator.md'
-    requirement = 'The system shall be able to rename or renumber mesh subdomains prior to running the '
-                  'simulation:'
+  design = 'RenameBlockGenerator.md'
+  issues = '#11640 #14128 #16885 #17710'
 
-    [rename_block_generator_test]
-      type = 'Exodiff'
-      input = 'rename_block1.i'
-      exodiff = 'rename_block1_out.e'
-      mesh_mode = 'REPLICATED'
-      recover = false
+  [rename]
+    requirement = 'The system shall be able to rename or renumber mesh blocks by:'
 
-      detail = 'using a sequence of renaming operations, or'
+    [all_ids]
+      type = JSONDiff
+      input = 'rename_block.i'
+      cli_args = 'Mesh/rename/old_block="0 1 3 2"
+                  Mesh/rename/new_block="1 2 4 3"
+                  Outputs/file_base=all_ids_out'
+      jsondiff = 'all_ids_out.json'
+
+      detail = 'identifying both old and new blocks by ID,'
     []
 
-    [rename_block_generator_test2]
-      type = 'Exodiff'
-      input = 'rename_block2.i'
-      exodiff = 'rename_block2_out.e'
-      mesh_mode = 'REPLICATED'
-      recover = false
+    [old_ids_new_names]
+      type = JSONDiff
+      input = 'rename_block.i'
+      cli_args = 'Mesh/rename/old_block="0 1"
+                  Mesh/rename/new_block="new_bottom new_right"
+                  Outputs/file_base=old_ids_new_names_out'
+      jsondiff = 'old_ids_new_names_out.json'
 
-      detail = 'by renaming several blocks simultaneously.'
+      detail = 'identifying old blocks by ID and new blocks by name,'
+    []
+
+    [old_names_new_ids]
+      type = JSONDiff
+      input = 'rename_block.i'
+      cli_args = 'Mesh/rename/old_block="block0 block1"
+                  Mesh/rename/new_block="10 0"
+                  Outputs/file_base=old_names_new_ids_out'
+      jsondiff = 'old_names_new_ids_out.json'
+
+      detail = 'identifying old blocks by name and new blocks by ID, and'
+    []
+
+    [all_names]
+      type = JSONDiff
+      input = 'rename_block.i'
+      cli_args = 'Mesh/rename/old_block="block0 block1 block2 block3"
+                  Mesh/rename/new_block="new_block0 new_block1 new_block2 new_block3"
+                  Outputs/file_base=all_names_out'
+      jsondiff = 'all_names_out.json'
+
+      detail = 'identifying both old and new blocks by name,'
+    []
+
+    [mixed]
+      type = JSONDiff
+      input = 'rename_block.i'
+      cli_args = 'Mesh/rename/old_block="block0 2 block1 3"
+                  Mesh/rename/new_block="10 new_block2 new_block1 4"
+                  Outputs/file_base=mixed_out'
+      jsondiff = 'mixed_out.json'
+
+      detail = 'and by identifying blocks by both id and name.'
+    []
+  []
+
+  [merge]
+    type = JSONDiff
+    input = 'rename_block.i'
+    cli_args = 'Mesh/rename/old_block="block0 3 2 block1"
+                Mesh/rename/new_block="block0_and_block3 block0_and_block3 2 2"
+                Outputs/file_base=merge_out'
+    jsondiff = 'merge_out.json'
+
+    requirement = 'The system shall be able to merge blocks in a mesh.'
+  []
+
+  [errors]
+    requirement = 'The system shall throw a reasonable error:'
+
+    [missing]
+      type = RunException
+      input = 'rename_block.i'
+      cli_args = 'Mesh/rename/old_block="0 42 bad_block"
+                  Mesh/rename/new_block="1 2 3"
+                  --mesh-only'
+      expect_err = 'The following blocks were requested to be renamed, but do not exist: 42 bad_block'
+
+      detail = 'when old blocks are provided that do not exist within the mesh'
+    []
+    [inconsistent_size]
+      type = RunException
+      input = 'rename_block.i'
+      cli_args = 'Mesh/rename/old_block="0"
+                  Mesh/rename/new_block="1 2"
+                  --mesh-only'
+      expect_err = "Must be the same length as 'old_block'"
+
+      detail = 'and when the provided old and new blocks are not the same length.'
+    []
+  []
+
+  [deprecated]
+    requirement = 'The system shall be able to rename or renumber mesh blocks using old syntax by'
+
+    [id]
+      type = JSONDiff
+      input = 'rename_block.i'
+      cli_args = '--allow-warnings
+                  Mesh/rename/old_block_id="0 1 3 2"
+                  Mesh/rename/new_block_id="1 2 4 3"
+                  Outputs/file_base=deprecated_id'
+      jsondiff = 'deprecated_id.json'
+
+      detail = 'identifying blocks by ID'
+    []
+    [name]
+      type = JSONDiff
+      input = 'rename_block.i'
+      cli_args = '--allow-warnings
+                  Mesh/rename/old_block_name="block0 block1"
+                  Mesh/rename/new_block_name="foo bar"
+                  Outputs/file_base=deprecated_name'
+      jsondiff = 'deprecated_name.json'
+
+      detail = 'identifying blocks by name'
+    []
+  []
+
+  [deprecated_errors]
+    requirement = 'The system shall report a reasonable error when renaming or renumbering blocks using deprecated syntax when'
+
+    [old_block_id_and_name]
+      type = RunException
+      input = 'rename_block.i'
+      cli_args = 'Mesh/rename/old_block_id=0
+                  Mesh/rename/old_block_name=dummy'
+      expect_err = "old_block_id\):.*Cannot use in combination with 'old_block_name'. Please use 'old_block' instead; 'old_block_id' and 'old_block_name' are deprecated."
+
+      detail = 'both old block IDs and old block names are provided'
+    []
+    [new_block_id_and_name]
+      type = RunException
+      input = 'rename_block.i'
+      cli_args = 'Mesh/rename/new_block_id=0
+                  Mesh/rename/new_block_name=dummy'
+      expect_err = "new_block_id\):.*Cannot use in combination with 'new_block_name'. Please use 'new_block' instead; 'new_block_id' and 'new_block_name' are deprecated."
+
+      detail = 'both new block IDs and new block names are provided'
+    []
+    [old_block_and_id]
+      type = RunException
+      input = 'rename_block.i'
+      cli_args = 'Mesh/rename/old_block=0
+                  Mesh/rename/old_block_id=0'
+      expect_err = "old_block_id\):.*Cannot use with 'old_block'. Use only 'old_block'; 'old_block_id' is deprecated."
+
+      detail = 'the deprecated syntax for old block id and the new syntax for old block is used'
+    []
+    [old_block_and_name]
+      type = RunException
+      input = 'rename_block.i'
+      cli_args = 'Mesh/rename/old_block=0
+                  Mesh/rename/old_block_name=dummy'
+      expect_err = "old_block_name\):.*Cannot use with 'old_block'. Use only 'old_block'; 'old_block_name' is deprecated."
+
+      detail = 'the deprecated syntax for old block name and the new syntax for old block is used'
+    []
+    [new_block_and_id]
+      type = RunException
+      input = 'rename_block.i'
+      cli_args = 'Mesh/rename/new_block=0
+                  Mesh/rename/new_block_id=0'
+      expect_err = "new_block_id\):.*Cannot use with 'new_block'. Use only 'new_block'; 'new_block_id' is deprecated."
+
+      detail = 'the deprecated syntax for new block id and the new syntax for new block is used'
+    []
+    [new_block_and_name]
+      type = RunException
+      input = 'rename_block.i'
+      cli_args = 'Mesh/rename/new_block=0
+                  Mesh/rename/new_block_name=dummy'
+      expect_err = "new_block_name\):.*Cannot use with 'new_block'. Use only 'new_block'; 'new_block_name' is deprecated."
+
+      detail = 'the deprecated syntax for new block name and the new syntax for new block is used'
     []
   []
 []

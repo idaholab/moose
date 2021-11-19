@@ -40,6 +40,16 @@ public:
     std::vector<std::pair<dof_id_type, unsigned int>> sides;
   };
 
+  /**
+   * Helper struct for defining information about a single subdomain.
+   */
+  struct SubdomainInfo
+  {
+    BoundaryID id;
+    std::string name;
+    std::vector<dof_id_type> elems;
+  };
+
 protected:
   const MultiMooseEnum & _items;
 
@@ -58,12 +68,21 @@ protected:
   std::map<BoundaryID, SidesetInfo> & _local_sideset_elems;
   std::map<BoundaryID, SidesetInfo> & _sidesets;
   std::map<BoundaryID, SidesetInfo> & _sideset_elems;
+  std::map<SubdomainID, SubdomainInfo> & _local_subdomains;
+  std::map<SubdomainID, SubdomainInfo> & _local_subdomain_elems;
+  std::map<SubdomainID, SubdomainInfo> & _subdomains;
+  std::map<SubdomainID, SubdomainInfo> & _subdomain_elems;
 
   // Helper to perform optional declaration based on "_items"
   template <typename T>
   T & declareHelper(const std::string & item_name, const ReporterMode mode);
 
 private:
+  /// Possibly add to _local_sidesets, _local_sideset_elems, _sidesets, and _sideset_elems
+  void possiblyAddSidesetInfo();
+  /// Possibly add to _local_subdomains, _local_subdomain_elems, _subdomains, and _subdomain_elems
+  void possiblyAddSubdomainInfo();
+
   const libMesh::EquationSystems & _equation_systems;
   const libMesh::System & _nonlinear_system;
   const libMesh::System & _aux_system;
@@ -81,3 +100,7 @@ MeshInfo::declareHelper(const std::string & item_name, const ReporterMode mode)
 void to_json(nlohmann::json & json, const std::map<BoundaryID, MeshInfo::SidesetInfo> & sidesets);
 void dataStore(std::ostream & stream, MeshInfo::SidesetInfo & sideset_info, void * context);
 void dataLoad(std::istream & stream, MeshInfo::SidesetInfo & sideset_info, void * context);
+
+void to_json(nlohmann::json & json, const std::map<BoundaryID, MeshInfo::SubdomainInfo> & sidesets);
+void dataStore(std::ostream & stream, MeshInfo::SubdomainInfo & sideset_info, void * context);
+void dataLoad(std::istream & stream, MeshInfo::SubdomainInfo & sideset_info, void * context);

@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "BlockWeightedPartitioner.h"
-#include "MooseMesh.h"
+#include "MooseMeshUtils.h"
 
 #include "libmesh/elem.h"
 
@@ -35,32 +35,16 @@ BlockWeightedPartitioner::validParams()
 }
 
 BlockWeightedPartitioner::BlockWeightedPartitioner(const InputParameters & params)
-  : PetscExternalPartitioner(params), _mesh(*getParam<MooseMesh *>("mesh"))
+  : PetscExternalPartitioner(params),
+    _blocks(getParam<std::vector<SubdomainName>>("block")),
+    _weights(getParam<std::vector<dof_id_type>>("weight"))
 {
-  // Vector the block names supplied by the user via the input file
-  auto blocks = getParam<std::vector<SubdomainName>>("block");
-  // Block weights
-  auto weights = getParam<std::vector<dof_id_type>>("weight");
-
-  if (blocks.size() != weights.size())
+  if (_blocks.size() != _weights.size())
     paramError("block",
                "Number of weights ",
-               weights.size(),
+               _weights.size(),
                " does not match with the number of blocks ",
-               blocks.size());
-
-  // Get the IDs from the supplied names
-  auto block_ids = _mesh.getSubdomainIDs(blocks);
-
-  if (block_ids.size() != blocks.size())
-    paramError("block", "One or more specified blocks was not found on the mesh ");
-
-  _blocks_to_weights.reserve(weights.size());
-
-  for (MooseIndex(block_ids.size()) i = 0; i < block_ids.size(); i++)
-  {
-    _blocks_to_weights[block_ids[i]] = weights[i];
-  }
+               _blocks.size());
 }
 
 std::unique_ptr<Partitioner>
@@ -69,13 +53,28 @@ BlockWeightedPartitioner::clone() const
   return std::make_unique<BlockWeightedPartitioner>(_pars);
 }
 
+void
+BlockWeightedPartitioner::initialize(MeshBase & mesh)
+{
+  // Get the IDs from the supplied names
+  const auto block_ids = MooseMeshUtils::getSubdomainIDs(mesh, _blocks);
+
+  // Make sure all of the blocks exist
+  std::set<subdomain_id_type> mesh_block_ids;
+  mesh.subdomain_ids(mesh_block_ids);
+  for (const auto block_id : block_ids)
+    if (!mesh_block_ids.count(block_id))
+      paramError("block", "The block ", block_id, " was not found on the mesh");
+
+  // Setup the block -> weight map for use in computeElementWeight
+  _blocks_to_weights.reserve(_weights.size());
+  for (MooseIndex(block_ids.size()) i = 0; i < block_ids.size(); i++)
+    _blocks_to_weights[block_ids[i]] = _weights[i];
+}
+
 dof_id_type
 BlockWeightedPartitioner::computeElementWeight(Elem & elem)
 {
-  auto blockid_to_weight = _blocks_to_weights.find(elem.subdomain_id());
-
-  if (blockid_to_weight == _blocks_to_weights.end())
-    mooseError("Can not find a weight for block id ", elem.subdomain_id());
-
-  return blockid_to_weight->second;
+  mooseAssert(_blocks_to_weights.count(elem.subdomain_id()), "Missing weight for block");
+  return _blocks_to_weights[elem.subdomain_id()];
 }

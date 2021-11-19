@@ -101,6 +101,8 @@ PetscExternalPartitioner::partition(MeshBase & mesh, const unsigned int n_parts)
 void
 PetscExternalPartitioner::_do_partition(MeshBase & mesh, const unsigned int n_parts)
 {
+  initialize(mesh);
+
   dof_id_type num_edges, num_local_elems, local_elem_id, nj, side;
   std::vector<dof_id_type> side_weights;
   std::vector<dof_id_type> elem_weights;
