@@ -8,8 +8,31 @@
     csvdiff = 'ne_array_mo_out_eigenvalues_0001.csv'
     slepc = true
     slepc_version = '>=3.11.0'
-    expect_out = 'PJFNK\s+with\s+matrix\s+only'
+    expect_out = 'PJFNK\s+with\s+Matrix\s+Only'
     requirement = "The system shall support use of matrix-vector multiplication as residual evaluation for eigenvalue calculations"
+  []
+
+  [const_mats]
+    type = 'CSVDiff'
+    input = 'ne_array_mo.i'
+    csvdiff = 'ne_array_mo_out_eigenvalues_0001.csv'
+    prereq = 'ne_array_mo'
+    slepc = true
+    slepc_version = '>=3.11.0'
+    expect_out = 'PJFNK\s+with\s+Matrix\s+Only'
+    cli_args = 'Executioner/constant_matrices=true'
+    requirement = "The system shall support use of matrix-vector multiplication as residual evaluation for eigenvalue calculations with constant matrices"
+  []
+
+  [check_solve_type]
+    type = RunException
+    input = 'ne_array_mo.i'
+    prereq = 'const_mats'
+    slepc = true
+    slepc_version = '>=3.11.0'
+    expect_err = 'constant_matrices flag is only vaid for solve type: PJFNKMO'
+    cli_args = 'Executioner/constant_matrices=true Executioner/solve_type=PJFNK'
+    requirement = "The system shall support compatibility of solve type and constant-matrices flag"
   []
 
   [ne_coupled_mo]

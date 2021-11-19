@@ -230,6 +230,8 @@ setEigenProblemSolverParams(EigenProblem & eigen_problem, const InputParameters 
     eigen_problem.setCoupling(Moose::COUPLING_FULL);
   }
 
+  eigen_problem.constantMatrices(params.get<bool>("constant_matrices"));
+
   if (eigen_problem.constantMatrices() && params.get<MooseEnum>("solve_type") != "PJFNKMO")
   {
     mooseError("constant_matrices flag is only vaid for solve type: PJFNKMO");

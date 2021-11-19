@@ -98,6 +98,7 @@
 [Executioner]
   type = Eigenvalue
   solve_type = PJFNKMO
+  constant_matrices = true
 []
 
 [VectorPostprocessors]

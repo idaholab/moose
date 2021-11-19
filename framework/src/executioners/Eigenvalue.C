@@ -126,8 +126,6 @@ Eigenvalue::Eigenvalue(const InputParameters & parameters)
   // Set a flag to nonlinear eigen system
   _eigen_problem.getNonlinearEigenSystem().precondMatrixIncludesEigenKernels(
       getParam<bool>("precond_matrix_includes_eigen"));
-
-  _eigen_problem.constantMatrices(getParam<bool>("constant_matrices"));
 #else
   mooseError("SLEPc is required to use Eigenvalue executioner, please use '--download-slepc in "
              "PETSc configuration'");
