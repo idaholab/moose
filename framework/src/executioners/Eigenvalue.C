@@ -47,6 +47,12 @@ Eigenvalue::validParams()
       "Whether or not to use a matrix free fashion for forming the preconditioning matrix. "
       "If true, a shell matrix will be used for preconditioner.");
 
+  params.addParam<bool>("constant_matrices",
+                        false,
+                        "Whether or not to use constant matrices so that we can use them to form "
+                        "residuals on both linear and "
+                        "nonlinear iterations");
+
   params.addParam<bool>("precond_matrix_includes_eigen",
                         false,
                         "Whether or not to include eigen kernels in the preconditioning matrix. "
@@ -121,6 +127,7 @@ Eigenvalue::Eigenvalue(const InputParameters & parameters)
   _eigen_problem.getNonlinearEigenSystem().precondMatrixIncludesEigenKernels(
       getParam<bool>("precond_matrix_includes_eigen"));
 
+  _eigen_problem.constantMatrices(getParam<bool>("constant_matrices"));
 #else
   mooseError("SLEPc is required to use Eigenvalue executioner, please use '--download-slepc in "
              "PETSc configuration'");

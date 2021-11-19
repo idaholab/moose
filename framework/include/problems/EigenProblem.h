@@ -204,6 +204,26 @@ public:
    */
   void onLinearSolver(bool ols) { _on_linear_solver = ols; }
 
+  /**
+   * Whether or not we are in a linear solver iteration
+   */
+  bool constantMatrices() const { return _constant_matrices; }
+
+  /**
+   * Set a flag to indicate whether or not we are in a linear solver iteration
+   */
+  void constantMatrices(bool cm) { _constant_matrices = cm; }
+
+  /**
+   * Whether or not we are in a linear solver iteration
+   */
+  bool wereMatricesFormed() const { return _matrices_formed; }
+
+  /**
+   * Set a flag to indicate whether or not we are in a linear solver iteration
+   */
+  void wereMatricesFormed(bool mf) { _matrices_formed = mf; }
+
 private:
   /**
    * Do some free/extra power iterations
@@ -236,14 +256,10 @@ protected:
   bool _output_inverse_eigenvalue;
   /// Whether or not we are in linear solver
   bool _on_linear_solver;
-  /// Timers
-  PerfID _compute_jacobian_tag_timer;
-  PerfID _compute_jacobian_ab_timer;
-  PerfID _compute_residual_tag_timer;
-  PerfID _compute_residual_ab_timer;
-  PerfID _solve_timer;
-  PerfID _compute_jacobian_blocks_timer;
-
+  /// Whether or not matrices had been formed
+  bool _matrices_formed;
+  /// Whether or not require constant matrices
+  bool _constant_matrices;
   /// Whether or not we normalize eigenvector
   bool _has_normalization;
   /// Postprocessor used to compute a factor from eigenvector

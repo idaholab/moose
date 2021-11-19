@@ -23,9 +23,7 @@
 #include "libmesh/petsc_matrix.h"
 #include "libmesh/slepc_macro.h"
 #include "libmesh/auto_ptr.h"
-// PETSc
 #include "petscsnes.h"
-// SLEPc
 #include "slepceps.h"
 
 namespace Moose
@@ -52,7 +50,7 @@ getSlepcValidParams(InputParameters & params)
                       "NEWTON: Newton "
                       "PJFNK: Preconditioned Jacobian-free Newton-Kyrlov"
                       "JFNK: Jacobian-free Newton-Kyrlov"
-                      "PJFNKMO: Preconditioned Jacobian-free Newton-Kyrlov with matrix only");
+                      "PJFNKMO: Preconditioned Jacobian-free Newton-Kyrlov with Matrix Only");
 
   // When the eigenvalue problems is reformed as a coupled nonlinear system,
   // we use part of Jacobian as the preconditioning matrix.
@@ -230,6 +228,11 @@ setEigenProblemSolverParams(EigenProblem & eigen_problem, const InputParameters 
     // By default, we need to form full matrices, otherwise residual
     // evaluations will not be accurate
     eigen_problem.setCoupling(Moose::COUPLING_FULL);
+  }
+
+  if (eigen_problem.constantMatrices() && params.get<MooseEnum>("solve_type") != "PJFNKMO")
+  {
+    mooseError("constant_matrices flag is only vaid for solve type: PJFNKMO");
   }
 }
 
@@ -491,6 +494,45 @@ slepcSetOptions(EigenProblem & eigen_problem, const InputParameters & params)
   Moose::PetscSupport::addPetscOptionsFromCommandline();
 }
 
+PetscErrorCode
+mooseEPSFormMatrices(EigenProblem & eigen_problem, EPS eps, Vec x, void * ctx)
+{
+  PetscErrorCode ierr;
+  ST st;
+  Mat A, B;
+  PetscBool aisshell, bisshell;
+  PetscFunctionBegin;
+
+  if (eigen_problem.constantMatrices() && eigen_problem.wereMatricesFormed())
+    PetscFunctionReturn(0);
+
+  NonlinearEigenSystem & eigen_nl = eigen_problem.getNonlinearEigenSystem();
+  SNES snes = eigen_nl.getSNES();
+  // Rest ST state so that we can retrieve matrices
+  ierr = EPSGetST(eps, &st);
+  CHKERRQ(ierr);
+  ierr = STResetMatrixState(st);
+  CHKERRQ(ierr);
+  ierr = EPSGetOperators(eps, &A, &B);
+  CHKERRQ(ierr);
+  ierr = PetscObjectTypeCompare((PetscObject)A, MATSHELL, &aisshell);
+  CHKERRQ(ierr);
+  ierr = PetscObjectTypeCompare((PetscObject)B, MATSHELL, &bisshell);
+  CHKERRQ(ierr);
+  if (aisshell || bisshell)
+  {
+    SETERRQ(PetscObjectComm((PetscObject)eps),
+            PETSC_ERR_ARG_INCOMP,
+            "A and B matrices can not be shell matrices when using PJFNKMO \n");
+  }
+  // Form A and B
+  std::vector<Mat> mats = {A, B};
+  moosePetscSNESFormMatricesTags(
+      snes, x, mats, ctx, {eigen_nl.nonEigenMatrixTag(), eigen_nl.eigenMatrixTag()});
+  eigen_problem.wereMatricesFormed(true);
+  PetscFunctionReturn(0);
+}
+
 void
 moosePetscSNESFormMatrixTag(SNES /*snes*/, Vec x, Mat mat, void * ctx, TagID tag)
 {
@@ -608,30 +650,10 @@ mooseSlepcEigenFormJacobianA(SNES snes, Vec x, Mat jac, Mat pc, void * ctx)
     CHKERRQ(ierr);
 
     EPS eps = eigen_nl.getEPS();
-    ST st;
-    Mat A, B;
-    PetscBool aisshell, bisshell;
-    // Rest ST state so that we can retrieve matrices
-    ierr = EPSGetST(eps, &st);
+
+    ierr = mooseEPSFormMatrices(*eigen_problem, eps, x, ctx);
     CHKERRQ(ierr);
-    ierr = STResetMatrixState(st);
-    CHKERRQ(ierr);
-    ierr = EPSGetOperators(eps, &A, &B);
-    CHKERRQ(ierr);
-    ierr = PetscObjectTypeCompare((PetscObject)A, MATSHELL, &aisshell);
-    CHKERRQ(ierr);
-    ierr = PetscObjectTypeCompare((PetscObject)B, MATSHELL, &bisshell);
-    CHKERRQ(ierr);
-    if (aisshell || bisshell)
-    {
-      SETERRQ(PetscObjectComm((PetscObject)snes),
-              PETSC_ERR_ARG_INCOMP,
-              "A and B matrices can not be shell matrices when using PJFNKMO \n");
-    }
-    // Form A and B
-    std::vector<Mat> mats = {A, B};
-    moosePetscSNESFormMatricesTags(
-        snes, x, mats, ctx, {eigen_nl.nonEigenMatrixTag(), eigen_nl.eigenMatrixTag()});
+
     if (pc != jac)
     {
       ierr = MatAssemblyBegin(jac, MAT_FINAL_ASSEMBLY);
@@ -782,11 +804,16 @@ mooseSlepcEigenFormFunctionA(SNES snes, Vec x, Vec r, void * ctx)
   EigenProblem * eigen_problem = static_cast<EigenProblem *>(ctx);
   NonlinearEigenSystem & eigen_nl = eigen_problem->getNonlinearEigenSystem();
 
-  if (eigen_problem->solverParams()._eigen_matrix_vector_mult && eigen_problem->onLinearSolver())
+  if (eigen_problem->solverParams()._eigen_matrix_vector_mult &&
+      (eigen_problem->onLinearSolver() || eigen_problem->constantMatrices()))
   {
     EPS eps = eigen_nl.getEPS();
     Mat A;
     ST st;
+
+    ierr = mooseEPSFormMatrices(*eigen_problem, eps, x, ctx);
+    CHKERRQ(ierr);
+
     // Rest ST state so that we can restrieve matrices
     ierr = EPSGetST(eps, &st);
     CHKERRQ(ierr);
@@ -816,11 +843,15 @@ mooseSlepcEigenFormFunctionB(SNES snes, Vec x, Vec r, void * ctx)
   EigenProblem * eigen_problem = static_cast<EigenProblem *>(ctx);
   NonlinearEigenSystem & eigen_nl = eigen_problem->getNonlinearEigenSystem();
 
-  if (eigen_problem->solverParams()._eigen_matrix_vector_mult && eigen_problem->onLinearSolver())
+  if (eigen_problem->solverParams()._eigen_matrix_vector_mult &&
+      (eigen_problem->onLinearSolver() || eigen_problem->constantMatrices()))
   {
     EPS eps = eigen_nl.getEPS();
     ST st;
     Mat B;
+
+    ierr = mooseEPSFormMatrices(*eigen_problem, eps, x, ctx);
+    CHKERRQ(ierr);
 
     // Rest ST state so that we can restrieve matrices
     ierr = EPSGetST(eps, &st);
@@ -853,11 +884,15 @@ mooseSlepcEigenFormFunctionAB(SNES /*snes*/, Vec x, Vec Ax, Vec Bx, void * ctx)
   NonlinearEigenSystem & eigen_nl = eigen_problem->getNonlinearEigenSystem();
   System & sys = eigen_nl.system();
 
-  if (eigen_problem->solverParams()._eigen_matrix_vector_mult && eigen_problem->onLinearSolver())
+  if (eigen_problem->solverParams()._eigen_matrix_vector_mult &&
+      (eigen_problem->onLinearSolver() || eigen_problem->constantMatrices()))
   {
     EPS eps = eigen_nl.getEPS();
     ST st;
     Mat A, B;
+
+    ierr = mooseEPSFormMatrices(*eigen_problem, eps, x, ctx);
+    CHKERRQ(ierr);
 
     // Rest ST state so that we can restrieve matrices
     ierr = EPSGetST(eps, &st);

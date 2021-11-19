@@ -457,7 +457,7 @@ stringify(const EigenSolveType & t)
     case EST_NONLINEAR_POWER:
       return "Nonlinear Power";
     case EST_PJFNKMO:
-      return "PJFNK with matrix only";
+      return "PJFNK with Matrix Only";
     case EST_NEWTON:
       return "Newton";
     case EST_JFNK:
