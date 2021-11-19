@@ -19,6 +19,12 @@ TangentialMortarMechanicalContact::validParams()
   MooseEnum component("x=0 y=1 z=2");
   params.addRequiredParam<MooseEnum>(
       "component", component, "The force component constraint that this object is supplying");
+
+  MooseEnum direction("direction_1 direction_2", "direction_1");
+  params.addParam<MooseEnum>("direction",
+                             direction,
+                             "Tangent direction to compute the residual due to frictional contact");
+
   params.addClassDescription(
       "Used to apply tangential stresses from frictional contact using lagrange multipliers");
   params.set<bool>("compute_lm_residual") = false;
@@ -27,7 +33,9 @@ TangentialMortarMechanicalContact::validParams()
 
 TangentialMortarMechanicalContact::TangentialMortarMechanicalContact(
     const InputParameters & parameters)
-  : ADMortarConstraint(parameters), _component(getParam<MooseEnum>("component"))
+  : ADMortarConstraint(parameters),
+    _component(getParam<MooseEnum>("component")),
+    _direction(getParam<MooseEnum>("direction"))
 {
 }
 
@@ -45,13 +53,13 @@ TangentialMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
       // want to increase momentum in the system, which means we want an inflow of momentum, which
       // means we want the residual to be negative in that case. So the sign of this residual should
       // be the same as the sign of lambda
-      return _test_secondary[_i][_qp] * _lambda[_qp] * _tangents[_qp][0](_component) /
-             _tangents[_qp][0].norm();
+      return _test_secondary[_i][_qp] * _lambda[_qp] * _tangents[_qp][_direction](_component) /
+             _tangents[_qp][_direction].norm();
 
     case Moose::MortarType::Primary:
       // Equal and opposite reactions so we put a negative sign here
-      return -_test_primary[_i][_qp] * _lambda[_qp] * _tangents[_qp][0](_component) /
-             _tangents[_qp][0].norm();
+      return -_test_primary[_i][_qp] * _lambda[_qp] * _tangents[_qp][_direction](_component) /
+             _tangents[_qp][_direction].norm();
 
     default:
       return 0;

@@ -50,6 +50,14 @@ protected:
   virtual void enforceConstraintOnDof(const DofObject * const dof) override;
 
   /**
+   * Method called from \p post(). Used to enforce node-associated constraints. E.g. for the base \p
+   * ComputeFrictionalForceLMMechanicalContact we enforce PDASS frictional constraints. This is also
+   * where we actually feed the node-based constraint information into the system residual and
+   * Jacobian. Method used to enforce frictional constraints in three-dimensional simulations.
+   */
+  virtual void enforceConstraintOnDof3d(const DofObject * const dof);
+
+  /**
    * Communicate weighted velocities to the owning process
    */
   void communicateVelocities();
@@ -57,11 +65,21 @@ protected:
   /// A map from node to weighted gap
   std::unordered_map<const DofObject *, ADReal> _dof_to_weighted_tangential_velocity;
 
+  /// A map from node to weighted gap for an additional tangential direction (three dimensions)
+  std::unordered_map<const DofObject *, ADReal> _dof_to_weighted_tangential_velocity_dir;
+
   /// A pointer member that can be used to help avoid copying ADReals
   const ADReal * _tangential_vel_ptr = nullptr;
 
+  /// A pointer member that can be used to help avoid copying ADReals (for 3D)
+  const ADReal * _tangential_vel_dir_ptr = nullptr;
+
   /// The value of the tangential velocity at the current quadrature point
   ADReal _qp_tangential_velocity;
+
+  /// The value of the tangential velocity at the current quadrature point
+  /// in an additional direction, required for three-dimensional cases
+  ADReal _qp_tangential_velocity_dir;
 
   /// Numerical factor used in the tangential constraints for convergence purposes
   const Real _c_t;
@@ -92,4 +110,10 @@ protected:
 
   /// Friction coefficient
   const Real _mu;
+
+  /// Frictional Lagrange's multiplier variable pointer for additional 3D direction
+  MooseVariable * _friction_var_dir;
+
+  /// Automatic flag to determine whether we are doing three-dimensional work
+  bool _3d;
 };
