@@ -8,14 +8,12 @@ ObjectiveGradientMinimize::validParams()
   InputParameters params = OptimizationReporter::validParams();
   params.addClassDescription("OptimizationReporter that holds optimization information and "
                              "computes gradient from adjoint data.");
-  params.addParam<ReporterValueName>(
-      "adjoint_data_name", "adjoint", "Reporter value to create containing adjoint point values.");
   return params;
 }
 
 ObjectiveGradientMinimize::ObjectiveGradientMinimize(const InputParameters & parameters)
   : OptimizationReporter(parameters),
-    _adjoint_data(declareValue<std::vector<Real>>("adjoint_data_name", REPORTER_MODE_REPLICATED))
+    _adjoint_data(declareValueByName<std::vector<Real>>("adjoint", REPORTER_MODE_REPLICATED))
 {
 }
 

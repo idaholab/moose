@@ -10,14 +10,20 @@ OptimizationReporter::validParams()
   params.addRequiredParam<std::vector<dof_id_type>>(
       "num_values",
       "Number of parameter values associated with each parameter group in 'parameter_names'.");
-  params.addParam<ReporterValueName>(
-      "misfit_name", "misfit", "Reporter value to create containing misfit point data.");
   params.addParam<std::vector<Real>>("initial_condition",
                                      "Initial condition for each parameter values, default is 0.");
   params.addParam<std::vector<Real>>(
       "lower_bounds", std::vector<Real>(), "Lower bounds for each parameter value.");
   params.addParam<std::vector<Real>>(
       "upper_bounds", std::vector<Real>(), "Upper bounds for each parameter value.");
+  // make measurement_values & measurement_points addRequiredParam  but will require all tests to
+  // change
+  params.addParam<std::vector<Real>>(
+      "measurement_values",
+      "Measurement values collected from locations given by measurement_points");
+  params.addParam<std::vector<Point>>("measurement_points",
+                                      "Point locations corresponding to each measurement value");
+
   return params;
 }
 
@@ -29,8 +35,20 @@ OptimizationReporter::OptimizationReporter(const InputParameters & parameters)
     _ndof(std::accumulate(_nvalues.begin(), _nvalues.end(), 0)),
     _lower_bounds(getParam<std::vector<Real>>("lower_bounds")),
     _upper_bounds(getParam<std::vector<Real>>("upper_bounds")),
-    _misfit(declareValue<std::vector<Real>>("misfit_name", REPORTER_MODE_REPLICATED))
+    _measurement_values(getParam<std::vector<Real>>("measurement_values")),
+    _measurement_points(getParam<std::vector<Point>>("measurement_points")),
+
+    _measurement_data(declareValueByName<std::vector<std::tuple<Point, Real, Real, Real>>>(
+        "measurement_data", REPORTER_MODE_REPLICATED)),
+    _misfit(declareValueByName<std::vector<Real>>("misfit", REPORTER_MODE_REPLICATED))
+
 {
+  for (size_t i = 0; i < _measurement_points.size(); ++i)
+    _measurement_data.push_back(std::make_tuple(_measurement_points[i],
+                                                _measurement_values[i],
+                                                std::numeric_limits<Real>::max(),
+                                                std::numeric_limits<Real>::max()));
+
   if (_parameter_names.size() != _nvalues.size())
     paramError("num_parameters",
                "There should be a number in 'num_parameters' for each name in 'parameter_names'.");
@@ -113,3 +131,63 @@ OptimizationReporter::computeObjective()
 
   return val;
 }
+
+namespace libMesh
+{
+void
+to_json(nlohmann::json & json, const std::vector<std::tuple<Point, Real, Real, Real>> & value)
+{
+  Point measurement_point;
+  Real measurement_value;
+  Real simualtion_value;
+  Real misfit_value;
+
+  for (auto & v : value)
+  {
+    std::stringstream ss;
+    std::tie(measurement_point, measurement_value, simualtion_value, misfit_value) = v;
+    ss << "(";
+    for (const auto & i : make_range(LIBMESH_DIM))
+    {
+      ss << measurement_point(i);
+      if (i < (LIBMESH_DIM - 1))
+        ss << ", ";
+    }
+    ss << ")";
+    json["measurement_point"].push_back(ss.str());
+    json["measurement_value"].push_back(measurement_value);
+    json["simualtion_value"].push_back(simualtion_value);
+    json["misfit_value"].push_back(misfit_value);
+  }
+}
+}
+//
+template <>
+void
+dataStore(std::ostream & stream, std::tuple<Point, Real, Real, Real> & v, void * context)
+{
+  Point measurement_point;
+  Real measurement_value;
+  Real simualtion_value;
+  Real misfit_value;
+  std::tie(measurement_point, measurement_value, simualtion_value, misfit_value) = v;
+  dataStore(stream, measurement_point, context);
+  dataStore(stream, measurement_value, context);
+  dataStore(stream, simualtion_value, context);
+  dataStore(stream, misfit_value, context);
+};
+
+template <>
+void
+dataLoad(std::istream & stream, std::tuple<Point, Real, Real, Real> & v, void * context)
+{
+  Point measurement_point;
+  Real measurement_value;
+  Real simualtion_value;
+  Real misfit_value;
+  std::tie(measurement_point, measurement_value, simualtion_value, misfit_value) = v;
+  dataLoad(stream, measurement_point, context);
+  dataLoad(stream, measurement_value, context);
+  dataLoad(stream, simualtion_value, context);
+  dataLoad(stream, misfit_value, context);
+};
