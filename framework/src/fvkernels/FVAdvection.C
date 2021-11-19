@@ -18,12 +18,13 @@ FVAdvection::validParams()
   params.addClassDescription(
       "Residual contribution from advection operator for finite volume method.");
   params.addRequiredParam<RealVectorValue>("velocity", "Constant advection velocity");
-  MooseEnum advected_interp_method("average upwind", "upwind");
+  MooseEnum advected_interp_method("average upwind skewness-corrected", "upwind");
 
-  params.addParam<MooseEnum>("advected_interp_method",
-                             advected_interp_method,
-                             "The interpolation to use for the advected quantity. Options are "
-                             "'upwind' and 'average', with the default being 'upwind'.");
+  params.addParam<MooseEnum>(
+      "advected_interp_method",
+      advected_interp_method,
+      "The interpolation to use for the advected quantity. Options are "
+      "'upwind', 'average' and 'skewness-corrected', with the default being 'upwind'.");
   return params;
 }
 
@@ -37,6 +38,8 @@ FVAdvection::FVAdvection(const InputParameters & params)
     _advected_interp_method = InterpMethod::Average;
   else if (advected_interp_method == "upwind")
     _advected_interp_method = InterpMethod::Upwind;
+  else if (advected_interp_method == "skewness-corrected")
+    _advected_interp_method = InterpMethod::SkewCorrectedAverage;
   else
     mooseError("Unrecognized interpolation type ",
                static_cast<std::string>(advected_interp_method));
@@ -45,13 +48,15 @@ FVAdvection::FVAdvection(const InputParameters & params)
 ADReal
 FVAdvection::computeQpResidual()
 {
-  ADReal u_interface;
-  interpolate(_advected_interp_method,
-              u_interface,
-              _u_elem[_qp],
-              _u_neighbor[_qp],
-              _velocity,
-              *_face_info,
-              true);
+  const Elem * const neighbor = _face_info->neighborPtr();
+
+  // Check if skewness-correction is necessary
+  bool correct_skewness =
+      (_advected_interp_method == Moose::FV::InterpMethod::SkewCorrectedAverage);
+
+  ADReal u_interface =
+      onBoundary(*_face_info)
+          ? _var.getBoundaryFaceValue(*_face_info)
+          : _var.getInternalFaceValue(neighbor, *_face_info, _u_elem[_qp], correct_skewness);
   return _normal * _velocity * u_interface;
 }
