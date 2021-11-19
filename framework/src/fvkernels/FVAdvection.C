@@ -48,15 +48,14 @@ FVAdvection::FVAdvection(const InputParameters & params)
 ADReal
 FVAdvection::computeQpResidual()
 {
-  const Elem * const neighbor = _face_info->neighborPtr();
+  ADReal u_interface;
+  interpolate(_advected_interp_method,
+              u_interface,
+              _u_elem[_qp],
+              _u_neighbor[_qp],
+              _velocity,
+              *_face_info,
+              true);
 
-  // Check if skewness-correction is necessary
-  bool correct_skewness =
-      (_advected_interp_method == Moose::FV::InterpMethod::SkewCorrectedAverage);
-
-  ADReal u_interface =
-      onBoundary(*_face_info)
-          ? _var.getBoundaryFaceValue(*_face_info)
-          : _var.getInternalFaceValue(neighbor, *_face_info, _u_elem[_qp], correct_skewness);
   return _normal * _velocity * u_interface;
 }
