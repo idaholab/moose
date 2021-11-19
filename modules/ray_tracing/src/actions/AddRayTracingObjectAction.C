@@ -29,12 +29,6 @@ AddRayTracingObjectAction::AddRayTracingObjectAction(InputParameters params)
 void
 AddRayTracingObjectAction::act()
 {
-  setRayTracingStudy();
-}
-
-void
-AddRayTracingObjectAction::setRayTracingStudy()
-{
   RayTracingStudy * rts = nullptr;
 
   // Query into UserObjects
@@ -96,4 +90,6 @@ AddRayTracingObjectAction::setRayTracingStudy()
   }
 
   _moose_object_pars.set<RayTracingStudy *>("_ray_tracing_study") = rts;
+
+  addRayTracingObject();
 }

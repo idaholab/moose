@@ -9,18 +9,15 @@
 
 #pragma once
 
-#include "AddRayTracingObjectAction.h"
+#include "LotsOfRaysRayStudy.h"
 
-/**
- * Action for creating a RayBC and associating it with the necessary RayTracingStudy objects.
- */
-class AddRayBCAction : public AddRayTracingObjectAction
+class TestRayLots : public LotsOfRaysRayStudy
 {
 public:
-  AddRayBCAction(InputParameters params);
+  TestRayLots(const InputParameters & parameters);
 
   static InputParameters validParams();
 
 protected:
-  void addRayTracingObject() override final;
+  void postExecuteStudy() override final;
 };

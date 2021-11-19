@@ -9,18 +9,16 @@
 
 #pragma once
 
-#include "AddRayTracingObjectAction.h"
+// Local Includes
+#include "NullRayKernel.h"
 
 /**
- * Action for creating a RayBC and associating it with the necessary RayTracingStudy objects.
+ * Test object for RayTracingObject
  */
-class AddRayBCAction : public AddRayTracingObjectAction
+class RayTracingObjectTest : public NullRayKernel
 {
 public:
-  AddRayBCAction(InputParameters params);
+  RayTracingObjectTest(const InputParameters & params);
 
   static InputParameters validParams();
-
-protected:
-  void addRayTracingObject() override final;
 };

@@ -9,14 +9,16 @@
 
 #pragma once
 
-#include "LotsOfRaysRayStudy.h"
+#include "GeneralUserObject.h"
 
-class TestRayGetInfoStudy : public LotsOfRaysRayStudy
+class RayTracingAngularQuadratureErrorTest : public GeneralUserObject
 {
 public:
-  TestRayGetInfoStudy(const InputParameters & parameters);
+  RayTracingAngularQuadratureErrorTest(const InputParameters & parameters);
 
   static InputParameters validParams();
 
-  void onCompleteRay(const std::shared_ptr<Ray> & ray) override;
+  void initialize(){};
+  void finalize(){};
+  void execute(){};
 };

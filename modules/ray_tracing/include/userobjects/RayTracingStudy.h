@@ -530,7 +530,7 @@ public:
    */
   virtual const Point * getElemNormals(const Elem * /* elem */, const THREAD_ID /* tid */)
   {
-    mooseError("Not implemented");
+    mooseError("Unimplemented element normal caching in ", type(), "::getElemNormals()");
   }
 
   /**
@@ -639,31 +639,6 @@ public:
    * Whether or not the study is generating
    */
   bool currentlyGenerating() const { return _parallel_ray_study->currentlyPreExecuting(); }
-
-  /**
-   * Casts the RayTracingStudy found in the given input parameters to a study of type T
-   * with a meaningful error message if it fails
-   *
-   * Can be used for casting to derived studies on other objects that use them
-   * (RayKernels, RayBCs, etc)
-   */
-  template <typename T>
-  static T & castFromStudy(const InputParameters & params)
-  {
-    static_assert(std::is_base_of<RayTracingStudy, T>::value, "Not derived from a RayTracingStudy");
-
-    RayTracingStudy * study =
-        params.getCheckedPointerParam<RayTracingStudy *>("_ray_tracing_study");
-
-    T * other_study = dynamic_cast<T *>(study);
-    if (!other_study)
-      ::mooseError(params.get<std::string>("_type"),
-                   " '",
-                   params.get<std::string>("_object_name"),
-                   "' must be paired with a ",
-                   typeid(T).name());
-    return *other_study;
-  }
 
   /**
    * Gets the threaded TraceRay object for \p tid.

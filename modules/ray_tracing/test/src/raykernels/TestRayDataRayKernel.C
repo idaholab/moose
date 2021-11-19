@@ -22,8 +22,7 @@ TestRayDataRayKernel::validParams()
 }
 
 TestRayDataRayKernel::TestRayDataRayKernel(const InputParameters & params)
-  : GeneralRayKernel(params),
-    _test_ray_data_study(RayTracingStudy::castFromStudy<TestRayDataStudy>(params))
+  : GeneralRayKernel(params), _test_ray_data_study(getStudy<TestRayDataStudy>())
 {
 }
 
