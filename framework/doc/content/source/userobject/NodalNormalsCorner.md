@@ -1,33 +1,13 @@
 # NodalNormalsCorner
 
-!alert! construction title=Undocumented Class
-The NodalNormalsCorner has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# NodalNormalsCorner
-
 !syntax description /UserObjects/NodalNormalsCorner
 
-## Overview
+The `NodalNormalsCorner` is added automatically by the `NodalNormals` [action](AddNodalNormalsAction.md).
+This object is created for the corners specified in the [!param](/Actions/AddNodalNormalsAction/corner_boundary)
+parameter of the action.
+See the [`NodalNormals system`](syntax/NodalNormals/index.md) for more information.
 
-!! Replace these lines with information regarding the NodalNormalsCorner object.
-
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the NodalNormalsCorner object.
-
-!syntax parameters /UserObjects/NodalNormalsCorner
-
-!syntax inputs /UserObjects/NodalNormalsCorner
-
-!syntax children /UserObjects/NodalNormalsCorner
-```
-!alert-end!
-
-!syntax description /UserObjects/NodalNormalsCorner
+The corner normal is saved in the `nodal_normal_x`, `nodal_normal_y` and `nodal_normal_z` variables.
 
 !syntax parameters /UserObjects/NodalNormalsCorner
 

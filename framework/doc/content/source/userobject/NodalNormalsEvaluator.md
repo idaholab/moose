@@ -1,33 +1,20 @@
 # NodalNormalsEvaluator
 
-!alert! construction title=Undocumented Class
-The NodalNormalsEvaluator has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# NodalNormalsEvaluator
-
 !syntax description /UserObjects/NodalNormalsEvaluator
 
-## Overview
+The `NodalNormalsEvaluator` is added automatically by the `NodalNormals` [action](AddNodalNormalsAction.md).
+This object is created for the boundaries specified in the [!param](/Actions/AddNodalNormalsAction/boundary)
+parameter. See the [`NodalNormals system`](syntax/NodalNormals/index.md) for more information.
 
-!! Replace these lines with information regarding the NodalNormalsEvaluator object.
+The nodal normal is computed from the `nodal_normal_x`, `nodal_normal_y` and `nodal_normal_z`
+variables, then it is used to divide the values for that node by the norm of the normal.
 
-## Example Input File Syntax
+## Example input syntax
 
-!! Describe and include an example of how to use the NodalNormalsEvaluator object.
+In this example, the `NodalNormals` system uses a `NodalNormalsEvaluator`, added behind the
+scene by the action, to smooth the distance computation between two disjoint surfaces.
 
-!syntax parameters /UserObjects/NodalNormalsEvaluator
-
-!syntax inputs /UserObjects/NodalNormalsEvaluator
-
-!syntax children /UserObjects/NodalNormalsEvaluator
-```
-!alert-end!
-
-!syntax description /UserObjects/NodalNormalsEvaluator
+!listing test/tests/geomsearch/3d_moving_penetration_smoothing/pl_test3nns.i block=NodalNormals
 
 !syntax parameters /UserObjects/NodalNormalsEvaluator
 
