@@ -10,11 +10,12 @@
 [RayBCs/kill]
   type = KillRayBC
   boundary = 'top right bottom left'
+  study = study
 []
 
 [UserObjects]
-  [test1]
-    type = TestRayGetInfoStudy
+  [study]
+    type = TestRayLots
     execute_on = initial
 
     vertex_to_vertex = true

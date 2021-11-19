@@ -108,8 +108,8 @@ RayKernelTempl<T>::computeJacobian()
     if (ivar != _var.number() || !jvariable.activeOnSubdomain(_current_subdomain_id))
       continue;
 
-    if (jvariable.count() > 1)
-      mooseError("ArrayMooseVariable objects are not coupleable");
+    // This error should be caught by the coupleable interface
+    mooseAssert(jvariable.count() == 1, "ArrayMooseVariable objects are not coupleable");
 
     const auto jvar = jvariable.number();
 

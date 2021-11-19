@@ -2,7 +2,7 @@
   [gmg]
     type = GeneratedMeshGenerator
     dim = 1
-    nx = 50
+    nx = 2
   []
 []
 

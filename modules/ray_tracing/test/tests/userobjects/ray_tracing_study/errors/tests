@@ -1,6 +1,6 @@
 [Tests]
   design = 'RayTracingStudy.md'
-  issues = '#16848'
+  issues = '#16028'
 
   parallel_scheduling = true
 
@@ -17,7 +17,8 @@
     [local_non_unique_id]
       type = 'RunException'
       input = 'errors.i'
-      cli_args = 'UserObjects/study/add_local_non_unique_id_ray=true'
+      cli_args = 'UserObjects/study/add_local_non_unique_id_ray=true
+                  Mesh/gmg/nx=50'
       allow_test_objects = true
       expect_err = 'Multiple Rays exist with ID 0 on processor'
       detail = 'when local rays that have the same ID are added to be traced,'
@@ -25,163 +26,12 @@
     [global_non_unique_id]
       type = 'RunException'
       input = 'errors.i'
-      cli_args = 'UserObjects/study/add_global_non_unique_id_ray=true'
+      cli_args = 'UserObjects/study/add_global_non_unique_id_ray=true
+                  Mesh/gmg/nx=50'
       allow_test_objects = true
       min_parallel = 2
       expect_err = 'Ray with ID 0 exists on ranks'
       detail = 'when rays that have the same ID on different processors are added to be traced,'
-    []
-    [ray_at_end_without_set]
-      type = RunException
-      input = 'errors.i'
-      cli_args = 'UserObjects/study/ray_at_end_without_set=true'
-      expect_err = 'Cannot use Ray::atEnd\(\) for a Ray that does not have an end set'
-      allow_test_objects = true
-      detail = 'when checking if a ray is at its end point without an end point being set,'
-    []
-    [ray_end_point_without_set]
-      type = RunException
-      input = 'errors.i'
-      cli_args = 'UserObjects/study/ray_end_point_without_set=true'
-      expect_err = 'Cannot use Ray::endPoint\(\) for a Ray that does not have an end set'
-      allow_test_objects = true
-      detail = 'when retrieving a ray\'s end point when its end point has not been set,'
-    []
-    [ray_set_start_again]
-      type = RunException
-      input = 'errors.i'
-      cli_args = 'UserObjects/study/ray_set_start_again=true'
-      expect_err = 'Starting point was already set via Ray::setStart\(\) and is being changed.'
-      allow_test_objects = true
-      detail = 'when setting a ray\'s start point that has already been set,'
-    []
-    [ray_set_start_fail_bbox]
-      type = RunException
-      input = 'errors.i'
-      cli_args = 'UserObjects/study/ray_set_start_fail_bbox=true'
-      expect_err = 'Mesh does not contain starting point.'
-      allow_test_objects = true
-      detail = 'when setting a ray\'s start point that is not contained within the mesh bounding box,'
-    []
-    [ray_set_side_without_elem]
-      type = RunException
-      input = 'errors.i'
-      cli_args = 'UserObjects/study/ray_set_side_without_elem=true'
-      expect_err = 'Starting incoming side is set but starting element is not set.'
-      allow_test_objects = true
-      detail = 'when setting a ray\'s starting incoming side without setting its starting element,'
-    []
-    [ray_set_invalid_side]
-      type = RunException
-      input = 'errors.i'
-      cli_args = 'UserObjects/study/ray_set_invalid_side=true'
-      expect_err = 'Starting incoming side is not valid for its starting element.'
-      allow_test_objects = true
-      detail = 'when setting a ray\'s starting incoming side to an invalid side,'
-    []
-    [ray_set_bad_side]
-      type = RunException
-      input = 'errors.i'
-      cli_args = 'UserObjects/study/ray_set_bad_side=true'
-      expect_err = 'Starting incoming side does not contain the starting point.'
-      allow_test_objects = true
-      detail = 'when setting a ray\'s starting incoming side to one that does not contain the starting point,'
-    []
-    [ray_set_bad_start]
-      type = RunException
-      input = 'errors.i'
-      cli_args = 'UserObjects/study/ray_set_bad_start=true'
-      expect_err = 'Starting element does not contain the starting point.'
-      allow_test_objects = true
-      detail = 'when setting a ray\'s starting point to a point that is not contained within a given starting element,'
-    []
-    [ray_set_direction_before_start]
-      type = RunException
-      input = 'errors.i'
-      cli_args = 'UserObjects/study/ray_set_direction_before_start=true'
-      expect_err = 'Cannot use Ray::setStartingDirection\(\) before Ray::setStart\(\).'
-      allow_test_objects = true
-      detail = 'when setting a ray\'s starting direction before setting its starting information,'
-    []
-    [ray_set_direction_again]
-      type = RunException
-      input = 'errors.i'
-      cli_args = 'UserObjects/study/ray_set_direction_again=true'
-      expect_err = 'Cannot change a Ray\'s starting direction using Ray::setStartingDirection\(\)'
-      allow_test_objects = true
-      detail = 'when setting a ray\'s starting direction multiple times without clearing it,'
-    []
-    [ray_set_zero_direction]
-      type = RunException
-      input = 'errors.i'
-      cli_args = 'UserObjects/study/ray_set_zero_direction=true'
-      expect_err = 'Starting direction in Ray::setStartingDirection\(\) is the zero vector.'
-      allow_test_objects = true
-      detail = 'when setting a ray\'s starting direction to the zero vector,'
-    []
-    [ray_set_end_before_start]
-      type = RunException
-      input = 'errors.i'
-      cli_args = 'UserObjects/study/ray_set_end_before_start=true'
-      expect_err = 'Cannot use Ray::setStartingEndPoint\(\) before Ray::setStart\(\).'
-      allow_test_objects = true
-      detail = 'when setting a ray\'s end point before setting its start point,'
-    []
-    [ray_set_end_equal_start]
-      type = RunException
-      input = 'errors.i'
-      cli_args = 'UserObjects/study/ray_set_end_equal_start=true'
-      expect_err = 'End point is equal to the start point in Ray::setStartingEndPoint\(\).'
-      allow_test_objects = true
-      detail = 'when setting a ray\'s end point to the same as its start point,'
-    []
-    [ray_set_end_with_direction]
-      type = RunException
-      input = 'errors.i'
-      cli_args = 'UserObjects/study/ray_set_end_with_direction=true'
-      expect_err = 'Cannot use Ray::setStartingEndPoint\(\) after Ray::setStartingDirection\(\).'
-      allow_test_objects = true
-      detail = 'when setting a ray\'s end point and starting direction,'
-    []
-    [ray_set_distance_with_end]
-      type = RunException
-      input = 'errors.i'
-      cli_args = 'UserObjects/study/ray_set_distance_with_end=true'
-      expect_err = 'Cannot use Ray::setStartingMaxDistance\(\) after Ray::setStartingEndPoint\(\).'
-      allow_test_objects = true
-      detail = 'when setting a ray\'s max distance after setting its end point,'
-    []
-    [ray_set_end_with_distance]
-      type = RunException
-      input = 'errors.i'
-      cli_args = 'UserObjects/study/ray_set_end_with_distance=true'
-      expect_err = 'Cannot use Ray::setStartingEndPoint\(\) after Ray::setStartingMaxDistance\(\)'
-      allow_test_objects = true
-      detail = 'when setting a ray\'s end point after setting its max distance,'
-    []
-    [ray_set_end_fail_bbox]
-      type = RunException
-      input = 'errors.i'
-      cli_args = 'UserObjects/study/ray_set_end_fail_bbox=true'
-      expect_err = 'End point is not within the mesh for Ray::setStartingEndPoint\(\).'
-      allow_test_objects = true
-      detail = 'when setting a ray\'s end point to a point that is not within the mesh bounding box,'
-    []
-    [ray_set_distance_before_start]
-      type = RunException
-      input = 'errors.i'
-      cli_args = 'UserObjects/study/ray_set_distance_before_start=true'
-      expect_err = 'Cannot use Ray::setStartingMaxDistance\(\) before Ray::setStart\(\).'
-      allow_test_objects = true
-      detail = 'when setting a ray\'s starting maximum distance before setting its start information,'
-    []
-    [ray_set_distance_negative]
-      type = RunException
-      input = 'errors.i'
-      cli_args = 'UserObjects/study/ray_set_distance_negative=true'
-      expect_err = 'Starting max distance is <= 0'
-      allow_test_objects = true
-      detail = 'when setting a ray\'s starting maximum distance to a negative value,'
     []
     [ray_kernel_coverage_check]
       type = RunException
@@ -389,6 +239,49 @@
       expect_err = 'Subdomain 1337 not found in subdomain hmax map'
       allow_test_objects = true
       detail = 'when requesting a subdomain hmax for an invalid subdomain'
+    []
+    [elem_extrema_build_edge]
+      type = RunException
+      input = 'errors.i'
+      cli_args = 'UserObjects/study/elem_extrema_build_edge=true'
+      expect_err = 'Element does not contain vertices in ElemExtrema'
+      allow_test_objects = true
+      # will hit assertions before the error outside of opt
+      method = opt
+      detail = 'building an element extrema edge for invalid vertices'
+    []
+    [get_elem_normals_unimplemented]
+      type = RunException
+      input = 'errors.i'
+      cli_args = 'UserObjects/study/get_elem_normals_unimplemented=true'
+      expect_err = 'Unimplemented element normal caching in RayTracingStudyTest::getElemNormals\(\)'
+      allow_test_objects = true
+      detail = 'requesting cached element normals when element normal caching has not been setup'
+    []
+    [ray_data_index_other_exists]
+      type = RunException
+      input = 'errors.i'
+      cli_args = 'UserObjects/study/ray_data_index_other_exists=true'
+      expect_err = 'However, Ray aux data with said name was found.'
+      allow_test_objects = true
+      detail = 'getting the index of ray data when aux data with the same name exists'
+    []
+    [ray_data_aux_index_other_exists]
+      type = RunException
+      input = 'errors.i'
+      cli_args = 'UserObjects/study/ray_data_aux_index_other_exists=true'
+      expect_err = 'However, Ray non-aux data with said name was found.'
+      allow_test_objects = true
+      detail = 'getting the index of ray aux data when data with the same name exists'
+    []
+    [register_ray_again]
+      type = RunException
+      input = 'errors.i'
+      cli_args = 'UserObjects/study/type=RayTracingStudyWithRegistrationTest
+                  UserObjects/study/register_ray_again=true'
+      expect_err = 'A ray with the name "foo" is already registered'
+      allow_test_objects = true
+      detail = 'registering a ray more than once with the same name'
     []
   []
 []

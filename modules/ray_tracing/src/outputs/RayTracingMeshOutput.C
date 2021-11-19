@@ -98,11 +98,8 @@ RayTracingMeshOutput::filename()
 }
 
 void
-RayTracingMeshOutput::output(const ExecFlagType & type)
+RayTracingMeshOutput::output(const ExecFlagType & /* type */)
 {
-  if (!shouldOutput(type))
-    return;
-
   // Do we even have any traces?
   auto num_segments = _study.getCachedTraces().size();
   _communicator.sum(num_segments);
