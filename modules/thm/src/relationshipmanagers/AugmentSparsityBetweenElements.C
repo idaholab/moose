@@ -5,8 +5,6 @@ registerMooseObject("THMApp", AugmentSparsityBetweenElements);
 
 using namespace libMesh;
 
-defineLegacyParams(AugmentSparsityBetweenElements);
-
 InputParameters
 AugmentSparsityBetweenElements::validParams()
 {
