@@ -30,6 +30,12 @@
   []
 []
 
+[Reporters]
+  [dummy]
+    type=OptimizationData
+  []
+[]
+
 [BCs]
   [left]
     type = DirichletBC
@@ -92,6 +98,7 @@
 []
 
 [Outputs]
+  json=true
   console = true
   exodus = true
   file_base = 'forward'

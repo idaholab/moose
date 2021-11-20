@@ -3,8 +3,8 @@
 InputParameters
 OptimizationReporter::validParams()
 {
-  InputParameters params = GeneralReporter::validParams();
-  params.addClassDescription("Base class for reporter holding optimization information.");
+  InputParameters params = OptimizationData::validParams();
+  params.addClassDescription("Base class for optimization reporter communication.");
   params.addRequiredParam<std::vector<ReporterValueName>>(
       "parameter_names", "List of parameter names, one for each group of parameters.");
   params.addRequiredParam<std::vector<dof_id_type>>(
@@ -28,7 +28,7 @@ OptimizationReporter::validParams()
 }
 
 OptimizationReporter::OptimizationReporter(const InputParameters & parameters)
-  : GeneralReporter(parameters),
+  : OptimizationData(parameters),
     _parameter_names(getParam<std::vector<ReporterValueName>>("parameter_names")),
     _nparam(_parameter_names.size()),
     _nvalues(getParam<std::vector<dof_id_type>>("num_values")),
@@ -37,17 +37,14 @@ OptimizationReporter::OptimizationReporter(const InputParameters & parameters)
     _upper_bounds(getParam<std::vector<Real>>("upper_bounds")),
     _measurement_values(getParam<std::vector<Real>>("measurement_values")),
     _measurement_points(getParam<std::vector<Point>>("measurement_points")),
-
-    _measurement_data(declareValueByName<std::vector<std::tuple<Point, Real, Real, Real>>>(
-        "measurement_data", REPORTER_MODE_REPLICATED)),
     _misfit(declareValueByName<std::vector<Real>>("misfit", REPORTER_MODE_REPLICATED))
 
 {
   for (size_t i = 0; i < _measurement_points.size(); ++i)
-    _measurement_data.push_back(std::make_tuple(_measurement_points[i],
-                                                _measurement_values[i],
-                                                std::numeric_limits<Real>::max(),
-                                                std::numeric_limits<Real>::max()));
+    _optimization_data.push_back(std::make_tuple(_measurement_points[i],
+                                                 _measurement_values[i],
+                                                 std::numeric_limits<Real>::max(),
+                                                 std::numeric_limits<Real>::max()));
 
   if (_parameter_names.size() != _nvalues.size())
     paramError("num_parameters",
@@ -131,63 +128,3 @@ OptimizationReporter::computeObjective()
 
   return val;
 }
-
-namespace libMesh
-{
-void
-to_json(nlohmann::json & json, const std::vector<std::tuple<Point, Real, Real, Real>> & value)
-{
-  Point measurement_point;
-  Real measurement_value;
-  Real simualtion_value;
-  Real misfit_value;
-
-  for (auto & v : value)
-  {
-    std::stringstream ss;
-    std::tie(measurement_point, measurement_value, simualtion_value, misfit_value) = v;
-    ss << "(";
-    for (const auto & i : make_range(LIBMESH_DIM))
-    {
-      ss << measurement_point(i);
-      if (i < (LIBMESH_DIM - 1))
-        ss << ", ";
-    }
-    ss << ")";
-    json["measurement_point"].push_back(ss.str());
-    json["measurement_value"].push_back(measurement_value);
-    json["simualtion_value"].push_back(simualtion_value);
-    json["misfit_value"].push_back(misfit_value);
-  }
-}
-}
-//
-template <>
-void
-dataStore(std::ostream & stream, std::tuple<Point, Real, Real, Real> & v, void * context)
-{
-  Point measurement_point;
-  Real measurement_value;
-  Real simualtion_value;
-  Real misfit_value;
-  std::tie(measurement_point, measurement_value, simualtion_value, misfit_value) = v;
-  dataStore(stream, measurement_point, context);
-  dataStore(stream, measurement_value, context);
-  dataStore(stream, simualtion_value, context);
-  dataStore(stream, misfit_value, context);
-};
-
-template <>
-void
-dataLoad(std::istream & stream, std::tuple<Point, Real, Real, Real> & v, void * context)
-{
-  Point measurement_point;
-  Real measurement_value;
-  Real simualtion_value;
-  Real misfit_value;
-  std::tie(measurement_point, measurement_value, simualtion_value, misfit_value) = v;
-  dataLoad(stream, measurement_point, context);
-  dataLoad(stream, measurement_value, context);
-  dataLoad(stream, simualtion_value, context);
-  dataLoad(stream, misfit_value, context);
-};

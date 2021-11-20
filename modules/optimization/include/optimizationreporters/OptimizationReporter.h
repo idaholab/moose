@@ -1,13 +1,13 @@
 #pragma once
 
-#include "GeneralReporter.h"
+#include "OptimizationData.h"
 
 #include "OptimizeSolve.h"
 #include "libmesh/petsc_vector.h"
 #include "libmesh/petsc_matrix.h"
 #include "DataIO.h"
 
-class OptimizationReporter : public GeneralReporter
+class OptimizationReporter : public OptimizationData
 {
 public:
   static InputParameters validParams();
@@ -83,9 +83,6 @@ protected:
   /// Measurement points and values
   const std::vector<Real> & _measurement_values;
   const std::vector<Point> & _measurement_points;
-  // fixme this should be a struct.  The order is measurement point, measurement value, simulation
-  // value, misfit
-  std::vector<std::tuple<Point, Real, Real, Real>> & _measurement_data;
 
   /// vector of misfit data
   const std::vector<Real> & _misfit;
@@ -105,21 +102,3 @@ protected:
 private:
   friend class OptimizeSolve;
 };
-
-// fixme
-// nothing below is implemented and it probalby should be
-namespace libMesh
-{
-void to_json(nlohmann::json & json, const std::vector<std::tuple<Point, Real, Real, Real>> & value);
-}
-
-/**
- * Store and load methods for measurement_data tuple,
- * which do nothing because I don't know if we need them
- */
-///@{
-template <>
-void dataStore(std::ostream & stream, std::tuple<Point, Real, Real, Real> & v, void * context);
-template <>
-void dataLoad(std::istream & stream, std::tuple<Point, Real, Real, Real> & v, void * context);
-///@}

@@ -36,6 +36,13 @@
 []
 
 [Transfers]
+  [toforward_dummy]
+    type = MultiAppReporterTransfer
+    multi_app = forward
+    direction = to_multiapp
+    from_reporters = 'OptimizationReporter/optimization_data'
+    to_reporters = 'dummy/optimization_data'
+  []
   [toforward]
     type = MultiAppReporterTransfer
     multi_app = forward
