@@ -10,13 +10,6 @@
 #pragma once
 #include "Material.h"
 
-
-// Forward Declarations
-class ExampleMaterial;
-
-template <>
-InputParameters validParams<ExampleMaterial>();
-
 /**
  * Example material class that defines a few properties.
  */
@@ -25,14 +18,15 @@ class ExampleMaterial : public Material
 public:
   ExampleMaterial(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual void computeQpProperties() override;
 
 private:
-  Real _input_diffusivity;
-  Real _input_time_coefficient;
+  const Real _input_diffusivity;
+  const Real _input_time_coefficient;
 
   MaterialProperty<Real> & _diffusivity;
   MaterialProperty<Real> & _time_coefficient;
 };
-

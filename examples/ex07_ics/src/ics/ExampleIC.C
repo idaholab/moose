@@ -11,11 +11,10 @@
 
 registerMooseObject("ExampleApp", ExampleIC);
 
-template <>
 InputParameters
-validParams<ExampleIC>()
+ExampleIC::validParams()
 {
-  InputParameters params = validParams<InitialCondition>();
+  InputParameters params = InitialCondition::validParams();
   params.addRequiredParam<Real>("coefficient", "The value of the initial condition");
   return params;
 }

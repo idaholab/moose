@@ -13,11 +13,10 @@
 
 registerMooseObject("ExampleApp", ExampleImplicitEuler);
 
-template <>
 InputParameters
-validParams<ExampleImplicitEuler>()
+ExampleImplicitEuler::validParams()
 {
-  InputParameters params = validParams<TimeDerivative>();
+  InputParameters params = TimeDerivative::validParams();
   return params;
 }
 

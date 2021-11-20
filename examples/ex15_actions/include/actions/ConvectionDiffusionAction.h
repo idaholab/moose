@@ -16,9 +16,7 @@ class ConvectionDiffusionAction : public Action
 public:
   ConvectionDiffusionAction(InputParameters params);
 
+  static InputParameters validParams();
+
   virtual void act() override;
 };
-
-template <>
-InputParameters validParams<ConvectionDiffusionAction>();
-

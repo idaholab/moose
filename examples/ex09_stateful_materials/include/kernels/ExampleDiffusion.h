@@ -11,16 +11,12 @@
 
 #include "Diffusion.h"
 
-// Forward Declarations
-class ExampleDiffusion;
-
-template <>
-InputParameters validParams<ExampleDiffusion>();
-
 class ExampleDiffusion : public Diffusion
 {
 public:
   ExampleDiffusion(const InputParameters & parameters);
+
+  static InputParameters validParams();
 
 protected:
   virtual Real computeQpResidual() override;
@@ -28,4 +24,3 @@ protected:
 
   const MaterialProperty<Real> & _diffusivity;
 };
-

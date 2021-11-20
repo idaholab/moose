@@ -8,14 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #pragma once
+
 #include "Material.h"
-
-
-// Forward Declarations
-class ExampleMaterial;
-
-template <>
-InputParameters validParams<ExampleMaterial>();
 
 /**
  * Example material class that defines a few properties.
@@ -24,6 +18,8 @@ class ExampleMaterial : public Material
 {
 public:
   ExampleMaterial(const InputParameters & parameters);
+
+  static InputParameters validParams();
 
 protected:
   virtual void initQpStatefulProperties() override;
@@ -39,4 +35,3 @@ private:
   MaterialProperty<Real> & _diffusivity;
   const MaterialProperty<Real> & _diffusivity_old;
 };
-

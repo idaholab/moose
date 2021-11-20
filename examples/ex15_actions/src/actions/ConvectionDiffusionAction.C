@@ -14,11 +14,10 @@
 
 registerMooseAction("ExampleApp", ConvectionDiffusionAction, "add_kernel");
 
-template <>
 InputParameters
-validParams<ConvectionDiffusionAction>()
+ConvectionDiffusionAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addRequiredParam<std::vector<NonlinearVariableName>>(
       "variables", "The names of the convection and diffusion variables in the simulation");
 

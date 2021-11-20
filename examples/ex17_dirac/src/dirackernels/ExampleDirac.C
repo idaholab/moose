@@ -11,11 +11,10 @@
 
 registerMooseObject("ExampleApp", ExampleDirac);
 
-template <>
 InputParameters
-validParams<ExampleDirac>()
+ExampleDirac::validParams()
 {
-  InputParameters params = validParams<DiracKernel>();
+  InputParameters params = DiracKernel::validParams();
   params.addRequiredParam<Real>("value", "The value of the point source");
   params.addRequiredParam<Point>("point", "The x,y,z coordinates of the point");
   return params;

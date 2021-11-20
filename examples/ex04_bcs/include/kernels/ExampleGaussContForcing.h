@@ -11,15 +11,12 @@
 
 #include "Kernel.h"
 
-class ExampleGaussContForcing;
-
-template <>
-InputParameters validParams<ExampleGaussContForcing>();
-
 class ExampleGaussContForcing : public Kernel
 {
 public:
   ExampleGaussContForcing(const InputParameters & parameters);
+
+  static InputParameters validParams();
 
 protected:
   virtual Real computeQpResidual();
@@ -40,4 +37,3 @@ protected:
   const Real _z_min;
   const Real _z_max;
 };
-

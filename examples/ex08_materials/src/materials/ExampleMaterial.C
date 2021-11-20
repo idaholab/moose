@@ -11,11 +11,10 @@
 
 registerMooseObject("ExampleApp", ExampleMaterial);
 
-template <>
 InputParameters
-validParams<ExampleMaterial>()
+ExampleMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
 
   // Allow users to specify vectors defining the points of a piecewise function formed via linear
   // interpolation.

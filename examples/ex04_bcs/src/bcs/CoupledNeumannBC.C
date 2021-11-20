@@ -11,11 +11,10 @@
 
 registerMooseObject("ExampleApp", CoupledNeumannBC);
 
-template <>
 InputParameters
-validParams<CoupledNeumannBC>()
+CoupledNeumannBC::validParams()
 {
-  InputParameters params = validParams<IntegratedBC>();
+  InputParameters params = IntegratedBC::validParams();
 
   // Specify input parameters that we want users to be able to set:
   params.addParam<Real>("alpha", 1.0, "Value multiplied by the coupled value on the boundary");

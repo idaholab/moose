@@ -11,11 +11,10 @@
 
 registerMooseObject("ExampleApp", BlockAverageDiffusionMaterial);
 
-template <>
 InputParameters
-validParams<BlockAverageDiffusionMaterial>()
+BlockAverageDiffusionMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
 
   // UserObjectName is the MOOSE type used for getting the name of a UserObject from the input file
   params.addRequiredParam<UserObjectName>(

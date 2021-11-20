@@ -11,11 +11,10 @@
 
 registerMooseObject("ExampleApp", ExampleMaterial);
 
-template <>
 InputParameters
-validParams<ExampleMaterial>()
+ExampleMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
 
   // Vectors for Linear Interpolation
   params.addRequiredParam<std::vector<Real>>(

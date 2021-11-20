@@ -11,17 +11,13 @@
 
 #include "MooseApp.h"
 
-class ExampleApp;
-
-template <>
-InputParameters validParams<ExampleApp>();
-
 class ExampleApp : public MooseApp
 {
 public:
   ExampleApp(InputParameters parameters);
 
+  static InputParameters validParams();
+
   static void registerApps();
   static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
 };
-
