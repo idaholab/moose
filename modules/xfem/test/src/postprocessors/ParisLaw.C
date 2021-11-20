@@ -19,11 +19,10 @@
 
 registerMooseObject("MooseApp", ParisLaw);
 
-template <>
 InputParameters
-validParams<ParisLaw>()
+ParisLaw::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
   params.addClassDescription("Computes the crack extension size at all active crack front points.");
   params.addRequiredParam<Real>(
       "max_growth_size",

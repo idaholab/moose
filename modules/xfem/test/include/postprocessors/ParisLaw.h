@@ -12,16 +12,12 @@
 #include "GeneralPostprocessor.h"
 #include "CrackMeshCut3DUserObject.h"
 
-// Forward Declarations
-class ParisLaw;
-
-template <>
-InputParameters validParams<ParisLaw>();
-
 class ParisLaw : public GeneralPostprocessor
 {
 public:
   ParisLaw(const InputParameters & parameters);
+
+  static InputParameters validParams();
 
   virtual void initialize() override;
   virtual void execute() override;
