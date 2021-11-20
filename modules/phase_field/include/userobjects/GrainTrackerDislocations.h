@@ -17,11 +17,7 @@
 #include "GrainDataTracker.h"
 #include "DislocationDensityFileReader.h"
 
-class GrainTrackerDislocations;
 class DislocationDensityFileReader;
-
-template <>
-InputParameters validParams<GrainTrackerDislocations>();
 
 /**
  * Manage a list of dislocation densities for the grains
@@ -30,6 +26,8 @@ class GrainTrackerDislocations : public GrainDataTracker<Real>
 {
 public:
   GrainTrackerDislocations(const InputParameters & parameters);
+
+  static InputParameters validParams();
 
   /// add a new grain and update the formation time
   virtual void newGrainCreated(unsigned int new_grain_id);

@@ -17,10 +17,6 @@
 #include "ACGrGrBase.h"
 #include "GrainTrackerDislocations.h"
 
-class ACPolycrystalDislocationEnergy;
-
-template <>
-InputParameters validParams<ACPolycrystalDislocationEnergy>();
 
 /**
  * This kernel calculates the residual for grain growth driven by dislocation density.
@@ -29,6 +25,8 @@ class ACPolycrystalDislocationEnergy : public ACGrGrBase
 {
 public:
   ACPolycrystalDislocationEnergy(const InputParameters & parameters);
+
+  static InputParameters validParams();
 
 protected:
   virtual Real computeDFDOP(PFFunctionType type);

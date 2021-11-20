@@ -16,10 +16,6 @@
 
 #include "PolycrystalKernelAction.h"
 
-class PolycrystalDislocationKernelAction;
-
-template <>
-InputParameters validParams<PolycrystalDislocationKernelAction>();
 
 /**
  * Action that adds the polycrystal dislocation deformation energy to the
@@ -29,6 +25,8 @@ class PolycrystalDislocationKernelAction : public PolycrystalKernelAction
 {
 public:
   PolycrystalDislocationKernelAction(const InputParameters & params);
+
+  static InputParameters validParams();
 
   virtual void act();
 

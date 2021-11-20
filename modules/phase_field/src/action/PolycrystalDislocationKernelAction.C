@@ -18,11 +18,10 @@
 
 registerMooseAction("MarmotApp", PolycrystalDislocationKernelAction, "add_kernel");
 
-template <>
 InputParameters
-validParams<PolycrystalDislocationKernelAction>()
+PolycrystalDislocationKernelAction::validParams()
 {
-  InputParameters params = validParams<PolycrystalKernelAction>();
+  InputParameters params = PolycrystalKernelAction::validParams();
   params.addRequiredParam<std::string>(
       "grain_tracker",
       "the grain tracker user object to get values from for dislocation densities");

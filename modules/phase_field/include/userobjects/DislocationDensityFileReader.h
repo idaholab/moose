@@ -17,10 +17,6 @@
 #include "GeneralUserObject.h"
 #include <vector>
 
-class DislocationDensityFileReader;
-
-template <>
-InputParameters validParams<DislocationDensityFileReader>();
 
 /**
  * Read a file to provide initial dislocation densities to grains
@@ -29,6 +25,8 @@ class DislocationDensityFileReader : public GeneralUserObject
 {
 public:
   DislocationDensityFileReader(const InputParameters & parameters);
+
+  static InputParameters validParams();
 
   /// return the dislocation density
   virtual const Real & getDensity(unsigned int) const;

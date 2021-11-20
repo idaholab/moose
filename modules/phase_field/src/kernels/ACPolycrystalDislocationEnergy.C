@@ -17,11 +17,10 @@
 
 registerMooseObject("MarmotApp", ACPolycrystalDislocationEnergy);
 
-template <>
 InputParameters
-validParams<ACPolycrystalDislocationEnergy>()
+ACPolycrystalDislocationEnergy::validParams()
 {
-  InputParameters params = validParams<ACGrGrBase>();
+  InputParameters params = ACGrGrBase::validParams();
 
   params.addRequiredParam<UserObjectName>("grain_tracker",
                                           "The GrainTracker UserObject to get values from.");

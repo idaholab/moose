@@ -16,11 +16,10 @@
 
 registerMooseObject("MarmotApp", GrainTrackerDislocations);
 
-template <>
 InputParameters
-validParams<GrainTrackerDislocations>()
+GrainTrackerDislocations::validParams()
 {
-  InputParameters params = validParams<GrainTracker>();
+  InputParameters params = GrainTracker::validParams();
 
   params.addClassDescription(
       "GrainTracker extension with grain dislocation density and formation time");

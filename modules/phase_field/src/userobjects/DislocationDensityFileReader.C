@@ -18,11 +18,10 @@
 
 registerMooseObject("MarmotApp", DislocationDensityFileReader);
 
-template <>
 InputParameters
-validParams<DislocationDensityFileReader>()
+DislocationDensityFileReader::validParams()
 {
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = GeneralUserObject::validParams();
   params.addClassDescription(
       "Read dislocation density data from a file and provide it to other objects.");
   params.addRequiredParam<FileName>("file_name", "dislocation density data file name");
