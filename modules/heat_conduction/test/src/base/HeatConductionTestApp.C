@@ -13,11 +13,10 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
-template <>
 InputParameters
-validParams<HeatConductionTestApp>()
+HeatConductionTestApp::validParams()
 {
-  InputParameters params = validParams<HeatConductionApp>();
+  InputParameters params = HeatConductionApp::validParams();
   return params;
 }
 

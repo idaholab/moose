@@ -10,7 +10,8 @@
 #pragma once
 
 #include "Material.h"
-#include "Function.h"
+
+class Function;
 
 /**
  * Double ellipsoid heat source distribution.

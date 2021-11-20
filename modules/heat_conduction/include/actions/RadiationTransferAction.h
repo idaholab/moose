@@ -17,6 +17,9 @@ class RadiationTransferAction : public Action
 {
 public:
   RadiationTransferAction(const InputParameters & params);
+
+  static InputParameters validParams();
+
   virtual void act() override;
 
 protected:

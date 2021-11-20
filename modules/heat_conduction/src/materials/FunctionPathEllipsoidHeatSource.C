@@ -9,11 +9,12 @@
 
 #include "FunctionPathEllipsoidHeatSource.h"
 
+#include "Function.h"
+
 registerMooseObject("HeatConductionApp", FunctionPathEllipsoidHeatSource);
 
-template <>
 InputParameters
-validParams<FunctionPathEllipsoidHeatSource>()
+FunctionPathEllipsoidHeatSource::validParams()
 {
   InputParameters params = Material::validParams();
   params.addRequiredParam<Real>("power", "power");

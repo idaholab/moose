@@ -11,8 +11,6 @@
 
 #include "InterfaceMaterial.h"
 
-#include "Function.h"
-
 // Forward Declarations
 class Function;
 
@@ -20,6 +18,8 @@ class SideSetHeatTransferMaterial : public InterfaceMaterial
 {
 public:
   SideSetHeatTransferMaterial(const InputParameters & parameters);
+
+  static InputParameters validParams();
 
 protected:
   virtual void computeQpProperties() override;

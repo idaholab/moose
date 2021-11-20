@@ -11,8 +11,6 @@
 
 #include "InterfaceKernel.h"
 
-// Forward Declarations
-
 /**
  * DG kernel for interfacing diffusion between two variables on adjacent blocks
  */
@@ -20,6 +18,8 @@ class SideSetHeatTransferKernel : public InterfaceKernel
 {
 public:
   SideSetHeatTransferKernel(const InputParameters & parameters);
+
+  static InputParameters validParams();
 
 protected:
   virtual Real computeQpResidual(Moose::DGResidualType type) override;
