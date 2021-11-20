@@ -16,6 +16,8 @@ class NodalFrictionalConstraint : public NodalConstraint
 public:
   NodalFrictionalConstraint(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void meshChanged() override;
 
   virtual void computeResidual(NumericVector<Number> & residual) override;
