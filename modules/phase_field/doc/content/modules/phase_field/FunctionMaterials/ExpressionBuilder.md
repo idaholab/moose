@@ -69,10 +69,10 @@ protected:
 The free energy expression would then be built in the constructor.
 
 ```cpp
-template<>
-InputParameters validParams<ExampleFreeEnergy>()
+InputParameters
+ExampleFreeEnergy::validParams()
 {
-  InputParameters params = validParams<DerivativeParsedMaterialHelper>();
+  InputParameters params = DerivativeParsedMaterialHelper::validParams();
   params.addClassDescription("Example derivative free energy material");
   params.addRequiredCoupledVar("T", "Temperature");
   params.addRequiredCoupledVar("c", "Concentration");
