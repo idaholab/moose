@@ -19,40 +19,6 @@
 class UserObject;
 
 /**
- * Because this is a templated base class and template partial
- * specializations are not allowed... this class instead defines
- * a new templated function that is templated on the type of
- * UserObject that will be at each nearest point.
- *
- * If you inherit from this class... then call this function
- * to start your parameters for the new class
- */
-template <typename UserObjectType, typename BaseType>
-InputParameters
-nearestPointBaseValidParams()
-{
-  InputParameters params = validParams<BaseType>();
-
-  params.addParam<std::vector<Point>>("points",
-                                      "Computations will be lumped into values at these points.");
-  params.addParam<FileName>("points_file",
-                            "A filename that should be looked in for points. Each "
-                            "set of 3 values in that file will represent a Point.  "
-                            "This and 'points' cannot be both supplied.");
-
-  MooseEnum distnorm("point=0 radius=1", "point");
-  params.addParam<MooseEnum>(
-      "dist_norm", distnorm, "To specify whether the distance is defined based on point or radius");
-  MooseEnum axis("x=0 y=1 z=2", "z");
-  params.addParam<MooseEnum>("axis", axis, "The axis around which the radius is determined");
-
-  // Add in the valid parameters
-  params += validParams<UserObjectType>();
-
-  return params;
-}
-
-/**
  * This UserObject computes averages of a variable storing partial
  * sums for the specified number of intervals in a direction (x,y,z).
  *
@@ -122,6 +88,31 @@ protected:
   using BaseType::name;
   using BaseType::processor_id;
 };
+
+template <typename UserObjectType, typename BaseType>
+InputParameters
+NearestPointBase<UserObjectType, BaseType>::validParams()
+{
+  InputParameters params = BaseType::validParams();
+
+  params.addParam<std::vector<Point>>("points",
+                                      "Computations will be lumped into values at these points.");
+  params.addParam<FileName>("points_file",
+                            "A filename that should be looked in for points. Each "
+                            "set of 3 values in that file will represent a Point.  "
+                            "This and 'points' cannot be both supplied.");
+
+  MooseEnum distnorm("point=0 radius=1", "point");
+  params.addParam<MooseEnum>(
+      "dist_norm", distnorm, "To specify whether the distance is defined based on point or radius");
+  MooseEnum axis("x=0 y=1 z=2", "z");
+  params.addParam<MooseEnum>("axis", axis, "The axis around which the radius is determined");
+
+  // Add in the valid parameters
+  params += UserObjectType::validParams();
+
+  return params;
+}
 
 template <typename UserObjectType, typename BaseType>
 NearestPointBase<UserObjectType, BaseType>::NearestPointBase(const InputParameters & parameters)
@@ -287,4 +278,12 @@ NearestPointBase<UserObjectType, BaseType>::spatialPoints() const
   }
 
   return points;
+}
+
+// Deprecated method that will be removed in #19440
+template <typename UserObjectType, typename BaseType>
+InputParameters
+nearestPointBaseValidParams()
+{
+  return NearestPointBase<UserObjectType, BaseType>::validParams();
 }
