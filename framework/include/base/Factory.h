@@ -269,7 +269,6 @@ public:
    * @return Parameters of the object
    */
   InputParameters getValidParams(const std::string & name);
-  InputParameters getADValidParams(const std::string & name);
 
   /**
    * Build an object (must be registered) - THIS METHOD IS DEPRECATED (Use create<T>())
