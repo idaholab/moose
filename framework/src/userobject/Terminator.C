@@ -24,8 +24,8 @@ InputParameters
 Terminator::validParams()
 {
   InputParameters params = GeneralUserObject::validParams();
-  params.addClassDescription("Requests termination of the current solve based on the values of "
-                             "Postprocessor value(s) via a logical expression.");
+  params.addClassDescription("Requests termination of the current solve based on the evaluation of"
+                             " a parsed logical expression of the Postprocessor value(s).");
   params.addRequiredCustomTypeParam<std::string>(
       "expression",
       "FunctionExpression",
@@ -35,7 +35,8 @@ Terminator::validParams()
   params.addParam<MooseEnum>(
       "fail_mode",
       failModeOption,
-      "Abort entire simulation (HARD) or just the current time step (SOFT).");
+      "Abort entire simulation (HARD), just the current time step (SOFT) or mark step as "
+      "converged (PASS).");
   params.addParam<std::string>(
       "message", "An optional message to be output when the termination condition is triggered");
 
@@ -60,7 +61,8 @@ Terminator::Terminator(const InputParameters & parameters)
     _fp()
 {
   // sanity check the parameters
-  if (_error_level == ErrorLevel::ERROR && _fail_mode == FailMode::SOFT)
+  if (_error_level == ErrorLevel::ERROR &&
+      (_fail_mode == FailMode::SOFT || _fail_mode == FailMode::PASS))
     paramError("error_level", "Setting the error level to ERROR always causes a hard failure.");
   if (_error_level != ErrorLevel::NONE && !isParamValid("message"))
     paramError("error_level",

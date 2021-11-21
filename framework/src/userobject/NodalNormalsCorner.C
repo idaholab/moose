@@ -85,7 +85,7 @@ NodalNormalsCorner::execute()
                                                .number(),
                                            0);
 
-      // substitute the normal form the face, we are going to have at least one normal every time
+      // substitute the normal from the face, we are going to have at least one normal every time
       sln.add(dof_x, _normals[0](0));
       sln.add(dof_y, _normals[0](1));
       sln.add(dof_z, _normals[0](2));

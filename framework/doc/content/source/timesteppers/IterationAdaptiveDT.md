@@ -4,6 +4,10 @@
 
 ## Description
 
+!alert note
+The `IterationAdaptiveDT` is often simply used to have an exponentially growing time step. For this
+purpose, simply omit all the linear iteration related parameters.
+
 The `IterationAdaptiveDT` Time Stepper provides a means to adapt the time step
 size based on the difficulty of the solution.
 
