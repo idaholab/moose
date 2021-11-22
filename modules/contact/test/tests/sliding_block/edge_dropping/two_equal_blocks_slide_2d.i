@@ -72,12 +72,6 @@
 []
 
 [Variables]
-  [disp_x]
-    block = '1 2'
-  []
-  [disp_y]
-    block = '1 2'
-  []
   [normal_lm]
     block = 'secondary_lower'
     use_dual = true

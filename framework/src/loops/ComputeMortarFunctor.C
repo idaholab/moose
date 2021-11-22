@@ -153,7 +153,7 @@ ComputeMortarFunctor::operator()()
       }
 
       // If edge dropping case we need JxW on the msm to compute dual shape functions
-      if (_assembly.needDual() /*&& edge_dropping*/)
+      if (_assembly.needDual())
         std::copy(std::begin(_JxW_msm), std::end(_JxW_msm), std::back_inserter(JxW));
 
 #ifndef NDEBUG
@@ -168,14 +168,6 @@ ComputeMortarFunctor::operator()()
         mooseAssert(JxW.size() == expected_length, "Fewer than expected JxW values computed");
 #endif
     }
-
-    // Note that if we aren't on an edge-dropping element it would be better to assemble
-    // with standard quadrature. Detecting edge dropping is a bit tricky though, in 3D we
-    // can't simply compare volume of mortar segments to secondary since the linearized elements
-    // don't have the same volume as the warped secondary elements. In 3D we could get the info
-    // from mortar_segment_helper->remainder (would need to add up for all sub-elements). In 2D
-    // we could just compare volumes like mentioned before. This only matters if we decide to
-    // treat non-edge dropping (interior) elements different than edge dropping ones.
 
     // Reinit dual shape coeffs if dual shape functions needed
     if (_assembly.needDual())
@@ -488,7 +480,7 @@ ComputeMortarFunctor::projectQPoints3d(const Elem * msm_elem,
       {
         if (q_pts.back()(0) < 0 || q_pts.back()(1) < 0 || q_pts.back()(0) + q_pts.back()(1) > 1)
         {
-          mooseError("Quadrature point: ", q_pts.back(), " out of bounds, truncating.");
+          mooseException("Quadrature point: ", q_pts.back(), " out of bounds, truncating.");
         }
       }
       else if (primal_elem->type() == QUAD4 || primal_elem->type() == QUAD9)
@@ -496,7 +488,7 @@ ComputeMortarFunctor::projectQPoints3d(const Elem * msm_elem,
         if (q_pts.back()(0) < -1 || q_pts.back()(0) > 1 || q_pts.back()(1) < -1 ||
             q_pts.back()(1) > 1)
         {
-          mooseError("Quadrature point: ", q_pts.back(), " out of bounds, truncating");
+          mooseException("Quadrature point: ", q_pts.back(), " out of bounds, truncating");
         }
       }
     }
