@@ -1,6 +1,6 @@
-{% set build = 8 %}
+{% set build = 0 %}
 {% set strbuild = "build_" + build|string %}
-{% set version = "3.3.2" %}
+{% set version = "3.4.2" %}
 
 package:
   name: moose-mpich
@@ -9,7 +9,7 @@ package:
 source:
   fn: mpich-{{ version }}.tar.gz
   url: https://www.mpich.org/static/downloads/{{ version }}/mpich-{{ version }}.tar.gz
-  sha256: 4bfaf8837a54771d3e4922c84071ef80ffebddbb6971a006038d91ee7ef959b9
+  sha256: 5c19bea8b84e8d74cca5f047e82b147ff3fba096144270e3911ad623d6c587bf
 
 build:
   number: {{ build }}
@@ -27,6 +27,7 @@ requirements:
     - {{ moose_impl_xx }}       # [linux]
     - {{ moose_libgcc }}        # [linux]
     - {{ moose_libstd }}        # [linux]
+    - {{ moose_sysroot }}       # [linux]
     - {{ moose_libcxx }}        # [osx]
     - {{ moose_libclang }}      # [osx]
     - {{ moose_openmp }}        # [osx]
@@ -47,6 +48,7 @@ requirements:
     - {{ moose_impl_xx }}       # [linux]
     - {{ moose_libgcc }}        # [linux]
     - {{ moose_libstd }}        # [linux]
+    - {{ moose_sysroot }}       # [linux]
     - {{ moose_libcxx }}        # [osx]
     - {{ moose_libclang }}      # [osx]
     - {{ moose_openmp }}        # [osx]

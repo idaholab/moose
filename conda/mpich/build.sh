@@ -25,7 +25,7 @@ export LIBRARY_PATH="$PREFIX/lib"
 if [[ $(uname) == Darwin ]]; then
     if [[ $target_platform == osx-arm64 ]]; then
         TUNING="-I$PREFIX/include"
-        OPTIONS="--disable-opencl --enable-cxx --enable-fortran --with-device=ch3"
+        OPTIONS="--disable-opencl --enable-cxx --enable-fortran"
         export pac_cv_f77_accepts_F=yes
         export pac_cv_f77_flibs_valid=unknown
         export pac_cv_f77_sizeof_double_precision=8
@@ -75,6 +75,7 @@ fi
             --enable-fast=O2 \
             --enable-debuginfo \
             --enable-two-level-namespace \
+            --with-device=ch3 \
             CC="${CC}" CXX="${CXX}" FC="${FC}" F77="${FC}" F90="" \
             CFLAGS="${TUNING}" CXXFLAGS="${TUNING}" FFLAGS="${TUNING}" LDFLAGS="${LDFLAGS}" \
             FCFLAGS="${TUNING}" F90FLAGS="" F77FLAGS="" \
