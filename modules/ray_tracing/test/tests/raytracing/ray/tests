@@ -1,0 +1,197 @@
+[Tests]
+  issues = '#16028'
+  design = 'RayTracingStudy.md Ray.md'
+
+  [get_info]
+    type = 'RunApp'
+    input = 'ray_lots.i'
+    allow_test_objects = true
+    cli_args = 'UserObjects/study/get_info=true'
+    requirement = 'The system shall support the console output of information pertaining to a Ray.'
+  []
+
+  [equality]
+    type = RunApp
+    input = 'ray_lots.i'
+    allow_test_objects = true
+    cli_args = "UserObjects/study/equality=true
+                UserObjects/other_study/type=RepeatableRayStudy
+                UserObjects/other_study/start_points='0 0 0'
+                UserObjects/other_study/end_points='0.1 0.1 0'
+                UserObjects/other_study/names=ray
+                UserObjects/other_study/ray_kernel_coverage_check=false"
+    requirement = 'The system shall provide a method for determining the equality of rays'
+    expect_out = 'Ray equality test passed 22440 checks'
+  []
+
+  [errors]
+    requirement = 'The system shall report a reasonable error from a ray when'
+
+    [at_end_without_set]
+      type = RunException
+      input = 'errors.i'
+      cli_args = 'UserObjects/study/at_end_without_set=true'
+      expect_err = 'Cannot use Ray::atEnd\(\) for a Ray that does not have an end set'
+      allow_test_objects = true
+      detail = 'checking if a ray is at its end point without an end point being set'
+    []
+    [end_point_without_set]
+      type = RunException
+      input = 'errors.i'
+      cli_args = 'UserObjects/study/end_point_without_set=true'
+      expect_err = 'Cannot use Ray::endPoint\(\) for a Ray that does not have an end set'
+      allow_test_objects = true
+      detail = 'retrieving a ray\'s end point when its end point has not been set'
+    []
+    [set_start_again]
+      type = RunException
+      input = 'errors.i'
+      cli_args = 'UserObjects/study/set_start_again=true'
+      expect_err = 'Starting point was already set via Ray::setStart\(\) and is being changed.'
+      allow_test_objects = true
+      detail = 'setting a ray\'s start point that has already been set'
+    []
+    [set_direction_again]
+      type = RunException
+      input = 'errors.i'
+      cli_args = 'UserObjects/study/set_direction_again=true'
+      expect_err = 'Cannot change a Ray\'s starting direction using Ray::setStartingDirection\(\)'
+      allow_test_objects = true
+      detail = 'setting a ray\'s starting direction multiple times without clearing it'
+    []
+    [set_start_fail_bbox]
+      type = RunException
+      input = 'errors.i'
+      cli_args = 'UserObjects/study/set_start_fail_bbox=true'
+      expect_err = 'Mesh does not contain starting point.'
+      allow_test_objects = true
+      detail = 'setting a ray\'s start point that is not contained within the mesh bounding box'
+    []
+    [set_side_without_elem]
+      type = RunException
+      input = 'errors.i'
+      cli_args = 'UserObjects/study/set_side_without_elem=true'
+      expect_err = 'Starting incoming side is set but starting element is not set.'
+      allow_test_objects = true
+      detail = 'setting a ray\'s starting incoming side without setting its starting element'
+    []
+    [set_invalid_side]
+      type = RunException
+      input = 'errors.i'
+      cli_args = 'UserObjects/study/set_invalid_side=true'
+      expect_err = 'Starting incoming side is not valid for its starting element.'
+      allow_test_objects = true
+      detail = 'setting a ray\'s starting incoming side to an invalid side'
+    []
+    [set_bad_side]
+      type = RunException
+      input = 'errors.i'
+      cli_args = 'UserObjects/study/set_bad_side=true'
+      expect_err = 'Starting incoming side does not contain the starting point.'
+      allow_test_objects = true
+      detail = 'setting a ray\'s starting incoming side to one that does not contain the starting point'
+    []
+    [set_bad_start]
+      type = RunException
+      input = 'errors.i'
+      cli_args = 'UserObjects/study/set_bad_start=true'
+      expect_err = 'Starting element does not contain the starting point.'
+      allow_test_objects = true
+      detail = 'setting a ray\'s starting point to a point that is not contained within a given starting element'
+    []
+    [set_direction_before_start]
+      type = RunException
+      input = 'errors.i'
+      cli_args = 'UserObjects/study/set_direction_before_start=true'
+      expect_err = 'Cannot use Ray::setStartingDirection\(\) before Ray::setStart\(\).'
+      allow_test_objects = true
+      detail = 'setting a ray\'s starting direction before setting its starting information,'
+    []
+    [set_zero_direction]
+      type = RunException
+      input = 'errors.i'
+      cli_args = 'UserObjects/study/set_zero_direction=true'
+      expect_err = 'Starting direction in Ray::setStartingDirection\(\) is the zero vector.'
+      allow_test_objects = true
+      detail = 'setting a ray\'s starting direction to the zero vector'
+    []
+    [set_end_before_start]
+      type = RunException
+      input = 'errors.i'
+      cli_args = 'UserObjects/study/set_end_before_start=true'
+      expect_err = 'Cannot use Ray::setStartingEndPoint\(\) before Ray::setStart\(\).'
+      allow_test_objects = true
+      detail = 'setting a ray\'s end point before setting its start point'
+    []
+    [set_end_equal_start]
+      type = RunException
+      input = 'errors.i'
+      cli_args = 'UserObjects/study/set_end_equal_start=true'
+      expect_err = 'End point is equal to the start point in Ray::setStartingEndPoint\(\).'
+      allow_test_objects = true
+      detail = 'setting a ray\'s end point to the same as its start point'
+    []
+    [set_end_with_direction]
+      type = RunException
+      input = 'errors.i'
+      cli_args = 'UserObjects/study/set_end_with_direction=true'
+      expect_err = 'Cannot use Ray::setStartingEndPoint\(\) after Ray::setStartingDirection\(\).'
+      allow_test_objects = true
+      detail = 'setting a ray\'s end point and starting direction'
+    []
+    [set_distance_with_end]
+      type = RunException
+      input = 'errors.i'
+      cli_args = 'UserObjects/study/set_distance_with_end=true'
+      expect_err = 'Cannot use Ray::setStartingMaxDistance\(\) after Ray::setStartingEndPoint\(\).'
+      allow_test_objects = true
+      detail = 'setting a ray\'s max distance after setting its end point'
+    []
+    [set_end_with_distance]
+      type = RunException
+      input = 'errors.i'
+      cli_args = 'UserObjects/study/set_end_with_distance=true'
+      expect_err = 'Cannot use Ray::setStartingEndPoint\(\) after Ray::setStartingMaxDistance\(\)'
+      allow_test_objects = true
+      detail = 'setting a ray\'s end point after setting its max distance'
+    []
+    [set_end_fail_bbox]
+      type = RunException
+      input = 'errors.i'
+      cli_args = 'UserObjects/study/set_end_fail_bbox=true'
+      expect_err = 'End point is not within the mesh for Ray::setStartingEndPoint\(\).'
+      allow_test_objects = true
+      detail = 'setting a ray\'s end point to a point that is not within the mesh bounding box'
+    []
+    [set_distance_before_start]
+      type = RunException
+      input = 'errors.i'
+      cli_args = 'UserObjects/study/set_distance_before_start=true'
+      expect_err = 'Cannot use Ray::setStartingMaxDistance\(\) before Ray::setStart\(\).'
+      allow_test_objects = true
+      detail = 'setting a ray\'s starting maximum distance before setting its start information'
+    []
+    [set_distance_negative]
+      type = RunException
+      input = 'errors.i'
+      cli_args = 'UserObjects/study/set_distance_negative=true'
+      expect_err = 'Starting max distance is <= 0'
+      allow_test_objects = true
+      detail = 'setting a ray\'s starting maximum distance to a negative value'
+    []
+    [set_start_inactive]
+      type = RunException
+      input = 'errors.i'
+      cli_args = 'UserObjects/study/set_start_inactive=true
+                  Adaptivity/steps=1
+                  Adaptivity/marker=uniform
+                  Adaptivity/max_h_level=2
+                  Adaptivity/initial_steps=2
+                  Adaptivity/Markers/uniform/type=UniformMarker
+                  Adaptivity/Markers/uniform/mark=refine'
+      expect_err = 'Starting element is not active'
+      allow_test_objects = true
+      detail = 'setting the starting element for a ray to an inactive element'
+    []
+  []
+[]

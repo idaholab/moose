@@ -21,8 +21,8 @@
   [rename]
     type = RenameBlockGenerator
     input = SubdomainBoundingBox
-    old_block_id = 1
-    new_block_name = 'my_name'
+    old_block = 1
+    new_block = 'my_name'
   []
 
   [./ed0]

@@ -20,5 +20,6 @@ public:
 protected:
   virtual ADReal computeQpResidual() override;
 
-  const Moose::Functor<ADReal> & _functor_prop;
+  /// The functor that provides the residual for this kernel
+  const Moose::Functor<ADReal> & _functor;
 };

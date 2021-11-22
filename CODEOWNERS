@@ -18,13 +18,11 @@
 
 /framework/*/dgkernels @lindsayad
 /framework/*/executioners/*Solve* @GiudGiud
-/framework/*/fv* @rwcarlsen @lindsayad
+/framework/*/fv* @lindsayad
 /framework/*/interfacekernels @lindsayad
 /framework/*/linesearches @lindsayad
-/framework/*/materials @rwcarlsen
 /framework/*/materials/Derivative* @dschwen
 /framework/*/materials/Parsed* @dschwen
-/framework/*/parser @rwcarlsen
 /framework/*/preconditioners @fdkong
 /framework/*/problems/EigenProblem* @fdkong
 /framework/*/relationshipmanagers @lindsayad
@@ -35,14 +33,13 @@
 /framework/*/utils/PetscSupport* @fdkong
 /framework/*/utils/SlepcSupport* @fdkong
 /framework/*/utils/Units* @dschwen
-/framework/*/variables @rwcarlsen
 
 /modules/contact @bwspenc @lindsayad
 /modules/doc/content/getting_started/installation @milljm @loganharbour @cticenhour
 /modules/doc/content/newsletter @cticenhour
 /modules/electromagnetics @cticenhour
 /modules/external_petsc_solver @fdkong
-/modules/fluid_properties @rwcarlsen @andrsd
+/modules/fluid_properties @andrsd
 /modules/fsi @fdkong
 /modules/functional_expansion_tools @lindsayad
 /modules/navier_stokes @lindsayad @GiudGiud

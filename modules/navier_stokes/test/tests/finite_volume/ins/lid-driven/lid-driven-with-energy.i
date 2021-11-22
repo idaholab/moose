@@ -187,7 +187,7 @@ advected_interp_method = 'average'
 
 [Materials]
   [functor_constants]
-    type = ADGenericConstantFunctorMaterial
+    type = ADGenericFunctorMaterial
     prop_names = 'cp k'
     prop_values = '${cp} ${k}'
   []

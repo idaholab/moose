@@ -339,8 +339,8 @@ cap_ver_wet_thermal_cond = ${fparse cap_ver_thermal_cond * 60 * 60 * 24} # J/day
   []
   [rename]
     type = RenameBlockGenerator
-    old_block_id = '1 2 3'
-    new_block_name = 'aquifer caps caps'
+    old_block = '1 2 3'
+    new_block = 'aquifer caps caps'
     input = 'injection_area'
   []
 []

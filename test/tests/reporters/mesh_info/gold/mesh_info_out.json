@@ -11,6 +11,12 @@
                 "local_sidesets": {
                     "type": "std::map<short, MeshInfo::SidesetInfo, std::less<short>, std::allocator<std::pair<short const, MeshInfo::SidesetInfo> > >"
                 },
+                "local_subdomain_elems": {
+                    "type": "std::map<unsigned short, MeshInfo::SubdomainInfo, std::less<unsigned short>, std::allocator<std::pair<unsigned short const, MeshInfo::SubdomainInfo> > >"
+                },
+                "local_subdomains": {
+                    "type": "std::map<unsigned short, MeshInfo::SubdomainInfo, std::less<unsigned short>, std::allocator<std::pair<unsigned short const, MeshInfo::SubdomainInfo> > >"
+                },
                 "num_dofs": {
                     "type": "unsigned int"
                 },
@@ -46,6 +52,12 @@
                 },
                 "sidesets": {
                     "type": "std::map<short, MeshInfo::SidesetInfo, std::less<short>, std::allocator<std::pair<short const, MeshInfo::SidesetInfo> > >"
+                },
+                "subdomain_elems": {
+                    "type": "std::map<unsigned short, MeshInfo::SubdomainInfo, std::less<unsigned short>, std::allocator<std::pair<unsigned short const, MeshInfo::SubdomainInfo> > >"
+                },
+                "subdomains": {
+                    "type": "std::map<unsigned short, MeshInfo::SubdomainInfo, std::less<unsigned short>, std::allocator<std::pair<unsigned short const, MeshInfo::SubdomainInfo> > >"
                 }
             }
         }
@@ -55,6 +67,8 @@
             "mesh_info": {
                 "local_sideset_elems": null,
                 "local_sidesets": null,
+                "local_subdomain_elems": null,
+                "local_subdomains": null,
                 "num_dofs": 0,
                 "num_dofs_auxiliary": 0,
                 "num_dofs_local_auxiliary": 0,
@@ -66,7 +80,9 @@
                 "num_local_nodes": 0,
                 "num_nodes": 0,
                 "sideset_elems": null,
-                "sidesets": null
+                "sidesets": null,
+                "subdomain_elems": null,
+                "subdomains": null
             },
             "time": 0.0,
             "time_step": 0
@@ -185,6 +201,68 @@
                     {
                         "id": 3,
                         "name": "left"
+                    }
+                ],
+                "local_subdomain_elems": [
+                    {
+                        "elems": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9,
+                            10,
+                            11,
+                            12,
+                            13,
+                            14,
+                            15,
+                            16,
+                            17,
+                            18,
+                            19,
+                            20,
+                            21,
+                            22,
+                            23,
+                            24,
+                            25,
+                            26,
+                            27,
+                            28,
+                            29,
+                            30,
+                            31,
+                            32,
+                            33,
+                            34,
+                            35,
+                            36,
+                            37,
+                            38,
+                            39,
+                            40,
+                            41,
+                            42,
+                            43,
+                            44,
+                            45,
+                            46,
+                            47,
+                            48,
+                            49
+                        ],
+                        "id": 0
+                    }
+                ],
+                "local_subdomains": [
+                    {
+                        "id": 0
                     }
                 ],
                 "num_dofs": 221,
@@ -399,6 +477,118 @@
                     {
                         "id": 3,
                         "name": "left"
+                    }
+                ],
+                "subdomain_elems": [
+                    {
+                        "elems": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8,
+                            9,
+                            10,
+                            11,
+                            12,
+                            13,
+                            14,
+                            15,
+                            16,
+                            17,
+                            18,
+                            19,
+                            20,
+                            21,
+                            22,
+                            23,
+                            24,
+                            25,
+                            26,
+                            27,
+                            28,
+                            29,
+                            30,
+                            31,
+                            32,
+                            33,
+                            34,
+                            35,
+                            36,
+                            37,
+                            38,
+                            39,
+                            40,
+                            41,
+                            42,
+                            43,
+                            44,
+                            45,
+                            46,
+                            47,
+                            48,
+                            49,
+                            50,
+                            51,
+                            52,
+                            53,
+                            54,
+                            55,
+                            56,
+                            57,
+                            58,
+                            59,
+                            60,
+                            61,
+                            62,
+                            63,
+                            64,
+                            65,
+                            66,
+                            67,
+                            68,
+                            69,
+                            70,
+                            71,
+                            72,
+                            73,
+                            74,
+                            75,
+                            76,
+                            77,
+                            78,
+                            79,
+                            80,
+                            81,
+                            82,
+                            83,
+                            84,
+                            85,
+                            86,
+                            87,
+                            88,
+                            89,
+                            90,
+                            91,
+                            92,
+                            93,
+                            94,
+                            95,
+                            96,
+                            97,
+                            98,
+                            99
+                        ],
+                        "id": 0
+                    }
+                ],
+                "subdomains": [
+                    {
+                        "id": 0
                     }
                 ]
             },

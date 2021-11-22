@@ -1,0 +1,25 @@
+[Tests]
+  design = 'RayTracingStudy.md'
+  issues = '#16028'
+
+  [errors]
+    requirement = 'A RayTracingObject shall return a useful error when'
+
+    [get_study_bad_param]
+      type = 'RunException'
+      input = 'errors.i'
+      cli_args = 'RayKernels/test/get_study_bad=true RayKernels/test/study=study'
+      allow_test_objects = true
+      expect_err = '\(RayKernels/test/study\):.*Supplied study of type RayTracingStudyTest is not the required study type RepeatableRayStudy'
+      detail = 'the study is provided via param and is of the wrong type'
+    []
+    [get_study_bad_default]
+      type = 'RunException'
+      input = 'errors.i'
+      cli_args = 'RayKernels/test/get_study_bad=true'
+      allow_test_objects = true
+      expect_err = 'The following error occurred in the object "test", of type "RayTracingObjectTest"..*Supplied study of type RayTracingStudyTest is not the required study type RepeatableRayStudy'
+      detail = 'the study is provided by default and is of the wrong type'
+    []
+  []
+[]

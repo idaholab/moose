@@ -119,6 +119,12 @@ public:
    * Whether or not the angular quadrature has direction \p l.
    */
   bool hasDirection(const unsigned int l) const { return l < _current_directions.size(); }
+
+  /**
+   * Throws a MooseError if the angular quadrature does not have direction \p l.
+   */
+  void checkDirection(const unsigned int l) const;
+
   /**
    * The number of polar directions associated with the given direction.
    *

@@ -11,6 +11,12 @@
                 "local_sidesets": {
                     "type": "std::map<short, MeshInfo::SidesetInfo, std::less<short>, std::allocator<std::pair<short const, MeshInfo::SidesetInfo> > >"
                 },
+                "local_subdomain_elems": {
+                    "type": "std::map<unsigned short, MeshInfo::SubdomainInfo, std::less<unsigned short>, std::allocator<std::pair<unsigned short const, MeshInfo::SubdomainInfo> > >"
+                },
+                "local_subdomains": {
+                    "type": "std::map<unsigned short, MeshInfo::SubdomainInfo, std::less<unsigned short>, std::allocator<std::pair<unsigned short const, MeshInfo::SubdomainInfo> > >"
+                },
                 "num_dofs": {
                     "type": "unsigned int"
                 },
@@ -40,9 +46,6 @@
                 },
                 "num_nodes": {
                     "type": "unsigned int"
-                },
-                "sidesets": {
-                    "type": "std::map<short, MeshInfo::SidesetInfo, std::less<short>, std::allocator<std::pair<short const, MeshInfo::SidesetInfo> > >"
                 }
             }
         }
@@ -52,6 +55,8 @@
             "mesh_info": {
                 "local_sideset_elems": null,
                 "local_sidesets": null,
+                "local_subdomain_elems": null,
+                "local_subdomains": null,
                 "num_dofs": 0,
                 "num_dofs_auxiliary": 0,
                 "num_dofs_local_auxiliary": 0,
@@ -61,8 +66,7 @@
                 "num_local_dofs": 0,
                 "num_local_elements": 0,
                 "num_local_nodes": 0,
-                "num_nodes": 0,
-                "sidesets": null
+                "num_nodes": 0
             },
             "time": 0.0,
             "time_step": 0
@@ -183,6 +187,68 @@
                         "name": "top"
                     }
                 ],
+                "local_subdomain_elems": [
+                    {
+                        "elems": [
+                            50,
+                            51,
+                            52,
+                            53,
+                            54,
+                            55,
+                            56,
+                            57,
+                            58,
+                            59,
+                            60,
+                            61,
+                            62,
+                            63,
+                            64,
+                            65,
+                            66,
+                            67,
+                            68,
+                            69,
+                            70,
+                            71,
+                            72,
+                            73,
+                            74,
+                            75,
+                            76,
+                            77,
+                            78,
+                            79,
+                            80,
+                            81,
+                            82,
+                            83,
+                            84,
+                            85,
+                            86,
+                            87,
+                            88,
+                            89,
+                            90,
+                            91,
+                            92,
+                            93,
+                            94,
+                            95,
+                            96,
+                            97,
+                            98,
+                            99
+                        ],
+                        "id": 0
+                    }
+                ],
+                "local_subdomains": [
+                    {
+                        "id": 0
+                    }
+                ],
                 "num_dofs": 221,
                 "num_dofs_auxiliary": 100,
                 "num_dofs_local_auxiliary": 50,
@@ -192,8 +258,7 @@
                 "num_local_dofs": 105,
                 "num_local_elements": 50,
                 "num_local_nodes": 55,
-                "num_nodes": 121,
-                "sidesets": null
+                "num_nodes": 121
             },
             "time": 1.0,
             "time_step": 1

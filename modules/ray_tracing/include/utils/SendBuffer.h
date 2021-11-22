@@ -260,6 +260,5 @@ template <typename Object, typename Context>
 void
 SendBuffer<Object, Context>::waitAll()
 {
-  for (auto & request : _requests)
-    request->wait();
+  std::for_each(_requests.begin(), _requests.end(), [](auto & request) { request->wait(); });
 }

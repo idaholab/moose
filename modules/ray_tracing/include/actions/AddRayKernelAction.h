@@ -21,5 +21,6 @@ public:
 
   static InputParameters validParams();
 
-  virtual void act() override;
+protected:
+  void addRayTracingObject() override final;
 };

@@ -25,8 +25,7 @@ AddRayBCAction::validParams()
 AddRayBCAction::AddRayBCAction(InputParameters params) : AddRayTracingObjectAction(params) {}
 
 void
-AddRayBCAction::act()
+AddRayBCAction::addRayTracingObject()
 {
-  AddRayTracingObjectAction::act();
   _problem->addObject<RayBoundaryConditionBase>(_type, _name, _moose_object_pars);
 }

@@ -57,8 +57,8 @@
   [block_rename]
     type = RenameBlockGenerator
     input = combined
-    old_block_id = '1 2'
-    new_block_name = 'left_block right_block'
+    old_block = '1 2'
+    new_block = 'left_block right_block'
   []
   [right_right_sideset]
     type = SideSetsAroundSubdomainGenerator

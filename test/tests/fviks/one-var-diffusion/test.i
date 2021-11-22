@@ -152,13 +152,13 @@
 
 [Materials]
   [block0]
-    type = ADGenericConstantFunctorMaterial
+    type = ADGenericFunctorMaterial
     block = '0'
     prop_names = 'left'
     prop_values = '4'
   []
   [block1]
-    type = ADGenericConstantFunctorMaterial
+    type = ADGenericFunctorMaterial
     block = '1'
     prop_names = 'right'
     prop_values = '2'

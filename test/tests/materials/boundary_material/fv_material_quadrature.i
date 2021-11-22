@@ -1,4 +1,3 @@
-#
 # Parsed material properties depend on the physical location of the element
 # This requires the initialization of the quadrature in the FVFlux loop
 
@@ -16,7 +15,7 @@
 
 [Functions]
   [linear_x]
-    type = ParsedFunction
+    type = ADParsedFunction
     value = 'x'
   []
 []
@@ -53,7 +52,7 @@
 
 [Materials]
   [k1]
-    type = ADGenericFunctionFunctorMaterial
+    type = ADGenericFunctorMaterial
     prop_names = 'k1'
     prop_values = linear_x
     block = 0

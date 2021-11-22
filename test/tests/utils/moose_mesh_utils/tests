@@ -1,0 +1,12 @@
+[Tests]
+  design = 'MooseMesh.md'
+  issues = '#17710'
+
+  [get_subdomain_id_any]
+    type = RunException
+    input = 'moose_mesh_utils.i'
+    cli_args = 'UserObjects/test/get_subdomain_id_any=true'
+    requirement = 'The mesh system shall report a reasonable error when using a subdomain name that is reserved for internal use'
+    expect_err = 'getSubdomainID\(\) does not work with "ANY_BLOCK_ID"'
+  []
+[]

@@ -1,0 +1,81 @@
+[Tests]
+  design = 'RayTracingAngularQuadrature.md'
+  issues = '#16028'
+
+  [errors]
+    requirement = 'The system shall provide a reasonable error when using angular quadrature for ray tracing and'
+
+    [non_positive_polar_order]
+      type = 'RunException'
+      input = 'errors.i'
+      cli_args = 'UserObjects/test/non_positive_polar_order=true'
+      allow_test_objects = true
+      expect_err = 'polar_order must be positive in RayTracingAngularQuadrature'
+      detail = 'the provided polar order is non-positive'
+    []
+    [non_positive_azimuthal_order]
+      type = 'RunException'
+      input = 'errors.i'
+      cli_args = 'UserObjects/test/non_positive_azimuthal_order=true'
+      allow_test_objects = true
+      expect_err = 'azimuthal_order must be positive in RayTracingAngularQuadrature'
+      detail = 'the provided azimuthal order is non-positive'
+    []
+    [mu_min_larger]
+      type = 'RunException'
+      input = 'errors.i'
+      cli_args = 'UserObjects/test/mu_min_larger=true'
+      allow_test_objects = true
+      expect_err = 'mu_min must be < mu_max in RayTracingAngularQuadrature'
+      detail = 'the minimum polar cosine is greater than the maximum polar cosine'
+    []
+    [mu_min_too_small]
+      type = 'RunException'
+      input = 'errors.i'
+      cli_args = 'UserObjects/test/mu_min_too_small=true'
+      allow_test_objects = true
+      expect_err = 'mu_min must be >= -1 in RayTracingAngularQuadrature'
+      detail = 'the minimum polar cosine is less than negative one'
+    []
+    [mu_max_too_big]
+      type = 'RunException'
+      input = 'errors.i'
+      cli_args = 'UserObjects/test/mu_max_too_big=true'
+      allow_test_objects = true
+      expect_err = 'mu_max must be <= 1 in RayTracingAngularQuadrature'
+      detail = 'the maximum polar cosine is greater than one'
+    []
+    [dim1]
+      type = 'RunException'
+      input = 'errors.i'
+      cli_args = 'UserObjects/test/dim1=true'
+      allow_test_objects = true
+      expect_err = 'RayTracingAngularQuadrature only supports dimensions 2 and 3'
+      detail = 'the dimension is less than two'
+    []
+    [non_positive_gauss_legendre_order]
+      type = 'RunException'
+      input = 'errors.i'
+      cli_args = 'UserObjects/test/non_positive_gauss_legendre_order=true'
+      allow_test_objects = true
+      expect_err = 'Order must be positive in gaussLegendre\(\)'
+      detail = 'the Gauss-Legendre order is non-positive'
+    []
+    [check_direction]
+      type = 'RunException'
+      input = 'errors.i'
+      cli_args = 'UserObjects/test/check_direction=true'
+      allow_test_objects = true
+      expect_err = 'RayTracingAngularQuadrature does not have direction 1337'
+      detail = 'an invalid direction index is requested'
+    []
+    [orthonormal_vector_zero]
+      type = 'RunException'
+      input = 'errors.i'
+      cli_args = 'UserObjects/test/orthonormal_vector_zero=true'
+      allow_test_objects = true
+      expect_err = 'Vector v has norm close to 0 in orthonormalVector\(\)'
+      detail = 'an orthonormal vector is requested from a vector that has a zero norm'
+    []
+  []
+[]

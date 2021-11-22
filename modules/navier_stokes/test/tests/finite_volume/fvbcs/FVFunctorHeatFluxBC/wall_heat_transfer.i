@@ -52,19 +52,19 @@ flux=10
 
 [Functions]
   [k_function]
-    type = ParsedFunction
+    type = ADParsedFunction
     value = 0.1*(100*y+1)
   []
   [kappa_function]
-    type = ParsedFunction
+    type = ADParsedFunction
     value = 0.2*(200*y+1)
   []
   [kappa_s_function]
-    type = ParsedFunction
+    type = ADParsedFunction
     value = 0.4*(200*y+1)
   []
   [k_s_function]
-    type = ParsedFunction
+    type = ADParsedFunction
     value = 0.2*(200*y+1)+2*x
   []
 []
@@ -121,40 +121,40 @@ flux=10
 
 [AuxKernels]
   [k]
-    type = FunctorADMatPropElementalAux
+    type = ADFunctorElementalAux
     variable = k
-    mat_prop = 'k_mat'
+    functor = 'k_mat'
   []
   [k_s]
-    type = FunctorADMatPropElementalAux
+    type = ADFunctorElementalAux
     variable = k_s
-    mat_prop = 'k_s_mat'
+    functor = 'k_s_mat'
   []
   [kappa_s]
-    type = FunctorADMatPropElementalAux
+    type = ADFunctorElementalAux
     variable = kappa_s
-    mat_prop = 'kappa_s_mat'
+    functor = 'kappa_s_mat'
   []
 []
 
 [Materials]
   [thermal_conductivities_k]
-    type = ADGenericFunctionFunctorMaterial
+    type = ADGenericFunctorMaterial
     prop_names = 'k_mat'
     prop_values = 'k_function'
   []
   [thermal_conductivities_k_s]
-    type = ADGenericFunctionFunctorMaterial
+    type = ADGenericFunctorMaterial
     prop_names = 'k_s_mat'
     prop_values = 'k_s_function'
   []
   [thermal_conductivities_kappa]
-    type = ADGenericConstantVectorFunctorMaterial
+    type = ADGenericVectorFunctorMaterial
     prop_names = 'kappa_mat'
     prop_values = '0.1 0.2 .03'
   []
   [thermal_conductivities_kappa_s]
-    type = ADGenericFunctionFunctorMaterial
+    type = ADGenericFunctorMaterial
     prop_names = 'kappa_s_mat'
     prop_values = 'kappa_s_function'
   []

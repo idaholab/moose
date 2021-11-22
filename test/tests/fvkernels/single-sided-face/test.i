@@ -18,9 +18,9 @@
 
 [AuxKernels]
   [aux]
-    type = FunctorADMatPropElementalAux
+    type = ADFunctorElementalAux
     variable = aux
-    mat_prop = 'first_value'
+    functor = 'first_value'
   []
 []
 
@@ -77,7 +77,7 @@
 
 [Materials]
   [diff]
-    type = ADGenericConstantFunctorMaterial
+    type = ADGenericFunctorMaterial
     prop_names = 'coeff'
     prop_values = '1'
   []

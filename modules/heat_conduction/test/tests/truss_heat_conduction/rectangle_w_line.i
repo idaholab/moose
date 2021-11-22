@@ -37,8 +37,8 @@
   [blcok_rename]
     type = RenameBlockGenerator
     input = combined
-    old_block_id = '1 2'
-    new_block_name = 'rectangle line'
+    old_block = '1 2'
+    new_block = 'rectangle line'
   []
 []
 

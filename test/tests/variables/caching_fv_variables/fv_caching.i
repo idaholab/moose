@@ -61,7 +61,7 @@
 
 [Materials]
   [v_mat]
-    type = ADGenericConstantVectorFunctorMaterial
+    type = ADGenericVectorFunctorMaterial
     prop_names = 'v_mat'
     prop_values = '4 0 0'
   []

@@ -5,10 +5,6 @@
   xmax = 2
 []
 
-[GlobalParams]
-  mat_prop_name = 'test'
-[]
-
 [Variables]
   [v]
     type = MooseVariableFVReal
@@ -39,6 +35,7 @@
   [sink]
     type = FVFunctorElementalKernel
     variable = v
+    functor_name = 'sink_mat'
   []
 []
 
@@ -54,12 +51,14 @@
 [Materials]
   active = 'functor'
   [functor]
-    type = VarFunctorMaterial
-    var = sink
+    type = ADGenericFunctorMaterial
+    prop_names = sink_mat
+    prop_values = sink
   []
   [overlapping_functor]
-    type = VarFunctorMaterial
-    var = v
+    type = ADGenericFunctorMaterial
+    prop_names = 'sink_mat'
+    prop_values = v
   []
 []
 

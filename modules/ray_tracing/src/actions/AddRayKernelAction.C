@@ -27,8 +27,7 @@ AddRayKernelAction::AddRayKernelAction(InputParameters params) : AddRayTracingOb
 }
 
 void
-AddRayKernelAction::act()
+AddRayKernelAction::addRayTracingObject()
 {
-  AddRayTracingObjectAction::act();
   _problem->addObject<RayKernelBase>(_type, _name, _moose_object_pars);
 }

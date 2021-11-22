@@ -1,6 +1,6 @@
 [Tests]
   issues = '#16758'
-  design = 'FVPropValPerSubdomainMaterial.md'
+  design = 'PiecewiseConstantByBlockMaterial.md'
   [exo]
     type = Exodiff
     input = test.i
