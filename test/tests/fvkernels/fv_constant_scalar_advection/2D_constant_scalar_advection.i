@@ -11,10 +11,6 @@
   [../]
 []
 
-[Problem]
-  kernel_coverage_check = off
-[]
-
 [Variables]
   [./v]
     family = MONOMIAL

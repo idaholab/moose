@@ -34,10 +34,6 @@
   []
 []
 
-[Problem]
-  kernel_coverage_check = off
-[]
-
 [Executioner]
   type = Steady
   petsc_options_iname = '-snes_max_it'
