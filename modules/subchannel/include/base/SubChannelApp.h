@@ -28,6 +28,8 @@ public:
   static const std::string ENTHALPY;
   /// temperature
   static const std::string TEMPERATURE;
+  /// pin temperature
+  static const std::string PIN_TEMPERATURE;
   /// density
   static const std::string DENSITY;
   /// viscosity

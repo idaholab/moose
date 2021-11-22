@@ -3,18 +3,30 @@ T_in = 359.15
 mass_flux_in = ${fparse 1e+6 * 17.00 / 3600.}
 P_out = 4.923e6 # Pa
 
-[Mesh]
-  type = QuadSubChannelMesh
-  nx = 6
-  ny = 6
-  n_cells = 50
-  n_blocks = 1
-  pitch = 0.0126
-  rod_diameter = 0.00950
-  gap = 0.00095 # the half gap between sub-channel assemblies
-  heated_length = 3.658
-  spacer_z = '0.0'
-  spacer_k = '0.0'
+[QuadSubChannelMesh]
+  [sub_channel]
+    type = QuadSubChannelMeshGenerator
+    nx = 6
+    ny = 6
+    n_cells = 50
+    n_blocks = 1
+    pitch = 0.0126
+    rod_diameter = 0.00950
+    gap = 0.00095 # the half gap between sub-channel assemblies
+    heated_length = 3.658
+    spacer_z = '0.0'
+    spacer_k = '0.0'
+  []
+
+  [fuel_pins]
+    type = PinMeshGenerator
+    input = sub_channel
+    nx = 6
+    ny = 6
+    n_cells = 50
+    pitch = 0.0126
+    heated_length = 3.658
+  []
 []
 
 [Modules]

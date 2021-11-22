@@ -9,13 +9,75 @@ registerMooseObject("SubChannelApp", DetailedQuadSubChannelMesh);
 InputParameters
 DetailedQuadSubChannelMesh::validParams()
 {
-  InputParameters params = QuadSubChannelMesh::validParams();
+  InputParameters params = MooseMesh::validParams();
+  params.addRequiredParam<Real>("pitch", "Pitch [m]");
+  params.addRequiredParam<Real>("rod_diameter", "Rod diameter [m]");
+  params.addParam<Real>("unheated_length_entry", 0.0, "Unheated length at entry [m]");
+  params.addRequiredParam<Real>("heated_length", "Heated length [m]");
+  params.addParam<Real>("unheated_length_exit", 0.0, "Unheated length at exit [m]");
+  params.addRequiredParam<unsigned int>("n_cells", "The number of cells in the axial direction");
+  params.addRequiredParam<unsigned int>("nx", "Number of channels in the x direction [-]");
+  params.addRequiredParam<unsigned int>("ny", "Number of channels in the y direction [-]");
+  params.addRequiredParam<Real>("gap", "Half of gap between assemblies [m]");
   return params;
 }
 
 DetailedQuadSubChannelMesh::DetailedQuadSubChannelMesh(const InputParameters & parameters)
-  : QuadSubChannelMesh(parameters)
+  : MooseMesh(parameters),
+    _unheated_length_entry(getParam<Real>("unheated_length_entry")),
+    _heated_length(getParam<Real>("heated_length")),
+    _unheated_length_exit(getParam<Real>("unheated_length_exit")),
+    _pitch(getParam<Real>("pitch")),
+    _rod_diameter(getParam<Real>("rod_diameter")),
+    _n_cells(getParam<unsigned int>("n_cells")),
+    _nx(getParam<unsigned int>("nx")),
+    _ny(getParam<unsigned int>("ny")),
+    _n_channels(_nx * _ny),
+    _gap(getParam<Real>("gap"))
 {
+  Real L = _unheated_length_entry + _heated_length + _unheated_length_exit;
+  Real dz = L / _n_cells;
+  for (unsigned int i = 0; i < _n_cells + 1; i++)
+    _z_grid.push_back(dz * i);
+
+  _subch_type.resize(_n_channels);
+  for (unsigned int iy = 0; iy < _ny; iy++)
+  {
+    for (unsigned int ix = 0; ix < _nx; ix++)
+    {
+      unsigned int i_ch = _nx * iy + ix;
+      bool is_corner = (ix == 0 && iy == 0) || (ix == _nx - 1 && iy == 0) ||
+                       (ix == 0 && iy == _ny - 1) || (ix == _nx - 1 && iy == _ny - 1);
+      bool is_edge = (ix == 0 || iy == 0 || ix == _nx - 1 || iy == _ny - 1);
+
+      if (is_corner)
+        _subch_type[i_ch] = EChannelType::CORNER;
+      else if (is_edge)
+        _subch_type[i_ch] = EChannelType::EDGE;
+      else
+        _subch_type[i_ch] = EChannelType::CENTER;
+    }
+  }
+}
+
+DetailedQuadSubChannelMesh::DetailedQuadSubChannelMesh(
+    const DetailedQuadSubChannelMesh & other_mesh)
+  : MooseMesh(other_mesh),
+    _unheated_length_entry(other_mesh._unheated_length_entry),
+    _heated_length(other_mesh._heated_length),
+    _unheated_length_exit(other_mesh._unheated_length_exit),
+    _z_grid(other_mesh._z_grid),
+    _pitch(other_mesh._pitch),
+    _rod_diameter(other_mesh._rod_diameter),
+    _n_cells(other_mesh._n_cells),
+    _gap(other_mesh._gap)
+{
+}
+
+std::unique_ptr<MooseMesh>
+DetailedQuadSubChannelMesh::safeClone() const
+{
+  return libmesh_make_unique<DetailedQuadSubChannelMesh>(*this);
 }
 
 void

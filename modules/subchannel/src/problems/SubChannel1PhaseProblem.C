@@ -78,7 +78,7 @@ SubChannel1PhaseProblem::validParams()
 
 SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
   : ExternalProblem(params),
-    _subchannel_mesh(dynamic_cast<SubChannelMesh &>(_mesh)),
+    _subchannel_mesh(dynamic_cast<QuadSubChannelMesh &>(_mesh)),
     _Wij(declareRestartableData<libMesh::DenseMatrix<Real>>("Wij")),
     _g_grav(9.87),
     _kij(_subchannel_mesh.getKij()),
@@ -103,7 +103,10 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
   _n_cells = _subchannel_mesh.getNumOfAxialCells();
   _n_blocks = _subchannel_mesh.getNumOfAxialBlocks();
   _n_gaps = _subchannel_mesh.getNumOfGapsPerLayer();
+  _n_pins = _subchannel_mesh.getNumOfPins();
   _n_channels = _subchannel_mesh.getNumOfChannels();
+  _nx = _subchannel_mesh.getNx();
+  _ny = _subchannel_mesh.getNy();
   _block_size = _n_cells / _n_blocks;
   // Turbulent crossflow (stuff that live on the gaps)
   if (!_app.isRestarting() && !_app.isRecovering())
@@ -130,6 +133,7 @@ SubChannel1PhaseProblem::initialSetup()
   _DP_soln = new SolutionHandle(getVariable(0, SubChannelApp::PRESSURE_DROP));
   _h_soln = new SolutionHandle(getVariable(0, SubChannelApp::ENTHALPY));
   _T_soln = new SolutionHandle(getVariable(0, SubChannelApp::TEMPERATURE));
+  _Tpin_soln = new SolutionHandle(getVariable(0, SubChannelApp::PIN_TEMPERATURE));
   _rho_soln = new SolutionHandle(getVariable(0, SubChannelApp::DENSITY));
   _mu_soln = new SolutionHandle(getVariable(0, SubChannelApp::VISCOSITY));
   _S_flow_soln = new SolutionHandle(getVariable(0, SubChannelApp::SURFACE_AREA));
@@ -145,6 +149,7 @@ SubChannel1PhaseProblem::~SubChannel1PhaseProblem()
   delete _DP_soln;
   delete _h_soln;
   delete _T_soln;
+  delete _Tpin_soln;
   delete _rho_soln;
   delete _mu_soln;
   delete _S_flow_soln;
@@ -773,8 +778,6 @@ SubChannel1PhaseProblem::externalSolve()
   }
   // update old crossflow matrix
   _Wij_old = _Wij;
-  _console << "Finished executing subchannel solver\n";
-  _aux->solution().close();
 
   auto power_in = 0.0;
   auto power_out = 0.0;
@@ -785,7 +788,30 @@ SubChannel1PhaseProblem::externalSolve()
     power_in += (*_mdot_soln)(node_in) * (*_h_soln)(node_in);
     power_out += (*_mdot_soln)(node_out) * (*_h_soln)(node_out);
   }
+  bool pin_mesh_exist = _subchannel_mesh.pinMeshExist();
   _console << "Power added to coolant is: " << power_out - power_in << " Watt" << std::endl;
+
+  if (pin_mesh_exist)
+  {
+    _console << "Commencing calculation of Pin surface temperature \n";
+    for (unsigned int i_pin = 0; i_pin < _n_pins; i_pin++)
+    {
+      for (unsigned int iz = 0; iz < _n_cells + 1; ++iz)
+      {
+        double sumTemp = 0.0;
+        // Calculate sum of temperatures in the channels around the pin
+        for (auto i_chan : _subchannel_mesh.getPinChannels(i_pin))
+        {
+          auto * channel_node = _subchannel_mesh.getChannelNode(i_chan, iz);
+          sumTemp += (*_T_soln)(channel_node);
+        }
+        auto * pin_node = _subchannel_mesh.getPinNode(i_pin, iz);
+        _Tpin_soln->set(pin_node, sumTemp / _subchannel_mesh.getPinChannels(i_pin).size());
+      }
+    }
+  }
+
+  _aux->solution().close();
 }
 
 void SubChannel1PhaseProblem::syncSolutions(Direction /*direction*/) {}

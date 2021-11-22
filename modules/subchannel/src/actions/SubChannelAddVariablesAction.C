@@ -32,6 +32,7 @@ SubChannelAddVariablesAction::act()
                                         SubChannelApp::LINEAR_HEAT_RATE,
                                         SubChannelApp::ENTHALPY,
                                         SubChannelApp::TEMPERATURE,
+                                        SubChannelApp::PIN_TEMPERATURE,
                                         SubChannelApp::DENSITY,
                                         SubChannelApp::VISCOSITY};
 

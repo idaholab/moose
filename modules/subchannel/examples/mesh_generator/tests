@@ -1,7 +1,7 @@
 [Tests]
-  [transient_check_syntax]
+  [check_syntax]
     type = 'RunApp'
-    input = '2X6_transient.i'
+    input = 'psbt_test_mesh_generator.i'
     check_input = true
   []
 []

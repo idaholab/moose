@@ -3,5 +3,6 @@
     type = CSVDiff
     input = 'test.i'
     csvdiff = 'test_out.csv'
+    recover = False
   []
 []
