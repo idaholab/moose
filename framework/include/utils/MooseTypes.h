@@ -452,53 +452,11 @@ using GenericVariableGradient = typename Moose::GenericType<VariableGradient, is
 template <bool is_ad>
 using GenericVariableSecond = typename Moose::GenericType<VariableSecond, is_ad>;
 
-#define declareADValidParams(ADObjectType)                                                         \
-  template <>                                                                                      \
-  InputParameters validParams<ADObjectType>()
-
-#define defineADValidParams(ADObjectType, ADBaseObjectType, addedParamCode)                        \
-  template <>                                                                                      \
-  InputParameters validParams<ADObjectType>()                                                      \
-  {                                                                                                \
-    InputParameters params = validParams<ADBaseObjectType>();                                      \
-    addedParamCode;                                                                                \
-    return params;                                                                                 \
-  }                                                                                                \
-  void mooseClangFormatFunction()
-
 #define defineLegacyParams(ObjectType)                                                             \
   template <>                                                                                      \
   InputParameters validParams<ObjectType>()                                                        \
   {                                                                                                \
     return ObjectType::validParams();                                                              \
-  }                                                                                                \
-  void mooseClangFormatFunction()
-
-#define defineADLegacyParams(ADObjectType)                                                         \
-  template <>                                                                                      \
-  InputParameters validParams<ADObjectType>()                                                      \
-  {                                                                                                \
-    return ADObjectType::validParams();                                                            \
-  }                                                                                                \
-  void mooseClangFormatFunction()
-
-#define defineADBaseValidParams(ADObjectType, BaseObjectType, addedParamCode)                      \
-  template <>                                                                                      \
-  InputParameters validParams<ADObjectType>()                                                      \
-  {                                                                                                \
-    InputParameters params = validParams<BaseObjectType>();                                        \
-    addedParamCode;                                                                                \
-    return params;                                                                                 \
-  }                                                                                                \
-  void mooseClangFormatFunction()
-
-#define defineADValidParamsFromEmpty(ADObjectType, addedParamCode)                                 \
-  template <>                                                                                      \
-  InputParameters validParams<ADObjectType>()                                                      \
-  {                                                                                                \
-    InputParameters params = emptyInputParameters();                                               \
-    addedParamCode;                                                                                \
-    return params;                                                                                 \
   }                                                                                                \
   void mooseClangFormatFunction()
 

@@ -1,0 +1,14 @@
+[Tests]
+  design = 'CheckLegacyParamsAction.md'
+  issues = '#19439'
+
+  [test]
+    type = RunException
+    input = 'check_legacy_params.i'
+    allow_test_objects = True
+    cli_args = '--test-check-legacy-params'
+    expect_err = 'using the legacy input parameter construction:(.*)Diffusion'
+
+    requirement = 'The system shall report an informative warning when object parameters are constructed using legacy methods'
+  []
+[]

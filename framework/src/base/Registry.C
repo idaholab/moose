@@ -16,44 +16,30 @@
 
 #include <memory>
 
-static Registry &
-getRegistry()
+Registry &
+Registry::getRegistry()
 {
-  static std::unique_ptr<Registry> _singleton;
-  if (!_singleton)
-    _singleton = std::make_unique<Registry>();
-  return *_singleton;
-}
-
-const std::map<std::string, std::vector<RegistryEntry>> &
-Registry::allObjects()
-{
-  return getRegistry()._per_label_objects;
-}
-const std::map<std::string, std::vector<RegistryEntry>> &
-Registry::allActions()
-{
-  return getRegistry()._per_label_actions;
+  static Registry registry_singleton;
+  return registry_singleton;
 }
 
 void
 Registry::addInner(const RegistryEntry & info)
 {
-  auto & r = getRegistry();
-  r._per_label_objects[info._label].push_back(info);
+  getRegistry()._per_label_objects[info._label].push_back(info);
 }
 
 void
 Registry::addActionInner(const RegistryEntry & info)
 {
-  auto & r = getRegistry();
-  r._per_label_actions[info._label].push_back(info);
+  getRegistry()._per_label_actions[info._label].push_back(info);
 }
 
 void
 Registry::registerObjectsTo(Factory & f, const std::set<std::string> & labels)
 {
   auto & r = getRegistry();
+
   for (const auto & label : labels)
   {
     r._known_labels.insert(label);
@@ -98,20 +84,11 @@ Registry::objData(const std::string & name)
     mooseError("Object ", name, " is not registered yet");
 }
 
-bool
-Registry::isRegisteredObj(const std::string & name)
-{
-  auto & r = getRegistry();
-
-  auto it = r._name_to_entry.find(name);
-
-  return it != r._name_to_entry.end();
-}
-
 void
 Registry::registerActionsTo(ActionFactory & f, const std::set<std::string> & labels)
 {
   auto & r = getRegistry();
+
   for (const auto & label : labels)
   {
     r._known_labels.insert(label);
@@ -150,7 +127,6 @@ Registry::checkLabels(const std::set<std::string> & known_labels)
 char
 Registry::addKnownLabel(const std::string & label)
 {
-  auto & r = getRegistry();
-  r._known_labels.insert(label);
+  getRegistry()._known_labels.insert(label);
   return 0;
 }
