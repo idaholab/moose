@@ -7,7 +7,7 @@ allow derived classes to perform setup applications prior to execution.
 
 ## Execute On
 
-Any object inheriting from the SetupInterface, that adds the `validParams<SetupInterface>` within its
+Any object inheriting from the SetupInterface, that adds the `SetupInterface::validParams()` within its
 own parameters, will have an "execute_on" parameter that can be set to various flags, the most common
 flags are listed below.
 
