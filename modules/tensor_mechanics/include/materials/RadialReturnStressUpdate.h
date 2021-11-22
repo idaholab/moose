@@ -233,6 +233,9 @@ protected:
    * when substepping is enabled, based on the maximum creep numerical integration error
    */
   bool _use_substep_integration_error;
+
+  /// Maximum number of substeps. If the calculation results in a larger number, cut overall time step.
+  const unsigned int _maximum_number_substeps;
 };
 
 typedef RadialReturnStressUpdateTempl<false> RadialReturnStressUpdate;

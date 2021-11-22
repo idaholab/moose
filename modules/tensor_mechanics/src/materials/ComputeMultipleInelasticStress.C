@@ -476,7 +476,7 @@ ComputeMultipleInelasticStress::computeAdmissibleState(unsigned model_number,
                                                        RankFourTensor & consistent_tangent_operator)
 {
   // Properly update material properties (necessary if substepping is employed).
-  _models[model_number]->zeroOutIncrementalMaterialProperties();
+  _models[model_number]->resetIncrementalMaterialProperties();
 
   const bool jac = _fe_problem.currentlyComputingJacobian();
   if (_damage_model)

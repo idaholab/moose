@@ -166,9 +166,9 @@ public:
   storeIncrementalMaterialProperties(const unsigned int /*total_number_of_substeps*/){};
 
   /**
-   * Zero out material properties. Useful for substepping with inelastic models.
+   * Reset material properties. Useful for substepping with inelastic models.
    */
-  virtual void zeroOutIncrementalMaterialProperties(){};
+  virtual void resetIncrementalMaterialProperties(){};
 
   /**
    * Compute the strain energy rate density for this inelastic model for the current step.

@@ -101,7 +101,7 @@ PowerLawCreepStressUpdate::computeStressFinalize(const RankTwoTensor & plastic_s
 }
 
 void
-PowerLawCreepStressUpdate::zeroOutIncrementalMaterialProperties()
+PowerLawCreepStressUpdate::resetIncrementalMaterialProperties()
 {
   _creep_strain[_qp] = _creep_strain_old[_qp];
 }

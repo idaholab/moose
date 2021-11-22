@@ -99,7 +99,7 @@ ADPowerLawCreepStressUpdate::computeStressFinalize(const ADRankTwoTensor & plast
 }
 
 void
-ADPowerLawCreepStressUpdate::zeroOutIncrementalMaterialProperties()
+ADPowerLawCreepStressUpdate::resetIncrementalMaterialProperties()
 {
   _creep_strain[_qp] = _creep_strain_old[_qp];
 }

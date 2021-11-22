@@ -34,7 +34,7 @@ public:
 
   virtual bool substeppingCapabilityEnabled() override;
 
-  virtual void zeroOutIncrementalMaterialProperties() override;
+  virtual void resetIncrementalMaterialProperties() override;
 
 protected:
   virtual void computeStressInitialize(const Real & effective_trial_stress,

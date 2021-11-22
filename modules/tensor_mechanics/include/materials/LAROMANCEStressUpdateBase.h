@@ -34,7 +34,7 @@ public:
 
   LAROMANCEStressUpdateBaseTempl(const InputParameters & parameters);
 
-  virtual void zeroOutIncrementalMaterialProperties() override;
+  virtual void resetIncrementalMaterialProperties() override;
   virtual void
   storeIncrementalMaterialProperties(const unsigned int total_number_substeps) override;
 
