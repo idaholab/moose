@@ -28,10 +28,6 @@
   [../]
 []
 
-[Problem]
-  kernel_coverage_check = false
-[]
-
 [Variables]
   [./u]
     order = FIRST
@@ -84,6 +80,10 @@
 [Executioner]
   type = Steady
   nl_abs_tol = 1e-12
+[]
+
+[Problem]
+  kernel_coverage_check = false
 []
 
 [Outputs]

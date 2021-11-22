@@ -43,7 +43,6 @@
 [Problem]
   type = FEProblem
   coord_type = RZ
-  kernel_coverage_check = off
 []
 
 [Executioner]

@@ -30,10 +30,6 @@
   []
 []
 
-[Problem]
-  kernel_coverage_check = off
-[]
-
 [Executioner]
   type = Steady
   petsc_options_iname = '-pc_type -pc_factor_shift_type'

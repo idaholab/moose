@@ -12,10 +12,6 @@
   advected_interp_method = 'average'
 []
 
-[Problem]
-  kernel_coverage_check = false
-[]
-
 [Variables]
   [fv_rho]
     order = CONSTANT
