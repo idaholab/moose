@@ -10,13 +10,14 @@
 #pragma once
 
 #include "SubblockIndexProvider.h"
+#include "GeneralUserObject.h"
 
 /**
  * A class used to set the subblock index for testing generalized plane strain
  * calculations when more than one out-of-plane strain is provided on different
  * subsets of elements.
  */
-class TestSubblockIndexProvider : public SubblockIndexProvider
+class TestSubblockIndexProvider : public SubblockIndexProvider, public GeneralUserObject
 {
 public:
   static InputParameters validParams();
@@ -26,7 +27,6 @@ public:
   virtual void initialize() override{};
   virtual void execute() override{};
   virtual void finalize() override{};
-
   /**
    * The index of subblock this element is on.
    */

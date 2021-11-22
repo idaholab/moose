@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ComputeAxisymmetric1DFiniteStrain.h"
+#include "UserObject.h"
 
 registerMooseObject("TensorMechanicsApp", ComputeAxisymmetric1DFiniteStrain);
 
