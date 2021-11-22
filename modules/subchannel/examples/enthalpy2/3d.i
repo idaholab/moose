@@ -1,16 +1,14 @@
-
 [Mesh]
   type = DetailedQuadSubChannelMesh
-  nx = 7
+  nx = 3
   ny = 3
-  n_cells = 48
-  n_blocks = 1
-  pitch = 0.014605
-  rod_diameter = 0.012065
-  gap = 0.0015875
-  heated_length = 1.2192
-  spacer_z = '0.0 '
-  spacer_k = '0.0 '
+  n_cells = 100
+  pitch = 0.0126
+  rod_diameter = 0.00950
+  gap = 0.00095
+  unheated_length_entry = 2.5
+  heated_length = 5.0
+  unheated_length_exit = 2.5
 []
 
 [AuxVariables]
@@ -47,5 +45,5 @@
 []
 
 [Executioner]
-  type = Transient
+  type = Steady
 []

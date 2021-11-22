@@ -1,19 +1,21 @@
 T_in = 297.039 # K
 P_out = 101325 # Pa
 
-[Mesh]
-  type = QuadSubChannelMesh
-  nx = 7
-  ny = 3
-  n_cells = 60
-  n_blocks = 1
-  pitch = 0.014605
-  rod_diameter = 0.012065
-  gap = 0.0015875
-  unheated_length_entry = 0.3048
-  heated_length = 1.2192
-  spacer_z = '0.0 '
-  spacer_k = '0.0 '
+[QuadSubChannelMesh]
+  [sub_channel]
+    type = QuadSubChannelMeshGenerator
+    nx = 7
+    ny = 3
+    n_cells = 60
+    n_blocks = 1
+    pitch = 0.014605
+    rod_diameter = 0.012065
+    gap = 0.0015875
+    unheated_length_entry = 0.3048
+    heated_length = 1.2192
+    spacer_z = '0.0'
+    spacer_k = '0.0'
+  []
 []
 
 [Modules]
@@ -108,8 +110,8 @@ P_out = 101325 # Pa
   [mass_flux_in]
     type = PiecewiseLinear
     xy_data = '
-      10.0 122.2645
-      160.0 42.7926'
+      5.0 122.2645
+      10.0 42.7926'
   []
 []
 
@@ -161,8 +163,8 @@ P_out = 101325 # Pa
 []
 
 [Outputs]
-    exodus = true
-    csv = true
+  exodus = true
+  csv = true
 []
 
 [Executioner]
@@ -170,7 +172,7 @@ P_out = 101325 # Pa
   nl_rel_tol = 0.9
   l_tol = 0.9
   start_time = 0.0
-  end_time = 170.0
+  end_time = 10
   dt = 1.0
 []
 
@@ -179,9 +181,9 @@ P_out = 101325 # Pa
 ################################################################################
 
 [MultiApps]
-  [pretty_mesh]
+  [viz]
     type = TransientMultiApp
-    input_files = "pretty_mesh.i"
+    input_files = "3d.i"
     execute_on = "timestep_end"
   []
 []
@@ -189,74 +191,72 @@ P_out = 101325 # Pa
 [Transfers]
   [xfer_mdot]
     type = MultiAppNearestNodeTransfer
-    multi_app = pretty_mesh
+    multi_app = viz
     direction = to_multiapp
     source_variable = mdot
     variable = mdot
   []
   [xfer_SumWij]
     type = MultiAppNearestNodeTransfer
-    multi_app = pretty_mesh
+    multi_app = viz
     direction = to_multiapp
     source_variable = SumWij
     variable = SumWij
   []
   [xfer_P]
     type = MultiAppNearestNodeTransfer
-    multi_app = pretty_mesh
+    multi_app = viz
     direction = to_multiapp
     source_variable = P
     variable = P
   []
   [xfer_DP]
     type = MultiAppNearestNodeTransfer
-    multi_app = pretty_mesh
+    multi_app = viz
     direction = to_multiapp
     source_variable = DP
     variable = DP
   []
   [xfer_h]
     type = MultiAppNearestNodeTransfer
-    multi_app = pretty_mesh
+    multi_app = viz
     direction = to_multiapp
     source_variable = h
     variable = h
   []
   [xfer_T]
     type = MultiAppNearestNodeTransfer
-    multi_app = pretty_mesh
+    multi_app = viz
     direction = to_multiapp
     source_variable = T
     variable = T
   []
   [xfer_rho]
     type = MultiAppNearestNodeTransfer
-    multi_app = pretty_mesh
+    multi_app = viz
     direction = to_multiapp
     source_variable = rho
     variable = rho
   []
   [xfer_mu]
     type = MultiAppNearestNodeTransfer
-    multi_app = pretty_mesh
+    multi_app = viz
     direction = to_multiapp
     source_variable = mu
     variable = mu
   []
   [xfer_q_prime]
     type = MultiAppNearestNodeTransfer
-    multi_app = pretty_mesh
+    multi_app = viz
     direction = to_multiapp
     source_variable = q_prime
     variable = q_prime
   []
   [xfer_S]
     type = MultiAppNearestNodeTransfer
-    multi_app = pretty_mesh
+    multi_app = viz
     direction = to_multiapp
     source_variable = S
     variable = S
   []
 []
-
-

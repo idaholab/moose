@@ -39,9 +39,14 @@ public:
   virtual const unsigned int & getNumOfAxialBlocks() const { return _n_blocks; }
 
   /**
-   * Get the mesh node for a given channel index and elevation index
+   * Get the subchannel mesh node for a given channel index and elevation index
    */
   virtual Node * getChannelNode(unsigned int i_chan, unsigned iz) const = 0;
+
+  /**
+   * Get the pin mesh node for a given pin index and elevation index
+   */
+  virtual Node * getPinNode(unsigned int i_pin, unsigned iz) const = 0;
 
   /**
    * Return the number of channels per layer
@@ -49,9 +54,19 @@ public:
   virtual const unsigned int & getNumOfChannels() const = 0;
 
   /**
+   * Return if Pin Mesh exists or not
+   */
+  virtual const bool & pinMeshExist() const = 0;
+
+  /**
    * Return the number of gaps per layer
    */
   virtual const unsigned int & getNumOfGapsPerLayer() const = 0;
+
+  /**
+   * Return the number of pins
+   */
+  virtual const unsigned int & getNumOfPins() const = 0;
 
   /**
    * Return a pair of subchannel indices for a given gap index
@@ -63,6 +78,11 @@ public:
    * Return a vector of gap indices for a given channel index
    */
   virtual const std::vector<unsigned int> & getChannelGaps(unsigned int i_chan) const = 0;
+
+  /**
+   * Return a vector of channel indices for a given Pin index
+   */
+  virtual const std::vector<unsigned int> & getPinChannels(unsigned int i_pin) const = 0;
 
   /**
    * Return a map with gap sizes
@@ -114,6 +134,9 @@ public:
    */
   virtual Real getGapWidth(unsigned int gap_index) const = 0;
 
+  virtual const unsigned int & getNx() const = 0;
+  virtual const unsigned int & getNy() const = 0;
+
 protected:
   /// unheated length of the fuel rod at the entry of the assembly
   Real _unheated_length_entry;
@@ -126,11 +149,11 @@ protected:
   /// axial form loss coefficient per computational cell
   std::vector<Real> _k_grid;
   /// axial location of the spacers
-  const std::vector<Real> & _spacer_z;
+  std::vector<Real> _spacer_z;
   /// form loss coefficient of the spacers
-  const std::vector<Real> & _spacer_k;
+  std::vector<Real> _spacer_k;
   /// Lateral form loss coefficient
-  const Real & _kij;
+  Real _kij;
   /// Distance between the neighbor fuel rods, pitch
   Real _pitch;
   /// fuel rod diameter

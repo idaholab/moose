@@ -3,18 +3,20 @@ T_in = 359.15
 mass_flux_in = ${fparse 1e+6 * 17.00 / 3600.}
 P_out = 4.923e6 # Pa
 
-[Mesh]
-  type = QuadSubChannelMesh
-  nx = 3
-  ny = 3
-  n_cells = 10
-  n_blocks = 1
-  pitch = 0.0126
-  rod_diameter = 0.00950
-  gap = 0.00095 # the half gap between sub-channel assemblies
-  heated_length = 1
-  spacer_z = '0.0'
-  spacer_k = '0.0'
+[QuadSubChannelMesh]
+  [sub_channel]
+    type = QuadSubChannelMeshGenerator
+    nx = 3
+    ny = 3
+    n_cells = 10
+    n_blocks = 1
+    pitch = 0.0126
+    rod_diameter = 0.00950
+    gap = 0.00095 # the half gap between sub-channel assemblies
+    heated_length = 1
+    spacer_z = '0.0'
+    spacer_k = '0.0'
+  []
 []
 
 [UserObjects]
@@ -22,7 +24,7 @@ P_out = 4.923e6 # Pa
     type = SolutionUserObject
     mesh = steady_out.e
     timestep = LATEST
-    system_variables = 'mdot SumWij P DP h T rho mu S w_perim q_prime'
+    system_variables = 'mdot SumWij P DP h T Tpin rho mu S w_perim q_prime'
   []
 []
 

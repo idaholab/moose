@@ -1,7 +1,7 @@
 #pragma once
 #include "ExternalProblem.h"
 #include "SubChannelApp.h"
-#include "SubChannelMesh.h"
+#include "QuadSubChannelMesh.h"
 #include "SolutionHandle.h"
 #include "SinglePhaseFluidProperties.h"
 
@@ -62,8 +62,11 @@ protected:
   unsigned int _n_cells;
   unsigned int _n_blocks;
   unsigned int _n_gaps;
+  unsigned int _n_pins;
   unsigned int _n_channels;
   unsigned int _block_size;
+  unsigned int _nx;
+  unsigned int _ny;
   Real _one;
   /// Flag that activates or deactivates the transient parts of the equations we solve by multiplication
   Real _TR;
@@ -104,6 +107,7 @@ protected:
   SolutionHandle * _DP_soln;
   SolutionHandle * _h_soln;
   SolutionHandle * _T_soln;
+  SolutionHandle * _Tpin_soln;
   SolutionHandle * _rho_soln;
   SolutionHandle * _mu_soln;
   SolutionHandle * _S_flow_soln;

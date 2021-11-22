@@ -3,42 +3,19 @@ T_in = 359.15
 mass_flux_in = ${fparse 1e+6 * 17.00 / 3600.}
 P_out = 4.923e6 # Pa
 
-[Mesh]
-  type = QuadSubChannelMesh
-  nx = 6
-  ny = 6
-  n_cells = 50
-  n_blocks = 1
-  pitch = 0.0126
-  rod_diameter = 0.00950
-  gap = 0.00095
-  heated_length = 3.658
-  spacer_z = '0.0 0.229 0.457 0.686 0.914 1.143 1.372 1.600 1.829 2.057 2.286 2.515 2.743 2.972 3.200 3.429'
-  spacer_k = '0.7 0.4 1.0 0.4 1.0 0.4 1.0 0.4 1.0 0.4 1.0 0.4 1.0 0.4 1.0 0.4'
-[]
-
-[AuxVariables]
-  [mdot]
-  []
-  [SumWij]
-  []
-  [P]
-  []
-  [DP]
-  []
-  [h]
-  []
-  [T]
-  []
-  [rho]
-  []
-  [mu]
-  []
-  [S]
-  []
-  [w_perim]
-  []
-  [q_prime]
+[QuadSubChannelMesh]
+  [sub_channel]
+    type = QuadSubChannelMeshGenerator
+    nx = 6
+    ny = 6
+    n_cells = 50
+    n_blocks = 1
+    pitch = 0.0126
+    rod_diameter = 0.00950
+    gap = 0.00095
+    heated_length = 3.658
+    spacer_z = '0.0 0.229 0.457 0.686 0.914 1.143 1.372 1.600 1.829 2.057 2.286 2.515 2.743 2.972 3.200 3.429'
+    spacer_k = '0.7 0.4 1.0 0.4 1.0 0.4 1.0 0.4 1.0 0.4 1.0 0.4 1.0 0.4 1.0 0.4'
   []
 []
 
@@ -50,7 +27,7 @@ P_out = 4.923e6 # Pa
   []
 []
 
-[Problem]
+[SubChannel]
   type = LiquidWaterSubChannel1PhaseProblem
   fp = water
   beta = 0.006
@@ -181,4 +158,3 @@ P_out = 4.923e6 # Pa
   end_time = 8
   dt = 1.0
 []
-
