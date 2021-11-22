@@ -1,33 +1,39 @@
 # ExplicitMidpoint
 
-!alert! construction title=Undocumented Class
-The ExplicitMidpoint has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# ExplicitMidpoint
-
 !syntax description /Executioner/TimeIntegrator/ExplicitMidpoint
 
-## Overview
+The explicit midpoint method is second order accurate in time. It is a two step method and
+a special case of the 2nd order Runge-Kutta method.
 
-!! Replace these lines with information regarding the ExplicitMidpoint object.
+## Description
 
-## Example Input File Syntax
+With $U$ the vector of non linear variables and $A$ a non linear operator
+describing the PDE of interest below:
 
-!! Describe and include an example of how to use the ExplicitMidpoint object.
+!equation
+\dfrac{\partial U(t)}{\partial t} = A(t, U(t))
 
-!syntax parameters /Executioner/TimeIntegrator/ExplicitMidpoint
+Using $t+dt$ for the current time step and $t$ for the previous step,
+the explicit midpoint integration scheme can be written:
 
-!syntax inputs /Executioner/TimeIntegrator/ExplicitMidpoint
+!equation
+U(t+dt) = U(t) + dt A(t+dt/2, U(t) + \dfrac{dt}{2} A(t,U(t)))
 
-!syntax children /Executioner/TimeIntegrator/ExplicitMidpoint
-```
-!alert-end!
+The Butcher tableau of the quadrature weights for this method is:
+!table
+0   | 0 |
+1/2 | 1/2 0 |
+---------------------
+    |  0   1
 
-!syntax description /Executioner/TimeIntegrator/ExplicitMidpoint
+!alert warning
+All kernels except time-(derivative)-kernels should have the parameter `implicit=false` to use this
+time integrator.
+
+!alert warning
+ExplicitRK2-derived TimeIntegrators (ExplicitMidpoint, Heun, Ralston) and other multistage
+TimeIntegrators are known not to work with Materials/AuxKernels that accumulate 'state' and
+should be used with caution.
 
 !syntax parameters /Executioner/TimeIntegrator/ExplicitMidpoint
 

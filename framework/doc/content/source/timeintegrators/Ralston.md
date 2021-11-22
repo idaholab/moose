@@ -1,33 +1,41 @@
 # Ralston
 
-!alert! construction title=Undocumented Class
-The Ralston has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# Ralston
-
 !syntax description /Executioner/TimeIntegrator/Ralston
 
-## Overview
+Ralston's time integration method is second order accurate in time. It is a two step explicit
+method and a special case of the 2nd order Runge-Kutta method. It's obtained through an error minimization
+process and has been shown to outperform other 2nd order explicit Runge Kunta methods [!cite](ralston1962).
 
-!! Replace these lines with information regarding the Ralston object.
+## Description
 
-## Example Input File Syntax
+With $U$ the vector of non linear variables and $A$ a non linear operator
+describing the PDE of interest below:
 
-!! Describe and include an example of how to use the Ralston object.
+!equation
+\dfrac{\partial U(t)}{\partial t} = A(t, U(t))
 
-!syntax parameters /Executioner/TimeIntegrator/Ralston
+Using $t+dt$ for the current time step and $t$ for the previous step,
+Ralston's method can be written:
 
-!syntax inputs /Executioner/TimeIntegrator/Ralston
+!equation
+U(t+dt) = U(t) + \dfrac{dt}{4} \left(A(t, U(t)\right) +  \dfrac{3dt}{4} A \left(t + \dfrac{2dt}{3},U(t) + \dfrac{2dt}{3} A(t, U(t)) \right)
 
-!syntax children /Executioner/TimeIntegrator/Ralston
-```
-!alert-end!
+The Butcher tableau of the quadrature weights for this method is:
 
-!syntax description /Executioner/TimeIntegrator/Ralston
+!table
+0   | 0
+2/3 | 2/3    0
+---------------------
+    | 1/4  3/4
+
+!alert warning
+All kernels except time-(derivative)-kernels should have the parameter `implicit=false` to use this
+time integrator.
+
+!alert warning
+ExplicitRK2-derived TimeIntegrators (ExplicitMidpoint, Heun, Ralston) and other multistage
+TimeIntegrators are known not to work with Materials/AuxKernels that accumulate 'state' and
+should be used with caution.
 
 !syntax parameters /Executioner/TimeIntegrator/Ralston
 

@@ -1,33 +1,22 @@
 # CrankNicolson
 
-!alert! construction title=Undocumented Class
-The CrankNicolson has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# CrankNicolson
-
 !syntax description /Executioner/TimeIntegrator/CrankNicolson
 
-## Overview
+The Crank Nicholson time integration scheme is a second order implicit method. It is unconditionally stable.
 
-!! Replace these lines with information regarding the CrankNicolson object.
+## Description
 
-## Example Input File Syntax
+With $U$ the vector of non linear variables and $A$ a non linear operator
+describing the PDE of interest below:
 
-!! Describe and include an example of how to use the CrankNicolson object.
+!equation
+\dfrac{\partial U(t)}{\partial t} = A(t, U(t))
 
-!syntax parameters /Executioner/TimeIntegrator/CrankNicolson
+Using $t+dt$ for the current time step and $t$ for the previous step,
+the implicit Euler time integration scheme can be written:
 
-!syntax inputs /Executioner/TimeIntegrator/CrankNicolson
-
-!syntax children /Executioner/TimeIntegrator/CrankNicolson
-```
-!alert-end!
-
-!syntax description /Executioner/TimeIntegrator/CrankNicolson
+!equation
+U(t+dt) = U(t) + dt \dfrac{1}{2} \left( A(t, U(t)) + A(t+dt, U(t+dt)) \right)
 
 !syntax parameters /Executioner/TimeIntegrator/CrankNicolson
 

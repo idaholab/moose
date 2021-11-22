@@ -17,7 +17,7 @@ InputParameters
 LayeredAverage::validParams()
 {
   InputParameters params = LayeredIntegral::validParams();
-  params.addClassDescription("Computes averages of variables over layers")
+  params.addClassDescription("Computes averages of variables over layers");
 
   return params;
 }
