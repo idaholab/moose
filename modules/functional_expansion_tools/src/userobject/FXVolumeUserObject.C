@@ -14,9 +14,8 @@ registerMooseObject("FunctionalExpansionToolsApp", FXVolumeUserObject);
 InputParameters
 FXVolumeUserObject::validParams()
 {
-  InputParameters params = ElementIntegralVariableUserObject::validParams();
-
-  params += FXIntegralBaseUserObjectParameters::validParams();
+  InputParameters params =
+      FXIntegralBaseUserObject<ElementIntegralVariableUserObject>::validParams();
 
   params.addClassDescription("Generates an Functional Expansion representation of a variable value "
                              "over a volume using a 'FunctionSeries'-type Function");
