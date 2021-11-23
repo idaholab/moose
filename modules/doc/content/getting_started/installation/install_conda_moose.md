@@ -53,12 +53,45 @@ What ever is returned is your shell. With that information in hand (if you recei
 conda init SHELL_NAME
 ```
 
-Where SHELL_NAME is the shell you discovered in the previous step. Once complete, close any terminals you have opened, and re-open them. Then run `conda activate moose` again. If successful proceed to installing packages:
+Where SHELL_NAME is the shell you discovered in the previous step. Once complete, close any terminals you have opened, and re-open them. Then run `conda activate moose` again. If successful proceed to installing packages.
+
+!alert! note
+If `mamba` is installed one can simply use it to do this operation as:
+
+```
+mamba init
+```
+Following this, close the terminal, open a new one and activate the environment using:
+```
+mamba activate moose
+```
+!alert-end!
+
+As a next step, the packages necessary for compiling/running moose are installed.
 
 ```bash
 mamba install moose-tools
 mamba install moose-libmesh
 ```
+
+Once the packages are installed, the environment needs to be deactivated and
+activated again to ensure that the environmental variables in the installed
+packages are set properly.
+
+```bash
+conda deactivate
+conda activate moose
+```
+
+!alert! note
+Alternatively, if `mamba` has been initialized, one can carry out the same
+step by using the following commands:
+
+```bash
+mamba deactivate
+mamba activate moose
+```
+!alert-end!
 
 If you are running into additional errors, please see our [troubleshooting guide for Conda](troubleshooting.md#condaissues optional=True).
 
