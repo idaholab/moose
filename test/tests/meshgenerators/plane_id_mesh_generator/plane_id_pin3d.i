@@ -1,13 +1,13 @@
 [Mesh]
   [pin2d]
-    type = PolygonConcentricCircleMeshGenerator
-    preserve_volumes = true
-    ring_radii = 0.4
-    ring_intervals = 2
-    background_intervals = 1
-    num_sides = 6
-    num_sectors_per_side = '2 2 2 2 2 2'
-    polygon_size = 0.5
+    type = ConcentricCircleMeshGenerator
+    num_sectors = 2
+    radii = '0.4 0.5'
+    rings = '1 1 1'
+    has_outer_square = on
+    pitch = 1.26
+    preserve_volumes = yes
+    smoothing_max_it = 3
   []
   [pin3d]
     type = FancyExtruderGenerator

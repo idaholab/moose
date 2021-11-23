@@ -20,7 +20,7 @@ The axis of plane can be specfied using [!param](/Mesh/PlaneIDMeshGenerator/plan
 
 ## Example Syntax
 
-!listing modules/reactor/test/tests/meshgenerators/reporting_id/plane_id/plane_id_pin3d.i block=Mesh
+!listing test/tests/meshgenerators/plane_id_mesh_generator/plane_id_pin3d.i block=Mesh
 
 !syntax parameters /Mesh/PlaneIDMeshGenerator
 
