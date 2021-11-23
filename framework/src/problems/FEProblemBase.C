@@ -603,11 +603,22 @@ FEProblemBase::getEvaluableElementRange()
 {
   if (!_evaluable_local_elem_range)
   {
-    _evaluable_local_elem_range =
-        std::make_unique<ConstElemRange>(_mesh.getMesh().evaluable_elements_begin(_nl->dofMap()),
-                                         _mesh.getMesh().evaluable_elements_end(_nl->dofMap()));
+    std::vector<const DofMap *> dof_maps = {&_nl->dofMap(), &_aux->dofMap()};
+    _evaluable_local_elem_range = libmesh_make_unique<ConstElemRange>(
+        _mesh.getMesh().multi_evaluable_elements_begin(dof_maps),
+        _mesh.getMesh().multi_evaluable_elements_end(dof_maps));
   }
   return *_evaluable_local_elem_range;
+}
+
+const ConstElemRange &
+FEProblemBase::getNonlinearEvaluableElementRange()
+{
+  if (!_nl_evaluable_local_elem_range)
+    _nl_evaluable_local_elem_range =
+        libmesh_make_unique<ConstElemRange>(_mesh.getMesh().evaluable_elements_begin(_nl->dofMap()),
+                                            _mesh.getMesh().evaluable_elements_end(_nl->dofMap()));
+  return *_nl_evaluable_local_elem_range;
 }
 
 void
@@ -848,7 +859,7 @@ FEProblemBase::initialSetup()
     {
       TIME_SECTION("computingInitialStatefulProps", 3, "Computing Initial Material Values");
 
-      ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
+      const ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
       ComputeMaterialsObjectThread cmt(*this,
                                        _material_data,
                                        _bnd_material_data,
@@ -1055,7 +1066,7 @@ FEProblemBase::initialSetup()
   {
     TIME_SECTION("computeMaterials", 2, "Computing Initial Material Properties");
 
-    ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
+    const ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
     ComputeMaterialsObjectThread cmt(*this,
                                      _material_data,
                                      _bnd_material_data,
@@ -6280,6 +6291,7 @@ FEProblemBase::meshChangedHelper(bool intermediate_change)
   _mesh.updateActiveSemiLocalNodeRange(_ghosted_elems);
 
   _evaluable_local_elem_range.reset();
+  _nl_evaluable_local_elem_range.reset();
 
   // Just like we reinitialized our geometric search objects, we also need to reinitialize our
   // mortar meshes. Note that this needs to happen after DisplacedProblem::meshChanged because the

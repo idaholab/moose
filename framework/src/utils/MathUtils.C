@@ -171,4 +171,57 @@ taylorLog(Real x)
   return val * 2.0 * y;
 }
 
+std::vector<std::vector<unsigned int>>
+multiIndex(unsigned int dim, unsigned int order)
+{
+  // first row all zero
+  std::vector<std::vector<unsigned int>> multi_index;
+  std::vector<std::vector<unsigned int>> n_choose_k;
+  std::vector<unsigned int> row(dim, 0);
+  multi_index.push_back(row);
+
+  if (dim == 1)
+    for (unsigned int q = 1; q <= order; q++)
+    {
+      row[0] = q;
+      multi_index.push_back(row);
+    }
+  else
+    for (unsigned int q = 1; q <= order; q++)
+    {
+      n_choose_k = multiIndexHelper(dim + q - 1, dim - 1);
+      for (unsigned int r = 0; r < n_choose_k.size(); r++)
+      {
+        row.clear();
+        for (unsigned int c = 1; c < n_choose_k[0].size(); c++)
+          row.push_back(n_choose_k[r][c] - n_choose_k[r][c - 1] - 1);
+        multi_index.push_back(row);
+      }
+    }
+
+  return multi_index;
+}
+
 } // namespace MathUtils
+
+std::vector<std::vector<unsigned int>>
+multiIndexHelper(unsigned int N, unsigned int K)
+{
+  std::vector<std::vector<unsigned int>> n_choose_k;
+  std::vector<unsigned int> row;
+  std::string bitmask(K, 1); // K leading 1's
+  bitmask.resize(N, 0);      // N-K trailing 0's
+
+  do
+  {
+    row.clear();
+    row.push_back(0);
+    for (unsigned int i = 0; i < N; ++i) // [0..N-1] integers
+      if (bitmask[i])
+        row.push_back(i + 1);
+    row.push_back(N + 1);
+    n_choose_k.push_back(row);
+  } while (std::prev_permutation(bitmask.begin(), bitmask.end()));
+
+  return n_choose_k;
+}

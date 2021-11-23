@@ -430,6 +430,7 @@ public:
   virtual void init() override;
   virtual void solve() override;
 
+  ///@{
   /**
    * In general, {evaluable elements} >= {local elements} U {algebraic ghosting elements}. That is,
    * the number of evaluable elements does NOT necessarily equal to the number of local and
@@ -438,8 +439,17 @@ public:
    * local or algebraically ghosted, then all the nodal (Lagrange) degrees of freedom associated
    * with the non-local, non-algebraically-ghosted element will be evaluable, and hence that
    * element will be considered evaluable.
+   *
+   * getNonlinearEvaluableElementRange() returns the evaluable element range based on the nonlinear
+   * system dofmap;
+   * getAuxliaryEvaluableElementRange() returns the evaluable element range based on the auxiliary
+   * system dofmap;
+   * getEvaluableElementRange() returns the element range that is evaluable based on both the
+   * nonlinear dofmap and the auxliary dofmap.
    */
   const ConstElemRange & getEvaluableElementRange();
+  const ConstElemRange & getNonlinearEvaluableElementRange();
+  ///@}
 
   /**
    * Set an exception.  Usually this should not be directly called - but should be called through
@@ -2235,6 +2245,8 @@ protected:
   std::shared_ptr<LineSearch> _line_search;
 
   std::unique_ptr<ConstElemRange> _evaluable_local_elem_range;
+  std::unique_ptr<ConstElemRange> _nl_evaluable_local_elem_range;
+  std::unique_ptr<ConstElemRange> _aux_evaluable_local_elem_range;
 
   /// Automatic differentiaion (AD) flag which indicates whether any consumer has
   /// requested an AD material property or whether any suppier has declared an AD material property

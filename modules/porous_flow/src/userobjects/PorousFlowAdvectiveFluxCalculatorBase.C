@@ -310,7 +310,7 @@ PorousFlowAdvectiveFluxCalculatorBase::buildCommLists()
   std::map<processor_id_type,
            std::map<std::pair<dof_id_type, dof_id_type>, std::vector<dof_id_type>>>
       tpr_global;
-  for (const auto & elem : _fe_problem.getEvaluableElementRange())
+  for (const auto & elem : _fe_problem.getNonlinearEvaluableElementRange())
     if (this->hasBlocks(elem->subdomain_id()))
     {
       const processor_id_type elem_pid = elem->processor_id();

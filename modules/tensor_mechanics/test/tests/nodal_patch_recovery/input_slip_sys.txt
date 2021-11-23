@@ -1,0 +1,1 @@
+../crystal_plasticity/input_slip_sys.txt
