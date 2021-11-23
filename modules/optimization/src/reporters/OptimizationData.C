@@ -32,6 +32,7 @@ OptimizationData::execute()
 {
 }
 
+// fixme I can't put this here because ReproterPointSource2 can't see it
 namespace libMesh
 {
 void
@@ -62,7 +63,7 @@ to_json(nlohmann::json & json,
   }
 }
 }
-//
+
 template <>
 void
 dataStore(std::ostream & stream,

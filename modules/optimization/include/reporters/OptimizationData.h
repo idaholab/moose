@@ -28,11 +28,13 @@ protected:
   std::vector<std::tuple<Point, Real, Real, Real>> & _optimization_data;
 };
 
+// fixme I can't put this here because OptimizationDataPointSource can't see it.  Its in
+// framework/include/outputs/JsonIO.h
 namespace libMesh
 {
 void to_json(nlohmann::json & json, const std::vector<std::tuple<Point, Real, Real, Real>> & value);
 }
-
+//
 /**
  * Store and load methods for measurement_data tuple,
  * fixme I don't know how to test these

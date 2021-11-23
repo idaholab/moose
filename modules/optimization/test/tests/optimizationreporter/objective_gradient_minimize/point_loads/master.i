@@ -5,12 +5,12 @@
   type = ObjectiveGradientMinimize
   parameter_names = 'parameter_results'
   num_values = '3'
-  adjoint_data_name = 'adjoint'
-  measurement_points = '0.2 0.2 0
-            0.8 0.6 0
-            0.2 1.4 0
-            0.8 1.8 0'
-  measurement_values = '209 218 164 121'
+  measurement_points = '0.3 0.3 0
+            0.4 1.0 0
+            0.8 0.5 0
+            0.8 0.6 0'
+  measurement_values = '100 204 320 216'
+
 
 []
 
@@ -38,10 +38,10 @@
 [Transfers]
   [toforward_dummy]
     type = MultiAppReporterTransfer
-    multi_app = forward
+    multi_app = adjoint
     direction = to_multiapp
     from_reporters = 'OptimizationReporter/optimization_data'
-    to_reporters = 'dummy/optimization_data'
+    to_reporters = 'misfit/optimization_data'
   []
   [toforward]
     type = MultiAppReporterTransfer

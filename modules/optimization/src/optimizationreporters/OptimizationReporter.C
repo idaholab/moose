@@ -120,6 +120,12 @@ OptimizationReporter::computeAndCheckObjective(bool multiapp_passed)
 Real
 OptimizationReporter::computeObjective()
 {
+  // fixme  we should write directly into optimization_data and get rid of misfit
+  for (size_t i = 0; i < _optimization_data.size(); ++i)
+  {
+    std::get<3>(_optimization_data[i]) = _misfit[i];
+  }
+
   Real val = 0;
   for (auto & misfit : _misfit)
     val += misfit * misfit;

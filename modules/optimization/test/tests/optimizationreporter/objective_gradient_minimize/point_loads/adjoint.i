@@ -21,12 +21,19 @@
 
 [DiracKernels]
   [pt]
-    type = ReporterPointSource
+    type = OptimizationDataPointSource
     variable = temperature
     x_coord_name = 'point_source/x'
     y_coord_name = 'point_source/y'
     z_coord_name = 'point_source/z'
     value_name = 'point_source/value'
+    optimization_data = 'misfit/optimization_data'
+  []
+[]
+
+[Reporters]
+  [misfit]
+    type=OptimizationData
   []
 []
 
