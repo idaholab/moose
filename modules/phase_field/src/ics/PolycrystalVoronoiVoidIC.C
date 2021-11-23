@@ -46,11 +46,11 @@ PolycrystalVoronoiVoidIC::validParams()
                                 "structure_type = voids");
   params.addRequiredParam<UserObjectName>(
       "polycrystal_ic_uo", "UserObject for obtaining the polycrystal grain structure.");
-  params.addParam<FileName>(
-      "file_name",
-      "",
-      "File containing grain centroids, if file_name is provided, the centroids "
-      "from the file will be used.");
+  params.addParam<FileName>("file_name",
+                            "",
+                            "File containing grain centroids, if file_name is "
+                            "provided, the centroids "
+                            "from the file will be used.");
   return params;
 }
 
@@ -131,8 +131,11 @@ PolycrystalVoronoiVoidIC::computeCircleCenters()
 
       // Find Slope of Line in the plane orthogonal to the diff_centerpoint
       // vector
-      Point diff_centerpoints =
-          _mesh.minPeriodicVector(_var.number(), closest_point, next_closest_point);
+      Point pa = rand_point + _mesh.minPeriodicVector(_var.number(), rand_point, closest_point);
+      Point pb =
+          rand_point + _mesh.minPeriodicVector(_var.number(), rand_point, next_closest_point);
+      Point diff_centerpoints = pb - pa;
+
       Point diff_rand_center = _mesh.minPeriodicVector(_var.number(), closest_point, rand_point);
       Point normal_vector = diff_centerpoints.cross(diff_rand_center);
       Point slope = normal_vector.cross(diff_centerpoints);
