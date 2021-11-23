@@ -12,7 +12,6 @@
 // Moose Includes
 #include "DiracKernel.h"
 #include "ReporterInterface.h"
-#include "OptimizationData.h"
 
 /**
  * A OptimizationDataPointSource DiracKernel is used to create variable valued point sources.
@@ -29,9 +28,8 @@ protected:
   virtual Real computeQpResidual() override;
 
 private:
-  /// fixme this should be a struct.  The order is measurement point, measurement value, simulation
-  /// value, misfit
-  const std::vector<std::tuple<Point, Real, Real, Real>> & _optimization_data;
+  const std::vector<Point> & _points;
+  const std::vector<Real> & _values;
   /// map to associate points with their index into the vpp value
   std::map<Point, size_t> _point_to_index;
 };

@@ -23,11 +23,8 @@
   [pt]
     type = OptimizationDataPointSource
     variable = temperature
-    x_coord_name = 'point_source/x'
-    y_coord_name = 'point_source/y'
-    z_coord_name = 'point_source/z'
-    value_name = 'point_source/value'
-    optimization_data = 'misfit/optimization_data'
+    points = misfit/measurement_points
+    values = misfit/misfit_values
   []
 []
 
@@ -82,11 +79,6 @@
 []
 
 [VectorPostprocessors]
-  [point_source]
-    type = ConstantVectorPostprocessor
-    vector_names = 'x y z value'
-    value = '0.3 0.4 0.8 0.8; 0.3 1.0 0.5 0.6; 0 0 0 0; 10 10 10 10'
-  []
   [data_pt]
     type = PointValueSampler
     points = '0.2 0.2 0

@@ -80,13 +80,6 @@ protected:
   const std::vector<Real> & _lower_bounds;
   const std::vector<Real> & _upper_bounds;
 
-  /// Measurement points and values
-  const std::vector<Real> & _measurement_values;
-  const std::vector<Point> & _measurement_points;
-
-  /// vector of misfit data
-  const std::vector<Real> & _misfit;
-
   /**
    * Function to compute objective.
    * This is the last function called in objective routine

@@ -23,29 +23,18 @@ public:
   virtual void finalize() override {}
 
 protected:
-  // fixme this should be a struct.  The order is measurement point, measurement value, simulation
-  // value, misfit
-  std::vector<std::tuple<Point, Real, Real, Real>> & _optimization_data;
+  std::vector<Point> & _measurement_points;
+  std::vector<Real> & _measurement_values;
+  std::vector<Real> & _simulation_values;
+  std::vector<Real> & _misfit_values;
+
+  // fixme lynn
+  // maybe add method to compute misfit
+  // add param names
+  // add param values
 };
 
-// fixme I can't put this here because OptimizationDataPointSource can't see it.  Its in
-// framework/include/outputs/JsonIO.h
 namespace libMesh
 {
-void to_json(nlohmann::json & json, const std::vector<std::tuple<Point, Real, Real, Real>> & value);
+void to_json(nlohmann::json & json, const Point & value);
 }
-//
-/**
- * Store and load methods for measurement_data tuple,
- * fixme I don't know how to test these
- */
-///@{
-template <>
-void dataStore(std::ostream & stream,
-               std::tuple<Point, Real, Real, Real> & optimization_data_entry,
-               void * context);
-template <>
-void dataLoad(std::istream & stream,
-              std::tuple<Point, Real, Real, Real> & optimization_data_entry,
-              void * context);
-///@}

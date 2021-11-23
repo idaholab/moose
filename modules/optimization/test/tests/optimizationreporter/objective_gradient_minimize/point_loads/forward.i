@@ -30,12 +30,6 @@
   []
 []
 
-[Reporters]
-  [dummy]
-    type=OptimizationData
-  []
-[]
-
 [BCs]
   [left]
     type = DirichletBC
@@ -84,16 +78,25 @@
   [point_source]
     type = ConstantVectorPostprocessor
     vector_names = 'x y z value'
-    value = '0.2 0.2 0.8; 0.2 0.8 0.2; 0 0 0; -2458 7257 26335'
+    value = '0.2 0.2 0.8;
+             0.2 0.8 0.2;
+             0 0 0;
+             -2458 7257 26335'
   []
+  #fixme lynn still need this to get simulation values at measurement points
+  # need to get points for this from measurement_points
   [data_pt]
-    type = MeasuredDataPointSampler
-    variable = temperature
+    type = PointValueSampler
     points = '0.3 0.3 0
               0.4 1.0 0
               0.8 0.5 0
               0.8 0.6 0'
-    measured_values = '100 204 320 216'
+    variable = temperature
+    # fixme lynn THIS HAS TO BE SORTED BY ID.
+    # I can hard code sort by ID into the new pointValueSampler
+    # that takes points from a reporter.  That requires some work because SamplerBase
+    # is very specialized for vectorPostprocessors and not reporters
+    sort_by = id
   []
 []
 

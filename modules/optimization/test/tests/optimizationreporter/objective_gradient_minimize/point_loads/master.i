@@ -10,8 +10,6 @@
             0.8 0.5 0
             0.8 0.6 0'
   measurement_values = '100 204 320 216'
-
-
 []
 
 [Executioner]
@@ -36,13 +34,6 @@
 []
 
 [Transfers]
-  [toforward_dummy]
-    type = MultiAppReporterTransfer
-    multi_app = adjoint
-    direction = to_multiapp
-    from_reporters = 'OptimizationReporter/optimization_data'
-    to_reporters = 'misfit/optimization_data'
-  []
   [toforward]
     type = MultiAppReporterTransfer
     multi_app = forward
@@ -54,16 +45,15 @@
     type = MultiAppReporterTransfer
     multi_app = forward
     direction = from_multiapp
-    from_reporters = 'data_pt/temperature_difference data_pt/temperature'
-    to_reporters = 'OptimizationReporter/misfit receiver/measured'
+    from_reporters = 'data_pt/temperature'
+    to_reporters = 'OptimizationReporter/simulation_values'
   []
-
   [toadjoint]
     type = MultiAppReporterTransfer
     multi_app = adjoint
     direction = to_multiapp
-    from_reporters = 'OptimizationReporter/misfit'
-    to_reporters = 'point_source/value'
+    from_reporters = 'OptimizationReporter/measurement_points OptimizationReporter/misfit_values'
+    to_reporters = 'misfit/measurement_points misfit/misfit_values'
   []
   [fromadjoint]
     type = MultiAppReporterTransfer

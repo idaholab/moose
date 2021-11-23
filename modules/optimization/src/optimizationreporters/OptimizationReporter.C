@@ -16,13 +16,11 @@ OptimizationReporter::validParams()
       "lower_bounds", std::vector<Real>(), "Lower bounds for each parameter value.");
   params.addParam<std::vector<Real>>(
       "upper_bounds", std::vector<Real>(), "Upper bounds for each parameter value.");
-  // make measurement_values & measurement_points addRequiredParam  but will require all tests to
-  // change
-  params.addParam<std::vector<Real>>(
+  params.addRequiredParam<std::vector<Real>>(
       "measurement_values",
       "Measurement values collected from locations given by measurement_points");
-  params.addParam<std::vector<Point>>("measurement_points",
-                                      "Point locations corresponding to each measurement value");
+  params.addRequiredParam<std::vector<Point>>(
+      "measurement_points", "Point locations corresponding to each measurement value");
 
   return params;
 }
@@ -34,18 +32,9 @@ OptimizationReporter::OptimizationReporter(const InputParameters & parameters)
     _nvalues(getParam<std::vector<dof_id_type>>("num_values")),
     _ndof(std::accumulate(_nvalues.begin(), _nvalues.end(), 0)),
     _lower_bounds(getParam<std::vector<Real>>("lower_bounds")),
-    _upper_bounds(getParam<std::vector<Real>>("upper_bounds")),
-    _measurement_values(getParam<std::vector<Real>>("measurement_values")),
-    _measurement_points(getParam<std::vector<Point>>("measurement_points")),
-    _misfit(declareValueByName<std::vector<Real>>("misfit", REPORTER_MODE_REPLICATED))
+    _upper_bounds(getParam<std::vector<Real>>("upper_bounds"))
 
 {
-  for (size_t i = 0; i < _measurement_points.size(); ++i)
-    _optimization_data.push_back(std::make_tuple(_measurement_points[i],
-                                                 _measurement_values[i],
-                                                 std::numeric_limits<Real>::max(),
-                                                 std::numeric_limits<Real>::max()));
-
   if (_parameter_names.size() != _nvalues.size())
     paramError("num_parameters",
                "There should be a number in 'num_parameters' for each name in 'parameter_names'.");
@@ -75,6 +64,8 @@ OptimizationReporter::OptimizationReporter(const InputParameters & parameters)
                            initial_condition.begin() + v + _nvalues[i]);
     v += _nvalues[i];
   }
+
+  _misfit_values.resize(_measurement_values.size(), 0.0);
 }
 
 void
@@ -120,14 +111,11 @@ OptimizationReporter::computeAndCheckObjective(bool multiapp_passed)
 Real
 OptimizationReporter::computeObjective()
 {
-  // fixme  we should write directly into optimization_data and get rid of misfit
-  for (size_t i = 0; i < _optimization_data.size(); ++i)
-  {
-    std::get<3>(_optimization_data[i]) = _misfit[i];
-  }
+  for (size_t i = 0; i < _measurement_values.size(); ++i)
+    _misfit_values[i] = _simulation_values[i] - _measurement_values[i];
 
   Real val = 0;
-  for (auto & misfit : _misfit)
+  for (auto & misfit : _misfit_values)
     val += misfit * misfit;
 
   val = 0.5 * val;
