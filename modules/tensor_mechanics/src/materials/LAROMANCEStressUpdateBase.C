@@ -528,7 +528,7 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::checkInputWindow(const GenericReal<is_ad>
     switch (behavior)
     {
       case WindowFailure::WARN:
-        mooseWarning(msg.str());
+        mooseDoOnce(mooseWarning(msg.str()));
         break;
       case WindowFailure::EXCEPTION:
         mooseException(msg.str());
