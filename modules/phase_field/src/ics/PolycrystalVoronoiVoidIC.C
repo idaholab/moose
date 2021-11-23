@@ -41,16 +41,14 @@ PolycrystalVoronoiVoidIC::validParams()
                                      "Which structure type is being initialized, grains or voids");
   params.addParam<unsigned int>("op_index",
                                 0,
-                                "The index for the current "
-                                "order parameter, not needed if "
-                                "structure_type = voids");
+                                "The index for the current order parameter, "
+                                "not needed if structure_type = voids");
   params.addRequiredParam<UserObjectName>(
       "polycrystal_ic_uo", "UserObject for obtaining the polycrystal grain structure.");
   params.addParam<FileName>("file_name",
                             "",
-                            "File containing grain centroids, if file_name is "
-                            "provided, the centroids "
-                            "from the file will be used.");
+                            "File containing grain centroids, if file_name is provided, "
+                            "the centroids from the file will be used.");
   return params;
 }
 
@@ -68,8 +66,7 @@ PolycrystalVoronoiVoidIC::PolycrystalVoronoiVoidIC(const InputParameters & param
                  "the intended usage for representing voids.");
   if (_numbub == 0)
     mooseError("PolycrystalVoronoiVoidIC requires numbub > 0. If you want no voids to "
-               "be "
-               "represented, use invalue = outvalue. In general, you should use "
+               "be represented, use invalue = outvalue. In general, you should use "
                "PolycrystalVoronoi to represent Voronoi grain structures without "
                "voids.");
 }
