@@ -12,6 +12,7 @@
 #include "RankFourTensor.h"
 #include "Function.h"
 #include "Assembly.h"
+#include "UserObjectInterface.h"
 
 #include "libmesh/quadrature.h"
 

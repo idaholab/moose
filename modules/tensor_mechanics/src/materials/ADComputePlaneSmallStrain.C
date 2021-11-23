@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ADComputePlaneSmallStrain.h"
+#include "UserObject.h"
 
 registerMooseObject("TensorMechanicsApp", ADComputePlaneSmallStrain);
 

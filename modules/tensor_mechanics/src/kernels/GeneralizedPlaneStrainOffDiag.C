@@ -16,6 +16,7 @@
 #include "MooseVariableScalar.h"
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
+#include "UserObject.h"
 
 #include "libmesh/quadrature.h"
 
