@@ -61,7 +61,9 @@ If `mamba` is installed one can simply use it to do this operation as:
 ```
 mamba init
 ```
-Following this, close the terminal, open a new one and activate the environment using:
+
+Following this, close the terminal, open a new one, and activate the environment using:
+
 ```
 mamba activate moose
 ```
