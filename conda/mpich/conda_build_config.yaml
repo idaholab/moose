@@ -253,11 +253,11 @@ pin_run_as_build:
 
 #### Darwin SDK SYSROOT
 CONDA_BUILD_SYSROOT:                           # [osx]
-  - /opt/MacOSX10.9.sdk                        # [not arm64 and osx]
+  - /opt/MacOSX10.11.sdk                       # [not arm64 and osx]
   - /opt/MacOSX11.3.sdk                        # [arm64]
 
 macos_min_version:                             # [osx]
-  - 10.9                                       # [not arm64 and osx]
+  - 10.11                                      # [not arm64 and osx]
   - 11.3                                       # [arm64]
 
 macos_machine:                                 # [osx]
@@ -265,5 +265,5 @@ macos_machine:                                 # [osx]
   - arm64-apple-darwin20.0.0                   # [arm64]
 
 MACOSX_DEPLOYMENT_TARGET:                      # [osx]
-  - 10.9                                       # [not arm64 and osx]
+  - 10.11                                      # [not arm64 and osx]
   - 11.3                                       # [arm64]
