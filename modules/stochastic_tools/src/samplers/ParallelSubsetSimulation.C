@@ -126,10 +126,14 @@ ParallelSubsetSimulation::computeSample(dof_id_type row_index, dof_id_type col_i
   if (_step <= (int)(_num_samplessub / n_processors()))
   {
     // This is the first subset which uses a simple Monte Carlo sampling scheme
+
+    // Select the correct seed value
     _seed_value = _step * n_processors();
+    // Track the current subset
     _subset = std::floor((_step * n_processors()) / _num_samplessub);
     if (sample)
     {
+      // Get and store the accepted samples inputs across all the procs from the previous step
       for (dof_id_type j = 0; j < _distributions.size(); ++j)
       {
         for (dof_id_type ss = 0; ss < n_processors(); ++ss)
@@ -139,11 +143,13 @@ ParallelSubsetSimulation::computeSample(dof_id_type row_index, dof_id_type col_i
               0,
               1));
       }
+      // Get the accepted samples outputs across all the procs from the previous step
       std::vector<Real> Tmp1 = (_use_absolute_value)
                                    ? AdaptiveMonteCarloUtils::computeVectorABS(
                                          getReporterValue<std::vector<Real>>("output_reporter"))
                                    : getReporterValue<std::vector<Real>>("output_reporter");
       _communicator.allgather(Tmp1);
+      // Store these accepted samples outputs
       for (dof_id_type ss = 0; ss < n_processors(); ++ss)
         _outputs_sto.push_back(Tmp1[ss]);
     }
@@ -152,11 +158,15 @@ ParallelSubsetSimulation::computeSample(dof_id_type row_index, dof_id_type col_i
   }
   else
   {
-    // This are the subsequent subsets which use Markov Chain Monte Carlo sampling scheme
+    // These are the subsequent subsets which use Markov Chain Monte Carlo sampling scheme
+
+    // Track the current subset
     _subset = std::floor(((_step - 1) * n_processors()) / _num_samplessub);
     if (sample)
     {
+      // Select the correct seed value
       _seed_value = _step * n_processors() + 1;
+      // Get and store the accepted samples inputs across all the procs from the previous step
       for (dof_id_type j = 0; j < _distributions.size(); ++j)
       {
         for (dof_id_type ss = 0; ss < n_processors(); ++ss)
@@ -166,18 +176,26 @@ ParallelSubsetSimulation::computeSample(dof_id_type row_index, dof_id_type col_i
               0,
               1));
       }
+      // Get the accepted samples outputs across all the procs from the previous step
       std::vector<Real> Tmp1 = (_use_absolute_value)
                                    ? AdaptiveMonteCarloUtils::computeVectorABS(
                                          getReporterValue<std::vector<Real>>("output_reporter"))
                                    : getReporterValue<std::vector<Real>>("output_reporter");
       _communicator.allgather(Tmp1);
+      // Store these accepted samples outputs
       for (dof_id_type ss = 0; ss < n_processors(); ++ss)
         _outputs_sto.push_back(Tmp1[ss]);
+      // Number of samples per Markov chain
       _count_max = std::floor(1 / _subset_probability);
+      // Check whether the subset index has changed
       if (_subset > (std::floor(((_step - 2) * n_processors()) / _num_samplessub)))
       {
+        // Reinitialize some variables to facilitate getting the starting inputs values for Markov
+        // chains for the new subset
         _ind_sto = -1;
         _count = INT_MAX;
+        // _inputs_sorted contains the input values corresponding to the largest po percentile
+        // output values
         for (dof_id_type j = 0; j < _distributions.size(); ++j)
         {
           _inputs_sorted[j].resize(std::floor(_num_samplessub * _subset_probability));
@@ -185,8 +203,10 @@ ParallelSubsetSimulation::computeSample(dof_id_type row_index, dof_id_type col_i
               _inputs_sto[j], _outputs_sto, _num_samplessub, _subset, _subset_probability);
         }
       }
+      // Check whether the number of samples in a Markov chain exceeded the limit
       if (_count >= _count_max)
       {
+        // Reinitialize the starting inputs values for the next set of Markov chains
         for (dof_id_type jj = 0; jj < n_processors(); ++jj)
         {
           ++_ind_sto;
@@ -197,14 +217,18 @@ ParallelSubsetSimulation::computeSample(dof_id_type row_index, dof_id_type col_i
       }
       else
       {
+        // Otherwise, use the previously accepted input values to propose the next set of input
+        // values
         for (dof_id_type jj = 0; jj < n_processors(); ++jj)
         {
           for (dof_id_type k = 0; k < _distributions.size(); ++k)
             _markov_seed[k][jj] = _inputs_sto[k][_inputs_sto[k].size() - n_processors() + jj];
         }
       }
+      // Track the sample index in the current Markov chain
       ++_count;
       Real rv;
+      // Use the previously accepted input values to propose the new input values
       for (dof_id_type jj = 0; jj < n_processors(); ++jj)
       {
         for (dof_id_type i = 0; i < _distributions.size(); ++i)
@@ -220,6 +244,7 @@ ParallelSubsetSimulation::computeSample(dof_id_type row_index, dof_id_type col_i
         }
       }
     }
+    // Track the current step
     _check_step = _step;
     return _distributions[col_index]->quantile(
         Normal::cdf(_new_sample_vec[col_index][row_index], 0, 1));
