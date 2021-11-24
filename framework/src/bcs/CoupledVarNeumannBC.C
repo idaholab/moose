@@ -30,6 +30,7 @@ CoupledVarNeumannBC::validParams()
 CoupledVarNeumannBC::CoupledVarNeumannBC(const InputParameters & parameters)
   : IntegratedBC(parameters),
     _coupled_var(coupledValue("v")),
+    _coupled_num(coupled("v")),
     _coef(getParam<Real>("coef")),
     _scale_factor(coupledValue("scale_factor"))
 {
@@ -39,4 +40,13 @@ Real
 CoupledVarNeumannBC::computeQpResidual()
 {
   return -_scale_factor[_qp] * _coef * _test[_i][_qp] * _coupled_var[_qp];
+}
+
+Real
+CoupledVarNeumannBC::computeQpOffDiagJacobian(const unsigned int jvar)
+{
+  if (jvar == _coupled_num)
+    return -_scale_factor[_qp] * _coef * _test[_i][_qp] * _phi[_j][_qp];
+  else
+    return 0;
 }

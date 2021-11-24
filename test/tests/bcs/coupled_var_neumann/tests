@@ -15,4 +15,21 @@
     requirement = 'The system shall enable scaling of the Neumann type boundary conditions.'
     issues = '#15421'
   [../]
+
+  [nonlinear]
+    requirement = 'When coupling nonlinear variables into a Neumann type boundary condition, the system shall'
+    [exo]
+      type = Exodiff
+      input = 'coupled_var_neumann_nl.i'
+      exodiff = 'coupled_var_neumann_nl_out.e'
+      detail = 'generate accurate results'
+    []
+    [jac]
+      type = PetscJacobianTester
+      run_sim = True
+      input = 'coupled_var_neumann_nl.i'
+      difference_tol = 1e-6
+      detail = 'generate a perfect Jacobian'
+    []
+  []
 []
