@@ -3,7 +3,7 @@ rho=1.0
 
 [Problem]
   coord_type = 'XYZ'
-  error_on_jacobian_nonzero_reallocation=true
+  error_on_jacobian_nonzero_reallocation = true
 []
 
 [Mesh]
