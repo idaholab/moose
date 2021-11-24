@@ -15,9 +15,13 @@
   parameter_names = 'p1'
   num_values = '1'
   initial_condition = '7'
-  adjoint_data_name = 'adjoint'
   lower_bounds = '0'
   upper_bounds = '10'
+  measurement_points = '0.2 0.2 0
+            0.8 0.6 0
+            0.2 1.4 0
+            0.8 1.8 0'
+  measurement_values = '226 254 214 146'
 []
 
 [Executioner]
@@ -57,19 +61,30 @@
 []
 
 [Transfers]
+  #these are usually the same for all input files.
+    [fromForward]
+      type = MultiAppReporterTransfer
+      multi_app = forward
+      direction = from_multiapp
+      from_reporters = 'data_pt/temperature data_pt/temperature'
+      to_reporters = 'OptimizationReporter/simulation_values receiver/measured'
+    []
+    [toAdjoint]
+      type = MultiAppReporterTransfer
+      multi_app = adjoint
+      direction = to_multiapp
+      from_reporters = 'OptimizationReporter/measurement_points OptimizationReporter/misfit_values'
+      to_reporters = 'misfit/measurement_points misfit/misfit_values'
+    []
+
+
+
   [to_forward]
     type = OptimizationParameterTransfer
     multi_app = forward
     value_names = 'p1'
     parameters = 'Postprocessors/p1/value'
     to_control = parameterReceiver
-  []
-  [from_forward]
-    type = MultiAppReporterTransfer
-    multi_app = forward
-    direction = from_multiapp
-    from_reporters = 'data_pt/temperature_difference data_pt/temperature'
-    to_reporters = 'OptimizationReporter/misfit receiver/measured'
   []
   [from_forward_temp]
     type = MultiAppCopyTransfer
@@ -79,19 +94,12 @@
     variable = 'temperature_forward'
   []
 
-  [to_adjoint]
+  [to_adjoint_param]
     type = OptimizationParameterTransfer
     multi_app = adjoint
     value_names = 'p1'
     parameters = 'Postprocessors/p1/value'
     to_control = parameterReceiver
-  []
-  [to_adjoint_misfit]
-    type = MultiAppReporterTransfer
-    multi_app = adjoint
-    direction = to_multiapp
-    from_reporters = 'OptimizationReporter/misfit'
-    to_reporters = 'point_source/value'
   []
   [to_adjoint_temp]
     type = MultiAppCopyTransfer
@@ -105,8 +113,10 @@
     type = MultiAppReporterTransfer
     multi_app = adjoint
     direction = from_multiapp
-    from_reporters = 'adjoint_grad/adjoint_grad' # what is the naming convention for this
+    from_reporters = 'adjoint_grad/adjoint_grad'
     to_reporters = 'OptimizationReporter/adjoint'
+    # The to_reporters is always OptimizationReporter/adjoint' for the gradient
+    #'OptimizationReporter/adjoint' is automatically created by ObjectiveGradientMinimize
   []
 []
 
@@ -114,7 +124,7 @@
   [receiver]
     type = ConstantReporter
     real_vector_names = measured
-    real_vector_values = '0 0 0 0'
+    real_vector_values = '0'
    []
 []
 

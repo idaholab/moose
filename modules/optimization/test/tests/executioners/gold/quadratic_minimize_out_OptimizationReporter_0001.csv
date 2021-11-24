@@ -1,4 +1,4 @@
-misfit,results
-0,1
-0,2
-0,3
+measurement_values,misfit_values,results,simulation_values
+0,0,1,0
+0,0,2,0
+0,0,3,0

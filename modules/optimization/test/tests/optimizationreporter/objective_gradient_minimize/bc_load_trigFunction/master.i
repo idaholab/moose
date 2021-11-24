@@ -28,10 +28,14 @@
   type = ObjectiveGradientMinimize
   parameter_names = 'p1 p2'
   num_values = '1 1'
-  adjoint_data_name = 'adjoint'
   initial_condition = '0 500'
   upper_bounds = '2 1500'
   lower_bounds = '0 0'
+  measurement_points = '0.2 0.2 0
+            0.2 0.6 0
+            0.2 1.4 0
+            0.2 1.8 0'
+  measurement_values = '229 236 284 290'
   # measured data for p1=1, p2=1000
   # not sure if bounds are used when -tao_ls_type=unit
 []
@@ -65,6 +69,27 @@
 []
 
 [Transfers]
+  #these are usually the same for all input files.
+    [fromForward]
+      type = MultiAppReporterTransfer
+      multi_app = forward
+      direction = from_multiapp
+      from_reporters = 'data_pt/temperature data_pt/temperature'
+      to_reporters = 'OptimizationReporter/simulation_values receiver/measured'
+    []
+    [toAdjoint]
+      type = MultiAppReporterTransfer
+      multi_app = adjoint
+      direction = to_multiapp
+      from_reporters = 'OptimizationReporter/measurement_points OptimizationReporter/misfit_values'
+      to_reporters = 'misfit/measurement_points misfit/misfit_values'
+    []
+
+  #these are different,
+  # - to forward depends on teh parameter being changed
+  # - from adjoint depends on the gradient being computed from the adjoint
+  #NOTE:  the adjoint variable we are transferring is actually the gradient
+
   [toforward]
     type = OptimizationParameterTransfer
     multi_app = forward
@@ -72,26 +97,12 @@
     parameters = 'Postprocessors/p1/value Postprocessors/p2/value'
     to_control = parameterReceiver
   []
-  [fromforward]
-    type = MultiAppReporterTransfer
-    multi_app = forward
-    direction = from_multiapp
-    from_reporters = 'data_pt/temperature_difference data_pt/temperature'
-    to_reporters = 'OptimizationReporter/misfit receiver/measured'
-  []
   [toadjoint_params]
     type = OptimizationParameterTransfer
     multi_app = adjoint
     value_names = 'p1'
     parameters = 'Postprocessors/p1/value'
     to_control = adjointReceiver
-  []
-  [toadjoint_misfit]
-    type = MultiAppReporterTransfer
-    multi_app = adjoint
-    direction = to_multiapp
-    from_reporters = 'OptimizationReporter/misfit'
-    to_reporters = 'point_source/value'
   []
   [fromadjoint]
     type = MultiAppReporterTransfer

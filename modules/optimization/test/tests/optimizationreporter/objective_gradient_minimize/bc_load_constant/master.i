@@ -17,14 +17,18 @@
   type = ObjectiveGradientMinimize
   parameter_names = 'bc_left bc_right'
   num_values = '1 1'
-  adjoint_data_name = 'adjoint'
+  measurement_points = '0.2 0.2 0
+            0.8 0.6 0
+            0.2 1.4 0
+            0.8 1.8 0'
+  measurement_values = '199 214 154 129'
 []
 
 [Executioner]
   type = Optimize
   tao_solver = taolmvm
-  #petsc_options_iname = '-tao_ls_type'
-  #petsc_options_value = 'unit'
+  petsc_options_iname = '-tao_gatol -tao_max_it' #-tao_ls_type'
+  petsc_options_value = '1e-1 50' #unit'
   verbose = true
 []
 
@@ -44,29 +48,35 @@
 []
 
 [Transfers]
-  [toforward]
+  #these are usually the same for all input files.
+    [fromForward]
+      type = MultiAppReporterTransfer
+      multi_app = forward
+      direction = from_multiapp
+      from_reporters = 'data_pt/temperature data_pt/temperature'
+      to_reporters = 'OptimizationReporter/simulation_values receiver/measured'
+    []
+    [toAdjoint]
+      type = MultiAppReporterTransfer
+      multi_app = adjoint
+      direction = to_multiapp
+      from_reporters = 'OptimizationReporter/measurement_points OptimizationReporter/misfit_values'
+      to_reporters = 'misfit/measurement_points misfit/misfit_values'
+    []
+
+  #these are different,
+  # - to forward depends on teh parameter being changed
+  # - from adjoint depends on the gradient being computed from the adjoint
+  #NOTE:  the adjoint variable we are transferring is actually the gradient
+
+  [toForward]
     type = OptimizationParameterTransfer
     multi_app = forward
     value_names = 'bc_left bc_right'
     parameters = 'BCs/left/value BCs/right/value'
     to_control = parameterReceiver
   []
-  [fromforward]
-    type = MultiAppReporterTransfer
-    multi_app = forward
-    from_reporters = 'data_pt/temperature_difference data_pt/temperature'
-    to_reporters = 'OptimizationReporter/misfit receiver/measured'
-    direction = from_multiapp
-  []
-
-  [toadjoint]
-    type = MultiAppReporterTransfer
-    multi_app = adjoint
-    from_reporters = 'OptimizationReporter/misfit'
-    to_reporters = 'point_source/value'
-    direction = to_multiapp
-  []
-  [fromadjoint]
+  [fromAdjoint]
     type = MultiAppReporterTransfer
     multi_app = adjoint
     from_reporters = 'adjoint_pt/adjoint_pt'
@@ -79,7 +89,11 @@
   [receiver]
     type = ConstantReporter
     real_vector_names = measured
-    real_vector_values = '0 0 0 0'
+    real_vector_values = '0'
+  []
+  [optInfo]
+    type = OptimizationInfo
+    items = 'gnorm function_value'
   []
 []
 

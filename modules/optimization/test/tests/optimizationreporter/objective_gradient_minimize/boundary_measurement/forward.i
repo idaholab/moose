@@ -30,7 +30,6 @@
   []
 []
 
-
 [BCs]
   [left]
     type = NeumannBC
@@ -71,8 +70,8 @@
   solve_type = PJFNK
   nl_abs_tol = 1e-6
   nl_rel_tol = 1e-8
-  petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre boomeramg'
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'lu'
 []
 
 [VectorPostprocessors]
@@ -82,17 +81,17 @@
     value = '0.2 0.2 0.8; 0.2 0.8 0.2; 0 0 0; -2458 7257 26335'
   []
   [data_pt]
-    type = MeasuredDataPointSampler
+    type = PointValueSampler
     variable = temperature
+    sort_by = id
     points = '0.0 0.3 0
               0.0 0.5 0
               0.0 1.0 0'
-    measured_values = '100 200 300'
   []
 []
 
 [Outputs]
-  console = true
-  exodus = true
+  console = false
+  exodus = false
   file_base = 'forward'
 []

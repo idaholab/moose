@@ -16,6 +16,11 @@
   type = ObjectiveMinimize
   parameter_names = 'bc_left bc_right'
   num_values = '1 1'
+  measurement_points = '0.2 0.2 0
+            0.8 0.6 0
+            0.2 1.4 0
+            0.8 1.8 0'
+  measurement_values = '199 214 154 129'
 []
 
 [Executioner]
@@ -44,8 +49,8 @@
   [fromforward]
     type = MultiAppReporterTransfer
     multi_app = forward
-    from_reporters = 'data_pt/temperature_difference data_pt/temperature'
-    to_reporters = 'OptimizationReporter/misfit receiver/measured'
+    from_reporters = 'data_pt/temperature data_pt/temperature'
+    to_reporters = 'OptimizationReporter/simulation_values receiver/measured'
     direction = from_multiapp
   []
 []
@@ -54,7 +59,7 @@
   [receiver]
     type = ConstantReporter
     real_vector_names = measured
-    real_vector_values = '0 0 0 0'
+    real_vector_values = '0'
   []
 []
 

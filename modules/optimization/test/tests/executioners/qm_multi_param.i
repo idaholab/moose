@@ -8,6 +8,8 @@
   initial_condition = '5 4 2 9 5 1 0'
   objective = 1.0
   solution = '1 2 3 4 5 6 7'
+  measurement_points = ''
+  measurement_values = ''
 []
 
 [Executioner]

@@ -17,12 +17,15 @@
   bias_y = 1.1
 []
 
-
 [OptimizationReporter]
   type = ObjectiveGradientMinimize
   parameter_names = 'p1 p2'
   num_values = '1 1'
-  adjoint_data_name = 'adjoint'
+  measurement_points = '0.2 0.2 0
+            0.8 0.6 0
+            0.2 1.4 0
+            0.8 1.8 0'
+  measurement_values = '207 204 185 125'
 []
 
 [Executioner]
@@ -53,26 +56,33 @@
 []
 
 [Transfers]
+  #these are usually the same for all input files.
+    [fromForward]
+      type = MultiAppReporterTransfer
+      multi_app = forward
+      direction = from_multiapp
+      from_reporters = 'data_pt/temperature data_pt/temperature'
+      to_reporters = 'OptimizationReporter/simulation_values receiver/measured'
+    []
+    [toAdjoint]
+      type = MultiAppReporterTransfer
+      multi_app = adjoint
+      direction = to_multiapp
+      from_reporters = 'OptimizationReporter/measurement_points OptimizationReporter/misfit_values'
+      to_reporters = 'misfit/measurement_points misfit/misfit_values'
+    []
+
+  #these are different,
+  # - to forward depends on teh parameter being changed
+  # - from adjoint depends on the gradient being computed from the adjoint
+  #NOTE:  the adjoint variable we are transferring is actually the gradient
+
   [toforward]
     type = OptimizationParameterTransfer
     multi_app = forward
     value_names = 'p1 p2'
     parameters = 'Postprocessors/p1/value Postprocessors/p2/value'
     to_control = parameterReceiver
-  []
-  [fromforward]
-    type = MultiAppReporterTransfer
-    multi_app = forward
-    direction = from_multiapp
-    from_reporters = 'data_pt/temperature_difference data_pt/temperature'
-    to_reporters = 'OptimizationReporter/misfit receiver/measured'
-  []
-  [toadjoint_misfit]
-    type = MultiAppReporterTransfer
-    multi_app = adjoint
-    direction = to_multiapp
-    from_reporters = 'OptimizationReporter/misfit'
-    to_reporters = 'point_source/value'
   []
   [fromadjoint]
     type = MultiAppReporterTransfer
@@ -87,7 +97,7 @@
   [receiver]
     type = ConstantReporter
     real_vector_names = measured
-    real_vector_values = '0 0 0 0'
+    real_vector_values = '0'
    []
    [optInfo]
      type = OptimizationInfo
@@ -95,8 +105,6 @@
      #execute_on=timestep_end
    []
 []
-
-
 
 [Outputs]
   csv=true

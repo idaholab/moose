@@ -36,9 +36,6 @@ OptimizationDataPointSource::OptimizationDataPointSource(const InputParameters &
     _points(getReporterValue<std::vector<Point>>("points", REPORTER_MODE_REPLICATED)),
     _values(getReporterValue<std::vector<Real>>("values", REPORTER_MODE_REPLICATED))
 {
-  std::cout << "****************************************OptimizationDataPointSource::"
-               "OptimizationDataPointSource"
-            << std::endl;
 }
 
 void

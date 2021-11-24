@@ -84,13 +84,13 @@
 
 [VectorPostprocessors]
   [data_pt]
-    type = MeasuredDataPointSampler
+    type = PointValueSampler
     variable = temperature
     points = '0.2 0.2 0
               0.8 0.6 0
               0.2 1.4 0
               0.8 1.8 0'
-    measured_values = '209 218 164 121'
+    sort_by = id
   []
 []
 

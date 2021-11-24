@@ -34,28 +34,34 @@
 []
 
 [Transfers]
-  [toforward]
-    type = MultiAppReporterTransfer
-    multi_app = forward
-    direction = to_multiapp
-    from_reporters = 'OptimizationReporter/parameter_results'
-    to_reporters = 'point_source/value'
-  []
-  [fromforward]
+#these are usually the same for all input files.
+  [fromForward]
     type = MultiAppReporterTransfer
     multi_app = forward
     direction = from_multiapp
-    from_reporters = 'data_pt/temperature'
-    to_reporters = 'OptimizationReporter/simulation_values'
+    from_reporters = 'data_pt/temperature data_pt/temperature'
+    to_reporters = 'OptimizationReporter/simulation_values receiver/measured'
   []
-  [toadjoint]
+  [toAdjoint]
     type = MultiAppReporterTransfer
     multi_app = adjoint
     direction = to_multiapp
     from_reporters = 'OptimizationReporter/measurement_points OptimizationReporter/misfit_values'
     to_reporters = 'misfit/measurement_points misfit/misfit_values'
   []
-  [fromadjoint]
+
+#these are different,
+# - to forward depends on teh parameter being changed
+# - from adjoint depends on the gradient being computed from the adjoint
+#NOTE:  the adjoint variable we are transferring is actually the gradient
+  [toForward]
+    type = MultiAppReporterTransfer
+    multi_app = forward
+    direction = to_multiapp
+    from_reporters = 'OptimizationReporter/parameter_results'
+    to_reporters = 'point_source/value'
+  []
+  [fromAdjoint]
     type = MultiAppReporterTransfer
     multi_app = adjoint
     direction = from_multiapp

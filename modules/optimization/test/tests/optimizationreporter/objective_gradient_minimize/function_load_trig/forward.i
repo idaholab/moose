@@ -78,24 +78,24 @@
   solve_type = PJFNK
   nl_abs_tol = 1e-6
   nl_rel_tol = 1e-8
-  petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre boomeramg'
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'lu'
 []
 
 [VectorPostprocessors]
   [data_pt]
-    type = MeasuredDataPointSampler
+    type = PointValueSampler
+    sort_by = id
     variable = temperature
     points = '0.2 0.2 0
               0.8 0.6 0
               0.2 1.4 0
               0.8 1.8 0'
-    measured_values = '209 218 164 121'
   []
 []
 
 [Outputs]
-  console = true
-  exodus = true
+  console = false
+  exodus = false
   file_base = 'forward'
 []

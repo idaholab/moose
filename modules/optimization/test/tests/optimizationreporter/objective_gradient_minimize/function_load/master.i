@@ -6,8 +6,11 @@
   parameter_names = 'parameter_results'
   num_values = '4'
   initial_condition = '100 1 -10 -10'
-
-  adjoint_data_name = 'adjoint'
+  points = '0.2 0.2 0
+            0.8 0.6 0
+            0.2 1.4 0
+            0.8 1.8 0'
+  measured_values = '209 218 164 121'
 []
 
 [Executioner]
@@ -51,26 +54,27 @@
 []
 
 [Transfers]
-  [fromforward]
+  [fromForward]
     type = MultiAppReporterTransfer
     multi_app = forward
-    from_reporters = 'data_pt/temperature_difference data_pt/temperature'
-    to_reporters = 'OptimizationReporter/misfit receiver/measured'
     direction = from_multiapp
+    #the second vector in the reporterTransfer just writes to teh constantReporter below for the csvDiff in the test file
+    from_reporters = 'data_pt/temperature data_pt/temperature'
+    to_reporters = 'OptimizationReporter/simulation_values receiver/measured'
   []
-  [toadjoint]
+  [toAdjoint]
     type = MultiAppReporterTransfer
     multi_app = adjoint
-    from_reporters = 'OptimizationReporter/misfit'
-    to_reporters = 'point_source/value'
     direction = to_multiapp
+    from_reporters = 'OptimizationReporter/measurement_points OptimizationReporter/misfit_values'
+    to_reporters = 'misfit/measurement_points misfit/misfit_values'
   []
-  [fromadjoint]
+  [fromAdjoint]
     type = MultiAppReporterTransfer
     multi_app = adjoint
+    direction = from_multiapp
     from_reporters = 'adjoint_pt/adjoint_pt'
     to_reporters = 'OptimizationReporter/adjoint'
-    direction = from_multiapp
   []
 []
 

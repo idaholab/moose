@@ -1,5 +1,5 @@
-adjoint,misfit,p1
-0,0,5
-0,0,0
-0,0,0
-0,0,0
+adjoint,measurement_values,misfit_values,p1,simulation_values
+0,226,0,5,226
+0,254,0,0,254
+0,214,0,0,214
+0,146,0,0,146

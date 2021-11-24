@@ -30,12 +30,16 @@
 
 [DiracKernels]
   [pt]
-    type = ReporterPointSource
+    type = OptimizationDataPointSource
     variable = temperature
-    x_coord_name = point_source/x
-    y_coord_name = point_source/y
-    z_coord_name = point_source/z
-    value_name = point_source/value
+    points = misfit/measurement_points
+    values = misfit/misfit_values
+  []
+[]
+
+[Reporters]
+  [misfit]
+    type=OptimizationData
   []
 []
 
@@ -81,8 +85,8 @@
   solve_type = PJFNK
   nl_abs_tol = 1e-6
   nl_rel_tol = 1e-8
-  petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre boomeramg'
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'lu'
 []
 
 [Functions]
@@ -107,17 +111,6 @@
   []
 []
 
-[Reporters]
-  [point_source]
-    type = ConstantReporter
-    real_vector_names = 'x y z value'
-    real_vector_values = '0.1	0.1	0.1	0.1	0.1	0.1	0.1	0.1	0.1	0.1	0.1	0.1	0.1	0.1	0.1	0.1	0.1	0.1	0.1	0.1	0.1;
-             0	0.1	0.2	0.3	0.4	0.5	0.6	0.7	0.8	0.9	1	1.1	1.2	1.3	1.4	1.5	1.6	1.7	1.8	1.9	2;
-             0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0;
-            10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10'
-  []
-[]
-
 [VectorPostprocessors]
   [adjoint_pt]
     type = VectorOfPostprocessors
@@ -132,6 +125,7 @@
 []
 
 [Outputs]
-  exodus = true
+  console = false
+  exodus = false
   file_base = 'adjoint'
 []

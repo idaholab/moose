@@ -15,12 +15,16 @@
 
 [DiracKernels]
   [pt]
-    type = ReporterPointSource
+    type = OptimizationDataPointSource
     variable = temperature
-    x_coord_name = point_source/x
-    y_coord_name =point_source/y
-    z_coord_name = point_source/z
-    value_name = point_source/value
+    points = misfit/measurement_points
+    values = misfit/misfit_values
+  []
+[]
+
+[Reporters]
+  [misfit]
+    type=OptimizationData
   []
 []
 
@@ -95,14 +99,6 @@
 []
 
 [VectorPostprocessors]
-  [point_source]
-    type = ConstantVectorPostprocessor
-    vector_names = 'x y z value'
-    value = '0.2 0.8 0.2 0.8;
-             0.2 0.6 1.4 1.8;
-             0   0   0   0;
-             10  10  10  10'
-  []
   [adjoint_bc]
     type = VectorOfPostprocessors
     postprocessors = 'adjoint_bc_0 adjoint_bc_1'
