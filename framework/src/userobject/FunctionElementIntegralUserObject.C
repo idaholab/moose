@@ -18,15 +18,14 @@ InputParameters
 FunctionElementIntegralUserObject::validParams()
 {
   InputParameters params = ElementIntegralUserObject::validParams();
-  params.addClassDescription("computes a volume integral of a function.");
+  params.addClassDescription("Computes a volume integral of a function.");
   params.addRequiredParam<FunctionName>("function", "The function that this object operates on");
   return params;
 }
 
 FunctionElementIntegralUserObject::FunctionElementIntegralUserObject(
     const InputParameters & parameters)
-  : ElementIntegralUserObject(parameters),
-    _function(getFunction("function"))
+  : ElementIntegralUserObject(parameters), _function(getFunction("function"))
 {
 }
 

@@ -13,9 +13,6 @@
 
 class FunctionElementIntegralUserObject;
 
-template <>
-InputParameters validParams<FunctionElementIntegralUserObject>();
-
 /**
  * This postprocessor computes a volume integral of a specified function.
  *
