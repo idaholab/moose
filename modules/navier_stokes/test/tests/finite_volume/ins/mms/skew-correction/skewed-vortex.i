@@ -7,10 +7,10 @@ rho=1.0
 []
 
 [Mesh]
-  [./gen_mesh]
+  [gen_mesh]
     type = FileMeshGenerator
     file = skewed.msh
-  [../]
+  []
 []
 
 [Variables]
@@ -140,31 +140,30 @@ rho=1.0
 []
 
 [Functions]
-[exact_u]
-  type = ParsedFunction
-  value = 'x^2*(1-x)^2*(2*y-6*y^2+4*y^3)'
-[]
-[exact_v]
-  type = ParsedFunction
-  value = '-y^2*(1-y)^2*(2*x-6*x^2+4*x^3)'
-[]
-[exact_p]
-  type = ParsedFunction
-  value = 'x*(1-x)-2/12'
-[]
-
-[forcing_u]
-  type = ParsedFunction
-  value = '-4*mu/rho*(-1+2*y)*(y^2-6*x*y^2+6*x^2*y^2-y+6*x*y-6*x^2*y+3*x^2-6*x^3+3*x^4)+1-2*x+4*x^3*y^2*(2*y^2-2*y+1)*(y-1)^2*(-1+2*x)*(x-1)^3'
-  vars = 'mu rho'
-  vals = '${mu} ${rho}'
-[]
-[forcing_v]
-  type = ParsedFunction
-  value = '4*mu/rho*(-1+2*x)*(x^2-6*y*x^2+6*x^2*y^2-x+6*x*y-6*x*y^2+3*y^2-6*y^3+3*y^4)+4*y^3*x^2*(2*x^2-2*x+1)*(x-1)^2*(-1+2*y)*(y-1)^3'
-  vars = 'mu rho'
-  vals = '${mu} ${rho}'
-[]
+  [exact_u]
+    type = ParsedFunction
+    value = 'x^2*(1-x)^2*(2*y-6*y^2+4*y^3)'
+  []
+  [exact_v]
+    type = ParsedFunction
+    value = '-y^2*(1-y)^2*(2*x-6*x^2+4*x^3)'
+  []
+  [exact_p]
+    type = ParsedFunction
+    value = 'x*(1-x)-2/12'
+  []
+  [forcing_u]
+    type = ParsedFunction
+    value = '-4*mu/rho*(-1+2*y)*(y^2-6*x*y^2+6*x^2*y^2-y+6*x*y-6*x^2*y+3*x^2-6*x^3+3*x^4)+1-2*x+4*x^3*y^2*(2*y^2-2*y+1)*(y-1)^2*(-1+2*x)*(x-1)^3'
+    vars = 'mu rho'
+    vals = '${mu} ${rho}'
+  []
+  [forcing_v]
+    type = ParsedFunction
+    value = '4*mu/rho*(-1+2*x)*(x^2-6*y*x^2+6*x^2*y^2-x+6*x*y-6*x*y^2+3*y^2-6*y^3+3*y^4)+4*y^3*x^2*(2*x^2-2*x+1)*(x-1)^2*(-1+2*y)*(y-1)^3'
+    vars = 'mu rho'
+    vals = '${mu} ${rho}'
+  []
 []
 
 [Executioner]
@@ -187,25 +186,25 @@ rho=1.0
     outputs = 'console csv'
     execute_on = 'timestep_end'
   []
-  [./L2u]
+  [L2u]
     type = ElementL2Error
     variable = vel_x
     function = exact_u
     outputs = 'console csv'
     execute_on = 'timestep_end'
-  [../]
-  [./L2v]
+  []
+  [L2v]
     type = ElementL2Error
     variable = vel_y
     function = exact_v
     outputs = 'console csv'
     execute_on = 'timestep_end'
-  [../]
-  [./L2p]
+  []
+  [L2p]
     variable = pressure
     function = exact_p
     type = ElementL2Error
     outputs = 'console csv'
     execute_on = 'timestep_end'
-  [../]
+  []
 []
