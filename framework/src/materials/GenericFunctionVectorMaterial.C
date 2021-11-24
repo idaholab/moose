@@ -19,7 +19,6 @@ template <bool is_ad>
 InputParameters
 GenericFunctionVectorMaterialTempl<is_ad>::validParams()
 {
-
   InputParameters params = Material::validParams();
   params.addClassDescription("Material object for declaring vector properties that are populated "
                              "by evaluation of Function objects.");
@@ -30,10 +29,6 @@ GenericFunctionVectorMaterialTempl<is_ad>::validParams()
                                              "functions that are going to provide "
                                              "the values for the variables, "
                                              "minor ordering by component");
-  params.addDeprecatedParam<bool>("enable_stateful",
-                                  false,
-                                  "Enable the declaration of old and older values",
-                                  "all properties can implicitly become stateful");
   return params;
 }
 
@@ -42,8 +37,7 @@ GenericFunctionVectorMaterialTempl<is_ad>::GenericFunctionVectorMaterialTempl(
     const InputParameters & parameters)
   : Material(parameters),
     _prop_names(getParam<std::vector<std::string>>("prop_names")),
-    _prop_values(getParam<std::vector<FunctionName>>("prop_values")),
-    _enable_stateful(getParam<bool>("enable_stateful"))
+    _prop_values(getParam<std::vector<FunctionName>>("prop_values"))
 {
   unsigned int num_names = _prop_names.size();
   unsigned int num_values = _prop_values.size();
@@ -60,13 +54,6 @@ GenericFunctionVectorMaterialTempl<is_ad>::GenericFunctionVectorMaterialTempl(
   _num_props = num_names;
 
   _properties.resize(num_names);
-
-  if (_enable_stateful)
-  {
-    _properties_old.resize(num_names);
-    _properties_older.resize(num_names);
-  }
-
   _functions.resize(num_names * LIBMESH_DIM);
 
   for (unsigned int i = 0; i < _num_props; i++)

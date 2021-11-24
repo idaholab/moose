@@ -11,7 +11,6 @@
 
 #include "Material.h"
 
-// Forward Declarations
 template <bool>
 class GenericFunctionMaterialTempl;
 typedef GenericFunctionMaterialTempl<false> GenericFunctionMaterial;
@@ -40,14 +39,19 @@ protected:
   virtual void initQpStatefulProperties() override;
   virtual void computeQpProperties() override;
 
+  /// Names of the material properties to define
   std::vector<std::string> _prop_names;
+
+  /// The functions to use for each property
   std::vector<FunctionName> _prop_values;
 
+  /// Number of properties that will be defined
   unsigned int _num_props;
 
+  /// Vector of all the properties
   std::vector<GenericMaterialProperty<Real, is_ad> *> _properties;
-  std::vector<const MaterialProperty<Real> *> _properties_old;
-  std::vector<const MaterialProperty<Real> *> _properties_older;
+
+  /// Vector of pointers to the functions, stored here after retrieval using their name
   std::vector<const Function *> _functions;
 
 private:
@@ -55,7 +59,4 @@ private:
    * A helper method for evaluating the functions
    */
   void computeQpFunctions();
-
-  /// Flag for calling declareProperyOld/Older
-  bool _enable_stateful;
 };
