@@ -80,16 +80,17 @@
 
 [VectorPostprocessors]
   [data_pt]
-    type = PointValueSampler
+    type = VppPointValueSampler
     variable = temperature
-    sort_by = id
-    points = '0.2 0.2 0
-              0.8 0.6 0
-              0.2 1.4 0
-              0.8 1.8 0'
+    reporter_name = measure_data
   []
 []
 
+[Reporters]
+  [measure_data]
+    type=OptimizationData
+  []
+[]
 
 [Postprocessors]
   [p1]

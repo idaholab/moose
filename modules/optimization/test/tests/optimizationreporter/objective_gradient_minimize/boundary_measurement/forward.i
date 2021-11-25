@@ -81,12 +81,15 @@
     value = '0.2 0.2 0.8; 0.2 0.8 0.2; 0 0 0; -2458 7257 26335'
   []
   [data_pt]
-    type = PointValueSampler
+    type = VppPointValueSampler
     variable = temperature
-    sort_by = id
-    points = '0.0 0.3 0
-              0.0 0.5 0
-              0.0 1.0 0'
+    reporter_name = measure_data
+  []
+[]
+
+[Reporters]
+  [measure_data]
+    type=OptimizationData
   []
 []
 

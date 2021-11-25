@@ -33,7 +33,6 @@ OptimizationReporter::OptimizationReporter(const InputParameters & parameters)
     _ndof(std::accumulate(_nvalues.begin(), _nvalues.end(), 0)),
     _lower_bounds(getParam<std::vector<Real>>("lower_bounds")),
     _upper_bounds(getParam<std::vector<Real>>("upper_bounds"))
-
 {
   if (_parameter_names.size() != _nvalues.size())
     paramError("num_parameters",

@@ -26,6 +26,9 @@
 [Executioner]
   type = Optimize
   tao_solver = TAONM
+  petsc_options_iname = '-tao_gatol'#
+  petsc_options_value = '1e-4'
+  verbose = true
 []
 
 
@@ -45,6 +48,13 @@
     value_names = 'bc_left bc_right'
     parameters = 'BCs/left/value BCs/right/value'
     to_control = parameterReceiver
+  []
+  [toForward_measument]
+    type = MultiAppReporterTransfer
+    multi_app = forward
+    direction = to_multiapp
+    from_reporters = 'OptimizationReporter/measurement_xcoord OptimizationReporter/measurement_ycoord OptimizationReporter/measurement_zcoord'
+    to_reporters = 'measure_data/measurement_xcoord measure_data/measurement_ycoord measure_data/measurement_zcoord'
   []
   [fromforward]
     type = MultiAppReporterTransfer

@@ -85,30 +85,15 @@
     sort_by = id
   [../]
   [data_pt]
-    type = PointValueSampler
+    type = VppPointValueSampler
     variable = temperature
-    sort_by = id
-    points = '0.1	0	0
-              0.1	0.1	0
-              0.1	0.2	0
-              0.1	0.3	0
-              0.1	0.4	0
-              0.1	0.5	0
-              0.1	0.6	0
-              0.1	0.7	0
-              0.1	0.8	0
-              0.1	0.9	0
-              0.1	1	0
-              0.1	1.1	0
-              0.1	1.2	0
-              0.1	1.3	0
-              0.1	1.4	0
-              0.1	1.5	0
-              0.1	1.6	0
-              0.1	1.7	0
-              0.1	1.8	0
-              0.1	1.9	0
-              0.1	2	0'
+    reporter_name = measure_data
+  []
+[]
+
+[Reporters]
+  [measure_data]
+    type=OptimizationData
   []
 []
 

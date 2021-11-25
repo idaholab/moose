@@ -56,21 +56,27 @@
 
 [Transfers]
   #these are usually the same for all input files.
-    [fromForward]
-      type = MultiAppReporterTransfer
-      multi_app = forward
-      direction = from_multiapp
-      from_reporters = 'data_pt/temperature data_pt/temperature'
-      to_reporters = 'OptimizationReporter/simulation_values receiver/measured'
-    []
-    [toAdjoint]
-      type = MultiAppReporterTransfer
-      multi_app = adjoint
-      direction = to_multiapp
-      from_reporters = 'OptimizationReporter/measurement_points OptimizationReporter/misfit_values'
-      to_reporters = 'misfit/measurement_points misfit/misfit_values'
-    []
-
+  [fromForward]
+    type = MultiAppReporterTransfer
+    multi_app = forward
+    direction = from_multiapp
+    from_reporters = 'data_pt/temperature data_pt/temperature'
+    to_reporters = 'OptimizationReporter/simulation_values receiver/measured'
+  []
+  [toAdjoint]
+    type = MultiAppReporterTransfer
+    multi_app = adjoint
+    direction = to_multiapp
+    from_reporters = 'OptimizationReporter/measurement_xcoord OptimizationReporter/measurement_ycoord OptimizationReporter/measurement_zcoord OptimizationReporter/misfit_values'
+    to_reporters = 'misfit/measurement_xcoord misfit/measurement_ycoord misfit/measurement_zcoord misfit/misfit_values'
+  []
+  [toForward_measument]
+    type = MultiAppReporterTransfer
+    multi_app = forward
+    direction = to_multiapp
+    from_reporters = 'OptimizationReporter/measurement_xcoord OptimizationReporter/measurement_ycoord OptimizationReporter/measurement_zcoord'
+    to_reporters = 'measure_data/measurement_xcoord measure_data/measurement_ycoord measure_data/measurement_zcoord'
+  []
     #these are different,
     # - to forward depends on teh parameter being changed
     # - from adjoint depends on the gradient being computed from the adjoint

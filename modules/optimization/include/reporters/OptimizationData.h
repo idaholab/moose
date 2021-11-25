@@ -23,7 +23,9 @@ public:
   virtual void finalize() override {}
 
 protected:
-  std::vector<Point> & _measurement_points;
+  std::vector<Real> & _measurement_xcoord;
+  std::vector<Real> & _measurement_ycoord;
+  std::vector<Real> & _measurement_zcoord;
   std::vector<Real> & _measurement_values;
   std::vector<Real> & _simulation_values;
   std::vector<Real> & _misfit_values;
@@ -33,8 +35,3 @@ protected:
   // add param names
   // add param values
 };
-
-namespace libMesh
-{
-void to_json(nlohmann::json & json, const Point & value);
-}

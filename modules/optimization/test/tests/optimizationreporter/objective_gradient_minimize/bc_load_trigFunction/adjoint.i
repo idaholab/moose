@@ -15,10 +15,12 @@
 
 [DiracKernels]
   [pt]
-    type = OptimizationDataPointSource
+    type = ReporterPointSource
     variable = temperature
-    points = misfit/measurement_points
-    values = misfit/misfit_values
+    x_coord_name = misfit/measurement_xcoord
+    y_coord_name = misfit/measurement_ycoord
+    z_coord_name = misfit/measurement_zcoord
+    value_name = misfit/misfit_values
   []
 []
 

@@ -1,5 +1,5 @@
-adjoint,measurement_values,misfit_values,p1,simulation_values
-0,226,0,5,226
-0,254,0,0,254
-0,214,0,0,214
-0,146,0,0,146
+adjoint,measurement_values,measurement_xcoord,measurement_ycoord,measurement_zcoord,misfit_values,p1,simulation_values
+4.0382574289009e-07,226,0.2,0.2,0,-4.3515910874703e-09,5.0000000006044,225.99999999565
+0,254,0.8,0.6,0,-1.0153684115721e-08,0,253.99999998985
+0,214,0.2,1.4,0,-1.0153627272302e-08,0,213.99999998985
+0,146,0.8,1.8,0,-4.3515910874703e-09,0,145.99999999565
