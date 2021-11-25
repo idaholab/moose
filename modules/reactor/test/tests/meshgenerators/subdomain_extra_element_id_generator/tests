@@ -1,0 +1,51 @@
+[Tests]
+  [subdomain_element_ids_test]
+    type = 'Exodiff'
+    input = 'subdomain_elem_ids_test.i'
+    exodiff = 'subdomain_elem_ids_test_out.e'
+    requirement = 'The system shall include the ability to assign element IDs based on mesh subdomain IDs.'
+    design = 'meshgenerators/SubdomainExtraElementIDGenerator.md'
+    issues = '#19297'
+    recover = false
+  []
+  [errors]
+    design = 'meshgenerators/SubdomainExtraElementIDGenerator.md'
+    issues = '#19297'
+    requirement = 'The system shall return an error if '
+    [no_subdomain]
+      type = RunException
+      input = 'subdomain_elem_ids_test.i'
+      cli_args = "Mesh/subdomain_ids/subdomains=''"
+      expect_err = 'Empty subdomain vector provided'
+      detail = 'the subdomain vector to use for assigning extra element IDs is empty'
+    []
+    [same_subdomain]
+      type = RunException
+      input = 'subdomain_elem_ids_test.i'
+      cli_args = "Mesh/subdomain_ids/subdomains='1 1'"
+      expect_err = 'Cannot have subdomain with ID 1 listed more than once!'
+      detail = 'a subdomain is listed more than once when assigning extra element IDs'
+    []
+    [diff_size1]
+      type = RunException
+      input = 'subdomain_elem_ids_test.i'
+      cli_args = "Mesh/subdomain_ids/extra_element_id_names='test_id1 test_id2'"
+      expect_err = 'Inconsistent vector size for element IDs'
+      detail = 'the subdomain ids and the extra element id names arent vectors of the same size'
+    []
+    [diff_size2]
+      type = RunException
+      input = 'subdomain_elem_ids_test.i'
+      cli_args = "Mesh/subdomain_ids/extra_element_ids='1 3 5 4;2 9 10 11'"
+      expect_err = 'Inconsistent vector size for element IDs'
+      detail = 'the subdomain ids and the extra element ids to set arent vectors of the same size'
+    []
+    [diff_size3]
+      type = RunException
+      input = 'subdomain_elem_ids_test.i'
+      cli_args = "Mesh/subdomain_ids/default_extra_element_ids='-1 0 '"
+      expect_err = 'Inconsistent vector size for default element IDs'
+      detail = 'the default extra element IDs arent specified for each extra element id'
+    []
+  []
+[]

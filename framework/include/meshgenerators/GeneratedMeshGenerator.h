@@ -40,6 +40,9 @@ protected:
   /// The min/max values for x,y,z component
   Real &_xmin, &_xmax, &_ymin, &_ymax, &_zmin, &_zmax;
 
+  /// Whether or not subdomain_ids parameter is set
+  bool _has_subdomain_ids;
+
   /**
    * All of the libmesh build_line/square/cube routines support an
    * option to grade the mesh into the boundaries according to the

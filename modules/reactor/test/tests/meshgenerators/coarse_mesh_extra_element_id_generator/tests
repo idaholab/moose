@@ -1,0 +1,63 @@
+[Tests]
+  [coarse_element_id_test]
+    type = 'Exodiff'
+    input = 'coarse_elem_id.i'
+    exodiff = 'coarse_elem_id_out.e'
+    requirement = 'The system shall include the ability to assign coarse element IDs based on a coarse mesh for elements of a fine mesh.'
+    design = 'meshgenerators/CoarseMeshExtraElementIDGenerator.md'
+    issues = '#19297'
+    recover = false
+  []
+  [coarse_element_subdomain_id_test]
+    type = 'Exodiff'
+    input = 'coarse_elem_subdomain_id.i'
+    exodiff = 'coarse_elem_subdomain_id_out.e'
+    requirement = 'The system shall include the ability to assign extra element IDs based on the subdomain ID of a coarse mesh for elements of a fine mesh.'
+    design = 'meshgenerators/CoarseMeshExtraElementIDGenerator.md'
+    issues = '#19297'
+    recover = false
+  []
+  [coarse_element_extra_elem_id_test]
+    type = 'Exodiff'
+    input = 'coarse_elem_extra_elem_id.i'
+    exodiff = 'coarse_elem_extra_elem_id_out.e'
+    requirement = 'The system shall include the ability to assign extra element IDs based on an extra element ID of a coarse mesh for elements of a fine mesh.'
+    design = 'meshgenerators/CoarseMeshExtraElementIDGenerator.md'
+    issues = '#19297'
+    recover = false
+  []
+
+  [errors]
+    design = 'meshgenerators/CoarseMeshExtraElementIDGenerator.md'
+    issues = '#19297'
+    requirement = 'The system shall return an error if '
+    [unknown_extra_elem_id]
+      type = RunException
+      input = 'coarse_elem_id.i'
+      cli_args = 'Mesh/coarse_id/coarse_mesh_extra_element_id=jaja'
+      expect_err = 'The extra element ID does not exist on the coarse mesh'
+      detail = 'the coarse mesh extra element id used for assigning does not exist'
+    []
+    [mesh_not_embedded_despite_request]
+      type = RunException
+      input = 'coarse_elem_id.i'
+      cli_args = 'Mesh/coarse_id/enforce_mesh_embedding=true'
+      expect_err = 'Input mesh is not nested in the coarse mesh in CoarseMeshExtraElementIDGenerator'
+      detail = 'the input mesh is not nested in the coarse mesh in CoarseMeshExtraElementIDGenerator'
+    []
+    [mesh_element_centroid_outside_coarse_mesh]
+      type = RunException
+      input = 'coarse_elem_id.i'
+      cli_args = 'Mesh/gmg/xmax=10'
+      expect_err = 'Could not find a coarse element containing a fine element with centroid'
+      detail = 'the fine mesh lies beyond the extent of the coarse mesh'
+    []
+    [mesh_element_node_outside_coarse_mesh]
+      type = RunException
+      input = 'coarse_elem_id.i'
+      cli_args = 'Mesh/gmg/xmax=8.1'
+      expect_err = 'Could not find a coarse element containing a node of fine element'
+      detail = 'any node of the fine mesh lies beyond the extent of the coarse mesh'
+    []
+  []
+[]
