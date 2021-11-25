@@ -3,7 +3,7 @@
 !syntax description /UserObjects/NodalNormalsEvaluator
 
 The `NodalNormalsEvaluator` is added automatically by the `NodalNormals` [action](AddNodalNormalsAction.md).
-This object is created for the boundaries specified in the [!param](/Actions/AddNodalNormalsAction/boundary)
+This object is created for the boundaries specified in the [!param](/NodalNormals/AddNodalNormalsAction/boundary)
 parameter. See the [`NodalNormals system`](syntax/NodalNormals/index.md) for more information.
 
 The nodal normal is computed from the `nodal_normal_x`, `nodal_normal_y` and `nodal_normal_z`

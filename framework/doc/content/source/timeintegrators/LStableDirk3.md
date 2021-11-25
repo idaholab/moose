@@ -1,33 +1,33 @@
 # LStableDirk3
 
-!alert! construction title=Undocumented Class
-The LStableDirk3 has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# LStableDirk3
-
 !syntax description /Executioner/TimeIntegrator/LStableDirk3
 
-## Overview
+The Butcher tableau for this method is:
 
-!! Replace these lines with information regarding the LStableDirk3 object.
+!table
+$\gamma$       | $\gamma$
+$(1+\gamma)/2$ | $(1-\gamma)/2$                         $\gamma$
+1           | $(1/4)*(-6*\gamma^2 + 16*\gamma - 1)$  $(1/4)*(6*\gamma^2 - 20*\gamma + 5)$  $\gamma$
+------------------------------------------------------------------------------------------
+            | $(1/4)*(-6*\gamma^2 + 16*\gamma - 1)$  $(1/4)*(6*\gamma^2 - 20*\gamma + 5)$  $\gamma$
 
-## Example Input File Syntax
+where $\gamma = -sqrt(2)*cos(atan(sqrt(2)/4)/3)/2 + sqrt(6)*sin(atan(sqrt(2)/4)/3)/2 + 1  ~
+.435866521508459$
 
-!! Describe and include an example of how to use the LStableDirk3 object.
+The stability function for this method is:
 
-!syntax parameters /Executioner/TimeIntegrator/LStableDirk3
+!equation
+R(z) = (1.90128552647780115*z^2 + 2.46079651620301599*z - 8) /
+       (0.662446064957040178*z^3 - 4.55951098972521484*z^2 + 10.460796516203016*z - 8)
 
-!syntax inputs /Executioner/TimeIntegrator/LStableDirk3
+The method is L-stable:
 
-!syntax children /Executioner/TimeIntegrator/LStableDirk3
-```
-!alert-end!
+!equation
+lim_{z->\infnty} R(z) = 0
 
-!syntax description /Executioner/TimeIntegrator/LStableDirk3
+This method is derived in detail in [!cite](alexander1967). Unlike BDF3,
+this method is L-stable and so may be more suitable for "stiff"
+problems.
 
 !syntax parameters /Executioner/TimeIntegrator/LStableDirk3
 
