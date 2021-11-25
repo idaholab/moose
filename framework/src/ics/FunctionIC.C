@@ -22,22 +22,26 @@ FunctionIC::validParams()
 
   params.addClassDescription("An initial condition that uses a normal function of x, y, z to "
                              "produce values (and optionally gradients) for a field variable.");
+  params.addParam<Real>("scaling_factor", 1, "Scaling factor to apply on the function");
+
   return params;
 }
 
 FunctionIC::FunctionIC(const InputParameters & parameters)
-  : InitialCondition(parameters), _func(getFunction("function"))
+  : InitialCondition(parameters),
+    _func(getFunction("function")),
+    _scaling(getParam<Real>("scaling_factor"))
 {
 }
 
 Real
 FunctionIC::value(const Point & p)
 {
-  return _func.value(_t, p);
+  return _scaling * _func.value(_t, p);
 }
 
 RealGradient
 FunctionIC::gradient(const Point & p)
 {
-  return _func.gradient(_t, p);
+  return _scaling * _func.gradient(_t, p);
 }

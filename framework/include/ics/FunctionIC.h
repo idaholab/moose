@@ -51,5 +51,9 @@ protected:
    */
   virtual RealGradient gradient(const Point & p) override;
 
+  /// Function to evaluate to form the initial condition
   const Function & _func;
+
+  /// Scaling factor, to be able to use a function with multiple ICs
+  const Real _scaling;
 };
