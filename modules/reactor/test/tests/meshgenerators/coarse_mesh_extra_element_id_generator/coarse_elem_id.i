@@ -26,7 +26,7 @@
     extra_element_id_name = coarse_elem_id
     enforce_mesh_embedding = false
   []
-  # need this to pass distributed-mesh test with the gold file generated in serial
+  # need this to ensure consistent numbering of the coarse mesh when using a distributed mesh
   allow_renumbering = false
 []
 

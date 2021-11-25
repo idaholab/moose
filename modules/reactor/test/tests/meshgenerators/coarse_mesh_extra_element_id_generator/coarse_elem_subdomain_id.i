@@ -30,8 +30,6 @@
     coarse_mesh_extra_element_id = subdomain_id
     enforce_mesh_embedding = false
   []
-  # need this to pass distributed-mesh test with the gold file generated in serial
-  allow_renumbering = false
 []
 
 [Problem]
