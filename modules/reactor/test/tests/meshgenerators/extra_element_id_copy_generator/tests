@@ -1,0 +1,20 @@
+[Tests]
+  [copy_element_id_test]
+    type = 'Exodiff'
+    input = 'copy_elem_id_test.i'
+    exodiff = 'copy_elem_id_test_out.e'
+    requirement = 'The system shall include the ability to copy an element ID to other element IDs.'
+    design = 'meshgenerators/ExtraElementIDCopyGenerator.md'
+    issues = '#19297'
+    recover = false
+  []
+  [unknown_source_id]
+    type = RunException
+    design = 'meshgenerators/ExtraElementIDCopyGenerator.md'
+    issues = '#19297'
+    requirement = 'The system shall return an error if the requested source element ID does not exist on the mesh.'
+    input = 'copy_elem_id_test.i'
+    cli_args = 'Mesh/copy_test_id/source_extra_element_id=jaja'
+    expect_err = 'The source element ID does not exist on the input mesh'
+  []
+[]

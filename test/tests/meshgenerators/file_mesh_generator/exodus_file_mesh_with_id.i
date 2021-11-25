@@ -15,7 +15,7 @@
 
 [AuxKernels]
   [set_material_id]
-    type = ElemExtraIDAux
+    type = ExtraElementIDAux
     variable = material_id
     extra_id_name = material_id
   []

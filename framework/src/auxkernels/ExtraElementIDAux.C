@@ -7,14 +7,15 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ElemExtraIDAux.h"
+#include "ExtraElementIDAux.h"
 
-registerMooseObject("MooseApp", ElemExtraIDAux);
+registerMooseObject("MooseApp", ExtraElementIDAux);
+registerMooseObjectRenamed("MooseApp", ElemExtraIDAux, "01/30/2022 24:00", ExtraElementIDAux);
 
-defineLegacyParams(ElemExtraIDAux);
+defineLegacyParams(ExtraElementIDAux);
 
 InputParameters
-ElemExtraIDAux::validParams()
+ExtraElementIDAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
   params.addRequiredParam<std::vector<ExtraElementIDName>>("extra_id_name",
@@ -23,13 +24,13 @@ ElemExtraIDAux::validParams()
   return params;
 }
 
-ElemExtraIDAux::ElemExtraIDAux(const InputParameters & parameters)
+ExtraElementIDAux::ExtraElementIDAux(const InputParameters & parameters)
   : AuxKernel(parameters), _id(getElementID("extra_id_name"))
 {
 }
 
 Real
-ElemExtraIDAux::computeValue()
+ExtraElementIDAux::computeValue()
 {
   return (_id == DofObject::invalid_id) ? -1.0 : _id;
 }

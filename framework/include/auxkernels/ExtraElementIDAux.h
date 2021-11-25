@@ -11,18 +11,17 @@
 
 #include "AuxKernel.h"
 
-// Forward Declarations
-class ElemExtraIDAux;
+class ExtraElementIDAux;
 
 template <>
-InputParameters validParams<ElemExtraIDAux>();
+InputParameters validParams<ExtraElementIDAux>();
 
-class ElemExtraIDAux : public AuxKernel
+class ExtraElementIDAux : public AuxKernel
 {
 public:
   static InputParameters validParams();
 
-  ElemExtraIDAux(const InputParameters & parameters);
+  ExtraElementIDAux(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue() override;

@@ -62,7 +62,7 @@
 
 [AuxKernels]
   [foo_id]
-    type = ElemExtraIDAux
+    type = ExtraElementIDAux
     variable = foo_id_var
     extra_id_name = foo_id
   []
