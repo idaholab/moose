@@ -211,12 +211,11 @@ GeneralFunctorFluidProps::GeneralFunctorFluidProps(const InputParameters & param
   _Re.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> ADReal {
     static constexpr Real small_number = 1e-8;
 
-    return std::max(
-        fp::reynolds(_rho(r, t),
-                     _eps(r, t) * _speed(r, t),
-                     _d,
-                     std::max(_mu_rampdown(r, t) * _mu(r, t), small_number)),
-                              1.0);
+    return std::max(fp::reynolds(_rho(r, t),
+                                 _eps(r, t) * _speed(r, t),
+                                 _d,
+                                 std::max(_mu_rampdown(r, t) * _mu(r, t), small_number)),
+                    1.0);
   });
   _dRe_dp.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> Real {
     return reynoldsPropertyDerivative(MetaPhysicL::raw_value(_Re(r, t)),
