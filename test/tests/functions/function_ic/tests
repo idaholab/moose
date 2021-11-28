@@ -1,10 +1,20 @@
 [Tests]
   issues = 'f792fc7ff9f8d8dfa8b3272117745fc422295ca1'
   design = 'source/ics/FunctionIC.md'
-  [./test]
-    type = 'Exodiff'
-    input = 'function_ic_test.i'
-    exodiff = 'out.e'
-    requirement = "MOOSE shall include an InitialCondition object capable of setting values base on a supplied function."
-  [../]
+  [test]
+    requirement = "MOOSE shall be able to initialize a variable with values computed using a user-specified function"
+    [basic]
+      type = 'Exodiff'
+      input = 'function_ic_test.i'
+      exodiff = 'out.e'
+      detail = "using the function directly."
+    []
+    [scaling]
+      type = 'Exodiff'
+      input = 'function_ic_test.i'
+      exodiff = 'scaling.e'
+      cli_args = 'Outputs/file_base=scaling Variables/u/InitialCondition/scaling_factor=2 AuxVariables/u_aux/InitialCondition/scaling_factor=1.5'
+      detail = "with a scaling factor applied to the function."
+    []
+  []
 []
