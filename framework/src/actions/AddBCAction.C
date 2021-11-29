@@ -13,8 +13,6 @@
 
 registerMooseAction("MooseApp", AddBCAction, "add_bc");
 
-defineLegacyParams(AddBCAction);
-
 InputParameters
 AddBCAction::validParams()
 {

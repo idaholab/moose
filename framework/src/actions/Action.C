@@ -17,8 +17,6 @@
 #include "DisplacedProblem.h"
 #include "RelationshipManager.h"
 
-defineLegacyParams(Action);
-
 InputParameters
 Action::validParams()
 {

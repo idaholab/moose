@@ -11,12 +11,6 @@
 
 #include "NodalKernelBase.h"
 
-// Forward declerations
-class NodalKernel;
-
-template <>
-InputParameters validParams<NodalKernel>();
-
 /**
  * Base class for creating nodal kernels with hand-coded Jacobians
  */

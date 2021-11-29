@@ -16,10 +16,6 @@
 #include "libmesh/fe_interface.h"
 #include "libmesh/quadrature.h"
 
-defineLegacyParams(InitialConditionTempl<Real>);
-defineLegacyParams(InitialConditionTempl<RealVectorValue>);
-defineLegacyParams(InitialConditionTempl<RealEigenVector>);
-
 template <typename T>
 InitialConditionTempl<T>::InitialConditionTempl(const InputParameters & parameters)
   : InitialConditionBase(parameters),

@@ -10,13 +10,3 @@
 #include "ArrayMooseVariable.h"
 
 registerMooseObject("MooseApp", ArrayMooseVariable);
-
-template <>
-InputParameters
-validParams<ArrayMooseVariable>()
-{
-  auto params = validParams<MooseVariableFEBase>();
-  params.addClassDescription(
-      "Used for grouping standard field variables with the same finite element family and order");
-  return params;
-}

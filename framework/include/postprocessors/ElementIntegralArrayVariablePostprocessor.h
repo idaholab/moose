@@ -12,12 +12,6 @@
 #include "ElementIntegralPostprocessor.h"
 #include "MooseVariableInterface.h"
 
-// Forward Declarations
-class ElementIntegralArrayVariablePostprocessor;
-
-template <>
-InputParameters validParams<ElementIntegralArrayVariablePostprocessor>();
-
 /**
  * This postprocessor computes a volume integral of the specified variable.
  *

@@ -12,8 +12,6 @@
 registerMooseObject("MooseApp", ExtraElementIDAux);
 registerMooseObjectRenamed("MooseApp", ElemExtraIDAux, "01/30/2022 24:00", ExtraElementIDAux);
 
-defineLegacyParams(ExtraElementIDAux);
-
 InputParameters
 ExtraElementIDAux::validParams()
 {

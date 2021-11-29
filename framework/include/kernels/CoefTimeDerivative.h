@@ -11,11 +11,6 @@
 
 #include "TimeDerivative.h"
 
-class CoefTimeDerivative;
-
-template <>
-InputParameters validParams<CoefTimeDerivative>();
-
 /**
  * Time derivative term multiplied by a coefficient
  */

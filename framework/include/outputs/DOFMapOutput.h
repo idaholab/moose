@@ -12,12 +12,7 @@
 // MOOSE includes
 #include "FileOutput.h"
 
-// Forward declarations
-class DOFMapOutput;
 class MooseMesh;
-
-template <>
-InputParameters validParams<DOFMapOutput>();
 
 /**
  * An output object for writing the DOF map of the system in a machine parsable format

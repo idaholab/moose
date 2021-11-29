@@ -12,12 +12,6 @@
 // Moose Includes
 #include "ElementDamper.h"
 
-// Forward Declarations
-class MaxIncrement;
-
-template <>
-InputParameters validParams<MaxIncrement>();
-
 /**
  * TODO
  */

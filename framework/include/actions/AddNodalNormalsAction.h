@@ -11,11 +11,6 @@
 
 #include "Action.h"
 
-class AddNodalNormalsAction;
-
-template <>
-InputParameters validParams<AddNodalNormalsAction>();
-
 /**
  * Action to setup computation of nodal normals.
  *

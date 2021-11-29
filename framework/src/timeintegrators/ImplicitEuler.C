@@ -12,8 +12,6 @@
 
 registerMooseObject("MooseApp", ImplicitEuler);
 
-defineLegacyParams(ImplicitEuler);
-
 InputParameters
 ImplicitEuler::validParams()
 {

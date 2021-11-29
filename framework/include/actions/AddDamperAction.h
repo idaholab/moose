@@ -11,11 +11,6 @@
 
 #include "MooseObjectAction.h"
 
-class AddDamperAction;
-
-template <>
-InputParameters validParams<AddDamperAction>();
-
 class AddDamperAction : public MooseObjectAction
 {
 public:

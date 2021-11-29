@@ -12,12 +12,6 @@
 #include "SideIntegralPostprocessor.h"
 #include "MooseVariableInterface.h"
 
-// Forward Declarations
-class SideIntegralVariablePostprocessor;
-
-template <>
-InputParameters validParams<SideIntegralVariablePostprocessor>();
-
 /**
  * This postprocessor computes a surface integral of the specified variable.
  *

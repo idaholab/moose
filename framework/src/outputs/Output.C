@@ -24,8 +24,6 @@
 
 #include "libmesh/equation_systems.h"
 
-defineLegacyParams(Output);
-
 InputParameters
 Output::validParams()
 {

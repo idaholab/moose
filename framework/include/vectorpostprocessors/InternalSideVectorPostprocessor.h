@@ -12,12 +12,6 @@
 #include "InternalSideUserObject.h"
 #include "VectorPostprocessor.h"
 
-// Forward Declarations
-class InternalSideVectorPostprocessor;
-
-template <>
-InputParameters validParams<InternalSideVectorPostprocessor>();
-
 class InternalSideVectorPostprocessor : public InternalSideUserObject, public VectorPostprocessor
 {
 public:

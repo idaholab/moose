@@ -14,8 +14,6 @@
 
 registerMooseObject("MooseApp", NumNodes);
 
-defineLegacyParams(NumNodes);
-
 InputParameters
 NumNodes::validParams()
 {

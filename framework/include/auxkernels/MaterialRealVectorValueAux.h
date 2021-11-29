@@ -18,9 +18,6 @@ class MaterialRealVectorValueAuxTempl;
 typedef MaterialRealVectorValueAuxTempl<false> MaterialRealVectorValueAux;
 typedef MaterialRealVectorValueAuxTempl<true> ADMaterialRealVectorValueAux;
 
-template <>
-InputParameters validParams<MaterialRealVectorValueAux>();
-
 /**
  * AuxKernel for outputting a RealVectorValue material property component to an AuxVariable
  */

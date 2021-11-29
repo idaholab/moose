@@ -11,12 +11,6 @@
 
 #include "MeshGenerator.h"
 
-// Forward declarations
-class FileMeshGenerator;
-
-template <>
-InputParameters validParams<FileMeshGenerator>();
-
 /**
  * Generates a mesh by reading it from an file.
  */

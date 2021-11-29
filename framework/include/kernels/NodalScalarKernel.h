@@ -13,11 +13,6 @@
 #include "Coupleable.h"
 #include "MooseVariableDependencyInterface.h"
 
-class NodalScalarKernel;
-
-template <>
-InputParameters validParams<NodalScalarKernel>();
-
 /**
  *
  */

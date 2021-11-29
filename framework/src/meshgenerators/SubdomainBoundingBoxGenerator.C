@@ -16,8 +16,6 @@
 
 registerMooseObject("MooseApp", SubdomainBoundingBoxGenerator);
 
-defineLegacyParams(SubdomainBoundingBoxGenerator);
-
 InputParameters
 SubdomainBoundingBoxGenerator::validParams()
 {

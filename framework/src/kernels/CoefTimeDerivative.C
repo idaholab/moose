@@ -11,8 +11,6 @@
 
 registerMooseObject("MooseApp", CoefTimeDerivative);
 
-defineLegacyParams(CoefTimeDerivative);
-
 InputParameters
 CoefTimeDerivative::validParams()
 {

@@ -14,8 +14,6 @@
 
 registerMooseObject("MooseApp", NumDOFs);
 
-defineLegacyParams(NumDOFs);
-
 InputParameters
 NumDOFs::validParams()
 {

@@ -11,8 +11,6 @@
 
 registerMooseObject("MooseApp", BoundingValueNodalDamper);
 
-defineLegacyParams(BoundingValueNodalDamper);
-
 InputParameters
 BoundingValueNodalDamper::validParams()
 {

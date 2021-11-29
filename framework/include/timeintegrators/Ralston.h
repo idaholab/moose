@@ -11,11 +11,6 @@
 
 #include "ExplicitRK2.h"
 
-class Ralston;
-
-template <>
-InputParameters validParams<Ralston>();
-
 /**
  * Ralston's time integration method.
  *

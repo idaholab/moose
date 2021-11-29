@@ -17,8 +17,6 @@
 
 registerMooseObject("MooseApp", Tecplot);
 
-defineLegacyParams(Tecplot);
-
 InputParameters
 Tecplot::validParams()
 {

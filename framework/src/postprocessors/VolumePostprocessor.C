@@ -11,8 +11,6 @@
 
 registerMooseObject("MooseApp", VolumePostprocessor);
 
-defineLegacyParams(VolumePostprocessor);
-
 InputParameters
 VolumePostprocessor::validParams()
 {

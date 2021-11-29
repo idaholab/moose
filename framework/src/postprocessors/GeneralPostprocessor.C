@@ -9,8 +9,6 @@
 
 #include "GeneralPostprocessor.h"
 
-defineLegacyParams(GeneralPostprocessor);
-
 InputParameters
 GeneralPostprocessor::validParams()
 {

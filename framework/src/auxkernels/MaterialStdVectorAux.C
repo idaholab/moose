@@ -11,8 +11,6 @@
 
 registerMooseObject("MooseApp", MaterialStdVectorAux);
 
-defineLegacyParams(MaterialStdVectorAux);
-
 InputParameters
 MaterialStdVectorAux::validParams()
 {

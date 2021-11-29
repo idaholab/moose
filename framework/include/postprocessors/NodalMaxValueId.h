@@ -11,12 +11,6 @@
 
 #include "NodalVariablePostprocessor.h"
 
-// Forward Declarations
-class NodalMaxValueId;
-
-template <>
-InputParameters validParams<NodalMaxValueId>();
-
 /**
  * Computes the id of the node with the maximum value across all processes
  */

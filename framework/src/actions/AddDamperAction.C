@@ -12,8 +12,6 @@
 
 registerMooseAction("MooseApp", AddDamperAction, "add_damper");
 
-defineLegacyParams(AddDamperAction);
-
 InputParameters
 AddDamperAction::validParams()
 {

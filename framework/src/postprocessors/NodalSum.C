@@ -13,8 +13,6 @@
 
 registerMooseObject("MooseApp", NodalSum);
 
-defineLegacyParams(NodalSum);
-
 InputParameters
 NodalSum::validParams()
 {

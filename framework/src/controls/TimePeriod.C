@@ -15,8 +15,6 @@
 
 registerMooseObject("MooseApp", TimePeriod);
 
-defineLegacyParams(TimePeriod);
-
 InputParameters
 TimePeriod::validParams()
 {

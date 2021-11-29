@@ -20,12 +20,6 @@
 #include "libmesh/mesh_function.h"
 #include "libmesh/bounding_box.h"
 
-// Forward declarations
-class PNGOutput;
-
-template <>
-InputParameters validParams<PNGOutput>();
-
 class PNGOutput : public FileOutput
 {
 public:

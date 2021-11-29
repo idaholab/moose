@@ -11,12 +11,7 @@
 
 #include "NodalKernel.h"
 
-// Forward Declarations
-class TimeNodalKernel;
 class Function;
-
-template <>
-InputParameters validParams<TimeNodalKernel>();
 
 /**
  * Represents a simple ODE of du/dt - rate = 0

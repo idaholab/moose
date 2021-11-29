@@ -22,10 +22,6 @@
 #include "libmesh/quadrature.h"
 #include "libmesh/boundary_info.h"
 
-defineLegacyParams(AuxKernel);
-defineLegacyParams(VectorAuxKernel);
-defineLegacyParams(ArrayAuxKernel);
-
 template <typename ComputeValueType>
 InputParameters
 AuxKernelTempl<ComputeValueType>::validParams()

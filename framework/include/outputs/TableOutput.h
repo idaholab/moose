@@ -14,11 +14,6 @@
 #include "FileOutput.h"
 #include "FormattedTable.h"
 
-class TableOutput;
-
-template <>
-InputParameters validParams<TableOutput>();
-
 /**
  * Base class for scalar variables and postprocessors output objects
  *

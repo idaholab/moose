@@ -15,17 +15,12 @@
 // System includes
 #include <string>
 
-// Forward Declarations
-class VectorFunctionIC;
 class InputParameters;
 
 namespace libMesh
 {
 class Point;
 }
-
-template <>
-InputParameters validParams<VectorFunctionIC>();
 
 /**
  * IC that calls vectorValue method of a Function object.

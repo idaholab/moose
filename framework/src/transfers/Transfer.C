@@ -21,8 +21,6 @@
 
 const Number Transfer::OutOfMeshValue = -999999;
 
-defineLegacyParams(Transfer);
-
 InputParameters
 Transfer::validParams()
 {

@@ -39,12 +39,7 @@
 
 #endif
 
-// Forward declarations
-class ImageSampler;
 class MooseMesh;
-
-template <>
-InputParameters validParams<ImageSampler>();
 
 /**
  * A helper class for reading and sampling images using VTK.

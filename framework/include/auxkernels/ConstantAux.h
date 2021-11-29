@@ -11,12 +11,6 @@
 
 #include "AuxKernel.h"
 
-// Forward Declarations
-class ConstantAux;
-
-template <>
-InputParameters validParams<ConstantAux>();
-
 /**
  * Constant auxiliary value
  */

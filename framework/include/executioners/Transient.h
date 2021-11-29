@@ -15,13 +15,8 @@
 #include <string>
 #include <fstream>
 
-// Forward Declarations
-class Transient;
 class TimeStepper;
 class FEProblemBase;
-
-template <>
-InputParameters validParams<Transient>();
 
 /**
  * Transient executioners usually loop through a number of timesteps... calling solve()

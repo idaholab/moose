@@ -11,12 +11,7 @@
 
 #include "ArrayInitialCondition.h"
 
-// Forward Declarations
-class ArrayFunctionIC;
 class Function;
-
-template <>
-InputParameters validParams<ArrayFunctionIC>();
 
 class ArrayFunctionIC : public ArrayInitialCondition
 {

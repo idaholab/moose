@@ -17,8 +17,6 @@ Threads::spin_mutex nodal_normals_evaluator_mutex;
 
 registerMooseObject("MooseApp", NodalNormalsEvaluator);
 
-defineLegacyParams(NodalNormalsEvaluator);
-
 InputParameters
 NodalNormalsEvaluator::validParams()
 {

@@ -13,11 +13,6 @@
 #include "Coupleable.h"
 #include "MaterialPropertyInterface.h"
 
-class QuadraturePointMarker;
-
-template <>
-InputParameters validParams<QuadraturePointMarker>();
-
 class QuadraturePointMarker : public Marker,
                               public MooseVariableInterface<Real>,
                               public MaterialPropertyInterface

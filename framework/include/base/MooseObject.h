@@ -22,11 +22,6 @@
   using MooseObject::paramError
 
 class MooseApp;
-class MooseObject;
-
-template <>
-InputParameters validParams<MooseObject>();
-
 // needed to avoid #include cycle with MooseApp and MooseObject
 [[noreturn]] void callMooseErrorRaw(std::string & msg, MooseApp * app);
 

@@ -13,8 +13,6 @@
 
 registerMooseObject("MooseApp", ChangeOverFixedPointPostprocessor);
 
-defineLegacyParams(ChangeOverFixedPointPostprocessor);
-
 InputParameters
 ChangeOverFixedPointPostprocessor::validParams()
 {

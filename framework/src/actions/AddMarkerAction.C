@@ -12,8 +12,6 @@
 
 registerMooseAction("MooseApp", AddMarkerAction, "add_marker");
 
-defineLegacyParams(AddMarkerAction);
-
 InputParameters
 AddMarkerAction::validParams()
 {

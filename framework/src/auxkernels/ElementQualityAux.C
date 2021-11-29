@@ -13,8 +13,6 @@
 
 registerMooseObject("MooseApp", ElementQualityAux);
 
-defineLegacyParams(ElementQualityAux);
-
 InputParameters
 ElementQualityAux::validParams()
 {

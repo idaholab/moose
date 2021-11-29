@@ -11,11 +11,6 @@
 
 #include "AuxKernel.h"
 
-class DebugResidualAux;
-
-template <>
-InputParameters validParams<DebugResidualAux>();
-
 /**
  * Auxiliary kernel for debugging convergence.
  */

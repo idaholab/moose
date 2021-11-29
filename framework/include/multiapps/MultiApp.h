@@ -19,7 +19,6 @@
 
 #include "nlohmann/json.h"
 
-class MultiApp;
 class UserObject;
 class FEProblemBase;
 class FEProblem;
@@ -38,9 +37,6 @@ class BoundingBox;
 template <typename T>
 class NumericVector;
 } // namespace libMesh
-
-template <>
-InputParameters validParams<MultiApp>();
 
 /// Holds app partitioning information relevant to the a particular rank for a
 /// multiapp scenario.

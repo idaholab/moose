@@ -13,8 +13,6 @@
 #include "ReporterContext.h"
 #include "FEProblemBase.h"
 
-defineLegacyParams(Postprocessor);
-
 InputParameters
 Postprocessor::validParams()
 {

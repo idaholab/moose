@@ -13,13 +13,11 @@
 
 registerMooseObject("MooseApp", NearestPointLayeredSideAverage);
 
-defineLegacyParams(NearestPointLayeredSideAverage);
-
 InputParameters
 NearestPointLayeredSideAverage::validParams()
 {
   InputParameters params =
-      nearestPointBaseValidParams<LayeredSideAverage, SideIntegralVariableUserObject>();
+      NearestPointBase<LayeredSideAverage, SideIntegralVariableUserObject>::validParams();
 
   params.addClassDescription("Compute layered side averages for nearest-point based subdomains");
 

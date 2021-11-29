@@ -21,11 +21,6 @@ class GriddedData;
  * Gridded data can be 1D, 2D, 3D or 4D.
  * See GriddedData for examples of file format.
  */
-class PiecewiseMultilinear;
-
-template <>
-InputParameters validParams<PiecewiseMultilinear>();
-
 class PiecewiseMultilinear : public PiecewiseMultiInterpolation
 {
 public:

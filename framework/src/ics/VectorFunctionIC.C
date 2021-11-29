@@ -12,8 +12,6 @@
 
 registerMooseObject("MooseApp", VectorFunctionIC);
 
-defineLegacyParams(VectorFunctionIC);
-
 InputParameters
 VectorFunctionIC::validParams()
 {

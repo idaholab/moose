@@ -14,12 +14,6 @@
 #include "CoupleableMooseVariableDependencyIntermediateInterface.h"
 #include "MooseVariableInterface.h"
 
-// Forward declarations
-class NodalBC;
-
-template <>
-InputParameters validParams<NodalBC>();
-
 /**
  * Base class for deriving any boundary condition that works at nodes
  */

@@ -17,8 +17,6 @@
 
 registerMooseObject("MooseApp", CentroidMultiApp);
 
-defineLegacyParams(CentroidMultiApp);
-
 InputParameters
 CentroidMultiApp::validParams()
 {

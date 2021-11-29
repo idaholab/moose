@@ -13,12 +13,6 @@
 #include "CoupleableMooseVariableDependencyIntermediateInterface.h"
 #include "MaterialPropertyInterface.h"
 
-// Forward declarations
-class IntegratedBCBase;
-
-template <>
-InputParameters validParams<IntegratedBCBase>();
-
 /**
  * Base class for deriving any boundary condition of a integrated type
  */

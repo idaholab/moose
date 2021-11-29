@@ -12,12 +12,6 @@
 #include "ElementUserObject.h"
 #include "ShapeUserObject.h"
 
-// Forward Declarations
-class ShapeElementUserObject;
-
-template <>
-InputParameters validParams<ShapeElementUserObject>();
-
 /**
  * ElementUserObject class in which the _phi and _grad_phi shape function data
  * is available and correctly initialized on EXEC_NONLINEAR (the Jacobian calculation).

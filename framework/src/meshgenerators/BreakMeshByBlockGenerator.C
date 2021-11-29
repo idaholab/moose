@@ -17,8 +17,6 @@
 
 registerMooseObject("MooseApp", BreakMeshByBlockGenerator);
 
-defineLegacyParams(BreakMeshByBlockGenerator);
-
 InputParameters
 BreakMeshByBlockGenerator::validParams()
 {

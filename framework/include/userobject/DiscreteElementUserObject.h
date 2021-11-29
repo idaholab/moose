@@ -12,12 +12,6 @@
 // MOOSE includes
 #include "ElementUserObject.h"
 
-// Forward Declarations
-class DiscreteElementUserObject;
-
-template <>
-InputParameters validParams<DiscreteElementUserObject>();
-
 class DiscreteElementUserObject : public ElementUserObject
 {
 public:

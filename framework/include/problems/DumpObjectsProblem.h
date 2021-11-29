@@ -11,11 +11,7 @@
 
 #include "FEProblemBase.h"
 
-class DumpObjectsProblem;
 class DumpObjectsNonlinearSystem;
-
-template <>
-InputParameters validParams<FEProblem>();
 
 #define captureDump(method_name, path)                                                             \
   void method_name(                                                                                \

@@ -11,12 +11,6 @@
 
 #include "EigenKernel.h"
 
-// Forward Declarations
-class MassEigenKernel;
-
-template <>
-InputParameters validParams<MassEigenKernel>();
-
 class MassEigenKernel : public EigenKernel
 {
 public:

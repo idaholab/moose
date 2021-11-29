@@ -23,8 +23,6 @@
 
 registerMooseObject("MooseApp", ImageMeshGenerator);
 
-defineLegacyParams(ImageMeshGenerator);
-
 InputParameters
 ImageMeshGenerator::validParams()
 {

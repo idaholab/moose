@@ -11,8 +11,6 @@
 
 registerMooseObject("MooseApp", AreaPostprocessor);
 
-defineLegacyParams(AreaPostprocessor);
-
 InputParameters
 AreaPostprocessor::validParams()
 {

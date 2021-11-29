@@ -12,8 +12,6 @@
 // MOOSE includes
 #include "Moose.h"
 
-// Forward declarations
-class FileRangeBuilder;
 class InputParameters;
 
 template <typename T>
@@ -24,9 +22,6 @@ InputParameters validParams();
  * operate on ranges of files.  Adds several non-required parameters
  * that are parsed in the parseFileRange function.
  */
-template <>
-InputParameters validParams<FileRangeBuilder>();
-
 /**
  * Augments an InputParameters object with file range information.
  * Creates and adds a vector<string> with the list of filenames to the

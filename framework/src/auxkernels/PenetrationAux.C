@@ -20,8 +20,6 @@ const Real PenetrationAux::NotPenetrated = -999999;
 
 registerMooseObject("MooseApp", PenetrationAux);
 
-defineLegacyParams(PenetrationAux);
-
 InputParameters
 PenetrationAux::validParams()
 {

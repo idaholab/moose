@@ -14,8 +14,6 @@
 
 registerMooseObject("MooseApp", CSV);
 
-defineLegacyParams(CSV);
-
 InputParameters
 CSV::validParams()
 {

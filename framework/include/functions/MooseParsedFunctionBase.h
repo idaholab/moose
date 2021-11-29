@@ -19,7 +19,6 @@
 // Forward declarations
 class FEProblemBase;
 class InputParameters;
-class MooseParsedFunctionBase;
 class MooseParsedFunctionWrapper;
 
 template <typename T>
@@ -31,9 +30,6 @@ InputParameters validParams();
  * for the class using the += operator.
  * @see MooseParsedFunction,  MooseParsedGradFunction, MooseParsedVectorFunction
  */
-template <>
-InputParameters validParams<MooseParsedFunctionBase>();
-
 /**
  * Adds user facing parameters for parsed function
  * @see ParsedFunction ParsedVectorFunction ParsedGradFunction

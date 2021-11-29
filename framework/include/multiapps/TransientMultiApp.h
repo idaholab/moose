@@ -13,12 +13,7 @@
 
 #include "libmesh/numeric_vector.h"
 
-// Forward declarations
-class TransientMultiApp;
 class Transient;
-
-template <>
-InputParameters validParams<TransientMultiApp>();
 
 /**
  * MultiApp Implementation for Transient Apps.

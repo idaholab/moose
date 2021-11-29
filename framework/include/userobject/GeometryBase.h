@@ -11,11 +11,6 @@
 
 #include "GeneralUserObject.h"
 
-class GeometryBase;
-
-template <>
-InputParameters validParams<GeometryBase>();
-
 /**
  * Base class for userobjects that snap nodes to a defined geometry when
  * adaptivity happens.

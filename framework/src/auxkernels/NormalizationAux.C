@@ -11,8 +11,6 @@
 
 registerMooseObject("MooseApp", NormalizationAux);
 
-defineLegacyParams(NormalizationAux);
-
 InputParameters
 NormalizationAux::validParams()
 {

@@ -11,11 +11,6 @@
 
 #include "AuxKernel.h"
 
-class ExtraElementIDAux;
-
-template <>
-InputParameters validParams<ExtraElementIDAux>();
-
 class ExtraElementIDAux : public AuxKernel
 {
 public:

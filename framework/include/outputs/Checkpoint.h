@@ -15,12 +15,7 @@
 
 #include <deque>
 
-// Forward declarations
-class Checkpoint;
 class MaterialPropertyStorage;
-
-template <>
-InputParameters validParams<Checkpoint>();
 
 /**
  * A structure for storing the various output files associated with checkpoint output

@@ -17,8 +17,6 @@
 
 registerMooseObject("MooseApp", MeshCollectionGenerator);
 
-defineLegacyParams(MeshCollectionGenerator);
-
 InputParameters
 MeshCollectionGenerator::validParams()
 {

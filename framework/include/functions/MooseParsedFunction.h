@@ -88,5 +88,3 @@ public:
   }
 };
 
-template <>
-InputParameters validParams<MooseParsedFunction>();

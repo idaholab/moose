@@ -11,11 +11,6 @@
 
 #include "MaterialDerivativeTestKernelBase.h"
 
-class MaterialDerivativeTestKernel;
-
-template <>
-InputParameters validParams<MaterialDerivativeTestKernel>();
-
 /**
  * This kernel is used for testing derivatives of a material property.
  */

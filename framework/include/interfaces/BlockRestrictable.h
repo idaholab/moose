@@ -17,15 +17,10 @@
 
 #define usingBlockRestrictableMembers using BlockRestrictable::getBlockCoordSystem
 
-// Forward declarations
-class BlockRestrictable;
 class FEProblemBase;
 class MooseMesh;
 
 class MooseVariableFieldBase;
-
-template <>
-InputParameters validParams<BlockRestrictable>();
 
 /**
  * \class BlockRestrictable BlockRestrictable.h
@@ -53,7 +48,7 @@ InputParameters validParams<BlockRestrictable>();
  * - '_mesh' = a pointer to MooseMesh
  *
  * When creating a new object, generally, this class should be inherited following MooseObject.
- * Also, the validParams<BlockRestricted>() must be added to any other parameters for the
+ * Also, the BlockRestricted::validParams() must be added to any other parameters for the
  * the class being created, since this is where the 'blocks' input parameter is created.
  *
  * \see Kernel

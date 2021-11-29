@@ -12,12 +12,6 @@
 #include "MeshGenerator.h"
 #include "libmesh/replicated_mesh.h"
 
-// Forward declarations
-class PatternedMeshGenerator;
-
-template <>
-InputParameters validParams<PatternedMeshGenerator>();
-
 /**
  * Reads one or more 2D mesh files and stitches them together based on
  * a provided two-dimensional pattern array.  Assigns new boundary

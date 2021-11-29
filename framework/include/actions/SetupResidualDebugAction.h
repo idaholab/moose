@@ -12,11 +12,6 @@
 #include "Action.h"
 #include "MooseTypes.h"
 
-class SetupResidualDebugAction;
-
-template <>
-InputParameters validParams<SetupResidualDebugAction>();
-
 /**
  *
  */

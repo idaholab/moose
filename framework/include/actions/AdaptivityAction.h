@@ -13,11 +13,6 @@
 
 #ifdef LIBMESH_ENABLE_AMR
 
-class AdaptivityAction;
-
-template <>
-InputParameters validParams<AdaptivityAction>();
-
 class AdaptivityAction : public Action
 {
 public:

@@ -12,8 +12,6 @@
 
 registerMooseObject("MooseApp", ElementL2Difference);
 
-defineLegacyParams(ElementL2Difference);
-
 InputParameters
 ElementL2Difference::validParams()
 {

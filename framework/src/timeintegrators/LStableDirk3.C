@@ -14,8 +14,6 @@
 
 registerMooseObject("MooseApp", LStableDirk3);
 
-defineLegacyParams(LStableDirk3);
-
 InputParameters
 LStableDirk3::validParams()
 {

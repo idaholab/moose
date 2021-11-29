@@ -9,8 +9,6 @@
 
 #include "NodalBCBase.h"
 
-defineLegacyParams(NodalBCBase);
-
 InputParameters
 NodalBCBase::validParams()
 {

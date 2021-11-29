@@ -16,8 +16,6 @@
 
 registerMooseObject("MooseApp", ArrayDGDiffusion);
 
-defineLegacyParams(ArrayDGDiffusion);
-
 InputParameters
 ArrayDGDiffusion::validParams()
 {

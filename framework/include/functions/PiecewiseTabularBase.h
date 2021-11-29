@@ -12,11 +12,6 @@
 #include "PiecewiseBase.h"
 #include "LinearInterpolation.h"
 
-class PiecewiseTabularBase;
-
-template <>
-InputParameters validParams<PiecewiseTabularBase>();
-
 /**
  * Function base which provides a piecewise approximation to a provided (x,y) point data set via
  * input parameter specifications. Derived classes, which control the order (constant, linear) of

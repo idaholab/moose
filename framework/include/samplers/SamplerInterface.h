@@ -15,11 +15,6 @@
 
 // Forward declarations
 class Sampler;
-class SamplerInterface;
-
-template <>
-InputParameters validParams<SamplerInterface>();
-
 /**
  * Interface for objects that need to use samplers.
  *

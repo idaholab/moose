@@ -14,11 +14,6 @@
 
 // Forward Declarations
 class Function;
-class LineFunctionSampler;
-
-template <>
-InputParameters validParams<LineFunctionSampler>();
-
 class LineFunctionSampler : public GeneralVectorPostprocessor, protected SamplerBase
 {
 public:

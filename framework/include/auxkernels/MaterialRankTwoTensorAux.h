@@ -23,9 +23,6 @@ typedef MaterialRankTwoTensorAuxTempl<true> ADMaterialRankTwoTensorAux;
  * supplied indices.
  */
 
-template <>
-InputParameters validParams<MaterialRankTwoTensorAux>();
-
 template <bool is_ad>
 class MaterialRankTwoTensorAuxTempl : public MaterialAuxBaseTempl<RankTwoTensor, is_ad>
 {

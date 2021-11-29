@@ -12,8 +12,6 @@
 
 registerMooseObject("MooseApp", PiecewiseMultilinear);
 
-defineLegacyParams(PiecewiseMultilinear);
-
 InputParameters
 PiecewiseMultilinear::validParams()
 {

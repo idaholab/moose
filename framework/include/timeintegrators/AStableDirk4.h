@@ -11,12 +11,7 @@
 
 #include "TimeIntegrator.h"
 
-// Forward declarations
-class AStableDirk4;
 class LStableDirk4;
-
-template <>
-InputParameters validParams<AStableDirk4>();
 
 /**
  * Fourth-order diagonally implicit Runge Kutta method (Dirk) with

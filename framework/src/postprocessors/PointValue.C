@@ -19,8 +19,6 @@
 
 registerMooseObject("MooseApp", PointValue);
 
-defineLegacyParams(PointValue);
-
 InputParameters
 PointValue::validParams()
 {

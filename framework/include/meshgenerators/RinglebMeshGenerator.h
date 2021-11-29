@@ -11,12 +11,6 @@
 
 #include "MeshGenerator.h"
 
-// Forward declarations
-class RinglebMeshGenerator;
-
-template <>
-InputParameters validParams<RinglebMeshGenerator>();
-
 /**
  * Generates a mesh given all the parameters
  */

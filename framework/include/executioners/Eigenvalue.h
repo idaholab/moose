@@ -14,14 +14,10 @@
 #include "Executioner.h"
 
 class InputParameters;
-class Eigenvalue;
 class EigenProblem;
 
 template <typename T>
 InputParameters validParams();
-
-template <>
-InputParameters validParams<Eigenvalue>();
 
 /**
  * Eigenvalue executioner is used to drive the eigenvalue calculations. At the end,

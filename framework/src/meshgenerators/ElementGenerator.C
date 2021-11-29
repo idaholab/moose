@@ -36,8 +36,6 @@
 
 registerMooseObject("MooseApp", ElementGenerator);
 
-defineLegacyParams(ElementGenerator);
-
 InputParameters
 ElementGenerator::validParams()
 {

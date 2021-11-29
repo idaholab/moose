@@ -13,8 +13,6 @@
 
 registerMooseObject("MooseApp", LineValueSampler);
 
-defineLegacyParams(LineValueSampler);
-
 InputParameters
 LineValueSampler::validParams()
 {

@@ -11,11 +11,6 @@
 
 #include "MooseObjectAction.h"
 
-class SetupPreconditionerAction;
-
-template <>
-InputParameters validParams<SetupPreconditionerAction>();
-
 /**
  * Set the preconditioner up.
  */

@@ -13,12 +13,6 @@
 #include "MooseEnum.h"
 #include "libmesh/bounding_box.h"
 
-// Forward declarations
-class SideSetsFromBoundingBoxGenerator;
-
-template <>
-InputParameters validParams<SideSetsFromBoundingBoxGenerator>();
-
 /**
  * MeshGenerator for defining sidesets inside or outside of a bounding box
  */

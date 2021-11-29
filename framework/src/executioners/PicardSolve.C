@@ -15,8 +15,6 @@
 #include "AllLocalDofIndicesThread.h"
 #include "Console.h"
 
-defineLegacyParams(PicardSolve);
-
 InputParameters
 PicardSolve::validParams()
 {

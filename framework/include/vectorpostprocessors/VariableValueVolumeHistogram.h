@@ -11,11 +11,6 @@
 
 #include "ElementVectorPostprocessor.h"
 
-class VariableValueVolumeHistogram;
-
-template <>
-InputParameters validParams<VariableValueVolumeHistogram>();
-
 /**
  * Compute a histogram of volume fractions binned according to variable values.
  * This VectorPostprocessor lets you tabulate the volumes in the simulation domain

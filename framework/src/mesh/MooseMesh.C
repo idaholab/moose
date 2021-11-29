@@ -61,8 +61,6 @@
 static const int GRAIN_SIZE =
     1; // the grain_size does not have much influence on our execution speed
 
-defineLegacyParams(MooseMesh);
-
 InputParameters
 MooseMesh::validParams()
 {

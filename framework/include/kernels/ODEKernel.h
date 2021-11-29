@@ -11,12 +11,6 @@
 
 #include "ScalarKernel.h"
 
-// Forward Declarations
-class ODEKernel;
-
-template <>
-InputParameters validParams<ODEKernel>();
-
 /**
  *
  */

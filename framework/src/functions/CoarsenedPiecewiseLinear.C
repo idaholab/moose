@@ -12,8 +12,6 @@
 
 registerMooseObject("MooseApp", CoarsenedPiecewiseLinear);
 
-defineLegacyParams(CoarsenedPiecewiseLinear);
-
 InputParameters
 CoarsenedPiecewiseLinear::validParams()
 {

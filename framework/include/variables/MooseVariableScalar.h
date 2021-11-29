@@ -19,11 +19,6 @@ template <typename T>
 class NumericVector;
 }
 
-class MooseVariableScalar;
-
-template <>
-InputParameters validParams<MooseVariableScalar>();
-
 class Assembly;
 class TimeIntegrator;
 

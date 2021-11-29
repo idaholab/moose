@@ -11,11 +11,6 @@
 
 #include "MooseObjectAction.h"
 
-class AddDistributionAction;
-
-template <>
-InputParameters validParams<AddDistributionAction>();
-
 /**
  * This class adds a distribution object.
  */

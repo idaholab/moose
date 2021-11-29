@@ -21,8 +21,6 @@
 
 registerMooseObject("MooseApp", MooseVariableScalar);
 
-defineLegacyParams(MooseVariableScalar);
-
 InputParameters
 MooseVariableScalar::validParams()
 {

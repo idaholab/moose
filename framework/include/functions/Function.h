@@ -251,5 +251,3 @@ public:
   Function(const InputParameters & params) : FunctionTempl<Real>(params) {}
 };
 
-template <>
-InputParameters validParams<Function>();

@@ -11,12 +11,6 @@
 
 #include "SideSetsGeneratorBase.h"
 
-// Forward declarations
-class SideSetsFromPointsGenerator;
-
-template <>
-InputParameters validParams<SideSetsFromPointsGenerator>();
-
 /**
  * A mesh generator to generate new sidesets from all faces connected to points
  * with the same normal as the face the point is part of

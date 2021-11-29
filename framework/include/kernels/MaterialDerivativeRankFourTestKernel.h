@@ -12,11 +12,6 @@
 #include "MaterialDerivativeTestKernelBase.h"
 #include "RankFourTensor.h"
 
-class MaterialDerivativeRankFourTestKernel;
-
-template <>
-InputParameters validParams<MaterialDerivativeRankFourTestKernel>();
-
 /**
  * This kernel is used for testing derivatives of a material property.
  */

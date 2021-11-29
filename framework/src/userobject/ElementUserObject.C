@@ -14,8 +14,6 @@
 
 #include "libmesh/elem.h"
 
-defineLegacyParams(ElementUserObject);
-
 InputParameters
 ElementUserObject::validParams()
 {

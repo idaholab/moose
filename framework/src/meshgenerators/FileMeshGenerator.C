@@ -18,8 +18,6 @@
 
 registerMooseObject("MooseApp", FileMeshGenerator);
 
-defineLegacyParams(FileMeshGenerator);
-
 InputParameters
 FileMeshGenerator::validParams()
 {

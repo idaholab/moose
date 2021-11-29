@@ -13,8 +13,6 @@
 #include "MooseMesh.h"
 #include "MooseObject.h"
 
-defineLegacyParams(BoundaryRestrictable);
-
 InputParameters
 BoundaryRestrictable::validParams()
 {

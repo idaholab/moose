@@ -12,12 +12,6 @@
 // Moose Includes
 #include "GeneralDamper.h"
 
-// Forward Declarations
-class ConstantDamper;
-
-template <>
-InputParameters validParams<ConstantDamper>();
-
 /**
  * Simple constant damper.
  *

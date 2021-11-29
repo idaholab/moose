@@ -14,13 +14,8 @@
 // Forward declarations
 class FEProblemBase;
 class InputParameters;
-class MeshChangedInterface;
-
 template <typename T>
 InputParameters validParams();
-
-template <>
-InputParameters validParams<MeshChangedInterface>();
 
 /**
  * Interface for notifications that the mesh has changed.

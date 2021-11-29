@@ -11,11 +11,6 @@
 
 #include "Action.h"
 
-class DeprecatedBlockAction;
-
-template <>
-InputParameters validParams<DeprecatedBlockAction>();
-
 /**
  * Used for marking that some block are deprecated and not be used
  */

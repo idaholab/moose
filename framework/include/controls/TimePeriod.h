@@ -12,12 +12,6 @@
 // MOOSE includes
 #include "ConditionalEnableControl.h"
 
-// Forward declarations
-class TimePeriod;
-
-template <>
-InputParameters validParams<TimePeriod>();
-
 /**
  * A basic control for disabling objects for a portion of the simulation.
  */

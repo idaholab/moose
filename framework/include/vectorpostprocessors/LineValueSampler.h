@@ -12,12 +12,6 @@
 // MOOSE includes
 #include "PointSamplerBase.h"
 
-// Forward Declarations
-class LineValueSampler;
-
-template <>
-InputParameters validParams<LineValueSampler>();
-
 class LineValueSampler : public PointSamplerBase
 {
 public:

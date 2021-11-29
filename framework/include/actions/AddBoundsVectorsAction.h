@@ -11,11 +11,6 @@
 
 #include "Action.h"
 
-class AddBoundsVectorsAction;
-
-template <>
-InputParameters validParams<AddBoundsVectorsAction>();
-
 class AddBoundsVectorsAction : public Action
 {
 public:

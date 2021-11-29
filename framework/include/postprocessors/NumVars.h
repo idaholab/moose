@@ -11,12 +11,6 @@
 
 #include "GeneralPostprocessor.h"
 
-// Forward Declarations
-class NumVars;
-
-template <>
-InputParameters validParams<NumVars>();
-
 class NumVars : public GeneralPostprocessor
 {
 public:

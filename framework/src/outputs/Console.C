@@ -26,8 +26,6 @@
 
 registerMooseObject("MooseApp", Console);
 
-defineLegacyParams(Console);
-
 InputParameters
 Console::validParams()
 {

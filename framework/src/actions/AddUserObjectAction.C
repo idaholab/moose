@@ -12,8 +12,6 @@
 
 registerMooseAction("MooseApp", AddUserObjectAction, "add_user_object");
 
-defineLegacyParams(AddUserObjectAction);
-
 InputParameters
 AddUserObjectAction::validParams()
 {

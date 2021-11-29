@@ -39,12 +39,6 @@
 
 #endif
 
-// Forward declarations
-class MeshBaseImageSampler;
-
-template <>
-InputParameters validParams<MeshBaseImageSampler>();
-
 /**
  * A helper class for reading and sampling images using VTK, but with a Meshbase object
  */

@@ -11,8 +11,6 @@
 
 registerMooseObject("MooseApp", CumulativeValuePostprocessor);
 
-defineLegacyParams(CumulativeValuePostprocessor);
-
 InputParameters
 CumulativeValuePostprocessor::validParams()
 {

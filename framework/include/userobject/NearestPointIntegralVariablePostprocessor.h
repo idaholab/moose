@@ -13,12 +13,6 @@
 #include "NearestPointBase.h"
 #include "ElementIntegralVariablePostprocessor.h"
 #include "ElementVariableVectorPostprocessor.h"
-// Forward Declarations
-class NearestPointIntegralVariablePostprocessor;
-
-template <>
-InputParameters validParams<NearestPointIntegralVariablePostprocessor>();
-
 /**
  * Given a list of points this object computes the variable integral
  * closest to each one of those points.

@@ -20,8 +20,6 @@ registerMooseObjectRenamed("MooseApp",
                            "06/30/2022 24:00",
                            VariableValueVolumeHistogram);
 
-defineLegacyParams(VariableValueVolumeHistogram);
-
 InputParameters
 VariableValueVolumeHistogram::validParams()
 {

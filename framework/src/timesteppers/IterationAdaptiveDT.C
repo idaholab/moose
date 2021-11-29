@@ -19,8 +19,6 @@
 
 registerMooseObject("MooseApp", IterationAdaptiveDT);
 
-defineLegacyParams(IterationAdaptiveDT);
-
 InputParameters
 IterationAdaptiveDT::validParams()
 {

@@ -35,14 +35,9 @@
 #include "GeometricSearchInterface.h"
 #include "FunctorInterface.h"
 
-// forward declarations
-class MaterialBase;
 class MooseMesh;
 class SubProblem;
 class FaceInfo;
-
-template <>
-InputParameters validParams<MaterialBase>();
 
 /**
  * MaterialBases compute MaterialProperties.

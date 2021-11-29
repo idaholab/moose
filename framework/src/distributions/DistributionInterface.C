@@ -13,8 +13,6 @@
 #include "MooseTypes.h"
 #include "FEProblemBase.h"
 
-defineLegacyParams(DistributionInterface);
-
 InputParameters
 DistributionInterface::validParams()
 {

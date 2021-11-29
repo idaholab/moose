@@ -13,11 +13,6 @@
 #include "NearestPointBase.h"
 #include "LayeredSideIntegral.h"
 
-class NearestPointLayeredSideIntegral;
-
-template <>
-InputParameters validParams<NearestPointLayeredSideIntegral>();
-
 /**
  * This UserObject computes integrals of a variable storing partial
  * sums for the specified number of intervals in a direction (x,y,z).

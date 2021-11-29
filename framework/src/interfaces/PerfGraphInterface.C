@@ -12,8 +12,6 @@
 
 #include "MooseApp.h"
 
-defineLegacyParams(PerfGraphInterface);
-
 InputParameters
 PerfGraphInterface::validParams()
 {

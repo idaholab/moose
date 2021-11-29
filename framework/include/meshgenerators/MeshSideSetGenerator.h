@@ -11,12 +11,6 @@
 
 #include "MeshGenerator.h"
 
-// Forward declarations
-class MeshSideSetGenerator;
-
-template <>
-InputParameters validParams<MeshSideSetGenerator>();
-
 /**
  * Add lower dimensional elements along the faces contained in a side set
  */

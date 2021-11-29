@@ -15,8 +15,6 @@
 
 registerMooseObject("MooseApp", TransformGenerator);
 
-defineLegacyParams(TransformGenerator);
-
 InputParameters
 TransformGenerator::validParams()
 {
