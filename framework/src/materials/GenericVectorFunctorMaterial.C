@@ -54,6 +54,13 @@ GenericVectorFunctorMaterialTempl<is_ad>::GenericVectorFunctorMaterialTempl(
     mooseError("Number of prop_names times three must match the number of prop_values for a "
                "GenericVectorFunctorMaterial!");
 
+  // Check that there is no name conflict, a common mistake with this object
+  for (const auto i : make_range(num_names))
+    for (const auto j : make_range(num_values))
+      if (_prop_names[i] == _prop_values[j])
+        paramError("prop_names", "prop_names should not be the same as any of the prop_values. They"
+                                 " can both be functors, and functors may not have the same name.");
+
   _num_props = num_names;
   _functors.resize(num_values);
 

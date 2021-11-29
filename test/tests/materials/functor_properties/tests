@@ -97,4 +97,22 @@
     requirement = 'The system shall allow replacement of an underlying functor material property type such that users do not have to worry about material ordering when declaring and retrieving functor material properties.'
     design = 'Materials/index.md'
   []
+  [prop_name_issue]
+    type = RunException
+    ad_indexing_type = 'global'
+    input = 1d_dirichlet.i
+    expect_err = 'prop_names should not be the same as any of the prop_values'
+    requirement = 'The system shall error if a functor material property is declared with the same name as another functor.'
+    design = 'Materials/index.md'
+    cli_args = 'Materials/functor/prop_names=sink'
+  []
+  [vector_prop_name_issue]
+    type = RunException
+    ad_indexing_type = 'global'
+    input = functor-vector-mat-props.i
+    expect_err = 'prop_names should not be the same as any of the prop_values'
+    requirement = 'The system shall error if a functor vector material property is declared with the same name as another functor.'
+    design = 'Materials/index.md'
+    cli_args = "Materials/block0/prop_names='matprop mat_x' Materials/block0/prop_values='4 2 mat_x 3 4 1'"
+  []
 []
