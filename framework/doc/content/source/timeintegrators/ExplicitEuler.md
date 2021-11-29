@@ -20,9 +20,9 @@ U(t+dt) = U(t) + dt A(t, U(t))
 
 The Butcher tableau of the quadrature weights for this method is:
 !table
-0   | 0 |
----------------------
-    | 1
+| 0 | 0 |
+| - | - |
+| - | 1 |
 
 !alert note
 The [ActuallyExplicitEuler.md] implements the same algorithm but without forming the non linear system,

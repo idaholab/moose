@@ -20,10 +20,12 @@ U(t+dt) = U(t) + dt A \left(t+dt/2, \dfrac{dt}{2} \left( U(t) +  U(t+dt) \right)
 
 
 The Butcher tableau of the quadrature weights for this method is:
+
 !table
-1/2 | 1/2 |
----------------------
-    |  1
+| $c_i$ | $a_{i1}$ |
+| 1/2 | 1/2 |
+| - | - |
+| $b_j$ |  1 |
 
 !syntax parameters /Executioner/TimeIntegrator/ImplicitMidpoint
 

@@ -45,5 +45,6 @@
     csvdiff = 'terminator_pass_out.csv'
     issues = '#16452'
     requirement = "The system shall be able to terminate the current time step solve, and accept the result, based on post-processing calculations performed within the simulation."
+    recover = false # changes the time steps
   []
 []

@@ -22,17 +22,18 @@ U(t+dt) = U(t) + \dfrac{dt}{2} \left(A(t, U(t)) +  A(t,U(t) + dt A(t, U(t)) ) \r
 The Butcher tableau of the quadrature weights for this method is:
 
 !table
-0   | 0
-1   | 1    0
----------------------
-    | 1/2  1/2
+| $c_i$ | $a_{i1}$ | $a_{i2}$ |
+| - | - | - |
+| 0 | 0 |
+| 1 | 1 | 0 |
+| $b_j$ | 1/2 | 1/2 |
 
 !alert warning
 All kernels except time-(derivative)-kernels should have the parameter `implicit=false` to use this
 time integrator.
 
 !alert warning
-ExplicitRK2-derived TimeIntegrators (ExplicitMidpoint, Heun, Ralston) and other multistage
+ExplicitRK2-derived TimeIntegrators ([ExplicitMidpoint.md], [Heun.md], [Ralston.md]) and other multistage
 TimeIntegrators are known not to work with Materials/AuxKernels that accumulate 'state' and
 should be used with caution.
 

@@ -18,6 +18,15 @@ the implicit Euler time integration scheme can be written:
 !equation
 U(t+dt) = U(t) + dt \dfrac{1}{2} \left( A(t, U(t)) + A(t+dt, U(t+dt)) \right)
 
+The Butcher tableau of the quadrature weights for this method is:
+
+!table
+| $c_i$ | $a_{i1}$ | $a_{i2}$ |
+| - | - | - |
+| 0 | 0 | 0 |
+| 1 | 1/2 | 1/2 |
+| $b_{j}$ | 1/2 | 1/2 |
+
 !syntax parameters /Executioner/TimeIntegrator/CrankNicolson
 
 !syntax inputs /Executioner/TimeIntegrator/CrankNicolson
