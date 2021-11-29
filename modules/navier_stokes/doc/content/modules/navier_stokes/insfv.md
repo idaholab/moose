@@ -79,7 +79,7 @@ interpolation is shown below:
 ## Skewness-correction
 
 The skewness-correction of different variables can be enabled by defining the
-`face_interp_method=skewness-corrected` parameter for the INSFVVaribles and
+`face_interp_method=skewness-corrected` parameter for the INSFVVariables and
 selecting it as an option in the advection kernels. It has proven to increase
 accuracy on unstructured grids. For an example see:
 

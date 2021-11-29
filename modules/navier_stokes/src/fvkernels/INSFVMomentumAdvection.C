@@ -408,7 +408,7 @@ INSFVMomentumAdvection::coeffCalculator(const Elem & elem) const
     mooseAssert((neighbor == &fi->elem()) || (neighbor == fi->neighborPtr()),
                 "Surely the neighbor has to match one of the face information's elements, right?");
 
-    // Checking if skewness correction is necesary
+    // Checking if skewness correction is necessary
     bool correct_skewness =
         (_u_var->faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage);
 
@@ -552,7 +552,7 @@ INSFVMomentumAdvection::interpolate(Moose::FV::InterpMethod m, ADRealVectorValue
       face_velocity_interp_method, face_D, elem_D, neighbor_D, *_face_info, true);
 
   // Perform the pressure correction. We don't use skewness-correction on these since
-  // it only influences the averaged vell gradients which cancel out in the correction
+  // it only influences the averaged cell gradients which cancel out in the correction
   // below.
   for (const auto i : make_range(_dim))
     v(i) -= face_D(i) * (grad_p(i) - unc_grad_p(i));
