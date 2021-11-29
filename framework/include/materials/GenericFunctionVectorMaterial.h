@@ -12,12 +12,12 @@
 #include "Material.h"
 
 template <bool>
-class GenericFunctionMaterialTempl;
-typedef GenericFunctionMaterialTempl<false> GenericFunctionMaterial;
-typedef GenericFunctionMaterialTempl<true> ADGenericFunctionMaterial;
+class GenericFunctionVectorMaterialTempl;
+typedef GenericFunctionVectorMaterialTempl<false> GenericFunctionVectorMaterial;
+typedef GenericFunctionVectorMaterialTempl<true> ADGenericFunctionVectorMaterial;
 
 template <>
-InputParameters validParams<GenericFunctionMaterial>();
+InputParameters validParams<GenericFunctionVectorMaterial>();
 
 /**
  * This material automatically declares as material properties whatever is passed to it
@@ -28,28 +28,28 @@ InputParameters validParams<GenericFunctionMaterial>();
  * during development phases for ultimate flexibility.
  */
 template <bool is_ad>
-class GenericFunctionMaterialTempl : public Material
+class GenericFunctionVectorMaterialTempl : public Material
 {
 public:
   static InputParameters validParams();
 
-  GenericFunctionMaterialTempl(const InputParameters & parameters);
+  GenericFunctionVectorMaterialTempl(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties() override;
   virtual void computeQpProperties() override;
 
-  /// Names of the material properties to define
+  /// Names of the vector material properties to define
   std::vector<std::string> _prop_names;
 
-  /// The functions to use for each property
+  /// The functions to use for each property's components
   std::vector<FunctionName> _prop_values;
 
-  /// Number of properties that will be defined
+  /// Number of vector properties that will be defined
   unsigned int _num_props;
 
   /// Vector of all the properties
-  std::vector<GenericMaterialProperty<Real, is_ad> *> _properties;
+  std::vector<GenericMaterialProperty<RealVectorValue, is_ad> *> _properties;
 
   /// Vector of pointers to the functions, stored here after retrieval using their name
   std::vector<const Function *> _functions;
