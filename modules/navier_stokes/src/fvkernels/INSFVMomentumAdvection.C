@@ -409,18 +409,26 @@ INSFVMomentumAdvection::coeffCalculator(const Elem & elem) const
                 "Surely the neighbor has to match one of the face information's elements, right?");
 
     // Checking if skewness correction is necessary
-    bool correct_skewness =
+    bool correct_skewness_u =
         (_u_var->faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage);
 
     // Fill a face velocity for the advection contribution
     ADRealVectorValue face_velocity(
-        _u_var->getInternalFaceValue(neighbor, *fi, elem_velocity(0), correct_skewness));
+        _u_var->getInternalFaceValue(neighbor, *fi, elem_velocity(0), correct_skewness_u));
     if (_v_var)
+    {
+      bool correct_skewness_v =
+          (_v_var->faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage);
       face_velocity(1) =
-          _v_var->getInternalFaceValue(neighbor, *fi, elem_velocity(1), correct_skewness);
+          _v_var->getInternalFaceValue(neighbor, *fi, elem_velocity(1), correct_skewness_v);
+    }
     if (_w_var)
+    {
+      bool correct_skewness_w =
+          (_w_var->faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage);
       face_velocity(2) =
-          _w_var->getInternalFaceValue(neighbor, *fi, elem_velocity(2), correct_skewness);
+          _w_var->getInternalFaceValue(neighbor, *fi, elem_velocity(2), correct_skewness_w);
+    }
 
     // Add advection contribution
     const auto advection_coeffs =
@@ -474,18 +482,26 @@ INSFVMomentumAdvection::interpolate(Moose::FV::InterpMethod m, ADRealVectorValue
   }
 
   // Check if skewness-correction is necessary
-  bool correct_skewness =
+  bool correct_skewness_u =
       (_u_var->faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage);
 
   // Create the average face velocity (not corrected using RhieChow yet)
   v(0) = _u_var->getInternalFaceValue(
-      neighbor, *_face_info, _u_var->getElemValue(elem), correct_skewness);
+      neighbor, *_face_info, _u_var->getElemValue(elem), correct_skewness_u);
   if (_v_var)
+  {
+    bool correct_skewness_v =
+        (_v_var->faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage);
     v(1) = _v_var->getInternalFaceValue(
-        neighbor, *_face_info, _v_var->getElemValue(elem), correct_skewness);
+        neighbor, *_face_info, _v_var->getElemValue(elem), correct_skewness_v);
+  }
   if (_w_var)
+  {
+    bool correct_skewness_w =
+        (_w_var->faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage);
     v(2) = _w_var->getInternalFaceValue(
-        neighbor, *_face_info, _w_var->getElemValue(elem), correct_skewness);
+        neighbor, *_face_info, _w_var->getElemValue(elem), correct_skewness_w);
+  }
 
   // Return if Rhie-Chow was not requested
   if (m == Moose::FV::InterpMethod::Average)
