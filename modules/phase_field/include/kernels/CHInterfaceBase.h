@@ -99,7 +99,7 @@ template <typename T>
 InputParameters
 CHInterfaceBase<T>::validParams()
 {
-  InputParameters params = ::validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addClassDescription("Gradient energy Cahn-Hilliard base Kernel");
   params.addRequiredParam<MaterialPropertyName>("kappa_name", "The kappa used with the kernel");
   params.addRequiredParam<MaterialPropertyName>("mob_name", "The mobility used with the kernel");

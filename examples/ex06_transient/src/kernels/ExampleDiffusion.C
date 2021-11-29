@@ -11,11 +11,10 @@
 
 registerMooseObject("ExampleApp", ExampleDiffusion);
 
-template <>
 InputParameters
-validParams<ExampleDiffusion>()
+ExampleDiffusion::validParams()
 {
-  InputParameters params = validParams<Diffusion>();
+  InputParameters params = Diffusion::validParams();
   // Here we will look for a parameter from the input file
   params.addParam<Real>("diffusivity", 1.0, "Diffusivity Coefficient");
   return params;

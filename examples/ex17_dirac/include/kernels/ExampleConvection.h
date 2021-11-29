@@ -12,22 +12,6 @@
 #include "Kernel.h"
 
 /**
- * The forward declaration is so that we can declare the validParams function
- * before we actually define the class... that way the definition isn't lost
- * at the bottom of the file.
- */
-
-// Forward Declarations
-class ExampleConvection;
-
-/**
- * validParams returns the parameters that this Kernel accepts / needs
- * The actual body of the function MUST be in the .C file.
- */
-template <>
-InputParameters validParams<ExampleConvection>();
-
-/**
  * Define the Kernel for a convection operator that looks like:
  *
  * velocity dot u'
@@ -43,6 +27,12 @@ public:
    * is really small.  Otherwise it should be in the .C
    */
   ExampleConvection(const InputParameters & parameters);
+
+  /**
+   * validParams returns the parameters that this Kernel accepts / needs
+   * The actual body of the function MUST be in the .C file.
+   */
+  static InputParameters validParams();
 
 protected:
   /**
@@ -69,12 +59,4 @@ private:
    * A velocity vector that supports a dot product.
    */
   RealVectorValue _velocity;
-
-  /**
-   * Class variables to hold the components of velocity coming from the input parameters.
-   */
-  Real _x;
-  Real _y;
-  Real _z;
 };
-

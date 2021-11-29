@@ -12,16 +12,12 @@
 #include "Material.h"
 #include "BlockAverageValue.h"
 
-// Forward Declarations
-class BlockAverageDiffusionMaterial;
-
-template <>
-InputParameters validParams<BlockAverageDiffusionMaterial>();
-
 class BlockAverageDiffusionMaterial : public Material
 {
 public:
   BlockAverageDiffusionMaterial(const InputParameters & parameters);
+
+  static InputParameters validParams();
 
 protected:
   virtual void computeQpProperties() override;
@@ -42,4 +38,3 @@ private:
    */
   const BlockAverageValue & _block_average_value;
 };
-

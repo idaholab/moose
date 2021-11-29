@@ -12,15 +12,12 @@
 InputParameters
 FXBoundaryBaseUserObject::validParams()
 {
-  InputParameters params = SideIntegralVariableUserObject::validParams();
-
-  params += FXIntegralBaseUserObjectParameters::validParams();
-
+  InputParameters params = FXIntegralBaseUserObject<SideIntegralVariableUserObject>::validParams();
   return params;
 }
 
 FXBoundaryBaseUserObject::FXBoundaryBaseUserObject(const InputParameters & parameters)
-  : FXIntegralBaseUserObject(parameters)
+  : FXIntegralBaseUserObject<SideIntegralVariableUserObject>(parameters)
 {
   mooseInfo("Using FXInterface-type UserObject '",
             name(),

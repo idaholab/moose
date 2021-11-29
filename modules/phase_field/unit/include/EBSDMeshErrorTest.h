@@ -39,7 +39,7 @@ protected:
       oss << name << "_" << i;
 
       // generate input parameter set
-      InputParameters params = validParams<EBSDMeshGenerator>();
+      InputParameters params = EBSDMeshGenerator::validParams();
       params.addPrivateParam("_moose_app", _app.get());
       params.set<std::string>("_object_name") = oss.str();
       params.set<std::string>("_type") = "EBSDMeshGenerator";

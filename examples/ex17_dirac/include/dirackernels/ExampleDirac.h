@@ -12,22 +12,17 @@
 // Moose Includes
 #include "DiracKernel.h"
 
-// Forward Declarations
-class ExampleDirac;
-
-template <>
-InputParameters validParams<ExampleDirac>();
-
 class ExampleDirac : public DiracKernel
 {
 public:
   ExampleDirac(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void addPoints() override;
   virtual Real computeQpResidual() override;
 
 protected:
-  Real _value;
-  Point _point;
+  const Real _value;
+  const Point _point;
 };
-

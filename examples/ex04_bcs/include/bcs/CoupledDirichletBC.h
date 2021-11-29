@@ -11,16 +11,13 @@
 
 #include "NodalBC.h"
 
-class CoupledDirichletBC;
-
-template <>
-InputParameters validParams<CoupledDirichletBC>();
-
 /// Implements a coupled Dirichlet BC where u = alpha * some_var on the boundary.
 class CoupledDirichletBC : public NodalBC
 {
 public:
   CoupledDirichletBC(const InputParameters & parameters);
+
+  static InputParameters validParams();
 
 protected:
   virtual Real computeQpResidual() override;
@@ -31,4 +28,3 @@ private:
   /// reference to a user-specifiable coupled (independent) variable
   const VariableValue & _some_var_val;
 };
-

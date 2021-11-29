@@ -16,61 +16,6 @@ registerMooseObject("MooseTestApp", SideSetupInterfaceCount);
 registerMooseObject("MooseTestApp", InternalSideSetupInterfaceCount);
 registerMooseObject("MooseTestApp", NodalSetupInterfaceCount);
 
-InputParameters
-setupInterfaceCountParameters()
-{
-  InputParameters parameters = emptyInputParameters();
-  MooseEnum count_type(
-      "initial timestep subdomain linear nonlinear initialize finalize execute threadjoin");
-  parameters.addRequiredParam<MooseEnum>(
-      "count_type", count_type, "Specify the count type to return.");
-  return parameters;
-}
-
-InputParameters
-GeneralSetupInterfaceCount::validParams()
-{
-  InputParameters parameters = GeneralPostprocessor::validParams();
-  parameters += setupInterfaceCountParameters();
-  return parameters;
-}
-
-template <>
-InputParameters
-validParams<ElementSetupInterfaceCount>()
-{
-  InputParameters parameters = validParams<ElementPostprocessor>();
-  parameters += setupInterfaceCountParameters();
-  return parameters;
-}
-
-template <>
-InputParameters
-validParams<SideSetupInterfaceCount>()
-{
-  InputParameters parameters = validParams<SidePostprocessor>();
-  parameters += setupInterfaceCountParameters();
-  return parameters;
-}
-
-template <>
-InputParameters
-validParams<InternalSideSetupInterfaceCount>()
-{
-  InputParameters parameters = validParams<InternalSidePostprocessor>();
-  parameters += setupInterfaceCountParameters();
-  return parameters;
-}
-
-template <>
-InputParameters
-validParams<NodalSetupInterfaceCount>()
-{
-  InputParameters parameters = validParams<NodalPostprocessor>();
-  parameters += setupInterfaceCountParameters();
-  return parameters;
-}
-
 GeneralSetupInterfaceCount::GeneralSetupInterfaceCount(const InputParameters & parameters)
   : SetupInterfaceCount<GeneralPostprocessor>(parameters)
 {

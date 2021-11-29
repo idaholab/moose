@@ -14,8 +14,6 @@
 
 registerMooseObject("MooseTestApp", TestFaceInfo);
 
-defineLegacyParams(TestFaceInfo);
-
 InputParameters
 TestFaceInfo::validParams()
 {

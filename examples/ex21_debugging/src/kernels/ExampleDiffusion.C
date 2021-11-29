@@ -15,11 +15,10 @@
  */
 registerMooseObject("ExampleApp", ExampleDiffusion);
 
-template <>
 InputParameters
-validParams<ExampleDiffusion>()
+ExampleDiffusion::validParams()
 {
-  InputParameters params = validParams<Diffusion>();
+  InputParameters params = Diffusion::validParams();
   params.addRequiredCoupledVar(
       "coupled_coef", "The value of this variable will be used as the diffusion coefficient.");
 

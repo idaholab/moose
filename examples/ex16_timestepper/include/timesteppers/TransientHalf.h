@@ -11,12 +11,6 @@
 
 #include "TimeStepper.h"
 
-// Forward Declarations
-class TransientHalf;
-
-template <>
-InputParameters validParams<TransientHalf>();
-
 /**
  * This class cuts the timestep in half at every iteration
  * until it reaches a user-specified minimum value.
@@ -26,13 +20,14 @@ class TransientHalf : public TimeStepper
 public:
   TransientHalf(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeInitialDT() override;
 
   virtual Real computeDT() override;
 
 private:
-  Real _ratio;
-  Real _min_dt;
+  const Real _ratio;
+  const Real _min_dt;
 };
-

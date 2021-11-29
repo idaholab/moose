@@ -13,8 +13,6 @@
 #include "SubProblem.h"
 #include "MooseTypes.h"
 
-defineLegacyParams(SurrogateModelInterface);
-
 InputParameters
 SurrogateModelInterface::validParams()
 {

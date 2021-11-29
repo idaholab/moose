@@ -12,11 +12,10 @@
 
 registerMooseObject("HeatConductionApp", ViewfactorVectorPostprocessor);
 
-template <>
 InputParameters
-validParams<ViewfactorVectorPostprocessor>()
+ViewfactorVectorPostprocessor::validParams()
 {
-  InputParameters params = validParams<GeneralVectorPostprocessor>();
+  InputParameters params = GeneralVectorPostprocessor::validParams();
   params.addClassDescription(
       "VectorPostprocessor for accessing view factors from GrayLambertSurfaceRadiationBase UO");
   params.addRequiredParam<UserObjectName>("surface_radiation_object_name",

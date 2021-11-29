@@ -11,11 +11,10 @@
 
 registerMooseObject("ExampleApp", ScalarDirichletBC);
 
-template <>
 InputParameters
-validParams<ScalarDirichletBC>()
+ScalarDirichletBC::validParams()
 {
-  InputParameters params = validParams<NodalBC>();
+  InputParameters params = NodalBC::validParams();
   // Here we are adding a parameter that will be extracted from the input file by the Parser
   params.addRequiredCoupledVar("scalar_var", "Value of the scalar variable");
   return params;

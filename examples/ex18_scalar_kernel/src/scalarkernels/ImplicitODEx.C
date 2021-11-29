@@ -15,11 +15,10 @@
  */
 registerMooseObject("ExampleApp", ImplicitODEx);
 
-template <>
 InputParameters
-validParams<ImplicitODEx>()
+ImplicitODEx::validParams()
 {
-  InputParameters params = validParams<ODEKernel>();
+  InputParameters params = ODEKernel::validParams();
   params.addCoupledVar("y", "variable Y coupled into this kernel");
   return params;
 }

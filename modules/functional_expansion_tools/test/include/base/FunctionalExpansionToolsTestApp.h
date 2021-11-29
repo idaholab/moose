@@ -17,6 +17,7 @@ public:
   FunctionalExpansionToolsTestApp(InputParameters parameters);
   virtual ~FunctionalExpansionToolsTestApp();
 
+  static InputParameters validParams();
   static void registerApps();
   static void registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_test_objs = false);
   static void registerObjects(Factory & factory);

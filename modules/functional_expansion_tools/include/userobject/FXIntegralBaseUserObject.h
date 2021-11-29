@@ -21,15 +21,6 @@
 #include "MutableCoefficientsInterface.h"
 
 /**
- * Class declaration for parameters - we cannot use templated types in validParams<>()
- */
-class FXIntegralBaseUserObjectParameters
-{
-public:
-  static InputParameters validParams();
-};
-
-/**
  * This class interacts with a MooseApp through functional expansions. It is templated to allow the
  * inheritance of two dual classes that operate in a volume (FXVolumeUserObject) or on a boundary
  * (FXBoundaryFluxUserObject and FXBoundaryValueUserObject)
@@ -43,6 +34,8 @@ class FXIntegralBaseUserObject : public IntegralBaseVariableUserObject,
 {
 public:
   FXIntegralBaseUserObject(const InputParameters & parameters);
+
+  static InputParameters validParams();
 
   /**
    * Return a reference to the underlying function series
@@ -107,6 +100,28 @@ protected:
   /// Moose volume of evaluation
   Real _volume;
 };
+
+template <class IntegralBaseVariableUserObject>
+InputParameters
+FXIntegralBaseUserObject<IntegralBaseVariableUserObject>::validParams()
+{
+  InputParameters params = IntegralBaseVariableUserObject::validParams();
+  params += MutableCoefficientsInterface::validParams();
+
+  params.addClassDescription(
+      "This UserObject interacts with a MooseApp through functional expansions.");
+
+  params.addRequiredParam<FunctionName>("function",
+                                        "The name of the FunctionSeries \"Function\" object with "
+                                        "which to generate this functional expansion.");
+
+  params.addParam<bool>(
+      "keep_history", false, "Keep the expansion coefficients from previous solves");
+
+  params.addParam<bool>("print_state", false, "Print the state of the zeroth instance each solve");
+
+  return params;
+}
 
 template <class IntegralBaseVariableUserObject>
 FXIntegralBaseUserObject<IntegralBaseVariableUserObject>::FXIntegralBaseUserObject(

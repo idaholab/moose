@@ -13,18 +13,16 @@
 
 registerMooseObject("ExampleApp", ExampleTimeDerivative);
 
-template <>
 InputParameters
-validParams<ExampleTimeDerivative>()
+ExampleTimeDerivative::validParams()
 {
-  InputParameters params = validParams<TimeDerivative>();
+  InputParameters params = TimeDerivative::validParams();
   params.addParam<Real>("time_coefficient", 1.0, "Time Coefficient");
   return params;
 }
 
 ExampleTimeDerivative::ExampleTimeDerivative(const InputParameters & parameters)
-  : TimeDerivative(parameters),
-    _time_coefficient(getParam<Real>("time_coefficient"))
+  : TimeDerivative(parameters), _time_coefficient(getParam<Real>("time_coefficient"))
 {
 }
 

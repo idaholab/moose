@@ -9,22 +9,20 @@
 
 #pragma once
 
-#include "Kernel.h"
+#include "Action.h"
 
-class ExponentialReaction : public Kernel
+/**
+ * Action for checking that the registered objects
+ * do not use the legacy input parameter construction
+ *
+ * Needed until #19439 is closed
+ */
+class CheckLegacyParamsAction : public Action
 {
 public:
+  CheckLegacyParamsAction(InputParameters params);
+
   static InputParameters validParams();
 
-  ExponentialReaction(const InputParameters & parameters);
-
-protected:
-
-  const Real & _mu1;
-
-  const Real & _mu2;
-
-  virtual Real computeQpResidual() override;
-
-  virtual Real computeQpJacobian() override;
+  virtual void act() override;
 };

@@ -21,4 +21,3 @@ public:
   static void registerApps();
   static void registerAll(Factory & factory, ActionFactory & action_factory, Syntax & syntax);
 };
-

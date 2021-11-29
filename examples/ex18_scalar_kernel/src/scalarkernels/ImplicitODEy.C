@@ -15,11 +15,10 @@
  */
 registerMooseObject("ExampleApp", ImplicitODEy);
 
-template <>
 InputParameters
-validParams<ImplicitODEy>()
+ImplicitODEy::validParams()
 {
-  InputParameters params = validParams<ODEKernel>();
+  InputParameters params = ODEKernel::validParams();
   params.addCoupledVar("x", "variable X coupled into this kernel");
   return params;
 }

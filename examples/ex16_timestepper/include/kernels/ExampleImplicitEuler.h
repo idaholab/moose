@@ -11,15 +11,12 @@
 
 #include "TimeDerivative.h"
 
-class ExampleImplicitEuler;
-
-template <>
-InputParameters validParams<ExampleImplicitEuler>();
-
 class ExampleImplicitEuler : public TimeDerivative
 {
 public:
   ExampleImplicitEuler(const InputParameters & parameters);
+
+  static InputParameters validParams();
 
 protected:
   virtual Real computeQpResidual() override;

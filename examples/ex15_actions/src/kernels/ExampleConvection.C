@@ -11,11 +11,10 @@
 
 registerMooseObject("ExampleApp", ExampleConvection);
 
-template <>
 InputParameters
-validParams<ExampleConvection>()
+ExampleConvection::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
 
   params.addRequiredCoupledVar(
       "some_variable", "The gradient of this variable will be used as the velocity vector.");

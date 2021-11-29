@@ -22,11 +22,10 @@ registerMooseAction("HeatConductionApp", RadiationTransferAction, "add_user_obje
 registerMooseAction("HeatConductionApp", RadiationTransferAction, "add_bc");
 registerMooseAction("HeatConductionApp", RadiationTransferAction, "add_ray_boundary_condition");
 
-template <>
 InputParameters
-validParams<RadiationTransferAction>()
+RadiationTransferAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addClassDescription(
       "This action sets up the net radiation calculation between specified sidesets.");
 

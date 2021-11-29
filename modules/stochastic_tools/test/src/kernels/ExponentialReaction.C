@@ -11,8 +11,6 @@
 
 registerMooseObject("StochasticToolsTestApp", ExponentialReaction);
 
-defineLegacyParams(ExponentialReaction);
-
 InputParameters
 ExponentialReaction::validParams()
 {

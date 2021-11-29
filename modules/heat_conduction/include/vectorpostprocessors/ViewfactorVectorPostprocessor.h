@@ -19,6 +19,8 @@ class ViewfactorVectorPostprocessor : public GeneralVectorPostprocessor
 public:
   ViewfactorVectorPostprocessor(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   void execute() override;
   void initialize() override;
 

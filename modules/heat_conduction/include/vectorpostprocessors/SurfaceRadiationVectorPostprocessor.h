@@ -19,6 +19,8 @@ class SurfaceRadiationVectorPostprocessor : public GeneralVectorPostprocessor
 public:
   SurfaceRadiationVectorPostprocessor(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   void execute() override;
   void initialize() override;
 

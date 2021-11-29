@@ -88,39 +88,37 @@ int main()
 
 [](---)
 
-## MOOSE `validParams()` Function
+## MOOSE `validParams()` Specialization
 
 - The InputParameters class is defined in `moose/include/utils/InputParameters.h`
-- The validParams() function returns an object of type InputParameters
+- The `static InputParameters YourObject::validParams()` method is specialized for your custom object, `YourObject`
+
+`YourObject.h`:
 
 ```cpp
-// template function declaration (InputParameters.h)
-template<class T>
-InputParameters validParams();
+class YourObject : public SomeBase
+{
+public:
+  static InputParameters validParams();
 
-// Fully-specialized validParams() function (YourKernel.h)
-template<>
-InputParameters validParams<YourKernel>();
+  /// continued...
+};
 ```
 
-- This function is used by the Factory and Parser for getting, setting ad converting parameters from the input file for use inside of your Kernel.
-- You need to specialize validParams() for *every* MooseObject you create!
-
-[](---)
-
-## Specialized validParams() example
+`YourObject.C`:
 
 ```cpp
-#include "YourKernel.h"
-template<>
-InputParameters validParams<YourKernel>()
+InputParameters
+YourObject::validParams()
 {
-  InputParameters params = validParams<Kernel>();
-  params.addParam<Real>("value", 1.0e-5, "Initial Value");
-  params.addCoupledVar("temp", "Coupled Temperature");
+  auto params = SomeBase::validParams();
+  params.addParam<Real>("some_value", 1.0e-5, "Some value description");
   return params;
 }
 ```
+
+- This function is used by the Factory and Parser for getting, setting and converting parameters from the input file for use inside of your Kernel.
+- You need to specialize `validParams()` for *every* MooseObject you create!
 
 [](---)
 
@@ -192,4 +190,3 @@ for (unsigned int i=0; i < v.size(); ++i)
   for (unsigned int j=0; j < v[i].size(); ++j)
     std::cout << v[i][j];
 ```
-

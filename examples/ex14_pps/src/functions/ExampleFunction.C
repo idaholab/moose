@@ -11,11 +11,10 @@
 
 registerMooseObject("ExampleApp", ExampleFunction);
 
-template <>
 InputParameters
-validParams<ExampleFunction>()
+ExampleFunction::validParams()
 {
-  InputParameters params = validParams<Function>();
+  InputParameters params = Function::validParams();
   params.addParam<Real>("alpha", 1.0, "The value of alpha");
   return params;
 }

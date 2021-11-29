@@ -11,11 +11,10 @@
 
 registerMooseObject("ExampleApp", ExampleConvection);
 
-template <>
 InputParameters
-validParams<ExampleConvection>()
+ExampleConvection::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   return params;
 }
 

@@ -13,11 +13,7 @@
 #include "Coupleable.h"
 
 // Forward Declarations
-class TestFaceInfo;
 class MooseMesh;
-
-template <>
-InputParameters validParams<TestFaceInfo>();
 
 class TestFaceInfo : public GeneralVectorPostprocessor, public Coupleable
 {

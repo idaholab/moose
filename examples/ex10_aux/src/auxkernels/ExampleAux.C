@@ -11,11 +11,10 @@
 
 registerMooseObject("ExampleApp", ExampleAux);
 
-template <>
 InputParameters
-validParams<ExampleAux>()
+ExampleAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addParam<Real>("value", 0.0, "Scalar value used for our auxiliary calculation");
   params.addRequiredCoupledVar("coupled", "Coupled variable");
   return params;

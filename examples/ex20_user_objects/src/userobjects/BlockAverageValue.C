@@ -14,11 +14,10 @@
 
 registerMooseObject("ExampleApp", BlockAverageValue);
 
-template <>
 InputParameters
-validParams<BlockAverageValue>()
+BlockAverageValue::validParams()
 {
-  InputParameters params = validParams<ElementIntegralVariablePostprocessor>();
+  InputParameters params = ElementIntegralVariablePostprocessor::validParams();
 
   // Since we are inheriting from a Postprocessor we override this to make sure
   // That MOOSE (and Peacock) know that this object is _actually_ a UserObject

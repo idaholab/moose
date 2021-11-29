@@ -11,11 +11,10 @@
 
 registerMooseObject("ExampleApp", ExampleCoefDiffusion);
 
-template <>
 InputParameters
-validParams<ExampleCoefDiffusion>()
+ExampleCoefDiffusion::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.set<Real>("coef") = 0.0;
   return params;
 }
