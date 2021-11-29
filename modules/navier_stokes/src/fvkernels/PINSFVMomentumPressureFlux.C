@@ -25,9 +25,10 @@ PINSFVMomentumPressureFlux::validParams()
   params.addRequiredCoupledVar(NS::pressure, "Pressure variable");
   params.addDeprecatedCoupledVar("p", NS::pressure, "1/1/2022");
   MooseEnum momentum_component("x=0 y=1 z=2");
-  params.addParam<MooseEnum>("momentum_component",
-                             momentum_component,
-                             "The component of the momentum equation that this kernel applies to.");
+  params.addRequiredParam<MooseEnum>("momentum_component",
+                                     momentum_component,
+                                     "The component of the momentum equation that this kernel "
+                                     "applies to.");
   params.set<bool>("force_boundary_execution") = true;
   return params;
 }
