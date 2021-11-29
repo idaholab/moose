@@ -1,6 +1,6 @@
 [Tests]
   issues = '#16758'
-  design = 'PiecewiseConstantByBlockMaterial.md'
+  design = 'PiecewiseByBlockFunctorMaterial.md'
   [exo]
     type = Exodiff
     input = test.i

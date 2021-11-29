@@ -12,13 +12,14 @@
 #include "FunctorMaterial.h"
 
 /**
- * Defines a material property that is piecewise constant per block, discontinuous at interfaces
+ * Defines a material property that defined by another functor (possibly constant) on each block,
+ * discontinuous at interfaces
  */
 template <bool is_ad>
-class PiecewiseConstantByBlockMaterialTempl : public FunctorMaterial
+class PiecewiseByBlockFunctorMaterialTempl : public FunctorMaterial
 {
 public:
-  PiecewiseConstantByBlockMaterialTempl(const InputParameters & parameters);
+  PiecewiseByBlockFunctorMaterialTempl(const InputParameters & parameters);
   static InputParameters validParams();
 
 private:
@@ -26,5 +27,5 @@ private:
   FunctorMaterialProperty<GenericReal<is_ad>> & _prop;
 };
 
-typedef PiecewiseConstantByBlockMaterialTempl<false> PiecewiseConstantByBlockMaterial;
-typedef PiecewiseConstantByBlockMaterialTempl<true> ADPiecewiseConstantByBlockMaterial;
+typedef PiecewiseByBlockFunctorMaterialTempl<false> PiecewiseByBlockFunctorMaterial;
+typedef PiecewiseByBlockFunctorMaterialTempl<true> ADPiecewiseByBlockFunctorMaterial;
