@@ -12,12 +12,6 @@
 #include "Material.h"
 #include "LinearInterpolation.h"
 
-// Forward Declarations
-class ExampleMaterial;
-
-template <>
-InputParameters validParams<ExampleMaterial>();
-
 /**
  * Example material class that defines a few properties.
  */
@@ -25,6 +19,8 @@ class ExampleMaterial : public Material
 {
 public:
   ExampleMaterial(const InputParameters & parameters);
+
+  static InputParameters validParams();
 
 protected:
   virtual void computeQpProperties() override;
@@ -53,4 +49,3 @@ private:
    */
   LinearInterpolation _piecewise_func;
 };
-

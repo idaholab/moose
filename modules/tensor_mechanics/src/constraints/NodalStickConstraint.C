@@ -24,11 +24,10 @@
 
 registerMooseObject("TensorMechanicsApp", NodalStickConstraint);
 
-template <>
 InputParameters
-validParams<NodalStickConstraint>()
+NodalStickConstraint::validParams()
 {
-  InputParameters params = validParams<NodalConstraint>();
+  InputParameters params = NodalConstraint::validParams();
   params.addClassDescription("Sticky nodal constraint for contact");
   params.addRequiredParam<BoundaryName>("boundary", "The primary boundary");
   params.addRequiredParam<BoundaryName>("secondary", "The secondary boundary");

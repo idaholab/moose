@@ -78,9 +78,3 @@ AppFactory::createShared(const std::string & app_type,
 
   return (*_name_to_build_pointer[app_type])(parameters);
 }
-
-bool
-AppFactory::isRegistered(const std::string & app_name) const
-{
-  return _name_to_params_pointer.find(app_name) != _name_to_params_pointer.end();
-}

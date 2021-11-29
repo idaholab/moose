@@ -91,11 +91,10 @@ clearUnusedWarnings(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
 }
 ///@}
 
-template <>
 InputParameters
-validParams<ModulesApp>()
+ModulesApp::validParams()
 {
-  InputParameters params = validParams<MooseApp>();
+  InputParameters params = MooseApp::validParams();
   return params;
 }
 

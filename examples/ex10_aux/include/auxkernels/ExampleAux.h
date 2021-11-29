@@ -11,12 +11,6 @@
 
 #include "AuxKernel.h"
 
-// Forward Declarations
-class ExampleAux;
-
-template <>
-InputParameters validParams<ExampleAux>();
-
 /**
  * Coupled auxiliary value
  */
@@ -29,11 +23,12 @@ public:
    */
   ExampleAux(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeValue() override;
 
   const VariableValue & _coupled_val;
 
-  Real _value;
+  const Real _value;
 };
-

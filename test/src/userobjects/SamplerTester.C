@@ -11,8 +11,6 @@
 
 registerMooseObject("MooseTestApp", SamplerTester);
 
-defineLegacyParams(SamplerTester);
-
 InputParameters
 SamplerTester::validParams()
 {

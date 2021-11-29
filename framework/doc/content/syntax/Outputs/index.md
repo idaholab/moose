@@ -305,7 +305,7 @@ the new objects `validParams` method that indicates which types of outputs the n
 responsible for outputting. For example, the Exodus output `validParams` method includes:
 
 ```cpp
-InputParameters params = validParams<AdvancedOutput<OversampleOutput> >();
+InputParameters params = AdvancedOutput<OversampleOutput>::validParams();
 params += AdvancedOutput<OversampleOutput>::enableOutputTypes("nodal elemental scalar
                                                               postprocessor input");
 ```

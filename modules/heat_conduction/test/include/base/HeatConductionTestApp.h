@@ -15,6 +15,9 @@ class HeatConductionTestApp : public MooseApp
 {
 public:
   HeatConductionTestApp(InputParameters parameters);
+
+  static InputParameters validParams();
+
   virtual ~HeatConductionTestApp();
 
   static void registerApps();

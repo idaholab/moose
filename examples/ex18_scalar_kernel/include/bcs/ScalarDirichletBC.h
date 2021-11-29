@@ -11,12 +11,6 @@
 
 #include "NodalBC.h"
 
-// Forward Declarations
-class ScalarDirichletBC;
-
-template <>
-InputParameters validParams<ScalarDirichletBC>();
-
 /**
  * Implements a Dirichlet BC where scalar variable is coupled in
  */
@@ -29,6 +23,8 @@ public:
    */
   ScalarDirichletBC(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
 protected:
   virtual Real computeQpResidual() override;
 
@@ -37,4 +33,3 @@ protected:
    */
   const VariableValue & _scalar_val;
 };
-

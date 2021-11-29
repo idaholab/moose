@@ -39,11 +39,13 @@ _value(isCoupled("v") ? coupledValue("v") : _zero)
 However, this use case became obsolete and now it is recommended to use default values for optionally coupled variables, see the following example:
 
 ```
-validParams<Class>()
+InputParameters
+Class::validParams()
 {
-  InputParameters params = validParams<BaseClass>();
+  InputParameters params = BaseClass::validParams();
   params.addCoupledVar("v", 2., "Coupled value");
   ...
+  return params;
 }
 
 Class::Class(...) : BaseClass(...),
@@ -79,11 +81,13 @@ protected:
 Implementation:
 
 ```
-validParams<B>()
+InputParameters
+B::validParams()
 {
-  InputParameters params = validParams<A>();
+  InputParameters params = A::validParams();
   params.addRequiredCoupledVar("v", "Coupled value");
   ...
+  return params;
 }
 
 B::B(...) : A(...),
@@ -100,11 +104,13 @@ Vectors of variables can be added using `params.addCoupledVar` as described abov
 defaults for vector variables as follows:
 
 ```
-validParams<B>()
+InputParameters
+B::validParams()
 {
-  InputParameters params = validParams<A>();
+  InputParameters params = A::validParams();
   params.addCoupledVar("v", {1, 2, 3}, "Coupled value");
   ...
+  return params;
 }
 ```
 

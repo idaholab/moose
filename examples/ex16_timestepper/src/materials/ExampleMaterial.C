@@ -11,11 +11,10 @@
 
 registerMooseObject("ExampleApp", ExampleMaterial);
 
-template <>
 InputParameters
-validParams<ExampleMaterial>()
+ExampleMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addParam<Real>("diffusivity", 1.0, "The Diffusivity");
   params.addParam<Real>("time_coefficient", 1.0, "Time Coefficient");
   return params;

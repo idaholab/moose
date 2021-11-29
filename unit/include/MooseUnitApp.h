@@ -11,17 +11,12 @@
 
 #include "MooseApp.h"
 
-class MooseUnitApp;
-
-template <>
-InputParameters validParams<MooseUnitApp>();
-
 class MooseUnitApp : public MooseApp
 {
 public:
   MooseUnitApp(const InputParameters & parameters);
   virtual ~MooseUnitApp();
 
+  static InputParameters validParams();
   static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
 };
-

@@ -168,10 +168,10 @@ An illustration for mesh in UNV file format and requirement of on-the-fly names 
 - Once enabled, the parameter can be set on individual MooseObjects which will enable them to use displaced coordinates during calculations:
 
   ```cpp
-  template<>
-  InputParameters validParams<SomeKernel>()
+  InputParameters
+  SomeKernel::validParams()
   {
-    InputParameters params = validParams<Kernel>();
+    InputParameters params = Kernel::validParams();
     params.set<bool>("use_displaced_mesh") = true;
     return params;
   }

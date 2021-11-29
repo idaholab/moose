@@ -9,16 +9,17 @@
 
 #include "SideSetHeatTransferMaterial.h"
 
+#include "Function.h"
+
 // Stefan - Boltzmann Constant
 const Real SIGMA = 5.670374419E-8;
 
 registerMooseObject("HeatConductionApp", SideSetHeatTransferMaterial);
 
-template <>
 InputParameters
-validParams<SideSetHeatTransferMaterial>()
+SideSetHeatTransferMaterial::validParams()
 {
-  InputParameters params = validParams<InterfaceMaterial>();
+  InputParameters params = InterfaceMaterial::validParams();
   params.addClassDescription("This material constructs the necessary coefficients and properties "
                              "for SideSetHeatTransferKernel.");
   params.addParam<FunctionName>("conductivity", 0.0, "Heat conductivity in W/m/K.");

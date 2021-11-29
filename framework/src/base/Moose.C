@@ -171,6 +171,7 @@ addActionTypes(Syntax & syntax)
 
   // clang-format on
 
+  registerTask("check_legacy_params", true);
   registerTask("dynamic_object_registration", false);
   registerTask("common_output", true);
   registerTask("setup_recover_file_base", true);
@@ -249,7 +250,8 @@ addActionTypes(Syntax & syntax)
    */
 
   // clang-format off
-  syntax.addDependencySets("(meta_action)"
+  syntax.addDependencySets("(check_legacy_params)"
+                           "(meta_action)"
                            "(dynamic_object_registration)"
                            "(common_output)"
                            "(set_global_params)"

@@ -16,6 +16,8 @@ class NodalStickConstraint : public NodalConstraint
 public:
   NodalStickConstraint(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual void meshChanged() override;
 
   virtual void computeResidual(NumericVector<Number> & residual) override;

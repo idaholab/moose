@@ -12,15 +12,12 @@
 #include "Material.h"
 #include "LinearInterpolation.h"
 
-class ExampleMaterial;
-
-template <>
-InputParameters validParams<ExampleMaterial>();
-
 class ExampleMaterial : public Material
 {
 public:
   ExampleMaterial(const InputParameters & parameters);
+
+  static InputParameters validParams();
 
 protected:
   virtual void computeQpProperties() override;
@@ -39,4 +36,3 @@ private:
   /// diffusivity property.
   LinearInterpolation _piecewise_func;
 };
-

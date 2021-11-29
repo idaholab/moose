@@ -11,8 +11,6 @@
 
 registerMooseObject("StochasticToolsTestApp", DirichletBCModifier);
 
-defineLegacyParams(DirichletBCModifier);
-
 InputParameters
 DirichletBCModifier::validParams()
 {

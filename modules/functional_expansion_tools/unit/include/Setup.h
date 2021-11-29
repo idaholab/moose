@@ -19,7 +19,7 @@ const double tol = 1e-13;
 // Set the name
 const std::string name = "UnitTesting";
 
-// Recreate the MooseEnum types used in validParams<FunctionSeries>()
+// Recreate the MooseEnum types used in FunctionSeries::validParams()
 extern MooseEnum single_series_types_1D;
 extern MooseEnum single_series_types_2D;
 extern MooseEnum expansion_type;

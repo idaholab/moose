@@ -12,12 +12,6 @@
 // MOOSE Includes
 #include "InitialCondition.h"
 
-// Forward Declarations
-class ExampleIC;
-
-template <>
-InputParameters validParams<ExampleIC>();
-
 /**
  * ExampleIC just returns a constant value.
  */
@@ -29,6 +23,8 @@ public:
    */
   ExampleIC(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   /**
    * The value of the variable at a point.
    *
@@ -37,6 +33,5 @@ public:
   virtual Real value(const Point & p) override;
 
 private:
-  Real _coefficient;
+  const Real _coefficient;
 };
-

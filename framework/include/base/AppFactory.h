@@ -42,16 +42,6 @@ using appBuildPtr = MooseAppPtr (*)(const InputParameters & parameters);
 using registeredMooseAppIterator = std::map<std::string, paramsPtr>::iterator;
 
 /**
- * Build an object of type T
- */
-template <class T>
-MooseAppPtr
-buildApp(const InputParameters & parameters)
-{
-  return std::make_shared<T>(parameters);
-}
-
-/**
  * Generic AppFactory class for building Application objects
  */
 class AppFactory
@@ -78,14 +68,7 @@ public:
    * @param name Name of the object to register
    */
   template <typename T>
-  void reg(const std::string & name)
-  {
-    if (_name_to_build_pointer.find(name) == _name_to_build_pointer.end())
-    {
-      _name_to_build_pointer[name] = &buildApp<T>;
-      _name_to_params_pointer[name] = &moose::internal::callValidParams<T>;
-    }
-  }
+  void reg(const std::string & name);
 
   /**
    * Get valid parameters for the object
@@ -118,7 +101,19 @@ public:
   /**
    * Returns a Boolean indicating whether an application type has been registered
    */
-  bool isRegistered(const std::string & app_name) const;
+  bool isRegistered(const std::string & app_name) const
+  {
+    return _name_to_params_pointer.count(app_name);
+  }
+
+  /**
+   * Returns the map of object name to a function pointer for building said object's
+   * input parameters.
+   */
+  const std::map<std::string, paramsPtr> & registeredObjectParamPointers() const
+  {
+    return _name_to_params_pointer;
+  }
 
 protected:
   std::map<std::string, appBuildPtr> _name_to_build_pointer;
@@ -130,5 +125,21 @@ protected:
 private:
   // Private constructor for singleton pattern
   AppFactory() {}
+
+  template <class T>
+  static MooseAppPtr buildApp(const InputParameters & parameters)
+  {
+    return std::make_shared<T>(parameters);
+  }
 };
 
+template <typename T>
+void
+AppFactory::reg(const std::string & name)
+{
+  if (isRegistered(name))
+    return;
+
+  _name_to_build_pointer[name] = &buildApp<T>;
+  _name_to_params_pointer[name] = &moose::internal::callValidParams<T>;
+}

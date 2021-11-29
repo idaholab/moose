@@ -17,18 +17,17 @@ class ExampleDiffusion;
 /* This class extends the Diffusion kernel to multiply by a coefficient
  * read from the input file
  */
-template <>
-InputParameters validParams<ExampleDiffusion>();
-
 class ExampleDiffusion : public Diffusion
 {
 public:
   ExampleDiffusion(const InputParameters & parameters);
+
+  static InputParameters validParams();
 
 protected:
   virtual Real computeQpResidual() override;
 
   virtual Real computeQpJacobian() override;
 
-  Real _diffusivity;
+  const Real _diffusivity;
 };

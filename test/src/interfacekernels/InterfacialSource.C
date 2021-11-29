@@ -16,8 +16,6 @@
 
 registerMooseObject("MooseTestApp", InterfacialSource);
 
-defineLegacyParams(InterfacialSource);
-
 InputParameters
 InterfacialSource::validParams()
 {

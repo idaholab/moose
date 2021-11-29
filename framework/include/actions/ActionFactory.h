@@ -49,16 +49,6 @@ typedef std::shared_ptr<Action> (*buildActionPtr)(const InputParameters & parame
 typedef InputParameters (*paramsActionPtr)();
 
 /**
- * Build an object of type T
- */
-template <class T>
-std::shared_ptr<Action>
-buildAction(const InputParameters & parameters)
-{
-  return std::make_shared<T>(parameters);
-}
-
-/**
  * Specialized factory for generic Action System objects
  */
 class ActionFactory
@@ -76,7 +66,7 @@ public:
            const std::string & file = "",
            int line = -1)
   {
-    reg(name, task, &buildAction<T>, &validParams<T>, file, line);
+    reg(name, task, &buildAction<T>, &moose::internal::callValidParams<T>, file, line);
   }
 
   void reg(const std::string & name,
@@ -130,7 +120,13 @@ public:
    */
   bool isRegisteredTask(const std::string & task) const { return _tasks.count(task); }
 
-protected:
+private:
+  template <class T>
+  static std::shared_ptr<Action> buildAction(const InputParameters & parameters)
+  {
+    return std::make_shared<T>(parameters);
+  }
+
   MooseApp & _app;
 
   std::multimap<std::string, BuildInfo> _name_to_build_info;

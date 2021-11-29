@@ -11,18 +11,15 @@
 
 #include "Function.h"
 
-class ExampleFunction;
-
-template <>
-InputParameters validParams<ExampleFunction>();
-
 class ExampleFunction : public Function
 {
 public:
   ExampleFunction(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   virtual Real value(Real t, const Point & p) const override;
 
 protected:
-  Real _alpha;
+  const Real _alpha;
 };

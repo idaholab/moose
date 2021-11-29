@@ -40,13 +40,6 @@ class MultiMooseEnum;
 class Problem;
 
 /**
- * This is the templated validParams() function that every
- * MooseObject-derived class is required to specialize.
- */
-template <class T>
-InputParameters validParams();
-
-/**
  * The main MOOSE class responsible for handling user-defined
  * parameters in almost every MOOSE system.
  */
@@ -1635,20 +1628,6 @@ InputParameters::get(const std::string & param1, const std::string & param2) con
 
 InputParameters emptyInputParameters();
 
-template <class T>
-InputParameters
-validParams()
-{
-  // If users forgot to make their (old) validParams, they screwed up and
-  // should get an error - so it is okay for us to try to call the new
-  // validParams static function - which will error if they didn't implement
-  // the new function.  We can't have the old static assert that use to be
-  // here because then the sfinae for toggling between old and new-style
-  // templating will always see this function and call it even if an object
-  // has *only* the new style validParams.
-  return T::validParams();
-}
-
 template <typename T>
 bool
 InputParameters::isType(const std::string & name) const
@@ -1656,4 +1635,65 @@ InputParameters::isType(const std::string & name) const
   if (!_params.count(name))
     mooseError("Parameter \"", name, "\" is not valid.");
   return have_parameter<T>(name);
+}
+
+template <class T>
+InputParameters
+validParams()
+{
+  // If users forgot to make their (old) validParams, they screwed up and
+  // should get an error - so it is okay for us to try to call the new
+  // validParams static function - which will error if they didn't implement
+  // the new function
+  // The SFINAE for toggling between old and new-style templating in
+  // callValidParams() will always see this function and call it even if
+  // an object has *only* the new style validParams. Therefore, we
+  // set _called_legacy_params to false so that we can avoid throwing
+  // a warning for using legacy parameters even though callValidParams()
+  // will result in calling validParams<T>. This is in support of #19439.
+  auto params = T::validParams();
+  params.template addPrivateParam<bool>("_called_legacy_params", false);
+  return params;
+}
+
+namespace moose
+{
+namespace internal
+{
+template <typename T>
+auto
+callValidParamsInner(long) -> decltype(T::validParams(), emptyInputParameters())
+{
+  return T::validParams();
+}
+
+template <typename T>
+auto
+callValidParamsInner(int) -> decltype(validParams<T>(), emptyInputParameters())
+{
+  auto params = validParams<T>();
+  // If we're calling the legacy validParams<T> method, we want to keep
+  // track of it so that we can throw a warning. But, we must make sure
+  // we didn't get here via the general definition of validParams<T>,
+  // which actually calls the correct T::validParams method
+  // This is in support of #19439
+  if (!params.template have_parameter<bool>("_called_legacy_params"))
+    params.template addPrivateParam<bool>("_called_legacy_params", true);
+  return params;
+}
+
+/**
+ * Calls the valid parameter method for the object of type T.
+ *
+ * Uses SFINAE with callValidParamsInner() to access the legacy
+ * parameter construction method validParams<T> in the event that
+ * the new construction method T::validParams is not available.
+ */
+template <typename T>
+auto
+callValidParams() -> decltype(callValidParamsInner<T>(0), emptyInputParameters())
+{
+  return callValidParamsInner<T>(0);
+}
+}
 }

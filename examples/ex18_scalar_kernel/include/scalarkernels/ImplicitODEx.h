@@ -12,22 +12,6 @@
 #include "ODEKernel.h"
 
 /**
- * The forward declaration is so that we can declare the validParams function
- * before we actually define the class... that way the definition isn't lost
- * at the bottom of the file.
- */
-
-// Forward Declarations
-class ImplicitODEx;
-
-/**
- * validParams returns the parameters that this Kernel accepts / needs
- * The actual body of the function MUST be in the .C file.
- */
-template <>
-InputParameters validParams<ImplicitODEx>();
-
-/**
  * ODE: x' = 3 * x + 2 * y
  */
 class ImplicitODEx : public ODEKernel
@@ -37,6 +21,12 @@ public:
    * Constructor
    */
   ImplicitODEx(const InputParameters & parameters);
+
+  /**
+   * validParams returns the parameters that this Kernel accepts / needs
+   * The actual body of the function MUST be in the .C file.
+   */
+  static InputParameters validParams();
 
 protected:
   /**
@@ -67,7 +57,7 @@ protected:
   /**
    * Needed for computing off-diagonal terms in Jacobian
    */
-  unsigned int _y_var;
+  const unsigned int _y_var;
 
   /**
    * Coupled scalar variable values

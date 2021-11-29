@@ -11,11 +11,10 @@
 
 registerMooseObject("HeatConductionApp", SideSetHeatTransferKernel);
 
-template <>
 InputParameters
-validParams<SideSetHeatTransferKernel>()
+SideSetHeatTransferKernel::validParams()
 {
-  InputParameters params = validParams<InterfaceKernel>();
+  InputParameters params = InterfaceKernel::validParams();
   params.addClassDescription(
       "Modeling conduction, convection, and radiation across internal side set.");
   params.addParam<MaterialPropertyName>("conductance",

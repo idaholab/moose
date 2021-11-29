@@ -12,11 +12,10 @@
 // Don't forget to register your object with MOOSE
 registerMooseObject("ExampleApp", ExampleConvection);
 
-template <>
 InputParameters
-validParams<ExampleConvection>()
+ExampleConvection::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
 
   // Here we specify a new parameter for our kernel allowing users to indicate which other
   // variable they want to be coupled into this kernel from an input file.

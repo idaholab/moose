@@ -11,10 +11,6 @@
 
 #include "AuxKernel.h"
 
-class WindingOrder;
-
-template <>
-InputParameters validParams<WindingOrder>();
 
 class WindingOrder : public AuxKernel
 {

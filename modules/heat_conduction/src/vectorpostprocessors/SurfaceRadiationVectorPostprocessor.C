@@ -14,11 +14,10 @@
 
 registerMooseObject("HeatConductionApp", SurfaceRadiationVectorPostprocessor);
 
-template <>
 InputParameters
-validParams<SurfaceRadiationVectorPostprocessor>()
+SurfaceRadiationVectorPostprocessor::validParams()
 {
-  InputParameters params = validParams<GeneralVectorPostprocessor>();
+  InputParameters params = GeneralVectorPostprocessor::validParams();
   params.addClassDescription(
       "VectorPostprocessor for accessing information stored in surface radiation user object");
   params.addRequiredParam<UserObjectName>("surface_radiation_object_name",

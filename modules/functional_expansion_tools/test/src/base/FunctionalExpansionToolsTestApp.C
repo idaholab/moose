@@ -14,11 +14,10 @@
 #include "FunctionalExpansionToolsTestApp.h"
 #include "FunctionalExpansionToolsApp.h"
 
-template <>
 InputParameters
-validParams<FunctionalExpansionToolsTestApp>()
+FunctionalExpansionToolsTestApp::validParams()
 {
-  InputParameters params = validParams<FunctionalExpansionToolsApp>();
+  InputParameters params = FunctionalExpansionToolsApp::validParams();
   return params;
 }
 

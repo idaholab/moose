@@ -11,21 +11,17 @@
 
 #include "TimeDerivative.h"
 
-// Forward Declarations
-class ExampleTimeDerivative;
-
-template <>
-InputParameters validParams<ExampleTimeDerivative>();
-
 class ExampleTimeDerivative : public TimeDerivative
 {
 public:
   ExampleTimeDerivative(const InputParameters & parameters);
+
+  static InputParameters validParams();
 
 protected:
   virtual Real computeQpResidual() override;
 
   virtual Real computeQpJacobian() override;
 
-  Real _time_coefficient;
+  const Real _time_coefficient;
 };

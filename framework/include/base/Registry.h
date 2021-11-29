@@ -22,19 +22,19 @@
 /// when your app/module code may be compiled with other apps without your objects being
 /// registered.  Calling this multiple times with the same argument is safe.
 #define registerKnownLabel(X)                                                                      \
-  static char combineNames(dummy_var_for_known_label, __LINE__) = Registry::addKnownLabel(X)
+  static char combineNames(dummy_var_for_known_label, __COUNTER__) = Registry::addKnownLabel(X)
 
 /// add an Action to the registry with the given app name/label as being associated with the given
 /// task (quoted string).  classname is the (unquoted) c++ class.
 #define registerMooseAction(app, classname, task)                                                  \
-  static char combineNames(dummyvar_for_registering_action_##classname, __LINE__) =                \
+  static char combineNames(dummyvar_for_registering_action_##classname, __COUNTER__) =             \
       Registry::addAction<classname>(                                                              \
           {app, #classname, "", task, nullptr, nullptr, nullptr, __FILE__, __LINE__, "", ""})
 
 /// Add a MooseObject to the registry with the given app name/label.  classname is the (unquoted)
 /// c++ class.  Each object/class should only be registered once.
 #define registerMooseObject(app, classname)                                                        \
-  static char combineNames(dummyvar_for_registering_obj_##classname, __LINE__) =                   \
+  static char combineNames(dummyvar_for_registering_obj_##classname, __COUNTER__) =                \
       Registry::add<classname>(                                                                    \
           {app, #classname, "", "", nullptr, nullptr, nullptr, __FILE__, __LINE__, "", ""})
 
@@ -43,14 +43,14 @@
 /// Add a MooseObject to the registry with the given app name/label under an alternate alias/name
 /// (quoted string) instead of the classname.
 #define registerMooseObjectAliased(app, classname, alias)                                          \
-  static char combineNames(dummyvar_for_registering_obj_##classname, __LINE__) =                   \
+  static char combineNames(dummyvar_for_registering_obj_##classname, __COUNTER__) =                \
       Registry::add<classname>(                                                                    \
           {app, #classname, alias, "", nullptr, nullptr, nullptr, __FILE__, __LINE__, "", ""})
 
 /// Add a deprecated MooseObject to the registry with the given app name/label. time is the time
 /// the object became/becomes deprecated in "mm/dd/yyyy HH:MM" format.
 #define registerMooseObjectDeprecated(app, classname, time)                                        \
-  static char combineNames(dummyvar_for_registering_obj_##classname, __LINE__) =                   \
+  static char combineNames(dummyvar_for_registering_obj_##classname, __COUNTER__) =                \
       Registry::add<classname>(                                                                    \
           {app, #classname, "", "", nullptr, nullptr, nullptr, __FILE__, __LINE__, time, ""})
 
@@ -60,7 +60,7 @@
 /// add a deprecated MooseObject to the registry that has been replaced by another
 /// object. time is the time the object became/becomes deprecated in "mm/dd/yyyy hh:mm" format.
 #define registerMooseObjectReplaced(app, classname, time, replacement)                             \
-  static char combineNames(dummyvar_for_registering_obj_##classname, __LINE__) =                   \
+  static char combineNames(dummyvar_for_registering_obj_##classname, __COUNTER__) =                \
       Registry::add<classname>({app,                                                               \
                                 #classname,                                                        \
                                 "",                                                                \
@@ -78,7 +78,7 @@
 /// "mm/dd/yyyy hh:mm" format.
 /// A call to registerMooseObject is still required for the new class
 #define registerMooseObjectRenamed(app, orig_class, time, new_class)                               \
-  static char combineNames(dummyvar_for_registering_obj_##orig_class, __LINE__) =                  \
+  static char combineNames(dummyvar_for_registering_obj_##orig_class, __COUNTER__) =               \
       Registry::add<new_class>({app,                                                               \
                                 #new_class,                                                        \
                                 #orig_class,                                                       \
@@ -104,57 +104,6 @@ class Action;
 using paramsPtr = InputParameters (*)();
 using buildPtr = std::shared_ptr<MooseObject> (*)(const InputParameters & parameters);
 using buildActionPtr = std::shared_ptr<Action> (*)(const InputParameters & parameters);
-
-namespace moose
-{
-namespace internal
-{
-template <typename T>
-auto
-callValidParamsInner(long) -> decltype(T::validParams(), emptyInputParameters())
-{
-  return T::validParams();
-}
-
-template <typename T>
-auto
-callValidParamsInner(int) -> decltype(validParams<T>(), emptyInputParameters())
-{
-  // The following error could be useful when doing the final
-  // conversion/removal of the old style validParams functions:
-  // Moose::show_trace = false;
-  // Moose::show_multiple = true;
-  // mooseDeprecated("Convert validParams<",
-  //                demangle(typeid(T).name()),
-  //                ">() into a static member function and remove the old function.");
-  // Moose::show_multiple = false;
-  // Moose::show_trace = true;
-  return validParams<T>();
-}
-
-template <typename T>
-auto
-callValidParams() -> decltype(callValidParamsInner<T>(0), emptyInputParameters())
-{
-  return callValidParamsInner<T>(0);
-}
-
-template <typename T>
-std::shared_ptr<MooseObject>
-buildObj(const InputParameters & parameters)
-{
-  return std::make_shared<T>(parameters);
-}
-
-template <typename T>
-std::shared_ptr<Action>
-buildAct(const InputParameters & parameters)
-{
-  return std::make_shared<T>(parameters);
-}
-
-} // namespace internal
-} // namespace moose
 
 /// Holds details and meta-data info for a particular MooseObject or Action for use in the
 /// registry.
@@ -197,6 +146,11 @@ struct RegistryEntry
 class Registry
 {
 public:
+  /**
+   * Get the global Registry singleton.
+   */
+  static Registry & getRegistry();
+
   /// Adds information on a MooseObject to the registry.  The _build_ptr, _build_action_ptr, and
   /// _params_ptr objects of the info object should all be nullptr - these are set automatically by
   /// the add function itself using the templated type T.
@@ -204,7 +158,7 @@ public:
   static char add(const RegistryEntry & info)
   {
     RegistryEntry copy = info;
-    copy._build_ptr = &moose::internal::buildObj<T>;
+    copy._build_ptr = &build<T, MooseObject>;
     copy._params_ptr = &moose::internal::callValidParams<T>;
     addInner(copy);
     return 0;
@@ -217,7 +171,7 @@ public:
   static char addAction(const RegistryEntry & info)
   {
     RegistryEntry copy = info;
-    copy._build_action_ptr = &moose::internal::buildAct<T>;
+    copy._build_action_ptr = &build<T, Action>;
     copy._params_ptr = &moose::internal::callValidParams<T>;
     addActionInner(copy);
     return 0;
@@ -241,16 +195,37 @@ public:
   static char addKnownLabel(const std::string & label);
 
   /// Returns a per-label keyed map of all MooseObjects in the registry.
-  static const std::map<std::string, std::vector<RegistryEntry>> & allObjects();
+  static const std::map<std::string, std::vector<RegistryEntry>> & allObjects()
+  {
+    return getRegistry()._per_label_objects;
+  }
   /// Returns a per-label keyed map of all Actions in the registry.
-  static const std::map<std::string, std::vector<RegistryEntry>> & allActions();
+  static const std::map<std::string, std::vector<RegistryEntry>> & allActions()
+  {
+    return getRegistry()._per_label_actions;
+  }
 
   static RegistryEntry & objData(const std::string & name);
-  static bool isRegisteredObj(const std::string & name);
+
+  /**
+   * \returns true if an object with the given name is registered
+   */
+  static bool isRegisteredObj(const std::string & name)
+  {
+    return getRegistry()._name_to_entry.count(name);
+  }
 
 private:
+  Registry(){};
+
   static void addInner(const RegistryEntry & info);
   static void addActionInner(const RegistryEntry & info);
+
+  template <typename T, typename ToType>
+  static std::shared_ptr<ToType> build(const InputParameters & parameters)
+  {
+    return std::make_shared<T>(parameters);
+  }
 
   std::map<std::string, RegistryEntry> _name_to_entry;
   std::map<std::string, std::vector<RegistryEntry>> _per_label_objects;

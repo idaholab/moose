@@ -31,6 +31,8 @@ class SetupInterfaceCount : public T
 public:
   SetupInterfaceCount(const InputParameters & parameters);
 
+  static InputParameters validParams();
+
   ///@{
   /**
    * Each setup methods simply increments a counter.
@@ -67,6 +69,18 @@ private:
   /// Storage for the various counts
   std::map<std::string, unsigned int> & _counts;
 };
+
+template <class T>
+InputParameters
+SetupInterfaceCount<T>::validParams()
+{
+  InputParameters parameters = T::validParams();
+  MooseEnum count_type(
+      "initial timestep subdomain linear nonlinear initialize finalize execute threadjoin");
+  parameters.addRequiredParam<MooseEnum>(
+      "count_type", count_type, "Specify the count type to return.");
+  return parameters;
+}
 
 template <class T>
 SetupInterfaceCount<T>::SetupInterfaceCount(const InputParameters & parameters)
@@ -120,8 +134,6 @@ SetupInterfaceCount<T>::threadJoinHelper(const UserObject & uo)
 class GeneralSetupInterfaceCount : public SetupInterfaceCount<GeneralPostprocessor>
 {
 public:
-  static InputParameters validParams();
-
   GeneralSetupInterfaceCount(const InputParameters & parameters);
 };
 

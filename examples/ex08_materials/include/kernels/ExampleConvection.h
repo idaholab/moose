@@ -11,15 +11,12 @@
 
 #include "Kernel.h"
 
-class ExampleConvection;
-
-template <>
-InputParameters validParams<ExampleConvection>();
-
 class ExampleConvection : public Kernel
 {
 public:
   ExampleConvection(const InputParameters & parameters);
+
+  static InputParameters validParams();
 
 protected:
   virtual Real computeQpResidual() override;
@@ -30,4 +27,3 @@ private:
   // we will store a material property instead of VariableGradient (like example 3):
   const MaterialProperty<RealGradient> & _velocity;
 };
-
