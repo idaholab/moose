@@ -730,21 +730,21 @@ PatternedHexMeshGenerator::generate()
     MooseMesh::changeBoundaryId(*out_mesh, OUTER_SIDESET_ID, _external_boundary_id, false);
   if (!_external_boundary_name.empty())
   {
-    out_mesh->boundary_info->sideset_name(
+    out_mesh->get_boundary_info().sideset_name(
         _external_boundary_id > 0 ? _external_boundary_id : (boundary_id_type)OUTER_SIDESET_ID) =
         _external_boundary_name;
-    out_mesh->boundary_info->nodeset_name(
+    out_mesh->get_boundary_info().nodeset_name(
         _external_boundary_id > 0 ? _external_boundary_id : (boundary_id_type)OUTER_SIDESET_ID) =
         _external_boundary_name;
   }
   // assign sideset and nodeset maps
-  auto & new_sideset_map = out_mesh->boundary_info->set_sideset_name_map();
-  auto & new_nodeset_map = out_mesh->boundary_info->set_nodeset_name_map();
+  auto & new_sideset_map = out_mesh->get_boundary_info().set_sideset_name_map();
+  auto & new_nodeset_map = out_mesh->get_boundary_info().set_nodeset_name_map();
   for (unsigned int i = 0; i < meshes.size(); i++)
   {
-    const auto input_sideset_map = meshes[i]->boundary_info->get_sideset_name_map();
+    const auto input_sideset_map = meshes[i]->get_boundary_info().get_sideset_name_map();
     new_sideset_map.insert(input_sideset_map.begin(), input_sideset_map.end());
-    const auto input_nodeset_map = meshes[i]->boundary_info->get_nodeset_name_map();
+    const auto input_nodeset_map = meshes[i]->get_boundary_info().get_nodeset_name_map();
     new_nodeset_map.insert(input_nodeset_map.begin(), input_nodeset_map.end());
   }
 

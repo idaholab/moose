@@ -522,10 +522,10 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
     MooseMesh::changeBoundaryId(*mesh0, OUTER_SIDESET_ID, _external_boundary_id, false);
   if (!_external_boundary_name.empty())
   {
-    mesh0->boundary_info->sideset_name(
+    mesh0->get_boundary_info().sideset_name(
         _external_boundary_id > 0 ? _external_boundary_id : (boundary_id_type)OUTER_SIDESET_ID) =
         _external_boundary_name;
-    mesh0->boundary_info->nodeset_name(
+    mesh0->get_boundary_info().nodeset_name(
         _external_boundary_id > 0 ? _external_boundary_id : (boundary_id_type)OUTER_SIDESET_ID) =
         _external_boundary_name;
   }
@@ -535,9 +535,9 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
         _has_rings ? (_ring_intervals.front() > 1 ? 2 : 1) : (_background_intervals > 1 ? 2 : 1);
     for (unsigned int i = 0; i < _interface_boundary_names.size(); i++)
     {
-      mesh0->boundary_info->sideset_name(i + interface_id_shift + _interface_boundary_id_shift) =
+      mesh0->get_boundary_info().sideset_name(i + interface_id_shift + _interface_boundary_id_shift) =
           _interface_boundary_names[i];
-      mesh0->boundary_info->nodeset_name(i + interface_id_shift + _interface_boundary_id_shift) =
+      mesh0->get_boundary_info().nodeset_name(i + interface_id_shift + _interface_boundary_id_shift) =
           _interface_boundary_names[i];
     }
   }
