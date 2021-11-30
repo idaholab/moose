@@ -9,9 +9,9 @@
 
 #pragma once
 
-#include "ADMortarConstraint.h"
+#include "ADMortarLagrangeConstraint.h"
 
-class NormalMortarMechanicalContact : public ADMortarConstraint
+class NormalMortarMechanicalContact : public ADMortarLagrangeConstraint
 {
 public:
   static InputParameters validParams();
@@ -22,6 +22,4 @@ protected:
   ADReal computeQpResidual(Moose::MortarType type) final;
 
   const MooseEnum _component;
-
-  std::map<unsigned int, unsigned int> _secondary_ip_i_to_lower_secondary_i;
 };

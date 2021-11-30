@@ -14,7 +14,7 @@ registerMooseObject("ContactApp", NormalMortarMechanicalContact);
 InputParameters
 NormalMortarMechanicalContact::validParams()
 {
-  InputParameters params = ADMortarConstraint::validParams();
+  InputParameters params = ADMortarLagrangeConstraint::validParams();
 
   MooseEnum component("x=0 y=1 z=2");
   params.addRequiredParam<MooseEnum>(
@@ -26,7 +26,7 @@ NormalMortarMechanicalContact::validParams()
 }
 
 NormalMortarMechanicalContact::NormalMortarMechanicalContact(const InputParameters & parameters)
-  : ADMortarConstraint(parameters), _component(getParam<MooseEnum>("component"))
+  : ADMortarLagrangeConstraint(parameters), _component(getParam<MooseEnum>("component"))
 {
 }
 
@@ -56,8 +56,7 @@ NormalMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
       {
         unsigned int normal_index = 0;
         normal_index = _secondary_ip_lowerd_map.at(_i);
-        return _test_secondary[_i][_qp] * _lambda[_qp] *
-               _normals[normal_index](_component);
+        return _test_secondary[_i][_qp] * _lambda[_qp] * _normals[normal_index](_component);
       }
 
     case Moose::MortarType::Primary:
@@ -73,8 +72,7 @@ NormalMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
       {
         unsigned int normal_index = 0;
         normal_index = _primary_ip_lowerd_map.at(_i);
-        return -_test_primary[_i][_qp] * _lambda[_qp] *
-               _normals[normal_index](_component);
+        return -_test_primary[_i][_qp] * _lambda[_qp] * _normals[normal_index](_component);
       }
 
     default:

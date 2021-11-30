@@ -9,9 +9,9 @@
 
 #pragma once
 
-#include "ADMortarConstraint.h"
+#include "ADMortarLagrangeConstraint.h"
 
-class TangentialMortarMechanicalContact : public ADMortarConstraint
+class TangentialMortarMechanicalContact : public ADMortarLagrangeConstraint
 {
 public:
   static InputParameters validParams();

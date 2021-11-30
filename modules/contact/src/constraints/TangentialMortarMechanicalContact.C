@@ -14,7 +14,7 @@ registerMooseObject("ContactApp", TangentialMortarMechanicalContact);
 InputParameters
 TangentialMortarMechanicalContact::validParams()
 {
-  InputParameters params = ADMortarConstraint::validParams();
+  InputParameters params = ADMortarLagrangeConstraint::validParams();
 
   MooseEnum component("x=0 y=1 z=2");
   params.addRequiredParam<MooseEnum>(
@@ -33,7 +33,7 @@ TangentialMortarMechanicalContact::validParams()
 
 TangentialMortarMechanicalContact::TangentialMortarMechanicalContact(
     const InputParameters & parameters)
-  : ADMortarConstraint(parameters),
+  : ADMortarLagrangeConstraint(parameters),
     _component(getParam<MooseEnum>("component")),
     _direction(getParam<MooseEnum>("direction"))
 {

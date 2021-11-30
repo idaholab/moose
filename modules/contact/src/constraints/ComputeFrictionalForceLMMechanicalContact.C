@@ -69,7 +69,8 @@ ComputeFrictionalForceLMMechanicalContact::ComputeFrictionalForceLMMechanicalCon
 
   if (!_friction_var->isNodal())
     if (_friction_var->feType().order != static_cast<Order>(0))
-      paramError("friction_lm",
+      paramError(
+          "friction_lm",
           "Frictional contact constraints only support elemental variables of CONSTANT order");
 
   if (_3d && !_friction_var_dir)
