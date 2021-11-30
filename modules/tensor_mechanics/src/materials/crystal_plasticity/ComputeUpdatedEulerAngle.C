@@ -47,26 +47,20 @@ void
 ComputeUpdatedEulerAngle::computeEulerAngleFromRotationMatrix(const RankTwoTensor & rot,
                                                               RealVectorValue & euler_angle)
 {
-  Real phi1, Phi, phi2;
+  // transform RankTwoTensor to Eigen::Matrix
+  Eigen::Matrix<Real, 3, 3> rot_mat;
 
-  // contert to Bunge's Euler angle
-  Phi = std::acos(rot(2, 2));
-  if (MooseUtils::absoluteFuzzyEqual(std::abs(rot(2, 2)) - 1.0, 0.0))
-  {
-    phi1 = 0.0;
-    phi2 = std::atan2(rot(0, 1), rot(0, 0));
-  }
-  else
-  {
-    Real sPhi = std::sin(Phi);
-    phi1 = std::atan2(rot(0, 2) / sPhi, rot(1, 2) / sPhi);
-    phi2 = std::atan2(rot(2, 0) / sPhi, -rot(2, 1) / sPhi);
-  }
+  for (unsigned int i = 0; i < 3; ++i)
+    for (unsigned int j = 0; j < 3; ++j)
+      rot_mat(i, j) = rot(i, j);
 
-  euler_angle(0) = phi1;
-  euler_angle(1) = Phi;
-  euler_angle(2) = phi2;
+  // compute Quaternion from rotation matrix
+  Eigen::Quaternion<Real> q(rot_mat);
+  // construct Euler angle from Quaternion
+  EulerAngles ea(q);
+  // convert EulerAngles to RealVectorValue
+  euler_angle = (RealVectorValue)ea;
 
-  if (getParam<bool>("radian_to_degree"))
-    euler_angle *= 180.0 / pi;
+  if (!getParam<bool>("radian_to_degree"))
+    euler_angle *= pi / 180.0;
 }

@@ -10,6 +10,7 @@
 #pragma once
 
 #include "Material.h"
+#include "EulerAngles.h"
 
 class ComputeUpdatedEulerAngle : public Material
 {
