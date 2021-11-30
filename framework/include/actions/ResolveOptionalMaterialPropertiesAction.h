@@ -11,6 +11,14 @@
 
 #include "Action.h"
 
+/**
+ * This action acts right after all material objects have been constructed.
+ * It iterates over the material warehouse and calls a method on each material class
+ * to trigger the resolution of all requested _optional_ material properties.
+ * Resolving here means setting the material property pointer, a reference to
+ * which was returned by the getOptional(AD)MaterialProperty call, to either point
+ * to the requested property if it exists, or to remain a nullptr.
+ */
 class ResolveOptionalMaterialPropertiesAction : public Action
 {
 public:

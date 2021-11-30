@@ -34,16 +34,12 @@ InputParameters validParams<Material>();
 class OptionalMaterialPropertyProxyBase
 {
 public:
-  OptionalMaterialPropertyProxyBase(const std::string & name, Material * material)
-    : _name(name), _material(material)
-  {
-  }
+  OptionalMaterialPropertyProxyBase(const std::string & name) : _name(name) {}
   virtual ~OptionalMaterialPropertyProxyBase() {}
-  virtual void resolve() = 0;
+  virtual void resolve(Material & material) = 0;
 
 protected:
   const std::string _name;
-  Material * _material;
 };
 
 /**
@@ -235,15 +231,15 @@ template <typename T, bool is_ad>
 class OptionalMaterialPropertyProxy : public OptionalMaterialPropertyProxyBase
 {
 public:
-  OptionalMaterialPropertyProxy(const std::string & name, Material * material)
-    : OptionalMaterialPropertyProxyBase(name, material), _value(nullptr)
+  OptionalMaterialPropertyProxy(const std::string & name)
+    : OptionalMaterialPropertyProxyBase(name), _value(nullptr)
   {
   }
-  const MaterialProperty<T> * const & value() { return _value; }
-  void resolve() override
+  const GenericMaterialProperty<T, is_ad> * const & value() const { return _value; }
+  void resolve(Material & material) override
   {
-    if (_material->hasGenericMaterialProperty<T, is_ad>(_name))
-      _value = &_material->getGenericMaterialProperty<T, is_ad>(_name);
+    if (material.hasGenericMaterialProperty<T, is_ad>(_name))
+      _value = &material.getGenericMaterialProperty<T, is_ad>(_name);
   }
 
 private:
@@ -370,7 +366,7 @@ template <typename T, bool is_ad>
 const GenericMaterialProperty<T, is_ad> * const &
 Material::getGenericOptionalMaterialProperty(const std::string & name)
 {
-  auto proxy = std::make_unique<OptionalMaterialPropertyProxy<T, is_ad>>(name, this);
+  auto proxy = std::make_unique<OptionalMaterialPropertyProxy<T, is_ad>>(name);
   auto & pointer = proxy->value();
   _optional_property_proxies.push_back(std::move(proxy));
   return pointer;

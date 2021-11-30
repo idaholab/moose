@@ -104,19 +104,18 @@ public:
   ///@}
 
   ///@{ Optional material property getters
+  template <typename T, bool is_ad>
+  const GenericMaterialProperty<T, is_ad> * const &
+  getGenericOptionalMaterialProperty(const std::string & name);
   template <typename T>
-  const MaterialProperty<T> * const & getOptionalMaterialProperty(const std::string & name);
-  template <typename T>
-  const ADMaterialProperty<T> * const & getOptionalADMaterialProperty(const std::string & name);
-  template <typename T, bool is_ad, typename std::enable_if<is_ad, int>::type = 0>
-  const ADMaterialProperty<T> * const & getGenericOptionalMaterialProperty(const std::string & name)
+  const MaterialProperty<T> * const & getOptionalMaterialProperty(const std::string & name)
   {
-    return getOptionalADMaterialProperty<T>(name);
+    return getGenericOptionalMaterialProperty<T, false>(name);
   }
-  template <typename T, bool is_ad, typename std::enable_if<!is_ad, int>::type = 0>
-  const MaterialProperty<T> * const & getGenericOptionalMaterialProperty(const std::string & name)
+  template <typename T>
+  const ADMaterialProperty<T> * const & getOptionalADMaterialProperty(const std::string & name)
   {
-    return getOptionalMaterialProperty<T>(name);
+    return getGenericOptionalMaterialProperty<T, true>(name);
   }
   ///@}
 
@@ -704,24 +703,13 @@ MaterialPropertyInterface::hasADMaterialPropertyByName(const std::string & name_
   return _material_data->haveADProperty<T>(name);
 }
 
-template <typename T>
-const MaterialProperty<T> * const &
-MaterialPropertyInterface::getOptionalMaterialProperty(const std::string & name)
+template <typename T, bool is_ad>
+const GenericMaterialProperty<T, is_ad> * const &
+MaterialPropertyInterface::getGenericOptionalMaterialProperty(const std::string & name)
 {
   _optional_material_pointer_storage.push_back(nullptr);
   auto & new_pointer = _optional_material_pointer_storage.back();
-  if (hasMaterialProperty<T>(name))
-    new_pointer = &getMaterialProperty<T>(name);
-  return reinterpret_cast<const MaterialProperty<T> *&>(new_pointer);
-}
-
-template <typename T>
-const ADMaterialProperty<T> * const &
-MaterialPropertyInterface::getOptionalADMaterialProperty(const std::string & name)
-{
-  _optional_material_pointer_storage.push_back(nullptr);
-  auto & new_pointer = _optional_material_pointer_storage.back();
-  if (hasADMaterialProperty<T>(name))
-    new_pointer = &getADMaterialProperty<T>(name);
-  return reinterpret_cast<const ADMaterialProperty<T> *&>(new_pointer);
+  if (hasGenericMaterialProperty<T, is_ad>(name))
+    new_pointer = &getGenericMaterialProperty<T, is_ad>(name);
+  return reinterpret_cast<const GenericMaterialProperty<T, is_ad> *&>(new_pointer);
 }

@@ -81,7 +81,7 @@ Objects that require material properties consume them using one of two functions
 
 1. `getMaterialProperty<TYPE>("property_name")` retrieves a property with a name "property_name" to be
    consumed by the object.
-1. `getADMaterialProperty<TYPE>` retrieves a property with a name "property_name" to be
+1. `getADMaterialProperty<TYPE>("property_name")` retrieves a property with a name "property_name" to be
    consumed by the object that will include automatic differentiation.
 
 For an object to consume a property the same basic procedure is followed. First in the consuming
@@ -107,6 +107,19 @@ then it +must+ be consumed with the `getADMaterialProperty`. The same is true fo
 differentiation; properties declared with `declareProperty` +must+ be consumed with the
 `getMaterialProperty` method.
 
+### Optional Properties
+
+Objects can weakly couple to material properties that may or may not exist.
+
+1. `getOptionalMaterialProperty<TYPE>("property_name")` retrieves a pointer to a property with a name "property_name" to be consumed by the object.
+1. `getOptionalADMaterialProperty<TYPE>("property_name")` retrieves a pointer to a property with a name "property_name" to be consumed by the object that will include automatic differentiation.
+
+This API returns a reference to a pointer to a material property. If the requested property
+is not provided by any material this pointer will remain `nullptr` and it is the consuming object's
+responsibility to check for this before dereferencing the pointer. Note that the pointer value is
+only finalized _after_ all materials have been constructed, so a `nullptr` check must _not_ be
+made in the constructor of a material class but either at time of first use in `computeQpProperties`
+or in `initailSetup`.
 
 ## Property Names id=property-names
 
