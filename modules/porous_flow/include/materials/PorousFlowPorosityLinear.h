@@ -23,6 +23,8 @@ public:
 
   PorousFlowPorosityLinear(const InputParameters & parameters);
 
+  virtual void initialSetup() override;
+
 protected:
   virtual void initQpStatefulProperties() override;
   virtual void computeQpProperties() override;
@@ -57,38 +59,37 @@ protected:
   /// whether epv_coeff has been set
   const bool _uses_volstrain;
 
-  /// whether a volumetric strain Material exists (used for error-checking)
-  const bool _has_volstrain;
-
   /// Strain (first const means we never want to dereference and change the value, second means we'll always be pointing to the same address after initialization (like a reference))
-  const MaterialProperty<Real> * const _vol_strain_qp;
+  const MaterialProperty<Real> * const & _vol_strain_qp;
 
   /// d(strain)/(dvar) (first const means we never want to dereference and change the value, second means we'll always be pointing to the same address after initialization (like a reference))
-  const MaterialProperty<std::vector<RealGradient>> * const _dvol_strain_qp_dvar;
+  const MaterialProperty<std::vector<RealGradient>> * const & _dvol_strain_qp_dvar;
 
   /// whether P_coeff has been set
   const bool _uses_pf;
 
-  /// whether an effective porepressure Material exists (used for error-checking)
-  const bool _has_pf;
-
   /// Effective porepressure at the quadpoints or nodes
-  const MaterialProperty<Real> * const _pf;
+  const MaterialProperty<Real> * const & _pf_nodal;
+  const MaterialProperty<Real> * const & _pf_qp;
+  const MaterialProperty<Real> * _pf;
 
   /// d(effective porepressure)/(d porflow variable)
-  const MaterialProperty<std::vector<Real>> * const _dpf_dvar;
+  const MaterialProperty<std::vector<Real>> * const & _dpf_dvar_nodal;
+  const MaterialProperty<std::vector<Real>> * const & _dpf_dvar_qp;
+  const MaterialProperty<std::vector<Real>> * _dpf_dvar;
 
   /// whether T_coeff has been set
   const bool _uses_T;
 
-  /// whether a temperature Material exists (used for error-checking)
-  const bool _has_T;
-
   /// Temperature at the quadpoints or nodes
-  const MaterialProperty<Real> * const _temperature;
+  const MaterialProperty<Real> * const & _temperature_nodal;
+  const MaterialProperty<Real> * const & _temperature_qp;
+  const MaterialProperty<Real> * _temperature;
 
   /// d(temperature)/(d porflow variable)
-  const MaterialProperty<std::vector<Real>> * const _dtemperature_dvar;
+  const MaterialProperty<std::vector<Real>> * const & _dtemperature_dvar_nodal;
+  const MaterialProperty<std::vector<Real>> * const & _dtemperature_dvar_qp;
+  const MaterialProperty<std::vector<Real>> * _dtemperature_dvar;
 
   /// If the linear relationship produces porosity < _porosity_min, then porosity is set to _porosity_min.  This means the derivatives of it will be zero.  However, this gives poor NR convergence, so the derivatives are set to _zero_modifier * (values that are relevant for porosity_min) to hint to the NR that porosity is not always constant.
   const Real _zero_modifier;

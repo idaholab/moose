@@ -78,60 +78,51 @@ PorousFlowPorosityLinear::PorousFlowPorosityLinear(const InputParameters & param
     _epv_coeff(getParam<Real>("epv_coeff")),
 
     _uses_volstrain(parameters.isParamSetByUser("epv_coeff") && _epv_coeff != 0.0),
-    _has_volstrain(hasMaterialProperty<Real>("PorousFlow_total_volumetric_strain_qp") &&
-                   hasMaterialProperty<std::vector<RealGradient>>(
-                       "dPorousFlow_total_volumetric_strain_qp_dvar")),
-    _vol_strain_qp(_has_volstrain
-                       ? &getMaterialProperty<Real>("PorousFlow_total_volumetric_strain_qp")
-                       : nullptr),
-    _dvol_strain_qp_dvar(_has_volstrain ? &getMaterialProperty<std::vector<RealGradient>>(
-                                              "dPorousFlow_total_volumetric_strain_qp_dvar")
-                                        : nullptr),
+    _vol_strain_qp(getOptionalMaterialProperty<Real>("PorousFlow_total_volumetric_strain_qp")),
+    _dvol_strain_qp_dvar(getOptionalMaterialProperty<std::vector<RealGradient>>(
+        "dPorousFlow_total_volumetric_strain_qp_dvar")),
 
     _uses_pf(parameters.isParamSetByUser("P_coeff") && _P_coeff != 0.0),
-    _has_pf(
-        (_nodal_material &&
-         hasMaterialProperty<Real>("PorousFlow_effective_fluid_pressure_nodal") &&
-         hasMaterialProperty<std::vector<Real>>(
-             "dPorousFlow_effective_fluid_pressure_nodal_dvar")) ||
-        (!_nodal_material && hasMaterialProperty<Real>("PorousFlow_effective_fluid_pressure_qp") &&
-         hasMaterialProperty<std::vector<Real>>("dPorousFlow_effective_fluid_pressure_qp_dvar"))),
-    _pf(_has_pf ? (_nodal_material
-                       ? &getMaterialProperty<Real>("PorousFlow_effective_fluid_pressure_nodal")
-                       : &getMaterialProperty<Real>("PorousFlow_effective_fluid_pressure_qp"))
-                : nullptr),
-    _dpf_dvar(_has_pf ? (_nodal_material ? &getMaterialProperty<std::vector<Real>>(
-                                               "dPorousFlow_effective_fluid_pressure_nodal_dvar")
-                                         : &getMaterialProperty<std::vector<Real>>(
-                                               "dPorousFlow_effective_fluid_pressure_qp_dvar"))
-                      : nullptr),
+    _pf_nodal(getOptionalMaterialProperty<Real>("PorousFlow_effective_fluid_pressure_nodal")),
+    _pf_qp(getOptionalMaterialProperty<Real>("PorousFlow_effective_fluid_pressure_qp")),
+    _dpf_dvar_nodal(getOptionalMaterialProperty<std::vector<Real>>(
+        "dPorousFlow_effective_fluid_pressure_nodal_dvar")),
+    _dpf_dvar_qp(getOptionalMaterialProperty<std::vector<Real>>(
+        "dPorousFlow_effective_fluid_pressure_qp_dvar")),
 
     _uses_T(parameters.isParamSetByUser("T_coeff") && _T_coeff != 0.0),
-    _has_T((_nodal_material && hasMaterialProperty<Real>("PorousFlow_temperature_nodal") &&
-            hasMaterialProperty<std::vector<Real>>("dPorousFlow_temperature_nodal_dvar")) ||
-           (!_nodal_material && hasMaterialProperty<Real>("PorousFlow_temperature_qp") &&
-            hasMaterialProperty<std::vector<Real>>("dPorousFlow_temperature_qp_dvar"))),
-    _temperature(_has_T
-                     ? (_nodal_material ? &getMaterialProperty<Real>("PorousFlow_temperature_nodal")
-                                        : &getMaterialProperty<Real>("PorousFlow_temperature_qp"))
-                     : nullptr),
-    _dtemperature_dvar(
-        _has_T
-            ? (_nodal_material
-                   ? &getMaterialProperty<std::vector<Real>>("dPorousFlow_temperature_nodal_dvar")
-                   : &getMaterialProperty<std::vector<Real>>("dPorousFlow_temperature_qp_dvar"))
-            : nullptr),
+    _temperature_nodal(getOptionalMaterialProperty<Real>("PorousFlow_temperature_nodal")),
+    _temperature_qp(getOptionalMaterialProperty<Real>("PorousFlow_temperature_qp")),
+    _dtemperature_dvar_nodal(
+        getOptionalMaterialProperty<std::vector<Real>>("dPorousFlow_temperature_nodal_dvar")),
+    _dtemperature_dvar_qp(
+        getOptionalMaterialProperty<std::vector<Real>>("dPorousFlow_temperature_qp_dvar")),
     _zero_modifier(getParam<Real>("zero_modifier"))
 {
-  if (!_has_pf && _uses_pf)
+}
+
+void
+PorousFlowPorosityLinear::initialSetup()
+{
+  _pf = _nodal_material ? _pf_nodal : _pf_qp;
+  _dpf_dvar = _nodal_material ? _dpf_dvar_nodal : _dpf_dvar_qp;
+  if (!(_pf && _dpf_dvar) && _uses_pf)
+  {
     mooseError("PorousFlowPorosityLinear: When P_coeff is given you must have an effective fluid "
                "pressure Material");
-  if (!_has_T && _uses_T)
+  }
+
+  _temperature = _nodal_material ? _temperature_nodal : _temperature_qp;
+  _dtemperature_dvar = _nodal_material ? _dtemperature_dvar_nodal : _dtemperature_dvar_qp;
+  if (!_temperature && _uses_T)
     mooseError(
         "PorousFlowPorosityLinear: When T_coeff is given you must have a temperature Material");
-  if (!_has_volstrain && _uses_volstrain)
+
+  if (!(_vol_strain_qp && _dvol_strain_qp_dvar) && _uses_volstrain)
     mooseError("PorousFlowPorosityLinear: When epv_coeff is given you must have a "
                "volumetric-strain Material");
+
+  PorousFlowPorosityBase::initialSetup();
 }
 
 void

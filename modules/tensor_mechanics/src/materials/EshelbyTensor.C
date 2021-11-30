@@ -56,9 +56,7 @@ EshelbyTensor::EshelbyTensor(const InputParameters & parameters)
     _J_thermal_term_vec(declareProperty<RealVectorValue>("J_thermal_term_vec")),
     _grad_temp(coupledGradient("temperature")),
     _has_temp(isCoupled("temperature")),
-    _total_deigenstrain_dT(hasMaterialProperty<RankTwoTensor>("total_deigenstrain_dT")
-                               ? &getMaterialProperty<RankTwoTensor>("total_deigenstrain_dT")
-                               : nullptr)
+    _total_deigenstrain_dT(getOptionalMaterialProperty<RankTwoTensor>("total_deigenstrain_dT"))
 {
   unsigned int ndisp = coupledComponents("displacements");
 
@@ -75,7 +73,7 @@ EshelbyTensor::EshelbyTensor(const InputParameters & parameters)
   for (unsigned i = ndisp; i < 3; ++i)
     _grad_disp[i] = &_grad_zero;
 
-  // Need previos step's displacements to compute deformation gradient time rate
+  // Need previous step's displacements to compute deformation gradient time rate
   if (_compute_dissipation)
   {
     // fetch coupled gradients previous step
@@ -86,7 +84,11 @@ EshelbyTensor::EshelbyTensor(const InputParameters & parameters)
     for (unsigned i = ndisp; i < 3; ++i)
       _grad_disp_old[i] = &_grad_zero;
   }
+}
 
+void
+EshelbyTensor::initialSetup()
+{
   if (_has_temp && !_total_deigenstrain_dT)
     mooseError("EshelbyTensor Error: To include thermal strain term in Fracture integral "
                "calculation, must both couple temperature in DomainIntegral block and compute "
