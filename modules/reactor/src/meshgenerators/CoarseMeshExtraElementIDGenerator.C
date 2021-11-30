@@ -118,7 +118,7 @@ CoarseMeshExtraElementIDGenerator::generate()
     {
       // Get the node: we need to manually move it towards the centroid to
       // ensure that nothing weird happes due to round-off
-      Node current_node = elem->node_ref(n);
+      Point current_node = elem->point(n);
       current_node.add_scaled(current_node, -aeps);
       current_node.add_scaled(centroid, aeps);
 
