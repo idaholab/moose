@@ -12,7 +12,7 @@
 #include "FunctorMaterial.h"
 
 /**
- * Defines a material property that defined by another functor (possibly constant) on each block,
+ * Defines a functor material property by another functor (possibly constant) on each block,
  * discontinuous at interfaces
  */
 template <bool is_ad>
