@@ -12,8 +12,8 @@ given on the documentation page for
 Additionally `CrystalPlasticityTwinningKalidindiUpdate` is intended to be used with
 a constitutive model for dislocation glide or slip: combining this twinning model
 with [CrystalPlasticityKalidindiUpdate](/CrystalPlasticityKalidindiUpdate.md) will
-replicate the complete crystal plasticity constitutive model set presented in
-[cite!](kalidindi2001).
+replicate the coupling of the two constitutive models through the plastic velocity
+gradient calcualtion as presented in [!cite](kalidindi2001).
 
 ## Constitutive Model Definition
 
@@ -33,7 +33,7 @@ plastic shear increment
 \begin{equation}
   \dot{f}^{\beta} = \frac{\dot{\gamma}^{\beta}}{\gamma_{tw}}
 \end{equation}
-where $\gamma_{tw}$ is the characteristic shear of the twin [citep!](kalidindi2001).
+where $\gamma_{tw}$ is the characteristic shear of the twin [!citep](kalidindi2001).
 
 The twin propagation resistance is calculated as a function of the twin volume fraction
 and the characteristic twin shear, with different hardening coefficients for
@@ -54,6 +54,7 @@ In simulations where both twin propagation and dislocation slip constitutive mod
 are included, the influence of the twin propagation on the plastic velocity gradient
 is implemented as a fraction of the twin volume fraction
 \begin{equation}
+\label{eqn:modTwinsLP}
 L^P = \left(1 - f_{total} \right) \sum_{\alpha}^{slip} \dot{\gamma}^{\alpha} S^{\alpha}_o + \sum_{\beta}^{twin} \dot{f}^{\beta}\gamma_{tw}S^{\beta}_o
 \end{equation}
 where $\dot{gamma}^{\alpha}$ is the plastic shear rate due to dislocation slip,
@@ -72,7 +73,13 @@ plasticity specific  stress calculator as shown below:
 !listing modules/tensor_mechanics/test/tests/crystal_plasticity/twinning/only_twinning_fcc.i block=Materials/stress
 
 In most cases this twinning model is intended to be used with a dislocation glide
-or slip model.
+or slip model, such as [CrystalPlasticityKalidindiUpdate](/CrystalPlasticityKalidindiUpdate.md).
+To couple the volume fraction of twins to the dislocation slip plastic velocity
+gradient contribution, as shown in [eqn:modTwinsLP]. The name of the total twin
+volume fraction material property must be supplied to the glide or slip material
+model:
+
+!listing modules/tensor_mechanics/test/tests/crystal_plasticity/twinning/combined_twinning_slip_100compression.i block=Materials/slip_xtalpl
 
 !syntax parameters /Materials/CrystalPlasticityTwinningKalidindiUpdate
 

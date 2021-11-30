@@ -53,4 +53,41 @@
                'the user-defined tolerance value.'
     []
   []
+  [combined_twinning_slip_models]
+    issues = '#18846'
+    design = '/CrystalPlasticityTwinningKalidindiUpdate.md /CrystalPlasticityKalidindiUpdate.md'
+    requirement = 'When combined with a dislocation slip constitutive model in a '
+                  'simulation of an FCC material, the Kalidindi (2001) twin '
+                  'propagation model shall:'
+    [combined_twinning_slip_111tension]
+      type = CSVDiff
+      input = 'combined_twinning_slip_111tension.i'
+      csvdiff = 'combined_twinning_slip_111tension_out.csv'
+      detail = 'compute plastic shear due to both slip and twin propagation when '
+               'loaded under tension in a 111 orientation.'
+    []
+    [combined_twinning_slip_111compression]
+      type = CSVDiff
+      input = 'combined_twinning_slip_111tension.i'
+      csvdiff = 'combined_twinning_slip_111compression_out.csv'
+      cli_args = 'BCs/tdisp/function=-0.02*t Outputs/file_base=combined_twinning_slip_111compression_out'
+      detail = 'compute a near-zero twin volume fraction when loaded under '
+               'compression in a 111 orientation.'
+    []
+    [combined_twinning_slip_100tension]
+      type = CSVDiff
+      input = 'combined_twinning_slip_100compression.i'
+      csvdiff = 'combined_twinning_slip_100tension_out.csv'
+      cli_args = 'BCs/tdisp/function=0.025*t Outputs/file_base=combined_twinning_slip_100tension_out'
+      detail = 'compute a near-zero volume fraction of twins for all twin system '
+               'when a 100 oriented crystal is loaded under tension.'
+    []
+    [combined_twinning_slip_100compression]
+      type = CSVDiff
+      input = 'combined_twinning_slip_100compression.i'
+      csvdiff = 'combined_twinning_slip_100compression_out.csv'
+      detail = 'compute both dislocation glide and twin propagation in a 100 '
+               'oriented crystal loaded under compression.'
+    []
+  []
 []

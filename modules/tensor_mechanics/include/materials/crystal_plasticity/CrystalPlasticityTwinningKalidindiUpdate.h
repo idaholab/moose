@@ -22,21 +22,21 @@ class CrystalPlasticityTwinningKalidindiUpdate;
  * are compatible with twinning.
  */
 
- class CrystalPlasticityTwinningKalidindiUpdate : public CrystalPlasticityStressUpdateBase
- {
- public:
-   static InputParameters validParams();
+class CrystalPlasticityTwinningKalidindiUpdate : public CrystalPlasticityStressUpdateBase
+{
+public:
+  static InputParameters validParams();
 
-   CrystalPlasticityTwinningKalidindiUpdate(const InputParameters & parameters);
+  CrystalPlasticityTwinningKalidindiUpdate(const InputParameters & parameters);
 
- protected:
-   virtual void initQpStatefulProperties() override;
+protected:
+  virtual void initQpStatefulProperties() override;
 
-   virtual void setInitialConstitutiveVariableValues() override;
+  virtual void setInitialConstitutiveVariableValues() override;
 
-   virtual void setSubstepConstitutiveVariableValues() override;
+  virtual void setSubstepConstitutiveVariableValues() override;
 
-   virtual void updateSubstepConstitutiveVariableValues() override;
+  virtual void updateSubstepConstitutiveVariableValues() override;
 
   /**
    * Despite the misnomer which results from the inheriting class structure,
@@ -104,7 +104,6 @@ class CrystalPlasticityTwinningKalidindiUpdate;
    * twin volume fraction
    */
   std::vector<Real> _twin_resistance_increment;
-
 
   ///@{Power-law slip rate calculation coefficients, from Kalidindi IJP 17 (2001), 837-860
   const Real _reference_strain_rate;

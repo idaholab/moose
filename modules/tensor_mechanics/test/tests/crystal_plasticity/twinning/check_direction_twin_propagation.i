@@ -335,7 +335,6 @@
     number_slip_systems = 12
     slip_sys_file_name = 'fcc_input_twinning_systems.txt'
     initial_twin_lattice_friction = 2.0
-    print_state_variable_convergence_error_messages = true
   []
 []
 

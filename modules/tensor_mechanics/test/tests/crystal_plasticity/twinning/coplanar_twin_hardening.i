@@ -214,7 +214,6 @@
     non_coplanar_coefficient_twin_hardening = 0
     non_coplanar_twin_hardening_exponent = 0
     coplanar_coefficient_twin_hardening = 8e8
-    print_state_variable_convergence_error_messages = true
   []
 []
 

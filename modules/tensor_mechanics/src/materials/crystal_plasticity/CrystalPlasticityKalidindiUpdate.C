@@ -24,6 +24,11 @@ CrystalPlasticityKalidindiUpdate::validParams()
   params.addParam<Real>("xm", 0.1, "exponent for slip rate");
   params.addParam<Real>("gss_initial", 60.8, "initial lattice friction strength of the material");
 
+  params.addParam<MaterialPropertyName>(
+      "total_twin_volume_fraction",
+      "Name of the material property of the total twin volume "
+      "fraction, only if twinning is considered in the simulation");
+
   return params;
 }
 
@@ -37,7 +42,13 @@ CrystalPlasticityKalidindiUpdate::CrystalPlasticityKalidindiUpdate(
     _gss_a(getParam<Real>("gss_a")),
     _ao(getParam<Real>("ao")),
     _xm(getParam<Real>("xm")),
-    _gss_initial(getParam<Real>("gss_initial"))
+    _gss_initial(getParam<Real>("gss_initial")),
+
+    _include_twinning_in_Lp(parameters.isParamSetByUser("total_twin_volume_fraction")),
+    _twin_volume_fraction_total(
+        _include_twinning_in_Lp ? &getMaterialPropertyByName<Real>(
+                                      getParam<MaterialPropertyName>("total_twin_volume_fraction"))
+                                : nullptr)
 {
   // resize local caching vectors used for substepping
   _previous_substep_slip_resistance.resize(_number_slip_systems);
@@ -95,6 +106,20 @@ CrystalPlasticityKalidindiUpdate::calculateSlipRate()
     }
   }
   return true;
+}
+
+void
+CrystalPlasticityKalidindiUpdate::calculateEquivalentSlipIncrement(
+    RankTwoTensor & equivalent_slip_increment)
+{
+  if (_include_twinning_in_Lp)
+  {
+    for (unsigned int i = 0; i < _number_slip_systems; ++i)
+      equivalent_slip_increment += (1.0 - (*_twin_volume_fraction_total)[_qp]) *
+                                   _flow_direction[_qp][i] * _slip_increment[_qp][i] * _substep_dt;
+  }
+  else // if no twinning volume fraction material property supplied, use base class
+    CrystalPlasticityStressUpdateBase::calculateEquivalentSlipIncrement(equivalent_slip_increment);
 }
 
 void
