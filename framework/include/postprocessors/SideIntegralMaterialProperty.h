@@ -25,6 +25,8 @@ public:
 
   SideIntegralMaterialPropertyTempl(const InputParameters & parameters);
 
+  virtual void initialSetup() override;
+
 protected:
   virtual Real computeQpIntegral() override;
 

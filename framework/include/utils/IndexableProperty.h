@@ -36,7 +36,7 @@ public:
   void check() const;
 
 protected:
-  void checkComponents(unsigned int components);
+  void checkComponents(unsigned int components) const;
 
   /// pointer to the host object
   T * _host;
@@ -148,7 +148,7 @@ IndexableProperty<T, is_ad>::check() const
 
 template <typename T, bool is_ad>
 void
-IndexableProperty<T, is_ad>::checkComponents(unsigned int components)
+IndexableProperty<T, is_ad>::checkComponents(unsigned int components) const
 {
   if (_component.size() != components)
     _host->mooseError("Material property '",

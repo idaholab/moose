@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ResolveOptionalMaterialPropertiesAction.h"
+#include "Material.h"
 #include "FEProblem.h"
 
 registerMooseAction("MooseApp",
