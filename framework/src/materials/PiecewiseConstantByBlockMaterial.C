@@ -83,9 +83,10 @@ PiecewiseConstantByBlockMaterialTempl<is_ad>::computeQpProperties()
     return;
   }
 
-  mooseAssert(_face_info,
-              "We must have set a face info object in order for the PiecewiseConstantByBlockMaterial "
-              "class to work on faces");
+  mooseAssert(
+      _face_info,
+      "We must have set a face info object in order for the PiecewiseConstantByBlockMaterial "
+      "class to work on faces");
 
   // We must be off the domain
   auto it = _sub_id_to_prop.find(_face_info->elem().subdomain_id());

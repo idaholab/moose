@@ -19,17 +19,13 @@ InputParameters
 FunctorADConverterTempl<T>::validParams()
 {
   InputParameters params = FunctorMaterial::validParams();
-  params.addClassDescription(
-      "Converts regular functors to AD functors and "
-      " AD functors to regular functors");
+  params.addClassDescription("Converts regular functors to AD functors and "
+                             " AD functors to regular functors");
   params.addParam<std::vector<std::string>>(
-      "reg_props_in",
-      "The names of the regular functors to convert to AD functors");
-  params.addParam<std::vector<std::string>>("ad_props_out",
-                                            "The names of the output AD functors");
+      "reg_props_in", "The names of the regular functors to convert to AD functors");
+  params.addParam<std::vector<std::string>>("ad_props_out", "The names of the output AD functors");
   params.addParam<std::vector<std::string>>(
-      "ad_props_in",
-      "The names of the AD functors to convert to regular functors");
+      "ad_props_in", "The names of the AD functors to convert to regular functors");
   params.addParam<std::vector<std::string>>("reg_props_out",
                                             "The names of the output regular functors");
   return params;
@@ -48,12 +44,14 @@ FunctorADConverterTempl<T>::FunctorADConverterTempl(const InputParameters & para
   if (reg_props_in.size() != ad_props_out.size())
     paramError("ad_props_out",
                "The number of output AD functors must match the number of input regular "
-               "functors, which is " + std::to_string(reg_props_in.size()));
+               "functors, which is " +
+                   std::to_string(reg_props_in.size()));
 
   if (ad_props_in.size() != reg_props_out.size())
     paramError("reg_props_out",
                "The number of output regular functors must match the number of input AD "
-               "functors, which is " + std::to_string(ad_props_in.size()));
+               "functors, which is " +
+                   std::to_string(ad_props_in.size()));
 
   // Check input names for overlaps, before possibly hitting a harder to
   // interpret error at functor definition
@@ -85,12 +83,12 @@ FunctorADConverterTempl<T>::FunctorADConverterTempl(const InputParameters & para
   for (const auto i : make_range(reg_props_in.size()))
   {
     const auto & reg_functor = &getFunctor<T>(reg_props_in[i]);
-    const auto & ad_prop = &declareFunctorProperty<typename Moose::ADType<T>::type>(ad_props_out[i]);
-    ad_prop->setFunctor(
-        _mesh,
-        blockIDs(),
-        [reg_functor](const auto & r, const auto & t) -> typename Moose::ADType<T>::type {
-            return (*reg_functor)(r, t); });
+    const auto & ad_prop =
+        &declareFunctorProperty<typename Moose::ADType<T>::type>(ad_props_out[i]);
+    ad_prop->setFunctor(_mesh,
+                        blockIDs(),
+                        [reg_functor](const auto & r, const auto & t) ->
+                        typename Moose::ADType<T>::type { return (*reg_functor)(r, t); });
   }
 
   // Define the regular functors
@@ -98,11 +96,9 @@ FunctorADConverterTempl<T>::FunctorADConverterTempl(const InputParameters & para
   {
     const auto & ad_functor = &getFunctor<typename Moose::ADType<T>::type>(ad_props_in[i]);
     const auto & reg_prop = &declareFunctorProperty<T>(reg_props_out[i]);
-    reg_prop->setFunctor(
-        _mesh,
-        blockIDs(),
-        [ad_functor](const auto & r, const auto & t) -> T {
-            return MetaPhysicL::raw_value((*ad_functor)(r, t)); });
+    reg_prop->setFunctor(_mesh, blockIDs(), [ad_functor](const auto & r, const auto & t) -> T {
+      return MetaPhysicL::raw_value((*ad_functor)(r, t));
+    });
   }
 }
 

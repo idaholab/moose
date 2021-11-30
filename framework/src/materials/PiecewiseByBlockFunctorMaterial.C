@@ -30,7 +30,8 @@ PiecewiseByBlockFunctorMaterialTempl<is_ad>::validParams()
   params.template addRequiredParam<MaterialPropertyName>("prop_name",
                                                          "The name of the property to declare");
   params.template addRequiredParam<std::map<std::string, std::string>>(
-      "subdomain_to_prop_value", "Map from subdomain to property value. The value may be a constant"
+      "subdomain_to_prop_value",
+      "Map from subdomain to property value. The value may be a constant"
       " or any kind of functor (functions, variables, functor material properties)");
   return params;
 }
@@ -40,16 +41,16 @@ PiecewiseByBlockFunctorMaterialTempl<is_ad>::PiecewiseByBlockFunctorMaterialTemp
     const InputParameters & params)
   : FunctorMaterial(params), _prop(declareFunctorProperty<GenericReal<is_ad>>("prop_name"))
 {
-  for (const auto & map_pr : getParam<std::map<std::string,
-                                               std::string>>("subdomain_to_prop_value"))
+  for (const auto & map_pr :
+       getParam<std::map<std::string, std::string>>("subdomain_to_prop_value"))
   {
     const MooseFunctorName value = map_pr.second;
     const auto & functor = &getFunctor<GenericReal<is_ad>>(value);
-    _prop.setFunctor(
-        _mesh,
-        {_mesh.getSubdomainID(map_pr.first)},
-        [functor](const auto & r, const auto & t) -> GenericReal<is_ad> {
-            return (*functor)(r, t); });
+    _prop.setFunctor(_mesh,
+                     {_mesh.getSubdomainID(map_pr.first)},
+                     [functor](const auto & r, const auto & t) -> GenericReal<is_ad> {
+                       return (*functor)(r, t);
+                     });
   }
 }
 

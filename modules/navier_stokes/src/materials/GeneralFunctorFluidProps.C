@@ -154,7 +154,7 @@ GeneralFunctorFluidProps::GeneralFunctorFluidProps(const InputParameters & param
     auto raw_T_fluid = MetaPhysicL::raw_value(_T_fluid(r, t));
 
     _fluid.mu_from_p_T(raw_pressure, raw_T_fluid, dummy, dmu_dp, dmu_dT);
-    return _mu_rampdown(r, t) * dmu_dp;
+    return dmu_dp;
   });
   _dmu_dT.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> Real {
     Real dmu_dp, dmu_dT, dummy;
@@ -162,7 +162,7 @@ GeneralFunctorFluidProps::GeneralFunctorFluidProps(const InputParameters & param
     auto raw_T_fluid = MetaPhysicL::raw_value(_T_fluid(r, t));
 
     _fluid.mu_from_p_T(raw_pressure, raw_T_fluid, dummy, dmu_dp, dmu_dT);
-    return _mu_rampdown(r, t) * dmu_dT;
+    return dmu_dT;
   });
 
   _dk_dp.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> Real {
@@ -186,13 +186,13 @@ GeneralFunctorFluidProps::GeneralFunctorFluidProps(const InputParameters & param
   _Pr.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> ADReal {
     static constexpr Real small_number = 1e-8;
 
-    return fp::prandtl(_cp(r, t), _mu_rampdown(r, t) * _mu(r, t), std::max(_k(r, t), small_number));
+    return fp::prandtl(_cp(r, t), _mu(r, t), std::max(_k(r, t), small_number));
   });
   _dPr_dp.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> Real {
-    return prandtlPropertyDerivative(MetaPhysicL::raw_value(_mu_rampdown(r, t) * _mu(r, t)),
+    return prandtlPropertyDerivative(MetaPhysicL::raw_value(_mu(r, t)),
                                      MetaPhysicL::raw_value(_cp(r, t)),
                                      MetaPhysicL::raw_value(_k(r, t)),
-                                     _mu_rampdown(r, t) * _dmu_dp(r, t),
+                                     _dmu_dp(r, t),
                                      _dcp_dp(r, t),
                                      _dk_dp(r, t));
   });
@@ -200,7 +200,7 @@ GeneralFunctorFluidProps::GeneralFunctorFluidProps(const InputParameters & param
     return prandtlPropertyDerivative(MetaPhysicL::raw_value(_mu(r, t)),
                                      MetaPhysicL::raw_value(_cp(r, t)),
                                      MetaPhysicL::raw_value(_k(r, t)),
-                                     _mu_rampdown(r, t) * _dmu_dT(r, t),
+                                     _dmu_dT(r, t),
                                      _dcp_dT(r, t),
                                      _dk_dT(r, t));
   });
@@ -211,25 +211,23 @@ GeneralFunctorFluidProps::GeneralFunctorFluidProps(const InputParameters & param
   _Re.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> ADReal {
     static constexpr Real small_number = 1e-8;
 
-    return std::max(fp::reynolds(_rho(r, t),
-                                 _eps(r, t) * _speed(r, t),
-                                 _d,
-                                 std::max(_mu_rampdown(r, t) * _mu(r, t), small_number)),
-                    1.0);
+    return std::max(
+        fp::reynolds(_rho(r, t), _eps(r, t) * _speed(r, t), _d, std::max(_mu(r, t), small_number)),
+        1.0);
   });
   _dRe_dp.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> Real {
     return reynoldsPropertyDerivative(MetaPhysicL::raw_value(_Re(r, t)),
                                       MetaPhysicL::raw_value(_rho(r, t)),
-                                      MetaPhysicL::raw_value(_mu_rampdown(r, t) * _mu(r, t)),
+                                      MetaPhysicL::raw_value(_mu(r, t)),
                                       _drho_dp(r, t),
-                                      _mu_rampdown(r, t) * _dmu_dp(r, t));
+                                      _dmu_dp(r, t));
   });
   _dRe_dT.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> Real {
     return reynoldsPropertyDerivative(MetaPhysicL::raw_value(_Re(r, t)),
                                       MetaPhysicL::raw_value(_rho(r, t)),
-                                      MetaPhysicL::raw_value(_mu_rampdown(r, t) * _mu(r, t)),
+                                      MetaPhysicL::raw_value(_mu(r, t)),
                                       _drho_dT(r, t),
-                                      _mu_rampdown(r, t) * _dmu_dT(r, t));
+                                      _dmu_dT(r, t));
   });
 
   // (hydraulic) Reynolds number

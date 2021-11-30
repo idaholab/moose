@@ -16,14 +16,11 @@
 registerMooseObject("MooseApp", MaterialADConverter);
 registerMooseObject("MooseApp", RankFourTensorMaterialADConverter);
 registerMooseObject("MooseApp", RankTwoTensorMaterialADConverter);
-registerMooseObjectRenamed("MooseApp",
-                           MaterialConverter,
-                           "06/30/2022 24:00",
-                           MaterialADConverter);
+registerMooseObjectRenamed("MooseApp", MaterialConverter, "06/30/2022 24:00", MaterialADConverter);
 registerMooseObjectRenamed("MooseApp",
                            RankTwoTensorMaterialConverter,
                            "06/30/2022 24:00",
-                           RankTwoTensorMaterialADConverter); 
+                           RankTwoTensorMaterialADConverter);
 registerMooseObjectRenamed("MooseApp",
                            RankFourTensorMaterialConverter,
                            "06/30/2022 24:00",
