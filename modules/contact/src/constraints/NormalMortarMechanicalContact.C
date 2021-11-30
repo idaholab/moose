@@ -33,6 +33,8 @@ NormalMortarMechanicalContact::NormalMortarMechanicalContact(const InputParamete
 ADReal
 NormalMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
 {
+  ADReal residual(0.0);
+
   switch (type)
   {
     case Moose::MortarType::Secondary:
@@ -44,12 +46,36 @@ NormalMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
       // indicates the momentum will tend to increase at this location with time, which is what we
       // want because the force vector is in the positive direction (always opposite of the
       // normals).
-      return _test_secondary[_i][_qp] * _lambda[_qp] * _normals[_qp](_component);
+      // Get the _dof_to_weighted_gap map
+      if (!_interpolate_normals && !_secondary_ip_lowerd_map.count(_i))
+        return residual;
+
+      if (_interpolate_normals)
+        return _test_secondary[_i][_qp] * _lambda[_qp] * _normals[_qp](_component);
+      else
+      {
+        unsigned int normal_index = 0;
+        normal_index = _secondary_ip_lowerd_map.at(_i);
+        return _test_secondary[_i][_qp] * _lambda[_qp] *
+               _normals[normal_index](_component);
+      }
 
     case Moose::MortarType::Primary:
       // The normal vector is signed according to the secondary face, so we need to introduce a
       // negative sign here
-      return -_test_primary[_i][_qp] * _lambda[_qp] * _normals[_qp](_component);
+
+      if (!_interpolate_normals && !_primary_ip_lowerd_map.count(_i))
+        return residual;
+
+      if (_interpolate_normals)
+        return -_test_primary[_i][_qp] * _lambda[_qp] * _normals[_qp](_component);
+      else
+      {
+        unsigned int normal_index = 0;
+        normal_index = _primary_ip_lowerd_map.at(_i);
+        return -_test_primary[_i][_qp] * _lambda[_qp] *
+               _normals[normal_index](_component);
+      }
 
     default:
       return 0;

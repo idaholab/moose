@@ -86,6 +86,39 @@ public:
   void setNormals(const std::vector<Point> & normals) { _normals = normals; }
 
   /**
+   * Set the normals vector
+   */
+  void setNormalMap(const std::unordered_map<const Node *, Point> & normals_map)
+  {
+    _normals_map = normals_map;
+  }
+
+  /**
+   * Set the normals vector
+   */
+  void setLibmeshNodalTangents(const std::array<std::vector<Point>, 2> & tangents)
+  {
+    _tangents_libmesh_3d = tangents;
+  }
+
+  /**
+   * Set the normals vector
+   */
+  void
+  setSecondaryIpToLowerdMap(const std::map<unsigned int, unsigned int> & secondary_ip_lowerd_map)
+  {
+    _secondary_ip_lowerd_map = secondary_ip_lowerd_map;
+  }
+
+  /**
+   * Set the normals vector
+   */
+  void setPrimaryIpToLowerdMap(const std::map<unsigned int, unsigned int> & primary_ip_lowerd_map)
+  {
+    _primary_ip_lowerd_map = primary_ip_lowerd_map;
+  }
+
+  /**
    * Whether to interpolate the nodal normals (e.g. classic idea of evaluating field at quadrature
    * points). If this is set to false, then non-interpolated nodal normals will be used, and then
    * the _normals member should be indexed with _i instead of _qp
@@ -142,11 +175,25 @@ protected:
   /// the normals
   std::vector<Point> _normals;
 
+  std::unordered_map<const Node *, Point> _normals_map;
+
   /// the normals along the primary face
   const MooseArray<Point> & _normals_primary;
 
   /// the tangents along the secondary face
   const MooseArray<std::vector<Point>> & _tangents;
+
+  /// the tangents along the secondary face (three-dimensions)
+  std::array<std::vector<Point>, 2> _tangents_3d;
+
+  /// the tangents along the secondary face (three-dimensions)
+  std::array<std::vector<Point>, 2> _tangents_libmesh_3d;
+
+  /// Map to locate nodes from higher dimensional element to lower dimensional elements
+  std::map<unsigned int, unsigned int> _secondary_ip_lowerd_map;
+
+  /// Map to locate nodes from higher dimensional element to lower dimensional elements
+  std::map<unsigned int, unsigned int> _primary_ip_lowerd_map;
 
   /// The element Jacobian times weights
   const std::vector<Real> & _JxW_msm;

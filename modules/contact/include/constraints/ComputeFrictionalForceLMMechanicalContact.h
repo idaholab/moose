@@ -81,6 +81,13 @@ protected:
   /// in an additional direction, required for three-dimensional cases
   ADReal _qp_tangential_velocity_dir;
 
+  /// The value of the tangential velocity at the current node
+  ADRealVectorValue _qp_tangential_velocity_nodal;
+
+  /// The value of the tangential velocity at the current node
+  /// in an additional direction, required for three-dimensional cases
+  ADRealVectorValue _qp_tangential_velocity_dir_nodal;
+
   /// Numerical factor used in the tangential constraints for convergence purposes
   const Real _c_t;
 

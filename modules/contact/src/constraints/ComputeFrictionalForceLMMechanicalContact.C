@@ -69,7 +69,7 @@ ComputeFrictionalForceLMMechanicalContact::ComputeFrictionalForceLMMechanicalCon
 
   if (!_friction_var->isNodal())
     if (_friction_var->feType().order != static_cast<Order>(0))
-      mooseError(
+      paramError("friction_lm",
           "Frictional contact constraints only support elemental variables of CONSTANT order");
 
   if (_3d && !_friction_var_dir)
@@ -84,8 +84,17 @@ ComputeFrictionalForceLMMechanicalContact::computeQpProperties()
   // Compute the value of _qp_gap
   ComputeWeightedGapLMMechanicalContact::computeQpProperties();
 
-  ADRealVectorValue relative_velocity(
-      _secondary_x_dot[_qp] - _primary_x_dot[_qp], _secondary_y_dot[_qp] - _primary_y_dot[_qp], 0);
+  ADRealVectorValue relative_velocity;
+
+  if (_has_disp_z)
+    relative_velocity = {_secondary_x_dot[_qp] - _primary_x_dot[_qp],
+                         _secondary_y_dot[_qp] - _primary_y_dot[_qp],
+                         (*_secondary_z_dot)[_qp] - (*_primary_z_dot)[_qp]};
+  else
+    relative_velocity = {_secondary_x_dot[_qp] - _primary_x_dot[_qp],
+                         _secondary_y_dot[_qp] - _primary_y_dot[_qp],
+                         0.0};
+
   // Add derivative information
   relative_velocity(0).derivatives() =
       _secondary_x_dot[_qp].derivatives() - _primary_x_dot[_qp].derivatives();
@@ -95,11 +104,22 @@ ComputeFrictionalForceLMMechanicalContact::computeQpProperties()
     relative_velocity(2).derivatives() =
         (*_secondary_z_dot)[_qp].derivatives() - (*_primary_z_dot)[_qp].derivatives();
 
-  // Get the component in the tangential direction
-  // TODO: Create a consistent mortar tangential vector field (right now tangents from libmesh)
-  _qp_tangential_velocity = relative_velocity * (_tangents[_qp][0] * _JxW_msm[_qp] * _coord[_qp]);
+  if (_interpolate_normals)
+    _qp_tangential_velocity = relative_velocity * (_tangents[_qp][0] * _JxW_msm[_qp] * _coord[_qp]);
+  else
+    _qp_tangential_velocity_nodal = relative_velocity * (_JxW_msm[_qp] * _coord[_qp]);
 
-  if (_3d)
+  if (_interpolate_normals)
+  {
+    Moose::out << "Tangent vector in 2D is: " << _tangents[_qp][0] << "\n";
+    Moose::out << "Tangent vector in 3D is: " << _tangents[_qp][1] << "\n";
+    Moose::out << "Their cross product is is: " << _tangents[_qp][1].cross(_tangents[_qp][0])
+               << "\n";
+    Moose::out << "And the normal is: " << _normals[_qp] << "\n";
+  }
+  // If we don't use interpolated normals, we get the directions at the node,
+  // not here at the quadrature points.
+  if (_3d && _interpolate_normals)
     _qp_tangential_velocity_dir =
         relative_velocity * (_tangents[_qp][1] * _JxW_msm[_qp] * _coord[_qp]);
 }
@@ -115,7 +135,11 @@ ComputeFrictionalForceLMMechanicalContact::computeQpIProperties()
                               ? static_cast<const DofObject *>(_lower_secondary_elem->node_ptr(_i))
                               : static_cast<const DofObject *>(_lower_secondary_elem);
 
-  _dof_to_weighted_tangential_velocity[dof] += _test[_i][_qp] * _qp_tangential_velocity;
+  if (_interpolate_normals)
+    _dof_to_weighted_tangential_velocity[dof] += _test[_i][_qp] * _qp_tangential_velocity;
+  else
+    _dof_to_weighted_tangential_velocity[dof] +=
+        _test[_i][_qp] * _qp_tangential_velocity_nodal * _tangents_libmesh_3d[_i][0];
 
   // Get the _dof_to_weighted_tangential_velocity map for a second direction
   if (_3d)
@@ -125,8 +149,12 @@ ComputeFrictionalForceLMMechanicalContact::computeQpIProperties()
             ? static_cast<const DofObject *>(_lower_secondary_elem->node_ptr(_i))
             : static_cast<const DofObject *>(_lower_secondary_elem);
 
-    _dof_to_weighted_tangential_velocity_dir[dof_dir] +=
-        _test[_i][_qp] * _qp_tangential_velocity_dir;
+    if (_interpolate_normals)
+      _dof_to_weighted_tangential_velocity_dir[dof_dir] +=
+          _test[_i][_qp] * _qp_tangential_velocity_dir;
+    else
+      _dof_to_weighted_tangential_velocity_dir[dof_dir] +=
+          _test[_i][_qp] * _qp_tangential_velocity_nodal * _tangents_libmesh_3d[_i][1];
   }
 }
 

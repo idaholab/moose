@@ -53,13 +53,41 @@ TangentialMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
       // want to increase momentum in the system, which means we want an inflow of momentum, which
       // means we want the residual to be negative in that case. So the sign of this residual should
       // be the same as the sign of lambda
-      return _test_secondary[_i][_qp] * _lambda[_qp] * _tangents[_qp][_direction](_component) /
-             _tangents[_qp][_direction].norm();
+
+      if (!_interpolate_normals && !_secondary_ip_lowerd_map.count(_i))
+        return 0.0;
+
+      if (_interpolate_normals)
+        return _test_secondary[_i][_qp] * _lambda[_qp] * _tangents[_qp][_direction](_component) /
+               _tangents[_qp][_direction].norm();
+      else
+      {
+        if (!_interpolate_normals)
+        {
+          unsigned int tangent_index = 0;
+          tangent_index = _secondary_ip_lowerd_map.at(_i);
+          return _test_secondary[tangent_index][_qp] * _lambda[_qp] *
+                 _tangents_libmesh_3d[tangent_index][_direction](_component) /
+                 _tangents_libmesh_3d[tangent_index][_direction].norm();
+        }
+      }
 
     case Moose::MortarType::Primary:
       // Equal and opposite reactions so we put a negative sign here
-      return -_test_primary[_i][_qp] * _lambda[_qp] * _tangents[_qp][_direction](_component) /
-             _tangents[_qp][_direction].norm();
+      if (!_interpolate_normals && !_primary_ip_lowerd_map.count(_i))
+        return 0.0;
+
+      if (_interpolate_normals)
+        return -_test_primary[_i][_qp] * _lambda[_qp] * _tangents[_qp][_direction](_component) /
+               _tangents[_qp][_direction].norm();
+      else
+      {
+        unsigned int tangent_index = 0;
+        tangent_index = _primary_ip_lowerd_map.at(_i);
+        return -_test_primary[tangent_index][_qp] * _lambda[_qp] *
+               _tangents_libmesh_3d[tangent_index][_direction](_component) /
+               _tangents_libmesh_3d[tangent_index][_direction].norm();
+      }
 
     default:
       return 0;

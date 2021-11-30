@@ -179,6 +179,22 @@ public:
   std::vector<Point> getNodalNormals(const Elem & secondary_elem) const;
 
   /**
+   * @return The nodal normals associated with the provided \p secondary_elem
+   */
+  std::map<unsigned int, unsigned int>
+  getSecondaryIpToLowerElementMap(const Elem & _lower_secondary_elem) const;
+
+  std::map<unsigned int, unsigned int>
+  getPrimaryIpToLowerElementMap(const Elem & _primary_elem,
+                                const Elem & _primary_elem_ip,
+                                const Elem & _lower_secondary_elem) const;
+
+  /**
+   * @return The nodal tangents associated with the provided \p secondary_elem
+   */
+  std::array<std::vector<Point>, 2> getLibmeshNodalTangents(const Elem & secondary_elem) const;
+
+  /**
    * Compute the normals at given reference points on a secondary element
    * @param secondary_elem The secondary element used to query for associated nodal normals
    * @param xi1_pts The reference points on the secondary element to evaluate the normals at. The
@@ -199,6 +215,19 @@ public:
    */
   std::vector<Point> getNormals(const Elem & secondary_elem,
                                 const std::vector<Real> & oned_xi1_pts) const;
+
+  /**
+   * Compute the normals at given reference points on a secondary element
+   * @param secondary_elem The secondary element used to query for associated nodal normals
+   * @param 1d_xi1_pts The reference points on the secondary element to evaluate the normals at. The
+   * "points" are single reals corresponding to xi because right now our mortar mesh elements are
+   * always 1D
+   * @return The normals
+   */
+  std::unordered_map<const Node *, Point> getNodalNormalsMap() const
+  {
+    return _secondary_node_to_nodal_normal;
+  }
 
   /**
    * Get list of secondary nodes that don't contribute to interaction with any primary element.
@@ -349,6 +378,12 @@ private:
 
   // Container for storing the nodal normal vector associated with each secondary node.
   std::unordered_map<const Node *, Point> _secondary_node_to_nodal_normal;
+
+  // Container for storing the tangent normal vectors associated with each secondary node (libmesh).
+  std::unordered_map<const Node *, std::array<Point, 2>> _secondary_node_to_libmesh_nodal_tangents;
+
+  // Container for storing the tangent normal vectors associated with each secondary node.
+  std::unordered_map<const Node *, std::array<Point, 2>> _secondary_node_to_nodal_tangents;
 
   // List of inactive lagrange multiplier nodes (for nodal variables)
   std::unordered_set<const Node *> _inactive_local_lm_nodes;
