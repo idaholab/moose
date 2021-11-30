@@ -35,10 +35,6 @@ ResolveOptionalMaterialPropertiesAction::act()
 
   for (auto tid : make_range(all_materials.numThreads()))
     for (auto matbase_ptr : all_materials.getObjects(tid))
-    {
-      auto mat_ptr = std::dynamic_pointer_cast<Material>(matbase_ptr);
-      if (mat_ptr)
-        for (auto & proxy : mat_ptr->getOptionalPropertyProxies())
-          proxy->resolve();
-    }
+      if (auto mat_ptr = std::dynamic_pointer_cast<Material>(matbase_ptr))
+        mat_ptr->resolveOptionalProperties();
 }
