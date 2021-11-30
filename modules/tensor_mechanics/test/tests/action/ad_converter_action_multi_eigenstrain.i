@@ -106,7 +106,7 @@
     eigenstrain_name = reg_eigenstrain1
   [../]
   [./converter1]
-    type = RankTwoTensorMaterialConverter
+    type = RankTwoTensorMaterialADConverter
     block = 1
     reg_props_in = 'reg_eigenstrain1'
     ad_props_out = 'eigenstrain1'

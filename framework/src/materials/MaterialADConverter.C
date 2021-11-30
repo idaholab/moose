@@ -7,19 +7,31 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MaterialConverter.h"
+#include "MaterialADConverter.h"
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
 
 #include "metaphysicl/raw_type.h"
 
-registerMooseObject("MooseApp", MaterialConverter);
-registerMooseObject("MooseApp", RankFourTensorMaterialConverter);
-registerMooseObject("MooseApp", RankTwoTensorMaterialConverter);
+registerMooseObject("MooseApp", MaterialADConverter);
+registerMooseObject("MooseApp", RankFourTensorMaterialADConverter);
+registerMooseObject("MooseApp", RankTwoTensorMaterialADConverter);
+registerMooseObjectRenamed("MooseApp",
+                           MaterialConverter,
+                           "06/30/2022 24:00",
+                           MaterialADConverter);
+registerMooseObjectRenamed("MooseApp",
+                           RankTwoTensorMaterialConverter,
+                           "06/30/2022 24:00",
+                           RankTwoTensorMaterialADConverter); 
+registerMooseObjectRenamed("MooseApp",
+                           RankFourTensorMaterialConverter,
+                           "06/30/2022 24:00",
+                           RankFourTensorMaterialADConverter);
 
 template <typename T>
 InputParameters
-MaterialConverterTempl<T>::validParams()
+MaterialADConverterTempl<T>::validParams()
 {
   InputParameters params = Material::validParams();
   params.addClassDescription(
@@ -38,7 +50,7 @@ MaterialConverterTempl<T>::validParams()
 }
 
 template <typename T>
-MaterialConverterTempl<T>::MaterialConverterTempl(const InputParameters & parameters)
+MaterialADConverterTempl<T>::MaterialADConverterTempl(const InputParameters & parameters)
   : Material(parameters), _intra_convert(getParam<bool>("intra_convert"))
 {
   auto reg_props_in = getParam<std::vector<std::string>>("reg_props_in");
@@ -104,14 +116,14 @@ MaterialConverterTempl<T>::MaterialConverterTempl(const InputParameters & parame
 
 template <typename T>
 void
-MaterialConverterTempl<T>::initQpStatefulProperties()
+MaterialADConverterTempl<T>::initQpStatefulProperties()
 {
   computeQpProperties();
 }
 
 template <typename T>
 void
-MaterialConverterTempl<T>::computeQpProperties()
+MaterialADConverterTempl<T>::computeQpProperties()
 {
   if (_intra_convert)
     for (MooseIndex(_num_reg_props_to_convert) i = 0; i < _num_reg_props_to_convert; ++i)
@@ -128,6 +140,6 @@ MaterialConverterTempl<T>::computeQpProperties()
       (*_reg_props_out[i])[_qp] = MetaPhysicL::raw_value((*_ad_props_in[i])[_qp]);
 }
 
-template class MaterialConverterTempl<Real>;
-template class MaterialConverterTempl<RankFourTensor>;
-template class MaterialConverterTempl<RankTwoTensor>;
+template class MaterialADConverterTempl<Real>;
+template class MaterialADConverterTempl<RankFourTensor>;
+template class MaterialADConverterTempl<RankTwoTensor>;

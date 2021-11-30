@@ -614,8 +614,8 @@ TensorMechanicsAction::actEigenstrainNames()
         remove_reduced_set.insert(i);
     }
 
-    // Account for MaterialConverter , add or remove later
-    if (mat_name == "RankTwoTensorMaterialConverter")
+    // Account for MaterialADConverter , add or remove later
+    if (mat_name == "RankTwoTensorMaterialADConverter")
     {
       std::vector<std::string> remove_list;
       std::vector<std::string> add_list;
@@ -633,7 +633,7 @@ TensorMechanicsAction::actEigenstrainNames()
         add_list = mat_params.get<std::vector<std::string>>("reg_props_out");
       }
 
-      // These vectors are the same size as checked in MaterialConverter
+      // These vectors are the same size as checked in MaterialADConverter
       for (unsigned int index = 0; index < remove_list.size(); index++)
         remove_add_map.emplace(remove_list[index], add_list[index]);
     }
