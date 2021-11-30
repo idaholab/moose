@@ -1,0 +1,17 @@
+[Tests]
+  issues = '#16758'
+  [regular]
+    type = Exodiff
+    input = test.i
+    exodiff = test_out.e
+    requirement = 'The system shall provide a material object that can, for a single material property, map subdomain IDs to a possibly discontinuous property value.'
+    design = 'PiecewiseConstantByBlockMaterial.md'
+  []
+  [functor]
+    type = Exodiff
+    input = test_functor.i
+    exodiff = test_functor_out.e
+    requirement = 'The system shall provide a material object that can, for a single functor material property, map subdomain IDs to different functors.'
+    design = 'PiecewiseByBlockFunctorMaterial.md'
+  []
+[]

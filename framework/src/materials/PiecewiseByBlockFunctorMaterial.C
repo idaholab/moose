@@ -12,14 +12,6 @@
 registerMooseObject("MooseApp", PiecewiseByBlockFunctorMaterial);
 registerMooseObject("MooseApp", ADPiecewiseByBlockFunctorMaterial);
 registerMooseObjectRenamed("MooseApp",
-                           PiecewiseConstantByBlockFunctorMaterial,
-                           "06/30/2022 24:00",
-                           PiecewiseByBlockFunctorMaterial);
-registerMooseObjectRenamed("MooseApp",
-                           ADPiecewiseConstantByBlockFunctorMaterial,
-                           "06/30/2022 24:00",
-                           ADPiecewiseByBlockFunctorMaterial);
-registerMooseObjectRenamed("MooseApp",
                            FVPropValPerSubdomainMaterial,
                            "06/30/2022 24:00",
                            PiecewiseByBlockFunctorMaterial);
@@ -37,7 +29,7 @@ PiecewiseByBlockFunctorMaterialTempl<is_ad>::validParams()
   // Somehow min gcc doesn't know the type of params here
   params.template addRequiredParam<MaterialPropertyName>("prop_name",
                                                          "The name of the property to declare");
-  params.template addRequiredParam<std::map<std::string, MooseFunctorName>>(
+  params.template addRequiredParam<std::map<std::string, std::string>>(
       "subdomain_to_prop_value", "Map from subdomain to property value. The value may be a constant"
       " or any kind of functor (functions, variables, functor material properties)");
   return params;
@@ -49,7 +41,7 @@ PiecewiseByBlockFunctorMaterialTempl<is_ad>::PiecewiseByBlockFunctorMaterialTemp
   : FunctorMaterial(params), _prop(declareFunctorProperty<GenericReal<is_ad>>("prop_name"))
 {
   for (const auto & map_pr : getParam<std::map<std::string,
-                                               MooseFunctorName>>("subdomain_to_prop_value"))
+                                               std::string>>("subdomain_to_prop_value"))
   {
     const MooseFunctorName value = map_pr.second;
     const auto & functor = &getFunctor<GenericReal<is_ad>>(value);
