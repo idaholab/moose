@@ -13,14 +13,38 @@
 #include "MaterialBase.h"
 #include "Coupleable.h"
 #include "MaterialPropertyInterface.h"
-#include "OptionalMaterialPropertyProxyForward.h"
 #include "FEProblemBase.h"
+
+#include <string>
 
 // forward declarations
 class Material;
 
 template <>
 InputParameters validParams<Material>();
+
+/**
+ * Helper class for deferred getting of material properties after the construction
+ * phase for materials. This enables "optional material properties" in materials.
+ * It works by returning a reference to a pointer to a material property (rather
+ * than a reference to the property value). The pointer will be set to point to
+ * either an existing material property or to nullptr if the requested property
+ * does not exist.
+ */
+class OptionalMaterialPropertyProxyBase
+{
+public:
+  OptionalMaterialPropertyProxyBase(const std::string & name, Material * material)
+    : _name(name), _material(material)
+  {
+  }
+  virtual ~OptionalMaterialPropertyProxyBase() {}
+  virtual void resolve() = 0;
+
+protected:
+  const std::string _name;
+  Material * _material;
+};
 
 /**
  * Materials compute MaterialProperties.
@@ -168,6 +192,13 @@ public:
 
   bool ghostable() const override final { return _ghostable; }
 
+  /// get a constant reference to the list of optional material properties
+  const std::vector<std::unique_ptr<OptionalMaterialPropertyProxyBase>> &
+  getOptionalPropertyProxies()
+  {
+    return _optional_property_proxies;
+  }
+
 protected:
   virtual const MaterialData & materialData() const override { return *_material_data; }
   virtual MaterialData & materialData() override { return *_material_data; }
@@ -200,6 +231,47 @@ private:
   /// context. If properties depend on finite element variables, then this material cannot be
   /// computed in a ghosted context
   bool _ghostable;
+
+  /// optional material properties
+  std::vector<std::unique_ptr<OptionalMaterialPropertyProxyBase>> _optional_property_proxies;
+};
+
+template <typename T>
+class OptionalMaterialPropertyProxy : public OptionalMaterialPropertyProxyBase
+{
+public:
+  OptionalMaterialPropertyProxy(const std::string & name, Material * material)
+    : OptionalMaterialPropertyProxyBase(name, material), _value(nullptr)
+  {
+  }
+  const MaterialProperty<T> * const & value() { return _value; }
+  void resolve() override
+  {
+    if (_material->hasMaterialProperty<T>(_name))
+      _value = &_material->getMaterialProperty<T>(_name);
+  }
+
+private:
+  const MaterialProperty<T> * _value;
+};
+
+template <typename T>
+class OptionalADMaterialPropertyProxy : public OptionalMaterialPropertyProxyBase
+{
+public:
+  OptionalADMaterialPropertyProxy(const std::string & name, Material * material)
+    : OptionalMaterialPropertyProxyBase(name, material), _value(nullptr)
+  {
+  }
+  const ADMaterialProperty<T> * const & value() { return _value; }
+  void resolve() override
+  {
+    if (_material->hasADMaterialProperty<T>(_name))
+      _value = &_material->getADMaterialProperty<T>(_name);
+  }
+
+private:
+  const ADMaterialProperty<T> * _value;
 };
 
 template <typename T>
@@ -318,16 +390,13 @@ Material::getMaterialPropertyOlderByName(const std::string & prop_name_in)
   return MaterialPropertyInterface::getMaterialPropertyOlderByName<T>(prop_name_in);
 }
 
-#include "OptionalMaterialPropertyProxy.h"
-
 template <typename T>
 const MaterialProperty<T> * const &
 Material::getOptionalMaterialProperty(const std::string & name)
 {
-  auto proxy = new OptionalMaterialPropertyProxy<T>(name, this);
+  auto proxy = std::make_unique<OptionalMaterialPropertyProxy<T>>(name, this);
   auto & pointer = proxy->value();
-  // lifetime management of the proxy object is performed by _fe_problem
-  _fe_problem.addOptionalMaterialPropertyProxy(proxy);
+  _optional_property_proxies.push_back(std::move(proxy));
   return pointer;
 }
 
@@ -335,9 +404,8 @@ template <typename T>
 const ADMaterialProperty<T> * const &
 Material::getOptionalADMaterialProperty(const std::string & name)
 {
-  auto proxy = new OptionalADMaterialPropertyProxy<T>(name, this);
+  auto proxy = std::make_unique<OptionalADMaterialPropertyProxy<T>>(name, this);
   auto & pointer = proxy->value();
-  // lifetime management of the proxy object is performed by _fe_problem
-  _fe_problem.addOptionalMaterialPropertyProxy(proxy);
+  _optional_property_proxies.push_back(std::move(proxy));
   return pointer;
 }

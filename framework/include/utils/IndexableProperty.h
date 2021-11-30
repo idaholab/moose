@@ -119,7 +119,7 @@ IndexableProperty<T, is_ad>::operator[](int qp) const
   if (_property_rank_four_tensor)
     return (*_property_rank_four_tensor)[qp](
         _component[0], _component[1], _component[2], _component[3]);
-  mooseError("internal error");
+  _host->mooseError("internal error in IndexableProperty");
 }
 
 template <typename T, bool is_ad>
@@ -139,11 +139,11 @@ IndexableProperty<T, is_ad>::check() const
   else if (_property_rank_four_tensor)
     checkComponents(4);
   else
-    mooseError("The ",
-               is_ad ? "AD" : "non-AD",
-               " material property '",
-               _property_name,
-               "' does not exist");
+    _host->mooseError("The ",
+                      is_ad ? "AD" : "non-AD",
+                      " material property '",
+                      _property_name,
+                      "' does not exist");
 }
 
 template <typename T, bool is_ad>
@@ -151,12 +151,12 @@ void
 IndexableProperty<T, is_ad>::checkComponents(unsigned int components)
 {
   if (_component.size() != components)
-    mooseError("Material property '",
-               _property_name,
-               "' is ",
-               components,
-               " dimensional, but an index vector of size ",
-               _component.size(),
-               " was supplied to select a component. It looks like you were expecting the "
-               "material property to have a different type.");
+    _host->mooseError("Material property '",
+                      _property_name,
+                      "' is ",
+                      components,
+                      " dimensional, but an index vector of size ",
+                      _component.size(),
+                      " was supplied to select a component. It looks like you were expecting the "
+                      "material property to have a different type.");
 }
