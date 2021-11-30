@@ -152,6 +152,9 @@ private:
   /// Whether the values are cumulative over the layers
   bool _cumulative;
 
+  /// Whether the cumulative values should be summed in the positive or negative direction
+  const bool _positive_cumulative_direction;
+
   /// List of SubdomainIDs, if given
   std::vector<SubdomainID> _layer_bounding_blocks;
 

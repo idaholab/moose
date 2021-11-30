@@ -51,6 +51,11 @@ LayeredBase::validParams()
       "cumulative",
       false,
       "When true the value in each layer is the sum of the values up to and including that layer");
+  params.addParam<bool>(
+      "positive_cumulative_direction",
+      true,
+      "When 'cumulative' is true, whether the direction for summing the cumulative value "
+      "is the positive direction or negative direction");
 
   params.addParam<std::vector<SubdomainName>>(
       "block", "The list of block ids (SubdomainID) that this object will be applied");
@@ -85,12 +90,17 @@ LayeredBase::LayeredBase(const InputParameters & parameters)
     _layer_has_value(declareRestartableData<std::vector<int>>("layer_has_value")),
     _layered_base_subproblem(*parameters.getCheckedPointerParam<SubProblem *>("_subproblem")),
     _cumulative(parameters.get<bool>("cumulative")),
+    _positive_cumulative_direction(parameters.get<bool>("positive_cumulative_direction")),
     _layer_bounding_blocks(),
     _has_direction_max_min(false)
 {
   if (_layered_base_params.isParamValid("num_layers") &&
       _layered_base_params.isParamValid("bounds"))
     mooseError("'bounds' and 'num_layers' cannot both be set");
+
+  if (!_cumulative && parameters.isParamSetByUser("positive_cumulative_direction"))
+    mooseWarning(
+        "The 'positive_cumulative_direction' parameter is unused when 'cumulative' is false");
 
   if (_layered_base_params.isParamValid("num_layers"))
   {
@@ -309,11 +319,18 @@ LayeredBase::finalize()
   {
     Real value = 0;
 
-    for (unsigned i = 0; i < _num_layers; ++i)
-    {
-      value += getLayerValue(i);
-      setLayerValue(i, value);
-    }
+    if (_positive_cumulative_direction)
+      for (unsigned i = 0; i < _num_layers; i++)
+      {
+        value += getLayerValue(i);
+        setLayerValue(i, value);
+      }
+    else
+      for (int i = _num_layers - 1; i >= 0; i--)
+      {
+        value += getLayerValue(i);
+        setLayerValue(i, value);
+      }
   }
 }
 
