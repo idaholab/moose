@@ -86,7 +86,8 @@ CoarseMeshExtraElementIDGenerator::generate()
   MeshSerializer tm(*coarse_mesh);
 
   // build a point_locator on coarse mesh
-  UniquePtr<PointLocatorBase> point_locator = PointLocatorBase::build(TREE_ELEMENTS, *coarse_mesh);
+  std::unique_ptr<PointLocatorBase> point_locator =
+      PointLocatorBase::build(TREE_ELEMENTS, *coarse_mesh);
   point_locator->enable_out_of_mesh_mode();
 
   // loop through fine mesh elements and get element's centroid
@@ -118,7 +119,7 @@ CoarseMeshExtraElementIDGenerator::generate()
     {
       // Get the node: we need to manually move it towards the centroid to
       // ensure that nothing weird happes due to round-off
-      Node current_node = elem->node_ref(n);
+      Point current_node = elem->point(n);
       current_node.add_scaled(current_node, -aeps);
       current_node.add_scaled(centroid, aeps);
 
