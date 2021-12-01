@@ -201,7 +201,7 @@ protected:
    * Tracks the rotation of the crystal during deformation
    * Note: this rotation tensor is not applied to the crystal lattice
    */
-  MaterialProperty<RankTwoTensor> & _update_rotation;
+  MaterialProperty<RankTwoTensor> & _updated_rotation;
 
   /**
    * Crystal rotation in the original, or reference, configuration as defined by

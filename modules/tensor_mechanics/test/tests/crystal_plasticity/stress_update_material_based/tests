@@ -118,4 +118,50 @@
     design = '/ComputeCrystalPlasticityThermalEigenstrain.md '
              '/ComputeMultipleCrystalPlasticityStress.md'
   []
+  [update_euler_angle_111_orientation]
+    type = 'CSVDiff'
+    input = 'update_euler_angle.i'
+    csvdiff = 'update_euler_angle_111_orientation_out.csv'
+    cli_args = 'Materials/elasticity_tensor/euler_angle_1=0 '
+               'Materials/elasticity_tensor/euler_angle_2=54.7 '
+               'Materials/elasticity_tensor/euler_angle_3=45 '
+               'Outputs/file_base=update_euler_angle_111_orientation_out'
+    allow_warnings = true
+    requirement = 'The system shall produce correct Euler angles during the crystal plastic '
+                  'simulation for single crystal oriented along (111).'
+    issues = '#19473'
+    design = '/ComputeUpdatedEulerAngle.md '
+             '/ComputeMultipleCrystalPlasticityStress.md'
+  []
+  [update_euler_angle_112_orientation]
+    type = 'CSVDiff'
+    input = 'update_euler_angle.i'
+    csvdiff = 'update_euler_angle_112_orientation_out.csv'
+    cli_args = 'Materials/elasticity_tensor/euler_angle_1=90 '
+               'Materials/elasticity_tensor/euler_angle_2=30 '
+               'Materials/elasticity_tensor/euler_angle_3=45 '
+               'Outputs/file_base=update_euler_angle_112_orientation_out'
+    allow_warnings = true
+    requirement = 'The system shall produce correct Euler angles during the crystal plastic '
+                  'simulation for single crystal oriented along (112).'
+    issues = '#19473'
+    design = '/ComputeUpdatedEulerAngle.md '
+             '/ComputeMultipleCrystalPlasticityStress.md'
+  []
+  [update_euler_angle_123_orientation]
+    type = 'CSVDiff'
+    input = 'update_euler_angle.i'
+    csvdiff = 'update_euler_angle_123_orientation_out.csv'
+    cli_args = 'Materials/elasticity_tensor/euler_angle_1=50 '
+               'Materials/elasticity_tensor/euler_angle_2=34 '
+               'Materials/elasticity_tensor/euler_angle_3=65 '
+               'Outputs/file_base=update_euler_angle_123_orientation_out'
+    allow_warnings = true
+    requirement = 'The system shall produce correct Euler angles during the crystal plastic '
+                  'simulation for single crystal oriented along (123). '
+    issues = '#19473'
+    design = '/ComputeUpdatedEulerAngle.md '
+             '/ComputeMultipleCrystalPlasticityStress.md'
+  []
+
 []
