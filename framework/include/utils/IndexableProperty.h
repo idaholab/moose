@@ -155,7 +155,7 @@ IndexableProperty<T, is_ad>::checkComponents(unsigned int components) const
                       _property_name,
                       "' is ",
                       components,
-                      " dimensional, but an index vector of size ",
+                      "-dimensional, but an index vector of size ",
                       _component.size(),
                       " was supplied to select a component. It looks like you were expecting the "
                       "material property to have a different type.");

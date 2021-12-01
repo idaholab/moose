@@ -23,7 +23,7 @@ public:
   OptionalTestMaterial(const InputParameters & parameters);
 
 protected:
-  void computeQpProperties();
+  void computeQpProperties() override;
 
 private:
   const MaterialProperty<Real> * const & _prop;

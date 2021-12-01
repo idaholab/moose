@@ -119,7 +119,7 @@ is not provided by any material this pointer will remain `nullptr` and it is the
 responsibility to check for this before dereferencing the pointer. Note that the pointer value is
 only finalized _after_ all materials have been constructed, so a `nullptr` check must _not_ be
 made in the constructor of a material class but either at time of first use in `computeQpProperties`
-or in `initailSetup`.
+or in `initialSetup`.
 
 ## Property Names id=property-names
 

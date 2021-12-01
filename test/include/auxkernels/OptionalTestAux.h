@@ -23,7 +23,7 @@ public:
   OptionalTestAux(const InputParameters & parameters);
 
 protected:
-  Real computeValue();
+  Real computeValue() override;
 
 private:
   const MaterialProperty<Real> * const & _prop;
