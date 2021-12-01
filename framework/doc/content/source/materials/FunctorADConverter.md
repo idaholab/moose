@@ -1,22 +1,28 @@
-# MaterialADConverter
+# FunctorADConverter
 
-The `MaterialADConverter` is used to explicitly convert regular material
-properties into AD material properties and visa versa.
+!syntax description /Materials/FunctorADConverter
 
-!alert warning When using the [`MaterialADConverter`](MaterialADConverter.md) object
-for RankTwoTensor eigenstrains with the
-`TensorMechanicsAction` setting
-`automatic_eigenstrain_names = true`, eigenstrains listed as MaterialADConverter
-input  tensors will not be included in the `eigenstrain_names` list passed. Set
-the automatic/_eigenstrain/_names = false and populate this list manually if
-these components need to be included.
+Converting from AD to regular functors or vice versa can both lead to irremediable loss of
+derivative information when using the [automatic differentiation system](systems/NonlinearSystem.md#AD).
+Missing derivative information (from using a converted regular functor where a true AD functor should have been used)
+can lead to an imperfect Jacobian which can impact convergence properties of Newton solves.
 
-## Description and Syntax
+Some examples of safe conversions:
 
-!syntax description /Materials/MaterialADConverter
+- Functions to ADFunctions and vice-versa are safe since functions do not hold derivative data
 
-!syntax parameters /Materials/MaterialADConverter
+- AuxVariables to regular functors is safe since auxiliary variables do not hold derivative data
 
-!syntax inputs /Materials/MaterialADConverter
 
-!syntax children /Materials/MaterialADConverter
+## Example input syntax
+
+An example of some gymnastic with functor conversions is shown in this example. The reader should note
+that only the conversion to an AD functor from a regular functor (from a regular Function) was necessary.
+
+!listing test/tests/materials/functor_properties/ad_conversion/1d_dirichlet.i block=Materials
+
+!syntax parameters /Materials/FunctorADConverter
+
+!syntax inputs /Materials/FunctorADConverter
+
+!syntax children /Materials/FunctorADConverter
