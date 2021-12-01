@@ -535,10 +535,10 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
         _has_rings ? (_ring_intervals.front() > 1 ? 2 : 1) : (_background_intervals > 1 ? 2 : 1);
     for (unsigned int i = 0; i < _interface_boundary_names.size(); i++)
     {
-      mesh0->get_boundary_info().sideset_name(i + interface_id_shift + _interface_boundary_id_shift) =
-          _interface_boundary_names[i];
-      mesh0->get_boundary_info().nodeset_name(i + interface_id_shift + _interface_boundary_id_shift) =
-          _interface_boundary_names[i];
+      mesh0->get_boundary_info().sideset_name(
+          i + interface_id_shift + _interface_boundary_id_shift) = _interface_boundary_names[i];
+      mesh0->get_boundary_info().nodeset_name(
+          i + interface_id_shift + _interface_boundary_id_shift) = _interface_boundary_names[i];
     }
   }
   return dynamic_pointer_cast<MeshBase>(mesh0);
