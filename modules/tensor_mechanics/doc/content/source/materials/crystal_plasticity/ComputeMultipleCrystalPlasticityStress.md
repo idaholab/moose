@@ -268,6 +268,24 @@ where a and c are the HCP unit cell lattice parameters in the basal and axial di
 !alert note
 The alignment of the a$_1$ axis of the Miller-Bravis notation and the x-axis of the Cartesian system within the basal plane of the unit HCP is specifically adopted for the conversion implementation in the `ComputeMultipleCrystalPlasticityStress` associated classes. While there is broad consensus in the alignment of the HPC c-axis with the Cartesian z-axis, no standard for alignment within the basal plane has emerged. Users should note this assumption in the construction of their simulations and the interpretations of the simulation results.
 
+## Calculation of Crystal Rotation
+
+The rotation of a crystal during deformation is calculated within the `ComputeMultipleCrystalPlasticityStress` class through a polar decomposition on the elastic part of the deformation tensor ($\boldsymbol{F}^{e}$), i.e.,
+
+\begin{equation}
+  \boldsymbol{F}^{e} = \boldsymbol{R}^{e}\cdot\boldsymbol{U}^{e},
+\end{equation}
+where $\boldsymbol{U}^{e}$ is the symmetric matrix that describes the elastic stretch of the crystal, $\boldsymbol{R}^{e}$ is the orthogonal tensor that describes the elastic part of the crystal rotation.
+
+Note here $\boldsymbol{R}^{e}$ represents the rotation of the crystal with respect to its crystal lattice. To obtain the the crystal rotation relative to the reference frame (total rotation $\boldsymbol{R}^{\text{total}}$), initial orientation of the crystal needs to be considered, i.e.,
+
+\begin{equation}
+  \boldsymbol{R}^{\text{total}} = \boldsymbol{R}^{e}\cdot\boldsymbol{R}^{\text{initial}},
+\end{equation}
+where $\boldsymbol{R}^{\text{initial}}$ denotes the rotation matrix that corresponds to the initial orientation of the crystal.
+
+To obtain the Euler angles for the crystals during deformation, one will need to transform the rotation matrix to the Euler angle. One can refer to the [ComputeUpdatedEulerAngle](/ComputeUpdatedEulerAngle.md) class for this purpose.
+
 ## Computation Workflow
 
 The order of calculations performed within the `ComputeMultipleCrystalPlasticityStress`
