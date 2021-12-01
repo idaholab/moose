@@ -87,6 +87,9 @@ private:
   // Set old and older solutions to be the same as the current solution
   void setOldAndOlderSolutionsForMovedNodes(SystemBase & sys);
 
+  // Change the subdomain ID of all ancestor elements
+  void setAncestorsSubdomainIDs(const SubdomainID & subdomain_id, const dof_id_type & elem_id);
+
   // Elements on the undisplaced mesh whose subdomain IDs have changed
   std::vector<const Elem *> _moved_elems;
 

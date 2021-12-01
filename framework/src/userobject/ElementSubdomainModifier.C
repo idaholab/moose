@@ -103,6 +103,10 @@ ElementSubdomainModifier::execute()
       displaced_elem->subdomain_id() = subdomain_id;
       _moved_displaced_elems.push_back(displaced_elem);
     }
+
+    // Change the parent's subdomain, if any
+    // We do not save the parent info since they are inactive
+    setAncestorsSubdomainIDs(subdomain_id, elem_id);
   }
 }
 
@@ -384,4 +388,27 @@ ElementSubdomainModifier::setOldAndOlderSolutionsForMovedNodes(SystemBase & sys)
   old_solution.close();
   if (older_solution)
     older_solution->close();
+}
+
+void
+ElementSubdomainModifier::setAncestorsSubdomainIDs(const SubdomainID & subdomain_id,
+                                                   const dof_id_type & elem_id)
+{
+  Elem * curr_elem = _mesh.elemPtr(elem_id);
+
+  unsigned int lv = curr_elem->level();
+
+  for (unsigned int i = lv; i > 0; --i)
+  {
+    // Change the parent's subdomain, if any
+    curr_elem = curr_elem->parent();
+    dof_id_type id = curr_elem->id();
+    Elem * elem = _mesh.elemPtr(id);
+    elem->subdomain_id() = subdomain_id;
+
+    // displaced parent element
+    Elem * displaced_elem = _displaced_problem ? _displaced_problem->mesh().elemPtr(id) : nullptr;
+    if (displaced_elem)
+      displaced_elem->subdomain_id() = subdomain_id;
+  }
 }
