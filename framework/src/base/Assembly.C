@@ -2320,7 +2320,7 @@ Assembly::reinitDual(const Elem * elem,
 
   for (const auto & it : _fe_lower[elem_dim])
   {
-    FEBase * fe_lower = it.second;
+    FEBase * const fe_lower = it.second;
     // We use customized quadrature rule for integration along the mortar segment elements
     fe_lower->set_calculate_default_dual_coeff(false);
     fe_lower->reinit_dual_shape_coeffs(elem, pts, JxW);

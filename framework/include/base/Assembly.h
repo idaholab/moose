@@ -548,7 +548,7 @@ public:
    * Indicates whether dual shape functions are used (computation is now repeated on each element
    * so expense of computing dual shape functions is no longer trivial)
    */
-  bool needDual() { return _need_dual; }
+  bool needDual() const { return _need_dual; }
 
 private:
   /**

@@ -87,7 +87,8 @@ ComputeMortarFunctor::operator()()
 
   for (const auto msm_elem : _amg.mortarSegmentMesh().active_local_element_ptr_range())
   {
-    const MortarSegmentInfo & msinfo = _amg.mortarSegmentMeshElemToInfo().at(msm_elem);
+    const MortarSegmentInfo & msinfo =
+        libmesh_map_find(_amg.mortarSegmentMeshElemToInfo(), msm_elem);
     const Elem * secondary_face_elem = msinfo.secondary_elem;
 
     // Compute fraction of volume of secondary element the segment accounts for
@@ -476,19 +477,19 @@ ComputeMortarFunctor::projectQPoints3d(const Elem * msm_elem,
       // On small mortar segment elements with very distorted elements this can fail, instead of
       // erroring simply truncate quadrature point, these points typically have very small
       // contributions to integrals
+      auto & qp_back = q_pts.back();
       if (primal_elem->type() == TRI3 || primal_elem->type() == TRI6)
       {
-        if (q_pts.back()(0) < 0 || q_pts.back()(1) < 0 || q_pts.back()(0) + q_pts.back()(1) > 1)
+        if (qp_back(0) < 0 || qp_back(1) < 0 || qp_back(0) + qp_back(1) > 1)
         {
-          mooseException("Quadrature point: ", q_pts.back(), " out of bounds, truncating.");
+          mooseException("Quadrature point: ", qp_back, " out of bounds, truncating.");
         }
       }
       else if (primal_elem->type() == QUAD4 || primal_elem->type() == QUAD9)
       {
-        if (q_pts.back()(0) < -1 || q_pts.back()(0) > 1 || q_pts.back()(1) < -1 ||
-            q_pts.back()(1) > 1)
+        if (qp_back(0) < -1 || qp_back(0) > 1 || qp_back(1) < -1 || qp_back(1) > 1)
         {
-          mooseException("Quadrature point: ", q_pts.back(), " out of bounds, truncating");
+          mooseException("Quadrature point: ", qp_back, " out of bounds, truncating");
         }
       }
     }
