@@ -22,10 +22,12 @@ public:
 
 protected:
   virtual MarkerValue computeElementMarker() override;
+  bool checkElementSubdomainConsistent(const Elem * const & _current_elem);
 
   Real _coarsen;
   Real _refine;
   bool _clear_extremes;
+  bool _is_subdomain_consistent;
 
   Real _max;
   Real _min;

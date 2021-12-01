@@ -34,6 +34,11 @@ ErrorFractionMarker::validParams()
                         " Changing this to `false` will result in the global extremes ever "
                         "encountered during the run to be used as the min and max error.");
 
+  params.addParam<bool>("check_subdomain_consistent_for_coarsen",
+                        false,
+                        "Whether or not to check the consistency of subdomain ids when coarsening."
+                        "The motivation is that coarsening on the moving boundary results in geometry accuracy lose");
+
   params.addClassDescription("Marks elements for refinement or coarsening based on the fraction of "
                              "the min/max error from the supplied indicator.");
   return params;
@@ -44,6 +49,7 @@ ErrorFractionMarker::ErrorFractionMarker(const InputParameters & parameters)
     _coarsen(parameters.get<Real>("coarsen")),
     _refine(parameters.get<Real>("refine")),
     _clear_extremes(parameters.get<bool>("clear_extremes")),
+    _is_subdomain_consistent(parameters.get<bool>("check_subdomain_consistent_for_coarsen")),
     _max(0),
     _min(std::numeric_limits<Real>::max())
 {
@@ -70,6 +76,27 @@ ErrorFractionMarker::markerSetup()
   _coarsen_cutoff = _coarsen * _delta + _min;
 }
 
+bool
+ErrorFractionMarker::checkElementSubdomainConsistent(const Elem * const & _current_elem)
+{
+  auto parent = _current_elem->parent();
+
+  if (parent)
+  {
+    std::set<subdomain_id_type> subdomain_ids;
+    for (auto & c : parent->child_ref_range())
+    {
+      subdomain_ids.insert(c.subdomain_id());
+    }
+    if (subdomain_ids.size() > 1)
+      return false;
+    else
+      return true;
+  }
+  else
+    return true; // Level-0 element will be fine
+}
+
 Marker::MarkerValue
 ErrorFractionMarker::computeElementMarker()
 {
@@ -78,7 +105,12 @@ ErrorFractionMarker::computeElementMarker()
   if (error > _refine_cutoff)
     return REFINE;
   else if (error < _coarsen_cutoff)
-    return COARSEN;
+  {
+     if (!_is_subdomain_consistent || (_is_subdomain_consistent && checkElementSubdomainConsistent(_current_elem)))
+       return COARSEN;
+     else
+       return DO_NOTHING;
+  }
 
   return DO_NOTHING;
 }
