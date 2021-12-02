@@ -52,12 +52,12 @@ protected:
   const std::vector<unsigned int> _component;
 
   ///@{ only one of those pointers will be non-null and pointing to the selected property
-  const GenericMaterialProperty<Real, is_ad> * const & _property_real;
-  const GenericMaterialProperty<std::vector<Real>, is_ad> * const & _property_std_vector;
-  const GenericMaterialProperty<RealVectorValue, is_ad> * const & _property_real_vector_value;
-  const GenericMaterialProperty<RankTwoTensor, is_ad> * const & _property_rank_two_tensor;
-  const GenericMaterialProperty<RankThreeTensor, is_ad> * const & _property_rank_three_tensor;
-  const GenericMaterialProperty<RankFourTensor, is_ad> * const & _property_rank_four_tensor;
+  const GenericOptionalMaterialProperty<Real, is_ad> & _property_real;
+  const GenericOptionalMaterialProperty<std::vector<Real>, is_ad> & _property_std_vector;
+  const GenericOptionalMaterialProperty<RealVectorValue, is_ad> & _property_real_vector_value;
+  const GenericOptionalMaterialProperty<RankTwoTensor, is_ad> & _property_rank_two_tensor;
+  const GenericOptionalMaterialProperty<RankThreeTensor, is_ad> & _property_rank_three_tensor;
+  const GenericOptionalMaterialProperty<RankFourTensor, is_ad> & _property_rank_four_tensor;
   ///@}
 };
 
@@ -107,17 +107,17 @@ GenericReal<is_ad>
 IndexableProperty<T, is_ad>::operator[](int qp) const
 {
   if (_property_real)
-    return (*_property_real)[qp];
+    return _property_real[qp];
   if (_property_std_vector)
-    return (*_property_std_vector)[qp][_component[0]];
+    return _property_std_vector[qp][_component[0]];
   if (_property_real_vector_value)
-    return (*_property_real_vector_value)[qp](_component[0]);
+    return _property_real_vector_value[qp](_component[0]);
   if (_property_rank_two_tensor)
-    return (*_property_rank_two_tensor)[qp](_component[0], _component[1]);
+    return _property_rank_two_tensor[qp](_component[0], _component[1]);
   if (_property_rank_three_tensor)
-    return (*_property_rank_three_tensor)[qp](_component[0], _component[1], _component[2]);
+    return _property_rank_three_tensor[qp](_component[0], _component[1], _component[2]);
   if (_property_rank_four_tensor)
-    return (*_property_rank_four_tensor)[qp](
+    return _property_rank_four_tensor[qp](
         _component[0], _component[1], _component[2], _component[3]);
   _host->mooseError("internal error in IndexableProperty");
 }

@@ -26,8 +26,8 @@ protected:
   Real computeValue() override;
 
 private:
-  const MaterialProperty<Real> * const & _prop;
-  const ADMaterialProperty<Real> * const & _adprop;
+  const OptionalMaterialProperty<Real> & _prop;
+  const OptionalADMaterialProperty<Real> & _adprop;
   const bool _expect;
   const bool _adexpect;
 };

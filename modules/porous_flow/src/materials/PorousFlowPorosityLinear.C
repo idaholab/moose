@@ -104,16 +104,17 @@ PorousFlowPorosityLinear::PorousFlowPorosityLinear(const InputParameters & param
 void
 PorousFlowPorosityLinear::initialSetup()
 {
-  _pf = _nodal_material ? _pf_nodal : _pf_qp;
-  _dpf_dvar = _nodal_material ? _dpf_dvar_nodal : _dpf_dvar_qp;
+  _pf = _nodal_material ? _pf_nodal.get() : _pf_qp.get();
+  _dpf_dvar = _nodal_material ? _dpf_dvar_nodal.get() : _dpf_dvar_qp.get();
   if (!(_pf && _dpf_dvar) && _uses_pf)
   {
     mooseError("PorousFlowPorosityLinear: When P_coeff is given you must have an effective fluid "
                "pressure Material");
   }
 
-  _temperature = _nodal_material ? _temperature_nodal : _temperature_qp;
-  _dtemperature_dvar = _nodal_material ? _dtemperature_dvar_nodal : _dtemperature_dvar_qp;
+  _temperature = _nodal_material ? _temperature_nodal.get() : _temperature_qp.get();
+  _dtemperature_dvar =
+      _nodal_material ? _dtemperature_dvar_nodal.get() : _dtemperature_dvar_qp.get();
   if (!_temperature && _uses_T)
     mooseError(
         "PorousFlowPorosityLinear: When T_coeff is given you must have a temperature Material");
@@ -151,7 +152,7 @@ PorousFlowPorosityLinear::computeQpProperties()
     // is OK for LINEAR elements, as strain is constant over the element anyway.
     const unsigned qp_to_use =
         (_nodal_material && (_bnd || _strain_at_nearest_qp) ? nearestQP(_qp) : _qp);
-    porosity += _epv_coeff * ((*_vol_strain_qp)[qp_to_use] - _epv_ref[0]);
+    porosity += _epv_coeff * (_vol_strain_qp[qp_to_use] - _epv_ref[0]);
   }
 
   if (porosity < _porosity_min)
@@ -178,7 +179,7 @@ PorousFlowPorosityLinear::computeQpProperties()
     {
       const unsigned qp_to_use =
           (_nodal_material && (_bnd || _strain_at_nearest_qp) ? nearestQP(_qp) : _qp);
-      deriv_grad += _epv_coeff * (*_dvol_strain_qp_dvar)[qp_to_use][pvar];
+      deriv_grad += _epv_coeff * _dvol_strain_qp_dvar[qp_to_use][pvar];
     }
     if (porosity < _porosity_min)
       _dporosity_dgradvar[_qp][pvar] = _zero_modifier * deriv_grad;

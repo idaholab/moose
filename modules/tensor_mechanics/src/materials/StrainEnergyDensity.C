@@ -68,11 +68,10 @@ void
 StrainEnergyDensity::computeQpProperties()
 {
 
-  if (_strain_increment != nullptr)
-    _strain_energy_density[_qp] =
-        _strain_energy_density_old[_qp] +
-        _stress[_qp].doubleContraction((*_strain_increment)[_qp]) / 2.0 +
-        _stress_old[_qp].doubleContraction((*_strain_increment)[_qp]) / 2.0;
+  if (_strain_increment)
+    _strain_energy_density[_qp] = _strain_energy_density_old[_qp] +
+                                  _stress[_qp].doubleContraction(_strain_increment[_qp]) / 2.0 +
+                                  _stress_old[_qp].doubleContraction(_strain_increment[_qp]) / 2.0;
   else
     _strain_energy_density[_qp] = _stress[_qp].doubleContraction((_mechanical_strain)[_qp]) / 2.0;
 }

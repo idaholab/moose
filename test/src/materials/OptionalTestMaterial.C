@@ -46,5 +46,5 @@ OptionalTestMaterial::computeQpProperties()
     mooseError("AD property not expected but found");
 
   _mirror[_qp] =
-      (_prop ? (*_prop)[_qp] : 0.0) + (_adprop ? MetaPhysicL::raw_value((*_adprop)[_qp]) : 0.0);
+      (_prop ? _prop[_qp] : 0.0) + (_adprop ? MetaPhysicL::raw_value(_adprop[_qp]) : 0.0);
 }

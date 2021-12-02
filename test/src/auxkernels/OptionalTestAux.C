@@ -44,5 +44,5 @@ OptionalTestAux::computeValue()
   if (!_adexpect && _adprop)
     mooseError("AD property not expected but found");
 
-  return (_prop ? (*_prop)[_qp] : 0.0) + (_adprop ? MetaPhysicL::raw_value((*_adprop)[_qp]) : 0.0);
+  return (_prop ? _prop[_qp] : 0.0) + (_adprop ? MetaPhysicL::raw_value(_adprop[_qp]) : 0.0);
 }

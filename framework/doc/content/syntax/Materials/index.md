@@ -111,15 +111,17 @@ differentiation; properties declared with `declareProperty` +must+ be consumed w
 
 Objects can weakly couple to material properties that may or may not exist.
 
-1. `getOptionalMaterialProperty<TYPE>("property_name")` retrieves a pointer to a property with a name "property_name" to be consumed by the object.
-1. `getOptionalADMaterialProperty<TYPE>("property_name")` retrieves a pointer to a property with a name "property_name" to be consumed by the object that will include automatic differentiation.
+1. `getOptionalMaterialProperty<TYPE>("property_name")` retrieves an optional property with a name "property_name" to be consumed by the object.
+1. `getOptionalADMaterialProperty<TYPE>("property_name")` retrieves an optional property with a name "property_name" to be consumed by the object that will include automatic differentiation.
 
-This API returns a reference to a pointer to a material property. If the requested property
-is not provided by any material this pointer will remain `nullptr` and it is the consuming object's
-responsibility to check for this before dereferencing the pointer. Note that the pointer value is
-only finalized _after_ all materials have been constructed, so a `nullptr` check must _not_ be
-made in the constructor of a material class but either at time of first use in `computeQpProperties`
-or in `initialSetup`.
+This API returns a reference to an optional material property
+(`OptionalMaterialProperty` or  `OptionalADMaterialProperty`). If the requested
+property is not provided by any material this reference will evaluate to
+`false`. It is the consuming object's responsibility to check for this before
+accessing the material property data. Note that the state of teh returned
+reference  is only finalized _after_ all materials have been constructed, so a
+validity check must _not_ be made in the constructor of a material class but
+either at time of first use in `computeQpProperties` or in `initialSetup`.
 
 ## Property Names id=property-names
 

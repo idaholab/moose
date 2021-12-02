@@ -128,15 +128,15 @@ public:
 
   ///@{ Optional material property getters
   template <typename T, bool is_ad>
-  const GenericMaterialProperty<T, is_ad> * const &
+  const GenericOptionalMaterialProperty<T, is_ad> &
   getGenericOptionalMaterialProperty(const std::string & name);
   template <typename T>
-  const MaterialProperty<T> * const & getOptionalMaterialProperty(const std::string & name)
+  const OptionalMaterialProperty<T> & getOptionalMaterialProperty(const std::string & name)
   {
     return getGenericOptionalMaterialProperty<T, false>(name);
   }
   template <typename T>
-  const ADMaterialProperty<T> * const & getOptionalADMaterialProperty(const std::string & name)
+  const OptionalADMaterialProperty<T> & getOptionalADMaterialProperty(const std::string & name)
   {
     return getGenericOptionalMaterialProperty<T, true>(name);
   }
@@ -231,19 +231,18 @@ template <typename T, bool is_ad>
 class OptionalMaterialPropertyProxy : public OptionalMaterialPropertyProxyBase
 {
 public:
-  OptionalMaterialPropertyProxy(const std::string & name)
-    : OptionalMaterialPropertyProxyBase(name), _value(nullptr)
+  OptionalMaterialPropertyProxy(const std::string & name) : OptionalMaterialPropertyProxyBase(name)
   {
   }
-  const GenericMaterialProperty<T, is_ad> * const & value() const { return _value; }
+  const GenericOptionalMaterialProperty<T, is_ad> & value() const { return _value; }
   void resolve(Material & material) override
   {
     if (material.hasGenericMaterialProperty<T, is_ad>(_name))
-      _value = &material.getGenericMaterialProperty<T, is_ad>(_name);
+      _value.set(&material.getGenericMaterialProperty<T, is_ad>(_name));
   }
 
 private:
-  const GenericMaterialProperty<T, is_ad> * _value;
+  GenericOptionalMaterialProperty<T, is_ad> _value;
 };
 
 template <typename T>
@@ -363,11 +362,11 @@ Material::getMaterialPropertyOlderByName(const std::string & prop_name_in)
 }
 
 template <typename T, bool is_ad>
-const GenericMaterialProperty<T, is_ad> * const &
+const GenericOptionalMaterialProperty<T, is_ad> &
 Material::getGenericOptionalMaterialProperty(const std::string & name)
 {
   auto proxy = std::make_unique<OptionalMaterialPropertyProxy<T, is_ad>>(name);
-  auto & pointer = proxy->value();
+  auto & optional_property = proxy->value();
   _optional_property_proxies.push_back(std::move(proxy));
-  return pointer;
+  return optional_property;
 }

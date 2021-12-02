@@ -105,15 +105,15 @@ public:
 
   ///@{ Optional material property getters
   template <typename T, bool is_ad>
-  const GenericMaterialProperty<T, is_ad> * const &
+  const GenericOptionalMaterialProperty<T, is_ad> &
   getGenericOptionalMaterialProperty(const std::string & name);
   template <typename T>
-  const MaterialProperty<T> * const & getOptionalMaterialProperty(const std::string & name)
+  const OptionalMaterialProperty<T> & getOptionalMaterialProperty(const std::string & name)
   {
     return getGenericOptionalMaterialProperty<T, false>(name);
   }
   template <typename T>
-  const ADMaterialProperty<T> * const & getOptionalADMaterialProperty(const std::string & name)
+  const OptionalADMaterialProperty<T> & getOptionalADMaterialProperty(const std::string & name)
   {
     return getGenericOptionalMaterialProperty<T, true>(name);
   }
@@ -389,7 +389,8 @@ private:
   const std::set<BoundaryID> & _mi_boundary_ids;
 
   /// address stable pointer storage to enable returning optional property pointers via reference
-  std::list<const PropertyValue *> _optional_material_pointer_storage;
+  std::list<std::unique_ptr<GenericOptionalMaterialPropertyBase>>
+      _optional_material_pointer_storage;
 };
 
 template <typename T>
@@ -704,12 +705,16 @@ MaterialPropertyInterface::hasADMaterialPropertyByName(const std::string & name_
 }
 
 template <typename T, bool is_ad>
-const GenericMaterialProperty<T, is_ad> * const &
+const GenericOptionalMaterialProperty<T, is_ad> &
 MaterialPropertyInterface::getGenericOptionalMaterialProperty(const std::string & name)
 {
-  _optional_material_pointer_storage.push_back(nullptr);
-  auto & new_pointer = _optional_material_pointer_storage.back();
-  if (hasGenericMaterialProperty<T, is_ad>(name))
-    new_pointer = &getGenericMaterialProperty<T, is_ad>(name);
-  return reinterpret_cast<const GenericMaterialProperty<T, is_ad> *&>(new_pointer);
+
+  auto new_item = std::make_unique<GenericOptionalMaterialProperty<T, is_ad>>(
+      hasGenericMaterialProperty<T, is_ad>(name) ? &getGenericMaterialProperty<T, is_ad>(name)
+                                                 : nullptr);
+
+  const auto & prop = *new_item;
+  _optional_material_pointer_storage.push_back(std::move(new_item));
+
+  return prop;
 }

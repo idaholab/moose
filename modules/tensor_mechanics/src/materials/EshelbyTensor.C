@@ -143,7 +143,7 @@ EshelbyTensor::computeQpProperties()
 
   if (_has_temp)
   {
-    Real sigma_alpha = _stress[_qp].doubleContraction((*_total_deigenstrain_dT)[_qp]);
+    const Real sigma_alpha = _stress[_qp].doubleContraction(_total_deigenstrain_dT[_qp]);
     _J_thermal_term_vec[_qp] = sigma_alpha * _grad_temp[_qp];
   }
   else
