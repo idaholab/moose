@@ -11,7 +11,6 @@
 
 #include "FunctionIC.h"
 
-
 /**
  * Initial conditions specifying an initial condition as a general function
  * while preserving a total integral magnitude.

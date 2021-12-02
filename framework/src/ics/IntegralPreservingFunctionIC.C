@@ -13,7 +13,6 @@
 
 registerMooseObject("MooseApp", IntegralPreservingFunctionIC);
 
-
 InputParameters
 IntegralPreservingFunctionIC::validParams()
 {
