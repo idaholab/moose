@@ -496,7 +496,7 @@ clobberall: clobber
 
 ADRealMonolithic.h: $(MOOSE_DIR)/framework/include/utils/ADReal.h
 	@echo "Building monolithic ADReal header for JIT compilation"
-	@$(libmesh_CXX) -E $(libmesh_CPPFLAGS) $(CXXFLAGS) $(libmesh_CXXFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -imacros cmath -x c++-header $< > $@
+	@$(libmesh_CXX) -E $(libmesh_CPPFLAGS) $(CXXFLAGS) $(libmesh_CXXFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -Wno-pragma-once-outside-header -imacros cmath -x c++-header $< > $@
 
 compile_commands_all_srcfiles := $(moose_srcfiles) $(srcfiles)
 compile_commands.json:
