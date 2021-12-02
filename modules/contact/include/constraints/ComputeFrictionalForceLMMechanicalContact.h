@@ -62,37 +62,26 @@ protected:
    */
   void communicateVelocities();
 
-  /// A map from node to weighted gap
-  std::unordered_map<const DofObject *, ADReal> _dof_to_weighted_tangential_velocity;
+  /// A map from node to two tangential velocities
+  std::unordered_map<const DofObject *, std::array<ADReal, 2>> _dof_to_weighted_tangential_velocity;
 
-  /// A map from node to weighted gap for an additional tangential direction (three dimensions)
-  std::unordered_map<const DofObject *, ADReal> _dof_to_weighted_tangential_velocity_dir;
+  /// An array of two pointers to avoid copies
+  std::array<const ADReal *, 2> _tangential_vel_ptr = {nullptr, nullptr};
 
-  /// A pointer member that can be used to help avoid copying ADReals
-  const ADReal * _tangential_vel_ptr = nullptr;
+  /// The value of the tangential velocity values at the current quadrature point
+  std::array<ADReal, 2> _qp_tangential_velocity;
 
-  /// A pointer member that can be used to help avoid copying ADReals (for 3D)
-  const ADReal * _tangential_vel_dir_ptr = nullptr;
-
-  /// The value of the tangential velocity at the current quadrature point
-  ADReal _qp_tangential_velocity;
-
-  /// The value of the tangential velocity at the current quadrature point
-  /// in an additional direction, required for three-dimensional cases
-  ADReal _qp_tangential_velocity_dir;
-
-  /// The value of the tangential velocity at the current node
+  /// The value of the tangential velocity vectors at the current node
   ADRealVectorValue _qp_tangential_velocity_nodal;
-
-  /// The value of the tangential velocity at the current node
-  /// in an additional direction, required for three-dimensional cases
-  ADRealVectorValue _qp_tangential_velocity_dir_nodal;
 
   /// Numerical factor used in the tangential constraints for convergence purposes
   const Real _c_t;
 
   /// Frictional Lagrange's multiplier variable pointer
   MooseVariable * _friction_var;
+
+  /// Frictional Lagrange's multiplier variable pointer for additional 3D direction
+  MooseVariable * _friction_var_dir;
 
   /// x-velocity on the secondary face
   const ADVariableValue & _secondary_x_dot;
@@ -117,9 +106,6 @@ protected:
 
   /// Friction coefficient
   const Real _mu;
-
-  /// Frictional Lagrange's multiplier variable pointer for additional 3D direction
-  MooseVariable * _friction_var_dir;
 
   /// Automatic flag to determine whether we are doing three-dimensional work
   bool _3d;

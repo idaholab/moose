@@ -86,15 +86,7 @@ public:
   void setNormals(const std::vector<Point> & normals) { _normals = normals; }
 
   /**
-   * Set the normals vector
-   */
-  void setNormalMap(const std::unordered_map<const Node *, Point> & normals_map)
-  {
-    _normals_map = normals_map;
-  }
-
-  /**
-   * Set the normals vector
+   * Set the nodal tangents
    */
   void setNodalTangents(const std::array<std::vector<Point>, 2> & tangents)
   {
@@ -102,7 +94,7 @@ public:
   }
 
   /**
-   * Set the normals vector
+   * Set map from secondary side interior parent nodes to secondary lower-dimensional domain nodes.
    */
   void
   setSecondaryIpToLowerdMap(const std::map<unsigned int, unsigned int> & secondary_ip_lowerd_map)
@@ -111,7 +103,7 @@ public:
   }
 
   /**
-   * Set the normals vector
+   * Set map from primary side interior parent nodes to primary lower-dimensional domain nodes.
    */
   void setPrimaryIpToLowerdMap(const std::map<unsigned int, unsigned int> & primary_ip_lowerd_map)
   {
@@ -175,15 +167,13 @@ protected:
   /// the normals
   std::vector<Point> _normals;
 
-  std::unordered_map<const Node *, Point> _normals_map;
-
   /// the normals along the primary face
   const MooseArray<Point> & _normals_primary;
 
-  /// the tangents along the secondary face
+  /// Tangent vectors on the secondary faces (libmesh)
   const MooseArray<std::vector<Point>> & _tangents;
 
-  /// the tangents along the secondary face (three-dimensions)
+  /// Tangents vector on the secondary faces (householder from normal vectors)
   std::array<std::vector<Point>, 2> _tangents_3d;
 
   /// Map to locate nodes from higher dimensional element to lower dimensional elements

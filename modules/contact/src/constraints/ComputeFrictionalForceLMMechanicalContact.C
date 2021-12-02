@@ -44,6 +44,7 @@ ComputeFrictionalForceLMMechanicalContact::ComputeFrictionalForceLMMechanicalCon
   : ComputeWeightedGapLMMechanicalContact(parameters),
     _c_t(getParam<Real>("c_t")),
     _friction_var(getVar("friction_lm", 0)),
+    _friction_var_dir(getVar("friction_lm_dir", 0)),
     _secondary_x_dot(_secondary_var.adUDot()),
     _primary_x_dot(_primary_var.adUDotNeighbor()),
     _secondary_y_dot(adCoupledDot("disp_y")),
@@ -52,7 +53,6 @@ ComputeFrictionalForceLMMechanicalContact::ComputeFrictionalForceLMMechanicalCon
     _primary_z_dot(_has_disp_z ? &adCoupledNeighborValueDot("disp_z") : nullptr),
     _epsilon(getParam<Real>("epsilon")),
     _mu(getParam<Real>("mu")),
-    _friction_var_dir(getVar("friction_lm_dir", 0)),
     _3d(_has_disp_z)
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
@@ -105,14 +105,15 @@ ComputeFrictionalForceLMMechanicalContact::computeQpProperties()
         (*_secondary_z_dot)[_qp].derivatives() - (*_primary_z_dot)[_qp].derivatives();
 
   if (_interpolate_normals)
-    _qp_tangential_velocity = relative_velocity * (_tangents[_qp][0] * _JxW_msm[_qp] * _coord[_qp]);
+    _qp_tangential_velocity[0] =
+        relative_velocity * (_tangents[_qp][0] * _JxW_msm[_qp] * _coord[_qp]);
   else
     _qp_tangential_velocity_nodal = relative_velocity * (_JxW_msm[_qp] * _coord[_qp]);
 
   // If we don't use interpolated normals, we get the directions at the node,
   // not here at the quadrature points.
   if (_3d && _interpolate_normals)
-    _qp_tangential_velocity_dir =
+    _qp_tangential_velocity[1] =
         relative_velocity * (_tangents[_qp][1] * _JxW_msm[_qp] * _coord[_qp]);
 }
 
@@ -123,29 +124,23 @@ ComputeFrictionalForceLMMechanicalContact::computeQpIProperties()
   ComputeWeightedGapLMMechanicalContact::computeQpIProperties();
 
   // Get the _dof_to_weighted_tangential_velocity map
-  const DofObject * dof = _friction_var->isNodal()
-                              ? static_cast<const DofObject *>(_lower_secondary_elem->node_ptr(_i))
-                              : static_cast<const DofObject *>(_lower_secondary_elem);
+  const DofObject * const dof =
+      _friction_var->isNodal() ? static_cast<const DofObject *>(_lower_secondary_elem->node_ptr(_i))
+                               : static_cast<const DofObject *>(_lower_secondary_elem);
 
   if (_interpolate_normals)
-    _dof_to_weighted_tangential_velocity[dof] += _test[_i][_qp] * _qp_tangential_velocity;
+    _dof_to_weighted_tangential_velocity[dof][0] += _test[_i][_qp] * _qp_tangential_velocity[0];
   else
-    _dof_to_weighted_tangential_velocity[dof] +=
+    _dof_to_weighted_tangential_velocity[dof][0] +=
         _test[_i][_qp] * _qp_tangential_velocity_nodal * _tangents_3d[0][_i];
 
   // Get the _dof_to_weighted_tangential_velocity map for a second direction
   if (_3d)
   {
-    const DofObject * dof_dir =
-        _friction_var_dir->isNodal()
-            ? static_cast<const DofObject *>(_lower_secondary_elem->node_ptr(_i))
-            : static_cast<const DofObject *>(_lower_secondary_elem);
-
     if (_interpolate_normals)
-      _dof_to_weighted_tangential_velocity_dir[dof_dir] +=
-          _test[_i][_qp] * _qp_tangential_velocity_dir;
+      _dof_to_weighted_tangential_velocity[dof][1] += _test[_i][_qp] * _qp_tangential_velocity[1];
     else
-      _dof_to_weighted_tangential_velocity_dir[dof_dir] +=
+      _dof_to_weighted_tangential_velocity[dof][1] +=
           _test[_i][_qp] * _qp_tangential_velocity_nodal * _tangents_3d[1][_i];
   }
 }
@@ -155,11 +150,7 @@ ComputeFrictionalForceLMMechanicalContact::residualSetup()
 {
   // Clear both maps
   ComputeWeightedGapLMMechanicalContact::residualSetup();
-
   _dof_to_weighted_tangential_velocity.clear();
-
-  if (_3d)
-    _dof_to_weighted_tangential_velocity_dir.clear();
 }
 
 void
@@ -167,11 +158,8 @@ ComputeFrictionalForceLMMechanicalContact::communicateVelocities()
 {
 #ifdef MOOSE_SPARSE_AD
   // We may have weighted gap information that should go to other processes that own the dofs
-  using Datum = std::pair<dof_id_type, ADReal>;
+  using Datum = std::pair<dof_id_type, std::array<ADReal, 2>>;
   std::unordered_map<processor_id_type, std::vector<Datum>> push_data;
-
-  // Same map for additional direction (three dimensions) -- must use same dofs
-  std::unordered_map<processor_id_type, std::vector<Datum>> push_data_dir;
 
   for (auto & pr : _dof_to_weighted_tangential_velocity)
   {
@@ -181,8 +169,6 @@ ComputeFrictionalForceLMMechanicalContact::communicateVelocities()
       continue;
 
     push_data[proc_id].push_back(std::make_pair(dof_object->id(), std::move(pr.second)));
-    push_data_dir[proc_id].push_back(std::make_pair(
-        dof_object->id(), std::move(_dof_to_weighted_tangential_velocity_dir[dof_object])));
   }
 
   const auto & lm_mesh = _mesh.getMesh();
@@ -197,30 +183,12 @@ ComputeFrictionalForceLMMechanicalContact::communicateVelocities()
           _nodal ? static_cast<const DofObject *>(lm_mesh.node_ptr(dof_id))
                  : static_cast<const DofObject *>(lm_mesh.elem_ptr(dof_id));
       mooseAssert(dof_object, "This should be non-null");
-      _dof_to_weighted_tangential_velocity[dof_object] += std::move(pr.second);
+      _dof_to_weighted_tangential_velocity[dof_object][0] += std::move(pr.second[0]);
+      _dof_to_weighted_tangential_velocity[dof_object][1] += std::move(pr.second[1]);
     }
   };
 
   TIMPI::push_parallel_vector_data(_communicator, push_data, action_functor);
-
-  // Perform parallel communication also for the other component of the relative tangential velocity
-  if (_3d)
-  {
-    auto action_functor_dir = [this, &lm_mesh](const processor_id_type libmesh_dbg_var(pid),
-                                               const std::vector<Datum> & sent_data) {
-      mooseAssert(pid != this->processor_id(), "We do not send messages to ourself here");
-      for (auto & pr : sent_data)
-      {
-        const auto dof_id = pr.first;
-        const auto * const dof_object =
-            _nodal ? static_cast<const DofObject *>(lm_mesh.node_ptr(dof_id))
-                   : static_cast<const DofObject *>(lm_mesh.elem_ptr(dof_id));
-        mooseAssert(dof_object, "This should be non-null");
-        _dof_to_weighted_tangential_velocity_dir[dof_object] += std::move(pr.second);
-      }
-    };
-    TIMPI::push_parallel_vector_data(_communicator, push_data_dir, action_functor_dir);
-  }
 #endif
 }
 
@@ -241,11 +209,11 @@ ComputeFrictionalForceLMMechanicalContact::post()
     auto & weighted_gap_pr = _dof_to_weighted_gap[dof];
     _weighted_gap_ptr = &weighted_gap_pr.first;
     _normalization_ptr = &weighted_gap_pr.second;
-    _tangential_vel_ptr = &pr.second;
+    _tangential_vel_ptr[0] = &(pr.second[0]);
 
     if (_3d)
     {
-      _tangential_vel_dir_ptr = &_dof_to_weighted_tangential_velocity_dir[dof];
+      _tangential_vel_ptr[1] = &(pr.second[1]);
       enforceConstraintOnDof3d(dof);
     }
     else
@@ -271,11 +239,11 @@ ComputeFrictionalForceLMMechanicalContact::incorrectEdgeDroppingPost(
       continue;
 
     _weighted_gap_ptr = &_dof_to_weighted_gap[dof].first;
-    _tangential_vel_ptr = &pr.second;
+    _tangential_vel_ptr[0] = &pr.second[0];
 
     if (_3d)
     {
-      _tangential_vel_dir_ptr = &_dof_to_weighted_tangential_velocity_dir[pr.first];
+      _tangential_vel_ptr[1] = &pr.second[1];
       enforceConstraintOnDof3d(dof);
     }
     else
@@ -296,14 +264,13 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(const DofObj
 
   // Get friction LM
   const auto friction_dof_index = dof->dof_number(_sys.number(), _friction_var->number(), 0);
-  const ADReal & tangential_vel = *_tangential_vel_ptr;
+  std::array<const ADReal *, 2> & tangential_vel = _tangential_vel_ptr;
   ADReal friction_lm_value = (*_sys.currentSolution())(friction_dof_index);
   Moose::derivInsert(friction_lm_value.derivatives(), friction_dof_index, 1.);
 
   // Get friction LM for second direction (three dimensions)
   const auto friction_dir_dof_index =
       dof->dof_number(_sys.number(), _friction_var_dir->number(), 0);
-  const ADReal & tangential_dir_vel = *_tangential_vel_dir_ptr;
   ADReal friction_dir_lm_value = (*_sys.currentSolution())(friction_dir_dof_index);
   Moose::derivInsert(friction_dir_lm_value.derivatives(), friction_dir_dof_index, 1.);
 
@@ -326,8 +293,8 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(const DofObj
 
     const auto lamdba_plus_cg = contact_pressure + c * weighted_gap;
     std::array<ADReal, 2> lambda_t_plus_ctu;
-    lambda_t_plus_ctu[0] = friction_lm_value + c_t * tangential_vel * _dt;
-    lambda_t_plus_ctu[1] = friction_dir_lm_value + c_t * tangential_dir_vel * _dt;
+    lambda_t_plus_ctu[0] = friction_lm_value + c_t * *tangential_vel[0] * _dt;
+    lambda_t_plus_ctu[1] = friction_dir_lm_value + c_t * *tangential_vel[1] * _dt;
 
     const auto term_1_x =
         std::max(_mu * lamdba_plus_cg,
@@ -347,6 +314,9 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(const DofObj
 
     dof_residual = term_1_x - term_2_x;
     dof_residual_dir = term_1_y - term_2_y;
+
+    //    dof_residual = _mu * contact_pressure - (friction_lm_value);
+    //    dof_residual_dir = _mu * contact_pressure - (friction_dir_lm_value);
   }
 
   if (_subproblem.currentlyComputingJacobian())
@@ -368,7 +338,7 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof(const DofObjec
 
   // Get friction LM
   const auto friction_dof_index = dof->dof_number(_sys.number(), _friction_var->number(), 0);
-  const ADReal & tangential_vel = *_tangential_vel_ptr;
+  const ADReal & tangential_vel = *_tangential_vel_ptr[0];
   ADReal friction_lm_value = (*_sys.currentSolution())(friction_dof_index);
   Moose::derivInsert(friction_lm_value.derivatives(), friction_dof_index, 1.);
 

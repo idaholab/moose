@@ -221,19 +221,6 @@ public:
                                 const std::vector<Real> & oned_xi1_pts) const;
 
   /**
-   * Compute the normals at given reference points on a secondary element
-   * @param secondary_elem The secondary element used to query for associated nodal normals
-   * @param 1d_xi1_pts The reference points on the secondary element to evaluate the normals at. The
-   * "points" are single reals corresponding to xi because right now our mortar mesh elements are
-   * always 1D
-   * @return The normals
-   */
-  std::unordered_map<const Node *, Point> getNodalNormalsMap() const
-  {
-    return _secondary_node_to_nodal_normal;
-  }
-
-  /**
    * Get list of secondary nodes that don't contribute to interaction with any primary element.
    * Used to enforce zero values on inactive DoFs of nodal variables.
    */

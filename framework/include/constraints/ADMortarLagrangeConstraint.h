@@ -19,12 +19,6 @@ public:
   ADMortarLagrangeConstraint(const InputParameters & parameters);
 
 protected:
-  using ADMortarConstraint::computeResidual;
-  /**
-   * compute the residual for the specified element type
-   */
-  void computeResidual(Moose::MortarType mortar_type) override;
-
   using ADMortarConstraint::computeJacobian;
   /**
    * compute the residual for the specified element type

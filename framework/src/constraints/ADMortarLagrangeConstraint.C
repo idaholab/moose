@@ -28,36 +28,6 @@ ADMortarLagrangeConstraint::ADMortarLagrangeConstraint(const InputParameters & p
 }
 
 void
-ADMortarLagrangeConstraint::computeResidual(Moose::MortarType mortar_type)
-{
-  unsigned int test_space_size = 0;
-  switch (mortar_type)
-  {
-    case Moose::MortarType::Secondary:
-      prepareVectorTag(_assembly, _secondary_var.number());
-      test_space_size = _test_secondary.size();
-      break;
-
-    case Moose::MortarType::Primary:
-      prepareVectorTagNeighbor(_assembly, _primary_var.number());
-      test_space_size = _test_primary.size();
-      break;
-
-    case Moose::MortarType::Lower:
-      mooseAssert(_var, "LM variable is null");
-      prepareVectorTagLower(_assembly, _var->number());
-      test_space_size = _test.size();
-      break;
-  }
-
-  for (_qp = 0; _qp < _qrule_msm->n_points(); _qp++)
-    for (_i = 0; _i < test_space_size; _i++)
-      _local_re(_i) += raw_value(_JxW_msm[_qp] * _coord[_qp] * computeQpResidual(mortar_type));
-
-  accumulateTaggedLocalResidual();
-}
-
-void
 ADMortarLagrangeConstraint::computeJacobian(Moose::MortarType mortar_type)
 {
   std::vector<DualReal> residuals;
@@ -196,11 +166,9 @@ ADMortarLagrangeConstraint::computeJacobian(Moose::MortarType mortar_type)
             _local_ke(_i, _j) +=
                 input_residuals[i_lower].derivatives()[ad_offsets[type_index] + _j];
           }
-
           i_lower++;
-
-          accumulateTaggedLocalMatrix();
         }
+        accumulateTaggedLocalMatrix();
       }
     }
   };

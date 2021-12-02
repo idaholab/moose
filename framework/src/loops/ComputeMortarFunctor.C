@@ -122,7 +122,6 @@ ComputeMortarFunctor::operator()()
     unsigned int expected_length = 0;
 #endif
 
-
     // Loop through contributing msm elements
     for (const auto msm_elem : msm_elems)
     {
@@ -211,6 +210,11 @@ ComputeMortarFunctor::operator()()
       // Compute secondary element normals (for computing residual)
       const auto normals = _amg.getNormals(*msinfo.secondary_elem, xi1_pts);
       const auto nodal_normals = _amg.getNodalNormals(*msinfo.secondary_elem);
+      const auto nodal_tangents = _amg.getNodalTangents(*msinfo.secondary_elem);
+      const auto primary_ip_to_lowerd_elemen_nodal_map = _amg.getPrimaryIpToLowerElementMap(
+          *msinfo.primary_elem, *msinfo.primary_elem->interior_parent(), *msinfo.secondary_elem);
+      const auto secondary_ip_to_lowerd_elemen_nodal_map =
+          _amg.getSecondaryIpToLowerElementMap(*msinfo.secondary_elem);
 
       const Elem * reinit_secondary_elem = secondary_ip;
 
@@ -268,6 +272,9 @@ ComputeMortarFunctor::operator()()
         for (auto * const mc : _mortar_constraints)
         {
           mc->setNormals(mc->interpolateNormals() ? normals : nodal_normals);
+          mc->setSecondaryIpToLowerdMap(secondary_ip_to_lowerd_elemen_nodal_map);
+          mc->setPrimaryIpToLowerdMap(primary_ip_to_lowerd_elemen_nodal_map);
+          mc->setNodalTangents(nodal_tangents);
           mc->computeResidual();
         }
 
@@ -277,13 +284,15 @@ ComputeMortarFunctor::operator()()
 
         if (num_cached % 20 == 0)
           _assembly.addCachedResiduals();
-
       }
       else
       {
         for (auto * const mc : _mortar_constraints)
         {
           mc->setNormals(mc->interpolateNormals() ? normals : nodal_normals);
+          mc->setSecondaryIpToLowerdMap(secondary_ip_to_lowerd_elemen_nodal_map);
+          mc->setPrimaryIpToLowerdMap(primary_ip_to_lowerd_elemen_nodal_map);
+          mc->setNodalTangents(nodal_tangents);
           mc->computeJacobian();
         }
 

@@ -185,7 +185,7 @@ AutomaticMortarGeneration::getNodalTangents(const Elem & secondary_elem) const
     nodal_tangents_two[n] = _secondary_node_to_hh_nodal_tangents.at(secondary_elem.node_ptr(n))[1];
   }
 
-  return {nodal_tangents_one, nodal_tangents_two};
+  return {{nodal_tangents_one, nodal_tangents_two}};
 }
 
 std::vector<Point>
@@ -1423,8 +1423,6 @@ AutomaticMortarGeneration::computeNodalGeometry()
   // The second member is that element's JxW at the node
   std::map<dof_id_type, std::vector<std::pair<Point, Real>>> node_to_normals_map;
 
-  std::map<dof_id_type, std::vector<std::array<std::pair<Point, Real>, 2>>> node_to_tangents_map;
-
   /// The _periodic flag tells us whether we want to inward vs outward facing normals
   Real sign = _periodic ? -1 : 1;
 
@@ -1449,10 +1447,6 @@ AutomaticMortarGeneration::computeNodalGeometry()
     nnx_fe_face->attach_quadrature_rule(&qface);
     const std::vector<Point> & face_normals = nnx_fe_face->get_normals();
 
-    const std::vector<std::vector<Point>> & face_tangents = nnx_fe_face->get_tangents();
-
-    // const std::vector<std::vector<Point>> & face_tangents = nnx_fe_face->get_tangents();
-
     const auto & JxW = nnx_fe_face->get_JxW();
 
     // Which side of the parent are we? We need to know this to know
@@ -1469,21 +1463,10 @@ AutomaticMortarGeneration::computeNodalGeometry()
     // Reinit the face FE object on side s.
     nnx_fe_face->reinit(interior_parent, s);
 
-    if (face_tangents[0].size() != 2)
-      mooseError("Size of tangents in AutomaticMortarGeneration is not valid.");
-
     for (MooseIndex(secondary_elem->n_nodes()) n = 0; n < secondary_elem->n_nodes(); ++n)
     {
       auto & normals_and_weights_vec = node_to_normals_map[secondary_elem->node_id(n)];
       normals_and_weights_vec.push_back(std::make_pair(sign * face_normals[n], JxW[n]));
-
-      //
-      auto & tangents_and_weights_vec = node_to_tangents_map[secondary_elem->node_id(n)];
-      //      Moose::out << "CCC face_tangents[n][0]: " << face_tangents[n][0] << "\n";
-      //      Moose::out << "CCC face_tangents[n][1]: " << face_tangents[n][1] << "\n";
-
-      tangents_and_weights_vec.push_back({std::make_pair(face_tangents[n][0], JxW[n]),
-                                          std::make_pair(face_tangents[n][1], JxW[n])});
     }
   }
 
