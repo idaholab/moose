@@ -144,10 +144,10 @@ SimpleHexagonGenerator::generate()
     MooseMesh::changeBoundaryId(*mesh, OUTER_SIDESET_ID, _external_boundary_id, false);
   if (!_external_boundary_name.empty())
   {
-    mesh->boundary_info->sideset_name(
+    mesh->get_boundary_info().sideset_name(
         _external_boundary_id > 0 ? _external_boundary_id : (boundary_id_type)OUTER_SIDESET_ID) =
         _external_boundary_name;
-    mesh->boundary_info->nodeset_name(
+    mesh->get_boundary_info().nodeset_name(
         _external_boundary_id > 0 ? _external_boundary_id : (boundary_id_type)OUTER_SIDESET_ID) =
         _external_boundary_name;
   }
