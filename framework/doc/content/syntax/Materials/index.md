@@ -118,8 +118,8 @@ This API returns a reference to an optional material property
 (`OptionalMaterialProperty` or  `OptionalADMaterialProperty`). If the requested
 property is not provided by any material this reference will evaluate to
 `false`. It is the consuming object's responsibility to check for this before
-accessing the material property data. Note that the state of teh returned
-reference  is only finalized _after_ all materials have been constructed, so a
+accessing the material property data. Note that the state of the returned
+reference is only finalized _after_ all materials have been constructed, so a
 validity check must _not_ be made in the constructor of a material class but
 either at time of first use in `computeQpProperties` or in `initialSetup`.
 
