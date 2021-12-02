@@ -539,7 +539,7 @@ protected:
   /// Total plastic strain increment in step (summing substep contributions)
   RankTwoTensor _plastic_strain_increment;
 
-  /// Material capturing number of substeps. If substepping isn't used will default to one.
+  /// Material property capturing number of substeps for output purposes (defaults to one if substepping isn't used)
   MaterialProperty<Real> & _number_of_substeps;
 };
 

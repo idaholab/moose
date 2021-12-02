@@ -79,7 +79,7 @@ page.
 
 Regular use of the radial return mapping triggers one instance of the return to the yield surface that spans
 the entire system wide time step. While the material time step limiter discussed in [ComputeMultipleInelasticStress](ComputeMultipleInelasticStress.md) can
-effectively limits the time step size to achieve the desired convergence or integration error properties, it does so at
+effectively limit the time step size to achieve the desired convergence or integration error properties, it does so at
 the expense of global solves and discarded time steps. An alternative to the material time step limiter is
 "substepping", which subdivides the current time step into substeps which are solved sequentially within `ComputeMultipleInelasticStress`.
 

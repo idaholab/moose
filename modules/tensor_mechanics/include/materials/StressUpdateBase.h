@@ -144,7 +144,6 @@ public:
   /**
    * Has the user requested usage of (possibly) implemented substepping capability for inelastic
    * models.
-   *
    */
   virtual bool substeppingCapabilityRequested() { return false; }
 

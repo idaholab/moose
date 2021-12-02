@@ -171,7 +171,7 @@
     type = 'RunException'
     input = 'isotropic_plasticity_finite_strain.i'
     cli_args = 'Materials/isotropic_plasticity/use_substep=true'
-    expect_err = 'Usage of substepping has been requested, but this inelastic model does not implement substepping yet'
+    expect_err = 'Usage of substepping has been requested, but the inelastic model'
     design = 'RadialReturnStressUpdate.md'
     issues = '#14757'
     requirement = 'The system shall return an error if the user requests substepping for a radial return inelastic model that does not implement it yet.'

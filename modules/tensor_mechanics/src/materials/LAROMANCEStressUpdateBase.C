@@ -161,12 +161,10 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::LAROMANCEStressUpdateBaseTempl(
         this->_base_name + "wall_dislocations_step")),
     _cell_dislocations_step(this->template declareGenericProperty<Real, is_ad>(
         this->_base_name + "cell_dislocations_step")),
-    _plastic_strain_increment(RankTwoTensor::initNone),
+    _plastic_strain_increment(),
     _number_of_substeps(
         this->template declareProperty<Real>(this->_base_name + "number_of_substeps"))
 {
-  _plastic_strain_increment.zero();
-
   this->_check_range = true;
 
   _window_failure[_cell_input_index] =
@@ -362,7 +360,6 @@ template <bool is_ad>
 void
 LAROMANCEStressUpdateBaseTempl<is_ad>::resetIncrementalMaterialProperties()
 {
-
   _cell_dislocation_increment = 0.0;
   _wall_dislocation_increment = 0.0;
 
