@@ -62,7 +62,7 @@ Transient::validParams()
   params.addParam<Real>("start_time", 0.0, "The start time of the simulation");
   params.addParam<Real>("end_time", 1.0e30, "The end time of the simulation");
   params.addParam<Real>("dt", 1., "The timestep size between solves");
-  params.addParam<Real>("dtmin", 2.0e-14, "The minimum timestep size in an adaptive run");
+  params.addParam<Real>("dtmin", 1.0e-13, "The minimum timestep size in an adaptive run");
   params.addParam<Real>("dtmax", 1.0e30, "The maximum timestep size in an adaptive run");
   params.addParam<bool>(
       "reset_dt", false, "Use when restarting a calculation to force a change in dt.");
@@ -116,7 +116,7 @@ Transient::validParams()
       "Throw error when timestep is less than dtmin instead of just aborting solve.");
   params.addParam<MooseEnum>("scheme", schemes, "Time integration scheme used.");
   params.addParam<Real>("timestep_tolerance",
-                        2.0e-14,
+                        1.0e-13,
                         "the tolerance setting for final timestep size and sync times");
 
   params.addParam<bool>("use_multiapp_dt",
