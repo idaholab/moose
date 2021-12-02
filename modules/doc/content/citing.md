@@ -230,6 +230,25 @@ The following papers present the governing equations of the MOOSE Porous Flow mo
 }
 ```
 
+### Geochemistry Module
+
+The following paper introduces the MOOSE Geochemistry module, along with discussions of its capabilities and implementation details:
+
+```
+@article{Wilkins2021,
+  doi = {10.21105/joss.03314},
+  url = {https://doi.org/10.21105/joss.03314},
+  year = {2021},
+  publisher = {The Open Journal},
+  volume = {6},
+  number = {68},
+  pages = {3314},
+  author = {Andy Wilkins and Christopher P. Green and Logan Harbour and Robert Podgorney},
+  title = {The MOOSE geochemistry module},
+  journal = {Journal of Open Source Software}
+}
+```
+
 ### XFEM
 
 The following papers document various aspects of the MOOSE XFEM module.
