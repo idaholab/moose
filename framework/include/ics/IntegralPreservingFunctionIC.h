@@ -11,14 +11,6 @@
 
 #include "FunctionIC.h"
 
-class IntegralPreservingFunctionIC;
-class InputParameters;
-
-template <typename T>
-InputParameters validParams();
-
-template <>
-InputParameters validParams<IntegralPreservingFunctionIC>();
 
 /**
  * Initial conditions specifying an initial condition as a general function

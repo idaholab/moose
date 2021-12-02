@@ -10,7 +10,7 @@ such that the applied initial condition is
 
 \begin{equation}
 \label{eq:ic1}
-u=q_0f
+u(\vec{r}, t_0) = q_0 f(\vec{r}, t_0)
 \end{equation}
 
 where $u$ is the variable, $f$ is the function, and $q_0$ is a scaling
