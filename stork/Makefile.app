@@ -37,6 +37,7 @@ HEAT_CONDUCTION             := no
 LEVEL_SET                   := no
 MISC                        := no
 NAVIER_STOKES               := no
+PERIDYNAMICS                := no
 PHASE_FIELD                 := no
 POROUS_FLOW                 := no
 RAY_TRACING                 := no
