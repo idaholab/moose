@@ -177,8 +177,8 @@ MortarData::update(AutomaticMortarGeneration & amg)
   // boundaries.
   amg.buildNodeToElemMaps();
 
-  // Compute nodal normals.
-  amg.computeNodalNormals();
+  // Compute nodal geoemtry (normals and tangents).
+  amg.computeNodalGeometry();
 
   // (Optional) Write nodal normals to file.
   // amg.writeNodalNormalsToFile();

@@ -81,13 +81,13 @@ public:
   void buildNodeToElemMaps();
 
   /**
-   * Computes and stores the nodal normal vectors in a local data
+   * Computes and stores the nodal normal/tangent vectors in a local data
    * structure instead of using the ExplicitSystem/NumericVector
    * approach. This design was triggered by the way that the
    * GhostingFunctor operates, but I think it is a better/more
    * efficient way to do it anyway.
    */
-  void computeNodalNormals();
+  void computeNodalGeometry();
 
   /**
    * Since the nodal normals are no longer a variable in the
@@ -179,20 +179,24 @@ public:
   std::vector<Point> getNodalNormals(const Elem & secondary_elem) const;
 
   /**
-   * @return The nodal normals associated with the provided \p secondary_elem
+   * @return The nodal tangents associated with the provided \p secondary_elem
+   */
+  std::array<std::vector<Point>, 2> getNodalTangents(const Elem & secondary_elem) const;
+
+  /**
+   * @return The mapping from secondary interior parent nodes to lower dimensional nodes
    */
   std::map<unsigned int, unsigned int>
   getSecondaryIpToLowerElementMap(const Elem & _lower_secondary_elem) const;
 
+  /**
+   * @return The mapping from primary interior parent nodes to its corresponding lower dimensional
+   * nodes
+   */
   std::map<unsigned int, unsigned int>
   getPrimaryIpToLowerElementMap(const Elem & _primary_elem,
                                 const Elem & _primary_elem_ip,
                                 const Elem & _lower_secondary_elem) const;
-
-  /**
-   * @return The nodal tangents associated with the provided \p secondary_elem
-   */
-  std::array<std::vector<Point>, 2> getLibmeshNodalTangents(const Elem & secondary_elem) const;
 
   /**
    * Compute the normals at given reference points on a secondary element
@@ -379,11 +383,9 @@ private:
   // Container for storing the nodal normal vector associated with each secondary node.
   std::unordered_map<const Node *, Point> _secondary_node_to_nodal_normal;
 
-  // Container for storing the tangent normal vectors associated with each secondary node (libmesh).
-  std::unordered_map<const Node *, std::array<Point, 2>> _secondary_node_to_libmesh_nodal_tangents;
-
-  // Container for storing the tangent normal vectors associated with each secondary node.
-  std::unordered_map<const Node *, std::array<Point, 2>> _secondary_node_to_nodal_tangents;
+  // Container for storing the nodal tangent/binormal vectors associated with each secondary node
+  // (Householder approach).
+  std::unordered_map<const Node *, std::array<Point, 2>> _secondary_node_to_hh_nodal_tangents;
 
   // List of inactive lagrange multiplier nodes (for nodal variables)
   std::unordered_set<const Node *> _inactive_local_lm_nodes;
@@ -404,6 +406,12 @@ private:
    */
   void projectPrimaryNodesSinglePair(subdomain_id_type lower_dimensional_primary_subdomain_id,
                                      subdomain_id_type lower_dimensional_secondary_subdomain_id);
+
+  /**
+   * Householder orthogonalization procedure to obtain proper basis for tangent and binormal vectors
+   */
+  void
+  householderOrthogolization(const Point & normal, Point & tangent_one, Point & tangent_two) const;
 
   /// Whether to print debug output
   const bool _debug;

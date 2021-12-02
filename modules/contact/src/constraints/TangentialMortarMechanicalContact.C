@@ -20,6 +20,7 @@ TangentialMortarMechanicalContact::validParams()
   params.addRequiredParam<MooseEnum>(
       "component", component, "The force component constraint that this object is supplying");
 
+  // This enum is used to pick the proper 'tangent' vector (i.e. tangent or binormal)
   MooseEnum direction("direction_1 direction_2", "direction_1");
   params.addParam<MooseEnum>("direction",
                              direction,
@@ -62,21 +63,17 @@ TangentialMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
                _tangents[_qp][_direction].norm();
       else
       {
-        if (!_interpolate_normals)
-        {
-          unsigned int tangent_index = 0;
-          tangent_index = _secondary_ip_lowerd_map.at(_i);
-          return _test_secondary[tangent_index][_qp] * _lambda[_qp] *
-                 _tangents_libmesh_3d[tangent_index][_direction](_component) /
-                 _tangents_libmesh_3d[tangent_index][_direction].norm();
-        }
+        unsigned int tangent_index = 0;
+        tangent_index = _secondary_ip_lowerd_map.at(_i);
+        return _test_secondary[_i][_qp] * _lambda[_qp] *
+               _tangents_3d[_direction][tangent_index](_component) /
+               _tangents_3d[_direction][tangent_index].norm();
       }
-
     case Moose::MortarType::Primary:
-      // Equal and opposite reactions so we put a negative sign here
       if (!_interpolate_normals && !_primary_ip_lowerd_map.count(_i))
         return 0.0;
 
+      // Equal and opposite reactions so we put a negative sign here
       if (_interpolate_normals)
         return -_test_primary[_i][_qp] * _lambda[_qp] * _tangents[_qp][_direction](_component) /
                _tangents[_qp][_direction].norm();
@@ -84,9 +81,9 @@ TangentialMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
       {
         unsigned int tangent_index = 0;
         tangent_index = _primary_ip_lowerd_map.at(_i);
-        return -_test_primary[tangent_index][_qp] * _lambda[_qp] *
-               _tangents_libmesh_3d[tangent_index][_direction](_component) /
-               _tangents_libmesh_3d[tangent_index][_direction].norm();
+        return -_test_primary[_i][_qp] * _lambda[_qp] *
+               _tangents_3d[_direction][tangent_index](_component) /
+               _tangents_3d[_direction][tangent_index].norm();
       }
 
     default:

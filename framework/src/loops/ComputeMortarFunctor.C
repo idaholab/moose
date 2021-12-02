@@ -122,6 +122,7 @@ ComputeMortarFunctor::operator()()
     unsigned int expected_length = 0;
 #endif
 
+
     // Loop through contributing msm elements
     for (const auto msm_elem : msm_elems)
     {
@@ -276,6 +277,7 @@ ComputeMortarFunctor::operator()()
 
         if (num_cached % 20 == 0)
           _assembly.addCachedResiduals();
+
       }
       else
       {

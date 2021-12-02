@@ -40,6 +40,7 @@
 #include "timpi/parallel_sync.h"
 
 #include <array>
+#include <algorithm>
 
 using namespace libMesh;
 using MetaPhysicL::DualNumber;
@@ -88,8 +89,7 @@ AutomaticMortarGeneration::clear()
   _lower_elem_to_side_id.clear();
   _mortar_interface_coupling.clear();
   _secondary_node_to_nodal_normal.clear();
-  _secondary_node_to_nodal_tangents.clear();
-  _secondary_node_to_libmesh_nodal_tangents.clear();
+  _secondary_node_to_hh_nodal_tangents.clear();
 }
 
 void
@@ -135,10 +135,7 @@ AutomaticMortarGeneration::getNodalNormals(const Elem & secondary_elem) const
 {
   std::vector<Point> nodal_normals(secondary_elem.n_nodes());
   for (const auto n : make_range(secondary_elem.n_nodes()))
-  {
     nodal_normals[n] = _secondary_node_to_nodal_normal.at(secondary_elem.node_ptr(n));
-    // Moose::out << "getNodalNormals: " << nodal_normals[n] << "\n";
-  }
 
   return nodal_normals;
 }
@@ -154,7 +151,6 @@ AutomaticMortarGeneration::getSecondaryIpToLowerElementMap(const Elem & lower_se
   {
     const auto & nd = lower_secondary_elem.node_ref(i);
     secondary_ip_i_to_lower_secondary_i[secondary_ip->get_node_index(&nd)] = i;
-    //    Moose::out << "Map is: " << secondary_ip->get_node_index(&nd) << "to: " << i << "\n";
   }
 
   return secondary_ip_i_to_lower_secondary_i;
@@ -172,24 +168,21 @@ AutomaticMortarGeneration::getPrimaryIpToLowerElementMap(
   {
     const auto & nd = lower_primary_elem.node_ref(i);
     primary_ip_i_to_lower_primary_i[primary_elem.get_node_index(&nd)] = i;
-    //    Moose::out << "Map is: " << secondary_ip->get_node_index(&nd) << "to: " << i << "\n";
   }
 
   return primary_ip_i_to_lower_primary_i;
 }
 
 std::array<std::vector<Point>, 2>
-AutomaticMortarGeneration::getLibmeshNodalTangents(const Elem & secondary_elem) const
+AutomaticMortarGeneration::getNodalTangents(const Elem & secondary_elem) const
 {
   std::vector<Point> nodal_tangents_one(secondary_elem.n_nodes());
   std::vector<Point> nodal_tangents_two(secondary_elem.n_nodes());
 
   for (const auto n : make_range(secondary_elem.n_nodes()))
   {
-    nodal_tangents_one[n] =
-        _secondary_node_to_libmesh_nodal_tangents.at(secondary_elem.node_ptr(n))[0];
-    nodal_tangents_two[n] =
-        _secondary_node_to_libmesh_nodal_tangents.at(secondary_elem.node_ptr(n))[1];
+    nodal_tangents_one[n] = _secondary_node_to_hh_nodal_tangents.at(secondary_elem.node_ptr(n))[0];
+    nodal_tangents_two[n] = _secondary_node_to_hh_nodal_tangents.at(secondary_elem.node_ptr(n))[1];
   }
 
   return {nodal_tangents_one, nodal_tangents_two};
@@ -1415,7 +1408,7 @@ AutomaticMortarGeneration::computeInactiveLMElems()
 }
 
 void
-AutomaticMortarGeneration::computeNodalNormals()
+AutomaticMortarGeneration::computeNodalGeometry()
 {
   // The dimension according to Mesh::mesh_dimension().
   const auto dim = _mesh.mesh_dimension();
@@ -1509,65 +1502,36 @@ AutomaticMortarGeneration::computeNodalNormals()
 
     _secondary_node_to_nodal_normal[_mesh.node_ptr(node_id)] = nodal_normal.unit();
 
-    // Compute tangent vectors
-    const auto & tangents_and_weights_vec = node_to_tangents_map[node_id];
     Point nodal_tangent_one;
     Point nodal_tangent_two;
-    for (const auto & tangents_and_weight : tangents_and_weights_vec)
-    {
-      //      Moose::out << "tangents_and_weight.at(0).first: " << tangents_and_weight.at(0).first
-      //      << "\n"; Moose::out << "tangents_and_weight.at(0).second: " <<
-      //      tangents_and_weight.at(0).second
-      //                 << "\n";
-      //      Moose::out << "tangents_and_weight.at(1).first: " << tangents_and_weight.at(1).first
-      //      << "\n"; Moose::out << "tangents_and_weight.at(1).second: " <<
-      //      tangents_and_weight.at(1).second
-      //                 << "\n";
+    householderOrthogolization(nodal_normal, nodal_tangent_one, nodal_tangent_two);
 
-      nodal_tangent_one += tangents_and_weight.at(0).first * tangents_and_weight.at(0).second;
-      nodal_tangent_two += tangents_and_weight.at(1).first * tangents_and_weight.at(1).second;
-    }
-    // There is the possibility that this process yields zero tangent(s), so remedy it below
-    // Check norm of both tangents, if close to zero, create your own tangents.
-
-    // The rationale for selecting something like '0.1' here is that if, after interpolation,
-    // you end up with a much shorter vector, it means you are interpolating vectors in
-    // significantly different orientations. So, you'd better create your own basis. In the limit,
-    // you _can_ get a null vector. Hard-coded values in the if statements below (e.g. 0.1,
-    // 0.9) should not affect the numerical results at all.
-    if (nodal_tangent_one.norm() < 0.1 || nodal_tangent_two.norm() < 0.1)
-    {
-      Point dummy(0, 0, 1);
-      Point dummy_alt(0, 1, 0);
-
-      if (nodal_normal * dummy < 0.9)
-      {
-        nodal_tangent_one = nodal_normal.cross(dummy);
-        nodal_tangent_one.unit();
-
-        nodal_tangent_two = nodal_normal.cross(nodal_tangent_one);
-        nodal_tangent_two.unit();
-      }
-      else if (nodal_normal * dummy_alt < 0.9)
-      {
-        nodal_tangent_one = nodal_normal.cross(dummy_alt);
-        nodal_tangent_one.unit();
-
-        nodal_tangent_two = nodal_normal.cross(nodal_tangent_one);
-        nodal_tangent_two.unit();
-      }
-      else
-        mooseError("Automatic mortar generation cannot generate proper tangential nodal vectors. "
-                   "This is probably due to an issue in the normal vector field generation");
-    }
-
-    _secondary_node_to_libmesh_nodal_tangents[_mesh.node_ptr(node_id)].at(0) =
-        nodal_tangent_one.unit();
-    _secondary_node_to_libmesh_nodal_tangents[_mesh.node_ptr(node_id)].at(1) =
-        nodal_tangent_two.unit();
+    _secondary_node_to_hh_nodal_tangents[_mesh.node_ptr(node_id)][0] = nodal_tangent_one;
+    _secondary_node_to_hh_nodal_tangents[_mesh.node_ptr(node_id)][1] = nodal_tangent_two;
   }
 }
+void
+AutomaticMortarGeneration::householderOrthogolization(const Point & nodal_normal,
+                                                      Point & nodal_tangent_one,
+                                                      Point & nodal_tangent_two) const
+{
+  Point unit_normal = nodal_normal.unit();
+  // See Lopes DS, Silva MT, Ambrosio JA. Tangent vectors to a 3-D surface normal: A geometric tool
+  // to find orthogonal vectors based on the Householder transformation. Computer-Aided Design. 2013
+  // Mar 1;45(3):683-94.
+  const Point h_vector(
+      std::max(unit_normal(0) - 1.0, unit_normal(0) + 1.0), unit_normal(1), unit_normal(2));
 
+  const Real h = h_vector.norm();
+
+  nodal_tangent_one(0) = -2.0 * h_vector(0) * h_vector(1) / (h * h);
+  nodal_tangent_one(1) = 1.0 - 2.0 * h_vector(1) * h_vector(1) / (h * h);
+  nodal_tangent_one(2) = -2.0 * h_vector(1) * h_vector(2) / (h * h);
+
+  nodal_tangent_two(0) = -2.0 * h_vector(0) * h_vector(2) / (h * h);
+  nodal_tangent_two(1) = -2.0 * h_vector(1) * h_vector(2) / (h * h);
+  nodal_tangent_two(2) = 1.0 - 2.0 * h_vector(2) * h_vector(2) / (h * h);
+}
 // Project secondary nodes onto their corresponding primary elements for each primary/secondary
 // pair.
 void

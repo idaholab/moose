@@ -96,9 +96,9 @@ public:
   /**
    * Set the normals vector
    */
-  void setLibmeshNodalTangents(const std::array<std::vector<Point>, 2> & tangents)
+  void setNodalTangents(const std::array<std::vector<Point>, 2> & tangents)
   {
-    _tangents_libmesh_3d = tangents;
+    _tangents_3d = tangents;
   }
 
   /**
@@ -185,9 +185,6 @@ protected:
 
   /// the tangents along the secondary face (three-dimensions)
   std::array<std::vector<Point>, 2> _tangents_3d;
-
-  /// the tangents along the secondary face (three-dimensions)
-  std::array<std::vector<Point>, 2> _tangents_libmesh_3d;
 
   /// Map to locate nodes from higher dimensional element to lower dimensional elements
   std::map<unsigned int, unsigned int> _secondary_ip_lowerd_map;
