@@ -2,30 +2,31 @@
 
 !syntax description /Executioner/TimeIntegrator/ImplicitMidpoint
 
-The implicit midpoint method is second order accurate. As a Gauss Legendre method it is A-stable.
+The implicit midpoint method is second-order accurate. As a Gauss-Legendre method it is A-stable.
 
 ## Description
 
-With $U$ the vector of non linear variables and $A$ a non linear operator
-describing the PDE of interest below:
+With $U$, the vector of nonlinear variables, and $A$, a nonlinear operator,
+we write the PDE of interest as:
 
 !equation
-\dfrac{\partial U(t)}{\partial t} = A(t, U(t))
+\dfrac{\partial U}{\partial t} = A(t, U(t))
 
-Using $t+dt$ for the current time step and $t$ for the previous step,
+Using $t+\Delta t$ for the current time step, and $t$ for the previous step,
 the implicit midpoint integration scheme can be written:
 
 !equation
-U(t+dt) = U(t) + dt A \left(t+dt/2, \dfrac{dt}{2} \left( U(t) +  U(t+dt) \right) \right)
+U(t+\Delta t) = U(t) + \Delta t A \left(t+\Delta t/2, \dfrac{\Delta t}{2} \left( U(t) +  U(t+\Delta t) \right) \right)
 
 
-The Butcher tableau of the quadrature weights for this method is:
+This method can be expressed as a Runge-Kutta method with the following Butcher Tableau:
 
-!table
-| $c_i$ | $a_{i1}$ |
-| 1/2 | 1/2 |
-| - | - |
-| $b_j$ |  1 |
+!equation
+\begin{array}{c|c}
+  1/2 & 1/2 \\
+\hline
+    &  1
+\end{array}
 
 !syntax parameters /Executioner/TimeIntegrator/ImplicitMidpoint
 

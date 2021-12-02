@@ -2,17 +2,19 @@
 
 !syntax description /Executioner/TimeIntegrator/LStableDirk4
 
-The Butcher tableau for this method is:
+This method can be expressed as a Runge-Kutta method with the following Butcher Tableau:
 
-!table
-| $c_i$ | $a_{i1}$ | $a_{i2}$ | $a_{i3}$ | $a_{i4}$ | $a_{i5}$ |
-| - | - | - | - | - | - |
-| 1/4 |  1/4 |
-| 0 | -1/4 | 1/4 |
-| 1/2 |  1/8 | 1/8 | 1/4 |
-| 1 | -3/2 | 3/4 | 3/2 | 1/4 |
-| 1 | 0 | 1/6 | 2/3 | -1/12 | 1/4 |
-| 1 | 0 | 1/6 | 2/3 | -1/12 | 1/4 |
+!equation
+\begin{array}{c|ccccc}
+  \alpha & \alpha\\
+1/4 & 1/4 \\
+0   & -1/4 & 1/4 \\
+1/2 & 1/8 & 1/8 & 1/4 \\
+1   & -3/2 & 3/4 & 3/2 & 1/4 \\
+1   & 0    & 1/6 & 2/3 & -1/12 & 1/4 \\
+\hline
+    & 0    & 1/6 & 2/3 & -1/12 & 1/4 \\
+\end{array}
 
 The stability function for this method is:
 
@@ -25,7 +27,8 @@ The method is L-stable:
 !equation
 \lim_{z->\infty} R(z) = 0
 
-Notes:
+## Notes
+
 The method was found in [!cite](skvortsov2006) but it may not be the original source.
 There is also a 4th-order rule with 5 stages on page 107 of [!cite](hairer1999)
 but its coefficients have less favorable "amplification factors" than the present rule.

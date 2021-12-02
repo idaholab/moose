@@ -4,10 +4,6 @@
 
 ## Description
 
-!alert note
-The `IterationAdaptiveDT` is often simply used to have an exponentially growing time step. For this
-purpose, simply omit all the linear iteration related parameters.
-
 The `IterationAdaptiveDT` Time Stepper provides a means to adapt the time step
 size based on the difficulty of the solution.
 
@@ -55,6 +51,10 @@ conditions applied to the model over a step. In addition to that limit, the bool
 `PiecewiseLinear` function.
 
 !media media/executioner/adaptive_dt_criteria.png style=width:70%; id=fig:adaptive_dt_criteria caption=Criteria used to determine adaptive time step size
+
+!alert tip
+The `IterationAdaptiveDT` is often simply used to have an exponentially growing time step. For this
+purpose, the iteration related parameters are not required.
 
 ## Example Input Syntax
 

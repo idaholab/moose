@@ -3,20 +3,20 @@
 !syntax description /UserObjects/Terminator
 
 The parsed logical expression is specified with the [!param](/UserObjects/Terminator/expression). More information about parsed expressions
-may be found on the [function parser documentation](http://warp.povusers.org/FunctionParser/)
+may be found on the [function parser documentation](http://warp.povusers.org/FunctionParser/).
 
 The `Terminator` can act in two modes, specified by the [!param](/UserObjects/Terminator/fail_mode) :
 
-- HARD stop, the default, will terminate the simulation when the conditions are met
+- `HARD` stop, the default, will terminate the simulation when the conditions are met
 
-- SOFT stop, will stop the ongoing solve and let the solver try again using a smaller time step, for
+- `SOFT` stop, will stop the ongoing solve and let the solver try again using a smaller time step, for
   transient simulations.
 
 
 !alert note
 To use the `Terminator` as if it were in a `PASS` mode, where it stops the simulation and accepts the result, use the `HARD` fail_mode with the `INFO` error_level.
 
-The message output by the `Terminator` when the condition for termination are met is specified using the
+The message output by the `Terminator` when the condition for termination is met is specified using the
 [!param](/UserObjects/Terminator/error_level) parameter. It may be output as:
 
 - an error, forcing a hard failure

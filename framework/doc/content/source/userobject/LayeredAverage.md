@@ -5,10 +5,10 @@
 ## How to define the layers
 
 The layer definition is handled by the `LayeredBase` class. It is summarized here.
-One or multiple layers are defined by their direction (normal or axis), their number
+One, or multiple, layers are defined by their direction (normal or axis), their number,
 and their thicknesses.
 
-The direction of the layers currently may only be along the three Cartesian axis, and can be
+The direction of the layers currently may only be along the three Cartesian axes, and can be
 set using the [!param](/UserObjects/LayeredAverage/direction) parameter.
 
 The number of layers is set using the [!param](/UserObjects/LayeredAverage/num_layers) parameter,

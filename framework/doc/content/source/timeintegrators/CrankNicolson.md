@@ -2,30 +2,31 @@
 
 !syntax description /Executioner/TimeIntegrator/CrankNicolson
 
-The Crank Nicholson time integration scheme is a second order implicit method. It is unconditionally stable.
+The Crank Nicolson time integration scheme is a second-order implicit method. It is unconditionally stable.
 
 ## Description
 
-With $U$ the vector of non linear variables and $A$ a non linear operator
-describing the PDE of interest below:
+With $U$, the vector of nonlinear variables, and $A$, a nonlinear operator,
+we write the PDE of interest as:
 
 !equation
-\dfrac{\partial U(t)}{\partial t} = A(t, U(t))
+\dfrac{\partial U}{\partial t} = A(t, U(t))
 
-Using $t+dt$ for the current time step and $t$ for the previous step,
-the implicit Euler time integration scheme can be written:
+Using $t+\Delta t$ for the current time step, and $t$ for the previous step,
+the Crank Nicolson time integration scheme can be written:
 
 !equation
-U(t+dt) = U(t) + dt \dfrac{1}{2} \left( A(t, U(t)) + A(t+dt, U(t+dt)) \right)
+U(t+\Delta t) = U(t) + \Delta t \dfrac{1}{2} \left( A(t, U(t)) + A(t+\Delta t, U(t+\Delta t)) \right)
 
-The Butcher tableau of the quadrature weights for this method is:
+This method can be expressed as a Runge-Kutta method with the following Butcher Tableau:
 
-!table
-| $c_i$ | $a_{i1}$ | $a_{i2}$ |
-| - | - | - |
-| 0 | 0 | 0 |
-| 1 | 1/2 | 1/2 |
-| $b_{j}$ | 1/2 | 1/2 |
+!equation
+\begin{array}{c|cc}
+0 & 0 & 0 \\
+1 & 1/2 & 1/2 \\
+\hline
+    &  1/2 & 1/2
+\end{array}
 
 !syntax parameters /Executioner/TimeIntegrator/CrankNicolson
 

@@ -1,13 +1,3 @@
-###########################################################
-# This is a test of the UserObject System. The
-# Terminator UserObject executes independently after
-# each solve and can terminate the solve early due to
-# user-defined criteria. (Type: GeneralUserObject)
-#
-# @Requirement F6.40
-###########################################################
-
-
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -21,49 +11,49 @@
 []
 
 [Variables]
-  [./c]
+  [c]
     order = FIRST
     family = LAGRANGE
     initial_condition = 1
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./dt]
+  [dt]
     type = TimestepSize
-  [../]
+  []
 []
 
 [UserObjects]
-  [./arnold]
+  [arnold]
     type = Terminator
     expression = 'dt > 20'
     fail_mode = HARD
     error_level = INFO
     message = 'Arnold says this should end'
     execute_on = TIMESTEP_END
-  [../]
+  []
 []
 
 [Kernels]
-  [./cres]
+  [cres]
     type = Diffusion
     variable = c
-  [../]
+  []
 
-  [./time]
+  [time]
     type = TimeDerivative
     variable = c
-  [../]
+  []
 []
 
 [BCs]
-  [./c]
+  [c]
     type = DirichletBC
     variable = c
     boundary = left
     value = 0
-  [../]
+  []
 []
 
 [Executioner]

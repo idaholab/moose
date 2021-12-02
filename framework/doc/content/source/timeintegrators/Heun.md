@@ -2,31 +2,32 @@
 
 !syntax description /Executioner/TimeIntegrator/Heun
 
-Heun's (aka improved Euler) time integration method is second order accurate in time. It is a two step explicit
-method and a special case of the 2nd order Runge-Kutta method.
+Heun's (or "improved Euler") time integration method is second-order accurate in time. It is a two-step explicit
+method and a special case of the 2nd-order Runge-Kutta method.
 
 ## Description
 
-With $U$ the vector of non linear variables and $A$ a non linear operator
-describing the PDE of interest below:
+With $U$, the vector of nonlinear variables, and $A$, a nonlinear operator,
+we write the PDE of interest as:
 
 !equation
-\dfrac{\partial U(t)}{\partial t} = A(t, U(t))
+\dfrac{\partial U}{\partial t} = A(t, U(t))
 
-Using $t+dt$ for the current time step and $t$ for the previous step,
+Using $t+\Delta t$ for the current time step, and $t$ for the previous step,
 Heun's method can be written:
 
 !equation
-U(t+dt) = U(t) + \dfrac{dt}{2} \left(A(t, U(t)) +  A(t,U(t) + dt A(t, U(t)) ) \right)
+U(t+\Delta t) = U(t) + \dfrac{\Delta t}{2} \left(A(t, U(t)) +  A(t,U(t) + \Delta t A(t, U(t)) ) \right)
 
-The Butcher tableau of the quadrature weights for this method is:
+This method can be expressed as a Runge-Kutta method with the following Butcher Tableau:
 
-!table
-| $c_i$ | $a_{i1}$ | $a_{i2}$ |
-| - | - | - |
-| 0 | 0 |
-| 1 | 1 | 0 |
-| $b_j$ | 1/2 | 1/2 |
+!equation
+\begin{array}{c|cc}
+  0 & 0 \\
+1 & 1 & 0 \\
+\hline
+    &  1/2  & 1/2
+\end{array}
 
 !alert warning
 All kernels except time-(derivative)-kernels should have the parameter `implicit=false` to use this

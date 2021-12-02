@@ -9,15 +9,15 @@ The method [!cite](gottlieb1998) consists of two stages:
 Stage 1.
 
 !equation
-R_{NL} = M*(U^{(1)}-U^n)/dt - F(t^n,U^n)
+R_{NL} = M(U^{(1)}-U^n)/\Delta t - F(t^n,U^n)
 
 !equation
-t^{(1)} = t^{n} + dt = t^{n+1}
+t^{(1)} = t^{n} + \Delta t = t^{n+1}
 
 Stage 2.
 
 !equation
-R_{NL} = M*(2*U^{(2)}-U^{(1)}-U^n)/(2*dt) - (1/2)*F(t^{(1)},U^{(1)})
+R_{NL} = M(2U^{(2)}-U^{(1)}-U^n)/(2\Delta t) - (1/2)F(t^{(1)},U^{(1)})
 
 !equation
 U^{n+1} = U^{(2)}
