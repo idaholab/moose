@@ -11,9 +11,6 @@
 
 #include "libmesh/utility.h"
 #include "SurrogateTrainer.h"
-#include "tensorflow/core/framework/tensor.h"
-#include "tensorflow/cc/ops/standard_ops.h"
-#include "tensorflow/cc/client/client_session.h"
 
 class BasicNNTrainer : public SurrogateTrainer
 {
@@ -29,61 +26,54 @@ public:
   virtual void postTrain() override;
 
 protected:
-#ifdef ENABLE_TF
-  tensorflow::Output addLayer(std::string idx,
-                              tensorflow::Scope scope,
-                              int in_neurons,
-                              int out_neurons,
-                              tensorflow::Input input,
-                              bool activate);
-
-  tensorflow::Input XavierInit(tensorflow::Scope scope, int in_neurons, int out_neurons);
-
-  tensorflow::Status prepareBatches(std::vector<tensorflow::Tensor> & param_batches,
-                                    std::vector<tensorflow::Tensor> & response_batches);
-
-  tensorflow::Status createGraph();
-
-  tensorflow::Status createOptimizationGraph();
-
-  tensorflow::Status initializeParameters();
-
-  tensorflow::Status trainGraph(tensorflow::Tensor & param_batch,
-                                tensorflow::Tensor & response_batch,
-                                double & loss);
-#endif
+// #ifdef ENABLE_TF
+//   tensorflow::Output addLayer(std::string idx,
+//                               tensorflow::Scope scope,
+//                               int in_neurons,
+//                               int out_neurons,
+//                               tensorflow::Input input,
+//                               bool activate);
+//
+//   tensorflow::Input XavierInit(tensorflow::Scope scope, int in_neurons, int out_neurons);
+//
+//   tensorflow::Status prepareBatches(std::vector<tensorflow::Tensor> & param_batches,
+//                                     std::vector<tensorflow::Tensor> & response_batches);
+//
+//   tensorflow::Status createGraph();
+//
+//   tensorflow::Status createOptimizationGraph();
+//
+//   tensorflow::Status initializeParameters();
+//
+//   tensorflow::Status trainGraph(tensorflow::Tensor & param_batch,
+//                                 tensorflow::Tensor & response_batch,
+//                                 double & loss);
+// #endif
 
 private:
-  unsigned int _no_batches;
-  unsigned int _no_epocs;
 
-  unsigned int _no_hidden_layers;
-  std::vector<unsigned int> _no_neurons_per_layer;
-
-  Real _learning_rate;
-
-#ifdef ENABLE_TF
-
-  tensorflow::Scope _t_root;
-
-  std::unique_ptr<tensorflow::ClientSession> _t_session;
-
-  tensorflow::Output _input_param_batch;
-  tensorflow::Output _input_response_batch;
-  std::string _input_name = "input";
-
-  tensorflow::Output _output;
-  tensorflow::Output _output_loss;
-
-  std::map<std::string, tensorflow::Output> _nn_params;
-  std::vector<tensorflow::Output> _raw_params;
-  std::map<std::string, tensorflow::TensorShape> _nn_shapes;
-  std::map<std::string, tensorflow::Output> _nn_assigns;
-
-  std::vector<tensorflow::Output> _v_weights_biases;
-  std::vector<tensorflow::Operation> _v_out_grads;
-
-#endif
+// #ifdef ENABLE_TF
+//
+//   tensorflow::Scope _t_root;
+//
+//   std::unique_ptr<tensorflow::ClientSession> _t_session;
+//
+//   tensorflow::Output _input_param_batch;
+//   tensorflow::Output _input_response_batch;
+//   std::string _input_name = "input";
+//
+//   tensorflow::Output _output;
+//   tensorflow::Output _output_loss;
+//
+//   std::map<std::string, tensorflow::Output> _nn_params;
+//   std::vector<tensorflow::Output> _raw_params;
+//   std::map<std::string, tensorflow::TensorShape> _nn_shapes;
+//   std::map<std::string, tensorflow::Output> _nn_assigns;
+//
+//   std::vector<tensorflow::Output> _v_weights_biases;
+//   std::vector<tensorflow::Operation> _v_out_grads;
+//
+// #endif
 
   /// Data from the current sampler row
   const std::vector<Real> & _sampler_row;
@@ -99,4 +89,12 @@ private:
 
   /// Response value
   const Real & _response;
+
+  unsigned int _no_batches;
+  unsigned int _no_epocs;
+
+  unsigned int _no_hidden_layers;
+  std::vector<unsigned int> _no_neurons_per_layer;
+
+  Real _learning_rate;
 };

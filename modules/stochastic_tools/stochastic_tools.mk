@@ -1,5 +1,9 @@
 libmesh_CXXFLAGS += -DENABLE_TF
 
-libmesh_CXXFLAGS += -I/data/miniconda3/pkgs/tensorflow-base-2.4.1-py39h23a8cbf_0/lib/python3.9/site-packages/tensorflow/include
+libmesh_CXXFLAGS += -I/Users/germp/mambaforge/envs/moose-pt-conda39/lib/python3.9/site-packages/torch/include/torch/csrc/api/include
+libmesh_CXXFLAGS += -I/Users/germp/mambaforge/envs/moose-pt-conda39/lib/python3.9/site-packages/torch/include
 
-libmesh_LIBS += -ltensorflow_framework -ltensorflow_cc
+libmesh_LDFLAGS += -Wl,-rpath,/Users/germp/mambaforge/envs/moose-pt-conda39/lib/python3.9/site-packages/torch/lib
+libmesh_LDFLAGS += -L/Users/germp/mambaforge/envs/moose-pt-conda39/lib/python3.9/site-packages/torch/lib -ltorch
+
+# libmesh_LIBS += -ltorch
