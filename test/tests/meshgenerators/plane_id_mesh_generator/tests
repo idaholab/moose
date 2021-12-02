@@ -1,0 +1,30 @@
+[Tests]
+  design = 'meshgenerators/PlaneIDMeshGenerator.md'
+  issues = '#19217'
+  [2d_cartesian_grid]
+    requirement = 'The system shall support the generation of plane IDs for 2D Cartesian grid'
+    [x_dir]
+      type = 'Exodiff'
+      input = 'plane_id_grid2d.i'
+      exodiff = 'plane_id_grid2d_x_dir_out.e'
+      cli_args = "Outputs/file_base='plane_id_grid2d_x_dir_out'"
+      detail = 'by taking x-direction as the plane axis'
+      recover = false
+    []
+    [y_dir]
+      type = 'Exodiff'
+      input = 'plane_id_grid2d.i'
+      exodiff = 'plane_id_grid2d_y_dir_out.e'
+      cli_args = "Mesh/plane_id_gen/plane_axis='y' Outputs/file_base='plane_id_grid2d_y_dir_out'"
+      detail = 'by taking y-direction as the plane axis'
+      recover = false
+    []
+  []
+  [3d_extruded_mesh]
+    type = 'Exodiff'
+    input = 'plane_id_pin3d.i'
+    exodiff = 'plane_id_pin3d_out.e'
+    requirement = 'The system shall support the generation of plane IDs for 3D extruded mesh'
+    recover = false
+  []
+[]

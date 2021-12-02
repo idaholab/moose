@@ -1,0 +1,45 @@
+[Tests]
+  design = 'meshgenerators/HexIDPatternedMeshGenerator.md'
+  issues = '#19217'
+  [assembly]
+    requirement = 'The system shall support the generation of reporting IDs for hexagonal assemblies assigned'
+    [cell]
+      type = 'Exodiff'
+      input = 'assembly_reporting_id.i'
+      exodiff = 'assembly_reporting_id_cell_out.e'
+      cli_args = "Outputs/file_base='assembly_reporting_id_cell_out'"
+      detail = 'in sequential order for each components in the lattice'
+      recover = false
+    []
+    [pattern]
+      type = 'Exodiff'
+      input = 'assembly_reporting_id.i'
+      exodiff = 'assembly_reporting_id_pattern_out.e'
+      cli_args = "Mesh/assembly/assign_type='pattern' Outputs/file_base='assembly_reporting_id_pattern_out'"
+      detail = 'based on the ID of the input pattern tiles'
+      recover = false
+    []
+    [manual]
+      type = 'Exodiff'
+      input = 'assembly_reporting_id.i'
+      exodiff = 'assembly_reporting_id_manual_out.e'
+      cli_args = "Mesh/assembly/assign_type='manual' Mesh/assembly/id_pattern='2 2 2;2 1 1 2;2 1 0 1 2;2 1 1 2;2 2 2' Outputs/file_base='assembly_reporting_id_manual_out'"
+      detail = 'based on user-defined mapping'
+      recover = false
+    []
+  []
+  [core_base]
+    type = 'Exodiff'
+    input = 'core_reporting_id.i'
+    exodiff = 'core_reporting_id_out.e'
+    requirement = 'The system shall support the generation of reporting IDs for hexagonal cores'
+    recover = false
+  []
+  [core_exclude_id]
+    type = 'Exodiff'
+    input = 'core_reporting_id_exclude.i'
+    exodiff = 'core_reporting_id_exclude_out.e'
+    requirement = 'The system shall support the generation of reporting IDs for hexagonal cores with removal of certain assemblies on periphery'
+    recover = false
+  []
+[]
