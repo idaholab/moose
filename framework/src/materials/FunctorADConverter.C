@@ -21,13 +21,14 @@ FunctorADConverterTempl<T>::validParams()
   InputParameters params = FunctorMaterial::validParams();
   params.addClassDescription("Converts regular functors to AD functors and "
                              " AD functors to regular functors");
-  params.addParam<std::vector<std::string>>(
+  params.addParam<std::vector<MooseFunctorName>>(
       "reg_props_in", "The names of the regular functors to convert to AD functors");
-  params.addParam<std::vector<std::string>>("ad_props_out", "The names of the output AD functors");
-  params.addParam<std::vector<std::string>>(
+  params.addParam<std::vector<MooseFunctorName>>("ad_props_out",
+                                                 "The names of the output AD functors");
+  params.addParam<std::vector<MooseFunctorName>>(
       "ad_props_in", "The names of the AD functors to convert to regular functors");
-  params.addParam<std::vector<std::string>>("reg_props_out",
-                                            "The names of the output regular functors");
+  params.addParam<std::vector<MooseFunctorName>>("reg_props_out",
+                                                 "The names of the output regular functors");
   return params;
 }
 
@@ -35,10 +36,10 @@ template <typename T>
 FunctorADConverterTempl<T>::FunctorADConverterTempl(const InputParameters & parameters)
   : FunctorMaterial(parameters)
 {
-  auto reg_props_in = getParam<std::vector<std::string>>("reg_props_in");
-  auto ad_props_out = getParam<std::vector<std::string>>("ad_props_out");
-  auto ad_props_in = getParam<std::vector<std::string>>("ad_props_in");
-  auto reg_props_out = getParam<std::vector<std::string>>("reg_props_out");
+  auto reg_props_in = getParam<std::vector<MooseFunctorName>>("reg_props_in");
+  auto ad_props_out = getParam<std::vector<MooseFunctorName>>("ad_props_out");
+  auto ad_props_in = getParam<std::vector<MooseFunctorName>>("ad_props_in");
+  auto reg_props_out = getParam<std::vector<MooseFunctorName>>("reg_props_out");
 
   // Check input sizes
   if (reg_props_in.size() != ad_props_out.size())

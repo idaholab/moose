@@ -21,6 +21,21 @@
   []
 []
 
+[Variables]
+  [dummy]
+    type = MooseVariableFVReal
+  []
+[]
+
+# This is added to have sufficient ghosting layers, see #19534
+[FVKernels]
+  [diff]
+    type = FVDiffusion
+    variable = 'dummy'
+    coeff = 1
+  []
+[]
+
 [AuxVariables]
   [u]
     type = MooseVariableFVReal
@@ -63,7 +78,7 @@
 
   # to trigger ghost evaluations
   [flux_mid]
-    type = ADSideDiffusiveFluxIntegral
+    type = ADInterfaceDiffusiveFluxIntegral
     boundary = middle
     variable = v
     diffusivity = 'coeff'
@@ -80,4 +95,9 @@
 
 [Outputs]
   exodus = true
+  # To get level of ghosting
+  [console]
+    type = Console
+    system_info = 'framework mesh aux nonlinear execution relationship'
+  []
 []
