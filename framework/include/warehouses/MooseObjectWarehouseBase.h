@@ -172,7 +172,7 @@ public:
   /**
    * Return the number of threads.
    */
-  THREAD_ID numThreads() { return _num_threads; }
+  THREAD_ID numThreads() const { return _num_threads; }
 
 protected:
   /// Convenience member storing the number of threads used for storage (1 or libMesh::n_threads)

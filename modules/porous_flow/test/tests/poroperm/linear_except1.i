@@ -10,6 +10,10 @@
   []
 []
 
+[Problem]
+  kernel_coverage_check = false
+[]
+
 [UserObjects]
   [dictator]
     type = PorousFlowDictator
@@ -21,6 +25,8 @@
 
 [Variables]
   [pp]
+  []
+  [disp]
   []
 []
 
@@ -50,6 +56,10 @@
     type = PorousFlowPorosityLinear
     porosity_ref = 0.1
   []
+  [total_strain]
+    type = ComputeSmallStrain
+    displacements = disp
+  []
 []
 
 [Executioner]
@@ -57,4 +67,3 @@
   dt = 1
   num_steps = 1
 []
-

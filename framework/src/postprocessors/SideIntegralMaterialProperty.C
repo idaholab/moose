@@ -32,6 +32,14 @@ SideIntegralMaterialPropertyTempl<is_ad>::SideIntegralMaterialPropertyTempl(
 }
 
 template <bool is_ad>
+void
+SideIntegralMaterialPropertyTempl<is_ad>::initialSetup()
+{
+  // check if the material property type and number of supplied components match
+  _prop.check();
+}
+
+template <bool is_ad>
 Real
 SideIntegralMaterialPropertyTempl<is_ad>::computeQpIntegral()
 {

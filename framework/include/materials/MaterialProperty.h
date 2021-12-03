@@ -447,3 +447,70 @@ struct GenericMaterialPropertyStruct<T, true>
 
 template <typename T, bool is_ad>
 using GenericMaterialProperty = typename GenericMaterialPropertyStruct<T, is_ad>::type;
+
+/**
+ * Base class to facilitate storage using unique pointers
+ */
+class GenericOptionalMaterialPropertyBase
+{
+public:
+  virtual ~GenericOptionalMaterialPropertyBase() {}
+};
+
+template <typename T, bool is_ad>
+class OptionalMaterialPropertyProxy;
+
+/**
+ * Wrapper around a material property pointer. Copying this wrapper is disabled
+ * to enforce capture via reference. Used by the optional material property
+ * API, which requires late binding updates of the stored pointer.
+ */
+template <typename T, bool is_ad>
+class GenericOptionalMaterialProperty : public GenericOptionalMaterialPropertyBase
+{
+  typedef GenericMaterialProperty<T, is_ad> P;
+
+public:
+  GenericOptionalMaterialProperty(const P * pointer) : _pointer(pointer) {}
+
+  /// no copy construction is permitted
+  GenericOptionalMaterialProperty(const GenericOptionalMaterialProperty<T, is_ad> &) = delete;
+  /// no copy assignment is permitted
+  GenericOptionalMaterialProperty &
+  operator=(const GenericOptionalMaterialProperty<T, is_ad> &) = delete;
+
+  /// pass through operator[] to provide a similar API as MaterialProperty
+  const MooseADWrapper<T, is_ad> & operator[](const unsigned int i) const
+  {
+    // check if the optional property is valid in debug mode
+    mooseAssert(
+        _pointer,
+        "Attempting to access an optional material property that was not provided by any material "
+        "class. Make sure to check optional material properties before using them.");
+    return (*_pointer)[i];
+  }
+
+  /// pass through size calls
+  unsigned int size() const { return (*_pointer).size(); }
+
+  /// implicit cast to bool to check the if the material property exists
+  operator bool() const { return _pointer; }
+
+  /// get a pointer to the underlying property (only do this in initialSetup or later)
+  const P * get() const { return _pointer; }
+
+private:
+  /// the default constructor is only called from the friend class
+  GenericOptionalMaterialProperty() : _pointer(nullptr) {}
+
+  /// setting the pointer is only permitted through the optional material proxy system
+  void set(const P * pointer) { _pointer = pointer; }
+  const P * _pointer;
+
+  friend class OptionalMaterialPropertyProxy<T, is_ad>;
+};
+
+template <typename T>
+using OptionalMaterialProperty = GenericOptionalMaterialProperty<T, false>;
+template <typename T>
+using OptionalADMaterialProperty = GenericOptionalMaterialProperty<T, true>;

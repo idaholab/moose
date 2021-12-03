@@ -27,6 +27,15 @@
 []
 
 [Materials]
+  active = 'types'
+  [types]
+    type = TypesMaterial
+    std_vec_prop_entry1 = 1.1
+  []
+
+  # while TypeMaterial supplies the types below as well, we're providing custom
+  # ones to ensure that the average stays teh same and we can use a single CSV
+  # gold file for the test
   [real]
     type = GenericConstantMaterial
     prop_names = prop

@@ -50,7 +50,7 @@
     [error]
       type = 'RunException'
       input = '../side_material.i side_integral_material_property.i'
-      expect_err = "Material property 'prop' is 1 dimensional, but an index vector of size 3 was "
+      expect_err = "Material property 'prop' is 1-dimensional, but an index vector of size 3 was "
                    "supplied to select a component. It looks like you were expecting the material "
                    "property to have a different type."
       cli_args = 'Materials/active=realvector Postprocessors/integral/component="1 2 3"'

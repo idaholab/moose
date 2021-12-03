@@ -1,0 +1,27 @@
+[Tests]
+  issues = '#19476'
+  design = 'IntegralPreservingFunctionIC.md'
+  [errors]
+    requirement = 'The system shall error if'
+    [missing_initial]
+      type = RunException
+      input = 'sinusoidal_z.i'
+      expect_err = "The 'execute_on' parameter for the 'vol' postprocessor must include 'initial'!"
+      cli_args = 'Postprocessors/vol/execute_on=final'
+      detail = 'the postprocessor does not have execute_on initial'
+    []
+    [zero_integral]
+      type = RunException
+      input = 'sinusoidal_z.i'
+      expect_err = "The integral of 'vol' cannot be zero!"
+      cli_args = 'Postprocessors/vol/function=0.0'
+      detail = 'the postprocessor for normalization is zero'
+    []
+  []
+  [sinusoidal]
+    type = Exodiff
+    input = 'sinusoidal_z.i'
+    exodiff = 'sinusoidal_z_out.e'
+    requirement = 'The system shall be able to apply a normalized sinusoidal initial condition.'
+  []
+[]
