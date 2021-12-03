@@ -207,6 +207,7 @@ addActionTypes(Syntax & syntax)
 
   registerTask("setup_dampers", true);
   registerTask("check_integrity", true);
+  registerTask("resolve_optional_materials", true);
   registerTask("check_integrity_early", true);
   registerTask("setup_quadrature", true);
 
@@ -310,6 +311,7 @@ addActionTypes(Syntax & syntax)
                            "(copy_nodal_vars, copy_nodal_aux_vars)"
                            "(add_material)"
                            "(add_master_action_material)"
+                           "(resolve_optional_materials)"
                            "(add_output_aux_variables)"
                            "(add_output)"
                            "(add_postprocessor)"

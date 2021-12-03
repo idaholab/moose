@@ -23,6 +23,7 @@ public:
 
   EshelbyTensor(const InputParameters & parameters);
 
+  virtual void initialSetup() override;
   virtual void initQpStatefulProperties() override;
   virtual void computeQpProperties() override;
 
@@ -51,5 +52,5 @@ protected:
   MaterialProperty<RealVectorValue> & _J_thermal_term_vec;
   const VariableGradient & _grad_temp;
   const bool _has_temp;
-  const MaterialProperty<RankTwoTensor> * const _total_deigenstrain_dT;
+  const OptionalMaterialProperty<RankTwoTensor> & _total_deigenstrain_dT;
 };

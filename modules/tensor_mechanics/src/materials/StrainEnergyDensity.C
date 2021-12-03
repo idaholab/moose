@@ -24,32 +24,38 @@ StrainEnergyDensity::validParams()
                                "Optional parameter that allows the user to define "
                                "multiple mechanics material systems on the same "
                                "block, i.e. for multiple phases");
-  params.addRequiredParam<bool>(
-      "incremental", "Flag to indicate whether an incremental or total model is being used.");
+  params.addParam<bool>(
+      "incremental",
+      "Optional flag for error checking if an incremental or total model should be used.");
   return params;
 }
 
 StrainEnergyDensity::StrainEnergyDensity(const InputParameters & parameters)
   : DerivativeMaterialInterface<Material>(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
-    _incremental(getParam<bool>("incremental")),
     _strain_energy_density(declareProperty<Real>(_base_name + "strain_energy_density")),
     _strain_energy_density_old(getMaterialPropertyOld<Real>(_base_name + "strain_energy_density")),
     _stress(getMaterialProperty<RankTwoTensor>(_base_name + "stress")),
     _stress_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "stress")),
     _mechanical_strain(getMaterialProperty<RankTwoTensor>(_base_name + "mechanical_strain")),
-    _strain_increment(_incremental
-                          ? &getMaterialProperty<RankTwoTensor>(_base_name + "strain_increment")
-                          : nullptr)
+    _strain_increment(getOptionalMaterialProperty<RankTwoTensor>(_base_name + "strain_increment"))
 {
 }
 
 void
 StrainEnergyDensity::initialSetup()
 {
-  if (!_incremental && hasMaterialProperty<RankTwoTensor>(_base_name + "strain_increment"))
-    mooseError("StrainEnergyDensity: Specified incremental = false, but material model is "
-               "incremental.");
+  // optional error checking
+  if (isParamValid("incremental"))
+  {
+    auto incremental = getParam<bool>("incremental");
+    if (incremental && !_strain_increment)
+      mooseError("StrainEnergyDensity: Specified incremental = true, but material model is "
+                 "not incremental.");
+    if (!incremental && _strain_increment)
+      mooseError("StrainEnergyDensity: Specified incremental = false, but material model is "
+                 "incremental.");
+  }
 }
 
 void
@@ -62,11 +68,10 @@ void
 StrainEnergyDensity::computeQpProperties()
 {
 
-  if (_strain_increment != nullptr)
-    _strain_energy_density[_qp] =
-        _strain_energy_density_old[_qp] +
-        _stress[_qp].doubleContraction((*_strain_increment)[_qp]) / 2.0 +
-        _stress_old[_qp].doubleContraction((*_strain_increment)[_qp]) / 2.0;
+  if (_strain_increment)
+    _strain_energy_density[_qp] = _strain_energy_density_old[_qp] +
+                                  _stress[_qp].doubleContraction(_strain_increment[_qp]) / 2.0 +
+                                  _stress_old[_qp].doubleContraction(_strain_increment[_qp]) / 2.0;
   else
     _strain_energy_density[_qp] = _stress[_qp].doubleContraction((_mechanical_strain)[_qp]) / 2.0;
 }

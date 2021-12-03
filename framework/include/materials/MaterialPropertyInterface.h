@@ -18,6 +18,8 @@
 #include "InputParameters.h"
 #include "SubProblem.h"
 
+#include <list>
+
 // Forward declarations
 class MaterialPropertyInterface;
 class MooseObject;
@@ -99,6 +101,22 @@ public:
   const MaterialProperty<T> & getMaterialPropertyOldByName(const MaterialPropertyName & name);
   template <typename T>
   const MaterialProperty<T> & getMaterialPropertyOlderByName(const MaterialPropertyName & name);
+  ///@}
+
+  ///@{ Optional material property getters
+  template <typename T, bool is_ad>
+  const GenericOptionalMaterialProperty<T, is_ad> &
+  getGenericOptionalMaterialProperty(const std::string & name);
+  template <typename T>
+  const OptionalMaterialProperty<T> & getOptionalMaterialProperty(const std::string & name)
+  {
+    return getGenericOptionalMaterialProperty<T, false>(name);
+  }
+  template <typename T>
+  const OptionalADMaterialProperty<T> & getOptionalADMaterialProperty(const std::string & name)
+  {
+    return getGenericOptionalMaterialProperty<T, true>(name);
+  }
   ///@}
 
   /**
@@ -369,6 +387,10 @@ private:
 
   /// Storage for the boundary ids created by BoundaryRestrictable
   const std::set<BoundaryID> & _mi_boundary_ids;
+
+  /// address stable pointer storage to enable returning optional property pointers via reference
+  std::list<std::unique_ptr<GenericOptionalMaterialPropertyBase>>
+      _optional_material_pointer_storage;
 };
 
 template <typename T>
@@ -680,4 +702,19 @@ MaterialPropertyInterface::hasADMaterialPropertyByName(const std::string & name_
                         ? name_in
                         : MooseUtils::join(std::vector<std::string>({name_in, _get_suffix}), "_");
   return _material_data->haveADProperty<T>(name);
+}
+
+template <typename T, bool is_ad>
+const GenericOptionalMaterialProperty<T, is_ad> &
+MaterialPropertyInterface::getGenericOptionalMaterialProperty(const std::string & name)
+{
+
+  auto new_item = std::make_unique<GenericOptionalMaterialProperty<T, is_ad>>(
+      hasGenericMaterialProperty<T, is_ad>(name) ? &getGenericMaterialProperty<T, is_ad>(name)
+                                                 : nullptr);
+
+  const auto & prop = *new_item;
+  _optional_material_pointer_storage.push_back(std::move(new_item));
+
+  return prop;
 }

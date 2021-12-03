@@ -23,16 +23,14 @@ public:
 
   StrainEnergyDensity(const InputParameters & parameters);
 
-  virtual void initQpStatefulProperties() override;
   virtual void initialSetup() override;
+
+  virtual void initQpStatefulProperties() override;
   virtual void computeQpProperties() override;
 
 protected:
   /// Base name of the material system
   const std::string _base_name;
-
-  /// Whether the material model is a total or incremental model
-  bool _incremental;
 
   /// The strain energy density material property
   MaterialProperty<Real> & _strain_energy_density;
@@ -48,5 +46,5 @@ protected:
   const MaterialProperty<RankTwoTensor> & _mechanical_strain;
 
   /// Current value of the strain increment for incremental models
-  const MaterialProperty<RankTwoTensor> * const _strain_increment;
+  const OptionalMaterialProperty<RankTwoTensor> & _strain_increment;
 };

@@ -1,0 +1,57 @@
+[Tests]
+  issues = "#18999"
+  design = 'syntax/Materials/index.md'
+
+  [order]
+    requirement = 'The system shall support optional material property coupling when the requesting '
+                  'object comes'
+
+    [material_before]
+      type = Exodiff
+      input = material.i
+      exodiff = material_before.e
+      cli_args = "Materials/active='before prop adprop' Outputs/file_base=material_before"
+      detail = "before the providing material."
+    []
+    [material_after]
+      type = Exodiff
+      input = material.i
+      exodiff = material_after.e
+      cli_args = "Materials/active='after prop adprop' Outputs/file_base=material_after"
+      detail = "after the providing material."
+    []
+  []
+
+  [error]
+    requirement = "The optional material property system shall return"
+    [ad_expected]
+      type = RunException
+      input = material.i
+      cli_args = "Materials/active='before prop'"
+      expect_err = 'AD property expected but not found'
+      detail = "an accessible material for existing AD properties"
+    []
+    [non-ad_expected]
+      type = RunException
+      input = material.i
+      cli_args = "Materials/active='before adprop'"
+      expect_err = 'Non-AD property expected but not found'
+      detail = "an accessible material for existing non-AD properties"
+    []
+
+    [ad_not_expected]
+      type = RunException
+      input = material.i
+      cli_args = "Materials/active='before prop adprop' Materials/before/adexpect=false"
+      expect_err = 'AD property not expected but found'
+      detail = "an inaccessible material for non-existing AD properties"
+    []
+    [non-ad_not_expected]
+      type = RunException
+      input = material.i
+      cli_args = "Materials/active='before prop adprop' Materials/before/expect=false"
+      expect_err = 'Non-AD property not expected but found'
+      detail = "an inaccessible material non-existing non-AD properties"
+    []
+  []
+[]
