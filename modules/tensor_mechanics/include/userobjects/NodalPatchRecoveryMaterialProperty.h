@@ -12,12 +12,10 @@
 // MOOSE includes
 #include "NodalPatchRecoveryBase.h"
 
+#include "IndexableProperty.h"
+
 /**
  * Prepare patches for use in nodal patch recovery based on a material property.
- * TODO: Right now this class expects a scalar-valued, i.e. `Real`, material property. If you want
- * to use this userobject to construct patches for a component of a tensor-valued material property,
- * use the `RankTwoCartesianComponent` to first extract the desired component from the rank-2
- * tensor. We need to figure out how to use IndexableProperty in this UO.
  */
 class NodalPatchRecoveryMaterialProperty : public NodalPatchRecoveryBase
 {
@@ -26,8 +24,10 @@ public:
 
   NodalPatchRecoveryMaterialProperty(const InputParameters & parameters);
 
+  virtual void initialSetup() override;
+
 protected:
   virtual Real computeValue() override;
 
-  const MaterialProperty<Real> & _prop;
+  const IndexableProperty<NodalPatchRecoveryBase, false> _prop;
 };

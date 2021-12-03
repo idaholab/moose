@@ -13,13 +13,15 @@
   [stress_xx_patch]
     type = NodalPatchRecoveryMaterialProperty
     patch_polynomial_order = FIRST
-    property = 'stress_00'
+    property = 'stress'
+    component = '0 0'
     execute_on = 'TIMESTEP_END'
   []
   [stress_yy_patch]
     type = NodalPatchRecoveryMaterialProperty
     patch_polynomial_order = FIRST
-    property = 'stress_11'
+    property = 'stress'
+    component = '1 1'
     execute_on = 'TIMESTEP_END'
   []
 []
@@ -99,20 +101,6 @@
     type = CrystalPlasticityKalidindiUpdate
     number_slip_systems = 12
     slip_sys_file_name = input_slip_sys.txt
-  []
-  [stress_00]
-    type = RankTwoCartesianComponent
-    property_name = 'stress_00'
-    rank_two_tensor = 'stress'
-    index_i = 0
-    index_j = 0
-  []
-  [stress_11]
-    type = RankTwoCartesianComponent
-    property_name = 'stress_11'
-    rank_two_tensor = 'stress'
-    index_i = 1
-    index_j = 1
   []
 []
 

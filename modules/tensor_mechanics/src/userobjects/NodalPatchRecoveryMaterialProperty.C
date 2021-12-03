@@ -14,8 +14,7 @@ registerMooseObject("TensorMechanicsApp", NodalPatchRecoveryMaterialProperty);
 InputParameters
 NodalPatchRecoveryMaterialProperty::validParams()
 {
-  InputParameters params = NodalPatchRecoveryBase::validParams();
-  params.addRequiredParam<MaterialPropertyName>("property", "The material property to recover.");
+  InputParameters params = IndexableProperty<NodalPatchRecoveryBase, false>::validParams();
   params.addClassDescription(
       "Prepare patches for use in nodal patch recovery based on a material property.");
   return params;
@@ -23,8 +22,15 @@ NodalPatchRecoveryMaterialProperty::validParams()
 
 NodalPatchRecoveryMaterialProperty::NodalPatchRecoveryMaterialProperty(
     const InputParameters & parameters)
-  : NodalPatchRecoveryBase(parameters), _prop(getMaterialProperty<Real>("property"))
+  : NodalPatchRecoveryBase(parameters), _prop(this)
 {
+}
+
+void
+NodalPatchRecoveryMaterialProperty::initialSetup()
+{
+  // check if the material property type and number of supplied components match
+  _prop.check();
 }
 
 Real
