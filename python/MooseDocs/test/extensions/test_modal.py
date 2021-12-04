@@ -191,7 +191,7 @@ class TestModalSourceLinkDisableSource(MooseDocsTestCase):
 
     def setupExtension(self, ext):
         if ext == modal:
-            return dict(show_source=False)
+            return dict(hide_source=True, exceptions=['*.i'])
 
     def testMaterialize(self):
         ast = modal.ModalSourceLink(None, src='framework/Makefile')
@@ -201,16 +201,28 @@ class TestModalSourceLinkDisableSource(MooseDocsTestCase):
                            string='(python/MooseDocs/test/extensions/framework/Makefile)',
                            class_='moose-source-filename tooltipped')
 
-    def testLatex(self):
-        ast = modal.ModalSourceLink(None, src='framework/Makefile', string='test')
-        res = self.render(ast, renderer=base.LatexRenderer())
-        self.assertSize(res, 1)
-        self.assertLatexString(res(0), content='test')
+        # An input file should render because it matches a pattern in the 'exceptions' setting
+        ast = modal.ModalSourceLink(None, src='moose/test/tests/kernels/simple_diffusion/simple_diffusion.i')
+        res = self.render(ast, renderer=base.MaterializeRenderer())
+        self.assertSize(res, 2)
+        self.assertHTMLTag(res(0), 'a', size=1,
+                           string='(python/MooseDocs/test/extensions/moose/test/tests/kernels/simple_diffusion/simple_diffusion.i)',
+                           class_='moose-source-filename tooltipped modal-trigger')
+        self.assertHTMLTag(res(1), 'div', size=2, class_='moose-modal modal')
 
+    def testLatex(self):
         ast = modal.ModalSourceLink(None, src='framework/Makefile')
         res = self.render(ast, renderer=base.LatexRenderer())
         self.assertSize(res, 1)
         self.assertLatexString(res(0), content='(python/MooseDocs/test/extensions/framework/Makefile)')
+
+        ast = modal.ModalSourceLink(None, string='test',
+                                    src='moose/test/tests/kernels/simple_diffusion/simple_diffusion.i')
+        res = self.render(ast, renderer=base.LatexRenderer())
+        self.assertSize(res, 1)
+        self.assertLatexString(res(0), content='test')
+
+        print(res, "\n")
 
 
 if __name__ == '__main__':
