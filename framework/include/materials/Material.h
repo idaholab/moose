@@ -24,25 +24,6 @@ template <>
 InputParameters validParams<Material>();
 
 /**
- * Helper class for deferred getting of material properties after the construction
- * phase for materials. This enables "optional material properties" in materials.
- * It works by returning a reference to a pointer to a material property (rather
- * than a reference to the property value). The pointer will be set to point to
- * either an existing material property or to nullptr if the requested property
- * does not exist.
- */
-class OptionalMaterialPropertyProxyBase
-{
-public:
-  OptionalMaterialPropertyProxyBase(const std::string & name) : _name(name) {}
-  virtual ~OptionalMaterialPropertyProxyBase() {}
-  virtual void resolve(Material & material) = 0;
-
-protected:
-  const std::string _name;
-};
-
-/**
  * Materials compute MaterialProperties.
  */
 class Material : public MaterialBase, public Coupleable, public MaterialPropertyInterface
@@ -126,22 +107,6 @@ public:
   }
   ///@}
 
-  ///@{ Optional material property getters
-  template <typename T, bool is_ad>
-  const GenericOptionalMaterialProperty<T, is_ad> &
-  getGenericOptionalMaterialProperty(const std::string & name);
-  template <typename T>
-  const OptionalMaterialProperty<T> & getOptionalMaterialProperty(const std::string & name)
-  {
-    return getGenericOptionalMaterialProperty<T, false>(name);
-  }
-  template <typename T>
-  const OptionalADMaterialProperty<T> & getOptionalADMaterialProperty(const std::string & name)
-  {
-    return getGenericOptionalMaterialProperty<T, true>(name);
-  }
-  ///@}
-
   ///@{
   /**
    * Retrieve the property named "name"
@@ -187,9 +152,6 @@ public:
 
   bool ghostable() const override final { return _ghostable; }
 
-  /// resolve all optional properties
-  void resolveOptionalProperties();
-
 protected:
   virtual const MaterialData & materialData() const override { return *_material_data; }
   virtual MaterialData & materialData() override { return *_material_data; }
@@ -222,27 +184,6 @@ private:
   /// context. If properties depend on finite element variables, then this material cannot be
   /// computed in a ghosted context
   bool _ghostable;
-
-  /// optional material properties
-  std::vector<std::unique_ptr<OptionalMaterialPropertyProxyBase>> _optional_property_proxies;
-};
-
-template <typename T, bool is_ad>
-class OptionalMaterialPropertyProxy : public OptionalMaterialPropertyProxyBase
-{
-public:
-  OptionalMaterialPropertyProxy(const std::string & name) : OptionalMaterialPropertyProxyBase(name)
-  {
-  }
-  const GenericOptionalMaterialProperty<T, is_ad> & value() const { return _value; }
-  void resolve(Material & material) override
-  {
-    if (material.hasGenericMaterialProperty<T, is_ad>(_name))
-      _value.set(&material.getGenericMaterialProperty<T, is_ad>(_name));
-  }
-
-private:
-  GenericOptionalMaterialProperty<T, is_ad> _value;
 };
 
 template <typename T>
@@ -359,14 +300,4 @@ Material::getMaterialPropertyOlderByName(const std::string & prop_name_in)
           : MooseUtils::join(std::vector<std::string>({prop_name_in, _get_suffix}), "_");
   registerPropName(prop_name, true, Material::OLDER);
   return MaterialPropertyInterface::getMaterialPropertyOlderByName<T>(prop_name_in);
-}
-
-template <typename T, bool is_ad>
-const GenericOptionalMaterialProperty<T, is_ad> &
-Material::getGenericOptionalMaterialProperty(const std::string & name)
-{
-  auto proxy = std::make_unique<OptionalMaterialPropertyProxy<T, is_ad>>(name);
-  auto & optional_property = proxy->value();
-  _optional_property_proxies.push_back(std::move(proxy));
-  return optional_property;
 }

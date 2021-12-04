@@ -311,7 +311,6 @@ addActionTypes(Syntax & syntax)
                            "(copy_nodal_vars, copy_nodal_aux_vars)"
                            "(add_material)"
                            "(add_master_action_material)"
-                           "(resolve_optional_materials)"
                            "(add_output_aux_variables)"
                            "(add_output)"
                            "(add_postprocessor)"
@@ -331,6 +330,7 @@ addActionTypes(Syntax & syntax)
                            "(delete_remote_elements_after_late_geometric_ghosting)"
                            "(init_problem)"
                            "(add_control)"
+                           "(resolve_optional_materials)"
                            "(check_output)"
                            "(check_integrity)");
   // clang-format on
