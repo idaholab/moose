@@ -196,18 +196,19 @@ ElementSubdomainModifier::updateBoundaryInfo(MooseMesh & mesh,
     for (auto side : elem->side_index_range())
     {
       const Elem * neighbor = elem->neighbor_ptr(side);
+
       if (neighbor && neighbor != libMesh::remote_elem)
       {
-        // If the neighbor has a different subdomain ID, then this side should be added to
-        // the moving boundary
-        if (neighbor->subdomain_id() != elem->subdomain_id())
-          bnd_info.add_side(elem, side, _moving_boundary_id);
-        // Otherwise remove this side and the neighbor side from the boundary.
-        else
+        // Add all the sides to the boundary first and remove excessive sides later
+        bnd_info.add_side(elem, side, _moving_boundary_id);
+        // If this element and neighbor element are in the same subdomain, remove this side and the
+        // neighbor side from the boundary.
+        if (neighbor->subdomain_id() == elem->subdomain_id())
         {
-          bnd_info.remove_side(elem, side);
+          bnd_info.remove_side(elem, side, _moving_boundary_id);
           unsigned int neighbor_side = neighbor->which_neighbor_am_i(elem);
-          bnd_info.remove_side(neighbor, neighbor_side);
+          // nothing happens if the neighbor side does not exist in the subdomain
+          bnd_info.remove_side(neighbor, neighbor_side, _moving_boundary_id);
           if (neighbor->processor_id() != this->processor_id())
             ghost_sides_to_remove[neighbor->processor_id()].emplace_back(neighbor->id(),
                                                                          neighbor_side);
