@@ -8,6 +8,9 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 import os
 import uuid
+import logging
+import fnmatch
+
 import mooseutils
 import moosetree
 import collections
@@ -17,6 +20,8 @@ from ..common import exceptions, report_error
 from ..base import components
 from ..tree import tokens, html, latex
 from . import core, command
+
+LOG = logging.getLogger('MooseDocs.extensions.modal')
 
 def make_extension(**kwargs):
     return ModalExtension(**kwargs)
@@ -34,7 +39,9 @@ class ModalExtension(command.CommandExtension):
     @staticmethod
     def defaultConfig():
         config = command.CommandExtension.defaultConfig()
-        config['show_source'] = (True, "Toggle the display of complete source files.")
+        config['hide_source'] = (False, "Toggle the display of complete source files.")
+        config['exceptions'] = (list(), "A list of shell-style patterns for displaying certain " \
+                                        "files when the 'hide_source' setting is True.")
         return config
 
     def __init__(self, *args, **kwargs):
@@ -49,6 +56,10 @@ class ModalExtension(command.CommandExtension):
     def extend(self, reader, renderer):
         renderer.add('ModalLink', RenderModalLinkToken())
         renderer.add('ModalSourceLink', RenderSourceLinkToken())
+
+    def init(self):
+        if self.get('exceptions') and not self.get('hide_source'):
+            LOG.warning("The 'exceptions' setting has no effect when 'hide_source' is disabled.")
 
     def postRender(self, page, results):
         parent = moosetree.find(results.root, lambda n: n.name == 'div' and 'moose-content' in n['class'])
@@ -116,46 +127,48 @@ class RenderSourceLinkToken(components.RenderComponent):
         string =  text if not token.children else None
         a = html.Tag(parent, 'span', string=string, class_='moose-source-filename tooltipped')
 
-        # This should remain a Extension option, so it can be disable universally
-        if self.extension['show_source']:
+        if self.extension['hide_source']:
+            if not any([fnmatch.fnmatch(fullpath, p) for p in self.extension['exceptions']]):
+                LOG.debug("Hide source content: %s", fullpath)
+                return a
 
-            # Create the <div> for the modal content
-            uid = uuid.uuid4()
-            modal_div = html.Tag(None, 'div', class_='moose-modal modal', id_=str(uid))
-            modal_content = html.Tag(modal_div, 'div', class_="modal-content")
-            self.extension.addModal(page.uid, modal_div)
+        # Create the <div> for the modal content
+        uid = uuid.uuid4()
+        modal_div = html.Tag(None, 'div', class_='moose-modal modal', id_=str(uid))
+        modal_content = html.Tag(modal_div, 'div', class_="modal-content")
+        self.extension.addModal(page.uid, modal_div)
 
-            # Add the title and update the span to be the <a> trigger
-            html.Tag(modal_content, 'h4', string=token['title'] or text)
-            a.name = 'a'
-            a['href'] = '#{}'.format(uid)
-            a.addClass('modal-trigger')
+        # Add the title and update the span to be the <a> trigger
+        html.Tag(modal_content, 'h4', string=token['title'] or text)
+        a.name = 'a'
+        a['href'] = '#{}'.format(uid)
+        a.addClass('modal-trigger')
 
-            footer = html.Tag(modal_div, 'div', class_='modal-footer')
-            html.Tag(footer, 'a', class_='modal-close btn-flat', string='Close')
+        footer = html.Tag(modal_div, 'div', class_='modal-footer')
+        html.Tag(footer, 'a', class_='modal-close btn-flat', string='Close')
 
-            source = common.project_find(fullpath)
-            if len(source) > 1:
-                options = mooseutils.levenshteinDistance(fullpath, source, number=8)
-                msg = "Multiple files match the supplied filename {}:\n".format(fullpath)
-                for opt in options:
-                    msg += "    {}\n".format(opt)
-                msg = report_error(msg, page.source,
-                                   token.info.line if token.info else None,
-                                   token.info[0] if token.info else token.text())
-                raise exceptions.MooseDocsException(msg)
+        source = common.project_find(fullpath)
+        if len(source) > 1:
+            options = mooseutils.levenshteinDistance(fullpath, source, number=8)
+            msg = "Multiple files match the supplied filename {}:\n".format(fullpath)
+            for opt in options:
+                msg += "    {}\n".format(opt)
+            msg = report_error(msg, page.source,
+                               token.info.line if token.info else None,
+                               token.info[0] if token.info else token.text())
+            raise exceptions.MooseDocsException(msg)
 
-            elif len(source) == 0:
-                msg = "Unable to locate file that matches the supplied filename {}\n".format(fullpath)
-                msg = report_error(msg, page.source,
-                                   token.info.line if token.info else None,
-                                   token.info[0] if token.info else token.text())
-                raise exceptions.MooseDocsException(msg)
+        elif len(source) == 0:
+            msg = "Unable to locate file that matches the supplied filename {}\n".format(fullpath)
+            msg = report_error(msg, page.source,
+                               token.info.line if token.info else None,
+                               token.info[0] if token.info else token.text())
+            raise exceptions.MooseDocsException(msg)
 
-            content = common.fix_moose_header(common.read(source[0]))
-            language = token['language'] or common.get_language(source[0])
-            code = core.Code(None, language=language, content=content)
-            self.renderer.render(modal_content, code, page)
+        content = common.fix_moose_header(common.read(source[0]))
+        language = token['language'] or common.get_language(source[0])
+        code = core.Code(None, language=language, content=content)
+        self.renderer.render(modal_content, code, page)
 
         return a
 
