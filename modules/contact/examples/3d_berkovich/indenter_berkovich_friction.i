@@ -182,7 +182,7 @@
     boundary = 201
   [../]
   [./disp_z]
-    type = NodalMaxValue
+    type = NodalExtremeValue
     variable = disp_z
     boundary = 201
   [../]
