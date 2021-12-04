@@ -4,26 +4,37 @@
 
   [order]
     requirement = 'The system shall support optional material property coupling when the requesting '
-                  'object comes'
+                  'object '
 
     [material_before]
       type = Exodiff
       input = material.i
       exodiff = material_before.e
       cli_args = "Materials/active='before prop adprop' Outputs/file_base=material_before"
-      detail = "before the providing material."
+      detail = "is a material that comes before the providing material"
     []
     [material_after]
       type = Exodiff
       input = material.i
       exodiff = material_after.e
       cli_args = "Materials/active='after prop adprop' Outputs/file_base=material_after"
-      detail = "after the providing material."
+      detail = "is a material that comes after the providing material"
+    []
+    [auxkernel]
+      type = Exodiff
+      input = auxkernel.i
+      exodiff = auxkernel_out.e
+      detail = "is an AuxKernel"
+    []
+    [userobject]
+      type = RunApp
+      input = userobject.i
+      detail = "is a UserObject"
     []
   []
 
-  [error]
-    requirement = "The optional material property system shall return"
+  [material_error]
+    requirement = "The optional material property system use from a material object shall return"
     [ad_expected]
       type = RunException
       input = material.i
@@ -51,7 +62,7 @@
       input = material.i
       cli_args = "Materials/active='before prop adprop' Materials/before/expect=false"
       expect_err = 'Non-AD property not expected but found'
-      detail = "an inaccessible material non-existing non-AD properties"
+      detail = "an inaccessible material for non-existing non-AD properties"
     []
   []
 []
