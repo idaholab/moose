@@ -11,6 +11,8 @@
 
 registerMooseObject("MooseApp", PiecewiseConstantFromCSV);
 
+using namespace PropertyReadFileEnums;
+
 InputParameters
 PiecewiseConstantFromCSV::validParams()
 {
@@ -72,24 +74,12 @@ PiecewiseConstantFromCSV::value(Real, const Point & p) const
     std::set<const Elem *> candidate_elements;
     (*_point_locator)(p, candidate_elements);
 
-    // Find the element with the lowest ID (that is also on the domain ???????)
-    unsigned int min_elem_id = std::numeric_limits<unsigned int>::max();
-    const Elem * min_id_elem;
-    unsigned int num_candidates = 0;
-
-    std::set<const Elem *>::iterator it = candidate_elements.begin();
-    while (it != candidate_elements.end())
-    {
-      if ((*it)->id() < min_elem_id)
-      {
-        min_elem_id = (*it)->id();
-        min_id_elem = (*it);
-        num_candidates++;
-      }
-      it++;
-    }
-
-    if (num_candidates == 0)
+    // Find the element with the lowest ID
+    const Elem * min_id_elem = nullptr;
+    for (const auto & elem : candidate_elements)
+      if (!elem || elem->id() < min_id_elem->id())
+        min_id_elem = elem;
+    if (!min_id_elem)
       mooseError("No element located at ", p, " to search in element or block sorted CSV values");
 
     return _read_prop_user_object->getData(min_id_elem, _column_number);
@@ -108,8 +98,5 @@ PiecewiseConstantFromCSV::value(Real, const Point & p) const
     // No need to search for the element if we're just looking at nearest neighbors
     return _read_prop_user_object->getVoronoiData(p, _column_number);
   else
-  {
     mooseError("This should not be reachable. Implementation error somewhere");
-    return 0;
-  }
 }

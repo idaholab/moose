@@ -30,12 +30,6 @@ public:
    */
   virtual Real value(Real t, const Point & pt) const override;
 
-  /**
-   * Get the time derivative of the function (based on time only)
-   * \param t The time (unused)
-   * \param pt The point in space (x,y,z) (unused)
-   * \return The time derivative of the function at the specified time
-   */
   virtual Real timeDerivative(Real, const Point &) const override { return 0; };
 
 protected:
@@ -48,7 +42,7 @@ protected:
   const unsigned int _column_number;
 
   /// Type of read - element, grain, or block
-  const ReadTypeEnum _read_type;
+  const PropertyReadFileEnums::ReadTypeEnum _read_type;
 
   /// The point locator is used when values are sorted by elements or blocks in the CSV
   std::unique_ptr<PointLocatorBase> _point_locator;

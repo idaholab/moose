@@ -13,6 +13,8 @@
 #include "MooseEnum.h"
 #include "DelimitedFileReader.h"
 
+namespace PropertyReadFileEnums
+{
 /**
  * How data is organized in the CSV file
  */
@@ -24,6 +26,7 @@ enum class ReadTypeEnum
   NODE = 3,
   GRAIN = 4
 };
+}
 
 /**
  * Read properties from file - grain, element, node or block
@@ -60,51 +63,57 @@ public:
   virtual void initVoronoiCenterPoints();
 
   /**
-   * This function assign property data to elements
+   * This function retrieves property data for elements
    * @param elem the element to get data for
    * @param prop_num the column index of the property we want to retrieve
+   * @return the property value for the element
    */
-  Real getData(const Elem * elem, unsigned int prop_num) const;
+  Real getData(const Elem * const elem, const unsigned int prop_num) const;
 
   /**
-   * This function assign properties to element read from file with element based properties
+   * This function retrieves properties for elements, from a file that has element-based data
    * @param elem the element to get data for
    * @param prop_num the column index of the property we want to retrieve
+   * @return the property value for the element
    */
-  Real getElementData(const Elem * elem, unsigned int prop_num) const;
+  Real getElementData(const Elem * const elem, const unsigned int prop_num) const;
 
   /**
-   * This function assign properties to read from file with node based properties
+   * This function retrieves properties for nodes, from a file that has node-based data
    * @param node the node to get the data for
    * @param prop_num the column index of the property we want to retrieve
+   * @return the property value for the node
    */
-  Real getNodeData(const Node * node, unsigned int prop_num) const;
+  Real getNodeData(const Node * const node, const unsigned int prop_num) const;
 
   /**
-   * This function assign properties to element read from file with nearest neighbor / grain based
-   * properties Voronoi centers distribution in the RVE can be Periodic or non-periodic (default)
+   * This function retrieves properties for elements from a file with nearest neighbor / grain based
+   * properties. Voronoi centers distribution in the RVE can be Periodic or non-periodic (default)
    * @param point the location to get data for
    * @param prop_num the column index of the property we want to retrieve
+   * @return the property value for the element
    */
-  Real getVoronoiData(const Point point, unsigned int prop_num) const;
+  Real getVoronoiData(const Point & point, const unsigned int prop_num) const;
 
   /**
-   * This function assigns properties to elements read from file with block  based properties
+   * This function retrieves properties for elements, from a file that has block-based data
    * @param elem the element to get data for
    * @param prop_num the column index of the property we want to retrieve
+   * @return the property value for the element
    */
-  Real getBlockData(const Elem * elem, unsigned int prop_num) const;
+  Real getBlockData(const Elem * const elem, const unsigned int prop_num) const;
 
   /**
    * This function calculates minimum distance between 2 points
    * considering periodicity of the simulation volume
+   * @return the minimum distance between two points
    */
   Real minPeriodicDistance(const Point &, const Point &) const;
 
   /**
    * Returns the ordering of data expected in the CSV file
    */
-  ReadTypeEnum getReadType() const { return _read_type; }
+  PropertyReadFileEnums::ReadTypeEnum getReadType() const { return _read_type; }
 
 protected:
   /// Name of file containing property values
@@ -118,7 +127,7 @@ protected:
   /// Number of blocks (for property read based on blocks)
   const unsigned int _nblock;
   /// Type of read - element, grain, or block
-  const ReadTypeEnum _read_type;
+  const PropertyReadFileEnums::ReadTypeEnum _read_type;
 
   /// Parameters for the nearest neighbor / grain interpolation
   /// Whether to use a random tesselation for the Voronoi/grain type
@@ -137,10 +146,6 @@ protected:
   std::vector<Point> _center;
 
 private:
-  unsigned int _nelem;
-  unsigned int _nnodes;
-  Point _top_right;
-  Point _bottom_left;
-  Point _range;
-  Real _max_range;
+  /// Bounding box for the mesh
+  BoundingBox _bounding_box;
 };

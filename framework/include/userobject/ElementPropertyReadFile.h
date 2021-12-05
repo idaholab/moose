@@ -13,4 +13,3 @@
 // the old name for PropertyReadFile
 
 #include "PropertyReadFile.h"
-typedef PropertyReadFile ElementPropertyReadFile;

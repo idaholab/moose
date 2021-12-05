@@ -19,6 +19,8 @@ registerMooseObjectRenamed("MooseApp",
                            "06/30/2021 24:00",
                            PropertyReadFile);
 
+using namespace PropertyReadFileEnums;
+
 InputParameters
 PropertyReadFile::validParams()
 {
@@ -75,17 +77,13 @@ PropertyReadFile::PropertyReadFile(const InputParameters & parameters)
   _nelem = _mesh.nElem();
   _nnodes = _mesh.nNodes();
 
-  for (unsigned int i = 0; i < LIBMESH_DIM; i++)
+  Point mesh_min, mesh_max;
+  for (unsigned int i:make_range(LIBMESH_DIM))
   {
-    _bottom_left(i) = _mesh.getMinInDimension(i);
-    _top_right(i) = _mesh.getMaxInDimension(i);
-    _range(i) = _top_right(i) - _bottom_left(i);
+    mesh_min(i) = _mesh.getMinInDimension(i);
+    mesh_max(i) = _mesh.getMaxInDimension(i);
   }
-
-  _max_range = _range(0);
-  for (unsigned int i = 1; i < LIBMESH_DIM; i++)
-    if (_range(i) > _max_range)
-      _max_range = _range(i);
+  _bounding_box = MooseUtils::buildBoundingBox(mesh_min, mesh_max);
 
   readData();
 }
@@ -104,11 +102,11 @@ PropertyReadFile::readData()
   switch (_read_type)
   {
     case ReadTypeEnum::ELEMENT:
-      nobjects = _nelem;
+      nobjects = _mesh.nElem();
       break;
 
     case ReadTypeEnum::NODE:
-      nobjects = _nnodes;
+      nobjects = _mesh.nNodes();
       break;
 
     case ReadTypeEnum::VORONOI:
@@ -117,7 +115,7 @@ PropertyReadFile::readData()
       nobjects = _nvoronoi;
       break;
 
-    // TODO Delete after Grizzly update
+    // TODO Delete after Grizzly update see idaholab/Grizzly#182
     case ReadTypeEnum::GRAIN:
       if (_nvoronoi <= 0)
         paramError("ngrain", "Provide non-zero number of voronoi tesselations/grains.");
@@ -160,7 +158,8 @@ PropertyReadFile::initVoronoiCenterPoints()
     MooseRandom::seed(_rand_seed);
     for (unsigned int i = 0; i < _nvoronoi; i++)
       for (unsigned int j = 0; j < LIBMESH_DIM; j++)
-        _center[i](j) = _bottom_left(j) + MooseRandom::rand() * _range(j);
+        _center[i](j) = _bounding_box.min()(j) + MooseRandom::rand() *
+            (_bounding_box.max() - _bounding_box.min())(j);
   }
   // Read tesselation from file
   else
@@ -172,7 +171,7 @@ PropertyReadFile::initVoronoiCenterPoints()
 }
 
 Real
-PropertyReadFile::getData(const Elem * elem, unsigned int prop_num) const
+PropertyReadFile::getData(const Elem * const elem, const unsigned int prop_num) const
 {
   if (prop_num >= _nprop)
     paramError(
@@ -216,7 +215,7 @@ PropertyReadFile::getElementData(const Elem * elem, unsigned int prop_num) const
 }
 
 Real
-PropertyReadFile::getNodeData(const Node * node, unsigned int prop_num) const
+PropertyReadFile::getNodeData(const Node * const node, const unsigned int prop_num) const
 {
   unsigned int jnode = node->id();
   if (jnode >= _nnodes)
@@ -242,9 +241,9 @@ PropertyReadFile::getBlockData(const Elem * elem, unsigned int prop_num) const
 }
 
 Real
-PropertyReadFile::getVoronoiData(const Point point, unsigned int prop_num) const
+PropertyReadFile::getVoronoiData(const Point & point, const unsigned int prop_num) const
 {
-  Real min_dist = _max_range;
+  Real min_dist = std::numeric_limits<Real>::max();
   unsigned int ivoronoi = 0;
 
   for (unsigned int i = 0; i < _nvoronoi; ++i)
@@ -287,9 +286,9 @@ PropertyReadFile::minPeriodicDistance(const Point & c, const Point & p) const
       for (unsigned int k = 0; k < 3; k++)
       {
         Point p1;
-        p1(0) = p(0) + fac[i] * _range(0);
-        p1(1) = p(1) + fac[j] * _range(1);
-        p1(2) = p(2) + fac[k] * _range(2);
+        p1(0) = p(0) + fac[i] * (_bounding_box.max() - _bounding_box.min())(0);
+        p1(1) = p(1) + fac[j] * (_bounding_box.max() - _bounding_box.min())(1);
+        p1(2) = p(2) + fac[k] * (_bounding_box.max() - _bounding_box.min())(2);
 
         dist_vec = c - p1;
         Real dist = dist_vec.norm();
