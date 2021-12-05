@@ -16,7 +16,7 @@ Some examples of safe conversions:
 
 ## Example input syntax
 
-An example of some gymnastic with functor conversions is shown in this example. The reader should note
+An example of some gymnastics with functor conversions is shown in this example. The reader should note
 that only the conversion to an AD functor from a regular functor (from a regular Function) was necessary.
 
 !listing test/tests/materials/functor_properties/ad_conversion/1d_dirichlet.i block=Materials

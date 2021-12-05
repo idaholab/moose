@@ -20,7 +20,7 @@ FunctorADConverterTempl<T>::validParams()
 {
   InputParameters params = FunctorMaterial::validParams();
   params.addClassDescription("Converts regular functors to AD functors and "
-                             " AD functors to regular functors");
+                             "AD functors to regular functors");
   params.addParam<std::vector<MooseFunctorName>>(
       "reg_props_in", "The names of the regular functors to convert to AD functors");
   params.addParam<std::vector<MooseFunctorName>>("ad_props_out",
@@ -83,22 +83,21 @@ FunctorADConverterTempl<T>::FunctorADConverterTempl(const InputParameters & para
   // Define the AD functors
   for (const auto i : make_range(reg_props_in.size()))
   {
-    const auto & reg_functor = &getFunctor<T>(reg_props_in[i]);
-    const auto & ad_prop =
-        &declareFunctorProperty<typename Moose::ADType<T>::type>(ad_props_out[i]);
-    ad_prop->setFunctor(_mesh,
-                        blockIDs(),
-                        [reg_functor](const auto & r, const auto & t) ->
-                        typename Moose::ADType<T>::type { return (*reg_functor)(r, t); });
+    const auto & reg_functor = getFunctor<T>(reg_props_in[i]);
+    auto & ad_prop = declareFunctorProperty<typename Moose::ADType<T>::type>(ad_props_out[i]);
+    ad_prop.setFunctor(_mesh,
+                       blockIDs(),
+                       [&reg_functor](const auto & r, const auto & t) ->
+                       typename Moose::ADType<T>::type { return reg_functor(r, t); });
   }
 
   // Define the regular functors
   for (const auto i : make_range(ad_props_in.size()))
   {
-    const auto & ad_functor = &getFunctor<typename Moose::ADType<T>::type>(ad_props_in[i]);
-    const auto & reg_prop = &declareFunctorProperty<T>(reg_props_out[i]);
-    reg_prop->setFunctor(_mesh, blockIDs(), [ad_functor](const auto & r, const auto & t) -> T {
-      return MetaPhysicL::raw_value((*ad_functor)(r, t));
+    const auto & ad_functor = getFunctor<typename Moose::ADType<T>::type>(ad_props_in[i]);
+    auto & reg_prop = declareFunctorProperty<T>(reg_props_out[i]);
+    reg_prop.setFunctor(_mesh, blockIDs(), [&ad_functor](const auto & r, const auto & t) -> T {
+      return MetaPhysicL::raw_value(ad_functor(r, t));
     });
   }
 }
