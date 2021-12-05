@@ -36,12 +36,13 @@ InputParameters validParams<MaterialPropertyInterface>();
  * either an existing material property or to nullptr if the requested property
  * does not exist.
  */
+template <class M>
 class OptionalMaterialPropertyProxyBase
 {
 public:
   OptionalMaterialPropertyProxyBase(const std::string & name) : _name(name) {}
   virtual ~OptionalMaterialPropertyProxyBase() {}
-  virtual void resolve(MaterialPropertyInterface & material) = 0;
+  virtual void resolve(M & material) = 0;
 
 protected:
   const std::string _name;
@@ -286,10 +287,11 @@ public:
   }
 
   /// get all material property interface objects for teh current app
-  static const std::vector<MaterialPropertyInterface *> getInterfaceObjects(MooseApp & app);
+  static const std::vector<MaterialPropertyInterface *>
+  getMaterialPropertyInterfaceObjects(MooseApp & app);
 
   /// resolve all optional properties
-  void resolveOptionalProperties();
+  virtual void resolveOptionalProperties();
 
 protected:
   /// Parameters of the object with this interface
@@ -417,21 +419,23 @@ private:
   static std::map<MooseApp *, std::vector<MaterialPropertyInterface *>> _mpi_registry;
 
   /// optional material properties
-  std::vector<std::unique_ptr<OptionalMaterialPropertyProxyBase>> _optional_property_proxies;
+  std::vector<std::unique_ptr<OptionalMaterialPropertyProxyBase<MaterialPropertyInterface>>>
+      _optional_property_proxies;
 };
 
-template <typename T, bool is_ad>
-class OptionalMaterialPropertyProxy : public OptionalMaterialPropertyProxyBase
+template <class M, typename T, bool is_ad>
+class OptionalMaterialPropertyProxy : public OptionalMaterialPropertyProxyBase<M>
 {
 public:
-  OptionalMaterialPropertyProxy(const std::string & name) : OptionalMaterialPropertyProxyBase(name)
+  OptionalMaterialPropertyProxy(const std::string & name)
+    : OptionalMaterialPropertyProxyBase<M>(name)
   {
   }
   const GenericOptionalMaterialProperty<T, is_ad> & value() const { return _value; }
-  void resolve(MaterialPropertyInterface & mpi) override
+  void resolve(M & mpi) override
   {
-    if (mpi.hasGenericMaterialProperty<T, is_ad>(_name))
-      _value.set(&mpi.getGenericMaterialProperty<T, is_ad>(_name));
+    if (mpi.template hasGenericMaterialProperty<T, is_ad>(this->_name))
+      _value.set(&mpi.template getGenericMaterialProperty<T, is_ad>(this->_name));
   }
 
 private:
@@ -753,7 +757,8 @@ template <typename T, bool is_ad>
 const GenericOptionalMaterialProperty<T, is_ad> &
 MaterialPropertyInterface::getGenericOptionalMaterialProperty(const std::string & name)
 {
-  auto proxy = std::make_unique<OptionalMaterialPropertyProxy<T, is_ad>>(name);
+  auto proxy =
+      std::make_unique<OptionalMaterialPropertyProxy<MaterialPropertyInterface, T, is_ad>>(name);
   auto & optional_property = proxy->value();
   _optional_property_proxies.push_back(std::move(proxy));
   return optional_property;

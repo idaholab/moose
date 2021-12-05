@@ -325,7 +325,7 @@ MaterialPropertyInterface::checkExecutionStage()
 }
 
 const std::vector<MaterialPropertyInterface *>
-MaterialPropertyInterface::getInterfaceObjects(MooseApp & app)
+MaterialPropertyInterface::getMaterialPropertyInterfaceObjects(MooseApp & app)
 {
   // insertion is intentional here to return a reference to an empty vector even
   // if no objects derived from material property interface are used in the model

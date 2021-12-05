@@ -32,7 +32,7 @@ ResolveOptionalMaterialPropertiesAction::act()
 {
   mooseAssert(_problem, "Problem doesn't exist");
 
-  const auto & mpi_registry = MaterialPropertyInterface::getInterfaceObjects(_app);
+  const auto & mpi_registry = MaterialPropertyInterface::getMaterialPropertyInterfaceObjects(_app);
   for (auto mpi : mpi_registry)
     mpi->resolveOptionalProperties();
 }

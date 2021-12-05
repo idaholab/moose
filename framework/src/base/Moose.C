@@ -321,6 +321,7 @@ addActionTypes(Syntax & syntax)
                            " add_nodal_kernel, add_dg_kernel, add_fv_kernel, add_fv_bc, add_fv_ik,"
                            " add_interface_kernel, add_scalar_kernel, add_aux_scalar_kernel,"
                            " add_indicator, add_marker)"
+                           "(resolve_optional_materials)"
                            "(add_algebraic_rm)"
                            "(add_coupling_rm)"
                            "(attach_geometric_rm_final)"
@@ -330,7 +331,6 @@ addActionTypes(Syntax & syntax)
                            "(delete_remote_elements_after_late_geometric_ghosting)"
                            "(init_problem)"
                            "(add_control)"
-                           "(resolve_optional_materials)"
                            "(check_output)"
                            "(check_integrity)");
   // clang-format on
