@@ -390,6 +390,9 @@ ADComputeMultipleInelasticStress::computeAdmissibleState(
     ADRankTwoTensor & elastic_strain_increment,
     ADRankTwoTensor & inelastic_strain_increment)
 {
+  // Properly update material properties (necessary if substepping is employed).
+  _models[model_number]->resetIncrementalMaterialProperties();
+
   if (_damage_model)
     _models[model_number]->updateState(elastic_strain_increment,
                                        inelastic_strain_increment,

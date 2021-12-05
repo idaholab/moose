@@ -12,6 +12,7 @@
 #include "StressUpdateBase.h"
 #include "MooseException.h"
 #include "DamageBase.h"
+#include "libmesh/int_range.h"
 
 registerMooseObject("TensorMechanicsApp", ComputeMultipleInelasticStress);
 
@@ -179,6 +180,19 @@ ComputeMultipleInelasticStress::initialSetup()
     paramError("damage_model",
                "Damage Model " + _damage_model->name() +
                    " is not compatible with ComputeMultipleInelasticStress");
+
+  // This check prevents the hierarchy from silently skipping substepping without informing the user
+  for (auto model_number : index_range(_models))
+  {
+    const bool use_substep = _models[model_number]->substeppingCapabilityRequested();
+    if (use_substep && !_models[model_number]->substeppingCapabilityEnabled())
+    {
+      std::stringstream error_message;
+      error_message << "Usage of substepping has been requested, but the inelastic model "
+                    << _models[model_number]->name() << " does not implement substepping yet.";
+      mooseError(error_message.str());
+    }
+  }
 }
 
 void
@@ -466,6 +480,9 @@ ComputeMultipleInelasticStress::computeAdmissibleState(unsigned model_number,
                                                        RankTwoTensor & inelastic_strain_increment,
                                                        RankFourTensor & consistent_tangent_operator)
 {
+  // Reset properties to the beginning of the time step (necessary if substepping is employed).
+  _models[model_number]->resetIncrementalMaterialProperties();
+
   const bool jac = _fe_problem.currentlyComputingJacobian();
   if (_damage_model)
     _models[model_number]->updateState(elastic_strain_increment,

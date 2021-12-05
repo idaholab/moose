@@ -1,33 +1,43 @@
 [Tests]
   issues = '#14757'
   design = 'ADRadialReturnStressUpdate.md'
-  [./ad_power_law]
+  [ad_power_law]
     type = 'RunException'
     input = 'ad_power_law_creep.i'
     expect_err = 'Exceeded maximum iterations in material return mapping iterations.'
-    cli_args = 'Materials/power_law_creep/use_substep=false Executioner/dtmin=0.1 Outputs/file_base=ad_power_law_out'
-    requirement = 'The system shall report diverged return mapping solve due to large deformation imposed in one step'
-  [../]
-  [./ad_power_law_substepping]
+    cli_args = 'Materials/power_law_creep/use_substep=false Executioner/dtmin=0.1 '
+               'Outputs/file_base=ad_power_law_out'
+    requirement = 'The system shall report diverged return mapping solve due to large deformation '
+                  'imposed in one step'
+  []
+  [ad_power_law_substepping]
     type = 'Exodiff'
     input = 'ad_power_law_creep.i'
-    cli_args = 'Materials/power_law_creep/use_substep=true Executioner/dtmin=0.1 Outputs/file_base=ad_power_law_substepping_out'
+    cli_args = 'Materials/power_law_creep/use_substep=true '
+               'Materials/power_law_creep/maximum_number_substeps=500 Executioner/dtmin=0.1 '
+               'Outputs/file_base=ad_power_law_substepping_out'
     exodiff = 'ad_power_law_substepping_out.e'
     valgrind = HEAVY
-    requirement = 'The system shall converge under large deformation owing to the help of substepping'
-  [../]
-  [./power_law]
+    requirement = 'The system shall converge under large deformation owing to the help of '
+                  'substepping'
+  []
+  [power_law]
     type = 'RunException'
     input = 'power_law_creep.i'
     expect_err = 'Exceeded maximum iterations in material return mapping iterations.'
-    cli_args = 'Materials/power_law_creep/use_substep=false Executioner/dtmin=0.1 Outputs/file_base=power_law_out'
-    requirement = 'The system shall report diverged return mapping solve due to large deformation imposed in one step'
-  [../]
-  [./power_law_substepping]
+    cli_args = 'Materials/power_law_creep/use_substep=false Executioner/dtmin=0.1 '
+               'Outputs/file_base=power_law_out'
+    requirement = 'The system shall report diverged return mapping solve due to large deformation '
+                  'imposed in one step'
+  []
+  [power_law_substepping]
     type = 'Exodiff'
     input = 'power_law_creep.i'
-    cli_args = 'Materials/power_law_creep/use_substep=true Executioner/dtmin=0.1 Outputs/file_base=power_law_substepping_out'
+    cli_args = 'Materials/power_law_creep/use_substep=true '
+               'Materials/power_law_creep/maximum_number_substeps=500 Executioner/dtmin=0.1 '
+               'Outputs/file_base=power_law_substepping_out'
     exodiff = 'power_law_substepping_out.e'
-    requirement = 'The system shall converge under large deformation owing to the help of substepping'
-  [../]
+    requirement = 'The system shall converge under large deformation owing to the help of '
+                  'substepping'
+  []
 []

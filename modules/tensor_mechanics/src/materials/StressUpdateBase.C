@@ -109,7 +109,7 @@ TangentCalculationMethod
 StressUpdateBaseTempl<true>::getTangentCalculationMethod()
 {
   mooseError(
-      "getTangentCalculationMethod called: no tangent calculationg is needed while using AD");
+      "getTangentCalculationMethod called: no tangent moduli calculation is needed while using AD");
   return TangentCalculationMethod::ELASTIC;
 }
 
