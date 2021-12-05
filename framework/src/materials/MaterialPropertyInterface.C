@@ -13,6 +13,8 @@
 #include "MaterialBase.h"
 #include "FEProblemBase.h"
 
+#include <algorithm>
+
 defineLegacyParams(MaterialPropertyInterface);
 
 // static material property interface object registry used for optional properties
@@ -65,6 +67,17 @@ MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_o
 
   // register self
   _mpi_registry[&moose_object->getMooseApp()].push_back(this);
+}
+
+MaterialPropertyInterface::~MaterialPropertyInterface()
+{
+  // unregister self
+  for (auto & reg : _mpi_registry)
+  {
+    auto it = std::find(reg.second.begin(), reg.second.end(), this);
+    if (it != reg.second.end())
+      reg.second.erase(it);
+  }
 }
 
 std::string

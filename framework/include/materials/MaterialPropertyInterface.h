@@ -65,6 +65,8 @@ public:
                             const std::set<SubdomainID> & block_ids,
                             const std::set<BoundaryID> & boundary_ids);
 
+  ~MaterialPropertyInterface();
+
   static InputParameters validParams();
 
   ///@{
