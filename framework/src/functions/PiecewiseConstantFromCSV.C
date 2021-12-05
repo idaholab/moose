@@ -77,7 +77,7 @@ PiecewiseConstantFromCSV::value(Real, const Point & p) const
     // Find the element with the lowest ID
     const Elem * min_id_elem = nullptr;
     for (const auto & elem : candidate_elements)
-      if (!elem || elem->id() < min_id_elem->id())
+      if (!min_id_elem || elem->id() < min_id_elem->id())
         min_id_elem = elem;
     if (!min_id_elem)
       mooseError("No element located at ", p, " to search in element or block sorted CSV values");

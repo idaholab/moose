@@ -78,7 +78,7 @@ PropertyReadFile::PropertyReadFile(const InputParameters & parameters)
   _nnodes = _mesh.nNodes();
 
   Point mesh_min, mesh_max;
-  for (unsigned int i:make_range(LIBMESH_DIM))
+  for (unsigned int i : make_range(LIBMESH_DIM))
   {
     mesh_min(i) = _mesh.getMinInDimension(i);
     mesh_max(i) = _mesh.getMaxInDimension(i);
@@ -158,8 +158,8 @@ PropertyReadFile::initVoronoiCenterPoints()
     MooseRandom::seed(_rand_seed);
     for (unsigned int i = 0; i < _nvoronoi; i++)
       for (unsigned int j = 0; j < LIBMESH_DIM; j++)
-        _center[i](j) = _bounding_box.min()(j) + MooseRandom::rand() *
-            (_bounding_box.max() - _bounding_box.min())(j);
+        _center[i](j) = _bounding_box.min()(j) +
+                        MooseRandom::rand() * (_bounding_box.max() - _bounding_box.min())(j);
   }
   // Read tesselation from file
   else
