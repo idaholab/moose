@@ -36,8 +36,7 @@ public:
   FunctionIC(const InputParameters & parameters);
 
   /**
-   * Get the function name
-   * @return function name
+   * @returns The function name
    */
   const FunctionName functionName() const;
 
