@@ -11,15 +11,8 @@
 #include "MaterialPropertyInterface.h"
 #include "MooseApp.h"
 #include "MaterialBase.h"
-#include "FEProblemBase.h"
-
-#include <algorithm>
 
 defineLegacyParams(MaterialPropertyInterface);
-
-// static material property interface object registry used for optional properties
-std::map<MooseApp *, std::vector<MaterialPropertyInterface *>>
-    MaterialPropertyInterface::_mpi_registry;
 
 InputParameters
 MaterialPropertyInterface::validParams()
@@ -52,6 +45,8 @@ MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_o
     _mi_block_ids(block_ids),
     _mi_boundary_ids(boundary_ids)
 {
+  moose_object->getMooseApp().registerInterfaceObject(*this);
+
   // Set the MaterialDataType flag
   if (_mi_params.isParamValid("_material_data_type"))
     _material_data_type = _mi_params.get<Moose::MaterialDataType>("_material_data_type");
@@ -64,20 +59,6 @@ MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_o
 
   _material_data =
       _mi_feproblem.getMaterialData(_material_data_type, _mi_params.get<THREAD_ID>("_tid"));
-
-  // register self
-  _mpi_registry[&moose_object->getMooseApp()].push_back(this);
-}
-
-MaterialPropertyInterface::~MaterialPropertyInterface()
-{
-  // unregister self
-  for (auto & reg : _mpi_registry)
-  {
-    auto it = std::find(reg.second.begin(), reg.second.end(), this);
-    if (it != reg.second.end())
-      reg.second.erase(it);
-  }
 }
 
 std::string
@@ -335,14 +316,6 @@ MaterialPropertyInterface::checkExecutionStage()
   if (_mi_feproblem.startedInitialSetup())
     mooseError("Material properties must be retrieved during object construction. This is a code "
                "problem.");
-}
-
-const std::vector<MaterialPropertyInterface *>
-MaterialPropertyInterface::getMaterialPropertyInterfaceObjects(MooseApp & app)
-{
-  // insertion is intentional here to return a reference to an empty vector even
-  // if no objects derived from material property interface are used in the model
-  return _mpi_registry[&app];
 }
 
 void

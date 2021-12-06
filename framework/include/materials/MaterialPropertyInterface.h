@@ -18,8 +18,6 @@
 #include "InputParameters.h"
 #include "SubProblem.h"
 
-#include <map>
-
 // Forward declarations
 class MaterialPropertyInterface;
 class MooseObject;
@@ -64,8 +62,6 @@ public:
   MaterialPropertyInterface(const MooseObject * moose_object,
                             const std::set<SubdomainID> & block_ids,
                             const std::set<BoundaryID> & boundary_ids);
-
-  ~MaterialPropertyInterface();
 
   static InputParameters validParams();
 
@@ -288,10 +284,6 @@ public:
     return _material_property_dependencies;
   }
 
-  /// get all material property interface objects for teh current app
-  static const std::vector<MaterialPropertyInterface *>
-  getMaterialPropertyInterfaceObjects(MooseApp & app);
-
   /// resolve all optional properties
   virtual void resolveOptionalProperties();
 
@@ -416,9 +408,6 @@ private:
 
   /// Storage for the boundary ids created by BoundaryRestrictable
   const std::set<BoundaryID> & _mi_boundary_ids;
-
-  /// registry for all material property interface objects
-  static std::map<MooseApp *, std::vector<MaterialPropertyInterface *>> _mpi_registry;
 
   /// optional material properties
   std::vector<std::unique_ptr<OptionalMaterialPropertyProxyBase<MaterialPropertyInterface>>>

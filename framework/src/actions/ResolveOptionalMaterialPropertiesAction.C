@@ -9,6 +9,7 @@
 
 #include "ResolveOptionalMaterialPropertiesAction.h"
 #include "MaterialPropertyInterface.h"
+#include "MooseApp.h"
 
 registerMooseAction("MooseApp",
                     ResolveOptionalMaterialPropertiesAction,
@@ -32,7 +33,6 @@ ResolveOptionalMaterialPropertiesAction::act()
 {
   mooseAssert(_problem, "Problem doesn't exist");
 
-  const auto & mpi_registry = MaterialPropertyInterface::getMaterialPropertyInterfaceObjects(_app);
-  for (auto mpi : mpi_registry)
+  for (auto mpi : _app.getInterfaceObjects<MaterialPropertyInterface>())
     mpi->resolveOptionalProperties();
 }
