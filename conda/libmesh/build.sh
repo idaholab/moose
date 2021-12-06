@@ -74,7 +74,7 @@ fi
 
 source $SRC_DIR/configure_libmesh.sh
 export INSTALL_BINARY="${SRC_DIR}/build-aux/install-sh -C"
-LIBMESH_DIR=${PREFIX}/libmesh METHODS="opt oprof devel dbg" \
+LIBMESH_DIR=${PREFIX}/libmesh \
   configure_libmesh --with-vtk-lib=${BUILD_PREFIX}/libmesh-vtk/lib \
                     --with-vtk-include=${BUILD_PREFIX}/libmesh-vtk/include/vtk-${SHORT_VTK_NAME} \
                     $*
