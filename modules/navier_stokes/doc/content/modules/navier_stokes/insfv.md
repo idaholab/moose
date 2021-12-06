@@ -75,3 +75,14 @@ line. An axisymmetric example with free slip conditions, using the Rhie-Chow
 interpolation is shown below:
 
 !listing modules/navier_stokes/test/tests/finite_volume/ins/channel-flow/cylindrical/2d-rc-slip.i
+
+## Skewness-correction
+
+The skewness-correction of different variables can be enabled by defining the
+`face_interp_method=skewness-corrected` parameter for the INSFVVariables and
+selecting it as an option in the advection kernels. It has proven to increase
+accuracy on unstructured grids. In case of a skewed 2D triangulation, it
+increases the order of the $L^2$ error from $O(h)$ to $O(h^2)$ for velocity, and from
+$O(h^{0.5})$ to $O(h)$ for pressure. For an example see:
+
+!listing modules/navier_stokes/test/tests/finite_volume/ins/mms/skew-correction/skewed-vortex.i

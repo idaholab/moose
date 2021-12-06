@@ -45,14 +45,17 @@ INSFVVelocityVariable::INSFVVelocityVariable(const InputParameters & params) : I
 const VectorValue<ADReal> &
 INSFVVelocityVariable::adGradSln(const Elem * const elem, bool correct_skewness) const
 {
-  if (correct_skewness)
-    mooseError("INSFVelocityVariable does not support skewness-correction at this point!");
+  VectorValue<ADReal> * value_pointer = &_temp_cell_gradient;
 
-  const auto it = _elem_to_grad.find(elem);
+  // We ensure that no caching takes place when we compute skewness-corrected
+  // quantities.
+  if (_cache_cell_gradients && !correct_skewness)
+  {
+    auto it = _elem_to_grad.find(elem);
 
-  if (it != _elem_to_grad.end())
-    // we already have a gradient ready to go
-    return it->second;
+    if (it != _elem_to_grad.end())
+      return it->second;
+  }
 
   ADReal elem_value = getElemValue(elem);
 
@@ -63,7 +66,7 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem, bool correct_skewness)
 
   try
   {
-    VectorValue<ADReal> grad = 0;
+    VectorValue<ADReal> & grad = *value_pointer;
 
     bool volume_set = false;
     Real volume = 0;
@@ -125,6 +128,7 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem, bool correct_skewness)
                            &grad_ebf_coeffs,
                            &grad_b,
                            &fdf_grad_centroid_coeffs,
+                           correct_skewness,
                            this](const Elem & functor_elem,
                                  const Elem * const neighbor,
                                  const FaceInfo * const fi,
@@ -176,7 +180,8 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem, bool correct_skewness)
           grad_b += surface_vector * elem_value;
       }
       else if (isInternalFace(*fi))
-        grad_b += surface_vector * getInternalFaceValue(neighbor, *fi, elem_value);
+        grad_b +=
+            surface_vector * getInternalFaceValue(neighbor, *fi, elem_value, correct_skewness);
       else
       {
         mooseAssert(isDirichletBoundaryFace(*fi), "We've run out of face types");
@@ -304,7 +309,7 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem, bool correct_skewness)
       for (const auto ebf_index : make_range(num_ebfs))
         _face_to_value.emplace(ebf_faces[ebf_index].first, x(lm_dim + ebf_index));
 
-      if (_cache_face_gradients)
+      if (_cache_face_gradients && !correct_skewness)
       {
         // Cache the extrapolated face gradient information
         auto it = ebf_faces.begin();
@@ -328,9 +333,15 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem, bool correct_skewness)
         }
       }
     }
-    auto pr = _elem_to_grad.emplace(elem, std::move(grad));
-    mooseAssert(pr.second, "Insertion should have just happened.");
-    return pr.first->second;
+
+    if (_cache_cell_gradients && !correct_skewness)
+    {
+      auto pr = _elem_to_grad.emplace(elem, std::move(grad));
+      mooseAssert(pr.second, "Insertion should have just happened.");
+      return pr.first->second;
+    }
+    else
+      return grad;
   }
   catch (libMesh::LogicError &)
   {
@@ -339,7 +350,7 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem, bool correct_skewness)
                 "I believe we should only get singular systems when two-term boundary expansion is "
                 "being used");
     const_cast<INSFVVelocityVariable *>(this)->_two_term_boundary_expansion = false;
-    const auto & grad = adGradSln(elem);
+    const auto & grad = adGradSln(elem, correct_skewness);
 
     // We failed to compute the extrapolated boundary faces with two-term expansion and callers of
     // this method may be relying on those values (e.g. if the caller is
