@@ -32,6 +32,7 @@
 #include <map>
 #include <set>
 #include <unordered_set>
+#include <typeindex>
 
 // Forward declarations
 class Executioner;
@@ -901,6 +902,22 @@ public:
    */
   virtual bool errorOnJacobianNonzeroReallocation() const { return false; }
 
+  /**
+   * Registers an interface object for accessing with getInterfaceObjects.
+   *
+   * This should be called within the constructor of the interface in interest.
+   */
+  template <class T>
+  void registerInterfaceObject(T & interface);
+
+  /**
+   * Gets the registered interface objects for a given interface.
+   *
+   * For this to work, the interface must register itself using registerInterfaceObject.
+   */
+  template <class T>
+  const std::vector<T *> & getInterfaceObjects() const;
+
 protected:
   /**
    * Whether or not this MooseApp has cached a Backup to use for restart / recovery
@@ -1115,6 +1132,20 @@ protected:
   std::map<std::pair<std::string, std::string>, void *> _lib_handles;
 
 private:
+  ///@{
+  /// Structs that are used in the _interface_registry
+  struct InterfaceRegistryObjectsBase
+  {
+    virtual ~InterfaceRegistryObjectsBase() {}
+  };
+
+  template <class T>
+  struct InterfaceRegistryObjects : public InterfaceRegistryObjectsBase
+  {
+    std::vector<T *> _objects;
+  };
+  ///@}
+
   /** Method for creating the minimum required actions for an application (no input file)
    *
    * Mimics the following input file:
@@ -1252,6 +1283,9 @@ private:
            std::map<const MeshBase *, std::unique_ptr<RelationshipManager>>>
       _template_to_clones;
 
+  /// Registration for interface objects
+  std::map<std::type_index, std::unique_ptr<InterfaceRegistryObjectsBase>> _interface_registry;
+
   // Allow FEProblemBase to set the recover/restart state, so make it a friend
   friend class FEProblemBase;
   friend class Restartable;
@@ -1270,4 +1304,39 @@ const T &
 MooseApp::getParam(const std::string & name) const
 {
   return InputParameters::getParamHelper(name, _pars, static_cast<T *>(0));
+}
+
+template <class T>
+void
+MooseApp::registerInterfaceObject(T & interface)
+{
+  static_assert(!std::is_base_of<MooseObject, T>::value, "T is not an interface");
+
+  InterfaceRegistryObjects<T> * registry = nullptr;
+  auto it = _interface_registry.find(typeid(T));
+  if (it == _interface_registry.end())
+  {
+    auto new_registry = std::make_unique<InterfaceRegistryObjects<T>>();
+    registry = new_registry.get();
+    _interface_registry.emplace(typeid(T), std::move(new_registry));
+  }
+  else
+    registry = static_cast<InterfaceRegistryObjects<T> *>(it->second.get());
+
+  mooseAssert(std::count(registry->_objects.begin(), registry->_objects.end(), &interface) == 0,
+              "Interface already registered");
+  registry->_objects.push_back(&interface);
+}
+
+template <class T>
+const std::vector<T *> &
+MooseApp::getInterfaceObjects() const
+{
+  static_assert(!std::is_base_of<MooseObject, T>::value, "T is not an interface");
+
+  const auto it = _interface_registry.find(typeid(T));
+  if (it != _interface_registry.end())
+    return static_cast<InterfaceRegistryObjects<T> *>(it->second.get())->_objects;
+  const static std::vector<T *> empty;
+  return empty;
 }

@@ -25,6 +25,8 @@
 #include "metaphysicl/raw_type.h"
 
 class PropertyValue;
+class Material;
+class MaterialPropertyInterface;
 
 /**
  * Scalar Init helper routine so that specialization isn't needed for basic scalar MaterialProperty
@@ -457,7 +459,7 @@ public:
   virtual ~GenericOptionalMaterialPropertyBase() {}
 };
 
-template <typename T, bool is_ad>
+template <class M, typename T, bool is_ad>
 class OptionalMaterialPropertyProxy;
 
 /**
@@ -507,7 +509,8 @@ private:
   void set(const P * pointer) { _pointer = pointer; }
   const P * _pointer;
 
-  friend class OptionalMaterialPropertyProxy<T, is_ad>;
+  friend class OptionalMaterialPropertyProxy<Material, T, is_ad>;
+  friend class OptionalMaterialPropertyProxy<MaterialPropertyInterface, T, is_ad>;
 };
 
 template <typename T>
