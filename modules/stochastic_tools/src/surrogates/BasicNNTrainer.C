@@ -104,7 +104,7 @@ BasicNNTrainer::postTrain()
   for (auto & it : _sample_points)
     _communicator.allgather(it);
 
-#ifdef ENABLE_TF
+#ifdef ENABLE_PT
 
   // Linearizing the data to make sure we can stor it in a tensor
 
