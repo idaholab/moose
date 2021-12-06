@@ -9,10 +9,17 @@
     subdomain_id = '0 1 2 3 4'
   []
 
+  [give_subdomain_name]
+    type = RenameBlockGenerator
+    input = gmg
+    old_block = '1 3'
+    new_block = 'sub1 sub3'
+  []
+
   [subdomain_ids]
     type = SubdomainExtraElementIDGenerator
-    input = gmg
-    subdomains = '0 1 2 3'
+    input = give_subdomain_name
+    subdomains = '0 sub1 2 sub3'
     extra_element_id_names = 'test_id1 test_id2 test_id3'
     extra_element_ids = '
                    1 3 5 4;

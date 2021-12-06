@@ -3,7 +3,7 @@
     type = 'Exodiff'
     input = 'subdomain_elem_ids_test.i'
     exodiff = 'subdomain_elem_ids_test_out.e'
-    requirement = 'The system shall include the ability to assign element IDs based on mesh subdomain IDs.'
+    requirement = 'The system shall include the ability to assign element IDs based on mesh subdomain IDs or names.'
     design = 'meshgenerators/SubdomainExtraElementIDGenerator.md'
     issues = '#19297'
     recover = false
