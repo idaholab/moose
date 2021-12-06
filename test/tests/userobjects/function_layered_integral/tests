@@ -6,6 +6,6 @@
     type = Exodiff
     input = 'function_layered_integral.i'
     exodiff = 'function_layered_integral_out.e'
-    requirement = 'The system shall integrate a function in layers'
+    requirement = 'The system shall be able to integrate a function over layers'
   []
 []

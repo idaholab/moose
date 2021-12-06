@@ -12,8 +12,6 @@
 
 registerMooseObject("MooseApp", FunctionElementIntegralUserObject);
 
-defineLegacyParams(FunctionElementIntegralUserObject);
-
 InputParameters
 FunctionElementIntegralUserObject::validParams()
 {

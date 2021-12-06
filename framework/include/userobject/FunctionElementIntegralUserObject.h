@@ -11,10 +11,8 @@
 
 #include "ElementIntegralUserObject.h"
 
-class FunctionElementIntegralUserObject;
-
 /**
- * This postprocessor computes a volume integral of a specified function.
+ * This user object computes a volume integral of a specified function.
  *
  * Note that specializations of this integral are possible by deriving from this
  * class and overriding computeQpIntegral().
