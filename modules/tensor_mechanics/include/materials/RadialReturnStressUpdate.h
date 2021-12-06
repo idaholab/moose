@@ -125,6 +125,13 @@ public:
   virtual int
   calculateNumberSubsteps(const GenericRankTwoTensor<is_ad> & strain_increment) override;
 
+  /**
+   * Has the user requested usage of (possibly) implemented substepping capability for inelastic
+   * models. Parent classes set this to false, but RadialReturn inelastic models have the ability
+   * to implement substepping.
+   */
+  virtual bool substeppingCapabilityRequested() override { return _use_substep; }
+
 protected:
   virtual void initQpStatefulProperties() override;
 
@@ -217,6 +224,18 @@ protected:
 
   /// Debugging option to enable specifying instead of calculating strain
   const bool _apply_strain;
+
+  /// Whether user has requested the use of substepping technique to improve convergence
+  const bool _use_substep;
+
+  /**
+   * Used to calculate the number of substeps taken in the radial return algorithm,
+   * when substepping is enabled, based on the maximum creep numerical integration error
+   */
+  bool _use_substep_integration_error;
+
+  /// Maximum number of substeps. If the calculation results in a larger number, cut overall time step.
+  const unsigned int _maximum_number_substeps;
 };
 
 typedef RadialReturnStressUpdateTempl<false> RadialReturnStressUpdate;

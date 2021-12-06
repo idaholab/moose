@@ -1,4 +1,4 @@
-# Generalized Radial Return Stress Update with automatic differentaiation
+# Generalized Radial Return Stress Update with automatic differentiation
 
 Base class which computes the solution of a generalized radial return mapping algorithm.
 The generalization of the isotropic radial return mapping to Hill plasticity allows for
