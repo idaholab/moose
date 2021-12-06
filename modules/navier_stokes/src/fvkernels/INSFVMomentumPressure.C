@@ -51,6 +51,8 @@ INSFVMomentumPressure::computeQpResidual()
              "configure script in the root MOOSE directory with the configure option "
              "'--with-ad-indexing-type=global'");
 #else
-  return _p_var->adGradSln(_current_elem)(_index);
+  bool correct_skewness =
+      (_p_var->faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage);
+  return _p_var->adGradSln(_current_elem, correct_skewness)(_index);
 #endif
 }

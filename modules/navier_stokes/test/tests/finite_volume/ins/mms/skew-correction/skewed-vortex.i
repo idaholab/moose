@@ -1,35 +1,32 @@
-mu=1.1
-rho=1.1
+mu=1.0
+rho=1.0
+
+[Problem]
+  coord_type = 'XYZ'
+  error_on_jacobian_nonzero_reallocation = true
+[]
 
 [Mesh]
-  [gen]
-    type = GeneratedMeshGenerator
-    dim = 2
-    xmin = 1
-    xmax = 3
-    ymin = -1
-    ymax = 1
-    nx = 2
-    ny = 2
+  [gen_mesh]
+    type = FileMeshGenerator
+    file = skewed.msh
   []
 []
 
-[Problem]
-  coord_type = 'RZ'
-[]
-
 [Variables]
-  [u]
+  [vel_x]
     type = INSFVVelocityVariable
     initial_condition = 1
     face_interp_method = 'skewness-corrected'
   []
-  [v]
+  [vel_y]
     type = INSFVVelocityVariable
     initial_condition = 1
+    face_interp_method = 'skewness-corrected'
   []
   [pressure]
     type = INSFVPressureVariable
+    face_interp_method = 'skewness-corrected'
   []
   [lambda]
     family = SCALAR
@@ -41,19 +38,14 @@ rho=1.1
   [mass]
     type = INSFVMassAdvection
     variable = pressure
-    advected_interp_method = 'average'
+    advected_interp_method = 'skewness-corrected'
     velocity_interp_method = 'rc'
     vel = 'velocity'
     pressure = pressure
-    u = u
-    v = v
+    u = vel_x
+    v = vel_y
     mu = ${mu}
     rho = ${rho}
-  []
-  [mass_forcing]
-    type = FVBodyForce
-    variable = pressure
-    function = forcing_p
   []
   [mean_zero_pressure]
     type = FVScalarLagrangeMultiplier
@@ -63,61 +55,61 @@ rho=1.1
 
   [u_advection]
     type = INSFVMomentumAdvection
-    variable = u
+    variable = vel_x
     advected_quantity = 'rhou'
     vel = 'velocity'
-    advected_interp_method = 'average'
+    advected_interp_method = 'skewness-corrected'
     velocity_interp_method = 'rc'
     pressure = pressure
-    u = u
-    v = v
+    u = vel_x
+    v = vel_y
     mu = ${mu}
     rho = ${rho}
   []
   [u_viscosity]
     type = FVDiffusion
-    variable = u
+    variable = vel_x
     coeff = ${mu}
   []
   [u_pressure]
     type = INSFVMomentumPressure
-    variable = u
+    variable = vel_x
     momentum_component = 'x'
     pressure = pressure
   []
   [u_forcing]
     type = FVBodyForce
-    variable = u
+    variable = vel_x
     function = forcing_u
   []
 
   [v_advection]
     type = INSFVMomentumAdvection
-    variable = v
+    variable = vel_y
     advected_quantity = 'rhov'
     vel = 'velocity'
-    advected_interp_method = 'average'
+    advected_interp_method = 'skewness-corrected'
     velocity_interp_method = 'rc'
     pressure = pressure
-    u = u
-    v = v
+    u = vel_x
+    v = vel_y
     mu = ${mu}
     rho = ${rho}
   []
   [v_viscosity]
     type = FVDiffusion
-    variable = v
+    variable = vel_y
     coeff = ${mu}
   []
   [v_pressure]
     type = INSFVMomentumPressure
-    variable = v
+    variable = vel_y
     momentum_component = 'y'
     pressure = pressure
   []
   [v_forcing]
     type = FVBodyForce
-    variable = v
+    variable = vel_y
     function = forcing_v
   []
 []
@@ -126,23 +118,22 @@ rho=1.1
   [no-slip-wall-u]
     type = INSFVNoSlipWallBC
     boundary = 'left right top bottom'
-    variable = u
-    function = 'exact_u'
+    variable = vel_x
+    function = '0'
   []
-
   [no-slip-wall-v]
     type = INSFVNoSlipWallBC
     boundary = 'left right top bottom'
-    variable = v
-    function = 'exact_v'
+    variable = vel_y
+    function = '0'
   []
 []
 
 [Materials]
   [ins_fv]
     type = INSFVMaterial
-    u = u
-    v = v
+    u = vel_x
+    v = vel_y
     pressure = 'pressure'
     rho = ${rho}
   []
@@ -151,45 +142,27 @@ rho=1.1
 [Functions]
   [exact_u]
     type = ParsedFunction
-    value = 'sin(y)*sin(x*pi)'
-  []
-  [exact_rhou]
-    type = ParsedFunction
-    value = 'rho*sin(y)*sin(x*pi)'
-    vars = 'rho'
-    vals = '${rho}'
-  []
-  [forcing_u]
-    type = ParsedFunction
-    value = 'mu*sin(y)*sin(x*pi) - (-x*pi^2*mu*sin(y)*sin(x*pi) + pi*mu*sin(y)*cos(x*pi))/x + (2*x*pi*rho*sin(y)^2*sin(x*pi)*cos(x*pi) + rho*sin(y)^2*sin(x*pi)^2)/x + (-1/2*x*pi*rho*sin(x)*sin(y)*sin(x*pi)*sin((1/2)*y*pi) + x*rho*sin(x)*sin(x*pi)*cos(y)*cos((1/2)*y*pi))/x'
-    vars = 'mu rho'
-    vals = '${mu} ${rho}'
+    value = 'x^2*(1-x)^2*(2*y-6*y^2+4*y^3)'
   []
   [exact_v]
     type = ParsedFunction
-    value = 'sin(x)*cos((1/2)*y*pi)'
-  []
-  [exact_rhov]
-    type = ParsedFunction
-    value = 'rho*sin(x)*cos((1/2)*y*pi)'
-    vars = 'rho'
-    vals = '${rho}'
-  []
-  [forcing_v]
-    type = ParsedFunction
-    value = '(1/4)*pi^2*mu*sin(x)*cos((1/2)*y*pi) - pi*rho*sin(x)^2*sin((1/2)*y*pi)*cos((1/2)*y*pi) + cos(y) - (-x*mu*sin(x)*cos((1/2)*y*pi) + mu*cos(x)*cos((1/2)*y*pi))/x + (x*pi*rho*sin(x)*sin(y)*cos(x*pi)*cos((1/2)*y*pi) + x*rho*sin(y)*sin(x*pi)*cos(x)*cos((1/2)*y*pi) + rho*sin(x)*sin(y)*sin(x*pi)*cos((1/2)*y*pi))/x'
-    vars = 'mu rho'
-    vals = '${mu} ${rho}'
+    value = '-y^2*(1-y)^2*(2*x-6*x^2+4*x^3)'
   []
   [exact_p]
     type = ParsedFunction
-    value = 'sin(y)'
-    []
-  [forcing_p]
+    value = 'x*(1-x)-2/12'
+  []
+  [forcing_u]
     type = ParsedFunction
-    value = '-1/2*pi*rho*sin(x)*sin((1/2)*y*pi) + (x*pi*rho*sin(y)*cos(x*pi) + rho*sin(y)*sin(x*pi))/x'
-    vars = 'rho'
-    vals = '${rho}'
+    value = '-4*mu/rho*(-1+2*y)*(y^2-6*x*y^2+6*x^2*y^2-y+6*x*y-6*x^2*y+3*x^2-6*x^3+3*x^4)+1-2*x+4*x^3*y^2*(2*y^2-2*y+1)*(y-1)^2*(-1+2*x)*(x-1)^3'
+    vars = 'mu rho'
+    vals = '${mu} ${rho}'
+  []
+  [forcing_v]
+    type = ParsedFunction
+    value = '4*mu/rho*(-1+2*x)*(x^2-6*y*x^2+6*x^2*y^2-x+6*x*y-6*x*y^2+3*y^2-6*y^3+3*y^4)+4*y^3*x^2*(2*x^2-2*x+1)*(x-1)^2*(-1+2*y)*(y-1)^3'
+    vars = 'mu rho'
+    vals = '${mu} ${rho}'
   []
 []
 
@@ -197,8 +170,9 @@ rho=1.1
   type = Steady
   solve_type = 'NEWTON'
   petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_pc_type -sub_pc_factor_shift_type'
-  petsc_options_value = 'asm      30                 lu           NONZERO'
-  nl_rel_tol = 1e-12
+  petsc_options_value = 'bjacobi      30                 lu           NONZERO'
+  line_search = 'none'
+  nl_rel_tol = 1e-8
 []
 
 [Outputs]
@@ -212,25 +186,25 @@ rho=1.1
     outputs = 'console csv'
     execute_on = 'timestep_end'
   []
-  [./L2u]
+  [L2u]
     type = ElementL2Error
-    variable = u
+    variable = vel_x
     function = exact_u
     outputs = 'console csv'
     execute_on = 'timestep_end'
-  [../]
-  [./L2v]
+  []
+  [L2v]
     type = ElementL2Error
-    variable = v
+    variable = vel_y
     function = exact_v
     outputs = 'console csv'
     execute_on = 'timestep_end'
-  [../]
-  [./L2p]
+  []
+  [L2p]
     variable = pressure
     function = exact_p
     type = ElementL2Error
     outputs = 'console csv'
     execute_on = 'timestep_end'
-  [../]
+  []
 []

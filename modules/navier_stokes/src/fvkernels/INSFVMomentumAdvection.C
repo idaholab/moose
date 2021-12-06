@@ -408,23 +408,32 @@ INSFVMomentumAdvection::coeffCalculator(const Elem & elem) const
     mooseAssert((neighbor == &fi->elem()) || (neighbor == fi->neighborPtr()),
                 "Surely the neighbor has to match one of the face information's elements, right?");
 
-    ADRealVectorValue neighbor_velocity(_u_var->getNeighborValue(neighbor, *fi, elem_velocity(0)));
+    // Checking if skewness correction is necessary
+    bool correct_skewness_u =
+        (_u_var->faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage);
+
+    // Fill a face velocity for the advection contribution
+    ADRealVectorValue face_velocity(
+        _u_var->getInternalFaceValue(neighbor, *fi, elem_velocity(0), correct_skewness_u));
     if (_v_var)
-      neighbor_velocity(1) = _v_var->getNeighborValue(neighbor, *fi, elem_velocity(1));
+    {
+      bool correct_skewness_v =
+          (_v_var->faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage);
+      face_velocity(1) =
+          _v_var->getInternalFaceValue(neighbor, *fi, elem_velocity(1), correct_skewness_v);
+    }
     if (_w_var)
-      neighbor_velocity(2) = _w_var->getNeighborValue(neighbor, *fi, elem_velocity(2));
+    {
+      bool correct_skewness_w =
+          (_w_var->faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage);
+      face_velocity(2) =
+          _w_var->getInternalFaceValue(neighbor, *fi, elem_velocity(2), correct_skewness_w);
+    }
 
-    ADRealVectorValue interp_v;
-    Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
-                           interp_v,
-                           elem_velocity,
-                           neighbor_velocity,
-                           *fi,
-                           elem_has_info);
-
+    // Add advection contribution
     const auto advection_coeffs =
-        Moose::FV::interpCoeffs(_advected_interp_method, *fi, elem_has_info, interp_v);
-    ADReal temp_coeff = face_rho * interp_v * surface_vector * advection_coeffs.first;
+        Moose::FV::interpCoeffs(_advected_interp_method, *fi, elem_has_info, face_velocity);
+    ADReal temp_coeff = face_rho * face_velocity * surface_vector * advection_coeffs.first;
 
     // Now add the viscous flux. Note that this includes only the orthogonal component! See
     // Moukalled equations 8.80, 8.78, and the orthogonal correction approach equation for
@@ -472,12 +481,29 @@ INSFVMomentumAdvection::interpolate(Moose::FV::InterpMethod m, ADRealVectorValue
     return;
   }
 
-  const auto elem_face = elemFromFace();
-  const auto neighbor_face = neighborFromFace();
+  // Check if skewness-correction is necessary
+  bool correct_skewness_u =
+      (_u_var->faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage);
 
-  Moose::FV::interpolate(
-      Moose::FV::InterpMethod::Average, v, _vel(elem_face), _vel(neighbor_face), *_face_info, true);
+  // Create the average face velocity (not corrected using RhieChow yet)
+  v(0) = _u_var->getInternalFaceValue(
+      neighbor, *_face_info, _u_var->getElemValue(elem), correct_skewness_u);
+  if (_v_var)
+  {
+    bool correct_skewness_v =
+        (_v_var->faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage);
+    v(1) = _v_var->getInternalFaceValue(
+        neighbor, *_face_info, _v_var->getElemValue(elem), correct_skewness_v);
+  }
+  if (_w_var)
+  {
+    bool correct_skewness_w =
+        (_w_var->faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage);
+    v(2) = _w_var->getInternalFaceValue(
+        neighbor, *_face_info, _w_var->getElemValue(elem), correct_skewness_w);
+  }
 
+  // Return if Rhie-Chow was not requested
   if (m == Moose::FV::InterpMethod::Average)
     return;
 
@@ -529,10 +555,21 @@ INSFVMomentumAdvection::interpolate(Moose::FV::InterpMethod m, ADRealVectorValue
     mooseAssert(neighbor_a(i).value() != 0, "We should not be dividing by zero");
     neighbor_D(i) = neighbor_volume / neighbor_a(i);
   }
-  Moose::FV::interpolate(
-      Moose::FV::InterpMethod::Average, face_D, elem_D, neighbor_D, *_face_info, true);
 
-  // perform the pressure correction
+  // We require this to ensure that the correct interpolation weights are used.
+  // This will change once the traditional weights are replaced by the weights
+  // that are used by the skewness-correction.
+  Moose::FV::InterpMethod face_velocity_interp_method =
+      (_advected_interp_method == Moose::FV::InterpMethod::SkewCorrectedAverage)
+          ? _advected_interp_method
+          : Moose::FV::InterpMethod::Average;
+
+  Moose::FV::interpolate(
+      face_velocity_interp_method, face_D, elem_D, neighbor_D, *_face_info, true);
+
+  // Perform the pressure correction. We don't use skewness-correction on these since
+  // it only influences the averaged cell gradients which cancel out in the correction
+  // below.
   for (const auto i : make_range(_dim))
     v(i) -= face_D(i) * (grad_p(i) - unc_grad_p(i));
 }

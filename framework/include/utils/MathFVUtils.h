@@ -162,6 +162,15 @@ interpolate(InterpMethod m,
     case InterpMethod::Average:
       result = linearInterpolation(value1, value2, fi, one_is_elem);
       break;
+    case InterpMethod::SkewCorrectedAverage:
+    {
+      // We create a zero gradient to ensure that the skewness-corrected
+      // weights are used, but no correction is applied. This will change when the
+      // old weights are replaced by the ones used with skewness-correction
+      typename TensorTools::IncrementRank<T2>::type surface_gradient;
+      result = skewCorrectedlinearInterpolation(value1, value2, surface_gradient, fi, one_is_elem);
+      break;
+    }
     default:
       mooseError("unsupported interpolation method for FVFaceInterface::interpolate");
   }
