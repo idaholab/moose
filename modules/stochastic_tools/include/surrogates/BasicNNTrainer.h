@@ -9,10 +9,12 @@
 
 #pragma once
 
+#include <torch/torch.h>
+
 #include "libmesh/utility.h"
 #include "SurrogateTrainer.h"
 
-class BasicNNTrainer : public SurrogateTrainer
+class BasicNNTrainer : public SurrogateTrainer, public torch::nn::Module
 {
 public:
   static InputParameters validParams();
@@ -26,55 +28,71 @@ public:
   virtual void postTrain() override;
 
 protected:
-// #ifdef ENABLE_TF
-//   tensorflow::Output addLayer(std::string idx,
-//                               tensorflow::Scope scope,
-//                               int in_neurons,
-//                               int out_neurons,
-//                               tensorflow::Input input,
-//                               bool activate);
-//
-//   tensorflow::Input XavierInit(tensorflow::Scope scope, int in_neurons, int out_neurons);
-//
-//   tensorflow::Status prepareBatches(std::vector<tensorflow::Tensor> & param_batches,
-//                                     std::vector<tensorflow::Tensor> & response_batches);
-//
-//   tensorflow::Status createGraph();
-//
-//   tensorflow::Status createOptimizationGraph();
-//
-//   tensorflow::Status initializeParameters();
-//
-//   tensorflow::Status trainGraph(tensorflow::Tensor & param_batch,
-//                                 tensorflow::Tensor & response_batch,
-//                                 double & loss);
-// #endif
+#ifdef ENABLE_PT
+
+  // A custom strcuture which is used to organize data foor the training of
+  // torch-based neural nets.
+  struct MyData : torch::data::datasets::Dataset<MyData>
+  {
+  public:
+    MyData(torch::Tensor dt, torch::Tensor rt) : _data_tensor(dt), _response_tensor(rt) {}
+    torch::data::Example<> get(size_t index) override
+    {
+      return {_data_tensor.slice(1, index, index + 1), _response_tensor[index]};
+    }
+
+    torch::optional<size_t> size() const override { return _response_tensor.sizes()[0]; }
+
+  private:
+    torch::Tensor _data_tensor;
+    torch::Tensor _response_tensor;
+  };
+
+  // A structure that describes a simple feed-forward neural net.
+  struct MyNet : torch::nn::Module
+  {
+  public:
+
+    // Contructor building the neural net, not the coversions from float to double
+    // due to the default type in pytorch is float and we use double in MOOSE.
+    MyNet(unsigned int no_inputs,
+          unsigned int no_hidden_layers,
+          std::vector<unsigned int> no_neurons_per_layer,
+          unsigned int no_outputs)
+    {
+      unsigned int inp_layers = no_inputs;
+      for (unsigned int i = 0; i < no_hidden_layers; ++i)
+      {
+        _weights.push_back(register_module("W" + std::to_string(i + 1),
+                                           torch::nn::Linear(inp_layers, no_neurons_per_layer[i])));
+        _weights[i]->to(at::kDouble);
+        inp_layers = no_neurons_per_layer[i];
+      }
+      _weights.push_back(register_module("W" + std::to_string(no_hidden_layers + 1),
+                                         torch::nn::Linear(inp_layers, no_outputs)));
+      _weights.back()->to(at::kDouble);
+    }
+
+    // Overriding the forward propagation function
+    torch::Tensor forward(torch::Tensor x)
+    {
+      for (unsigned int i = 0; i < _weights.size() - 1; ++i)
+        x = torch::relu(_weights[i]->forward(x));
+
+      x = _weights[_weights.size() - 1]->forward(x);
+
+      return x.reshape({x.size(0)});
+    }
+
+  protected:
+
+    // Submodules that hold linear operations and the corresponding
+    // weights and biases (y = W * x + b)
+    std::vector<torch::nn::Linear> _weights;
+  };
+#endif
 
 private:
-
-// #ifdef ENABLE_TF
-//
-//   tensorflow::Scope _t_root;
-//
-//   std::unique_ptr<tensorflow::ClientSession> _t_session;
-//
-//   tensorflow::Output _input_param_batch;
-//   tensorflow::Output _input_response_batch;
-//   std::string _input_name = "input";
-//
-//   tensorflow::Output _output;
-//   tensorflow::Output _output_loss;
-//
-//   std::map<std::string, tensorflow::Output> _nn_params;
-//   std::vector<tensorflow::Output> _raw_params;
-//   std::map<std::string, tensorflow::TensorShape> _nn_shapes;
-//   std::map<std::string, tensorflow::Output> _nn_assigns;
-//
-//   std::vector<tensorflow::Output> _v_weights_biases;
-//   std::vector<tensorflow::Operation> _v_out_grads;
-//
-// #endif
-
   /// Data from the current sampler row
   const std::vector<Real> & _sampler_row;
 
