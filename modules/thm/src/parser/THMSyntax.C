@@ -14,6 +14,7 @@ associateSyntax(Syntax & syntax)
   syntax.registerActionSyntax("THMCreateMeshAction", "Components");
   syntax.registerActionSyntax("AddComponentAction", "Components/*", "THM:add_component");
   syntax.registerActionSyntax("AddComponentAction", "Components/*/*", "THM:add_component");
+  syntax.registerActionSyntax("AddClosuresAction", "Closures/*", "THM:add_closures");
   syntax.registerActionSyntax("THMAddControlAction", "ControlLogic/*", "add_control");
   syntax.registerActionSyntax("AddIterationCountPostprocessorsAction", "Debug");
   syntax.registerActionSyntax("PostprocessorAsControlAction", "Postprocessors/*");
@@ -43,11 +44,13 @@ registerActions(Syntax & syntax)
 
   registerMooseObjectTask("THM:add_component", Component, false);
   registerMooseObjectTask("THM:add_heat_structure_material", SolidMaterialProperties, false);
+  registerMooseObjectTask("THM:add_closures", Closures, false);
 
   try
   {
     syntax.addDependency("THM:add_heat_structure_material", "add_function");
     syntax.addDependency("THM:output_vector_velocity", "setup_mesh");
+    syntax.addDependency("THM:add_closures", "setup_mesh");
     syntax.addDependency("THM:add_component", "THM:output_vector_velocity");
     syntax.addDependency("THM:debug_action", "setup_mesh");
     syntax.addDependency("THM:init_simulation", "THM:add_component");
@@ -64,6 +67,7 @@ registerActions(Syntax & syntax)
     syntax.addDependency("add_aux_variable", "add_fluid_properties");
     syntax.addDependency("add_variable", "add_fluid_properties");
     syntax.addDependency("THM:init_components", "THM:add_heat_structure_material");
+    syntax.addDependency("THM:init_components", "THM:add_closures");
     syntax.addDependency("THM:add_variables", "THM:init_components");
     syntax.addDependency("THM:setup_output", "add_output");
     syntax.addDependency("THM:add_component_physics", "add_material");
