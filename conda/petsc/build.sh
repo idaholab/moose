@@ -38,7 +38,6 @@ fi
 
 source $PETSC_DIR/configure_petsc.sh
 configure_petsc \
-    --download-slepc=0 \
     --COPTFLAGS=-O3 \
     --CXXOPTFLAGS=-O3 \
     --FOPTFLAGS=-O3 \
