@@ -94,7 +94,19 @@ THMApp::getClosuresClassName(const std::string & closures_option,
   {
     const auto & map_for_flow_model = _closures_class_names_map.at(flow_model_id);
     if (map_for_flow_model.find(closures_option_lc) != map_for_flow_model.end())
-      return map_for_flow_model.at(closures_option_lc);
+    {
+      const std::string & closures_class = map_for_flow_model.at(closures_option_lc);
+      mooseDeprecated("The closures system now uses objects created in the input file instead of "
+                      "enumerated options.\n",
+                      "To remove this warning, add the following block to your input file "
+                      "(replacing 'my_closures' as you choose):\n",
+                      "  [Closures]\n    [my_closures]\n      type = ",
+                      closures_class,
+                      "\n    []\n  []\n",
+                      "Then, set the 'closures' parameter in your flow channel to this name:\n",
+                      "  closures = my_closures");
+      return closures_class;
+    }
     else
       mooseError("The closures option '" + closures_option_lc + "' is not registered.");
   }
