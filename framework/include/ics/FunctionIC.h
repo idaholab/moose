@@ -35,6 +35,11 @@ public:
 
   FunctionIC(const InputParameters & parameters);
 
+  /**
+   * @returns The function name
+   */
+  const FunctionName functionName() const;
+
 protected:
   /**
    * Evaluate the function at the current quadrature point and time step.
