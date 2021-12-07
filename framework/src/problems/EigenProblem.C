@@ -571,6 +571,9 @@ EigenProblem::solve()
   // sync solutions in displaced problem
   if (_displaced_problem)
     _displaced_problem->syncSolutions();
+
+  // Reset the matrix flag, so that we reform matrix in next picard iteration
+  _matrices_formed = false;
 }
 
 void
