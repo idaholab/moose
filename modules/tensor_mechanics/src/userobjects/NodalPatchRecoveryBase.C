@@ -53,7 +53,7 @@ Real
 NodalPatchRecoveryBase::nodalPatchRecovery(const Point & x,
                                            const std::vector<dof_id_type> & elem_ids) const
 {
-  // before we go, check if we have enough sample points for solving the least square fitting
+  // Before we go, check if we have enough sample points for solving the least square fitting
   if (_q_point.size() * elem_ids.size() < _q)
     mooseError("There are not enough sample points to recover the nodal value, try reducing the "
                "polynomial order or using a higher-order quadrature scheme.");

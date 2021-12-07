@@ -24,10 +24,10 @@ public:
 
   NodalPatchRecoveryMaterialProperty(const InputParameters & parameters);
 
-  virtual void initialSetup() override;
+  virtual void initialSetup() override { _prop.check(); }
 
 protected:
-  virtual Real computeValue() override;
+  virtual Real computeValue() override { return _prop[_qp]; }
 
   const IndexableProperty<NodalPatchRecoveryBase, false> _prop;
 };

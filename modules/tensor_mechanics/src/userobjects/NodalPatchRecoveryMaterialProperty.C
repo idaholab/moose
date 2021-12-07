@@ -25,16 +25,3 @@ NodalPatchRecoveryMaterialProperty::NodalPatchRecoveryMaterialProperty(
   : NodalPatchRecoveryBase(parameters), _prop(this)
 {
 }
-
-void
-NodalPatchRecoveryMaterialProperty::initialSetup()
-{
-  // check if the material property type and number of supplied components match
-  _prop.check();
-}
-
-Real
-NodalPatchRecoveryMaterialProperty::computeValue()
-{
-  return _prop[_qp];
-}

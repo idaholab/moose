@@ -35,16 +35,14 @@ public:
   virtual void threadJoin(const UserObject &) override {}
 
 protected:
-  /**
-   * Compute and return the value of the aux variable.
-   */
+  /// Compute the quantity to recover using nodal patch recovery
   virtual Real computeValue() = 0;
 
   unsigned int _qp;
 
 private:
   /**
-   * compute the P vector at given point
+   * Compute the P vector at a given point
    * i.e. given dim = 2, order = 2, polynomial P has the following terms:
    * 1
    * x
@@ -57,7 +55,7 @@ private:
    */
   RealEigenVector evaluateBasisFunctions(const Point & q_point) const;
 
-  /// polynomial order, default is variable order
+  /// The polynomial order, default is variable order
   const unsigned int _patch_polynomial_order;
 
   /// The multi-index table
