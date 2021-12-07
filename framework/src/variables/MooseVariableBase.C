@@ -62,10 +62,10 @@ MooseVariableBase::validParams()
                                      "Specifies a scaling factor to apply to this variable");
   params.addParam<bool>("eigen", false, "True to make this variable an eigen variable");
   params.addParam<bool>("fv", false, "True to make this variable a finite volume variable");
-  params.addParam<bool>(
-      "array",
-      false,
-      "True to make this variable a array variable regardless of number of components");
+  params.addParam<bool>("array",
+                        false,
+                        "True to make this variable a array variable regardless of number of "
+                        "components. If 'components' > 1, this will automatically be set to true.");
   params.addParamNamesToGroup("scaling eigen", "Advanced");
 
   params.addParam<bool>("use_dual", false, "True to use dual basis for Lagrange multipliers");
