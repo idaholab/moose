@@ -52,7 +52,7 @@ public:
   static FEType feType(const InputParameters & params);
 
   /**
-   * determine the variable type given an FEType and number of components
+   * DEPRECATED: Use variableType instead
    */
   static std::string
   determineType(const FEType & fe_type, unsigned int components, bool is_fv = false);
