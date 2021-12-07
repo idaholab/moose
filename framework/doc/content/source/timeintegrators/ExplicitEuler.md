@@ -1,33 +1,39 @@
 # ExplicitEuler
 
-!alert! construction title=Undocumented Class
-The ExplicitEuler has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# ExplicitEuler
-
 !syntax description /Executioner/TimeIntegrator/ExplicitEuler
 
-## Overview
+The explicit Euler method is only first-order accurate in time.
 
-!! Replace these lines with information regarding the ExplicitEuler object.
+## Description
 
-## Example Input File Syntax
+With $U$, the vector of nonlinear variables, and $A$, a nonlinear operator,
+we write the PDE of interest as:
 
-!! Describe and include an example of how to use the ExplicitEuler object.
+!equation
+\dfrac{\partial U}{\partial t} = A(t, U(t))
 
-!syntax parameters /Executioner/TimeIntegrator/ExplicitEuler
+Using $t+\Delta t$ for the current time step, and $t$ for the previous step,
+the explicit Euler method can be written:
 
-!syntax inputs /Executioner/TimeIntegrator/ExplicitEuler
+!equation
+U(t+\Delta t) = U(t) + \Delta t A(t, U(t))
 
-!syntax children /Executioner/TimeIntegrator/ExplicitEuler
-```
-!alert-end!
+This method can be expressed as a Runge-Kutta method with the following Butcher Tableau:
 
-!syntax description /Executioner/TimeIntegrator/ExplicitEuler
+!equation
+\begin{array}{c|c}
+  0 & 0 \\
+\hline
+    &  1
+\end{array}
+
+!alert note
+The [ActuallyExplicitEuler.md] implements the same algorithm but without forming the non linear system,
+making it faster and use less memory.
+
+!alert warning
+All kernels except time-(derivative)-kernels should have the parameter `implicit=false` to use this
+time integrator.
 
 !syntax parameters /Executioner/TimeIntegrator/ExplicitEuler
 

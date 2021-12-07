@@ -52,6 +52,10 @@ conditions applied to the model over a step. In addition to that limit, the bool
 
 !media media/executioner/adaptive_dt_criteria.png style=width:70%; id=fig:adaptive_dt_criteria caption=Criteria used to determine adaptive time step size
 
+!alert tip
+The `IterationAdaptiveDT` is often simply used to have an exponentially growing time step. For this
+purpose, the iteration related parameters are not required.
+
 ## Example Input Syntax
 
 !listing test/tests/time_steppers/iteration_adaptive/adapt_tstep_shrink_init_dt.i block=Executioner

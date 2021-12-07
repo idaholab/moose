@@ -1,33 +1,29 @@
 # LayeredIntegral
 
-!alert! construction title=Undocumented Class
-The LayeredIntegral has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# LayeredIntegral
-
 !syntax description /UserObjects/LayeredIntegral
 
-## Overview
+## How to define the layers
 
-!! Replace these lines with information regarding the LayeredIntegral object.
+The parameters to define layers are explained in the [LayeredAverage.md] documentation.
 
-## Example Input File Syntax
+## How to retrieve the result
 
-!! Describe and include an example of how to use the LayeredIntegral object.
+The result of a `LayeredIntegral` computation can be saved in an auxiliary variable using a
+[SpatialUserObjectAux.md]. It can be output to a CSV file using a [SpatialUserObjectVectorPostprocessor.md].
 
-!syntax parameters /UserObjects/LayeredIntegral
+## Additional computation options
 
-!syntax inputs /UserObjects/LayeredIntegral
+Additional options for performing averages, interpolations and cumulative sums are explained in the
+[LayeredAverage.md] documentation.
 
-!syntax children /UserObjects/LayeredIntegral
-```
-!alert-end!
+## Example input syntax
 
-!syntax description /UserObjects/LayeredIntegral
+In this example, the integral of variable `u` is taken over the whole domain in direction `y` over
+three layers, on every linear iteration. The result of this averaging is stored in the variable
+`layered_integral` using a [SpatialUserObjectAux.md] at the end of every timestep, and output to a
+CSV file using a [SpatialUserObjectVectorPostprocessor.md].
+
+!listing test/tests/userobjects/layered_integral/layered_integral_test.i block=UserObjects AuxKernels VectorPostprocessors
 
 !syntax parameters /UserObjects/LayeredIntegral
 

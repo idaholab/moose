@@ -18,7 +18,7 @@ LayeredSideIntegral::validParams()
 {
   InputParameters params = SideIntegralVariableUserObject::validParams();
   params += LayeredBase::validParams();
-  params.addClassDescription("Computes volume integral of a variable storing partial sums for the "
+  params.addClassDescription("Computes surface integral of a variable storing partial sums for the "
                              "specified number of intervals in a direction (x,y,z).");
   return params;
 }

@@ -18,6 +18,7 @@ InputParameters
 ElementIntegralUserObject::validParams()
 {
   InputParameters params = ElementUserObject::validParams();
+  params.addClassDescription("Performs a spatial integration");
   return params;
 }
 

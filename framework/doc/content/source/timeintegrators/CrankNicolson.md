@@ -1,33 +1,32 @@
 # CrankNicolson
 
-!alert! construction title=Undocumented Class
-The CrankNicolson has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# CrankNicolson
-
 !syntax description /Executioner/TimeIntegrator/CrankNicolson
 
-## Overview
+The Crank Nicolson time integration scheme is a second-order implicit method. It is unconditionally stable.
 
-!! Replace these lines with information regarding the CrankNicolson object.
+## Description
 
-## Example Input File Syntax
+With $U$, the vector of nonlinear variables, and $A$, a nonlinear operator,
+we write the PDE of interest as:
 
-!! Describe and include an example of how to use the CrankNicolson object.
+!equation
+\dfrac{\partial U}{\partial t} = A(t, U(t))
 
-!syntax parameters /Executioner/TimeIntegrator/CrankNicolson
+Using $t+\Delta t$ for the current time step, and $t$ for the previous step,
+the Crank Nicolson time integration scheme can be written:
 
-!syntax inputs /Executioner/TimeIntegrator/CrankNicolson
+!equation
+U(t+\Delta t) = U(t) + \Delta t \dfrac{1}{2} \left( A(t, U(t)) + A(t+\Delta t, U(t+\Delta t)) \right)
 
-!syntax children /Executioner/TimeIntegrator/CrankNicolson
-```
-!alert-end!
+This method can be expressed as a Runge-Kutta method with the following Butcher Tableau:
 
-!syntax description /Executioner/TimeIntegrator/CrankNicolson
+!equation
+\begin{array}{c|cc}
+0 & 0 & 0 \\
+1 & 1/2 & 1/2 \\
+\hline
+    &  1/2 & 1/2
+\end{array}
 
 !syntax parameters /Executioner/TimeIntegrator/CrankNicolson
 

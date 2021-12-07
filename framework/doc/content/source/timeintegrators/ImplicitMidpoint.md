@@ -1,33 +1,32 @@
 # ImplicitMidpoint
 
-!alert! construction title=Undocumented Class
-The ImplicitMidpoint has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# ImplicitMidpoint
-
 !syntax description /Executioner/TimeIntegrator/ImplicitMidpoint
 
-## Overview
+The implicit midpoint method is second-order accurate. As a Gauss-Legendre method it is A-stable.
 
-!! Replace these lines with information regarding the ImplicitMidpoint object.
+## Description
 
-## Example Input File Syntax
+With $U$, the vector of nonlinear variables, and $A$, a nonlinear operator,
+we write the PDE of interest as:
 
-!! Describe and include an example of how to use the ImplicitMidpoint object.
+!equation
+\dfrac{\partial U}{\partial t} = A(t, U(t))
 
-!syntax parameters /Executioner/TimeIntegrator/ImplicitMidpoint
+Using $t+\Delta t$ for the current time step, and $t$ for the previous step,
+the implicit midpoint integration scheme can be written:
 
-!syntax inputs /Executioner/TimeIntegrator/ImplicitMidpoint
+!equation
+U(t+\Delta t) = U(t) + \Delta t A \left(t+\Delta t/2, \dfrac{\Delta t}{2} \left( U(t) +  U(t+\Delta t) \right) \right)
 
-!syntax children /Executioner/TimeIntegrator/ImplicitMidpoint
-```
-!alert-end!
 
-!syntax description /Executioner/TimeIntegrator/ImplicitMidpoint
+This method can be expressed as a Runge-Kutta method with the following Butcher Tableau:
+
+!equation
+\begin{array}{c|c}
+  1/2 & 1/2 \\
+\hline
+    &  1
+\end{array}
 
 !syntax parameters /Executioner/TimeIntegrator/ImplicitMidpoint
 
