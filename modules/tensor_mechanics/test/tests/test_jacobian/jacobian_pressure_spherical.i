@@ -33,8 +33,7 @@
   [disp_x]
     type = Pressure
     variable = disp_x
-    boundary = right
-    component = 0
+    boundary = 'left right'
     factor = 1e8
   []
 []

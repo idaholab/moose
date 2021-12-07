@@ -16,6 +16,10 @@
   dim = 2
   nx = 1
   ny = 1
+  xmin = 1
+  xmax = 1.75
+  ymin = 0
+  ymax = 1.5
 []
 
 [GlobalParams]
@@ -47,15 +51,6 @@
     boundary = left
     value = 1.0
   []
-
-  [right]
-    type = DirichletBC
-    variable = disp_x
-    preset = false
-    boundary = right
-    value = 0.0
-  []
-
 []
 
 [Materials]
@@ -81,7 +76,7 @@
   type = Transient #Transient
 
   solve_type = NEWTON
-  petsc_options = '-snes_check_jacobian -snes_check_jacobian_view'
+  petsc_options = '-snes_test_jacobian -snes_test_jacobian_view'
 
   l_max_its = 1
   nl_abs_tol = 1e-4

@@ -85,7 +85,6 @@
   [pressure_x]
     type = Pressure
     variable = disp_x
-    component = 0
     boundary = right
     factor = -0.5
     function = shear_function
@@ -93,7 +92,6 @@
   [pressure_y]
     type = Pressure
     variable = disp_y
-    component = 1
     boundary = top
     factor = -0.5
     function = shear_function
@@ -101,7 +99,6 @@
   [pressure_z]
     type = Pressure
     variable = disp_z
-    component = 2
     boundary = front
     factor = 0.5
     function = shear_function

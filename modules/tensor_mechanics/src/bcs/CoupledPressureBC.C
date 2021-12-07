@@ -20,7 +20,7 @@ CoupledPressureBC::validParams()
   params.addRequiredRangeCheckedParam<unsigned int>(
       "component", "component<3", "The component for the pressure");
   params.addRequiredCoupledVar("pressure", "Coupled variable containing the pressure");
-  params.set<bool>("use_displaced_mesh") = true;
+  params.addParam<bool>("use_displaced_mesh", true, "Whether to use the displaced mesh.");
   return params;
 }
 

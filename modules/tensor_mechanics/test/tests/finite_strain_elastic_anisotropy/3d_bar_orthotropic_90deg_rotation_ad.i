@@ -112,7 +112,6 @@
     displacements = 'disp_x disp_y disp_z'
     type = Pressure
     variable = disp_x
-    component = 0
   []
 
 []

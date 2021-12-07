@@ -71,7 +71,6 @@
     type = Pressure
     variable = disp_r
     boundary = outer
-    component = 0
     factor = 200000
   [../]
 
@@ -79,7 +78,6 @@
     type = Pressure
     variable = disp_z
     boundary = outer
-    component = 1
     factor = 200000
   [../]
 
@@ -87,7 +85,6 @@
     type = Pressure
     variable = disp_r
     boundary = inner
-    component = 0
     factor = 100000
   [../]
 
@@ -95,7 +92,6 @@
     type = Pressure
     variable = disp_z
     boundary = inner
-    component = 1
     factor = 100000
   [../]
 []
