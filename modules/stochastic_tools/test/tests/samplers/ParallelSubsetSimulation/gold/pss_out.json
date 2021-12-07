@@ -1,6 +1,4 @@
 {
-    "number_of_parts": 2,
-    "part": 0,
     "reporters": {
         "adaptive_MC": {
             "type": "AdaptiveMonteCarloDecision",
@@ -10,21 +8,6 @@
                 },
                 "output_required": {
                     "type": "std::vector<double>"
-                }
-            }
-        },
-        "constant": {
-            "type": "StochasticReporter",
-            "values": {
-                "reporter_transfer:average:value": {
-                    "row_begin": 0,
-                    "row_end": 1,
-                    "type": "std::vector<double>"
-                },
-                "reporter_transfer:converged": {
-                    "row_begin": 0,
-                    "row_end": 1,
-                    "type": "std::vector<bool>"
                 }
             }
         }
@@ -47,16 +30,28 @@
                     0.0
                 ]
             },
-            "constant": {
-                "reporter_transfer:average:value": [
-                    0.0
-                ],
-                "reporter_transfer:converged": [
-                    false
-                ]
-            },
             "time": 0.0,
             "time_step": 0
+        },
+        {
+            "adaptive_MC": {
+                "inputs": [
+                    [
+                        -0.8369452076865469,
+                        0.4869494418587333
+                    ],
+                    [
+                        0.4936391114873937,
+                        0.8762173213632056
+                    ]
+                ],
+                "output_required": [
+                    0.16725171999941016,
+                    0.6641070121361847
+                ]
+            },
+            "time": 1.0,
+            "time_step": 1
         },
         {
             "adaptive_MC": {
@@ -75,16 +70,8 @@
                     0.3143479036057473
                 ]
             },
-            "constant": {
-                "reporter_transfer:average:value": [
-                    -0.12516475803407015
-                ],
-                "reporter_transfer:converged": [
-                    true
-                ]
-            },
-            "time": 1.0,
-            "time_step": 1
+            "time": 2.0,
+            "time_step": 2
         },
         {
             "adaptive_MC": {
@@ -103,16 +90,8 @@
                     0.06604673239128403
                 ]
             },
-            "constant": {
-                "reporter_transfer:average:value": [
-                    0.4160171802983967
-                ],
-                "reporter_transfer:converged": [
-                    true
-                ]
-            },
-            "time": 2.0,
-            "time_step": 2
+            "time": 3.0,
+            "time_step": 3
         },
         {
             "adaptive_MC": {
@@ -131,16 +110,8 @@
                     0.2760475606235183
                 ]
             },
-            "constant": {
-                "reporter_transfer:average:value": [
-                    0.7639556844459852
-                ],
-                "reporter_transfer:converged": [
-                    true
-                ]
-            },
-            "time": 3.0,
-            "time_step": 3
+            "time": 4.0,
+            "time_step": 4
         },
         {
             "adaptive_MC": {
@@ -159,16 +130,8 @@
                     0.3239804441261827
                 ]
             },
-            "constant": {
-                "reporter_transfer:average:value": [
-                    0.7636251049900106
-                ],
-                "reporter_transfer:converged": [
-                    true
-                ]
-            },
-            "time": 4.0,
-            "time_step": 4
+            "time": 5.0,
+            "time_step": 5
         },
         {
             "adaptive_MC": {
@@ -187,16 +150,8 @@
                     0.2499527977739232
                 ]
             },
-            "constant": {
-                "reporter_transfer:average:value": [
-                    0.5059626705943967
-                ],
-                "reporter_transfer:converged": [
-                    true
-                ]
-            },
-            "time": 5.0,
-            "time_step": 5
+            "time": 6.0,
+            "time_step": 6
         },
         {
             "adaptive_MC": {
@@ -215,16 +170,8 @@
                     0.971944950665619
                 ]
             },
-            "constant": {
-                "reporter_transfer:average:value": [
-                    0.33658167950133655
-                ],
-                "reporter_transfer:converged": [
-                    true
-                ]
-            },
-            "time": 6.0,
-            "time_step": 6
+            "time": 7.0,
+            "time_step": 7
         },
         {
             "adaptive_MC": {
@@ -243,16 +190,8 @@
                     0.9392567260134137
                 ]
             },
-            "constant": {
-                "reporter_transfer:average:value": [
-                    0.41503067928059584
-                ],
-                "reporter_transfer:converged": [
-                    true
-                ]
-            },
-            "time": 7.0,
-            "time_step": 7
+            "time": 8.0,
+            "time_step": 8
         },
         {
             "adaptive_MC": {
@@ -271,16 +210,8 @@
                     0.5312537058858486
                 ]
             },
-            "constant": {
-                "reporter_transfer:average:value": [
-                    0.3677725714821252
-                ],
-                "reporter_transfer:converged": [
-                    true
-                ]
-            },
-            "time": 8.0,
-            "time_step": 8
+            "time": 9.0,
+            "time_step": 9
         },
         {
             "adaptive_MC": {
@@ -297,42 +228,6 @@
                 "output_required": [
                     0.48849126102040047,
                     0.4388078965974893
-                ]
-            },
-            "constant": {
-                "reporter_transfer:average:value": [
-                    0.48849126102040047
-                ],
-                "reporter_transfer:converged": [
-                    true
-                ]
-            },
-            "time": 9.0,
-            "time_step": 9
-        },
-        {
-            "adaptive_MC": {
-                "inputs": [
-                    [
-                        -0.1422408180750021,
-                        0.6730427555380012
-                    ],
-                    [
-                        0.6600980689017069,
-                        0.5942934539565934
-                    ]
-                ],
-                "output_required": [
-                    0.2522894783228597,
-                    0.6174203231528446
-                ]
-            },
-            "constant": {
-                "reporter_transfer:average:value": [
-                    0.2522894783228597
-                ],
-                "reporter_transfer:converged": [
-                    true
                 ]
             },
             "time": 10.0,
@@ -355,14 +250,6 @@
                     0.971944950665619
                 ]
             },
-            "constant": {
-                "reporter_transfer:average:value": [
-                    0.44030069788722603
-                ],
-                "reporter_transfer:converged": [
-                    true
-                ]
-            },
             "time": 11.0,
             "time_step": 11
         },
@@ -370,25 +257,17 @@
             "adaptive_MC": {
                 "inputs": [
                     [
-                        0.4756234757587354,
+                        0.5993098445506496,
                         0.517241399750267
                     ],
                     [
-                        1.6069412882448921,
+                        1.3286378018918115,
                         1.4778031159916283
                     ]
                 ],
                 "output_required": [
-                    1.0145830285171529,
+                    0.9392567260134137,
                     0.971944950665619
-                ]
-            },
-            "constant": {
-                "reporter_transfer:average:value": [
-                    1.0145830285171529
-                ],
-                "reporter_transfer:converged": [
-                    true
                 ]
             },
             "time": 12.0,
@@ -399,24 +278,16 @@
                 "inputs": [
                     [
                         0.4756234757587354,
-                        0.517241399750267
+                        0.23574626132198995
                     ],
                     [
                         1.6069412882448921,
-                        1.4778031159916283
+                        1.7647270585523014
                     ]
                 ],
                 "output_required": [
                     1.0145830285171529,
-                    0.971944950665619
-                ]
-            },
-            "constant": {
-                "reporter_transfer:average:value": [
-                    0.7519210785435437
-                ],
-                "reporter_transfer:converged": [
-                    true
+                    0.9745897531875222
                 ]
             },
             "time": 13.0,
@@ -426,25 +297,17 @@
             "adaptive_MC": {
                 "inputs": [
                     [
-                        0.47562346092947255,
-                        0.517241399750267
+                        0.4756234757587354,
+                        0.23574627520335667
                     ],
                     [
-                        1.7237977598085366,
-                        1.4778031159916283
+                        1.6069412882448921,
+                        1.7647270667219133
                     ]
                 ],
                 "output_required": [
-                    1.0715131081117226,
-                    0.971944950665619
-                ]
-            },
-            "constant": {
-                "reporter_transfer:average:value": [
-                    1.0715131081117226
-                ],
-                "reporter_transfer:converged": [
-                    true
+                    1.0145830285171529,
+                    0.974589763930306
                 ]
             },
             "time": 14.0,
@@ -454,25 +317,17 @@
             "adaptive_MC": {
                 "inputs": [
                     [
-                        0.6294843771749885,
-                        0.517241399750267
+                        0.47562346092947255,
+                        0.2226204161047154
                     ],
                     [
-                        1.6331731802910776,
-                        1.4778031159916283
+                        1.7237977598085366,
+                        1.7647270748915256
                     ]
                 ],
                 "output_required": [
-                    1.1023205601236452,
-                    0.971944950665619
-                ]
-            },
-            "constant": {
-                "reporter_transfer:average:value": [
-                    1.1023205601236452
-                ],
-                "reporter_transfer:converged": [
-                    true
+                    1.0715131081117226,
+                    0.9681951173783231
                 ]
             },
             "time": 15.0,
@@ -483,24 +338,16 @@
                 "inputs": [
                     [
                         0.6294843771749885,
-                        0.5172413852737283
+                        0.36048229944193577
                     ],
                     [
                         1.6331731802910776,
-                        1.4778031011292225
+                        1.735440621426733
                     ]
                 ],
                 "output_required": [
                     1.1023205601236452,
-                    0.9719449363722816
-                ]
-            },
-            "constant": {
-                "reporter_transfer:average:value": [
-                    0.7223082820731129
-                ],
-                "reporter_transfer:converged": [
-                    true
+                    1.0210908497780886
                 ]
             },
             "time": 16.0,
@@ -511,24 +358,16 @@
                 "inputs": [
                     [
                         0.6294843771749885,
-                        0.3755646470226146
+                        0.36048229944193577
                     ],
                     [
                         1.6331731802910776,
-                        1.5721956562839479
+                        1.735440621426733
                     ]
                 ],
                 "output_required": [
                     1.1023205601236452,
-                    0.9489090478779318
-                ]
-            },
-            "constant": {
-                "reporter_transfer:average:value": [
-                    0.8122846573749496
-                ],
-                "reporter_transfer:converged": [
-                    true
+                    1.0210908497780886
                 ]
             },
             "time": 17.0,
@@ -538,25 +377,17 @@
             "adaptive_MC": {
                 "inputs": [
                     [
-                        0.732030178707445,
-                        0.3755646470226146
+                        0.6294843771749885,
+                        0.3604822948948435
                     ],
                     [
-                        1.6331731748299185,
-                        1.5721956562839479
+                        1.6331731802910776,
+                        1.8236093653944063
                     ]
                 ],
                 "output_required": [
-                    1.1522787780564305,
-                    0.9489090478779318
-                ]
-            },
-            "constant": {
-                "reporter_transfer:average:value": [
-                    1.1522787780564305
-                ],
-                "reporter_transfer:converged": [
-                    true
+                    1.1023205601236452,
+                    1.0640448592803147
                 ]
             },
             "time": 18.0,
@@ -566,25 +397,17 @@
             "adaptive_MC": {
                 "inputs": [
                     [
-                        0.7320301838559187,
-                        0.3755646470226146
+                        0.732030178707445,
+                        0.3604822948948435
                     ],
                     [
-                        1.3391495843731742,
-                        1.5721956562839479
+                        1.6331731748299185,
+                        1.8236093653944063
                     ]
                 ],
                 "output_required": [
-                    1.0090364910486074,
-                    0.9489090478779318
-                ]
-            },
-            "constant": {
-                "reporter_transfer:average:value": [
-                    1.0090364910486074
-                ],
-                "reporter_transfer:converged": [
-                    true
+                    1.1522787780564305,
+                    1.0640448592803147
                 ]
             },
             "time": 19.0,
@@ -595,24 +418,16 @@
                 "inputs": [
                     [
                         0.7320301838559187,
-                        0.4579845687063668
+                        0.3802835588367257
                     ],
                     [
                         1.3391495843731742,
-                        1.5721956449847716
+                        1.8236093777453977
                     ]
                 ],
                 "output_required": [
                     1.0090364910486074,
-                    0.9890623452605423
-                ]
-            },
-            "constant": {
-                "reporter_transfer:average:value": [
-                    0.7929673663103923
-                ],
-                "reporter_transfer:converged": [
-                    true
+                    1.0736916367620521
                 ]
             },
             "time": 20.0,

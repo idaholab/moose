@@ -32,11 +32,8 @@ public:
   const Real & getSubsetProbability() const;
 
 protected:
-  /// Return the sample for the given row and column
+  virtual void sampleSetUp(const Sampler::SampleMode mode) override;
   virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) override;
-
-  /// Storage for distribution objects to be utilized
-  std::vector<Distribution const *> _distributions;
 
   /// Number of samples per subset
   const unsigned int & _num_samplessub;
@@ -50,6 +47,27 @@ protected:
   /// Initialize a certain number of random seeds. Change from the default only if you have to.
   const unsigned int & _num_random_seeds;
 
+  /// Reporter value containing calculated outputs
+  const std::vector<Real> & _outputs;
+
+  /// Reporter value containing input values from decision reporter
+  const std::vector<std::vector<Real>> & _inputs;
+
+  /// Track the current step of the main App
+  const int & _step;
+
+  /// Maximum length of markov chains based on subset probability
+  const unsigned int _count_max;
+
+  /// Ensure that the MCMC algorithm proceeds in a sequential fashion
+  int _check_step;
+
+  /// Track the current subset index
+  unsigned int _subset;
+
+  /// Storage for distribution objects to be utilized
+  std::vector<Distribution const *> _distributions;
+
 private:
   /// Storage for the previously accepted sample inputs across all the subsets
   std::vector<std::vector<Real>> _inputs_sto;
@@ -57,42 +75,9 @@ private:
   /// Storage for previously accepted sample outputs across all the subsets
   std::vector<Real> _outputs_sto;
 
-  /// Storage for the next proposed sample inputs across all the processors
-  std::vector<std::vector<Real>> _new_sample_vec;
-
-  /// Storage for the acceptance ratio for the MCMC sampler
-  Real _acceptance_ratio;
-
-  /// Track the current step of the main App
-  const int & _step;
-
-  /// Track the current subset index
-  unsigned int _subset;
-
-  /// Ensure proper randomization across several processors in parallel
-  unsigned int _seed_value;
-
-  /// Aid in proposing the next sample inputs across several processors in parallel
-  int _ind_sto;
-
-  /// Mean input vector for the next proposed sample inputs across several processors
-  std::vector<std::vector<Real>> _markov_seed;
-
-  /// Aid in proposing the next sample inputs across several processors in parallel
-  unsigned int _count;
-
-  /// Ensure that the MCMC algorithm proceeds in a sequential fashion
-  int _check_step;
-
-  /// Aid in selecting the seed input values for proposing the next input sample
-  unsigned int _count_max;
-
   /// Store the sorted input samples according to their corresponding outputs
   std::vector<std::vector<Real>> _inputs_sorted;
 
-  /// Storage of the previous sample to propose the next sample
-  std::vector<Real> _prev_val;
-
-  /// Store the intermediate ouput failure thresholds
-  std::vector<Real> _output_limits;
+  /// Mean input vector for the next proposed sample inputs across several processors
+  std::vector<std::vector<Real>> _markov_seed;
 };

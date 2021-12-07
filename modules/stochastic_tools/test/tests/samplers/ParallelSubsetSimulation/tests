@@ -8,7 +8,5 @@
     skip_keys = 'number_of_parts part'
     input = 'pss.i'
     jsondiff = 'pss_out.json'
-    min_parallel = 2
-    max_parallel = 2
   []
 []
