@@ -201,6 +201,9 @@ DGKernel::computeOffDiagElemNeighJacobian(Moose::DGJacobianType type,
   else
     prepareMatrixTagNeighbor(_assembly, _var.number(), jvar.number(), type);
 
+  if (_local_ke.n() == 0 || _local_ke.m() == 0)
+    return;
+
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
     precalculateQpOffDiagJacobian(type, jvar);
