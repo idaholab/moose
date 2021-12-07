@@ -9,21 +9,23 @@
 
 #pragma once
 
-#include "FunctorMaterial.h"
+#include "Material.h"
 
-/**
- * Defines a material property that is piecewise constant per block, discontinuous at interfaces
- */
+#include <unordered_map>
+
 template <bool is_ad>
-class PiecewiseConstantByBlockMaterialTempl : public FunctorMaterial
+class PiecewiseConstantByBlockMaterialTempl : public Material
 {
 public:
   PiecewiseConstantByBlockMaterialTempl(const InputParameters & parameters);
   static InputParameters validParams();
 
+protected:
+  virtual void computeQpProperties() override;
+
 private:
-  /// Material property functor defined
-  FunctorMaterialProperty<GenericReal<is_ad>> & _prop;
+  GenericMaterialProperty<Real, is_ad> & _prop;
+  std::unordered_map<SubdomainID, Real> _sub_id_to_prop;
 };
 
 typedef PiecewiseConstantByBlockMaterialTempl<false> PiecewiseConstantByBlockMaterial;

@@ -614,26 +614,26 @@ TensorMechanicsAction::actEigenstrainNames()
         remove_reduced_set.insert(i);
     }
 
-    // Account for MaterialConverter , add or remove later
-    if (mat_name == "RankTwoTensorMaterialConverter")
+    // Account for MaterialADConverter , add or remove later
+    if (mat_name == "RankTwoTensorMaterialADConverter")
     {
-      std::vector<std::string> remove_list;
-      std::vector<std::string> add_list;
+      std::vector<MaterialPropertyName> remove_list;
+      std::vector<MaterialPropertyName> add_list;
 
       if (mat_params.isParamValid("ad_props_out") && mat_params.isParamValid("reg_props_in") &&
           _use_ad)
       {
-        remove_list = mat_params.get<std::vector<std::string>>("reg_props_in");
-        add_list = mat_params.get<std::vector<std::string>>("ad_props_out");
+        remove_list = mat_params.get<std::vector<MaterialPropertyName>>("reg_props_in");
+        add_list = mat_params.get<std::vector<MaterialPropertyName>>("ad_props_out");
       }
       if (mat_params.isParamValid("ad_props_in") && mat_params.isParamValid("reg_props_out") &&
           !_use_ad)
       {
-        remove_list = mat_params.get<std::vector<std::string>>("ad_props_in");
-        add_list = mat_params.get<std::vector<std::string>>("reg_props_out");
+        remove_list = mat_params.get<std::vector<MaterialPropertyName>>("ad_props_in");
+        add_list = mat_params.get<std::vector<MaterialPropertyName>>("reg_props_out");
       }
 
-      // These vectors are the same size as checked in MaterialConverter
+      // These vectors are the same size as checked in MaterialADConverter
       for (unsigned int index = 0; index < remove_list.size(); index++)
         remove_add_map.emplace(remove_list[index], add_list[index]);
     }

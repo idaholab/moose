@@ -106,7 +106,7 @@
     eigenstrain_name = reg_eigenstrain1
   [../]
   [./converter1]
-    type = RankTwoTensorMaterialConverter
+    type = RankTwoTensorMaterialADConverter
     block = 1
     reg_props_in = 'reg_eigenstrain1'
     ad_props_out = 'eigenstrain1'
@@ -145,13 +145,13 @@
 
 [Postprocessors]
   [./disp_1]
-    type = NodalMaxValue
+    type = NodalExtremeValue
     variable = disp_x
     boundary = 101
   [../]
 
   [./disp_2]
-    type = NodalMaxValue
+    type = NodalExtremeValue
     variable = disp_x
     boundary = 102
   [../]

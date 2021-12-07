@@ -127,7 +127,7 @@
     elementid = 0
   [../]
   [./disp_right]
-    type = NodalMaxValue
+    type = NodalExtremeValue
     variable = disp_x
     boundary = right
   [../]
