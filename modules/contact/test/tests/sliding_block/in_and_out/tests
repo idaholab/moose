@@ -1,17 +1,4 @@
 [Tests]
-  [frictional_lm]
-    type = 'Exodiff'
-    input = 'frictional_lm.i'
-    exodiff = 'frictional_lm_out.e'
-    heavy = true
-    abs_zero = 1e-6
-    design = 'Constraints/index.md'
-    issues = '#13080'
-    requirement = 'We shall be able to run our canonical frictional sliding block problem with mortar Lagrange Multiplier contact'
-    mesh_mode = 'replicated'
-    cli_args = "Outputs/active='out' Postprocessors/active=''"
-    allow_warnings = true
-  []
   [frictionless_lm]
     type = 'Exodiff'
     input = 'frictionless_lm.i'

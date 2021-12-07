@@ -132,14 +132,14 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
     _displaced(getParam<bool>("use_displaced_mesh")),
     _interpolate_normals(getParam<bool>("interpolate_normals"))
 {
+  if (_use_dual)
+    _assembly.activateDual();
+
   // Note parameter is discretization order, we then convert to quadrature order
   const MooseEnum p_order = getParam<MooseEnum>("quadrature");
   // If quadrature not DEFAULT, set mortar qrule
   if (p_order != "DEFAULT")
   {
-    if (_var->useDual())
-      mooseError("Using custom mortar quadrature order not supported with dual shape functions");
-
     Order q_order = static_cast<Order>(2 * Utility::string_to_enum<Order>(p_order) + 1);
     _assembly.setMortarQRule(q_order);
   }
