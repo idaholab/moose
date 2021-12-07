@@ -29,10 +29,9 @@
 #include "libmesh/fe.h"
 
 registerMooseAction("MooseTestApp", AddLotsOfDiffusion, "add_variable");
-
 registerMooseAction("MooseTestApp", AddLotsOfDiffusion, "add_kernel");
-
 registerMooseAction("MooseTestApp", AddLotsOfDiffusion, "add_bc");
+registerMooseAction("MooseTestApp", AddLotsOfDiffusion, "add_material");
 
 InputParameters
 AddLotsOfDiffusion::validParams()
@@ -51,7 +50,7 @@ AddLotsOfDiffusion::validParams()
                    "LAGRANGE");
   params.addParam<MooseEnum>(
       "family", family, "Specifies the family of FE shape functions to use for this variable.");
-
+  params.addParam<bool>("array", false, "Whether or not to use array variables");
   params.addRequiredParam<unsigned int>("number", "The number of variables to add");
 
   return params;
@@ -64,15 +63,18 @@ AddLotsOfDiffusion::act()
 {
   unsigned int number = getParam<unsigned int>("number");
 
+  const auto array = getParam<bool>("array");
+
   if (_current_task == "add_variable")
   {
     auto fe_type = AddVariableAction::feType(_pars);
-    auto type = AddVariableAction::variableType(fe_type);
+    auto type = AddVariableAction::variableType(fe_type, false, array);
     auto var_params = _factory.getValidParams(type);
 
     var_params.set<MooseEnum>("family") = getParam<MooseEnum>("family");
     var_params.set<MooseEnum>("order") = getParam<MooseEnum>("order");
-
+    if (array)
+      var_params.set<unsigned int>("components") = 2;
     for (unsigned int cur_num = 0; cur_num < number; cur_num++)
     {
       std::string var_name = name() + Moose::stringify(cur_num);
@@ -84,10 +86,13 @@ AddLotsOfDiffusion::act()
     for (unsigned int cur_num = 0; cur_num < number; cur_num++)
     {
       std::string var_name = name() + Moose::stringify(cur_num);
+      const auto kernel_type = array ? "ArrayDiffusion" : "Diffusion";
 
-      InputParameters params = _factory.getValidParams("Diffusion");
+      InputParameters params = _factory.getValidParams(kernel_type);
       params.set<NonlinearVariableName>("variable") = var_name;
-      _problem->addKernel("Diffusion", var_name, params);
+      if (array)
+        params.set<MaterialPropertyName>("diffusion_coefficient") = "dc";
+      _problem->addKernel(kernel_type, var_name, params);
     }
   }
   else if (_current_task == "add_bc")
@@ -95,18 +100,32 @@ AddLotsOfDiffusion::act()
     for (unsigned int cur_num = 0; cur_num < number; cur_num++)
     {
       std::string var_name = name() + Moose::stringify(cur_num);
+      const auto bc_type = array ? "ArrayDirichletBC" : "DirichletBC";
 
-      InputParameters params = _factory.getValidParams("DirichletBC");
+      InputParameters params = _factory.getValidParams(bc_type);
       params.set<NonlinearVariableName>("variable") = var_name;
       params.set<std::vector<BoundaryName>>("boundary").push_back("left");
-      params.set<Real>("value") = 0;
+      if (array)
+        params.set<RealEigenVector>("values") = RealEigenVector::Constant(2, 0);
+      else
+        params.set<Real>("value") = 0;
 
-      _problem->addBoundaryCondition("DirichletBC", var_name + "_left", params);
+      _problem->addBoundaryCondition(bc_type, var_name + "_left", params);
 
       params.set<std::vector<BoundaryName>>("boundary")[0] = "right";
-      params.set<Real>("value") = 1;
+      if (array)
+        params.set<RealEigenVector>("values") = RealEigenVector::Constant(2, 1);
+      else
+        params.set<Real>("value") = 1;
 
-      _problem->addBoundaryCondition("DirichletBC", var_name + "_right", params);
+      _problem->addBoundaryCondition(bc_type, var_name + "_right", params);
     }
+  }
+  else if (_current_task == "add_material" && array)
+  {
+    auto params = _factory.getValidParams("GenericConstantArray");
+    params.set<std::string>("prop_name") = "dc";
+    params.set<RealEigenVector>("prop_value") = RealEigenVector::Constant(2, 1);
+    _problem->addMaterial("GenericConstantArray", "dc", params);
   }
 }
