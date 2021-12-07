@@ -1,0 +1,11 @@
+[Tests]
+  issues='#19478'
+  design='FunctionLayeredIntegral.md'
+
+  [function_layered_integral]
+    type = Exodiff
+    input = 'function_layered_integral.i'
+    exodiff = 'function_layered_integral_out.e'
+    requirement = 'The system shall be able to integrate a function over layers'
+  []
+[]
