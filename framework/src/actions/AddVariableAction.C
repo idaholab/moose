@@ -132,8 +132,8 @@ AddVariableAction::init()
   _moose_object_pars.applySpecificParameters(_pars, {"order", "family", "scaling"});
 
   // Determine the MooseVariable type
-  bool is_fv = _moose_object_pars.get<bool>("fv");
-  bool is_array = (_components > 1 || _moose_object_pars.get<bool>("array")) ? true : false;
+  const auto is_fv = _moose_object_pars.get<bool>("fv");
+  const auto is_array = _components > 1 || _moose_object_pars.get<bool>("array");
   if (_type == "MooseVariableBase")
     _type = variableType(_fe_type, is_fv, is_array);
   if (is_fv)
