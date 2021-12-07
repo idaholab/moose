@@ -64,7 +64,7 @@ given above. Thus $\boldsymbol{\hat{U}}$ can be computed from $\boldsymbol{\hat{
 \end{equation}
 which can be evaluated by performing a spectral decomposition of $\boldsymbol{\hat{C}}$.
 Once $\boldsymbol{\hat{U}}$ has been computed, the multiplicative decomposition
-of the deformation graidient is used to find the incremental rotation tensor
+of the deformation gradient is used to find the incremental rotation tensor
 $\boldsymbol{\hat{R}}$ and the stretching rate $\boldsymbol{D}$.
 Following [!cite](rashid1993incremental), the stretching rate tensor can be expressed in terms
 of the 'incremental' right Cauchy-Green deformation tensor

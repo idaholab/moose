@@ -45,11 +45,10 @@ void
 ComputeRSphericalFiniteStrain::computeProperties()
 {
   // Method from Rashid, 1993
-  RankTwoTensor ave_Fhat;
 
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
   {
-    // Deformation gradient calculation in cylindrical coordinates
+    // Deformation gradient calculation in spherical coordinates
     RankTwoTensor A;    // Deformation gradient
     RankTwoTensor Fbar; // Old Deformation gradient
 
@@ -74,7 +73,7 @@ ComputeRSphericalFiniteStrain::computeProperties()
     _deformation_gradient[_qp] = A;
     _deformation_gradient[_qp].addIa(1.0);
 
-    // very nearly A = gradU - gradUold, adapted to cylindrical coords
+    // very nearly A = gradU - gradUold, adapted to spherical coords
     A -= Fbar;
 
     // Fbar = ( I + gradUold)
@@ -86,4 +85,14 @@ ComputeRSphericalFiniteStrain::computeProperties()
 
     computeQpStrain();
   }
+}
+
+void
+ComputeRSphericalFiniteStrain::computeQpIncrements(RankTwoTensor & total_strain_increment,
+                                                   RankTwoTensor & rotation_increment)
+{
+  for (unsigned int i = 0; i < 3; ++i)
+    total_strain_increment(i, i) = std::log(_Fhat[_qp](i, i));
+
+  rotation_increment.setToIdentity();
 }

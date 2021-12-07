@@ -57,9 +57,9 @@ elasticJacobian(const RankFourTensor & r4t,
      ) * gt1
      +
      (
-       r4t(i,2,k,0) * gp0
-     + r4t(i,2,k,1) * gp1
-     + r4t(i,2,k,2) * gp2
+         r4t(i,2,k,0) * gp0
+       + r4t(i,2,k,1) * gp1
+       + r4t(i,2,k,2) * gp2
      ) * gt2;
   // clang-format on
 }
