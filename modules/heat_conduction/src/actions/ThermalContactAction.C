@@ -212,7 +212,7 @@ ThermalContactAction::addAuxVariables()
   }
 
   auto var_type =
-      AddVariableAction::determineType(FEType(order, Utility::string_to_enum<FEFamily>(family)), 1);
+      AddVariableAction::variableType(FEType(order, Utility::string_to_enum<FEFamily>(family)));
   auto var_params = _factory.getValidParams(var_type);
   var_params.set<MooseEnum>("order") = order;
   var_params.set<MooseEnum>("family") = family;

@@ -75,7 +75,7 @@ NonconservedAction::act()
   //
   if (_current_task == "add_variable")
   {
-    auto type = AddVariableAction::determineType(_fe_type, 1);
+    auto type = AddVariableAction::variableType(_fe_type);
     auto var_params = _factory.getValidParams(type);
 
     var_params.applySpecificParameters(_pars, {"family", "order"});
