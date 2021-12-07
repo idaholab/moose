@@ -22,6 +22,7 @@ requirements:
     - autoconf                                          # [arm64]
     - automake                                          # [arm64]
     - make                                              # [arm64]
+    - m4                                                # [arm64]
     - pkg-config
     - {{ moose_cctools }}                               # [osx]
     - {{ moose_ld64 }}                                  # [osx]
