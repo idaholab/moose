@@ -5,7 +5,7 @@
   f = 0
   fp = fp
 
-  closures = simple
+  closures = simple_closures
 []
 
 [FluidProperties]
@@ -16,6 +16,12 @@
     p_inf = 0
     q = 0
     q_prime = 0
+  []
+[]
+
+[Closures]
+  [simple_closures]
+    type = Closures1PhaseSimple
   []
 []
 

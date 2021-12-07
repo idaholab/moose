@@ -29,7 +29,7 @@ p_out = 100e3
 
   scaling_factor_1phase = '1 1 1e-4'
 
-  closures = simple
+  closures = simple_closures
 []
 
 [FluidProperties]
@@ -42,6 +42,12 @@ p_out = 100e3
     q_prime = 0
     k = 0.5
     mu = 281.8e-6
+  []
+[]
+
+[Closures]
+  [simple_closures]
+    type = Closures1PhaseSimple
   []
 []
 

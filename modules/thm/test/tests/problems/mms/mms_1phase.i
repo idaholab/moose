@@ -34,7 +34,7 @@ cv = ${fparse cp / gamma}
 [GlobalParams]
   gravity_vector = '0 0 0'
 
-  closures = simple
+  closures = simple_closures
 []
 
 [Functions]
@@ -90,6 +90,12 @@ cv = ${fparse cp / gamma}
     type = IdealGasFluidProperties
     gamma = ${gamma}
     molar_mass = ${M}
+  []
+[]
+
+[Closures]
+  [simple_closures]
+    type = Closures1PhaseSimple
   []
 []
 

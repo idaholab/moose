@@ -10,7 +10,7 @@ p_out = 7e6
   initial_vel = 1
   initial_T = ${T_in}
   gravity_vector = '0 0 0'
-  closures = simple
+  closures = simple_closures
   n_elems = 3
   f = 0
   scaling_factor_1phase = '1 1 1e-5'
@@ -19,6 +19,12 @@ p_out = 7e6
 [FluidProperties]
   [fp]
     type = IdealGasFluidProperties
+  []
+[]
+
+[Closures]
+  [simple_closures]
+    type = Closures1PhaseSimple
   []
 []
 

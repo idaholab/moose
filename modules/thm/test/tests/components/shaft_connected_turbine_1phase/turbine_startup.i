@@ -11,7 +11,7 @@ p_out = 1e6
 [GlobalParams]
   f = 1
   scaling_factor_1phase = '0.04 0.04 0.04e-5'
-  closures = simple
+  closures = simple_closures
   n_elems = 20
   initial_T = ${T_in}
   initial_p = ${p_out}
@@ -24,6 +24,12 @@ p_out = 1e6
 [FluidProperties]
   [eos]
     type = IdealGasFluidProperties
+  []
+[]
+
+[Closures]
+  [simple_closures]
+    type = Closures1PhaseSimple
   []
 []
 

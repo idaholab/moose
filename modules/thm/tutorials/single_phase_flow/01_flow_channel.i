@@ -8,7 +8,7 @@ press = 1e5         # Pa
   initial_T = ${T_in}
 
   rdg_slope_reconstruction = full
-  closures = simple
+  closures = simple_closures
   fp = he
 []
 
@@ -19,6 +19,12 @@ press = 1e5         # Pa
     gamma = 1.67
     k = 0.2556
     mu = 3.22639e-5
+  []
+[]
+
+[Closures]
+  [simple_closures]
+    type = Closures1PhaseSimple
   []
 []
 

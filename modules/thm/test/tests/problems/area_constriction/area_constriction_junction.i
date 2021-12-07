@@ -13,7 +13,7 @@ p_outlet = 1e5
   initial_p = ${p_outlet}
 
   fp = fp
-  closures = simple
+  closures = simple_closures
   f = 0
 
   scaling_factor_1phase = '1 1 1e-5'
@@ -23,6 +23,12 @@ p_outlet = 1e5
   [fp]
     type = IdealGasFluidProperties
     gamma = 1.4
+  []
+[]
+
+[Closures]
+  [simple_closures]
+    type = Closures1PhaseSimple
   []
 []
 

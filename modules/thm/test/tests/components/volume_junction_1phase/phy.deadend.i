@@ -12,7 +12,7 @@
   initial_vel_y = 0
   initial_vel_z = 0
 
-  closures = simple
+  closures = simple_closures
 []
 
 [AuxVariables]
@@ -41,6 +41,12 @@
     q = 0
     q_prime = 0
     p_inf = 0
+  []
+[]
+
+[Closures]
+  [simple_closures]
+    type = Closures1PhaseSimple
   []
 []
 

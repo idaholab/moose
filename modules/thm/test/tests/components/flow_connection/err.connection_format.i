@@ -6,6 +6,12 @@
   []
 []
 
+[Closures]
+  [simple_closures]
+    type = Closures1PhaseSimple
+  []
+[]
+
 [Components]
   [left_wall]
     type = SolidWall1Phase
@@ -14,7 +20,7 @@
   [pipe]
     type = FlowChannel1Phase
     fp = fp
-    closures = simple
+    closures = simple_closures
 
     position = '0 0 0'
     orientation = '1 0 0'

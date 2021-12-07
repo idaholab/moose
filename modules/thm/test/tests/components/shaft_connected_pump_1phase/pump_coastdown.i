@@ -15,7 +15,7 @@ dt = 0.005
   A_ref = ${area}
   f = 100
   scaling_factor_1phase = '1 1 1e-3'
-  closures = simple
+  closures = simple_closures
   rdg_slope_reconstruction = minmod
   fp = fp
 []
@@ -23,6 +23,12 @@ dt = 0.005
 [FluidProperties]
   [fp]
     type = IdealGasFluidProperties
+  []
+[]
+
+[Closures]
+  [simple_closures]
+    type = Closures1PhaseSimple
   []
 []
 

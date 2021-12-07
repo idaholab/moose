@@ -6,7 +6,7 @@ p_out = 1e5
   initial_T = ${T_in}
   initial_vel = 0
   gravity_vector = '0 0 0'
-  closures = simple
+  closures = simple_closures
   n_elems = 50
   f = 0
   scaling_factor_1phase = '1 1e-2 1e-4'
@@ -20,6 +20,12 @@ p_out = 1e5
     q_prime = 0
     p_inf = 1.e9
     cv = 1816
+  []
+[]
+
+[Closures]
+  [simple_closures]
+    type = Closures1PhaseSimple
   []
 []
 

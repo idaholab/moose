@@ -2,7 +2,7 @@
   gravity_vector = '0 0 0'
   scaling_factor_1phase = '1. 1e-4'
 
-  closures = simple
+  closures = simple_closures
 []
 
 [FluidProperties]
@@ -15,6 +15,12 @@
     cv = 4.18e3    # J/kg-K, could be a global parameter?
     e_0 = 1.254e6  # J/kg
     T_0 = 300      # K
+  []
+[]
+
+[Closures]
+  [simple_closures]
+    type = Closures1PhaseSimple
   []
 []
 

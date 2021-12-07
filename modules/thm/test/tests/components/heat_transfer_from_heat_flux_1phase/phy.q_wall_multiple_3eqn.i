@@ -32,7 +32,7 @@
   initial_p = 100e3
   initial_vel = 0
 
-  closures = simple
+  closures = simple_closures
 []
 
 [FluidProperties]
@@ -43,6 +43,12 @@
     q_prime = 0
     p_inf = 1.e9
     cv = 1816
+  []
+[]
+
+[Closures]
+  [simple_closures]
+    type = Closures1PhaseSimple
   []
 []
 

@@ -7,7 +7,7 @@
   initial_T = 300
   initial_vel = 522.676
 
-  closures = simple
+  closures = simple_closures
 
   spatial_discretization = cg
 []
@@ -17,6 +17,12 @@
     type = IdealGasFluidProperties
     gamma = 1.41
     molar_mass = 0.028966206103678928
+  []
+[]
+
+[Closures]
+  [simple_closures]
+    type = Closures1PhaseSimple
   []
 []
 

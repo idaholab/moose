@@ -8,7 +8,7 @@
   gravity_vector = '0 0 0'
   scaling_factor_1phase = '1.e0 1.e-4 1.e-6'
 
-  closures = simple
+  closures = simple_closures
 []
 
 [FluidProperties]
@@ -19,6 +19,12 @@
     q_prime = 0
     p_inf = 1.e9
     cv = 1816
+  []
+[]
+
+[Closures]
+  [simple_closures]
+    type = Closures1PhaseSimple
   []
 []
 

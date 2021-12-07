@@ -16,6 +16,12 @@
   []
 []
 
+[Closures]
+  [simple_closures]
+    type = Closures1PhaseSimple
+  []
+[]
+
 [Components]
   [a_test_component]
     type = TestSetupStatusComponent
@@ -25,7 +31,7 @@
   [pipe]
     type = FlowChannel1Phase
     fp = fp
-    closures = simple
+    closures = simple_closures
 
     position = '0 0 0'
     orientation = '1 0 0'

@@ -7,7 +7,13 @@
 
   2nd_order_mesh = true
 
-  closures = simple
+  closures = simple_closures
+[]
+
+[Closures]
+  [simple_closures]
+    type = Closures1PhaseSimple
+  []
 []
 
 [HeatStructureMaterials]
