@@ -75,7 +75,7 @@
   []
 
   [heat_added]
-    type = TotalVariableValue
+    type = TimeIntegratedPostprocessor
     value = hf_pipe
     execute_on = 'initial timestep_end'
   []

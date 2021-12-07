@@ -108,7 +108,7 @@
     value2 = massflux_left
   []
   [massflux_integral]
-    type = TotalVariableValue
+    type = TimeIntegratedPostprocessor
     value = massflux_difference
   []
   [mass]
@@ -151,7 +151,7 @@
     value2 = momentumflux_left
   []
   [momentumflux_integral]
-    type = TotalVariableValue
+    type = TimeIntegratedPostprocessor
     value = momentumflux_difference
   []
   [momentum]
@@ -190,7 +190,7 @@
     value2 = energyflux_left
   []
   [energyflux_integral]
-    type = TotalVariableValue
+    type = TimeIntegratedPostprocessor
     value = energyflux_difference
   []
   [energy]
