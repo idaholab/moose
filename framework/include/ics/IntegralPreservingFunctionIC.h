@@ -24,6 +24,11 @@ public:
 
   virtual void initialSetup() override;
 
+  /**
+   * @returns The magnitude of the function
+   */
+  Real magnitude() const { return _magnitude; }
+
 protected:
   virtual Real value(const Point & p) override;
 

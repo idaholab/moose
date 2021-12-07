@@ -45,3 +45,9 @@ FunctionIC::gradient(const Point & p)
 {
   return _scaling * _func.gradient(_t, p);
 }
+
+const FunctionName
+FunctionIC::functionName() const
+{
+  return _func.name();
+}
