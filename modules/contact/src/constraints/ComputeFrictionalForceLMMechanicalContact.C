@@ -105,16 +105,15 @@ ComputeFrictionalForceLMMechanicalContact::computeQpProperties()
         (*_secondary_z_dot)[_qp].derivatives() - (*_primary_z_dot)[_qp].derivatives();
 
   if (_interpolate_normals)
+  {
     _qp_tangential_velocity[0] =
         relative_velocity * (_tangents[_qp][0] * _JxW_msm[_qp] * _coord[_qp]);
+    if (_3d)
+      _qp_tangential_velocity[1] =
+          relative_velocity * (_tangents[_qp][1] * _JxW_msm[_qp] * _coord[_qp]);
+  }
   else
     _qp_tangential_velocity_nodal = relative_velocity * (_JxW_msm[_qp] * _coord[_qp]);
-
-  // If we don't use interpolated normals, we get the directions at the node,
-  // not here at the quadrature points.
-  if (_3d && _interpolate_normals)
-    _qp_tangential_velocity[1] =
-        relative_velocity * (_tangents[_qp][1] * _JxW_msm[_qp] * _coord[_qp]);
 }
 
 void
