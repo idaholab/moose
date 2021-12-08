@@ -64,9 +64,10 @@ VTKOutput::filename()
   std::ostringstream output;
   output << _file_base;
 
-  // In serial, add the _00x.vtk extension.
   // In parallel, add the _00x.pvtu extension.
-  std::string ext = (n_processors() == 1) ? ".vtk" : ".pvtu";
+  // In serial, add the _00x.pvtu extension anyway - libMesh outputs
+  // PVTU format regardless of what file name we give it.
+  const std::string ext = ".pvtu";
   output << "_" << std::setw(_padding) << std::setfill('0') << std::right << _file_num << ext;
 
   // Return the filename

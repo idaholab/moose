@@ -9,7 +9,7 @@
        # Check that the files are being created (serial)
        type = 'CheckFiles'
        input = 'vtk_serial.i'
-       check_files = 'vtk_serial_out_000.vtk vtk_serial_out_000_0.vtu vtk_serial_out_001.vtk vtk_serial_out_001_0.vtu vtk_serial_out_002.vtk vtk_serial_out_002_0.vtu vtk_serial_out_003.vtk vtk_serial_out_003_0.vtu vtk_serial_out_004.vtk vtk_serial_out_004_0.vtu vtk_serial_out_005.vtk vtk_serial_out_005_0.vtu'
+       check_files = 'vtk_serial_out_000.pvtu vtk_serial_out_000_0.vtu vtk_serial_out_001.pvtu vtk_serial_out_001_0.vtu vtk_serial_out_002.pvtu vtk_serial_out_002_0.vtu vtk_serial_out_003.pvtu vtk_serial_out_003_0.vtu vtk_serial_out_004.pvtu vtk_serial_out_004_0.vtu vtk_serial_out_005.pvtu vtk_serial_out_005_0.vtu'
        max_parallel = 1
        vtk = true
 
@@ -33,7 +33,7 @@
      [./diff_serial_mesh]
        # Check that actual solution, requires serial due to VTK parallel output
        type = XMLDiff
-       xmldiff = 'vtk_diff_out_005.vtk vtk_diff_out_005_0.vtu'
+       xmldiff = 'vtk_diff_out_005.pvtu vtk_diff_out_005_0.vtu'
        input = vtk_diff.i
        max_parallel = 1
        vtk = true
