@@ -699,14 +699,6 @@ NonlinearSystemBase::computeResidualTag(NumericVector<Number> & residual, TagID 
 }
 
 void
-NonlinearSystemBase::computeResidual(NumericVector<Number> & residual, TagID tag_id)
-{
-  mooseDeprecated(" Please use computeResidualTag");
-
-  computeResidualTag(residual, tag_id);
-}
-
-void
 NonlinearSystemBase::computeResidualTags(const std::set<TagID> & tags)
 {
   TIME_SECTION("nl::computeResidualTags", 5);
@@ -898,23 +890,6 @@ NonlinearSystemBase::getResidualNonTimeVector()
     _Re_non_time = &addVector(_Re_non_time_tag, false, GHOSTED);
   }
   return *_Re_non_time;
-}
-
-NumericVector<Number> &
-NonlinearSystemBase::residualVector(TagID tag)
-{
-  mooseDeprecated("Please use getVector()");
-  switch (tag)
-  {
-    case 0:
-      return getResidualNonTimeVector();
-
-    case 1:
-      return getResidualTimeVector();
-
-    default:
-      mooseError("The required residual vector is not available");
-  }
 }
 
 void

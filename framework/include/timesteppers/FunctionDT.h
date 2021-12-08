@@ -11,7 +11,6 @@
 
 #include "TimeStepper.h"
 #include "FunctionInterface.h"
-#include "LinearInterpolation.h"
 
 class FunctionDT;
 class Function;
@@ -36,23 +35,11 @@ protected:
 
   void removeOldKnots();
 
-  const std::vector<Real> & _time_t;
-  const std::vector<Real> & _time_dt;
+  /// The time-dependent function specifying the time step size
+  const Function & _function;
 
-  /// true, if we are using `_function`, false if we are using _time_ipol
-  bool _use_function;
-  /// The time-dependent function specifying the time step size (turn this into a reference then
-  /// `time_t` and `time_dt` is removed)
-  const Function * _function;
-
-  /// Piecewise linear definition of time stepping
-  std::unique_ptr<LinearInterpolation> _time_ipol;
-
-  Real _growth_factor;
-  Real _min_dt;
-
-  /// Whether or not to interpolate DT between times
-  bool _interpolate;
+  const Real _growth_factor;
+  const Real _min_dt;
 
   std::vector<Real> _time_knots;
 };

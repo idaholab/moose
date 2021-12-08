@@ -830,14 +830,6 @@ InputParameters::applyParameter(const InputParameters & common,
   _show_deprecated_message = true;
 }
 
-///Deprecated method
-bool
-InputParameters::paramSetByUser(const std::string & name) const
-{
-  mooseDeprecated("paramSetByUser() is deprecated. Use isParamSetByUser() instead.");
-  return isParamSetByUser(name);
-}
-
 bool
 InputParameters::isParamSetByUser(const std::string & name) const
 {

@@ -105,8 +105,6 @@ MooseApp::validParams()
   params.addCommandLineParam<bool>(
       "show_controls", "--show-controls", false, "Shows the Control logic available and executed.");
 
-  params.addCommandLineParam<bool>(
-      "no_color", "--no-color", false, "Disable coloring of all Console outputs.");
   params.addCommandLineParam<std::string>("color",
                                           "--color [auto,on,off]",
                                           "default-on",
@@ -548,13 +546,6 @@ MooseApp::MooseApp(InputParameters parameters)
   // until all objects have been created and all Actions have been executed (i.e. initialSetup).
   registerRestartableDataMapName(MooseApp::MESH_META_DATA, "mesh");
 
-  if (parameters.have_parameter<bool>("use_legacy_dirichlet_bc"))
-    mooseDeprecated("The parameter 'use_legacy_dirichlet_bc' is no longer valid.\n\n",
-                    "All Dirichlet boundary conditions are preset by default.\n\n",
-                    "Remove said parameter in ",
-                    name(),
-                    " to remove this deprecation warning.");
-
   Moose::out << std::flush;
 }
 
@@ -662,8 +653,6 @@ MooseApp::setupOptions()
   {
     // Toggle the color console off
     Moose::setColorConsole(true, true); // set default color condition
-    if (getParam<bool>("no_color"))
-      Moose::setColorConsole(false);
 
     char * c_color = std::getenv("MOOSE_COLOR");
     std::string color = "on";
@@ -681,11 +670,6 @@ MooseApp::setupOptions()
     else
       mooseWarning("ignoring invalid --color arg (want 'auto', 'on', or 'off')");
   }
-
-  // this warning goes below --color processing to honor that setting for
-  // the warning. And below settings for warnings/error setup.
-  if (getParam<bool>("no_color"))
-    mooseDeprecated("The --no-color flag is deprecated. Use '--color off' instead.");
 
 // If there's no threading model active, but the user asked for
 // --n-threads > 1 on the command line, throw a mooseError.  This is
@@ -1106,14 +1090,6 @@ MooseApp::isUseSplit() const
 bool
 MooseApp::hasRestartRecoverFileBase() const
 {
-  return !_restart_recover_base.empty();
-}
-
-bool
-MooseApp::hasRecoverFileBase() const
-{
-  mooseDeprecated("MooseApp::hasRecoverFileBase is deprecated, use "
-                  "MooseApp::hasRestartRecoverFileBase() instead.");
   return !_restart_recover_base.empty();
 }
 

@@ -268,11 +268,6 @@ public:
   void computeResidualTags(const std::set<TagID> & tags);
 
   /**
-   * Form a residual vector for a given tag
-   */
-  void computeResidual(NumericVector<Number> & residual, TagID tag_id);
-
-  /**
    * Adds entries to the Jacobian in the correct positions for couplings coming from dofs being
    * coupled that
    * are related geometrically (i.e. near each other across a gap).
@@ -390,11 +385,6 @@ public:
    * Return a numeric vector that is associated with the nontime tag.
    */
   NumericVector<Number> & getResidualNonTimeVector();
-
-  /**
-   * Return a residual vector that is associated with the residual tag.
-   */
-  NumericVector<Number> & residualVector(TagID tag);
 
   const NumericVector<Number> * const & currentSolution() const override
   {

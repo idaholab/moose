@@ -70,7 +70,7 @@
     boundary = 'right'
   []
   [flux_right_exact]
-    type = SideFluxIntegral
+    type = SideDiffusiveFluxIntegral
     variable = T
     diffusivity = 'thermal_conductivity'
     boundary = 'right'
@@ -81,7 +81,7 @@
     boundary = 'left'
   []
   [flux_left_exact]
-    type = SideFluxIntegral
+    type = SideDiffusiveFluxIntegral
     variable = T
     diffusivity = 'thermal_conductivity'
     boundary = 'left'

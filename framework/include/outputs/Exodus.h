@@ -83,13 +83,6 @@ public:
   virtual void sequence(bool state);
 
   /**
-   * Force the output dimension programatically
-   *
-   * @param dim The dimension written in the output file
-   */
-  void setOutputDimension(unsigned int dim);
-
-  /**
    * Helper method to change the output dimension in the passed in Exodus writer depending on
    * the dimension and coordinates of the passed in mesh.
    *

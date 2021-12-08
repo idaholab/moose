@@ -113,13 +113,6 @@ Exodus::Exodus(const InputParameters & parameters)
 }
 
 void
-Exodus::setOutputDimension(unsigned int /*dim*/)
-{
-  mooseDeprecated(
-      "This method is no longer needed. We can determine output dimension programmatically");
-}
-
-void
 Exodus::initialSetup()
 {
   // Call base class setup method

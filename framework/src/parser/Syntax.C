@@ -115,13 +115,6 @@ Syntax::hasTask(const std::string & task) const
 }
 
 bool
-Syntax::isActionRequired(const std::string & task) const
-{
-  mooseDeprecated("Syntax::isActionRequired is deprecated, use shouldAutoBuild() instead");
-  return shouldAutoBuild(task);
-}
-
-bool
 Syntax::shouldAutoBuild(const std::string & task) const
 {
   auto map_pair = _registered_tasks.find(task);

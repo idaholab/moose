@@ -35,5 +35,5 @@ public:
   virtual void lineSearch() override;
 
 protected:
-  PetscNonlinearSolver<Real> * _solver;
+  PetscNonlinearSolver<Real> * const _solver;
 };

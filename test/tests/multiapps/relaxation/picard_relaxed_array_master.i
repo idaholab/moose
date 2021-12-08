@@ -83,7 +83,7 @@
 
 [Postprocessors]
   [picard_its]
-    type = NumPicardIterations
+    type = NumFixedPointIterations
     execute_on = 'initial timestep_end'
   []
 []

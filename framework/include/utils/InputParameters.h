@@ -710,11 +710,6 @@ public:
   void applyCoupledVar(const InputParameters & common, const std::string & var_name);
 
   /**
-   * Deprecated method.  Use isParamSetByUser() instead.
-   */
-  bool paramSetByUser(const std::string & name) const;
-
-  /**
    * Method returns true if the parameter was by the user
    * @param name The parameter name
    */

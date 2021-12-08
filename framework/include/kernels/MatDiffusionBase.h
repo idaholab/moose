@@ -62,18 +62,12 @@ InputParameters
 MatDiffusionBase<T>::validParams()
 {
   InputParameters params = Kernel::validParams();
-  params.addDeprecatedParam<MaterialPropertyName>(
-      "D_name",
-      "The name of the diffusivity",
-      "This parameter has been renamed to 'diffusivity', which is more mnemonic and more conducive "
-      "to passing a number literal");
   params.addParam<MaterialPropertyName>(
       "diffusivity", "D", "The diffusivity value or material property");
   params.addCoupledVar("args",
                        "Optional vector of arguments for the diffusivity. If provided and "
                        "diffusivity is a derivative parsed material, Jacobian contributions from "
                        "the diffusivity will be automatically computed");
-  params.addCoupledVar("conc", "Deprecated! Use 'v' instead");
   params.addCoupledVar("v",
                        "Coupled concentration variable for kernel to operate on; if this "
                        "is not specified, the kernel's nonlinear variable will be used as "
@@ -84,32 +78,23 @@ MatDiffusionBase<T>::validParams()
 template <typename T>
 MatDiffusionBase<T>::MatDiffusionBase(const InputParameters & parameters)
   : DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>(parameters),
-    _D(isParamValid("D_name") ? getMaterialProperty<T>("D_name")
-                              : getMaterialProperty<T>("diffusivity")),
-    _dDdc(getMaterialPropertyDerivative<T>(isParamValid("D_name") ? "D_name" : "diffusivity",
-                                           _var.name())),
+    _D(getMaterialProperty<T>("diffusivity")),
+    _dDdc(getMaterialPropertyDerivative<T>("diffusivity", _var.name())),
     _dDdarg(_coupled_moose_vars.size()),
     _is_coupled(isCoupled("v")),
-    _v_var(_is_coupled ? coupled("v") : (isCoupled("conc") ? coupled("conc") : _var.number())),
-    _grad_v(_is_coupled ? coupledGradient("v")
-                        : (isCoupled("conc") ? coupledGradient("conc") : _grad_u))
+    _v_var(_is_coupled ? coupled("v") : _var.number()),
+    _grad_v(_is_coupled ? coupledGradient("v") : _grad_u)
 {
-  // deprecated variable parameter conc
-  if (isCoupled("conc"))
-    mooseDeprecated("In '", name(), "' the parameter 'conc' is deprecated, please use 'v' instead");
-
   // fetch derivatives
   for (unsigned int i = 0; i < _dDdarg.size(); ++i)
-    _dDdarg[i] = &getMaterialPropertyDerivative<T>(
-        isParamValid("D_name") ? "D_name" : "diffusivity", _coupled_moose_vars[i]->name());
+    _dDdarg[i] = &getMaterialPropertyDerivative<T>("diffusivity", _coupled_moose_vars[i]->name());
 }
 
 template <typename T>
 void
 MatDiffusionBase<T>::initialSetup()
 {
-  validateNonlinearCoupling<Real>(parameters().isParamSetByUser("D_name") ? "D_name"
-                                                                          : "diffusivity");
+  validateNonlinearCoupling<Real>("diffusivity");
 }
 
 template <typename T>

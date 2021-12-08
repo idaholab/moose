@@ -11,15 +11,10 @@
 
 #include "InitialCondition.h"
 #include "RandomData.h"
-#include "MooseRandom.h"
 
 // Forward Declarations
 class InputParameters;
 class RandomICBase;
-namespace libMesh
-{
-class Point;
-}
 
 template <typename T>
 InputParameters validParams();
@@ -54,21 +49,12 @@ protected:
   /// Determines whether a variable basis is elemental or nodal
   const bool _is_nodal;
 
-  /// Boolean to indicate whether we want to use the old (deprecated) generation pattern
-  const bool _use_legacy;
-
 private:
   /// RandomData element object, we cannot inherit from RandomInterface in an InitialCondition
   std::unique_ptr<RandomData> _elem_random_data;
 
   /// RandomData node object, we cannot inherit from RandomInterface in an InitialCondition
   std::unique_ptr<RandomData> _node_random_data;
-
-  /// Elemental random number generator
-  MooseRandom * _elem_random_generator;
-
-  /// Nodal random number generator
-  MooseRandom * _node_random_generator;
 
   /// Random numbers per element (currently limited to a single value at a time)
   std::map<dof_id_type, Real> _elem_numbers;

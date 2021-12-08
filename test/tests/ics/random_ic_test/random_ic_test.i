@@ -22,13 +22,11 @@
 [ICs]
   [u]
     type = RandomIC
-    legacy_generator = false
     variable = u
   []
 
   [u_aux]
     type = RandomIC
-    legacy_generator = false
     variable = u_aux
   []
 []

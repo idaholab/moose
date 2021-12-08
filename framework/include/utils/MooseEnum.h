@@ -87,9 +87,6 @@ public:
   bool operator==(unsigned short value) const;
   bool operator!=(unsigned short value) const;
 
-  bool operator==(const MooseEnum & value) const;
-  bool operator!=(const MooseEnum & value) const;
-
   /**
    * Method for comparing currently set values between MooseEnum.
    */

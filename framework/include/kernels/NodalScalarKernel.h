@@ -33,9 +33,9 @@ public:
   virtual void reinit() override;
   virtual void computeOffDiagJacobianScalar(unsigned int jvar) override;
 
-protected:
-  /// List of node IDs
-  std::vector<dof_id_type> _node_ids;
-  /// List of node boundary names
-  std::vector<BoundaryName> _boundary_names;
+  /// The nodes to evaluate
+  const std::vector<dof_id_type> _node_ids;
+
+private:
+  std::vector<dof_id_type> buildNodeIDs() const;
 };

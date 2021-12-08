@@ -472,26 +472,15 @@ public:
    */
   bool isUseSplit() const;
 
-  ///@{
   /**
    * Return true if the recovery file base is set
    */
   bool hasRestartRecoverFileBase() const;
-  bool hasRecoverFileBase() const;
-  ///@}
 
-  ///@{
   /**
    * The file_base for the recovery file.
    */
   std::string getRestartRecoverFileBase() const { return _restart_recover_base; }
-  std::string getRecoverFileBase() const
-  {
-    mooseDeprecated("MooseApp::getRecoverFileBase is deprecated, use "
-                    "MooseApp::getRestartRecoverFileBase() instead.");
-    return _restart_recover_base;
-  }
-  ///@}
 
   /**
    * mutator for recover_base (set by RecoverBaseAction)

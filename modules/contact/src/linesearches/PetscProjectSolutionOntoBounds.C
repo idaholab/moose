@@ -12,7 +12,7 @@
 #if !PETSC_VERSION_LESS_THAN(3, 6, 0)
 #include "FEProblem.h"
 #include "DisplacedProblem.h"
-#include "NonlinearSystem.h"
+#include "NonlinearSystemBase.h"
 #include "GeometricSearchData.h"
 #include "PenetrationLocator.h"
 
@@ -30,10 +30,11 @@ PetscProjectSolutionOntoBounds::validParams()
 }
 
 PetscProjectSolutionOntoBounds::PetscProjectSolutionOntoBounds(const InputParameters & parameters)
-  : LineSearch(parameters), _nl(_fe_problem.getNonlinearSystemBase())
+  : LineSearch(parameters),
+    _nl(_fe_problem.getNonlinearSystemBase()),
+    _solver(dynamic_cast<PetscNonlinearSolver<Real> *>(
+        _fe_problem.getNonlinearSystemBase().nonlinearSolver()))
 {
-  _solver = dynamic_cast<PetscNonlinearSolver<Real> *>(
-      _fe_problem.getNonlinearSystem().nonlinearSolver());
   if (!_solver)
     mooseError(
         "This line search operates only with Petsc, so Petsc must be your nonlinear solver.");

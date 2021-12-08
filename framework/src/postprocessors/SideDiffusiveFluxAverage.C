@@ -11,14 +11,6 @@
 
 registerMooseObject("MooseApp", SideDiffusiveFluxAverage);
 registerMooseObject("MooseApp", ADSideDiffusiveFluxAverage);
-registerMooseObjectRenamed("MooseApp",
-                           SideFluxAverage,
-                           "06/30/2021 24:00",
-                           SideDiffusiveFluxAverage);
-registerMooseObjectRenamed("MooseApp",
-                           ADSideFluxAverage,
-                           "06/30/2021 24:00",
-                           ADSideDiffusiveFluxAverage);
 
 template <bool is_ad>
 InputParameters

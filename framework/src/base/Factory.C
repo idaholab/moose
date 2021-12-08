@@ -84,17 +84,13 @@ Factory::getValidParams(const std::string & obj_name)
 }
 
 MooseObjectPtr
-Factory::create(const std::string & obj_name,
-                const std::string & name,
-                const InputParameters & parameters,
-                THREAD_ID tid /* =0 */,
-                bool print_deprecated /* =true */)
+Factory::createInternal(const std::string & obj_name,
+                        const std::string & name,
+                        const InputParameters & parameters,
+                        THREAD_ID tid /* =0 */)
 {
-  if (print_deprecated)
-    mooseDeprecated("Factory::create() is deprecated, please use Factory::create<T>() instead");
-
   // Pointer to the object constructor
-  std::map<std::string, buildPtr>::iterator it = _name_to_build_pointer.find(obj_name);
+  const auto it = _name_to_build_pointer.find(obj_name);
 
   // Check if the object is registered
   if (it == _name_to_build_pointer.end())
@@ -104,8 +100,8 @@ Factory::create(const std::string & obj_name,
   deprecatedMessage(obj_name);
 
   // Create the actual parameters object that the object will reference
-  InputParameters & params =
-      _app.getInputParameterWarehouse().addInputParameters(name, parameters, tid);
+  InputParameters & params = _app.getInputParameterWarehouse().addInputParameters(
+      name, parameters, tid, InputParameterWarehouse::AddRemoveInputParametersKey());
 
   // Set the _type parameter
   params.set<std::string>("_type") = obj_name;
@@ -124,8 +120,7 @@ Factory::create(const std::string & obj_name,
   buildPtr & func = it->second;
   auto obj = (*func)(params);
 
-  auto fep = std::dynamic_pointer_cast<FEProblemBase>(obj);
-  if (fep)
+  if (auto fep = std::dynamic_pointer_cast<FEProblemBase>(obj))
     _app.actionWarehouse().problemBase() = fep;
 
   // Make sure no unexpected parameters were added by the object's constructor or by the action
@@ -165,7 +160,8 @@ Factory::create(const std::string & obj_name,
 void
 Factory::releaseSharedObjects(const MooseObject & moose_object, THREAD_ID tid)
 {
-  _app.getInputParameterWarehouse().removeInputParameters(moose_object, tid);
+  _app.getInputParameterWarehouse().removeInputParameters(
+      moose_object, tid, InputParameterWarehouse::AddRemoveInputParametersKey());
 }
 
 void

@@ -63,11 +63,6 @@ public:
   virtual void execute() = 0;
 
   /**
-   * (DEPRECATED) Return the valid "execute_on" options for Control objects
-   */
-  static MultiMooseEnum getExecuteOptions();
-
-  /**
    * Return the Controls that must run before this Control
    */
   std::vector<std::string> & getDependencies() { return _depends_on; }
@@ -166,7 +161,6 @@ protected:
 private:
   /// A reference to the InputParameterWarehouse which is used for access the parameter objects
   InputParameterWarehouse & _input_parameter_warehouse;
-
 };
 
 template <typename T>
@@ -285,4 +279,3 @@ Control::setControllableValueByName(const std::string & tag,
   ControllableParameter helper = getControllableParameterByName(desired);
   helper.set<T>(value);
 }
-

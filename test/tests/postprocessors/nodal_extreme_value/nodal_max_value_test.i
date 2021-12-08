@@ -71,7 +71,7 @@
 
 [Postprocessors]
   [./max_nodal_val]
-    type = NodalMaxValue
+    type = NodalExtremeValue
     variable = u
   [../]
 []

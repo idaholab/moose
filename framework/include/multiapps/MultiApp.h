@@ -229,12 +229,6 @@ public:
   FEProblemBase & appProblemBase(unsigned int app);
 
   /**
-   * Get the FEProblem for the global app is part of.
-   * @param app The global app number
-   */
-  FEProblem & appProblem(unsigned int app);
-
-  /**
    * Get a UserObject base for a specific global app
    * @param app The global app number you want to get a UserObject from.
    * @param name The name of the UserObject.

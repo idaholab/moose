@@ -44,7 +44,7 @@ public:
 
 protected:
   NonlinearSystemBase & _nl;
-  PetscNonlinearSolver<Real> * _solver;
+  PetscNonlinearSolver<Real> * const _solver;
   DisplacedProblem * _displaced_problem;
   const GeometricSearchData * _geometric_search_data;
   const std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> *

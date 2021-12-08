@@ -93,12 +93,6 @@ public:
   bool hasTask(const std::string & task) const;
 
   /**
-   * Returns a Boolean indicating whether the specified task is required.
-   * DEPRECATED (use shouldAutoBuild).
-   */
-  bool isActionRequired(const std::string & task) const;
-
-  /**
    * Returns a Boolean indicating whether MOOSE should attempt to automatically create an Action
    * to satisfy a task if an Action doesn't already exist to service that task.
    */

@@ -11,10 +11,6 @@
 #include "Function.h"
 
 registerMooseObject("MooseApp", VectorFunctionDirichletBC);
-registerMooseObjectRenamed("MooseApp",
-                           LagrangeVecFunctionDirichletBC,
-                           "05/01/2019 00:01",
-                           VectorFunctionDirichletBC);
 
 defineLegacyParams(VectorFunctionDirichletBC);
 

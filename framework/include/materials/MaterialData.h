@@ -56,18 +56,6 @@ public:
   MaterialProperty<T> & declareProperty(const std::string & prop_name);
 
   /**
-   * Declare the Real valued property prop_name.
-   */
-  template <typename T>
-  MaterialProperty<T> & declarePropertyOld(const std::string & prop_name);
-
-  /**
-   * Declare the Real valued property named prop_name.
-   */
-  template <typename T>
-  MaterialProperty<T> & declarePropertyOlder(const std::string & prop_name);
-
-  /**
    * Declare the AD property named "name".
    * Calling any of the declareProperty
    * functions multiple times with the same property name is okay and
@@ -323,22 +311,6 @@ ADMaterialProperty<T> &
 MaterialData::declareADProperty(const std::string & prop_name)
 {
   return declareADHelper<T>(_props, prop_name, _storage.addProperty(prop_name));
-}
-
-template <typename T>
-MaterialProperty<T> &
-MaterialData::declarePropertyOld(const std::string & prop_name)
-{
-  // TODO: add mooseDeprecated("'declarePropertyOld' is deprecated an no longer necessary");
-  return getPropertyOld<T>(prop_name);
-}
-
-template <typename T>
-MaterialProperty<T> &
-MaterialData::declarePropertyOlder(const std::string & prop_name)
-{
-  // TODO: add mooseDeprecated("'declarePropertyOlder' is deprecated an no longer necessary");
-  return getPropertyOlder<T>(prop_name);
 }
 
 template <typename T>

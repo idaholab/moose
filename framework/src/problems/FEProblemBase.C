@@ -253,8 +253,6 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _neighbor_material_props(declareRestartableDataWithContext<MaterialPropertyStorage>(
         "neighbor_material_props", &_mesh)),
     _reporter_data(_app),
-    // TODO: delete the following line after apps have been updated to not call getUserObjects
-    _all_user_objects(_app.getExecuteOnEnum()),
     _multi_apps(_app.getExecuteOnEnum()),
     _transient_multi_apps(_app.getExecuteOnEnum()),
     _transfers(_app.getExecuteOnEnum(), /*threaded=*/false),
@@ -1593,14 +1591,6 @@ FEProblemBase::addCachedJacobian(THREAD_ID tid)
 }
 
 void
-FEProblemBase::addCachedJacobianContributions(THREAD_ID tid)
-{
-  mooseDeprecated("please use addCachedJacobian");
-
-  addCachedJacobian(tid);
-}
-
-void
 FEProblemBase::addJacobianBlock(SparseMatrix<Number> & jacobian,
                                 unsigned int ivar,
                                 unsigned int jvar,
@@ -2147,20 +2137,6 @@ FEProblemBase::lineSearch()
   _line_search->lineSearch();
 }
 
-NonlinearSystem &
-FEProblemBase::getNonlinearSystem()
-{
-  mooseDeprecated("FEProblemBase::getNonlinearSystem() is deprecated, please use "
-                  "FEProblemBase::getNonlinearSystemBase() \n");
-
-  auto nl_sys = std::dynamic_pointer_cast<NonlinearSystem>(_nl);
-
-  if (!nl_sys)
-    mooseError("This is not a NonlinearSystem");
-
-  return *nl_sys;
-}
-
 void
 FEProblemBase::addDistribution(const std::string & type,
                                const std::string & name,
@@ -2265,102 +2241,6 @@ FEProblemBase::addVariable(const std::string & var_type,
   if (_displaced_problem)
     // MooseObjects need to be unique so change the name here
     _displaced_problem->addVariable(var_type, var_name, params);
-}
-
-void
-FEProblemBase::addVariable(const std::string & var_name,
-                           const FEType & type,
-                           Real scale_factor,
-                           const std::set<SubdomainID> * const active_subdomains)
-{
-  mooseDeprecated("Please use the addVariable(var_type, var_name, params) API instead");
-
-  if (duplicateVariableCheck(var_name, type, /* is_aux = */ false))
-    return;
-
-  std::string var_type;
-  if (type == FEType(0, MONOMIAL))
-    var_type = "MooseVariableConstMonomial";
-  else if (type.family == SCALAR)
-    var_type = "MooseVariableScalar";
-  else if (type.family == LAGRANGE_VEC || type.family == NEDELEC_ONE || type.family == MONOMIAL_VEC)
-    var_type = "VectorMooseVariable";
-  else
-    var_type = "MooseVariable";
-
-  InputParameters params = _factory.getValidParams(var_type);
-  params.set<FEProblemBase *>("_fe_problem_base") = this;
-  params.set<Moose::VarKindType>("_var_kind") = Moose::VarKindType::VAR_NONLINEAR;
-  params.set<MooseEnum>("order") = type.order.get_order();
-  params.set<MooseEnum>("family") = Moose::stringify(type.family);
-  params.set<std::vector<Real>>("scaling") =
-      std::vector<Real>(params.get<unsigned int>("components"), scale_factor);
-  if (active_subdomains)
-    for (const SubdomainID & id : *active_subdomains)
-      params.set<std::vector<SubdomainName>>("block").push_back(Moose::stringify(id));
-
-  _nl->addVariable(var_type, var_name, params);
-  if (_displaced_problem)
-    _displaced_problem->addVariable(var_type, var_name, params);
-}
-
-void
-FEProblemBase::addArrayVariable(const std::string & var_name,
-                                const FEType & type,
-                                unsigned int components,
-                                const std::vector<Real> & scale_factor,
-                                const std::set<SubdomainID> * const active_subdomains)
-{
-  mooseDeprecated("Please use the addVariable(type_name, name, params) API instead");
-
-  if (duplicateVariableCheck(var_name, type, /* is_aux = */ false))
-    return;
-
-  auto moose_type = "ArrayMooseVariable";
-  auto params = _factory.getValidParams(moose_type);
-  params.set<FEProblemBase *>("_fe_problem_base") = this;
-  params.set<Moose::VarKindType>("_var_kind") = Moose::VarKindType::VAR_NONLINEAR;
-  params.set<MooseEnum>("order") = type.order.get_order();
-  params.set<MooseEnum>("family") = Moose::stringify(type.family);
-  params.set<unsigned int>("components") = components;
-  params.set<std::vector<Real>>("scaling") = scale_factor;
-  if (active_subdomains)
-    for (const SubdomainID & id : *active_subdomains)
-      params.set<std::vector<SubdomainName>>("block").push_back(Moose::stringify(id));
-
-  _nl->addVariable(moose_type, var_name, params);
-  if (_displaced_problem)
-    _displaced_problem->addVariable(moose_type, var_name, params);
-}
-
-void
-FEProblemBase::addScalarVariable(const std::string & var_name,
-                                 Order order,
-                                 Real scale_factor,
-                                 const std::set<SubdomainID> * const active_subdomains)
-{
-  mooseDeprecated("Please use the addVariable(type_name, name, params) API instead");
-
-  if (order > _max_scalar_order)
-    _max_scalar_order = order;
-
-  FEType type(order, SCALAR);
-  if (duplicateVariableCheck(var_name, type, /* is_aux = */ false))
-    return;
-
-  InputParameters params = _factory.getValidParams("MooseVariableScalar");
-  params.set<FEProblemBase *>("_fe_problem_base") = this;
-  params.set<Moose::VarKindType>("_var_kind") = Moose::VarKindType::VAR_NONLINEAR;
-  params.set<MooseEnum>("order") = type.order.get_order();
-  params.set<MooseEnum>("family") = "SCALAR";
-  params.set<std::vector<Real>>("scaling") = {scale_factor};
-  if (active_subdomains)
-    for (const SubdomainID & id : *active_subdomains)
-      params.set<std::vector<SubdomainName>>("block").push_back(Moose::stringify(id));
-
-  _nl->addVariable("MooseVariableScalar", var_name, params);
-  if (_displaced_problem)
-    _displaced_problem->addVariable("MooseVariableScalar", var_name, params);
 }
 
 void
@@ -2554,99 +2434,6 @@ FEProblemBase::addAuxVariable(const std::string & var_type,
   if (_displaced_problem)
     // MooseObjects need to be unique so change the name here
     _displaced_problem->addAuxVariable(var_type, var_name, params);
-}
-
-void
-FEProblemBase::addAuxVariable(const std::string & var_name,
-                              const FEType & type,
-                              const std::set<SubdomainID> * const active_subdomains)
-{
-  mooseDeprecated("Please use the addAuxVariable(var_type, var_name, params) API instead");
-
-  if (duplicateVariableCheck(var_name, type, /* is_aux = */ true))
-    return;
-
-  std::string var_type;
-  if (type == FEType(0, MONOMIAL))
-    var_type = "MooseVariableConstMonomial";
-  else if (type.family == SCALAR)
-    var_type = "MooseVariableScalar";
-  else if (type.family == LAGRANGE_VEC || type.family == NEDELEC_ONE || type.family == MONOMIAL_VEC)
-    var_type = "VectorMooseVariable";
-  else
-    var_type = "MooseVariable";
-
-  InputParameters params = _factory.getValidParams(var_type);
-  params.set<FEProblemBase *>("_fe_problem_base") = this;
-  params.set<Moose::VarKindType>("_var_kind") = Moose::VarKindType::VAR_AUXILIARY;
-  params.set<MooseEnum>("order") = type.order.get_order();
-  params.set<MooseEnum>("family") = Moose::stringify(type.family);
-
-  if (active_subdomains)
-    for (const SubdomainID & id : *active_subdomains)
-      params.set<std::vector<SubdomainName>>("block").push_back(Moose::stringify(id));
-
-  _aux->addVariable(var_type, var_name, params);
-  if (_displaced_problem)
-    _displaced_problem->addAuxVariable("MooseVariable", var_name, params);
-}
-
-void
-FEProblemBase::addAuxArrayVariable(const std::string & var_name,
-                                   const FEType & type,
-                                   unsigned int components,
-                                   const std::set<SubdomainID> * const active_subdomains)
-{
-  mooseDeprecated("Please use the addAuxVariable(var_type, var_name, params) API instead");
-
-  if (duplicateVariableCheck(var_name, type, /* is_aux = */ true))
-    return;
-
-  InputParameters params = _factory.getValidParams("ArrayMooseVariable");
-  params.set<FEProblemBase *>("_fe_problem_base") = this;
-  params.set<Moose::VarKindType>("_var_kind") = Moose::VarKindType::VAR_AUXILIARY;
-  params.set<MooseEnum>("order") = type.order.get_order();
-  params.set<MooseEnum>("family") = Moose::stringify(type.family);
-  params.set<unsigned int>("components") = components;
-
-  if (active_subdomains)
-    for (const SubdomainID & id : *active_subdomains)
-      params.set<std::vector<SubdomainName>>("block").push_back(Moose::stringify(id));
-
-  _aux->addVariable("ArrayMooseVariable", var_name, params);
-  if (_displaced_problem)
-    _displaced_problem->addAuxVariable("ArrayMooseVariable", var_name, params);
-}
-
-void
-FEProblemBase::addAuxScalarVariable(const std::string & var_name,
-                                    Order order,
-                                    Real /*scale_factor*/,
-                                    const std::set<SubdomainID> * const active_subdomains)
-{
-  mooseDeprecated("Please use the addAuxVariable(var_type, var_name, params) API instead");
-
-  if (order > _max_scalar_order)
-    _max_scalar_order = order;
-
-  FEType type(order, SCALAR);
-  if (duplicateVariableCheck(var_name, type, /* is_aux = */ true))
-    return;
-
-  InputParameters params = _factory.getValidParams("MooseVariableScalar");
-  params.set<FEProblemBase *>("_fe_problem_base") = this;
-  params.set<Moose::VarKindType>("_var_kind") = Moose::VarKindType::VAR_AUXILIARY;
-
-  params.set<MooseEnum>("order") = type.order.get_order();
-  params.set<MooseEnum>("family") = "SCALAR";
-  params.set<std::vector<Real>>("scaling") = {1};
-  if (active_subdomains)
-    for (const SubdomainID & id : *active_subdomains)
-      params.set<std::vector<SubdomainName>>("block").push_back(Moose::stringify(id));
-
-  _aux->addVariable("MooseVariableScalar", var_name, params);
-  if (_displaced_problem)
-    _displaced_problem->addAuxVariable("MooseVariableScalar", var_name, params);
 }
 
 void
@@ -3506,9 +3293,6 @@ FEProblemBase::addUserObject(const std::string & user_object_name,
       primary = user_object.get();
     else
       user_object->setPrimaryThreadCopy(primary);
-
-    // TODO: delete this line after apps have been updated to not call getUserObjects
-    _all_user_objects.addObject(user_object, tid);
 
     theWarehouse().add(user_object);
 
@@ -5339,16 +5123,6 @@ FEProblemBase::computeResidualSys(NonlinearImplicitSystem & /*sys*/,
   computeResidual(soln, residual);
 
   ADReal::do_derivatives = true;
-}
-
-void
-FEProblemBase::computeResidual(NonlinearImplicitSystem & sys,
-                               const NumericVector<Number> & soln,
-                               NumericVector<Number> & residual)
-{
-  mooseDeprecated("Please use computeResidualSys");
-
-  computeResidualSys(sys, soln, residual);
 }
 
 void

@@ -47,9 +47,6 @@ public:
   /// Return the MultiApp that this transfer belongs to
   const std::shared_ptr<MultiApp> getMultiApp() const { return _multi_app; }
 
-  /// Return the execution flags, handling "same_as_multiapp"
-  virtual const std::vector<ExecFlagType> & execFlags() const;
-
 protected:
   /// The MultiApp this Transfer is transferring data to or from
   std::shared_ptr<MultiApp> _multi_app;

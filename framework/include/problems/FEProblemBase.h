@@ -612,8 +612,6 @@ public:
   virtual const SystemBase & systemBaseAuxiliary() const override;
   virtual SystemBase & systemBaseAuxiliary() override;
 
-  virtual NonlinearSystem & getNonlinearSystem();
-
   /**
    * Canonical method for adding a non-linear variable
    * @param var_type the type of the variable, e.g. MooseVariableScalar
@@ -622,20 +620,6 @@ public:
    */
   virtual void
   addVariable(const std::string & var_type, const std::string & var_name, InputParameters & params);
-
-  virtual void addVariable(const std::string & var_name,
-                           const FEType & type,
-                           Real scale_factor,
-                           const std::set<SubdomainID> * const active_subdomains = nullptr);
-  virtual void addArrayVariable(const std::string & var_name,
-                                const FEType & type,
-                                unsigned int components,
-                                const std::vector<Real> & scale_factor,
-                                const std::set<SubdomainID> * const active_subdomains = nullptr);
-  virtual void addScalarVariable(const std::string & var_name,
-                                 Order order,
-                                 Real scale_factor = 1.,
-                                 const std::set<SubdomainID> * const active_subdomains = nullptr);
 
   virtual void addKernel(const std::string & kernel_name,
                          const std::string & name,
@@ -669,17 +653,6 @@ public:
                               const std::string & var_name,
                               InputParameters & params);
 
-  virtual void addAuxVariable(const std::string & var_name,
-                              const FEType & type,
-                              const std::set<SubdomainID> * const active_subdomains = NULL);
-  virtual void addAuxArrayVariable(const std::string & var_name,
-                                   const FEType & type,
-                                   unsigned int components,
-                                   const std::set<SubdomainID> * const active_subdomains = NULL);
-  virtual void addAuxScalarVariable(const std::string & var_name,
-                                    Order order,
-                                    Real scale_factor = 1.,
-                                    const std::set<SubdomainID> * const active_subdomains = NULL);
   virtual void addAuxKernel(const std::string & kernel_name,
                             const std::string & name,
                             InputParameters & parameters);
@@ -861,14 +834,6 @@ public:
   virtual void addUserObject(const std::string & user_object_name,
                              const std::string & name,
                              InputParameters & parameters);
-
-  // TODO: delete this function after apps have been updated to not call it
-  const ExecuteMooseObjectWarehouse<UserObject> & getUserObjects() const
-  {
-    mooseDeprecated(
-        "This function is deprecated, use theWarehouse().query() to construct a query instead");
-    return _all_user_objects;
-  }
 
   /**
    * Get the user object by its name
@@ -1068,17 +1033,6 @@ public:
   void incrementMultiAppTStep(ExecFlagType type);
 
   /**
-   * Deprecated method; use finishMultiAppStep and/or incrementMultiAppTStep depending
-   * on your purpose
-   */
-  void advanceMultiApps(ExecFlagType type)
-  {
-    mooseDeprecated("Deprecated method; use finishMultiAppStep and/or incrementMultiAppTStep "
-                    "depending on your purpose");
-    finishMultiAppStep(type);
-  }
-
-  /**
    * Finish the MultiApp time step (endStep, postStep) associated with the ExecFlagType. Optionally
    * recurse through all multi-app levels
    */
@@ -1147,13 +1101,6 @@ public:
   virtual void computeResidualSys(NonlinearImplicitSystem & sys,
                                   const NumericVector<Number> & soln,
                                   NumericVector<Number> & residual);
-  /**
-   * This function is called by Libmesh to form a residual. This is deprecated.
-   * We should remove this as soon as RattleSnake is fixed.
-   */
-  void computeResidual(NonlinearImplicitSystem & sys,
-                       const NumericVector<Number> & soln,
-                       NumericVector<Number> & residual);
 
   /**
    * Form a residual with default tags (nontime, time, residual).
@@ -1338,10 +1285,6 @@ public:
   virtual void cacheJacobian(THREAD_ID tid) override;
   virtual void cacheJacobianNeighbor(THREAD_ID tid) override;
   virtual void addCachedJacobian(THREAD_ID tid) override;
-  /**
-   * Deprecated method. Use addCachedJacobian
-   */
-  virtual void addCachedJacobianContributions(THREAD_ID tid) override;
 
   virtual void prepareShapes(unsigned int var, THREAD_ID tid) override;
   virtual void prepareFaceShapes(unsigned int var, THREAD_ID tid) override;
@@ -2043,9 +1986,6 @@ protected:
 
   // Helper class to access Reporter object values
   ReporterData _reporter_data;
-
-  // TODO: delete this after apps have been updated to not call getUserObjects
-  ExecuteMooseObjectWarehouse<UserObject> _all_user_objects;
 
   /// MultiApp Warehouse
   ExecuteMooseObjectWarehouse<MultiApp> _multi_apps;

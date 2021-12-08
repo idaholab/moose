@@ -11,7 +11,7 @@
 
 #if !PETSC_VERSION_LESS_THAN(3, 6, 0)
 #include "FEProblem.h"
-#include "NonlinearSystem.h"
+#include "NonlinearSystemBase.h"
 #include "libmesh/petsc_nonlinear_solver.h"
 #include "libmesh/petsc_solver_exception.h"
 #include <petscdm.h>
@@ -25,10 +25,10 @@ PetscContactLineSearch::validParams()
 }
 
 PetscContactLineSearch::PetscContactLineSearch(const InputParameters & parameters)
-  : ContactLineSearchBase(parameters)
+  : ContactLineSearchBase(parameters),
+    _solver(dynamic_cast<PetscNonlinearSolver<Real> *>(
+        _fe_problem.getNonlinearSystemBase().nonlinearSolver()))
 {
-  _solver = dynamic_cast<PetscNonlinearSolver<Real> *>(
-      _fe_problem.getNonlinearSystem().nonlinearSolver());
   if (!_solver)
     mooseError(
         "This line search operates only with Petsc, so Petsc must be your nonlinear solver.");

@@ -10,10 +10,6 @@
 #include "VectorDirichletBC.h"
 
 registerMooseObject("MooseApp", VectorDirichletBC);
-registerMooseObjectRenamed("MooseApp",
-                           LagrangeVecDirichletBC,
-                           "05/01/2019 00:01",
-                           VectorDirichletBC);
 
 defineLegacyParams(VectorDirichletBC);
 

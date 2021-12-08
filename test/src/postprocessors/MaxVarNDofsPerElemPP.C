@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MaxVarNDofsPerElemPP.h"
-#include "NonlinearSystem.h"
+#include "NonlinearSystemBase.h"
 
 registerMooseObject("MooseTestApp", MaxVarNDofsPerElemPP);
 
@@ -27,5 +27,5 @@ MaxVarNDofsPerElemPP::MaxVarNDofsPerElemPP(const InputParameters & parameters)
 PostprocessorValue
 MaxVarNDofsPerElemPP::getValue()
 {
-  return _fe_problem.getNonlinearSystem().getMaxVarNDofsPerElem();
+  return _fe_problem.getNonlinearSystemBase().getMaxVarNDofsPerElem();
 }

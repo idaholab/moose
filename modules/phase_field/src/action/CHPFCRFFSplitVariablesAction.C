@@ -74,6 +74,14 @@ CHPFCRFFSplitVariablesAction::act()
   poly_params.set<MultiAppName>("multi_app") = "HHEquationSolver";
   _problem->addTransfer("MultiAppNearestNodeTransfer", _n_name + "_trans", poly_params);
 
+  const auto variable_type = AddVariableAction::variableType(
+      FEType(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
+             Utility::string_to_enum<FEFamily>(getParam<MooseEnum>("family"))));
+  auto variable_params = _factory.getValidParams(variable_type);
+  variable_params.set<MooseEnum>("family") = getParam<MooseEnum>("family");
+  variable_params.set<MooseEnum>("order") = getParam<MooseEnum>("order");
+  variable_params.set<Real>("scaling") = getParam<Real>("scaling");
+
   // Loop through the number of L variables
   for (unsigned int l = 0; l < _num_L; ++l)
   {
@@ -83,10 +91,8 @@ CHPFCRFFSplitVariablesAction::act()
     // Create real L variable
     std::string real_name = L_name + "_real";
 
-    _problem->addAuxVariable(
-        real_name,
-        FEType(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
-               Utility::string_to_enum<FEFamily>(getParam<MooseEnum>("family"))));
+    InputParameters real_params = variable_params;
+    _problem->addAuxVariable(variable_type, real_name, real_params);
 
     poly_params = _factory.getValidParams("MultiAppNearestNodeTransfer");
     poly_params.set<MultiMooseEnum>("direction") = "from_multiapp";
@@ -100,10 +106,8 @@ CHPFCRFFSplitVariablesAction::act()
       // Create imaginary L variable IF l > 0
       std::string imag_name = L_name + "_imag";
 
-      _problem->addAuxVariable(
-          imag_name,
-          FEType(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
-                 Utility::string_to_enum<FEFamily>(getParam<MooseEnum>("family"))));
+      InputParameters imag_prams = variable_params;
+      _problem->addAuxVariable(variable_type, imag_name, imag_prams);
 
       poly_params = _factory.getValidParams("MultiAppNearestNodeTransfer");
       poly_params.set<MultiMooseEnum>("direction") = "from_multiapp";

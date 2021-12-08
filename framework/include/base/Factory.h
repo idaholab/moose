@@ -268,21 +268,6 @@ public:
   InputParameters getValidParams(const std::string & name);
 
   /**
-   * Build an object (must be registered) - THIS METHOD IS DEPRECATED (Use create<T>())
-   * @param obj_name Type of the object being constructed
-   * @param name Name for the object
-   * @param parameters Parameters this object should have
-   * @param tid The thread id that this copy will be created for
-   * @param print_deprecated controls the deprecated message
-   * @return The created object
-   */
-  std::shared_ptr<MooseObject> create(const std::string & obj_name,
-                                      const std::string & name,
-                                      const InputParameters & parameters,
-                                      THREAD_ID tid = 0,
-                                      bool print_deprecated = true);
-
-  /**
    * Build an object (must be registered)
    * @param obj_name Type of the object being constructed
    * @param name Name for the object
@@ -297,7 +282,7 @@ public:
                             THREAD_ID tid = 0)
   {
     std::shared_ptr<T> new_object =
-        std::dynamic_pointer_cast<T>(create(obj_name, name, parameters, tid, false));
+        std::dynamic_pointer_cast<T>(createInternal(obj_name, name, parameters, tid));
     if (!new_object)
       mooseError("We expected to create an object of type '" + demangle(typeid(T).name()) +
                  "'.\nInstead we received a parameters object for type '" + obj_name +
@@ -373,6 +358,19 @@ private:
   {
     return std::make_shared<T>(parameters);
   }
+
+  /**
+   * Internal create method for create<T> (must be registered)
+   * @param obj_name Type of the object being constructed
+   * @param name Name for the object
+   * @param parameters Parameters this object should have
+   * @param tid The thread id that this copy will be created for
+   * @return The created object
+   */
+  std::shared_ptr<MooseObject> createInternal(const std::string & obj_name,
+                                              const std::string & name,
+                                              const InputParameters & parameters,
+                                              THREAD_ID tid = 0);
 
   /// Reference to the application
   MooseApp & _app;

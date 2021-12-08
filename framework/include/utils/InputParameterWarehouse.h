@@ -42,6 +42,18 @@ public:
    */
   virtual ~InputParameterWarehouse() = default;
 
+  /**
+   * Class that is used as a parameter to addInputParameters() and
+   * removeInputParameters () that allows only the desired classes
+   * to call said method
+   */
+  class AddRemoveInputParametersKey
+  {
+    friend class Factory;
+    AddRemoveInputParametersKey() {}
+    AddRemoveInputParametersKey(const AddRemoveInputParametersKey &) {}
+  };
+
   ///@{
   /**
    * Return a const reference to the InputParameters for the named object
@@ -104,17 +116,6 @@ public:
   std::vector<MooseObjectParameterName>
   getControllableParameterNames(const MooseObjectParameterName & input) const;
 
-private:
-  /// Storage for the InputParameters objects
-  /// TODO: Remove multimap
-  std::vector<std::multimap<MooseObjectName, std::shared_ptr<InputParameters>>> _input_parameters;
-
-  /// Storage for controllable parameters via ControllableItem objects, a unique_ptr is
-  /// used to avoid creating multiple copies. All access to the objects are done via
-  /// pointers. The ControllableItem objects are not designed and will not be used directly in
-  /// user code. All user level access goes through the ControllableParameter object.
-  std::vector<std::vector<std::shared_ptr<ControllableItem>>> _controllable_items;
-
   /**
    * Method for adding a new InputParameters object
    * @param parameters The InputParameters object to copy and store in the warehouse
@@ -125,17 +126,36 @@ private:
    * are generic until Factory::create() is called and the actual MooseObject
    * is created.
    *
-   * This method is private, because only the factories that are creating objects should be
+   * This method is guarded by the AddRemoveInputParametersKey,
+   * because only the factories that are creating objects should be
    * able to call this method.
    */
   InputParameters & addInputParameters(const std::string & name,
                                        const InputParameters & parameters,
-                                       THREAD_ID tid = 0);
+                                       const THREAD_ID tid,
+                                       const AddRemoveInputParametersKey);
 
   /**
    * Allows for the deletion and cleanup of an object while the simulation is running.
+   *
+   * This method is guarded by the AddRemoveInputParametersKey,
+   * because only the factories that are creating objects should be
+   * able to call this method.
    */
-  void removeInputParameters(const MooseObject & moose_object, THREAD_ID tid = 0);
+  void removeInputParameters(const MooseObject & moose_object,
+                             const THREAD_ID tid,
+                             const AddRemoveInputParametersKey);
+
+private:
+  /// Storage for the InputParameters objects
+  /// TODO: Remove multimap
+  std::vector<std::multimap<MooseObjectName, std::shared_ptr<InputParameters>>> _input_parameters;
+
+  /// Storage for controllable parameters via ControllableItem objects, a unique_ptr is
+  /// used to avoid creating multiple copies. All access to the objects are done via
+  /// pointers. The ControllableItem objects are not designed and will not be used directly in
+  /// user code. All user level access goes through the ControllableParameter object.
+  std::vector<std::vector<std::shared_ptr<ControllableItem>>> _controllable_items;
 
   /**
    * Returns a ControllableParameter object that contains all matches to ControllableItem objects
@@ -170,13 +190,6 @@ private:
   getInputParameters(const std::string & tag, const std::string & name, THREAD_ID tid = 0) const;
   InputParameters & getInputParameters(const MooseObjectName & object_name,
                                        THREAD_ID tid = 0) const;
-  ///@}
-
-  ///@{
-  /// The factory is allowed to call addInputParameters and removeInputParameters.
-  friend MooseObjectPtr Factory::create(
-      const std::string &, const std::string &, const InputParameters &, THREAD_ID, bool);
-  friend void Factory::releaseSharedObjects(const MooseObject &, THREAD_ID);
   ///@}
 
   /// Only controls are allowed to call getControllableParameter. The

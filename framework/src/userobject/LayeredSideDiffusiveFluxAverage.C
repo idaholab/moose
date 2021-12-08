@@ -10,10 +10,6 @@
 #include "LayeredSideDiffusiveFluxAverage.h"
 
 registerMooseObject("MooseApp", LayeredSideDiffusiveFluxAverage);
-registerMooseObjectRenamed("MooseApp",
-                           LayeredSideFluxAverage,
-                           "06/30/2021 24:00",
-                           LayeredSideDiffusiveFluxAverage);
 
 InputParameters
 LayeredSideDiffusiveFluxAverage::validParams()

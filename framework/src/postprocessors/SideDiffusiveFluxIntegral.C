@@ -15,14 +15,6 @@ registerMooseObject("MooseApp", SideDiffusiveFluxIntegral);
 registerMooseObject("MooseApp", ADSideDiffusiveFluxIntegral);
 registerMooseObject("MooseApp", SideVectorDiffusivityFluxIntegral);
 registerMooseObject("MooseApp", ADSideVectorDiffusivityFluxIntegral);
-registerMooseObjectRenamed("MooseApp",
-                           SideFluxIntegral,
-                           "06/30/2021 24:00",
-                           SideDiffusiveFluxIntegral);
-registerMooseObjectRenamed("MooseApp",
-                           ADSideFluxIntegral,
-                           "06/30/2021 24:00",
-                           ADSideDiffusiveFluxIntegral);
 
 defineLegacyParams(SideDiffusiveFluxIntegral);
 

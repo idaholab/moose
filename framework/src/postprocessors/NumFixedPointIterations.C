@@ -13,10 +13,6 @@
 #include "Executioner.h"
 
 registerMooseObject("MooseApp", NumFixedPointIterations);
-registerMooseObjectRenamed("MooseApp",
-                           NumPicardIterations,
-                           "06/30/2021 24:00",
-                           NumFixedPointIterations);
 
 InputParameters
 NumFixedPointIterations::validParams()

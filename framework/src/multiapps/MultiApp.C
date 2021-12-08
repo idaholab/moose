@@ -691,19 +691,6 @@ MultiApp::appProblemBase(unsigned int app)
   return _apps[local_app]->getExecutioner()->feProblem();
 }
 
-FEProblem &
-MultiApp::appProblem(unsigned int app)
-{
-  mooseDeprecated(
-      "MultiApp::appProblem() is deprecated, call MultiApp::appProblemBase() instead.\n");
-  if (!_has_an_app)
-    mooseError("No app for ", name(), " on processor ", _orig_rank);
-
-  unsigned int local_app = globalAppToLocal(app);
-
-  return dynamic_cast<FEProblem &>(_apps[local_app]->getExecutioner()->feProblem());
-}
-
 const UserObject &
 MultiApp::appUserObjectBase(unsigned int app, const std::string & name)
 {

@@ -9,6 +9,7 @@
 
 #include "MaterialDerivativeTestAction.h"
 
+#include "AddVariableAction.h"
 #include "Conversion.h"
 #include "MooseEnum.h"
 #include "FEProblemBase.h"
@@ -77,9 +78,15 @@ MaterialDerivativeTestAction::MaterialDerivativeTestAction(const InputParameters
 void
 MaterialDerivativeTestAction::act()
 {
-  // finite element type
-  auto fetype = FEType(Utility::string_to_enum<Order>(_second ? "SECOND" : "FIRST"),
-                       Utility::string_to_enum<FEFamily>("LAGRANGE"));
+  const auto add_variable = [this](const std::string & name) {
+    const auto variable_type = AddVariableAction::variableType(
+        FEType(Utility::string_to_enum<Order>(_second ? "SECOND" : "FIRST"),
+               Utility::string_to_enum<FEFamily>("LAGRANGE")));
+    auto params = _factory.getValidParams(variable_type);
+    params.set<MooseEnum>("family") = Utility::string_to_enum<Order>(_second ? "SECOND" : "FIRST");
+    params.set<MooseEnum>("order") = Utility::string_to_enum<FEFamily>("LAGRANGE");
+    _problem->addVariable(variable_type, name, params);
+  };
 
   // build higher order derivatives
   for (const auto & derivative : _derivatives)
@@ -90,17 +97,14 @@ MaterialDerivativeTestAction::act()
       switch (_prop_type)
       {
         case PropTypeEnum::REAL:
-          _problem->addVariable("var_" + derivative.first, fetype, 1.0, nullptr);
+          add_variable("var_" + derivative.first);
           break;
 
         case PropTypeEnum::RANKTWOTENSOR:
           for (unsigned int i = 0; i < 3; ++i)
             for (unsigned int j = 0; j < 3; ++j)
-              _problem->addVariable("var_" + derivative.first + '_' + Moose::stringify(i) + '_' +
-                                        Moose::stringify(j),
-                                    fetype,
-                                    1.0,
-                                    nullptr);
+              add_variable("var_" + derivative.first + '_' + Moose::stringify(i) + '_' +
+                           Moose::stringify(j));
           break;
 
         case PropTypeEnum::RANKFOURTENSOR:
@@ -108,12 +112,9 @@ MaterialDerivativeTestAction::act()
             for (unsigned int j = 0; j < 3; ++j)
               for (unsigned int k = 0; k < 3; ++k)
                 for (unsigned int l = 0; l < 3; ++l)
-                  _problem->addVariable("var_" + derivative.first + '_' + Moose::stringify(i) +
-                                            '_' + Moose::stringify(j) + '_' + Moose::stringify(k) +
-                                            '_' + Moose::stringify(l),
-                                        fetype,
-                                        1.0,
-                                        nullptr);
+                  add_variable("var_" + derivative.first + '_' + Moose::stringify(i) + '_' +
+                               Moose::stringify(j) + '_' + Moose::stringify(k) + '_' +
+                               Moose::stringify(l));
           break;
 
         default:

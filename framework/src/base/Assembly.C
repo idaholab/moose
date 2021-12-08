@@ -3450,22 +3450,6 @@ Assembly::cacheResidual(dof_id_type dof, Real value, const std::set<TagID> & tag
 }
 
 void
-Assembly::cacheResidualContribution(dof_id_type dof, Real value, TagID tag_id)
-{
-  mooseDeprecated("please use cacheResidual");
-
-  cacheResidual(dof, value, tag_id);
-}
-
-void
-Assembly::cacheResidualContribution(dof_id_type dof, Real value, const std::set<TagID> & tags)
-{
-  mooseDeprecated("please use cacheResidual");
-
-  cacheResidual(dof, value, tags);
-}
-
-void
 Assembly::cacheResidualNodes(const DenseVector<Number> & res,
                              const std::vector<dof_id_type> & dof_index,
                              TagID tag)
@@ -3798,14 +3782,6 @@ Assembly::cacheJacobianBlock(DenseMatrix<Number> & jac_block,
       }
   }
   jac_block.zero();
-}
-
-void
-Assembly::addCachedJacobian(SparseMatrix<Number> & /*jacobian*/)
-{
-  mooseDeprecated(" Please use addCachedJacobian() ");
-
-  addCachedJacobian();
 }
 
 Real
@@ -4451,28 +4427,6 @@ Assembly::cacheJacobian(numeric_index_type i,
 }
 
 void
-Assembly::cacheJacobianContribution(numeric_index_type i,
-                                    numeric_index_type j,
-                                    Real value,
-                                    TagID tag)
-{
-  mooseDeprecated("please use the corresponding cacheJacobian method instead.");
-
-  cacheJacobian(i, j, value, tag);
-}
-
-void
-Assembly::cacheJacobianContribution(numeric_index_type i,
-                                    numeric_index_type j,
-                                    Real value,
-                                    const std::set<TagID> & tags)
-{
-  mooseDeprecated("please use the corresponding cacheJacobian method instead.");
-
-  cacheJacobian(i, j, value, tags);
-}
-
-void
 Assembly::setCachedJacobian()
 {
   for (MooseIndex(_cached_jacobian_rows) tag = 0; tag < _cached_jacobian_rows.size(); tag++)
@@ -4493,14 +4447,6 @@ Assembly::setCachedJacobian()
 }
 
 void
-Assembly::setCachedJacobianContributions()
-{
-  mooseDeprecated("please use setCachedJacobian instead");
-
-  setCachedJacobian();
-}
-
-void
 Assembly::zeroCachedJacobian()
 {
   for (MooseIndex(_cached_jacobian_rows) tag = 0; tag < _cached_jacobian_rows.size(); tag++)
@@ -4508,22 +4454,6 @@ Assembly::zeroCachedJacobian()
       _sys.getMatrix(tag).zero_rows(_cached_jacobian_rows[tag], 0.0);
 
   clearCachedJacobian();
-}
-
-void
-Assembly::zeroCachedJacobianContributions()
-{
-  mooseDeprecated("please use zeroCachedJacobian instead");
-
-  zeroCachedJacobian();
-}
-
-void
-Assembly::addCachedJacobianContributions()
-{
-  mooseDeprecated("please use addCachedJacobian instead");
-
-  addCachedJacobian();
 }
 
 void
@@ -4535,14 +4465,6 @@ Assembly::clearCachedJacobian()
     _cached_jacobian_cols[tag].clear();
     _cached_jacobian_values[tag].clear();
   }
-}
-
-void
-Assembly::clearCachedJacobianContributions()
-{
-  mooseDeprecated("please use clearCachedJacobian instead");
-
-  clearCachedJacobian();
 }
 
 void

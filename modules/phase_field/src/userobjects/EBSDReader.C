@@ -580,7 +580,7 @@ EBSDReader::getPointDataAccessFunctor(const MooseEnum & field_name) const
     {
       // check for custom columns
       for (unsigned int i = 0; i < _custom_columns; ++i)
-        if (field_name == "CUSTOM" + Moose::stringify(i))
+        if (std::string(field_name) == "CUSTOM" + Moose::stringify(i))
         {
           ret_val = new EBSDPointDataCustom(i);
           break;
@@ -629,7 +629,7 @@ EBSDReader::getAvgDataAccessFunctor(const MooseEnum & field_name) const
     {
       // check for custom columns
       for (unsigned int i = 0; i < _custom_columns; ++i)
-        if (field_name == "CUSTOM" + Moose::stringify(i))
+        if (std::string(field_name) == "CUSTOM" + Moose::stringify(i))
         {
           ret_val = new EBSDAvgDataCustom(i);
           break;

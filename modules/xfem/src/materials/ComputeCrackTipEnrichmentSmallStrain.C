@@ -38,6 +38,7 @@ ComputeCrackTipEnrichmentSmallStrain::ComputeCrackTipEnrichmentSmallStrain(
     _enrich_variable(4),
     _phi(_assembly.phi()),
     _grad_phi(_assembly.gradPhi()),
+    _nl(_fe_problem.getNonlinearSystemBase()),
     _B(4),
     _dBX(4),
     _dBx(4)
@@ -53,12 +54,9 @@ ComputeCrackTipEnrichmentSmallStrain::ComputeCrackTipEnrichmentSmallStrain(
   else if (_ndisp == 3 && nl_vnames.size() != 12)
     mooseError("The number of enrichment displacements should be total 12 for 3D.");
 
-  NonlinearSystem & nl = _fe_problem.getNonlinearSystem();
-  _nl = &(_fe_problem.getNonlinearSystem());
-
   for (unsigned int j = 0; j < _ndisp; ++j)
     for (unsigned int i = 0; i < 4; ++i)
-      _enrich_variable[i][j] = &(nl.getVariable(0, nl_vnames[j * 4 + i]));
+      _enrich_variable[i][j] = &(_nl.getVariable(0, nl_vnames[j * 4 + i]));
 
   if (_ndisp == 2)
     _BI.resize(4); // QUAD4
@@ -79,7 +77,7 @@ ComputeCrackTipEnrichmentSmallStrain::computeQpProperties()
   for (unsigned int i = 0; i < 4; ++i)
     rotateFromCrackFrontCoordsToGlobal(_dBx[i], _dBX[i], crack_front_point_index);
 
-  _sln = _nl->currentSolution();
+  auto sln = _nl.currentSolution();
 
   for (unsigned int m = 0; m < _ndisp; ++m)
   {
@@ -90,8 +88,8 @@ ComputeCrackTipEnrichmentSmallStrain::computeQpProperties()
       const Node * node_i = _current_elem->node_ptr(i);
       for (unsigned int j = 0; j < 4; ++j)
       {
-        dof_id_type dof = node_i->dof_number(_nl->number(), _enrich_variable[j][m]->number(), 0);
-        Real soln = (*_sln)(dof);
+        dof_id_type dof = node_i->dof_number(_nl.number(), _enrich_variable[j][m]->number(), 0);
+        Real soln = (*sln)(dof);
         _enrich_disp[m] += (*_fe_phi)[i][_qp] * (_B[j] - _BI[i][j]) * soln;
         RealVectorValue grad_B(_dBX[j]);
         _grad_enrich_disp[m] +=

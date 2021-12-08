@@ -21,9 +21,9 @@ InputParameters
 NodalScalarKernel::validParams()
 {
   InputParameters params = ScalarKernel::validParams();
-  params.addParam<std::vector<dof_id_type>>("nodes", "Supply nodes using node ids");
-  params.addParam<std::vector<BoundaryName>>(
-      "boundary", "The list of boundary IDs  from the mesh where this nodal kernel applies");
+
+  params.addRequiredParam<std::vector<BoundaryName>>(
+      "boundary", "The list of boundary IDs from the mesh where this nodal kernel applies");
 
   return params;
 }
@@ -32,39 +32,24 @@ NodalScalarKernel::NodalScalarKernel(const InputParameters & parameters)
   : ScalarKernel(parameters),
     Coupleable(this, true),
     MooseVariableDependencyInterface(),
-    _node_ids(getParam<std::vector<dof_id_type>>("nodes")),
-    _boundary_names(getParam<std::vector<BoundaryName>>("boundary"))
+    _node_ids(buildNodeIDs())
 {
   // Fill in the MooseVariable dependencies
   const std::vector<MooseVariableFEBase *> & coupled_vars = getCoupledMooseVars();
   for (const auto & var : coupled_vars)
     addMooseVariableDependency(var);
+}
 
-  // Check if node_ids and/or node_bc_names given
-  if ((_node_ids.size() == 0) && (_boundary_names.size() == 0))
-    mooseError("Must provide either 'nodes' or 'boundary' parameter.");
-
-  if ((_node_ids.size() != 0) && (_boundary_names.size() != 0))
-    mooseError("Both 'nodes' and 'boundary' parameters were specified. Use the 'boundary' "
-               "parameter only.");
-
-  // nodal bc names provided, append the nodes in each bc to _node_ids
-  if ((_node_ids.size() == 0) && (_boundary_names.size() != 0))
+std::vector<dof_id_type>
+NodalScalarKernel::buildNodeIDs() const
+{
+  std::vector<dof_id_type> node_ids;
+  for (const auto & boundary_name : getParam<std::vector<BoundaryName>>("boundary"))
   {
-    std::vector<dof_id_type> nodelist;
-
-    for (auto & boundary_name : _boundary_names)
-    {
-      nodelist = _mesh.getNodeList(_mesh.getBoundaryID(boundary_name));
-      for (auto & node_id : nodelist)
-        _node_ids.push_back(node_id);
-    }
+    const auto boundary_node_ids = _mesh.getNodeList(_mesh.getBoundaryID(boundary_name));
+    node_ids.insert(node_ids.end(), boundary_node_ids.begin(), boundary_node_ids.end());
   }
-  else
-  {
-    mooseDeprecated("Using the 'nodes' parameter is deprecated. Please update your input file to "
-                    "use the 'boundary' parameter.");
-  }
+  return node_ids;
 }
 
 void

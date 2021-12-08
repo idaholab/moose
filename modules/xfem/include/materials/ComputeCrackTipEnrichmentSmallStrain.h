@@ -51,6 +51,8 @@ protected:
   const VariablePhiGradient & _grad_phi;
 
 private:
+  /// The nonlinear system
+  NonlinearSystemBase & _nl;
   /// enrichment function value
   std::vector<Real> _B;
   /// derivatives of enrichment function respect to global cooridnate
@@ -63,6 +65,4 @@ private:
   const std::vector<std::vector<Real>> * _fe_phi;
   /// gradient of shape function
   const std::vector<std::vector<RealGradient>> * _fe_dphi;
-  NonlinearSystem * _nl;
-  const NumericVector<Number> * _sln;
 };

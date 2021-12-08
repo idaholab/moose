@@ -920,14 +920,6 @@ DisplacedProblem::addCachedJacobian(THREAD_ID tid)
 }
 
 void
-DisplacedProblem::addCachedJacobianContributions(THREAD_ID tid)
-{
-  mooseDeprecated("please use addCachedJacobian");
-
-  addCachedJacobian(tid);
-}
-
-void
 DisplacedProblem::addJacobianBlock(SparseMatrix<Number> & jacobian,
                                    unsigned int ivar,
                                    unsigned int jvar,

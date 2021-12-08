@@ -794,16 +794,6 @@ public:
   void cacheResidual(dof_id_type dof, Real value, const std::set<TagID> & tags);
 
   /**
-   * Deperecated method. Use \p cacheResidual
-   */
-  void cacheResidualContribution(dof_id_type dof, Real value, TagID tag_id);
-
-  /**
-   * Deperecated method. Use \p cacheResidual
-   */
-  void cacheResidualContribution(dof_id_type dof, Real value, const std::set<TagID> & tags);
-
-  /**
    * Lets an external class cache residual at a set of nodes
    */
   void cacheResidualNodes(const DenseVector<Number> & res,
@@ -981,11 +971,6 @@ public:
    * Note that this will also clear the cache.
    */
   void addCachedJacobian();
-
-  /**
-   * Same as addCachedJacobian but deprecated.
-   */
-  void addCachedJacobian(SparseMatrix<Number> & jacobian);
 
   /**
    * Get local residual block for a variable and a tag.
@@ -1505,28 +1490,9 @@ public:
                      const std::set<TagID> & tags);
 
   /**
-   * Deprecated method. Use cacheJacobian instead
-   */
-  void
-  cacheJacobianContribution(numeric_index_type i, numeric_index_type j, Real value, TagID tag = 0);
-
-  /**
-   * Deprecated method. Use cacheJacobian instead
-   */
-  void cacheJacobianContribution(numeric_index_type i,
-                                 numeric_index_type j,
-                                 Real value,
-                                 const std::set<TagID> & tags);
-
-  /**
    * Sets previously-cached Jacobian values via SparseMatrix::set() calls.
    */
   void setCachedJacobian();
-
-  /**
-   * Deprecated. Use \p setCachedJacobian instead
-   */
-  void setCachedJacobianContributions();
 
   /**
    * Zero out previously-cached Jacobian rows.

@@ -233,7 +233,6 @@ public:
   const std::shared_ptr<MooseMesh> & getDisplacedMesh() const { return _displaced_mesh; }
 
   std::shared_ptr<FEProblemBase> & problemBase() { return _problem; }
-  std::shared_ptr<FEProblem> problem();
   MooseApp & mooseApp() { return _app; }
   const std::string & getMooseAppName();
   const std::string & getCurrentTaskName() const { return _current_task; }
