@@ -464,6 +464,14 @@ FlowChannelBase::getHeatTransferNamesSuffix(const std::string & ht_name) const
     return "";
 }
 
+std::vector<std::string>
+FlowChannelBase::getHeatTransferNames() const
+{
+  checkSetupStatus(INITIALIZED_PRIMARY);
+
+  return _heat_transfer_names;
+}
+
 unsigned int
 FlowChannelBase::getNodesetID() const
 {
