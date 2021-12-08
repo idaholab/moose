@@ -142,7 +142,7 @@ CNSAction::act()
 
     // FIXME: need to check boundaries are non-overlapping and enclose the blocks
 
-    auto var_type = AddVariableAction::determineType(_fe_type, 1);
+    auto var_type = AddVariableAction::variableType(_fe_type);
     auto base_params = _factory.getValidParams(var_type);
     base_params.set<MooseEnum>("order") = _fe_type.order.get_order();
     base_params.set<MooseEnum>("family") = Moose::stringify(_fe_type.family);

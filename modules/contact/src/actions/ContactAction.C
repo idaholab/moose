@@ -457,7 +457,7 @@ ContactAction::addMortarContact()
       params.set<std::vector<SubdomainName>>("block") = {secondary_subdomain_name};
       params.set<std::vector<Real>>("scaling") = {scaling_factor};
       auto fe_type = AddVariableAction::feType(params);
-      auto var_type = AddVariableAction::determineType(fe_type, 1);
+      auto var_type = AddVariableAction::variableType(fe_type);
       _problem->addVariable(var_type, variable_name, params);
     };
 

@@ -113,7 +113,7 @@ SetupDebugAction::act()
       paramError("pid_aux", "Variable with the name \"pid\" already exists");
 
     auto fe_type = FEType(CONSTANT, MONOMIAL);
-    auto type = AddAuxVariableAction::determineType(fe_type, 1);
+    auto type = AddAuxVariableAction::variableType(fe_type);
     auto var_params = _factory.getValidParams(type);
     _problem->addAuxVariable(type, "pid", var_params);
 

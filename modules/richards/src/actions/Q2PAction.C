@@ -214,7 +214,7 @@ Q2PAction::act()
   {
     FEType fe_type(Utility::string_to_enum<Order>(getParam<MooseEnum>("ORDER")),
                    Utility::string_to_enum<FEFamily>("LAGRANGE"));
-    auto type = AddVariableAction::determineType(fe_type, 1);
+    auto type = AddVariableAction::variableType(fe_type);
     auto var_params = _factory.getValidParams(type);
     var_params.set<MooseEnum>("family") = "LAGRANGE";
     var_params.set<MooseEnum>("order") = getParam<MooseEnum>("ORDER");
