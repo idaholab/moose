@@ -224,6 +224,9 @@ ArrayDGKernel::computeOffDiagElemNeighJacobian(Moose::DGJacobianType type,
   else
     prepareMatrixTagNeighbor(_assembly, _var.number(), jvar.number(), type);
 
+  if (_local_ke.n() == 0 || _local_ke.m() == 0)
+    return;
+
   if (jvar.fieldType() == Moose::VarFieldType::VAR_FIELD_STANDARD)
   {
     const auto & jv0 = static_cast<const MooseVariable &>(jvar);
