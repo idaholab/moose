@@ -1,33 +1,35 @@
 # LStableDirk2
 
-!alert! construction title=Undocumented Class
-The LStableDirk2 has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# LStableDirk2
-
 !syntax description /Executioner/TimeIntegrator/LStableDirk2
 
-## Overview
+This method can be expressed as a Runge-Kutta method with the following Butcher Tableau:
 
-!! Replace these lines with information regarding the LStableDirk2 object.
+!equation
+\begin{array}{c|cc}
+  \alpha & \alpha\\
+1 & 1 - \alpha & \alpha \\
+\hline
+    &  1 - \alpha  & \alpha
+\end{array}
 
-## Example Input File Syntax
+where $\alpha = 1 - \sqrt{2}/2 \approx 0.29289$
 
-!! Describe and include an example of how to use the LStableDirk2 object.
+The stability function for this method is:
 
-!syntax parameters /Executioner/TimeIntegrator/LStableDirk2
+!equation
+R(z) = 4 \dfrac{-z(-\sqrt{2} + 2) + z + 1}{z^2(-\sqrt{2} + 2)^2 - 4z(-\sqrt{2} + 2) + 4}
 
-!syntax inputs /Executioner/TimeIntegrator/LStableDirk2
+The method is L-stable:
 
-!syntax children /Executioner/TimeIntegrator/LStableDirk2
-```
-!alert-end!
+!equation
+\lim_{z->\infty} R(z) = 0
 
-!syntax description /Executioner/TimeIntegrator/LStableDirk2
+## Notes
+
+This method is derived in detail in [!cite](alexander1967). This method is
+more expensive than Crank-Nicolson, but has the advantage of being
+L-stable (the same type of stability as the implicit Euler method)
+so may be more suitable for "stiff" problems.
 
 !syntax parameters /Executioner/TimeIntegrator/LStableDirk2
 

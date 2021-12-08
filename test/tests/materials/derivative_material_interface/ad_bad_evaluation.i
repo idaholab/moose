@@ -24,7 +24,7 @@
     outputs = all
   [../]
   [./time]
-    type = MaterialConverter
+    type = MaterialADConverter
     reg_props_in = time_no_ad
     ad_props_out = time
   [../]

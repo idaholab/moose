@@ -244,17 +244,17 @@
     type = TimestepSize
   []
   [disp]
-    type = NodalMaxValue
+    type = NodalExtremeValue
     variable = disp_y
     boundary = bottom
   []
   [vel]
-    type = NodalMaxValue
+    type = NodalExtremeValue
     variable = vel_y
     boundary = bottom
   []
   [accel]
-    type = NodalMaxValue
+    type = NodalExtremeValue
     variable = accel_y
     boundary = bottom
   []

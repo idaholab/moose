@@ -20,6 +20,8 @@ LayeredIntegral::validParams()
 {
   InputParameters params = ElementIntegralVariableUserObject::validParams();
   params += LayeredBase::validParams();
+  params.addClassDescription("Compute variable integrals over layers.");
+
   return params;
 }
 

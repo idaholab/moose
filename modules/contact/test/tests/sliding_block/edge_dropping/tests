@@ -1,0 +1,53 @@
+[Examples]
+  design = 'Constraints/index.md'
+  issues = '#13080 #15215'
+
+  [frictionless-slide-2d]
+    type = 'CSVDiff'
+    input = 'two_equal_blocks_slide_2d.i'
+    csvdiff = 'two_equal_blocks_slide_2d_out.csv'
+    mesh_mode = 'REPLICATED'
+    requirement = 'The system shall simulate correct contact behavior in 2D when the node from a '
+                  'secondary mortar element does not project to the primary surface using the dual '
+                  'basis'
+    allow_test_objects = true
+    min_ad_size = 100
+  []
+  [frictionless-slide-2d-nondual]
+    type = 'CSVDiff'
+    input = 'two_equal_blocks_slide_2d.i'
+    csvdiff = 'two_equal_blocks_slide_2d_nondual_out.csv'
+    mesh_mode = 'REPLICATED'
+    requirement = 'The system shall simulate correct contact behavior in 2D when the node from a '
+                  'secondary mortar element does not project to the primary surface using the '
+                  'standard (non-dual) basis'
+    cli_args = 'Variables/normal_lm/use_dual=false '
+               'Outputs/file_base="two_equal_blocks_slide_2d_nondual_out"'
+    allow_test_objects = true
+    min_ad_size = 100
+  []
+  [frictionless-slide-3d]
+    type = 'CSVDiff'
+    input = 'two_equal_blocks_slide_3d.i'
+    csvdiff = 'two_equal_blocks_slide_3d_out.csv'
+    mesh_mode = 'REPLICATED'
+    requirement = 'The system shall simulate correct contact behavior in 3D when the node from a '
+                  'secondary mortar element does not project to the primary surface'
+    allow_test_objects = true
+    min_ad_size = 100
+  []
+  [frictionless-slide-3d-nondual]
+    type = 'CSVDiff'
+    input = 'two_equal_blocks_slide_3d.i'
+    csvdiff = 'two_equal_blocks_slide_3d_nondual_out.csv'
+    mesh_mode = 'REPLICATED'
+    requirement = 'The system shall simulate correct contact behavior in 3D when the node from a '
+                  'secondary mortar element does not project to the primary surface using the '
+                  'standard (non-dual) basis'
+    cli_args = 'Variables/normal_lm/use_dual=false '
+               'Outputs/file_base="two_equal_blocks_slide_3d_nondual_out"'
+    allow_test_objects = true
+    min_ad_size = 100
+  []
+
+[]

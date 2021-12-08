@@ -1,33 +1,11 @@
 # VerifyNodalUniqueID
 
-!alert! construction title=Undocumented Class
-The VerifyNodalUniqueID has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# VerifyNodalUniqueID
-
 !syntax description /UserObjects/VerifyNodalUniqueID
 
-## Overview
+This object is used for debugging mesh issues.
 
-!! Replace these lines with information regarding the VerifyNodalUniqueID object.
-
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the VerifyNodalUniqueID object.
-
-!syntax parameters /UserObjects/VerifyNodalUniqueID
-
-!syntax inputs /UserObjects/VerifyNodalUniqueID
-
-!syntax children /UserObjects/VerifyNodalUniqueID
-```
-!alert-end!
-
-!syntax description /UserObjects/VerifyNodalUniqueID
+!alert note
+For distributed mesh, this will perform an `MPI_AllGather` operation, sending all ids to all processes, which may require a lot of memory on all processes.
 
 !syntax parameters /UserObjects/VerifyNodalUniqueID
 

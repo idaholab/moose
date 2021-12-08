@@ -18,12 +18,12 @@
  * properties
  */
 template <typename T>
-class MaterialConverterTempl : public Material
+class MaterialADConverterTempl : public Material
 {
 public:
   static InputParameters validParams();
 
-  MaterialConverterTempl(const InputParameters & parameters);
+  MaterialADConverterTempl(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties() override;
@@ -40,6 +40,6 @@ protected:
   const bool _intra_convert;
 };
 
-typedef MaterialConverterTempl<Real> MaterialConverter;
-typedef MaterialConverterTempl<RankFourTensor> RankFourTensorMaterialConverter;
-typedef MaterialConverterTempl<RankTwoTensor> RankTwoTensorMaterialConverter;
+typedef MaterialADConverterTempl<Real> MaterialADConverter;
+typedef MaterialADConverterTempl<RankFourTensor> RankFourTensorMaterialADConverter;
+typedef MaterialADConverterTempl<RankTwoTensor> RankTwoTensorMaterialADConverter;

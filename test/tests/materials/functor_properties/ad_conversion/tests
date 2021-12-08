@@ -1,0 +1,57 @@
+[Tests]
+  design = FunctorADConverter.md
+  issues = '#19420'
+  [exo]
+    type = Exodiff
+    ad_indexing_type = 'global'
+    input = 1d_dirichlet.i
+    exodiff = 1d_dirichlet_out.e
+    requirement = 'The system shall be able to convert functors from AD to regular and vice versa.'
+  []
+  [errors]
+    design = 'FunctorADConverter.md'
+    requirement = 'The system shall error with a clear parameter error if'
+    [reg_in_ad_out]
+      type = RunException
+      input = 1d_dirichlet.i
+      cli_args = 'Materials/converter_to_ad/ad_props_out=regular_sink_1'
+      expect_err = 'Functor names may not overlap between reg_props_in and ad_props_out'
+      detail = 'the names for the regular functors to be converted are going to overlap with the new automatic differentiation functors'
+    []
+    [reg_in_reg_out]
+      type = RunException
+      input = 1d_dirichlet.i
+      cli_args = 'Materials/converter_to_ad/ad_props_in=sink Materials/converter_to_ad/reg_props_out=regular_sink_1'
+      expect_err = 'Functor names may not overlap between reg_props_in and reg_props_out'
+      detail = 'the names for the regular functors to be converted are going to overlap with the other new regular functors'
+    []
+    [ad_in_reg_out]
+      type = RunException
+      input = 1d_dirichlet.i
+      cli_args = 'Materials/converter_to_regular/reg_props_out=sink'
+      expect_err = 'Functor names may not overlap between ad_props_in and reg_props_out'
+      detail = 'the names for the automatic differentiation functors to be converted are going to overlap with the new regular functors'
+    []
+    [ad_in_ad_out]
+      type = RunException
+      input = 1d_dirichlet.i
+      cli_args = 'Materials/converter_to_ad/ad_props_in=sink Materials/converter_to_ad/reg_props_out=regular_sink_2 Materials/converter_to_ad/ad_props_out=sink'
+      expect_err = 'Functor names may not overlap between ad_props_in and ad_props_out'
+      detail = 'the names for the automatic differentiation functors to be converted are going to overlap with the other new automatic differentiation functors'
+    []
+    [size_ad_in]
+      type = RunException
+      input = 1d_dirichlet.i
+      cli_args = "Materials/converter_to_regular/ad_props_in='sink 4'"
+      expect_err = 'The number of output regular functors must match the number of input AD'
+      detail = 'the number of automatic differentiation functors to convert does not match the number of names for the converted functors'
+    []
+    [size_reg_in]
+      type = RunException
+      input = 1d_dirichlet.i
+      cli_args = "Materials/converter_to_ad/reg_props_in='regular_sink_1 1'"
+      expect_err = 'The number of output AD functors must match the number of input regular'
+      detail = 'the number of regular functors to convert does not match the number of names for the converted functors'
+    []
+  []
+[]

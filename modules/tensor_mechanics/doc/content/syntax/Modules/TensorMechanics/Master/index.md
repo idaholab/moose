@@ -38,7 +38,7 @@ automatic/_eigenstrain/_names = true, the eigenstrain_names will be populated
 under restrictive conditions for classes such as
 [CompositeEigenstrain](CompositeEigenstrain.md),
 [ComputeReducedOrderEigenstrain](ComputeReducedOrderEigenstrain.md), and
-[RankTwoTensorMaterialConverter](MaterialConverter.md).  The input components for
+[RankTwoTensorMaterialADConverter](MaterialADConverter.md).  The input components for
 these classes are not included in the eigenstrain_names passed to the
 `TensorMechanicsAction`.  Set the automatic/_eigenstrain/_names = false and
 populate this list manually if these components need to be included.

@@ -274,7 +274,7 @@ INSAction::act()
 
     // FIXME: need to check boundaries are non-overlapping and enclose the blocks
 
-    auto var_type = AddVariableAction::determineType(_fe_type, 1);
+    auto var_type = AddVariableAction::variableType(_fe_type);
     auto base_params = _factory.getValidParams(var_type);
     if (_block_ids.size() != 0)
       for (const SubdomainID & id : _block_ids)
@@ -292,7 +292,7 @@ INSAction::act()
       if (_fe_type.family != LAGRANGE)
         mooseError("AD has to use LAGRANGE variable family");
       FEType fetype(_fe_type.order.get_order(), LAGRANGE_VEC);
-      auto vec_var_type = AddVariableAction::determineType(fetype, 1);
+      auto vec_var_type = AddVariableAction::variableType(fetype);
       auto adparams = _factory.getValidParams(vec_var_type);
       if (_block_ids.size() != 0)
         for (const SubdomainID & id : _block_ids)

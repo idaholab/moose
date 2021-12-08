@@ -102,7 +102,7 @@ GrainGrowthAction::act()
   // Loop over order parameters
   for (unsigned int op = 0; op < _op_num; op++)
   {
-    auto type = AddVariableAction::determineType(_fe_type, 1);
+    auto type = AddVariableAction::variableType(_fe_type);
     auto var_params = _factory.getValidParams(type);
 
     var_params.applySpecificParameters(_pars, {"family", "order"});

@@ -125,13 +125,13 @@
 
 [Postprocessors]
   [./disp_1]
-    type = NodalMaxValue
+    type = NodalExtremeValue
     variable = disp_x
     boundary = 101
   [../]
 
   [./disp_2]
-    type = NodalMaxValue
+    type = NodalExtremeValue
     variable = disp_x
     boundary = 102
   [../]

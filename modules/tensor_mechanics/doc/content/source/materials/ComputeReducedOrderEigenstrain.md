@@ -14,7 +14,7 @@ This class accepts eigenstrains and computes a reduced order eigenstrain.  If th
 [`ComputeReducedOrderEigenstrain`](ComputeReducedOrderEigenstrain.md) object for
 RankTwoTensor eigenstrains with the
 [TensorMechanicsAction](TensorMechanics/Master/index.md) setting
-`automatic_eigenstrain_names = true`, eigenstrains listed as MaterialConverter
+`automatic_eigenstrain_names = true`, eigenstrains listed as MaterialADConverter
 input  tensors will not be included in the `eigenstrain_names` list passed. Set
 the automatic/_eigenstrain/_names = false and populate this list manually if
 these components need to be included.

@@ -1,33 +1,25 @@
 # ImplicitEuler
 
-!alert! construction title=Undocumented Class
-The ImplicitEuler has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
+This is the default time integrator in MOOSE. It is first-order in time, and L-stable, making it
+suitable to integrate stiff equation systems. It is also known as the backwards Euler method.
 
-```markdown
-# ImplicitEuler
+## Description
 
-!syntax description /Executioner/TimeIntegrator/ImplicitEuler
+With $U$, the vector of nonlinear variables, and $A$, a nonlinear operator,
+we write the PDE of interest as:
 
-## Overview
+!equation
+\dfrac{\partial U}{\partial t} = A(t, U(t))
 
-!! Replace these lines with information regarding the ImplicitEuler object.
+Using $t+\Delta t$ for the current time step, and $t$ for the previous step,
+the implicit Euler time integration scheme can be written:
 
-## Example Input File Syntax
+!equation
+U(t+\Delta t) = U(t) + \Delta t A(t+\Delta t, U(t+\Delta t))
 
-!! Describe and include an example of how to use the ImplicitEuler object.
-
-!syntax parameters /Executioner/TimeIntegrator/ImplicitEuler
-
-!syntax inputs /Executioner/TimeIntegrator/ImplicitEuler
-
-!syntax children /Executioner/TimeIntegrator/ImplicitEuler
-```
-!alert-end!
-
-!syntax description /Executioner/TimeIntegrator/ImplicitEuler
+This is an implicit system with $U(t+\Delta t)$, the variable to solve for, appearing on both sides of the
+equation. We solve this system iteratively, usually with a Newton or Newton-Krylov method as described
+in the non linear system solve [documentation](systems/NonlinearSystem.md).
 
 !syntax parameters /Executioner/TimeIntegrator/ImplicitEuler
 

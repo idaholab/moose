@@ -1,33 +1,39 @@
 # ExplicitTVDRK2
 
-!alert! construction title=Undocumented Class
-The ExplicitTVDRK2 has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# ExplicitTVDRK2
-
 !syntax description /Executioner/TimeIntegrator/ExplicitTVDRK2
 
-## Overview
+## Description
 
-!! Replace these lines with information regarding the ExplicitTVDRK2 object.
+The method [!cite](gottlieb1998) consists of two stages:
 
-## Example Input File Syntax
+Stage 1.
 
-!! Describe and include an example of how to use the ExplicitTVDRK2 object.
+!equation
+R_{NL} = M(U^{(1)}-U^n)/\Delta t - F(t^n,U^n)
 
-!syntax parameters /Executioner/TimeIntegrator/ExplicitTVDRK2
+!equation
+t^{(1)} = t^{n} + \Delta t = t^{n+1}
 
-!syntax inputs /Executioner/TimeIntegrator/ExplicitTVDRK2
+Stage 2.
 
-!syntax children /Executioner/TimeIntegrator/ExplicitTVDRK2
-```
-!alert-end!
+!equation
+R_{NL} = M(2U^{(2)}-U^{(1)}-U^n)/(2\Delta t) - (1/2)F(t^{(1)},U^{(1)})
 
-!syntax description /Executioner/TimeIntegrator/ExplicitTVDRK2
+!equation
+U^{n+1} = U^{(2)}
+
+The method requires two mass matrix (linear) system solves
+per timestep. Although strictly speaking these are "two stage"
+methods, we treat the "update" step as a third stage, since in
+finite element analysis the update step requires a mass matrix
+solve.
+
+!alert warning
+To use the explicit TimeIntegrators derived from this
+method, you must generally add "implicit=false" to the Kernels,
+Materials, etc. used in your simulation, so that MOOSE evaluates
+them correctly!  An important exception are TimeDerivative kernels,
+which should never be marked "implicit=false".
 
 !syntax parameters /Executioner/TimeIntegrator/ExplicitTVDRK2
 

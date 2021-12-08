@@ -68,6 +68,7 @@ protected:
   /// Postprocessor values
   std::vector<const PostprocessorValue *> _pp_values;
 
+  /// Expression of the criterion, to be parsed for evaluation
   std::string _expression;
 
   /// Fparser object
