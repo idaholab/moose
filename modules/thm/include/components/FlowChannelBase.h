@@ -76,6 +76,11 @@ public:
   EConvHeatTransGeom getHeatTransferGeometry() const { return _HT_geometry; }
 
   /**
+   * Gets the names of all connected heat transfer components
+   */
+  std::vector<std::string> getHeatTransferNames() const;
+
+  /**
    * Gets temperature mode flag
    */
   bool getTemperatureMode() const { return _temperature_mode; }
