@@ -156,12 +156,13 @@ AdaptiveMonteCarloDecision::execute()
       // Check whether the number of samples in a Markov chain exceeded the limit
       if (sub_ind % count_max == 0)
       {
+        const unsigned int soffset = (sub_ind / count_max) * _sampler.getNumberOfRows();
         // Reinitialize the starting inputs values for the next set of Markov chains
         for (dof_id_type j = 0; j < _sampler.getNumberOfCols(); ++j)
-          _prev_val[j].assign(_inputs_sorted[j].begin() + offset,
-                              _inputs_sorted[j].begin() + offset + _sampler.getNumberOfRows());
-        _prev_val_out.assign(_output_sorted.begin() + offset,
-                             _output_sorted.begin() + offset + _sampler.getNumberOfRows());
+          _prev_val[j].assign(_inputs_sorted[j].begin() + soffset,
+                              _inputs_sorted[j].begin() + soffset + _sampler.getNumberOfRows());
+        _prev_val_out.assign(_output_sorted.begin() + soffset,
+                             _output_sorted.begin() + soffset + _sampler.getNumberOfRows());
       }
       else
       {

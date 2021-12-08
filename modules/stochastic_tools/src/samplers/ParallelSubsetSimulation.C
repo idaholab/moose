@@ -63,7 +63,7 @@ ParallelSubsetSimulation::ParallelSubsetSimulation(const InputParameters & param
   setNumberOfRows(nchains);
   if ((_num_samplessub / nchains) % _count_max > 0)
     mooseError("Number of model evaluations per chain per subset (",
-               _num_samplessub / getNumberOfRows(),
+               _num_samplessub / nchains,
                ") should be a multiple of requested chain length (",
                _count_max,
                ").");
@@ -151,9 +151,10 @@ ParallelSubsetSimulation::sampleSetUp(const SampleMode mode)
     // Reinitialize the starting inputs values for the next set of Markov chains
     if (sub_ind % _count_max == 0)
     {
+      const unsigned int soffset = (sub_ind / _count_max) * getNumberOfRows();
       for (dof_id_type j = 0; j < _distributions.size(); ++j)
-        _markov_seed[j].assign(_inputs_sorted[j].begin() + offset + getLocalRowBegin(),
-                               _inputs_sorted[j].begin() + offset + getLocalRowEnd());
+        _markov_seed[j].assign(_inputs_sorted[j].begin() + soffset + getLocalRowBegin(),
+                               _inputs_sorted[j].begin() + soffset + getLocalRowEnd());
     }
     // Otherwise, use the previously accepted input values to propose the next set of input
     // values
