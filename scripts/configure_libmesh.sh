@@ -30,11 +30,6 @@ function configure_libmesh()
     exit 1
   fi
 
-  if [ -z "$METHODS" ]; then
-    echo "METHODS must be set in configure_libmesh"
-    exit 1
-  fi
-
   # Preserves capability in update_and_rebuild_libmesh.sh, but this is set in
   # conda/libmesh/build.sh. If not, conda considers it an "unbound variable"
   if [[ -n "$INSTALL_BINARY" ]]; then
@@ -42,6 +37,9 @@ function configure_libmesh()
   else
     export INSTALL_BINARY="${SRC_DIR}/build-aux/install-sh -C"
   fi
+
+  # If METHODS is not set in update_and_rebuild_libmesh.sh, set a default value.
+  export METHODS=${METHODS:="opt oprof devel dbg"}
 
   cd ${SRC_DIR}/build
   ../configure --enable-silent-rules \

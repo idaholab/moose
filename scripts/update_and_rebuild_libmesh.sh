@@ -76,7 +76,7 @@ else
 fi
 
 # If the user set METHOD, but not METHODS, we'll let METHOD override
-# METHODS in this script.
+# METHODS in this script. Otherwise, METHODS has a default in configure_libmesh.sh
 if [[ -n "$METHOD" && -z "$METHODS" ]]; then
   export METHODS="$METHOD"
 fi
@@ -86,9 +86,6 @@ VTK_OPTIONS=""
 if [[ -n "$VTKLIB_DIR" && -n "$VTKINCLUDE_DIR" ]]; then
   export VTK_OPTIONS="--with-vtk-lib=$VTKLIB_DIR --with-vtk-include=$VTKINCLUDE_DIR"
 fi
-
-# Finally, if METHODS is still not set, set a default value.
-export METHODS=${METHODS:="opt oprof dbg"}
 
 cd $SCRIPT_DIR/..
 
