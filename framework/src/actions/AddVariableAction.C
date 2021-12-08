@@ -222,14 +222,6 @@ AddVariableAction::createInitialConditionAction()
 }
 
 std::string
-AddVariableAction::determineType(const FEType & fe_type, unsigned int components, bool is_fv)
-{
-  mooseDeprecated("AddVariableAction::determineType() is deprecated. Use "
-                  "AddVariableAction::variableType() instead.");
-  return variableType(fe_type, is_fv, components > 1);
-}
-
-std::string
 AddVariableAction::variableType(const FEType & fe_type, const bool is_fv, const bool is_array)
 {
   if (is_fv)

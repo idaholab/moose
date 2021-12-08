@@ -46,12 +46,6 @@ public:
   static FEType feType(const InputParameters & params);
 
   /**
-   * DEPRECATED: Use variableType instead
-   */
-  static std::string
-  determineType(const FEType & fe_type, unsigned int components, bool is_fv = false);
-
-  /**
    * Determines a variable type
    * @param fe_type The FE type
    * @param is_fv Whether or not the variable is use for finite volume
