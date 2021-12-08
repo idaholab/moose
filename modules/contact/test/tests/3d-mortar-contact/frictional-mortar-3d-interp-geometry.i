@@ -70,8 +70,8 @@ offset = 0.00
   [block_rename]
     type = RenameBlockGenerator
     input = combined
-    old_block_id = '1 2'
-    new_block_name = 'top_block bottom_block'
+    old_block = '1 2'
+    new_block = 'top_block bottom_block'
   []
   [bottom_right_sideset]
     type = SideSetsAroundSubdomainGenerator
@@ -196,7 +196,7 @@ offset = 0.00
     use_displaced_mesh = true
     mu = 0.4
     c = 1e0
-    c_t = 1.0e-3
+    c_t = 1.0e0
     friction_lm = mortar_tangential_x_lm
     friction_lm_dir = mortar_tangential_y_lm
     interpolate_normals = true
@@ -241,7 +241,7 @@ offset = 0.00
     interpolate_normals = true
   []
   [tangential_x]
-    type = NormalMortarMechanicalContact
+    type = TangentialMortarMechanicalContact
     primary_boundary = 'bottom_top'
     secondary_boundary = 'top_bottom'
     primary_subdomain = 'primary_lower'
@@ -254,7 +254,7 @@ offset = 0.00
     interpolate_normals = true
   []
   [tangential_y]
-    type = NormalMortarMechanicalContact
+    type = TangentialMortarMechanicalContact
     primary_boundary = 'bottom_top'
     secondary_boundary = 'top_bottom'
     primary_subdomain = 'primary_lower'
@@ -267,7 +267,7 @@ offset = 0.00
     interpolate_normals = true
   []
   [tangential_z]
-    type = NormalMortarMechanicalContact
+    type = TangentialMortarMechanicalContact
     primary_boundary = 'bottom_top'
     secondary_boundary = 'top_bottom'
     primary_subdomain = 'primary_lower'
@@ -280,7 +280,7 @@ offset = 0.00
     interpolate_normals = true
   []
   [tangential_dir_x]
-    type = NormalMortarMechanicalContact
+    type = TangentialMortarMechanicalContact
     primary_boundary = 'bottom_top'
     secondary_boundary = 'top_bottom'
     primary_subdomain = 'primary_lower'
@@ -288,12 +288,13 @@ offset = 0.00
     variable = mortar_tangential_y_lm
     secondary_variable = disp_x
     component = x
+    direction = direction_2
     use_displaced_mesh = true
     compute_lm_residuals = false
     interpolate_normals = true
   []
   [tangential_dir_y]
-    type = NormalMortarMechanicalContact
+    type = TangentialMortarMechanicalContact
     primary_boundary = 'bottom_top'
     secondary_boundary = 'top_bottom'
     primary_subdomain = 'primary_lower'
@@ -301,12 +302,13 @@ offset = 0.00
     variable = mortar_tangential_y_lm
     secondary_variable = disp_y
     component = y
+    direction = direction_2
     use_displaced_mesh = true
     compute_lm_residuals = false
-    interpolate_normals = true
+    interpolate_normals = false
   []
   [tangential_dir_z]
-    type = NormalMortarMechanicalContact
+    type = TangentialMortarMechanicalContact
     primary_boundary = 'bottom_top'
     secondary_boundary = 'top_bottom'
     primary_subdomain = 'primary_lower'
@@ -314,6 +316,7 @@ offset = 0.00
     variable = mortar_tangential_y_lm
     secondary_variable = disp_z
     component = z
+    direction = direction_2
     use_displaced_mesh = true
     compute_lm_residuals = false
     interpolate_normals = true
@@ -361,8 +364,8 @@ offset = 0.00
 
 [Executioner]
   type = Transient
-  end_time = .00625
-  dt = .00625
+  end_time = .025
+  dt = .025
   dtmin = .001
   solve_type = 'PJFNK'
   petsc_options = '-snes_converged_reason -ksp_converged_reason -pc_svd_monitor '
@@ -371,8 +374,10 @@ offset = 0.00
   petsc_options_value = 'lu       NONZERO               1e-14                  1e-5'
   l_max_its = 15
   nl_max_its = 30
-  nl_rel_tol = 1e-7
-  nl_abs_tol = 1e-7
+  automatic_scaling = true
+  off_diagonals_in_auto_scaling = true
+  nl_rel_tol = 5e-7
+  nl_abs_tol = 5e-7
   line_search = 'basic'
 []
 

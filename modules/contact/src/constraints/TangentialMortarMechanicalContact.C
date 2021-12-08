@@ -55,9 +55,6 @@ TangentialMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
       // means we want the residual to be negative in that case. So the sign of this residual should
       // be the same as the sign of lambda
 
-      if (!_interpolate_normals && !_secondary_ip_lowerd_map.count(_i))
-        return 0.0;
-
       if (_interpolate_normals)
         return _test_secondary[_i][_qp] * _lambda[_qp] * _tangents[_qp][_direction](_component) /
                _tangents[_qp][_direction].norm();
@@ -70,8 +67,6 @@ TangentialMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
                _tangents_3d[_direction][tangent_index].norm();
       }
     case Moose::MortarType::Primary:
-      if (!_interpolate_normals && !_primary_ip_lowerd_map.count(_i))
-        return 0.0;
 
       // Equal and opposite reactions so we put a negative sign here
       if (_interpolate_normals)

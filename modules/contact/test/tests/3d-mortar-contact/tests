@@ -56,7 +56,8 @@
                   'using nodal-attached geometry'
     rel_err = 1.0e-5
     abs_zero = 1.0e-5
-    max_parallel = 1
+    min_ad_size = 100
+    max_parallel = 8
   []
   [frictional-mortar-3d-interp-geometry]
     type = 'Exodiff'
@@ -66,6 +67,7 @@
                   'using weakly interpolated mesh geometry, such as normal and tangent vectors'
     rel_err = 1.0e-5
     abs_zero = 1.0e-5
-    max_parallel = 1
+    min_ad_size = 100
+    max_parallel = 8
   []
 []

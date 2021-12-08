@@ -28,6 +28,54 @@ ADMortarLagrangeConstraint::ADMortarLagrangeConstraint(const InputParameters & p
 }
 
 void
+ADMortarLagrangeConstraint::computeResidual(Moose::MortarType mortar_type)
+{
+  unsigned int test_space_size = 0;
+  switch (mortar_type)
+  {
+    case Moose::MortarType::Secondary:
+      prepareVectorTag(_assembly, _secondary_var.number());
+      test_space_size = _test_secondary.size();
+      break;
+
+    case Moose::MortarType::Primary:
+      prepareVectorTagNeighbor(_assembly, _primary_var.number());
+      test_space_size = _test_primary.size();
+      break;
+
+    case Moose::MortarType::Lower:
+      mooseAssert(_var, "LM variable is null");
+      prepareVectorTagLower(_assembly, _var->number());
+      test_space_size = _test.size();
+      break;
+  }
+
+  std::vector<unsigned int> is_index_on_lower_dimension;
+  // Find out if nodes are on the surface
+  for (_i = 0; _i < test_space_size; _i++)
+  {
+    if (mortar_type == Moose::MortarType::Primary && !_interpolate_normals &&
+        !_primary_ip_lowerd_map.count(_i))
+      continue;
+
+    if (mortar_type == Moose::MortarType::Secondary && !_interpolate_normals &&
+        !_secondary_ip_lowerd_map.count(_i))
+      continue;
+
+    is_index_on_lower_dimension.push_back(_i);
+  }
+
+  for (_qp = 0; _qp < _qrule_msm->n_points(); _qp++)
+    for (const auto index : is_index_on_lower_dimension)
+    {
+      _i = index;
+      _local_re(_i) += raw_value(_JxW_msm[_qp] * _coord[_qp] * computeQpResidual(mortar_type));
+    }
+
+  accumulateTaggedLocalResidual();
+}
+
+void
 ADMortarLagrangeConstraint::computeJacobian(Moose::MortarType mortar_type)
 {
   std::vector<DualReal> residuals;
@@ -58,35 +106,51 @@ ADMortarLagrangeConstraint::computeJacobian(Moose::MortarType mortar_type)
   test_space_size = dof_indices.size();
 
   residuals.resize(test_space_size, 0);
-  for (_qp = 0; _qp < _qrule_msm->n_points(); _qp++)
-    for (_i = 0; _i < test_space_size; _i++)
-      residuals[_i] += _JxW_msm[_qp] * _coord[_qp] * computeQpResidual(mortar_type);
 
-  // If we don't interpolate geometry, only some residuals/dofs are populated.
-  // Eliminating unnecessary residual component is necessary to preserve the right order of
-  // derivative entries when performing the processing of derivatives in assembly.
-  std::vector<DualReal> residuals_lower;
+  std::vector<unsigned int> is_index_on_lower_dimension;
   std::vector<dof_id_type> dof_indices_lower;
 
+  // Find out if nodes are on the surface
+  unsigned int number_indices_on_lowerd = 0;
+
+  for (_i = 0; _i < test_space_size; _i++)
+  {
+    if (mortar_type == Moose::MortarType::Primary && !_interpolate_normals &&
+        !_primary_ip_lowerd_map.count(_i))
+      continue;
+
+    if (mortar_type == Moose::MortarType::Secondary && !_interpolate_normals &&
+        !_secondary_ip_lowerd_map.count(_i))
+      continue;
+
+    is_index_on_lower_dimension.push_back(_i);
+    dof_indices_lower.push_back(dof_indices[_i]);
+    number_indices_on_lowerd++;
+  }
+
+  std::vector<DualReal> residuals_lower;
+  residuals_lower.resize(number_indices_on_lowerd, 0);
+
+  // Only populate nodal residuals on the primary/secondary surfaces
   if (!_interpolate_normals)
   {
-    for (_i = 0; _i < test_space_size; _i++)
+    for (_qp = 0; _qp < _qrule_msm->n_points(); _qp++)
     {
-      const bool skip_dof =
-          ((!_secondary_ip_lowerd_map.count(_i) && mortar_type == Moose::MortarType::Secondary)) ||
-          ((!_primary_ip_lowerd_map.count(_i) && mortar_type == Moose::MortarType::Primary));
-
-      if (!skip_dof)
+      unsigned int index_lower = 0;
+      for (const auto index : is_index_on_lower_dimension)
       {
-        residuals_lower.push_back(residuals[_i]);
-        dof_indices_lower.push_back(dof_indices[_i]);
+        _i = index;
+        residuals_lower[index_lower] +=
+            _JxW_msm[_qp] * _coord[_qp] * computeQpResidual(mortar_type);
+        index_lower++;
       }
     }
   }
   else
   {
-    residuals_lower = residuals;
-    dof_indices_lower = dof_indices;
+    for (_qp = 0; _qp < _qrule_msm->n_points(); _qp++)
+      for (_i = 0; _i < test_space_size; _i++)
+        residuals[_i] += _JxW_msm[_qp] * _coord[_qp] * computeQpResidual(mortar_type);
   }
 
   auto local_functor = [&](const std::vector<ADReal> & input_residuals,
@@ -143,35 +207,45 @@ ADMortarLagrangeConstraint::computeJacobian(Moose::MortarType mortar_type)
           continue;
 
         prepareMatrixTagLower(_assembly, ivar, jvar, jacobian_type);
-        unsigned int i_lower = 0;
 
+        std::vector<unsigned int> is_index_on_lower_dimension;
+
+        // Find out if nodes are on the surface
         for (_i = 0; _i < test_space_size; _i++)
         {
-          // Do we need to skip the derivatives of a zero residual?
-          const bool skip_dof =
-              ((!_interpolate_normals && (!_secondary_ip_lowerd_map.count(_i) &&
-                                          mortar_type == Moose::MortarType::Secondary)) ||
-               (!_interpolate_normals &&
-                (!_primary_ip_lowerd_map.count(_i) && mortar_type == Moose::MortarType::Primary)));
-
-          if (skip_dof)
+          if (mortar_type == Moose::MortarType::Primary && !_interpolate_normals &&
+              !_primary_ip_lowerd_map.count(_i))
             continue;
 
+          if (mortar_type == Moose::MortarType::Secondary && !_interpolate_normals &&
+              !_secondary_ip_lowerd_map.count(_i))
+            continue;
+
+          is_index_on_lower_dimension.push_back(_i);
+        }
+        unsigned int index_lower = 0;
+
+        for (const auto index : is_index_on_lower_dimension)
+        {
           for (_j = 0; _j < shape_space_sizes[type_index]; _j++)
           {
+            _i = index;
 #ifndef MOOSE_SPARSE_AD
             mooseAssert(ad_offsets[type_index] + _j < MOOSE_AD_MAX_DOFS_PER_ELEM,
                         "Out of bounds access in derivative vector.");
 #endif
             _local_ke(_i, _j) +=
-                input_residuals[i_lower].derivatives()[ad_offsets[type_index] + _j];
+                input_residuals[index_lower].derivatives()[ad_offsets[type_index] + _j];
           }
-          i_lower++;
+          index_lower++;
         }
+
         accumulateTaggedLocalMatrix();
       }
     }
   };
-
-  _assembly.processDerivatives(residuals_lower, dof_indices_lower, _matrix_tags, local_functor);
+  if (_interpolate_normals)
+    _assembly.processDerivatives(residuals, dof_indices, _matrix_tags, local_functor);
+  else
+    _assembly.processDerivatives(residuals_lower, dof_indices_lower, _matrix_tags, local_functor);
 }

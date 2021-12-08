@@ -77,11 +77,8 @@ protected:
   /// Numerical factor used in the tangential constraints for convergence purposes
   const Real _c_t;
 
-  /// Frictional Lagrange's multiplier variable pointer
-  MooseVariable * _friction_var;
-
-  /// Frictional Lagrange's multiplier variable pointer for additional 3D direction
-  MooseVariable * _friction_var_dir;
+  /// Frictional Lagrange's multiplier variable pointers
+  std::vector<MooseVariable *> _friction_vars;
 
   /// x-velocity on the secondary face
   const ADVariableValue & _secondary_x_dot;

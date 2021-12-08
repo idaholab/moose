@@ -33,8 +33,6 @@ NormalMortarMechanicalContact::NormalMortarMechanicalContact(const InputParamete
 ADReal
 NormalMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
 {
-  ADReal residual(0.0);
-
   switch (type)
   {
     case Moose::MortarType::Secondary:
@@ -47,8 +45,6 @@ NormalMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
       // want because the force vector is in the positive direction (always opposite of the
       // normals).
       // Get the _dof_to_weighted_gap map
-      if (!_interpolate_normals && !_secondary_ip_lowerd_map.count(_i))
-        return residual;
 
       if (_interpolate_normals)
         return _test_secondary[_i][_qp] * _lambda[_qp] * _normals[_qp](_component);
@@ -62,9 +58,6 @@ NormalMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
     case Moose::MortarType::Primary:
       // The normal vector is signed according to the secondary face, so we need to introduce a
       // negative sign here
-
-      if (!_interpolate_normals && !_primary_ip_lowerd_map.count(_i))
-        return residual;
 
       if (_interpolate_normals)
         return -_test_primary[_i][_qp] * _lambda[_qp] * _normals[_qp](_component);
