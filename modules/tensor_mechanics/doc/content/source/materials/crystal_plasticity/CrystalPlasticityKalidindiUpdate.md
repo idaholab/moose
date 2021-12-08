@@ -51,6 +51,25 @@ coplanar slip system groups, for a total of six slip systems
 [!citep](kalidindi1992).
 
 
+### Connection to Twinning Constitutive Models
+
+In simulations where both twin propagation and dislocation slip constitutive models
+are included, the influence of the twin propagation on the plastic velocity gradient
+is implemented as a fraction of the total twin volume fraction [!citep](kalidindi2001)
+\begin{equation}
+L^P = \left(1 - {f_{total}}_{(n-1)} \right) \sum_{\alpha}^{slip} \dot{\gamma}^{\alpha} S^{\alpha}_o + \sum_{\beta}^{twin} \dot{f}^{\beta}\gamma_{tw}S^{\beta}_o
+\end{equation}
+where f$_{total}$ is the sum of the twin volume fraction on all twin systems,
+$\dot{\gamma}^{\alpha}$ is the plastic shear rate due to dislocation slip,
+S$^{\alpha}_o$ is the Schmid tensor for the slip systems, and S$^{\beta}_o$ is the
+Schmid tensor for the twinning system.
+Note that the value of the total volume fraction of twins lags by single timestep.
+The use of this lagged value is designated by the $(n-1)$ subscript.
+This modification requires that the name for the total twin volume
+fraction material property be provided to the dislocation slip constitutive model
+as shown below.
+
+
 ## Example Input File Syntax
 
 !listing modules/tensor_mechanics/test/tests/crystal_plasticity/stress_update_material_based/update_method_test.i block=Materials/trial_xtalpl
@@ -59,6 +78,14 @@ coplanar slip system groups, for a total of six slip systems
 plasticity specific  stress calculator as shown below:
 
 !listing modules/tensor_mechanics/test/tests/crystal_plasticity/stress_update_material_based/update_method_test.i block=Materials/stress
+
+In simulations which couple this dislocation slip constitutive model with a twin
+propagation model, such as
+[CrystalPlasticityTwinningKalidindiUpdate](/CrystalPlasticityTwinningKalidindiUpdate.md),
+the name of the total twin volume fraction material property must be supplied
+in the input file:
+
+!listing modules/tensor_mechanics/test/tests/crystal_plasticity/twinning/combined_twinning_slip_100compression.i block=Materials/slip_xtalpl
 
 !syntax parameters /Materials/CrystalPlasticityKalidindiUpdate
 

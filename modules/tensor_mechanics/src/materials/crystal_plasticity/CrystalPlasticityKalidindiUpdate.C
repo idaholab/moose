@@ -45,10 +45,9 @@ CrystalPlasticityKalidindiUpdate::CrystalPlasticityKalidindiUpdate(
     _gss_initial(getParam<Real>("gss_initial")),
 
     _include_twinning_in_Lp(parameters.isParamSetByUser("total_twin_volume_fraction")),
-    _twin_volume_fraction_total(
-        _include_twinning_in_Lp ? &getMaterialPropertyByName<Real>(
-                                      getParam<MaterialPropertyName>("total_twin_volume_fraction"))
-                                : nullptr)
+    _twin_volume_fraction_total(_include_twinning_in_Lp
+                                    ? &getMaterialPropertyOld<Real>("total_twin_volume_fraction")
+                                    : nullptr)
 {
   // resize local caching vectors used for substepping
   _previous_substep_slip_resistance.resize(_number_slip_systems);

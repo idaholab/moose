@@ -6,9 +6,9 @@
   [cube]
     type = GeneratedMeshGenerator
     dim = 3
-    nx = 3
-    ny = 3
-    nz = 3
+    nx = 1
+    ny = 1
+    nz = 2
     elem_type = HEX8
   []
 []
@@ -22,51 +22,11 @@
     order = CONSTANT
     family = MONOMIAL
   []
-  [twin_resistance_0]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [twin_resistance_1]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [twin_resistance_2]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [twin_resistance_3]
-    order = CONSTANT
-    family = MONOMIAL
-  []
   [twin_resistance_4]
     order = CONSTANT
     family = MONOMIAL
   []
-  [twin_resistance_5]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [twin_resistance_6]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [twin_resistance_7]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [twin_resistance_8]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [twin_resistance_9]
-    order = CONSTANT
-    family = MONOMIAL
-  []
   [twin_resistance_10]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [twin_resistance_11]
     order = CONSTANT
     family = MONOMIAL
   []
@@ -118,51 +78,11 @@
    order = CONSTANT
    family = MONOMIAL
   []
-  [twin_tau_0]
-   order = CONSTANT
-   family = MONOMIAL
-  []
-  [twin_tau_1]
-   order = CONSTANT
-   family = MONOMIAL
-  []
-  [twin_tau_2]
-   order = CONSTANT
-   family = MONOMIAL
-  []
-  [twin_tau_3]
-   order = CONSTANT
-   family = MONOMIAL
-  []
   [twin_tau_4]
    order = CONSTANT
    family = MONOMIAL
   []
-  [twin_tau_5]
-   order = CONSTANT
-   family = MONOMIAL
-  []
-  [twin_tau_6]
-   order = CONSTANT
-   family = MONOMIAL
-  []
-  [twin_tau_7]
-   order = CONSTANT
-   family = MONOMIAL
-  []
-  [twin_tau_8]
-   order = CONSTANT
-   family = MONOMIAL
-  []
-  [twin_tau_9]
-   order = CONSTANT
-   family = MONOMIAL
-  []
   [twin_tau_10]
-   order = CONSTANT
-   family = MONOMIAL
-  []
-  [twin_tau_11]
    order = CONSTANT
    family = MONOMIAL
   []
@@ -188,34 +108,6 @@
     property = total_volume_fraction_twins
     execute_on = timestep_end
   []
-  [twin_resistance_0]
-   type = MaterialStdVectorAux
-   variable = twin_resistance_0
-   property = slip_resistance
-   index = 0
-   execute_on = timestep_end
-  []
-  [twin_resistance_1]
-   type = MaterialStdVectorAux
-   variable = twin_resistance_1
-   property = slip_resistance
-   index = 1
-   execute_on = timestep_end
-  []
-  [twin_resistance_2]
-   type = MaterialStdVectorAux
-   variable = twin_resistance_2
-   property = slip_resistance
-   index = 2
-   execute_on = timestep_end
-  []
-  [twin_resistance_3]
-   type = MaterialStdVectorAux
-   variable = twin_resistance_3
-   property = slip_resistance
-   index = 3
-   execute_on = timestep_end
-  []
   [twin_resistance_4]
    type = MaterialStdVectorAux
    variable = twin_resistance_4
@@ -223,53 +115,11 @@
    index = 4
    execute_on = timestep_end
   []
-  [twin_resistance_5]
-   type = MaterialStdVectorAux
-   variable = twin_resistance_5
-   property = slip_resistance
-   index = 5
-   execute_on = timestep_end
-  []
-  [twin_resistance_6]
-   type = MaterialStdVectorAux
-   variable = twin_resistance_6
-   property = slip_resistance
-   index = 6
-   execute_on = timestep_end
-  []
-  [twin_resistance_7]
-   type = MaterialStdVectorAux
-   variable = twin_resistance_7
-   property = slip_resistance
-   index = 7
-   execute_on = timestep_end
-  []
-  [twin_resistance_8]
-   type = MaterialStdVectorAux
-   variable = twin_resistance_8
-   property = slip_resistance
-   index = 8
-   execute_on = timestep_end
-  []
-  [twin_resistance_9]
-   type = MaterialStdVectorAux
-   variable = twin_resistance_9
-   property = slip_resistance
-   index = 9
-   execute_on = timestep_end
-  []
   [twin_resistance_10]
    type = MaterialStdVectorAux
    variable = twin_resistance_10
    property = slip_resistance
    index = 10
-   execute_on = timestep_end
-  []
-  [twin_resistance_11]
-   type = MaterialStdVectorAux
-   variable = twin_resistance_11
-   property = slip_resistance
-   index = 11
    execute_on = timestep_end
   []
   [twin_volume_fraction_0]
@@ -356,34 +206,6 @@
    index = 11
    execute_on = timestep_end
   []
-  [twin_tau_0]
-    type = MaterialStdVectorAux
-    variable = twin_tau_0
-    property = applied_shear_stress
-    index = 0
-    execute_on = timestep_end
-  []
-  [twin_tau_1]
-    type = MaterialStdVectorAux
-    variable = twin_tau_1
-    property = applied_shear_stress
-    index = 1
-    execute_on = timestep_end
-  []
-  [twin_tau_2]
-    type = MaterialStdVectorAux
-    variable = twin_tau_2
-    property = applied_shear_stress
-    index = 2
-    execute_on = timestep_end
-  []
-  [twin_tau_3]
-    type = MaterialStdVectorAux
-    variable = twin_tau_3
-    property = applied_shear_stress
-    index = 3
-    execute_on = timestep_end
-  []
   [twin_tau_4]
     type = MaterialStdVectorAux
     variable = twin_tau_4
@@ -391,53 +213,11 @@
     index = 4
     execute_on = timestep_end
   []
-  [twin_tau_5]
-    type = MaterialStdVectorAux
-    variable = twin_tau_5
-    property = applied_shear_stress
-    index = 5
-    execute_on = timestep_end
-  []
-  [twin_tau_6]
-    type = MaterialStdVectorAux
-    variable = twin_tau_6
-    property = applied_shear_stress
-    index = 6
-    execute_on = timestep_end
-  []
-  [twin_tau_7]
-    type = MaterialStdVectorAux
-    variable = twin_tau_7
-    property = applied_shear_stress
-    index = 7
-    execute_on = timestep_end
-  []
-  [twin_tau_8]
-    type = MaterialStdVectorAux
-    variable = twin_tau_8
-    property = applied_shear_stress
-    index = 8
-    execute_on = timestep_end
-  []
-  [twin_tau_9]
-    type = MaterialStdVectorAux
-    variable = twin_tau_9
-    property = applied_shear_stress
-    index = 9
-    execute_on = timestep_end
-  []
   [twin_tau_10]
     type = MaterialStdVectorAux
     variable = twin_tau_10
     property = applied_shear_stress
     index = 10
-    execute_on = timestep_end
-  []
-  [twin_tau_11]
-    type = MaterialStdVectorAux
-    variable = twin_tau_11
-    property = applied_shear_stress
-    index = 11
     execute_on = timestep_end
   []
 []
@@ -483,12 +263,15 @@
     type = ComputeMultipleCrystalPlasticityStress
     crystal_plasticity_models = 'twin_only_xtalpl'
     tan_mod_type = exact
+    maximum_substep_iteration = 2
   []
   [twin_only_xtalpl]
     type = CrystalPlasticityTwinningKalidindiUpdate
     number_slip_systems = 12
     slip_sys_file_name = 'fcc_input_twinning_systems.txt'
     initial_twin_lattice_friction = 3.0
+    non_coplanar_coefficient_twin_hardening = 8e5
+    coplanar_coefficient_twin_hardening = 8e4
   []
 []
 
@@ -501,53 +284,13 @@
     type = ElementAverageValue
     variable = total_twin_volume_fraction
   []
-  [twin_resistance_0]
-    type = ElementAverageValue
-    variable = twin_resistance_0
-  []
-  [twin_resistance_1]
-    type = ElementAverageValue
-    variable = twin_resistance_1
-  []
-  [twin_resistance_2]
-    type = ElementAverageValue
-    variable = twin_resistance_2
-  []
-  [twin_resistance_3]
-    type = ElementAverageValue
-    variable = twin_resistance_3
-  []
   [twin_resistance_4]
     type = ElementAverageValue
     variable = twin_resistance_4
   []
-  [twin_resistance_5]
-    type = ElementAverageValue
-    variable = twin_resistance_5
-  []
-  [twin_resistance_6]
-    type = ElementAverageValue
-    variable = twin_resistance_6
-  []
-  [twin_resistance_7]
-    type = ElementAverageValue
-    variable = twin_resistance_7
-  []
-  [twin_resistance_8]
-    type = ElementAverageValue
-    variable = twin_resistance_8
-  []
-  [twin_resistance_9]
-    type = ElementAverageValue
-    variable = twin_resistance_9
-  []
   [twin_resistance_10]
     type = ElementAverageValue
     variable = twin_resistance_10
-  []
-  [twin_resistance_11]
-    type = ElementAverageValue
-    variable = twin_resistance_11
   []
   [twin_volume_fraction_0]
     type = ElementAverageValue
@@ -597,53 +340,13 @@
     type = ElementAverageValue
     variable = twin_volume_fraction_11
   []
-  [twin_tau_0]
-    type = ElementAverageValue
-    variable = twin_tau_0
-  []
-  [twin_tau_1]
-    type = ElementAverageValue
-    variable = twin_tau_1
-  []
-  [twin_tau_2]
-    type = ElementAverageValue
-    variable = twin_tau_2
-  []
-  [twin_tau_3]
-    type = ElementAverageValue
-    variable = twin_tau_3
-  []
   [twin_tau_4]
     type = ElementAverageValue
     variable = twin_tau_4
   []
-  [twin_tau_5]
-    type = ElementAverageValue
-    variable = twin_tau_5
-  []
-  [twin_tau_6]
-    type = ElementAverageValue
-    variable = twin_tau_6
-  []
-  [twin_tau_7]
-    type = ElementAverageValue
-    variable = twin_tau_7
-  []
-  [twin_tau_8]
-    type = ElementAverageValue
-    variable = twin_tau_8
-  []
-  [twin_tau_9]
-    type = ElementAverageValue
-    variable = twin_tau_9
-  []
   [twin_tau_10]
     type = ElementAverageValue
     variable = twin_tau_10
-  []
-  [twin_tau_11]
-    type = ElementAverageValue
-    variable = twin_tau_11
   []
 []
 

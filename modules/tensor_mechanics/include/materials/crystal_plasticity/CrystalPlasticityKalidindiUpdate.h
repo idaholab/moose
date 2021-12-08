@@ -135,6 +135,8 @@ protected:
    * User-defined material property name for the total volume fraction of twins
    * in a twinning propagation constitutive model, when this class is used in
    * conjunction with the twinning propagation model.
+   * Note that this value is the OLD material property and thus lags the current
+   * value by a single timestep.
    */
   const MaterialProperty<Real> * const _twin_volume_fraction_total;
 };

@@ -55,13 +55,16 @@ are included, the influence of the twin propagation on the plastic velocity grad
 is implemented as a fraction of the twin volume fraction
 \begin{equation}
 \label{eqn:modTwinsLP}
-L^P = \left(1 - f_{total} \right) \sum_{\alpha}^{slip} \dot{\gamma}^{\alpha} S^{\alpha}_o + \sum_{\beta}^{twin} \dot{f}^{\beta}\gamma_{tw}S^{\beta}_o
+L^P = \left(1 - {f_{total}}_{(n-1)} \right) \sum_{\alpha}^{slip} \dot{\gamma}^{\alpha} S^{\alpha}_o + \sum_{\beta}^{twin} \dot{f}^{\beta}\gamma_{tw}S^{\beta}_o
 \end{equation}
-where $\dot{gamma}^{\alpha}$ is the plastic shear rate due to dislocation slip,
+where $\dot{\gamma}^{\alpha}$ is the plastic shear rate due to dislocation slip,
 S$^{\alpha}_o$ is the Schmid tensor for the slip systems, and S$^{\beta}_o$ is the
-Schmid tensor for the twinning system. This modification requires providing the
-name for the total twin volume fraction material property to the dislocation slip
-constitutive model as shown below.
+Schmid tensor for the twinning system.
+Note that the value of the total volume fraction of twins used in [eqn:modTwinsLP]
+lags by single timestep. The use of this lagged value is designated by the $(n-1)$
+subscript. This modification requires that the name for the total twin volume
+fraction material property be provided to the dislocation slip constitutive model
+as shown below.
 
 ## Example Input File Syntax
 

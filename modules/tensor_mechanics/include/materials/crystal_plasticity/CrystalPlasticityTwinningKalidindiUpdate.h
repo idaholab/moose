@@ -11,8 +11,6 @@
 
 #include "CrystalPlasticityStressUpdateBase.h"
 
-class CrystalPlasticityTwinningKalidindiUpdate;
-
 /**
  * CrystalPlasticityTwinningKalidindiUpdate uses the multiplicative decomposition
  * of the deformation gradient, contributing shear due to twinning to the plastic
@@ -61,12 +59,6 @@ protected:
    */
   virtual void calculateStateVariableEvolutionRateComponent() override;
 
-  /**
-   * Calculates the resistance to twin propagation, following Kalidindi
-   * IJP 17 (2001) 837-860 eqn 22.
-   */
-  void calculateTwinPropagationResistanceIncrement();
-
   virtual bool updateStateVariables() override;
 
   /**
@@ -80,16 +72,17 @@ protected:
   bool calculateTwinVolumeFraction();
 
   /**
-   * Determines if the incremented twin resistance increment value is a postive
-   * value and updates the current twin propagation resistance value.
+   * Calculates the resistance to twin propagation, following Kalidindi
+   * IJP 17 (2001) 837-860 eqn 22.
    * Note that this value does not allow for softening due to de-twinning.
    */
-  bool calculateTwinPropagationResistance();
+  void calculateTwinResistance();
 
   virtual bool areConstitutiveStateVariablesConverged() override;
 
   ///@{Total volume fraction of twins across all twin systems
   MaterialProperty<Real> & _total_twin_volume_fraction;
+  const MaterialProperty<Real> & _total_twin_volume_fraction_old;
   const Real _initial_total_twin_volume_fraction;
   ///@}
 
@@ -97,13 +90,7 @@ protected:
   MaterialProperty<std::vector<Real>> & _twin_volume_fraction;
   const MaterialProperty<std::vector<Real>> & _twin_volume_fraction_old;
   MaterialProperty<std::vector<Real>> & _twin_volume_fraction_increment;
-  // ///@}
-
-  /**
-   * Increment of resistance to twin propagation, calculated as a function of
-   * twin volume fraction
-   */
-  std::vector<Real> _twin_resistance_increment;
+  ///@}
 
   ///@{Power-law slip rate calculation coefficients, from Kalidindi IJP 17 (2001), 837-860
   const Real _reference_strain_rate;

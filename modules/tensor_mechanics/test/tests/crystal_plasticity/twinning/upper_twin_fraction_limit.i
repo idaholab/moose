@@ -130,8 +130,3 @@
   dtmin = 0.025
   end_time = 0.15
 []
-
-[Outputs]
-  csv = true
-  perf_graph = true
-[]

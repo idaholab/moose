@@ -77,6 +77,8 @@ CrystalPlasticityTwinningKalidindiUpdate::CrystalPlasticityTwinningKalidindiUpda
   : CrystalPlasticityStressUpdateBase(parameters),
 
     _total_twin_volume_fraction(declareProperty<Real>(_base_name + "total_volume_fraction_twins")),
+    _total_twin_volume_fraction_old(
+        getMaterialPropertyOld<Real>(_base_name + "total_volume_fraction_twins")),
     _initial_total_twin_volume_fraction(getParam<Real>("initial_total_twin_volume_fraction")),
     _twin_volume_fraction(
         declareProperty<std::vector<Real>>(_base_name + "twin_system_volume_fraction")),
@@ -94,8 +96,6 @@ CrystalPlasticityTwinningKalidindiUpdate::CrystalPlasticityTwinningKalidindiUpda
     _noncoplanar_exponent(getParam<Real>("non_coplanar_twin_hardening_exponent")),
     _limit_twin_volume_fraction(getParam<Real>("upper_limit_twin_volume_fraction"))
 {
-  _twin_resistance_increment.resize(_number_slip_systems);
-
   // resize local caching vectors used for substepping
   _previous_substep_twin_resistance.resize(_number_slip_systems);
   _previous_substep_twin_volume_fraction.resize(_number_slip_systems);
@@ -240,41 +240,12 @@ CrystalPlasticityTwinningKalidindiUpdate::calculateStateVariableEvolutionRateCom
   for (unsigned int i = 0; i < _number_slip_systems; ++i)
     _twin_volume_fraction_increment[_qp][i] =
         _slip_increment[_qp][i] / _characteristic_twin_shear * _substep_dt;
-
-  calculateTwinPropagationResistanceIncrement();
-}
-
-void
-CrystalPlasticityTwinningKalidindiUpdate::calculateTwinPropagationResistanceIncrement()
-{
-  Real total_twin_volume_fraction = 0.0;
-  for (unsigned int i = 0; i < _number_slip_systems; ++i)
-    total_twin_volume_fraction += _twin_volume_fraction[_qp][i];
-
-  for (unsigned int i = 0; i < _number_slip_systems; ++i)
-  {
-    _twin_resistance_increment[i] = 0.0;
-    for (unsigned int j = 0; j < _number_slip_systems; ++j)
-    {
-      if (MooseUtils::relativeFuzzyEqual(_slip_plane_normal[j](0), _slip_plane_normal[i](0)) &&
-          MooseUtils::relativeFuzzyEqual(_slip_plane_normal[j](1), _slip_plane_normal[i](1)))
-        // If the first two are the same, the third index will have to be
-        _twin_resistance_increment[i] +=
-            _coplanar_coefficient_twin_hardening * _total_twin_volume_fraction[_qp] *
-            _characteristic_twin_shear * _twin_volume_fraction_increment[_qp][j];
-      else // assume non-coplanar
-        _twin_resistance_increment[i] +=
-            _non_coplanar_coefficient_twin_hardening *
-            std::pow(_total_twin_volume_fraction[_qp], _noncoplanar_exponent) *
-            _characteristic_twin_shear * _twin_volume_fraction_increment[_qp][j];
-    }
-  }
 }
 
 bool
 CrystalPlasticityTwinningKalidindiUpdate::updateStateVariables()
 {
-  if (calculateTwinVolumeFraction() && calculateTwinPropagationResistance())
+  if (calculateTwinVolumeFraction())
     return true;
   else
     return false;
@@ -314,26 +285,52 @@ CrystalPlasticityTwinningKalidindiUpdate::calculateTwinVolumeFraction()
                    _total_twin_volume_fraction[_qp],
                    " when the limit is set as ",
                    _limit_twin_volume_fraction);
+
     return false;
   }
   else
+  {
+    calculateTwinResistance();
     return true;
+  }
 }
 
-bool
-CrystalPlasticityTwinningKalidindiUpdate::calculateTwinPropagationResistance()
+void
+CrystalPlasticityTwinningKalidindiUpdate::calculateTwinResistance()
 {
+  DenseVector<Real> twin_hardening_increment(_number_slip_systems);
+
   for (unsigned int i = 0; i < _number_slip_systems; ++i)
   {
-    // _slip_resistance_increment[i] *= _substep_dt;
-    if (_previous_substep_twin_resistance[i] < _zero_tol && _twin_resistance_increment[i] < 0.0)
+    twin_hardening_increment(i) = 0.0;
+    for (unsigned int j = 0; j < _number_slip_systems; ++j)
+    {
+      if (MooseUtils::relativeFuzzyEqual(_slip_plane_normal[j](0), _slip_plane_normal[i](0)) &&
+          MooseUtils::relativeFuzzyEqual(_slip_plane_normal[j](1), _slip_plane_normal[i](1)))
+      // If the first two are the same, the third index will have to be as well
+      {
+        if (_slip_increment[_qp][j] > 0.0)
+          twin_hardening_increment(i) += _coplanar_coefficient_twin_hardening *
+                                         _total_twin_volume_fraction[_qp] *
+                                         _twin_volume_fraction[_qp][j];
+      }
+      else // assume non-coplanar
+      {
+        if (_slip_increment[_qp][j] > 0.0)
+          twin_hardening_increment(i) +=
+              _non_coplanar_coefficient_twin_hardening *
+              std::pow(_total_twin_volume_fraction[_qp], _noncoplanar_exponent) *
+              _twin_volume_fraction[_qp][j];
+      }
+    }
+  }
+
+  for (unsigned int i = 0; i < _number_slip_systems; ++i)
+  {
+    twin_hardening_increment(i) *= _characteristic_twin_shear;
+    if (twin_hardening_increment(i) <= 0.0)
       _slip_resistance[_qp][i] = _previous_substep_twin_resistance[i];
     else
-      _slip_resistance[_qp][i] =
-          _previous_substep_twin_resistance[i] + _twin_resistance_increment[i];
-
-    if (_slip_resistance[_qp][i] < 0.0)
-      return false;
+      _slip_resistance[_qp][i] = twin_hardening_increment(i) + _previous_substep_twin_resistance[i];
   }
-  return true;
 }
