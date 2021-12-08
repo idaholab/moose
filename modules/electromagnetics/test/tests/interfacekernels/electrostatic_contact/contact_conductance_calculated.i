@@ -13,8 +13,8 @@
   [./rename_subdomains]
     type = RenameBlockGenerator
     input = box
-    old_block_id = '1 2'
-    new_block_name = 'stainless_steel graphite'
+    old_block = '1 2'
+    new_block = 'stainless_steel graphite'
   [../]
   [./create_interface]
     type = SideSetsBetweenSubdomainsGenerator

@@ -53,8 +53,8 @@
   [./block_rename]
     type = RenameBlockGenerator
     input = gss_interface
-    old_block_id = '0 2'
-    new_block_name = 'stainless_steel_left stainless_steel_right'
+    old_block = '0 2'
+    new_block = 'stainless_steel_left stainless_steel_right'
   [../]
 []
 

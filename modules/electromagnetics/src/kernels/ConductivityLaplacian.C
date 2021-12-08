@@ -12,8 +12,6 @@
 
 registerMooseObject("ElectromagneticsApp", ConductivityLaplacian);
 
-defineLegacyParams(ConductivityLaplacian);
-
 InputParameters
 ConductivityLaplacian::validParams()
 {

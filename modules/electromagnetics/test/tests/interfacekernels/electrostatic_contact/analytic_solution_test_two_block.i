@@ -31,8 +31,8 @@
   [./block_rename]
     type = RenameBlockGenerator
     input = break
-    old_block_id = 0
-    new_block_name = 'stainless_steel'
+    old_block = 0
+    new_block = 'stainless_steel'
   [../]
   [./interface]
     type = SideSetsBetweenSubdomainsGenerator
