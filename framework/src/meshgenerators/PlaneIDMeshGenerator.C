@@ -77,12 +77,12 @@ PlaneIDMeshGenerator::generate()
   const Real tol = getParam<Real>("tolerance");
   for (auto & elem : mesh->active_element_ptr_range())
   {
-    const int layer_id = getPlaneID(elem->centroid());
+    const int layer_id = getPlaneID(elem->vertex_average());
     for (unsigned int i = 0; i < elem->n_nodes(); ++i)
     {
-      const Point & p = elem->point(i) - (elem->point(i) - elem->centroid()) * tol;
+      const Point & p = elem->point(i) - (elem->point(i) - elem->vertex_average()) * tol;
       if (getPlaneID(p) != layer_id)
-        mooseError("Element at ", elem->centroid(), " is cut by the planes");
+        mooseError("Element at ", elem->vertex_average(), " is cut by the planes");
     }
     elem->set_extra_integer(extra_id_index, layer_id);
   }
