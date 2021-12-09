@@ -1,6 +1,6 @@
 [Tests]
   design = 'syntax/Executioner/index.md'
-  [./test_nl_forced_iterations]
+  [./nl_forced_its]
     type = RunApp
     input = 'nl_forced_its.i'
     expect_out = "Nonlinear solve did not converge due to DIVERGED_DTOL iterations 2"
@@ -8,7 +8,7 @@
     issues = '#16474'
     design = 'FEProblemSolve.md'
   [../]
-  [./test_force_2_nl_iterations]
+  [./2d_diffusion_test]
     type = 'RunApp'
     input = '2d_diffusion_test.i'
     expect_out = 'Nonlinear solve converged due to CONVERGED_FNORM_ABS iterations 2'
@@ -16,5 +16,21 @@
     issues = '#16474'
     design = 'FEProblemSolve.md'
     cli_args = "-snes_converged_reason"
+  [../]
+  [./many_nl_forced_its]
+    type = RunApp
+    input = 'many_nl_forced_its.i'
+    expect_out = "10 Nonlinear"
+    requirement = 'The system shall perform many non linear iterations before checking for non linear divergence'
+    issues = '#19591'
+    design = 'FEProblemSolve.md'
+  [../]
+  [./many_nl_forced_its_ref_res]
+    type = RunApp
+    input = 'many_nl_forced_its_ref_res.i'
+    expect_out = "10 Nonlinear"
+    requirement = 'The system shall perform many non linear iterations before checking for non linear divergence using reference residual'
+    issues = '#19591'
+    design = 'FEProblemSolve.md'
   [../]
 []
