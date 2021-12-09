@@ -181,7 +181,7 @@ MortarData::update(AutomaticMortarGeneration & amg)
   amg.computeNodalGeometry();
 
   // (Optional) Write nodal normals to file.
-  // amg.writeNodalNormalsToFile();
+  amg.writeNodalNormalsToFile();
 
   const auto dim = amg.dim();
   if (dim == 2)

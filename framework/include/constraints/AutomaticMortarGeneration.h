@@ -30,6 +30,7 @@ namespace libMesh
 {
 class MeshBase;
 class Elem;
+class System;
 }
 class GetPot;
 
@@ -289,6 +290,8 @@ public:
   bool incorrectEdgeDropping() const { return !_correct_edge_dropping; }
 
 private:
+  MooseApp & _app;
+
   // Reference to the mesh stored in equation_systems.
   MeshBase & _mesh;
 
@@ -402,6 +405,10 @@ private:
 
   /// Whether to print debug output
   const bool _debug;
+
+  libMesh::System * _nodal_normals_system = nullptr;
+  unsigned int _nnx_var_num;
+  unsigned int _nny_var_num;
 
   /// Whether this object is on the displaced mesh
   const bool _on_displaced;

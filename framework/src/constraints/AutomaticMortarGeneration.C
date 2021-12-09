@@ -15,6 +15,7 @@
 #include "MooseLagrangeHelpers.h"
 #include "MortarSegmentHelper.h"
 #include "FormattedTable.h"
+#include "DisplacedProblem.h"
 
 #include "libmesh/mesh_tools.h"
 #include "libmesh/explicit_system.h"
@@ -57,6 +58,7 @@ AutomaticMortarGeneration::AutomaticMortarGeneration(
     const bool debug,
     const bool correct_edge_dropping)
   : ConsoleStreamInterface(app),
+    _app(app),
     _mesh(mesh_in),
     _debug(debug),
     _on_displaced(on_displaced),
@@ -2019,17 +2021,20 @@ AutomaticMortarGeneration::writeNodalNormalsToFile()
   if (_secondary_node_to_nodal_normal.empty())
     mooseError("No entries found in the secondary node -> nodal normal map.");
 
-  // Note: I seem to remember an issue with creating a second
-  // EquationSystems with the same Mesh, but this code seems to work
-  // OK currently.
-  EquationSystems nodal_normals_es(_mesh);
-  ExplicitSystem & nodal_normals_system =
-      nodal_normals_es.add_system<ExplicitSystem>("nodal_normals");
-  auto nnx_var_num = nodal_normals_system.add_variable("nodal_normal_x", FEType(FIRST, LAGRANGE)),
-       nny_var_num = nodal_normals_system.add_variable("nodal_normal_y", FEType(FIRST, LAGRANGE));
-  nodal_normals_es.init();
+  auto & problem = _app.feProblem();
+  auto & subproblem = _on_displaced ? static_cast<SubProblem &>(*problem.getDisplacedProblem())
+                                    : static_cast<SubProblem &>(problem);
+  auto & nodal_normals_es = subproblem.es();
 
-  const DofMap & dof_map = nodal_normals_system.get_dof_map();
+  if (!_nodal_normals_system)
+  {
+    _nodal_normals_system = &nodal_normals_es.template add_system<ExplicitSystem>("nodal_normals");
+    _nnx_var_num = _nodal_normals_system->add_variable("nodal_normal_x", FEType(FIRST, LAGRANGE)),
+    _nny_var_num = _nodal_normals_system->add_variable("nodal_normal_y", FEType(FIRST, LAGRANGE));
+    nodal_normals_es.reinit();
+  }
+
+  const DofMap & dof_map = _nodal_normals_system->get_dof_map();
   std::vector<dof_id_type> dof_indices_nnx, dof_indices_nny;
 
   for (MeshBase::const_element_iterator el = _mesh.elements_begin(), end_el = _mesh.elements_end();
@@ -2039,8 +2044,8 @@ AutomaticMortarGeneration::writeNodalNormalsToFile()
     const Elem * elem = *el;
 
     // Get the nodal dofs for this Elem.
-    dof_map.dof_indices(elem, dof_indices_nnx, nnx_var_num);
-    dof_map.dof_indices(elem, dof_indices_nny, nny_var_num);
+    dof_map.dof_indices(elem, dof_indices_nnx, _nnx_var_num);
+    dof_map.dof_indices(elem, dof_indices_nny, _nny_var_num);
 
     // For each node of the Elem, if it is in the secondary_node_to_nodal_normal
     // container, set the corresponding nodal normal dof values.
@@ -2049,15 +2054,16 @@ AutomaticMortarGeneration::writeNodalNormalsToFile()
       auto it = _secondary_node_to_nodal_normal.find(elem->node_ptr(n));
       if (it != _secondary_node_to_nodal_normal.end())
       {
-        nodal_normals_system.solution->set(dof_indices_nnx[n], it->second(0));
-        nodal_normals_system.solution->set(dof_indices_nny[n], it->second(1));
+        _nodal_normals_system->solution->set(dof_indices_nnx[n], it->second(0));
+        _nodal_normals_system->solution->set(dof_indices_nny[n], it->second(1));
       }
     } // end loop over nodes
   }   // end loop over elems
 
   // Finish assembly.
-  nodal_normals_system.solution->close();
+  _nodal_normals_system->solution->close();
 
+  std::set<std::string> sys_names = {"nodal_normals"};
   // Write the nodal normals to file
-  ExodusII_IO(_mesh).write_equation_systems("nodal_normals_only.e", nodal_normals_es);
+  ExodusII_IO(_mesh).write_equation_systems("nodal_normals_only.e", nodal_normals_es, &sys_names);
 }
