@@ -116,6 +116,7 @@
     plugin = '../../../../tensor_mechanics/test/plugins/elastic_temperature'
     num_state_vars = 0
     temperature = temp
+    use_one_based_indexing = true
   []
   #  2. Active for reference MOOSE computations
   [elasticity_tensor]

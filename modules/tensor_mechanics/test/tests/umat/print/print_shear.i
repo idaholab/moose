@@ -95,6 +95,7 @@
     plugin = '../../../plugins/elastic_print_multiple_fields'
     num_state_vars = 0
     external_fields = 'strain_yy strain_xy'
+    use_one_based_indexing = true
   []
 
   # 2. Active for reference MOOSE computations

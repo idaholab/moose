@@ -66,7 +66,7 @@ umat_(double * stress,
     for (int k2 = 0; k2 < *ntens; ++k2)
       stress[k1] += ddsdde[k1 * *ntens + k2] * dstran[k2];
 
-  if (*npt == 7)
+  if (*npt == 8)
   {
     Moose::out << std::fixed << std::setprecision(7);
     for (int k1 = 0; k1 < *ntens; ++k1)
