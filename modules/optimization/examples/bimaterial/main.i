@@ -15,6 +15,13 @@
   parameter_names = diffusivity_values
   num_values = 2 # diffusivity in the bottom material and in the top material of model.i
   initial_condition = '2.0 2.0' # the expected result is about '1 10' so this initial condition is not too bad
+  lower_bounds = '0 0'
+  upper_bounds = '20 20'
+  measurement_points = '-2 -2 0
+             0 -2 0
+             2 -2 0
+             0 2 0'
+  measurement_values = '0.022 0.040 0.022 0.137'
 []
 
 [Executioner]
@@ -46,13 +53,20 @@
     from_reporters = 'OptimizationReporter/diffusivity_values'
     to_reporters = 'vector_pp/diffusivity_values'
   []
+  [toForward_measument]
+    type = MultiAppReporterTransfer
+    multi_app = model
+    direction = to_multiapp
+    from_reporters = 'OptimizationReporter/measurement_xcoord OptimizationReporter/measurement_ycoord OptimizationReporter/measurement_zcoord'
+    to_reporters = 'measure_data/measurement_xcoord measure_data/measurement_ycoord measure_data/measurement_zcoord'
+  []
 
   [from_model]
     type = MultiAppReporterTransfer
     multi_app = model
     direction = from_multiapp
-    from_reporters = 'experimental_observations/temperature_difference experimental_observations/temperature vector_pp/diffusivity_values'
-    to_reporters = 'OptimizationReporter/temperature_misfit temperature_at_observation_points/values diffusivities/values'
+    from_reporters = 'data_pt/temperature data_pt/temperature vector_pp/diffusivity_values'
+    to_reporters = 'OptimizationReporter/simulation_values temperature_at_observation_points/values diffusivities/values'
   []
 []
 

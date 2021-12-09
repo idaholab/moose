@@ -20,7 +20,7 @@
 # The purpose of the main.i input file is to find this solution
 #
 # The unusual things about this input file are:
-# - the diffusivity values are not just stored in two Materials.  Instead, the Materials get their values from Functions (they are GenericFunctionMaterials) which get their values from Postprocessors, which get their values from a VectorPostprocessor.  The reason for this rather convoluted approach is because the VectorPostprocessor can be controlled by a MultiAppReporterTransfer in main.i 
+# - the diffusivity values are not just stored in two Materials.  Instead, the Materials get their values from Functions (they are GenericFunctionMaterials) which get their values from Postprocessors, which get their values from a VectorPostprocessor.  The reason for this rather convoluted approach is because the VectorPostprocessor can be controlled by a MultiAppReporterTransfer in main.i
 # - the existance of the MeasuredDataPointSampler VectorPostprocessor: it simply records the difference between the MOOSE prediction and the experimental observations
 #
 [Mesh]
@@ -154,16 +154,19 @@
     vector_names = diffusivity_values
     value = '1.0 10.0'
   []
-  [experimental_observations]
-    type = MeasuredDataPointSampler
+  [data_pt]
+    type = VppPointValueSampler
     variable = temperature
-    points = '-2 -2 0
-               0 -2 0
-               2 -2 0
-               0 2 0'
-    measured_values = '0.022 0.040 0.022 0.137'
+    reporter_name = measure_data
   []
 []
+
+[Reporters]
+  [measure_data]
+    type=OptimizationData
+  []
+[]
+
 
 [Executioner]
   type = Transient
