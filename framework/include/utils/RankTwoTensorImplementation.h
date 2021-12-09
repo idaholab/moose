@@ -965,7 +965,7 @@ RankTwoTensor::symmetricEigenvaluesEigenvectors(std::vector<Real> & eigvals,
 
 template <>
 void
-ADRankTwoTensor::symmetricEigenvaluesEigenvectors(std::vector<DualReal> & eigvals,
+ADRankTwoTensor::symmetricEigenvaluesEigenvectors(std::vector<ADReal> & eigvals,
                                                   ADRankTwoTensor & eigvecs) const
 {
   typedef Eigen::Matrix<ADReal, N, N, Eigen::DontAlign> RankTwoMatrix;
@@ -982,12 +982,12 @@ ADRankTwoTensor::symmetricEigenvaluesEigenvectors(std::vector<DualReal> & eigval
   Eigen::SelfAdjointEigenSolver<RankTwoMatrix> es;
   es.compute(self);
 
-  auto lambda = es.eigenvalues();
+  const auto & lambda = es.eigenvalues();
   eigvals.resize(N);
   for (unsigned int i = 0; i < N; ++i)
     eigvals[i] = lambda(i);
 
-  auto v = es.eigenvectors();
+  const auto & v = es.eigenvectors();
   for (unsigned int i = 0; i < N; i++)
     for (unsigned int j = 0; j < N; j++)
       eigvecs(i, j) = v(i, j);
