@@ -38,8 +38,19 @@
                'on non-coplanar twin systems.'
     []
     [upper_twin_fraction_limit]
+      type = CSVDiff
+      input = 'upper_twin_fraction_limit.i'
+      csvdiff = 'upper_twin_fraction_limit_out.csv'
+      allow_warnings = true
+      detail = 'set the plastic shear increments due to twinning to zero once '
+               'the total twin volume fraction limit is reached.'
+    []
+    [upper_twin_fraction_limit_error]
       type = RunException
       input = 'upper_twin_fraction_limit.i'
+      cli_args = 'Materials/twin_only_xtalpl/print_state_variable_convergence_error_messages=true '
+                 'Materials/twin_only_xtalpl/initial_twin_lattice_friction=3.0 '
+                 'Executioner/dtmin=0.025 Outputs/csv=false'
       expect_err = 'Maximum allowable twin volume fraction limit exceeded with a value of'
       detail = 'prevent the accumulation of a total twin volume fraction above the '
                'user-defined limit.'

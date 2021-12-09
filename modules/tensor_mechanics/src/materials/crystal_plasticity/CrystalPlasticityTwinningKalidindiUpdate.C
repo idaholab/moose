@@ -190,7 +190,7 @@ CrystalPlasticityTwinningKalidindiUpdate::calculateConstitutiveSlipDerivative(
     total_twin_volume_fraction += _twin_volume_fraction[_qp][i];
 
   // Once reach the limit of volume fraction, all plastic slip increments will be zero
-  if (total_twin_volume_fraction > _limit_twin_volume_fraction)
+  if (total_twin_volume_fraction >= _limit_twin_volume_fraction)
     std::fill(dslip_dtau.begin(), dslip_dtau.end(), 0.0);
   else
   {
@@ -278,13 +278,16 @@ CrystalPlasticityTwinningKalidindiUpdate::calculateTwinVolumeFraction()
       _total_twin_volume_fraction[_qp] += _twin_volume_fraction[_qp][i];
   }
 
-  if (_total_twin_volume_fraction[_qp] > _limit_twin_volume_fraction)
+  if ((_total_twin_volume_fraction[_qp] - _limit_twin_volume_fraction) >
+      (_rel_state_var_tol * _limit_twin_volume_fraction))
   {
     if (_print_convergence_message)
       mooseWarning("Maximum allowable twin volume fraction limit exceeded with a value of ",
                    _total_twin_volume_fraction[_qp],
                    " when the limit is set as ",
-                   _limit_twin_volume_fraction);
+                   _limit_twin_volume_fraction,
+                   " with a user-set tolerance value of ",
+                   _rel_state_var_tol);
 
     return false;
   }

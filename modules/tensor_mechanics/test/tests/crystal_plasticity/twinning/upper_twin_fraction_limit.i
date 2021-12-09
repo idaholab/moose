@@ -6,9 +6,6 @@
   [cube]
     type = GeneratedMeshGenerator
     dim = 3
-    nx = 2
-    ny = 2
-    nz = 2
     elem_type = HEX8
   []
 []
@@ -21,6 +18,22 @@
   [total_twin_volume_fraction]
     order = CONSTANT
     family = MONOMIAL
+  []
+  [slip_increment_4]
+    order = CONSTANT
+    family = MONOMIAL
+  []
+  [slip_increment_10]
+    order = CONSTANT
+    family = MONOMIAL
+  []
+  [twin_volume_fraction_4]
+   order = CONSTANT
+   family = MONOMIAL
+  []
+  [twin_volume_fraction_10]
+   order = CONSTANT
+   family = MONOMIAL
   []
 []
 
@@ -43,6 +56,34 @@
     variable = total_twin_volume_fraction
     property = total_volume_fraction_twins
     execute_on = timestep_end
+  []
+  [slip_increment_4]
+   type = MaterialStdVectorAux
+   variable = slip_increment_4
+   property = slip_increment
+   index = 4
+   execute_on = timestep_end
+  []
+  [slip_increment_10]
+   type = MaterialStdVectorAux
+   variable = slip_increment_10
+   property = slip_increment
+   index = 10
+   execute_on = timestep_end
+  []
+  [twin_volume_fraction_4]
+   type = MaterialStdVectorAux
+   variable = twin_volume_fraction_4
+   property = twin_system_volume_fraction
+   index = 4
+   execute_on = timestep_end
+  []
+  [twin_volume_fraction_10]
+   type = MaterialStdVectorAux
+   variable = twin_volume_fraction_10
+   property = twin_system_volume_fraction
+   index = 10
+   execute_on = timestep_end
   []
 []
 
@@ -92,8 +133,9 @@
     type = CrystalPlasticityTwinningKalidindiUpdate
     number_slip_systems = 12
     slip_sys_file_name = 'fcc_input_twinning_systems.txt'
-    initial_twin_lattice_friction = 3.0
-    upper_limit_twin_volume_fraction = 1.0e-7
+    initial_twin_lattice_friction = 1.5
+    upper_limit_twin_volume_fraction = 1e-7
+    stol = 0.01
     print_state_variable_convergence_error_messages = true
   []
 []
@@ -106,6 +148,22 @@
   [total_twin_volume_fraction]
     type = ElementAverageValue
     variable = total_twin_volume_fraction
+  []
+  [slip_increment_4]
+    type = ElementAverageValue
+    variable = slip_increment_4
+  []
+  [slip_increment_10]
+    type = ElementAverageValue
+    variable = slip_increment_10
+  []
+  [twin_volume_fraction_4]
+    type = ElementAverageValue
+    variable = twin_volume_fraction_4
+  []
+  [twin_volume_fraction_10]
+    type = ElementAverageValue
+    variable = twin_volume_fraction_10
   []
 []
 
@@ -126,7 +184,12 @@
   nl_rel_tol = 1e-10
   nl_abs_step_tol = 1e-10
 
-  dt = 0.025
-  dtmin = 0.025
-  end_time = 0.15
+  dt = 0.05
+  dtmin = 1e-5
+  end_time = 0.18
+[]
+
+[Outputs]
+  csv = true
+  perf_graph = true
 []
