@@ -120,17 +120,17 @@ void
 NodalPatchRecoveryBase::finalize()
 {
   // When calling nodalPatchRecovery, we may need to know _Ae and _be on algebraically ghosted
-  // elements. However, this userobject is only run on local elements, so we need to querry those
+  // elements. However, this userobject is only run on local elements, so we need to query those
   // information from other processors in this finalize() method.
 
-  // Populate algebraically elements to querry
-  std::unordered_map<processor_id_type, std::vector<dof_id_type>> querry_ids;
+  // Populate algebraically ghosted elements to query
+  std::unordered_map<processor_id_type, std::vector<dof_id_type>> query_ids;
   const ConstElemRange evaluable_elem_range = _fe_problem.getEvaluableElementRange();
   for (auto elem : evaluable_elem_range)
     if (elem->processor_id() != processor_id())
-      querry_ids[elem->processor_id()].push_back(elem->id());
+      query_ids[elem->processor_id()].push_back(elem->id());
 
-  // Answer querries received from other processors
+  // Answer queries received from other processors
   auto gather_data = [this](const processor_id_type /*pid*/,
                             const std::vector<dof_id_type> & elem_ids,
                             std::vector<std::vector<Real>> & data_to_fill) {
@@ -171,5 +171,5 @@ NodalPatchRecoveryBase::finalize()
 
   const std::vector<Real> * ex = nullptr;
   libMesh::Parallel::pull_parallel_vector_data(
-      _communicator, querry_ids, gather_data, act_on_data, ex);
+      _communicator, query_ids, gather_data, act_on_data, ex);
 }
