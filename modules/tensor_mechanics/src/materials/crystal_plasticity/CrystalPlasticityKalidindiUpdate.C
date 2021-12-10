@@ -43,7 +43,7 @@ CrystalPlasticityKalidindiUpdate::CrystalPlasticityKalidindiUpdate(
     _xm(getParam<Real>("xm")),
     _gss_initial(getParam<Real>("gss_initial")),
 
-    _include_twinning_in_Lp(parameters.isParamSetByUser("total_twin_volume_fraction")),
+    _include_twinning_in_Lp(parameters.isParamValid("total_twin_volume_fraction")),
     _twin_volume_fraction_total(_include_twinning_in_Lp
                                     ? &getMaterialPropertyOld<Real>("total_twin_volume_fraction")
                                     : nullptr)
