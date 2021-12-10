@@ -53,8 +53,3 @@
   nl_rel_tol = 1e-50
   solve_type = 'NEWTON'
 []
-
-[Outputs]
-  file_base = out
-  exodus = true
-[]
