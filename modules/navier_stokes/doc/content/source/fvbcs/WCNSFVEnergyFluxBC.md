@@ -2,10 +2,6 @@
 
 !syntax description /FVBCs/WCNSFVEnergyFluxBC
 
-This boundary condition works with postprocessors, which can be replaced by constant
-values. The intended use case for this boundary condition is to be receiving its value
-from a coupled application, using a [Receiver.md] postprocessor.
-
 The energy flux is:
 
 !equation
@@ -26,13 +22,17 @@ There are three options for specifying the energy flux:
 
 The functors needed are usually functor material properties, defined by a [GeneralFunctorFluidProps.md].
 
+This boundary condition works with postprocessors, which may be replaced by constant
+values in the input. The intended use case for this boundary condition is to be receiving its value from
+a coupled application, using a [Receiver.md] postprocessor.
+
 ## Example input syntax
 
-In this example input, the boundary conditions to the energy conservation equation are
+In this example input, the inlet boundary condition to the energy conservation equation is
 specified using a `WCNSFVEnergyFluxBC`. The energy flux is specified using the mass flow rate, the inlet area,
 the specific heat capacity and the temperature.
 
-!listing modules/navier_stokes/test/tests/finite_volume/wcns/fvbcs/flux_bcs_mdot.i block=FVBCs
+!listing modules/navier_stokes/test/tests/finite_volume/wcns/boundary_conditions/flux_bcs_mdot.i block=FVBCs
 
 !syntax parameters /FVBCs/WCNSFVEnergyFluxBC
 

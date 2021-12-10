@@ -2,10 +2,6 @@
 
 !syntax description /FVBCs/WCNSFVMassFluxBC
 
-This boundary condition works with postprocessors, which can be replaced by constant
-values. The intended use case for this boundary condition is to be receiving its value from
-a coupled application, using a [Receiver.md] postprocessor.
-
 The mass flux is:
 
 !equation
@@ -23,13 +19,17 @@ There are two options for specifying the mass flux:
   usually a functor material property, defined by a [GeneralFunctorFluidProps.md].
 
 
+This boundary condition works with postprocessors, which may be replaced by constant
+values in the input. The intended use case for this boundary condition is to be receiving its value from
+a coupled application, using a [Receiver.md] postprocessor.
+
 ## Example input syntax
 
-In this example input, the boundary conditions to the mass conservation equation are
+In this example input, the inlet boundary condition to the mass conservation equation is
 specified using a `WCNSFVMassFluxBC`. The mass flux is specified using the mass flow rate
 and the inlet area.
 
-!listing modules/navier_stokes/test/tests/finite_volume/wcns/fvbcs/flux_bcs_mdot.i block=FVBCs
+!listing modules/navier_stokes/test/tests/finite_volume/wcns/boundary_conditions/flux_bcs_mdot.i block=FVBCs
 
 !syntax parameters /FVBCs/WCNSFVMassFluxBC
 

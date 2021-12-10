@@ -2,10 +2,6 @@
 
 !syntax description /FVBCs/WCNSFVScalarFluxBC
 
-This boundary condition works with postprocessors, which can be replaced by constant
-values. The intended use case for this boundary condition is to be receiving its value
-from a coupled application, using a [Receiver.md] postprocessor.
-
 The flux for scalar quantity $c$ is:
 
 !equation
@@ -26,13 +22,17 @@ There are three options for specifying the scalar flux:
   the inlet velocity.
 
 
+This boundary condition works with postprocessors, which may be replaced by constant
+values in the input. The intended use case for this boundary condition is to be receiving its value from
+a coupled application, using a [Receiver.md] postprocessor.
+
 ## Example input syntax
 
-In this example input, the boundary conditions to the scalar quantity conservation equation are
+In this example input, the inlet boundary conditions to the scalar quantity conservation equation is
 specified using a `WCNSFVScalarFluxBC`. The scalar quantity flux is specified using the mass flow rate
 and the inlet area.
 
-!listing modules/navier_stokes/test/tests/finite_volume/wcns/fvbcs/flux_bcs_mdot.i block=FVBCs
+!listing modules/navier_stokes/test/tests/finite_volume/wcns/boundary_conditions/flux_bcs_mdot.i block=FVBCs
 
 !syntax parameters /FVBCs/WCNSFVScalarFluxBC
 

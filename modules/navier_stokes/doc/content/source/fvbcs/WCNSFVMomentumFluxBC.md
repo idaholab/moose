@@ -2,10 +2,6 @@
 
 !syntax description /FVBCs/WCNSFVMomentumFluxBC
 
-This boundary condition works with postprocessors, which can be replaced by constant
-values. The intended use case for this boundary condition is to be receiving its value from
-a coupled application, using a [Receiver.md] postprocessor.
-
 The momentum flux is:
 
 !equation
@@ -27,13 +23,17 @@ The scaling factor may be used if the inlet is not aligned with the X or Y direc
 in which case a projection is necessary and this boundary condition should be used for
 both components of the momentum equation.
 
+This boundary condition works with postprocessors, which may be replaced by constant
+values in the input. The intended use case for this boundary condition is to be receiving its value from
+a coupled application, using a [Receiver.md] postprocessor.
+
 ## Example input syntax
 
-In this example input, the boundary conditions to the momentum conservation equation are
+In this example input, the inlet boundary condition to the momentum conservation equation is
 specified using a `WCNSFVMomentumFluxBC`. The momentum flux is specified using the mass flow rate
 and the inlet area.
 
-!listing modules/navier_stokes/test/tests/finite_volume/wcns/fvbcs/flux_bcs_mdot.i block=FVBCs
+!listing modules/navier_stokes/test/tests/finite_volume/wcns/boundary_conditions/flux_bcs_mdot.i block=FVBCs
 
 !syntax parameters /FVBCs/WCNSFVMomentumFluxBC
 
