@@ -29,9 +29,9 @@ AbaqusUMATStress::validParams()
       "plugin", "The path to the compiled dynamic library for the plugin you want to use");
   params.addRequiredParam<bool>(
       "use_one_based_indexing",
-      "MOOSE is transitioning to supporting 1-based indexing to ensure maximum "
-      "compatibility with UMAT plugins. During the transition period we require "
-      "users to specify this parameter to acknowledge the change.");
+      "Parameter to control whether indexing for element and integration points as presented to "
+      "UMAT models is based on 1 (true) or 0 (false). This does not affect internal MOOSE "
+      "numbering. The option to use 0-based numbering is deprecated and will be removed soon.");
   params.addRequiredParam<std::vector<Real>>(
       "constant_properties", "Constant mechanical and thermal material properties (PROPS)");
   params.addRequiredParam<unsigned int>("num_state_vars",
@@ -83,7 +83,7 @@ AbaqusUMATStress::AbaqusUMATStress(const InputParameters & parameters)
 {
   if (!_use_one_based_indexing)
     mooseDeprecated(
-        "AbaqusUMATStress is transitioning to 1-based indexing in the element (NOEL) and "
+        "AbaqusUMATStress has transitioned to 1-based indexing in the element (NOEL) and "
         "integration point (NPT) numbers to ensure maximum compatibility with legacy UMAT files. "
         "Please ensure that any new UMAT plugins using these quantities are using the correct "
         "indexing. 0-based indexing will be deprecated soon.");
