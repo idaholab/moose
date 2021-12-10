@@ -162,7 +162,7 @@ offset = 0.00
   [tensor]
     type = ComputeIsotropicElasticityTensor
     block = '1'
-    youngs_modulus = 1.0e0
+    youngs_modulus = 1.0e4
     poissons_ratio = 0.0
   []
   [stress]
@@ -173,7 +173,7 @@ offset = 0.00
   [tensor_1000]
     type = ComputeIsotropicElasticityTensor
     block = '2'
-    youngs_modulus = 1e1
+    youngs_modulus = 1e5
     poissons_ratio = 0.0
   []
   [stress_1000]
@@ -195,8 +195,8 @@ offset = 0.00
     disp_z = disp_z
     use_displaced_mesh = true
     mu = 0.4
-    c = 1e0
-    c_t = 1.0e0
+    c = 1e4
+    c_t = 1.0e4
     friction_lm = mortar_tangential_x_lm
     friction_lm_dir = mortar_tangential_y_lm
     interpolate_normals = true

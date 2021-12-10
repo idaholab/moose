@@ -66,7 +66,7 @@ protected:
   std::unordered_map<const DofObject *, std::array<ADReal, 2>> _dof_to_weighted_tangential_velocity;
 
   /// An array of two pointers to avoid copies
-  std::array<const ADReal *, 2> _tangential_vel_ptr = {nullptr, nullptr};
+  std::array<const ADReal *, 2> _tangential_vel_ptr = {{nullptr, nullptr}};
 
   /// The value of the tangential velocity values at the current quadrature point
   std::array<ADReal, 2> _qp_tangential_velocity;

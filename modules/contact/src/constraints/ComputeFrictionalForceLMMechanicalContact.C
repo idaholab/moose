@@ -318,9 +318,6 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(const DofObj
 
     dof_residual = term_1_x - term_2_x;
     dof_residual_dir = term_1_y - term_2_y;
-
-    //    dof_residual = _mu * contact_pressure - (friction_lm_value);
-    //    dof_residual_dir = _mu * contact_pressure - (friction_dir_lm_value);
   }
 
   if (_subproblem.currentlyComputingJacobian())

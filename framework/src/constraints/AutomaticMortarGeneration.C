@@ -15,6 +15,7 @@
 #include "MooseLagrangeHelpers.h"
 #include "MortarSegmentHelper.h"
 #include "FormattedTable.h"
+#include "FEProblemBase.h"
 #include "DisplacedProblem.h"
 
 #include "libmesh/mesh_tools.h"
@@ -2015,11 +2016,14 @@ AutomaticMortarGeneration::projectPrimaryNodesSinglePair(
 }
 
 void
-AutomaticMortarGeneration::writeNodalNormalsToFile()
+AutomaticMortarGeneration::writeGeometryToFile()
 {
-  // Must call compute_nodal_normals() first!
-  if (_secondary_node_to_nodal_normal.empty())
-    mooseError("No entries found in the secondary node -> nodal normal map.");
+  if (!_debug)
+    return;
+
+  // Must call compute_nodal_geometry first!
+  if (_secondary_node_to_nodal_normal.empty() || _secondary_node_to_hh_nodal_tangents.empty())
+    mooseError("No entries found in the secondary node -> nodal geometry map.");
 
   auto & problem = _app.feProblem();
   auto & subproblem = _on_displaced ? static_cast<SubProblem &>(*problem.getDisplacedProblem())
@@ -2031,11 +2035,28 @@ AutomaticMortarGeneration::writeNodalNormalsToFile()
     _nodal_normals_system = &nodal_normals_es.template add_system<ExplicitSystem>("nodal_normals");
     _nnx_var_num = _nodal_normals_system->add_variable("nodal_normal_x", FEType(FIRST, LAGRANGE)),
     _nny_var_num = _nodal_normals_system->add_variable("nodal_normal_y", FEType(FIRST, LAGRANGE));
+    _nnz_var_num = _nodal_normals_system->add_variable("nodal_normal_z", FEType(FIRST, LAGRANGE));
+
+    _t1x_var_num =
+        _nodal_normals_system->add_variable("nodal_tangent_1_x", FEType(FIRST, LAGRANGE)),
+    _t1y_var_num =
+        _nodal_normals_system->add_variable("nodal_tangent_1_y", FEType(FIRST, LAGRANGE));
+    _t1z_var_num =
+        _nodal_normals_system->add_variable("nodal_tangent_1_z", FEType(FIRST, LAGRANGE));
+
+    _t2x_var_num =
+        _nodal_normals_system->add_variable("nodal_tangent_2_x", FEType(FIRST, LAGRANGE)),
+    _t2y_var_num =
+        _nodal_normals_system->add_variable("nodal_tangent_2_y", FEType(FIRST, LAGRANGE));
+    _t2z_var_num =
+        _nodal_normals_system->add_variable("nodal_tangent_2_z", FEType(FIRST, LAGRANGE));
     nodal_normals_es.reinit();
   }
 
   const DofMap & dof_map = _nodal_normals_system->get_dof_map();
-  std::vector<dof_id_type> dof_indices_nnx, dof_indices_nny;
+  std::vector<dof_id_type> dof_indices_nnx, dof_indices_nny, dof_indices_nnz;
+  std::vector<dof_id_type> dof_indices_t1x, dof_indices_t1y, dof_indices_t1z;
+  std::vector<dof_id_type> dof_indices_t2x, dof_indices_t2y, dof_indices_t2z;
 
   for (MeshBase::const_element_iterator el = _mesh.elements_begin(), end_el = _mesh.elements_end();
        el != end_el;
@@ -2046,6 +2067,17 @@ AutomaticMortarGeneration::writeNodalNormalsToFile()
     // Get the nodal dofs for this Elem.
     dof_map.dof_indices(elem, dof_indices_nnx, _nnx_var_num);
     dof_map.dof_indices(elem, dof_indices_nny, _nny_var_num);
+    dof_map.dof_indices(elem, dof_indices_nnz, _nnz_var_num);
+
+    dof_map.dof_indices(elem, dof_indices_t1x, _t1x_var_num);
+    dof_map.dof_indices(elem, dof_indices_t1y, _t1y_var_num);
+    dof_map.dof_indices(elem, dof_indices_t1z, _t1z_var_num);
+
+    dof_map.dof_indices(elem, dof_indices_t2x, _t2x_var_num);
+    dof_map.dof_indices(elem, dof_indices_t2y, _t2y_var_num);
+    dof_map.dof_indices(elem, dof_indices_t2z, _t2z_var_num);
+
+    //
 
     // For each node of the Elem, if it is in the secondary_node_to_nodal_normal
     // container, set the corresponding nodal normal dof values.
@@ -2056,14 +2088,28 @@ AutomaticMortarGeneration::writeNodalNormalsToFile()
       {
         _nodal_normals_system->solution->set(dof_indices_nnx[n], it->second(0));
         _nodal_normals_system->solution->set(dof_indices_nny[n], it->second(1));
+        _nodal_normals_system->solution->set(dof_indices_nnz[n], it->second(2));
       }
+
+      auto it_tangent = _secondary_node_to_hh_nodal_tangents.find(elem->node_ptr(n));
+      if (it_tangent != _secondary_node_to_hh_nodal_tangents.end())
+      {
+        _nodal_normals_system->solution->set(dof_indices_t1x[n], it_tangent->second[0](0));
+        _nodal_normals_system->solution->set(dof_indices_t1y[n], it_tangent->second[0](1));
+        _nodal_normals_system->solution->set(dof_indices_t1z[n], it_tangent->second[0](2));
+
+        _nodal_normals_system->solution->set(dof_indices_t2x[n], it_tangent->second[1](0));
+        _nodal_normals_system->solution->set(dof_indices_t2y[n], it_tangent->second[1](1));
+        _nodal_normals_system->solution->set(dof_indices_t2z[n], it_tangent->second[1](2));
+      }
+
     } // end loop over nodes
   }   // end loop over elems
 
   // Finish assembly.
   _nodal_normals_system->solution->close();
 
-  std::set<std::string> sys_names = {"nodal_normals"};
+  std::set<std::string> sys_names = {"nodal_geometry"};
   // Write the nodal normals to file
-  ExodusII_IO(_mesh).write_equation_systems("nodal_normals_only.e", nodal_normals_es, &sys_names);
+  ExodusII_IO(_mesh).write_equation_systems("nodal_geometry_only.e", nodal_normals_es, &sys_names);
 }

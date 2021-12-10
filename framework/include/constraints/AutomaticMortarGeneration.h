@@ -91,11 +91,9 @@ public:
   void computeNodalGeometry();
 
   /**
-   * Since the nodal normals are no longer a variable in the
-   * EquationSystems, we need to have an alternate method for writing
-   * them out to file for visualization.
+   * Debug method for writing normal and tangent vectors out to file for visualization.
    */
-  void writeNodalNormalsToFile();
+  void writeGeometryToFile();
 
   /**
    * Project secondary nodes (find xi^(2) values) to the closest points on
@@ -406,9 +404,21 @@ private:
   /// Whether to print debug output
   const bool _debug;
 
+  ///@{
+  /** Member variables for geometry debug output */
   libMesh::System * _nodal_normals_system = nullptr;
   unsigned int _nnx_var_num;
   unsigned int _nny_var_num;
+  unsigned int _nnz_var_num;
+
+  unsigned int _t1x_var_num;
+  unsigned int _t1y_var_num;
+  unsigned int _t1z_var_num;
+
+  unsigned int _t2x_var_num;
+  unsigned int _t2y_var_num;
+  unsigned int _t2z_var_num;
+  ///@}
 
   /// Whether this object is on the displaced mesh
   const bool _on_displaced;

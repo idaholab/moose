@@ -48,6 +48,19 @@
     min_ad_size = 100
     max_parallel = 1
   []
+  [frictionless-mortar-3d-debug-mesh-geometry]
+    type = 'Exodiff'
+    input = 'frictionless-mortar-3d.i'
+    exodiff = 'nodal_geometry_only.e'
+    mesh_mode = 'REPLICATED'
+    cli_args = 'Executioner/end_time=0.5 Executioner/dtmin=0.5 Constraints/normal_lm/debug_mesh=true '
+               'Constraints/normal_x/debug_mesh=true Constraints/normal_y/debug_mesh=true '
+               'Constraints/normal_z/debug_mesh=true Outputs/exodus=false Problem/solve=false'
+    requirement = 'MOOSE shall will solve a 3D frictionless bouncing block problem with mortar '
+                  'constraint and output the normal and tangent vector fields for debugging purposes'
+    min_ad_size = 100
+    max_parallel = 1
+  []
   [frictional-mortar-3d]
     type = 'Exodiff'
     input = 'frictional-mortar-3d.i'
