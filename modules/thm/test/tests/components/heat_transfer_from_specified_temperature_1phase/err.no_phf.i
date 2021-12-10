@@ -4,6 +4,12 @@
   []
 []
 
+[Closures]
+  [simple_closures]
+    type = Closures1PhaseSimple
+  []
+[]
+
 [HeatStructureMaterials]
   [mat]
     type = SolidMaterialProperties
@@ -21,7 +27,7 @@
     length = 1
     n_elems = 2
     A = 1
-    closures = simple
+    closures = simple_closures
     fp = fp
     f = 0.01
 

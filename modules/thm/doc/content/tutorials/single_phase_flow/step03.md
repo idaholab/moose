@@ -72,7 +72,7 @@ upper part of the loop
 In the heat exchanger section, we only build the primary side and connect it to
 [HeatTransferFromSpecifiedTemperature1Phase](HeatTransferFromSpecifiedTemperature1Phase.md).
 This component requires the `T_wall` parameter -- wall temperature and `Hw` convective wall
-heat transfer coefficient (because we are using `simple` closures).
+heat transfer coefficient (this is a requirement of [Closures1PhaseSimple.md]).
 Using a simplified secondary side is a good first step when building a heat exchanger model.
 
 

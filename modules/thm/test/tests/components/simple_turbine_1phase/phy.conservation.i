@@ -8,7 +8,7 @@
 
   fp = fp
 
-  closures = simple
+  closures = simple_closures
   f = 0
 
   rdg_slope_reconstruction = minmod
@@ -23,6 +23,11 @@
   []
 []
 
+[Closures]
+  [simple_closures]
+    type = Closures1PhaseSimple
+  []
+[]
 
 [Components]
   [inlet]

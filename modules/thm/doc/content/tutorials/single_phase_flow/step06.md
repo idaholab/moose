@@ -7,8 +7,9 @@
 The +closure system+ is another powerful system provided by THM.
 It allows users to either use pre-defined closure sets or entirely define their own ones.
 
-The +pre-defined sets+ are selected by using the `closure` parameter.
-This can be done globally in `[GlobalParams]` block or on per-component basis.
+Flow channels have the `closures` parameter, which corresponds to the name of
+a [Closures](syntax/Closures/index.md) object.
+This parameter can be specified globally in `[GlobalParams]` block or on per-component basis.
 Note that not all components require the closure parameter (for example heat structures have no
 concept of closure correlations).
 
@@ -52,13 +53,14 @@ closure.
 The `ht_blocks` parameter will contain the names of components that have the wall heat transfer
 associated with them.
 
-To use the custom closure set, we need to inform the code to +not+ setup anything for us.
-We do that by saying:
+To use the custom closure set, we create a closures object of the class [Closures1PhaseNone.md],
+which does not create any of its own Materials:
 
-```
-closures = none
-```
+!listing thm/tutorials/single_phase_flow/06_custom_closures.i
+         block=Closures
+         link=False
 
+Then the name we gave this closures object (`no_closures`) is passed to the `closures` parameter.
 Again, this can be done on a global level or per-component basis.
 
 ## Materials

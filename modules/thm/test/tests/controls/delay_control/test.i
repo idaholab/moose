@@ -2,7 +2,7 @@
   initial_p = 100.e3
   initial_vel = 0
   initial_T = 300.
-  closures = simple
+  closures = simple_closures
 []
 
 [Functions]
@@ -21,6 +21,12 @@
     q_prime = 0
     p_inf = 1.e9
     cv = 1816
+  []
+[]
+
+[Closures]
+  [simple_closures]
+    type = Closures1PhaseSimple
   []
 []
 

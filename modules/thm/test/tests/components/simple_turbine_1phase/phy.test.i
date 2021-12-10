@@ -8,7 +8,7 @@
 
   fp = fp
 
-  closures = simple
+  closures = simple_closures
   f = 0
 
   gravity_vector = '0 0 0'
@@ -19,6 +19,12 @@
     type = IdealGasFluidProperties
     gamma = 1.4
     molar_mass = 0.01
+  []
+[]
+
+[Closures]
+  [simple_closures]
+    type = Closures1PhaseSimple
   []
 []
 

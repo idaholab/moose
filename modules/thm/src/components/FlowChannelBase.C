@@ -115,7 +115,10 @@ FlowChannelBase::init()
   {
     _flow_model->init();
 
-    _closures = buildClosures();
+    if (_sim.hasClosures(_closures_name))
+      _closures = _sim.getClosures(_closures_name);
+    else
+      _closures = buildClosures();
   }
 }
 

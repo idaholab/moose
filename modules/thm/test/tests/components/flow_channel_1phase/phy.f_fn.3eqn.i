@@ -11,7 +11,7 @@ f = 5
 
   scaling_factor_1phase = '1e0 1e-2 1e-4'
 
-  closures = simple
+  closures = simple_closures
 []
 
 [FluidProperties]
@@ -22,6 +22,12 @@ f = 5
     q = -1.167e6
     p_inf = 1.0e9
     q_prime = 0
+  []
+[]
+
+[Closures]
+  [simple_closures]
+    type = Closures1PhaseSimple
   []
 []
 

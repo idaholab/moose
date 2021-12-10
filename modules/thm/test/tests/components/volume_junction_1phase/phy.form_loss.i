@@ -22,7 +22,7 @@ A = 0.1
   f = 0
 
   fp = fp
-  closures = simple
+  closures = simple_closures
 []
 
 [FluidProperties]
@@ -33,6 +33,12 @@ A = 0.1
     q = 0
     q_prime = 0
     p_inf = 0
+  []
+[]
+
+[Closures]
+  [simple_closures]
+    type = Closures1PhaseSimple
   []
 []
 

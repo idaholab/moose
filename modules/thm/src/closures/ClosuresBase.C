@@ -9,7 +9,7 @@ ClosuresBase::validParams()
   params.addPrivateParam<THMProblem *>("_thm_problem");
   params.addPrivateParam<Logger *>("_logger");
 
-  params.registerBase("THM:closures");
+  params.registerBase("Closures");
 
   return params;
 }

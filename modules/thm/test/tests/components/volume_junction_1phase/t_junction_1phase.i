@@ -26,7 +26,7 @@ A_small = 0.5
 
   rdg_slope_reconstruction = minmod
 
-  closures = simple
+  closures = simple_closures
 []
 
 [FluidProperties]
@@ -37,6 +37,12 @@ A_small = 0.5
     q = 0
     q_prime = 0
     p_inf = 0
+  []
+[]
+
+[Closures]
+  [simple_closures]
+    type = Closures1PhaseSimple
   []
 []
 

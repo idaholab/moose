@@ -46,6 +46,15 @@ To do so, we will put the following block inside the `[FluidProperties]` block.
          block=FluidProperties/he
          link=False
 
+## Closures
+
+Closure relations are provided through objects created in a `[Closures]` block.
+Here we create a simple set of closures, which will be used by our flow channel component:
+
+!listing thm/tutorials/single_phase_flow/01_flow_channel.i
+         block=Closures
+         link=False
+
 ## Flow Channel
 
 The heart of all input files is the top-level `[Components]` block.
@@ -131,15 +140,15 @@ initial_vel = 0
 initial_T = ${T_in}
 ```
 
-It is also required to specify closure correlations.
-The closure system will be introduced in the final step of this tutorial, so for right now,
-we use the `simple` closure set via the following syntax:
+The `closures` parameter is used to specify the name of a closures object, so
+we pass the name we gave to the closures object we created in the `Closures` block:
 
 ```
-closures = simple
+closures = simple_closures
 ```
 
-This closure set requires users to specify wall friction factor `f` and wall heat transfer
+Note that the corresponding closures class, [Closures1PhaseSimple.md],
+requires users to specify wall friction factor `f` and wall heat transfer
 coefficient `Hw` (if heating is present) manually as a constant value.
 
 Since we will be using helium gas in almost all flow components, we can place the following in the

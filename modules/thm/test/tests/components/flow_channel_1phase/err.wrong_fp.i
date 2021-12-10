@@ -1,5 +1,5 @@
 [GlobalParams]
-  closures = simple
+  closures = simple_closures
 
   initial_p = 1e5
   initial_T = 300
@@ -9,6 +9,12 @@
 [FluidProperties]
   [fp_2phase]
     type = StiffenedGasTwoPhaseFluidProperties
+  []
+[]
+
+[Closures]
+  [simple_closures]
+    type = Closures1PhaseSimple
   []
 []
 

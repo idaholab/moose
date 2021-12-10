@@ -8,6 +8,7 @@
 #include "FlowChannelBase.h"
 #include "FlowJunction.h"
 
+#include "ClosuresBase.h"
 #include "FluidProperties.h"
 #include "THMControl.h"
 #include "TerminateControl.h"
@@ -822,6 +823,32 @@ Simulation::hasComponent(const std::string & name) const
 {
   auto it = _comp_by_name.find(name);
   return (it != _comp_by_name.end());
+}
+
+void
+Simulation::addClosures(const std::string & type, const std::string & name, InputParameters params)
+{
+  std::shared_ptr<ClosuresBase> obj_ptr = _factory.create<ClosuresBase>(type, name, params);
+  if (_closures_by_name.find(name) == _closures_by_name.end())
+    _closures_by_name[name] = obj_ptr;
+  else
+    logError("A closures object with the name '", name, "' already exists.");
+}
+
+bool
+Simulation::hasClosures(const std::string & name) const
+{
+  return _closures_by_name.find(name) != _closures_by_name.end();
+}
+
+std::shared_ptr<ClosuresBase>
+Simulation::getClosures(const std::string & name) const
+{
+  auto it = _closures_by_name.find(name);
+  if (it != _closures_by_name.end())
+    return it->second;
+  else
+    mooseError("The requested closures object '", name, "' does not exist.");
 }
 
 void

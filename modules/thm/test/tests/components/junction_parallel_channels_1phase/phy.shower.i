@@ -20,12 +20,18 @@
 
   scaling_factor_1phase = '1 1 1e-6'
 
-  closures = simple
+  closures = simple_closures
 []
 
 [FluidProperties]
   [eos]
     type = IdealGasFluidProperties
+  []
+[]
+
+[Closures]
+  [simple_closures]
+    type = Closures1PhaseSimple
   []
 []
 

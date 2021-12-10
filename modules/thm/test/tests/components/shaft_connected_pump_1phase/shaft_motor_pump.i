@@ -15,13 +15,19 @@ dt = 1.e-2
   A_ref = ${area}
   f = 100
   scaling_factor_1phase = '0.04 0.04 0.04e-5'
-  closures = simple
+  closures = simple_closures
   fp = fp
 []
 
 [FluidProperties]
   [fp]
     type = IdealGasFluidProperties
+  []
+[]
+
+[Closures]
+  [simple_closures]
+    type = Closures1PhaseSimple
   []
 []
 

@@ -4,7 +4,7 @@
   initial_p = 17e+06
   f = 0
   fp = fp
-  closures = simple
+  closures = simple_closures
   A = 1
   gravity_vector = '0 0 0'
 []
@@ -17,6 +17,12 @@
     q_prime = 0
     p_inf = 1.e9
     cv = 1816
+  []
+[]
+
+[Closures]
+  [simple_closures]
+    type = Closures1PhaseSimple
   []
 []
 

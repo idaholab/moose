@@ -17,6 +17,12 @@
   []
 []
 
+[Closures]
+  [simple_closures]
+    type = Closures1PhaseSimple
+  []
+[]
+
 [Functions]
   [T_init]
     type = ParsedFunction
@@ -38,7 +44,7 @@
     initial_T = T_init
     initial_p = 1.01e5
     initial_vel = 0
-    closures = simple
+    closures = simple_closures
     A   = 0.00314159
     D_h  = 0.2
     f = 0.01

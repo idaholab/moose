@@ -21,7 +21,7 @@ time = ${fparse num_steps * dt}
 
   scaling_factor_1phase = '1 1 1e-5'
 
-  closures = simple
+  closures = simple_closures
 []
 
 [FluidProperties]
@@ -32,6 +32,12 @@ time = ${fparse num_steps * dt}
     q = -1.167e6
     q_prime = 0
     p_inf = 1e9
+  []
+[]
+
+[Closures]
+  [simple_closures]
+    type = Closures1PhaseSimple
   []
 []
 

@@ -7,7 +7,7 @@ pout = 7e6
   initial_vel = 1
   initial_T = ${T_in}
   gravity_vector = '0 0 0'
-  closures = simple
+  closures = simple_closures
   n_elems = 5
 
   scaling_factor_1phase = '1 1e-2 1e-5'
@@ -22,6 +22,11 @@ pout = 7e6
   []
 []
 
+[Closures]
+  [simple_closures]
+    type = Closures1PhaseSimple
+  []
+[]
 
 [Components]
   [inlet_bc]
