@@ -18,9 +18,7 @@ do
   if [[ "$i" == "--version="* ]]; then
     VSTR="$i"
     VERSION=${VSTR#*=};
-  fi
-
-  if [[ "$i" == "-h" || "$i" == "--help" ]]; then
+  elif [[ "$i" == "-h" || "$i" == "--help" ]]; then
     HELP=1;
   fi
 done
@@ -36,12 +34,33 @@ if [[ -n "$HELP" ]]; then
   exit 0
 fi
 
+if [[ $VERSION -le 1.4 ]]; then
+  echo "The current implementation does not support libtorch versions below 1.4!"
+  exit 1
+fi
+
 # Checking the operating system
 UNAME_OUT="$(uname -s)"
 case "${UNAME_OUT}" in
   linux*)     OP_SYS=linux;;
   darwin*)    OP_SYS=mac;;
 esac
+
+# Checking if the available GLIBC version is sufficient for proper linkig. Only
+# causes issues on llinux distributions. Considering that most Macs use the
+# moose compiler stack.
+if [[ $OP_SYS -eq linux ]]; then
+  GLIBC_VERSION=`ldd --version | awk '/ldd/{print $NF}'`
+  if [[ $VERSION -le 1.8 -a $GLIBC_VERSION -leq 2.23 ]]; then
+    echo "The current version of GLIBC is not sufficient for proper linking!"
+    echo "Upgrade it to at least 2.23! Current version: $GLIBC_VERSION"
+    exit 1
+  elif [[ $VERSION -ge 1.8 -a $GLIBC_VERSION -leq 2.27 ]]; then
+    echo "The current version of GLIBC is not sufficient for proper linking!"
+    echo "Upgrade it to at least 2.27! Current version: $GLIBC_VERSION"
+    exit 1
+  fi
+fi
 
 # Depending on the distribution, download the corresponding precompiled libs
 # Also, if another installation is present for libtorch, we overwrite the files.
