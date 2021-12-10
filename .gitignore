@@ -70,6 +70,7 @@ temp_print_trace.*
 *.vtk
 *.vtu
 *.pvtu
+*.zip
 .depend
 *.png
 *.svg
@@ -95,6 +96,7 @@ temp_print_trace.*
 failed-unittest
 compile_commands.json
 build
+**/libtorch
 
 # Allow certain files in gold directories
 !**/gold/*.e
