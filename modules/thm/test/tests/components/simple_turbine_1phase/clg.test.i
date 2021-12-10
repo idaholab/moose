@@ -8,7 +8,7 @@
 
   f = 0
   fp = fp
-  closures = simple
+  closures = simple_closures
   gravity_vector = '0 0 0'
 
   automatic_scaling = true
@@ -25,6 +25,12 @@
     k = 0.026
     mu = 134.4e-7
     M = 0.01801488
+  []
+[]
+
+[Closures]
+  [simple_closures]
+    type = Closures1PhaseSimple
   []
 []
 

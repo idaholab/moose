@@ -71,7 +71,7 @@ cp2 = 600
 
   scaling_factor_1phase = '1e-3 1e-3 1e-8'
 
-  closures = simple
+  closures = simple_closures
 []
 
 [FluidProperties]
@@ -79,6 +79,12 @@ cp2 = 600
     type = IdealGasFluidProperties
     gamma = 1.0001
     molar_mass = 0.083144598
+  []
+[]
+
+[Closures]
+  [simple_closures]
+    type = Closures1PhaseSimple
   []
 []
 

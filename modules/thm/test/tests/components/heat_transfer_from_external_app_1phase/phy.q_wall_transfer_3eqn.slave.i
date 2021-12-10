@@ -5,12 +5,18 @@
   initial_vel = 0.
   initial_T = 300.
 
-  closures = simple
+  closures = simple_closures
 []
 
 [FluidProperties]
   [eos]
     type = IdealGasFluidProperties
+  []
+[]
+
+[Closures]
+  [simple_closures]
+    type = Closures1PhaseSimple
   []
 []
 

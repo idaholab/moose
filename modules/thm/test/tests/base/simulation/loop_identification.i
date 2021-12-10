@@ -33,7 +33,7 @@
 #   outlet
 
 [GlobalParams]
-  closures = simple
+  closures = simple_closures
 
   initial_p = 1e6
   initial_T = 300
@@ -48,6 +48,12 @@
     q_prime = 0
     p_inf = 1.e9
     cv = 1816
+  []
+[]
+
+[Closures]
+  [simple_closures]
+    type = Closures1PhaseSimple
   []
 []
 

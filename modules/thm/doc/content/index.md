@@ -52,6 +52,28 @@ Use the modeling guide to explore how to piece your models together:
 
 ## Announcements and News
 
+#### December 7, 2021
+
+Closures objects are now created in the input file, allowing for greater flexibility,
+since some closures classes could take parameters for customization, which was
+not possible in the old setup. For example, the closures option `simple` corresponds
+to the class [Closures1PhaseSimple.md], so the new setup creates a closures object
+of this class in the input file:
+
+```
+[Closures]
+  [simple_closures]
+    type = Closures1PhaseSimple
+  []
+[]
+```
+
+Then the user-given name (in this case, `simple_closures`) is provided to the
+`closures` parameter instead of `simple`.
+
+!alert2 warning
++Warning:+ The old setup is now deprecated and will be removed March 31, 2022.
+
 ####  September 1, 2021
 
 THM was converted to use the automated differentiation (AD) system available in MOOSE.

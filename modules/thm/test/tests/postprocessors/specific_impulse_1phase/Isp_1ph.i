@@ -7,7 +7,7 @@
 
   scaling_factor_1phase = '1 1 1e-5'
 
-  closures = simple
+  closures = simple_closures
 []
 
 [FluidProperties]
@@ -17,6 +17,12 @@
     molar_mass = 2.016e-3
     k = 0.437
     mu = 3e-5
+  []
+[]
+
+[Closures]
+  [simple_closures]
+    type = Closures1PhaseSimple
   []
 []
 

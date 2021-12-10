@@ -8,7 +8,7 @@
 
   fp = fp
 
-  closures = simple
+  closures = simple_closures
   f = 0
 
   gravity_vector = '0 0 0'
@@ -25,6 +25,12 @@
     k = 0.026
     mu = 134.4e-7
     M = 0.01801488
+  []
+[]
+
+[Closures]
+  [simple_closures]
+    type = Closures1PhaseSimple
   []
 []
 

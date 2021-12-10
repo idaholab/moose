@@ -33,7 +33,7 @@ m_dot_sec_in = 1    # kg/s
   initial_vel_z = 0
 
   rdg_slope_reconstruction = full
-  closures = simple
+  closures = simple_closures
   fp = he
   f = 0.4
 []
@@ -63,6 +63,12 @@ m_dot_sec_in = 1    # kg/s
     q = -1.167e6
     p_inf = 1.0e9
     q_prime = 0
+  []
+[]
+
+[Closures]
+  [simple_closures]
+    type = Closures1PhaseSimple
   []
 []
 

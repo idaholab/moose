@@ -6,12 +6,18 @@
   scaling_factor_1phase = '1 1 1'
   scaling_factor_temperature = '1'
 
-  closures = simple
+  closures = simple_closures
 []
 
 [FluidProperties]
   [fp]
     type = IdealGasFluidProperties
+  []
+[]
+
+[Closures]
+  [simple_closures]
+    type = Closures1PhaseSimple
   []
 []
 

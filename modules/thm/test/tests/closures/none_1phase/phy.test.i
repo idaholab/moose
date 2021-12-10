@@ -9,7 +9,7 @@
   initial_p = 1e5
   initial_T = 300
 
-  closures = none
+  closures = no_closures
 []
 
 [FluidProperties]
@@ -20,6 +20,12 @@
     q = -1.167e6
     p_inf = 1.0e9
     q_prime = 0
+  []
+[]
+
+[Closures]
+  [no_closures]
+    type = Closures1PhaseNone
   []
 []
 

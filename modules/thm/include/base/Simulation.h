@@ -10,6 +10,7 @@
 
 class ActionWarehouse;
 class Component;
+class ClosuresBase;
 class THMMesh;
 class THMProblem;
 
@@ -95,6 +96,30 @@ public:
    * Return list of components available in the simulation
    */
   const std::vector<std::shared_ptr<Component>> & getComponents() { return _components; }
+
+  /**
+   * Add a closures object into this simulation
+   *
+   * @param[in] type   Closures class name
+   * @param[in] name   Closures object name
+   * @param[in] params   Input parameters
+   */
+  virtual void
+  addClosures(const std::string & type, const std::string & name, InputParameters params);
+
+  /**
+   * Return whether the simulation has a closures object
+   *
+   * @param[in] name   Closures object name
+   */
+  bool hasClosures(const std::string & name) const;
+
+  /**
+   * Get a pointer to a closures object
+   *
+   * @param[in] name   Closures object name
+   */
+  std::shared_ptr<ClosuresBase> getClosures(const std::string & name) const;
 
   /**
    * Called by a component to announce a variable
@@ -315,6 +340,9 @@ protected:
   std::map<std::string, std::string> _component_name_to_loop_name;
   /// Map of loop name to model type
   std::map<std::string, THM::FlowModelID> _loop_name_to_model_id;
+
+  /// Map of closures by their names
+  std::map<std::string, std::shared_ptr<ClosuresBase>> _closures_by_name;
 
   /// variables for this simulation (name and info about the var)
   std::map<VariableName, VariableInfo> _vars;

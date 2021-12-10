@@ -10,12 +10,18 @@ L = 2.0
 [GlobalParams]
   gravity_vector = '0 0 0'
 
-  closures = simple
+  closures = simple_closures
 []
 
 [FluidProperties]
   [fp]
     type = IdealGasFluidProperties
+  []
+[]
+
+[Closures]
+  [simple_closures]
+    type = Closures1PhaseSimple
   []
 []
 

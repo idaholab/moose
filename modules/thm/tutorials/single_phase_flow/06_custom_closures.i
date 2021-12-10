@@ -36,7 +36,7 @@ ht_blocks = 'core_chan hx/pri hx/sec'
   initial_vel_z = 0
 
   rdg_slope_reconstruction = full
-  closures = none
+  closures = no_closures
   fp = he
 []
 
@@ -90,6 +90,12 @@ ht_blocks = 'core_chan hx/pri hx/sec'
     q = -1.167e6
     p_inf = 1.0e9
     q_prime = 0
+  []
+[]
+
+[Closures]
+  [no_closures]
+    type = Closures1PhaseNone
   []
 []
 

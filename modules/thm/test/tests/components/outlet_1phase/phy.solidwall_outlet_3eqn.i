@@ -4,7 +4,7 @@
 [GlobalParams]
   gravity_vector = '0 0 0'
 
-  closures = simple
+  closures = simple_closures
 []
 
 [FluidProperties]
@@ -15,6 +15,12 @@
     q = 2.03e6
     p_inf = 0.0
     q_prime = -2.3e4
+  []
+[]
+
+[Closures]
+  [simple_closures]
+    type = Closures1PhaseSimple
   []
 []
 

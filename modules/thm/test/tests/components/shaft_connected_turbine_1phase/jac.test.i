@@ -11,7 +11,7 @@
   A = 0.1
   A_ref = 0.1
 
-  closures = simple
+  closures = simple_closures
   fp = fp
   f = 0.01
 []
@@ -24,6 +24,12 @@
     p_inf = 0
     q = 0
     q_prime = 0
+  []
+[]
+
+[Closures]
+  [simple_closures]
+    type = Closures1PhaseSimple
   []
 []
 

@@ -3,7 +3,7 @@
   initial_T = 300
   initial_vel = 0
 
-  closures = simple
+  closures = simple_closures
 
   f = 0
   fp = fp
@@ -14,6 +14,12 @@
 [FluidProperties]
   [fp]
     type = IdealGasFluidProperties
+  []
+[]
+
+[Closures]
+  [simple_closures]
+    type = Closures1PhaseSimple
   []
 []
 

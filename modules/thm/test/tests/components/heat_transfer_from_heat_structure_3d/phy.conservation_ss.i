@@ -24,6 +24,12 @@
   []
 []
 
+[Closures]
+  [simple_closures]
+    type = Closures1PhaseSimple
+  []
+[]
+
 [Components]
   [fch]
     type = FlowChannel1Phase
@@ -35,7 +41,7 @@
     initial_T = 300
     initial_p = 1.01e5
     initial_vel = 1
-    closures = simple
+    closures = simple_closures
     A  = 0.00314159
     f = 0.0
   []

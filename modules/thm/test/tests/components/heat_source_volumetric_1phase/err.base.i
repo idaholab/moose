@@ -9,6 +9,12 @@
   []
 []
 
+[Closures]
+  [simple_closures]
+    type = Closures1PhaseSimple
+  []
+[]
+
 [Components]
   [total_power]
     type = TotalPower
@@ -25,7 +31,7 @@
     A = 1
     f = 0.1
     fp = fp
-    closures = simple
+    closures = simple_closures
 
     initial_T = 300
     initial_p = 1e05
