@@ -18,6 +18,7 @@
 // Any requisite includes here
 #include "libmesh/libmesh.h"
 #include "libmesh/tensor_value.h"
+#include "libmesh/int_range.h"
 
 #include "metaphysicl/raw_type.h"
 
@@ -542,8 +543,8 @@ struct RawType<RankTwoTensorTempl<T>>
   static value_type value(const RankTwoTensorTempl<T> & in)
   {
     value_type ret;
-    for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-      for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
+    for (auto i : make_range(LIBMESH_DIM))
+      for (auto j : make_range(LIBMESH_DIM))
         ret(i, j) = raw_value(in(i, j));
 
     return ret;
@@ -614,7 +615,7 @@ RankTwoTensorTempl<T>::positiveProjectionEigenDecomposition(std::vector<T> & eig
   // Separate out positive and negative eigen values
   std::array<T, N> epos;
   std::array<T, N> d;
-  for (unsigned int i = 0; i < N; ++i)
+  for (auto i : make_range(N))
   {
     epos[i] = (std::abs(eigval[i]) + eigval[i]) / 2.0;
     d[i] = 0 < eigval[i] ? 1.0 : 0.0;
@@ -625,14 +626,14 @@ RankTwoTensorTempl<T>::positiveProjectionEigenDecomposition(std::vector<T> & eig
   RankFourTensorTempl<T> Gab, Gba;
   RankTwoTensorTempl<T> Ma, Mb;
 
-  for (unsigned int a = 0; a < N; ++a)
+  for (auto a : make_range(N))
   {
     Ma.vectorOuterProduct(eigvec.column(a), eigvec.column(a));
     proj_pos += d[a] * Ma.outerProduct(Ma);
   }
 
-  for (unsigned int a = 0; a < N; ++a)
-    for (unsigned int b = 0; b < a; ++b)
+  for (auto a : make_range(N))
+    for (auto b : make_range(a))
     {
       Ma.vectorOuterProduct(eigvec.column(a), eigvec.column(a));
       Mb.vectorOuterProduct(eigvec.column(b), eigvec.column(b));

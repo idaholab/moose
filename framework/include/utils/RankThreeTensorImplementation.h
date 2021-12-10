@@ -46,7 +46,7 @@ RankThreeTensorTempl<T>::RankThreeTensorTempl()
 {
   mooseAssert(N == 3, "RankThreeTensor is currently only tested for 3 dimensions.");
 
-  for (unsigned int i = 0; i < N3; ++i)
+  for (auto i : make_range(N3))
     _vals[i] = 0;
 }
 
@@ -73,7 +73,7 @@ template <typename T>
 void
 RankThreeTensorTempl<T>::zero()
 {
-  for (unsigned int i = 0; i < N3; ++i)
+  for (auto i : make_range(N3))
     _vals[i] = 0;
 }
 
@@ -81,7 +81,7 @@ template <typename T>
 RankThreeTensorTempl<T> &
 RankThreeTensorTempl<T>::operator=(const T & value)
 {
-  for (unsigned int i = 0; i < N3; ++i)
+  for (auto i : make_range(N3))
     _vals[i] = value;
   return *this;
 }
@@ -90,23 +90,24 @@ template <typename T>
 RankThreeTensorTempl<T> &
 RankThreeTensorTempl<T>::operator=(const RankThreeTensorTempl<T> & a)
 {
-  for (unsigned int i = 0; i < N3; ++i)
+  for (auto i : make_range(N3))
     _vals[i] = a._vals[i];
 
   return *this;
 }
 
 template <typename T>
-VectorValue<T> RankThreeTensorTempl<T>::operator*(const RankTwoTensorTempl<T> & a) const
+VectorValue<T>
+RankThreeTensorTempl<T>::operator*(const RankTwoTensorTempl<T> & a) const
 {
   VectorValue<T> result;
 
-  for (unsigned int i = 0; i < N; ++i)
+  for (auto i : make_range(N))
   {
     T sum = 0;
     unsigned int i1 = i * N2;
     for (unsigned int j1 = 0; j1 < N2; j1 += N)
-      for (unsigned int k = 0; k < N; ++k)
+      for (auto k : make_range(N))
         sum += _vals[i1 + j1 + k] * a._coords[j1 + k];
     result(i) = sum;
   }
@@ -115,11 +116,12 @@ VectorValue<T> RankThreeTensorTempl<T>::operator*(const RankTwoTensorTempl<T> & 
 }
 
 template <typename T>
-RankThreeTensorTempl<T> RankThreeTensorTempl<T>::operator*(const T b) const
+RankThreeTensorTempl<T>
+RankThreeTensorTempl<T>::operator*(const T b) const
 {
   RankThreeTensorTempl<T> result;
 
-  for (unsigned int i = 0; i < N3; ++i)
+  for (auto i : make_range(N3))
     result._vals[i] = _vals[i] * b;
 
   return result;
@@ -129,7 +131,7 @@ template <typename T>
 RankThreeTensorTempl<T> &
 RankThreeTensorTempl<T>::operator*=(const T a)
 {
-  for (unsigned int i = 0; i < N3; ++i)
+  for (auto i : make_range(N3))
     _vals[i] *= a;
 
   return *this;
@@ -141,7 +143,7 @@ RankThreeTensorTempl<T>::operator/(const T b) const
 {
   RankThreeTensorTempl<T> result;
 
-  for (unsigned int i = 0; i < N3; ++i)
+  for (auto i : make_range(N3))
     result._vals[i] = _vals[i] / b;
 
   return result;
@@ -151,7 +153,7 @@ template <typename T>
 RankThreeTensorTempl<T> &
 RankThreeTensorTempl<T>::operator/=(const T a)
 {
-  for (unsigned int i = 0; i < N3; ++i)
+  for (auto i : make_range(N3))
     _vals[i] /= a;
 
   return *this;
@@ -161,7 +163,7 @@ template <typename T>
 RankThreeTensorTempl<T> &
 RankThreeTensorTempl<T>::operator+=(const RankThreeTensorTempl<T> & a)
 {
-  for (unsigned int i = 0; i < N3; ++i)
+  for (auto i : make_range(N3))
     _vals[i] += a._vals[i];
 
   return *this;
@@ -173,7 +175,7 @@ RankThreeTensorTempl<T>::operator+(const RankThreeTensorTempl<T> & b) const
 {
   RankThreeTensorTempl<T> result;
 
-  for (unsigned int i = 0; i < N3; ++i)
+  for (auto i : make_range(N3))
     result._vals[i] = _vals[i] + b._vals[i];
 
   return result;
@@ -183,7 +185,7 @@ template <typename T>
 RankThreeTensorTempl<T> &
 RankThreeTensorTempl<T>::operator-=(const RankThreeTensorTempl<T> & a)
 {
-  for (unsigned int i = 0; i < N3; ++i)
+  for (auto i : make_range(N3))
     _vals[i] -= a._vals[i];
 
   return *this;
@@ -195,7 +197,7 @@ RankThreeTensorTempl<T>::operator-(const RankThreeTensorTempl<T> & b) const
 {
   RankThreeTensorTempl<T> result;
 
-  for (unsigned int i = 0; i < N3; ++i)
+  for (auto i : make_range(N3))
     result._vals[i] = _vals[i] - b._vals[i];
 
   return result;
@@ -207,7 +209,7 @@ RankThreeTensorTempl<T>::operator-() const
 {
   RankThreeTensorTempl<T> result;
 
-  for (unsigned int i = 0; i < N3; ++i)
+  for (auto i : make_range(N3))
     result._vals[i] = -_vals[i];
 
   return result;
@@ -219,7 +221,7 @@ RankThreeTensorTempl<T>::L2norm() const
 {
   T l2 = 0;
 
-  for (unsigned int i = 0; i < N3; ++i)
+  for (auto i : make_range(N3))
     l2 += Utility::pow<2>(_vals[i]);
 
   return std::sqrt(l2);
@@ -266,13 +268,13 @@ void
 RankThreeTensorTempl<T>::fillFromPlaneNormal(const VectorValue<T> & input)
 {
   unsigned int index = 0;
-  for (unsigned int i = 0; i < N; ++i)
+  for (auto i : make_range(N))
   {
     const T a = input(i);
-    for (unsigned int j = 0; j < N; ++j)
+    for (auto j : make_range(N))
     {
       const T b = input(j);
-      for (unsigned int k = 0; k < N; ++k)
+      for (auto k : make_range(N))
       {
         const T c = input(k);
         T sum = 0;
@@ -294,13 +296,13 @@ RankThreeTensorTempl<T>::mixedProductRankFour(const RankTwoTensorTempl<T> & a) c
   RankFourTensorTempl<T> result;
 
   unsigned int index = 0;
-  for (unsigned int i = 0; i < N; ++i)
-    for (unsigned int j = 0; j < N; ++j)
-      for (unsigned int k = 0; k < N; ++k)
-        for (unsigned int l = 0; l < N; ++l)
+  for (auto i : make_range(N))
+    for (auto j : make_range(N))
+      for (auto k : make_range(N))
+        for (auto l : make_range(N))
         {
-          for (unsigned int m = 0; m < N; ++m)
-            for (unsigned int n = 0; n < N; ++n)
+          for (auto m : make_range(N))
+            for (auto n : make_range(N))
               result._vals[index] += (*this)(m, i, j) * a(m, n) * (*this)(n, k, l);
           index++;
         }
@@ -315,19 +317,19 @@ RankThreeTensorTempl<T>::rotate(const TensorValue<T> & R)
   RankThreeTensorTempl<T> old = *this;
 
   unsigned int index = 0;
-  for (unsigned int i = 0; i < N; ++i)
-    for (unsigned int j = 0; j < N; ++j)
-      for (unsigned int k = 0; k < N; ++k)
+  for (auto i : make_range(N))
+    for (auto j : make_range(N))
+      for (auto k : make_range(N))
       {
         T sum = 0.0;
         unsigned int index2 = 0;
-        for (unsigned int m = 0; m < N; ++m)
+        for (auto m : make_range(N))
         {
           T a = R(i, m);
-          for (unsigned int n = 0; n < N; ++n)
+          for (auto n : make_range(N))
           {
             T ab = a * R(j, n);
-            for (unsigned int o = 0; o < N; ++o)
+            for (auto o : make_range(N))
               sum += ab * R(k, o) * old._vals[index2++];
           }
         }
@@ -345,7 +347,7 @@ RankThreeTensorTempl<T>::fillGeneralFromInputVector(const std::vector<T> & input
         input.size(),
         ".");
 
-  for (unsigned int i = 0; i < N3; ++i)
+  for (auto i : make_range(N3))
     _vals[i] = input[i];
 }
 
@@ -355,8 +357,8 @@ RankThreeTensorTempl<T>::doubleContraction(const RankTwoTensorTempl<T> & b) cons
 {
   VectorValue<T> result;
 
-  for (unsigned int i = 0; i < N; ++i)
-    for (unsigned int j = 0; j < N2; ++j)
+  for (auto i : make_range(N))
+    for (auto j : make_range(N2))
       result(i) += _vals[i * N2 + j] * b._coords[j];
 
   return result;
@@ -366,12 +368,12 @@ template <typename T>
 void
 RankThreeTensorTempl<T>::print(std::ostream & stm) const
 {
-  for (unsigned int i = 0; i < N; ++i)
+  for (auto i : make_range(N))
   {
     stm << "a(" << i << ", j, k) = \n";
-    for (unsigned int j = 0; j < N; ++j)
+    for (auto j : make_range(N))
     {
-      for (unsigned int k = 0; k < N; ++k)
+      for (auto k : make_range(N))
         stm << std::setw(15) << (*this)(i, j, k) << ' ';
       stm << "\n";
     }
