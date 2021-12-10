@@ -26,8 +26,7 @@ CrystalPlasticityKalidindiUpdate::validParams()
 
   params.addParam<MaterialPropertyName>(
       "total_twin_volume_fraction",
-      "Name of the material property of the total twin volume "
-      "fraction, only if twinning is considered in the simulation");
+      "Total twin volume fraction, if twinning is considered in the simulation");
 
   return params;
 }
