@@ -22,7 +22,7 @@ WCNSFVMassFluxBC::validParams()
   // this flux boundary
   params += INSFVFlowBC::validParams();
 
-  params.addParam<Real>("scaling_factor", 1, "To scale the velocity");
+  params.addParam<Real>("scaling_factor", 1, "To scale the mass flux");
 
   // Two different ways to input velocity
   // 1) Postprocessor with the velocity value

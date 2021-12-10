@@ -19,7 +19,7 @@ WCNSFVEnergyFluxBC::validParams()
   InputParameters params = FVFluxBC::validParams();
   params += INSFVFlowBC::validParams();
 
-  params.addParam<Real>("scaling_factor", 1, "To scale the velocity");
+  params.addParam<Real>("scaling_factor", 1, "To scale the energy flux");
 
   // Three different ways to input temperature
   // 1) Postprocessor with the energy flow rate directly
@@ -86,7 +86,7 @@ WCNSFVEnergyFluxBC::computeQpResidual()
 {
 
   if (_energy_pp)
-    return -*_energy_pp / *_area_pp;
+    return -_scaling_factor * *_energy_pp / *_area_pp;
   else if (_velocity_pp)
     return -_scaling_factor * (*_rho)(singleSidedFaceArg()) * *_velocity_pp *
            (*_cp)(singleSidedFaceArg()) * *_temperature_pp;
