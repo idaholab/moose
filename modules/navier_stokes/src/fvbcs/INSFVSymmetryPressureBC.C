@@ -11,12 +11,13 @@
 #include "InputParameters.h"
 
 registerMooseObject("NavierStokesApp", INSFVSymmetryPressureBC);
+registerMooseObject("NavierStokesApp", INSFVSymmetryScalarBC);
 
 InputParameters
 INSFVSymmetryPressureBC::validParams()
 {
   auto params = INSFVSymmetryBC::validParams();
-  params.addClassDescription("Though applied to the pressure, this object ensures that the "
+  params.addClassDescription("Though not applied to velocity, this object ensures that the "
                              "velocity perpendicular to a symmetry bounadry is zero by setting the "
                              "mass flow rate across the symmetry boundary to zero.");
   return params;
