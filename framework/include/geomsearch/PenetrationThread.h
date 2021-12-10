@@ -13,6 +13,8 @@
 #include "MooseTypes.h"
 #include "PenetrationLocator.h"
 
+#include "libmesh/elem_side_builder.h"
+
 // Forward declarations
 template <typename>
 class MooseVariableFE;
@@ -82,6 +84,9 @@ protected:
   const std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>> & _bc_tuples;
 
   THREAD_ID _tid;
+
+  /// Helper for building element sides without extraneous allocation
+  ElemSideBuilder _elem_side_builder;
 
   enum CompeteInteractionResult
   {

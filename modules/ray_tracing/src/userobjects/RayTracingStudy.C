@@ -115,7 +115,6 @@ RayTracingStudy::validParams()
 
 RayTracingStudy::RayTracingStudy(const InputParameters & parameters)
   : GeneralUserObject(parameters),
-    SidePtrHelper(),
     _mesh(_fe_problem.mesh()),
     _comm(_mesh.comm()),
     _pid(_comm.rank()),
@@ -138,6 +137,7 @@ RayTracingStudy::RayTracingStudy(const InputParameters & parameters)
     _verify_trace_intersections(getParam<bool>("verify_trace_intersections")),
 #endif
 
+    _threaded_elem_side_builders(libMesh::n_threads()),
     _threaded_cached_traces(libMesh::n_threads()),
 
     _num_cached(libMesh::n_threads(), 0),
@@ -467,11 +467,11 @@ RayTracingStudy::nonPlanarSideSetup()
 
     for (const auto s : elem->side_index_range())
     {
-      const auto side = sidePtrHelper(elem, s);
-      if (side->n_vertices() < 4)
+      const auto & side = elemSide(*elem, s);
+      if (side.n_vertices() < 4)
         continue;
 
-      if (!side->has_affine_map())
+      if (!side.has_affine_map())
       {
         entry[s] = 1;
         _has_non_planar_sides = true;

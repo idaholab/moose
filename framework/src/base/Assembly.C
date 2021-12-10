@@ -264,9 +264,6 @@ Assembly::~Assembly()
   for (auto & it : _ad_vector_grad_phi_data_face)
     it.second.release();
 
-  delete _current_side_elem;
-  delete _current_neighbor_side_elem;
-
   _current_physical_points.release();
 
   _coord.release();
@@ -1381,7 +1378,7 @@ Assembly::reinitFEFace(const Elem * elem, unsigned int side)
     _curvatures.shallowCopy(
         const_cast<std::vector<Real> &>((*_holder_fe_face_helper[dim])->get_curvatures()));
 
-  computeADFace(elem, side);
+  computeADFace(*elem, side);
 
   if (_xfem != nullptr)
     modifyFaceWeightsDueToXFEM(elem, side);
@@ -1393,7 +1390,7 @@ Assembly::reinitFEFace(const Elem * elem, unsigned int side)
 }
 
 void
-Assembly::computeFaceMap(unsigned dim, const std::vector<Real> & qw, const Elem * side)
+Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::vector<Real> & qw)
 {
   // Important quantities calculated by this method:
   //   - _ad_JxW_face
@@ -1401,11 +1398,9 @@ Assembly::computeFaceMap(unsigned dim, const std::vector<Real> & qw, const Elem 
   //   - _ad_normals
   //   - _ad_curvatures
 
+  const Elem & side_elem = _compute_face_map_side_elem_builder(elem, side);
+  const auto dim = elem.dim();
   const auto n_qp = qw.size();
-  const Elem * elem = side->interior_parent();
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  auto side_number = elem->which_side_am_i(side);
-#endif
   const auto & dpsidxi_map = (*_holder_fe_face_helper[dim])->get_fe_map().get_dpsidxi();
   const auto & dpsideta_map = (*_holder_fe_face_helper[dim])->get_fe_map().get_dpsideta();
   const auto & psi_map = (*_holder_fe_face_helper[dim])->get_fe_map().get_psi();
@@ -1430,7 +1425,7 @@ Assembly::computeFaceMap(unsigned dim, const std::vector<Real> & qw, const Elem 
       if (!n_qp)
         break;
 
-      if (side->node_id(0) == elem->node_id(0))
+      if (side_elem.node_id(0) == elem.node_id(0))
         _ad_normals[0] = Point(-1.);
       else
         _ad_normals[0] = Point(1.);
@@ -1438,10 +1433,10 @@ Assembly::computeFaceMap(unsigned dim, const std::vector<Real> & qw, const Elem 
       VectorValue<DualReal> side_point;
       if (_calculate_face_xyz)
       {
-        const Node & node = side->node_ref(0);
+        const Node & node = side_elem.node_ref(0);
         side_point = node;
 #ifndef MOOSE_GLOBAL_AD_INDEXING
-        auto element_node_number = elem->local_side_node(side_number, 0);
+        auto element_node_number = elem.local_side_node(side, 0);
 #endif
 
         unsigned dimension = 0;
@@ -1488,14 +1483,14 @@ Assembly::computeFaceMap(unsigned dim, const std::vector<Real> & qw, const Elem 
       }
 
       const auto n_mapping_shape_functions =
-          FE<2, LAGRANGE>::n_shape_functions(side->type(), side->default_order());
+          FE<2, LAGRANGE>::n_shape_functions(side_elem.type(), side_elem.default_order());
 
       for (unsigned int i = 0; i < n_mapping_shape_functions; i++)
       {
-        const Node & node = side->node_ref(i);
+        const Node & node = side_elem.node_ref(i);
         VectorValue<DualReal> side_point = node;
 #ifndef MOOSE_GLOBAL_AD_INDEXING
-        auto element_node_number = elem->local_side_node(side_number, i);
+        auto element_node_number = elem.local_side_node(side, i);
 #endif
 
         unsigned dimension = 0;
@@ -1564,14 +1559,14 @@ Assembly::computeFaceMap(unsigned dim, const std::vector<Real> & qw, const Elem 
       }
 
       const unsigned int n_mapping_shape_functions =
-          FE<3, LAGRANGE>::n_shape_functions(side->type(), side->default_order());
+          FE<3, LAGRANGE>::n_shape_functions(side_elem.type(), side_elem.default_order());
 
       for (unsigned int i = 0; i < n_mapping_shape_functions; i++)
       {
-        const Node & node = side->node_ref(i);
+        const Node & node = side_elem.node_ref(i);
         VectorValue<DualReal> side_point = node;
 #ifndef MOOSE_GLOBAL_AD_INDEXING
-        auto element_node_number = elem->local_side_node(side_number, i);
+        auto element_node_number = elem.local_side_node(side, i);
 #endif
 
         unsigned dimension = 0;
@@ -1938,10 +1933,7 @@ Assembly::reinitFVFace(const FaceInfo & fi)
       _current_qrule_face->init(EDGE2);
   }
 
-  // TODO: maybe we don't need this and can delete it? - investigate
-  if (_current_side_elem)
-    delete _current_side_elem;
-  _current_side_elem = _current_elem->build_side_ptr(_current_side).release();
+  _current_side_elem = &_current_side_elem_builder(*_current_elem, _current_side);
 
   // We've initialized the reference points. Now we need to compute the physical location of the
   // quadrature points. We do not do any FE initialization so we cannot simply copy over FE results
@@ -1981,9 +1973,7 @@ Assembly::reinit(const Elem * elem, unsigned int side)
 
   unsigned int elem_dimension = elem->dim();
 
-  if (_current_side_elem)
-    delete _current_side_elem;
-  _current_side_elem = elem->build_side_ptr(side).release();
+  _current_side_elem = &_current_side_elem_builder(*elem, side);
 
   //// Make sure the qrule is the right one
   auto rule = qruleFace(elem, side);
@@ -2016,9 +2006,7 @@ Assembly::reinit(const Elem * elem, unsigned int side, const std::vector<Point> 
 
   _current_qrule_arbitrary->setPoints(reference_points);
 
-  if (_current_side_elem)
-    delete _current_side_elem;
-  _current_side_elem = elem->build_side_ptr(side).release();
+  _current_side_elem = &_current_side_elem_builder(*elem, side);
 
   reinitFEFace(elem, side);
 
@@ -2057,8 +2045,7 @@ Assembly::reinitElemAndNeighbor(const Elem * elem,
     reference_points_ptr = &reference_points;
   }
 
-  delete _current_neighbor_side_elem;
-  _current_neighbor_side_elem = neighbor->build_side_ptr(neighbor_side).release();
+  _current_neighbor_side_elem = &_current_neighbor_side_elem_builder(*neighbor, neighbor_side);
 
   if (_need_JxW_neighbor)
   {
@@ -2155,18 +2142,16 @@ Assembly::reinitElemFaceRef(const Elem * elem,
     _curvatures.shallowCopy(
         const_cast<std::vector<Real> &>((*_holder_fe_face_helper[elem_dim])->get_curvatures()));
 
-  computeADFace(elem, elem_side);
+  computeADFace(*elem, elem_side);
 }
 
 void
-Assembly::computeADFace(const Elem * elem, unsigned int side)
+Assembly::computeADFace(const Elem & elem, const unsigned int side)
 {
-  auto dim = elem->dim();
+  const auto dim = elem.dim();
 
   if (_subproblem.haveADObjects())
   {
-    const std::unique_ptr<const Elem> side_elem(elem->build_side_ptr(side));
-
     auto n_qp = _current_qrule_face->n_points();
     resizeADMappingObjects(n_qp, dim);
     _ad_normals.resize(n_qp);
@@ -2179,11 +2164,11 @@ Assembly::computeADFace(const Elem * elem, unsigned int side)
     if (_displaced)
     {
       const auto & qw = _current_qrule_face->get_weights();
-      computeFaceMap(dim, qw, side_elem.get());
-      std::vector<Real> dummy_qw(n_qp, 1.);
+      computeFaceMap(elem, side, qw);
+      const std::vector<Real> dummy_qw(n_qp, 1.);
 
       for (unsigned int qp = 0; qp != n_qp; qp++)
-        computeSinglePointMapAD(elem, dummy_qw, qp, *_holder_fe_face_helper[dim]);
+        computeSinglePointMapAD(&elem, dummy_qw, qp, *_holder_fe_face_helper[dim]);
     }
     else
       for (unsigned qp = 0; qp < n_qp; ++qp)
@@ -2210,7 +2195,7 @@ Assembly::computeADFace(const Elem * elem, unsigned int side)
       const auto & regular_grad_phi = _fe_shape_data_face[fe_type]->_grad_phi;
 
       if (_displaced)
-        computeGradPhiAD(elem, n_qp, grad_phi, fe);
+        computeGradPhiAD(&elem, n_qp, grad_phi, fe);
       else
         for (unsigned qp = 0; qp < n_qp; ++qp)
           for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
@@ -2230,7 +2215,7 @@ Assembly::computeADFace(const Elem * elem, unsigned int side)
       const auto & regular_grad_phi = _vector_fe_shape_data_face[fe_type]->_grad_phi;
 
       if (_displaced)
-        computeGradPhiAD(elem, n_qp, grad_phi, fe);
+        computeGradPhiAD(&elem, n_qp, grad_phi, fe);
       else
         for (unsigned qp = 0; qp < n_qp; ++qp)
           for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
@@ -2455,8 +2440,7 @@ Assembly::reinitNeighborAtPhysical(const Elem * neighbor,
                                    unsigned int neighbor_side,
                                    const std::vector<Point> & physical_points)
 {
-  delete _current_neighbor_side_elem;
-  _current_neighbor_side_elem = neighbor->build_side_ptr(neighbor_side).release();
+  _current_neighbor_side_elem = &_current_neighbor_side_elem_builder(*neighbor, neighbor_side);
 
   std::vector<Point> reference_points;
 
