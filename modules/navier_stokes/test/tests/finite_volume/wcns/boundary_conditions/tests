@@ -1,0 +1,96 @@
+[Tests]
+  [dirichlet]
+    issues = ''
+    design = 'WCNSFVInletVelocityBC.md WCNSFVInletTemperatureBC.md'
+    requirement = ''The system shall be able to use Dirichlet boundary conditions for specifying inlet conditions in a weakly compressible fluid flow simulation'
+    [using_velocity]
+      type = 'Exodiff'
+      input = dirichlet_bcs_velocity.i
+      exodiff = dirichlet_bcs_velocity_out.e
+      method = "!dbg"
+      ad_indexing_type = 'global'
+      abs_zero = 1e-9
+      recover = false # see #19126
+      detail = 'using a velocity postprocessor'
+    []
+    [using_mdot]
+      type = 'Exodiff'
+      input = dirichlet_bcs_mdot.i
+      exodiff = dirichlet_bcs_mdot_out.e
+      method = "!dbg"
+      ad_indexing_type = 'global'
+      abs_zero = 1e-9
+      recover = false # see #19126
+      detail = 'using a mass flow rate postprocessor'
+    []
+  []
+  [flux]
+    issues = '#19543'
+    design = 'WCNSFVMassFluxBC.md WCNSFVMomentumFluxBC.md WCNSFVEnergyFluxBC.md WCNSFVScalarFluxBC.md'
+    requirement = 'The system shall be able to use flux boundary conditions for specifying inlet conditions in a weakly compressible fluid flow simulation'
+    [direct]
+      type = 'Exodiff'
+      input = flux_bcs_direct.i
+      exodiff = flux_bcs_direct_out.e
+      method = "!dbg"
+      ad_indexing_type = 'global'
+      abs_zero = 1e-9
+      recover = false # see #19126
+      detail = 'specifying the flux values directly though the flow rates'
+    []
+    [from_velocity]
+      type = 'Exodiff'
+      input = flux_bcs_velocity.i
+      exodiff = flux_bcs_velocity_out.e
+      method = "!dbg"
+      ad_indexing_type = 'global'
+      abs_zero = 1e-9
+      recover = false # see #19126
+      detail = 'using the inlet velocity to compute the fluxes'
+    []
+    [from_mdot]
+      type = 'Exodiff'
+      input = flux_bcs_mdot.i
+      exodiff = flux_bcs_mdot_out.e
+      method = "!dbg"
+      ad_indexing_type = 'global'
+      abs_zero = 1e-9
+      recover = false # see #19126
+      detail = 'using the inlet mass flow rate to compute the fluxes'
+    []
+  []
+  [exceptions_dirichlet_bcs]
+    issues = ''
+    design = 'WCNSFVInletVelocityBC.md WCNSFVInletTemperatureBC.md'
+    requirement = 'The system shall error out if'
+    [both_velocity_and_area]
+      type = RunException
+      input = 'dirichlet_bcs_mdot.i'
+      cli_args = 'FVBCs/inactive=inlet_u FVBCs/inlet_u_bis/type=WCNSFVInletVelocityBC FVBCs/inlet_u_bis/variable=u FVBCs/inlet_u_bis/boundary=left FVBCs/inlet_u_bis/mdot_pp=0'
+      expect_err = ''
+    []
+  []
+  [warnings_dirichlet_bcs]
+    issues = ''
+    design = 'WCNSFVInletVelocityBC.md WCNSFVInletTemperatureBC.md'
+    requirement = 'The system shall return a warning if'
+    [both_velocity_and_mdot]
+      type = RunException
+      input = 'dirichlet_bcs_velocity.i'
+      cli_args = 'FVBCs/inlet_u/mdot_pp=0'
+      expect_err = 'If setting the mass flow rate directly, no need for inlet velocity or area'
+      detail = 'redundant information if provided for setting the inlet velocity'
+    []
+  []
+  [exceptions_flux_bcs]
+    issues = '#19543'
+    design = 'WCNSFVMassFluxBC.md WCNSFVMomentumFluxBC.md WCNSFVEnergyFluxBC.md WCNSFVScalarFluxBC.md'
+    requirement = 'The system shall error out if'
+    [too_much_info_mass_flux_1]
+      type = RunException
+      input = 'flux_bcs_velocity.i'
+      cli_args = ''
+      expect_err = ''
+    []
+  []
+[]

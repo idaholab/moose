@@ -23,11 +23,13 @@ WCNSFVScalarFluxBC::validParams()
 
   // Three different ways to input a scalar being advected:
   // 1) Postprocessor with the scalar flow rate directly
-  params.addParam<PostprocessorName>("scalar_flux_pp", "Postprocessor with the inlet scalar flow rate");
+  params.addParam<PostprocessorName>("scalar_flux_pp",
+                                     "Postprocessor with the inlet scalar flow rate");
   params.addParam<PostprocessorName>("area_pp", "Postprocessor with the inlet flow area");
 
   // 2) Postprocessors for inlet velocity and scalar concentration
-  params.addParam<PostprocessorName>("scalar_value_pp", "Postprocessor with the inlet scalar concentration");
+  params.addParam<PostprocessorName>("scalar_value_pp",
+                                     "Postprocessor with the inlet scalar concentration");
   params.addParam<PostprocessorName>("velocity_pp", "Postprocessor with the velocity");
 
   // 3) Postprocessors for mass flow rate and energy, functor for density
@@ -49,7 +51,7 @@ WCNSFVScalarFluxBC::WCNSFVScalarFluxBC(const InputParameters & params)
     _mdot_pp(isParamValid("mdot_pp") ? &getPostprocessorValue("mdot_pp") : nullptr),
     _area_pp(isParamValid("area_pp") ? &getPostprocessorValue("area_pp") : nullptr),
     _rho(isParamValid(NS::density) ? &getFunctor<ADReal>(NS::density) : nullptr)
-  {
+{
   // Density is often set as global parameters so it is not checked
   if (_scalar_flux_pp && (_velocity_pp || _mdot_pp || _scalar_value_pp))
     mooseWarning(
@@ -60,7 +62,8 @@ WCNSFVScalarFluxBC::WCNSFVScalarFluxBC(const InputParameters & params)
   if (!_scalar_flux_pp)
   {
     if (!_scalar_value_pp)
-      mooseError("If not providing the scalar flow rate, the inlet scalar concentration should be provided");
+      mooseError("If not providing the scalar flow rate, the inlet scalar concentration should be "
+                 "provided");
     if (!_velocity_pp && !_mdot_pp)
       mooseError("If not providing the scalar flow rate, the inlet velocity or mass flow "
                  "should be provided");
@@ -82,6 +85,6 @@ WCNSFVScalarFluxBC::computeQpResidual()
   else if (_velocity_pp)
     return -_scaling_factor * *_velocity_pp * *_scalar_value_pp;
   else
-    return -_scaling_factor * *_mdot_pp / *_area_pp /  (*_rho)(singleSidedFaceArg()) *
-        *_scalar_value_pp;
+    return -_scaling_factor * *_mdot_pp / *_area_pp / (*_rho)(singleSidedFaceArg()) *
+           *_scalar_value_pp;
 }
