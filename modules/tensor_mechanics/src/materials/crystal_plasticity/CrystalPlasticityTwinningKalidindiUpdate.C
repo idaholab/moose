@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CrystalPlasticityTwinningKalidindiUpdate.h"
+#include "libmesh/int_range.h"
 
 registerMooseObject("TensorMechanicsApp", CrystalPlasticityTwinningKalidindiUpdate);
 
@@ -94,13 +95,14 @@ CrystalPlasticityTwinningKalidindiUpdate::CrystalPlasticityTwinningKalidindiUpda
         getParam<Real>("non_coplanar_coefficient_twin_hardening")),
     _coplanar_coefficient_twin_hardening(getParam<Real>("coplanar_coefficient_twin_hardening")),
     _noncoplanar_exponent(getParam<Real>("non_coplanar_twin_hardening_exponent")),
-    _limit_twin_volume_fraction(getParam<Real>("upper_limit_twin_volume_fraction"))
+    _limit_twin_volume_fraction(getParam<Real>("upper_limit_twin_volume_fraction")),
+
+    // resize local caching vectors used for substepping
+    _previous_substep_twin_resistance(_number_slip_systems, 0.0),
+    _previous_substep_twin_volume_fraction(_number_slip_systems, 0.0),
+    _twin_resistance_before_update(_number_slip_systems, 0.0),
+    _twin_volume_fraction_before_update(_number_slip_systems, 0.0)
 {
-  // resize local caching vectors used for substepping
-  _previous_substep_twin_resistance.resize(_number_slip_systems);
-  _previous_substep_twin_volume_fraction.resize(_number_slip_systems);
-  _twin_resistance_before_update.resize(_number_slip_systems);
-  _twin_volume_fraction_before_update.resize(_number_slip_systems);
 }
 
 void
@@ -116,7 +118,7 @@ CrystalPlasticityTwinningKalidindiUpdate::initQpStatefulProperties()
   _total_twin_volume_fraction[_qp] = _initial_total_twin_volume_fraction;
   const Real twin_volume_fraction_per_system =
       _initial_total_twin_volume_fraction / _number_slip_systems;
-  for (unsigned int i = 0; i < _number_slip_systems; ++i)
+  for (auto i : make_range(_number_slip_systems))
   {
     _twin_volume_fraction[_qp][i] = twin_volume_fraction_per_system;
     _slip_resistance[_qp][i] = _twin_initial_lattice_friction;
@@ -145,12 +147,12 @@ bool
 CrystalPlasticityTwinningKalidindiUpdate::calculateSlipRate()
 {
   Real total_twin_volume_fraction = 0.0;
-  for (unsigned int i = 0; i < _number_slip_systems; ++i)
+  for (auto i : make_range(_number_slip_systems))
     total_twin_volume_fraction += _twin_volume_fraction[_qp][i];
 
   if (total_twin_volume_fraction < _limit_twin_volume_fraction)
   {
-    for (unsigned int i = 0; i < _number_slip_systems; ++i)
+    for (auto i : make_range(_number_slip_systems))
     {
       if (_tau[_qp][i] > 0.0)
       {
@@ -186,7 +188,7 @@ CrystalPlasticityTwinningKalidindiUpdate::calculateConstitutiveSlipDerivative(
     std::vector<Real> & dslip_dtau)
 {
   Real total_twin_volume_fraction = 0.0;
-  for (unsigned int i = 0; i < _number_slip_systems; ++i)
+  for (auto i : make_range(_number_slip_systems))
     total_twin_volume_fraction += _twin_volume_fraction[_qp][i];
 
   // Once reach the limit of volume fraction, all plastic slip increments will be zero
@@ -194,7 +196,7 @@ CrystalPlasticityTwinningKalidindiUpdate::calculateConstitutiveSlipDerivative(
     std::fill(dslip_dtau.begin(), dslip_dtau.end(), 0.0);
   else
   {
-    for (unsigned int i = 0; i < _number_slip_systems; ++i)
+    for (auto i : make_range(_number_slip_systems))
     {
       if (_tau[_qp][i] <= 0.0)
         dslip_dtau[i] = 0.0;
@@ -237,7 +239,7 @@ CrystalPlasticityTwinningKalidindiUpdate::cacheStateVariablesBeforeUpdate()
 void
 CrystalPlasticityTwinningKalidindiUpdate::calculateStateVariableEvolutionRateComponent()
 {
-  for (unsigned int i = 0; i < _number_slip_systems; ++i)
+  for (auto i : make_range(_number_slip_systems))
     _twin_volume_fraction_increment[_qp][i] =
         _slip_increment[_qp][i] / _characteristic_twin_shear * _substep_dt;
 }
@@ -256,7 +258,7 @@ CrystalPlasticityTwinningKalidindiUpdate::calculateTwinVolumeFraction()
 {
   _total_twin_volume_fraction[_qp] = 0.0;
 
-  for (unsigned int i = 0; i < _number_slip_systems; ++i)
+  for (auto i : make_range(_number_slip_systems))
   {
     if (_previous_substep_twin_volume_fraction[i] < _zero_tol &&
         _twin_volume_fraction_increment[_qp][i] < 0.0)
@@ -303,10 +305,10 @@ CrystalPlasticityTwinningKalidindiUpdate::calculateTwinResistance()
 {
   DenseVector<Real> twin_hardening_increment(_number_slip_systems);
 
-  for (unsigned int i = 0; i < _number_slip_systems; ++i)
+  for (auto i : make_range(_number_slip_systems))
   {
     twin_hardening_increment(i) = 0.0;
-    for (unsigned int j = 0; j < _number_slip_systems; ++j)
+    for (auto j : make_range(_number_slip_systems))
     {
       if (MooseUtils::relativeFuzzyEqual(_slip_plane_normal[j](0), _slip_plane_normal[i](0)) &&
           MooseUtils::relativeFuzzyEqual(_slip_plane_normal[j](1), _slip_plane_normal[i](1)))
@@ -328,7 +330,7 @@ CrystalPlasticityTwinningKalidindiUpdate::calculateTwinResistance()
     }
   }
 
-  for (unsigned int i = 0; i < _number_slip_systems; ++i)
+  for (auto i : make_range(_number_slip_systems))
   {
     twin_hardening_increment(i) *= _characteristic_twin_shear;
     if (twin_hardening_increment(i) <= 0.0)

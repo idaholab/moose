@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CrystalPlasticityHCPDislocationSlipBeyerleinUpdate.h"
+#include "libmesh/int_range.h"
 
 registerMooseObject("TensorMechanicsApp", CrystalPlasticityHCPDislocationSlipBeyerleinUpdate);
 
@@ -224,7 +225,7 @@ CrystalPlasticityHCPDislocationSlipBeyerleinUpdate::
                "for slip_system_modes");
 
   unsigned int sum = 0;
-  for (unsigned int i = 0; i < _slip_system_modes; ++i)
+  for (auto i : make_range(_slip_system_modes))
     sum += _number_slip_systems_per_mode[i];
   if (sum != _number_slip_systems)
     paramError("slip_system_modes",
@@ -245,7 +246,7 @@ CrystalPlasticityHCPDislocationSlipBeyerleinUpdate::initQpStatefulProperties()
 
   // Set constitutive-model specific initial values from parameters
   const Real forest_density_per_system = _initial_forest_dislocation_density / _number_slip_systems;
-  for (unsigned int i = 0; i < _number_slip_systems; ++i)
+  for (auto i : make_range(_number_slip_systems))
   {
     _forest_dislocation_density[_qp][i] = forest_density_per_system;
     _forest_dislocation_increment[_qp][i] = 0.0;
@@ -255,7 +256,7 @@ CrystalPlasticityHCPDislocationSlipBeyerleinUpdate::initQpStatefulProperties()
   // Set initial resistance from lattice friction, which is type dependent
   unsigned int slip_mode = 0;
   unsigned int counter_adjustment = 0;
-  for (unsigned int i = 0; i < _number_slip_systems; ++i)
+  for (auto i : make_range(_number_slip_systems))
   {
     if ((i - counter_adjustment) < _number_slip_systems_per_mode[slip_mode])
       _initial_lattice_friction(i) = _lattice_friction[slip_mode];
@@ -269,7 +270,7 @@ CrystalPlasticityHCPDislocationSlipBeyerleinUpdate::initQpStatefulProperties()
 
   calculateGrainSizeResistance();
 
-  for (unsigned int i = 0; i < _number_slip_systems; ++i)
+  for (auto i : make_range(_number_slip_systems))
     _slip_resistance[_qp][i] = _initial_lattice_friction(i);
 
   _total_substructure_density[_qp] = _initial_substructure_density;
@@ -281,7 +282,7 @@ CrystalPlasticityHCPDislocationSlipBeyerleinUpdate::calculateGrainSizeResistance
 {
   unsigned int slip_mode = 0;
   unsigned int counter_adjustment = 0;
-  for (unsigned int i = 0; i < _number_slip_systems; ++i)
+  for (auto i : make_range(_number_slip_systems))
   {
     Real hallpetch_burgers_term = 0.0;
     if ((i - counter_adjustment) < _number_slip_systems_per_mode[slip_mode])
@@ -322,7 +323,7 @@ CrystalPlasticityHCPDislocationSlipBeyerleinUpdate::setSubstepConstitutiveVariab
 bool
 CrystalPlasticityHCPDislocationSlipBeyerleinUpdate::calculateSlipRate()
 {
-  for (unsigned int i = 0; i < _number_slip_systems; ++i)
+  for (auto i : make_range(_number_slip_systems))
   {
     Real driving_force = std::abs(_tau[_qp][i] / _slip_resistance[_qp][i]);
     if (driving_force < _zero_tol)
@@ -349,7 +350,7 @@ void
 CrystalPlasticityHCPDislocationSlipBeyerleinUpdate::calculateConstitutiveSlipDerivative(
     std::vector<Real> & dslip_dtau)
 {
-  for (unsigned int i = 0; i < _number_slip_systems; ++i)
+  for (auto i : make_range(_number_slip_systems))
   {
     if (MooseUtils::absoluteFuzzyEqual(_tau[_qp][i], 0.0))
       dslip_dtau[i] = 0.0;
@@ -428,7 +429,7 @@ CrystalPlasticityHCPDislocationSlipBeyerleinUpdate::calculateForestDislocationEv
   // solve first for the coefficients, which depend on the given slip mode
   unsigned int slip_mode = 0;
   unsigned int counter_adjustment = 0;
-  for (unsigned int i = 0; i < _number_slip_systems; ++i)
+  for (auto i : make_range(_number_slip_systems))
   {
     Real interaction_term = 0.0;
     Real volume_term = 0.0;
@@ -454,7 +455,7 @@ CrystalPlasticityHCPDislocationSlipBeyerleinUpdate::calculateForestDislocationEv
     k2_term(i) = interaction_term * k1_term(i) * (1.0 - temperature_strain_term / volume_term);
   }
 
-  for (unsigned int i = 0; i < _number_slip_systems; ++i)
+  for (auto i : make_range(_number_slip_systems))
   {
     const Real abs_slip_increment = std::abs(_slip_increment[_qp][i]);
     Real generated_dislocations = 0.0;
@@ -479,7 +480,7 @@ CrystalPlasticityHCPDislocationSlipBeyerleinUpdate::calculateSubstructureDensity
 
   unsigned int slip_mode = 0;
   unsigned int counter_adjustment = 0;
-  for (unsigned int i = 0; i < _number_slip_systems; ++i)
+  for (auto i : make_range(_number_slip_systems))
   {
     if ((i - counter_adjustment) < _number_slip_systems_per_mode[slip_mode])
       generation_term(i) = _substructure_rate_coefficient[slip_mode] * _burgers_vector[slip_mode];
@@ -495,7 +496,7 @@ CrystalPlasticityHCPDislocationSlipBeyerleinUpdate::calculateSubstructureDensity
   _total_substructure_density_increment[_qp] = 0.0;
   const Real sqrt_substructures = std::sqrt(_total_substructure_density[_qp]);
 
-  for (unsigned int i = 0; i < _number_slip_systems; ++i)
+  for (auto i : make_range(_number_slip_systems))
     _total_substructure_density_increment[_qp] +=
         generation_term(i) * sqrt_substructures * _forest_dislocations_removed_increment[_qp][i];
 }
@@ -508,7 +509,7 @@ CrystalPlasticityHCPDislocationSlipBeyerleinUpdate::calculateSlipResistance()
 
   unsigned int slip_mode = 0;
   unsigned int counter_adjustment = 0;
-  for (unsigned int i = 0; i < _number_slip_systems; ++i)
+  for (auto i : make_range(_number_slip_systems))
   {
     Real burgers = 0.0;
     Real shear_modulus = 0.0;
@@ -544,7 +545,7 @@ CrystalPlasticityHCPDislocationSlipBeyerleinUpdate::calculateSlipResistance()
   }
 
   // have the constant initial value, while it's not a function of temperature, sum
-  for (unsigned int i = 0; i < _number_slip_systems; ++i)
+  for (auto i : make_range(_number_slip_systems))
     _slip_resistance[_qp][i] =
         _initial_lattice_friction(i) + forest_hardening(i) + substructure_hardening(i);
 }
@@ -561,7 +562,7 @@ CrystalPlasticityHCPDislocationSlipBeyerleinUpdate::updateStateVariables()
 bool
 CrystalPlasticityHCPDislocationSlipBeyerleinUpdate::calculateForestDislocationDensity()
 {
-  for (unsigned int i = 0; i < _number_slip_systems; ++i)
+  for (auto i : make_range(_number_slip_systems))
   {
     if (_previous_substep_forest_dislocations[i] < _zero_tol &&
         _forest_dislocation_increment[_qp][i] < 0.0)

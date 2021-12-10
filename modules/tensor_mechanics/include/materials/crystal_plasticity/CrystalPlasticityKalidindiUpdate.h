@@ -89,6 +89,25 @@ protected:
    */
   virtual bool areConstitutiveStateVariablesConverged() override;
 
+  ///@{Varibles used in the Kalidindi 1992 slip system resistance constiutive model
+  const Real _r;
+  const Real _h;
+  const Real _tau_sat;
+  const Real _gss_a;
+  const Real _ao;
+  const Real _xm;
+  const Real _gss_initial;
+  ///@}
+
+  /**
+   * Slip system interaction matrix used to calculate the hardening contributions
+   * from the self and latent slip systems, from Kalidindi et al (1992).
+   */
+  std::vector<Real> _hb;
+
+  /// Increment of increased resistance for each slip system
+  std::vector<Real> _slip_resistance_increment;
+
   /**
    * Stores the values of the slip system resistance from the previous substep
    * In classes which use dislocation densities, analogous dislocation density
@@ -105,25 +124,6 @@ protected:
    * caching vectors will also be required.
    */
   std::vector<Real> _slip_resistance_before_update;
-
-  /**
-   * Slip system interaction matrix used to calculate the hardening contributions
-   * from the self and latent slip systems, from Kalidindi et al (1992).
-   */
-  std::vector<Real> _hb;
-
-  /// Increment of increased resistance for each slip system
-  std::vector<Real> _slip_resistance_increment;
-
-  ///@{Varibles used in the Kalidindi 1992 slip system resistance constiutive model
-  const Real _r;
-  const Real _h;
-  const Real _tau_sat;
-  const Real _gss_a;
-  const Real _ao;
-  const Real _xm;
-  const Real _gss_initial;
-  ///@}
 
   /**
    * Flag to include the total twin volume fraction in the plastic velocity
