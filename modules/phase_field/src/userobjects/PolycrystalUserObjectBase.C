@@ -136,7 +136,7 @@ PolycrystalUserObjectBase::execute()
    *    the flood routine on the same entity as long as new discoveries are being made. We know
    *    this information from the return value of flood.
    */
-  for (const auto & current_elem : _fe_problem.getEvaluableElementRange())
+  for (const auto & current_elem : _fe_problem.getNonlinearEvaluableElementRange())
   {
     // Loop over elements or nodes
     if (_is_elemental)

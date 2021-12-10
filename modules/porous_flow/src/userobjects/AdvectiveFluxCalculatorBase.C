@@ -93,12 +93,12 @@ AdvectiveFluxCalculatorBase::timestepSetup()
      * Jacobian computations
      */
     _connections.clear();
-    for (const auto & elem : _fe_problem.getEvaluableElementRange())
+    for (const auto & elem : _fe_problem.getNonlinearEvaluableElementRange())
       if (this->hasBlocks(elem->subdomain_id()))
         for (unsigned i = 0; i < elem->n_nodes(); ++i)
           _connections.addGlobalNode(elem->node_id(i));
     _connections.finalizeAddingGlobalNodes();
-    for (const auto & elem : _fe_problem.getEvaluableElementRange())
+    for (const auto & elem : _fe_problem.getNonlinearEvaluableElementRange())
       if (this->hasBlocks(elem->subdomain_id()))
         for (unsigned i = 0; i < elem->n_nodes(); ++i)
           for (unsigned j = 0; j < elem->n_nodes(); ++j)
@@ -137,7 +137,7 @@ AdvectiveFluxCalculatorBase::timestepSetup()
      * appears in the local elements and >=1 layer, and pass that info to the Kernel
      */
     _valence.assign(_number_of_nodes, 0);
-    for (const auto & elem : _fe_problem.getEvaluableElementRange())
+    for (const auto & elem : _fe_problem.getNonlinearEvaluableElementRange())
       if (this->hasBlocks(elem->subdomain_id()))
         for (unsigned i = 0; i < elem->n_nodes(); ++i)
         {
@@ -853,7 +853,7 @@ AdvectiveFluxCalculatorBase::buildCommLists()
    *
    * (A) We will have to send _u_nodal information to other processors.
    * This is because although we can Evaluate Variables at all elements in
-   * _fe_problem.getEvaluableElementRange(), in the PorousFlow setting
+   * _fe_problem.getNonlinearEvaluableElementRange(), in the PorousFlow setting
    * _u_nodal could depend on Material Properties within the elements, and
    * we can't access those Properties within the ghosted elements.
    *
@@ -862,7 +862,7 @@ AdvectiveFluxCalculatorBase::buildCommLists()
    */
 
   _nodes_to_receive.clear();
-  for (const auto & elem : _fe_problem.getEvaluableElementRange())
+  for (const auto & elem : _fe_problem.getNonlinearEvaluableElementRange())
     if (this->hasBlocks(elem->subdomain_id()))
     {
       const processor_id_type elem_pid = elem->processor_id();
@@ -907,7 +907,7 @@ AdvectiveFluxCalculatorBase::buildCommLists()
 
   // Build pairs_to_receive
   _pairs_to_receive.clear();
-  for (const auto & elem : _fe_problem.getEvaluableElementRange())
+  for (const auto & elem : _fe_problem.getNonlinearEvaluableElementRange())
     if (this->hasBlocks(elem->subdomain_id()))
     {
       const processor_id_type elem_pid = elem->processor_id();

@@ -1,0 +1,11 @@
+[Tests]
+  [nodal_patch_recovery]
+    type = Exodiff
+    input = 'patch_recovery.i'
+    exodiff = 'patch_recovery_out.e'
+    issues = '#15748 #12036'
+    requirement = 'The TensorMechanics module shall be able to construct nodal variables from '
+                  'material properties that are defined at quadrature points.'
+    design = 'nodal_patch_recovery.md'
+  []
+[]
