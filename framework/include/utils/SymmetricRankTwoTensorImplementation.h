@@ -16,6 +16,7 @@
 #include "SymmetricRankFourTensor.h"
 #include "Conversion.h"
 #include "MooseArray.h"
+#include "MathUtils.h"
 
 #include "libmesh/libmesh.h"
 #include "libmesh/vector_value.h"
@@ -24,7 +25,7 @@
 // PETSc includes
 #include <petscblaslapack.h>
 
-// C++ includes
+// C++ includes/sqrt
 #include <iomanip>
 #include <ostream>
 #include <vector>
@@ -74,29 +75,65 @@ SymmetricRankTwoTensorTempl<T>::SymmetricRankTwoTensorTempl(const InitMethod ini
 
 template <typename T>
 SymmetricRankTwoTensorTempl<T>::SymmetricRankTwoTensorTempl(
-    T S11, T S22, T S33, T S23, T S13, T S12)
+    const T & S11, const T & S22, const T & S33, const T & S23, const T & S13, const T & S12)
 {
   _vals[0] = S11;
   _vals[1] = S22;
   _vals[2] = S33;
-  _vals[3] = SQRT2 * S23;
-  _vals[4] = SQRT2 * S13;
-  _vals[5] = SQRT2 * S12;
+  _vals[3] = MathUtils::sqrt2 * S23;
+  _vals[4] = MathUtils::sqrt2 * S13;
+  _vals[5] = MathUtils::sqrt2 * S12;
 }
 
 template <typename T>
-SymmetricRankTwoTensorTempl<T>::SymmetricRankTwoTensorTempl(
-    T S11, T S21, T S31, T S12, T S22, T S32, T S13, T S23, T S33)
+SymmetricRankTwoTensorTempl<T>::operator RankTwoTensorTempl<T>()
+{
+  return RankTwoTensorTempl<T>(_vals[0],
+                               _vals[5] / MathUtils::sqrt2,
+                               _vals[4] / MathUtils::sqrt2,
+                               _vals[5] / MathUtils::sqrt2,
+                               _vals[1],
+                               _vals[3] / MathUtils::sqrt2,
+                               _vals[4] / MathUtils::sqrt2,
+                               _vals[3] / MathUtils::sqrt2,
+                               _vals[2]);
+}
+
+template <typename T>
+SymmetricRankTwoTensorTempl<T>::SymmetricRankTwoTensorTempl(const T & S11,
+                                                            const T & S21,
+                                                            const T & S31,
+                                                            const T & S12,
+                                                            const T & S22,
+                                                            const T & S32,
+                                                            const T & S13,
+                                                            const T & S23,
+                                                            const T & S33)
 {
   _vals[0] = S11;
   _vals[1] = S22;
   _vals[2] = S33;
-  _vals[3] = (S23 + S32) / SQRT2;
-  _vals[4] = (S13 + S31) / SQRT2;
-  _vals[5] = (S12 + S21) / SQRT2;
+  _vals[3] = (S23 + S32) / MathUtils::sqrt2;
+  _vals[4] = (S13 + S31) / MathUtils::sqrt2;
+  _vals[5] = (S12 + S21) / MathUtils::sqrt2;
 }
 
-/// named constructor for initializing symetrically
+template <typename T>
+SymmetricRankTwoTensorTempl<T>
+SymmetricRankTwoTensorTempl<T>::fromRawComponents(
+    const T & S11, const T & S22, const T & S33, const T & S23, const T & S13, const T & S12)
+{
+  SymmetricRankTwoTensorTempl<T> ret(SymmetricRankTwoTensorTempl<T>::initNone);
+  ret._vals[0] = S11;
+  ret._vals[1] = S22;
+  ret._vals[2] = S33;
+  ret._vals[3] = S23;
+  ret._vals[4] = S13;
+  ret._vals[5] = S12;
+  return ret;
+}
+
+/// named constructor for initializing symmetrically
 template <typename T>
 SymmetricRankTwoTensorTempl<T>
 SymmetricRankTwoTensorTempl<T>::initializeSymmetric(const TypeVector<T> & v0,
@@ -141,9 +178,9 @@ SymmetricRankTwoTensorTempl<T>::fillFromInputVector(const std::vector<T> & input
       _vals[0] = input[0];
       _vals[1] = input[1];
       _vals[2] = input[2];
-      _vals[3] = SQRT2 * input[3];
-      _vals[4] = SQRT2 * input[4];
-      _vals[5] = SQRT2 * input[5];
+      _vals[3] = MathUtils::sqrt2 * input[3];
+      _vals[4] = MathUtils::sqrt2 * input[4];
+      _vals[5] = MathUtils::sqrt2 * input[5];
       break;
 
     default:
@@ -173,16 +210,16 @@ SymmetricRankTwoTensorTempl<T>::fillFromScalarVariable(const VariableValue & sca
       _vals[2] = 0.0;
       _vals[3] = 0.0;
       _vals[4] = 0.0;
-      _vals[5] = SQRT2 * scalar_variable[2];
+      _vals[5] = MathUtils::sqrt2 * scalar_variable[2];
       break;
 
     case 6:
       _vals[0] = scalar_variable[0];
       _vals[1] = scalar_variable[1];
       _vals[2] = scalar_variable[2];
-      _vals[3] = SQRT2 * scalar_variable[3];
-      _vals[4] = SQRT2 * scalar_variable[4];
-      _vals[5] = SQRT2 * scalar_variable[5];
+      _vals[3] = MathUtils::sqrt2 * scalar_variable[3];
+      _vals[4] = MathUtils::sqrt2 * scalar_variable[4];
+      _vals[5] = MathUtils::sqrt2 * scalar_variable[5];
       break;
 
     default:
@@ -214,11 +251,14 @@ SymmetricRankTwoTensorTempl<T>::rowMultiply(std::size_t n, const TypeVector<T> &
   switch (n)
   {
     case 0:
-      return _vals[0] * v(0) + _vals[5] * v(1) + _vals[4] * v(2);
+      return _vals[0] * v(0) + _vals[5] / MathUtils::sqrt2 * v(1) +
+             _vals[4] / MathUtils::sqrt2 * v(2);
     case 1:
-      return _vals[5] * v(0) + _vals[1] * v(1) + _vals[3] * v(2);
+      return _vals[5] / MathUtils::sqrt2 * v(0) + _vals[1] * v(1) +
+             _vals[3] / MathUtils::sqrt2 * v(2);
     case 2:
-      return _vals[4] * v(0) + _vals[3] * v(1) + _vals[2] * v(2);
+      return _vals[4] / MathUtils::sqrt2 * v(0) + _vals[3] / MathUtils::sqrt2 * v(1) +
+             _vals[2] * v(2);
     default:
       mooseError("Invalid row");
   }
@@ -240,13 +280,16 @@ template <typename T>
 SymmetricRankTwoTensorTempl<T>
 SymmetricRankTwoTensorTempl<T>::timesTranspose(const SymmetricRankTwoTensorTempl<T> & a)
 {
-  return SymmetricRankTwoTensorTempl<T>(
-      a._vals[0] * a._vals[0] + a._vals[4] * a._vals[4] + a._vals[5] * a._vals[5],
-      a._vals[1] * a._vals[1] + a._vals[3] * a._vals[3] + a._vals[5] * a._vals[5],
-      a._vals[2] * a._vals[2] + a._vals[3] * a._vals[3] + a._vals[4] * a._vals[4],
-      a._vals[1] * a._vals[3] + a._vals[2] * a._vals[3] + a._vals[4] * a._vals[5],
-      a._vals[0] * a._vals[4] + a._vals[2] * a._vals[4] + a._vals[3] * a._vals[5],
-      a._vals[0] * a._vals[5] + a._vals[1] * a._vals[5] + a._vals[3] * a._vals[4]);
+  return SymmetricRankTwoTensorTempl<T>::fromRawComponents(
+      a._vals[0] * a._vals[0] + a._vals[4] * a._vals[4] / 2.0 + a._vals[5] * a._vals[5] / 2.0,
+      a._vals[1] * a._vals[1] + a._vals[3] * a._vals[3] / 2.0 + a._vals[5] * a._vals[5] / 2.0,
+      a._vals[2] * a._vals[2] + a._vals[3] * a._vals[3] / 2.0 + a._vals[4] * a._vals[4] / 2.0,
+      a._vals[1] * a._vals[3] + a._vals[2] * a._vals[3] +
+          a._vals[4] * a._vals[5] / MathUtils::sqrt2,
+      a._vals[0] * a._vals[4] + a._vals[2] * a._vals[4] +
+          a._vals[3] * a._vals[5] / MathUtils::sqrt2,
+      a._vals[0] * a._vals[5] + a._vals[1] * a._vals[5] +
+          a._vals[3] * a._vals[4] / MathUtils::sqrt2);
 }
 
 template <typename T>
@@ -467,7 +510,14 @@ template <typename T>
 T
 SymmetricRankTwoTensorTempl<T>::secondInvariant() const
 {
-  mooseError("Not implemented");
+  T result;
+  result = Utility::pow<2>(_vals[0] - _vals[1]) / 6.0;
+  result += Utility::pow<2>(_vals[0] - _vals[2]) / 6.0;
+  result += Utility::pow<2>(_vals[1] - _vals[2]) / 6.0;
+  result += Utility::pow<2>(MathUtils::sqrt2 * _vals[5]) / 4.0;
+  result += Utility::pow<2>(MathUtils::sqrt2 * _vals[4]) / 4.0;
+  result += Utility::pow<2>(MathUtils::sqrt2 * _vals[3]) / 4.0;
+  return result;
 }
 
 template <typename T>
@@ -495,22 +545,17 @@ template <typename T>
 SymmetricRankTwoTensorTempl<T>
 SymmetricRankTwoTensorTempl<T>::inverse() const
 {
-  T s3 = _vals[3] * _vals[3];
-  T det = _vals[0] * (_vals[2] * _vals[1] - s3) -
-          _vals[5] * (_vals[2] * _vals[5] - _vals[3] * _vals[4]) +
-          _vals[4] * (_vals[3] * _vals[5] - _vals[1] * _vals[4]);
-
-  if (det == 0.0)
+  const auto d = det();
+  if (d == 0.0)
     mooseException("Matrix not invertible");
-
-  SymmetricRankTwoTensorTempl<T> inv;
-  inv._vals[0] = _vals[2] * _vals[1] - s3;
-  inv._vals[1] = _vals[2] * _vals[0] - _vals[4] * _vals[4];
-  inv._vals[2] = _vals[0] * _vals[1] - _vals[5] * _vals[5];
-  inv._vals[3] = _vals[5] * _vals[4] - _vals[0] * _vals[3];
-  inv._vals[4] = _vals[5] * _vals[3] - _vals[4] * _vals[1];
-  inv._vals[5] = _vals[4] * _vals[3] - _vals[2] * _vals[5];
-  return inv;
+  const SymmetricRankTwoTensorTempl<T> inv(
+      _vals[2] * _vals[1] - _vals[3] * _vals[3] / 2.0,
+      _vals[2] * _vals[0] - _vals[4] * _vals[4] / 2.0,
+      _vals[0] * _vals[1] - _vals[5] * _vals[5] / 2.0,
+      _vals[5] * _vals[4] / 2.0 - _vals[0] * _vals[3] / MathUtils::sqrt2,
+      _vals[5] * _vals[3] / 2.0 - _vals[4] * _vals[1] / MathUtils::sqrt2,
+      _vals[4] * _vals[3] / 2.0 - _vals[2] * _vals[5] / MathUtils::sqrt2);
+  return inv * 1.0 / d;
 }
 
 template <typename T>
@@ -542,17 +587,27 @@ SymmetricRankTwoTensorTempl<T>::d2thirdInvariant() const
 }
 
 template <typename T>
+T
+SymmetricRankTwoTensorTempl<T>::det() const
+{
+  return _vals[0] * (_vals[2] * _vals[1] - _vals[3] * _vals[3] / 2.0) -
+         _vals[5] / MathUtils::sqrt2 *
+             (_vals[2] * _vals[5] / MathUtils::sqrt2 - _vals[3] * _vals[4] / 2.0) +
+         _vals[4] / MathUtils::sqrt2 *
+             (_vals[3] * _vals[5] / 2.0 - _vals[1] * _vals[4] / MathUtils::sqrt2);
+}
+
+template <typename T>
 SymmetricRankTwoTensorTempl<T>
 SymmetricRankTwoTensorTempl<T>::ddet() const
 {
-  SymmetricRankTwoTensorTempl<T> ddet;
-  ddet._vals[0] = _vals[1] * _vals[2] - _vals[3] * _vals[3];
-  ddet._vals[1] = _vals[0] * _vals[2] - _vals[4] * _vals[4];
-  ddet._vals[2] = _vals[0] * _vals[1] - _vals[5] * _vals[5];
-  ddet._vals[3] = _vals[4] * _vals[5] - _vals[0] * _vals[3];
-  ddet._vals[4] = _vals[5] * _vals[3] - _vals[4] * _vals[1];
-  ddet._vals[5] = _vals[4] * _vals[3] - _vals[5] * _vals[2];
-  return ddet;
+  return SymmetricRankTwoTensorTempl<T>(
+      _vals[2] * _vals[1] - _vals[3] * _vals[3] / 2.0,
+      _vals[0] * _vals[2] - _vals[4] * _vals[4] / 2.0,
+      _vals[0] * _vals[1] - _vals[5] * _vals[5] / 2.0,
+      _vals[4] * _vals[5] / 2.0 - _vals[0] * _vals[3] / MathUtils::sqrt2,
+      _vals[5] * _vals[3] / 2.0 - _vals[4] * _vals[1] / MathUtils::sqrt2,
+      _vals[4] * _vals[3] / 2.0 - _vals[5] * _vals[2] / MathUtils::sqrt2);
 }
 
 template <typename T>
@@ -638,41 +693,6 @@ ADSymmetricRankTwoTensor::symmetricEigenvaluesEigenvectors(
 }
 
 template <typename T>
-SymmetricRankTwoTensorTempl<T>
-SymmetricRankTwoTensorTempl<T>::permutationTensor(
-    const std::array<unsigned int, LIBMESH_DIM> & /*old_elements*/,
-    const std::array<unsigned int, LIBMESH_DIM> & /*new_elements*/) const
-{
-  mooseError("Not implemented");
-}
-
-template <typename T>
-void
-SymmetricRankTwoTensorTempl<T>::hessenberg(SymmetricRankTwoTensorTempl<T> & /*H*/,
-                                           SymmetricRankTwoTensorTempl<T> & /*U*/) const
-{
-  mooseError("Not implemented");
-}
-
-template <typename T>
-void
-SymmetricRankTwoTensorTempl<T>::QR(SymmetricRankTwoTensorTempl<T> & /*Q*/,
-                                   SymmetricRankTwoTensorTempl<T> & /*R*/,
-                                   unsigned int /*dim*/) const
-{
-  mooseError("Not implemented");
-}
-
-template <>
-void
-SymmetricRankTwoTensor::QR(SymmetricRankTwoTensor & /*Q*/,
-                           SymmetricRankTwoTensor & /*R*/,
-                           unsigned int /*dim*/) const
-{
-  mooseError("Not implemented");
-}
-
-template <typename T>
 void
 SymmetricRankTwoTensorTempl<T>::dsymmetricEigenvalues(
     std::vector<T> & /*eigvals*/, std::vector<SymmetricRankTwoTensorTempl<T>> & /*deigvals*/) const
@@ -717,41 +737,16 @@ SymmetricRankTwoTensorTempl<T>::genRandomSymmTensor(T scale, T offset)
   for (unsigned int i = 0; i < 3; ++i)
     ret._vals[i] = (MooseRandom::rand() + offset) * scale;
   for (unsigned int i = 3; i < 6; ++i)
-    ret._vals[i] = SQRT2 * (MooseRandom::rand() + offset) * scale;
+    ret._vals[i] = MathUtils::sqrt2 * (MooseRandom::rand() + offset) * scale;
   return ret;
 }
 
 template <typename T>
-void
+SymmetricRankTwoTensorTempl<T>
 SymmetricRankTwoTensorTempl<T>::vectorSelfOuterProduct(const TypeVector<T> & v)
 {
-  _vals[0] = v(0) * v(0);
-  _vals[1] = v(1) * v(1);
-  _vals[2] = v(2) * v(2);
-  _vals[3] = SQRT2 * v(2) * v(3);
-  _vals[4] = SQRT2 * v(1) * v(3);
-  _vals[5] = SQRT2 * v(1) * v(2);
-}
-
-template <typename T>
-void
-SymmetricRankTwoTensorTempl<T>::fillRealTensor(TensorValue<T> & /*tensor*/)
-{
-  mooseError("Not implemented");
-}
-
-template <typename T>
-void
-SymmetricRankTwoTensorTempl<T>::fillRow(unsigned int /*r*/, const TypeVector<T> & /*v*/)
-{
-  mooseError("Not implemented");
-}
-
-template <typename T>
-void
-SymmetricRankTwoTensorTempl<T>::fillColumn(unsigned int /*c*/, const TypeVector<T> & /*v*/)
-{
-  mooseError("Not implemented");
+  return SymmetricRankTwoTensorTempl<T>(
+      v(0) * v(0), v(1) * v(1), v(2) * v(2), v(1) * v(2), v(0) * v(2), v(0) * v(1));
 }
 
 template <typename T>

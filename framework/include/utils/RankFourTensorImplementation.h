@@ -228,18 +228,13 @@ RankFourTensorTempl<T>::operator*(const RankFourTensorTempl<T2> & b) const
   typedef decltype(T() * T2()) ValueType;
   RankFourTensorTempl<ValueType> result;
 
-  unsigned int index = 0;
   for (auto i : make_range(N))
     for (auto j : make_range(N))
       for (auto k : make_range(N))
         for (auto l : make_range(N))
-        {
-          ValueType sum = 0;
           for (auto p : make_range(N))
             for (auto q : make_range(N))
-              sum += _vals[i * N3 + j * N2 + p * N + q] * b(p, q, k, l);
-          result._vals[index++] = sum;
-        }
+              result(i, j, k, l) += (*this)(i, j, p, q) * b(p, q, k, l);
 
   return result;
 }
@@ -939,11 +934,12 @@ template <typename T>
 T
 RankFourTensorTempl<T>::sum3x3() const
 {
-  // summation of Ciijj for i and j ranging from 0 to 2 - used in the volumetric locking
-  // correction
-  return (*this)(0, 0, 0, 0) + (*this)(0, 0, 1, 1) + (*this)(0, 0, 2, 2) + (*this)(1, 1, 0, 0) +
-         (*this)(1, 1, 1, 1) + (*this)(1, 1, 2, 2) + (*this)(2, 2, 0, 0) + (*this)(2, 2, 1, 1) +
-         (*this)(2, 2, 2, 2);
+  // used in the volumetric locking correction
+  T sum = 0;
+  for (auto i : make_range(3))
+    for (auto j : make_range(3))
+      sum += (*this)(i, i, j, j);
+  return sum;
 }
 
 template <typename T>

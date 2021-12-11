@@ -19,6 +19,8 @@
 namespace MathUtils
 {
 
+constexpr Real sqrt2 = 1.4142135623730951;
+
 Real poly1Log(Real x, Real tol, unsigned int derivative_order);
 Real poly2Log(Real x, Real tol, unsigned int derivative_order);
 Real poly3Log(Real x, Real tol, unsigned int derivative_order);

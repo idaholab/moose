@@ -11,7 +11,7 @@
 
 // MOOSE includes
 #include "SymmetricRankTwoTensor.h"
-#include "RankThreeTensor.h"
+#include "RankFourTensor.h"
 #include "MooseEnum.h"
 #include "MooseException.h"
 #include "MooseUtils.h"
@@ -21,6 +21,10 @@
 #include "libmesh/utility.h"
 #include "libmesh/tensor_value.h"
 #include "libmesh/vector_value.h"
+
+// Eigen includes
+#include <Eigen/Core>
+#include <Eigen/Dense>
 
 // C++ includes
 #include <iomanip>
@@ -89,6 +93,38 @@ SymmetricRankFourTensorTempl<T>::SymmetricRankFourTensorTempl(const InitMethod i
 }
 
 template <typename T>
+SymmetricRankFourTensorTempl<T>::operator RankFourTensorTempl<T>()
+{
+  // Full tensor indices in the Mandel/Voigt representation
+  constexpr unsigned int g[6][6][4] = {
+      {{1, 1, 1, 1}, {1, 1, 2, 2}, {1, 1, 3, 3}, {1, 1, 2, 3}, {1, 1, 1, 3}, {1, 1, 1, 2}},
+      {{2, 2, 1, 1}, {2, 2, 2, 2}, {2, 2, 3, 3}, {2, 2, 2, 3}, {2, 2, 1, 3}, {2, 2, 1, 2}},
+      {{3, 3, 1, 1}, {3, 3, 2, 2}, {3, 3, 3, 3}, {3, 3, 2, 3}, {3, 3, 1, 3}, {3, 3, 1, 2}},
+      {{2, 3, 1, 1}, {2, 3, 2, 2}, {2, 3, 3, 3}, {2, 3, 2, 3}, {2, 3, 1, 3}, {2, 3, 1, 2}},
+      {{1, 3, 1, 1}, {1, 3, 2, 2}, {1, 3, 3, 3}, {1, 3, 2, 3}, {1, 3, 1, 3}, {1, 3, 1, 2}},
+      {{1, 2, 1, 1}, {1, 2, 2, 2}, {1, 2, 3, 3}, {1, 2, 2, 3}, {1, 2, 1, 3}, {1, 2, 1, 2}}};
+
+  auto & q = *this;
+  RankFourTensorTempl<T> r;
+  for (auto a : make_range(6))
+    for (auto b : make_range(6))
+    {
+      const auto i = g[a][b][0] - 1;
+      const auto j = g[a][b][1] - 1;
+      const auto k = g[a][b][2] - 1;
+      const auto l = g[a][b][3] - 1;
+
+      // Rijkl = Rjikl = Rijlk = Rjilk
+      r(i, j, k, l) = q(a, b) / mandelFactor(a, b);
+      r(j, i, k, l) = q(a, b) / mandelFactor(a, b);
+      r(i, j, l, k) = q(a, b) / mandelFactor(a, b);
+      r(j, i, l, k) = q(a, b) / mandelFactor(a, b);
+    }
+
+  return r;
+}
+
+template <typename T>
 SymmetricRankFourTensorTempl<T>::SymmetricRankFourTensorTempl(const std::vector<T> & input,
                                                               FillMethod fill_method)
 {
@@ -113,8 +149,8 @@ SymmetricRankFourTensorTempl<T>::rotationMatrix(const TypeTensor<T> & R)
     for (std::size_t j = 0; j < 3; ++j)
     {
       M(i, j) = R(i, j) * R(i, j);
-      M(i + 3, j) = SQRT2 * R((i + 1) % 3, j) * R((i + 2) % 3, j);
-      M(j, i + 3) = SQRT2 * R(j, (i + 1) % 3) * R(j, (i + 2) % 3);
+      M(i + 3, j) = MathUtils::sqrt2 * R((i + 1) % 3, j) * R((i + 2) % 3, j);
+      M(j, i + 3) = MathUtils::sqrt2 * R(j, (i + 1) % 3) * R(j, (i + 2) % 3);
       M(i + 3, j + 3) = R(a[i], a[j]) * R(b[i], b[j]) + R(a[i], b[j]) * R(b[i], a[j]);
     }
   return M;
@@ -218,10 +254,10 @@ SymmetricRankFourTensorTempl<T>::operator*(const SymmetricRankFourTensorTempl<T2
   typedef decltype(T() * T2()) ValueType;
   SymmetricRankFourTensorTempl<ValueType> result;
 
-  for (std::size_t i = 0; i < N; ++i)
-    for (std::size_t j = 0; j < N; ++j)
-      for (std::size_t k = 0; k < N; ++k)
-        result._vals[i + N * j] += _vals[i + N * k] * b._vals[k + N * j];
+  for (auto i : make_range(N))
+    for (auto j : make_range(N))
+      for (auto p : make_range(N))
+        result(i, j) += (*this)(i, p) * b(p, j);
 
   return result;
 }
@@ -240,20 +276,10 @@ template <typename T>
 SymmetricRankFourTensorTempl<T>
 SymmetricRankFourTensorTempl<T>::invSymm() const
 {
-  mooseError("The invSymm operation calls to LAPACK and only supports plain Real type tensors.");
-}
-
-template <>
-SymmetricRankFourTensorTempl<Real>
-SymmetricRankFourTensorTempl<Real>::invSymm() const
-{
-  std::vector<PetscScalar> buf(_vals.begin(), _vals.end());
-
-  // use LAPACK to find the inverse
-  MatrixTools::inverse(buf, 6);
-
-  SymmetricRankFourTensorTempl<Real> result(initNone);
-  std::copy(buf.begin(), buf.end(), result._vals.begin());
+  const Eigen::Map<const Eigen::Matrix<T, N, N, Eigen::RowMajor>> mat(&_vals[0]);
+  SymmetricRankFourTensorTempl<T> result(initNone);
+  Eigen::Map<Eigen::Matrix<T, N, N, Eigen::RowMajor>> res(&result._vals[0]);
+  res = mat.inverse();
   return result;
 }
 
@@ -495,11 +521,12 @@ template <typename T>
 T
 SymmetricRankFourTensorTempl<T>::sum3x3() const
 {
-  // summation of Ciijj for i and j ranging from 0 to 2 - used in the volumetric locking
-  // correction
-  return _vals[0] + _vals[1] + _vals[2] + _vals[6] + _vals[7] + _vals[8] + _vals[12] + _vals[13] +
-         _vals[14];
-  ;
+  // summation of Ciijj used in the volumetric locking correction
+  T sum = 0;
+  for (auto i : make_range(3))
+    for (auto j : make_range(3))
+      sum += (*this)(i, j);
+  return sum;
 }
 
 template <typename T>
@@ -507,11 +534,9 @@ VectorValue<T>
 SymmetricRankFourTensorTempl<T>::sum3x1() const
 {
   // used for volumetric locking correction
-  VectorValue<T> a(3);
-  a(0) = _vals[0] + _vals[1] + _vals[2];    // C0000 + C0011 + C0022
-  a(1) = _vals[6] + _vals[7] + _vals[8];    // C1100 + C1111 + C1122
-  a(2) = _vals[12] + _vals[13] + _vals[14]; // C2200 + C2211 + C2222
-  return a;
+  return VectorValue<T>(_vals[0] + _vals[1] + _vals[2],
+                        _vals[6] + _vals[7] + _vals[8],
+                        _vals[12] + _vals[13] + _vals[14]);
 }
 
 template <typename T>
@@ -546,21 +571,21 @@ SymmetricRankFourTensorTempl<T>::isIsotropic() const
     return false;
 
   // off diagonal blocks in Voigt
-  for (unsigned int i = 0; i < 3; ++i)
-    for (unsigned int j = 0; j < 3; ++j)
+  for (auto i : make_range(3))
+    for (auto j : make_range(3))
       if (_vals[3 + i + N * j] != 0.0)
         return false;
 
   // top left block
   const T & K1 = _vals[0];
   const T & K2 = _vals[1];
-  if (!MooseUtils::relativeFuzzyEqual(K1 - 4.0 * mu / 3.0, K2 + 2.0 * mu / 3.0))
+  if (!MooseUtils::relativeFuzzyEqual(K1 - 2.0 * mu / 3.0, K2 + mu / 3.0))
     return false;
   if (_vals[7] != K1 || _vals[14] != K1)
     return false;
 
-  for (unsigned int i = 1; i < N; ++i)
-    for (unsigned int j = 0; j < i; ++j)
+  for (auto i : make_range(1, 3))
+    for (auto j : make_range(i))
       if (_vals[i + N * j] != K2)
         return false;
 

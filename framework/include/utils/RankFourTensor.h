@@ -69,6 +69,12 @@ template <typename T>
 class RankFourTensorTempl
 {
 public:
+  /// Dimensionality of rank-four tensor
+  static constexpr unsigned int N = LIBMESH_DIM;
+  static constexpr unsigned int N2 = N * N;
+  static constexpr unsigned int N3 = N * N * N;
+  static constexpr unsigned int N4 = N * N * N * N;
+
   typedef tuple_of<4, unsigned int> index_type;
 
   /// Initialization method
@@ -152,7 +158,7 @@ public:
   /// Gets the value for the index specified.  Takes index = 0,1,2
   inline T & operator()(unsigned int i, unsigned int j, unsigned int k, unsigned int l)
   {
-    return _vals[((i * LIBMESH_DIM + j) * LIBMESH_DIM + k) * LIBMESH_DIM + l];
+    return _vals[i * N3 + j * N2 + k * N + l];
   }
 
   /**
@@ -161,7 +167,7 @@ public:
    */
   inline T operator()(unsigned int i, unsigned int j, unsigned int k, unsigned int l) const
   {
-    return _vals[((i * LIBMESH_DIM + j) * LIBMESH_DIM + k) * LIBMESH_DIM + l];
+    return _vals[i * N3 + j * N2 + k * N + l];
   }
 
   /// Zeros out the tensor.
@@ -387,12 +393,6 @@ public:
   bool isIsotropic() const;
 
 protected:
-  /// Dimensionality of rank-four tensor
-  static constexpr unsigned int N = LIBMESH_DIM;
-  static constexpr unsigned int N2 = N * N;
-  static constexpr unsigned int N3 = N * N * N;
-  static constexpr unsigned int N4 = N * N * N * N;
-
   /// The values of the rank-four tensor stored by
   /// index=(((i * LIBMESH_DIM + j) * LIBMESH_DIM + k) * LIBMESH_DIM + l)
   T _vals[N4];
@@ -506,11 +506,12 @@ struct RawType<RankFourTensorTempl<T>>
 
   static value_type value(const RankFourTensorTempl<T> & in)
   {
+    constexpr auto N = RankFourTensorTempl<T>::N;
     value_type ret;
-    for (auto i : make_range(LIBMESH_DIM))
-      for (auto j : make_range(LIBMESH_DIM))
-        for (auto k : make_range(LIBMESH_DIM))
-          for (auto l : make_range(LIBMESH_DIM))
+    for (auto i : make_range(N))
+      for (auto j : make_range(N))
+        for (auto k : make_range(N))
+          for (auto l : make_range(N))
             ret(i, j, k, l) = raw_value(in(i, j, k, l));
 
     return ret;

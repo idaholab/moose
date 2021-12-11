@@ -103,10 +103,7 @@ public:
     general = 9
   };
 
-  /**
-   * Constructor that takes in 3 vectors and uses them to create rows
-   * _coords[0][i] = row1(i), _coords[1][i] = row2(i), _coords[2][i] = row3(i)
-   */
+  // deprecated constructor (replaced by initializeFrom)
   RankTwoTensorTempl(const TypeVector<T> & row1,
                      const TypeVector<T> & row2,
                      const TypeVector<T> & row3);
@@ -129,10 +126,19 @@ public:
   RankTwoTensorTempl(const std::vector<T> & input) { this->fillFromInputVector(input); };
 
   /// Initialization list replacement constructors, 6 arguments
-  RankTwoTensorTempl(T S11, T S22, T S33, T S23, T S13, T S12);
+  RankTwoTensorTempl(
+      const T & S11, const T & S22, const T & S33, const T & S23, const T & S13, const T & S12);
 
   /// Initialization list replacement constructors, 9 arguments
-  RankTwoTensorTempl(T S11, T S21, T S31, T S12, T S22, T S32, T S13, T S23, T S33);
+  RankTwoTensorTempl(const T & S11,
+                     const T & S21,
+                     const T & S31,
+                     const T & S12,
+                     const T & S22,
+                     const T & S32,
+                     const T & S13,
+                     const T & S23,
+                     const T & S33);
 
   /// Copy assignment operator must be defined if used
   RankTwoTensorTempl(const RankTwoTensorTempl<T> & a) = default;
@@ -528,7 +534,7 @@ public:
   void vectorOuterProduct(const TypeVector<T> &, const TypeVector<T> &);
 
   /// RankTwoTensorTempl<T> from outer product of a vector with itself
-  void vectorSelfOuterProduct(const TypeVector<T> &);
+  static RankTwoTensorTempl<T> vectorSelfOuterProduct(const TypeVector<T> &);
 
   /// Return real tensor of a rank two tensor
   void fillRealTensor(TensorValue<T> &);

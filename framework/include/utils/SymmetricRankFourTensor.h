@@ -11,11 +11,15 @@
 
 #include "Moose.h"
 #include "ADRankTwoTensorForward.h"
+#include "ADRankFourTensorForward.h"
 #include "ADSymmetricRankTwoTensorForward.h"
 #include "ADSymmetricRankFourTensorForward.h"
+#include "MooseUtils.h"
+#include "MathUtils.h"
 
 #include "libmesh/libmesh.h"
 #include "libmesh/tuple_of.h"
+#include "libmesh/int_range.h"
 
 #include <array>
 
@@ -40,9 +44,6 @@ class MooseEnum;
 
 namespace MathUtils
 {
-template <typename T>
-void mooseSetToZero(T & v);
-
 /**
  * Helper function template specialization to set an object to zero.
  * Needed by DerivativeMaterialInterface
@@ -67,7 +68,11 @@ template <typename T>
 class SymmetricRankFourTensorTempl
 {
 public:
-  typedef tuple_of<4, unsigned int> index_type;
+  /// returns the 1, sqrt(2), or 2 prefactor in the Mandel notation
+  static constexpr Real mandelFactor(unsigned int i, unsigned int j)
+  {
+    return i < 3 ? (j < 3 ? 1.0 : MathUtils::sqrt2) : (j < 3 ? MathUtils::sqrt2 : 2.0);
+  }
 
   /// Initialization method
   enum InitMethod
@@ -132,6 +137,9 @@ public:
    */
   template <typename T2>
   SymmetricRankFourTensorTempl(const SymmetricRankFourTensorTempl<T2> & copy);
+
+  // explicit cast to a full tensor
+  explicit operator RankFourTensorTempl<T>();
 
   // Named constructors
   static SymmetricRankFourTensorTempl<T> Identity()
@@ -522,17 +530,21 @@ template <typename T2>
 void
 SymmetricRankFourTensorTempl<T>::fillSymmetric21FromInputVector(const T2 & input)
 {
-  static const std::array<Real, 21> mandel_factor = {
-      {1.0, 1.0,   1.0,   SQRT2, SQRT2, SQRT2, 1.0, 1.0, SQRT2, SQRT2, SQRT2,
-       1.0, SQRT2, SQRT2, SQRT2, 2.0,   2.0,   2.0, 2.0, 2.0,   2.0}};
+  // C1111 C1122 C1133 C1123 C1113 C1112
+  //       C2222 C2233 C2223 C2213 C2212
+  //             C3333 C3323 C3313 C3312
+  //                   C2323 C2313 C2312
+  //                         C1313 C1312
+  //                               C1212
+
   mooseAssert(input.size() == 21,
               "To use fillSymmetric21FromInputVector, your input must have size 21.");
   std::size_t index = 0;
-  for (std::size_t i = 0; i < N; ++i)
-    for (std::size_t j = i; j < N; ++j)
+  for (auto i : make_range(N))
+    for (auto j : make_range(i, N))
     {
-      _vals[i + N * j] = mandel_factor[index] * input[index];
-      _vals[j + N * i] = mandel_factor[index] * input[index];
+      _vals[i + N * j] = mandelFactor(i, j) * input[index];
+      _vals[j + N * i] = mandelFactor(j, i) * input[index];
       index++;
     }
 }

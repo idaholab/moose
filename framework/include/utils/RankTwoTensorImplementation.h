@@ -114,7 +114,7 @@ RankTwoTensorTempl<T>::RankTwoTensorTempl(const TypeVector<T> & row1,
     this->_coords[2 * N + i] = row3(i);
 }
 
-/// named constructor for initializing symetrically
+/// named constructor for initializing symmetrically
 template <typename T>
 RankTwoTensorTempl<T>
 RankTwoTensorTempl<T>::initializeSymmetric(const TypeVector<T> & v0,
@@ -153,7 +153,8 @@ RankTwoTensorTempl<T>::initializeFromColumns(const TypeVector<T> & col0,
 }
 
 template <typename T>
-RankTwoTensorTempl<T>::RankTwoTensorTempl(T S11, T S22, T S33, T S23, T S13, T S12)
+RankTwoTensorTempl<T>::RankTwoTensorTempl(
+    const T & S11, const T & S22, const T & S33, const T & S23, const T & S13, const T & S12)
 {
   (*this)(0, 0) = S11;
   (*this)(1, 1) = S22;
@@ -164,8 +165,15 @@ RankTwoTensorTempl<T>::RankTwoTensorTempl(T S11, T S22, T S33, T S23, T S13, T S
 }
 
 template <typename T>
-RankTwoTensorTempl<T>::RankTwoTensorTempl(
-    T S11, T S21, T S31, T S12, T S22, T S32, T S13, T S23, T S33)
+RankTwoTensorTempl<T>::RankTwoTensorTempl(const T & S11,
+                                          const T & S21,
+                                          const T & S31,
+                                          const T & S12,
+                                          const T & S22,
+                                          const T & S32,
+                                          const T & S13,
+                                          const T & S23,
+                                          const T & S33)
 {
   (*this)(0, 0) = S11;
   (*this)(1, 0) = S21;
@@ -279,8 +287,8 @@ T
 RankTwoTensorTempl<T>::rowMultiply(std::size_t n, const TypeVector<T> & v) const
 {
   T sum = 0.0;
-  for (unsigned int j = 0; j < LIBMESH_DIM; j++)
-    sum += this->_coords[n * LIBMESH_DIM + j] * v(j);
+  for (auto i : make_range(LIBMESH_DIM))
+    sum += (*this)(n, i) * v(i);
   return sum;
 }
 
@@ -635,7 +643,7 @@ template <typename T>
 T
 RankTwoTensorTempl<T>::secondInvariant() const
 {
-  T result = 0.0;
+  T result;
 
   // RankTwoTensorTempl<T> deviatoric(*this);
   // deviatoric.addIa(-1.0/3.0 * this->tr()); // actually construct deviatoric part
@@ -1207,12 +1215,14 @@ RankTwoTensorTempl<T>::vectorOuterProduct(const TypeVector<T> & v1, const TypeVe
 }
 
 template <typename T>
-void
+RankTwoTensorTempl<T>
 RankTwoTensorTempl<T>::vectorSelfOuterProduct(const TypeVector<T> & v)
 {
+  RankTwoTensorTempl<T> ret(RankTwoTensorTempl<T>::initNone);
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
-      (*this)(i, j) = v(i) * v(j);
+      ret(i, j) = v(i) * v(j);
+  return ret;
 }
 
 template <typename T>

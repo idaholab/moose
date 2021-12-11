@@ -109,11 +109,27 @@ public:
   SymmetricRankTwoTensorTempl(const std::vector<T> & input) { this->fillFromInputVector(input); };
 
   /// Initialization list replacement constructors, 6 arguments
-  SymmetricRankTwoTensorTempl(T S11, T S22, T S33, T S23, T S13, T S12);
+  SymmetricRankTwoTensorTempl(
+      const T & S11, const T & S22, const T & S33, const T & S23, const T & S13, const T & S12);
+
+  // explicit cast to a full tensor
+  explicit operator RankTwoTensorTempl<T>();
 
 private:
   /// Initialization list replacement constructors, 9 arguments (for internal use only)
-  SymmetricRankTwoTensorTempl(T S11, T S21, T S31, T S12, T S22, T S32, T S13, T S23, T S33);
+  SymmetricRankTwoTensorTempl(const T & S11,
+                              const T & S21,
+                              const T & S31,
+                              const T & S12,
+                              const T & S22,
+                              const T & S32,
+                              const T & S13,
+                              const T & S23,
+                              const T & S33);
+
+  // internal use named constructor that does not apply the sqrt(2) factors
+  static SymmetricRankTwoTensorTempl fromRawComponents(
+      const T & S11, const T & S22, const T & S33, const T & S23, const T & S13, const T & S12);
 
 public:
   /// Copy assignment operator must be defined if used
@@ -407,6 +423,9 @@ public:
    */
   SymmetricRankFourTensorTempl<T> d2thirdInvariant() const;
 
+  // determinant of teh tensor
+  T det() const;
+
   /**
    * Denote the _vals[i][j] by A_ij, then this returns
    * d(det)/dA_ij
@@ -473,14 +492,6 @@ public:
   typename std::enable_if<!MooseUtils::IsLikeReal<T2>::value, SymmetricRankTwoTensorTempl<T>>::type
   givensRotation(unsigned int, unsigned int, unsigned int) const;
 
-  /// computes the Hessenberg form of this matrix A and its unitary transformation U such that A = U * H * U^T
-  void hessenberg(SymmetricRankTwoTensorTempl<T> & H, SymmetricRankTwoTensorTempl<T> & U) const;
-
-  /// computes the QR factorization such that A = Q * R, where Q is the unitary matrix and R an upper triangular matrix
-  void QR(SymmetricRankTwoTensorTempl<T> & Q,
-          SymmetricRankTwoTensorTempl<T> & R,
-          unsigned int dim = SymmetricRankTwoTensorTempl<T>::N) const;
-
   /**
    * computes eigenvalues and eigenvectors, assuming tens is symmetric, and places them
    * in ascending order in eigvals.  eigvecs is a matrix with the first column
@@ -539,16 +550,7 @@ public:
   static SymmetricRankTwoTensorTempl<T> genRandomSymmTensor(T, T);
 
   /// SymmetricRankTwoTensorTempl<T> from outer product of a vector with itself
-  void vectorSelfOuterProduct(const TypeVector<T> &);
-
-  /// Return real tensor of a rank two tensor
-  void fillRealTensor(TensorValue<T> &);
-
-  ///Assigns value to the columns of a specified row
-  void fillRow(unsigned int, const TypeVector<T> &);
-
-  ///Assigns value to the rows of a specified column
-  void fillColumn(unsigned int, const TypeVector<T> &);
+  static SymmetricRankTwoTensorTempl<T> vectorSelfOuterProduct(const TypeVector<T> &);
 
   /// returns this_ij * b_ijkl
   SymmetricRankTwoTensorTempl<T>
@@ -564,9 +566,6 @@ private:
 
   // tensor components
   std::array<T, N> _vals;
-
-  /// as std::sqrt is not constexpr we need to define this here ourselves
-  static constexpr Real SQRT2 = 1.4142135623730951;
 
   template <class T2>
   friend void dataStore(std::ostream &, SymmetricRankTwoTensorTempl<T2> &, void *);
