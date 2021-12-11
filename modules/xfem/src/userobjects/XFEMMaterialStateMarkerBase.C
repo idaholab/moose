@@ -14,6 +14,7 @@
 
 #include "libmesh/parallel_algebra.h"
 #include "libmesh/parallel.h"
+#include "libmesh/parallel_sync.h"
 
 InputParameters
 XFEMMaterialStateMarkerBase::validParams()
@@ -66,7 +67,7 @@ XFEMMaterialStateMarkerBase::execute()
   bool isOnBoundary = false;
   unsigned int boundarySide = 99999;
   unsigned int _current_eid = _current_elem->id();
-  std::map<unsigned int, RealVectorValue>::iterator mit;
+  std::map<unsigned int, std::vector<RealVectorValue>>::iterator mit;
   mit = _marked_elems.find(_current_eid);
 
   for (unsigned int i = 0; i < _initiation_boundary_ids.size(); ++i)
@@ -80,29 +81,95 @@ XFEMMaterialStateMarkerBase::execute()
 
   if (isCTE && doesElementCrack(direction))
   {
-    if (mit != _marked_elems.end())
+    //    if (mit != _marked_elems.end())
+    //    {
+    //      mooseError("ERROR: element ", _current_eid, " already marked for crack growth.");
+    //    }
+    if (doesCrackBranch(direction))
     {
-      mooseError("ERROR: element ", _current_eid, " already marked for crack growth.");
+      //      _marked_elems[_current_eid] = direction;//+-45 degrees off
+      // TODO: update this for 3D rotational matrix, currently only rotating in Z plane for 2D
+      Real angle = 45.0;
+      RealVectorValue upperBranchDirection;
+      upperBranchDirection(0) = std::cos(angle * libMesh::pi / 180.0) * direction(0) +
+                                (direction(1) * -std::sin(angle * libMesh::pi / 180.0));
+      upperBranchDirection(1) = std::sin(angle * libMesh::pi / 180.0) * direction(0) +
+                                (direction(1) * std::cos(angle * libMesh::pi / 180.0));
+      upperBranchDirection(2) = direction(2);
+
+      RealVectorValue lowerBranchDirection;
+      angle = 315.0;
+      lowerBranchDirection(0) = std::cos(angle * libMesh::pi / 180.0) * direction(0) +
+                                (direction(1) * -std::sin(angle * libMesh::pi / 180.0));
+      lowerBranchDirection(1) = std::sin(angle * libMesh::pi / 180.0) * direction(0) +
+                                (direction(1) * std::cos(angle * libMesh::pi / 180.0));
+      lowerBranchDirection(2) = direction(2);
+
+      //      _marked_elems.insert(std::pair<unsigned int, RealVectorValue>(_current_eid,
+      //      upperBranchDirection));//+45 degrees _marked_elems.insert(std::pair<unsigned int,
+      //      RealVectorValue>(_current_eid, lowerBranchDirection));//-45 degrees
+      _marked_elems[_current_eid].push_back(upperBranchDirection);
+      _marked_elems[_current_eid].push_back(lowerBranchDirection);
     }
-    _marked_elems[_current_eid] = direction;
+    else
+      //      _marked_elems.insert(std::pair<unsigned int, RealVectorValue>(_current_eid,
+      //      direction));
+      _marked_elems[_current_eid].push_back(direction);
   }
   else if (isOnBoundary && doesElementCrack(direction))
   {
-    if (mit != _marked_elems.end())
-    {
-      mooseError("ERROR: element ", _current_eid, " already marked for crack growth.");
-    }
-    _marked_elems[_current_eid] = direction;
+    //    if (mit != _marked_elems.end())
+    //    {
+    //      mooseError("ERROR: element ", _current_eid, " already marked for crack growth.");
+    //    }
+    // No Branching here since at the edge it wouldn't continue
+    _marked_elems[_current_eid].push_back(direction);
+    //    _marked_elems.insert(std::pair<unsigned int, RealVectorValue>(_current_eid, direction));
     _marked_elem_sides[_current_eid] = boundarySide;
+    //    _marked_elem_sides.insert(std::pair<unsigned int, RealVectorValue>(_current_eid,
+    //    boundarySide));
   }
   else if (isCut && _secondary_cracks && doesElementCrack(direction))
   {
-    if (mit != _marked_elems.end())
+    //    if (mit != _marked_elems.end())
+    //    {
+    //      mooseError("ERROR: element ", _current_eid, " already marked for crack growth.");
+    //    }
+    if (doesCrackBranch(direction))
     {
-      mooseError("ERROR: element ", _current_eid, " already marked for crack growth.");
+      // TODO: update this for 3D rotational matrix, currently only rotating in Z plane for 2D
+      Real angle = 45.0;
+      RealVectorValue upperBranchDirection;
+      upperBranchDirection(0) = std::cos(angle * libMesh::pi / 180.0) * direction(0) +
+                                (direction(1) * -std::sin(angle * libMesh::pi / 180.0));
+      upperBranchDirection(1) = std::sin(angle * libMesh::pi / 180.0) * direction(0) +
+                                (direction(1) * std::cos(angle * libMesh::pi / 180.0));
+      upperBranchDirection(2) = direction(2);
+
+      RealVectorValue lowerBranchDirection;
+      angle = 315.0;
+      lowerBranchDirection(0) = std::cos(angle * libMesh::pi / 180.0) * direction(0) +
+                                (direction(1) * -std::sin(angle * libMesh::pi / 180.0));
+      lowerBranchDirection(1) = std::sin(angle * libMesh::pi / 180.0) * direction(0) +
+                                (direction(1) * std::cos(angle * libMesh::pi / 180.0));
+      lowerBranchDirection(2) = direction(2);
+
+      //      _marked_elems.insert(std::pair<unsigned int, RealVectorValue>(_current_eid,
+      //      upperBranchDirection));//+45 degrees _marked_elems.insert(std::pair<unsigned int,
+      //      RealVectorValue>(_current_eid, lowerBranchDirection));//-45 degrees
+      //      _marked_frags.insert(_current_eid);
+      //      _marked_frags.insert(_current_eid);
+      _marked_elems[_current_eid].push_back(upperBranchDirection);
+      _marked_elems[_current_eid].push_back(lowerBranchDirection);
+      _marked_frags.insert(_current_eid);
     }
-    _marked_elems[_current_eid] = direction;
-    _marked_frags.insert(_current_eid);
+    else
+    {
+      //      _marked_elems.insert(std::pair<unsigned int, RealVectorValue>(_current_eid,
+      //      direction)); _marked_frags.insert(_current_eid);
+      _marked_elems[_current_eid].push_back(direction);
+      _marked_frags.insert(_current_eid);
+    }
   }
 }
 
@@ -111,11 +178,13 @@ XFEMMaterialStateMarkerBase::threadJoin(const UserObject & y)
 {
   const XFEMMaterialStateMarkerBase & xmuo = dynamic_cast<const XFEMMaterialStateMarkerBase &>(y);
 
-  for (std::map<unsigned int, RealVectorValue>::const_iterator mit = xmuo._marked_elems.begin();
+  for (std::map<unsigned int, std::vector<RealVectorValue>>::const_iterator mit =
+           xmuo._marked_elems.begin();
        mit != xmuo._marked_elems.end();
        ++mit)
   {
-    _marked_elems[mit->first] = mit->second; // TODO do error checking for duplicates here too
+    //    _marked_elems[mit->first] = mit->second; // TODO do error checking for duplicates here too
+    _marked_elems.find(mit->first)->second = mit->second;
   }
 
   for (std::set<unsigned int>::const_iterator mit = xmuo._marked_frags.begin();
@@ -129,24 +198,30 @@ XFEMMaterialStateMarkerBase::threadJoin(const UserObject & y)
        mit != xmuo._marked_elem_sides.end();
        ++mit)
   {
-    _marked_elem_sides[mit->first] = mit->second; // TODO do error checking for duplicates here too
+    //    _marked_elem_sides[mit->first] = mit->second; // TODO do error checking for duplicates
+    //    here too
+    _marked_elem_sides.find(mit->first)->second = mit->second;
   }
 }
 
 void
 XFEMMaterialStateMarkerBase::finalize()
 {
-  _communicator.set_union(_marked_elems);
+
+  //  _communicator.set_union(_marked_elems);
   _communicator.set_union(_marked_frags);
   _communicator.set_union(_marked_elem_sides);
 
   _xfem->clearStateMarkedElems();
-  std::map<unsigned int, RealVectorValue>::iterator mit;
+  std::map<unsigned int, std::vector<RealVectorValue>>::iterator mit;
   for (mit = _marked_elems.begin(); mit != _marked_elems.end(); ++mit)
   {
     if (_marked_elem_sides.find(mit->first) != _marked_elem_sides.end())
     {
-      _xfem->addStateMarkedElem(mit->first, mit->second, _marked_elem_sides[mit->first]);
+      _xfem->addStateMarkedElem(
+          mit->first,
+          mit->second,
+          _marked_elem_sides.find(mit->first)->second); //_marked_elem_sides[mit->first]
     }
     else if (_marked_frags.find(mit->first) != _marked_frags.end())
     {
@@ -164,6 +239,13 @@ XFEMMaterialStateMarkerBase::finalize()
 
 bool
 XFEMMaterialStateMarkerBase::doesElementCrack(RealVectorValue & direction)
+{
+  direction(1) = 1.0;
+  return true;
+}
+
+bool
+XFEMMaterialStateMarkerBase::doesCrackBranch(RealVectorValue & direction)
 {
   direction(1) = 1.0;
   return true;

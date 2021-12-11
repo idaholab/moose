@@ -122,6 +122,15 @@
     unique_id = true
     requirement = 'The XFEM system shall permit branched cracks to be represented in 2D by sequentially cutting a 4-noded quadrilateral element by two prescribed evolving cutting planes'
   [../]
+  [./square_branch_quad_2d_simultaneously]
+    type = Exodiff
+    input = square_branch_quad_2d_simultaneously.i
+    exodiff = 'square_branch_quad_2d_simultaneously_out.e square_branch_quad_2d_simultaneously_out.e-s002'
+    map = false
+    # XFEM requires --enable-unique-ids in libmesh
+    unique_id = true
+    requirement = 'The XFEM system shall permit branched cracks to be represented in 2D by simultaneously cutting a 4-noded quadrilateral element by two prescribed evolving cutting planes'
+  [../]
   [./square_branch_tri_2d]
     type = Exodiff
     input = square_branch_tri_2d.i

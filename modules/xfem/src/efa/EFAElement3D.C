@@ -418,7 +418,7 @@ EFAElement3D::getMasterInfo(EFANode * node,
   }
 
   if (!masters_found)
-    EFAError("In EFAelement3D::getMaterInfo, cannot find the given EFAnode");
+    EFAError("In EFAelement3D::getMasterInfo, cannot find the given EFAnode");
 }
 
 unsigned int
@@ -2249,4 +2249,13 @@ EFAElement3D::getCommonNodes(const EFAElement3D * other_elem) const
                               other_elem->_nodes.begin() + _num_vertices);
   std::vector<EFANode *> common_nodes = Efa::getCommonElems(e1nodes, e2nodes);
   return common_nodes;
+}
+
+unsigned int
+EFAElement3D::getNewCutPlaneIdx()
+{
+  unsigned int cut_plane_idx = 0;
+  // TODO: See 2D make similar cut plane index in 3D elements tracking nodes and indices. Need to
+  // check face nodes as well
+  return (cut_plane_idx);
 }

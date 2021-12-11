@@ -238,7 +238,9 @@ ElementFragmentAlgorithm::addElemNodeIntersection(unsigned int elemid, unsigned 
 
   // Only add cut node when the curr_elem does not have any fragment
   if (curr_elem->numFragments() == 0)
+  {
     curr_elem->addNodeCut(nodeid, NULL, _permanent_nodes, _embedded_permanent_nodes);
+  }
 }
 
 bool
