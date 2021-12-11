@@ -2236,3 +2236,12 @@ EFAElement3D::getCommonNodes(const EFAElement3D * other_elem) const
   std::vector<EFANode *> common_nodes = Efa::getCommonElems(e1nodes, e2nodes);
   return common_nodes;
 }
+
+unsigned int
+EFAElement3D::getNewCutPlaneIdx()
+{
+  unsigned int cut_plane_idx = 0;
+  // TODO: See 2D make similar cut plane index in 3D elements tracking nodes and indices. Need to
+  // check face nodes as well
+  return (cut_plane_idx);
+}
