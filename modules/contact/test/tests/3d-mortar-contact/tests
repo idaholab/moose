@@ -72,6 +72,18 @@
     min_ad_size = 100
     max_parallel = 8
   []
+  [frictional-mortar-3d-action]
+    type = 'CSVDiff'
+    input = 'frictional-mortar-3d-action.i'
+    csvdiff = 'frictional-mortar-3d-action_out_frictional-pressure_0001.csv '
+              'frictional-mortar-3d-action_out_frictional-pressure-3d_0001.csv'
+    requirement = 'MOOSE shall solve a 3D frictional bouncing block problem with mortar constraint '
+                  'using nodal-attached geometry through a user-friendly action'
+    rel_err = 1.0e-5
+    abs_zero = 1.0e-5
+    min_ad_size = 100
+    max_parallel = 8
+  []
   [frictional-mortar-3d-interp-geometry]
     type = 'Exodiff'
     input = 'frictional-mortar-3d-interp-geometry.i'

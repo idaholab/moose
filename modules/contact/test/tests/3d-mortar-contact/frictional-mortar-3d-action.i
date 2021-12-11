@@ -115,37 +115,7 @@ offset = 0.00
     block = bottom_block
     normal = '0 -1 0'
   []
-  [secondary]
-    input = bottom_back_sideset
-    type = LowerDBlockFromSidesetGenerator
-    sidesets = 'top_bottom' # top_back top_left'
-    new_block_id = '10001'
-    new_block_name = 'secondary_lower'
-  []
-  [primary]
-    input = secondary
-    type = LowerDBlockFromSidesetGenerator
-    sidesets = 'bottom_top'
-    new_block_id = '10000'
-    new_block_name = 'primary_lower'
-  []
-  uniform_refine = 0
   allow_renumbering = false
-[]
-
-[Variables]
-  [mortar_normal_lm]
-    block = 'secondary_lower'
-    use_dual = true
-  []
-  [mortar_tangential_lm]
-    block = 'secondary_lower'
-    use_dual = true
-  []
-  [mortar_tangential_3d_lm]
-    block = 'secondary_lower'
-    use_dual = true
-  []
 []
 
 [Modules/TensorMechanics/Master]
@@ -182,143 +152,15 @@ offset = 0.00
   []
 []
 
-[Constraints]
-  [friction]
-    type = ComputeFrictionalForceLMMechanicalContact
-    primary_boundary = 'bottom_top'
-    secondary_boundary = 'top_bottom'
-    primary_subdomain = 'primary_lower'
-    secondary_subdomain = 'secondary_lower'
-    variable = mortar_normal_lm
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-    use_displaced_mesh = true
-    mu = 0.4
-    c = 1e4
-    c_t = 1.0e4
-    friction_lm = mortar_tangential_lm
-    friction_lm_dir = mortar_tangential_3d_lm
-    interpolate_normals = false
-  []
-  [normal_x]
-    type = NormalMortarMechanicalContact
-    primary_boundary = 'bottom_top'
-    secondary_boundary = 'top_bottom'
-    primary_subdomain = 'primary_lower'
-    secondary_subdomain = 'secondary_lower'
-    variable = mortar_normal_lm
-    secondary_variable = disp_x
-    component = x
-    use_displaced_mesh = true
-    compute_lm_residuals = false
-    interpolate_normals = false
-  []
-  [normal_y]
-    type = NormalMortarMechanicalContact
-    primary_boundary = 'bottom_top'
-    secondary_boundary = 'top_bottom'
-    primary_subdomain = 'primary_lower'
-    secondary_subdomain = 'secondary_lower'
-    variable = mortar_normal_lm
-    secondary_variable = disp_y
-    component = y
-    use_displaced_mesh = true
-    compute_lm_residuals = false
-    interpolate_normals = false
-  []
-  [normal_z]
-    type = NormalMortarMechanicalContact
-    primary_boundary = 'bottom_top'
-    secondary_boundary = 'top_bottom'
-    primary_subdomain = 'primary_lower'
-    secondary_subdomain = 'secondary_lower'
-    variable = mortar_normal_lm
-    secondary_variable = disp_z
-    component = z
-    use_displaced_mesh = true
-    compute_lm_residuals = false
-    interpolate_normals = false
-  []
-  [tangential_x]
-    type = TangentialMortarMechanicalContact
-    primary_boundary = 'bottom_top'
-    secondary_boundary = 'top_bottom'
-    primary_subdomain = 'primary_lower'
-    secondary_subdomain = 'secondary_lower'
-    variable = mortar_tangential_lm
-    secondary_variable = disp_x
-    component = x
-    use_displaced_mesh = true
-    compute_lm_residuals = false
-    interpolate_normals = false
-  []
-  [tangential_y]
-    type = TangentialMortarMechanicalContact
-    primary_boundary = 'bottom_top'
-    secondary_boundary = 'top_bottom'
-    primary_subdomain = 'primary_lower'
-    secondary_subdomain = 'secondary_lower'
-    variable = mortar_tangential_lm
-    secondary_variable = disp_y
-    component = y
-    use_displaced_mesh = true
-    compute_lm_residuals = false
-    interpolate_normals = false
-  []
-  [tangential_z]
-    type = TangentialMortarMechanicalContact
-    primary_boundary = 'bottom_top'
-    secondary_boundary = 'top_bottom'
-    primary_subdomain = 'primary_lower'
-    secondary_subdomain = 'secondary_lower'
-    variable = mortar_tangential_lm
-    secondary_variable = disp_z
-    component = z
-    use_displaced_mesh = true
-    compute_lm_residuals = false
-    interpolate_normals = false
-  []
-  [tangential_dir_x]
-    type = TangentialMortarMechanicalContact
-    primary_boundary = 'bottom_top'
-    secondary_boundary = 'top_bottom'
-    primary_subdomain = 'primary_lower'
-    secondary_subdomain = 'secondary_lower'
-    variable = mortar_tangential_3d_lm
-    secondary_variable = disp_x
-    component = x
-    direction = direction_2
-    use_displaced_mesh = true
-    compute_lm_residuals = false
-    interpolate_normals = false
-  []
-  [tangential_dir_y]
-    type = TangentialMortarMechanicalContact
-    primary_boundary = 'bottom_top'
-    secondary_boundary = 'top_bottom'
-    primary_subdomain = 'primary_lower'
-    secondary_subdomain = 'secondary_lower'
-    variable = mortar_tangential_3d_lm
-    secondary_variable = disp_y
-    component = y
-    direction = direction_2
-    use_displaced_mesh = true
-    compute_lm_residuals = false
-    interpolate_normals = false
-  []
-  [tangential_dir_z]
-    type = TangentialMortarMechanicalContact
-    primary_boundary = 'bottom_top'
-    secondary_boundary = 'top_bottom'
-    primary_subdomain = 'primary_lower'
-    secondary_subdomain = 'secondary_lower'
-    variable = mortar_tangential_3d_lm
-    secondary_variable = disp_z
-    component = z
-    direction = direction_2
-    use_displaced_mesh = true
-    compute_lm_residuals = false
+[Contact]
+  [mortar]
+    primary = 'bottom_top'
+    secondary = 'top_bottom'
+    formulation = mortar
+    model = coulomb
+    friction_coefficient = 0.4
+    c_normal = 1e4
+    c_tangential = 1.0e4
     interpolate_normals = false
   []
 []
@@ -409,7 +251,7 @@ offset = 0.00
   [contact]
     type = ContactDOFSetSize
     variable = mortar_normal_lm
-    subdomain = 'secondary_lower'
+    subdomain = 'mortar_secondary_subdomain'
     execute_on = 'nonlinear timestep_end'
   []
 []
@@ -417,21 +259,21 @@ offset = 0.00
 [VectorPostprocessors]
   [contact-pressure]
     type = NodalValueSampler
-    block = secondary_lower
+    block = mortar_secondary_subdomain
     variable = mortar_normal_lm
     sort_by = 'id'
     execute_on = NONLINEAR
   []
   [frictional-pressure]
     type = NodalValueSampler
-    block = secondary_lower
+    block = mortar_secondary_subdomain
     variable = mortar_tangential_lm
     sort_by = 'id'
     execute_on = NONLINEAR
   []
   [frictional-pressure-3d]
     type = NodalValueSampler
-    block = secondary_lower
+    block = mortar_secondary_subdomain
     variable = mortar_tangential_3d_lm
     sort_by = 'id'
     execute_on = NONLINEAR

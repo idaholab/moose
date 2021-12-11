@@ -125,6 +125,13 @@ ContactAction::validParams()
       "quadrature points). If this is set to false, then non-interpolated nodal normals will be "
       "used, and then the _normals member should be indexed with _i instead of _qp. This input "
       "parameter is intended for developers.");
+  params.addParam<bool>(
+      "normalize_c",
+      false,
+      "Whether to normalize c by weighting function norm for mortar contact. When unnormalized "
+      "the value of c effectively depends on element size since in the constraint we compare nodal "
+      "Lagrange Multiplier values to integrated gap values (LM nodal value is independent of "
+      "element size, where integrated values are dependent on element size).");
   params.addParam<MooseEnum>("mortar_approach",
                              ContactAction::getMortarApproach(),
                              "Whether to choose a variationally consistent mortar approach "
@@ -394,6 +401,7 @@ ContactAction::addMortarContact()
   const std::string secondary_subdomain_name = action_name + "_secondary_subdomain";
   const std::string normal_lagrange_multiplier_name = action_name + "_normal_lm";
   const std::string tangential_lagrange_multiplier_name = action_name + "_tangential_lm";
+  const std::string tangential_lagrange_multiplier_3d_name = action_name + "_tangential_3d_lm";
 
   if (_current_task == "append_mesh_generator")
   {
@@ -473,8 +481,15 @@ ContactAction::addMortarContact()
     //    For standard Mortar: one order lower than primal, Lagrange family unless zeroth order,
     //    than MONOMIAL. For dual Mortar: same family, equal order as primal, Lagrange family.
     if (_model == ContactModel::COULOMB && _mortar_approach == MortarApproach::Weighted)
+    {
       addLagrangeMultiplier(
           tangential_lagrange_multiplier_name, 1, true, getParam<Real>("tangential_lm_scaling"));
+      if (ndisp > 2)
+        addLagrangeMultiplier(tangential_lagrange_multiplier_3d_name,
+                              1,
+                              true,
+                              getParam<Real>("tangential_lm_scaling"));
+    }
     else if (_model == ContactModel::COULOMB && _mortar_approach == MortarApproach::Legacy)
       addLagrangeMultiplier(
           tangential_lagrange_multiplier_name, 0, true, getParam<Real>("tangential_lm_scaling"));
@@ -499,6 +514,7 @@ ContactAction::addMortarContact()
         params.set<NonlinearVariableName>("variable") = normal_lagrange_multiplier_name;
         params.set<std::vector<VariableName>>("disp_x") = {displacements[0]};
         params.set<bool>("interpolate_normals") = getParam<bool>("interpolate_normals");
+        params.set<bool>("normalize_c") = getParam<bool>("normalize_c");
 
         params.set<Real>("c") = getParam<Real>("c_normal");
 
@@ -553,6 +569,8 @@ ContactAction::addMortarContact()
         params.set<bool>("use_displaced_mesh") = true;
         params.set<Real>("c_t") = getParam<Real>("c_tangential");
         params.set<Real>("c") = getParam<Real>("c_normal");
+        params.set<bool>("interpolate_normals") = getParam<bool>("interpolate_normals");
+        params.set<bool>("normalize_c") = getParam<bool>("normalize_c");
         params.set<bool>("compute_primal_residuals") = false;
 
         params.set<std::vector<VariableName>>("disp_x") = {displacements[0]};
@@ -565,8 +583,12 @@ ContactAction::addMortarContact()
         params.set<NonlinearVariableName>("variable") = normal_lagrange_multiplier_name;
         params.set<std::vector<VariableName>>("friction_lm") = {
             tangential_lagrange_multiplier_name};
+
+        if (ndisp > 2)
+          params.set<std::vector<VariableName>>("friction_lm_dir") = {
+              tangential_lagrange_multiplier_3d_name};
+
         params.set<Real>("mu") = getParam<Real>("friction_coefficient");
-        // secondary_disp_z is not implemented for tangential (yet).
 
         _problem->addConstraint(
             "ComputeFrictionalForceLMMechanicalContact", action_name + "_tangential_lm", params);
@@ -621,7 +643,8 @@ ContactAction::addMortarContact()
         [this, &primary_subdomain_name, &secondary_subdomain_name, &displacements](
             const std::string & variable_name,
             const std::string & constraint_prefix,
-            const std::string & constraint_type) //
+            const std::string & constraint_type,
+            const bool is_additional_frictional_constraint) //
     {
       InputParameters params = _factory.getValidParams(constraint_type);
 
@@ -634,6 +657,15 @@ ContactAction::addMortarContact()
       params.set<NonlinearVariableName>("variable") = variable_name;
       params.set<bool>("use_displaced_mesh") = true;
       params.set<bool>("compute_lm_residuals") = false;
+      params.set<bool>("interpolate_normals") = getParam<bool>("interpolate_normals");
+
+      // Additional displacement residual for frictional problem
+      // The second frictional LM acts on a perpendicular direction.
+      if (is_additional_frictional_constraint)
+      {
+        MooseEnum direction("direction_1 direction_2", "direction_2");
+        params.set<MooseEnum>("direction") = direction;
+      }
 
       for (unsigned int i = 0; i < displacements.size(); ++i)
       {
@@ -650,12 +682,21 @@ ContactAction::addMortarContact()
     // Add mortar mechanical contact constraint objects for primal variables
     addMechanicalContactConstraints(normal_lagrange_multiplier_name,
                                     action_name + "_normal_constraint_",
-                                    "NormalMortarMechanicalContact");
+                                    "NormalMortarMechanicalContact",
+                                    false);
 
     if (_model == ContactModel::COULOMB)
+    {
       addMechanicalContactConstraints(tangential_lagrange_multiplier_name,
                                       action_name + "_tangential_constraint_",
-                                      "TangentialMortarMechanicalContact");
+                                      "TangentialMortarMechanicalContact",
+                                      false);
+      if (ndisp > 2)
+        addMechanicalContactConstraints(tangential_lagrange_multiplier_3d_name,
+                                        action_name + "_tangential_constraint_3d_",
+                                        "TangentialMortarMechanicalContact",
+                                        true);
+    }
   }
 }
 
