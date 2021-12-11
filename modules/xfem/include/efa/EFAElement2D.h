@@ -33,6 +33,12 @@ private:
   std::vector<std::vector<EFAElement2D *>> _edge_neighbors;
   std::vector<EFAFragment2D *> _fragments;
   std::vector<EFAPoint> _local_node_coor;
+  // Index of the current cut plane
+  unsigned int _current_cut_plane_idx = 0;
+  // Vector of cut plane indices
+  std::vector<unsigned int> _cut_plane_idx;
+  // Vector of vectors tracking nodes cut by each cut index referenced against _cut_plane_idx
+  std::vector<std::vector<EFANode *>> _cut_plane_nodes;
 
 public:
   // override virtual methods in base class
@@ -126,6 +132,47 @@ public:
   std::vector<EFAFragment2D *> branchingSplit(std::map<unsigned int, EFANode *> & EmbeddedNodes);
 
   std::vector<EFANode *> getCommonNodes(const EFAElement2D * other_elem) const;
+
+  /**
+   * Add a new face node to 2d element
+   * @param faceNode   The EFAFaceNode object to be added to the vector for this element's interior
+   * nodes
+   */
+  void addInteriorNode(EFAFaceNode * faceNode);
+
+  /**
+   * Return boolean answer for if the input node is on the interior of the current element
+   * @param node   The EFANode object to be compared against the vector of interior nodes
+   */
+  bool isInteriorNode(EFANode * node) const;
+  /**
+   * Return the faceNode object containing the input EFANode
+   * @param node   The EFANode object to be compared against the vector of interior nodes, then
+   * returning the faceNode containing the input node
+   */
+  EFAFaceNode * getFaceNode(EFANode * node) const;
+  /**
+   * Return boolean answer for if the input node's coordinates are found
+   * @param node   The EFANode object to be checked against interior nodes and then edge nodes to
+   * find its parametric coordinates
+   * @param para_coor   The vector of doubles, initially empty but parametric coordinates are added
+   * once found in either interior node or edge node
+   */
+  bool getNodeParametricCoordinate(EFANode * node, std::vector<double> & para_coor) const;
+
+  void getNewCutPlaneIdx();
+  unsigned int getCurrentCutPlaneIdx();
+  void addNodeToCutPlaneIdx(EFANode * node, unsigned int cut);
+  void reassignNodeToCutPlaneIdx(EFANode * node, unsigned int cut);
+  std::vector<std::vector<EFANode *>> getCutPlaneNodes();
+  std::vector<unsigned int> getCutPlaneIndices();
+  void removeCutPlaneNode(EFANode * node, unsigned int cut);
+  void removeCutPlane(unsigned int cut);
+  bool hasSameCut(EFANode * otherNode, unsigned int cut);
+  unsigned int numSoloNodes();
+  void pairSoloNodes();
+
+  void addNodeCutToNeighbors(EFANode * cut_node);
 
 private:
   // given the 1D parent coord of a point in an 2D element edge, translate it to 2D parametric

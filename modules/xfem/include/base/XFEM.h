@@ -113,9 +113,11 @@ public:
 
   void addGeometricCut(GeometricCutUserObject * geometric_cut);
 
-  void addStateMarkedElem(unsigned int elem_id, RealVectorValue & normal);
-  void addStateMarkedElem(unsigned int elem_id, RealVectorValue & normal, unsigned int marked_side);
-  void addStateMarkedFrag(unsigned int elem_id, RealVectorValue & normal);
+  void addStateMarkedElem(unsigned int elem_id, std::vector<RealVectorValue> & normal);
+  void addStateMarkedElem(unsigned int elem_id,
+                          std::vector<RealVectorValue> & normal,
+                          unsigned int marked_side);
+  void addStateMarkedFrag(unsigned int elem_id, std::vector<RealVectorValue> & normal);
 
   void clearStateMarkedElems();
 
@@ -336,7 +338,7 @@ private:
 
   // std::map<const Elem*, Point> _crack_propagation_direction_map;
 
-  std::map<const Elem *, RealVectorValue> _state_marked_elems;
+  std::map<const Elem *, std::vector<RealVectorValue>> _state_marked_elems;
   std::set<const Elem *> _state_marked_frags;
   std::map<const Elem *, unsigned int> _state_marked_elem_sides;
 
@@ -390,6 +392,16 @@ private:
    * XFEM_MARK.
    */
   std::unordered_map<const Elem *, Xfem::CutElemInfo> _old_geom_cut_elems;
+
+  /**
+   * Data structures to store material properties of the children elements prior to heal. These
+   * material properties are copied back to the children elements if the healed element is re-cut.
+   */
+  std::map<const Elem *, std::pair<const Elem *, const Elem *>> _healed_elems;
+  std::map<const Elem *, std::pair<bool, bool>> _healed_material_properties_used;
+
+  /// healed geometric cuts
+  std::map<const Elem *, const GeometricCutUserObject *> _healed_cuts;
 
   /**
    * Store the solution in stored_solution for a given node
