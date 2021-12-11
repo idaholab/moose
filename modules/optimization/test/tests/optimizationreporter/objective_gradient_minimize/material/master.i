@@ -1,16 +1,48 @@
 [StochasticTools]
 []
 
-[FormFunction]
-  type = ObjectiveMinimize
-  parameter_vpp = 'parameter_results'
-  data_computed = 'data_rec_0 data_rec_1 data_rec_2 data_rec_3'
-  data_target = '226 254 214 146'
+[Mesh]
+  type = GeneratedMesh
+  dim = 2
+  nx = 10
+  ny = 10
+  xmax = 2
+  ymax = 2
+[]
+[AuxVariables]
+  [temperature_forward]
+  []
+[]
+
+[OptimizationReporter]
+  type = ObjectiveGradientMinimize
+  parameter_names = 'p1'
+  num_values = '1'
+  initial_condition = '7'
+  lower_bounds = '0'
+  upper_bounds = '10'
+  measurement_points = '0.2 0.2 0
+            0.8 0.6 0
+            0.2 1.4 0
+            0.8 1.8 0'
+  measurement_values = '226 254 214 146'
 []
 
 [Executioner]
   type = Optimize
-  tao_solver = TAONM
+  tao_solver = taoblmvm
+  # FINITE DIFFERENCE OPTIONS
+  # petsc_options_iname='-tao_max_it -tao_fd_gradient -tao_fd_delta -tao_gatol'
+  # petsc_options_value='1000 true 0.00001 0.0001'
+  #-------------
+  # petsc_options_iname = '-tao_gatol'
+  # petsc_options_value = '1e-4'
+  # petsc_options_iname = '-tao_fd_gradient -tao_fd_delta -tao_gatol'
+  # petsc_options_value = 'true 0.0001 1e-4'
+   # petsc_options_iname='-tao_max_it -tao_fd_test -tao_test_gradient -tao_fd_gradient -tao_fd_delta -tao_gatol'
+   # petsc_options_value='1            true         true               false            0.00001       0.0001'
+   petsc_options_iname='-tao_gatol'
+   petsc_options_value='0.0001'
   verbose = true
 []
 
@@ -19,74 +51,94 @@
     type = OptimizeFullSolveMultiApp
     input_files = forward.i
     execute_on = "FORWARD"
+    clone_master_mesh = true
+    ignore_solve_not_converge = true #false
+  []
+  [adjoint]
+    type = OptimizeFullSolveMultiApp
+    input_files = adjoint.i
+    execute_on = "ADJOINT"
+    clone_master_mesh = true
+    ignore_solve_not_converge = false
   []
 []
 
 [Transfers]
+  [fromForward]
+    type = MultiAppReporterTransfer
+    multi_app = forward
+    direction = from_multiapp
+    from_reporters = 'data_pt/temperature data_pt/temperature'
+    to_reporters = 'OptimizationReporter/simulation_values receiver/measured'
+  []
+  [toAdjoint]
+    type = MultiAppReporterTransfer
+    multi_app = adjoint
+    direction = to_multiapp
+    from_reporters = 'OptimizationReporter/measurement_xcoord OptimizationReporter/measurement_ycoord OptimizationReporter/measurement_zcoord OptimizationReporter/misfit_values'
+    to_reporters = 'misfit/measurement_xcoord misfit/measurement_ycoord misfit/measurement_zcoord misfit/misfit_values'
+  []
+  [toForward_measument]
+    type = MultiAppReporterTransfer
+    multi_app = forward
+    direction = to_multiapp
+    from_reporters = 'OptimizationReporter/measurement_xcoord OptimizationReporter/measurement_ycoord OptimizationReporter/measurement_zcoord'
+    to_reporters = 'measure_data/measurement_xcoord measure_data/measurement_ycoord measure_data/measurement_zcoord'
+  []
+
   [toforward]
     type = OptimizationParameterTransfer
     multi_app = forward
-    parameter_vpp = parameter_results
+    value_names = 'p1'
+    parameters = 'Postprocessors/p1/value'
     to_control = parameterReceiver
   []
-  [pp_transfer_0]
-    type = MultiAppPostprocessorTransfer
-    direction = from_multiapp
+  [fromforwardMesh]
+    type = MultiAppCopyTransfer
     multi_app = forward
-    from_postprocessor = data_pt_0
-    to_postprocessor = data_rec_0
-    reduction_type = average
-  []
-  [pp_transfer_1]
-    type = MultiAppPostprocessorTransfer
     direction = from_multiapp
-    multi_app = forward
-    from_postprocessor = data_pt_1
-    to_postprocessor = data_rec_1
-    reduction_type = average
+    source_variable = 'temperature'
+    variable = 'temperature_forward'
   []
-  [pp_transfer_2]
-    type = MultiAppPostprocessorTransfer
-    direction = from_multiapp
-    multi_app = forward
-    from_postprocessor = data_pt_2
-    to_postprocessor = data_rec_2
-    reduction_type = average
-  []
-  [pp_transfer_3]
-    type = MultiAppPostprocessorTransfer
-    direction = from_multiapp
-    multi_app = forward
-    from_postprocessor = data_pt_3
-    to_postprocessor = data_rec_3
-    reduction_type = average
-  []
-[]
 
-[VectorPostprocessors]
-  [parameter_results]
-    type = OptimizationParameterVectorPostprocessor
+  [toAdjointMesh]
+    type = MultiAppCopyTransfer
+    multi_app = adjoint
+    direction = to_multiapp
+    source_variable = 'temperature_forward'
+    variable = 'temperature_forward'
+  []
+  [toAdjointParameter]
+    type = OptimizationParameterTransfer
+    multi_app = adjoint
+    value_names = 'p1'
     parameters = 'Postprocessors/p1/value'
+    to_control = parameterReceiver
+  []
+  [fromadjoint]
+    type = MultiAppReporterTransfer
+    multi_app = adjoint
+    direction = from_multiapp
+    from_reporters = 'adjoint_grad/adjoint_grad'
+    to_reporters = 'OptimizationReporter/adjoint'
   []
 []
 
-[Postprocessors]
-  [data_rec_0]
-    type = Receiver
-  []
-  [data_rec_1]
-    type = Receiver
-  []
-  [data_rec_2]
-    type = Receiver
-  []
-  [data_rec_3]
-    type = Receiver
-  []
+[Reporters]
+  [receiver]
+    type = ConstantReporter
+    real_vector_names = measured
+    real_vector_values = '0'
+   []
+   [optInfo]
+     type = OptimizationInfo
+     items = 'current_iterate'
+   []
 []
 
 
 [Outputs]
+  file_base = 'master'
   console = true
   csv=true
 []

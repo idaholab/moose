@@ -114,5 +114,6 @@
 
 [Outputs]
   csv=true
+  console = false
   #execute_on = timestepfinal
 []

@@ -1,8 +1,8 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 20
-  ny = 20
+  nx = 10
+  ny = 10
   xmax = 2
   ymax = 2
 []
@@ -11,17 +11,51 @@
   [temperature]
   []
 []
-
 [Kernels]
   [heat_conduction]
-    type = ADHeatConduction
+    type = HeatConduction
     variable = temperature
   []
-  [./heat_source]
+  [heat_source]
     type = ADMatHeatSource
     material_property = volumetric_heat
     variable = temperature
-  [../]
+  []
+[]
+
+[AuxVariables]
+  [grad_Tx]
+    order = CONSTANT
+    family = MONOMIAL
+  []
+  [grad_Ty]
+    order = CONSTANT
+    family = MONOMIAL
+  []
+  [grad_Tz]
+    order = CONSTANT
+    family = MONOMIAL
+  []
+[]
+[AuxKernels]
+  [grad_Tx]
+    type = VariableGradientComponent
+    component = x
+    variable = grad_Tx
+    gradient_variable = temperature
+  []
+  [grad_Ty]
+    type = VariableGradientComponent
+    component = y
+    variable = grad_Ty
+    gradient_variable = temperature
+  []
+  [grad_Tz]
+    type = VariableGradientComponent
+    component = z
+    variable = grad_Tz
+    gradient_variable = temperature
+  []
 []
 
 [BCs]
@@ -58,18 +92,23 @@
     vars = 'alpha'
     vals = 'p1'
   []
+  [heat_source]
+    type = ParsedFunction
+    # value = 100*cos(2*pi/2*(x+1))
+    value = 1000
+  []
 []
 
 [Materials]
   [steel]
-    type = ADGenericFunctionMaterial
+    type = GenericFunctionMaterial
     prop_names = 'thermal_conductivity'
     prop_values = 'thermo_conduct'
   []
   [volumetric_heat]
     type = ADGenericFunctionMaterial
     prop_names = 'volumetric_heat'
-    prop_values = '1000'
+    prop_values = 'heat_source'
   []
 []
 
@@ -91,6 +130,7 @@
     type = VppPointValueSampler
     variable = temperature
     reporter_name = measure_data
+    outputs = none
   []
 []
 

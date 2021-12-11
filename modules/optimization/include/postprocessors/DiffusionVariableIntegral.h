@@ -9,25 +9,22 @@
 
 #pragma once
 
-#include "ElementIntegralVariablePostprocessor.h"
+#include "ElementIntegralPostprocessor.h"
 
-class DiffusionVariableIntegral;
-
-template <>
-InputParameters validParams<DiffusionVariableIntegral>();
-
-class DiffusionVariableIntegral : public ElementIntegralVariablePostprocessor
+class DiffusionVariableIntegral : public ElementIntegralPostprocessor
 {
 public:
   static InputParameters validParams();
 
   DiffusionVariableIntegral(const InputParameters & parameters);
 
-  virtual Real getValue() override;
-
 protected:
   virtual Real computeQpIntegral() override;
-
-  // gradient of the forward solution
-  const VariableGradient & _grad_u_forward;
+  ///@{ Derivative of materwith with respect to parameter being optimized
+  const MaterialProperty<Real> & _M;
+  ///@}
+  /// Holds variable1 gradient at the current quadrature points
+  const VariableGradient & _grad_u;
+  /// Holds variable2 gradient at the current quadrature points
+  const VariableGradient & _grad_v;
 };

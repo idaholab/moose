@@ -9,41 +9,32 @@
 
 #include "DiffusionVariableIntegral.h"
 
-#include "Assembly.h"
-#include "MooseVariableFE.h"
-#include "MooseVariableScalar.h"
-#include "SubProblem.h"
-#include "NonlinearSystem.h"
-
-#include "libmesh/threads.h"
-#include "libmesh/quadrature.h"
-
 registerMooseObject("isopodApp", DiffusionVariableIntegral);
-
-defineLegacyParams(DiffusionVariableIntegral);
 
 InputParameters
 DiffusionVariableIntegral::validParams()
 {
-  InputParameters params = ElementIntegralVariablePostprocessor::validParams();
-  params.addRequiredCoupledVar("variable_forward", "forward solution");
+  InputParameters params = ElementIntegralPostprocessor::validParams();
+  params.addClassDescription("computes some stuff for material gradient");
+
+  params.addRequiredCoupledVar("variable1",
+                               "The name of the variable that this object operates on");
+  params.addRequiredCoupledVar("variable2", "Variable being multiplied");
+  params.addRequiredParam<MaterialPropertyName>("material_derivative",
+                                                "Material Derivative wrt parameterize");
   return params;
 }
 
 DiffusionVariableIntegral::DiffusionVariableIntegral(const InputParameters & parameters)
-  : ElementIntegralVariablePostprocessor(parameters),
-    _grad_u_forward(coupledGradient("variable_forward"))
+  : ElementIntegralPostprocessor(parameters),
+    _dMdP(getMaterialProperty<Real>("material_derivative")),
+    _grad_u(coupledGradient("variable1")),
+    _grad_v(coupledGradient("variable2"))
 {
-}
-
-Real
-DiffusionVariableIntegral::getValue()
-{
-  return ElementIntegralPostprocessor::getValue();
 }
 
 Real
 DiffusionVariableIntegral::computeQpIntegral()
 {
-  return - _grad_u[_qp] * _grad_u_forward[_qp];
+  return -_grad_v[_qp] * _dMdP[_qp] * _grad_u[_qp];
 }

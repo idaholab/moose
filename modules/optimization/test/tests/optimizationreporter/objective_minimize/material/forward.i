@@ -80,10 +80,10 @@
 [Executioner]
   type = Steady
   solve_type = PJFNK
-  nl_abs_tol = 1e-6
+  nl_abs_tol = 1e-8
   nl_rel_tol = 1e-8
-  petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre boomeramg'
+  petsc_options_iname = '-ksp_type -pc_type -pc_factor_mat_solver_package'
+  petsc_options_value = 'preonly lu       superlu_dist'
 []
 
 [Postprocessors]
@@ -96,13 +96,15 @@
 
 [VectorPostprocessors]
   [data_pt]
-    type = PointValueSampler
+    type = VppPointValueSampler
     variable = temperature
-    sort_by = id
-    points = '0.2 0.2 0
-              0.8 0.6 0
-              0.2 1.4 0
-              0.8 1.8 0'
+    reporter_name = measure_data
+  []
+[]
+
+[Reporters]
+  [measure_data]
+    type=OptimizationData
   []
 []
 

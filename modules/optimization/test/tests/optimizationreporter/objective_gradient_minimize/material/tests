@@ -1,8 +1,27 @@
 [Tests]
-  [function_load_grad_free_p1_taolmvm]
+  [fd_grad]
     type = CSVDiff
     rel_err = 0.01
+    abs_zero=0.01
     input = master.i
-    csvdiff = master_out.csv
+    cli_args = "Executioner/petsc_options_iname='-tao_max_it -tao_fd_gradient -tao_fd_delta -tao_gatol'"
+               " Executioner/petsc_options_value='10 true 0.00001 0.0001'"
+    csvdiff = master_OptimizationReporter_0001.csv
+  []
+  [grad_free]
+    type = CSVDiff
+    rel_err = 0.01
+    abs_zero=0.01
+    input = master_gradFree.i
+    csvdiff = master_gradFree_OptimizationReporter_0001.csv
+  []
+  [adjoint_grad]
+  type = CSVDiff
+  rel_err = 0.01
+  abs_zero=0.01
+  input = master.i
+  cli_args = "Executioner/petsc_options_iname='-tao_gatol'"
+             " Executioner/petsc_options_value='0.0001'"
+  csvdiff = master_OptimizationReporter_0001.csv
   []
 []

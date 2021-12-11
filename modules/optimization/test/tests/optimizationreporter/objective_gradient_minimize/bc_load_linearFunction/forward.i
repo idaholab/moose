@@ -112,7 +112,7 @@
 []
 
 [Outputs]
-  console = true
-  exodus = true
+  console = false
+  exodus = false
   file_base = 'forward'
 []
