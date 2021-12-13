@@ -109,5 +109,9 @@ THM also provides components like pumps and valves, which behave like junctions.
 However, they may have some limitations on the number of connected channels.
 For example, a pump component might have only a single inlet and a single outlet.
 
+The single-phase flow model does not support mixing of fluids.
+This means you cannot bring 2 different fluids into a junction and have their mixture produced at the junction outlet.
+The code will detect this problem and report an error, if you do so.
+
 !content pagination previous=tutorials/single_phase_flow/step02.md
                     next=tutorials/single_phase_flow/step04.md
