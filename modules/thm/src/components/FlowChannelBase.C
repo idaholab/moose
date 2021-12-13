@@ -158,7 +158,7 @@ FlowChannelBase::check() const
   GeometricalFlowComponent::check();
 
   if (_closures)
-    _closures->check(*this);
+    _closures->checkFlowChannel(*this);
 
   // check types of heat transfer for all sources; must be all of same type
   if (_temperature_mode)
@@ -418,7 +418,7 @@ FlowChannelBase::addMooseObjects()
   }
 
   _flow_model->addMooseObjects();
-  _closures->addMooseObjects(*this);
+  _closures->addMooseObjectsFlowChannel(*this);
 }
 
 void
