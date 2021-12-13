@@ -17,18 +17,18 @@ Closures1PhaseNone::Closures1PhaseNone(const InputParameters & params) : Closure
 }
 
 void
-Closures1PhaseNone::check(const FlowChannelBase & /*flow_channel*/) const
+Closures1PhaseNone::checkFlowChannel(const FlowChannelBase & /*flow_channel*/) const
 {
 }
 
 void
-Closures1PhaseNone::check(const HeatTransferBase & /*heat_transfer*/,
-                          const FlowChannelBase & /*flow_channel*/) const
+Closures1PhaseNone::checkHeatTransfer(const HeatTransferBase & /*heat_transfer*/,
+                                      const FlowChannelBase & /*flow_channel*/) const
 {
 }
 
 void
-Closures1PhaseNone::addMooseObjects(const FlowChannelBase & flow_channel)
+Closures1PhaseNone::addMooseObjectsFlowChannel(const FlowChannelBase & flow_channel)
 {
   const FlowChannel1Phase & flow_channel_1phase =
       dynamic_cast<const FlowChannel1Phase &>(flow_channel);
@@ -44,7 +44,7 @@ Closures1PhaseNone::addMooseObjects(const FlowChannelBase & flow_channel)
 }
 
 void
-Closures1PhaseNone::addMooseObjects(const HeatTransferBase & /*heat_transfer*/,
-                                    const FlowChannelBase & /*flow_channel*/)
+Closures1PhaseNone::addMooseObjectsHeatTransfer(const HeatTransferBase & /*heat_transfer*/,
+                                                const FlowChannelBase & /*flow_channel*/)
 {
 }

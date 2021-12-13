@@ -21,7 +21,7 @@ Closures1PhaseSimple::Closures1PhaseSimple(const InputParameters & params)
 }
 
 void
-Closures1PhaseSimple::check(const FlowChannelBase & flow_channel) const
+Closures1PhaseSimple::checkFlowChannel(const FlowChannelBase & flow_channel) const
 {
   if (!flow_channel.isParamValid("f"))
     logComponentError(flow_channel.cname(),
@@ -29,8 +29,8 @@ Closures1PhaseSimple::check(const FlowChannelBase & flow_channel) const
 }
 
 void
-Closures1PhaseSimple::check(const HeatTransferBase & heat_transfer,
-                            const FlowChannelBase & /*flow_channel*/) const
+Closures1PhaseSimple::checkHeatTransfer(const HeatTransferBase & heat_transfer,
+                                        const FlowChannelBase & /*flow_channel*/) const
 {
   if (!heat_transfer.isParamValid("Hw"))
     logComponentError(heat_transfer.cname(),
@@ -38,7 +38,7 @@ Closures1PhaseSimple::check(const HeatTransferBase & heat_transfer,
 }
 
 void
-Closures1PhaseSimple::addMooseObjects(const FlowChannelBase & flow_channel)
+Closures1PhaseSimple::addMooseObjectsFlowChannel(const FlowChannelBase & flow_channel)
 {
   const FlowChannel1Phase & flow_channel_1phase =
       dynamic_cast<const FlowChannel1Phase &>(flow_channel);
@@ -73,8 +73,8 @@ Closures1PhaseSimple::addMooseObjects(const FlowChannelBase & flow_channel)
 }
 
 void
-Closures1PhaseSimple::addMooseObjects(const HeatTransferBase & heat_transfer,
-                                      const FlowChannelBase & flow_channel)
+Closures1PhaseSimple::addMooseObjectsHeatTransfer(const HeatTransferBase & heat_transfer,
+                                                  const FlowChannelBase & flow_channel)
 {
   const HeatTransfer1PhaseBase & heat_transfer_1phase =
       dynamic_cast<const HeatTransfer1PhaseBase &>(heat_transfer);
