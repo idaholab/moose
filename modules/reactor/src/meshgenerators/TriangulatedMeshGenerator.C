@@ -98,13 +98,24 @@ TriangulatedMeshGenerator::generate()
 
   std::unique_ptr<MeshBase> mesh = std::move(_inner_boundary_mesh);
   BoundaryInfo & boundary_info = mesh->get_boundary_info();
+  const std::set<boundary_id_type> & boundary_ids = boundary_info.get_boundary_ids();
 
   // set inner boundary id based on give input
   if(isParamValid("inner_boundary_id")) {
     _inner_boundary_id = getParam<boundary_id_type>("inner_boundary_id");
+    // confirm inner_boundary_id exists in input mesh
+    if (boundary_ids.find(_inner_boundary_id) == boundary_ids.end()) {
+      paramError(
+        "inner_boundary_id",
+        "Boundary id not found in input mesh.");}
   }
   if(isParamValid("inner_boundary_name")) {
     _inner_boundary_id = boundary_info.get_id_by_name(getParam<std::string>("inner_boundary_name"));
+    // confirm inner_boundary_name exists in input mesh
+    if (boundary_ids.find(_inner_boundary_id) == boundary_ids.end()) {
+      paramError(
+        "inner_boundary_name",
+        "Boundary name not found in input mesh.");}
   }
 
   // build nodesets and sidesets
@@ -324,6 +335,12 @@ void TriangulatedMeshGenerator::_create_sorted_boundary_node_list(std::unique_pt
 
   std::vector<dof_id_type> boundary_ordered_node_list;
   bool isFlipped = false;
+
+// check that boundary list is non-zero, otherwise error
+if (boundary_node_assm.size() == 0) {
+  mooseError("In TriangulatedMeshGenerator, inner boundary node list appears empty, ",
+             "check inner boundary input.");
+}
 
   // start sorted node list with nodes from first side in side list, first two nodes are sorted
   // remove side from side list to be sorted
