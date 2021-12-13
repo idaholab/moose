@@ -54,4 +54,20 @@
     expect_err = "Either 'inner_boundary_id' or 'inner_boundary_name' must be provided, but not both."
     requirement ="The system shall throw an error if neither inner_boundary_name and inner_boundary_id are provided."
   []
+  [err_inner_mesh_name_not_found]
+    type = 'RunException'
+    input = 'abtr_tri_err.i'
+    cli_args = 'Mesh/tmg/inner_boundary_name=name_not_defined
+                --mesh-only "abtr_tri_err.e"'
+    expect_err = "Boundary name not found in input mesh."
+    requirement ="The system shall throw an error if inner_boundary_name is not defined on the input mesh."
+  []
+  [err_inner_mesh_id_not_found]
+    type = 'RunException'
+    input = 'abtr_tri_err.i'
+    cli_args = 'Mesh/tmg/inner_boundary_id=-123
+                --mesh-only "abtr_tri_err.e"'
+    expect_err = "Boundary id not found in input mesh."
+    requirement ="The system shall throw an error if inner_boundary_name is not defined on the input mesh."
+  []
 []
