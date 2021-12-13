@@ -1,6 +1,7 @@
 [Tests]
   design = "Strains.md Stresses.md"
   issues = "#8235"
+  parallel_scheduling = true
   [./smallstrain_3D]
     type = 'PetscJacobianTester'
     input = 'jacobian_test_3D.i'
@@ -228,5 +229,26 @@
                   " for planestrain problems using finite strain and volumetric"
                   " locking correction."
     design = "VolumetricLocking.md"
+  [../]
+  [./smallstrain_spherical]
+    type = 'PetscJacobianTester'
+    input = 'jacobian_spherical.i'
+    cli_args = 'Modules/TensorMechanics/Master/all/incremental=false
+                Modules/TensorMechanics/Master/all/strain=SMALL'
+    ratio_tol = 2e-10
+    difference_tol = 2e5
+    requirement = "The mechanics system shall correctly compute the jacobian"
+                  " for spherical problems using small strain."
+  [../]
+  [./incrementalstrain_spherical]
+    type = 'PetscJacobianTester'
+    input = 'jacobian_spherical.i'
+    cli_args = 'Modules/TensorMechanics/Master/all/incremental=true
+                Modules/TensorMechanics/Master/all/strain=SMALL
+                Materials/stress/type=ComputeFiniteStrainElasticStress'
+    ratio_tol = 2e-10
+    difference_tol = 2e5
+    requirement = "The mechanics system shall correctly compute the jacobian"
+                  " for spherical problems using small, incremental strain."
   [../]
 []
