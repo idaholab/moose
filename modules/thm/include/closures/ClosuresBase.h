@@ -22,22 +22,36 @@ public:
   ClosuresBase(const InputParameters & params);
 
   /**
-   * Checks for errors
+   * Checks for errors associated with a flow channel component
    *
    * @param[in] flow_channel   Flow channel component
    */
-  virtual void check(const FlowChannelBase & flow_channel) const = 0;
-  virtual void check(const HeatTransferBase & heat_transfer,
-                     const FlowChannelBase & flow_channel) const = 0;
+  virtual void checkFlowChannel(const FlowChannelBase & flow_channel) const = 0;
 
   /**
-   * Adds MOOSE objects
+   * Checks for errors associated with a heat transfer component
+   *
+   * @param[in] heat_transfer   Heat transfer component
+   * @param[in] flow_channel   Flow channel component
+   */
+  virtual void checkHeatTransfer(const HeatTransferBase & heat_transfer,
+                                 const FlowChannelBase & flow_channel) const = 0;
+
+  /**
+   * Adds MOOSE objects associated with a flow channel component
    *
    * @param[in] flow_channel   Flow channel component
    */
-  virtual void addMooseObjects(const FlowChannelBase & flow_channel) = 0;
-  virtual void addMooseObjects(const HeatTransferBase & heat_transfer,
-                               const FlowChannelBase & flow_channel) = 0;
+  virtual void addMooseObjectsFlowChannel(const FlowChannelBase & flow_channel) = 0;
+
+  /**
+   * Adds MOOSE objects associated with a heat transfer component
+   *
+   * @param[in] heat_transfer   Heat transfer component
+   * @param[in] flow_channel   Flow channel component
+   */
+  virtual void addMooseObjectsHeatTransfer(const HeatTransferBase & heat_transfer,
+                                           const FlowChannelBase & flow_channel) = 0;
 
 protected:
   /**

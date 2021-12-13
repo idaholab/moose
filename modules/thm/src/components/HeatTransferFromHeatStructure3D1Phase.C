@@ -226,7 +226,7 @@ HeatTransferFromHeatStructure3D1Phase::check() const
   {
     auto & clsr = _flow_channel_closures[i];
     if (clsr != nullptr && hasComponentByName<FlowChannel1Phase>(_flow_channel_names[i]))
-      clsr->check(*this, getComponentByName<FlowChannel1Phase>(_flow_channel_names[i]));
+      clsr->checkHeatTransfer(*this, getComponentByName<FlowChannel1Phase>(_flow_channel_names[i]));
   }
 
   if (!hasComponentByName<HeatStructureFromFile3D>(_hs_name))
@@ -260,7 +260,7 @@ HeatTransferFromHeatStructure3D1Phase::addMooseObjects()
 
   for (unsigned int i = 0; i < _flow_channel_closures.size(); i++)
   {
-    _flow_channel_closures[i]->addMooseObjects(
+    _flow_channel_closures[i]->addMooseObjectsHeatTransfer(
         *this, getComponentByName<FlowChannel1Phase>(_flow_channel_names[i]));
   }
 
