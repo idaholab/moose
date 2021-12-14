@@ -34,7 +34,7 @@
       exodiff = flux_bcs_direct_out.e
       method = "!dbg"
       ad_indexing_type = 'global'
-      abs_zero = 1e-9
+      abs_zero = 3e-9
       recover = false # see #19126
       detail = 'specifying the flux values directly though the flow rates'
     []

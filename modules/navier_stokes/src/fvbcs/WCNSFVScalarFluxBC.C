@@ -18,6 +18,7 @@ WCNSFVScalarFluxBC::validParams()
 {
   InputParameters params = FVFluxBC::validParams();
   params += INSFVFlowBC::validParams();
+  params.addClassDescription("Flux boundary conditions for scalar quantity advection.");
 
   params.addParam<Real>("scaling_factor", 1, "To scale the flux");
 

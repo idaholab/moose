@@ -21,6 +21,7 @@ WCNSFVMomentumFluxBC::validParams()
   // this is not really necessary, since advection kernel wont be executed on
   // this flux boundary
   params += INSFVFlowBC::validParams();
+  params.addClassDescription("Flux boundary conditions for momentum advection.");
 
   params.addParam<Real>("scaling_factor", 1, "To scale the momentum flux");
 

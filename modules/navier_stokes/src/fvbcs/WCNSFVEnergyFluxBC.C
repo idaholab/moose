@@ -18,6 +18,7 @@ WCNSFVEnergyFluxBC::validParams()
 {
   InputParameters params = FVFluxBC::validParams();
   params += INSFVFlowBC::validParams();
+  params.addClassDescription("Flux boundary conditions for energy advection.");
 
   params.addParam<Real>("scaling_factor", 1, "To scale the energy flux");
 
