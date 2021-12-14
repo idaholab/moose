@@ -91,6 +91,13 @@ ComputeElemAuxBcsThread<AuxKernelType>::operator()(const ConstBndElemRange & ran
             neighbor && neighbor->active() &&
             _problem.getInterfaceMaterialsWarehouse().hasActiveBoundaryObjects(boundary_id, _tid);
 
+        // Set up Sentinel class so that, even if reinitMaterialsFace() throws, we
+        // still remember to swap back during stack unwinding.
+        SwapBackSentinel sentinel(_problem, &FEProblem::swapBackMaterialsFace, _tid);
+        std::unique_ptr<SwapBackSentinel> neighbor_sentinel =
+            compute_interface ? std::make_unique<SwapBackSentinel>(
+                                    _problem, &FEProblem::swapBackMaterialsNeighbor, _tid)
+                              : nullptr;
         if (_need_materials)
         {
           std::set<unsigned int> needed_mat_props;
@@ -117,12 +124,7 @@ ComputeElemAuxBcsThread<AuxKernelType>::operator()(const ConstBndElemRange & ran
           aux->compute();
 
         if (_need_materials)
-        {
-          _problem.swapBackMaterialsFace(_tid);
-          if (compute_interface)
-            _problem.swapBackMaterialsNeighbor(_tid);
           _problem.clearActiveMaterialProperties(_tid);
-        }
       }
 
       // update the solution vector
