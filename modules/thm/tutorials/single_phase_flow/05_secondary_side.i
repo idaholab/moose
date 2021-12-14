@@ -276,7 +276,7 @@ m_dot_sec_in = 1    # kg/s
   []
 
   [jct6]
-    type = JunctionParallelChannels1Phase
+    type = VolumeJunction1Phase
     position = '0 0 0'
     connections = 'bottom_a:out core_chan:in'
     volume = 1e-3

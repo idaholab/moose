@@ -298,7 +298,7 @@ ht_blocks = 'core_chan hx/pri hx/sec'
   []
 
   [jct6]
-    type = JunctionParallelChannels1Phase
+    type = VolumeJunction1Phase
     position = '0 0 0'
     connections = 'bottom_a:out core_chan:in'
     volume = 1e-3

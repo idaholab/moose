@@ -68,7 +68,7 @@ Then, we add the PID control block as follows:
          link=False
 
 The value computed by the PID control is available in the control logic system under the name
-`pid:value`, where `pid` is the name of the block.
+`pid:output`, where `pid` is the name of the block.
 
 As a last step, we need to feed this value back into the system.
 That can be done via `SetComponentRealValueControl` block.
