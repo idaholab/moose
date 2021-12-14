@@ -459,7 +459,6 @@ clean:
 # .) moose (ignore a possible MOOSE submodule)
 # .) .git  (don't accidentally delete any of git's metadata)
 # Notes:
-# .) Be careful: running 'make -n clobber' will actually delete files!
 # .) 'make clobber' does not respect $(METHOD), it just deletes
 #    everything it can find!
 # .) Running 'make clobberall' is a good way to clean up outdated
