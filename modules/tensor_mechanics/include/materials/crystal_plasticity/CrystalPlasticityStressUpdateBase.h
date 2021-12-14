@@ -142,7 +142,7 @@ public:
    */
   virtual bool calculateSlipRate() = 0;
 
-  void calculateEquivalentSlipIncrement(RankTwoTensor & /*equivalent_slip_increment*/);
+  virtual void calculateEquivalentSlipIncrement(RankTwoTensor & /*equivalent_slip_increment*/);
 
   /**
    * This virtual method is called to find the derivative of the slip increment

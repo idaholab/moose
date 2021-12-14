@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CrystalPlasticityKalidindiUpdate.h"
+#include "libmesh/int_range.h"
 
 registerMooseObject("TensorMechanicsApp", CrystalPlasticityKalidindiUpdate);
 
@@ -24,6 +25,10 @@ CrystalPlasticityKalidindiUpdate::validParams()
   params.addParam<Real>("xm", 0.1, "exponent for slip rate");
   params.addParam<Real>("gss_initial", 60.8, "initial lattice friction strength of the material");
 
+  params.addParam<MaterialPropertyName>(
+      "total_twin_volume_fraction",
+      "Total twin volume fraction, if twinning is considered in the simulation");
+
   return params;
 }
 
@@ -37,15 +42,22 @@ CrystalPlasticityKalidindiUpdate::CrystalPlasticityKalidindiUpdate(
     _gss_a(getParam<Real>("gss_a")),
     _ao(getParam<Real>("ao")),
     _xm(getParam<Real>("xm")),
-    _gss_initial(getParam<Real>("gss_initial"))
-{
-  // resize local caching vectors used for substepping
-  _previous_substep_slip_resistance.resize(_number_slip_systems);
-  _slip_resistance_before_update.resize(_number_slip_systems);
+    _gss_initial(getParam<Real>("gss_initial")),
 
-  // resize vectors used in the consititutive slip hardening
-  _hb.resize(_number_slip_systems);
-  _slip_resistance_increment.resize(_number_slip_systems);
+    // resize vectors used in the consititutive slip hardening
+    _hb(_number_slip_systems, 0.0),
+    _slip_resistance_increment(_number_slip_systems, 0.0),
+
+    // resize local caching vectors used for substepping
+    _previous_substep_slip_resistance(_number_slip_systems, 0.0),
+    _slip_resistance_before_update(_number_slip_systems, 0.0),
+
+    // Twinning contributions, if used
+    _include_twinning_in_Lp(parameters.isParamValid("total_twin_volume_fraction")),
+    _twin_volume_fraction_total(_include_twinning_in_Lp
+                                    ? &getMaterialPropertyOld<Real>("total_twin_volume_fraction")
+                                    : nullptr)
+{
 }
 
 void
@@ -53,7 +65,7 @@ CrystalPlasticityKalidindiUpdate::initQpStatefulProperties()
 {
   CrystalPlasticityStressUpdateBase::initQpStatefulProperties();
 
-  for (unsigned int i = 0; i < _number_slip_systems; ++i)
+  for (auto i : make_range(_number_slip_systems))
   {
     _slip_resistance[_qp][i] = _gss_initial;
     _slip_increment[_qp][i] = 0.0;
@@ -78,7 +90,7 @@ CrystalPlasticityKalidindiUpdate::setSubstepConstitutiveVariableValues()
 bool
 CrystalPlasticityKalidindiUpdate::calculateSlipRate()
 {
-  for (unsigned int i = 0; i < _number_slip_systems; ++i)
+  for (auto i : make_range(_number_slip_systems))
   {
     _slip_increment[_qp][i] =
         _ao * std::pow(std::abs(_tau[_qp][i] / _slip_resistance[_qp][i]), 1.0 / _xm);
@@ -98,10 +110,24 @@ CrystalPlasticityKalidindiUpdate::calculateSlipRate()
 }
 
 void
+CrystalPlasticityKalidindiUpdate::calculateEquivalentSlipIncrement(
+    RankTwoTensor & equivalent_slip_increment)
+{
+  if (_include_twinning_in_Lp)
+  {
+    for (auto i : make_range(_number_slip_systems))
+      equivalent_slip_increment += (1.0 - (*_twin_volume_fraction_total)[_qp]) *
+                                   _flow_direction[_qp][i] * _slip_increment[_qp][i] * _substep_dt;
+  }
+  else // if no twinning volume fraction material property supplied, use base class
+    CrystalPlasticityStressUpdateBase::calculateEquivalentSlipIncrement(equivalent_slip_increment);
+}
+
+void
 CrystalPlasticityKalidindiUpdate::calculateConstitutiveSlipDerivative(
     std::vector<Real> & dslip_dtau)
 {
-  for (unsigned int i = 0; i < _number_slip_systems; ++i)
+  for (auto i : make_range(_number_slip_systems))
   {
     if (MooseUtils::absoluteFuzzyEqual(_tau[_qp][i], 0.0))
       dslip_dtau[i] = 0.0;
@@ -137,7 +163,7 @@ CrystalPlasticityKalidindiUpdate::cacheStateVariablesBeforeUpdate()
 void
 CrystalPlasticityKalidindiUpdate::calculateStateVariableEvolutionRateComponent()
 {
-  for (unsigned int i = 0; i < _number_slip_systems; ++i)
+  for (auto i : make_range(_number_slip_systems))
   {
     // Clear out increment from the previous iteration
     _slip_resistance_increment[i] = 0.0;
@@ -148,9 +174,9 @@ CrystalPlasticityKalidindiUpdate::calculateStateVariableEvolutionRateComponent()
       _hb[i] *= -1.0;
   }
 
-  for (unsigned int i = 0; i < _number_slip_systems; ++i)
+  for (auto i : make_range(_number_slip_systems))
   {
-    for (unsigned int j = 0; j < _number_slip_systems; ++j)
+    for (auto j : make_range(_number_slip_systems))
     {
       unsigned int iplane, jplane;
       iplane = i / 3;
@@ -170,7 +196,7 @@ bool
 CrystalPlasticityKalidindiUpdate::updateStateVariables()
 {
   // Now perform the check to see if the slip system should be updated
-  for (unsigned int i = 0; i < _number_slip_systems; ++i)
+  for (auto i : make_range(_number_slip_systems))
   {
     _slip_resistance_increment[i] *= _substep_dt;
     if (_previous_substep_slip_resistance[i] < _zero_tol && _slip_resistance_increment[i] < 0.0)
