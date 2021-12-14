@@ -66,27 +66,34 @@ StressDivergenceRSphericalTensors::computeQpOffDiagJacobian(unsigned int jvar)
 }
 
 Real
+#if DEBUG
 StressDivergenceRSphericalTensors::calculateJacobian(unsigned int ivar, unsigned int jvar)
+#else
+StressDivergenceRSphericalTensors::calculateJacobian(unsigned int /*ivar*/, unsigned int /*jvar*/)
+#endif
 {
-  RealGradient test_r, phi_r;
-
   mooseAssert(ivar == 0 && jvar == 0,
               "Invalid component in Jacobian Calculation"); // Only nonzero case for a 1D simulation
 
-  if (ivar == 0) // Case grad_test for r, requires contributions from stress_{rr}, stress_{\theta
-                 // \theta}, and stress_{\phi \phi}
-  {
-    test_r(0) = _grad_test[_i][_qp](0);
-    test_r(1) = _test[_i][_qp] / _q_point[_qp](0);
-    test_r(2) = _test[_i][_qp] / _q_point[_qp](0);
-  }
+  const Real test = _grad_test[_i][_qp](0);
+  const Real test_r1 = _test[_i][_qp] / _q_point[_qp](0);
+  // const Real test_r2 = test_r1;
 
-  if (jvar == 0)
-  {
-    phi_r(0) = _grad_phi[_j][_qp](0);
-    phi_r(1) = _phi[_j][_qp] / _q_point[_qp](0);
-    phi_r(2) = _phi[_j][_qp] / _q_point[_qp](0);
-  }
+  const Real phi = _grad_phi[_j][_qp](0);
+  const Real phi_r1 = _phi[_j][_qp] / _q_point[_qp](0);
+  const Real phi_r2 = phi_r1;
 
-  return ElasticityTensorTools::elasticJacobian(_Jacobian_mult[_qp], ivar, jvar, test_r, phi_r);
+  const Real term1 = test * _Jacobian_mult[_qp](0, 0, 0, 0) * phi;
+  const Real term2 = test * _Jacobian_mult[_qp](0, 0, 1, 1) * phi_r1; // same as term3
+  // const Real term3 = test * _Jacobian_mult[_qp](0, 0, 2, 2) * phi_r2;
+
+  const Real term4 = test_r1 * _Jacobian_mult[_qp](1, 1, 0, 0) * phi;    // same as term7
+  const Real term5 = test_r1 * _Jacobian_mult[_qp](1, 1, 1, 1) * phi_r1; // same as term9
+  const Real term6 = test_r1 * _Jacobian_mult[_qp](1, 1, 2, 2) * phi_r2; // same as term8
+
+  // const Real term7 = test_r2 * _Jacobian_mult[_qp](2, 2, 0, 0) * phi;
+  // const Real term8 = test_r2 * _Jacobian_mult[_qp](2, 2, 1, 1) * phi_r1;
+  // const Real term9 = test_r2 * _Jacobian_mult[_qp](2, 2, 2, 2) * phi_r2;
+
+  return term1 + 2 * (term2 + term4 + term5 + term6);
 }

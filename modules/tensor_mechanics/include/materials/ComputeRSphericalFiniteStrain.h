@@ -24,13 +24,15 @@ public:
 
   ComputeRSphericalFiniteStrain(const InputParameters & parameters);
 
-  virtual void initialSetup();
+  virtual void initialSetup() override;
 
   /// Computes the current and old deformation gradients with the assumptions for
   /// 1D spherical symmetry geometries: \f$ \epsilon_{\theta} = \epsilon_{\phi} = \frac{u_r}{r} \f$
-  virtual void computeProperties();
+  virtual void computeProperties() override;
 
 protected:
+  virtual void computeQpIncrements(RankTwoTensor & e, RankTwoTensor & r) override;
+
   /// the old value of the first component of the displacements vector
   const VariableValue & _disp_old_0;
 };
