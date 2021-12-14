@@ -16,6 +16,7 @@
 
 #include "libmesh/libmesh.h"
 #include "libmesh/tuple_of.h"
+#include "libmesh/int_range.h"
 
 #include "metaphysicl/raw_type.h"
 
@@ -465,10 +466,10 @@ struct RawType<RankFourTensorTempl<T>>
   static value_type value(const RankFourTensorTempl<T> & in)
   {
     value_type ret;
-    for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-      for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
-        for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
-          for (unsigned int l = 0; l < LIBMESH_DIM; ++l)
+    for (auto i : make_range(LIBMESH_DIM))
+      for (auto j : make_range(LIBMESH_DIM))
+        for (auto k : make_range(LIBMESH_DIM))
+          for (auto l : make_range(LIBMESH_DIM))
             ret(i, j, k, l) = raw_value(in(i, j, k, l));
 
     return ret;
@@ -489,7 +490,7 @@ template <typename T>
 template <typename T2>
 RankFourTensorTempl<T>::RankFourTensorTempl(const RankFourTensorTempl<T2> & copy)
 {
-  for (unsigned int i = 0; i < N4; ++i)
+  for (auto i : make_range(N4))
     _vals[i] = copy._vals[i];
 }
 
@@ -503,7 +504,7 @@ RankFourTensorTempl<T>::operator*(const T2 & b) const ->
   typedef decltype(T() * T2()) ValueType;
   RankFourTensorTempl<ValueType> result;
 
-  for (unsigned int i = 0; i < N4; ++i)
+  for (auto i : make_range(N4))
     result._vals[i] = _vals[i] * b;
 
   return result;
@@ -517,7 +518,7 @@ RankFourTensorTempl<T>::operator/(const T2 & b) const ->
                             RankFourTensorTempl<decltype(T() / T2())>>::type
 {
   RankFourTensorTempl<decltype(T() / T2())> result;
-  for (unsigned int i = 0; i < N4; ++i)
+  for (auto i : make_range(N4))
     result._vals[i] = _vals[i] / b;
   return result;
 }
