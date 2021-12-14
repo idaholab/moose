@@ -10,6 +10,7 @@
 #pragma once
 
 #include "IntegratedBC.h"
+#include "MooseTypes.h"
 
 class Function;
 
@@ -24,7 +25,11 @@ public:
   Pressure(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual();
+  virtual void initialSetup() override;
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
+
+  Real computeFactor();
 
   const int _component;
 
@@ -36,4 +41,10 @@ protected:
 
   /// _alpha Parameter for HHT time integration scheme
   const Real _alpha;
+
+  /// Whether to use the displaced mesh
+  const bool _use_displaced_mesh;
+
+  /// Coordinate system type
+  Moose::CoordinateSystemType _coord_type;
 };

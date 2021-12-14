@@ -34,14 +34,34 @@ Pressure::Pressure(const InputParameters & parameters)
     _factor(getParam<Real>("factor")),
     _function(isParamValid("function") ? &getFunction("function") : NULL),
     _postprocessor(isParamValid("postprocessor") ? &getPostprocessorValue("postprocessor") : NULL),
-    _alpha(getParam<Real>("alpha"))
+    _alpha(getParam<Real>("alpha")),
+    _use_displaced_mesh(getParam<bool>("use_displaced_mesh"))
 {
   if (_component > 2)
     mooseError("Invalid component given for ", name(), ": ", _component, ".\n");
 }
 
+void
+Pressure::initialSetup()
+{
+  auto boundary_ids = boundaryIDs();
+  std::set<SubdomainID> block_ids;
+  for (auto bndry_id : boundary_ids)
+  {
+    auto bids = _mesh.getBoundaryConnectedBlocks(bndry_id);
+    block_ids.insert(bids.begin(), bids.end());
+  }
+
+  _coord_type = _fe_problem.getCoordSystem(*block_ids.begin());
+  for (auto blk_id : block_ids)
+  {
+    if (_coord_type != _fe_problem.getCoordSystem(blk_id))
+      mooseError("The Pressure BC requires all submdomains to have the same coordinate system.");
+  }
+}
+
 Real
-Pressure::computeQpResidual()
+Pressure::computeFactor()
 {
   Real factor = _factor;
 
@@ -51,5 +71,28 @@ Pressure::computeQpResidual()
   if (_postprocessor)
     factor *= *_postprocessor;
 
+  return factor;
+}
+
+Real
+Pressure::computeQpResidual()
+{
+  const Real factor = computeFactor();
+
   return factor * (_normals[_qp](_component) * _test[_i][_qp]);
+}
+
+Real
+Pressure::computeQpJacobian()
+{
+  Real value = 0;
+
+  if (_use_displaced_mesh)
+    if (_coord_type == Moose::COORD_RSPHERICAL)
+    {
+      value = 2 / _q_point[_qp](0);
+      value *= computeFactor() * _test[_i][_qp] * _phi[_j][_qp];
+    }
+
+  return value;
 }
