@@ -48,15 +48,16 @@ ComputeFiniteStrain::computeProperties()
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
   {
     // Deformation gradient
-    RankTwoTensor A((*_grad_disp[0])[_qp],
-                    (*_grad_disp[1])[_qp],
-                    (*_grad_disp[2])[_qp]); // Deformation gradient
-    RankTwoTensor Fbar((*_grad_disp_old[0])[_qp],
-                       (*_grad_disp_old[1])[_qp],
-                       (*_grad_disp_old[2])[_qp]); // Old Deformation gradient
+    auto A = RankTwoTensor::initializeFromRows(
+        (*_grad_disp[0])[_qp], (*_grad_disp[1])[_qp], (*_grad_disp[2])[_qp]);
 
+    // Old Deformation gradient
+    auto Fbar = RankTwoTensor::initializeFromRows(
+        (*_grad_disp_old[0])[_qp], (*_grad_disp_old[1])[_qp], (*_grad_disp_old[2])[_qp]);
+
+    // Gauss point deformation gradient
     _deformation_gradient[_qp] = A;
-    _deformation_gradient[_qp].addIa(1.0); // Gauss point deformation gradient
+    _deformation_gradient[_qp].addIa(1.0);
 
     // A = gradU - gradUold
     A -= Fbar;

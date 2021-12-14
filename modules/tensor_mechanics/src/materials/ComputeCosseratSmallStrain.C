@@ -40,7 +40,8 @@ ComputeCosseratSmallStrain::ComputeCosseratSmallStrain(const InputParameters & p
 void
 ComputeCosseratSmallStrain::computeQpProperties()
 {
-  RankTwoTensor strain((*_grad_disp[0])[_qp], (*_grad_disp[1])[_qp], (*_grad_disp[2])[_qp]);
+  auto strain = RankTwoTensor::initializeFromRows(
+      (*_grad_disp[0])[_qp], (*_grad_disp[1])[_qp], (*_grad_disp[2])[_qp]);
   RealVectorValue wc_vector((*_wc[0])[_qp], (*_wc[1])[_qp], (*_wc[2])[_qp]);
 
   for (unsigned i = 0; i < LIBMESH_DIM; ++i)
@@ -54,5 +55,6 @@ ComputeCosseratSmallStrain::computeQpProperties()
   for (auto es : _eigenstrains)
     _mechanical_strain[_qp] -= (*es)[_qp];
 
-  _curvature[_qp] = RankTwoTensor((*_grad_wc[0])[_qp], (*_grad_wc[1])[_qp], (*_grad_wc[2])[_qp]);
+  _curvature[_qp] = RankTwoTensor::initializeFromRows(
+      (*_grad_wc[0])[_qp], (*_grad_wc[1])[_qp], (*_grad_wc[2])[_qp]);
 }

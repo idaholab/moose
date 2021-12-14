@@ -40,8 +40,9 @@ ADComputeGreenLagrangeStrain::computeProperties()
 {
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
   {
-    ADRankTwoTensor dxu((*_grad_disp[0])[_qp], (*_grad_disp[1])[_qp], (*_grad_disp[2])[_qp]);
-    ADRankTwoTensor dxuT = dxu.transpose();
+    auto dxu = ADRankTwoTensor::initializeFromRows(
+        (*_grad_disp[0])[_qp], (*_grad_disp[1])[_qp], (*_grad_disp[2])[_qp]);
+    auto dxuT = dxu.transpose();
 
     _mechanical_strain[_qp] = _total_strain[_qp] = (dxuT + dxu + dxuT * dxu) / 2.0;
   }

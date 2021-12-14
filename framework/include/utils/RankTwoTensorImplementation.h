@@ -83,6 +83,9 @@ RankTwoTensorTempl<T>::RankTwoTensorTempl(const TypeVector<T> & row1,
                                           const TypeVector<T> & row2,
                                           const TypeVector<T> & row3)
 {
+  mooseDeprecated(
+      "This constructor is deprecated in favor of RankTwoTensorTempl<T>::initializeFromRows");
+
   // Initialize the Tensor matrix from the passed in vectors
   for (unsigned int i = 0; i < N; i++)
     this->_coords[i] = row1(i);
