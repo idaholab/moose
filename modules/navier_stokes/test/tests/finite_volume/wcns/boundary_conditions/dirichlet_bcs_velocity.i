@@ -14,7 +14,7 @@ mu = 1e2
 # Operating conditions
 inlet_temp = 300
 outlet_pressure = 1e5
-inlet_v = 0.001
+inlet_velocity = 0.001
 
 [Mesh]
   [gen]
@@ -25,14 +25,14 @@ inlet_v = 0.001
     ymin = 0
     ymax = 1
     nx = 10
-    ny = 10
+    ny = 5
   []
 []
 
 [Variables]
   [u]
     type = INSFVVelocityVariable
-    initial_condition = ${inlet_v}
+    initial_condition = ${inlet_velocity}
   []
   [v]
     type = INSFVVelocityVariable
@@ -174,7 +174,7 @@ inlet_v = 0.001
     type = WCNSFVInletVelocityBC
     variable = u
     boundary = 'left'
-    velocity_pp = 'inlet_v'
+    velocity_pp = 'inlet_u'
   []
   [inlet_v]
     type = WCNSFVInletVelocityBC
@@ -213,17 +213,13 @@ inlet_v = 0.001
 
 # used for the boundary conditions in this example
 [Postprocessors]
-  [inlet_v]
+  [inlet_u]
     type = Receiver
-    default_value = ${fparse inlet_v}
-  []
-  [surface_inlet]
-    type = SurfacePostprocessor
-    boundary = 'left'
+    default = ${inlet_velocity}
   []
   [inlet_T]
     type = Receiver
-    default_value = ${inlet_temp}
+    default = ${inlet_temp}
   []
 []
 
@@ -265,10 +261,10 @@ inlet_v = 0.001
 
   [TimeStepper]
     type = IterationAdaptiveDT
-    dt = 1e-3
+    dt = 1e-2
     optimal_iterations = 6
   []
-  end_time = 15
+  end_time = 1
 
   nl_abs_tol = 1e-9
   nl_max_its = 50
@@ -279,4 +275,5 @@ inlet_v = 0.001
 
 [Outputs]
   exodus = true
+  execute_on = FINAL
 []

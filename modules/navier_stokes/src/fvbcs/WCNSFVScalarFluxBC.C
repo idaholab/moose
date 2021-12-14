@@ -21,7 +21,7 @@ WCNSFVScalarFluxBC::validParams()
 
   params.addParam<Real>("scaling_factor", 1, "To scale the flux");
 
-  // Three different ways to input a scalar being advected:
+  // Three different ways to input an advected scalar flux:
   // 1) Postprocessor with the scalar flow rate directly
   params.addParam<PostprocessorName>("scalar_flux_pp",
                                      "Postprocessor with the inlet scalar flow rate");
@@ -30,7 +30,7 @@ WCNSFVScalarFluxBC::validParams()
   // 2) Postprocessors for inlet velocity and scalar concentration
   params.addParam<PostprocessorName>("scalar_value_pp",
                                      "Postprocessor with the inlet scalar concentration");
-  params.addParam<PostprocessorName>("velocity_pp", "Postprocessor with the velocity");
+  params.addParam<PostprocessorName>("velocity_pp", "Postprocessor with the inlet velocity norm");
 
   // 3) Postprocessors for mass flow rate and energy, functor for density
   params.addParam<PostprocessorName>("mdot_pp", "Postprocessor with the inlet mass flow rate");
@@ -55,7 +55,7 @@ WCNSFVScalarFluxBC::WCNSFVScalarFluxBC(const InputParameters & params)
   // Density is often set as global parameters so it is not checked
   if (_scalar_flux_pp && (_velocity_pp || _mdot_pp || _scalar_value_pp))
     mooseWarning(
-        "If setting the temperature directly, no need for inlet velocity, mass flow or scalar "
+        "If setting the scalar flux directly, no need for inlet velocity, mass flow or scalar "
         "concentration");
 
   // Need enough information if trying to use a mass flow rate postprocessor
@@ -79,6 +79,9 @@ WCNSFVScalarFluxBC::WCNSFVScalarFluxBC(const InputParameters & params)
 ADReal
 WCNSFVScalarFluxBC::computeQpResidual()
 {
+  if (_area_pp)
+    if (MooseUtils::absoluteFuzzyEqual(*_area_pp, 0))
+      mooseError("Surface area is 0");
 
   if (_scalar_flux_pp)
     return -_scaling_factor * *_scalar_flux_pp / *_area_pp;

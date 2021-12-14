@@ -14,7 +14,7 @@ mu = 1e2
 # Operating conditions
 inlet_temp = 300
 outlet_pressure = 1e5
-inlet_v = 0.001
+inlet_velocity = 0.001
 
 [Mesh]
   [gen]
@@ -24,15 +24,15 @@ inlet_v = 0.001
     xmax = ${l}
     ymin = 0
     ymax = 1
-    nx = 20
-    ny = 10
+    nx = 10
+    ny = 5
   []
 []
 
 [Variables]
   [u]
     type = INSFVVelocityVariable
-    initial_condition = ${inlet_v}
+    initial_condition = ${inlet_velocity}
   []
   [v]
     type = INSFVVelocityVariable
@@ -45,6 +45,10 @@ inlet_v = 0.001
   [T]
     type = INSFVEnergyVariable
     initial_condition = ${inlet_temp}
+  []
+  [scalar]
+    type = MooseVariableFVReal
+    initial_condition = 0.1
   []
 []
 
@@ -166,37 +170,74 @@ inlet_v = 0.001
     variable = T
     v = power_density
   []
+
+  # Scalar concentration equation
+  [scalar_time]
+    type = FVTimeKernel
+    variable = scalar
+  []
+  [scalar_advection]
+    type = INSFVScalarFieldAdvection
+    variable = scalar
+    vel = ${vel}
+    velocity_interp_method = ${velocity_interp_method}
+    advected_interp_method = ${advected_interp_method}
+    pressure = pressure
+    u = u
+    v = v
+    mu = ${mu}
+    rho = ${rho}
+  []
+  [scalar_diffusion]
+    type = FVDiffusion
+    variable = scalar
+    coeff = 1.1
+  []
+  [scalar_source]
+    type = FVBodyForce
+    variable = scalar
+    function = 2.1
+  []
 []
 
 [FVBCs]
   # Inlet
   [inlet_mass]
     type = WCNSFVMassFluxBC
-    variable = u
+    variable = pressure
     boundary = 'left'
-    velocity_pp = 'inlet_v'
+    velocity_pp = 'inlet_u'
+    rho = 'rho'
   []
   [inlet_u]
     type = WCNSFVMomentumFluxBC
     variable = u
     boundary = 'left'
-    velocity_pp = 'inlet_v'
+    velocity_pp = 'inlet_u'
     rho = 'rho'
   []
   [inlet_v]
     type = WCNSFVMomentumFluxBC
-    variable = u
+    variable = v
     boundary = 'left'
-    velocity_pp = 'inlet_v'
+    velocity_pp = 0
     rho = 'rho'
   []
   [inlet_T]
     type = WCNSFVEnergyFluxBC
     variable = T
     boundary = 'left'
-    velocity_pp = 'inlet_v'
+    velocity_pp = 'inlet_u'
+    temperature_pp = 'inlet_T'
     rho = 'rho'
     cp = 'cp'
+  []
+  [inlet_scalar]
+    type = WCNSFVScalarFluxBC
+    variable = scalar
+    boundary = 'left'
+    scalar_value_pp = 'inlet_scalar_value'
+    velocity_pp = 'inlet_u'
   []
 
   [outlet_p]
@@ -223,17 +264,22 @@ inlet_v = 0.001
 
 # used for the boundary conditions in this example
 [Postprocessors]
-  [inlet_mdot]
+  [inlet_u]
     type = Receiver
-    default_value = ${fparse 1980 * inlet_v}
+    default = ${inlet_velocity}
   []
   [surface_inlet]
-    type = SurfacePostprocessor
+    type = AreaPostprocessor
     boundary = 'left'
+    execute_on = 'INITIAL'
   []
-  [inlet_Edot]
+  [inlet_T]
     type = Receiver
-    default_value = ${fpase 1980 * inlet_v * 2530 * inlet_temp}
+    default = ${inlet_temp}
+  []
+  [inlet_scalar_value]
+    type = Receiver
+    default = 0.2
   []
 []
 
@@ -275,10 +321,10 @@ inlet_v = 0.001
 
   [TimeStepper]
     type = IterationAdaptiveDT
-    dt = 1e-3
+    dt = 1e-2
     optimal_iterations = 6
   []
-  end_time = 15
+  end_time = 1
 
   nl_abs_tol = 1e-9
   nl_max_its = 50
@@ -289,4 +335,5 @@ inlet_v = 0.001
 
 [Outputs]
   exodus = true
+  execute_on = FINAL
 []

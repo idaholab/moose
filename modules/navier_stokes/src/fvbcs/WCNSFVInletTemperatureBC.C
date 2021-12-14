@@ -27,7 +27,7 @@ WCNSFVInletTemperatureBC::validParams()
 
   // 2) Postprocessors for velocity and energy, functors for specific heat and density
   params.addParam<PostprocessorName>("energy_pp", "Postprocessor with the inlet energy flow rate");
-  params.addParam<PostprocessorName>("velocity_pp", "Postprocessor with the velocity");
+  params.addParam<PostprocessorName>("velocity_pp", "Postprocessor with the inlet velocity norm");
   params.addParam<MooseFunctorName>(NS::density, "Density functor");
   params.addParam<MooseFunctorName>(NS::cp, "specific heat capacity functor");
 
@@ -84,6 +84,9 @@ WCNSFVInletTemperatureBC::WCNSFVInletTemperatureBC(const InputParameters & param
 Real
 WCNSFVInletTemperatureBC::boundaryValue(const FaceInfo & fi) const
 {
+  if (_area_pp)
+    if (MooseUtils::absoluteFuzzyEqual(*_area_pp, 0))
+      mooseError("Surface area is 0");
 
   if (_temperature_pp)
     return *_temperature_pp;

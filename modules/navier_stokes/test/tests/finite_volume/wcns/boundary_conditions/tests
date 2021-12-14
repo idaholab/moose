@@ -1,8 +1,8 @@
 [Tests]
   [dirichlet]
-    issues = ''
+    issues = '#18086'
     design = 'WCNSFVInletVelocityBC.md WCNSFVInletTemperatureBC.md'
-    requirement = ''The system shall be able to use Dirichlet boundary conditions for specifying inlet conditions in a weakly compressible fluid flow simulation'
+    requirement = 'The system shall be able to use Dirichlet boundary conditions for specifying inlet conditions in a weakly compressible fluid flow simulation'
     [using_velocity]
       type = 'Exodiff'
       input = dirichlet_bcs_velocity.i
@@ -60,37 +60,177 @@
     []
   []
   [exceptions_dirichlet_bcs]
-    issues = ''
+    issues = '#18086'
     design = 'WCNSFVInletVelocityBC.md WCNSFVInletTemperatureBC.md'
     requirement = 'The system shall error out if'
-    [both_velocity_and_area]
+    [missing_info_dirichlet_velocity]
       type = RunException
       input = 'dirichlet_bcs_mdot.i'
       cli_args = 'FVBCs/inactive=inlet_u FVBCs/inlet_u_bis/type=WCNSFVInletVelocityBC FVBCs/inlet_u_bis/variable=u FVBCs/inlet_u_bis/boundary=left FVBCs/inlet_u_bis/mdot_pp=0'
-      expect_err = ''
+      expect_err = 'Mass flow rate, area and density should be provided if velocity is not'
+      detail = 'the inlet velocity cannot be determined from the mass flow rate due to insufficient parameters'
+    []
+    [missing_info_dirichlet_temperature]
+      type = RunException
+      input = 'dirichlet_bcs_mdot.i'
+      cli_args = 'FVBCs/inactive=inlet_T FVBCs/inlet_T_bis/type=WCNSFVInletTemperatureBC FVBCs/inlet_T_bis/variable=T FVBCs/inlet_T_bis/boundary=left'
+      expect_err = 'If not providing the temperature, the energy flow rate should be provided'
+      detail = 'the inlet temperature cannot be determined because neither the temperature or the energy flow rate have been provided'
+    []
+    [missing_info_dirichlet_temperature_from_energy_flow]
+      type = RunException
+      input = 'dirichlet_bcs_mdot.i'
+      cli_args = 'FVBCs/inactive=inlet_T FVBCs/inlet_T_bis/type=WCNSFVInletTemperatureBC FVBCs/inlet_T_bis/variable=T FVBCs/inlet_T_bis/boundary=left FVBCs/inlet_T_bis/energy_pp=0'
+      expect_err = 'If not providing the inlet temperature, the inlet velocity or mass flow should'
+      detail = 'the inlet temperature cannot be determined from the energy flow rate due to missing fluid velocity information'
+    []
+    [missing_info_dirichlet_temperature_from_velocity]
+      type = RunException
+      input = 'dirichlet_bcs_mdot.i'
+      cli_args = 'FVBCs/inactive=inlet_T FVBCs/inlet_T_bis/type=WCNSFVInletTemperatureBC FVBCs/inlet_T_bis/variable=T FVBCs/inlet_T_bis/boundary=left FVBCs/inlet_T_bis/energy_pp=0 FVBCs/inlet_T_bis/velocity_pp=0'
+      expect_err = 'If providing the inlet velocity, the density, the area and the specific heat'
+      detail = 'the inlet temperature cannot be determined from the velocity due to insufficient parameters'
+    []
+    [missing_info_dirichlet_temperature_from_mdot]
+      type = RunException
+      input = 'dirichlet_bcs_mdot.i'
+      cli_args = 'FVBCs/inactive=inlet_T FVBCs/inlet_T_bis/type=WCNSFVInletTemperatureBC FVBCs/inlet_T_bis/variable=T FVBCs/inlet_T_bis/boundary=left FVBCs/inlet_T_bis/energy_pp=0 FVBCs/inlet_T_bis/mdot_pp=0'
+      expect_err = 'If providing the inlet mass flow rate, the inlet specific heat capacity should'
+      detail = 'the inlet temperature cannot be determined from the mass flow rate due to insufficient parameters'
     []
   []
   [warnings_dirichlet_bcs]
-    issues = ''
+    issues = '#18086'
     design = 'WCNSFVInletVelocityBC.md WCNSFVInletTemperatureBC.md'
     requirement = 'The system shall return a warning if'
     [both_velocity_and_mdot]
       type = RunException
       input = 'dirichlet_bcs_velocity.i'
       cli_args = 'FVBCs/inlet_u/mdot_pp=0'
-      expect_err = 'If setting the mass flow rate directly, no need for inlet velocity or area'
-      detail = 'redundant information if provided for setting the inlet velocity'
+      expect_err = 'If setting the velocity directly, no need for inlet mass flow rate or area'
+      detail = 'redundant information is provided for setting the inlet velocity'
+    []
+    [both_temperature_and_mdot]
+      type = RunException
+      input = 'dirichlet_bcs_velocity.i'
+      cli_args = 'FVBCs/inlet_T/mdot_pp=0'
+      expect_err = 'If setting the temperature directly, no need for inlet velocity, mass flow or energy'
+      detail = 'redundant information is provided for setting the inlet temperature'
     []
   []
   [exceptions_flux_bcs]
     issues = '#19543'
     design = 'WCNSFVMassFluxBC.md WCNSFVMomentumFluxBC.md WCNSFVEnergyFluxBC.md WCNSFVScalarFluxBC.md'
     requirement = 'The system shall error out if'
-    [too_much_info_mass_flux_1]
+    [mass_mdot_needs_area]
       type = RunException
       input = 'flux_bcs_velocity.i'
-      cli_args = ''
-      expect_err = ''
+      cli_args = 'FVBCs/inactive=inlet_mass FVBCs/inlet_mass_bis/type=WCNSFVMassFluxBC FVBCs/inlet_mass_bis/variable=pressure FVBCs/inlet_mass_bis/boundary=left FVBCs/inlet_mass_bis/mdot_pp=0'
+      expect_err = 'The inlet area should be provided along with the mass flow rate'
+      detail = 'only the mass flow rate is provided to compute the inlet mass flux'
+    []
+    [mass_velocity_needs_density]
+      type = RunException
+      input = 'flux_bcs_velocity.i'
+      cli_args = 'FVBCs/inactive=inlet_mass FVBCs/inlet_mass_bis/type=WCNSFVMassFluxBC FVBCs/inlet_mass_bis/variable=pressure FVBCs/inlet_mass_bis/boundary=left FVBCs/inlet_mass_bis/velocity_pp=0'
+      expect_err = 'Velocity and density should be provided if the mass flow rate is not'
+      detail = 'only the velocity is provided to compute the inlet mass flux'
+    []
+    [momentum_mdot_needs_area]
+      type = RunException
+      input = 'flux_bcs_velocity.i'
+      cli_args = 'FVBCs/inactive=inlet_u FVBCs/inlet_u_bis/type=WCNSFVMassFluxBC FVBCs/inlet_u_bis/variable=pressure FVBCs/inlet_u_bis/boundary=left FVBCs/inlet_u_bis/mdot_pp=0'
+      expect_err = 'The inlet area should be provided along with the mass flow rate'
+      detail = 'only the mass flow rate is provided to compute the inlet momentum flux'
+    []
+    [momentum_velocity_needs_density]
+      type = RunException
+      input = 'flux_bcs_velocity.i'
+      cli_args = 'FVBCs/inactive=inlet_u FVBCs/inlet_u_bis/type=WCNSFVMassFluxBC FVBCs/inlet_u_bis/variable=pressure FVBCs/inlet_u_bis/boundary=left FVBCs/inlet_u_bis/velocity_pp=0'
+      expect_err = 'Velocity and density should be provided if the mass flow rate is not'
+      detail = 'only the velocity is provided to compute the inlet momentum flux'
+    []
+    [energy_need_temperature]
+      type = RunException
+      input = 'flux_bcs_mdot.i'
+      cli_args = 'FVBCs/inactive=inlet_T FVBCs/inlet_T_bis/type=WCNSFVEnergyFluxBC FVBCs/inlet_T_bis/variable=T FVBCs/inlet_T_bis/boundary=left'
+      expect_err = 'If not providing the energy flow rate, the inlet temperature should be provided'
+      detail = 'the inlet energy cannot be determined because neither the temperature or the energy flow rate have been provided'
+    []
+    [energy_temperature_needs_velocity_or_mdot]
+      type = RunException
+      input = 'flux_bcs_mdot.i'
+      cli_args = 'FVBCs/inactive=inlet_T FVBCs/inlet_T_bis/type=WCNSFVEnergyFluxBC FVBCs/inlet_T_bis/variable=T FVBCs/inlet_T_bis/boundary=left FVBCs/inlet_T_bis/temperature_pp=0'
+      expect_err = 'If not providing the inlet energy flow rate, the inlet velocity or mass flow'
+      detail = 'the inlet energy flux cannot be determined because the temperature was provided but neither the inlet mass flow rate or velocity were provided'
+    []
+    [energy_temperature_velocity_needs_density]
+      type = RunException
+      input = 'flux_bcs_mdot.i'
+      cli_args = 'FVBCs/inactive=inlet_T FVBCs/inlet_T_bis/type=WCNSFVEnergyFluxBC FVBCs/inlet_T_bis/variable=T FVBCs/inlet_T_bis/boundary=left FVBCs/inlet_T_bis/temperature_pp=0 FVBCs/inlet_T_bis/velocity_pp=0'
+      expect_err = 'If providing the inlet velocity, the density, the area and the specific heat'
+      detail = 'the inlet energy flux cannot be determined because the temperature and velocity were provided but the density or specific heat capacity were not'
+    []
+    [energy_temperature_mdot_needs_cp]
+      type = RunException
+      input = 'flux_bcs_mdot.i'
+      cli_args = 'FVBCs/inactive=inlet_T FVBCs/inlet_T_bis/type=WCNSFVEnergyFluxBC FVBCs/inlet_T_bis/variable=T FVBCs/inlet_T_bis/boundary=left FVBCs/inlet_T_bis/temperature_pp=0 FVBCs/inlet_T_bis/mdot_pp=0'
+      expect_err = 'If providing the inlet mass flow rate, the inlet specific heat capacity and flow'
+      detail = 'the inlet energy flux cannot be determined because the temperature and mass flow rate were provided but the specific heat capacity or flow area were not'
+    []
+    [scalar_need_flux_or_value]
+      type = RunException
+      input = 'flux_bcs_velocity.i'
+      cli_args = 'FVBCs/inactive=inlet_scalar FVBCs/inlet_scalar_bis/type=WCNSFVScalarFluxBC FVBCs/inlet_scalar_bis/variable=scalar FVBCs/inlet_scalar_bis/boundary=left'
+      expect_err = 'If not providing the scalar flow rate, the inlet scalar concentration should be provided'
+      detail = 'neither the scalar quantity flux or boundary values are specified when attempting to compute the scalar quantity flux'
+    []
+    [scalar_mdot_needs_area]
+      type = RunException
+      input = 'flux_bcs_velocity.i'
+      cli_args = 'FVBCs/inactive=inlet_scalar FVBCs/inlet_scalar_bis/type=WCNSFVScalarFluxBC FVBCs/inlet_scalar_bis/variable=scalar FVBCs/inlet_scalar_bis/boundary=left FVBCs/inlet_scalar_bis/scalar_value_pp=0 FVBCs/inlet_scalar_bis/mdot_pp=0'
+      expect_err = 'If providing the inlet mass flow rate, the inlet density and flow area should be provided as well'
+      detail = 'only the mass flow rate is provided to compute the inlet scalar quantity flux'
+    []
+    [scalar_need_some_velocity_info]
+      type = RunException
+      input = 'flux_bcs_velocity.i'
+      cli_args = 'FVBCs/inactive=inlet_scalar FVBCs/inlet_scalar_bis/type=WCNSFVScalarFluxBC FVBCs/inlet_scalar_bis/variable=scalar FVBCs/inlet_scalar_bis/boundary=left FVBCs/inlet_scalar_bis/scalar_value_pp=0'
+      expect_err = 'If not providing the scalar flow rate, the inlet velocity or mass flow should be provided'
+      detail = 'only the scalar quantity boundary value is provided to compute the inlet scalar quantity flux'
+    []
+  []
+  [warnings_flux_bcs]
+    issues = '#19543'
+    design = 'WCNSFVMassFluxBC.md WCNSFVMomentumFluxBC.md WCNSFVEnergyFluxBC.md WCNSFVScalarFluxBC.md'
+    requirement = 'The system shall return a warning if'
+    [mass_both_velocity_and_mdot]
+      type = RunException
+      input = 'flux_bcs_velocity.i'
+      cli_args = 'FVBCs/inlet_mass/mdot_pp=0'
+      expect_err = 'If setting the mass flow rate directly, no need for inlet velocity'
+      detail = 'redundant information is provided for setting the inlet mass flux'
+    []
+    [momentum_both_velocity_and_mdot]
+      type = RunException
+      input = 'flux_bcs_velocity.i'
+      cli_args = 'FVBCs/inlet_u/mdot_pp=0'
+      expect_err = 'If setting the mass flow rate directly, no need for inlet velocity'
+      detail = 'redundant information is provided for setting the inlet momentum flux'
+    []
+    [both_temperature_and_mdot]
+      type = RunException
+      input = 'flux_bcs_direct.i'
+      cli_args = 'FVBCs/inlet_T/mdot_pp=0'
+      expect_err = 'If setting the energy flow rate directly, no need for inlet velocity, mass flow or energy'
+      detail = 'redundant information is provided for setting the inlet energy flux'
+    []
+    [both_scalar_and_mdot]
+      type = RunException
+      input = 'flux_bcs_direct.i'
+      cli_args = 'FVBCs/inlet_scalar/mdot_pp=0'
+      expect_err = 'If setting the scalar flux directly, no need for inlet velocity, mass flow or scalar '
+      detail = 'redundant information is provided for setting the inlet scalar flux'
     []
   []
 []

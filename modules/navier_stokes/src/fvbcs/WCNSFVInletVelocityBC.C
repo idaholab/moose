@@ -48,17 +48,20 @@ WCNSFVInletVelocityBC::WCNSFVInletVelocityBC(const InputParameters & params)
         "The variable argument to WCNSFVInletVelocityBC must be of type INSFVVelocityVariable");
 
   // Density is often set as global parameters so it is not checked
-  if (_mdot_pp && (_velocity_pp || _area_pp))
-    mooseWarning("If setting the mass flow rate directly, no need for inlet velocity or area");
+  if (_velocity_pp && (_mdot_pp || _area_pp))
+    mooseWarning("If setting the velocity directly, no need for inlet mass flow rate or area");
 
   // Need enough information if trying to use a mass flow rate postprocessor
-  if (!_mdot_pp && (!_velocity_pp || !_area_pp || !_rho))
-    mooseError("Velocity, area and density should be provided if velocity is not");
+  if (!_velocity_pp && (!_mdot_pp || !_area_pp || !_rho))
+    mooseError("Mass flow rate, area and density should be provided if velocity is not");
 }
 
 Real
 WCNSFVInletVelocityBC::boundaryValue(const FaceInfo & fi) const
 {
+  if (_area_pp)
+    if (MooseUtils::absoluteFuzzyEqual(*_area_pp, 0))
+      mooseError("Surface area is 0");
 
   if (_velocity_pp)
     return _scaling_factor * (*_velocity_pp);

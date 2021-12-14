@@ -26,7 +26,7 @@ WCNSFVMomentumFluxBC::validParams()
 
   // Two different ways to input velocity
   // 1) Postprocessor with the velocity value
-  params.addParam<PostprocessorName>("velocity_pp", "Postprocessor with the inlet velocity");
+  params.addParam<PostprocessorName>("velocity_pp", "Postprocessor with the inlet velocity norm");
   params.addParam<MooseFunctorName>(NS::density, "Density functor");
 
   // 2) Postprocessors with an inlet mass flow rate directly
@@ -64,6 +64,9 @@ WCNSFVMomentumFluxBC::WCNSFVMomentumFluxBC(const InputParameters & params)
 ADReal
 WCNSFVMomentumFluxBC::computeQpResidual()
 {
+  if (_area_pp)
+    if (MooseUtils::absoluteFuzzyEqual(*_area_pp, 0))
+      mooseError("Surface area is 0");
 
   if (_velocity_pp)
     return -_scaling_factor * std::pow((*_velocity_pp), 2) * (*_rho)(singleSidedFaceArg());
