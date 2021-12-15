@@ -31,7 +31,7 @@ CZMComputeDisplacementJumpTotalLagrangian::CZMComputeDisplacementJumpTotalLagran
     _czm_reference_rotation(
         declarePropertyByName<RankTwoTensor>(_base_name + "czm_reference_rotation"))
 {
-  // initializing the displacement gradeint vectors
+  // initializing the displacement gradient vectors
   for (unsigned int i = 0; i < _ndisp; ++i)
   {
     _grad_disp.push_back(&coupledGradient("displacements", i));
@@ -75,13 +75,13 @@ CZMComputeDisplacementJumpTotalLagrangian::computeRotationMatrices()
 void
 CZMComputeDisplacementJumpTotalLagrangian::computeFandR()
 {
-  RankTwoTensor F =
-      (RankTwoTensor::Identity() +
-       RankTwoTensor((*_grad_disp[0])[_qp], (*_grad_disp[1])[_qp], (*_grad_disp[2])[_qp]));
-  RankTwoTensor F_neighbor =
-      (RankTwoTensor::Identity() + RankTwoTensor((*_grad_disp_neighbor[0])[_qp],
-                                                 (*_grad_disp_neighbor[1])[_qp],
-                                                 (*_grad_disp_neighbor[2])[_qp]));
+  RankTwoTensor F = (RankTwoTensor::Identity() +
+                     RankTwoTensor::initializeFromRows(
+                         (*_grad_disp[0])[_qp], (*_grad_disp[1])[_qp], (*_grad_disp[2])[_qp]));
+  RankTwoTensor F_neighbor = (RankTwoTensor::Identity() +
+                              RankTwoTensor::initializeFromRows((*_grad_disp_neighbor[0])[_qp],
+                                                                (*_grad_disp_neighbor[1])[_qp],
+                                                                (*_grad_disp_neighbor[2])[_qp]));
 
   _F[_qp] = 0.5 * (F + F_neighbor);
   // According to Cody mooseError are always fatal, so nothing we can do about

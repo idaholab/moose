@@ -56,11 +56,12 @@ void
 Compute2DIncrementalStrain::computeTotalStrainIncrement(RankTwoTensor & total_strain_increment)
 {
   // Deformation gradient calculation for 2D problems
-  RankTwoTensor A(
-      (*_grad_disp[0])[_qp], (*_grad_disp[1])[_qp], (*_grad_disp[2])[_qp]); // Deformation gradient
-  RankTwoTensor Fbar((*_grad_disp_old[0])[_qp],
-                     (*_grad_disp_old[1])[_qp],
-                     (*_grad_disp_old[2])[_qp]); // Old Deformation gradient
+  auto A = RankTwoTensor::initializeFromRows(
+      (*_grad_disp[0])[_qp], (*_grad_disp[1])[_qp], (*_grad_disp[2])[_qp]);
+
+  // Old Deformation gradient
+  auto Fbar = RankTwoTensor::initializeFromRows(
+      (*_grad_disp_old[0])[_qp], (*_grad_disp_old[1])[_qp], (*_grad_disp_old[2])[_qp]);
 
   // Compute the displacement gradient of the out of plane direction for plane strain,
   // generalized plane strain, or axisymmetric problems

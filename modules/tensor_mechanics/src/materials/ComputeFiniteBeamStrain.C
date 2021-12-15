@@ -56,7 +56,8 @@ ComputeFiniteBeamStrain::computeRotation()
   const RealVectorValue rotation_d_2(-cos_alpha * sin_beta, cos_beta, -sin_alpha * sin_beta);
   const RealVectorValue rotation_d_3(-sin_alpha, 0.0, cos_alpha);
 
-  const RankTwoTensor rotation_d(rotation_d_1, rotation_d_2, rotation_d_3);
+  const auto rotation_d =
+      RankTwoTensor ::initializeFromRows(rotation_d_1, rotation_d_2, rotation_d_3);
 
   // Convert average rotational displacement to the beam configuration at previous time step
   const RealVectorValue avg_rot_local(_total_rotation_old[0] * (_rot0 + _rot1));
