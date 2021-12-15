@@ -9,4 +9,4 @@ Before proceeding with the topics that follow, consider checking out our discuss
 
 [Numerical Implementation](/numerical_implementation.md)
 
-[Nodal Patch Recovery](/nodal_patch_recovery.md)
+[Nodal Patch Recovery](modules/tensor_mechanics/doc/content/modules/tensor_mechanics/nodal_patch_recovery.md optional=True)
