@@ -60,7 +60,8 @@ MaterialAuxBaseTempl<T, is_ad, RT>::validParams()
   params.addRequiredParam<MaterialPropertyName>("property", "The scalar material property name");
   params.addParam<Real>(
       "factor", 1, "The factor by which to multiply your material property for visualization");
-  params.addParam<RT>("offset", 0, "The offset to add to your material property for visualization");
+  params.addParam<RT>(
+      "offset", "The offset to add to your material property for visualization (defaults to zero)");
   return params;
 }
 
@@ -69,7 +70,7 @@ MaterialAuxBaseTempl<T, is_ad, RT>::MaterialAuxBaseTempl(const InputParameters &
   : AuxKernelTempl<RT>(parameters),
     _prop(this->template getGenericMaterialProperty<T, is_ad>("property")),
     _factor(this->template getParam<Real>("factor")),
-    _offset(this->template getParam<RT>("offset"))
+    _offset(this->isParamValid("offset") ? this->template getParam<RT>("offset") : 0)
 {
 }
 

@@ -1,0 +1,28 @@
+[Tests]
+  design = 'VectorMaterialRealEigenVectorValueAux.md'
+  issues = '#19639'
+
+  [test]
+    type = Exodiff
+    input = test.i
+    exodiff = test_out.e
+    requirement = 'The system shall be able to output array auxiliary variables based on the values of array material properties'
+  []
+  [errors]
+    requirement = 'The system shall report a reasonable error when outputting array material properties as array auxiliary variables when'
+    [variable_size]
+      type = RunException
+      input = test.i
+      cli_args = 'AuxVariables/foo_mat_value/components=3 Outputs/exodus=false'
+      requirement = 'the auxiliary variable does not have the same number of components as the material'
+      expect_err = 'Variable foo_mat_value has 3 component\(s\) but the material foo has 2 component\(s\)'
+    []
+    [offset_size]
+      type = RunException
+      input = test.i
+      cli_args = 'AuxKernels/foo_mat_value/offset=0 Outputs/exodus=false'
+      requirement = 'the auxiliary variable does not have the same number of components as the material'
+      expect_err = 'Has 1 component\(s\) but the variable foo_mat_value has 2 component\(s\)'
+    []
+  []
+[]
