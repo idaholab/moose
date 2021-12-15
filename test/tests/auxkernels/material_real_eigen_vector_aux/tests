@@ -1,0 +1,18 @@
+[Tests]
+  design = 'MaterialRealEigenVectorValueAux.md'
+  issues = '#19639'
+
+  [test]
+    type = Exodiff
+    input = test.i
+    exodiff = test_out.e
+    requirement = 'The system shall be able to output a component of an array material property'
+  []
+  [component_error]
+    type = RunException
+    input = test.i
+    cli_args = 'AuxKernels/foo_mat_value_0/component=2 Outputs/exodus=false'
+    requirement = 'The system shall report a reasonable error when outputting a component of an array material property when the component is out of range for said property'
+    expect_err = 'Requested component 2 for array material property foo, which has 2 component\(s\).'
+  []
+[]
