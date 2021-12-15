@@ -66,11 +66,8 @@ StressDivergenceRSphericalTensors::computeQpOffDiagJacobian(unsigned int jvar)
 }
 
 Real
-#if DEBUG
-StressDivergenceRSphericalTensors::calculateJacobian(unsigned int ivar, unsigned int jvar)
-#else
-StressDivergenceRSphericalTensors::calculateJacobian(unsigned int /*ivar*/, unsigned int /*jvar*/)
-#endif
+StressDivergenceRSphericalTensors::calculateJacobian(unsigned int libmesh_dbg_var(ivar),
+                                                     unsigned int libmesh_dbg_var(jvar))
 {
   mooseAssert(ivar == 0 && jvar == 0,
               "Invalid component in Jacobian Calculation"); // Only nonzero case for a 1D simulation
