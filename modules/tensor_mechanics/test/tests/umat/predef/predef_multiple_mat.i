@@ -116,6 +116,7 @@
     plugin = '../../../plugins/elastic_multiple_predef'
     num_state_vars = 0
     external_properties = 'strain_xx strain_yy'
+    use_one_based_indexing = true
   []
 
   # 2. Active for reference MOOSE computations

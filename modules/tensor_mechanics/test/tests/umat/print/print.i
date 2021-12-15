@@ -82,6 +82,7 @@
     plugin = '../../../plugins/elastic_print'
     num_state_vars = 0
     external_fields = 'strain_yy'
+    use_one_based_indexing = true
   []
 []
 

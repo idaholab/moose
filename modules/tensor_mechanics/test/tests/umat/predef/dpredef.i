@@ -83,6 +83,7 @@
     plugin = '../../../plugins/elastic_dpredef'
     num_state_vars = 0
     external_fields = 'strain_yy'
+    use_one_based_indexing = true
   []
 
    # 2. Active for reference MOOSE computations

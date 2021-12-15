@@ -44,6 +44,11 @@ C
 A description of the input and output parameters of the UMAT user subroutines
 can be found in the Abaqus user manual.
 
+Note that the UMAT standard uses 1-based indexing for `NOEL` (element number)
+and `NPT` (integration point number), while MOOSE uses 0-based indexing
+internally. We therefore add one to the element and integration point numbers
+from MOOSE before passing them to the UMAT.
+
 ## UMAT Time step control
 
 Time step control within the UMAT subroutine is used together with MOOSE's

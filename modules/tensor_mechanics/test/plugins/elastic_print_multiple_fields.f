@@ -79,7 +79,7 @@ C
 C
 C     PRINTING FOR VERIFICATION PURPOSES
 C
-      IF (NPT.EQ.7) THEN
+      IF (NPT.EQ.8) THEN
         DO K1=1, NTENS
           WRITE(*,120)  K1, STRAN(K1)
           WRITE(*,125)  K1, DSTRAN(K1)
