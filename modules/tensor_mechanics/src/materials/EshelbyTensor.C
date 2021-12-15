@@ -103,9 +103,9 @@ EshelbyTensor::initQpStatefulProperties()
 void
 EshelbyTensor::computeQpProperties()
 {
-  RankTwoTensor F((*_grad_disp[0])[_qp],
-                  (*_grad_disp[1])[_qp],
-                  (*_grad_disp[2])[_qp]); // Deformation gradient
+  // Deformation gradient
+  auto F = RankTwoTensor::initializeFromRows(
+      (*_grad_disp[0])[_qp], (*_grad_disp[1])[_qp], (*_grad_disp[2])[_qp]);
 
   RankTwoTensor H(F);
   F.addIa(1.0);
@@ -126,7 +126,7 @@ EshelbyTensor::computeQpProperties()
   // Compute deformation gradient rate
   if (_compute_dissipation == true)
   {
-    RankTwoTensor H_old(
+    auto H_old = RankTwoTensor::initializeFromRows(
         (*_grad_disp_old[0])[_qp], (*_grad_disp_old[1])[_qp], (*_grad_disp_old[2])[_qp]);
 
     RankTwoTensor Wdot = RankTwoTensor(RankTwoTensor::initIdentity);

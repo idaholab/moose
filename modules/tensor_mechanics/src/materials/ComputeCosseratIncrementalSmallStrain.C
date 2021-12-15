@@ -53,8 +53,9 @@ ComputeCosseratIncrementalSmallStrain::initQpStatefulProperties()
 void
 ComputeCosseratIncrementalSmallStrain::computeQpProperties()
 {
-  RankTwoTensor strain((*_grad_disp[0])[_qp], (*_grad_disp[1])[_qp], (*_grad_disp[2])[_qp]);
-  RankTwoTensor strain_old(
+  auto strain = RankTwoTensor::initializeFromRows(
+      (*_grad_disp[0])[_qp], (*_grad_disp[1])[_qp], (*_grad_disp[2])[_qp]);
+  auto strain_old = RankTwoTensor::initializeFromRows(
       (*_grad_disp_old[0])[_qp], (*_grad_disp_old[1])[_qp], (*_grad_disp_old[2])[_qp]);
   RealVectorValue wc_vector((*_wc[0])[_qp], (*_wc[1])[_qp], (*_wc[2])[_qp]);
   RealVectorValue wc_vector_old((*_wc_old[0])[_qp], (*_wc_old[1])[_qp], (*_wc_old[2])[_qp]);
@@ -67,8 +68,9 @@ ComputeCosseratIncrementalSmallStrain::computeQpProperties()
         strain_old(i, j) += PermutationTensor::eps(i, j, k) * wc_vector_old(k);
       }
 
+  // Gauss point deformation gradient
   _deformation_gradient[_qp] = strain;
-  _deformation_gradient[_qp].addIa(1.0); // Gauss point deformation gradient
+  _deformation_gradient[_qp].addIa(1.0);
 
   const RankTwoTensor total_strain_increment = strain - strain_old;
 
@@ -82,8 +84,10 @@ ComputeCosseratIncrementalSmallStrain::computeQpProperties()
   _total_strain[_qp] = _total_strain_old[_qp] + total_strain_increment;
   _mechanical_strain[_qp] = _mechanical_strain_old[_qp] + _strain_increment[_qp];
 
-  RankTwoTensor curv((*_grad_wc[0])[_qp], (*_grad_wc[1])[_qp], (*_grad_wc[2])[_qp]);
-  RankTwoTensor curv_old((*_grad_wc_old[0])[_qp], (*_grad_wc_old[1])[_qp], (*_grad_wc_old[2])[_qp]);
+  auto curv = RankTwoTensor::initializeFromRows(
+      (*_grad_wc[0])[_qp], (*_grad_wc[1])[_qp], (*_grad_wc[2])[_qp]);
+  auto curv_old = RankTwoTensor::initializeFromRows(
+      (*_grad_wc_old[0])[_qp], (*_grad_wc_old[1])[_qp], (*_grad_wc_old[2])[_qp]);
   _curvature_increment[_qp] = curv - curv_old;
   _curvature[_qp] = _curvature_old[_qp] + _curvature_increment[_qp];
 

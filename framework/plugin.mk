@@ -25,6 +25,7 @@ plugin_OBJECTS += $(patsubst %.c, %.$(obj-suffix), $(filter %.c, $(plugin_SOURCE
 plugin_OBJECTS += $(patsubst %.f, %.$(obj-suffix), $(filter %.f, $(plugin_SOURCES)))
 plugin_OBJECTS += $(patsubst %.F, %.$(obj-suffix), $(filter %.F, $(plugin_SOURCES)))
 plugin_OBJECTS += $(patsubst %.f90, %.$(obj-suffix), $(filter %.f90, $(plugin_SOURCES)))
+plugin_OBJECTS += $(patsubst %.mod, %.$(obj-suffix), $(filter %.mod, $(plugin_SOURCES)))
 
 plugin_NAME ?= umat
 plugin_FILE := $(plugin_NAME)-$(METHOD).plugin

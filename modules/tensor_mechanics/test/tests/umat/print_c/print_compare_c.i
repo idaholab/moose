@@ -94,18 +94,21 @@
     constant_properties = '1000 0.3'
     plugin = '../../../plugins/elastic_print_c'
     num_state_vars = 0
+    use_one_based_indexing = true
   []
   [umat_f]
     type = AbaqusUMATStress
     constant_properties = '1000 0.3'
     plugin = '../../../plugins/elastic'
     num_state_vars = 0
+    use_one_based_indexing = true
   []
   [umat_eigen]
     type = AbaqusUMATStress
     constant_properties = '1000 0.3'
     plugin = '../../../plugins/elastic_print_eigen'
     num_state_vars = 0
+    use_one_based_indexing = true
   []
 []
 

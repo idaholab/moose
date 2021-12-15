@@ -191,7 +191,8 @@ InteractionIntegral::computeQpIntegral(const std::size_t crack_front_point_index
   else if (_sif_mode == SifMethod::T)
     computeTFields(aux_stress, aux_du);
 
-  RankTwoTensor grad_disp((*_grad_disp[0])[_qp], (*_grad_disp[1])[_qp], (*_grad_disp[2])[_qp]);
+  auto grad_disp = RankTwoTensor::initializeFromRows(
+      (*_grad_disp[0])[_qp], (*_grad_disp[1])[_qp], (*_grad_disp[2])[_qp]);
 
   // Rotate stress, strain, displacement and temperature to crack front coordinate system
   RealVectorValue grad_q_cf =

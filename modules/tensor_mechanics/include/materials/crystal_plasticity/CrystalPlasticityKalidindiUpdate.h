@@ -58,6 +58,9 @@ protected:
 
   virtual bool calculateSlipRate() override;
 
+  virtual void
+  calculateEquivalentSlipIncrement(RankTwoTensor & /*equivalent_slip_increment*/) override;
+
   virtual void calculateConstitutiveSlipDerivative(std::vector<Real> & dslip_dtau) override;
 
   // Cache the slip system value before the update for the diff in the convergence check
@@ -86,6 +89,25 @@ protected:
    */
   virtual bool areConstitutiveStateVariablesConverged() override;
 
+  ///@{Varibles used in the Kalidindi 1992 slip system resistance constiutive model
+  const Real _r;
+  const Real _h;
+  const Real _tau_sat;
+  const Real _gss_a;
+  const Real _ao;
+  const Real _xm;
+  const Real _gss_initial;
+  ///@}
+
+  /**
+   * Slip system interaction matrix used to calculate the hardening contributions
+   * from the self and latent slip systems, from Kalidindi et al (1992).
+   */
+  std::vector<Real> _hb;
+
+  /// Increment of increased resistance for each slip system
+  std::vector<Real> _slip_resistance_increment;
+
   /**
    * Stores the values of the slip system resistance from the previous substep
    * In classes which use dislocation densities, analogous dislocation density
@@ -104,21 +126,17 @@ protected:
   std::vector<Real> _slip_resistance_before_update;
 
   /**
-   * Slip system interaction matrix used to calculate the hardening contributions
-   * from the self and latent slip systems, from Kalidindi et al (1992).
+   * Flag to include the total twin volume fraction in the plastic velocity
+   * gradient calculation, per Kalidindi IJP (2001).
    */
-  std::vector<Real> _hb;
+  const bool _include_twinning_in_Lp;
 
-  /// Increment of increased resistance for each slip system
-  std::vector<Real> _slip_resistance_increment;
-
-  ///@{Varibles used in the Kalidindi 1992 slip system resistance constiutive model
-  const Real _r;
-  const Real _h;
-  const Real _tau_sat;
-  const Real _gss_a;
-  const Real _ao;
-  const Real _xm;
-  const Real _gss_initial;
-  ///@}
+  /**
+   * User-defined material property name for the total volume fraction of twins
+   * in a twinning propagation constitutive model, when this class is used in
+   * conjunction with the twinning propagation model.
+   * Note that this value is the OLD material property and thus lags the current
+   * value by a single timestep.
+   */
+  const MaterialProperty<Real> * const _twin_volume_fraction_total;
 };

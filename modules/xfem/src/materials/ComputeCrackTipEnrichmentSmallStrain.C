@@ -100,12 +100,13 @@ ComputeCrackTipEnrichmentSmallStrain::computeQpProperties()
     }
   }
 
-  RankTwoTensor grad_tensor_enrich(
+  auto grad_tensor_enrich = RankTwoTensor::initializeFromRows(
       _grad_enrich_disp[0], _grad_enrich_disp[1], _grad_enrich_disp[2]);
 
   RankTwoTensor enrich_strain = (grad_tensor_enrich + grad_tensor_enrich.transpose()) / 2.0;
 
-  RankTwoTensor grad_tensor((*_grad_disp[0])[_qp], (*_grad_disp[1])[_qp], (*_grad_disp[2])[_qp]);
+  auto grad_tensor = RankTwoTensor::initializeFromRows(
+      (*_grad_disp[0])[_qp], (*_grad_disp[1])[_qp], (*_grad_disp[2])[_qp]);
 
   _total_strain[_qp] = (grad_tensor + grad_tensor.transpose()) / 2.0;
 

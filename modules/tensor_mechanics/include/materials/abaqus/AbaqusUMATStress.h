@@ -123,6 +123,9 @@ protected:
   /// Element number
   int _aqNOEL;
 
+  /// Integration point number
+  unsigned int _aqNPT;
+
   /// Layer number (for composite shells and layered solids). (not supported)
   int _aqLAYER;
 
@@ -232,4 +235,7 @@ protected:
   const std::size_t _number_external_properties;
   std::vector<const MaterialProperty<Real> *> _external_properties;
   std::vector<const MaterialProperty<Real> *> _external_properties_old;
+
+  /// parameter to assist with the transition to 1-based indexing
+  const bool _use_one_based_indexing;
 };

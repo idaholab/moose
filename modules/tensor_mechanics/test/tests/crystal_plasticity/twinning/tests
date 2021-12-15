@@ -1,0 +1,104 @@
+[Tests]
+  [constiutive_model]
+    issues = '#18846'
+    design = '/CrystalPlasticityTwinningKalidindiUpdate.md'
+    requirement = 'The crystal plasticity model for twin propagation in FCC materials, '
+                   'using the Kalidindi (2001) constiutive model, shall:'
+    [only_twinning_fcc]
+      type = 'CSVDiff'
+      input = 'only_twinning_fcc.i'
+      csvdiff = 'only_twinning_fcc_out.csv'
+      allow_warnings = true
+      detail = 'compute the plastic shear due to twinning as a function of the '
+               'applied shear stress and resistance to twin propagation, the '
+               'corresponding twin volume fraction per twin system, and the total '
+               'value of the twin volume fraction across all twin systems.'
+    []
+    [check_direction_twin_propagation]
+      type = 'CSVDiff'
+      input = 'check_direction_twin_propagation.i'
+      csvdiff = 'check_direction_twin_propagation_out.csv'
+      allow_warnings = true
+      detail = 'compute a non-zero twin volume fraction, and associate plastic '
+               'shear increment, for only postive applied shear stress values.'
+    []
+    [coplanar_twin_hardening]
+      type = 'CSVDiff'
+      input = 'coplanar_twin_hardening.i'
+      csvdiff = 'coplanar_twin_hardening_out.csv'
+      detail = 'calculate the coplanar twin propogation resistance contribution '
+               'as a function of the twin volume fractions on coplanar systems alone.'
+    []
+    [non_coplanar_twin_hardening]
+      type = 'CSVDiff'
+      input = 'non_coplanar_twin_hardening.i'
+      csvdiff = 'non_coplanar_twin_hardening_out.csv'
+      detail = 'calculate the contribution to twin propagation resistance from '
+               'non-coplanar systems as a function of only the twin volume fraction '
+               'on non-coplanar twin systems.'
+    []
+    [upper_twin_fraction_limit]
+      type = CSVDiff
+      input = 'upper_twin_fraction_limit.i'
+      csvdiff = 'upper_twin_fraction_limit_out.csv'
+      allow_warnings = true
+      detail = 'set the plastic shear increments due to twinning to zero once '
+               'the total twin volume fraction limit is reached.'
+    []
+    [upper_twin_fraction_limit_error]
+      type = RunException
+      input = 'upper_twin_fraction_limit.i'
+      cli_args = 'Materials/twin_only_xtalpl/print_state_variable_convergence_error_messages=true '
+                 'Materials/twin_only_xtalpl/initial_twin_lattice_friction=3.0 '
+                 'Executioner/dtmin=0.025 Outputs/csv=false'
+      expect_err = 'Maximum allowable twin volume fraction limit exceeded with a value of'
+      detail = 'prevent the accumulation of a total twin volume fraction above the '
+               'user-defined limit.'
+    []
+    [strain_increment_upper_limit]
+      type = RunException
+      input = 'upper_twin_fraction_limit.i'
+      cli_args = 'BCs/tdisp/function=5.0e-3*t'
+      expect_err = 'Maximum allowable plastic slip increment due to twinning exceeded'
+      detail = 'prevent the calculation of a plastic shear increment in excess of '
+               'the user-defined tolerance value.'
+    []
+  []
+  [combined_twinning_slip_models]
+    issues = '#18846'
+    design = '/CrystalPlasticityTwinningKalidindiUpdate.md /CrystalPlasticityKalidindiUpdate.md'
+    requirement = 'When combined with a dislocation slip constitutive model in a '
+                  'simulation of an FCC material, the Kalidindi (2001) twin '
+                  'propagation model shall:'
+    [combined_twinning_slip_111tension]
+      type = CSVDiff
+      input = 'combined_twinning_slip_111tension.i'
+      csvdiff = 'combined_twinning_slip_111tension_out.csv'
+      detail = 'compute plastic shear due to both slip and twin propagation when '
+               'loaded under tension in a 111 orientation.'
+    []
+    [combined_twinning_slip_111compression]
+      type = CSVDiff
+      input = 'combined_twinning_slip_111tension.i'
+      csvdiff = 'combined_twinning_slip_111compression_out.csv'
+      cli_args = 'BCs/tdisp/function=-0.02*t Outputs/file_base=combined_twinning_slip_111compression_out'
+      detail = 'compute a near-zero twin volume fraction when loaded under '
+               'compression in a 111 orientation.'
+    []
+    [combined_twinning_slip_100tension]
+      type = CSVDiff
+      input = 'combined_twinning_slip_100compression.i'
+      csvdiff = 'combined_twinning_slip_100tension_out.csv'
+      cli_args = 'BCs/tdisp/function=0.025*t Outputs/file_base=combined_twinning_slip_100tension_out'
+      detail = 'compute a near-zero volume fraction of twins for all twin system '
+               'when a 100 oriented crystal is loaded under tension.'
+    []
+    [combined_twinning_slip_100compression]
+      type = CSVDiff
+      input = 'combined_twinning_slip_100compression.i'
+      csvdiff = 'combined_twinning_slip_100compression_out.csv'
+      detail = 'compute both dislocation glide and twin propagation in a 100 '
+               'oriented crystal loaded under compression.'
+    []
+  []
+[]

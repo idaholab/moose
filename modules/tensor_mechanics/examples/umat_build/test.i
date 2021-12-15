@@ -22,6 +22,7 @@
     constant_properties = '1000 0.3'
     num_state_vars = 0
     plugin = umat
+    use_one_based_indexing = true
   []
 []
 

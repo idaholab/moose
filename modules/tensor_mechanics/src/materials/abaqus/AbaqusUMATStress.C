@@ -27,6 +27,11 @@ AbaqusUMATStress::validParams()
   params.addClassDescription("Coupling material to use Abaqus UMAT models in MOOSE");
   params.addRequiredParam<FileName>(
       "plugin", "The path to the compiled dynamic library for the plugin you want to use");
+  params.addRequiredParam<bool>(
+      "use_one_based_indexing",
+      "Parameter to control whether indexing for element and integration points as presented to "
+      "UMAT models is based on 1 (true) or 0 (false). This does not affect internal MOOSE "
+      "numbering. The option to use 0-based numbering is deprecated and will be removed soon.");
   params.addRequiredParam<std::vector<Real>>(
       "constant_properties", "Constant mechanical and thermal material properties (PROPS)");
   params.addRequiredParam<unsigned int>("num_state_vars",
@@ -73,8 +78,16 @@ AbaqusUMATStress::AbaqusUMATStress(const InputParameters & parameters)
     _external_property_names(getParam<std::vector<MaterialPropertyName>>("external_properties")),
     _number_external_properties(_external_property_names.size()),
     _external_properties(_number_external_properties),
-    _external_properties_old(_number_external_properties)
+    _external_properties_old(_number_external_properties),
+    _use_one_based_indexing(getParam<bool>("use_one_based_indexing"))
 {
+  if (!_use_one_based_indexing)
+    mooseDeprecated(
+        "AbaqusUMATStress has transitioned to 1-based indexing in the element (NOEL) and "
+        "integration point (NPT) numbers to ensure maximum compatibility with legacy UMAT files. "
+        "Please ensure that any new UMAT plugins using these quantities are using the correct "
+        "indexing. 0-based indexing will be deprecated soon.");
+
   // get material properties
   for (std::size_t i = 0; i < _number_external_properties; ++i)
   {
@@ -115,7 +128,7 @@ void
 AbaqusUMATStress::computeProperties()
 {
   // current element "number"
-  _aqNOEL = _current_elem->id();
+  _aqNOEL = _current_elem->id() + (_use_one_based_indexing ? 1 : 0);
 
   // characteristic element length
   _aqCELENT = std::pow(_current_elem->volume(), 1.0 / _current_elem->dim());
@@ -215,6 +228,9 @@ AbaqusUMATStress::computeQpStress()
   _aqKINC = _t_step;
   _aqKSTEP = 1;
 
+  // integration point number
+  _aqNPT = _qp + (_use_one_based_indexing ? 1 : 0);
+
   // Connection to extern statement
   _umat(_aqSTRESS.data(),
         _aqSTATEV.data(),
@@ -248,7 +264,7 @@ AbaqusUMATStress::computeQpStress()
         _aqDFGRD0.data(),
         _aqDFGRD1.data(),
         &_aqNOEL,
-        &_qp,
+        &_aqNPT,
         &_aqLAYER,
         &_aqKSPT,
         &_aqKSTEP,

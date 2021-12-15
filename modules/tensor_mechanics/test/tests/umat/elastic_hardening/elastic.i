@@ -68,6 +68,7 @@
     constant_properties = '1000 0.3'
     plugin = '../../../plugins/elastic'
     num_state_vars = 0
+    use_one_based_indexing = true
   []
 
   # 2. active for moose built-in finite strain elasticity reference

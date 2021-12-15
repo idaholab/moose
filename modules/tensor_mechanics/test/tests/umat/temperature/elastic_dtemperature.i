@@ -101,6 +101,7 @@
     plugin = '../../../plugins/elastic_dtemperature'
     num_state_vars = 0
     temperature = temperature
+    use_one_based_indexing = true
   []
 
   #  2. Active for reference MOOSE computations

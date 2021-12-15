@@ -23,7 +23,7 @@
                  '1.0000000\ndrot 1 = -?0.0000000\ndrot 2 = -?0.0000000\ndrot 3 = -?0.0000000\ndrot '
                  '4 = 1.0000000\ndrot 5 = -?0.0000000\ndrot 6 = -?0.0000000\ndrot 7 = '
                  '-?0.0000000\ndrot 8 = 1.0000000\ntime 0 = 0.0000000\ntime 1 = 0.0000000\ncelent = '
-                 '1.0000000\nndi = 3\nnshr = 3\nntens = 6\nnoel = 0\nnpt = 7\nlayer = -1\nkspt = '
+                 '1.0000000\nndi = 3\nnshr = 3\nntens = 6\nnoel = 1\nnpt = 8\nlayer = -1\nkspt = '
                  '-1\nkstep = 1\nkinc = 1\ncmname = umat'
     requirement = 'The Abaqus UMAT interface shall pass correct values into a C UMAT routine for '
                   'STRAN, DSTRAN, TIME, CMNAME, NDI, NSHR, NTENS, COORDS, DROT, CELENT, DFGRD0, '

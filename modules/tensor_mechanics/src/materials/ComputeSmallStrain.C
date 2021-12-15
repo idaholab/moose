@@ -33,7 +33,8 @@ ComputeSmallStrain::computeProperties()
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
   {
     // strain = (grad_disp + grad_disp^T)/2
-    RankTwoTensor grad_tensor((*_grad_disp[0])[_qp], (*_grad_disp[1])[_qp], (*_grad_disp[2])[_qp]);
+    const auto grad_tensor = RankTwoTensor ::initializeFromRows(
+        (*_grad_disp[0])[_qp], (*_grad_disp[1])[_qp], (*_grad_disp[2])[_qp]);
 
     _total_strain[_qp] = (grad_tensor + grad_tensor.transpose()) / 2.0;
 

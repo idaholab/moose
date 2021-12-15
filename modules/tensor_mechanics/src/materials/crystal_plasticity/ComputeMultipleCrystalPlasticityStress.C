@@ -494,7 +494,7 @@ ComputeMultipleCrystalPlasticityStress::calculateResidual()
   {
     equivalent_slip_increment_per_model.zero();
 
-    // calculat shear stress with consideration of contribution from other physics
+    // calculate shear stress with consideration of contribution from other physics
     _models[i]->calculateShearStress(
         _pk2[_qp], _inverse_eigenstrain_deformation_grad, _num_eigenstrains);
 
