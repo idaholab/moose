@@ -17,63 +17,6 @@
 #include "libmesh/int_range.h"
 #include "metaphysicl/raw_type.h"
 
-// TEST_F(SymmetricRankFourTensorTest, invSymm1)
-// {
-//   // inverse check for a standard symmetric-isotropic tensor
-//   std::vector<Real> input(2);
-//   input[0] = 1;
-//   input[1] = 3;
-//   RankFourTensor a(input, RankFourTensor::symmetric_isotropic);
-//
-//   EXPECT_NEAR(0, (iSymmetric - a.invSymm() * a).L2norm(), 1E-5);
-// }
-
-// TEST_F(SymmetricRankFourTensorTest, invSymm2)
-// {
-//   // following (basically random) "a" tensor has symmetry
-//   // a_ijkl = a_jikl = a_ijlk
-//   // BUT it doesn't have a_ijkl = a_klij
-//   RankFourTensor a;
-//   a(0, 0, 0, 0) = 1;
-//   a(0, 0, 0, 1) = a(0, 0, 1, 0) = 2;
-//   a(0, 0, 0, 2) = a(0, 0, 2, 0) = 1.1;
-//   a(0, 0, 1, 1) = 0.5;
-//   a(0, 0, 1, 2) = a(0, 0, 2, 1) = -0.2;
-//   a(0, 0, 2, 2) = 0.8;
-//   a(1, 1, 0, 0) = 0.6;
-//   a(1, 1, 0, 1) = a(1, 1, 1, 0) = 1.3;
-//   a(1, 1, 0, 2) = a(1, 1, 2, 0) = 0.9;
-//   a(1, 1, 1, 1) = 0.6;
-//   a(1, 1, 1, 2) = a(1, 1, 2, 1) = -0.3;
-//   a(1, 1, 2, 2) = -1.1;
-//   a(2, 2, 0, 0) = -0.6;
-//   a(2, 2, 0, 1) = a(2, 2, 1, 0) = -0.1;
-//   a(2, 2, 0, 2) = a(2, 2, 2, 0) = -0.3;
-//   a(2, 2, 1, 1) = 0.5;
-//   a(2, 2, 1, 2) = a(2, 2, 2, 1) = 0.7;
-//   a(2, 2, 2, 2) = -0.9;
-//   a(0, 1, 0, 0) = a(1, 0, 0, 0) = 1.2;
-//   a(0, 1, 0, 1) = a(0, 1, 1, 0) = a(1, 0, 0, 1) = a(1, 0, 1, 0) = 0.1;
-//   a(0, 1, 0, 2) = a(0, 1, 2, 0) = a(1, 0, 0, 2) = a(1, 0, 2, 0) = 0.15;
-//   a(0, 1, 1, 1) = a(1, 0, 1, 1) = 0.24;
-//   a(0, 1, 1, 2) = a(0, 1, 2, 1) = a(1, 0, 1, 2) = a(1, 0, 2, 1) = -0.4;
-//   a(0, 1, 2, 2) = a(1, 0, 2, 2) = -0.3;
-//   a(0, 2, 0, 0) = a(2, 0, 0, 0) = -0.3;
-//   a(0, 2, 0, 1) = a(0, 2, 1, 0) = a(2, 0, 0, 1) = a(2, 0, 1, 0) = -0.4;
-//   a(0, 2, 0, 2) = a(0, 2, 2, 0) = a(2, 0, 0, 2) = a(2, 0, 2, 0) = 0.22;
-//   a(0, 2, 1, 1) = a(2, 0, 1, 1) = -0.9;
-//   a(0, 2, 1, 2) = a(0, 2, 2, 1) = a(2, 0, 1, 2) = a(2, 0, 2, 1) = -0.05;
-//   a(0, 2, 2, 2) = a(2, 0, 2, 2) = 0.32;
-//   a(1, 2, 0, 0) = a(2, 1, 0, 0) = -0.35;
-//   a(1, 2, 0, 1) = a(1, 2, 1, 0) = a(2, 1, 0, 1) = a(2, 1, 1, 0) = -1.4;
-//   a(1, 2, 0, 2) = a(1, 2, 2, 0) = a(2, 1, 0, 2) = a(2, 1, 2, 0) = 0.2;
-//   a(1, 2, 1, 1) = a(2, 1, 1, 1) = -0.91;
-//   a(1, 2, 1, 2) = a(1, 2, 2, 1) = a(2, 1, 1, 2) = a(2, 1, 2, 1) = 1.4;
-//   a(1, 2, 2, 2) = a(2, 1, 2, 2) = 0.1;
-//
-//   EXPECT_NEAR(0, (iSymmetric - a.invSymm() * a).L2norm(), 1E-5);
-// }
-
 TEST_F(SymmetricRankFourTensorTest, ADConversion)
 {
   SymmetricRankFourTensor reg;
@@ -91,32 +34,70 @@ TEST_F(SymmetricRankFourTensorTest, ADConversion)
 
 TEST_F(SymmetricRankFourTensorTest, symmetric9)
 {
-  RankFourTensor a(_i1, RankFourTensor::symmetric9);
-  SymmetricRankFourTensor b(_i1, SymmetricRankFourTensor::symmetric9);
-  EXPECT_NEAR(0, (a - RankFourTensor(b)).L2norm(), 1E-5);
+  RankFourTensor A(_i1, RankFourTensor::symmetric9);
+  SymmetricRankFourTensor B(_i1, SymmetricRankFourTensor::symmetric9);
+  EXPECT_NEAR(0, (A - RankFourTensor(B)).L2norm(), 1E-5);
 }
 
 TEST_F(SymmetricRankFourTensorTest, symmetric21)
 {
-  RankFourTensor a(_i2, RankFourTensor::symmetric21);
-  SymmetricRankFourTensor b(_i2, SymmetricRankFourTensor::symmetric21);
-  EXPECT_NEAR(0, (a - RankFourTensor(b)).L2norm(), 1E-9);
+  RankFourTensor A(_i2, RankFourTensor::symmetric21);
+  SymmetricRankFourTensor B(_i2, SymmetricRankFourTensor::symmetric21);
+  EXPECT_NEAR(0, (A - RankFourTensor(B)).L2norm(), 1E-9);
 }
 
 TEST_F(SymmetricRankFourTensorTest, symmetric_isotropic)
 {
-  RankFourTensor a({0.37, 4.8}, RankFourTensor::symmetric_isotropic);
-  SymmetricRankFourTensor b({0.37, 4.8}, SymmetricRankFourTensor::symmetric_isotropic);
-  EXPECT_NEAR(0, (a - RankFourTensor(b)).L2norm(), 1E-9);
-  EXPECT_EQ(a.isIsotropic(), true);
-  EXPECT_EQ(b.isIsotropic(), true);
+  RankFourTensor A({0.37, 4.8}, RankFourTensor::symmetric_isotropic);
+  SymmetricRankFourTensor B({0.37, 4.8}, SymmetricRankFourTensor::symmetric_isotropic);
+  EXPECT_NEAR(0, (A - RankFourTensor(B)).L2norm(), 1E-9);
+  EXPECT_EQ(A.isIsotropic(), true);
+  EXPECT_EQ(B.isIsotropic(), true);
 }
 
 TEST_F(SymmetricRankFourTensorTest, symmetric_isotropic_E_nu)
 {
-  RankFourTensor a({1234, 0.7}, RankFourTensor::symmetric_isotropic_E_nu);
-  SymmetricRankFourTensor b({1234, 0.7}, SymmetricRankFourTensor::symmetric_isotropic_E_nu);
-  EXPECT_NEAR(0, (a - RankFourTensor(b)).L2norm(), 1E-9);
+  RankFourTensor A({1234, 0.7}, RankFourTensor::symmetric_isotropic_E_nu);
+  SymmetricRankFourTensor B({1234, 0.7}, SymmetricRankFourTensor::symmetric_isotropic_E_nu);
+  EXPECT_NEAR(0, (A - RankFourTensor(B)).L2norm(), 1E-9);
+}
+
+TEST_F(SymmetricRankFourTensorTest, axisymmetric_rz)
+{
+  RankFourTensor A({1, -20, 33.7, 4.4, -55}, RankFourTensor::axisymmetric_rz);
+  SymmetricRankFourTensor B({1, -20, 33.7, 4.4, -55}, SymmetricRankFourTensor::axisymmetric_rz);
+  EXPECT_NEAR(0, (A - RankFourTensor(B)).L2norm(), 1E-9);
+}
+
+TEST_F(SymmetricRankFourTensorTest, principal)
+{
+  RankFourTensor A({1, -20, 33.7, 4.4, -55, -6.66669, 700, -88.8, 0.9}, RankFourTensor::principal);
+  SymmetricRankFourTensor B({1, -20, 33.7, 4.4, -55, -6.66669, 700, -88.8, 0.9},
+                            SymmetricRankFourTensor::principal);
+  EXPECT_NEAR(0, (A - RankFourTensor(B)).L2norm(), 1E-9);
+}
+
+TEST_F(SymmetricRankFourTensorTest, orthotropic)
+{
+  RankFourTensor A({2, 3, 4, 1.1, 2.2, 3.3, 0.3, 0.25, 0.1, 0.2, 0.125, 0.075},
+                   RankFourTensor::orthotropic);
+  SymmetricRankFourTensor B({2, 3, 4, 1.1, 2.2, 3.3, 0.3, 0.25, 0.1, 0.2, 0.125, 0.075},
+                            SymmetricRankFourTensor::orthotropic);
+  EXPECT_NEAR(0, (A - RankFourTensor(B)).L2norm(), 1E-9);
+}
+
+TEST_F(SymmetricRankFourTensorTest, initIdentity)
+{
+  RankFourTensor A(RankFourTensor::InitMethod::initIdentity);
+  SymmetricRankFourTensor B(SymmetricRankFourTensor::InitMethod::initIdentity);
+  EXPECT_NEAR(0, (A - RankFourTensor(B)).L2norm(), 1E-9);
+}
+
+TEST_F(SymmetricRankFourTensorTest, initIdentitySymmetricFour)
+{
+  RankFourTensor A(RankFourTensor::InitMethod::initIdentitySymmetricFour);
+  SymmetricRankFourTensor B(SymmetricRankFourTensor::InitMethod::initIdentitySymmetricFour);
+  EXPECT_NEAR(0, (A - RankFourTensor(B)).L2norm(), 1E-9);
 }
 
 TEST_F(SymmetricRankFourTensorTest, print)
@@ -180,20 +161,6 @@ TEST_F(SymmetricRankFourTensorTest, r4r2multiply)
   auto p2 = b * d;
   EXPECT_NEAR(0, (p1 - p2).L2norm(), 1E-9);
 }
-
-// TEST_F(SymmetricRankFourTensorTest, Identity)
-// {
-//   auto A = SymmetricRankFourTensor::Identity();
-//   auto B = RankFourTensor::Identity();
-//   EXPECT_EQ((RankFourTensor(A) - B).L2norm(), 0.0);
-// }
-//
-// TEST_F(SymmetricRankFourTensorTest, IdentityFour)
-// {
-//   auto A = SymmetricRankFourTensor::IdentityFour();
-//   auto B = RankFourTensor::IdentityFour();
-//   EXPECT_EQ((RankFourTensor(A) - B).L2norm(), 0.0);
-// }
 
 TEST_F(SymmetricRankFourTensorTest, operators)
 {

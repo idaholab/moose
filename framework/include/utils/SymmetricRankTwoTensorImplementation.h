@@ -446,51 +446,6 @@ SymmetricRankTwoTensorTempl<T>::outerProduct(const SymmetricRankTwoTensorTempl<T
 }
 
 template <typename T>
-SymmetricRankFourTensorTempl<T>
-SymmetricRankTwoTensorTempl<T>::mixedProductIkJl(const SymmetricRankTwoTensorTempl<T> & /*b*/) const
-{
-  mooseError("Not implemented");
-}
-
-template <typename T>
-SymmetricRankFourTensorTempl<T>
-SymmetricRankTwoTensorTempl<T>::mixedProductIlJk(const SymmetricRankTwoTensorTempl<T> & /*b*/) const
-{
-  mooseError("Not implemented");
-}
-
-template <typename T>
-SymmetricRankFourTensorTempl<T>
-SymmetricRankTwoTensorTempl<T>::mixedProductJkIl(const SymmetricRankTwoTensorTempl<T> & /*b*/) const
-{
-  mooseError("Not implemented");
-}
-
-template <typename T>
-SymmetricRankFourTensorTempl<T>
-SymmetricRankTwoTensorTempl<T>::mixedProductIjJklm(
-    const SymmetricRankFourTensorTempl<T> & /*b*/) const
-{
-  mooseError("Not implemented");
-}
-
-template <typename T>
-SymmetricRankFourTensorTempl<T>
-SymmetricRankTwoTensorTempl<T>::mixedProductJmIjkl(
-    const SymmetricRankFourTensorTempl<T> & /*b*/) const
-{
-  mooseError("Not implemented");
-}
-
-template <typename T>
-SymmetricRankFourTensorTempl<T>
-SymmetricRankTwoTensorTempl<T>::mixedProductJkIjlm(
-    const SymmetricRankFourTensorTempl<T> & /*b*/) const
-{
-  mooseError("Not implemented");
-}
-
-template <typename T>
 SymmetricRankTwoTensorTempl<T>
 SymmetricRankTwoTensorTempl<T>::deviatoric() const
 {
@@ -503,7 +458,8 @@ template <typename T>
 T
 SymmetricRankTwoTensorTempl<T>::generalSecondInvariant() const
 {
-  mooseError("Not implemented");
+  return _vals[0] * _vals[1] + _vals[0] * _vals[2] + _vals[1] * _vals[2] -
+         (_vals[3] * _vals[3] + _vals[4] * _vals[4] + _vals[5] * _vals[5]) / 2.0;
 }
 
 template <typename T>
@@ -514,9 +470,9 @@ SymmetricRankTwoTensorTempl<T>::secondInvariant() const
   result = Utility::pow<2>(_vals[0] - _vals[1]) / 6.0;
   result += Utility::pow<2>(_vals[0] - _vals[2]) / 6.0;
   result += Utility::pow<2>(_vals[1] - _vals[2]) / 6.0;
-  result += Utility::pow<2>(MathUtils::sqrt2 * _vals[5]) / 4.0;
-  result += Utility::pow<2>(MathUtils::sqrt2 * _vals[4]) / 4.0;
-  result += Utility::pow<2>(MathUtils::sqrt2 * _vals[3]) / 4.0;
+  result += Utility::pow<2>(_vals[5]) / 2.0;
+  result += Utility::pow<2>(_vals[4]) / 2.0;
+  result += Utility::pow<2>(_vals[3]) / 2.0;
   return result;
 }
 
@@ -524,14 +480,20 @@ template <typename T>
 SymmetricRankTwoTensorTempl<T>
 SymmetricRankTwoTensorTempl<T>::dsecondInvariant() const
 {
-  mooseError("Not implemented");
+  return SymmetricRankTwoTensorTempl<T>::plusTranspose(deviatoric()) * 0.5;
 }
 
 template <typename T>
 SymmetricRankFourTensorTempl<T>
 SymmetricRankTwoTensorTempl<T>::d2secondInvariant() const
 {
-  mooseError("Not implemented");
+  SymmetricRankFourTensorTempl<T> result;
+
+  for (auto i : make_range(N))
+    for (auto j : make_range(N))
+      result(i, j) = 0.5 * (i == j) + 0.5 * (i == j) - (1.0 / 3.0) * (i < 3) * (j < 3);
+
+  return result;
 }
 
 template <typename T>
@@ -569,21 +531,72 @@ template <typename T>
 T
 SymmetricRankTwoTensorTempl<T>::thirdInvariant() const
 {
-  mooseError("Not implemented");
+  const auto s = SymmetricRankTwoTensorTempl<T>::plusTranspose(deviatoric()) * 0.5;
+  return s(0) * (s(1) * s(2) - s(3) / MathUtils::sqrt2 * s(3) / MathUtils::sqrt2) -
+         s(5) / MathUtils::sqrt2 *
+             (s(5) / MathUtils::sqrt2 * s(2) - s(3) / MathUtils::sqrt2 * s(4) / MathUtils::sqrt2) +
+         s(4) / MathUtils::sqrt2 *
+             (s(5) / MathUtils::sqrt2 * s(3) / MathUtils::sqrt2 - s(1) * s(4) / MathUtils::sqrt2);
 }
 
 template <typename T>
 SymmetricRankTwoTensorTempl<T>
 SymmetricRankTwoTensorTempl<T>::dthirdInvariant() const
 {
-  mooseError("Not implemented");
+  const auto s = SymmetricRankTwoTensorTempl<T>::plusTranspose(deviatoric()) * 0.5;
+  const T s3 = secondInvariant() / 3.0;
+  return SymmetricRankTwoTensorTempl<T>(s(1) * s(2) - s(3) * s(3) / 2.0 + s3,
+                                        s(0) * s(2) - s(4) * s(4) / 2.0 + s3,
+                                        s(0) * s(1) - s(5) * s(5) / 2.0 + s3,
+                                        s(5) * s(4) / 2.0 - s(0) * s(3) / MathUtils::sqrt2,
+                                        s(5) * s(3) / 2.0 - s(1) * s(4) / MathUtils::sqrt2,
+                                        s(4) * s(3) / 2.0 - s(5) * s(2) / MathUtils::sqrt2);
 }
 
 template <typename T>
 SymmetricRankFourTensorTempl<T>
 SymmetricRankTwoTensorTempl<T>::d2thirdInvariant() const
 {
-  mooseError("Not implemented");
+  const auto s = SymmetricRankTwoTensorTempl<T>::plusTranspose(deviatoric()) * 0.5;
+
+  SymmetricRankFourTensorTempl<T> d2;
+  for (auto i : make_range(N))
+    for (auto j : make_range(N))
+      d2(i, j) = Real(i < 3) * s(j) / 3.0 / (j < 3 ? 1 : MathUtils::sqrt2) +
+                 Real(j < 3) * s(i) / 3.0 / (i < 3 ? 1 : MathUtils::sqrt2);
+
+  d2(0, 1) += s(2);
+  d2(0, 2) += s(1);
+  d2(0, 3) -= s(3) / MathUtils::sqrt2;
+
+  d2(1, 0) += s(2);
+  d2(1, 2) += s(0);
+  d2(1, 4) -= s(4) / MathUtils::sqrt2;
+
+  d2(2, 0) += s(1);
+  d2(2, 1) += s(0);
+  d2(2, 5) -= s(5) / MathUtils::sqrt2;
+
+  d2(3, 0) -= s(3) / MathUtils::sqrt2;
+  d2(3, 3) -= s(0) / 2.0;
+  d2(3, 4) += s(5) / 2.0 / MathUtils::sqrt2;
+  d2(3, 5) += s(4) / 2.0 / MathUtils::sqrt2;
+
+  d2(4, 1) -= s(4) / MathUtils::sqrt2;
+  d2(4, 3) += s(5) / 2.0 / MathUtils::sqrt2;
+  d2(4, 4) -= s(1) / 2.0;
+  d2(4, 5) += s(3) / 2.0 / MathUtils::sqrt2;
+
+  d2(5, 2) -= s(5) / MathUtils::sqrt2;
+  d2(5, 3) += s(4) / 2.0 / MathUtils::sqrt2;
+  d2(5, 4) += s(3) / 2.0 / MathUtils::sqrt2;
+  d2(5, 5) -= s(2) / 2.0;
+
+  for (auto i : make_range(N))
+    for (auto j : make_range(N))
+      d2(i, j) *= SymmetricRankFourTensorTempl<T>::mandelFactor(i, j);
+
+  return d2;
 }
 
 template <typename T>
@@ -648,14 +661,48 @@ template <typename T>
 void
 SymmetricRankTwoTensorTempl<T>::syev(const char *, std::vector<T> &, std::vector<T> &) const
 {
-  mooseError("Not implemented");
+  mooseError("The syev method is only supported for Real valued tensors");
+}
+
+template <>
+void
+SymmetricRankTwoTensor::syev(const char * calculation_type,
+                             std::vector<Real> & eigvals,
+                             std::vector<Real> & a) const
+{
+  eigvals.resize(Ndim);
+  a.resize(Ndim * Ndim);
+
+  // prepare data for the LAPACKsyev_ routine (which comes from petscblaslapack.h)
+  PetscBLASInt nd = Ndim;
+  PetscBLASInt lwork = 66 * nd;
+  PetscBLASInt info;
+  std::vector<PetscScalar> work(lwork);
+
+  auto A = RankTwoTensor(*this);
+  for (auto i : make_range(Ndim))
+    for (auto j : make_range(Ndim))
+      // a is destroyed by dsyev, and if calculation_type == "V" then eigenvectors are placed
+      // there
+      a[i * Ndim + j] = A(i, j);
+
+  // compute the eigenvalues only (if calculation_type == "N"),
+  // or both the eigenvalues and eigenvectors (if calculation_type == "V")
+  // assume upper triangle of a is stored (second "U")
+  LAPACKsyev_(calculation_type, "U", &nd, &a[0], &nd, &eigvals[0], &work[0], &lwork, &info);
+
+  if (info != 0)
+    mooseError("In computing the eigenvalues and eigenvectors for the symmetric rank-2 tensor (",
+               Moose::stringify(a),
+               "), the PETSC LAPACK syev routine returned error code ",
+               info);
 }
 
 template <typename T>
 void
 SymmetricRankTwoTensorTempl<T>::symmetricEigenvalues(std::vector<T> & eigvals) const
 {
-  SymmetricRankTwoTensorTempl<T> a;
+  RankTwoTensorTempl<T> a;
   symmetricEigenvaluesEigenvectors(eigvals, a);
 }
 
@@ -669,8 +716,8 @@ SymmetricRankTwoTensor::symmetricEigenvalues(std::vector<Real> & eigvals) const
 
 template <typename T>
 void
-SymmetricRankTwoTensorTempl<T>::symmetricEigenvaluesEigenvectors(
-    std::vector<T> &, SymmetricRankTwoTensorTempl<T> &) const
+SymmetricRankTwoTensorTempl<T>::symmetricEigenvaluesEigenvectors(std::vector<T> &,
+                                                                 RankTwoTensorTempl<T> &) const
 {
   mooseError(
       "symmetricEigenvaluesEigenvectors is only available for ordered tensor component types");
@@ -678,48 +725,15 @@ SymmetricRankTwoTensorTempl<T>::symmetricEigenvaluesEigenvectors(
 
 template <>
 void
-SymmetricRankTwoTensor::symmetricEigenvaluesEigenvectors(std::vector<Real> & /*eigvals*/,
-                                                         SymmetricRankTwoTensor & /*eigvecs*/) const
+SymmetricRankTwoTensor::symmetricEigenvaluesEigenvectors(std::vector<Real> & eigvals,
+                                                         RankTwoTensor & eigvecs) const
 {
-  mooseError("Not implemented");
-}
+  std::vector<Real> a;
+  syev("V", eigvals, a);
 
-template <>
-void
-ADSymmetricRankTwoTensor::symmetricEigenvaluesEigenvectors(
-    std::vector<DualReal> & /*eigvals*/, ADSymmetricRankTwoTensor & /*eigvecs*/) const
-{
-  mooseError("Not implemented");
-}
-
-template <typename T>
-void
-SymmetricRankTwoTensorTempl<T>::dsymmetricEigenvalues(
-    std::vector<T> & /*eigvals*/, std::vector<SymmetricRankTwoTensorTempl<T>> & /*deigvals*/) const
-{
-  mooseError("Not implemented");
-}
-
-template <typename T>
-void
-SymmetricRankTwoTensorTempl<T>::d2symmetricEigenvalues(
-    std::vector<SymmetricRankFourTensorTempl<T>> & /*deriv*/) const
-{
-  mooseError("Not implemented");
-}
-
-template <typename T>
-void
-SymmetricRankTwoTensorTempl<T>::getRUDecompositionRotation(SymmetricRankTwoTensorTempl<T> &) const
-{
-  mooseError("Not implemented");
-}
-
-template <>
-void
-SymmetricRankTwoTensor::getRUDecompositionRotation(SymmetricRankTwoTensor & /*rot*/) const
-{
-  mooseError("Not implemented");
+  for (auto i : make_range(Ndim))
+    for (auto j : make_range(Ndim))
+      eigvecs(j, i) = a[i * Ndim + j];
 }
 
 template <typename T>
@@ -733,12 +747,8 @@ template <typename T>
 SymmetricRankTwoTensorTempl<T>
 SymmetricRankTwoTensorTempl<T>::genRandomSymmTensor(T scale, T offset)
 {
-  SymmetricRankTwoTensorTempl<T> ret;
-  for (unsigned int i = 0; i < 3; ++i)
-    ret._vals[i] = (MooseRandom::rand() + offset) * scale;
-  for (unsigned int i = 3; i < 6; ++i)
-    ret._vals[i] = MathUtils::sqrt2 * (MooseRandom::rand() + offset) * scale;
-  return ret;
+  auto r = [&]() { return (MooseRandom::rand() + offset) * scale; };
+  return SymmetricRankTwoTensorTempl<T>(r(), r(), r(), r(), r(), r());
 }
 
 template <typename T>
@@ -751,10 +761,13 @@ SymmetricRankTwoTensorTempl<T>::vectorSelfOuterProduct(const TypeVector<T> & v)
 
 template <typename T>
 SymmetricRankTwoTensorTempl<T>
-SymmetricRankTwoTensorTempl<T>::initialContraction(
-    const SymmetricRankFourTensorTempl<T> & /*b*/) const
+SymmetricRankTwoTensorTempl<T>::initialContraction(const SymmetricRankFourTensorTempl<T> & b) const
 {
-  mooseError("Not implemented");
+  SymmetricRankTwoTensorTempl<T> result;
+  for (auto i : make_range(N))
+    for (auto j : make_range(N))
+      result(j) += (*this)(i)*b(i, j);
+  return result;
 }
 
 template <typename T>

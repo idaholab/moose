@@ -21,11 +21,15 @@
 #include "libmesh/tuple_of.h"
 #include "libmesh/int_range.h"
 
-#include <array>
-
 #include "metaphysicl/raw_type.h"
 
 #include <petscsys.h>
+
+// Eigen includes
+#include <Eigen/Core>
+#include <Eigen/Dense>
+
+#include <array>
 
 using libMesh::Real;
 using libMesh::tuple_of;
@@ -68,6 +72,11 @@ template <typename T>
 class SymmetricRankFourTensorTempl
 {
 public:
+  /// Dimensionality of rank-four tensor
+  static constexpr unsigned int Ndim = 3;
+  static constexpr unsigned int N = 2 * Ndim;
+  static constexpr unsigned int N2 = N * N;
+
   /// returns the 1, sqrt(2), or 2 prefactor in the Mandel notation
   static constexpr Real mandelFactor(unsigned int i, unsigned int j)
   {
@@ -79,7 +88,6 @@ public:
   {
     initNone,
     initIdentity,
-    initIdentityFour,
     initIdentitySymmetricFour
   };
 
@@ -146,9 +154,9 @@ public:
   {
     return SymmetricRankFourTensorTempl<T>(initIdentity);
   }
-  static SymmetricRankFourTensorTempl<T> IdentityFour()
+  static SymmetricRankFourTensorTempl<T> IdentitySymmetricFour()
   {
-    return SymmetricRankFourTensorTempl<T>(initIdentityFour);
+    return SymmetricRankFourTensorTempl<T>(initIdentitySymmetricFour);
   };
 
   /// Gets the value for the index specified.  Takes index = 0,1,2
@@ -240,6 +248,15 @@ public:
    * This returns A_ijkl such that C_ijkl*A_klmn = 0.5*(de_im de_jn + de_in de_jm)
    * This routine assumes that C_ijkl = C_jikl = C_ijlk
    */
+  template <typename T2 = T,
+            typename std::enable_if<(SymmetricRankFourTensorTempl<T2>::N2 * sizeof(T2) >
+                                     EIGEN_STACK_ALLOCATION_LIMIT),
+                                    int>::type = 0>
+  SymmetricRankFourTensorTempl<T> invSymm() const;
+  template <typename T2 = T,
+            typename std::enable_if<(SymmetricRankFourTensorTempl<T2>::N2 * sizeof(T2) <=
+                                     EIGEN_STACK_ALLOCATION_LIMIT),
+                                    int>::type = 0>
   SymmetricRankFourTensorTempl<T> invSymm() const;
 
   /**
@@ -267,20 +284,6 @@ public:
    * Transpose the tensor by swapping the first two indices - a no-op
    */
   SymmetricRankFourTensorTempl<T> transposeIj() const { return *this; }
-
-  /**
-   * Fills the tensor entries ignoring the last dimension (ie, C_ijkl=0 if any of i, j, k, or l =
-   * 3).
-   * Fill method depends on size of input
-   * Input size = 2.  Then C_1111 = C_2222 = input[0], and C_1122 = input[1], and C_1212 = (input[0]
-   * - input[1])/2,
-   *                  and C_ijkl = C_jikl = C_ijlk = C_klij, and C_1211 = C_1222 = 0.
-   * Input size = 9.  Then C_1111 = input[0], C_1112 = input[1], C_1122 = input[3],
-   *                       C_1212 = input[4], C_1222 = input[5], C_1211 = input[6]
-   *                       C_2211 = input[7], C_2212 = input[8], C_2222 = input[9]
-   *                       and C_ijkl = C_jikl = C_ijlk
-   */
-  void surfaceFillFromInputVector(const std::vector<T> & input);
 
   /// Static method for use in validParams for getting the "fill_method"
   static MooseEnum fillMethodEnum();
@@ -334,16 +337,9 @@ public:
   /// checks if the tensor is isotropic
   bool isIsotropic() const;
 
-  /// Dimensionality of rank-four tensor
-  static constexpr unsigned int N = 6;
-  static constexpr unsigned int N2 = N * N;
-
 protected:
   /// The values of the rank-four tensor
   std::array<T, N2> _vals;
-
-  /// as std::sqrt is not constexpr we need to define this here ourselves
-  static constexpr Real SQRT2 = 1.4142135623730951;
 
   /**
    * fillSymmetricIsotropicFromInputVector takes 2 inputs to fill the
@@ -547,4 +543,39 @@ SymmetricRankFourTensorTempl<T>::fillSymmetric21FromInputVector(const T2 & input
       _vals[j + N * i] = mandelFactor(j, i) * input[index];
       index++;
     }
+}
+
+template <typename T>
+template <typename T2,
+          typename std::enable_if<(SymmetricRankFourTensorTempl<T2>::N2 * sizeof(T2) >
+                                   EIGEN_STACK_ALLOCATION_LIMIT),
+                                  int>::type>
+SymmetricRankFourTensorTempl<T>
+SymmetricRankFourTensorTempl<T>::invSymm() const
+{
+  SymmetricRankFourTensorTempl<T> result(initNone);
+  Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> mat(6, 6);
+  for (auto i : make_range(N))
+    for (auto j : make_range(N))
+      mat(i, j) = (*this)(i, j);
+  mat = mat.inverse();
+  for (auto i : make_range(N))
+    for (auto j : make_range(N))
+      result(i, j) = mat(i, j);
+  return result;
+}
+
+template <typename T>
+template <typename T2,
+          typename std::enable_if<(SymmetricRankFourTensorTempl<T2>::N2 * sizeof(T2) <=
+                                   EIGEN_STACK_ALLOCATION_LIMIT),
+                                  int>::type>
+SymmetricRankFourTensorTempl<T>
+SymmetricRankFourTensorTempl<T>::invSymm() const
+{
+  SymmetricRankFourTensorTempl<T> result(initNone);
+  const Eigen::Map<const Eigen::Matrix<T, N, N, Eigen::RowMajor>> mat(&_vals[0]);
+  Eigen::Map<Eigen::Matrix<T, N, N, Eigen::RowMajor>> res(&result._vals[0]);
+  res = mat.inverse();
+  return result;
 }

@@ -22,10 +22,6 @@
 #include "libmesh/tensor_value.h"
 #include "libmesh/vector_value.h"
 
-// Eigen includes
-#include <Eigen/Core>
-#include <Eigen/Dense>
-
 // C++ includes
 #include <iomanip>
 #include <ostream>
@@ -64,28 +60,15 @@ SymmetricRankFourTensorTempl<T>::SymmetricRankFourTensorTempl(const InitMethod i
 
     case initIdentity:
       zero();
-      for (unsigned int i = 0; i < N; ++i)
-        _vals[i * 7] = 1.0;
+      for (auto i : make_range(Ndim))
+        (*this)(i, i) = 1.0;
       break;
 
-    case initIdentityFour:
-      for (unsigned int i = 0; i < N; ++i)
-        for (unsigned int j = 0; j < N; ++j)
-        {
-          _vals[i + N * j] = 1.0;
-          _vals[i + N * j + 3] = 0.0;
-          _vals[i + N * (j + 3)] = 0.0;
-          _vals[i + N * (j + 3) + 3] = 2.0 * Real(i == j);
-        }
+    case initIdentitySymmetricFour:
+      zero();
+      for (auto i : make_range(N))
+        (*this)(i, i) = 1.0;
       break;
-
-      // case initIdentitySymmetricFour:
-      //   for (unsigned int i = 0; i < N; ++i)
-      //     for (unsigned int j = 0; j < N; ++j)
-      //       for (unsigned int k = 0; k < N; ++k)
-      //         for (unsigned int l = 0; l < N; ++l)
-      //           _vals[index++] = 0.5 * Real(i == k && j == l) + 0.5 * Real(i == l && j == k);
-      //   break;
 
     default:
       mooseError("Unknown SymmetricRankFourTensorTempl<T> initialization pattern.");
@@ -273,17 +256,6 @@ SymmetricRankFourTensorTempl<T>::L2norm() const
 }
 
 template <typename T>
-SymmetricRankFourTensorTempl<T>
-SymmetricRankFourTensorTempl<T>::invSymm() const
-{
-  const Eigen::Map<const Eigen::Matrix<T, N, N, Eigen::RowMajor>> mat(&_vals[0]);
-  SymmetricRankFourTensorTempl<T> result(initNone);
-  Eigen::Map<Eigen::Matrix<T, N, N, Eigen::RowMajor>> res(&result._vals[0]);
-  res = mat.inverse();
-  return result;
-}
-
-template <typename T>
 void
 SymmetricRankFourTensorTempl<T>::print(std::ostream & stm) const
 {
@@ -321,13 +293,6 @@ SymmetricRankFourTensorTempl<T>::transposeMajor() const
     for (unsigned int j = 0; j < N; ++j)
       ret._vals[index++] = _vals[i + N * j];
   return ret;
-}
-
-template <typename T>
-void
-SymmetricRankFourTensorTempl<T>::surfaceFillFromInputVector(const std::vector<T> & /*input*/)
-{
-  mooseError("Not implemented yet");
 }
 
 template <typename T>
@@ -512,9 +477,9 @@ SymmetricRankFourTensorTempl<T>::fillGeneralOrthotropicFromInputVector(const std
   _vals[13] = Ec * (nuac * nuba + nubc) / k;
   _vals[14] = Ec * (1 - nuab * nuba) / k;
 
-  _vals[21] = 2 * Gab;
+  _vals[21] = 2 * Gbc;
   _vals[28] = 2 * Gca;
-  _vals[35] = 2 * Gbc;
+  _vals[35] = 2 * Gab;
 }
 
 template <typename T>

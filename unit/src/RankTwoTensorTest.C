@@ -637,9 +637,43 @@ TEST_F(RankTwoTensorTest, sqr)
   EXPECT_NEAR(0, (_unsymmetric0.sqr() - B).L2norm(), 1e-9);
 }
 
+TEST_F(RankTwoTensorTest, vectorOuterProduct)
+{
+  RealVectorValue v2(5, -4, 7);
+  RankTwoTensor A;
+  A.vectorOuterProduct(v2, _v);
+  auto B = RankTwoTensor(5, -4, 7, 10, -8, 14, 15, -12, 21);
+  EXPECT_EQ((A - B).L2norm(), 0);
+}
+
 TEST_F(RankTwoTensorTest, vectorSelfOuterProduct)
 {
   auto A = RankTwoTensor::vectorSelfOuterProduct(_v);
   auto B = RankTwoTensor(1, 2, 3, 2, 4, 6, 3, 6, 9);
+  EXPECT_EQ((A - B).L2norm(), 0);
+}
+
+TEST_F(RankTwoTensorTest, fillRealTensor)
+{
+  RankTwoTensor A(1, 2, 3, 4, 5, 6, 7, 8, 9);
+  RealTensorValue B;
+  A.fillRealTensor(B);
+  RankTwoTensor C = B;
+  EXPECT_EQ((A - C).L2norm(), 0);
+}
+
+TEST_F(RankTwoTensorTest, fillColumn)
+{
+  RankTwoTensor A;
+  A.fillColumn(1, _v);
+  auto B = RankTwoTensor(0, 0, 0, 1, 2, 3, 0, 0, 0);
+  EXPECT_EQ((A - B).L2norm(), 0);
+}
+
+TEST_F(RankTwoTensorTest, fillRow)
+{
+  RankTwoTensor A;
+  A.fillRow(1, _v);
+  auto B = RankTwoTensor(0, 1, 0, 0, 2, 0, 0, 3, 0);
   EXPECT_EQ((A - B).L2norm(), 0);
 }

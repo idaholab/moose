@@ -295,34 +295,13 @@ public:
   /// returns C_ijkl = a_ij * b_kl
   SymmetricRankFourTensorTempl<T> outerProduct(const SymmetricRankTwoTensorTempl<T> & a) const;
 
-  /// returns C_ijkl = a_ik * b_jl
-  SymmetricRankFourTensorTempl<T> mixedProductIkJl(const SymmetricRankTwoTensorTempl<T> & a) const;
-
-  /// returns C_ijkl = a_jk * b_il
-  SymmetricRankFourTensorTempl<T> mixedProductJkIl(const SymmetricRankTwoTensorTempl<T> & a) const;
-
-  /// returns C_ijkl = a_il * b_jk
-  SymmetricRankFourTensorTempl<T> mixedProductIlJk(const SymmetricRankTwoTensorTempl<T> & a) const;
-
-  /// returns C_iklm = a_ij * b_jklm
-  SymmetricRankFourTensorTempl<T>
-  mixedProductIjJklm(const SymmetricRankFourTensorTempl<T> & a) const;
-
-  /// returns C_iklm = a_jm * b_ijkl
-  SymmetricRankFourTensorTempl<T>
-  mixedProductJmIjkl(const SymmetricRankFourTensorTempl<T> & b) const;
-
-  /// returns C_iklm = a_jk * b_ijlm
-  SymmetricRankFourTensorTempl<T>
-  mixedProductJkIjlm(const SymmetricRankFourTensorTempl<T> & b) const;
-
   /// return positive projection tensor of eigen-decomposition
   template <typename T2 = T>
   typename std::enable_if<MooseUtils::IsLikeReal<T2>::value, SymmetricRankFourTensorTempl<T>>::type
-  positiveProjectionEigenDecomposition(std::vector<T> &, SymmetricRankTwoTensorTempl<T> &) const;
+  positiveProjectionEigenDecomposition(std::vector<T> &, RankTwoTensorTempl<T> &) const;
   template <typename T2 = T>
   typename std::enable_if<!MooseUtils::IsLikeReal<T2>::value, SymmetricRankFourTensorTempl<T>>::type
-  positiveProjectionEigenDecomposition(std::vector<T> &, SymmetricRankTwoTensorTempl<T> &) const;
+  positiveProjectionEigenDecomposition(std::vector<T> &, RankTwoTensorTempl<T> &) const;
 
   /// returns A_ij - de_ij*tr(A)/3, where A are the _vals
   SymmetricRankTwoTensorTempl<T> deviatoric() const;
@@ -391,19 +370,6 @@ public:
   dsin3Lode(const T & r0) const;
 
   /**
-   * d^2(sin3Lode)/dA_ij/dA_kl
-   * If secondInvariant() <= r0 then return zero
-   * This is to gaurd against precision-loss errors.
-   * Note that sin(3*Lode_angle) is not defined for secondInvariant() = 0
-   */
-  template <typename T2 = T>
-  typename std::enable_if<MooseUtils::IsLikeReal<T2>::value, SymmetricRankFourTensorTempl<T>>::type
-  d2sin3Lode(const T & r0) const;
-  template <typename T2 = T>
-  typename std::enable_if<!MooseUtils::IsLikeReal<T2>::value, SymmetricRankFourTensorTempl<T>>::type
-  d2sin3Lode(const T & r0) const;
-
-  /**
    * Denote the _vals[i][j] by A_ij, then
    * S_ij = A_ij - de_ij*tr(A)/3
    * Then this returns det(S + S.transpose())/2
@@ -423,7 +389,7 @@ public:
    */
   SymmetricRankFourTensorTempl<T> d2thirdInvariant() const;
 
-  // determinant of teh tensor
+  // determinant of the tensor
   T det() const;
 
   /**
@@ -460,65 +426,12 @@ public:
   void symmetricEigenvalues(std::vector<T> & eigvals) const;
 
   /**
-   * computes and returns the permutation matrix P
-   * @param old_elements is the original row/column numbering
-   * @param new_elements is the permuted row/column numbering
-   * Dual numbers are permuted as well
-   * P * A permutes rows and A * P^T permutes columns
-   */
-  SymmetricRankTwoTensorTempl<T>
-  permutationTensor(const std::array<unsigned int, LIBMESH_DIM> & old_elements,
-                    const std::array<unsigned int, LIBMESH_DIM> & new_elements) const;
-
-  /**
-   * computes and returns the Givens rotation matrix R
-   * @param row1 is the row number of the first component to rotate
-   * @param row2 is the row number of the second component to rotate
-   * @param col is the column number of the components to rotate
-   * consider a SymmetricRankTwoTensor A = [ a11 a12 a13
-   *                                a21 a22 a23
-   *                                a31 a32 a33]
-   * and we want to rotate a21 and a31. Then row1 = 1, row2 = 2, col = 0.
-   * It retunrs the Givens rotation matrix R of this tensor A such that R * A rotates the second
-   * component to zero, i.e. R * A = [ a11 a12 a13
-   *                                     r a22 a23
-   *                                     0 a32 a33]
-   * A DualReal instantiation is available to rotate dual numbers as well.
-   */
-  template <typename T2 = T>
-  typename std::enable_if<MooseUtils::IsLikeReal<T2>::value, SymmetricRankTwoTensorTempl<T>>::type
-  givensRotation(unsigned int row1, unsigned int row2, unsigned int col) const;
-  template <typename T2 = T>
-  typename std::enable_if<!MooseUtils::IsLikeReal<T2>::value, SymmetricRankTwoTensorTempl<T>>::type
-  givensRotation(unsigned int, unsigned int, unsigned int) const;
-
-  /**
    * computes eigenvalues and eigenvectors, assuming tens is symmetric, and places them
    * in ascending order in eigvals.  eigvecs is a matrix with the first column
    * being the first eigenvector, the second column being the second, etc.
    */
   void symmetricEigenvaluesEigenvectors(std::vector<T> & eigvals,
-                                        SymmetricRankTwoTensorTempl<T> & eigvecs) const;
-
-  /**
-   * computes eigenvalues, and their symmetric derivatives wrt vals,
-   * assuming tens is symmetric
-   * @param eigvals are the eigenvalues of the matrix, in ascending order
-   * @param deigvals Here digvals[i](j,k) = (1/2)*(d(eigvals[i])/dA_jk + d(eigvals[i]/dA_kj))
-   * Note the explicit symmeterisation here.
-   * For equal eigenvalues, these derivatives are not gauranteed to
-   * be the ones you expect, since the derivatives in this case are
-   * often defined by continuation from the un-equal case, and that is
-   * too sophisticated for this routine.
-   */
-  void dsymmetricEigenvalues(std::vector<T> & eigvals,
-                             std::vector<SymmetricRankTwoTensorTempl<T>> & deigvals) const;
-
-  /**
-   * Computes second derivatives of Eigenvalues of a rank two tensor
-   * @param deriv store second derivative of the current tensor in here
-   */
-  void d2symmetricEigenvalues(std::vector<SymmetricRankFourTensorTempl<T>> & deriv) const;
+                                        RankTwoTensorTempl<T> & eigvecs) const;
 
   /**
    * Uses the petscblaslapack.h LAPACKsyev_ routine to find, for symmetric _vals:
@@ -530,12 +443,6 @@ public:
    * See code in dsymmetricEigenvalues for extracting eigenvectors from the a output.
    */
   void syev(const char * calculation_type, std::vector<T> & eigvals, std::vector<T> & a) const;
-
-  /**
-   * Uses the petscblaslapack.h LAPACKsyev_ routine to perform RU decomposition and obtain the
-   * rotation tensor.
-   */
-  void getRUDecompositionRotation(SymmetricRankTwoTensorTempl<T> & rot) const;
 
   /**
    * This function initializes random seed based on a user-defined number.
@@ -559,7 +466,8 @@ public:
   /// set the tensor to the identity matrix
   void setToIdentity();
 
-  static constexpr unsigned int N = 6;
+  static constexpr unsigned int Ndim = 3;
+  static constexpr unsigned int N = 2 * Ndim;
 
 private:
   static constexpr std::array<Real, N> identityCoords = {{1, 1, 1, 0, 0, 0}};
@@ -636,7 +544,7 @@ template <typename T>
 template <typename T2>
 typename std::enable_if<MooseUtils::IsLikeReal<T2>::value, SymmetricRankFourTensorTempl<T>>::type
 SymmetricRankTwoTensorTempl<T>::positiveProjectionEigenDecomposition(
-    std::vector<T> & eigval, SymmetricRankTwoTensorTempl<T> & eigvec) const
+    std::vector<T> & eigval, RankTwoTensorTempl<T> & eigvec) const
 {
   // The calculate of projection tensor follows
   // C. Miehe and M. Lambrecht, Commun. Numer. Meth. Engng 2001; 17:337~353
@@ -687,61 +595,11 @@ SymmetricRankTwoTensorTempl<T>::positiveProjectionEigenDecomposition(
 template <typename T>
 template <typename T2>
 typename std::enable_if<!MooseUtils::IsLikeReal<T2>::value, SymmetricRankFourTensorTempl<T>>::type
-SymmetricRankTwoTensorTempl<T>::positiveProjectionEigenDecomposition(
-    std::vector<T> &, SymmetricRankTwoTensorTempl<T> &) const
+SymmetricRankTwoTensorTempl<T>::positiveProjectionEigenDecomposition(std::vector<T> &,
+                                                                     RankTwoTensorTempl<T> &) const
 {
   mooseError(
       "positiveProjectionEigenDecomposition is only available for ordered tensor component types");
-}
-
-template <typename T>
-template <typename T2>
-typename std::enable_if<MooseUtils::IsLikeReal<T2>::value, SymmetricRankTwoTensorTempl<T>>::type
-SymmetricRankTwoTensorTempl<T>::givensRotation(unsigned int row1,
-                                               unsigned int row2,
-                                               unsigned int col) const
-{
-  T c, s;
-  T a = (*this)(row1, col);
-  T b = (*this)(row2, col);
-
-  if (MooseUtils::absoluteFuzzyEqual(b, 0.0) && MooseUtils::absoluteFuzzyEqual(a, 0.0))
-  {
-    c = a < 0.0 ? -1.0 : 1.0;
-    s = 0.0;
-  }
-  else if (std::abs(a) > std::abs(b))
-  {
-    T t = b / a;
-    Real sgn = a < 0.0 ? -1.0 : 1.0;
-    T u = sgn * std::sqrt(1.0 + t * t);
-    c = 1.0 / u;
-    s = c * t;
-  }
-  else
-  {
-    T t = a / b;
-    Real sgn = b < 0.0 ? -1.0 : 1.0;
-    T u = sgn * std::sqrt(1.0 + t * t);
-    s = 1.0 / u;
-    c = s * t;
-  }
-
-  SymmetricRankTwoTensorTempl<T> R(initIdentity);
-  R(row1, row1) = c;
-  R(row1, row2) = s;
-  R(row2, row1) = -s;
-  R(row2, row2) = c;
-
-  return R;
-}
-
-template <typename T>
-template <typename T2>
-typename std::enable_if<!MooseUtils::IsLikeReal<T2>::value, SymmetricRankTwoTensorTempl<T>>::type
-SymmetricRankTwoTensorTempl<T>::givensRotation(unsigned int, unsigned int, unsigned int) const
-{
-  mooseError("givensRotation is only available for ordered tensor component types");
 }
 
 template <typename T>
@@ -787,39 +645,4 @@ typename std::enable_if<!MooseUtils::IsLikeReal<T2>::value, SymmetricRankTwoTens
 SymmetricRankTwoTensorTempl<T>::dsin3Lode(const T &) const
 {
   mooseError("dsin3Lode is only available for ordered tensor component types");
-}
-
-template <typename T>
-template <typename T2>
-typename std::enable_if<MooseUtils::IsLikeReal<T2>::value, SymmetricRankFourTensorTempl<T>>::type
-SymmetricRankTwoTensorTempl<T>::d2sin3Lode(const T & r0) const
-{
-  T bar = secondInvariant();
-  if (bar <= r0)
-    return SymmetricRankFourTensorTempl<T>();
-
-  T J3 = thirdInvariant();
-  SymmetricRankTwoTensorTempl<T> dII = dsecondInvariant();
-  SymmetricRankTwoTensorTempl<T> dIII = dthirdInvariant();
-  SymmetricRankFourTensorTempl<T> deriv =
-      d2thirdInvariant() / std::pow(bar, 1.5) - 1.5 * d2secondInvariant() * J3 / std::pow(bar, 2.5);
-
-  for (unsigned i = 0; i < N; ++i)
-    for (unsigned j = 0; j < N; ++j)
-      for (unsigned k = 0; k < N; ++k)
-        for (unsigned l = 0; l < N; ++l)
-          deriv(i, j, k, l) +=
-              (-1.5 * dII(i, j) * dIII(k, l) - 1.5 * dIII(i, j) * dII(k, l)) / std::pow(bar, 2.5) +
-              1.5 * 2.5 * dII(i, j) * dII(k, l) * J3 / std::pow(bar, 3.5);
-
-  deriv *= -1.5 * std::sqrt(3.0);
-  return deriv;
-}
-
-template <typename T>
-template <typename T2>
-typename std::enable_if<!MooseUtils::IsLikeReal<T2>::value, SymmetricRankFourTensorTempl<T>>::type
-SymmetricRankTwoTensorTempl<T>::d2sin3Lode(const T &) const
-{
-  mooseError("d2sin3Lode is only available for ordered tensor component types");
 }

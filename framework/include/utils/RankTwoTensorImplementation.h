@@ -274,10 +274,8 @@ TypeVector<T>
 RankTwoTensorTempl<T>::column(const unsigned int c) const
 {
   VectorValue<T> result;
-
   for (auto i : make_range(N))
     result(i) = (*this)(i, c);
-
   return result;
 }
 
@@ -473,7 +471,6 @@ RankFourTensorTempl<T>
 RankTwoTensorTempl<T>::outerProduct(const RankTwoTensorTempl<T> & b) const
 {
   RankFourTensorTempl<T> result;
-
   unsigned int index = 0;
   for (unsigned int ij = 0; ij < N2; ++ij)
   {
@@ -481,7 +478,6 @@ RankTwoTensorTempl<T>::outerProduct(const RankTwoTensorTempl<T> & b) const
     for (unsigned int kl = 0; kl < N2; ++kl)
       result._vals[index++] = a * b._coords[kl];
   }
-
   return result;
 }
 
@@ -490,17 +486,11 @@ RankFourTensorTempl<T>
 RankTwoTensorTempl<T>::mixedProductIkJl(const RankTwoTensorTempl<T> & b) const
 {
   RankFourTensorTempl<T> result;
-
-  unsigned int index = 0;
   for (auto i : make_range(N))
     for (auto j : make_range(N))
       for (auto k : make_range(N))
-      {
-        const T & a = (*this)(i, k);
         for (auto l : make_range(N))
-          result._vals[index++] = a * b(j, l);
-      }
-
+          result(i, j, k, l) = (*this)(i, k) * b(j, l);
   return result;
 }
 
@@ -524,17 +514,11 @@ RankFourTensorTempl<T>
 RankTwoTensorTempl<T>::mixedProductJkIl(const RankTwoTensorTempl<T> & b) const
 {
   RankFourTensorTempl<T> result;
-
-  unsigned int index = 0;
   for (auto i : make_range(N))
     for (auto j : make_range(N))
       for (auto k : make_range(N))
-      {
-        const T & a = (*this)(j, k);
         for (auto l : make_range(N))
-          result._vals[index++] = a * b(i, l);
-      }
-
+          result(i, j, k, l) = (*this)(j, k) * b(i, l);
   return result;
 }
 
@@ -543,14 +527,12 @@ RankFourTensorTempl<T>
 RankTwoTensorTempl<T>::mixedProductIjJklm(const RankFourTensorTempl<T> & b) const
 {
   RankFourTensorTempl<T> result;
-
   for (auto i : make_range(N))
     for (auto j : make_range(N))
       for (auto k : make_range(N))
         for (auto l : make_range(N))
           for (auto m : make_range(N))
             result(i, k, l, m) += (*this)(i, j) * b(j, k, l, m);
-
   return result;
 }
 
@@ -559,14 +541,12 @@ RankFourTensorTempl<T>
 RankTwoTensorTempl<T>::mixedProductJmIjkl(const RankFourTensorTempl<T> & b) const
 {
   RankFourTensorTempl<T> result;
-
   for (auto i : make_range(N))
     for (auto j : make_range(N))
       for (auto k : make_range(N))
         for (auto l : make_range(N))
           for (auto m : make_range(N))
             result(i, k, l, m) += (*this)(j, m) * b(i, j, k, l);
-
   return result;
 }
 
@@ -620,7 +600,8 @@ RankTwoTensorTempl<T>
 RankTwoTensorTempl<T>::deviatoric() const
 {
   RankTwoTensorTempl<T> deviatoric(*this);
-  deviatoric.addIa(-1.0 / 3.0 * this->tr()); // actually construct deviatoric part
+  // actually construct deviatoric part
+  deviatoric.addIa(-1.0 / 3.0 * this->tr());
   return deviatoric;
 }
 
@@ -628,15 +609,9 @@ template <typename T>
 T
 RankTwoTensorTempl<T>::generalSecondInvariant() const
 {
-  // clang-format off
-  T result = (*this)(0, 0) * (*this)(1, 1) +
-                (*this)(0, 0) * (*this)(2, 2) +
-                (*this)(1, 1) * (*this)(2, 2) -
-                (*this)(0, 1) * (*this)(1, 0) -
-                (*this)(0, 2) * (*this)(2, 0) -
-                (*this)(1, 2) * (*this)(2, 1);
-  // clang-format on
-  return result;
+  return (*this)(0, 0) * (*this)(1, 1) + (*this)(0, 0) * (*this)(2, 2) +
+         (*this)(1, 1) * (*this)(2, 2) - (*this)(0, 1) * (*this)(1, 0) -
+         (*this)(0, 2) * (*this)(2, 0) - (*this)(1, 2) * (*this)(2, 1);
 }
 
 template <typename T>
@@ -662,7 +637,7 @@ template <typename T>
 RankTwoTensorTempl<T>
 RankTwoTensorTempl<T>::dsecondInvariant() const
 {
-  return 0.5 * (deviatoric() + deviatoric().transpose());
+  return RankTwoTensorTempl<T>::plusTranspose(deviatoric()) * 0.5;
 }
 
 template <typename T>
@@ -670,15 +645,12 @@ RankFourTensorTempl<T>
 RankTwoTensorTempl<T>::d2secondInvariant() const
 {
   RankFourTensorTempl<T> result;
-
-  unsigned int index = 0;
   for (auto i : make_range(N))
     for (auto j : make_range(N))
       for (auto k : make_range(N))
         for (auto l : make_range(N))
-          result._vals[index++] = 0.5 * (i == k) * (j == l) + 0.5 * (i == l) * (j == k) -
-                                  (1.0 / 3.0) * (i == j) * (k == l);
-
+          result(i, j, k, l) = 0.5 * (i == k) * (j == l) + 0.5 * (i == l) * (j == k) -
+                               (1.0 / 3.0) * (i == j) * (k == l);
   return result;
 }
 
@@ -708,38 +680,29 @@ template <typename T>
 T
 RankTwoTensorTempl<T>::thirdInvariant() const
 {
-  RankTwoTensorTempl<T> s = 0.5 * deviatoric();
-  s += s.transpose();
-
-  T result = 0.0;
-
-  result = s(0, 0) * (s(1, 1) * s(2, 2) - s(2, 1) * s(1, 2));
-  result -= s(1, 0) * (s(0, 1) * s(2, 2) - s(2, 1) * s(0, 2));
-  result += s(2, 0) * (s(0, 1) * s(1, 2) - s(1, 1) * s(0, 2));
-
-  return result;
+  auto s = RankTwoTensorTempl<T>::plusTranspose(deviatoric()) * 0.5;
+  return s(0, 0) * (s(1, 1) * s(2, 2) - s(2, 1) * s(1, 2)) -
+         s(1, 0) * (s(0, 1) * s(2, 2) - s(2, 1) * s(0, 2)) +
+         s(2, 0) * (s(0, 1) * s(1, 2) - s(1, 1) * s(0, 2));
 }
 
 template <typename T>
 RankTwoTensorTempl<T>
 RankTwoTensorTempl<T>::dthirdInvariant() const
 {
-  RankTwoTensorTempl<T> s = 0.5 * deviatoric();
-  s += s.transpose();
+  auto s = RankTwoTensorTempl<T>::plusTranspose(deviatoric()) * 0.5;
+  T s3 = secondInvariant() / 3.0;
 
   RankTwoTensorTempl<T> d;
-  T sec_over_three = secondInvariant() / 3.0;
-
-  d(0, 0) = s(1, 1) * s(2, 2) - s(2, 1) * s(1, 2) + sec_over_three;
+  d(0, 0) = s(1, 1) * s(2, 2) - s(2, 1) * s(1, 2) + s3;
   d(0, 1) = s(2, 0) * s(1, 2) - s(1, 0) * s(2, 2);
   d(0, 2) = s(1, 0) * s(2, 1) - s(2, 0) * s(1, 1);
   d(1, 0) = s(2, 1) * s(0, 2) - s(0, 1) * s(2, 2);
-  d(1, 1) = s(0, 0) * s(2, 2) - s(2, 0) * s(0, 2) + sec_over_three;
+  d(1, 1) = s(0, 0) * s(2, 2) - s(2, 0) * s(0, 2) + s3;
   d(1, 2) = s(2, 0) * s(0, 1) - s(0, 0) * s(2, 1);
   d(2, 0) = s(0, 1) * s(1, 2) - s(1, 1) * s(0, 2);
   d(2, 1) = s(1, 0) * s(0, 2) - s(0, 0) * s(1, 2);
-  d(2, 2) = s(0, 0) * s(1, 1) - s(1, 0) * s(0, 1) + sec_over_three;
-
+  d(2, 2) = s(0, 0) * s(1, 1) - s(1, 0) * s(0, 1) + s3;
   return d;
 }
 
@@ -747,17 +710,15 @@ template <typename T>
 RankFourTensorTempl<T>
 RankTwoTensorTempl<T>::d2thirdInvariant() const
 {
-  RankTwoTensorTempl<T> s = 0.5 * deviatoric();
-  s += s.transpose();
+  auto s = RankTwoTensorTempl<T>::plusTranspose(deviatoric()) * 0.5;
 
   RankFourTensorTempl<T> d2;
-  unsigned int index = 0;
   for (auto i : make_range(N))
     for (auto j : make_range(N))
       for (auto k : make_range(N))
         for (auto l : make_range(N))
         {
-          d2._vals[index++] = Real(i == j) * s(k, l) / 3.0 + Real(k == l) * s(i, j) / 3.0;
+          d2(i, j, k, l) = Real(i == j) * s(k, l) / 3.0 + Real(k == l) * s(i, j) / 3.0;
           // for (auto a: make_range(N))
           //  for (auto b: make_range(N))
           //    d2(i, j, k, l) += 0.5*(PermutationTensor::eps(i, k, a)*PermutationTensor::eps(j, l,
@@ -1183,26 +1144,19 @@ template <typename T>
 RankTwoTensorTempl<T>
 RankTwoTensorTempl<T>::genRandomTensor(T scale, T offset)
 {
-  RankTwoTensorTempl<T> tensor;
-
+  RankTwoTensorTempl<T> result;
   for (auto i : make_range(N))
     for (auto j : make_range(N))
-      tensor(i, j) = (MooseRandom::rand() + offset) * scale;
-
-  return tensor;
+      result(i, j) = (MooseRandom::rand() + offset) * scale;
+  return result;
 }
 
 template <typename T>
 RankTwoTensorTempl<T>
 RankTwoTensorTempl<T>::genRandomSymmTensor(T scale, T offset)
 {
-  RankTwoTensorTempl<T> tensor;
-
-  for (auto i : make_range(N))
-    for (unsigned int j = i; j < N; j++)
-      tensor(i, j) = tensor(j, i) = (MooseRandom::rand() + offset) * scale;
-
-  return tensor;
+  auto r = [&]() { return (MooseRandom::rand() + offset) * scale; };
+  return RankTwoTensorTempl<T>(r(), r(), r(), r(), r(), r());
 }
 
 template <typename T>
@@ -1218,11 +1172,11 @@ template <typename T>
 RankTwoTensorTempl<T>
 RankTwoTensorTempl<T>::vectorSelfOuterProduct(const TypeVector<T> & v)
 {
-  RankTwoTensorTempl<T> ret(RankTwoTensorTempl<T>::initNone);
+  RankTwoTensorTempl<T> result(RankTwoTensorTempl<T>::initNone);
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N; ++j)
-      ret(i, j) = v(i) * v(j);
-  return ret;
+      result(i, j) = v(i) * v(j);
+  return result;
 }
 
 template <typename T>
@@ -1255,17 +1209,11 @@ RankTwoTensorTempl<T>
 RankTwoTensorTempl<T>::initialContraction(const RankFourTensorTempl<T> & b) const
 {
   RankTwoTensorTempl<T> result;
-
-  unsigned int index = 0;
   for (auto i : make_range(N))
     for (auto j : make_range(N))
-    {
-      const T & a = (*this)(i, j);
       for (auto k : make_range(N))
         for (auto l : make_range(N))
-          result(k, l) += a * b._vals[index++];
-    }
-
+          result(k, l) += (*this)(i, j) * b(i, j, k, l);
   return result;
 }
 
