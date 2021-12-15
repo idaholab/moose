@@ -94,10 +94,9 @@ ComputeElemAuxBcsThread<AuxKernelType>::operator()(const ConstBndElemRange & ran
         // Set up Sentinel class so that, even if reinitMaterialsFace() throws, we
         // still remember to swap back during stack unwinding.
         SwapBackSentinel sentinel(_problem, &FEProblem::swapBackMaterialsFace, _tid);
-        std::unique_ptr<SwapBackSentinel> neighbor_sentinel =
-            compute_interface ? std::make_unique<SwapBackSentinel>(
-                                    _problem, &FEProblem::swapBackMaterialsNeighbor, _tid)
-                              : nullptr;
+        SwapBackSentinel neighbor_sentinel(
+            _problem, &FEProblem::swapBackMaterialsNeighbor, _tid, compute_interface);
+
         if (_need_materials)
         {
           std::set<unsigned int> needed_mat_props;
