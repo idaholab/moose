@@ -34,13 +34,14 @@ Note that there are many variations for the calculation of the stress divergence
 
 
 !alert warning If the using the TensorMechanicsAction with
-automatic/_eigenstrain/_names = true, the eigenstrain_names will be populated
+`automatic_eigenstrain_names = true`, the eigenstrain_names will be populated
 under restrictive conditions for classes such as
 [CompositeEigenstrain](CompositeEigenstrain.md),
 [ComputeReducedOrderEigenstrain](ComputeReducedOrderEigenstrain.md), and
 [RankTwoTensorMaterialADConverter](MaterialADConverter.md).  The input components for
-these classes are not included in the eigenstrain_names passed to the
-`TensorMechanicsAction`.  Set the automatic/_eigenstrain/_names = false and
+these classes are not included in the
+[!param](/Modules/TensorMechanics/Master/TensorMechanicsAction/eigenstrain_names) passed to the
+`TensorMechanicsAction`.  Set the `automatic_eigenstrain_names = false` and
 populate this list manually if these components need to be included.
 
 ## Example Input File Syntax

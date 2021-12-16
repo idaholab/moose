@@ -68,6 +68,17 @@ a large number of positions a file can be provided instead using the
 
 If this parameter is not provided, a single position (0,0,0) will be used.
 
+## Mesh optimizations
+
+The [!param](/MultiApps/TransientMultiApp/clone_master_mesh) parameter allows for re-using the
+main application mesh in the sub-app. This avoids repeating mesh creation operations. This does
+not automatically transfer the mesh modifications performed by [Adaptivity](syntax/Adaptivity/index.md)
+on either the main or sub-app, though it does transfer initial mesh modification work such as uniform
+refinement.
+
+When using the same mesh between two applications, the [MultiAppCopyTransfer.md] may be
+utilized for more efficient transfers of field variables.
+
 ## Parallel Execution
 
 The `MultiApp` system is designed for efficient parallel execution of hierarchical problems. The
