@@ -14,7 +14,7 @@
 #include "libmesh/utility.h"
 #include "SurrogateTrainer.h"
 
-class BasicNNTrainer : public SurrogateTrainer, public torch::nn::Module
+class BasicNNTrainer : public SurrogateTrainer
 {
 public:
   static InputParameters validParams();
@@ -52,7 +52,6 @@ protected:
   struct MyNet : torch::nn::Module
   {
   public:
-
     // Contructor building the neural net, not the coversions from float to double
     // due to the default type in pytorch is float and we use double in MOOSE.
     MyNet(unsigned int no_inputs,
@@ -63,17 +62,16 @@ protected:
       unsigned int inp_layers = no_inputs;
       for (unsigned int i = 0; i < no_hidden_layers; ++i)
       {
-        _weights.push_back(register_module("W" + std::to_string(i + 1),
+        _weights.push_back(register_module("HL" + std::to_string(i + 1),
                                            torch::nn::Linear(inp_layers, no_neurons_per_layer[i])));
         _weights[i]->to(at::kDouble);
         inp_layers = no_neurons_per_layer[i];
       }
-      _weights.push_back(register_module("W" + std::to_string(no_hidden_layers + 1),
-                                         torch::nn::Linear(inp_layers, no_outputs)));
+      _weights.push_back(register_module("OL", torch::nn::Linear(inp_layers, no_outputs)));
       _weights.back()->to(at::kDouble);
     }
 
-    // Overriding the forward propagation function
+    // Overriding the forward substitution function
     torch::Tensor forward(torch::Tensor x)
     {
       for (unsigned int i = 0; i < _weights.size() - 1; ++i)
@@ -85,7 +83,6 @@ protected:
     }
 
   protected:
-
     // Submodules that hold linear operations and the corresponding
     // weights and biases (y = W * x + b)
     std::vector<torch::nn::Linear> _weights;
@@ -108,11 +105,19 @@ private:
   /// Response value
   const Real & _response;
 
+  /// Number of batches we want to prepare
   unsigned int _no_batches;
+
+  /// Number of epochs for the training
   unsigned int _no_epocs;
 
+  /// Number of hidden layers in the neural net
   unsigned int _no_hidden_layers;
+
+  /// Number of neurons within the hidden layers (the length of this vector
+  /// should be the same as _no_hidden_layers)
   std::vector<unsigned int> _no_neurons_per_layer;
 
+  /// The learning rate for the optimization algorithm
   Real _learning_rate;
 };

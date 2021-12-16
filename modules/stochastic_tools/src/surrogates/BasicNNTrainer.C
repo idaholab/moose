@@ -106,8 +106,6 @@ BasicNNTrainer::postTrain()
 
 #ifdef ENABLE_PT
 
-  // Linearizing the data to make sure we can stor it in a tensor
-
   // Fixing the RNG seed to make sure every experiment is the same.
   // Otherwise sampling / stochastic gradient descent would be different.
   torch::manual_seed(11);
