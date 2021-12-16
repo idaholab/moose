@@ -178,7 +178,8 @@ BasicNNTrainer::postTrain()
     }
 
     if (epoch % 10 == 0)
-      std::cout << "Epoch: " << epoch << " | Loss: " << epoch_error << std::endl;
+      _console << "Epoch: " << epoch << COLOR_GREEN << " | Loss: " << epoch_error << COLOR_DEFAULT
+               << std::endl;
   }
 #endif
 }

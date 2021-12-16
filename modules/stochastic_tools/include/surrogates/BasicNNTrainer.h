@@ -9,7 +9,9 @@
 
 #pragma once
 
+#ifdef ENABLE_PT
 #include <torch/torch.h>
+#endif
 
 #include "libmesh/utility.h"
 #include "SurrogateTrainer.h"
