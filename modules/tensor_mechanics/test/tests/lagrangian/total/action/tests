@@ -8,6 +8,7 @@
     abs_zero = 1e-6
     cli_args = "Outputs/out/file_base=L_large_stab Modules/TensorMechanics/Master/all/strain=FINITE Modules/TensorMechanics/Master/all/formulation=TOTAL Modules/TensorMechanics/Master/all/volumetric_locking_correction=true Materials/compute_stress/large_kinematics=true"
     design = 'source/actions/TensorMechanicsAction.md'
+    heavy = true
   [../]
   [./action_large_no_stab]
     type = Exodiff
@@ -17,6 +18,7 @@
     abs_zero = 1e-6
     cli_args = "Outputs/out/file_base=L_large_nostab Modules/TensorMechanics/Master/all/strain=FINITE Modules/TensorMechanics/Master/all/formulation=TOTAL Modules/TensorMechanics/Master/all/volumetric_locking_correction=false Materials/compute_stress/large_kinematics=true"
     design = 'source/actions/TensorMechanicsAction.md'
+    heavy = true
   [../]
   [./action_small_stab]
     type = Exodiff

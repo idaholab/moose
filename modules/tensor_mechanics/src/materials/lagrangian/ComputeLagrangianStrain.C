@@ -183,8 +183,9 @@ ComputeLagrangianStrain::calculateDeformationGradient()
   // First calculate the base deformation gradient at each qp
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
     _unstabilized_def_grad[_qp] =
-        (RankTwoTensor::Identity() +
-         RankTwoTensor((*_grad_disp[0])[_qp], (*_grad_disp[1])[_qp], (*_grad_disp[2])[_qp]));
+        (RankTwoTensor::Identity() + RankTwoTensor::initializeFromRows((*_grad_disp[0])[_qp],
+                                                                       (*_grad_disp[1])[_qp],
+                                                                       (*_grad_disp[2])[_qp]));
 
   // If stabilization is on do the volumetric correction
   if (_stabilize_strain)
