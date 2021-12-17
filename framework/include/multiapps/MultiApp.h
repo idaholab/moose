@@ -530,6 +530,13 @@ protected:
 
   /// The app configuration resulting from calling init
   LocalRankConfig _rank_config;
+
+  ///Timers
+  const PerfID _solve_step_timer;
+  const PerfID _init_timer;
+  const PerfID _backup_timer;
+  const PerfID _restore_timer;
+  const PerfID _reset_timer;
 };
 
 template <>
