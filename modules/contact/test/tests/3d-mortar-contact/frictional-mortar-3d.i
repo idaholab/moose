@@ -6,6 +6,54 @@ offset = 0.00
   volumetric_locking_correction = true
 []
 
+[AuxVariables]
+  [mortar_tangent_x]
+    family = LAGRANGE
+    order = FIRST
+  []
+  [mortar_tangent_y]
+    family = LAGRANGE
+    order = FIRST
+  []
+  [mortar_tangent_z]
+    family = LAGRANGE
+    order = FIRST
+  []
+[]
+
+[AuxKernels]
+  [friction_x_component]
+   type = MortarFrictionalPressureVectorAux
+   primary_boundary = 'bottom_top'
+   secondary_boundary = 'top_bottom'
+   tangent_one = mortar_tangential_lm
+   tangent_two = mortar_tangential_3d_lm
+   variable = mortar_tangent_x
+   component = 0
+   boundary = 'top_bottom'
+  []
+  [friction_y_component]
+   type = MortarFrictionalPressureVectorAux
+   primary_boundary = 'bottom_top'
+   secondary_boundary = 'top_bottom'
+   tangent_one = mortar_tangential_lm
+   tangent_two = mortar_tangential_3d_lm
+   variable = mortar_tangent_y
+   component = 1
+   boundary = 'top_bottom'
+  []
+  [friction_z_component]
+   type = MortarFrictionalPressureVectorAux
+   primary_boundary = 'bottom_top'
+   secondary_boundary = 'top_bottom'
+   tangent_one = mortar_tangential_lm
+   tangent_two = mortar_tangential_3d_lm
+   variable = mortar_tangent_z
+   component = 2
+   boundary = 'top_bottom'
+  []
+[]
+
 [Mesh]
   [top_block]
     type = GeneratedMeshGenerator
@@ -433,6 +481,20 @@ offset = 0.00
     type = NodalValueSampler
     block = secondary_lower
     variable = mortar_tangential_3d_lm
+    sort_by = 'id'
+    execute_on = NONLINEAR
+  []
+  [tangent_x]
+    type = NodalValueSampler
+    block = secondary_lower
+    variable = mortar_tangent_x
+    sort_by = 'id'
+    execute_on = NONLINEAR
+  []
+  [tangent_y]
+    type = NodalValueSampler
+    block = secondary_lower
+    variable = mortar_tangent_y
     sort_by = 'id'
     execute_on = NONLINEAR
   []

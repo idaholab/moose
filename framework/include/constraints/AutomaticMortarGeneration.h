@@ -220,6 +220,15 @@ public:
                                 const std::vector<Real> & oned_xi1_pts) const;
 
   /**
+   * Return lower dimensional secondary element given its interior parent. Helpful outside the
+   * mortar generation to locate mortar-related quantities.
+   * @param secondary_elem_id The secondary interior parent element id used to query for associated
+   * lower dimensional element
+   * @return The corresponding lower dimensional secondary element
+   */
+  const Elem * getSecondaryLowerdElemFromSecondaryElem(dof_id_type secondary_elem_id) const;
+
+  /**
    * Get list of secondary nodes that don't contribute to interaction with any primary element.
    * Used to enforce zero values on inactive DoFs of nodal variables.
    */
@@ -374,6 +383,9 @@ private:
   // Container for storing the nodal tangent/binormal vectors associated with each secondary node
   // (Householder approach).
   std::unordered_map<const Node *, std::array<Point, 2>> _secondary_node_to_hh_nodal_tangents;
+
+  // Map from full dimensional secondary element id to lower dimensional secondary element
+  std::unordered_map<dof_id_type, const Elem *> _secondary_element_to_secondary_lowerd_element;
 
   // List of inactive lagrange multiplier nodes (for nodal variables)
   std::unordered_set<const Node *> _inactive_local_lm_nodes;

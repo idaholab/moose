@@ -20,6 +20,9 @@
 #include "libmesh/petsc_nonlinear_solver.h"
 #include "libmesh/string_to_enum.h"
 
+// Counter for naming mortar auxiliary kernels
+static unsigned int contact_mortar_auxkernel_counter = 0;
+
 // Counter for naming auxiliary kernels
 static unsigned int contact_auxkernel_counter = 0;
 
@@ -320,6 +323,48 @@ ContactAction::act()
         _problem->addAuxKernel("ContactPressureAux", name, params);
       }
     }
+
+    const unsigned int ndisp = getParam<std::vector<VariableName>>("displacements").size();
+
+    // Add MortarFrictionalPressureVectorAux
+    if (_formulation == ContactFormulation::MORTAR && _model == ContactModel::COULOMB &&
+        _mortar_approach == MortarApproach::Weighted && ndisp > 2)
+    {
+      {
+        InputParameters params = _factory.getValidParams("MortarFrictionalPressureVectorAux");
+
+        params.set<BoundaryName>("primary_boundary") = _boundary_pairs[0].first;
+        params.set<BoundaryName>("secondary_boundary") = _boundary_pairs[0].second;
+        params.set<std::vector<BoundaryName>>("boundary") = {_boundary_pairs[0].second};
+        params.set<ExecFlagEnum>("execute_on", true) = {EXEC_NONLINEAR};
+
+        std::string action_name = MooseUtils::shortName(name());
+        const std::string tangential_lagrange_multiplier_name = action_name + "_tangential_lm";
+        const std::string tangential_lagrange_multiplier_3d_name =
+            action_name + "_tangential_3d_lm";
+
+        params.set<std::vector<VariableName>>("tangent_one") = {
+            tangential_lagrange_multiplier_name};
+        params.set<std::vector<VariableName>>("tangent_two") = {
+            tangential_lagrange_multiplier_3d_name};
+
+        std::vector<std::string> disp_components({"x", "y", "z"});
+        unsigned component_index = 0;
+
+        // Loop over three displacements
+        for (const auto & disp_component : disp_components)
+        {
+          params.set<AuxVariableName>("variable") = _name + "_tangent_" + disp_component;
+          params.set<unsigned int>("component") = component_index;
+
+          std::string name = _name + "_mortar_frictional_pressure_" + disp_component + "_" +
+                             Moose::stringify(contact_mortar_auxkernel_counter++);
+
+          _problem->addAuxKernel("MortarFrictionalPressureVectorAux", name, params);
+          component_index++;
+        }
+      }
+    }
   }
 
   if (_current_task == "add_aux_variable")
@@ -350,6 +395,27 @@ ContactAction::act()
       var_params.set<MooseEnum>("family") = "LAGRANGE";
 
       _problem->addAuxVariable("MooseVariable", "nodal_area_" + _name, var_params);
+    }
+
+    const unsigned int ndisp = getParam<std::vector<VariableName>>("displacements").size();
+
+    // Add MortarFrictionalPressureVectorAux variables
+    if (_formulation == ContactFormulation::MORTAR && _model == ContactModel::COULOMB &&
+        _mortar_approach == MortarApproach::Weighted && ndisp > 2)
+    {
+      {
+        std::vector<std::string> disp_components({"x", "y", "z"});
+        // Loop over three displacements
+        for (const auto & disp_component : disp_components)
+        {
+          auto var_params = _factory.getValidParams("MooseVariable");
+          var_params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
+          var_params.set<MooseEnum>("family") = "LAGRANGE";
+
+          _problem->addAuxVariable(
+              "MooseVariable", _name + "_tangent_" + disp_component, var_params);
+        }
+      }
     }
   }
 

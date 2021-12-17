@@ -278,4 +278,18 @@ offset = 0.00
     sort_by = 'id'
     execute_on = NONLINEAR
   []
+  [tangent_x]
+    type = NodalValueSampler
+    block = mortar_secondary_subdomain
+    variable = mortar_tangent_x
+    sort_by = 'id'
+    execute_on = NONLINEAR
+  []
+  [tangent_y]
+    type = NodalValueSampler
+    block = mortar_secondary_subdomain
+    variable = mortar_tangent_y
+    sort_by = 'id'
+    execute_on = NONLINEAR
+  []
 []

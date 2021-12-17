@@ -93,6 +93,7 @@ AutomaticMortarGeneration::clear()
   _mortar_interface_coupling.clear();
   _secondary_node_to_nodal_normal.clear();
   _secondary_node_to_hh_nodal_tangents.clear();
+  _secondary_element_to_secondary_lowerd_element.clear();
 }
 
 void
@@ -141,6 +142,16 @@ AutomaticMortarGeneration::getNodalNormals(const Elem & secondary_elem) const
     nodal_normals[n] = _secondary_node_to_nodal_normal.at(secondary_elem.node_ptr(n));
 
   return nodal_normals;
+}
+
+const Elem *
+AutomaticMortarGeneration::getSecondaryLowerdElemFromSecondaryElem(
+    dof_id_type secondary_elem_id) const
+{
+  mooseAssert(_secondary_element_to_secondary_lowerd_element.count(secondary_elem_id),
+              "Map should locate secondary element");
+
+  return _secondary_element_to_secondary_lowerd_element.at(secondary_elem_id);
 }
 
 std::map<unsigned int, unsigned int>
@@ -1459,6 +1470,13 @@ AutomaticMortarGeneration::computeNodalGeometry()
                 "No interior parent exists for element "
                     << secondary_elem->id()
                     << ". There may be a problem with your sideset set-up.");
+
+    // Map to get lower dimensional element from interior parent on secondary surface
+    // This map can be used to provide a handle to methods in this class that need to
+    // operate on lower dimensional elements.
+
+    _secondary_element_to_secondary_lowerd_element.insert(
+        std::make_pair(interior_parent->id(), secondary_elem));
 
     // Look up which side of the interior parent secondary_elem is.
     auto s = interior_parent->which_side_am_i(secondary_elem);
