@@ -1,0 +1,65 @@
+[Tests]
+  design = 'meshgenerators/AssemblyMeshGenerator.md'
+  issues = ''
+  [square]
+    requirement = 'The system shall generate a 3D square assembly mesh'
+    type = 'Exodiff'
+    input = 'assembly_only.i'
+    cli_args = "Mesh/pin1/region_ids='1 4 2 5; 11 14 12 15; 21 24 22 25'
+                Mesh/pin2/region_ids='3; 13; 23'
+                --mesh-only assembly_only_in.e"
+    exodiff = 'assembly_only_in.e'
+    recover = false
+    detail = 'square with 2 pin types'
+  []
+  [hex]
+    requirement = 'The system shall generate a 3D hexagonal assembly mesh'
+    type = 'Exodiff'
+    input = 'assembly_only.i'
+    cli_args = "Mesh/rmp/geom='Hex'
+                Mesh/rmp/procedural_region_ids=true
+                Mesh/pin2/quad_center_elements=false
+                Mesh/amg/pattern='  0   0   0 ; 0   1   1   0; 0   1   1   1  0; 0   1   1   0; 0   0   0'
+                Mesh/amg/background_intervals=2                 
+                --mesh-only assembly_hex_in.e"
+    exodiff = 'assembly_hex_in.e'
+    recover = false
+    detail = 'hex with tri-center pins'
+  []
+  [ducts]
+    requirement = 'The system shall generate a 3D hexagonal assembly mesh with duct regions'
+    type = 'Exodiff'
+    input = 'assembly_only.i'
+    cli_args = "Mesh/rmp/geom='Hex'
+                Mesh/rmp/procedural_region_ids=true
+                Mesh/pin2/quad_center_elements=false
+                Mesh/amg/pattern='  0   0   0 ; 0   1   1   0; 0   1   1   1  0; 0   1   1   0; 0   0   0'
+                Mesh/amg/background_intervals=2
+                Mesh/amg/duct_radii='3.5'
+                Mesh/amg/duct_intervals='1'                 
+                --mesh-only assembly_ducts_in.e"
+    exodiff = 'assembly_ducts_in.e'
+    recover = false
+    detail = 'hex with tri-center pins and a duct region'
+  []
+  [ductIDs]
+    requirement = 'The system shall generate a 3D hexagonal assembly mesh with duct regions with assigned IDs'
+    type = 'Exodiff'
+    input = 'assembly_only.i'
+    cli_args = "Mesh/rmp/geom='Hex'
+                Mesh/pin1/region_ids='1 4 2 5; 11 14 12 15; 21 24 22 25'
+                Mesh/pin1/quad_center_elements=true
+                Mesh/pin2/region_ids='3; 13; 23'
+                Mesh/pin2/quad_center_elements=true
+                Mesh/amg/pattern='  0   0   0 ; 0   1   1   0; 0   1   1   1  0; 0   1   1   0; 0   0   0'
+                Mesh/amg/background_intervals=2
+                Mesh/amg/background_region_id='6 16 26'
+                Mesh/amg/duct_radii='3.5'
+                Mesh/amg/duct_region_ids='7; 17; 27'
+                Mesh/amg/duct_intervals='1'                 
+                --mesh-only assembly_ductIDs_in.e"
+    exodiff = 'assembly_ductIDs_in.e'
+    recover = false
+    detail = 'hex with quad-center pins and a duct region with region IDs declared'
+  []
+[]
