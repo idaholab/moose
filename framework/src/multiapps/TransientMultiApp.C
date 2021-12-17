@@ -178,6 +178,8 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
   if (!_has_an_app)
     return true;
 
+  TIME_SECTION(_solve_step_timer);
+
   _auto_advance = auto_advance;
 
   _console << COLOR_CYAN << "Solving MultiApp '" << name() << "' with target time " << target_time

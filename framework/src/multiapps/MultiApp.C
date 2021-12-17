@@ -207,7 +207,7 @@ MultiApp::MultiApp(const InputParameters & parameters)
   : MooseObject(parameters),
     SetupInterface(this),
     Restartable(this, "MultiApps"),
-    PerfGraphInterface(this),
+    PerfGraphInterface(this, std::string("MultiApp::") + _name),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _app_type(isParamValid("app_type") ? std::string(getParam<MooseEnum>("app_type"))
                                        : _fe_problem.getMooseApp().type()),
@@ -236,7 +236,12 @@ MultiApp::MultiApp(const InputParameters & parameters)
     _has_an_app(true),
     _backups(declareRestartableDataWithContext<SubAppBackups>("backups", this)),
     _cli_args(getParam<std::vector<std::string>>("cli_args")),
-    _keep_solution_during_restore(getParam<bool>("keep_solution_during_restore"))
+    _keep_solution_during_restore(getParam<bool>("keep_solution_during_restore")),
+    _solve_step_timer(registerTimedSection("solveStep", 3, "Taking Step")),
+    _init_timer(registerTimedSection("init", 3, "Initializing MultiApp")),
+    _backup_timer(registerTimedSection("backup", 3, "Backing Up MultiApp")),
+    _restore_timer(registerTimedSection("restore", 3, "Restoring MultiApp")),
+    _reset_timer(registerTimedSection("resetApp", 3, "Resetting MultiApp"))
 {
 
   if (parameters.isParamSetByUser("cli_args") && parameters.isParamValid("cli_args") &&
@@ -256,7 +261,7 @@ MultiApp::init(unsigned int num_apps, bool batch_mode)
 void
 MultiApp::init(unsigned int num_apps, const LocalRankConfig & config)
 {
-  TIME_SECTION("init", 3, "Initializing MultiApp");
+  TIME_SECTION(_init_timer);
 
   _total_num_apps = num_apps;
   _rank_config = config;
@@ -539,7 +544,8 @@ MultiApp::postExecute()
 void
 MultiApp::backup()
 {
-  TIME_SECTION("backup", 3, "Backing Up MultiApp");
+  TIME_SECTION(_backup_timer);
+
   for (unsigned int i = 0; i < _my_num_apps; i++)
     _backups[i] = _apps[i]->backup();
 }
@@ -547,7 +553,7 @@ MultiApp::backup()
 void
 MultiApp::restore(bool force)
 {
-  TIME_SECTION("restore", 3, "Restoring MultiApp");
+  TIME_SECTION(_restore_timer);
 
   if (force || needsRestoration())
   {
@@ -748,7 +754,7 @@ MultiApp::localApp(unsigned int local_app)
 void
 MultiApp::resetApp(unsigned int global_app, Real time)
 {
-  TIME_SECTION("resetApp", 3, "Resetting MultiApp");
+  TIME_SECTION(_reset_timer);
 
   Moose::ScopedCommSwapper swapper(_my_comm);
 
