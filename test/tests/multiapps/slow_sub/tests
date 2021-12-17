@@ -1,0 +1,11 @@
+[Tests]
+  [slow_sub]
+    type = 'RunApp'
+    input = 'master.i'
+    expect_out = 'MultiApp::really_slow::solveStep'
+
+    issues = '#19662'
+    design = 'PerfGraph.md'
+    requirement = 'MultiApps shall be properly identified in the PerfGraph'
+  []
+[]
