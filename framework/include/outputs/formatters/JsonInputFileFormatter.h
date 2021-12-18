@@ -12,9 +12,9 @@
 #include "nlohmann/json.h"
 
 /**
- * This class produces produces a dump of the InputFileParameters that appears like the normal input
+ * This class produces produces a dump of the InputParameters that appears like the normal input
  * file syntax.
- * Different from InputFileFormatter in that it takes its input from JsonSyntaxTree.
+ * It is different from InputFileFormatter in that it takes its input from JsonSyntaxTree.
  */
 class JsonInputFileFormatter
 {

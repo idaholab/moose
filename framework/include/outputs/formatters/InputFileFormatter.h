@@ -12,7 +12,7 @@
 #include "SyntaxTree.h"
 
 /**
- * This class produces produces a dump of the InputFileParameters that appears like the normal input
+ * This class produces produces a dump of the InputParameters that appears like the normal input
  * file syntax.
  */
 class InputFileFormatter : public SyntaxTree
@@ -33,4 +33,3 @@ public:
 protected:
   bool _dump_mode;
 };
-

@@ -17,11 +17,9 @@
 #include "MooseSyntax.h"
 
 /**
- * This interface is for classes that want to be called to format InputFileParameters.  When the
- * syntax tree is
- * traversed, each of these methods are called at the right points to build up a formatted string
- * that can be
- * meet a number of different needs.
+ * This interface is for classes that want to be called to format InputParameters.  When the
+ * syntax tree is traversed, each of these methods are called at the right points to build up
+ * a formatted string that can meet a number of different needs.
  */
 class SyntaxFormatterInterface
 {
@@ -80,4 +78,3 @@ public:
                                   const std::string & search_string,
                                   bool & found) = 0;
 };
-

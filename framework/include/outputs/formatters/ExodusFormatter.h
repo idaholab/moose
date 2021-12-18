@@ -11,6 +11,9 @@
 
 #include "InputFileFormatter.h"
 
+/*
+ * Dumps the input file in the Exodus output
+ */
 class ExodusFormatter : public InputFileFormatter
 {
 public:
@@ -26,4 +29,3 @@ protected:
   std::stringstream _ss;
   std::vector<std::string> _input_file_record;
 };
-

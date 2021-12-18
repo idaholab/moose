@@ -14,7 +14,7 @@
 #include <iterator>
 
 /**
- * This class produces produces a yaml dump of the InputFileParameters that is machine parsable by
+ * This class produces produces a yaml dump of the InputParameters that is machine parsable by
  * any YAML formatter.
  */
 class YAMLFormatter : public SyntaxTree
@@ -47,4 +47,3 @@ protected:
   void buildOutputString(std::ostringstream & output,
                          const std::iterator_traits<InputParameters::iterator>::value_type & p);
 };
-
