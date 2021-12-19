@@ -62,7 +62,8 @@ def createTokenHelper(key, parent, info, page, settings):
         return AutoLink(parent, page=filename, bookmark=bookmark, optional=settings['optional'],
                         exact=settings['exact'], alternative=settings['alternative'])
     elif common.project_find(info[key]):
-        return modal.ModalSourceLink(parent, src=info[key], language=settings['language'])
+        return modal.ModalSourceLink(parent, src=common.check_filenames(info[key]),
+                                     language=settings['language'])
     return None
 
 class PageShortcutLinkComponent(core.ShortcutLinkInline):

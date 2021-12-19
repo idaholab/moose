@@ -31,7 +31,7 @@ ModalSourceLink = tokens.newToken('ModalSourceLink', src=None, title=None, langu
 
 class ModalExtension(command.CommandExtension):
     """
-    Adds ability to create links to complete source files.
+    Creates links to modal windows displaying code content.
 
     This extension does not add any commands; it provides a token to be created by other packages.
     It was created to have a single control point for toggling display of complete source.
@@ -39,7 +39,7 @@ class ModalExtension(command.CommandExtension):
     @staticmethod
     def defaultConfig():
         config = command.CommandExtension.defaultConfig()
-        config['hide_source'] = (False, "Toggle the display of complete source files.")
+        config['hide_source'] = (False, "Disable all modals containing source file content.")
         config['exceptions'] = (list(), "A list of shell-style patterns for displaying certain " \
                                         "files when the 'hide_source' setting is True.")
         return config
