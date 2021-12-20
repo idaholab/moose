@@ -64,11 +64,12 @@ public:
   enum DIRECTION
   {
     TO_MULTIAPP,
-    FROM_MULTIAPP
+    FROM_MULTIAPP,
+    BETWEEN_MULTIAPP
   };
 
   /// Used to construct InputParameters
-  static std::string possibleDirections() { return "to_multiapp from_multiapp"; }
+  static std::string possibleDirections() { return "to_multiapp from_multiapp between_multiapp"; }
 
   /// The directions this Transfer should be executed on
   const MultiMooseEnum & directions() { return _directions; }

@@ -23,7 +23,8 @@ InputParameters
 MultiAppTransfer::validParams()
 {
   InputParameters params = Transfer::validParams();
-  params.addRequiredParam<MultiAppName>("multi_app", "The name of the MultiApp to use.");
+  params.addParam<MultiAppName>("from_multi_app", "The name of the MultiApp to receive data from");
+  params.addParam<MultiAppName>("to_multi_app", "The name of the MultiApp to transfer the data to");
 
   // MultiAppTransfers by default will execute with their associated MultiApp. These flags will be
   // added by FEProblemBase when the transfer is added.
@@ -48,6 +49,9 @@ MultiAppTransfer::validParams()
 MultiAppTransfer::MultiAppTransfer(const InputParameters & parameters)
   : Transfer(parameters),
     _multi_app(_fe_problem.getMultiApp(getParam<MultiAppName>("multi_app"))),
+    _to_multi_app(isParamValid("to_multi_app")
+                      ? _fe_problem.getMultiApp(getParam<MultiAppName>("to_multi_app"))
+                      : _fe_problem.getMultiApp(getParam<MultiAppName>("multi_app"))),
     _displaced_source_mesh(getParam<bool>("displaced_source_mesh")),
     _displaced_target_mesh(getParam<bool>("displaced_target_mesh"))
 {
@@ -65,6 +69,10 @@ MultiAppTransfer::MultiAppTransfer(const InputParameters & parameters)
     _current_direction = only_direction;
     _direction = only_direction;
   }
+
+  for (auto dir : _directions)
+    if (dir == BETWEEN_MULTIAPP && !isParamValid("to_multi_app"))
+      paramError("direction", "Need to specify a to_multi_app for a BETWEEN_MULTIAPP direction");
 }
 
 void
@@ -73,13 +81,19 @@ MultiAppTransfer::checkMultiAppExecuteOn()
   if (getExecuteOnEnum() != _multi_app->getExecuteOnEnum())
     mooseDoOnce(mooseWarning("MultiAppTransfer execute_on flags do not match associated Multiapp "
                              "execute_on flags"));
+  if (getExecuteOnEnum() != _to_multi_app->getExecuteOnEnum())
+    mooseDoOnce(
+        mooseWarning("MultiAppTransfer execute_on flags do not match associated to_Multiapp "
+                     "execute_on flags"));
 }
 
 void
 MultiAppTransfer::variableIntegrityCheck(const AuxVariableName & var_name) const
 {
   for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
-    if (_multi_app->hasLocalApp(i) && !_multi_app->appProblemBase(i).hasVariable(var_name))
+    if ((_multi_app->hasLocalApp(i) && !_multi_app->appProblemBase(i).hasVariable(var_name)) &&
+        (_to_multi_app && _to_multi_app->hasLocalApp(i) &&
+         !_to_multi_app->appProblemBase(i).hasVariable(var_name)))
       mooseError("Cannot find variable ", var_name, " for ", name(), " Transfer");
 }
 
@@ -141,6 +155,31 @@ MultiAppTransfer::getAppInfo()
         _local2global_map.push_back(i_app);
         _from_problems.push_back(&_multi_app->appProblemBase(i_app));
         _from_positions.push_back(_multi_app->position(i_app));
+      }
+      break;
+
+    case BETWEEN_MULTIAPP:
+      _to_problems.push_back(&_multi_app->problemBase());
+      _to_positions.push_back(Point(0., 0., 0.));
+      for (unsigned int i_app = 0; i_app < _multi_app->numGlobalApps(); i_app++)
+      {
+        if (!_multi_app->hasLocalApp(i_app))
+          continue;
+        for (unsigned int j_app = 0; j_app < _multi_app->numGlobalApps(); j_app++)
+        {
+          if (!_multi_app->hasLocalApp(i_app))
+            continue;
+
+          if (i_app == j_app)
+            continue;
+
+          _local2global_map.push_back(i_app);
+          _from_problems.push_back(&_multi_app->appProblemBase(i_app));
+          _from_positions.push_back(_multi_app->position(i_app));
+
+          _to_problems.push_back(&_multi_app->appProblemBase(j_app));
+          _to_positions.push_back(_multi_app->position(j_app));
+        }
       }
       break;
   }
@@ -262,6 +301,10 @@ MultiAppTransfer::getFromsPerProc()
       froms_per_proc.resize(n_processors(), 1);
       break;
     case FROM_MULTIAPP:
+      froms_per_proc.resize(n_processors());
+      _communicator.allgather(_multi_app->numLocalApps(), froms_per_proc);
+      break;
+    case BETWEEN_MULTIAPP:
       froms_per_proc.resize(n_processors());
       _communicator.allgather(_multi_app->numLocalApps(), froms_per_proc);
       break;

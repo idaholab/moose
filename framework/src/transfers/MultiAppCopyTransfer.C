@@ -59,5 +59,26 @@ MultiAppCopyTransfer::execute()
         transfer(to_problem, _multi_app->appProblemBase(i));
   }
 
+  else if (_current_direction == BETWEEN_MULTIAPP)
+  {
+    bool transfer_done = false;
+    for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
+    {
+      if (_multi_app->hasLocalApp(i))
+      {
+        for (unsigned int j = 0; j < _to_multi_app->numGlobalApps(); j++)
+        {
+          if (_to_multi_app->hasLocalApp(j))
+          {
+            transfer(_to_multi_app->appProblemBase(j), _multi_app->appProblemBase(i));
+            transfer_done = true;
+          }
+        }
+      }
+    }
+    if (!transfer_done)
+      mooseError("BETWEEN_MULTIAPP transfer not supported with more than one rank");
+  }
+
   _console << "Finished MultiAppCopyTransfer " << name() << std::endl;
 }

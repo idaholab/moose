@@ -48,6 +48,7 @@ public:
 protected:
   /// The MultiApp this Transfer is transferring data to or from
   std::shared_ptr<MultiApp> _multi_app;
+  std::shared_ptr<MultiApp> _to_multi_app;
 
   /**
    * This method will fill information into the convenience member variables
