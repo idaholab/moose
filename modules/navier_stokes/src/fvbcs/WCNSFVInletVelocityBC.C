@@ -67,17 +67,7 @@ WCNSFVInletVelocityBC::boundaryValue(const FaceInfo & fi) const
     return _scaling_factor * (*_velocity_pp);
   else
   {
-    ADReal rho;
-
-    // TODO: Make this a utility to all FVBCs
-    const bool use_elem = fi.faceType(_var.name()) == FaceInfo::VarFaceNeighbors::ELEM;
-
-    if (use_elem)
-      rho = (*_rho)(std::make_tuple(
-          &fi, Moose::FV::LimiterType::CentralDifference, true, fi.elem().subdomain_id()));
-    else
-      rho = (*_rho)(std::make_tuple(
-          &fi, Moose::FV::LimiterType::CentralDifference, true, fi.neighborPtr()->subdomain_id()));
+    ADReal rho = (*_rho)(singleSidedFaceArg(&fi));
 
     return _scaling_factor * (*_mdot_pp) / (*_area_pp * rho.value());
   }

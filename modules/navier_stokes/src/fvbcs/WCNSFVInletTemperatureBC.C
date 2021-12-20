@@ -92,42 +92,14 @@ WCNSFVInletTemperatureBC::boundaryValue(const FaceInfo & fi) const
     return *_temperature_pp;
   else if (_velocity_pp)
   {
-    ADReal rho;
-    ADReal cp;
-
-    // TODO: Make this a utility to all FVBCs
-    const bool use_elem = fi.faceType(_var.name()) == FaceInfo::VarFaceNeighbors::ELEM;
-
-    if (use_elem)
-    {
-      rho = (*_rho)(std::make_tuple(
-          &fi, Moose::FV::LimiterType::CentralDifference, true, fi.elem().subdomain_id()));
-      cp = (*_cp)(std::make_tuple(
-          &fi, Moose::FV::LimiterType::CentralDifference, true, fi.elem().subdomain_id()));
-    }
-    else
-    {
-      rho = (*_rho)(std::make_tuple(
-          &fi, Moose::FV::LimiterType::CentralDifference, true, fi.neighborPtr()->subdomain_id()));
-      cp = (*_cp)(std::make_tuple(
-          &fi, Moose::FV::LimiterType::CentralDifference, true, fi.neighborPtr()->subdomain_id()));
-    }
+    ADReal rho = (*_rho)(singleSidedFaceArg(&fi));
+    ADReal cp = (*_cp)(singleSidedFaceArg(&fi));
 
     return _scaling_factor * (*_energy_pp) / (*_area_pp * rho.value() * *_velocity_pp * cp.value());
   }
   else
   {
-    ADReal cp;
-
-    // TODO: Make this a utility to all FVBCs
-    const bool use_elem = fi.faceType(_var.name()) == FaceInfo::VarFaceNeighbors::ELEM;
-
-    if (use_elem)
-      cp = (*_cp)(std::make_tuple(
-          &fi, Moose::FV::LimiterType::CentralDifference, true, fi.elem().subdomain_id()));
-    else
-      cp = (*_cp)(std::make_tuple(
-          &fi, Moose::FV::LimiterType::CentralDifference, true, fi.neighborPtr()->subdomain_id()));
+    ADReal cp = (*_cp)(singleSidedFaceArg(&fi));
 
     return _scaling_factor * (*_energy_pp) / (*_mdot_pp * cp.value());
   }

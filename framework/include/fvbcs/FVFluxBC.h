@@ -38,7 +38,6 @@ protected:
   const ADVariableValue & _u_neighbor;
   // TODO: add gradients once we have reconstruction.
   ADRealVectorValue _normal;
-  const FaceInfo * _face_info = nullptr;
 
   /**
    * @return the value of u at the cell centroid on the subdomain on which u is defined. E.g. u is
@@ -70,16 +69,6 @@ protected:
    * the block restriction of the variable this object is acting upon
    */
   std::pair<SubdomainID, SubdomainID> faceArgSubdomains() const;
-
-  /**
-   * Determine the single sided face argument when evaluating a functor on a face.
-   * This is used to perform evluations of material properties with the actual face values of
-   * their dependences, rather than interpolate the material property to the boundary.
-   * @param limiter_type the limiter type, to be specified if more than the default average
-   *        interpolation is required for the parameters of the functor
-   */
-  std::tuple<const FaceInfo *, Moose::FV::LimiterType, bool, SubdomainID> singleSidedFaceArg(
-      Moose::FV::LimiterType limiter_type = Moose::FV::LimiterType::CentralDifference) const;
 
 private:
   /**

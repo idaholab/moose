@@ -28,20 +28,20 @@ protected:
   const Real _scaling_factor;
 
   /// Postprocessor with the inlet scalar concentration
-  const PostprocessorValue * _scalar_value_pp;
+  const PostprocessorValue * const _scalar_value_pp;
 
   /// Postprocessor with the inlet scalar flow rate
-  const PostprocessorValue * _scalar_flux_pp;
+  const PostprocessorValue * const _scalar_flux_pp;
 
   /// Postprocessor with the inlet velocity
-  const PostprocessorValue * _velocity_pp;
+  const PostprocessorValue * const _velocity_pp;
 
   /// Postprocessor with the inlet mass flow rate
-  const PostprocessorValue * _mdot_pp;
+  const PostprocessorValue * const _mdot_pp;
 
   /// Postprocessor with the inlet area
-  const PostprocessorValue * _area_pp;
+  const PostprocessorValue * const _area_pp;
 
   /// Fluid density functor
-  const Moose::Functor<ADReal> * _rho;
+  const Moose::Functor<ADReal> * const _rho;
 };
