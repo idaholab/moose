@@ -126,11 +126,11 @@ VectorEMRobinBC::computeQpResidual()
     field_inc = VectorValue<std::complex<double>>(field_inc_0, field_inc_1, field_inc_2);
 
     std::complex<double> curl_inc_0(_inc_real.vectorCurl(_t, _q_point[_qp])(0),
-                                   _inc_imag.vectorCurl(_t, _q_point[_qp])(0));
+                                    _inc_imag.vectorCurl(_t, _q_point[_qp])(0));
     std::complex<double> curl_inc_1(_inc_real.vectorCurl(_t, _q_point[_qp])(1),
-                                   _inc_imag.vectorCurl(_t, _q_point[_qp])(1));
+                                    _inc_imag.vectorCurl(_t, _q_point[_qp])(1));
     std::complex<double> curl_inc_2(_inc_real.vectorCurl(_t, _q_point[_qp])(2),
-                                   _inc_imag.vectorCurl(_t, _q_point[_qp])(2));
+                                    _inc_imag.vectorCurl(_t, _q_point[_qp])(2));
     curl_inc = VectorValue<std::complex<double>>(curl_inc_0, curl_inc_1, curl_inc_2);
   }
 
