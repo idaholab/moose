@@ -56,7 +56,13 @@ Extensions:
     MooseDocs.extensions.gallery: default
     MooseDocs.extensions.pdf: default
     MooseDocs.extensions.pysyntax: default
-    MooseDocs.extensions.modal: default
+    MooseDocs.extensions.modal:
+        hide_source: True
+        exceptions:
+            - '*.C'
+            - '*.yml'
+            - '*.i'
+            - '*tests'
     MooseDocs.extensions.datetime: default
     MooseDocs.extensions.gitutils: default
     MooseDocs.extensions.template:

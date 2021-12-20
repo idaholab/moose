@@ -119,7 +119,7 @@ class FileListingCommand(LocalListingCommand):
             code.name = 'ListingCode' #TODO: Find a better way
 
         if settings['link']:
-            modal.ModalSourceLink(flt, src=filename)
+            modal.ModalSourceLink(flt, src=filename, language=lang)
 
         return parent
 
