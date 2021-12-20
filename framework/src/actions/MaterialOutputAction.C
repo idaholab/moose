@@ -204,11 +204,12 @@ MaterialOutputAction::act()
     for (const auto & var_name : material_names)
     {
       oss << "\n  " << var_name;
-      _problem->addAuxVariable("MooseVariableConstMonomial", var_name, params);
       if (_problem->hasVariable(var_name))
-        mooseWarning("The material property output " + var_name +
-                     " has the same name as an existing variable, use the material declare_suffix"
-                     " parameter to disambiguate");
+        mooseError("The material property output " + var_name +
+                   " has the same name as an existing variable, either use the material"
+                   " declare_suffix parameter to disambiguate or the output_properties parameter"
+                   " to restrict the material properties to output");
+      _problem->addAuxVariable("MooseVariableConstMonomial", var_name, params);
     }
     if (material_names.size() > 0)
       _console << COLOR_CYAN << "The following total " << material_names.size()

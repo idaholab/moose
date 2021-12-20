@@ -63,11 +63,13 @@
     type = MaterialRealAux
     property = axial_stress
     variable = axial_stress
+    execute_on = 'initial TIMESTEP_END'
   [../]
   [./e_over_l]
     type = MaterialRealAux
     property = e_over_l
     variable = e_over_l
+    execute_on = 'initial TIMESTEP_END'
   [../]
   [./area]
     type = ConstantAux
@@ -123,7 +125,8 @@
     type = PlasticTruss
     youngs_modulus = 2.0e11
     yield_stress = 500e5
-    outputs = exodus
+    outputs = 'exodus'
+    output_properties = 'elastic_stretch hardening_variable plastic_stretch total_stretch'
   [../]
 []
 

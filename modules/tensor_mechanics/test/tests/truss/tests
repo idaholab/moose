@@ -77,7 +77,6 @@
     cli_args = 'Outputs/file_base=truss_plastic_tensile_out Materials/truss/hardening_constant=1e7'
     exodiff = 'truss_plastic_tensile_out.e'
     design = "source/materials/PlasticTruss.md"
-    allow_warnings = true # see #18371
     requirement = "The system shall correctly model the plastic response of "
                   "truss elements with a linear hardening model under tension."
   [../]
@@ -87,7 +86,6 @@
     cli_args = 'Outputs/file_base=truss_nohardening_tension_out Materials/truss/hardening_constant=0.0'
     exodiff = 'truss_nohardening_tension_out.e'
     design = "source/materials/PlasticTruss.md"
-    allow_warnings = true # see #18371
     requirement = "The system shall correctly model the plastic response of "
                   "truss elements with perfect plasticity under tension."
   [../]
@@ -97,7 +95,6 @@
     cli_args = 'Outputs/file_base=truss_hardeningfn_tension_out Materials/truss/hardening_function=hf'
     exodiff = 'truss_hardeningfn_tension_out.e'
     design = "source/materials/PlasticTruss.md"
-    allow_warnings = true # see #18371
     requirement = "The system shall correctly model the plastic response of "
                   "truss elements with a user-defined hardening function model under tension."
   [../]
@@ -107,7 +104,6 @@
     cli_args = 'Outputs/file_base=truss_plastic_compression_out BCs/load/function=-t Materials/truss/hardening_constant=1e7'
     exodiff = 'truss_plastic_compression_out.e'
     design = "source/materials/PlasticTruss.md"
-    allow_warnings = true # see #18371
     requirement = "The system shall correctly model the plastic response of "
                   "truss elements with a linear hardening model under compression."
   [../]
@@ -117,7 +113,6 @@
     cli_args = 'Outputs/file_base=truss_nohardening_compression_out BCs/load/function=-t Materials/truss/hardening_constant=0.0'
     exodiff = 'truss_nohardening_compression_out.e'
     design = "source/materials/PlasticTruss.md"
-    allow_warnings = true # see #18371
     requirement = "The system shall correctly model the plastic response of "
                   "truss elements with perfect plasticity under compression."
   [../]
@@ -127,7 +122,6 @@
     cli_args = 'Outputs/file_base=truss_hardeningfn_compression_out BCs/load/function=-t Materials/truss/hardening_function=hf'
     exodiff = 'truss_hardeningfn_compression_out.e'
     design = "source/materials/PlasticTruss.md"
-    allow_warnings = true # see #18371
     requirement = "The system shall correctly model the plastic response of "
                   "truss elements with a user-defined hardening function model under compression."
   [../]
