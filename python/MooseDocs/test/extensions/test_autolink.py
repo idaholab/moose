@@ -71,7 +71,8 @@ class TestShortcutLink(MooseDocsTestCase):
         ast = self.tokenize('[framework/Makefile]')
         self.assertSize(ast, 1)
         self.assertToken(ast(0), 'Paragraph', size=1)
-        self.assertToken(ast(0)(0), 'ModalSourceLink', size=0, src='framework/Makefile')
+        self.assertToken(ast(0)(0), 'ModalSourceLink', size=0,
+                         src=common.check_filenames('framework/Makefile'))
 
         # If a file is not given, it should fall through to a regular link
         ast = self.tokenize('[not_a_file]')
@@ -142,7 +143,8 @@ class TestLink(MooseDocsTestCase):
         ast = self.tokenize('[make](framework/Makefile)')
         self.assertSize(ast, 1)
         self.assertToken(ast(0), 'Paragraph', size=1)
-        self.assertToken(ast(0,0), 'ModalSourceLink', size=1, src='framework/Makefile')
+        self.assertToken(ast(0,0), 'ModalSourceLink', size=1,
+                         src=common.check_filenames('framework/Makefile'))
         self.assertToken(ast(0,0,0), 'Word', size=0, content='make')
 
         # If a file is not given, it should fall through to a regular link

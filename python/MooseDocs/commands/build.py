@@ -78,7 +78,7 @@ def command_line_options(subparser, parent):
                                                      "This is mainly used by CIVET to allow " \
                                                      "temporary sites to be functional.")
     parser.add_argument('--hide-source', action='store_true',
-                        help="Shortcut for setting the 'show_source' option in the modal extension.")
+                        help="Shortcut for setting the 'hide_source' option in the modal extension.")
 
 class MooseDocsWatcher(livereload.watcher.Watcher):
     """
@@ -186,7 +186,7 @@ def main(options):
         kwargs['Extensions'][name] = dict(active=False)
 
     if options.hide_source:
-        kwargs['Extensions']['MooseDocs.extensions.modal']['show_source'] = False
+        kwargs['Extensions']['MooseDocs.extensions.modal']['hide_source'] = True
 
     # Apply Translator settings
     if options.destination:

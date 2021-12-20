@@ -54,7 +54,7 @@ commaond are shown in [appsyntax-parameters-settings].
 !syntax parameters /Dampers/ConstantDamper
 !devel-end!
 
-## Input Files (`!syntax inputs`)
+## Input Files (`!syntax inputs`) id=inputs
 
 In many cases it is useful to know where in the examples, tutorials, or tests an object is utilized
 in an input file. Therefore, `inputs` sub-command is defined. [appsyntax-inputs-example] lists
