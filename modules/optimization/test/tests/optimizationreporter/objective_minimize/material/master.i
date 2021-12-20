@@ -6,7 +6,7 @@
   parameter_names = 'parameter_results'
   num_values = '1'
   initial_condition = '1000'
-  lower_bounds = '0'
+  lower_bounds = '0.1'
   upper_bounds = '2000'
   measurement_points = '0.2 0.2 0
             0.8 0.6 0
