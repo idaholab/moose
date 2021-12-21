@@ -60,11 +60,10 @@ TangentialMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
                _tangents[_qp][_direction].norm();
       else
       {
-        unsigned int tangent_index = 0;
-        tangent_index = _secondary_ip_lowerd_map.at(_i);
+        const unsigned int tangent_index = libmesh_map_find(_secondary_ip_lowerd_map, _i);
         return _test_secondary[_i][_qp] * _lambda[_qp] *
-               _tangents_3d[_direction][tangent_index](_component) /
-               _tangents_3d[_direction][tangent_index].norm();
+               _nodal_tangents[_direction][tangent_index](_component) /
+               _nodal_tangents[_direction][tangent_index].norm();
       }
     case Moose::MortarType::Primary:
 
@@ -74,11 +73,10 @@ TangentialMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
                _tangents[_qp][_direction].norm();
       else
       {
-        unsigned int tangent_index = 0;
-        tangent_index = _primary_ip_lowerd_map.at(_i);
+        const unsigned int tangent_index = libmesh_map_find(_primary_ip_lowerd_map, _i);
         return -_test_primary[_i][_qp] * _lambda[_qp] *
-               _tangents_3d[_direction][tangent_index](_component) /
-               _tangents_3d[_direction][tangent_index].norm();
+               _nodal_tangents[_direction][tangent_index](_component) /
+               _nodal_tangents[_direction][tangent_index].norm();
       }
 
     default:

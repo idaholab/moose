@@ -728,10 +728,7 @@ ContactAction::addMortarContact()
       // Additional displacement residual for frictional problem
       // The second frictional LM acts on a perpendicular direction.
       if (is_additional_frictional_constraint)
-      {
-        MooseEnum direction("direction_1 direction_2", "direction_2");
-        params.set<MooseEnum>("direction") = direction;
-      }
+        params.set<MooseEnum>("direction") = "direction_2";
 
       for (unsigned int i = 0; i < displacements.size(); ++i)
       {

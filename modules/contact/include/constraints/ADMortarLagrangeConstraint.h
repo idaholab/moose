@@ -11,6 +11,11 @@
 
 #include "ADMortarConstraint.h"
 
+/**
+ * This class enforces mortar constraints on lower dimensional domains, skipping interior nodes.
+ * This class is intended to provide an alternative to imposing mortar constraints for finite
+ * elements with nodal variables.
+ */
 class ADMortarLagrangeConstraint : public ADMortarConstraint
 {
 public:

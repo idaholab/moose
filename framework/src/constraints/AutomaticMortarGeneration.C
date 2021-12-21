@@ -195,8 +195,10 @@ AutomaticMortarGeneration::getNodalTangents(const Elem & secondary_elem) const
 
   for (const auto n : make_range(secondary_elem.n_nodes()))
   {
-    nodal_tangents_one[n] = _secondary_node_to_hh_nodal_tangents.at(secondary_elem.node_ptr(n))[0];
-    nodal_tangents_two[n] = _secondary_node_to_hh_nodal_tangents.at(secondary_elem.node_ptr(n))[1];
+    nodal_tangents_one[n] =
+        libmesh_map_find(_secondary_node_to_hh_nodal_tangents, secondary_elem.node_ptr(n))[0];
+    nodal_tangents_two[n] =
+        libmesh_map_find(_secondary_node_to_hh_nodal_tangents, secondary_elem.node_ptr(n))[1];
   }
 
   return {{nodal_tangents_one, nodal_tangents_two}};
@@ -1474,9 +1476,7 @@ AutomaticMortarGeneration::computeNodalGeometry()
     // Map to get lower dimensional element from interior parent on secondary surface
     // This map can be used to provide a handle to methods in this class that need to
     // operate on lower dimensional elements.
-
-    _secondary_element_to_secondary_lowerd_element.insert(
-        std::make_pair(interior_parent->id(), secondary_elem));
+    _secondary_element_to_secondary_lowerd_element.emplace(interior_parent->id(), secondary_elem);
 
     // Look up which side of the interior parent secondary_elem is.
     auto s = interior_parent->which_side_am_i(secondary_elem);

@@ -135,7 +135,7 @@ ComputeFrictionalForceLMMechanicalContact::computeQpIProperties()
     _dof_to_weighted_tangential_velocity[dof][0] += _test[_i][_qp] * _qp_tangential_velocity[0];
   else
     _dof_to_weighted_tangential_velocity[dof][0] +=
-        _test[_i][_qp] * _qp_tangential_velocity_nodal * _tangents_3d[0][_i];
+        _test[_i][_qp] * _qp_tangential_velocity_nodal * _nodal_tangents[0][_i];
 
   // Get the _dof_to_weighted_tangential_velocity map for a second direction
   if (_3d)
@@ -144,7 +144,7 @@ ComputeFrictionalForceLMMechanicalContact::computeQpIProperties()
       _dof_to_weighted_tangential_velocity[dof][1] += _test[_i][_qp] * _qp_tangential_velocity[1];
     else
       _dof_to_weighted_tangential_velocity[dof][1] +=
-          _test[_i][_qp] * _qp_tangential_velocity_nodal * _tangents_3d[1][_i];
+          _test[_i][_qp] * _qp_tangential_velocity_nodal * _nodal_tangents[1][_i];
   }
 }
 
@@ -293,7 +293,8 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(const DofObj
   }
   else
   {
-    Real epsilon_ad = 1.0e-14;
+    // Espilon to avoid automatic differentiation singularity
+    const Real epsilon_sqrt = 1.0e-14;
 
     const auto lamdba_plus_cg = contact_pressure + c * weighted_gap;
     std::array<ADReal, 2> lambda_t_plus_ctu;
@@ -303,13 +304,13 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(const DofObj
     const auto term_1_x =
         std::max(_mu * lamdba_plus_cg,
                  std::sqrt(lambda_t_plus_ctu[0] * lambda_t_plus_ctu[0] +
-                           lambda_t_plus_ctu[1] * lambda_t_plus_ctu[1] + epsilon_ad)) *
+                           lambda_t_plus_ctu[1] * lambda_t_plus_ctu[1] + epsilon_sqrt)) *
         friction_lm_values[0];
 
     const auto term_1_y =
         std::max(_mu * lamdba_plus_cg,
                  std::sqrt(lambda_t_plus_ctu[0] * lambda_t_plus_ctu[0] +
-                           lambda_t_plus_ctu[1] * lambda_t_plus_ctu[1] + epsilon_ad)) *
+                           lambda_t_plus_ctu[1] * lambda_t_plus_ctu[1] + epsilon_sqrt)) *
         friction_lm_values[1];
 
     const auto term_2_x = _mu * std::max(0.0, lamdba_plus_cg) * lambda_t_plus_ctu[0];

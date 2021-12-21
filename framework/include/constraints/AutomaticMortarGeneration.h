@@ -178,18 +178,22 @@ public:
   std::vector<Point> getNodalNormals(const Elem & secondary_elem) const;
 
   /**
+   * Compute the two nodal tangents, which are built on-the-fly.
    * @return The nodal tangents associated with the provided \p secondary_elem
    */
   std::array<std::vector<Point>, 2> getNodalTangents(const Elem & secondary_elem) const;
 
   /**
-   * @return The mapping from secondary interior parent nodes to lower dimensional nodes
+   * Compute on-the-fly mapping from secondary interior parent nodes to lower dimensional nodes
+   * @return The map from secondary interior parent nodes to lower dimensional nodes
    */
   std::map<unsigned int, unsigned int>
   getSecondaryIpToLowerElementMap(const Elem & _lower_secondary_elem) const;
 
   /**
-   * @return The mapping from primary interior parent nodes to its corresponding lower dimensional
+   * Compute on-the-fly mapping from primary interior parent nodes to its corresponding lower
+   * dimensional nodes
+   * @return The map from primary interior parent nodes to its corresponding lower dimensional
    * nodes
    */
   std::map<unsigned int, unsigned int>

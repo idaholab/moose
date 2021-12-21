@@ -86,11 +86,12 @@ public:
   void setNormals(const std::vector<Point> & normals) { _normals = normals; }
 
   /**
-   * Set the nodal tangents
+   * Set the nodal tangents, which are computed via Householder orthogonalization from nodal normal
+   * vectors
    */
   void setNodalTangents(const std::array<std::vector<Point>, 2> & tangents)
   {
-    _tangents_3d = tangents;
+    _nodal_tangents = tangents;
   }
 
   /**
@@ -173,8 +174,8 @@ protected:
   /// Tangent vectors on the secondary faces (libmesh)
   const MooseArray<std::vector<Point>> & _tangents;
 
-  /// Tangents vector on the secondary faces (householder from normal vectors)
-  std::array<std::vector<Point>, 2> _tangents_3d;
+  /// Nodal tangent vectors on the secondary faces (householder from normal vectors)
+  std::array<std::vector<Point>, 2> _nodal_tangents;
 
   /// Map to locate nodes from higher dimensional element to lower dimensional elements
   std::map<unsigned int, unsigned int> _secondary_ip_lowerd_map;
