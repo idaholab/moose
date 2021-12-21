@@ -25,6 +25,13 @@ public:
   virtual void execute() override;
   virtual void finalize() override;
   virtual void threadJoin(const UserObject & uo) override;
+  /// Return extra ID list
+  const std::vector<VectorPostprocessorValue *> & getUniqueExtraIds() const
+  {
+    return _var_extra_ids;
+  };
+  /// Return Integral values
+  const std::vector<VectorPostprocessorValue *> & getIntegrals() const { return _var_integrals; };
 
 protected:
   /// Number of variables to be integrated

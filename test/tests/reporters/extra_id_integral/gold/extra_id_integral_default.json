@@ -1,0 +1,49 @@
+{
+    "reporters": {
+        "extra_id_integral": {
+            "type": "ExtraIDIntegralReporter",
+            "values": {
+                "extra_id_data": {
+                    "type": "ExtraIDIntegralReporter::ExtraIDData"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "extra_id_integral": {
+                "extra_id_data": {
+                    "extra_id_data": {
+                        "id_name": [
+                            "assembly_id"
+                        ],
+                        "map_id_to_value": [
+                            [
+                                0,
+                                1,
+                                2,
+                                3
+                            ]
+                        ],
+                        "num_id_name": 1,
+                        "num_values_per_integral": 1
+                    },
+                    "integrals": {
+                        "num_variables": 1,
+                        "value1_integral": [
+                            20.587959364372683,
+                            8.527812240131858,
+                            8.527812240131855,
+                            3.5323329229393914
+                        ],
+                        "variable_names": [
+                            "value1"
+                        ]
+                    }
+                }
+            },
+            "time": 2.0,
+            "time_step": 2
+        }
+    ]
+}

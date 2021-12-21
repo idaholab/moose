@@ -5,9 +5,9 @@
 
 ## Overview
 
-The `ExtraIDIntegralVectorPostprocessor` object is a vector postprocessor to integrate input variables based on multiple extra IDs.
+The `ExtraIDIntegralVectorPostprocessor` object is a vector postprocessor to integrate input variables based on multiple extra element integer IDs.
 First, it finds unique combinations of extra IDs, and then it computes separate integral values over input variables for elements with these unique combinations.
-For reactor applications, reactor component-wise values, such as pin-by-pin power distribution can be easily tallied using this object.
+For reactor applications, component-wise values such as pin-by-pin power distribution can be easily tallied using this object when the mesh contains the appropriate IDs.
 
 The `ExtraIDIntegralVectorPostprocessor` object needs the following parameters:
 
