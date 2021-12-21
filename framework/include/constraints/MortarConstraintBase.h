@@ -86,32 +86,6 @@ public:
   void setNormals(const std::vector<Point> & normals) { _normals = normals; }
 
   /**
-   * Set the nodal tangents, which are computed via Householder orthogonalization from nodal normal
-   * vectors
-   */
-  void setNodalTangents(const std::array<std::vector<Point>, 2> & tangents)
-  {
-    _nodal_tangents = tangents;
-  }
-
-  /**
-   * Set map from secondary side interior parent nodes to secondary lower-dimensional domain nodes.
-   */
-  void
-  setSecondaryIpToLowerdMap(const std::map<unsigned int, unsigned int> & secondary_ip_lowerd_map)
-  {
-    _secondary_ip_lowerd_map = secondary_ip_lowerd_map;
-  }
-
-  /**
-   * Set map from primary side interior parent nodes to primary lower-dimensional domain nodes.
-   */
-  void setPrimaryIpToLowerdMap(const std::map<unsigned int, unsigned int> & primary_ip_lowerd_map)
-  {
-    _primary_ip_lowerd_map = primary_ip_lowerd_map;
-  }
-
-  /**
    * Whether to interpolate the nodal normals (e.g. classic idea of evaluating field at quadrature
    * points). If this is set to false, then non-interpolated nodal normals will be used, and then
    * the _normals member should be indexed with _i instead of _qp
@@ -173,15 +147,6 @@ protected:
 
   /// Tangent vectors on the secondary faces (libmesh)
   const MooseArray<std::vector<Point>> & _tangents;
-
-  /// Nodal tangent vectors on the secondary faces (householder from normal vectors)
-  std::array<std::vector<Point>, 2> _nodal_tangents;
-
-  /// Map to locate nodes from higher dimensional element to lower dimensional elements
-  std::map<unsigned int, unsigned int> _secondary_ip_lowerd_map;
-
-  /// Map to locate nodes from higher dimensional element to lower dimensional elements
-  std::map<unsigned int, unsigned int> _primary_ip_lowerd_map;
 
   /// The element Jacobian times weights
   const std::vector<Real> & _JxW_msm;

@@ -125,6 +125,7 @@ ComputeFrictionalForceLMMechanicalContact::computeQpIProperties()
   // Get the _dof_to_weighted_gap map
   ComputeWeightedGapLMMechanicalContact::computeQpIProperties();
 
+  _nodal_tangents = amg().getNodalTangents(*_lower_secondary_elem);
   // Get the _dof_to_weighted_tangential_velocity map
   const DofObject * const dof =
       _friction_vars[0]->isNodal()

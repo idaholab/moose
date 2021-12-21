@@ -35,4 +35,10 @@ protected:
    * compute the Jacobian for the specified element type
    */
   void computeJacobian(Moose::MortarType mortar_type) override;
+
+  /// Nodal map from secondary interior parent to lower dimensional domain
+  std::map<unsigned int, unsigned int> _secondary_ip_lowerd_map;
+
+  /// Nodal map from primary interior parent to lower dimensional domain
+  std::map<unsigned int, unsigned int> _primary_ip_lowerd_map;
 };

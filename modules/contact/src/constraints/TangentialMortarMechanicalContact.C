@@ -43,6 +43,8 @@ TangentialMortarMechanicalContact::TangentialMortarMechanicalContact(
 ADReal
 TangentialMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
 {
+  _nodal_tangents = amg().getNodalTangents(*_lower_secondary_elem);
+
   switch (type)
   {
     case Moose::MortarType::Secondary:

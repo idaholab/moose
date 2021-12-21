@@ -30,6 +30,11 @@ ADMortarLagrangeConstraint::ADMortarLagrangeConstraint(const InputParameters & p
 void
 ADMortarLagrangeConstraint::computeResidual(Moose::MortarType mortar_type)
 {
+  _primary_ip_lowerd_map = amg().getPrimaryIpToLowerElementMap(
+      *_lower_primary_elem, *_lower_primary_elem->interior_parent(), *_lower_secondary_elem);
+
+  _secondary_ip_lowerd_map = amg().getSecondaryIpToLowerElementMap(*_lower_secondary_elem);
+
   unsigned int test_space_size = 0;
   switch (mortar_type)
   {
@@ -84,6 +89,11 @@ ADMortarLagrangeConstraint::computeJacobian(Moose::MortarType mortar_type)
   typedef Moose::MortarType MType;
   std::vector<JType> jacobian_types;
   std::vector<dof_id_type> dof_indices;
+
+  _primary_ip_lowerd_map = amg().getPrimaryIpToLowerElementMap(
+      *_lower_primary_elem, *_lower_primary_elem->interior_parent(), *_lower_secondary_elem);
+
+  _secondary_ip_lowerd_map = amg().getSecondaryIpToLowerElementMap(*_lower_secondary_elem);
 
   switch (mortar_type)
   {
