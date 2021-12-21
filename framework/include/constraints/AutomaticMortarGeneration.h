@@ -174,6 +174,11 @@ public:
   bool onDisplaced() const { return _on_displaced; }
 
   /**
+   * @return The nodal normal associated with the provided \p node
+   */
+  Point getNodalNormal(const Node * const node) const;
+
+  /**
    * @return The nodal normals associated with the provided \p secondary_elem
    */
   std::vector<Point> getNodalNormals(const Elem & secondary_elem) const;
@@ -326,6 +331,11 @@ public:
    */
   const std::set<SubdomainID> & primaryIPSubIDs() const { return _primary_ip_sub_ids; }
 
+  /**
+   *  Populate node to weighted gap map.
+   */
+  void setNodalWeightedGapMap(const Node * node, const Real weighted_gap);
+
 private:
   MooseApp & _app;
 
@@ -416,7 +426,9 @@ private:
   /// Map from full dimensional secondary element id to lower dimensional secondary element
   std::unordered_map<dof_id_type, const Elem *> _secondary_element_to_secondary_lowerd_element;
 
-  /// List of inactive lagrange multiplier nodes (for nodal variables)
+  std::unordered_map<const Node *, const Real> _node_to_weighted_gap;
+
+  // List of inactive lagrange multiplier nodes (for nodal variables)
   std::unordered_set<const Node *> _inactive_local_lm_nodes;
 
   /// List of inactive lagrange multiplier nodes (for elemental variables)

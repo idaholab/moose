@@ -125,6 +125,8 @@ ComputeDynamicFrictionalForceLMMechanicalContact::computeQpIProperties()
   // Get the _dof_to_weighted_gap map
   ComputeDynamicWeightedGapLMMechanicalContact::computeQpIProperties();
 
+  _nodal_tangents = amg().getNodalTangents(*_lower_secondary_elem);
+
   // Get the _dof_to_weighted_tangential_velocity map
   const DofObject * const dof =
       _friction_vars[0]->isNodal()
@@ -135,7 +137,7 @@ ComputeDynamicFrictionalForceLMMechanicalContact::computeQpIProperties()
     _dof_to_weighted_tangential_velocity[dof][0] += _test[_i][_qp] * _qp_tangential_velocity[0];
   else
     _dof_to_weighted_tangential_velocity[dof][0] +=
-        _test[_i][_qp] * _qp_tangential_velocity_nodal * _tangents_3d[0][_i];
+        _test[_i][_qp] * _qp_tangential_velocity_nodal * _nodal_tangents[0][_i];
 
   // Get the _dof_to_weighted_tangential_velocity map for a second direction
   if (_3d)
@@ -144,7 +146,7 @@ ComputeDynamicFrictionalForceLMMechanicalContact::computeQpIProperties()
       _dof_to_weighted_tangential_velocity[dof][1] += _test[_i][_qp] * _qp_tangential_velocity[1];
     else
       _dof_to_weighted_tangential_velocity[dof][1] +=
-          _test[_i][_qp] * _qp_tangential_velocity_nodal * _tangents_3d[1][_i];
+          _test[_i][_qp] * _qp_tangential_velocity_nodal * _nodal_tangents[1][_i];
   }
 }
 

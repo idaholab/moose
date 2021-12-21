@@ -31,6 +31,11 @@ protected:
    */
   virtual void computeQpProperties() override;
 
+  const VariableValue & _secondary_x_old;
+  const VariableValue & _primary_x_old;
+  const VariableValue & _secondary_y_old;
+  const VariableValue & _primary_y_old;
+
   const ADVariableValue & _secondary_x_dot;
   const ADVariableValue & _primary_x_dot;
   const ADVariableValue & _secondary_y_dot;

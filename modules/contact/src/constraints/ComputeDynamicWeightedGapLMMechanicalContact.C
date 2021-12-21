@@ -31,6 +31,10 @@ ComputeDynamicWeightedGapLMMechanicalContact::validParams()
 ComputeDynamicWeightedGapLMMechanicalContact::ComputeDynamicWeightedGapLMMechanicalContact(
     const InputParameters & parameters)
   : ComputeWeightedGapLMMechanicalContact(parameters),
+    _secondary_x_old(coupledDotOld("disp_x")),
+    _primary_x_old(coupledNeighborValueOld("disp_x")),
+    _secondary_y_old(coupledDotOld("disp_y")),
+    _primary_y_old(coupledNeighborValueOld("disp_y")),
     _secondary_x_dot(adCoupledDot("disp_x")),
     _primary_x_dot(adCoupledNeighborValueDot("disp_x")),
     _secondary_y_dot(adCoupledDot("disp_y")),
@@ -60,6 +64,10 @@ ComputeDynamicWeightedGapLMMechanicalContact::computeQpProperties()
                                  _secondary_y_dotdot[_qp] - _primary_y_dotdot[_qp],
                                  0.0);
 
+  ADRealVectorValue gap_vec_old(_secondary_x_old[_qp] - _primary_x_old[_qp],
+                                _secondary_y_old[_qp] - _primary_y_old[_qp],
+                                0.0);
+
   if (_has_disp_z)
   {
     relative_velocity(2) = (*_secondary_z_dot)[_qp] - (*_primary_z_dot)[_qp];
@@ -76,11 +84,16 @@ ComputeDynamicWeightedGapLMMechanicalContact::computeQpProperties()
         (*_primary_disp_z)[_qp].derivatives() - (*_secondary_disp_z)[_qp].derivatives();
 
   if (_interpolate_normals)
-    _qp_gap = (gap_vec - 0.5 * (relative_velocity * _dt + _beta * relative_acc * _dt * _dt)) *
-              (_normals[_qp] * _JxW_msm[_qp] * _coord[_qp]);
+    _qp_gap = gap_vec * (_normals[_qp] * _JxW_msm[_qp] * _coord[_qp]);
   else
-    _qp_gap_nodal = (gap_vec - 0.5 * (relative_velocity * _dt + _beta * relative_acc * _dt * _dt)) *
-                    (_JxW_msm[_qp] * _coord[_qp]);
+  {
+    if (gap_vec_old * _normals[_i] < 0)
+    {
+      _qp_gap_nodal = -10.0 * (_JxW_msm[_qp] * _coord[_qp]);
+    }
+    else
+      _qp_gap_nodal = (relative_velocity * _dt) * (_JxW_msm[_qp] * _coord[_qp]);
+  }
 
   // To do normalization of constraint coefficient (c_n)
   _qp_factor = _JxW_msm[_qp] * _coord[_qp];

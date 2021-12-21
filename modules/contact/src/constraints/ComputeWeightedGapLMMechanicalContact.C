@@ -265,6 +265,8 @@ ComputeWeightedGapLMMechanicalContact::enforceConstraintOnDof(const DofObject * 
   ADReal lm_value = (*_sys.currentSolution())(dof_index);
   Moose::derivInsert(lm_value.derivatives(), dof_index, 1.);
 
+  amg().setNodalWeightedGapMap(_lower_secondary_elem->node_ptr(_i),
+                               MetaPhysicL::raw_value(weighted_gap));
   const ADReal dof_residual = std::min(lm_value, weighted_gap * c);
 
   if (_subproblem.currentlyComputingJacobian())
