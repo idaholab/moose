@@ -1,8 +1,8 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 20
-  ny = 20
+  nx = 10
+  ny = 10
   xmax = 2
   ymax = 2
 []
@@ -54,9 +54,10 @@
 [Functions]
   [volumetric_heat_func]
     type = ParsedFunction
-    value = alpha*sin(C1+x*pi/2)*sin(C2+y*pi/2)+beta
-    vars = 'alpha beta C1 C2'
-    vals = '100 1 -10 -10'
+    # value = 100*cos(2*pi/2*(x+1))
+    value = q
+    vars = 'q'
+    vals = 'valueFromControl'
   []
 []
 
@@ -69,20 +70,37 @@
   [volumetric_heat]
     type = ADGenericFunctionMaterial
     prop_names = 'volumetric_heat'
-    prop_values = volumetric_heat_func
+    prop_values = 'volumetric_heat_func'
   []
 []
 
 [Executioner]
   type = Steady
   solve_type = PJFNK
-  nl_abs_tol = 1e-6
+  nl_abs_tol = 1e-8
   nl_rel_tol = 1e-8
-  petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre boomeramg'
+  petsc_options_iname = '-ksp_type -pc_type -pc_factor_mat_solver_package'
+  petsc_options_value = 'preonly lu       superlu_dist'
+[]
+
+[VectorPostprocessors]
+  [data_pt]
+    type = VppPointValueSampler
+    variable = temperature
+    reporter_name = measure_data
+    outputs = none
+  []
+[]
+
+[Reporters]
+  [measure_data]
+    type=OptimizationData
+  []
 []
 
 [Outputs]
-  exodus = true
+  # console = true
+  # exodus = true
+  # csv = true
   file_base = 'forward'
 []
