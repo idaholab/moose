@@ -70,6 +70,9 @@
 #ifdef TENSOR_MECHANICS_ENABLED
 #include "TensorMechanicsApp.h"
 #endif
+#ifdef THM_ENABLED
+#include "THMApp.h"
+#endif
 #ifdef XFEM_ENABLED
 #include "XFEMApp.h"
 #endif
@@ -183,6 +186,10 @@ ModulesApp::registerObjects(Factory & factory)
   TensorMechanicsApp::registerObjects(factory);
 #endif
 
+#ifdef THM_ENABLED
+  THMApp::registerObjects(factory);
+#endif
+
 #ifdef XFEM_ENABLED
   XFEMApp::registerObjects(factory);
 #endif
@@ -262,6 +269,10 @@ ModulesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   TensorMechanicsApp::associateSyntax(syntax, action_factory);
 #endif
 
+#ifdef THM_ENABLED
+  THMApp::associateSyntax(syntax, action_factory);
+#endif
+
 #ifdef XFEM_ENABLED
   XFEMApp::associateSyntax(syntax, action_factory);
 #endif
@@ -335,6 +346,10 @@ ModulesApp::registerExecFlags(Factory & factory)
 
 #ifdef TENSOR_MECHANICS_ENABLED
   TensorMechanicsApp::registerExecFlags(factory);
+#endif
+
+#ifdef THM_ENABLED
+  THMApp::registerExecFlags(factory);
 #endif
 
 #ifdef XFEM_ENABLED
@@ -417,6 +432,10 @@ ModulesApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 
 #ifdef TENSOR_MECHANICS_ENABLED
   TensorMechanicsApp::registerAll(f, af, s);
+#endif
+
+#ifdef THM_ENABLED
+  THMApp::registerAll(f, af, s);
 #endif
 
 #ifdef XFEM_ENABLED

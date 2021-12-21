@@ -17,6 +17,8 @@ THMTestApp::validParams()
   return params;
 }
 
+registerKnownLabel("THMTestApp");
+
 THMTestApp::THMTestApp(InputParameters parameters) : THMApp(parameters)
 {
   srand(processor_id());

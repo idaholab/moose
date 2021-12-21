@@ -39,12 +39,32 @@ THMApp::validParams()
   return params;
 }
 
+registerKnownLabel("THMApp");
+
 THMApp::THMApp(InputParameters parameters) : MooseApp(parameters)
 {
   THMApp::registerAll(_factory, _action_factory, _syntax);
 }
 
 THMApp::~THMApp() {}
+
+void
+THMApp::registerObjects(Factory & /*factory*/)
+{
+  mooseError("registerObjects() is deprecated and not supported in THM");
+}
+
+void
+THMApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+{
+  mooseError("associateSynbtax() is deprecated and not supported in THM");
+}
+
+void
+THMApp::registerExecFlags(Factory & /*factory*/)
+{
+  mooseError("registerExecFlags() is deprecated and not supported in THM");
+}
 
 void
 THMApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)

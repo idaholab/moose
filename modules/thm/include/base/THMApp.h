@@ -66,6 +66,13 @@ public:
   static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
 
   /**
+   * Deprecated Methods
+   */
+  static void registerObjects(Factory & factory);
+  static void associateSyntax(Syntax & syntax, ActionFactory & action_factory);
+  static void registerExecFlags(Factory & factory);
+
+  /**
    * Get the class name of a flow model corresponding to the flow model ID
    *
    * @param closure_name The name of the closure type
