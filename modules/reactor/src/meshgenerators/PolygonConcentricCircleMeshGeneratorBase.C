@@ -368,7 +368,7 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
   mesh0->stitch_surfaces(SLICE_BEGIN, SLICE_END, TOLERANCE, true);
 
   if (!_has_rings && !_has_ducts && _background_intervals == 1)
-    MooseMesh::changeBoundaryId(*mesh0, 1, OUTER_SIDESET_ID, false);
+    MooseMesh::changeBoundaryId(*mesh0, 1 + _interface_boundary_id_shift, OUTER_SIDESET_ID, false);
 
   if (!_is_general_polygon)
   {
