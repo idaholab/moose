@@ -21,6 +21,7 @@
 #include "libmesh/point.h"
 #include "libmesh/fe_base.h"
 #include "libmesh/numeric_vector.h"
+#include "libmesh/elem_side_builder.h"
 
 #include "DualRealOps.h"
 
@@ -633,7 +634,7 @@ private:
   /**
    * compute AD things on an element face
    */
-  void computeADFace(const Elem * elem, unsigned int side);
+  void computeADFace(const Elem & elem, const unsigned int side);
 
 public:
   /**
@@ -1736,7 +1737,7 @@ protected:
    */
   void reinitFEFace(const Elem * elem, unsigned int side);
 
-  void computeFaceMap(unsigned dim, const std::vector<Real> & qw, const Elem * side);
+  void computeFaceMap(const Elem & elem, const unsigned int side, const std::vector<Real> & qw);
 
   void reinitFEFaceNeighbor(const Elem * neighbor, const std::vector<Point> & reference_points);
 
@@ -2585,6 +2586,13 @@ protected:
   /// The map from global index to variable scaling factor
   const NumericVector<Real> * _scaling_vector = nullptr;
 #endif
+
+  /// In place side element builder for _current_side_elem
+  ElemSideBuilder _current_side_elem_builder;
+  /// In place side element builder for _current_neighbor_side_elem
+  ElemSideBuilder _current_neighbor_side_elem_builder;
+  /// In place side element builder for computeFaceMap()
+  ElemSideBuilder _compute_face_map_side_elem_builder;
 };
 
 template <typename OutputType>

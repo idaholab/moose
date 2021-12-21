@@ -35,6 +35,7 @@
 #include "libmesh/petsc_matrix.h"
 #include "libmesh/dof_map.h"
 #include "libmesh/preconditioner.h"
+#include "libmesh/elem_side_builder.h"
 
 struct DM_Moose
 {
@@ -830,6 +831,7 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
 
         if (dmm->_uncontact_names->size() && dmm->_include_all_contact_nodes)
         {
+          ElemSideBuilder side_builder; // to avoid extra element allocation
           std::set<boundary_id_type> bc_id_set;
           // loop over contacts
           for (const auto & it : *(dmm->_uncontact_names))
@@ -849,9 +851,8 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
             if (bc_id_set.find(boundary_id) == bc_id_set.end())
               continue;
 
-            std::unique_ptr<const Elem> side_bdry = elem_bdry->build_side_ptr(side, false);
             evindices.clear();
-            dofmap.dof_indices(side_bdry.get(), evindices, v);
+            dofmap.dof_indices(&side_builder(*elem_bdry, side), evindices, v);
             for (const auto & edof : evindices)
               if (edof >= dofmap.first_dof() && edof < dofmap.end_dof())
                 unindices.insert(edof);

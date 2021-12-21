@@ -17,6 +17,7 @@
 #include "CastUniquePointer.h"
 
 #include "libmesh/quadrature.h"
+#include "libmesh/elem_side_builder.h"
 
 #include <numeric>
 
@@ -191,11 +192,9 @@ public:
       else
         _local_num_partition_sides++;
 
-      // Build the side so we can compute its volume
-      auto side_elem = elem->build_side_ptr(side);
       // NOTE: we do not want to account for different coordinate systems here, so
       // using volume from libmesh elem is fine here
-      auto volume = side_elem->volume();
+      auto volume = _elem_side_builder(*elem, side).volume();
       _local_partition_surface_area += volume;
 
       if (_my_hardware_id != _rank_map.hardwareID(elem->neighbor_ptr(side)->processor_id()))
@@ -230,6 +229,8 @@ public:
   Real _local_partition_hardware_id_surface_area;
 
   processor_id_type _this_pid;
+
+  ElemSideBuilder _elem_side_builder;
 
   std::unique_ptr<PetscExternalPartitioner> _petsc_partitioner;
 };

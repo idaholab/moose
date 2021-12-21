@@ -14,7 +14,6 @@
 #include "ElemExtrema.h"
 #include "NeighborInfo.h"
 #include "RayTracingCommon.h"
-#include "SidePtrHelper.h"
 #include "TraceRayBndElement.h"
 
 // MOOSE Includes
@@ -25,6 +24,7 @@
 
 // libMesh includes
 #include "libmesh/enum_elem_type.h"
+#include "libmesh/elem_side_builder.h"
 
 // Forward declarations
 class Ray;
@@ -43,7 +43,7 @@ class Mesh;
 /**
  * Traces Rays through the mesh on a single processor
  */
-class TraceRay : public SidePtrHelper
+class TraceRay
 {
 public:
   TraceRay(RayTracingStudy & study, const THREAD_ID tid);
@@ -511,6 +511,9 @@ private:
 
   /// Results over all of the local traces, indexed by TraceRayResult
   std::vector<unsigned long long int> _results;
+
+  /// Helper for building element sides without excessive allocation
+  ElemSideBuilder _elem_side_builder;
 
   /// Reusable for getting the RayBCs in onBoundary()
   std::vector<RayBoundaryConditionBase *> _on_boundary_ray_bcs;

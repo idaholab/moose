@@ -148,11 +148,10 @@ ClaimRays::postClaimRay(std::shared_ptr<Ray> & ray, const Elem * elem)
   // if we can find an incoming side that is valid.
   auto starting_incoming_side = RayTracingCommon::invalid_side;
   if (!(!ray->invalidCurrentIncomingSide() &&
-        _study.sidePtrHelper(elem, ray->currentIncomingSide())
-            ->contains_point(ray->currentPoint()) &&
+        _study.elemSide(*elem, ray->currentIncomingSide()).contains_point(ray->currentPoint()) &&
         _study.sideIsIncoming(elem, ray->currentIncomingSide(), ray->direction(), /* tid = */ 0)))
     for (const auto s : elem->side_index_range())
-      if (_study.sidePtrHelper(elem, s)->contains_point(ray->currentPoint()) &&
+      if (_study.elemSide(*elem, s).contains_point(ray->currentPoint()) &&
           _study.sideIsIncoming(elem, s, ray->direction(), /* tid = */ 0))
       {
         starting_incoming_side = s;

@@ -157,7 +157,7 @@ LotsOfRaysRayStudy::defineRays()
       continue;
 
     // Centroid on this boundary face
-    const auto & side_centroid = sidePtrHelper(elem, side)->vertex_average();
+    const auto & side_centroid = elemSide(*elem, side).vertex_average();
 
     // Vertices on this boundary side -> in direction of all other vertices not on said boundary
     // side on elem
