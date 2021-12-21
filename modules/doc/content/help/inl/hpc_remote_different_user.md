@@ -1,7 +1,7 @@
 # Remote Access HPC Connectivity (different username)
 
 !alert warning
-Users should only follow these instructions if/when they are operating on a machine located out side
+Users should only follow these instructions if/when they are operating on a machine located outside
 INL's internal network.
 
 ### SSH Config file (different remote username)

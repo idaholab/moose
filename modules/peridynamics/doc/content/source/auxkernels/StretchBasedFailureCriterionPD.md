@@ -23,7 +23,7 @@ The bond critical stretch value can be calculated for the bond-based models from
 \end{equation}
 where $K$ is the bulk modulus and $\delta$ is the horizon size.
 
-Derivation of above relationships can be found in Ref. [citep:](Silling2005meshfree).
+Derivation of above relationships can be found in Ref. [!citep](Silling2005meshfree).
 
 
 !syntax parameters /AuxKernels/StretchBasedFailureCriterionPD
