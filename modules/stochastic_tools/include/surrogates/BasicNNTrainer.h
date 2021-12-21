@@ -9,7 +9,7 @@
 
 #pragma once
 
-#ifdef ENABLE_PT
+#ifdef TORCH_ENABLED
 #include <torch/torch.h>
 #endif
 
@@ -30,7 +30,7 @@ public:
   virtual void postTrain() override;
 
 protected:
-#ifdef ENABLE_PT
+#ifdef TORCH_ENABLED
 
   // A custom strcuture which is used to organize data foor the training of
   // torch-based neural nets.

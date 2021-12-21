@@ -7,7 +7,7 @@ ifneq ($(TORCH_DIR),)
   ifneq ($(wildcard $(TORCH_DIR)/lib/libtorch.so),)
 
 	  # Enabling parts that have pytorch dependencies
-		libmesh_CXXFLAGS += -DPYTOCH_ENABLED
+		libmesh_CXXFLAGS += -DTORCH_ENABLED
 
   	# Adding the include directories
 		libmesh_CXXFLAGS += -I$(TORCH_DIR)/include/torch/csrc/api/include

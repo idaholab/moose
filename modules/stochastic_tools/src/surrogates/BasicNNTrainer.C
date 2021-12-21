@@ -104,7 +104,7 @@ BasicNNTrainer::postTrain()
   for (auto & it : _sample_points)
     _communicator.allgather(it);
 
-#ifdef ENABLE_PT
+#ifdef TORCH_ENABLED
 
   // Fixing the RNG seed to make sure every experiment is the same.
   // Otherwise sampling / stochastic gradient descent would be different.
@@ -178,7 +178,7 @@ BasicNNTrainer::postTrain()
     }
 
     if (epoch % 10 == 0)
-      _console << "Epoch: " << epoch << COLOR_GREEN << " | Loss: " << epoch_error << COLOR_DEFAULT
+      _console << "Epoch: " << epoch << " | Loss: " << COLOR_GREEN << epoch_error << COLOR_DEFAULT
                << std::endl;
   }
 #endif

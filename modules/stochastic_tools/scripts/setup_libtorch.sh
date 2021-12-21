@@ -34,7 +34,7 @@ if [[ -n "$HELP" ]]; then
   exit 0
 fi
 
-if [[ $VERSION -le 1.4 ]]; then
+if (( $(echo "$VERSION < 1.4" | bc -l) )); then
   echo "The current implementation does not support libtorch versions below 1.4!"
   exit 1
 fi
@@ -43,19 +43,19 @@ fi
 UNAME_OUT="$(uname -s)"
 case "${UNAME_OUT}" in
   linux*)     OP_SYS=linux;;
-  darwin*)    OP_SYS=mac;;
+  Darwin*)    OP_SYS=mac;;
 esac
 
 # Checking if the available GLIBC version is sufficient for proper linkig. Only
 # causes issues on llinux distributions. Considering that most Macs use the
 # moose compiler stack.
-if [[ $OP_SYS -eq linux ]]; then
+if [[ $OP_SYS == linux ]]; then
   GLIBC_VERSION=`ldd --version | awk '/ldd/{print $NF}'`
-  if [[ $VERSION -le 1.8 -a $GLIBC_VERSION -leq 2.23 ]]; then
+  if (( $(echo "$VERSION < 1.8" | bc -l) && $(echo "$GLIBC_VERSION < 2.23" | bc -l) )); then
     echo "The current version of GLIBC is not sufficient for proper linking!"
     echo "Upgrade it to at least 2.23! Current version: $GLIBC_VERSION"
     exit 1
-  elif [[ $VERSION -ge 1.8 -a $GLIBC_VERSION -leq 2.27 ]]; then
+  elif (( $(echo "$VERSION > 1.8" | bc -l) && $(echo "$GLIBC_VERSION < 2.27" | bc -l) )); then
     echo "The current version of GLIBC is not sufficient for proper linking!"
     echo "Upgrade it to at least 2.27! Current version: $GLIBC_VERSION"
     exit 1
@@ -64,7 +64,7 @@ fi
 
 # Depending on the distribution, download the corresponding precompiled libs
 # Also, if another installation is present for libtorch, we overwrite the files.
-if [[ $OP_SYS -eq linux ]]; then
+if [[ $OP_SYS == linux ]]; then
   if [[ -f "libtorch-cxx11-abi-shared-with-deps-$VERSION.0%2Bcpu.zip" ]]; then
     echo "Found requested package for libtorch v. $VERSION, no need to download."
   else
@@ -72,7 +72,7 @@ if [[ $OP_SYS -eq linux ]]; then
   fi
   echo "Extracting libtorch-cxx11-abi-shared-with-deps-$VERSION.0%2Bcpu.zip."
   unzip -q -o libtorch-cxx11-abi-shared-with-deps-$VERSION.0%2Bcpu.zip
-elif [[ $OP_SYS -eq mac ]]; then
+elif [[ $OP_SYS == mac ]]; then
   if [[ -f libtorch-macos-$VERSION.0.zip ]]; then
     echo "Found requested package for libtorch v. $VERSION, no need to download."
   else
