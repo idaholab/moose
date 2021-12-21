@@ -17,7 +17,7 @@ BasicNNTrainer::validParams()
 {
   InputParameters params = SurrogateTrainer::validParams();
 
-  params.addClassDescription("Computes coefficients for polynomial regession model.");
+  params.addClassDescription("Trains a simple neural network using libtorch.");
 
   MooseEnum data_type("real=0 vector_real=1", "real");
   params.addRequiredParam<ReporterName>(
