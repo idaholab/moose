@@ -42,8 +42,7 @@
 using namespace TraceRayTools;
 
 TraceRay::TraceRay(RayTracingStudy & study, const THREAD_ID tid)
-  : SidePtrHelper(),
-    _study(study),
+  : _study(study),
     _mesh(study.getSubProblem().mesh()),
     _dim(_mesh.dimension()),
     _boundary_info(_mesh.getMesh().get_boundary_info()),
@@ -335,7 +334,7 @@ TraceRay::exitsElem(const Elem * elem,
     // Loop over all of the sides
     while (true)
     {
-      debugRay("  Side ", s, " with centroid ", sidePtrHelper(elem, s)->vertex_average());
+      debugRay("  Side ", s, " with centroid ", _elem_side_builder(*elem, s).vertex_average());
 
       // All of the checks that follow are done while we're still searching through
       // all of the sides. try_nonplanar_incoming_side is our last possible check
@@ -424,7 +423,7 @@ TraceRay::exitsElem(const Elem * elem,
 #ifndef NDEBUG
         // Only validate intersections if the side is planar
         if (_study.verifyTraceIntersections() && !_study.sideIsNonPlanar(elem, s) &&
-            !sidePtrHelper(elem, s)->contains_point(current_intersection_point))
+            !_elem_side_builder(*elem, s).contains_point(current_intersection_point))
           failTrace("Intersected side does not contain intersection point",
                     /* warning = */ false,
                     __LINE__);
@@ -2002,8 +2001,8 @@ TraceRay::onSegment(const std::shared_ptr<Ray> & ray)
     if (_intersected_side != RayTracingCommon::invalid_side &&
         !_study.sideIsNonPlanar(_current_elem, _intersected_side))
     {
-      traceAssert(sidePtrHelper(_current_elem, _intersected_side)
-                      ->close_to_point(_intersection_point, LOOSE_TRACE_TOLERANCE),
+      traceAssert(_elem_side_builder(*_current_elem, _intersected_side)
+                      .close_to_point(_intersection_point, LOOSE_TRACE_TOLERANCE),
                   "Intersected point is not on intersected side");
       traceAssert(!_study.sideIsIncoming(
                       _current_elem, _intersected_side, (*_current_ray)->direction(), _tid),
@@ -2012,8 +2011,8 @@ TraceRay::onSegment(const std::shared_ptr<Ray> & ray)
     if (_incoming_side != RayTracingCommon::invalid_side &&
         !_study.sideIsNonPlanar(_current_elem, _incoming_side))
     {
-      traceAssert(sidePtrHelper(_current_elem, _incoming_side)
-                      ->close_to_point(_incoming_point, LOOSE_TRACE_TOLERANCE),
+      traceAssert(_elem_side_builder(*_current_elem, _incoming_side)
+                      .close_to_point(_incoming_point, LOOSE_TRACE_TOLERANCE),
                   "Incoming point is not on incoming side");
       traceAssert(
           _study.sideIsIncoming(_current_elem, _incoming_side, (*_current_ray)->direction(), _tid),
