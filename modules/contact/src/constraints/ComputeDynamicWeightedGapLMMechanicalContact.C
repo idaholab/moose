@@ -98,3 +98,11 @@ ComputeDynamicWeightedGapLMMechanicalContact::computeQpProperties()
   // To do normalization of constraint coefficient (c_n)
   _qp_factor = _JxW_msm[_qp] * _coord[_qp];
 }
+
+void
+ComputeDynamicWeightedGapLMMechanicalContact::timestepSetup()
+{
+  _dof_to_old_weighted_gap.clear();
+  for (auto & map_pr : _dof_to_weighted_gap)
+    _dof_to_old_weighted_gap.emplace(map_pr.first, std::move(map_pr.second.first));
+}

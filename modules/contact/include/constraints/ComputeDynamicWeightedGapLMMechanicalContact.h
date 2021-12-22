@@ -31,6 +31,8 @@ protected:
    */
   virtual void computeQpProperties() override;
 
+  void timestepSetup() override;
+
   const VariableValue & _secondary_x_old;
   const VariableValue & _primary_x_old;
   const VariableValue & _secondary_y_old;
@@ -53,4 +55,7 @@ protected:
 
   const bool _has_beta;
   const Real _beta;
+
+  /// A map from dof-object to the old weighted gap
+  std::unordered_map<const DofObject *, ADReal> _dof_to_old_weighted_gap;
 };
