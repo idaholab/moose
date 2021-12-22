@@ -30,6 +30,7 @@ namespace libMesh
 {
 class MeshBase;
 class Elem;
+class System;
 }
 class GetPot;
 
@@ -81,20 +82,18 @@ public:
   void buildNodeToElemMaps();
 
   /**
-   * Computes and stores the nodal normal vectors in a local data
+   * Computes and stores the nodal normal/tangent vectors in a local data
    * structure instead of using the ExplicitSystem/NumericVector
    * approach. This design was triggered by the way that the
    * GhostingFunctor operates, but I think it is a better/more
    * efficient way to do it anyway.
    */
-  void computeNodalNormals();
+  void computeNodalGeometry();
 
   /**
-   * Since the nodal normals are no longer a variable in the
-   * EquationSystems, we need to have an alternate method for writing
-   * them out to file for visualization.
+   * Debug method for writing normal and tangent vectors out to file for visualization.
    */
-  void writeNodalNormalsToFile();
+  void writeGeometryToFile();
 
   /**
    * Project secondary nodes (find xi^(2) values) to the closest points on
@@ -179,6 +178,30 @@ public:
   std::vector<Point> getNodalNormals(const Elem & secondary_elem) const;
 
   /**
+   * Compute the two nodal tangents, which are built on-the-fly.
+   * @return The nodal tangents associated with the provided \p secondary_elem
+   */
+  std::array<std::vector<Point>, 2> getNodalTangents(const Elem & secondary_elem) const;
+
+  /**
+   * Compute on-the-fly mapping from secondary interior parent nodes to lower dimensional nodes
+   * @return The map from secondary interior parent nodes to lower dimensional nodes
+   */
+  std::map<unsigned int, unsigned int>
+  getSecondaryIpToLowerElementMap(const Elem & _lower_secondary_elem) const;
+
+  /**
+   * Compute on-the-fly mapping from primary interior parent nodes to its corresponding lower
+   * dimensional nodes
+   * @return The map from primary interior parent nodes to its corresponding lower dimensional
+   * nodes
+   */
+  std::map<unsigned int, unsigned int>
+  getPrimaryIpToLowerElementMap(const Elem & _primary_elem,
+                                const Elem & _primary_elem_ip,
+                                const Elem & _lower_secondary_elem) const;
+
+  /**
    * Compute the normals at given reference points on a secondary element
    * @param secondary_elem The secondary element used to query for associated nodal normals
    * @param xi1_pts The reference points on the secondary element to evaluate the normals at. The
@@ -199,6 +222,15 @@ public:
    */
   std::vector<Point> getNormals(const Elem & secondary_elem,
                                 const std::vector<Real> & oned_xi1_pts) const;
+
+  /**
+   * Return lower dimensional secondary element given its interior parent. Helpful outside the
+   * mortar generation to locate mortar-related quantities.
+   * @param secondary_elem_id The secondary interior parent element id used to query for associated
+   * lower dimensional element
+   * @return The corresponding lower dimensional secondary element
+   */
+  const Elem * getSecondaryLowerdElemFromSecondaryElem(dof_id_type secondary_elem_id) const;
 
   /**
    * Get list of secondary nodes that don't contribute to interaction with any primary element.
@@ -269,6 +301,8 @@ public:
   bool incorrectEdgeDropping() const { return !_correct_edge_dropping; }
 
 private:
+  MooseApp & _app;
+
   // Reference to the mesh stored in equation_systems.
   MeshBase & _mesh;
 
@@ -350,6 +384,13 @@ private:
   // Container for storing the nodal normal vector associated with each secondary node.
   std::unordered_map<const Node *, Point> _secondary_node_to_nodal_normal;
 
+  // Container for storing the nodal tangent/binormal vectors associated with each secondary node
+  // (Householder approach).
+  std::unordered_map<const Node *, std::array<Point, 2>> _secondary_node_to_hh_nodal_tangents;
+
+  // Map from full dimensional secondary element id to lower dimensional secondary element
+  std::unordered_map<dof_id_type, const Elem *> _secondary_element_to_secondary_lowerd_element;
+
   // List of inactive lagrange multiplier nodes (for nodal variables)
   std::unordered_set<const Node *> _inactive_local_lm_nodes;
 
@@ -370,8 +411,30 @@ private:
   void projectPrimaryNodesSinglePair(subdomain_id_type lower_dimensional_primary_subdomain_id,
                                      subdomain_id_type lower_dimensional_secondary_subdomain_id);
 
+  /**
+   * Householder orthogonalization procedure to obtain proper basis for tangent and binormal vectors
+   */
+  void
+  householderOrthogolization(const Point & normal, Point & tangent_one, Point & tangent_two) const;
+
   /// Whether to print debug output
   const bool _debug;
+
+  ///@{
+  /** Member variables for geometry debug output */
+  libMesh::System * _nodal_normals_system = nullptr;
+  unsigned int _nnx_var_num;
+  unsigned int _nny_var_num;
+  unsigned int _nnz_var_num;
+
+  unsigned int _t1x_var_num;
+  unsigned int _t1y_var_num;
+  unsigned int _t1z_var_num;
+
+  unsigned int _t2x_var_num;
+  unsigned int _t2y_var_num;
+  unsigned int _t2z_var_num;
+  ///@}
 
   /// Whether this object is on the displaced mesh
   const bool _on_displaced;

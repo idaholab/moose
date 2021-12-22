@@ -70,7 +70,6 @@ ComputeWeightedGapLMMechanicalContact::ComputeWeightedGapLMMechanicalContact(
     _has_disp_z(isCoupled("disp_z")),
     _secondary_disp_z(_has_disp_z ? &adCoupledValue("disp_z") : nullptr),
     _primary_disp_z(_has_disp_z ? &adCoupledNeighborValue("disp_z") : nullptr),
-    _normal_index(_interpolate_normals ? _qp : _i),
     _c(getParam<Real>("c")),
     _normalize_c(getParam<bool>("normalize_c")),
     _nodal(getVar("disp_x", 0)->feType().family == LAGRANGE)
@@ -108,7 +107,12 @@ ComputeWeightedGapLMMechanicalContact::computeQpProperties()
     gap_vec(2).derivatives() =
         (*_primary_disp_z)[_qp].derivatives() - (*_secondary_disp_z)[_qp].derivatives();
 
-  _qp_gap = gap_vec * (_normals[_normal_index] * _JxW_msm[_qp] * _coord[_qp]);
+  if (_interpolate_normals)
+    _qp_gap = gap_vec * (_normals[_qp] * _JxW_msm[_qp] * _coord[_qp]);
+  else
+    _qp_gap_nodal = gap_vec * (_JxW_msm[_qp] * _coord[_qp]);
+
+  // To do normalization of constraint coefficient (c_n)
   _qp_factor = _JxW_msm[_qp] * _coord[_qp];
 }
 
@@ -124,7 +128,11 @@ ComputeWeightedGapLMMechanicalContact::computeQpIProperties()
                               ? static_cast<const DofObject *>(_lower_secondary_elem->node_ptr(_i))
                               : static_cast<const DofObject *>(_lower_secondary_elem);
 
-  _dof_to_weighted_gap[dof].first += _test[_i][_qp] * _qp_gap;
+  if (_interpolate_normals)
+    _dof_to_weighted_gap[dof].first += _test[_i][_qp] * _qp_gap;
+  else
+    _dof_to_weighted_gap[dof].first += _test[_i][_qp] * _qp_gap_nodal * _normals[_i];
+
   if (_normalize_c)
     _dof_to_weighted_gap[dof].second += _test[_i][_qp] * _qp_factor;
 }
