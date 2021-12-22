@@ -364,6 +364,13 @@ protected:
                                                        unsigned int comp = 0) const;
 
   /**
+   * Returns the values for all of a coupled array variable's components
+   * @param var_name Name of coupled array variable
+   * @return Vector of ArrayVariableValue pointers for each component of \p var_name
+   */
+  std::vector<const ArrayVariableValue *> coupledArrayValues(const std::string & var_name) const;
+
+  /**
    * Returns a *writable* reference to a coupled variable.  Note: you
    * should not have to use this very often (use coupledValue()
    * instead) but there are situations, such as writing to multiple
