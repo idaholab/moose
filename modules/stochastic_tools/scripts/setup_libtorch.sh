@@ -9,7 +9,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 # For now, 1.10 is the default version of torchlib
-VERSION="1.10"
+VERSION=1.10
 
 # Parse the input arguments
 for i in "$@"
