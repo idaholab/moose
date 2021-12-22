@@ -145,7 +145,7 @@ protected:
   /// the normals along the primary face
   const MooseArray<Point> & _normals_primary;
 
-  /// the tangents along the secondary face
+  /// Tangent vectors on the secondary faces (libmesh)
   const MooseArray<std::vector<Point>> & _tangents;
 
   /// The element Jacobian times weights

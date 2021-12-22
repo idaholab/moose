@@ -80,9 +80,6 @@ protected:
   /// z-displacement on the primary face
   const ADVariableValue * const _primary_disp_z;
 
-  /// The normal index. This is _qp if we are interpolating the nodal normals, else it is _i
-  const unsigned int & _normal_index;
-
   /// This factor multiplies the weighted gap. This member, provided through a user parameter,
   /// should be of a value such that its product with the gap is on the same scale as the lagrange
   /// multiplier
@@ -90,6 +87,7 @@ protected:
 
   /// The value of the gap at the current quadrature point
   ADReal _qp_gap;
+
   /// The value of the LM at the current quadrature point
   Real _qp_factor;
 
@@ -98,6 +96,9 @@ protected:
 
   /// Whether the dof objects are nodal; if they're not, then they're elemental
   const bool _nodal;
+
+  /// Vector for computation of weighted gap with nodal normals
+  ADRealVectorValue _qp_gap_nodal;
 
   /// A map from node to weighted gap and normalization (if requested)
   std::unordered_map<const DofObject *, std::pair<ADReal, Real>> _dof_to_weighted_gap;

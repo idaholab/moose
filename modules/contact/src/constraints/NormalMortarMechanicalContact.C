@@ -14,7 +14,7 @@ registerMooseObject("ContactApp", NormalMortarMechanicalContact);
 InputParameters
 NormalMortarMechanicalContact::validParams()
 {
-  InputParameters params = ADMortarConstraint::validParams();
+  InputParameters params = ADMortarLagrangeConstraint::validParams();
 
   MooseEnum component("x=0 y=1 z=2");
   params.addRequiredParam<MooseEnum>(
@@ -26,7 +26,7 @@ NormalMortarMechanicalContact::validParams()
 }
 
 NormalMortarMechanicalContact::NormalMortarMechanicalContact(const InputParameters & parameters)
-  : ADMortarConstraint(parameters), _component(getParam<MooseEnum>("component"))
+  : ADMortarLagrangeConstraint(parameters), _component(getParam<MooseEnum>("component"))
 {
 }
 
@@ -44,12 +44,27 @@ NormalMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
       // indicates the momentum will tend to increase at this location with time, which is what we
       // want because the force vector is in the positive direction (always opposite of the
       // normals).
-      return _test_secondary[_i][_qp] * _lambda[_qp] * _normals[_qp](_component);
+      // Get the _dof_to_weighted_gap map
+
+      if (_interpolate_normals)
+        return _test_secondary[_i][_qp] * _lambda[_qp] * _normals[_qp](_component);
+      else
+      {
+        const auto normal_index = libmesh_map_find(_secondary_ip_lowerd_map, _i);
+        return _test_secondary[_i][_qp] * _lambda[_qp] * _normals[normal_index](_component);
+      }
 
     case Moose::MortarType::Primary:
       // The normal vector is signed according to the secondary face, so we need to introduce a
       // negative sign here
-      return -_test_primary[_i][_qp] * _lambda[_qp] * _normals[_qp](_component);
+
+      if (_interpolate_normals)
+        return -_test_primary[_i][_qp] * _lambda[_qp] * _normals[_qp](_component);
+      else
+      {
+        const auto normal_index = libmesh_map_find(_primary_ip_lowerd_map, _i);
+        return -_test_primary[_i][_qp] * _lambda[_qp] * _normals[normal_index](_component);
+      }
 
     default:
       return 0;
