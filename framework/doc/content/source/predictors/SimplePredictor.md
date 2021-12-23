@@ -1,33 +1,25 @@
 # SimplePredictor
 
-!alert! construction title=Undocumented Class
-The SimplePredictor has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# SimplePredictor
-
 !syntax description /Executioner/Predictor/SimplePredictor
 
-## Overview
+The simple predictor uses the solution from the previous time step to update the solution
+before a non linear solve.
+The simple predictor update is:
 
-!! Replace these lines with information regarding the SimplePredictor object.
+!equation
+\phi = \phi (1 + s \dfrac{\Delta t}{\Delta t_{old}}) - \phi_{old} s \dfrac{\Delta t}{\Delta t_{old}}
 
-## Example Input File Syntax
+with $\phi$ the solution vector, which includes all the application's non linear variables,
+and $s$ a scaling factor, specified by the [!param](/Executioner/Predictor/SimplePredictor/scale)
+parameter. That scaling factor is further scaled with the size of the current time step $\Delta t$
+divided by the previous one.
 
-!! Describe and include an example of how to use the SimplePredictor object.
+## Example input syntax
 
-!syntax parameters /Executioner/Predictor/SimplePredictor
+In this example, a `SimplePredictor` is specified in the executioner to use the previous
+time step solution to compute better initial guesses for each non linear solve.
 
-!syntax inputs /Executioner/Predictor/SimplePredictor
-
-!syntax children /Executioner/Predictor/SimplePredictor
-```
-!alert-end!
-
-!syntax description /Executioner/Predictor/SimplePredictor
+!listing test/tests/predictor/simple/predictor_test.i block=Executioner
 
 !syntax parameters /Executioner/Predictor/SimplePredictor
 

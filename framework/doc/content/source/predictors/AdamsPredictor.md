@@ -1,33 +1,37 @@
 # AdamsPredictor
 
-!alert! construction title=Undocumented Class
-The AdamsPredictor has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# AdamsPredictor
-
 !syntax description /Executioner/Predictor/AdamsPredictor
 
-## Overview
+An Adams predictor is automatically added by MOOSE for the [AB2PredictorCorrector.md]
+time stepping/integration scheme.
 
-!! Replace these lines with information regarding the AdamsPredictor object.
+The formula for the update by Adams' predictor is:
 
-## Example Input File Syntax
+!equation
+\phi_{new} = A \phi + B \phi_{old} + C \phi_{older}
 
-!! Describe and include an example of how to use the AdamsPredictor object.
+with \phi being the solution vector, including all degrees of freedom for the nonlinear variables
+and
 
-!syntax parameters /Executioner/Predictor/AdamsPredictor
+!equation
+A = 1 + \dfrac{\Delta t}{\Delta t_{old}} (1 + \dfrac{\Delta t}{2\Delta t_{old}})
 
-!syntax inputs /Executioner/Predictor/AdamsPredictor
+!equation
+B = - \dfrac{\Delta t}{\Delta t_{old}} (1 + \dfrac{\Delta t}{2\Delta t_{old}} + \dfrac{\Delta t}{2\Delta t_{older}})
 
-!syntax children /Executioner/Predictor/AdamsPredictor
-```
-!alert-end!
+!equation
+C = \dfrac{\Delta t}{\Delta t_{old}} \dfrac{\Delta t}{2\Delta t_{older}}
 
-!syntax description /Executioner/Predictor/AdamsPredictor
+with $\dfrac{\Delta t}$, $\dfrac{\Delta t_{old}}$ and $\dfrac{\Delta t_{older}}$
+being the current, previous and antepenultimate time steps sizes.
+
+## Example input syntax
+
+In this example, an `AdamsPredictor` is implicitly being created by specifying the
+`AB2PredictorCorrector` time stepping scheme. The predictor is being used on every
+time step to perform a first update step.
+
+!listing test/tests/time_integrators/aee/aee.i block=Executioner
 
 !syntax parameters /Executioner/Predictor/AdamsPredictor
 
