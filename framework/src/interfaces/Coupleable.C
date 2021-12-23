@@ -653,6 +653,13 @@ Coupleable::coupledArrayValue(const std::string & var_name, unsigned int comp) c
   }
 }
 
+std::vector<const ArrayVariableValue *>
+Coupleable::coupledArrayValues(const std::string & var_name) const
+{
+  auto func = [this, &var_name](unsigned int comp) { return &coupledArrayValue(var_name, comp); };
+  return coupledVectorHelper<const ArrayVariableValue *>(var_name, func);
+}
+
 VariableValue &
 Coupleable::writableCoupledValue(const std::string & var_name, unsigned int comp)
 {
