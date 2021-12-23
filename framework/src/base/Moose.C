@@ -221,7 +221,6 @@ addActionTypes(Syntax & syntax)
   registerTask("deprecated_block", false);
   registerTask("set_adaptivity_options", false);
   registerTask("add_mortar_interface", false);
-  registerTask("coupling_functor_check", true);
   registerTask("add_master_action_material", false);
 
   // Dummy Actions (useful for sync points in the dependencies)
@@ -327,7 +326,6 @@ addActionTypes(Syntax & syntax)
                            "(attach_geometric_rm_final)"
                            "(attach_algebraic_rm)"
                            "(attach_coupling_rm)"
-                           "(coupling_functor_check)"
                            "(delete_remote_elements_after_late_geometric_ghosting)"
                            "(init_problem)"
                            "(add_control)"
