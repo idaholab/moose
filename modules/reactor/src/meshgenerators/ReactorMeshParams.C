@@ -58,9 +58,8 @@ ReactorMeshParams::ReactorMeshParams(const InputParameters & parameters)
     _axial_mesh_intervals(getParam<std::vector<unsigned int>>("axial_mesh_intervals"))
 {
   if (_axial_regions.size() != _axial_mesh_intervals.size())
-  {
     mooseError("The number of axial regions is not consistant.");
-  }
+
 
   this->declareMeshProperty("mesh_dimensions", int(_dim));
   this->declareMeshProperty("mesh_geometry", std::string(_geom));

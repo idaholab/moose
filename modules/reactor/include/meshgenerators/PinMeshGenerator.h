@@ -40,13 +40,22 @@ protected:
   std::vector<Real> _ring_radii;
 
   ///The inner apothem of any surrounding ducts in the pin
-  std::vector<Real> _duct_radii;
+  std::vector<Real> _duct_halfpitch;
 
   ///The number of mesh intervals in a radial division starting from the center
   std::vector<unsigned int> _intervals;
 
   ///The ID that will be assigned as both the block id and name as well as stored as an extra-element integer
   std::vector<std::vector<subdomain_id_type>> _region_ids;
+  
+  ///Whether procedural IDs are to be used rather than declared by the user (declared in the ReactorMeshParams object)
+  bool _procedural_ids;
+  
+  ///The type of geometry that is being described (Square or Hex, declared in the ReactorMeshParams object)
+  std::string _mesh_geometry;
+  
+  ///The number of dimensions the mesh is ultimately going to have (2 or 3, declared in the ReactorMeshParams object)
+  int _mesh_dimensions;
 
   ///Whether this mesh should be extruded to 3-D, making it the final structure in the reactor mesh
   bool _extrude;

@@ -16,7 +16,7 @@
     pitch = 1.42063
     num_sectors = 6
     ring_radii = '0.2 0.3818'
-    duct_radii = '0.68'
+    duct_halfpitch = '0.68'
     mesh_intervals = '1 2 1 1'
 
     quad_center_elements = true
@@ -71,7 +71,7 @@
   [cmg]
     type = CoreMeshGenerator
     inputs = 'amg2 amg1 empty'
-    empty_position_name = empty
+    dummy_assembly_name = empty
     pattern = '1 1 1 1 1 1;
                1 1 0 0 1 1;
                1 0 0 0 0 1;

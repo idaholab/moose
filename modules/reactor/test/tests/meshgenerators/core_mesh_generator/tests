@@ -2,7 +2,7 @@
   design = 'meshgenerators/CoreMeshGenerator.md'
   issues = ''
   [square]
-    requirement = 'The system shall generate a 3D square core mesh'
+    requirement = 'The system shall generate a full 3D square core mesh with 3 pin types and 2 assembly types'
     type = 'Exodiff'
     input = 'core.i'
     cli_args = "Mesh/pin1/region_ids='1 4 2 5; 11 14 12 15; 21 24 22 25'
@@ -11,7 +11,6 @@
                 --mesh-only core_in.e"
     exodiff = 'core_in.e'
     recover = false
-    detail = 'full square core with 3 pin types and 2 assembly types '
   []
   [empty]
     requirement = 'The system shall generate a 3D square core mesh with empty lattice positions'
@@ -24,7 +23,6 @@
                 --mesh-only core_empty_in.e"
     exodiff = 'core_empty_in.e'
     recover = false
-    detail = 'full square core with 3 pin types and 2 assembly types and empty lattice positions '
   []
   [hex]
     requirement = 'The system shall generate a 3D hexagonal core mesh with empty lattice positions'
@@ -40,14 +38,13 @@
                 Mesh/amg2/inputs='pin1 pin3'
                 Mesh/amg2/pattern='  0   0   0 ; 0   1   1   0; 0   1   1   1  0; 0   1   1   0; 0   0   0' 
                 Mesh/amg2/background_intervals=2
-                Mesh/amg2/duct_radii='3.5'
+                Mesh/amg2/duct_halfpitch='3.5'
                 Mesh/amg2/duct_intervals='1' 
                 Mesh/cmg/inputs='amg1 amg2 empty'                
                 Mesh/cmg/pattern='  2 0 0 2 ; 0 0 1 0 0 ; 0 0 1 1 0 0 ; 2 0 1 1 1 0 2 ; 0 0 1 1 0 0 ; 0 0 1 0 0 ; 2 0 0 2 '
                 --mesh-only core_hex_in.e"
     exodiff = 'core_hex_in.e'
     recover = false
-    detail = 'full hex core with 3 pin types and 2 assembly types and empty lattice positions '
   []
 
 []
