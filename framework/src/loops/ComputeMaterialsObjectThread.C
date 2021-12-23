@@ -126,7 +126,7 @@ ComputeMaterialsObjectThread::onBoundary(const Elem * elem,
 {
   if (_fe_problem.needBoundaryMaterialOnSide(bnd_id, _tid))
   {
-    _assembly[_tid]->reinit(elem, side);
+    _fe_problem.reinitElemFace(elem, side, bnd_id, _tid);
     unsigned int face_n_points = _assembly[_tid]->qRuleFace()->n_points();
 
     _bnd_material_data[_tid]->resize(face_n_points);
@@ -171,7 +171,15 @@ ComputeMaterialsObjectThread::onInternalSide(const Elem * elem, unsigned int sid
 {
   if (_need_internal_side_material)
   {
-    _assembly[_tid]->reinit(elem, side);
+    const Elem * neighbor = elem->neighbor_ptr(side);
+    const dof_id_type elem_id = elem->id(), neighbor_id = neighbor->id();
+    const bool should_continue =
+        (neighbor->active() && (neighbor->level() == elem->level()) && (elem_id < neighbor_id)) ||
+        (neighbor->level() < elem->level());
+    if (!should_continue)
+      return;
+
+    _fe_problem.reinitElemNeighborAndLowerD(elem, side, _tid);
     unsigned int face_n_points = _assembly[_tid]->qRuleFace()->n_points();
     _bnd_material_data[_tid]->resize(face_n_points);
     _neighbor_material_data[_tid]->resize(face_n_points);
@@ -194,16 +202,10 @@ ComputeMaterialsObjectThread::onInternalSide(const Elem * elem, unsigned int sid
             side);
     }
 
-    const Elem * neighbor = elem->neighbor_ptr(side);
     unsigned int neighbor_side = neighbor->which_neighbor_am_i(_assembly[_tid]->elem());
-    const dof_id_type elem_id = elem->id(), neighbor_id = neighbor->id();
 
-    if (_has_neighbor_stateful_props &&
-        ((neighbor->active() && (neighbor->level() == elem->level()) && (elem_id < neighbor_id)) ||
-         (neighbor->level() < elem->level())))
+    if (_has_neighbor_stateful_props)
     {
-      _assembly[_tid]->reinitElemAndNeighbor(elem, side, neighbor, neighbor_side);
-
       // Neighbor Materials
       if (_discrete_materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBlockObjects(
               neighbor->subdomain_id(), _tid))
