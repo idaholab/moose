@@ -174,11 +174,6 @@ public:
   bool onDisplaced() const { return _on_displaced; }
 
   /**
-   * @return The nodal normal associated with the provided \p node
-   */
-  Point getNodalNormal(const Node * const node) const;
-
-  /**
    * @return The nodal normals associated with the provided \p secondary_elem
    */
   std::vector<Point> getNodalNormals(const Elem & secondary_elem) const;
@@ -302,6 +297,7 @@ public:
 
   bool incorrectEdgeDropping() const { return !_correct_edge_dropping; }
 
+<<<<<<< HEAD
   using MortarFilterIter =
       std::unordered_map<const Elem *, std::set<Elem *, CompareDofObjectsByID>>::const_iterator;
 
@@ -335,6 +331,9 @@ public:
    *  Populate node to weighted gap map.
    */
   void setNodalWeightedGapMap(const Node * node, const Real weighted_gap);
+
+=======
+>>>>>>> Stabilization of mortar contact constraints for dynamics (#19671)
 
 private:
   MooseApp & _app;

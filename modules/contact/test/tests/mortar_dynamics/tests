@@ -6,11 +6,12 @@
     exodiff = 'block-dynamics_out.e'
     input = 'block-dynamics.i'
     rel_err = 5.0e-4
+    abs_zero = 1.0e-5
     min_parallel = 1
     max_parallel = 4
     min_ad_size = '50'
     ad_indexing_type = 'global'
-    cli_args = 'Executioner/dt=1.0 Executioner/end_time=3.0'
+    cli_args = 'Executioner/dt=0.05 Executioner/end_time=0.3'
     requirement = 'Contact module shall solve mortar normal contact between two blocks with gap time stabilization using mortar nodal geometry.'
   []
   [block-dynamics-friction]
@@ -18,35 +19,12 @@
     exodiff = 'block-dynamics-friction_out.e'
     input = 'block-dynamics-friction.i'
     rel_err = 5.0e-4
+    abs_zero = 1.0e-5
     min_parallel = 1
     max_parallel = 4
     min_ad_size = '50'
     ad_indexing_type = 'global'
-    cli_args = 'Executioner/dt=1.0 Executioner/end_time=3.0'
+    cli_args = 'Executioner/dt=0.05 Executioner/end_time=0.3'
     requirement = 'Contact module shall solve mortar frictional contact between two blocks with gap time stabilization using mortar nodal geometry.'
-  []
-  [block-dynamics-interp]
-    type = 'Exodiff'
-    exodiff = 'block-dynamics-interp_out.e'
-    input = 'block-dynamics-interp.i'
-    rel_err = 5.0e-4
-    min_parallel = 1
-    max_parallel = 4
-    min_ad_size = '50'
-    ad_indexing_type = 'global'
-    cli_args = 'Executioner/dt=1.0 Executioner/end_time=3.0'
-    requirement = 'Contact module shall solve mortar normal contact between two blocks with gap time stabilization using mortar interpolated geometry.'
-  []
-  [block-dynamics-friction-interp]
-    type = 'Exodiff'
-    exodiff = 'block-dynamics-friction-interp_out.e'
-    input = 'block-dynamics-friction-interp.i'
-    rel_err = 5.0e-4
-    min_parallel = 1
-    max_parallel = 4
-    min_ad_size = '50'
-    ad_indexing_type = 'global'
-    cli_args = 'Executioner/dt=1.0 Executioner/end_time=3.0'
-    requirement = 'Contact module shall solve mortar frictional contact between two blocks with gap time stabilization using mortar interpolated geometry.'
   []
 []

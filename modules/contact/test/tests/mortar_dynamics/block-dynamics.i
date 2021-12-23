@@ -1,5 +1,5 @@
 starting_point = 2e-1
-offset = -0.195
+offset = -0.19
 
 [GlobalParams]
   displacements = 'disp_x disp_y'
@@ -22,21 +22,6 @@ offset = -0.195
   []
 []
 
-[AuxVariables]
-  [pid]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-[]
-
-[AuxKernels]
-  [pid]
-    type = ProcessorIDAux
-    variable = pid
-    execute_on = 'initial timestep_end'
-  []
-[]
-
 [ICs]
   [disp_y]
     block = 2
@@ -52,7 +37,7 @@ offset = -0.195
     generate_output = 'stress_xx stress_yy'
     strain = FINITE
     block = '1 2'
-    zeta = 0.1
+    zeta = 1.0
     alpha = 0.0
   []
   [inertia_x]
@@ -63,7 +48,7 @@ offset = -0.195
     beta = 0.25
     gamma = 0.5
     alpha = 0
-    eta = 0.1
+    eta = 0.0
     block = '1 2'
   []
   [inertia_y]
@@ -74,7 +59,7 @@ offset = -0.195
     beta = 0.25
     gamma = 0.5
     alpha = 0
-    eta = 0.1
+    eta = 0.0
     block = '1 2'
   []
 []
@@ -83,13 +68,13 @@ offset = -0.195
   [elasticity_2]
     type = ComputeIsotropicElasticityTensor
     block = '2'
-    youngs_modulus = 1e4
+    youngs_modulus = 1e6
     poissons_ratio = 0.3
   []
   [elasticity_1]
     type = ComputeIsotropicElasticityTensor
     block = '1'
-    youngs_modulus = 1e7
+    youngs_modulus = 1e8
     poissons_ratio = 0.3
   []
   [stress]
@@ -174,8 +159,8 @@ offset = -0.195
     disp_y = disp_y
     use_displaced_mesh = true
     c = 1e4
-    newmark_beta = 0.25
     interpolate_normals = false
+    capture_tolerance = 1.0e-5
   []
   [normal_x]
     type = NormalMortarMechanicalContact
@@ -222,7 +207,7 @@ offset = -0.195
     type = FunctionDirichletBC
     variable = disp_y
     boundary = 30
-    function = '${starting_point} * cos(2 * pi / 40 * t) + ${offset}'
+    function = '${starting_point} * cos(2 * pi / 4 * t) + ${offset}'
   []
   [leftx]
     type = FunctionDirichletBC

@@ -25,7 +25,7 @@ InputParameters
 ComputeDynamicFrictionalForceLMMechanicalContact::validParams()
 {
   InputParameters params = ComputeDynamicWeightedGapLMMechanicalContact::validParams();
-  params.addClassDescription("Computes the tangential frictional forces");
+  params.addClassDescription("Computes the tangential frictional forces for dynamic simulations");
   params.addRequiredCoupledVar("friction_lm", "The frictional Lagrange's multiplier");
   params.addCoupledVar("friction_lm_dir",
                        "The frictional Lagrange's multiplier for an addtional direction.");
@@ -69,6 +69,10 @@ ComputeDynamicFrictionalForceLMMechanicalContact::ComputeDynamicFrictionalForceL
                "Three-dimensional mortar frictional contact simulations require an additional "
                "frictional Lagrange's multiplier to enforce a second tangential pressure");
 
+  mooseAssert(!_interpolate_normals,
+              "Dynamic mortar mechanical contact constraints require the surface geometry be "
+              "attached to nodes");
+
   _friction_vars.push_back(getVar("friction_lm", 0));
 
   if (_3d)
@@ -103,20 +107,12 @@ ComputeDynamicFrictionalForceLMMechanicalContact::computeQpProperties()
       _secondary_x_dot[_qp].derivatives() - _primary_x_dot[_qp].derivatives();
   relative_velocity(1).derivatives() =
       _secondary_y_dot[_qp].derivatives() - _primary_y_dot[_qp].derivatives();
+
   if (_3d)
     relative_velocity(2).derivatives() =
         (*_secondary_z_dot)[_qp].derivatives() - (*_primary_z_dot)[_qp].derivatives();
 
-  if (_interpolate_normals)
-  {
-    _qp_tangential_velocity[0] =
-        relative_velocity * (_tangents[_qp][0] * _JxW_msm[_qp] * _coord[_qp]);
-    if (_3d)
-      _qp_tangential_velocity[1] =
-          relative_velocity * (_tangents[_qp][1] * _JxW_msm[_qp] * _coord[_qp]);
-  }
-  else
-    _qp_tangential_velocity_nodal = relative_velocity * (_JxW_msm[_qp] * _coord[_qp]);
+  _qp_tangential_velocity_nodal = relative_velocity * (_JxW_msm[_qp] * _coord[_qp]);
 }
 
 void
@@ -133,21 +129,13 @@ ComputeDynamicFrictionalForceLMMechanicalContact::computeQpIProperties()
           ? static_cast<const DofObject *>(_lower_secondary_elem->node_ptr(_i))
           : static_cast<const DofObject *>(_lower_secondary_elem);
 
-  if (_interpolate_normals)
-    _dof_to_weighted_tangential_velocity[dof][0] += _test[_i][_qp] * _qp_tangential_velocity[0];
-  else
-    _dof_to_weighted_tangential_velocity[dof][0] +=
-        _test[_i][_qp] * _qp_tangential_velocity_nodal * _nodal_tangents[0][_i];
+  _dof_to_weighted_tangential_velocity[dof][0] +=
+      _test[_i][_qp] * _qp_tangential_velocity_nodal * _nodal_tangents[0][_i];
 
   // Get the _dof_to_weighted_tangential_velocity map for a second direction
   if (_3d)
-  {
-    if (_interpolate_normals)
-      _dof_to_weighted_tangential_velocity[dof][1] += _test[_i][_qp] * _qp_tangential_velocity[1];
-    else
-      _dof_to_weighted_tangential_velocity[dof][1] +=
-          _test[_i][_qp] * _qp_tangential_velocity_nodal * _nodal_tangents[1][_i];
-  }
+    _dof_to_weighted_tangential_velocity[dof][1] +=
+        _test[_i][_qp] * _qp_tangential_velocity_nodal * _nodal_tangents[1][_i];
 }
 
 void
@@ -200,7 +188,7 @@ ComputeDynamicFrictionalForceLMMechanicalContact::communicateVelocities()
 void
 ComputeDynamicFrictionalForceLMMechanicalContact::post()
 {
-  communicateGaps();
+  ComputeDynamicWeightedGapLMMechanicalContact::post();
   communicateVelocities();
 
   // Enforce frictional complementarity constraints
@@ -211,9 +199,18 @@ ComputeDynamicFrictionalForceLMMechanicalContact::post()
     if (dof->processor_id() != this->processor_id())
       continue;
 
-    auto & weighted_gap_pr = _dof_to_weighted_gap[dof];
-    _weighted_gap_ptr = &weighted_gap_pr.first;
-    _normalization_ptr = &weighted_gap_pr.second;
+    //    const auto is_dof_on_map = _dof_to_old_weighted_gap.find(pr.first);
+    // If is_dof_on_map isn't on map, it means it's an initial step
+    //    if (is_dof_on_map == _dof_to_old_weighted_gap.end() ||
+    //        _dof_to_old_weighted_gap[pr.first] > _capture_tolerance)
+    //      _weighted_gap_ptr = &_dof_to_weighted_gap[dof].first;
+    //    else
+    //      _weighted_gap_ptr = &_dof_to_weighted_gap_dynamics[pr.first];
+
+    // Use always weighted gap for dynamic PDASS
+    _weighted_gap_ptr = &_dof_to_weighted_gap[dof].first;
+
+    _normalization_ptr = &_dof_to_weighted_gap[dof].second;
     _tangential_vel_ptr[0] = &(pr.second[0]);
 
     if (_3d)
@@ -230,7 +227,7 @@ void
 ComputeDynamicFrictionalForceLMMechanicalContact::incorrectEdgeDroppingPost(
     const std::unordered_set<const Node *> & inactive_lm_nodes)
 {
-  communicateGaps();
+  ComputeDynamicWeightedGapLMMechanicalContact::incorrectEdgeDroppingPost(inactive_lm_nodes);
   communicateVelocities();
 
   // Enforce frictional complementarity constraints
@@ -243,7 +240,17 @@ ComputeDynamicFrictionalForceLMMechanicalContact::incorrectEdgeDroppingPost(
         (dof->processor_id() != this->processor_id()))
       continue;
 
+    // const auto is_dof_on_map = _dof_to_old_weighted_gap.find(pr.first);
+    // If is_dof_on_map isn't on map, it means it's an initial step
+    //    if (is_dof_on_map == _dof_to_old_weighted_gap.end() ||
+    //        _dof_to_old_weighted_gap[pr.first] > _capture_tolerance)
+    //      _weighted_gap_ptr = &_dof_to_weighted_gap[dof].first;
+    //    else
+    //      _weighted_gap_ptr = &_dof_to_weighted_gap_dynamics[pr.first];
+
+    // Use always weighted gap for dynamic PDASS
     _weighted_gap_ptr = &_dof_to_weighted_gap[dof].first;
+
     _tangential_vel_ptr[0] = &pr.second[0];
 
     if (_3d)
@@ -260,8 +267,6 @@ void
 ComputeDynamicFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(
     const DofObject * const dof)
 {
-  ComputeDynamicWeightedGapLMMechanicalContact::enforceConstraintOnDof(dof);
-
   // Get normal LM
   const auto normal_dof_index = dof->dof_number(_sys.number(), _var->number(), 0);
   const ADReal & weighted_gap = *_weighted_gap_ptr;
@@ -339,8 +344,6 @@ void
 ComputeDynamicFrictionalForceLMMechanicalContact::enforceConstraintOnDof(
     const DofObject * const dof)
 {
-  ComputeDynamicWeightedGapLMMechanicalContact::enforceConstraintOnDof(dof);
-
   // Get friction LM
   const auto friction_dof_index = dof->dof_number(_sys.number(), _friction_vars[0]->number(), 0);
   const ADReal & tangential_vel = *_tangential_vel_ptr[0];

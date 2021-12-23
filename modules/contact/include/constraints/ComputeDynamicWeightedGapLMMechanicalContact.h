@@ -14,8 +14,7 @@
 #include <unordered_map>
 
 /**
- * Computes the weighted gap that will later be used to enforce the
- * zero-penetration mechanical contact conditions
+ * Computes the normal contact mortar constraints for dynamic simulations.
  */
 class ComputeDynamicWeightedGapLMMechanicalContact : public ComputeWeightedGapLMMechanicalContact
 {
@@ -31,31 +30,34 @@ protected:
    */
   virtual void computeQpProperties() override;
 
+  virtual void computeQpIProperties() override;
+
+  virtual void residualSetup() override;
+
   void timestepSetup() override;
 
-  const VariableValue & _secondary_x_old;
-  const VariableValue & _primary_x_old;
-  const VariableValue & _secondary_y_old;
-  const VariableValue & _primary_y_old;
+  virtual void post() override;
+
+  virtual void
+  incorrectEdgeDroppingPost(const std::unordered_set<const Node *> & inactive_lm_nodes) override;
+
+  /// A small threshold gap value to consider that a node needs a "persistency" constraint
+  const Real _capture_tolerance;
 
   const ADVariableValue & _secondary_x_dot;
   const ADVariableValue & _primary_x_dot;
   const ADVariableValue & _secondary_y_dot;
   const ADVariableValue & _primary_y_dot;
 
-  const ADVariableValue & _secondary_x_dotdot;
-  const ADVariableValue & _primary_x_dotdot;
-  const ADVariableValue & _secondary_y_dotdot;
-  const ADVariableValue & _primary_y_dotdot;
-
   const ADVariableValue * _secondary_z_dot;
   const ADVariableValue * _primary_z_dot;
-  const ADVariableValue * _secondary_z_dotdot;
-  const ADVariableValue * _primary_z_dotdot;
-
-  const bool _has_beta;
-  const Real _beta;
 
   /// A map from dof-object to the old weighted gap
   std::unordered_map<const DofObject *, ADReal> _dof_to_old_weighted_gap;
+
+  /// Vector for computation of weighted gap velocity to fulfill "persistency" condition
+  ADRealVectorValue _qp_gap_nodal_dynamics;
+
+  /// A map from node to weighted gap velocity times _dt
+  std::unordered_map<const DofObject *, ADReal> _dof_to_weighted_gap_dynamics;
 };

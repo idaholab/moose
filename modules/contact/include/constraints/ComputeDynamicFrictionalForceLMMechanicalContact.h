@@ -12,7 +12,7 @@
 #include "ComputeDynamicWeightedGapLMMechanicalContact.h"
 
 /**
- * Computes frictional constraints (and normal contact constraints by calling its parent object)
+ * Computes the mortar tangential frictional forces for dynamic simulations.
  */
 class ComputeDynamicFrictionalForceLMMechanicalContact
   : public ComputeDynamicWeightedGapLMMechanicalContact
