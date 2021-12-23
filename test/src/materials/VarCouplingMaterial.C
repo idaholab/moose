@@ -21,12 +21,16 @@ VarCouplingMaterial::validParams()
   params.addParam<bool>(
       "declare_old", false, "When True the old value for the material property is declared.");
   params.addParam<TagName>("tag", Moose::SOLUTION_TAG, "The solution vector to be coupled in");
+  params.addParam<bool>("use_tag",
+                        true,
+                        "Whether the coupled value should come from a tag. If false, then we use "
+                        "an ordinary coupled value.");
   return params;
 }
 
 VarCouplingMaterial::VarCouplingMaterial(const InputParameters & parameters)
   : Material(parameters),
-    _var(coupledVectorTagValue("var", "tag")),
+    _var(getParam<bool>("use_tag") ? coupledVectorTagValue("var", "tag") : coupledValue("var")),
     _base(getParam<Real>("base")),
     _coef(getParam<Real>("coef")),
     _diffusion(declareProperty<Real>("diffusion")),
