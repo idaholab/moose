@@ -34,6 +34,7 @@ OptimizationData::OptimizationData(const InputParameters & parameters)
         declareValueByName<std::vector<Real>>("simulation_values", REPORTER_MODE_REPLICATED)),
     _misfit_values(declareValueByName<std::vector<Real>>("misfit_values", REPORTER_MODE_REPLICATED))
 {
+  // fixme add mesasurementpoints to params
   if (isParamValid("measurement_points"))
   {
     std::vector<Point> measurement_points = getParam<std::vector<Point>>("measurement_points");
