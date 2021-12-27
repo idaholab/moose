@@ -26,8 +26,19 @@ ElementL2Difference::validParams()
 }
 
 ElementL2Difference::ElementL2Difference(const InputParameters & parameters)
-  : ElementIntegralVariablePostprocessor(parameters), _other_var(coupledValue("other_variable"))
+  : ElementIntegralVariablePostprocessor(parameters),
+    _other_var(coupledValue("other_variable")),
+    _variables_match(getVar("other_variable", 0)->name() == getVar("variable", 0)->name())
 {
+  if (_variables_match)
+  {
+    if (!_fe_problem.isTransient())
+      paramError("other_variable",
+                 "When using a 'Steady' executioner, cannot compare against "
+                 "previous values; 'other_variable' cannot be the same as 'variable'");
+    else
+      _u_old = &coupledValueOld("variable");
+  }
 }
 
 Real
@@ -39,6 +50,7 @@ ElementL2Difference::getValue()
 Real
 ElementL2Difference::computeQpIntegral()
 {
-  Real diff = _u[_qp] - _other_var[_qp];
+  Real other = _variables_match ? (*_u_old)[_qp] : _other_var[_qp];
+  Real diff = _u[_qp] - other;
   return diff * diff;
 }

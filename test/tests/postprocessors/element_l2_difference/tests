@@ -1,12 +1,26 @@
 [Tests]
-  issues = '#5771'
   design = 'ElementL2Difference.md'
 
-  [./test]
-    type = 'Exodiff'
-    input = 'element_l2_difference.i'
-    exodiff = 'element_l2_difference_out.e'
+  [test]
+    type = Exodiff
+    input = element_l2_difference.i
+    exodiff = element_l2_difference_out.e
 
     requirement = 'The system shall compute the element-wise L2 difference between two field variables.'
-  [../]
+    issues = '#5771'
+  []
+  [test_against_old]
+    type = CSVDiff
+    input = element_l2_difference_time.i
+    csvdiff = element_l2_difference_time_out.csv
+    requirement = 'The system shall compute the element-wise L2 difference between a variable and the previous time step.'
+    issues = '#19925'
+  []
+  [invaid_executioner]
+    type = RunException
+    input = steady_error.i
+    expect_err = "When using a 'Steady' executioner, cannot compare against previous values; 'other_variable' cannot be the same as 'variable'"
+    requirement = 'The system shall error if computing the difference between two time steps with a steady executioner'
+    issues = '#19925'
+  []
 []

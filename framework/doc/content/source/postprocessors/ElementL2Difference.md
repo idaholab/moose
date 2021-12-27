@@ -10,6 +10,11 @@ The element $L_2$ difference between two variables $u$ and $v$ is computed as:
 The $J$ term accounts for the geometry/volume of the element, the $W$ for the weight in the [quadrature](syntax/Executioner/Quadrature/index.md),
 $c$ for an eventual coordinate change (cylindrical, spherical) and $u(qp)$ and $v(qp)$ are the values of the variable at the quadrature point.
 
+If [!param](/Postprocessors/ElementL2Difference/other_variable) is the same as
+[!param](/Postprocessors/ElementL2Difference/variable), then $v$ is taken as the value
+of $u$ at the previous time step, such that the postprocessor computes the $L_2$
+difference between $u$ between the current and previous time steps.
+
 ## Example input syntax
 
 In this example, we compute the L2 difference between two variables that are solution of the same problem, but of different order, using `ElementL2Difference` postprocessors. $u$ is a linear lagrange variable while $v$ is a second order lagrange variable. We can verify by refining the mesh that their difference goes to 0.
