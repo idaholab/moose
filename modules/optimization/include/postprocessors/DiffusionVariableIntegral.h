@@ -21,7 +21,7 @@ public:
 protected:
   virtual Real computeQpIntegral() override;
   ///@{ Derivative of materwith with respect to parameter being optimized
-  const MaterialProperty<Real> & _M;
+  const MaterialProperty<Real> & _dMdP;
   ///@}
   /// Holds variable1 gradient at the current quadrature points
   const VariableGradient & _grad_u;

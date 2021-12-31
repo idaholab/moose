@@ -199,7 +199,7 @@
     type = DiffusionVariableIntegral
     variable1 = temperature
     variable2 = temperature_forward
-    material = thermal_conductivity_deriv
+    material_derivative = thermal_conductivity_deriv
     execute_on = 'initial linear'
   []
   [pp_adjoint_grad_parsedFunc]
