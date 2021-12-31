@@ -27,9 +27,21 @@ where the first integral is an L$_2$ norm or euclidean distance between the expe
 
 Gradient-free optimization solvers only require a function to solve for the objective given in [eq:objective].  Solving for the objective only requires solving a forward problem to determine $\mathbf{u}$ and then plugging that into [eq:objective] to determine $J$.  The forward problem is defined as the FEM model of the experiment which the analyst should have already made before attempting to perform optimization.  The parameters that go into the forward problem (e.g. pressure distributions on sidesets or material properties) are adjusted by the optimization solver and the forward problem is recomputed.  This process continues until $J$ is below some user defined threshold. The basic gradient-free solver available in TAO is the simplex or Nelder-Mead method.  Gradient-free optimization solvers are robust and straight-forward to use.  Unfortunately, their computational cost scales exponentially with the number of parameters.  When the forward model is a computationally expensive FEM model, gradient-free approaches quickly become computationally expensive.
 
-Gradient-based optimization algorithms require fewer iterations but require functions to solve for the gradient vector and sometimes Hessians matrix.  TAO has \code{petsc\_options} to evaluate finite difference based gradients and Hessians by solving the objective function multiple times with perturbed parameters, which also requires multiple solves of the forward problem.  Finite difference gradients and Hessians are good for testing an optimization approach but become computationally expensive for realistic problems.
+Gradient-based optimization algorithms require fewer iterations but require functions to solve for the gradient vector and sometimes Hessians matrix.  TAO has `petsc_options` to evaluate finite difference based gradients and Hessians by solving the objective function multiple times with perturbed parameters, which also requires multiple solves of the forward problem.  Finite difference gradients and Hessians are good for testing an optimization approach but become too expensive for realistic problems.
 
-Neglecting the regularization in [eq:objective] the total derivative of $J$ with respect to $\mathbf{p}$ using the chain rule is given by
+Given the large parameter space, we resort to the adjoint method for gradient computation; unlike finite difference approaches, the computational cost of adjoint methods is independent of the number of parameters (ref18).  In the adjoint method, the gradient, i.e. the total derivative $\mathrm{d}J/\mathrm{d}\mathbf{p}$, is computed as,
+\begin{equation}\label{eq:adjointGrad}
+\frac{\mathrm{d}J}{\mathrm{d}\mathbf{p}} = \frac{\partial J}{\partial\mathbf{p}}+\mathbf{\lambda}\frac{\partial\mathbf{g}}{\partial\mathbf{p}} ,
+\end{equation}
+where $\partial J/\partial\mathbf{p}$ accounts for the regularization in [eq:objective] and $\mathbf{\lambda}$ is the adjoint variable solved for from the adjoint equation
+\begin{equation}\label{eq:adjoint}
+\left(\frac{\partial\mathbf{g}}{\partial\mathbf{u}}\right)^\top \mathbf{\lambda}= \left(\frac{\partial J}{\partial\mathbf{u}}\right)^\top ,
+\end{equation}
+where $\left(\partial\mathbf{g}/\partial\mathbf{u}\right)^\top$ is the adjoint of the Jacobian for the original forward problem, $\mathbf{g}$, and $\left(\partial J/\partial\mathbf{u}\right)^\top$ is a body force like term that accounts for the misfit between the computed and experimental data.  Thus, the solution to [eq:adjoint] has the same complexity as the solution to the forward problem.  
+
+The remaining step for evaluating the derivative of the PDE in [eq:adjointGrad] is to compute $\partial\mathbf{g}/\partial\mathbf{p}$, the derivative of the PDE with respect to the parameter vector.  The form this term takes is dependent on the physics (e.g. mechanics or heat conduction) and the parameter being optimized (e.g. force inversion versus material inversion).  In what follows, we will derive the adjoint equation for steady state heat conduction and the gradient term for both force and material inversion.  
+
+In the following, the adjoint method given in [eq:adjointGrad] and [eq:adjoint] is derived from [eq:objective] following the derivation given by [!citet](bradley2013pde).  Neglecting the regularization in [eq:objective] the total derivative of $J$ with respect to $\mathbf{p}$ using the chain rule is given by
 \begin{equation}\label{eq:objectiveGrad}
 \frac{\mathrm{d}J(\mathbf{u},\mathbf{p})}{\mathrm{d}\mathbf{p}} = \frac{\partial J}{\partial \mathbf{u}}\frac{\partial \mathbf{u}}{\partial\mathbf{p}}.  
 \end{equation}
@@ -48,20 +60,21 @@ which can be substituted into [eq:objectiveGrad] to give
 \begin{equation}\label{eq:objectiveGrad2}
 \frac{\mathrm{d}J(\mathbf{u},\mathbf{p})}{\mathrm{d}\mathbf{p}} = -\frac{\partial J}{\partial \mathbf{u}}\left(\frac{\partial g}{\partial \mathbf{u}}\right)^{-1}\frac{\partial g}{\partial \mathbf{p}}.  
 \end{equation}
+The terms in [eq:objectiveGrad2] are all terms we can compute.  The derivative of the objective with respect to the degree of freedom, $\frac{\partial J}{\partial \mathbf{u}}$, is dependent on the data being fit and will be discussed in the section discussing the [adjoint method](#sec:adjoint) for discrete data points.  The term, $\frac{\partial g}{\partial \mathbf{p}}$, requires differentiation of our PDE with respect to each parameter being inverted for and is derived for simple cases in the following [section](#sec:PDEDerivs) for force inversion and material identification.  The middle term, $\frac{\partial g}{\partial \mathbf{u}}$, is the Jacobian matrix of the forward problem.  [eq:objectiveGrad2] requires the inverse of the Jacobian matrix which is not how we actually solve this system of equations.  
 
+We have two options for dealing with the inverse of the Jacobian.  In the first, we could perform one linear solve per parameter, $p_i$, being fit by solving $\left[\left(\frac{\partial g}{\partial \mathbf{u}}\right)^{-1}\frac{\partial g}{\partial p_i}\right]$.  This algorithm scales with the number of parameters which makes it computationally expensive for tens of parameters.  
 
-
-Given the large parameter space, we resort to the adjoint method for gradient computation; unlike finite difference approaches, the computational cost of adjoint methods is independent of the number of parameters (ref18).  In the adjoint method, the gradient, i.e. the total derivative $\mathrm{d}J/\mathrm{d}\mathbf{p}$, is computed as,
-\begin{equation}\label{eq:adjointGrad}
-\frac{\mathrm{d}J}{\mathrm{d}\mathbf{p}} = \frac{\partial J}{\partial\mathbf{p}}+\mathbf{\lambda}\frac{\partial\mathbf{g}}{\partial\mathbf{p}} ,
+The alternative that we will use is the adjoint method which scales independently to the number of optimization parameters.   The adjoint method requires one additional solve of the same complexity as the original forward problem.  The adjoint equation given in [eq:adjoint] is found by setting the adjoint variable, $\lambda$, equal to the first two terms of [eq:objectiveGrad2] and then rearranging terms to give
+\begin{equation} \label{eq:AdjEqn}
+	\begin{aligned}
+	&\lambda= \frac{\partial J}{\partial \mathbf{u}}\left(\frac{\partial g}{\partial \mathbf{u}}\right)^{-1}  \\
+	&\rightarrow \lambda \left(\frac{\partial g}{\partial \mathbf{u}}\right)= -\frac{\partial J}{\partial \mathbf{u}}\left[\left(\frac{\partial g}{\partial \mathbf{u}}\right)^{-1} \left(\frac{\partial g}{\partial \mathbf{u}}\right)\right] \\
+	&\rightarrow \lambda \left(\frac{\partial g}{\partial \mathbf{u}}\right)= -\frac{\partial J}{\partial \mathbf{u}} \\
+	&\rightarrow \left[\lambda \left(\frac{\partial g}{\partial \mathbf{u}}\right)\right]^\top= -\left[\frac{\partial J}{\partial \mathbf{u}}\right]^\top \\
+	&\rightarrow \left(\frac{\partial g}{\partial \mathbf{u}}\right)^\top \lambda^\top = -\left[\frac{\partial J}{\partial \mathbf{u}}\right]^\top \\
+\end{aligned}
 \end{equation}
-where $\partial J/\partial\mathbf{p}$ accounts for the regularization in [eq:objective] and $\mathbf{\lambda}$ is the adjoint variable solved for from the adjoint equation
-\begin{equation}\label{eq:adjoint}
-\left(\frac{\partial\mathbf{g}}{\partial\mathbf{u}}\right)^\top \mathbf{\lambda}= \left(\frac{\partial J}{\partial\mathbf{u}}\right)^\top ,
-\end{equation}
-where $\left(\partial\mathbf{g}/\partial\mathbf{u}\right)^\top$ is the adjoint of the Jacobian for the original forward problem, $\mathbf{g}$, and $\left(\partial J/\partial\mathbf{u}\right)^\top$ is a body force like term that accounts for the misfit between the computed and experimental data.  Thus, the solution to \eq{eq:adjoint} has the same complexity as the solution to the forward problem.  
-
-The remaining step for evaluating the derivative of the PDE in [eq:adjointGrad] is to compute $\partial\mathbf{g}/\partial\mathbf{p}$, the derivative of the PDE with respect to the parameter vector.  The form this term takes is dependent on the physics (e.g. mechanics or heat conduction) and the parameter being optimized (e.g. force inversion versus material inversion).  In what follows, we will derive the adjoint equation for steady state heat conduction and the gradient term for both force and material inversion.  
+where each step of the derivation has been included as a reminder of how [eq:adjoint] is obtained.  The next [section](#sec:adjoint) uses an alternative approach to determine the adjoint equation based on Lagrange multipliers.  
 
 [comment]: <> (% ----------------------------------------------------------------------------------------------------------%)
 
