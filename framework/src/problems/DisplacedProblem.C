@@ -31,8 +31,9 @@ InputParameters
 DisplacedProblem::validParams()
 {
   InputParameters params = SubProblem::validParams();
-  params.addClassDescription("A Problem object for provided access to the displaced finite element "
-                             "mesh and associated variables.");
+  params.addClassDescription(
+      "A Problem object for providing access to the displaced finite element "
+      "mesh and associated variables.");
   params.addPrivateParam<MooseMesh *>("mesh");
   params.addPrivateParam<std::vector<std::string>>("displacements");
   return params;

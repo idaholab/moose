@@ -10,7 +10,7 @@ problem useful for creating ["MOOSE-wrapped Apps"](moose_wrapped_apps.md optiona
 
 One of the advantages of the MOOSE framework is the ease at building up Multiphysics
 simulations. Coupling is a first-class feature and filling out residuals, or
-materials properties with coupling is very natural. When coupling is optional, it
+material properties with coupling is very natural. When coupling is optional, it
 is often handy to have access to valid data structures that may be used in-place
 of the actual coupled variables. This makes it possible to avoid branch statements
 inside of your residual statements and other computationally intensive areas of

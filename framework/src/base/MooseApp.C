@@ -2600,7 +2600,7 @@ MooseApp::getRelationshipManagerInfo() const
     {
       const auto * gf_ptr = dynamic_cast<const RelationshipManager *>(gf);
       if (!gf_ptr)
-        // Count how many occurances of the same Ghosting Functor types we are encountering
+        // Count how many occurences of the same Ghosting Functor types we are encountering
         counts[demangle(typeid(*gf).name())]++;
     }
 
@@ -2624,7 +2624,7 @@ MooseApp::getRelationshipManagerInfo() const
     {
       const auto * gf_ptr = dynamic_cast<const RelationshipManager *>(gf);
       if (!gf_ptr)
-        // Count how many occurances of the same Ghosting Functor types we are encountering
+        // Count how many occurences of the same Ghosting Functor types we are encountering
         counts[demangle(typeid(*gf).name())]++;
     }
 

@@ -19,7 +19,7 @@ divided by the previous one.
 In this example, a `SimplePredictor` is specified in the executioner to use the previous
 time step solution to compute better initial guesses for each non linear solve.
 
-!listing test/tests/predictor/simple/predictor_test.i block=Executioner
+!listing test/tests/predictors/simple/predictor_test.i block=Executioner
 
 !syntax parameters /Executioner/Predictor/SimplePredictor
 
