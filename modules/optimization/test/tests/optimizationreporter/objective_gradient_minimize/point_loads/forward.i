@@ -2,30 +2,20 @@
   type = GeneratedMesh
   dim = 2
   nx = 10
-  ny = 10
+  ny = 20
   xmax = 1
-  ymax = 1.4
+  ymax = 2
 []
 
 [Variables]
   [temperature]
-    order = FIRST
-    family = LAGRANGE
-  []
-[]
-
-[AuxVariables]
-  [saved_t]
-    order = FIRST
-    family = LAGRANGE
   []
 []
 
 [Kernels]
   [heat_conduction]
-    type = HeatConduction
+    type = ADHeatConduction
     variable = temperature
-    save_in = saved_t
   []
 []
 
@@ -45,31 +35,31 @@
     type = DirichletBC
     variable = temperature
     boundary = left
-    value = 300
+    value = 0
   []
   [right]
     type = DirichletBC
     variable = temperature
     boundary = right
-    value = 300
+    value = 0
   []
   [bottom]
     type = DirichletBC
     variable = temperature
     boundary = bottom
-    value = 300
+    value = 0
   []
   [top]
     type = DirichletBC
     variable = temperature
     boundary = top
-    value = 300
+    value = 0
   []
 []
 
 [Materials]
   [steel]
-    type = GenericConstantMaterial
+    type = ADGenericConstantMaterial
     prop_names = thermal_conductivity
     prop_values = 5
   []
@@ -124,12 +114,5 @@
   json=false
   console = true
   exodus = false
-<<<<<<< HEAD:test/tests/optimizationreporter/objective_gradient_minimize/point_loads/forward.i
-=======
-  csv=true
->>>>>>> 9811d3b (updated tests to output the point load figures included in the ldrd seed poster and report):test/tests/formfunction/objective_gradient_minimize/point_loads/forward.i
   file_base = 'forward'
-  print_linear_converged_reason = false
-  print_nonlinear_converged_reason = false
-  print_linear_residuals = false
 []

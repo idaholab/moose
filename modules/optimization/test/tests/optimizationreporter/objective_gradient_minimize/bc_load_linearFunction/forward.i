@@ -82,16 +82,7 @@
   [data_pt]
     type = VppPointValueSampler
     variable = temperature
-<<<<<<< HEAD:test/tests/optimizationreporter/objective_gradient_minimize/bc_load_linearFunction/forward.i
     reporter_name = measure_data
-=======
-    points = '0.2 0.2 0
-              0.8 0.6 0
-              0.2 1.4 0
-              0.8 1.8 0'
-    measured_values = '207 204 185 125'
-    outputs=none
->>>>>>> 5d604ba (changes for milestone report):test/tests/formfunction/objective_gradient_minimize/bc_load_linearFunction/forward.i
   []
    [vertical_1]
      type = LineValueSampler

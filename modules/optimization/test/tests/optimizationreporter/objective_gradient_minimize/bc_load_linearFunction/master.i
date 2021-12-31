@@ -30,9 +30,9 @@
 
 [Executioner]
   type = Optimize
-  tao_solver = taocg
-  petsc_options_iname = '-tao_max_it  -tao_fmin'# -tao_ls_type' #-tao_gatol'#
-  petsc_options_value = '1000 .05'# unit'  #1e-4'
+  tao_solver = taolmvm
+  petsc_options_iname = '-tao_gatol'#
+  petsc_options_value = '1e-4'
   # petsc_options_iname = '-tao_fd_gradient -tao_fd_delta -tao_gatol'
   # petsc_options_value = 'true 0.0001 1e-4'
   # petsc_options_iname='-tao_max_it -tao_fd_test -tao_test_gradient -tao_fd_gradient -tao_fd_delta -tao_gatol'
@@ -107,7 +107,7 @@
    []
    [optInfo]
      type = OptimizationInfo
-     #items = 'current_iterate'
+     items = 'current_iterate'
      #execute_on=timestep_end
    []
 []

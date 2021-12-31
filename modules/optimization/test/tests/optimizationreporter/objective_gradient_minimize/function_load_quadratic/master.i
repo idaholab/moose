@@ -6,14 +6,6 @@
   parameter_names = 'parameter_results'
   num_values = '3'
   initial_condition = '1 1 1'
-<<<<<<< HEAD:test/tests/optimizationreporter/objective_gradient_minimize/function_load_quadratic/master.i
-
-=======
-  # lower_bounds = '-5000 0     -1000'
-  # upper_bounds = '0     10000  0'
-  misfit_name = 'misfit'
->>>>>>> 5d604ba (changes for milestone report):test/tests/formfunction/objective_gradient_minimize/function_load_quadratic/master.i
-  adjoint_data_name = 'adjoint'
 []
 
 [Executioner]

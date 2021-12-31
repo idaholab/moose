@@ -2,22 +2,13 @@
   type = GeneratedMesh
   dim = 2
   nx = 10
-  ny = 10
+  ny = 20
   xmax = 1
-  ymax = 1.4
+  ymax = 2
 []
 
 [Variables]
   [temperature]
-    order = FIRST
-    family = LAGRANGE
-  []
-[]
-
-[AuxVariables]
-  [saved_t]
-    order = FIRST
-    family = LAGRANGE
   []
 []
 
@@ -25,7 +16,6 @@
   [heat_conduction]
     type = ADHeatConduction
     variable = temperature
-    save_in = saved_t
   []
 []
 #-----every adjoint problem should have these two
@@ -94,13 +84,12 @@
 [VectorPostprocessors]
   [data_pt]
     type = PointValueSampler
-    points = '0.35 0.20 0
-              0.4 1.0 0
-              0.7 0.56 0'
+    points = '0.2 0.2 0
+              0.2 0.8 0
+              0.8 0.2 0'
     variable = temperature
     sort_by = id
   []
-
 []
 
 [Outputs]
