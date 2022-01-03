@@ -15,6 +15,7 @@
 #include "ADRankThreeTensorForward.h"
 #include "ADSymmetricRankTwoTensorForward.h"
 #include "MooseUtils.h"
+#include "MathUtils.h"
 
 // Any requisite includes here
 #include "libmesh/libmesh.h"
@@ -152,7 +153,12 @@ public:
   /// Copy constructor from SymmetricRankTwoTensor (delegates)
   template <typename T2>
   RankTwoTensorTempl(const SymmetricRankTwoTensorTempl<T2> & a)
-    : RankTwoTensorTempl<T>(a(0), a(1), a(2), a(3) / sqrt(2.0), a(4) / sqrt(2.0), a(5) / sqrt(2.0))
+    : RankTwoTensorTempl<T>(a(0),
+                            a(1),
+                            a(2),
+                            a(3) / MathUtils::sqrt2,
+                            a(4) / MathUtils::sqrt2,
+                            a(5) / MathUtils::sqrt2)
   {
   }
 
@@ -193,10 +199,10 @@ public:
   /// multiply vector v with row n of this tensor
   T rowMultiply(std::size_t n, const TypeVector<T> & v) const;
 
-  /// return the marix multiplied with its transpose A*A^T (guaranteed symmetric)
+  /// return the matrix multiplied with its transpose A*A^T (guaranteed symmetric)
   static RankTwoTensorTempl<T> timesTranspose(const RankTwoTensorTempl<T> &);
 
-  /// return the marix plus its transpose A-A^T (guaranteed symmetric)
+  /// return the matrix plus its transpose A+A^T (guaranteed symmetric)
   static RankTwoTensorTempl<T> plusTranspose(const RankTwoTensorTempl<T> &);
 
   /**

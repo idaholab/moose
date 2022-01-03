@@ -180,17 +180,17 @@ public:
    */
   void fillFromScalarVariable(const VariableValue & scalar_variable);
 
-  /// Gets the value for the index specified.  Takes index = 0,1,2
+  /// Gets the value for the index specified.  Takes index = 0,1,2,3,4,5
   inline T & operator()(unsigned int i) { return _vals[i]; }
 
   /// multiply vector v with row n of this tensor
   T rowMultiply(std::size_t n, const TypeVector<T> & v) const;
 
-  /// return the marix multiplied with its transpose A*A^T (guaranteed symmetric)
+  /// return the matrix multiplied with its transpose A*A^T (guaranteed symmetric)
   static SymmetricRankTwoTensorTempl<T> timesTranspose(const RankTwoTensorTempl<T> &);
   static SymmetricRankTwoTensorTempl<T> timesTranspose(const SymmetricRankTwoTensorTempl<T> &);
 
-  /// return the marix plus its transpose A-A^T (guaranteed symmetric)
+  /// return the matrix plus its transpose A-A^T (guaranteed symmetric)
   static SymmetricRankTwoTensorTempl<T> plusTranspose(const RankTwoTensorTempl<T> &);
   static SymmetricRankTwoTensorTempl<T> plusTranspose(const SymmetricRankTwoTensorTempl<T> &);
 

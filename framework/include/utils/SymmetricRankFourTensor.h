@@ -159,11 +159,11 @@ public:
     return SymmetricRankFourTensorTempl<T>(initIdentitySymmetricFour);
   };
 
-  /// Gets the value for the index specified.  Takes index = 0,1,2
+  /// Gets the value for the index specified.  Takes index = 0,1,2,3,4,5
   inline T & operator()(unsigned int i, unsigned int j) { return _vals[i * N + j]; }
 
   /**
-   * Gets the value for the index specified.  Takes index = 0,1,2
+   * Gets the value for the index specified.  Takes index = 0,1,2,3,4,5
    * used for const
    */
   inline T operator()(unsigned int i, unsigned int j) const { return _vals[i * N + j]; }

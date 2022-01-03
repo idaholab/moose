@@ -211,7 +211,6 @@ ADComputeFiniteStrainTempl<R2, R4>::computeQpIncrements(ADR2 & total_strain_incr
     {
       std::vector<ADReal> e_value(3);
       ADRankTwoTensor e_vector;
-      ADR2 N1, N2, N3;
 
       const auto Chat = _Fhat[_qp].transpose() * _Fhat[_qp];
       Chat.symmetricEigenvaluesEigenvectors(e_value, e_vector);
@@ -221,9 +220,9 @@ ADComputeFiniteStrainTempl<R2, R4>::computeQpIncrements(ADR2 & total_strain_incr
       const auto lambda3 = std::sqrt(e_value[2]);
 
       // outer product of a vector with itself is guaranteed to be symmetric
-      N1.vectorSelfOuterProduct(e_vector.column(0));
-      N2.vectorSelfOuterProduct(e_vector.column(1));
-      N3.vectorSelfOuterProduct(e_vector.column(2));
+      const auto N1 = ADR2::vectorSelfOuterProduct(e_vector.column(0));
+      const auto N2 = ADR2::vectorSelfOuterProduct(e_vector.column(1));
+      const auto N3 = ADR2::vectorSelfOuterProduct(e_vector.column(2));
 
       const ADRankTwoTensor Uhat(N1 * lambda1 + N2 * lambda2 + N3 * lambda3);
       const ADRankTwoTensor invUhat(Uhat.inverse());
