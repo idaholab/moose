@@ -58,7 +58,7 @@
     type = ParsedFunction
     value = q
     vars = 'q'
-    vals = 'valueFromControl'
+    # vals = # This is set by the master app OptimizationMultiAppCommandLineControl
   []
 []
 
