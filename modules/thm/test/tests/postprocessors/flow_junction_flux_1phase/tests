@@ -1,0 +1,10 @@
+[Tests]
+  [test]
+    type = 'CSVDiff'
+    input = 'flow_junction_flux_1phase.i'
+    csvdiff = 'flow_junction_flux_1phase_out.csv'
+    recover = false
+    abs_zero = 2e-8
+    max_parallel = 1
+  []
+[]

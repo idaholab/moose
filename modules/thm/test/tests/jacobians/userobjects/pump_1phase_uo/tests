@@ -1,0 +1,57 @@
+[Tests]
+  # 1-phase pump
+  [pump_rhoV]
+    type = 'PetscJacobianTester'
+    input = 'pump_1phase.i'
+    ratio_tol = 1e-11
+    difference_tol = 1e-11
+    max_threads = 1
+    max_parallel = 1
+    allow_test_objects = true
+    group = 'pump1phase'
+  []
+
+  # x-direction mesh
+  [pump_rhouV]
+    type = 'PetscJacobianTester'
+    input = 'pump_1phase.i'
+    cli_args = '
+      ScalarKernels/scalar_kernel/variable=rhouV
+      ScalarKernels/scalar_kernel/equation_index=1'
+    ratio_tol = 4e-10
+    difference_tol = 2e-6
+    max_threads = 1
+    max_parallel = 1
+    allow_test_objects = true
+    group = 'pump1phase'
+  []
+  # y-direction mesh
+  [pump_rhouV_y]
+    type = 'PetscJacobianTester'
+    input = 'pump_1phase.i'
+    cli_args = "
+      ScalarKernels/scalar_kernel/variable=rhouV
+      ScalarKernels/scalar_kernel/equation_index=1
+      Mesh/file=../../meshes/y_2channel_1elem.e"
+    ratio_tol = 4e-10
+    difference_tol = 1e-6
+    max_threads = 1
+    max_parallel = 1
+    allow_test_objects = true
+    group = 'pump1phase'
+  []
+
+  [pump_rhoEV]
+    type = 'PetscJacobianTester'
+    input = 'pump_1phase.i'
+    cli_args = '
+      ScalarKernels/scalar_kernel/variable=rhoEV
+      ScalarKernels/scalar_kernel/equation_index=4'
+    ratio_tol = 3e-10
+    difference_tol = 9e-7
+    max_threads = 1
+    max_parallel = 1
+    allow_test_objects = true
+    group = 'pump1phase'
+  []
+[]

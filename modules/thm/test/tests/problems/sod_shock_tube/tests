@@ -1,0 +1,63 @@
+[Tests]
+  [sod_shock_tube_erk2_heavy]
+    type = 'Exodiff'
+    input = 'sod_shock_tube.i'
+    exodiff = 'sod_shock_tube_erk2_heavy.e'
+    cli_args = '
+      Executioner/TimeIntegrator/order=2
+      Outputs/file_base=sod_shock_tube_erk2_heavy
+      Outputs/execute_on=final'
+    abs_zero = 1e-10
+    rel_err = 1e-5
+    heavy = true
+    recover = false
+    max_parallel = 1
+    group = '1phase rdg explicit pipe free_boundary'
+  []
+  [sod_shock_tube_erk2_light]
+    type = 'Exodiff'
+    input = 'sod_shock_tube.i'
+    exodiff = 'sod_shock_tube_erk2_light.e'
+    cli_args = '
+      Executioner/TimeIntegrator/order=2
+      Executioner/num_steps=5
+      Outputs/file_base=sod_shock_tube_erk2_light'
+    abs_zero = 1e-10
+    rel_err = 1e-5
+    max_parallel = 1
+    group = '1phase rdg explicit pipe free_boundary'
+  []
+  [non_x_direction_1phase]
+    type = 'Exodiff'
+    input = 'sod_shock_tube.i'
+    exodiff = 'non_x_direction_1phase.e'
+    cli_args = '
+      Functions/p_ic_fn/axis=y
+      Functions/T_ic_fn/axis=y
+      Components/pipe/position="1 0 0"
+      Components/pipe/orientation="0 1 0"
+      Executioner/TimeIntegrator/order=2
+      Executioner/num_steps=5
+      Outputs/file_base=non_x_direction_1phase'
+    abs_zero = 1e-10
+    rel_err = 1e-5
+    max_parallel = 1
+    group = '1phase rdg explicit pipe free_boundary'
+  []
+  [sod_shock_tube_be]
+    type = 'Exodiff'
+    input = 'sod_shock_tube.i'
+    exodiff = 'sod_shock_tube_be.e'
+    cli_args = '
+      Preconditioning/pc/type=SMP
+      Preconditioning/pc/full=true
+      Executioner/TimeIntegrator/type=ImplicitEuler
+      Executioner/solve_type=NEWTON
+      Executioner/num_steps=5
+      Outputs/file_base=sod_shock_tube_be'
+    abs_zero = 1e-7
+    rel_err = 1e-5
+    max_parallel = 1
+    group = '1phase rdg implicit pipe free_boundary'
+  []
+[]

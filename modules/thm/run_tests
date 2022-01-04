@@ -1,0 +1,12 @@
+#!/usr/bin/env python
+import sys, os
+
+MOOSE_DIR = os.path.abspath(os.environ.get('MOOSE_DIR', os.path.join(os.path.dirname(__file__), '..', 'moose')))
+if os.path.exists(os.path.abspath(os.path.join('moose', 'framework', 'Makefile'))):
+  MOOSE_DIR = os.path.abspath('moose')
+MOOSE_DIR = os.environ.get('MOOSE_DIR', MOOSE_DIR)
+
+sys.path.append(os.path.join(MOOSE_DIR, 'python'))
+
+from TestHarness import TestHarness
+TestHarness.buildAndRun(sys.argv, None, MOOSE_DIR)

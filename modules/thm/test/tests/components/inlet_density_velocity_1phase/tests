@@ -1,0 +1,29 @@
+[Tests]
+  # physics
+  [phy:densityvelocity_3eqn]
+    type = 'Exodiff'
+    input = 'phy.densityvelocity_3eqn.i'
+    exodiff = 'phy.densityvelocity_3eqn_out.e'
+    max_parallel = 1
+    recover = false
+  []
+
+  # control logic
+  [clg:densityvelocity_3eqn]
+    type = 'CSVDiff'
+    input = 'clg.densityvelocity_3eqn.i'
+    csvdiff = 'clg.densityvelocity_3eqn_out.csv'
+    max_parallel = 1
+    rel_err = 1e-5
+  []
+
+  [jacobian]
+    type = 'PetscJacobianTester'
+    input = 'jacobian.i'
+    ratio_tol = 1e-7
+    difference_tol = 15
+    max_parallel = 1
+    max_threads = 1
+    cli_args = 'Debug/check_jacobian=true'
+  []
+[]

@@ -1,0 +1,26 @@
+#include "GetFunctionValueControl.h"
+#include "Function.h"
+
+registerMooseObject("THMApp", GetFunctionValueControl);
+
+InputParameters
+GetFunctionValueControl::validParams()
+{
+  InputParameters params = THMControl::validParams();
+  params.addRequiredParam<FunctionName>("function",
+                                        "The name of the function prescribing a value.");
+  return params;
+}
+
+GetFunctionValueControl::GetFunctionValueControl(const InputParameters & parameters)
+  : THMControl(parameters),
+    _value(declareComponentControlData<Real>("value")),
+    _function(getFunction("function"))
+{
+}
+
+void
+GetFunctionValueControl::execute()
+{
+  _value = _function.value(_t, Point());
+}

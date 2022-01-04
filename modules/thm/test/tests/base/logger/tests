@@ -1,0 +1,9 @@
+[Tests]
+  [warning]
+    type = 'RunApp'
+    command = '../../../../thm-opt -i test.i --allow-test-objects --color off'
+    expect_out = "1 warning:
+\s+- warn: This is a warning"
+    method = 'OPT'
+  []
+[]

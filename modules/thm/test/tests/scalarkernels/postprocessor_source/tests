@@ -1,0 +1,7 @@
+[Tests]
+  [postprocessor_source]
+    type = 'CSVDiff'
+    input = 'postprocessor_source.i'
+    csvdiff = 'postprocessor_source_out.csv'
+  []
+[]

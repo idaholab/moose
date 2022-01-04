@@ -1,0 +1,172 @@
+[Tests]
+  [one_d_mass_free_bc]
+    type = 'PetscJacobianTester'
+    input = 'one_d_mass_free_bc.i'
+    ratio_tol = 5e-10
+    difference_tol = 1e-9
+    max_threads = 1
+    max_parallel = 1
+    allow_test_objects = true
+  []
+  [one_d_momentum_free_bc]
+    type = 'PetscJacobianTester'
+    input = 'one_d_momentum_free_bc.i'
+    ratio_tol = 1e-7
+    difference_tol = 0.2
+    max_threads = 1
+    max_parallel = 1
+    allow_test_objects = true
+  []
+  [one_d_energy_free_bc]
+    type = 'PetscJacobianTester'
+    input = 'one_d_energy_free_bc.i'
+    ratio_tol = 4e-8
+    difference_tol = 0.15
+    max_threads = 1
+    max_parallel = 1
+    allow_test_objects = true
+  []
+
+  [one_d_equal_value_ced_bc]
+    type = 'PetscJacobianTester'
+    input = 'one_d_equal_value_ced_bc.i'
+    ratio_tol = 1e-13
+    difference_tol = 1e-13
+    max_threads = 1
+    max_parallel = 1
+    allow_test_objects = true
+  []
+
+  [one_d_momentum_static_pressure_bc_supersonic]
+    type = 'PetscJacobianTester'
+    input = 'one_d_momentum_static_pressure_bc_supersonic.i'
+    ratio_tol = 5e-7
+    difference_tol = 1
+    max_threads = 1
+    max_parallel = 1
+    allow_test_objects = true
+  []
+
+  [one_d_energy_static_pressure_bc]
+    type = 'PetscJacobianTester'
+    input = 'one_d_energy_static_pressure_bc.i'
+    ratio_tol = 2e-7
+    difference_tol = 3
+    max_threads = 1
+    max_parallel = 1
+    allow_test_objects = true
+  []
+
+  [one_d_mass_hrhou_bc]
+    type = 'PetscJacobianTester'
+    input = 'one_d_mass_hrhou_bc.i'
+    ratio_tol = 1e-13
+    difference_tol = 1e-13
+    max_threads = 1
+    max_parallel = 1
+    allow_test_objects = true
+  []
+  [one_d_momentum_hrhou_bc]
+    type = 'PetscJacobianTester'
+    input = 'one_d_momentum_hrhou_bc.i'
+    ratio_tol = 1e-6
+    difference_tol = 5
+    max_threads = 1
+    max_parallel = 1
+    allow_test_objects = true
+  []
+  [one_d_energy_hrhou_bc]
+    type = 'PetscJacobianTester'
+    input = 'one_d_energy_hrhou_bc.i'
+    ratio_tol = 1e-13
+    difference_tol = 1e-13
+    max_threads = 1
+    max_parallel = 1
+    allow_test_objects = true
+  []
+
+  [one_d_momentum_densityvelocity_bc]
+    type = 'PetscJacobianTester'
+    input = 'one_d_momentum_densityvelocity_bc.i'
+    ratio_tol = 2e-7
+    difference_tol = 5e-8
+    max_threads = 1
+    max_parallel = 1
+    allow_test_objects = true
+  []
+  [one_d_energy_densityvelocity_bc]
+    type = 'PetscJacobianTester'
+    input = 'one_d_energy_densityvelocity_bc.i'
+    ratio_tol = 3e-8
+    difference_tol = 4e-8
+    max_threads = 1
+    max_parallel = 1
+    allow_test_objects = true
+  []
+
+  [one_d_mass_massflowrate_bc]
+    type = 'PetscJacobianTester'
+    input = 'one_d_mass_massflowrate_bc.i'
+    ratio_tol = 1e-13
+    difference_tol = 1e-13
+    max_threads = 1
+    max_parallel = 1
+    allow_test_objects = true
+  []
+  [one_d_momentum_massflowrate_bc]
+    type = 'PetscJacobianTester'
+    input = 'one_d_momentum_massflowrate_bc.i'
+    ratio_tol = 5e-13
+    difference_tol = 5e-13
+    max_threads = 1
+    max_parallel = 1
+    allow_test_objects = true
+  []
+  [one_d_energy_massflowrate_bc]
+    type = 'PetscJacobianTester'
+    input = 'one_d_energy_massflowrate_bc.i'
+    ratio_tol = 5e-6
+    difference_tol = 0.01
+    max_threads = 1
+    max_parallel = 1
+    allow_test_objects = true
+  []
+
+  [one_d_mass_stagnation_pt_bc_3eqn]
+    type = 'PetscJacobianTester'
+    input = 'one_d_mass_stagnation_pt_bc_3eqn.i'
+    ratio_tol = 2e-9
+    difference_tol = 2e-9
+    max_threads = 1
+    max_parallel = 1
+    allow_test_objects = true
+  []
+  [one_d_momentum_stagnation_pt_bc_3eqn]
+    type = 'PetscJacobianTester'
+    input = 'one_d_momentum_stagnation_pt_bc_3eqn.i'
+    ratio_tol = 3.4e-5
+    difference_tol = 2.2e-4
+    max_threads = 1
+    max_parallel = 1
+    allow_test_objects = true
+  []
+  [one_d_energy_stagnation_pt_bc_3eqn]
+    type = 'PetscJacobianTester'
+    input = 'one_d_energy_stagnation_pt_bc_3eqn.i'
+    ratio_tol = 1e-4
+    difference_tol = 1e-3
+    max_threads = 1
+    max_parallel = 1
+    allow_test_objects = true
+  []
+
+  [one_d_area_times_constant_bc]
+    type = 'PetscJacobianTester'
+    input = 'one_d_area_times_constant_bc.i'
+    ratio_tol = 1e-9
+    difference_tol = 2e-9
+    max_threads = 1
+    max_parallel = 1
+    allow_test_objects = true
+  []
+[]

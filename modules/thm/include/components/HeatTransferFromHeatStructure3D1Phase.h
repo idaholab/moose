@@ -1,0 +1,55 @@
+#pragma once
+
+#include "HeatTransferFromTemperature1Phase.h"
+#include "FlowChannel3DAlignment.h"
+#include "MooseEnum.h"
+
+/**
+ * Connects a 1-phase flow channel and a 3D heat structure
+ */
+class HeatTransferFromHeatStructure3D1Phase : public HeatTransferFromTemperature1Phase
+{
+public:
+  HeatTransferFromHeatStructure3D1Phase(const InputParameters & parameters);
+  ~HeatTransferFromHeatStructure3D1Phase();
+
+  virtual void addVariables() override;
+  virtual void addMooseObjects() override;
+
+protected:
+  /// enum for axis alignment
+  enum EAxisAlignment
+  {
+    INVALID = -1,
+    X,
+    Y,
+    Z
+  };
+
+  virtual const FEType & getFEType() override;
+
+  virtual void setupMesh() override;
+  virtual void init() override;
+  virtual void initSecondary() override;
+  virtual void check() const override;
+
+  virtual EAxisAlignment getFlowChannelAxisAlignment(const std::string & flow_channel_name) const;
+
+  /// name of the connected flow channel
+  const std::vector<std::string> & _flow_channel_names;
+  /// Boundary names for which the boundary component applies
+  const BoundaryName & _boundary;
+  /// Closures associated with each flow channel
+  std::vector<std::shared_ptr<ClosuresBase>> _flow_channel_closures;
+  /// Heat structure name
+  const std::string & _hs_name;
+  /// Flow channel alignment object
+  std::vector<FlowChannel3DAlignment *> _fch_alignments;
+  /// Number of layers in the flow channel direction
+  unsigned int _num_layers;
+  /// Direction for layered average user objects
+  MooseEnum _layered_average_uo_direction;
+
+public:
+  static InputParameters validParams();
+};

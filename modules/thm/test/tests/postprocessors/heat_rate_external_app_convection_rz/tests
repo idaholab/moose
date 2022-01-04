@@ -1,0 +1,9 @@
+[Tests]
+  [test]
+    type = 'CSVDiff'
+    input = 'heat_rate_external_app_convection_rz.i'
+    csvdiff = 'heat_rate_external_app_convection_rz.csv'
+    recover = false
+    max_parallel = 1
+  []
+[]

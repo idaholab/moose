@@ -1,0 +1,11 @@
+[Tests]
+  [1phase]
+    type = 'Exodiff'
+    input = '1phase.i'
+    exodiff = '1phase.e'
+    cli_args = 'Executioner/num_steps=5'
+    abs_zero = 1e-10
+    rel_err = 1e-5
+    max_parallel = 1
+  []
+[]

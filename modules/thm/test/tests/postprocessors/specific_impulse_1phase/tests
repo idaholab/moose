@@ -1,0 +1,11 @@
+[Tests]
+  [Isp_1ph]
+    type = 'CSVDiff'
+    input = 'Isp_1ph.i'
+    csvdiff = 'Isp_1ph_out.csv'
+    max_parallel = 1
+    issues = '#189'
+    design = 'SpecificImpulse1Phase.md'
+    requirement = 'The system shall compute specific impulse from conditions on a boundary'
+  []
+[]

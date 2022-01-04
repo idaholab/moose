@@ -1,0 +1,9 @@
+[Tests]
+  [3eqn]
+    type = 'Exodiff'
+    input = '3eqn.i'
+    exodiff = '3eqn_out.e'
+    abs_zero = 5e-8
+    max_parallel = 1
+  []
+[]

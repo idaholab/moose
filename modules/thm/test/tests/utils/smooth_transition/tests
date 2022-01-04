@@ -1,0 +1,51 @@
+[Tests]
+  [cubic_nonad]
+    type = 'CSVDiff'
+    input = 'smooth_transition.i'
+    csvdiff = 'cubic_nonad_test_vpp_0000.csv'
+    allow_test_objects = True
+    recover = False
+  []
+  [weighted_nonad]
+    type = 'CSVDiff'
+    input = 'smooth_transition.i'
+    cli_args = "Materials/test_mat/transition_type=weighted Outputs/file_base=weighted_nonad"
+    csvdiff = 'weighted_nonad_test_vpp_0000.csv'
+    allow_test_objects = True
+    recover = False
+  []
+  [cubic_derivative]
+    type = 'PetscJacobianTester'
+    input = 'smooth_transition_derivative.i'
+    ratio_tol = 1e-9
+    difference_tol = 1e-9
+    max_threads = 1
+    allow_test_objects = True
+  []
+  [weighted_derivative]
+    type = 'PetscJacobianTester'
+    input = 'smooth_transition_derivative.i'
+    cli_args = "Materials/test_mat/transition_type=weighted"
+    ratio_tol = 1e-7
+    difference_tol = 1e-7
+    max_threads = 1
+    allow_test_objects = True
+  []
+  [ad_cubic]
+    type = 'CSVDiff'
+    input = 'ad_smooth_transition.i'
+    csvdiff = 'ad_cubic_test_vpp_0000.csv'
+    cli_args = "
+      Materials/test_mat/transition_type=cubic
+      Outputs/file_base=ad_cubic"
+    allow_test_objects = True
+    recover = False
+  []
+  [ad_weighted]
+    type = 'CSVDiff'
+    input = 'ad_smooth_transition.i'
+    csvdiff = 'ad_weighted_test_vpp_0000.csv'
+    allow_test_objects = True
+    recover = False
+  []
+[]

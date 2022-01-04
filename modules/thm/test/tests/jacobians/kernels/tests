@@ -1,0 +1,74 @@
+[Tests]
+  [one_d_3eqn_momentum_flux]
+    type = 'PetscJacobianTester'
+    input = 'one_d_3eqn_momentum_flux.i'
+    ratio_tol = 6e-8
+    difference_tol = 0.09
+    max_threads = 1
+    max_parallel = 1
+    allow_test_objects = true
+  []
+  [one_d_3eqn_momentum_area_gradient]
+    type = 'PetscJacobianTester'
+    input = 'one_d_3eqn_momentum_area_gradient.i'
+    ratio_tol = 0.0005
+    difference_tol = 3e5
+    max_threads = 1
+    max_parallel = 1
+    allow_test_objects = true
+  []
+  [one_d_3eqn_momentum_friction]
+    type = 'PetscJacobianTester'
+    input = 'one_d_3eqn_momentum_friction.i'
+    ratio_tol = 4e-8
+    difference_tol = 1
+    max_threads = 1
+    max_parallel = 1
+    allow_test_objects = true
+  []
+  [one_d_3eqn_energy_flux]
+    type = 'PetscJacobianTester'
+    input = 'one_d_3eqn_energy_flux.i'
+    ratio_tol = 2e-8
+    difference_tol = 2e-4
+    max_threads = 1
+    max_parallel = 1
+    allow_test_objects = true
+  []
+  [one_d_energy_wall_heating]
+    type = 'PetscJacobianTester'
+    input = 'one_d_energy_wall_heating.i'
+    ratio_tol = 2e-7
+    difference_tol = 8e-5
+    max_threads = 1
+    max_parallel = 1
+    allow_test_objects = true
+  []
+  [one_d_3eqn_momentum_gravity]
+    type = 'PetscJacobianTester'
+    input = 'one_d_3eqn_momentum_gravity.i'
+    ratio_tol = 5e-8
+    difference_tol = 5e-5
+    max_threads = 1
+    max_parallel = 1
+    allow_test_objects = true
+  []
+  [one_d_3eqn_energy_gravity]
+    type = 'PetscJacobianTester'
+    input = 'one_d_3eqn_energy_gravity.i'
+    ratio_tol = 5e-8
+    difference_tol = 5e-2
+    max_threads = 1
+    max_parallel = 1
+    allow_test_objects = true
+  []
+  [one_d_3eqn_energy_heat_source]
+    type = 'PetscJacobianTester'
+    input = 'one_d_3eqn_energy_heat_source.i'
+    ratio_tol = 1e-20
+    difference_tol = 1e-20
+    max_threads = 1
+    max_parallel = 1
+    allow_test_objects = true
+  []
+[]

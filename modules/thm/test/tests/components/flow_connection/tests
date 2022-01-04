@@ -1,0 +1,20 @@
+[Tests]
+  [err:connecting_to_non_existent_component]
+    type = 'RunException'
+    input = 'err.connecting_to_non_existent_component.i'
+    expect_err = "inlet_1p: Trying to connect to a component 'pipe', but there is no such component in the simulation. Please check your spelling."
+  []
+
+  [err:old_connection_format]
+    type = 'RunException'
+    input = 'err.connection_format.i'
+    expect_err = "You are using the old connection format 'comp_name\(end\)'\. Please update your input file to the new one 'comp_name:end'\."
+    cli_args = "Components/left_wall/input='pipe(in)'"
+  []
+  [err:incorrect_connection_format]
+    type = 'RunException'
+    input = 'err.connection_format.i'
+    expect_err = "Incorrect connection specified 'pipe_in'\. Valid connection format is 'component_name:end_type'\."
+    cli_args = "Components/left_wall/input='pipe_in'"
+  []
+[]

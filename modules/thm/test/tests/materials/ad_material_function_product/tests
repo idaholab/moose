@@ -1,0 +1,7 @@
+[Tests]
+  [test]
+    type = 'CSVDiff'
+    input = 'ad_material_function_product.i'
+    csvdiff = 'ad_material_function_product_out.csv'
+  []
+[]

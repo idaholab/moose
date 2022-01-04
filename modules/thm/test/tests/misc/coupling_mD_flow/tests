@@ -1,0 +1,8 @@
+[Tests]
+  [coupling_mD_nonoverlapping]
+    type = Exodiff
+    input = 'master_non_overlapping.i'
+    exodiff = 'master_non_overlapping_out.e'
+    recover = false
+  []
+[]

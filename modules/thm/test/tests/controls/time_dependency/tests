@@ -1,0 +1,8 @@
+[Tests]
+  [test]
+    type = CSVDiff
+    input = 'test.i'
+    csvdiff = 'test_out.csv'
+    allow_test_objects = True
+  []
+[]

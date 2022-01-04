@@ -1,0 +1,13 @@
+[Tests]
+  [err:rz_domain]
+    type = 'RunException'
+    input = 'err.rz_domain.i'
+    expect_err = 'el_int: This is a THM-specific object can be applied only on subdomains with '
+      'Cartesian coordinate system\. If your domain has RZ cooridnate system associated with it, '
+      'you need to use the object without the RZ suffix to obtain the desired result\.'
+    recover = false
+    issues = '#215'
+    design = 'RZSymmetry.md'
+    requirement = 'The system should report an error when users set subdomain-restricted RZ-symmtrical THM-specific objects on RZ-subdomains.'
+  []
+[]

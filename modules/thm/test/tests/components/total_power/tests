@@ -1,0 +1,15 @@
+[Tests]
+  [phy:constant_power]
+    type = 'CSVDiff'
+    input = 'phy.constant_power.i'
+    csvdiff = 'phy.constant_power_out.csv'
+    max_parallel = 1
+  []
+
+  [clg:power]
+    type = 'CSVDiff'
+    input = 'clg.power.i'
+    csvdiff = 'clg.power_out.csv'
+    max_parallel = 1
+  []
+[]

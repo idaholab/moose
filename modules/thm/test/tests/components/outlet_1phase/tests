@@ -1,0 +1,28 @@
+[Tests]
+  [phy:solidwall_outlet_3eqn]
+    type = 'Exodiff'
+    input = 'phy.solidwall_outlet_3eqn.i'
+    exodiff = 'phy.solidwall_outlet_3eqn.e'
+    group = 'solid_wall outlet pipe 1phase'
+    abs_zero = 1e-7
+    # see #530 why
+    max_threads = 1
+    max_parallel = 1
+  []
+
+  [clg:ctrl_p_3eqn]
+    type = 'CSVDiff'
+    input = 'clg.ctrl_p_3eqn.i'
+    csvdiff = 'clg.ctrl_p_3eqn_out.csv'
+    max_parallel = 1
+  []
+
+  [jacobian]
+    type = 'PetscJacobianTester'
+    input = 'jacobian.i'
+    ratio_tol = 1e-6
+    difference_tol = 15
+    cli_args = 'Debug/check_jacobian=true'
+    max_parallel = 1
+  []
+[]

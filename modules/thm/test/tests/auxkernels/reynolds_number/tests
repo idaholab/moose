@@ -1,0 +1,7 @@
+[Tests]
+  [1phase]
+    type = 'CSVDiff'
+    input = '1phase.i'
+    csvdiff = '1phase_out.csv'
+  []
+[]

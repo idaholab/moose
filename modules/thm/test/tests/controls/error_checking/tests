@@ -1,0 +1,7 @@
+[Tests]
+  [non_existent_control_data]
+    type = 'RunException'
+    input = 'non_existent_control_data.i'
+    expect_err = "Control data 'wrong' was requested, but was not declared by any active control object."
+  []
+[]

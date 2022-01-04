@@ -1,0 +1,18 @@
+[Tests]
+  # physics
+  [phy:3eqn]
+    type = 'Exodiff'
+    input = 'phy.3eqn.i'
+    exodiff = 'phy.3eqn_out.e'
+    max_parallel = 1
+  []
+
+  [jacobian]
+    type = 'PetscJacobianTester'
+    input = 'jacobian.i'
+    ratio_tol = 2e-5
+    difference_tol = 2100
+    cli_args = 'Debug/check_jacobian=true'
+    max_parallel = 1
+  []
+[]

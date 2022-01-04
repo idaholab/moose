@@ -1,0 +1,60 @@
+[Tests]
+  [part1]
+    type = 'Exodiff'
+    input = 'test.i'
+    exodiff = 'part1_out.e'
+    cli_args = '
+      GlobalParams/initial_T=507
+      GlobalParams/initial_p=6.e6
+      GlobalParams/initial_vel=0
+      GlobalParams/initial_vel_x=0
+      GlobalParams/initial_vel_y=0
+      GlobalParams/initial_vel_z=0
+      Components/hs/initial_T=Ts_init
+      Components/hx3ext/initial_T_wall=520
+      Executioner/num_steps=5
+      Outputs/checkpoint=true
+      Outputs/file_base=part1_out'
+    recover = false
+    abs_zero = 1e-7
+    max_parallel = 1
+  []
+
+  [part2]
+    type = 'Exodiff'
+    input = 'test.i'
+    exodiff = 'part2_out.e'
+    cli_args = '
+      Problem/restart_file_base=part1_out_cp/0005
+      Executioner/num_steps=10
+      Outputs/file_base=part2_out'
+    abs_zero = 1e-7
+    prereq = 'part1'
+    recover = false
+    max_parallel = 1
+  []
+
+  [part2_ics]
+    type = 'Exodiff'
+    input = 'test.i'
+    exodiff = 'part2_ics_out.e'
+    cli_args = '
+      GlobalParams/initial_T=507
+      GlobalParams/initial_p=6.e6
+      GlobalParams/initial_vel=0.1
+      GlobalParams/initial_vel_x=0.1
+      GlobalParams/initial_vel_y=0.1
+      GlobalParams/initial_vel_z=0.1
+      Components/hs/initial_T=508
+      Components/hx3ext/initial_T_wall=510
+      Components/inlet/vel=0.1
+      Components/temp_outside/T=508
+      Problem/restart_file_base=part1_out_cp/0005
+      Executioner/num_steps=10
+      Outputs/file_base=part2_ics_out'
+    prereq = 'part1'
+    recover = false
+    abs_zero = 1e-7
+    max_parallel = 1
+  []
+[]

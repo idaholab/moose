@@ -1,0 +1,44 @@
+#include "HSBoundaryExternalAppTemperature.h"
+#include "HeatConductionModel.h"
+
+registerMooseObject("THMApp", HSBoundaryExternalAppTemperature);
+
+InputParameters
+HSBoundaryExternalAppTemperature::validParams()
+{
+  InputParameters params = HSBoundary::validParams();
+  params.addParam<VariableName>(
+      "T_ext",
+      "T_ext",
+      "Name of the variable that will store the values computed by the external application");
+  params.addClassDescription("Heat structure boundary condition to set temperature values computed "
+                             "by an external application");
+  return params;
+}
+
+HSBoundaryExternalAppTemperature::HSBoundaryExternalAppTemperature(const InputParameters & params)
+  : HSBoundary(params), _T_ext_var_name(getParam<VariableName>("T_ext"))
+{
+}
+
+void
+HSBoundaryExternalAppTemperature::addVariables()
+{
+  const HeatStructureBase & hs = getComponent<HeatStructureBase>("hs");
+  const std::vector<SubdomainName> & subdomain_names = hs.getSubdomainNames();
+
+  _sim.addSimVariable(false, _T_ext_var_name, HeatConductionModel::feType(), subdomain_names);
+}
+
+void
+HSBoundaryExternalAppTemperature::addMooseObjects()
+{
+  {
+    std::string class_name = "ADMatchedValueBC";
+    InputParameters pars = _factory.getValidParams(class_name);
+    pars.set<NonlinearVariableName>("variable") = HeatConductionModel::TEMPERATURE;
+    pars.set<std::vector<BoundaryName>>("boundary") = _boundary;
+    pars.set<std::vector<VariableName>>("v") = {_T_ext_var_name};
+    _sim.addBoundaryCondition(class_name, genName(name(), "bc"), pars);
+  }
+}

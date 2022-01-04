@@ -1,0 +1,7 @@
+[Tests]
+  [weighted_average]
+    type = 'CSVDiff'
+    input = 'weighted_average.i'
+    csvdiff = 'weighted_average_out.csv'
+  []
+[]

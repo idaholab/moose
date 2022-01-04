@@ -1,0 +1,17 @@
+[Tests]
+  [steady_state]
+    type = 'RunApp'
+    input = 'steady_state.i'
+    recover = false
+    max_parallel = 1
+  []
+
+  [test]
+    type = 'Exodiff'
+    input = 'test.i'
+    exodiff = 'test_out.e'
+    prereq = steady_state
+    recover = false
+    max_parallel = 1
+  []
+[]

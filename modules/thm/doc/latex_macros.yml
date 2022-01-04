@@ -1,0 +1,4 @@
+\eqc: "\\,,"
+\eqp: "\\,."
+\pd: "\\frac{\\partial #1}{\\partial #2}"
+\pr: "\\left(#1\\right)"

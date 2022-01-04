@@ -1,0 +1,23 @@
+#include "CopyValueAux.h"
+
+registerMooseObject("THMApp", CopyValueAux);
+
+InputParameters
+CopyValueAux::validParams()
+{
+  InputParameters params = AuxKernel::validParams();
+  params.addRequiredCoupledVar("source", "Source variable to be copied.");
+
+  return params;
+}
+
+CopyValueAux::CopyValueAux(const InputParameters & parameters)
+  : AuxKernel(parameters), _source_var(coupledValue("source"))
+{
+}
+
+Real
+CopyValueAux::computeValue()
+{
+  return _source_var[_qp];
+}

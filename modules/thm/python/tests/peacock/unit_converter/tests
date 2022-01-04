@@ -1,0 +1,15 @@
+[Tests]
+  [./plugin]
+    type = PythonUnitTest
+    input = test_UnitConverterPlugin.py
+    separate = True
+    display_required = True
+  [../]
+
+  [./unit_conversion]
+    type = PythonUnitTest
+    input = test_UnitConversion.py
+    separate = True
+    display_required = False
+  [../]
+[]

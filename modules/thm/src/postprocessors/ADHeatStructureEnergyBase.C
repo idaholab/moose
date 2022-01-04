@@ -1,0 +1,34 @@
+#include "ADHeatStructureEnergyBase.h"
+#include "HeatConductionModel.h"
+
+InputParameters
+ADHeatStructureEnergyBase::validParams()
+{
+  InputParameters params = ElementIntegralPostprocessor::validParams();
+
+  params.addClassDescription("Computes the total energy for a heat structure.");
+
+  params.addParam<Real>("n_units", 1., "Number of units of heat structure represents");
+  params.addParam<Real>("T_ref", 0, "Reference temperature");
+
+  return params;
+}
+
+ADHeatStructureEnergyBase::ADHeatStructureEnergyBase(const InputParameters & parameters)
+  : ElementIntegralPostprocessor(parameters),
+    _n_units(getParam<Real>("n_units")),
+    _T_ref(getParam<Real>("T_ref")),
+    _rho(getADMaterialPropertyByName<Real>(HeatConductionModel::DENSITY)),
+    _cp(getADMaterialPropertyByName<Real>(HeatConductionModel::SPECIFIC_HEAT_CONSTANT_PRESSURE)),
+    _T_var(&_fe_problem.getStandardVariable(_tid, HeatConductionModel::TEMPERATURE)),
+    _T(_T_var->sln())
+{
+  addMooseVariableDependency(_T_var);
+}
+
+Real
+ADHeatStructureEnergyBase::computeQpIntegral()
+{
+  return MetaPhysicL::raw_value(_rho[_qp]) * MetaPhysicL::raw_value(_cp[_qp]) * (_T[_qp] - _T_ref) *
+         _n_units;
+}
