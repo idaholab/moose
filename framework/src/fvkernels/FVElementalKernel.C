@@ -59,6 +59,15 @@ FVElementalKernel::computeResidual()
 }
 
 void
+FVElementalKernel::computeResidualAndJacobian()
+{
+  const auto r = computeQpResidual() * _assembly.elemVolume();
+  const auto dof_index = _var.dofIndices()[0];
+  _assembly.processDerivatives(r, dof_index, _matrix_tags);
+  _assembly.processResidual(r.value(), dof_index, _vector_tags);
+}
+
+void
 FVElementalKernel::computeJacobian()
 {
   const auto r = computeQpResidual() * _assembly.elemVolume();

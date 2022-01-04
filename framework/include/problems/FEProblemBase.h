@@ -1180,6 +1180,14 @@ public:
    */
   virtual void computeResidual(const NumericVector<Number> & soln,
                                NumericVector<Number> & residual);
+
+  /**
+   * Form a residual and Jacobian with default tags
+   */
+  void computeResidualAndJacobian(const NumericVector<Number> & soln,
+                                  NumericVector<Number> & residual,
+                                  SparseMatrix<Number> & jacobian);
+
   /**
    * Form a residual vector for a given tag
    */

@@ -13,20 +13,25 @@
 #include "NeighborCoupleableMooseVariableDependencyIntermediateInterface.h"
 #include "TwoMaterialPropertyInterface.h"
 #include "MathFVUtils.h"
+#include "FVFaceResidualObject.h"
 
-// Provides an interface for computing residual contributions from finite
-// volume numerical fluxes computed on faces to neighboring elements.
+/**
+ * Provides an interface for computing residual contributions from finite
+ * volume numerical fluxes computed on faces to neighboring elements.
+ */
 class FVFluxBC : public FVBoundaryCondition,
                  public NeighborCoupleableMooseVariableDependencyIntermediateInterface,
-                 public TwoMaterialPropertyInterface
+                 public TwoMaterialPropertyInterface,
+                 public FVFaceResidualObject
 {
 public:
   FVFluxBC(const InputParameters & parameters);
 
   static InputParameters validParams();
 
-  virtual void computeResidual(const FaceInfo & fi);
-  virtual void computeJacobian(const FaceInfo & fi);
+  void computeResidual(const FaceInfo & fi) override;
+  void computeJacobian(const FaceInfo & fi) override;
+  void computeResidualAndJacobian(const FaceInfo & fi) override;
 
 protected:
   virtual ADReal computeQpResidual() = 0;

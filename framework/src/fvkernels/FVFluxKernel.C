@@ -162,6 +162,32 @@ FVFluxKernel::computeResidual(const FaceInfo & fi)
 }
 
 void
+FVFluxKernel::computeResidualAndJacobian(const FaceInfo & fi)
+{
+  if (skipForBoundary(fi))
+    return;
+
+  _face_info = &fi;
+  _normal = fi.normal();
+  _face_type = fi.faceType(_var.name());
+  const auto residual = fi.faceArea() * fi.faceCoord() * computeQpResidual();
+
+  auto process_residual = [this](const ADReal & residual, const Elem & elem) {
+    const auto dof_index = elem.dof_number(_sys.number(), _var.number(), 0);
+
+    _assembly.processDerivatives(residual, dof_index, _matrix_tags);
+    _assembly.processResidual(residual.value(), dof_index, _vector_tags);
+  };
+
+  if (_face_type == FaceInfo::VarFaceNeighbors::ELEM ||
+      _face_type == FaceInfo::VarFaceNeighbors::BOTH)
+    process_residual(residual, _face_info->elem());
+  if (_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR ||
+      _face_type == FaceInfo::VarFaceNeighbors::BOTH)
+    process_residual(-residual, _face_info->neighbor());
+}
+
+void
 FVFluxKernel::computeJacobian(Moose::DGJacobianType type, const ADReal & residual)
 {
   auto & ce = _assembly.couplingEntries();

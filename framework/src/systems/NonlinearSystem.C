@@ -94,10 +94,25 @@ NonlinearSystem::NonlinearSystem(FEProblemBase & fe_problem, const std::string &
     _nl_implicit_sys(fe_problem.es().get_system<NonlinearImplicitSystem>(name)),
     _nl_residual_functor(_fe_problem),
     _fd_residual_functor(_fe_problem),
+    _resid_and_jac_functor(_fe_problem),
     _use_coloring_finite_difference(false)
 {
-  nonlinearSolver()->residual_object = &_nl_residual_functor;
-  nonlinearSolver()->jacobian = Moose::compute_jacobian;
+}
+
+NonlinearSystem::~NonlinearSystem() {}
+
+void
+NonlinearSystem::init()
+{
+  NonlinearSystemBase::init();
+
+  if (_resid_and_jacobian_together)
+    nonlinearSolver()->residual_and_jacobian_object = &_resid_and_jac_functor;
+  else
+  {
+    nonlinearSolver()->residual_object = &_nl_residual_functor;
+    nonlinearSolver()->jacobian = Moose::compute_jacobian;
+  }
   nonlinearSolver()->bounds = Moose::compute_bounds;
   nonlinearSolver()->nullspace = Moose::compute_nullspace;
   nonlinearSolver()->transpose_nullspace = Moose::compute_transpose_nullspace;
@@ -111,14 +126,6 @@ NonlinearSystem::NonlinearSystem(FEProblemBase & fe_problem, const std::string &
     petsc_solver->set_jacobian_zero_out(false);
     petsc_solver->use_default_monitor(false);
   }
-}
-
-NonlinearSystem::~NonlinearSystem() {}
-
-void
-NonlinearSystem::init()
-{
-  NonlinearSystemBase::init();
 
   if (_automatic_scaling && _resid_vs_jac_scaling_param < 1. - TOLERANCE)
     // Add diagonal matrix that will be used for computing scaling factors

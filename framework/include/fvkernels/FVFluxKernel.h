@@ -15,6 +15,7 @@
 #include "TwoMaterialPropertyInterface.h"
 #include "NeighborMooseVariableInterface.h"
 #include "NeighborCoupleableMooseVariableDependencyIntermediateInterface.h"
+#include "FVFaceResidualObject.h"
 
 class FaceInfo;
 
@@ -28,18 +29,16 @@ class FaceInfo;
 class FVFluxKernel : public FVKernel,
                      public TwoMaterialPropertyInterface,
                      public NeighborMooseVariableInterface<Real>,
-                     public NeighborCoupleableMooseVariableDependencyIntermediateInterface
+                     public NeighborCoupleableMooseVariableDependencyIntermediateInterface,
+                     public FVFaceResidualObject
 {
 public:
   static InputParameters validParams();
   FVFluxKernel(const InputParameters & params);
 
-  /// Usually you should not override these functions - they have some super
-  /// tricky stuff in them that you don't want to mess up!
-  // @{
-  virtual void computeResidual(const FaceInfo & fi);
-  virtual void computeJacobian(const FaceInfo & fi);
-  /// @}
+  void computeResidual(const FaceInfo & fi) override;
+  void computeJacobian(const FaceInfo & fi) override;
+  void computeResidualAndJacobian(const FaceInfo & fi) override;
 
   const MooseVariableFV<Real> & variable() const { return _var; }
 

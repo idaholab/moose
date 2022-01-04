@@ -35,6 +35,7 @@ public:
   /// tricky stuff in them that you don't want to mess up!
   ///@{
   virtual void computeResidual();
+  virtual void computeResidualAndJacobian();
   virtual void computeJacobian();
   virtual void computeOffDiagJacobian();
   ///@}

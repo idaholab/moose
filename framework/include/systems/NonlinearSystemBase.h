@@ -268,6 +268,19 @@ public:
   void computeResidualTags(const std::set<TagID> & tags);
 
   /**
+   * Form possibly multiple tag-associated vectors and matrices
+   */
+  void computeResidualAndJacobianTags(const std::set<TagID> & vector_tags,
+                                      const std::set<TagID> & matrix_tags);
+
+  /**
+   * Compute residual and Jacobian from contributions not related to constraints, such as nodal
+   * boundary conditions
+   */
+  void computeResidualAndJacobianInternal(const std::set<TagID> & vector_tags,
+                                          const std::set<TagID> & matrix_tags);
+
+  /**
    * Form a residual vector for a given tag
    */
   void computeResidual(NumericVector<Number> & residual, TagID tag_id);
@@ -626,6 +639,11 @@ public:
   TagID residualVectorTag() const override { return _Re_tag; }
   TagID systemMatrixTag() const override { return _Ke_system_tag; }
 
+  /**
+   * Set whether to compute the residual and Jacobian together
+   */
+  void setResidAndJacobianTogether(bool resid_and_jacobian_together);
+
   bool computeScalingOnce() const { return _compute_scaling_once; }
   void computeScalingOnce(bool compute_scaling_once)
   {
@@ -948,6 +966,9 @@ protected:
   /// A diagonal matrix used for computing scaling
   std::unique_ptr<DiagonalMatrix<Number>> _scaling_matrix;
 
+  /// Whether to compute the residual and Jacobian together
+  bool _resid_and_jacobian_together;
+
 private:
   /**
    * Finds the implicit sparsity graph between geometrically related dofs.
@@ -986,3 +1007,9 @@ private:
   /// The number of scaling groups
   std::size_t _num_scaling_groups;
 };
+
+inline void
+NonlinearSystemBase::setResidAndJacobianTogether(bool resid_and_jacobian_together)
+{
+  _resid_and_jacobian_together = resid_and_jacobian_together;
+}

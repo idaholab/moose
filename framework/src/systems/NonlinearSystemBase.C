@@ -19,6 +19,7 @@
 #include "ThreadedElementLoop.h"
 #include "MaterialData.h"
 #include "ComputeResidualThread.h"
+#include "ComputeResidualAndJacobianThread.h"
 #include "ComputeFVFluxThread.h"
 #include "ComputeJacobianThread.h"
 #include "ComputeJacobianForScalingThread.h"
@@ -158,6 +159,7 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
     _compute_scaling_once(true),
     _resid_vs_jac_scaling_param(0),
     _off_diagonals_in_auto_scaling(false),
+    _resid_and_jacobian_together(false),
 #ifndef MOOSE_SPARSE_AD
     _required_derivative_size(0),
 #endif
@@ -784,6 +786,43 @@ NonlinearSystemBase::computeResidualTags(const std::set<TagID> & tags)
   activeAllMatrixTags();
 
   _fe_problem.setCurrentlyComputingResidual(false);
+}
+
+void
+NonlinearSystemBase::computeResidualAndJacobianTags(const std::set<TagID> & vector_tags,
+                                                    const std::set<TagID> & matrix_tags)
+{
+  const bool required_residual =
+      vector_tags.find(residualVectorTag()) == vector_tags.end() ? false : true;
+
+  try
+  {
+    zeroTaggedVectors(vector_tags);
+    computeResidualAndJacobianInternal(vector_tags, matrix_tags);
+    closeTaggedVectors(vector_tags);
+    closeTaggedMatrices(matrix_tags);
+
+    if (required_residual)
+    {
+      auto & residual = getVector(residualVectorTag());
+      if (_time_integrator)
+        _time_integrator->postResidual(residual);
+      else
+        residual += *_Re_non_time;
+      residual.close();
+    }
+
+    // To-do: handle nodal bcs
+    // computeNodalBCsRJ(vector_tags, matrix_tags);
+    // closeTaggedVectors(vector_tags);
+    // closeTaggedMatrices(matrix_tags);
+  }
+  catch (MooseException & e)
+  {
+    // The buck stops here, we have already handled the exception by
+    // calling stopSolve(), it is now up to PETSc to return a
+    // "diverged" reason during the next solve.
+  }
 }
 
 void
@@ -1485,7 +1524,7 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
     if (_fe_problem.haveFV())
     {
       using FVRange = StoredRange<std::vector<const FaceInfo *>::const_iterator, const FaceInfo *>;
-      ComputeFVFluxThread<FVRange> fvr(_fe_problem, tags);
+      ComputeFVFluxResidualThread<FVRange> fvr(_fe_problem, tags);
       FVRange faces(_fe_problem.mesh().faceInfo().begin(), _fe_problem.mesh().faceInfo().end());
       Threads::parallel_reduce(faces, fvr);
     }
@@ -1639,6 +1678,84 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
     PARALLEL_CATCH;
     _Re_non_time->close();
   }
+}
+
+void
+NonlinearSystemBase::computeResidualAndJacobianInternal(const std::set<TagID> & vector_tags,
+                                                        const std::set<TagID> & matrix_tags)
+{
+  TIME_SECTION("computeResidualAndJacobianInternal", 3);
+
+  // Make matrix ready to use
+  activeAllMatrixTags();
+
+  for (auto tag : matrix_tags)
+  {
+    if (!hasMatrix(tag))
+      continue;
+
+    auto & jacobian = getMatrix(tag);
+    // Necessary for speed
+    if (auto petsc_matrix = dynamic_cast<PetscMatrix<Number> *>(&jacobian))
+    {
+      MatSetOption(petsc_matrix->mat(),
+                   MAT_KEEP_NONZERO_PATTERN, // This is changed in 3.1
+                   PETSC_TRUE);
+      if (!_fe_problem.errorOnJacobianNonzeroReallocation())
+        MatSetOption(petsc_matrix->mat(), MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
+    }
+  }
+
+  residualSetup();
+
+  // Residual contributions from UOs - for now this is used for ray tracing
+  // and ray kernels that contribute to the residual (think line sources)
+  std::vector<UserObject *> uos;
+  _fe_problem.theWarehouse()
+      .query()
+      .condition<AttribSystem>("UserObject")
+      .condition<AttribExecOns>(EXEC_PRE_KERNELS)
+      .queryInto(uos);
+  for (auto & uo : uos)
+    uo->residualSetup();
+  for (auto & uo : uos)
+  {
+    uo->initialize();
+    uo->execute();
+    uo->finalize();
+  }
+
+  // reinit scalar variables
+  for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
+    _fe_problem.reinitScalars(tid);
+
+  // residual contributions from the domain
+  PARALLEL_TRY
+  {
+    TIME_SECTION("Kernels", 3 /*, "Computing Kernels"*/);
+
+    ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
+
+    ComputeResidualAndJacobianThread crj(_fe_problem, vector_tags, matrix_tags);
+    Threads::parallel_reduce(elem_range, crj);
+
+    if (_fe_problem.haveFV())
+    {
+      using FVRange = StoredRange<std::vector<const FaceInfo *>::const_iterator, const FaceInfo *>;
+      ComputeFVFluxRJThread<FVRange> fvrj(_fe_problem, vector_tags, matrix_tags);
+      FVRange faces(_fe_problem.mesh().faceInfo().begin(), _fe_problem.mesh().faceInfo().end());
+      Threads::parallel_reduce(faces, fvrj);
+    }
+
+    unsigned int n_threads = libMesh::n_threads();
+    for (unsigned int i = 0; i < n_threads;
+         i++) // Add any cached residuals that might be hanging around
+    {
+      _fe_problem.addCachedResidual(i);
+      _fe_problem.addCachedJacobian(i);
+    }
+  }
+  PARALLEL_CATCH;
 }
 
 void
@@ -2430,7 +2547,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
       // the same loop works for both residual and jacobians because it keys
       // off of FEProblem's _currently_computing_jacobian parameter
       using FVRange = StoredRange<std::vector<const FaceInfo *>::const_iterator, const FaceInfo *>;
-      ComputeFVFluxThread<FVRange> fvj(_fe_problem, tags);
+      ComputeFVFluxJacobianThread<FVRange> fvj(_fe_problem, tags);
       FVRange faces(_fe_problem.mesh().faceInfo().begin(), _fe_problem.mesh().faceInfo().end());
       Threads::parallel_reduce(faces, fvj);
     }

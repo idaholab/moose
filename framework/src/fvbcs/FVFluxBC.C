@@ -82,6 +82,42 @@ FVFluxBC::computeResidual(const FaceInfo & fi)
 }
 
 void
+FVFluxBC::computeResidualAndJacobian(const FaceInfo & fi)
+{
+  _face_info = &fi;
+  _normal = fi.normal();
+  _face_type = fi.faceType(_var.name());
+
+  // For FV flux kernels, the normal is always oriented outward from the lower-id
+  // element's perspective.  But for BCs, there is only a residual
+  // contribution to one element (one side of the face).  Because of this, we
+  // make an exception and orient the normal to point outward from whichever
+  // side of the face the BC's variable is defined on; we flip it if this
+  // variable is defined on the neighbor side of the face (instead of elem) since
+  // the FaceInfo normal polarity is always oriented with respect to the lower-id element.
+  if (_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR)
+    _normal = -_normal;
+
+  if (_face_type == FaceInfo::VarFaceNeighbors::BOTH)
+    mooseError("A FVFluxBC is being triggered on an internal face with centroid: ",
+               fi.faceCentroid());
+  else if (_face_type == FaceInfo::VarFaceNeighbors::NEITHER)
+    mooseError("A FVFluxBC is being triggered on a face which does not connect to a block ",
+               "with the relevant finite volume variable. Its centroid: ",
+               fi.faceCentroid());
+
+  const auto r = fi.faceArea() * fi.faceCoord() * computeQpResidual();
+
+  const auto * const elem = (_face_type == FaceInfo::VarFaceNeighbors::ELEM)
+                                ? &_face_info->elem()
+                                : _face_info->neighborPtr();
+  const auto dof_index = elem->dof_number(_sys.number(), _var.number(), 0);
+
+  _assembly.processDerivatives(r, dof_index, _matrix_tags);
+  _assembly.processResidual(r.value(), dof_index, _vector_tags);
+}
+
+void
 FVFluxBC::computeJacobian(Moose::DGJacobianType type, const ADReal & residual)
 {
   auto & ce = _assembly.couplingEntries();

@@ -192,6 +192,27 @@ FVInterfaceKernel::computeResidual(const FaceInfo & fi)
 }
 
 void
+FVInterfaceKernel::computeResidualAndJacobian(const FaceInfo & fi)
+{
+  setupData(fi);
+
+  const auto var_elem_num = _elem_is_one ? _var1.number() : _var2.number();
+  const auto var_neigh_num = _elem_is_one ? _var2.number() : _var1.number();
+  const auto & elem_dof_indices = _elem_is_one ? _var1.dofIndices() : _var2.dofIndices();
+  const auto & neigh_dof_indices =
+      _elem_is_one ? _var2.dofIndicesNeighbor() : _var1.dofIndicesNeighbor();
+  mooseAssert((elem_dof_indices.size() == 1) && (neigh_dof_indices.size() == 1),
+              "We're currently built to use CONSTANT MONOMIALS");
+
+  const auto r = fi.faceArea() * fi.faceCoord() * computeQpResidual();
+
+  processResidual(MetaPhysicL::raw_value(r), var_elem_num, false);
+  processResidual(-MetaPhysicL::raw_value(r), var_neigh_num, true);
+  processDerivatives(r, elem_dof_indices[0]);
+  processDerivatives(-r, neigh_dof_indices[0]);
+}
+
+void
 FVInterfaceKernel::computeJacobian(const FaceInfo & fi)
 {
   setupData(fi);

@@ -26,6 +26,7 @@
 #include "NeighborCoupleableMooseVariableDependencyIntermediateInterface.h"
 #include "TwoMaterialPropertyInterface.h"
 #include "FunctorInterface.h"
+#include "FVFaceResidualObject.h"
 
 #include <set>
 
@@ -54,7 +55,8 @@ class FVInterfaceKernel : public MooseObject,
                           public TaggingInterface,
                           public NeighborCoupleableMooseVariableDependencyIntermediateInterface,
                           public TwoMaterialPropertyInterface,
-                          public FunctorInterface
+                          public FunctorInterface,
+                          public FVFaceResidualObject
 {
 public:
   /**
@@ -71,15 +73,9 @@ public:
    */
   const SubProblem & subProblem() const { return _subproblem; }
 
-  /**
-   * Compute the residual on the supplied face
-   */
-  virtual void computeResidual(const FaceInfo & fi);
-
-  /**
-   * Compute the jacobian on the supplied face
-   */
-  virtual void computeJacobian(const FaceInfo & fi);
+  void computeResidual(const FaceInfo & fi) override;
+  void computeJacobian(const FaceInfo & fi) override;
+  void computeResidualAndJacobian(const FaceInfo & fi) override;
 
 protected:
   /**

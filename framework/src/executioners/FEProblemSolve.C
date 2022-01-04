@@ -122,11 +122,14 @@ FEProblemSolve::validParams()
       "num_grids>0",
       "The number of grids to use for a grid sequencing algorithm. This includes the final grid, "
       "so num_grids = 1 indicates just one solve in a time-step");
+  params.addParam<bool>("resid_and_jacobian_together",
+                        false,
+                        "Whether to compute the residual and Jacobian together.");
 
   params.addParamNamesToGroup("solve_type l_tol l_abs_tol l_max_its nl_max_its nl_max_funcs "
                               "nl_abs_tol nl_rel_tol nl_abs_step_tol nl_rel_step_tol "
                               "snesmf_reuse_base compute_initial_residual_before_preset_bcs "
-                              "num_grids nl_div_tol nl_abs_div_tol nl_max_its "
+                              "num_grids nl_div_tol nl_abs_div_tol resid_and_jacobian_together "
                               "n_max_nonlinear_pingpong",
                               "Solver");
   params.addParamNamesToGroup(
@@ -195,6 +198,8 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
   _problem.setNonlinearAbsoluteDivergenceTolerance(getParam<Real>("nl_abs_div_tol"));
 
   _nl.setDecomposition(_splitting);
+
+  _nl.setResidAndJacobianTogether(getParam<bool>("resid_and_jacobian_together"));
 
   // Check whether the user has explicitly requested automatic scaling and is using a solve type
   // without a matrix. If so, then we warn them

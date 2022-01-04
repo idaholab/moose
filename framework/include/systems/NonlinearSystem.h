@@ -12,6 +12,7 @@
 #include "NonlinearSystemBase.h"
 #include "ComputeResidualFunctor.h"
 #include "ComputeFDResidualFunctor.h"
+#include "ComputeResidualAndJacobian.h"
 #include "SubProblem.h"
 #include "MooseError.h"
 
@@ -75,6 +76,7 @@ protected:
   NonlinearImplicitSystem & _nl_implicit_sys;
   ComputeResidualFunctor _nl_residual_functor;
   ComputeFDResidualFunctor _fd_residual_functor;
+  ComputeResidualAndJacobian _resid_and_jac_functor;
 
 private:
   /**
