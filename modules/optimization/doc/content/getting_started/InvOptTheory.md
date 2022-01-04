@@ -1,15 +1,19 @@
 # Inverse Optimization id=sec:invOpt
 
-This section gives an overview of the inverse optimization capabilities developed in isopod. Section [#sec:invOptTheory] describes the theory for partial differential equation (PDE) constrained constrained optimization.  Gradient terms needed for gradient based optimization are derived in Section [#sec:adjoint] for the adjoint equation and PDE derivatives are given in Section [#sec:PDEDerivs].  Force and material inversion examples are provided on this [page](#sec:forceInvExample) where PDE constrained optimization is used to parameterize boundary conditions and body loads is provided on this [page](#sec:forceInvExample).  Material inversion examples are provided on this [page](#sec:forceInvExample) where PDE constrained optimization is used to identify material properties.
+This page gives an overview of the inverse optimization capabilities developed in isopod. This page is split up into the following sections:
 
-The over all flow of the optimization algorithm implemented in the MOOSE based app isopod is shown in [fig:optCycle].  In this example, the internal heat source, $q_v$, is being parameterized to match the simulated and experimental steady state temperature fields, $\widetilde{T}$ and $T$, respectively.  Step one of the optimization cycle consists of adjusting the internal heat source, $q_v$.  In step two, the physics model is solved with the current $q_v$ to obtain a simulated temperature field, $T$.  In step three, the simulated and experimental temperature fields are compared via the objective function, $J$.  If $J$ is below the user defined threshold, the optimization cycle stops and the best fit parameterization of $q_v$ is found.  If $J$ is above the user defined threshold, the optimization algorithm determines a new $q_v$ and the process is repeated.  In the next section, methods for determining the next iteration of the parameterized value, in this case $q_v$, will be presented.  
+- [PDE constrained Optimization Theory:](#sec:invOptTheory) Describes the theory for partial differential equation (PDE) constrained optimization
+- [Adjoint Equation and Boundary Conditions:](#sec:adjoint) Derivation of the Adjoint equation using Lagrange multipliers and its boundary conditions.
+- [Parameter Derivatives of PDE:](#sec:PDEDerivs) Derivatives of the PDE with respect to the optimization parameters for force and material inversion.  Force inversion examples are provided where PDE constrained optimization is used to parameterize boundary conditions and body loads is provided on this [section](#sec:forceInvExample).  Material inversion examples are provided on this [section](#sec:forceInvExample) where PDE constrained optimization is used to identify material properties.
+
+The overall flow of the optimization algorithm implemented in the MOOSE based app isopod is shown in [fig:optCycle].  In this example, the internal heat source, $q_v$, is being parameterized to match the simulated and experimental steady state temperature fields, $\widetilde{T}$ and $T$, respectively.  Step one of the optimization cycle consists of adjusting the internal heat source, $q_v$.  In step two, the physics model is solved with the current $q_v$ to obtain a simulated temperature field, $T$.  Step two is often referred to as the forward solve.  In step three, the simulated and experimental temperature fields are compared via the objective function, $J$.  If $J$ is below the user defined threshold, the optimization cycle stops and the best fit parameterization of $q_v$ is found.  If $J$ is above the user defined threshold, the optimization algorithm determines a new $q_v$ and the process is repeated.  In the next section, methods for determining the next iteration of the parameterized value, in this case $q_v$, will be presented.  MOOSE examples using isopod are available on this [page](examples/index.md).
 
 !media media/fig_optCycle.png
        style=width:80%;margin:auto;padding-top:2.5%;
        id=fig:optCycle
        caption=Optimization cycle example for parameterizaing an internal heat source distribution $q_v$ to match the simulated and experimental temperature field, $T$ and $\widetilde{T}$, respectively.
 
-[comment]: <> (% ----------------------------------------------------------------------------------------------------------%)
+[comment0]: <> (% ----------------------------------------------------------------------------------------------------------%)
 
 ## PDE Constrained Inverse Optimization id=sec:invOptTheory
 
@@ -29,7 +33,7 @@ Gradient-free optimization solvers only require a function to solve for the obje
 
 Gradient-based optimization algorithms require fewer iterations but require functions to solve for the gradient vector and sometimes Hessians matrix.  TAO has `petsc_options` to evaluate finite difference based gradients and Hessians by solving the objective function multiple times with perturbed parameters, which also requires multiple solves of the forward problem.  Finite difference gradients and Hessians are good for testing an optimization approach but become too expensive for realistic problems.
 
-Given the large parameter space, we resort to the adjoint method for gradient computation; unlike finite difference approaches, the computational cost of adjoint methods is independent of the number of parameters (ref18).  In the adjoint method, the gradient, i.e. the total derivative $\mathrm{d}J/\mathrm{d}\mathbf{p}$, is computed as,
+Given the large parameter space, we resort to the adjoint method for gradient computation; unlike finite difference approaches, the computational cost of adjoint methods is independent of the number of parameters [!citet](plessix2006review).  In the adjoint method, the gradient, i.e. the total derivative $\mathrm{d}J/\mathrm{d}\mathbf{p}$, is computed as,
 \begin{equation}\label{eq:adjointGrad}
 \frac{\mathrm{d}J}{\mathrm{d}\mathbf{p}} = \frac{\partial J}{\partial\mathbf{p}}+\mathbf{\lambda}\frac{\partial\mathbf{g}}{\partial\mathbf{p}} ,
 \end{equation}
@@ -45,14 +49,14 @@ In the following, the adjoint method given in [eq:adjointGrad] and [eq:adjoint] 
 \begin{equation}\label{eq:objectiveGrad}
 \frac{\mathrm{d}J(\mathbf{u},\mathbf{p})}{\mathrm{d}\mathbf{p}} = \frac{\partial J}{\partial \mathbf{u}}\frac{\partial \mathbf{u}}{\partial\mathbf{p}}.  
 \end{equation}
-The physics constraint of the PDE from [eq:optimization], $\mathbf{g}\left(\mathbf{u},\mathbf{p}\right)=\mathbf{0}$, implies that
+We can solve easily compute  $\frac{\partial \mathbf{u}}{\partial\mathbf{p}}$ and so we need to rearrange  The physics constraint of the PDE from [eq:optimization], $\mathbf{g}\left(\mathbf{u},\mathbf{p}\right)=\mathbf{0}$, implies that
 \begin{equation} \label{eq:gradZero}
 	\begin{aligned}
-	\frac{\mathrm{d}g(\mathbf{u},\mathbf{p})}{\mathrm{d}\mathbf{p}} & = 0  \\
-	\frac{\mathrm{d}g(\mathbf{u},\mathbf{p})}{\mathrm{d}\mathbf{p}} & = \frac{\partial g}{\partial \mathbf{u}}\frac{\partial \mathbf{u}}{\partial\mathbf{p}} + \frac{\partial g}{\partial \mathbf{p}}= 0 \\
+	\frac{\mathrm{d}\mathbf{g}(\mathbf{u},\mathbf{p})}{\mathrm{d}\mathbf{p}} & = 0  \\
+	\frac{\mathrm{d}\mathbf{g}(\mathbf{u},\mathbf{p})}{\mathrm{d}\mathbf{p}} & = \frac{\partial \mathbf{g}}{\partial \mathbf{u}}\frac{\partial \mathbf{u}}{\partial\mathbf{p}} + \frac{\partial \mathbf{g}}{\partial \mathbf{p}}= 0 \\
 \end{aligned}
 \end{equation}
-Rearranging the last term in [eq:gradZero] gives
+Rearranging the last part of [eq:gradZero] gives
 \begin{equation}\label{eq:gradZeroArrange}
 \frac{\partial \mathbf{u}}{\partial\mathbf{p}}=-\left(\frac{\partial g}{\partial \mathbf{u}}\right)^{-1}\frac{\partial g}{\partial \mathbf{p}}
 \end{equation}
@@ -67,16 +71,16 @@ We have two options for dealing with the inverse of the Jacobian.  In the first,
 The alternative that we will use is the adjoint method which scales independently to the number of optimization parameters.   The adjoint method requires one additional solve of the same complexity as the original forward problem.  The adjoint equation given in [eq:adjoint] is found by setting the adjoint variable, $\lambda$, equal to the first two terms of [eq:objectiveGrad2] and then rearranging terms to give
 \begin{equation} \label{eq:AdjEqn}
 	\begin{aligned}
-	&\lambda= \frac{\partial J}{\partial \mathbf{u}}\left(\frac{\partial g}{\partial \mathbf{u}}\right)^{-1}  \\
-	&\rightarrow \lambda \left(\frac{\partial g}{\partial \mathbf{u}}\right)= -\frac{\partial J}{\partial \mathbf{u}}\left[\left(\frac{\partial g}{\partial \mathbf{u}}\right)^{-1} \left(\frac{\partial g}{\partial \mathbf{u}}\right)\right] \\
-	&\rightarrow \lambda \left(\frac{\partial g}{\partial \mathbf{u}}\right)= -\frac{\partial J}{\partial \mathbf{u}} \\
-	&\rightarrow \left[\lambda \left(\frac{\partial g}{\partial \mathbf{u}}\right)\right]^\top= -\left[\frac{\partial J}{\partial \mathbf{u}}\right]^\top \\
-	&\rightarrow \left(\frac{\partial g}{\partial \mathbf{u}}\right)^\top \lambda^\top = -\left[\frac{\partial J}{\partial \mathbf{u}}\right]^\top \\
+	&\lambda^\top= \frac{\partial J}{\partial \mathbf{u}}\left(\frac{\partial g}{\partial \mathbf{u}}\right)^{-1}  \\
+	&\rightarrow \lambda^\top \left(\frac{\partial g}{\partial \mathbf{u}}\right)= -\frac{\partial J}{\partial \mathbf{u}}\left[\left(\frac{\partial g}{\partial \mathbf{u}}\right)^{-1} \left(\frac{\partial g}{\partial \mathbf{u}}\right)\right] \\
+	&\rightarrow \lambda^\top \left(\frac{\partial g}{\partial \mathbf{u}}\right)= -\frac{\partial J}{\partial \mathbf{u}} \\
+	&\rightarrow \left[\lambda^\top \left(\frac{\partial g}{\partial \mathbf{u}}\right)\right]^\top= -\left[\frac{\partial J}{\partial \mathbf{u}}\right]^\top \\
+	&\rightarrow \left(\frac{\partial g}{\partial \mathbf{u}}\right)^\top \lambda = -\left[\frac{\partial J}{\partial \mathbf{u}}\right]^\top \\
 \end{aligned}
 \end{equation}
 where each step of the derivation has been included as a reminder of how [eq:adjoint] is obtained.  The next [section](#sec:adjoint) uses an alternative approach to determine the adjoint equation based on Lagrange multipliers.  
 
-[comment]: <> (% ----------------------------------------------------------------------------------------------------------%)
+[comment1]: <> (% ----------------------------------------------------------------------------------------------------------%)
 
 ## Adjoint Problem for Steady State Heat Conduction id=sec:adjoint
 
@@ -141,7 +145,7 @@ By substituting the above and [eqn:objective_integral] into [eqn:lagrangian], we
 	   	- T\left( \kappa \nabla \lambda  \right) \cdot \boldsymbol{n}\right]~\text{d}\Gamma,
 \end{aligned}
 \end{equation}
-where $\lambda$ is the Lagrange multiplier field known as the adjoint state or costate variable.  The Lagrangian has been broken up into terms integrated over the body, $\mathcal{A}$, and boundary terms, $\mathcal{B}$.  In order to determine the boundary conditions for the adjoint equation, the boundary integral terms, $\mathcal{B}$, in \eq{eqn:lagrangian_fn} are further broken up into their separate domains, $\Gamma_D$ and $\Gamma_R$, given in [eqn:optimization_bcs] resulting in
+where $\lambda$ is the Lagrange multiplier field known as the adjoint state or costate variable.  The Lagrangian has been broken up into terms integrated over the body, $\mathcal{A}$, and boundary terms, $\mathcal{B}$.  In order to determine the boundary conditions for the adjoint equation, the boundary integral terms, $\mathcal{B}$, in [eqn:lagrangian_fn] are further broken up into their separate domains, $\Gamma_D$ and $\Gamma_R$, given in [eqn:optimization_bcs] resulting in
 \begin{equation}\label{eqn:bcLagrangian}
 \begin{aligned}
 \mathcal{B}=&\int\left[ \lambda \left( \kappa \nabla T \right)\cdot \boldsymbol{n} 
@@ -193,7 +197,7 @@ Stationarity of $\mathcal{L}$ would require $\delta\mathcal{L} = 0$ for all admi
 \end{equation}
 Solving [eqn:adjoint_problem] comes down to adjusting the boundary conditions and load vector from the forward problem and re-solving.  
 
-[comment]: <> (% ----------------------------------------------------------------------------------------------------------%)
+[comment2]: <> (% ----------------------------------------------------------------------------------------------------------%)
 
 ## PDE Derivatives for Inversion id=sec:PDEDerivs
 
@@ -215,7 +219,7 @@ where $N^{\alpha}$ denotes the finite element shape function at node $\alpha$. T
 
 To compute the derivative of PDE with respect to the design parameters, i.e., $\partial g /\partial \boldsymbol{p}$, it can be seen from [eq:elementwise_discretized_terms] that the derivatives can come from either $\textbf{K}$ or $\hat{\text f}$. For problems that have design parameters that are embedded in $f_b$ and/or the Neumann boundary condition in $G(T)$, we call them \textbf{force inversion} problems, since the derivative only depends on the body load. For design parameters that are embedded in $\textbf{K}$ and/or the convection boundary condition in $G(T)$, indicating dependence on the material property, we call them \textbf{material inversion} problems. Derivative calculation of different force inversion and material inversion problems are included in the following subsections ([#sec:forceInv], [#sec:robinInv], and [#sec:material_inversion]).
 
-[comment]: <> (% ----------------------------------------------------------------------------------------------------------%)
+[comment3]: <> (% ----------------------------------------------------------------------------------------------------------%)
 
 ## PDE Derivatives for Force Inversion id=sec:forceInv
 
@@ -307,11 +311,11 @@ However, if we try to parameterize for the location of the peak of the Gaussian 
 \end{equation}
 where the parameter $b$ remains in the derivative term.  Optimizing for the peak location of a Gaussian heat source, [eq:gaussOpt_b],  will be a much more difficult problem to solve than [eq:gaussOpt_a] and convergence will be dependent on the initial guesses given for $b$ and the locations where measurement data is taken. 
 
-[comment]: <> (% ----------------------------------------------------------------------------------------------------------%)
+[comment4]: <> (% ----------------------------------------------------------------------------------------------------------%)
 
 ## PDE Derivative for Convective Boundary Conditions id=sec:robinInv
 
-In this section, the convective heat transfer coefficient, $h$, is considered as a parameter for the convection boundary condition given in \eq{eq:robin_bc_types}.  This is a material inversion problem with integral limited to the boundary, $\Gamma_R$.  The boundary condition is given by $G(T)=h \left(T - T_{\infty}\right)$ on $\Gamma_R$.  The PDE derivative term is given by
+In this section, the convective heat transfer coefficient, $h$, is considered as a parameter for the convection boundary condition given in [eq:robin_bc_types].  This is a material inversion problem with integral limited to the boundary, $\Gamma_R$.  The boundary condition is given by $G(T)=h \left(T - T_{\infty}\right)$ on $\Gamma_R$.  The PDE derivative term is given by
 \begin{equation}\label{eq:convectiveBC}
 \begin{aligned}
 \frac{\partial\hat{\text{g}}}{\partial \boldsymbol{p}} &= \frac{\partial\hat{\text{g}}}{\partial h}
@@ -321,12 +325,12 @@ In this section, the convective heat transfer coefficient, $h$, is considered as
 \end{equation}
 This derivative requires the solution from the forward problem $T$ to be included in the integral over the boundary $\Gamma_R$ which again results in a nonlinear optimization problem.  
 
-[comment]: <> (% ----------------------------------------------------------------------------------------------------------%)
+[comment5]: <> (% ----------------------------------------------------------------------------------------------------------%)
 
 ## PDE Derivative for Material Inversion id=sec:material_inversion
 
 In [#sec:forceInv] and [#sec:robinInv], the design parameters only exist in the load terms. Therefore, 
-the derivatives of $g(x)$ with respect to the design parameters are only related to the form of the load function, not the Jacobian.  In this section, we consider cases where the design parameters exist in the Jacobian term, which make the derivative calculation more convoluted. One such example is the material inversion, where we identify the thermal conductivity ($\kappa$) through experimentally measured temperature data points. Here, the derivative of $g(x)$ is taken with respect to $\kappa$. This requires the derivative of $\textbf{K}$ in \eq{eq:discretePDE} leading to
+the derivatives of $g(x)$ with respect to the design parameters are only related to the form of the load function, not the Jacobian.  In this section, we consider cases where the design parameters exist in the Jacobian term, which make the derivative calculation more convoluted. One such example is the material inversion, where we identify the thermal conductivity ($\kappa$) through experimentally measured temperature data points. Here, the derivative of $g(x)$ is taken with respect to $\kappa$. This requires the derivative of $\textbf{K}$ in [eq:discretePDE] leading to
 \begin{equation}\label{eq:kappa}
 \begin{aligned}
 \frac{\partial \hat{\text g}}{\partial\mathbf{p}} &=  \int\nabla\text{N}^{\top} \cdot \frac{\partial \kappa}{{\partial\mathbf{p}}}\cdot\nabla\text{N}~\text{d}\Omega \cdot\hat{\text T}\\
