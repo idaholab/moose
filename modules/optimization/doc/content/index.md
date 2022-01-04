@@ -11,11 +11,10 @@ Isopod is based on the MOOSE framework, and builds on the MOOSE framework and
 modules for many of its core capabilities.
 
 !row!
-!col! small=12 medium=4 large=4 icon=get_app
-### [Getting Started](getting_started/RunningIsopod.md) class=center style=font-weight:200;
+!col! small=12 medium=4 large=4 icon=toys
+### [Theory](getting_started/InvOptTheory.md) class=center style=font-weight:200;
 
-Quickly learn how to obtain the Isopod source code, compile an executable, and run simulations
-with these instructions.
+Learn the theory behind PDE constrained optimization as implemented in isopod.
 !col-end!
 
 !col! small=12 medium=4 large=4 icon=settings
@@ -28,7 +27,7 @@ provides detailed documentation of specific code features.
 !col! small=12 medium=4 large=4 icon=assessment
 ### [Example](examples/index.md) class=center style=font-weight:200;
 
-There are a number of example problems to demonstrate usage of Isopod. Details of those models are
+There are a number of inverse optimization example problems to demonstrate usage of Isopod. Details of those models are
 provided here.
 !col-end!
 !row-end!

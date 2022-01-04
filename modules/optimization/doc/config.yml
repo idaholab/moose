@@ -4,7 +4,7 @@ Content:
   - ${MOOSE_DIR}/framework/doc/content
   - ${MOOSE_DIR}/modules/heat_conduction/doc/content
   - ${MOOSE_DIR}/modules/stochastic_tools/doc/content
-
+  - ${MOOSE_DIR}/modules/ray_tracing/doc/content
 Renderer:
   type: MooseDocs.base.MaterializeRenderer
 
@@ -14,12 +14,9 @@ Extensions:
     repo: https://github.com/zachmprince/isopod
     home: https://mooseframework.inl.gov/
     menu:
-      Getting Started:
-        Theory: getting_started/InvOptTheory.md
-        Running Isopod: getting_started/RunningIsopod.md
-        Input Structure: getting_started/IsopodInputStructure.md
-      Syntax: syntax/index.md
+      Theory: getting_started/InvOptTheory.md
       Examples: examples/index.md
+      Syntax: syntax/index.md
 
   MooseDocs.extensions.appsyntax:
     executable: ${ROOT_DIR}
