@@ -32,6 +32,7 @@
 #include "StochasticToolsApp.h"
 #include "PeridynamicsApp.h"
 #include "TensorMechanicsApp.h"
+#include "THMApp.h"
 #include "XFEMApp.h"
 #include "ExternalPetscSolverApp.h"
 
@@ -86,6 +87,7 @@ CombinedApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   StochasticToolsApp::registerAll(f, af, s);
   PeridynamicsApp::registerAll(f, af, s);
   TensorMechanicsApp::registerAll(f, af, s);
+  THMApp::registerAll(f, af, s);
   XFEMApp::registerAll(f, af, s);
   ExternalPetscSolverApp::registerAll(f, af, s);
 }
@@ -111,6 +113,7 @@ CombinedApp::registerObjects(Factory & factory)
   StochasticToolsApp::registerObjects(factory);
   PeridynamicsApp::registerObjects(factory);
   TensorMechanicsApp::registerObjects(factory);
+  THMApp::registerObjects(factory);
   XFEMApp::registerObjects(factory);
 }
 
@@ -135,6 +138,7 @@ CombinedApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   StochasticToolsApp::associateSyntax(syntax, action_factory);
   PeridynamicsApp::associateSyntax(syntax, action_factory);
   TensorMechanicsApp::associateSyntax(syntax, action_factory);
+  THMApp::associateSyntax(syntax, action_factory);
   XFEMApp::associateSyntax(syntax, action_factory);
 }
 
@@ -155,6 +159,7 @@ CombinedApp::registerExecFlags(Factory & factory)
   StochasticToolsApp::registerExecFlags(factory);
   PeridynamicsApp::registerExecFlags(factory);
   TensorMechanicsApp::registerExecFlags(factory);
+  THMApp::registerExecFlags(factory);
   XFEMApp::registerExecFlags(factory);
   PorousFlowApp::registerExecFlags(factory);
   RdgApp::registerExecFlags(factory);
