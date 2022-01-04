@@ -33,7 +33,8 @@ FunctorVectorElementalAuxTempl<is_ad>::FunctorVectorElementalAuxTempl(
     const InputParameters & parameters)
   : AuxKernel(parameters),
     _functor(getFunctor<GenericRealVectorValue<is_ad>>("functor")),
-    _component(getParam<unsigned int>("component"))
+    _component(getParam<unsigned int>("component")),
+    _factor(getFunctor<GenericReal<is_ad>>("factor"))
 {
 }
 

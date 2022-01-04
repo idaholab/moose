@@ -30,7 +30,7 @@ FunctorElementalAuxTempl<is_ad>::validParams()
       "Evaluates a functor (variable, function or functor material property) on the current "
       "element. For finite volume, this evaluates the material property at the centroid.");
   params.addRequiredParam<MooseFunctorName>("functor", "The functor to evaluate");
-  params.addRequiredParam<MooseFunctorName>("factor", 1, "A factor to apply on the functor");
+  params.addParam<MooseFunctorName>("factor", 1, "A factor to apply on the functor");
 
   return params;
 }
@@ -38,8 +38,8 @@ FunctorElementalAuxTempl<is_ad>::validParams()
 template <bool is_ad>
 FunctorElementalAuxTempl<is_ad>::FunctorElementalAuxTempl(const InputParameters & parameters)
   : AuxKernel(parameters),
-  _functor(getFunctor<GenericReal<is_ad>>("functor")),
-  _factor(getFunctor<GenericReal<is_ad>>("factor"))
+    _functor(getFunctor<GenericReal<is_ad>>("functor")),
+    _factor(getFunctor<GenericReal<is_ad>>("factor"))
 {
 }
 
