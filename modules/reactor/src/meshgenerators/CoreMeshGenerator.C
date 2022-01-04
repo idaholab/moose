@@ -64,7 +64,6 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
   MeshGeneratorName _reactor_params =
       MeshGeneratorName(getMeshProperty<std::string>("reactor_params_name", _inputs[0]));
 
-  // std::unique_ptr<MeshBase> & reactor_params_mesh = getMeshByName(_reactor_params);
   // Ensure that the user has supplied the correct info for conformal mesh generation
   if (!hasMeshProperty("mesh_dimensions", _reactor_params) ||
       !hasMeshProperty("mesh_geometry", _reactor_params))
@@ -75,7 +74,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
     _mesh_dimensions = getMeshProperty<int>("mesh_dimensions", _reactor_params);
   }
   if (_extrude && getMeshProperty<unsigned int>("mesh_dimensions", _reactor_params) != 3)
-    mooseError("This is a 2 dimensional mesh, you cannot extrude it. Check you ReactorMeshParams "
+    mooseError("This is a 2 dimensional mesh, you cannot extrude it. Check your ReactorMeshParams "
                "inputs\n");
 
   size_t empty_pattern_loc = 0;
