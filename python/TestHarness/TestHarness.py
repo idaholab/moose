@@ -413,7 +413,7 @@ class TestHarness:
                             # Get the testers for this test
                             testers = self.createTesters(dirpath, file, find_only, testroot_params)
 
-                            # Schedule the testers for immediate execution
+                            # Schedule the testers (non blocking)
                             self.scheduler.schedule(testers)
 
                             # record these launched test to prevent this test from launching again
@@ -423,7 +423,7 @@ class TestHarness:
                             os.chdir(saved_cwd)
                             sys.path.pop()
 
-            # Wait for all the tests to complete
+            # Wait for all the tests to complete (blocking)
             self.scheduler.waitFinish()
 
             # TODO: this DOES NOT WORK WITH MAX FAILES (max failes is considered a scheduler error at the moment)
