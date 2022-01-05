@@ -34,11 +34,5 @@ protected:
 
   /// The variable to compare to
   const VariableValue & _other_var;
-
-  /// Whether the other_var matches the variable
-  const bool _variables_match;
-
-  /// Old value of the variable
-  const VariableValue * _u_old;
 };
 

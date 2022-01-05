@@ -16,7 +16,7 @@
     requirement = 'The system shall compute the element-wise L2 difference between a variable and the previous time step.'
     issues = '#19925'
   []
-  [invaid_executioner]
+  [invalid_executioner]
     type = RunException
     input = steady_error.i
     expect_err = "When using a 'Steady' executioner, cannot compare against previous values; 'other_variable' cannot be the same as 'variable'"
