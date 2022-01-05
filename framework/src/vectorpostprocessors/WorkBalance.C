@@ -233,6 +233,12 @@ public:
   ElemSideBuilder _elem_side_builder;
 
   std::unique_ptr<PetscExternalPartitioner> _petsc_partitioner;
+
+private:
+  bool shouldComputeInternalSide(const Elem & /*elem*/, const Elem & /*neighbor*/) const override
+  {
+    return true;
+  }
 };
 
 class WBNodeLoop : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>

@@ -172,19 +172,6 @@ ComputeMaterialsObjectThread::onInternalSide(const Elem * elem, unsigned int sid
   if (_need_internal_side_material)
   {
     const Elem * neighbor = elem->neighbor_ptr(side);
-    const dof_id_type elem_id = elem->id(), neighbor_id = neighbor->id();
-
-    // When looping over elements and then sides, we need to make sure that we not duplicate effort,
-    // e.g. if a face is shared by element 1 and element 2, then we do not want to do compute work
-    // both when we are visiting element 1 *and* then later when visiting element 2. Our rule is to
-    // only compute when we are visting the element that has the lower element id when element and
-    // neighbor are of the same adaptivity level, and then if they are not of the same level, then
-    // we only compute when we are visiting the finer element
-    const bool should_continue =
-        (neighbor->active() && (neighbor->level() == elem->level()) && (elem_id < neighbor_id)) ||
-        (neighbor->level() < elem->level());
-    if (!should_continue)
-      return;
 
     _fe_problem.reinitElemNeighborAndLowerD(elem, side, _tid);
     unsigned int face_n_points = _assembly[_tid]->qRuleFace()->n_points();
