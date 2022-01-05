@@ -25,6 +25,10 @@ VarCouplingMaterial::validParams()
                         true,
                         "Whether the coupled value should come from a tag. If false, then we use "
                         "an ordinary coupled value.");
+  params.addParam<MaterialPropertyName>(
+      "coupled_prop_name",
+      "diffusion",
+      "The name of the material property that this material declares.");
   return params;
 }
 
@@ -33,16 +37,17 @@ VarCouplingMaterial::VarCouplingMaterial(const InputParameters & parameters)
     _var(getParam<bool>("use_tag") ? coupledVectorTagValue("var", "tag") : coupledValue("var")),
     _base(getParam<Real>("base")),
     _coef(getParam<Real>("coef")),
-    _diffusion(declareProperty<Real>("diffusion")),
-    _diffusion_old(getParam<bool>("declare_old") ? &getMaterialPropertyOld<Real>("diffusion")
-                                                 : nullptr)
+    _coupled_prop(declareProperty<Real>("coupled_prop_name")),
+    _coupled_prop_old(getParam<bool>("declare_old")
+                          ? &getMaterialPropertyOld<Real>("coupled_prop_name")
+                          : nullptr)
 {
 }
 
 void
 VarCouplingMaterial::initQpStatefulProperties()
 {
-  _diffusion[_qp] = _var[_qp];
+  _coupled_prop[_qp] = _var[_qp];
 }
 
 void
@@ -50,8 +55,8 @@ VarCouplingMaterial::computeQpProperties()
 {
   // If "declare_old" is set, then just use it. The test associated is checking that
   // initQpStatefulProperties can use a coupledValue
-  if (_diffusion_old)
-    _diffusion[_qp] = (*_diffusion_old)[_qp];
+  if (_coupled_prop_old)
+    _coupled_prop[_qp] = (*_coupled_prop_old)[_qp];
   else
-    _diffusion[_qp] = _base + _coef * _var[_qp];
+    _coupled_prop[_qp] = _base + _coef * _var[_qp];
 }
