@@ -3,12 +3,6 @@
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
-#include "ModulesApp.h"
-
-#include "HeatConductionApp.h"
-#include "MiscApp.h"
-#include "FluidPropertiesApp.h"
-#include "FluidPropertiesTestApp.h"
 
 InputParameters
 THMTestApp::validParams()
@@ -42,9 +36,6 @@ THMTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_te
 
     s.registerActionSyntax("ClosureTest1PhaseAction", "ClosureTest1Phase");
   }
-  HeatConductionApp::registerAll(f, af, s);
-  FluidPropertiesApp::registerAll(f, af, s);
-  THMApp::registerAll(f, af, s);
 }
 
 void

@@ -80,7 +80,12 @@ ifeq ($(XFEM),yes)
 endif
 
 ifeq ($(THM),yes)
+        NAVIER_STOKES               := yes
         FLUID_PROPERTIES            := yes
+        HEAT_CONDUCTION             := yes
+        RAY_TRACING                 := yes
+        RDG                         := yes
+        MISC                        := yes
 endif
 
 # The master list of all moose modules
@@ -182,7 +187,7 @@ endif
 ifeq ($(HEAT_CONDUCTION),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/heat_conduction
   APPLICATION_NAME   := heat_conduction
-	DEPEND_MODULES     := ray_tracing
+  DEPEND_MODULES     := ray_tracing
   SUFFIX             := hc
   include $(FRAMEWORK_DIR)/app.mk
 endif
@@ -257,7 +262,7 @@ endif
 ifeq ($(THM),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/thm
   APPLICATION_NAME   := thm
-  DEPEND_MODULES     := fluid_properties
+  DEPEND_MODULES     := navier_stokes fluid_properties heat_conduction rdg ray_tracing misc
   SUFFIX             := thm
   include $(FRAMEWORK_DIR)/app.mk
 endif

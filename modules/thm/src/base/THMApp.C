@@ -1,7 +1,10 @@
 #include "THMApp.h"
 #include "THMSyntax.h"
+#include "HeatConductionApp.h"
+#include "FluidPropertiesApp.h"
+#include "NavierStokesApp.h"
+#include "MiscApp.h"
 
-#include "ModulesApp.h"
 #include "AppFactory.h"
 
 #include "SinglePhaseFluidProperties.h"
@@ -72,13 +75,16 @@ THMApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   Registry::registerObjectsTo(f, {"THMApp"});
   Registry::registerActionsTo(af, {"THMApp"});
 
-  s.replaceActionSyntax(
-      "AddFluidPropertiesAction", "FluidProperties/*", "add_fluid_properties", __FILE__, __LINE__);
-
-  ModulesApp::registerAll(f, af, s);
+  HeatConductionApp::registerAll(f, af, s);
+  FluidPropertiesApp::registerAll(f, af, s);
+  NavierStokesApp::registerAll(f, af, s);
+  MiscApp::registerAll(f, af, s);
 
   THM::associateSyntax(s);
   THM::registerActions(s);
+
+  s.replaceActionSyntax(
+      "AddFluidPropertiesAction", "FluidProperties/*", "add_fluid_properties", __FILE__, __LINE__);
 
   registerClosuresOption("simple", "Closures1PhaseSimple", THM::FM_SINGLE_PHASE);
   registerClosuresOption("none", "Closures1PhaseNone", THM::FM_SINGLE_PHASE);
