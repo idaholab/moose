@@ -47,15 +47,6 @@ PhysicsBasedPreconditioner::validParams()
       "than once (to create cylces if you like).");
   params.addRequiredParam<std::vector<std::string>>("preconditioner", "TODO: docstring");
 
-  params.addParam<std::vector<std::string>>(
-      "off_diag_row",
-      "The off diagonal row you want to add into the matrix, it will be associated "
-      "with an off diagonal column from the same position in off_diag_colum.");
-  params.addParam<std::vector<std::string>>("off_diag_column",
-                                            "The off diagonal column you want to add into the "
-                                            "matrix, it will be associated with an off diagonal "
-                                            "row from the same position in off_diag_row.");
-
   return params;
 }
 
@@ -79,7 +70,7 @@ PhysicsBasedPreconditioner::PhysicsBasedPreconditioner(const InputParameters & p
     // object
     std::unique_ptr<CouplingMatrix> cm = std::make_unique<CouplingMatrix>(n_vars);
 
-    bool full = false; // getParam<bool>("full"); // TODO: add a FULL option for PBP
+    bool full = getParam<bool>("full");
 
     if (!full)
     {

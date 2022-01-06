@@ -30,20 +30,7 @@ FieldSplitPreconditioner::validParams()
 {
   InputParameters params = MoosePreconditioner::validParams();
   params.addClassDescription("Preconditioner designed to map onto PETSc's PCFieldSplit.");
-  params.addParam<std::vector<std::string>>(
-      "off_diag_row",
-      "The off diagonal row you want to add into the matrix, it will be associated "
-      "with an off diagonal column from the same position in off_diag_column.");
-  params.addParam<std::vector<std::string>>("off_diag_column",
-                                            "The off diagonal column you want to add into the "
-                                            "matrix, it will be associated with an off diagonal "
-                                            "row from the same position in off_diag_row.");
-  // We should use full coupling Jacobian matrix by default
-  params.addParam<bool>("full",
-                        true,
-                        "Set to true if you want the full set of couplings.  Simply "
-                        "for convenience so you don't have to set every off_diag_row "
-                        "and off_diag_column combination.");
+
   params.addRequiredParam<std::vector<std::string>>(
       "topsplit", "entrance to splits, the top split will specify how splits will go.");
   return params;
@@ -61,35 +48,13 @@ FieldSplitPreconditioner::FieldSplitPreconditioner(const InputParameters & param
   // the fieldSplit preconditioner
   bool full = getParam<bool>("full");
 
-  // We either have a full coupling or a custom coupling
-  if (full && isParamValid("off_diag_row"))
-    paramError("off_diag_row", "Set full=false to specify the off-diagonal rows manually");
-  if (full && isParamValid("off_diag_column"))
-    paramError("off_diag_column", "Set full=false to specify the off-diagonal columns manually");
-
-  // Off-diagonal rows and colums must match
-  const auto off_diag_rows = getParam<std::vector<std::string>>("off_diag_row");
-  const auto off_diag_columns = getParam<std::vector<std::string>>("off_diag_column");
-  if (isParamValid("off_diag_row"))
-  {
-    if (isParamValid("off_diag_column"))
-    {
-      if (off_diag_rows.size() != off_diag_columns.size())
-        paramError("off_diag_row", "Off-diagonal rows should be paired one to one with "
-                                   "off-diagonal columns");
-    }
-    else
-      paramError("off_diag_row", "If off-diagonal rows are specified, matching off-diagonal "
-                                 "columns must be specified as well");
-  }
-  else if (isParamValid("off_diag_column"))
-    paramError("off_diag_column", "If off-diagonal columns are specified, matching off-diagonal "
-                                  "rows must be specified as well");
-
   // how variables couple
   std::unique_ptr<CouplingMatrix> cm = std::make_unique<CouplingMatrix>(n_vars);
   if (!full)
   {
+    const auto off_diag_rows = getParam<std::vector<NonlinearVariableName>>("off_diag_row");
+    const auto off_diag_columns = getParam<std::vector<NonlinearVariableName>>("off_diag_column");
+
     // put 1s on diagonal
     for (unsigned int i = 0; i < n_vars; i++)
       (*cm)(i, i) = 1;
@@ -98,10 +63,8 @@ FieldSplitPreconditioner::FieldSplitPreconditioner(const InputParameters & param
     std::vector<std::vector<unsigned int>> off_diag(n_vars);
     for (unsigned int i = 0; i < off_diag_rows.size(); i++)
     {
-      unsigned int row =
-          _nl.getVariable(0, off_diag_rows[i]).number();
-      unsigned int column =
-          _nl.getVariable(0, off_diag_columns[i]).number();
+      unsigned int row = _nl.getVariable(0, off_diag_rows[i]).number();
+      unsigned int column = _nl.getVariable(0, off_diag_columns[i]).number();
       (*cm)(row, column) = 1;
     }
   }
