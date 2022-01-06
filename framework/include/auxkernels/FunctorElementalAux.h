@@ -28,6 +28,9 @@ protected:
 
   /// Functor to evaluate with the element argument
   const Moose::Functor<GenericReal<is_ad>> & _functor;
+
+  /// Factor to multiply the functor with
+  const Moose::Functor<GenericReal<is_ad>> & _factor;
 };
 
 typedef FunctorElementalAuxTempl<false> FunctorElementalAux;

@@ -23,6 +23,8 @@ FunctorVectorElementalAuxTempl<is_ad>::validParams()
       "For finite volume, this evaluates the vector functor at the centroid.");
   params.addRequiredParam<MooseFunctorName>("functor", "The functor to evaluate");
   params.addRequiredParam<unsigned int>("component", "Component of the vector functor");
+  params.addParam<MooseFunctorName>("factor", 1, "A factor to apply on the functor");
+
   return params;
 }
 
@@ -31,7 +33,8 @@ FunctorVectorElementalAuxTempl<is_ad>::FunctorVectorElementalAuxTempl(
     const InputParameters & parameters)
   : AuxKernel(parameters),
     _functor(getFunctor<GenericRealVectorValue<is_ad>>("functor")),
-    _component(getParam<unsigned int>("component"))
+    _component(getParam<unsigned int>("component")),
+    _factor(getFunctor<GenericReal<is_ad>>("factor"))
 {
 }
 
@@ -39,5 +42,6 @@ template <bool is_ad>
 Real
 FunctorVectorElementalAuxTempl<is_ad>::computeValue()
 {
-  return MetaPhysicL::raw_value(_functor(_current_elem)(_component));
+  return MetaPhysicL::raw_value(_factor(_current_elem)) *
+         MetaPhysicL::raw_value(_functor(_current_elem)(_component));
 }

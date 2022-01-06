@@ -165,6 +165,15 @@ protected:
 
   /// The subdomain for the last neighbor
   SubdomainID _old_neighbor_subdomain;
+
+private:
+  /**
+   * Whether to compute the internal side for the provided element-neighbor pair. Typically this
+   * will return true if the element id is less than the neighbor id when the elements are equal
+   * level, or when the element is more refined than the neighbor, and then false otherwise. One
+   * type of loop where the logic will be different is when projecting stateful material properties
+   */
+  virtual bool shouldComputeInternalSide(const Elem & elem, const Elem & neighbor) const;
 };
 
 template <typename RangeType>
@@ -238,7 +247,7 @@ ThreadedElementLoopBase<RangeType>::operator()(const RangeType & range, bool byp
             }
 
           const Elem * neighbor = elem->neighbor_ptr(side);
-          if (neighbor != nullptr)
+          if (neighbor)
           {
             preInternalSide(elem, side);
 
@@ -247,7 +256,8 @@ ThreadedElementLoopBase<RangeType>::operator()(const RangeType & range, bool byp
             if (_neighbor_subdomain != _old_neighbor_subdomain)
               neighborSubdomainChanged();
 
-            onInternalSide(elem, side);
+            if (shouldComputeInternalSide(*elem, *neighbor))
+              onInternalSide(elem, side);
 
             if (boundary_ids.size() > 0)
               for (std::vector<BoundaryID>::iterator it = boundary_ids.begin();
@@ -359,4 +369,21 @@ template <typename RangeType>
 void
 ThreadedElementLoopBase<RangeType>::neighborSubdomainChanged()
 {
+}
+
+template <typename RangeType>
+bool
+ThreadedElementLoopBase<RangeType>::shouldComputeInternalSide(const Elem & elem,
+                                                              const Elem & neighbor) const
+{
+  const dof_id_type elem_id = elem.id(), neighbor_id = neighbor.id();
+
+  // When looping over elements and then sides, we need to make sure that we do not duplicate
+  // effort, e.g. if a face is shared by element 1 and element 2, then we do not want to do compute
+  // work both when we are visiting element 1 *and* then later when visiting element 2. Our rule is
+  // to only compute when we are visting the element that has the lower element id when element and
+  // neighbor are of the same adaptivity level, and then if they are not of the same level, then
+  // we only compute when we are visiting the finer element
+  return (neighbor.active() && (neighbor.level() == elem.level()) && (elem_id < neighbor_id)) ||
+         (neighbor.level() < elem.level());
 }

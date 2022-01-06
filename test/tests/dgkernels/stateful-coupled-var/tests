@@ -1,0 +1,9 @@
+[Tests]
+  issues = '#19735'
+  design = 'Materials/index.md'
+  [run]
+    type = RunApp
+    input = test.i
+    requirement = 'The system shall be able to use variables when initializing stateful material properties on neighbor materials used for the discontinuous Galerkin method.'
+  []
+[]

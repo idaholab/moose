@@ -4,6 +4,7 @@ Content:
     - modules/chemical_reactions/doc/content
     - modules/combined/doc/content
     - modules/contact/doc/content
+    - modules/external_petsc_solver/doc/content
     - modules/geochemistry/doc/content
     - modules/fluid_properties/doc/content
     - modules/fsi/doc/content

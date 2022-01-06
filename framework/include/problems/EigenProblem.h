@@ -66,29 +66,29 @@ public:
                         const Real value = std::numeric_limits<Real>::max());
 
   /**
-   * Whether or not we do free power iteration. It is used in convergence check.
+   * Whether or not we are doing free power iteration. It is used in convergence check.
    * We need to mark the solver as "converged" when doing free power to retrieve
    * the final solution from SLPEc
    */
   bool doFreePowerIteration() const { return _do_free_power_iteration; }
 
   /**
-   * Set a flag to indicate whether or not we do free power iteration.
+   * Set a flag to indicate whether or not we are doing free power iterations.
    */
   void doFreePowerIteration(bool do_power) { _do_free_power_iteration = do_power; }
 
   /**
-   * Eigenvector need to be scaled back if it was scaled in an ealier stage
+   * Eigenvector need to be scaled back if it was scaled in an earlier stage
    * Scaling eigen vector does not affect solution (eigenvalue, eigenvector),
-   * but it does affect the convergence rate. To have a optimal converge rate,
-   * We pre scale eigen vector using the same factor as that computed in
+   * but it does affect the convergence rate. To have an optimal convergence rate,
+   * We pre-scale eigen vector using the same factor as the one computed in
    * "postScaleEigenVector"
    */
   void preScaleEigenVector();
 
   /**
    * Normalize eigen vector. Scale eigen vector such as ||x|| = _normal_factor
-   * This might be useful when couple to other physics
+   * This might be useful when coupling to other physics
    */
   void postScaleEigenVector();
 
@@ -123,7 +123,7 @@ public:
                            const std::set<TagID> & tags);
 
   /**
-   * Form two Jacobian matrices, whre each is associateed with one tag, through one
+   * Form two Jacobian matrices, where each is associated with one tag, through one
    * element-loop.
    */
   void computeJacobianAB(const NumericVector<Number> & soln,
@@ -142,7 +142,7 @@ public:
                                   TagID tag) override;
 
   /**
-   * Form two vetors, whre each is associateed with one tag, through one
+   * Form two vetors, where each is associated with one tag, through one
    * element-loop.
    */
   void computeResidualAB(const NumericVector<Number> & soln,
@@ -227,6 +227,6 @@ protected:
   /// Postprocessor target value. The value of postprocessor should equal to
   /// '_normal_factor' by adjusting eigenvector
   Real _normal_factor;
-  /// A flag to indicate if it is the first time of calling solve
+  /// A flag to indicate if it is the first time calling the solve
   bool & _first_solve;
 };

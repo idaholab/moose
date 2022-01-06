@@ -276,28 +276,21 @@ ComputeJacobianThread::onInternalSide(const Elem * elem, unsigned int side)
     // Pointer to the neighbor we are currently working on.
     const Elem * neighbor = elem->neighbor_ptr(side);
 
-    // Get the global id of the element and the neighbor
-    const dof_id_type elem_id = elem->id(), neighbor_id = neighbor->id();
+    _fe_problem.reinitElemNeighborAndLowerD(elem, side, _tid);
 
-    if ((neighbor->active() && (neighbor->level() == elem->level()) && (elem_id < neighbor_id)) ||
-        (neighbor->level() < elem->level()))
+    // Set up Sentinels so that, even if one of the reinitMaterialsXXX() calls throws, we
+    // still remember to swap back during stack unwinding.
+    SwapBackSentinel face_sentinel(_fe_problem, &FEProblem::swapBackMaterialsFace, _tid);
+    _fe_problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
+
+    SwapBackSentinel neighbor_sentinel(_fe_problem, &FEProblem::swapBackMaterialsNeighbor, _tid);
+    _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
+
+    computeInternalFaceJacobian(neighbor);
+
     {
-      _fe_problem.reinitElemNeighborAndLowerD(elem, side, _tid);
-
-      // Set up Sentinels so that, even if one of the reinitMaterialsXXX() calls throws, we
-      // still remember to swap back during stack unwinding.
-      SwapBackSentinel face_sentinel(_fe_problem, &FEProblem::swapBackMaterialsFace, _tid);
-      _fe_problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
-
-      SwapBackSentinel neighbor_sentinel(_fe_problem, &FEProblem::swapBackMaterialsNeighbor, _tid);
-      _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
-
-      computeInternalFaceJacobian(neighbor);
-
-      {
-        Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-        _fe_problem.addJacobianNeighborLowerD(_tid);
-      }
+      Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+      _fe_problem.addJacobianNeighborLowerD(_tid);
     }
   }
 }

@@ -33,7 +33,7 @@ InputParameters
 EigenProblem::validParams()
 {
   InputParameters params = FEProblemBase::validParams();
-  params.addClassDescription("Problem object for solving Eigen value problem.");
+  params.addClassDescription("Problem object for solving an eigenvalue problem.");
   params.addParam<bool>("negative_sign_eigen_kernel",
                         true,
                         "Whether or not to use a negative sign for eigenvalue kernels. "
@@ -43,7 +43,7 @@ EigenProblem::validParams()
   params.addParam<unsigned int>(
       "active_eigen_index",
       0,
-      "Which eigen vector is used to compute residual and also associateed to nonlinear variable");
+      "Which eigenvector is used to compute residual and also associated to nonlinear variable");
 
   return params;
 }
@@ -405,7 +405,7 @@ EigenProblem::preScaleEigenVector()
   if (_active_eigen_index < _nl_eigen->getNumConvergedEigenvalues())
     eig = _nl_eigen->getConvergedEigenvalue(_active_eigen_index);
 
-  // Eigenvaluve magnitude
+  // Eigenvalue magnitude
   Real v = std::sqrt(eig.first * eig.first + eig.second * eig.second);
   // Scaling factor
   Real factor = 1 / v / _nl_eigen->residualVectorBX().l2_norm();

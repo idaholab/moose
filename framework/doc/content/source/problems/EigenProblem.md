@@ -1,33 +1,17 @@
 # EigenProblem
 
-!alert! construction title=Undocumented Class
-The EigenProblem has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# EigenProblem
-
 !syntax description /Problem/EigenProblem
 
-## Overview
+The `EigenProblem` holds the nonlinear eigen system and organizes the computation
+of the residual and Jacobian in the context of an eigen system.
 
-!! Replace these lines with information regarding the EigenProblem object.
+It also takes care of the following customizations of the solve:
 
-## Example Input File Syntax
+- normalization and scaling parameters for eigenvectors
+- setting the type of the SLEPc eigenvalue solver
+- whether to start solves with free power iterations and how many
+- selecting the eigenvector of interest for the residual
 
-!! Describe and include an example of how to use the EigenProblem object.
-
-!syntax parameters /Problem/EigenProblem
-
-!syntax inputs /Problem/EigenProblem
-
-!syntax children /Problem/EigenProblem
-```
-!alert-end!
-
-!syntax description /Problem/EigenProblem
 
 !syntax parameters /Problem/EigenProblem
 

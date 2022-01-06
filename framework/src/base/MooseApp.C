@@ -2463,8 +2463,8 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type,
     if (!rm->isType(rm_type))
       continue;
 
-    // RM is already attached, and we do not need to handle this on the final stage
-    if (rm->attachGeometricEarly() && attach_geometric_rm_final)
+    // RM is already attached (this also handles the geometric early case)
+    if (_attached_relationship_managers[rm_type].count(rm.get()))
       continue;
 
     if (rm_type == Moose::RelationshipManagerType::GEOMETRIC)
@@ -2505,6 +2505,10 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type,
         else if (_action_warehouse.displacedMesh())
           mooseError("The displaced mesh should not yet exist at the time that we are attaching "
                      "early geometric relationship managers.");
+
+        // Mark this RM as attached
+        mooseAssert(!_attached_relationship_managers[rm_type].count(rm.get()), "Already attached");
+        _attached_relationship_managers[rm_type].insert(rm.get());
       }
     }
     else // rm_type is algebraic or coupling
@@ -2558,6 +2562,10 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type,
               createRMFromTemplateAndInit(*rm, undisp_mesh, &undisp_nl_dof_map),
               /*to_mesh = */ false);
       }
+
+      // Mark this RM as attached
+      mooseAssert(!_attached_relationship_managers[rm_type].count(rm.get()), "Already attached");
+      _attached_relationship_managers[rm_type].insert(rm.get());
     }
   }
 }
@@ -2600,7 +2608,7 @@ MooseApp::getRelationshipManagerInfo() const
     {
       const auto * gf_ptr = dynamic_cast<const RelationshipManager *>(gf);
       if (!gf_ptr)
-        // Count how many occurances of the same Ghosting Functor types we are encountering
+        // Count how many occurences of the same Ghosting Functor types we are encountering
         counts[demangle(typeid(*gf).name())]++;
     }
 
@@ -2624,7 +2632,7 @@ MooseApp::getRelationshipManagerInfo() const
     {
       const auto * gf_ptr = dynamic_cast<const RelationshipManager *>(gf);
       if (!gf_ptr)
-        // Count how many occurances of the same Ghosting Functor types we are encountering
+        // Count how many occurences of the same Ghosting Functor types we are encountering
         counts[demangle(typeid(*gf).name())]++;
     }
 

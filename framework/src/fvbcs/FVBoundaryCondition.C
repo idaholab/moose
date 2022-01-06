@@ -83,3 +83,17 @@ FVBoundaryCondition::FVBoundaryCondition(const InputParameters & parameters)
   if (getParam<bool>("use_displaced_mesh"))
     paramError("use_displaced_mesh", "FV boundary conditions do not yet support displaced mesh");
 }
+
+std::tuple<const FaceInfo *, Moose::FV::LimiterType, bool, SubdomainID>
+FVBoundaryCondition::singleSidedFaceArg(const FaceInfo * fi,
+                                        Moose::FV::LimiterType limiter_type) const
+{
+  if (!fi)
+    fi = _face_info;
+  const bool use_elem = fi->faceType(_var.name()) == FaceInfo::VarFaceNeighbors::ELEM;
+
+  if (use_elem)
+    return std::make_tuple(fi, limiter_type, true, fi->elem().subdomain_id());
+  else
+    return std::make_tuple(fi, limiter_type, true, fi->neighborPtr()->subdomain_id());
+}

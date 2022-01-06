@@ -64,4 +64,14 @@ protected:
   const MaterialWarehouse & _materials;
   /// Discrete materials warehouse
   const MaterialWarehouse & _discrete_materials;
+
+private:
+  bool shouldComputeInternalSide(const Elem & /*elem*/, const Elem & /*neighbor*/) const override;
 };
+
+inline bool
+ProjectMaterialProperties::shouldComputeInternalSide(const Elem & /*elem*/,
+                                                     const Elem & /*neighbor*/) const
+{
+  return true;
+}

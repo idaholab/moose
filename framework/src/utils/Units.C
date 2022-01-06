@@ -8,6 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "Units.h"
+#include "libmesh/int_range.h"
+
 #include <stack>
 #include <algorithm>
 #include <sstream>
@@ -191,7 +193,7 @@ const std::vector<std::pair<std::string, MooseUnits>> MooseUnits::_unit_table = 
     {"at", {1, 0, {{MooseUnits::BaseUnit::COUNT, 1}}}}               // 1 single count (atom)
 };
 
-MooseUnits::MooseUnits(const std::string & unit_string) : _factor(1.0), _base()
+MooseUnits::MooseUnits(const std::string & unit_string) : _factor(1.0), _shift(0.0), _base()
 {
   // parse the passed in unit string
   parse(unit_string);
@@ -356,9 +358,9 @@ MooseUnits::parse(const std::string & unit_string)
       if (len == 0)
       {
         if (it == end)
-          parseError(unit_string, it, "Expeced unit but found end of string.");
+          parseError(unit_string, it, "Expected unit but found end of string.");
         else
-          parseError(unit_string, it, "Expeced unit but found '", *it, "'.");
+          parseError(unit_string, it, "Expected unit but found '", *it, "'.");
       }
 
       unsigned int i = 0;
@@ -428,7 +430,8 @@ MooseUnits::parse(const std::string & unit_string)
   simplify();
 }
 
-MooseUnits MooseUnits::operator*(Real f) const
+MooseUnits
+MooseUnits::operator*(const Real f) const
 {
   MooseUnits u = *this;
   u._factor *= f;
@@ -436,7 +439,8 @@ MooseUnits MooseUnits::operator*(Real f) const
   return u;
 }
 
-MooseUnits MooseUnits::operator*(const MooseUnits & rhs) const
+MooseUnits
+MooseUnits::operator*(const MooseUnits & rhs) const
 {
   MooseUnits u = rhs;
   u._factor *= _factor;
@@ -468,7 +472,7 @@ MooseUnits::operator==(const MooseUnits & rhs) const
 }
 
 bool
-MooseUnits::operator==(Real rhs) const
+MooseUnits::operator==(const Real rhs) const
 {
   return (_factor == rhs && _shift == 0.0 && _base.empty());
 }
@@ -501,7 +505,7 @@ MooseUnits::simplify()
 }
 
 bool
-MooseUnits::isBase(MooseUnits::BaseUnit base) const
+MooseUnits::isBase(const MooseUnits::BaseUnit base) const
 {
   // must have only one base unit
   if (_base.size() != 1)
@@ -562,7 +566,7 @@ operator<<(std::ostream & os, const MooseUnits & u)
       os << ' ';
   }
 
-  for (unsigned int i = 0; i < u._base.size(); ++i)
+  for (const auto i : index_range(u._base))
   {
     os << (i ? (latex ? "\\cdot " : "*") : "");
 
