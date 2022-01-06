@@ -162,6 +162,7 @@ rho=1
   petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_pc_type -sub_pc_factor_shift_type'
   petsc_options_value = 'asm      100                lu           NONZERO'
   nl_rel_tol = 1e-12
+  resid_and_jacobian_together = true
 []
 
 [Outputs]

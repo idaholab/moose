@@ -29,6 +29,7 @@ public:
 
   void computeResidual(const FaceInfo &) override final {}
   void computeJacobian(const FaceInfo &) override final {}
+  void computeResidualAndJacobian(const FaceInfo &) override final {}
 
 protected:
   ADReal computeQpResidual() override final

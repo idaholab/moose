@@ -32,11 +32,7 @@ INSFVFluxKernel::processResidual(const ADReal & residual)
   auto process_residual = [this](const ADReal & residual, const Elem & elem)
   {
     const auto dof_index = elem.dof_number(_sys.number(), _var.number(), 0);
-
-    if (_subproblem.currentlyComputingJacobian())
-      _assembly.processDerivatives(residual, dof_index, _matrix_tags);
-    else
-      _assembly.processResidual(residual.value(), dof_index, _vector_tags);
+    _assembly.processResidual(residual, dof_index, _vector_tags, _matrix_tags);
   };
 
   if (_face_type == FaceInfo::VarFaceNeighbors::ELEM ||

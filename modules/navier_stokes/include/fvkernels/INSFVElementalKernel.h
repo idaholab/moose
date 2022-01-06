@@ -29,6 +29,7 @@ public:
   void computeResidual() override final {}
   void computeJacobian() override final {}
   void computeOffDiagJacobian() override final {}
+  void computeResidualAndJacobian() override final {}
 
 protected:
   ADReal computeQpResidual() override final

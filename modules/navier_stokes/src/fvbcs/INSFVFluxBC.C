@@ -33,8 +33,5 @@ INSFVFluxBC::processResidual(const ADReal & residual)
                                 : _face_info->neighborPtr();
   const auto dof_index = elem->dof_number(_sys.number(), _var.number(), 0);
 
-  if (_fv_problem.currentlyComputingJacobian())
-    _assembly.processDerivatives(residual, dof_index, _matrix_tags);
-  else
-    _assembly.processResidual(residual.value(), dof_index, _vector_tags);
+  _assembly.processResidual(residual, dof_index, _vector_tags, _matrix_tags);
 }

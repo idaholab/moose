@@ -38,6 +38,15 @@ FVScalarLagrangeMultiplierConstraint::FVScalarLagrangeMultiplierConstraint(
 }
 
 void
+FVScalarLagrangeMultiplierConstraint::computeResidualAndJacobian()
+{
+  const auto volume = _assembly.elemVolume();
+  _assembly.processResidual(_lambda[0] * volume, _var.dofIndices()[0], _vector_tags, _matrix_tags);
+  _assembly.processResidual(
+      computeQpResidual() * volume, _lambda_var.dofIndices()[0], _vector_tags, _matrix_tags);
+}
+
+void
 FVScalarLagrangeMultiplierConstraint::computeResidual()
 {
   // Primal residual
