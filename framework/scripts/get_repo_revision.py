@@ -12,7 +12,11 @@
 # It currently understands both local git-svn and svn repositories
 
 import subprocess, os, sys, re
-from distutils.version import LooseVersion
+
+if sys.version_info[0] == 3 and sys.version_info[1] < 7:
+    from distutils.version import LooseVersion
+else:
+    from packaging import version
 
 def shellCommand(command, cwd=None):
     """
@@ -47,8 +51,12 @@ class VersionInfo:
                 m = re.search(r"(\d+\.\S+)", shellCommand('git --version'))
                 if m:
                     gitVersion = m.group(1)
-                    if LooseVersion(gitVersion) >= LooseVersion("2.9"):
-                        self.hide_signature_string = "--no-show-signature"
+                    if sys.version_info[0] == 3 and sys.version_info[1] < 7:
+                        if LooseVersion(gitVersion) >= LooseVersion("2.9"):
+                            self.hide_signature_string = "--no-show-signature"
+                    else:
+                        if version.parse(gitVersion) >= version.parse("2.9"):
+                            self.hide_signature_string = "--no-show-signature"
             except:
                 pass
 
