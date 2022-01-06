@@ -68,3 +68,9 @@ DisplacedSystem::system() const
 {
   return _sys;
 }
+
+bool
+DisplacedSystem::residAndJacobianTogether() const
+{
+  return _undisplaced_system.residAndJacobianTogether();
+}

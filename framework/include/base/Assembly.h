@@ -1689,6 +1689,15 @@ public:
                           const std::set<TagID> & matrix_tags);
 
   /**
+   * This method is only meant to be called if MOOSE is configured to use global AD indexing. This
+   * performs the duties of both \p processResidual and \p processDerivatives
+   */
+  void processResidual(const ADReal & residual,
+                       dof_id_type dof_index,
+                       const std::set<TagID> & vector_tags,
+                       const std::set<TagID> & matrix_tags);
+
+  /**
    * Process the \p derivatives() data of an \p ADReal. When using global indexing, this method
    * simply caches the derivative values for the corresponding column indices for the provided
    * \p matrix_tags. Note that this single dof overload will not call \p

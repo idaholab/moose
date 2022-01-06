@@ -888,6 +888,11 @@ public:
    */
   void clearAllDofIndices();
 
+  /**
+   * @return whether to compute the residual and Jacobian together
+   */
+  virtual bool residAndJacobianTogether() const = 0;
+
 protected:
   /**
    * Internal getter for solution owned by libMesh.

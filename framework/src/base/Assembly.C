@@ -3455,6 +3455,25 @@ Assembly::processResidual(Real value, const dof_id_type dof, const std::set<TagI
 }
 
 void
+Assembly::processResidual(const ADReal & residual,
+                          const dof_id_type row_index,
+                          const std::set<TagID> & vector_tags,
+                          const std::set<TagID> & matrix_tags)
+{
+  if (_sys.residAndJacobianTogether())
+  {
+    processResidual(MetaPhysicL::raw_value(residual), row_index, vector_tags);
+    processDerivatives(residual, row_index, matrix_tags);
+    return;
+  }
+
+  if (_subproblem.currentlyComputingJacobian())
+    processDerivatives(residual, row_index, matrix_tags);
+  else
+    processResidual(MetaPhysicL::raw_value(residual), row_index, vector_tags);
+}
+
+void
 Assembly::cacheResidualContribution(dof_id_type dof, Real value, TagID tag_id)
 {
   mooseDeprecated("please use cacheResidual");

@@ -642,7 +642,8 @@ public:
   /**
    * Set whether to compute the residual and Jacobian together
    */
-  void setResidAndJacobianTogether(bool resid_and_jacobian_together);
+  void residAndJacobianTogether(bool resid_and_jacobian_together);
+  bool residAndJacobianTogether() const override { return _resid_and_jacobian_together; }
 
   bool computeScalingOnce() const { return _compute_scaling_once; }
   void computeScalingOnce(bool compute_scaling_once)
@@ -1009,7 +1010,7 @@ private:
 };
 
 inline void
-NonlinearSystemBase::setResidAndJacobianTogether(bool resid_and_jacobian_together)
+NonlinearSystemBase::residAndJacobianTogether(bool resid_and_jacobian_together)
 {
   _resid_and_jacobian_together = resid_and_jacobian_together;
 }

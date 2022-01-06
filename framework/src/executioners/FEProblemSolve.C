@@ -199,7 +199,7 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
 
   _nl.setDecomposition(_splitting);
 
-  _nl.setResidAndJacobianTogether(getParam<bool>("resid_and_jacobian_together"));
+  _nl.residAndJacobianTogether(getParam<bool>("resid_and_jacobian_together"));
 
   // Check whether the user has explicitly requested automatic scaling and is using a solve type
   // without a matrix. If so, then we warn them
