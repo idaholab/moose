@@ -28,14 +28,14 @@ WCNSFVScalarFluxBC::validParams()
                                      "Postprocessor with the inlet scalar flow rate");
   params.addParam<PostprocessorName>("area_pp", "Postprocessor with the inlet flow area");
 
-  // 2) Postprocessors for inlet velocity and scalar concentration
+  // 2) Postprocessors for inlet velocity and scalar concentration and functor for density
   params.addParam<PostprocessorName>("scalar_value_pp",
                                      "Postprocessor with the inlet scalar concentration");
   params.addParam<PostprocessorName>("velocity_pp", "Postprocessor with the inlet velocity norm");
-
-  // 3) Postprocessors for mass flow rate and energy, functor for density
-  params.addParam<PostprocessorName>("mdot_pp", "Postprocessor with the inlet mass flow rate");
   params.addParam<MooseFunctorName>(NS::density, "Density functor");
+
+  // 3) Postprocessors for mass flow rate. Also requires postprocessor for scalar concentration
+  params.addParam<PostprocessorName>("mdot_pp", "Postprocessor with the inlet mass flow rate");
 
   return params;
 }
@@ -68,7 +68,9 @@ WCNSFVScalarFluxBC::WCNSFVScalarFluxBC(const InputParameters & params)
     if (!_velocity_pp && !_mdot_pp)
       mooseError("If not providing the scalar flow rate, the inlet velocity or mass flow "
                  "should be provided");
-    if (_mdot_pp && (!_rho || !_area_pp))
+    if (_velocity_pp && !_rho)
+      mooseError("If the velocity postprocessor is provided, then we must have a density functor.");
+    if (_mdot_pp && !_area_pp)
       mooseError("If providing the inlet mass flow rate, the inlet density and flow "
                  "area should be provided as well");
   }
@@ -87,8 +89,7 @@ WCNSFVScalarFluxBC::computeQpResidual()
   if (_scalar_flux_pp)
     return -_scaling_factor * *_scalar_flux_pp / *_area_pp;
   else if (_velocity_pp)
-    return -_scaling_factor * *_velocity_pp * *_scalar_value_pp;
+    return -_scaling_factor * *_velocity_pp * (*_rho)(singleSidedFaceArg()) * *_scalar_value_pp;
   else
-    return -_scaling_factor * *_mdot_pp / *_area_pp / (*_rho)(singleSidedFaceArg()) *
-           *_scalar_value_pp;
+    return -_scaling_factor * *_mdot_pp / *_area_pp * *_scalar_value_pp;
 }

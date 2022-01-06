@@ -1,5 +1,7 @@
 rho = 'rho'
+rho_val = 1980
 l = 10
+inlet_area = 1
 velocity_interp_method = 'rc'
 advected_interp_method = 'average'
 
@@ -7,13 +9,14 @@ advected_interp_method = 'average'
 # For a real case, use a GeneralFluidFunctorProperties and a viscosity rampdown
 # or initialize very well!
 k = 1
-cp = 1000
+cp = 2530
 mu = 1e2
 
 # Operating conditions
 inlet_temp = 300
 outlet_pressure = 1e5
 inlet_velocity = 0.001
+inlet_scalar_conc = 0.2
 
 [Mesh]
   [gen]
@@ -60,7 +63,7 @@ inlet_velocity = 0.001
   []
   [scalar]
     type = MooseVariableFVReal
-    initial_condition = 0.2
+    initial_condition = ${inlet_scalar_conc}
   []
 []
 
@@ -196,11 +199,6 @@ inlet_velocity = 0.001
     variable = scalar
     coeff = 1.1
   []
-  [scalar_source]
-    type = FVBodyForce
-    variable = scalar
-    function = 2.1
-  []
 []
 
 [FVBCs]
@@ -209,14 +207,15 @@ inlet_velocity = 0.001
     type = WCNSFVMassFluxBC
     variable = pressure
     boundary = 'left'
-    velocity_pp = 'inlet_u'
-    rho = 'rho'
+    mdot_pp = 'inlet_mdot'
+    area_pp = 'surface_inlet'
   []
   [inlet_u]
     type = WCNSFVMomentumFluxBC
     variable = u
     boundary = 'left'
-    velocity_pp = 'inlet_u'
+    mdot_pp = 'inlet_mdot'
+    area_pp = 'surface_inlet'
     rho = 'rho'
     momentum_component = 'x'
   []
@@ -224,7 +223,8 @@ inlet_velocity = 0.001
     type = WCNSFVMomentumFluxBC
     variable = v
     boundary = 'left'
-    velocity_pp = 0
+    mdot_pp = 0
+    area_pp = 'surface_inlet'
     rho = 'rho'
     momentum_component = 'y'
   []
@@ -232,18 +232,15 @@ inlet_velocity = 0.001
     type = WCNSFVEnergyFluxBC
     variable = T
     boundary = 'left'
-    velocity_pp = 'inlet_u'
-    temperature_pp = 'inlet_T'
-    rho = 'rho'
-    cp = 'cp'
+    energy_pp = 'inlet_Edot'
+    area_pp = 'surface_inlet'
   []
   [inlet_scalar]
     type = WCNSFVScalarFluxBC
     variable = scalar
     boundary = 'left'
-    scalar_value_pp = 'inlet_scalar_value'
-    velocity_pp = 'inlet_u'
-    rho = 'rho'
+    scalar_flux_pp = 'inlet_scalar_flux'
+    area_pp = 'surface_inlet'
   []
 
   [outlet_p]
@@ -270,29 +267,31 @@ inlet_velocity = 0.001
 
 # used for the boundary conditions in this example
 [Postprocessors]
-  [inlet_u]
+  [inlet_mdot]
     type = Receiver
-    default = ${inlet_velocity}
+    default = ${fparse rho_val * inlet_velocity * inlet_area}
   []
   [surface_inlet]
     type = AreaPostprocessor
     boundary = 'left'
     execute_on = 'INITIAL'
   []
-  [inlet_T]
+  [inlet_Edot]
     type = Receiver
-    default = ${inlet_temp}
+    default = ${fparse rho_val * inlet_velocity * cp * inlet_temp * inlet_area}
   []
-  [inlet_scalar_value]
+  [inlet_scalar_flux]
     type = Receiver
-    default = 0.2
+    default = ${fparse rho_val * inlet_velocity * inlet_scalar_conc * inlet_area}
   []
 []
 
 [Modules]
   [FluidProperties]
     [fp]
-      type = FlibeFluidProperties
+      type = SimpleFluidProperties
+      density0 = ${rho_val}
+      cp = ${cp}
     []
   []
 []
