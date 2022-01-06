@@ -64,13 +64,6 @@
     c = c
     v = 'gr0 gr1 gr2 gr3'
     diffusivity = diffusivity
-    Dbulk = 1.0
-    Dsurf = 1.0
-    surfindex = 1.0
-    gbindex = 1.0
-    bulkindex = 1.0
-    voidindex = 1.0
-    Dgb = 1.0
     outputs = exodus
     output_properties = 'diffusivity'
   []
