@@ -28,6 +28,6 @@ protected:
   const VariableValue & _var;
   Real _base;
   Real _coef;
-  MaterialProperty<Real> & _diffusion;
-  const MaterialProperty<Real> * const _diffusion_old;
+  MaterialProperty<Real> & _coupled_prop;
+  const MaterialProperty<Real> * const _coupled_prop_old;
 };

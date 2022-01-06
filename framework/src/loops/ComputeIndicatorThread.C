@@ -136,34 +136,27 @@ ComputeIndicatorThread::onInternalSide(const Elem * elem, unsigned int side)
   // Pointer to the neighbor we are currently working on.
   const Elem * neighbor = elem->neighbor_ptr(side);
 
-  // Get the global id of the element and the neighbor
-  const dof_id_type elem_id = elem->id(), neighbor_id = neighbor->id();
+  for (auto * var : _aux_sys._elem_vars[_tid])
+    var->prepareAux();
 
-  if ((neighbor->active() && (neighbor->level() == elem->level()) && (elem_id < neighbor_id)) ||
-      (neighbor->level() < elem->level()))
+  SubdomainID block_id = elem->subdomain_id();
+  if (_internal_side_indicators.hasActiveBlockObjects(block_id, _tid))
   {
-    for (auto * var : _aux_sys._elem_vars[_tid])
-      var->prepareAux();
+    _fe_problem.reinitNeighbor(elem, side, _tid);
 
-    SubdomainID block_id = elem->subdomain_id();
-    if (_internal_side_indicators.hasActiveBlockObjects(block_id, _tid))
-    {
-      _fe_problem.reinitNeighbor(elem, side, _tid);
+    // Set up Sentinels so that, even if one of the reinitMaterialsXXX() calls throws, we
+    // still remember to swap back during stack unwinding.
+    SwapBackSentinel face_sentinel(_fe_problem, &FEProblemBase::swapBackMaterialsFace, _tid);
+    _fe_problem.reinitMaterialsFace(block_id, _tid);
 
-      // Set up Sentinels so that, even if one of the reinitMaterialsXXX() calls throws, we
-      // still remember to swap back during stack unwinding.
-      SwapBackSentinel face_sentinel(_fe_problem, &FEProblemBase::swapBackMaterialsFace, _tid);
-      _fe_problem.reinitMaterialsFace(block_id, _tid);
+    SwapBackSentinel neighbor_sentinel(
+        _fe_problem, &FEProblemBase::swapBackMaterialsNeighbor, _tid);
+    _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
 
-      SwapBackSentinel neighbor_sentinel(
-          _fe_problem, &FEProblemBase::swapBackMaterialsNeighbor, _tid);
-      _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
-
-      const std::vector<std::shared_ptr<InternalSideIndicator>> & indicators =
-          _internal_side_indicators.getActiveBlockObjects(block_id, _tid);
-      for (const auto & indicator : indicators)
-        indicator->computeIndicator();
-    }
+    const std::vector<std::shared_ptr<InternalSideIndicator>> & indicators =
+        _internal_side_indicators.getActiveBlockObjects(block_id, _tid);
+    for (const auto & indicator : indicators)
+      indicator->computeIndicator();
   }
 }
 
