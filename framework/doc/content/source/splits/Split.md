@@ -1,33 +1,22 @@
 # Split
 
-!alert! construction title=Undocumented Class
-The Split has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# Split
-
 !syntax description /Preconditioning/Split
 
-## Overview
+This is an alternative syntax to the [FieldSplitPreconditioner.md].
+The field split based preconditioner is entirely set up by defining the relevant Petsc options.
+This syntax offers shorthands for some of the parameters that may be passed to Petsc,
+such as for splitting between variables, blocks or sidesets.
 
-!! Replace these lines with information regarding the Split object.
+More information about field split preconditioning may be found in the
+[Petsc manual]([here](https://www.mcs.anl.gov/petsc/petsc-current/docs/manualpages/).
 
-## Example Input File Syntax
+## Example input syntax
 
-!! Describe and include an example of how to use the Split object.
+In this example, a two level field split preconditioning is set up using the `Split` syntax.
+A Schur decomposition is used for preconditioning at the top level, and `asm` preconditioning,
+with their own sets of petsc options, is set set up for two groups of variables.
 
-!syntax parameters /Preconditioning/Split
-
-!syntax inputs /Preconditioning/Split
-
-!syntax children /Preconditioning/Split
-```
-!alert-end!
-
-!syntax description /Preconditioning/Split
+!listing modules/phase_field/test/tests/phase_field_crystal/PFCTrad/pfct_newton_split1_asm5.i block=Splits
 
 !syntax parameters /Preconditioning/Split
 

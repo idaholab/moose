@@ -6,18 +6,21 @@
 
 The `FieldSplitPreconditioner` allows for custom preconditioning for each nonlinear variable in the numerical
 system. One or more variables may be targetted in a subsolve that will only consider part of the numerical system.
-The results from these subsolves is then used to precondition the main numerical system.
+The preconditioning defined for these subsolves is used for the relevant block(s) in the global numerical system.
 
 A `FSP` may for example be used for block-diagonal preconditioning by setting `full=false`
 and no off-diagonal variable couplings. Numerical systems considering only a single variable
-are then solved. This is the default preconditioner for the `PJFNK` solves. See the
+are then preconditioned individually. This is the default preconditioner for the `PJFNK` solves. See the
 [Executioner documentation](Executioner/index.md) for more information on the default preconditioner.
+
+More information about field split preconditioning may be found in the
+[Petsc manual]([here](https://www.mcs.anl.gov/petsc/petsc-current/docs/manualpages/).
 
 ## Example input syntax
 
 In this example, the preconditioning is performed by solving individual problems for each variables,
-as described in the comments in the snippets. The solution for each subsolve provides the inverse of
-the diagonal blocks, which are then used to compute the main solve preconditioning matrix.
+as described in the comments in the snippet. The solution for these subsolves is used to perform
+the Schur decomposition preconditioning of the main numerical system.
 
 !listing test/tests/preconditioners/fsp/fsp_test.i block=Preconditioning
 
