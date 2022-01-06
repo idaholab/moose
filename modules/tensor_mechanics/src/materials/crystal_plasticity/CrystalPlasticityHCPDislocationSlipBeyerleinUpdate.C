@@ -119,6 +119,10 @@ CrystalPlasticityHCPDislocationSlipBeyerleinUpdate::validParams()
   params.addRequiredRangeCheckedParam<Real>(
       "grain_size", "grain_size>0", "Value of the crystal grain size, in mm");
 
+  params.addParam<MaterialPropertyName>(
+      "total_twin_volume_fraction",
+      "Total twin volume fraction, if twinning is considered in the simulation");
+
   return params;
 }
 
@@ -168,7 +172,13 @@ CrystalPlasticityHCPDislocationSlipBeyerleinUpdate::
         getParam<std::vector<Real>>("substructure_rate_coefficient_per_mode")),
     _substructure_hardening_coefficient(getParam<Real>("substructure_hardening_coefficient")),
     _hallpetch_like_coefficient(getParam<std::vector<Real>>("Hall_Petch_like_constant_per_mode")),
-    _grain_size(getParam<Real>("grain_size"))
+    _grain_size(getParam<Real>("grain_size")),
+
+    // Twinning contributions, if used
+    _include_twinning_in_Lp(parameters.isParamValid("total_twin_volume_fraction")),
+    _twin_volume_fraction_total(_include_twinning_in_Lp
+                                    ? &getMaterialPropertyOld<Real>("total_twin_volume_fraction")
+                                    : nullptr)
 {
   // resize local caching vectors used for substepping
   _previous_substep_slip_resistance.resize(_number_slip_systems);
@@ -344,6 +354,20 @@ CrystalPlasticityHCPDislocationSlipBeyerleinUpdate::calculateSlipRate()
     }
   }
   return true;
+}
+
+void
+CrystalPlasticityHCPDislocationSlipBeyerleinUpdate::calculateEquivalentSlipIncrement(
+    RankTwoTensor & equivalent_slip_increment)
+{
+  if (_include_twinning_in_Lp)
+  {
+    for (auto i : make_range(_number_slip_systems))
+      equivalent_slip_increment += (1.0 - (*_twin_volume_fraction_total)[_qp]) *
+                                   _flow_direction[_qp][i] * _slip_increment[_qp][i] * _substep_dt;
+  }
+  else // if no twinning volume fraction material property supplied, use base class
+    CrystalPlasticityStressUpdateBase::calculateEquivalentSlipIncrement(equivalent_slip_increment);
 }
 
 void
