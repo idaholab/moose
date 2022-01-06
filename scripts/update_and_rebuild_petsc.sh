@@ -73,12 +73,16 @@ if [[ -n "$go_fast" && $# != 1 ]]; then
   exit 1;
 fi
 
-# Set PETSc envir
-export PETSC_DIR=$SCRIPT_DIR/../petsc
-if [ -z "$PETSC_ARCH" ]; then
-    export PETSC_ARCH=arch-moose
+# Set PETSc envir unless it is specified by the user
+if [[ -z "$PETSC_DIR" ]]; then
+  export PETSC_DIR=$SCRIPT_DIR/../petsc
+  if [ -z "$PETSC_ARCH" ]; then
+      export PETSC_ARCH=arch-moose
+  fi
+else
+  # skip submodule update for custom PETSc DIRs
+  skip_sub_update=1;
 fi
-
 
 cd $SCRIPT_DIR/..
 
@@ -103,11 +107,11 @@ if [ ! -z "$MOOSE_JOBS" ]; then
   MAKE_NP_STR="--with-make-np=$MOOSE_JOBS"
 fi
 
-cd $SCRIPT_DIR/../petsc
+cd $PETSC_DIR
 
 # If we're not going fast, remove the build directory and reconfigure
 if [ -z "$go_fast" ]; then
-  rm -rf $SCRIPT_DIR/../petsc/$PETSC_ARCH
+  rm -rf $PETSC_DIR/$PETSC_ARCH
 
   source $SCRIPT_DIR/configure_petsc.sh
   configure_petsc "$PFX_STR" "$MAKE_NP_STR" $*
