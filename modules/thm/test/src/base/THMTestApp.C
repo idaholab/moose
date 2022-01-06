@@ -15,7 +15,6 @@ registerKnownLabel("THMTestApp");
 
 THMTestApp::THMTestApp(InputParameters parameters) : THMApp(parameters)
 {
-  srand(processor_id());
   THMTestApp::registerAll(_factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));
 }
 

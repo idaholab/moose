@@ -16,22 +16,27 @@
 
 #include "ChemicalReactionsTestApp.h"
 #include "ContactTestApp.h"
+#include "ExternalPetscSolverTestApp.h"
 #include "FluidPropertiesTestApp.h"
+#include "FsiTestApp.h"
+#include "FunctionalExpansionToolsTestApp.h"
+#include "GeochemistryTestApp.h"
 #include "HeatConductionTestApp.h"
+#include "LevelSetTestApp.h"
 #include "MiscTestApp.h"
 #include "NavierStokesTestApp.h"
 #include "PeridynamicsTestApp.h"
 #include "PhaseFieldTestApp.h"
+#include "PorousFlowTestApp.h"
 #include "RayTracingTestApp.h"
 #include "RichardsTestApp.h"
 #include "StochasticToolsTestApp.h"
-#include "TensorMechanicsTestApp.h"
-#include "XFEMTestApp.h"
 #include "PorousFlowTestApp.h"
 #include "RdgTestApp.h"
 #include "ReactorTestApp.h"
-#include "LevelSetTestApp.h"
-#include "ExternalPetscSolverApp.h"
+#include "TensorMechanicsTestApp.h"
+#include "THMTestApp.h"
+#include "XFEMTestApp.h"
 
 InputParameters
 CombinedTestApp::validParams()
@@ -58,24 +63,29 @@ CombinedTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool u
   {
     Registry::registerObjectsTo(f, {"CombinedTestApp"});
     Registry::registerActionsTo(af, {"CombinedTestApp"});
+
     ChemicalReactionsTestApp::registerAll(f, af, s, use_test_objs);
     ContactTestApp::registerAll(f, af, s, use_test_objs);
+    ExternalPetscSolverTestApp::registerAll(f, af, s, use_test_objs);
     FluidPropertiesTestApp::registerAll(f, af, s, use_test_objs);
+    FsiTestApp::registerAll(f, af, s, use_test_objs);
+    FunctionalExpansionToolsTestApp::registerAll(f, af, s, use_test_objs);
+    GeochemistryTestApp::registerAll(f, af, s, use_test_objs);
     HeatConductionTestApp::registerAll(f, af, s, use_test_objs);
+    LevelSetTestApp::registerAll(f, af, s, use_test_objs);
     MiscTestApp::registerAll(f, af, s, use_test_objs);
     NavierStokesTestApp::registerAll(f, af, s, use_test_objs);
     PeridynamicsTestApp::registerAll(f, af, s, use_test_objs);
     PhaseFieldTestApp::registerAll(f, af, s, use_test_objs);
+    PorousFlowTestApp::registerAll(f, af, s, use_test_objs);
     RayTracingTestApp::registerAll(f, af, s, use_test_objs);
+    RdgTestApp::registerAll(f, af, s, use_test_objs);
+    ReactorTestApp::registerAll(f, af, s, use_test_objs);
     RichardsTestApp::registerAll(f, af, s, use_test_objs);
     StochasticToolsTestApp::registerAll(f, af, s, use_test_objs);
     TensorMechanicsTestApp::registerAll(f, af, s, use_test_objs);
+    THMTestApp::registerAll(f, af, s, use_test_objs);
     XFEMTestApp::registerAll(f, af, s, use_test_objs);
-    PorousFlowTestApp::registerAll(f, af, s, use_test_objs);
-    RdgTestApp::registerAll(f, af, s, use_test_objs);
-    ReactorTestApp::registerAll(f, af, s, use_test_objs);
-    LevelSetTestApp::registerAll(f, af, s, use_test_objs);
-    ExternalPetscSolverApp::registerAll(f, af, s);
   }
 }
 
@@ -87,66 +97,21 @@ CombinedTestApp::registerApps()
 }
 
 void
-CombinedTestApp::registerObjects(Factory & factory)
+CombinedTestApp::registerObjects(Factory & /*factory*/)
 {
-  ChemicalReactionsTestApp::registerObjects(factory);
-  ContactTestApp::registerObjects(factory);
-  FluidPropertiesTestApp::registerObjects(factory);
-  HeatConductionTestApp::registerObjects(factory);
-  MiscTestApp::registerObjects(factory);
-  NavierStokesTestApp::registerObjects(factory);
-  PeridynamicsTestApp::registerObjects(factory);
-  PhaseFieldTestApp::registerObjects(factory);
-  RayTracingTestApp::registerObjects(factory);
-  RichardsTestApp::registerObjects(factory);
-  StochasticToolsTestApp::registerObjects(factory);
-  TensorMechanicsTestApp::registerObjects(factory);
-  XFEMTestApp::registerObjects(factory);
-  PorousFlowTestApp::registerObjects(factory);
-  RdgTestApp::registerObjects(factory);
-  LevelSetTestApp::registerObjects(factory);
+  mooseError("registerObjects is deprecated, fix the calling application");
 }
 
 void
-CombinedTestApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
+CombinedTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
 {
-  ChemicalReactionsTestApp::associateSyntax(syntax, action_factory);
-  ContactTestApp::associateSyntax(syntax, action_factory);
-  FluidPropertiesTestApp::associateSyntax(syntax, action_factory);
-  HeatConductionTestApp::associateSyntax(syntax, action_factory);
-  MiscTestApp::associateSyntax(syntax, action_factory);
-  NavierStokesTestApp::associateSyntax(syntax, action_factory);
-  PeridynamicsTestApp::associateSyntax(syntax, action_factory);
-  PhaseFieldTestApp::associateSyntax(syntax, action_factory);
-  RayTracingTestApp::associateSyntax(syntax, action_factory);
-  RichardsTestApp::associateSyntax(syntax, action_factory);
-  StochasticToolsTestApp::associateSyntax(syntax, action_factory);
-  TensorMechanicsTestApp::associateSyntax(syntax, action_factory);
-  XFEMTestApp::associateSyntax(syntax, action_factory);
-  PorousFlowTestApp::associateSyntax(syntax, action_factory);
-  RdgTestApp::associateSyntax(syntax, action_factory);
-  LevelSetTestApp::associateSyntax(syntax, action_factory);
+  mooseError("associateSyntax is deprecated, fix the calling application");
 }
 
 void
-CombinedTestApp::registerExecFlags(Factory & factory)
+CombinedTestApp::registerExecFlags(Factory & /*factory*/)
 {
-  ChemicalReactionsTestApp::registerExecFlags(factory);
-  ContactTestApp::registerExecFlags(factory);
-  FluidPropertiesTestApp::registerExecFlags(factory);
-  HeatConductionTestApp::registerExecFlags(factory);
-  MiscTestApp::registerExecFlags(factory);
-  NavierStokesTestApp::registerExecFlags(factory);
-  PeridynamicsTestApp::registerExecFlags(factory);
-  PhaseFieldTestApp::registerExecFlags(factory);
-  RayTracingTestApp::registerExecFlags(factory);
-  RichardsTestApp::registerExecFlags(factory);
-  StochasticToolsTestApp::registerExecFlags(factory);
-  TensorMechanicsTestApp::registerExecFlags(factory);
-  XFEMTestApp::registerExecFlags(factory);
-  PorousFlowTestApp::registerExecFlags(factory);
-  RdgTestApp::registerExecFlags(factory);
-  LevelSetTestApp::registerExecFlags(factory);
+  mooseError("registerExecFlags is deprecated, fix the calling application");
 }
 
 extern "C" void

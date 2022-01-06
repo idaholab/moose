@@ -70,6 +70,7 @@ CombinedApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 
   ChemicalReactionsApp::registerAll(f, af, s);
   ContactApp::registerAll(f, af, s);
+  ExternalPetscSolverApp::registerAll(f, af, s);
   FluidPropertiesApp::registerAll(f, af, s);
   FsiApp::registerAll(f, af, s);
   FunctionalExpansionToolsApp::registerAll(f, af, s);
@@ -78,6 +79,7 @@ CombinedApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   LevelSetApp::registerAll(f, af, s);
   MiscApp::registerAll(f, af, s);
   NavierStokesApp::registerAll(f, af, s);
+  PeridynamicsApp::registerAll(f, af, s);
   PhaseFieldApp::registerAll(f, af, s);
   PorousFlowApp::registerAll(f, af, s);
   RayTracingApp::registerAll(f, af, s);
@@ -85,7 +87,6 @@ CombinedApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   ReactorApp::registerAll(f, af, s);
   RichardsApp::registerAll(f, af, s);
   StochasticToolsApp::registerAll(f, af, s);
-  PeridynamicsApp::registerAll(f, af, s);
   TensorMechanicsApp::registerAll(f, af, s);
   THMApp::registerAll(f, af, s);
   XFEMApp::registerAll(f, af, s);
@@ -93,77 +94,21 @@ CombinedApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 }
 
 void
-CombinedApp::registerObjects(Factory & factory)
+CombinedApp::registerObjects(Factory & /*factory*/)
 {
-  mooseDeprecated("use registerAll instead of registerObjects");
-  ChemicalReactionsApp::registerObjects(factory);
-  ContactApp::registerObjects(factory);
-  FluidPropertiesApp::registerObjects(factory);
-  FunctionalExpansionToolsApp::registerObjects(factory);
-  HeatConductionApp::registerObjects(factory);
-  LevelSetApp::registerObjects(factory);
-  MiscApp::registerObjects(factory);
-  NavierStokesApp::registerObjects(factory);
-  PhaseFieldApp::registerObjects(factory);
-  PorousFlowApp::registerObjects(factory);
-  RayTracingApp::registerObjects(factory);
-  ReactorApp::registerObjects(factory);
-  RdgApp::registerObjects(factory);
-  RichardsApp::registerObjects(factory);
-  StochasticToolsApp::registerObjects(factory);
-  PeridynamicsApp::registerObjects(factory);
-  TensorMechanicsApp::registerObjects(factory);
-  THMApp::registerObjects(factory);
-  XFEMApp::registerObjects(factory);
+  mooseError("registerObjects is deprecated, fix the calling application");
 }
 
 void
-CombinedApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
+CombinedApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
 {
-  mooseDeprecated("use registerAll instead of associateSyntax");
-  ChemicalReactionsApp::associateSyntax(syntax, action_factory);
-  ContactApp::associateSyntax(syntax, action_factory);
-  FluidPropertiesApp::associateSyntax(syntax, action_factory);
-  FunctionalExpansionToolsApp::associateSyntax(syntax, action_factory);
-  HeatConductionApp::associateSyntax(syntax, action_factory);
-  LevelSetApp::associateSyntax(syntax, action_factory);
-  MiscApp::associateSyntax(syntax, action_factory);
-  NavierStokesApp::associateSyntax(syntax, action_factory);
-  PhaseFieldApp::associateSyntax(syntax, action_factory);
-  PorousFlowApp::associateSyntax(syntax, action_factory);
-  RayTracingApp::associateSyntax(syntax, action_factory);
-  ReactorApp::associateSyntax(syntax, action_factory);
-  RdgApp::associateSyntax(syntax, action_factory);
-  RichardsApp::associateSyntax(syntax, action_factory);
-  StochasticToolsApp::associateSyntax(syntax, action_factory);
-  PeridynamicsApp::associateSyntax(syntax, action_factory);
-  TensorMechanicsApp::associateSyntax(syntax, action_factory);
-  THMApp::associateSyntax(syntax, action_factory);
-  XFEMApp::associateSyntax(syntax, action_factory);
+  mooseError("associateSyntax is deprecated, fix the calling application");
 }
 
 void
-CombinedApp::registerExecFlags(Factory & factory)
+CombinedApp::registerExecFlags(Factory & /*factory*/)
 {
-  mooseDeprecated("use registerAll instead of registerExecFlags");
-  ChemicalReactionsApp::registerExecFlags(factory);
-  ContactApp::registerExecFlags(factory);
-  FluidPropertiesApp::registerExecFlags(factory);
-  HeatConductionApp::registerExecFlags(factory);
-  MiscApp::registerExecFlags(factory);
-  NavierStokesApp::registerExecFlags(factory);
-  PhaseFieldApp::registerExecFlags(factory);
-  RayTracingApp::registerExecFlags(factory);
-  ReactorApp::registerExecFlags(factory);
-  RichardsApp::registerExecFlags(factory);
-  StochasticToolsApp::registerExecFlags(factory);
-  PeridynamicsApp::registerExecFlags(factory);
-  TensorMechanicsApp::registerExecFlags(factory);
-  THMApp::registerExecFlags(factory);
-  XFEMApp::registerExecFlags(factory);
-  PorousFlowApp::registerExecFlags(factory);
-  RdgApp::registerExecFlags(factory);
-  LevelSetApp::registerExecFlags(factory);
+  mooseError("registerExecFlags is deprecated, fix the calling application");
 }
 
 extern "C" void
