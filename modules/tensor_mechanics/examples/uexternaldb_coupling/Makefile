@@ -10,3 +10,7 @@ plugin_INCLUDES := $(shell find $(plugin_INCLUDEDIRS) -name "*.h")
 
 # build the plugin
 -include $(MOOSE_DIR)/framework/plugin.mk
+
+fail:
+	@echo "Make sure the MOOSE_DIR environment variable is set."
+

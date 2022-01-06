@@ -12,6 +12,7 @@
 #include "omi_for_c.h"
 
 #include <unistd.h>
+#include <limits.h>
 
 #include <iostream>
 #include <vector>
@@ -20,12 +21,8 @@
 // data shared with the UMAT object
 std::vector<std::map<std::pair<int, int>, double>> out_data;
 
-extern "C" void FOR_NAME(uexternaldb, UEXTERNALDB)(const int & LOP,
-                                                   const int & LRESTART,
-                                                   const double (&TIME)[2],
-                                                   const double & DTIME,
-                                                   const int & KSTEP,
-                                                   const int & KINC)
+extern "C" void FOR_NAME(uexternaldb, UEXTERNALDB)(
+    const int & LOP, const int &, const double (&)[2], const double &, const int &, const int &)
 {
   int myNthreads = CALL_NAME(getnumthreads, GETNUMTHREADS)();
   int myThreadID = CALL_NAME(get_thread_id, GET_THREAD_ID)();
@@ -43,18 +40,16 @@ extern "C" void FOR_NAME(uexternaldb, UEXTERNALDB)(const int & LOP,
     char outdir[256];
 
     int lenout;
-    int GETLEN(outdir) = 256;
+    // int GETLEN(outdir) = 256;
     CALL_NAME(getoutdir, GETOUTDIR)(CHNAME_C(outdir), &lenout);
     std::cout << "outdir name is ";
     for (int i = 0; i < lenout; ++i)
-    {
       std::cout << outdir[i];
-    }
     std::cout << std::endl;
 
     char jobname[256];
     int jobnamelen;
-    int GETLEN(jobname) = 256;
+    // int GETLEN(jobname) = 256;
     CALL_NAME(getjobname, GETJOBNAME)(CHNAME_C(jobname), &jobnamelen);
     int namecount(0);
     std::string jobnamestr;
