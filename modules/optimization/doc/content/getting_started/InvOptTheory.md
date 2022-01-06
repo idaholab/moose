@@ -1,23 +1,25 @@
 # Inverse Optimization id=sec:invOpt
 
-This page gives an overview of the inverse optimization capabilities developed in isopod. This page is split up into the following sections:
+This page provides a practical overview of the theory and equations needed to solve inverse optimization problems for users/developers of isopod.  This overview focuses on optimization problems constrained by the solution to a partial differentiation equation, i.e. PDE constrained optimization, and how to efficiently compute the various gradients needed to accelerate the convergence of the optimization solver.  See citations throughout this overview for a more in depth and rigorous overview of inverse optimization.  This overview on inverse optimization in isopod is split up into the following sections:
 
 - [PDE constrained Optimization Theory:](#sec:invOptTheory) Describes the theory for partial differential equation (PDE) constrained optimization
 - [Adjoint Equation and Boundary Conditions:](#sec:adjoint) Derivation of the Adjoint equation using Lagrange multipliers and its boundary conditions.
 - [Parameter Derivatives of PDE:](#sec:PDEDerivs) Derivatives of the PDE with respect to the optimization parameters for force and material inversion.  Force inversion examples are provided where PDE constrained optimization is used to parameterize boundary conditions and body loads is provided on this [section](#sec:forceInvExample).  Material inversion examples are provided on this [section](#sec:forceInvExample) where PDE constrained optimization is used to identify material properties.
 
-The overall flow of the optimization algorithm implemented in the MOOSE based app isopod is shown in [fig:optCycle].  In this example, the internal heat source, $q_v$, is being parameterized to match the simulated and experimental steady state temperature fields, $\widetilde{T}$ and $T$, respectively.  Step one of the optimization cycle consists of adjusting the internal heat source, $q_v$.  In step two, the physics model is solved with the current $q_v$ to obtain a simulated temperature field, $T$.  Step two is often referred to as the forward solve.  In step three, the simulated and experimental temperature fields are compared via the objective function, $J$.  If $J$ is below the user defined threshold, the optimization cycle stops and the best fit parameterization of $q_v$ is found.  If $J$ is above the user defined threshold, the optimization algorithm determines a new $q_v$ and the process is repeated.  In the next section, methods for determining the next iteration of the parameterized value, in this case $q_v$, will be presented.  MOOSE examples using isopod are available on this [page](examples/index.md).
+The overall flow of the optimization algorithm implemented in the MOOSE based app isopod is shown in [fig:optCycle].  In this example, the internal heat source, $q_v$, is being parameterized to match the simulated and experimental steady state temperature fields, $\widetilde{T}$ and $T$, respectively.  Step one of the optimization cycle consists of adjusting the internal heat source, $q_v$.  In step two, the physics model is solved with the current $q_v$ to obtain a simulated temperature field, $T$.  Step two is often referred to as the forward solve.  In step three, the simulated and experimental temperature fields are compared via the objective function, $J$.  If $J$ is below the user defined threshold, the optimization cycle stops and the best fit parameterization of $q_v$ is found.  If $J$ is above the user defined threshold, the optimization algorithm determines a new $q_v$ and the process is repeated.  In the next section, methods for determining the next iteration of the parameterized value, in this case $q_v$, will be presented.  Problems solved using isopod are available on the [Examples page](examples/index.md).
 
 !media media/fig_optCycle.png
        style=width:80%;margin:auto;padding-top:2.5%;
        id=fig:optCycle
        caption=Optimization cycle example for parameterizaing an internal heat source distribution $q_v$ to match the simulated and experimental temperature field, $T$ and $\widetilde{T}$, respectively.
 
+
+
 [comment0]: <> (% ----------------------------------------------------------------------------------------------------------%)
 
 ## PDE Constrained Inverse Optimization id=sec:invOptTheory
 
-Inverse optimization is a mathematical framework to infer model parameters by minimizing the misfit between the experimental and simulation observables.  In this work, our model is a PDE describing the physics of the experiment.  We solve our physics PDE using the finite element method as implemented in MOOSE.  The physics of our problem constrains our optimization algorithm.  A PDE-constrained inverse optimization framework is formulated as an abstract optimization problem [!citet](biegler2003large):
+Inverse optimization is a mathematical framework to infer model parameters by minimizing the misfit between the experimental and simulation observables.  In this isopod, our model is a PDE describing the physics of the experiment.  We solve our physics PDE using the finite element method as implemented in MOOSE.  The physics of our problem constrains our optimization algorithm.  A PDE-constrained inverse optimization framework is formulated as an abstract optimization problem [!citet](biegler2003large):
 \begin{equation}\label{eq:optimization}
    \min_{\mathbf{p}} J\left(\mathbf{u},\mathbf{p}\right);\quad~\textrm{subject to}~\mathbf{g}\left(\mathbf{u},\mathbf{p}\right)=\mathbf{0} ,
 \end{equation}
@@ -217,7 +219,14 @@ where $\textbf{K}$ is the Jacobian matrix, $\hat{\text T}$ and $\hat{\text f}$ a
 \end{equation}
 where $N^{\alpha}$ denotes the finite element shape function at node $\alpha$. The solution can be expressed as $T(x)\approx \sum_{\alpha} \text{N}^{\alpha}\hat{\text T}^{\alpha} = N \hat{\text T}$. Note here the $\hat{\text f}$ includes the contribution from both the body load term ($f_b$ in [eqn:optimization_problem]) and boundary conditions (see [eqn:optimization_bcs]). We are assuming a Galerkin form for our discretized PDE by making our test and trial functions identical (both are $\text{N}^{\alpha}$). Note in the rest of this document, we omit the superscript of the shape function (i.e., $(\cdot)^{\alpha}$) and the summation over all the elements (i.e., $\sum_e$) for simplicity.
 
-To compute the derivative of PDE with respect to the design parameters, i.e., $\partial g /\partial \boldsymbol{p}$, it can be seen from [eq:elementwise_discretized_terms] that the derivatives can come from either $\textbf{K}$ or $\hat{\text f}$. For problems that have design parameters that are embedded in $f_b$ and/or the Neumann boundary condition in $G(T)$, we call them \textbf{force inversion} problems, since the derivative only depends on the body load. For design parameters that are embedded in $\textbf{K}$ and/or the convection boundary condition in $G(T)$, indicating dependence on the material property, we call them \textbf{material inversion} problems. Derivative calculation of different force inversion and material inversion problems are included in the following subsections ([#sec:forceInv], [#sec:robinInv], and [#sec:material_inversion]).
+To compute the derivative of PDE with respect to the design parameters, i.e., $\partial g /\partial \boldsymbol{p}$, it can be seen from [eq:elementwise_discretized_terms] that the derivatives can come from either $\textbf{K}$ or $\hat{\text f}$. For problems that have design parameters that are embedded in $f_b$ and/or the Neumann boundary condition in $G(T)$, we call them \textbf{force inversion} problems, since the derivative only depends on the body load. For design parameters that are embedded in $\textbf{K}$ and/or the convection boundary condition in $G(T)$, indicating dependence on the material property, we call them \textbf{material inversion} problems. Derivative calculation of different force inversion and material inversion problems are included in the following subsections:
+
+- [#sec:forceInv]
+- [#sec:robinInv]
+- [#sec:material_inversion]
+
+Examples for force and material inversion are given on the following pages:
+
 
 [comment3]: <> (% ----------------------------------------------------------------------------------------------------------%)
 
@@ -249,6 +258,7 @@ with $p_0$ and $p_1$ the design parameters. Therefore, the derivative can be cal
     ,\int\text{N}\cdot \left(x\right)~\text{d}\Omega\right]^\top.\\
 \end{aligned}
 \end{equation}
+An example using the derivative given in [eq:bodyLoad_example] is given in the [Distributed Body Load Example ](forceInv_BodyLoad.md).
 
 In the next force inversion case, we parameterize the intensity of $np$ point heat sources, where the heat source takes the form
 \begin{equation}
@@ -262,7 +272,7 @@ The corresponding gradient term is given by
 & = \int \text{N}\cdot\delta\left(x-x_i \right)d\Omega \quad \text{for}~i=1 \dots np,
 \end{aligned}
 \end{equation}
-which makes the gradient equal to one at the locations of the point loads.
+which makes the gradient equal to one at the locations of the point loads.  This PDE derivative is used in the [Point Loads Example](forceInv_pointLoads.md).
 
 Next, we will use force inversion to parameterize a Neumann boundary condition with the heat flux on the boundary being a function of the coordinates, $G(x)$, given by
 \begin{equation}\label{eq:bcLoad}
@@ -286,6 +296,7 @@ with $p_0$ and $p_1$ the design parameters, then
     ,\int_{\Gamma_R} \text{N}x~\text{d}\Gamma\right]^\top.\\
 \end{aligned}
 \end{equation}
+The derivative given in [eq:neumannBC] is used in the [Neumann Boundary Condition Example](forceInv_NeumannBC.md).
 
 The above force inversion examples, [eq:bodyLoads] and [eq:neumannBC], are all linear optimization problems where the parameter being optimized does not show up in the derivative term.  Linear optimization problems are not overly sensitive to the location of measurement points or the initial guesses for the parameter being optimized, making them easy to solve.  In the following we parameterize a Gaussian body force given by 
 \begin{equation}\label{eq:gaussOpt}
@@ -323,14 +334,13 @@ In this section, the convective heat transfer coefficient, $h$, is considered as
  &= \int_{\Gamma_R} \text{N}\cdot \left(T-T_{\infty} \right)~\text{d}\Gamma.
 \end{aligned}
 \end{equation}
-This derivative requires the solution from the forward problem $T$ to be included in the integral over the boundary $\Gamma_R$ which again results in a nonlinear optimization problem.  
+This derivative requires the solution from the forward problem $T$ to be included in the integral over the boundary $\Gamma_R$ making this a nonlinear optimization problem.  This derivative is used in the [Convective Boundary Condition Example](materialInv_ConvectiveBC.md).
 
 [comment5]: <> (% ----------------------------------------------------------------------------------------------------------%)
 
 ## PDE Derivative for Material Inversion id=sec:material_inversion
 
-In [#sec:forceInv] and [#sec:robinInv], the design parameters only exist in the load terms. Therefore, 
-the derivatives of $g(x)$ with respect to the design parameters are only related to the form of the load function, not the Jacobian.  In this section, we consider cases where the design parameters exist in the Jacobian term, which make the derivative calculation more convoluted. One such example is the material inversion, where we identify the thermal conductivity ($\kappa$) through experimentally measured temperature data points. Here, the derivative of $g(x)$ is taken with respect to $\kappa$. This requires the derivative of $\textbf{K}$ in [eq:discretePDE] leading to
+In [force inversion](#sec:forceInv) and [convective heat transfer inversion](#sec:robinInv), the design parameters only exist in the load terms. This made their derivatives of $g(x)$ with respect to the design parameters only related to the form of the load function, not the Jacobian.  In this section, we consider material inversion where the design parameters exist in the Jacobian term.  In the below derivatives, we identify the thermal conductivity ($\kappa$) by matching experimentally measured temperature data points. The derivative of $g(x)$ is taken with respect to $\kappa$. This requires the derivative of $\textbf{K}$ in [eq:discretePDE] leading to
 \begin{equation}\label{eq:kappa}
 \begin{aligned}
 \frac{\partial \hat{\text g}}{\partial\mathbf{p}} &=  \int\nabla\text{N}^{\top} \cdot \frac{\partial \kappa}{{\partial\mathbf{p}}}\cdot\nabla\text{N}~\text{d}\Omega \cdot\hat{\text T}\\
@@ -345,9 +355,9 @@ where $\nabla\text{N}\hat{T}=\nabla T$ was used in the last line.  The gradient 
     &=  \int\nabla\lambda^{\top} \cdot \frac{\partial \kappa}{{\partial\mathbf{p}}}\cdot\nabla T~\text{d}\Omega,
 \end{aligned}
 \end{equation}
-where  $\hat{\lambda}^{\top}\cdot\nabla\text{N}^{\top}=\left[\nabla\text{N}\cdot\hat{\lambda}\right]^{\top}=\left[\nabla\lambda\right]^{\top}=\nabla\lambda^{\top}$ is used in the last line.  Computing the integral in [eq:kappaLambda] requires an inner product of the gradients of the adjoint and forward variables. This is much simpler to compute than the integral in [eq:kappa] which requires the multiplication of nodal variables with elemental shape function gradients.  Material inversion is also a nonlinear optimization problem since $T$ shows up in the derivative, making the derivative dependent on the solution to the forward problem.
+where  $\hat{\lambda}^{\top}\cdot\nabla\text{N}^{\top}=\left[\nabla\text{N}\cdot\hat{\lambda}\right]^{\top}=\left[\nabla\lambda\right]^{\top}=\nabla\lambda^{\top}$ is used in the last line.  Computing the integral in [eq:kappaLambda] requires an inner product of the gradients of the adjoint and forward variables. This is much simpler to compute in MOOSE than the integral in [eq:kappa] which requires the multiplication of nodal variables with elemental shape function gradients.  Material inversion is a nonlinear optimization problem since $T$ shows up in the derivative, making the derivative dependent on the solution to the forward problem.  The derivative given in [eq:kappaLambda] is used in this example](materialInv_ConstK.md) where the thermal conductivity of a block is found.
 
-This also works for temperature dependent thermal conductivity
+This same procedure is used to a temperature dependent thermal conductivity given by
 \begin{equation}
 \kappa\left(T\right)=\alpha T^2+\beta T,
 \end{equation}
@@ -361,5 +371,6 @@ where $\alpha$ and $\beta$ are the design parameters. The resultant derivative i
     &= \left[\int\nabla\lambda^{\top} \cdot \left(T^2\right) \cdot\nabla T~\text{d}\Omega,\int\nabla\lambda^{\top} \cdot \left(T\right) \cdot\nabla T~\text{d}\Omega\right]^\top.
 \end{aligned}
 \end{equation}
+An example using this derivative is given on this [page](materialInv_TDepK.md).
 
 !bibtex bibliography

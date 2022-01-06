@@ -12,7 +12,6 @@ Extensions:
   MooseDocs.extensions.navigation:
     name: Isopod
     repo: https://github.com/zachmprince/isopod
-    home: https://mooseframework.inl.gov/
     menu:
       Theory: getting_started/InvOptTheory.md
       Examples: examples/index.md

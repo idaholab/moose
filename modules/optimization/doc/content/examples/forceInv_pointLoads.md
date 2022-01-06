@@ -1,53 +1,17 @@
-# Force Inversion Example
+# Force Inversion Example: Point Loads
 
-In a force inversion problem, we use inverse optimization to match the primary
-variable (e.g. displacement and temperature) by parameterizing gradients of the
-primary variables (e.g. force and heat flux).  The theory behind force inversion is given in []. This is a linear optimization or
-linear programming problem because the parameters are not dependent on the solution.
-We will present three force inversion problems in this section for steady state 
-heat conduction where the following types of loadings are parameterized:
+## Background
 
-- Example 1: Point Loads
+Isopod provides a flexible framework for solve inverse optimization problems in MOOSE.  This page is part of a set of examples for different types of inverse optimization problems. 
 
-- Example 2: Neumann Boundary Condition
+- [Theory](getting_started/InvOptTheory.md)
+- [Examples overview](examples/index.md)
+- [Example 1: Point Loads](forceInv_pointLoads.md)
+- [Example 2: Neumann Boundary Condition](forceInv_NeumannBC.md)
+- [Example 3: Distributed Body Load](forceInv_BodyLoad.md)
+- [Example 4: Dirichlet Boundary Condition](forceInv_DirichletBC.md)
 
-- Example 3: Distributed Body Load
-
-- Example 4: Dirichlet Boundary Condition
-
-## Steady State Heat Conduction
-
-All of the examples in this section are parameterizing force loads for steady state
-heat conduction in a solid.  Below we, copy the
-equations for steady state heat conduction from the the [heat conduction](/heat_conduction/index.md)
-section from the MOOSE module.  The differential equation describing steady
-state he conduction is given by
-
-\begin{equation}\label{eq:heat_equation}
-  0 = \nabla k(\vec{x}) \nabla T + q ~\text{for}~\vec{x} \in \Omega,
-\end{equation}
-
-where $T$ is temperature, $\vec{x}$ is the vector of spatial coordinates, $k$ is the thermal conductivity, $q$ is a heat source, and $\Omega$ is the domain.
-
-Boundary conditions for the heat equation are defined on the boundary of the domain $\partial \Omega$. The boundary is divided into Dirichlet boundaries $\partial \Omega_D$ and Robin boundaries $\partial \Omega_R$ such that $\partial \Omega = \partial \Omega_D \cup \partial \Omega_R$:
-
-\begin{equation}
-\begin{aligned}
-   T(\vec{x}) &= T_D(\vec{x}) &~\text{for}~\vec{x}\in \partial \Omega_D  \\
-   -k \vec{n} \cdot \nabla T - G(\vec{x},T) &= 0 &~\text{for}~\vec{x}\in \partial \Omega_R,
-\end{aligned}
-\end{equation}
-
-where $T_D$ and $G(t,\vec{x},T)$ are known functions and $\vec{n}$ is the outward normal at $\vec{x}$. The function $G(\vec{x},T)$ defines the type of Robin boundary conditions. Common cases for $G$ are:
-
-\begin{equation}
-\begin{aligned}\label{eq:robin_bc_types}
-   &\text{Neumann:     }~G(\vec{x},T) = 0 \\
-   &\text{Convection:  }~G(\vec{x},T) = h (T - T_{\infty}) \\
-\end{aligned}
-\end{equation}
-
-## Example 1: Point Loads
+# Example 1: Point Loads id=sec:invOptTheory
 
 In this example we are parameterizing the heat source intensity at the locations indicated by the $\bigcirc$ symbols in [figSetup] that will produce a temperature field that most closely matches the temperature measurements taken at the points indicated by the $\times$ symbols.  Dirichlet boundary conditions are applied to the entire boundary with T=300.  
 
@@ -58,13 +22,13 @@ In this example we are parameterizing the heat source intensity at the locations
 
 ## Main Application Input
 
-Optimization problems are solved using the [MultiApps] system.  The main application contains the optimization executioner and the sub-applications solve the forward and adjoint PDE.   The main application input is shown in [master_app].
+Optimization problems are solved using the [MultiApps](MultiApps/index.md) system.  The main application contains the optimization executioner and the sub-applications solve the forward and adjoint PDE.   The main application input is shown in [fig:master_app].
 
 !listing test/tests/optimizationreporter/objective_gradient_minimize/point_loads/master.i
-         id=master_app
+         id=fig:master_app
          caption=Main application optimization input for point load parameterization shown in [figSetup]
 
-The main application runs the optimization executioner and transfers data from the optimization executioner back and forth to the sub-apps that are running the actual Forward and adjoint FEM simulations.  Since no mesh or physics kernels are required on the main app, we use the [StochasticTools](syntax/StochasticTools/index.md) action to set up all of the nullkernels, empty mesh, etc. needed to get a MOOSE simulation to run.  
+The main application runs the optimization executioner and transfers data from the optimization executioner back and forth to the sub-apps that are running the "forward" and "adjoint" FE models.  Since no mesh or physics kernels are required on the main-app, we use the [StochasticTools](syntax/StochasticTools/index.md) action to set up all of the nullkernels, empty mesh, etc. needed to get a MOOSE simulation to run.  
 
 The [optimize](Optimize.md) executioner block, shown below, provides an interface with the [PETSc TAO](https://www.mcs.anl.gov/petsc/documentation/taosolvertable.html) optimization library. The optimization algorithm is selected with `tao_solver` with specific solver options set with `petsc_options`.
 
@@ -106,8 +70,8 @@ with $a$ and $b$ defining the lower and upper limits of the distribution, respec
 
 ## Sub-Application Input
 
-The problem defined above, with respect to the [MultiApps] system, is a sub-application. The
-complete input file for the problem is provided in [master-app]. The only item required
+The problem defined above, with respect to the [MultiApps](MultiApps/index.md) system, is a sub-application. The
+complete input file for the problem is provided in "main-app". The only item required
 to enable the stochastic analysis is the [Controls] block, which contains a
 [SamplerReceiver](/SamplerReceiver.md) object, the use of which will be explained
 in the following section.
@@ -126,7 +90,7 @@ in the following section.
 
 ## Master Input
 
-The master application, with respect to the [MultiApps] system, is the driver of the stochastic
+The master application, with respect to the [MultiApps](MultiApps/index.md) system, is the driver of the stochastic
 simulations, by itself it does not perform a solve. The complete input file for the master
 application is shown in [monte-carlo-master], but the import sections will be detailed individually.
 
