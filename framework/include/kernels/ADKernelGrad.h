@@ -25,7 +25,8 @@ public:
 
   ADKernelGradTempl(const InputParameters & parameters);
 
-  virtual void computeResidual() override;
+  void computeResidual() override;
+  void computeResidualAndJacobian() override;
 
 protected:
   void computeResidualsForJacobian() override;
@@ -64,4 +65,6 @@ protected:
   using ADKernelTempl<T>::_has_diag_save_in;
   using ADKernelTempl<T>::prepareMatrixTag;
   using ADKernelTempl<T>::_residuals;
+  using ADKernelTempl<T>::_vector_tags;
+  using ADKernelTempl<T>::_matrix_tags;
 };

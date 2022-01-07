@@ -812,10 +812,9 @@ NonlinearSystemBase::computeResidualAndJacobianTags(const std::set<TagID> & vect
       residual.close();
     }
 
-    // To-do: handle nodal bcs
-    // computeNodalBCsRJ(vector_tags, matrix_tags);
-    // closeTaggedVectors(vector_tags);
-    // closeTaggedMatrices(matrix_tags);
+    computeNodalBCsResidualAndJacobian();
+    closeTaggedVectors(vector_tags);
+    closeTaggedMatrices(matrix_tags);
   }
   catch (MooseException & e)
   {
@@ -1833,6 +1832,43 @@ NonlinearSystemBase::computeNodalBCs(const std::set<TagID> & tags)
   if (_Re_time)
     _Re_time->close();
   _Re_non_time->close();
+}
+
+void
+NonlinearSystemBase::computeNodalBCsResidualAndJacobian()
+{
+  PARALLEL_TRY
+  {
+    ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
+
+    if (!bnd_nodes.empty())
+    {
+      TIME_SECTION("NodalBCs", 3 /*, "Computing NodalBCs"*/);
+
+      for (const auto & bnode : bnd_nodes)
+      {
+        BoundaryID boundary_id = bnode->_bnd_id;
+        Node * node = bnode->_node;
+
+        if (node->processor_id() == processor_id())
+        {
+          // reinit variables in nodes
+          _fe_problem.reinitNodeFace(node, boundary_id, 0);
+          if (_nodal_bcs.hasActiveBoundaryObjects(boundary_id))
+          {
+            const auto & bcs = _nodal_bcs.getActiveBoundaryObjects(boundary_id);
+            for (const auto & nbc : bcs)
+              if (nbc->shouldApply())
+                nbc->computeResidualAndJacobian();
+          }
+        }
+      }
+    }
+  }
+  PARALLEL_CATCH;
+
+  // Set the cached NodalBCBase values in the Jacobian matrix
+  _fe_problem.assembly(0).setCachedJacobian();
 }
 
 void
@@ -3414,8 +3450,9 @@ NonlinearSystemBase::needInterfaceMaterialOnSide(BoundaryID bnd_id, THREAD_ID ti
   return _interface_kernels.hasActiveBoundaryObjects(bnd_id, tid);
 }
 
-bool NonlinearSystemBase::needSubdomainMaterialOnSide(SubdomainID /*subdomain_id*/,
-                                                      THREAD_ID /*tid*/) const
+bool
+NonlinearSystemBase::needSubdomainMaterialOnSide(SubdomainID /*subdomain_id*/,
+                                                 THREAD_ID /*tid*/) const
 {
   return _doing_dg;
 }

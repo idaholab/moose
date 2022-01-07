@@ -725,6 +725,11 @@ protected:
   void computeNodalBCs(const std::set<TagID> & tags);
 
   /**
+   * compute the residual and Jacobian for nodal boundary conditions
+   */
+  void computeNodalBCsResidualAndJacobian();
+
+  /**
    * Form multiple matrices for all the tags. Users should not call this func directly.
    */
   void computeJacobianInternal(const std::set<TagID> & tags);

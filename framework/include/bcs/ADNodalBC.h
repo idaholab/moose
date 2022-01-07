@@ -28,6 +28,7 @@ public:
 private:
   void computeResidual() override final;
   void computeJacobian() override final;
+  void computeResidualAndJacobian() override;
   void computeOffDiagJacobian(unsigned int jvar) override final;
   void computeOffDiagJacobianScalar(unsigned int jvar) override final;
 
