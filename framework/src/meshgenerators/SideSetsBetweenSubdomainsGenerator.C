@@ -106,8 +106,8 @@ SideSetsBetweenSubdomainsGenerator::generate()
 
   if (!mesh->is_serial())
   {
-    Parallel::MessageTag queries_tag = mesh->comm().get_unique_tag(867),
-                         replies_tag = mesh->comm().get_unique_tag(5309);
+    const auto queries_tag = mesh->comm().get_unique_tag(),
+               replies_tag = mesh->comm().get_unique_tag();
 
     std::vector<Parallel::Request> side_requests(my_n_proc - 1), reply_requests(my_n_proc - 1);
 
