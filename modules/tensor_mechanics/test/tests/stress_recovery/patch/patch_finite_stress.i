@@ -58,20 +58,16 @@
     execute_on = 'timestep_end'
   []
   [stress_xx_recovered]
-    type = RankTwoAux
-    rank_two_tensor = stress
+    type = NodalPatchRecoveryAux
     variable = stress_xx_recovered
-    index_i = 0
-    index_j = 0
-    execute_on = 'timestep_end'
+    nodal_patch_recovery_uo = stress_xx_patch
+    execute_on = 'TIMESTEP_END'
   []
   [stress_yy_recovered]
-    type = RankTwoAux
-    rank_two_tensor = stress
+    type = NodalPatchRecoveryAux
     variable = stress_yy_recovered
-    index_i = 1
-    index_j = 1
-    execute_on = 'timestep_end'
+    nodal_patch_recovery_uo = stress_yy_patch
+    execute_on = 'TIMESTEP_END'
   []
 []
 
@@ -126,6 +122,23 @@
     variable = disp_y
     boundary = 'bottom'
     function = 0
+  []
+[]
+
+[UserObjects]
+  [stress_xx_patch]
+    type = NodalPatchRecoveryMaterialProperty
+    patch_polynomial_order = FIRST
+    property = 'stress'
+    component = '0 0'
+    execute_on = 'TIMESTEP_END'
+  []
+  [stress_yy_patch]
+    type = NodalPatchRecoveryMaterialProperty
+    patch_polynomial_order = FIRST
+    property = 'stress'
+    component = '1 1'
+    execute_on = 'TIMESTEP_END'
   []
 []
 
