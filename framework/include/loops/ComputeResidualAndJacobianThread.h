@@ -36,9 +36,13 @@ public:
 
   virtual ~ComputeResidualAndJacobianThread();
 
-  virtual void subdomainChanged() override;
-  virtual void onElement(const Elem * elem) override;
-  virtual void postElement(const Elem * /*elem*/) override;
+  void subdomainChanged() override;
+  void onElement(const Elem * elem) override;
+  void onBoundary(const Elem * elem,
+                  unsigned int side,
+                  BoundaryID bnd_id,
+                  const Elem * /*lower_d_elem*/ = nullptr) override;
+  void postElement(const Elem * /*elem*/) override;
 
   void join(const ComputeResidualAndJacobianThread & /*y*/);
 
@@ -46,8 +50,10 @@ protected:
   NonlinearSystemBase & _nl;
   const std::set<TagID> & _tags;
   unsigned int _num_cached;
-  ///@{
+
+  /// Reference to BC storage structures
+  MooseObjectTagWarehouse<IntegratedBCBase> & _integrated_bcs;
+
   /// Reference to Kernel storage structures
   MooseObjectTagWarehouse<KernelBase> & _kernels;
-  ///@}
 };

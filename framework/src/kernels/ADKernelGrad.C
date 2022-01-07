@@ -93,27 +93,7 @@ template <typename T>
 void
 ADKernelGradTempl<T>::computeResidualAndJacobian()
 {
-  if (_residuals.size() != _grad_test.size())
-    _residuals.resize(_grad_test.size(), 0);
-  for (auto & r : _residuals)
-    r = 0;
-
-  precalculateResidual();
-  if (_use_displaced_mesh)
-    for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-    {
-      const auto value = precomputeQpResidual() * _ad_JxW[_qp] * _ad_coord[_qp];
-      for (_i = 0; _i < _grad_test.size(); _i++)
-        _residuals[_i] += MathUtils::dotProduct(value, _grad_test[_i][_qp]);
-    }
-  else
-    for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-    {
-      const auto value = precomputeQpResidual() * _JxW[_qp] * _coord[_qp];
-      for (_i = 0; _i < _grad_test.size(); _i++)
-        _residuals[_i] += MathUtils::dotProduct(value, _regular_grad_test[_i][_qp]);
-    }
-
+  computeResidualsForJacobian();
   _assembly.processResiduals(_residuals, _var.dofIndices(), _vector_tags, _matrix_tags);
 }
 

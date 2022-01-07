@@ -141,6 +141,14 @@ ADIntegratedBCTempl<T>::computeResidualsForJacobian()
 
 template <typename T>
 void
+ADIntegratedBCTempl<T>::computeResidualAndJacobian()
+{
+  computeResidualsForJacobian();
+  _assembly.processResiduals(_residuals, _var.dofIndices(), _vector_tags, _matrix_tags);
+}
+
+template <typename T>
+void
 ADIntegratedBCTempl<T>::addJacobian(const MooseVariableFieldBase & jvariable)
 {
   unsigned int jvar = jvariable.number();

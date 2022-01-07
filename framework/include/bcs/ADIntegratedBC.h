@@ -25,13 +25,12 @@ public:
 
   const MooseVariableFE<T> & variable() const override { return _var; }
 
-private:
-  void computeJacobian() override final;
-  void computeOffDiagJacobian(unsigned int jvar) override final;
-  void computeOffDiagJacobianScalar(unsigned int jvar) override final;
-
 protected:
   void computeResidual() override;
+  void computeJacobian() override;
+  void computeResidualAndJacobian() override;
+  void computeOffDiagJacobian(unsigned int jvar) override;
+  void computeOffDiagJacobianScalar(unsigned int jvar) override;
 
   /**
    * compute the \p _residuals member for filling the Jacobian. We want to calculate these residuals
