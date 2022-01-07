@@ -46,4 +46,8 @@ protected:
   NonlinearSystemBase & _nl;
   const std::set<TagID> & _tags;
   unsigned int _num_cached;
+  ///@{
+  /// Reference to Kernel storage structures
+  MooseObjectTagWarehouse<KernelBase> & _kernels;
+  ///@}
 };

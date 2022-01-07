@@ -261,5 +261,31 @@ ADKernelTempl<T>::computeOffDiagJacobianScalar(unsigned int /*jvar*/)
 {
 }
 
+template <typename T>
+void
+ADKernelTempl<T>::computeResidualAndJacobian()
+{
+  if (_residuals.size() != _test.size())
+    _residuals.resize(_test.size(), 0);
+  for (auto & r : _residuals)
+    r = 0;
+
+  precalculateResidual();
+  if (_use_displaced_mesh)
+    for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+    {
+      _r = _ad_JxW[_qp];
+      _r *= _ad_coord[_qp];
+      for (_i = 0; _i < _test.size(); _i++)
+        _residuals[_i] += _r * computeQpResidual();
+    }
+  else
+    for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+      for (_i = 0; _i < _test.size(); _i++)
+        _residuals[_i] += _JxW[_qp] * _coord[_qp] * computeQpResidual();
+
+  _assembly.processResiduals(_residuals, _var.dofIndices(), _vector_tags, _matrix_tags);
+}
+
 template class ADKernelTempl<Real>;
 template class ADKernelTempl<RealVectorValue>;

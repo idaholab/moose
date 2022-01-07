@@ -29,14 +29,19 @@ ComputeResidualAndJacobianThread::ComputeResidualAndJacobianThread(
   : ThreadedElementLoop<ConstElemRange>(fe_problem),
     _nl(fe_problem.getNonlinearSystemBase()),
     _tags(vector_tags),
-    _num_cached(0)
+    _num_cached(0),
+    _kernels(_nl.getKernelWarehouse())
 {
 }
 
 // Splitting Constructor
 ComputeResidualAndJacobianThread::ComputeResidualAndJacobianThread(
     ComputeResidualAndJacobianThread & x, Threads::split split)
-  : ThreadedElementLoop<ConstElemRange>(x, split), _nl(x._nl), _tags(x._tags), _num_cached(0)
+  : ThreadedElementLoop<ConstElemRange>(x, split),
+    _nl(x._nl),
+    _tags(x._tags),
+    _num_cached(0),
+    _kernels(x._kernels)
 {
 }
 
@@ -60,19 +65,29 @@ ComputeResidualAndJacobianThread::onElement(const Elem * elem)
 
   _fe_problem.reinitMaterials(_subdomain, _tid);
 
-  mooseAssert(_fe_problem.haveFV(), "Currently this is only being used with FV");
+  if (_kernels.hasActiveBlockObjects(_subdomain, _tid))
+  {
+    const auto & kernels = _kernels.getActiveBlockObjects(_subdomain, _tid);
+    for (const auto & kernel : kernels)
+      kernel->computeResidualAndJacobian();
+  }
 
-  std::vector<FVElementalKernel *> kernels;
-  _fe_problem.theWarehouse()
-      .query()
-      .template condition<AttribSystem>("FVElementalKernel")
-      .template condition<AttribSubdomains>(_subdomain)
-      .template condition<AttribThread>(_tid)
-      .template condition<AttribVectorTags>(_tags)
-      .queryInto(kernels);
+  // TODO: use a querycache here and then we probably won't need the if-guard
+  // anymore.
+  if (_fe_problem.haveFV())
+  {
+    std::vector<FVElementalKernel *> kernels;
+    _fe_problem.theWarehouse()
+        .query()
+        .template condition<AttribSystem>("FVElementalKernel")
+        .template condition<AttribSubdomains>(_subdomain)
+        .template condition<AttribThread>(_tid)
+        .template condition<AttribVectorTags>(_tags)
+        .queryInto(kernels);
 
-  for (auto * const kernel : kernels)
-    kernel->computeResidualAndJacobian();
+    for (auto * const kernel : kernels)
+      kernel->computeResidualAndJacobian();
+  }
 }
 
 void

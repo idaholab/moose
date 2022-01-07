@@ -1715,6 +1715,19 @@ public:
                           LocalFunctor & local_functor);
 
   /**
+   * Process the value and \p derivatives() data of a vector of \p ADReals. When using global
+   * indexing, this method simply caches the value (residual) for the provided \p vector_tags and
+   * derivative values (Jacobian) for the corresponding column indices for the provided \p
+   * matrix_tags. Note that this overload will call \p DofMap::constrain_element_vector and \p
+   * DofMap::constrain_element_matrix. If not using global indexing, calling of this method will
+   * result in an error
+   */
+  void processResiduals(const std::vector<ADReal> & residuals,
+                        const std::vector<dof_id_type> & row_indices,
+                        const std::set<TagID> & vector_tags,
+                        const std::set<TagID> & matrix_tags);
+
+  /**
    * Process the \p derivatives() data of a vector of \p ADReals. When using global indexing, this
    * method simply caches the derivative values for the corresponding column indices for the
    * provided \p matrix_tags. Note that this overload will call \p DofMap::constrain_element_matrix.

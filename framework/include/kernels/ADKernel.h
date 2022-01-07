@@ -32,6 +32,8 @@ public:
 
   const MooseVariableFE<T> & variable() const override { return _var; }
 
+  void computeResidualAndJacobian() override;
+
 private:
   void computeJacobian() override final;
   void computeOffDiagJacobian(unsigned int) override final;
