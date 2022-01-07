@@ -9,7 +9,7 @@ To summarize, an accurate and complete preconditioning matrix can be important f
 - Finite Difference Preconditioner (FDP)
 - Physics Based Preconditioner (PBP)
 
-Block diagonal preconditioning uses kernels' and integrated boundary conditions' `computeQpJacobian` methods to build a block diagonal matrix. It will +not account for variable coupling+. This is the default if a user does not specify a `[Preconditiong]` block in their input file.
+Block diagonal preconditioning uses kernels' and integrated boundary conditions' `computeQpJacobian` methods to build a block diagonal matrix. It will +not account for variable coupling+. This is the default if a user does not specify a `[Preconditioning]` block in their input file.
 
 The Single Matrix Preconditioner builds its matrix using kernels' and integrated BCs' `computeQpJacobian` +and+ `computeQpOffDiagJacobian` methods, the latter of which is responsible for the contributions of coupled variables. A good, simple example of a `computeQpOffDiagJacobian` method is in [CoupledForce](https://github.com/idaholab/moose/blob/devel/framework/src/kernels/CoupledForce.C). `CoupledForce` contributes a waek-form residual equal to
 

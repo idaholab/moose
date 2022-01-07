@@ -18,7 +18,7 @@ class RunException(RunApp):
 
         params.addParam('expect_err', "A regular expression or literal string that must occur in the output (see match_literal). (Test may terminate unexpectedly and be considered passing)")
         params.addParam('expect_assert', "DEBUG MODE ONLY: A regular expression that must occur in the output. (Test may terminate unexpectedly and be considered passing)")
-        params.addParam('should_crash', True, "Inidicates that the test is expected to crash or otherwise terminate early")
+        params.addParam('should_crash', True, "Indicates that the test is expected to crash or otherwise terminate early")
 
         # RunException tests executed in parallel need to have their output redirected to a file, and examined individually
         params['redirect_output'] = True

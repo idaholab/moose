@@ -3,7 +3,7 @@ MOOSE performs several sanity checks when parsing the input file and command lin
 # Parsing
 
 The HIT (formerly GetPot) syntax is strict but fairly easy to use
-and understand. The syntax consists of nesting blocks deliniated by square brackets. Name/value pairs are then used to set parameters
+and understand. The syntax consists of nesting blocks delineated by square brackets. Name/value pairs are then used to set parameters
 throughout the system. The token rules are fairly loose. Most tokens are allowed (letters, numbers, underscores). Notably, spaces may
 not occur inside any section names, nor parameter names. When the parser runs, several different kinds of errors are detected:
 

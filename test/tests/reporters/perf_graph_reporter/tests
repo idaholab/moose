@@ -14,7 +14,7 @@
       type = RunCommand
       command = 'python verify_perf_graph_reporter.py'
       prereq = test/run
-      detail = 'and shall provide a tool to postproceses said information'
+      detail = 'and shall provide a tool to postprocess said information'
     []
   []
 
@@ -41,7 +41,7 @@
       type = RunCommand
       command = 'python verify_perf_graph_reporter.py recover'
       prereq = recover/run
-      detail = 'and shall provide a tool to postproceses said information'
+      detail = 'and shall provide a tool to postprocess said information'
     []
   []
 []

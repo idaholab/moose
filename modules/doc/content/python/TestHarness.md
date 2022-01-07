@@ -75,18 +75,22 @@ Testers represent individual tests in MOOSE. Testers encompass a set of instruct
 a task and then verifying the result. There are several built-in testers in the framework but the
 Tester system is completely pluggable and extendable. The list of default testers is listed here:
 
-- [RunApp](RunApp.md)
-- Exodiff
-- CSVDiff
+- [RunApp](RunApp.md) (includes syntax-only checking)
+- [RunCommand](RunCommand.md)
+- [RunException](RunException.md)
+- [Exodiff](Exodiff.md)
+- [CSVDiff](testers/CSVDiff.md)
+- [JSONDiff](JSONDiff.md)
+- [XMLDiff](XMLDiff.md)
+- [ImageDiff](ImageDiff.md)
 - [CSVValidationTester](CSVValidationTester.md)
-- FileTester
-- AnalyzeJacobian
-- CheckFiles
-- ImageDiff
-- PetscJacobianTester
-- RunCommand
-- RunException
-- VTKDiff
+- [FileTester](FileTester.md)
+- [CheckFiles](CheckFiles.md)
+- [AnalyzeJacobian](AnalyzeJacobian.md)
+- [PetscJacobianTester](PetscJacobianTester.md)
+- [PythonUnitTest](PythonUnitTest.md) (includes [Method of Manufactured solutions](python/mms.md) testing)
+- [BenchmarkTesting](application_development/performance_benchmarking.md)
+
 
 ## Test Specifications
 

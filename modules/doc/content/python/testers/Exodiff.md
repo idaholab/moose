@@ -1,0 +1,41 @@
+# Exodiff
+
+`Exodiff` tests compare `Exodus` output(s) for the test to a reference in the specified
+`gold_dir` folder. Exodus output(s) contains both field variables, scalar variables and postprocessors,
+the latter two defined as global variables. This tester picks up any difference between
+all fields at any spatial location, at any time step included in the output(s).
+Complete documentation for the `Exodiff` utility may be found [here](https://gsjaardema.github.io/seacas-docs/sphinx/html/index.html#exodiff).
+
+## Options
+
+Test configuration options are added to the `tests` file.
+
+- `abs_tol`: sets an absolute tolerance, defaults to 1e-10. Both absolute and relative tolerances must
+  be met for a test to pass.
+
+- `rel_tol`: sets a relative tolerance. Defaults to 5.5e-6.
+
+- `exodiff_opts`: additional options passed to the `Exodiff` utility on the command line. Their list
+  may be found in its [documentation]()
+
+- `custom_cmp`: use a custom comparison. The output of the comparison
+  must match the specified file.
+
+- `map`: Use geometrical mapping to match up elements. This is usually a good idea because it makes files comparable between runs with Serial and Parallel Mesh. Defaults to True.
+
+- `partial`: Invokes a matching algorithm similar to the -m option.
+             However this option ignores unmatched nodes and elements.  This allows
+             comparison of files that only partially overlap. Defaults to False.
+
+- `use_old_floor`: Use `Exodiff` old floor option. Defaults to False
+
+
+Other test commands & restrictions may be found in the [TestHarness documentation](TestHarness.md).
+
+## Example test configuration in the MOOSE test suite
+
+In this example, four tests are set up using an `Exodiff` tester. The third one uses the same input file
+as the second one, with additional arguments passed on the command line to run a different configuration.
+The Exodus files compared here mainly contain the values of the array variables on the mesh.
+
+!listing test/tests/variables/array_variables/tests
