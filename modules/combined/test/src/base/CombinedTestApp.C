@@ -94,6 +94,15 @@ CombinedTestApp::registerApps()
 {
   registerApp(CombinedApp);
   registerApp(CombinedTestApp);
+
+  // Terrible Hack:
+  // Right now we aren't automatically registering dependent apps to build. We
+  // need a way to do this so that Multiapp types work automatically. We have a
+  // few regression tests in THM that create THMApps that fail to work with the
+  // combined module. For now, I'm going to manually register THMApp. We'll
+  // need to design the API so that all registered apps and modules also get
+  // immediate access to the buildable apps for use in Multiapps.
+  registerApp(THMApp);
 }
 
 void
