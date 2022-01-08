@@ -1,8 +1,14 @@
 [Mesh]
- [./fmg]
-   type = FileMeshGenerator
-   file = halfSphere.e
- []
+  [fmg]
+    type = FileMeshGenerator
+    file = halfSphere.e
+  []
+  [patch]
+    type = PatchSidesetGenerator
+    boundary = 2
+    n_patches = 10
+    input = fmg
+  []
 []
 
 [Variables]
@@ -26,22 +32,20 @@
 []
 
 [DiracKernels]
-  [ar]
-    type = VectorPostprocessorPointSource
-    variable = temperature
-    vector_postprocessor = point_source
-    x_coord_name = x
-    y_coord_name = y
-    z_coord_name = z
-    value_name = value
-  []
+    [pt]
+      type = ReporterPointSource
+      variable = temperature
+      x_coord_name = 'point_source/x'
+      y_coord_name = 'point_source/y'
+      z_coord_name = 'point_source/z'
+      value_name = 'point_source/value'
+    []
 []
-
 
 [BCs]
   [round]
     type = ConvectiveFluxFunction
-    boundary = 2
+    boundary = round
     variable = temperature
     coefficient = 0.05
     T_infinity = 100.0
@@ -49,7 +53,7 @@
   [flat]
     type = NeumannBC
     variable = temperature
-    boundary = 1
+    boundary = flat
     value = 0
   []
 []
@@ -77,27 +81,24 @@
 
 [VectorPostprocessors]
   [point_source]
-    type = ParConstantVectorPostprocessor
+    type = ConstantVectorPostprocessor
     vector_names = 'x y z value'
     value = '4 2.3  2.3  2.3  2.3;
              0   2.3 -2.3 -2.3  2.3;
              0   2.3  2.3 -2.3 -2.3;
              100 150  300  250  150'
   []
-  [forward_meas]
-    type = MeasuredDataPointSampler
+  #-----every forward problem should have these two
+  [data_pt]
+    type = VppPointValueSampler
     variable = temperature
-    points =
-    '4.24	0	2.45
-     4.24	2.45	0
-     4.24	0	-2.45
-     4.24	-2.45	0
-     2.45	0	4.24
-     2.45	4.24	0
-     2.45	0	-4.24
-     2.45	-4.24	0
-     4.9 0 0'
-    measured_values = '221.5542848	220.3392602	221.1322675	222.3562443	220.9615351	219.2140933	220.3868245	222.1432008	222.9280329'
+    reporter_name = measure_data
+  []
+[]
+
+[Reporters]
+  [measure_data]
+    type=OptimizationData
   []
 []
 

@@ -1,5 +1,5 @@
 [Mesh]
- [./fmg]
+ [fmg]
    type = FileMeshGenerator
    file = halfSphere.e
  []
@@ -25,30 +25,36 @@
   []
 []
 
+#-----every adjoint problem should have these two
 [DiracKernels]
-  [a]
-    type = VectorPostprocessorPointSource
+  [pt]
+    type = ReporterPointSource
     variable = temperature
-    vector_postprocessor = point_source
-    x_coord_name = x
-    y_coord_name = y
-    z_coord_name = z
-    value_name = value
+    x_coord_name = misfit/measurement_xcoord
+    y_coord_name = misfit/measurement_ycoord
+    z_coord_name = misfit/measurement_zcoord
+    value_name = misfit/misfit_values
   []
 []
+[Reporters]
+  [misfit]
+    type=OptimizationData
+  []
+[]
+
 
 [BCs]
   [round]
     type = ConvectiveFluxFunction
-    boundary = 2
+    boundary = round
     variable = temperature
-    coefficient = 0.1
+    coefficient = 0.05
     T_infinity = 0.0
   []
   [flat]
     type = NeumannBC
     variable = temperature
-    boundary = 1
+    boundary = flat
     value = 0
   []
 []
@@ -71,16 +77,7 @@
 []
 
 [VectorPostprocessors]
-  [point_source]
-    type = ParConstantVectorPostprocessor
-    vector_names = 'x y z value'
-    value = '4.24	4.24	4.24	 4.24	2.45	2.45	 2.45	 2.45 4.9;
-                0	2.45	   0	-2.45	   0	4.24	    0	-4.24   0;
-             2.45	   0 -2.45	    0	4.24	0	    -4.24	    0   0;
-
-             1 2 3 4 5 6 7 8 9'
-  []
-  [adjoint_meas]
+  [data_pt]
     type = PointValueSampler
     variable = temperature
     points = '4 0 0
