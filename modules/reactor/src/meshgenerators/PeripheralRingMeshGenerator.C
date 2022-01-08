@@ -181,6 +181,7 @@ PeripheralRingMeshGenerator::generate()
   // This would make sure that the boundary OUTER_SIDESET_ID is deleted after stiching.
   if (_input_mesh_external_bid != OUTER_SIDESET_ID)
     MooseMesh::changeBoundaryId(*input_mesh, _input_mesh_external_bid, OUTER_SIDESET_ID, true);
+  mesh->prepare_for_use();
   mesh->stitch_meshes(*input_mesh, OUTER_SIDESET_ID_ALT, _input_mesh_external_bid, TOLERANCE, true);
 
   // Assign subdomain name to the new block if applicable
