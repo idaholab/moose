@@ -81,11 +81,6 @@ public:
   bool useDual() const { return _use_dual; }
 
   /**
-   * Set the normals vector
-   */
-  void setNormals(const std::vector<Point> & normals) { _normals = normals; }
-
-  /**
    * Whether to interpolate the nodal normals (e.g. classic idea of evaluating field at quadrature
    * points). If this is set to false, then non-interpolated nodal normals will be used, and then
    * the _normals member should be indexed with _i instead of _qp
@@ -109,6 +104,11 @@ public:
                           const std::unordered_set<const Elem *> & inactive_lm_elems);
 
 protected:
+  /**
+   * Set the normals vector
+   */
+  void setNormals();
+
   const FEProblemBase & feProblem() const { return _fe_problem; }
 
 private:
@@ -154,8 +154,11 @@ protected:
   /// Member for handling change of coordinate systems (xyz, rz, spherical)
   const MooseArray<Real> & _coord;
 
-  /// The quadrature rule
+  /// The quadrature rule on the mortar segment element
   const QBase * const & _qrule_msm;
+
+  /// The arbitrary quadrature rule on the lower dimensional secondary face
+  const QBase * const & _qrule;
 
   /// The quadrature points in physical space
   const std::vector<Point> & _q_point;

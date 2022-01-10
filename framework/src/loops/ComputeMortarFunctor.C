@@ -207,10 +207,6 @@ ComputeMortarFunctor::operator()()
           xi1_pts.begin(), secondary_xi_pts.begin() + start, secondary_xi_pts.begin() + end);
       xi2_pts.insert(xi2_pts.begin(), primary_xi_pts.begin() + start, primary_xi_pts.begin() + end);
 
-      // Compute secondary element normals (for computing residual)
-      const auto normals = _amg.getNormals(*msinfo.secondary_elem, xi1_pts);
-      const auto nodal_normals = _amg.getNodalNormals(*msinfo.secondary_elem);
-
       const Elem * reinit_secondary_elem = secondary_ip;
 
       // If we're on the displaced mesh, we need to get the corresponding undisplaced elem before
@@ -265,10 +261,7 @@ ComputeMortarFunctor::operator()()
       if (!_fe_problem.currentlyComputingJacobian())
       {
         for (auto * const mc : _mortar_constraints)
-        {
-          mc->setNormals(mc->interpolateNormals() ? normals : nodal_normals);
           mc->computeResidual();
-        }
 
         _assembly.cacheResidual();
         _assembly.cacheResidualNeighbor();
@@ -280,10 +273,7 @@ ComputeMortarFunctor::operator()()
       else
       {
         for (auto * const mc : _mortar_constraints)
-        {
-          mc->setNormals(mc->interpolateNormals() ? normals : nodal_normals);
           mc->computeJacobian();
-        }
 
         _assembly.cacheJacobianMortar();
 
@@ -331,7 +321,8 @@ ComputeMortarFunctor::projectQPoints3d(const Elem * msm_elem,
   const auto sub_elem = msm_elem->get_extra_integer(sub_elem_ind);
   const ElemType primal_type = primal_elem->type();
 
-  auto get_sub_elem_inds = [primal_type, sub_elem]() -> std::array<unsigned int, 4> {
+  auto get_sub_elem_inds = [primal_type, sub_elem]() -> std::array<unsigned int, 4>
+  {
     switch (primal_type)
     {
       case TRI3:
@@ -375,7 +366,8 @@ ComputeMortarFunctor::projectQPoints3d(const Elem * msm_elem,
 
   // Transforms quadrature point from first order sub-elements (in case of second-order)
   // to primal element
-  auto transform_qp = [primal_type, sub_elem](const Real nu, const Real xi) {
+  auto transform_qp = [primal_type, sub_elem](const Real nu, const Real xi)
+  {
     switch (primal_type)
     {
       case TRI3:

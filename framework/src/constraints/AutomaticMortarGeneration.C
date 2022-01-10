@@ -94,6 +94,7 @@ AutomaticMortarGeneration::clear()
   _secondary_node_to_nodal_normal.clear();
   _secondary_node_to_hh_nodal_tangents.clear();
   _secondary_element_to_secondary_lowerd_element.clear();
+  _secondary_elems_to_mortar_segments.clear();
 }
 
 void
@@ -111,9 +112,9 @@ AutomaticMortarGeneration::buildNodeToElemMaps()
     if (!this->_secondary_boundary_subdomain_ids.count(secondary_elem->subdomain_id()))
       continue;
 
-    for (MooseIndex(secondary_elem->n_vertices()) n = 0; n < secondary_elem->n_vertices(); ++n)
+    for (const auto & nd : secondary_elem->node_ref_range())
     {
-      std::vector<const Elem *> & vec = _nodes_to_secondary_elem_map[secondary_elem->node_id(n)];
+      std::vector<const Elem *> & vec = _nodes_to_secondary_elem_map[nd.id()];
       vec.push_back(secondary_elem);
     }
   }
@@ -126,9 +127,9 @@ AutomaticMortarGeneration::buildNodeToElemMaps()
     if (!this->_primary_boundary_subdomain_ids.count(primary_elem->subdomain_id()))
       continue;
 
-    for (MooseIndex(primary_elem->n_vertices()) n = 0; n < primary_elem->n_vertices(); ++n)
+    for (const auto & nd : primary_elem->node_ref_range())
     {
-      std::vector<const Elem *> & vec = _nodes_to_primary_elem_map[primary_elem->node_id(n)];
+      std::vector<const Elem *> & vec = _nodes_to_primary_elem_map[nd.id()];
       vec.push_back(primary_elem);
     }
   }
@@ -247,12 +248,6 @@ AutomaticMortarGeneration::getNormals(const Elem & secondary_elem,
 void
 AutomaticMortarGeneration::buildMortarSegmentMesh()
 {
-  // We maintain a mapping from lower-dimensional secondary elements in
-  // the original mesh to (sets of) elements in mortar_segment_mesh.
-  // This allows us to quickly determine which elements need to be
-  // split.
-  std::map<const Elem *, std::set<Elem *>> secondary_elems_to_mortar_segments;
-
   dof_id_type local_id_index = 0;
   std::size_t node_unique_id_offset = 0;
 
@@ -360,7 +355,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
 
     // Maintain the mapping between secondary elems and mortar segment elems contained within them.
     // Initially, only the original secondary_elem is present.
-    secondary_elems_to_mortar_segments[secondary_elem].insert(new_elem);
+    _secondary_elems_to_mortar_segments[secondary_elem].insert(new_elem);
   }
 
   // 2.) Insert new nodes from primary side and split mortar segments as necessary.
@@ -385,7 +380,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
       new_pt += Moose::fe_lagrange_1D_shape(order, n, xi1) * secondary_elem->point(n);
 
     // Find the current mortar segment that will have to be split.
-    auto & mortar_segment_set = secondary_elems_to_mortar_segments[secondary_elem];
+    auto & mortar_segment_set = _secondary_elems_to_mortar_segments[secondary_elem];
     Elem * current_mortar_segment = nullptr;
     MortarSegmentInfo * info = nullptr;
 
@@ -677,11 +672,11 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     }
   }
 
-#ifndef NDEBUG
+#ifdef DEBUG
   // Verify that all segments without primary contribution have been deleted
   for (auto msm_elem : _mortar_segment_mesh->active_element_ptr_range())
   {
-    const MortarSegmentInfo & msinfo = _msm_elem_to_info.at(msm_elem);
+    const MortarSegmentInfo & msinfo = libmesh_map_find(_msm_elem_to_info, msm_elem);
     mooseAssert(msinfo.primary_elem != nullptr,
                 "All mortar segment elements should have valid "
                 "primary element.");
@@ -754,7 +749,8 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
 
     // Define expression for getting sub-elements nodes (for sub-dividing secondary elements)
     auto get_sub_elem_nodes = [](const ElemType type,
-                                 const unsigned int sub_elem) -> std::array<unsigned int, 4> {
+                                 const unsigned int sub_elem) -> std::array<unsigned int, 4>
+    {
       switch (type)
       {
         case TRI3:
@@ -1279,7 +1275,8 @@ AutomaticMortarGeneration::computeIncorrectEdgeDroppingInactiveLMNodes()
 
     // First push data
     auto action_functor = [this, &inactive_node_ids](const processor_id_type pid,
-                                                     const std::vector<dof_id_type> & sent_data) {
+                                                     const std::vector<dof_id_type> & sent_data)
+    {
       if (pid == _mesh.processor_id())
         mooseError("Should not be communicating with self.");
       for (const auto pr : sent_data)
@@ -1355,7 +1352,8 @@ AutomaticMortarGeneration::computeInactiveLMNodes()
 
     // First push data
     auto action_functor = [this, &active_local_nodes](const processor_id_type pid,
-                                                      const std::vector<dof_id_type> & sent_data) {
+                                                      const std::vector<dof_id_type> & sent_data)
+    {
       if (pid == _mesh.processor_id())
         mooseError("Should not be communicating with self.");
       active_local_nodes.insert(sent_data.begin(), sent_data.end());
@@ -2130,4 +2128,26 @@ AutomaticMortarGeneration::writeGeometryToFile()
   std::set<std::string> sys_names = {"nodal_geometry"};
   // Write the nodal normals to file
   ExodusII_IO(_mesh).write_equation_systems("nodal_geometry_only.e", nodal_normals_es, &sys_names);
+}
+
+std::vector<AutomaticMortarGeneration::MortarFilterIter>
+AutomaticMortarGeneration::secondariesToMortarSegments(const Node & node) const
+{
+  auto secondary_it = _nodes_to_secondary_elem_map.find(node.id());
+  if (secondary_it == _nodes_to_secondary_elem_map.end())
+    mooseError("end of secondary map in associatedMortarSegments");
+
+  const auto & secondary_elems = secondary_it->second;
+  std::vector<MortarFilterIter> ret(secondary_elems.size());
+
+  for (const auto i : index_range(secondary_elems))
+  {
+    auto msm_it = _secondary_elems_to_mortar_segments.find(secondary_elems[i]);
+    if (msm_it == _secondary_elems_to_mortar_segments.end())
+      mooseError("end of mortar segment map in associatedMortarSegments");
+
+    ret[i] = msm_it;
+  }
+
+  return ret;
 }
