@@ -7,6 +7,7 @@
     # then renamed to equal_area_with_junction_out.csv.
     csvdiff = 'equal_area_with_junction_out.csv'
     max_parallel = 1
+    ad_indexing_type = 'global'
   []
   [equal_area_not_x_direction]
     type = 'CSVDiff'
@@ -24,6 +25,7 @@
     csvdiff = 'equal_area_with_junction_out.csv'
     prereq = 'equal_area_x_direction'
     max_parallel = 1
+    ad_indexing_type = 'global'
   []
 
   [phy:unequal_area]
@@ -34,6 +36,7 @@
     rel_err = 0
     recover = false
     max_parallel = 1
+    ad_indexing_type = 'global'
   []
 
   [phy:deadend]
@@ -43,6 +46,7 @@
     abs_zero = 1e-5
     rel_err = 0
     max_parallel = 1
+    ad_indexing_type = 'global'
   []
 
 
@@ -52,6 +56,7 @@
     check_input = true
     recover = false
     max_parallel = 1
+    ad_indexing_type = 'global'
   []
 
   [phy:shower]
@@ -62,6 +67,7 @@
     rel_err = 0
     heavy = true
     max_parallel = 1
+    ad_indexing_type = 'global'
   []
 
   # Tests conservation of mass and energy for 1-phase flow.
@@ -71,6 +77,7 @@
     csvdiff = 't_junction_1phase_out.csv'
     abs_zero = 1e-10
     max_parallel = 1
+    ad_indexing_type = 'global'
   []
 
   [phy.form_loss]
@@ -81,6 +88,7 @@
     rel_err = 2e-4
     recover = false
     max_parallel = 1
+    ad_indexing_type = 'global'
   []
 
   [phy.form_loss_Aref]
@@ -91,6 +99,7 @@
     rel_err = 2e-4
     recover = false
     max_parallel = 1
+    ad_indexing_type = 'global'
   []
 
   # error checking

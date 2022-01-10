@@ -4,6 +4,7 @@
     input = 'test.i'
     csvdiff = 'test_out.csv'
     max_parallel = 1
+    ad_indexing_type = 'global'
   []
 
   [err.negative_tau]

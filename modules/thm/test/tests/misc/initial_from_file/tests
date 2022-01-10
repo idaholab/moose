@@ -4,6 +4,7 @@
     input = 'steady_state.i'
     recover = false
     max_parallel = 1
+    ad_indexing_type = 'global'
   []
 
   [test]
@@ -13,5 +14,6 @@
     prereq = steady_state
     recover = false
     max_parallel = 1
+    ad_indexing_type = 'global'
   []
 []

@@ -4,6 +4,7 @@
     input = 'test.i'
     cli_args = 'Components/hs/initial_T=300'
     expect_err = "shaft: The `initial_speed` parameter is missing."
+    ad_indexing_type = 'global'
   []
   [part1]
     type = 'CSVDiff'
@@ -16,6 +17,7 @@
       Outputs/file_base=part1_out'
     recover = false
     max_parallel = 1
+    ad_indexing_type = 'global'
   []
 
   [part2]
@@ -30,6 +32,7 @@
     prereq = 'part1'
     recover = false
     max_parallel = 1
+    ad_indexing_type = 'global'
   []
 
   [clg_test_torque]
@@ -38,6 +41,7 @@
     input = 'clg.test.i'
     cli_args = 'ControlLogic/motor_ctrl/parameter=torque ControlLogic/motor_ctrl/function=torque_fn Postprocessors/test/parameter=torque Outputs/file_base=clg.test.torque'
     max_parallel = 1
+    ad_indexing_type = 'global'
   []
 
   [clg_test_inertia]
@@ -46,5 +50,6 @@
     input = 'clg.test.i'
     cli_args = 'ControlLogic/motor_ctrl/parameter=inertia ControlLogic/motor_ctrl/function=inertia_fn Postprocessors/test/parameter=inertia Outputs/file_base=clg.test.inertia'
     max_parallel = 1
+    ad_indexing_type = 'global'
   []
 []

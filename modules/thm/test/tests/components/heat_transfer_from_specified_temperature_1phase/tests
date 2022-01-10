@@ -5,6 +5,7 @@
     csvdiff = 'phy.energy_walltemperature_ss_1phase_out.csv'
     abs_zero = 1e-9
     max_parallel = 1
+    ad_indexing_type = 'global'
   []
 
   # controls
@@ -13,6 +14,7 @@
     input = 'clg.Hw.i'
     csvdiff = 'clg.Hw_out.csv'
     max_parallel = 1
+    ad_indexing_type = 'global'
   []
 
   [clg:T_wall]
@@ -20,6 +22,7 @@
     input = 'clg.T_wall.i'
     csvdiff = 'clg.T_wall_out.csv'
     max_parallel = 1
+    ad_indexing_type = 'global'
   []
 
   [err:no_phf]

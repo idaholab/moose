@@ -5,5 +5,6 @@
     exodiff = 'phy.position_out.e'
     custom_cmp = 'phy.position.exodiff'
     max_parallel = 1
+    ad_indexing_type = 'global'
   []
 []

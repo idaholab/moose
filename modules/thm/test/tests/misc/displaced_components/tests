@@ -5,5 +5,6 @@
     exodiff = 'displaced_components_out.e'
     custom_cmp = 'displaced_components.exodiff'
     max_parallel = 1
+    ad_indexing_type = 'global'
   []
 []

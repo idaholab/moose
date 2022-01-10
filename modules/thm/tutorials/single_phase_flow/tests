@@ -19,6 +19,7 @@
     check_input = true
     max_parallel = 1
     recover = false
+    ad_indexing_type = 'global'
   []
   [04.check_syntax]
     type = RunApp
@@ -26,6 +27,7 @@
     check_input = true
     max_parallel = 1
     recover = false
+    ad_indexing_type = 'global'
   []
   [05.check_syntax]
     type = RunApp
@@ -33,6 +35,7 @@
     check_input = true
     max_parallel = 1
     recover = false
+    ad_indexing_type = 'global'
   []
   [06.check_syntax]
     type = RunApp
@@ -40,5 +43,6 @@
     check_input = true
     max_parallel = 1
     recover = false
+    ad_indexing_type = 'global'
   []
 []

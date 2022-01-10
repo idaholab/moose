@@ -15,6 +15,7 @@
     abs_zero = 1e-9
     prereq = mesh
     max_parallel = 1
+    ad_indexing_type = 'global'
   []
   [phy:conservation_ss]
     type = CSVDiff
@@ -24,6 +25,7 @@
     max_time = 6000
     prereq = mesh
     max_parallel = 1
+    ad_indexing_type = 'global'
   []
   [phy:conservation_ss_inv]
     type = CSVDiff
@@ -34,6 +36,7 @@
     max_time = 6000
     prereq = mesh
     max_parallel = 1
+    ad_indexing_type = 'global'
   []
   # Error checking
   [err:not_a_pipe]
@@ -88,5 +91,6 @@
     cli_args = "Debug/check_jacobian=true"
     prereq = mesh
     max_parallel = 1
+    ad_indexing_type = 'global'
   []
 []

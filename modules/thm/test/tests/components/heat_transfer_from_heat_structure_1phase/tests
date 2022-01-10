@@ -6,6 +6,7 @@
     exodiff = 'phy.T_wall_transfer_3eqn_x_out.e'
     max_parallel = 1
     recover = false
+    ad_indexing_type = 'global'
   []
   [phy:T_wall_transfer_3eqn_y]
     type = Exodiff
@@ -13,6 +14,7 @@
     exodiff = 'phy.T_wall_transfer_3eqn_y_out.e'
     max_parallel = 1
     recover = false
+    ad_indexing_type = 'global'
   []
   [phy:T_wall_transfer_3eqn_z]
     type = Exodiff
@@ -20,6 +22,7 @@
     exodiff = 'phy.T_wall_transfer_3eqn_z_out.e'
     max_parallel = 1
     recover = false
+    ad_indexing_type = 'global'
   []
   [phy:conservation_1phase_plate]
     type = CSVDiff
@@ -36,6 +39,7 @@
     max_parallel = 1
     # because of output has execute_on = 'initial final'
     recover = false
+    ad_indexing_type = 'global'
   []
   [phy:conservation_1phase_cylinder]
     type = CSVDiff
@@ -55,6 +59,7 @@
     max_parallel = 1
     # because of output has execute_on = 'initial final'
     recover = false
+    ad_indexing_type = 'global'
   []
   [phy:heat_structure_multiple_3eqn]
     type = 'CSVDiff'
@@ -66,6 +71,7 @@
     rel_err = 0
     max_parallel = 1
     max_time = 6000
+    ad_indexing_type = 'global'
   []
   [phy.energy_heatstructure_ss_1phase]
     type = 'CSVDiff'
@@ -73,6 +79,7 @@
     csvdiff = 'phy.energy_heatstructure_ss_1phase_out.csv'
     abs_zero = 5e-7
     max_parallel = 1
+    ad_indexing_type = 'global'
   []
 
   # Error checking
@@ -146,6 +153,7 @@
     difference_tol = 55
     cli_args = "Debug/check_jacobian=true Components/hs/type=HeatStructureCylindrical Components/hx/hs_side=outer"
     max_parallel = 1
+    ad_indexing_type = 'global'
   []
 
   [jac:cylindrical_bottom_side_1phase]
@@ -155,6 +163,7 @@
     difference_tol = 55
     cli_args = "Debug/check_jacobian=true Components/pipe/position='0 0 0' Components/hs/inner_radius=0.1 Components/hs/type=HeatStructureCylindrical Components/hx/hs_side=inner"
     max_parallel = 1
+    ad_indexing_type = 'global'
   []
 
   [jac:plate_top_side_1phase]
@@ -164,6 +173,7 @@
     difference_tol = 55
     cli_args = "Debug/check_jacobian=true Components/hs/type=HeatStructurePlate Components/hs/depth=1 Components/hx/hs_side=outer"
     max_parallel = 1
+    ad_indexing_type = 'global'
   []
 
   [jac:plate_bottom_side_1phase]
@@ -173,5 +183,6 @@
     difference_tol = 55
     cli_args = "Debug/check_jacobian=true Components/pipe/position='0 0 0' Components/hs/depth=1 Components/hs/type=HeatStructurePlate Components/hx/hs_side=inner"
     max_parallel = 1
+    ad_indexing_type = 'global'
   []
 []

@@ -8,6 +8,7 @@
     abs_zero = 1e-8
     rel_err = 0
     max_parallel = 1
+    ad_indexing_type = 'global'
   []
 
   [phy:loop]
@@ -18,6 +19,7 @@
     abs_zero = 1e-9
     cli_args = 'Outputs/exodus=true'
     max_parallel = 1
+    ad_indexing_type = 'global'
   []
 
   [phy:coastdown]
@@ -28,6 +30,7 @@
     abs_zero = 1e-9
     heavy = true
     max_parallel = 1
+    ad_indexing_type = 'global'
   []
 
   # jacobian test
@@ -40,5 +43,6 @@
     allow_test_objects = true
     max_threads = 1
     max_parallel = 1
+    ad_indexing_type = 'global'
   []
 []

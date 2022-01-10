@@ -4,6 +4,8 @@
     input = 'Isp_1ph.i'
     csvdiff = 'Isp_1ph_out.csv'
     max_parallel = 1
+    ad_indexing_type = 'global'
+
     issues = '#189'
     design = 'SpecificImpulse1Phase.md'
     requirement = 'The system shall compute specific impulse from conditions on a boundary'

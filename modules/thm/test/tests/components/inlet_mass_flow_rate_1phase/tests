@@ -6,12 +6,14 @@
     group = 'inlet_mass_flow_rate outlet pipe 1phase'
     max_parallel = 1
     max_time = 1000
+    ad_indexing_type = 'global'
   []
   [phy:reversed_flow]
     type = 'Exodiff'
     input = 'phy.reversed_flow.i'
     exodiff = 'phy.reversed_flow.e'
     max_parallel = 1
+    ad_indexing_type = 'global'
   []
 
   [clg:ctrl_m_dot_3eqn_rdg]
@@ -19,12 +21,14 @@
     input = 'clg.ctrl_m_dot_3eqn_rdg.i'
     csvdiff = 'clg.ctrl_m_dot_3eqn_rdg_out.csv'
     max_parallel = 1
+    ad_indexing_type = 'global'
   []
   [clg:ctrl_T_3eqn_rdg]
     type = 'CSVDiff'
     input = 'clg.ctrl_T_3eqn_rdg.i'
     csvdiff = 'clg.ctrl_T_3eqn_rdg_out.csv'
     max_parallel = 1
+    ad_indexing_type = 'global'
   []
 
   [jacobian]
@@ -34,5 +38,6 @@
     difference_tol = 15
     cli_args = 'Debug/check_jacobian=true'
     max_parallel = 1
+    ad_indexing_type = 'global'
   []
 []

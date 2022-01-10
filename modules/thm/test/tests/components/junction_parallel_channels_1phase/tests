@@ -6,6 +6,7 @@
     # then renamed to equal_area_with_junction_out.csv.
     csvdiff = 'equal_area_with_junction_out.csv'
     max_parallel = 1
+    ad_indexing_type = 'global'
   []
 
   [phy:unequal_area]
@@ -16,6 +17,7 @@
     rel_err = 0
     recover = false
     max_parallel = 1
+    ad_indexing_type = 'global'
   []
 
   [phy:shower_syntax]
@@ -25,6 +27,7 @@
     recover = false
     max_threads = 1
     max_parallel = 1
+    ad_indexing_type = 'global'
   []
 
   [phy:shower]
@@ -35,6 +38,7 @@
     rel_err = 0
     max_parallel = 1
     heavy = true
+    ad_indexing_type = 'global'
   []
 
   # Tests conservation of mass and energy for 1-phase flow.
@@ -44,6 +48,7 @@
     csvdiff = 'conservation_out.csv'
     abs_zero = 2e-8
     max_parallel = 1
+    ad_indexing_type = 'global'
   []
 
   # error checking
@@ -59,6 +64,7 @@
     cli_args = "--error Components/junction/volume=1.0 Components/pipe2/orientation='0 1 0'"
     expect_err = "junction: Connected flow channels are not parallel, use "
     "VolumeJunction1Phase component instead."
+    ad_indexing_type = 'global'
   []
 
   # jacobian test
@@ -71,5 +77,6 @@
     allow_test_objects = true
     max_threads = 1
     max_parallel = 1
+    ad_indexing_type = 'global'
   []
 []

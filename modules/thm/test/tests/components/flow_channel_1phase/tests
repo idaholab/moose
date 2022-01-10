@@ -6,6 +6,7 @@
     csvdiff = 'phy.f_fn.3eqn_out.csv'
     rel_err = 1e-10
     max_parallel = 1
+    ad_indexing_type = 'global'
   []
 
   [phy:par_fn]
@@ -14,6 +15,7 @@
     csvdiff = 'phy.par_fn_out.csv'
     rel_err = 1e-10
     max_parallel = 1
+    ad_indexing_type = 'global'
   []
 
   [phy:sub_discretization]
@@ -24,6 +26,7 @@
     # matching geometry at t=0
     recover = false
     max_parallel = 1
+    ad_indexing_type = 'global'
   []
 
   # controls
@@ -33,6 +36,7 @@
     type = 'RunException'
     input = 'err.wrong_fp.i'
     expect_err = "pipe: Supplied fluid properties must be for 1-phase fluids."
+    ad_indexing_type = 'global'
   []
 
   [jacobian]
@@ -43,5 +47,6 @@
     cli_args = 'Debug/check_jacobian=true'
     max_threads = 1
     max_parallel = 1
+    ad_indexing_type = 'global'
   []
 []

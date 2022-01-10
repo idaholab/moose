@@ -6,6 +6,7 @@
     abs_zero = 1e-8
     recover = false
     max_parallel = 1
+    ad_indexing_type = 'global'
   []
 
   [multiple_blocks]
@@ -16,5 +17,6 @@
     method = 'opt'
     skip = '#709'
     max_parallel = 1
+    ad_indexing_type = 'global'
   []
 []

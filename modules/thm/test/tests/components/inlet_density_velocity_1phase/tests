@@ -6,6 +6,7 @@
     exodiff = 'phy.densityvelocity_3eqn_out.e'
     max_parallel = 1
     recover = false
+    ad_indexing_type = 'global'
   []
 
   # control logic
@@ -15,6 +16,7 @@
     csvdiff = 'clg.densityvelocity_3eqn_out.csv'
     max_parallel = 1
     rel_err = 1e-5
+    ad_indexing_type = 'global'
   []
 
   [jacobian]
@@ -25,5 +27,6 @@
     max_parallel = 1
     max_threads = 1
     cli_args = 'Debug/check_jacobian=true'
+    ad_indexing_type = 'global'
   []
 []
