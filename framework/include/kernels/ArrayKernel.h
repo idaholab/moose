@@ -61,12 +61,7 @@ protected:
   virtual RealEigenMatrix computeQpOffDiagJacobian(const MooseVariableFEBase & jvar)
   {
     if (jvar.number() == _var.number())
-    {
-      RealEigenVector v = computeQpJacobian();
-      RealEigenMatrix t = RealEigenMatrix::Zero(_var.count(), _var.count());
-      t.diagonal() = v;
-      return t;
-    }
+      return computeQpJacobian().asDiagonal();
     else
       return RealEigenMatrix::Zero(_var.count(), jvar.count());
   }

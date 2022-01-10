@@ -42,6 +42,11 @@ public:
   virtual const MooseVariableFEBase & variable() const override { return _var; }
 
   /**
+   * Override this function to consider couplings of components of the array variable
+   */
+  virtual void computeOffDiagJacobian(unsigned int jvar) override;
+
+  /**
    * Computes the residual for this element or the neighbor
    */
   virtual void computeElemNeighResidual(Moose::DGResidualType type) override;
@@ -73,10 +78,13 @@ protected:
   /**
    * This is the virtual that derived classes should override for computing the off-diag Jacobian.
    */
-  virtual RealEigenMatrix computeQpOffDiagJacobian(Moose::DGJacobianType,
+  virtual RealEigenMatrix computeQpOffDiagJacobian(Moose::DGJacobianType type,
                                                    const MooseVariableFEBase & jvar)
   {
-    return RealEigenMatrix::Zero(_var.count(), jvar.count());
+    if (jvar.number() == _var.number())
+      return computeQpJacobian(type).asDiagonal();
+    else
+      return RealEigenMatrix::Zero(_var.count(), jvar.count());
   }
 
   /**
