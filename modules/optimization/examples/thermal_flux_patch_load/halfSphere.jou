@@ -1,0 +1,13 @@
+reset
+
+create sphere radius 5 xpositive 
+volume 1  Scheme Tetmesh proximity layers off geometry approximation angle 15 
+volume 1  tetmesh growth_factor 1 
+mesh volume 1 
+Sideset 1 add surface 1  
+Sideset 1 name 'flat'
+Sideset 2 add surface 2  
+Sideset 2 name 'round'
+block 1 add volume 1  
+export mesh "/Users/mundlb/projects/isopod/examples/spherical_point_sources/halfSphere.e" block all overwrite
+
