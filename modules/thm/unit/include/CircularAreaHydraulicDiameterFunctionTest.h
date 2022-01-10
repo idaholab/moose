@@ -6,7 +6,7 @@
 class CircularAreaHydraulicDiameterFunctionTest : public MooseObjectUnitTest
 {
 public:
-  CircularAreaHydraulicDiameterFunctionTest() : MooseObjectUnitTest("THMTestApp"), _Dh_name("Dh_fn")
+  CircularAreaHydraulicDiameterFunctionTest() : MooseObjectUnitTest("THMApp"), _Dh_name("Dh_fn")
   {
     buildObjects();
   }

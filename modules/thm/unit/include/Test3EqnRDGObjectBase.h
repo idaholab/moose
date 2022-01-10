@@ -11,7 +11,7 @@ class Test3EqnRDGObjectBase : public MooseObjectUnitTest
 {
 public:
   Test3EqnRDGObjectBase()
-    : MooseObjectUnitTest("THMTestApp"),
+    : MooseObjectUnitTest("THMApp"),
 
       _fp_name("fp"),
       _fp(getFluidPropertiesObject()),

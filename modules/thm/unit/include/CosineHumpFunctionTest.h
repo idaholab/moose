@@ -6,7 +6,7 @@ class CosineHumpFunctionTest : public MooseObjectUnitTest
 {
 public:
   CosineHumpFunctionTest()
-    : MooseObjectUnitTest("THMTestApp"),
+    : MooseObjectUnitTest("THMApp"),
       _fn_name_positive("positive_hump"),
       _fn_name_negative("negative_hump"),
       _hump_center_position(3.0),

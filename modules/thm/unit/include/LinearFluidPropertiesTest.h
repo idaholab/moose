@@ -6,7 +6,7 @@
 class LinearFluidPropertiesTest : public MooseObjectUnitTest
 {
 public:
-  LinearFluidPropertiesTest() : MooseObjectUnitTest("THMTestApp") { buildObjects(); }
+  LinearFluidPropertiesTest() : MooseObjectUnitTest("THMApp") { buildObjects(); }
 
 protected:
   void buildObjects()

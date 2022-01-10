@@ -6,7 +6,7 @@ class TimeRampFunctionTest : public MooseObjectUnitTest
 {
 public:
   TimeRampFunctionTest()
-    : MooseObjectUnitTest("THMTestApp"),
+    : MooseObjectUnitTest("THMApp"),
 
       _initial_value(1.0),
       _final_value(2.0),
