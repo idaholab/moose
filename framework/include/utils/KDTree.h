@@ -39,7 +39,8 @@ public:
   using KdTreeT = nanoflann::KDTreeSingleIndexAdaptor<
       nanoflann::L2_Simple_Adaptor<Real, PointListAdaptor<Point>>,
       PointListAdaptor<Point>,
-      LIBMESH_DIM>;
+      LIBMESH_DIM,
+      std::size_t>;
 
 protected:
   PointListAdaptor<Point> _point_list_adaptor;
