@@ -34,7 +34,10 @@ if [[ -n "$HELP" ]]; then
   exit 0
 fi
 
-if (( $(echo "$VERSION < 1.4" | bc -l) )); then
+MAINVERSION=${VERSION%%.*}
+SUBVERSION=${VERSION##*.}
+
+if (( $SUBVERSION < 4 || $MAINVERSION < 1 )); then
   echo "The current implementation does not support libtorch versions below 1.4!"
   exit 1
 fi
@@ -42,7 +45,7 @@ fi
 # Checking the operating system
 UNAME_OUT="$(uname -s)"
 case "${UNAME_OUT}" in
-  linux*)     OP_SYS=linux;;
+  Linux*)     OP_SYS=linux;;
   Darwin*)    OP_SYS=mac;;
 esac
 
@@ -51,11 +54,11 @@ esac
 # moose compiler stack.
 if [[ $OP_SYS == linux ]]; then
   GLIBC_VERSION=`ldd --version | awk '/ldd/{print $NF}'`
-  if (( $(echo "$VERSION < 1.8" | bc -l) && $(echo "$GLIBC_VERSION < 2.23" | bc -l) )); then
+  if (( $SUBVERSION < 8 && $(echo "$GLIBC_VERSION < 2.23" | bc -l) )); then
     echo "The current version of GLIBC is not sufficient for proper linking!"
     echo "Upgrade it to at least 2.23! Current version: $GLIBC_VERSION"
     exit 1
-  elif (( $(echo "$VERSION > 1.8" | bc -l) && $(echo "$GLIBC_VERSION < 2.27" | bc -l) )); then
+  elif (( $SUBVERSION > 8 && $(echo "$GLIBC_VERSION < 2.27" | bc -l) )); then
     echo "The current version of GLIBC is not sufficient for proper linking!"
     echo "Upgrade it to at least 2.27! Current version: $GLIBC_VERSION"
     exit 1
