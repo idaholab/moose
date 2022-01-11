@@ -234,7 +234,7 @@ setEigenProblemSolverParams(EigenProblem & eigen_problem, const InputParameters 
 
   if (eigen_problem.constantMatrices() && params.get<MooseEnum>("solve_type") != "PJFNKMO")
   {
-    mooseError("constant_matrices flag is only vaid for solve type: PJFNKMO");
+    mooseError("constant_matrices flag is only valid for solve type: PJFNKMO");
   }
 }
 
@@ -496,6 +496,7 @@ slepcSetOptions(EigenProblem & eigen_problem, const InputParameters & params)
   Moose::PetscSupport::addPetscOptionsFromCommandline();
 }
 
+// For matrices A and B
 PetscErrorCode
 mooseEPSFormMatrices(EigenProblem & eigen_problem, EPS eps, Vec x, void * ctx)
 {

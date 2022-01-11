@@ -205,22 +205,22 @@ public:
   void onLinearSolver(bool ols) { _on_linear_solver = ols; }
 
   /**
-   * Whether or not we are in a linear solver iteration
+   * Whether or not matrices are constant
    */
   bool constantMatrices() const { return _constant_matrices; }
 
   /**
-   * Set a flag to indicate whether or not we are in a linear solver iteration
+   * Set a flag to indicate whether or not we use constant matrices
    */
   void constantMatrices(bool cm) { _constant_matrices = cm; }
 
   /**
-   * Whether or not we are in a linear solver iteration
+   * Whether or not constant matrices were already formed
    */
   bool wereMatricesFormed() const { return _matrices_formed; }
 
   /**
-   * Set a flag to indicate whether or not we are in a linear solver iteration
+   * Set a flag to indicate whether or not constant matrices were already formed
    */
   void wereMatricesFormed(bool mf) { _matrices_formed = mf; }
 

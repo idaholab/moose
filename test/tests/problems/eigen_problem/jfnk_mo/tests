@@ -30,7 +30,7 @@
     prereq = 'const_mats'
     slepc = true
     slepc_version = '>=3.11.0'
-    expect_err = 'constant_matrices flag is only vaid for solve type: PJFNKMO'
+    expect_err = 'constant_matrices flag is only valid for solve type: PJFNKMO'
     cli_args = 'Executioner/constant_matrices=true Executioner/solve_type=PJFNK'
     requirement = "The system shall support compatibility of solve type and constant-matrices flag"
   []
