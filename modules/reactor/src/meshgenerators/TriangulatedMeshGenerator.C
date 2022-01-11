@@ -9,6 +9,9 @@
 
 #include "TriangulatedMeshGenerator.h"
 
+// Moose headers
+#include "CastUniquePointer.h" // dynamic_pointer_cast, but not std::
+
 // libMesh headers - some of this only has forward declares so far
 #include "libmesh/boundary_info.h"
 #include "libmesh/elem.h"
