@@ -181,5 +181,4 @@ meshCentroidCalculator(const ReplicatedMesh & mesh)
   origin_pt /= vol_tmp;
   return origin_pt;
 }
-
 }
