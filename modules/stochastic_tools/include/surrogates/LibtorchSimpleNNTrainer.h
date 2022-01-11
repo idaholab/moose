@@ -54,8 +54,11 @@ protected:
 #endif
 
 private:
+
+  #ifdef TORCH_ENABLED
   /// pointer to the neural net object (initialized as null)
   std::shared_ptr<StochasticTools::LibtorchSimpleNeuralNet> _nn;
+  #endif
 
   /// Data from the current sampler row
   const std::vector<Real> & _sampler_row;
