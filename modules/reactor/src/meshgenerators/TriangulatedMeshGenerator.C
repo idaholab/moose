@@ -10,7 +10,7 @@
 #include "TriangulatedMeshGenerator.h"
 
 // poly2tri triangulation library
-#include "poly2tri.h"
+#include "poly2tri/poly2tri.h"
 
 registerMooseObject("ReactorApp", TriangulatedMeshGenerator);
 

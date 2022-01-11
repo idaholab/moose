@@ -10,7 +10,7 @@
 #pragma once
 #include "MeshGenerator.h"
 // poly2tri triangulation library
-#include "poly2tri.h"
+#include "poly2tri/poly2tri.h"
 
 /**
  * This TriangulatedMeshGenerator object is designed to generate a triangulated mesh between
