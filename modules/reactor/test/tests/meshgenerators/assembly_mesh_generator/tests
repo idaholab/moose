@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/AssemblyMeshGenerator.md'
-  issues = ''
+  issues = '#19949'
   [square]
     requirement = 'The system shall generate a 3D square assembly mesh from 2 pin types'
     type = 'Exodiff'

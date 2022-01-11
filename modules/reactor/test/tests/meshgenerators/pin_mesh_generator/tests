@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/PinMeshGenerator.md'
-  issues = ''
+  issues = '#19949'
   [square]
     requirement = 'The system shall generate a 3D square pin mesh with only 1 radial region and quad center elements'
     type = 'Exodiff'

@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/CoreMeshGenerator.md'
-  issues = ''
+  issues = '#19949'
   [square]
     requirement = 'The system shall generate a full 3D square core mesh with 3 pin types and 2 assembly types'
     type = 'Exodiff'
