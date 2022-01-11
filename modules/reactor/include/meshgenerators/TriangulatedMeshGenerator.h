@@ -47,15 +47,18 @@ protected:
   const std::vector<unsigned int> _extra_circle_num_segments;
 
   /**
-   * Extracts the boundary nodes from the input mesh inner boundary and sorted nodes in connected-order.
+   * Extracts the boundary nodes from the input mesh inner boundary and sorted nodes in
+   * connected-order.
    * @param mesh mesh pointer for the mesh being assembled.
-   * @param inner_boundary_nodes vector of inner boundary nodes, input as empty list, populated by function.
+   * @param inner_boundary_nodes vector of inner boundary nodes, input as empty list, populated by
+   * function.
    */
-  void _create_sorted_boundary_node_list(std::unique_ptr<MeshBase>& mesh, std::vector<Node*>& inner_boundary_nodes);
+  void _create_sorted_boundary_node_list(std::unique_ptr<MeshBase> & mesh,
+                                         std::vector<Node *> & inner_boundary_nodes);
 
   /**
    * Deletes and clears a list of poly2tri Point pointers.
    * @param point_list list of poly2tri Point pointers to be deleted.
    */
-  void _clearPoints(std::vector<p2t::Point*>& point_list);
+  void _clearPoints(std::vector<p2t::Point *> & point_list);
 };
