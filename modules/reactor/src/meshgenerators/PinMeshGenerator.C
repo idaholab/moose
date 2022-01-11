@@ -88,7 +88,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
     _quad_center(getParam<bool>("quad_center_elements"))
 {
   // Ensure that the user has supplied the correct info for conformal mesh generation
-  
+
 
   if (getMeshByName(_reactor_params) != nullptr)
     mooseError("The reactor_params mesh is not of the correct type");
@@ -105,7 +105,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
   if (_extrude && _mesh_dimensions != 3)
     mooseError("This is a 2 dimensional mesh, you cannot extrude it. Check your ReactorMeshParams "
                "inputs\n");
-               
+
   if (_intervals.size() != (_ring_radii.size() + _duct_halfpitch.size() + 1))
     mooseError("The number of mesh intervals must be equal to the number of annular regions + the "
                "number of duct regions + 1"
@@ -120,7 +120,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
   else if (!_procedural_ids){
     mooseError("If procedural ID generation is not being used then region IDs must be assigned "
                "with parameter region_ids");
-  }             
+  }
   else{
     // procedurally generate region ids, making centermost interval its own region
     // IDs are generated attempting to concatenate the pin type ID and the radial region
@@ -128,7 +128,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
     // are too many radial regions the concatenation will truncate the end of the pin type ID.
     // The region ID is limited by the subdomain_id_type which is uint16.
 
-    
+
     int num_rings = _intervals.size();
     if (_intervals[0] > 1){
       // To allow quad and tri center elements the innermost ring must be
@@ -144,7 +144,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
       num_rings++;
     }
 
-    //checking to see if the concatenization of pin_type and ring number will fit in a unint16 (subdomain_id_type) 
+    //checking to see if the concatenization of pin_type and ring number will fit in a unint16 (subdomain_id_type)
     subdomain_id_type ident;
     int digits_r = floor(log10(num_rings)) + 1;
     int digits_id = floor(log10(_pin_type)) + 1;
@@ -184,7 +184,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
       //Get and assign parameters for the main geometry feature of the Pin
       //which is created with a PolygonConcentricCircleMeshGenerator subgenerator
       auto params = _app.getFactory().getValidParams("PolygonConcentricCircleMeshGenerator");
-      
+
       params.set<unsigned int>("num_sides") = 4; // Cartesian geometry so pin are given a square box
       params.set<std::vector<unsigned int>>("num_sectors_per_side") =
                             std::vector<unsigned int>(4, _num_sectors);
@@ -286,11 +286,11 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
     if (hasMeshProperty("num_sectors_per_side_meta", name() + "_circle"))
       declareMeshProperty("num_sectors_per_side_meta",
                           getMeshProperty<std::vector<unsigned int>>("num_sectors_per_side_meta",
-                                                                     name() + "_circle"));  
+                                                                     name() + "_circle"));
     if (hasMeshProperty("max_radius_meta", name() + "_circle"))
       declareMeshProperty("max_radius_meta",
                           getMeshProperty<Real>("max_radius_meta", name() + "_circle"));
-    
+
     //Change boundary IDs so that there are unified boundaries for use in patterned MeshGenerator
     //if this pin is to be used in an AssemblyMeshGenerator
     {
@@ -353,7 +353,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
         params.set<std::vector<Real>>("ring_radii") = _ring_radii;
         if (ring_intervals.front() != 1)
           ring_ids.insert(ring_ids.begin(), ring_ids.front());
-      
+
         params.set<std::vector<subdomain_id_type>>("ring_block_ids") = ring_ids;
         params.set<std::vector<unsigned int>>("ring_intervals") = ring_intervals;
       }

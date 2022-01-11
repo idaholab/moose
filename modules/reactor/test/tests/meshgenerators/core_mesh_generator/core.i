@@ -21,7 +21,7 @@
 
     quad_center_elements = true
   []
-  
+
   [pin2]
     type = PinMeshGenerator
     reactor_params = rmp
@@ -32,8 +32,8 @@
 
     quad_center_elements = true
   []
-  
-  
+
+
   [pin3]
     type = PinMeshGenerator
     reactor_params = rmp
@@ -54,9 +54,9 @@
                0 0 0 0 0;
                0 0 0 0 0;
                0 0 0 0 0;
-               0 0 0 0 0'          
+               0 0 0 0 0'
   []
-  
+
   [amg2]
     type = AssemblyMeshGenerator
     assembly_type = 2
@@ -65,9 +65,9 @@
                1 2 2 2 1;
                1 2 0 2 1;
                1 2 2 2 1;
-               1 1 1 1 1'          
+               1 1 1 1 1'
   []
-  
+
   [cmg]
     type = CoreMeshGenerator
     inputs = 'amg2 amg1 empty'
@@ -78,7 +78,7 @@
                1 0 0 0 0 1;
                1 1 0 0 1 1;
                1 1 1 1 1 1'
-    extrude = true               
+    extrude = true
   []
 []
 

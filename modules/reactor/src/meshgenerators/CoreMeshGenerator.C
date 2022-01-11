@@ -130,7 +130,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
       if (make_empty)
         params.set<std::vector<MeshGeneratorName>>("exclude_id") =
             std::vector<MeshGeneratorName>{_empty_key};
-            
+
       params.set<BoundaryName>("top_boundary") = "10001";
       params.set<BoundaryName>("left_boundary") = "10002";
       params.set<BoundaryName>("bottom_boundary") = "10003";
@@ -317,13 +317,13 @@ CoreMeshGenerator::generate()
       dof_id_type z_id = elem->get_extra_integer(pid_int);
       dof_id_type pt_id = elem->get_extra_integer(ptid_int);
       subdomain_id_type r_id = elem->subdomain_id();
-      
-      //Going through the elements in the mesh checking the pin_type_ids to axial 
+
+      //Going through the elements in the mesh checking the pin_type_ids to axial
       //region ids
       if (_id_map.find(pt_id) == _id_map.end())
       {
         //element is in an assembly duct or background region since it doesn't have a pin type id
-        //that matches one in the map. What region it is in the periphery is then stored in the 
+        //that matches one in the map. What region it is in the periphery is then stored in the
         //pt_id
         dof_id_type at_id = elem->get_extra_integer(atid_int);
         unsigned int peripheral_index = (UINT16_MAX - 1) - pt_id;
@@ -375,7 +375,7 @@ CoreMeshGenerator::generate()
   if (_geom_type == "Square")
   {
     //the boundaries need to be directly assigned for cartesian cores
-    //since the CartesianIDPatternedMeshGenerator lacks the ability 
+    //since the CartesianIDPatternedMeshGenerator lacks the ability
     //to assign them during construction.
     MooseMesh::changeBoundaryId(*(_build_mesh->get()), 10001, 200, false);
     MooseMesh::changeBoundaryId(*(_build_mesh->get()), 10002, 200, false);

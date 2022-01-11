@@ -27,4 +27,3 @@ If the core is extruded to three dimensions the top-most boundary will be assign
 !syntax inputs /Mesh/CoreMeshGenerator
 
 !syntax children /Mesh/CoreMeshGenerator
-

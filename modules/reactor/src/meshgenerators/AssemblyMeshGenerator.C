@@ -93,8 +93,8 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
   */
   MeshGeneratorName _reactor_params =
       MeshGeneratorName(getMeshProperty<std::string>("reactor_params_name", _inputs[0]));
-      
-  bool _procedural_ids =  getMeshProperty<bool>("procedural_ids", _reactor_params);   
+
+  bool _procedural_ids =  getMeshProperty<bool>("procedural_ids", _reactor_params);
 
   // Ensure that the user has supplied the correct info for conformal mesh generation
   if (!hasMeshProperty("mesh_dimensions", _reactor_params) ||
@@ -108,7 +108,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
   if (_extrude && _mesh_dimensions != 3)
     mooseError("This is a 2 dimensional mesh, you cannot extrude it. Check you ReactorMeshParams "
                "inputs\n");
-               
+
   for (auto pin : _inputs)
   {
     if (getMeshProperty<bool>("extruded", pin))
@@ -118,7 +118,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
   if ((_geom_type == "Square") &&
       (_duct_sizes.size() != 0 || _duct_intervals.size() != 0 || _background_intervals != 0))
     mooseError("Ducts and background regions are not currently supported for square assemblies");
-  
+
   if ((_geom_type == "Hex") && ((_background_region_id.size() == 0 &&
                                  !_procedural_ids) ||
                                 _background_intervals == 0))
@@ -404,12 +404,12 @@ AssemblyMeshGenerator::generate()
       dof_id_type z_id = elem->get_extra_integer(pid_int);
       dof_id_type pt_id = elem->get_extra_integer(ptid_int);
       subdomain_id_type r_id = elem->subdomain_id();
-      
-      //Going through the elements in the mesh checking pin_type_ids to assign their axial 
+
+      //Going through the elements in the mesh checking pin_type_ids to assign their axial
       //region ids
       if (_id_map.find(pt_id) == _id_map.end())
       {
-        //region isn't in a pin so it must be a peripheral (background or duct) region of the assembly  
+        //region isn't in a pin so it must be a peripheral (background or duct) region of the assembly
         unsigned int peripheral_index = (UINT16_MAX - 1) - r_id;
         if (peripheral_index == 0)
           // background region element
@@ -478,7 +478,7 @@ AssemblyMeshGenerator::generate()
   if (_geom_type == "Square")
   {
     //the boundaries need to be directly assigned for cartesian cores
-    //since the CartesianIDPatternedMeshGenerator lacks the ability 
+    //since the CartesianIDPatternedMeshGenerator lacks the ability
     //to assign them during construction.
     MooseMesh::changeBoundaryId(*(_build_mesh->get()), 10001, _assembly_boundary_id, false);
     MooseMesh::changeBoundaryId(*(_build_mesh->get()), 10002, _assembly_boundary_id, false);
