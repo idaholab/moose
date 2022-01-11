@@ -4,7 +4,7 @@
 
 ## Overview
 
-The `PeripheralRingMeshGenerator` object adds a peripheral region using first-order quadrilateral elements (i.e., QUAD4) with a circular external boundary to the input mesh. A common use of this mesh generator is to mesh the circular peripheral region of a reactor core. This mesh generator can be used recursively on a mesh to add as many rings of peripheral regions as desired.
+The `PeripheralRingMeshGenerator` object adds a 2D peripheral region using first-order quadrilateral elements (i.e., QUAD4) with a circular external boundary to the input 2D mesh. A common use of this mesh generator is to mesh the circular peripheral region of a reactor core. This mesh generator can be used recursively on a mesh to add as many rings of peripheral regions as desired.
 
 ## More Information
 

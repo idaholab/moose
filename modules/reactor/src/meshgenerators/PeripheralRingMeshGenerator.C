@@ -62,16 +62,16 @@ PeripheralRingMeshGenerator::PeripheralRingMeshGenerator(const InputParameters &
                               : 0),
     _external_boundary_name(isParamValid("external_boundary_name")
                                 ? getParam<std::string>("external_boundary_name")
-                                : std::string())
+                                : std::string()),
+    _mesh(getMeshByName(_input_name))
 {
-  _mesh_ptrs = &getMeshByName(_input_name);
 }
 
 std::unique_ptr<MeshBase>
 PeripheralRingMeshGenerator::generate()
 {
   // Need ReplicatedMesh for stitching
-  auto input_mesh = dynamic_pointer_cast<ReplicatedMesh>(*_mesh_ptrs);
+  auto input_mesh = dynamic_cast<ReplicatedMesh *>(_mesh.get());
   _input_mesh_external_bid =
       MooseMeshUtils::getBoundaryID(_input_mesh_external_boundary, *input_mesh);
 

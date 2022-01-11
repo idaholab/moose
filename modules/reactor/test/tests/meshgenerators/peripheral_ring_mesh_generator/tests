@@ -16,7 +16,7 @@
     input = 'core_ring.i'
     exodiff = 'core_ring_preserved_in.e'
     cli_args = '--mesh-only core_ring_preserved_in.e'
-    requirement ='The system shall add a peripheral ring to to the input mesh with preserving volumes due to polygonization.'
+    requirement ='The system shall be able to add a peripheral ring to the input mesh and preserve volumes even with polygonization.'
     recover = false
     mesh_mode = 'REPLICATED'
   []
@@ -26,7 +26,7 @@
     cli_args = 'Mesh/pr/input_mesh_external_boundary=1
                 --mesh-only'
     expect_err = 'This mesh generator does not work for the provided boundary.'
-    requirement ='The system shall threw an error if the given boundary of the input mesh is not valid.'
+    requirement ='The system shall throw an error if the given boundary of the input mesh is not valid.'
     mesh_mode = 'REPLICATED'
   []
   [err_small_radius]
@@ -35,7 +35,7 @@
     cli_args = 'Mesh/pr/peripheral_ring_radius=20
                 --mesh-only'
     expect_err = 'The peripheral ring to be generated must be large enough to cover the entire input mesh.'
-    requirement ='The system shall threw an error if the given peripheral ring radius is not enough to cover the input mesh.'
+    requirement ='The system shall throw an error if the given peripheral ring radius is not enough to cover the input mesh.'
     mesh_mode = 'REPLICATED'
   []
   [err_internal_boundary]
@@ -45,7 +45,7 @@
                 Mesh/pr/input_mesh_external_boundary=30500
                 --mesh-only'
     expect_err = 'The boundary provided is not an external boundary.'
-    requirement ='The system shall threw an error if the given external boundary is actually an internal boundary of the input mesh.'
+    requirement ='The system shall throw an error if the given external boundary is actually an internal boundary of the input mesh.'
     mesh_mode = 'REPLICATED'
   []
 []

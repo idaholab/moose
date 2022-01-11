@@ -29,7 +29,7 @@ protected:
   const MeshGeneratorName _input_name;
   /// Number of layers of elements of the peripheral region in radial direction
   const unsigned int _peripheral_layer_num;
-  /// Radius of the periferial region's outer circular boundary
+  /// Radius of the peripheral region's outer circular boundary
   const Real _peripheral_ring_radius;
   /// Volume preserving function is optional
   const bool _preserve_volumes;
@@ -42,9 +42,9 @@ protected:
   /// ID of the new external boundary
   const boundary_id_type _external_boundary_id;
   /// Name of the new external boundary
-  const std::string _external_boundary_name;
-  /// Pointer to the input mesh
-  std::unique_ptr<MeshBase> * _mesh_ptrs;
+  const BoundaryName _external_boundary_name;
+  /// Reference to input mesh pointer
+  std::unique_ptr<MeshBase> & _mesh;
   /// ID of the external boundary of the input mesh
   boundary_id_type _input_mesh_external_bid;
 
@@ -75,7 +75,7 @@ protected:
   /**
    * Decides whether a boundary of a given mesh works is an external boundary.
    * @param mesh input mesh that contains the boundary to be examined
-   * @param bid ID of the bounadry to be examined
+   * @param bid ID of the boundary to be examined
    * @return whether the boundary is the external boundary of the given mesh
    */
   bool isExternalBoundary(ReplicatedMesh & mesh, const boundary_id_type bid) const;
