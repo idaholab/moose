@@ -91,8 +91,18 @@ TriangulatedMeshGenerator::generate()
   //
   // Set up mesh based on input inner mesh
   //
-
   std::unique_ptr<MeshBase> mesh = std::move(_inner_boundary_mesh);
+
+  //
+  // The input mesh might be distributed (because a user wants a
+  // distributed mesh in the end), but we'll need to serialize it to
+  // do our work here.  If we're running distributed because we'll be
+  // extruded later into 3D then it's probably still cheap enough for
+  // us to serialize now.  If we're already serial we're fine.
+  //
+  if (!mesh->is_serial())
+    mesh->allgather();
+
   BoundaryInfo & boundary_info = mesh->get_boundary_info();
   const std::set<boundary_id_type> & boundary_ids = boundary_info.get_boundary_ids();
 
@@ -298,7 +308,8 @@ TriangulatedMeshGenerator::generate()
   _clearPoints(steiner_points);
 
   //
-  // finalize mesh and return
+  // finalize mesh (partition the new elements, make the mesh
+  // distributed again if necessary) and return
   //
 
   mesh->prepare_for_use();
