@@ -9,6 +9,12 @@
 
 #include "TriangulatedMeshGenerator.h"
 
+// libMesh headers - some of this only has forward declares so far
+#include "libmesh/boundary_info.h"
+#include "libmesh/elem.h"
+#include "libmesh/face_tri3.h"
+#include "libmesh/mesh_base.h"
+
 // poly2tri triangulation library
 #include "poly2tri/poly2tri.h"
 
