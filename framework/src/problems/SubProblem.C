@@ -400,31 +400,6 @@ SubProblem::clearActiveElementalMooseVariables(THREAD_ID tid)
   _active_elemental_moose_variables[tid].clear();
 }
 
-void
-SubProblem::setActiveMaterialProperties(const std::set<unsigned int> & mat_prop_ids, THREAD_ID tid)
-{
-  if (!mat_prop_ids.empty())
-    _active_material_property_ids[tid] = mat_prop_ids;
-}
-
-const std::set<unsigned int> &
-SubProblem::getActiveMaterialProperties(THREAD_ID tid) const
-{
-  return _active_material_property_ids[tid];
-}
-
-bool
-SubProblem::hasActiveMaterialProperties(THREAD_ID tid) const
-{
-  return !_active_material_property_ids[tid].empty();
-}
-
-void
-SubProblem::clearActiveMaterialProperties(THREAD_ID tid)
-{
-  _active_material_property_ids[tid].clear();
-}
-
 std::set<SubdomainID>
 SubProblem::getMaterialPropertyBlocks(const std::string & prop_name)
 {
