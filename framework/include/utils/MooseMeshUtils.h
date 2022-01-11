@@ -54,4 +54,4 @@ std::vector<subdomain_id_type> getSubdomainIDs(const libMesh::MeshBase & mesh,
  * @return a Point data containing the mesh origin position
  */
 Point meshCentroidCalculator(const ReplicatedMesh & mesh);
-};
+}
