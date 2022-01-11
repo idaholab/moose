@@ -310,7 +310,7 @@ void TriangulatedMeshGenerator::_create_sorted_boundary_node_list(std::unique_pt
   std::vector<std::pair<dof_id_type, dof_id_type>> boundary_node_assm;
 
   // create edge node pairs for sides on the specified boundary
-  for (const auto entry : side_list) {
+  for (const auto & entry : side_list) {
     // select out tuple components
     dof_id_type element_id = std::get<0>(entry);
     unsigned short int side_id = std::get<1>(entry);
