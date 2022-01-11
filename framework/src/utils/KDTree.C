@@ -18,7 +18,7 @@ KDTree::KDTree(std::vector<Point> & master_points, unsigned int max_leaf_size)
     _kd_tree(std::make_unique<KdTreeT>(
         LIBMESH_DIM, _point_list_adaptor, nanoflann::KDTreeSingleIndexAdaptorParams(max_leaf_size)))
 {
-  mooseAssert(_kd_tree != nullptr, "KDTree was not properly initalized.");
+  mooseAssert(_kd_tree != nullptr, "KDTree was not properly initialized.");
 
   _kd_tree->buildIndex();
 }
