@@ -20,7 +20,6 @@ namespace StochasticTools
 class LibtorchSimpleNeuralNet : public LibtorchNeuralNetBase
 {
 public:
-
   // Generic constructor
   LibtorchSimpleNeuralNet() {}
 
