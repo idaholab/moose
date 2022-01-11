@@ -40,10 +40,19 @@ DGLowerDKernel::DGLowerDKernel(const InputParameters & parameters)
     _phi_lambda(_lowerd_var.phiLower()),
     _test_lambda(_lowerd_var.phiLower())
 {
-  if (!_lowerd_var.activeSubdomains().count(Moose::INTERNAL_SIDE_LOWERD_ID))
-    paramError("lowerd_variable",
-               "Must be defined on the subdomain INTERNAL_SIDE_LOWERD_SUBDOMAIN subdomain that is "
-               "added by Mesh/build_all_side_lowerd_mesh=true");
+  const auto & lower_domains = _lowerd_var.activeSubdomains();
+  if (!lower_domains.count(Moose::INTERNAL_SIDE_LOWERD_ID) && lower_domains.size() != 1)
+    paramError(
+        "lowerd_variable",
+        "Must be only defined on the subdomain INTERNAL_SIDE_LOWERD_SUBDOMAIN subdomain that is "
+        "added by Mesh/build_all_side_lowerd_mesh=true");
+
+  if (_var.activeSubdomains().count(Moose::INTERNAL_SIDE_LOWERD_ID))
+    paramError("variable",
+               "Must not be defined on the subdomain INTERNAL_SIDE_LOWERD_SUBDOMAIN subdomain");
+
+  // Note: the above two conditions also ensure that the variable and lower-d variable are
+  // different.
 }
 
 void
@@ -99,10 +108,6 @@ DGLowerDKernel::computeJacobian()
 
     // Compute the other five pieces of Jacobian related with lower-d variable
     computeLowerDJacobian(Moose::LowerLower);
-    computeLowerDJacobian(Moose::LowerSecondary);
-    computeLowerDJacobian(Moose::LowerPrimary);
-    computeLowerDJacobian(Moose::SecondaryLower);
-    computeLowerDJacobian(Moose::PrimaryLower);
   }
 }
 
@@ -152,17 +157,26 @@ DGLowerDKernel::computeOffDiagJacobian(const unsigned int jvar_num)
 {
   if (!excludeBoundary())
   {
-    // Lower dimensional variable is handled in computeJacobian
-    if (jvar_num == _lowerd_var.number())
-      return;
-
-    const auto & jvar = getVariable(jvar_num);
+    precalculateOffDiagJacobian(jvar_num);
 
     if (jvar_num == variable().number())
-      computeJacobian();
+    {
+      computeElemNeighJacobian(Moose::ElementElement);
+      computeElemNeighJacobian(Moose::ElementNeighbor);
+      computeElemNeighJacobian(Moose::NeighborElement);
+      computeElemNeighJacobian(Moose::NeighborNeighbor);
+      computeLowerDJacobian(Moose::LowerSecondary);
+      computeLowerDJacobian(Moose::LowerPrimary);
+    }
+    else if (jvar_num == _lowerd_var.number())
+    {
+      computeLowerDJacobian(Moose::LowerLower);
+      computeLowerDJacobian(Moose::SecondaryLower);
+      computeLowerDJacobian(Moose::PrimaryLower);
+    }
     else
     {
-      precalculateOffDiagJacobian(jvar_num);
+      const auto & jvar = getVariable(jvar_num);
 
       // Compute element-element Jacobian
       computeOffDiagElemNeighJacobian(Moose::ElementElement, jvar);
