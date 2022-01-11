@@ -35,7 +35,10 @@ template <typename ComputeValueType>
 void
 MortarNodalAuxKernelTempl<ComputeValueType>::compute()
 {
-  const auto & msm_elems = amg().associatedMortarSegments(*_current_node);
+  const auto & its = amg().secondariesToMortarSegments(*_current_node);
+  for (const auto it : its)
+    ;
+
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
     const auto qp_qoi = computeValue();

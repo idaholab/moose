@@ -35,7 +35,7 @@ public:
       const std::vector<std::shared_ptr<MortarConstraintBase>> & mortar_constraints,
       const AutomaticMortarGeneration & amg,
       SubProblem & subproblem,
-      FEProblemBase & _fe_problem,
+      FEProblemBase & fe_problem,
       bool displaced);
 
   /**
@@ -74,18 +74,4 @@ private:
 
   /// A reference to the assembly object
   Assembly & _assembly;
-
-  /// The mortar quadrature rule. Necessary for sizing the number of custom
-  /// points for re-init'ing the secondary interior, primary interior, and secondary face
-  /// elements
-  const libMesh::QBase * const & _qrule_msm;
-
-  /// The element Jacobian times weights
-  const std::vector<Real> & _JxW_msm;
-
-  /// The secondary boundary id needed for reiniting the MOOSE systems on the element (secondary) face
-  BoundaryID _secondary_boundary_id;
-
-  /// The primary boundary id needed for reiniting the MOOSE systems on the neighbor (primary) face
-  BoundaryID _primary_boundary_id;
 };
