@@ -1024,7 +1024,7 @@ PolygonMeshGeneratorBase::azimuthalAnglesCollector(ReplicatedMesh & mesh,
 
   if (calculate_origin)
   {
-    const Point origin_pt = meshCentroidCalculator(mesh);
+    const Point origin_pt = MooseMeshUtils::meshCentroidCalculator(mesh);
     origin_x = origin_pt(0);
     origin_y = origin_pt(1);
   }
@@ -1049,20 +1049,4 @@ PolygonMeshGeneratorBase::azimuthalAnglesCollector(ReplicatedMesh & mesh,
   std::sort(azimuthal_output.begin(), azimuthal_output.end());
 
   return azimuthal_output;
-}
-
-Point
-PolygonMeshGeneratorBase::meshCentroidCalculator(ReplicatedMesh & mesh) const
-{
-  Point origin_pt = Point(0.0, 0.0, 0.0);
-  Real vol_tmp = 0.0;
-  // Iterate through elements to calculate the center of mass of the mesh, which is used as the
-  // origin.
-  for (const auto & elem : as_range(mesh.elements_begin(), mesh.elements_end()))
-  {
-    origin_pt += (elem->true_centroid()) * (elem->volume());
-    vol_tmp += elem->volume();
-  }
-  origin_pt /= vol_tmp;
-  return origin_pt;
 }

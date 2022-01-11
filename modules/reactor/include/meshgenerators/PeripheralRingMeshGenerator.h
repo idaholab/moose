@@ -10,6 +10,7 @@
 #pragma once
 #include "PolygonMeshGeneratorBase.h"
 #include "MooseEnum.h"
+#include "MooseMeshUtils.h"
 #include "MeshMetaDataInterface.h"
 
 /**

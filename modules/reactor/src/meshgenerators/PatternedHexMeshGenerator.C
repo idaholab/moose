@@ -9,6 +9,7 @@
 
 #include "PatternedHexMeshGenerator.h"
 #include "MooseUtils.h"
+#include "MooseMeshUtils.h"
 
 // C++ includes
 #include <cmath> // provides round, not std::round (see http://www.cplusplus.com/reference/cmath/round/)
@@ -587,7 +588,7 @@ PatternedHexMeshGenerator::generate()
   std::vector<Real> bd_x_list;
   std::vector<Real> bd_y_list;
   std::vector<std::pair<Real, unsigned int>> node_azi_list;
-  const Point orign_pt = meshCentroidCalculator(*out_mesh);
+  const Point orign_pt = MooseMeshUtils::meshCentroidCalculator(*out_mesh);
   const Real origin_x = orign_pt(0);
   const Real origin_y = orign_pt(1);
 

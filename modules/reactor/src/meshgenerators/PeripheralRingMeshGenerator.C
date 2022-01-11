@@ -76,7 +76,7 @@ PeripheralRingMeshGenerator::generate()
       MooseMeshUtils::getBoundaryID(_input_mesh_external_boundary, *input_mesh);
 
   // Use CoM of the input mesh as its origin for azimuthal calculation
-  const Point origin_pt = meshCentroidCalculator(*input_mesh);
+  const Point origin_pt = MooseMeshUtils::meshCentroidCalculator(*input_mesh);
   const Real origin_x = origin_pt(0);
   const Real origin_y = origin_pt(1);
   // Vessel for containing maximum radius of the boundary nodes

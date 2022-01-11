@@ -11,6 +11,7 @@
 
 #include "libmesh/mesh_base.h"
 #include "libmesh/boundary_info.h"
+#include "libmesh/replicated_mesh.h"
 
 #include "MooseUtils.h"
 #include "MooseTypes.h"
@@ -46,4 +47,11 @@ SubdomainID getSubdomainID(const SubdomainName & subdomain_name, const MeshBase 
 
 std::vector<subdomain_id_type> getSubdomainIDs(const libMesh::MeshBase & mesh,
                                                const std::vector<SubdomainName> & subdomain_name);
-}
+
+/**
+ * Calculates the origin coordinates of a ReplicatedMesh.
+ * @param mesh input mesh whose origin needs to be calculated
+ * @return a Point data containing the mesh origin position
+ */
+Point meshCentroidCalculator(const ReplicatedMesh & mesh);
+};

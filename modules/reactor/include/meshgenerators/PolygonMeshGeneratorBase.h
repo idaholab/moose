@@ -12,6 +12,7 @@
 #include "MeshGenerator.h"
 #include "MooseEnum.h"
 #include "CastUniquePointer.h"
+#include "MooseMeshUtils.h"
 #include "libmesh/replicated_mesh.h"
 #include "libmesh/mesh_modification.h"
 #include "libmesh/face_quad4.h"
@@ -392,11 +393,4 @@ protected:
                                              const Real input_origin_x = 0.0,
                                              const Real input_origin_y = 0.0,
                                              const Real tol = 1.0E-10) const;
-
-  /**
-   * Calculates the origin coordinates of a ReplicatedMesh.
-   * @param mesh input mesh whose origin needs to be calculated
-   * @return a Point data containing the mesh origin position
-   */
-  Point meshCentroidCalculator(ReplicatedMesh & mesh) const;
 };

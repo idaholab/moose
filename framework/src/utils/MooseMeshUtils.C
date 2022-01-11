@@ -165,4 +165,21 @@ getSubdomainID(const SubdomainName & subdomain_name, const MeshBase & mesh)
 
   return id;
 }
+
+Point
+meshCentroidCalculator(const ReplicatedMesh & mesh)
+{
+  Point origin_pt = Point(0.0, 0.0, 0.0);
+  Real vol_tmp = 0.0;
+  // Iterate through elements to calculate the center of mass of the mesh, which is used as the
+  // origin.
+  for (const auto & elem : as_range(mesh.elements_begin(), mesh.elements_end()))
+  {
+    origin_pt += (elem->true_centroid()) * (elem->volume());
+    vol_tmp += elem->volume();
+  }
+  origin_pt /= vol_tmp;
+  return origin_pt;
+}
+
 }
