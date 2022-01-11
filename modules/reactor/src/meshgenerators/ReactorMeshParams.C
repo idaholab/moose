@@ -60,7 +60,6 @@ ReactorMeshParams::ReactorMeshParams(const InputParameters & parameters)
   if (_axial_regions.size() != _axial_mesh_intervals.size())
     mooseError("The number of axial regions is not consistant.");
 
-
   this->declareMeshProperty("mesh_dimensions", int(_dim));
   this->declareMeshProperty("mesh_geometry", std::string(_geom));
   this->declareMeshProperty("axial_boundaries", _axial_regions);

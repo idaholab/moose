@@ -211,7 +211,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
       {
         if (_id_map.find(pin->first) == _id_map.end())
           _id_map.insert(std::pair<subdomain_id_type, std::vector<std::vector<subdomain_id_type>>>(
-                         pin->first, pin->second));
+              pin->first, pin->second));
         else if (pin->second != _id_map.find(pin->first)->second)
           mooseError("Multiple region definitions for the same pin type. Check pin_type ids.\n");
       }
@@ -318,13 +318,13 @@ CoreMeshGenerator::generate()
       dof_id_type pt_id = elem->get_extra_integer(ptid_int);
       subdomain_id_type r_id = elem->subdomain_id();
 
-      //Going through the elements in the mesh checking the pin_type_ids to axial
-      //region ids
+      // Going through the elements in the mesh checking the pin_type_ids to axial
+      // region ids
       if (_id_map.find(pt_id) == _id_map.end())
       {
-        //element is in an assembly duct or background region since it doesn't have a pin type id
-        //that matches one in the map. What region it is in the periphery is then stored in the
-        //pt_id
+        // element is in an assembly duct or background region since it doesn't have a pin type id
+        // that matches one in the map. What region it is in the periphery is then stored in the
+        // pt_id
         dof_id_type at_id = elem->get_extra_integer(atid_int);
         unsigned int peripheral_index = (UINT16_MAX - 1) - pt_id;
         if (peripheral_index == 0)
@@ -336,8 +336,8 @@ CoreMeshGenerator::generate()
       }
       else
       {
-        //region is in a pin so grab the different axial region ids and swap them
-        //since during extrusion all regions are given the same ID as the 2D layer
+        // region is in a pin so grab the different axial region ids and swap them
+        // since during extrusion all regions are given the same ID as the 2D layer
         for (size_t i = 0; i < (_id_map.at(pt_id))[0].size(); ++i)
         {
           // swap subdomain region ids if they are different
@@ -369,14 +369,14 @@ CoreMeshGenerator::generate()
 
     if (subdomain_name_map.find(elem->subdomain_id()) == subdomain_name_map.end())
       subdomain_name_map.insert(std::pair<subdomain_id_type, std::string>(
-                                elem->subdomain_id(), std::to_string(elem->subdomain_id())));
+          elem->subdomain_id(), std::to_string(elem->subdomain_id())));
   }
 
   if (_geom_type == "Square")
   {
-    //the boundaries need to be directly assigned for cartesian cores
-    //since the CartesianIDPatternedMeshGenerator lacks the ability
-    //to assign them during construction.
+    // the boundaries need to be directly assigned for cartesian cores
+    // since the CartesianIDPatternedMeshGenerator lacks the ability
+    // to assign them during construction.
     MooseMesh::changeBoundaryId(*(_build_mesh->get()), 10001, 200, false);
     MooseMesh::changeBoundaryId(*(_build_mesh->get()), 10002, 200, false);
     MooseMesh::changeBoundaryId(*(_build_mesh->get()), 10003, 200, false);

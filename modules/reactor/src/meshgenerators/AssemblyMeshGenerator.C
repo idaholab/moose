@@ -31,7 +31,9 @@ AssemblyMeshGenerator::validParams()
       "pattern", "A double-indexed array starting with the upper-left corner");
 
   params.addRangeCheckedParam<std::vector<Real>>(
-      "duct_halfpitch", "duct_halfpitch>0.0", "Distance(s) from center to duct(s) inner boundaries.");
+      "duct_halfpitch",
+      "duct_halfpitch>0.0",
+      "Distance(s) from center to duct(s) inner boundaries.");
 
   params.addRangeCheckedParam<unsigned int>("background_intervals",
                                             "background_intervals>0",
@@ -70,7 +72,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
     _assembly_type(getParam<subdomain_id_type>("assembly_type")),
     _pattern(getParam<std::vector<std::vector<unsigned int>>>("pattern")),
     _duct_sizes(isParamValid("duct_halfpitch") ? getParam<std::vector<Real>>("duct_halfpitch")
-                                           : std::vector<Real>()),
+                                               : std::vector<Real>()),
     _background_intervals(
         isParamValid("background_intervals") ? getParam<unsigned int>("background_intervals") : 0),
     _duct_intervals(isParamValid("duct_intervals")
@@ -94,7 +96,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
   MeshGeneratorName _reactor_params =
       MeshGeneratorName(getMeshProperty<std::string>("reactor_params_name", _inputs[0]));
 
-  bool _procedural_ids =  getMeshProperty<bool>("procedural_ids", _reactor_params);
+  bool _procedural_ids = getMeshProperty<bool>("procedural_ids", _reactor_params);
 
   // Ensure that the user has supplied the correct info for conformal mesh generation
   if (!hasMeshProperty("mesh_dimensions", _reactor_params) ||
@@ -119,9 +121,8 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
       (_duct_sizes.size() != 0 || _duct_intervals.size() != 0 || _background_intervals != 0))
     mooseError("Ducts and background regions are not currently supported for square assemblies");
 
-  if ((_geom_type == "Hex") && ((_background_region_id.size() == 0 &&
-                                 !_procedural_ids) ||
-                                _background_intervals == 0))
+  if ((_geom_type == "Hex") &&
+      ((_background_region_id.size() == 0 && !_procedural_ids) || _background_intervals == 0))
     mooseError("Hexagonal assemblies must have a background region defined");
 
   if (_duct_sizes.size() != _duct_intervals.size())
@@ -146,8 +147,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
   // Procedural generation of region ids for background and duct regions
   // Unlike pin region IDs, these IDs aim to be 5 digits long unless the
   // assembly ID is too large.
-  if (_procedural_ids &&
-      (_duct_sizes.size() != 0 || _background_intervals != 0))
+  if (_procedural_ids && (_duct_sizes.size() != 0 || _background_intervals != 0))
   {
     int num_regions = _duct_sizes.size() + 1;
 
@@ -405,11 +405,12 @@ AssemblyMeshGenerator::generate()
       dof_id_type pt_id = elem->get_extra_integer(ptid_int);
       subdomain_id_type r_id = elem->subdomain_id();
 
-      //Going through the elements in the mesh checking pin_type_ids to assign their axial
-      //region ids
+      // Going through the elements in the mesh checking pin_type_ids to assign their axial
+      // region ids
       if (_id_map.find(pt_id) == _id_map.end())
       {
-        //region isn't in a pin so it must be a peripheral (background or duct) region of the assembly
+        // region isn't in a pin so it must be a peripheral (background or duct) region of the
+        // assembly
         unsigned int peripheral_index = (UINT16_MAX - 1) - r_id;
         if (peripheral_index == 0)
           // background region element
@@ -420,8 +421,8 @@ AssemblyMeshGenerator::generate()
       }
       else
       {
-        //region is in a pin so grab the different axial region ids and swap them
-        //since during extrusion all regions are given the same ID as the 2D layer
+        // region is in a pin so grab the different axial region ids and swap them
+        // since during extrusion all regions are given the same ID as the 2D layer
         for (size_t i = 0; i < (_id_map.at(pt_id))[0].size(); ++i)
         {
           // swap subdomain region ids if they are different
@@ -477,9 +478,9 @@ AssemblyMeshGenerator::generate()
   // Setting Boundary Info
   if (_geom_type == "Square")
   {
-    //the boundaries need to be directly assigned for cartesian cores
-    //since the CartesianIDPatternedMeshGenerator lacks the ability
-    //to assign them during construction.
+    // the boundaries need to be directly assigned for cartesian cores
+    // since the CartesianIDPatternedMeshGenerator lacks the ability
+    // to assign them during construction.
     MooseMesh::changeBoundaryId(*(_build_mesh->get()), 10001, _assembly_boundary_id, false);
     MooseMesh::changeBoundaryId(*(_build_mesh->get()), 10002, _assembly_boundary_id, false);
     MooseMesh::changeBoundaryId(*(_build_mesh->get()), 10003, _assembly_boundary_id, false);

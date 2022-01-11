@@ -44,7 +44,8 @@ PinMeshGenerator::validParams()
       "mesh_intervals",
       std::vector<unsigned int>{1},
       "mesh_intervals>0",
-      "The number of meshing intervals for each region starting at the center (length(ring_radii) + "
+      "The number of meshing intervals for each region starting at the center (length(ring_radii) "
+      "+ "
       "length(duct_halfpitch )+ 1)");
 
   params.addParam<std::vector<std::vector<subdomain_id_type>>>(
@@ -79,7 +80,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
     _ring_radii(isParamValid("ring_radii") ? getParam<std::vector<Real>>("ring_radii")
                                            : std::vector<Real>()),
     _duct_halfpitch(isParamValid("duct_halfpitch") ? getParam<std::vector<Real>>("duct_halfpitch")
-                                           : std::vector<Real>()),
+                                                   : std::vector<Real>()),
     _intervals(getParam<std::vector<unsigned int>>("mesh_intervals")),
     _region_ids(isParamValid("region_ids")
                     ? getParam<std::vector<std::vector<subdomain_id_type>>>("region_ids")
@@ -89,18 +90,18 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
 {
   // Ensure that the user has supplied the correct info for conformal mesh generation
 
-
   if (getMeshByName(_reactor_params) != nullptr)
     mooseError("The reactor_params mesh is not of the correct type");
   else
-      _procedural_ids = getMeshProperty<bool>("procedural_ids", _reactor_params);
+    _procedural_ids = getMeshProperty<bool>("procedural_ids", _reactor_params);
 
   if (!hasMeshProperty("mesh_dimensions", _reactor_params) ||
       !hasMeshProperty("mesh_geometry", _reactor_params))
     mooseError("The reactor_params input must be a ReactorMeshParams type MeshGenerator\n");
-  else{
-      _mesh_dimensions = getMeshProperty<int>("mesh_dimensions", _reactor_params);
-      _mesh_geometry = getMeshProperty<std::string>("mesh_geometry", _reactor_params);
+  else
+  {
+    _mesh_dimensions = getMeshProperty<int>("mesh_dimensions", _reactor_params);
+    _mesh_geometry = getMeshProperty<std::string>("mesh_geometry", _reactor_params);
   }
   if (_extrude && _mesh_dimensions != 3)
     mooseError("This is a 2 dimensional mesh, you cannot extrude it. Check your ReactorMeshParams "
@@ -111,29 +112,32 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
                "number of duct regions + 1"
                " for the region between the rings and ducts\n");
 
-
-  if (isParamValid("region_ids")){
+  if (isParamValid("region_ids"))
+  {
     if (_region_ids[0].size() != (_ring_radii.size() + _duct_halfpitch.size() + 1))
       mooseError("The number of region IDs given needs to be one more than the number of "
                  "ring_radii + the number of duct_radii\n");
   }
-  else if (!_procedural_ids){
+  else if (!_procedural_ids)
+  {
     mooseError("If procedural ID generation is not being used then region IDs must be assigned "
                "with parameter region_ids");
   }
-  else{
+  else
+  {
     // procedurally generate region ids, making centermost interval its own region
     // IDs are generated attempting to concatenate the pin type ID and the radial region
     // with the centermost being region 0. If the pin type ID is too large or there
     // are too many radial regions the concatenation will truncate the end of the pin type ID.
     // The region ID is limited by the subdomain_id_type which is uint16.
 
-
     int num_rings = _intervals.size();
-    if (_intervals[0] > 1){
+    if (_intervals[0] > 1)
+    {
       // To allow quad and tri center elements the innermost ring must be
       // a unique region
-      if (_ring_radii.size() > 0){
+      if (_ring_radii.size() > 0)
+      {
         _ring_radii.insert(_ring_radii.begin(), _ring_radii[0] / _intervals[0]);
         _intervals[0] = _intervals[0] - 1;
         _intervals.insert(_intervals.begin(), 1);
@@ -144,13 +148,15 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
       num_rings++;
     }
 
-    //checking to see if the concatenization of pin_type and ring number will fit in a unint16 (subdomain_id_type)
+    // checking to see if the concatenization of pin_type and ring number will fit in a unint16
+    // (subdomain_id_type)
     subdomain_id_type ident;
     int digits_r = floor(log10(num_rings)) + 1;
     int digits_id = floor(log10(_pin_type)) + 1;
-    if (_pin_type * pow(10, digits_r) + num_rings > UINT16_MAX - 1){
-      //too big to concatenate, check if truncated pin_type_id to 5 digits will fit.
-      //If not, truncating to 4 digits will always fit.
+    if (_pin_type * pow(10, digits_r) + num_rings > UINT16_MAX - 1)
+    {
+      // too big to concatenate, check if truncated pin_type_id to 5 digits will fit.
+      // If not, truncating to 4 digits will always fit.
       if (_pin_type * pow(10, 5 - digits_id) + num_rings > UINT16_MAX - 1)
         ident = _pin_type * pow(10, 4 - digits_id) -
                 int(_pin_type * pow(10, 4 - digits_id)) % int(digits_r);
@@ -162,32 +168,35 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
       ident = _pin_type * pow(10, digits_r);
 
     std::vector<subdomain_id_type> regions_0;
-    for (subdomain_id_type i = 0; i < num_rings; i++){
+    for (subdomain_id_type i = 0; i < num_rings; i++)
+    {
       if (!(_intervals[0] > 1 && i == 0))
         // for center background skip the first to assign in params
         regions_0.push_back(ident + i + 1);
     }
 
     _region_ids.push_back(regions_0);
-    if (_mesh_dimensions == 3){
+    if (_mesh_dimensions == 3)
+    {
       for (size_t i = 1;
            i < getMeshProperty<std::vector<Real>>("axial_boundaries", _reactor_params).size();
-           i++){
+           i++)
+      {
         _region_ids.push_back(regions_0);
       }
     }
   }
 
-
-  if (_mesh_geometry == "Square"){
+  if (_mesh_geometry == "Square")
+  {
     {
-      //Get and assign parameters for the main geometry feature of the Pin
-      //which is created with a PolygonConcentricCircleMeshGenerator subgenerator
+      // Get and assign parameters for the main geometry feature of the Pin
+      // which is created with a PolygonConcentricCircleMeshGenerator subgenerator
       auto params = _app.getFactory().getValidParams("PolygonConcentricCircleMeshGenerator");
 
       params.set<unsigned int>("num_sides") = 4; // Cartesian geometry so pin are given a square box
       params.set<std::vector<unsigned int>>("num_sectors_per_side") =
-                            std::vector<unsigned int>(4, _num_sectors);
+          std::vector<unsigned int>(4, _num_sectors);
       params.set<bool>("preserve_volumes") = true;
       params.set<bool>("quad_center_elements") = _quad_center;
 
@@ -199,16 +208,20 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
       std::vector<subdomain_id_type> background_ids;
       std::vector<unsigned int> duct_intervals;
       std::vector<subdomain_id_type> duct_ids;
-      for (size_t i = 0; i < _intervals.size(); i++){
-        if (i < _ring_radii.size()){
+      for (size_t i = 0; i < _intervals.size(); i++)
+      {
+        if (i < _ring_radii.size())
+        {
           ring_intervals.push_back(_intervals[i]);
           ring_ids.push_back(_region_ids[0][i]);
         }
-        else if (i > _ring_radii.size()){
+        else if (i > _ring_radii.size())
+        {
           duct_intervals.push_back(_intervals[i]);
           duct_ids.push_back(_region_ids[0][i]);
         }
-        else{
+        else
+        {
           background_intervals = _intervals[i];
           background_ids.push_back(_region_ids[0][i]);
         }
@@ -291,8 +304,8 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
       declareMeshProperty("max_radius_meta",
                           getMeshProperty<Real>("max_radius_meta", name() + "_circle"));
 
-    //Change boundary IDs so that there are unified boundaries for use in patterned MeshGenerator
-    //if this pin is to be used in an AssemblyMeshGenerator
+    // Change boundary IDs so that there are unified boundaries for use in patterned MeshGenerator
+    // if this pin is to be used in an AssemblyMeshGenerator
     {
       auto params = _app.getFactory().getValidParams("RenameBoundaryGenerator");
 
@@ -519,7 +532,7 @@ PinMeshGenerator::generate()
 
     if (subdomain_name_map.find(elem->subdomain_id()) == subdomain_name_map.end())
       subdomain_name_map.insert(std::pair<subdomain_id_type, std::string>(
-                                elem->subdomain_id(), std::to_string(elem->subdomain_id())));
+          elem->subdomain_id(), std::to_string(elem->subdomain_id())));
   }
 
   (*_build_mesh)->set_subdomain_name_map() = subdomain_name_map;
