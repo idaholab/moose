@@ -11,17 +11,18 @@
 
 #ifdef TORCH_ENABLED
 #include <torch/torch.h>
+#include "LibtorchSimpleNeuralNet.h"
 #endif
 
 #include "libmesh/utility.h"
 #include "SurrogateTrainer.h"
 
-class BasicNNTrainer : public SurrogateTrainer
+class LibtorchSimpleNNTrainer : public SurrogateTrainer
 {
 public:
   static InputParameters validParams();
 
-  BasicNNTrainer(const InputParameters & parameters);
+  LibtorchSimpleNNTrainer(const InputParameters & parameters);
 
   virtual void preTrain() override;
 
@@ -50,48 +51,12 @@ protected:
     torch::Tensor _response_tensor;
   };
 
-  // A structure that describes a simple feed-forward neural net.
-  struct MyNet : torch::nn::Module
-  {
-  public:
-    // Contructor building the neural net, not the coversions from float to double
-    // due to the default type in pytorch is float and we use double in MOOSE.
-    MyNet(unsigned int no_inputs,
-          unsigned int no_hidden_layers,
-          std::vector<unsigned int> no_neurons_per_layer,
-          unsigned int no_outputs)
-    {
-      unsigned int inp_layers = no_inputs;
-      for (unsigned int i = 0; i < no_hidden_layers; ++i)
-      {
-        _weights.push_back(register_module("HL" + std::to_string(i + 1),
-                                           torch::nn::Linear(inp_layers, no_neurons_per_layer[i])));
-        _weights[i]->to(at::kDouble);
-        inp_layers = no_neurons_per_layer[i];
-      }
-      _weights.push_back(register_module("OL", torch::nn::Linear(inp_layers, no_outputs)));
-      _weights.back()->to(at::kDouble);
-    }
-
-    // Overriding the forward substitution function
-    torch::Tensor forward(torch::Tensor x)
-    {
-      for (unsigned int i = 0; i < _weights.size() - 1; ++i)
-        x = torch::relu(_weights[i]->forward(x));
-
-      x = _weights[_weights.size() - 1]->forward(x);
-
-      return x.reshape({x.size(0)});
-    }
-
-  protected:
-    // Submodules that hold linear operations and the corresponding
-    // weights and biases (y = W * x + b)
-    std::vector<torch::nn::Linear> _weights;
-  };
 #endif
 
 private:
+  /// pointer to the neural net object (initialized as null)
+  std::shared_ptr<StochasticTools::LibtorchSimpleNeuralNet> _nn;
+
   /// Data from the current sampler row
   const std::vector<Real> & _sampler_row;
 

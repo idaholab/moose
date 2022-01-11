@@ -7,13 +7,13 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "BasicNNTrainer.h"
+#include "LibtorchSimpleNNTrainer.h"
 #include "Sampler.h"
 
-registerMooseObject("StochasticToolsApp", BasicNNTrainer);
+registerMooseObject("StochasticToolsApp", LibtorchSimpleNNTrainer);
 
 InputParameters
-BasicNNTrainer::validParams()
+LibtorchSimpleNNTrainer::validParams()
 {
   InputParameters params = SurrogateTrainer::validParams();
 
@@ -45,7 +45,7 @@ BasicNNTrainer::validParams()
   return params;
 }
 
-BasicNNTrainer::BasicNNTrainer(const InputParameters & parameters)
+LibtorchSimpleNNTrainer::LibtorchSimpleNNTrainer(const InputParameters & parameters)
   : SurrogateTrainer(parameters),
     _sampler_row(getSamplerData()),
     _sample_points(declareModelData<std::vector<std::vector<Real>>>("_sample_points")),
@@ -77,7 +77,7 @@ BasicNNTrainer::BasicNNTrainer(const InputParameters & parameters)
 }
 
 void
-BasicNNTrainer::preTrain()
+LibtorchSimpleNNTrainer::preTrain()
 {
   // Resize to number of sample points
   for (auto & it : _sample_points)
@@ -85,7 +85,7 @@ BasicNNTrainer::preTrain()
 }
 
 void
-BasicNNTrainer::train()
+LibtorchSimpleNNTrainer::train()
 {
   unsigned int d = 0;
   // Get predictors from reporter values
@@ -99,7 +99,7 @@ BasicNNTrainer::train()
 }
 
 void
-BasicNNTrainer::postTrain()
+LibtorchSimpleNNTrainer::postTrain()
 {
   for (auto & it : _sample_points)
     _communicator.allgather(it);
@@ -147,10 +147,21 @@ BasicNNTrainer::postTrain()
       std::move(my_data.map(torch::data::transforms::Stack<>())), sample_per_batch);
 
   // We create a neural net (for the definition of the net see the header file)
-  auto net = std::make_shared<MyNet>(n_rows, _no_hidden_layers, _no_neurons_per_layer, 1);
+  _nn = std::make_shared<StochasticTools::LibtorchSimpleNeuralNet>(
+      n_rows, _no_hidden_layers, _no_neurons_per_layer, 1);
 
   // Initialize the optimizer
-  torch::optim::Adam optimizer(net->parameters(), torch::optim::AdamOptions(_learning_rate));
+  torch::optim::Adam optimizer(_nn->parameters(), torch::optim::AdamOptions(_learning_rate));
+
+  try
+  {
+    torch::load(_nn, "net.pt");
+    _console << "Loaded requested .pt file." << std::endl;
+  }
+  catch (...)
+  {
+    _console << "The requested .pt file does not exist, training a new neural net." << std::endl;
+  }
 
   // Begin training loop
   for (size_t epoch = 1; epoch <= _no_epocs; ++epoch)
@@ -163,7 +174,7 @@ BasicNNTrainer::postTrain()
       optimizer.zero_grad();
 
       // Compute prediction
-      torch::Tensor prediction = net->forward(torch::transpose(batch.data, 1, 2));
+      torch::Tensor prediction = _nn->forward(torch::transpose(batch.data, 1, 2));
 
       // Compute loss values using a MSE ( mean squared error)
       torch::Tensor loss = torch::mse_loss(prediction, batch.target);
@@ -177,9 +188,13 @@ BasicNNTrainer::postTrain()
       epoch_error += loss.item<double>();
     }
 
+    epoch_error = epoch_error / _no_batches;
+
     if (epoch % 10 == 0)
       _console << "Epoch: " << epoch << " | Loss: " << COLOR_GREEN << epoch_error << COLOR_DEFAULT
                << std::endl;
   }
+
+  torch::save(_nn, "net.pt");
 #endif
 }

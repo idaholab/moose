@@ -22,10 +22,10 @@
 
 [Trainers]
   [train]
-    type = BasicNNTrainer
+    type = LibtorchSimpleNNTrainer
     sampler = sample
     response = values/g_values
-    no_epochs = 20000
+    no_epochs = 200
     no_batches = 40
     no_hidden_layers = 3
     no_neurons_per_layer = '48 24 12'
