@@ -68,6 +68,6 @@
     cli_args = 'Mesh/tmg/inner_boundary_id=-123
                 --mesh-only "abtr_tri_err.e"'
     expect_err = "Boundary id not found in input mesh."
-    requirement ="The system shall throw an error if inner_boundary_name is not defined on the input mesh."
+    requirement ="The system shall throw an error if inner_boundary_id is not defined on the input mesh."
   []
 []
