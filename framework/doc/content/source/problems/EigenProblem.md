@@ -95,6 +95,17 @@ in this system. There is a current list:
  of eigenvalue with respective to the eigenvector, this option is not efficient.
  Users should not use it in general.
 
+
+ In general, `EigenProblem` takes care of the following customizations of the solve:
+
+- normalization and scaling parameters for eigenvectors
+
+- setting the type of the SLEPc eigenvalue solver
+
+- whether to start solves with free power iterations and how many
+
+- selecting the eigenvector of interest for the residual
+
 !syntax parameters /Problem/EigenProblem
 
 !syntax inputs /Problem/EigenProblem
