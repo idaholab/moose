@@ -48,7 +48,8 @@ ComputeMortarFunctor::operator()()
   // Compile map of secondary to msm elements
   // All this could be computed in AutomaticMortarGeneration, will suffice for now but
   // in the future may want to move for optimization, especially on non-displaced meshes
-  std::map<const Elem *, std::vector<Elem *>> secondary_elems_to_mortar_segments;
+  std::unordered_map<const Elem *, std::vector<Elem *>> secondary_elems_to_mortar_segments;
+  typedef decltype(secondary_elems_to_mortar_segments.begin()) it_type;
 
   for (const auto msm_elem : _amg.mortarSegmentMesh().active_local_element_ptr_range())
   {
@@ -65,9 +66,14 @@ ComputeMortarFunctor::operator()()
 
     secondary_elems_to_mortar_segments[secondary_face_elem].push_back(msm_elem);
   }
+  std::vector<it_type> iterators;
+  iterators.reserve(secondary_elems_to_mortar_segments.size());
+  for (auto it = secondary_elems_to_mortar_segments.begin();
+       it != secondary_elems_to_mortar_segments.end();
+       ++it)
+    iterators.push_back(it);
 
-  auto act_functor = [this, &num_cached]()
-  {
+  auto act_functor = [this, &num_cached]() {
     ++num_cached;
     if (!_fe_problem.currentlyComputingJacobian())
     {
@@ -93,7 +99,7 @@ ComputeMortarFunctor::operator()()
     }
   };
 
-  Moose::Mortar::loopOverMortarSegments(secondary_elems_to_mortar_segments,
+  Moose::Mortar::loopOverMortarSegments(iterators,
                                         _assembly,
                                         _subproblem,
                                         _fe_problem,

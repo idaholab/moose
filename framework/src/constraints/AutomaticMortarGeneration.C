@@ -749,8 +749,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
 
     // Define expression for getting sub-elements nodes (for sub-dividing secondary elements)
     auto get_sub_elem_nodes = [](const ElemType type,
-                                 const unsigned int sub_elem) -> std::array<unsigned int, 4>
-    {
+                                 const unsigned int sub_elem) -> std::array<unsigned int, 4> {
       switch (type)
       {
         case TRI3:
@@ -1275,8 +1274,7 @@ AutomaticMortarGeneration::computeIncorrectEdgeDroppingInactiveLMNodes()
 
     // First push data
     auto action_functor = [this, &inactive_node_ids](const processor_id_type pid,
-                                                     const std::vector<dof_id_type> & sent_data)
-    {
+                                                     const std::vector<dof_id_type> & sent_data) {
       if (pid == _mesh.processor_id())
         mooseError("Should not be communicating with self.");
       for (const auto pr : sent_data)
@@ -1352,8 +1350,7 @@ AutomaticMortarGeneration::computeInactiveLMNodes()
 
     // First push data
     auto action_functor = [this, &active_local_nodes](const processor_id_type pid,
-                                                      const std::vector<dof_id_type> & sent_data)
-    {
+                                                      const std::vector<dof_id_type> & sent_data) {
       if (pid == _mesh.processor_id())
         mooseError("Should not be communicating with self.");
       active_local_nodes.insert(sent_data.begin(), sent_data.end());

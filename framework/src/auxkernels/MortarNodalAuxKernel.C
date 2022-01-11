@@ -9,6 +9,7 @@
 
 #include "MortarNodalAuxKernel.h"
 #include "MooseVariableField.h"
+#include "MortarUtils.h"
 
 #include "libmesh/quadrature.h"
 
@@ -25,7 +26,11 @@ MortarNodalAuxKernelTempl<ComputeValueType>::validParams()
 template <typename ComputeValueType>
 MortarNodalAuxKernelTempl<ComputeValueType>::MortarNodalAuxKernelTempl(
     const InputParameters & parameters)
-  : AuxKernelTempl<ComputeValueType>(parameters), MortarInterface(this)
+  : AuxKernelTempl<ComputeValueType>(parameters),
+    MortarInterface(this),
+    _displaced(this->template getParam<bool>("use_displaced_mesh")),
+    _fe_problem(*this->template getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
+    _msm_volume(0)
 {
   if (!isNodal())
     paramError("variable", "MortarNodalAuxKernel derivatives populate nodal aux variables only.");
@@ -35,17 +40,24 @@ template <typename ComputeValueType>
 void
 MortarNodalAuxKernelTempl<ComputeValueType>::compute()
 {
+  ComputeValueType value(0);
+  Real total_volume = 0;
+
   const auto & its = amg().secondariesToMortarSegments(*_current_node);
-  for (const auto it : its)
-    ;
+  std::array<MortarNodalAuxKernelTempl<ComputeValueType> *, 1> consumers = {{this}};
 
-  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-  {
-    const auto qp_qoi = computeValue();
-    // Now what do we do
-  }
+  auto act_functor = [&value, &total_volume, this]() {
+    _msm_volume = 0;
+    value += computeValue();
+    total_volume += _msm_volume;
+  };
 
-  _var.setNodalValue(value);
+  Moose::Mortar::loopOverMortarSegments(
+      its, _assembly, _subproblem, _fe_problem, amg(), _displaced, consumers, act_functor);
+
+  // We have to reinit the node for this variable in order to get the dof index set for the node
+  _var.reinitNode();
+  _var.setNodalValue(value / total_volume);
 }
 
 template <typename ComputeValueType>

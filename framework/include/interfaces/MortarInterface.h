@@ -19,6 +19,13 @@ class FEProblemBase;
 class MooseMesh;
 class MortarData;
 class AutomaticMortarGeneration;
+class SubProblem;
+class Assembly;
+
+namespace libMesh
+{
+class QBase;
+}
 
 /**
  * An interface for accessing mortar mesh data
@@ -50,12 +57,26 @@ protected:
    */
   const AutomaticMortarGeneration & amg() const;
 
-  FEProblemBase & _moi_problem;
+  /**
+   * Whether to interpolate the nodal normals (e.g. classic idea of evaluating field at quadrature
+   * points). If this is set to false, then non-interpolated nodal normals will be used, and then
+   * the _normals member should be indexed with _i instead of _qp
+   */
+  bool interpolateNormals() const { return _interpolate_normals; }
 
-  /// This mesh corresponds to the reference space mesh always, but
-  /// we are just querying it for ID information which should be
-  /// the exact same on reference and displaced meshes
+  /**
+   * Set the normals vector
+   */
+  void setNormals();
+
+  FEProblemBase & _moi_fe_problem;
+  SubProblem & _moi_subproblem;
+  const THREAD_ID _moi_tid;
+
+  /// Mesh to query for boundary and subdomain ID information
   MooseMesh & _moi_mesh;
+
+  Assembly & _moi_assembly;
 
   /// A reference to the mortar data object that holds all the mortar
   /// mesh information
@@ -78,6 +99,35 @@ protected:
 
   /// the higher dimensional subdomain ids corresponding to the interior parents
   std::set<SubdomainID> _higher_dim_subdomain_ids;
+
+  /// Whether to interpolate the nodal normals
+  const bool _interpolate_normals;
+
+  /// The locations of the quadrature points on the interior secondary elements
+  const MooseArray<Point> & _phys_points_secondary;
+
+  /// The locations of the quadrature points on the interior primary elements
+  const MooseArray<Point> & _phys_points_primary;
+
+  /// The quadrature rule on the mortar segment element
+  const libMesh::QBase * const & _qrule_msm;
+
+  /// The arbitrary quadrature rule on the lower dimensional secondary face
+  const libMesh::QBase * const & _qrule_face;
+
+  /// The secondary face lower dimensional element (not the mortar element!). The mortar element
+  /// lives on the secondary side of the mortar interface and *may* correspond to \p
+  /// _lower_secondary_elem under the very specific circumstance that the nodes on the primary side
+  /// of the mortar interface exactly project onto the secondary side of the mortar interface. In
+  /// general projection of primary nodes will split the face elements on the secondary side of the
+  /// interface. It is these split elements that are the mortar segment mesh elements
+  Elem const * const & _lower_secondary_elem;
+
+  /// The element Jacobian times weights
+  const std::vector<Real> & _JxW_msm;
+
+  /// the normals
+  std::vector<Point> _normals;
 
 private:
   // Pointer to automatic mortar generation object to give constraints access to mortar geometry

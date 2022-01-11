@@ -25,9 +25,9 @@ void projectQPoints3d(const Elem * msm_elem,
                       const QBase & qrule_msm,
                       std::vector<Point> & q_pts);
 
-template <typename Map, typename Consumers, typename ActionFunctor>
+template <typename Iterators, typename Consumers, typename ActionFunctor>
 void
-loopOverMortarSegments(const Map & secondary_elems_to_mortar_segments,
+loopOverMortarSegments(const Iterators & secondary_elems_to_mortar_segments,
                        Assembly & assembly,
                        SubProblem & subproblem,
                        FEProblemBase & fe_problem,
@@ -71,10 +71,10 @@ loopOverMortarSegments(const Map & secondary_elems_to_mortar_segments,
 
   // Loop through secondary elements, accumulating quadrature points for all corresponding mortar
   // segments
-  for (const auto & elem_to_msm : secondary_elems_to_mortar_segments)
+  for (const auto elem_to_msm : secondary_elems_to_mortar_segments)
   {
-    const Elem * secondary_face_elem = elem_to_msm.first;
-    const auto & msm_elems = elem_to_msm.second;
+    const Elem * secondary_face_elem = elem_to_msm->first;
+    const auto & msm_elems = elem_to_msm->second;
 
     // Need to be able to check if there's edge dropping, in 3D we can't just compare
 

@@ -1,0 +1,10 @@
+[Tests]
+  [gap]
+    type = Exodiff
+    input = gap.i
+    exodiff = gap_out.e
+    design = WeightedGapAux.md
+    issues = '#20001'
+    requirement = 'The system shall be able to compute the gap between secondary and primary bodies using the mortar method and auxiliary kernels.'
+  []
+[]
