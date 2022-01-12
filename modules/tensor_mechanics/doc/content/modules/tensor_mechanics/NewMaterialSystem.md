@@ -27,6 +27,16 @@ or [`ComputeLagrangianStressPK1`](ComputeLagrangianStressPK1.md) (or an associat
 stress update and associated algorithmic tangent.  The resulting model can be used with either kernel
 formulation.
 
+## Using existing MOOSE materials
+
+The kernels are compatible with "old style" MOOSE materials derived from [StressUpdateBase](Stresses.md) through use
+of the [ComputeLagrangianWrappedStress](ComputeLagrangianWrappedStress.md) wrapper.  The user can just define their material
+using the existing MOOSE material system and also supply the wrapper material object in the input file.  There are some limitations
+to this wrapper, discussed in more detailed in the [wrapper documentation](ComputeLagrangianWrappedStress.md).
+
+New materials could be derived from one of several base classes provided by the new material system, described here, to remove 
+these limitations.
+
 ## Strain Calculator
 
 It does not matter what kinematic quantities you use to define the stress update, so long as in the end the material 

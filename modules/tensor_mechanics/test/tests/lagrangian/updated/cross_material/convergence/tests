@@ -1,0 +1,69 @@
+[Tests]
+  issues = '#17472'
+  design = 'source/materials/lagrangian/ComputeLagrangianWrappedStress.md'
+  [./elastic_small_neither]
+    type = PetscJacobianTester
+    input = 'elastic.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = "GlobalParams/large_kinematics=false GlobalParams/stabilize_strain=false Kernels/sdx/use_displaced_mesh=false Kernels/sdy/use_displaced_mesh=false Kernels/sdz/use_displaced_mesh=false"
+    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for small displacements, without stabilization, and an elastic material'
+  [../]
+  [./elastic_large_neither]
+    type = PetscJacobianTester
+    input = 'elastic.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=false Kernels/sdx/use_displaced_mesh=true Kernels/sdy/use_displaced_mesh=true Kernels/sdz/use_displaced_mesh=true"
+    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, without stabilization, and an elastic material'
+  [../]
+  [./elastic_small_right]
+    type = PetscJacobianTester
+    input = 'elastic.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = "GlobalParams/large_kinematics=false GlobalParams/stabilize_strain=true Kernels/sdx/use_displaced_mesh=false Kernels/sdy/use_displaced_mesh=false Kernels/sdz/use_displaced_mesh=false"
+    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for small displacements, with stabilization, and an elastic material'
+  [../]
+  [./elastic_large_right]
+    type = PetscJacobianTester
+    input = 'elastic.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=true Kernels/sdx/use_displaced_mesh=true Kernels/sdy/use_displaced_mesh=true Kernels/sdz/use_displaced_mesh=true"
+    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, with stabilization, and an elastic material'
+  [../]
+
+  [./plastic_j2_small_neither]
+    type = PetscJacobianTester
+    input = 'plastic_j2.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = "GlobalParams/large_kinematics=false GlobalParams/stabilize_strain=false Kernels/sdx/use_displaced_mesh=false Kernels/sdy/use_displaced_mesh=false Kernels/sdz/use_displaced_mesh=false"
+    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for small displacements, without stabilization, and an plastic_j2 material'
+  [../]
+  [./plastic_j2_large_neither]
+    type = PetscJacobianTester
+    input = 'plastic_j2.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=false Kernels/sdx/use_displaced_mesh=true Kernels/sdy/use_displaced_mesh=true Kernels/sdz/use_displaced_mesh=true"
+    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, without stabilization, and an plastic_j2 material'
+  [../]
+  [./plastic_j2_small_right]
+    type = PetscJacobianTester
+    input = 'plastic_j2.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = "GlobalParams/large_kinematics=false GlobalParams/stabilize_strain=true Kernels/sdx/use_displaced_mesh=false Kernels/sdy/use_displaced_mesh=false Kernels/sdz/use_displaced_mesh=false"
+    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for small displacements, with stabilization, and an plastic_j2 material'
+  [../]
+  [./plastic_j2_large_right]
+    type = PetscJacobianTester
+    input = 'plastic_j2.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=true Kernels/sdx/use_displaced_mesh=true Kernels/sdy/use_displaced_mesh=true Kernels/sdz/use_displaced_mesh=true"
+    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, with stabilization, and an plastic_j2 material'
+  [../]
+[]

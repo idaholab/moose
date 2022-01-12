@@ -107,7 +107,7 @@ theories.  The user can switch between them by setting the
 the [strain calculator](materials/lagrangian/ComputeLagrangianStrain.md), the
 [homogenization system](/tensor_mechanics/Homogenization.md), and
 for many models, the [constiutive](tensor_mechanics/NewMaterialSystem.md) models for calculating the stress.
- As such, it is often convient to set it in the `GlobalParams` section
+ As such, it is often convenient to set it in the `GlobalParams` section
  of the input file so that you can easily switch between the two.
 
 ## The `use_displaced_mesh` Flag
@@ -134,7 +134,6 @@ all of Tensor Mechanics as well as the rest of MOOSE.
 However, right now the new kernels have some major limitations:
 
 - The new kernels only work for Cartesian coordinates, not cylindrical or spherical
-- The new material system is only partly integrated into the existing Tensor Mechanics constitutive models
 - The new kernels are not fully compatible with other MOOSE modules.  In  particular, modules expecting to couple to the `stress` material property, which represented the Cauchy stress in the old material system, should now couple to `cauchy_stress` or `pk1_stress` instead.
 
 We expect to resolve these limitations as users switch to the new kernels.

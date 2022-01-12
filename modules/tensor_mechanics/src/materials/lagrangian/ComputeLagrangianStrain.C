@@ -61,7 +61,8 @@ ComputeLagrangianStrain::ComputeLagrangianStrain(const InputParameters & paramet
     _detJ(declareProperty<Real>(_base_name + "detJ")),
     _homogenization_gradient_names(
         getParam<std::vector<MaterialPropertyName>>("homogenization_gradient_names")),
-    _homogenization_contributions(_homogenization_gradient_names.size())
+    _homogenization_contributions(_homogenization_gradient_names.size()),
+    _rotation_increment(declareProperty<RankTwoTensor>(_base_name + "rotation_increment"))
 {
   // Setup eigenstrains
   for (unsigned int i = 0; i < _eigenstrain_names.size(); i++)
@@ -165,6 +166,9 @@ ComputeLagrangianStrain::calculateIncrementalStrains(const RankTwoTensor & L)
 
   // Increment the mechanical strain
   _mechanical_strain[_qp] = _mechanical_strain_old[_qp] + _strain_increment[_qp];
+
+  // Faked rotation increment for ComputeStressBase materials
+  _rotation_increment[_qp] = RankTwoTensor::Identity();
 }
 
 void

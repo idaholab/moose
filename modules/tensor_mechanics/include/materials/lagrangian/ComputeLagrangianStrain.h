@@ -110,4 +110,7 @@ protected:
 
   /// Actual homogenization contributions
   std::vector<const MaterialProperty<RankTwoTensor> *> _homogenization_contributions;
+
+  /// Rotation increment for "old" materials inheriting from ComputeStressBase
+  MaterialProperty<RankTwoTensor> & _rotation_increment;
 };

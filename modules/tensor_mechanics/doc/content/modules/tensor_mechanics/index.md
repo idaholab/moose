@@ -108,10 +108,10 @@ on the [help/contact_us.md optional=True] page.
 The Tensor Mechanics module currently has two, partially interoperable 
 underlying systems:
 
-- The old system based on the [StressDivergenceTensors](/StressDivergenceTensors.md) kernels.
+- The current system based on the [StressDivergenceTensors](/StressDivergenceTensors.md) kernels.
 - A newer system based on the [TotalLagrangianStressDivergence](/TotalLagrangianStressDivergence.md) and [UpdatedLagrangianStressDivergence](/UpdatedLagrangianStressDivergence.md) kernels.
 
-The older system is fully compatible with the entirety of the Tensor Mechanics and MOOSE ecosystems.  However, it suffers from convergence issues caused by
+The current system is fully compatible with the entirety of the Tensor Mechanics and MOOSE ecosystems.  However, it suffers from convergence issues caused by
 non-exact Jacobians when not used with the Automatic Differentiation variants of the kernels and underlying materials.
 
 The newer system (referred to in the documentation as the *Lagrangian* kernels) has exact Jacobians, but is a work in progress.  Currently, it supports
@@ -122,9 +122,11 @@ The newer system (referred to in the documentation as the *Lagrangian* kernels) 
 - A [homogenization system](/tensor_mechanics/Homogenization.md) designed to enforce cell-average deformation or stress conditions over a periodic unit cell.
 - [Stabilization for linear elements](/tensor_mechanics/Stabilization.md) for use in incompressible or nearly-incompressible problems through a $\bar{\boldsymbol{F}}$ formulation.
 
+The newer kernels are compatible with the existing MOOSE materials via the [ComputeLagrangianWrappedStress](/ComputeLagrangianWrappedStress.md) object.  This object maps the output from the existing MOOSE material system into the format expected
+by the Lagrangian kernels.
+
 However, it does not currently support:
 
-- Full interoperability with the current Tensor Mechanics materials.
 - Cylindrical or spherical coordinates.
 - Full interoperability with the other MOOSE modules.
 
