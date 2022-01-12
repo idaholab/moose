@@ -40,6 +40,21 @@ dataStore(std::ostream & stream, std::string & v, void * /*context*/)
 
 template <>
 void
+dataStore(std::ostream & stream, unsigned int & v, void * /*context*/)
+{
+  stream.write((char *)&v, sizeof(v));
+}
+
+template <>
+void
+dataStore(std::ostream & stream, std::vector<unsigned int> & v, void * context)
+{
+  for (unsigned int ui : v)
+    dataStore(stream, ui, context);
+}
+
+template <>
+void
 dataStore(std::ostream & stream, bool & v, void * /*context*/)
 {
   stream.write((char *)&v, sizeof(v));
@@ -332,6 +347,21 @@ dataLoad(std::istream & stream, std::string & v, void * /*context*/)
 
   // Read the string
   stream.read(&v[0], sizeof(char) * size);
+}
+
+template <>
+void
+dataLoad(std::istream & stream, unsigned int & v, void * /*context*/)
+{
+  stream.read((char *)&v, sizeof(v));
+}
+
+template <>
+void
+dataLoad(std::istream & stream, std::vector<unsigned int> & v, void * context)
+{
+  for (unsigned int ui : v)
+    dataLoad(stream, ui, context);
 }
 
 template <>

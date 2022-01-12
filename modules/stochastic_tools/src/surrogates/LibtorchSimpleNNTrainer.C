@@ -40,6 +40,8 @@ LibtorchSimpleNNTrainer::validParams()
   params.addParam<unsigned int>("no_hidden_layers", 0, "Number of hidden layers.");
   params.addParam<std::vector<unsigned int>>(
       "no_neurons_per_layer", std::vector<unsigned int>(), "Number of neurons per layer.");
+  params.addParam<std::string>(
+      "filename", "net.pt", "Filename used to output the neural net parameters.");
   params.addParam<Real>("learning_rate", 0.001, "Learning rate (relaxation).");
 
   return params;
@@ -54,9 +56,11 @@ LibtorchSimpleNNTrainer::LibtorchSimpleNNTrainer(const InputParameters & paramet
     _response(getTrainingData<Real>(getParam<ReporterName>("response"))),
     _no_batches(getParam<unsigned int>("no_batches")),
     _no_epocs(getParam<unsigned int>("no_epochs")),
-    _no_hidden_layers(getParam<unsigned int>("no_hidden_layers")),
-    _no_neurons_per_layer(getParam<std::vector<unsigned int>>("no_neurons_per_layer")),
-    _learning_rate(getParam<Real>("learning_rate"))
+    _no_hidden_layers(declareModelData<unsigned int>("no_hidden_layers")),
+    _no_neurons_per_layer(declareModelData<std::vector<unsigned int>>("no_neurons_per_layer")),
+    _filename(getParam<std::string>("filename")),
+    _learning_rate(getParam<Real>("learning_rate")),
+    _nn(declareModelData<std::shared_ptr<StochasticTools::LibtorchSimpleNeuralNet>>("nn"))
 {
   const auto & pnames = getParam<std::vector<ReporterName>>("predictors");
   for (unsigned int i = 0; i < pnames.size(); ++i)
@@ -74,6 +78,10 @@ LibtorchSimpleNNTrainer::LibtorchSimpleNNTrainer(const InputParameters & paramet
 
   if (_no_hidden_layers != _no_neurons_per_layer.size())
     mooseError("The number of layers are not the same!");
+
+  _no_hidden_layers = getParam<unsigned int>("no_hidden_layers");
+  _no_neurons_per_layer = getParam<std::vector<unsigned int>>("no_neurons_per_layer");
+  _filename = getParam<std::string>("filename");
 }
 
 void
@@ -126,8 +134,8 @@ LibtorchSimpleNNTrainer::postTrain()
   }
 
   // Then, we create and load our Tensors
-  int n_rows = _sample_points.size() - 1;
-  int n_cols = _sample_points[0].size();
+  unsigned int n_rows = _sample_points.size() - 1;
+  unsigned int n_cols = _sample_points[0].size();
 
   // The default data type in pytorch is float, while we use double in MOOSE.
   // Therefore, in some cases we have to convert Tensors to double.
@@ -143,19 +151,20 @@ LibtorchSimpleNNTrainer::postTrain()
 
   // We initialize a data_loader for the training part.
   unsigned int sample_per_batch = n_cols > _no_batches ? n_cols / _no_batches : 1;
+  auto data_set = my_data.map(torch::data::transforms::Stack<>());
   auto data_loader = torch::data::make_data_loader<torch::data::samplers::SequentialSampler>(
-      std::move(my_data.map(torch::data::transforms::Stack<>())), sample_per_batch);
+      std::move(data_set), sample_per_batch);
 
   // We create a neural net (for the definition of the net see the header file)
   _nn = std::make_shared<StochasticTools::LibtorchSimpleNeuralNet>(
-      n_rows, _no_hidden_layers, _no_neurons_per_layer, 1);
+      _filename, n_rows, _no_hidden_layers, _no_neurons_per_layer, 1);
 
   // Initialize the optimizer
   torch::optim::Adam optimizer(_nn->parameters(), torch::optim::AdamOptions(_learning_rate));
 
   try
   {
-    torch::load(_nn, "net.pt");
+    torch::load(_nn, _filename);
     _console << "Loaded requested .pt file." << std::endl;
   }
   catch (...)
@@ -166,7 +175,6 @@ LibtorchSimpleNNTrainer::postTrain()
   // Begin training loop
   for (size_t epoch = 1; epoch <= _no_epocs; ++epoch)
   {
-    size_t batch_index = 0;
     Real epoch_error = 0.0;
     for (auto & batch : *data_loader)
     {
@@ -195,6 +203,62 @@ LibtorchSimpleNNTrainer::postTrain()
                << std::endl;
   }
 
-  torch::save(_nn, "net.pt");
+#endif
+}
+
+template <>
+void
+dataStore(std::ostream & stream,
+          std::shared_ptr<StochasticTools::LibtorchSimpleNeuralNet> & nn,
+          void * context)
+{
+#ifdef TORCH_ENABLED
+
+  std::string n(nn->name());
+  dataStore(stream, n, context);
+
+  unsigned int ni(nn->noInputs());
+  dataStore(stream, ni, context);
+
+  unsigned int nhl(nn->noHiddenLayers());
+  dataStore(stream, nhl, context);
+
+  std::vector<unsigned int> nnpl(nn->noNeuronsPerLayer());
+  dataStore(stream, nnpl, context);
+
+  unsigned int no(nn->noOutputs());
+  dataStore(stream, no, context);
+
+  torch::save(nn, nn->name());
+#endif
+}
+
+template <>
+void
+dataLoad(std::istream & stream,
+         std::shared_ptr<StochasticTools::LibtorchSimpleNeuralNet> & nn,
+         void * context)
+{
+#ifdef TORCH_ENABLED
+  std::string name;
+  dataLoad(stream, name, context);
+
+  unsigned int no_inputs;
+  dataLoad(stream, no_inputs, context);
+
+  unsigned int no_hidden_layers;
+  dataLoad(stream, no_hidden_layers, context);
+
+  std::vector<unsigned int> no_neurons_per_layer;
+  no_neurons_per_layer.resize(no_hidden_layers);
+  dataLoad(stream, no_neurons_per_layer, context);
+
+  unsigned int no_outputs;
+  dataLoad(stream, no_outputs, context);
+
+  nn = std::make_shared<StochasticTools::LibtorchSimpleNeuralNet>(
+      name, no_inputs, no_hidden_layers, no_neurons_per_layer, no_outputs);
+
+  torch::load(nn, name);
 #endif
 }

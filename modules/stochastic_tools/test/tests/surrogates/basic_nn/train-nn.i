@@ -4,9 +4,15 @@
 [Samplers]
   [sample]
     type = CartesianProduct
-    linear_space_items = '0 0.05 20
-                          0 0.05 20
-                          0 0.05 20'
+    linear_space_items = '0 0.0125 8
+                          0 0.0125 8
+                          0 0.0125 8'
+  []
+  [test]
+    type = CartesianProduct
+    linear_space_items = '0 0.05 2
+                          0 0.05 2
+                          0 0.05 2'
   []
 []
 
@@ -26,10 +32,28 @@
     sampler = sample
     response = values/g_values
     no_epochs = 200
-    no_batches = 40
+    no_batches = 32
     no_hidden_layers = 3
-    no_neurons_per_layer = '48 24 12'
-    learning_rate = 0.0002
+    no_neurons_per_layer = '128 64 32'
+    learning_rate = 0.00005
+    filename = mynet.pt
+  []
+[]
+
+[Surrogates]
+  [surr]
+    type = LibtorchSimpleNNSurrogate
+    trainer = train
+  []
+[]
+
+[Reporters]
+  [results]
+    type = EvaluateSurrogate
+    model = surr
+    sampler = test
+    execute_on = FINAL
+    parallel_type = ROOT
   []
 []
 

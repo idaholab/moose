@@ -29,8 +29,8 @@ public:
 
   // Virtual function which can be used to add a layer to a neural network.
   // The input will
-  virtual void addLayer(std::string layer_name,
-                        std::unordered_map<std::string, unsigned int> parameters)
+  virtual void addLayer(std::string /*layer_name*/,
+                        std::unordered_map<std::string, unsigned int> /*parameters*/)
   {
   }
 };

@@ -54,11 +54,6 @@ protected:
 #endif
 
 private:
-#ifdef TORCH_ENABLED
-  /// pointer to the neural net object (initialized as null)
-  std::shared_ptr<StochasticTools::LibtorchSimpleNeuralNet> _nn;
-#endif
-
   /// Data from the current sampler row
   const std::vector<Real> & _sampler_row;
 
@@ -81,12 +76,21 @@ private:
   unsigned int _no_epocs;
 
   /// Number of hidden layers in the neural net
-  unsigned int _no_hidden_layers;
+  unsigned int & _no_hidden_layers;
 
   /// Number of neurons within the hidden layers (the length of this vector
   /// should be the same as _no_hidden_layers)
-  std::vector<unsigned int> _no_neurons_per_layer;
+  std::vector<unsigned int> & _no_neurons_per_layer;
+
+  /// Name of the pytorch output file. This can be overridden, but there is
+  /// a default value in case the trainer and the surrogate are in the same run.
+  std::string _filename;
 
   /// The learning rate for the optimization algorithm
   Real _learning_rate;
+
+#ifdef TORCH_ENABLED
+  /// Pointer to the neural net object (initialized as null)
+  std::shared_ptr<StochasticTools::LibtorchSimpleNeuralNet> & _nn;
+#endif
 };

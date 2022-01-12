@@ -1,6 +1,6 @@
 # NearestPointTrainer
 
-!syntax description /Trainers/BasicNNTrainer
+!syntax description /Trainers/LibtorchSimpleNNTrainer
 
 ## Overview
 
@@ -8,8 +8,8 @@ Soon to come.
 
 ## Example Input File Syntax
 
-!syntax parameters /Trainers/BasicNNTrainer
+!syntax parameters /Trainers/LibtorchSimpleNNTrainer
 
-!syntax inputs /Trainers/BasicNNTrainer
+!syntax inputs /Trainers/LibtorchSimpleNNTrainer
 
-!syntax children /Trainers/BasicNNTrainer
+!syntax children /Trainers/LibtorchSimpleNNTrainer
