@@ -1,0 +1,8 @@
+[Tests]
+  [taonm_forwardOnly]
+    type = CSVDiff
+    rel_err = 1e-4
+    input = master.i
+    csvdiff = master_out_OptimizationReporter_0001.csv
+  []
+[]

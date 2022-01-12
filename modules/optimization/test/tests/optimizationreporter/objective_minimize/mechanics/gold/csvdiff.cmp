@@ -1,0 +1,11 @@
+lynn
+TIME STEPS relative 1 floor 0  # min: 0 @ t0  max: 0 @ t0
+
+GLOBAL VARIABLES relative 5.5e-06 floor 1e-11
+    fy_right                              # min: 2.000e+03 @ t0          max: 2.000e+03 @ t0
+    measurement_values                    # min: 8.090e-05 @ t0          max: 8.090e-05 @ t0
+    measurement_xcoord                    # min: 5.000e+00 @ t0          max: 5.000e+00 @ t0
+    measurement_ycoord                    # min: 1.000e+00 @ t0          max: 1.000e+00 @ t0
+    measurement_zcoord                    # min: 0.000e+00 @ t0          max: 0.000e+00 @ t0
+    misfit_values                         # min: 0.000e+00 @ t0          max: 0.000e+00 @ t0
+    simulation_values                     # min: 8.090e-05 @ t0          max: 8.090e-05 @ t0
