@@ -188,9 +188,9 @@ QuadSubChannelMeshGenerator::QuadSubChannelMeshGenerator(const InputParameters &
   }
 
   // Make channel to pin map
-  for (unsigned int iy = 0; iy < _ny; iy++)
+  for (unsigned int iy = 0; iy < _ny; iy++) // row
   {
-    for (unsigned int ix = 0; ix < _nx; ix++)
+    for (unsigned int ix = 0; ix < _nx; ix++) // column
     {
       unsigned int i_ch = _nx * iy + ix;
       // Corners contact 1/4 of one pin
