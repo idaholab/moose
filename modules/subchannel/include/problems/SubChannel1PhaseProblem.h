@@ -44,6 +44,8 @@ protected:
   virtual void computeRho(int iblock);
   /// Computes Viscosity per channel for block iblock
   virtual void computeMu(int iblock);
+  /// Computes added heat for channel i_ch and cell iz
+  virtual Real computeAddedHeat(unsigned int i_ch, unsigned int iz);
   /// Computes Residual per gap for block iblock
   virtual libMesh::DenseVector<Real> residualFunction(int iblock,
                                                       libMesh::DenseVector<Real> solution);
@@ -67,6 +69,8 @@ protected:
   unsigned int _block_size;
   unsigned int _nx;
   unsigned int _ny;
+  /// axial location of nodes
+  std::vector<Real> _z_grid;
   Real _one;
   /// Flag that activates or deactivates the transient parts of the equations we solve by multiplication
   Real _TR;
@@ -76,6 +80,8 @@ protected:
   const bool _compute_viscosity;
   /// Flag that informs if we need to solve the Enthalpy/Temperature equations or not
   const bool _compute_power;
+  /// Flag that informs if there is a pin mesh or not or not
+  const bool _pin_mesh_exist;
   /// Variable that informs whether we exited external solve with a converged solution or not
   bool _converged;
   /// Time step

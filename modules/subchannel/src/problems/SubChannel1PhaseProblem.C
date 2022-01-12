@@ -87,6 +87,7 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
     _compute_density(getParam<bool>("compute_density")),
     _compute_viscosity(getParam<bool>("compute_viscosity")),
     _compute_power(getParam<bool>("compute_power")),
+    _pin_mesh_exist(_subchannel_mesh.pinMeshExist()),
     _dt(isTransient() ? dt() : _one),
     _P_out(getParam<Real>("P_out")),
     _beta(getParam<Real>("beta")),
@@ -107,6 +108,7 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
   _n_channels = _subchannel_mesh.getNumOfChannels();
   _nx = _subchannel_mesh.getNx();
   _ny = _subchannel_mesh.getNy();
+  _z_grid = _subchannel_mesh.getZGrid();
   _block_size = _n_cells / _n_blocks;
   // Turbulent crossflow (stuff that live on the gaps)
   if (!_app.isRestarting() && !_app.isRecovering())
@@ -230,9 +232,7 @@ SubChannel1PhaseProblem::computeMdot(int iblock)
 
   for (unsigned int iz = first_node; iz < last_node + 1; iz++)
   {
-    auto z_grid = _subchannel_mesh.getZGrid();
-    auto dz = z_grid[iz] - z_grid[iz - 1];
-
+    auto dz = _z_grid[iz] - _z_grid[iz - 1];
     for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
     {
       auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
@@ -263,8 +263,7 @@ SubChannel1PhaseProblem::computeWijPrime(int iblock)
 
   for (unsigned int iz = first_node; iz < last_node + 1; iz++)
   {
-    auto z_grid = _subchannel_mesh.getZGrid();
-    auto dz = z_grid[iz] - z_grid[iz - 1];
+    auto dz = _z_grid[iz] - _z_grid[iz - 1];
     for (unsigned int i_gap = 0; i_gap < _n_gaps; i_gap++)
     {
       auto chans = _subchannel_mesh.getGapNeighborChannels(i_gap);
@@ -298,9 +297,8 @@ SubChannel1PhaseProblem::computeDP(int iblock)
 
   for (unsigned int iz = first_node; iz < last_node + 1; iz++)
   {
-    auto z_grid = _subchannel_mesh.getZGrid();
     auto k_grid = _subchannel_mesh.getKGrid();
-    auto dz = z_grid[iz] - z_grid[iz - 1];
+    auto dz = _z_grid[iz] - _z_grid[iz - 1];
     for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
     {
       auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
@@ -386,6 +384,31 @@ SubChannel1PhaseProblem::computeP(int iblock)
   }
 }
 
+Real
+SubChannel1PhaseProblem::computeAddedHeat(unsigned int i_ch, unsigned int iz)
+{
+  auto dz = _z_grid[iz] - _z_grid[iz - 1];
+  if (_pin_mesh_exist)
+  {
+    auto heat_rate_in = 0.0;
+    auto heat_rate_out = 0.0;
+    for (auto i_pin : _subchannel_mesh.getChannelPins(i_ch))
+    {
+      auto * node_in = _subchannel_mesh.getPinNode(i_pin, iz - 1);
+      auto * node_out = _subchannel_mesh.getPinNode(i_pin, iz);
+      heat_rate_out += 0.25 * (*_q_prime_soln)(node_out);
+      heat_rate_in += 0.25 * (*_q_prime_soln)(node_in);
+    }
+    return (heat_rate_in + heat_rate_out) * dz / 2.0;
+  }
+  else
+  {
+    auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
+    auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
+    return ((*_q_prime_soln)(node_out) + (*_q_prime_soln)(node_in)) * dz / 2.0;
+  }
+}
+
 void
 SubChannel1PhaseProblem::computeh(int iblock)
 {
@@ -403,8 +426,7 @@ SubChannel1PhaseProblem::computeh(int iblock)
 
   for (unsigned int iz = first_node; iz < last_node + 1; iz++)
   {
-    auto z_grid = _subchannel_mesh.getZGrid();
-    auto dz = z_grid[iz] - z_grid[iz - 1];
+    auto dz = _z_grid[iz] - _z_grid[iz - 1];
     auto heated_length = _subchannel_mesh.getHeatedLength();
     auto unheated_length_entry = _subchannel_mesh.getHeatedLengthEntry();
     for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
@@ -419,8 +441,9 @@ SubChannel1PhaseProblem::computeh(int iblock)
       double sumWijh = 0.0;
       double sumWijPrimeDhij = 0.0;
       double added_enthalpy;
-      if (z_grid[iz] > unheated_length_entry && z_grid[iz] <= unheated_length_entry + heated_length)
-        added_enthalpy = ((*_q_prime_soln)(node_out) + (*_q_prime_soln)(node_in)) * dz / 2.0;
+      if (_z_grid[iz] > unheated_length_entry &&
+          _z_grid[iz] <= unheated_length_entry + heated_length)
+        added_enthalpy = computeAddedHeat(i_ch, iz);
       else
         added_enthalpy = 0.0;
 
@@ -568,11 +591,10 @@ SubChannel1PhaseProblem::residualFunction(int iblock, libMesh::DenseVector<Real>
   computeP(iblock);
 
   // Cross flow residual
-  auto z_grid = _subchannel_mesh.getZGrid();
   const Real & pitch = _subchannel_mesh.getPitch();
   for (unsigned int iz = first_node; iz < last_node + 1; iz++)
   {
-    auto dz = z_grid[iz] - z_grid[iz - 1];
+    auto dz = _z_grid[iz] - _z_grid[iz - 1];
     for (unsigned int i_gap = 0; i_gap < _n_gaps; i_gap++)
     {
       auto chans = _subchannel_mesh.getGapNeighborChannels(i_gap);
@@ -788,10 +810,10 @@ SubChannel1PhaseProblem::externalSolve()
     power_in += (*_mdot_soln)(node_in) * (*_h_soln)(node_in);
     power_out += (*_mdot_soln)(node_out) * (*_h_soln)(node_out);
   }
-  bool pin_mesh_exist = _subchannel_mesh.pinMeshExist();
+
   _console << "Power added to coolant is: " << power_out - power_in << " Watt" << std::endl;
 
-  if (pin_mesh_exist)
+  if (_pin_mesh_exist)
   {
     _console << "Commencing calculation of Pin surface temperature \n";
     for (unsigned int i_pin = 0; i_pin < _n_pins; i_pin++)

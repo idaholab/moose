@@ -58,6 +58,11 @@ public:
    */
   unsigned int getSubchannelIndexFromPoint(const Point & p) const override;
 
+  /**
+   * Return the index of the pin for a given point
+   */
+  unsigned int getPinIndexFromPoint(const Point & p) const override;
+
   virtual EChannelType getSubchannelType(unsigned int index) const override
   {
     return _subch_type[index];
