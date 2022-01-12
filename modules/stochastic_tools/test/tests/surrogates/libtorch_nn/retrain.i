@@ -61,9 +61,4 @@
 [Outputs]
   csv=true
   execute_on = FINAL
-  [out]
-    type = SurrogateTrainerOutput
-    trainers = 'train'
-    execute_on = FINAL
-  []
 []

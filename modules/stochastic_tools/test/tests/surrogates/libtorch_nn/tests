@@ -21,7 +21,7 @@
   [evaluate]
     requirement = 'The system shall be able to evaluate a previously trained, libtorch-based neural network.'
     type = CSVDiff
-    input = train_and_evaluate.i
+    input = evaluate.i
     allow_test_objects = true
     csvdiff = 'evaluate_out_results_0002.csv'
     prereq = train
