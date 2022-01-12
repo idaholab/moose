@@ -19,12 +19,48 @@ namespace Moose
 {
 namespace Mortar
 {
+/**
+ * 3D projection operator for mapping qpoints on mortar segments to secondary or primary elements
+ * @param msm_elem The mortar segment element that we will be mapping quadrature points from
+ * @param primal_elem The "persistent" mesh element (e.g. it exists on the simulation's MooseMesh)
+ * that we will be mapping quadrature points for. This can be either an element on the secondary or
+ * primary face
+ * @param sub_elem_index We will call \p msm_elem->get_extra_integer(sub_elem_index) in the
+ * implementation in order to determine which sub-element of the primal element the mortar segment
+ * element corresponds to. This \p sub_elem_index should correspond to the secondary element index
+ * if \p primal_elem is a secondary face element and the primary element index if \p primal_elem is
+ * a primary face element
+ * @param qrule_msm The rule that governs quadrature on the mortar segment element
+ * @param q_pts The output of this function. This will correspond to the the (reference space)
+ * quadrature points that we wish to evaluate shape functions, etc., at on the primal element
+ */
 void projectQPoints3d(const Elem * msm_elem,
                       const Elem * primal_elem,
                       unsigned int sub_elem_index,
                       const QBase & qrule_msm,
                       std::vector<Point> & q_pts);
 
+/**
+ * This method will loop over pairs of secondary elements and their corresponding mortar segments,
+ * reinitialize all finite element shape functions, variables, and material properties, and then
+ * call a provided action function for each mortar segment
+ * @param secondary_elems_to_mortar_segments This is a container of iterators. Each iterator should
+ * point to a pair. The first member of the pair should be a pointer to a secondary face element and
+ * the second member of the pair should correspond to a container of mortar segment element pointers
+ * that correspond to the secondary face element.
+ * @param assembly The object we will to use to reinitalize finite element data
+ * @param subproblem The object we will use to reinitialize variables
+ * @param fe_problem The object we will use to reinitialize material properties
+ * @param amg The mortar mesh generation object which holds all the mortar mesh data
+ * @param displaced Whether the mortar mesh was built from a displaced parent mesh
+ * @param consumers A container of objects that are going to be using all the data that we are
+ * reinitializing within this function. This may be, for instance, a container of mortar constraints
+ * or auxiliary kernels. This \p consumers parameter is important as it allows us to build up
+ * variable and material property dependencies that we must make sure we reinit
+ * @param act The action functor that we will call for each mortar segment after we have
+ * reinitalized all of our prereq data. This functor may, for instance, call \p computeResidual or
+ * \p computeJacobian on mortar constraints, or \p computeValue for an auxiliary kernel
+ */
 template <typename Iterators, typename Consumers, typename ActionFunctor>
 void
 loopOverMortarSegments(const Iterators & secondary_elems_to_mortar_segments,

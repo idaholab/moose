@@ -39,7 +39,7 @@ projectQPoints3d(const Elem * const msm_elem,
   const auto sub_elem = msm_elem->get_extra_integer(sub_elem_index);
   const ElemType primal_type = primal_elem->type();
 
-  auto get_sub_elem_indices = [primal_type, sub_elem]() -> std::array<unsigned int, 4> {
+  auto get_sub_elem_node_indices = [primal_type, sub_elem]() -> std::array<unsigned int, 4> {
     switch (primal_type)
     {
       case TRI3:
@@ -125,8 +125,8 @@ projectQPoints3d(const Elem * const msm_elem,
     }
   };
 
-  // Get sub-elem node indexes
-  auto sub_elem_indices = get_sub_elem_indices();
+  // Get sub-elem node indices
+  auto sub_elem_node_indices = get_sub_elem_node_indices();
 
   // Loop through quadrature points on msm_elem
   for (auto qp : make_range(qrule_msm.n_points()))
@@ -156,7 +156,7 @@ projectQPoints3d(const Elem * const msm_elem,
       VectorValue<Dual2> x1;
       for (auto n : make_range(primal_elem->n_vertices()))
         x1 += Moose::fe_lagrange_2D_shape(primal_type, FIRST, n, xi) *
-              primal_elem->point(sub_elem_indices[n]);
+              primal_elem->point(sub_elem_node_indices[n]);
       auto u = x1 - x0;
       VectorValue<Dual2> F(u(1) * normal(2) - u(2) * normal(1),
                            u(2) * normal(0) - u(0) * normal(2),

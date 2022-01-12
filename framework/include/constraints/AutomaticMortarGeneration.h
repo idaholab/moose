@@ -304,8 +304,9 @@ public:
       std::unordered_map<const Elem *, std::unordered_set<Elem *>>::const_iterator;
 
   /**
-   * @return the lower dimensional secondary elements and their associated mortar segment elements
-   * that would have nonzero values for a Lagrange shape function associated with the provided node
+   * @return A vector of iterators that point to the lower dimensional secondary elements and their
+   * associated mortar segment elements that would have nonzero values for a Lagrange shape function
+   * associated with the provided node
    */
   std::vector<MortarFilterIter> secondariesToMortarSegments(const Node & node) const;
 
