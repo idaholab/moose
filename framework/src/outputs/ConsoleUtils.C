@@ -322,8 +322,7 @@ outputExecutionInformation(const MooseApp & app, FEProblemBase & problem)
   if (time_stepper != "")
     oss << std::setw(console_field_width) << "  TimeStepper: " << time_stepper << '\n';
 
-  oss << std::setw(console_field_width)
-      << "  Solver Mode: " << Moose::stringify(problem.solverParams()._type) << '\n';
+  oss << std::setw(console_field_width) << "  Solver Mode: " << problem.solverTypeString() << '\n';
 
   const std::string & pc_desc = problem.getPetscOptions().pc_description;
   if (!pc_desc.empty())

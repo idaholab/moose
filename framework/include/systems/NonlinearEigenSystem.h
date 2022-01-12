@@ -82,6 +82,11 @@ public:
    */
   virtual SNES getSNES() override;
 
+  /**
+   * Retrieve EPS (SLEPc eigen solver)
+   */
+  virtual EPS getEPS();
+
   EigenSystem & sys() { return _eigen_sys; }
 
   /**
