@@ -79,9 +79,9 @@ in this system. There is a current list:
 
 - `PJFNKMO`- Matrix-only Preconditioned Jacobian-free Newton Krylov: Mathematically,
  this option is the same as PJFNK. The difference is the residual evaluation.
- PJFNK does `real` residual evaluations, including all finite element calculations.
+ PJFNK calls the user residual/function evaluation routine, which includes all finite element calculations.
  PJFNKMO forms residual vectors via  matrix-vector multiplications: $A (x) = Ax$
- and $B(x) = Bx$. This is useful when matrixes are constant. This option will be
+ and $B(x) = Bx$. This is useful when matrices are constant. This option will be
  more efficient. If the matrices are not constant, please do not use this option;
  otherwise, simulation results will be wrong.
 
