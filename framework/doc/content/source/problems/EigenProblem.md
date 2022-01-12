@@ -43,10 +43,10 @@ In a multiphysics environment, physics are often nonlinear. For instance,
 \begin{equation}
 A(x) = \lambda B(x),
 \end{equation}
-where $A(\cdot)$ and $B$ are nonlinear functions. In the EigenProblem
+where $A(\cdot)$ and $B(\cdot)$ are nonlinear functions. In the EigenProblem
 system, the kernels of $A(\cdot)$ are referred to as "noneigen,"
 and the kernels of $B(\cdot)$ are referred to as "eigen."
-To utilize Newton to solve this problem, we define $\lambda = \frac{1}{|B(x)|}$,
+To utilize Newton method to solve this problem, we define $\lambda = \frac{1}{|B(x)|}$,
 and rewrite the nonlinear eigen problem as
 \begin{equation}
 0=F(x) = A(x) - \lambda B(x).
@@ -54,7 +54,7 @@ and rewrite the nonlinear eigen problem as
 Newton can be applied to solve this problem. The only issue is that
 the derivatives of $\lambda$ with respective to $x$ can be dense.
 We use the Jacobian-free Newton method to overcome this difficulty,
-where the action of the Jacobian is approximated via finite differences.
+where the action of Jacobian on a solution vector is approximated via finite differences.
 To handle various use cases, variants of Newton are provided
 in this system. There is a current list:
 
@@ -70,7 +70,7 @@ in this system. There is a current list:
 
 - `JFNK` - Jacobian-free Newton Krylov:  Users are responsible for
   providing a preconditioner. This allows users to build a customized
-  preconditioner, such as a sweeper,
+  preconditioner, such as using a sweeper in radiation transport,
   that might be more efficient for their underlying problems.
 
 !listing test/tests/problems/eigen_problem/preconditioners/ne_pbp.i
@@ -82,8 +82,12 @@ in this system. There is a current list:
  PJFNK calls the user residual/function evaluation routine, which includes all finite element calculations.
  PJFNKMO forms residual vectors via  matrix-vector multiplications: $A (x) = Ax$
  and $B(x) = Bx$. This is useful when matrices are constant. This option will be
- more efficient. If the matrices are not constant, please do not use this option;
- otherwise, simulation results will be wrong.
+ more efficient. If the problem is nonlinear, i.e. the matrices are not constant,
+ you should not use this solve option because we do not attempt to re-evaluate $A$
+ and $B$ at each Newton iteration. This solve option is valid with Picard iterations
+ when the matrices are constant at each Picard iteration with conditions only changing
+ with Picard iterations. We do re-evaluate the two matrices at the beginning of each
+ Picard iteration.
 
 !listing test/tests/problems/eigen_problem/jfnk_mo/ne_array_mo.i
            block=Executioner
