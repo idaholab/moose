@@ -37,7 +37,7 @@ QuadPowerIC::QuadPowerIC(const InputParameters & params)
 
   _power_dis.resize((ny - 1) * (nx - 1), 1);
   _power_dis.setZero();
-  _pin_power_correction.resize(ny - 1, nx - 1);
+  _pin_power_correction.resize((ny - 1) * (nx - 1), 1);
   _pin_power_correction.setOnes();
   double vin;
   ifstream inFile;
@@ -64,8 +64,6 @@ QuadPowerIC::QuadPowerIC(const InputParameters & params)
     i++;
   }
   inFile.close();
-
-  _power_dis.resize(ny - 1, nx - 1);
   _console << " Power distribution matrix :\n" << _power_dis << " \n";
   auto sum = _power_dis.sum();
   // full (100%) power of one pin [W]
@@ -86,7 +84,7 @@ QuadPowerIC::initialSetup()
   auto heated_length = _mesh.getHeatedLength();
   auto unheated_length_entry = _mesh.getHeatedLengthEntry();
 
-  _estimate_power.resize(ny - 1, nx - 1);
+  _estimate_power.resize((ny - 1) * (nx - 1), 1);
   _estimate_power.setZero();
   for (unsigned int iz = 1; iz < nz + 1; iz++)
   {
@@ -102,14 +100,10 @@ QuadPowerIC::initialSetup()
     {
       for (unsigned int i_pin = 0; i_pin < (ny - 1) * (nx - 1); i_pin++)
       {
-        // row
-        unsigned int j = (i_pin / (nx - 1));
-        // column
-        unsigned int i = i_pin - j * (nx - 1);
         // use of trapezoidal rule to add to total power of pin
-        _estimate_power(j, i) += _ref_qprime(j, i) *
-                                 (_axial_heat_rate.value(_t, p1) + _axial_heat_rate.value(_t, p2)) *
-                                 dz / 2.0;
+        _estimate_power(i_pin) +=
+            _ref_qprime(i_pin) * (_axial_heat_rate.value(_t, p1) + _axial_heat_rate.value(_t, p2)) *
+            dz / 2.0;
       }
     }
   }
@@ -119,12 +113,8 @@ QuadPowerIC::initialSetup()
   // _ref_qprime(j, i) = 0.0
   for (unsigned int i_pin = 0; i_pin < (ny - 1) * (nx - 1); i_pin++)
   {
-    // row
-    unsigned int j = (i_pin / (nx - 1));
-    // column
-    unsigned int i = i_pin - j * (nx - 1);
-    if (_estimate_power(j, i) == 0.0)
-      _estimate_power(j, i) = 1.0;
+    if (_estimate_power(i_pin) == 0.0)
+      _estimate_power(i_pin) = 1.0;
   }
   _pin_power_correction = _ref_power.cwiseQuotient(_estimate_power);
 }
@@ -132,11 +122,7 @@ QuadPowerIC::initialSetup()
 Real
 QuadPowerIC::value(const Point & p)
 {
-  auto nx = _mesh.getNx();
-  auto ny = _mesh.getNy();
   auto idx = _mesh.getSubchannelIndexFromPoint(p);
-  unsigned int i = idx % nx; // column
-  unsigned int j = idx / nx; // row
   auto heated_length = _mesh.getHeatedLength();
   auto unheated_length_entry = _mesh.getHeatedLengthEntry();
   Point p1(0, 0, unheated_length_entry);
@@ -144,48 +130,13 @@ QuadPowerIC::value(const Point & p)
   // if we are adjacent to the heated part of the fuel rod
   if (p(2) >= unheated_length_entry && p(2) <= unheated_length_entry + heated_length)
   {
-    // Compute and return the corrected axial heat rate deposited in channel at point p
-    // Corners contact 1/4 of one pin
-    if (i == 0 && j == 0)
-      return 0.25 * _ref_qprime(j, i) * _pin_power_correction(j, i) * _axial_heat_rate.value(_t, P);
-    else if (i == 0 && j == ny - 1)
-      return 0.25 * _ref_qprime(j - 1, i) * _pin_power_correction(j - 1, i) *
-             _axial_heat_rate.value(_t, P);
-    else if (i == nx - 1 && j == 0)
-      return 0.25 * _ref_qprime(j, i - 1) * _pin_power_correction(j, i - 1) *
-             _axial_heat_rate.value(_t, P);
-    else if (i == nx - 1 && j == ny - 1)
-      return 0.25 * _ref_qprime(j - 1, i - 1) * _pin_power_correction(j - 1, i - 1) *
-             _axial_heat_rate.value(_t, P);
-    // Sides contact 1/4 of two pins
-    else if (i == 0)
-      return 0.25 *
-             (_ref_qprime(j - 1, i) * _pin_power_correction(j - 1, i) +
-              _ref_qprime(j, i) * _pin_power_correction(j, i)) *
-             _axial_heat_rate.value(_t, P);
-    else if (i == nx - 1)
-      return 0.25 *
-             (_ref_qprime(j - 1, i - 1) * _pin_power_correction(j - 1, i - 1) +
-              _ref_qprime(j, i - 1) * _pin_power_correction(j, i - 1)) *
-             _axial_heat_rate.value(_t, P);
-    else if (j == 0)
-      return 0.25 *
-             (_ref_qprime(j, i - 1) * _pin_power_correction(j, i - 1) +
-              _ref_qprime(j, i) * _pin_power_correction(j, i)) *
-             _axial_heat_rate.value(_t, P);
-    else if (j == ny - 1)
-      return 0.25 *
-             (_ref_qprime(j - 1, i - 1) * _pin_power_correction(j - 1, i - 1) +
-              _ref_qprime(j - 1, i) * _pin_power_correction(j - 1, i)) *
-             _axial_heat_rate.value(_t, P);
-    // interior contacts 1/4 of 4 pins
-    else
-      return 0.25 *
-             (_ref_qprime(j - 1, i - 1) * _pin_power_correction(j - 1, i - 1) +
-              _ref_qprime(j, i - 1) * _pin_power_correction(j, i - 1) +
-              _ref_qprime(j - 1, i) * _pin_power_correction(j - 1, i) +
-              _ref_qprime(j, i) * _pin_power_correction(j, i)) *
-             _axial_heat_rate.value(_t, P);
+    auto heat_rate = 0.0;
+    for (auto i_pin : _mesh.getChannelPins(idx))
+    {
+      heat_rate +=
+          0.25 * _ref_qprime(i_pin) * _pin_power_correction(i_pin) * _axial_heat_rate.value(_t, P);
+    }
+    return heat_rate;
   }
   else
     return 0.0;
