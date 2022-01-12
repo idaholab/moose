@@ -33,7 +33,11 @@ LibtorchSimpleNNSurrogate::LibtorchSimpleNNSurrogate(const InputParameters & par
 }
 
 Real
-LibtorchSimpleNNSurrogate::evaluate(const std::vector<Real> & x) const
+LibtorchSimpleNNSurrogate::evaluate(const std::vector<Real> &
+#ifdef TORCH_ENABLED
+                                        x
+#endif
+) const
 {
   Real val(0.0);
 

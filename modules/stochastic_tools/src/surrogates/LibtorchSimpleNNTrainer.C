@@ -63,8 +63,11 @@ LibtorchSimpleNNTrainer::LibtorchSimpleNNTrainer(const InputParameters & paramet
     _no_neurons_per_layer(declareModelData<std::vector<unsigned int>>("no_neurons_per_layer")),
     _filename(getParam<std::string>("filename")),
     _read_from_file(getParam<bool>("read_from_file")),
-    _learning_rate(getParam<Real>("learning_rate")),
+    _learning_rate(getParam<Real>("learning_rate"))
+#ifdef TORCH_ENABLED
+    ,
     _nn(declareModelData<std::shared_ptr<StochasticTools::LibtorchSimpleNeuralNet>>("nn"))
+#endif
 {
   const auto & pnames = getParam<std::vector<ReporterName>>("predictors");
   for (unsigned int i = 0; i < pnames.size(); ++i)
