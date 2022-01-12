@@ -95,10 +95,11 @@ QuadSubChannelMeshGenerator::QuadSubChannelMeshGenerator(const InputParameters &
   for (unsigned int index = 0; index < spacer_cell.size(); index++)
     _k_grid[spacer_cell[index]] += _spacer_k[index];
 
-  // Resize the gap-to-channel and channel-to-gap maps.
+  // Resize the maps.
   _gap_to_chan_map.resize(_n_gaps);
   _gapnodes.resize(_n_gaps);
   _chan_to_gap_map.resize(_n_channels);
+  _chan_to_pin_map.resize(_n_channels);
   _pin_to_chan_map.resize(_n_pins);
   _sign_id_crossflow_map.resize(_n_channels);
   _gij_map.resize(_n_gaps);
@@ -186,9 +187,68 @@ QuadSubChannelMeshGenerator::QuadSubChannelMeshGenerator(const InputParameters &
     }
   }
 
+  // Make channel to pin map
+  for (unsigned int iy = 0; iy < _ny; iy++)
+  {
+    for (unsigned int ix = 0; ix < _nx; ix++)
+    {
+      unsigned int i_ch = _nx * iy + ix;
+      // Corners contact 1/4 of one pin
+      if (iy == 0 && ix == 0)
+      {
+        _chan_to_pin_map[i_ch].push_back((_nx - 1) * iy + ix);
+      }
+      else if (iy == _ny - 1 && ix == 0)
+      {
+        _chan_to_pin_map[i_ch].push_back((_nx - 1) * (iy - 1) + ix);
+      }
+      else if (iy == 0 && ix == _nx - 1)
+      {
+        _chan_to_pin_map[i_ch].push_back((_nx - 1) * iy + ix - 1);
+      }
+      else if (iy == _ny - 1 && ix == _nx - 1)
+      {
+        _chan_to_pin_map[i_ch].push_back((_nx - 1) * (iy - 1) + ix - 1);
+      }
+      // Sides contact 1/4 of two pins
+      else if (iy == 0)
+      {
+        _chan_to_pin_map[i_ch].push_back((_nx - 1) * iy + ix);
+        _chan_to_pin_map[i_ch].push_back((_nx - 1) * iy + ix - 1);
+      }
+      else if (iy == _ny - 1)
+      {
+        _chan_to_pin_map[i_ch].push_back((_nx - 1) * (iy - 1) + ix);
+        _chan_to_pin_map[i_ch].push_back((_nx - 1) * (iy - 1) + ix - 1);
+      }
+      else if (ix == 0)
+      {
+        _chan_to_pin_map[i_ch].push_back((_nx - 1) * iy + ix);
+        _chan_to_pin_map[i_ch].push_back((_nx - 1) * (iy - 1) + ix);
+      }
+      else if (ix == _nx - 1)
+      {
+        _chan_to_pin_map[i_ch].push_back((_nx - 1) * iy + ix - 1);
+        _chan_to_pin_map[i_ch].push_back((_nx - 1) * (iy - 1) + ix - 1);
+      }
+      // interior contacts 1/4 of 4 pins
+      else
+      {
+        _chan_to_pin_map[i_ch].push_back((_nx - 1) * iy + ix);
+        _chan_to_pin_map[i_ch].push_back((_nx - 1) * iy + ix - 1);
+        _chan_to_pin_map[i_ch].push_back((_nx - 1) * (iy - 1) + ix);
+        _chan_to_pin_map[i_ch].push_back((_nx - 1) * (iy - 1) + ix - 1);
+      }
+    }
+  }
+
   // Reduce reserved memory in the channel-to-gap map.
   for (auto & gap : _chan_to_gap_map)
     gap.shrink_to_fit();
+
+  // Reduce reserved memory in the channel-to-pin map.
+  for (auto & pin : _chan_to_pin_map)
+    pin.shrink_to_fit();
 
   // Reduce reserved memory in the pin-to-channel map.
   for (auto & pin : _pin_to_chan_map)
@@ -283,6 +343,7 @@ QuadSubChannelMeshGenerator::generate()
   sch_mesh->_gapnodes = _gapnodes;
   sch_mesh->_gap_to_chan_map = _gap_to_chan_map;
   sch_mesh->_chan_to_gap_map = _chan_to_gap_map;
+  sch_mesh->_chan_to_pin_map = _chan_to_pin_map;
   sch_mesh->_pin_to_chan_map = _pin_to_chan_map;
   sch_mesh->_sign_id_crossflow_map = _sign_id_crossflow_map;
   sch_mesh->_gij_map = _gij_map;
