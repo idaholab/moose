@@ -4,7 +4,7 @@
 
 The homogenization system is a means to impose cell-average
 stress or strain conditions on periodic unit cell models
-using the [new, Lagrangian kernels](NewBackground.md) and
+using the [new, Lagrangian kernels](LagrangianKernelTheory.md) and
 specifically the [total Lagrangian](kernels/lagrangian/TotalLagrangianStressDivergence.md)
 formulation.
 These types of constraints are very useful for homogenization
@@ -39,7 +39,7 @@ For large deformations the system imposes the constraints
 on the 1st Piola-Kirchhoff stress or the displacement gradient.
 For small deformations the system constrains the small stress or the
 small strain.
-As with the underlying [kernels](NewBackground.md), the
+As with the underlying [kernels](LagrangianKernelTheory.md), the
 system uses the `large_kinematics` flag to switch between small and
 large deformation theory.
 Components can be mixed and matched -- the system can impose deformation

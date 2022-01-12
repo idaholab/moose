@@ -52,7 +52,7 @@ Notionally, in MOOSE the $\bar{F}$ only alters the material model, though in fac
 definition of the Jacobian (but not the residual) in the [Kernel](Kernel.md).
 
 $\bar{B}$ makes this modification to the strain but then also modifies the definition of
-the residual, replacing the [original](NewBackground.md) small deformation stress equilibrium weak form
+the residual, replacing the [original](LagrangianKernelTheory.md) small deformation stress equilibrium weak form
 \begin{equation}
       R^{\alpha}=\int_{v}s_{ij}\phi_{i,j}^{\alpha}dv
 \end{equation}
@@ -101,7 +101,7 @@ For large displacements the strain calculator modifies the deformation gradient 
       F_{iJ}^{\prime}=\left(\frac{\det\bar{F}}{\det F}\right)^{1/3}F_{iJ}.
 \end{equation}
 
-From here the stress update proceeds the same as with stabilization off, expect the stress is now based on the modified
+From here the stress update proceeds the same as with stabilization off, except the stress is now based on the modified
 strain value.
 The $\bar{F}$ approach does not alter the weak form residual in the kernel.  However, this change in the definition 
 of the strain does affect the Jacobian calculated in the

@@ -5,7 +5,7 @@
 ## Overview
 
 The `ComputeLagrangianStrain` class calculates the basic kinematic quantities used by 
-the [new mechanics kernels](NewBackground.md) mechanics kernels.  
+the [new mechanics kernels](LagrangianKernelTheory.md) mechanics kernels.  
 [The theory](NewMaterialSystem.md) section on the new material system describes this
 class's role in greater detail, the following gives a brief description.
 

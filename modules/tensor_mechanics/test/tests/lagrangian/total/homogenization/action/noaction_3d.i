@@ -407,7 +407,7 @@
     block = '4'
   []
   [compute_stress]
-    type = ComputeLagrangianElasticEngineeringStress
+    type = ComputeLagrangianLinearElasticStress
   []
   [compute_strain]
     type = ComputeLagrangianStrain

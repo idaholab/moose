@@ -122,9 +122,6 @@ TensorMechanicsAction::validParams()
   return params;
 }
 
-const std::map<unsigned int, std::string> TensorMechanicsAction::_order_mapper = {
-    {1, "FIRST"}, {3, "THIRD"}, {4, "FOURTH"}, {6, "SIXTH"}, {9, "NINTH"}};
-
 TensorMechanicsAction::TensorMechanicsAction(const InputParameters & params)
   : TensorMechanicsActionBase(params),
     _displacements(getParam<std::vector<VariableName>>("displacements")),
@@ -399,8 +396,8 @@ TensorMechanicsAction::act()
     {
       InputParameters params = _factory.getValidParams("MooseVariable");
       params.set<MooseEnum>("family") = "SCALAR";
-      params.set<MooseEnum>("order") = TensorMechanicsAction::_order_mapper.at(
-          HomogenizationConstants::required.at(_lk_large_kinematics)[_ndisp - 1]);
+      params.set<MooseEnum>("order") =
+          HomogenizationConstants::required.at(_lk_large_kinematics)[_ndisp - 1];
       auto fe_type = AddVariableAction::feType(params);
       auto var_type = AddVariableAction::determineType(fe_type, 1);
       _problem->addVariable(var_type, _hname, params);

@@ -5,7 +5,7 @@
 The TensorMechanics Master Action is a convenience object that simplifies part of the
 mechanics system setup.
 
-It applies to both the old kernel system based on the [StressDivergenceTensors](/StressDivergenceTensors.md) kernels
+It applies to both the current kernel system based on the [StressDivergenceTensors](/StressDivergenceTensors.md) kernels
 and to the new kernel system based on the
 [TotalLagrangianStressDivergence](/TotalLagrangianStressDivergence.md) and [UpdatedLagrangianStressDivergence](/UpdatedLagrangianStressDivergence.md) kernels.
 Some options only apply to one or the other system, as outlined below.
@@ -28,7 +28,7 @@ The Tensor Mechanics `Master` Action is used to construct the kernels, displacem
 
 ### For the `StressDivergenceTensors` Kernels
 
-!table id=tmMaster_action_table_sdt caption=Correspondence Among Action Functionality and MooseObjects for the Tensor Mechanics `Master` Action, old kernel system
+!table id=tmMaster_action_table_sdt caption=Correspondence Among Action Functionality and MooseObjects for the Tensor Mechanics `Master` Action, current kernel system
 | Functionality     | Replaced Classes   | Associated Parameters   |
 |-------------------|--------------------|-------------------------|
 | Calculate stress divergence equilibrium for the given coordinate system | [StressDivergenceTensors](/StressDivergenceTensors.md) and optionally [WeakPlaneStress](/WeakPlaneStress.md) or [StressDivergenceRZTensors](/StressDivergenceRZTensors.md) or [StressDivergenceRSphericalTensors](/StressDivergenceRSphericalTensors.md) | `displacements` : a string of the displacement field variables |

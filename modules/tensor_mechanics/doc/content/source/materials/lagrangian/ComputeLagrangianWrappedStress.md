@@ -6,7 +6,7 @@
 
 This class wraps the information returned by MOOSE materials inheriting
 from [StressUpdateBase](Stresses.md) for use with the
-[Lagrangian kernel system](NewBackground.md).
+[Lagrangian kernel system](LagrangianKernelTheory.md).
 To use the current MOOSE materials the user simply adds this wrapper
 object to the `[Materials]` block in their input file, in addition to the
 definition of the actual MOOSE material.

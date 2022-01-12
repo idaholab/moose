@@ -108,7 +108,7 @@ on the [help/contact_us.md optional=True] page.
 The Tensor Mechanics module currently has two, partially interoperable 
 underlying systems:
 
-- The current system based on the [StressDivergenceTensors](/StressDivergenceTensors.md) kernels.
+- The current system based on the [StressDivergenceTensors](/StressDivergenceTensors.md) and related kernels.
 - A newer system based on the [TotalLagrangianStressDivergence](/TotalLagrangianStressDivergence.md) and [UpdatedLagrangianStressDivergence](/UpdatedLagrangianStressDivergence.md) kernels.
 
 The current system is fully compatible with the entirety of the Tensor Mechanics and MOOSE ecosystems.  However, it suffers from convergence issues caused by
@@ -116,7 +116,7 @@ non-exact Jacobians when not used with the Automatic Differentiation variants of
 
 The newer system (referred to in the documentation as the *Lagrangian* kernels) has exact Jacobians, but is a work in progress.  Currently, it supports
 
-- A [common interface](tensor_mechanics/NewBackground.md) for running small or large deformation problems that simplifies how input files are setup and makes it easier to switch between different kinematic and material models.
+- A [common interface](tensor_mechanics/LagrangianKernelTheory.md) for running small or large deformation problems that simplifies how input files are setup and makes it easier to switch between different kinematic and material models.
 - An [improved material system](tensor_mechanics/NewMaterialSystem.md), that provides multiple options for implementing new materials models.  The new material system can also automatically convert a small deformation material model to large deformation kinematics by integrating a user-select objective stress rate.
 - Both [total Lagrangian](/TotalLagrangianStressDivergence.md) and [updated Lagrangian](/UpdatedLagrangianStressDivergence.md) formulations.
 - A [homogenization system](/tensor_mechanics/Homogenization.md) designed to enforce cell-average deformation or stress conditions over a periodic unit cell.
@@ -128,7 +128,7 @@ by the Lagrangian kernels.
 However, it does not currently support:
 
 - Cylindrical or spherical coordinates.
-- Full interoperability with the other MOOSE modules.
+- Full interoperability with the other MOOSE modules.  Specifically, modules that couple to `"stress"` as a material property will need to be updated to couple to `"cauchy_stress"` or `"pk1_stress"` as appropriate.
 
 The future goal for the new system is full interoperability with the rest of the module.  Currently, users should consider using the new system
 for problems where numerical convergence is critical -- for example problems with large material or geometric nonlinearities -- or 

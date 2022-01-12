@@ -4,8 +4,8 @@
 
 ## Overview
 
-This object provides the total Lagrangian stress equilibrium and 
-Jacobian.  It is identical to the [`TotalLagrangianStressDivergence`](TotalLagrangianStressDivergence.md)
+This object provides the total Lagrangian stress equilibrium kernel and corresponding
+Jacobian for the homogenization system.  It is identical to the [`TotalLagrangianStressDivergence`](TotalLagrangianStressDivergence.md)
 class except it also provides the correct off-diagonal Jacobinan
 terms for the [Lagrangian kernel homogenization system](Homogenization.md).
 

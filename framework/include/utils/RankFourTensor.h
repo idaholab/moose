@@ -143,6 +143,7 @@ public:
   // Named constructors
   static RankFourTensorTempl<T> Identity() { return RankFourTensorTempl<T>(initIdentity); }
   static RankFourTensorTempl<T> IdentityFour() { return RankFourTensorTempl<T>(initIdentityFour); };
+  /// Identity of type \delta_{ik} \delta_{jl} - \delta_{ij} \delta_{kl} / 3
   static RankFourTensorTempl<T> IdentityDeviatoric()
   {
     return RankFourTensorTempl<T>(initIdentityDeviatoric);

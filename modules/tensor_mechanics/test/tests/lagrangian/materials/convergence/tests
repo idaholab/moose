@@ -5,7 +5,7 @@
     input = 'cauchy-elastic.i'
     ratio_tol = 1E-4
     difference_tol = 1E10
-    design = 'source/materials/lagrangian/ComputeLagrangianElasticEngineeringStress.md'
+    design = 'source/materials/lagrangian/ComputeLagrangianLinearElasticStress.md'
     requirement = 'Correct Jacobian coming from the material model'
   [../]
   [./pk_stvenant]

@@ -171,7 +171,7 @@
     block = '4'
   []
   [compute_stress]
-    type = ComputeLagrangianElasticEngineeringStress
+    type = ComputeLagrangianLinearElasticStress
     large_kinematics = true
   []
 []

@@ -115,9 +115,8 @@ for many models, the [constiutive](tensor_mechanics/NewMaterialSystem.md) models
 In MOOSE the `use_displaced_mesh` flag indicates whether gradients
 and integrals are with respect to the current (`true`) or reference (`false`)
 configurations. 
-In the old [StressDivergenceTensors](/StressDivergenceTensors.md) it can
-be confusing to determine when to use the flag.  With the new Lagrangian
-kernels it is simple: the only object that needs to have `use_displaced_mesh`
+ With the new Lagrangian
+the only object that needs to have `use_displaced_mesh`
 set is the [updated Lagrangian](kernels/lagrangian/UpdatedLagrangianStressDivergence.md)
 when `large_kinematics = true`.  The kernel enforces this condition with 
 an error.  For all other objects in the new mechanics system the

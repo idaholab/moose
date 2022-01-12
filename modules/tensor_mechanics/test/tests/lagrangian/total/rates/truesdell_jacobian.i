@@ -127,7 +127,7 @@
     poissons_ratio = 0.3
   []
   [compute_stress]
-    type = ComputeLagrangianElasticEngineeringStress
+    type = ComputeLagrangianLinearElasticStress
     objective_rate = truesdell
   []
   [compute_strain]

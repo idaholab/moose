@@ -5,7 +5,7 @@
 The material system for the new Lagrangian kernels consists of:
 
 - The strain calculator for the new system, [`ComputeLagrangianStrain`](ComputeLagrangianStrain.md)
-- A stress update object, implemented as a derived class based on either
+- A stress calculator, implemented as a derived class based on either
   [`ComputeLagrangianStressCauchy`](ComputeLagrangianStressCauchy.md) or
   [`ComputeLagrangianStressPK1`](ComputeLagrangianStressPK1.md)
 - Optionally, additional material objects part of the [homogenization system](tensor_mechanics/Homogenization.md).
@@ -22,14 +22,14 @@ Similarly, subclasses that derive from either [`ComputeLagrangianStressCauchy`](
 or [`ComputeLagrangianStressPK1`](ComputeLagrangianStressPK1.md) can provide an interface for
 defining the constitutive model in terms of some other stress measure and associated derivative.
 
-To summarize: to implement a new material model inherit from [`ComputeLagrangianStressCauchy`](ComputeLagrangianStressCauchy.md)
+To summarize: to implement a new material model make a class that inherits from [`ComputeLagrangianStressCauchy`](ComputeLagrangianStressCauchy.md)
 or [`ComputeLagrangianStressPK1`](ComputeLagrangianStressPK1.md) (or an associated subclass) and implement the required
 stress update and associated algorithmic tangent.  The resulting model can be used with either kernel
 formulation.
 
 ## Using existing MOOSE materials
 
-The kernels are compatible with "old style" MOOSE materials derived from [StressUpdateBase](Stresses.md) through use
+The kernels are compatible with "current" MOOSE materials derived from [StressUpdateBase](Stresses.md) through use
 of the [ComputeLagrangianWrappedStress](ComputeLagrangianWrappedStress.md) wrapper.  The user can just define their material
 using the existing MOOSE material system and also supply the wrapper material object in the input file.  There are some limitations
 to this wrapper, discussed in more detailed in the [wrapper documentation](ComputeLagrangianWrappedStress.md).
@@ -64,7 +64,7 @@ and any kinematic measures derived from these quantities.
 
 ### Homogenization system
 
-The strain calculator adds any extra, homogenization gradient supplied by [ComputeHomogenizedLagrangianStrain](ComputeHomogenizedLagrangianStrain.md)
+The strain calculator adds any extra homogenization gradient supplied by [ComputeHomogenizedLagrangianStrain](ComputeHomogenizedLagrangianStrain.md)
 to the  deformation gradient defined directly from the displacement gradients before forming any of the derived kinematic measures.
 As such, the homogenization system affects constitutive models defined in terms of any kinematic tensor (unlike the eigenstrain modification).
 
@@ -106,7 +106,8 @@ and the incremental deformation gradient.
 The [`ComputeLagrangianStrain`](ComputeLagrangianStrain.md) class uses the `large_kinematics` option to switch between
 large strain kinematics and small strain kinematics.  This option must be set consistently between the strain 
 calculator and the kernels.  The [TensorMechanics/MasterAction](/Modules/TensorMechanics/Master/index.md) can
-be used to automatically setup the kernels and strain calculator with consistent options.
+be used to automatically setup the kernels and strain calculator with consistent options by using the `strain=SMALL` or
+`strain=FINITE` options.
 
 Material models do not *need* to use the `large_kinematics` option and there is no requirement it be set consistently
 with the strain calculator and the kernel.

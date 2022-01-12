@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ComputeLagrangianElasticEngineeringStress.h"
+#include "ComputeLagrangianLinearElasticStress.h"
 
-registerMooseObject("TensorMechanicsApp", ComputeLagrangianElasticEngineeringStress);
+registerMooseObject("TensorMechanicsApp", ComputeLagrangianLinearElasticStress);
 
 InputParameters
-ComputeLagrangianElasticEngineeringStress::validParams()
+ComputeLagrangianLinearElasticStress::validParams()
 {
   InputParameters params = ComputeLagrangianObjectiveStress::validParams();
 
@@ -22,7 +22,7 @@ ComputeLagrangianElasticEngineeringStress::validParams()
   return params;
 }
 
-ComputeLagrangianElasticEngineeringStress::ComputeLagrangianElasticEngineeringStress(
+ComputeLagrangianLinearElasticStress::ComputeLagrangianLinearElasticStress(
     const InputParameters & parameters)
   : ComputeLagrangianObjectiveStress(parameters),
     _elasticity_tensor(
@@ -31,7 +31,7 @@ ComputeLagrangianElasticEngineeringStress::ComputeLagrangianElasticEngineeringSt
 }
 
 void
-ComputeLagrangianElasticEngineeringStress::computeQpSmallStress()
+ComputeLagrangianLinearElasticStress::computeQpSmallStress()
 {
   _small_stress[_qp] = _elasticity_tensor[_qp] * _mechanical_strain[_qp];
   _small_jacobian[_qp] = _elasticity_tensor[_qp];

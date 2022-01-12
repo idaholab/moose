@@ -9,6 +9,7 @@
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
   large_kinematics = false
+  eigenstrain_names = "thermal_contribution"
 []
 
 [Variables]
@@ -23,54 +24,6 @@
 [AuxVariables]
   [temperature]
   []
-  [strain_xx]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [strain_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [strain_zz]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [strain_xy]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [strain_xz]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [strain_yz]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [stress_xx]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [stress_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [stress_zz]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [stress_xy]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [stress_yz]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [stress_xz]
-    order = CONSTANT
-    family = MONOMIAL
-  []
 []
 
 [AuxKernels]
@@ -78,104 +31,6 @@
     type = FunctionAux
     variable = temperature
     function = temperature_control
-  []
-
-  [stress_xx]
-    type = RankTwoAux
-    rank_two_tensor = cauchy_stress
-    variable = stress_xx
-    index_i = 0
-    index_j = 0
-    execute_on = timestep_end
-  []
-  [stress_yy]
-    type = RankTwoAux
-    rank_two_tensor = cauchy_stress
-    variable = stress_yy
-    index_i = 1
-    index_j = 1
-    execute_on = timestep_end
-  []
-  [stress_zz]
-    type = RankTwoAux
-    rank_two_tensor = cauchy_stress
-    variable = stress_zz
-    index_i = 2
-    index_j = 2
-    execute_on = timestep_end
-  []
-  [stress_xy]
-    type = RankTwoAux
-    rank_two_tensor = cauchy_stress
-    variable = stress_xy
-    index_i = 0
-    index_j = 1
-    execute_on = timestep_end
-  []
-  [stress_xz]
-    type = RankTwoAux
-    rank_two_tensor = cauchy_stress
-    variable = stress_xz
-    index_i = 0
-    index_j = 2
-    execute_on = timestep_end
-  []
-  [stress_yz]
-    type = RankTwoAux
-    rank_two_tensor = cauchy_stress
-    variable = stress_yz
-    index_i = 1
-    index_j = 2
-    execute_on = timestep_end
-  []
-
-  [strain_xx]
-    type = RankTwoAux
-    rank_two_tensor = mechanical_strain
-    variable = strain_xx
-    index_i = 0
-    index_j = 0
-    execute_on = timestep_end
-  []
-  [strain_yy]
-    type = RankTwoAux
-    rank_two_tensor = mechanical_strain
-    variable = strain_yy
-    index_i = 1
-    index_j = 1
-    execute_on = timestep_end
-  []
-  [strain_zz]
-    type = RankTwoAux
-    rank_two_tensor = mechanical_strain
-    variable = strain_zz
-    index_i = 2
-    index_j = 2
-    execute_on = timestep_end
-  []
-  [strain_xy]
-    type = RankTwoAux
-    rank_two_tensor = mechanical_strain
-    variable = strain_xy
-    index_i = 0
-    index_j = 1
-    execute_on = timestep_end
-  []
-  [strain_xz]
-    type = RankTwoAux
-    rank_two_tensor = mechanical_strain
-    variable = strain_xz
-    index_i = 0
-    index_j = 2
-    execute_on = timestep_end
-  []
-  [strain_yz]
-    type = RankTwoAux
-    rank_two_tensor = mechanical_strain
-    variable = strain_yz
-    index_i = 1
-    index_j = 2
-    execute_on = timestep_end
   []
 []
 
@@ -210,24 +65,19 @@
   []
 []
 
-[Kernels]
-  [sdx]
-    type = TotalLagrangianStressDivergence
-    variable = disp_x
-    component = 0
-    eigenstrain_names = "thermal_contribution"
-  []
-  [sdy]
-    type = TotalLagrangianStressDivergence
-    variable = disp_y
-    component = 1
-    eigenstrain_names = "thermal_contribution"
-  []
-  [sdz]
-    type = TotalLagrangianStressDivergence
-    variable = disp_z
-    component = 2
-    eigenstrain_names = "thermal_contribution"
+[Modules]
+  [TensorMechanics]
+    [Master]
+      [all]
+        strain = SMALL
+        new_system = true
+        formulation = TOTAL
+        volumetric_locking_correction = false
+        generate_output = 'cauchy_stress_xx cauchy_stress_yy cauchy_stress_zz cauchy_stress_xy '
+                          'cauchy_stress_xz cauchy_stress_yz strain_xx strain_yy strain_zz strain_xy '
+                          'strain_xz strain_yz'
+      []
+    []
   []
 []
 
@@ -238,11 +88,7 @@
     poissons_ratio = 0.3
   []
   [compute_stress]
-    type = ComputeLagrangianElasticEngineeringStress
-  []
-  [compute_strain]
-    type = ComputeLagrangianStrain
-    eigenstrain_names = "thermal_contribution"
+    type = ComputeLagrangianLinearElasticStress
   []
   [thermal_expansion]
     type = ComputeThermalExpansionEigenstrain
