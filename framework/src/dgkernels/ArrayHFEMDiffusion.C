@@ -45,11 +45,6 @@ ArrayHFEMDiffusion::computeLowerDQpResidual(RealEigenVector & r)
   r += (_u_neighbor[_qp] - _u[_qp]) * _test_lambda[_i][_qp];
 }
 
-RealEigenVector ArrayHFEMDiffusion::computeQpJacobian(Moose::DGJacobianType)
-{
-  return RealEigenVector::Zero(_count);
-}
-
 RealEigenVector
 ArrayHFEMDiffusion::computeLowerDQpJacobian(Moose::ConstraintJacobianType type)
 {

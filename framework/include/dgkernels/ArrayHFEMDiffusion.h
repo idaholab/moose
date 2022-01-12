@@ -20,7 +20,6 @@ public:
 
 protected:
   virtual void computeQpResidual(Moose::DGResidualType type, RealEigenVector & residual) override;
-  virtual RealEigenVector computeQpJacobian(Moose::DGJacobianType type) override;
   virtual void computeLowerDQpResidual(RealEigenVector & residual) override;
   virtual RealEigenVector computeLowerDQpJacobian(Moose::ConstraintJacobianType type) override;
 };

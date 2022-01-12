@@ -73,7 +73,10 @@ protected:
    * This is the virtual that derived classes should override for computing the Jacobian on
    * neighboring element.
    */
-  virtual RealEigenVector computeQpJacobian(Moose::DGJacobianType type) = 0;
+  virtual RealEigenVector computeQpJacobian(Moose::DGJacobianType)
+  {
+    return RealEigenVector::Zero(_count);
+  }
 
   /**
    * This is the virtual that derived classes should override for computing the off-diag Jacobian.
