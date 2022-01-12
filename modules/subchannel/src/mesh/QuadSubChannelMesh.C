@@ -63,3 +63,13 @@ QuadSubChannelMesh::getSubchannelIndexFromPoint(const Point & p) const
   unsigned int j = (p(1) + offset_y + 0.5 * _pitch) / _pitch;
   return j * _nx + i;
 }
+
+unsigned int
+QuadSubChannelMesh::getPinIndexFromPoint(const Point & p) const
+{
+  Real offset_x = (_nx - 2) * _pitch / 2.0;
+  Real offset_y = (_ny - 2) * _pitch / 2.0;
+  unsigned int i = (p(0) + offset_x + 0.5 * _pitch) / _pitch;
+  unsigned int j = (p(1) + offset_y + 0.5 * _pitch) / _pitch;
+  return j * (_nx - 1) + i;
+}

@@ -122,22 +122,39 @@ QuadPowerIC::initialSetup()
 Real
 QuadPowerIC::value(const Point & p)
 {
-  auto idx = _mesh.getSubchannelIndexFromPoint(p);
   auto heated_length = _mesh.getHeatedLength();
   auto unheated_length_entry = _mesh.getHeatedLengthEntry();
   Point p1(0, 0, unheated_length_entry);
   Point P = p - p1;
-  // if we are adjacent to the heated part of the fuel rod
-  if (p(2) >= unheated_length_entry && p(2) <= unheated_length_entry + heated_length)
+  auto pin_mesh_exist = _mesh.pinMeshExist();
+
+  if (pin_mesh_exist) // project axial heat rate on pins
   {
-    auto heat_rate = 0.0;
-    for (auto i_pin : _mesh.getChannelPins(idx))
+    auto i_pin = _mesh.getPinIndexFromPoint(p);
     {
-      heat_rate +=
-          0.25 * _ref_qprime(i_pin) * _pin_power_correction(i_pin) * _axial_heat_rate.value(_t, P);
+      if (p(2) >= unheated_length_entry && p(2) <= unheated_length_entry + heated_length)
+      {
+        return _ref_qprime(i_pin) * _pin_power_correction(i_pin) * _axial_heat_rate.value(_t, P);
+      }
+      else
+        return 0.0;
     }
-    return heat_rate;
   }
-  else
-    return 0.0;
+  else // project axial heat rate on subchannels
+  {
+    auto i_ch = _mesh.getSubchannelIndexFromPoint(p);
+    // if we are adjacent to the heated part of the fuel rod
+    if (p(2) >= unheated_length_entry && p(2) <= unheated_length_entry + heated_length)
+    {
+      auto heat_rate = 0.0;
+      for (auto i_pin : _mesh.getChannelPins(i_ch))
+      {
+        heat_rate += 0.25 * _ref_qprime(i_pin) * _pin_power_correction(i_pin) *
+                     _axial_heat_rate.value(_t, P);
+      }
+      return heat_rate;
+    }
+    else
+      return 0.0;
+  }
 }

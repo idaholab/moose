@@ -1,6 +1,6 @@
 T_in = 359.15
 # [1e+6 kg/m^2-hour] turns into kg/m^2-sec
-mass_flux_in = ${fparse 1e+6 * 17.0 / 3600.}
+mass_flux_in = ${fparse 1e+6 * 17.00 / 3600.}
 P_out = 4.923e6 # Pa
 
 [QuadSubChannelMesh]
@@ -12,37 +12,59 @@ P_out = 4.923e6 # Pa
     n_blocks = 1
     pitch = 0.0126
     rod_diameter = 0.00950
-    gap = 0.00095
+    gap = 0.00095 # the half gap between sub-channel assemblies
     heated_length = 3.658
-    spacer_z = '0.0 0.229 0.457 0.686 0.914 1.143 1.372 1.600 1.829 2.057 2.286 2.515 2.743 2.972 3.200 3.429'
-    spacer_k = '0.7 0.4 1.0 0.4 1.0 0.4 1.0 0.4 1.0 0.4 1.0 0.4 1.0 0.4 1.0 0.4'
+    spacer_z = '0.0'
+    spacer_k = '0.0'
+  []
+
+  [fuel_pins]
+    type = PinMeshGenerator
+    input = sub_channel
+    nx = 6
+    ny = 6
+    n_cells = 50
+    pitch = 0.0126
+    heated_length = 3.658
   []
 []
 
 [AuxVariables]
   [mdot]
+    block = sub_channel
   []
   [SumWij]
+    block = sub_channel
   []
   [P]
+    block = sub_channel
   []
   [DP]
+    block = sub_channel
   []
   [h]
+    block = sub_channel
   []
   [T]
+    block = sub_channel
   []
   [Tpin]
+    block = fuel_pins
   []
   [rho]
+    block = sub_channel
   []
   [mu]
+    block = sub_channel
   []
   [S]
+    block = sub_channel
   []
   [w_perim]
+    block = sub_channel
   []
   [q_prime]
+    block = fuel_pins
   []
 []
 
@@ -54,13 +76,11 @@ P_out = 4.923e6 # Pa
   []
 []
 
-[Problem]
+[SubChannel]
   type = LiquidWaterSubChannel1PhaseProblem
   fp = water
   beta = 0.006
   CT = 2.0
-  P_tol = 1e-6
-  T_tol = 1e-6
   compute_density = true
   compute_viscosity = true
   compute_power = true
@@ -82,7 +102,7 @@ P_out = 4.923e6 # Pa
     type = QuadPowerIC
     variable = q_prime
     power = 3.44e6 # W
-    filename = "power_profile.txt" #
+    filename = "power_profile.txt" #type in name of file that describes radial power profile
   []
 
   [T_ic]
@@ -154,7 +174,6 @@ P_out = 4.923e6 # Pa
 
 [Outputs]
   exodus = true
-  checkpoint = true
   [Temp_Out_MATRIX]
     type = QuadSubChannelNormalSliceValues
     variable = T
