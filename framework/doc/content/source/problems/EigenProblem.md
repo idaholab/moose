@@ -6,7 +6,7 @@
 It offers linear and nonlinear eigensolvers by leveraging [SLEPc](https://slepc.upv.es)
 capabilities (mainly the EPS system). For linear problems,
 the system supports one eigenvalue and multiple eigenvalues. For
-nonlinear problems, we currently support solving for the minimum
+nonlinear problems, we currently support solving for the smallest (in magnitude)
 eigenvalue. The development of nonlinear eigensolver was mainly motivated
 by neutron transport criticality calculations, but the implementation
 and algorithm are general and applicable to other applications.
@@ -28,18 +28,18 @@ Here is an example with Jacobi Davidson:
 
 Note that to use the linear solvers from SLEPc, we need to form accurate
 $A$ and $B$ that will be utilized to represent the underlying physics.
-If $A% and $B$ are incorrect, you will likely end with the
+If $A$ and $B$ are incorrect, you will likely end up with the
 wrong eigenvalue and eigenvector. For that reason, if you
 want to use linear eigenvalue solvers, you need to implement
 Jacobian by hand or with AD in the corresponding kernels.
 Details of all the linear eigensolvers can be found in
 [SLEPc Users Manual](https://slepc.upv.es/documentation/slepc.pdf).
 
-In a multiphysics environment, physics often is nonlinear. For instance,
+In a multiphysics environment, physics are often nonlinear. For instance,
  neutron transport with temperature feedback. In this case,
-  $A$ and $B$ are not constant anymore; instead, they depend on
-   the eigenvector directly or indirectly. To describe our nonlinear
-    solver, we write a generalized nonlinear eigenvalue problem as,
+ $A$ and $B$ are not constant anymore; instead, they depend on
+ the eigenvector directly or indirectly. To describe our nonlinear
+ solver, we write a generalized nonlinear eigenvalue problem as,
 \begin{equation}
 A(x) = \lambda B(x),
 \end{equation}
@@ -54,12 +54,12 @@ and rewrite the nonlinear eigen problem as
 Newton can be applied to solve this problem. The only issue is that
 the derivatives of $\lambda$ with respective to $x$ can be dense.
 We use the Jacobian-free Newton method to overcome this difficulty,
-where the Jacobian is computed via finite difference.
+where the action of the Jacobian is approximated via finite differences.
 To handle various use cases, variants of Newton are provided
 in this system. There is a current list:
 
 - `PJFNK` - Preconditioned Jacobian-free Newton Krylov: The preconditioning matrix
-  is formed using nonegein kernels. We do have an option to allow users to
+  is formed using noneigen kernels. We do have an option to allow users to
   incorporate eigen kernels into the preconditioning matrix. Still, in
   general, we won't encourage users to do that since the preconditioning
   matrix might be singular when close to the solution.
@@ -90,7 +90,7 @@ in this system. There is a current list:
            link=False
 
 - `Newton` - Newton method: Both Jacobian and preconditioning matrices are $A$.
- This option is added for the consistency between the nonlinear system and
+ This option is added for consistency between the nonlinear system and
  the nonlinear eigensystem. Since this option does not account for the derivative
  of eigenvalue with respective to the eigenvector, this option is not efficient.
  Users should not use it in general.
