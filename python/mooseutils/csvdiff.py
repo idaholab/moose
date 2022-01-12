@@ -158,7 +158,7 @@ class CSVSummary(CSVTools):
 
         # Generate a 'TIME STEPS' summary line if a time field does not exist. This is to maintain compliance with an exodiff summary
         if 'time' not in [x.lower() for x in table1.keys()]:
-            value_count = len(table1[table1.keys()[0]]) - 1
+            value_count = len(table1[list(table1.keys())[0]]) - 1
             formatted_messages.insert(0, 'TIME STEPS relative 1 floor 0  # min: 0 @ t0  max: %d @ t%d\n' % (value_count, value_count))
 
         for field, value in table1.items():
