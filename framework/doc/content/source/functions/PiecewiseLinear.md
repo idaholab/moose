@@ -17,7 +17,8 @@ and the data can be provided in either rows (default) or columns, as specified i
 
 By default, the x-data corresponds to time, but this can be changed to correspond to x, y,
 or z coordinate with the `axis` line.  If the function is queried outside of its range of
-x data, it returns the y value associated with the closest x data point.
+x data, it returns the y value associated with the closest x data point, unless
+the parameter `extrap` is set to `true`, in which case extrapolation is performed instead.
 
 ## Example Input Syntax
 
