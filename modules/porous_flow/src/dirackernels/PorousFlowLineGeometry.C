@@ -88,7 +88,7 @@ PorousFlowLineGeometry::PorousFlowLineGeometry(const InputParameters & parameter
 {
   statefulPropertiesAllowed(true);
 
-  int checkInputFormat =
+  const int checkInputFormat =
       int(isParamValid("line_base")) + int(!_point_file.empty()) + int(_usingReporter);
 
   if (checkInputFormat > 1)

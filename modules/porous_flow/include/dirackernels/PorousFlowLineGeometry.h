@@ -72,10 +72,10 @@ protected:
 
   ///@{
   /// reporter input alternative (to the point file and line_base data)
-  const std::vector<Real> * _x_coord = nullptr;
-  const std::vector<Real> * _y_coord = nullptr;
-  const std::vector<Real> * _z_coord = nullptr;
-  const std::vector<Real> * _weight = nullptr;
+  const std::vector<Real> * const _x_coord;
+  const std::vector<Real> * const _y_coord;
+  const std::vector<Real> * const _z_coord;
+  const std::vector<Real> * const _weight;
   const bool _usingReporter;
   ///@}
 private:

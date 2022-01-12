@@ -111,7 +111,6 @@
 
     # The following file defines the polyline geometry
     # which is just two points in this particular example
-    # point_file = bh02.bh
     weight_reporter='bh02file/column_0'
     x_coord_reporter='bh02file/column_1'
     y_coord_reporter='bh02file/column_2'

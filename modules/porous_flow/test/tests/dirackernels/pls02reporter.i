@@ -146,11 +146,10 @@
 
     # The following file defines the polyline geometry
     # which is just two points in this particular example
-    # point_file = pls02.bh
-    weight_reporter='pls02file/column_0'
-    x_coord_reporter='pls02file/column_1'
-    y_coord_reporter='pls02file/column_2'
-    z_coord_reporter='pls02file/column_3'
+    weight_reporter='pls02file/w'
+    x_coord_reporter='pls02file/x'
+    y_coord_reporter='pls02file/y'
+    z_coord_reporter='pls02file/z'
 
     # Now define the piecewise-linear function, L
 
@@ -178,10 +177,15 @@
   []
 []
 
-[VectorPostprocessors]
+[Reporters]
   [pls02file]
-    type = CSVReader
-    csv_file = pls02.bh
+    # contains contents from pls02.bh
+    type=ConstantReporter
+    real_vector_names = 'w x y z'
+    real_vector_values = '0.10 0.10;
+                          0.00 0.00;
+                          0.00 0.00;
+                         -0.25 0.25'
   []
 []
 
