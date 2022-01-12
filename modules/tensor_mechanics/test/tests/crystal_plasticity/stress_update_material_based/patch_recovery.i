@@ -10,21 +10,21 @@
 []
 
 [AuxVariables]
-  [./stress_xx_recovered]
+  [stress_xx_recovered]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./stress_yy_recovered]
+  []
+  [stress_yy_recovered]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Functions]
-  [./tdisp]
+  [tdisp]
     type = ParsedFunction
     value = 0.01*t
-  [../]
+  []
 []
 
 [Modules/TensorMechanics/Master/all]
@@ -33,70 +33,81 @@
 []
 
 [AuxKernels]
-  [./stress_xx_recovered]
-    type = RankTwoAux
-    patch_polynomial_order = first
-    rank_two_tensor = stress
+  [stress_xx_recovered]
+    type = NodalPatchRecoveryAux
     variable = stress_xx_recovered
-    index_i = 0
-    index_j = 0
-    execute_on = 'timestep_end'
-  [../]
-  [./stress_yy_recovered]
-    type = RankTwoAux
-    patch_polynomial_order = first
-    rank_two_tensor = stress
+    nodal_patch_recovery_uo = stress_xx_patch
+    execute_on = 'TIMESTEP_END'
+  []
+  [stress_yy_recovered]
+    type = NodalPatchRecoveryAux
     variable = stress_yy_recovered
-    index_i = 1
-    index_j = 1
-    execute_on = 'timestep_end'
-  [../]
+    nodal_patch_recovery_uo = stress_yy_patch
+    execute_on = 'TIMESTEP_END'
+  []
 []
 
 [BCs]
-  [./symmy]
+  [symmy]
     type = DirichletBC
     variable = uy
     boundary = bottom
     value = 0
-  [../]
-  [./symmx]
+  []
+  [symmx]
     type = DirichletBC
     variable = ux
     boundary = left
     value = 0
-  [../]
-  [./tdisp]
+  []
+  [tdisp]
     type = FunctionDirichletBC
     variable = uy
     boundary = top
     function = tdisp
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeElasticityTensorConstantRotationCP
     C_ijkl = '1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5'
     fill_method = symmetric9
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeMultipleCrystalPlasticityStress
     crystal_plasticity_models = 'trial_xtalpl'
     tan_mod_type = exact
-  [../]
-  [./trial_xtalpl]
+  []
+  [trial_xtalpl]
     type = CrystalPlasticityKalidindiUpdate
     number_slip_systems = 12
     slip_sys_file_name = input_slip_sys.txt
-  [../]
+  []
+[]
+
+[UserObjects]
+  [stress_xx_patch]
+    type = NodalPatchRecoveryMaterialProperty
+    patch_polynomial_order = FIRST
+    property = 'stress'
+    component = '0 0'
+    execute_on = 'TIMESTEP_END'
+  []
+  [stress_yy_patch]
+    type = NodalPatchRecoveryMaterialProperty
+    patch_polynomial_order = FIRST
+    property = 'stress'
+    component = '1 1'
+    execute_on = 'TIMESTEP_END'
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

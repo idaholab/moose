@@ -7,112 +7,120 @@
 []
 
 [Variables]
-  [./ux]
-  [../]
-  [./uy]
-  [../]
+  [ux]
+  []
+  [uy]
+  []
 []
 
 [AuxVariables]
-  [./stress_xx_recovered]
+  [stress_xx_recovered]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./stress_yy_recovered]
+  []
+  [stress_yy_recovered]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Functions]
-  [./tdisp]
+  [tdisp]
     type = ParsedFunction
     value = 0.01*t
-  [../]
+  []
 []
 
 [Kernels]
-  [./TensorMechanics]
+  [TensorMechanics]
     displacements = 'ux uy'
     use_displaced_mesh = true
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./stress_xx_recovered]
-    type = RankTwoAux
-    patch_polynomial_order = first
-    rank_two_tensor = stress
+  [stress_xx_recovered]
+    type = NodalPatchRecoveryAux
     variable = stress_xx_recovered
-    index_i = 0
-    index_j = 0
-    execute_on = 'timestep_end'
-  [../]
-  [./stress_yy_recovered]
-    type = RankTwoAux
-    patch_polynomial_order = first
-    rank_two_tensor = stress
+    nodal_patch_recovery_uo = stress_xx_patch
+    execute_on = 'TIMESTEP_END'
+  []
+  [stress_yy_recovered]
+    type = NodalPatchRecoveryAux
     variable = stress_yy_recovered
-    index_i = 1
-    index_j = 1
-    execute_on = 'timestep_end'
-  [../]
+    nodal_patch_recovery_uo = stress_yy_patch
+    execute_on = 'TIMESTEP_END'
+  []
 []
 
 [BCs]
-  [./symmy]
+  [symmy]
     type = DirichletBC
     variable = uy
     boundary = bottom
     value = 0
-  [../]
-  [./symmx]
+  []
+  [symmx]
     type = DirichletBC
     variable = ux
     boundary = left
     value = 0
-  [../]
-  [./tdisp]
+  []
+  [tdisp]
     type = FunctionDirichletBC
     variable = uy
     boundary = top
     function = tdisp
-  [../]
+  []
 []
 
 [UserObjects]
-  [./slip_rate_gss]
+  [slip_rate_gss]
     type = CrystalPlasticitySlipRateGSS
     variable_size = 12
     slip_sys_file_name = input_slip_sys.txt
     num_slip_sys_flowrate_props = 2
     flowprops = '1 4 0.001 0.1 5 8 0.001 0.1 9 12 0.001 0.1'
     uo_state_var_name = state_var_gss
-  [../]
-  [./slip_resistance_gss]
+  []
+  [slip_resistance_gss]
     type = CrystalPlasticitySlipResistanceGSS
     variable_size = 12
     uo_state_var_name = state_var_gss
-  [../]
-  [./state_var_gss]
+  []
+  [state_var_gss]
     type = CrystalPlasticityStateVariable
     variable_size = 12
     groups = '0 4 8 12'
     group_values = '60.8 60.8 60.8'
     uo_state_var_evol_rate_comp_name = state_var_evol_rate_comp_gss
     scale_factor = 1.0
-  [../]
-  [./state_var_evol_rate_comp_gss]
+  []
+  [state_var_evol_rate_comp_gss]
     type = CrystalPlasticityStateVarRateComponentGSS
     variable_size = 12
     hprops = '1.0 541.5 109.8 2.5'
     uo_slip_rate_name = slip_rate_gss
     uo_state_var_name = state_var_gss
-  [../]
+  []
+  [stress_xx_patch]
+    type = NodalPatchRecoveryMaterialProperty
+    patch_polynomial_order = FIRST
+    property = 'stress'
+    component = '0 0'
+    execute_on = 'TIMESTEP_END'
+  []
+  [stress_yy_patch]
+    type = NodalPatchRecoveryMaterialProperty
+    patch_polynomial_order = FIRST
+    property = 'stress'
+    component = '1 1'
+    execute_on = 'TIMESTEP_END'
+  []
 []
 
 [Materials]
-  [./crysp]
+  [crysp]
     type = FiniteStrainUObasedCP
     stol = 1e-2
     tan_mod_type = exact
@@ -120,23 +128,23 @@
     uo_slip_resistances = 'slip_resistance_gss'
     uo_state_vars = 'state_var_gss'
     uo_state_var_evol_rate_comps = 'state_var_evol_rate_comp_gss'
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputeFiniteStrain
     displacements = 'ux uy'
-  [../]
-  [./elasticity_tensor]
+  []
+  [elasticity_tensor]
     type = ComputeElasticityTensorCP
     C_ijkl = '1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5'
     fill_method = symmetric9
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

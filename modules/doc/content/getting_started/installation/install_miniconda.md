@@ -1,44 +1,34 @@
-## Install Miniconda3 id=installconda
+## Install Mambaforge3 id=installconda
 
-Installing Miniconda3 is straight forward. Download, install, and configure. If you run into issues during these steps, please visit our [troubleshooting guide for Conda](troubleshooting.md#condaissues optional=True).
+Follow the steps below depending on your platform to install mambaforge. If you run into issues during these steps, please visit our [troubleshooting guide for Conda](troubleshooting.md#condaissues optional=True). This installation
+guide relies on the utilization of `mamba`, an optimized package manager for Conda.
 
 - +Linux Users:+
 
   ```bash
-  curl -L -O https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-  bash Miniconda3-latest-Linux-x86_64.sh -b -p ~/miniconda3
+  curl -L -O https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-Linux-x86_64.sh
+  bash Mambaforge-Linux-x86_64.sh -b -p ~/mambaforge3
   ```
 
-- +Macintosh Users:+
+- +Macintosh Users with Intel processors:+
 
   ```bash
-  curl -L -O https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-x86_64.sh
-  bash Miniconda3-latest-MacOSX-x86_64.sh -b -p ~/miniconda3
+  curl -L -O https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-MacOSX-x86_64.sh
+  bash Mambaforge-MacOSX-x86_64.sh -b -p ~/mambaforge3
   ```
 
-With Miniconda installed to your home directory, export PATH, so that it may be used:
+
+With Mambaforge installed to your home directory, export PATH, so that it may be used:
 
 ```bash
-export PATH=$HOME/miniconda3/bin:$PATH
+export PATH=$HOME/mambaforge3/bin:$PATH
 ```
 
-Configure Conda to work with conda-forge, and our INL public channel:
+Configure Conda to work with our INL public channel:
 
 ```bash
-conda config --add channels conda-forge
 conda config --add channels https://conda.software.inl.gov/public
 ```
 
 !alert warning title=sudo conda
-If you find yourself using `sudo conda`... something's not right. The most common reason for needing sudo, is due to an improper Conda installation. Conda *should* be installed to your home directory, without any use of `sudo`.
-
-While in the `base` conda environment, we also encourage the usage of
-[Mamba](https://github.com/mamba-org/mamba), a drop-in re-implementation of the conda
-package manager that takes advantage of parallelization. This will lead to faster
-installation of conda packages. To install mamba, simply perform:
-
-```
-conda install mamba
-```
-
-Now `mamba` can be used instead of `conda` for installing packages.
+If you find yourself using `sudo conda`/`sudo mamba`... something is not right. The most common reason for needing sudo is due to an improper Conda installation. Conda *should* be installed to your home directory, without any use of `sudo`.
