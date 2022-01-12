@@ -108,16 +108,26 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
     // create a dummy assembly that is 1 assembly sized element that will get deleted later
     if (make_empty)
     {
-      auto params = _app.getFactory().getValidParams("CartesianMeshGenerator");
+      Real pitch = getMeshProperty<Real>("assembly_pitch", _reactor_params);
 
-      params.set<MooseEnum>("dim") = 2;
-      std::vector<Real> pitch{getMeshProperty<Real>("assembly_pitch", _reactor_params)};
-      params.set<std::vector<Real>>("dx") = pitch;
-      params.set<std::vector<Real>>("dy") = pitch;
-      params.set<std::vector<unsigned int>>("subdomain_id") =
-          std::vector<unsigned int>{UINT16_MAX - 1};
+      auto params = _app.getFactory().getValidParams("PolygonConcentricCircleMeshGenerator");
+      params.set<unsigned int>("num_sides") = 4;
+      params.set<std::vector<unsigned int>>("num_sectors_per_side") =
+          std::vector<unsigned int>(4, 2);
+      params.set<Real>("polygon_size") = pitch / 2.0;
+      params.set<std::vector<subdomain_id_type>>("background_block_ids") =
+          std::vector<subdomain_id_type>{UINT16_MAX - 1};
 
-      addMeshSubgenerator("CartesianMeshGenerator", std::string(_empty_key), params);
+      addMeshSubgenerator(
+          "PolygonConcentricCircleMeshGenerator", std::string(_empty_key) + "_circle", params);
+
+      // Rotate assembly to be square rather than diamond
+      params = _app.getFactory().getValidParams("TransformGenerator");
+      params.set<MeshGeneratorName>("input") = std::string(_empty_key) + "_circle";
+      params.set<MooseEnum>("transform") = 4;
+      params.set<RealVectorValue>("vector_value") = RealVectorValue(0, 0, 45);
+
+      addMeshSubgenerator("TransformGenerator", std::string(_empty_key), params);
     }
     {
       auto params = _app.getFactory().getValidParams("CartesianIDPatternedMeshGenerator");
