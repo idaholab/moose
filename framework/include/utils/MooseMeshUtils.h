@@ -49,7 +49,7 @@ std::vector<subdomain_id_type> getSubdomainIDs(const libMesh::MeshBase & mesh,
                                                const std::vector<SubdomainName> & subdomain_name);
 
 /**
- * Calculates the origin coordinates of a ReplicatedMesh.
+ * Calculates the centroid of a ReplicatedMesh.
  * @param mesh input mesh whose origin needs to be calculated
  * @return a Point data containing the mesh origin position
  */

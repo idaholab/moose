@@ -21,8 +21,11 @@ PeripheralRingMeshGenerator::validParams()
 {
   InputParameters params = PolygonMeshGeneratorBase::validParams();
   params.addRequiredParam<MeshGeneratorName>("input", "The input mesh to be modified.");
-  params.addParam<unsigned int>(
-      "peripheral_layer_num", 3, "The radial layers of the peripheral ring to be added.");
+  params.addRangeCheckedParam<unsigned int>(
+      "peripheral_layer_num",
+      3,
+      "peripheral_layer_num>0",
+      "The radial layers of the peripheral ring to be added.");
   params.addRequiredRangeCheckedParam<Real>("peripheral_ring_radius",
                                             "peripheral_ring_radius>0",
                                             "Radius of the peripheral ring to be added.");
@@ -127,10 +130,10 @@ PeripheralRingMeshGenerator::generate()
       output_ext_bd_pts.push_back(Point(_peripheral_ring_radius * std::cos(tmp_azi),
                                         _peripheral_ring_radius * std::sin(tmp_azi),
                                         0.0));
-      // a tuple using azimuthal angle as the key to faciliate sorting
+      // a vector of tuples using azimuthal angle as the key to facilitate sorting
       azi_points.push_back(
           std::make_tuple(tmp_azi, input_ext_bd_pts.back(), output_ext_bd_pts.back()));
-      // a simple vector of azimuthal angles for radius correction purpose (in degree)
+      // a simple vector of azimuthal angles for radius correction purposes (in degree)
       azi_array.push_back(tmp_azi / M_PI * 180.0);
     }
   std::sort(azi_points.begin(), azi_points.end());
@@ -142,7 +145,7 @@ PeripheralRingMeshGenerator::generate()
     points_array[0][i] = std::get<1>(azi_points[i]);
     // Outer boundary nodes of the peripheral region
     points_array[_peripheral_layer_num][i] = std::get<2>(azi_points[i]) * correction_factor;
-    // Use interpolation to get intermediated layers nodes
+    // Use interpolation to get intermediate layers nodes
     for (unsigned int j = 1; j < _peripheral_layer_num; ++j)
       points_array[j][i] = (points_array[0][i] * ((Real)_peripheral_layer_num - (Real)j) +
                             points_array[_peripheral_layer_num][i] * (Real)j) /
@@ -178,7 +181,7 @@ PeripheralRingMeshGenerator::generate()
         boundary_info.add_side(elem_Quad4, 1, OUTER_SIDESET_ID);
     }
 
-  // This would make sure that the boundary OUTER_SIDESET_ID is deleted after stiching.
+  // This would make sure that the boundary OUTER_SIDESET_ID is deleted after stitching.
   if (_input_mesh_external_bid != OUTER_SIDESET_ID)
     MooseMesh::changeBoundaryId(*input_mesh, _input_mesh_external_bid, OUTER_SIDESET_ID, true);
   mesh->prepare_for_use();
@@ -241,12 +244,10 @@ PeripheralRingMeshGenerator::isBoundaryValid(ReplicatedMesh & mesh,
   {
     // Find nodes to expand the chain
     dof_id_type end_node_id = boundary_orderred_node_list.back();
-    auto isMatch1 = [end_node_id](std::pair<dof_id_type, dof_id_type> old_id_pair) {
-      return old_id_pair.first == end_node_id;
-    };
-    auto isMatch2 = [end_node_id](std::pair<dof_id_type, dof_id_type> old_id_pair) {
-      return old_id_pair.second == end_node_id;
-    };
+    auto isMatch1 = [end_node_id](std::pair<dof_id_type, dof_id_type> old_id_pair)
+    { return old_id_pair.first == end_node_id; };
+    auto isMatch2 = [end_node_id](std::pair<dof_id_type, dof_id_type> old_id_pair)
+    { return old_id_pair.second == end_node_id; };
     auto result = std::find_if(boundary_node_assm.begin(), boundary_node_assm.end(), isMatch1);
     bool match_first;
     if (result == boundary_node_assm.end())
@@ -324,6 +325,8 @@ bool
 PeripheralRingMeshGenerator::isExternalBoundary(ReplicatedMesh & mesh,
                                                 const boundary_id_type bid) const
 {
+  if (!mesh.is_prepared())
+    mesh.find_neighbors();
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
   auto side_list = boundary_info.build_side_list();
   for (unsigned int i = 0; i < side_list.size(); i++)
