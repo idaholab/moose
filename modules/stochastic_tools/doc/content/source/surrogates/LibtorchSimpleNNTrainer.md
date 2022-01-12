@@ -1,4 +1,4 @@
-# NearestPointTrainer
+# LibtorchSimpleNNTrainer
 
 !syntax description /Trainers/LibtorchSimpleNNTrainer
 

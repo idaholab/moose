@@ -42,6 +42,9 @@ LibtorchSimpleNNTrainer::validParams()
       "no_neurons_per_layer", std::vector<unsigned int>(), "Number of neurons per layer.");
   params.addParam<std::string>(
       "filename", "net.pt", "Filename used to output the neural net parameters.");
+  params.addParam<bool>("read_from_file",
+                        false,
+                        "Switch to allow reading old trained neural nets for further training.");
   params.addParam<Real>("learning_rate", 0.001, "Learning rate (relaxation).");
 
   return params;
@@ -59,6 +62,7 @@ LibtorchSimpleNNTrainer::LibtorchSimpleNNTrainer(const InputParameters & paramet
     _no_hidden_layers(declareModelData<unsigned int>("no_hidden_layers")),
     _no_neurons_per_layer(declareModelData<std::vector<unsigned int>>("no_neurons_per_layer")),
     _filename(getParam<std::string>("filename")),
+    _read_from_file(getParam<bool>("read_from_file")),
     _learning_rate(getParam<Real>("learning_rate")),
     _nn(declareModelData<std::shared_ptr<StochasticTools::LibtorchSimpleNeuralNet>>("nn"))
 {
@@ -162,15 +166,16 @@ LibtorchSimpleNNTrainer::postTrain()
   // Initialize the optimizer
   torch::optim::Adam optimizer(_nn->parameters(), torch::optim::AdamOptions(_learning_rate));
 
-  try
-  {
-    torch::load(_nn, _filename);
-    _console << "Loaded requested .pt file." << std::endl;
-  }
-  catch (...)
-  {
-    _console << "The requested .pt file does not exist, training a new neural net." << std::endl;
-  }
+  if (_read_from_file)
+    try
+    {
+      torch::load(_nn, _filename);
+      _console << "Loaded requested .pt file." << std::endl;
+    }
+    catch (...)
+    {
+      mooseError("The requested pytorch file could not be loaded.");
+    }
 
   // Begin training loop
   for (size_t epoch = 1; epoch <= _no_epocs; ++epoch)
@@ -206,14 +211,13 @@ LibtorchSimpleNNTrainer::postTrain()
 #endif
 }
 
+#ifdef TORCH_ENABLED
 template <>
 void
 dataStore(std::ostream & stream,
           std::shared_ptr<StochasticTools::LibtorchSimpleNeuralNet> & nn,
           void * context)
 {
-#ifdef TORCH_ENABLED
-
   std::string n(nn->name());
   dataStore(stream, n, context);
 
@@ -230,7 +234,6 @@ dataStore(std::ostream & stream,
   dataStore(stream, no, context);
 
   torch::save(nn, nn->name());
-#endif
 }
 
 template <>
@@ -239,7 +242,6 @@ dataLoad(std::istream & stream,
          std::shared_ptr<StochasticTools::LibtorchSimpleNeuralNet> & nn,
          void * context)
 {
-#ifdef TORCH_ENABLED
   std::string name;
   dataLoad(stream, name, context);
 
@@ -260,5 +262,5 @@ dataLoad(std::istream & stream,
       name, no_inputs, no_hidden_layers, no_neurons_per_layer, no_outputs);
 
   torch::load(nn, name);
-#endif
 }
+#endif

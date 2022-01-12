@@ -82,9 +82,14 @@ private:
   /// should be the same as _no_hidden_layers)
   std::vector<unsigned int> & _no_neurons_per_layer;
 
-  /// Name of the pytorch output file. This can be overridden, but there is
-  /// a default value in case the trainer and the surrogate are in the same run.
+  /// Name of the pytorch output file. This is used for loading and storing
+  /// already existing data.
   std::string _filename;
+
+  /// Switch indicating if an already existing neural net should be read from a
+  /// file or not. This can be used to load existing torch files (from previous
+  /// MOOSE or python runs for retraining and further manipulation)
+  bool _read_from_file;
 
   /// The learning rate for the optimization algorithm
   Real _learning_rate;

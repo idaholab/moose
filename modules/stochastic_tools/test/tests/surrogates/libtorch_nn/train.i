@@ -4,9 +4,9 @@
 [Samplers]
   [sample]
     type = CartesianProduct
-    linear_space_items = '0 0.01 10
-                          0 0.01 10
-                          0 0.01 10'
+    linear_space_items = '0 0.0125 5
+                          0 0.0125 5
+                          0 0.0125 5'
   []
 []
 
@@ -22,14 +22,16 @@
 
 [Trainers]
   [train]
-    type = BasicNNTrainer
+    type = LibtorchSimpleNNTrainer
     sampler = sample
     response = values/g_values
-    no_epochs = 60
-    no_batches = 20
-    no_hidden_layers = 3
-    no_neurons_per_layer = '16 8 4'
-    learning_rate = 0.01
+    no_epochs = 40
+    no_batches = 10
+    no_hidden_layers = 2
+    no_neurons_per_layer = '64 32'
+    learning_rate = 0.001
+    filename = mynet.pt
+    read_from_file = false
   []
 []
 
