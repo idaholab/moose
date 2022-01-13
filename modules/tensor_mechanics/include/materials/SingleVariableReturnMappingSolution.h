@@ -106,6 +106,24 @@ protected:
                                    const Real reference_residual);
 
   /**
+   * Output information for a single iteration step to build the convergence history of the model.
+   * This method is duplicative of outputIterationStep, but matches the signature of
+   * ADSingleVariableReturnMappingSolution to allow for consistant code impelementation.
+   * @param iter_output            Output stream
+   * @param effective_trial_stress Effective trial stress
+   * @param residual               Current value of the residual
+   * @param reference              Current value of the reference quantity
+   */
+  virtual void outputIterationStep(std::stringstream * iter_output,
+                                   const Real & effective_trial_stress,
+                                   const Real & scalar,
+                                   const Real reference_residual)
+  {
+    return outputIterationStep(
+        iter_output, _iteration, effective_trial_stress, scalar, _residual, reference_residual);
+  };
+
+  /**
    * Output summary information for the convergence history of the model
    * @param iter_output            Output stream
    * @param total_it               Total iteration count
