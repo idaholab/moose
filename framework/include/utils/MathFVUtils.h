@@ -532,7 +532,6 @@ interpolate(const Limiter & limiter,
 
 /**
  * Return whether the supplied face is on a boundary of the \p object's execution
- *
  */
 template <typename SubdomainRestrictable>
 bool
@@ -542,5 +541,12 @@ onBoundary(const SubdomainRestrictable & obj, const FaceInfo & fi)
                         obj.hasBlocks(fi.neighborSubdomainID());
   return !internal;
 }
+
+/**
+ * Determine whether the passed-in face is on the boundary of an object that lives on the provided
+ * subdomains. Note that if the subdomain set is empty we consider that to mean that the object has
+ * no block restriction and lives on the entire mesh
+ */
+bool onBoundary(const std::set<SubdomainID> & subs, const FaceInfo & fi);
 }
 }
