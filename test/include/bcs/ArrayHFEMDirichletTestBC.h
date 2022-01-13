@@ -30,4 +30,6 @@ protected:
 
   /// Boundary values
   const RealEigenVector _value;
+  /// flag for PJFNK
+  const bool & _for_pjfnk;
 };

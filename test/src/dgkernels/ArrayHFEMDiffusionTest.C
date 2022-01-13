@@ -15,12 +15,14 @@ InputParameters
 ArrayHFEMDiffusionTest::validParams()
 {
   InputParameters params = ArrayDGLowerDKernel::validParams();
+  params.addParam<bool>(
+      "for_pjfnk", false, "True to avoid zeros when assembling block-diagonal Jacobian for PJFNK");
   params.addClassDescription("Imposes the constraints on internal sides with HFEM.");
   return params;
 }
 
 ArrayHFEMDiffusionTest::ArrayHFEMDiffusionTest(const InputParameters & parameters)
-  : ArrayDGLowerDKernel(parameters)
+  : ArrayDGLowerDKernel(parameters), _for_pjfnk(getParam<bool>("for_pjfnk"))
 {
 }
 
@@ -65,6 +67,11 @@ ArrayHFEMDiffusionTest::computeLowerDQpJacobian(Moose::ConstraintJacobianType ty
 
     case Moose::SecondaryLower:
       return transform().diagonal() * (_phi_lambda[_j][_qp] * _test_neighbor[_i][_qp]);
+      break;
+
+    case Moose::LowerLower:
+      if (_for_pjfnk)
+        return RealEigenVector::Ones(_count);
       break;
 
     default:

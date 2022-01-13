@@ -16,6 +16,8 @@ ArrayHFEMDirichletTestBC::validParams()
 {
   InputParameters params = ArrayLowerDIntegratedBC::validParams();
   params.addParam<RealEigenVector>("value", "Value of the BC");
+  params.addParam<bool>(
+      "for_pjfnk", false, "True to avoid zeros when assembling block-diagonal Jacobian for PJFNK");
   params.addClassDescription("Imposes the Dirichlet BC with HFEM.");
   return params;
 }
@@ -23,7 +25,8 @@ ArrayHFEMDirichletTestBC::validParams()
 ArrayHFEMDirichletTestBC::ArrayHFEMDirichletTestBC(const InputParameters & parameters)
   : ArrayLowerDIntegratedBC(parameters),
     _value(isParamValid("value") ? getParam<RealEigenVector>("value")
-                                 : RealEigenVector::Zero(_count))
+                                 : RealEigenVector::Zero(_count)),
+    _for_pjfnk(getParam<bool>("for_pjfnk"))
 {
   if (_value.size() != _count)
     paramError(
@@ -54,6 +57,11 @@ ArrayHFEMDirichletTestBC::computeLowerDQpJacobian(Moose::ConstraintJacobianType 
 
     case Moose::PrimaryLower:
       return transform().diagonal() * (_phi_lambda[_j][_qp] * _test[_i][_qp]);
+      break;
+
+    case Moose::LowerLower:
+      if (_for_pjfnk)
+        return RealEigenVector::Ones(_count);
       break;
 
     default:

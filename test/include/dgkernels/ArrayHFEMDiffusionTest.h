@@ -27,4 +27,6 @@ protected:
 
   // return a matrix for linear transformation of a vector
   RealEigenMatrix transform();
+
+  const bool & _for_pjfnk;
 };

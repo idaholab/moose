@@ -17,6 +17,14 @@
     mesh_mode = replicated
     mumps = true
   []
+  [array_dirichlet_pjfnk]
+    type = 'Exodiff'
+    input = 'array_dirichlet_pjfnk.i'
+    exodiff = 'array_dirichlet_pjfnk_out.e'
+    requirement = 'The system shall support hybrid finite element method (HFEM) calculations with preconditioner only using the block diagonal Jacobian.'
+    mesh_mode = replicated
+    issues = '#20029'
+  []
   [array_dirichlet_transform]
     type = 'Exodiff'
     input = 'array_dirichlet_transform.i'
