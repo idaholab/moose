@@ -15,6 +15,7 @@
 #include <limits.h>
 
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <map>
 
@@ -73,9 +74,15 @@ extern "C" void FOR_NAME(uexternaldb, UEXTERNALDB)(
   {
     std::cout << "UEXTERNALDB: Starting LOP = 2" << std::endl;
     if (myThreadID == 0)
+    {
+      std::ofstream out;
+      out.open("UEXTERNALDB_out.csv");
+      out << "element,qp,increment\n";
       for (int i = 0; i < myNthreads; ++i)
         for (auto & j : out_data[i])
-          std::cout << j.first.first << ' ' << j.first.second << ' ' << j.second << '\n';
+          out << j.first.first << ',' << j.first.second << ',' << j.second << '\n';
+      out.close();
+    }
     std::cout << "UEXTERNALDB: Done with LOP = 2" << std::endl;
   }
 }
