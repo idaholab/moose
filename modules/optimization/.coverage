@@ -1,0 +1,11 @@
+# Coverage requirement configuration for moose, enforced in CIVET testing
+#
+# Valid configuration options:
+# - require_new: Requires this percentage of coverage for new lines added
+# - require_total: Requires this percentage of total coverage
+# - warn_new: Warns below this percentage of coverage for new lines added
+#
+
+[default]
+require_total = 90
+warn_new = 90
