@@ -13,16 +13,16 @@
 #include "poly2tri/poly2tri.h"
 
 /**
- * This TriangulatedMeshGenerator object is designed to generate a triangulated mesh between
+ * This PeripheralTriangleMeshGenerator object is designed to generate a triangulated mesh between
  * a generated outer circle boundary and a provided inner mesh. The inner mesh's outer boundary
  * is used as the triangulation inner boundary.
  */
-class TriangulatedMeshGenerator : public MeshGenerator
+class PeripheralTriangleMeshGenerator : public MeshGenerator
 {
 public:
   static InputParameters validParams();
 
-  TriangulatedMeshGenerator(const InputParameters & parameters);
+  PeripheralTriangleMeshGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 

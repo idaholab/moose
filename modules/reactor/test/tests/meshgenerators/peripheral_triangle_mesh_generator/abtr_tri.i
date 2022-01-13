@@ -5,11 +5,12 @@
   []
 
   [tmg]
-    type = TriangulatedMeshGenerator
+    type = PeripheralTriangleMeshGenerator
     subdomain_id = 35
 
     # inner boundary mesh input
     inner_boundary_mesh = hex_in
+    inner_boundary_name = core_out
 
     # outer circle boundary settings
     outer_circle_radius = 150

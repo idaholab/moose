@@ -1,5 +1,5 @@
 [Tests]
-  design = 'meshgenerators/TriangulatedMeshGenerator.md'
+  design = 'meshgenerators/PeripheralTriangleMeshGenerator.md'
   issues = '#18628'
   [no_steiner_points_inner_boundary_name]
     type = 'Exodiff'

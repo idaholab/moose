@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "TriangulatedMeshGenerator.h"
+#include "PeripheralTriangleMeshGenerator.h"
 
 // Moose headers
 #include "CastUniquePointer.h" // dynamic_pointer_cast, but not std::
@@ -21,10 +21,10 @@
 // poly2tri triangulation library
 #include "poly2tri/poly2tri.h"
 
-registerMooseObject("ReactorApp", TriangulatedMeshGenerator);
+registerMooseObject("ReactorApp", PeripheralTriangleMeshGenerator);
 
 InputParameters
-TriangulatedMeshGenerator::validParams()
+PeripheralTriangleMeshGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
 
@@ -56,14 +56,14 @@ TriangulatedMeshGenerator::validParams()
   params.addParam<std::vector<Real>>("extra_circle_radii", "Radii of extra Steiner point circles.");
   params.addParam<std::vector<unsigned int>>("extra_circle_num_segments",
                                              "Number of segments for extra Steiner point circles.");
-  params.addClassDescription("This TriangulatedMeshGenerator object is designed to generate "
+  params.addClassDescription("This PeripheralTriangleMeshGenerator object is designed to generate "
                              "a triangulated mesh between a generated outer circle boundary "
                              "and a provided inner mesh.");
 
   return params;
 }
 
-TriangulatedMeshGenerator::TriangulatedMeshGenerator(const InputParameters & parameters)
+PeripheralTriangleMeshGenerator::PeripheralTriangleMeshGenerator(const InputParameters & parameters)
   : MeshGenerator(parameters),
     _tri_subdomain_id(isParamValid("subdomain_id") ? getParam<SubdomainID>("subdomain_id") : 0),
     _inner_boundary_mesh(getMesh("inner_boundary_mesh")),
@@ -95,7 +95,7 @@ TriangulatedMeshGenerator::TriangulatedMeshGenerator(const InputParameters & par
 }
 
 std::unique_ptr<MeshBase>
-TriangulatedMeshGenerator::generate()
+PeripheralTriangleMeshGenerator::generate()
 {
   //
   // Set up mesh based on input inner mesh
@@ -327,7 +327,7 @@ TriangulatedMeshGenerator::generate()
 }
 
 void
-TriangulatedMeshGenerator::_create_sorted_boundary_node_list(
+PeripheralTriangleMeshGenerator::_create_sorted_boundary_node_list(
     std::unique_ptr<MeshBase> & mesh, std::vector<Node *> & inner_boundary_nodes)
 {
   BoundaryInfo & boundary_info = mesh->get_boundary_info();
@@ -370,7 +370,7 @@ TriangulatedMeshGenerator::_create_sorted_boundary_node_list(
   // check that boundary list is non-zero, otherwise error
   if (boundary_node_assm.size() == 0)
   {
-    mooseError("In TriangulatedMeshGenerator, inner boundary node list appears empty, ",
+    mooseError("In PeripheralTriangleMeshGenerator, inner boundary node list appears empty, ",
                "check inner boundary input.");
   }
 
@@ -460,7 +460,7 @@ TriangulatedMeshGenerator::_create_sorted_boundary_node_list(
 }
 
 void
-TriangulatedMeshGenerator::_clearPoints(std::vector<p2t::Point *> & point_list)
+PeripheralTriangleMeshGenerator::_clearPoints(std::vector<p2t::Point *> & point_list)
 {
   for (auto point : point_list)
   {
