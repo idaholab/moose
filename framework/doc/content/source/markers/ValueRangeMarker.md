@@ -1,4 +1,3 @@
-
 # ValueRangeMarker
 
 !syntax description /Adaptivity/Markers/ValueRangeMarker

@@ -1,4 +1,3 @@
-
 # ADDerivativeSumMaterial
 
 !syntax description /Materials/ADDerivativeSumMaterial

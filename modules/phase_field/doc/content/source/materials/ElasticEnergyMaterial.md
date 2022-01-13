@@ -1,4 +1,3 @@
-
 # ElasticEnergyMaterial
 
 !syntax description /Materials/ElasticEnergyMaterial

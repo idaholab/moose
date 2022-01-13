@@ -1,4 +1,3 @@
-
 # SinDirichletBC
 
 !syntax description /BCs/SinDirichletBC
