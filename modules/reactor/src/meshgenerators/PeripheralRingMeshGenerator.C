@@ -82,6 +82,7 @@ PeripheralRingMeshGenerator::generate()
   const Point origin_pt = MooseMeshUtils::meshCentroidCalculator(*input_mesh);
   const Real origin_x = origin_pt(0);
   const Real origin_y = origin_pt(1);
+  const Real origin_z = origin_pt(2);
   // Vessel for containing maximum radius of the boundary nodes
   Real max_input_mesh_node_radius;
   unsigned short invalid_boundary_type;
@@ -152,7 +153,7 @@ PeripheralRingMeshGenerator::generate()
       tmp_azi = atan2(input_ext_bd_pts.back()(1) - origin_y, input_ext_bd_pts.back()(0) - origin_x);
       output_ext_bd_pts.push_back(Point(_peripheral_ring_radius * std::cos(tmp_azi),
                                         _peripheral_ring_radius * std::sin(tmp_azi),
-                                        0.0));
+                                        origin_z));
       // a vector of tuples using azimuthal angle as the key to facilitate sorting
       azi_points.push_back(
           std::make_tuple(tmp_azi, input_ext_bd_pts.back(), output_ext_bd_pts.back()));
