@@ -27,6 +27,7 @@ Requirements:
         log_missing: WARNING
         log_missing_design: WARNING
         log_missing_issues: WARNING
+        log_missing_test: WARNING
         log_testable: WARNING
         log_duplicate_requirement: WARNING
         show_warning: false
