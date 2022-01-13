@@ -41,7 +41,7 @@ protected:
     MyData(torch::Tensor dt, torch::Tensor rt) : _data_tensor(dt), _response_tensor(rt) {}
     torch::data::Example<> get(size_t index) override
     {
-      return {_data_tensor.slice(1, index, index + 1), _response_tensor[index]};
+      return {_data_tensor.slice(0, index, index + 1), _response_tensor[index]};
     }
 
     torch::optional<size_t> size() const override { return _response_tensor.sizes()[0]; }
@@ -57,17 +57,14 @@ private:
   /// Data from the current sampler row
   const std::vector<Real> & _sampler_row;
 
-  /// Map containing sample points and the results
-  std::vector<std::vector<Real>> & _sample_points;
-
-  /// Predictor values from reporters
-  std::vector<const Real *> _pvals;
-
-  /// Columns from sampler for predictors
-  std::vector<unsigned int> _pcols;
-
   /// Response value
   const Real & _response;
+
+  /// The gathered data in a flattened form to be able to convert easily to torch::Tensor.
+  std::vector<Real> _flattened_data;
+
+  /// The gathered response in a flattened form to be able to convert easily to torch::Tensor.
+  std::vector<Real> _flattened_response;
 
   /// Number of batches we want to prepare
   unsigned int _no_batches;

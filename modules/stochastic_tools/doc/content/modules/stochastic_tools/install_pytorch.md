@@ -26,8 +26,8 @@ stochastic tools module (let's say it is in `~/projects`):
 
 ```bash
 conda activate moose-torch
-git clone https://github.com/grmnptr/moose.git
-cd moose
+git clone https://github.com/grmnptr/moose.git moose-torch
+cd moose-torch
 git checkout torch-compile-19571
 cd ~/projects/moose/modules/stochastic_tools
 ```
@@ -71,8 +71,8 @@ such as Ubuntu actually do have suitable compilers). For this first, clone the
 repository, then use the corresponding scripts as:
 
 ```bash
-git clone https://github.com/grmnptr/moose.git
-cd moose
+git clone https://github.com/grmnptr/moose.git moose-torch
+cd moose-torch
 git checkout torch-compile-19571
 ./scripts/update_and_rebuild_petsc.sh
 ./scripts/update_and_rebuild_libmesh.sh
@@ -110,8 +110,8 @@ we can proceed to clone moose, built `petsc` and `libmesh`, download `libtorch` 
 built moose with `libtorch`:
 
 ```bash
-git clone https://github.com/grmnptr/moose.git
-cd moose
+git clone https://github.com/grmnptr/moose.git moose-torch
+cd moose-torch
 git checkout torch-compile-19571
 ./scripts/update_and_rebuild_petsc.sh
 ./scripts/update_and_rebuild_libmesh.sh
@@ -122,55 +122,25 @@ MOOSE_UNITY=false make -j 8
 
 ## Testing the installation
 
-A basic neural network trainer class has been implemented in the stochastic tools
-module for testing purposes. If MOOSE compiled without error messages, we can
+Basic neural network trainer and surrogate classes have been implemented in the stochastic tools
+module for testing purposes. For their documentation, see
+[surrogates/LibtorchSimpleNNTrainer.md] and [LibtorchSimpleNNTrainer.md].
+If MOOSE compiled without error messages, we can
 navigate to the testing folder within the stochastic tools root
-and use the following command to train a simple neural network:
+and use the following command to test the implementation:
 
 ```bash
-cd test/tests/surrogates/basic_nn/
-./../../../../stochastic_tools-opt -i train-nn.i --allow-test-objects
+cd test/tests/surrogates/libtorch_nn/
+./../../../../run_tests -j 8
 ```
 
 The expected output should look like this:
 
 ```bash
-Framework Information:
-MOOSE Version:           git commit d4f7f666e3 on 2021-12-16
-LibMesh Version:         
-PETSc Version:           3.15.1
-SLEPc Version:           3.15.1
-Current Time:            Tue Dec 21 11:09:04 2021
-Executable Timestamp:    Tue Dec 21 11:07:46 2021
-
-Parallelism:
-  Num Processors:          1
-  Num Threads:             1
-
-Mesh:
-  Parallel Type:           replicated
-  Mesh Dimension:          1
-  Spatial Dimension:       1
-  Nodes:                   2
-  Elems:                   1
-  Num Subdomains:          1
-
-Execution Information:
-  Executioner:             Steady
-  Solver Mode:             Preconditioned JFNK
-
- Solve Skipped!
-Epoch: 10 | Loss: 59.7538
-Epoch: 20 | Loss: 56.9033
-Epoch: 30 | Loss: 55.8542
-Epoch: 40 | Loss: 54.5681
-Epoch: 50 | Loss: 52.8059
-Epoch: 60 | Loss: 50.5726
-Epoch: 70 | Loss: 47.6894
-Epoch: 80 | Loss: 44.2285
-Epoch: 90 | Loss: 40.4647
-Epoch: 100 | Loss: 36.7318
-Epoch: 110 | Loss: 33.1301
+test:surrogates/libtorch_nn.train_and_evaluate ............................................................ OK
+test:surrogates/libtorch_nn.train ......................................................................... OK
+test:surrogates/libtorch_nn.evaluate ...................................................................... OK
+test:surrogates/libtorch_nn.retrain ....................................................................... OK
 ...
 ...
 ```

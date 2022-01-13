@@ -22,7 +22,6 @@ LibtorchSimpleNNSurrogate::validParams()
 
 LibtorchSimpleNNSurrogate::LibtorchSimpleNNSurrogate(const InputParameters & parameters)
   : SurrogateModel(parameters),
-    _sample_points(getModelData<std::vector<std::vector<Real>>>("_sample_points")),
     _no_hidden_layers(getModelData<unsigned int>("no_hidden_layers")),
     _no_neurons_per_layer(getModelData<std::vector<unsigned int>>("no_neurons_per_layer"))
 #ifdef TORCH_ENABLED

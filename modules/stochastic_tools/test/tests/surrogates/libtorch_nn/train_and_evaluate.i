@@ -31,11 +31,11 @@
     type = LibtorchSimpleNNTrainer
     sampler = sample
     response = values/g_values
-    no_epochs = 40
+    no_epochs = 1000
     no_batches = 10
     no_hidden_layers = 2
     no_neurons_per_layer = '64 32'
-    learning_rate = 0.001
+    learning_rate = 0.0001
     filename = mynet_tne.pt
     read_from_file = false
   []

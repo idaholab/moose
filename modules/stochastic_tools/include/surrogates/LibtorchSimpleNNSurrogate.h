@@ -26,9 +26,6 @@ public:
   virtual Real evaluate(const std::vector<Real> & x) const override;
 
 protected:
-  /// Array containing sample points and the results
-  const std::vector<std::vector<Real>> & _sample_points;
-
   /// Number of hidden layers in the neural net
   const unsigned int & _no_hidden_layers;
 

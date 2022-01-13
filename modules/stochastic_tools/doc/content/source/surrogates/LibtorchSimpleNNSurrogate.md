@@ -1,15 +1,16 @@
 # LibtorchSimpleNNSurrogate
 
-!syntax description /Trainers/LibtorchSimpleNNSurrogate
+!syntax description /Surrogates/LibtorchSimpleNNSurrogate
 
 ## Overview
 
+!alert construction
 Soon to come.
 
 ## Example Input File Syntax
 
-!syntax parameters /Trainers/LibtorchSimpleNNSurrogate
+!syntax parameters /Surrogates/LibtorchSimpleNNSurrogate
 
-!syntax inputs /Trainers/LibtorchSimpleNNSurrogate
+!syntax inputs /Surrogates/LibtorchSimpleNNSurrogate
 
-!syntax children /Trainers/LibtorchSimpleNNSurrogate
+!syntax children /Surrogates/LibtorchSimpleNNSurrogate
