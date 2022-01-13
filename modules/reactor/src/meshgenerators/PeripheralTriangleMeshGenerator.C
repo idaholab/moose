@@ -145,7 +145,7 @@ PeripheralTriangleMeshGenerator::generate()
   //
 
   std::vector<Node *> inner_boundary_nodes;
-  _create_sorted_boundary_node_list(mesh, inner_boundary_nodes);
+  createSortedBoundaryNodeList(mesh, inner_boundary_nodes);
 
   //
   // C2T storage
@@ -312,9 +312,9 @@ PeripheralTriangleMeshGenerator::generate()
   //
 
   delete cdt;
-  _clearPoints(outer_polyline);
-  _clearPoints(inner_polyline);
-  _clearPoints(steiner_points);
+  clearPoints(outer_polyline);
+  clearPoints(inner_polyline);
+  clearPoints(steiner_points);
 
   //
   // finalize mesh (partition the new elements, make the mesh
@@ -327,7 +327,7 @@ PeripheralTriangleMeshGenerator::generate()
 }
 
 void
-PeripheralTriangleMeshGenerator::_create_sorted_boundary_node_list(
+PeripheralTriangleMeshGenerator::createSortedBoundaryNodeList(
     std::unique_ptr<MeshBase> & mesh, std::vector<Node *> & inner_boundary_nodes)
 {
   BoundaryInfo & boundary_info = mesh->get_boundary_info();
@@ -460,7 +460,7 @@ PeripheralTriangleMeshGenerator::_create_sorted_boundary_node_list(
 }
 
 void
-PeripheralTriangleMeshGenerator::_clearPoints(std::vector<p2t::Point *> & point_list)
+PeripheralTriangleMeshGenerator::clearPoints(std::vector<p2t::Point *> & point_list)
 {
   for (auto point : point_list)
   {

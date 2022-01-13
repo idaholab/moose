@@ -53,12 +53,12 @@ protected:
    * @param inner_boundary_nodes vector of inner boundary nodes, input as empty list, populated by
    * function.
    */
-  void _create_sorted_boundary_node_list(std::unique_ptr<MeshBase> & mesh,
-                                         std::vector<Node *> & inner_boundary_nodes);
+  void createSortedBoundaryNodeList(std::unique_ptr<MeshBase> & mesh,
+                                    std::vector<Node *> & inner_boundary_nodes);
 
   /**
    * Deletes and clears a list of poly2tri Point pointers.
    * @param point_list list of poly2tri Point pointers to be deleted.
    */
-  void _clearPoints(std::vector<p2t::Point *> & point_list);
+  void clearPoints(std::vector<p2t::Point *> & point_list);
 };
