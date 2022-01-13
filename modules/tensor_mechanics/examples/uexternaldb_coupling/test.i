@@ -43,7 +43,7 @@
   [uexternaldb]
     type = AbaqusUExternalDB
     plugin = umat
-    execute_on = 'INITIAL TIMESTEP_END'
+    execute_on = 'INITIAL TIMESTEP_END FINAL'
   []
 []
 

@@ -32,7 +32,14 @@ getnumcpus_(int * num)
   *num = communicator->size();
 }
 
-extern "C" TIMPI::communicator
+extern "C" void
+getrank_(int * rank)
+{
+  auto communicator = AbaqusUtils::getCommunicator();
+  *rank = communicator->rank();
+}
+
+extern "C" MPI_Comm
 get_communicator()
 {
   auto communicator = AbaqusUtils::getCommunicator();
@@ -40,13 +47,6 @@ get_communicator()
 }
 
 // Threads
-
-extern "C" void
-getrank_(int * rank)
-{
-  auto communicator = AbaqusUtils::getCommunicator();
-  *rank = communicator->rank();
-}
 
 extern "C" int
 getnumthreads_()
