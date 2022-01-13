@@ -65,12 +65,6 @@ ArrayHFEMDirichletBC::computeLowerDQpResidual(RealEigenVector & r)
 }
 
 RealEigenVector
-ArrayHFEMDirichletBC::computeQpJacobian()
-{
-  return RealEigenVector::Zero(_count);
-}
-
-RealEigenVector
 ArrayHFEMDirichletBC::computeLowerDQpJacobian(Moose::ConstraintJacobianType type)
 {
   RealEigenVector r = RealEigenVector::Zero(_count);
@@ -103,5 +97,5 @@ ArrayHFEMDirichletBC::computeLowerDQpOffDiagJacobian(Moose::ConstraintJacobianTy
     return t;
   }
   else
-    return RealEigenMatrix::Zero(_count, jvar.count());
+    return ArrayLowerDIntegratedBC::computeLowerDQpOffDiagJacobian(type, jvar);
 }
