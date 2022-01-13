@@ -52,28 +52,19 @@ protected:
   /**
    * Compute this Kernel's contribution to the diagonal Jacobian at the current quadrature point
    */
-  virtual RealEigenVector computeQpJacobian() { return RealEigenVector::Zero(_var.count()); }
+  virtual RealEigenVector computeQpJacobian();
 
   /**
    * This is the virtual that derived classes should override for computing a full Jacobian
    * component
    */
-  virtual RealEigenMatrix computeQpOffDiagJacobian(const MooseVariableFEBase & jvar)
-  {
-    if (jvar.number() == _var.number())
-      return computeQpJacobian().asDiagonal();
-    else
-      return RealEigenMatrix::Zero(_var.count(), jvar.count());
-  }
+  virtual RealEigenMatrix computeQpOffDiagJacobian(const MooseVariableFEBase & jvar);
 
   /**
    * This is the virtual that derived classes should override for computing a full Jacobian
    * component
    */
-  virtual RealEigenMatrix computeQpOffDiagJacobianScalar(const MooseVariableScalar & jvar)
-  {
-    return RealEigenMatrix::Zero(_var.count(), (unsigned int)jvar.order() + 1);
-  }
+  virtual RealEigenMatrix computeQpOffDiagJacobianScalar(const MooseVariableScalar & jvar);
 
   /**
    * Put necessary evaluations depending on qp but independent on test functions here

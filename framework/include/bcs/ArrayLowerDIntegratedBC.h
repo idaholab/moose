@@ -56,21 +56,7 @@ protected:
    * Method for computing an off-diagonal jacobian component at quadrature points.
    */
   virtual RealEigenMatrix computeLowerDQpOffDiagJacobian(Moose::ConstraintJacobianType type,
-                                                         const MooseVariableFEBase & jvar)
-  {
-    if (jvar.number() == _var.number())
-    {
-      if (type == Moose::LowerPrimary)
-        return computeLowerDQpJacobian(type).asDiagonal();
-    }
-    else if (jvar.number() == _lowerd_var.number())
-    {
-      if (type == Moose::PrimaryLower || type == Moose::LowerLower)
-        return computeLowerDQpJacobian(type).asDiagonal();
-    }
-
-    return RealEigenMatrix::Zero(_count, jvar.count());
-  }
+                                                         const MooseVariableFEBase & jvar);
 
   /**
    * Put necessary evaluations depending on qp but independent on test functions here

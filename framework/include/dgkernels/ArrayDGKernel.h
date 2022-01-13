@@ -73,22 +73,13 @@ protected:
    * This is the virtual that derived classes should override for computing the Jacobian on
    * neighboring element.
    */
-  virtual RealEigenVector computeQpJacobian(Moose::DGJacobianType)
-  {
-    return RealEigenVector::Zero(_count);
-  }
+  virtual RealEigenVector computeQpJacobian(Moose::DGJacobianType);
 
   /**
    * This is the virtual that derived classes should override for computing the off-diag Jacobian.
    */
   virtual RealEigenMatrix computeQpOffDiagJacobian(Moose::DGJacobianType type,
-                                                   const MooseVariableFEBase & jvar)
-  {
-    if (jvar.number() == _var.number())
-      return computeQpJacobian(type).asDiagonal();
-    else
-      return RealEigenMatrix::Zero(_var.count(), jvar.count());
-  }
+                                                   const MooseVariableFEBase & jvar);
 
   /**
    * Put necessary evaluations depending on qp but independent on test functions here

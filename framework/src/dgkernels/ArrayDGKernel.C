@@ -212,6 +212,11 @@ ArrayDGKernel::computeElemNeighJacobian(Moose::DGJacobianType type)
   }
 }
 
+RealEigenVector ArrayDGKernel::computeQpJacobian(Moose::DGJacobianType)
+{
+  return RealEigenVector::Zero(_count);
+}
+
 void
 ArrayDGKernel::computeOffDiagJacobian(const unsigned int jvar_num)
 {
@@ -322,4 +327,14 @@ ArrayDGKernel::computeOffDiagElemNeighJacobian(Moose::DGJacobianType type,
         avar->addSolutionNeighbor(diag);
     }
   }
+}
+
+RealEigenMatrix
+ArrayDGKernel::computeQpOffDiagJacobian(Moose::DGJacobianType type,
+                                        const MooseVariableFEBase & jvar)
+{
+  if (jvar.number() == _var.number())
+    return computeQpJacobian(type).asDiagonal();
+  else
+    return RealEigenMatrix::Zero(_var.count(), jvar.count());
 }

@@ -205,3 +205,21 @@ ArrayLowerDIntegratedBC::computeLowerDOffDiagJacobian(Moose::ConstraintJacobianT
 
   accumulateTaggedLocalMatrix();
 }
+
+RealEigenMatrix
+ArrayLowerDIntegratedBC::computeLowerDQpOffDiagJacobian(Moose::ConstraintJacobianType type,
+                                                        const MooseVariableFEBase & jvar)
+{
+  if (jvar.number() == _var.number())
+  {
+    if (type == Moose::LowerPrimary)
+      return computeLowerDQpJacobian(type).asDiagonal();
+  }
+  else if (jvar.number() == _lowerd_var.number())
+  {
+    if (type == Moose::PrimaryLower || type == Moose::LowerLower)
+      return computeLowerDQpJacobian(type).asDiagonal();
+  }
+
+  return RealEigenMatrix::Zero(_count, jvar.count());
+}
