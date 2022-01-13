@@ -83,9 +83,6 @@ THMApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   THM::associateSyntax(s);
   THM::registerActions(s);
 
-  s.replaceActionSyntax(
-      "AddFluidPropertiesAction", "FluidProperties/*", "add_fluid_properties", __FILE__, __LINE__);
-
   registerClosuresOption("simple", "Closures1PhaseSimple", THM::FM_SINGLE_PHASE);
   registerClosuresOption("none", "Closures1PhaseNone", THM::FM_SINGLE_PHASE);
 
