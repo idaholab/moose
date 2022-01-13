@@ -1,0 +1,18 @@
+[Tests]
+  issues = '#20024'
+  design = 'source/functions/PiecewiseLinear.md'
+
+  [no_extrap]
+    type = 'CSVDiff'
+    input = 'piecewise_linear.i'
+    csvdiff = 'no_extrap_function_vpp_0000.csv'
+    requirement = "The Function system shall include an object that creates a function based on x- and y-data pairs and does not extrapolate."
+  []
+  [extrap]
+    type = 'CSVDiff'
+    input = 'piecewise_linear.i'
+    cli_args = "Functions/piecewise_linear/extrap=true Outputs/file_base='extrap'"
+    csvdiff = 'extrap_function_vpp_0000.csv'
+    requirement = "The Function system shall include an object that creates a function based on x- and y-data pairs and does extrapolate."
+  []
+[]

@@ -32,12 +32,12 @@ PiecewiseLinearBase::initialSetup()
 }
 
 void
-PiecewiseLinearBase::buildInterpolation()
+PiecewiseLinearBase::buildInterpolation(const bool extrap)
 {
   // try building a linear interpolation object
   try
   {
-    _linear_interp = std::make_unique<LinearInterpolation>(_raw_x, _raw_y);
+    _linear_interp = std::make_unique<LinearInterpolation>(_raw_x, _raw_y, extrap);
   }
   catch (std::domain_error & e)
   {
