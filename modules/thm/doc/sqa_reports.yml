@@ -1,8 +1,9 @@
 Applications:
     thm:
-        app_types:
-            - THMApp
-        content_directory: ${ROOT_DIR}/doc/content
+        exe_directory: ${MOOSE_DIR}/modules/thm
+        content_directory: ${MOOSE_DIR}/modules/thm/doc/content
+        unregister:
+            - ${MOOSE_DIR}/framework/doc/unregister.yml
         remove:
             - ${MOOSE_DIR}/framework/doc/remove.yml
         log_stub_files: WARNING
@@ -15,8 +16,11 @@ Documents:
     software_design_description: sqa/thm_sdd.md
     software_test_plan: sqa/thm_stp.md
     requirements_traceablity_matrix: sqa/thm_rtm.md
-    verification_validation_report: sqa/thm_vvr.md
+    verification_validation_plan: sqa/thm_vvr.md
     failure_analysis_report: sqa/thm_far.md
+    software_library_list: sqa/thm_sll.md
+    communication_and_contact_information: sqa/framework_cci.md
+    software_coding_standards: sqa/framework_scs.md
     log_default: WARNING
     show_warning: false
 
@@ -27,7 +31,6 @@ Requirements:
         log_missing: WARNING
         log_missing_design: WARNING
         log_missing_issues: WARNING
-        log_missing_test: WARNING
         log_testable: WARNING
         log_duplicate_requirement: WARNING
         show_warning: false

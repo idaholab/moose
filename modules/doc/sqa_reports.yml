@@ -234,6 +234,20 @@ Applications:
         remove:
             - framework/doc/remove.yml
 
+    THM:
+        exe_directory: modules/combined
+        app_types:
+            - THMApp
+        content_directory: modules/thm/doc/content
+        unregister:
+            - framework/doc/unregister.yml
+        remove:
+            - framework/doc/remove.yml
+        log_stub_files: WARNING
+        log_missing_description: WARNING
+        log_missing_markdown: WARNING
+        show_warning: false
+
 Documents:
     software_quality_plan: sqa/inl_records.md#software_quality_plan
     enterprise_architecture_entry: sqa/inl_records.md#enterprise_architecture_entry
@@ -408,3 +422,13 @@ Requirements:
     fsi:
         directories:
             - modules/fsi
+
+    thm:
+        directories:
+            - modules/thm
+        log_missing: WARNING
+        log_missing_design: WARNING
+        log_missing_issues: WARNING
+        log_testable: WARNING
+        log_duplicate_requirement: WARNING
+        show_warning: false
