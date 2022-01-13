@@ -46,5 +46,3 @@ plt.ylabel("Objective function")
 plt.title("Comparison of inverse methods for the bimaterial example")
 plt.savefig("comparison.png", bbox_inches = 'tight')
 plt.show()
-
-    
