@@ -1,5 +1,5 @@
 # Do not use jinja templating (A physical change to this file is required to trigger a build)
-{% set build = 0 %}
+{% set build = 1 %}
 {% set strbuild = "build_" + build|string %}
 {% set vtk_version = "9.1.0" %}
 {% set friendly_version = "9.1" %}
@@ -20,32 +20,30 @@ build:
 
 requirements:
   build:
-    - {{ compiler('cxx') }}
-    - {{ moose_cxx }}
     - {{ moose_mpich }}
     - cmake
     - ninja
-    - {{ moose_libglu }}                # [linux]
-    - {{ moose_mesalib }}               # [linux]
-    - {{ cdt('libxt-devel') }}          # [linux]
-    - {{ cdt('libsm-devel') }}          # [linux]
-    - {{ cdt('libx11-devel') }}         # [linux]
-    - {{ cdt('libice-devel') }}         # [linux]
-    - {{ cdt('libxext-devel') }}        # [linux]
-    - {{ cdt('mesa-libgl-devel') }}     # [linux]
-    - {{ cdt('xorg-x11-proto-devel') }} # [linux]
+    - {{ moose_libglu }}       # [linux]
+    - {{ moose_mesalib }}      # [linux]
+    - {{ moose_libxt }}        # [linux]
+    - {{ moose_libsm }}        # [linux]
+    - {{ moose_libx11 }}       # [linux]
+    - {{ moose_libice }}       # [linux]
+    - {{ moose_libxext }}      # [linux]
+    - {{ moose_mesa_libgl }}   # [linux]
+    - {{ moose_xorg_x11 }}     # [linux]
 
   run:
     - {{ moose_mpich }}
-    - {{ moose_libglu }}                # [linux]
-    - {{ moose_mesalib }}               # [linux]
-    - {{ cdt('libxt-devel') }}          # [linux]
-    - {{ cdt('libsm-devel') }}          # [linux]
-    - {{ cdt('libx11-devel') }}         # [linux]
-    - {{ cdt('libice-devel') }}         # [linux]
-    - {{ cdt('libxext-devel') }}        # [linux]
-    - {{ cdt('mesa-libgl-devel') }}     # [linux]
-    - {{ cdt('xorg-x11-proto-devel') }} # [linux]
+    - {{ moose_libglu }}       # [linux]
+    - {{ moose_mesalib }}      # [linux]
+    - {{ moose_libxt }}        # [linux]
+    - {{ moose_libsm }}        # [linux]
+    - {{ moose_libx11 }}       # [linux]
+    - {{ moose_libice }}       # [linux]
+    - {{ moose_libxext }}      # [linux]
+    - {{ moose_mesa_libgl }}   # [linux]
+    - {{ moose_xorg_x11 }}     # [linux]
 
 test:
   commands:
