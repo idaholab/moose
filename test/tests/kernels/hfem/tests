@@ -17,6 +17,15 @@
     mesh_mode = replicated
     mumps = true
   []
+  [array_dirichlet_transform]
+    type = 'Exodiff'
+    input = 'array_dirichlet_transform.i'
+    exodiff = 'array_dirichlet_transform_out.e'
+    requirement = 'The system shall support hybrid finite element method (HFEM) calculations with coupling of components of array variables on internal sides.'
+    mesh_mode = replicated
+    mumps = true
+    issues = '#20029'
+  []
   [neumann]
     type = 'Exodiff'
     input = 'neumann.i'
