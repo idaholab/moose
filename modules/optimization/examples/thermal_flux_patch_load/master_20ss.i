@@ -5,14 +5,14 @@
   type = ObjectiveGradientMinimize
   parameter_names = 'p0 p1 p2 p3 p4 p5 p6 p7 p8 p9 p10 p11 p12 p13 p14 p15 p16 p17 p18 p19'
   num_values = '1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1'
-  measurement_points = '4.24	0	2.45
-                        4.24	2.45	0
-                        4.24	0	-2.45
-                        4.24	-2.45	0
-                        2.45	0	4.24
-                        2.45	4.24	0
-                        2.45	0	-4.24
-                        2.45	-4.24	0
+  measurement_points = '4.24  0  2.45
+                        4.24  2.45  0
+                        4.24  0  -2.45
+                        4.24  -2.45  0
+                        2.45  0  4.24
+                        2.45  4.24  0
+                        2.45  0  -4.24
+                        2.45  -4.24  0
                         4.9 0 0'
   measurement_values = '296.8965126
                         299.1226708
