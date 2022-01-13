@@ -116,7 +116,7 @@ LibtorchSimpleNNTrainer::postTrain()
   MyData my_data(data_tensor, response_tensor);
 
   // We initialize a data_loader for the training part.
-  unsigned int sample_per_batch = n_cols > _no_batches ? n_cols / _no_batches : 1;
+  unsigned int sample_per_batch = n_rows > _no_batches ? n_rows / _no_batches : 1;
 
   auto data_set = my_data.map(torch::data::transforms::Stack<>());
   auto data_loader = torch::data::make_data_loader<torch::data::samplers::SequentialSampler>(
