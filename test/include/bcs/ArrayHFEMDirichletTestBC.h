@@ -11,24 +11,25 @@
 
 #include "ArrayLowerDIntegratedBC.h"
 
-class ArrayHFEMDirichletBC : public ArrayLowerDIntegratedBC
+class ArrayHFEMDirichletTestBC : public ArrayLowerDIntegratedBC
 {
 public:
   static InputParameters validParams();
 
-  ArrayHFEMDirichletBC(const InputParameters & parameters);
+  ArrayHFEMDirichletTestBC(const InputParameters & parameters);
 
 protected:
   virtual void computeQpResidual(RealEigenVector & residual) override;
   virtual void computeLowerDQpResidual(RealEigenVector & residual) override;
   virtual RealEigenVector computeLowerDQpJacobian(Moose::ConstraintJacobianType type) override;
-  virtual RealEigenMatrix computeLowerDQpOffDiagJacobian(Moose::ConstraintJacobianType,
+  virtual RealEigenMatrix computeLowerDQpOffDiagJacobian(Moose::ConstraintJacobianType type,
                                                          const MooseVariableFEBase & jvar) override;
+
+  // return a matrix for linear transformation of a vector
+  RealEigenMatrix transform();
 
   /// Boundary values
   const RealEigenVector _value;
-  /// Variable coupled in
-  const ArrayMooseVariable * const _uhat_var;
-  /// Holds the coupled solution at the current quadrature point on the face.
-  const ArrayVariableValue * const _uhat;
+  /// flag for PJFNK
+  const bool & _for_pjfnk;
 };

@@ -48,7 +48,6 @@ Real HFEMDiffusion::computeQpJacobian(Moose::DGJacobianType) { return 0; }
 Real
 HFEMDiffusion::computeLowerDQpJacobian(Moose::ConstraintJacobianType type)
 {
-
   switch (type)
   {
     case Moose::LowerPrimary:
