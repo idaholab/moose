@@ -84,11 +84,34 @@ PeripheralRingMeshGenerator::generate()
   const Real origin_y = origin_pt(1);
   // Vessel for containing maximum radius of the boundary nodes
   Real max_input_mesh_node_radius;
+  unsigned short invalid_boundary_type;
 
-  if (!isBoundaryValid(
-          *input_mesh, max_input_mesh_node_radius, origin_pt, _input_mesh_external_bid))
-    paramError("input_mesh_external_boundary",
-               "This mesh generator does not work for the provided boundary.");
+  if (!isBoundaryValid(*input_mesh,
+                       max_input_mesh_node_radius,
+                       invalid_boundary_type,
+                       origin_pt,
+                       _input_mesh_external_bid))
+  {
+    switch (invalid_boundary_type)
+    {
+      case 1:
+        paramError("input_mesh_external_boundary",
+                   "This mesh generator does not work for the provided external boundary as it has "
+                   "more than one segments.");
+        break;
+      case 2:
+        paramError("input_mesh_external_boundary",
+                   "This mesh generator does not work for the provided external boundary as it is "
+                   "not a closed loop.");
+        break;
+      case 3:
+        paramError("input_mesh_external_boundary",
+                   "This mesh generator does not work for the provided external boundary as "
+                   "azimuthal angles of consecutive nodes do not change monotonically.");
+        break;
+    }
+  }
+
   if (max_input_mesh_node_radius >= _peripheral_ring_radius)
     paramError(
         "peripheral_ring_radius",
@@ -210,10 +233,12 @@ PeripheralRingMeshGenerator::generate()
 bool
 PeripheralRingMeshGenerator::isBoundaryValid(ReplicatedMesh & mesh,
                                              Real & max_node_radius,
+                                             unsigned short & invalid_type,
                                              const Point origin_pt,
                                              const boundary_id_type bid) const
 {
   max_node_radius = 0.0;
+  invalid_type = 0;
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
   auto side_list_tmp = boundary_info.build_side_list();
   unsigned int elem_counter = 0;
@@ -274,6 +299,8 @@ PeripheralRingMeshGenerator::isBoundaryValid(ReplicatedMesh & mesh,
       if (isFlipped)
       {
         // Flipped twice; this means the boundary has at least two segments.
+        // This is invalid type #1
+        invalid_type = 1;
         return false;
       }
       // mark the first flip event.
@@ -287,7 +314,11 @@ PeripheralRingMeshGenerator::isBoundaryValid(ReplicatedMesh & mesh,
   // If the isFlipped == true, the boundary is not a loop.
   // This is not done inside the loop just for some potential applications in the future.
   if (isFlipped)
+  {
+    // This is invalid type #2
+    invalid_type = 2;
     return false;
+  }
   // It the boundary is a loop, check if azimuthal angles change monotonically
   else
   {
@@ -306,7 +337,11 @@ PeripheralRingMeshGenerator::isBoundaryValid(ReplicatedMesh & mesh,
     }
     std::sort(orderred_node_azi_list.begin(), orderred_node_azi_list.end());
     if (orderred_node_azi_list.front() * orderred_node_azi_list.back() < 0.0)
+    {
+      // This is invalid type #3
+      invalid_type = 3;
       return false;
+    }
     else
       return true;
   }
@@ -318,7 +353,8 @@ PeripheralRingMeshGenerator::isBoundaryValid(ReplicatedMesh & mesh,
                                              const boundary_id_type bid) const
 {
   Real dummy_max_node_radius;
-  return isBoundaryValid(mesh, dummy_max_node_radius, origin_pt, bid);
+  unsigned short dummy_invalid_type;
+  return isBoundaryValid(mesh, dummy_max_node_radius, dummy_invalid_type, origin_pt, bid);
 }
 
 bool

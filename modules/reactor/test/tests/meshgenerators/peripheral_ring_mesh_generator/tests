@@ -20,13 +20,37 @@
     recover = false
     mesh_mode = 'REPLICATED'
   []
-  [err_invalid_boundary]
+  [err_invalid_boundary_type_1]
     type = 'RunException'
     input = 'core_ring.i'
     cli_args = 'Mesh/pr/input_mesh_external_boundary=1
                 --mesh-only'
-    expect_err = 'This mesh generator does not work for the provided boundary.'
-    requirement ='The system shall throw an error if the given boundary of the input mesh is not valid.'
+    expect_err = 'This mesh generator does not work for the provided external boundary as it has more than one segments.'
+    requirement ='The system shall throw an error if the given boundary of the input mesh has two or more segments.'
+    mesh_mode = 'REPLICATED'
+  []
+  [err_invalid_boundary_type_2]
+    type = 'RunException'
+    input = 'core_ring.i'
+    cli_args = 'Mesh/pr/input_mesh_external_boundary=10001
+                Mesh/fmg/file=input_mesh_invalid_bdry_2.e
+                --mesh-only'
+    expect_err = 'This mesh generator does not work for the provided external boundary as it is not a closed loop.'
+    requirement ='The system shall throw an error if the given boundary of the input mesh is an open curve.'
+    mesh_mode = 'REPLICATED'
+  []
+  [err_invalid_boundary_type_3]
+    type = 'RunException'
+    input = 'core_ring.i'
+    cli_args = 'Mesh/ssasg/type=SideSetsAroundSubdomainGenerator
+                Mesh/ssasg/input=fmg
+                Mesh/ssasg/block=1
+                Mesh/ssasg/new_boundary=5000
+                Mesh/pr/input=ssasg
+                Mesh/pr/input_mesh_external_boundary=5000
+                --mesh-only'
+    expect_err = 'This mesh generator does not work for the provided external boundary as azimuthal angles of consecutive nodes do not change monotonically.'
+    requirement ='The system shall throw an error if the consecutive nodes of the given boundary of the input mesh do not change monotonically.'
     mesh_mode = 'REPLICATED'
   []
   [err_small_radius]

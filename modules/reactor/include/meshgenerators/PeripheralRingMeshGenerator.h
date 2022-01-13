@@ -54,12 +54,14 @@ protected:
    * @param mesh input mesh that contains the boundary to be examined
    * @param max_node_radius a reference variable to contain the maximum radius of the nodes on the
    * boundary
+   * @param invalid_type a reference variable to distinguish different types of invalid boundary
    * @param origin_pt origin position of the given mesh (used for azimuthal angle calculation)
    * @param bid ID of the bounadry to be examined
    * @return whether the boundary works with the algorithm
    */
   bool isBoundaryValid(ReplicatedMesh & mesh,
                        Real & max_node_radius,
+                       unsigned short & invalid_type,
                        const Point origin_pt,
                        const boundary_id_type bid) const;
 
