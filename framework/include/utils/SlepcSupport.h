@@ -209,6 +209,11 @@ PetscErrorCode PCApply_MoosePC(PC pc, Vec x, Vec y);
  */
 PetscErrorCode PCSetUp_MoosePC(PC pc);
 
+/**
+ * Function call for MFFD
+ */
+PetscErrorCode mooseSlepcEigenFormFunctionMFFD(void * ctx, Vec x, Vec r);
+
 } // namespace SlepcSupport
 } // namespace moose
 

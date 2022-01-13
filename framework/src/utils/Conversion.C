@@ -84,6 +84,7 @@ initEigenSolveType()
     eigen_solve_type_to_enum["NONLINEAR_POWER"] = EST_NONLINEAR_POWER;
     eigen_solve_type_to_enum["NEWTON"] = EST_NEWTON;
     eigen_solve_type_to_enum["PJFNK"] = EST_PJFNK;
+    eigen_solve_type_to_enum["PJFNKMO"] = EST_PJFNKMO;
     eigen_solve_type_to_enum["JFNK"] = EST_JFNK;
   }
 }
@@ -436,6 +437,33 @@ stringify(const SolveType & t)
       return "FD";
     case ST_LINEAR:
       return "Linear";
+  }
+  return "";
+}
+
+std::string
+stringify(const EigenSolveType & t)
+{
+  switch (t)
+  {
+    case EST_POWER:
+      return "Power";
+    case EST_ARNOLDI:
+      return "ARNOLDI";
+    case EST_KRYLOVSCHUR:
+      return "KRYLOVSCHUR";
+    case EST_JACOBI_DAVIDSON:
+      return "Jacobi Davidson";
+    case EST_NONLINEAR_POWER:
+      return "Nonlinear Power";
+    case EST_PJFNKMO:
+      return "PJFNK with Matrix Only";
+    case EST_NEWTON:
+      return "Newton";
+    case EST_JFNK:
+      return "JFNK";
+    case EST_PJFNK:
+      return "Preconditioned JFNK";
   }
   return "";
 }

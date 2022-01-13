@@ -100,6 +100,9 @@ stringify(unsigned long long v)
 /// Convert solve type into human readable string
 std::string stringify(const SolveType & t);
 
+/// Convert eigen solve type into human readable string
+std::string stringify(const EigenSolveType & t);
+
 /// Convert variable field type into human readable string
 std::string stringify(const VarFieldType & t);
 

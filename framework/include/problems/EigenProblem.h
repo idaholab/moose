@@ -30,6 +30,11 @@ public:
 
   EigenProblem(const InputParameters & parameters);
 
+  virtual std::string solverTypeString() override
+  {
+    return Moose::stringify(solverParams()._eigen_solve_type);
+  }
+
 #ifdef LIBMESH_HAVE_SLEPC
   virtual void solve() override;
 
@@ -189,6 +194,36 @@ public:
    */
   void outputInverseEigenvalue(bool inverse) { _output_inverse_eigenvalue = inverse; }
 
+  /**
+   * Whether or not we are in a linear solver iteration
+   */
+  bool onLinearSolver() const { return _on_linear_solver; }
+
+  /**
+   * Set a flag to indicate whether or not we are in a linear solver iteration
+   */
+  void onLinearSolver(bool ols) { _on_linear_solver = ols; }
+
+  /**
+   * Whether or not matrices are constant
+   */
+  bool constantMatrices() const { return _constant_matrices; }
+
+  /**
+   * Set a flag to indicate whether or not we use constant matrices
+   */
+  void constantMatrices(bool cm) { _constant_matrices = cm; }
+
+  /**
+   * Whether or not constant matrices were already formed
+   */
+  bool wereMatricesFormed() const { return _matrices_formed; }
+
+  /**
+   * Set a flag to indicate whether or not constant matrices were already formed
+   */
+  void wereMatricesFormed(bool mf) { _matrices_formed = mf; }
+
 private:
   /**
    * Do some free/extra power iterations
@@ -219,7 +254,12 @@ protected:
   bool _do_free_power_iteration;
   /// Whether or not output eigenvalue as its inverse. By default, we output regular eigenvalue.
   bool _output_inverse_eigenvalue;
-
+  /// Whether or not we are in linear solver
+  bool _on_linear_solver;
+  /// Whether or not matrices had been formed
+  bool _matrices_formed;
+  /// Whether or not require constant matrices
+  bool _constant_matrices;
   /// Whether or not we normalize eigenvector
   bool _has_normalization;
   /// Postprocessor used to compute a factor from eigenvector
