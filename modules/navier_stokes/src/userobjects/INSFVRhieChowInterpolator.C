@@ -215,13 +215,14 @@ INSFVRhieChowInterpolator::isFaceGeometricallyRelevant(const FaceInfo & fi) cons
   // remote. If we are not a boundary face, then at this point we're safe
   //
 
-  if (fi.neighborPtr())
+  if (!Moose::FV::onBoundary(_sub_ids, fi))
     return true;
 
-  mooseAssert(fi.elem().on_boundary(),
-              "If we don't have a neighbor pointer, then this element has to be on a boundary");
+  const auto & boundary_elem = (fi.neighborPtr() && _sub_ids.count(fi.neighbor().subdomain_id()))
+                                   ? fi.neighbor()
+                                   : fi.elem();
 
-  for (auto * const neighbor : fi.elem().neighbor_ptr_range())
+  for (auto * const neighbor : boundary_elem.neighbor_ptr_range())
   {
     if (!neighbor)
       continue;
@@ -264,23 +265,20 @@ INSFVRhieChowInterpolator::insfvSetup()
       return true;
     };
 
-    // We definitely need the face info element to be evaluable in all cases
-    if (!is_elem_evaluable(fi.elem()))
-      return false;
-
-    if (fi.neighborPtr())
+    if (!Moose::FV::onBoundary(_sub_ids, fi))
       // We're on an internal face and interpolation to this face will just entail linear
-      // interpolation from neighboring cell values. We'll just check then if the neighbor is
-      // evaluable (we've already checked the element)
-      return is_elem_evaluable(fi.neighbor());
+      // interpolation from neighboring cell values. We just have to check whether both elements are
+      // evaluable
+      return is_elem_evaluable(fi.elem()) && is_elem_evaluable(fi.neighbor());
 
     // Else we are a boundary face. Two-term boundary face extrapolation will require a cell value
     // and gradient, which will require evaluations on all surrounding elements
 
-    mooseAssert(fi.elem().on_boundary(),
-                "If we don't have a neighbor pointer, then this element has to be on a boundary");
+    const auto & boundary_elem = (fi.neighborPtr() && _sub_ids.count(fi.neighbor().subdomain_id()))
+                                     ? fi.neighbor()
+                                     : fi.elem();
 
-    for (auto * const neighbor : fi.elem().neighbor_ptr_range())
+    for (auto * const neighbor : boundary_elem.neighbor_ptr_range())
     {
       if (!neighbor)
         continue;
