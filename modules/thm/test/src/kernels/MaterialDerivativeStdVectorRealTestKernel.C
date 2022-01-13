@@ -1,6 +1,6 @@
 #include "MaterialDerivativeStdVectorRealTestKernel.h"
 
-registerMooseObject("MooseApp", MaterialDerivativeStdVectorRealTestKernel);
+registerMooseObject("THMTestApp", MaterialDerivativeStdVectorRealTestKernel);
 
 InputParameters
 MaterialDerivativeStdVectorRealTestKernel::validParams()

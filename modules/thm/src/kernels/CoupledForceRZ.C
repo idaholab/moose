@@ -1,6 +1,6 @@
 #include "CoupledForceRZ.h"
 
-registerMooseObject("MooseApp", CoupledForceRZ);
+registerMooseObject("THMApp", CoupledForceRZ);
 
 InputParameters
 CoupledForceRZ::validParams()

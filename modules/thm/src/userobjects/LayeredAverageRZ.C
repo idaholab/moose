@@ -1,6 +1,6 @@
 #include "LayeredAverageRZ.h"
 
-registerMooseObject("MooseApp", LayeredAverageRZ);
+registerMooseObject("THMApp", LayeredAverageRZ);
 
 InputParameters
 LayeredAverageRZ::validParams()
