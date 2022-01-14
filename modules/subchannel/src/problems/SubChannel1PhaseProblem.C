@@ -810,9 +810,7 @@ SubChannel1PhaseProblem::externalSolve()
     power_in += (*_mdot_soln)(node_in) * (*_h_soln)(node_in);
     power_out += (*_mdot_soln)(node_out) * (*_h_soln)(node_out);
   }
-
   _console << "Power added to coolant is: " << power_out - power_in << " Watt" << std::endl;
-
   if (_pin_mesh_exist)
   {
     _console << "Commencing calculation of Pin surface temperature \n";
@@ -820,19 +818,33 @@ SubChannel1PhaseProblem::externalSolve()
     {
       for (unsigned int iz = 0; iz < _n_cells + 1; ++iz)
       {
-        double sumTemp = 0.0;
-        // Calculate sum of temperatures in the channels around the pin
-        for (auto i_chan : _subchannel_mesh.getPinChannels(i_pin))
-        {
-          auto * channel_node = _subchannel_mesh.getChannelNode(i_chan, iz);
-          sumTemp += (*_T_soln)(channel_node);
-        }
         auto * pin_node = _subchannel_mesh.getPinNode(i_pin, iz);
-        _Tpin_soln->set(pin_node, sumTemp / _subchannel_mesh.getPinChannels(i_pin).size());
+        double sumTemp = 0.0;
+        // Calculate sum of pin surface temperatures that the channels around the pin see
+        for (auto i_ch : _subchannel_mesh.getPinChannels(i_pin))
+        {
+          auto * node = _subchannel_mesh.getChannelNode(i_ch, iz);
+
+          auto mu = (*_mu_soln)(node);
+          auto S = (*_S_flow_soln)(node);
+          auto w_perim = (*_w_perim_soln)(node);
+          auto Dh_i = 4.0 * S / w_perim;
+          auto Re = (((*_mdot_soln)(node) / S) * Dh_i / mu);
+
+          auto k = _fp->k_from_p_T((*_P_soln)(node) + _P_out, (*_T_soln)(node));
+          auto cp = _fp->cp_from_p_T((*_P_soln)(node) + _P_out, (*_T_soln)(node));
+          auto Pr = (*_mu_soln)(node)*cp / k;
+
+          auto Nu = 0.023 * std::pow(Re, 0.8) * std::pow(Pr, 0.4);
+          auto hw = Nu * k / Dh_i;
+
+          sumTemp += (*_q_prime_soln)(pin_node) / (_subchannel_mesh.getRodDiameter() * M_PI * hw) +
+                     (*_T_soln)(node);
+        }
+        _Tpin_soln->set(pin_node, 0.25 * sumTemp);
       }
     }
   }
-
   _aux->solution().close();
 }
 

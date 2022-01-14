@@ -53,14 +53,8 @@ public:
   virtual const unsigned int & getNy() const override { return _ny; }
   const Real & getGap() const { return _gap; }
 
-  /**
-   * Return the index of the sub-channel for a given point
-   */
   unsigned int getSubchannelIndexFromPoint(const Point & p) const override;
 
-  /**
-   * Return the index of the pin for a given point
-   */
   unsigned int getPinIndexFromPoint(const Point & p) const override;
 
   virtual EChannelType getSubchannelType(unsigned int index) const override

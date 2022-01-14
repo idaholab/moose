@@ -12,7 +12,7 @@ P_out = 4.923e6 # Pa
     n_blocks = 1
     pitch = 0.0126
     rod_diameter = 0.00950
-    gap = 0.00095 # the half gap between sub-channel assemblies
+    gap = 0.00095
     heated_length = 3.658
     spacer_z = '0.0'
     spacer_k = '0.0'
@@ -102,7 +102,7 @@ P_out = 4.923e6 # Pa
     type = QuadPowerIC
     variable = q_prime
     power = 3.44e6 # W
-    filename = "power_profile.txt" #type in name of file that describes radial power profile
+    filename = "power_profile.txt"
   []
 
   [T_ic]

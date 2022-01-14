@@ -128,20 +128,20 @@ QuadPowerIC::value(const Point & p)
   Point P = p - p1;
   auto pin_mesh_exist = _mesh.pinMeshExist();
 
-  if (pin_mesh_exist) // project axial heat rate on pins
+  if (pin_mesh_exist)
   {
+    // project axial heat rate on pins
     auto i_pin = _mesh.getPinIndexFromPoint(p);
     {
       if (p(2) >= unheated_length_entry && p(2) <= unheated_length_entry + heated_length)
-      {
         return _ref_qprime(i_pin) * _pin_power_correction(i_pin) * _axial_heat_rate.value(_t, P);
-      }
       else
         return 0.0;
     }
   }
-  else // project axial heat rate on subchannels
+  else
   {
+    // project axial heat rate on subchannels
     auto i_ch = _mesh.getSubchannelIndexFromPoint(p);
     // if we are adjacent to the heated part of the fuel rod
     if (p(2) >= unheated_length_entry && p(2) <= unheated_length_entry + heated_length)
