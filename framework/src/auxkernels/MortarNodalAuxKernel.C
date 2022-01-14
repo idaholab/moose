@@ -19,7 +19,7 @@ MortarNodalAuxKernelTempl<ComputeValueType>::validParams()
 {
   InputParameters params = AuxKernelTempl<ComputeValueType>::validParams();
   params += MortarInterface::validParams();
-  params.set<bool>("use_displaced_mesh") = true;
+  params.set<bool>("ghost_point_neighbors") = true;
   return params;
 }
 

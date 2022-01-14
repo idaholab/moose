@@ -36,6 +36,10 @@ AugmentSparsityOnInterface::validParams()
                                          "The name of the primary lower dimensional subdomain.");
   params.addRequiredParam<SubdomainName>("secondary_subdomain",
                                          "The name of the secondary lower dimensional subdomain.");
+  params.addParam<bool>("ghost_point_neighbors",
+                        false,
+                        "Whether we should ghost point neighbors of secondary face elements, and "
+                        "consequently also their mortar interface couples.");
   return params;
 }
 
@@ -47,7 +51,8 @@ AugmentSparsityOnInterface::AugmentSparsityOnInterface(const InputParameters & p
     _secondary_boundary_name(getParam<BoundaryName>("secondary_boundary")),
     _primary_subdomain_name(getParam<SubdomainName>("primary_subdomain")),
     _secondary_subdomain_name(getParam<SubdomainName>("secondary_subdomain")),
-    _is_coupling_functor(isType(Moose::RelationshipManagerType::COUPLING))
+    _is_coupling_functor(isType(Moose::RelationshipManagerType::COUPLING)),
+    _ghost_point_neighbors(getParam<bool>("ghost_point_neighbors"))
 {
 }
 
@@ -59,7 +64,8 @@ AugmentSparsityOnInterface::AugmentSparsityOnInterface(const AugmentSparsityOnIn
     _secondary_boundary_name(other._secondary_boundary_name),
     _primary_subdomain_name(other._primary_subdomain_name),
     _secondary_subdomain_name(other._secondary_subdomain_name),
-    _is_coupling_functor(other._is_coupling_functor)
+    _is_coupling_functor(other._is_coupling_functor),
+    _ghost_point_neighbors(other._ghost_point_neighbors)
 {
 }
 
@@ -88,7 +94,7 @@ AugmentSparsityOnInterface::getInfo() const
 void
 AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator & range_begin,
                                        const MeshBase::const_element_iterator & range_end,
-                                       processor_id_type p,
+                                       const processor_id_type p,
                                        map_type & coupled_elements)
 {
   // We ask the user to pass boundary names instead of ids to our constraint object.  However, We
@@ -200,20 +206,39 @@ AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator & 
   // can just ghost the coupled elements determined during mortar mesh generation
   else if (_amg)
   {
+    auto ghost_mortar_interface_couplings =
+        [this, p, &coupled_elements, null_mat](const Elem * const elem_arg) {
+          // Look up elem_arg in the mortar_interface_coupling data structure.
+          auto bounds = _amg->mortarInterfaceCoupling().equal_range(elem_arg->id());
+
+          for (const auto & pr : as_range(bounds))
+          {
+            auto coupled_elem_id = pr.second;
+            const Elem * coupled_elem = _mesh->elem_ptr(coupled_elem_id);
+            mooseAssert(coupled_elem,
+                        "The coupled element with id " << coupled_elem_id << " doesn't exist!");
+
+            if (coupled_elem->processor_id() != p)
+              coupled_elements.insert(std::make_pair(coupled_elem, null_mat));
+          }
+        };
+
     for (const Elem * const elem : as_range(range_begin, range_end))
     {
-      // Look up elem in the mortar_interface_coupling data structure.
-      auto bounds = _amg->mortarInterfaceCoupling().equal_range(elem->id());
+      ghost_mortar_interface_couplings(elem);
 
-      for (const auto & pr : as_range(bounds))
+      if (_ghost_point_neighbors && (elem->subdomain_id() == secondary_subdomain_id))
       {
-        auto coupled_elem_id = pr.second;
-        const Elem * coupled_elem = _mesh->elem_ptr(coupled_elem_id);
-        mooseAssert(coupled_elem,
-                    "The coupled element with id " << coupled_elem_id << " doesn't exist!");
+        std::set<const Elem *> elem_point_neighbors;
+        elem->find_point_neighbors(elem_point_neighbors);
 
-        if (coupled_elem->processor_id() != p)
-          coupled_elements.insert(std::make_pair(coupled_elem, null_mat));
+        for (const Elem * const neigh : elem_point_neighbors)
+        {
+          if (neigh->processor_id() != p)
+            coupled_elements.emplace(neigh, null_mat);
+
+          ghost_mortar_interface_couplings(neigh);
+        }
       }
     }
   }
@@ -227,7 +252,8 @@ AugmentSparsityOnInterface::operator>=(const RelationshipManager & other) const
     if (_primary_boundary_name == asoi->_primary_boundary_name &&
         _secondary_boundary_name == asoi->_secondary_boundary_name &&
         _primary_subdomain_name == asoi->_primary_subdomain_name &&
-        _secondary_subdomain_name == asoi->_secondary_subdomain_name && baseGreaterEqual(*asoi))
+        _secondary_subdomain_name == asoi->_secondary_subdomain_name &&
+        (_ghost_point_neighbors >= asoi->_ghost_point_neighbors) && baseGreaterEqual(*asoi))
       return true;
   }
   return false;
