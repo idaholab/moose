@@ -79,6 +79,7 @@
     type = ConstantVectorPostprocessor
     vector_names = 'x y z value'
     value = '0.2 0.2 0.8; 0.2 0.8 0.2; 0 0 0; -2458 7257 26335'
+    execute_on = LINEAR
   []
   [data_pt]
     type = VppPointValueSampler

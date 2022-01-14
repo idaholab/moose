@@ -87,6 +87,7 @@
              0   2.3 -2.3 -2.3  2.3;
              0   2.3  2.3 -2.3 -2.3;
              100 150  300  250  150'
+    execute_on = LINEAR
   []
   #-----every forward problem should have these two
   [data_pt]

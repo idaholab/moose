@@ -133,6 +133,7 @@ function_vals = '0 0 0'
     vector_names = 'x y z value'
     # value = '0.2 0.5 1.5 1.8; 0.5 0.5 0.5 0.5; 0 0 0 0; 10 10 10 10'
     value = '0.2 0.5 1.5 1.8 0.3 0.6 0.9 1.2;0.5 0.5 0.5 0.5 1.1 1.1 1.1 1.1;0 0 0 0 0 0 0 0;10 10 10 10 10 10 10 10'
+    execute_on = LINEAR
   []
   [adjoint_pt]
     type = VectorOfPostprocessors
