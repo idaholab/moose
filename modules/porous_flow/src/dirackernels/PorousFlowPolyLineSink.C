@@ -57,7 +57,7 @@ PorousFlowPolyLineSink::computeQpBaseOutflow(unsigned current_dirac_ptid) const
     // contribution from half-segment "ahead of" this point, or we only have one point
     outflow += _half_seg_len[current_dirac_ptid];
 
-  return outflow * _test[_i][_qp] * _sink_func.sample(ptqp()) * _rs[current_dirac_ptid];
+  return outflow * _test[_i][_qp] * _sink_func.sample(ptqp()) * _weight->at(current_dirac_ptid);
 }
 
 void
@@ -83,6 +83,6 @@ PorousFlowPolyLineSink::computeQpBaseOutflowJacobian(unsigned jvar,
     outflow += _half_seg_len[current_dirac_ptid];
 
   outflowp = outflow * _test[_i][_qp] * _sink_func.sampleDerivative(ptqp()) * dptqp(pvar) *
-             _phi[_j][_qp] * _rs[current_dirac_ptid];
-  outflow *= _test[_i][_qp] * _sink_func.sample(ptqp()) * _rs[current_dirac_ptid];
+             _phi[_j][_qp] * _weight->at(current_dirac_ptid);
+  outflow *= _test[_i][_qp] * _sink_func.sample(ptqp()) * _weight->at(current_dirac_ptid);
 }

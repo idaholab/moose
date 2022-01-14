@@ -235,7 +235,7 @@ PorousFlowPeacemanBorehole::computeQpBaseOutflow(unsigned current_dirac_ptid) co
                                    _rot_matrix[current_dirac_ptid - 1],
                                    _half_seg_len[current_dirac_ptid - 1],
                                    _current_elem,
-                                   _rs[current_dirac_ptid]);
+                                   _weight->at(current_dirac_ptid));
       outflow += wc * (pp - bh_pressure);
     }
   }
@@ -250,7 +250,7 @@ PorousFlowPeacemanBorehole::computeQpBaseOutflow(unsigned current_dirac_ptid) co
                                    _rot_matrix[current_dirac_ptid],
                                    _half_seg_len[current_dirac_ptid],
                                    _current_elem,
-                                   _rs[current_dirac_ptid]);
+                                   _weight->at(current_dirac_ptid));
       outflow += wc * (pp - bh_pressure);
     }
   }
@@ -289,7 +289,7 @@ PorousFlowPeacemanBorehole::computeQpBaseOutflowJacobian(unsigned jvar,
                                    _rot_matrix[current_dirac_ptid - 1],
                                    _half_seg_len[current_dirac_ptid - 1],
                                    _current_elem,
-                                   _rs[current_dirac_ptid]);
+                                   _weight->at(current_dirac_ptid));
       outflowp += wc * pp_prime;
       outflow += wc * (pp - bh_pressure);
     }
@@ -305,7 +305,7 @@ PorousFlowPeacemanBorehole::computeQpBaseOutflowJacobian(unsigned jvar,
                                    _rot_matrix[current_dirac_ptid],
                                    _half_seg_len[current_dirac_ptid],
                                    _current_elem,
-                                   _rs[current_dirac_ptid]);
+                                   _weight->at(current_dirac_ptid));
       outflowp += wc * pp_prime;
       outflow += wc * (pp - bh_pressure);
     }

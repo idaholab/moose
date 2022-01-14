@@ -28,6 +28,26 @@ PorousFlowLineGeometry::validParams()
       "borehole bottom, where the borehole pressure is bottom_pressure.  If your file contains "
       "just one point, you must also specify the line_length and line_direction parameters.  Note "
       "that you will get segementation faults if your points do not lie within your mesh!");
+  params.addParam<ReporterName>(
+      "x_coord_reporter",
+      "reporter x-coordinate name of line sink.  This uses the reporter syntax <reporter>/<name>.  "
+      "Each point must adhere to the same requirements as those that would be given if using "
+      "point_file ");
+  params.addParam<ReporterName>(
+      "y_coord_reporter",
+      "reporter y-coordinate name of line sink.  This uses the reporter syntax <reporter>/<name>.  "
+      "Each point must adhere to the same requirements as those that would be given if using "
+      "point_file ");
+  params.addParam<ReporterName>(
+      "z_coord_reporter",
+      "reporter z-coordinate name of line sink.  This uses the reporter syntax <reporter>/<name>.  "
+      "Each point must adhere to the same requirements as those that would be given if using "
+      "point_file ");
+  params.addParam<ReporterName>(
+      "weight_reporter",
+      "reporter weight name of line sink. This uses the reporter syntax <reporter>/<name>.  "
+      "Each point must adhere to the same requirements as those that would be given if using "
+      "point_file ");
   params.addRangeCheckedParam<Real>(
       "line_length",
       0.0,
@@ -48,18 +68,38 @@ PorousFlowLineGeometry::validParams()
 
 PorousFlowLineGeometry::PorousFlowLineGeometry(const InputParameters & parameters)
   : DiracKernel(parameters),
+    ReporterInterface(this),
     _line_length(getParam<Real>("line_length")),
     _line_direction(getParam<RealVectorValue>("line_direction")),
-    _point_file(getParam<std::string>("point_file"))
+    _point_file(getParam<std::string>("point_file")),
+    _x_coord(isParamValid("x_coord_reporter") ? &getReporterValue<std::vector<Real>>(
+                                                    "x_coord_reporter", REPORTER_MODE_REPLICATED)
+                                              : &_xs),
+    _y_coord(isParamValid("y_coord_reporter") ? &getReporterValue<std::vector<Real>>(
+                                                    "y_coord_reporter", REPORTER_MODE_REPLICATED)
+                                              : &_ys),
+    _z_coord(isParamValid("z_coord_reporter") ? &getReporterValue<std::vector<Real>>(
+                                                    "z_coord_reporter", REPORTER_MODE_REPLICATED)
+                                              : &_zs),
+    _weight(isParamValid("weight_reporter")
+                ? &getReporterValue<std::vector<Real>>("weight_reporter", REPORTER_MODE_REPLICATED)
+                : &_rs),
+    _usingReporter(isParamValid("x_coord_reporter"))
 {
   statefulPropertiesAllowed(true);
 
-  if (isParamValid("line_base") && !_point_file.empty())
+  const int checkInputFormat =
+      int(isParamValid("line_base")) + int(!_point_file.empty()) + int(_usingReporter);
+
+  if (checkInputFormat > 1)
     paramError("point_file",
-               "PorousFlowLineGeometry: must specify only one of 'point_file' and 'line_base'");
-  if (!isParamValid("line_base") && _point_file.empty())
-    paramError("point_file",
-               "PorousFlowLineGeometry: must specify at least one of 'point_file' and 'line_base'");
+               "PorousFlowLineGeometry: must specify only one of 'point_file' or 'line_base' or "
+               "reporter based input");
+  else if (checkInputFormat == 0)
+    paramError(
+        "point_file",
+        "PorousFlowLineGeometry: must specify at least one of 'point_file' or 'line_base' or "
+        "reporter based input");
 
   if (!_point_file.empty())
   {
@@ -87,6 +127,35 @@ PorousFlowLineGeometry::PorousFlowLineGeometry(const InputParameters & parameter
       }
     }
     file.close();
+    calcLineLengths();
+  }
+  else if (_usingReporter)
+  {
+    if (_weight->size() != _x_coord->size() || _weight->size() != _y_coord->size() ||
+        _weight->size() != _z_coord->size())
+    {
+      std::string errMsg =
+          "The value and coordinate vectors are a different size.  \n"
+          "There must be one value per coordinate.  If the sizes are \n"
+          "zero, the reporter or reporter may not have been initialized with data \n"
+          "before the Dirac Kernel is called.  \n"
+          "Try setting \"execute_on = timestep_begin\" in the reporter being read. \n"
+          "weight size = " +
+          std::to_string(_weight->size()) +
+          ";  x_coord size = " + std::to_string(_x_coord->size()) +
+          ";  y_coord size = " + std::to_string(_y_coord->size()) +
+          ";  z_coord size = " + std::to_string(_z_coord->size());
+
+      mooseError(errMsg);
+    }
+
+    for (std::size_t i = 0; i < _x_coord->size(); ++i)
+    {
+      _rs.push_back(_weight->at(i));
+      _xs.push_back(_x_coord->at(i));
+      _ys.push_back(_y_coord->at(i));
+      _zs.push_back(_z_coord->at(i));
+    }
     calcLineLengths();
   }
   else
@@ -157,7 +226,7 @@ PorousFlowLineGeometry::calcLineLengths()
 void
 PorousFlowLineGeometry::regenPoints()
 {
-  if (!_point_file.empty())
+  if (!_point_file.empty() || _usingReporter)
     return;
 
   // recalculate the auto-generated points:
@@ -202,7 +271,6 @@ PorousFlowLineGeometry::regenPoints()
     _ys.back() = p1(1);
     _zs.back() = p1(2);
   }
-
   calcLineLengths();
 }
 
@@ -241,6 +309,6 @@ PorousFlowLineGeometry::addPoints()
   // Add point using the unique ID "i", let the DiracKernel take
   // care of the caching.  This should be fast after the first call,
   // as long as the points don't move around.
-  for (unsigned int i = 0; i < _zs.size(); i++)
-    addPoint(Point(_xs[i], _ys[i], _zs[i]), i);
+  for (unsigned int i = 0; i < _x_coord->size(); i++)
+    addPoint(Point(_x_coord->at(i), _y_coord->at(i), _z_coord->at(i)), i);
 }
