@@ -32,7 +32,14 @@ getnumcpus_(int * num)
   *num = communicator->size();
 }
 
-extern "C" TIMPI::communicator
+extern "C" void
+getrank_(int * rank)
+{
+  auto communicator = AbaqusUtils::getCommunicator();
+  *rank = communicator->rank();
+}
+
+extern "C" MPI_Comm
 get_communicator()
 {
   auto communicator = AbaqusUtils::getCommunicator();
@@ -41,22 +48,10 @@ get_communicator()
 
 // Threads
 
-extern "C" void
-getrank_(int * rank)
-{
-  auto communicator = AbaqusUtils::getCommunicator();
-  *rank = communicator->rank();
-}
-
 extern "C" int
 getnumthreads_()
 {
   return libMesh::n_threads();
-}
-extern "C" int
-getnumthreads()
-{
-  return getnumthreads_();
 }
 
 extern "C" int
@@ -64,11 +59,6 @@ get_thread_id_()
 {
   ParallelUniqueId puid;
   return puid.id;
-}
-extern "C" int
-get_thread_id()
-{
-  return get_thread_id_();
 }
 
 // Output directory
@@ -102,35 +92,34 @@ AbaqusUtils::setInputFile(const std::string & input_file)
 }
 
 extern "C" void
-getoutdir_(char * dir, unsigned int * len)
+getoutdir_(char * dir, int * len)
 {
   auto output_dir = AbaqusUtils::getOutputDir();
   *len = output_dir.length();
-  for (unsigned int i = 0; i < 256; ++i)
+  for (int i = 0; i < 256; ++i)
     dir[i] = i < *len ? output_dir[i] : ' ';
 }
 
 extern "C" void
-getjobname_(char * dir, unsigned int * len)
+getjobname_(char * dir, int * len)
 {
   auto job_name = AbaqusUtils::getJobName();
   *len = job_name.length();
-  for (unsigned int i = 0; i < 256; ++i)
+  for (int i = 0; i < 256; ++i)
     dir[i] = i < *len ? job_name[i] : ' ';
 }
 
 // error/warning/info message output
 
 extern "C" void
-stdb_abqerr_(
-    int * lop, char * format, int * intv, double * realv, char * charv, std::size_t format_len)
+stdb_abqerr_(int * lop, char * format, int * intv, double * realv, char * charv, int format_len)
 {
   std::string message;
   unsigned int int_index = 0;
   unsigned int real_index = 0;
   unsigned int char_index = 0;
 
-  for (unsigned int i = 0; i < format_len; ++i)
+  for (int i = 0; i < format_len; ++i)
   {
     // interpret %I, %R, and %S
     if (format[i] == '%' && i < format_len - 1)
@@ -206,7 +195,7 @@ AbaqusUtils::smaInitialize()
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     if (!initialized)
     {
-      const auto n = getnumthreads();
+      const auto n = getnumthreads_();
       _sma_local_int_array.resize(n);
       _sma_local_float_array.resize(n);
       initialized = true;
@@ -230,7 +219,7 @@ SMAIntArrayCreate(int id, int len, int val)
   return ib.first->second.data();
 }
 
-extern "C" Real *
+extern "C" double *
 SMAFloatArrayCreate(int id, int len, Real val)
 {
   auto ib = AbaqusUtils::_sma_float_array.emplace(id, std::vector<Real>(len, val));
@@ -249,7 +238,7 @@ SMALocalIntArrayCreate(int id, int len, int val)
   return array.data();
 }
 
-extern "C" Real *
+extern "C" double *
 SMALocalFloatArrayCreate(int id, int len, Real val)
 {
   AbaqusUtils::smaInitialize();
@@ -268,7 +257,7 @@ SMAIntArrayAccess(int id)
   return it->second.data();
 }
 
-extern "C" Real *
+extern "C" double *
 SMAFloatArrayAccess(int id)
 {
   auto it = AbaqusUtils::getSMAIterator(AbaqusUtils::_sma_float_array, id, "SMAFloatArrayAccess");
@@ -284,7 +273,7 @@ SMALocalIntArrayAccess(int id)
   return it->second.data();
 }
 
-extern "C" Real *
+extern "C" double *
 SMALocalFloatArrayAccess(int id)
 {
   auto & array = AbaqusUtils::getSMAThreadArray(AbaqusUtils::_sma_local_float_array,
