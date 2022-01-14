@@ -99,39 +99,10 @@
 []
 
 [VectorPostprocessors]
-  # [data_pt]
-  #   type = MeasuredDataPointSampler
-  #   variable = temperature
-  #   points = '0.2 0.5 0
-  #             0.5 0.5 0
-  #             1.5 0.5 0
-  #             1.8 0.5 0'
-  #   measured_values = '210 220 160 120'
-  #   outputs=none
-  # []
-  # [data_pt]
-  #   type = MeasuredDataPointSampler
-  #   variable = temperature
-  #   points = '0.3 1.1 0
-  #             0.6 1.1 0
-  #             0.9 1.1 0
-  #             1.2 1.1 0'
-  #   measured_values = '260 271 265 236'
-  #   outputs=none
-  # []
   [data_pt]
-    type = MeasuredDataPointSampler
+    type = VppPointValueSampler
     variable = temperature
-    points = '0.2 0.5 0
-              0.5 0.5 0
-              1.5 0.5 0
-              1.8 0.5 0
-              0.3 1.1 0
-              0.6 1.1 0
-              0.9 1.1 0
-              1.2 1.1 0'
-    measured_values = '210 220 160 120 260 271 265 236'
-    outputs=none
+    reporter_name = measure_data
   []
   [horizontal]
     type = LineValueSampler
@@ -151,9 +122,15 @@
   [../]
 []
 
+[Reporters]
+  [measure_data]
+    type=OptimizationData
+  []
+[]
+
 [Outputs]
   # console = true
-  exodus = true
-  csv = true
+  exodus = false
+  csv = false
   # file_base = 'forward'
 []

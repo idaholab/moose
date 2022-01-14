@@ -25,10 +25,15 @@ function_vals = '0 0 0'
   [pt]
     type = ReporterPointSource
     variable = temperature
-    x_coord_name = point_source/x
-    y_coord_name = point_source/y
-    z_coord_name = point_source/z
-    value_name = point_source/value
+    x_coord_name = misfit/measurement_xcoord
+    y_coord_name = misfit/measurement_ycoord
+    z_coord_name = misfit/measurement_zcoord
+    value_name = misfit/misfit_values
+  []
+[]
+[Reporters]
+  [misfit]
+    type=OptimizationData
   []
 []
 

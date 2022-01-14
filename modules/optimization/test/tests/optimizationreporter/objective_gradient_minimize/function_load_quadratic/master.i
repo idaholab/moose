@@ -6,11 +6,20 @@
   parameter_names = 'parameter_results'
   num_values = '3'
   initial_condition = '1 1 1'
+  measurement_points = '0.2 0.5 0
+            0.5 0.5 0
+            1.5 0.5 0
+            1.8 0.5 0
+            0.3 1.1 0
+            0.6 1.1 0
+            0.9 1.1 0
+            1.2 1.1 0'
+  measurement_values = '209 221 159 121 260 271 265 236'
 []
 
 [Executioner]
   type = Optimize
-  tao_solver = taocg #taolmvm
+  tao_solver =taolmvm
   petsc_options_iname = '-tao_max_it -tao_fmin -tao_ls_type' # tao_gatol'
   petsc_options_value = '50 4 unit' #1e-4
    # petsc_options_iname='-tao_max_it -tao_fd_test -tao_test_gradient -tao_fd_gradient -tao_fd_delta -tao_gatol'
@@ -49,20 +58,28 @@
 []
 
 [Transfers]
-  [fromforward]
-    type = MultiAppReporterTransfer
-    multi_app = forward
-    from_reporters = 'data_pt/temperature_difference data_pt/temperature'
-    to_reporters = 'OptimizationReporter/misfit receiver/measured'
-    direction = from_multiapp
-  []
-  [toadjoint]
-    type = MultiAppReporterTransfer
-    multi_app = adjoint
-    from_reporters = 'OptimizationReporter/misfit'
-    to_reporters = 'point_source/value'
-    direction = to_multiapp
-  []
+  #these are usually the same for all input files.
+    [fromForward]
+      type = MultiAppReporterTransfer
+      multi_app = forward
+      direction = from_multiapp
+      from_reporters = 'data_pt/temperature'
+      to_reporters = 'OptimizationReporter/simulation_values'
+    []
+    [toAdjoint]
+      type = MultiAppReporterTransfer
+      multi_app = adjoint
+      direction = to_multiapp
+      from_reporters = 'OptimizationReporter/measurement_xcoord OptimizationReporter/measurement_ycoord OptimizationReporter/measurement_zcoord OptimizationReporter/misfit_values'
+      to_reporters = 'misfit/measurement_xcoord misfit/measurement_ycoord misfit/measurement_zcoord misfit/misfit_values'
+    []
+    [toForward_measument]
+      type = MultiAppReporterTransfer
+      multi_app = forward
+      direction = to_multiapp
+      from_reporters = 'OptimizationReporter/measurement_xcoord OptimizationReporter/measurement_ycoord OptimizationReporter/measurement_zcoord'
+      to_reporters = 'measure_data/measurement_xcoord measure_data/measurement_ycoord measure_data/measurement_zcoord'
+    []
   [fromadjoint]
     type = MultiAppReporterTransfer
     multi_app = adjoint
@@ -73,11 +90,6 @@
 []
 
 [Reporters]
-  [receiver]
-    type = ConstantReporter
-    real_vector_names = measured
-    real_vector_values = '0 0 0 0'
-  []
   [optInfo]
     type = OptimizationInfo
   []

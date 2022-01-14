@@ -4,9 +4,10 @@
                   "  This is nonlinear because b will show up in the adjoint "
                   " function that computes the gradient.  It takes 51 iterations which is a lot."
     type = CSVDiff
+    abs_zero = 1
     rel_err = 0.01
     input = master.i
-    csvdiff = master_out_receiver_0001.csv
+    csvdiff = master_out_optInfo_0001.csv
     heavy = true
   []
 []
