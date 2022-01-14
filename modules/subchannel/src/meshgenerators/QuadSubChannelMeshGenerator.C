@@ -95,7 +95,6 @@ QuadSubChannelMeshGenerator::QuadSubChannelMeshGenerator(const InputParameters &
   for (unsigned int index = 0; index < spacer_cell.size(); index++)
     _k_grid[spacer_cell[index]] += _spacer_k[index];
 
-  // Resize the maps.
   _gap_to_chan_map.resize(_n_gaps);
   _gapnodes.resize(_n_gaps);
   _chan_to_gap_map.resize(_n_channels);
