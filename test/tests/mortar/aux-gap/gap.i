@@ -3,28 +3,28 @@
     type = FileMeshGenerator
     file = nodal_normals_test_offset_nonmatching_gap.e
   []
-  [./primary]
+  [primary]
     input = file
     type = LowerDBlockFromSidesetGenerator
     sidesets = '2'
     new_block_id = '20'
-  [../]
-  [./secondary]
+  []
+  [secondary]
     input = primary
     type = LowerDBlockFromSidesetGenerator
     sidesets = '1'
     new_block_id = '10'
-  [../]
+  []
 []
 
 [Variables]
-  [./T]
+  [T]
     block = '1 2'
-  [../]
-  [./lambda]
+  []
+  [lambda]
     block = '10'
     use_dual = true
-  [../]
+  []
 []
 
 [AuxVariables]
@@ -46,42 +46,42 @@
 []
 
 [BCs]
-  [./neumann]
+  [neumann]
     type = FunctionGradientNeumannBC
     exact_solution = exact_soln
     variable = T
     boundary = '3 4 5 6 7 8'
-  [../]
+  []
 []
 
 [Kernels]
-  [./conduction]
+  [conduction]
     type = Diffusion
     variable = T
     block = '1 2'
-  [../]
-  [./sink]
+  []
+  [sink]
     type = Reaction
     variable = T
     block = '1 2'
-  [../]
-  [./forcing_function]
+  []
+  [forcing_function]
     type = BodyForce
     variable = T
     function = forcing_function
     block = '1 2'
-  [../]
+  []
 []
 
 [Functions]
-  [./forcing_function]
+  [forcing_function]
     type = ParsedFunction
     value = '-4 + x^2 + y^2'
-  [../]
-  [./exact_soln]
+  []
+  [exact_soln]
     type = ParsedFunction
     value = 'x^2 + y^2'
-  [../]
+  []
 []
 
 [Debug]
@@ -89,7 +89,7 @@
 []
 
 [Constraints]
-  [./mortar]
+  [mortar]
     type = EqualValueConstraint
     primary_boundary = 2
     secondary_boundary = 1
@@ -97,14 +97,14 @@
     secondary_subdomain = 10
     variable = lambda
     secondary_variable = T
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

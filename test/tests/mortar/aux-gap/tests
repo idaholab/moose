@@ -3,17 +3,24 @@
   issues = '#20001'
   [gap]
     requirement = 'The system shall be able to compute the gap between secondary and primary bodies using the mortar method and auxiliary kernels'
-    [matched_order]
+    [first_order]
       type = Exodiff
       input = gap.i
       exodiff = gap_out.e
-      detail = 'when the gap auxiliary variable order matches the mesh order'
+      detail = 'when the gap auxiliary variable and mesh are both first order'
     []
     [mismatched_order]
       type = Exodiff
       input = mismatch.i
       exodiff = mismatch_out.e
-      detail = 'when the gap auxiliary variable is of order less than the mesh order'
+      detail = 'when the gap auxiliary variable is first order and the mesh is second order'
+    []
+    [second_order]
+      type = Exodiff
+      input = mismatch.i
+      exodiff = second_order.e
+      detail = 'when the gap auxiliary variable and mesh are both second order'
+      cli_args = 'Outputs/file_base=second_order AuxVariables/gap/order=SECOND'
     []
   []
 []
