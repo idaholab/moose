@@ -60,10 +60,6 @@ WeightedGapAux::computeQpProperties()
 void
 WeightedGapAux::computeQpIProperties()
 {
-  mooseAssert(_normals.size() ==
-                  (_interpolate_normals ? _test[_i].size() : _lower_secondary_elem->n_nodes()),
-              "Making sure that _normals is the expected size");
-
   if (_interpolate_normals)
     _weighted_gap += _test[_i][_qp] * _qp_gap;
   else
