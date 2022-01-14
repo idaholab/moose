@@ -683,11 +683,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
   }
 #endif
 
-  // Set up the the mortar segment neighbor information.
-  _mortar_segment_mesh->allow_renumbering(true);
-  _mortar_segment_mesh->skip_partitioning(true);
-  _mortar_segment_mesh->allow_find_neighbors(false);
-  _mortar_segment_mesh->prepare_for_use();
+  _mortar_segment_mesh->cache_elem_data();
 
   // (Optionally) Write the mortar segment mesh to file for inspection
   if (_debug)
