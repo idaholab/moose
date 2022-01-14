@@ -41,10 +41,16 @@ ArrayDGLowerDKernel::ArrayDGLowerDKernel(const InputParameters & parameters)
     _test_lambda(_lowerd_var.phiLower()),
     _work_vector(_count)
 {
-  if (!_lowerd_var.activeSubdomains().count(Moose::INTERNAL_SIDE_LOWERD_ID))
-    paramError("lowerd_variable",
-               "Must be defined on the subdomain INTERNAL_SIDE_LOWERD_SUBDOMAIN subdomain that is "
-               "added by Mesh/build_all_side_lowerd_mesh=true");
+  const auto & lower_domains = _lowerd_var.activeSubdomains();
+  if (!lower_domains.count(Moose::INTERNAL_SIDE_LOWERD_ID) && lower_domains.size() != 1)
+    paramError(
+        "lowerd_variable",
+        "Must be only defined on the subdomain INTERNAL_SIDE_LOWERD_SUBDOMAIN subdomain that is "
+        "added by Mesh/build_all_side_lowerd_mesh=true");
+
+  if (_var.activeSubdomains().count(Moose::INTERNAL_SIDE_LOWERD_ID))
+    paramError("variable",
+               "Must not be defined on the subdomain INTERNAL_SIDE_LOWERD_SUBDOMAIN subdomain");
 
   if (_lowerd_var.count() != _count)
     paramError("lowerd_variable",
@@ -112,10 +118,6 @@ ArrayDGLowerDKernel::computeJacobian()
 
     // Compute the other five pieces of Jacobian related with lower-d variable
     computeLowerDJacobian(Moose::LowerLower);
-    computeLowerDJacobian(Moose::LowerSecondary);
-    computeLowerDJacobian(Moose::LowerPrimary);
-    computeLowerDJacobian(Moose::SecondaryLower);
-    computeLowerDJacobian(Moose::PrimaryLower);
   }
 }
 
@@ -170,37 +172,33 @@ ArrayDGLowerDKernel::computeOffDiagJacobian(const unsigned int jvar_num)
 {
   if (!excludeBoundary())
   {
-    // Lower dimensional variable is handled in computeJacobian
-    if (jvar_num == _lowerd_var.number())
-      return;
+    precalculateOffDiagJacobian(jvar_num);
+
+    /*
+     * Note: we cannot call compute jacobian functions like in DGLowerDKernel
+     *       because we could have cross component couplings for the array variables
+     */
 
     const auto & jvar = getVariable(jvar_num);
 
-    if (jvar_num == variable().number())
-      computeJacobian();
-    else
-    {
-      precalculateOffDiagJacobian(jvar_num);
+    // Compute element-element Jacobian
+    computeOffDiagElemNeighJacobian(Moose::ElementElement, jvar);
 
-      // Compute element-element Jacobian
-      computeOffDiagElemNeighJacobian(Moose::ElementElement, jvar);
+    // Compute element-neighbor Jacobian
+    computeOffDiagElemNeighJacobian(Moose::ElementNeighbor, jvar);
 
-      // Compute element-neighbor Jacobian
-      computeOffDiagElemNeighJacobian(Moose::ElementNeighbor, jvar);
+    // Compute neighbor-element Jacobian
+    computeOffDiagElemNeighJacobian(Moose::NeighborElement, jvar);
 
-      // Compute neighbor-element Jacobian
-      computeOffDiagElemNeighJacobian(Moose::NeighborElement, jvar);
+    // Compute neighbor-neighbor Jacobian
+    computeOffDiagElemNeighJacobian(Moose::NeighborNeighbor, jvar);
 
-      // Compute neighbor-neighbor Jacobian
-      computeOffDiagElemNeighJacobian(Moose::NeighborNeighbor, jvar);
-
-      // Compute the other five pieces of Jacobian related with lower-d variable
-      computeOffDiagLowerDJacobian(Moose::LowerLower, jvar);
-      computeOffDiagLowerDJacobian(Moose::LowerSecondary, jvar);
-      computeOffDiagLowerDJacobian(Moose::LowerPrimary, jvar);
-      computeOffDiagLowerDJacobian(Moose::SecondaryLower, jvar);
-      computeOffDiagLowerDJacobian(Moose::PrimaryLower, jvar);
-    }
+    // Compute the other five pieces of Jacobian related with lower-d variable
+    computeOffDiagLowerDJacobian(Moose::LowerLower, jvar);
+    computeOffDiagLowerDJacobian(Moose::LowerSecondary, jvar);
+    computeOffDiagLowerDJacobian(Moose::LowerPrimary, jvar);
+    computeOffDiagLowerDJacobian(Moose::SecondaryLower, jvar);
+    computeOffDiagLowerDJacobian(Moose::PrimaryLower, jvar);
   }
 }
 
@@ -269,4 +267,22 @@ ArrayDGLowerDKernel::computeOffDiagLowerDJacobian(Moose::ConstraintJacobianType 
     mooseError("Vector variable cannot be coupled into array DG kernel currently");
 
   accumulateTaggedLocalMatrix();
+}
+
+RealEigenMatrix
+ArrayDGLowerDKernel::computeLowerDQpOffDiagJacobian(Moose::ConstraintJacobianType type,
+                                                    const MooseVariableFEBase & jvar)
+{
+  if (jvar.number() == _var.number())
+  {
+    if (type == Moose::LowerSecondary || type == Moose::LowerPrimary)
+      return computeLowerDQpJacobian(type).asDiagonal();
+  }
+  else if (jvar.number() == _lowerd_var.number())
+  {
+    if (type == Moose::SecondaryLower || type == Moose::PrimaryLower || type == Moose::LowerLower)
+      return computeLowerDQpJacobian(type).asDiagonal();
+  }
+
+  return RealEigenMatrix::Zero(_var.count(), jvar.count());
 }

@@ -33,10 +33,19 @@ LowerDIntegratedBC::LowerDIntegratedBC(const InputParameters & parameters)
     _phi_lambda(_lowerd_var.phiLower()),
     _test_lambda(_lowerd_var.phiLower())
 {
-  if (!_lowerd_var.activeSubdomains().count(Moose::BOUNDARY_SIDE_LOWERD_ID))
-    paramError("lowerd_variable",
-               "Must be defined on the subdomain BOUNDARY_SIDE_LOWERD_SUBDOMAIN that is added by "
-               "Mesh/build_all_side_lowerd_mesh=true");
+  const auto & lower_domains = _lowerd_var.activeSubdomains();
+  if (!lower_domains.count(Moose::BOUNDARY_SIDE_LOWERD_ID) && lower_domains.size() != 1)
+    paramError(
+        "lowerd_variable",
+        "Must be only defined on the subdomain BOUNDARY_SIDE_LOWERD_SUBDOMAIN subdomain that is "
+        "added by Mesh/build_all_side_lowerd_mesh=true");
+
+  if (_var.activeSubdomains().count(Moose::BOUNDARY_SIDE_LOWERD_ID))
+    paramError("variable",
+               "Must not be defined on the subdomain INTERNAL_SIDE_LOWERD_SUBDOMAIN subdomain");
+
+  // Note: the above two conditions also ensure that the variable and lower-d variable are
+  // different.
 }
 
 void
@@ -62,8 +71,6 @@ LowerDIntegratedBC::computeJacobian()
   IntegratedBC::computeJacobian();
 
   computeLowerDJacobian(Moose::LowerLower);
-  computeLowerDJacobian(Moose::LowerPrimary);
-  computeLowerDJacobian(Moose::PrimaryLower);
 }
 
 void
@@ -110,16 +117,19 @@ LowerDIntegratedBC::computeLowerDJacobian(Moose::ConstraintJacobianType type)
 void
 LowerDIntegratedBC::computeOffDiagJacobian(const unsigned int jvar_num)
 {
-  // Lower dimensional variable is handled in computeJacobian
-  if (jvar_num == _lowerd_var.number())
-    return;
-
   if (jvar_num == variable().number())
-    computeJacobian();
+  {
+    IntegratedBC::computeJacobian();
+    computeLowerDJacobian(Moose::LowerPrimary);
+  }
+  else if (jvar_num == _lowerd_var.number())
+  {
+    computeLowerDJacobian(Moose::LowerLower);
+    computeLowerDJacobian(Moose::PrimaryLower);
+  }
   else
   {
     IntegratedBC::computeOffDiagJacobian(jvar_num);
-
     computeLowerDOffDiagJacobian(Moose::LowerLower, jvar_num);
     computeLowerDOffDiagJacobian(Moose::LowerPrimary, jvar_num);
     computeLowerDOffDiagJacobian(Moose::PrimaryLower, jvar_num);

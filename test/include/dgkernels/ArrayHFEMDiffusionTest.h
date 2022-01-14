@@ -11,15 +11,22 @@
 
 #include "ArrayDGLowerDKernel.h"
 
-class ArrayHFEMDiffusion : public ArrayDGLowerDKernel
+class ArrayHFEMDiffusionTest : public ArrayDGLowerDKernel
 {
 public:
   static InputParameters validParams();
 
-  ArrayHFEMDiffusion(const InputParameters & parameters);
+  ArrayHFEMDiffusionTest(const InputParameters & parameters);
 
 protected:
   virtual void computeQpResidual(Moose::DGResidualType type, RealEigenVector & residual) override;
   virtual void computeLowerDQpResidual(RealEigenVector & residual) override;
-  virtual RealEigenVector computeLowerDQpJacobian(Moose::ConstraintJacobianType type) override;
+  virtual RealEigenVector computeLowerDQpJacobian(Moose::ConstraintJacobianType) override;
+  virtual RealEigenMatrix computeLowerDQpOffDiagJacobian(Moose::ConstraintJacobianType type,
+                                                         const MooseVariableFEBase & jvar) override;
+
+  // return a matrix for linear transformation of a vector
+  RealEigenMatrix transform();
+
+  const bool & _for_pjfnk;
 };
