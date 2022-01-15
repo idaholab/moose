@@ -3,8 +3,6 @@
 
 registerMooseObject("isopodApp", ConstantValuePostprocessor);
 
-defineLegacyParams(ConstantValuePostprocessor);
-
 InputParameters
 ConstantValuePostprocessor::validParams()
 {
