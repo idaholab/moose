@@ -6,6 +6,8 @@
     rel_err = 0.01
     input = master.i
     csvdiff = master_out_OptimizationReporter_0001.csv
+    # steady solve
+    recover = false
   []
   [t_dependent_material]
     requirement = "invert for a constant heat source with a temperature"
@@ -15,5 +17,7 @@
     abs_zero=0.5
     input = master_nonLinear.i
     csvdiff = master_nonLinear_out_OptimizationReporter_0001.csv
+    # steady solve
+    recover = false
   []
 []

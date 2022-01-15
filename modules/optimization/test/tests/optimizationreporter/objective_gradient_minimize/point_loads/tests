@@ -4,6 +4,8 @@
     rel_err = 0.1
     input = master.i
     csvdiff = master_out_receiver_0001.csv
+    # steady solve
+    recover = false
   []
   [adjointFDGradTest]
     type = CSVDiff

@@ -4,6 +4,8 @@
     rel_err = 0.01
     input = master.i
     csvdiff = master_out_receiver_0001.csv
+    # steady solve
+    recover = false
   []
   [biasedMesh]
     type = CSVDiff
@@ -11,6 +13,8 @@
     input = master.i
     csvdiff = master_out_receiver_0001.csv
     cli_args = "Mesh/bias_x=1.2 Mesh/bias_y=1.2"
+    # steady solve
+    recover = false
   []
   [fd_grad]
     type = CSVDiff
@@ -20,6 +24,8 @@
     " Executioner/petsc_options_iname='-tao_fd_gradient -tao_fd_delta -tao_gatol'"
     " Executioner/petsc_options_value='true 0.0001 0.1'"
     csvdiff = master_out_receiver_0001.csv
+    # steady solve
+    recover = false
   []
   [taonm]
     type = CSVDiff
@@ -29,5 +35,7 @@
     " Executioner/petsc_options_iname='-tao_gatol'"
     " Executioner/petsc_options_value='0.1'"
     csvdiff = master_out_receiver_0001.csv
+    # steady solve
+    recover = false
   []
 []

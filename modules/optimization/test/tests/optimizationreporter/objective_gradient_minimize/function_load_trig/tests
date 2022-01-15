@@ -5,5 +5,7 @@
     abs_zero=0.5
     input = master.i
     csvdiff = master_out_OptimizationReporter_0001.csv
+    # steady solve
+    recover = false
   []
 []
