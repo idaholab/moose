@@ -14,7 +14,7 @@ Optimize::validParams()
 
 Optimize::Optimize(const InputParameters & parameters) : Steady(parameters), _optim_solve(*this)
 {
-  _optim_solve.setInnerSolve(picardSolve());
+  _optim_solve.setInnerSolve(fixedPointSolve());
 }
 
 void
