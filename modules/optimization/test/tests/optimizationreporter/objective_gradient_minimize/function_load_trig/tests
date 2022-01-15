@@ -2,7 +2,8 @@
   [function_load_grad_p1_taolmvm]
     type = CSVDiff
     rel_err = 0.01
+    abs_zero=0.5
     input = master.i
-    csvdiff = master_out_receiver_0001.csv
+    csvdiff = master_out_OptimizationReporter_0001.csv
   []
 []

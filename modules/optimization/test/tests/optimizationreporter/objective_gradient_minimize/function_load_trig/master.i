@@ -10,7 +10,7 @@
             0.8 0.6 0
             0.2 1.4 0
             0.8 1.8 0'
-  measurement_values = '209 218 164 121'
+  measurement_values = '204 215 166 127'
 []
 
 [Executioner]
