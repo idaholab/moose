@@ -45,33 +45,23 @@ ComputeMortarFunctor::operator()()
 {
   unsigned int num_cached = 0;
 
-  // Compile map of secondary to msm elements
-  // All this could be computed in AutomaticMortarGeneration, will suffice for now but
-  // in the future may want to move for optimization, especially on non-displaced meshes
-  std::unordered_map<const Elem *, std::vector<Elem *>> secondary_elems_to_mortar_segments;
+  const auto & secondary_elems_to_mortar_segments = _amg.secondariesToMortarSegments();
   typedef decltype(secondary_elems_to_mortar_segments.begin()) it_type;
 
-  for (const auto msm_elem : _amg.mortarSegmentMesh().active_local_element_ptr_range())
-  {
-    const MortarSegmentInfo & msinfo =
-        libmesh_map_find(_amg.mortarSegmentMeshElemToInfo(), msm_elem);
-    const Elem * secondary_face_elem = msinfo.secondary_elem;
-
-    // Compute fraction of volume of secondary element the segment accounts for
-    const Real volume_fraction = msm_elem->volume() / secondary_face_elem->volume();
-
-    // Neglect small segments to avoid negative Jacobian errors for 0 volume segments
-    if (volume_fraction < TOLERANCE)
-      continue;
-
-    secondary_elems_to_mortar_segments[secondary_face_elem].push_back(msm_elem);
-  }
   std::vector<it_type> iterators;
-  iterators.reserve(secondary_elems_to_mortar_segments.size());
   for (auto it = secondary_elems_to_mortar_segments.begin();
        it != secondary_elems_to_mortar_segments.end();
        ++it)
-    iterators.push_back(it);
+  {
+    auto * const secondary_elem = it->first;
+    mooseAssert(secondary_elem->active(),
+                "We loop over active elements when building the mortar segment mesh, so we golly "
+                "well hope this is active.");
+
+    if (secondary_elem->processor_id() == _subproblem.processor_id() && !it->second.empty())
+      // This is local and the mortar segment set isn't empty, so include
+      iterators.push_back(it);
+  }
 
   auto act_functor = [this, &num_cached]() {
     ++num_cached;
