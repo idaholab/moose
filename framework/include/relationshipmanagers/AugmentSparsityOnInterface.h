@@ -75,13 +75,6 @@ public:
 protected:
   virtual void internalInitWithMesh(const MeshBase &) override;
 
-  /**
-   * The Mesh we're calculating on
-   */
-  const AutomaticMortarGeneration * _amg;
-
-  bool _has_attached_amg;
-
   BoundaryName _primary_boundary_name;
   BoundaryName _secondary_boundary_name;
   SubdomainName _primary_subdomain_name;

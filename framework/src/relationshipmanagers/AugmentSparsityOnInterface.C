@@ -45,8 +45,6 @@ AugmentSparsityOnInterface::validParams()
 
 AugmentSparsityOnInterface::AugmentSparsityOnInterface(const InputParameters & params)
   : RelationshipManager(params),
-    _amg(nullptr),
-    _has_attached_amg(false),
     _primary_boundary_name(getParam<BoundaryName>("primary_boundary")),
     _secondary_boundary_name(getParam<BoundaryName>("secondary_boundary")),
     _primary_subdomain_name(getParam<SubdomainName>("primary_subdomain")),
@@ -58,8 +56,6 @@ AugmentSparsityOnInterface::AugmentSparsityOnInterface(const InputParameters & p
 
 AugmentSparsityOnInterface::AugmentSparsityOnInterface(const AugmentSparsityOnInterface & other)
   : RelationshipManager(other),
-    _amg(other._amg),
-    _has_attached_amg(other._has_attached_amg),
     _primary_boundary_name(other._primary_boundary_name),
     _secondary_boundary_name(other._secondary_boundary_name),
     _primary_subdomain_name(other._primary_subdomain_name),
@@ -113,18 +109,12 @@ AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator & 
                                     ? Moose::INVALID_BLOCK_ID
                                     : _moose_mesh->getSubdomainID(_secondary_subdomain_name);
 
-  if (!_has_attached_amg && _app.getExecutioner())
-  {
-    _amg = &_app.getExecutioner()->feProblem().getMortarInterface(
-        std::make_pair(primary_boundary_id, secondary_boundary_id),
-        std::make_pair(primary_subdomain_id, secondary_subdomain_id),
-        _use_displaced_mesh);
-    _has_attached_amg = true;
-
-    mooseAssert(
-        !generating_mesh,
-        "If we have an executioner, then we should definitely not still be generating the mesh.");
-  }
+  const AutomaticMortarGeneration * const amg =
+      _app.getExecutioner() ? &_app.getExecutioner()->feProblem().getMortarInterface(
+                                  std::make_pair(primary_boundary_id, secondary_boundary_id),
+                                  std::make_pair(primary_subdomain_id, secondary_subdomain_id),
+                                  _use_displaced_mesh)
+                            : nullptr;
 
   const CouplingMatrix * const null_mat = libmesh_nullptr;
 
@@ -135,7 +125,7 @@ AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator & 
   // element at a time (and then below we do a loop over all the mesh's active elements). It's
   // perhaps faster in this case to deal with mallocs coming out of MatSetValues, especially if the
   // mesh displacements are relatively small
-  if ((!_amg || _use_displaced_mesh) && !_is_coupling_functor)
+  if ((!amg || _use_displaced_mesh) && !_is_coupling_functor)
   {
     for (const Elem * const elem : _mesh->active_element_ptr_range())
     {
@@ -204,12 +194,12 @@ AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator & 
   }
   // For a static mesh (or for determining a sparsity pattern approximation on a displaced mesh) we
   // can just ghost the coupled elements determined during mortar mesh generation
-  else if (_amg)
+  else if (amg)
   {
     auto ghost_mortar_interface_couplings =
-        [this, p, &coupled_elements, null_mat](const Elem * const elem_arg) {
+        [this, p, &coupled_elements, null_mat, amg](const Elem * const elem_arg) {
           // Look up elem_arg in the mortar_interface_coupling data structure.
-          auto bounds = _amg->mortarInterfaceCoupling().equal_range(elem_arg->id());
+          auto bounds = amg->mortarInterfaceCoupling().equal_range(elem_arg->id());
 
           for (const auto & pr : as_range(bounds))
           {
@@ -254,7 +244,7 @@ AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator & 
             continue;
 
           for (const auto & multimap_pr :
-               as_range(_amg->mortarInterfaceCoupling().equal_range(elem->id())))
+               as_range(amg->mortarInterfaceCoupling().equal_range(elem->id())))
           {
             const auto secondary_lower_elem_id = multimap_pr.second;
             auto insert_pr = secondary_lower_elems_handled.insert(secondary_lower_elem_id);
