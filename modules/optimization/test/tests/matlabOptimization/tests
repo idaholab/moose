@@ -3,10 +3,12 @@
     type = CSVDiff
     input = forwardSolve.i
     csvdiff = zForwardOutput/all_temperatures_0002.csv
+    mesh_mode = REPLICATED
   []
   [adjoint_solve]
     type = CSVDiff
     input = adjointSolve.i
     csvdiff = zAdjointOutput/all_temperatures_0002.csv
+    mesh_mode = REPLICATED
   []
 []
