@@ -32,7 +32,7 @@
 #include "StochasticToolsApp.h"
 #include "PeridynamicsApp.h"
 #include "TensorMechanicsApp.h"
-#include "THMApp.h"
+#include "ThermalHydraulicsApp.h"
 #include "XFEMApp.h"
 #include "ExternalPetscSolverApp.h"
 
@@ -88,7 +88,7 @@ CombinedApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   RichardsApp::registerAll(f, af, s);
   StochasticToolsApp::registerAll(f, af, s);
   TensorMechanicsApp::registerAll(f, af, s);
-  THMApp::registerAll(f, af, s);
+  ThermalHydraulicsApp::registerAll(f, af, s);
   XFEMApp::registerAll(f, af, s);
   ExternalPetscSolverApp::registerAll(f, af, s);
 }

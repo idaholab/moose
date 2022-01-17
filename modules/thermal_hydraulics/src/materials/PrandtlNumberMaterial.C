@@ -1,0 +1,30 @@
+#include "PrandtlNumberMaterial.h"
+#include "Numerics.h"
+
+registerMooseObject("ThermalHydraulicsApp", PrandtlNumberMaterial);
+
+InputParameters
+PrandtlNumberMaterial::validParams()
+{
+  InputParameters params = Material::validParams();
+  params.addRequiredParam<MaterialPropertyName>("cp", "Constant-pressure specific heat");
+  params.addRequiredParam<MaterialPropertyName>("mu", "Dynamic viscosity");
+  params.addRequiredParam<MaterialPropertyName>("k", "Thermal conductivity");
+  params.addClassDescription("Computes Prandtl number as material property");
+  return params;
+}
+
+PrandtlNumberMaterial::PrandtlNumberMaterial(const InputParameters & parameters)
+  : Material(parameters),
+    _Pr(declareProperty<Real>("Pr")),
+    _cp(getMaterialProperty<Real>("cp")),
+    _mu(getMaterialProperty<Real>("mu")),
+    _k(getMaterialProperty<Real>("k"))
+{
+}
+
+void
+PrandtlNumberMaterial::computeQpProperties()
+{
+  _Pr[_qp] = THM::Prandtl(_cp[_qp], _mu[_qp], _k[_qp]);
+}

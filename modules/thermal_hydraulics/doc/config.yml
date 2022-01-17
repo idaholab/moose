@@ -1,0 +1,66 @@
+Content:
+    - framework/doc/content
+    - modules/thermal_hydraulics/doc/content
+    - modules/thermal_hydraulics/test/doc/content
+    - modules/fluid_properties/doc/content
+    - modules/heat_conduction/doc/content
+    - modules/misc/doc/content
+    - modules/navier_stokes/doc/content
+    - modules/ray_tracing/doc/content
+    - modules/rdg/doc/content
+    - infrastructure:
+        root_dir: modules/doc/content
+        content:
+          - application_usage/command_line_usage.md
+          - media/inl_blue.png
+
+Renderer:
+    type: MooseDocs.base.MaterializeRenderer
+    extra-css:
+        - modules/thermal_hydraulics/doc/content/css/thm.css
+
+Extensions:
+    MooseDocs.extensions.navigation:
+        name: Moose Thermal Hydraulics Module
+        repo: https://github.com/idaholab/moose
+        home: /modules/thermal_hydraulics/index.md
+    MooseDocs.extensions.appsyntax:
+        executable: ${MOOSE_DIR}/modules/thermal_hydraulics
+        allow-test-objects: True
+        unregister:
+            framework: !include ${MOOSE_DIR}/framework/doc/unregister.yml
+            thermal_hydraulics:
+                AddComponentAction: Components/*/*
+                Component: Components/*/*
+        remove:
+            framework: !include ${MOOSE_DIR}/framework/doc/remove.yml
+        includes:
+            - framework/include
+            - modules/thermal_hydraulics/include
+            - modules/fluid_properties/include
+            - modules/heat_conduction/include
+            - modules/misc/include
+            - modules/navier_stokes/include
+            - modules/ray_tracing/include
+            - modules/rdg/include
+    MooseDocs.extensions.common:
+        shortcuts:
+            framework: !include framework/doc/globals.yml
+            thermal_hydraulics:
+                Components: systems/Components/index.md
+    MooseDocs.extensions.acronym:
+        acronyms: !include framework/doc/acronyms.yml
+    MooseDocs.extensions.bibtex:
+        duplicate_warning: False
+    MooseDocs.extensions.katex:
+        macros: !include modules/thermal_hydraulics/doc/latex_macros.yml
+    MooseDocs.extensions.template:
+        active: True
+        args:
+            project-name: Thermal Hydraulics Module
+            project-name-abbrev: THM
+            bin-opt: thermal_hydraulics-opt
+            bin-dbg: thermal_hydraulics-dbg
+    MooseDocs.extensions.sqa: disable
+    alert2:
+        active: true

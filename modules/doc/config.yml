@@ -21,7 +21,7 @@ Content:
     - modules/richards/doc/content
     - modules/stochastic_tools/doc/content
     - modules/tensor_mechanics/doc/content
-    - modules/thm/doc/content
+    - modules/thermal_hydraulics/doc/content
     - modules/xfem/doc/content
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
@@ -138,7 +138,7 @@ Extensions:
             reactor: !include modules/reactor/doc/sqa_reactor.yml
             ray_tracing: !include modules/ray_tracing/doc/sqa_ray_tracing.yml
             fsi: !include modules/fsi/doc/sqa_fsi.yml
-            thm: !include modules/thm/doc/sqa_thm.yml
+            thermal_hydraulics: !include modules/thermal_hydraulics/doc/sqa_thm.yml
 
         requirement-groups:
             dgkernels: DGKernel Objects

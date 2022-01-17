@@ -1,0 +1,37 @@
+#include "HeatRateConvection.h"
+#include "Function.h"
+
+registerMooseObject("ThermalHydraulicsApp", HeatRateConvection);
+
+InputParameters
+HeatRateConvection::validParams()
+{
+  InputParameters params = SideIntegralPostprocessor::validParams();
+
+  params.addRequiredCoupledVar("T", "Temperature");
+  params.addRequiredParam<FunctionName>("T_ambient", "Ambient temperature function");
+  params.addRequiredParam<FunctionName>("htc", "Ambient heat transfer coefficient function");
+  params.addParam<Real>(
+      "scale", 1.0, "Factor by which to scale integral, like when using a 2D domain");
+
+  params.addClassDescription("Integrates a convective heat flux over a boundary.");
+
+  return params;
+}
+
+HeatRateConvection::HeatRateConvection(const InputParameters & parameters)
+  : SideIntegralPostprocessor(parameters),
+
+    _T(coupledValue("T")),
+    _T_ambient_fn(getFunction("T_ambient")),
+    _htc_ambient_fn(getFunction("htc")),
+    _scale(getParam<Real>("scale"))
+{
+}
+
+Real
+HeatRateConvection::computeQpIntegral()
+{
+  return _scale * _htc_ambient_fn.value(_t, _q_point[_qp]) *
+         (_T_ambient_fn.value(_t, _q_point[_qp]) - _T[_qp]);
+}

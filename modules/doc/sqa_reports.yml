@@ -227,8 +227,8 @@ Applications:
     THM:
         exe_directory: modules/combined
         app_types:
-            - THMApp
-        content_directory: modules/thm/doc/content
+            - ThermalHydraulicsApp
+        content_directory: modules/thermal_hydraulics/doc/content
         unregister:
             - framework/doc/unregister.yml
         remove:
@@ -329,6 +329,10 @@ Requirements:
         log_missing: WARNING
         show_warning: false
 
+    fsi:
+        directories:
+            - modules/fsi
+
     functional_expansion_tools:
         directories:
             - modules/functional_expansion_tools
@@ -415,20 +419,16 @@ Requirements:
         log_empty_issues: WARNING
         show_warning: false
 
-    xfem:
+    thermal_hydraulics:
         directories:
-            - modules/xfem
-
-    fsi:
-        directories:
-            - modules/fsi
-
-    thm:
-        directories:
-            - modules/thm
+            - modules/thermal_hydraulics
         log_missing: WARNING
         log_missing_design: WARNING
         log_missing_issues: WARNING
         log_testable: WARNING
         log_duplicate_requirement: WARNING
         show_warning: false
+
+    xfem:
+        directories:
+            - modules/xfem

@@ -70,8 +70,8 @@
 #ifdef TENSOR_MECHANICS_ENABLED
 #include "TensorMechanicsApp.h"
 #endif
-#ifdef THM_ENABLED
-#include "THMApp.h"
+#ifdef THERMAL_HYDRAULICS_ENABLED
+#include "ThermalHydraulicsApp.h"
 #endif
 #ifdef XFEM_ENABLED
 #include "XFEMApp.h"
@@ -186,8 +186,8 @@ ModulesApp::registerObjects(Factory & factory)
   TensorMechanicsApp::registerObjects(factory);
 #endif
 
-#ifdef THM_ENABLED
-  THMApp::registerObjects(factory);
+#ifdef THERMAL_HYDRAULICS_ENABLED
+  ThermalHydraulicsApp::registerObjects(factory);
 #endif
 
 #ifdef XFEM_ENABLED
@@ -269,8 +269,8 @@ ModulesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   TensorMechanicsApp::associateSyntax(syntax, action_factory);
 #endif
 
-#ifdef THM_ENABLED
-  THMApp::associateSyntax(syntax, action_factory);
+#ifdef THERMAL_HYDRAULICS_ENABLED
+  ThermalHydraulicsApp::associateSyntax(syntax, action_factory);
 #endif
 
 #ifdef XFEM_ENABLED
@@ -348,8 +348,8 @@ ModulesApp::registerExecFlags(Factory & factory)
   TensorMechanicsApp::registerExecFlags(factory);
 #endif
 
-#ifdef THM_ENABLED
-  THMApp::registerExecFlags(factory);
+#ifdef THERMAL_HYDRAULICS_ENABLED
+  ThermalHydraulicsApp::registerExecFlags(factory);
 #endif
 
 #ifdef XFEM_ENABLED
@@ -434,8 +434,8 @@ ModulesApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   TensorMechanicsApp::registerAll(f, af, s);
 #endif
 
-#ifdef THM_ENABLED
-  THMApp::registerAll(f, af, s);
+#ifdef THERMAL_HYDRAULICS_ENABLED
+  ThermalHydraulicsApp::registerAll(f, af, s);
 #endif
 
 #ifdef XFEM_ENABLED

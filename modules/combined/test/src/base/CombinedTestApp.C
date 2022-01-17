@@ -35,7 +35,7 @@
 #include "RdgTestApp.h"
 #include "ReactorTestApp.h"
 #include "TensorMechanicsTestApp.h"
-#include "THMTestApp.h"
+#include "ThermalHydraulicsTestApp.h"
 #include "XFEMTestApp.h"
 
 InputParameters
@@ -84,7 +84,7 @@ CombinedTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool u
     RichardsTestApp::registerAll(f, af, s, use_test_objs);
     StochasticToolsTestApp::registerAll(f, af, s, use_test_objs);
     TensorMechanicsTestApp::registerAll(f, af, s, use_test_objs);
-    THMTestApp::registerAll(f, af, s, use_test_objs);
+    ThermalHydraulicsTestApp::registerAll(f, af, s, use_test_objs);
     XFEMTestApp::registerAll(f, af, s, use_test_objs);
   }
 }
@@ -98,11 +98,11 @@ CombinedTestApp::registerApps()
   // Terrible Hack:
   // Right now we aren't automatically registering dependent apps to build. We
   // need a way to do this so that Multiapp types work automatically. We have a
-  // few regression tests in THM that create THMApps that fail to work with the
-  // combined module. For now, I'm going to manually register THMApp. We'll
+  // few regression tests in THM that create ThermalHydraulicsApp that fail to work with the
+  // combined module. For now, I'm going to manually register ThermalHydraulicsApp. We'll
   // need to design the API so that all registered apps and modules also get
   // immediate access to the buildable apps for use in Multiapps.
-  registerApp(THMApp);
+  registerApp(ThermalHydraulicsApp);
 }
 
 void
