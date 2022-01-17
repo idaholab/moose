@@ -448,15 +448,43 @@ NSFVAction::act()
 
   if (_current_task == "add_navier_stokes_kernels")
   {
-    // if (_type == "transient")
-    //   addINSTimeKernels();
-    //
-    // // Add all the inviscid flux Kernels.
-    // addINSMass();
-    // addINSMomentum();
-    //
-    // if (getParam<bool>("add_temperature_equation"))
-    //   addTemperature();
+    if (_compressibility == "compressible")
+    {
+      if (_type == "transient")
+        addCNSTimeKernels();
+
+      addCNSMass();
+      addCNSMomentum();
+      addCNSEnergy();
+    }
+    else if (_compressibility == "weakly-compressible")
+    {
+      if (_type == "transient")
+        addWCNSTimeKernels();
+
+      addWCNSMass();
+      addWCNSMomentum();
+
+      if (getParam<bool>("add_temperature_equation"))
+      {
+        addWCNSEnergy();
+        addWCNSTemperature();
+      }
+    }
+    else if (_compressibility == "incompressible")
+    {
+      if (_type == "transient")
+        addWCNSTimeKernels();
+
+      addINSMass();
+      addINSMomentum();
+
+      if (getParam<bool>("add_temperature_equation"))
+      {
+        addINSEnergy();
+        addWCNSTemperature();
+      }
+    }
   }
 
   if (_current_task == "add_navier_stokes_bcs")
@@ -540,62 +568,124 @@ NSFVAction::act()
 }
 
 void
-NSFVAction::addTimeKernels()
+NSFVAction::addCNSTimeKernels()
 {
-  _console << "something here" << std::endl;
-  // if (_use_ad)
-  // {
-  //   const std::string kernel_type = "INSADMomentumTimeDerivative";
-  //   InputParameters params = _factory.getValidParams(kernel_type);
-  //   if (_blocks.size() > 0)
-  //     params.set<std::vector<SubdomainName>>("block") = _blocks;
-  //   params.set<NonlinearVariableName>("variable") = NS::velocity;
-  //   _problem->addKernel(kernel_type, "ins_velocity_time_deriv", params);
-  //
-  //   if (getParam<bool>("add_temperature_equation"))
-  //   {
-  //     const std::string kernel_type = "INSADHeatConductionTimeDerivative";
-  //     InputParameters params = _factory.getValidParams(kernel_type);
-  //     params.set<NonlinearVariableName>("variable") = _temperature_variable_name;
-  //     if (_blocks.size() > 0)
-  //       params.set<std::vector<SubdomainName>>("block") = _blocks;
-  //     _problem->addKernel(kernel_type, "ins_temperature_time_deriv", params);
-  //   }
-  // }
-  // else
-  // {
-  //   const std::string kernel_type = "INSMomentumTimeDerivative";
-  //   InputParameters params = _factory.getValidParams(kernel_type);
-  //   if (_blocks.size() > 0)
-  //     params.set<std::vector<SubdomainName>>("block") = _blocks;
-  //   params.set<MaterialPropertyName>("rho_name") =
-  //   getParam<MaterialPropertyName>("density_name");
-  //
-  //   const static std::string momentums[3] = {NS::velocity_x, NS::velocity_y, NS::velocity_z};
-  //   for (unsigned int component = 0; component < _dim; ++component)
-  //   {
-  //     params.set<NonlinearVariableName>("variable") = momentums[component];
-  //     _problem->addKernel(kernel_type, momentums[component] + "_time_deriv", params);
-  //   }
-  //
-  //   if (getParam<bool>("add_temperature_equation"))
-  //   {
-  //     const std::string kernel_type = "INSTemperatureTimeDerivative";
-  //     InputParameters params = _factory.getValidParams(kernel_type);
-  //     params.set<NonlinearVariableName>("variable") = _temperature_variable_name;
-  //     if (_blocks.size() > 0)
-  //       params.set<std::vector<SubdomainName>>("block") = _blocks;
-  //     params.set<MaterialPropertyName>("rho_name") =
-  //     getParam<MaterialPropertyName>("density_name"); params.set<MaterialPropertyName>("cp_name")
-  //     =
-  //         getParam<MaterialPropertyName>("specific_heat_name");
-  //     _problem->addKernel(kernel_type, "ins_temperature_time_deriv", params);
-  //   }
-  // }
+  if (_porous_medium_treatment)
+  {
+    _console << "last one to finish" << std::endl;
+  }
+  else
+  {
+    _console << "last one to finish" << std::endl;
+  }
 }
 
 void
-NSFVAction::addMass()
+NSFVAction::addWCNSTimeKernels()
+{
+  if (_porous_medium_treatment)
+  {
+    const std::string mass_kernel_type = "PWCNSFVMassTimeDerivative";
+    InputParameters params = _factory.getValidParams(mass_kernel_type);
+    params.set<NonlinearVariableName>("variable") = _pressure_variable_name;
+    params.set<AuxVariableName>("porosity") = NS::porosity;
+    params.set<MaterialPropertyName>(NS::time_deriv(NS::density)) = NS::time_deriv(NS::density);
+    if (_blocks.size() > 0)
+      params.set<std::vector<SubdomainName>>("block") = _blocks;
+    _problem->addKernel(mass_kernel_type, "pwcns_mass_time", params);
+
+    const std::string mom_kernel_type = "WCNSFVMomentumTimeDerivative";
+    params = _factory.getValidParams(mom_kernel_type);
+    params.set<NonlinearVariableName>("variable") = NS::superficial_velocity_x;
+    params.set<MaterialPropertyName>(NS::density) = NS::density;
+    params.set<MaterialPropertyName>(NS::time_deriv(NS::density)) = NS::time_deriv(NS::density);
+    if (_blocks.size() > 0)
+      params.set<std::vector<SubdomainName>>("block") = _blocks;
+
+    _problem->addKernel(mom_kernel_type, "pwcns_superficial_velocity_x_time", params);
+    if (_dim >= 2)
+    {
+      params.set<NonlinearVariableName>("variable") = NS::superficial_velocity_y;
+      _problem->addKernel(mom_kernel_type, "pwcns_superficial_velocity_z_time", params);
+    }
+    if (_dim == 3)
+    {
+      params.set<NonlinearVariableName>("variable") = NS::superficial_velocity_z;
+      _problem->addKernel(mom_kernel_type, "pwcns_superficial_velocity_z_time", params);
+    }
+
+    if (getParam<bool>("add_temperature_equation"))
+    {
+      const std::string en_kernel_type = "PINSFVEnergyTimeDerivative";
+      params = _factory.getValidParams(en_kernel_type);
+      params.set<NonlinearVariableName>("variable") = NS::T_fluid;
+      params.set<AuxVariableName>(NS::porosity) = NS::porosity;
+      params.set<MaterialPropertyName>(NS::density) = NS::density;
+      params.set<MaterialPropertyName>(NS::time_deriv(NS::density)) = NS::time_deriv(NS::density);
+      params.set<MaterialPropertyName>(NS::cp) = NS::cp;
+      params.set<MaterialPropertyName>(NS::time_deriv(NS::cp)) = NS::time_deriv(NS::cp);
+      _problem->addKernel(en_kernel_type, "pwcns_energy_time", params);
+    }
+  }
+  else
+  {
+    const std::string mass_kernel_type = "WCNSFVMassTimeDerivative";
+    InputParameters params = _factory.getValidParams(mass_kernel_type);
+    params.set<NonlinearVariableName>("variable") = _pressure_variable_name;
+    params.set<MaterialPropertyName>(NS::time_deriv(NS::density)) = NS::time_deriv(NS::density);
+    if (_blocks.size() > 0)
+      params.set<std::vector<SubdomainName>>("block") = _blocks;
+    _problem->addKernel(mass_kernel_type, "wcns_mass_time", params);
+
+    const std::string mom_kernel_type = "WCNSFVMomentumTimeDerivative";
+    params = _factory.getValidParams(mom_kernel_type);
+    params.set<NonlinearVariableName>("variable") = NS::velocity_x;
+    params.set<MaterialPropertyName>(NS::density) = NS::density;
+    params.set<MaterialPropertyName>(NS::time_deriv(NS::density)) = NS::time_deriv(NS::density);
+    if (_blocks.size() > 0)
+      params.set<std::vector<SubdomainName>>("block") = _blocks;
+
+    _problem->addKernel(mom_kernel_type, "wcns_velocity_x_time", params);
+    if (_dim >= 2)
+    {
+      params.set<NonlinearVariableName>("variable") = NS::velocity_y;
+      _problem->addKernel(mom_kernel_type, "wcns_velocity_z_time", params);
+    }
+    if (_dim == 3)
+    {
+      params.set<NonlinearVariableName>("variable") = NS::velocity_z;
+      _problem->addKernel(mom_kernel_type, "wcns_velocity_z_time", params);
+    }
+
+    if (getParam<bool>("add_temperature_equation"))
+    {
+      const std::string en_kernel_type = "INSFVEnergyTimeDerivative";
+      params = _factory.getValidParams(en_kernel_type);
+      params.set<NonlinearVariableName>("variable") = NS::T_fluid;
+      params.set<MaterialPropertyName>(NS::density) = NS::density;
+      params.set<MaterialPropertyName>(NS::time_deriv(NS::density)) = NS::time_deriv(NS::density);
+      params.set<MaterialPropertyName>(NS::cp) = NS::cp;
+      params.set<MaterialPropertyName>(NS::time_deriv(NS::cp)) = NS::time_deriv(NS::cp);
+      _problem->addKernel(en_kernel_type, "wcns_energy_time", params);
+    }
+  }
+}
+
+void
+NSFVAction::addINSTimeKernels()
+{
+  if (_porous_medium_treatment)
+  {
+    _console << "last one to finish" << std::endl;
+  }
+  else
+  {
+    _console << "last one to finish" << std::endl;
+  }
+}
+
+void
+NSFVAction::addINSMass()
 {
   _console << "something here" << std::endl;
   // if (_use_ad)
@@ -632,7 +722,19 @@ NSFVAction::addMass()
 }
 
 void
-NSFVAction::addVelocityAux()
+NSFVAction::addWCNSMass()
+{
+  _console << "something here" << std::endl;
+}
+
+void
+NSFVAction::addCNSMass()
+{
+  _console << "something here" << std::endl;
+}
+
+void
+NSFVAction::addINSVelocityAux()
 {
   _console << "something here" << std::endl;
   // const static std::string momentums[3] = {NS::velocity_x, NS::velocity_y, NS::velocity_z};
@@ -643,12 +745,25 @@ NSFVAction::addVelocityAux()
   // {
   //   params.set<AuxVariableName>("variable") = momentums[component];
   //   params.set<MooseEnum>("component") = coord[component];
-  //   _problem->addAuxKernel("VectorVariableComponentAux", momentums[component] + "_aux", params);
+  //   _problem->addAuxKernel("VectorVariableComponentAux", momentums[component] + "_aux",
+  //   params);
   // }
 }
 
 void
-NSFVAction::addMomentum()
+NSFVAction::addWCNSVelocityAux()
+{
+  _console << "something here" << std::endl;
+}
+
+void
+NSFVAction::addCNSVelocityAux()
+{
+  _console << "something here" << std::endl;
+}
+
+void
+NSFVAction::addINSMomentum()
 {
   _console << "something here" << std::endl;
   // if (_use_ad)
@@ -766,7 +881,19 @@ NSFVAction::addMomentum()
 }
 
 void
-NSFVAction::addTemperature()
+NSFVAction::addWCNSMomentum()
+{
+  _console << "something here" << std::endl;
+}
+
+void
+NSFVAction::addCNSMomentum()
+{
+  _console << "something here" << std::endl;
+}
+
+void
+NSFVAction::addINSTemperature()
 {
   _console << "something here" << std::endl;
   // if (_use_ad)
@@ -846,12 +973,25 @@ NSFVAction::addTemperature()
   //   params.set<MaterialPropertyName>("k_name") =
   //       getParam<MaterialPropertyName>("thermal_conductivity_name");
   //   params.set<MaterialPropertyName>("rho_name") =
-  //   getParam<MaterialPropertyName>("density_name"); params.set<MaterialPropertyName>("cp_name") =
+  //   getParam<MaterialPropertyName>("density_name"); params.set<MaterialPropertyName>("cp_name")
+  //   =
   //       getParam<MaterialPropertyName>("specific_heat_name");
   //   if (_blocks.size() > 0)
   //     params.set<std::vector<SubdomainName>>("block") = _blocks;
   //   _problem->addKernel(kernel_type, "ins_temperature", params);
   // }
+}
+
+void
+NSFVAction::addWCNSTemperature()
+{
+  _console << "something here" << std::endl;
+}
+
+void
+NSFVAction::addCNSTemperature()
+{
+  _console << "something here" << std::endl;
 }
 
 void
@@ -952,7 +1092,8 @@ NSFVAction::addINSVelocityBC()
   //         params.set<NonlinearVariableName>("variable") = momentums[component];
   //         params.set<std::vector<BoundaryName>>("boundary") = {_velocity_boundary[i]};
   //         _problem->addBoundaryCondition(
-  //             "FunctionDirichletBC", momentums[component] + "_" + _velocity_boundary[i], params);
+  //             "FunctionDirichletBC", momentums[component] + "_" + _velocity_boundary[i],
+  //             params);
   //       }
   //       else
   //       {
@@ -1058,8 +1199,8 @@ NSFVAction::addINSNoBCBC()
   //     params.set<std::vector<SubdomainName>>("block") = _blocks;
   //   params.set<bool>("integrate_p_by_parts") = getParam<bool>("integrate_p_by_parts");
   //   params.set<CoupledName>(NS::pressure) = {_pressure_variable_name};
-  //   params.set<MooseEnum>("viscous_form") = (getParam<bool>("laplace") ? "laplace" : "traction");
-  //   _problem->addBoundaryCondition(kernel_type, "ins_momentum_nobc_bc", params);
+  //   params.set<MooseEnum>("viscous_form") = (getParam<bool>("laplace") ? "laplace" :
+  //   "traction"); _problem->addBoundaryCondition(kernel_type, "ins_momentum_nobc_bc", params);
   // }
   // else
   // {

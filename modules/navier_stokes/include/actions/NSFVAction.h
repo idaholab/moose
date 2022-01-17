@@ -37,26 +37,36 @@ protected:
   void setNoBCCommonParams(InputParameters & params);
 
   // Helper functions that add various inviscid flux Kernels.
-  void addTimeKernels();
-  void addMass();
-  void addMomentum();
-  void addEnergy();
-  void addVelocityAux();
-  void addTemperature();
-
-  // Helper functions that add BCs.
+  void addINSTimeKernels();
+  void addINSMass();
+  void addINSMomentum();
+  void addINSEnergy();
+  void addINSVelocityAux();
+  void addINSTemperature();
   void addINSVelocityBC();
   void addINSPinnedPressureBC();
   void addINSNoBCBC();
   void addINSPressureBC();
   void addINSTemperatureBC();
 
+  void addWCNSTimeKernels();
+  void addWCNSMass();
+  void addWCNSMomentum();
+  void addWCNSEnergy();
+  void addWCNSVelocityAux();
+  void addWCNSTemperature();
   void addWCNSVelocityBC();
   void addWCNSPinnedPressureBC();
   void addWCNSNoBCBC();
   void addWCNSPressureBC();
   void addWCNSTemperatureBC();
 
+  void addCNSTimeKernels();
+  void addCNSMass();
+  void addCNSMomentum();
+  void addCNSEnergy();
+  void addCNSVelocityAux();
+  void addCNSTemperature();
   void addCNSVelocityBC();
   void addCNSPinnedPressureBC();
   void addCNSNoBCBC();
