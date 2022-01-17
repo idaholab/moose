@@ -918,6 +918,8 @@ public:
   template <class T>
   const std::vector<T *> & getInterfaceObjects() const;
 
+  static void addAppParam(InputParameters & params);
+
 protected:
   /**
    * Whether or not this MooseApp has cached a Backup to use for restart / recovery
