@@ -58,7 +58,10 @@ NSFVAction::validParams()
       "thermal_expansion_name", "alpha", "The name of the thermal expansion");
   params.addParam<bool>("add_temperature_equation", false, "True to add temperature equation");
   params.addParam<VariableName>(
-      "temperature_variable", NS::temperature, "Temperature variable name");
+      "fluid_temperature_variable", NS::T_fluid, "Fluid temperature variable name");
+  params.addParam<VariableName>("solid_temperature_variable",
+                                NS::T_solid,
+                                "Solid subscale structure temperature variable name");
   params.addParam<Real>(
       "initial_temperature", 0, "The initial temperature, assumed constant everywhere");
   params.addParam<MaterialPropertyName>(
@@ -115,6 +118,9 @@ NSFVAction::validParams()
   params.addParam<RealVectorValue>("initial_velocity",
                                    RealVectorValue(1e-15, 1e-15, 1e-15),
                                    "The initial velocity, assumed constant everywhere");
+  params.addParam<RealVectorValue>("initial_momentum",
+                                   RealVectorValue(1e-15, 1e-15, 1e-15),
+                                   "The initial momentum, assumed constant everywhere");
   params.addParam<std::string>("pressure_variable_name",
                                NS::pressure,
                                "A name for the pressure variable. If this is not provided, a "
@@ -150,7 +156,8 @@ NSFVAction::NSFVAction(InputParameters parameters)
     _pinned_node("ins_pinned_node"),
     _fixed_temperature_boundary(getParam<std::vector<BoundaryName>>("fixed_temperature_boundary")),
     _temperature_function(getParam<std::vector<FunctionName>>("temperature_function")),
-    _temperature_variable_name(getParam<VariableName>("temperature_variable")),
+    _fluid_temperature_variable_name(getParam<VariableName>("fluid_temperature_variable")),
+    _solid_temperature_variable_name(getParam<VariableName>("solid_temperature_variable")),
     _pressure_variable_name(getParam<std::string>("pressure_variable_name"))
 {
   if (_pressure_function.size() != _pressure_boundary.size())
@@ -258,7 +265,7 @@ NSFVAction::act()
       }
 
       _problem->addVariable("MooseVariableFVReal", _pressure_variable_name, base_params);
-      _problem->addVariable("MooseVariableFVReal", _temperature_variable_name, base_params);
+      _problem->addVariable("MooseVariableFVReal", _fluid_temperature_variable_name, base_params);
 
       _problem->addAuxVariable("MooseVariableFVReal", NS::velocity_x, base_params);
       if (_dim >= 2)
@@ -297,45 +304,137 @@ NSFVAction::act()
       _problem->addVariable("INSFVPressureVariable", _pressure_variable_name, base_params);
 
       if (getParam<bool>("add_temperature_equation") &&
-          !_problem->getNonlinearSystemBase().hasVariable(_temperature_variable_name))
-        _problem->addVariable("INSFVEnergyVariable", _temperature_variable_name, base_params);
+          !_problem->getNonlinearSystemBase().hasVariable(_fluid_temperature_variable_name))
+        _problem->addVariable("INSFVEnergyVariable", _fluid_temperature_variable_name, base_params);
     }
   }
 
   if (_current_task == "add_navier_stokes_ics")
   {
-    auto vvalue = getParam<RealVectorValue>("initial_velocity");
     Real pvalue = getParam<Real>("initial_pressure");
 
-    if (vvalue(0) != 0)
+    if (_compressibility == "compressible")
     {
-      InputParameters params = _factory.getValidParams("ConstantIC");
-      params.set<VariableName>("variable") = NS::velocity_x;
-      params.set<Real>("value") = vvalue(0);
-      _problem->addInitialCondition("ConstantIC", NS::velocity_x + "_ic", params);
-    }
-    if (vvalue(1) != 0 && _dim >= 2)
-    {
-      InputParameters params = _factory.getValidParams("ConstantIC");
-      params.set<VariableName>("variable") = NS::velocity_y;
-      params.set<Real>("value") = vvalue(1);
-      _problem->addInitialCondition("ConstantIC", NS::velocity_y + "_ic", params);
-    }
-    if (vvalue(2) != 0 && _dim >= 3)
-    {
-      InputParameters params = _factory.getValidParams("ConstantIC");
-      params.set<VariableName>("variable") = NS::velocity_z;
-      params.set<Real>("value") = vvalue(2);
-      _problem->addInitialCondition("ConstantIC", NS::velocity_z + "_ic", params);
-    }
+      auto mvalue = getParam<RealVectorValue>("initial_momentum");
 
-    if (getParam<bool>("add_temperature_equation"))
-    {
+      if (_porous_medium_treatment)
+      {
+        if (mvalue(0) != 0)
+        {
+          InputParameters params = _factory.getValidParams("ConstantIC");
+          params.set<VariableName>("variable") = NS::superficial_momentum_x;
+          params.set<Real>("value") = mvalue(0);
+          _problem->addInitialCondition("ConstantIC", NS::superficial_momentum_x + "_ic", params);
+        }
+        if (mvalue(1) != 0 && _dim >= 2)
+        {
+          InputParameters params = _factory.getValidParams("ConstantIC");
+          params.set<VariableName>("variable") = NS::superficial_momentum_y;
+          params.set<Real>("value") = mvalue(1);
+          _problem->addInitialCondition("ConstantIC", NS::superficial_momentum_y + "_ic", params);
+        }
+        if (mvalue(2) != 0 && _dim >= 3)
+        {
+          InputParameters params = _factory.getValidParams("ConstantIC");
+          params.set<VariableName>("variable") = NS::superficial_momentum_z;
+          params.set<Real>("value") = mvalue(2);
+          _problem->addInitialCondition("ConstantIC", NS::superficial_momentum_z + "_ic", params);
+        }
+      }
+      else
+      {
+        if (mvalue(0) != 0)
+        {
+          InputParameters params = _factory.getValidParams("ConstantIC");
+          params.set<VariableName>("variable") = NS::momentum_x;
+          params.set<Real>("value") = mvalue(0);
+          _problem->addInitialCondition("ConstantIC", NS::momentum_x + "_ic", params);
+        }
+        if (mvalue(1) != 0 && _dim >= 2)
+        {
+          InputParameters params = _factory.getValidParams("ConstantIC");
+          params.set<VariableName>("variable") = NS::momentum_y;
+          params.set<Real>("value") = mvalue(1);
+          _problem->addInitialCondition("ConstantIC", NS::momentum_y + "_ic", params);
+        }
+        if (mvalue(2) != 0 && _dim >= 3)
+        {
+          InputParameters params = _factory.getValidParams("ConstantIC");
+          params.set<VariableName>("variable") = NS::momentum_z;
+          params.set<Real>("value") = mvalue(2);
+          _problem->addInitialCondition("ConstantIC", NS::momentum_z + "_ic", params);
+        }
+      }
+
       Real tvalue = getParam<Real>("initial_temperature");
       InputParameters params = _factory.getValidParams("ConstantIC");
-      params.set<VariableName>("variable") = _temperature_variable_name;
+      params.set<VariableName>("variable") = _fluid_temperature_variable_name;
       params.set<Real>("value") = tvalue;
-      _problem->addInitialCondition("ConstantIC", "temperature_ic", params);
+      _problem->addInitialCondition("ConstantIC", _fluid_temperature_variable_name + "_ic", params);
+    }
+    else if (_compressibility == "weakly-compressible" || _compressibility == "incompressible")
+    {
+
+      auto vvalue = getParam<RealVectorValue>("initial_velocity");
+
+      if (_porous_medium_treatment)
+      {
+        if (vvalue(0) != 0)
+        {
+          InputParameters params = _factory.getValidParams("ConstantIC");
+          params.set<VariableName>("variable") = NS::superficial_velocity_x;
+          params.set<Real>("value") = vvalue(0);
+          _problem->addInitialCondition("ConstantIC", NS::superficial_velocity_x + "_ic", params);
+        }
+        if (vvalue(1) != 0 && _dim >= 2)
+        {
+          InputParameters params = _factory.getValidParams("ConstantIC");
+          params.set<VariableName>("variable") = NS::superficial_velocity_y;
+          params.set<Real>("value") = vvalue(1);
+          _problem->addInitialCondition("ConstantIC", NS::superficial_velocity_y + "_ic", params);
+        }
+        if (vvalue(2) != 0 && _dim >= 3)
+        {
+          InputParameters params = _factory.getValidParams("ConstantIC");
+          params.set<VariableName>("variable") = NS::superficial_velocity_z;
+          params.set<Real>("value") = vvalue(2);
+          _problem->addInitialCondition("ConstantIC", NS::superficial_velocity_z + "_ic", params);
+        }
+      }
+      else
+      {
+        if (vvalue(0) != 0)
+        {
+          InputParameters params = _factory.getValidParams("ConstantIC");
+          params.set<VariableName>("variable") = NS::velocity_x;
+          params.set<Real>("value") = vvalue(0);
+          _problem->addInitialCondition("ConstantIC", NS::velocity_x + "_ic", params);
+        }
+        if (vvalue(1) != 0 && _dim >= 2)
+        {
+          InputParameters params = _factory.getValidParams("ConstantIC");
+          params.set<VariableName>("variable") = NS::velocity_y;
+          params.set<Real>("value") = vvalue(1);
+          _problem->addInitialCondition("ConstantIC", NS::velocity_y + "_ic", params);
+        }
+        if (vvalue(2) != 0 && _dim >= 3)
+        {
+          InputParameters params = _factory.getValidParams("ConstantIC");
+          params.set<VariableName>("variable") = NS::velocity_z;
+          params.set<Real>("value") = vvalue(2);
+          _problem->addInitialCondition("ConstantIC", NS::velocity_z + "_ic", params);
+        }
+      }
+
+      if (getParam<bool>("add_temperature_equation"))
+      {
+        Real tvalue = getParam<Real>("initial_temperature");
+        InputParameters params = _factory.getValidParams("ConstantIC");
+        params.set<VariableName>("variable") = _fluid_temperature_variable_name;
+        params.set<Real>("value") = tvalue;
+        _problem->addInitialCondition(
+            "ConstantIC", _fluid_temperature_variable_name + "_ic", params);
+      }
     }
 
     if (pvalue != 0)
@@ -358,7 +457,6 @@ NSFVAction::act()
     //
     // if (getParam<bool>("add_temperature_equation"))
     //   addTemperature();
-
   }
 
   if (_current_task == "add_navier_stokes_bcs")
@@ -384,59 +482,60 @@ NSFVAction::act()
 
   if (_current_task == "add_material")
   {
-  //   auto set_common_parameters = [&](InputParameters & params)
-  //   {
-  //     if (_blocks.size() > 0)
-  //       params.set<std::vector<SubdomainName>>("block") = _blocks;
-  //     params.set<CoupledName>("velocity") = {NS::velocity};
-  //     params.set<CoupledName>(NS::pressure) = {_pressure_variable_name};
-  //     params.set<MaterialPropertyName>("mu_name") =
-  //         getParam<MaterialPropertyName>("dynamic_viscosity_name");
-  //     params.set<MaterialPropertyName>("rho_name") = getParam<MaterialPropertyName>("density_name");
-  //   };
-  //
-  //   auto set_common_3eqn_parameters = [&](InputParameters & params)
-  //   {
-  //     set_common_parameters(params);
-  //     params.set<CoupledName>("temperature") = {_temperature_variable_name};
-  //     params.set<MaterialPropertyName>("cp_name") =
-  //         getParam<MaterialPropertyName>("specific_heat_name");
-  //   };
-  //
-  //   if (getParam<bool>("add_temperature_equation"))
-  //   {
-  //     if (getParam<bool>("supg") || getParam<bool>("pspg"))
-  //     {
-  //       InputParameters params = _factory.getValidParams("INSADStabilized3Eqn");
-  //       set_common_3eqn_parameters(params);
-  //       params.set<Real>("alpha") = getParam<Real>("alpha");
-  //       params.set<MaterialPropertyName>("k_name") =
-  //           getParam<MaterialPropertyName>("thermal_conductivity_name");
-  //       _problem->addMaterial("INSADStabilized3Eqn", "ins_ad_material", params);
-  //     }
-  //     else
-  //     {
-  //       InputParameters params = _factory.getValidParams("INSAD3Eqn");
-  //       set_common_3eqn_parameters(params);
-  //       _problem->addMaterial("INSAD3Eqn", "ins_ad_material", params);
-  //     }
-  //   }
-  //   else
-  //   {
-  //     if (getParam<bool>("supg") || getParam<bool>("pspg"))
-  //     {
-  //       InputParameters params = _factory.getValidParams("INSADTauMaterial");
-  //       set_common_parameters(params);
-  //       params.set<Real>("alpha") = getParam<Real>("alpha");
-  //       _problem->addMaterial("INSADTauMaterial", "ins_ad_material", params);
-  //     }
-  //     else
-  //     {
-  //       InputParameters params = _factory.getValidParams("INSADMaterial");
-  //       set_common_parameters(params);
-  //       _problem->addMaterial("INSADMaterial", "ins_ad_material", params);
-  //     }
-  //   }
+    //   auto set_common_parameters = [&](InputParameters & params)
+    //   {
+    //     if (_blocks.size() > 0)
+    //       params.set<std::vector<SubdomainName>>("block") = _blocks;
+    //     params.set<CoupledName>("velocity") = {NS::velocity};
+    //     params.set<CoupledName>(NS::pressure) = {_pressure_variable_name};
+    //     params.set<MaterialPropertyName>("mu_name") =
+    //         getParam<MaterialPropertyName>("dynamic_viscosity_name");
+    //     params.set<MaterialPropertyName>("rho_name") =
+    //     getParam<MaterialPropertyName>("density_name");
+    //   };
+    //
+    //   auto set_common_3eqn_parameters = [&](InputParameters & params)
+    //   {
+    //     set_common_parameters(params);
+    //     params.set<CoupledName>("temperature") = {_temperature_variable_name};
+    //     params.set<MaterialPropertyName>("cp_name") =
+    //         getParam<MaterialPropertyName>("specific_heat_name");
+    //   };
+    //
+    //   if (getParam<bool>("add_temperature_equation"))
+    //   {
+    //     if (getParam<bool>("supg") || getParam<bool>("pspg"))
+    //     {
+    //       InputParameters params = _factory.getValidParams("INSADStabilized3Eqn");
+    //       set_common_3eqn_parameters(params);
+    //       params.set<Real>("alpha") = getParam<Real>("alpha");
+    //       params.set<MaterialPropertyName>("k_name") =
+    //           getParam<MaterialPropertyName>("thermal_conductivity_name");
+    //       _problem->addMaterial("INSADStabilized3Eqn", "ins_ad_material", params);
+    //     }
+    //     else
+    //     {
+    //       InputParameters params = _factory.getValidParams("INSAD3Eqn");
+    //       set_common_3eqn_parameters(params);
+    //       _problem->addMaterial("INSAD3Eqn", "ins_ad_material", params);
+    //     }
+    //   }
+    //   else
+    //   {
+    //     if (getParam<bool>("supg") || getParam<bool>("pspg"))
+    //     {
+    //       InputParameters params = _factory.getValidParams("INSADTauMaterial");
+    //       set_common_parameters(params);
+    //       params.set<Real>("alpha") = getParam<Real>("alpha");
+    //       _problem->addMaterial("INSADTauMaterial", "ins_ad_material", params);
+    //     }
+    //     else
+    //     {
+    //       InputParameters params = _factory.getValidParams("INSADMaterial");
+    //       set_common_parameters(params);
+    //       _problem->addMaterial("INSADMaterial", "ins_ad_material", params);
+    //     }
+    //   }
   }
 }
 
@@ -469,7 +568,8 @@ NSFVAction::addTimeKernels()
   //   InputParameters params = _factory.getValidParams(kernel_type);
   //   if (_blocks.size() > 0)
   //     params.set<std::vector<SubdomainName>>("block") = _blocks;
-  //   params.set<MaterialPropertyName>("rho_name") = getParam<MaterialPropertyName>("density_name");
+  //   params.set<MaterialPropertyName>("rho_name") =
+  //   getParam<MaterialPropertyName>("density_name");
   //
   //   const static std::string momentums[3] = {NS::velocity_x, NS::velocity_y, NS::velocity_z};
   //   for (unsigned int component = 0; component < _dim; ++component)
@@ -485,8 +585,9 @@ NSFVAction::addTimeKernels()
   //     params.set<NonlinearVariableName>("variable") = _temperature_variable_name;
   //     if (_blocks.size() > 0)
   //       params.set<std::vector<SubdomainName>>("block") = _blocks;
-  //     params.set<MaterialPropertyName>("rho_name") = getParam<MaterialPropertyName>("density_name");
-  //     params.set<MaterialPropertyName>("cp_name") =
+  //     params.set<MaterialPropertyName>("rho_name") =
+  //     getParam<MaterialPropertyName>("density_name"); params.set<MaterialPropertyName>("cp_name")
+  //     =
   //         getParam<MaterialPropertyName>("specific_heat_name");
   //     _problem->addKernel(kernel_type, "ins_temperature_time_deriv", params);
   //   }
@@ -513,8 +614,8 @@ NSFVAction::addMass()
   //     const std::string kernel_type = "INSADMassPSPG";
   //     InputParameters params = _factory.getValidParams(kernel_type);
   //     params.set<NonlinearVariableName>("variable") = _pressure_variable_name;
-  //     params.set<MaterialPropertyName>("rho_name") = getParam<MaterialPropertyName>("density_name");
-  //     if (_blocks.size() > 0)
+  //     params.set<MaterialPropertyName>("rho_name") =
+  //     getParam<MaterialPropertyName>("density_name"); if (_blocks.size() > 0)
   //       params.set<std::vector<SubdomainName>>("block") = _blocks;
   //     _problem->addKernel(kernel_type, "ins_mass_pspg", params);
   //   }
@@ -565,8 +666,8 @@ NSFVAction::addMomentum()
   //     const std::string kernel_type = "INSADMomentumViscous";
   //     InputParameters params = _factory.getValidParams(kernel_type);
   //     params.set<NonlinearVariableName>("variable") = NS::velocity;
-  //     params.set<MooseEnum>("viscous_form") = (getParam<bool>("laplace") ? "laplace" : "traction");
-  //     if (_blocks.size() > 0)
+  //     params.set<MooseEnum>("viscous_form") = (getParam<bool>("laplace") ? "laplace" :
+  //     "traction"); if (_blocks.size() > 0)
   //       params.set<std::vector<SubdomainName>>("block") = _blocks;
   //     _problem->addKernel(kernel_type, "ins_momentum_viscous", params);
   //   }
@@ -630,7 +731,8 @@ NSFVAction::addMomentum()
   //     if (_blocks.size() > 0)
   //       params.set<std::vector<SubdomainName>>("block") = _blocks;
   //     if (isParamValid("coupled_force_var"))
-  //       params.set<CoupledName>("coupled_vector_var") = getParam<CoupledName>("coupled_force_var");
+  //       params.set<CoupledName>("coupled_vector_var") =
+  //       getParam<CoupledName>("coupled_force_var");
   //     if (isParamValid("coupled_force_vector_function"))
   //       params.set<std::vector<FunctionName>>("vector_function") =
   //           getParam<std::vector<FunctionName>>("coupled_force_vector_function");
@@ -726,8 +828,8 @@ NSFVAction::addTemperature()
   //           getParam<FunctionName>("heat_source_function");
   //     else
   //       mooseError("Either the 'heat_source_var' or 'heat_source_function' param must be "
-  //                  "set if adding the 'INSADEnergySource' through the incompressible Navier-Stokes "
-  //                  "action.");
+  //                  "set if adding the 'INSADEnergySource' through the incompressible
+  //                  Navier-Stokes " "action.");
   //     _problem->addKernel(kernel_type, "ins_temperature_source", params);
   //   }
   // }
@@ -743,8 +845,8 @@ NSFVAction::addTemperature()
   //     params.set<CoupledName>("w") = {NS::velocity_z};
   //   params.set<MaterialPropertyName>("k_name") =
   //       getParam<MaterialPropertyName>("thermal_conductivity_name");
-  //   params.set<MaterialPropertyName>("rho_name") = getParam<MaterialPropertyName>("density_name");
-  //   params.set<MaterialPropertyName>("cp_name") =
+  //   params.set<MaterialPropertyName>("rho_name") =
+  //   getParam<MaterialPropertyName>("density_name"); params.set<MaterialPropertyName>("cp_name") =
   //       getParam<MaterialPropertyName>("specific_heat_name");
   //   if (_blocks.size() > 0)
   //     params.set<std::vector<SubdomainName>>("block") = _blocks;
@@ -896,7 +998,8 @@ NSFVAction::addINSTemperatureBC()
   //     params.set<NonlinearVariableName>("variable") = _temperature_variable_name;
   //     params.set<std::vector<BoundaryName>>("boundary") = {_fixed_temperature_boundary[i]};
   //     _problem->addBoundaryCondition(
-  //         "DirichletBC", _temperature_variable_name + "_" + _fixed_temperature_boundary[i], params);
+  //         "DirichletBC", _temperature_variable_name + "_" + _fixed_temperature_boundary[i],
+  //         params);
   //   }
   // }
 }
@@ -925,7 +1028,8 @@ NSFVAction::addINSPressureBC()
   //     params.set<Real>("value") = val;
   //     params.set<NonlinearVariableName>("variable") = _pressure_variable_name;
   //     params.set<std::vector<BoundaryName>>("boundary") = {_pressure_boundary[i]};
-  //     _problem->addBoundaryCondition("DirichletBC", NS::pressure + _pressure_boundary[i], params);
+  //     _problem->addBoundaryCondition("DirichletBC", NS::pressure + _pressure_boundary[i],
+  //     params);
   //   }
   // }
 }

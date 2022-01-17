@@ -92,7 +92,10 @@ protected:
   /// Temperature function names at fixed temperature boundaries
   std::vector<FunctionName> _temperature_function;
   /// Temperature variable name to facilitate temperature variable added outside
-  VariableName _temperature_variable_name;
+  VariableName _fluid_temperature_variable_name;
+  /// Temperature variable name in the solid subscale structure (in porous medium treatment)
+  /// to facilitate temperature variable added outside
+  VariableName _solid_temperature_variable_name;
   /// Mesh dimension
   unsigned int _dim;
   /// Subdomain IDs
