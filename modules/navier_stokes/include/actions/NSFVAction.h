@@ -19,7 +19,7 @@
  * following which automatically adds variables, kernels, aux kernels, bcs
  * for setting up the incompressible Navier-Stokes equation.
  *
- * [IncompressibleNavierStokes]
+ * [FiniteVolumeNavierStokes]
  * []
  */
 class NSFVAction : public Action
@@ -37,11 +37,12 @@ protected:
   void setNoBCCommonParams(InputParameters & params);
 
   // Helper functions that add various inviscid flux Kernels.
-  void addINSTimeKernels();
-  void addINSMass();
-  void addINSMomentum();
-  void addINSTemperature();
-  void addINSVelocityAux();
+  void addTimeKernels();
+  void addMass();
+  void addMomentum();
+  void addEnergy();
+  void addVelocityAux();
+  void addTemperature();
 
   // Helper functions that add BCs.
   void addINSVelocityBC();
@@ -50,8 +51,28 @@ protected:
   void addINSPressureBC();
   void addINSTemperatureBC();
 
+  void addWCNSVelocityBC();
+  void addWCNSPinnedPressureBC();
+  void addWCNSNoBCBC();
+  void addWCNSPressureBC();
+  void addWCNSTemperatureBC();
+
+  void addCNSVelocityBC();
+  void addCNSPinnedPressureBC();
+  void addCNSNoBCBC();
+  void addCNSPressureBC();
+  void addCNSTemperatureBC();
+
   /// Equation type, transient or steady-state
   MooseEnum _type;
+
+  /// Compressibility type, can be compressible, incompressible
+  /// or weakly-incompressible
+  MooseEnum _compressibility;
+
+  /// Swich dedicated to show if porous medium treatment is requested or not
+  bool _porous_medium_treatment;
+
   /// Subdomains Navier-Stokes equation is defined on
   std::vector<SubdomainName> _blocks;
   /// Boundaries with velocity specified
@@ -62,8 +83,6 @@ protected:
   std::vector<BoundaryName> _pressure_boundary;
   /// Pressure function names at pressure boundaries
   std::vector<FunctionName> _pressure_function;
-  /// No-BC boundaries
-  std::vector<BoundaryName> _no_bc_boundary;
   /// Whether or not we need to pin pressure at a node
   bool _has_pinned_node;
   /// The node set name of the pinned node
@@ -72,10 +91,6 @@ protected:
   std::vector<BoundaryName> _fixed_temperature_boundary;
   /// Temperature function names at fixed temperature boundaries
   std::vector<FunctionName> _temperature_function;
-  /// FE type for various variables
-  FEType _fe_type;
-  /// Whether we use AD or not
-  bool _use_ad;
   /// Temperature variable name to facilitate temperature variable added outside
   VariableName _temperature_variable_name;
   /// Mesh dimension
