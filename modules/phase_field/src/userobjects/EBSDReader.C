@@ -280,7 +280,7 @@ EBSDReader::readFile()
 
       bin = std::make_tuple(w_index, x_index, y_index, z_index);
 
-      // storing the bincorresponding to the quaternion quat[i][k]
+      // storing the bin corresponding to the quaternion quat[i][k]
       quat_to_bin[i].push_back(bin);
 
       // storing the bin name and its corresponding size value
@@ -298,12 +298,12 @@ EBSDReader::readFile()
      * A 4 by N matrix (Q) is constructed, where N is the number of quaternions.
      * A weight matrix (W) is created. The eigen vector corresponding to the
      * maximum eigen value of Q*W*Q' is the weighted average quaternion
-     **/
+     */
 
     // creating a quaternion matrix
     Eigen::MatrixXd quat_mat(4, quat[i].size());
     // creating the weight matrix
-    Eigen::MatrixXd weight = Eigen::MatrixXd::Identity(quat[i].size(), quat[i].size());
+    Eigen::MatrixXd weight = Eigen::VectorXd::Zero(quat[i].size());
 
     unsigned int bin_size;
     bool data_quality_ok = false;
@@ -320,10 +320,10 @@ EBSDReader::readFile()
       // instantiating columns of the matrix
       quat_mat.col(j) << w, x, y, z;
       // assigning weights to each quaternion
-      weight(j, j) = std::pow(bin_size, _L_norm);
-      total_weight += weight(j, j);
+      weight(j) = std::pow(bin_size, _L_norm);
+      total_weight += weight(j);
       /**
-       * If no bin exists which has atleast 50% of total quaternions in a grain
+       * If no bin exists which has at least 50% of total quaternions in a grain
        * then the EBSD data may not be reliable
        * Note: The limit 50% is arbitrary
        */
@@ -340,7 +340,8 @@ EBSDReader::readFile()
                << COLOR_DEFAULT << std::flush;
 
     // compute eigen values and eigen vectors
-    Eigen::EigenSolver<Eigen::MatrixXd> EigenSolver(quat_mat * weight * quat_mat.transpose());
+    Eigen::EigenSolver<Eigen::MatrixXd> EigenSolver(quat_mat * weight.asDiagonal() *
+                                                    quat_mat.transpose());
     Eigen::VectorXd eigen_values = EigenSolver.eigenvalues().real();
     Eigen::MatrixXd eigen_vectors = EigenSolver.eigenvectors().real();
 
