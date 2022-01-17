@@ -23,6 +23,9 @@ public:
    */
   void setInitialCondition(libMesh::PetscVector<Number> & param);
 
+  
+  void setMisfitToSimulatedValues();
+
   /**
    * Functions to get and check bounds
    */
@@ -47,15 +50,6 @@ public:
   virtual void computeGradient(libMesh::PetscVector<Number> & /*gradient*/)
   {
     mooseError("Gradient function has not been defined for form function type ", _type);
-  }
-
-  /**
-   * Function to compute gradient.
-   * This is the last call of the hessian routine.
-   */
-  virtual void computeHessian(libMesh::PetscMatrix<Number> & /*hessian*/)
-  {
-    mooseError("Hessian function has not been defined for form function type ", _type);
   }
 
   /**

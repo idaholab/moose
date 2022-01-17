@@ -47,12 +47,3 @@ QuadraticMinimize::computeGradient(libMesh::PetscVector<Number> & gradient)
     }
   gradient.close();
 }
-
-void
-QuadraticMinimize::computeHessian(libMesh::PetscMatrix<Number> & hessian)
-{
-  hessian.zero();
-  for (dof_id_type i = 0; i < _ndof; ++i)
-    hessian.set(i, i, 2.0);
-  hessian.close();
-}

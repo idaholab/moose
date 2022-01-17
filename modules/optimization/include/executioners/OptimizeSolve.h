@@ -40,8 +40,9 @@ protected:
   /// Gradient routine
   virtual void gradientFunction(libMesh::PetscVector<Number> & gradient);
 
-  /// Hessian routine
-  virtual void hessianFunction(libMesh::PetscMatrix<Number> & hessian);
+  /// Hessian application routine
+  virtual PetscErrorCode applyHessian(libMesh::PetscVector<Number> &  s, libMesh::PetscVector<Number> &  Hs);
+
 
   /// Communicator used for operations
   const libMesh::Parallel::Communicator _my_comm;
@@ -82,6 +83,7 @@ private:
   /// Function wrappers for tao
   static PetscErrorCode objectiveFunctionWrapper(Tao tao, Vec x, Real * objective, void * ctx);
   static PetscErrorCode hessianFunctionWrapper(Tao tao, Vec x, Mat hessian, Mat pc, void * ctx);
+  static PetscErrorCode applyHessianWrapper(Mat H, Vec s, Vec Hs);
   static PetscErrorCode
   objectiveAndGradientFunctionWrapper(Tao tao, Vec x, Real * objective, Vec gradient, void * ctx);
   static PetscErrorCode variableBoundsWrapper(Tao /*tao*/, Vec xl, Vec xu, void * ctx);
@@ -112,6 +114,7 @@ private:
   /// Parameters (solution)
   std::unique_ptr<libMesh::PetscVector<Number>> _parameters;
 
-  /// Hessian (matrix)
-  libMesh::PetscMatrix<Number> _hessian;
+  /// Hessian (matrix) - usually a matrix-free representation
+  Mat _hessian;
+  Mat _hessianPrecond;
 };

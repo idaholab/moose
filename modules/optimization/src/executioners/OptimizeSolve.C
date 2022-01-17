@@ -4,6 +4,8 @@
 #include "libmesh/petsc_vector.h"
 #include "libmesh/petsc_matrix.h"
 
+#include <petsc/private/taoimpl.h>
+
 InputParameters
 OptimizeSolve::validParams()
 {
@@ -26,8 +28,7 @@ OptimizeSolve::OptimizeSolve(Executioner & ex)
     _solve_on(getParam<ExecFlagEnum>("solve_on")),
     _verbose(getParam<bool>("verbose")),
     _tao_solver_enum(getParam<MooseEnum>("tao_solver").getEnum<TaoSolverEnum>()),
-    _parameters(std::make_unique<libMesh::PetscVector<Number>>(_my_comm)),
-    _hessian(_my_comm)
+    _parameters(libmesh_make_unique<libMesh::PetscVector<Number>>(_my_comm))
 {
   if (libMesh::n_threads() > 1)
     mooseError("OptimizeSolve does not currently support threaded execution");
@@ -47,13 +48,6 @@ OptimizeSolve::solve()
   // Initialize solution and matrix
   _form_function->setInitialCondition(*_parameters.get());
   _ndof = _parameters->size();
-  _hessian.init(/*global_rows =*/_ndof,
-                /*global_cols =*/_ndof,
-                /*local_rows =*/_ndof,
-                /*local_cols =*/_ndof,
-                /*block_diag_nz =*/_ndof,
-                /*block_off_diag_nz =*/0);
-
   bool solveInfo = (taoSolve() == 0);
   return solveInfo;
 }
@@ -124,15 +118,22 @@ OptimizeSolve::taoSolve()
   CHKERRQ(ierr);
   // Set bounds for bounded optimization
   ierr = TaoSetVariableBoundsRoutine(_tao, variableBoundsWrapper, this);
-
   CHKERRQ(ierr);
 
-  // Set objective, gradient, and hessian functions
+  // Set objective and gradient functions
   ierr = TaoSetObjectiveRoutine(_tao, objectiveFunctionWrapper, this);
   CHKERRQ(ierr);
   ierr = TaoSetObjectiveAndGradientRoutine(_tao, objectiveAndGradientFunctionWrapper, this);
   CHKERRQ(ierr);
-  ierr = TaoSetHessianRoutine(_tao, _hessian.mat(), _hessian.mat(), hessianFunctionWrapper, this);
+
+  // Set matrix-free version of the Hessian function
+  ierr = MatCreateShell(_my_comm.get(), _ndof, _ndof, _ndof, _ndof, this, &_hessian);
+  CHKERRQ(ierr);
+  // Define Hessian-vector multiplication routine
+  ierr = MatShellSetOperation(_hessian, MATOP_MULT, (void (*)(void))applyHessianWrapper);
+  CHKERRQ(ierr);
+  // Link matrix-free Hessian to Tao
+  ierr = TaoSetHessianRoutine(_tao, _hessian, _hessian, hessianFunctionWrapper, this);
   CHKERRQ(ierr);
 
   // Set initial guess
@@ -146,9 +147,6 @@ OptimizeSolve::taoSolve()
   // Solve optimization
   ierr = TaoSolve(_tao);
   CHKERRQ(ierr);
-
-  // Setting data on reporter
-  //  setTaoSolutionStatus(_tao);  fixme lynn
 
   // Print solve statistics
   if (getParam<bool>("verbose"))
@@ -214,8 +212,8 @@ OptimizeSolve::setTaoSolutionStatus(double f, int its, double gnorm, double cnor
   _hess_iterate = 0;
   // print verbose per iteration output
   if (_verbose)
-    _console << "****************** TAO SOLVER OUTPUT: iteration=" << its << "\tf=" << f
-             << "\tgnorm=" << gnorm << "\tcnorm=" << cnorm << "\txdiff=" << xdiff << std::endl;
+    _console << "TAO SOLVER: iteration=" << its << "\tf=" << f << "\tgnorm=" << gnorm
+             << "\tcnorm=" << cnorm << "\txdiff=" << xdiff << std::endl;
 }
 
 PetscErrorCode
@@ -263,16 +261,49 @@ OptimizeSolve::objectiveAndGradientFunctionWrapper(
 }
 
 PetscErrorCode
-OptimizeSolve::hessianFunctionWrapper(Tao /*tao*/, Vec x, Mat hessian, Mat /*pc*/, void * ctx)
+OptimizeSolve::hessianFunctionWrapper(Tao /*tao*/, Vec x, Mat /*hessian*/, Mat /*pc*/, void * ctx)
 {
   auto * solver = static_cast<OptimizeSolve *>(ctx);
-
   libMesh::PetscVector<Number> param(x, solver->_my_comm);
   *solver->_parameters = param;
+  auto n = solver->_ndof;
+  auto comm = solver->_my_comm.get();
+  MatCreateShell(
+      comm, n, n, n, n, ctx, &(solver->_hessian)); // need to fix two of the n's for parallel
+  MatShellSetOperation(
+      solver->_hessian, MATOP_MULT, (void (*)(void))OptimizeSolve::applyHessianWrapper);
+  return 0;
+}
 
-  libMesh::PetscMatrix<Number> mat(hessian, solver->_my_comm);
+PetscErrorCode
+OptimizeSolve::applyHessianWrapper(Mat H, Vec s, Vec Hs)
+{
+  void * ctx;
+  MatShellGetContext(H, &ctx);
+  auto * solver = static_cast<OptimizeSolve *>(ctx);
+  libMesh::PetscVector<Number> sbar(s, solver->_my_comm);
+  libMesh::PetscVector<Number> Hsbar(Hs, solver->_my_comm);
+  return solver->applyHessian(sbar, Hsbar);
+}
 
-  solver->hessianFunction(mat);
+PetscErrorCode
+OptimizeSolve::applyHessian(libMesh::PetscVector<Number> & s, libMesh::PetscVector<Number> & Hs)
+{
+  _form_function->updateParameters(s);
+  // What happens for material inversion when the Hessian
+  // is dependent on the parameters? Deal with it later???
+  if (!_problem.execMultiApps(EXEC_FORWARD))
+    mooseError("Forward solve multiapp failed!");
+  // delete this?
+  //  if (_solve_on.contains(EXEC_FORWARD))
+  //    _inner_solve->solve();
+  _form_function->setMisfitToSimulatedValues();
+  if (!_problem.execMultiApps(EXEC_ADJOINT))
+    mooseError("Adjoint solve multiapp failed!");
+  // delete this?
+  //  if (_solve_on.contains(EXEC_ADJOINT))
+  //    _inner_solve->solve();
+  _form_function->computeGradient(Hs);
   return 0;
 }
 
@@ -290,12 +321,12 @@ OptimizeSolve::objectiveFunction()
 {
   _form_function->updateParameters(*_parameters.get());
 
-  _problem.execute(EXEC_FORWARD);
+  //  _problem.execute(EXEC_FORWARD);
   bool multiapp_passed = true;
   if (!_problem.execMultiApps(EXEC_FORWARD))
     multiapp_passed = false;
-  if (_solve_on.contains(EXEC_FORWARD))
-    _inner_solve->solve();
+  //  if (_solve_on.contains(EXEC_FORWARD))
+  //    _inner_solve->solve();
 
   _obj_iterate++;
   return _form_function->computeAndCheckObjective(multiapp_passed);
@@ -306,30 +337,14 @@ OptimizeSolve::gradientFunction(libMesh::PetscVector<Number> & gradient)
 {
   _form_function->updateParameters(*_parameters.get());
 
-  _problem.execute(EXEC_ADJOINT);
+  //  _problem.execute(EXEC_ADJOINT);
   if (!_problem.execMultiApps(EXEC_ADJOINT))
     mooseError("Adjoint solve multiapp failed!");
-  if (_solve_on.contains(EXEC_ADJOINT))
-    _inner_solve->solve();
+  //  if (_solve_on.contains(EXEC_ADJOINT))
+  //    _inner_solve->solve();
 
   _grad_iterate++;
   _form_function->computeGradient(gradient);
-}
-
-void
-OptimizeSolve::hessianFunction(libMesh::PetscMatrix<Number> & hessian)
-{
-  _form_function->updateParameters(*_parameters.get());
-
-  _problem.execute(EXEC_HESSIAN);
-  if (!_problem.execMultiApps(EXEC_HESSIAN))
-    mooseError("Hessian solve multiapp failed!");
-  if (_solve_on.contains(EXEC_HESSIAN))
-    _inner_solve->solve();
-
-  _hess_iterate++;
-
-  _form_function->computeHessian(hessian);
 }
 
 PetscErrorCode
