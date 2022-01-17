@@ -273,27 +273,26 @@ EBSDReader::readFile()
      * "Averaging quaternions." Journal of Guidance, Control, and Dynamics 30,
      * no. 4 (2007): 1193-1197.
      * A 4 by N matrix (Q) is constructed, where N is the number of quaternions.
-     * A weight matrix (W) is created. The eigen vector corresponding to the
-     * maximum eigen value of Q*W*Q' is the weighted average quaternion
+     * A weight matrix (W) is created. The eigenvector corresponding to the
+     * maximum eigenvalue of Q*W*Q' is the weighted average quaternion
      */
 
-    // creating quaternion average matrix Q*w*Q^T
-    Eigen::Matrix<Real, 4, 4> quat_mat = Eigen::Matrix<Real, 4, 4>::Zero();
+    // quaternion average matrix Q*w*Q^T
+    typedef Eigen::Matrix<Real, 4, 4> Matrix4x4;
+    Matrix4x4 quat_mat = Matrix4x4::Zero();
+    typedef Eigen::Matrix<Real, 4, 1> Vector4;
 
-    unsigned int bin_size;
     bool data_quality_ok = false;
     Real total_weight = 0.0;
-
     for (const auto & q : quat[i])
     {
-      Eigen::Matrix<Real, 4, 1> v(q.w(), q.x(), q.y(), q.z());
+      Vector4 v(q.w(), q.x(), q.y(), q.z());
 
       const auto bin = std::make_tuple<int, int, int, int>(std::floor(q.w() * 0.5 * _bins),
                                                            std::floor(q.x() * 0.5 * _bins),
                                                            std::floor(q.y() * 0.5 * _bins),
                                                            std::floor(q.z() * 0.5 * _bins));
-      bin_size = feature_weights[bin];
-
+      const auto bin_size = feature_weights[bin];
       const auto weight = std::pow(bin_size, _L_norm);
       total_weight += weight;
 
@@ -316,33 +315,16 @@ EBSDReader::readFile()
                << '\n'
                << COLOR_DEFAULT << std::flush;
 
-    // compute eigen values and eigen vectors
-    Eigen::EigenSolver<Eigen::MatrixXd> EigenSolver(quat_mat);
-    Eigen::VectorXd eigen_values = EigenSolver.eigenvalues().real();
-    Eigen::MatrixXd eigen_vectors = EigenSolver.eigenvectors().real();
+    // compute eigenvalues and eigenvectors
+    Eigen::EigenSolver<Matrix4x4> EigenSolver(quat_mat);
+    Vector4 eigen_values = EigenSolver.eigenvalues().real();
+    Matrix4x4 eigen_vectors = EigenSolver.eigenvectors().real();
 
-    // creating a tuple of eigen values and eigen vectors
-    std::vector<std::tuple<double, Eigen::VectorXd>> eigen_vectors_and_values;
-    for (unsigned int i = 0; i < eigen_values.size(); i++)
-    {
-      std::tuple<double, Eigen::VectorXd> vec_and_val(eigen_values[i], eigen_vectors.col(i));
-      eigen_vectors_and_values.push_back(vec_and_val);
-    }
-    // Sorting the eigen values and vectors in ascending order of eigen values
-
-    // clang-format off
-    auto j = std::max_element(eigen_vectors_and_values.begin(),
-                              eigen_vectors_and_values.end(),
-                              [&](const std::tuple<double, Eigen::VectorXd> & a,
-                                  const std::tuple<double, Eigen::VectorXd> & b) -> bool {
-                                return std::get<0>(a) < std::get<0>(b);
-                              });
-    // clang-format on
-
-    // Selecting eigen vector corresponding to max eigen value to compute average Euler angle
-    Eigen::Quaternion<Real> q(
-        std::get<1>(*j)(0), std::get<1>(*j)(1), std::get<1>(*j)(2), std::get<1>(*j)(3));
-
+    // Selecting eigenvector corresponding to max eigenvalue to compute average Euler angle
+    Vector4::Index max_index = 0;
+    eigen_values.maxCoeff(&max_index);
+    const auto max_vec = eigen_vectors.col(max_index);
+    const Eigen::Quaternion<Real> q(max_vec(0), max_vec(1), max_vec(2), max_vec(3));
     b = EulerAngles(q);
 
     // link the EulerAngles into the EBSDAvgData for access via the functors
@@ -362,7 +344,7 @@ EBSDReader::readFile()
       a._custom[i] /= Real(a._n);
   }
   // Build maps to indicate the weights with which grain and phase data
-  // from the surrounding elements contributes to a node fo IC purposes
+  // from the surrounding elements contributes to a node for IC purposes
   buildNodeWeightMaps();
 }
 

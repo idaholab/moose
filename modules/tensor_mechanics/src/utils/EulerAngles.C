@@ -18,7 +18,7 @@ EulerAngles::EulerAngles()
   phi2 = 0.0;
 }
 
-EulerAngles::EulerAngles(Eigen::Quaternion<Real> & q)
+EulerAngles::EulerAngles(const Eigen::Quaternion<Real> & q)
 {
   phi1 = std::atan2((q.x() * q.z() + q.w() * q.y()), -(-q.w() * q.x() + q.y() * q.z())) *
          (180.0 / libMesh::pi);
