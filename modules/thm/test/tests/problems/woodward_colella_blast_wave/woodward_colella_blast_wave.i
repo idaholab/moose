@@ -23,7 +23,7 @@
   []
 []
 
-[FluidProperties]
+[Modules/FluidProperties]
   [fp]
     type = IdealGasFluidProperties
     gamma = 1.4

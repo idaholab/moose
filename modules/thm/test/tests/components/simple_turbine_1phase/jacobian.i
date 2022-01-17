@@ -14,7 +14,7 @@
   gravity_vector = '0 0 0'
 []
 
-[FluidProperties]
+[Modules/FluidProperties]
   [fp]
     type = StiffenedGasFluidProperties
     gamma = 1.43

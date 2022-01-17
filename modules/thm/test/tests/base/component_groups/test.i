@@ -6,7 +6,7 @@
   initial_vel = 0
 []
 
-[FluidProperties]
+[Modules/FluidProperties]
   [fp_liquid]
     type = StiffenedGasFluidProperties
     gamma = 2.35

@@ -32,7 +32,7 @@ p_out = 100e3
   closures = simple_closures
 []
 
-[FluidProperties]
+[Modules/FluidProperties]
   [fp]
     type = StiffenedGasFluidProperties
     gamma = 2.35

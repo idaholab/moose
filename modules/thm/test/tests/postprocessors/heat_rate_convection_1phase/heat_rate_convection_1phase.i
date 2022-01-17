@@ -13,7 +13,7 @@ L = 2.0
   closures = simple_closures
 []
 
-[FluidProperties]
+[Modules/FluidProperties]
   [fp]
     type = IdealGasFluidProperties
   []

@@ -9,7 +9,7 @@
   closures = simple_closures
 []
 
-[FluidProperties]
+[Modules/FluidProperties]
   [fp]
     type = IdealGasFluidProperties
   []

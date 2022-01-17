@@ -1,4 +1,4 @@
-[FluidProperties]
+[Modules/FluidProperties]
   [fp]
     type = IdealGasFluidProperties
   []

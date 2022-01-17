@@ -16,7 +16,7 @@ p_out = 7e6
   scaling_factor_1phase = '1 1 1e-5'
 []
 
-[FluidProperties]
+[Modules/FluidProperties]
   [fp]
     type = IdealGasFluidProperties
   []

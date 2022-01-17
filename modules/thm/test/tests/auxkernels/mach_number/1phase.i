@@ -10,7 +10,7 @@
   allow_renumbering = false
 []
 
-[FluidProperties]
+[Modules/FluidProperties]
   [fp]
     type = StiffenedGasFluidProperties
     gamma = 2.35

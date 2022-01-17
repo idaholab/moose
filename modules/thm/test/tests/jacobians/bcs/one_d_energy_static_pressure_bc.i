@@ -8,7 +8,7 @@
   fp_1phase = fp_1phase
 []
 
-[FluidProperties]
+[Modules/FluidProperties]
   [fp_1phase]
     type = StiffenedGasFluidProperties
     gamma = 2.35

@@ -16,7 +16,7 @@
   initial_vel = 1
 []
 
-[FluidProperties]
+[Modules/FluidProperties]
   [fp]
     type = IdealGasFluidProperties
     gamma = 1.4

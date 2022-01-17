@@ -33,7 +33,7 @@ delta_t_open = 0.1
   initial_vel = 0
 []
 
-[FluidProperties]
+[Modules/FluidProperties]
   [fp]
     type = IdealGasFluidProperties
     gamma = 1.4

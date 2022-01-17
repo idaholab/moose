@@ -7,7 +7,7 @@
   snes_test_err = 1e-10
 []
 
-[FluidProperties]
+[Modules/FluidProperties]
   [fp]
     type = StiffenedGasFluidProperties
     gamma = 1.43

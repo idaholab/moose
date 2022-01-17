@@ -13,7 +13,7 @@
   scaling_factor_rhoEV = 1e-5
 []
 
-[FluidProperties]
+[Modules/FluidProperties]
   [fp]
     type = StiffenedGasFluidProperties
     gamma = 2.35

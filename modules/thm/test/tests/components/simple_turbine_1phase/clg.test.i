@@ -14,7 +14,7 @@
   automatic_scaling = true
 []
 
-[FluidProperties]
+[Modules/FluidProperties]
   [fp]
     type = StiffenedGasFluidProperties
     gamma = 1.43

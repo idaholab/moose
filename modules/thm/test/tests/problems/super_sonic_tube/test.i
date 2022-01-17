@@ -12,7 +12,7 @@
   spatial_discretization = cg
 []
 
-[FluidProperties]
+[Modules/FluidProperties]
   [ig]
     type = IdealGasFluidProperties
     gamma = 1.41

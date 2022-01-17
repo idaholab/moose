@@ -21,7 +21,7 @@ D_h = 5
   []
 []
 
-[FluidProperties]
+[Modules/FluidProperties]
   [eos]
     type = StiffenedGasFluidProperties
     gamma = 2.35
