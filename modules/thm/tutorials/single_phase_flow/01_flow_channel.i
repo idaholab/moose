@@ -12,7 +12,7 @@ press = 1e5         # Pa
   fp = he
 []
 
-[FluidProperties]
+[Modules/FluidProperties]
   [he]
     type = IdealGasFluidProperties
     molar_mass = 4e-3

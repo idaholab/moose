@@ -27,7 +27,7 @@ tot_power = 100     # W
   f = 0.4
 []
 
-[FluidProperties]
+[Modules/FluidProperties]
   [he]
     type = IdealGasFluidProperties
     molar_mass = 4e-3
