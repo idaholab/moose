@@ -3,6 +3,8 @@
 #include "HeatConductionApp.h"
 #include "FluidPropertiesApp.h"
 #include "NavierStokesApp.h"
+#include "RayTracingApp.h"
+#include "RdgApp.h"
 #include "MiscApp.h"
 
 #include "AppFactory.h"
@@ -60,7 +62,7 @@ THMApp::registerObjects(Factory & /*factory*/)
 void
 THMApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
 {
-  mooseError("associateSynbtax() is deprecated and not supported in THM");
+  mooseError("associateSyntax() is deprecated and not supported in THM");
 }
 
 void
@@ -78,6 +80,8 @@ THMApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   HeatConductionApp::registerAll(f, af, s);
   FluidPropertiesApp::registerAll(f, af, s);
   NavierStokesApp::registerAll(f, af, s);
+  RayTracingApp::registerAll(f, af, s);
+  RdgApp::registerAll(f, af, s);
   MiscApp::registerAll(f, af, s);
 
   THM::associateSyntax(s);
