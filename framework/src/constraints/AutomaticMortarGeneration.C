@@ -94,6 +94,7 @@ AutomaticMortarGeneration::clear()
   _secondary_node_to_nodal_normal.clear();
   _secondary_node_to_hh_nodal_tangents.clear();
   _secondary_element_to_secondary_lowerd_element.clear();
+  _secondary_elems_to_mortar_segments.clear();
 }
 
 void
@@ -111,9 +112,9 @@ AutomaticMortarGeneration::buildNodeToElemMaps()
     if (!this->_secondary_boundary_subdomain_ids.count(secondary_elem->subdomain_id()))
       continue;
 
-    for (MooseIndex(secondary_elem->n_vertices()) n = 0; n < secondary_elem->n_vertices(); ++n)
+    for (const auto & nd : secondary_elem->node_ref_range())
     {
-      std::vector<const Elem *> & vec = _nodes_to_secondary_elem_map[secondary_elem->node_id(n)];
+      std::vector<const Elem *> & vec = _nodes_to_secondary_elem_map[nd.id()];
       vec.push_back(secondary_elem);
     }
   }
@@ -126,9 +127,9 @@ AutomaticMortarGeneration::buildNodeToElemMaps()
     if (!this->_primary_boundary_subdomain_ids.count(primary_elem->subdomain_id()))
       continue;
 
-    for (MooseIndex(primary_elem->n_vertices()) n = 0; n < primary_elem->n_vertices(); ++n)
+    for (const auto & nd : primary_elem->node_ref_range())
     {
-      std::vector<const Elem *> & vec = _nodes_to_primary_elem_map[primary_elem->node_id(n)];
+      std::vector<const Elem *> & vec = _nodes_to_primary_elem_map[nd.id()];
       vec.push_back(primary_elem);
     }
   }
@@ -247,12 +248,6 @@ AutomaticMortarGeneration::getNormals(const Elem & secondary_elem,
 void
 AutomaticMortarGeneration::buildMortarSegmentMesh()
 {
-  // We maintain a mapping from lower-dimensional secondary elements in
-  // the original mesh to (sets of) elements in mortar_segment_mesh.
-  // This allows us to quickly determine which elements need to be
-  // split.
-  std::map<const Elem *, std::set<Elem *>> secondary_elems_to_mortar_segments;
-
   dof_id_type local_id_index = 0;
   std::size_t node_unique_id_offset = 0;
 
@@ -360,7 +355,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
 
     // Maintain the mapping between secondary elems and mortar segment elems contained within them.
     // Initially, only the original secondary_elem is present.
-    secondary_elems_to_mortar_segments[secondary_elem].insert(new_elem);
+    _secondary_elems_to_mortar_segments[secondary_elem].insert(new_elem);
   }
 
   // 2.) Insert new nodes from primary side and split mortar segments as necessary.
@@ -385,7 +380,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
       new_pt += Moose::fe_lagrange_1D_shape(order, n, xi1) * secondary_elem->point(n);
 
     // Find the current mortar segment that will have to be split.
-    auto & mortar_segment_set = secondary_elems_to_mortar_segments[secondary_elem];
+    auto & mortar_segment_set = _secondary_elems_to_mortar_segments[secondary_elem];
     Elem * current_mortar_segment = nullptr;
     MortarSegmentInfo * info = nullptr;
 
@@ -591,8 +586,9 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
       new_interior_node_right->set_unique_id(new_interior_id_right + node_unique_id_offset);
     }
 
-    _mortar_segment_mesh->add_elem(new_elem_right);
-    _mortar_segment_mesh->add_elem(new_elem_left);
+    const auto secondary_volume = secondary_elem->volume();
+    const bool add_right = !(new_elem_right->volume() / secondary_volume < TOLERANCE);
+    const bool add_left = !(new_elem_left->volume() / secondary_volume < TOLERANCE);
 
     // If orientation 2 was valid, swap the left and right primaries.
     if (orientation2_valid)
@@ -615,32 +611,52 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
       mooseError("MortarSegmentInfo not found for current_mortar_segment.");
     MortarSegmentInfo current_msinfo = msm_it->second;
 
-    // Create new MortarSegmentInfo objects for new_elem_left and new_elem_right.
-    MortarSegmentInfo new_msinfo_left, new_msinfo_right;
+    if (add_left)
+    {
+      _mortar_segment_mesh->add_elem(new_elem_left);
 
-    // The new MortarSegmentInfo info objects inherit their "outer"
-    // information from current_msinfo and the rest is determined by
-    // the Node being inserted.
-    new_msinfo_left.xi1_a = current_msinfo.xi1_a;
-    new_msinfo_left.xi2_a = current_msinfo.xi2_a;
-    new_msinfo_left.secondary_elem = secondary_elem;
-    new_msinfo_left.xi1_b = xi1;
-    new_msinfo_left.xi2_b = left_xi2;
-    new_msinfo_left.primary_elem = left_primary_elem;
+      // Create new MortarSegmentInfo objects for new_elem_left
+      MortarSegmentInfo new_msinfo_left;
 
-    new_msinfo_right.xi1_b = current_msinfo.xi1_b;
-    new_msinfo_right.xi2_b = current_msinfo.xi2_b;
-    new_msinfo_right.secondary_elem = secondary_elem;
-    new_msinfo_right.xi1_a = xi1;
-    new_msinfo_right.xi2_a = right_xi2;
-    new_msinfo_right.primary_elem = right_primary_elem;
+      // The new MortarSegmentInfo info objects inherit their "outer"
+      // information from current_msinfo and the rest is determined by
+      // the Node being inserted.
+      new_msinfo_left.xi1_a = current_msinfo.xi1_a;
+      new_msinfo_left.xi2_a = current_msinfo.xi2_a;
+      new_msinfo_left.secondary_elem = secondary_elem;
+      new_msinfo_left.xi1_b = xi1;
+      new_msinfo_left.xi2_b = left_xi2;
+      new_msinfo_left.primary_elem = left_primary_elem;
+
+      // Add new msinfo objects to the map.
+      _msm_elem_to_info.emplace(new_elem_left, new_msinfo_left);
+
+      // We need to insert new_elem_left in
+      // the mortar_segment_set for this secondary_elem.
+      mortar_segment_set.insert(new_elem_left);
+    }
+
+    if (add_right)
+    {
+      _mortar_segment_mesh->add_elem(new_elem_right);
+
+      // Create new MortarSegmentInfo objects for new_elem_right
+      MortarSegmentInfo new_msinfo_right;
+
+      new_msinfo_right.xi1_b = current_msinfo.xi1_b;
+      new_msinfo_right.xi2_b = current_msinfo.xi2_b;
+      new_msinfo_right.secondary_elem = secondary_elem;
+      new_msinfo_right.xi1_a = xi1;
+      new_msinfo_right.xi2_a = right_xi2;
+      new_msinfo_right.primary_elem = right_primary_elem;
+
+      _msm_elem_to_info.emplace(new_elem_right, new_msinfo_right);
+
+      mortar_segment_set.insert(new_elem_right);
+    }
 
     // Erase the MortarSegmentInfo object for current_mortar_segment from the map.
     _msm_elem_to_info.erase(msm_it);
-
-    // Add new_msinfo_left and new_msinfo_right objects to the map.
-    _msm_elem_to_info.emplace(new_elem_left, new_msinfo_left);
-    _msm_elem_to_info.emplace(new_elem_right, new_msinfo_right);
 
     // current_mortar_segment must be erased from the
     // mortar_segment_set since it has now been split.
@@ -649,11 +665,6 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     // The original mortar segment has been split, so erase it from
     // the mortar segment mesh.
     _mortar_segment_mesh->delete_elem(current_mortar_segment);
-
-    // We need to insert new_elem_left and new_elem_right in
-    // the mortar_segment_set for this secondary_elem.
-    mortar_segment_set.insert(new_elem_left);
-    mortar_segment_set.insert(new_elem_right);
   }
 
   // Remove all MSM elements without a primary contribution
@@ -664,35 +675,34 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
    */
   for (auto msm_elem : _mortar_segment_mesh->active_element_ptr_range())
   {
-    MortarSegmentInfo & msinfo = _msm_elem_to_info.at(msm_elem);
+    MortarSegmentInfo & msinfo = libmesh_map_find(_msm_elem_to_info, msm_elem);
     Elem * primary_elem = const_cast<Elem *>(msinfo.primary_elem);
     if (primary_elem == nullptr || std::abs(msinfo.xi2_a) > 1.0 + TOLERANCE ||
         std::abs(msinfo.xi2_b) > 1.0 + TOLERANCE)
     {
-      // Remove element from mortar segment mesh
-      _mortar_segment_mesh->delete_elem(msm_elem);
+      // Erase from secondary to msms map
+      libmesh_map_find(_secondary_elems_to_mortar_segments, msinfo.secondary_elem).erase(msm_elem);
 
       // Erase msinfo
       _msm_elem_to_info.erase(msm_elem);
+
+      // Remove element from mortar segment mesh
+      _mortar_segment_mesh->delete_elem(msm_elem);
     }
   }
 
-#ifndef NDEBUG
+#ifdef DEBUG
   // Verify that all segments without primary contribution have been deleted
   for (auto msm_elem : _mortar_segment_mesh->active_element_ptr_range())
   {
-    const MortarSegmentInfo & msinfo = _msm_elem_to_info.at(msm_elem);
+    const MortarSegmentInfo & msinfo = libmesh_map_find(_msm_elem_to_info, msm_elem);
     mooseAssert(msinfo.primary_elem != nullptr,
                 "All mortar segment elements should have valid "
                 "primary element.");
   }
 #endif
 
-  // Set up the the mortar segment neighbor information.
-  _mortar_segment_mesh->allow_renumbering(true);
-  _mortar_segment_mesh->skip_partitioning(true);
-  _mortar_segment_mesh->allow_find_neighbors(false);
-  _mortar_segment_mesh->prepare_for_use();
+  _mortar_segment_mesh->cache_elem_data();
 
   // (Optionally) Write the mortar segment mesh to file for inspection
   if (_debug)
@@ -805,6 +815,8 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
          ++el)
     {
       const Elem * secondary_side_elem = *el;
+      auto & secondary_to_msm_element_set =
+          _secondary_elems_to_mortar_segments[secondary_side_elem];
 
       const Real secondary_volume = secondary_side_elem->volume();
 
@@ -1060,6 +1072,9 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
 
             // Associate this MSM elem with the MortarSegmentInfo.
             _msm_elem_to_info.emplace(msm_new_elem, msinfo);
+
+            // Add this mortar segment to the secondary elem to mortar segment map
+            secondary_to_msm_element_set.insert(msm_new_elem);
           }
         }
         // End loop through primary element candidates
@@ -2130,4 +2145,26 @@ AutomaticMortarGeneration::writeGeometryToFile()
   std::set<std::string> sys_names = {"nodal_geometry"};
   // Write the nodal normals to file
   ExodusII_IO(_mesh).write_equation_systems("nodal_geometry_only.e", nodal_normals_es, &sys_names);
+}
+
+std::vector<AutomaticMortarGeneration::MortarFilterIter>
+AutomaticMortarGeneration::secondariesToMortarSegments(const Node & node) const
+{
+  auto secondary_it = _nodes_to_secondary_elem_map.find(node.id());
+  if (secondary_it == _nodes_to_secondary_elem_map.end())
+    mooseError("end of secondary map in associatedMortarSegments");
+
+  const auto & secondary_elems = secondary_it->second;
+  std::vector<MortarFilterIter> ret(secondary_elems.size());
+
+  for (const auto i : index_range(secondary_elems))
+  {
+    auto msm_it = _secondary_elems_to_mortar_segments.find(secondary_elems[i]);
+    if (msm_it == _secondary_elems_to_mortar_segments.end())
+      mooseError("end of mortar segment map in associatedMortarSegments");
+
+    ret[i] = msm_it;
+  }
+
+  return ret;
 }

@@ -36,30 +36,32 @@ AugmentSparsityOnInterface::validParams()
                                          "The name of the primary lower dimensional subdomain.");
   params.addRequiredParam<SubdomainName>("secondary_subdomain",
                                          "The name of the secondary lower dimensional subdomain.");
+  params.addParam<bool>("ghost_point_neighbors",
+                        false,
+                        "Whether we should ghost point neighbors of secondary face elements, and "
+                        "consequently also their mortar interface couples.");
   return params;
 }
 
 AugmentSparsityOnInterface::AugmentSparsityOnInterface(const InputParameters & params)
   : RelationshipManager(params),
-    _amg(nullptr),
-    _has_attached_amg(false),
     _primary_boundary_name(getParam<BoundaryName>("primary_boundary")),
     _secondary_boundary_name(getParam<BoundaryName>("secondary_boundary")),
     _primary_subdomain_name(getParam<SubdomainName>("primary_subdomain")),
     _secondary_subdomain_name(getParam<SubdomainName>("secondary_subdomain")),
-    _is_coupling_functor(isType(Moose::RelationshipManagerType::COUPLING))
+    _is_coupling_functor(isType(Moose::RelationshipManagerType::COUPLING)),
+    _ghost_point_neighbors(getParam<bool>("ghost_point_neighbors"))
 {
 }
 
 AugmentSparsityOnInterface::AugmentSparsityOnInterface(const AugmentSparsityOnInterface & other)
   : RelationshipManager(other),
-    _amg(other._amg),
-    _has_attached_amg(other._has_attached_amg),
     _primary_boundary_name(other._primary_boundary_name),
     _secondary_boundary_name(other._secondary_boundary_name),
     _primary_subdomain_name(other._primary_subdomain_name),
     _secondary_subdomain_name(other._secondary_subdomain_name),
-    _is_coupling_functor(other._is_coupling_functor)
+    _is_coupling_functor(other._is_coupling_functor),
+    _ghost_point_neighbors(other._ghost_point_neighbors)
 {
 }
 
@@ -88,7 +90,7 @@ AugmentSparsityOnInterface::getInfo() const
 void
 AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator & range_begin,
                                        const MeshBase::const_element_iterator & range_end,
-                                       processor_id_type p,
+                                       const processor_id_type p,
                                        map_type & coupled_elements)
 {
   // We ask the user to pass boundary names instead of ids to our constraint object.  However, We
@@ -107,18 +109,12 @@ AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator & 
                                     ? Moose::INVALID_BLOCK_ID
                                     : _moose_mesh->getSubdomainID(_secondary_subdomain_name);
 
-  if (!_has_attached_amg && _app.getExecutioner())
-  {
-    _amg = &_app.getExecutioner()->feProblem().getMortarInterface(
-        std::make_pair(primary_boundary_id, secondary_boundary_id),
-        std::make_pair(primary_subdomain_id, secondary_subdomain_id),
-        _use_displaced_mesh);
-    _has_attached_amg = true;
-
-    mooseAssert(
-        !generating_mesh,
-        "If we have an executioner, then we should definitely not still be generating the mesh.");
-  }
+  const AutomaticMortarGeneration * const amg =
+      _app.getExecutioner() ? &_app.getExecutioner()->feProblem().getMortarInterface(
+                                  std::make_pair(primary_boundary_id, secondary_boundary_id),
+                                  std::make_pair(primary_subdomain_id, secondary_subdomain_id),
+                                  _use_displaced_mesh)
+                            : nullptr;
 
   const CouplingMatrix * const null_mat = libmesh_nullptr;
 
@@ -129,7 +125,7 @@ AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator & 
   // element at a time (and then below we do a loop over all the mesh's active elements). It's
   // perhaps faster in this case to deal with mallocs coming out of MatSetValues, especially if the
   // mesh displacements are relatively small
-  if ((!_amg || _use_displaced_mesh) && !_is_coupling_functor)
+  if ((!amg || _use_displaced_mesh) && !_is_coupling_functor)
   {
     for (const Elem * const elem : _mesh->active_element_ptr_range())
     {
@@ -198,25 +194,93 @@ AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator & 
   }
   // For a static mesh (or for determining a sparsity pattern approximation on a displaced mesh) we
   // can just ghost the coupled elements determined during mortar mesh generation
-  else if (_amg)
+  else if (amg)
   {
+    auto ghost_mortar_interface_couplings =
+        [this, p, &coupled_elements, null_mat, amg](const Elem * const elem_arg) {
+          // Look up elem_arg in the mortar_interface_coupling data structure.
+          auto bounds = amg->mortarInterfaceCoupling().equal_range(elem_arg->id());
+
+          for (const auto & pr : as_range(bounds))
+          {
+            auto coupled_elem_id = pr.second;
+            const Elem * coupled_elem = _mesh->elem_ptr(coupled_elem_id);
+            mooseAssert(coupled_elem,
+                        "The coupled element with id " << coupled_elem_id << " doesn't exist!");
+
+            if (coupled_elem->processor_id() != p)
+              coupled_elements.insert(std::make_pair(coupled_elem, null_mat));
+          }
+        };
+
     for (const Elem * const elem : as_range(range_begin, range_end))
     {
-      // Look up elem in the mortar_interface_coupling data structure.
-      auto bounds = _amg->mortarInterfaceCoupling().equal_range(elem->id());
+      ghost_mortar_interface_couplings(elem);
 
-      for (const auto & pr : as_range(bounds))
+      if (_ghost_point_neighbors)
       {
-        auto coupled_elem_id = pr.second;
-        const Elem * coupled_elem = _mesh->elem_ptr(coupled_elem_id);
-        mooseAssert(coupled_elem,
-                    "The coupled element with id " << coupled_elem_id << " doesn't exist!");
+        // I hypothesize that node processor ids are tied to higher dimensional element processor
+        // ids over lower dimensional element processor ids based on debugging experience.
+        // Consequently we need to be checking for higher dimensional elements and whether they are
+        // along our secondary boundary. From there we will query the AMG object's
+        // mortar-interface-coupling container to get the secondary lower-dimensional element, and
+        // then we will ghost it's point neighbors and their mortar interface couples
 
-        if (coupled_elem->processor_id() != p)
-          coupled_elements.insert(std::make_pair(coupled_elem, null_mat));
-      }
-    }
-  }
+        // It's possible that one higher-dimensional element could have multiple lower-dimensional
+        // elements from multiple sides. Morever, even if there is only one lower-d element per
+        // higher-d element, the unordered_multimap that holds the coupling information can have
+        // duplicate key-value pairs if there are multiple mortar segments per secondary face. So to
+        // prevent attempting to insert into the coupled elements map multiple times with the same
+        // element, we'll keep track of the elements we've handled. We're going to use a tree-based
+        // set here since the number of lower-d elements handled should never exceed the number of
+        // element sides (which is small)
+        std::set<dof_id_type> secondary_lower_elems_handled;
+        const BoundaryInfo & binfo = _mesh->get_boundary_info();
+        for (auto side : elem->side_index_range())
+        {
+          if (!binfo.has_boundary_id(elem, side, secondary_boundary_id))
+            // We're not a higher-dimensional element along the secondary face, or at least this
+            // side isn't
+            continue;
+
+          for (const auto & multimap_pr :
+               as_range(amg->mortarInterfaceCoupling().equal_range(elem->id())))
+          {
+            const auto secondary_lower_elem_id = multimap_pr.second;
+            auto insert_pr = secondary_lower_elems_handled.insert(secondary_lower_elem_id);
+
+            // If insertion didn't happen, then we've already handled this element
+            if (!insert_pr.second)
+              continue;
+
+            auto * const secondary_lower_elem = _mesh->elem_ptr(secondary_lower_elem_id);
+            mooseAssert(secondary_lower_elem->subdomain_id() == secondary_subdomain_id,
+                        "This should be on the secondary subdomain.");
+
+            // We've already ghosted the secondary lower-d element itself if it needed to be
+            // outside of the _ghost_point_neighbors logic. But now we must make sure to ghost the
+            // point neighbors of the secondary lower-d element and their mortar interface
+            // couplings
+            std::set<const Elem *> secondary_lower_elem_point_neighbors;
+            secondary_lower_elem->find_point_neighbors(secondary_lower_elem_point_neighbors);
+
+            for (const Elem * const neigh : secondary_lower_elem_point_neighbors)
+            {
+              if (neigh->processor_id() != p)
+                coupled_elements.emplace(neigh, null_mat);
+
+              ghost_mortar_interface_couplings(neigh);
+            }
+          } // end iteration over multimap
+
+          // We actually should have added all the lower-dimensional elements associated with the
+          // higher-dimensional element, so we can stop iterating over sides
+          break;
+
+        } // end for side_index_range
+      }   // end if ghost_point_neighbors
+    }     // end for loop over input range
+  }       // end if amg
 }
 
 bool
@@ -227,7 +291,8 @@ AugmentSparsityOnInterface::operator>=(const RelationshipManager & other) const
     if (_primary_boundary_name == asoi->_primary_boundary_name &&
         _secondary_boundary_name == asoi->_secondary_boundary_name &&
         _primary_subdomain_name == asoi->_primary_subdomain_name &&
-        _secondary_subdomain_name == asoi->_secondary_subdomain_name && baseGreaterEqual(*asoi))
+        _secondary_subdomain_name == asoi->_secondary_subdomain_name &&
+        (_ghost_point_neighbors >= asoi->_ghost_point_neighbors) && baseGreaterEqual(*asoi))
       return true;
   }
   return false;

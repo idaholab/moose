@@ -287,22 +287,6 @@ public:
   virtual void setActiveScalarVariableCoupleableMatrixTags(std::set<TagID> & mtags,
                                                            THREAD_ID tid) override;
 
-  /**
-   * Record and set the material properties required by the current computing thread.
-   * @param mat_prop_ids The set of material properties required by the current computing thread.
-   *
-   * @param tid The thread id
-   */
-  virtual void setActiveMaterialProperties(const std::set<unsigned int> & mat_prop_ids,
-                                           THREAD_ID tid) override;
-
-  /**
-   * Clear the active material properties. Should be called at the end of every computing thread
-   *
-   * @param tid The thread id
-   */
-  virtual void clearActiveMaterialProperties(THREAD_ID tid) override;
-
   virtual void createQRules(QuadratureType type,
                             Order order,
                             Order volume_order = INVALID_ORDER,
@@ -763,7 +747,7 @@ public:
    */
   virtual void prepareMaterials(SubdomainID blk_id, THREAD_ID tid);
 
-  virtual void reinitMaterials(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful = true);
+  void reinitMaterials(SubdomainID blk_id, THREAD_ID tid, bool swap_stateful = true);
 
   /**
    * reinit materials on element faces
@@ -775,10 +759,11 @@ public:
    * should be \p false when for example executing material objects for mortar contexts in which
    * stateful properties don't make sense
    */
-  virtual void reinitMaterialsFace(SubdomainID blk_id,
-                                   THREAD_ID tid,
-                                   bool swap_stateful = true,
-                                   bool execute_stateful = true);
+  void reinitMaterialsFace(SubdomainID blk_id,
+                           THREAD_ID tid,
+                           bool swap_stateful = true,
+                           bool execute_stateful = true,
+                           bool use_displaced_assembly = false);
 
   /**
    * reinit materials on the neighboring element face
@@ -790,10 +775,11 @@ public:
    * should be \p false when for example executing material objects for mortar contexts in which
    * stateful properties don't make sense
    */
-  virtual void reinitMaterialsNeighbor(SubdomainID blk_id,
-                                       THREAD_ID tid,
-                                       bool swap_stateful = true,
-                                       bool execute_stateful = true);
+  void reinitMaterialsNeighbor(SubdomainID blk_id,
+                               THREAD_ID tid,
+                               bool swap_stateful = true,
+                               bool execute_stateful = true,
+                               bool use_displaced_assembly = false);
 
   /**
    * reinit materials on a boundary
@@ -805,19 +791,52 @@ public:
    * should be \p false when for example executing material objects for mortar contexts in which
    * stateful properties don't make sense
    */
-  virtual void reinitMaterialsBoundary(BoundaryID boundary_id,
-                                       THREAD_ID tid,
-                                       bool swap_stateful = true,
-                                       bool execute_stateful = true);
+  void reinitMaterialsBoundary(BoundaryID boundary_id,
+                               THREAD_ID tid,
+                               bool swap_stateful = true,
+                               bool execute_stateful = true,
+                               bool use_displaced_assembly = false);
 
-  virtual void
-  reinitMaterialsInterface(BoundaryID boundary_id, THREAD_ID tid, bool swap_stateful = true);
+  void reinitMaterialsInterface(BoundaryID boundary_id, THREAD_ID tid, bool swap_stateful = true);
+
   /*
    * Swap back underlying data storing stateful material properties
    */
   virtual void swapBackMaterials(THREAD_ID tid);
   virtual void swapBackMaterialsFace(THREAD_ID tid);
   virtual void swapBackMaterialsNeighbor(THREAD_ID tid);
+
+  /**
+   * Record and set the material properties required by the current computing thread.
+   * @param mat_prop_ids The set of material properties required by the current computing thread.
+   *
+   * @param tid The thread id
+   */
+  void setActiveMaterialProperties(const std::set<unsigned int> & mat_prop_ids, THREAD_ID tid);
+
+  /**
+   * Get the material properties required by the current computing thread.
+   *
+   * @param tid The thread id
+   */
+  const std::set<unsigned int> & getActiveMaterialProperties(THREAD_ID tid) const;
+
+  /**
+   * Method to check whether or not a list of active material roperties has been set. This method
+   * is called by reinitMaterials to determine whether Material computeProperties methods need to be
+   * called. If the return is False, this check prevents unnecessary material property computation
+   * @param tid The thread id
+   *
+   * @return True if there has been a list of active material properties set, False otherwise
+   */
+  bool hasActiveMaterialProperties(THREAD_ID tid) const;
+
+  /**
+   * Clear the active material properties. Should be called at the end of every computing thread
+   *
+   * @param tid The thread id
+   */
+  void clearActiveMaterialProperties(THREAD_ID tid);
 
   /**
    * Method for creating and adding an object to the warehouse.

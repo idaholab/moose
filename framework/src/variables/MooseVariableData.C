@@ -2788,10 +2788,10 @@ template <typename OutputType>
 void
 MooseVariableData<OutputType>::reinitNode()
 {
-  if (size_t n_dofs = _node->n_dofs(_sys.number(), _var_num))
+  if (std::size_t n_dofs = _node->n_dofs(_sys.number(), _var_num))
   {
     _dof_indices.resize(n_dofs);
-    for (size_t i = 0; i < n_dofs; ++i)
+    for (std::size_t i = 0; i < n_dofs; ++i)
       _dof_indices[i] = _node->dof_number(_sys.number(), _var_num, i);
     // For standard variables. _nodal_dof_index is retrieved by nodalDofIndex() which is used in
     // NodalBC for example
