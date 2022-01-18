@@ -2,7 +2,7 @@
 
 The following instructions aims at setting up a baseline single-user environment for building MOOSE based applications in a job scheduling capable environment.
 
-If instead, you are here interested in allowing MOOSE-based development to be made avaialable to multiple users, please see our [Multi-User](getting_started/installation/cluster.md) setup instructions (requires administrative rights). Normal users: please ingore the previous sentence, and continue on...
+If instead, you are here interested in allowing MOOSE-based development to be made available to multiple users, please see our [Multi-User](getting_started/installation/cluster.md) setup instructions (requires administrative rights). Normal users: please ignore the previous sentence, and continue on...
 
 ## Pre-Reqs
 
