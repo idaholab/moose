@@ -138,7 +138,7 @@ Extensions:
             reactor: !include modules/reactor/doc/sqa_reactor.yml
             ray_tracing: !include modules/ray_tracing/doc/sqa_ray_tracing.yml
             fsi: !include modules/fsi/doc/sqa_fsi.yml
-            thermal_hydraulics: !include modules/thermal_hydraulics/doc/sqa_thm.yml
+            thermal_hydraulics: !include modules/thermal_hydraulics/doc/sqa_thermal_hydraulics.yml
 
         requirement-groups:
             dgkernels: DGKernel Objects
