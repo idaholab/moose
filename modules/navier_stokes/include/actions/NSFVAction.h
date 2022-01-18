@@ -41,7 +41,6 @@ protected:
   void addINSMass();
   void addINSMomentum();
   void addINSEnergy();
-  void addINSVelocityAux();
   void addINSTemperature();
   void addINSVelocityBC();
   void addINSPinnedPressureBC();
@@ -53,7 +52,6 @@ protected:
   void addWCNSMass();
   void addWCNSMomentum();
   void addWCNSEnergy();
-  void addWCNSVelocityAux();
   void addWCNSTemperature();
   void addWCNSVelocityBC();
   void addWCNSPinnedPressureBC();
@@ -65,7 +63,6 @@ protected:
   void addCNSMass();
   void addCNSMomentum();
   void addCNSEnergy();
-  void addCNSVelocityAux();
   void addCNSTemperature();
   void addCNSVelocityBC();
   void addCNSPinnedPressureBC();
