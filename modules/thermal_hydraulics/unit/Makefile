@@ -25,21 +25,21 @@ include $(FRAMEWORK_DIR)/build.mk
 include $(FRAMEWORK_DIR)/moose.mk
 
 ################################## MODULES ####################################
-THM               := yes
-include           $(MOOSE_DIR)/modules/modules.mk
+THERMAL_HYDRAULICS  := yes
+include             $(MOOSE_DIR)/modules/modules.mk
 ###############################################################################
 
 APPLICATION_DIR  := $(shell pwd)
-APPLICATION_NAME := thm-unit
+APPLICATION_NAME := thermal_hydraulics-unit
 BUILD_EXEC       := yes
 app_BASE_DIR     :=
 DEP_APPS    ?= $(shell $(FRAMEWORK_DIR)/scripts/find_dep_apps.py $(APPLICATION_NAME))
 include $(FRAMEWORK_DIR)/app.mk
 
 # Find all the MOOSE unit test source files and include their dependencies.
-thm_unit_srcfiles := $(shell find $(APPLICATION_DIR)/src -name "*.C")
-thm_unit_deps := $(patsubst %.C, %.$(obj-suffix).d, $(thm_unit_srcfiles))
--include $(thm_unit_deps)
+thermal_hydraulics_unit_srcfiles := $(shell find $(APPLICATION_DIR)/src -name "*.C")
+thermal_hydraulics_unit_deps := $(patsubst %.C, %.$(obj-suffix).d, $(thermal_hydraulics_unit_srcfiles))
+-include $(thermal_hydraulics_unit_deps)
 
 ###############################################################################
 # Additional special case targets should be added here
