@@ -175,8 +175,9 @@ meshCentroidCalculator(const ReplicatedMesh & mesh)
   // origin.
   for (const auto & elem : as_range(mesh.elements_begin(), mesh.elements_end()))
   {
-    origin_pt += (elem->true_centroid()) * (elem->volume());
-    vol_tmp += elem->volume();
+    Real elem_vol = elem->volume();
+    origin_pt += (elem->true_centroid()) * elem_vol;
+    vol_tmp += elem_vol;
   }
   origin_pt /= vol_tmp;
   return origin_pt;
