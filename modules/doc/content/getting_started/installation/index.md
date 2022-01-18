@@ -8,6 +8,7 @@ To install the MOOSE Framework, click the link below that corresponds to your op
 - Advanced Instructions:
 
   - [installation/hpc_install_moose.md]
+  - [installation/inl_hpc_install_moose.md]
   - [installation/manual_installation_gcc.md]
   - [installation/manual_installation_llvm.md]
   - [installation/manual_installation_linux_lldb.md]
