@@ -41,7 +41,6 @@ protected:
   void addINSMass();
   void addINSMomentum();
   void addINSEnergy();
-  void addINSTemperature();
   void addINSVelocityBC();
   void addINSPinnedPressureBC();
   void addINSNoBCBC();
@@ -50,7 +49,6 @@ protected:
 
   void addWCNSTimeKernels();
   void addWCNSEnergy();
-  void addWCNSTemperature();
   void addWCNSVelocityBC();
   void addWCNSPinnedPressureBC();
   void addWCNSNoBCBC();
@@ -61,7 +59,6 @@ protected:
   void addCNSMass();
   void addCNSMomentum();
   void addCNSEnergy();
-  void addCNSTemperature();
   void addCNSVelocityBC();
   void addCNSPinnedPressureBC();
   void addCNSNoBCBC();
@@ -74,24 +71,39 @@ protected:
   /// Compressibility type, can be compressible, incompressible
   /// or weakly-incompressible
   MooseEnum _compressibility;
-
   /// Swich dedicated to show if porous medium treatment is requested or not
   bool _porous_medium_treatment;
+  /// Turbulent diffusivity handling type (mixing-length, etc.)
+  MooseEnum _turbulence_handling;
 
   /// Subdomains Navier-Stokes equation is defined on
   std::vector<SubdomainName> _blocks;
-  /// Boundaries with velocity specified
-  std::vector<BoundaryName> _velocity_boundary;
-  /// Velocity function names at velocity boundaries
-  std::vector<FunctionName> _velocity_function;
+  /// Subdomain IDs
+  std::set<SubdomainID> _block_ids;
+
+  /// Boundaries with a flow inlet specified on them
+  std::vector<BoundaryName> _inlet_boundaries;
+  /// Boundaries with a flow outlet specified on them
+  std::vector<BoundaryName> _outlet_boundaries;
+  /// Boundaries which define a wall (slip/noslip/etc.)
+  std::vector<BoundaryName> _wall_boundaries;
+
+  /// Velocity function names at velocity inlet boundaries
+  std::vector<FunctionName> _velocity_inlet_function;
+  /// Velocity outlet types (pressure/mass-outflow/momentum-outflow)
+  MultiMooseEnum _velocity_outlet_types;
+  /// Velocity wall types (symmetry/noslip/slip/wallfunction)
+  MultiMooseEnum _velocity_wall_types;
+
   /// Boundaries with pressure specified
   std::vector<BoundaryName> _pressure_boundary;
   /// Pressure function names at pressure boundaries
   std::vector<FunctionName> _pressure_function;
   /// Whether or not we need to pin pressure at a node
-  bool _has_pinned_node;
+  bool _has_pinned_dof;
   /// The node set name of the pinned node
-  BoundaryName _pinned_node;
+  BoundaryName _pinned_dof;
+
   /// Boundaries with temperature specified
   std::vector<BoundaryName> _fixed_temperature_boundary;
   /// Temperature function names at fixed temperature boundaries
@@ -103,8 +115,7 @@ protected:
   VariableName _solid_temperature_variable_name;
   /// Mesh dimension
   unsigned int _dim;
-  /// Subdomain IDs
-  std::set<SubdomainID> _block_ids;
+
   /// pressure variable name
   const std::string _pressure_variable_name;
 
