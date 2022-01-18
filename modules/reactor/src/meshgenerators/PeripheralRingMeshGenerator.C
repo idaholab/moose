@@ -12,7 +12,7 @@
 #include "MooseMeshUtils.h"
 
 // C++ includes
-#include <cmath> // provides round, not std::round (see http://www.cplusplus.com/reference/cmath/round/)
+#include <cmath> // for atan2
 
 registerMooseObject("ReactorApp", PeripheralRingMeshGenerator);
 
@@ -29,9 +29,10 @@ PeripheralRingMeshGenerator::validParams()
   params.addRequiredRangeCheckedParam<Real>("peripheral_ring_radius",
                                             "peripheral_ring_radius>0",
                                             "Radius of the peripheral ring to be added.");
-  params.addParam<bool>("preserve_volumes",
-                        true,
-                        "Volume of the peripheral region can be preserved using this function.");
+  params.addParam<bool>(
+      "preserve_volumes",
+      true,
+      "Whether the volume of the peripheral region is preserved by fixing the radius.");
   params.addRequiredParam<BoundaryName>("input_mesh_external_boundary",
                                         "The external boundary of the input mesh.");
   params.addRequiredParam<subdomain_id_type>(
@@ -66,7 +67,7 @@ PeripheralRingMeshGenerator::PeripheralRingMeshGenerator(const InputParameters &
     _external_boundary_name(isParamValid("external_boundary_name")
                                 ? getParam<std::string>("external_boundary_name")
                                 : std::string()),
-    _mesh(getMeshByName(_input_name))
+    _input(getMeshByName(_input_name))
 {
 }
 
@@ -74,7 +75,7 @@ std::unique_ptr<MeshBase>
 PeripheralRingMeshGenerator::generate()
 {
   // Need ReplicatedMesh for stitching
-  auto input_mesh = dynamic_cast<ReplicatedMesh *>(_mesh.get());
+  auto input_mesh = dynamic_cast<ReplicatedMesh *>(_input.get());
   _input_mesh_external_bid =
       MooseMeshUtils::getBoundaryID(_input_mesh_external_boundary, *input_mesh);
 

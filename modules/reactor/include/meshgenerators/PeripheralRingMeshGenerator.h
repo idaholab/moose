@@ -45,18 +45,18 @@ protected:
   /// Name of the new external boundary
   const BoundaryName _external_boundary_name;
   /// Reference to input mesh pointer
-  std::unique_ptr<MeshBase> & _mesh;
+  std::unique_ptr<MeshBase> & _input;
   /// ID of the external boundary of the input mesh
   boundary_id_type _input_mesh_external_bid;
 
   /**
    * Decides whether a boundary of a given mesh works with the algorithm used in this class.
    * @param mesh input mesh that contains the boundary to be examined
-   * @param max_node_radius a reference variable to contain the maximum radius of the nodes on the
+   * @param max_node_radius the maximum radius of the nodes on the
    * boundary
-   * @param invalid_type a reference variable to distinguish different types of invalid boundary
+   * @param invalid_type help distinguish different types of invalid boundaries
    * @param origin_pt origin position of the given mesh (used for azimuthal angle calculation)
-   * @param bid ID of the bounadry to be examined
+   * @param bid ID of the boundary to be examined
    * @return whether the boundary works with the algorithm
    */
   bool isBoundaryValid(ReplicatedMesh & mesh,
@@ -69,7 +69,7 @@ protected:
    * Decides whether a boundary of a given mesh works with the algorithm used in this class.
    * @param mesh input mesh that contains the boundary to be examined
    * @param origin_pt origin position of the given mesh (used for azimuthal angle calculation)
-   * @param bid ID of the bounadry to be examined
+   * @param bid ID of the boundary to be examined
    * @return whether the boundary works with the algorithm
    */
   bool

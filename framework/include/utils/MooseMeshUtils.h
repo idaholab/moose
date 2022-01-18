@@ -50,8 +50,8 @@ std::vector<subdomain_id_type> getSubdomainIDs(const libMesh::MeshBase & mesh,
 
 /**
  * Calculates the centroid of a ReplicatedMesh.
- * @param mesh input mesh whose origin needs to be calculated
- * @return a Point data containing the mesh origin position
+ * @param mesh input mesh whose centroid needs to be calculated
+ * @return a Point data containing the mesh centroid
  */
 Point meshCentroidCalculator(const ReplicatedMesh & mesh);
 }
