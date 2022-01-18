@@ -1,6 +1,6 @@
 # Step 6: Custom Closures
 
-+Complete input file for this step:+ [06_custom_closures.i](thm/tutorials/single_phase_flow/06_custom_closures.i)
++Complete input file for this step:+ [06_custom_closures.i](thermal_hydraulics/tutorials/single_phase_flow/06_custom_closures.i)
 
 ## Closure System
 
@@ -56,7 +56,7 @@ associated with them.
 To use the custom closure set, we create a closures object of the class [Closures1PhaseNone.md],
 which does not create any of its own Materials:
 
-!listing thm/tutorials/single_phase_flow/06_custom_closures.i
+!listing thermal_hydraulics/tutorials/single_phase_flow/06_custom_closures.i
          block=Closures
          link=False
 
@@ -70,13 +70,13 @@ formula for convective wall heat transfer closure
 
 The Churchill's formula can be set up by using the [ADWallFrictionChurchillMaterial](ADWallFrictionChurchillMaterial.md)
 
-!listing thm/tutorials/single_phase_flow/06_custom_closures.i
+!listing thermal_hydraulics/tutorials/single_phase_flow/06_custom_closures.i
          block=Materials/f_mat
          link=False
 
 The Dittus-Boelter formula can be set up by using [ADWallHeatTransferCoefficient3EqnDittusBoelterMaterial](ADWallHeatTransferCoefficient3EqnDittusBoelterMaterial.md).
 
-!listing thm/tutorials/single_phase_flow/06_custom_closures.i
+!listing thermal_hydraulics/tutorials/single_phase_flow/06_custom_closures.i
          block=Materials/Hw_mat
          link=False
 

@@ -1,6 +1,6 @@
 # Step 1: Flow Through a Channel
 
-+Complete input file for this step:+ [01_flow_channel.i](thm/tutorials/single_phase_flow/01_flow_channel.i)
++Complete input file for this step:+ [01_flow_channel.i](thermal_hydraulics/tutorials/single_phase_flow/01_flow_channel.i)
 
 !media images/tutorials/single_phase_flow/step-01.png
        style=width:15%;float:right;margin-left:40px
@@ -42,7 +42,7 @@ In this block, we define all fluids that will be used by the flow components.
 To model the helium gas, we will use the ideal gas equation of state.
 To do so, we will put the following block inside the `[Modules/FluidProperties]` block.
 
-!listing thm/tutorials/single_phase_flow/01_flow_channel.i
+!listing thermal_hydraulics/tutorials/single_phase_flow/01_flow_channel.i
          block=FluidProperties/he
          link=False
 
@@ -51,7 +51,7 @@ To do so, we will put the following block inside the `[Modules/FluidProperties]`
 Closure relations are provided through objects created in a `[Closures]` block.
 Here we create a simple set of closures, which will be used by our flow channel component:
 
-!listing thm/tutorials/single_phase_flow/01_flow_channel.i
+!listing thermal_hydraulics/tutorials/single_phase_flow/01_flow_channel.i
          block=Closures
          link=False
 
@@ -66,7 +66,7 @@ They are like LEGO bricks which when put together they build up the overall simu
 The first component we introduce is the `FlowChannel1Phase` component which represents a channel
 with single-phase flow.
 
-!listing thm/tutorials/single_phase_flow/01_flow_channel.i
+!listing thermal_hydraulics/tutorials/single_phase_flow/01_flow_channel.i
          block=Components/core_chan
          link=False
 
@@ -105,7 +105,7 @@ For the channel inlet, we prescribe a mass flow rate and temperature boundary co
 The component expects two required parameters: `m_dot` and `T`.
 We use the simulation parameters we defined earlier at the beginning of this step, so the block will look like this:
 
-!listing thm/tutorials/single_phase_flow/01_flow_channel.i
+!listing thermal_hydraulics/tutorials/single_phase_flow/01_flow_channel.i
          block=Components/inlet
          link=False
 
@@ -114,7 +114,7 @@ We use the simulation parameters we defined earlier at the beginning of this ste
 For the channel outlet, we prescribe pressure boundary condition and we use our `press` parameter to
 specify the pressure via a `p` parameter.
 
-!listing thm/tutorials/single_phase_flow/01_flow_channel.i
+!listing thermal_hydraulics/tutorials/single_phase_flow/01_flow_channel.i
          block=Components/outlet
          link=False
 
@@ -168,7 +168,7 @@ otherwise.
 
 This top-level block describes how the simulation will be executed.
 
-!listing thm/tutorials/single_phase_flow/01_flow_channel.i
+!listing thermal_hydraulics/tutorials/single_phase_flow/01_flow_channel.i
          block=Executioner
          link=False
 
@@ -191,7 +191,7 @@ By default, MOOSE will only produce an output to terminal.
 For visualizing the obtained solution, we need to enable an output to a file or files.
 The most useful output is stored in an ExodusII file format and can be enabled by:
 
-!listing thm/tutorials/single_phase_flow/01_flow_channel.i
+!listing thermal_hydraulics/tutorials/single_phase_flow/01_flow_channel.i
          block=Outputs
          link=False
 

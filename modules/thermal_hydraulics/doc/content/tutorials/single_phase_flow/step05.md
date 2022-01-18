@@ -1,6 +1,6 @@
 # Step 5: Secondary Side
 
-+Complete input file for this step:+  [05_secondary_side.i](thm/tutorials/single_phase_flow/05_secondary_side.i)
++Complete input file for this step:+  [05_secondary_side.i](thermal_hydraulics/tutorials/single_phase_flow/05_secondary_side.i)
 
 !media images/tutorials/single_phase_flow/step-05.png
        style=width:35%;float:right;margin-left:40px
@@ -29,7 +29,7 @@ m_dot_sec_in = 1    # kg/s
 
 We also define second fluid that we will be using on the secondary side:
 
-!listing thm/tutorials/single_phase_flow/05_secondary_side.i
+!listing thermal_hydraulics/tutorials/single_phase_flow/05_secondary_side.i
          block=FluidProperties/water
          link=False
 
@@ -57,20 +57,20 @@ Good candidates would be `hx_length` and `hx_n_elems`.
 
 We will take advantage of this feature and set our heat exchanger as follows:
 
-!listing thm/tutorials/single_phase_flow/05_secondary_side.i
+!listing thermal_hydraulics/tutorials/single_phase_flow/05_secondary_side.i
          block=Components/hx
          link=False
          max-height=None
 
 Then, we connect the inlet boundary condition to the secondary side flow channel:
 
-!listing thm/tutorials/single_phase_flow/05_secondary_side.i
+!listing thermal_hydraulics/tutorials/single_phase_flow/05_secondary_side.i
          block=Components/inlet_sec
          link=False
 
 And then, the outlet boundary condition for the same channel:
 
-!listing thm/tutorials/single_phase_flow/05_secondary_side.i
+!listing thermal_hydraulics/tutorials/single_phase_flow/05_secondary_side.i
          block=Components/outlet_sec
          link=False
 
@@ -82,20 +82,20 @@ This is the same as what we did in step 1 of this tutorial.
 To set up the inlet boundary condition as a function of time, we first need to define a time-dependent
 function in the top-level `[Functions]` block:
 
-!listing thm/tutorials/single_phase_flow/05_secondary_side.i
+!listing thermal_hydraulics/tutorials/single_phase_flow/05_secondary_side.i
          block=Functions/m_dot_sec_fn
          link=False
 
 In the `[ControlLogic]` block, we bring the function value in using the `GetFunctionValueControl`
 block:
 
-!listing thm/tutorials/single_phase_flow/05_secondary_side.i
+!listing thermal_hydraulics/tutorials/single_phase_flow/05_secondary_side.i
          block=ControlLogic/m_dot_sec_inlet_ctrl
          link=False
 
 And then we feed this value back into the system:
 
-!listing thm/tutorials/single_phase_flow/05_secondary_side.i
+!listing thermal_hydraulics/tutorials/single_phase_flow/05_secondary_side.i
          block=ControlLogic/set_m_dot_sec_ctrl
          link=False
 

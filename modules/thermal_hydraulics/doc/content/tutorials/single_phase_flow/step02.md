@@ -1,6 +1,6 @@
 # Step 2: Conjugate Heat Transfer
 
-+Complete input file for this step:+ [02_core.i](thm/tutorials/single_phase_flow/02_core.i)
++Complete input file for this step:+ [02_core.i](thermal_hydraulics/tutorials/single_phase_flow/02_core.i)
 
 !media images/tutorials/single_phase_flow/step-02.png
        style=width:15%;float:right;margin-left:40px
@@ -35,7 +35,7 @@ To set up a heat conduction, we will need to define a solid material used in the
 heat conduction.
 To do that, we put the following block into a top-level `[HeatStructureMaterials]` block:
 
-!listing thm/tutorials/single_phase_flow/02_core.i
+!listing thermal_hydraulics/tutorials/single_phase_flow/02_core.i
          block=HeatStructureMaterials/steel
          link=False
 
@@ -56,7 +56,7 @@ The number of axial elements must match the number of elements in the flow chann
 In radial direction we define one block called `block` and assign our previously defined `steel`
 material to it. The number of radial element in this block will be `3`.
 
-!listing thm/tutorials/single_phase_flow/02_core.i
+!listing thermal_hydraulics/tutorials/single_phase_flow/02_core.i
          block=Components/core_hs
          link=False
 
@@ -65,11 +65,11 @@ material to it. The number of radial element in this block will be `3`.
 Our heating will be given by the specified total power parameter. For this, we need to include
 `TotalPower` component and link it with another component -- `HeatSourceFromTotalPower`.
 
-!listing thm/tutorials/single_phase_flow/02_core.i
+!listing thermal_hydraulics/tutorials/single_phase_flow/02_core.i
          block=Components/total_power
          link=False
 
-!listing thm/tutorials/single_phase_flow/02_core.i
+!listing thermal_hydraulics/tutorials/single_phase_flow/02_core.i
          block=Components/core_heating
          link=False
 
@@ -87,7 +87,7 @@ which is the side of the heat structure and can be either `inner` or `outer`.
 Lastly, we need to specify `P_hf`, which is the heated perimeter, and because we are using `simple`
 closure we need to supply `Hw`, which is a convective wall heat transfer coefficient.
 
-!listing thm/tutorials/single_phase_flow/02_core.i
+!listing thermal_hydraulics/tutorials/single_phase_flow/02_core.i
          block=Components/core_ht
          link=False
 

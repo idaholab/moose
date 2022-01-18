@@ -1,6 +1,6 @@
 # Step 3: Upper Loop
 
-+Complete input file for this step:+  [03_upper_loop.i](thm/tutorials/single_phase_flow/03_upper_loop.i)
++Complete input file for this step:+  [03_upper_loop.i](thermal_hydraulics/tutorials/single_phase_flow/03_upper_loop.i)
 
 !media images/tutorials/single_phase_flow/step-03.png
        style=width:33%;float:right;margin-left:40px
@@ -21,7 +21,7 @@ primary loop.
 
 Let's look at an example of a volume junction:
 
-!listing thm/tutorials/single_phase_flow/03_upper_loop.i
+!listing thermal_hydraulics/tutorials/single_phase_flow/03_upper_loop.i
          block=Components/jct1
          link=False
 
@@ -63,7 +63,7 @@ If we needed to change it later, we can do so just in one place.
 The following part of the input file defines all the flow channels and junctions that build up the
 upper part of the loop
 
-!listing thm/tutorials/single_phase_flow/03_upper_loop.i
+!listing thermal_hydraulics/tutorials/single_phase_flow/03_upper_loop.i
          start=jct1
          end=jct4
          link=False
@@ -88,13 +88,13 @@ In our model, we will add the two following postprocessors:
 
 1. `core_T_out` for monitoring core outlet temperature
 
-   !listing thm/tutorials/single_phase_flow/03_upper_loop.i
+   !listing thermal_hydraulics/tutorials/single_phase_flow/03_upper_loop.i
             block=Postprocessors/core_T_out
             link=False
 
 2. `hx_pri_T_out` for monitoring heat exchanger outlet temperature
 
-   !listing thm/tutorials/single_phase_flow/03_upper_loop.i
+   !listing thermal_hydraulics/tutorials/single_phase_flow/03_upper_loop.i
             block=Postprocessors/hx_pri_T_out
             link=False
 

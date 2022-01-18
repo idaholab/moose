@@ -1,6 +1,6 @@
 # Step 4: Primary Loop
 
-+Complete input file for this step:+ [04_loop.i](thm/tutorials/single_phase_flow/04_loop.i)
++Complete input file for this step:+ [04_loop.i](thermal_hydraulics/tutorials/single_phase_flow/04_loop.i)
 
 !media images/tutorials/single_phase_flow/step-04.png
        style=width:33%;float:right;margin-left:40px
@@ -15,7 +15,7 @@ it maintains the prescribed mass flow rate.
 We add two pipes for the bottom section of the primary loop with a pump in the middle.
 A pump is a junction-like component that connects to two flow channels corresponding to its inlet and outlet.
 
-!listing thm/tutorials/single_phase_flow/04_loop.i
+!listing thermal_hydraulics/tutorials/single_phase_flow/04_loop.i
          start=jct5
          end=jct6
          link=False
@@ -46,7 +46,7 @@ for the proportional, integral, and derivative terms, respectively.
 For the input value, we set up a postprocessor `m_dot_pump` with type `ADFlowJunctionFlux1Phase`
 which will be measuring the outlet mass flow rate from the pump.
 
-!listing thm/tutorials/single_phase_flow/04_loop.i
+!listing thermal_hydraulics/tutorials/single_phase_flow/04_loop.i
          block=Postprocessors/m_dot_pump
          link=False
 
@@ -54,7 +54,7 @@ A set point will be our desired mass flow rate specified by the global parameter
 To bring this value into the control logic system, we need to use `GetFunctionValueControl` block
 like so:
 
-!listing thm/tutorials/single_phase_flow/04_loop.i
+!listing thermal_hydraulics/tutorials/single_phase_flow/04_loop.i
          block=ControlLogic/set_point
          link=False
 
@@ -63,7 +63,7 @@ This value will be available in the control logic system as `set_point:value` (i
 
 Then, we add the PID control block as follows:
 
-!listing thm/tutorials/single_phase_flow/04_loop.i
+!listing thermal_hydraulics/tutorials/single_phase_flow/04_loop.i
          block=ControlLogic/pid
          link=False
 
@@ -73,7 +73,7 @@ The value computed by the PID control is available in the control logic system u
 As a last step, we need to feed this value back into the system.
 That can be done via `SetComponentRealValueControl` block.
 
-!listing thm/tutorials/single_phase_flow/04_loop.i
+!listing thermal_hydraulics/tutorials/single_phase_flow/04_loop.i
          block=ControlLogic/set_pump_head
          link=False
 
