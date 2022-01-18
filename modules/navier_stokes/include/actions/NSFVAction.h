@@ -49,8 +49,6 @@ protected:
   void addINSTemperatureBC();
 
   void addWCNSTimeKernels();
-  void addWCNSMass();
-  void addWCNSMomentum();
   void addWCNSEnergy();
   void addWCNSTemperature();
   void addWCNSVelocityBC();

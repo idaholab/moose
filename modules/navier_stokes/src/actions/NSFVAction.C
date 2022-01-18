@@ -822,8 +822,6 @@ NSFVAction::addCNSMass()
 void
 NSFVAction::addINSMomentum()
 {
-  _console << "something here" << std::endl;
-
   if (_porous_medium_treatment)
   {
     const std::string adv_kernel_type = "PINSFVMomentumAdvection";
@@ -1055,7 +1053,7 @@ NSFVAction::addINSMomentum()
       _problem->addKernel(grav_kernel_type, "pins_mom_gravity_z", params);
     }
 
-    if (getParam<bool>("boussinesq_approximation"))
+    if (getParam<bool>("boussinesq_approximation") && !_compressibility == "weakly-compressible")
     {
       const std::string boussinesq_kernel_type = "INSFVMomentumBoussinesq";
       params = _factory.getValidParams(boussinesq_kernel_type);
@@ -1086,124 +1084,6 @@ NSFVAction::addINSMomentum()
       }
     }
   }
-  // if (_use_ad)
-  // {
-  //   {
-  //     const std::string kernel_type = "INSADMomentumAdvection";
-  //     InputParameters params = _factory.getValidParams(kernel_type);
-  //     params.set<NonlinearVariableName>("variable") = NS::velocity;
-  //     if (_blocks.size() > 0)
-  //       params.set<std::vector<SubdomainName>>("block") = _blocks;
-  //     _problem->addKernel(kernel_type, "ins_momentum_convection", params);
-  //   }
-  //
-  //   {
-  //     const std::string kernel_type = "INSADMomentumViscous";
-  //     InputParameters params = _factory.getValidParams(kernel_type);
-  //     params.set<NonlinearVariableName>("variable") = NS::velocity;
-  //     params.set<MooseEnum>("viscous_form") = (getParam<bool>("laplace") ? "laplace" :
-  //     "traction"); if (_blocks.size() > 0)
-  //       params.set<std::vector<SubdomainName>>("block") = _blocks;
-  //     _problem->addKernel(kernel_type, "ins_momentum_viscous", params);
-  //   }
-  //
-  //   {
-  //     const std::string kernel_type = "INSADMomentumPressure";
-  //     InputParameters params = _factory.getValidParams(kernel_type);
-  //     params.set<NonlinearVariableName>("variable") = NS::velocity;
-  //     if (_blocks.size() > 0)
-  //       params.set<std::vector<SubdomainName>>("block") = _blocks;
-  //     params.set<bool>("integrate_p_by_parts") = getParam<bool>("integrate_p_by_parts");
-  //     params.set<CoupledName>(NS::pressure) = {_pressure_variable_name};
-  //     _problem->addKernel(kernel_type, "ins_momentum_pressure", params);
-  //   }
-  //
-  //   auto gravity = getParam<RealVectorValue>("gravity");
-  //   if (gravity.norm() != 0)
-  //   {
-  //     const std::string kernel_type = "INSADGravityForce";
-  //     InputParameters params = _factory.getValidParams(kernel_type);
-  //     params.set<NonlinearVariableName>("variable") = NS::velocity;
-  //     if (_blocks.size() > 0)
-  //       params.set<std::vector<SubdomainName>>("block") = _blocks;
-  //     params.set<RealVectorValue>("gravity") = gravity;
-  //     _problem->addKernel(kernel_type, "ins_momentum_gravity", params);
-  //   }
-  //
-  //   if (getParam<bool>("supg"))
-  //   {
-  //     const std::string kernel_type = "INSADMomentumSUPG";
-  //     InputParameters params = _factory.getValidParams(kernel_type);
-  //     params.set<NonlinearVariableName>("variable") = NS::velocity;
-  //     params.set<std::vector<VariableName>>("velocity") = {NS::velocity};
-  //     params.set<MaterialPropertyName>("tau_name") = "tau";
-  //     if (_blocks.size() > 0)
-  //       params.set<std::vector<SubdomainName>>("block") = _blocks;
-  //     _problem->addKernel(kernel_type, "ins_momentum_supg", params);
-  //   }
-  //
-  //   if (getParam<bool>("boussinesq_approximation"))
-  //   {
-  //     const std::string kernel_type = "INSADBoussinesqBodyForce";
-  //     InputParameters params = _factory.getValidParams(kernel_type);
-  //     params.set<NonlinearVariableName>("variable") = NS::velocity;
-  //     params.set<std::vector<VariableName>>("temperature") = {_temperature_variable_name};
-  //     params.set<RealVectorValue>("gravity") = gravity;
-  //     params.set<MaterialPropertyName>("alpha_name") =
-  //         getParam<MaterialPropertyName>("thermal_expansion_name");
-  //     params.set<MaterialPropertyName>("ref_temp") =
-  //         getParam<MaterialPropertyName>("reference_temperature_name");
-  //     if (_blocks.size() > 0)
-  //       params.set<std::vector<SubdomainName>>("block") = _blocks;
-  //     _problem->addKernel(kernel_type, "ins_momentum_boussinesq_force", params);
-  //   }
-  //
-  //   if (getParam<bool>("has_coupled_force"))
-  //   {
-  //     const std::string kernel_type = "INSADMomentumCoupledForce";
-  //     InputParameters params = _factory.getValidParams(kernel_type);
-  //     params.set<NonlinearVariableName>("variable") = NS::velocity;
-  //     if (_blocks.size() > 0)
-  //       params.set<std::vector<SubdomainName>>("block") = _blocks;
-  //     if (isParamValid("coupled_force_var"))
-  //       params.set<CoupledName>("coupled_vector_var") =
-  //       getParam<CoupledName>("coupled_force_var");
-  //     if (isParamValid("coupled_force_vector_function"))
-  //       params.set<std::vector<FunctionName>>("vector_function") =
-  //           getParam<std::vector<FunctionName>>("coupled_force_vector_function");
-  //
-  //     _problem->addKernel(kernel_type, "ins_momentum_coupled_force", params);
-  //   }
-  // }
-  // else
-  // {
-  //   const static std::string momentums[3] = {NS::velocity_x, NS::velocity_y, NS::velocity_z};
-  //   std::string kernel_type;
-  //   if (getParam<bool>("laplace"))
-  //     kernel_type = "INSMomentumLaplaceForm";
-  //   else
-  //     kernel_type = "INSMomentumTractionForm";
-  //
-  //   InputParameters params = _factory.getValidParams(kernel_type);
-  //   setKernelCommonParams(params);
-  //
-  //   // Extra stuff needed by momentum Kernels
-  //   params.set<bool>("integrate_p_by_parts") = getParam<bool>("integrate_p_by_parts");
-  //   params.set<bool>("supg") = getParam<bool>("supg");
-  //
-  //   for (unsigned int component = 0; component < _dim; ++component)
-  //   {
-  //     params.set<NonlinearVariableName>("variable") = momentums[component];
-  //     params.set<unsigned int>("component") = component;
-  //     _problem->addKernel(kernel_type, momentums[component] + std::string("_if"), params);
-  //   }
-  // }
-}
-
-void
-NSFVAction::addWCNSMomentum()
-{
-  _console << "something here" << std::endl;
 }
 
 void
