@@ -297,7 +297,6 @@ public:
 
   bool incorrectEdgeDropping() const { return !_correct_edge_dropping; }
 
-<<<<<<< HEAD
   using MortarFilterIter =
       std::unordered_map<const Elem *, std::set<Elem *, CompareDofObjectsByID>>::const_iterator;
 
@@ -331,9 +330,6 @@ public:
    *  Populate node to weighted gap map.
    */
   void setNodalWeightedGapMap(const Node * node, const Real weighted_gap);
-
-=======
->>>>>>> Stabilization of mortar contact constraints for dynamics (#19671)
 
 private:
   MooseApp & _app;
