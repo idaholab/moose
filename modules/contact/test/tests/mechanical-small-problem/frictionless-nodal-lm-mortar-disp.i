@@ -127,8 +127,6 @@
   dtmin = 1
   petsc_options_iname = '-pc_type -snes_linesearch_type -pc_factor_shift_type -pc_factor_shift_amount'
   petsc_options_value = 'lu       basic                 NONZERO               1e-15'
-  # function is too noisy
-  snesmf_reuse_base = false
 []
 
 [Outputs]
