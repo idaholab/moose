@@ -137,12 +137,6 @@ PeripheralRingMeshGenerator::generate()
   std::vector<std::tuple<dof_id_type, boundary_id_type>> node_list =
       input_mesh->get_boundary_info().build_node_list();
 
-  // 2D vector containing all the node positions of the peripheral region
-  std::vector<std::vector<Point>> points_array(_peripheral_layer_num + 1,
-                                               std::vector<Point>(node_list.size()));
-  // 2D vector containing all the node ids of the peripheral region
-  std::vector<std::vector<dof_id_type>> node_id_array(_peripheral_layer_num + 1,
-                                                      std::vector<dof_id_type>(node_list.size()));
   // Node counter for the external boundary
   unsigned int input_ext_node_num = 0;
 
@@ -166,6 +160,12 @@ PeripheralRingMeshGenerator::generate()
   std::sort(azi_points.begin(), azi_points.end());
   std::sort(azi_array.begin(), azi_array.end());
   const Real correction_factor = _preserve_volumes ? radiusCorrectionFactor(azi_array) : 1.0;
+  // 2D vector containing all the node positions of the peripheral region
+  std::vector<std::vector<Point>> points_array(_peripheral_layer_num + 1,
+                                               std::vector<Point>(input_ext_node_num));
+  // 2D vector containing all the node ids of the peripheral region
+  std::vector<std::vector<dof_id_type>> node_id_array(_peripheral_layer_num + 1,
+                                                      std::vector<dof_id_type>(input_ext_node_num));
   for (unsigned int i = 0; i < input_ext_node_num; ++i)
   {
     // Inner boundary nodes of the peripheral region
@@ -273,12 +273,10 @@ PeripheralRingMeshGenerator::isBoundaryValid(ReplicatedMesh & mesh,
   {
     // Find nodes to expand the chain
     dof_id_type end_node_id = boundary_orderred_node_list.back();
-    auto isMatch1 = [end_node_id](std::pair<dof_id_type, dof_id_type> old_id_pair) {
-      return old_id_pair.first == end_node_id;
-    };
-    auto isMatch2 = [end_node_id](std::pair<dof_id_type, dof_id_type> old_id_pair) {
-      return old_id_pair.second == end_node_id;
-    };
+    auto isMatch1 = [end_node_id](std::pair<dof_id_type, dof_id_type> old_id_pair)
+    { return old_id_pair.first == end_node_id; };
+    auto isMatch2 = [end_node_id](std::pair<dof_id_type, dof_id_type> old_id_pair)
+    { return old_id_pair.second == end_node_id; };
     auto result = std::find_if(boundary_node_assm.begin(), boundary_node_assm.end(), isMatch1);
     bool match_first;
     if (result == boundary_node_assm.end())
