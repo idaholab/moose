@@ -41,13 +41,10 @@ protected:
   void addINSMass();
   void addINSMomentum();
   void addINSEnergy();
-  void addINSVelocityBC();
-  void addINSInletVelocityBC(unsigned int bc_index);
-  void addINSOutletVelocityBC(unsigned int bc_index);
-  void addINSWallVelocityBC(unsigned int bc_index);
+  void addINSInletBC();
+  void addINSOutletBC();
+  void addINSWallBC();
   void addINSPinnedPressureBC();
-  void addINSPressureBC();
-  void addINSTemperatureBC();
 
   void addWCNSTimeKernels();
   void addWCNSEnergy();
@@ -88,12 +85,23 @@ protected:
   /// Boundaries which define a wall (slip/noslip/etc.)
   std::vector<BoundaryName> _wall_boundaries;
 
+  /// Velocity intlet types (fixed-velocity/mass-flow/momentum-inflow)
+  MultiMooseEnum _momentum_inlet_types;
   /// Velocity function names at velocity inlet boundaries
-  std::vector<FunctionName> _velocity_inlet_function;
+  std::vector<FunctionName> _momentum_inlet_function;
   /// Velocity outlet types (pressure/mass-outflow/momentum-outflow)
-  MultiMooseEnum _velocity_outlet_types;
+  MultiMooseEnum _momentum_outlet_types;
   /// Velocity wall types (symmetry/noslip/slip/wallfunction)
-  MultiMooseEnum _velocity_wall_types;
+  MultiMooseEnum _momentum_wall_types;
+
+  /// Energy intlet types (fixed-velocity/mass-flow/momentum-inflow)
+  MultiMooseEnum _energy_inlet_types;
+  /// Energy function names at inlet boundaries
+  std::vector<FunctionName> _energy_inlet_function;
+  /// Energy wall types (symmetry/heatflux/fixed-temperature)
+  MultiMooseEnum _energy_wall_types;
+  /// Energy function names at wall boundaries
+  std::vector<FunctionName> _energy_wall_function;
 
   /// Boundaries with pressure specified
   std::vector<BoundaryName> _pressure_boundary;

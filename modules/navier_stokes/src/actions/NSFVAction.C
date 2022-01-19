@@ -75,22 +75,14 @@ NSFVAction::validParams()
       "thermal_conductivity_name", "k", "The name of the thermal conductivity");
   params.addParam<MaterialPropertyName>(
       "specific_heat_name", "cp", "The name of the specific heat");
-  params.addParam<std::vector<BoundaryName>>("natural_temperature_boundary",
-                                             std::vector<BoundaryName>(),
-                                             "Natural boundaries for temperature equation");
-  params.addParam<std::vector<BoundaryName>>("fixed_temperature_boundary",
-                                             std::vector<BoundaryName>(),
-                                             "Dirichlet boundaries for temperature equation");
-  params.addParam<std::vector<FunctionName>>(
-      "temperature_function", std::vector<FunctionName>(), "Temperature on Dirichlet boundaries");
-  addAmbientConvectionParams(params);
+
   params.addParam<bool>(
       "has_heat_source", false, "Whether there is a heat source function object in the simulation");
   params.addParam<FunctionName>("heat_source_function", "The function describing the heat source");
   params.addCoupledVar("heat_source_var", "The coupled variable describing the heat source");
 
   params.addParam<RealVectorValue>(
-      "gravity", RealVectorValue(0, 0, 0), "Direction of the gravity vector");
+      "gravity", RealVectorValue(0, 0, 0), "The gravitational acceleration vector.");
 
   params.addParam<MaterialPropertyName>(
       "dynamic_viscosity_name", NS::mu, "The name of the dynamic viscosity");
@@ -111,24 +103,53 @@ NSFVAction::validParams()
   params.addParam<std::vector<BoundaryName>>(
       "wall_boundaries", std::vector<BoundaryName>(), "Names of wall boundaries");
 
-  params.addParam<std::vector<FunctionName>>("velocity_inlet_function",
+  MultiMooseEnum mom_inlet_type("fixed-velocity fixed-massflow", "fixed-velocity");
+  params.addParam<MultiMooseEnum>("momentum_inlet_types",
+                                  mom_inlet_type,
+                                  "Types of inlet boundaries for them omentum equation");
+
+  params.addParam<std::vector<FunctionName>>("momentum_inlet_function",
                                              std::vector<FunctionName>(),
                                              "Functions for inlet boundary velocities");
-  MultiMooseEnum outlet_type("pressure mass-outflow momentum-outflow", "pressure");
-  params.addParam<MultiMooseEnum>(
-      "velocity_outlet_types", outlet_type, "Boundaries with given velocities");
 
-  MultiMooseEnum wall_type("symmetry noslip slip wallfunction", "noslip");
+  MultiMooseEnum mom_outlet_type("fixed-pressure zero-gradient fixed-pressure-zero-gradient",
+                                 "fixed-pressure");
+  params.addParam<MultiMooseEnum>("momentum_outlet_types",
+                                  mom_outlet_type,
+                                  "Types of outlet boundaries for them momentum equation");
+  params.addParam<std::vector<FunctionName>>("pressure_function",
+                                             std::vector<FunctionName>(),
+                                             "Functions for boundary pressures at outlets.");
+
+  MultiMooseEnum mom_wall_type("symmetry noslip slip wallfunction", "noslip");
   params.addParam<MultiMooseEnum>(
-      "velocity_wall_types", outlet_type, "Boundaries with given velocities");
+      "momentum_wall_types", mom_wall_type, "Types of wall boundaries for them momentum equation");
+
+  MultiMooseEnum en_inlet_type("fixed-temperature fixed-enthalpy fixed-totalenergy",
+                               "fixed-temperature");
+  params.addParam<MultiMooseEnum>("energy_inlet_types",
+                                  en_inlet_type,
+                                  "Types for the inlet boundaries for the energy equation.");
+
+  params.addParam<std::vector<FunctionName>>(
+      "energy_inlet_function",
+      std::vector<FunctionName>(),
+      "Functions for fixed-value boundaries in the energy equation.");
+
+  MultiMooseEnum en_wall_type("fixed-temperature heatflux symmetry wallfunction", "symmetry");
+  params.addParam<MultiMooseEnum>(
+      "energy_wall_types", en_wall_type, "Types for the wall boundaries for the energy equation.");
+
+  params.addParam<std::vector<FunctionName>>(
+      "energy_wall_function",
+      std::vector<FunctionName>(),
+      "Functions for Dirichlet/Neumann boundaries in the energy equation.");
+
+  addAmbientConvectionParams(params);
 
   params.addParam<unsigned int>(
       "pressure_pinned_dof",
       "The dof where pressure needs to be pinned for incompressible simulations.");
-
-  params.addParam<std::vector<FunctionName>>("pressure_function",
-                                             std::vector<FunctionName>(),
-                                             "Functions for boundary pressures at outlets.");
 
   params.addParam<Real>("initial_pressure", 0, "The initial pressure, assumed constant everywhere");
 
@@ -140,6 +161,7 @@ NSFVAction::validParams()
   params.addParam<RealVectorValue>("initial_momentum",
                                    RealVectorValue(1e-15, 1e-15, 1e-15),
                                    "The initial momentum, assumed constant everywhere");
+
   params.addParam<std::string>("pressure_variable_name",
                                NS::pressure,
                                "A name for the pressure variable. If this is not provided, a "
@@ -149,7 +171,7 @@ NSFVAction::validParams()
       "simulation_type block gravity dynamic_viscosity_name density_name boussinesq_approximation "
       "ref_temperature thermal_expansion_name",
       "Base");
-  params.addParamNamesToGroup("velocity_boundary velocity_function pressure_pinned_node "
+  params.addParamNamesToGroup("inlet_boundary inlet_velocity_function pressure_pinned_node "
                               "pressure_boundary pressure_function",
                               "BoundaryCondition");
   params.addParamNamesToGroup("initial_pressure initial_velocity", "Variable");
@@ -171,36 +193,69 @@ NSFVAction::NSFVAction(InputParameters parameters)
     _inlet_boundaries(getParam<std::vector<BoundaryName>>("inlet_boundaries")),
     _outlet_boundaries(getParam<std::vector<BoundaryName>>("outlet_boundaries")),
     _wall_boundaries(getParam<std::vector<BoundaryName>>("wall_boundaries")),
-    _velocity_inlet_function(getParam<std::vector<FunctionName>>("velocity_inlet_function")),
-    _velocity_outlet_types(getParam<MultiMooseEnum>("velocity_outlet_types")),
-    _velocity_wall_types(getParam<MultiMooseEnum>("velocity_wall_types")),
-    _pressure_boundary(getParam<std::vector<BoundaryName>>("pressure_boundary")),
+    _momentum_inlet_types(getParam<MultiMooseEnum>("momentum_inlet_types")),
+    _momentum_inlet_function(getParam<std::vector<FunctionName>>("velocity_inlet_function")),
+    _momentum_outlet_types(getParam<MultiMooseEnum>("momentum_outlet_types")),
+    _momentum_wall_types(getParam<MultiMooseEnum>("momentum_wall_types")),
+    _energy_inlet_types(getParam<MultiMooseEnum>("energy_inlet_types")),
+    _energy_inlet_function(getParam<std::vector<FunctionName>>("energy_inlet_function")),
+    _energy_wall_types(getParam<MultiMooseEnum>("energy_wall_types")),
+    _energy_wall_function(getParam<std::vector<FunctionName>>("energy_wall_function")),
     _pressure_function(getParam<std::vector<FunctionName>>("pressure_function")),
     _has_pinned_dof(isParamValid("pressure_pinned_dof")),
     _pinned_dof("ins_pinned_dof"),
-    _fixed_temperature_boundary(getParam<std::vector<BoundaryName>>("fixed_temperature_boundary")),
-    _temperature_function(getParam<std::vector<FunctionName>>("temperature_function")),
     _fluid_temperature_variable_name(getParam<VariableName>("fluid_temperature_variable")),
     _solid_temperature_variable_name(getParam<VariableName>("solid_temperature_variable")),
     _pressure_variable_name(getParam<std::string>("pressure_variable_name"))
 {
-  if (_pressure_function.size() != _pressure_boundary.size())
-    paramError("pressure_function",
-               "Size is not the same as the number of boundaries in 'pressure_boundary'");
-  if (_temperature_function.size() != _fixed_temperature_boundary.size())
-    paramError("temperature_function",
-               "Size is not the same as the number of boundaries in 'fixed_temperature_boundary'");
+  unsigned int no_pressure_outlets = 0;
+  for (unsigned int enum_ind = 0; enum_ind < _momentum_outlet_types.size(); ++enum_ind)
+    if (_momentum_outlet_types[enum_ind] == "fixed-pressure")
+      no_pressure_outlets += 1;
 
-  if (_outlet_boundaries.size() != _velocity_outlet_types.size())
+  if (_pressure_function.size() != no_pressure_outlets)
+    paramError("pressure_function",
+               "Size is not the same as the number of pressure outlet boundaries!");
+
+  if (_outlet_boundaries.size() != _momentum_outlet_types.size())
   {
     paramError("velocity_outlet_types",
                "Size is not the same as the number of outlet boundaries in 'outlet_boundaries'");
   }
 
-  if (_wall_boundaries.size() != _velocity_wall_types.size())
+  if (_wall_boundaries.size() != _momentum_wall_types.size())
   {
     paramError("velocity_wall_types",
-               "Size is not the same as the number of outlet boundaries in 'wall_boundaries'");
+               "Size is not the same as the number of wall boundaries in 'wall_boundaries'");
+  }
+
+  if (_energy_inlet_types.size() != _energy_inlet_function.size())
+    paramError("energy_inlet_function",
+               "Size is not the same as the number of boundaries in 'energy_inlet_types'");
+
+  unsigned int no_fixed_energy_walls = 0;
+  for (unsigned int enum_ind = 0; enum_ind < _energy_wall_types.size(); ++enum_ind)
+    if (_energy_wall_types[enum_ind] == "fixed-temperature" ||
+        _energy_wall_types[enum_ind] == "heatflux")
+      no_fixed_energy_walls += 1;
+
+  if (_energy_wall_function.size() != no_fixed_energy_walls)
+    paramError("energy_wall_function",
+               "Size " + std::to_string(_energy_wall_function.size()) +
+                   " is not the same as the number of Dirichlet/Neumann conditions in "
+                   "'energy_wall_types' (" +
+                   std::to_string(no_fixed_energy_walls) + ")");
+
+  if (_inlet_boundaries.size() != _energy_inlet_types.size())
+  {
+    paramError("energy_inlet_types",
+               "Size is not the same as the number of inlet boundaries in 'inlet_boundaries'");
+  }
+
+  if (_wall_boundaries.size() != _energy_wall_types.size())
+  {
+    paramError("energy_wall_types",
+               "Size is not the same as the number of wall boundaries in 'wall_boundaries'");
   }
 
   if (getParam<bool>("has_ambient_convection"))
@@ -269,7 +324,7 @@ NSFVAction::act()
           mooseError("RZ has not been added in action");
     }
 
-    if (_velocity_inlet_function.size() != _inlet_boundaries.size() * _dim)
+    if (_momentum_inlet_function.size() != _inlet_boundaries.size() * _dim)
       paramError("velocity_inlet_function",
                  "Size is not the same as the number of boundaries in 'inlet_boundaries' times "
                  "the mesh dimension");
@@ -1023,23 +1078,286 @@ NSFVAction::addCNSEnergy()
 }
 
 void
-NSFVAction::addINSInletVelocityBC(unsigned int /*bc_index*/)
+NSFVAction::addINSInletBC()
 {
-  _console << "Something here. " << std::endl;
+  for (unsigned int bc_ind = 0; bc_ind < _inlet_boundaries.size(); ++bc_ind)
+  {
+    if (_momentum_inlet_types[bc_ind] == "fixed-velocity")
+    {
+      const std::string bc_type = "INSFVInletVelocityBC";
+      InputParameters params = _factory.getValidParams(bc_type);
+
+      for (unsigned int d = 0; d < _dim; ++d)
+      {
+        NonlinearVariableName vname;
+        if (_porous_medium_treatment)
+          vname = NS::superficial_velocity_vector[d];
+        else
+          vname = NS::velocity_vector[d];
+
+        params.set<NonlinearVariableName>("variable") = vname;
+        params.set<FunctionName>("function") = _momentum_inlet_function[bc_ind * _dim + d];
+        params.set<std::vector<BoundaryName>>("boundary") = {_inlet_boundaries[bc_ind]};
+
+        _problem->addBoundaryCondition(bc_type, vname + "_" + _inlet_boundaries[bc_ind], params);
+      }
+    }
+    else
+      mooseError(_momentum_inlet_types[bc_ind] +
+                 " inlet BC is not supported for INS simulations at the moment!");
+
+    if (getParam<bool>("add_energy_equation"))
+    {
+      if (_energy_inlet_types[bc_ind] == "fixed-temperature")
+      {
+        const std::string bc_type = "FVFunctionDirichletBC";
+        InputParameters params = _factory.getValidParams(bc_type);
+        params.set<NonlinearVariableName>("variable") = _fluid_temperature_variable_name;
+        params.set<FunctionName>("function") = _energy_inlet_function[bc_ind];
+        params.set<std::vector<BoundaryName>>("boundary") = {_inlet_boundaries[bc_ind]};
+        _problem->addBoundaryCondition(
+            bc_type, _fluid_temperature_variable_name + "_" + _inlet_boundaries[bc_ind], params);
+      }
+      else
+        mooseError(_energy_inlet_types[bc_ind] +
+                   " inlet BC is not supported for INS simulations at the moment!");
+    }
+  }
 }
 
 void
-NSFVAction::addINSVelocityBC()
+NSFVAction::addINSOutletBC()
 {
-  for (unsigned int bc_ind = 0; bc_ind < _inlet_boundaries.size(); ++bc_ind)
-    addINSInletVelocityBC(bc_ind);
-
+  const std::string u_names[3] = {"u", "v", "w"};
   for (unsigned int bc_ind = 0; bc_ind < _outlet_boundaries.size(); ++bc_ind)
-    addINSOutletVelocityBC(bc_ind);
+  {
+    if (_momentum_outlet_types[bc_ind] == "fixed-pressure")
+    {
+      const std::string bc_type = "INSFVOutletPressureBC";
+      InputParameters params = _factory.getValidParams(bc_type);
+      params.set<NonlinearVariableName>("variable") = _pressure_variable_name;
+      params.set<FunctionName>("function") = _pressure_function[bc_ind];
+      params.set<std::vector<BoundaryName>>("boundary") = {_outlet_boundaries[bc_ind]};
+      _problem->addBoundaryCondition(
+          bc_type, _pressure_variable_name + "_" + _outlet_boundaries[bc_ind], params);
+    }
+    else if (_momentum_outlet_types[bc_ind] == "zero-gradient")
+    {
+      {
+        const std::string bc_type = "INSFVMassAdvectionOutflowBC";
+        InputParameters params = _factory.getValidParams(bc_type);
+        params.set<NonlinearVariableName>("variable") = _pressure_variable_name;
+        params.set<MaterialPropertyName>(NS::density) = NS::density;
+        params.set<std::vector<BoundaryName>>("boundary") = {_outlet_boundaries[bc_ind]};
+        for (unsigned int d = 0; d < _dim; ++d)
+        {
+          if (_porous_medium_treatment)
+            params.set<NonlinearVariableName>(u_names[d]) = NS::superficial_velocity_vector[d];
+          else
+            params.set<NonlinearVariableName>(u_names[d]) = NS::velocity_vector[d];
+        }
+        _problem->addBoundaryCondition(
+            bc_type, _pressure_variable_name + "_" + _outlet_boundaries[bc_ind], params);
+      }
 
+      {
+        const std::string bc_type = "INSFVMomentumAdvectionOutflowBC";
+        InputParameters params = _factory.getValidParams(bc_type);
+
+        for (unsigned int d = 0; d < _dim; ++d)
+        {
+          NonlinearVariableName vname;
+          if (_porous_medium_treatment)
+          {
+            vname = NS::superficial_velocity_vector[d];
+            for (unsigned int d = 0; d < _dim; ++d)
+              params.set<NonlinearVariableName>(u_names[d]) = NS::superficial_velocity_vector[d];
+          }
+          else
+          {
+            vname = NS::velocity_vector[d];
+            for (unsigned int d = 0; d < _dim; ++d)
+              params.set<NonlinearVariableName>(u_names[d]) = NS::velocity_vector[d];
+          }
+
+          params.set<NonlinearVariableName>("variable") = vname;
+          params.set<MooseEnum>("momentum_component") = NS::directions[d];
+          params.set<MaterialPropertyName>(NS::density) = NS::density;
+          params.set<std::vector<BoundaryName>>("boundary") = {_outlet_boundaries[bc_ind]};
+
+          _problem->addBoundaryCondition(bc_type, vname + "_" + _outlet_boundaries[bc_ind], params);
+        }
+      }
+    }
+    else if (_momentum_outlet_types[bc_ind] == "fixed-pressure-zero-gradient")
+    {
+      {
+        const std::string bc_type = "INSFVMomentumAdvectionOutflowBC";
+        InputParameters params = _factory.getValidParams(bc_type);
+
+        for (unsigned int d = 0; d < _dim; ++d)
+        {
+          NonlinearVariableName vname;
+          if (_porous_medium_treatment)
+          {
+            vname = NS::superficial_velocity_vector[d];
+            for (unsigned int d = 0; d < _dim; ++d)
+              params.set<NonlinearVariableName>(u_names[d]) = NS::superficial_velocity_vector[d];
+          }
+          else
+          {
+            vname = NS::velocity_vector[d];
+            for (unsigned int d = 0; d < _dim; ++d)
+              params.set<NonlinearVariableName>(u_names[d]) = NS::velocity_vector[d];
+          }
+
+          params.set<NonlinearVariableName>("variable") = vname;
+          params.set<MooseEnum>("momentum_component") = NS::directions[d];
+          params.set<MaterialPropertyName>(NS::density) = NS::density;
+          params.set<std::vector<BoundaryName>>("boundary") = {_outlet_boundaries[bc_ind]};
+
+          _problem->addBoundaryCondition(bc_type, vname + "_" + _outlet_boundaries[bc_ind], params);
+        }
+      }
+      {
+        const std::string bc_type = "INSFVOutletPressureBC";
+        InputParameters params = _factory.getValidParams(bc_type);
+        params.set<NonlinearVariableName>("variable") = _pressure_variable_name;
+        params.set<FunctionName>("function") = _pressure_function[bc_ind];
+        params.set<std::vector<BoundaryName>>("boundary") = {_outlet_boundaries[bc_ind]};
+        _problem->addBoundaryCondition(
+            bc_type, _pressure_variable_name + "_" + _outlet_boundaries[bc_ind], params);
+      }
+    }
+    else
+      mooseError(_momentum_outlet_types[bc_ind] +
+                 " outlet BC is not supported for INS simulations at the moment!");
+  }
+}
+
+void
+NSFVAction::addINSWallBC()
+{
+  const std::string u_names[3] = {"u", "v", "w"};
   for (unsigned int bc_ind = 0; bc_ind < _wall_boundaries.size(); ++bc_ind)
-    addINSWallVelocityBC(bc_ind);
+  {
+    if (_momentum_wall_types[bc_ind] == "noslip")
+    {
+      const std::string bc_type = "INSFVNoSlipWallBC";
+      InputParameters params = _factory.getValidParams(bc_type);
 
+      for (unsigned int d = 0; d < _dim; ++d)
+      {
+        NonlinearVariableName vname;
+        if (_porous_medium_treatment)
+          vname = NS::superficial_velocity_vector[d];
+        else
+          vname = NS::velocity_vector[d];
+
+        params.set<NonlinearVariableName>("variable") = vname;
+        params.set<std::vector<BoundaryName>>("boundary") = {_wall_boundaries[bc_ind]};
+
+        _problem->addBoundaryCondition(bc_type, vname + "_" + _wall_boundaries[bc_ind], params);
+      }
+    }
+    else if (_momentum_wall_types[bc_ind] == "slip")
+    {
+      const std::string bc_type = "INSFVNaturalFreeSlipBC";
+      InputParameters params = _factory.getValidParams(bc_type);
+
+      for (unsigned int d = 0; d < _dim; ++d)
+      {
+        NonlinearVariableName vname;
+        if (_porous_medium_treatment)
+          vname = NS::superficial_velocity_vector[d];
+        else
+          vname = NS::velocity_vector[d];
+
+        params.set<NonlinearVariableName>("variable") = vname;
+        params.set<MooseEnum>("momentum_component") = NS::directions[d];
+        params.set<std::vector<BoundaryName>>("boundary") = {_wall_boundaries[bc_ind]};
+
+        _problem->addBoundaryCondition(bc_type, vname + "_" + _wall_boundaries[bc_ind], params);
+      }
+    }
+    else if (_momentum_wall_types[bc_ind] == "symmetry")
+    {
+      {
+        const std::string bc_type = "INSFVSymmetryVelocityBC";
+        InputParameters params = _factory.getValidParams(bc_type);
+
+        for (unsigned int d = 0; d < _dim; ++d)
+        {
+          NonlinearVariableName vname;
+          if (_porous_medium_treatment)
+          {
+            vname = NS::superficial_velocity_vector[d];
+            for (unsigned int d = 0; d < _dim; ++d)
+              params.set<NonlinearVariableName>(u_names[d]) = NS::superficial_velocity_vector[d];
+          }
+          else
+          {
+            vname = NS::velocity_vector[d];
+            for (unsigned int d = 0; d < _dim; ++d)
+              params.set<NonlinearVariableName>(u_names[d]) = NS::velocity_vector[d];
+          }
+
+          params.set<NonlinearVariableName>("variable") = vname;
+          params.set<MooseEnum>("momentum_component") = NS::directions[d];
+          params.set<std::vector<BoundaryName>>("boundary") = {_wall_boundaries[bc_ind]};
+
+          _problem->addBoundaryCondition(bc_type, vname + "_" + _wall_boundaries[bc_ind], params);
+        }
+      }
+      {
+        const std::string bc_type = "INSFVSymmetryPressureBC";
+        InputParameters params = _factory.getValidParams(bc_type);
+        params.set<NonlinearVariableName>("variable") = _pressure_variable_name;
+        params.set<std::vector<BoundaryName>>("boundary") = {_wall_boundaries[bc_ind]};
+        _problem->addBoundaryCondition(
+            bc_type, _pressure_variable_name + "_" + _wall_boundaries[bc_ind], params);
+      }
+    }
+    else
+      mooseError(_momentum_wall_types[bc_ind] +
+                 " wall BC is not supported for INS simulations at the moment!");
+
+    if (getParam<bool>("add_energy_equation"))
+    {
+      if (_energy_wall_types[bc_ind] == "fixed-temperature")
+      {
+        const std::string bc_type = "FVFunctionDirichletBC";
+        InputParameters params = _factory.getValidParams(bc_type);
+        params.set<NonlinearVariableName>("variable") = _fluid_temperature_variable_name;
+        params.set<FunctionName>("function") = _energy_wall_function[bc_ind];
+        params.set<std::vector<BoundaryName>>("boundary") = {_wall_boundaries[bc_ind]};
+        _problem->addBoundaryCondition(
+            bc_type, _fluid_temperature_variable_name + "_" + _wall_boundaries[bc_ind], params);
+      }
+      else if (_energy_wall_types[bc_ind] == "heatflux")
+      {
+        const std::string bc_type = "FVFunctionNeumannBC";
+        InputParameters params = _factory.getValidParams(bc_type);
+        params.set<NonlinearVariableName>("variable") = _fluid_temperature_variable_name;
+        params.set<FunctionName>("function") = _energy_wall_function[bc_ind];
+        params.set<std::vector<BoundaryName>>("boundary") = {_wall_boundaries[bc_ind]};
+        _problem->addBoundaryCondition(
+            bc_type, _fluid_temperature_variable_name + "_" + _wall_boundaries[bc_ind], params);
+      }
+      else if (_energy_wall_types[bc_ind] == "symmetry")
+      {
+        const std::string bc_type = "INSFVSymmetryBC";
+        InputParameters params = _factory.getValidParams(bc_type);
+        params.set<NonlinearVariableName>("variable") = _fluid_temperature_variable_name;
+        params.set<std::vector<BoundaryName>>("boundary") = {_wall_boundaries[bc_ind]};
+        _problem->addBoundaryCondition(
+            bc_type, _fluid_temperature_variable_name + "_" + _wall_boundaries[bc_ind], params);
+      }
+      else
+        mooseError(_energy_wall_types[bc_ind] +
+                   " wall BC is not supported for INS simulations at the moment!");
+    }
+  }
   // const static std::string momentums[3] = {NS::velocity_x, NS::velocity_y, NS::velocity_z};
   // for (unsigned int i = 0; i < _velocity_boundary.size(); ++i)
   // {
@@ -1147,72 +1465,6 @@ NSFVAction::addINSVelocityBC()
   //             "DirichletBC", momentums[component] + "_" + _velocity_boundary[i], params);
   //       }
   //     }
-  //   }
-  // }
-}
-
-void
-NSFVAction::addINSTemperatureBC()
-{
-  _console << "something here" << std::endl;
-  // for (unsigned int i = 0; i < _fixed_temperature_boundary.size(); ++i)
-  // {
-  //   const FunctionName func = _temperature_function[i];
-  //   if (func == "NA")
-  //     continue;
-  //
-  //   std::stringstream ss(func);
-  //   Real val;
-  //   if ((ss >> val).fail() || !ss.eof())
-  //   {
-  //     InputParameters params = _factory.getValidParams("FunctionDirichletBC");
-  //     params.set<FunctionName>("function") = func;
-  //     params.set<NonlinearVariableName>("variable") = _temperature_variable_name;
-  //     params.set<std::vector<BoundaryName>>("boundary") = {_fixed_temperature_boundary[i]};
-  //     _problem->addBoundaryCondition("FunctionDirichletBC",
-  //                                    _temperature_variable_name + "_" +
-  //                                        _fixed_temperature_boundary[i],
-  //                                    params);
-  //   }
-  //   else
-  //   {
-  //     InputParameters params = _factory.getValidParams("DirichletBC");
-  //     params.set<Real>("value") = val;
-  //     params.set<NonlinearVariableName>("variable") = _temperature_variable_name;
-  //     params.set<std::vector<BoundaryName>>("boundary") = {_fixed_temperature_boundary[i]};
-  //     _problem->addBoundaryCondition(
-  //         "DirichletBC", _temperature_variable_name + "_" + _fixed_temperature_boundary[i],
-  //         params);
-  //   }
-  // }
-}
-
-void
-NSFVAction::addINSPressureBC()
-{
-  _console << "something here" << std::endl;
-  // for (unsigned int i = 0; i < _pressure_boundary.size(); ++i)
-  // {
-  //   const FunctionName func = _pressure_function[i];
-  //   std::stringstream ss(func);
-  //   Real val;
-  //   if ((ss >> val).fail() || !ss.eof())
-  //   {
-  //     InputParameters params = _factory.getValidParams("FunctionDirichletBC");
-  //     params.set<FunctionName>("function") = func;
-  //     params.set<NonlinearVariableName>("variable") = _pressure_variable_name;
-  //     params.set<std::vector<BoundaryName>>("boundary") = {_pressure_boundary[i]};
-  //     _problem->addBoundaryCondition(
-  //         "FunctionDirichletBC", NS::pressure + _pressure_boundary[i], params);
-  //   }
-  //   else
-  //   {
-  //     InputParameters params = _factory.getValidParams("DirichletBC");
-  //     params.set<Real>("value") = val;
-  //     params.set<NonlinearVariableName>("variable") = _pressure_variable_name;
-  //     params.set<std::vector<BoundaryName>>("boundary") = {_pressure_boundary[i]};
-  //     _problem->addBoundaryCondition("DirichletBC", NS::pressure + _pressure_boundary[i],
-  //     params);
   //   }
   // }
 }
