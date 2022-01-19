@@ -23,8 +23,8 @@
 #include "libmesh/vector_value.h"
 #include "libmesh/string_to_enum.h"
 
-registerMooseAction("NavierStokesApp", NSFVAction, "add_navier_stokes_user_objects");
 registerMooseAction("NavierStokesApp", NSFVAction, "add_navier_stokes_variables");
+registerMooseAction("NavierStokesApp", NSFVAction, "add_navier_stokes_user_objects");
 registerMooseAction("NavierStokesApp", NSFVAction, "add_navier_stokes_ics");
 registerMooseAction("NavierStokesApp", NSFVAction, "add_navier_stokes_kernels");
 registerMooseAction("NavierStokesApp", NSFVAction, "add_navier_stokes_bcs");
@@ -292,10 +292,6 @@ NSFVAction::NSFVAction(InputParameters parameters)
 void
 NSFVAction::act()
 {
-  if (_current_task == "add_navier_stokes_user_objects")
-  {
-    //
-  }
   if (_current_task == "add_navier_stokes_variables")
   {
     _dim = _mesh->dimension();
@@ -362,6 +358,37 @@ NSFVAction::act()
       if (getParam<bool>("add_energy_equation") &&
           !_problem->getNonlinearSystemBase().hasVariable(_fluid_temperature_variable_name))
         _problem->addVariable("INSFVEnergyVariable", _fluid_temperature_variable_name, base_params);
+    }
+  }
+
+  if (_current_task == "add_navier_stokes_user_objects")
+  {
+    if (_compressibility == "incompressible" || _compressibility == "weakly-compressible")
+    {
+      const std::string u_names[3] = {"u", "v", "w"};
+      if (_porous_medium_treatment)
+      {
+        auto params = _factory.getValidParams("PINSFVRhieChowInterpolator");
+        for (unsigned int d = 0; d < _dim; ++d)
+          params.set<NonlinearVariableName>(u_names[d]) = NS::superficial_velocity_vector[d];
+
+        params.set<NonlinearVariableName>("pressure") = _pressure_variable_name;
+        params.set<AuxVariableName>("porosity") = NS::porosity;
+
+        _problem->addUserObject(
+            "PINSFVRhieChowInterpolator", "pins_rhie_chow_interpolator", params);
+      }
+      else
+      {
+        auto params = _factory.getValidParams("INSFVRhieChowInterpolator");
+        for (unsigned int d = 0; d < _dim; ++d)
+          params.set<NonlinearVariableName>(u_names[d]) = NS::velocity_vector[d];
+
+        params.set<NonlinearVariableName>("pressure") = _pressure_variable_name;
+
+        _problem->addUserObject(
+            "INSFVRhieChowInterpolator", "ins_rhie_chow_interpolator", params);
+      }
     }
   }
 
@@ -748,7 +775,7 @@ NSFVAction::addINSMass()
     params.set<NonlinearVariableName>("variable") = _pressure_variable_name;
     params.set<AuxVariableName>(NS::porosity) = NS::porosity;
     params.set<MaterialPropertyName>(NS::density) = NS::density;
-    params.set<MooseEnum>("velocity_interp_method") = "rc";
+    params.set<MooseEnum>("velocity_interp_method") = "pins_rhie_chow_interpolator";
     params.set<MooseEnum>("advected_interp_method") = "average";
 
     for (unsigned int d = 0; d < _dim; ++d)
@@ -765,7 +792,7 @@ NSFVAction::addINSMass()
 
     params.set<NonlinearVariableName>("variable") = _pressure_variable_name;
     params.set<MaterialPropertyName>(NS::density) = NS::density;
-    params.set<MooseEnum>("velocity_interp_method") = "rc";
+    params.set<MooseEnum>("velocity_interp_method") = "ins_rhie_chow_interpolator";
     params.set<MooseEnum>("advected_interp_method") = "average";
 
     for (unsigned int d = 0; d < _dim; ++d)
@@ -795,7 +822,7 @@ NSFVAction::addINSMomentum()
 
       params.set<MaterialPropertyName>(NS::density) = NS::density;
       params.set<AuxVariableName>(NS::porosity) = NS::porosity;
-      params.set<MooseEnum>("velocity_interp_method") = "rc";
+      params.set<MooseEnum>("velocity_interp_method") = "pins_rhie_chow_interpolator";
       params.set<MooseEnum>("advected_interp_method") = "average";
       for (unsigned int d = 0; d < _dim; ++d)
         params.set<NonlinearVariableName>(u_names[d]) = NS::superficial_velocity_vector[d];
@@ -894,7 +921,7 @@ NSFVAction::addINSMomentum()
         params.set<std::vector<SubdomainName>>("block") = _blocks;
 
       params.set<MaterialPropertyName>(NS::density) = NS::density;
-      params.set<MooseEnum>("velocity_interp_method") = "rc";
+      params.set<MooseEnum>("velocity_interp_method") = "ins_rhie_chow_interpolator";
       params.set<MooseEnum>("advected_interp_method") = "average";
       for (unsigned int d = 0; d < _dim; ++d)
         params.set<NonlinearVariableName>(u_names[d]) = NS::velocity_vector[d];
@@ -1005,7 +1032,7 @@ NSFVAction::addINSEnergy()
 
       params.set<MaterialPropertyName>(NS::density) = NS::density;
       params.set<AuxVariableName>(NS::porosity) = NS::porosity;
-      params.set<MooseEnum>("velocity_interp_method") = "rc";
+      params.set<MooseEnum>("velocity_interp_method") = "pins_rhie_chow_interpolator";
       params.set<MooseEnum>("advected_interp_method") = "average";
       for (unsigned int d = 0; d < _dim; ++d)
         params.set<NonlinearVariableName>(u_names[d]) = NS::superficial_velocity_vector[d];
@@ -1039,7 +1066,7 @@ NSFVAction::addINSEnergy()
         params.set<std::vector<SubdomainName>>("block") = _blocks;
 
       params.set<MaterialPropertyName>(NS::density) = NS::density;
-      params.set<MooseEnum>("velocity_interp_method") = "rc";
+      params.set<MooseEnum>("velocity_interp_method") = "ins_rhie_chow_interpolator";
       params.set<MooseEnum>("advected_interp_method") = "average";
       for (unsigned int d = 0; d < _dim; ++d)
         params.set<NonlinearVariableName>(u_names[d]) = NS::velocity_vector[d];
