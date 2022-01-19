@@ -11,7 +11,7 @@
 
 #include "Conversion.h"
 #include "InputParameters.h"
-#include "ADMaterial.h"
+#include "Material.h"
 
 /**
  * ADSmearedCrackSofteningBase is the base class for a set of models that define the
@@ -19,7 +19,7 @@
  * These models are called by ADComputeSmearedCrackingStress, so they
  * must have the compute=false flag set in the parameter list.
  */
-class ADSmearedCrackSofteningBase : public ADMaterial
+class ADSmearedCrackSofteningBase : public Material
 {
 public:
   static InputParameters validParams();

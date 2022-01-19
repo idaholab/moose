@@ -14,7 +14,7 @@ registerMooseObject("TensorMechanicsApp", HillConstants);
 InputParameters
 HillConstants::validParams()
 {
-  InputParameters params = ADMaterial::validParams();
+  InputParameters params = Material::validParams();
   params.addClassDescription("Build and rotate the Hill Tensor. It can be used with other Hill "
                              "plasticity and creep materials.");
   params.addParam<std::string>("base_name",
@@ -43,7 +43,7 @@ HillConstants::validParams()
 }
 
 HillConstants::HillConstants(const InputParameters & parameters)
-  : ADMaterial(parameters),
+  : Material(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _use_large_rotation(getParam<bool>("use_large_rotation")),
     _rotation_total_hill(_use_large_rotation

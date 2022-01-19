@@ -9,9 +9,9 @@
 
 #pragma once
 
-#include "ADMaterial.h"
+#include "Material.h"
 
-class ADDensity : public ADMaterial
+class ADDensity : public Material
 {
 public:
   static InputParameters validParams();

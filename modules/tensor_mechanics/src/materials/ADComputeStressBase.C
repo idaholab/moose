@@ -14,7 +14,7 @@
 InputParameters
 ADComputeStressBase::validParams()
 {
-  InputParameters params = ADMaterial::validParams();
+  InputParameters params = Material::validParams();
   params.addParam<std::string>("base_name",
                                "Optional parameter that allows the user to define "
                                "multiple mechanics material systems on the same "
@@ -28,7 +28,7 @@ ADComputeStressBase::validParams()
 }
 
 ADComputeStressBase::ADComputeStressBase(const InputParameters & parameters)
-  : ADMaterial(parameters),
+  : Material(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _mechanical_strain(getADMaterialProperty<RankTwoTensor>(_base_name + "mechanical_strain")),
     _stress(declareADProperty<RankTwoTensor>(_base_name + "stress")),

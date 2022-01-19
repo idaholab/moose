@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "ADMaterial.h"
+#include "Material.h"
 #include "Function.h"
 #include "ADRankTwoTensorForward.h"
 #include "ADRankFourTensorForward.h"
@@ -17,7 +17,7 @@
 /**
  * ADComputeStressBase is the base class for stress tensors
  */
-class ADComputeStressBase : public ADMaterial
+class ADComputeStressBase : public Material
 {
 public:
   static InputParameters validParams();

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ADMaterial.h"
+#include "Material.h"
 
 // A helper class from MOOSE that linearly interpolates abscissa-ordinate pairs
 #include "LinearInterpolation.h"
@@ -10,7 +10,7 @@
  * diameter in accordance with Pamuk and Ozdemir (2012). This also provides a specified dynamic
  * viscosity of the fluid in the medium.
  */
-class PackedColumn : public ADMaterial
+class PackedColumn : public Material
 {
 public:
   static InputParameters validParams();

@@ -14,13 +14,13 @@ registerMooseObject("HeatConductionTestApp", ADConvectiveHeatFluxTest);
 InputParameters
 ADConvectiveHeatFluxTest::validParams()
 {
-  auto params = ADMaterial::validParams();
+  auto params = Material::validParams();
   params.addRequiredCoupledVar("temperature", "Coupled temperature");
   return params;
 }
 
 ADConvectiveHeatFluxTest::ADConvectiveHeatFluxTest(const InputParameters & parameters)
-  : ADMaterial(parameters),
+  : Material(parameters),
     _temperature(adCoupledValue("temperature")),
     _t_inf(declareADProperty<Real>("T_inf")),
     _htc(declareADProperty<Real>("htc"))

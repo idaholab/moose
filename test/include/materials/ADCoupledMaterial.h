@@ -9,12 +9,12 @@
 
 #pragma once
 
-#include "ADMaterial.h"
+#include "Material.h"
 
 /**
  * A material that couples a material property
  */
-class ADCoupledMaterial : public ADMaterial
+class ADCoupledMaterial : public Material
 {
 public:
   static InputParameters validParams();

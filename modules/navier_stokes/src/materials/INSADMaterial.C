@@ -19,7 +19,7 @@ registerMooseObject("NavierStokesApp", INSADMaterial);
 InputParameters
 INSADMaterial::validParams()
 {
-  InputParameters params = ADMaterial::validParams();
+  InputParameters params = Material::validParams();
   params.addClassDescription("This is the material class used to compute some of the strong "
                              "residuals for the INS equations.");
   params.addRequiredCoupledVar("velocity", "The velocity");
@@ -30,7 +30,7 @@ INSADMaterial::validParams()
 }
 
 INSADMaterial::INSADMaterial(const InputParameters & parameters)
-  : ADMaterial(parameters),
+  : Material(parameters),
     _velocity(adCoupledVectorValue("velocity")),
     _grad_velocity(adCoupledVectorGradient("velocity")),
     _grad_p(adCoupledGradient(NS::pressure)),

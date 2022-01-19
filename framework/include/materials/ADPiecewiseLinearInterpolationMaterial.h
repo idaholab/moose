@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "ADMaterial.h"
+#include "Material.h"
 #include "LinearInterpolation.h"
 #include "DerivativeMaterialPropertyNameInterface.h"
 
@@ -17,7 +17,7 @@
  * This material uses a LinearInterpolation object to define the dependence
  * of the material's value on a variable.
  */
-class ADPiecewiseLinearInterpolationMaterial : public ADMaterial,
+class ADPiecewiseLinearInterpolationMaterial : public Material,
                                                public DerivativeMaterialPropertyNameInterface
 {
 public:

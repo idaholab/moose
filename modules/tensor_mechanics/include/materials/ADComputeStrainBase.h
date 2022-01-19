@@ -9,13 +9,13 @@
 
 #pragma once
 
-#include "ADMaterial.h"
+#include "Material.h"
 #include "ADRankTwoTensorForward.h"
 
 /**
  * ADADComputeStrainBase is the base class for strain tensors
  */
-class ADComputeStrainBase : public ADMaterial
+class ADComputeStrainBase : public Material
 {
 public:
   static InputParameters validParams();

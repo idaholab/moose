@@ -9,11 +9,11 @@
 
 #pragma once
 
-#include "ADMaterial.h"
+#include "Material.h"
 
 class INSADObjectTracker;
 
-class INSADMaterial : public ADMaterial
+class INSADMaterial : public Material
 {
 public:
   static InputParameters validParams();
