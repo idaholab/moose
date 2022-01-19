@@ -235,4 +235,32 @@
                   'using the function feature to enrich the evolution of the gap conductance.'
     ad_indexing_type = 'global'
   []
+  [gap_heat_transfer_3d]
+    design = 'ModularGapConductanceConstraint.md'
+    issues = '#19286'
+    input = 'gap_heat_transfer_3D.i'
+    type = CSVDiff
+    csvdiff = 'gap_heat_transfer_3D_out_NodalTemperature_0001.csv'
+    rel_err = 1e-3
+    abs_zero = 1e-8
+    mesh_mode = 'REPLICATED'
+    requirement = 'We shall be able to generate node-to-segment numerical results for conduction and '
+                  'radiation between two blocks in 3D and use it as a reference for mortar-based '
+                  'constraints.'
+  []
+  [gap_heat_transfer_3d_mortar]
+    design = 'ModularGapConductanceConstraint.md'
+    issues = '#19286'
+    input = 'gap_heat_transfer_3D_mortar.i'
+    type = CSVDiff
+    csvdiff = 'gap_heat_transfer_3D_mortar_out_NodalTemperature_0001.csv'
+    rel_err = 1e-2
+    abs_zero = 1e-8
+    min_ad_size = 100
+    ad_indexing_type = 'global'
+    mesh_mode = 'REPLICATED'
+    requirement = 'We shall be able to generate mortar numerical results for conduction and '
+                  'radiation between two blocks in 3D and match reasonably well with the '
+                  'node-to-segment approach with a refined mesh.'
+  []
 []
