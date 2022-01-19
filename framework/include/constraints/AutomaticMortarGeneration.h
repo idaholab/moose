@@ -188,7 +188,7 @@ public:
    * @return The map from secondary interior parent nodes to lower dimensional nodes
    */
   std::map<unsigned int, unsigned int>
-  getSecondaryIpToLowerElementMap(const Elem & _lower_secondary_elem) const;
+  getSecondaryIpToLowerElementMap(const Elem & lower_secondary_elem) const;
 
   /**
    * Compute on-the-fly mapping from primary interior parent nodes to its corresponding lower
@@ -197,9 +197,9 @@ public:
    * nodes
    */
   std::map<unsigned int, unsigned int>
-  getPrimaryIpToLowerElementMap(const Elem & _primary_elem,
-                                const Elem & _primary_elem_ip,
-                                const Elem & _lower_secondary_elem) const;
+  getPrimaryIpToLowerElementMap(const Elem & primary_elem,
+                                const Elem & primary_elem_ip,
+                                const Elem & lower_secondary_elem) const;
 
   /**
    * Compute the normals at given reference points on a secondary element
@@ -300,102 +300,126 @@ public:
 
   bool incorrectEdgeDropping() const { return !_correct_edge_dropping; }
 
+  using MortarFilterIter =
+      std::unordered_map<const Elem *, std::unordered_set<Elem *>>::const_iterator;
+
+  /**
+   * @return A vector of iterators that point to the lower dimensional secondary elements and their
+   * associated mortar segment elements that would have nonzero values for a Lagrange shape function
+   * associated with the provided node
+   */
+  std::vector<MortarFilterIter> secondariesToMortarSegments(const Node & node) const;
+
+  /**
+   * @return the lower dimensional secondary elements and their associated mortar segment elements
+   */
+  const std::unordered_map<const Elem *, std::unordered_set<Elem *>> &
+  secondariesToMortarSegments() const
+  {
+    return _secondary_elems_to_mortar_segments;
+  }
+
 private:
   MooseApp & _app;
 
   // Reference to the mesh stored in equation_systems.
   MeshBase & _mesh;
 
-  // The boundary ids corresponding to all the secondary surfaces.
+  /// The boundary ids corresponding to all the secondary surfaces.
   std::set<boundary_id_type> _secondary_requested_boundary_ids;
 
-  // The boundary ids corresponding to all the primary surfaces.
+  /// The boundary ids corresponding to all the primary surfaces.
   std::set<boundary_id_type> _primary_requested_boundary_ids;
 
-  // A list of primary/secondary boundary id pairs corresponding to each
-  // side of the mortar interface.
+  /// A list of primary/secondary boundary id pairs corresponding to each
+  /// side of the mortar interface.
   std::vector<std::pair<boundary_id_type, boundary_id_type>> _primary_secondary_boundary_id_pairs;
 
-  // Map from nodes to connected lower-dimensional elements on the secondary/primary subdomains.
+  /// Map from nodes to connected lower-dimensional elements on the secondary/primary subdomains.
   std::unordered_map<dof_id_type, std::vector<const Elem *>> _nodes_to_secondary_elem_map;
   std::unordered_map<dof_id_type, std::vector<const Elem *>> _nodes_to_primary_elem_map;
 
-  // Similar to the map above, but associates a (Secondary Node, Secondary Elem)
-  // pair to a (xi^(2), primary Elem) pair. This allows a single secondary node, which is
-  // potentially connected to two elements on the secondary side, to be associated with
-  // multiple primary Elem/xi^(2) values to handle the case where the primary and secondary
-  // nodes are "matching".
-  // In this configuration:
-  //
-  //    A     B
-  // o-----o-----o  (secondary orientation ->)
-  //       |
-  //       v
-  // ------x------ (primary orientation <-)
-  //    C     D
-  //
-  // The entries in the map should be:
-  // (Elem A, Node 1) -> (Elem C, xi^(2)=-1)
-  // (Elem B, Node 0) -> (Elem D, xi^(2)=+1)
+  /// Similar to the map above, but associates a (Secondary Node, Secondary Elem)
+  /// pair to a (xi^(2), primary Elem) pair. This allows a single secondary node, which is
+  /// potentially connected to two elements on the secondary side, to be associated with
+  /// multiple primary Elem/xi^(2) values to handle the case where the primary and secondary
+  /// nodes are "matching".
+  /// In this configuration:
+  ///
+  ///    A     B
+  /// o-----o-----o  (secondary orientation ->)
+  ///       |
+  ///       v
+  /// ------x------ (primary orientation <-)
+  ///    C     D
+  ///
+  /// The entries in the map should be:
+  /// (Elem A, Node 1) -> (Elem C, xi^(2)=-1)
+  /// (Elem B, Node 0) -> (Elem D, xi^(2)=+1)
   std::unordered_map<std::pair<const Node *, const Elem *>, std::pair<Real, const Elem *>>
       _secondary_node_and_elem_to_xi2_primary_elem;
 
-  // Same type of container, but for mapping (Primary Node ID, Primary Node,
-  // Primary Elem) -> (xi^(1), Secondary Elem) where they are inverse-projected along
-  // the nodal normal direction. Note that the first item of the key, the primary
-  // node ID, is important for storing the key-value pairs in a consistent order
-  // across processes, e.g. this container has to be ordered!
+  /// Same type of container, but for mapping (Primary Node ID, Primary Node,
+  /// Primary Elem) -> (xi^(1), Secondary Elem) where they are inverse-projected along
+  /// the nodal normal direction. Note that the first item of the key, the primary
+  /// node ID, is important for storing the key-value pairs in a consistent order
+  /// across processes, e.g. this container has to be ordered!
   std::map<std::tuple<dof_id_type, const Node *, const Elem *>, std::pair<Real, const Elem *>>
       _primary_node_and_elem_to_xi1_secondary_elem;
 
-  // 1D Mesh of mortar segment elements which gets built by the call
-  // to build_mortar_segment_mesh().
+  /// 1D Mesh of mortar segment elements which gets built by the call
+  /// to build_mortar_segment_mesh().
   std::unique_ptr<MeshBase> _mortar_segment_mesh;
 
-  // Map between Elems in the mortar segment mesh and their info
-  // structs. This gets filled in by the call to
-  // build_mortar_segment_mesh().
+  /// Map between Elems in the mortar segment mesh and their info
+  /// structs. This gets filled in by the call to
+  /// build_mortar_segment_mesh().
   std::unordered_map<const Elem *, MortarSegmentInfo> _msm_elem_to_info;
 
-  // Keeps track of the mapping between lower-dimensional elements and
-  // the side_id of the interior_parent which they are.
+  /// Keeps track of the mapping between lower-dimensional elements and
+  /// the side_id of the interior_parent which they are.
   std::unordered_map<const Elem *, unsigned int> _lower_elem_to_side_id;
 
-  // A list of primary/secondary subdomain id pairs corresponding to each
-  // side of the mortar interface.
+  /// A list of primary/secondary subdomain id pairs corresponding to each
+  /// side of the mortar interface.
   std::vector<std::pair<subdomain_id_type, subdomain_id_type>>
       _primary_secondary_subdomain_id_pairs;
 
-  // The secondary/primary lower-dimensional boundary subdomain ids are the
-  // secondary/primary *boundary* ids offset by the value above.
+  /// The secondary/primary lower-dimensional boundary subdomain ids are the
+  /// secondary/primary *boundary* ids
   std::set<subdomain_id_type> _secondary_boundary_subdomain_ids;
   std::set<subdomain_id_type> _primary_boundary_subdomain_ids;
 
-  // Used by the AugmentSparsityOnInterface functor to determine
-  // whether a given Elem is coupled to any others across the gap, and
-  // to explicitly set up the dependence between interior_parent()
-  // elements on the secondary side and their lower-dimensional sides
-  // which are on the interface. This latter type of coupling must be
-  // explicitly declared when there is no primary_elem for a given
-  // mortar segment and you are using e.g.  a P^1-P^0 discretization
-  // which does not induce the coupling automatically.
+  /// Used by the AugmentSparsityOnInterface functor to determine
+  /// whether a given Elem is coupled to any others across the gap, and
+  /// to explicitly set up the dependence between interior_parent()
+  /// elements on the secondary side and their lower-dimensional sides
+  /// which are on the interface. This latter type of coupling must be
+  /// explicitly declared when there is no primary_elem for a given
+  /// mortar segment and you are using e.g.  a P^1-P^0 discretization
+  /// which does not induce the coupling automatically.
   std::unordered_multimap<dof_id_type, dof_id_type> _mortar_interface_coupling;
 
-  // Container for storing the nodal normal vector associated with each secondary node.
+  /// Container for storing the nodal normal vector associated with each secondary node.
   std::unordered_map<const Node *, Point> _secondary_node_to_nodal_normal;
 
-  // Container for storing the nodal tangent/binormal vectors associated with each secondary node
-  // (Householder approach).
+  /// Container for storing the nodal tangent/binormal vectors associated with each secondary node
+  /// (Householder approach).
   std::unordered_map<const Node *, std::array<Point, 2>> _secondary_node_to_hh_nodal_tangents;
 
-  // Map from full dimensional secondary element id to lower dimensional secondary element
+  /// Map from full dimensional secondary element id to lower dimensional secondary element
   std::unordered_map<dof_id_type, const Elem *> _secondary_element_to_secondary_lowerd_element;
 
-  // List of inactive lagrange multiplier nodes (for nodal variables)
+  /// List of inactive lagrange multiplier nodes (for nodal variables)
   std::unordered_set<const Node *> _inactive_local_lm_nodes;
 
-  // List of inactive lagrange multiplier nodes (for elemental variables)
+  /// List of inactive lagrange multiplier nodes (for elemental variables)
   std::unordered_set<const Elem *> _inactive_local_lm_elems;
+
+  /// We maintain a mapping from lower-dimensional secondary elements in the original mesh to (sets
+  /// of) elements in mortar_segment_mesh.  This allows us to quickly determine which elements need
+  /// to be split.
+  std::unordered_map<const Elem *, std::unordered_set<Elem *>> _secondary_elems_to_mortar_segments;
 
   /**
    * Helper function responsible for projecting secondary nodes

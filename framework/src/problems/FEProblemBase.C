@@ -3283,16 +3283,22 @@ FEProblemBase::reinitMaterials(SubdomainID blk_id, THREAD_ID tid, bool swap_stat
 }
 
 void
-FEProblemBase::reinitMaterialsFace(SubdomainID blk_id,
-                                   THREAD_ID tid,
-                                   bool swap_stateful,
-                                   bool execute_stateful)
+FEProblemBase::reinitMaterialsFace(const SubdomainID blk_id,
+                                   const THREAD_ID tid,
+                                   const bool swap_stateful,
+                                   const bool execute_stateful,
+                                   const bool use_displaced_assembly)
 {
   if (hasActiveMaterialProperties(tid))
   {
-    auto && elem = _assembly[tid]->elem();
-    unsigned int side = _assembly[tid]->side();
-    unsigned int n_points = _assembly[tid]->qRuleFace()->n_points();
+    mooseAssert(use_displaced_assembly ? static_cast<bool>(_displaced_problem) : true,
+                "If we are to use the displaced assembly, then we must have the displaced problem");
+    auto * const assembly =
+        use_displaced_assembly ? &_displaced_problem->assembly(tid) : _assembly[tid].get();
+    auto * const elem =
+        use_displaced_assembly ? _mesh.elemPtr(assembly->elem()->id()) : assembly->elem();
+    const auto side = assembly->side();
+    const auto n_points = assembly->qRuleFace()->n_points();
 
     _bnd_material_data[tid]->resize(n_points);
 
@@ -3311,24 +3317,33 @@ FEProblemBase::reinitMaterialsFace(SubdomainID blk_id,
 }
 
 void
-FEProblemBase::reinitMaterialsNeighbor(SubdomainID blk_id,
-                                       THREAD_ID tid,
-                                       bool swap_stateful,
-                                       bool execute_stateful)
+FEProblemBase::reinitMaterialsNeighbor(const SubdomainID blk_id,
+                                       const THREAD_ID tid,
+                                       const bool swap_stateful,
+                                       const bool execute_stateful,
+                                       const bool use_displaced_assembly)
 {
   if (hasActiveMaterialProperties(tid))
   {
     // NOTE: this will not work with h-adaptivity
     // lindsayad: why not?
-    const Elem * neighbor = _assembly[tid]->neighbor();
-    unsigned int neighbor_side = neighbor->which_neighbor_am_i(_assembly[tid]->elem());
+
+    mooseAssert(use_displaced_assembly ? static_cast<bool>(_displaced_problem) : true,
+                "If we are to use the displaced assembly, then we must have the displaced problem");
+    auto * const assembly =
+        use_displaced_assembly ? &_displaced_problem->assembly(tid) : _assembly[tid].get();
+    auto * const elem =
+        use_displaced_assembly ? _mesh.elemPtr(assembly->elem()->id()) : assembly->elem();
+    auto * const neighbor =
+        use_displaced_assembly ? _mesh.elemPtr(assembly->neighbor()->id()) : assembly->neighbor();
+    const auto neighbor_side = neighbor->which_neighbor_am_i(elem);
 
     mooseAssert(neighbor, "neighbor should be non-null");
     mooseAssert(blk_id == neighbor->subdomain_id(),
                 "The provided blk_id " << blk_id << " and neighbor subdomain ID "
                                        << neighbor->subdomain_id() << " do not match.");
 
-    unsigned int n_points = _assembly[tid]->qRuleFace()->n_points();
+    const auto n_points = assembly->qRuleFace()->n_points();
     _neighbor_material_data[tid]->resize(n_points);
 
     // Only swap if requested
@@ -3347,16 +3362,23 @@ FEProblemBase::reinitMaterialsNeighbor(SubdomainID blk_id,
 }
 
 void
-FEProblemBase::reinitMaterialsBoundary(BoundaryID boundary_id,
-                                       THREAD_ID tid,
-                                       bool swap_stateful,
-                                       bool execute_stateful)
+FEProblemBase::reinitMaterialsBoundary(const BoundaryID boundary_id,
+                                       const THREAD_ID tid,
+                                       const bool swap_stateful,
+                                       const bool execute_stateful,
+                                       const bool use_displaced_assembly)
 {
   if (hasActiveMaterialProperties(tid))
   {
-    auto && elem = _assembly[tid]->elem();
-    unsigned int side = _assembly[tid]->side();
-    unsigned int n_points = _assembly[tid]->qRuleFace()->n_points();
+    mooseAssert(use_displaced_assembly ? static_cast<bool>(_displaced_problem) : true,
+                "If we are to use the displaced assembly, then we must have the displaced problem");
+    auto * const assembly =
+        use_displaced_assembly ? &_displaced_problem->assembly(tid) : _assembly[tid].get();
+    auto * const elem =
+        use_displaced_assembly ? _mesh.elemPtr(assembly->elem()->id()) : assembly->elem();
+
+    const auto side = assembly->side();
+    const auto n_points = assembly->qRuleFace()->n_points();
     _bnd_material_data[tid]->resize(n_points);
 
     if (swap_stateful && !_bnd_material_data[tid]->isSwapped())
@@ -4732,19 +4754,26 @@ void
 FEProblemBase::setActiveMaterialProperties(const std::set<unsigned int> & mat_prop_ids,
                                            THREAD_ID tid)
 {
-  SubProblem::setActiveMaterialProperties(mat_prop_ids, tid);
+  if (!mat_prop_ids.empty())
+    _active_material_property_ids[tid] = mat_prop_ids;
+}
 
-  if (_displaced_problem)
-    _displaced_problem->setActiveMaterialProperties(mat_prop_ids, tid);
+const std::set<unsigned int> &
+FEProblemBase::getActiveMaterialProperties(THREAD_ID tid) const
+{
+  return _active_material_property_ids[tid];
+}
+
+bool
+FEProblemBase::hasActiveMaterialProperties(THREAD_ID tid) const
+{
+  return !_active_material_property_ids[tid].empty();
 }
 
 void
 FEProblemBase::clearActiveMaterialProperties(THREAD_ID tid)
 {
-  SubProblem::clearActiveMaterialProperties(tid);
-
-  if (_displaced_problem)
-    _displaced_problem->clearActiveMaterialProperties(tid);
+  _active_material_property_ids[tid].clear();
 }
 
 void
