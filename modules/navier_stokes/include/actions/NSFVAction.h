@@ -32,11 +32,6 @@ public:
   virtual void act() override;
 
 protected:
-  // Helper function that sets the parameters which are common to all INS Kernels.
-  void setKernelCommonParams(InputParameters & params);
-  void setNoBCCommonParams(InputParameters & params);
-
-  // Helper functions that add various inviscid flux Kernels.
   void addINSTimeKernels();
   void addINSMass();
   void addINSMomentum();
@@ -44,23 +39,21 @@ protected:
   void addINSInletBC();
   void addINSOutletBC();
   void addINSWallBC();
-  void addINSPinnedPressureBC();
 
   void addWCNSTimeKernels();
   void addWCNSEnergy();
   void addWCNSVelocityBC();
-  void addWCNSPinnedPressureBC();
-  void addWCNSPressureBC();
-  void addWCNSTemperatureBC();
+  void addWCNSInletBC();
+  void addWCNSOutletBC();
+  void addWCNSWallBC();
 
   void addCNSTimeKernels();
   void addCNSMass();
   void addCNSMomentum();
   void addCNSEnergy();
-  void addCNSVelocityBC();
-  void addCNSPinnedPressureBC();
-  void addCNSPressureBC();
-  void addCNSTemperatureBC();
+  void addCNSInletBC();
+  void addCNSOutletBC();
+  void addCNSWallBC();
 
   /// Equation type, transient or steady-state
   MooseEnum _type;

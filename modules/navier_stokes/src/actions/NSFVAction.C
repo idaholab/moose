@@ -23,7 +23,7 @@
 #include "libmesh/vector_value.h"
 #include "libmesh/string_to_enum.h"
 
-registerMooseAction("NavierStokesApp", NSFVAction, "append_mesh_generator");
+registerMooseAction("NavierStokesApp", NSFVAction, "add_navier_stokes_user_objects");
 registerMooseAction("NavierStokesApp", NSFVAction, "add_navier_stokes_variables");
 registerMooseAction("NavierStokesApp", NSFVAction, "add_navier_stokes_ics");
 registerMooseAction("NavierStokesApp", NSFVAction, "add_navier_stokes_kernels");
@@ -292,21 +292,10 @@ NSFVAction::NSFVAction(InputParameters parameters)
 void
 NSFVAction::act()
 {
-  if (_current_task == "append_mesh_generator")
+  if (_current_task == "add_navier_stokes_user_objects")
   {
-    // if (_has_pinned_node)
-    // {
-    //   if (_app.getMeshGeneratorNames().size() == 0)
-    //     mooseError("The new mesh generator system is required to pin pressure");
     //
-    //   InputParameters params = _factory.getValidParams("ExtraNodesetGenerator");
-    //   params.set<std::vector<BoundaryName>>("new_boundary") = {_pinned_node};
-    //   params.set<std::vector<unsigned int>>("nodes") = {
-    //       getParam<unsigned int>("pressure_pinned_node")};
-    //   _app.appendMeshGenerator("ExtraNodesetGenerator", _pinned_node, params);
-    // }
   }
-
   if (_current_task == "add_navier_stokes_variables")
   {
     _dim = _mesh->dimension();
@@ -454,6 +443,8 @@ NSFVAction::act()
   {
     if (_compressibility == "compressible")
     {
+      mooseError("compressible flows are not supported yet.");
+
       if (_type == "transient")
         addCNSTimeKernels();
 
@@ -463,6 +454,8 @@ NSFVAction::act()
     }
     else if (_compressibility == "weakly-compressible")
     {
+      mooseError("weakly-compressible flows are not supported yet.");
+
       if (_type == "transient")
         addWCNSTimeKernels();
 
@@ -487,27 +480,33 @@ NSFVAction::act()
 
   if (_current_task == "add_navier_stokes_bcs")
   {
-    // if (_velocity_boundary.size() > 0)
-    //   addINSVelocityBC();
-    //
-    // if (_has_pinned_node)
-    //   addINSPinnedPressureBC();
-    //
-    // if (_no_bc_boundary.size() > 0)
-    //   addINSNoBCBC();
-    //
-    // if (_pressure_boundary.size() > 0)
-    //   addINSPressureBC();
-    //
-    // if (getParam<bool>("add_temperature_equation"))
-    // {
-    //   if (_fixed_temperature_boundary.size() > 0)
-    //     addINSTemperatureBC();
-    // }
+    if (_compressibility == "incompressible")
+    {
+      addINSInletBC();
+      addINSOutletBC();
+      addINSWallBC();
+    }
+    else
+    {
+      mooseError("Weakly-compressible and compressible simulations are not supported yet.");
+    }
   }
 
   if (_current_task == "add_material")
   {
+    if (_compressibility == "incompressible")
+    {
+      InputParameters params = _factory.getValidParams("INSFVMaterial");
+      if (_blocks.size() > 0)
+        params.set<std::vector<SubdomainName>>("block") = _blocks;
+
+      _problem->addMaterial("INSFVMaterial", "ins_material", params);
+    }
+    else
+    {
+      mooseError("Weakly-compressible and compressible simulations are not supported yet.");
+    }
+
     //   auto set_common_parameters = [&](InputParameters & params)
     //   {
     //     if (_blocks.size() > 0)
@@ -1358,166 +1357,4 @@ NSFVAction::addINSWallBC()
                    " wall BC is not supported for INS simulations at the moment!");
     }
   }
-  // const static std::string momentums[3] = {NS::velocity_x, NS::velocity_y, NS::velocity_z};
-  // for (unsigned int i = 0; i < _velocity_boundary.size(); ++i)
-  // {
-  //   if (_use_ad)
-  //   {
-  //     InputParameters params = _factory.getValidParams("ADVectorFunctionDirichletBC");
-  //
-  //     {
-  //       const FunctionName funcx = _velocity_function[i * _dim];
-  //       if (funcx == "NA")
-  //         params.set<bool>("set_x_comp") = false;
-  //       else
-  //       {
-  //         std::stringstream ss(funcx);
-  //         Real val;
-  //         if ((ss >> val).fail() || !ss.eof())
-  //         {
-  //           if (!_problem->hasFunction(funcx))
-  //           {
-  //             InputParameters func_params = _factory.getValidParams("ConstantFunction");
-  //             func_params.set<Real>("value") = val;
-  //             _problem->addFunction("ConstantFunction", funcx, func_params);
-  //           }
-  //         }
-  //         params.set<FunctionName>("function_x") = funcx;
-  //       }
-  //     }
-  //
-  //     if (_dim >= 2)
-  //     {
-  //       const FunctionName funcy = _velocity_function[i * _dim + 1];
-  //       if (funcy == "NA")
-  //         params.set<bool>("set_y_comp") = false;
-  //       else
-  //       {
-  //         std::stringstream ss(funcy);
-  //         Real val;
-  //         if ((ss >> val).fail() || !ss.eof())
-  //         {
-  //           if (!_problem->hasFunction(funcy))
-  //           {
-  //             InputParameters func_params = _factory.getValidParams("ConstantFunction");
-  //             func_params.set<Real>("value") = val;
-  //             _problem->addFunction("ConstantFunction", funcy, func_params);
-  //           }
-  //         }
-  //         params.set<FunctionName>("function_y") = funcy;
-  //       }
-  //     }
-  //
-  //     if (_dim >= 3)
-  //     {
-  //       const FunctionName funcz = _velocity_function[i * _dim + 1];
-  //       if (funcz == "NA")
-  //         params.set<bool>("set_z_comp") = false;
-  //       else
-  //       {
-  //         std::stringstream ss(funcz);
-  //         Real val;
-  //         if ((ss >> val).fail() || !ss.eof())
-  //         {
-  //           if (!_problem->hasFunction(funcz))
-  //           {
-  //             InputParameters func_params = _factory.getValidParams("ConstantFunction");
-  //             func_params.set<Real>("value") = val;
-  //             _problem->addFunction("ConstantFunction", funcz, func_params);
-  //           }
-  //         }
-  //         params.set<FunctionName>("function_z") = funcz;
-  //       }
-  //     }
-  //
-  //     params.set<NonlinearVariableName>("variable") = NS::velocity;
-  //     params.set<std::vector<BoundaryName>>("boundary") = {_velocity_boundary[i]};
-  //     _problem->addBoundaryCondition(
-  //         "ADVectorFunctionDirichletBC", "ins_velocity_bc_" + _velocity_boundary[i], params);
-  //   }
-  //   else
-  //   {
-  //     for (unsigned int component = 0; component < _dim; ++component)
-  //     {
-  //       const FunctionName func = _velocity_function[i * _dim + component];
-  //       if (func == "NA")
-  //         continue;
-  //
-  //       std::stringstream ss(func);
-  //       Real val;
-  //       if ((ss >> val).fail() || !ss.eof())
-  //       {
-  //         InputParameters params = _factory.getValidParams("FunctionDirichletBC");
-  //         params.set<FunctionName>("function") = func;
-  //         params.set<NonlinearVariableName>("variable") = momentums[component];
-  //         params.set<std::vector<BoundaryName>>("boundary") = {_velocity_boundary[i]};
-  //         _problem->addBoundaryCondition(
-  //             "FunctionDirichletBC", momentums[component] + "_" + _velocity_boundary[i],
-  //             params);
-  //       }
-  //       else
-  //       {
-  //         InputParameters params = _factory.getValidParams("DirichletBC");
-  //         params.set<Real>("value") = val;
-  //         params.set<NonlinearVariableName>("variable") = momentums[component];
-  //         params.set<std::vector<BoundaryName>>("boundary") = {_velocity_boundary[i]};
-  //         _problem->addBoundaryCondition(
-  //             "DirichletBC", momentums[component] + "_" + _velocity_boundary[i], params);
-  //       }
-  //     }
-  //   }
-  // }
-}
-
-void
-NSFVAction::addINSPinnedPressureBC()
-{
-  _console << "something here" << std::endl;
-  // InputParameters params = _factory.getValidParams("DirichletBC");
-  // params.set<Real>("value") = 0;
-  // params.set<NonlinearVariableName>("variable") = _pressure_variable_name;
-  // params.set<std::vector<BoundaryName>>("boundary") = {_pinned_node};
-  // _problem->addBoundaryCondition("DirichletBC", "pressure_pin", params);
-}
-
-void
-NSFVAction::setKernelCommonParams(InputParameters & params)
-{
-  if (_blocks.size() > 0)
-    params.set<std::vector<SubdomainName>>("block") = _blocks;
-
-  // coupled variables
-  params.set<CoupledName>("u") = {NS::velocity_x};
-  if (_dim >= 2)
-    params.set<CoupledName>("v") = {NS::velocity_y};
-  if (_dim >= 3)
-    params.set<CoupledName>("w") = {NS::velocity_z};
-  params.set<CoupledName>(NS::pressure) = {_pressure_variable_name};
-  params.set<RealVectorValue>("gravity") = getParam<RealVectorValue>("gravity");
-  params.set<MaterialPropertyName>("mu_name") =
-      getParam<MaterialPropertyName>("dynamic_viscosity_name");
-  params.set<MaterialPropertyName>("rho_name") = getParam<MaterialPropertyName>("density_name");
-  params.set<Real>("alpha") = getParam<Real>("alpha");
-  params.set<bool>("laplace") = getParam<bool>("laplace");
-  // this parameter only affecting Jacobian evaluation in non-AD
-  params.set<bool>("convective_term") = getParam<bool>("convective_term");
-  // FIXME: this parameter seems not changing solution much?
-  params.set<bool>("transient_term") = (_type == "transient");
-}
-
-void
-NSFVAction::setNoBCCommonParams(InputParameters & params)
-{
-  // coupled variables
-  params.set<CoupledName>("u") = {NS::velocity_x};
-  if (_dim >= 2)
-    params.set<CoupledName>("v") = {NS::velocity_y};
-  if (_dim >= 3)
-    params.set<CoupledName>("w") = {NS::velocity_z};
-  params.set<CoupledName>(NS::pressure) = {_pressure_variable_name};
-  params.set<RealVectorValue>("gravity") = getParam<RealVectorValue>("gravity");
-  params.set<MaterialPropertyName>("mu_name") =
-      getParam<MaterialPropertyName>("dynamic_viscosity_name");
-  params.set<MaterialPropertyName>("rho_name") = getParam<MaterialPropertyName>("density_name");
-  params.set<bool>("integrate_p_by_parts") = getParam<bool>("integrate_p_by_parts");
 }
