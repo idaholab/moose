@@ -778,25 +778,40 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
 
     // Define expression for getting sub-elements nodes (for sub-dividing secondary elements)
     auto get_sub_elem_nodes = [](const ElemType type,
-                                 const unsigned int sub_elem) -> std::array<unsigned int, 4>
-    {
+                                 const unsigned int sub_elem) -> std::vector<unsigned int> {
       switch (type)
       {
         case TRI3:
-          return {{0, 1, 2, /*dummy, out of range*/ 10}};
+          return {{0, 1, 2}};
         case QUAD4:
           return {{0, 1, 2, 3}};
         case TRI6:
           switch (sub_elem)
           {
             case 0:
-              return {{0, 3, 5, /*dummy, out of range*/ 10}};
+              return {{0, 3, 5}};
             case 1:
-              return {{3, 4, 5, /*dummy, out of range*/ 10}};
+              return {{3, 4, 5}};
             case 2:
-              return {{3, 1, 4, /*dummy, out of range*/ 10}};
+              return {{3, 1, 4}};
             case 3:
-              return {{5, 4, 2, /*dummy, out of range*/ 10}};
+              return {{5, 4, 2}};
+            default:
+              mooseError("get_sub_elem_nodes: Invalid sub_elem: ", sub_elem);
+          }
+        case QUAD8:
+          switch (sub_elem)
+          {
+            case 0:
+              return {{0, 4, 7}};
+            case 1:
+              return {{4, 1, 5}};
+            case 2:
+              return {{5, 2, 6}};
+            case 3:
+              return {{7, 6, 3}};
+            case 4:
+              return {{4, 5, 6, 7}};
             default:
               mooseError("get_sub_elem_nodes: Invalid sub_elem: ", sub_elem);
           }
@@ -849,6 +864,8 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
        * For first order face elements (Tri3 and Quad4) elements are simply linearized around center
        * For second order face elements (Tri6 and Quad9), elements are sub-divided into four first
        * order elements then each of the sub-elements is linearized around their respective centers
+       * For Quad8 elements, they are sub-divided into 5 first order elements and each sub-element
+       * is linearized around their respective centers
        */
       for (auto sel : make_range(secondary_side_elem->n_sub_elem()))
       {
@@ -860,7 +877,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
         auto sub_elem_nodes = get_sub_elem_nodes(secondary_side_elem->type(), sel);
 
         // Loop through sub_element nodes, collect points and compute center and normal
-        for (auto iv : make_range(secondary_side_elem->n_vertices()))
+        for (auto iv : make_range(sub_elem_nodes.size()))
         {
           const auto n = sub_elem_nodes[iv];
           nodes[iv] = secondary_side_elem->point(n);
@@ -893,6 +910,10 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
           break;
         case TRI6:
           center_point = mortar_segment_helper[1]->center();
+          query_pt = {{center_point(0), center_point(1), center_point(2)}};
+          break;
+        case QUAD8:
+          center_point = mortar_segment_helper[4]->center();
           query_pt = {{center_point(0), center_point(1), center_point(2)}};
           break;
         case QUAD9:

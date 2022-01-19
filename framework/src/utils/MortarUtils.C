@@ -39,27 +39,42 @@ projectQPoints3d(const Elem * const msm_elem,
   const auto sub_elem = msm_elem->get_extra_integer(sub_elem_index);
   const ElemType primal_type = primal_elem->type();
 
-  auto get_sub_elem_node_indices = [primal_type, sub_elem]() -> std::array<unsigned int, 4>
-  {
+  auto get_sub_elem_node_indices = [primal_type, sub_elem]() -> std::vector<unsigned int> {
     switch (primal_type)
     {
       case TRI3:
-        return {{0, 1, 2, /*dummy, out of range*/ 10}};
+        return {{0, 1, 2}};
       case QUAD4:
         return {{0, 1, 2, 3}};
       case TRI6:
         switch (sub_elem)
         {
           case 0:
-            return {{0, 3, 5, /*dummy, out of range*/ 10}};
+            return {{0, 3, 5}};
           case 1:
-            return {{3, 4, 5, /*dummy, out of range*/ 10}};
+            return {{3, 4, 5}};
           case 2:
-            return {{3, 1, 4, /*dummy, out of range*/ 10}};
+            return {{3, 1, 4}};
           case 3:
-            return {{5, 4, 2, /*dummy, out of range*/ 10}};
+            return {{5, 4, 2}};
           default:
             mooseError("get_sub_elem_indices: Invalid sub_elem: ", sub_elem);
+        }
+      case QUAD8:
+        switch (sub_elem)
+        {
+          case 0:
+            return {{0, 4, 7}};
+          case 1:
+            return {{4, 1, 5}};
+          case 2:
+            return {{5, 2, 6}};
+          case 3:
+            return {{7, 6, 3}};
+          case 4:
+            return {{4, 5, 6, 7}};
+          default:
+            mooseError("get_sub_elem_nodes: Invalid sub_elem: ", sub_elem);
         }
       case QUAD9:
         switch (sub_elem)
@@ -106,17 +121,33 @@ projectQPoints3d(const Elem * const msm_elem,
           default:
             mooseError("get_sub_elem_indices: Invalid sub_elem: ", sub_elem);
         }
+      case QUAD8:
+        switch (sub_elem)
+        {
+          case 0:
+            return Point(nu - 1, xi - 1, 0);
+          case 1:
+            return Point(nu + xi, xi - 1, 0);
+          case 2:
+            return Point(1 - xi, nu + xi, 0);
+          case 3:
+            return Point(nu - 1, nu + xi, 0);
+          case 4:
+            return Point(0.5 * (xi - nu), 0.5 * (nu + xi), 0);
+          default:
+            mooseError("get_sub_elem_indices: Invalid sub_elem: ", sub_elem);
+        }
       case QUAD9:
         switch (sub_elem)
         {
           case 0:
-            return Point(0.5 * (nu - 1), 0.5 * (xi - 1), 0);
+            return Point(0.5 * (xi - 1), 0.5 * (nu - 1), 0);
           case 1:
-            return Point(0.5 * (nu + 1), 0.5 * (xi - 1), 0);
+            return Point(0.5 * (xi + 1), 0.5 * (nu - 1), 0);
           case 2:
-            return Point(0.5 * (nu + 1), 0.5 * (xi + 1), 0);
+            return Point(0.5 * (xi + 1), 0.5 * (nu + 1), 0);
           case 3:
-            return Point(0.5 * (nu - 1), 0.5 * (xi + 1), 0);
+            return Point(0.5 * (xi - 1), 0.5 * (nu + 1), 0);
           default:
             mooseError("get_sub_elem_indices: Invalid sub_elem: ", sub_elem);
         }
@@ -195,7 +226,8 @@ projectQPoints3d(const Elem * const msm_elem,
           mooseException("Quadrature point: ", qp_back, " out of bounds, truncating.");
         }
       }
-      else if (primal_elem->type() == QUAD4 || primal_elem->type() == QUAD9)
+      else if (primal_elem->type() == QUAD4 || primal_elem->type() == QUAD8 ||
+               primal_elem->type() == QUAD9)
       {
         if (qp_back(0) < -1 || qp_back(0) > 1 || qp_back(1) < -1 || qp_back(1) > 1)
         {
