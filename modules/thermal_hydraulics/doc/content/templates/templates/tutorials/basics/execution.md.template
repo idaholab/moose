@@ -14,7 +14,7 @@ This is done by doing:
 Based on your {{project-name-abbrev}} installation, the exact command how to run the code can differ,
 see the follwing subsections below.
 
-!alert2 note
+!alert note
 +Note:+ Further details on [command line switches](user/command_line_args.md) are in the user manual.
 
 ### Pre-installed Version

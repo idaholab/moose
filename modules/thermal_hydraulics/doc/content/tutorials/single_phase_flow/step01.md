@@ -29,7 +29,7 @@ press = 1e5         # Pa
 It is a good habit to include the units we are assuming in case our input file will be used by
 other people.
 
-!alert2 note
+!alert note
 +Note:+ THM is using SI units: `kg`, `m`, `s`, `K`.
 
 
@@ -83,7 +83,7 @@ They are named `flow_channel_name:in` and `flow_channel_name:out` and refer to t
 of the flow channel, respectively. This will be useful later for connecting components together and
 setting up other objects like postprocessors.
 
-!alert2 note
+!alert note
 +Note:+ The `flow_channel_name:in` and `flow_channel_name:out` are only refering to the geometry of the channel.
 The actual flow direction will be determined by the physics and the boundary conditions connected to each end,
 i.e. `flow_channel_name:in` can be a flow outlet.
@@ -161,7 +161,7 @@ fp = he
 This will make sure that all flow components will pick the helium gas, unless they will be directed
 otherwise.
 
-!alert2 note
+!alert note
 +Tip:+ Place the `[GlobalParams]` at the top of the input file for visibility.
 
 ## Executioner

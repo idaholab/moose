@@ -51,7 +51,7 @@ The general syntax is:
 
 Then, individual components can be referred to as `group/component1` and `group/component2`.
 
-!alert2 note
+!alert note
 +Note:+ It is possible to define parameters within the group.
 Good candidates would be `hx_length` and `hx_n_elems`.
 
@@ -117,7 +117,7 @@ The equivalent syntax would look like this:
 []
 ```
 
-!alert2 note
+!alert note
 +Note:+ This should be your preferred setup when you want to use time-dependent component parameters.
 
 

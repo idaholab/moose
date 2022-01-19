@@ -50,7 +50,7 @@ The component takes the `position` parameter, which is the location in 3D space.
 The `orientation` parameter is the axial directional vector, `length` is the axial length, and
 `n_elems` is the number of elements in the axial direction.
 
-!alert2 note
+!alert note
 The number of axial elements must match the number of elements in the flow channel.
 
 In radial direction we define one block called `block` and assign our previously defined `steel`

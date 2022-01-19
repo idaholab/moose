@@ -78,7 +78,7 @@ It is possible to create named values that can be used thoughout the input file.
 radius = 2
 ```
 
-!alert2 note
+!alert note
 +Note:+ These values cannot be specified inside blocks that have the `type` parameter.
 Usually, these values are specified at the top level of the input file outside of any block.
 When specified inside a block, they are local to the block.

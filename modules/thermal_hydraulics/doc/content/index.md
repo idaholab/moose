@@ -71,7 +71,7 @@ of this class in the input file:
 Then the user-given name (in this case, `simple_closures`) is provided to the
 `closures` parameter instead of `simple`.
 
-!alert2 warning
+!alert warning
 +Warning:+ The old setup is now deprecated and will be removed March 31, 2022.
 
 ####  September 1, 2021

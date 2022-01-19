@@ -65,7 +65,7 @@ To run the above input file such that the `param` would have value of `0.1`, we 
 
 Using this functionality, we can also supply new parameters that are not included in the input file.
 
-!alert2 note
+!alert note
 +Note:+ Command line shell usually splits parameters based on spaces, so make sure you +don't+ have
 spaces around `=` or anywhere else which could confuse the shell and produce an unexpected result.
 

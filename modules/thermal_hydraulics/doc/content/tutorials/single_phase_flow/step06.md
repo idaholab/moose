@@ -18,7 +18,7 @@ Users can use any pre-built material objects that come with MOOSE and provide th
 The most notable and useful material is [ADParsedMaterial](ParsedMaterial.md) which allows users to
 provide the closure formula on the input file level.
 
-!alert2 note
+!alert note
 +Tip:+ THM provides convenient materials for computing Reynolds and Prandtl number, named
 [ADReynoldsNumberMaterial](ADReynoldsNumberMaterial.md) and
 [ADPrandtlNumberMaterial](ADPrandtlNumberMaterial.md), respectively.
@@ -34,7 +34,7 @@ Before we add our custom materials it is advisable to define two named parameter
 One parameter will be for the wall friction and the other for the wall heat transfer correlation.
 They will hold the names of components where we will be applying each closure.
 
-!alert2 note
+!alert note
 +Note:+ Heat transfer is optional, so defining a wall heat transfer coefficient on blocks that
 do not have wall heat transfer linked to them makes no sense.
 
