@@ -42,8 +42,10 @@ protected:
   void addINSMomentum();
   void addINSEnergy();
   void addINSVelocityBC();
+  void addINSInletVelocityBC(unsigned int bc_index);
+  void addINSOutletVelocityBC(unsigned int bc_index);
+  void addINSWallVelocityBC(unsigned int bc_index);
   void addINSPinnedPressureBC();
-  void addINSNoBCBC();
   void addINSPressureBC();
   void addINSTemperatureBC();
 
@@ -51,7 +53,6 @@ protected:
   void addWCNSEnergy();
   void addWCNSVelocityBC();
   void addWCNSPinnedPressureBC();
-  void addWCNSNoBCBC();
   void addWCNSPressureBC();
   void addWCNSTemperatureBC();
 
@@ -61,7 +62,6 @@ protected:
   void addCNSEnergy();
   void addCNSVelocityBC();
   void addCNSPinnedPressureBC();
-  void addCNSNoBCBC();
   void addCNSPressureBC();
   void addCNSTemperatureBC();
 
