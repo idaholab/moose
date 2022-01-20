@@ -63,6 +63,8 @@ protected:
   MooseEnum _compressibility;
   /// Swich dedicated to show if porous medium treatment is requested or not
   bool _porous_medium_treatment;
+  /// The name of the auxiliary variable for the porosity field
+  AuxVariableName _porosity_name;
   /// Turbulent diffusivity handling type (mixing-length, etc.)
   MooseEnum _turbulence_handling;
 
@@ -109,16 +111,23 @@ protected:
   std::vector<BoundaryName> _fixed_temperature_boundary;
   /// Temperature function names at fixed temperature boundaries
   std::vector<FunctionName> _temperature_function;
-  /// Temperature variable name to facilitate temperature variable added outside
-  VariableName _fluid_temperature_variable_name;
+
   /// Temperature variable name in the solid subscale structure (in porous medium treatment)
   /// to facilitate temperature variable added outside
   VariableName _solid_temperature_variable_name;
   /// Mesh dimension
   unsigned int _dim;
 
-  /// pressure variable name
-  const std::string _pressure_variable_name;
+  /// Name of the density material property
+  MaterialPropertyName _density_name;
+  /// Name of the dynamic viscosity material property
+  MaterialPropertyName _dynamic_viscosity_name;
+  /// Name of the specific heat material property
+  MaterialPropertyName _specific_heat_name;
+  /// Name of the thermal conductivity material property
+  MaterialPropertyName _thermal_conductivity_name;
+  /// NAme of the thermal expansion material property
+  MaterialPropertyName _thermal_expansion_name;
 
   /// Type that we use in Actions for declaring coupling
   typedef std::vector<VariableName> CoupledName;
