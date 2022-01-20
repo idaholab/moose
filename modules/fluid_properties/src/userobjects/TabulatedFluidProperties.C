@@ -11,6 +11,7 @@
 #include "BicubicInterpolation.h"
 #include "MooseUtils.h"
 #include "Conversion.h"
+#include "KDTree.h"
 
 // C++ includes
 #include <fstream>
@@ -51,6 +52,29 @@ TabulatedFluidProperties::validParams()
                                   properties,
                                   "Properties to interpolate if no data file is provided");
   params.addParam<bool>("save_file", true, "Whether to save the csv fluid properties file");
+  params.addParam<bool>("construct_pT_from_ve",
+                        false,
+                        "If the loopup table (p, T) as functions of (v, e) should be constructed.");
+  params.addRangeCheckedParam<unsigned int>(
+      "num_v",
+      100,
+      "num_v > 0",
+      "Number of points to divide specific volume range for (v,e) lookups. Default is 100");
+  params.addRangeCheckedParam<unsigned int>("num_e",
+                                            100,
+                                            "num_e > 0",
+                                            "Number of points to divide specific internal energy "
+                                            "range for (v,e) lookups. Default is 100");
+  params.addRangeCheckedParam<unsigned int>(
+      "pt_ve_inversion_interpolation_order",
+      3,
+      "pt_ve_inversion_interpolation_order > 0",
+      "Number of points used for interpolating (p, T) points during (p,T)->(v,e) inversion");
+
+  params.addParam<bool>(
+      "error_on_out_of_bounds",
+      true,
+      "If true exceeding pressure or temperature tabulation values leads to an error.");
   params.addClassDescription(
       "Fluid properties using bicubic interpolation on tabulated values provided");
   return params;
@@ -85,7 +109,12 @@ TabulatedFluidProperties::TabulatedFluidProperties(const InputParameters & param
     _cp_idx(0),
     _cv_idx(0),
     _entropy_idx(0),
-    _csv_reader(_file_name, &_communicator)
+    _csv_reader(_file_name, &_communicator),
+    _construct_pT_from_ve(getParam<bool>("construct_pT_from_ve")),
+    _num_v(getParam<unsigned int>("num_v")),
+    _num_e(getParam<unsigned int>("num_e")),
+    _inversion_interpolation_order(getParam<unsigned int>("pt_ve_inversion_interpolation_order")),
+    _error_on_out_of_bounds(getParam<bool>("error_on_out_of_bounds"))
 {
   // Sanity check on minimum and maximum temperatures and pressures
   if (_temperature_max <= _temperature_min)
@@ -299,6 +328,125 @@ TabulatedFluidProperties::initialSetup()
     _property_ipol[i] =
         std::make_unique<BicubicInterpolation>(_pressure, _temperature, data_matrix);
   }
+
+  // do we need to construct the reverse lookup p(v,e), T(v,e)?
+  if (_construct_pT_from_ve)
+  {
+    // extreme values to set limits
+    Real e1 = e_from_p_T(_pressure_min, _temperature_min);
+    Real e2 = e_from_p_T(_pressure_max, _temperature_min);
+    Real e3 = e_from_p_T(_pressure_min, _temperature_max);
+    Real e4 = e_from_p_T(_pressure_max, _temperature_max);
+    _e_min = std::min({e1, e2, e3, e4});
+    _e_max = std::max({e1, e2, e3, e4});
+
+    Real v1 = v_from_p_T(_pressure_min, _temperature_min);
+    Real v2 = v_from_p_T(_pressure_max, _temperature_min);
+    Real v3 = v_from_p_T(_pressure_min, _temperature_max);
+    Real v4 = v_from_p_T(_pressure_max, _temperature_max);
+    _v_min = std::min({v1, v2, v3, v4});
+    _v_max = std::max({v1, v2, v3, v4});
+
+    Real dv = (_v_max - _v_min) / ((Real)_num_v - 1);
+    Real de = (_e_max - _e_min) / ((Real)_num_e - 1);
+
+    // the number of points to have 1 point every kPa and Kelvin
+    Real np = std::ceil((_pressure_max - _pressure_min) / 1e3) + 1;
+    Real nT = std::ceil((_temperature_max - _temperature_min) / 1.0) + 1;
+
+    Real dp = (_pressure_max - _pressure_min) / ((Real)np - 1.0);
+    Real dT = (_temperature_max - _temperature_min) / ((Real)nT - 1.0);
+
+    // create a very fine p T grid to sample against
+    std::vector<Point> pT_points(np * nT);
+    std::vector<Point> ve_points(np * nT);
+    for (unsigned int ip = 0; ip < np; ++ip)
+      for (unsigned int iT = 0; iT < nT; ++iT)
+      {
+        unsigned int index = iT + ip * nT;
+        Real p = (_pressure_min + dp * ip);
+        Real T = (_temperature_min + dT * iT);
+        Real v = v_from_p_T(p, T) / (_v_max - _v_min);
+        Real e = e_from_p_T(p, T) / (_e_max - _e_min);
+        pT_points[index] = Point(p, T, 0.0);
+        ve_points[index] = Point(v, e, 0.0);
+      }
+
+    // create the KDTree for ve_points
+    KDTree kd_tree_ve(ve_points, 5);
+
+    // Create v, e grid for interpolation
+    _specific_volume.resize(_num_v);
+    for (unsigned int j = 0; j < _num_v; ++j)
+      _specific_volume[j] = _v_min + j * dv;
+    _internal_energy.resize(_num_e);
+    for (unsigned int j = 0; j < _num_e; ++j)
+      _internal_energy[j] = _e_min + j * de;
+
+    // match p, T data to these grid points
+    std::vector<std::vector<Real>> p_from_v_e(_num_v);
+    std::vector<std::vector<Real>> T_from_v_e(_num_v);
+    for (unsigned int iv = 0; iv < _num_v; ++iv)
+    {
+      p_from_v_e[iv].resize(_num_e);
+      T_from_v_e[iv].resize(_num_e);
+      for (unsigned int ie = 0; ie < _num_e; ++ie)
+      {
+        Point ve = Point(_specific_volume[iv] / (_v_max - _v_min),
+                         _internal_energy[ie] / (_e_max - _e_min),
+                         0.0);
+        std::vector<std::size_t> return_index(_inversion_interpolation_order);
+        std::vector<Real> return_dist_sqr(_inversion_interpolation_order);
+        kd_tree_ve.neighborSearch(
+            ve, _inversion_interpolation_order, return_index, return_dist_sqr);
+
+        std::vector<Real> nearest_pressures(_inversion_interpolation_order);
+        std::vector<Real> nearest_temperatures(_inversion_interpolation_order);
+        for (unsigned int j = 0; j < _inversion_interpolation_order; ++j)
+        {
+          nearest_pressures[j] = pT_points[return_index[j]](0);
+          nearest_temperatures[j] = pT_points[return_index[j]](1);
+        }
+
+        p_from_v_e[iv][ie] = inverseDistance(nearest_pressures, return_dist_sqr);
+        T_from_v_e[iv][ie] = inverseDistance(nearest_temperatures, return_dist_sqr);
+      }
+    }
+
+    // the bicubic interpolation object are init'ed now
+    _p_from_v_e_ipol =
+        libmesh_make_unique<BicubicInterpolation>(_specific_volume, _internal_energy, p_from_v_e);
+    _T_from_v_e_ipol =
+        libmesh_make_unique<BicubicInterpolation>(_specific_volume, _internal_energy, T_from_v_e);
+
+    // it works!!
+    /*
+    for (unsigned int iv = 0; iv < _num_v; ++iv)
+      for (unsigned int ie = 0; ie < _num_e; ++ie)
+      {
+        Real p = _p_from_v_e_ipol->sample(_specific_volume[iv], _internal_energy[ie]);
+        Real T = _T_from_v_e_ipol->sample(_specific_volume[iv], _internal_energy[ie]);
+        std::cout << p << " " << T << " " << _specific_volume[iv] << " " << v_from_p_T(p, T) << " "
+                  << _internal_energy[ie] << " " << e_from_p_T(p, T) << " " << std::endl;
+      }
+    */
+  }
+}
+
+Real
+TabulatedFluidProperties::inverseDistance(const std::vector<Real> & value,
+                                          const std::vector<Real> & distance) const
+{
+  Real ret = 0.0;
+  Real denom = 0.0;
+  for (unsigned int j = 0; j < value.size(); ++j)
+  {
+    if (distance[j] == 0)
+      return value[j];
+    ret += value[j] / distance[j];
+    denom += 1.0 / distance[j];
+  }
+  return ret / denom;
 }
 
 std::string
@@ -311,6 +459,38 @@ Real
 TabulatedFluidProperties::molarMass() const
 {
   return _fp.molarMass();
+}
+
+Real
+TabulatedFluidProperties::v_from_p_T(Real pressure, Real temperature) const
+{
+  if (_interpolate_density)
+  {
+    checkInputVariables(pressure, temperature);
+    return 1.0 / _property_ipol[_density_idx]->sample(pressure, temperature);
+  }
+  else
+    return 1.0 / _fp.rho_from_p_T(pressure, temperature);
+}
+
+void
+TabulatedFluidProperties::v_from_p_T(
+    Real pressure, Real temperature, Real & v, Real & dv_dp, Real & dv_dT) const
+{
+  Real rho, drho_dp, drho_dT;
+  if (_interpolate_density)
+  {
+    checkInputVariables(pressure, temperature);
+    _property_ipol[_density_idx]->sampleValueAndDerivatives(
+        pressure, temperature, rho, drho_dp, drho_dT);
+  }
+  else
+    _fp.rho_from_p_T(pressure, temperature, rho, drho_dp, drho_dT);
+
+  // convert from rho to v
+  v = 1.0 / rho;
+  dv_dp = -drho_dp / (rho * rho);
+  dv_dT = -drho_dT / (rho * rho);
 }
 
 Real
@@ -423,6 +603,13 @@ TabulatedFluidProperties::c_from_p_T(Real pressure, Real temperature) const
   return _fp.c_from_p_T(pressure, temperature);
 }
 
+void
+TabulatedFluidProperties::c_from_p_T(
+    Real pressure, Real temperature, Real & c, Real & dc_dp, Real & dc_dT) const
+{
+  _fp.c_from_p_T(pressure, temperature, c, dc_dp, dc_dT);
+}
+
 Real
 TabulatedFluidProperties::cp_from_p_T(Real pressure, Real temperature) const
 {
@@ -435,6 +622,19 @@ TabulatedFluidProperties::cp_from_p_T(Real pressure, Real temperature) const
     return _fp.cp_from_p_T(pressure, temperature);
 }
 
+void
+TabulatedFluidProperties::cp_from_p_T(
+    Real pressure, Real temperature, Real & cp, Real & dcp_dp, Real & dcp_dT) const
+{
+  if (_interpolate_cp)
+  {
+    checkInputVariables(pressure, temperature);
+    _property_ipol[_cp_idx]->sampleValueAndDerivatives(pressure, temperature, cp, dcp_dp, dcp_dT);
+  }
+  else
+    _fp.cp_from_p_T(pressure, temperature, cp, dcp_dp, dcp_dT);
+}
+
 Real
 TabulatedFluidProperties::cv_from_p_T(Real pressure, Real temperature) const
 {
@@ -445,6 +645,19 @@ TabulatedFluidProperties::cv_from_p_T(Real pressure, Real temperature) const
   }
   else
     return _fp.cv_from_p_T(pressure, temperature);
+}
+
+void
+TabulatedFluidProperties::cv_from_p_T(
+    Real pressure, Real temperature, Real & cv, Real & dcv_dp, Real & dcv_dT) const
+{
+  if (_interpolate_cv)
+  {
+    checkInputVariables(pressure, temperature);
+    _property_ipol[_cv_idx]->sampleValueAndDerivatives(pressure, temperature, cv, dcv_dp, dcv_dT);
+  }
+  else
+    _fp.cv_from_p_T(pressure, temperature, cv, dcv_dp, dcv_dT);
 }
 
 Real
@@ -491,6 +704,16 @@ TabulatedFluidProperties::s_from_p_T(Real p, Real T, Real & s, Real & ds_dp, Rea
   SinglePhaseFluidProperties::s_from_p_T(p, T, s, ds_dp, ds_dT);
 }
 
+Real
+TabulatedFluidProperties::g_from_v_e(Real v, Real e) const
+{
+  const Real p = p_from_v_e(v, e);
+  const Real T = T_from_v_e(v, e);
+  const Real s = s_from_p_T(p, T);
+  const Real h = h_from_p_T(p, T);
+  return h - T * s;
+}
+
 std::vector<Real>
 TabulatedFluidProperties::henryCoefficients() const
 {
@@ -507,6 +730,163 @@ void
 TabulatedFluidProperties::vaporPressure(Real temperature, Real & psat, Real & dpsat_dT) const
 {
   _fp.vaporPressure(temperature, psat, dpsat_dT);
+}
+
+Real
+TabulatedFluidProperties::p_from_v_e(Real v, Real e) const
+{
+  if (!_construct_pT_from_ve)
+    mooseError("You must construct pT from ve tables when calling p_from_v_e.");
+  return _p_from_v_e_ipol->sample(v, e);
+}
+
+void
+TabulatedFluidProperties::p_from_v_e(Real v, Real e, Real & p, Real & dp_dv, Real & dp_de) const
+{
+  if (!_construct_pT_from_ve)
+    mooseError("You must construct pT from ve tables when calling p_from_v_e.");
+  _p_from_v_e_ipol->sampleValueAndDerivatives(v, e, p, dp_dv, dp_de);
+}
+
+Real
+TabulatedFluidProperties::T_from_v_e(Real v, Real e) const
+{
+  if (!_construct_pT_from_ve)
+    mooseError("You must construct pT from ve tables when calling T_from_v_e.");
+  return _T_from_v_e_ipol->sample(v, e);
+}
+
+void
+TabulatedFluidProperties::T_from_v_e(Real v, Real e, Real & T, Real & dT_dv, Real & dT_de) const
+{
+  if (!_construct_pT_from_ve)
+    mooseError("You must construct pT from ve tables when calling T_from_v_e.");
+  _T_from_v_e_ipol->sampleValueAndDerivatives(v, e, T, dT_dv, dT_de);
+}
+
+Real
+TabulatedFluidProperties::c_from_v_e(Real v, Real e) const
+{
+  if (!_construct_pT_from_ve)
+    mooseError("You must construct pT from ve tables when calling c_from_v_e.");
+  Real T = _T_from_v_e_ipol->sample(v, e);
+  Real p = _p_from_v_e_ipol->sample(v, e);
+  return c_from_p_T(p, T);
+}
+
+void
+TabulatedFluidProperties::c_from_v_e(Real v, Real e, Real & c, Real & dc_dv, Real & dc_de) const
+{
+  if (!_construct_pT_from_ve)
+    mooseError("You must construct pT from ve tables when calling c_from_v_e.");
+  Real p, dp_dv, dp_de;
+  _p_from_v_e_ipol->sampleValueAndDerivatives(v, e, p, dp_dv, dp_de);
+  Real T, dT_dv, dT_de;
+  _T_from_v_e_ipol->sampleValueAndDerivatives(v, e, T, dT_dv, dT_de);
+  Real dc_dp, dc_dT;
+  c_from_p_T(p, T, c, dc_dp, dc_dT);
+  dc_dv = dc_dp * dp_dv + dc_dT * dT_dv;
+  dc_de = dc_dp * dp_de + dc_dT * dT_de;
+}
+
+Real
+TabulatedFluidProperties::cp_from_v_e(Real v, Real e) const
+{
+  if (!_construct_pT_from_ve)
+    mooseError("You must construct pT from ve tables when calling cp_from_v_e.");
+  Real T = _T_from_v_e_ipol->sample(v, e);
+  Real p = _p_from_v_e_ipol->sample(v, e);
+  return cp_from_p_T(p, T);
+}
+
+void
+TabulatedFluidProperties::cp_from_v_e(Real v, Real e, Real & cp, Real & dcp_dv, Real & dcp_de) const
+{
+  if (!_construct_pT_from_ve)
+    mooseError("You must construct pT from ve tables when calling cp_from_v_e.");
+  Real p, dp_dv, dp_de;
+  _p_from_v_e_ipol->sampleValueAndDerivatives(v, e, p, dp_dv, dp_de);
+  Real T, dT_dv, dT_de;
+  _T_from_v_e_ipol->sampleValueAndDerivatives(v, e, T, dT_dv, dT_de);
+  Real dcp_dp, dcp_dT;
+  cp_from_p_T(p, T, cp, dcp_dp, dcp_dT);
+  dcp_dv = dcp_dp * dp_dv + dcp_dT * dT_dv;
+  dcp_de = dcp_dp * dp_de + dcp_dT * dT_de;
+}
+
+Real
+TabulatedFluidProperties::cv_from_v_e(Real v, Real e) const
+{
+  if (!_construct_pT_from_ve)
+    mooseError("You must construct pT from ve tables when calling cv_from_v_e.");
+  Real T = _T_from_v_e_ipol->sample(v, e);
+  Real p = _p_from_v_e_ipol->sample(v, e);
+  return cv_from_p_T(p, T);
+}
+
+void
+TabulatedFluidProperties::cv_from_v_e(Real v, Real e, Real & cv, Real & dcv_dv, Real & dcv_de) const
+{
+  if (!_construct_pT_from_ve)
+    mooseError("You must construct pT from ve tables when calling cv_from_v_e.");
+  Real p, dp_dv, dp_de;
+  _p_from_v_e_ipol->sampleValueAndDerivatives(v, e, p, dp_dv, dp_de);
+  Real T, dT_dv, dT_de;
+  _T_from_v_e_ipol->sampleValueAndDerivatives(v, e, T, dT_dv, dT_de);
+  Real dcv_dp, dcv_dT;
+  cv_from_p_T(p, T, cv, dcv_dp, dcv_dT);
+  dcv_dv = dcv_dp * dp_dv + dcv_dT * dT_dv;
+  dcv_de = dcv_dp * dp_de + dcv_dT * dT_de;
+}
+
+Real
+TabulatedFluidProperties::mu_from_v_e(Real v, Real e) const
+{
+  if (!_construct_pT_from_ve)
+    mooseError("You must construct pT from ve tables when calling mu_from_v_e.");
+  Real T = _T_from_v_e_ipol->sample(v, e);
+  Real p = _p_from_v_e_ipol->sample(v, e);
+  return mu_from_p_T(p, T);
+}
+
+void
+TabulatedFluidProperties::mu_from_v_e(Real v, Real e, Real & mu, Real & dmu_dv, Real & dmu_de) const
+{
+  if (!_construct_pT_from_ve)
+    mooseError("You must construct pT from ve tables when calling mu_from_v_e.");
+  Real p, dp_dv, dp_de;
+  _p_from_v_e_ipol->sampleValueAndDerivatives(v, e, p, dp_dv, dp_de);
+  Real T, dT_dv, dT_de;
+  _T_from_v_e_ipol->sampleValueAndDerivatives(v, e, T, dT_dv, dT_de);
+  Real dmu_dp, dmu_dT;
+  mu_from_p_T(p, T, mu, dmu_dp, dmu_dT);
+  dmu_dv = dmu_dp * dp_dv + dmu_dT * dT_dv;
+  dmu_de = dmu_dp * dp_de + dmu_dT * dT_de;
+}
+
+Real
+TabulatedFluidProperties::k_from_v_e(Real v, Real e) const
+{
+  if (!_construct_pT_from_ve)
+    mooseError("You must construct pT from ve tables when calling k_from_v_e.");
+  Real T = _T_from_v_e_ipol->sample(v, e);
+  Real p = _p_from_v_e_ipol->sample(v, e);
+  return k_from_p_T(p, T);
+}
+
+void
+TabulatedFluidProperties::k_from_v_e(Real v, Real e, Real & k, Real & dk_dv, Real & dk_de) const
+{
+  if (!_construct_pT_from_ve)
+    mooseError("You must construct pT from ve tables when calling k_from_v_e.");
+  Real p, dp_dv, dp_de;
+  _p_from_v_e_ipol->sampleValueAndDerivatives(v, e, p, dp_dv, dp_de);
+  Real T, dT_dv, dT_de;
+  _T_from_v_e_ipol->sampleValueAndDerivatives(v, e, T, dT_dv, dT_de);
+  Real dk_dp, dk_dT;
+  k_from_p_T(p, T, k, dk_dp, dk_dT);
+  dk_dv = dk_dp * dp_dv + dk_dT * dT_dv;
+  dk_de = dk_dp * dp_de + dk_dT * dT_de;
 }
 
 void
@@ -639,13 +1019,24 @@ void
 TabulatedFluidProperties::checkInputVariables(Real & pressure, Real & temperature) const
 {
   if (pressure < _pressure_min || pressure > _pressure_max)
-    throw MooseException(
-        "Pressure " + Moose::stringify(pressure) + " is outside the range of tabulated pressure (" +
-        Moose::stringify(_pressure_min) + ", " + Moose::stringify(_pressure_max) + ").");
+  {
+    if (_error_on_out_of_bounds)
+      throw MooseException("Pressure " + Moose::stringify(pressure) +
+                           " is outside the range of tabulated pressure (" +
+                           Moose::stringify(_pressure_min) + ", " +
+                           Moose::stringify(_pressure_max) + ").");
+    else
+      pressure = std::max(_pressure_min, std::min(pressure, _pressure_max));
+  }
 
   if (temperature < _temperature_min || temperature > _temperature_max)
-    throw MooseException("Temperature " + Moose::stringify(temperature) +
-                         " is outside the range of tabulated temperature (" +
-                         Moose::stringify(_temperature_min) + ", " +
-                         Moose::stringify(_temperature_max) + ").");
+  {
+    if (_error_on_out_of_bounds)
+      throw MooseException("Temperature " + Moose::stringify(temperature) +
+                           " is outside the range of tabulated temperature (" +
+                           Moose::stringify(_temperature_min) + ", " +
+                           Moose::stringify(_temperature_max) + ").");
+    else
+      temperature = std::max(_temperature_min, std::min(temperature, _temperature_max));
+  }
 }
