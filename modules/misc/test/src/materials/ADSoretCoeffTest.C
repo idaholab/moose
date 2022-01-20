@@ -14,14 +14,14 @@ registerMooseObject("MiscTestApp", ADSoretCoeffTest);
 InputParameters
 ADSoretCoeffTest::validParams()
 {
-  InputParameters params = ADMaterial::validParams();
+  InputParameters params = Material::validParams();
   params.addRequiredCoupledVar("coupled_var", "A coupled variable");
   params.addRequiredCoupledVar("temperature", "The coupled temperature variable");
   return params;
 }
 
 ADSoretCoeffTest::ADSoretCoeffTest(const InputParameters & parameters)
-  : ADMaterial(parameters),
+  : Material(parameters),
     _coupled_var(adCoupledValue("coupled_var")),
     _temp(adCoupledValue("temperature")),
     _soret_coeff(declareADProperty<Real>("soret_coefficient"))

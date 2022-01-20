@@ -9,12 +9,12 @@
 
 #pragma once
 
-#include "ADMaterial.h"
+#include "Material.h"
 
 /**
  * Stateful material class that defines a few properties.
  */
-class ADStatefulMaterial : public ADMaterial
+class ADStatefulMaterial : public Material
 {
 public:
   static InputParameters validParams();

@@ -9,14 +9,14 @@
 
 #pragma once
 
-#include "ADMaterial.h"
+#include "Material.h"
 #include "DerivativeMaterialPropertyNameInterface.h"
 
 /**
  * Material class that creates the math free energy and its derivatives
  * for use with ADSplitCHParsed. \f$ F = \frac14(1 + c)^2(1 - c)^2 \f$.
  */
-class ADMathFreeEnergy : public ADMaterial, public DerivativeMaterialPropertyNameInterface
+class ADMathFreeEnergy : public Material, public DerivativeMaterialPropertyNameInterface
 {
 public:
   static InputParameters validParams();

@@ -10,7 +10,7 @@
 #pragma once
 
 #include "DenseMatrix.h"
-#include "ADMaterial.h"
+#include "Material.h"
 #include "ADRankTwoTensorForward.h"
 
 namespace libMesh
@@ -18,7 +18,7 @@ namespace libMesh
 class QGauss;
 }
 
-class ADComputeIncrementalShellStrain : public ADMaterial
+class ADComputeIncrementalShellStrain : public Material
 {
 public:
   static InputParameters validParams();

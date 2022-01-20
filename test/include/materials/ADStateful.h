@@ -9,9 +9,9 @@
 
 #pragma once
 
-#include "ADMaterial.h"
+#include "Material.h"
 
-class ADStateful : public ADMaterial
+class ADStateful : public Material
 {
 public:
   static InputParameters validParams();

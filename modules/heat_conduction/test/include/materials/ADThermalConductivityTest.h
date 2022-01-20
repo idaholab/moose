@@ -9,10 +9,10 @@
 
 #pragma once
 
-#include "ADMaterial.h"
+#include "Material.h"
 
 // Forward Declarations
-class ADThermalConductivityTest : public ADMaterial
+class ADThermalConductivityTest : public Material
 {
 public:
   static InputParameters validParams();
