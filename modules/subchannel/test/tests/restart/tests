@@ -11,6 +11,6 @@
     input = transient.i
     exodiff = transient_out.e
     prereq = 'steady'
-    abs_zero = 1e-7
+    abs_zero = 5e-6
   []
 []
