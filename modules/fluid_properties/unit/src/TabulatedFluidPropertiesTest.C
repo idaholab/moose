@@ -151,6 +151,144 @@ TEST_F(TabulatedFluidPropertiesTest, fromFile)
   REL_TEST(de_dT, dec_dT, 1.0e-3);
 }
 
+// Test tabulated fluid properties read from file including comments
+TEST_F(TabulatedFluidPropertiesTest, fromFileVE)
+{
+  Real p = 1.5e6;
+  Real T = 450.0;
+
+  // Read the data file
+  const_cast<TabulatedFluidProperties *>(_tab_fp_ve)->initialSetup();
+
+  // round trip p,T -> v,e -> p,T
+  {
+    Real e = _tab_fp_ve->e_from_p_T(p, T);
+    Real v = _tab_fp_ve->v_from_p_T(p, T);
+    Real pp = _tab_fp_ve->p_from_v_e(v, e);
+    Real TT = _tab_fp_ve->T_from_v_e(v, e);
+    ABS_TEST(T, TT, 1.0);
+    REL_TEST(p, pp, 0.001);
+  }
+
+  // check computation of fluid props from p, T & v, e
+  {
+    Real e = _tab_fp_ve->e_from_p_T(p, T);
+    Real v = _tab_fp_ve->v_from_p_T(p, T);
+
+    // speed of sound
+    Real c1 = _tab_fp_ve->c_from_p_T(p, T);
+    Real c2 = _tab_fp_ve->c_from_v_e(v, e);
+    REL_TEST(c1, c2, 0.001);
+
+    // heat capacity at constant pressure
+    Real cp1 = _tab_fp_ve->cp_from_p_T(p, T);
+    Real cp2 = _tab_fp_ve->cp_from_v_e(v, e);
+    REL_TEST(cp1, cp2, 0.001);
+
+    // heat capacity at constant volume
+    Real cv1 = _tab_fp_ve->cv_from_p_T(p, T);
+    Real cv2 = _tab_fp_ve->cv_from_v_e(v, e);
+    REL_TEST(cv1, cv2, 0.001);
+
+    // viscosity
+    Real mu1 = _tab_fp_ve->mu_from_p_T(p, T);
+    Real mu2 = _tab_fp_ve->mu_from_v_e(v, e);
+    REL_TEST(mu1, mu2, 0.001);
+
+    // thermal conductivity
+    Real k1 = _tab_fp_ve->k_from_p_T(p, T);
+    Real k2 = _tab_fp_ve->k_from_v_e(v, e);
+    REL_TEST(k1, k2, 0.001);
+  }
+
+  // are the two version of functions equivalent
+  {
+    Real e = _tab_fp_ve->e_from_p_T(p, T);
+    Real v = _tab_fp_ve->v_from_p_T(p, T);
+
+    Real d1, d2;
+
+    // speed of sound errors bc co2 props don't
+    // implement enough
+
+    // heat capacity at constant pressure
+    Real cp1;
+    _tab_fp_ve->cp_from_v_e(v, e, cp1, d1, d2);
+    Real cp2 = _tab_fp_ve->cp_from_v_e(v, e);
+    REL_TEST(cp1, cp2, 0.001);
+
+    // heat capacity at constant volume
+    Real cv1;
+    _tab_fp_ve->cv_from_v_e(v, e, cv1, d1, d2);
+    Real cv2 = _tab_fp_ve->cv_from_v_e(v, e);
+    REL_TEST(cv1, cv2, 0.001);
+
+    // viscosity
+    Real mu1;
+    _tab_fp_ve->mu_from_v_e(v, e, mu1, d1, d2);
+    Real mu2 = _tab_fp_ve->mu_from_v_e(v, e);
+    REL_TEST(mu1, mu2, 0.001);
+
+    // thermal conductivity
+    Real k1;
+    _tab_fp_ve->k_from_v_e(v, e, k1, d1, d2);
+    Real k2 = _tab_fp_ve->k_from_v_e(v, e);
+    REL_TEST(k1, k2, 0.001);
+  }
+
+  // check derivatives
+  {
+    Real pert = 1.0e-7;
+    Real e = _tab_fp_ve->e_from_p_T(p, T);
+    Real v = _tab_fp_ve->v_from_p_T(p, T);
+
+    Real deriv1, deriv2;
+
+    // speed of sound errors bc co2 props don't
+    // implement enough
+
+    // heat capacity at constant pressure
+    Real cp1;
+    _tab_fp_ve->cp_from_v_e(v, e, cp1, deriv1, deriv2);
+    Real cp_0 = _tab_fp_ve->cp_from_v_e(v, e);
+    Real cp_1 = _tab_fp_ve->cp_from_v_e(v * (1 + pert), e);
+    Real cp_2 = _tab_fp_ve->cp_from_v_e(v, e * (1 + pert));
+    REL_TEST(deriv1, (cp_1 - cp_0) / (v * pert), 0.001);
+    REL_TEST(deriv2, (cp_2 - cp_0) / (e * pert), 0.001);
+
+    // heat capacity at constant volume
+    Real cv1;
+    _tab_fp_ve->cv_from_v_e(v, e, cv1, deriv1, deriv2);
+    Real cv_0 = _tab_fp_ve->cv_from_v_e(v, e);
+    Real cv_1 = _tab_fp_ve->cv_from_v_e(v * (1 + pert), e);
+    Real cv_2 = _tab_fp_ve->cv_from_v_e(v, e * (1 + pert));
+    REL_TEST(deriv1, (cv_1 - cv_0) / (v * pert), 0.001);
+    REL_TEST(deriv2, (cv_2 - cv_0) / (e * pert), 0.001);
+
+    // viscosity
+    Real mu1;
+    _tab_fp_ve->mu_from_v_e(v, e, mu1, deriv1, deriv2);
+    Real mu_0 = _tab_fp_ve->mu_from_v_e(v, e);
+    Real mu_1 = _tab_fp_ve->mu_from_v_e(v * (1 + pert), e);
+    Real mu_2 = _tab_fp_ve->mu_from_v_e(v, e * (1 + pert));
+    REL_TEST(deriv1, (mu_1 - mu_0) / (v * pert), 0.001);
+    REL_TEST(deriv2, (mu_2 - mu_0) / (e * pert), 0.001);
+
+    // thermal conductivity
+    Real k1;
+    _tab_fp_ve->k_from_v_e(v, e, k1, deriv1, deriv2);
+    Real k_0 = _tab_fp_ve->k_from_v_e(v, e);
+    Real k_1 = _tab_fp_ve->k_from_v_e(v * (1 + pert), e);
+    Real k_2 = _tab_fp_ve->k_from_v_e(v, e * (1 + pert));
+    REL_TEST(deriv1, (k_1 - k_0) / (v * pert), 0.001);
+    REL_TEST(deriv2, (k_2 - k_0) / (e * pert), 0.001);
+  }
+
+  // test
+  {
+  }
+}
+
 // Test generation of tabulated fluid properties
 TEST_F(TabulatedFluidPropertiesTest, generateTabulatedData)
 {
