@@ -1,9 +1,17 @@
 [Tests]
-  [./tabulated]
+  [tabulated]
     type = CSVDiff
     input = 'tabulated.i'
     csvdiff = 'tabulated_out.csv'
     rel_err = 1e-4
     threading = '!pthreads'
-  [../]
+  []
+
+  [tabulated_ve]
+    type = CSVDiff
+    input = 'tabulated_v_e.i'
+    csvdiff = 'tabulated_v_e_out.csv'
+    rel_err = 1e-4
+    threading = '!pthreads'
+  []
 []

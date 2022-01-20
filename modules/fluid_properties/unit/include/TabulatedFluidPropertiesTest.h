@@ -34,6 +34,13 @@ protected:
     _fe_problem->addUserObject("TabulatedFluidProperties", "tab_fp", tab_uo_params);
     _tab_fp = &_fe_problem->getUserObject<TabulatedFluidProperties>("tab_fp");
 
+    InputParameters tab_uo_ve_params = _factory.getValidParams("TabulatedFluidProperties");
+    tab_uo_ve_params.set<UserObjectName>("fp") = "co2_fp";
+    tab_uo_ve_params.set<bool>("construct_pT_from_ve") = true;
+    tab_uo_ve_params.set<FileName>("fluid_property_file") = "data/csv/fluid_props.csv";
+    _fe_problem->addUserObject("TabulatedFluidProperties", "tab_fp_ve", tab_uo_ve_params);
+    _tab_fp_ve = &_fe_problem->getUserObject<TabulatedFluidProperties>("tab_fp_ve");
+
     InputParameters tab_gen_uo_params = _factory.getValidParams("TabulatedFluidProperties");
     tab_gen_uo_params.set<UserObjectName>("fp") = "co2_fp";
     tab_gen_uo_params.set<Real>("temperature_min") = 400;
@@ -91,6 +98,7 @@ protected:
 
   const CO2FluidProperties * _co2_fp;
   const TabulatedFluidProperties * _tab_fp;
+  const TabulatedFluidProperties * _tab_fp_ve;
   const TabulatedFluidProperties * _tab_gen_fp;
   const TabulatedFluidProperties * _unordered_fp;
   const TabulatedFluidProperties * _unequal_fp;
