@@ -517,9 +517,19 @@ NSFVAction::act()
   {
     if (_compressibility == "incompressible")
     {
+      const std::string u_names[3] = {"u", "v", "w"};
       InputParameters params = _factory.getValidParams("INSFVMaterial");
       if (_blocks.size() > 0)
         params.set<std::vector<SubdomainName>>("block") = _blocks;
+
+      params.set<MaterialPropertyName>("rho") = _density_name;
+      params.set<MaterialPropertyName>("cp_name") = _specific_heat_name;
+      if (_porous_medium_treatment)
+        for (unsigned int d = 0; d < _dim; ++d)
+          params.set<NonlinearVariableName>(u_names[d]) = NS::superficial_velocity_vector[d];
+      else
+        for (unsigned int d = 0; d < _dim; ++d)
+          params.set<NonlinearVariableName>(u_names[d]) = NS::velocity_vector[d];
 
       _problem->addMaterial("INSFVMaterial", "ins_material", params);
     }
