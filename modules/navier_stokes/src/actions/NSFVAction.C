@@ -515,7 +515,7 @@ NSFVAction::act()
 
   if (_current_task == "add_material")
   {
-    if (_compressibility == "incompressible")
+    if (_compressibility == "incompressible" || _compressibility == "weakly-compressible")
     {
       const std::string u_names[3] = {"u", "v", "w"};
       InputParameters params = _factory.getValidParams("INSFVMaterial");
@@ -523,75 +523,18 @@ NSFVAction::act()
         params.set<std::vector<SubdomainName>>("block") = _blocks;
 
       params.set<MaterialPropertyName>("rho") = _density_name;
-      params.set<MaterialPropertyName>("cp_name") = _specific_heat_name;
-      if (_porous_medium_treatment)
-        for (unsigned int d = 0; d < _dim; ++d)
-          params.set<NonlinearVariableName>(u_names[d]) = NS::superficial_velocity_vector[d];
-      else
-        for (unsigned int d = 0; d < _dim; ++d)
-          params.set<NonlinearVariableName>(u_names[d]) = NS::velocity_vector[d];
+      if (getParam<bool>("add_energy_equation"))
+      {
+        params.set<NonlinearVariableName>("temperature") = NS::temperature;
+        params.set<MaterialPropertyName>("cp_name") = _specific_heat_name;
+      }
 
       _problem->addMaterial("INSFVMaterial", "ins_material", params);
     }
     else
     {
-      mooseError("Weakly-compressible and compressible simulations are not supported yet.");
+      mooseError("Compressible simulations are not supported yet.");
     }
-
-    //   auto set_common_parameters = [&](InputParameters & params)
-    //   {
-    //     if (_blocks.size() > 0)
-    //       params.set<std::vector<SubdomainName>>("block") = _blocks;
-    //     params.set<CoupledName>("velocity") = {NS::velocity};
-    //     params.set<CoupledName>(NS::pressure) = {_pressure_variable_name};
-    //     params.set<MaterialPropertyName>("mu_name") =
-    //         getParam<MaterialPropertyName>("dynamic_viscosity_name");
-    //     params.set<MaterialPropertyName>("rho_name") =
-    //     getParam<MaterialPropertyName>("density_name");
-    //   };
-    //
-    //   auto set_common_3eqn_parameters = [&](InputParameters & params)
-    //   {
-    //     set_common_parameters(params);
-    //     params.set<CoupledName>("temperature") = {_temperature_variable_name};
-    //     params.set<MaterialPropertyName>("cp_name") =
-    //         getParam<MaterialPropertyName>("specific_heat_name");
-    //   };
-    //
-    //   if (getParam<bool>("add_temperature_equation"))
-    //   {
-    //     if (getParam<bool>("supg") || getParam<bool>("pspg"))
-    //     {
-    //       InputParameters params = _factory.getValidParams("INSADStabilized3Eqn");
-    //       set_common_3eqn_parameters(params);
-    //       params.set<Real>("alpha") = getParam<Real>("alpha");
-    //       params.set<MaterialPropertyName>("k_name") =
-    //           getParam<MaterialPropertyName>("thermal_conductivity_name");
-    //       _problem->addMaterial("INSADStabilized3Eqn", "ins_ad_material", params);
-    //     }
-    //     else
-    //     {
-    //       InputParameters params = _factory.getValidParams("INSAD3Eqn");
-    //       set_common_3eqn_parameters(params);
-    //       _problem->addMaterial("INSAD3Eqn", "ins_ad_material", params);
-    //     }
-    //   }
-    //   else
-    //   {
-    //     if (getParam<bool>("supg") || getParam<bool>("pspg"))
-    //     {
-    //       InputParameters params = _factory.getValidParams("INSADTauMaterial");
-    //       set_common_parameters(params);
-    //       params.set<Real>("alpha") = getParam<Real>("alpha");
-    //       _problem->addMaterial("INSADTauMaterial", "ins_ad_material", params);
-    //     }
-    //     else
-    //     {
-    //       InputParameters params = _factory.getValidParams("INSADMaterial");
-    //       set_common_parameters(params);
-    //       _problem->addMaterial("INSADMaterial", "ins_ad_material", params);
-    //     }
-    //   }
   }
 }
 
