@@ -1,21 +1,20 @@
 T_in = 660
 # [1e+6 kg/m^2-hour] turns into kg/m^2-sec
-mass_flux_in = ${fparse 1e+6 * 17.00 / 36000.*0.5}
+mass_flux_in = ${fparse 1e+6 * 37.00 / 36000.*0.5}
 P_out = 2.0e5 # Pa
 [Mesh]
   type = BetterTriSubChannelMesh
   nrings = 4
-  n_cells = 20
+  n_cells = 100
   n_blocks = 1
   flat_to_flat = 0.077
-  heated_length = 3.658
+  heated_length = 1.0
   rod_diameter = 0.01
   pitch = 0.012
   dwire = 0.002
   hwire = 0.0833
-  max_dz = 0.02
-  spacer_z = '0 0.229 0.457 0.686 0.914 1.143 1.372 1.600 1.829 2.057 2.286 2.515 2.743 2.972 3.200 3.429'
-  spacer_k = '0.7 0.4 1.0 0.4 1.0 0.4 1.0 0.4 1.0 0.4 1.0 0.4 1.0 0.4 1.0 0.4'
+  spacer_z = '0 0.2 0.4 0.6 0.8'
+  spacer_k = '0.1 0.1 0.1 0.1 0.10'
 []
 
 [AuxVariables]
@@ -56,13 +55,15 @@ P_out = 2.0e5 # Pa
 [Problem]
   type = BetterLiquidMetalSubChannel1PhaseProblem
   fp = sodium
-  beta = 0.02
+  beta = 0.1
   P_out = 2.0e5
   CT = 1.0
   enforce_uniform_pressure = false
   compute_density = true
   compute_viscosity = true
   compute_power = true
+#  P_tol = 1.0e-5
+#  T_tol = 1.0e-5
 []
 
 [ICs]
@@ -79,7 +80,7 @@ P_out = 2.0e5 # Pa
    [q_prime_IC]
     type = BetterTriPowerIC
     variable = q_prime
-    power = 1.500e5 # W
+    power = 1.000e5 # W
     filename = "pin_power_profile37.txt"
   []
 
