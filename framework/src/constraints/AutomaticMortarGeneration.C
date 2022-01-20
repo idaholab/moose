@@ -884,7 +884,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
           center += secondary_side_elem->point(n);
           normal += nodal_normals[n];
         }
-        center /= secondary_side_elem->n_vertices();
+        center /= sub_elem_nodes.size();
         normal.unit();
 
         // Build and store linearized sub-elements for later use
@@ -996,8 +996,8 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
           auto sub_elem_nodes = get_sub_elem_nodes(primary_elem_candidate->type(), p_el);
 
           // Get list of primary sub-element vertex nodes
-          std::vector<Point> primary_sub_elem(primary_elem_candidate->n_vertices());
-          for (auto iv : make_range(primary_elem_candidate->n_vertices()))
+          std::vector<Point> primary_sub_elem(sub_elem_nodes.size());
+          for (auto iv : make_range(sub_elem_nodes.size()))
           {
             const auto n = sub_elem_nodes[iv];
             primary_sub_elem[iv] = primary_elem_candidate->point(n);
