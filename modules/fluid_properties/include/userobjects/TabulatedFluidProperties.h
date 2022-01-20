@@ -104,6 +104,11 @@ public:
   virtual void rho_from_p_T(
       Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const override;
 
+  virtual Real v_from_p_T(Real pressure, Real temperature) const override;
+
+  virtual void v_from_p_T(
+      Real pressure, Real temperature, Real & v, Real & dv_dp, Real & dv_dT) const override;
+
   virtual Real e_from_p_T(Real pressure, Real temperature) const override;
 
   virtual void
@@ -120,12 +125,15 @@ public:
       Real pressure, Real temperature, Real & mu, Real & dmu_dp, Real & dmu_dT) const override;
 
   virtual Real cp_from_p_T(Real pressure, Real temperature) const override;
+  virtual void cp_from_p_T(Real pressure, Real temperature, Real & cp, Real & dcp_dp, Real & dcp_dT) const override;
 
   using SinglePhaseFluidProperties::cp_from_p_T;
 
   virtual Real cv_from_p_T(Real pressure, Real temperature) const override;
+  virtual void cv_from_p_T(Real pressure, Real temperature, Real & cv, Real & dcv_dp, Real & dcv_dT) const override;
 
   virtual Real c_from_p_T(Real pressure, Real temperature) const override;
+  virtual void c_from_p_T(Real pressure, Real temperature, Real & c, Real & dc_dp, Real & dc_dT) const override;
 
   virtual Real k_from_p_T(Real pressure, Real temperature) const override;
 
@@ -141,6 +149,44 @@ public:
   virtual Real vaporPressure(Real temperature) const override;
 
   virtual void vaporPressure(Real temperature, Real & psat, Real & dpsat_dT) const override;
+
+  /**
+   * Derivatives like dc_dv & dc_de are computed using the chain role
+   * dy/dx(p,T) = dy/dp * dp/dx + dy/dT * dT/dx
+   * where y = c, cp, cv... & x = v, e
+   */
+  virtual Real p_from_v_e(Real v, Real e) const override;
+  virtual void p_from_v_e(Real v, Real e, Real & p, Real & dp_dv, Real & dp_de) const override;
+  virtual Real T_from_v_e(Real v, Real e) const override;
+  virtual void T_from_v_e(Real v, Real e, Real & T, Real & dT_dv, Real & dT_de) const override;
+  virtual Real c_from_v_e(Real v, Real e) const override;
+  virtual void c_from_v_e(Real v, Real e, Real & c, Real & dc_dv, Real & dc_de) const override;
+  virtual Real cp_from_v_e(Real v, Real e) const override;
+  virtual void cp_from_v_e(Real v, Real e, Real & cp, Real & dcp_dv, Real & dcp_de) const override;
+  virtual Real cv_from_v_e(Real v, Real e) const override;
+  virtual void cv_from_v_e(Real v, Real e, Real & cv, Real & dcv_dv, Real & dcv_de) const override;
+  virtual Real mu_from_v_e(Real v, Real e) const override;
+  virtual void mu_from_v_e(Real v, Real e, Real & mu, Real & dmu_dv, Real & dmu_de) const override;
+  virtual Real k_from_v_e(Real v, Real e) const override;
+  virtual void k_from_v_e(Real v, Real e, Real & k, Real & dk_dv, Real & dk_de) const override;
+  virtual Real g_from_v_e(Real v, Real e) const override;
+/* the RELAP-7 properties
+  virtual ADReal p_from_v_e(const ADReal & v, const ADReal & e) const override;
+
+  virtual void p_from_v_e(const DualReal & v,
+                          const DualReal & e,
+                          DualReal & p,
+                          DualReal & dp_dv,
+                          DualReal & dp_de) const override;
+  virtual ADReal T_from_v_e(const ADReal & v, const ADReal & e) const override;
+  virtual void T_from_v_e(const DualReal & v,
+                          const DualReal & e,
+                          DualReal & T,
+                          DualReal & dT_dv,
+                          DualReal & dT_de) const override;
+
+  virtual ADReal c_from_v_e(const ADReal & v, const ADReal & e) const override;
+*/
 
 protected:
   /**
@@ -174,6 +220,8 @@ protected:
                      unsigned int ncol,
                      const std::vector<Real> & vec,
                      std::vector<std::vector<Real>> & mat);
+
+  Real inverseDistance(const std::vector<Real> & value, const std::vector<Real> & distance) const;
 
   /// File name of tabulated data file
   FileName _file_name;
@@ -236,6 +284,37 @@ protected:
 
   /// The MOOSE delimited file reader.
   MooseUtils::DelimitedFileReader _csv_reader;
+
+  /// if the loopup table p(v, e) and T(v, e) should be constructed
+  bool _construct_pT_from_ve;
+  /// Number of specific volume points in the tabulated data
+  unsigned int _num_v;
+  /// Number of internal energy points in tabulated data
+  unsigned int _num_e;
+  /// interpolation order for inversion
+  unsigned int _inversion_interpolation_order;
+  /// to error or not on out of bounds check
+  bool _error_on_out_of_bounds;
+
+  /// interpolate temperature from (v,e)
+  std::unique_ptr<BicubicInterpolation> _T_from_v_e_ipol;
+
+  /// interpolate pressure from (v,e)
+  std::unique_ptr<BicubicInterpolation> _p_from_v_e_ipol;
+
+  /// Minimum internal energy in tabulated data
+  Real _e_min;
+  /// Maximum internal energy in tabulated data
+  Real _e_max;
+  /// Minimum specific volume in tabulated data
+  Real _v_min;
+  /// Maximum specific volume in tabulated data
+  Real _v_max;
+
+  /// specific volume vector
+  std::vector<Real> _specific_volume;
+  /// internal energy vector
+  std::vector<Real> _internal_energy;
 };
 
 #pragma GCC diagnostic pop
