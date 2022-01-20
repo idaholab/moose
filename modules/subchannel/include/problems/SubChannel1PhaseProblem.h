@@ -67,8 +67,6 @@ protected:
   unsigned int _n_pins;
   unsigned int _n_channels;
   unsigned int _block_size;
-  unsigned int _nx;
-  unsigned int _ny;
   /// axial location of nodes
   std::vector<Real> _z_grid;
   Real _one;
