@@ -1,0 +1,11 @@
+[Tests]
+  design = 'RayleighNumber.md'
+  issues = '#20091'
+  [rayleigh]
+    type = 'CSVDiff'
+    input = 'natural_convection.i'
+    exodiff = 'natural_convection_out.csv'
+    requirement = 'The system shall be able to compute the Rayleigh number in a natural convection flow simulation'
+    ad_indexing_type = 'global'
+  []
+[]
