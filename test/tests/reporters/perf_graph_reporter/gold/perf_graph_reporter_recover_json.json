@@ -176,12 +176,6 @@
                                             "num_calls": 2,
                                             "time": 1.754e-06
                                         },
-                                        "MooseApp::MooseApp::checkRegistryLabels": {
-                                            "level": 5,
-                                            "memory": 0,
-                                            "num_calls": 2,
-                                            "time": 1.814e-06
-                                        },
                                         "NonlinearSystemBase::nlInitialSetup": {
                                             "NonlinearSystemBase::kernelsInitialSetup": {
                                                 "level": 2,

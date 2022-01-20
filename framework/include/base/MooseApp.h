@@ -102,8 +102,6 @@ public:
    */
   const std::string & name() const { return _name; }
 
-  virtual void checkRegistryLabels();
-
   /**
    * Get printable name of the application.
    */

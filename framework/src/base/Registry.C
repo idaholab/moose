@@ -101,29 +101,6 @@ Registry::registerActionsTo(ActionFactory & f, const std::set<std::string> & lab
   }
 }
 
-void
-Registry::checkLabels(const std::set<std::string> & known_labels)
-{
-  auto & r = getRegistry();
-  std::vector<RegistryEntry> orphs;
-
-  for (auto & entry : r._per_label_objects)
-    if (known_labels.count(entry.first) == 0 && r._known_labels.count(entry.first) == 0)
-      orphs.insert(orphs.end(), entry.second.begin(), entry.second.end());
-  for (auto & entry : r._per_label_actions)
-    if (known_labels.count(entry.first) == 0 && r._known_labels.count(entry.first) == 0)
-      orphs.insert(orphs.end(), entry.second.begin(), entry.second.end());
-
-  if (orphs.size() > 0)
-  {
-    std::stringstream lst;
-    for (auto & orph : orphs)
-      lst << "\n\t" << orph._classname << " (app='" << orph._label << "')";
-    mooseError("The following objects/actions have been registered to unknown applications/labels:",
-               lst.str());
-  }
-}
-
 char
 Registry::addKnownLabel(const std::string & label)
 {

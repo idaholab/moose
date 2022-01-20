@@ -185,12 +185,6 @@ public:
   /// factory f.
   static void registerActionsTo(ActionFactory & f, const std::set<std::string> & labels);
 
-  /// This runs error checking to make sure that all objects and actions in the registry have valid
-  /// labels.  Labels are considered valid if they have been added to the list of known labels via
-  /// the addKnownLabel function or they have been used to register objects to a factory via
-  /// registerObjectsTo or registerActionsTo.
-  static void checkLabels(const std::set<std::string> & known_labels = {});
-
   /// addKnownLabel whitelists a label as valid for purposes of the checkLabels function.
   static char addKnownLabel(const std::string & label);
 

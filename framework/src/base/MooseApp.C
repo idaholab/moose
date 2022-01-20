@@ -571,13 +571,6 @@ MooseApp::MooseApp(InputParameters parameters)
   Moose::out << std::flush;
 }
 
-void
-MooseApp::checkRegistryLabels()
-{
-  TIME_SECTION("MooseApp::checkRegistryLabels", 5, "Checking Registry Labels");
-  Registry::checkLabels();
-}
-
 MooseApp::~MooseApp()
 {
 #ifdef HAVE_GPERFTOOLS
