@@ -56,7 +56,7 @@ public:
   /**
    * Return if Pin Mesh exists or not
    */
-  virtual const bool & pinMeshExist() const = 0;
+  virtual bool pinMeshExist() const = 0;
 
   /**
    * Return the number of gaps per layer
@@ -87,7 +87,7 @@ public:
   /**
    * Return a vector of pin indices for a given channel index
    */
-  virtual const std::vector<unsigned int> & getChannelPins(unsigned int i_pin) const = 0;
+  virtual const std::vector<unsigned int> & getChannelPins(unsigned int i_chan) const = 0;
 
   /**
    * Return a map with gap sizes
@@ -143,9 +143,6 @@ public:
    * Return gap width for a given gap index
    */
   virtual Real getGapWidth(unsigned int gap_index) const = 0;
-
-  virtual const unsigned int & getNx() const = 0;
-  virtual const unsigned int & getNy() const = 0;
 
 protected:
   /// unheated length of the fuel rod at the entry of the assembly

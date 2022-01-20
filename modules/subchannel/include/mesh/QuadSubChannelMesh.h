@@ -24,7 +24,7 @@ public:
   virtual const unsigned int & getNumOfChannels() const override { return _n_channels; }
   virtual const unsigned int & getNumOfGapsPerLayer() const override { return _n_gaps; }
   virtual const unsigned int & getNumOfPins() const override { return _n_pins; }
-  virtual const bool & pinMeshExist() const override { return _pin_mesh_exist; }
+  virtual bool pinMeshExist() const override { return _pin_mesh_exist; }
   virtual const std::pair<unsigned int, unsigned int> &
   getGapNeighborChannels(unsigned int i_gap) const override
   {
@@ -49,8 +49,8 @@ public:
     return _sign_id_crossflow_map[i_chan][i_local];
   }
 
-  virtual const unsigned int & getNx() const override { return _nx; }
-  virtual const unsigned int & getNy() const override { return _ny; }
+  virtual const unsigned int & getNx() const { return _nx; }
+  virtual const unsigned int & getNy() const { return _ny; }
   const Real & getGap() const { return _gap; }
 
   unsigned int getSubchannelIndexFromPoint(const Point & p) const override;

@@ -78,7 +78,7 @@ SubChannel1PhaseProblem::validParams()
 
 SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
   : ExternalProblem(params),
-    _subchannel_mesh(dynamic_cast<QuadSubChannelMesh &>(_mesh)),
+    _subchannel_mesh(dynamic_cast<SubChannelMesh &>(_mesh)),
     _Wij(declareRestartableData<libMesh::DenseMatrix<Real>>("Wij")),
     _g_grav(9.87),
     _kij(_subchannel_mesh.getKij()),
@@ -106,8 +106,6 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
   _n_gaps = _subchannel_mesh.getNumOfGapsPerLayer();
   _n_pins = _subchannel_mesh.getNumOfPins();
   _n_channels = _subchannel_mesh.getNumOfChannels();
-  _nx = _subchannel_mesh.getNx();
-  _ny = _subchannel_mesh.getNy();
   _z_grid = _subchannel_mesh.getZGrid();
   _block_size = _n_cells / _n_blocks;
   // Turbulent crossflow (stuff that live on the gaps)
