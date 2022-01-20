@@ -16,19 +16,6 @@ BetterLiquidMetalSubChannel1PhaseProblem::BetterLiquidMetalSubChannel1PhaseProbl
   : SubChannel1PhaseProblem(params),
     _tri_sch_mesh(dynamic_cast<BetterTriSubChannelMesh &>(_subchannel_mesh))
 {
-//  _n_cells = _subchannel_mesh.getNumOfAxialCells();
-//  _n_blocks = _subchannel_mesh.getNumOfAxialBlocks();
-//  _n_gaps = _subchannel_mesh.getNumOfGapsPerLayer();
-//  _n_channels = _subchannel_mesh.getNumOfChannels();
-//  _block_size = _n_cells / _n_blocks;
-    // Turbulent crossflow (stuff that live on the gaps)
-//  _Wij.resize(_n_gaps, _n_cells + 1);
-//  _Wij_old.resize(_n_gaps, _n_cells + 1);
-//  _WijPrime.resize(_n_gaps, _n_cells + 1);
-//  _Wij.setZero();
-//  _Wij_old.setZero();
-//  _WijPrime.setZero();
-//  _converged = true;
 }
 
 double
@@ -55,22 +42,40 @@ BetterLiquidMetalSubChannel1PhaseProblem::computeWijPrime(int iblock)
       auto chans = _subchannel_mesh.getGapNeighborChannels(i_gap);
       unsigned int i_ch = chans.first;
       unsigned int j_ch = chans.second;
-      auto * node_in_i = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
-      auto * node_out_i = _subchannel_mesh.getChannelNode(i_ch, iz);
-      auto * node_in_j = _subchannel_mesh.getChannelNode(j_ch, iz - 1);
-      auto * node_out_j = _subchannel_mesh.getChannelNode(j_ch, iz);
-      auto Si_in = (*_S_flow_soln)(node_in_i);
-      auto Sj_in = (*_S_flow_soln)(node_in_j);
-      auto Si_out = (*_S_flow_soln)(node_out_i);
-      auto Sj_out = (*_S_flow_soln)(node_out_j);
-      // crossflow area between channels i,j (dz*gap_width)
-      auto Sij = dz * _subchannel_mesh.getGapWidth(i_gap);
-      // Calculation of Turbulent Crossflow
-      _WijPrime(i_gap, iz) =
-          _beta * 0.5 *
+      auto subch_type1 = _subchannel_mesh.getSubchannelType(i_ch);
+      auto subch_type2 = _subchannel_mesh.getSubchannelType(j_ch);
+      _WijPrime(i_gap, iz) = 0.0;
+      if(subch_type1 == EChannelType::CENTER || subch_type2 == EChannelType::CENTER) {
+        auto * node_in_i = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
+        auto * node_out_i = _subchannel_mesh.getChannelNode(i_ch, iz);
+        auto * node_in_j = _subchannel_mesh.getChannelNode(j_ch, iz - 1);
+        auto * node_out_j = _subchannel_mesh.getChannelNode(j_ch, iz);
+        auto Si_in = (*_S_flow_soln)(node_in_i);
+        auto Sj_in = (*_S_flow_soln)(node_in_j);
+        auto Si_out = (*_S_flow_soln)(node_out_i);
+        auto Sj_out = (*_S_flow_soln)(node_out_j);
+        // crossflow area between channels i,j (dz*gap_width)
+        auto Sij = dz * _subchannel_mesh.getGapWidth(i_gap);
+        const Real & pitch = _subchannel_mesh.getPitch();
+        const Real & rod_diameter = _subchannel_mesh.getRodDiameter();
+        const Real & wire_lead_length = _tri_sch_mesh.getWireLeadLength();
+        const Real & wire_diameter = _tri_sch_mesh.getWireDiameter();
+        auto theta = std::acos(wire_lead_length /
+                           std::sqrt(std::pow(wire_lead_length, 2) +
+                                     std::pow(libMesh::pi * (rod_diameter + wire_diameter), 2)));
+        // Calculation of Turbulent Crossflow
+        auto dum1 = 0.14 * std::pow((pitch - rod_diameter) / rod_diameter, -0.5);
+        auto dum2 = libMesh::pi / 6 * std::pow((pitch - rod_diameter / 2), 2);
+        auto dum3 = libMesh::pi * std::pow(rod_diameter, 2) / 24;
+        auto dum4 = std::sqrt(3) / 4 * std::pow(pitch, 2);
+        auto dum5 = libMesh::pi * std::pow(rod_diameter, 2) / 8;
+        auto eps = dum1 * pow((dum2 - dum3) / (dum4 - dum5), 0.5) * std::tan(theta);
+        _WijPrime(i_gap, iz) =
+          eps * 0.5 *
           (((*_mdot_soln)(node_in_i) + (*_mdot_soln)(node_in_j)) / (Si_in + Sj_in) +
            ((*_mdot_soln)(node_out_i) + (*_mdot_soln)(node_out_j)) / (Si_out + Sj_out)) *
           Sij;
+       }
     }
   }
 }
@@ -281,6 +286,7 @@ BetterLiquidMetalSubChannel1PhaseProblem::computeDP(int iblock)
     auto rho_out = (*_rho_soln)(node_out);
     auto T_in = (*_T_soln)(node_in);
     auto S = (*_S_flow_soln)(node_in);
+    
     auto w_perim = (*_w_perim_soln)(node_in);
     // hydraulic diameter in the i direction
     auto Dh_i = 4.0 * S / w_perim;
@@ -525,6 +531,23 @@ BetterLiquidMetalSubChannel1PhaseProblem::computeh(int iblock)
     auto dz = z_grid[iz] - z_grid[iz - 1];
     auto heated_length = _subchannel_mesh.getHeatedLength();
     auto unheated_length_entry = _subchannel_mesh.getHeatedLengthEntry();
+    
+    Real gedge_ave = 0.0;
+    Real mdot_sum = 0.0;
+    Real si_sum = 0.0;
+    for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
+    {
+        auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
+        if(subch_type == EChannelType::EDGE || subch_type == EChannelType::CORNER) {
+            auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
+            auto Si = (*_S_flow_soln)(node_in);
+            auto mdot_in = (*_mdot_soln)(node_in);
+            mdot_sum = mdot_sum + mdot_in;
+            si_sum = si_sum + Si;
+        }
+    }
+    gedge_ave = mdot_sum/si_sum;    
+    
     for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
     {
       const Real & pitch = _subchannel_mesh.getPitch();
@@ -539,12 +562,42 @@ BetterLiquidMetalSubChannel1PhaseProblem::computeh(int iblock)
       double sumWijh = 0.0;
       double sumWijPrimeDhij = 0.0;
       Real e_cond = 0.0;
+
       double added_enthalpy;
       if (z_grid[iz] > unheated_length_entry && z_grid[iz] <= unheated_length_entry + heated_length)
         added_enthalpy = ((*_q_prime_soln)(node_out) + (*_q_prime_soln)(node_in)) * dz / 2.0;
       else
         added_enthalpy = 0.0;
 
+      // compute the sweep flow enthalpy change
+      auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
+      Real sweep_enthalpy = 0.0;
+ 
+      if(subch_type == EChannelType::EDGE || subch_type == EChannelType::CORNER) {
+      	const Real & pitch = _subchannel_mesh.getPitch();
+      	const Real & rod_diameter = _subchannel_mesh.getRodDiameter();
+     	const Real & wire_lead_length = _tri_sch_mesh.getWireLeadLength();
+      	const Real & wire_diameter = _tri_sch_mesh.getWireDiameter();
+      	auto gap = _tri_sch_mesh.getDuctToRodGap();
+      	auto w = rod_diameter + gap;
+      	auto theta = std::acos(wire_lead_length /
+                         std::sqrt(std::pow(wire_lead_length, 2) +
+                                   std::pow(libMesh::pi * (rod_diameter + wire_diameter), 2)));
+      	// in/out channels for i_ch     
+        auto sweep_in =  _tri_sch_mesh.getSweepFlowChans(i_ch).first;
+      	auto * node_sin = _subchannel_mesh.getChannelNode(sweep_in, iz - 1);
+      	auto cs_t = 0.75 * std::pow(wire_lead_length/rod_diameter,0.3);
+      	auto ar2 = libMesh::pi * (rod_diameter + wire_diameter) * wire_diameter/4.0;
+      	auto a2p = pitch * (w - rod_diameter/2.0) - libMesh::pi * std::pow(rod_diameter,2)/8.0;
+      	auto Sij_in = dz * gap;
+      	auto Sij_out = dz * gap;
+      	auto wsweep_in = gedge_ave*cs_t*std::pow((ar2/a2p),0.5)*std::tan(theta) * Sij_in;
+      	auto wsweep_out =  gedge_ave*cs_t*std::pow((ar2/a2p),0.5)*std::tan(theta) * Sij_out;
+      	auto sweep_hin = (*_h_soln)(node_sin);
+      	auto sweep_hout = (*_h_soln)(node_in);
+      	sweep_enthalpy = (wsweep_in*sweep_hin - wsweep_out*sweep_hout);        
+      }
+     
       // Calculate sum of crossflow into channel i from channels j around i
       unsigned int counter = 0;
       for (auto i_gap : _subchannel_mesh.getChannelGaps(i_ch))
@@ -567,7 +620,6 @@ BetterLiquidMetalSubChannel1PhaseProblem::computeh(int iblock)
                                                    (*_h_soln)(node_in_i));
         counter++;
      
-
       //compute the radial heat conduction through the gaps
 
       // compute the radial heat conduction through gaps
@@ -634,7 +686,7 @@ BetterLiquidMetalSubChannel1PhaseProblem::computeh(int iblock)
 
      // end of radial heat conduction calc.
 
-      h_out = (mdot_in * h_in - sumWijh - sumWijPrimeDhij + added_enthalpy +
+      h_out = (mdot_in * h_in - sumWijh - sumWijPrimeDhij + added_enthalpy + e_cond + sweep_enthalpy +
                _TR * _rho_soln->old(node_out) * _h_soln->old(node_out) * volume / _dt) /
               (mdot_out + _TR * (*_rho_soln)(node_out)*volume / _dt);
 
@@ -679,6 +731,7 @@ BetterLiquidMetalSubChannel1PhaseProblem::externalSolve()
       auto T_it = 0;
       _console << "Solving Block: " << iblock << " From first level: " << first_level
                << " to last level: " << last_level << std::endl;
+     
       while (T_block_error > _T_tol && T_it < _T_maxit)
       {
         T_it += 1;
