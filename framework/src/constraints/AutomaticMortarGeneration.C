@@ -1002,6 +1002,10 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
             const auto n = sub_elem_nodes[iv];
             primary_sub_elem[iv] = primary_elem_candidate->point(n);
           }
+          std::cout << "primary sub_element nodes  = ";
+          for (auto pt : primary_sub_elem)
+            std::cout << pt << "\t";
+          std::cout << std::endl;
 
           // Loop through secondary sub-elements
           for (auto s_el : make_range(secondary_side_elem->n_sub_elem()))
@@ -1013,8 +1017,12 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
             //
             // Mortar segment helpers append a list of mortar segment nodes and connectivities that
             // can be directly used to build mortar segments
+            std::cout << "secondary sub_element center  = " << mortar_segment_helper[s_el]->center()
+                      << std::endl;
             mortar_segment_helper[s_el]->getMortarSegments(
                 primary_sub_elem, nodal_points, elem_to_node_map);
+
+            std::cout << nodal_points.size() << std::endl;
 
             // Keep track of which secondary and primary sub-elements created segment
             for (auto i = sub_elem_map.size(); i < elem_to_node_map.size(); ++i)
