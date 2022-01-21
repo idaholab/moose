@@ -1,6 +1,7 @@
 [Tests]
   [adjoint]
     type = CSVDiff
+    max_threads = 1
     rel_err = 0.1
     input = master.i
     csvdiff = master_out_receiver_0001.csv
@@ -9,6 +10,7 @@
   []
   [adjointFDGradTest]
     type = CSVDiff
+    max_threads = 1
     rel_err = 0.1
     input = master.i
     cli_args = "Executioner/petsc_options_iname='-tao_fd_test -tao_fd_gradient -tao_fd_delta -tao_gatol'"

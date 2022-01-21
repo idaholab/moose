@@ -1,6 +1,7 @@
 [Tests]
   [quadratic_taonm]
     type = CSVDiff
+    max_threads = 1
     rel_err = 1.0e-4
     cli_args = "Executioner/tao_solver=TAONM"
     input = quadratic_minimize.i
@@ -9,6 +10,7 @@
   []
   [quadratic_taobncg]
     type = CSVDiff
+    max_threads = 1
     rel_err = 1.0e-4
     cli_args = "Executioner/tao_solver=TAOBNCG"
     " Executioner/petsc_options_iname='-tao_gatol -tao_cg_delta_max'"
@@ -19,6 +21,7 @@
   []
   [quadratic_taontr]
     type = CSVDiff
+    max_threads = 1
     cli_args = "Executioner/tao_solver=TAONTR"
     " Executioner/petsc_options_iname='-tao_ntr_min_radius -tao_ntr_max_radius -tao_ntr_init_type'"
     " Executioner/petsc_options_value='0 1e16 constant'"
@@ -28,6 +31,7 @@
   []
   [quadratic_multi]
     type = CSVDiff
+    max_threads = 1
     rel_err = 1.0e-4
     input = qm_multi_param.i
     csvdiff = qm_multi_param_out_OptimizationReporter_0001.csv

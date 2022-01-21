@@ -8,6 +8,7 @@
                   " and the phase of the function is all over the place.  It is important to use"
                   " to use the bounded tao solvers with good bounds."
     type = CSVDiff
+    max_threads = 1
     rel_err = 0.01
     input = master.i
     csvdiff = master_out_receiver_0001.csv

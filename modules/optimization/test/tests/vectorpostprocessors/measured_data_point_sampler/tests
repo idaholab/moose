@@ -7,6 +7,7 @@
                   "it the same as the sampler dataVector post-processor values shall be able to"
                   "be compute a difference measure between two vectors and return a Real "
       type = 'CSVDiff'
+    max_threads = 1
       input = 'measured_point_value_sampler.i'
       csvdiff = 'measured_point_value_sampler_out_point_measure_sample_0001.csv'
   []

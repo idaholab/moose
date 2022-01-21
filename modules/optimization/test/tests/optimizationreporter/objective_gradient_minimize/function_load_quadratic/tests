@@ -4,6 +4,7 @@
                   "  This is nonlinear because b will show up in the adjoint "
                   " function that computes the gradient.  It takes 51 iterations which is a lot."
     type = CSVDiff
+    max_threads = 1
     abs_zero = 1
     rel_err = 0.01
     input = master.i

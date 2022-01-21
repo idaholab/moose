@@ -1,6 +1,7 @@
 [Tests]
   [taolmvm]
     type = CSVDiff
+    max_threads = 1
     rel_err = 0.01
     input = master.i
     csvdiff = master_out_receiver_0001.csv
@@ -9,6 +10,7 @@
   []
   [biasedMesh]
     type = CSVDiff
+    max_threads = 1
     rel_err = 0.01
     input = master.i
     csvdiff = master_out_receiver_0001.csv
@@ -18,6 +20,7 @@
   []
   [fd_grad]
     type = CSVDiff
+    max_threads = 1
     rel_err = 0.01
     input = master.i
     cli_args = "Executioner/tao_solver=TAOBNCG"
@@ -29,6 +32,7 @@
   []
   [taonm]
     type = CSVDiff
+    max_threads = 1
     rel_err = 0.01
     input = master.i
     cli_args = "Executioner/tao_solver=TAONM"

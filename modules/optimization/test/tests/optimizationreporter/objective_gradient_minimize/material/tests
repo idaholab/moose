@@ -1,6 +1,7 @@
 [Tests]
   [fd_grad]
     type = CSVDiff
+    max_threads = 1
     rel_err = 0.01
     abs_zero=0.01
     input = master.i
@@ -12,6 +13,7 @@
   []
   [grad_free]
     type = CSVDiff
+    max_threads = 1
     rel_err = 0.01
     abs_zero=0.01
     input = master_gradFree.i
@@ -21,6 +23,7 @@
   []
   [adjoint_grad]
     type = CSVDiff
+    max_threads = 1
     rel_err = 0.01
     abs_zero=0.01
     input = master.i

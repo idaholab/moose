@@ -1,6 +1,7 @@
 [Tests]
   [bracket_bounds]
     type = CSVDiff
+    max_threads = 1
     rel_err = 0.01
     input = master.i
     csvdiff = bracket_bounds_receiver_0001.csv
@@ -11,6 +12,7 @@
   []
   [lower_bounds]
     type = CSVDiff
+    max_threads = 1
     rel_err = 0.01
     input = master.i
     csvdiff = lower_bounds_receiver_0001.csv
@@ -22,6 +24,7 @@
   []
   [upper_bounds]
     type = CSVDiff
+    max_threads = 1
     rel_err = 0.01
     input = master.i
     csvdiff = upper_bounds_receiver_0001.csv

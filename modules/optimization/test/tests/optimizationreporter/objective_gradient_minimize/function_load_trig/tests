@@ -1,6 +1,7 @@
 [Tests]
   [function_load_grad_p1_taolmvm]
     type = CSVDiff
+    max_threads = 1
     rel_err = 0.01
     abs_zero=0.5
     input = master.i

@@ -5,6 +5,7 @@
                   " two parsed functions.  The scale of the linear and constant functions "
                   " are being parameterized. This is testing the iter output reporter."
     type = CSVDiff
+    max_threads = 1
     rel_err = 0.0000001
     input = master.i
     csvdiff = master_out_optInfo_0001.csv
@@ -15,6 +16,7 @@
     requirement = "Make sure everything is working in parallel, like the constantvectorpostprocessor"
                   " and the vectorpostprocessor dirac kernel"
     type = CSVDiff
+    max_threads = 1
     rel_err = 0.01
     input = master.i
     min_parallel = 2
