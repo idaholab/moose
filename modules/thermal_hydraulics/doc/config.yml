@@ -62,5 +62,3 @@ Extensions:
             bin-opt: thermal_hydraulics-opt
             bin-dbg: thermal_hydraulics-dbg
     MooseDocs.extensions.sqa: disable
-    alert2:
-        active: true
