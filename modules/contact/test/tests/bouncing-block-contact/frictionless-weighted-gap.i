@@ -122,7 +122,7 @@ offset = 1e-2
   l_max_its = 30
   nl_max_its = 20
   line_search = 'none'
-  snesmf_reuse_base = false
+  snesmf_reuse_base = true
 []
 
 [Debug]
