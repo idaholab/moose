@@ -303,6 +303,55 @@ TEST_F(TabulatedFluidPropertiesTest, fromFileVE)
     REL_TEST(de_dv, (e_1 - e_0) / (v * pert), 0.001);
     REL_TEST(de_dh, (e_2 - e_0) / (h * pert), 0.001);
   }
+
+  // AD p_from_v_e
+  {
+    Real e = _tab_fp_ve->e_from_p_T(p, T);
+    Real v = _tab_fp_ve->v_from_p_T(p, T);
+    DNDerivativeType dvdx;
+    DNDerivativeType dedx;
+    // set it up so these are the derivatives
+    // w.r.t. to themselves
+    Moose::derivInsert(dvdx, 0, 1);
+    Moose::derivInsert(dvdx, 1, 0);
+    Moose::derivInsert(dedx, 0, 0);
+    Moose::derivInsert(dedx, 1, 1);
+
+    DualReal v_ad(v, dvdx);
+    DualReal e_ad(e, dedx);
+    DualReal p_ad = _tab_fp_ve->p_from_v_e(v_ad, e_ad);
+
+    Real pp, dp_dv, dp_de;
+    _tab_fp_ve->p_from_v_e(v, e, pp, dp_dv, dp_de);
+    REL_TEST(p_ad.derivatives()[0], dp_dv, 0.0001);
+    REL_TEST(p_ad.derivatives()[1], dp_de, 0.0001);
+  }
+
+  // AD T_from_v_e
+  {
+    Real e = _tab_fp_ve->e_from_p_T(p, T);
+    Real v = _tab_fp_ve->v_from_p_T(p, T);
+    DNDerivativeType dvdx;
+    DNDerivativeType dedx;
+    // set it up so these are the derivatives
+    // w.r.t. to themselves
+    Moose::derivInsert(dvdx, 0, 1);
+    Moose::derivInsert(dvdx, 1, 0);
+    Moose::derivInsert(dedx, 0, 0);
+    Moose::derivInsert(dedx, 1, 1);
+
+    DualReal v_ad(v, dvdx);
+    DualReal e_ad(e, dedx);
+    DualReal T_ad = _tab_fp_ve->T_from_v_e(v_ad, e_ad);
+
+    Real TT, dT_dv, dT_de;
+    _tab_fp_ve->T_from_v_e(v, e, TT, dT_dv, dT_de);
+    REL_TEST(T_ad.derivatives()[0], dT_dv, 0.0001);
+    REL_TEST(T_ad.derivatives()[1], dT_de, 0.0001);
+  }
+
+  // cannot test AD c_from_v_e because co2 props do not
+  // implement enough
 }
 
 // Test generation of tabulated fluid properties
