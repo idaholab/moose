@@ -347,8 +347,16 @@ TabulatedFluidProperties::initialSetup()
     _v_min = std::min({v1, v2, v3, v4});
     _v_max = std::max({v1, v2, v3, v4});
 
+    Real h1 = h_from_p_T(_pressure_min, _temperature_min);
+    Real h2 = h_from_p_T(_pressure_max, _temperature_min);
+    Real h3 = h_from_p_T(_pressure_min, _temperature_max);
+    Real h4 = h_from_p_T(_pressure_max, _temperature_max);
+    _h_min = std::min({h1, h2, h3, h4});
+    _h_max = std::max({h1, h2, h3, h4});
+
     Real dv = (_v_max - _v_min) / ((Real)_num_v - 1);
     Real de = (_e_max - _e_min) / ((Real)_num_e - 1);
+    Real dh = (_h_max - _h_min) / ((Real)_num_e - 1);
 
     // the number of points to have 1 point every kPa and Kelvin
     Real np = std::ceil((_pressure_max - _pressure_min) / 1e3) + 1;
@@ -360,6 +368,7 @@ TabulatedFluidProperties::initialSetup()
     // create a very fine p T grid to sample against
     std::vector<Point> pT_points(np * nT);
     std::vector<Point> ve_points(np * nT);
+    std::vector<Point> vh_points(np * nT);
     for (unsigned int ip = 0; ip < np; ++ip)
       for (unsigned int iT = 0; iT < nT; ++iT)
       {
@@ -368,48 +377,83 @@ TabulatedFluidProperties::initialSetup()
         Real T = (_temperature_min + dT * iT);
         Real v = v_from_p_T(p, T) / (_v_max - _v_min);
         Real e = e_from_p_T(p, T) / (_e_max - _e_min);
+        Real h = h_from_p_T(p, T) / (_h_max - _h_min);
         pT_points[index] = Point(p, T, 0.0);
         ve_points[index] = Point(v, e, 0.0);
+        vh_points[index] = Point(v, h, 0.0);
       }
 
-    // create the KDTree for ve_points
+    // create the KDTree for ve_points and vh_points
     KDTree kd_tree_ve(ve_points, 5);
+    KDTree kd_tree_vh(vh_points, 5);
 
-    // Create v, e grid for interpolation
+    // Create v, e, h grids for interpolation
     _specific_volume.resize(_num_v);
     for (unsigned int j = 0; j < _num_v; ++j)
       _specific_volume[j] = _v_min + j * dv;
     _internal_energy.resize(_num_e);
     for (unsigned int j = 0; j < _num_e; ++j)
       _internal_energy[j] = _e_min + j * de;
+    // enthalpy & internal energy use same # grid points
+    _enthalpy.resize(_num_e);
+    for (unsigned int j = 0; j < _num_e; ++j)
+      _enthalpy[j] = _h_min + j * dh;
 
     // match p, T data to these grid points
     std::vector<std::vector<Real>> p_from_v_e(_num_v);
     std::vector<std::vector<Real>> T_from_v_e(_num_v);
+    std::vector<std::vector<Real>> p_from_v_h(_num_v);
+    std::vector<std::vector<Real>> T_from_v_h(_num_v);
     for (unsigned int iv = 0; iv < _num_v; ++iv)
     {
       p_from_v_e[iv].resize(_num_e);
       T_from_v_e[iv].resize(_num_e);
+      p_from_v_h[iv].resize(_num_e);
+      T_from_v_h[iv].resize(_num_e);
       for (unsigned int ie = 0; ie < _num_e; ++ie)
       {
-        Point ve = Point(_specific_volume[iv] / (_v_max - _v_min),
-                         _internal_energy[ie] / (_e_max - _e_min),
-                         0.0);
-        std::vector<std::size_t> return_index(_inversion_interpolation_order);
-        std::vector<Real> return_dist_sqr(_inversion_interpolation_order);
-        kd_tree_ve.neighborSearch(
-            ve, _inversion_interpolation_order, return_index, return_dist_sqr);
-
-        std::vector<Real> nearest_pressures(_inversion_interpolation_order);
-        std::vector<Real> nearest_temperatures(_inversion_interpolation_order);
-        for (unsigned int j = 0; j < _inversion_interpolation_order; ++j)
+        // do v & e mapping first
         {
-          nearest_pressures[j] = pT_points[return_index[j]](0);
-          nearest_temperatures[j] = pT_points[return_index[j]](1);
+          Point ve = Point(_specific_volume[iv] / (_v_max - _v_min),
+                           _internal_energy[ie] / (_e_max - _e_min),
+                           0.0);
+          std::vector<std::size_t> return_index(_inversion_interpolation_order);
+          std::vector<Real> return_dist_sqr(_inversion_interpolation_order);
+          kd_tree_ve.neighborSearch(
+              ve, _inversion_interpolation_order, return_index, return_dist_sqr);
+
+          std::vector<Real> nearest_pressures(_inversion_interpolation_order);
+          std::vector<Real> nearest_temperatures(_inversion_interpolation_order);
+          for (unsigned int j = 0; j < _inversion_interpolation_order; ++j)
+          {
+            nearest_pressures[j] = pT_points[return_index[j]](0);
+            nearest_temperatures[j] = pT_points[return_index[j]](1);
+          }
+
+          p_from_v_e[iv][ie] = inverseDistance(nearest_pressures, return_dist_sqr);
+          T_from_v_e[iv][ie] = inverseDistance(nearest_temperatures, return_dist_sqr);
         }
 
-        p_from_v_e[iv][ie] = inverseDistance(nearest_pressures, return_dist_sqr);
-        T_from_v_e[iv][ie] = inverseDistance(nearest_temperatures, return_dist_sqr);
+        // now do v & h mapping
+        {
+          Point vh = Point(
+              _specific_volume[iv] / (_v_max - _v_min), _enthalpy[ie] / (_h_max - _h_min), 0.0);
+          std::vector<std::size_t> return_index(_inversion_interpolation_order);
+          std::vector<Real> return_dist_sqr(_inversion_interpolation_order);
+          kd_tree_vh.neighborSearch(
+              vh, _inversion_interpolation_order, return_index, return_dist_sqr);
+
+          std::vector<Real> nearest_pressures(_inversion_interpolation_order);
+          std::vector<Real> nearest_temperatures(_inversion_interpolation_order);
+          for (unsigned int j = 0; j < _inversion_interpolation_order; ++j)
+          {
+            nearest_pressures[j] = pT_points[return_index[j]](0);
+            nearest_temperatures[j] = pT_points[return_index[j]](1);
+          }
+
+          p_from_v_h[iv][ie] = inverseDistance(nearest_pressures, return_dist_sqr);
+          T_from_v_h[iv][ie] = inverseDistance(nearest_temperatures, return_dist_sqr);
+        }
       }
     }
 
@@ -418,18 +462,10 @@ TabulatedFluidProperties::initialSetup()
         libmesh_make_unique<BicubicInterpolation>(_specific_volume, _internal_energy, p_from_v_e);
     _T_from_v_e_ipol =
         libmesh_make_unique<BicubicInterpolation>(_specific_volume, _internal_energy, T_from_v_e);
-
-    // it works!!
-    /*
-    for (unsigned int iv = 0; iv < _num_v; ++iv)
-      for (unsigned int ie = 0; ie < _num_e; ++ie)
-      {
-        Real p = _p_from_v_e_ipol->sample(_specific_volume[iv], _internal_energy[ie]);
-        Real T = _T_from_v_e_ipol->sample(_specific_volume[iv], _internal_energy[ie]);
-        std::cout << p << " " << T << " " << _specific_volume[iv] << " " << v_from_p_T(p, T) << " "
-                  << _internal_energy[ie] << " " << e_from_p_T(p, T) << " " << std::endl;
-      }
-    */
+    _p_from_v_h_ipol =
+        libmesh_make_unique<BicubicInterpolation>(_specific_volume, _enthalpy, p_from_v_h);
+    _T_from_v_h_ipol =
+        libmesh_make_unique<BicubicInterpolation>(_specific_volume, _enthalpy, T_from_v_h);
   }
 }
 
@@ -711,7 +747,34 @@ TabulatedFluidProperties::g_from_v_e(Real v, Real e) const
   const Real T = T_from_v_e(v, e);
   const Real s = s_from_p_T(p, T);
   const Real h = h_from_p_T(p, T);
+  // this is simple the definition of Gibbs free energy
   return h - T * s;
+}
+
+Real
+TabulatedFluidProperties::e_from_v_h(Real v, Real h) const
+{
+  if (!_construct_pT_from_ve)
+    mooseError("You must construct pT from ve tables when calling e_from_v_h.");
+  const Real p = _p_from_v_h_ipol->sample(v, h);
+  const Real T = _T_from_v_h_ipol->sample(v, h);
+  return e_from_p_T(p, T);
+}
+
+void
+TabulatedFluidProperties::e_from_v_h(Real v, Real h, Real & e, Real & de_dv, Real & de_dh) const
+{
+  if (!_construct_pT_from_ve)
+    mooseError("You must construct pT from ve tables when calling e_from_v_h.");
+  Real p, dp_dv, dp_dh;
+  _p_from_v_h_ipol->sampleValueAndDerivatives(v, h, p, dp_dv, dp_dh);
+  Real T, dT_dv, dT_dh;
+  _T_from_v_h_ipol->sampleValueAndDerivatives(v, h, T, dT_dv, dT_dh);
+  Real de_dp, de_dT;
+  e_from_p_T(p, T, e, de_dp, de_dT);
+
+  de_dv = de_dp * dp_dv + de_dT * dT_dv;
+  de_dh = de_dp * dp_dh + de_dT * dT_dh;
 }
 
 std::vector<Real>

@@ -106,8 +106,8 @@ public:
 
   virtual Real v_from_p_T(Real pressure, Real temperature) const override;
 
-  virtual void v_from_p_T(
-      Real pressure, Real temperature, Real & v, Real & dv_dp, Real & dv_dT) const override;
+  virtual void
+  v_from_p_T(Real pressure, Real temperature, Real & v, Real & dv_dp, Real & dv_dT) const override;
 
   virtual Real e_from_p_T(Real pressure, Real temperature) const override;
 
@@ -125,15 +125,18 @@ public:
       Real pressure, Real temperature, Real & mu, Real & dmu_dp, Real & dmu_dT) const override;
 
   virtual Real cp_from_p_T(Real pressure, Real temperature) const override;
-  virtual void cp_from_p_T(Real pressure, Real temperature, Real & cp, Real & dcp_dp, Real & dcp_dT) const override;
+  virtual void cp_from_p_T(
+      Real pressure, Real temperature, Real & cp, Real & dcp_dp, Real & dcp_dT) const override;
 
   using SinglePhaseFluidProperties::cp_from_p_T;
 
   virtual Real cv_from_p_T(Real pressure, Real temperature) const override;
-  virtual void cv_from_p_T(Real pressure, Real temperature, Real & cv, Real & dcv_dp, Real & dcv_dT) const override;
+  virtual void cv_from_p_T(
+      Real pressure, Real temperature, Real & cv, Real & dcv_dp, Real & dcv_dT) const override;
 
   virtual Real c_from_p_T(Real pressure, Real temperature) const override;
-  virtual void c_from_p_T(Real pressure, Real temperature, Real & c, Real & dc_dp, Real & dc_dT) const override;
+  virtual void
+  c_from_p_T(Real pressure, Real temperature, Real & c, Real & dc_dp, Real & dc_dT) const override;
 
   virtual Real k_from_p_T(Real pressure, Real temperature) const override;
 
@@ -170,23 +173,26 @@ public:
   virtual Real k_from_v_e(Real v, Real e) const override;
   virtual void k_from_v_e(Real v, Real e, Real & k, Real & dk_dv, Real & dk_de) const override;
   virtual Real g_from_v_e(Real v, Real e) const override;
-/* the RELAP-7 properties
-  virtual ADReal p_from_v_e(const ADReal & v, const ADReal & e) const override;
+  /* the RELAP-7 properties
+    virtual ADReal p_from_v_e(const ADReal & v, const ADReal & e) const override;
 
-  virtual void p_from_v_e(const DualReal & v,
-                          const DualReal & e,
-                          DualReal & p,
-                          DualReal & dp_dv,
-                          DualReal & dp_de) const override;
-  virtual ADReal T_from_v_e(const ADReal & v, const ADReal & e) const override;
-  virtual void T_from_v_e(const DualReal & v,
-                          const DualReal & e,
-                          DualReal & T,
-                          DualReal & dT_dv,
-                          DualReal & dT_de) const override;
+    virtual void p_from_v_e(const DualReal & v,
+                            const DualReal & e,
+                            DualReal & p,
+                            DualReal & dp_dv,
+                            DualReal & dp_de) const override;
+    virtual ADReal T_from_v_e(const ADReal & v, const ADReal & e) const override;
+    virtual void T_from_v_e(const DualReal & v,
+                            const DualReal & e,
+                            DualReal & T,
+                            DualReal & dT_dv,
+                            DualReal & dT_de) const override;
 
-  virtual ADReal c_from_v_e(const ADReal & v, const ADReal & e) const override;
-*/
+    virtual ADReal c_from_v_e(const ADReal & v, const ADReal & e) const override;
+  */
+
+  virtual Real e_from_v_h(Real v, Real h) const override;
+  virtual void e_from_v_h(Real v, Real h, Real & e, Real & de_dv, Real & de_dh) const override;
 
 protected:
   /**
@@ -302,6 +308,12 @@ protected:
   /// interpolate pressure from (v,e)
   std::unique_ptr<BicubicInterpolation> _p_from_v_e_ipol;
 
+  /// interpolate temperature from (v,h)
+  std::unique_ptr<BicubicInterpolation> _T_from_v_h_ipol;
+
+  /// interpolate pressure from (v,h)
+  std::unique_ptr<BicubicInterpolation> _p_from_v_h_ipol;
+
   /// Minimum internal energy in tabulated data
   Real _e_min;
   /// Maximum internal energy in tabulated data
@@ -310,11 +322,17 @@ protected:
   Real _v_min;
   /// Maximum specific volume in tabulated data
   Real _v_max;
+  /// Minimum specific enthalpy in tabulated data
+  Real _h_min;
+  /// Maximum specific enthalpy in tabulated data
+  Real _h_max;
 
   /// specific volume vector
   std::vector<Real> _specific_volume;
   /// internal energy vector
   std::vector<Real> _internal_energy;
+  /// enthalpy vector
+  std::vector<Real> _enthalpy;
 };
 
 #pragma GCC diagnostic pop
