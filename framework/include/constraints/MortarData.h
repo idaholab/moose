@@ -18,6 +18,7 @@
 #include <set>
 
 class SubProblem;
+class MortarExecutorInterface;
 
 class MortarData : public libMesh::ParallelObject
 {
@@ -96,6 +97,9 @@ public:
    */
   const std::set<SubdomainID> & getHigherDimSubdomainIDs(SubdomainID lower_d_subdomain_id) const;
 
+  void notifyWhenMortarSetup(MortarExecutorInterface *);
+  void dontNotifyWhenMortarSetup(MortarExecutorInterface *);
+
 private:
   /**
    * Builds mortar segment mesh from specific AutomaticMortarGeneration object
@@ -135,4 +139,9 @@ private:
   /// Map from lower dimensional subdomain ids to corresponding higher simensional subdomain ids
   /// (e.g. the ids of the interior parents)
   std::unordered_map<SubdomainID, std::set<SubdomainID>> _lower_d_sub_to_higher_d_subs;
+
+  std::set<MortarExecutorInterface *> _mei_objs;
+
+  /// Whether we have performed any mortar mesh construction
+  bool _mortar_initd;
 };

@@ -27,6 +27,8 @@ template <typename ComputeValueType>
 MortarNodalAuxKernelTempl<ComputeValueType>::MortarNodalAuxKernelTempl(
     const InputParameters & parameters)
   : AuxKernelTempl<ComputeValueType>(parameters),
+    MortarExecutorInterface(
+        *this->template getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     MortarInterface(this),
     _displaced(this->template getParam<bool>("use_displaced_mesh")),
     _fe_problem(*this->template getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
@@ -34,6 +36,21 @@ MortarNodalAuxKernelTempl<ComputeValueType>::MortarNodalAuxKernelTempl(
 {
   if (!isNodal())
     paramError("variable", "MortarNodalAuxKernel derivatives populate nodal aux variables only.");
+}
+
+template <typename ComputeValueType>
+void
+MortarNodalAuxKernelTempl<ComputeValueType>::mortarSetup()
+{
+  std::array<const MortarNodalAuxKernelTempl<ComputeValueType> *, 1> consumers = {{this}};
+
+  Moose::Mortar::setupMortarMaterials(consumers,
+                                      _fe_problem,
+                                      amg(),
+                                      _tid,
+                                      _secondary_ip_sub_to_mats,
+                                      _primary_ip_sub_to_mats,
+                                      _secondary_boundary_mats);
 }
 
 template <typename ComputeValueType>
@@ -52,8 +69,17 @@ MortarNodalAuxKernelTempl<ComputeValueType>::compute()
     total_volume += _msm_volume;
   };
 
-  Moose::Mortar::loopOverMortarSegments(
-      its, _assembly, _subproblem, _fe_problem, amg(), _displaced, consumers, act_functor);
+  Moose::Mortar::loopOverMortarSegments(its,
+                                        _assembly,
+                                        _subproblem,
+                                        _fe_problem,
+                                        amg(),
+                                        _displaced,
+                                        consumers,
+                                        _secondary_ip_sub_to_mats,
+                                        _primary_ip_sub_to_mats,
+                                        _secondary_boundary_mats,
+                                        act_functor);
 
   // We have to reinit the node for this variable in order to get the dof index set for the node
   _var.reinitNode();

@@ -10,6 +10,7 @@
 #pragma once
 
 #include "MooseTypes.h"
+#include "MortarExecutorInterface.h"
 
 #include "libmesh/libmesh_common.h"
 
@@ -19,6 +20,7 @@ class FEProblemBase;
 class AutomaticMortarGeneration;
 class Assembly;
 class MooseMesh;
+class MaterialBase;
 
 namespace libMesh
 {
@@ -28,7 +30,7 @@ class FEGenericBase;
 typedef FEGenericBase<Real> FEBase;
 }
 
-class ComputeMortarFunctor
+class ComputeMortarFunctor : public MortarExecutorInterface
 {
 public:
   ComputeMortarFunctor(
@@ -42,6 +44,8 @@ public:
    * Loops over the mortar segment mesh and computes the residual/Jacobian
    */
   void operator()();
+
+  void mortarSetup() override;
 
 private:
   /// The mortar constraints to loop over when on each element. These must be
@@ -66,4 +70,8 @@ private:
 
   /// A reference to the assembly object
   Assembly & _assembly;
+
+  std::map<SubdomainID, std::deque<MaterialBase *>> _secondary_ip_sub_to_mats;
+  std::map<SubdomainID, std::deque<MaterialBase *>> _primary_ip_sub_to_mats;
+  std::deque<MaterialBase *> _secondary_boundary_mats;
 };

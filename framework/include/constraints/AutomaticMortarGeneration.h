@@ -12,6 +12,7 @@
 #include "MortarSegmentInfo.h"
 #include "MooseHashing.h"
 #include "ConsoleStreamInterface.h"
+#include "MooseError.h"
 
 // libMesh includes
 #include "libmesh/id_types.h"
@@ -261,11 +262,15 @@ public:
   /**
    * @return The primary-secondary boundary ID pairs
    */
-  const std::vector<std::pair<boundary_id_type, boundary_id_type>> &
-  primarySecondaryBoundaryIDPairs() const
+  const std::vector<std::pair<BoundaryID, BoundaryID>> & primarySecondaryBoundaryIDPairs() const
   {
     return _primary_secondary_boundary_id_pairs;
   }
+
+  // const std::pair<SubdomainID, SubdomainID> & primarySecondarySubdomainIDPair()
+  // const;
+
+  const std::pair<BoundaryID, BoundaryID> & primarySecondaryBoundaryIDPair() const;
 
   /**
    * @return The mortar segment mesh
@@ -319,6 +324,10 @@ public:
     return _secondary_elems_to_mortar_segments;
   }
 
+  const std::set<SubdomainID> & secondaryIPSubIDs() const { return _secondary_ip_sub_ids; }
+
+  const std::set<SubdomainID> & primaryIPSubIDs() const { return _primary_ip_sub_ids; }
+
 private:
   MooseApp & _app;
 
@@ -326,14 +335,14 @@ private:
   MeshBase & _mesh;
 
   /// The boundary ids corresponding to all the secondary surfaces.
-  std::set<boundary_id_type> _secondary_requested_boundary_ids;
+  std::set<BoundaryID> _secondary_requested_boundary_ids;
 
   /// The boundary ids corresponding to all the primary surfaces.
-  std::set<boundary_id_type> _primary_requested_boundary_ids;
+  std::set<BoundaryID> _primary_requested_boundary_ids;
 
   /// A list of primary/secondary boundary id pairs corresponding to each
   /// side of the mortar interface.
-  std::vector<std::pair<boundary_id_type, boundary_id_type>> _primary_secondary_boundary_id_pairs;
+  std::vector<std::pair<BoundaryID, BoundaryID>> _primary_secondary_boundary_id_pairs;
 
   /// Map from nodes to connected lower-dimensional elements on the secondary/primary subdomains.
   std::unordered_map<dof_id_type, std::vector<const Elem *>> _nodes_to_secondary_elem_map;
@@ -382,13 +391,12 @@ private:
 
   /// A list of primary/secondary subdomain id pairs corresponding to each
   /// side of the mortar interface.
-  std::vector<std::pair<subdomain_id_type, subdomain_id_type>>
-      _primary_secondary_subdomain_id_pairs;
+  std::vector<std::pair<SubdomainID, SubdomainID>> _primary_secondary_subdomain_id_pairs;
 
   /// The secondary/primary lower-dimensional boundary subdomain ids are the
   /// secondary/primary *boundary* ids
-  std::set<subdomain_id_type> _secondary_boundary_subdomain_ids;
-  std::set<subdomain_id_type> _primary_boundary_subdomain_ids;
+  std::set<SubdomainID> _secondary_boundary_subdomain_ids;
+  std::set<SubdomainID> _primary_boundary_subdomain_ids;
 
   /// Used by the AugmentSparsityOnInterface functor to determine
   /// whether a given Elem is coupled to any others across the gap, and
@@ -422,19 +430,22 @@ private:
   std::unordered_map<const Elem *, std::set<Elem *, CompareDofObjectsByID>>
       _secondary_elems_to_mortar_segments;
 
+  std::set<SubdomainID> _secondary_ip_sub_ids;
+  std::set<SubdomainID> _primary_ip_sub_ids;
+
   /**
    * Helper function responsible for projecting secondary nodes
    * onto primary elements for a single primary/secondary pair. Called by the class member
    * AutomaticMortarGeneration::project_secondary_nodes().
    */
-  void projectSecondaryNodesSinglePair(subdomain_id_type lower_dimensional_primary_subdomain_id,
-                                       subdomain_id_type lower_dimensional_secondary_subdomain_id);
+  void projectSecondaryNodesSinglePair(SubdomainID lower_dimensional_primary_subdomain_id,
+                                       SubdomainID lower_dimensional_secondary_subdomain_id);
 
   /**
    * Helper function used internally by AutomaticMortarGeneration::project_primary_nodes().
    */
-  void projectPrimaryNodesSinglePair(subdomain_id_type lower_dimensional_primary_subdomain_id,
-                                     subdomain_id_type lower_dimensional_secondary_subdomain_id);
+  void projectPrimaryNodesSinglePair(SubdomainID lower_dimensional_primary_subdomain_id,
+                                     SubdomainID lower_dimensional_secondary_subdomain_id);
 
   /**
    * Householder orthogonalization procedure to obtain proper basis for tangent and binormal vectors
@@ -482,3 +493,21 @@ private:
   /// are strongly set to 0.
   bool _correct_edge_dropping;
 };
+
+// inline const std::pair<SubdomainID, SubdomainID> &
+// AutomaticMortarGeneration::primarySecondarySubdomainIDPair() const
+// {
+//   mooseAssert(_primary_secondary_subdomain_id_pairs.size() == 1,
+//               "We currently only support a single subdomain pair per mortar generation object");
+
+//   return _primary_secondary_subdomain_id_pairs.front();
+// }
+
+inline const std::pair<BoundaryID, BoundaryID> &
+AutomaticMortarGeneration::primarySecondaryBoundaryIDPair() const
+{
+  mooseAssert(_primary_secondary_boundary_id_pairs.size() == 1,
+              "We currently only support a single boundary pair per mortar generation object");
+
+  return _primary_secondary_boundary_id_pairs.front();
+}

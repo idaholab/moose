@@ -762,8 +762,7 @@ public:
   void reinitMaterialsFace(SubdomainID blk_id,
                            THREAD_ID tid,
                            bool swap_stateful = true,
-                           bool execute_stateful = true,
-                           bool use_displaced_assembly = false);
+                           const std::deque<MaterialBase *> * reinit_mats = nullptr);
 
   /**
    * reinit materials on the neighboring element face
@@ -778,8 +777,7 @@ public:
   void reinitMaterialsNeighbor(SubdomainID blk_id,
                                THREAD_ID tid,
                                bool swap_stateful = true,
-                               bool execute_stateful = true,
-                               bool use_displaced_assembly = false);
+                               const std::deque<MaterialBase *> * reinit_mats = nullptr);
 
   /**
    * reinit materials on a boundary
@@ -794,8 +792,7 @@ public:
   void reinitMaterialsBoundary(BoundaryID boundary_id,
                                THREAD_ID tid,
                                bool swap_stateful = true,
-                               bool execute_stateful = true,
-                               bool use_displaced_assembly = false);
+                               const std::deque<MaterialBase *> * reinit_mats = nullptr);
 
   void reinitMaterialsInterface(BoundaryID boundary_id, THREAD_ID tid, bool swap_stateful = true);
 
@@ -1852,6 +1849,7 @@ public:
    * Returns the mortar data object
    */
   const MortarData & mortarData() const { return _mortar_data; }
+  MortarData & mortarData() { return _mortar_data; }
 
   /**
    * Whether the simulation has neighbor coupling

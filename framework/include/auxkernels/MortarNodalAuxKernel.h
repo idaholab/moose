@@ -11,13 +11,16 @@
 
 #include "AuxKernel.h"
 #include "MortarInterface.h"
+#include "MortarExecutorInterface.h"
 
 /**
  * Base class for creating new nodally-based mortar auxiliary kernels
  *
  */
 template <typename ComputeValueType>
-class MortarNodalAuxKernelTempl : public AuxKernelTempl<ComputeValueType>, protected MortarInterface
+class MortarNodalAuxKernelTempl : public AuxKernelTempl<ComputeValueType>,
+                                  public MortarExecutorInterface,
+                                  protected MortarInterface
 {
 public:
   static InputParameters validParams();
@@ -29,10 +32,13 @@ public:
    */
   void compute() override;
 
+  void mortarSetup() override;
+
 protected:
   void precalculateValue() override final;
 
   using AuxKernelTempl<ComputeValueType>::isNodal;
+  using AuxKernelTempl<ComputeValueType>::_tid;
   using AuxKernelTempl<ComputeValueType>::paramError;
   using AuxKernelTempl<ComputeValueType>::mooseError;
   using AuxKernelTempl<ComputeValueType>::_subproblem;
@@ -49,6 +55,10 @@ protected:
 
   /// The mortar segment volume
   Real _msm_volume;
+
+  std::map<SubdomainID, std::deque<MaterialBase *>> _secondary_ip_sub_to_mats;
+  std::map<SubdomainID, std::deque<MaterialBase *>> _primary_ip_sub_to_mats;
+  std::deque<MaterialBase *> _secondary_boundary_mats;
 };
 
 typedef MortarNodalAuxKernelTempl<Real> MortarNodalAuxKernel;

@@ -92,8 +92,8 @@ public:
    * should be \p false when for example executing material objects for mortar contexts in which
    * stateful properties don't make sense
    */
-  void reinit(const std::vector<std::shared_ptr<MaterialBase>> & mats,
-              bool execute_stateful = true);
+  template <typename MatContainer>
+  void reinit(const MatContainer & mats);
 
   /// Calls the reset method of Materials to ensure that they are in a proper state.
   void reset(const std::vector<std::shared_ptr<MaterialBase>> & mats);
@@ -448,4 +448,12 @@ MaterialProperty<T> &
 MaterialData::getPropertyOlder(const std::string & name)
 {
   return declareHelper<T>(_props_older, name, _storage.addPropertyOlder(name));
+}
+
+template <typename MatContainer>
+void
+MaterialData::reinit(const MatContainer & mats)
+{
+  for (const auto & mat : mats)
+    mat->computeProperties();
 }
