@@ -10,9 +10,9 @@ outer_Tinf = 300 # K
   [left_block]
     type = GeneratedMeshGenerator
     dim = 3
-    nx = 6
-    ny = 12
-    nz = 12
+    nx = 3
+    ny = 6
+    nz = 6
     xmin = -1
     xmax = -0.5
     ymin = -0.5
@@ -36,9 +36,9 @@ outer_Tinf = 300 # K
   [right_block]
     type = GeneratedMeshGenerator
     dim = 3
-    nx = 7
-    ny = 14
-    nz = 14
+    nx = 4
+    ny = 8
+    nz = 8
     xmin = 0.5
     xmax = 1
     ymin = -0.5

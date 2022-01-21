@@ -254,7 +254,7 @@
     input = 'gap_heat_transfer_3D_mortar.i'
     type = CSVDiff
     csvdiff = 'gap_heat_transfer_3D_mortar_out_NodalTemperature_0001.csv'
-    rel_err = 1e-2
+    rel_err = 4e-2
     abs_zero = 1e-8
     min_ad_size = 100
     ad_indexing_type = 'global'
