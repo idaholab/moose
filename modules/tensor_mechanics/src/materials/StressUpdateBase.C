@@ -11,9 +11,9 @@
 
 #include "MooseMesh.h"
 
-template <bool is_ad>
+template <bool is_ad, typename R2, typename R4>
 InputParameters
-StressUpdateBaseTempl<is_ad>::validParams()
+StressUpdateBaseTempl<is_ad, R2, R4>::validParams()
 {
   InputParameters params = Material::validParams();
   params.addClassDescription("Calculates an admissible state (stress that lies on or within the "
@@ -32,8 +32,8 @@ StressUpdateBaseTempl<is_ad>::validParams()
   return params;
 }
 
-template <bool is_ad>
-StressUpdateBaseTempl<is_ad>::StressUpdateBaseTempl(const InputParameters & parameters)
+template <bool is_ad, typename R2, typename R4>
+StressUpdateBaseTempl<is_ad, R2, R4>::StressUpdateBaseTempl(const InputParameters & parameters)
   : Material(parameters),
     _base_name(this->isParamValid("base_name")
                    ? this->template getParam<std::string>("base_name") + "_"
@@ -41,37 +41,37 @@ StressUpdateBaseTempl<is_ad>::StressUpdateBaseTempl(const InputParameters & para
 {
 }
 
-template <bool is_ad>
+template <bool is_ad, typename R2, typename R4>
 void
-StressUpdateBaseTempl<is_ad>::setQp(unsigned int qp)
+StressUpdateBaseTempl<is_ad, R2, R4>::setQp(unsigned int qp)
 {
   _qp = qp;
 }
 
-template <bool is_ad>
+template <bool is_ad, typename R2, typename R4>
 void
-StressUpdateBaseTempl<is_ad>::propagateQpStatefulProperties()
+StressUpdateBaseTempl<is_ad, R2, R4>::propagateQpStatefulProperties()
 {
   mooseError(
       "propagateQpStatefulProperties called: it needs to be implemented by your inelastic model");
 }
 
-template <bool is_ad>
+template <bool is_ad, typename R2, typename R4>
 Real
-StressUpdateBaseTempl<is_ad>::computeTimeStepLimit()
+StressUpdateBaseTempl<is_ad, R2, R4>::computeTimeStepLimit()
 {
   return std::numeric_limits<Real>::max();
 }
 
-template <bool is_ad>
+template <bool is_ad, typename R2, typename R4>
 void
-StressUpdateBaseTempl<is_ad>::updateState(
-    GenericRankTwoTensor<is_ad> & /*strain_increment*/,
-    GenericRankTwoTensor<is_ad> & /*inelastic_strain_increment*/,
-    const GenericRankTwoTensor<is_ad> & /*rotation_increment*/,
-    GenericRankTwoTensor<is_ad> & /*stress_new*/,
+StressUpdateBaseTempl<is_ad, R2, R4>::updateState(
+    GR2 & /*strain_increment*/,
+    GR2 & /*inelastic_strain_increment*/,
+    const GR2 & /*rotation_increment*/,
+    GR2 & /*stress_new*/,
     const RankTwoTensor & /*stress_old*/,
-    const GenericRankFourTensor<is_ad> & /*elasticity_tensor*/,
+    const GR4 & /*elasticity_tensor*/,
     const RankTwoTensor & /*elastic_strain_old*/,
     bool /*compute_full_tangent_operator = false*/,
     RankFourTensor & /*tangent_operator = _identityTensor*/)
@@ -79,15 +79,15 @@ StressUpdateBaseTempl<is_ad>::updateState(
   mooseError("updateState called: it needs to be implemented by your inelastic model");
 }
 
-template <bool is_ad>
+template <bool is_ad, typename R2, typename R4>
 void
-StressUpdateBaseTempl<is_ad>::updateStateSubstep(
-    GenericRankTwoTensor<is_ad> & /*strain_increment*/,
-    GenericRankTwoTensor<is_ad> & /*inelastic_strain_increment*/,
-    const GenericRankTwoTensor<is_ad> & /*rotation_increment*/,
-    GenericRankTwoTensor<is_ad> & /*stress_new*/,
+StressUpdateBaseTempl<is_ad, R2, R4>::updateStateSubstep(
+    GR2 & /*strain_increment*/,
+    GR2 & /*inelastic_strain_increment*/,
+    const GR2 & /*rotation_increment*/,
+    GR2 & /*stress_new*/,
     const RankTwoTensor & /*stress_old*/,
-    const GenericRankFourTensor<is_ad> & /*elasticity_tensor*/,
+    const GR4 & /*elasticity_tensor*/,
     const RankTwoTensor & /*elastic_strain_old*/,
     bool /*compute_full_tangent_operator*/,
     RankFourTensor & /*tangent_operator*/)
@@ -97,9 +97,9 @@ StressUpdateBaseTempl<is_ad>::updateStateSubstep(
       "updateStateSubstep called: it needs to be implemented by your inelastic model");
 }
 
-template <bool is_ad>
+template <bool is_ad, typename R2, typename R4>
 TangentCalculationMethod
-StressUpdateBaseTempl<is_ad>::getTangentCalculationMethod()
+StressUpdateBaseTempl<is_ad, R2, R4>::getTangentCalculationMethod()
 {
   return TangentCalculationMethod::ELASTIC;
 }
