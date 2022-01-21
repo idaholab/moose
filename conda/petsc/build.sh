@@ -18,17 +18,18 @@ export FCFLAGS="$FFLAGS"
 export HYDRA_LAUNCHER=fork
 export LIBS="-lmpifort -lgfortran"
 
-if [[ $HOST == arm64-apple-darwin20.0.0 ]]; then
-    CFLAGS="${CFLAGS} -mcpu=apple-a12"
-    CXXFLAGS="${CXXFLAGS} -mcpu=apple-a12"
-    FFLAGS="${FFLAGS} -march=armv8.3-a"
-    FCFLAGS="${FCFLAGS} -march=armv8.3-a"
-elif [[ $(uname) == Darwin ]]; then
-    CFLAGS="${CFLAGS} -march=core2 -mtune=haswell"
-    CXXFLAGS="${CXXFLAGS} -march=core2 -mtune=haswell"
-    FFLAGS="${FFLAGS} -I$PREFIX/include"
-    FCFLAGS="${FCFLAGS} -I$PREFIX/include"
-    LDFLAGS="${LDFLAGS} -Wl,-headerpad-max-install-names"
+if [[ $(uname) == Darwin ]]; then
+    if [[ $HOST == arm64-apple-darwin20.0.0 ]]; then
+        CFLAGS="${CFLAGS} -mcpu=apple-a12"
+        CXXFLAGS="${CXXFLAGS} -mcpu=apple-a12"
+        FFLAGS="${FFLAGS} -march=armv8.3-a"
+        FCFLAGS="${FCFLAGS} -march=armv8.3-a"
+    else
+        CFLAGS="${CFLAGS} -march=core2 -mtune=haswell"
+        CXXFLAGS="${CXXFLAGS} -march=core2 -mtune=haswell"
+        FFLAGS="${FFLAGS} -I$PREFIX/include"
+        FCFLAGS="${FCFLAGS} -I$PREFIX/include"
+    fi
 else
     CFLAGS="${CFLAGS} -march=nocona -mtune=haswell"
     CXXFLAGS="${CXXFLAGS} -march=nocona -mtune=haswell"
