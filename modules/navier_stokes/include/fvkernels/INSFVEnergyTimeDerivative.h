@@ -20,6 +20,12 @@ public:
 protected:
   ADReal computeQpResidual() override;
 
-  const Real & _rho;
+  /// the density
+  const Moose::Functor<ADReal> & _rho;
+  /// the time derivative of the density
+  const Moose::Functor<ADReal> * _rho_dot;
+  /// the heat conductivity
   const Moose::Functor<ADReal> & _cp;
+  /// the time derivative of the heat conductivity
+  const Moose::Functor<ADReal> * _cp_dot;
 };

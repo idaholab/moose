@@ -19,19 +19,36 @@ INSFVEnergyTimeDerivative::validParams()
   InputParameters params = FVTimeKernel::validParams();
   params.addClassDescription(
       "Adds the time derivative term to the incompressible Navier-Stokes energy equation.");
-  params.addRequiredParam<Real>(NS::density, "The value for the density");
-  params.declareControllable(NS::density);
-  params.addParam<MooseFunctorName>(NS::cp, NS::cp, "The name of the specific heat capacity");
+  params.addRequiredParam<MooseFunctorName>(NS::density, "Density");
+  params.addParam<MooseFunctorName>(NS::time_deriv(NS::density), "Density time derivative functor");
+  params.addRequiredParam<MooseFunctorName>(NS::cp, "Specific heat capacity");
+  params.addParam<MooseFunctorName>(NS::time_deriv(NS::cp),
+                                    "Specific heat capacity time derivative functor");
   return params;
 }
 
 INSFVEnergyTimeDerivative::INSFVEnergyTimeDerivative(const InputParameters & params)
-  : FVTimeKernel(params), _rho(getParam<Real>(NS::density)), _cp(getFunctor<ADReal>(NS::cp))
+  : FVTimeKernel(params),
+    _rho(getFunctor<ADReal>(NS::density)),
+    _rho_dot(isParamValid(NS::time_deriv(NS::density))
+                 ? &getFunctor<ADReal>(NS::time_deriv(NS::density))
+                 : nullptr),
+    _cp(getFunctor<ADReal>(NS::cp)),
+    _cp_dot(isParamValid(NS::time_deriv(NS::cp)) ? &getFunctor<ADReal>(NS::time_deriv(NS::cp))
+                                                 : nullptr)
 {
 }
 
 ADReal
 INSFVEnergyTimeDerivative::computeQpResidual()
 {
-  return _rho * _cp(makeElemArg(_current_elem)) * FVTimeKernel::computeQpResidual();
+  auto time_derivative = _rho(makeElemArg(_current_elem)) * _cp(makeElemArg(_current_elem)) *
+                         FVTimeKernel::computeQpResidual();
+  if (_rho_dot)
+    time_derivative += (*_rho_dot)(makeElemArg(_current_elem)) * _cp(makeElemArg(_current_elem)) *
+                       _var(makeElemArg(_current_elem));
+  if (_cp_dot)
+    time_derivative += _rho(makeElemArg(_current_elem)) * (*_cp_dot)(makeElemArg(_current_elem)) *
+                       _var(makeElemArg(_current_elem));
+  return time_derivative;
 }

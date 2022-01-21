@@ -19,7 +19,7 @@ PWCNSFVMassTimeDerivative::validParams()
   InputParameters params = WCNSFVMassTimeDerivative::validParams();
   params.addClassDescription("Adds the time derivative term to the porous weakly-compressible "
                              "Navier-Stokes continuity equation.");
-  params.addRequiredCoupledVar(NS::porosity, "Porosity auxiliary variable");
+  params.addParam<MooseFunctorName>(NS::porosity, NS::porosity, "the porosity");
   return params;
 }
 

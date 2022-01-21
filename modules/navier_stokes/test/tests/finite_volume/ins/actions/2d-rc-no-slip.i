@@ -21,8 +21,8 @@ rho=1.1
     porous_medium_treatment = false
     add_energy_equation = false
 
-    density_name = 'rho'
-    dynamic_viscosity_name = 'mu'
+    density = 'rho'
+    dynamic_viscosity = 'mu'
     gravity = '0 0 0'
 
     inlet_boundaries = 'left'
@@ -38,7 +38,7 @@ rho=1.1
 
 [Materials]
   [const]
-    type = ADGenericConstantMaterial
+    type = ADGenericFunctorMaterial
     prop_names = 'rho mu'
     prop_values = '${rho} ${mu}'
   []
