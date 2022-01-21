@@ -2,15 +2,14 @@
 
 !alert! construction title=Work In Progress
 This document is intended to be a living one, as M1 support is added and the current
-"best practice" of installing it improved. As of Nov 3 2021, full package support
-(i.e., `moose-mpich` + `moose-petsc` + `moose-libmesh`) is not yet available.
+"best practice" of installing it improved. As of 21 Jan 2022, full, public package
+support (i.e., `moose-mpich` + `moose-petsc` + `moose-libmesh`) is not yet available.
 !alert-end!
 
-!alert! note title=Miniforge3
-This guide assumes that you have miniforge3 installed. Download the newest release
-[using this link](https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-MacOSX-arm64.sh).
-Then the [MOOSE installation instructions for conda](conda.md) can be used to perform
-the installation.
+!alert! note title=Mambaforge3
+This guide assumes that you have mambaforge3 installed. The [MOOSE installation instructions for conda](conda.md)
+can be used to perform the installation. Note for those instructions that `x86_64`
+in the name of the Mambaforge install script should be replaced with `arm64`.
 !alert-end!
 
 1. Download MacOSX 11.3 SDK [via GitHub](https://github.com/phracker/MacOSX-SDKs/releases/download/11.3/MacOSX11.3.sdk.tar.xz).
@@ -21,7 +20,6 @@ the installation.
 
    ```
    conda deactivate
-   conda install mamba
    conda create -n build -y
    conda activate build
    mamba install boa
@@ -34,23 +32,32 @@ the installation.
    conda activate build
    ```
 
-4. Build moose-mpich and moose-tools locally (make sure build environment is activated) and init submodules
+4. Initialize MOOSE submodules (as well as all libMesh contrib submodules):
+
+   ```
+   git submodule update --init petsc libmesh
+   cd ~/projects/moose/libmesh
+   git submodule update --init --recursive
+   ```
+
+5. Build MOOSE packages locally and in order of dependency (this step will take some time):
 
    ```
    cd ~/projects/moose/conda
    conda mambabuild mpich
+   conda mambabuild libmesh-vtk
+   conda mambabuild petsc
+   conda mambabuild libmesh
    conda mambabuild tools
-   cd ..
-   git submodule update --init --recursive petsc libmesh
    ```
 
-5. Create development environment and build PETSc:
+6. Create development environment (can name it something other than "testing" if you want):
 
    ```
    conda deactivate
    conda create -n testing -y
    conda activate testing
-   mamba install -c ~/miniforge3/envs/build/conda-bld moose-mpich moose-tools cmake
+   mamba install -c ~/mambaforge3/envs/build/conda-bld moose-libmesh moose-tools
    ```
 
    !alert! tip
@@ -58,50 +65,17 @@ the installation.
    can be properly set upon activation
    !alert-end!
 
+7. Build and test MOOSE:
+
    ```
    conda activate testing
-   cd ~/projects/moose
-   scripts/updata_and_rebuild_petsc.sh --enable-shared-libraries=0 --download-mumps=0
-   ```
-
-   The modified configure options are necessary for the current build to succeed.
-   FBLASLAPACK fails if shared libraries are enabled, and the `-lmpiseq` library
-   cannot be currently found in the current `moose-mpich` build on Monterey.
-
-6. When PETSc completes, libmesh and its dependencies need to be bootstrapped for ARM64 on MacOS:
-
-   ```
-   cd libmesh
-   git submodule update --recursive
-   ./bootstrap
-   cd contrib/metaphysicl
-   ./bootstrap
-   cd ../timpi
-   ./bootstrap
-   cd ../netcdf/netcdf*
-   autoreconf
-   cd ../../../.. # to get back to moose
-   ```
-
-7. Then run the libmesh script as normal:
-
-   ```
-   scripts/update_and_rebuild_libmesh.sh
-   ```
-
-8. Build and test MOOSE:
-
-   ```
-   cd test
+   cd ~/projects/moose/test
    make -j8
    ./run_tests -j8
    ```
 
 !alert! warning title=Failing tests
-This method of building MOOSE *will* result in many failing tests. Currently (as
-of Nov 3 2021), many of these tests fail with the following error:
-
-```
-dyld[75720]: symbol not found in flat namespace '_petsc_allreduce_ct'
-```
+This method of building MOOSE should pass all framework and unit tests in the `opt`
+build mode. Currently (as of 21 Jan 2022), only a handful of geochemistry tests
+are failing. "Heavy" tests still need to be tested more thoroughly.  
 !alert-end!
