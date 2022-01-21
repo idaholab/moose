@@ -803,6 +803,23 @@ TabulatedFluidProperties::p_from_v_e(Real v, Real e, Real & p, Real & dp_dv, Rea
   _p_from_v_e_ipol->sampleValueAndDerivatives(v, e, p, dp_dv, dp_de);
 }
 
+DualReal
+TabulatedFluidProperties::p_from_v_e(const DualReal & v, const DualReal & e) const
+{
+  if (!_construct_pT_from_ve)
+    mooseError("You must construct pT from ve tables when calling p_from_v_e.");
+  Real x = 0;
+  Real raw1 = v.value();
+  Real raw2 = e.value();
+  Real dxd1 = 0;
+  Real dxd2 = 0;
+  p_from_v_e(raw1, raw2, x, dxd1, dxd2);
+
+  DualReal result = x;
+  result.derivatives() = v.derivatives() * dxd1 + e.derivatives() * dxd2;
+  return result;
+}
+
 Real
 TabulatedFluidProperties::T_from_v_e(Real v, Real e) const
 {
@@ -817,6 +834,23 @@ TabulatedFluidProperties::T_from_v_e(Real v, Real e, Real & T, Real & dT_dv, Rea
   if (!_construct_pT_from_ve)
     mooseError("You must construct pT from ve tables when calling T_from_v_e.");
   _T_from_v_e_ipol->sampleValueAndDerivatives(v, e, T, dT_dv, dT_de);
+}
+
+DualReal
+TabulatedFluidProperties::T_from_v_e(const DualReal & v, const DualReal & e) const
+{
+  if (!_construct_pT_from_ve)
+    mooseError("You must construct pT from ve tables when calling p_from_v_e.");
+  Real x = 0;
+  Real raw1 = v.value();
+  Real raw2 = e.value();
+  Real dxd1 = 0;
+  Real dxd2 = 0;
+  T_from_v_e(raw1, raw2, x, dxd1, dxd2);
+
+  DualReal result = x;
+  result.derivatives() = v.derivatives() * dxd1 + e.derivatives() * dxd2;
+  return result;
 }
 
 Real
@@ -842,6 +876,23 @@ TabulatedFluidProperties::c_from_v_e(Real v, Real e, Real & c, Real & dc_dv, Rea
   c_from_p_T(p, T, c, dc_dp, dc_dT);
   dc_dv = dc_dp * dp_dv + dc_dT * dT_dv;
   dc_de = dc_dp * dp_de + dc_dT * dT_de;
+}
+
+DualReal
+TabulatedFluidProperties::c_from_v_e(const DualReal & v, const DualReal & e) const
+{
+  if (!_construct_pT_from_ve)
+    mooseError("You must construct pT from ve tables when calling p_from_v_e.");
+  Real x = 0;
+  Real raw1 = v.value();
+  Real raw2 = e.value();
+  Real dxd1 = 0;
+  Real dxd2 = 0;
+  c_from_v_e(raw1, raw2, x, dxd1, dxd2);
+
+  DualReal result = x;
+  result.derivatives() = v.derivatives() * dxd1 + e.derivatives() * dxd2;
+  return result;
 }
 
 Real
