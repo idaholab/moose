@@ -41,13 +41,27 @@ endif
 
 # Modules that follow have one or more dependencies
 # on the modules defined above them.
-
-ifeq ($(CONTACT),yes)
-        TENSOR_MECHANICS            := yes
+ifeq ($(THERMAL_HYDRAULICS),yes)
+        NAVIER_STOKES               := yes
+        FLUID_PROPERTIES            := yes
+        HEAT_CONDUCTION             := yes
+        RAY_TRACING                 := yes
+        RDG                         := yes
+        MISC                        := yes
 endif
 
 ifeq ($(FSI),yes)
         NAVIER_STOKES               := yes
+        TENSOR_MECHANICS            := yes
+endif
+
+ifeq ($(NAVIER_STOKES),yes)
+        FLUID_PROPERTIES            := yes
+        HEAT_CONDUCTION             := yes
+        RDG                         := yes
+endif
+
+ifeq ($(CONTACT),yes)
         TENSOR_MECHANICS            := yes
 endif
 
@@ -69,23 +83,8 @@ ifeq ($(POROUS_FLOW),yes)
         TENSOR_MECHANICS            := yes
 endif
 
-ifeq ($(NAVIER_STOKES),yes)
-        FLUID_PROPERTIES            := yes
-        HEAT_CONDUCTION             := yes
-        RDG                         := yes
-endif
-
 ifeq ($(XFEM),yes)
         TENSOR_MECHANICS            := yes
-endif
-
-ifeq ($(THERMAL_HYDRAULICS),yes)
-        NAVIER_STOKES               := yes
-        FLUID_PROPERTIES            := yes
-        HEAT_CONDUCTION             := yes
-        RAY_TRACING                 := yes
-        RDG                         := yes
-        MISC                        := yes
 endif
 
 # The master list of all moose modules
