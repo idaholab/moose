@@ -158,6 +158,7 @@ TEST_F(TabulatedFluidPropertiesTest, fromFileVE)
 {
   Real p = 1.5e6;
   Real T = 450.0;
+  Real pert = 1.0e-7;
 
   // Read the data file
   const_cast<TabulatedFluidProperties *>(_tab_fp_ve)->initialSetup();
@@ -240,7 +241,6 @@ TEST_F(TabulatedFluidPropertiesTest, fromFileVE)
 
   // check derivatives
   {
-    Real pert = 1.0e-7;
     Real e = _tab_fp_ve->e_from_p_T(p, T);
     Real v = _tab_fp_ve->v_from_p_T(p, T);
 
@@ -286,8 +286,22 @@ TEST_F(TabulatedFluidPropertiesTest, fromFileVE)
     REL_TEST(deriv2, (k_2 - k_0) / (e * pert), 0.001);
   }
 
-  // test
+  // test enthalpy relationships
   {
+    Real h = _tab_fp_ve->h_from_p_T(p, T);
+    Real v = _tab_fp_ve->v_from_p_T(p, T);
+    Real e_gold = _tab_fp_ve->e_from_p_T(p, T);
+    Real e = _tab_fp_ve->e_from_v_h(v, h);
+    REL_TEST(e_gold, e, 0.001);
+
+    Real e2, de_dv, de_dh;
+    _tab_fp_ve->e_from_v_h(v, h, e2, de_dv, de_dh);
+    REL_TEST(e_gold, e2, 0.001);
+    Real e_0 = _tab_fp_ve->e_from_v_h(v, h);
+    Real e_1 = _tab_fp_ve->e_from_v_h(v * (1 + pert), h);
+    Real e_2 = _tab_fp_ve->e_from_v_h(v, h * (1 + pert));
+    REL_TEST(de_dv, (e_1 - e_0) / (v * pert), 0.001);
+    REL_TEST(de_dh, (e_2 - e_0) / (h * pert), 0.001);
   }
 }
 
