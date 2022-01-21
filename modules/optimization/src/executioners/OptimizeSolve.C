@@ -29,6 +29,8 @@ OptimizeSolve::OptimizeSolve(Executioner & ex)
     _parameters(libmesh_make_unique<libMesh::PetscVector<Number>>(_my_comm)),
     _hessian(_my_comm)
 {
+  if (libMesh::n_threads() > 1)
+    mooseError("OptimizeSolve does not currently support threaded execution");
 }
 
 bool
@@ -120,7 +122,6 @@ OptimizeSolve::taoSolve()
   }
 
   CHKERRQ(ierr);
-
   // Set bounds for bounded optimization
   ierr = TaoSetVariableBoundsRoutine(_tao, variableBoundsWrapper, this);
 
