@@ -48,6 +48,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   // Create the syntax
   registerSyntax("CNSAction", "Modules/CompressibleNavierStokes");
   registerSyntax("INSAction", "Modules/IncompressibleNavierStokes");
+  registerSyntax("NSFVAction", "Modules/NavierStokesFV");
 
   // add variables action
   registerTask("add_navier_stokes_variables", /*is_required=*/false);
@@ -56,6 +57,10 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   // add ICs action
   registerTask("add_navier_stokes_ics", /*is_required=*/false);
   addTaskDependency("add_navier_stokes_ics", "add_ic");
+
+  // add user objects action
+  registerTask("add_navier_stokes_user_objects", /*is_required=*/false);
+  addTaskDependency("add_navier_stokes_user_objects", "add_navier_stokes_ics");
 
   // add Kernels action
   registerTask("add_navier_stokes_kernels", /*is_required=*/false);
