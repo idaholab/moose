@@ -173,26 +173,13 @@ public:
   virtual Real k_from_v_e(Real v, Real e) const override;
   virtual void k_from_v_e(Real v, Real e, Real & k, Real & dk_dv, Real & dk_de) const override;
   virtual Real g_from_v_e(Real v, Real e) const override;
-  /* the RELAP-7 properties
-    virtual ADReal p_from_v_e(const ADReal & v, const ADReal & e) const override;
-
-    virtual void p_from_v_e(const DualReal & v,
-                            const DualReal & e,
-                            DualReal & p,
-                            DualReal & dp_dv,
-                            DualReal & dp_de) const override;
-    virtual ADReal T_from_v_e(const ADReal & v, const ADReal & e) const override;
-    virtual void T_from_v_e(const DualReal & v,
-                            const DualReal & e,
-                            DualReal & T,
-                            DualReal & dT_dv,
-                            DualReal & dT_de) const override;
-
-    virtual ADReal c_from_v_e(const ADReal & v, const ADReal & e) const override;
-  */
-
   virtual Real e_from_v_h(Real v, Real h) const override;
   virtual void e_from_v_h(Real v, Real h, Real & e, Real & de_dv, Real & de_dh) const override;
+
+  // AD versions of properties
+  virtual DualReal p_from_v_e(const DualReal & v, const DualReal & e) const override;
+  virtual DualReal T_from_v_e(const DualReal & v, const DualReal & e) const override;
+  virtual DualReal c_from_v_e(const DualReal & v, const DualReal & e) const override;
 
 protected:
   /**
