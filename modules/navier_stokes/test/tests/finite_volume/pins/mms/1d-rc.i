@@ -70,7 +70,7 @@ velocity_interp_method='rc'
     vars = 'rho'
     vals = '${rho}'
   []
-  []
+[]
 
 [FVKernels]
   [mass]

@@ -84,8 +84,10 @@ INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & par
     _standard_body_forces(getParam<bool>("standard_body_forces")),
     _bx(_b, 0),
     _by(_b, 1),
+    _bz(_b, 2),
     _b2x(_b2, 0),
-    _b2y(_b2, 1)
+    _b2y(_b2, 1),
+    _b2z(_b2, 2)
 {
   if (!_p)
     paramError(NS::pressure, "the pressure must be a INSFVPressureVariable.");
@@ -160,8 +162,10 @@ INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & par
 
     UserObject::_subproblem.addFunctor("bx", _bx, tid);
     UserObject::_subproblem.addFunctor("by", _by, tid);
+    UserObject::_subproblem.addFunctor("bz", _bz, tid);
     UserObject::_subproblem.addFunctor("b2x", _b2x, tid);
     UserObject::_subproblem.addFunctor("b2y", _b2y, tid);
+    UserObject::_subproblem.addFunctor("b2z", _b2z, tid);
   }
 }
 
@@ -271,8 +275,8 @@ INSFVRhieChowInterpolator::insfvSetup()
       // evaluable
       return is_elem_evaluable(fi.elem()) && is_elem_evaluable(fi.neighbor());
 
-    // Else we are a boundary face. Two-term boundary face extrapolation will require a cell value
-    // and gradient, which will require evaluations on all surrounding elements
+    // Else we are on a boundary face. Two-term boundary face extrapolation will require a cell
+    // value and gradient, which will require evaluations on all surrounding elements
 
     const auto & boundary_elem = (fi.neighborPtr() && _sub_ids.count(fi.neighbor().subdomain_id()))
                                      ? fi.neighbor()

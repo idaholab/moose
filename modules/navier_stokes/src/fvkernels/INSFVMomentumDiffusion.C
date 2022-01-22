@@ -20,7 +20,7 @@ INSFVMomentumDiffusion::validParams()
   auto params = INSFVFluxKernel::validParams();
   params.addRequiredParam<MooseFunctorName>(NS::mu, "The viscosity");
   params.addClassDescription(
-      "Implements the Laplace form of the viscous strees in the Navier-Stokes equation.");
+      "Implements the Laplace form of the viscous stress in the Navier-Stokes equation.");
   params.set<unsigned short>("ghost_layers") = 2;
   return params;
 }

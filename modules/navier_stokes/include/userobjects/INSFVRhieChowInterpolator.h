@@ -220,17 +220,31 @@ private:
   /// body forces
   const bool _standard_body_forces;
 
+  /**
+   * @name Body Force Component Functors
+   * These vector component functors are not used anywhere within this class but they can be used
+   * for outputting, to auxiliary variables, either the non-interpolated or interpolated body
+   * forces
+   */
+  ///@{
   /// The x-component of the non-interpolated body forces
   VectorComponentFunctor<ADReal> _bx;
 
   /// The y-component of the non-interpolated body forces
   VectorComponentFunctor<ADReal> _by;
 
+  /// The z-component of the non-interpolated body forces
+  VectorComponentFunctor<ADReal> _bz;
+
   /// The x-component of the interpolated and reconstructed body forces
   VectorComponentFunctor<ADReal> _b2x;
 
   /// The y-component of the interpolated and reconstructed body forces
   VectorComponentFunctor<ADReal> _b2y;
+
+  /// The z-component of the interpolated and reconstructed body forces
+  VectorComponentFunctor<ADReal> _b2z;
+  ///@}
 
   /// Mutex that prevents multiple threads from saving into the 'a' coefficients at the same time
   Threads::spin_mutex _a_mutex;

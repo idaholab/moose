@@ -36,23 +36,6 @@ rho=1
   []
 []
 
-[AuxVariables]
-  [U]
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
-  []
-[]
-
-[AuxKernels]
-  [mag]
-    type = VectorMagnitudeAux
-    variable = U
-    x = u
-    y = v
-  []
-[]
-
 [UserObjects]
   [rc]
     type = INSFVRhieChowInterpolator

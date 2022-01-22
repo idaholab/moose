@@ -16,9 +16,7 @@ INSFVScalarFieldAdvection::validParams()
 {
   auto params = INSFVMomentumAdvection::validParams();
   params.suppressParameter<MooseEnum>("momentum_component");
-  params.addClassDescription(
-      "Advects an arbitrary quantity. If the 'advected_quantity' parameter is specified, it will "
-      "be used. Else the default is to advect the associated nonlinear 'variable'.");
+  params.addClassDescription("Advects an arbitrary quantity, the associated nonlinear 'variable'.");
   return params;
 }
 

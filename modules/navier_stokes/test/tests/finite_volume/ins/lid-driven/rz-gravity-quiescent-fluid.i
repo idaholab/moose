@@ -145,14 +145,14 @@ rho=1
 []
 
 [FVBCs]
-  [no_slip_x]
+  [free_slip_x]
     type = INSFVNaturalFreeSlipBC
     variable = u
     boundary = 'left right top bottom'
     momentum_component = 'x'
   []
 
-  [no_slip_y]
+  [free_slip_y]
     type = INSFVNaturalFreeSlipBC
     variable = v
     boundary = 'left right top bottom'
@@ -172,13 +172,6 @@ rho=1
     type = ADGenericFunctorMaterial
     prop_names = 'mu'
     prop_values = '${mu}'
-  []
-[]
-
-[Preconditioning]
-  [smp]
-    type = SMP
-    full = true
   []
 []
 
