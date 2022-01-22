@@ -44,7 +44,12 @@ StrainEnergyRateDensityTempl<is_ad>::StrainEnergyRateDensityTempl(
     _strain_rate(getGenericMaterialProperty<RankTwoTensor, is_ad>(_base_name + "strain_rate")),
     _num_models(getParam<std::vector<MaterialName>>("inelastic_models").size())
 {
+}
 
+template <bool is_ad>
+void
+StrainEnergyRateDensityTempl<is_ad>::initialSetup()
+{
   std::vector<MaterialName> models = getParam<std::vector<MaterialName>>("inelastic_models");
 
   // Store inelastic models as generic StressUpdateBase.
@@ -56,12 +61,6 @@ StrainEnergyRateDensityTempl<is_ad>::StrainEnergyRateDensityTempl(
     if (inelastic_model_stress_update)
       _inelastic_models.push_back(inelastic_model_stress_update);
   }
-}
-
-template <bool is_ad>
-void
-StrainEnergyRateDensityTempl<is_ad>::initialSetup()
-{
 }
 
 template <bool is_ad>

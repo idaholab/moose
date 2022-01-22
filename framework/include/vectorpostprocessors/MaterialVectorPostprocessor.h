@@ -58,4 +58,3 @@ private:
   /// properties are scalar or not.
   std::vector<std::string> _prop_names;
 };
-

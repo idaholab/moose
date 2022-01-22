@@ -25,8 +25,10 @@ public:
   NewtonMaterial(const InputParameters & parameters);
   virtual ~NewtonMaterial(){};
 
+  virtual void initialSetup() override;
+
 protected:
-  void computeQpProperties();
+  void computeQpProperties() override;
 
 private:
   const Real & _tol;
@@ -35,5 +37,5 @@ private:
   MaterialProperty<Real> & _p;
   std::vector<unsigned int> _prop_ids;
   unsigned int _max_iterations;
-  MaterialBase & _discrete;
+  MaterialBase * _discrete;
 };

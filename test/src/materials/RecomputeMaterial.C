@@ -26,6 +26,7 @@ RecomputeMaterial::validParams()
   params.addRequiredParam<std::string>("p_name",
                                        "The name of the independant variable for the function");
   params.addParam<Real>("constant", 0, "The constant to add to the f equation.");
+  params.set<bool>("compute") = false;
   return params;
 }
 

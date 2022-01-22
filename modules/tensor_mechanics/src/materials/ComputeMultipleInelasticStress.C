@@ -96,10 +96,7 @@ ComputeMultipleInelasticStress::ComputeMultipleInelasticStress(const InputParame
     _cycle_models(getParam<bool>("cycle_models")),
     _material_timestep_limit(declareProperty<Real>(_base_name + "material_timestep_limit")),
     _identity_symmetric_four(RankFourTensor::initIdentitySymmetricFour),
-    _all_models_isotropic(true),
-    _damage_model(isParamValid("damage_model")
-                      ? dynamic_cast<DamageBaseTempl<false> *>(&getMaterial("damage_model"))
-                      : nullptr)
+    _all_models_isotropic(true)
 {
   if (_inelastic_weights.size() != _num_models)
     mooseError(
@@ -120,6 +117,10 @@ ComputeMultipleInelasticStress::initQpStatefulProperties()
 void
 ComputeMultipleInelasticStress::initialSetup()
 {
+  _damage_model = isParamValid("damage_model")
+                      ? dynamic_cast<DamageBaseTempl<false> *>(&getMaterial("damage_model"))
+                      : nullptr;
+
   _is_elasticity_tensor_guaranteed_isotropic =
       hasGuaranteedMaterialProperty(_elasticity_tensor_name, Guarantee::ISOTROPIC);
 

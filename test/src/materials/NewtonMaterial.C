@@ -38,9 +38,14 @@ NewtonMaterial::NewtonMaterial(const InputParameters & parameters)
     _f(getMaterialProperty<Real>(getParam<std::string>("f_name"))),
     _f_prime(getMaterialProperty<Real>(getParam<std::string>("f_prime_name"))),
     _p(declareProperty<Real>(getParam<std::string>("p_name"))),
-    _max_iterations(getParam<unsigned int>("max_iterations")),
-    _discrete(getMaterial("material"))
+    _max_iterations(getParam<unsigned int>("max_iterations"))
 {
+}
+
+void
+NewtonMaterial::initialSetup()
+{
+  _discrete = &getMaterial("material");
 }
 
 // MOOSEDOCS_START
@@ -52,7 +57,7 @@ NewtonMaterial::computeQpProperties()
   // Newton iteration for find p
   for (unsigned int i = 0; i < _max_iterations; ++i)
   {
-    _discrete.computePropertiesAtQp(_qp);
+    _discrete->computePropertiesAtQp(_qp);
     _p[_qp] -= _f[_qp] / _f_prime[_qp];
     if (std::abs(_f[_qp]) < _tol)
       break;

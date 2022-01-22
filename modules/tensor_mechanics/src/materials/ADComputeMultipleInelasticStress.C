@@ -79,10 +79,7 @@ ADComputeMultipleInelasticStress::ADComputeMultipleInelasticStress(
                            : std::vector<Real>(_num_models, true)),
     _cycle_models(getParam<bool>("cycle_models")),
     _material_timestep_limit(declareProperty<Real>(_base_name + "material_timestep_limit")),
-    _is_elasticity_tensor_guaranteed_isotropic(false),
-    _damage_model(isParamValid("damage_model")
-                      ? dynamic_cast<DamageBaseTempl<true> *>(&getMaterial("damage_model"))
-                      : nullptr)
+    _is_elasticity_tensor_guaranteed_isotropic(false)
 {
   if (_inelastic_weights.size() != _num_models)
     paramError("combined_inelastic_strain_weights",
@@ -102,6 +99,10 @@ ADComputeMultipleInelasticStress::initQpStatefulProperties()
 void
 ADComputeMultipleInelasticStress::initialSetup()
 {
+  _damage_model = isParamValid("damage_model")
+                      ? dynamic_cast<DamageBaseTempl<true> *>(&getMaterial("damage_model"))
+                      : nullptr;
+
   _is_elasticity_tensor_guaranteed_isotropic =
       this->hasGuaranteedMaterialProperty(_elasticity_tensor_name, Guarantee::ISOTROPIC);
 

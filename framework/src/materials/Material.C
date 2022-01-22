@@ -148,6 +148,26 @@ Material::computeConstantOption()
   return co;
 }
 
+MaterialBase &
+Material::getMaterialByName(const std::string & name, bool no_warn, bool no_dep)
+{
+  if (!no_dep && _mi_feproblem.getCurrentExecuteOnFlag() != EXEC_INITIAL)
+    mooseError("To ensure dependency resolution, discrete materials must be retrieved during "
+               "initial setup. This is a code problem.");
+
+  MaterialBase & discrete_mat = MaterialPropertyInterface::getMaterialByName(name, no_warn);
+
+  if (!no_dep)
+  {
+    // Insert the materials requested by the discrete material into the host material who
+    // retrieves this discrete material
+    const auto & discrete_requested = discrete_mat.getRequestedItems();
+    _requested_props.insert(discrete_requested.begin(), discrete_requested.end());
+  }
+
+  return discrete_mat;
+}
+
 void
 Material::resolveOptionalProperties()
 {
