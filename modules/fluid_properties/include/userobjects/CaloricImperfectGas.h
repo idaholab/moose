@@ -1,0 +1,203 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#pragma once
+
+#include "SinglePhaseFluidProperties.h"
+#include "NaNInterface.h"
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Woverloaded-virtual"
+
+/**
+ * Ideal gas fluid properties
+ * Default parameters are for air at atmospheric pressure and temperature
+ */
+class CaloricImperfectGas : public SinglePhaseFluidProperties, public NaNInterface
+{
+public:
+  static InputParameters validParams();
+
+  CaloricImperfectGas(const InputParameters & parameters);
+  virtual ~CaloricImperfectGas();
+
+  virtual void initialSetup() override;
+
+  virtual Real p_from_v_e(Real v, Real e) const override;
+  virtual ADReal p_from_v_e(const ADReal & v, const ADReal & e) const override;
+  virtual void p_from_v_e(Real v, Real e, Real & p, Real & dp_dv, Real & dp_de) const override;
+  virtual Real T_from_v_e(Real v, Real e) const override;
+  virtual ADReal T_from_v_e(const ADReal & v, const ADReal & e) const override;
+  virtual void T_from_v_e(Real v, Real e, Real & T, Real & dT_dv, Real & dT_de) const override;
+
+  virtual Real cp_from_v_e(Real v, Real e) const override;
+  virtual void cp_from_v_e(Real v, Real e, Real & cp, Real & dcp_dv, Real & dcp_de) const override;
+  virtual Real cv_from_v_e(Real v, Real e) const override;
+  virtual ADReal cv_from_v_e(ADReal v, ADReal e) const;
+  virtual void cv_from_v_e(Real v, Real e, Real & cv, Real & dcv_dv, Real & dcv_de) const override;
+  virtual Real mu_from_v_e(Real v, Real e) const override;
+  virtual void mu_from_v_e(Real v, Real e, Real & mu, Real & dmu_dv, Real & dmu_de) const override;
+  virtual Real k_from_v_e(Real v, Real e) const override;
+  virtual void k_from_v_e(Real v, Real e, Real & k, Real & dk_dv, Real & dk_de) const override;
+  virtual Real s_from_v_e(Real v, Real e) const override;
+  virtual void s_from_v_e(Real v, Real e, Real & s, Real & ds_dv, Real & ds_de) const override;
+  virtual Real s_from_p_T(Real p, Real T) const override;
+  virtual void s_from_p_T(Real p, Real T, Real & s, Real & ds_dp, Real & ds_dT) const override;
+  virtual Real s_from_h_p(Real h, Real p) const override;
+  virtual void s_from_h_p(Real h, Real p, Real & s, Real & ds_dh, Real & ds_dp) const override;
+  virtual Real rho_from_p_s(Real p, Real s) const override;
+  virtual void
+  rho_from_p_s(Real p, Real s, Real & rho, Real & drho_dp, Real & drho_ds) const override;
+  virtual Real e_from_v_h(Real v, Real h) const override;
+  virtual void e_from_v_h(Real v, Real h, Real & e, Real & de_dv, Real & de_dh) const override;
+  virtual Real rho_from_p_T(Real p, Real T) const override;
+  virtual ADReal rho_from_p_T(const ADReal & p, const ADReal & T) const override;
+  virtual void
+  rho_from_p_T(Real p, Real T, Real & rho, Real & drho_dp, Real & drho_dT) const override;
+  virtual void rho_from_p_T(const DualReal & p,
+                            const DualReal & T,
+                            DualReal & rho,
+                            DualReal & drho_dp,
+                            DualReal & drho_dT) const override;
+  virtual Real e_from_p_rho(Real p, Real rho) const override;
+  virtual ADReal e_from_p_rho(const ADReal & p, const ADReal & rho) const override;
+  virtual void
+  e_from_p_rho(Real p, Real rho, Real & e, Real & de_dp, Real & de_drho) const override;
+  virtual Real e_from_T_v(Real T, Real v) const override;
+  virtual void e_from_T_v(Real T, Real v, Real & e, Real & de_dT, Real & de_dv) const override;
+  virtual ADReal e_from_T_v(const ADReal & T, const ADReal & v) const override;
+  virtual Real p_from_T_v(Real T, Real v) const override;
+  virtual void p_from_T_v(Real T, Real v, Real & p, Real & dp_dT, Real & dp_dv) const override;
+  virtual Real h_from_T_v(Real T, Real v) const override;
+  virtual void h_from_T_v(Real T, Real v, Real & h, Real & dh_dT, Real & dh_dv) const override;
+  virtual Real s_from_T_v(Real T, Real v) const override;
+  virtual void s_from_T_v(Real T, Real v, Real & s, Real & ds_dT, Real & ds_dv) const override;
+  virtual Real cv_from_T_v(Real T, Real v) const override;
+  virtual Real e_spndl_from_v(Real v) const override;
+  virtual void v_e_spndl_from_T(Real T, Real & v, Real & e) const override;
+  virtual Real h_from_p_T(Real p, Real T) const override;
+  virtual void h_from_p_T(Real p, Real T, Real & h, Real & dh_dp, Real & dh_dT) const override;
+  virtual Real e_from_p_T(Real p, Real T) const override;
+  virtual ADReal e_from_p_T(ADReal p, ADReal T) const;
+  virtual void e_from_p_T(Real p, Real T, Real & e, Real & de_dp, Real & de_dT) const override;
+  virtual Real p_from_h_s(Real h, Real s) const override;
+  virtual void p_from_h_s(Real h, Real s, Real & p, Real & dp_dh, Real & dp_ds) const override;
+  virtual Real g_from_v_e(Real v, Real e) const override;
+  virtual Real T_from_p_h(Real p, Real h) const override;
+  virtual void T_from_p_h(Real p, Real h, Real & T, Real & dT_dp, Real & dT_dh) const override;
+  virtual Real cv_from_p_T(Real p, Real T) const override;
+  virtual void cv_from_p_T(Real p, Real T, Real & cv, Real & dcv_dp, Real & dcv_dT) const override;
+  virtual Real cp_from_p_T(Real p, Real T) const override;
+  virtual void cp_from_p_T(Real p, Real T, Real & cp, Real & dcp_dp, Real & dcp_dT) const override;
+  virtual Real mu_from_p_T(Real p, Real T) const override;
+  virtual void mu_from_p_T(Real p, Real T, Real & mu, Real & dmu_dp, Real & dmu_dT) const override;
+  virtual Real k_from_p_T(Real pressure, Real temperature) const override;
+  virtual void
+  k_from_p_T(Real pressure, Real temperature, Real & k, Real & dk_dp, Real & dk_dT) const override;
+  virtual std::string fluidName() const override;
+  virtual Real molarMass() const override;
+  virtual Real criticalTemperature() const override;
+  virtual Real criticalDensity() const override;
+  virtual Real criticalInternalEnergy() const override;
+  virtual Real gamma_from_v_e(Real v, Real e) const override;
+  virtual ADReal gamma_from_v_e(ADReal v, ADReal e) const;
+  virtual void
+  gamma_from_v_e(Real v, Real e, Real & gamma, Real & dgamma_dv, Real & dgamma_de) const override;
+  virtual Real gamma_from_p_T(Real p, Real T) const override;
+  virtual ADReal gamma_from_p_T(ADReal p, ADReal T) const;
+  virtual void
+  gamma_from_p_T(Real p, Real T, Real & gamma, Real & dgamma_dp, Real & dgamma_dT) const override;
+  /**
+   * This fluid property is calorically imperfect but
+   * otherwise it is still an ideal gas. In particular gamma = constant
+   * We use c = sqrt(gamma * R * T / M) and obtain T from the parameters
+   * R_specific = R / M
+   * passed into the c(...) function
+   */
+  virtual Real c_from_v_e(Real v, Real e) const override;
+  virtual ADReal c_from_v_e(const ADReal & v, const ADReal & e) const override;
+  virtual void c_from_v_e(Real v, Real e, Real & c, Real & dc_dv, Real & dc_de) const override;
+  virtual Real c_from_p_T(Real p, Real T) const override;
+  virtual ADReal c_from_p_T(const ADReal & p, const ADReal & T) const override;
+  virtual void c_from_p_T(Real /*p*/, Real T, Real & c, Real & dc_dp, Real & dc_dT) const override;
+
+  virtual Real pp_sat_from_p_T(Real /*p*/, Real /*T*/) const override;
+
+protected:
+  /// sets up the T(e) reverse lookup table
+  void setupLookupTables();
+
+  /// function that handles exceeding parameter limits
+  void outOfBounds() const { mooseError("Out of bounds. Implement sensible error handling."); }
+
+  ///@{ helper functions for e(T) and h(T), T(e), T(h), cv(T), cp(T)
+  Real e_from_T(Real T) const;
+  Real h_from_T(Real T) const;
+  Real T_from_e(Real e) const;
+  Real T_from_h(Real h) const;
+  Real cv_from_T(Real T) const;
+  Real cp_from_T(Real T) const;
+  void cv_from_T(Real T, Real & cv, Real & dcv_dT) const;
+  void cp_from_T(Real T, Real & cp, Real & dcp_dT) const;
+  ///@}
+
+  /// molar mass
+  const Real & _molar_mass;
+
+  /// Specific gas constant (R / molar mass)
+  const Real _R_specific;
+
+  // properties at critical point (used by IdealRealGasMixtureFluidProperties (primary component))
+  Real _T_c;
+  Real _rho_c;
+  Real _e_c;
+
+  ///@{ temperature limits when creating lookup tables
+  Real _min_temperature;
+  Real _max_temperature;
+  ///@}
+
+  // tolerance for checking monotonicity of T for h(T) & e(T)
+  Real _tol;
+
+  /// Enthalpy as function of temperature
+  const Function * _h_T;
+  /// Internal energy as a function of temperature
+  const Function * _e_T;
+  /// Specific heat at constant pressure as function of temperature
+  const Function * _cp_T;
+  /// Specific heat at constant volume energy as a function of temperature
+  const Function * _cv_T;
+  /// Dynamic viscosity
+  const Function * _mu_T;
+  /// Thermal conductivity
+  const Function * _k_T;
+
+  /// temperature interval in lookup tables
+  Real _delta_T;
+
+  ///@{ internal energy and enthalpy limits when creating lookup tables
+  Real _min_e;
+  Real _max_e;
+  Real _min_h;
+  Real _max_h;
+  ///@}
+
+  ///@{ step size in internal energy and enthalpy
+  Real _delta_e;
+  Real _delta_h;
+  ///@}
+
+  ///@{ inverse lookup table data
+  std::vector<Real> _T_h_lookup;
+  std::vector<Real> _T_e_lookup;
+  ///@}
+};
+
+#pragma GCC diagnostic pop
