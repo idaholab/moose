@@ -156,6 +156,8 @@ protected:
   const QBase * const & _qrule;
   /// Transformed Jacobian weights
   const MooseArray<Real> & _JxW;
+  /// The scaling factor to convert from cartesian to another coordinate system (e.g rz, spherical, etc.)
+  const MooseArray<Real> & _coord;
 
   /// i-th, j-th index for enumerating shape and test functions
   unsigned int _i, _j;

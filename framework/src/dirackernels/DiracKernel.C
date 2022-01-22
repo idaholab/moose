@@ -72,6 +72,7 @@ DiracKernel::DiracKernel(const InputParameters & parameters)
     _physical_point(_assembly.physicalPoints()),
     _qrule(_assembly.qRule()),
     _JxW(_assembly.JxW()),
+    _coord(_assembly.coordTransformation()),
     _phi(_assembly.phi(_var)),
     _grad_phi(_assembly.gradPhi(_var)),
     _test(_var.phi()),
@@ -107,7 +108,7 @@ DiracKernel::computeResidual()
         multiplicity = (*multiplicities)[local_qp++];
 
       for (_i = 0; _i < _test.size(); _i++)
-        _local_re(_i) += multiplicity * computeQpResidual();
+        _local_re(_i) += multiplicity * computeQpResidual() * _coord[_qp];
     }
   }
 

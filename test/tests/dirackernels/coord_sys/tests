@@ -1,0 +1,14 @@
+[Tests]
+  issues = '#20107'
+  design = 'syntax/DiracKernels/index.md'
+  [non_cartesian]
+    requirement = "The system shall allow for non-cartesian coordinate systems including "
+    [rz]
+      type = Exodiff
+      input = 'coord_sys.i'
+      exodiff = 'rz.e'
+      cli_args = 'Problem/coord_type=RZ Outputs/file_base=rz'
+      detail = "RZ"
+    []
+  []
+[]
