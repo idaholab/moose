@@ -170,8 +170,10 @@ AbaqusUMATStress::computeQpStress()
 
   // Pass through updated stress, total strain, and strain increment arrays
   static const std::array<Real, 6> strain_factor{{1, 1, 1, 2, 2, 2}};
+  // Account for difference in vector order convention: yz, xz, xy (MOOSE)  vs xy, xz, yz
+  // (commercial software)
   static const std::array<std::pair<unsigned int, unsigned int>, 6> component{
-      {{0, 0}, {1, 1}, {2, 2}, {1, 2}, {0, 2}, {0, 1}}};
+      {{0, 0}, {1, 1}, {2, 2}, {0, 1}, {0, 2}, {1, 2}}};
 
   for (int i = 0; i < _aqNTENS; ++i)
   {
@@ -280,8 +282,10 @@ AbaqusUMATStress::computeQpStress()
   _material_timestep[_qp] = _aqPNEWDT * _dt;
 
   // Get new stress tensor - UMAT should update stress
+  // Account for difference in vector order convention: yz, xz, xy (MOOSE)  vs xy, xz, yz
+  // (commercial software)
   _stress[_qp] = RankTwoTensor(
-      _aqSTRESS[0], _aqSTRESS[1], _aqSTRESS[2], _aqSTRESS[3], _aqSTRESS[4], _aqSTRESS[5]);
+      _aqSTRESS[0], _aqSTRESS[1], _aqSTRESS[2], _aqSTRESS[5], _aqSTRESS[4], _aqSTRESS[3]);
 
   // Rotate the stress state to the current configuration
   _stress[_qp].rotate(_rotation_increment[_qp]);
