@@ -7,5 +7,5 @@
 #
 
 [default]
-require_total = 90
+require_total = 85
 warn_new = 90
