@@ -25,7 +25,6 @@ $INSTALLABLE_DIRS$(STACK) := $(INSTALLABLE_DIRS)
 
 # install target related stuff
 share_install_dir := $(share_dir)/$(APPLICATION_NAME)
-tests_install_dir := $(share_install_dir)/test
 docs_install_dir := $(share_install_dir)/doc
 
 #
@@ -411,10 +410,10 @@ $(app_EXEC): $(app_LIBS) $(mesh_library) $(main_object) $(app_test_LIB) $(depend
 	@$(codesign)
 
 ###### install stuff #############
-
+INSTALLABLE_DIRS ?= test/tests
 docs_dir := $(APPLICATION_DIR)/doc
 bindst = $(bin_install_dir)/$(notdir $(app_EXEC))
-binlink = $(tests_install_dir)/$(notdir $(app_EXEC))
+binlink = $(share_install_dir)/$(notdir $(app_EXEC))
 
 lib_install_targets = $(foreach lib,$(applibs),$(dir $(lib))install_lib_$(notdir $(lib)))
 ifneq ($(app_test_LIB),)
@@ -429,6 +428,7 @@ install_$(APPLICATION_NAME)_tests: all
 	do \
 		base_dir=$$(basename $$dir); \
 		rm -rf $(share_install_dir)/$$base_dir; \
+		mkdir -p $(share_install_dir)/$$base_dir; \
 		cp -R $(APPLICATION_DIR)/$$dir $(share_install_dir)/$$base_dir; \
 		if [ -e $(APPLICATION_DIR)/testroot ]; \
 		then \
@@ -455,7 +455,7 @@ install_lib_%: % all
 	@for lib in $(libpaths); do $(call patch_relink,$(libdst),$$lib,$$(basename $$lib)); done
 
 $(binlink): all install_$(APPLICATION_NAME)_tests
-	@ln -s ../../../bin/$(notdir $(app_EXEC)) $@
+	ln -sf ../../bin/$(notdir $(app_EXEC)) $@
 
 install_$(APPLICATION_NAME)_docs:
 ifeq ($(MOOSE_SKIP_DOCS),)
