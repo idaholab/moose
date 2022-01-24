@@ -18,6 +18,7 @@
       exodiff = 'nonlinear_fixed_point_out.e'
 
       detail = "nonlinear problems."
+      rel_err = 7e-6
     []
   []
 
