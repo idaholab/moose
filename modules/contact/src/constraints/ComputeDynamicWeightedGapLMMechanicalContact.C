@@ -77,7 +77,11 @@ ComputeDynamicWeightedGapLMMechanicalContact::computeQpProperties()
   }
 
   _qp_gap_nodal = gap_vec * (_JxW_msm[_qp] * _coord[_qp]);
-  _qp_gap_nodal_dynamics = (relative_velocity * _dt) * (_JxW_msm[_qp] * _coord[_qp]);
+
+  _qp_velocity = relative_velocity * (_JxW_msm[_qp] * _coord[_qp]);
+
+  _qp_gap_nodal_dynamics =
+      (2.0 * gap_vec / _dt) * (_JxW_msm[_qp] * _coord[_qp]);
   //    (2.0 * gap_vec / _dt / _dt - 2.0 * relative_velocity / _dt - relative_acc) *
 
   // To do normalization of constraint coefficient (c_n)
@@ -96,7 +100,11 @@ ComputeDynamicWeightedGapLMMechanicalContact::computeQpIProperties()
                               : static_cast<const DofObject *>(_lower_secondary_elem);
 
   _dof_to_weighted_gap[dof].first += _test[_i][_qp] * _qp_gap_nodal * _normals[_i];
+
   _dof_to_weighted_gap_dynamics[dof] += _test[_i][_qp] * _qp_gap_nodal_dynamics * _normals[_i];
+
+  _dof_to_velocity[dof] += _test[_i][_qp] * _qp_velocity * _normals[_i];
+
 
   if (_normalize_c)
     _dof_to_weighted_gap[dof].second += _test[_i][_qp] * _qp_factor;
@@ -106,8 +114,13 @@ void
 ComputeDynamicWeightedGapLMMechanicalContact::timestepSetup()
 {
   _dof_to_old_weighted_gap.clear();
+  _dof_to_old_velocity.clear();
+
   for (auto & map_pr : _dof_to_weighted_gap)
     _dof_to_old_weighted_gap.emplace(map_pr.first, std::move(map_pr.second.first));
+
+  for (auto & map_pr : _dof_to_velocity)
+	  _dof_to_old_velocity.emplace(map_pr);
 }
 
 void
@@ -115,6 +128,9 @@ ComputeDynamicWeightedGapLMMechanicalContact::residualSetup()
 {
   ComputeWeightedGapLMMechanicalContact::residualSetup();
   _dof_to_weighted_gap_dynamics.clear();
+  _dof_to_velocity.clear();
+
+
 }
 
 void
@@ -137,7 +153,13 @@ ComputeDynamicWeightedGapLMMechanicalContact::post()
         _dof_to_old_weighted_gap[pr.first] > _capture_tolerance)
       _weighted_gap_ptr = &pr.second.first;
     else
+    {
+      ADReal term = -2.0 / _dt * _dof_to_old_weighted_gap[pr.first];
+      term += _dof_to_old_velocity[pr.first];
+      _dof_to_weighted_gap_dynamics[pr.first] += term;
+
       _weighted_gap_ptr = &_dof_to_weighted_gap_dynamics[pr.first];
+    }
 
     _normalization_ptr = &pr.second.second;
 

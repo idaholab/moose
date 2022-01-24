@@ -58,6 +58,14 @@ protected:
   /// Vector for computation of weighted gap velocity to fulfill "persistency" condition
   ADRealVectorValue _qp_gap_nodal_dynamics;
 
+  /// Vector for computation of weighted gap velocity to fulfill "persistency" condition
+  ADRealVectorValue _qp_velocity;
+
   /// A map from node to weighted gap velocity times _dt
   std::unordered_map<const DofObject *, ADReal> _dof_to_weighted_gap_dynamics;
+
+  /// A map from node to weighted gap velocity times _dt
+  std::unordered_map<const DofObject *, ADReal> _dof_to_velocity;
+  /// A map from node to weighted gap velocity times _dt
+  std::unordered_map<const DofObject *, ADReal> _dof_to_old_velocity;
 };
