@@ -102,8 +102,6 @@ public:
    */
   const std::string & name() const { return _name; }
 
-  virtual void checkRegistryLabels();
-
   /**
    * Get printable name of the application.
    */
@@ -917,6 +915,8 @@ public:
    */
   template <class T>
   const std::vector<T *> & getInterfaceObjects() const;
+
+  static void addAppParam(InputParameters & params);
 
 protected:
   /**
