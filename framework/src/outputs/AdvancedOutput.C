@@ -693,7 +693,7 @@ AdvancedOutput::addValidParams(InputParameters & params, const MultiMooseEnum & 
                           "Flag indicating if material properties should be output");
     params.addParam<std::vector<std::string>>(
         "show_material_properties",
-        "List of materialproperties that should be written to the output");
+        "List of material properties that should be written to the output");
     params.addParamNamesToGroup("output_material_properties show_material_properties", "Materials");
   }
 

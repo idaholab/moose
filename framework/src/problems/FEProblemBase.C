@@ -1108,7 +1108,6 @@ FEProblemBase::initialSetup()
   // Perform Reporter get/declare check
   _reporter_data.check();
 
-  _app.checkRegistryLabels();
   setCurrentExecuteOnFlag(EXEC_NONE);
 }
 

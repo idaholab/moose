@@ -58,7 +58,7 @@ public:
   /**
    * Helper function for creating a MooseApp from command-line arguments.
    */
-  static MooseAppPtr createAppShared(const std::string & app_type,
+  static MooseAppPtr createAppShared(const std::string & default_app_type,
                                      int argc,
                                      char ** argv,
                                      MPI_Comm comm_word = MPI_COMM_WORLD);

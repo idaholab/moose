@@ -79,6 +79,17 @@
 
 defineLegacyParams(MooseApp);
 
+void
+MooseApp::addAppParam(InputParameters & params)
+{
+  params.addCommandLineParam<std::string>(
+      "app_to_run",
+      "--app <AppName>",
+      "Specify the application that should be used to run the input file. This must match an "
+      "application name registered to the application factory. Note that this option is "
+      "case-sensitive.");
+}
+
 InputParameters
 MooseApp::validParams()
 {
@@ -302,6 +313,8 @@ MooseApp::validParams()
       "use_legacy_material_output",
       true,
       "Set false to allow material properties to be output on INITIAL, not just TIMESTEP_END.");
+
+  MooseApp::addAppParam(params);
 
   return params;
 }
@@ -556,13 +569,6 @@ MooseApp::MooseApp(InputParameters parameters)
                     " to remove this deprecation warning.");
 
   Moose::out << std::flush;
-}
-
-void
-MooseApp::checkRegistryLabels()
-{
-  TIME_SECTION("MooseApp::checkRegistryLabels", 5, "Checking Registry Labels");
-  Registry::checkLabels();
 }
 
 MooseApp::~MooseApp()
