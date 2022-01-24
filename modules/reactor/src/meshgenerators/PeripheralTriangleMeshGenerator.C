@@ -71,8 +71,6 @@ PeripheralTriangleMeshGenerator::PeripheralTriangleMeshGenerator(const InputPara
     _outer_circle_num_segments(getParam<unsigned int>("outer_circle_num_segments")),
     _outer_boundary_id(
         isParamValid("outer_boundary_id") ? getParam<boundary_id_type>("outer_boundary_id") : 0),
-    // _outer_boundary_name(isParamValid("outer_boundary_name") ?
-    // getParam<std::string>("outer_boundary_name") : std::string("outside")),
     _extra_circle_radii(getParam<std::vector<Real>>("extra_circle_radii")),
     _extra_circle_num_segments(getParam<std::vector<unsigned int>>("extra_circle_num_segments"))
 {
