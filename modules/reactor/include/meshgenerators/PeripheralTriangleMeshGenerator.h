@@ -39,8 +39,6 @@ protected:
   const unsigned int _outer_circle_num_segments;
   /// The boundary id for the generated mesh outer boundary.
   const unsigned int _outer_boundary_id;
-  /// The boundary name of the generated mesh outer boundary.
-  // const std::string _outer_boundary_name;
   /// Radii of concentric Steiner circles
   const std::vector<Real> _extra_circle_radii;
   /// Number of segments in each Steiner circle
