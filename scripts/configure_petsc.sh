@@ -24,11 +24,17 @@ function configure_petsc()
     echo "$PETSC_DIR=PETSC_DIR does not exist"
     exit 1
   fi
+  # Apple Silicon has an issue building shared libraries
+  if [[ `uname -p` == "arm" ]]; then
+    SHARED=0
+  else
+    SHARED=1
+  fi
 
   cd $PETSC_DIR
   python ./configure --download-hypre=1 \
+      --with-shared-libraries=$SHARED \
       --with-debugging=no \
-      --with-shared-libraries=1 \
       --download-fblaslapack=1 \
       --download-metis=1 \
       --download-ptscotch=1 \
@@ -44,7 +50,7 @@ function configure_petsc()
       --with-fortran-bindings=0 \
       --with-sowing=0 \
       --with-64-bit-indices \
-      $*
+      "$@"
 
   return $?
 }

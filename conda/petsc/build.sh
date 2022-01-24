@@ -5,55 +5,60 @@ export PATH=/bin:$PATH
 export PETSC_DIR=$SRC_DIR
 export PETSC_ARCH=arch-conda-c-opt
 
-if [[ $mpi == "openmpi" ]]; then
-  export OMPI_MCA_plm=isolated
-  export OMPI_MCA_rmaps_base_oversubscribe=yes
-  export OMPI_MCA_btl_vader_single_copy_mechanism=none
-elif [[ $mpi == "moose-mpich" ]]; then
-  export HYDRA_LAUNCHER=fork
-fi
+export CC=$(basename "$CC")
+export CXX=$(basename "$CXX")
+export FC=$(basename "$FC")
 
-unset CFLAGS CPPFLAGS CXXFLAGS FFLAGS LIBS LDFLAGS
+# feed-stock recommendation
+# scrub debug-prefix-map args, which cause problems in pkg-config
+export CFLAGS=$(echo ${CFLAGS:-} | sed -E 's@\-fdebug\-prefix\-map[^ ]*@@g')
+export CXXFLAGS=$(echo ${CXXFLAGS:-} | sed -E 's@\-fdebug\-prefix\-map[^ ]*@@g')
+export FFLAGS=$(echo ${FFLAGS:-} | sed -E 's@\-fdebug\-prefix\-map[^ ]*@@g')
+export FCFLAGS="$FFLAGS"
+export HYDRA_LAUNCHER=fork
+export LIBS="-lmpifort -lgfortran"
+
 if [[ $(uname) == Darwin ]]; then
     if [[ $HOST == arm64-apple-darwin20.0.0 ]]; then
-        LDFLAGS="${LDFLAGS:-} -L$PREFIX/lib -Wl,-rpath,$PREFIX/lib"
-        CTUNING="-march=armv8.3-a -I$PREFIX/include"
-        FTUNING="-march=armv8.3-a -I$PREFIX/include"
-        export LIBRARY_PATH="$PREFIX/lib"
+        CFLAGS="${CFLAGS} -mcpu=apple-a12"
+        CXXFLAGS="${CXXFLAGS} -mcpu=apple-a12"
+        FFLAGS="${FFLAGS} -march=armv8.3-a"
+        FCFLAGS="${FCFLAGS} -march=armv8.3-a"
     else
-        CTUNING="-march=core2 -mtune=haswell"
-        FTUNING="-I$PREFIX/include"
+        CFLAGS="${CFLAGS} -march=core2 -mtune=haswell"
+        CXXFLAGS="${CXXFLAGS} -march=core2 -mtune=haswell"
+        FFLAGS="${FFLAGS} -I$PREFIX/include"
+        FCFLAGS="${FCFLAGS} -I$PREFIX/include"
     fi
-    LDFLAGS="${LDFLAGS:-} -Wl,-headerpad-max-install-names"
 else
-    CTUNING="-march=nocona -mtune=haswell"
-    FTUNING="-I$PREFIX/include"
+    CFLAGS="${CFLAGS} -march=nocona -mtune=haswell"
+    CXXFLAGS="${CXXFLAGS} -march=nocona -mtune=haswell"
+    FFLAGS="${FFLAGS} -I$PREFIX/include"
+    FCFLAGS="${FCFLAGS} -I$PREFIX/include"
 fi
-
-# for MPI discovery
-export C_INCLUDE_PATH=$PREFIX/include
-export CPLUS_INCLUDE_PATH=$PREFIX/include
-export FPATH_INCLUDE_PATH=$PREFIX/include
 
 source $PETSC_DIR/configure_petsc.sh
 configure_petsc \
-       --COPTFLAGS=-O3 \
-       --CXXOPTFLAGS=-O3 \
-       --FOPTFLAGS=-O3 \
-       --with-x=0 \
-       --with-ssl=0 \
-       AR="${AR:-ar}" \
-       CC="mpicc" \
-       CXX="mpicxx" \
-       FC="mpifort" \
-       F90="mpifort" \
-       F77="mpifort" \
-       CFLAGS="${CTUNING}" \
-       CXXFLAGS="${CTUNING}" \
-       FFLAGS="${FTUNING}" \
-       FCFLAGS="${FTUNING}" \
-       LDFLAGS="${LDFLAGS:-}" \
-       --prefix=$PREFIX || (cat configure.log && exit 1)
+    --COPTFLAGS=-O3 \
+    --CXXOPTFLAGS=-O3 \
+    --FOPTFLAGS=-O3 \
+    --with-x=0 \
+    --with-ssl=0 \
+    CC="$CC" \
+    CXX="$CXX" \
+    FC="$FC" \
+    F90="$F90" \
+    F77="$F77" \
+    AR="$AR" \
+    RANLIB="$RANLIB" \
+    CFLAGS="$CFLAGS" \
+    CXXFLAGS="$CXXFLAGS" \
+    CPPFLAGS="$CPPFLAGS" \
+    FFLAGS="$FFLAGS" \
+    FCFLAGS="$FCFLAGS" \
+    LDFLAGS="$LDFLAGS" \
+    LIBS="$LIBS" \
+    --prefix=$PREFIX || (cat configure.log && exit 1)
 
 # Verify that gcc_ext isn't linked
 for f in $PETSC_ARCH/lib/petsc/conf/petscvariables $PETSC_ARCH/lib/pkgconfig/PETSc.pc; do
