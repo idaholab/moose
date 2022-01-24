@@ -50,11 +50,9 @@ protected:
    * Extracts the boundary nodes from the input mesh inner boundary and sorted nodes in
    * connected-order.
    * @param mesh mesh pointer for the mesh being assembled.
-   * @param inner_boundary_nodes vector of inner boundary nodes, input as empty list, populated by
-   * function.
+   * @return vector of inner boundary nodes
    */
-  void createSortedBoundaryNodeList(std::unique_ptr<MeshBase> & mesh,
-                                    std::vector<Node *> & inner_boundary_nodes);
+  std::vector<Node *> createSortedBoundaryNodeList(MeshBase & mesh) const;
 
   /**
    * Deletes and clears a list of poly2tri Point pointers.

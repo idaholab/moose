@@ -144,8 +144,8 @@ PeripheralTriangleMeshGenerator::generate()
   // poly2tri requires input boundary nodes be sorted in connected order
   //
 
-  std::vector<Node *> inner_boundary_nodes;
-  createSortedBoundaryNodeList(mesh, inner_boundary_nodes);
+  std::vector<Node *> inner_boundary_nodes =
+    createSortedBoundaryNodeList(*mesh);
 
   //
   // C2T storage
@@ -326,11 +326,12 @@ PeripheralTriangleMeshGenerator::generate()
   return dynamic_pointer_cast<MeshBase>(mesh);
 }
 
-void
-PeripheralTriangleMeshGenerator::createSortedBoundaryNodeList(
-    std::unique_ptr<MeshBase> & mesh, std::vector<Node *> & inner_boundary_nodes)
+std::vector<Node *>
+PeripheralTriangleMeshGenerator::createSortedBoundaryNodeList(MeshBase & mesh) const
 {
-  BoundaryInfo & boundary_info = mesh->get_boundary_info();
+  std::vector<Node *> inner_boundary_nodes;
+
+  BoundaryInfo & boundary_info = mesh.get_boundary_info();
 
   // poly2tri requires input boundary nodes be in connected order
   // create edge node pairs to sort by connectivity
@@ -355,7 +356,7 @@ PeripheralTriangleMeshGenerator::createSortedBoundaryNodeList(
     }
 
     // select out nodes for given side and add to list
-    auto side = mesh->elem_ptr(element_id)->side_ptr(side_id);
+    auto side = mesh.elem_ptr(element_id)->side_ptr(side_id);
 
     boundary_node_assm.push_back(std::make_pair(side->node_id(0), side->node_id(1)));
   }
@@ -454,9 +455,11 @@ PeripheralTriangleMeshGenerator::createSortedBoundaryNodeList(
   // resolve node_ids to Node pointers
   for (dof_id_type node_id : boundary_ordered_node_list)
   {
-    Node * node = mesh->node_ptr(node_id);
+    Node * node = mesh.node_ptr(node_id);
     inner_boundary_nodes.push_back(node);
   }
+
+  return inner_boundary_nodes;
 }
 
 void
