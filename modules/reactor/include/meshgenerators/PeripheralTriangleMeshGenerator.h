@@ -58,5 +58,5 @@ protected:
    * Deletes and clears a list of poly2tri Point pointers.
    * @param point_list list of poly2tri Point pointers to be deleted.
    */
-  void clearPoints(std::vector<p2t::Point *> & point_list);
+  static void clearPoints(std::vector<p2t::Point *> & point_list);
 };
