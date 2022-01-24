@@ -278,10 +278,8 @@ PeripheralTriangleMeshGenerator::generate()
 
       // check if node has been created for point
       // if not, create and add to map
-      if (point_node_map.find(point) == point_node_map.end())
-      {
+      if (!point_node_map.count(point))
         point_node_map[point] = mesh->add_point(Point(point->x, point->y, 0.0));
-      }
 
       // retrieve node and add to element
       tri_elem->set_node(i) = point_node_map[point];
