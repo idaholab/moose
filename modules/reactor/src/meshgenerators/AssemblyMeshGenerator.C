@@ -28,7 +28,9 @@ AssemblyMeshGenerator::validParams()
                                              "The integer ID for this assembly type definition");
 
   params.addRequiredParam<std::vector<std::vector<unsigned int>>>(
-      "pattern", "A double-indexed array starting with the upper-left corner");
+      "pattern",
+      "A double-indexed array starting with the upper-left corner where the index"
+      "represents the layout of input pins in the assembly lattice.");
 
   params.addRangeCheckedParam<std::vector<Real>>(
       "duct_halfpitch",
@@ -108,11 +110,22 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
     _mesh_dimensions = getMeshProperty<int>("mesh_dimensions", _reactor_params);
   }
   if (_extrude && _mesh_dimensions != 3)
-    mooseError("This is a 2 dimensional mesh, you cannot extrude it. Check you ReactorMeshParams "
+    paramError("extrude",
+               "This is a 2 dimensional mesh, you cannot extrude it. Check you ReactorMeshParams "
                "inputs\n");
 
-  for (auto pin : _inputs)
+  Real base_pitch;
+  for (const auto i : make_range(_inputs.size()))
   {
+    auto pin = _inputs[i];
+    if (i == 0)
+      base_pitch = getMeshProperty<Real>("pitch", pin);
+    else
+    {
+      auto pitch = getMeshProperty<Real>("pitch", pin);
+      if (pitch != base_pitch)
+        mooseError("All pins within an assembly must have the same pitch");
+    }
     if (getMeshProperty<bool>("extruded", pin))
       mooseError("Pins that have already been extruded cannot be used in AssemblyMeshGenerator "
                  "definition.\n");
@@ -134,11 +147,13 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
     if (!_procedural_ids)
     {
       if (_duct_region_ids.size() == 0)
-        mooseError(
+        paramError(
+            "duct_halfpitch",
             "If ducts are defined, and procedural ID generation is not used, then "
             "\"duct_intervals\" and \"duct_region_ids\" must also be defined and of equal size.");
       else if (_duct_region_ids[0].size() != _duct_sizes.size())
-        mooseError(
+        paramError(
+            "duct_halfpitch",
             "If ducts are defined, and procedural ID generation is not used, then "
             "\"duct_intervals\" and \"duct_region_ids\" must also be defined and of equal size.");
     }
@@ -163,13 +178,13 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
 
     _background_region_id.push_back(ident);
     std::vector<subdomain_id_type> regions_tmp;
-    for (size_t i = 0; i < _duct_sizes.size(); i++)
+    for (const auto i : make_range(_duct_sizes.size()))
       regions_tmp.push_back(ident + i + 1);
 
     _duct_region_ids.push_back(regions_tmp);
     if (_mesh_dimensions == 3)
     {
-      for (size_t i = 1;
+      for (std::size_t i = 1;
            i < getMeshProperty<std::vector<Real>>("axial_boundaries", _reactor_params).size();
            i++)
       {
@@ -226,7 +241,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
       if (_duct_sizes.size() > 0)
       {
         std::vector<subdomain_id_type> tmp_duct_regions;
-        for (size_t duct_it = 0; duct_it < _duct_region_ids[0].size(); ++duct_it)
+        for (std::size_t duct_it = 0; duct_it < _duct_region_ids[0].size(); ++duct_it)
         {
           // loop through ducts and set their subdomain id as UINT16_MAX-(i+1)
           tmp_duct_regions.push_back(UINT16_MAX - 1 - _peripheral_regions);
@@ -377,7 +392,7 @@ AssemblyMeshGenerator::generate()
 
   // go through the background and duct regions and assign their elements
   // pin_type id placeholders and region id place holders
-  for (size_t i = 0; i < _peripheral_regions; ++i)
+  for (const auto i : make_range(_peripheral_regions))
   {
     subdomain_id_type region = UINT16_MAX - (i + 1);
 
@@ -393,7 +408,7 @@ AssemblyMeshGenerator::generate()
   {
     // swap the region ids on the subdomain ids to the correct ones
     // for their axial layer
-    mesh_name = name() + "_extrudedIDs";
+    _mesh_name = name() + "_extrudedIDs";
     if (!(*_build_mesh)->has_elem_integer(plane_id_name))
       mooseError("Expected extruded mesh to have plane IDs");
 
@@ -423,7 +438,7 @@ AssemblyMeshGenerator::generate()
       {
         // region is in a pin so grab the different axial region ids and swap them
         // since during extrusion all regions are given the same ID as the 2D layer
-        for (size_t i = 0; i < (_id_map.at(pt_id))[0].size(); ++i)
+        for (const auto i : make_range((_id_map.at(pt_id))[0].size()))
         {
           // swap subdomain region ids if they are different
           if (r_id == _id_map.at(pt_id)[0][i] &&
@@ -435,9 +450,9 @@ AssemblyMeshGenerator::generate()
   }
   else
   {
-    mesh_name = name() + "_pattern";
+    _mesh_name = name() + "_pattern";
 
-    for (size_t i = 0; i < _peripheral_regions; ++i)
+    for (const auto i : make_range(_peripheral_regions))
     {
       subdomain_id_type region = UINT16_MAX - (i + 1);
 

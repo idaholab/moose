@@ -26,7 +26,6 @@ InputParameters
 ReactorMeshParams::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
-  // MooseEnum dims = dimensions;
   MooseEnum dims("2=2 3", "2");
   params.addRequiredParam<MooseEnum>("dim", dims, "The dimension of the mesh to be generated");
 
@@ -55,17 +54,18 @@ ReactorMeshParams::ReactorMeshParams(const InputParameters & parameters)
     _geom(getParam<MooseEnum>("geom")),
     _assembly_pitch(getParam<Real>("assembly_pitch")),
     _axial_regions(getParam<std::vector<Real>>("axial_regions")),
-    _axial_mesh_intervals(getParam<std::vector<unsigned int>>("axial_mesh_intervals"))
+    _axial_mesh_intervals(getParam<std::vector<unsigned int>>("axial_mesh_intervals")),
+    _procedural_ids(getParam<bool>("procedural_region_ids"))
 {
   if (_axial_regions.size() != _axial_mesh_intervals.size())
-    mooseError("The number of axial regions is not consistant.");
+    mooseError("The number of axial regions is not consistent with the number of axial intervals.");
 
   this->declareMeshProperty("mesh_dimensions", int(_dim));
   this->declareMeshProperty("mesh_geometry", std::string(_geom));
   this->declareMeshProperty("axial_boundaries", _axial_regions);
   this->declareMeshProperty("axial_mesh_intervals", _axial_mesh_intervals);
   this->declareMeshProperty("assembly_pitch", _assembly_pitch);
-  this->declareMeshProperty("procedural_ids", getParam<bool>("procedural_region_ids"));
+  this->declareMeshProperty("procedural_ids", _procedural_ids);
 }
 
 std::unique_ptr<MeshBase>

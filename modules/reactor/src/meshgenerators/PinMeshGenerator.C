@@ -88,8 +88,9 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
     _extrude(getParam<bool>("extrude")),
     _quad_center(getParam<bool>("quad_center_elements"))
 {
-  // Ensure that the user has supplied the correct info for conformal mesh generation
+  declareMeshProperty("pitch", _pitch);
 
+  // Ensure that the user has supplied the correct info for conformal mesh generation
   if (getMeshByName(_reactor_params) != nullptr)
     mooseError("The reactor_params mesh is not of the correct type");
   else
@@ -178,7 +179,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
     _region_ids.push_back(regions_0);
     if (_mesh_dimensions == 3)
     {
-      for (size_t i = 1;
+      for (std::size_t i = 1;
            i < getMeshProperty<std::vector<Real>>("axial_boundaries", _reactor_params).size();
            i++)
       {
@@ -208,7 +209,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
       std::vector<subdomain_id_type> background_ids;
       std::vector<unsigned int> duct_intervals;
       std::vector<subdomain_id_type> duct_ids;
-      for (size_t i = 0; i < _intervals.size(); i++)
+      for (const auto i : make_range(_intervals.size()))
       {
         if (i < _ring_radii.size())
         {
@@ -343,7 +344,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
       std::vector<subdomain_id_type> background_ids;
       std::vector<unsigned int> duct_intervals;
       std::vector<subdomain_id_type> duct_ids;
-      for (size_t i = 0; i < _intervals.size(); i++)
+      for (const auto i : make_range(_intervals.size()))
       {
         if (i < _ring_radii.size())
         {
@@ -490,14 +491,14 @@ PinMeshGenerator::generate()
     mesh_name = name() + "_extrudedIDs";
     std::string plane_id_name = "plane_id";
     unsigned int pid_int = (*_build_mesh)->get_elem_integer_index(plane_id_name);
-    for (size_t i = 0; i < _region_ids[0].size(); ++i)
+    for (const auto i : make_range(_region_ids[0].size()))
     {
       subdomain_id_type region = _region_ids[0][i];
       for (const auto & elem : as_range((*_build_mesh)->active_subdomain_elements_begin(region),
                                         (*_build_mesh)->active_subdomain_elements_end(region)))
       {
         dof_id_type z_id = elem->get_extra_integer(pid_int);
-        subdomain_id_type r_id = _region_ids[size_t(z_id)][i];
+        subdomain_id_type r_id = _region_ids[std::size_t(z_id)][i];
 
         // only swap if necessary
         if (r_id != region)

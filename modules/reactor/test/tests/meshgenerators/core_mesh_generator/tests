@@ -46,5 +46,4 @@
     exodiff = 'core_hex_in.e'
     recover = false
   []
-
 []

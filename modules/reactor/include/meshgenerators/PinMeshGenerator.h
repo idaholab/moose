@@ -12,7 +12,7 @@
 #include "MeshGenerator.h"
 
 /**
- * Generates a pin-like structure for a square or hex grid with the option to be 2- or 3-D.
+ * Generates a pin-like structure for a square or hexagonal grid with the option to be 2- or 3-D.
  */
 class PinMeshGenerator : public MeshGenerator
 {
@@ -25,22 +25,22 @@ public:
 
 protected:
   ///The ReactorMeshParams object that is storing the reactor global information for this reactor geometry mesh
-  MeshGeneratorName _reactor_params;
+  const MeshGeneratorName _reactor_params;
 
   ///The id number for this pin type
-  subdomain_id_type _pin_type;
+  const subdomain_id_type _pin_type;
 
   ///The face-to-face size of this pin
-  Real _pitch;
+  const Real _pitch;
 
   ///The number of azimuthal divisions
-  unsigned int _num_sectors;
+  const unsigned int _num_sectors;
 
   ///The outer radii of concentric rings in the pin
   std::vector<Real> _ring_radii;
 
   ///The inner apothem of any surrounding ducts in the pin
-  std::vector<Real> _duct_halfpitch;
+  const std::vector<Real> _duct_halfpitch;
 
   ///The number of mesh intervals in a radial division starting from the center
   std::vector<unsigned int> _intervals;
@@ -58,9 +58,9 @@ protected:
   int _mesh_dimensions;
 
   ///Whether this mesh should be extruded to 3-D, making it the final structure in the reactor mesh
-  bool _extrude;
+  const bool _extrude;
 
-  ///Whether the center most elements in the pin should be quad elements as opposed to tri elements
+  ///Whether the centermost elements in the pin should be quad elements as opposed to tri elements
   bool _quad_center;
 
   ///The ultimate name of the mesh for generation. The value of this string depends on whether the mesh is extruded.

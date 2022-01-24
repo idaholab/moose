@@ -12,11 +12,6 @@
 #include "MeshGenerator.h"
 #include "MooseEnum.h"
 
-class ReactorMeshParams;
-
-template <>
-InputParameters validParams<ReactorMeshParams>();
-
 /**
  * A class to store mesh information that is globally applicable to a reactor.
  */
@@ -31,16 +26,20 @@ public:
 
 protected:
   /// The number of dimension in the mesh
-  MooseEnum _dim;
+  const MooseEnum _dim;
+
   /// The geometry type for the reactor
-  MooseEnum _geom;
+  const MooseEnum _geom;
 
   /// The the flat-to-flat size of assemblies in the reactor.
-  Real _assembly_pitch;
+  const Real _assembly_pitch;
 
   ///The heights of the axial regions.
-  std::vector<Real> _axial_regions;
+  const std::vector<Real> _axial_regions;
 
   ///The number of mesh divisions in each axial region.
-  std::vector<unsigned int> _axial_mesh_intervals;
+  const std::vector<unsigned int> _axial_mesh_intervals;
+
+  ///Whether to use procedural IDs for ID assigment
+  const bool _procedural_ids;
 };

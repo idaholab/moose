@@ -28,7 +28,9 @@ CoreMeshGenerator::validParams()
       "The place holder name in \"inputs\" that indicates an empty position.");
 
   params.addRequiredParam<std::vector<std::vector<unsigned int>>>(
-      "pattern", "A double-indexed array starting with the upper-left corner");
+      "pattern",
+      "A double-indexed array starting with the upper-left corner where the index"
+      "represents the layout of input assemblies in the core lattice.");
 
   params.addParam<bool>("extrude",
                         false,
@@ -77,7 +79,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
     mooseError("This is a 2 dimensional mesh, you cannot extrude it. Check your ReactorMeshParams "
                "inputs\n");
 
-  size_t empty_pattern_loc = 0;
+  std::size_t empty_pattern_loc = 0;
   bool make_empty = false;
   for (auto assembly : _inputs)
   {
@@ -91,12 +93,12 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
     else
     {
       make_empty = true;
-      for (size_t i = 0; i < _pattern.size(); ++i)
+      for (const auto i : make_range(_pattern.size()))
       {
-        for (size_t j = 0; j < _pattern[i].size(); ++j)
+        for (const auto j : make_range(_pattern[i].size()))
         {
           if (_pattern[i][j] == empty_pattern_loc)
-            empty_pos = true;
+            _empty_pos = true;
         }
       }
     }
@@ -197,7 +199,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
           &addMeshSubgenerator("HexIDPatternedMeshGenerator", name() + "_pattern", params);
     }
   }
-  if (empty_pos)
+  if (_empty_pos)
   {
     auto params = _app.getFactory().getValidParams("BlockDeletionGenerator");
 
@@ -259,7 +261,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
       auto params = _app.getFactory().getValidParams("FancyExtruderGenerator");
 
       params.set<MeshGeneratorName>("input") =
-          empty_pos ? name() + "_deleted" : name() + "_pattern";
+          _empty_pos ? name() + "_deleted" : name() + "_pattern";
       params.set<Point>("direction") = Point(0, 0, 1);
       params.set<std::vector<unsigned int>>("num_layers") =
           getMeshProperty<std::vector<unsigned int>>("axial_mesh_intervals", _reactor_params);
@@ -313,7 +315,7 @@ CoreMeshGenerator::generate()
   {
     // swap the region ids on the subdomain ids to the correct ones
     // for their axial layer
-    mesh_name = name() + "_extrudedIDs";
+    _mesh_name = name() + "_extrudedIDs";
     std::string plane_id_name = "plane_id";
     std::string pin_type_id_name = "pin_type_id";
     std::string assembly_type_id_name = "assembly_type_id";
@@ -348,7 +350,7 @@ CoreMeshGenerator::generate()
       {
         // region is in a pin so grab the different axial region ids and swap them
         // since during extrusion all regions are given the same ID as the 2D layer
-        for (size_t i = 0; i < (_id_map.at(pt_id))[0].size(); ++i)
+        for (const auto i : make_range((_id_map.at(pt_id))[0].size()))
         {
           // swap subdomain region ids if they are different
           if (r_id == _id_map.at(pt_id)[0][i] &&
@@ -360,7 +362,7 @@ CoreMeshGenerator::generate()
   }
   else
   {
-    mesh_name = empty_pos ? name() + "_deleted" : name() + "_pattern";
+    _mesh_name = _empty_pos ? name() + "_deleted" : name() + "_pattern";
   }
 
   std::string region_id_name = "region_id";
