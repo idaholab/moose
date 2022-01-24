@@ -29,9 +29,8 @@ PINSFVRhieChowInterpolator::validParams()
       "ElementSideNeighborLayers",
       Moose::RelationshipManagerType::GEOMETRIC,
       [](const InputParameters & obj_params, InputParameters & rm_params) {
-        // We need one additional layer for the case that we have an extrapolated boundary face
         rm_params.set<unsigned short>("layers") =
-            obj_params.get<unsigned short>("smoothing_layers") + 1;
+            obj_params.get<unsigned short>("smoothing_layers");
         rm_params.set<bool>("use_displaced_mesh") = obj_params.get<bool>("use_displaced_mesh");
       });
   return params;
