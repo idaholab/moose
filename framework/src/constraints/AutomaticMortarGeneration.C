@@ -901,24 +901,13 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
       result_set.init(&ret_index[0], &out_dist_sqr[0]);
       kd_tree.findNeighbors(result_set, &query_pt[0], nanoflann::SearchParams(10));
 
-      struct CompareElemsByID
-      {
-        bool operator()(const Elem * a, const Elem * b) const
-        {
-          libmesh_assert(a);
-          libmesh_assert(b);
-
-          return a->id() < b->id();
-        }
-      };
-
       // Initialize list of processed primary elements, we don't want to revisit processed elements
-      std::set<const Elem *, CompareElemsByID> processed_primary_elems;
+      std::set<const Elem *, CompareDofObjectsByID> processed_primary_elems;
 
       // Initialize candidate set and flag for switching between coarse screening and breadth-first
       // search
       bool primary_elem_found = false;
-      std::set<const Elem *, CompareElemsByID> primary_elem_candidates;
+      std::set<const Elem *, CompareDofObjectsByID> primary_elem_candidates;
 
       // Loop candidate nodes (returned by Nanoflann) and add all adjoining elems to candidate set
       for (auto r : make_range(result_set.size()))

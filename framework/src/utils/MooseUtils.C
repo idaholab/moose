@@ -815,8 +815,15 @@ convertStringToInt(const std::string & str, bool throw_on_failure)
   // This would be the case for scientific notation
   long double double_val;
   std::stringstream double_ss(str);
+  double_ss >> double_val;
 
-  if ((double_ss >> double_val).fail() || !double_ss.eof())
+  // on arm64 the long double does not have sufficient precission
+  bool use_int = false;
+  std::stringstream int_ss(str);
+  if (!(int_ss >> val).fail() && int_ss.eof())
+    use_int = true;
+
+  if (double_ss.fail() || !double_ss.eof())
   {
     std::string msg =
         std::string("Unable to convert '") + str + "' to type " + demangle(typeid(T).name());
@@ -827,21 +834,18 @@ convertStringToInt(const std::string & str, bool throw_on_failure)
       mooseError(msg);
   }
 
-  // Check to see if it's an integer (and within range of an integer
+  // Check to see if it's an integer (and within range of an integer)
   if (double_val == static_cast<T>(double_val))
-    val = double_val;
-  else // Still failure
-  {
-    std::string msg =
-        std::string("Unable to convert '") + str + "' to type " + demangle(typeid(T).name());
+    return use_int ? val : static_cast<T>(double_val);
 
-    if (throw_on_failure)
-      throw std::invalid_argument(msg);
-    else
-      mooseError(msg);
-  }
+  // Still failure
+  std::string msg =
+      std::string("Unable to convert '") + str + "' to type " + demangle(typeid(T).name());
 
-  return val;
+  if (throw_on_failure)
+    throw std::invalid_argument(msg);
+  else
+    mooseError(msg);
 }
 
 template <>

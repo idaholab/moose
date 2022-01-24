@@ -24,7 +24,8 @@ export LIBRARY_PATH="$PREFIX/lib"
 
 if [[ $(uname) == Darwin ]]; then
     if [[ $target_platform == osx-arm64 ]]; then
-        TUNING="-I$PREFIX/include"
+        CTUNING="-mcpu=apple-a12 -I$PREFIX/include"
+        FTUNING="-march=armv8.3-a -I$PREFIX/include"
         OPTIONS="--disable-opencl --enable-cxx --enable-fortran"
         export pac_cv_f77_accepts_F=yes
         export pac_cv_f77_flibs_valid=unknown
@@ -59,13 +60,15 @@ if [[ $(uname) == Darwin ]]; then
         export pac_cv_prog_fc_works=yes
         export pac_MOD='mod'
     else
-        TUNING="-march=core2 -mtune=haswell -I$PREFIX/include"
+        CTUNING="-march=core2 -mtune=haswell -I$PREFIX/include"
+        FTUNING="-march=core2 -mtune=haswell -I$PREFIX/include"
         OPTIONS=""
     fi
     SHARED="clang"
 else
     SHARED="gcc"
-    TUNING="-march=nocona -mtune=haswell -I$PREFIX/include"
+    CTUNING="-march=nocona -mtune=haswell -I$PREFIX/include"
+    FTUNING="-march=nocona -mtune=haswell -I$PREFIX/include"
     OPTIONS=""
 fi
 
@@ -77,8 +80,8 @@ fi
             --enable-two-level-namespace \
             --with-device=ch3 \
             CC="${CC}" CXX="${CXX}" FC="${FC}" F77="${FC}" F90="" \
-            CFLAGS="${TUNING}" CXXFLAGS="${TUNING}" FFLAGS="${TUNING}" LDFLAGS="${LDFLAGS}" \
-            FCFLAGS="${TUNING}" F90FLAGS="" F77FLAGS="" \
+            CFLAGS="${CTUNING}" CXXFLAGS="${CTUNING}" FFLAGS="${FTUNING}" LDFLAGS="${LDFLAGS}" \
+            FCFLAGS="${FTUNING}" F90FLAGS="" F77FLAGS="" \
             ${OPTIONS}
 
 make -j"${CPU_COUNT:-1}"

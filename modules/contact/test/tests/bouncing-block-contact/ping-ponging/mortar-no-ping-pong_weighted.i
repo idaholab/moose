@@ -92,7 +92,7 @@ offset = 1e-2
   dt = 5
   dtmin = 5
   solve_type = 'PJFNK'
-  petsc_options = '-snes_converged_reason -ksp_converged_reason'
+  petsc_options = '-snes_converged_reason -ksp_converged_reason -snes_ksp_ew'
   petsc_options_iname = '-pc_type -mat_mffd_err -pc_factor_shift_type'
   petsc_options_value = 'lu       1e-5          NONZERO'
   l_max_its = 30
@@ -100,6 +100,7 @@ offset = 1e-2
   nl_abs_tol = 1e-10
   nl_rel_tol = 1e-10
   line_search = 'none'
+  snesmf_reuse_base = true
 []
 
 [Debug]
