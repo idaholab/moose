@@ -50,21 +50,18 @@ stress_unit = 'Pa'
   [pressure_x]
     type = Pressure
     variable = disp_x
-    component = 0
     boundary = right
     factor = ${p}
   []
   [pressure_y]
     type = Pressure
     variable = disp_y
-    component = 1
     boundary = top
     factor = -${p}
   []
   [pressure_z]
     type = Pressure
     variable = disp_z
-    component = 2
     boundary = front
     factor = -${p}
   []

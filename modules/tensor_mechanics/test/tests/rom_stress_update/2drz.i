@@ -43,7 +43,6 @@
   [./pressure_x]
     type = Pressure
     variable = disp_x
-    component = 0
     boundary = right
     function = t
     factor = 3.1675e5
@@ -51,7 +50,6 @@
   [./pressure_y]
     type = Pressure
     variable = disp_y
-    component = 1
     boundary = top
     function = t
     factor = 6.336e5

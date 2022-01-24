@@ -138,15 +138,15 @@
     type = Pressure
     variable = disp_y
     boundary = top
-    component = 1
     factor = -1
+    displacements = 'disp_x disp_y'
   [../]
   [./bottom_y]
     type = Pressure
     variable = disp_y
     boundary = bottom
-    component = 1
     factor = -1
+    displacements = 'disp_x disp_y'
   [../]
   [./fix_y]
     type = DirichletBC
