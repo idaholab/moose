@@ -302,10 +302,6 @@ PeripheralTriangleMeshGenerator::generate()
   {
     boundary_info.add_node(point_node_map[point], _outer_boundary_id);
   }
-  // boundary_info.sideset_name(_outer_boundary_id) = _outer_boundary_name;
-
-  // generate sidesets from nodesets
-  // boundary_info.build_side_list_from_node_list();
 
   //
   // Cleanup P2T objects
