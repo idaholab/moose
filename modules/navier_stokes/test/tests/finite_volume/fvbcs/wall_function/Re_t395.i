@@ -216,7 +216,7 @@ velocity_interp_method='rc'
     variable = u
     u = u
     v = v
-    mu = ${mu}
+    mu = total_viscosity
     momentum_component = x
   []
   [sym-v]
@@ -225,7 +225,7 @@ velocity_interp_method='rc'
     variable = v
     u = u
     v = v
-    mu = ${mu}
+    mu = total_viscosity
     momentum_component = y
   []
   [symmetry_pressure]
@@ -249,6 +249,14 @@ velocity_interp_method='rc'
     pressure = 'pressure'
     rho = ${rho}
   []
+  [total_viscosity]
+    type = MixingLengthTurbulentViscosityMaterial
+    u = 'u'                             #computes total viscosity = mu_t + mu
+    v = 'v'                             #property is called total_viscosity
+    mixing_length = mixing_len
+    mu = ${mu}
+    rho = ${rho}
+  []
 []
 
 [Executioner]
@@ -262,7 +270,4 @@ velocity_interp_method='rc'
 
 [Outputs]
   exodus = true
-  [restart_out]        # creates input_other.e
-   type = Exodus
-  []
 []
