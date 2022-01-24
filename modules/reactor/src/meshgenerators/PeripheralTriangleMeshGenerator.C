@@ -138,8 +138,7 @@ PeripheralTriangleMeshGenerator::generate()
   // poly2tri requires input boundary nodes be sorted in connected order
   //
 
-  std::vector<Node *> inner_boundary_nodes =
-    createSortedBoundaryNodeList(*mesh);
+  std::vector<Node *> inner_boundary_nodes = createSortedBoundaryNodeList(*mesh);
 
   //
   // C2T storage
