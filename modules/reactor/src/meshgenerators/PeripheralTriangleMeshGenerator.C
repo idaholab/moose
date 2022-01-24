@@ -50,9 +50,6 @@ PeripheralTriangleMeshGenerator::validParams()
       "outer_boundary_id",
       "outer_boundary_id>=0",
       "The boundary id for the generated mesh outer boundary.");
-  // params.addParam<std::string>(
-  //   "outer_boundary_name",
-  //   "The boundary name of the generated mesh outer boundary.");
   params.addParam<std::vector<Real>>("extra_circle_radii", "Radii of extra Steiner point circles.");
   params.addParam<std::vector<unsigned int>>("extra_circle_num_segments",
                                              "Number of segments for extra Steiner point circles.");
