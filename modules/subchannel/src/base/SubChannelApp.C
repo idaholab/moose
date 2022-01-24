@@ -4,6 +4,9 @@
 #include "ModulesApp.h"
 #include "MooseSyntax.h"
 #include "SubChannelSyntax.h"
+#ifdef BISON_ENABLED
+#include "BisonApp.h"
+#endif
 
 const std::string SubChannelApp::MASS_FLOW_RATE = "mdot";
 const std::string SubChannelApp::SURFACE_AREA = "S";
@@ -41,12 +44,19 @@ SubChannelApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 
   /* register custom execute flags, action syntax, etc. here */
   SubChannel::associateSyntax(s, af);
+
+#ifdef BISON_ENABLED
+  BisonApp::registerAll(f, af, s);
+#endif
 }
 
 void
 SubChannelApp::registerApps()
 {
   registerApp(SubChannelApp);
+#ifdef BISON_ENABLED
+  BisonApp::registerApps();
+#endif
 }
 /***************************************************************************************************
  *********************** Dynamic Library Entry Points - DO NOT MODIFY ******************************

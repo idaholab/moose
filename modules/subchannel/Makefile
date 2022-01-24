@@ -14,6 +14,9 @@ else
   MOOSE_DIR        ?= $(shell dirname `pwd`)/moose
 endif
 
+BISON_DIR ?= ""
+BISON_CONTENT := $(shell ls $(BISON_DIR) 2> /dev/null)
+
 # framework
 FRAMEWORK_DIR      := $(MOOSE_DIR)/framework
 include $(FRAMEWORK_DIR)/build.mk
@@ -43,8 +46,43 @@ STOCHASTIC_TOOLS            := no
 TENSOR_MECHANICS            := no
 XFEM                        := no
 
+ifneq ($(BISON_CONTENT),)
+  TENSOR_MECHANICS  := yes
+  CONTACT           := yes
+  HEAT_CONDUCTION   := yes
+  FLUID_PROPERTIES  := yes
+  MISC              := yes
+  PHASE_FIELD       := yes
+  XFEM              := yes
+  STOCHASTIC_TOOLS  := yes
+  LEVEL_SET         := yes
+endif
+
 include $(MOOSE_DIR)/modules/modules.mk
 ###############################################################################
+
+ifneq ($(BISON_CONTENT),)
+  IAPWS95_SUBMODULE    := $(BISON_DIR)/iapws95
+  ifneq ($(wildcard $(IAPWS95_SUBMODULE)/Makefile),)
+    IAPWS95_DIR        ?= $(IAPWS95_SUBMODULE)
+  else
+    IAPWS95_DIR        ?= $(shell dirname `pwd`)/iapws95
+  endif
+  # check that IAPWS95 is available
+  IAPWS95_CONTENT := $(shell ls $(IAPWS95_DIR) 2> /dev/null)
+  ifeq ($(IAPWS95_CONTENT),)
+    $(error IAPWS95 does not seem to be available. Make sure that either the submodule in BISON is checked out or that your IAPWS95_DIR points to the correct location)
+  endif
+  APPLICATION_DIR    := $(IAPWS95_DIR)
+  APPLICATION_NAME   := iapws95
+  include            $(FRAMEWORK_DIR)/app.mk
+  include            $(IAPWS95_DIR)/libSBTL.mk
+
+  libmesh_CXXFLAGS += -DBISON_ENABLED
+  APPLICATION_DIR  := $(BISON_DIR)
+  APPLICATION_NAME := bison
+  include          $(FRAMEWORK_DIR)/app.mk
+endif
 
 # dep apps
 APPLICATION_DIR    := $(CURDIR)
