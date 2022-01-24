@@ -77,8 +77,7 @@ PeripheralTriangleMeshGenerator::PeripheralTriangleMeshGenerator(const InputPara
     _extra_circle_num_segments(getParam<std::vector<unsigned int>>("extra_circle_num_segments"))
 {
   // confirm either id or name (exclusive or) for inner mesh boundary is provided
-  if ((!isParamValid("inner_boundary_id") && !isParamValid("inner_boundary_name")) ||
-      (isParamValid("inner_boundary_id") && isParamValid("inner_boundary_name")))
+  if (isParamValid("inner_boundary_id") == isParamValid("inner_boundary_name"))
   {
     paramError(
         "inner_boundary_id",
