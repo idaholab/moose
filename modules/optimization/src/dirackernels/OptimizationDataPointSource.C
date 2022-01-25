@@ -13,8 +13,6 @@
 
 registerMooseObject("MooseApp", OptimizationDataPointSource);
 
-defineLegacyParams(OptimizationDataPointSource);
-
 InputParameters
 OptimizationDataPointSource::validParams()
 {
