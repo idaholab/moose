@@ -10,7 +10,7 @@
 #pragma once
 
 #include "AuxKernel.h"
-#include "MortarInterface.h"
+#include "MortarConsumerInterface.h"
 #include "MortarExecutorInterface.h"
 
 /**
@@ -19,7 +19,7 @@
 template <typename ComputeValueType>
 class MortarNodalAuxKernelTempl : public AuxKernelTempl<ComputeValueType>,
                                   public MortarExecutorInterface,
-                                  protected MortarInterface
+                                  protected MortarConsumerInterface
 {
 public:
   static InputParameters validParams();

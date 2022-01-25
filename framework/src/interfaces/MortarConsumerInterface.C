@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 // MOOSE Includes
-#include "MortarInterface.h"
+#include "MortarConsumerInterface.h"
 #include "InputParameters.h"
 #include "MooseObject.h"
 #include "FEProblemBase.h"
@@ -20,7 +20,7 @@
 #include <algorithm>
 
 InputParameters
-MortarInterface::validParams()
+MortarConsumerInterface::validParams()
 {
   // Create InputParameters object that will be appended to the parameters for the inheriting object
   InputParameters params = emptyInputParameters();
@@ -84,7 +84,7 @@ MortarInterface::validParams()
 }
 
 // Standard constructor
-MortarInterface::MortarInterface(const MooseObject * moose_object)
+MortarConsumerInterface::MortarConsumerInterface(const MooseObject * moose_object)
   : _moi_fe_problem(*moose_object->getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _moi_subproblem(*moose_object->getCheckedPointerParam<SubProblem *>("_subproblem")),
     _moi_tid(moose_object->getParam<THREAD_ID>("_tid")),
@@ -136,7 +136,7 @@ MortarInterface::MortarInterface(const MooseObject * moose_object)
 }
 
 void
-MortarInterface::setNormals()
+MortarConsumerInterface::setNormals()
 {
   if (interpolateNormals())
     _normals = amg().getNormals(*_lower_secondary_elem, _qrule_face->get_points());

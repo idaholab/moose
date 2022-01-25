@@ -33,10 +33,10 @@ class QBase;
  * \note moi is shorthand for mortar interface, so \p _moi_problem indicates
  *       the mortar interface's problem
  */
-class MortarInterface
+class MortarConsumerInterface
 {
 public:
-  MortarInterface(const MooseObject * moose_object);
+  MortarConsumerInterface(const MooseObject * moose_object);
 
   static InputParameters validParams();
 
@@ -135,7 +135,7 @@ private:
 };
 
 inline const AutomaticMortarGeneration &
-MortarInterface::amg() const
+MortarConsumerInterface::amg() const
 {
   mooseAssert(_amg, "this should have been set in the constructor");
   return *_amg;

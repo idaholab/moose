@@ -18,7 +18,7 @@ InputParameters
 MortarNodalAuxKernelTempl<ComputeValueType>::validParams()
 {
   InputParameters params = AuxKernelTempl<ComputeValueType>::validParams();
-  params += MortarInterface::validParams();
+  params += MortarConsumerInterface::validParams();
   params.set<bool>("ghost_point_neighbors") = true;
   return params;
 }
@@ -29,7 +29,7 @@ MortarNodalAuxKernelTempl<ComputeValueType>::MortarNodalAuxKernelTempl(
   : AuxKernelTempl<ComputeValueType>(parameters),
     MortarExecutorInterface(
         *this->template getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
-    MortarInterface(this),
+    MortarConsumerInterface(this),
     _displaced(this->template getParam<bool>("use_displaced_mesh")),
     _fe_problem(*this->template getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _msm_volume(0)

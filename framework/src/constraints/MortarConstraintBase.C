@@ -20,7 +20,7 @@ InputParameters
 MortarConstraintBase::validParams()
 {
   InputParameters params = Constraint::validParams();
-  params += MortarInterface::validParams();
+  params += MortarConsumerInterface::validParams();
   params += TwoMaterialPropertyInterface::validParams();
 
   // Whether on a displaced or undisplaced mesh, coupling ghosting will only happen for
@@ -68,7 +68,7 @@ MortarConstraintBase::validParams()
 MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
   : Constraint(parameters),
     NeighborCoupleableMooseVariableDependencyIntermediateInterface(this, false, false),
-    MortarInterface(this),
+    MortarConsumerInterface(this),
     TwoMaterialPropertyInterface(this, Moose::EMPTY_BLOCK_IDS, getBoundaryIDs()),
     MooseVariableInterface<Real>(this,
                                  true,
