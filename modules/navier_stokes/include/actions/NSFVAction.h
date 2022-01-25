@@ -55,6 +55,10 @@ protected:
   void addCNSOutletBC();
   void addCNSWallBC();
 
+  void addRelationshipManager(std::string name,
+                              unsigned int no_layers,
+                              const InputParameters & obj_params);
+
   /// Equation type, transient or steady-state
   MooseEnum _type;
 

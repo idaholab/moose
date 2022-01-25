@@ -15,6 +15,7 @@
 #include "MooseObject.h"
 #include "INSADObjectTracker.h"
 #include "NonlinearSystemBase.h"
+#include "RelationshipManager.h"
 
 // MOOSE includes
 #include "FEProblem.h"
@@ -1166,6 +1167,34 @@ NSFVAction::addINSInletBC()
 }
 
 void
+NSFVAction::addRelationshipManager(std::string name,
+                                   unsigned int no_layers,
+                                   const InputParameters & obj_params)
+{
+  auto & factory = _app.getFactory();
+  auto rm_params = factory.getValidParams("ElementSideNeighborLayers");
+
+  rm_params.set<std::string>("for_whom") = name;
+  rm_params.set<MooseMesh *>("mesh") = _mesh.get();
+  rm_params.set<Moose::RelationshipManagerType>("rm_type") =
+      Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC |
+      Moose::RelationshipManagerType::COUPLING;
+  rm_params.set<unsigned short>("layers") = no_layers;
+  rm_params.set<bool>("attach_geometric_early") = false;
+  if (obj_params.isParamValid("use_point_neighbors"))
+    rm_params.set<bool>("use_point_neighbors") = obj_params.get<bool>("use_point_neighbors");
+
+  rm_params.set<bool>("use_displaced_mesh") = obj_params.get<bool>("use_displaced_mesh");
+  mooseAssert(rm_params.areAllRequiredParamsValid(),
+              "All relationship manager parameters should be valid.");
+
+  auto rm_obj = factory.create<RelationshipManager>("ElementSideNeighborLayers", name, rm_params);
+
+  if (!_app.addRelationshipManager(rm_obj))
+    factory.releaseSharedObjects(*rm_obj);
+}
+
+void
 NSFVAction::addINSOutletBC()
 {
   const std::string u_names[3] = {"u", "v", "w"};
@@ -1178,7 +1207,9 @@ NSFVAction::addINSOutletBC()
       params.set<NonlinearVariableName>("variable") = NS::pressure;
       params.set<FunctionName>("function") = _pressure_function[bc_ind];
       params.set<std::vector<BoundaryName>>("boundary") = {_outlet_boundaries[bc_ind]};
+
       _problem->addFVBC(bc_type, NS::pressure + "_" + _outlet_boundaries[bc_ind], params);
+      addRelationshipManager(NS::pressure + "_" + _outlet_boundaries[bc_ind], 2, params);
     }
     else if (_momentum_outlet_types[bc_ind] == "zero-gradient")
     {
