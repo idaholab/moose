@@ -9,6 +9,7 @@
 
 #include "VolumetricFlowRate.h"
 #include "MathFVUtils.h"
+#include "INSFVRhieChowInterpolator.h"
 #include <math.h>
 
 registerMooseObject("NavierStokesApp", VolumetricFlowRate);
@@ -27,11 +28,21 @@ VolumetricFlowRate::validParams()
       "advected_variable", 0, "The advected variable quantity of which to study the flow");
   params.addParam<MooseFunctorName>(
       "advected_mat_prop", 0, "The advected material property of which to study the flow");
+  params.addParam<MooseFunctorName>("advected_quantity",
+                                    "The quantity to advect. This is the canonical parameter to "
+                                    "set the advected quantity when finite volume is being used.");
   MooseEnum advected_interp_method("average upwind", "upwind");
   params.addParam<MooseEnum>("advected_interp_method",
                              advected_interp_method,
                              "The interpolation to use for the advected quantity. Options are "
                              "'upwind' and 'average', with the default being 'upwind'.");
+  MooseEnum velocity_interp_method("average rc", "rc");
+  params.addParam<MooseEnum>(
+      "velocity_interp_method",
+      velocity_interp_method,
+      "The interpolation to use for the velocity. Options are "
+      "'average' and 'rc' which stands for Rhie-Chow. The default is Rhie-Chow.");
+  params.addParam<UserObjectName>("rhie_chow_user_object", "The rhie-chow user-object");
   return params;
 }
 
@@ -41,15 +52,15 @@ VolumetricFlowRate::VolumetricFlowRate(const InputParameters & parameters)
     _vel_x(coupledValue("vel_x")),
     _vel_y(coupledValue("vel_y")),
     _vel_z(coupledValue("vel_z")),
-    _fv_vel_x(dynamic_cast<const MooseVariableFV<Real> *>(getFieldVar("vel_x", 0))),
-    _fv_vel_y(dynamic_cast<const MooseVariableFV<Real> *>(getFieldVar("vel_y", 0))),
-    _fv_vel_z(dynamic_cast<const MooseVariableFV<Real> *>(getFieldVar("vel_z", 0))),
     _advected_variable_supplied(parameters.isParamSetByUser("advected_variable")),
     _advected_variable(coupledValue("advected_variable")),
-    _fv_advected_variable(
-        dynamic_cast<const MooseVariableFV<Real> *>(getFieldVar("advected_variable", 0))),
     _advected_mat_prop_supplied(parameters.isParamSetByUser("advected_mat_prop")),
-    _advected_material_property(getFunctor<ADReal>("advected_mat_prop"))
+    _advected_material_property(getFunctor<ADReal>("advected_mat_prop")),
+    _adv_quant(isParamValid("advected_quantity") ? &getFunctor<ADReal>("advected_quantity")
+                                                 : nullptr),
+    _rc_uo(isParamValid("rhie_chow_user_object")
+               ? &getUserObject<INSFVRhieChowInterpolator>("rhie_chow_user_object")
+               : nullptr)
 {
   // Check that at most one advected quantity has been provided
   if (_advected_variable_supplied && _advected_mat_prop_supplied)
@@ -61,6 +72,16 @@ VolumetricFlowRate::VolumetricFlowRate(const InputParameters & parameters)
     mooseWarning("Advected quantity interpolation methods are currently unavailable for "
                  "advected material properties.");
 
+  if (_fv)
+  {
+    if (!_rc_uo)
+      mooseError("We were instructed to use finite volume, but no Rhie-Chow user object is "
+                 "supplied. Please make sure to set the 'rhie_chow_user_object' parameter");
+    if (!_adv_quant)
+      mooseError("We were instructed to use finite volume, but no 'advected_quantity' parameter is "
+                 "supplied.");
+  }
+
   using namespace Moose::FV;
 
   const auto & advected_interp_method = getParam<MooseEnum>("advected_interp_method");
@@ -71,6 +92,15 @@ VolumetricFlowRate::VolumetricFlowRate(const InputParameters & parameters)
   else
     mooseError("Unrecognized advected quantity interpolation type ",
                static_cast<std::string>(advected_interp_method));
+
+  const auto & velocity_interp_method = getParam<MooseEnum>("velocity_interp_method");
+  if (velocity_interp_method == "average")
+    _velocity_interp_method = InterpMethod::Average;
+  else if (velocity_interp_method == "rc")
+    _velocity_interp_method = InterpMethod::RhieChow;
+  else
+    mooseError("Unrecognized interpolation type ",
+               static_cast<std::string>(velocity_interp_method));
 }
 
 Real
@@ -84,41 +114,21 @@ VolumetricFlowRate::computeQpIntegral()
     mooseAssert(fi, "We should have a face info");
 
     // Get face value for velocity
-    const auto & vx_face =
-        _fv_vel_x ? MetaPhysicL::raw_value(_fv_vel_x->getBoundaryFaceValue(*fi)) : _vel_x[_qp];
+    const auto vel =
+        MetaPhysicL::raw_value(_rc_uo->getVelocity(_velocity_interp_method, *fi, _tid));
 
-    const auto & vy_face =
-        _fv_vel_y ? MetaPhysicL::raw_value(_fv_vel_y->getBoundaryFaceValue(*fi)) : _vel_y[_qp];
+    const auto elem_face = Moose::FV::elemFromFace(*_rc_uo, *fi);
+    const auto neighbor_face = Moose::FV::neighborFromFace(*_rc_uo, *fi);
 
-    const auto & vz_face =
-        _fv_vel_z ? MetaPhysicL::raw_value(_fv_vel_z->getBoundaryFaceValue(*fi)) : _vel_z[_qp];
-
-    // Compute the advected quantity on the face
-    Real advected_quantity;
-    if (_advected_variable_supplied)
-    {
-      // Get neighbor value
-      const Elem * const neighbor = _current_elem->neighbor_ptr(_current_side);
-      const auto & advected_variable_neighbor =
-          _fv_advected_variable ? MetaPhysicL::raw_value(_fv_advected_variable->getNeighborValue(
-                                      neighbor, *fi, _advected_variable[_qp]))
-                                : _advected_variable[_qp];
-
-      Moose::FV::interpolate(_advected_interp_method,
-                             advected_quantity,
-                             MetaPhysicL::raw_value(_advected_variable[_qp]),
-                             MetaPhysicL::raw_value(advected_variable_neighbor),
-                             RealVectorValue(vx_face, vy_face, vz_face),
-                             *fi,
-                             true);
-    }
-    else if (_advected_mat_prop_supplied)
-      advected_quantity =
-          MetaPhysicL::raw_value(_advected_material_property(makeElemArg(_current_elem)));
-    else
-      advected_quantity = 1;
-
-    return advected_quantity * RealVectorValue(vx_face, vy_face, vz_face) * _normals[_qp];
+    Real adv_quant_interface;
+    Moose::FV::interpolate(_advected_interp_method,
+                           adv_quant_interface,
+                           MetaPhysicL::raw_value((*_adv_quant)(elem_face)),
+                           MetaPhysicL::raw_value((*_adv_quant)(neighbor_face)),
+                           vel,
+                           *fi,
+                           true);
+    return fi->normal() * vel * adv_quant_interface;
   }
   else
 #endif

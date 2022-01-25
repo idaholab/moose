@@ -13,6 +13,8 @@
 #include "InterfaceIntegralPostprocessor.h"
 #include "MathFVUtils.h"
 
+class INSFVRhieChowInterpolator;
+
 /**
  * This postprocessor computes the volumetric flow rate through an internal boundary.
  */
@@ -34,23 +36,25 @@ protected:
   const VariableValue & _vel_y;
   const VariableValue & _vel_z;
 
-  /// Velocity components for finite volume
-  const MooseVariableFV<Real> * const _fv_vel_x;
-  const MooseVariableFV<Real> * const _fv_vel_y;
-  const MooseVariableFV<Real> * const _fv_vel_z;
-
   /// Whether an advected variable was supplied in the input
   const bool _advected_variable_supplied;
   /// Variable storing the advected quantity
   const VariableValue & _advected_variable;
-  /// Variable storing the advected quantity for finite volume
-  const MooseVariableFV<Real> * const _fv_advected_variable;
 
   /// Whether an advected material property was supplied in the input
   const bool _advected_mat_prop_supplied;
   /// Material property storing the advected quantity
   const Moose::Functor<ADReal> & _advected_material_property;
 
+  /// The functor representing the advected quantity for finite volume
+  const Moose::Functor<ADReal> * const _adv_quant;
+
   /// The interpolation method to use for the advected quantity
   Moose::FV::InterpMethod _advected_interp_method;
+
+  /// The interpolation method to use for the velocity
+  Moose::FV::InterpMethod _velocity_interp_method;
+
+  /// The Rhie-Chow interpolation user object
+  const INSFVRhieChowInterpolator * const _rc_uo;
 };

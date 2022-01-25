@@ -108,7 +108,7 @@ INSFVMomentumAdvection::INSFVMomentumAdvection(const InputParameters & params)
     mooseError("Unrecognized interpolation type ",
                static_cast<std::string>(advected_interp_method));
 
-  const auto & velocity_interp_method = params.get<MooseEnum>("velocity_interp_method");
+  const auto & velocity_interp_method = getParam<MooseEnum>("velocity_interp_method");
   if (velocity_interp_method == "average")
     _velocity_interp_method = InterpMethod::Average;
   else if (velocity_interp_method == "rc")
