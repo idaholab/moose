@@ -51,10 +51,4 @@ protected:
    * @return vector of inner boundary nodes
    */
   std::vector<Node *> createSortedBoundaryNodeList(MeshBase & mesh) const;
-
-  /**
-   * Deletes and clears a list of poly2tri Point pointers.
-   * @param point_list list of poly2tri Point pointers to be deleted.
-   */
-  static void clearPoints(std::vector<p2t::Point *> & point_list);
 };

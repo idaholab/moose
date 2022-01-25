@@ -21,6 +21,19 @@
 // poly2tri triangulation library
 #include "poly2tri/poly2tri.h"
 
+
+// Anonymous namespace - poly2tri doesn't define operator<(Point,Point)
+namespace {
+  struct P2TPointCompare
+  {
+    bool operator() (const p2t::Point & a, const p2t::Point & b) const
+    {
+      return a.x < b.x || (a.x == b.x && a.y < b.y);
+    }
+  };
+};
+
+
 registerMooseObject("ReactorApp", PeripheralTriangleMeshGenerator);
 
 InputParameters
@@ -145,12 +158,12 @@ PeripheralTriangleMeshGenerator::generate()
   //
 
   /// Polylines
-  std::vector<p2t::Point *> outer_polyline;
-  std::vector<p2t::Point *> inner_polyline;
-  std::vector<p2t::Point *> steiner_points;
+  std::vector<p2t::Point> inner_polyline;
+  std::vector<p2t::Point> outer_polyline;
+  std::vector<p2t::Point> steiner_points;
 
   // store association map for reference
-  std::map<p2t::Point *, Node *> point_node_map;
+  std::map<const p2t::Point, Node *, P2TPointCompare> point_node_map;
 
   //
   // Inner P2T boundary; extract from existing mesh
@@ -163,12 +176,10 @@ PeripheralTriangleMeshGenerator::generate()
     // extract (x, y) coords
     Real x = (*node)(0);
     Real y = (*node)(1);
-    // create Point
-    p2t::Point * point = new p2t::Point(x, y);
     // add to inner boundary list
-    inner_polyline.push_back(point);
+    inner_polyline.emplace_back(x,y);
     // add to association map
-    point_node_map[point] = node;
+    point_node_map[inner_polyline.back()] = node;
   }
 
   //
@@ -186,14 +197,12 @@ PeripheralTriangleMeshGenerator::generate()
     Real x = _outer_circle_radius * std::cos(theta);
     Real y = _outer_circle_radius * std::sin(theta);
 
-    // create Point
-    p2t::Point * point = new p2t::Point(x, y);
     // add to outer boundary list
-    outer_polyline.push_back(point);
+    outer_polyline.emplace_back(x, y);
     // create Node and add to mesh
     Node * node = mesh->add_point(Point(x, y, 0.0));
     // add to association map
-    point_node_map[point] = node;
+    point_node_map[outer_polyline.back()] = node;
   }
 
   //
@@ -218,14 +227,12 @@ PeripheralTriangleMeshGenerator::generate()
       Real x = radius * std::cos(theta);
       Real y = radius * std::sin(theta);
 
-      // create Point
-      p2t::Point * point = new p2t::Point(x, y);
       // add to Steiner point list
-      steiner_points.push_back(point);
+      steiner_points.emplace_back(x,y);
       // create Node and add to mesh
       Node * node = mesh->add_point(Point(x, y, 0.0));
       // add to association map
-      point_node_map[point] = node;
+      point_node_map[steiner_points.back()] = node;
     }
   }
 
@@ -235,16 +242,22 @@ PeripheralTriangleMeshGenerator::generate()
   // repeat points!!!
   //
 
-  p2t::CDT * cdt = new p2t::CDT(outer_polyline);
+  std::vector<p2t::Point *> outer_polyline_ptrs(outer_polyline.size());
+  std::transform(outer_polyline.begin(), outer_polyline.end(),
+                 outer_polyline_ptrs.begin(),
+                 [](p2t::Point & p){ return &p; });
+  p2t::CDT * cdt = new p2t::CDT(outer_polyline_ptrs);
 
   // Add inner boundary
-  cdt->AddHole(inner_polyline);
+  std::vector<p2t::Point *> inner_polyline_ptrs(inner_polyline.size());
+  std::transform(inner_polyline.begin(), inner_polyline.end(),
+                 inner_polyline_ptrs.begin(),
+                 [](p2t::Point & p){ return &p; });
+  cdt->AddHole(inner_polyline_ptrs);
 
   // Add Steiner points
-  for (const auto & point : steiner_points)
-  {
-    cdt->AddPoint(point);
-  }
+  for (auto & point : steiner_points)
+    cdt->AddPoint(&point);
 
   // Triangulate!
   cdt->Triangulate();
@@ -271,11 +284,11 @@ PeripheralTriangleMeshGenerator::generate()
 
       // check if node has been created for point
       // if not, create and add to map
-      if (!point_node_map.count(point))
-        point_node_map[point] = mesh->add_point(Point(point->x, point->y, 0.0));
+      if (!point_node_map.count(*point))
+        point_node_map[*point] = mesh->add_point(Point(point->x, point->y, 0.0));
 
       // retrieve node and add to element
-      tri_elem->set_node(i) = point_node_map[point];
+      tri_elem->set_node(i) = point_node_map[*point];
     }
 
     // set element subdomain id
@@ -289,19 +302,14 @@ PeripheralTriangleMeshGenerator::generate()
   // add nodesets for boundaries
   //
 
-  for (p2t::Point * point : outer_polyline)
-  {
+  for (const p2t::Point & point : outer_polyline)
     boundary_info.add_node(point_node_map[point], _outer_boundary_id);
-  }
 
   //
   // Cleanup P2T objects
   //
 
   delete cdt;
-  clearPoints(outer_polyline);
-  clearPoints(inner_polyline);
-  clearPoints(steiner_points);
 
   //
   // finalize mesh (partition the new elements, make the mesh
@@ -447,14 +455,4 @@ PeripheralTriangleMeshGenerator::createSortedBoundaryNodeList(MeshBase & mesh) c
   }
 
   return inner_boundary_nodes;
-}
-
-void
-PeripheralTriangleMeshGenerator::clearPoints(std::vector<p2t::Point *> & point_list)
-{
-  for (auto point : point_list)
-  {
-    delete point;
-  }
-  point_list.clear();
 }
