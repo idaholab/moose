@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ForcingFunctionAux.h"
-// #include "Function.h" //don't think this is needed but check
+#include "Function.h"
 
 registerMooseObject("MooseApp", ForcingFunctionAux);
 
@@ -26,13 +26,12 @@ ForcingFunctionAux::validParams()
 ForcingFunctionAux::ForcingFunctionAux(const InputParameters & parameters)
   : FunctionAux(parameters), _u_old(uOld())
 {
+  if (isNodal())
+    paramError("variable", "The variable must be elemental");
 }
 
 Real
 ForcingFunctionAux::computeValue()
 {
-  if (isNodal())
-    mooseError("Must use an elemental AuxVariable for ForcingFunctionAux.");
-  else
-    return _u_old[_qp] + _dt * _func.value(_t, _q_point[_qp]);
+  return _u_old[_qp] + _dt * _func.value(_t, _q_point[_qp]);
 }
