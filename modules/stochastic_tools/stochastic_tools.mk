@@ -6,7 +6,13 @@ endif
 $(info $(TORCH_DIR))
 
 ifneq ($(TORCH_DIR),)
-  ifneq ($(wildcard $(TORCH_DIR)/lib/libtorch.so),)
+	UNAME_S := $(shell uname -s)
+	LIBTORCH_LIB := libtorch.so
+  ifeq ($(UNAME_S),Darwin)
+    LIBTORCH_LIB := libtorch.dylib
+  endif
+
+  ifneq ($(wildcard $(TORCH_DIR)/lib/$(LIBTORCH_LIB)),)
     # Enabling parts that have pytorch dependencies
     libmesh_CXXFLAGS += -DTORCH_ENABLED
 
