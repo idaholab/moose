@@ -76,14 +76,10 @@ loopOverMortarSegments(const Iterators & secondary_elems_to_mortar_segments,
                        std::deque<MaterialBase *> secondary_boundary_mats,
                        const ActionFunctor act)
 {
-  const auto & primary_secondary_boundary_id_pairs = amg.primarySecondaryBoundaryIDPairs();
-  mooseAssert(primary_secondary_boundary_id_pairs.size() == 1,
-              "We currently only support a single primary-secondary ID pair per mortar segment "
-              "mesh. We can probably support this without too much trouble if you want to contact "
-              "a MOOSE developer.");
+  const auto & primary_secondary_boundary_id_pair = amg.primarySecondaryBoundaryIDPair();
 
-  const auto primary_boundary_id = primary_secondary_boundary_id_pairs[0].first;
-  const auto secondary_boundary_id = primary_secondary_boundary_id_pairs[0].second;
+  const auto primary_boundary_id = primary_secondary_boundary_id_pair.first;
+  const auto secondary_boundary_id = primary_secondary_boundary_id_pair.second;
 
   // For 3D mortar get index for retrieving sub-element info
   unsigned int secondary_sub_elem_index = 0, primary_sub_elem_index = 0;
@@ -293,6 +289,20 @@ loopOverMortarSegments(const Iterators & secondary_elems_to_mortar_segments,
   }   // End loop over (active) secondary elems
 }
 
+/**
+ * This function creates containers of materials necessary to execute the mortar method for a
+ * supplied set of consumers
+ * @param consumers The objects that we're building the material dependencies for. This could be a
+ * container of mortar constraints or a "mortar" auxiliary kernel for example
+ * @param fe_problem The finite element problem that we'll be querying for material warehouses
+ * @param tid The thread ID that we will use for pulling the material warehouse
+ * @param secondary_ip_sub_to_mats A map from the secondary interior parent subdomain IDs to the
+ * required secondary \em block materials we will need to evaluate for the consumers
+ * @param primary_ip_sub_to_mats A map from the primary interior parent subdomain IDs to the
+ * required primary \em block materials we will need to evaluate for the consumers
+ * @param secondary_boundary_mats The secondary \em boundary materials we will need to evaluate for
+ * the consumers
+ */
 template <typename Consumers>
 void
 setupMortarMaterials(const Consumers & consumers,
@@ -321,16 +331,19 @@ setupMortarMaterials(const Consumers & consumers,
       return {};
   };
 
+  // Construct secondary *block* materials container
   const auto & secondary_ip_sub_ids = amg.secondaryIPSubIDs();
   for (const auto secondary_ip_sub : secondary_ip_sub_ids)
     secondary_ip_sub_to_mats.emplace(
         secondary_ip_sub, get_required_sub_mats(secondary_ip_sub, Moose::FACE_MATERIAL_DATA));
 
+  // Construct primary *block* materials container
   const auto & primary_ip_sub_ids = amg.primaryIPSubIDs();
   for (const auto primary_ip_sub : primary_ip_sub_ids)
     primary_ip_sub_to_mats.emplace(
         primary_ip_sub, get_required_sub_mats(primary_ip_sub, Moose::NEIGHBOR_MATERIAL_DATA));
 
+  // Construct secondary *boundary* materials container
   const auto & boundary_pr = amg.primarySecondaryBoundaryIDPair();
   const auto secondary_boundary = boundary_pr.second;
   if (mat_warehouse.hasActiveBoundaryObjects(secondary_boundary, tid))

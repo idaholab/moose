@@ -97,8 +97,17 @@ public:
    */
   const std::set<SubdomainID> & getHigherDimSubdomainIDs(SubdomainID lower_d_subdomain_id) const;
 
-  void notifyWhenMortarSetup(MortarExecutorInterface *);
-  void dontNotifyWhenMortarSetup(MortarExecutorInterface *);
+  /**
+   * \em Adds \p mei to the container of objects that will have their \p mortarSetup method called
+   * as soon as the mortar mesh has been generated for the first time
+   */
+  void notifyWhenMortarSetup(MortarExecutorInterface * mei);
+
+  /**
+   * \em Removes \p mei from the container of objects that will have their \p mortarSetup method
+   * called as soon as the mortar mesh has been generated for the first time
+   */
+  void dontNotifyWhenMortarSetup(MortarExecutorInterface * mei);
 
 private:
   /**
@@ -140,6 +149,8 @@ private:
   /// (e.g. the ids of the interior parents)
   std::unordered_map<SubdomainID, std::set<SubdomainID>> _lower_d_sub_to_higher_d_subs;
 
+  /// A container of objects for whom the \p mortarSetup method will be called after the mortar mesh
+  /// has been setup for the first time
   std::set<MortarExecutorInterface *> _mei_objs;
 
   /// Whether we have performed any mortar mesh construction

@@ -70,8 +70,4 @@ private:
 
   /// A reference to the assembly object
   Assembly & _assembly;
-
-  std::map<SubdomainID, std::deque<MaterialBase *>> _secondary_ip_sub_to_mats;
-  std::map<SubdomainID, std::deque<MaterialBase *>> _primary_ip_sub_to_mats;
-  std::deque<MaterialBase *> _secondary_boundary_mats;
 };

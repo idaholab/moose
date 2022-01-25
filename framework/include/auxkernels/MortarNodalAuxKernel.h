@@ -15,7 +15,6 @@
 
 /**
  * Base class for creating new nodally-based mortar auxiliary kernels
- *
  */
 template <typename ComputeValueType>
 class MortarNodalAuxKernelTempl : public AuxKernelTempl<ComputeValueType>,
@@ -55,10 +54,6 @@ protected:
 
   /// The mortar segment volume
   Real _msm_volume;
-
-  std::map<SubdomainID, std::deque<MaterialBase *>> _secondary_ip_sub_to_mats;
-  std::map<SubdomainID, std::deque<MaterialBase *>> _primary_ip_sub_to_mats;
-  std::deque<MaterialBase *> _secondary_boundary_mats;
 };
 
 typedef MortarNodalAuxKernelTempl<Real> MortarNodalAuxKernel;

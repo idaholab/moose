@@ -259,17 +259,9 @@ public:
     return _mortar_interface_coupling;
   }
 
-  /**
-   * @return The primary-secondary boundary ID pairs
+  /*
+   * @return The primary-secondary boundary ID pair
    */
-  const std::vector<std::pair<BoundaryID, BoundaryID>> & primarySecondaryBoundaryIDPairs() const
-  {
-    return _primary_secondary_boundary_id_pairs;
-  }
-
-  // const std::pair<SubdomainID, SubdomainID> & primarySecondarySubdomainIDPair()
-  // const;
-
   const std::pair<BoundaryID, BoundaryID> & primarySecondaryBoundaryIDPair() const;
 
   /**
@@ -324,8 +316,14 @@ public:
     return _secondary_elems_to_mortar_segments;
   }
 
+  /**
+   * @return All the secondary interior parent subdomain IDs associated with the mortar mesh
+   */
   const std::set<SubdomainID> & secondaryIPSubIDs() const { return _secondary_ip_sub_ids; }
 
+  /**
+   * @return All the primary interior parent subdomain IDs associated with the mortar mesh
+   */
   const std::set<SubdomainID> & primaryIPSubIDs() const { return _primary_ip_sub_ids; }
 
 private:
@@ -430,7 +428,10 @@ private:
   std::unordered_map<const Elem *, std::set<Elem *, CompareDofObjectsByID>>
       _secondary_elems_to_mortar_segments;
 
+  /// All the secondary interior parent subdomain IDs associated with the mortar mesh
   std::set<SubdomainID> _secondary_ip_sub_ids;
+
+  /// All the primary interior parent subdomain IDs associated with the mortar mesh
   std::set<SubdomainID> _primary_ip_sub_ids;
 
   /**
@@ -493,15 +494,6 @@ private:
   /// are strongly set to 0.
   bool _correct_edge_dropping;
 };
-
-// inline const std::pair<SubdomainID, SubdomainID> &
-// AutomaticMortarGeneration::primarySecondarySubdomainIDPair() const
-// {
-//   mooseAssert(_primary_secondary_subdomain_id_pairs.size() == 1,
-//               "We currently only support a single subdomain pair per mortar generation object");
-
-//   return _primary_secondary_subdomain_id_pairs.front();
-// }
 
 inline const std::pair<BoundaryID, BoundaryID> &
 AutomaticMortarGeneration::primarySecondaryBoundaryIDPair() const
