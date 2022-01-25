@@ -93,8 +93,6 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
   // Ensure that the user has supplied the correct info for conformal mesh generation
   if (getMeshByName(_reactor_params) != nullptr)
     mooseError("The reactor_params mesh is not of the correct type");
-  else
-    _procedural_ids = getMeshProperty<bool>("procedural_ids", _reactor_params);
 
   if (!hasMeshProperty("mesh_dimensions", _reactor_params) ||
       !hasMeshProperty("mesh_geometry", _reactor_params))
@@ -104,6 +102,9 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
     _mesh_dimensions = getMeshProperty<int>("mesh_dimensions", _reactor_params);
     _mesh_geometry = getMeshProperty<std::string>("mesh_geometry", _reactor_params);
   }
+  if (!_quad_center && _intervals[0] != 1)
+    mooseError("The number of mesh intervals in the ring region must be one if "
+               "quad_center_elements is not true");
   if (_extrude && _mesh_dimensions != 3)
     mooseError("This is a 2 dimensional mesh, you cannot extrude it. Check your ReactorMeshParams "
                "inputs\n");
@@ -119,73 +120,9 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
       mooseError("The number of region IDs given needs to be one more than the number of "
                  "ring_radii + the number of duct_radii\n");
   }
-  else if (!_procedural_ids)
-  {
-    mooseError("If procedural ID generation is not being used then region IDs must be assigned "
-               "with parameter region_ids");
-  }
   else
   {
-    // procedurally generate region ids, making centermost interval its own region
-    // IDs are generated attempting to concatenate the pin type ID and the radial region
-    // with the centermost being region 0. If the pin type ID is too large or there
-    // are too many radial regions the concatenation will truncate the end of the pin type ID.
-    // The region ID is limited by the subdomain_id_type which is uint16.
-
-    int num_rings = _intervals.size();
-    if (_intervals[0] > 1)
-    {
-      // To allow quad and tri center elements the innermost ring must be
-      // a unique region
-      if (_ring_radii.size() > 0)
-      {
-        _ring_radii.insert(_ring_radii.begin(), _ring_radii[0] / _intervals[0]);
-        _intervals[0] = _intervals[0] - 1;
-        _intervals.insert(_intervals.begin(), 1);
-      }
-      // else the background is the inner most region
-      // so interval handling is done during params assignment
-      // background center -> generate id but don't break interval yet
-      num_rings++;
-    }
-
-    // checking to see if the concatenization of pin_type and ring number will fit in a unint16
-    // (subdomain_id_type)
-    subdomain_id_type ident;
-    int digits_r = floor(log10(num_rings)) + 1;
-    int digits_id = floor(log10(_pin_type)) + 1;
-    if (_pin_type * pow(10, digits_r) + num_rings > UINT16_MAX - 1)
-    {
-      // too big to concatenate, check if truncated pin_type_id to 5 digits will fit.
-      // If not, truncating to 4 digits will always fit.
-      if (_pin_type * pow(10, 5 - digits_id) + num_rings > UINT16_MAX - 1)
-        ident = _pin_type * pow(10, 4 - digits_id) -
-                int(_pin_type * pow(10, 4 - digits_id)) % int(digits_r);
-      else
-        ident = _pin_type * pow(10, 5 - digits_id) -
-                int(_pin_type * pow(10, 5 - digits_id)) % int(digits_r);
-    }
-    else
-      ident = _pin_type * pow(10, digits_r);
-
-    std::vector<subdomain_id_type> regions_0;
-    for (subdomain_id_type i = 0; i < num_rings; i++)
-    {
-      if (!(_intervals[0] > 1 && i == 0))
-        // for center background skip the first to assign in params
-        regions_0.push_back(ident + i + 1);
-    }
-
-    _region_ids.push_back(regions_0);
-    if (_mesh_dimensions == 3)
-    {
-      for (std::size_t i = 1;
-           i < getMeshProperty<std::vector<Real>>("axial_boundaries", _reactor_params).size();
-           i++)
-      {
-        _region_ids.push_back(regions_0);
-      }
-    }
+    mooseError("Region IDs must be assigned with parameter region_ids");
   }
 
   if (_mesh_geometry == "Square")
@@ -237,12 +174,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
       }
       else if (background_intervals > 1)
       {
-        // background center so if procedural add the extra region ID
-        if (_procedural_ids)
-          background_ids.insert(background_ids.begin(), background_ids.front() - 1);
-        // set innermost interval of region to the same ID as the rest of the region
-        else
-          background_ids.insert(background_ids.begin(), background_ids.front());
+        background_ids.insert(background_ids.begin(), background_ids.front());
       }
 
       params.set<std::vector<subdomain_id_type>>("background_block_ids") = background_ids;
@@ -305,20 +237,22 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
       declareMeshProperty("max_radius_meta",
                           getMeshProperty<Real>("max_radius_meta", name() + "_circle"));
 
-    // Change boundary IDs so that there are unified boundaries for use in patterned MeshGenerator
+    // Define boundary IDs so that there are unified boundaries for use in patterned MeshGenerator
     // if this pin is to be used in an AssemblyMeshGenerator
     {
-      auto params = _app.getFactory().getValidParams("RenameBoundaryGenerator");
+      auto params = _app.getFactory().getValidParams("SideSetsFromNormalsGenerator");
 
       params.set<MeshGeneratorName>("input") = name() + "trans";
-      params.set<std::vector<BoundaryName>>("old_boundary") = {
-          "15001",
-          "15002",
-          "15003",
-          "15004"}; // hard coded boundary IDs in patterned mesh generator
+      params.set<std::vector<Point>>("normals") = {
+          {1, 0, 0},
+          {-1, 0, 0},
+          {0, 1, 0},
+          {0, -1, 0}}; // normal directions over which to define boundaries
+      params.set<bool>("fixed_normal") = true;
+      params.set<bool>("replace") = false;
       params.set<std::vector<BoundaryName>>("new_boundary") = {"10001", "10002", "10003", "10004"};
 
-      _build_mesh = &addMeshSubgenerator("RenameBoundaryGenerator", name() + "_2D", params);
+      _build_mesh = &addMeshSubgenerator("SideSetsFromNormalsGenerator", name() + "_2D", params);
     }
   }
   else
@@ -373,10 +307,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
       }
       else if (background_intervals > 1)
       {
-        if (_procedural_ids)
-          background_ids.insert(background_ids.begin(), background_ids.front() - 1);
-        else
-          background_ids.insert(background_ids.begin(), background_ids.front());
+        background_ids.insert(background_ids.begin(), background_ids.front());
       }
 
       params.set<std::vector<subdomain_id_type>>("background_block_ids") = background_ids;

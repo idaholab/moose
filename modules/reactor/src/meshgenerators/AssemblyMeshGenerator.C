@@ -98,8 +98,6 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
   MeshGeneratorName _reactor_params =
       MeshGeneratorName(getMeshProperty<std::string>("reactor_params_name", _inputs[0]));
 
-  bool _procedural_ids = getMeshProperty<bool>("procedural_ids", _reactor_params);
-
   // Ensure that the user has supplied the correct info for conformal mesh generation
   if (!hasMeshProperty("mesh_dimensions", _reactor_params) ||
       !hasMeshProperty("mesh_geometry", _reactor_params))
@@ -134,8 +132,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
       (_duct_sizes.size() != 0 || _duct_intervals.size() != 0 || _background_intervals != 0))
     mooseError("Ducts and background regions are not currently supported for square assemblies");
 
-  if ((_geom_type == "Hex") &&
-      ((_background_region_id.size() == 0 && !_procedural_ids) || _background_intervals == 0))
+  if ((_geom_type == "Hex") && ((_background_region_id.size() == 0) || _background_intervals == 0))
     mooseError("Hexagonal assemblies must have a background region defined");
 
   if (_duct_sizes.size() != _duct_intervals.size())
@@ -144,58 +141,15 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
 
   if (_duct_sizes.size() != 0)
   {
-    if (!_procedural_ids)
-    {
-      if (_duct_region_ids.size() == 0)
-        paramError(
-            "duct_halfpitch",
-            "If ducts are defined, and procedural ID generation is not used, then "
-            "\"duct_intervals\" and \"duct_region_ids\" must also be defined and of equal size.");
-      else if (_duct_region_ids[0].size() != _duct_sizes.size())
-        paramError(
-            "duct_halfpitch",
-            "If ducts are defined, and procedural ID generation is not used, then "
-            "\"duct_intervals\" and \"duct_region_ids\" must also be defined and of equal size.");
-    }
+    if (_duct_region_ids.size() == 0)
+      paramError("duct_halfpitch",
+                 "If ducts are defined, then \"duct_intervals\" and \"duct_region_ids\" "
+                 "must also be defined and of equal size.");
+    else if (_duct_region_ids[0].size() != _duct_sizes.size())
+      paramError("duct_halfpitch",
+                 "If ducts are defined, then \"duct_intervals\" and \"duct_region_ids\" "
+                 "must also be defined and of equal size.");
   }
-
-  // Procedural generation of region ids for background and duct regions
-  // Unlike pin region IDs, these IDs aim to be 5 digits long unless the
-  // assembly ID is too large.
-  if (_procedural_ids && (_duct_sizes.size() != 0 || _background_intervals != 0))
-  {
-    int num_regions = _duct_sizes.size() + 1;
-
-    subdomain_id_type ident;
-    int digits_r = floor(log10(num_regions)) + 1;
-    int digits_id = floor(log10(_assembly_type)) + 1;
-    if (_assembly_type * pow(10, 5 - digits_id) + num_regions > UINT16_MAX - 1)
-      ident = _assembly_type * pow(10, 4 - digits_id) -
-              int(_assembly_type * pow(10, 4 - digits_id)) % int(digits_r);
-    else
-      ident = _assembly_type * pow(10, 5 - digits_id) -
-              int(_assembly_type * pow(10, 5 - digits_id)) % int(digits_r);
-
-    _background_region_id.push_back(ident);
-    std::vector<subdomain_id_type> regions_tmp;
-    for (const auto i : make_range(_duct_sizes.size()))
-      regions_tmp.push_back(ident + i + 1);
-
-    _duct_region_ids.push_back(regions_tmp);
-    if (_mesh_dimensions == 3)
-    {
-      for (std::size_t i = 1;
-           i < getMeshProperty<std::vector<Real>>("axial_boundaries", _reactor_params).size();
-           i++)
-      {
-        _background_region_id.push_back(ident);
-        _duct_region_ids.push_back(regions_tmp);
-      }
-    }
-  }
-
-  //***Add checks for pins to be the same size and pin sizes to add to Assembly pitch
-  //***Add check for region IDs clashing with UINT16_MAX
 
   _assembly_boundary_id = 2000 + _assembly_type;
   _assembly_boundary_name = "outer_assembly_" + std::to_string(_assembly_type);
@@ -210,13 +164,29 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
           "cell"; // give elems IDs relative to position in assembly
       params.set<std::vector<MeshGeneratorName>>("inputs") = _inputs;
       params.set<std::vector<std::vector<unsigned int>>>("pattern") = _pattern;
-      params.set<BoundaryName>("top_boundary") = "10001";
-      params.set<BoundaryName>("left_boundary") = "10002";
-      params.set<BoundaryName>("bottom_boundary") = "10003";
-      params.set<BoundaryName>("right_boundary") = "10004";
+      params.set<BoundaryName>("top_boundary") = "10000";
+      params.set<BoundaryName>("left_boundary") = "10000";
+      params.set<BoundaryName>("bottom_boundary") = "10000";
+      params.set<BoundaryName>("right_boundary") = "10000";
 
       _build_mesh =
-          &addMeshSubgenerator("CartesianIDPatternedMeshGenerator", name() + "_pattern", params);
+          &addMeshSubgenerator("CartesianIDPatternedMeshGenerator", name() + "_lattice", params);
+    }
+    {
+      auto params = _app.getFactory().getValidParams("SideSetsFromNormalsGenerator");
+
+      params.set<MeshGeneratorName>("input") = name() + "_lattice";
+      params.set<std::vector<Point>>("normals") = {
+          {1, 0, 0},
+          {-1, 0, 0},
+          {0, 1, 0},
+          {0, -1, 0}}; // normal directions over which to define boundaries
+      params.set<bool>("fixed_normal") = true;
+      params.set<bool>("replace") = false;
+      params.set<std::vector<BoundaryName>>("new_boundary") = {"10001", "10002", "10003", "10004"};
+
+      _build_mesh =
+          &addMeshSubgenerator("SideSetsFromNormalsGenerator", name() + "_pattern", params);
     }
     //***Add assembly duct around PatternedMesh
   }
@@ -234,6 +204,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
       params.set<Real>("hexagon_size") =
           getMeshProperty<Real>("assembly_pitch", _reactor_params) / 2.0;
       params.set<MooseEnum>("hexagon_size_style") = "apothem";
+      params.set<unsigned int>("background_intervals") = _background_intervals;
       params.set<subdomain_id_type>("background_block_id") =
           UINT16_MAX - 1; // place holder subdomain id to indicate background region
       _peripheral_regions++;

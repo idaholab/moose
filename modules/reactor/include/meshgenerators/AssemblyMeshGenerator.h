@@ -60,9 +60,6 @@ protected:
   ///The number of dimensions the mesh is ultimately going to have (2 or 3, declared in the ReactorMeshParams object)
   int _mesh_dimensions;
 
-  ///Whether procedural IDs are to be used rather than declared by the user (declared in the ReactorMeshParams object)
-  bool _procedural_ids;
-
   ///The heights of the axial regions that are stored on the ReactorMeshParams object
   std::vector<Real> _axial_boundaries;
 

@@ -143,12 +143,28 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
         params.set<std::vector<MeshGeneratorName>>("exclude_id") =
             std::vector<MeshGeneratorName>{_empty_key};
 
-      params.set<BoundaryName>("top_boundary") = "10001";
-      params.set<BoundaryName>("left_boundary") = "10002";
-      params.set<BoundaryName>("bottom_boundary") = "10003";
-      params.set<BoundaryName>("right_boundary") = "10004";
+      params.set<BoundaryName>("top_boundary") = "10000";
+      params.set<BoundaryName>("left_boundary") = "10000";
+      params.set<BoundaryName>("bottom_boundary") = "10000";
+      params.set<BoundaryName>("right_boundary") = "10000";
 
-      addMeshSubgenerator("CartesianIDPatternedMeshGenerator", name() + "_pattern", params);
+      addMeshSubgenerator("CartesianIDPatternedMeshGenerator", name() + "_lattice", params);
+    }
+    {
+      auto params = _app.getFactory().getValidParams("SideSetsFromNormalsGenerator");
+
+      params.set<MeshGeneratorName>("input") = name() + "_lattice";
+      params.set<std::vector<Point>>("normals") = {
+          {1, 0, 0},
+          {-1, 0, 0},
+          {0, 1, 0},
+          {0, -1, 0}}; // normal directions over which to define boundaries
+      params.set<bool>("fixed_normal") = true;
+      params.set<bool>("replace") = false;
+      params.set<std::vector<BoundaryName>>("new_boundary") = {"10001", "10002", "10003", "10004"};
+
+      _build_mesh =
+          &addMeshSubgenerator("SideSetsFromNormalsGenerator", name() + "_pattern", params);
     }
   }
   else

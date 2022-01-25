@@ -39,7 +39,4 @@ protected:
 
   ///The number of mesh divisions in each axial region.
   const std::vector<unsigned int> _axial_mesh_intervals;
-
-  ///Whether to use procedural IDs for ID assigment
-  const bool _procedural_ids;
 };

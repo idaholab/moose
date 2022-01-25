@@ -39,10 +39,6 @@ ReactorMeshParams::validParams()
       "axial_mesh_intervals",
       std::vector<unsigned int>(1),
       "Number of elements in the Z direction for each axial region");
-  params.addParam<bool>("procedural_region_ids",
-                        false,
-                        "Whether to enable the automatic generation of region and block IDs in "
-                        "subsequent MeshGenerators");
   params.addClassDescription("This ReactorMeshParams object acts as storage for persistent "
                              "information about the reactor geometry.");
   return params;
@@ -54,8 +50,7 @@ ReactorMeshParams::ReactorMeshParams(const InputParameters & parameters)
     _geom(getParam<MooseEnum>("geom")),
     _assembly_pitch(getParam<Real>("assembly_pitch")),
     _axial_regions(getParam<std::vector<Real>>("axial_regions")),
-    _axial_mesh_intervals(getParam<std::vector<unsigned int>>("axial_mesh_intervals")),
-    _procedural_ids(getParam<bool>("procedural_region_ids"))
+    _axial_mesh_intervals(getParam<std::vector<unsigned int>>("axial_mesh_intervals"))
 {
   if (_axial_regions.size() != _axial_mesh_intervals.size())
     mooseError("The number of axial regions is not consistent with the number of axial intervals.");
@@ -65,7 +60,6 @@ ReactorMeshParams::ReactorMeshParams(const InputParameters & parameters)
   this->declareMeshProperty("axial_boundaries", _axial_regions);
   this->declareMeshProperty("axial_mesh_intervals", _axial_mesh_intervals);
   this->declareMeshProperty("assembly_pitch", _assembly_pitch);
-  this->declareMeshProperty("procedural_ids", _procedural_ids);
 }
 
 std::unique_ptr<MeshBase>

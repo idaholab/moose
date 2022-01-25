@@ -5,28 +5,41 @@
     requirement = 'The system shall generate a 3D square pin mesh with only 1 radial region and quad center elements'
     type = 'Exodiff'
     input = 'pin_only.i'
-    cli_args = "Mesh/pin1/region_ids='3; 13; 23'
+    cli_args = "Mesh/pin1/region_ids='3; 13'
                   --mesh-only pin_only_in.e"
     exodiff = 'pin_only_in.e'
     recover = false
   []
   [tri]
-    requirement = 'The system shall generate a 3D square pin mesh with only 2 radial regions and tri center elements'
+    requirement = 'The system shall generate a 3D square pin mesh with only 1 radial region and tri center elements'
     type = 'Exodiff'
     input = 'pin_only.i'
-    cli_args = 'Mesh/rmp/procedural_region_ids=true
+    cli_args = "Mesh/pin1/region_ids='3; 13'
                 Mesh/pin1/quad_center_elements=false
-                --mesh-only pin_only_tri_in.e'
+                Mesh/pin1/mesh_intervals=1
+                --mesh-only pin_only_tri_in.e"
     exodiff = 'pin_only_tri_in.e'
     recover = false
   []
+  [tri_error]
+    requirement = 'The system shall throw an error when trying to generate a pin mesh with more than 1 radial region and tri center elements'
+    type = 'RunException'
+    input = 'pin_only.i'
+    cli_args = "Mesh/pin1/region_ids='3; 13'
+                Mesh/pin1/quad_center_elements=false
+                Mesh/pin1/mesh_intervals=2
+                --mesh-only pin_only_tri_in.e"
+    expect_err = "The number of mesh intervals in the ring region must be one if quad_center_elements is not true"
+    recover = false
+  []
   [hex]
-    requirement = 'The system shall generate a 3D hexagonal pin mesh with only 2 radial regions '
+    requirement = 'The system shall generate a 3D hexagonal pin mesh with 2 radial regions and 2 axial regions'
     type = 'Exodiff'
     input = 'pin_only.i'
     cli_args = 'Mesh/rmp/geom="Hex"
-                Mesh/rmp/procedural_region_ids=true
-                Mesh/pin1/quad_center_elements=false
+                Mesh/rmp/procedural_region_ids=false
+                Mesh/pin1/quad_center_elements=true
+                Mesh/pin1/region_ids="1; 2"
                 --mesh-only pin_only_hex_in.e'
     exodiff = 'pin_only_hex_in.e'
     recover = false
@@ -36,11 +49,11 @@
     type = 'Exodiff'
     input = 'pin_only.i'
     cli_args = "Mesh/rmp/geom='Hex'
-                Mesh/rmp/procedural_region_ids=true
+                Mesh/pin1/region_ids='11 12 13; 11 12 13'
                 Mesh/pin1/pin_type=1
-                Mesh/pin1/ring_radii='0.2 0.3818'
+                Mesh/pin1/ring_radii='0.2'
                 Mesh/pin1/duct_halfpitch='0.68'
-                Mesh/pin1/mesh_intervals='1 2 1 1'
+                Mesh/pin1/mesh_intervals='1 1 1'
                 Mesh/pin1/quad_center_elements=false
                 --mesh-only pin_only_hex_complex_in.e"
     exodiff = 'pin_only_hex_complex_in.e'
