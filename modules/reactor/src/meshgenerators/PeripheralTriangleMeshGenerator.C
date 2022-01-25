@@ -21,18 +21,17 @@
 // poly2tri triangulation library
 #include "poly2tri/poly2tri.h"
 
-
 // Anonymous namespace - poly2tri doesn't define operator<(Point,Point)
-namespace {
-  struct P2TPointCompare
+namespace
+{
+struct P2TPointCompare
+{
+  bool operator()(const p2t::Point & a, const p2t::Point & b) const
   {
-    bool operator() (const p2t::Point & a, const p2t::Point & b) const
-    {
-      return a.x < b.x || (a.x == b.x && a.y < b.y);
-    }
-  };
+    return a.x < b.x || (a.x == b.x && a.y < b.y);
+  }
 };
-
+};
 
 registerMooseObject("ReactorApp", PeripheralTriangleMeshGenerator);
 
@@ -177,7 +176,7 @@ PeripheralTriangleMeshGenerator::generate()
     Real x = (*node)(0);
     Real y = (*node)(1);
     // add to inner boundary list
-    inner_polyline.emplace_back(x,y);
+    inner_polyline.emplace_back(x, y);
     // add to association map
     point_node_map[inner_polyline.back()] = node;
   }
@@ -228,7 +227,7 @@ PeripheralTriangleMeshGenerator::generate()
       Real y = radius * std::sin(theta);
 
       // add to Steiner point list
-      steiner_points.emplace_back(x,y);
+      steiner_points.emplace_back(x, y);
       // create Node and add to mesh
       Node * node = mesh->add_point(Point(x, y, 0.0));
       // add to association map
@@ -243,16 +242,18 @@ PeripheralTriangleMeshGenerator::generate()
   //
 
   std::vector<p2t::Point *> outer_polyline_ptrs(outer_polyline.size());
-  std::transform(outer_polyline.begin(), outer_polyline.end(),
+  std::transform(outer_polyline.begin(),
+                 outer_polyline.end(),
                  outer_polyline_ptrs.begin(),
-                 [](p2t::Point & p){ return &p; });
-  p2t::CDT cdt { outer_polyline_ptrs };
+                 [](p2t::Point & p) { return &p; });
+  p2t::CDT cdt{outer_polyline_ptrs};
 
   // Add inner boundary
   std::vector<p2t::Point *> inner_polyline_ptrs(inner_polyline.size());
-  std::transform(inner_polyline.begin(), inner_polyline.end(),
+  std::transform(inner_polyline.begin(),
+                 inner_polyline.end(),
                  inner_polyline_ptrs.begin(),
-                 [](p2t::Point & p){ return &p; });
+                 [](p2t::Point & p) { return &p; });
   cdt.AddHole(inner_polyline_ptrs);
 
   // Add Steiner points
