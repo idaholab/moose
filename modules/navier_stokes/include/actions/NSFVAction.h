@@ -102,10 +102,6 @@ protected:
   std::vector<BoundaryName> _pressure_boundary;
   /// Pressure function names at pressure boundaries
   std::vector<FunctionName> _pressure_function;
-  /// Whether or not we need to pin pressure at a node
-  bool _has_pinned_dof;
-  /// The node set name of the pinned node
-  BoundaryName _pinned_dof;
 
   /// Boundaries with temperature specified
   std::vector<BoundaryName> _fixed_temperature_boundary;

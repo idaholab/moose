@@ -31,9 +31,13 @@ rho=1.1
     wall_boundaries = 'top bottom'
     momentum_wall_types = 'noslip noslip'
     outlet_boundaries = 'right'
-    momentum_outlet_types = 'fixed-pressure'
-    pressure_function = '0'
+    momentum_outlet_types = 'zero-gradient'
+    # pressure_function = '0'
   []
+[]
+
+[Debug]
+  show_actions = true
 []
 
 [Materials]

@@ -20,7 +20,7 @@ INSFVMassAdvectionOutflowBC::validParams()
   InputParameters params = FVFluxBC::validParams();
   params += INSFVFullyDevelopedFlowBC::validParams();
   params.addClassDescription("Outflow boundary condition for advecting mass.");
-  params.addRequiredParam<Real>("rho", "The value for the density");
+  params.addRequiredParam<MooseFunctorName>(NS::density, "The functor for the density");
   params.declareControllable("rho");
   params.addRequiredCoupledVar("u", "The velocity in the x direction.");
   params.addCoupledVar("v", "The velocity in the y direction.");
@@ -31,7 +31,7 @@ INSFVMassAdvectionOutflowBC::validParams()
 INSFVMassAdvectionOutflowBC::INSFVMassAdvectionOutflowBC(const InputParameters & params)
   : FVFluxBC(params),
     INSFVFullyDevelopedFlowBC(params),
-    _rho(getParam<Real>("rho")),
+    _rho(getFunctor<ADReal>(NS::density)),
     _u_var(dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("u", 0))),
     _v_var(dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("v", 0))),
     _w_var(dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("w", 0))),
@@ -67,7 +67,7 @@ INSFVMassAdvectionOutflowBC::computeQpResidual()
   if (_w_var)
     v(2) = _w_var->getBoundaryFaceValue(*_face_info);
 
-  return _normal * v * _rho;
+  return _normal * v * _rho(singleSidedFaceArg());
 #else
   mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
              "configure script in the root MOOSE directory with the configure option "
