@@ -31,7 +31,7 @@ struct P2TPointCompare
     return a.x < b.x || (a.x == b.x && a.y < b.y);
   }
 };
-};
+}
 
 registerMooseObject("ReactorApp", PeripheralTriangleMeshGenerator);
 
