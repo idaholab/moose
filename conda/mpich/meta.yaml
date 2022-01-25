@@ -1,4 +1,4 @@
-{% set build = 1 %}
+{% set build = 2 %}
 {% set strbuild = "build_" + build|string %}
 {% set version = "3.4.2" %}
 
@@ -33,7 +33,6 @@ requirements:
     - {{ moose_openmp }}        # [osx]
     - {{ moose_llvm_tools }}    # [osx]
     - {{ moose_ld64 }}          # [osx]
-    - {{ moose_cctools }}       # [osx]
     - autoconf                  # [unix]
     - automake                  # [unix]
     - libtool                   # [unix]
@@ -54,7 +53,6 @@ requirements:
     - {{ moose_openmp }}        # [osx]
     - {{ moose_llvm_tools }}    # [osx]
     - {{ moose_ld64 }}          # [osx]
-    - {{ moose_cctools }}       # [osx]
     - autoconf                  # [osx]
     - automake                  # [osx]
     - libtool                   # [osx]

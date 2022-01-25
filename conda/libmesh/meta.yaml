@@ -1,5 +1,5 @@
 # Do not use jinja templating (A physical change to this file is required to trigger a build)
-{% set build = 1 %}
+{% set build = 2 %}
 {% set strbuild = "build_" + build|string %}
 {% set version = "2022.01.19" %}
 
@@ -24,7 +24,6 @@ requirements:
     - make                                              # [arm64]
     - m4                                                # [arm64]
     - pkg-config
-    - {{ moose_cctools }}                               # [osx]
     - {{ moose_ld64 }}                                  # [osx]
     - {{ moose_libmesh_vtk }}
     - {{ moose_petsc }}

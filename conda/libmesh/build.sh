@@ -79,7 +79,8 @@ LIBMESH_DIR=${PREFIX}/libmesh \
                     --with-vtk-include=${BUILD_PREFIX}/libmesh-vtk/include/vtk-${SHORT_VTK_NAME} \
                     $*
 
-make -j $CPU_COUNT
+CORES=$(echo "${CPU_COUNT:-2} / 2" | bc)
+make -j $CORES
 make install
 sed_replace
 

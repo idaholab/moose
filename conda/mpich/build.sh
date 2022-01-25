@@ -83,8 +83,8 @@ fi
             CFLAGS="${CTUNING}" CXXFLAGS="${CTUNING}" FFLAGS="${FTUNING}" LDFLAGS="${LDFLAGS}" \
             FCFLAGS="${FTUNING}" F90FLAGS="" F77FLAGS="" \
             ${OPTIONS}
-
-make -j"${CPU_COUNT:-1}"
+CORES=$(echo "${CPU_COUNT:-2} / 2" | bc)
+make -j $CORES
 make install
 
 # Set PETSC_DIR environment variable for those that need it

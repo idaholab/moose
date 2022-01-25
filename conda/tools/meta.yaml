@@ -1,5 +1,5 @@
 {% set build = 0 %}
-{% set version = "2021.10.19" %}
+{% set version = "2022.01.25" %}
 
 package:
   name: moose-tools
@@ -28,7 +28,6 @@ requirements:
     - {{ moose_openmp }}         # [osx]
     - {{ moose_llvm_tools }}     # [osx]
     - {{ moose_ld64 }}           # [osx]
-    - {{ moose_cctools }}        # [osx]
     - {{ moose_vtk }}
     - {{ moose_numpy }}
     - {{ moose_pyqt }}           # [not arm64]
