@@ -1,9 +1,9 @@
-#include "ScaledGradientVector.h"
+#include "MaterialScaledGradientVector.h"
 
-registerMooseObject("isopodApp", ScaledGradientVector);
+registerMooseObject("isopodApp", MaterialScaledGradientVector);
 
 InputParameters
-ScaledGradientVector::validParams()
+MaterialScaledGradientVector::validParams()
 {
   InputParameters params = VectorAuxKernel::validParams();
   params.addRequiredCoupledVar("gradient_variable",
@@ -13,7 +13,7 @@ ScaledGradientVector::validParams()
   return params;
 }
 
-ScaledGradientVector::ScaledGradientVector(const InputParameters & parameters)
+MaterialScaledGradientVector::MaterialScaledGradientVector(const InputParameters & parameters)
   : VectorAuxKernel(parameters),
     _var_grad(coupledGradient("gradient_variable")),
     _mat_scaling(getMaterialProperty<Real>("material_scaling"))
@@ -21,7 +21,7 @@ ScaledGradientVector::ScaledGradientVector(const InputParameters & parameters)
 }
 
 RealVectorValue
-ScaledGradientVector::computeValue()
+MaterialScaledGradientVector::computeValue()
 {
   return _mat_scaling[_qp] * _var_grad[_qp];
 }

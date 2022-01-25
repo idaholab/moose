@@ -5,12 +5,12 @@
 /**
  * Auxiliary kernel to output scaled gradient of a variable in vector format
  */
-class ScaledGradientVector : public VectorAuxKernel
+class MaterialScaledGradientVector : public VectorAuxKernel
 {
 public:
   static InputParameters validParams();
 
-  ScaledGradientVector(const InputParameters & parameters);
+  MaterialScaledGradientVector(const InputParameters & parameters);
 
 protected:
   virtual RealVectorValue computeValue() override;

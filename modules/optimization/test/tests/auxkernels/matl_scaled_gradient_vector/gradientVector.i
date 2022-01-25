@@ -81,12 +81,12 @@
     function = parsed_grad_function
   [../]
   [grad_u]
-    type = ScaledGradientVector
+    type = MaterialScaledGradientVector
     gradient_variable = u
     variable = auxGrad_u
   []
   [grad_v]
-    type = ScaledGradientVector
+    type = MaterialScaledGradientVector
     gradient_variable = v
     variable = auxGrad_v
     material_scaling = 'trig_material'
