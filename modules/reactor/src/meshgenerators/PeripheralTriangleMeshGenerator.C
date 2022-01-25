@@ -246,28 +246,28 @@ PeripheralTriangleMeshGenerator::generate()
   std::transform(outer_polyline.begin(), outer_polyline.end(),
                  outer_polyline_ptrs.begin(),
                  [](p2t::Point & p){ return &p; });
-  p2t::CDT * cdt = new p2t::CDT(outer_polyline_ptrs);
+  p2t::CDT cdt { outer_polyline_ptrs };
 
   // Add inner boundary
   std::vector<p2t::Point *> inner_polyline_ptrs(inner_polyline.size());
   std::transform(inner_polyline.begin(), inner_polyline.end(),
                  inner_polyline_ptrs.begin(),
                  [](p2t::Point & p){ return &p; });
-  cdt->AddHole(inner_polyline_ptrs);
+  cdt.AddHole(inner_polyline_ptrs);
 
   // Add Steiner points
   for (auto & point : steiner_points)
-    cdt->AddPoint(&point);
+    cdt.AddPoint(&point);
 
   // Triangulate!
-  cdt->Triangulate();
+  cdt.Triangulate();
 
   //
   // Translate triangulated C2T points/triangles to libMesh nodes/Tri3s
   //
 
   // Extract triangle list from triangulation
-  std::vector<p2t::Triangle *> triangles = cdt->GetTriangles();
+  std::vector<p2t::Triangle *> triangles = cdt.GetTriangles();
 
   // process each P2T triangle into libMesh Tri3
   for (p2t::Triangle * triangle : triangles)
@@ -304,12 +304,6 @@ PeripheralTriangleMeshGenerator::generate()
 
   for (const p2t::Point & point : outer_polyline)
     boundary_info.add_node(point_node_map[point], _outer_boundary_id);
-
-  //
-  // Cleanup P2T objects
-  //
-
-  delete cdt;
 
   //
   // finalize mesh (partition the new elements, make the mesh
