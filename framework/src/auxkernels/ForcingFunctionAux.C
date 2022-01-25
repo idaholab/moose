@@ -12,8 +12,6 @@
 
 registerMooseObject("MooseApp", ForcingFunctionAux);
 
-defineLegacyParams(ForcingFunctionAux); //?
-
 InputParameters
 ForcingFunctionAux::validParams()
 {
