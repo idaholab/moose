@@ -1,0 +1,7 @@
+[Tests]
+  [forward_solve]
+    type = CSVDiff
+    input = gradientVector.i
+    csvdiff = gradientVector_out_results_0001.csv
+  []
+[]

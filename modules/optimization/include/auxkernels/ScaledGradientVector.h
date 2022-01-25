@@ -13,12 +13,11 @@ public:
   ScaledGradientVector(const InputParameters & parameters);
 
 protected:
-
   virtual RealVectorValue computeValue() override;
 
   /// The gradient of a coupled variable
   const VariableGradient & _var_grad;
 
-  /// scaling constant for gradient
-  const Real & _scale;
+  /// scaling material for gradient
+  const MaterialProperty<Real> & _mat_scaling;
 };

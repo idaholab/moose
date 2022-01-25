@@ -8,21 +8,20 @@ ScaledGradientVector::validParams()
   InputParameters params = VectorAuxKernel::validParams();
   params.addRequiredCoupledVar("gradient_variable",
                                "The variable from which to compute the gradient");
-  // MURHTY is scale something else, like a material property or anothe auxvariable?  This is easy
-  // to change
-  params.addParam<Real>("scale", 1.0, "scale factor for each gradient term");
+  params.addParam<MaterialPropertyName>(
+      "material_scaling", 1, "Material property to scale gradient variable");
   return params;
 }
 
 ScaledGradientVector::ScaledGradientVector(const InputParameters & parameters)
   : VectorAuxKernel(parameters),
     _var_grad(coupledGradient("gradient_variable")),
-    _scale(getParam<Real>("scale"))
+    _mat_scaling(getMaterialProperty<Real>("material_scaling"))
 {
 }
 
 RealVectorValue
 ScaledGradientVector::computeValue()
 {
-  return _scale * _var_grad[_qp];
+  return _mat_scaling[_qp] * _var_grad[_qp];
 }
