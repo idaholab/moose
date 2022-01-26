@@ -10,9 +10,8 @@
 #include "gtest/gtest.h"
 
 #include "Registry.h"
-#include "MooseApp.h"
 #include "MooseMesh.h"
-#include "MooseUnitApp.h"
+#include "NavierStokesApp.h"
 #include "AppFactory.h"
 #include "Factory.h"
 #include "InputParameters.h"
@@ -57,7 +56,7 @@ testReconstruction(const Moose::CoordinateSystemType coord_type)
   for (const auto i : index_range(num_elem))
   {
     const auto nx = num_elem[i];
-    auto app = AppFactory::createAppShared("MooseUnitApp", 1, (char **)argv);
+    auto app = AppFactory::createAppShared("NavierStokesApp", 1, (char **)argv);
     auto * factory = &app->getFactory();
     std::string mesh_type = "MeshGeneratorMesh";
 
