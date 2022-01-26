@@ -12,7 +12,6 @@
 
 #include "libmesh/elem.h"
 #include "libmesh/boundary_info.h"
-#include "libmesh/replicated_mesh.h"
 #include "libmesh/mesh_base.h"
 #include "libmesh/parallel.h"
 
@@ -167,19 +166,22 @@ getSubdomainID(const SubdomainName & subdomain_name, const MeshBase & mesh)
 }
 
 Point
-meshCentroidCalculator(const ReplicatedMesh & mesh)
+meshCentroidCalculator(const MeshBase & mesh)
 {
-  Point origin_pt = Point(0.0, 0.0, 0.0);
+  Point centroid_pt = Point(0.0, 0.0, 0.0);
   Real vol_tmp = 0.0;
-  // Iterate through elements to calculate the center of mass of the mesh, which is used as the
-  // origin.
-  for (const auto & elem : as_range(mesh.elements_begin(), mesh.elements_end()))
+  for (const auto & elem :
+       as_range(mesh.active_local_elements_begin(), mesh.active_local_elements_end()))
   {
     Real elem_vol = elem->volume();
-    origin_pt += (elem->true_centroid()) * elem_vol;
+    centroid_pt += (elem->true_centroid()) * elem_vol;
     vol_tmp += elem_vol;
   }
-  origin_pt /= vol_tmp;
-  return origin_pt;
+  mesh.comm().sum(centroid_pt(0));
+  mesh.comm().sum(centroid_pt(1));
+  mesh.comm().sum(centroid_pt(2));
+  mesh.comm().sum(vol_tmp);
+  centroid_pt /= vol_tmp;
+  return centroid_pt;
 }
 }
