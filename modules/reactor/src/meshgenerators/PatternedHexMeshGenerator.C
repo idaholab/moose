@@ -588,9 +588,9 @@ PatternedHexMeshGenerator::generate()
   std::vector<Real> bd_x_list;
   std::vector<Real> bd_y_list;
   std::vector<std::pair<Real, unsigned int>> node_azi_list;
-  const Point orign_pt = MooseMeshUtils::meshCentroidCalculator(*out_mesh);
-  const Real origin_x = orign_pt(0);
-  const Real origin_y = orign_pt(1);
+  const Point origin_pt = MooseMeshUtils::meshCentroidCalculator(*out_mesh);
+  const Real origin_x = origin_pt(0);
+  const Real origin_y = origin_pt(1);
 
   MeshTools::Modification::translate(*out_mesh, -origin_x, -origin_y, 0);
 

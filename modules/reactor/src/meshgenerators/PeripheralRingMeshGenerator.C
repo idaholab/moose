@@ -247,7 +247,7 @@ PeripheralRingMeshGenerator::isBoundaryValid(ReplicatedMesh & mesh,
   auto side_list_tmp = boundary_info.build_side_list();
   unsigned int elem_counter = 0;
   std::vector<std::pair<dof_id_type, dof_id_type>> boundary_node_assm;
-  std::vector<dof_id_type> boundary_orderred_node_list;
+  std::vector<dof_id_type> boundary_ordered_node_list;
   bool isFlipped = false;
   for (unsigned int i = 0; i < side_list_tmp.size(); i++)
   {
@@ -264,15 +264,15 @@ PeripheralRingMeshGenerator::isBoundaryValid(ReplicatedMesh & mesh,
     }
   }
   // Start from the first element, try to find a chain of nodes
-  boundary_orderred_node_list.push_back(boundary_node_assm.front().first);
-  boundary_orderred_node_list.push_back(boundary_node_assm.front().second);
-  // Remove the element that has been added to boundary_orderred_node_list
+  boundary_ordered_node_list.push_back(boundary_node_assm.front().first);
+  boundary_ordered_node_list.push_back(boundary_node_assm.front().second);
+  // Remove the element that has been added to boundary_ordered_node_list
   boundary_node_assm.erase(boundary_node_assm.begin());
   const unsigned int boundary_node_assm_size_0 = boundary_node_assm.size();
   for (unsigned int i = 0; i < boundary_node_assm_size_0; i++)
   {
     // Find nodes to expand the chain
-    dof_id_type end_node_id = boundary_orderred_node_list.back();
+    dof_id_type end_node_id = boundary_ordered_node_list.back();
     auto isMatch1 = [end_node_id](std::pair<dof_id_type, dof_id_type> old_id_pair) {
       return old_id_pair.first == end_node_id;
     };
@@ -290,15 +290,15 @@ PeripheralRingMeshGenerator::isBoundaryValid(ReplicatedMesh & mesh,
     {
       match_first = true;
     }
-    // If found, add the node to boundary_orderred_node_list
+    // If found, add the node to boundary_ordered_node_list
     if (result != boundary_node_assm.end())
     {
-      boundary_orderred_node_list.push_back(match_first ? (*result).second : (*result).first);
+      boundary_ordered_node_list.push_back(match_first ? (*result).second : (*result).first);
       boundary_node_assm.erase(result);
     }
     // If there are still elements in boundary_node_assm and result ==
     // boundary_node_assm.end(), this means the boundary is not a loop, the
-    // boundary_orderred_node_list is flipped and try the other direction that has not
+    // boundary_ordered_node_list is flipped and try the other direction that has not
     // been examined yet.
     else
     {
@@ -311,7 +311,7 @@ PeripheralRingMeshGenerator::isBoundaryValid(ReplicatedMesh & mesh,
       }
       // mark the first flip event.
       isFlipped = true;
-      std::reverse(boundary_orderred_node_list.begin(), boundary_orderred_node_list.end());
+      std::reverse(boundary_ordered_node_list.begin(), boundary_ordered_node_list.end());
       // As this iteration is wasted, set the iterator backward
       i--;
     }
@@ -331,18 +331,18 @@ PeripheralRingMeshGenerator::isBoundaryValid(ReplicatedMesh & mesh,
     // Utilize cross product here.
     // If azimuthal angles change monotonically,
     // the z components of the cross products are always negative or positive.
-    std::vector<Real> orderred_node_azi_list;
-    for (unsigned int i = 0; i < boundary_orderred_node_list.size() - 1; i++)
+    std::vector<Real> ordered_node_azi_list;
+    for (unsigned int i = 0; i < boundary_ordered_node_list.size() - 1; i++)
     {
-      orderred_node_azi_list.push_back(
-          (*mesh.node_ptr(boundary_orderred_node_list[i]) - origin_pt)
-              .cross(*mesh.node_ptr(boundary_orderred_node_list[i + 1]) - origin_pt)(2));
+      ordered_node_azi_list.push_back(
+          (*mesh.node_ptr(boundary_ordered_node_list[i]) - origin_pt)
+              .cross(*mesh.node_ptr(boundary_ordered_node_list[i + 1]) - origin_pt)(2));
       // Use this opportunity to calculate maximum radius
       max_node_radius = std::max(
-          (*mesh.node_ptr(boundary_orderred_node_list[i]) - origin_pt).norm(), max_node_radius);
+          (*mesh.node_ptr(boundary_ordered_node_list[i]) - origin_pt).norm(), max_node_radius);
     }
-    std::sort(orderred_node_azi_list.begin(), orderred_node_azi_list.end());
-    if (orderred_node_azi_list.front() * orderred_node_azi_list.back() < 0.0)
+    std::sort(ordered_node_azi_list.begin(), ordered_node_azi_list.end());
+    if (ordered_node_azi_list.front() * ordered_node_azi_list.back() < 0.0)
     {
       // This is invalid type #3
       invalid_type = 3;
