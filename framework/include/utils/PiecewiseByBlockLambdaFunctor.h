@@ -76,17 +76,14 @@ protected:
   ValueType evaluate(const Moose::ElemSideQpArg & elem_side_qp, unsigned int state) const override;
 
   using Moose::FunctorBase<T>::evaluateGradient;
-  GradientType evaluateGradient(const Moose::ElemArg & elem_arg, unsigned int) const override
-  {
-    return Moose::FV::greenGaussGradient(elem_arg, *this, true, _mesh);
-  }
+  GradientType evaluateGradient(const Moose::ElemArg & elem_arg, unsigned int) const override;
 
 private:
   /**
    * Provide a useful error message about lack of functor material property on the provided
    * subdomain \p sub_id
    */
-  std::string subdomainErrorMessage(SubdomainID sub_id) const;
+  void subdomainErrorMessage(SubdomainID sub_id) const;
 
   /// Functors that return element average values (or cell centroid values or whatever the
   /// implementer wants to return for a given element argument)
@@ -176,13 +173,15 @@ PiecewiseByBlockLambdaFunctor<T>::isExtrapolatedBoundaryFace(const FaceInfo & fi
 }
 
 template <typename T>
-std::string
+void
 PiecewiseByBlockLambdaFunctor<T>::subdomainErrorMessage(const SubdomainID sub_id) const
 {
-  return "The provided subdomain ID " + std::to_string(sub_id) +
-         " doesn't exist in the map for material property " + _name +
-         "! This is likely because you did not provide a functor material "
-         "definition on that subdomain";
+  mooseError("The provided subdomain ID ",
+             std::to_string(sub_id),
+             " doesn't exist in the map for lambda functor '",
+             _name,
+             "'! This is likely because you did not provide a functor material "
+             "definition on that subdomain");
 }
 
 template <typename T>
@@ -286,4 +285,12 @@ PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::ElemSideQpArg & elem_sid
     subdomainErrorMessage(sub_id);
 
   return it->second(elem_side_qp, state);
+}
+
+template <typename T>
+typename PiecewiseByBlockLambdaFunctor<T>::GradientType
+PiecewiseByBlockLambdaFunctor<T>::evaluateGradient(const Moose::ElemArg & elem_arg,
+                                                   unsigned int) const
+{
+  return Moose::FV::greenGaussGradient(elem_arg, *this, true, _mesh);
 }

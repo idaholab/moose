@@ -15,6 +15,7 @@
 #include "MeshGeneratorMesh.h"
 #include "GeneratedMeshGenerator.h"
 #include "AppFactory.h"
+#include "PiecewiseByBlockLambdaFunctor.h"
 #include "libmesh/elem.h"
 #include "libmesh/quadrature_gauss.h"
 #include "libmesh/type_tensor.h"
@@ -194,43 +195,43 @@ TEST(MooseFunctorTest, testArgs)
     EXPECT_EQ(cf.dot(elem_side_qp), 0);
   }
 
+  const char * argv[2] = {"foo", "\0"};
+
+  MultiMooseEnum coord_type_enum("XYZ RZ RSPHERICAL", "XYZ");
+
+  const auto nx = 2;
+  auto app = AppFactory::createAppShared("MooseUnitApp", 1, (char **)argv);
+  auto * factory = &app->getFactory();
+  std::string mesh_type = "MeshGeneratorMesh";
+
+  std::shared_ptr<MeshGeneratorMesh> mesh;
+  {
+    InputParameters params = factory->getValidParams(mesh_type);
+    mesh = factory->create<MeshGeneratorMesh>(mesh_type, "moose_mesh", params);
+  }
+
+  app->actionWarehouse().mesh() = mesh;
+
+  {
+    std::unique_ptr<MeshBase> lm_mesh;
+    InputParameters params = factory->getValidParams("GeneratedMeshGenerator");
+    params.set<unsigned int>("nx") = nx;
+    params.set<unsigned int>("ny") = nx;
+    params.set<MooseEnum>("dim") = "2";
+    auto mesh_gen =
+        factory->create<GeneratedMeshGenerator>("GeneratedMeshGenerator", "mesh_gen", params);
+    lm_mesh = mesh_gen->generate();
+    mesh->setMeshBase(std::move(lm_mesh));
+  }
+
+  mesh->prepare();
+  mesh->setCoordSystem({}, coord_type_enum);
+  // Build the face info
+  const auto & all_fi = mesh->allFaceInfo();
+  mesh->computeFaceInfoFaceCoords();
+
   // Test VectorComponentFunctor
   {
-    const char * argv[2] = {"foo", "\0"};
-
-    MultiMooseEnum coord_type_enum("XYZ RZ RSPHERICAL", "XYZ");
-
-    const auto nx = 2;
-    auto app = AppFactory::createAppShared("MooseUnitApp", 1, (char **)argv);
-    auto * factory = &app->getFactory();
-    std::string mesh_type = "MeshGeneratorMesh";
-
-    std::shared_ptr<MeshGeneratorMesh> mesh;
-    {
-      InputParameters params = factory->getValidParams(mesh_type);
-      mesh = factory->create<MeshGeneratorMesh>(mesh_type, "moose_mesh", params);
-    }
-
-    app->actionWarehouse().mesh() = mesh;
-
-    {
-      std::unique_ptr<MeshBase> lm_mesh;
-      InputParameters params = factory->getValidParams("GeneratedMeshGenerator");
-      params.set<unsigned int>("nx") = nx;
-      params.set<unsigned int>("ny") = nx;
-      params.set<MooseEnum>("dim") = "2";
-      auto mesh_gen =
-          factory->create<GeneratedMeshGenerator>("GeneratedMeshGenerator", "mesh_gen", params);
-      lm_mesh = mesh_gen->generate();
-      mesh->setMeshBase(std::move(lm_mesh));
-    }
-
-    mesh->prepare();
-    mesh->setCoordSystem({}, coord_type_enum);
-    // Build the face info
-    const auto & all_fi = mesh->allFaceInfo();
-    mesh->computeFaceInfoFaceCoords();
-
     WithGradientTestFunctor<RealVectorValue> vec_test_func(*mesh);
     VectorComponentFunctor<Real> vec_comp(vec_test_func, 0);
     EXPECT_EQ(vec_comp(elem_arg), 0);
@@ -271,7 +272,7 @@ TEST(MooseFunctorTest, testArgs)
   // Test NullFunctor errors
   {
     NullFunctor<Real> null;
-    auto test_null_errors = [&null](const auto & arg) {
+    auto test_null_error = [&null](const auto & arg) {
       try
       {
         null(arg);
@@ -283,11 +284,59 @@ TEST(MooseFunctorTest, testArgs)
       }
     };
 
-    test_null_errors(elem_arg);
-    test_null_errors(face);
-    test_null_errors(single_face);
-    test_null_errors(elem_from_face);
-    test_null_errors(elem_qp);
-    test_null_errors(elem_side_qp);
+    test_null_error(elem_arg);
+    test_null_error(face);
+    test_null_error(single_face);
+    test_null_error(elem_from_face);
+    test_null_error(elem_qp);
+    test_null_error(elem_side_qp);
+  }
+
+  // Test PiecewiseByBlockLambdaFunctor
+  {
+    // Test subdomain error
+    {
+      auto dummy_lammy = [](const auto &, const auto &) -> Real { return 0; };
+      PiecewiseByBlockLambdaFunctor<Real> errorful(
+          "errorful", dummy_lammy, {EXEC_ALWAYS}, *mesh, {});
+
+      auto test_sub_error = [&errorful](const auto & arg) {
+        try
+        {
+          errorful(arg);
+          EXPECT_TRUE(false);
+        }
+        catch (std::runtime_error & e)
+        {
+          std::string error_message(e.what());
+          EXPECT_TRUE(error_message.find(
+                          "did not provide a functor material definition on that subdomain") !=
+                      std::string::npos);
+        }
+      };
+
+      test_sub_error(elem_arg);
+      test_sub_error(face);
+      test_sub_error(single_face);
+      test_sub_error(elem_from_face);
+      test_sub_error(elem_qp);
+      test_sub_error(elem_side_qp);
+    }
+
+    // Test functions
+    {
+      auto zero_lammy = [](const auto &, const auto &) -> Real { return 0; };
+      PiecewiseByBlockLambdaFunctor<Real> zero(
+          "zero", zero_lammy, {EXEC_ALWAYS}, *mesh, {mesh->meshSubdomains()});
+
+      for (const auto & mesh_elem : mesh->getMesh().active_element_ptr_range())
+      {
+        const auto mesh_elem_arg = ElemArg{mesh_elem, false, false};
+        zero_gradient_test(zero, mesh_elem_arg);
+      }
+
+      for (const auto & mesh_fi : all_fi)
+        EXPECT_TRUE(zero.isExtrapolatedBoundaryFace(mesh_fi) == !(mesh_fi.neighborPtr()));
+    }
   }
 }
