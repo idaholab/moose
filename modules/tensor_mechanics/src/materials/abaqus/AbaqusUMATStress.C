@@ -290,28 +290,23 @@ AbaqusUMATStress::computeQpStress()
   // Rotate the stress state to the current configuration
   _stress[_qp].rotate(_rotation_increment[_qp]);
 
-  // use DDSDDE as Jacobian mult
-  _jacobian_mult[_qp].fillSymmetric21FromInputVector(std::array<Real, 21>{{
-      _aqDDSDDE[0],  // C1111
-      _aqDDSDDE[1],  // C1122
-      _aqDDSDDE[2],  // C1133
-      _aqDDSDDE[3],  // C1123
-      _aqDDSDDE[4],  // C1113
-      _aqDDSDDE[5],  // C1112
-      _aqDDSDDE[7],  // C2222
-      _aqDDSDDE[8],  // C2233
-      _aqDDSDDE[9],  // C2223
-      _aqDDSDDE[10], // C2213
-      _aqDDSDDE[11], // C2212
-      _aqDDSDDE[14], // C3333
-      _aqDDSDDE[15], // C3323
-      _aqDDSDDE[16], // C3313
-      _aqDDSDDE[17], // C3312
-      _aqDDSDDE[21], // C2323
-      _aqDDSDDE[22], // C2313
-      _aqDDSDDE[23], // C2312
-      _aqDDSDDE[28], // C1313
-      _aqDDSDDE[29], // C1312
-      _aqDDSDDE[35]  // C1212
-  }});
+  // Build Jacobian matrix from UMAT's Voigt non-standard order to fourth order tensor.
+  const unsigned int N = LIBMESH_DIM;
+  const unsigned int ntens = N * (N + 1) / 2;
+  const int nskip = N - 1;
+
+  for (auto i : make_range(N))
+    for (auto j : make_range(N))
+      for (auto k : make_range(N))
+        for (auto l : make_range(N))
+        {
+          if (i == j)
+            _jacobian_mult[_qp](i, j, k, l) =
+                k == l ? _aqDDSDDE[i * ntens + k] : _aqDDSDDE[i * ntens + k + nskip + l];
+          else
+            // i!=j
+            _jacobian_mult[_qp](i, j, k, l) =
+                k == l ? _aqDDSDDE[(nskip + i + j) * ntens + k]
+                       : _aqDDSDDE[(nskip + i + j) * ntens + k + nskip + l];
+        }
 }
