@@ -535,7 +535,12 @@ FEProblemBase::getEvaluableElementRange()
 {
   if (!_evaluable_local_elem_range)
   {
-    std::vector<const DofMap *> dof_maps = {&_nl->dofMap(), &_aux->dofMap()};
+    std::vector<const DofMap *> dof_maps(_eq.n_systems());
+    for (const auto i : make_range(_eq.n_systems()))
+    {
+      const auto & sys = _eq.get_system(i);
+      dof_maps[i] = &sys.get_dof_map();
+    }
     _evaluable_local_elem_range = libmesh_make_unique<ConstElemRange>(
         _mesh.getMesh().multi_evaluable_elements_begin(dof_maps),
         _mesh.getMesh().multi_evaluable_elements_end(dof_maps));
