@@ -28,7 +28,7 @@ have more variables/DoFs than others, this may cause imbalance.
 
 In this example, a `LibmeshPartitioner` is used to perform linear partitioning of the mesh.
 
-!listing test/tests/custom_partitioner/custom_linear_partitioner_test.i block=Mesh
+!listing test/tests/mesh/custom_partitioner/custom_linear_partitioner_test.i block=Mesh
 
 !syntax parameters /Mesh/Partitioner/LibmeshPartitioner
 

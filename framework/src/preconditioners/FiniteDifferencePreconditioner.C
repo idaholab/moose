@@ -70,12 +70,16 @@ FiniteDifferencePreconditioner::FiniteDifferencePreconditioner(const InputParame
 
     // off-diagonal entries
     std::vector<std::vector<unsigned int>> off_diag(n_vars);
-    for (unsigned int i = 0; i < getParam<std::vector<std::string>>("off_diag_row").size(); i++)
+    for (unsigned int i = 0;
+         i < getParam<std::vector<NonlinearVariableName>>("off_diag_row").size();
+         i++)
     {
       unsigned int row =
-          nl.getVariable(0, getParam<std::vector<std::string>>("off_diag_row")[i]).number();
+          nl.getVariable(0, getParam<std::vector<NonlinearVariableName>>("off_diag_row")[i])
+              .number();
       unsigned int column =
-          nl.getVariable(0, getParam<std::vector<std::string>>("off_diag_column")[i]).number();
+          nl.getVariable(0, getParam<std::vector<NonlinearVariableName>>("off_diag_column")[i])
+              .number();
       (*cm)(row, column) = 1;
     }
 

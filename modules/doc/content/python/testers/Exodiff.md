@@ -16,7 +16,7 @@ Test configuration options are added to the `tests` file.
 - `rel_tol`: sets a relative tolerance. Defaults to 5.5e-6.
 
 - `exodiff_opts`: additional options passed to the `Exodiff` utility on the command line. Their list
-  may be found in its [documentation]()
+  may be found in its [documentation](https://gsjaardema.github.io/seacas-docs/sphinx/html/index.html#exodiff)
 
 - `custom_cmp`: use a custom comparison. The output of the comparison
   must match the specified file.
@@ -38,4 +38,4 @@ In this example, four tests are set up using an `Exodiff` tester. The third one 
 as the second one, with additional arguments passed on the command line to run a different configuration.
 The Exodus files compared here mainly contain the values of the array variables on the mesh.
 
-!listing test/tests/variables/array_variables/tests
+!listing test/tests/variables/array_variable/tests

@@ -33,6 +33,12 @@ FieldSplitPreconditioner::validParams()
 
   params.addRequiredParam<std::vector<std::string>>(
       "topsplit", "entrance to splits, the top split will specify how splits will go.");
+  // We should use full coupling Jacobian matrix by default
+  params.addParam<bool>("full",
+                        true,
+                        "Set to true if you want the full set of couplings between variables. "
+                        "Simply for convenience so you don't have to set every off_diag_row "
+                        "and off_diag_column combination.");
   return params;
 }
 

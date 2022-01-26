@@ -79,7 +79,7 @@ Tester system is completely pluggable and extendable. The list of default tester
 - [RunCommand](RunCommand.md)
 - [RunException](RunException.md)
 - [Exodiff](Exodiff.md)
-- [CSVDiff](testers/CSVDiff.md)
+- [CSVDiff](testers/CSVDiff_tester.md)
 - [JSONDiff](JSONDiff.md)
 - [XMLDiff](XMLDiff.md)
 - [ImageDiff](ImageDiff.md)

@@ -83,7 +83,7 @@
   active = 'SMP'
   [./SMP]
     type = SMP
-    full = true
+    full = false
     off_diag_row    = 'u n n v'
     off_diag_column = 'n u v u'
   [../]

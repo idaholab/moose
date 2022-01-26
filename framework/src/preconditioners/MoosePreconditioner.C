@@ -38,9 +38,8 @@ MoosePreconditioner::validParams()
       "off_diag_column",
       "The variable names for the off-diagonal columns you want to add into the matrix, they will "
       "be associated with an off-diagonal row from the same position in off_diag_row.");
-  // We should use full coupling Jacobian matrix by default
   params.addParam<bool>("full",
-                        true,
+                        false,
                         "Set to true if you want the full set of couplings between variables. "
                         "Simply for convenience so you don't have to set every off_diag_row "
                         "and off_diag_column combination.");
@@ -73,8 +72,8 @@ MoosePreconditioner::MoosePreconditioner(const InputParameters & params)
   {
     if (isParamValid("off_diag_column"))
     {
-      const auto off_diag_rows = getParam<std::vector<std::string>>("off_diag_row");
-      const auto off_diag_columns = getParam<std::vector<std::string>>("off_diag_column");
+      const auto off_diag_rows = getParam<std::vector<NonlinearVariableName>>("off_diag_row");
+      const auto off_diag_columns = getParam<std::vector<NonlinearVariableName>>("off_diag_column");
       if (off_diag_rows.size() != off_diag_columns.size())
         paramError("off_diag_row",
                    "Off-diagonal rows should be paired one to one with "
