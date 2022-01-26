@@ -20,6 +20,16 @@
     recover = false
     mesh_mode = 'REPLICATED'
   []
+  [err_non_2d_mesh]
+    type = 'RunException'
+    input = 'core_ring.i'
+    cli_args = 'Mesh/fmg/type=GeneratedMeshGenerator
+                Mesh/fmg/dim=1
+                --mesh-only'
+    expect_err = 'Only 2D meshes are supported.'
+    requirement ='The system shall throw an error if a non-2D mesh is given as the input mesh.'
+    mesh_mode = 'REPLICATED'
+  []
   [err_invalid_boundary_type_1]
     type = 'RunException'
     input = 'core_ring.i'

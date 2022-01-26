@@ -77,7 +77,10 @@ PeripheralRingMeshGenerator::generate()
   // Need ReplicatedMesh for stitching
   auto input_mesh = dynamic_cast<ReplicatedMesh *>(_input.get());
   if (!input_mesh)
-    paramError("input", "Input is not a replicated mesh, which is required");
+    paramError("input", "Input is not a replicated mesh, which is required.");
+  if (*(input_mesh->elem_dimensions().begin()) != 2 ||
+      *(input_mesh->elem_dimensions().rbegin()) != 2)
+    paramError("input", "Only 2D meshes are supported.");
   _input_mesh_external_bid =
       MooseMeshUtils::getBoundaryID(_input_mesh_external_boundary, *input_mesh);
 
@@ -273,12 +276,10 @@ PeripheralRingMeshGenerator::isBoundaryValid(ReplicatedMesh & mesh,
   {
     // Find nodes to expand the chain
     dof_id_type end_node_id = boundary_ordered_node_list.back();
-    auto isMatch1 = [end_node_id](std::pair<dof_id_type, dof_id_type> old_id_pair) {
-      return old_id_pair.first == end_node_id;
-    };
-    auto isMatch2 = [end_node_id](std::pair<dof_id_type, dof_id_type> old_id_pair) {
-      return old_id_pair.second == end_node_id;
-    };
+    auto isMatch1 = [end_node_id](std::pair<dof_id_type, dof_id_type> old_id_pair)
+    { return old_id_pair.first == end_node_id; };
+    auto isMatch2 = [end_node_id](std::pair<dof_id_type, dof_id_type> old_id_pair)
+    { return old_id_pair.second == end_node_id; };
     auto result = std::find_if(boundary_node_assm.begin(), boundary_node_assm.end(), isMatch1);
     bool match_first;
     if (result == boundary_node_assm.end())
@@ -338,8 +339,8 @@ PeripheralRingMeshGenerator::isBoundaryValid(ReplicatedMesh & mesh,
           (*mesh.node_ptr(boundary_ordered_node_list[i]) - origin_pt)
               .cross(*mesh.node_ptr(boundary_ordered_node_list[i + 1]) - origin_pt)(2));
       // Use this opportunity to calculate maximum radius
-      max_node_radius = std::max(
-          (*mesh.node_ptr(boundary_ordered_node_list[i]) - origin_pt).norm(), max_node_radius);
+      max_node_radius = std::max((*mesh.node_ptr(boundary_ordered_node_list[i]) - origin_pt).norm(),
+                                 max_node_radius);
     }
     std::sort(ordered_node_azi_list.begin(), ordered_node_azi_list.end());
     if (ordered_node_azi_list.front() * ordered_node_azi_list.back() < 0.0)
