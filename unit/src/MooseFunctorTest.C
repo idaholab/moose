@@ -123,11 +123,11 @@ TEST(MooseFunctorTest, testArgs)
       try
       {
         test.dot(arg);
-        ASSERT_TRUE(false);
+        EXPECT_TRUE(false);
       }
       catch (std::runtime_error & e)
       {
-        ASSERT_TRUE(std::string(e.what()).find("not implemented") != std::string::npos);
+        EXPECT_TRUE(std::string(e.what()).find("not implemented") != std::string::npos);
       }
     };
 
@@ -143,11 +143,11 @@ TEST(MooseFunctorTest, testArgs)
       try
       {
         test.gradient(arg);
-        ASSERT_TRUE(false);
+        EXPECT_TRUE(false);
       }
       catch (std::runtime_error & e)
       {
-        ASSERT_TRUE(std::string(e.what()).find("not implemented") != std::string::npos);
+        EXPECT_TRUE(std::string(e.what()).find("not implemented") != std::string::npos);
       }
     };
 
@@ -241,17 +241,53 @@ TEST(MooseFunctorTest, testArgs)
     EXPECT_EQ(vec_comp(elem_qp), 0);
     EXPECT_EQ(vec_comp(elem_side_qp), 0);
 
-    const auto & mesh_fi = all_fi.front();
-    const auto vec_elem_arg = ElemArg{&mesh_fi.elem(), false, false};
-    auto vec_face_arg =
-        FaceArg({&mesh_fi,
-                 LimiterType::CentralDifference,
-                 true,
-                 false,
-                 false,
-                 mesh_fi.elem().subdomain_id(),
-                 mesh_fi.neighborPtr() ? mesh_fi.neighbor().subdomain_id() : INVALID_BLOCK_ID});
-    zero_gradient_test(vec_comp, vec_elem_arg);
-    zero_gradient_test(vec_comp, vec_face_arg);
+    bool found_internal = false;
+    for (const auto & mesh_fi : all_fi)
+    {
+      if (!mesh_fi.neighborPtr())
+        continue;
+
+      auto vec_face_arg =
+          FaceArg({&mesh_fi,
+                   LimiterType::CentralDifference,
+                   true,
+                   false,
+                   false,
+                   mesh_fi.elem().subdomain_id(),
+                   mesh_fi.neighborPtr() ? mesh_fi.neighbor().subdomain_id() : INVALID_BLOCK_ID});
+      const auto vec_elem_arg = vec_face_arg.makeElem();
+      const auto vec_neighbor_arg = vec_face_arg.makeNeighbor();
+      zero_gradient_test(vec_comp, vec_elem_arg);
+      zero_gradient_test(vec_comp, vec_neighbor_arg);
+      zero_gradient_test(vec_comp, vec_face_arg);
+
+      found_internal = true;
+      break;
+    }
+
+    EXPECT_TRUE(found_internal);
+  }
+
+  // Test NullFunctor errors
+  {
+    NullFunctor<Real> null;
+    auto test_null_errors = [&null](const auto & arg) {
+      try
+      {
+        null(arg);
+        EXPECT_TRUE(false);
+      }
+      catch (std::runtime_error & e)
+      {
+        EXPECT_TRUE(std::string(e.what()).find("should never get here") != std::string::npos);
+      }
+    };
+
+    test_null_errors(elem_arg);
+    test_null_errors(face);
+    test_null_errors(single_face);
+    test_null_errors(elem_from_face);
+    test_null_errors(elem_qp);
+    test_null_errors(elem_side_qp);
   }
 }
