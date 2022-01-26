@@ -11,7 +11,6 @@
 
 #include "libmesh/mesh_base.h"
 #include "libmesh/boundary_info.h"
-#include "libmesh/replicated_mesh.h"
 
 #include "MooseUtils.h"
 #include "MooseTypes.h"
