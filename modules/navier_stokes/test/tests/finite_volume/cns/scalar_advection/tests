@@ -8,6 +8,5 @@
     requirement = 'The system shall be able to advect a scalar using density and velocity computed through solution of the Euler equations.'
     ad_indexing_type = 'global'
     abs_zero = 3e-9
-    threading = 'tbb openmp'
   []
 []

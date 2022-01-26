@@ -46,7 +46,6 @@
     ad_indexing_type = 'global'
     method = '!dbg'
     valgrind = 'none'
-    threading = 'tbb openmp'
   []
   [transient_wcnsfv]
     type = Exodiff
@@ -58,6 +57,5 @@
     cli_args = "Outputs/out/execute_on='final'"
     recover = false # See https://github.com/idaholab/moose/issues/17906
     valgrind = 'none'
-    threading = 'tbb openmp'
   []
 []

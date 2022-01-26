@@ -10,7 +10,6 @@
     ad_indexing_type = 'global'
     abs_zero = 1e-9
     recover = false # see #19126
-    threading = 'tbb openmp'
   []
   [turbulence]
     type = 'Exodiff'
@@ -34,7 +33,6 @@
 		     # is used in computation of the Rhie-Chow velocity required for the advection kernels)
 		     # Unfortunately I need to further bump this by one because I have a bug in my metaphysicl
 		     # debugging assertions (which I'm fixing)
-    threading = 'tbb openmp'
   []
   [transient-jac]
     type = 'PetscJacobianTester'
@@ -44,7 +42,6 @@
     ad_indexing_type = 'global'
     difference_tol = 1e-7
     cli_args = 'Mesh/gen/nx=2 Mesh/gen/ny=2 Executioner/num_steps=1'
-    threading = 'tbb openmp'
   []
   [turbulence-jac]
     type = 'PetscJacobianTester'
@@ -52,7 +49,6 @@
     run_sim = True
     ad_indexing_type = 'global'
     difference_tol = 1e-7
-    threading = 'tbb openmp'
     cli_args = "Mesh/gen/nx=2 Mesh/gen/ny=2 Executioner/num_steps=1 FVKernels/inactive='' AuxKernels/inactive='' Outputs/file_base='2d-turbulent'"
     requirement = 'The system shall be able to solve for a transient 2D channel case with a weakly compressible formulation and a mixing length turbulence model and show a perfect Jacobian.'
     mesh_mode = REPLICATED
