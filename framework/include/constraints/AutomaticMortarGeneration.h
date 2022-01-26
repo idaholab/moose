@@ -259,7 +259,7 @@ public:
     return _mortar_interface_coupling;
   }
 
-  /*
+  /**
    * @return The primary-secondary boundary ID pair
    */
   const std::pair<BoundaryID, BoundaryID> & primarySecondaryBoundaryIDPair() const;

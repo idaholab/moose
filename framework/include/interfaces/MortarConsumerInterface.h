@@ -30,8 +30,8 @@ class QBase;
 /**
  * An interface for accessing mortar mesh data
  *
- * \note moi is shorthand for mortar interface, so \p _moi_problem indicates
- *       the mortar interface's problem
+ * \note mci is shorthand for mortar consumer interface, so \p _mci_problem indicates
+ *       the mortar consumer interface's problem
  */
 class MortarConsumerInterface
 {
@@ -69,14 +69,14 @@ protected:
    */
   void setNormals();
 
-  FEProblemBase & _moi_fe_problem;
-  SubProblem & _moi_subproblem;
-  const THREAD_ID _moi_tid;
+  FEProblemBase & _mci_fe_problem;
+  SubProblem & _mci_subproblem;
+  const THREAD_ID _mci_tid;
 
   /// Mesh to query for boundary and subdomain ID information
-  MooseMesh & _moi_mesh;
+  MooseMesh & _mci_mesh;
 
-  Assembly & _moi_assembly;
+  Assembly & _mci_assembly;
 
   /// A reference to the mortar data object that holds all the mortar
   /// mesh information

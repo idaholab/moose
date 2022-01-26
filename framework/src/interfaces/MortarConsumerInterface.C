@@ -85,33 +85,33 @@ MortarConsumerInterface::validParams()
 
 // Standard constructor
 MortarConsumerInterface::MortarConsumerInterface(const MooseObject * moose_object)
-  : _moi_fe_problem(*moose_object->getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
-    _moi_subproblem(*moose_object->getCheckedPointerParam<SubProblem *>("_subproblem")),
-    _moi_tid(moose_object->getParam<THREAD_ID>("_tid")),
-    _moi_mesh(_moi_subproblem.mesh()),
-    _moi_assembly(_moi_subproblem.assembly(_moi_tid)),
-    _mortar_data(_moi_fe_problem.mortarData()),
+  : _mci_fe_problem(*moose_object->getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
+    _mci_subproblem(*moose_object->getCheckedPointerParam<SubProblem *>("_subproblem")),
+    _mci_tid(moose_object->getParam<THREAD_ID>("_tid")),
+    _mci_mesh(_mci_subproblem.mesh()),
+    _mci_assembly(_mci_subproblem.assembly(_mci_tid)),
+    _mortar_data(_mci_fe_problem.mortarData()),
     _secondary_id(
-        _moi_mesh.getBoundaryID(moose_object->getParam<BoundaryName>("secondary_boundary"))),
-    _primary_id(_moi_mesh.getBoundaryID(moose_object->getParam<BoundaryName>("primary_boundary"))),
+        _mci_mesh.getBoundaryID(moose_object->getParam<BoundaryName>("secondary_boundary"))),
+    _primary_id(_mci_mesh.getBoundaryID(moose_object->getParam<BoundaryName>("primary_boundary"))),
     _secondary_subdomain_id(
-        _moi_mesh.getSubdomainID(moose_object->getParam<SubdomainName>("secondary_subdomain"))),
+        _mci_mesh.getSubdomainID(moose_object->getParam<SubdomainName>("secondary_subdomain"))),
     _primary_subdomain_id(
-        _moi_mesh.getSubdomainID(moose_object->getParam<SubdomainName>("primary_subdomain"))),
+        _mci_mesh.getSubdomainID(moose_object->getParam<SubdomainName>("primary_subdomain"))),
     _interpolate_normals(moose_object->getParam<bool>("interpolate_normals")),
-    _phys_points_secondary(_moi_assembly.qPointsFace()),
-    _phys_points_primary(_moi_assembly.qPointsFaceNeighbor()),
-    _qrule_msm(_moi_assembly.qRuleMortar()),
-    _qrule_face(_moi_assembly.qRuleFace()),
-    _lower_secondary_elem(_moi_assembly.lowerDElem()),
-    _JxW_msm(_moi_assembly.jxWMortar())
+    _phys_points_secondary(_mci_assembly.qPointsFace()),
+    _phys_points_primary(_mci_assembly.qPointsFaceNeighbor()),
+    _qrule_msm(_mci_assembly.qRuleMortar()),
+    _qrule_face(_mci_assembly.qRuleFace()),
+    _lower_secondary_elem(_mci_assembly.lowerDElem()),
+    _JxW_msm(_mci_assembly.jxWMortar())
 {
   const bool displaced = moose_object->isParamValid("use_displaced_mesh")
                              ? moose_object->getParam<bool>("use_displaced_mesh")
                              : false;
 
   // Create the mortar interface if it hasn't already been created
-  _moi_fe_problem.createMortarInterface(
+  _mci_fe_problem.createMortarInterface(
       std::make_pair(_primary_id, _secondary_id),
       std::make_pair(_primary_subdomain_id, _secondary_subdomain_id),
       displaced,
@@ -119,7 +119,7 @@ MortarConsumerInterface::MortarConsumerInterface(const MooseObject * moose_objec
       moose_object->getParam<bool>("debug_mesh"),
       moose_object->getParam<bool>("correct_edge_dropping"));
 
-  _amg = &_moi_fe_problem.getMortarInterface(
+  _amg = &_mci_fe_problem.getMortarInterface(
       std::make_pair(_primary_id, _secondary_id),
       std::make_pair(_primary_subdomain_id, _secondary_subdomain_id),
       displaced);
