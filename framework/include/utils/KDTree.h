@@ -37,7 +37,10 @@ public:
                     std::vector<std::pair<std::size_t, Real>> & indices_dist);
 
   using KdTreeT = nanoflann::KDTreeSingleIndexAdaptor<
-      nanoflann::L2_Simple_Adaptor<Real, PointListAdaptor<Point>>,
+      nanoflann::L2_Simple_Adaptor<Real,
+                                   /* DataSource = */ PointListAdaptor<Point>,
+                                   /* DistanceType = */ Real,
+                                   /* AccessorType = */ std::size_t>,
       PointListAdaptor<Point>,
       LIBMESH_DIM,
       std::size_t>;
