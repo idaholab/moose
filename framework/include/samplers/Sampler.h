@@ -255,6 +255,14 @@ protected:
   virtual void executeTearDown() {}
   ///@}
 
+  //@{
+  /**
+   * Here we save/restore generator states
+   */
+  void saveGeneratorState() { _generator.saveState(); }
+  void restoreGeneratorState() { _generator.restoreState(); }
+  //@}
+
   /**
    * This is where the sampler partitioning is defined. It is NOT recommended to
    * override this function unless you know EXACTLY what you are doing

@@ -1,0 +1,30 @@
+[Tests]
+  issues = '#20130'
+  design = 'NestedMonteCarloSampler.md'
+
+  [nested_monte_carlo]
+    requirement = 'The system shall include a nested Monte Carlo sampling scheme where sets of distributions are sampled as nested loops of rows'
+    [serial]
+      type = CSVDiff
+      input = 'nested_monte_carlo.i'
+      csvdiff = 'nested_monte_carlo_out_data_0001.csv'
+      max_parallel = 1
+      detail = 'in serial;'
+    []
+    [parallel]
+      type = CSVDiff
+      input = 'nested_monte_carlo.i'
+      csvdiff = 'nested_monte_carlo_out_data_0001.csv'
+      min_parallel = 3
+      detail = 'in parallel;'
+    []
+  []
+
+  [error]
+    type = RunException
+    input = nested_monte_carlo.i
+    cli_args = "Samplers/nested_mc/num_rows='10 3'"
+    expect_err = "There must be a set of distributions for each loop defined by 'num_rows'"
+    requirement = 'The system shall error out when the number of nested Monte Carlo loops does not match the number of sets of distributions.'
+  []
+[]
