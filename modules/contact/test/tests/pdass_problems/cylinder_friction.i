@@ -216,15 +216,13 @@
   type = Transient
   solve_type = 'PJFNK'
 
+  petsc_options = '-snes_ksp_ew'
   petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_shift_amount -mat_mffd_err'
   petsc_options_value = 'lu       NONZERO               1e-15                   1e-5'
 
   line_search = 'none'
 
   nl_abs_tol = 1e-7
-  nl_rel_tol = 1e-7
-  l_max_its = 100
-  nl_max_its = 30
 
   start_time = 0.0
   end_time = 0.3 # 3.5
