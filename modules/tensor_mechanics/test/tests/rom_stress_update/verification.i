@@ -147,7 +147,6 @@
   [./pressure_x]
     type = Pressure
     variable = disp_x
-    component = 0
     boundary = right
     function = vmJ2_fcn
     factor = 0.5e6
@@ -155,7 +154,6 @@
   [./pressure_y]
     type = Pressure
     variable = disp_y
-    component = 1
     boundary = top
     function = vmJ2_fcn
     factor = -0.5e6
@@ -163,7 +161,6 @@
   [./pressure_z]
     type = Pressure
     variable = disp_z
-    component = 2
     boundary = front
     function = vmJ2_fcn
     factor = -0.5e6

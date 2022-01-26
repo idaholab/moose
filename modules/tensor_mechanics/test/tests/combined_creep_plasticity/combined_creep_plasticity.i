@@ -95,7 +95,6 @@
   [./u_top_pull]
     type = Pressure
     variable = disp_y
-    component = 1
     boundary = top
     factor = 1
     function = top_pull

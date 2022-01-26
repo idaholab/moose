@@ -173,11 +173,12 @@
     value = 0.0
   []
 
-  [Pressure]
-    [Side1]
-      boundary = top
-      function = pull
-    []
+  [pressure]
+    type = ADPressure
+    boundary = top
+    function = pull
+    variable = disp_y
+    component = 1
   []
 []
 

@@ -210,16 +210,13 @@ offset = 0.00
   dt = .025
   dtmin = .001
   solve_type = 'PJFNK'
-  petsc_options = '-snes_converged_reason -ksp_converged_reason -pc_svd_monitor '
-                  '-snes_linesearch_monitor'
+  petsc_options = '-snes_converged_reason -ksp_converged_reason -snes_ksp_ew'
   petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_shift_amount -mat_mffd_err'
   petsc_options_value = 'lu       NONZERO               1e-14                  1e-5'
   l_max_its = 15
   nl_max_its = 30
-  automatic_scaling = true
-  off_diagonals_in_auto_scaling = true
-  nl_rel_tol = 5e-8
-  nl_abs_tol = 5e-8
+  nl_rel_tol = 1e-11
+  nl_abs_tol = 1e-12
   line_search = 'basic'
 []
 

@@ -35,6 +35,7 @@ PressureAction::validParams()
                                                 "The save_in variables for z displacement");
 
   params.addParam<Real>("factor", 1.0, "The factor to use in computing the pressure");
+  params.addParam<bool>("use_displaced_mesh", true, "Whether to use the displaced mesh.");
   params.addParam<Real>("hht_alpha",
                         0,
                         "alpha parameter for mass dependent numerical damping induced "
@@ -79,11 +80,12 @@ PressureAction::act()
 
     InputParameters params = _factory.getValidParams(kernel_name);
     params.applyParameters(parameters(), {"factor"});
-    params.set<bool>("use_displaced_mesh") = true;
+    params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
     params.set<Real>("alpha") =
         isParamValid("alpha") ? getParam<Real>("alpha") : getParam<Real>("hht_alpha");
 
-    params.set<unsigned int>("component") = i;
+    if (_use_ad)
+      params.set<unsigned int>("component") = i;
     params.set<NonlinearVariableName>("variable") = displacements[i];
 
     if (_has_save_in_vars[i])
