@@ -276,10 +276,12 @@ PeripheralRingMeshGenerator::isBoundaryValid(ReplicatedMesh & mesh,
   {
     // Find nodes to expand the chain
     dof_id_type end_node_id = boundary_ordered_node_list.back();
-    auto isMatch1 = [end_node_id](std::pair<dof_id_type, dof_id_type> old_id_pair)
-    { return old_id_pair.first == end_node_id; };
-    auto isMatch2 = [end_node_id](std::pair<dof_id_type, dof_id_type> old_id_pair)
-    { return old_id_pair.second == end_node_id; };
+    auto isMatch1 = [end_node_id](std::pair<dof_id_type, dof_id_type> old_id_pair) {
+      return old_id_pair.first == end_node_id;
+    };
+    auto isMatch2 = [end_node_id](std::pair<dof_id_type, dof_id_type> old_id_pair) {
+      return old_id_pair.second == end_node_id;
+    };
     auto result = std::find_if(boundary_node_assm.begin(), boundary_node_assm.end(), isMatch1);
     bool match_first;
     if (result == boundary_node_assm.end())
