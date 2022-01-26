@@ -19,7 +19,8 @@ PINSFVMomentumFrictionCorrection::validParams()
 {
   auto params = INSFVFluxKernel::validParams();
   params.addClassDescription(
-      "Computes the diffusion kernel to avoid pressure-driven oscillations.");
+      "Computes a correction term to avoid oscillations from average pressure interpolation in "
+      "regions of high changes in friction coefficients.");
   params.addParam<MooseFunctorName>("Darcy_name", "Name of the Darcy coefficients property.");
   params.addParam<MooseFunctorName>("Forchheimer_name",
                                     "Name of the Forchheimer coefficients property.");
