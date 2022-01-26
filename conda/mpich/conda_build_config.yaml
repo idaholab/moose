@@ -2,7 +2,7 @@
 ## Any changes made will require additional changes to any item above that.
 
 moose_libmesh:
-  - moose-libmesh 2021.12.15 build_2
+  - moose-libmesh 2022.01.19 build_2
 
 SHORT_VTK_NAME:
   - 9.1
