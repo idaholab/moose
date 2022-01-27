@@ -54,7 +54,6 @@
                   'CompositeElasticityTensor. This test also serves as a reference for UMAT behavior '
                   'in the presence of shear deformation. '
   []
-
   [print_shear_print]
     type = 'RunApp'
     input = 'print_shear.i'
@@ -63,8 +62,8 @@
     valgrind = 'NONE'
     expect_out = 'STRAIN_ 1   [ -]0.0000000\n DSTRAIN_ 1   -0.0000299\n STRAIN_ 2   [ -]0.0000000\n '
                  'DSTRAIN_ 2    0.0001463\n STRAIN_ 3   [ -]0.0000000\n DSTRAIN_ 3   -0.0000388\n '
-                 'STRAIN_ 4   [ -]0.0000000\n DSTRAIN_ 4    0.0000219\n STRAIN_ 5   [ -]0.0000000\n '
-                 'DSTRAIN_ 5   -0.0024651\n STRAIN_ 6   [ -]0.0000000\n DSTRAIN_ 6    0.0045930\n '
+                 'STRAIN_ 4   [ -]0.0000000\n DSTRAIN_ 4    0.0045930\n STRAIN_ 5   [ -]0.0000000\n '
+                 'DSTRAIN_ 5   -0.0024651\n STRAIN_ 6   [ -]0.0000000\n DSTRAIN_ 6    0.0000219\n '
                  'COORDS_ 1   [ -]0.0000000\n COORDS_ 2    0.3872983\n COORDS_ 3   -0.3872983\n '
                  'DFGRD0_ 1 1    1.0000000\n DFGRD0_ 1 2   [ -]0.0000000\n DFGRD0_ 1 3   [ '
                  '-]0.0000000\n DFGRD0_ 2 1   [ -]0.0000000\n DFGRD0_ 2 2    1.0000000\n DFGRD0_ 2 3 '
