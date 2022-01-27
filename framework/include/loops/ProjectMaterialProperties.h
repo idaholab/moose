@@ -44,7 +44,6 @@ public:
                           BoundaryID bnd_id,
                           const Elem * lower_d_elem = nullptr) override;
   virtual void onInternalSide(const Elem * elem, unsigned int side) override;
-  void postElement(const Elem * elem) override;
 
   void join(const ProjectMaterialProperties & /*y*/);
 
