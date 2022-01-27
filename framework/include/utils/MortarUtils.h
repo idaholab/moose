@@ -9,7 +9,8 @@
 
 #include "Assembly.h"
 #include "FEProblemBase.h"
-#include "SubProblem.h"
+#include "MooseUtils.h"
+#include "MaterialWarehouse.h"
 
 #include "libmesh/quadrature.h"
 #include "libmesh/elem.h"
@@ -70,16 +71,15 @@ loopOverMortarSegments(const Iterators & secondary_elems_to_mortar_segments,
                        const AutomaticMortarGeneration & amg,
                        const bool displaced,
                        const Consumers & consumers,
+                       std::map<SubdomainID, std::deque<MaterialBase *>> secondary_ip_sub_to_mats,
+                       std::map<SubdomainID, std::deque<MaterialBase *>> primary_ip_sub_to_mats,
+                       std::deque<MaterialBase *> secondary_boundary_mats,
                        const ActionFunctor act)
 {
-  const auto & primary_secondary_boundary_id_pairs = amg.primarySecondaryBoundaryIDPairs();
-  mooseAssert(primary_secondary_boundary_id_pairs.size() == 1,
-              "We currently only support a single primary-secondary ID pair per mortar segment "
-              "mesh. We can probably support this without too much trouble if you want to contact "
-              "a MOOSE developer.");
+  const auto & primary_secondary_boundary_id_pair = amg.primarySecondaryBoundaryIDPair();
 
-  const auto primary_boundary_id = primary_secondary_boundary_id_pairs[0].first;
-  const auto secondary_boundary_id = primary_secondary_boundary_id_pairs[0].second;
+  const auto primary_boundary_id = primary_secondary_boundary_id_pair.first;
+  const auto secondary_boundary_id = primary_secondary_boundary_id_pair.second;
 
   // For 3D mortar get index for retrieving sub-element info
   unsigned int secondary_sub_elem_index = 0, primary_sub_elem_index = 0;
@@ -110,6 +110,12 @@ loopOverMortarSegments(const Iterators & secondary_elems_to_mortar_segments,
   for (const auto elem_to_msm : secondary_elems_to_mortar_segments)
   {
     const Elem * secondary_face_elem = elem_to_msm->first;
+    // Set the secondary interior parent and side ids
+    const Elem * secondary_ip = secondary_face_elem->interior_parent();
+    unsigned int secondary_side_id = secondary_ip->which_side_am_i(secondary_face_elem);
+    const auto & secondary_ip_mats =
+        libmesh_map_find(secondary_ip_sub_to_mats, secondary_ip->subdomain_id());
+
     const auto & msm_elems = elem_to_msm->second;
 
     // Need to be able to check if there's edge dropping, in 3D we can't just compare
@@ -180,6 +186,7 @@ loopOverMortarSegments(const Iterators & secondary_elems_to_mortar_segments,
     }
 
     // Reinit dual shape coeffs if dual shape functions needed
+    // lindsayad: is there any need to make sure we do this on both reference and displaced?
     if (assembly.needDual())
       assembly.reinitDual(secondary_face_elem, secondary_xi_pts, JxW);
 
@@ -196,13 +203,11 @@ loopOverMortarSegments(const Iterators & secondary_elems_to_mortar_segments,
       // Get a reference to the MortarSegmentInfo for this Elem.
       const MortarSegmentInfo & msinfo = amg.mortarSegmentMeshElemToInfo().at(msm_elem);
 
-      // Set the secondary interior parent and side ids
-      const Elem * secondary_ip = msinfo.secondary_elem->interior_parent();
-      unsigned int secondary_side_id = secondary_ip->which_side_am_i(msinfo.secondary_elem);
-
       // Set the primary interior parent and side ids
       const Elem * primary_ip = msinfo.primary_elem->interior_parent();
       unsigned int primary_side_id = primary_ip->which_side_am_i(msinfo.primary_elem);
+      const auto & primary_ip_mats =
+          libmesh_map_find(primary_ip_sub_to_mats, primary_ip->subdomain_id());
 
       // Compute a JxW for the actual mortar segment element (not the lower dimensional element on
       // the secondary face!)
@@ -255,7 +260,7 @@ loopOverMortarSegments(const Iterators & secondary_elems_to_mortar_segments,
       fe_problem.reinitMaterialsNeighbor(primary_ip->subdomain_id(),
                                          /*tid=*/0,
                                          /*swap_stateful=*/false,
-                                         /*execute_stateful=*/false);
+                                         &primary_ip_mats);
 
       // reinit the variables/residuals/jacobians on the lower dimensional element corresponding to
       // the secondary face. This must be done last after the dof indices have been prepared for the
@@ -274,14 +279,79 @@ loopOverMortarSegments(const Iterators & secondary_elems_to_mortar_segments,
       fe_problem.reinitMaterialsFace(secondary_ip->subdomain_id(),
                                      /*tid=*/0,
                                      /*swap_stateful=*/false,
-                                     /*execute_stateful=*/false);
+                                     &secondary_ip_mats);
       fe_problem.reinitMaterialsBoundary(
-          secondary_boundary_id, /*tid=*/0, /*swap_stateful=*/false, /*execute_stateful=*/false);
+          secondary_boundary_id, /*tid=*/0, /*swap_stateful=*/false, &secondary_boundary_mats);
 
       act();
 
     } // End loop over msm segments on secondary face elem
   }   // End loop over (active) secondary elems
+}
+
+/**
+ * This function creates containers of materials necessary to execute the mortar method for a
+ * supplied set of consumers
+ * @param consumers The objects that we're building the material dependencies for. This could be a
+ * container of mortar constraints or a "mortar" auxiliary kernel for example
+ * @param fe_problem The finite element problem that we'll be querying for material warehouses
+ * @param tid The thread ID that we will use for pulling the material warehouse
+ * @param secondary_ip_sub_to_mats A map from the secondary interior parent subdomain IDs to the
+ * required secondary \em block materials we will need to evaluate for the consumers
+ * @param primary_ip_sub_to_mats A map from the primary interior parent subdomain IDs to the
+ * required primary \em block materials we will need to evaluate for the consumers
+ * @param secondary_boundary_mats The secondary \em boundary materials we will need to evaluate for
+ * the consumers
+ */
+template <typename Consumers>
+void
+setupMortarMaterials(const Consumers & consumers,
+                     FEProblemBase & fe_problem,
+                     const AutomaticMortarGeneration & amg,
+                     const THREAD_ID tid,
+                     std::map<SubdomainID, std::deque<MaterialBase *>> & secondary_ip_sub_to_mats,
+                     std::map<SubdomainID, std::deque<MaterialBase *>> & primary_ip_sub_to_mats,
+                     std::deque<MaterialBase *> & secondary_boundary_mats)
+{
+  secondary_ip_sub_to_mats.clear();
+  primary_ip_sub_to_mats.clear();
+  secondary_boundary_mats.clear();
+
+  auto & mat_warehouse = fe_problem.getRegularMaterialsWarehouse();
+  auto get_required_sub_mats =
+      [&mat_warehouse, tid, &consumers](
+          const SubdomainID sub_id,
+          const Moose::MaterialDataType mat_data_type) -> std::deque<MaterialBase *> {
+    if (mat_warehouse[mat_data_type].hasActiveBlockObjects(sub_id, tid))
+    {
+      auto & sub_mats = mat_warehouse[mat_data_type].getActiveBlockObjects(sub_id, tid);
+      return MooseUtils::buildRequiredMaterials(consumers, sub_mats, /*allow_stateful=*/false);
+    }
+    else
+      return {};
+  };
+
+  // Construct secondary *block* materials container
+  const auto & secondary_ip_sub_ids = amg.secondaryIPSubIDs();
+  for (const auto secondary_ip_sub : secondary_ip_sub_ids)
+    secondary_ip_sub_to_mats.emplace(
+        secondary_ip_sub, get_required_sub_mats(secondary_ip_sub, Moose::FACE_MATERIAL_DATA));
+
+  // Construct primary *block* materials container
+  const auto & primary_ip_sub_ids = amg.primaryIPSubIDs();
+  for (const auto primary_ip_sub : primary_ip_sub_ids)
+    primary_ip_sub_to_mats.emplace(
+        primary_ip_sub, get_required_sub_mats(primary_ip_sub, Moose::NEIGHBOR_MATERIAL_DATA));
+
+  // Construct secondary *boundary* materials container
+  const auto & boundary_pr = amg.primarySecondaryBoundaryIDPair();
+  const auto secondary_boundary = boundary_pr.second;
+  if (mat_warehouse.hasActiveBoundaryObjects(secondary_boundary, tid))
+  {
+    auto & boundary_mats = mat_warehouse.getActiveBoundaryObjects(secondary_boundary, tid);
+    secondary_boundary_mats =
+        MooseUtils::buildRequiredMaterials(consumers, boundary_mats, /*allow_stateful=*/false);
+  }
 }
 }
 }

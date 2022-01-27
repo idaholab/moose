@@ -14,7 +14,7 @@
 #include "NeighborCoupleableMooseVariableDependencyIntermediateInterface.h"
 #include "MooseMesh.h"
 #include "MooseVariableInterface.h"
-#include "MortarInterface.h"
+#include "MortarConsumerInterface.h"
 #include "TwoMaterialPropertyInterface.h"
 
 // Forward Declarations
@@ -41,7 +41,7 @@ class QBase;
  */
 class MortarConstraintBase : public Constraint,
                              public NeighborCoupleableMooseVariableDependencyIntermediateInterface,
-                             public MortarInterface,
+                             public MortarConsumerInterface,
                              public TwoMaterialPropertyInterface,
                              public MooseVariableInterface<Real>
 {

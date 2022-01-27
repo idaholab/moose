@@ -10,14 +10,16 @@
 #pragma once
 
 #include "AuxKernel.h"
-#include "MortarInterface.h"
+#include "MortarConsumerInterface.h"
+#include "MortarExecutorInterface.h"
 
 /**
  * Base class for creating new nodally-based mortar auxiliary kernels
- *
  */
 template <typename ComputeValueType>
-class MortarNodalAuxKernelTempl : public AuxKernelTempl<ComputeValueType>, protected MortarInterface
+class MortarNodalAuxKernelTempl : public AuxKernelTempl<ComputeValueType>,
+                                  public MortarExecutorInterface,
+                                  protected MortarConsumerInterface
 {
 public:
   static InputParameters validParams();
@@ -29,10 +31,13 @@ public:
    */
   void compute() override;
 
+  void mortarSetup() override;
+
 protected:
   void precalculateValue() override final;
 
   using AuxKernelTempl<ComputeValueType>::isNodal;
+  using AuxKernelTempl<ComputeValueType>::_tid;
   using AuxKernelTempl<ComputeValueType>::paramError;
   using AuxKernelTempl<ComputeValueType>::mooseError;
   using AuxKernelTempl<ComputeValueType>::_subproblem;
