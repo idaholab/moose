@@ -15,6 +15,7 @@
 #include "libmesh/replicated_mesh.h"
 #include "libmesh/mesh_base.h"
 #include "libmesh/parallel.h"
+#include "libmesh/parallel_algebra.h"
 
 namespace MooseMeshUtils
 {
@@ -178,9 +179,7 @@ meshCentroidCalculator(const MeshBase & mesh)
     centroid_pt += (elem->true_centroid()) * elem_vol;
     vol_tmp += elem_vol;
   }
-  mesh.comm().sum(centroid_pt(0));
-  mesh.comm().sum(centroid_pt(1));
-  mesh.comm().sum(centroid_pt(2));
+  mesh.comm().sum(centroid_pt);
   mesh.comm().sum(vol_tmp);
   centroid_pt /= vol_tmp;
   return centroid_pt;
