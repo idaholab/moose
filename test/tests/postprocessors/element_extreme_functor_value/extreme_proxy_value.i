@@ -70,7 +70,7 @@
 
 [Postprocessors]
   [max_u]
-    type = ElementExtremeFunctorValue
+    type = ADElementExtremeFunctorValue
     functor = 'u'
   []
   [min_w_f]
@@ -79,11 +79,11 @@
     value_type = min
   []
   [max_v_x]
-    type = ElementExtremeFunctorValue
+    type = ADElementExtremeFunctorValue
     functor = 'v_x'
   []
   [min_v_y]
-    type = ElementExtremeFunctorValue
+    type = ADElementExtremeFunctorValue
     functor = 'v_y'
     value_type = min
   []
@@ -91,13 +91,13 @@
   # because we set v_x and v_y equal to the x and y coordinates, these two postprocessors
   # should just return the point at which u reaches a maximum value
   [max_v_from_proxy_x]
-    type = ElementExtremeFunctorValue
+    type = ADElementExtremeFunctorValue
     functor = v_x
     proxy_functor = u
     value_type = max
   []
   [max_v_from_proxy_y]
-    type = ElementExtremeFunctorValue
+    type = ADElementExtremeFunctorValue
     functor = v_y
     proxy_functor = u
     value_type = max
@@ -106,13 +106,13 @@
   # because we set v_x and v_y equal to the x and y coordinates, these two postprocessors
   # should just return the point at which w reaches a minimum value
   [min_v_from_proxy_x]
-    type = ElementExtremeFunctorValue
+    type = ADElementExtremeFunctorValue
     functor = v_x
     proxy_functor = w
     value_type = min
   []
   [min_v_from_proxy_y]
-    type = ElementExtremeFunctorValue
+    type = ADElementExtremeFunctorValue
     functor = v_y
     proxy_functor = w
     value_type = min
