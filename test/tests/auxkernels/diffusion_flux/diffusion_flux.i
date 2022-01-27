@@ -24,10 +24,16 @@
 []
 
 [Kernels]
+  active = 'diff'
   [./diff]
     type = MatDiffusionTest # A Laplacian operator
     variable = T
     prop_name = 'thermal_conductivity'
+  [../]
+  [./diff_ad]
+    type = ADMatDiffusion # A Laplacian operator
+    variable = T
+    diffusivity = 'thermal_conductivity'
   [../]
 []
 
