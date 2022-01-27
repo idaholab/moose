@@ -16,6 +16,7 @@
 #include "MooseMesh.h"
 #include "Assembly.h"
 #include "MortarUtils.h"
+#include "MaterialBase.h"
 
 #include "libmesh/fe_base.h"
 #include "libmesh/quadrature.h"
@@ -29,7 +30,8 @@ ComputeMortarFunctor::ComputeMortarFunctor(
     SubProblem & subproblem,
     FEProblemBase & fe_problem,
     bool displaced)
-  : _amg(amg),
+  : MortarExecutorInterface(fe_problem),
+    _amg(amg),
     _subproblem(subproblem),
     _fe_problem(fe_problem),
     _displaced(displaced),
@@ -38,6 +40,18 @@ ComputeMortarFunctor::ComputeMortarFunctor(
   // Construct the mortar constraints we will later loop over
   for (auto mc : mortar_constraints)
     _mortar_constraints.push_back(mc.get());
+}
+
+void
+ComputeMortarFunctor::mortarSetup()
+{
+  Moose::Mortar::setupMortarMaterials(_mortar_constraints,
+                                      _fe_problem,
+                                      _amg,
+                                      0,
+                                      _secondary_ip_sub_to_mats,
+                                      _primary_ip_sub_to_mats,
+                                      _secondary_boundary_mats);
 }
 
 void
@@ -96,6 +110,9 @@ ComputeMortarFunctor::operator()()
                                         _amg,
                                         _displaced,
                                         _mortar_constraints,
+                                        _secondary_ip_sub_to_mats,
+                                        _primary_ip_sub_to_mats,
+                                        _secondary_boundary_mats,
                                         act_functor);
 
   // Call any post operations for our mortar constraints

@@ -95,6 +95,8 @@ AutomaticMortarGeneration::clear()
   _secondary_node_to_hh_nodal_tangents.clear();
   _secondary_element_to_secondary_lowerd_element.clear();
   _secondary_elems_to_mortar_segments.clear();
+  _secondary_ip_sub_ids.clear();
+  _primary_ip_sub_ids.clear();
 }
 
 void
@@ -352,6 +354,9 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
 
     // Associate this MSM elem with the MortarSegmentInfo.
     _msm_elem_to_info.emplace(new_elem, msinfo);
+    _secondary_ip_sub_ids.insert(msinfo.secondary_elem->interior_parent()->subdomain_id());
+    if (msinfo.primary_elem)
+      _primary_ip_sub_ids.insert(msinfo.primary_elem->interior_parent()->subdomain_id());
 
     // Maintain the mapping between secondary elems and mortar segment elems contained within them.
     // Initially, only the original secondary_elem is present.
@@ -410,7 +415,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     // just made it <= and put this condition in to handle equality different. It probably could be
     // done with a tolerance but the the toleranced equality is already handled later when we drop
     // segments with small volume.
-    info = &_msm_elem_to_info.at(current_mortar_segment);
+    info = &libmesh_map_find(_msm_elem_to_info, current_mortar_segment);
     if (info->xi1_a == xi1 || xi1 == info->xi1_b)
       continue;
 
@@ -630,6 +635,10 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
 
       // Add new msinfo objects to the map.
       _msm_elem_to_info.emplace(new_elem_left, new_msinfo_left);
+      _secondary_ip_sub_ids.insert(
+          new_msinfo_left.secondary_elem->interior_parent()->subdomain_id());
+      if (new_msinfo_left.primary_elem)
+        _primary_ip_sub_ids.insert(new_msinfo_left.primary_elem->interior_parent()->subdomain_id());
 
       // We need to insert new_elem_left in
       // the mortar_segment_set for this secondary_elem.
@@ -651,6 +660,11 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
       new_msinfo_right.primary_elem = right_primary_elem;
 
       _msm_elem_to_info.emplace(new_elem_right, new_msinfo_right);
+      _secondary_ip_sub_ids.insert(
+          new_msinfo_right.secondary_elem->interior_parent()->subdomain_id());
+      if (new_msinfo_right.primary_elem)
+        _primary_ip_sub_ids.insert(
+            new_msinfo_right.primary_elem->interior_parent()->subdomain_id());
 
       mortar_segment_set.insert(new_elem_right);
     }
@@ -1064,6 +1078,11 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
 
             // Add this mortar segment to the secondary elem to mortar segment map
             secondary_to_msm_element_set.insert(msm_new_elem);
+
+            _secondary_ip_sub_ids.insert(msinfo.secondary_elem->interior_parent()->subdomain_id());
+            // Unlike for 2D, we always have a primary when building the mortar mesh so we don't
+            // have to check for null
+            _primary_ip_sub_ids.insert(msinfo.primary_elem->interior_parent()->subdomain_id());
           }
         }
         // End loop through primary element candidates
@@ -1553,8 +1572,8 @@ AutomaticMortarGeneration::projectSecondaryNodes()
 
 void
 AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
-    subdomain_id_type lower_dimensional_primary_subdomain_id,
-    subdomain_id_type lower_dimensional_secondary_subdomain_id)
+    SubdomainID lower_dimensional_primary_subdomain_id,
+    SubdomainID lower_dimensional_secondary_subdomain_id)
 {
   // Build the "subdomain" adaptor based KD Tree.
   NanoflannMeshSubdomainAdaptor<3> mesh_adaptor(_mesh, lower_dimensional_primary_subdomain_id);
@@ -1849,8 +1868,8 @@ AutomaticMortarGeneration::projectPrimaryNodes()
 
 void
 AutomaticMortarGeneration::projectPrimaryNodesSinglePair(
-    subdomain_id_type lower_dimensional_primary_subdomain_id,
-    subdomain_id_type lower_dimensional_secondary_subdomain_id)
+    SubdomainID lower_dimensional_primary_subdomain_id,
+    SubdomainID lower_dimensional_secondary_subdomain_id)
 {
   // Build a Nanoflann object on the lower-dimensional secondary elements of the Mesh.
   NanoflannMeshSubdomainAdaptor<3> mesh_adaptor(_mesh, lower_dimensional_secondary_subdomain_id);

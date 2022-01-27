@@ -266,11 +266,15 @@ inlet_velocity = 0.001
   []
   end_time = 1
 
-  nl_abs_tol = 1e-9
-  nl_max_its = 50
   line_search = 'none'
 
   automatic_scaling = true
+  compute_scaling_once = false
+  off_diagonals_in_auto_scaling = true
+[]
+
+[Debug]
+  show_var_residual_norms = true
 []
 
 [Outputs]

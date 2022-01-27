@@ -30,11 +30,13 @@
 #include <map>
 #include <list>
 #include <iterator>
+#include <deque>
 
 // Forward Declarations
 class InputParameters;
 class ExecFlagEnum;
 class MaterialProperties;
+class MaterialBase;
 
 namespace libMesh
 {
@@ -974,6 +976,12 @@ findPair(C & container, const M1 & first, const M2 & second)
  * @return Valid bounding box
  */
 BoundingBox buildBoundingBox(const Point & p1, const Point & p2);
+
+template <typename Consumers>
+std::deque<MaterialBase *>
+buildRequiredMaterials(const Consumers & mat_consumers,
+                       const std::vector<std::shared_ptr<MaterialBase>> & mats,
+                       const bool allow_stateful);
 
 } // MooseUtils namespace
 

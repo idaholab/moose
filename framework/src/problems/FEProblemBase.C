@@ -3285,19 +3285,13 @@ void
 FEProblemBase::reinitMaterialsFace(const SubdomainID blk_id,
                                    const THREAD_ID tid,
                                    const bool swap_stateful,
-                                   const bool execute_stateful,
-                                   const bool use_displaced_assembly)
+                                   const std::deque<MaterialBase *> * const reinit_mats)
 {
   if (hasActiveMaterialProperties(tid))
   {
-    mooseAssert(use_displaced_assembly ? static_cast<bool>(_displaced_problem) : true,
-                "If we are to use the displaced assembly, then we must have the displaced problem");
-    auto * const assembly =
-        use_displaced_assembly ? &_displaced_problem->assembly(tid) : _assembly[tid].get();
-    auto * const elem =
-        use_displaced_assembly ? _mesh.elemPtr(assembly->elem()->id()) : assembly->elem();
-    const auto side = assembly->side();
-    const auto n_points = assembly->qRuleFace()->n_points();
+    auto && elem = _assembly[tid]->elem();
+    unsigned int side = _assembly[tid]->side();
+    unsigned int n_points = _assembly[tid]->qRuleFace()->n_points();
 
     _bnd_material_data[tid]->resize(n_points);
 
@@ -3308,10 +3302,11 @@ FEProblemBase::reinitMaterialsFace(const SubdomainID blk_id,
       _bnd_material_data[tid]->reset(
           _discrete_materials[Moose::FACE_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
 
-    if (_materials[Moose::FACE_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
+    if (reinit_mats)
+      _bnd_material_data[tid]->reinit(*reinit_mats);
+    else if (_materials[Moose::FACE_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
       _bnd_material_data[tid]->reinit(
-          _materials[Moose::FACE_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid),
-          execute_stateful);
+          _materials[Moose::FACE_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
   }
 }
 
@@ -3319,30 +3314,22 @@ void
 FEProblemBase::reinitMaterialsNeighbor(const SubdomainID blk_id,
                                        const THREAD_ID tid,
                                        const bool swap_stateful,
-                                       const bool execute_stateful,
-                                       const bool use_displaced_assembly)
+                                       const std::deque<MaterialBase *> * const reinit_mats)
 {
   if (hasActiveMaterialProperties(tid))
   {
     // NOTE: this will not work with h-adaptivity
     // lindsayad: why not?
 
-    mooseAssert(use_displaced_assembly ? static_cast<bool>(_displaced_problem) : true,
-                "If we are to use the displaced assembly, then we must have the displaced problem");
-    auto * const assembly =
-        use_displaced_assembly ? &_displaced_problem->assembly(tid) : _assembly[tid].get();
-    auto * const elem =
-        use_displaced_assembly ? _mesh.elemPtr(assembly->elem()->id()) : assembly->elem();
-    auto * const neighbor =
-        use_displaced_assembly ? _mesh.elemPtr(assembly->neighbor()->id()) : assembly->neighbor();
-    const auto neighbor_side = neighbor->which_neighbor_am_i(elem);
+    const Elem * neighbor = _assembly[tid]->neighbor();
+    unsigned int neighbor_side = neighbor->which_neighbor_am_i(_assembly[tid]->elem());
 
     mooseAssert(neighbor, "neighbor should be non-null");
     mooseAssert(blk_id == neighbor->subdomain_id(),
                 "The provided blk_id " << blk_id << " and neighbor subdomain ID "
                                        << neighbor->subdomain_id() << " do not match.");
 
-    const auto n_points = assembly->qRuleFace()->n_points();
+    unsigned int n_points = _assembly[tid]->qRuleFace()->n_points();
     _neighbor_material_data[tid]->resize(n_points);
 
     // Only swap if requested
@@ -3353,10 +3340,11 @@ FEProblemBase::reinitMaterialsNeighbor(const SubdomainID blk_id,
       _neighbor_material_data[tid]->reset(
           _discrete_materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
 
-    if (_materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
+    if (reinit_mats)
+      _neighbor_material_data[tid]->reinit(*reinit_mats);
+    else if (_materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
       _neighbor_material_data[tid]->reinit(
-          _materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid),
-          execute_stateful);
+          _materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
   }
 }
 
@@ -3364,20 +3352,13 @@ void
 FEProblemBase::reinitMaterialsBoundary(const BoundaryID boundary_id,
                                        const THREAD_ID tid,
                                        const bool swap_stateful,
-                                       const bool execute_stateful,
-                                       const bool use_displaced_assembly)
+                                       const std::deque<MaterialBase *> * const reinit_mats)
 {
   if (hasActiveMaterialProperties(tid))
   {
-    mooseAssert(use_displaced_assembly ? static_cast<bool>(_displaced_problem) : true,
-                "If we are to use the displaced assembly, then we must have the displaced problem");
-    auto * const assembly =
-        use_displaced_assembly ? &_displaced_problem->assembly(tid) : _assembly[tid].get();
-    auto * const elem =
-        use_displaced_assembly ? _mesh.elemPtr(assembly->elem()->id()) : assembly->elem();
-
-    const auto side = assembly->side();
-    const auto n_points = assembly->qRuleFace()->n_points();
+    auto && elem = _assembly[tid]->elem();
+    unsigned int side = _assembly[tid]->side();
+    unsigned int n_points = _assembly[tid]->qRuleFace()->n_points();
     _bnd_material_data[tid]->resize(n_points);
 
     if (swap_stateful && !_bnd_material_data[tid]->isSwapped())
@@ -3387,9 +3368,10 @@ FEProblemBase::reinitMaterialsBoundary(const BoundaryID boundary_id,
       _bnd_material_data[tid]->reset(
           _discrete_materials.getActiveBoundaryObjects(boundary_id, tid));
 
-    if (_materials.hasActiveBoundaryObjects(boundary_id, tid))
-      _bnd_material_data[tid]->reinit(_materials.getActiveBoundaryObjects(boundary_id, tid),
-                                      execute_stateful);
+    if (reinit_mats)
+      _bnd_material_data[tid]->reinit(*reinit_mats);
+    else if (_materials.hasActiveBoundaryObjects(boundary_id, tid))
+      _bnd_material_data[tid]->reinit(_materials.getActiveBoundaryObjects(boundary_id, tid));
   }
 }
 
