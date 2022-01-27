@@ -23,7 +23,8 @@ WallFunctionWallShearStressAux::validParams()
   params.addCoupledVar("w", "The velocity in the z direction.");
   params.addRequiredParam<MooseFunctorName>("rho", "fluid density");
   params.addRequiredParam<MooseFunctorName>("mu", "Dynamic viscosity");
-  params.addRequiredParam<std::vector<BoundaryName>>("walls", "Boundaries that correspond to solid walls");
+  params.addRequiredParam<std::vector<BoundaryName>>("walls",
+                                                     "Boundaries that correspond to solid walls");
   return params;
 }
 

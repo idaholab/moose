@@ -31,9 +31,10 @@ ElementExtremeFunctorValueTempl<is_ad>::validParams()
                              "returns the maximum value. 'min' returns "
                              "the minimum value.");
 
-  params.addRequiredParam<MooseFunctorName>("functor",
-  "The name of the functor for which to find the extrema");
-  params.addParam<MooseFunctorName>("proxy_functor",
+  params.addRequiredParam<MooseFunctorName>(
+      "functor", "The name of the functor for which to find the extrema");
+  params.addParam<MooseFunctorName>(
+      "proxy_functor",
       "The name of the functor to use to identify the location at which "
       "the functor value should be taken; if not provided, this defaults "
       "to the 'functor' parameter.");
@@ -45,7 +46,8 @@ ElementExtremeFunctorValueTempl<is_ad>::validParams()
 }
 
 template <bool is_ad>
-ElementExtremeFunctorValueTempl<is_ad>::ElementExtremeFunctorValueTempl(const InputParameters & parameters)
+ElementExtremeFunctorValueTempl<is_ad>::ElementExtremeFunctorValueTempl(
+    const InputParameters & parameters)
   : ElementPostprocessor(parameters),
     _type((ExtremeType)(int)parameters.get<MooseEnum>("value_type")),
     _functor(getFunctor<GenericReal<is_ad>>("functor")),

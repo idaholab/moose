@@ -34,7 +34,7 @@ protected:
   const PostprocessorValue * const _rho_max;
 
   /// Average density
-  const PostprocessorValue * const _rho_ave;
+  const PostprocessorValue & _rho_ave;
 
   /// Thermal expansion coefficient
   const PostprocessorValue * const _beta;
@@ -53,6 +53,9 @@ protected:
 
   /// Average thermal conductivity
   const PostprocessorValue & _k;
+
+  /// Average specific thermal capacity
+  const PostprocessorValue & _cp;
 
   /// Magnitude of gravity in the direction of interest
   const Real _gravity;

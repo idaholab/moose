@@ -1,8 +1,8 @@
 mu = 1
-rho = 1
+rho = 1.1
 beta = 1e-4
 k = .01
-cp = 1
+cp = 1000
 vel = 'velocity'
 velocity_interp_method = 'rc'
 advected_interp_method = 'average'
@@ -223,9 +223,11 @@ l = 4
     type = RayleighNumber
     rho_min = rho_min
     rho_max = rho_max
+    rho_ave = ${rho}
     l = ${l}
     mu_ave = ${mu}
     k_ave = ${k}
+    cp_ave = ${cp}
     gravity_magnitude = 9.81
   []
   [rayleigh_2]
@@ -237,6 +239,7 @@ l = 4
     l = ${l}
     mu_ave = ${mu}
     k_ave = ${k}
+    cp_ave = ${cp}
     gravity_magnitude = 9.81
   []
 
