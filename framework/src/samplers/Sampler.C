@@ -106,7 +106,7 @@ Sampler::init()
     _generator.seed(i, seed_generator.randl(0));
 
   // Save the initial state
-  _generator.saveState();
+  saveGeneratorState();
 
   // Mark class as initialized, which locks out certain methods
   _initialized = true;
@@ -186,10 +186,10 @@ Sampler::execute()
 
   if (_has_executed)
   {
-    _generator.restoreState();
+    restoreGeneratorState();
     advanceGeneratorsInternal(_n_rows * _n_cols);
   }
-  _generator.saveState();
+  saveGeneratorState();
   executeTearDown();
   _has_executed = true;
 }
@@ -210,7 +210,7 @@ Sampler::getGlobalSamples()
                ".");
 
   _next_local_row_requires_state_restore = true;
-  _generator.restoreState();
+  restoreGeneratorState();
   sampleSetUp(SampleMode::GLOBAL);
   DenseMatrix<Real> output(_n_rows, _n_cols);
   computeSampleMatrix(output);
@@ -238,7 +238,7 @@ Sampler::getLocalSamples()
     return output;
 
   _next_local_row_requires_state_restore = true;
-  _generator.restoreState();
+  restoreGeneratorState();
   sampleSetUp(SampleMode::LOCAL);
   computeLocalSampleMatrix(output);
   sampleTearDown(SampleMode::LOCAL);
@@ -252,7 +252,7 @@ Sampler::getNextLocalRow()
 
   if (_next_local_row_requires_state_restore)
   {
-    _generator.restoreState();
+    restoreGeneratorState();
     sampleSetUp(SampleMode::LOCAL);
     advanceGeneratorsInternal(_next_local_row * _n_cols);
     _next_local_row_requires_state_restore = false;
