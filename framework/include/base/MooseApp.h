@@ -1215,6 +1215,21 @@ private:
    */
   PerfGraph & createRecoverablePerfGraph();
 
+  /**
+   * Handles the copy_inputs input parameter logic: Checks to see whether the passed argument is
+   * valid (a readable installed directory) and recursively copies those files into a read/writable
+   * location for the user.
+   * @return a Boolean value used to indicate whether the application should exit early
+   */
+  bool copyInputs();
+
+  /**
+   * Handles the run input parameter logic: Checks to see whether a directory exists in user space
+   * and launches the TestHarness to process the given directory.
+   * @return a Boolean value used to indicate whether the application should exit early
+   */
+  bool runInputs();
+
   /// General storage for custom RestartableData that can be added to from outside applications
   std::unordered_map<RestartableDataMapName, std::pair<RestartableDataMap, std::string>>
       _restartable_meta_data;

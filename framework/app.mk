@@ -19,6 +19,7 @@ $APPLICATION_NAME$(STACK) := $(APPLICATION_NAME)
 $DEPEND_MODULES$(STACK) := $(DEPEND_MODULES)
 $GEN_REVISION$(STACK) := $(GEN_REVISION)
 $BUILD_EXEC$(STACK) := $(BUILD_EXEC)
+$INSTALLABLE_DIRS$(STACK) := $(INSTALLABLE_DIRS)
 
 -include $(APPLICATION_DIR)/$(APPLICATION_NAME).mk
 
@@ -35,6 +36,7 @@ APPLICATION_NAME := $($APPLICATION_NAME$(STACK))
 DEPEND_MODULES := $($DEPEND_MODULES$(STACK))
 GEN_REVISION := $($GEN_REVISION$(STACK))
 BUILD_EXEC := $($BUILD_EXEC$(STACK))
+INSTALLABLE_DIRS := $($INSTALLABLE_DIRS$(STACK))
 STACK := $(basename $(STACK))
 
 ifneq ($(SUFFIX),)
@@ -414,11 +416,6 @@ docs_dir := $(APPLICATION_DIR)/doc
 bindst = $(bin_install_dir)/$(notdir $(app_EXEC))
 binlink = $(tests_install_dir)/$(notdir $(app_EXEC))
 
-test_dir := $(APPLICATION_DIR)
-ifneq ($(wildcard $(APPLICATION_DIR)/test/.),)
-	test_dir := $(APPLICATION_DIR)/test
-endif
-
 lib_install_targets = $(foreach lib,$(applibs),$(dir $(lib))install_lib_$(notdir $(lib)))
 ifneq ($(app_test_LIB),)
 	lib_install_targets += $(dir $(app_test_LIB))install_lib_$(notdir $(app_test_LIB))
@@ -427,19 +424,22 @@ endif
 install_libs: $(lib_install_targets)
 
 install_$(APPLICATION_NAME)_tests: all
-	@echo "Installing tests"
-	@rm -rf $(tests_install_dir)
-	@mkdir -p $(tests_install_dir)
-	@cp -R $(test_dir)/tests $(tests_install_dir)/
-ifneq (,$(wildcard $(APPLICATION_DIR)/testroot))
-	@cp -f $(APPLICATION_DIR)/testroot $(tests_install_dir)/
-else
-ifneq (,$(wildcard $(test_dir)/testroot))
-	@cp -f $(test_dir)/testroot $(tests_install_dir)/
-else
-	@echo "app_name = $(APPLICATION_NAME)" > $(tests_install_dir)/testroot
-endif
-endif
+	@echo "Installing the following directories: $(INSTALLABLE_DIRS)"
+	@for dir in $(INSTALLABLE_DIRS); \
+	do \
+		base_dir=$$(basename $$dir); \
+		rm -rf $(share_install_dir)/$$base_dir; \
+		cp -R $(APPLICATION_DIR)/$$dir $(share_install_dir)/$$base_dir; \
+		if [ -e $(APPLICATION_DIR)/testroot ]; \
+		then \
+			cp -f $(APPLICATION_DIR)/testroot $(share_install_dir)/$$base_dir/; \
+		elif [ -e $$dir/testroot ]; \
+		then \
+			cp -f $$dir/testroot $(share_install_dir)/$$base_dir/; \
+		else \
+			echo "app_name = $(APPLICATION_NAME)" > $(share_install_dir)/$$base_dir/testroot; \
+		fi; \
+	done
 
 install_lib_%: % all
 	@echo "Installing $<"
