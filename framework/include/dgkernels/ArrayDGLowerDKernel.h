@@ -87,11 +87,8 @@ protected:
   /**
    * Computes one of the five pieces of off-diagonal Jacobian involving lower-d at quadrature points
    */
-  virtual RealEigenMatrix computeLowerDQpOffDiagJacobian(Moose::ConstraintJacobianType,
-                                                         const MooseVariableFEBase & jvar)
-  {
-    return RealEigenMatrix::Zero(_var.count(), jvar.count());
-  }
+  virtual RealEigenMatrix computeLowerDQpOffDiagJacobian(Moose::ConstraintJacobianType type,
+                                                         const MooseVariableFEBase & jvar);
 
   /**
    * Put necessary evaluations depending on qp but independent on test functions here

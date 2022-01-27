@@ -351,6 +351,15 @@
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPolyLineSink.md'
     issues = '#7992 #8139'
   [../]
+  [./pls02reporter]
+    type = 'CSVDiff'
+    input = 'pls02reporter.i'
+    csvdiff = 'pls02reporter_out.csv'
+    threading = '!pthreads'
+    requirement = 'PorousFlowPolyLineSink shall extract fluid at the specified rate getting the coordinates from a reporter'
+    design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPolyLineSink.md'
+    issues = '#20018'
+  [../]
 
   [./bh02]
     type = 'CSVDiff'
@@ -407,6 +416,15 @@
     requirement = 'PorousFlowPeacemanBorehole shall extract fluid at the specified rate in a cylindrical model'
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
     issues = '#7992 #8139'
+  [../]
+  [./bh02reporter]
+    type = 'CSVDiff'
+    input = 'bh02reporter.i'
+    csvdiff = 'bh02reporter_out.csv'
+    threading = '!pthreads'
+    requirement = 'PorousFlowPeacemanBorehole shall extract fluid at the specified rate in a fully-saturated system using reporter for input'
+    design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPeacemanBorehole.md'
+    issues = '#20018'
   [../]
   [./injection_production]
     type = 'Exodiff'

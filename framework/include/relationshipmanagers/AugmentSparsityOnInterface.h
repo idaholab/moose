@@ -75,13 +75,6 @@ public:
 protected:
   virtual void internalInitWithMesh(const MeshBase &) override;
 
-  /**
-   * The Mesh we're calculating on
-   */
-  const AutomaticMortarGeneration * _amg;
-
-  bool _has_attached_amg;
-
   BoundaryName _primary_boundary_name;
   BoundaryName _secondary_boundary_name;
   SubdomainName _primary_subdomain_name;
@@ -90,4 +83,8 @@ protected:
   /// Whether this relationship manager is called when coupling functors are called when building
   /// the matrix sparsity pattern
   const bool _is_coupling_functor;
+
+  /// Whether to ghost point neighbors of secondary lower subdomain elements and consequently their
+  /// cross mortar interface counterparts
+  const bool _ghost_point_neighbors;
 };

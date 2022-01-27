@@ -1,29 +1,32 @@
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
+[]
+
 [XFEM]
   qrule = volfrac
   output_cut_plane = true
   use_crack_tip_enrichment = true
   crack_front_definition = crack_front
   enrichment_displacements = 'enrich1_x enrich2_x enrich3_x enrich4_x enrich1_y enrich2_y enrich3_y enrich4_y enrich1_z enrich2_z enrich3_z enrich4_z'
-  displacements = 'disp_x disp_y disp_z'
   cut_off_boundary = all
   cut_off_radius = 0.3
 []
 
 [UserObjects]
-  [./circle_cut_uo]
+  [circle_cut_uo]
     type = CircleCutUserObject
     cut_data = '0 0 0
                 0.5 0 0
                 0 0.5 0'
-  [../]
-  [./crack_front]
+  []
+  [crack_front]
     type = CrackFrontDefinition
     crack_direction_method = CurvedCrackFront
     crack_front_points = '0.500000000000000                   0                   0
                           0.000000000000000   0.500000000000000                   0
                          -0.500000000000000   0.000000000000000                   0
                          -0.000000000000000  -0.500000000000000                   0'
-  [../]
+  []
 []
 
 [Mesh]
@@ -41,134 +44,131 @@
     zmax = 0.75
     elem_type = HEX8
   []
-  [./all_node]
+  [all_node]
     type = BoundingBoxNodeSetGenerator
     input = gen
     new_boundary = 'all'
     top_right = '1 1 1'
     bottom_left = '-1 -1 -1'
-  [../]
+  []
 []
 
 [Variables]
-  [./disp_x]
+  [disp_x]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./disp_y]
+  []
+  [disp_y]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./disp_z]
+  []
+  [disp_z]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./stress_xx]
+  [stress_xx]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./stress_zz]
+  []
+  [stress_zz]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./SED]
+  []
+  [SED]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./stress_xx]
+  [stress_xx]
   type = RankTwoAux
   rank_two_tensor = stress
   variable = stress_xx
   index_i = 0
   index_j = 0
   execute_on = timestep_end
-  [../]
-  [./stress_yy]
+  []
+  [stress_yy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yy
     index_i = 1
     index_j = 1
     execute_on = timestep_end
-  [../]
-  [./stress_zz]
+  []
+  [stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_zz
     index_i = 2
     index_j = 2
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [Kernels]
-  [./TensorMechanics]
-    displacements = 'disp_x disp_y disp_z'
+  [TensorMechanics]
     use_displaced_mesh = false
     volumetric_locking_correction = false
-  [../]
+  []
 []
 
 [BCs]
-  [./top_z]
+  [top_z]
     type = Pressure
     variable = disp_z
     boundary = front
-    component = 2
     factor = -1
-  [../]
-  [./bottom_x]
+  []
+  [bottom_x]
     type = DirichletBC
     boundary = back
     variable = disp_x
     value = 0.0
-  [../]
-  [./bottom_y]
+  []
+  [bottom_y]
     type = DirichletBC
     boundary = back
     variable = disp_y
     value = 0.0
-  [../]
-  [./bottom_z]
+  []
+  [bottom_z]
     type = DirichletBC
     boundary = back
     variable = disp_z
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 1e6
     poissons_ratio = 0.3
-  [../]
-  [./strain]
+  []
+  [strain]
     type = ComputeCrackTipEnrichmentSmallStrain
-    displacements = 'disp_x disp_y disp_z'
     crack_front_definition = crack_front
     enrichment_displacements = 'enrich1_x enrich2_x enrich3_x enrich4_x enrich1_y enrich2_y enrich3_y enrich4_y enrich1_z enrich2_z enrich3_z enrich4_z'
-  [../]
-  [./stress]
+  []
+  [stress]
     type = ComputeLinearElasticStress
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -180,10 +180,10 @@
 
   line_search = 'none'
 
-  [./Quadrature]
+  [Quadrature]
     type = GAUSS
     order = SECOND
-  [../]
+  []
 
   # controls for linear iterations
   l_max_its = 10
@@ -202,8 +202,8 @@
 
 [Outputs]
   exodus = true
-  [./console]
+  [console]
     type = Console
     output_linear = true
-  [../]
+  []
 []

@@ -163,11 +163,12 @@
     value = 0.0
   []
 
-  [Pressure]
-    [Side1]
-      boundary = front
-      function = pull
-    []
+  [pressure]
+    type = ADPressure
+    boundary = front
+    function = pull
+    variable = disp_z
+    component = 2
   []
 []
 

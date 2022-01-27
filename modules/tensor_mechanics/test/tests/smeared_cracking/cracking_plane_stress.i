@@ -82,7 +82,6 @@
   [./front]
     type = Pressure
     variable = disp_z
-    component = 2
     boundary = 6
     function = pressure
     factor   = 1.0

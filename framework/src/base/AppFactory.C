@@ -10,6 +10,7 @@
 #include "AppFactory.h"
 #include "CommandLine.h"
 #include "InputParameters.h"
+#include "MooseApp.h"
 
 AppFactory AppFactory::_instance = AppFactory();
 
@@ -32,12 +33,19 @@ AppFactory::getValidParams(const std::string & name)
 }
 
 MooseAppPtr
-AppFactory::createAppShared(const std::string & app_type,
+AppFactory::createAppShared(const std::string & default_app_type,
                             int argc,
                             char ** argv,
                             MPI_Comm comm_world_in)
 {
   auto command_line = std::make_shared<CommandLine>(argc, argv);
+  auto which_app_param = emptyInputParameters();
+  MooseApp::addAppParam(which_app_param);
+  command_line->addCommandLineOptionsFromParams(which_app_param);
+  std::string app_type;
+  if (!command_line->search("app_to_run", app_type))
+    app_type = default_app_type;
+
   auto app_params = AppFactory::instance().getValidParams(app_type);
 
   app_params.set<int>("_argc") = argc;

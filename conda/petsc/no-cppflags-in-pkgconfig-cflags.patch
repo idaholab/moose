@@ -1,0 +1,13 @@
+diff --git a/config/PETSc/Configure.py b/config/PETSc/Configure.py
+index 64738da03e..ecc4a7d937 100644
+--- a/config/PETSc/Configure.py
++++ b/config/PETSc/Configure.py
+@@ -186,7 +186,7 @@ class Configure(config.base.Configure):
+       fd.write('Name: PETSc\n')
+       fd.write('Description: Library to solve ODEs and algebraic equations\n')
+       fd.write('Version: %s\n' % self.petscdir.version)
+-      fd.write('Cflags: ' + ' '.join([self.setCompilers.CPPFLAGS] + cflags_inc) + '\n')
++      fd.write('Cflags: ' + ' '.join(cflags_inc) + '\n')
+       fd.write('Libs: '+self.libraries.toStringNoDupes(['-L${libdir}', self.petsclib], with_rpath=False)+'\n')
+       # Remove RPATH flags from library list.  User can add them using
+       # pkg-config --variable=ldflag_rpath and pkg-config --libs-only-L

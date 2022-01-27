@@ -22,7 +22,7 @@ registerMooseObject("TensorMechanicsApp", ADComputeIsotropicElasticityTensorShel
 InputParameters
 ADComputeIsotropicElasticityTensorShell::validParams()
 {
-  InputParameters params = ADMaterial::validParams();
+  InputParameters params = Material::validParams();
   params.addClassDescription("Compute a plane stress isotropic elasticity tensor.");
   params.addRequiredRangeCheckedParam<Real>("poissons_ratio",
                                             "poissons_ratio >= -1.0 & poissons_ratio < 0.5",
@@ -36,7 +36,7 @@ ADComputeIsotropicElasticityTensorShell::validParams()
 
 ADComputeIsotropicElasticityTensorShell::ADComputeIsotropicElasticityTensorShell(
     const InputParameters & parameters)
-  : ADMaterial(parameters),
+  : Material(parameters),
     _poissons_ratio(getParam<Real>("poissons_ratio")),
     _youngs_modulus(getParam<Real>("youngs_modulus"))
 {

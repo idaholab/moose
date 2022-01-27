@@ -113,9 +113,7 @@ protected:
   /**
    * Output information for a single iteration step to build the convergence history of the model
    * @param iter_output            Output stream
-   * @param it                     Current iteration count
    * @param effective_trial_stress Effective trial stress
-   * @param scalar                 Inelastic strain increment magnitude being solved for
    * @param residual               Current value of the residual
    * @param reference              Current value of the reference quantity
    */

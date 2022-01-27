@@ -91,4 +91,10 @@
     requirement = "MOOSE python utilities shall include tools for reading PerfGraphReporter data."
     issues = "#16256"
   []
+  [csvdiff]
+    type = PythonUnitTest
+    input = test_csvdiff.py
+    requirement = "MOOSE python utilities shall include a tool for reading compared csv files."
+    issues = '#20032'
+  []
 []

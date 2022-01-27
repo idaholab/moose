@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#20065'
+  design = 'auxkernels/ForcingFunctionAux.md'
+  [./forcing_function_aux]
+    type = 'Exodiff'
+    input = 'forcing_function_aux.i'
+    exodiff = 'forcing_function_aux_out.e'
+    requirement = "MOOSE shall include the ability to increase the value of an AuxVariable from the previous time step using a forcing function."
+  [../]
+[]

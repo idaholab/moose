@@ -46,25 +46,25 @@
 
 [BCs]
   [./symmy]
-    type = DirichletBC
+    type = ADDirichletBC
     variable = disp_y
     boundary = bottom
     value = 0
   [../]
   [./symmx]
-    type = DirichletBC
+    type = ADDirichletBC
     variable = disp_x
     boundary = left
     value = 0
   [../]
   [./symmz]
-    type = DirichletBC
+    type = ADDirichletBC
     variable = disp_z
     boundary = back
     value = 0
   [../]
   [./tdisp]
-    type = DirichletBC
+    type = ADDirichletBC
     variable = disp_z
     boundary = front
     value = 0.1

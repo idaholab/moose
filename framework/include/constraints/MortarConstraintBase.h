@@ -14,7 +14,7 @@
 #include "NeighborCoupleableMooseVariableDependencyIntermediateInterface.h"
 #include "MooseMesh.h"
 #include "MooseVariableInterface.h"
-#include "MortarInterface.h"
+#include "MortarConsumerInterface.h"
 #include "TwoMaterialPropertyInterface.h"
 
 // Forward Declarations
@@ -41,7 +41,7 @@ class QBase;
  */
 class MortarConstraintBase : public Constraint,
                              public NeighborCoupleableMooseVariableDependencyIntermediateInterface,
-                             public MortarInterface,
+                             public MortarConsumerInterface,
                              public TwoMaterialPropertyInterface,
                              public MooseVariableInterface<Real>
 {
@@ -79,18 +79,6 @@ public:
    * Whether to use dual mortar
    */
   bool useDual() const { return _use_dual; }
-
-  /**
-   * Set the normals vector
-   */
-  void setNormals(const std::vector<Point> & normals) { _normals = normals; }
-
-  /**
-   * Whether to interpolate the nodal normals (e.g. classic idea of evaluating field at quadrature
-   * points). If this is set to false, then non-interpolated nodal normals will be used, and then
-   * the _normals member should be indexed with _i instead of _qp
-   */
-  bool interpolateNormals() const { return _interpolate_normals; }
 
   /**
    * This method will be called after the loop over the mortar segment mesh
@@ -139,23 +127,14 @@ protected:
   /// Whether to use the dual motar approach
   const bool _use_dual;
 
-  /// the normals
-  std::vector<Point> _normals;
-
   /// the normals along the primary face
   const MooseArray<Point> & _normals_primary;
 
   /// Tangent vectors on the secondary faces (libmesh)
   const MooseArray<std::vector<Point>> & _tangents;
 
-  /// The element Jacobian times weights
-  const std::vector<Real> & _JxW_msm;
-
   /// Member for handling change of coordinate systems (xyz, rz, spherical)
   const MooseArray<Real> & _coord;
-
-  /// The quadrature rule
-  const QBase * const & _qrule_msm;
 
   /// The quadrature points in physical space
   const std::vector<Point> & _q_point;
@@ -175,20 +154,6 @@ protected:
   /// The shape function gradients corresponding to the primary interior primal variable
   const VariableTestGradient & _grad_test_primary;
 
-  /// The locations of the quadrature points on the interior secondary elements
-  const MooseArray<Point> & _phys_points_secondary;
-
-  /// The locations of the quadrature points on the interior primary elements
-  const MooseArray<Point> & _phys_points_primary;
-
-  /// The secondary face lower dimensional element (not the mortar element!). The mortar element
-  /// lives on the secondary side of the mortar interface and *may* correspond to \p
-  /// _lower_secondary_elem under the very specific circumstance that the nodes on the primary side
-  /// of the mortar interface exactly project onto the secondary side of the mortar interface. In
-  /// general projection of primary nodes will split the face elements on the secondary side of the
-  /// interface. It is these split elements that are the mortar segment mesh elements
-  Elem const * const & _lower_secondary_elem;
-
   /// The primary face lower dimensional element (not the mortar element!). The mortar element
   /// lives on the secondary side of the mortar interface and *may* correspond to \p
   /// _lower_secondary_elem under the very specific circumstance that the nodes on the primary side
@@ -199,7 +164,4 @@ protected:
 
   /// Whether this object operates on the displaced mesh
   const bool _displaced;
-
-  /// Whether to interpolate the nodal normals
-  const bool _interpolate_normals;
 };

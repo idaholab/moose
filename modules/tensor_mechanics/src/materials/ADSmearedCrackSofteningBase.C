@@ -24,6 +24,6 @@ ADSmearedCrackSofteningBase::validParams()
 }
 
 ADSmearedCrackSofteningBase::ADSmearedCrackSofteningBase(const InputParameters & parameters)
-  : ADMaterial(parameters)
+  : Material(parameters)
 {
 }

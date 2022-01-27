@@ -1,5 +1,5 @@
 # Do not use jinja templating (A physical change to this file is required to trigger a build)
-{% set build = 3 %}
+{% set build = 5 %}
 {% set strbuild = "build_" + build|string %}
 {% set version = "3.15.1" %}
 {% set sha256 = "d676eb67e79314d6cca6422d7c477d2b192c830b89d5edc6b46934f7453bcfc0" %}
@@ -13,6 +13,7 @@ source:
   - path: ../../scripts/configure_petsc.sh
   - patches:
       - arm64_framework.patch           # [arm64]
+      - no-cppflags-in-pkgconfig-cflags.patch
 
 build:
   number: {{ build }}

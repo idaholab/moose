@@ -11,8 +11,12 @@
 #include "SubProblem.h"
 #include "MooseMesh.h"
 #include "MooseError.h"
+#include "MortarExecutorInterface.h"
 
-MortarData::MortarData(const libMesh::ParallelObject & other) : libMesh::ParallelObject(other) {}
+MortarData::MortarData(const libMesh::ParallelObject & other)
+  : libMesh::ParallelObject(other), _mortar_initd(false)
+{
+}
 
 void
 MortarData::createMortarInterface(const std::pair<BoundaryID, BoundaryID> & boundary_key,
@@ -165,6 +169,12 @@ MortarData::update()
     update(mortar_pair.second);
   for (auto & mortar_pair : _displaced_mortar_interfaces)
     update(mortar_pair.second);
+
+  if (!_mortar_initd)
+    for (auto * const mei_obj : _mei_objs)
+      mei_obj->mortarSetup();
+
+  _mortar_initd = true;
 }
 
 void
@@ -212,4 +222,16 @@ MortarData::getHigherDimSubdomainIDs(SubdomainID lower_d_subdomain_id) const
     mooseError(
         "The lower dimensional ID ", lower_d_subdomain_id, " has not been added to MortarData yet");
   return _lower_d_sub_to_higher_d_subs.at(lower_d_subdomain_id);
+}
+
+void
+MortarData::notifyWhenMortarSetup(MortarExecutorInterface * const mei_obj)
+{
+  _mei_objs.insert(mei_obj);
+}
+
+void
+MortarData::dontNotifyWhenMortarSetup(MortarExecutorInterface * const mei_obj)
+{
+  _mei_objs.erase(mei_obj);
 }

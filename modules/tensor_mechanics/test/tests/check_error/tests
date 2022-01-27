@@ -39,12 +39,4 @@
     issues = "#9438"
     requirement = "The system shall generate an error if a non-positive shear modulus is supplied for an isotropic elasticity tensor"
   [../]
-  [./pressure_component]
-    type = 'RunException'
-    input = 'pressure_component.i'
-    expect_err = "Invalid component given for fred: 123456789."
-    design = "/Pressure.md"
-    issues = "#4781"
-    requirement = "The system shall generate an error if a component outside the accepted range is supplied for the Pressure boundary condition" 
-  [../]
 []

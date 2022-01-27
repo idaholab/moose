@@ -120,7 +120,6 @@
     type = Pressure
     variable = disp_r
     boundary = outer
-    component = 0
     function = '200000*t'
   [../]
 
@@ -128,7 +127,6 @@
     type = Pressure
     variable = disp_z
     boundary = outer
-    component = 1
     function = '200000*t'
   [../]
 
@@ -136,7 +134,6 @@
     type = Pressure
     variable = disp_r
     boundary = inner
-    component = 0
     function = '100000*t'
   [../]
 
@@ -144,7 +141,6 @@
     type = Pressure
     variable = disp_z
     boundary = inner
-    component = 1
     function = '100000*t'
   [../]
 []

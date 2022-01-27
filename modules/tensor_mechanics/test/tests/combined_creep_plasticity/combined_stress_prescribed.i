@@ -78,7 +78,6 @@
   [./top_pressure]
     type = Pressure
     variable = disp_y
-    component = 1
     boundary = top
     function = pressure
   [../]

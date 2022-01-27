@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "ADMaterial.h"
+#include "Material.h"
 #include "Function.h"
 #include "RotationTensor.h"
 
@@ -17,7 +17,7 @@
  * This class defines a Hill tensor material object with a given base name.
  */
 
-class HillConstants : public ADMaterial
+class HillConstants : public Material
 {
 public:
   static InputParameters validParams();

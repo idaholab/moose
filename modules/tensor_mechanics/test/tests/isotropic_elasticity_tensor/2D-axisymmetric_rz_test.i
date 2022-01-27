@@ -70,7 +70,6 @@
     type = Pressure
     variable = disp_r
     boundary = right
-    component = 0
     factor = 200000
   [../]
 []

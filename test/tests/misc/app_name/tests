@@ -9,4 +9,13 @@
     design = MooseApp.md
     requirement = "The compiled application shall be capable of returning the name used for registering objects."
   [../]
+  [specified_app]
+    type = 'Exodiff'
+    input = 'simple-diffusion.i'
+    exodiff = 'simple-diffusion_out.e'
+    issues = '#20062'
+    design = 'MooseApp.md'
+    cli_args = '--app MooseTestApp'
+    requirement = 'The system shall be able to run a specific application by passing a command line option.'
+  []
 []

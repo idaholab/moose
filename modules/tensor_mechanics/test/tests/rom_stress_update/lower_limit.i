@@ -78,21 +78,18 @@ disp = 1.0053264195e6
   [./pressure_x]
     type = Pressure
     variable = disp_x
-    component = 0
     boundary = right
     factor = ${disp}
   [../]
   [./pressure_y]
     type = Pressure
     variable = disp_y
-    component = 1
     boundary = top
     factor = -${disp}
   [../]
   [./pressure_z]
     type = Pressure
     variable = disp_z
-    component = 2
     boundary = front
     factor = -${disp}
   [../]

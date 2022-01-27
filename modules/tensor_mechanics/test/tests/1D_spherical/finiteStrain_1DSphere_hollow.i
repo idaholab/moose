@@ -64,7 +64,6 @@
     type = Pressure
     boundary = right
     variable = disp_r
-    component = 0
     factor = 2
   []
 []

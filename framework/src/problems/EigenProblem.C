@@ -33,7 +33,7 @@ InputParameters
 EigenProblem::validParams()
 {
   InputParameters params = FEProblemBase::validParams();
-  params.addClassDescription("Problem object for solving Eigen value problem.");
+  params.addClassDescription("Problem object for solving an eigenvalue problem.");
   params.addParam<bool>("negative_sign_eigen_kernel",
                         true,
                         "Whether or not to use a negative sign for eigenvalue kernels. "
@@ -43,7 +43,7 @@ EigenProblem::validParams()
   params.addParam<unsigned int>(
       "active_eigen_index",
       0,
-      "Which eigen vector is used to compute residual and also associateed to nonlinear variable");
+      "Which eigenvector is used to compute residual and also associated to nonlinear variable");
 
   return params;
 }
@@ -58,6 +58,9 @@ EigenProblem::EigenProblem(const InputParameters & parameters)
     _active_eigen_index(getParam<unsigned int>("active_eigen_index")),
     _do_free_power_iteration(false),
     _output_inverse_eigenvalue(false),
+    _on_linear_solver(false),
+    _matrices_formed(false),
+    _constant_matrices(false),
     _has_normalization(false),
     _normal_factor(1.0),
     _first_solve(declareRestartableData<bool>("first_solve", true))
@@ -405,7 +408,7 @@ EigenProblem::preScaleEigenVector()
   if (_active_eigen_index < _nl_eigen->getNumConvergedEigenvalues())
     eig = _nl_eigen->getConvergedEigenvalue(_active_eigen_index);
 
-  // Eigenvaluve magnitude
+  // Eigenvalue magnitude
   Real v = std::sqrt(eig.first * eig.first + eig.second * eig.second);
   // Scaling factor
   Real factor = 1 / v / _nl_eigen->residualVectorBX().l2_norm();
@@ -568,6 +571,9 @@ EigenProblem::solve()
   // sync solutions in displaced problem
   if (_displaced_problem)
     _displaced_problem->syncSolutions();
+
+  // Reset the matrix flag, so that we reform matrix in next picard iteration
+  _matrices_formed = false;
 }
 
 void
@@ -583,7 +589,8 @@ EigenProblem::init()
 {
 #if !PETSC_RELEASE_LESS_THAN(3, 13, 0)
   // If matrix_free=true, this tells Libmesh to use shell matrices
-  _nl_eigen->sys().use_shell_matrices(solverParams()._eigen_matrix_free);
+  _nl_eigen->sys().use_shell_matrices(solverParams()._eigen_matrix_free &&
+                                      !solverParams()._eigen_matrix_vector_mult);
   // We need to tell libMesh if we are using a shell preconditioning matrix
   _nl_eigen->sys().use_shell_precond_matrix(solverParams()._precond_matrix_free);
 #endif
@@ -603,7 +610,8 @@ EigenProblem::isNonlinearEigenvalueSolver() const
   return solverParams()._eigen_solve_type == Moose::EST_NONLINEAR_POWER ||
          solverParams()._eigen_solve_type == Moose::EST_NEWTON ||
          solverParams()._eigen_solve_type == Moose::EST_PJFNK ||
-         solverParams()._eigen_solve_type == Moose::EST_JFNK;
+         solverParams()._eigen_solve_type == Moose::EST_JFNK ||
+         solverParams()._eigen_solve_type == Moose::EST_PJFNKMO;
 }
 
 void

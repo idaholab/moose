@@ -73,21 +73,6 @@ MaterialData::swap(const Elem & elem, unsigned int side /* = 0*/)
 }
 
 void
-MaterialData::reinit(const std::vector<std::shared_ptr<MaterialBase>> & mats, bool execute_stateful)
-{
-  for (const auto & mat : mats)
-  {
-    // Mortar objects may use ordinary material properties but stateful properties conceptually
-    // don't make sense (at least not without doing expensive projections potentially at every
-    // linear iteration)
-    if (!execute_stateful && mat->hasStatefulProperties())
-      continue;
-
-    mat->computeProperties();
-  }
-}
-
-void
 MaterialData::reset(const std::vector<std::shared_ptr<MaterialBase>> & mats)
 {
   for (const auto & mat : mats)

@@ -163,6 +163,12 @@ ArrayKernel::computeJacobian()
   }
 }
 
+RealEigenVector
+ArrayKernel::computeQpJacobian()
+{
+  return RealEigenVector::Zero(_var.count());
+}
+
 void
 ArrayKernel::computeOffDiagJacobian(const unsigned int jvar_num)
 {
@@ -206,6 +212,15 @@ ArrayKernel::computeOffDiagJacobian(const unsigned int jvar_num)
   }
 }
 
+RealEigenMatrix
+ArrayKernel::computeQpOffDiagJacobian(const MooseVariableFEBase & jvar)
+{
+  if (jvar.number() == _var.number())
+    return computeQpJacobian().asDiagonal();
+  else
+    return RealEigenMatrix::Zero(_var.count(), jvar.count());
+}
+
 void
 ArrayKernel::computeOffDiagJacobianScalar(unsigned int jvar)
 {
@@ -221,4 +236,10 @@ ArrayKernel::computeOffDiagJacobianScalar(unsigned int jvar)
     }
 
   accumulateTaggedLocalMatrix();
+}
+
+RealEigenMatrix
+ArrayKernel::computeQpOffDiagJacobianScalar(const MooseVariableScalar & jvar)
+{
+  return RealEigenMatrix::Zero(_var.count(), (unsigned int)jvar.order() + 1);
 }

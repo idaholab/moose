@@ -131,7 +131,6 @@
     use_displaced_mesh = true
     displacements = 'disp_x disp_y disp_z'
     variable = disp_y
-    component = 1
   []
 []
 

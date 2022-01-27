@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "ADMaterial.h"
+#include "Material.h"
 #include "ADComputeIsotropicElasticityTensorShell.h"
 #include "ADRankTwoTensorForward.h"
 #include "ADRankFourTensorForward.h"
@@ -21,7 +21,7 @@ namespace libMesh
 class QGauss;
 }
 
-class ADComputeShellStress : public ADMaterial
+class ADComputeShellStress : public Material
 {
 public:
   static InputParameters validParams();

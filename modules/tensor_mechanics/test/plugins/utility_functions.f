@@ -63,5 +63,7 @@ C     TEST MPI AND THREAD FUNCTIONS
       CALL GETRANK(N)
       PRINT *, "getrank", N
 
+      CALL FLUSH()
+
       RETURN
       END

@@ -27,6 +27,7 @@ CoupledPressureAction::validParams()
       "displacements",
       "The displacements appropriate for the simulation geometry and coordinate system");
 
+  params.addParam<bool>("use_displaced_mesh", true, "Whether to use the displaced mesh.");
   params.addParam<std::vector<AuxVariableName>>("save_in_disp_x",
                                                 "The save_in variables for x displacement");
   params.addParam<std::vector<AuxVariableName>>("save_in_disp_y",
@@ -65,7 +66,7 @@ CoupledPressureAction::act()
     InputParameters params = _factory.getValidParams(kernel_name);
     params.applySpecificParameters(parameters(), {"boundary"});
     params.set<std::vector<VariableName>>("pressure") = {getParam<VariableName>("pressure")};
-    params.set<bool>("use_displaced_mesh") = true;
+    params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
     params.set<unsigned int>("component") = i;
     params.set<NonlinearVariableName>("variable") = displacements[i];
 

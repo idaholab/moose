@@ -15,7 +15,7 @@
 InputParameters
 ADComputeStrainBase::validParams()
 {
-  InputParameters params = ADMaterial::validParams();
+  InputParameters params = Material::validParams();
   params.addRequiredCoupledVar(
       "displacements",
       "The displacements appropriate for the simulation geometry and coordinate system");
@@ -35,7 +35,7 @@ ADComputeStrainBase::validParams()
 }
 
 ADComputeStrainBase::ADComputeStrainBase(const InputParameters & parameters)
-  : ADMaterial(parameters),
+  : Material(parameters),
     _ndisp(coupledComponents("displacements")),
     _disp(adCoupledValues("displacements")),
     _grad_disp(adCoupledGradients("displacements")),

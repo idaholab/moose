@@ -102,8 +102,6 @@ public:
    */
   const std::string & name() const { return _name; }
 
-  virtual void checkRegistryLabels();
-
   /**
    * Get printable name of the application.
    */
@@ -918,6 +916,8 @@ public:
   template <class T>
   const std::vector<T *> & getInterfaceObjects() const;
 
+  static void addAppParam(InputParameters & params);
+
 protected:
   /**
    * Whether or not this MooseApp has cached a Backup to use for restart / recovery
@@ -1120,7 +1120,12 @@ protected:
   /// true if we want to just check the input file
   bool _check_input;
 
+  /// The relationship managers that have been added
   std::set<std::shared_ptr<RelationshipManager>> _relationship_managers;
+
+  /// The relationship managers that have been attached (type -> RMs)
+  std::map<Moose::RelationshipManagerType, std::set<const RelationshipManager *>>
+      _attached_relationship_managers;
 
   /// A map from undisplaced relationship managers to their displaced clone (stored as the base
   /// GhostingFunctor). Anytime we clone in attachRelationshipManagers we create a map entry from

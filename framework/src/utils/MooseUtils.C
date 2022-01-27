@@ -15,6 +15,9 @@
 #include "InputParameters.h"
 #include "ExecFlagEnum.h"
 #include "InfixIterator.h"
+#include "MaterialBase.h"
+#include "MortarConstraintBase.h"
+#include "MortarNodalAuxKernel.h"
 
 #include "libmesh/utility.h"
 #include "libmesh/elem.h"
@@ -815,8 +818,15 @@ convertStringToInt(const std::string & str, bool throw_on_failure)
   // This would be the case for scientific notation
   long double double_val;
   std::stringstream double_ss(str);
+  double_ss >> double_val;
 
-  if ((double_ss >> double_val).fail() || !double_ss.eof())
+  // on arm64 the long double does not have sufficient precission
+  bool use_int = false;
+  std::stringstream int_ss(str);
+  if (!(int_ss >> val).fail() && int_ss.eof())
+    use_int = true;
+
+  if (double_ss.fail() || !double_ss.eof())
   {
     std::string msg =
         std::string("Unable to convert '") + str + "' to type " + demangle(typeid(T).name());
@@ -827,21 +837,18 @@ convertStringToInt(const std::string & str, bool throw_on_failure)
       mooseError(msg);
   }
 
-  // Check to see if it's an integer (and within range of an integer
+  // Check to see if it's an integer (and within range of an integer)
   if (double_val == static_cast<T>(double_val))
-    val = double_val;
-  else // Still failure
-  {
-    std::string msg =
-        std::string("Unable to convert '") + str + "' to type " + demangle(typeid(T).name());
+    return use_int ? val : static_cast<T>(double_val);
 
-    if (throw_on_failure)
-      throw std::invalid_argument(msg);
-    else
-      mooseError(msg);
-  }
+  // Still failure
+  std::string msg =
+      std::string("Unable to convert '") + str + "' to type " + demangle(typeid(T).name());
 
-  return val;
+  if (throw_on_failure)
+    throw std::invalid_argument(msg);
+  else
+    mooseError(msg);
 }
 
 template <>
@@ -1194,6 +1201,72 @@ prettyCppType(const std::string & cpp_type)
   return s;
 }
 
+template <typename Consumers>
+std::deque<MaterialBase *>
+buildRequiredMaterials(const Consumers & mat_consumers,
+                       const std::vector<std::shared_ptr<MaterialBase>> & mats,
+                       const bool allow_stateful)
+{
+  std::deque<MaterialBase *> required_mats;
+
+  std::unordered_set<unsigned int> needed_mat_props;
+  for (const auto & consumer : mat_consumers)
+  {
+    const auto & mp_deps = consumer->getMatPropDependencies();
+    needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
+  }
+
+  // A predicate of calling this function is that these materials come in already sorted by
+  // dependency with the front of the container having no other material dependencies and following
+  // materials potentially depending on the ones in front of them. So we can start at the back and
+  // iterate forward checking whether the current material supplies anything that is needed, and if
+  // not we discard it
+  for (auto it = mats.rbegin(); it != mats.rend(); ++it)
+  {
+    auto * const mat = it->get();
+    bool supplies_needed = false;
+
+    const auto & supplied_props = mat->getSuppliedPropIDs();
+
+    // Do O(N) with the small container
+    for (const auto supplied_prop : supplied_props)
+    {
+      if (needed_mat_props.count(supplied_prop))
+      {
+        supplies_needed = true;
+        break;
+      }
+    }
+
+    if (!supplies_needed)
+      continue;
+
+    if (!allow_stateful && mat->hasStatefulProperties())
+      mooseError("Someone called buildRequiredMaterials with allow_stateful = false but a material "
+                 "dependency ",
+                 mat->name(),
+                 " computes stateful properties.");
+
+    const auto & mp_deps = mat->getMatPropDependencies();
+    needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
+    required_mats.push_front(mat);
+  }
+
+  return required_mats;
+}
+
+template std::deque<MaterialBase *>
+buildRequiredMaterials(const std::vector<MortarConstraintBase *> &,
+                       const std::vector<std::shared_ptr<MaterialBase>> &,
+                       bool);
+template std::deque<MaterialBase *>
+buildRequiredMaterials(const std::array<const MortarNodalAuxKernelTempl<Real> *, 1> &,
+                       const std::vector<std::shared_ptr<MaterialBase>> &,
+                       bool);
+template std::deque<MaterialBase *>
+buildRequiredMaterials(const std::array<const MortarNodalAuxKernelTempl<RealVectorValue> *, 1> &,
+                       const std::vector<std::shared_ptr<MaterialBase>> &,
+                       bool);
 } // MooseUtils namespace
 
 std::string

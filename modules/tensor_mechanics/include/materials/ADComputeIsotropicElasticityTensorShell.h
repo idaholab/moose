@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "ADMaterial.h"
+#include "Material.h"
 
 #define usingComputeIsotropicElasticityTensorShellMembers usingMaterialMembers
 
@@ -18,7 +18,7 @@ namespace libMesh
 class QGauss;
 }
 
-class ADComputeIsotropicElasticityTensorShell : public ADMaterial
+class ADComputeIsotropicElasticityTensorShell : public Material
 {
 public:
   static InputParameters validParams();

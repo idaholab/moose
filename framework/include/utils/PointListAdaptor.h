@@ -76,10 +76,7 @@ public:
   }
 
   /**
-   * Returns the dim'th component of the idx'th point in the class:
-   * Since this is inlined and the "dim" argument is typically an immediate
-   * value, the
-   *  "if's" are actually solved at compile time.
+   * Returns the dim'th component of the idx'th point in the class
    */
   inline coord_t kdtree_get_pt(const size_t idx, int dim) const
   {
@@ -116,4 +113,3 @@ PointListAdaptor<Point>::getPoint(const Point & item) const
 {
   return item;
 }
-

@@ -31,6 +31,9 @@ protected:
 
   /// The component to retrieve
   const unsigned int _component;
+
+  /// Factor to multiply the functor with
+  const Moose::Functor<GenericReal<is_ad>> & _factor;
 };
 
 typedef FunctorVectorElementalAuxTempl<false> FunctorVectorElementalAux;

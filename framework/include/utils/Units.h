@@ -77,7 +77,7 @@ public:
   ///@}
 
   /// Unit prefactor scaling
-  MooseUnits operator*(Real f) const;
+  MooseUnits operator*(const Real f) const;
 
   /**
    * @{ Unit combination operators for unit pairs zero out the shift. e.g. temperatures
@@ -88,7 +88,7 @@ public:
   ///@}
 
   bool operator==(const MooseUnits & rhs) const;
-  bool operator==(Real rhs) const;
+  bool operator==(const Real rhs) const;
 
   /// cast of units representing pure numbers
   explicit operator Real() const;
@@ -113,7 +113,7 @@ protected:
   Real _shift;
 
   /// check if the unit has a pure base
-  bool isBase(MooseUnits::BaseUnit) const;
+  bool isBase(const MooseUnits::BaseUnit) const;
 
   /// base SI units and their exponents
   std::vector<std::pair<BaseUnit, int>> _base;

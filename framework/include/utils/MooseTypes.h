@@ -640,8 +640,9 @@ enum EigenSolveType
   EST_JACOBI_DAVIDSON, ///< Jacobi-Davidson
   EST_NONLINEAR_POWER, ///< Nonlinear inverse power
   EST_NEWTON, ///< Newton-based eigensolver with an assembled Jacobian matrix (fully coupled by default)
-  EST_PJFNK, ///< Preconditioned Jacobian-free Newton Krylov
-  EST_JFNK   ///< Jacobian-free Newton Krylov
+  EST_PJFNK,   ///< Preconditioned Jacobian-free Newton Krylov
+  EST_PJFNKMO, ///< The same as PJFNK except that matrix-vector multiplication is employed to replace residual evaluation in linear solver
+  EST_JFNK     ///< Jacobian-free Newton Krylov
 };
 
 /**

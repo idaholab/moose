@@ -1421,9 +1421,10 @@ MooseMesh::buildPeriodicNodeMap(std::multimap<dof_id_type, dof_id_type> & period
 
   // build kd-tree
   using KDTreeType = nanoflann::KDTreeSingleIndexAdaptor<
-      nanoflann::L2_Simple_Adaptor<Real, PointListAdaptor<PeriodicNodeInfo>>,
+      nanoflann::L2_Simple_Adaptor<Real, PointListAdaptor<PeriodicNodeInfo>, Real, std::size_t>,
       PointListAdaptor<PeriodicNodeInfo>,
-      LIBMESH_DIM>;
+      LIBMESH_DIM,
+      std::size_t>;
   const unsigned int max_leaf_size = 20; // slightly affects runtime
   auto point_list =
       PointListAdaptor<PeriodicNodeInfo>(periodic_nodes.begin(), periodic_nodes.end());

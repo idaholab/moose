@@ -10,6 +10,7 @@
 #pragma once
 
 #include "MooseTypes.h"
+#include "MortarExecutorInterface.h"
 
 #include "libmesh/libmesh_common.h"
 
@@ -19,6 +20,7 @@ class FEProblemBase;
 class AutomaticMortarGeneration;
 class Assembly;
 class MooseMesh;
+class MaterialBase;
 
 namespace libMesh
 {
@@ -28,14 +30,14 @@ class FEGenericBase;
 typedef FEGenericBase<Real> FEBase;
 }
 
-class ComputeMortarFunctor
+class ComputeMortarFunctor : public MortarExecutorInterface
 {
 public:
   ComputeMortarFunctor(
       const std::vector<std::shared_ptr<MortarConstraintBase>> & mortar_constraints,
       const AutomaticMortarGeneration & amg,
       SubProblem & subproblem,
-      FEProblemBase & _fe_problem,
+      FEProblemBase & fe_problem,
       bool displaced);
 
   /**
@@ -43,13 +45,7 @@ public:
    */
   void operator()();
 
-  /**
-   * 3D projection operator for mapping qpoints on mortar segments to secondary or primary elements
-   */
-  void projectQPoints3d(const Elem * msm_elem,
-                        const Elem * primal_elem,
-                        const unsigned int sub_elem_ind,
-                        std::vector<Point> & q_pts);
+  void mortarSetup() override;
 
 private:
   /// The mortar constraints to loop over when on each element. These must be
@@ -74,18 +70,4 @@ private:
 
   /// A reference to the assembly object
   Assembly & _assembly;
-
-  /// The mortar quadrature rule. Necessary for sizing the number of custom
-  /// points for re-init'ing the secondary interior, primary interior, and secondary face
-  /// elements
-  const libMesh::QBase * const & _qrule_msm;
-
-  /// The element Jacobian times weights
-  const std::vector<Real> & _JxW_msm;
-
-  /// The secondary boundary id needed for reiniting the MOOSE systems on the element (secondary) face
-  BoundaryID _secondary_boundary_id;
-
-  /// The primary boundary id needed for reiniting the MOOSE systems on the neighbor (primary) face
-  BoundaryID _primary_boundary_id;
 };

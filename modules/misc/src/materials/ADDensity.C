@@ -14,7 +14,7 @@ registerMooseObject("MiscApp", ADDensity);
 InputParameters
 ADDensity::validParams()
 {
-  InputParameters params = ADMaterial::validParams();
+  InputParameters params = Material::validParams();
   params.addClassDescription("Creates density AD material property");
   params.addCoupledVar(
       "displacements",
@@ -24,7 +24,7 @@ ADDensity::validParams()
 }
 
 ADDensity::ADDensity(const InputParameters & parameters)
-  : ADMaterial(parameters),
+  : Material(parameters),
     _coord_system(getBlockCoordSystem()),
     _initial_density(getParam<Real>("density")),
     _disp_r(coupledComponents("displacements") ? adCoupledValue("displacements", 0) : _ad_zero),

@@ -9,9 +9,9 @@
 
 #pragma once
 
-#include "ADMaterial.h"
+#include "Material.h"
 
-class ADConvectiveHeatFluxTest : public ADMaterial
+class ADConvectiveHeatFluxTest : public Material
 {
 public:
   ADConvectiveHeatFluxTest(const InputParameters & parameters);

@@ -166,8 +166,14 @@ TEST(MooseUtils, convertStringInt)
   EXPECT_THROW(MooseUtils::convert<long long int>("42.1", true), std::invalid_argument);
 
   EXPECT_EQ(MooseUtils::convert<unsigned long long int>("42"), 42ull);
+  EXPECT_EQ(MooseUtils::convert<unsigned long long int>("18446744073709551615"),
+            18446744073709551615ull);
   EXPECT_EQ(MooseUtils::convert<unsigned long long int>("18446744073709551614"),
             18446744073709551614ull);
+  EXPECT_EQ(MooseUtils::convert<unsigned long long int>("18446744073709551613"),
+            18446744073709551613ull);
+  EXPECT_EQ(MooseUtils::convert<unsigned long long int>("17446744073709551600"),
+            17446744073709551600ull);
   EXPECT_THROW(MooseUtils::convert<unsigned long long int>("-42", true), std::invalid_argument);
   EXPECT_THROW(MooseUtils::convert<unsigned long long int>("", true), std::invalid_argument);
   EXPECT_THROW(MooseUtils::convert<unsigned long long int>("42 ", true), std::invalid_argument);

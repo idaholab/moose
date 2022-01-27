@@ -16,7 +16,7 @@ registerMooseObject("DarcyThermoMechApp", PackedColumn);
 InputParameters
 PackedColumn::validParams()
 {
-  InputParameters params = ADMaterial::validParams();
+  InputParameters params = Material::validParams();
   params.addRequiredCoupledVar("temperature", "The temperature (C) of the fluid.");
 
   // Add a parameter to get the radius of the spheres in the column
@@ -90,7 +90,7 @@ PackedColumn::validParams()
 }
 
 PackedColumn::PackedColumn(const InputParameters & parameters)
-  : ADMaterial(parameters),
+  : Material(parameters),
     // Get the one parameter from the input file
     _input_radius(getFunction("radius")),
     _input_porosity(getFunction("porosity")),

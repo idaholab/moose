@@ -22,6 +22,7 @@
 #include "MooseMesh.h"
 #include "TimeIntegrator.h"
 #include "Console.h"
+#include "AuxiliarySystem.h"
 
 #include "libmesh/implicit_system.h"
 #include "libmesh/nonlinear_implicit_system.h"
@@ -126,8 +127,13 @@ Transient::validParams()
                         "default) then the minimum over the master dt "
                         "and the MultiApps is used");
 
+  params.addParam<bool>("check_aux",
+                        false,
+                        "Whether to check the auxiliary system for convergence to steady-state. If "
+                        "false, then the nonlinear system is used.");
+
   params.addParamNamesToGroup(
-      "steady_state_detection steady_state_tolerance steady_state_start_time",
+      "steady_state_detection steady_state_tolerance steady_state_start_time check_aux",
       "Steady State Detection");
 
   params.addParamNamesToGroup("start_time dtmin dtmax n_startup_steps trans_ss_check ss_check_tol "
@@ -144,6 +150,8 @@ Transient::Transient(const InputParameters & parameters)
     _problem(_fe_problem),
     _feproblem_solve(*this),
     _nl(_fe_problem.getNonlinearSystemBase()),
+    _aux(_fe_problem.getAuxiliarySystem()),
+    _check_aux(getParam<bool>("check_aux")),
     _time_scheme(getParam<MooseEnum>("scheme").getEnum<Moose::TimeIntegratorType>()),
     _t_step(_problem.timeStep()),
     _time(_problem.time()),
@@ -171,7 +179,8 @@ Transient::Transient(const InputParameters & parameters)
     _target_time(declareRecoverableData<Real>("target_time", -std::numeric_limits<Real>::max())),
     _use_multiapp_dt(getParam<bool>("use_multiapp_dt")),
     _solution_change_norm(declareRecoverableData<Real>("solution_change_norm", 0.0)),
-    _sln_diff(_nl.addVector("sln_diff", false, PARALLEL)),
+    _sln_diff(_check_aux ? _aux.addVector("sln_diff", false, PARALLEL)
+                         : _nl.addVector("sln_diff", false, PARALLEL)),
     _normalize_solution_diff_norm_by_dt(getParam<bool>("normalize_solution_diff_norm_by_dt"))
 {
   _fixed_point_solve->setInnerSolve(_feproblem_solve);
@@ -723,8 +732,9 @@ Transient::getTimeStepperName()
 Real
 Transient::relativeSolutionDifferenceNorm()
 {
-  const NumericVector<Number> & current_solution = *_nl.currentSolution();
-  const NumericVector<Number> & old_solution = _nl.solutionOld();
+  const NumericVector<Number> & current_solution =
+      _check_aux ? _aux.solution() : *_nl.currentSolution();
+  const NumericVector<Number> & old_solution = _check_aux ? _aux.solutionOld() : _nl.solutionOld();
 
   _sln_diff = current_solution;
   _sln_diff -= old_solution;

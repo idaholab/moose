@@ -1108,7 +1108,6 @@ FEProblemBase::initialSetup()
   // Perform Reporter get/declare check
   _reporter_data.check();
 
-  _app.checkRegistryLabels();
   setCurrentExecuteOnFlag(EXEC_NONE);
 }
 
@@ -3283,10 +3282,10 @@ FEProblemBase::reinitMaterials(SubdomainID blk_id, THREAD_ID tid, bool swap_stat
 }
 
 void
-FEProblemBase::reinitMaterialsFace(SubdomainID blk_id,
-                                   THREAD_ID tid,
-                                   bool swap_stateful,
-                                   bool execute_stateful)
+FEProblemBase::reinitMaterialsFace(const SubdomainID blk_id,
+                                   const THREAD_ID tid,
+                                   const bool swap_stateful,
+                                   const std::deque<MaterialBase *> * const reinit_mats)
 {
   if (hasActiveMaterialProperties(tid))
   {
@@ -3303,23 +3302,25 @@ FEProblemBase::reinitMaterialsFace(SubdomainID blk_id,
       _bnd_material_data[tid]->reset(
           _discrete_materials[Moose::FACE_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
 
-    if (_materials[Moose::FACE_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
+    if (reinit_mats)
+      _bnd_material_data[tid]->reinit(*reinit_mats);
+    else if (_materials[Moose::FACE_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
       _bnd_material_data[tid]->reinit(
-          _materials[Moose::FACE_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid),
-          execute_stateful);
+          _materials[Moose::FACE_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
   }
 }
 
 void
-FEProblemBase::reinitMaterialsNeighbor(SubdomainID blk_id,
-                                       THREAD_ID tid,
-                                       bool swap_stateful,
-                                       bool execute_stateful)
+FEProblemBase::reinitMaterialsNeighbor(const SubdomainID blk_id,
+                                       const THREAD_ID tid,
+                                       const bool swap_stateful,
+                                       const std::deque<MaterialBase *> * const reinit_mats)
 {
   if (hasActiveMaterialProperties(tid))
   {
     // NOTE: this will not work with h-adaptivity
     // lindsayad: why not?
+
     const Elem * neighbor = _assembly[tid]->neighbor();
     unsigned int neighbor_side = neighbor->which_neighbor_am_i(_assembly[tid]->elem());
 
@@ -3339,18 +3340,19 @@ FEProblemBase::reinitMaterialsNeighbor(SubdomainID blk_id,
       _neighbor_material_data[tid]->reset(
           _discrete_materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
 
-    if (_materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
+    if (reinit_mats)
+      _neighbor_material_data[tid]->reinit(*reinit_mats);
+    else if (_materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
       _neighbor_material_data[tid]->reinit(
-          _materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid),
-          execute_stateful);
+          _materials[Moose::NEIGHBOR_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
   }
 }
 
 void
-FEProblemBase::reinitMaterialsBoundary(BoundaryID boundary_id,
-                                       THREAD_ID tid,
-                                       bool swap_stateful,
-                                       bool execute_stateful)
+FEProblemBase::reinitMaterialsBoundary(const BoundaryID boundary_id,
+                                       const THREAD_ID tid,
+                                       const bool swap_stateful,
+                                       const std::deque<MaterialBase *> * const reinit_mats)
 {
   if (hasActiveMaterialProperties(tid))
   {
@@ -3366,9 +3368,10 @@ FEProblemBase::reinitMaterialsBoundary(BoundaryID boundary_id,
       _bnd_material_data[tid]->reset(
           _discrete_materials.getActiveBoundaryObjects(boundary_id, tid));
 
-    if (_materials.hasActiveBoundaryObjects(boundary_id, tid))
-      _bnd_material_data[tid]->reinit(_materials.getActiveBoundaryObjects(boundary_id, tid),
-                                      execute_stateful);
+    if (reinit_mats)
+      _bnd_material_data[tid]->reinit(*reinit_mats);
+    else if (_materials.hasActiveBoundaryObjects(boundary_id, tid))
+      _bnd_material_data[tid]->reinit(_materials.getActiveBoundaryObjects(boundary_id, tid));
   }
 }
 
@@ -4732,19 +4735,26 @@ void
 FEProblemBase::setActiveMaterialProperties(const std::set<unsigned int> & mat_prop_ids,
                                            THREAD_ID tid)
 {
-  SubProblem::setActiveMaterialProperties(mat_prop_ids, tid);
+  if (!mat_prop_ids.empty())
+    _active_material_property_ids[tid] = mat_prop_ids;
+}
 
-  if (_displaced_problem)
-    _displaced_problem->setActiveMaterialProperties(mat_prop_ids, tid);
+const std::set<unsigned int> &
+FEProblemBase::getActiveMaterialProperties(THREAD_ID tid) const
+{
+  return _active_material_property_ids[tid];
+}
+
+bool
+FEProblemBase::hasActiveMaterialProperties(THREAD_ID tid) const
+{
+  return !_active_material_property_ids[tid].empty();
 }
 
 void
 FEProblemBase::clearActiveMaterialProperties(THREAD_ID tid)
 {
-  SubProblem::clearActiveMaterialProperties(tid);
-
-  if (_displaced_problem)
-    _displaced_problem->clearActiveMaterialProperties(tid);
+  _active_material_property_ids[tid].clear();
 }
 
 void

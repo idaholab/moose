@@ -74,6 +74,24 @@
     []
   []
 
+  [data_types]
+    requirement = "The system shall support the output as auxiliary field variables of "
+    [ad_vector]
+      type = Exodiff
+      input = output.i
+      exodiff = 'vector_output.e'
+      cli_args = "Outputs/file_base='vector_output' Materials/active='vector' Materials/vector/type=ADGenericConstantVectorMaterial Materials/vector/prop_names='p1 p2' Materials/vector/prop_values='0 1 2 1.2 3.4 -1' Materials/vector/outputs='exodus'"
+      detail = 'automatic differentiation vector material properties'
+    []
+  []
+
+  [duplicate_variable_name]
+    type = RunException
+    input = output_steady.i
+    expect_err = "The material property output real_property has the same name as an existing variable, either use the material declare_suffix parameter to disambiguate"
+    cli_args = "AuxVariables/real_property/order=CONSTANT AuxVariables/real_property/family=MONOMIAL"
+    requirement = "The system shall error if an existing variable shares the same name as an auxiliary variable used for material output"
+  []
   [invalid_outputs]
     type = RunException
     input = output.i

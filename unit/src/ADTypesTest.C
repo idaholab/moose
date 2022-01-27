@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "Moose.h"
-#include "ADMaterial.h"
+#include "Material.h"
 #include "DenseMatrix.h"
 
 #include "libmesh/dense_vector.h"

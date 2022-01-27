@@ -20,24 +20,8 @@ InputParameters
 MortarConstraintBase::validParams()
 {
   InputParameters params = Constraint::validParams();
-  params += MortarInterface::validParams();
+  params += MortarConsumerInterface::validParams();
   params += TwoMaterialPropertyInterface::validParams();
-
-  // On a displaced mesh this will geometrically and algebraically ghost the entire interface
-  params.addRelationshipManager(
-      "AugmentSparsityOnInterface",
-      Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC,
-      [](const InputParameters & obj_params, InputParameters & rm_params) {
-        rm_params.set<bool>("use_displaced_mesh") = obj_params.get<bool>("use_displaced_mesh");
-        rm_params.set<BoundaryName>("secondary_boundary") =
-            obj_params.get<BoundaryName>("secondary_boundary");
-        rm_params.set<BoundaryName>("primary_boundary") =
-            obj_params.get<BoundaryName>("primary_boundary");
-        rm_params.set<SubdomainName>("secondary_subdomain") =
-            obj_params.get<SubdomainName>("secondary_subdomain");
-        rm_params.set<SubdomainName>("primary_subdomain") =
-            obj_params.get<SubdomainName>("primary_subdomain");
-      });
 
   // Whether on a displaced or undisplaced mesh, coupling ghosting will only happen for
   // cross-interface elements
@@ -70,12 +54,6 @@ MortarConstraintBase::validParams()
       "compute_primal_residuals", true, "Whether to compute residuals for the primal variable.");
   params.addParam<bool>(
       "compute_lm_residuals", true, "Whether to compute Lagrange Multiplier residuals");
-  params.addParam<bool>(
-      "interpolate_normals",
-      true,
-      "Whether to interpolate the nodal normals (e.g. classic idea of evaluating field at "
-      "quadrature points). If this is set to false, then non-interpolated nodal normals will be "
-      "used, and then the _normals member should be indexed with _i instead of _qp");
   params.addParam<MooseEnum>(
       "quadrature",
       MooseEnum("DEFAULT FIRST SECOND THIRD FOURTH", "DEFAULT"),
@@ -90,7 +68,7 @@ MortarConstraintBase::validParams()
 MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
   : Constraint(parameters),
     NeighborCoupleableMooseVariableDependencyIntermediateInterface(this, false, false),
-    MortarInterface(this),
+    MortarConsumerInterface(this),
     TwoMaterialPropertyInterface(this, Moose::EMPTY_BLOCK_IDS, getBoundaryIDs()),
     MooseVariableInterface<Real>(this,
                                  true,
@@ -116,21 +94,15 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
     _use_dual(_var ? _var->useDual() : false),
     _normals_primary(_assembly.neighborNormals()),
     _tangents(_assembly.tangents()),
-    _JxW_msm(_assembly.jxWMortar()),
     _coord(_assembly.mortarCoordTransformation()),
-    _qrule_msm(_assembly.qRuleMortar()),
     _q_point(_assembly.qPointsMortar()),
     _test(_var ? _var->phiLower() : _test_dummy),
     _test_secondary(_secondary_var.phiFace()),
     _test_primary(_primary_var.phiFaceNeighbor()),
     _grad_test_secondary(_secondary_var.gradPhiFace()),
     _grad_test_primary(_primary_var.gradPhiFaceNeighbor()),
-    _phys_points_secondary(_assembly.qPointsFace()),
-    _phys_points_primary(_assembly.qPointsFaceNeighbor()),
-    _lower_secondary_elem(_assembly.lowerDElem()),
     _lower_primary_elem(_assembly.neighborLowerDElem()),
-    _displaced(getParam<bool>("use_displaced_mesh")),
-    _interpolate_normals(getParam<bool>("interpolate_normals"))
+    _displaced(getParam<bool>("use_displaced_mesh"))
 {
   if (_use_dual)
     _assembly.activateDual();
@@ -148,6 +120,8 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
 void
 MortarConstraintBase::computeResidual()
 {
+  setNormals();
+
   if (_compute_primal_residuals)
   {
     // Compute the residual for the secondary interior primal dofs
@@ -165,6 +139,8 @@ MortarConstraintBase::computeResidual()
 void
 MortarConstraintBase::computeJacobian()
 {
+  setNormals();
+
   if (_compute_primal_residuals)
   {
     // Compute the jacobian for the secondary interior primal dofs

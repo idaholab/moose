@@ -4,10 +4,9 @@
     input = 'stress_concentration.i'
     exodiff = 'stress_concentration_out.e'
     custom_cmp = 'stress_concentration_out.cmp'
-    max_parallel = 1 #This restriction will be removed once #12036 is resolved.
     mesh_mode = replicated
     requirement = "In areas of high concentration gradients, the Zienkiewicz-Zhu implementation shall recover the specified material property."
-    design = 'auxkernels/RankTwoAux.md'
+    design = 'nodal_patch_recovery.md'
     issues = '#11880'
   [../]
 []

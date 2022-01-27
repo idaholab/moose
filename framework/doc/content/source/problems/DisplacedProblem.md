@@ -1,33 +1,19 @@
 # DisplacedProblem
 
-!alert! construction title=Undocumented Class
-The DisplacedProblem has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# DisplacedProblem
-
 !syntax description /Problem/DisplacedProblem
 
-## Overview
+The `DisplacedProblem` encompasses a normal undisplaced [FEProblemBase.md], which can
+be a [FEProblem.md] or an [EigenProblem.md] for example. Function attributes of the
+`DisplacedProblem` often forward to the normal encompassed problem, and are only
+modified when displacements affect the behavior, such as for [Adaptivity](syntax/Adaptivity/index.md).
 
-!! Replace these lines with information regarding the DisplacedProblem object.
+The `DisplacedProblem` object contains a displaced nonlinear system, a displaced
+auxiliary system and a displaced mesh. The undisplaced mesh can also be obtained from the
+`DisplacedProblem`.
 
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the DisplacedProblem object.
-
-!syntax parameters /Problem/DisplacedProblem
-
-!syntax inputs /Problem/DisplacedProblem
-
-!syntax children /Problem/DisplacedProblem
-```
-!alert-end!
-
-!syntax description /Problem/DisplacedProblem
+!alert note
+The `DisplacedProblem` is automatically created by the [CreateDisplacedProblemAction.md]
+when the [!param](/Mesh/SetupMeshAction/displacements) parameter is set in the `[Mesh]` block.
 
 !syntax parameters /Problem/DisplacedProblem
 

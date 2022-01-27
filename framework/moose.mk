@@ -91,7 +91,7 @@ endif
 hit $(pyhit_LIB) $(hit_CLI): $(pyhit_srcfiles) $(hit_CLI_srcfiles)
 	@echo "Building and linking "$@"..."
 	@bash -c '(cd "$(HIT_DIR)" && $(libmesh_CXX) -std=c++11 -w -fPIC -lstdc++ -shared $^ $(pyhit_COMPILEFLAGS) $(DYNAMIC_LOOKUP) -o $(pyhit_LIB))'
-	@bash -c '(cd "$(HIT_DIR)" && make)'
+	@bash -c '(cd "$(HIT_DIR)" && $(MAKE))'
 
 #
 # gtest
@@ -459,7 +459,6 @@ clean:
 # .) moose (ignore a possible MOOSE submodule)
 # .) .git  (don't accidentally delete any of git's metadata)
 # Notes:
-# .) Be careful: running 'make -n clobber' will actually delete files!
 # .) 'make clobber' does not respect $(METHOD), it just deletes
 #    everything it can find!
 # .) Running 'make clobberall' is a good way to clean up outdated
@@ -474,7 +473,7 @@ cleanall: clean
 	@echo "Cleaning in:"
 	@for dir in $(app_DIRS); do \
           echo \ $$dir; \
-          make -C $$dir clean ; \
+          $(MAKE) -C $$dir clean ; \
         done
 
 # clobberall runs 'make clobber' in all dependent application directories
@@ -482,7 +481,7 @@ clobberall: clobber
 	@echo "Clobbering in:"
 	@for dir in $(app_DIRS); do \
           echo \ $$dir; \
-          make -C $$dir clobber ; \
+          $(MAKE) -C $$dir clobber ; \
         done
 
 # clang_complete builds a clang configuration file for various clang-based autocompletion plugins

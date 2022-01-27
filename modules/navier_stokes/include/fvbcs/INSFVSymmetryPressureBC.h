@@ -25,3 +25,5 @@ public:
 protected:
   ADReal computeQpResidual() override;
 };
+
+typedef INSFVSymmetryPressureBC INSFVSymmetryScalarBC;

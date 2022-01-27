@@ -121,7 +121,6 @@
     type = Pressure
     variable = disp_x
     boundary = outer
-    component = 0
     function = '200000*t'
   [../]
 
@@ -129,7 +128,6 @@
     type = Pressure
     variable = disp_y
     boundary = outer
-    component = 1
     function = '200000*t'
   [../]
 
@@ -137,7 +135,6 @@
     type = Pressure
     variable = disp_z
     boundary = outer
-    component = 2
     function = '200000*t'
   [../]
 
@@ -145,7 +142,6 @@
     type = Pressure
     variable = disp_x
     boundary = inner
-    component = 0
     function = '100000*t'
   [../]
 
@@ -153,7 +149,6 @@
     type = Pressure
     variable = disp_y
     boundary = inner
-    component = 1
     function = '100000*t'
   [../]
 
@@ -161,7 +156,6 @@
     type = Pressure
     variable = disp_z
     boundary = inner
-    component = 2
     function = '100000*t'
   [../]
 

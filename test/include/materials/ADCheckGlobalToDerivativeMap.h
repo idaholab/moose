@@ -9,13 +9,13 @@
 
 #pragma once
 
-#include "ADMaterial.h"
+#include "Material.h"
 
 /**
  * Test object for verifying that \p globalDofIndexToDerivative generates a correct mapping from
  * global dof indices to derivatives for Jacobians
  */
-class ADCheckGlobalToDerivativeMap : public ADMaterial
+class ADCheckGlobalToDerivativeMap : public Material
 {
 public:
   static InputParameters validParams();

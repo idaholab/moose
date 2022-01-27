@@ -250,9 +250,6 @@ Factory::deprecatedMessage(const std::string obj_name)
 void
 Factory::reportUnregisteredError(const std::string & obj_name) const
 {
-  // Make sure that we don't have an improperly registered object first
-  _app.checkRegistryLabels();
-
   std::ostringstream oss;
   std::set<std::string> paths = _app.getLoadedLibraryPaths();
 

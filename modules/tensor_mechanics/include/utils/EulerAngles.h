@@ -29,7 +29,7 @@ public:
   // default constructor
   EulerAngles();
   // Quaternions to Euler Angles
-  EulerAngles(Eigen::Quaternion<Real> & q);
+  EulerAngles(const Eigen::Quaternion<Real> & q);
 
   operator RealVectorValue() const { return RealVectorValue(phi1, Phi, phi2); }
 
