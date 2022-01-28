@@ -569,6 +569,12 @@ PatternedHexMeshGenerator::generate()
       // subdomain map
       const auto & increment_subdomain_map = pattern_mesh.get_subdomain_name_map();
       main_subdomain_map.insert(increment_subdomain_map.begin(), increment_subdomain_map.end());
+      // Check if one SubdomainName is shared by more than one subdomain ids
+      std::set<SubdomainName> main_subdomain_map_name_list;
+      for (auto const & id_name_pair : main_subdomain_map)
+        main_subdomain_map_name_list.emplace(id_name_pair.second);
+      if (main_subdomain_map.size() != main_subdomain_map_name_list.size())
+        paramError("inputs", "The input meshes contain subdomain name maps with conflicts.");
 
       out_mesh->stitch_meshes(pattern_mesh,
                               OUTER_SIDESET_ID,
