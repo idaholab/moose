@@ -26,7 +26,7 @@ plot shows the results in terms of the Cauchy stress and logarithmic
 strain to illustrate that the large deformation version of the
 model is in fact nonlinear.
 
-!media media/tensor_mechanics/neohookean.png
+!media tensor_mechanics/neohookean.png
        id=example
        style=width:50%;float:center;padding-top:1.5%;
        caption=Response of the Neo-Hookean model to uniaxial deformation, plotted as log strain versus Cauchy stress.

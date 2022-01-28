@@ -21,7 +21,7 @@ while
 denotes a gradient with respect to the reference coordinates.  [potatoes]
 describes these two frames of reference.
 
-!media media/tensor_mechanics/mechanics_potatoes.png
+!media tensor_mechanics/mechanics_potatoes.png
        id=potatoes
        style=width:30%;float:center;padding-top:1.5%;
        caption=Summary of the reference and current configurations with key quantities.

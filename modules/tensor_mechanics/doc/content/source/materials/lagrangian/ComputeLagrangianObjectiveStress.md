@@ -163,7 +163,7 @@ steps the simulation results are correct: the $yy$ component of the Cauchy stres
 and the $zz$ component goes to zero as the block rotates.  But for fewer steps the rotational process is not integrated exactly, leading to errors in the
 final stress tensor.
 
-!media media/tensor_mechanics/rotation.png
+!media tensor_mechanics/rotation.png
        id=rotation
        style=width:50%;float:center;padding-top:1.5%;
        caption=Plot of $\sigma_{yy}$ and $\sigma_{zz}$ in the cube as it rotates, for different numbers of time steps.
@@ -182,7 +182,7 @@ shear stress/strain response for the Jaumann model oscillates, which is not a re
 elastic material.  The Truesdell rate, which is used by default by `ComputeLagrangianObjectiveStress` models, avoids
 this non-physical behavior.
 
-!media media/tensor_mechanics/shearcompare.png
+!media tensor_mechanics/shearcompare.png
        id=shear
        style=width:50%;float:center;padding-top:1.5%;
        caption=Shear stress/shear strain plot comparing the Truesdell and Jaumann rates for very large shear deformations.

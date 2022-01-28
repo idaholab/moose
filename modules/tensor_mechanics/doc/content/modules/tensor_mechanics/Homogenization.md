@@ -104,12 +104,12 @@ The problem imposes a combination of deformation gradient and 1st Piola Kirchhof
 equilibrium in the body.  Because each subdomain has different material properties the microdisplacements are not
 homogeneous, producing an inhomogeneous stress state in the simulation cell.
 
-!media media/tensor_mechanics/homogenization-strain.png
+!media tensor_mechanics/homogenization-strain.png
        id=strain
        style=width:50%;float:center;padding-top:1.5%;
        caption=Results showing that the controlled deformation values match their targets.
 
-!media media/tensor_mechanics/homogenization-stress.png
+!media tensor_mechanics/homogenization-stress.png
        id=stress
        style=width:50%;float:center;padding-top:1.5%;
        caption=Results showing that the controlled stress values match their targets.

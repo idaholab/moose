@@ -137,12 +137,12 @@ These plots demonstrate
    for each kernel type are identical, they demonstrate the proper, non-locking stiffness, and mesh refinement converges the
    problem to a stable, analytic solution.
 
-!media media/tensor_mechanics/smallcook.png
+!media tensor_mechanics/smallcook.png
        id=smallcook
        style=width:50%;float:center;padding-top:1.5%;
        caption=Demonstration of $\bar{F}$ stabilization on a small deformation problem.
 
-!media media/tensor_mechanics/largecook.png
+!media tensor_mechanics/largecook.png
        id=largecook
        style=width:50%;float:center;padding-top:1.5%;
        caption=Demonstration of $\bar{F}$ stabilization on a large deformation problem.
