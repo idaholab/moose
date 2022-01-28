@@ -46,7 +46,7 @@ protected:
   /// MeshMetaData: vector of all nodes' azimuthal angles
   std::vector<Real> & _azimuthal_angle_meta;
   /// Reference to input mesh pointer
-  std::unique_ptr<MeshBase> & _mesh;
+  std::unique_ptr<MeshBase> & _input;
   /// MeshMetaData: number of mesh sectors of each polygon side
   std::vector<unsigned int> _num_sectors_per_side_meta;
   /// Ending angular position of the modified azimuthal blocks

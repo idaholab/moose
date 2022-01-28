@@ -55,7 +55,7 @@ AzimuthalBlockSplitGenerator::AzimuthalBlockSplitGenerator(const InputParameters
     _is_control_drum_meta(declareMeshProperty<bool>("is_control_drum_meta", true)),
     _azimuthal_angle_meta(
         declareMeshProperty<std::vector<Real>>("azimuthal_angle_meta", std::vector<Real>())),
-    _mesh(getMeshByName(_input_name))
+    _input(getMeshByName(_input_name))
 {
   if (!_new_block_names.empty() && _new_block_names.size() != _new_block_ids.size())
     paramError("new_block_names",
@@ -70,7 +70,7 @@ AzimuthalBlockSplitGenerator::AzimuthalBlockSplitGenerator(const InputParameters
 std::unique_ptr<MeshBase>
 AzimuthalBlockSplitGenerator::generate()
 {
-  auto replicated_mesh_ptr = dynamic_cast<ReplicatedMesh *>(_mesh.get());
+  auto replicated_mesh_ptr = dynamic_cast<ReplicatedMesh *>(_input.get());
   if (!replicated_mesh_ptr)
     paramError("input", "Input is not a replicated mesh, which is required");
 
@@ -295,7 +295,7 @@ AzimuthalBlockSplitGenerator::generate()
                                    : _azimuthal_angle_meta[i] - 90.0;
   std::sort(_azimuthal_angle_meta.begin(), _azimuthal_angle_meta.end());
 
-  return std::move(_mesh);
+  return std::move(_input);
 }
 
 void

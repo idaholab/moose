@@ -1,0 +1,85 @@
+[Tests]
+  design = 'meshgenerators/PeripheralRingMeshGenerator.md'
+  issues = '#19978'
+  [core_peripheral_ring_nonpreserved]
+    type = 'Exodiff'
+    input = 'core_ring.i'
+    exodiff = 'core_ring_in.e'
+    cli_args = 'Mesh/pr/preserve_volumes=false
+                --mesh-only'
+    requirement ='The system shall add a peripheral ring to to the input mesh without preserving volumes due to polygonization.'
+    recover = false
+    mesh_mode = 'REPLICATED'
+  []
+  [core_peripheral_ring_preserved]
+    type = 'Exodiff'
+    input = 'core_ring.i'
+    exodiff = 'core_ring_preserved_in.e'
+    cli_args = '--mesh-only core_ring_preserved_in.e'
+    requirement ='The system shall be able to add a peripheral ring to the input mesh and preserve volumes even with polygonization.'
+    recover = false
+    mesh_mode = 'REPLICATED'
+  []
+  [err_non_2d_mesh]
+    type = 'RunException'
+    input = 'core_ring.i'
+    cli_args = 'Mesh/fmg/type=GeneratedMeshGenerator
+                Mesh/fmg/dim=1
+                --mesh-only'
+    expect_err = 'Only 2D meshes are supported.'
+    requirement ='The system shall throw an error if a non-2D mesh is given as the input mesh.'
+    mesh_mode = 'REPLICATED'
+  []
+  [err_invalid_boundary_type_1]
+    type = 'RunException'
+    input = 'core_ring.i'
+    cli_args = 'Mesh/pr/input_mesh_external_boundary=1
+                --mesh-only'
+    expect_err = 'This mesh generator does not work for the provided external boundary as it has more than one segments.'
+    requirement ='The system shall throw an error if the given boundary of the input mesh has two or more segments.'
+    mesh_mode = 'REPLICATED'
+  []
+  [err_invalid_boundary_type_2]
+    type = 'RunException'
+    input = 'core_ring.i'
+    cli_args = 'Mesh/pr/input_mesh_external_boundary=10001
+                Mesh/fmg/file=input_mesh_invalid_bdry_2.e
+                --mesh-only'
+    expect_err = 'This mesh generator does not work for the provided external boundary as it is not a closed loop.'
+    requirement ='The system shall throw an error if the given boundary of the input mesh is an open curve.'
+    mesh_mode = 'REPLICATED'
+  []
+  [err_invalid_boundary_type_3]
+    type = 'RunException'
+    input = 'core_ring.i'
+    cli_args = 'Mesh/ssasg/type=SideSetsAroundSubdomainGenerator
+                Mesh/ssasg/input=fmg
+                Mesh/ssasg/block=1
+                Mesh/ssasg/new_boundary=5000
+                Mesh/pr/input=ssasg
+                Mesh/pr/input_mesh_external_boundary=5000
+                --mesh-only'
+    expect_err = 'This mesh generator does not work for the provided external boundary as azimuthal angles of consecutive nodes do not change monotonically.'
+    requirement ='The system shall throw an error if the consecutive nodes of the given boundary of the input mesh do not change monotonically.'
+    mesh_mode = 'REPLICATED'
+  []
+  [err_small_radius]
+    type = 'RunException'
+    input = 'core_ring.i'
+    cli_args = 'Mesh/pr/peripheral_ring_radius=20
+                --mesh-only'
+    expect_err = 'The peripheral ring to be generated must be large enough to cover the entire input mesh.'
+    requirement ='The system shall throw an error if the given peripheral ring radius is not enough to cover the input mesh.'
+    mesh_mode = 'REPLICATED'
+  []
+  [err_internal_boundary]
+    type = 'RunException'
+    input = 'core_ring.i'
+    cli_args = 'Mesh/fmg/file=input_mesh_err.e
+                Mesh/pr/input_mesh_external_boundary=30500
+                --mesh-only'
+    expect_err = 'The boundary provided is not an external boundary.'
+    requirement ='The system shall throw an error if the given external boundary is actually an internal boundary of the input mesh.'
+    mesh_mode = 'REPLICATED'
+  []
+[]
