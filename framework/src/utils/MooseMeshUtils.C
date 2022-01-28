@@ -15,6 +15,7 @@
 #include "libmesh/replicated_mesh.h"
 #include "libmesh/mesh_base.h"
 #include "libmesh/parallel.h"
+#include "libmesh/parallel_algebra.h"
 
 namespace MooseMeshUtils
 {
@@ -164,5 +165,23 @@ getSubdomainID(const SubdomainName & subdomain_name, const MeshBase & mesh)
     id = mesh.get_id_by_name(subdomain_name);
 
   return id;
+}
+
+Point
+meshCentroidCalculator(const MeshBase & mesh)
+{
+  Point centroid_pt = Point(0.0, 0.0, 0.0);
+  Real vol_tmp = 0.0;
+  for (const auto & elem :
+       as_range(mesh.active_local_elements_begin(), mesh.active_local_elements_end()))
+  {
+    Real elem_vol = elem->volume();
+    centroid_pt += (elem->true_centroid()) * elem_vol;
+    vol_tmp += elem_vol;
+  }
+  mesh.comm().sum(centroid_pt);
+  mesh.comm().sum(vol_tmp);
+  centroid_pt /= vol_tmp;
+  return centroid_pt;
 }
 }

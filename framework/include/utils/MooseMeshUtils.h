@@ -46,4 +46,11 @@ SubdomainID getSubdomainID(const SubdomainName & subdomain_name, const MeshBase 
 
 std::vector<subdomain_id_type> getSubdomainIDs(const libMesh::MeshBase & mesh,
                                                const std::vector<SubdomainName> & subdomain_name);
+
+/**
+ * Calculates the centroid of a MeshBase.
+ * @param mesh input mesh whose centroid needs to be calculated
+ * @return a Point data containing the mesh centroid
+ */
+Point meshCentroidCalculator(const MeshBase & mesh);
 }
