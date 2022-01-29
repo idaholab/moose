@@ -1,0 +1,8 @@
+[Tests]
+  [sampler_1d_vector]
+    type = 'CSVDiff'
+    input = 'sampler_1d_vector.i'
+    csvdiff = 'out_test_property_vpp_0001.csv'
+    allow_test_objects = true
+  []
+[]

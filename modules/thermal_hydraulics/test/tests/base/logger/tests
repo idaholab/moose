@@ -1,0 +1,11 @@
+[Tests]
+  [warning]
+    type = 'RunApp'
+    input = 'test.i'
+    cli_args = "--color off"
+    expect_out = "1 warning:\n\s+- warn: This is a warning"
+    method = 'OPT'
+    allow_test_objects = true
+    allow_warnings = true
+  []
+[]

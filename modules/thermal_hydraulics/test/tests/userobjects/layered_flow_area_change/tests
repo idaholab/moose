@@ -1,0 +1,9 @@
+[Tests]
+  [layered_area_change]
+    type = Exodiff
+    input = layered_flow_area_2D.i
+    exodiff = layered_flow_area_2D_out.e
+    design = 'userobjects/LayeredFlowAreaChange.md'
+    requirement = "The system shall allow computing changes in channel flow areas from deformation."
+  []
+[]

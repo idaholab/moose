@@ -1,0 +1,52 @@
+[Tests]
+  # physics
+  [phy:f_fn_3eqn]
+    type = 'CSVDiff'
+    input = 'phy.f_fn.3eqn.i'
+    csvdiff = 'phy.f_fn.3eqn_out.csv'
+    rel_err = 1e-10
+    max_parallel = 1
+    ad_indexing_type = 'global'
+  []
+
+  [phy:par_fn]
+    type = 'CSVDiff'
+    input = 'phy.par_fn.i'
+    csvdiff = 'phy.par_fn_out.csv'
+    rel_err = 1e-10
+    max_parallel = 1
+    ad_indexing_type = 'global'
+  []
+
+  [phy:sub_discretization]
+    type = 'Exodiff'
+    input = 'phy.sub_discretization.i'
+    exodiff = 'phy.sub_discretization_out.e'
+    custom_cmp = 'phy.sub_discretization.exodiff'
+    # matching geometry at t=0
+    recover = false
+    max_parallel = 1
+    ad_indexing_type = 'global'
+  []
+
+  # controls
+
+  # error checking
+  [err:wrong_fp]
+    type = 'RunException'
+    input = 'err.wrong_fp.i'
+    expect_err = "pipe: Supplied fluid properties must be for 1-phase fluids."
+    ad_indexing_type = 'global'
+  []
+
+  [jacobian]
+    type = 'PetscJacobianTester'
+    input = 'jacobian.i'
+    ratio_tol = 7e-8
+    difference_tol = 15
+    cli_args = 'Debug/check_jacobian=true'
+    max_threads = 1
+    max_parallel = 1
+    ad_indexing_type = 'global'
+  []
+[]

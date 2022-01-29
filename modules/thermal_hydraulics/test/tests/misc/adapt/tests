@@ -1,0 +1,22 @@
+[Tests]
+  [single_block]
+    type = 'Exodiff'
+    input = 'single_block.i'
+    exodiff = 'single_block_out.e-s005'
+    abs_zero = 1e-8
+    recover = false
+    max_parallel = 1
+    ad_indexing_type = 'global'
+  []
+
+  [multiple_blocks]
+    type = 'Exodiff'
+    input = 'multiple_blocks.i'
+    exodiff = 'multiple_blocks_out.e-s005'
+    recover = false
+    method = 'opt'
+    skip = '#709'
+    max_parallel = 1
+    ad_indexing_type = 'global'
+  []
+[]

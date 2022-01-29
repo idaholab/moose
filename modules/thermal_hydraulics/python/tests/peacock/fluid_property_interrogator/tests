@@ -1,0 +1,8 @@
+[Tests]
+  [./fluid_property_interrogator]
+    type = PythonUnitTest
+    input = test_FluidPropertyInterrogator.py
+    separate = True
+    display_required = True
+  [../]
+[]

@@ -1,0 +1,30 @@
+[Tests]
+  [loop_identification]
+    type = 'RunApp'
+    input = 'loop_identification.i'
+    cli_args = 'Debug/print_component_loops=true'
+    expect_out = "Loop 1:
+\s+corechannel
+\s+hx:primary
+\s+j1
+\s+j2
+\s+j3
+\s+j4
+\s+pipe1
+\s+pipe2
+
+\s+Loop 2:
+\s+hx:secondary
+\s+inlet
+\s+outlet"
+    max_parallel = 1
+    ad_indexing_type = 'global'
+  []
+
+  [err.no_smp]
+    type = 'RunException'
+    input = 'err.no_smp.i'
+    expect_err = "Single matrix preconditioning with full coupling is required to run\. Please, check that your input file has the following preconditioning block\:"
+    deleted = "#190"
+  []
+[]

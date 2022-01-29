@@ -1,0 +1,6 @@
+COORDINATES
+TIME STEPS
+NODAL VARIABLES relative 1e-5 floor 1.e-10
+	rhoA
+	rhouA
+	rhoEA

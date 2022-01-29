@@ -1,0 +1,136 @@
+[Tests]
+  [constant_material]
+    type = 'PetscJacobianTester'
+    input = 'constant_material.i'
+    ratio_tol = 1e-14
+    difference_tol = 1e-14
+    max_threads = 1
+    max_parallel = 1
+    allow_test_objects = true
+  []
+  [density_3eqn_material]
+    type = 'PetscJacobianTester'
+    input = 'fluid_properties_3eqn.i'
+    cli_args = "Kernels/test_kernel/material_property=rho Kernels/test_kernel/args='rhoA' JacobianTest1Phase/snes_test_err=1e-8"
+    ratio_tol = 5e-9
+    difference_tol = 5e-10
+    max_threads = 1
+    max_parallel = 1
+    allow_test_objects = true
+  []
+  [dynamic_viscosity]
+    type = 'PetscJacobianTester'
+    input = 'dynamic_viscosity.i'
+    ratio_tol = 1e-7
+    difference_tol = 1e-7
+    max_threads = 1
+    max_parallel = 1
+    allow_test_objects = true
+  []
+  [linear_test_material]
+    type = 'PetscJacobianTester'
+    input = 'linear_test_material.i'
+    ratio_tol = 5e-14
+    difference_tol = 5e-14
+    max_threads = 1
+    max_parallel = 1
+    allow_test_objects = true
+  []
+  [pressure_3eqn_material]
+    type = 'PetscJacobianTester'
+    input = 'fluid_properties_3eqn.i'
+    cli_args = "Kernels/test_kernel/material_property=p"
+    ratio_tol = 1e-8
+    difference_tol = 8e-4
+    max_threads = 1
+    max_parallel = 1
+    allow_test_objects = true
+  []
+  [specific_internal_energy_3eqn]
+    type = 'PetscJacobianTester'
+    input = 'fluid_properties_3eqn.i'
+    cli_args = "Kernels/test_kernel/material_property=e JacobianTest1Phase/snes_test_err=1e-8"
+    ratio_tol = 5e-8
+    difference_tol = 5e-7
+    max_threads = 1
+    max_parallel = 1
+    allow_test_objects = true
+  []
+  [specific_volume_3eqn]
+    type = 'PetscJacobianTester'
+    input = 'fluid_properties_3eqn.i'
+    cli_args = "Kernels/test_kernel/material_property=v JacobianTest1Phase/snes_test_err=1e-8"
+    ratio_tol = 5e-8
+    difference_tol = 5e-14
+    max_threads = 1
+    max_parallel = 1
+    allow_test_objects = true
+  []
+  [velocity_3eqn]
+    type = 'PetscJacobianTester'
+    input = 'fluid_properties_3eqn.i'
+    cli_args = "Kernels/test_kernel/material_property=v Kernels/test_kernel/args='rhoA rhouA' JacobianTest1Phase/snes_test_err=1e-8"
+    ratio_tol = 5e-8
+    difference_tol = 5e-8
+    max_threads = 1
+    max_parallel = 1
+    allow_test_objects = true
+  []
+  [enthalpy_3eqn]
+    type = 'PetscJacobianTester'
+    input = 'fluid_properties_3eqn.i'
+    cli_args = "Kernels/test_kernel/material_property=h JacobianTest1Phase/snes_test_err=1e-8"
+    ratio_tol = 1e-7
+    difference_tol = 5e-5
+    max_threads = 1
+    max_parallel = 1
+    allow_test_objects = true
+  []
+  [reynolds_number]
+    type = 'PetscJacobianTester'
+    input = 'reynolds_number.i'
+    ratio_tol = 5e-8
+    difference_tol = 1e-8
+    max_threads = 1
+    max_parallel = 1
+    allow_test_objects = true
+  []
+  [temperature_3eqn_material]
+    type = 'PetscJacobianTester'
+    input = 'fluid_properties_3eqn.i'
+    cli_args = "Kernels/test_kernel/material_property=T"
+    ratio_tol = 2e-8
+    difference_tol = 3e-10
+    max_threads = 1
+    max_parallel = 1
+    allow_test_objects = true
+  []
+  [total_enthalpy_3eqn]
+    type = 'PetscJacobianTester'
+    input = 'fluid_properties_3eqn.i'
+    cli_args = "Kernels/test_kernel/material_property=H JacobianTest1Phase/snes_test_err=1e-8"
+    ratio_tol = 5e-8
+    difference_tol = 1e-5
+    max_threads = 1
+    max_parallel = 1
+    allow_test_objects = true
+  []
+  [wall_friction_function]
+    type = 'PetscJacobianTester'
+    input = 'wall_friction_function.i'
+    ratio_tol = 1e-14
+    difference_tol = 1e-14
+    max_threads = 1
+    max_parallel = 1
+    allow_test_objects = true
+  []
+  [wall_friction_churchill]
+    type = 'PetscJacobianTester'
+    input = 'wall_friction_churchill.i'
+    ratio_tol = 2e-10
+    difference_tol = 2e-10
+    max_threads = 1
+    max_parallel = 1
+    allow_test_objects = true
+  []
+[]

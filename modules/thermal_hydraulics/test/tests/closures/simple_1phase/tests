@@ -1,0 +1,17 @@
+[Tests]
+  [err:missing_f_1phase]
+    type = 'RunException'
+    input = 'err.missing_f_1phase.i'
+    expect_err = "pipe: When using simple closures, the parameter 'f' must be provided."
+    ad_indexing_type = 'global'
+  []
+  [enumeration_option]
+    type = RunException
+    input = 'err.missing_f_1phase.i'
+    cli_args = "GlobalParams/closures=simple Components/pipe/f=0"
+    allow_deprecated = False
+    expect_err = 'The closures system now uses objects created in the input file'
+    max_parallel = 1
+    ad_indexing_type = 'global'
+  []
+[]

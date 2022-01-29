@@ -1,0 +1,9 @@
+[Tests]
+  [1phase]
+    type = 'CSVDiff'
+    input = 'cfl_1ph.i'
+    csvdiff = 'cfl_1ph_out.csv'
+    max_parallel = 1
+    ad_indexing_type = 'global'
+  []
+[]

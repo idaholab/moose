@@ -1,0 +1,22 @@
+[Tests]
+  # Tests that TerminateControl can be used to exit gracefully (no error thrown)
+  [no_error]
+    type = 'RunApp'
+    input = 'terminate.i'
+    expect_out = 'Threshold exceeded'
+
+    group = 'controls'
+  []
+
+  # Tests that TerminateControl can be used to exit with an error thrown
+  [throw_error]
+    type = 'RunException'
+    input = 'terminate.i'
+    cli_args = '
+      ControlLogic/terminate/throw_error=true
+      ControlLogic/terminate/termination_message="Custom error message"'
+    expect_err = 'Custom error message'
+
+    group = 'controls'
+  []
+[]

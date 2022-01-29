@@ -1,0 +1,8 @@
+[Tests]
+  [energy_conservation_plate]
+    type = Exodiff
+    input = 'plate.master.i'
+    exodiff = 'plate.master_out.e plate.master_out_thm0.e'
+    max_parallel = 1
+  []
+[]

@@ -1,0 +1,10 @@
+[Tests]
+  [test]
+    type = 'CSVDiff'
+    input = 'test.i'
+    csvdiff = 'test_out.csv'
+    requirement = 'The system shall provide a control that evaluates a parsed function'
+    design = 'ParsedFunctionControl.md'
+    issues = '#93'
+  []
+[]

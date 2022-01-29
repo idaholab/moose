@@ -1,0 +1,17 @@
+[Tests]
+  [phy:test]
+    type = Exodiff
+    input = 'phy.test.i'
+    exodiff = 'phy.test_out.e'
+    max_parallel = 1
+  []
+
+  [phy:test_mats]
+    type = Exodiff
+    input = 'phy.test_mats.i'
+    exodiff = 'phy.test_out.e'
+    cli_args = 'Outputs/file_base=phy.test_out'
+    prereq = 'phy:test'
+    max_parallel = 1
+  []
+[]

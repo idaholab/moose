@@ -1,0 +1,10 @@
+[Tests]
+  [test]
+    type = 'Exodiff'
+    input = 'test.i'
+    exodiff = 'test_out.e'
+    custom_cmp = 'test.exodiff'
+    # needs rDG version of supersonic inlet
+    deleted = yes
+  []
+[]

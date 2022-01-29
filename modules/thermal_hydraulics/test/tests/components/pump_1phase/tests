@@ -1,0 +1,103 @@
+[Tests]
+  # conservation
+  [phy:pump_mass_energy_conservation]
+    type = 'CSVDiff'
+    input = 'pump_mass_energy_conservation.i'
+    csvdiff = 'pump_mass_energy_conservation_out.csv'
+    max_parallel = 1
+    group = 'pump1phase'
+    ad_indexing_type = 'global'
+  []
+  [phy:pump_mass_energy_conservation_orientation]
+    type = 'CSVDiff'
+    input = 'pump_mass_energy_conservation.i'
+    cli_args = "Components/pipe1/orientation='1 1 1'
+                Outputs/file_base=pump_mass_energy_conservation_out_orientation
+                Outputs/out/show='E_change'"
+    # csvdiff made with Components/pipe1/orientation='1 0 0'
+    csvdiff = 'pump_mass_energy_conservation_out_orientation.csv'
+    max_parallel = 1
+    group = 'pump1phase'
+    ad_indexing_type = 'global'
+  []
+
+  # physics
+  [phy:pressure_check]
+    type = 'CSVDiff'
+    input = 'pump_pressure_check.i'
+    csvdiff = 'pump_pressure_check_out.csv'
+    abs_zero = 5e-7
+    max_parallel = 1
+    group = 'pump1phase'
+    ad_indexing_type = 'global'
+  []
+  [phy:pressure_check_orientation]
+    type = 'CSVDiff'
+    input = 'pump_pressure_check.i'
+    cli_args = "Components/pipe1/orientation='20 0 0'
+                Outputs/file_base=pump_pressure_check_out_orientation"
+    # csvdiff made with Components/pipe1/orientation='1 0 0'
+    csvdiff = 'pump_pressure_check_out_orientation.csv'
+    abs_zero = 5e-7
+    max_parallel = 1
+    group = 'pump1phase'
+    ad_indexing_type = 'global'
+  []
+  [phy:pipe_friction_pump_head_balance_x_direction]
+    type = 'Exodiff'
+    input = 'pipe_friction_pump_head_balance.i'
+    exodiff = 'pipe_friction_pump_head_balance_out_x.e'
+    max_parallel = 1
+    group = 'pump1phase'
+    ad_indexing_type = 'global'
+  []
+  [phy:pipe_friction_pump_head_balance_y_direction]
+    type = 'Exodiff'
+    input = 'pipe_friction_pump_head_balance.i'
+    cli_args = "Components/pipe1/orientation='0 1 0'
+                Components/pump/initial_vel_x=0
+                Components/pump/initial_vel_y=1
+                Outputs/file_base=pipe_friction_pump_head_balance_out_y"
+    exodiff = 'pipe_friction_pump_head_balance_out_y.e'
+    max_parallel = 1
+    group = 'pump1phase'
+    ad_indexing_type = 'global'
+  []
+
+  [phy:pump_loop]
+    type = 'Exodiff'
+    input = 'pump_loop.i'
+    exodiff = 'pump_loop_out.e'
+    rel_err = 8e-5
+    abs_zero = 1e-9
+    max_parallel = 1
+    group = 'pump1phase'
+    ad_indexing_type = 'global'
+  []
+
+  # controls
+  [clg:head]
+    type = 'CSVDiff'
+    input = 'clg.head.i'
+    csvdiff = 'clg.head_out.csv'
+    max_parallel = 1
+    group = 'pump1phase'
+    requirement = 'The system shall allow for controlling the pump head'
+    design = 'Pump1Phase.md'
+    issues = '#684'
+    ad_indexing_type = 'global'
+  []
+
+  [jacobian]
+    type = 'PetscJacobianTester'
+    input = 'jacobian.i'
+    ratio_tol = 2e-8
+    difference_tol = 20
+    cli_args = 'Debug/check_jacobian=true'
+    max_parallel = 1
+    requirement = 'The system shall allow for controlling the pump head'
+    design = 'Pump1Phase.md'
+    issues = '#684'
+    ad_indexing_type = 'global'
+  []
+[]

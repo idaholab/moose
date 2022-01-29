@@ -1,0 +1,34 @@
+[Tests]
+  # Tests the function valus of PiecewiseFunction
+  [function_values]
+    type = 'CSVDiff'
+    input = 'piecewise_function.i'
+    csvdiff = 'piecewise_function_out.csv'
+  []
+
+  # Tests that PiecewiseFunction throws an error when an inconsistent number of points is given
+  [error_inconsistent_number_of_points]
+    type = 'RunException'
+    input = 'piecewise_function.i'
+    cli_args = "Functions/function_piecewise/axis_coordinates='3'"
+    expect_err =
+      "The number of entries in the parameter 'axis_coordinates' must"
+      " equal the number of entries in the parameter 'functions' minus one"
+  []
+
+  # Tests that PiecewiseFunction throws an error when an points are not given in ascending order
+  [error_points_nonascending_order]
+    type = 'RunException'
+    input = 'piecewise_function.i'
+    cli_args = "Functions/function_piecewise/axis_coordinates='5 3'"
+    expect_err = "The entries in the parameter 'axis_coordinates' must be in ascending order"
+  []
+
+  # Tests that PiecewiseFunction throws an error when it references itself
+  [error_self_reference]
+    type = 'RunException'
+    input = 'piecewise_function.i'
+    cli_args = "Functions/function_piecewise/functions='function_left function_piecewise function_end'"
+    expect_err = "This function cannot use its own name in the 'functions' parameter"
+  []
+[]

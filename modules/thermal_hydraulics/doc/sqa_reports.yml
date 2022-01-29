@@ -1,0 +1,36 @@
+Applications:
+    thermal_hydraulics:
+        exe_directory: ${MOOSE_DIR}/modules/thermal_hydraulics
+        content_directory: ${MOOSE_DIR}/modules/thermal_hydraulics/doc/content
+        unregister:
+            - ${MOOSE_DIR}/framework/doc/unregister.yml
+        remove:
+            - ${MOOSE_DIR}/framework/doc/remove.yml
+        log_stub_files: WARNING
+        log_missing_description: WARNING
+        log_missing_markdown: WARNING
+        show_warning: false
+
+Documents:
+    software_requirements_specification: sqa/thermal_hydraulics_srs.md
+    software_design_description: sqa/thermal_hydraulics_sdd.md
+    software_test_plan: sqa/thermal_hydraulics_stp.md
+    requirements_traceablity_matrix: sqa/thermal_hydraulics_rtm.md
+    verification_validation_plan: sqa/thermal_hydraulics_vvr.md
+    failure_analysis_report: sqa/thermal_hydraulics_far.md
+    software_library_list: sqa/thermal_hydraulics_sll.md
+    communication_and_contact_information: sqa/framework_cci.md
+    software_coding_standards: sqa/framework_scs.md
+    log_default: WARNING
+    show_warning: false
+
+Requirements:
+    thermal_hydraulics:
+        directories:
+            - ${ROOT_DIR}/test
+        log_missing: WARNING
+        log_missing_design: WARNING
+        log_missing_issues: WARNING
+        log_testable: WARNING
+        log_duplicate_requirement: WARNING
+        show_warning: false

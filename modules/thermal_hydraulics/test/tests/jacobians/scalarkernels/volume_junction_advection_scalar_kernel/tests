@@ -1,0 +1,60 @@
+[Tests]
+  # 1-phase
+  [rhoV]
+    type = 'PetscJacobianTester'
+    input = '1phase.i'
+    ratio_tol = 1e-6
+    difference_tol = 1e-5
+    max_threads = 1
+    max_parallel = 1
+    allow_test_objects = true
+  []
+  [rhouV]
+    type = 'PetscJacobianTester'
+    input = '1phase.i'
+    cli_args = '
+      ScalarKernels/scalar_kernel/variable=rhouV
+      ScalarKernels/scalar_kernel/equation_index=1'
+    ratio_tol = 1e-6
+    difference_tol = 1e-5
+    max_threads = 1
+    max_parallel = 1
+    allow_test_objects = true
+  []
+  [rhovV]
+    type = 'PetscJacobianTester'
+    input = '1phase.i'
+    cli_args = '
+      ScalarKernels/scalar_kernel/variable=rhovV
+      ScalarKernels/scalar_kernel/equation_index=2'
+    ratio_tol = 1e-6
+    difference_tol = 1e-5
+    max_threads = 1
+    max_parallel = 1
+    allow_test_objects = true
+  []
+  [rhowV]
+    type = 'PetscJacobianTester'
+    input = '1phase.i'
+    cli_args = '
+      ScalarKernels/scalar_kernel/variable=rhowV
+      ScalarKernels/scalar_kernel/equation_index=3'
+    ratio_tol = 1e-6
+    difference_tol = 1e-5
+    max_threads = 1
+    max_parallel = 1
+    allow_test_objects = true
+  []
+  [rhoEV]
+    type = 'PetscJacobianTester'
+    input = '1phase.i'
+    cli_args = '
+      ScalarKernels/scalar_kernel/variable=rhoEV
+      ScalarKernels/scalar_kernel/equation_index=4'
+    ratio_tol = 1e-6
+    difference_tol = 1e-5
+    max_threads = 1
+    max_parallel = 1
+    allow_test_objects = true
+  []
+[]

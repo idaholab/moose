@@ -1,0 +1,7 @@
+[Tests]
+  [err:2nd_order]
+    type = 'RunException'
+    input = 'err.2nd_order.i'
+    expect_err = "Cannot use TRAP quadrature rule with 2nd order elements.  Use SIMPSON or GAUSS instead."
+  []
+[]

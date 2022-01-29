@@ -1,0 +1,98 @@
+#include "HSBoundaryExternalAppConvection.h"
+#include "HeatStructureCylindricalBase.h"
+#include "HeatConductionModel.h"
+
+registerMooseObject("ThermalHydraulicsApp", HSBoundaryExternalAppConvection);
+
+InputParameters
+HSBoundaryExternalAppConvection::validParams()
+{
+  InputParameters params = HSBoundary::validParams();
+
+  params.addParam<VariableName>("T_ext", "T_ext", "Temperature from external application");
+  params.addParam<VariableName>(
+      "htc_ext", "htc_ext", "Heat transfer coefficient from external application");
+  params.addParam<PostprocessorName>("scale_pp",
+                                     "Post-processor by which to scale boundary condition");
+
+  params.addClassDescription("Heat structure boundary condition to perform convective heat "
+                             "transfer with an external application");
+  return params;
+}
+
+HSBoundaryExternalAppConvection::HSBoundaryExternalAppConvection(const InputParameters & params)
+  : HSBoundary(params),
+
+    _T_ext_var_name(getParam<VariableName>("T_ext")),
+    _htc_ext_var_name(getParam<VariableName>("htc_ext"))
+{
+}
+
+void
+HSBoundaryExternalAppConvection::check() const
+{
+  HSBoundary::check();
+
+  if (isParamValid("scale_pp"))
+  {
+    const PostprocessorName & pp_name = getParam<PostprocessorName>("scale_pp");
+    if (!_sim.hasPostprocessor(pp_name))
+      logError("The post-processor name provided for the parameter 'scale_pp' is '" + pp_name +
+               "', but no post-processor of this name exists.");
+  }
+}
+
+void
+HSBoundaryExternalAppConvection::addVariables()
+{
+  const HeatStructureBase & hs = getComponent<HeatStructureBase>("hs");
+  const std::vector<SubdomainName> & subdomain_names = hs.getSubdomainNames();
+
+  _sim.addSimVariable(false, _T_ext_var_name, HeatConductionModel::feType(), subdomain_names);
+  _sim.addSimVariable(false, _htc_ext_var_name, HeatConductionModel::feType(), subdomain_names);
+}
+
+void
+HSBoundaryExternalAppConvection::addMooseObjects()
+{
+  const HeatStructureBase & hs = getComponent<HeatStructureBase>("hs");
+  const HeatStructureCylindricalBase * hs_cyl =
+      dynamic_cast<const HeatStructureCylindricalBase *>(&hs);
+  const bool is_cylindrical = hs_cyl != nullptr;
+
+  {
+    const std::string class_name = is_cylindrical ? "ADExternalAppConvectionHeatTransferRZBC"
+                                                  : "ADExternalAppConvectionHeatTransferBC";
+    InputParameters pars = _factory.getValidParams(class_name);
+    pars.set<NonlinearVariableName>("variable") = HeatConductionModel::TEMPERATURE;
+    pars.set<std::vector<BoundaryName>>("boundary") = _boundary;
+    pars.set<std::vector<VariableName>>("T_ext") = {_T_ext_var_name};
+    pars.set<std::vector<VariableName>>("htc_ext") = {_htc_ext_var_name};
+    if (is_cylindrical)
+    {
+      pars.set<Point>("axis_point") = hs.getPosition();
+      pars.set<RealVectorValue>("axis_dir") = hs.getDirection();
+      pars.set<Real>("offset") = hs_cyl->getInnerRadius() - hs_cyl->getAxialOffset();
+    }
+    if (isParamValid("scale_pp"))
+      pars.set<PostprocessorName>("scale_pp") = getParam<PostprocessorName>("scale_pp");
+
+    _sim.addBoundaryCondition(class_name, genName(name(), "bc"), pars);
+  }
+
+  // Create integral PP for cylindrical heat structures
+  if (is_cylindrical)
+  {
+    const std::string class_name = "HeatRateExternalAppConvectionRZ";
+    InputParameters pars = _factory.getValidParams(class_name);
+    pars.set<std::vector<BoundaryName>>("boundary") = _boundary;
+    pars.set<std::vector<VariableName>>("T") = {HeatConductionModel::TEMPERATURE};
+    pars.set<std::vector<VariableName>>("T_ext") = {_T_ext_var_name};
+    pars.set<std::vector<VariableName>>("htc_ext") = {_htc_ext_var_name};
+    pars.set<Point>("axis_point") = hs.getPosition();
+    pars.set<RealVectorValue>("axis_dir") = hs.getDirection();
+    pars.set<Real>("offset") = hs_cyl->getInnerRadius() - hs_cyl->getAxialOffset();
+    pars.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
+    _sim.addPostprocessor(class_name, genSafeName(name(), "integral"), pars);
+  }
+}
