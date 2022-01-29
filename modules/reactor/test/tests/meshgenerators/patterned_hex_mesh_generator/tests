@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/PatternedHexMeshGenerator.md'
-  issues = '#18628'
+  issues = '#18628 #20148'
   [hexagon_boundary]
     type = 'Exodiff'
     input = 'patterned_2d.i'
@@ -41,12 +41,19 @@
     requirement ='The system shall stitch hexagon meshes twice to form a larger mesh with a control drum.'
     recover = false
   []
+  [err_block_name_conflict]
+    type = 'RunException'
+    input = 'patterned_2d_block_name_conflict.i'
+    cli_args = '--mesh-only "patterned_err.e"'
+    expect_err = 'The input meshes contain subdomain name maps with conflicts.'
+    requirement ='The system shall throw an error if the input meshes contain different block ids that share the same block name.'
+  []
   [err_pattern_layer]
     type = 'RunException'
     input = 'patterned_2d.i'
     cli_args = 'Mesh/pattern/pattern_boundary=none
                 Mesh/pattern/pattern="0 0;0"
-                --mesh-only "patterned_err.e.e"'
+                --mesh-only "patterned_err.e"'
     expect_err = 'this parameter must be odd to ensure a hexagonal shape.'
     requirement ='The system shall throw an error if the layer number of pattern is not odd.'
   []
@@ -55,7 +62,7 @@
     input = 'patterned_2d.i'
     cli_args = 'Mesh/pattern/pattern_boundary=none
                 Mesh/pattern/pattern="0"
-                --mesh-only "patterned_err.e.e"'
+                --mesh-only "patterned_err.e"'
     expect_err = 'this parameter must be larger than unity.'
     requirement ='The system shall throw an error if the layer number of pattern is zero or unity.'
   []
@@ -64,7 +71,7 @@
     input = 'patterned_2d.i'
     cli_args = 'Mesh/pattern/pattern_boundary=none
                 Mesh/pattern/pattern="0 0;0 0 0;0"
-                --mesh-only "patterned_err.e.e"'
+                --mesh-only "patterned_err.e"'
     expect_err = 'The two-dimentional array parameter pattern must have a correct hexagonal shape.'
     requirement ='The system shall throw an error if the pattern does not represent a hexagonal pattern.'
   []
@@ -73,7 +80,7 @@
     input = 'patterned_2d.i'
     cli_args = 'Mesh/pattern/pattern_boundary=none
                 Mesh/pattern/pattern="0 0;0 1 0;0 0"
-                --mesh-only "patterned_err.e.e"'
+                --mesh-only "patterned_err.e"'
     expect_err = 'Elements of this parameter must be smaller than the length of input_name.'
     requirement ='The system shall throw an error if the pattern includes input mesh indices that exceed number of elements of inputs.'
   []
