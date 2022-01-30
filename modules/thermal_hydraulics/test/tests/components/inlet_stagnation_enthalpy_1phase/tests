@@ -1,0 +1,7 @@
+[Tests]
+  [phy:h_rhou_3eqn]
+    type = 'RunException'
+    input = 'phy.h_rhou_3eqn.i'
+    expect_err = 'This component does not work with rDG, yet\.'
+  []
+[]

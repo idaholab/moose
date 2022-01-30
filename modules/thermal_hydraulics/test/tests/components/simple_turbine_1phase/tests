@@ -1,0 +1,40 @@
+[Tests]
+  [phy:conservation]
+    type = 'CSVDiff'
+    input = 'phy.conservation.i'
+    csvdiff = 'phy.conservation_csv.csv'
+    override_columns = 'energy_diff mass_diff momentum_diff'
+    override_abs_zero = '1e-7 1e-7 1e-4'
+    override_rel_err = '0 0 0'
+    max_parallel = 1
+    ad_indexing_type = 'global'
+  []
+
+  [phy:test]
+    type = 'Exodiff'
+    input = 'phy.test.i'
+    exodiff = 'phy.test_out.e'
+    max_parallel = 1
+    ad_indexing_type = 'global'
+  []
+
+  [clg:test]
+    type = 'CSVDiff'
+    input = 'clg.test.i'
+    csvdiff = 'clg.test_csv.csv'
+    max_parallel = 1
+    ad_indexing_type = 'global'
+  []
+
+  [jacobian]
+    type = 'PetscJacobianTester'
+    input = 'jacobian.i'
+    ratio_tol = 1e-7
+    difference_tol = 170
+    cli_args = 'Debug/check_jacobian=true'
+    allow_test_objects = true
+    max_threads = 1
+    max_parallel = 1
+    ad_indexing_type = 'global'
+  []
+[]

@@ -1,0 +1,59 @@
+[Tests]
+  [rhoV]
+    type = 'PetscJacobianTester'
+    input = 'shaft_connected_pump_1phase.i'
+    ratio_tol = 4e-8
+    difference_tol = 3e-6
+    max_threads = 1
+    max_parallel = 1
+    allow_test_objects = true
+  []
+  [rhouV]
+    type = 'PetscJacobianTester'
+    input = 'shaft_connected_pump_1phase.i'
+    cli_args = '
+      ScalarKernels/jct_ask/variable=rhouV
+      ScalarKernels/jct_ask/equation_index=1'
+    ratio_tol = 3e-8
+    difference_tol = 1e-4
+    max_threads = 1
+    max_parallel = 1
+    allow_test_objects = true
+  []
+  [rhovV]
+    type = 'PetscJacobianTester'
+    input = 'shaft_connected_pump_1phase.i'
+    cli_args = '
+      ScalarKernels/jct_ask/variable=rhovV
+      ScalarKernels/jct_ask/equation_index=2'
+    ratio_tol = 3e-8
+    difference_tol = 3e-4
+    max_threads = 1
+    max_parallel = 1
+    allow_test_objects = true
+  []
+  [rhowV]
+    type = 'PetscJacobianTester'
+    input = 'shaft_connected_pump_1phase.i'
+    cli_args = '
+      ScalarKernels/jct_ask/variable=rhowV
+      ScalarKernels/jct_ask/equation_index=3'
+    ratio_tol = 3e-8
+    difference_tol = 4e-4
+    max_threads = 1
+    max_parallel = 1
+    allow_test_objects = true
+  []
+  [rhoEV]
+    type = 'PetscJacobianTester'
+    input = 'shaft_connected_pump_1phase.i'
+    cli_args = '
+      ScalarKernels/jct_ask/variable=rhoEV
+      ScalarKernels/jct_ask/equation_index=4'
+    ratio_tol = 5e-8
+    difference_tol = 8e-4
+    max_threads = 1
+    max_parallel = 1
+    allow_test_objects = true
+  []
+[]

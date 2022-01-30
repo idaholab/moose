@@ -69,6 +69,16 @@ Applications:
         log_stub_files: WARNING
         show_warning: false
 
+    fsi:
+        exe_directory: modules/combined
+        app_types:
+            - FsiApp
+        content_directory: modules/fsi/doc/content
+        unregister:
+            - framework/doc/unregister.yml
+        remove:
+            - framework/doc/remove.yml
+
     functional_expansion_tools:
         exe_directory: modules/combined
         app_types:
@@ -214,21 +224,25 @@ Applications:
         log_missing_description: WARNING
         show_warning: false
 
+    THM:
+        exe_directory: modules/combined
+        app_types:
+            - ThermalHydraulicsApp
+        content_directory: modules/thermal_hydraulics/doc/content
+        unregister:
+            - framework/doc/unregister.yml
+        remove:
+            - framework/doc/remove.yml
+        log_stub_files: WARNING
+        log_missing_description: WARNING
+        log_missing_markdown: WARNING
+        show_warning: false
+
     XFEM:
         exe_directory: modules/combined
         app_types:
             - XFEMApp
         content_directory: modules/xfem/doc/content
-        unregister:
-            - framework/doc/unregister.yml
-        remove:
-            - framework/doc/remove.yml
-
-    fsi:
-        exe_directory: modules/combined
-        app_types:
-            - FsiApp
-        content_directory: modules/fsi/doc/content
         unregister:
             - framework/doc/unregister.yml
         remove:
@@ -314,6 +328,10 @@ Requirements:
             - modules/fluid_properties
         log_missing: WARNING
         show_warning: false
+
+    fsi:
+        directories:
+            - modules/fsi
 
     functional_expansion_tools:
         directories:
@@ -401,10 +419,16 @@ Requirements:
         log_empty_issues: WARNING
         show_warning: false
 
+    thermal_hydraulics:
+        directories:
+            - modules/thermal_hydraulics
+        log_missing: WARNING
+        log_missing_design: WARNING
+        log_missing_issues: WARNING
+        log_testable: WARNING
+        log_duplicate_requirement: WARNING
+        show_warning: false
+
     xfem:
         directories:
             - modules/xfem
-
-    fsi:
-        directories:
-            - modules/fsi

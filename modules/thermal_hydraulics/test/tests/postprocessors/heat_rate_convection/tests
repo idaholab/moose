@@ -1,0 +1,10 @@
+[Tests]
+  [test]
+    type = 'CSVDiff'
+    input = 'heat_rate_convection.i'
+    csvdiff = 'heat_rate_convection.csv'
+    recover = false
+    max_parallel = 1
+    ad_indexing_type = 'global'
+  []
+[]

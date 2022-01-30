@@ -1,0 +1,54 @@
+!config navigation scrollspy=False
+
+# {{title}}
+
+!row! class=tutorial
+!col! small=5 medium=5 large=5
+
+!template field key=description
+
+!col-end!
+
+!col! small=1 medium=1 large=1
+
+&nbsp;
+
+!col-end!
+
+!col! small=4 medium=4 large=4
+
+### Contents
+
+!style! class=tutorial-content
+
+!content outline
+  max_level=1
+  pages={{pages}}
+
+!style-end!
+
+!col-end!
+
+!row-end!
+
+
+!row! class=tutorial-nav
+!col! small=5 medium=5 large=5
+
+Use on the +Next+ button on the right to start the tutorial.
+
+!col-end!
+
+!col! small=1 medium=1 large=1
+
+&nbsp;
+
+!col-end!
+
+!col! small=4 medium=4 large=4
+
+!content pagination next={{start_page}}
+
+!col-end!
+
+!row-end!

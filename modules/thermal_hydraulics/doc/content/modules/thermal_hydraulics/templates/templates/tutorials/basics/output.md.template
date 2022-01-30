@@ -1,0 +1,50 @@
+# Output
+
+The basic output of {{project-name-abbrev}} comes in 2 flavors.
+
+## ExodusII
+
+[ExodusII](https://www.osti.gov/servlets/purl/10102115) is a binary file format for storing finite element data models.
+
+Almost any computed value can be stored in an ExodusII file:
+
+- field variables,
+- material properties,
+- postprocessors,
+- vector postprocessors.
+
+ExodusII files can be visualized in
+[paraview](https://www.paraview.org/),
+[VisIt](https://visit-dav.github.io/visit-website/index.html),
+and others.
+
+To enable ExodusII output, include the following block in your input file:
+
+```
+[Outputs]
+  exodus = true
+[]
+```
+
+## Comma Separated Values
+
+This is a text file format that uses commas to separate values (hence the name).
+
+The postprocessor and vector postprocessor values computed by {{project-name-abbrev}} can be stored in this format.
+
+CSV files are suitable for further processing in visualization tools like
+[matplotlib](https://matplotlib.org/),
+[gnuplot](http://www.gnuplot.info/),
+or [Microsoft Excel](https://www.microsoft.com/en-us/microsoft-365/excel).
+
+To enable CSV output, include the following block in your input file:
+
+```
+[Outputs]
+  csv = true
+[]
+```
+
+## More Information
+
+For more information, see the [Outputs](https://mooseframework.inl.gov/syntax/Outputs/) system in MOOSE.

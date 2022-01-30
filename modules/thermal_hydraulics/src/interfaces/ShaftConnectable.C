@@ -1,0 +1,40 @@
+#include "ShaftConnectable.h"
+#include "Component.h"
+
+InputParameters
+ShaftConnectable::validParams()
+{
+  InputParameters params = emptyInputParameters();
+  return params;
+}
+
+ShaftConnectable::ShaftConnectable(const Component * const component)
+  : _moment_of_inertia_var_name(component->genName(component->name(), "moment_of_inertia")),
+    _torque_var_name(component->genName(component->name(), "torque")),
+    _user_object_name(component->genName(component->name(), "shaftconnected_uo"))
+{
+}
+
+VariableName
+ShaftConnectable::getMomentofInertiaVariableName() const
+{
+  return _moment_of_inertia_var_name;
+}
+
+VariableName
+ShaftConnectable::getTorqueVariableName() const
+{
+  return _torque_var_name;
+}
+
+UserObjectName
+ShaftConnectable::getShaftConnectedUserObjectName() const
+{
+  return _user_object_name;
+}
+
+void
+ShaftConnectable::setShaftName(const std::string & name) const
+{
+  _shaft_name = name;
+}

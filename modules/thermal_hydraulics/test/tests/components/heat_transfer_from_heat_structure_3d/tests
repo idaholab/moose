@@ -1,0 +1,96 @@
+[Tests]
+  # Mesh generation
+  [mesh]
+    type = RunApp
+    cli_args = 'Mesh/parallel_type=replicated --mesh-only mesh.e'
+    input = mesh.i
+    recover = false
+    max_parallel = 1
+  []
+  # Energy conservation
+  [phy:conservation]
+    type = CSVDiff
+    input = 'phy.conservation.i'
+    csvdiff = 'phy.conservation.csv'
+    abs_zero = 1e-9
+    prereq = mesh
+    max_parallel = 1
+    ad_indexing_type = 'global'
+  []
+  [phy:conservation_ss]
+    type = CSVDiff
+    input = 'phy.conservation_ss.i'
+    csvdiff = 'phy.conservation_ss.csv'
+    abs_zero = 1e-6
+    max_time = 6000
+    prereq = mesh
+    max_parallel = 1
+    ad_indexing_type = 'global'
+  []
+  [phy:conservation_ss_inv]
+    type = CSVDiff
+    input = 'phy.conservation_ss.i'
+    csvdiff = 'phy.conservation_ss.csv'
+    cli_args = "Components/fch/position='0 0 1' Components/fch/orientation='0 0 -1'"
+    abs_zero = 1e-6
+    max_time = 6000
+    prereq = mesh
+    max_parallel = 1
+    ad_indexing_type = 'global'
+  []
+  # Error checking
+  [err:not_a_pipe]
+    type = 'RunException'
+    input = 'phy.conservation.i'
+    cli_args = "Components/ht/flow_channels='in'"
+    expect_err = "ht: The component 'in' is not of type 'FlowChannel1Phase'."
+    prereq = mesh
+  []
+  [err:fch_orientation]
+    type = 'RunException'
+    input = 'phy.conservation.i'
+    cli_args = "Components/fch/orientation='1 0 1'"
+    expect_err = "ht: The flow channel 'fch' must be aligned with the x-, y-, or z- axis."
+    prereq = mesh
+  []
+  [err:not_3d_hs]
+    type = 'RunException'
+    input = 'err.not_a_3d_hs.i'
+    expect_err = "ht: The component 'blk' is not a HeatStructureFromFile3D component."
+  []
+  [err:non_existent_boundary]
+    type = 'RunException'
+    input = 'err.multi_fchs.i'
+    cli_args = "Components/fch1/orientation='0 0 1' Components/fch2/orientation='0 0 1' Components/ht/boundary=asdf"
+    expect_err = "ht: The boundary 'asdf' \(.+\) was not found."
+  []
+  [err:differently_aligned_channels]
+    type = 'RunException'
+    input = 'err.multi_fchs.i'
+    cli_args = "Components/fch1/orientation='0 0 1' Components/fch2/orientation='0 1 0'"
+    expect_err = "ht: Flow channel 'fch2' has a different axis alignment \(1\). Make sure all flow channels are aligned with the same axis."
+  []
+  [err:different_n_elems]
+    type = 'RunException'
+    input = 'err.multi_fchs.i'
+    cli_args = "Components/fch1/orientation='0 0 1' Components/fch2/orientation='0 0 1' Components/fch2/n_elems=7"
+    expect_err = "ht: Flow channel 'fch2' has 7 elements which is inconsistent with the rest of the flow channels. Make sure all flow channels have the same number of elements."
+  []
+  [err:different_lengths]
+    type = 'RunException'
+    input = 'err.multi_fchs.i'
+    cli_args = "Components/fch1/orientation='0 0 1' Components/fch2/orientation='0 0 1' Components/fch2/length=2"
+    expect_err = "ht: Flow channel 'fch2' has length equal to 2 which is inconsistent with the rest of the flow channels. Make sure all flow channels have the length."
+  []
+  # Jacobians
+  [jac]
+    type = 'PetscJacobianTester'
+    input = 'jac.1phase.i'
+    ratio_tol = 1.3e-2
+    difference_tol = 35000
+    cli_args = "Debug/check_jacobian=true"
+    prereq = mesh
+    max_parallel = 1
+    ad_indexing_type = 'global'
+  []
+[]

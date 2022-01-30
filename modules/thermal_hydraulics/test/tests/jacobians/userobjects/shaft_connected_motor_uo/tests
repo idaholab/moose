@@ -1,0 +1,11 @@
+[Tests]
+  [test]
+    type = 'PetscJacobianTester'
+    input = 'shaft_connected_motor.i'
+    ratio_tol = 1e-8
+    difference_tol = 1e-7
+    max_threads = 1
+    max_parallel = 1
+    allow_test_objects = true
+  []
+[]

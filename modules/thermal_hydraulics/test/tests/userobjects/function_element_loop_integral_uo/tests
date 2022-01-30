@@ -1,0 +1,8 @@
+[Tests]
+  [test]
+    type = CSVDiff
+    input = 'function_element_loop_integral_uo.i'
+    csvdiff = 'function_element_loop_integral_uo_out.csv'
+    allow_test_objects = true
+  []
+[]

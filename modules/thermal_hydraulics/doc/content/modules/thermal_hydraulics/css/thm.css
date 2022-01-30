@@ -1,0 +1,300 @@
+.main {
+  line-height: 1.25;
+}
+
+.section {
+  padding-bottom: 0.5em
+}
+
+/* code block are light gray */
+:not(pre) > code[class*="language-"],
+pre[class*="language-"] {
+    border: 1px solid #666;
+    border: 0;
+    background-color: #eee;
+}
+
+.section {
+  margin-bottom: 0.5rem;
+}
+
+h1 {
+  margin-top: 0;
+  margin-bottom: 0.5em;
+}
+
+h2 {
+  font-size: 160%;
+}
+
+h3 {
+  font-size: 130%;
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+p {
+  margin-top: 0;
+  margin-bottom: 1em;
+}
+
+pre.moose-pre {
+    margin-top; 0;
+    margin-bottom: 1em;
+}
+
+.moose-table-div {
+    margin-bottom: 1em;
+}
+
+code[class*="language-"] {
+    text-shadow: none
+}
+
+.token.punctuation {
+    color: #08080D;
+}
+
+/* redefine the little toolbar for code blocks */
+pre.code-toolbar:hover > .toolbar {
+    opacity: 1;
+}
+
+pre.code-toolbar > .toolbar a,
+pre.code-toolbar > .toolbar button,
+pre.code-toolbar > .toolbar span {
+    font-size: .8em;
+    padding: 0 .5em;
+    box-shadow: none;
+    border-radius: .5em;
+}
+
+pre.code-toolbar > .toolbar a:hover,
+pre.code-toolbar > .toolbar a:focus,
+pre.code-toolbar > .toolbar button:hover,
+pre.code-toolbar > .toolbar button:focus,
+pre.code-toolbar > .toolbar span:hover,
+pre.code-toolbar > .toolbar span:focus {
+    text-decoration: none;
+}
+
+@media (prefers-color-scheme: light) {
+  pre.moose-pre  {
+      background-color: #eee;
+  }
+
+  code[class*="language-"] {
+      color: #444;
+  }
+
+  pre.code-toolbar > .toolbar a,
+  pre.code-toolbar > .toolbar button,
+  pre.code-toolbar > .toolbar span {
+      color: #eee;
+      background: rgba(0, 0, 0, 0.2);
+  }
+
+  pre.code-toolbar > .toolbar a:hover,
+  pre.code-toolbar > .toolbar a:focus,
+  pre.code-toolbar > .toolbar button:hover,
+  pre.code-toolbar > .toolbar button:focus,
+  pre.code-toolbar > .toolbar span:hover,
+  pre.code-toolbar > .toolbar span:focus {
+      color: #fff;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  h1, h2, h3, h4, h5, h6 {
+    color: #c8c8c8;
+  }
+
+  pre.moose-pre {
+      background-color: #111;
+  }
+
+  code[class*="language-"] {
+      color: #aaa;
+  }
+
+  pre.code-toolbar > .toolbar a,
+  pre.code-toolbar > .toolbar button,
+  pre.code-toolbar > .toolbar span {
+      color: #aaa;
+      background: rgba(0, 0, 0, 0.2);
+  }
+
+  pre.code-toolbar > .toolbar a:hover,
+  pre.code-toolbar > .toolbar a:focus,
+  pre.code-toolbar > .toolbar button:hover,
+  pre.code-toolbar > .toolbar button:focus,
+  pre.code-toolbar > .toolbar span:hover,
+  pre.code-toolbar > .toolbar span:focus {
+      color: #fff;
+  }
+
+  .moose-table-div table thead {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.82);
+  }
+  tr {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.82);
+  }
+}
+
+/* do not highlight the row on mouse hover */
+.moose-table-div tr:hover
+{
+    background: inherit;
+}
+
+/* no shadow for bread crumbs */
+nav {
+  -webkit-box-shadow: none;
+  box-shadow: none;
+}
+
+.steps>ol {
+    list-style: none;
+    counter-reset: li;
+    position: relative;
+    padding-left: 16px;
+}
+
+.steps>ol>li::before {
+    content: counter(li);
+    counter-increment: li;
+    font-weight: 700;
+    position: absolute;
+    left: 0;
+    text-align: right;
+    width: 16px;
+    color: #AAA;
+}
+
+div.alert2 {
+  border-radius: 4px;
+  margin-bottom: 10px;
+  margin-top: 10px;
+  padding: 1em;
+  font-size: 87.5%;
+}
+
+div.alert2>p {
+  margin: 0;
+}
+
+@media (prefers-color-scheme: light) {
+  div.alert2.note, div.alert2.tip {
+    border: 1px solid rgb(41, 137, 211);
+    background-color: rgb(225, 243, 256);
+  }
+
+  div.alert2.warning {
+    border: 1px solid rgb(191, 53, 54);
+    background-color: rgb(252, 236, 234);
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  div.alert2.note, div.alert2.tip {
+    border: 1px solid rgb(51, 113, 227);
+    background-color: rgb(24, 35, 56);
+  }
+
+  div.alert2.warning {
+    border: 1px solid rgb(201, 69, 60);
+    background-color: rgb(46, 28, 31);
+  }
+}
+
+.footer {
+  font-size: 90%;
+}
+
+h3.footer {
+  font-weight: bold;
+  color: #888;
+  margin-bottom: 1rem;
+  font-size: 110%;
+}
+
+li {
+  margin-bottom: 0.33em;
+}
+
+div.tutorial.row {
+}
+
+div.tutorial.row > div > h3 {
+  font-weight: 700;
+  font-size: 105%;
+  color: #444;
+}
+
+div.tutorial-content>div>ol {
+  padding-left: 0;
+  list-style: none;
+  counter-reset: li;
+  position: relative;
+  padding-left: 24px;
+}
+
+div.tutorial-content>div>ol>li {
+  padding-left: 0;
+}
+
+div.tutorial-content>div>ol>li::before {
+  content: counter(li);
+  counter-increment: li;
+  font-weight: 700;
+  position: absolute;
+  left: 0;
+  text-align: right;
+  width: 24px;
+  color: #AAA;
+}
+
+div.tutorial-nav.row>div>div>a.moose-content-next {
+  float: none;
+}
+
+.smaller {
+  font-size: 90%;
+}
+
+div.enumerate {
+  padding-left: 0;
+}
+
+div.enumerate>ul.browser-default {
+  margin-left: 0;
+  list-style: none;
+  position: relative;
+  padding-left: 16px;
+}
+
+div.enumerate>ul.browser-default>li {
+  /* padding-left: 0; */
+  margin-left: 0;
+}
+
+div.enumerate>ul.browser-default>li::before {
+  content: "\2013\a0";
+  position: absolute;
+  left: 0;
+  text-align: right;
+  width: 16px;
+}
+
+.snippet {
+  margin: 0 auto 1em auto;
+  width: 90%;
+  border-radius: 4px;
+  border: 2px solid rgb(209, 215, 221);
+  padding: 1em;
+  background-color: #fcfcfc;
+}
+
+.snippet > p:first {
+  margin-top: 0;
+}

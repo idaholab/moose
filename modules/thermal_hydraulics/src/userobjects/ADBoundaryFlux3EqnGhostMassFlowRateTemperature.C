@@ -1,0 +1,77 @@
+#include "ADBoundaryFlux3EqnGhostMassFlowRateTemperature.h"
+#include "THMIndices3Eqn.h"
+#include "SinglePhaseFluidProperties.h"
+#include "Numerics.h"
+
+registerMooseObject("ThermalHydraulicsApp", ADBoundaryFlux3EqnGhostMassFlowRateTemperature);
+
+InputParameters
+ADBoundaryFlux3EqnGhostMassFlowRateTemperature::validParams()
+{
+  InputParameters params = ADBoundaryFlux3EqnGhostBase::validParams();
+
+  params.addClassDescription(
+      "Computes a boundary flux from a specified mass flow rate and temperature for the 1-D, "
+      "1-phase, variable-area Euler equations using a ghost cell");
+
+  params.addRequiredParam<Real>("mass_flow_rate", "Specified mass flow rate");
+  params.addRequiredParam<Real>("T", "Specified temperature");
+  params.addParam<bool>("reversible", true, "True for reversible, false for pure inlet");
+
+  params.addRequiredParam<UserObjectName>("fluid_properties",
+                                          "Name of single-phase fluid properties user object");
+
+  params.declareControllable("mass_flow_rate T");
+  return params;
+}
+
+ADBoundaryFlux3EqnGhostMassFlowRateTemperature::ADBoundaryFlux3EqnGhostMassFlowRateTemperature(
+    const InputParameters & parameters)
+  : ADBoundaryFlux3EqnGhostBase(parameters),
+
+    _rhouA(getParam<Real>("mass_flow_rate")),
+    _T(getParam<Real>("T")),
+    _reversible(getParam<bool>("reversible")),
+    _fp(getUserObject<SinglePhaseFluidProperties>("fluid_properties"))
+{
+}
+
+std::vector<ADReal>
+ADBoundaryFlux3EqnGhostMassFlowRateTemperature::getGhostCellSolution(
+    const std::vector<ADReal> & U) const
+{
+  const ADReal rhoA = U[THM3Eqn::CONS_VAR_RHOA];
+  const ADReal rhouA = U[THM3Eqn::CONS_VAR_RHOUA];
+  const ADReal rhoEA = U[THM3Eqn::CONS_VAR_RHOEA];
+  const ADReal A = U[THM3Eqn::CONS_VAR_AREA];
+
+  std::vector<ADReal> U_ghost(THM3Eqn::N_CONS_VAR);
+  if (!_reversible || THM::isInlet(_rhouA, _normal))
+  {
+    // Pressure is the only quantity coming from the interior
+    const ADReal rho = rhoA / A;
+    const ADReal vel = rhouA / rhoA;
+    const ADReal E = rhoEA / rhoA;
+    const ADReal e = E - 0.5 * vel * vel;
+    const ADReal p = _fp.p_from_v_e(1.0 / rho, e);
+
+    const ADReal rho_b = _fp.rho_from_p_T(p, _T);
+    const ADReal vel_b = _rhouA / (rho_b * A);
+    const ADReal e_b = _fp.e_from_p_rho(p, rho_b);
+    const ADReal E_b = e_b + 0.5 * vel_b * vel_b;
+
+    U_ghost[THM3Eqn::CONS_VAR_RHOA] = rho_b * A;
+    U_ghost[THM3Eqn::CONS_VAR_RHOUA] = _rhouA;
+    U_ghost[THM3Eqn::CONS_VAR_RHOEA] = rho_b * E_b * A;
+    U_ghost[THM3Eqn::CONS_VAR_AREA] = A;
+  }
+  else
+  {
+    U_ghost[THM3Eqn::CONS_VAR_RHOA] = rhoA;
+    U_ghost[THM3Eqn::CONS_VAR_RHOUA] = _rhouA;
+    U_ghost[THM3Eqn::CONS_VAR_RHOEA] = rhoEA;
+    U_ghost[THM3Eqn::CONS_VAR_AREA] = A;
+  }
+
+  return U_ghost;
+}

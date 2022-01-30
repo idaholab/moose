@@ -1,0 +1,7 @@
+[Tests]
+  [err:mixed_heat_modes]
+    type = 'RunException'
+    input = 'err.mixed_heat_modes.i'
+    expect_err = "Heat sources for a flow channel must be all of temperature type or all of heat flux type"
+  []
+[]

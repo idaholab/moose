@@ -1,0 +1,11 @@
+[Tests]
+  [mass_free_constraint]
+    type = 'PetscJacobianTester'
+    input = 'mass_free_constraint.i'
+    ratio_tol = 5e-6
+    difference_tol = 5e-6
+    max_threads = 1
+    max_parallel = 1
+    allow_test_objects = true
+  []
+[]

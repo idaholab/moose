@@ -1,0 +1,18 @@
+[Tests]
+  [phy:]
+    type = 'Exodiff'
+    input = 'phy.test.i'
+    exodiff = 'phy.test_out.e'
+    max_parallel = 1
+    ad_indexing_type = 'global'
+  []
+  [enumeration_option]
+    type = RunException
+    input = 'phy.test.i'
+    cli_args = "GlobalParams/closures=none"
+    allow_deprecated = False
+    expect_err = 'The closures system now uses objects created in the input file'
+    max_parallel = 1
+    ad_indexing_type = 'global'
+  []
+[]

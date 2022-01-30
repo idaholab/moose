@@ -1,0 +1,18 @@
+[Tests]
+  [power_profile]
+    type = 'Exodiff'
+    input = 'power_profile.i'
+    exodiff = 'power_profile.e'
+    max_parallel = 1
+    ad_indexing_type = 'global'
+  []
+
+  [surrogate_power_profile]
+    type = 'Exodiff'
+    input = 'surrogate_power_profile.i'
+    exodiff = 'surrogate_power_profile_out.e'
+    prereq = 'power_profile'
+    max_parallel = 1
+    ad_indexing_type = 'global'
+  []
+[]

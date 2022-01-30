@@ -1,0 +1,11 @@
+[Tests]
+  [test]
+    type = 'CSVDiff'
+    input = 'test.i'
+    csvdiff = 'test_out.csv'
+    rel_err = 1e-10
+    requirement = 'The system shall compute convective heat flux between fluid and wall temperature for 1-phase flow'
+    design = 'ConvectiveHeatFlux1PhaseAux.md'
+    issues = '#60'
+  []
+[]

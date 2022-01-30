@@ -1,0 +1,18 @@
+[Tests]
+  [phy:q_wall_multiple_3eqn]
+    type = 'CSVDiff'
+    input = 'phy.q_wall_multiple_3eqn.i'
+    csvdiff = 'phy.q_wall_multiple_3eqn_out.csv'
+    max_parallel = 1
+    ad_indexing_type = 'global'
+  []
+
+  [phy.energy_heatflux_ss_1phase]
+    type = 'CSVDiff'
+    input = 'phy.energy_heatflux_ss_1phase.i'
+    csvdiff = 'phy.energy_heatflux_ss_1phase_out.csv'
+    abs_zero = 1e-8
+    max_parallel = 1
+    ad_indexing_type = 'global'
+  []
+[]

@@ -1,0 +1,13 @@
+[Tests]
+  [non_ad]
+    type = 'CSVDiff'
+    input = 'sampler_1d_real.i'
+    csvdiff = 'out_test_property_vpp_0001.csv'
+  []
+  [ad]
+    type = 'CSVDiff'
+    input = 'ad_sampler_1d_real.i'
+    csvdiff = 'ad_sampler_1d_real_out_test_vpp_0000.csv'
+    recover = False
+  []
+[]

@@ -1,0 +1,21 @@
+[Tests]
+  [test]
+    type = 'RunApp'
+    input = 'test.i'
+    expect_out = "Loop 1:
+\s+hx/primary
+\s+pri_inlet
+\s+pri_outlet
+
+\s+Loop 2:
+\s+hx/secondary
+\s+sec_inlet
+\s+sec_outlet"
+    max_parallel = 1
+    ad_indexing_type = 'global'
+
+    requirement = 'The system shall allow nesting components into groups in input files'
+    design = 'ComponentGroup.md'
+    issues = '#94'
+  []
+[]
