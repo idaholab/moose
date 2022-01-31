@@ -61,7 +61,7 @@ inlet_velocity = 0.001
   []
   [scalar]
     type = MooseVariableFVReal
-    initial_condition = 0.2
+    initial_condition = 0.1
   []
 []
 
@@ -169,10 +169,8 @@ inlet_velocity = 0.001
 
   # Scalar concentration equation
   [scalar_time]
-    type = WCNSFVScalarTimeDerivative
+    type = FVTimeKernel
     variable = scalar
-    rho = rho
-    drho_dt = drho_dt
   []
   [scalar_advection]
     type = INSFVScalarFieldAdvection
@@ -273,7 +271,7 @@ inlet_velocity = 0.001
   []
   [inlet_scalar_flux]
     type = Receiver
-    default = ${fparse 1980 * inlet_velocity * 0.2 * inlet_area}
+    default = ${fparse inlet_velocity * 0.2 * inlet_area}
   []
 []
 

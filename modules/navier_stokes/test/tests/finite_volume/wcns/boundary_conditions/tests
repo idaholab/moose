@@ -59,18 +59,6 @@
       detail = 'using the inlet mass flow rate to compute the fluxes'
     []
   []
-  [constant_scalar_conc]
-    type = 'Exodiff'
-    input = 'flux-bcs-no-scalar-source.i'
-    exodiff = 'flux-bcs-no-scalar-source_out.e'
-    method = "!dbg"
-    ad_indexing_type = 'global'
-    abs_zero = 1e-9
-    recover = false # see #19126
-    issues = '#19543'
-    design = 'WCNSFVMassFluxBC.md WCNSFVMomentumFluxBC.md WCNSFVEnergyFluxBC.md WCNSFVScalarFluxBC.md'
-    requirement = 'The system shall show a constant scalar field concentration matching the inlet condition when no sources are present.'
-  []
   [exceptions_dirichlet_bcs]
     issues = '#18086'
     design = 'WCNSFVInletVelocityBC.md WCNSFVInletTemperatureBC.md'
