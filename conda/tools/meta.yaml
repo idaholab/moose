@@ -14,6 +14,7 @@ build:
 requirements:
   build:
     - {{ moose_python }}
+    - {{ pin_compatible('setuptools', lower_bound='58', upper_bound='60') }}
 
   run:
     - {{ moose_cc }}
@@ -46,6 +47,7 @@ requirements:
     - {{ moose_mako }}
     - {{ moose_sympy }}
     - {{ moose_deepdiff }}
+    - {{ pin_compatible('setuptools', lower_bound='58', upper_bound='60') }}
     - clang-tools
     - python
 

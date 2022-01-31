@@ -25,6 +25,7 @@ requirements:
 
   run:
     - {{ moose_cxx }}
+    - {{ pin_compatible('setuptools', lower_bound='58', upper_bound='60') }}
     - python
 
 test:

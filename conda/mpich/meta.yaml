@@ -57,6 +57,7 @@ requirements:
     - automake                  # [osx]
     - libtool                   # [osx]
     - make                      # [osx]
+    - {{ pin_compatible('setuptools', lower_bound='58', upper_bound='60') }}
     - mpi 1.0 mpich
 test:
   script: run_test.sh
