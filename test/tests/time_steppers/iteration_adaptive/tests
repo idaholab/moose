@@ -100,6 +100,12 @@
     requirement = "MOOSE shall support the ability to force time steps to resolve
     sudden changes in piecewise linear functions."
   [../]
+  [./piecewise_constant]
+    type = 'CSVDiff'
+    input = 'piecewise_constant.i'
+    csvdiff = 'piecewise_constant_out.csv'
+    requirement = "MOOSE shall support the ability to force time steps to match changes in piecewise constant functions."
+  [../]
 
   [./multi_piecewise_linear_function_point]
     type = 'CSVDiff'
@@ -114,5 +120,12 @@
     csvdiff = 'multi_piecewise_linear_function_change.csv'
     cli_args = "Executioner/TimeStepper/max_function_change=0.5 Outputs/file_base=multi_piecewise_linear_function_change"
     requirement = "MOOSE shall support the ability to force time steps to resolve sudden changes in multiple piecewise linear functions."
+  [../]
+
+  [./multi_piecewise_function_point]
+    type = 'CSVDiff'
+    input = 'multi_piecewise.i'
+    csvdiff = 'multi_piecewise_out.csv'
+    requirement = "MOOSE shall support the ability to force time steps to hit all nodes in a set of piecewise linear and constant functions."
   [../]
 []
