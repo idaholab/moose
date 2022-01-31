@@ -79,8 +79,6 @@ inlet_velocity = 0.001
     variable = pressure
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
-    u = u
-    v = v
     rho = ${rho}
   []
 
@@ -96,8 +94,6 @@ inlet_velocity = 0.001
     variable = u
     velocity_interp_method = ${velocity_interp_method}
     advected_interp_method = ${advected_interp_method}
-    u = u
-    v = v
     rho = ${rho}
     momentum_component = 'x'
   []
@@ -126,8 +122,6 @@ inlet_velocity = 0.001
     variable = v
     velocity_interp_method = ${velocity_interp_method}
     advected_interp_method = ${advected_interp_method}
-    u = u
-    v = v
     rho = ${rho}
     momentum_component = 'y'
   []
@@ -162,9 +156,6 @@ inlet_velocity = 0.001
     variable = T
     velocity_interp_method = ${velocity_interp_method}
     advected_interp_method = ${advected_interp_method}
-    u = u
-    v = v
-    rho = ${rho}
   []
   [heat_source]
     type = FVCoupledForce

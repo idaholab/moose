@@ -57,8 +57,6 @@ two_term_boundary_expansion=true
     variable = pressure
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
-    u = u
-    v = v
     rho = ${rho}
   []
   [mass_forcing]
@@ -72,8 +70,6 @@ two_term_boundary_expansion=true
     variable = u
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
-    u = u
-    v = v
     rho = ${rho}
     momentum_component = 'x'
   []
@@ -101,8 +97,6 @@ two_term_boundary_expansion=true
     variable = v
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
-    u = u
-    v = v
     rho = ${rho}
     momentum_component = 'y'
   []

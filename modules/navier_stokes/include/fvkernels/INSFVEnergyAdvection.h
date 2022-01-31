@@ -9,13 +9,13 @@
 
 #pragma once
 
-#include "INSFVMomentumAdvection.h"
+#include "INSFVAdvectionKernel.h"
 
 /**
  * An advection kernel that implements interpolation schemes specific to Navier-Stokes flow
  * physics
  */
-class INSFVEnergyAdvection : public INSFVMomentumAdvection
+class INSFVEnergyAdvection : public INSFVAdvectionKernel
 {
 public:
   static InputParameters validParams();

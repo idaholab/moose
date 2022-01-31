@@ -74,15 +74,12 @@ velocity_interp_method='rc'
 []
 
 [FVKernels]
-  inactive = 'u_advection_porosity_gradient'
   [mass]
     type = PINSFVMassAdvection
     variable = pressure
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
-    u = u
     rho = ${rho}
-    porosity = porosity
   []
 
   [u_advection]
@@ -90,7 +87,6 @@ velocity_interp_method='rc'
     variable = u
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
-    u = u
     rho = ${rho}
     porosity = porosity
     momentum_component = 'x'
@@ -108,15 +104,6 @@ velocity_interp_method='rc'
     pressure = pressure
     porosity = porosity
     momentum_component = 'x'
-  []
-  [u_advection_porosity_gradient]
-    type = PINSFVMomentumAdvectionPorosityGradient
-    variable = u
-    u = u
-    rho = ${rho}
-    porosity = porosity
-    momentum_component = 'x'
-    smooth_porosity = true
   []
 []
 

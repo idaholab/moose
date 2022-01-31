@@ -51,7 +51,8 @@ public:
   virtual ~INSFVMomentumResidualObject() = default;
 
 protected:
-  /// The Rhie-Chow user object that holds the 'a' and 'B' data structures
+  /// The Rhie-Chow user object that holds the 'a' and 'B' data structures which we will be feeding
+  /// data to
   INSFVRhieChowInterpolator & _rc_uo;
 
   /// index x|y|z

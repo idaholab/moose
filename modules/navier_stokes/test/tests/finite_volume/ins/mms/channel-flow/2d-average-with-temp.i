@@ -4,7 +4,6 @@ k=1.1
 cp=1.1
 advected_interp_method='average'
 velocity_interp_method='average'
-velocity='velocity'
 
 [Mesh]
   [gen]
@@ -64,8 +63,6 @@ velocity='velocity'
     variable = pressure
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
-    u = u
-    v = v
     rho = ${rho}
   []
   [mass_forcing]
@@ -79,8 +76,6 @@ velocity='velocity'
     variable = u
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
-    u = u
-    v = v
     rho = ${rho}
     momentum_component = 'x'
   []
@@ -108,8 +103,6 @@ velocity='velocity'
     variable = v
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
-    u = u
-    v = v
     rho = ${rho}
     momentum_component = 'y'
   []
@@ -142,14 +135,11 @@ velocity='velocity'
     variable = temperature
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
-    u = u
-    v = v
-    rho = ${rho}
   []
   [temp_forcing]
     type = FVBodyForce
     variable = temperature
-    functor = forcing_t
+    function = forcing_t
   []
 []
 

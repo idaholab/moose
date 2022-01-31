@@ -87,8 +87,6 @@ restricted_blocks = '1'
     variable = pressure
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
-    u = u
-    v = v
     rho = ${rho}
   []
 
@@ -97,8 +95,6 @@ restricted_blocks = '1'
     variable = u
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
-    u = u
-    v = v
     rho = ${rho}
     momentum_component = 'x'
   []
@@ -120,8 +116,6 @@ restricted_blocks = '1'
     variable = v
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
-    u = u
-    v = v
     rho = ${rho}
     momentum_component = 'y'
   []
@@ -143,9 +137,6 @@ restricted_blocks = '1'
     variable = temperature
     velocity_interp_method = ${velocity_interp_method}
     advected_interp_method = ${advected_interp_method}
-    u = u
-    v = v
-    rho = ${rho}
   []
   [energy_diffusion]
     type = FVDiffusion
@@ -163,9 +154,6 @@ restricted_blocks = '1'
     variable = scalar
     velocity_interp_method = ${velocity_interp_method}
     advected_interp_method = ${advected_interp_method}
-    u = u
-    v = v
-    rho = ${rho}
   []
   [scalar_diffusion]
     type = FVDiffusion

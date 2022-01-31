@@ -79,8 +79,6 @@ cp = 1
   [mass]
     type = INSFVMassAdvection
     variable = pressure
-    u = u
-    v = v
     rho = ${rho}
   []
   [mean_zero_pressure]
@@ -92,8 +90,6 @@ cp = 1
   [u_advection]
     type = INSFVMomentumAdvection
     variable = u
-    u = u
-    v = v
     rho = ${rho}
     momentum_component = 'x'
   []
@@ -113,8 +109,6 @@ cp = 1
   [v_advection]
     type = INSFVMomentumAdvection
     variable = v
-    u = u
-    v = v
     rho = ${rho}
     momentum_component = 'y'
   []
@@ -139,9 +133,6 @@ cp = 1
   [temp_advection]
     type = INSFVEnergyAdvection
     variable = T
-    u = u
-    v = v
-    rho = ${rho}
   []
 
   [solid_temp_conduction]

@@ -126,16 +126,12 @@ ref_delta_P = ${fparse f * L / D * rho * bulk_u^2 / 2}
   [mass]
     type = INSFVMassAdvection
     variable = pressure
-    u = u
-    v = v
     rho = ${rho}
   []
 
   [u_advection]
     type = INSFVMomentumAdvection
     variable = u
-    u = u
-    v = v
     rho = ${rho}
     momentum_component = 'x'
   []
@@ -164,8 +160,6 @@ ref_delta_P = ${fparse f * L / D * rho * bulk_u^2 / 2}
   [v_advection]
     type = INSFVMomentumAdvection
     variable = v
-    u = u
-    v = v
     rho = ${rho}
     momentum_component = 'y'
   []

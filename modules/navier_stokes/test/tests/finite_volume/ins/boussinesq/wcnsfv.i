@@ -126,8 +126,6 @@ hot_temp=310
     variable = pressure
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
-    u = u
-    v = v
     rho = ${rho}
   []
   [mean_zero_pressure]
@@ -142,8 +140,6 @@ hot_temp=310
     variable = u
     velocity_interp_method = ${velocity_interp_method}
     advected_interp_method = ${advected_interp_method}
-    u = u
-    v = v
     rho = ${rho}
     momentum_component = 'x'
   []
@@ -172,8 +168,6 @@ hot_temp=310
     variable = v
     velocity_interp_method = ${velocity_interp_method}
     advected_interp_method = ${advected_interp_method}
-    u = u
-    v = v
     rho = ${rho}
     momentum_component = 'y'
   []
@@ -207,9 +201,6 @@ hot_temp=310
     variable = T
     velocity_interp_method = ${velocity_interp_method}
     advected_interp_method = ${advected_interp_method}
-    u = u
-    v = v
-    rho = ${rho}
   []
 []
 

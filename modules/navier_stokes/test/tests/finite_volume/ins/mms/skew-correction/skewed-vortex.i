@@ -20,8 +20,8 @@ rho=1.0
 [UserObjects]
   [rc]
     type = INSFVRhieChowInterpolator
-    u = u
-    v = v
+    u = vel_x
+    v = vel_y
     pressure = pressure
   []
 []
@@ -53,8 +53,6 @@ rho=1.0
     variable = pressure
     advected_interp_method = 'skewness-corrected'
     velocity_interp_method = 'rc'
-    u = vel_x
-    v = vel_y
     rho = ${rho}
   []
   [mean_zero_pressure]
@@ -68,8 +66,6 @@ rho=1.0
     variable = vel_x
     advected_interp_method = 'skewness-corrected'
     velocity_interp_method = 'rc'
-    u = vel_x
-    v = vel_y
     rho = ${rho}
     momentum_component = 'x'
   []
@@ -97,8 +93,6 @@ rho=1.0
     variable = vel_y
     advected_interp_method = 'skewness-corrected'
     velocity_interp_method = 'rc'
-    u = vel_x
-    v = vel_y
     rho = ${rho}
     momentum_component = 'y'
   []

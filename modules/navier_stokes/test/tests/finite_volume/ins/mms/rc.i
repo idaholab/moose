@@ -58,8 +58,6 @@ rho=1.1
     type = INSFVMassAdvection
     variable = pressure
     advected_interp_method = 'average'
-    u = u
-    v = v
     rho = ${rho}
   []
   [mass_forcing]
@@ -77,8 +75,6 @@ rho=1.1
     type = INSFVMomentumAdvection
     variable = u
     advected_interp_method = 'average'
-    u = u
-    v = v
     rho = ${rho}
     momentum_component = 'x'
   []
@@ -105,8 +101,6 @@ rho=1.1
     type = INSFVMomentumAdvection
     variable = v
     advected_interp_method = 'average'
-    u = u
-    v = v
     rho = ${rho}
     momentum_component = 'y'
   []

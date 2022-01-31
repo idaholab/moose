@@ -87,8 +87,6 @@ advected_interp_method = 'average'
     variable = pressure
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
-    u = u
-    v = v
     rho = ${rho}
   []
   [mean_zero_pressure]
@@ -108,8 +106,6 @@ advected_interp_method = 'average'
     variable = u
     velocity_interp_method = ${velocity_interp_method}
     advected_interp_method = ${advected_interp_method}
-    u = u
-    v = v
     rho = ${rho}
     momentum_component = 'x'
   []
@@ -137,8 +133,6 @@ advected_interp_method = 'average'
     variable = v
     velocity_interp_method = ${velocity_interp_method}
     advected_interp_method = ${advected_interp_method}
-    u = u
-    v = v
     rho = ${rho}
     momentum_component = 'y'
   []
@@ -171,9 +165,6 @@ advected_interp_method = 'average'
     variable = T
     velocity_interp_method = ${velocity_interp_method}
     advected_interp_method = ${advected_interp_method}
-    u = u
-    v = v
-    rho = ${rho}
   []
 []
 

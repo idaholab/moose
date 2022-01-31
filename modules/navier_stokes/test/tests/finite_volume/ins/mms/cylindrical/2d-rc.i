@@ -55,8 +55,6 @@ rho=1.1
     variable = pressure
     advected_interp_method = 'average'
     velocity_interp_method = 'rc'
-    u = u
-    v = v
     rho = ${rho}
   []
   [mass_forcing]
@@ -75,8 +73,6 @@ rho=1.1
     variable = u
     advected_interp_method = 'average'
     velocity_interp_method = 'rc'
-    u = u
-    v = v
     rho = ${rho}
     momentum_component = 'x'
   []
@@ -104,8 +100,6 @@ rho=1.1
     variable = v
     advected_interp_method = 'average'
     velocity_interp_method = 'rc'
-    u = u
-    v = v
     rho = ${rho}
     momentum_component = 'y'
   []

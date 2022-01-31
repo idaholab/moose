@@ -24,11 +24,11 @@ FVMatAdvection::validParams()
       "is acting on");
 
   MooseEnum advected_interp_method("average upwind skewness-corrected", "upwind");
-
-  params.addParam<MooseEnum>("advected_interp_method",
-                             advected_interp_method,
-                             "The interpolation to use for the advected quantity. Options are "
-                             "'upwind' and 'average', with the default being 'upwind'.");
+  params.addParam<MooseEnum>(
+      "advected_interp_method",
+      advected_interp_method,
+      "The interpolation to use for the advected quantity. Options are "
+      "'upwind', 'average', and 'skewness-corrected' with the default being 'upwind'.");
   return params;
 }
 

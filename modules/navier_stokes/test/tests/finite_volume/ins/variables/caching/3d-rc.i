@@ -70,9 +70,6 @@ velocity_face_value_caching = true
     variable = pressure
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
-    u = u
-    v = v
-    w = w
     rho = ${rho}
   []
 
@@ -81,9 +78,6 @@ velocity_face_value_caching = true
     variable = u
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
-    u = u
-    v = v
-    w = w
     rho = ${rho}
     momentum_component = 'x'
   []
@@ -105,9 +99,6 @@ velocity_face_value_caching = true
     variable = v
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
-    u = u
-    v = v
-    w = w
     rho = ${rho}
     momentum_component = 'y'
   []
@@ -129,9 +120,6 @@ velocity_face_value_caching = true
     variable = w
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
-    u = u
-    v = v
-    w = w
     rho = ${rho}
     momentum_component = 'z'
   []

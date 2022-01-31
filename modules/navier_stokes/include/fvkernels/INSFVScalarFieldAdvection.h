@@ -9,15 +9,18 @@
 
 #pragma once
 
-#include "INSFVMomentumAdvection.h"
+#include "INSFVAdvectionKernel.h"
 
 /**
  * An advection kernel that implements interpolation schemes specific to Navier-Stokes flow
  * physics and that advects arbitrary scalar quantities
  */
-class INSFVScalarFieldAdvection : public INSFVMomentumAdvection
+class INSFVScalarFieldAdvection : public INSFVAdvectionKernel
 {
 public:
   static InputParameters validParams();
   INSFVScalarFieldAdvection(const InputParameters & params);
+
+protected:
+  ADReal computeQpResidual() override;
 };

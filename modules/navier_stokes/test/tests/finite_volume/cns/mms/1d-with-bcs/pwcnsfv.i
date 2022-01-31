@@ -90,9 +90,7 @@ cp=${fparse gamma*R_specific/(gamma-1)}
     variable = pressure
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
-    u = sup_vel_x
     rho = ${rho}
-    porosity = porosity
   []
   [mass_fn]
     type = FVBodyForce
@@ -105,7 +103,6 @@ cp=${fparse gamma*R_specific/(gamma-1)}
     variable = sup_vel_x
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
-    u = sup_vel_x
     rho = ${rho}
     porosity = porosity
     momentum_component = 'x'

@@ -78,9 +78,7 @@ velocity_interp_method='rc'
     variable = pressure
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
-    u = u
     rho = ${rho}
-    porosity = porosity
   []
   [mass_forcing]
     type = FVBodyForce
@@ -93,7 +91,6 @@ velocity_interp_method='rc'
     variable = u
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
-    u = u
     rho = ${rho}
     porosity = porosity
     momentum_component = 'x'

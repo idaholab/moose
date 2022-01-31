@@ -9,12 +9,12 @@
 
 #pragma once
 
-#include "PINSFVMomentumAdvection.h"
+#include "INSFVAdvectionKernel.h"
 
 /**
  * A flux kernel transporting energy in porous media across cell faces
  */
-class PINSFVEnergyAdvection : public PINSFVMomentumAdvection
+class PINSFVEnergyAdvection : public INSFVAdvectionKernel
 {
 public:
   static InputParameters validParams();

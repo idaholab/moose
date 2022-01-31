@@ -92,17 +92,12 @@ velocity_interp_method='rc'
   [mass]
     type = PINSFVMassAdvection
     variable = pressure
-    u = u
-    v = v
     rho = ${rho}
-    porosity = porosity
   []
 
   [u_advection]
     type = PINSFVMomentumAdvection
     variable = u
-    u = u
-    v = v
     rho = ${rho}
     porosity = porosity
     momentum_component = 'x'
@@ -126,8 +121,6 @@ velocity_interp_method='rc'
   [v_advection]
     type = PINSFVMomentumAdvection
     variable = v
-    u = u
-    v = v
     rho = ${rho}
     porosity = porosity
     momentum_component = 'y'
@@ -151,10 +144,6 @@ velocity_interp_method='rc'
   [temp_advection]
     type = PINSFVEnergyAdvection
     variable = temperature
-    u = u
-    v = v
-    rho = ${rho}
-    porosity = porosity
     advected_interp_method = 'upwind'
   []
   [temp_source]

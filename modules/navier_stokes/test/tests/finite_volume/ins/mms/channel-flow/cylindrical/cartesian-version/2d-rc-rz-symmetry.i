@@ -112,8 +112,6 @@ offset=0e0
   [mass]
     type = INSFVMassAdvection
     variable = pressure
-    u = u
-    v = v
     rho = ${rho}
   []
   [mass_forcing]
@@ -125,8 +123,6 @@ offset=0e0
   [u_advection]
     type = INSFVMomentumAdvection
     variable = u
-    u = u
-    v = v
     rho = ${rho}
     momentum_component = 'x'
   []
@@ -152,8 +148,6 @@ offset=0e0
   [v_advection]
     type = INSFVMomentumAdvection
     variable = v
-    u = u
-    v = v
     rho = ${rho}
     momentum_component = 'y'
   []

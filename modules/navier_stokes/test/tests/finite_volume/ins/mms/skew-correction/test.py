@@ -23,7 +23,7 @@ class TestVortexSkewCorrected(unittest.TestCase):
         for key,value in fig.label_to_slope.items():
             print("%s, %f" % (key, value))
             if key in velocity_labels:
-                self.assertTrue(fuzzyAbsoluteEqual(value, 2., .15))
+                self.assertTrue(fuzzyAbsoluteEqual(value, 2., .2))
             else:
                 self.assertTrue(fuzzyAbsoluteEqual(value, 1., .2))
 

@@ -8,8 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PINSFVMomentumAdvection.h"
-#include "INSFVPressureVariable.h"
-#include "PINSFVSuperficialVelocityVariable.h"
 #include "FVUtils.h"
 #include "MathFVUtils.h"
 #include "NS.h"
@@ -30,9 +28,6 @@ PINSFVMomentumAdvection::validParams()
 PINSFVMomentumAdvection::PINSFVMomentumAdvection(const InputParameters & params)
   : INSFVMomentumAdvection(params), _eps(getFunctor<ADReal>(NS::porosity))
 {
-  if (!dynamic_cast<const PINSFVSuperficialVelocityVariable *>(_u_var))
-    mooseError("PINSFVMomentumAdvection may only be used with a superficial advective velocity, "
-               "of variable type PINSFVSuperficialVelocityVariable.");
 }
 
 ADReal
@@ -42,7 +37,7 @@ PINSFVMomentumAdvection::computeQpResidual()
   const auto neighbor_face = neighborFromFace();
 
   // Superficial velocity interpolation
-  const auto v = _rc_uo.getVelocity(_velocity_interp_method, *_face_info, _tid);
+  const auto v = _rc_vel_provider.getVelocity(_velocity_interp_method, *_face_info, _tid);
 
   const auto interp_coeffs = Moose::FV::interpCoeffs(_advected_interp_method, *_face_info, true, v);
 

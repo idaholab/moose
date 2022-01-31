@@ -63,17 +63,12 @@ rho=1.1
   [mass]
     type = PINSFVMassAdvection
     variable = pressure
-    u = u
-    v = v
     rho = ${rho}
-    porosity = porosity
   []
 
   [u_advection]
     type = PINSFVMomentumAdvection
     variable = u
-    u = u
-    v = v
     rho = ${rho}
     porosity = porosity
     momentum_component = 'x'
@@ -96,8 +91,6 @@ rho=1.1
   [v_advection]
     type = PINSFVMomentumAdvection
     variable = v
-    u = u
-    v = v
     rho = ${rho}
     porosity = porosity
     momentum_component = 'y'

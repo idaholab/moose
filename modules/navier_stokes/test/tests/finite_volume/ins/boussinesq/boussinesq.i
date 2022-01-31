@@ -112,8 +112,6 @@ temp_ref=${fparse hot_temp / 2.}
     variable = pressure
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
-    u = u
-    v = v
     rho = ${rho}
   []
   [mean_zero_pressure]
@@ -127,8 +125,6 @@ temp_ref=${fparse hot_temp / 2.}
     variable = u
     velocity_interp_method = ${velocity_interp_method}
     advected_interp_method = ${advected_interp_method}
-    u = u
-    v = v
     rho = ${rho}
     momentum_component = 'x'
   []
@@ -166,8 +162,6 @@ temp_ref=${fparse hot_temp / 2.}
     variable = v
     velocity_interp_method = ${velocity_interp_method}
     advected_interp_method = ${advected_interp_method}
-    u = u
-    v = v
     rho = ${rho}
     momentum_component = 'y'
   []
@@ -210,9 +204,6 @@ temp_ref=${fparse hot_temp / 2.}
     variable = T
     velocity_interp_method = ${velocity_interp_method}
     advected_interp_method = ${advected_interp_method}
-    u = u
-    v = v
-    rho = ${rho}
   []
 []
 

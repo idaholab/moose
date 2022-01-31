@@ -85,16 +85,12 @@ velocity_interp_method='rc'
   [mass]
     type = INSFVMassAdvection
     variable = pressure
-    u = u
-    v = v
     rho = ${rho}
   []
 
   [u_advection]
     type = INSFVMomentumAdvection
     variable = u
-    u = u
-    v = v
     rho = ${rho}
     momentum_component = 'x'
   []
@@ -115,8 +111,6 @@ velocity_interp_method='rc'
   [v_advection]
     type = INSFVMomentumAdvection
     variable = v
-    u = u
-    v = v
     rho = ${rho}
     momentum_component = 'y'
   []
@@ -137,9 +131,6 @@ velocity_interp_method='rc'
   [temp_advection]
     type = INSFVEnergyAdvection
     variable = temperature
-    u = u
-    v = v
-    rho = ${rho}
     advected_interp_method = 'upwind'
   []
   [temp_source]
