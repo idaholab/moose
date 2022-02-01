@@ -68,4 +68,10 @@ protected:
   std::unordered_map<const DofObject *, ADReal> _dof_to_velocity;
   /// A map from node to weighted gap velocity times _dt
   std::unordered_map<const DofObject *, ADReal> _dof_to_old_velocity;
+
+  // Newmark-beta beta parameter
+  const Real _newmark_beta;
+
+  // Newmark-beta gamma parameter
+  const Real _newmark_gamma;
 };

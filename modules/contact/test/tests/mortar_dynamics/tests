@@ -1,5 +1,6 @@
 [Tests]
-  design = 'constraints/ComputeDynamicFrictionalForceLMMechanicalContact.md constraints/ComputeDynamicFrictionalForceLMMechanicalContact.md'
+  design = 'constraints/ComputeDynamicFrictionalForceLMMechanicalContact.md '
+           'constraints/ComputeDynamicFrictionalForceLMMechanicalContact.md'
   issues = '#19671'
   [block-dynamics]
     type = 'Exodiff'
@@ -12,7 +13,8 @@
     min_ad_size = '50'
     ad_indexing_type = 'global'
     cli_args = 'Executioner/dt=0.05 Executioner/end_time=0.3'
-    requirement = 'Contact module shall solve mortar normal contact between two blocks with gap time stabilization using mortar nodal geometry.'
+    requirement = 'Contact module shall solve mortar frictionless contact between two blocks with '
+                  'weighted gap time stabilization using mortar nodal geometry.'
   []
   [block-dynamics-friction]
     type = 'Exodiff'
@@ -25,6 +27,21 @@
     min_ad_size = '50'
     ad_indexing_type = 'global'
     cli_args = 'Executioner/dt=0.05 Executioner/end_time=0.3'
-    requirement = 'Contact module shall solve mortar frictional contact between two blocks with gap time stabilization using mortar nodal geometry.'
+    requirement = 'Contact module shall solve mortar frictional contact between two blocks with '
+                  'weighted gap time stabilization using mortar nodal geometry.'
   []
+  [block-dynamics-friction-creep]
+    type = 'Exodiff'
+    exodiff = 'block-dynamics-friction-creep_out.e'
+    input = 'block-dynamics-friction-creep.i'
+    rel_err = 5.0e-4
+    abs_zero = 1.0e-5
+    min_parallel = 1
+    max_parallel = 4
+    min_ad_size = '50'
+    ad_indexing_type = 'global'
+    requirement = 'Contact module shall simulate mortar frictional contact between two blocks with '
+                  'weighted gap time stabilization using mortar nodal geometry with a creep material model.'
+  []
+
 []

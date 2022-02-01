@@ -199,15 +199,10 @@ ComputeDynamicFrictionalForceLMMechanicalContact::post()
     if (dof->processor_id() != this->processor_id())
       continue;
 
-    //    const auto is_dof_on_map = _dof_to_old_weighted_gap.find(pr.first);
-    // If is_dof_on_map isn't on map, it means it's an initial step
-    //    if (is_dof_on_map == _dof_to_old_weighted_gap.end() ||
-    //        _dof_to_old_weighted_gap[pr.first] > _capture_tolerance)
-    //      _weighted_gap_ptr = &_dof_to_weighted_gap[dof].first;
-    //    else
-    //      _weighted_gap_ptr = &_dof_to_weighted_gap_dynamics[pr.first];
+    // Use always weighted gap for dynamic PDASS. Omit the dynamic weighted gap approach that is
+    // used in normal contact where the discretized gap velocity is enforced if a node has
+    // identified to be into contact.
 
-    // Use always weighted gap for dynamic PDASS
     _weighted_gap_ptr = &_dof_to_weighted_gap[dof].first;
 
     _normalization_ptr = &_dof_to_weighted_gap[dof].second;
@@ -239,14 +234,6 @@ ComputeDynamicFrictionalForceLMMechanicalContact::incorrectEdgeDroppingPost(
     if ((inactive_lm_nodes.find(static_cast<const Node *>(dof)) != inactive_lm_nodes.end()) ||
         (dof->processor_id() != this->processor_id()))
       continue;
-
-    // const auto is_dof_on_map = _dof_to_old_weighted_gap.find(pr.first);
-    // If is_dof_on_map isn't on map, it means it's an initial step
-    //    if (is_dof_on_map == _dof_to_old_weighted_gap.end() ||
-    //        _dof_to_old_weighted_gap[pr.first] > _capture_tolerance)
-    //      _weighted_gap_ptr = &_dof_to_weighted_gap[dof].first;
-    //    else
-    //      _weighted_gap_ptr = &_dof_to_weighted_gap_dynamics[pr.first];
 
     // Use always weighted gap for dynamic PDASS
     _weighted_gap_ptr = &_dof_to_weighted_gap[dof].first;
@@ -301,7 +288,7 @@ ComputeDynamicFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(
   }
   else
   {
-    Real epsilon_ad = 1.0e-14;
+    const Real epsilon_sqrt = 1.0e-14;
 
     const auto lamdba_plus_cg = contact_pressure + c * weighted_gap;
     std::array<ADReal, 2> lambda_t_plus_ctu;
@@ -311,13 +298,13 @@ ComputeDynamicFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(
     const auto term_1_x =
         std::max(_mu * lamdba_plus_cg,
                  std::sqrt(lambda_t_plus_ctu[0] * lambda_t_plus_ctu[0] +
-                           lambda_t_plus_ctu[1] * lambda_t_plus_ctu[1] + epsilon_ad)) *
+                           lambda_t_plus_ctu[1] * lambda_t_plus_ctu[1] + epsilon_sqrt)) *
         friction_lm_values[0];
 
     const auto term_1_y =
         std::max(_mu * lamdba_plus_cg,
                  std::sqrt(lambda_t_plus_ctu[0] * lambda_t_plus_ctu[0] +
-                           lambda_t_plus_ctu[1] * lambda_t_plus_ctu[1] + epsilon_ad)) *
+                           lambda_t_plus_ctu[1] * lambda_t_plus_ctu[1] + epsilon_sqrt)) *
         friction_lm_values[1];
 
     const auto term_2_x = _mu * std::max(0.0, lamdba_plus_cg) * lambda_t_plus_ctu[0];

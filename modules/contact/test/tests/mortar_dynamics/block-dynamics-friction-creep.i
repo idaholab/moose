@@ -1,5 +1,5 @@
-starting_point = 2e-1
-offset = -0.19
+starting_point = 1e-1
+offset = -0.095
 
 [GlobalParams]
   displacements = 'disp_x disp_y'
@@ -80,7 +80,7 @@ offset = -0.19
     newmark_beta = 0.25
     newmark_gamma = 0.5
     mass_damping_coefficient = 0.0
-    stiffness_damping_coefficient = 1.0
+    stiffness_damping_coefficient = 0.01
     displacements = 'disp_x disp_y'
     generate_output = 'stress_xx stress_yy'
     block = '1 2'
@@ -113,10 +113,6 @@ offset = -0.19
     activation_energy = 0
     block = '2'
   []
-  # [strain]
-  #   type = ComputeFiniteStrain
-  #   block = '1 2'
-  # []
   [stress]
     type = ComputeFiniteStrainElasticStress
     block = '1'
@@ -125,7 +121,7 @@ offset = -0.19
     type = GenericConstantMaterial
     block = '1 2'
     prop_names = 'density'
-    prop_values = '7750'
+    prop_values = '775'
   []
 []
 
@@ -145,6 +141,9 @@ offset = -0.19
     c_t = 1e4
     mu = 0.5
     interpolate_normals = false
+    newmark_beta = 0.25
+    newmark_gamma = 0.5
+    capture_tolerance = 1e-04
   []
   [normal_x]
     type = NormalMortarMechanicalContact
@@ -223,25 +222,24 @@ offset = -0.19
     type = FunctionDirichletBC
     variable = disp_x
     boundary = 30 # 50
-    function = '0.1 *sin(2 * pi / 12 * t)' # '1e-2*t'
+    function =  '1e-2*t' #'0.1 *sin(2 * pi / 12 * t)'
   []
 []
 
 [Executioner]
   type = Transient
-  end_time = 75
-  dt = 0.025
-  dtmin = .005
+  end_time = 0.25
+  dt = 0.05
+  dtmin = 0.05
   solve_type = 'PJFNK'
   petsc_options = '-snes_converged_reason -ksp_converged_reason -pc_svd_monitor '
-                  '-snes_linesearch_monitor'
+                  '-snes_linesearch_monitor -snes_ksp_ew'
   petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_shift_amount -mat_mffd_err '
-                        '-ksp_gmres_restart'
-  petsc_options_value = 'lu       NONZERO               1e-15                   1e-5          100'
-  l_max_its = 100
+  petsc_options_value = 'lu       NONZERO               1e-15                   1e-5'
   nl_max_its = 50
   line_search = 'none'
   snesmf_reuse_base = false
+
   [TimeIntegrator]
     type = NewmarkBeta
     beta = 0.25

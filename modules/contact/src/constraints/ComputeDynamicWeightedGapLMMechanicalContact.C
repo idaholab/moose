@@ -28,6 +28,10 @@ ComputeDynamicWeightedGapLMMechanicalContact::validParams()
                                     "capture_tolerance>=0",
                                     "Parameter describing a gap threshold for the application of "
                                     "the persistency constraint in dynamic simulations.");
+  params.addRequiredRangeCheckedParam<Real>(
+      "newmark_beta", "newmark_beta > 0", "Beta parameter for the Newmark time integrator");
+  params.addRequiredRangeCheckedParam<Real>(
+      "newmark_gamma", "newmark_gamma >= 0.25", "Gamma parameter for the Newmark time integrator");
 
   return params;
 }
@@ -41,11 +45,17 @@ ComputeDynamicWeightedGapLMMechanicalContact::ComputeDynamicWeightedGapLMMechani
     _secondary_y_dot(adCoupledDot("disp_y")),
     _primary_y_dot(adCoupledNeighborValueDot("disp_y")),
     _secondary_z_dot(_has_disp_z ? &adCoupledDot("disp_z") : nullptr),
-    _primary_z_dot(_has_disp_z ? &adCoupledNeighborValueDot("disp_z") : nullptr)
+    _primary_z_dot(_has_disp_z ? &adCoupledNeighborValueDot("disp_z") : nullptr),
+    _newmark_beta(getParam<Real>("newmark_beta")),
+    _newmark_gamma(getParam<Real>("newmark_gamma"))
 {
   mooseAssert(!_interpolate_normals,
               "Dynamic mortar mechanical contact constraints require the surface geometry be "
               "attached to nodes");
+
+  if (!useDual())
+    mooseError("Dynamic mortar contact constraints requires the use of Lagrange's multipliers dual "
+               "interpolation");
 }
 
 void
@@ -77,12 +87,11 @@ ComputeDynamicWeightedGapLMMechanicalContact::computeQpProperties()
   }
 
   _qp_gap_nodal = gap_vec * (_JxW_msm[_qp] * _coord[_qp]);
-
   _qp_velocity = relative_velocity * (_JxW_msm[_qp] * _coord[_qp]);
 
+  // Current part of the gap velocity Newmark-beta time discretization
   _qp_gap_nodal_dynamics =
-      (2.0 * gap_vec / _dt) * (_JxW_msm[_qp] * _coord[_qp]);
-  //    (2.0 * gap_vec / _dt / _dt - 2.0 * relative_velocity / _dt - relative_acc) *
+      (_newmark_gamma / _newmark_beta * gap_vec / _dt) * (_JxW_msm[_qp] * _coord[_qp]);
 
   // To do normalization of constraint coefficient (c_n)
   _qp_factor = _JxW_msm[_qp] * _coord[_qp];
@@ -105,7 +114,6 @@ ComputeDynamicWeightedGapLMMechanicalContact::computeQpIProperties()
 
   _dof_to_velocity[dof] += _test[_i][_qp] * _qp_velocity * _normals[_i];
 
-
   if (_normalize_c)
     _dof_to_weighted_gap[dof].second += _test[_i][_qp] * _qp_factor;
 }
@@ -120,7 +128,7 @@ ComputeDynamicWeightedGapLMMechanicalContact::timestepSetup()
     _dof_to_old_weighted_gap.emplace(map_pr.first, std::move(map_pr.second.first));
 
   for (auto & map_pr : _dof_to_velocity)
-	  _dof_to_old_velocity.emplace(map_pr);
+    _dof_to_old_velocity.emplace(map_pr);
 }
 
 void
@@ -129,8 +137,6 @@ ComputeDynamicWeightedGapLMMechanicalContact::residualSetup()
   ComputeWeightedGapLMMechanicalContact::residualSetup();
   _dof_to_weighted_gap_dynamics.clear();
   _dof_to_velocity.clear();
-
-
 }
 
 void
@@ -154,7 +160,7 @@ ComputeDynamicWeightedGapLMMechanicalContact::post()
       _weighted_gap_ptr = &pr.second.first;
     else
     {
-      ADReal term = -2.0 / _dt * _dof_to_old_weighted_gap[pr.first];
+      ADReal term = -_newmark_gamma / _newmark_beta / _dt * _dof_to_old_weighted_gap[pr.first];
       term += _dof_to_old_velocity[pr.first];
       _dof_to_weighted_gap_dynamics[pr.first] += term;
 
