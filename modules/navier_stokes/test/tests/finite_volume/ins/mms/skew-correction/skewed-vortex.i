@@ -178,7 +178,10 @@ rho=1.0
 []
 
 [Outputs]
-  exodus = true
+  [out]
+    type = Exodus
+    hide = lambda
+  []
   csv = true
 []
 
