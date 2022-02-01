@@ -170,22 +170,6 @@ ADShaftConnectedCompressor1PhaseUserObject::computeFluxesAndResiduals(const unsi
     const ADReal flow_rel_corr = flow_A / flow_B;
     const ADReal speed_rel_corr = (_omega[0] / _omega_rated) * (_c0_rated / c0_in);
 
-    if (MetaPhysicL::raw_value(speed_rel_corr) < _speeds[0])
-      mooseError(_compressor_name,
-                 ": is attempting to operate at speeds less than allowed by functions ",
-                 _Rp_function_names[0],
-                 " and ",
-                 _eff_function_names[0],
-                 ".");
-
-    if (speed_rel_corr > _speeds.back())
-      mooseError(_compressor_name,
-                 ": is attempting to operate at speeds greater than allowed by functions ",
-                 _Rp_function_names.back(),
-                 " and ",
-                 _eff_function_names.back(),
-                 ".");
-
     // If speed_rel_corr == _speeds[0], then the lower index x1 is determined to be -1
     ADReal Rp, eff;
     if (speed_rel_corr == _speeds[0])
@@ -193,13 +177,28 @@ ADShaftConnectedCompressor1PhaseUserObject::computeFluxesAndResiduals(const unsi
       Rp = _Rp_functions[0]->value(flow_rel_corr, ADPoint());
       eff = _eff_functions[0]->value(flow_rel_corr, ADPoint());
     }
-    else // linear interpolation
+    else // linear interpolation/extrapolation
     {
-      auto x1_iter = std::lower_bound(_speeds.begin(), _speeds.end(), speed_rel_corr);
-      auto x2_iter = std::upper_bound(_speeds.begin(), _speeds.end(), speed_rel_corr);
+      unsigned int x1, x2;
+      if (speed_rel_corr < _speeds[0]) // extrapolation past minimum
+      {
+        x1 = 0;
+        x2 = 1;
+      }
+      else if (speed_rel_corr > _speeds.back()) // extrapolation past maximum
+      {
+        x1 = _n_speeds - 1;
+        x2 = x1 - 1;
+      }
+      else // interpolation
+      {
+        auto x1_iter = std::lower_bound(_speeds.begin(), _speeds.end(), speed_rel_corr);
+        auto x2_iter = std::upper_bound(_speeds.begin(), _speeds.end(), speed_rel_corr);
 
-      auto x1 = (x1_iter - _speeds.begin()) - 1; // _speeds index for entry <= speed_rel_corr
-      auto x2 = (x2_iter - _speeds.begin());     // _speeds index for entry > speed_rel_corr
+        x1 = (x1_iter - _speeds.begin()) - 1; // _speeds index for entry <= speed_rel_corr
+        x2 = (x2_iter - _speeds.begin());     // _speeds index for entry > speed_rel_corr
+      }
+
       const Real x1_spd = _speeds[x1];
       const Real x2_spd = _speeds[x2];
 
