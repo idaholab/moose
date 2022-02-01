@@ -186,22 +186,34 @@ ADShaftConnectedCompressor1PhaseUserObject::computeFluxesAndResiduals(const unsi
                  _eff_function_names.back(),
                  ".");
 
-    auto x1_iter = std::lower_bound(_speeds.begin(), _speeds.end(), speed_rel_corr);
-    auto x2_iter = std::upper_bound(_speeds.begin(), _speeds.end(), speed_rel_corr);
+    // If speed_rel_corr == _speeds[0], then the lower index x1 is determined to be -1
+    ADReal Rp, eff;
+    if (speed_rel_corr == _speeds[0])
+    {
+      Rp = _Rp_functions[0]->value(flow_rel_corr, ADPoint());
+      eff = _eff_functions[0]->value(flow_rel_corr, ADPoint());
+    }
+    else // linear interpolation
+    {
+      auto x1_iter = std::lower_bound(_speeds.begin(), _speeds.end(), speed_rel_corr);
+      auto x2_iter = std::upper_bound(_speeds.begin(), _speeds.end(), speed_rel_corr);
 
-    auto x1 = (x1_iter - _speeds.begin()) - 1; // _speeds index for entry <= speed_rel_corr
-    auto x2 = (x2_iter - _speeds.begin());     // _speeds index for entry > speed_rel_corr
-    const Real x1_spd = _speeds[x1];
-    const Real x2_spd = _speeds[x2];
+      auto x1 = (x1_iter - _speeds.begin()) - 1; // _speeds index for entry <= speed_rel_corr
+      auto x2 = (x2_iter - _speeds.begin());     // _speeds index for entry > speed_rel_corr
+      const Real x1_spd = _speeds[x1];
+      const Real x2_spd = _speeds[x2];
 
-    const auto y1_Rp = _Rp_functions[x1]->value(flow_rel_corr, ADPoint());
-    const auto y2_Rp = _Rp_functions[x2]->value(flow_rel_corr, ADPoint());
-    const ADReal Rp_m = (y2_Rp - y1_Rp) / (x2_spd - x1_spd);
-    const ADReal Rp = y1_Rp + (speed_rel_corr - x1_spd) * Rp_m;
-    const ADReal y1_eff = _eff_functions[x1]->value(flow_rel_corr, ADPoint());
-    const ADReal y2_eff = _eff_functions[x2]->value(flow_rel_corr, ADPoint());
-    const ADReal eff_m = (y2_eff - y1_eff) / (x2_spd - x1_spd);
-    const ADReal eff = y1_eff + (speed_rel_corr - x1_spd) * eff_m;
+      const ADReal y1_Rp = _Rp_functions[x1]->value(flow_rel_corr, ADPoint());
+      const ADReal y2_Rp = _Rp_functions[x2]->value(flow_rel_corr, ADPoint());
+      const ADReal Rp_m = (y2_Rp - y1_Rp) / (x2_spd - x1_spd);
+      Rp = y1_Rp + (speed_rel_corr - x1_spd) * Rp_m;
+
+      const ADReal y1_eff = _eff_functions[x1]->value(flow_rel_corr, ADPoint());
+      const ADReal y2_eff = _eff_functions[x2]->value(flow_rel_corr, ADPoint());
+      const ADReal eff_m = (y2_eff - y1_eff) / (x2_spd - x1_spd);
+      eff = y1_eff + (speed_rel_corr - x1_spd) * eff_m;
+    }
+
     const ADReal p0_out = p0_in * Rp;
     const ADReal rho0_out_isen = _fp.rho_from_p_s(p0_out, s_out);
 
