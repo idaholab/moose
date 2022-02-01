@@ -37,7 +37,7 @@ public:
   virtual Real timeDerivative(Real t, const Point & p) const override;
 
 protected:
-  virtual Real sample(const std::vector<Real> & pt) const override;
+  virtual Real sample(const GridPoint & pt) const override;
 
 private:
   /// direction where to look for value if interpolation order is constant

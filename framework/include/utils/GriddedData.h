@@ -9,6 +9,9 @@
 
 #pragma once
 
+#include "MooseError.h"
+#include "MooseUtils.h"
+
 #include "libmesh/libmesh_common.h" // Real
 
 using namespace libMesh;
@@ -73,7 +76,11 @@ public:
    * For instance, evaluateFcn({n,m}) = value at (grid[0][n], grid[1][m]), for a function defined on
    * a 2D grid
    */
-  Real evaluateFcn(const std::vector<unsigned int> & ijk);
+  template <typename T>
+  Real evaluateFcn(const T & ijk);
+
+  typedef MooseUtils::SemidynamicVector<Real, 4> GridPoint;
+  typedef MooseUtils::SemidynamicVector<unsigned int, 4> GridIndex;
 
 private:
   unsigned int _dim;
@@ -131,3 +138,22 @@ private:
    */
   void splitToRealVec(const std::string & input_string, std::vector<Real> & output_vec);
 };
+
+template <typename T>
+Real
+GriddedData::evaluateFcn(const T & ijk)
+{
+  if (ijk.size() != _dim)
+    mooseError(
+        "Gridded data evaluateFcn called with ", ijk.size(), " arguments, but expected ", _dim);
+  unsigned int index = ijk[0];
+  for (unsigned int i = 1; i < _dim; ++i)
+    index += ijk[i] * _step[i];
+  if (index >= _fcn.size())
+    mooseError("Gridded data evaluateFcn attempted to access index ",
+               index,
+               " of function, but it contains only ",
+               _fcn.size(),
+               " entries");
+  return _fcn[index];
+}

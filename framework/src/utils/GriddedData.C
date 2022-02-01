@@ -8,8 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "GriddedData.h"
-#include "MooseError.h"
-#include "MooseUtils.h"
 #include <fstream>
 #include <algorithm>
 
@@ -87,24 +85,6 @@ GriddedData::getFcn(std::vector<Real> & fcn)
 {
   fcn.resize(_fcn.size());
   std::copy(_fcn.begin(), _fcn.end(), fcn.begin());
-}
-
-Real
-GriddedData::evaluateFcn(const std::vector<unsigned int> & ijk)
-{
-  if (ijk.size() != _dim)
-    mooseError(
-        "Gridded data evaluateFcn called with ", ijk.size(), " arguments, but expected ", _dim);
-  unsigned int index = ijk[0];
-  for (unsigned int i = 1; i < _dim; ++i)
-    index += ijk[i] * _step[i];
-  if (index >= _fcn.size())
-    mooseError("Gridded data evaluateFcn attempted to access index ",
-               index,
-               " of function, but it contains only ",
-               _fcn.size(),
-               " entries");
-  return _fcn[index];
 }
 
 void

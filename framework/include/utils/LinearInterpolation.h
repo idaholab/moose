@@ -83,5 +83,4 @@ private:
 };
 
 typedef LinearInterpolationTempl<Real> LinearInterpolation;
-typedef LinearInterpolationTempl<DualReal> DualLinearInterpolation;
-typedef DualLinearInterpolation ADLinearInterpolation;
+typedef LinearInterpolationTempl<ADReal> ADLinearInterpolation;

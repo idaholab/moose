@@ -39,11 +39,11 @@ PiecewiseMulticonstant::PiecewiseMulticonstant(const InputParameters & parameter
 }
 
 Real
-PiecewiseMulticonstant::sample(const std::vector<Real> & pt) const
+PiecewiseMulticonstant::sample(const GridPoint & pt) const
 {
-  std::vector<unsigned int> left(_dim);
-  std::vector<unsigned int> right(_dim);
-  std::vector<unsigned int> arg(_dim);
+  GridIndex left(_dim);
+  GridIndex right(_dim);
+  GridIndex arg(_dim);
   for (unsigned int i = 0; i < _dim; ++i)
   {
     getNeighborIndices(_grid[i], pt[i], left[i], right[i]);
