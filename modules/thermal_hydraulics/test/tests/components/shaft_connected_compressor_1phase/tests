@@ -1,4 +1,6 @@
 [Tests]
+  design = 'ShaftConnectedCompressor1Phase.md'
+
   # mass and energy conservation
   [phy:mass_energy_conservation]
     type = 'CSVDiff'
@@ -20,6 +22,22 @@
     cli_args = 'Outputs/exodus=true'
     max_parallel = 1
     ad_indexing_type = 'global'
+  []
+
+  [runs_with_zero_shaft_speed]
+    type = 'RunApp'
+    input = 'shaft_motor_compressor.i'
+    cli_args = "
+      Components/shaft/initial_speed=0
+      GlobalParams/initial_vel=0
+      GlobalParams/initial_vel_x=0
+      Executioner/num_steps=1"
+    recover = False
+    max_parallel = 1
+    ad_indexing_type = 'global'
+
+    requirement = 'The system shall allow ShaftConnectedCompressor1Phase to run with a zero shaft speed.'
+    issues = '#20008 #20009'
   []
 
   # jacobian test

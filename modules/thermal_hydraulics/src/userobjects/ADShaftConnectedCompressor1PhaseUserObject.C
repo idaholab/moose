@@ -221,16 +221,21 @@ ADShaftConnectedCompressor1PhaseUserObject::computeFluxesAndResiduals(const unsi
 
     _delta_p = p0_in * (Rp - 1.0);
 
-    const ADReal h0_out_isen = THM::h_from_e_p_rho(e0_out_isen, p0_out, rho0_out_isen);
+    if (MooseUtils::absoluteFuzzyEqual(_omega[0], 0.0))
+    {
+      _isentropic_torque = 0.0;
+      _dissipation_torque = 0.0;
+    }
+    else
+    {
+      const ADReal h0_out_isen = THM::h_from_e_p_rho(e0_out_isen, p0_out, rho0_out_isen);
+      _isentropic_torque = -(rhouA_in / _omega[0]) * (h0_out_isen - h0_in); // tau_isen
 
-    _isentropic_torque = -(rhouA_in / _omega[0]) * (h0_out_isen - h0_in); // tau_isen
+      const ADReal g_x = h0_out_isen - h0_in + h0_in * eff;
+      const ADReal h0_out = g_x / eff;
 
-    // f(x) = g(x) / h(x)
-    // f'(x) = (g'(x)*h(x) - g(x)*h'(x)) / (h(x)*h(x))
-    const ADReal g_x = h0_out_isen - h0_in + h0_in * eff;
-    const ADReal h0_out = g_x / eff;
-
-    _dissipation_torque = -(rhouA_in / _omega[0]) * (h0_out - h0_out_isen);
+      _dissipation_torque = -(rhouA_in / _omega[0]) * (h0_out - h0_out_isen);
+    }
 
     const ADReal alpha = _omega[0] / _omega_rated;
 
