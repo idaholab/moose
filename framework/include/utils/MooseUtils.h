@@ -986,6 +986,48 @@ buildRequiredMaterials(const Consumers & mat_consumers,
                        const std::vector<std::shared_ptr<MaterialBase>> & mats,
                        const bool allow_stateful);
 
+/**
+ * Utility class template for a semidynamic vector with a maximum size N
+ * and a chosen dynamic size. This container avoids heap allocation and
+ * is meant as a replacement for small local std::vector variables.
+ */
+template <typename T, std::size_t N>
+class SemidynamicVector
+{
+public:
+  SemidynamicVector(std::size_t size) : _size(size) {}
+
+  typedef typename std::array<T, N>::iterator iterator;
+  typedef typename std::array<T, N>::const_iterator const_iterator;
+
+  iterator begin() { return _data.begin(); }
+  const_iterator begin() const { return _data.begin(); }
+  iterator end() { return _data.begin() + _size; }
+  const_iterator end() const { return _data.begin() + _size; }
+
+  void resize(std::size_t size)
+  {
+    mooseAssert(size <= N, "Trying to resize beyond SemidynamicVector::max_size()");
+    _size = size;
+  }
+  std::size_t size() const { return _size; }
+  std::size_t max_size() const { return N; }
+  const T & operator[](std::size_t i) const
+  {
+    mooseAssert(i < _size, "Out of bounds access in SemidynamicVector");
+    return _data[i];
+  }
+  T & operator[](std::size_t i)
+  {
+    mooseAssert(i < _size, "Out of bounds access in SemidynamicVector");
+    return _data[i];
+  }
+
+protected:
+  std::array<T, N> _data;
+  std::size_t _size;
+};
+
 } // MooseUtils namespace
 
 /**
