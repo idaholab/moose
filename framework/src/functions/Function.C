@@ -50,6 +50,25 @@ FunctionTempl<T>::value(Real /*t*/, const Point & /*p*/) const
 }
 
 template <typename T>
+ADReal
+FunctionTempl<T>::value(ADReal t, const ADPoint & p) const
+{
+  const auto rt = MetaPhysicL::raw_value(t);
+  const auto rp = MetaPhysicL::raw_value(p);
+  const auto grad = gradient(rt, rp);
+  ADReal ret = value(rt, rp);
+  ret.derivatives() = grad(0) * p(0).derivatives()
+#if LIBMESH_DIM > 1
+                      + grad(1) * p(1).derivatives()
+#endif
+#if LIBMESH_DIM > 2
+                      + grad(2) * p(2).derivatives()
+#endif
+                      + timeDerivative(rt, rp) * t.derivatives();
+  return ret;
+}
+
+template <typename T>
 RealGradient
 FunctionTempl<T>::gradient(Real /*t*/, const Point & /*p*/) const
 {

@@ -17,6 +17,7 @@
 #include "MeshChangedInterface.h"
 #include "ScalarCoupleable.h"
 #include "MooseFunctor.h"
+#include "MooseADWrapper.h"
 
 // libMesh
 #include "libmesh/vector_value.h"
@@ -63,6 +64,16 @@ public:
    * \return A scalar of the function evaluated at the time and location
    */
   virtual Real value(Real t, const Point & p) const;
+
+  /**
+   * Override this to evaluate the scalar function at point (t,x,y,z), using dual numbers by default
+   * this uses value, gradient, and timeDerivative to assemble a dual number, although the function
+   * can be overridden with a custom computation using dual numbers.
+   * \param t The time
+   * \param p The Point in space (x,y,z)
+   * \return A scalar of the function evaluated at the time and location
+   */
+  virtual ADReal value(ADReal t, const ADPoint & p) const;
 
   /**
    * Override this to evaluate the vector function at a point (t,x,y,z), by default
