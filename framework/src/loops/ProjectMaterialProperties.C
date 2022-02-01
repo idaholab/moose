@@ -195,22 +195,3 @@ void
 ProjectMaterialProperties::join(const ProjectMaterialProperties & /*y*/)
 {
 }
-
-void
-ProjectMaterialProperties::postElement(const Elem * elem)
-{
-  if (_refine)
-  {
-    _material_props.eraseProperty(elem);
-    _bnd_material_props.eraseProperty(elem);
-  }
-  else
-  {
-    auto && coarsened_children = _mesh.coarsenedElementChildren(elem);
-    for (auto && child : coarsened_children)
-    {
-      _material_props.eraseProperty(child);
-      _bnd_material_props.eraseProperty(child);
-    }
-  }
-}

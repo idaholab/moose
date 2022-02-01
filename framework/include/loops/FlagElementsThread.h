@@ -31,6 +31,10 @@ public:
 
   virtual void onElement(const Elem * elem) override;
 
+  // Must override this in order to avoid calling the base class method which reads the refinement
+  // flags, causing read-write data races
+  bool shouldComputeInternalSide(const Elem &, const Elem &) const override { return false; }
+
   void join(const FlagElementsThread & /*y*/);
 
 protected:
