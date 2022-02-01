@@ -86,6 +86,10 @@ protected:
   std::vector<const Function *> _Rp_functions;
   /// Adiabatic efficiency functions
   std::vector<const Function *> _eff_functions;
+  /// Minimum pressure ratio
+  const Real & _Rp_min;
+  /// Maximum pressure ratio
+  const Real & _Rp_max;
 
   /// Compressor name
   const std::string & _compressor_name;

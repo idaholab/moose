@@ -52,6 +52,8 @@ ADShaftConnectedCompressor1PhaseUserObject::validParams()
       "Functions of adiabatic efficiency versus relative corrected flow. Each function is for a "
       "different, constant relative corrected speed. The order of function names should correspond "
       "to the order of speeds in the `speeds` parameter [-]");
+  params.addRequiredParam<Real>("min_pressure_ratio", "Minimum pressure ratio");
+  params.addRequiredParam<Real>("max_pressure_ratio", "Maximum pressure ratio");
   params.addRequiredParam<std::string>("compressor_name",
                                        "Name of the instance of this compressor component");
   params.addRequiredCoupledVar("omega", "Shaft rotational speed [rad/s]");
@@ -85,6 +87,8 @@ ADShaftConnectedCompressor1PhaseUserObject::ADShaftConnectedCompressor1PhaseUser
     _n_speeds(_speeds.size()),
     _Rp_functions(_n_speeds),
     _eff_functions(_n_speeds),
+    _Rp_min(getParam<Real>("min_pressure_ratio")),
+    _Rp_max(getParam<Real>("max_pressure_ratio")),
     _compressor_name(getParam<std::string>("compressor_name")),
     _omega(adCoupledScalarValue("omega"))
 {
@@ -218,6 +222,9 @@ ADShaftConnectedCompressor1PhaseUserObject::computeFluxesAndResiduals(const unsi
       const ADReal eff_m = (y2_eff - y1_eff) / (x2_spd - x1_spd);
       _eff = y1_eff + (speed_rel_corr - x1_spd) * eff_m;
     }
+
+    // Apply bounds
+    _Rp = std::max(_Rp_min, std::min(_Rp_max, _Rp));
 
     const ADReal p0_out = p0_in * _Rp;
     const ADReal rho0_out_isen = _fp.rho_from_p_s(p0_out, s_out);

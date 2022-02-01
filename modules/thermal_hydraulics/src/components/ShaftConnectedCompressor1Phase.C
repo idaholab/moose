@@ -55,6 +55,8 @@ ShaftConnectedCompressor1Phase::validParams()
       "Functions of adiabatic efficiency versus relative corrected flow. Each function is for a "
       "different, constant relative corrected speed. The order of function names should correspond "
       "to the order of speeds in the `speeds` parameter [-]");
+  params.addParam<Real>("min_pressure_ratio", 0.0, "Minimum pressure ratio");
+  params.addParam<Real>("max_pressure_ratio", 50.0, "Maximum pressure ratio");
 
   params.addClassDescription(
       "1-phase compressor that must be connected to a Shaft component. Compressor speed "
@@ -159,6 +161,8 @@ ShaftConnectedCompressor1Phase::buildVolumeJunctionUserObject()
     params.set<std::vector<Real>>("speeds") = _speeds;
     params.set<std::vector<FunctionName>>("Rp_functions") = _Rp_functions;
     params.set<std::vector<FunctionName>>("eff_functions") = _eff_functions;
+    params.set<Real>("min_pressure_ratio") = getParam<Real>("min_pressure_ratio");
+    params.set<Real>("max_pressure_ratio") = getParam<Real>("max_pressure_ratio");
     params.set<std::vector<VariableName>>("omega") = {omega_var_name};
     params.set<Real>("A_ref") = getParam<Real>("A_ref");
     params.set<Real>("K") = getParam<Real>("K");
