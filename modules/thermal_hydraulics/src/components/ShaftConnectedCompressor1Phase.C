@@ -237,4 +237,12 @@ ShaftConnectedCompressor1Phase::addMooseObjects()
 
     _sim.addAuxScalarKernel(class_name, Component::genName(name(), "inertia_aux"), params);
   }
+  {
+    const std::string class_name = "ShaftConnectedCompressor1PhasePostprocessor";
+    InputParameters params = _factory.getValidParams(class_name);
+    params.set<MooseEnum>("quantity") = "pressure_ratio";
+    params.set<UserObjectName>("compressor_uo") = getShaftConnectedUserObjectName();
+    params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
+    _sim.addPostprocessor(class_name, Component::genName(name(), "pressure_ratio"), params);
+  }
 }

@@ -122,6 +122,8 @@ ADShaftConnectedCompressor1PhaseUserObject::initialize()
   _dissipation_torque = 0;
   _friction_torque = 0;
   _delta_p = 0;
+  _Rp = 0;
+  _eff = 0;
 }
 
 void
@@ -171,16 +173,15 @@ ADShaftConnectedCompressor1PhaseUserObject::computeFluxesAndResiduals(const unsi
     const ADReal speed_rel_corr = (_omega[0] / _omega_rated) * (_c0_rated / c0_in);
 
     // If speed_rel_corr == _speeds[0], then the lower index x1 is determined to be -1
-    ADReal Rp, eff;
     if (speed_rel_corr == _speeds[0])
     {
-      Rp = _Rp_functions[0]->value(flow_rel_corr, ADPoint());
-      eff = _eff_functions[0]->value(flow_rel_corr, ADPoint());
+      _Rp = _Rp_functions[0]->value(flow_rel_corr, ADPoint());
+      _eff = _eff_functions[0]->value(flow_rel_corr, ADPoint());
     }
     else if (std::isnan(speed_rel_corr)) // NaN; unguarded, gives segmentation fault
     {
-      Rp = std::nan("");
-      eff = std::nan("");
+      _Rp = std::nan("");
+      _eff = std::nan("");
     }
     else // linear interpolation/extrapolation
     {
@@ -210,20 +211,20 @@ ADShaftConnectedCompressor1PhaseUserObject::computeFluxesAndResiduals(const unsi
       const ADReal y1_Rp = _Rp_functions[x1]->value(flow_rel_corr, ADPoint());
       const ADReal y2_Rp = _Rp_functions[x2]->value(flow_rel_corr, ADPoint());
       const ADReal Rp_m = (y2_Rp - y1_Rp) / (x2_spd - x1_spd);
-      Rp = y1_Rp + (speed_rel_corr - x1_spd) * Rp_m;
+      _Rp = y1_Rp + (speed_rel_corr - x1_spd) * Rp_m;
 
       const ADReal y1_eff = _eff_functions[x1]->value(flow_rel_corr, ADPoint());
       const ADReal y2_eff = _eff_functions[x2]->value(flow_rel_corr, ADPoint());
       const ADReal eff_m = (y2_eff - y1_eff) / (x2_spd - x1_spd);
-      eff = y1_eff + (speed_rel_corr - x1_spd) * eff_m;
+      _eff = y1_eff + (speed_rel_corr - x1_spd) * eff_m;
     }
 
-    const ADReal p0_out = p0_in * Rp;
+    const ADReal p0_out = p0_in * _Rp;
     const ADReal rho0_out_isen = _fp.rho_from_p_s(p0_out, s_out);
 
     const ADReal e0_out_isen = _fp.e_from_p_rho(p0_out, rho0_out_isen);
 
-    _delta_p = p0_in * (Rp - 1.0);
+    _delta_p = p0_in * (_Rp - 1.0);
 
     if (MooseUtils::absoluteFuzzyEqual(_omega[0], 0.0))
     {
@@ -235,8 +236,8 @@ ADShaftConnectedCompressor1PhaseUserObject::computeFluxesAndResiduals(const unsi
       const ADReal h0_out_isen = THM::h_from_e_p_rho(e0_out_isen, p0_out, rho0_out_isen);
       _isentropic_torque = -(rhouA_in / _omega[0]) * (h0_out_isen - h0_in); // tau_isen
 
-      const ADReal g_x = h0_out_isen - h0_in + h0_in * eff;
-      const ADReal h0_out = g_x / eff;
+      const ADReal g_x = h0_out_isen - h0_in + h0_in * _eff;
+      const ADReal h0_out = g_x / _eff;
 
       _dissipation_torque = -(rhouA_in / _omega[0]) * (h0_out - h0_out_isen);
     }
@@ -311,6 +312,18 @@ ADShaftConnectedCompressor1PhaseUserObject::getCompressorDeltaP() const
   return _delta_p;
 }
 
+ADReal
+ADShaftConnectedCompressor1PhaseUserObject::getPressureRatio() const
+{
+  return _Rp;
+}
+
+ADReal
+ADShaftConnectedCompressor1PhaseUserObject::getEfficiency() const
+{
+  return _eff;
+}
+
 void
 ADShaftConnectedCompressor1PhaseUserObject::finalize()
 {
@@ -333,4 +346,6 @@ ADShaftConnectedCompressor1PhaseUserObject::threadJoin(const UserObject & uo)
   _dissipation_torque += scpuo._dissipation_torque;
   _friction_torque += scpuo._friction_torque;
   _delta_p += scpuo._delta_p;
+  _Rp += scpuo._Rp;
+  _eff += scpuo._eff;
 }
