@@ -177,6 +177,11 @@ ADShaftConnectedCompressor1PhaseUserObject::computeFluxesAndResiduals(const unsi
       Rp = _Rp_functions[0]->value(flow_rel_corr, ADPoint());
       eff = _eff_functions[0]->value(flow_rel_corr, ADPoint());
     }
+    else if (std::isnan(speed_rel_corr)) // NaN; unguarded, gives segmentation fault
+    {
+      Rp = std::nan("");
+      eff = std::nan("");
+    }
     else // linear interpolation/extrapolation
     {
       unsigned int x1, x2;
