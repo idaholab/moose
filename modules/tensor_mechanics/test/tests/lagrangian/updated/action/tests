@@ -1,0 +1,46 @@
+[Tests]
+  issues = '#17472'
+  design = 'source/actions/TensorMechanicsAction.md'
+  [./action_large_stab]
+    type = Exodiff
+    input = 'action_L.i'
+    exodiff = 'L_large_stab.e'
+    requirement = "Action produces identical results for large deformations/with stabilization"
+    abs_zero = 1e-6
+    heavy = true
+    cli_args = "Outputs/out/file_base=L_large_stab Modules/TensorMechanics/Master/all/strain=FINITE Modules/TensorMechanics/Master/all/formulation=UPDATED Modules/TensorMechanics/Master/all/volumetric_locking_correction=true Materials/compute_stress/large_kinematics=true"
+  [../]
+  [./action_large_no_stab]
+    type = Exodiff
+    input = 'action_L.i'
+    exodiff = 'L_large_nostab.e'
+    requirement = "Action produces identical results for large deformations/no stabilization"
+    abs_zero = 1e-6
+    heavy = true
+    cli_args = "Outputs/out/file_base=L_large_nostab Modules/TensorMechanics/Master/all/strain=FINITE Modules/TensorMechanics/Master/all/formulation=UPDATED Modules/TensorMechanics/Master/all/volumetric_locking_correction=false Materials/compute_stress/large_kinematics=true"
+  [../]
+
+  [./action_small_stab]
+    type = Exodiff
+    input = 'action_L.i'
+    exodiff = 'L_small_stab.e'
+    requirement = "Action produces identical results for small deformations/with stabilization"
+    abs_zero = 1e-6
+    cli_args = "Outputs/out/file_base=L_small_stab Modules/TensorMechanics/Master/all/strain=SMALL Modules/TensorMechanics/Master/all/formulation=UPDATED Modules/TensorMechanics/Master/all/volumetric_locking_correction=true"
+  [../]
+  [./action_small_no_stab]
+    type = Exodiff
+    input = 'action_L.i'
+    exodiff = 'L_small_nostab.e'
+    requirement = "Action produces identical results for small deformations/no stabilization"
+    abs_zero = 1e-4
+    cli_args = "Outputs/out/file_base=L_small_nostab Modules/TensorMechanics/Master/all/strain=SMALL Modules/TensorMechanics/Master/all/formulation=UPDATED Modules/TensorMechanics/Master/all/volumetric_locking_correction=false"
+  [../]
+  [./action_1D]
+    type = Exodiff
+    input = 'action_1D.i'
+    exodiff = 'action_1D_out.e'
+    requirement = "Action produces identical results for 1D Cartesian problem"
+    abs_zero = 1e-6
+  [../]
+[]
