@@ -13,6 +13,10 @@ Content:
             - media/*
     fluid_properties:
         root_dir: ${MOOSE_DIR}/modules/fluid_properties/doc/content
+    heat_conduction:
+        root_dir: ${MOOSE_DIR}/modules/heat_conduction/doc/content
+    ray_tracing:
+        root_dir: ${MOOSE_DIR}/modules/ray_tracing/doc/content
 
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
@@ -30,6 +34,8 @@ Extensions:
         includes:
             - ${MOOSE_DIR}/framework/include
             - ${MOOSE_DIR}/modules/fluid_properties/include
+            - ${MOOSE_DIR}/modules/heat_conduction/include
+            - ${MOOSE_DIR}/modules/ray_tracing/include
             - include
 
     MooseDocs.extensions.common:

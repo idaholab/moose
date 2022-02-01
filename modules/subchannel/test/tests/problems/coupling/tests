@@ -1,0 +1,16 @@
+[Tests]
+  [master]
+    type = Exodiff
+    input = master.i
+    exodiff = master_out.e
+    recover = false
+    mesh_mode = 'replicated'
+  []
+  [slave]
+    type = Exodiff
+    input = master.i
+    exodiff = master_out_SLAVE0.e
+    recover = false
+    mesh_mode = 'replicated'
+  []
+[]

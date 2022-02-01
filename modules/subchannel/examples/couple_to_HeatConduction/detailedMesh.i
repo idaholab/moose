@@ -1,12 +1,11 @@
 [GlobalParams]
-  ######## Geometry #
-  nx = 7
-  ny = 3
-  n_cells = 48
+  nx = 2
+  ny = 2
+  n_cells = 10
   pitch = 0.014605
   rod_diameter = 0.012065
   gap = 0.0015875
-  heated_length = 1.2192
+  heated_length = 1.0
 []
 
 [Mesh]
