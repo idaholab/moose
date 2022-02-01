@@ -15,7 +15,7 @@
 
 /* The size of the derivative backing array */
 #ifndef MOOSE_AD_MAX_DOFS_PER_ELEM
-#define MOOSE_AD_MAX_DOFS_PER_ELEM 50
+#define MOOSE_AD_MAX_DOFS_PER_ELEM 53
 #endif
 
 /* Whether to use a global indexing scheme for AD */
