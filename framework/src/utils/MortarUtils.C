@@ -133,7 +133,7 @@ projectQPoints3d(const Elem * const msm_elem,
           case 3:
             return Point(nu - 1, nu + xi, 0);
           case 4:
-            return Point(0.5 * (xi - nu), 0.5 * (nu + xi), 0);
+            return Point(0.5 * (nu - xi), 0.5 * (nu + xi), 0);
           default:
             mooseError("get_sub_elem_indices: Invalid sub_elem: ", sub_elem);
         }
@@ -141,13 +141,13 @@ projectQPoints3d(const Elem * const msm_elem,
         switch (sub_elem)
         {
           case 0:
-            return Point(0.5 * (xi - 1), 0.5 * (nu - 1), 0);
+            return Point(0.5 * (nu - 1), 0.5 * (xi - 1), 0);
           case 1:
-            return Point(0.5 * (xi + 1), 0.5 * (nu - 1), 0);
+            return Point(0.5 * (nu + 1), 0.5 * (xi - 1), 0);
           case 2:
-            return Point(0.5 * (xi + 1), 0.5 * (nu + 1), 0);
+            return Point(0.5 * (nu + 1), 0.5 * (xi + 1), 0);
           case 3:
-            return Point(0.5 * (xi - 1), 0.5 * (nu + 1), 0);
+            return Point(0.5 * (nu - 1), 0.5 * (xi + 1), 0);
           default:
             mooseError("get_sub_elem_indices: Invalid sub_elem: ", sub_elem);
         }
