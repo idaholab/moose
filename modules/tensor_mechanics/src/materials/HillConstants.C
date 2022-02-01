@@ -119,10 +119,9 @@ HillConstants::computeQpProperties()
   {
     _hill_constant_material[_qp].resize(6);
 
-    const Point p;
+    static const Point p;
     for (unsigned int i = 0; i < 6; i++)
-      _hill_constant_material[_qp][i] =
-          _functions[i]->value(MetaPhysicL::raw_value(_temperature[_qp]), p);
+      _hill_constant_material[_qp][i] = _functions[i]->value(_temperature[_qp], p);
   }
 
   // We need to update the coefficients whether we use temperature dependency or large rotation

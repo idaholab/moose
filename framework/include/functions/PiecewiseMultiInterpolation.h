@@ -42,13 +42,16 @@ public:
    * Given t and p, return the interpolated value.
    */
   virtual Real value(Real t, const Point & pt) const override;
+  virtual ADReal value(ADReal t, const ADPoint & pt) const override;
 
 protected:
   typedef GriddedData::GridPoint GridPoint;
+  typedef GriddedData::ADGridPoint ADGridPoint;
   typedef GriddedData::GridIndex GridIndex;
 
   /// convert cartesian+time coordinates into grid coordinates
-  void updatePointInGrid(Real t, const Point & p, GridPoint & point_in_grid) const;
+  template <bool is_ad>
+  auto pointInGrid(MooseADWrapper<Real, is_ad> t, const MooseADWrapper<Point, is_ad> & p) const;
 
   /**
    * This does the core work.  Given a point, pt, defined
@@ -56,6 +59,7 @@ protected:
    * interpolate the gridded data to this point
    */
   virtual Real sample(const GridPoint & pt) const = 0;
+  virtual ADReal sample(const ADGridPoint & pt) const;
 
   /// object to provide function evaluations at points on the grid
   std::unique_ptr<GriddedData> _gridded_data;

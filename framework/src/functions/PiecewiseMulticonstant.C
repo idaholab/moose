@@ -38,6 +38,13 @@ PiecewiseMulticonstant::PiecewiseMulticonstant(const InputParameters & parameter
     mooseError("Parameter direction must have a size identical to ", _dim);
 }
 
+ADReal
+PiecewiseMulticonstant::value(ADReal t, const ADPoint & p) const
+{
+  // piecewise constant derivatives are zero everywhere (ignore discontinuities)
+  return value(MetaPhysicL::raw_value(t), MetaPhysicL::raw_value(p));
+}
+
 Real
 PiecewiseMulticonstant::sample(const GridPoint & pt) const
 {

@@ -141,19 +141,18 @@ ADShaftConnectedPump1PhaseUserObject::computeFluxesAndResiduals(const unsigned i
     // Head and torque
     ADReal x_p = c_coef + std::atan(alpha / nu);
 
-    Real wt = _torque_hydraulic.value(MetaPhysicL::raw_value(x_p), Point());
+    const auto wt = _torque_hydraulic.value(x_p, ADPoint());
+    const auto wh = _head.value(x_p, ADPoint());
 
-    Real wh = _head.value(MetaPhysicL::raw_value(x_p), Point());
+    const ADReal y = alpha * alpha + nu * nu;
 
-    ADReal y = alpha * alpha + nu * nu;
-
-    Real zt = wt * _torque_rated;
+    const auto zt = wt * _torque_rated;
 
     // Real homologous_torque = -(alpha * alpha + nu * nu) * wt * _torque_rated;
-    ADReal homologous_torque = -y * zt;
+    const ADReal homologous_torque = -y * zt;
     _hydraulic_torque = homologous_torque * ((_rhoV[0] / _volume) / _density_rated);
 
-    Real zh = wh * _head_rated;
+    const auto zh = wh * _head_rated;
 
     // _pump_head = (alpha * alpha + nu * nu) * wh * _head_rated;
     _pump_head = y * zh;

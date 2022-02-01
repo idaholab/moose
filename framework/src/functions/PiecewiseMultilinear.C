@@ -36,6 +36,19 @@ PiecewiseMultilinear::PiecewiseMultilinear(const InputParameters & parameters)
 Real
 PiecewiseMultilinear::sample(const GridPoint & pt) const
 {
+  return sampleInternal<false>(pt);
+}
+
+ADReal
+PiecewiseMultilinear::sample(const ADGridPoint & pt) const
+{
+  return sampleInternal<true>(pt);
+}
+
+template <bool is_ad>
+MooseADWrapper<Real, is_ad>
+PiecewiseMultilinear::sampleInternal(const MooseADWrapper<GridPoint, is_ad> pt) const
+{
   /*
    * left contains the indices of the point to the 'left', 'down', etc, of pt
    * right contains the indices of the point to the 'right', 'up', etc, of pt
@@ -44,7 +57,7 @@ PiecewiseMultilinear::sample(const GridPoint & pt) const
   GridIndex left(_dim);
   GridIndex right(_dim);
   for (unsigned int i = 0; i < _dim; ++i)
-    getNeighborIndices(_grid[i], pt[i], left[i], right[i]);
+    getNeighborIndices(_grid[i], MetaPhysicL::raw_value(pt[i]), left[i], right[i]);
 
   /*
    * The following just loops through all the vertices of the
@@ -52,21 +65,22 @@ PiecewiseMultilinear::sample(const GridPoint & pt) const
    * those vertices, and weighting the contributions to the
    * final result depending on the distance of pt from the vertex
    */
-  Real f = 0;
-  Real weight;
+  MooseADWrapper<Real, is_ad> f = 0;
+  MooseADWrapper<Real, is_ad> weight;
   GridIndex arg(_dim);
-  for (unsigned int i = 0; i < (1 << _dim); ++i) // number of points in hypercube = 2^_dim
+  // number of points in hypercube = 2^_dim
+  for (unsigned int i = 0; i < (1 << _dim); ++i)
   {
     weight = 1;
     for (unsigned int j = 0; j < _dim; ++j)
-      if ((i >> j) % 2 ==
-          0) // shift i j-bits to the right and see if the result has a 0 as its right-most bit
+      // shift i j-bits to the right and see if the result has a 0 as its right-most bit
+      if ((i >> j) % 2 == 0)
       {
         arg[j] = left[j];
         if (left[j] != right[j])
           weight *= std::abs(pt[j] - _grid[j][right[j]]);
-        else // unusual "end condition" case.  weight by 0.5 because we will encounter this
-             // twice
+        else
+          // unusual "end condition" case. weight by 0.5 because we will encounter this twice
           weight *= 0.5;
       }
       else
@@ -74,8 +88,8 @@ PiecewiseMultilinear::sample(const GridPoint & pt) const
         arg[j] = right[j];
         if (left[j] != right[j])
           weight *= std::abs(pt[j] - _grid[j][left[j]]);
-        else // unusual "end condition" case.  weight by 0.5 because we will encounter this
-             // twice
+        else
+          // unusual "end condition" case. weight by 0.5 because we will encounter this twice
           weight *= 0.5;
       }
     f += _gridded_data->evaluateFcn(arg) * weight;
@@ -88,8 +102,8 @@ PiecewiseMultilinear::sample(const GridPoint & pt) const
   for (unsigned int dim = 0; dim < pt.size(); ++dim)
     if (left[dim] != right[dim])
       weight *= _grid[dim][right[dim]] - _grid[dim][left[dim]];
-    else // unusual "end condition" case.  weight by 1 to cancel the two 0.5 encountered
-         // previously
+    else
+      // unusual "end condition" case. weight by 1 to cancel the two 0.5 encountered previously
       weight *= 1;
 
   return f / weight;
@@ -99,11 +113,9 @@ RealGradient
 PiecewiseMultilinear::gradient(Real t, const Point & p) const
 {
   RealGradient grad;
-  GridPoint pg(_dim);
 
   // sample center point
-  updatePointInGrid(t, p, pg);
-  auto s1 = sample(pg);
+  auto s1 = sample(pointInGrid<false>(t, p));
 
   // sample epsilon steps in all directions
   for (const auto dir : _axes)
@@ -111,8 +123,7 @@ PiecewiseMultilinear::gradient(Real t, const Point & p) const
     {
       Point pp = p;
       pp(dir) += _epsilon;
-      updatePointInGrid(t, pp, pg);
-      grad(dir) = (sample(pg) - s1) / _epsilon;
+      grad(dir) = (sample(pointInGrid<false>(t, pp)) - s1) / _epsilon;
     }
 
   return grad;
@@ -121,9 +132,6 @@ PiecewiseMultilinear::gradient(Real t, const Point & p) const
 Real
 PiecewiseMultilinear::timeDerivative(Real t, const Point & p) const
 {
-  GridPoint p1(_dim);
-  GridPoint p2(_dim);
-  updatePointInGrid(t, p, p1);
-  updatePointInGrid(t + _epsilon, p, p2);
-  return (sample(p2) - sample(p1)) / _epsilon;
+  return (sample(pointInGrid<false>(t + _epsilon, p)) - sample(pointInGrid<false>(t, p))) /
+         _epsilon;
 }

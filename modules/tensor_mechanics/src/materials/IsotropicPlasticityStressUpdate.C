@@ -213,14 +213,14 @@ IsotropicPlasticityStressUpdateTempl<is_ad>::computeHardeningDerivative(
   return _hardening_constant;
 }
 
-template <>
+template <bool is_ad>
 void
-IsotropicPlasticityStressUpdateTempl<false>::computeYieldStress(
-    const RankFourTensor & /*elasticity_tensor*/)
+IsotropicPlasticityStressUpdateTempl<is_ad>::computeYieldStress(
+    const GenericRankFourTensor<is_ad> & /*elasticity_tensor*/)
 {
   if (_yield_stress_function)
   {
-    const Point p;
+    static const MooseADWrapper<Point, is_ad> p;
     _yield_stress = _yield_stress_function->value(_temperature[_qp], p);
 
     if (_yield_stress <= 0.0)
@@ -229,29 +229,6 @@ IsotropicPlasticityStressUpdateTempl<false>::computeYieldStress(
                  ": The calculated yield stress (",
                  _yield_stress,
                  ") is less than zero");
-  }
-}
-
-template <>
-void
-IsotropicPlasticityStressUpdateTempl<true>::computeYieldStress(
-    const ADRankFourTensor & /*elasticity_tensor*/)
-{
-  if (_yield_stress_function)
-  {
-    const Point p;
-
-    _yield_stress = _yield_stress_function->value(MetaPhysicL::raw_value(_temperature[_qp]), p);
-    _yield_stress.derivatives() =
-        _temperature[_qp].derivatives() *
-        _yield_stress_function->timeDerivative(MetaPhysicL::raw_value(_temperature[_qp]), p);
-
-    if (_yield_stress <= 0.0)
-      mooseException("In ",
-                     this->_name,
-                     ": The calculated yield stress (",
-                     _yield_stress.value(),
-                     ") is less than zero");
   }
 }
 

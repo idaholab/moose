@@ -47,10 +47,5 @@ ADReal
 ADComputeMeanThermalExpansionFunctionEigenstrain::meanThermalExpansionCoefficient(
     const ADReal & temperature)
 {
-  ADReal alpha = _thermal_expansion_function.value(MetaPhysicL::raw_value(temperature), Point());
-  alpha.derivatives() =
-      _thermal_expansion_function.timeDerivative(MetaPhysicL::raw_value(temperature), Point()) *
-      temperature.derivatives();
-
-  return alpha;
+  return _thermal_expansion_function.value(temperature, ADPoint());
 }

@@ -39,10 +39,8 @@ HeatConductionMaterialTempl<is_ad>::validParams()
 template <bool is_ad>
 HeatConductionMaterialTempl<is_ad>::HeatConductionMaterialTempl(const InputParameters & parameters)
   : Material(parameters),
-
     _has_temp(isCoupled("temp")),
-    _temperature((_has_temp && !is_ad) ? coupledValue("temp") : _zero),
-    _ad_temperature((_has_temp && is_ad) ? adCoupledValue("temp") : _ad_zero),
+    _temperature(_has_temp ? coupledGenericValue<is_ad>("temp") : genericZeroValue<is_ad>()),
     _my_thermal_conductivity(
         isParamValid("thermal_conductivity") ? getParam<Real>("thermal_conductivity") : 0),
     _my_specific_heat(isParamValid("specific_heat") ? getParam<Real>("specific_heat") : 0),
@@ -52,65 +50,42 @@ HeatConductionMaterialTempl<is_ad>::HeatConductionMaterialTempl(const InputParam
     _thermal_conductivity_temperature_function(
         getParam<FunctionName>("thermal_conductivity_temperature_function") != ""
             ? &getFunction("thermal_conductivity_temperature_function")
-            : NULL),
+            : nullptr),
 
     _specific_heat(declareGenericProperty<Real, is_ad>("specific_heat")),
     _specific_heat_temperature_function(
         getParam<FunctionName>("specific_heat_temperature_function") != ""
             ? &getFunction("specific_heat_temperature_function")
-            : NULL)
+            : nullptr)
 {
   if (_thermal_conductivity_temperature_function && !_has_temp)
-  {
-    mooseError("Must couple with temperature if using thermal conductivity function");
-  }
+    paramError("thermal_conductivity_temperature_function",
+               "Must couple with temperature if using thermal conductivity function");
+
   if (isParamValid("thermal_conductivity") && _thermal_conductivity_temperature_function)
-  {
     mooseError(
         "Cannot define both thermal conductivity and thermal conductivity temperature function");
-  }
+
   if (_specific_heat_temperature_function && !_has_temp)
-  {
-    mooseError("Must couple with temperature if using specific heat function");
-  }
+    paramError("specific_heat_temperature_function",
+               "Must couple with temperature if using specific heat function");
+
   if (isParamValid("specific_heat") && _specific_heat_temperature_function)
-  {
     mooseError("Cannot define both specific heat and specific heat temperature function");
-  }
-}
-
-template <bool is_ad>
-void
-HeatConductionMaterialTempl<is_ad>::setDerivatives(GenericReal<is_ad> & prop,
-                                                   Real dprop_dT,
-                                                   const ADReal & ad_T)
-{
-  if (ad_T < 0)
-    prop.derivatives() = 0;
-  else
-    prop.derivatives() = dprop_dT * ad_T.derivatives();
-}
-
-template <>
-void
-HeatConductionMaterialTempl<false>::setDerivatives(Real &, Real, const ADReal &)
-{
-  mooseError("Mistaken call of setDerivatives in a non-AD HeatConductionMaterial version");
 }
 
 template <bool is_ad>
 void
 HeatConductionMaterialTempl<is_ad>::computeProperties()
 {
+  static const MooseADWrapper<Point, is_ad> p;
+  static const Point rp;
+
   for (unsigned int qp(0); qp < _qrule->n_points(); ++qp)
   {
-    Real qp_temperature = 0;
+    auto qp_temperature = _temperature[qp];
     if (_has_temp)
     {
-      if (is_ad)
-        qp_temperature = MetaPhysicL::raw_value(_ad_temperature[qp]);
-      else
-        qp_temperature = _temperature[qp];
       if (qp_temperature < 0)
       {
         std::stringstream msg;
@@ -126,16 +101,10 @@ HeatConductionMaterialTempl<is_ad>::computeProperties()
     }
     if (_thermal_conductivity_temperature_function)
     {
-      Point p;
       _thermal_conductivity[qp] =
           _thermal_conductivity_temperature_function->value(qp_temperature, p);
-      // A terrible exploitation of the Function API to get a derivative with respect to a
-      // non-linear variable
-      _thermal_conductivity_dT[qp] =
-          _thermal_conductivity_temperature_function->timeDerivative(qp_temperature, p);
-      if (is_ad)
-        setDerivatives(
-            _thermal_conductivity[qp], _thermal_conductivity_dT[qp], _ad_temperature[qp]);
+      _thermal_conductivity_dT[qp] = _thermal_conductivity_temperature_function->timeDerivative(
+          MetaPhysicL::raw_value(qp_temperature), rp);
     }
     else
     {
@@ -144,21 +113,9 @@ HeatConductionMaterialTempl<is_ad>::computeProperties()
     }
 
     if (_specific_heat_temperature_function)
-    {
-      Point p;
       _specific_heat[qp] = _specific_heat_temperature_function->value(qp_temperature, p);
-      if (is_ad)
-      {
-        // A terrible exploitation of the Function API to get a derivative with respect to a
-        // non-linear variable
-        Real dcp_dT = _specific_heat_temperature_function->timeDerivative(qp_temperature, p);
-        setDerivatives(_specific_heat[qp], dcp_dT, _ad_temperature[qp]);
-      }
-    }
     else
-    {
       _specific_heat[qp] = _my_specific_heat;
-    }
   }
 }
 

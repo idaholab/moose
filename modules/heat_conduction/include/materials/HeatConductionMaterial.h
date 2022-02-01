@@ -30,8 +30,7 @@ protected:
   virtual void computeProperties();
 
   const bool _has_temp;
-  const VariableValue & _temperature;
-  const ADVariableValue & _ad_temperature;
+  const GenericVariableValue<is_ad> & _temperature;
 
   const Real _my_thermal_conductivity;
   const Real _my_specific_heat;
@@ -42,9 +41,6 @@ protected:
 
   GenericMaterialProperty<Real, is_ad> & _specific_heat;
   const Function * const _specific_heat_temperature_function;
-
-private:
-  void setDerivatives(GenericReal<is_ad> & prop, Real dprop_dT, const ADReal & ad_T);
 };
 
 typedef HeatConductionMaterialTempl<false> HeatConductionMaterial;

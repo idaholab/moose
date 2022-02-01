@@ -44,5 +44,5 @@ protected:
   ADMaterialProperty<Real> & _property;
 
   /// LinearInterpolation object
-  std::unique_ptr<LinearInterpolation> _linear_interp;
+  std::unique_ptr<ADLinearInterpolation> _linear_interp;
 };

@@ -25,16 +25,31 @@ struct MooseADWrapperStruct<Real, true>
   typedef ADReal type;
 };
 
+template <>
+struct MooseADWrapperStruct<Point, true>
+{
+  typedef ADPoint type;
+};
+
+// W<T> -> W<ADT>, e.g. RankTwoTensorTempl<Real> -> RankTwoTensorTempl<ADReal>
 template <template <typename> class W, typename T, bool is_ad>
 struct MooseADWrapperStruct<W<T>, is_ad>
 {
   typedef W<typename MooseADWrapperStruct<T, is_ad>::type> type;
 };
 
+// e.g. std::vector<Real> -> std::vector<ADReal>
 template <typename T, bool is_ad>
 struct MooseADWrapperStruct<std::vector<T>, is_ad>
 {
   typedef std::vector<typename MooseADWrapperStruct<T, is_ad>::type> type;
+};
+
+// std::array and MooseUtils::SemidynamicVector support
+template <template <typename, std::size_t> class W, typename T, std::size_t N, bool is_ad>
+struct MooseADWrapperStruct<W<T, N>, is_ad>
+{
+  typedef W<typename MooseADWrapperStruct<T, is_ad>::type, N> type;
 };
 
 template <typename T, bool is_ad>

@@ -38,6 +38,11 @@ public:
 
 protected:
   virtual Real sample(const GridPoint & pt) const override;
+  virtual ADReal sample(const ADGridPoint & pt) const override;
 
   const Real _epsilon;
+
+private:
+  template <bool is_ad>
+  MooseADWrapper<Real, is_ad> sampleInternal(const MooseADWrapper<GridPoint, is_ad> pt) const;
 };

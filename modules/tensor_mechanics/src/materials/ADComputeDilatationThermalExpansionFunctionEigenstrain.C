@@ -36,6 +36,5 @@ ADReal
 ADComputeDilatationThermalExpansionFunctionEigenstrain::computeDilatation(
     const ADReal & temperature)
 {
-  // Note: All dual number information will be lost until functions can handle AD points!
-  return _dilatation_function.value(MetaPhysicL::raw_value(temperature), Point());
+  return _dilatation_function.value(temperature, ADPoint());
 }
