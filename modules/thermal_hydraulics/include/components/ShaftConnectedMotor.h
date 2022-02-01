@@ -26,10 +26,10 @@ public:
 protected:
   virtual void check() const override;
 
-  /// Torque
-  const Real & _torque;
-  /// Moment of intertia
-  const Real & _inertia;
+  /// Torque function name
+  const FunctionName & _torque_fn_name;
+  /// Moment of inertia function name
+  const FunctionName & _inertia_fn_name;
 
 public:
   static InputParameters validParams();

@@ -28,10 +28,10 @@ public:
   virtual void finalize() override;
 
 protected:
-  /// User defined torque
-  const Real & _torque;
-  /// User defined moment of intertia
-  const Real & _inertia;
+  /// Torque as a function of shaft speed
+  const Function & _torque_fn;
+  /// Moment of inertia as a function of shaft speed
+  const Function & _inertia_fn;
 
 public:
   static InputParameters validParams();
