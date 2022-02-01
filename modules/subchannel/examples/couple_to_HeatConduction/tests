@@ -1,0 +1,8 @@
+[Tests]
+  [ss_check_syntax]
+    type = 'RunApp'
+    input = 'master.i'
+    check_input = true
+    mesh_mode = 'replicated'
+  []
+[]

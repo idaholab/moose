@@ -1,29 +1,28 @@
-[GlobalParams]
-  ######## Geometry #
-  nx = 7
-  ny = 3
-  n_cells = 48
-  n_blocks = 1
-  pitch = 0.014605
-  rod_diameter = 0.012065
-  gap = 0.0015875
-  heated_length = 1.2192
-  spacer_z = '0.0'
-  spacer_k = '0.0'
-[]
-
-######## BC's #################
 T_in = 297.039 # K
 P_out = 101325 # Pa
 
 [QuadSubChannelMesh]
   [sub_channel]
     type = QuadSubChannelMeshGenerator
+    nx = 2
+    ny = 2
+    n_cells = 10
+    pitch = 0.014605
+    rod_diameter = 0.012065
+    gap = 0.0015875
+    heated_length = 1.0
+    spacer_z = '0.0'
+    spacer_k = '0.0'
   []
 
   [fuel_pins]
     type = PinMeshGenerator
     input = sub_channel
+    nx = 2
+    ny = 2
+    n_cells = 10
+    pitch = 0.014605
+    heated_length = 1.0
   []
 []
 
@@ -76,11 +75,10 @@ P_out = 101325 # Pa
 
 [SubChannel]
   type = LiquidWaterSubChannel1PhaseProblem
+  n_blocks = 1
   fp = water
   beta = 0.006
   CT = 2.6
-  P_tol = 1e-6
-  T_tol = 1e-6
   compute_density = true
   compute_viscosity = true
   compute_power = true
@@ -98,11 +96,11 @@ P_out = 101325 # Pa
     variable = w_perim
   []
 
-  [q_prime_IC]
-    type = QuadPowerIC
-    variable = q_prime
-    power = 5460  # W
-    filename = "power_profile.txt"
+   [q_prime_IC]
+     type = QuadPowerIC
+     variable = q_prime
+     power = 1000  # W
+     filename = "power_profile.txt"
   []
 
   [T_ic]
@@ -172,93 +170,60 @@ P_out = 101325 # Pa
   []
 []
 
+[UserObjects]
+  [Tpin_avg_uo]
+    type = NearestPointLayeredAverage
+    direction = z
+    num_layers = 10
+    variable = Tpin
+    block = fuel_pins
+    points = '0 0 0'
+    execute_on = timestep_end
+  []
+[]
+
 [Outputs]
   exodus = true
-  [mdot_in_MATRIX]
-    type = QuadSubChannelNormalSliceValues
-    variable = mdot
-    execute_on = final
-    file_base = "mdot_in.txt"
-    height = 0.0
-  []
-
-  [rho_in_MATRIX]
-    type = QuadSubChannelNormalSliceValues
-    variable = rho
-    execute_on = final
-    file_base = "rho_in.txt"
-    height = 0.0
-  []
-
-  [mdot_out_MATRIX]
-    type = QuadSubChannelNormalSliceValues
-    variable = mdot
-    execute_on = final
-    file_base = "mdot_out.txt"
-    height = 1.2192
-  []
-
-  [rho_out_MATRIX]
-    type = QuadSubChannelNormalSliceValues
-    variable = rho
-    execute_on = final
-    file_base = "rho_out.txt"
-    height = 1.2192
-  []
-
-  [mdot_MATRIX]
-    type = QuadSubChannelNormalSliceValues
-    variable = mdot
-    execute_on = final
-    file_base = "mdot_075.txt"
-    height = 0.9144
-  []
-
-  [T_in_MATRIX]
-    type = QuadSubChannelNormalSliceValues
-    variable = T
-    execute_on = final
-    file_base = "T_in.txt"
-    height = 0.0
-  []
-
-  [T_out_MATRIX]
-    type = QuadSubChannelNormalSliceValues
-    variable = T
-    execute_on = final
-    file_base = "T_out.txt"
-    height = 1.2192
-  []
 []
 
 [Executioner]
   type = Steady
-  nl_rel_tol = 0.9
-  l_tol = 0.9
+  petsc_options_iname = '-pc_type -pc_hypre_type'
+  petsc_options_value = 'hypre boomeramg'
+  fixed_point_max_its = 30
+  fixed_point_min_its = 2
+  fixed_point_rel_tol = 1e-6
 []
 
 ################################################################################
-# A multiapp that projects data to a detailed mesh
+# A multiapp that transfers data to BISON simulations
 ################################################################################
 
-[MultiApps]
-  [viz]
+[MultiApps] # I have as many multiapps as pins
+  [SLAVE]
     type = FullSolveMultiApp
-    input_files = "3d.i"
-    execute_on = "timestep_end"
+    input_files = slave.i # seperate file for multiapps due to radial power profile
+    execute_on = 'timestep_end'
+    positions = '0   0   0 '
+    bounding_box_padding = '0 0 0.01'
   []
 []
 
-###### Transfers to the detailedMesh at the end of the coupled simulations
 [Transfers]
-  [subchannel_transfer]
-    type = MultiAppDetailedSolutionTransfer
-    to_multi_app = viz
-    variable = 'mdot SumWij P DP h T rho mu S'
+  [Tpin] # send pin surface temperature to bison,
+    type = MultiAppUserObjectTransfer2
+    multi_app = SLAVE
+    direction = to_multiapp
+    variable = Pin_surface_temperature
+    user_object = Tpin_avg_uo
   []
-  [pin_transfer]
-    type = MultiAppDetailedPinSolutionTransfer
-    to_multi_app = viz
-    variable = 'Tpin q_prime'
+#
+  [from_SLAVE] # send heat flux from BISON to subchannel
+    type = MultiAppUserObjectTransfer2
+    direction = from_multiapp
+    variable = q_prime
+    multi_app = SLAVE
+    user_object = q_prime_uo
+    execute_on = 'timestep_end'
   []
 []

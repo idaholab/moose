@@ -1,0 +1,11 @@
+[Tests]
+  [Transfers]
+    type = Exodiff
+    input = 'main.i'
+    exodiff = 'main_out.e main_out_sub0.e'
+    method = '!DBG'
+    valgrind = NONE
+    recover = false
+    mesh_mode = 'replicated'
+  []
+[]

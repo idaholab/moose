@@ -747,7 +747,7 @@ SubChannel1PhaseProblem::externalSolve()
   while (P_error > _P_tol && P_it < P_it_max)
   {
     P_it += 1;
-    if (P_it == P_it_max and _n_blocks != 1)
+    if (P_it == P_it_max && _n_blocks != 1)
     {
       _console << "Reached maximum number of axial pressure iterations" << std::endl;
       _converged = false;
@@ -847,6 +847,7 @@ SubChannel1PhaseProblem::externalSolve()
     }
   }
   _aux->solution().close();
+  _aux->update();
 }
 
 void SubChannel1PhaseProblem::syncSolutions(Direction /*direction*/) {}

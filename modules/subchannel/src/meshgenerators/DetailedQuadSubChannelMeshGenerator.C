@@ -190,11 +190,11 @@ DetailedQuadSubChannelMeshGenerator::generate()
       tl_corner_points[ii + 1] = quadrant_centers[3] + c_pt;
     }
     tl_corner_points[points_per_quad + 1] =
-        Point(_pitch * 0.5 * shrink_factor, _pitch * 0.5 * shrink_factor + _gap, 0);
+        Point(_pitch * 0.5 * shrink_factor, _pitch * 0.25 * shrink_factor + _gap, 0);
     tl_corner_points[points_per_quad + 2] =
-        Point(-_pitch * 0.5 * shrink_factor - _gap, _pitch * 0.5 * shrink_factor + _gap, 0);
+        Point(-_pitch * 0.25 * shrink_factor - _gap, _pitch * 0.25 * shrink_factor + _gap, 0);
     tl_corner_points[points_per_quad + 3] =
-        Point(-_pitch * 0.5 * shrink_factor - _gap, -_pitch * 0.5 * shrink_factor, 0);
+        Point(-_pitch * 0.25 * shrink_factor - _gap, -_pitch * 0.5 * shrink_factor, 0);
   }
 
   // Build an array of points that represent a cross section of a top right corner subchannel
@@ -212,11 +212,11 @@ DetailedQuadSubChannelMeshGenerator::generate()
       tr_corner_points[ii + 1] = quadrant_centers[2] + c_pt;
     }
     tr_corner_points[points_per_quad + 1] =
-        Point(_pitch * 0.5 * shrink_factor + _gap, -_pitch * 0.5 * shrink_factor, 0);
+        Point(_pitch * 0.25 * shrink_factor + _gap, -_pitch * 0.5 * shrink_factor, 0);
     tr_corner_points[points_per_quad + 2] =
-        Point(_pitch * 0.5 * shrink_factor + _gap, _pitch * 0.5 * shrink_factor + _gap, 0);
+        Point(_pitch * 0.25 * shrink_factor + _gap, _pitch * 0.25 * shrink_factor + _gap, 0);
     tr_corner_points[points_per_quad + 3] =
-        Point(-_pitch * 0.5 * shrink_factor, _pitch * 0.5 * shrink_factor + _gap, 0);
+        Point(-_pitch * 0.5 * shrink_factor, _pitch * 0.25 * shrink_factor + _gap, 0);
   }
 
   // Build an array of points that represent a cross section of a bottom left corner subchannel
@@ -234,11 +234,11 @@ DetailedQuadSubChannelMeshGenerator::generate()
       bl_corner_points[ii + 1] = quadrant_centers[0] + c_pt;
     }
     bl_corner_points[points_per_quad + 1] =
-        Point(-_pitch * 0.5 * shrink_factor - _gap, _pitch * 0.5 * shrink_factor, 0);
+        Point(-_pitch * 0.25 * shrink_factor - _gap, _pitch * 0.5 * shrink_factor, 0);
     bl_corner_points[points_per_quad + 2] =
-        Point(-_pitch * 0.5 * shrink_factor - _gap, -_pitch * 0.5 * shrink_factor - _gap, 0);
+        Point(-_pitch * 0.25 * shrink_factor - _gap, -_pitch * 0.25 * shrink_factor - _gap, 0);
     bl_corner_points[points_per_quad + 3] =
-        Point(_pitch * 0.5 * shrink_factor, -_pitch * 0.5 * shrink_factor - _gap, 0);
+        Point(_pitch * 0.5 * shrink_factor, -_pitch * 0.25 * shrink_factor - _gap, 0);
   }
 
   // Build an array of points that represent a cross section of a bottom right corner subchannel
@@ -256,11 +256,11 @@ DetailedQuadSubChannelMeshGenerator::generate()
       br_corner_points[ii + 1] = quadrant_centers[1] + c_pt;
     }
     br_corner_points[points_per_quad + 1] =
-        Point(-_pitch * 0.5 * shrink_factor, -_pitch * 0.5 * shrink_factor - _gap, 0);
+        Point(-_pitch * 0.5 * shrink_factor, -_pitch * 0.25 * shrink_factor - _gap, 0);
     br_corner_points[points_per_quad + 2] =
-        Point(_pitch * 0.5 * shrink_factor + _gap, -_pitch * 0.5 * shrink_factor - _gap, 0);
+        Point(_pitch * 0.25 * shrink_factor + _gap, -_pitch * 0.25 * shrink_factor - _gap, 0);
     br_corner_points[points_per_quad + 3] =
-        Point(_pitch * 0.5 * shrink_factor + _gap, _pitch * 0.5 * shrink_factor, 0);
+        Point(_pitch * 0.25 * shrink_factor + _gap, _pitch * 0.5 * shrink_factor, 0);
   }
 
   // Build an array of points that represent a cross section of a top side subchannel
@@ -283,9 +283,9 @@ DetailedQuadSubChannelMeshGenerator::generate()
       top_points[points_per_quad + ii + 1] = quadrant_centers[3] + c_pt;
     }
     top_points[2 * points_per_quad + 1] =
-        Point(_pitch * 0.5 * shrink_factor, _pitch * 0.5 * shrink_factor + _gap, 0);
+        Point(_pitch * 0.5 * shrink_factor, _pitch * 0.25 * shrink_factor + _gap, 0);
     top_points[2 * points_per_quad + 2] =
-        Point(-_pitch * 0.5 * shrink_factor, _pitch * 0.5 * shrink_factor + _gap, 0);
+        Point(-_pitch * 0.5 * shrink_factor, _pitch * 0.25 * shrink_factor + _gap, 0);
   }
 
   // Build an array of points that represent a cross section of a left side subchannel
@@ -308,9 +308,9 @@ DetailedQuadSubChannelMeshGenerator::generate()
       left_points[points_per_quad + ii + 1] = quadrant_centers[0] + c_pt;
     }
     left_points[2 * points_per_quad + 1] =
-        Point(-_pitch * 0.5 * shrink_factor - _gap, _pitch * 0.5 * shrink_factor, 0);
+        Point(-_pitch * 0.25 * shrink_factor - _gap, _pitch * 0.5 * shrink_factor, 0);
     left_points[2 * points_per_quad + 2] =
-        Point(-_pitch * 0.5 * shrink_factor - _gap, -_pitch * 0.5 * shrink_factor, 0);
+        Point(-_pitch * 0.25 * shrink_factor - _gap, -_pitch * 0.5 * shrink_factor, 0);
   }
 
   // Build an array of points that represent a cross section of a bottom side subchannel
@@ -333,9 +333,9 @@ DetailedQuadSubChannelMeshGenerator::generate()
       bottom_points[points_per_quad + ii + 1] = quadrant_centers[1] + c_pt;
     }
     bottom_points[2 * points_per_quad + 1] =
-        Point(-_pitch * 0.5 * shrink_factor, -_pitch * 0.5 * shrink_factor - _gap, 0);
+        Point(-_pitch * 0.5 * shrink_factor, -_pitch * 0.25 * shrink_factor - _gap, 0);
     bottom_points[2 * points_per_quad + 2] =
-        Point(_pitch * 0.5 * shrink_factor, -_pitch * 0.5 * shrink_factor - _gap, 0);
+        Point(_pitch * 0.5 * shrink_factor, -_pitch * 0.25 * shrink_factor - _gap, 0);
   }
 
   // Build an array of points that represent a cross section of a right side subchannel
@@ -358,9 +358,9 @@ DetailedQuadSubChannelMeshGenerator::generate()
       right_points[points_per_quad + ii + 1] = quadrant_centers[2] + c_pt;
     }
     right_points[2 * points_per_quad + 1] =
-        Point(_pitch * 0.5 * shrink_factor + _gap, -_pitch * 0.5 * shrink_factor, 0);
+        Point(_pitch * 0.25 * shrink_factor + _gap, -_pitch * 0.5 * shrink_factor, 0);
     right_points[2 * points_per_quad + 2] =
-        Point(_pitch * 0.5 * shrink_factor + _gap, _pitch * 0.5 * shrink_factor, 0);
+        Point(_pitch * 0.25 * shrink_factor + _gap, _pitch * 0.5 * shrink_factor, 0);
   }
 
   // Add the points to the mesh.
