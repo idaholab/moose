@@ -20,6 +20,7 @@ ShaftConnectedMotorUserObject::validParams()
   params.addRequiredParam<FunctionName>("torque", "Torque as a function of shaft speed");
   params.addRequiredParam<FunctionName>("inertia",
                                         "Moment of inertia as a function of shaft speed");
+  params.addRequiredCoupledVar("shaft_speed", "Shaft speed");
   return params;
 }
 
@@ -27,14 +28,15 @@ ShaftConnectedMotorUserObject::ShaftConnectedMotorUserObject(const InputParamete
   : GeneralUserObject(params),
     ShaftConnectableUserObjectInterface(this),
     _torque_fn(getFunction("torque")),
-    _inertia_fn(getFunction("inertia"))
+    _inertia_fn(getFunction("inertia")),
+    _shaft_speed(coupledScalarValue("shaft_speed"))
 {
 }
 
 Real
 ShaftConnectedMotorUserObject::getTorque() const
 {
-  return _torque_fn.value(0.0, Point());
+  return _torque_fn.value(_shaft_speed[0], Point());
 }
 
 void
@@ -46,7 +48,7 @@ ShaftConnectedMotorUserObject::getTorqueJacobianData(DenseMatrix<Real> & /*jacob
 Real
 ShaftConnectedMotorUserObject::getMomentOfInertia() const
 {
-  return _inertia_fn.value(0.0, Point());
+  return _inertia_fn.value(_shaft_speed[0], Point());
 }
 
 void

@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ShaftConnectedMotor.h"
+#include "Shaft.h"
 
 registerMooseObject("ThermalHydraulicsApp", ShaftConnectedMotor);
 
@@ -48,6 +49,9 @@ ShaftConnectedMotor::addMooseObjects()
   makeFunctionControllableIfConstant(_torque_fn_name, "torque");
   makeFunctionControllableIfConstant(_inertia_fn_name, "inertia");
 
+  const Shaft & shaft = getComponentByName<Shaft>(_shaft_name);
+  const VariableName shaft_speed_var_name = shaft.getOmegaVariableName();
+
   const UserObjectName & uo_name = getShaftConnectedUserObjectName();
   if (getParam<bool>("ad"))
   {
@@ -55,6 +59,7 @@ ShaftConnectedMotor::addMooseObjects()
     InputParameters params = _factory.getValidParams(class_name);
     params.set<FunctionName>("torque") = _torque_fn_name;
     params.set<FunctionName>("inertia") = _inertia_fn_name;
+    params.set<std::vector<VariableName>>("shaft_speed") = {shaft_speed_var_name};
     _sim.addUserObject(class_name, uo_name, params);
   }
   else
@@ -63,6 +68,7 @@ ShaftConnectedMotor::addMooseObjects()
     InputParameters params = _factory.getValidParams(class_name);
     params.set<FunctionName>("torque") = _torque_fn_name;
     params.set<FunctionName>("inertia") = _inertia_fn_name;
+    params.set<std::vector<VariableName>>("shaft_speed") = {shaft_speed_var_name};
     _sim.addUserObject(class_name, uo_name, params);
   }
 }

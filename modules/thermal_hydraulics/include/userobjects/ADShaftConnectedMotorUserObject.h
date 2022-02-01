@@ -32,6 +32,8 @@ protected:
   const Function & _torque_fn;
   /// Moment of inertia as a function of shaft speed
   const Function & _inertia_fn;
+  /// Shaft speed
+  const ADVariableValue & _shaft_speed;
 
 public:
   static InputParameters validParams();

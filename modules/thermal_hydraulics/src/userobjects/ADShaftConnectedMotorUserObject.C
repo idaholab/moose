@@ -20,6 +20,7 @@ ADShaftConnectedMotorUserObject::validParams()
   params.addRequiredParam<FunctionName>("torque", "Torque as a function of shaft speed");
   params.addRequiredParam<FunctionName>("inertia",
                                         "Moment of inertia as a function of shaft speed");
+  params.addRequiredCoupledVar("shaft_speed", "Shaft speed");
   return params;
 }
 
@@ -27,20 +28,29 @@ ADShaftConnectedMotorUserObject::ADShaftConnectedMotorUserObject(const InputPara
   : GeneralUserObject(params),
     ADShaftConnectableUserObjectInterface(this),
     _torque_fn(getFunction("torque")),
-    _inertia_fn(getFunction("inertia"))
+    _inertia_fn(getFunction("inertia")),
+    _shaft_speed(adCoupledScalarValue("shaft_speed"))
 {
 }
 
 ADReal
 ADShaftConnectedMotorUserObject::getTorque() const
 {
-  return _torque_fn.value(0.0, Point());
+  const ADReal & shaft_speed = _shaft_speed[0];
+  ADReal torque = _torque_fn.value(MetaPhysicL::raw_value(shaft_speed), Point());
+  torque.derivatives() = _torque_fn.timeDerivative(MetaPhysicL::raw_value(shaft_speed), Point()) *
+                         shaft_speed.derivatives();
+  return torque;
 }
 
 ADReal
 ADShaftConnectedMotorUserObject::getMomentOfInertia() const
 {
-  return _inertia_fn.value(0.0, Point());
+  const ADReal & shaft_speed = _shaft_speed[0];
+  ADReal inertia = _inertia_fn.value(MetaPhysicL::raw_value(shaft_speed), Point());
+  inertia.derivatives() = _inertia_fn.timeDerivative(MetaPhysicL::raw_value(shaft_speed), Point()) *
+                          shaft_speed.derivatives();
+  return inertia;
 }
 
 void
