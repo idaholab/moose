@@ -14,10 +14,6 @@ rho=1.1
   []
 []
 
-[Problem]
-  fv_bcs_integrity_check = true
-[]
-
 [Modules]
   [NavierStokesFV]
     simulation_type = 'steady-state'
@@ -29,9 +25,11 @@ rho=1.1
     dynamic_viscosity = 'mu'
     gravity = '0 0 0'
 
+    initial_velocity = '1 1 0'
+
     inlet_boundaries = 'left'
     momentum_inlet_types = 'fixed-velocity'
-    momentum_inlet_function = 'velocity_x_inlet velocity_y_inlet'
+    momentum_inlet_function = '1 0'
     wall_boundaries = 'top bottom'
     momentum_wall_types = 'noslip noslip'
     outlet_boundaries = 'right'
@@ -45,21 +43,6 @@ rho=1.1
     type = ADGenericFunctorMaterial
     prop_names = 'rho mu'
     prop_values = '${rho} ${mu}'
-  []
-[]
-
-[Functions]
-  [velocity_x_inlet]
-    type = ParsedFunction
-    value = '1'
-  []
-  [velocity_y_inlet]
-    type = ParsedFunction
-    value = '0'
-  []
-  [pressure_outlet]
-    type = ParsedFunction
-    value = '0'
   []
 []
 

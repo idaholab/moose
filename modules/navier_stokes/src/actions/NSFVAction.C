@@ -222,7 +222,8 @@ NSFVAction::NSFVAction(InputParameters parameters)
 {
   unsigned int no_pressure_outlets = 0;
   for (unsigned int enum_ind = 0; enum_ind < _outlet_boundaries.size(); ++enum_ind)
-    if (_momentum_outlet_types[enum_ind] == "fixed-pressure")
+    if (_momentum_outlet_types[enum_ind] == "fixed-pressure" ||
+        _momentum_outlet_types[enum_ind] == "fixed-pressure-zero-gradient")
       no_pressure_outlets += 1;
 
   if (_outlet_boundaries.size() > 0 && _pressure_function.size() != no_pressure_outlets)
@@ -1275,20 +1276,20 @@ NSFVAction::addINSOutletBC()
           {
             vname = NS::superficial_velocity_vector[d];
             for (unsigned int d = 0; d < _dim; ++d)
-              params.set<VariableName>(u_names[d]) = NS::superficial_velocity_vector[d];
+              params.set<CoupledName>(u_names[d]) = {NS::superficial_velocity_vector[d]};
             params.set<UserObjectName>("rhie_chow_user_object") = "pins_rhie_chow_interpolator";
           }
           else
           {
             vname = NS::velocity_vector[d];
             for (unsigned int d = 0; d < _dim; ++d)
-              params.set<VariableName>(u_names[d]) = NS::velocity_vector[d];
+              params.set<CoupledName>(u_names[d]) = {NS::velocity_vector[d]};
             params.set<UserObjectName>("rhie_chow_user_object") = "ins_rhie_chow_interpolator";
           }
 
           params.set<NonlinearVariableName>("variable") = vname;
           params.set<MooseEnum>("momentum_component") = NS::directions[d];
-          params.set<MaterialPropertyName>(NS::density) = _density_name;
+          params.set<MooseFunctorName>(NS::density) = _density_name;
           params.set<std::vector<BoundaryName>>("boundary") = {_outlet_boundaries[bc_ind]};
 
           _problem->addFVBC(bc_type, vname + "_" + _outlet_boundaries[bc_ind], params);
