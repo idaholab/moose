@@ -32,6 +32,12 @@ ShaftConnectedMotor::ShaftConnectedMotor(const InputParameters & parameters)
 }
 
 void
+ShaftConnectedMotor::check() const
+{
+  checkShaftConnection(this);
+}
+
+void
 ShaftConnectedMotor::addVariables()
 {
 }

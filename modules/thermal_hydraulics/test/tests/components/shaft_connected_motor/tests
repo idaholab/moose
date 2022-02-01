@@ -1,10 +1,25 @@
 [Tests]
+  design = 'ShaftConnectedMotor.md'
+
   [err:no_initial_speed]
     type = 'RunException'
     input = 'test.i'
     cli_args = 'Components/hs/initial_T=300'
     expect_err = "shaft: The `initial_speed` parameter is missing."
     ad_indexing_type = 'global'
+  []
+  [err:not_connected_to_shaft]
+    type = 'RunException'
+    input = 'test.i'
+    cli_args = "
+      Components/hs/initial_T=300
+      Components/shaft/initial_speed=0
+      Components/shaft/connected_components=''"
+    expect_err = "This component must be connected to a shaft"
+    ad_indexing_type = 'global'
+
+    requirement = 'The system shall throw an error if ShaftConnectedMotor is not connected to a shaft component.'
+    issues = '#19998'
   []
   [part1]
     type = 'CSVDiff'

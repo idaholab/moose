@@ -21,6 +21,7 @@ class ShaftConnectable
 public:
   ShaftConnectable(const Component * const component);
 
+  virtual void checkShaftConnection(const Component * const component) const;
   virtual VariableName getMomentofInertiaVariableName() const;
   virtual VariableName getTorqueVariableName() const;
   virtual UserObjectName getShaftConnectedUserObjectName() const;
@@ -35,6 +36,8 @@ protected:
   UserObjectName _user_object_name;
   /// Name of the shaft component
   mutable std::string _shaft_name;
+  /// Flag indicating that a shaft has this component connected
+  mutable bool _connected_to_shaft;
 
 public:
   static InputParameters validParams();

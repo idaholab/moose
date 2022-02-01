@@ -112,6 +112,13 @@ ShaftConnectedCompressor1Phase::init()
 }
 
 void
+ShaftConnectedCompressor1Phase::check() const
+{
+  VolumeJunction1Phase::check();
+  checkShaftConnection(this);
+}
+
+void
 ShaftConnectedCompressor1Phase::buildVolumeJunctionUserObject()
 {
   const Component & c = getComponentByName<Component>(_shaft_name);

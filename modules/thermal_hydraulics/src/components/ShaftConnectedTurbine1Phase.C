@@ -101,6 +101,13 @@ ShaftConnectedTurbine1Phase::init()
 }
 
 void
+ShaftConnectedTurbine1Phase::check() const
+{
+  VolumeJunction1Phase::check();
+  checkShaftConnection(this);
+}
+
+void
 ShaftConnectedTurbine1Phase::buildVolumeJunctionUserObject()
 {
   const Component & c = getComponentByName<Component>(_shaft_name);

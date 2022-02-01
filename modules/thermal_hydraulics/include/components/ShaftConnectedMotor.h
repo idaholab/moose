@@ -24,6 +24,8 @@ public:
   virtual void addMooseObjects() override;
 
 protected:
+  virtual void check() const override;
+
   /// Torque
   const Real & _torque;
   /// Moment of intertia
