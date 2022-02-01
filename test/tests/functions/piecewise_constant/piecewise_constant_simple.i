@@ -10,25 +10,32 @@
 [Functions]
   [./left]
     type = PiecewiseConstant
-    xy_data = '2.5 1
-               5.0 2
+    xy_data = '2.0 1
+               5.5 2
                7.0 3
-               8.5 4'
+               8.0 4'
     direction = left
     scale_factor = 2
   [../]
   [./right]
     type = PiecewiseConstant
-    x = '2.5 5.0 7.0 8.5'
+    x = '2.0 5.5 7.0 8.0'
     y = '1   2   3   4'
     direction = right
     scale_factor = 2
   [../]
-  [./centered]
+  [./left_inclusive]
     type = PiecewiseConstant
-    x = '2.5 5.0 7.0 8.5'
+    x = '2.0 5.5 7.0 8.0'
     y = '1   2   3   4'
-    direction = centered
+    direction = left_inclusive
+    scale_factor = 2
+  [../]
+  [./right_inclusive]
+    type = PiecewiseConstant
+    x = '2.0 5.5 7.0 8.0'
+    y = '1   2   3   4'
+    direction = right_inclusive
     scale_factor = 2
   [../]
 []
@@ -44,9 +51,14 @@
     function = right
     execute_on = 'TIMESTEP_END INITIAL'
   []
-  [centered]
+  [left_inclusive]
     type = FunctionValuePostprocessor
-    function = centered
+    function = left_inclusive
+    execute_on = 'TIMESTEP_END INITIAL'
+  []
+  [right_inclusive]
+    type = FunctionValuePostprocessor
+    function = right_inclusive
     execute_on = 'TIMESTEP_END INITIAL'
   []
 []
@@ -54,7 +66,7 @@
 [Executioner]
   type = Transient
   dt = 1
-  end_time = 14
+  end_time = 10
 []
 
 [Outputs]

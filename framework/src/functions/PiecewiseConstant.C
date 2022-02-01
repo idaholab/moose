@@ -17,7 +17,7 @@ InputParameters
 PiecewiseConstant::validParams()
 {
   InputParameters params = PiecewiseTabularBase::validParams();
-  MooseEnum direction("LEFT RIGHT CENTERED", "LEFT");
+  MooseEnum direction("LEFT RIGHT LEFT_INCLUSIVE RIGHT_INCLUSIVE", "LEFT");
   params.addParam<MooseEnum>(
       "direction", direction, "Direction to look to find value: " + direction.getRawNames());
   params.addClassDescription("Defines data using a set of x-y data pairs");
@@ -42,21 +42,25 @@ PiecewiseConstant::value(Real t, const Point & p) const
   // endpoint cases
   if ((_direction == DirectionEnum::LEFT && x < (1 + tolerance) * domain(0)) ||
       (_direction == DirectionEnum::RIGHT && x < (1 - tolerance) * domain(0)) ||
-      (_direction == DirectionEnum::CENTERED && x < (1 + tolerance) * domain(0)))
+      (_direction == DirectionEnum::LEFT_INCLUSIVE && x < (1 - tolerance) * domain(0)) ||
+      (_direction == DirectionEnum::RIGHT_INCLUSIVE && x < (1 + tolerance) * domain(0)))
     return _scale_factor * range(0);
   else if ((_direction == DirectionEnum::LEFT && x > (1 + tolerance) * domain(len - 1)) ||
            (_direction == DirectionEnum::RIGHT && x > (1 - tolerance) * domain(len - 1)) ||
-           (_direction == DirectionEnum::CENTERED && x > (1 - tolerance) * domain(len - 1)))
+           (_direction == DirectionEnum::LEFT_INCLUSIVE && x > (1 - tolerance) * domain(len - 1)) ||
+           (_direction == DirectionEnum::RIGHT_INCLUSIVE && x > (1 + tolerance) * domain(len - 1)))
     return _scale_factor * range(len - 1);
 
   for (; i < len; ++i)
   {
     if (_direction == DirectionEnum::LEFT && x < (1 + tolerance) * domain(i))
       return _scale_factor * range(i - 1);
+    else if (_direction == DirectionEnum::LEFT_INCLUSIVE && x < (1 - tolerance) * domain(i))
+      return _scale_factor * range(i - 1);
     else if ((_direction == DirectionEnum::RIGHT && x < (1 - tolerance) * domain(i)))
       return _scale_factor * range(i);
-    else if ((_direction == DirectionEnum::CENTERED && x < (1 - tolerance) * domain(i)))
-      return _scale_factor * range(i - 1);
+    else if ((_direction == DirectionEnum::RIGHT_INCLUSIVE && x < (1 + tolerance) * domain(i)))
+      return _scale_factor * range(i);
   }
 
   return 0.0;
@@ -75,7 +79,7 @@ PiecewiseConstant::integral() const
   Real sum = 0;
   unsigned offset = 0;
 
-  if (_direction == DirectionEnum::RIGHT)
+  if (_direction == DirectionEnum::RIGHT || _direction == DirectionEnum::RIGHT_INCLUSIVE)
     offset = 1;
 
   for (unsigned i = 0; i < len - 1; ++i)
