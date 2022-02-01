@@ -29,6 +29,7 @@ ShaftConnectedCompressor1Phase::validParams()
   params.addRequiredParam<BoundaryName>("inlet", "Compressor inlet");
   params.addRequiredParam<BoundaryName>("outlet", "Compressor outlet");
   params.suppressParameter<std::vector<BoundaryName>>("connections");
+  params.addParam<bool>("treat_as_turbine", false, "Treat the compressor as a turbine?");
   params.addRequiredParam<Real>("omega_rated", "Rated compressor speed [rad/s]");
   params.addRequiredParam<Real>("mdot_rated", "Rated compressor mass flow rate [kg/s]");
   params.addRequiredParam<Real>("rho0_rated", "Rated compressor stagnation fluid density [kg/m^3]");
@@ -149,6 +150,7 @@ ShaftConnectedCompressor1Phase::buildVolumeJunctionUserObject()
     // the direction of the outlet channel
     params.set<Point>("di_out") = _directions[1].unit();
     params.set<Real>("omega_rated") = _omega_rated;
+    params.set<bool>("treat_as_turbine") = getParam<bool>("treat_as_turbine");
     params.set<Real>("mdot_rated") = _mdot_rated;
     params.set<Real>("rho0_rated") = _rho0_rated;
     params.set<Real>("c0_rated") = _c0_rated;

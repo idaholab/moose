@@ -54,6 +54,8 @@ protected:
 
   /// Direction of the compressor outlet
   Point _di_out;
+  /// Treat the compressor as a turbine?
+  const bool _treat_as_turbine;
   /// Rated compressor speed
   const Real & _omega_rated;
   /// Rated compressor mass flow rate
