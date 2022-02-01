@@ -954,6 +954,7 @@ NSFVAction::addINSMomentum()
       {
         params.set<NonlinearVariableName>("variable") = NS::velocity_vector[d];
         params.set<MooseEnum>("momentum_component") = NS::directions[d];
+        addRelationshipManager("ins_momentum_" + NS::directions[d] + "_diffusion", 2, params);
         _problem->addFVKernel(
             diff_kernel_type, "ins_momentum_" + NS::directions[d] + "_diffusion", params);
       }

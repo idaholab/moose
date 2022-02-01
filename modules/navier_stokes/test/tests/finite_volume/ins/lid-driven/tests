@@ -8,6 +8,13 @@
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in a lid-driven cavity using the finite volume method.'
     ad_indexing_type = 'global'
   []
+  [exo-action]
+    type = 'Exodiff'
+    input = 'lid-driven-action.i'
+    exodiff = 'lid-driven_out.e'
+    requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in a lid-driven cavity using the finite volume Navier-Stokes action.'
+    ad_indexing_type = 'global'
+  []
   [nonsingular]
     type = 'RunApp'
     input = 'lid-driven.i'
