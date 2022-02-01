@@ -8,10 +8,9 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PiecewiseConstant.h"
+#include "MathUtils.h"
 
 registerMooseObject("MooseApp", PiecewiseConstant);
-
-defineLegacyParams(PiecewiseConstant);
 
 InputParameters
 PiecewiseConstant::validParams()
@@ -37,29 +36,41 @@ PiecewiseConstant::value(Real t, const Point & p) const
 
   unsigned i = 1;
   const unsigned len = functionSize();
-  const Real tolerance = 1e-14;
+  const Real tolerance = 1.0e-14;
 
   // endpoint cases
-  if ((_direction == DirectionEnum::LEFT && x < (1 + tolerance) * domain(0)) ||
-      (_direction == DirectionEnum::RIGHT && x < (1 - tolerance) * domain(0)) ||
-      (_direction == DirectionEnum::LEFT_INCLUSIVE && x < (1 - tolerance) * domain(0)) ||
-      (_direction == DirectionEnum::RIGHT_INCLUSIVE && x < (1 + tolerance) * domain(0)))
+  if ((_direction == DirectionEnum::LEFT &&
+       x < (1 + tolerance * MathUtils::sign(domain(0))) * domain(0)) ||
+      (_direction == DirectionEnum::RIGHT &&
+       x < (1 - tolerance * MathUtils::sign(domain(0))) * domain(0)) ||
+      (_direction == DirectionEnum::LEFT_INCLUSIVE &&
+       x < (1 - tolerance * MathUtils::sign(domain(0))) * domain(0)) ||
+      (_direction == DirectionEnum::RIGHT_INCLUSIVE &&
+       x < (1 + tolerance * MathUtils::sign(domain(0))) * domain(0)))
     return _scale_factor * range(0);
-  else if ((_direction == DirectionEnum::LEFT && x > (1 + tolerance) * domain(len - 1)) ||
-           (_direction == DirectionEnum::RIGHT && x > (1 - tolerance) * domain(len - 1)) ||
-           (_direction == DirectionEnum::LEFT_INCLUSIVE && x > (1 - tolerance) * domain(len - 1)) ||
-           (_direction == DirectionEnum::RIGHT_INCLUSIVE && x > (1 + tolerance) * domain(len - 1)))
+  else if ((_direction == DirectionEnum::LEFT &&
+            x > (1 + tolerance * MathUtils::sign(domain(len - 1))) * domain(len - 1)) ||
+           (_direction == DirectionEnum::RIGHT &&
+            x > (1 - tolerance * MathUtils::sign(domain(len - 1))) * domain(len - 1)) ||
+           (_direction == DirectionEnum::LEFT_INCLUSIVE &&
+            x > (1 - tolerance * MathUtils::sign(domain(len - 1))) * domain(len - 1)) ||
+           (_direction == DirectionEnum::RIGHT_INCLUSIVE &&
+            x > (1 + tolerance * MathUtils::sign(domain(len - 1))) * domain(len - 1)))
     return _scale_factor * range(len - 1);
 
   for (; i < len; ++i)
   {
-    if (_direction == DirectionEnum::LEFT && x < (1 + tolerance) * domain(i))
+    if (_direction == DirectionEnum::LEFT &&
+        x < (1 + tolerance * MathUtils::sign(domain(i))) * domain(i))
       return _scale_factor * range(i - 1);
-    else if (_direction == DirectionEnum::LEFT_INCLUSIVE && x < (1 - tolerance) * domain(i))
+    else if (_direction == DirectionEnum::LEFT_INCLUSIVE &&
+             x < (1 - tolerance * MathUtils::sign(domain(i))) * domain(i))
       return _scale_factor * range(i - 1);
-    else if ((_direction == DirectionEnum::RIGHT && x < (1 - tolerance) * domain(i)))
+    else if ((_direction == DirectionEnum::RIGHT &&
+              x < (1 - tolerance * MathUtils::sign(domain(i))) * domain(i)))
       return _scale_factor * range(i);
-    else if ((_direction == DirectionEnum::RIGHT_INCLUSIVE && x < (1 + tolerance) * domain(i)))
+    else if ((_direction == DirectionEnum::RIGHT_INCLUSIVE &&
+              x < (1 + tolerance * MathUtils::sign(domain(i))) * domain(i)))
       return _scale_factor * range(i);
   }
 
