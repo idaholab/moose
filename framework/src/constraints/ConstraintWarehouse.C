@@ -131,9 +131,17 @@ ConstraintWarehouse::getActiveNodeFaceConstraints(BoundaryID boundary_id, bool d
   return it->second.getActiveObjects();
 }
 
+bool
+ConstraintWarehouse::hasActiveMortarConstraints(
+    const std::pair<BoundaryID, BoundaryID> & mortar_interface_key, const bool displaced) const
+{
+  const auto & constraints = displaced ? _displaced_mortar_constraints : _mortar_constraints;
+  return constraints.find(mortar_interface_key) != constraints.end();
+}
+
 const std::vector<std::shared_ptr<MortarConstraintBase>> &
 ConstraintWarehouse::getActiveMortarConstraints(
-    const std::pair<BoundaryID, BoundaryID> & mortar_interface_key, bool displaced) const
+    const std::pair<BoundaryID, BoundaryID> & mortar_interface_key, const bool displaced) const
 {
   std::map<std::pair<BoundaryID, BoundaryID>,
            MooseObjectWarehouse<MortarConstraintBase>>::const_iterator it,
