@@ -869,12 +869,13 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
        */
       for (auto sel : make_range(secondary_side_elem->n_sub_elem()))
       {
-        Point center;
-        Point normal;
-        std::vector<Point> nodes(secondary_side_elem->n_vertices());
-
         // Get indices of sub-element nodes in element
         auto sub_elem_nodes = get_sub_elem_nodes(secondary_side_elem->type(), sel);
+
+        // Secondary sub-element center, normal, and nodes
+        Point center;
+        Point normal;
+        std::vector<Point> nodes(sub_elem_nodes.size());
 
         // Loop through sub_element nodes, collect points and compute center and normal
         for (auto iv : make_range(sub_elem_nodes.size()))

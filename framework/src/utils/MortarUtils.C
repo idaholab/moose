@@ -187,7 +187,7 @@ projectQPoints3d(const Elem * const msm_elem,
     do
     {
       VectorValue<Dual2> x1;
-      for (auto n : make_range(primal_elem->n_vertices()))
+      for (auto n : make_range(sub_elem_node_indices.size()))
         x1 += Moose::fe_lagrange_2D_shape(primal_type, FIRST, n, xi) *
               primal_elem->point(sub_elem_node_indices[n]);
       auto u = x1 - x0;
