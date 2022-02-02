@@ -49,7 +49,7 @@ LinearCombinationFunction::value(Real t, const Point & p) const
 }
 
 ADReal
-LinearCombinationFunction::value(ADReal t, const ADPoint & p) const
+LinearCombinationFunction::value(const ADReal & t, const ADPoint & p) const
 {
   ADReal val = 0.0;
   for (const auto & fw : _fw)

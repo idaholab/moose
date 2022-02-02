@@ -35,10 +35,12 @@ public:
    */
   void useCache(bool use);
 
+  using Function::value;
   // Make this implementation of Function::value() final so derived classes cannot bypass the
   // memoization functionality it implements. Instead, deriving classes should implement
   // evaluateValue().
   virtual Real value(Real time, const Point & point) const final;
+  virtual ADReal value(const ADReal & time, const ADPoint & time) const final;
 
 protected:
   /**

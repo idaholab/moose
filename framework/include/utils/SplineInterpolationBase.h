@@ -9,9 +9,8 @@
 
 #pragma once
 
+#include "MooseTypes.h"
 #include <vector>
-#include "libmesh/libmesh_common.h"
-using libMesh::Real;
 
 class SplineInterpolationBase
 {
@@ -24,6 +23,10 @@ public:
               const std::vector<Real> & y,
               const std::vector<Real> & y2,
               Real x_int) const;
+  ADReal sample(const std::vector<Real> & x,
+                const std::vector<Real> & y,
+                const std::vector<Real> & y2,
+                const ADReal & x_int) const;
 
   Real sampleDerivative(const std::vector<Real> & x,
                         const std::vector<Real> & y,
@@ -50,13 +53,14 @@ protected:
                     unsigned int & klo,
                     unsigned int & khi) const;
 
+  template <typename T>
   void computeCoeffs(const std::vector<Real> & x,
                      unsigned int klo,
                      unsigned int khi,
-                     Real x_int,
+                     const T & x_int,
                      Real & h,
-                     Real & a,
-                     Real & b) const;
+                     T & a,
+                     T & b) const;
 
   /**
    * Sample value at point x_int given the indices of the vector of
@@ -64,12 +68,13 @@ protected:
    * in bicubic spline interpolation, where several spline evaluations
    * are needed to sample from a 2D point.
    */
-  Real sample(const std::vector<Real> & x,
-              const std::vector<Real> & y,
-              const std::vector<Real> & y2,
-              Real x_int,
-              unsigned int klo,
-              unsigned int khi) const;
+  template <typename T>
+  T sample(const std::vector<Real> & x,
+           const std::vector<Real> & y,
+           const std::vector<Real> & y2,
+           const T & x_int,
+           unsigned int klo,
+           unsigned int khi) const;
 
   static const Real _deriv_bound;
 };

@@ -36,7 +36,7 @@ ConstantFunction::value(Real, const Point &) const
 }
 
 ADReal
-ConstantFunction::value(ADReal, const ADPoint &) const
+ConstantFunction::value(const ADReal &, const ADPoint &) const
 {
   return _value;
 }

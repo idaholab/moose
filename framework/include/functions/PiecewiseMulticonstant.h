@@ -29,12 +29,13 @@ public:
   PiecewiseMulticonstant(const InputParameters & parameters);
 
   using PiecewiseMultiInterpolation::value;
-  virtual ADReal value(ADReal t, const ADPoint & pt) const override;
+  virtual ADReal value(const ADReal & t, const ADPoint & p) const override;
 
   virtual RealGradient gradient(Real t, const Point & p) const override;
   virtual Real timeDerivative(Real t, const Point & p) const override;
 
 protected:
+  using PiecewiseMultiInterpolation::sample;
   virtual Real sample(const GridPoint & pt) const override;
 
 private:

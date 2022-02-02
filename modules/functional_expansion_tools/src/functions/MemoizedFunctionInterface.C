@@ -70,6 +70,12 @@ MemoizedFunctionInterface::value(Real time, const Point & point) const
   return ptr->evaluateValue(time, point);
 }
 
+ADReal
+MemoizedFunctionInterface::value(ADReal, const ADPoint &) const
+{
+  mooseError("Not implemented");
+}
+
 void
 MemoizedFunctionInterface::useCache(bool use)
 {

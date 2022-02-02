@@ -66,7 +66,7 @@ CompositeFunction::value(Real t, const Point & p) const
 }
 
 ADReal
-CompositeFunction::value(ADReal t, const ADPoint & p) const
+CompositeFunction::value(const ADReal & t, const ADPoint & p) const
 {
   ADReal val = _scale_factor;
 

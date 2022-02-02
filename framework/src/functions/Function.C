@@ -51,7 +51,7 @@ FunctionTempl<T>::value(Real /*t*/, const Point & /*p*/) const
 
 template <typename T>
 ADReal
-FunctionTempl<T>::value(ADReal t, const ADPoint & p) const
+FunctionTempl<T>::value(const ADReal & t, const ADPoint & p) const
 {
   const auto rt = MetaPhysicL::raw_value(t);
   const auto rp = MetaPhysicL::raw_value(p);

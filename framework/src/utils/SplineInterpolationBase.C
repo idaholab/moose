@@ -80,14 +80,15 @@ SplineInterpolationBase::findInterval(const std::vector<Real> & x,
   }
 }
 
+template <typename T>
 void
 SplineInterpolationBase::computeCoeffs(const std::vector<Real> & x,
                                        unsigned int klo,
                                        unsigned int khi,
-                                       Real x_int,
+                                       const T & x_int,
                                        Real & h,
-                                       Real & a,
-                                       Real & b) const
+                                       T & a,
+                                       T & b) const
 {
   h = x[khi] - x[klo];
   if (h == 0)
@@ -104,6 +105,18 @@ SplineInterpolationBase::sample(const std::vector<Real> & x,
 {
   unsigned int klo, khi;
   findInterval(x, x_int, klo, khi);
+
+  return sample(x, y, y2, x_int, klo, khi);
+}
+
+ADReal
+SplineInterpolationBase::sample(const std::vector<Real> & x,
+                                const std::vector<Real> & y,
+                                const std::vector<Real> & y2,
+                                const ADReal & x_int) const
+{
+  unsigned int klo, khi;
+  findInterval(x, MetaPhysicL::raw_value(x_int), klo, khi);
 
   return sample(x, y, y2, x_int, klo, khi);
 }
@@ -139,15 +152,17 @@ SplineInterpolationBase::sample2ndDerivative(const std::vector<Real> & x,
   return a * y2[klo] + b * y2[khi];
 }
 
-Real
+template <typename T>
+T
 SplineInterpolationBase::sample(const std::vector<Real> & x,
                                 const std::vector<Real> & y,
                                 const std::vector<Real> & y2,
-                                Real x_int,
+                                const T & x_int,
                                 unsigned int klo,
                                 unsigned int khi) const
 {
-  Real h, a, b;
+  Real h;
+  T a, b;
   computeCoeffs(x, klo, khi, x_int, h, a, b);
 
   return a * y[klo] + b * y[khi] +

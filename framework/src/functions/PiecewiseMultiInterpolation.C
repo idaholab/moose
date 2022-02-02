@@ -85,7 +85,7 @@ PiecewiseMultiInterpolation::value(Real t, const Point & p) const
 }
 
 ADReal
-PiecewiseMultiInterpolation::value(ADReal t, const ADPoint & p) const
+PiecewiseMultiInterpolation::value(const ADReal & t, const ADPoint & p) const
 {
   return sample(pointInGrid<true>(t, p));
 }

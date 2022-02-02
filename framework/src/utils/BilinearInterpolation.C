@@ -22,7 +22,7 @@ void
 BilinearInterpolation::getNeighborIndices(const std::vector<Real> & inArr,
                                           Real x,
                                           int & lowerX,
-                                          int & upperX)
+                                          int & upperX) const
 {
   int N = inArr.size();
   if (x <= inArr[0])
@@ -55,33 +55,34 @@ BilinearInterpolation::getNeighborIndices(const std::vector<Real> & inArr,
   }
 }
 
-Real
-BilinearInterpolation::sample(Real xcoord, Real ycoord)
+template <typename T>
+T
+BilinearInterpolation::sample(const T & xcoord, const T & ycoord) const
 {
   // first find 4 neighboring points
   int lx = 0; // index of x coordinate of adjacent grid point to left of P
   int ux = 0; // index of x coordinate of adjacent grid point to right of P
-  getNeighborIndices(_xAxis, xcoord, lx, ux);
+  getNeighborIndices(_xAxis, MetaPhysicL::raw_value(xcoord), lx, ux);
 
   int ly = 0; // index of y coordinate of adjacent grid point below P
   int uy = 0; // index of y coordinate of adjacent grid point above P
-  getNeighborIndices(_yAxis, ycoord, ly, uy);
+  getNeighborIndices(_yAxis, MetaPhysicL::raw_value(ycoord), ly, uy);
 
-  Real fQ11 = _zSurface(ly, lx);
-  Real fQ21 = _zSurface(ly, ux);
-  Real fQ12 = _zSurface(uy, lx);
-  Real fQ22 = _zSurface(uy, ux);
+  const Real & fQ11 = _zSurface(ly, lx);
+  const Real & fQ21 = _zSurface(ly, ux);
+  const Real & fQ12 = _zSurface(uy, lx);
+  const Real & fQ22 = _zSurface(uy, ux);
 
   // if point exactly found on a node do not interpolate
   if ((lx == ux) && (ly == uy))
     return fQ11;
 
-  Real x = xcoord;
-  Real y = ycoord;
-  Real x1 = _xAxis[lx];
-  Real x2 = _xAxis[ux];
-  Real y1 = _yAxis[ly];
-  Real y2 = _yAxis[uy];
+  const auto & x = xcoord;
+  const auto & y = ycoord;
+  const Real & x1 = _xAxis[lx];
+  const Real & x2 = _xAxis[ux];
+  const Real & y1 = _yAxis[ly];
+  const Real & y2 = _yAxis[uy];
 
   // if xcoord lies exactly on an xAxis node do linear interpolation
   if (lx == ux)
@@ -92,7 +93,7 @@ BilinearInterpolation::sample(Real xcoord, Real ycoord)
   if (ly == uy)
     return fQ11 + (fQ21 - fQ11) * (x - x1) / (x2 - x1);
 
-  Real fxy = fQ11 * (x2 - x) * (y2 - y);
+  auto fxy = fQ11 * (x2 - x) * (y2 - y);
   fxy += fQ21 * (x - x1) * (y2 - y);
   fxy += fQ12 * (x2 - x) * (y - y1);
   fxy += fQ22 * (x - x1) * (y - y1);
@@ -100,3 +101,6 @@ BilinearInterpolation::sample(Real xcoord, Real ycoord)
 
   return fxy;
 }
+
+template Real BilinearInterpolation::sample<Real>(const Real &, const Real &) const;
+template ADReal BilinearInterpolation::sample<ADReal>(const ADReal &, const ADReal &) const;

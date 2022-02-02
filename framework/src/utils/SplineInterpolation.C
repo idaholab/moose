@@ -70,6 +70,12 @@ SplineInterpolation::sample(Real x) const
   return SplineInterpolationBase::sample(_x, _y, _y2, x);
 }
 
+ADReal
+SplineInterpolation::sample(const ADReal & x) const
+{
+  return SplineInterpolationBase::sample(_x, _y, _y2, x);
+}
+
 Real
 SplineInterpolation::sampleDerivative(Real x) const
 {

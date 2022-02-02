@@ -48,7 +48,14 @@ PiecewiseLinearBase::buildInterpolation(const bool extrap)
 Real
 PiecewiseLinearBase::value(Real t, const Point & p) const
 {
-  const Real x = _has_axis ? p(_axis) : t;
+  const auto x = _has_axis ? p(_axis) : t;
+  return _scale_factor * _linear_interp->sample(x);
+}
+
+ADReal
+PiecewiseLinearBase::value(const ADReal & t, const ADPoint & p) const
+{
+  const auto x = _has_axis ? p(_axis) : t;
   return _scale_factor * _linear_interp->sample(x);
 }
 

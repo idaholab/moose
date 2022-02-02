@@ -71,6 +71,19 @@ VectorPostprocessorFunction::VectorPostprocessorFunction(const InputParameters &
 Real
 VectorPostprocessorFunction::value(Real t, const Point & p) const
 {
+  return valueInternal(t, p);
+}
+
+ADReal
+VectorPostprocessorFunction::value(const ADReal & t, const ADPoint & p) const
+{
+  return valueInternal(t, p);
+}
+
+template <typename T, typename P>
+T
+VectorPostprocessorFunction::valueInternal(const T & t, const P & p) const
+{
   if (_argument_column.empty())
   {
     std::vector<Real> dummy{0};
@@ -82,6 +95,6 @@ VectorPostprocessorFunction::value(Real t, const Point & p) const
     // iteration?
     _linear_interp->setData(_argument_column, _value_column);
   }
-  const Real x = _component == 3 ? t : p(_component);
+  const T x = _component == 3 ? t : p(_component);
   return _linear_interp->sample(x);
 }

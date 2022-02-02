@@ -60,10 +60,12 @@ public:
   // Necessary for using forward declaration of BilinearInterpolation in std::unique_ptr
   virtual ~PiecewiseBilinear();
 
+  using Function::value;
   /**
    * This function will return a value based on the first input argument only.
    */
   virtual Real value(Real t, const Point & pt) const override;
+  virtual ADReal value(const ADReal & t, const ADPoint & pt) const override;
 
 private:
   std::unique_ptr<BilinearInterpolation> _bilinear_interp;
@@ -76,6 +78,9 @@ private:
   const bool _xaxisValid;
   const Real _scale_factor;
   const bool _radial;
+
+  template <typename T, typename P>
+  T valueInternal(T t, const P & p) const;
 
   void parse(std::vector<Real> & x, std::vector<Real> & y, ColumnMajorMatrix & z);
 };

@@ -30,7 +30,7 @@ public:
 
   using Function::value;
   virtual Real value(Real t, const Point & pt) const override;
-  virtual ADReal value(ADReal t, const ADPoint & pt) const override;
+  virtual ADReal value(const ADReal & t, const ADPoint & p) const override;
 
 private:
   const Real _scale_factor;

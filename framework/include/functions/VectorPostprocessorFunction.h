@@ -29,12 +29,18 @@ public:
   static InputParameters validParams();
 
   VectorPostprocessorFunction(const InputParameters & parameters);
+
+  using Function::value;
   virtual Real value(Real t, const Point & p) const override;
+  virtual ADReal value(const ADReal & t, const ADPoint & p) const override;
 
 protected:
   std::unique_ptr<LinearInterpolation> _linear_interp;
   const VectorPostprocessorValue & _argument_column;
   const VectorPostprocessorValue & _value_column;
+
+  template <typename T, typename P>
+  T valueInternal(const T & t, const P & p) const;
 
   /// if the "component" parameter is specified, its value is assigned here and
   /// function values are interpolated W.R.T. spatial coordinates in that direction,

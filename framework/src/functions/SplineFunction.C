@@ -48,6 +48,12 @@ SplineFunction::value(Real /*t*/, const Point & p) const
   return _ipol.sample(p(_component));
 }
 
+ADReal
+SplineFunction::value(const ADReal & /*t*/, const ADPoint & p) const
+{
+  return _ipol.sample(p(_component));
+}
+
 RealGradient
 SplineFunction::gradient(Real /*t*/, const Point & p) const
 {

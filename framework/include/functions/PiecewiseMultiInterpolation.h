@@ -38,11 +38,12 @@ public:
   // Necessary for using forward declaration of GriddedData in std::unique_ptr
   virtual ~PiecewiseMultiInterpolation();
 
+  using Function::value;
   /**
    * Given t and p, return the interpolated value.
    */
   virtual Real value(Real t, const Point & pt) const override;
-  virtual ADReal value(ADReal t, const ADPoint & pt) const override;
+  virtual ADReal value(const ADReal & t, const ADPoint & p) const override;
 
 protected:
   typedef GriddedData::GridPoint GridPoint;

@@ -73,7 +73,7 @@ public:
    * \param p The Point in space (x,y,z)
    * \return A scalar of the function evaluated at the time and location
    */
-  virtual ADReal value(ADReal t, const ADPoint & p) const;
+  virtual ADReal value(const ADReal & t, const ADPoint & p) const;
 
   /**
    * Override this to evaluate the vector function at a point (t,x,y,z), by default

@@ -33,6 +33,7 @@ public:
 
   SolutionFunction(const InputParameters & parameters);
 
+  using Function::value;
   /**
    * Extract a value from the solution
    * @param t Time at which to extract
