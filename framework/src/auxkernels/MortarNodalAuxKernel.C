@@ -76,6 +76,7 @@ MortarNodalAuxKernelTempl<ComputeValueType>::compute()
                                         amg(),
                                         _displaced,
                                         consumers,
+                                        _tid,
                                         _secondary_ip_sub_to_mats,
                                         _primary_ip_sub_to_mats,
                                         _secondary_boundary_mats,

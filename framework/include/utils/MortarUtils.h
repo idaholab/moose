@@ -71,6 +71,7 @@ loopOverMortarSegments(const Iterators & secondary_elems_to_mortar_segments,
                        const AutomaticMortarGeneration & amg,
                        const bool displaced,
                        const Consumers & consumers,
+                       const THREAD_ID tid,
                        std::map<SubdomainID, std::deque<MaterialBase *>> secondary_ip_sub_to_mats,
                        std::map<SubdomainID, std::deque<MaterialBase *>> primary_ip_sub_to_mats,
                        std::deque<MaterialBase *> secondary_boundary_mats,
@@ -136,7 +137,7 @@ loopOverMortarSegments(const Iterators & secondary_elems_to_mortar_segments,
     for (const auto msm_elem : msm_elems)
     {
       // Initialize mortar segment quadrature and compute JxW
-      subproblem.reinitMortarElem(msm_elem);
+      subproblem.reinitMortarElem(msm_elem, tid);
 
       // Get a reference to the MortarSegmentInfo for this Elem.
       const MortarSegmentInfo & msinfo = amg.mortarSegmentMeshElemToInfo().at(msm_elem);
@@ -211,7 +212,7 @@ loopOverMortarSegments(const Iterators & secondary_elems_to_mortar_segments,
 
       // Compute a JxW for the actual mortar segment element (not the lower dimensional element on
       // the secondary face!)
-      subproblem.reinitMortarElem(msm_elem);
+      subproblem.reinitMortarElem(msm_elem, tid);
 
       // Extract previously computed mapped quadrature points for secondary and primary face
       // elements
@@ -241,8 +242,13 @@ loopOverMortarSegments(const Iterators & secondary_elems_to_mortar_segments,
       // it's safest to keep making calls on fe_problem instead of subproblem
 
       // reinit the variables/residuals/jacobians on the secondary interior
-      fe_problem.reinitElemFaceRef(
-          reinit_secondary_elem, secondary_side_id, secondary_boundary_id, TOLERANCE, &xi1_pts);
+      fe_problem.reinitElemFaceRef(reinit_secondary_elem,
+                                   secondary_side_id,
+                                   secondary_boundary_id,
+                                   TOLERANCE,
+                                   &xi1_pts,
+                                   nullptr,
+                                   tid);
 
       const Elem * reinit_primary_elem = primary_ip;
 
@@ -252,36 +258,41 @@ loopOverMortarSegments(const Iterators & secondary_elems_to_mortar_segments,
         reinit_primary_elem = fe_problem.mesh().elemPtr(reinit_primary_elem->id());
 
       // reinit the variables/residuals/jacobians on the primary interior
-      fe_problem.reinitNeighborFaceRef(
-          reinit_primary_elem, primary_side_id, primary_boundary_id, TOLERANCE, &xi2_pts);
+      fe_problem.reinitNeighborFaceRef(reinit_primary_elem,
+                                       primary_side_id,
+                                       primary_boundary_id,
+                                       TOLERANCE,
+                                       &xi2_pts,
+                                       nullptr,
+                                       tid);
 
       // reinit neighbor materials, but be careful not to execute stateful materials since
       // conceptually they don't make sense with mortar (they're not interpolary)
       fe_problem.reinitMaterialsNeighbor(primary_ip->subdomain_id(),
-                                         /*tid=*/0,
+                                         /*tid=*/tid,
                                          /*swap_stateful=*/false,
                                          &primary_ip_mats);
 
       // reinit the variables/residuals/jacobians on the lower dimensional element corresponding to
       // the secondary face. This must be done last after the dof indices have been prepared for the
       // secondary (element) and primary (neighbor)
-      subproblem.reinitLowerDElem(secondary_face_elem, /*tid=*/0, &xi1_pts);
+      subproblem.reinitLowerDElem(secondary_face_elem, /*tid=*/tid, &xi1_pts);
 
       // All this does currently is sets the neighbor/primary lower dimensional elem in Assembly and
       // computes its volume for potential use in the MortarConstraints. Solution continuity
       // stabilization for example relies on being able to access the volume
-      subproblem.reinitNeighborLowerDElem(msinfo.primary_elem);
+      subproblem.reinitNeighborLowerDElem(msinfo.primary_elem, tid);
 
       // reinit higher-dimensional secondary face/boundary materials. Do this after we reinit
       // lower-d variables in case we want to pull the lower-d variable values into the secondary
       // face/boundary materials. Be careful not to execute stateful materials since conceptually
       // they don't make sense with mortar (they're not interpolary)
       fe_problem.reinitMaterialsFace(secondary_ip->subdomain_id(),
-                                     /*tid=*/0,
+                                     /*tid=*/tid,
                                      /*swap_stateful=*/false,
                                      &secondary_ip_mats);
       fe_problem.reinitMaterialsBoundary(
-          secondary_boundary_id, /*tid=*/0, /*swap_stateful=*/false, &secondary_boundary_mats);
+          secondary_boundary_id, /*tid=*/tid, /*swap_stateful=*/false, &secondary_boundary_mats);
 
       act();
 
