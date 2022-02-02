@@ -43,6 +43,7 @@ public:
    */
   virtual void initialSetup() override;
 
+  using Function::value;
   /**
    * Return the pixel value for the given point
    * @param t Time (unused)

@@ -69,7 +69,7 @@ PiecewiseMultilinear::sampleInternal(const MooseADWrapper<GridPoint, is_ad> pt) 
   MooseADWrapper<Real, is_ad> weight;
   GridIndex arg(_dim);
   // number of points in hypercube = 2^_dim
-  for (unsigned int i = 0; i < (1 << _dim); ++i)
+  for (unsigned int i = 0; i < (1u << _dim); ++i)
   {
     weight = 1;
     for (unsigned int j = 0; j < _dim; ++j)

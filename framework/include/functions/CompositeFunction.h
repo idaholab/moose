@@ -28,7 +28,9 @@ public:
 
   CompositeFunction(const InputParameters & parameters);
 
+  using Function::value;
   virtual Real value(Real t, const Point & pt) const override;
+  virtual ADReal value(ADReal t, const ADPoint & pt) const override;
 
 private:
   const Real _scale_factor;

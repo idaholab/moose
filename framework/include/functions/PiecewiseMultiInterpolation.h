@@ -51,7 +51,8 @@ protected:
 
   /// convert cartesian+time coordinates into grid coordinates
   template <bool is_ad>
-  auto pointInGrid(MooseADWrapper<Real, is_ad> t, const MooseADWrapper<Point, is_ad> & p) const;
+  MooseADWrapper<GridPoint, is_ad> pointInGrid(MooseADWrapper<Real, is_ad> t,
+                                               const MooseADWrapper<Point, is_ad> & p) const;
 
   /**
    * This does the core work.  Given a point, pt, defined

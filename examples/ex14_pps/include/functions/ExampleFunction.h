@@ -18,6 +18,7 @@ public:
 
   static InputParameters validParams();
 
+  using Function::value;
   virtual Real value(Real t, const Point & p) const override;
 
 protected:

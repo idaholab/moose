@@ -26,28 +26,16 @@ LinearCombinationFunction::validParams()
 }
 
 LinearCombinationFunction::LinearCombinationFunction(const InputParameters & parameters)
-  : Function(parameters), FunctionInterface(this), _w(getParam<std::vector<Real>>("w"))
+  : Function(parameters), FunctionInterface(this)
 {
+  const auto fname_w = getParam<FunctionName, Real>("functions", "w");
 
-  const std::vector<FunctionName> & names = getParam<std::vector<FunctionName>>("functions");
-  const unsigned int len = names.size();
-  if (len != _w.size())
-    mooseError(
-        "LinearCombinationFunction: The number of functions must equal the number of w values");
-
-  _f.resize(len);
-  for (unsigned i = 0; i < len; ++i)
+  for (const auto & fw : fname_w)
   {
-    if (name() == names[i])
-      mooseError("A LinearCombinationFunction must not reference itself");
-    const Function * const f = &getFunctionByName(names[i]);
-    if (!f)
-      mooseError("LinearCombinationFunction: The function ",
-                 names[i],
-                 " (referenced by ",
-                 name(),
-                 ") cannot be found");
-    _f[i] = f;
+    if (name() == fw.first)
+      paramError("functions", "A LinearCombinationFunction must not reference itself");
+
+    _fw.emplace_back(&getFunctionByName(fw.first), fw.second);
   }
 }
 
@@ -55,8 +43,17 @@ Real
 LinearCombinationFunction::value(Real t, const Point & p) const
 {
   Real val = 0;
-  for (unsigned i = 0; i < _f.size(); ++i)
-    val += _w[i] * _f[i]->value(t, p);
+  for (const auto & fw : _fw)
+    val += fw.first->value(t, p) * fw.second;
+  return val;
+}
+
+ADReal
+LinearCombinationFunction::value(ADReal t, const ADPoint & p) const
+{
+  ADReal val = 0.0;
+  for (const auto & fw : _fw)
+    val += fw.first->value(t, p) * fw.second;
   return val;
 }
 
@@ -64,8 +61,8 @@ RealGradient
 LinearCombinationFunction::gradient(Real t, const Point & p) const
 {
   RealGradient g;
-  for (unsigned i = 0; i < _f.size(); ++i)
-    g += _w[i] * _f[i]->gradient(t, p);
+  for (const auto & fw : _fw)
+    g += fw.first->gradient(t, p) * fw.second;
   return g;
 }
 
@@ -73,7 +70,7 @@ RealVectorValue
 LinearCombinationFunction::vectorValue(Real t, const Point & p) const
 {
   RealVectorValue v;
-  for (unsigned i = 0; i < _f.size(); ++i)
-    v += _w[i] * _f[i]->vectorValue(t, p);
+  for (const auto & fw : _fw)
+    v += fw.first->vectorValue(t, p) * fw.second;
   return v;
 }

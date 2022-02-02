@@ -62,7 +62,7 @@ PiecewiseMultiInterpolation::PiecewiseMultiInterpolation(const InputParameters &
 PiecewiseMultiInterpolation::~PiecewiseMultiInterpolation() {}
 
 template <bool is_ad>
-auto
+MooseADWrapper<PiecewiseMultiInterpolation::GridPoint, is_ad>
 PiecewiseMultiInterpolation::pointInGrid(MooseADWrapper<Real, is_ad> t,
                                          const MooseADWrapper<Point, is_ad> & p) const
 {
