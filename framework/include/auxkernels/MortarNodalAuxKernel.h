@@ -47,7 +47,7 @@ protected:
   using AuxKernelTempl<ComputeValueType>::_current_node;
   using AuxKernelTempl<ComputeValueType>::_var;
   using AuxKernelTempl<ComputeValueType>::computeValue;
-
+  using AuxKernelTempl<ComputeValueType>::uOld;
   /// Whether we're computing on the displaced mesh
   const bool _displaced;
 
@@ -56,6 +56,12 @@ protected:
 
   /// The mortar segment volume
   Real _msm_volume;
+
+  /// Incremental quantity. If true, values accumulate over time.
+  bool _incremental;
+
+  /// Old value
+  const typename OutputTools<ComputeValueType>::VariableValue & _u_old;
 };
 
 typedef MortarNodalAuxKernelTempl<Real> MortarNodalAuxKernel;
