@@ -129,13 +129,6 @@ rho=1
 []
 
 [Materials]
-  [ins_fv]
-    type = INSFVMaterial
-    u = 'u'
-    v = 'v'
-    pressure = 'pressure'
-    rho = ${rho}
-  []
   [mu]
     type = ADGenericFunctorMaterial
     prop_names = 'mu'

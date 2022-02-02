@@ -252,16 +252,6 @@ ref_delta_P = ${fparse f * L / D * rho * bulk_u^2 / 2}
   []
 []
 
-[Materials]
-  [ins_fv]
-    type = INSFVMaterial
-    u = 'u'
-    v = 'v'
-    pressure = 'pressure'
-    rho = ${rho}
-  []
-[]
-
 [Executioner]
   type = Steady
   solve_type = 'PJFNK'

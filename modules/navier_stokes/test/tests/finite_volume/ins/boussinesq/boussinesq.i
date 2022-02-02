@@ -251,10 +251,7 @@ temp_ref=${fparse hot_temp / 2.}
     prop_values = '${alpha} ${cp} ${k}'
   []
   [ins_fv]
-    type = INSFVMaterial
-    u = 'u'
-    v = 'v'
-    pressure = 'pressure'
+    type = INSFVEnthalpyMaterial
     temperature = 'T'
     rho = ${rho}
   []

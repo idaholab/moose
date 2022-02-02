@@ -94,15 +94,6 @@ velocity_interp_method='average'
   []
 []
 
-[Materials]
-  [ins_fv]
-    type = INSFVMaterial
-    u = 'u'
-    pressure = 'pressure'
-    rho = ${rho}
-  []
-[]
-
 [Functions]
   [exact_u]
     type = ParsedFunction

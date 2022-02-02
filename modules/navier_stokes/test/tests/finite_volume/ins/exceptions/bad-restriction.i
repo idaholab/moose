@@ -237,10 +237,7 @@ restricted_blocks = '1'
 
 [Materials]
   [ins_fv]
-    type = INSFVMaterial
-    u = 'u'
-    v = 'v'
-    pressure = 'pressure'
+    type = INSFVEnthalpyMaterial
     temperature = 'temperature'
     rho = ${rho}
     block = ${restricted_blocks}

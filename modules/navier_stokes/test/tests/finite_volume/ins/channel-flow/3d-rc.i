@@ -175,17 +175,6 @@ velocity_interp_method='rc'
   []
 []
 
-[Materials]
-  [ins_fv]
-    type = INSFVMaterial
-    u = 'u'
-    v = 'v'
-    w = 'w'
-    pressure = 'pressure'
-    rho = ${rho}
-  []
-[]
-
 [Executioner]
   type = Steady
   solve_type = 'NEWTON'

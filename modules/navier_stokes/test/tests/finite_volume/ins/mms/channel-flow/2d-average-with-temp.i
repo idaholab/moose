@@ -189,10 +189,7 @@ velocity_interp_method='average'
     prop_values = '${k} ${cp}'
   []
   [ins_fv]
-    type = INSFVMaterial
-    u = 'u'
-    v = 'v'
-    pressure = 'pressure'
+    type = INSFVEnthalpyMaterial
     temperature = 'temperature'
     rho = ${rho}
   []

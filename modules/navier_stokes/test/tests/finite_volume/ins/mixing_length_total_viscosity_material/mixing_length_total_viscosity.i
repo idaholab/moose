@@ -218,13 +218,6 @@ velocity_interp_method='rc'
 []
 
 [Materials]
-  [ins_fv]
-    type = INSFVMaterial
-    u = 'u'
-    v = 'v'
-    pressure = 'pressure'
-    rho = ${rho}
-  []
   [total_viscosity]
     type = MixingLengthTurbulentViscosityMaterial
     u = 'u'                             #computes total viscosity = mu_t + mu

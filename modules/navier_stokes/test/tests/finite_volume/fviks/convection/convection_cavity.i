@@ -227,10 +227,7 @@ advected_interp_method = 'average'
     prop_values = '${cp} ${k}'
   []
   [ins_fv]
-    type = INSFVMaterial
-    u = 'u'
-    v = 'v'
-    pressure = 'pressure'
+    type = INSFVEnthalpyMaterial
     temperature = 'T'
     rho = ${rho}
     block = 0

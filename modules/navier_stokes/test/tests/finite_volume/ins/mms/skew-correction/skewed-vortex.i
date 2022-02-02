@@ -131,16 +131,6 @@ rho=1.0
   []
 []
 
-[Materials]
-  [ins_fv]
-    type = INSFVMaterial
-    u = vel_x
-    v = vel_y
-    pressure = 'pressure'
-    rho = ${rho}
-  []
-[]
-
 [Functions]
   [exact_u]
     type = ParsedFunction

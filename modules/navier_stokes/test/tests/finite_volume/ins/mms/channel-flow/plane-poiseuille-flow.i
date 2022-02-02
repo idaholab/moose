@@ -153,16 +153,6 @@ two_term_boundary_expansion=true
   []
 []
 
-[Materials]
-  [ins_fv]
-    type = INSFVMaterial
-    u = 'u'
-    v = 'v'
-    pressure = 'pressure'
-    rho = ${rho}
-  []
-[]
-
 [Functions]
   [exact_u]
     type = ParsedFunction

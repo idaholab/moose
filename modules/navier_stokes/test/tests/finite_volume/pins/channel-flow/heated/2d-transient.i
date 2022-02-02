@@ -280,10 +280,7 @@ velocity_interp_method='rc'
     prop_values = '${cp}'
   []
   [ins_fv]
-    type = INSFVMaterial
-    u = 'u'
-    v = 'v'
-    pressure = 'pressure'
+    type = INSFVEnthalpyMaterial
     rho = ${rho}
     temperature = 'temp_fluid'
   []

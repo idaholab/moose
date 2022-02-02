@@ -261,10 +261,7 @@ velocity_interp_method='rc'
   []
 
   [ins_fv]
-    type = INSFVMaterial
-    u = 'u'
-    v = 'v'
-    pressure = 'pressure'
+    type = INSFVEnthalpyMaterial
     rho = ${rho}
     temperature = 'temperature'
   []

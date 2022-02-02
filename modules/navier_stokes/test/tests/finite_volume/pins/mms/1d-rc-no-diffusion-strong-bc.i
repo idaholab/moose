@@ -156,12 +156,6 @@ velocity_interp_method='rc'
     prop_names = 'rho'
     prop_values = '${rho}'
   []
-  [ins_fv]
-    type = INSFVMaterial
-    u = 'u'
-    pressure = 'pressure'
-    rho = ${rho}
-  []
 []
 
 [Executioner]

@@ -259,10 +259,7 @@ inlet_v = 0.001
     pressure = pressure
   []
   [ins_fv]
-    type = INSFVMaterial
-    u = 'u'
-    v = 'v'
-    pressure = 'pressure'
+    type = INSFVEnthalpyMaterial
     temperature = 'T'
     rho = ${rho}
   []

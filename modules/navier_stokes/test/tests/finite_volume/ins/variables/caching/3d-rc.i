@@ -184,17 +184,6 @@ velocity_face_value_caching = true
   []
 []
 
-[Materials]
-  [ins_fv]
-    type = INSFVMaterial
-    u = 'u'
-    v = 'v'
-    w = 'w'
-    pressure = 'pressure'
-    rho = ${rho}
-  []
-[]
-
 [Postprocessors]
   [physical]
     type = MemoryUsage
