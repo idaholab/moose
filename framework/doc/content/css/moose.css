@@ -1181,3 +1181,18 @@ div.moose-mega-menu-content{
      color: white;
 }
 }
+
+div.moose-algorithm-line {
+  display: flex;
+  justify-content: space-between;
+}
+
+div.moose-algorithm {
+    border-left: solid 10px gray;
+    border-right: solid 2px black;
+    border-top: solid 2px black;
+    border-bottom: solid 2px black;
+    padding-left:10px;
+    padding-right:10px;
+    line-height:15px;
+}

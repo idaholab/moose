@@ -99,6 +99,11 @@
       input = test_katex.py
       detail = "support equations,"
     []
+    [algorithm]
+      type = PythonUnitTest
+      input = test_algorithm.py
+      detail = "displaying algorithmic pseudo-code,"
+    []
     [datetime]
       type = PythonUnitTest
       input = test_datetime.py

@@ -103,6 +103,7 @@ Extensions:
             - framework/include
             - test/include
     MooseDocs.extensions.ifelse: default
+    MooseDocs.extensions.algorithm: default
 
 Translator:
     type: MooseDocs.base.Translator
