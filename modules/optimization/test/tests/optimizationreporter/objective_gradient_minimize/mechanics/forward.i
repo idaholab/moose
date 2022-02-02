@@ -44,7 +44,7 @@
   []
   [strain]
     type = ComputeSmallStrain
-    displacements = 'disp_x disp_y'    
+    displacements = 'disp_x disp_y'
   []
   [stress]
     type = ComputeLinearElasticStress

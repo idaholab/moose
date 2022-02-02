@@ -23,7 +23,10 @@ public:
    */
   void setInitialCondition(libMesh::PetscVector<Number> & param);
 
-  
+  /**
+   * Function to over-ride misfit values with the simulated values from the matrix free hessian
+   * forward solve
+   */
   void setMisfitToSimulatedValues();
 
   /**

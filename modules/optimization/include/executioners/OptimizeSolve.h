@@ -41,8 +41,8 @@ protected:
   virtual void gradientFunction(libMesh::PetscVector<Number> & gradient);
 
   /// Hessian application routine
-  virtual PetscErrorCode applyHessian(libMesh::PetscVector<Number> &  s, libMesh::PetscVector<Number> &  Hs);
-
+  virtual PetscErrorCode applyHessian(libMesh::PetscVector<Number> & s,
+                                      libMesh::PetscVector<Number> & Hs);
 
   /// Communicator used for operations
   const libMesh::Parallel::Communicator _my_comm;
@@ -116,5 +116,4 @@ private:
 
   /// Hessian (matrix) - usually a matrix-free representation
   Mat _hessian;
-  Mat _hessianPrecond;
 };

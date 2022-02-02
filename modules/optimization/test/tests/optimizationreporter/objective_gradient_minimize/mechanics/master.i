@@ -17,7 +17,7 @@
   parameter_names = 'fy_right'
   num_values = '1'
   measurement_points = '5.0 1.0 0.0'
-  measurement_values = '80.935883542921'
+  measurement_values = '80.9'
   initial_condition = '100'
 []
 
@@ -90,6 +90,12 @@
     from_reporters = 'adjoint_pt/adjoint_pt'
     to_reporters = 'OptimizationReporter/adjoint'
     direction = from_multiapp
+  []
+[]
+
+[Reporters]
+  [optInfo]
+    type = OptimizationInfo
   []
 []
 

@@ -22,21 +22,30 @@
   parameter_names = 'p1 p2'
   num_values = '1 1'
   measurement_points = '0.2 0.2 0
-            0.8 0.6 0
-            0.2 1.4 0
-            0.8 1.8 0'
+                        0.8 0.6 0
+                        0.2 1.4 0
+                        0.8 1.8 0'
   measurement_values = '207 204 185 125'
 []
 
 [Executioner]
   type = Optimize
-  tao_solver = taolmvm
-  petsc_options_iname = '-tao_gatol'#
-  petsc_options_value = '1e-4'
+  # tao_solver = taobncg
+  # petsc_options_iname = '-tao_gatol'#
+  # petsc_options_value = '1e-4'
+
+  # switching this to tao_max_iter=3 runs forever.
+  tao_solver = taonls
+  petsc_options_iname = '-tao_gttol -tao_max_it -tao_nls_pc_type -tao_nls_ksp_type'
+  petsc_options_value = '1e-5 2 none cg'
+
+
   # petsc_options_iname = '-tao_fd_gradient -tao_fd_delta -tao_gatol'
   # petsc_options_value = 'true 0.0001 1e-4'
-  # petsc_options_iname='-tao_max_it -tao_fd_test -tao_test_gradient -tao_fd_gradient -tao_fd_delta -tao_gatol'
-  # petsc_options_value='3 true true false 0.0001 0.0001'
+
+  #FIXME Lynn I can't get the tao_test_hessian to work.
+  # petsc_options_iname='-tao_max_it -tao_fd_test -tao_test_gradient -tao_test_hessian -tao_fd_delta -tao_gatol -tao_nls_pc_type -tao_nls_ksp_type'
+  # petsc_options_value=' 1           true         true               true              0.0001        0.0001 none cg'
   verbose = true
 []
 
