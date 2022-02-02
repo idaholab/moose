@@ -169,12 +169,9 @@ IterationAdaptiveDT::init()
         const auto * plfunc = dynamic_cast<const PiecewiseLinear *>(pfunc);
         _piecewise_linear_timestep_limiting_functions.push_back(plfunc);
 
-        if (plfunc)
-        {
-          const auto ntimes = plfunc->functionSize();
-          for (unsigned int i = 0; i < ntimes; ++i)
-            times.insert(plfunc->domain(i));
-        }
+        const auto ntimes = pfunc->functionSize();
+        for (unsigned int i = 0; i < ntimes; ++i)
+          times.insert(pfunc->domain(i));
       }
       else
         mooseError("timestep_limiting_function must be a PiecewiseBase function");
