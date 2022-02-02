@@ -17,6 +17,8 @@
 #include "libmesh/compare_types.h"
 #include "libmesh/threads.h"
 
+namespace Moose
+{
 template <typename T, typename T2, typename std::enable_if<ScalarTraits<T>::value, int>::type = 0>
 inline TypeVector<typename CompareTypes<T, T2>::supertype>
 outer_product(const T & a, const TypeVector<T2> & b)
@@ -26,6 +28,14 @@ outer_product(const T & a, const TypeVector<T2> & b)
     ret(i) = a * b(i);
 
   return ret;
+}
+
+template <typename T, typename T2>
+inline TypeTensor<typename CompareTypes<T, T2>::supertype>
+outer_product(const TypeVector<T> & a, const TypeVector<T2> & b)
+{
+  return libMesh::outer_product(a, b);
+}
 }
 
 /**
@@ -144,9 +154,9 @@ private:
       const auto linear_interp_gradient =
           fi.gC() * elem_gradient + (1 - fi.gC()) * this->gradient(neighbor_arg);
       return linear_interp_gradient +
-             outer_product(((*this)(neighbor_arg) - (*this)(elem_arg)) / fi.dCFMag() -
-                               linear_interp_gradient * fi.eCF(),
-                           fi.eCF());
+             Moose::outer_product(((*this)(neighbor_arg) - (*this)(elem_arg)) / fi.dCFMag() -
+                                      linear_interp_gradient * fi.eCF(),
+                                  fi.eCF());
     }
 
     // One term expansion
