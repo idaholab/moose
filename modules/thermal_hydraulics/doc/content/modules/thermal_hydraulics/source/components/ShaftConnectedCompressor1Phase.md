@@ -1,22 +1,63 @@
 # ShaftConnectedCompressor1Phase
 
-The 1-phase shaft-connected compressor component is modeled as a volume junction with source terms added to the momentum and energy equations due to the compressor's torque and pressure head. The compressor model is based off the model described in [!cite](CompressorR5).
-
-The compressor model relies on input parameters, upstream flow conditions, and rotational speed to calculate the compressor pressure head, isentropic torque, dissipation torque, friction torque, and moment of inertia. Compressor head and net torque (sum of isentropic, dissipation, and friction torques) are used in source terms to affect flow conditions coming out of the compressor. Net torque and moment of inertia are sent to the connected `Shaft` component and affect the rotational speed.
+This component models a compressor that is connected to a [Shaft.md] for the single-phase flow model.
+The compressor formulation is based off the model described in [!cite](CompressorR5).
+The user supplies performance curves that give the pressure ratio and isentropic
+efficiency as functions of shaft speed and mass flow rate. The compressor then
+applies a pressure rise and work to the working fluid, according to the current
+flow conditions.
 
 ## Usage
 
-A `ShaftConnectedCompressor1Phase` component must be connected to a [Shaft](Shaft.md) component, which controls the compressor rotational speed. The user must specify which flow channel boundaries are connected to the compressor with the [!param](/Components/ShaftConnectedCompressor1Phase/inlet) and [!param](/Components/ShaftConnectedCompressor1Phase/outlet) parameters.
+This component must be must be connected to a [Shaft](Shaft.md) component, which
+controls the compressor rotational speed. The user must specify which flow
+channel boundaries are connected to the compressor with the
+[!param](/Components/ShaftConnectedCompressor1Phase/inlet) and
+[!param](/Components/ShaftConnectedCompressor1Phase/outlet) parameters.
 
-[!param](/Components/ShaftConnectedCompressor1Phase/A_ref) should generally be assigned a value in between the [!param](/Components/FlowChannel1Phase/A) values of the connected `inlet` or `outlet`. `A_ref` can act as a means to scale the compressor head. `A_ref` can also be used in combination with [!param](/Components/ShaftConnectedCompressor1Phase/K) to apply a pressure drop due to form loss. The compressor volume, [!param](/Components/ShaftConnectedCompressor1Phase/volume), should be a reasonable estimate of the inlet to outlet fluid volume of the modeled compressor.
+The user assigns values for several compressor rated conditions:
+[!param](/Components/ShaftConnectedCompressor1Phase/omega_rated),
+[!param](/Components/ShaftConnectedCompressor1Phase/mdot_rated),
+[!param](/Components/ShaftConnectedCompressor1Phase/rho0_rated), and
+[!param](/Components/ShaftConnectedCompressor1Phase/c0_rated). These rated
+conditions, along with the user-supplied data
+[!param](/Components/ShaftConnectedCompressor1Phase/Rp_functions),
+[!param](/Components/ShaftConnectedCompressor1Phase/eff_functions),
+[!param](/Components/ShaftConnectedCompressor1Phase/speeds), define the
+compressor performance model.
 
-The user assigns values for several compressor rated conditions: [!param](/Components/ShaftConnectedCompressor1Phase/omega_rated), [!param](/Components/ShaftConnectedCompressor1Phase/mdot_rated), [!param](/Components/ShaftConnectedCompressor1Phase/rho0_rated), and [!param](/Components/ShaftConnectedCompressor1Phase/c0_rated). These rated conditions, along with the user-supplied data [!param](/Components/ShaftConnectedCompressor1Phase/Rp_functions), [!param](/Components/ShaftConnectedCompressor1Phase/eff_functions), [!param](/Components/ShaftConnectedCompressor1Phase/speeds), define the compressor performance model.
+The parameter `speeds` is a list of relative corrected speeds $\alpha$ (see
+[speed_rel_corr]) in increasing order. The parameters parameters `Rp_functions`
+and `eff_functions` define curves for the pressure ratio $r_p$ (see [Rp]) and
+isentropic efficiency $\eta$ (see [eff]), respectively, as
+[Functions](Functions/index.md) for each entry in `speeds`, where the time value
+in the function corresponds to the relative corrected mass flow rate $\nu$ (see
+[flow_rel_corr]). Further discussion on these equations and the input data used
+in them is found in [#perfdata].
 
-The inputs `Rp_functions` and `eff_functions` should be vectors of function names; each function should be defined for a constant relative corrected speed, $\alpha$, [speed_rel_corr]. The length and order of `speeds` need to correspond to the length and order of `Rp_functions` and `eff_functions`. These functions describe $Rp$, [Rp], and $\eta_{\text{ad}}$, [eff], versus $\nu$, [flow_rel_corr]. Further discussion on these equations and the input data used in them is found in [#data].
+The user inputs values for
+[!param](/Components/ShaftConnectedCompressor1Phase/tau_fr_coeff),
+[!param](/Components/ShaftConnectedCompressor1Phase/tau_fr_const), and
+[!param](/Components/ShaftConnectedCompressor1Phase/speed_cr_fr) that are used
+to compute friction torque as defined in [#friction].
 
-The user inputs values for [!param](/Components/ShaftConnectedCompressor1Phase/tau_fr_coeff), [!param](/Components/ShaftConnectedCompressor1Phase/tau_fr_const), and [!param](/Components/ShaftConnectedCompressor1Phase/speed_cr_fr) that are used to compute friction torque as defined in [#friction].
+The compressor moment of inertia contributes to the total moment of inertia of
+the shaft, which represents the resistance to acceleration of the shaft speed.
+The user inputs values for
+[!param](/Components/ShaftConnectedCompressor1Phase/inertia_coeff),
+[!param](/Components/ShaftConnectedCompressor1Phase/inertia_const), and
+[!param](/Components/ShaftConnectedCompressor1Phase/speed_cr_I) that are used to
+compute the compressor moment of inertia as defined in [#moi].
 
-The compressor moment of inertia affects how the compressor accelerates. The user inputs values for [!param](/Components/ShaftConnectedCompressor1Phase/inertia_coeff), [!param](/Components/ShaftConnectedCompressor1Phase/inertia_const), and [!param](/Components/ShaftConnectedCompressor1Phase/speed_cr_I) that are used to compute the compressor moment of inertia as defined in [#moi].
+The parameter [!param](/Components/ShaftConnectedCompressor1Phase/A_ref)
+corresponds to the reference area $A_\text{ref}$ (see [momentum]). It
+should generally be assigned a value between the inlet area and outlet area.
+`A_ref` can act as a means to scale the compressor head and can also be used in
+combination with [!param](/Components/ShaftConnectedCompressor1Phase/K) to apply
+a pressure drop due to form loss. The compressor volume,
+[!param](/Components/ShaftConnectedCompressor1Phase/volume), should be a
+reasonable estimate of the inlet to outlet fluid volume of the modeled
+compressor.
 
 !syntax parameters /Components/ShaftConnectedCompressor1Phase
 
@@ -26,85 +67,143 @@ The compressor moment of inertia affects how the compressor accelerates. The use
 
 ## Formulation
 
-The conservation of mass, momentum, and energy equations for the compressor volume are similar to the equations used by [VolumeJunction1Phase](VolumeJunction1Phase.md) but add the compressor momentum and energy source terms,
+The compressor is modeled as a 0-D volume based on the [VolumeJunction1Phase.md]
+component, which has conservation of mass, momentum, and energy equations in the
+volume, but with the addition of source terms to the momentum and energy equations:
 
-!equation id=momentum_source
-S^{\text{momentum}} = \Delta p A_{\text{ref}} \cdot \hat{n}_{\text{out}},
+!equation
+\ddt{\rho V} = \dot{m}_\text{in} - \dot{m}_\text{out} \eqc
 
-and
+!equation id=momentum
+\ddt{\rho u V}
+  = \pr{(\rho u^2 + p) A}_\text{in}
+  - \pr{(\rho u^2 + p) A}_\text{out}
+  + \Delta p_0 A_\text{ref} \eqc
 
-!equation id=energy_source
-S^{\text{energy}} = -(\tau_{\text{isentropic}} + \tau_{\text{dissipation}}) \omega,
+!equation
+\ddt{\rho E V} = \pr{\dot{m} H}_\text{in} - \pr{\dot{m} H}_\text{out} + \dot{W} \eqc
 
 where
 
-- $\Delta p$ is the change in pressure due to compressor head,
-- $A_{\text{ref}}$ is the cross-sectional area of the compressor,
-- $\hat{n}_{out}$ is the orientation of the flow channel connected to the compressor outlet,
-- $\tau_{\text{isentropic}}$ is the isentropic torque,
-- $\tau_{\text{dissipation}}$ is the dissipation torque, and
-- $\omega$ is the shaft speed.
+- $\Delta p_0$ is the change in stagnation pressure,
+- $A_{\text{ref}}$ is the reference cross-sectional area, and
+- $\dot{W}$ is the work rate.
 
-The connected [Shaft.md] receives not only the isentropic and dissipation torque,
-but also a friction torque $\tau_\text{friction}$:
-
-!equation
-\tau_\text{shaft,compressor} = \tau_\text{isentropic} + \tau_\text{dissipation} + \tau_\text{friction} \eqp
-
-#### Compressor performance data id=data
-
-Values are obtained by means of an empirical compressor performance map. The independent variables are based on incoming mass flow rate and shaft angular velocity. The dependent variables are pressure ratio, $Rp$, and adiabatic efficiency, $\eta_{\text{ad}}$. The mass flow rate and angular velocity tables should be entered as relative corrected values. The relative corrected mass flow rate, $\nu$, is computed as,
-
-!equation id=flow_rel_corr
-\nu = \frac{ (\frac{\dot{m}}{\rho_{\text{0, in}} a_{\text{0, in}}}) } { (\frac{\dot{m}}{\rho_{\text{0, in}} a_{\text{0, in}}})_{\text{rated}} }.
-
-The relative corrected speed, $\alpha$, is computed as,
-
-!equation id=speed_rel_corr
-\alpha = \frac{ (\frac{\omega}{a_{\text{0, in}}}) } { (\frac{\omega}{a_{\text{0, in}}})_{\text{rated}} }.
-
-Pressure ratio, $Rp$, is defined as the ratio of outlet stagnation pressure over inlet stagnation pressure; it is a function of $\nu$ and $\alpha$.
+The pressure ratio $r_p$, which is given by user-defined performance data (see
+[#perfdata]), is defined as the ratio of the outlet stagnation pressure to the
+inlet stagnation pressure:
 
 !equation id=Rp
-Rp = Rp(\nu, \alpha) = \frac{p_{\text{0, out}}} {p_{\text{0, in}}}
+r_p \equiv \frac{p_{\text{0, out}}} {p_{\text{0, in}}} \eqp
 
-Adiabatic efficiency, $\eta_{\text{ad}}$, is defined as the ratio of isentropic work over actual work; it is a function of $\nu$ and $\alpha$.
-
-!equation id=eff
-\eta_{\text{ad}} = \eta_{\text{ad}}(\nu, \alpha) = \frac{\text{isentropic work}}{\text{actual work}} = \frac{h_{\text{0, out}}^{*} - h_{\text{0, in}}} {h_{\text{0, out}} - h_{\text{0, in}}}
-
-The user should enter functions of $Rp$ and $\eta_{\text{ad}}$ versus $\nu$ for a range of constant speeds, $\alpha = \text{const}$. These functions are typically entered as data tables. The model linearly interpolates using the constant speed data tables to compute $Rp$ and $\eta_{\text{ad}}$ for the actual current compressor shaft speed.
-
-Pressure head, isentropic torque, dissipation torque are calculated using the input compressor performance data, fluid properties, and the three equations below.
+The stagnation pressure change can then be computed as
 
 !equation id=delta_p
-\Delta p = p_{\text{0, in}} * (Rp - 1.0)
+\Delta p_0 = p_{\text{0, in}} (r_p - 1) \eqp
 
-!equation id=tau_isen
-\tau_{\text{isentropic}} = \frac{\dot{m}}{\omega} (h_{\text{0, out}}^{*} - h_{\text{0, in}})
+The isentropic efficiency $\eta$, which is given by user-defined performance
+data (see [#perfdata]), is defined as the ratio of the isentropic work rate
+$\dot{W}_s$ to the actual work rate $\dot{W}$:
 
-!equation id=tau_diss
-\tau_{\text{dissipation}} = \frac{\dot{m}}{\omega} (h_{\text{0, out}} - h_{\text{0, out}}^{*})
+!equation id=eff
+\eta \equiv \frac{\dot{W}_s}{\dot{W}} \eqc
+
+!equation
+\dot{W}_s = \dot{m} (H_{\text{out},s} - H_\text{in}) \eqc
+
+!equation
+\dot{W} = \dot{m} (H_\text{out} - H_\text{in}) = \frac{\dot{W}_s}{\eta} \eqp
+
+The connected [Shaft.md] receives a corresponding torque $\tau_\text{compressor}$,
+computed using the work rate and shaft speed $\omega$,
+and also a friction torque $\tau_\text{friction}$ (discussed in [#friction]):
+
+!equation
+\tau_\text{shaft,compressor} = \tau_\text{compressor} + \tau_\text{friction} \eqc
+
+!equation
+\tau_\text{compressor} = -\frac{\dot{W}}{\omega} \eqp
+
+### Compressor performance data id=perfdata
+
+Users specify performance curves that give the pressure ratio $r_p$ and isentropic
+efficiency $\eta$ as functions of the mass flow rate and shaft speed. Specifically,
+the mass flow rate used is a quantity normalized by rated conditions, often referred to as the
+"relative corrected mass flow rate", given the symbol $\nu$:
+
+!equation id=flow_rel_corr
+\nu \equiv \frac{ (\frac{\dot{m}}{\rho_{\text{0, in}} c_{\text{0, in}}}) }
+  { (\frac{\dot{m}}{\rho_{\text{0, in}} c_{\text{0, in}}})_{\text{rated}} } \eqc
+
+where $\rho_0$ and $c_0$ are stagnation density and sound speed, respectively.
+Similarly, the shaft speed used is also normalized by rated conditions, often referred to as
+the "relative corrected shaft speed", given the symbol $\alpha$:
+
+!equation id=speed_rel_corr
+\alpha \equiv \frac{ (\frac{\omega}{c_{\text{0, in}}}) }
+  { (\frac{\omega}{c_{\text{0, in}}})_{\text{rated}} } \eqp
+
+The user provides an ordered list of relative corrected shaft speeds, which
+correspond to ordered lists of pressure ratio and isentropic efficiency functions:
+
+!equation
+\left\{\alpha_1, \alpha_2, \ldots, \alpha_n\right\} \eqc
+
+!equation
+\left\{r_{p,1}(\nu), r_{p,2}(\nu), \ldots, r_{p,n}(\nu)\right\} \eqc
+
+!equation
+\left\{\eta_1(\nu), \eta_2(\nu), \ldots, \eta_n(\nu)\right\} \eqc
+
+Linear interpolation and extrapolation is used to get the dependence on $\alpha$
+between and outside of the provided $\alpha_i$ values:
+
+!equation
+r_p(\nu, \alpha) = r_{p,i}(\nu) + \frac{r_{p,i+1}(\nu) - r_{p,i}(\nu)}{\alpha_{i+1} - \alpha_i}(\alpha - \alpha_i) \eqc
+
+!equation
+\eta(\nu, \alpha) = \eta_i(\nu) + \frac{\eta_{i+1}(\nu) - \eta_i(\nu)}{\alpha_{i+1} - \alpha_i}(\alpha - \alpha_i) \eqp
+
+Lastly, bounds are applied to the pressure ratio, since extrapolation outside of
+limited performance data may yield unphysical values.
+
+!equation
+r_p^- \leq r_p \leq r_p^+ \eqp
 
 ### Friction torque id=friction
 
-Friction torque always resists the direction of motion, so the sign of the compressor friction torque depends on the sign of the connected shaft speed. Positive shaft speed results in negative friction torque while negative shaft speed results in positive friction torque.
+Friction torque always resists the direction of motion, so the sign of the
+compressor friction torque depends on the sign of the connected shaft speed.
+Positive shaft speed results in negative friction torque while negative shaft
+speed results in positive friction torque.
 
-The friction torque magnitude, $\tau_{\text{friction}}$, is a function of shaft speed, $\omega$, and four input parameters. If the ratio of shaft speed to [!param](/Components/ShaftConnectedCompressor1Phase/omega_rated), $\alpha$, is less than [!param](/Components/ShaftConnectedCompressor1Phase/speed_cr_fr), friction torque magnitude equals [!param](/Components/ShaftConnectedCompressor1Phase/tau_fr_const),
+The friction torque magnitude, $\tau_{\text{friction}}$, is a function of shaft
+speed, $\omega$, and four input parameters. If the ratio of shaft speed to
+[!param](/Components/ShaftConnectedCompressor1Phase/omega_rated), $\alpha$, is
+less than [!param](/Components/ShaftConnectedCompressor1Phase/speed_cr_fr),
+friction torque magnitude equals
+[!param](/Components/ShaftConnectedCompressor1Phase/tau_fr_const),
 
 !equation
 \tau_{\text{friction}} = \tau_{\text{fr,const}},
 
 
-otherwise, $\tau_{\text{friction}}$ is a function of shaft speed and friction torque coefficients, [!param](/Components/ShaftConnectedCompressor1Phase/tau_fr_coeff),
+otherwise, $\tau_{\text{friction}}$ is a function of shaft speed and friction
+torque coefficients,
+[!param](/Components/ShaftConnectedCompressor1Phase/tau_fr_coeff),
 
 !equation
-\tau_{\text{friction}} = \tau_{\text{fr,coeff}}[0] + \tau_{\text{fr,coeff}}[1] \mid \alpha \mid + \tau_{\text{fr,coeff}}[2] \mid\alpha \mid^{2} + \tau_{\text{fr,coeff}}[3] \mid \alpha \mid^{3}.
-
+\tau_{\text{friction}} = \tau_{\text{fr,coeff}}[0] + \tau_{\text{fr,coeff}}[1] \mid \alpha \mid
+  + \tau_{\text{fr,coeff}}[2] \mid\alpha \mid^{2} + \tau_{\text{fr,coeff}}[3] \mid \alpha \mid^{3}.
 
 ### Moment of inertia id=moi
 
-The compressor moment of inertia, $I_{\text{compressor}}$, is a function of shaft speed, $\omega$, and four input parameters. If the ratio of shaft speed to [!param](/Components/ShaftConnectedCompressor1Phase/omega_rated), $\alpha$, is less than [!param](/Components/ShaftConnectedCompressor1Phase/speed_cr_I), compressor inertia equals [!param](/Components/ShaftConnectedCompressor1Phase/inertia_const),
+The compressor moment of inertia, $I_{\text{compressor}}$, is a function of
+shaft speed, $\omega$, and four input parameters. If the ratio of shaft speed to
+[!param](/Components/ShaftConnectedCompressor1Phase/omega_rated), $\alpha$, is
+less than [!param](/Components/ShaftConnectedCompressor1Phase/speed_cr_I),
+compressor inertia equals
+[!param](/Components/ShaftConnectedCompressor1Phase/inertia_const),
 
 !equation
 I_{\text{compressor}} = I_{\text{const}},
