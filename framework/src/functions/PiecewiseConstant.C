@@ -25,7 +25,7 @@ PiecewiseConstant::validParams()
 
 PiecewiseConstant::PiecewiseConstant(const InputParameters & parameters)
   : PiecewiseTabularBase(parameters),
-    _direction(getParam<MooseEnum>("direction").template getEnum<DirectionEnum>())
+    _direction(getParam<MooseEnum>("direction").getEnum<Direction>())
 {
 }
 
@@ -39,37 +39,37 @@ PiecewiseConstant::value(Real t, const Point & p) const
   const Real tolerance = 1.0e-14;
 
   // endpoint cases
-  if ((_direction == DirectionEnum::LEFT &&
+  if ((_direction == Direction::LEFT &&
        x < (1 + tolerance * MathUtils::sign(domain(0))) * domain(0)) ||
-      (_direction == DirectionEnum::RIGHT &&
+      (_direction == Direction::RIGHT &&
        x < (1 - tolerance * MathUtils::sign(domain(0))) * domain(0)) ||
-      (_direction == DirectionEnum::LEFT_INCLUSIVE &&
+      (_direction == Direction::LEFT_INCLUSIVE &&
        x < (1 - tolerance * MathUtils::sign(domain(0))) * domain(0)) ||
-      (_direction == DirectionEnum::RIGHT_INCLUSIVE &&
+      (_direction == Direction::RIGHT_INCLUSIVE &&
        x < (1 + tolerance * MathUtils::sign(domain(0))) * domain(0)))
     return _scale_factor * range(0);
-  else if ((_direction == DirectionEnum::LEFT &&
+  else if ((_direction == Direction::LEFT &&
             x > (1 + tolerance * MathUtils::sign(domain(len - 1))) * domain(len - 1)) ||
-           (_direction == DirectionEnum::RIGHT &&
+           (_direction == Direction::RIGHT &&
             x > (1 - tolerance * MathUtils::sign(domain(len - 1))) * domain(len - 1)) ||
-           (_direction == DirectionEnum::LEFT_INCLUSIVE &&
+           (_direction == Direction::LEFT_INCLUSIVE &&
             x > (1 - tolerance * MathUtils::sign(domain(len - 1))) * domain(len - 1)) ||
-           (_direction == DirectionEnum::RIGHT_INCLUSIVE &&
+           (_direction == Direction::RIGHT_INCLUSIVE &&
             x > (1 + tolerance * MathUtils::sign(domain(len - 1))) * domain(len - 1)))
     return _scale_factor * range(len - 1);
 
   for (; i < len; ++i)
   {
-    if (_direction == DirectionEnum::LEFT &&
+    if (_direction == Direction::LEFT &&
         x < (1 + tolerance * MathUtils::sign(domain(i))) * domain(i))
       return _scale_factor * range(i - 1);
-    else if (_direction == DirectionEnum::LEFT_INCLUSIVE &&
+    else if (_direction == Direction::LEFT_INCLUSIVE &&
              x < (1 - tolerance * MathUtils::sign(domain(i))) * domain(i))
       return _scale_factor * range(i - 1);
-    else if ((_direction == DirectionEnum::RIGHT &&
+    else if ((_direction == Direction::RIGHT &&
               x < (1 - tolerance * MathUtils::sign(domain(i))) * domain(i)))
       return _scale_factor * range(i);
-    else if ((_direction == DirectionEnum::RIGHT_INCLUSIVE &&
+    else if ((_direction == Direction::RIGHT_INCLUSIVE &&
               x < (1 + tolerance * MathUtils::sign(domain(i))) * domain(i)))
       return _scale_factor * range(i);
   }
@@ -90,7 +90,7 @@ PiecewiseConstant::integral() const
   Real sum = 0;
   unsigned offset = 0;
 
-  if (_direction == DirectionEnum::RIGHT || _direction == DirectionEnum::RIGHT_INCLUSIVE)
+  if (_direction == Direction::RIGHT || _direction == Direction::RIGHT_INCLUSIVE)
     offset = 1;
 
   for (unsigned i = 0; i < len - 1; ++i)

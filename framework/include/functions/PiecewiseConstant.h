@@ -29,5 +29,5 @@ public:
 
 private:
   /// Enum for which direction to apply values
-  const enum class DirectionEnum { LEFT, RIGHT, LEFT_INCLUSIVE, RIGHT_INCLUSIVE } _direction;
+  const enum class Direction { LEFT, RIGHT, LEFT_INCLUSIVE, RIGHT_INCLUSIVE } _direction;
 };
