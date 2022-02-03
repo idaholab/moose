@@ -78,7 +78,7 @@ ADPiecewiseLinearInterpolationMaterial::ADPiecewiseLinearInterpolationMaterial(
 
   try
   {
-    _linear_interp = std::make_unique<ADLinearInterpolation>(x, y, _extrap);
+    _linear_interp = std::make_unique<LinearInterpolation>(x, y, _extrap);
   }
   catch (std::domain_error & e)
   {

@@ -53,7 +53,7 @@ LinearInterpolation::sample(const T & x) const
   // endpoint cases
   if (_extrap)
   {
-    if (x <= _x[0])
+    if (x < _x[0])
       return _y[0] + (x - _x[0]) / (_x[1] - _x[0]) * (_y[1] - _y[0]);
     if (x >= _x.back())
       return _y.back() +
@@ -61,9 +61,12 @@ LinearInterpolation::sample(const T & x) const
   }
   else
   {
-    if (x <= _x[0])
+    if (x < _x[0])
       return _y[0];
-    if (x >= _x.back())
+    if (x == _x.back())
+      return _y.back() +
+             (x - _x.back()) / (_x[_x.size() - 2] - _x.back()) * (_y[_y.size() - 2] - _y.back());
+    if (x > _x.back())
       return _y.back();
   }
 
@@ -71,6 +74,7 @@ LinearInterpolation::sample(const T & x) const
     if (x >= _x[i] && x < _x[i + 1])
       return _y[i] + (_y[i + 1] - _y[i]) * (x - _x[i]) / (_x[i + 1] - _x[i]);
 
+  mooseError("Unreachable!");
   throw std::out_of_range("Unreachable");
   return 0;
 }
