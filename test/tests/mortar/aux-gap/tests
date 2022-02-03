@@ -23,4 +23,11 @@
       cli_args = 'Outputs/file_base=second_order AuxVariables/gap/order=SECOND'
     []
   []
+  [no_constraint]
+    type = RunApp
+    input = gap.i
+    cli_args = "Variables/inactive='lambda' Constraints/active='' Problem/kernel_coverage_check=false Outputs/exodus=false"
+    requirement = 'The system shall be able to run mortar auxiliary kernels when no constraints are present in the simulation.'
+    issues = '#20214'
+  []
 []
