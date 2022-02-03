@@ -57,6 +57,8 @@ public:
    * Deterimine if active objects exist.
    */
   bool hasActiveNodalConstraints() const;
+  bool hasActiveMortarConstraints(const std::pair<BoundaryID, BoundaryID> & mortar_interface_key,
+                                  bool displaced) const;
   bool hasActiveElemElemConstraints(const InterfaceID interface_id, bool displaced) const;
   bool hasActiveNodeFaceConstraints(BoundaryID boundary_id, bool displaced) const;
   bool hasActiveNodeElemConstraints(SubdomainID secondary_id,
@@ -110,4 +112,3 @@ protected:
   std::map<std::pair<SubdomainID, SubdomainID>, MooseObjectWarehouse<NodeElemConstraint>>
       _displaced_node_elem_constraints;
 };
-

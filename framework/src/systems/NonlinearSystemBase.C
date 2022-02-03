@@ -294,7 +294,10 @@ NonlinearSystemBase::initialSetup()
         _fe_problem.getMortarInterfaces(/*displaced=*/false);
     for (const auto & mortar_interface : undisplaced_mortar_interfaces)
     {
-      auto primary_secondary_boundary_pair = mortar_interface.first;
+      const auto primary_secondary_boundary_pair = mortar_interface.first;
+      if (!_constraints.hasActiveMortarConstraints(primary_secondary_boundary_pair, false))
+        continue;
+
       const auto & mortar_generation_object = mortar_interface.second;
 
       auto & mortar_constraints = _constraints.getActiveMortarConstraints(
@@ -313,7 +316,10 @@ NonlinearSystemBase::initialSetup()
     {
       mooseAssert(_fe_problem.getDisplacedProblem(),
                   "Cannot create displaced mortar functors when the displaced problem is null");
-      auto primary_secondary_boundary_pair = mortar_interface.first;
+      const auto primary_secondary_boundary_pair = mortar_interface.first;
+      if (!_constraints.hasActiveMortarConstraints(primary_secondary_boundary_pair, true))
+        continue;
+
       const auto & mortar_generation_object = mortar_interface.second;
 
       auto & mortar_constraints = _constraints.getActiveMortarConstraints(
@@ -3311,33 +3317,11 @@ NonlinearSystemBase::setPreviousNewtonSolution(const NumericVector<Number> & sol
 void
 NonlinearSystemBase::mortarConstraints()
 {
-  const auto & undisplaced_mortar_interfaces = _fe_problem.getMortarInterfaces(/*displaced=*/false);
+  for (auto & map_pr : _undisplaced_mortar_functors)
+    map_pr.second();
 
-  for (const auto & mortar_interface : undisplaced_mortar_interfaces)
-  {
-    auto it = _undisplaced_mortar_functors.find(mortar_interface.first);
-
-    mooseAssert(it != _undisplaced_mortar_functors.end(),
-                "No ComputeMortarFunctor exists for the specified primary-secondary boundary "
-                "pair, primary "
-                    << mortar_interface.first.first << " and secondary "
-                    << mortar_interface.first.second);
-    it->second();
-  }
-
-  const auto & displaced_mortar_interfaces = _fe_problem.getMortarInterfaces(/*displaced=*/true);
-
-  for (const auto & mortar_interface : displaced_mortar_interfaces)
-  {
-    auto it = _displaced_mortar_functors.find(mortar_interface.first);
-
-    mooseAssert(it != _displaced_mortar_functors.end(),
-                "No ComputeMortarFunctor exists for the specified primary-secondary boundary "
-                "pair, primary "
-                    << mortar_interface.first.first << " and secondary "
-                    << mortar_interface.first.second);
-    it->second();
-  }
+  for (auto & map_pr : _displaced_mortar_functors)
+    map_pr.second();
 }
 
 void
