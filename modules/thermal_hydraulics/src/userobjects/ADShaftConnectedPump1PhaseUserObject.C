@@ -126,21 +126,8 @@ ADShaftConnectedPump1PhaseUserObject::computeFluxesAndResiduals(const unsigned i
 
     ADReal nu = Q_in / _volumetric_rated;
 
-    Real c_coef;
-    if ((alpha >= 0) & (nu >= 0))
-      c_coef = 0;
-    else if ((alpha > 0) & (nu < 0))
-      c_coef = libMesh::pi;
-    else if ((alpha <= 0) & (nu <= 0))
-      c_coef = libMesh::pi;
-    else if ((alpha < 0) & (nu > 0))
-      c_coef = 2 * libMesh::pi;
-    else
-      mooseError(_pump_name, ": The pump is outside normal operating regime.");
-
     // Head and torque
-    ADReal x_p = c_coef + std::atan(alpha / nu);
-
+    ADReal x_p = std::atan2(alpha, nu);
     const auto wt = _torque_hydraulic.value(x_p, ADPoint());
     const auto wh = _head.value(x_p, ADPoint());
 

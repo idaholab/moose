@@ -137,22 +137,8 @@ ShaftConnectedPump1PhaseUserObject::computeFluxesAndResiduals(const unsigned int
     Real dv_drhoA = dQ_in_drhoA / _volumetric_rated;
     Real dv_drhouA = dQ_in_drhouA / _volumetric_rated;
 
-    Real c_coef;
-    if ((alpha >= 0) & (nu >= 0))
-      c_coef = 0;
-    else if ((alpha > 0) & (nu < 0))
-      c_coef = libMesh::pi;
-    else if ((alpha <= 0) & (nu <= 0))
-      c_coef = libMesh::pi;
-    else if ((alpha < 0) & (nu > 0))
-      c_coef = 2 * libMesh::pi;
-    else
-    {
-      mooseError(_pump_name, ": The pump is outside normal operating regime.");
-    }
-
     // Head and torque
-    Real x_p = c_coef + std::atan(alpha / nu);
+    Real x_p = std::atan2(alpha, nu);
     Real dx_p_dalpha = nu / (alpha * alpha + nu * nu);
     Real dx_p_dnu = -alpha / (alpha * alpha + nu * nu);
 
