@@ -38,4 +38,3 @@ public:
 protected:
   Real _volume;
 };
-

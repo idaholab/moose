@@ -32,4 +32,3 @@ protected:
 
   const VariableValue & _u_dot_nodal;
 };
-

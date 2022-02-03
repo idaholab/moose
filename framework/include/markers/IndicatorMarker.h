@@ -26,4 +26,3 @@ public:
 protected:
   ErrorVector & _error_vector;
 };
-

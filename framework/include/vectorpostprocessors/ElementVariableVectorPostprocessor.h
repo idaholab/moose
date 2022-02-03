@@ -26,4 +26,3 @@ public:
 
   ElementVariableVectorPostprocessor(const InputParameters & parameters);
 };
-

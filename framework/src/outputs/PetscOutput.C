@@ -22,7 +22,7 @@ PetscOutput::validParams()
 {
   InputParameters params = Output::validParams();
 
-// Toggled for outputting nonlinear and linear residuals, only if we have PETSc
+  // Toggled for outputting nonlinear and linear residuals, only if we have PETSc
   params.addParam<bool>(
       "output_linear", false, "Specifies whether output occurs on each linear residual evaluation");
   params.addParam<bool>("output_nonlinear",

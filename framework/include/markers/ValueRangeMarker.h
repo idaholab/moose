@@ -33,4 +33,3 @@ protected:
   MarkerValue _inside;
   MarkerValue _outside;
 };
-

@@ -25,4 +25,3 @@ public:
 
   InternalSidePostprocessor(const InputParameters & parameters);
 };
-

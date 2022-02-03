@@ -519,9 +519,8 @@ ComputeFVFluxThread<RangeType>::checkPropDeps(
         auto same_matprop_name_it =
             std::find_if(prop_ids.begin(),
                          prop_ids.end(),
-                         [prop_id](const std::pair<std::string, unsigned int> & map_pr) {
-                           return map_pr.second == prop_id;
-                         });
+                         [prop_id](const std::pair<std::string, unsigned int> & map_pr)
+                         { return map_pr.second == prop_id; });
         same_matprop_name.insert(same_matprop_name_it->first);
       }
     }

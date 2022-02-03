@@ -134,7 +134,8 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem, bool correct_skewness)
                                  const FaceInfo * const fi,
                                  const Point & surface_vector,
                                  Real coord,
-                                 const bool elem_has_info) {
+                                 const bool elem_has_info)
+    {
       mooseAssert(fi, "We need a FaceInfo for this action_functor");
       mooseAssert(elem == &functor_elem,
                   "Just a sanity check that the element being passed in is the one we passed out.");
@@ -315,9 +316,9 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem, bool correct_skewness)
         auto it = ebf_faces.begin();
         for (const auto fdf_index : make_range(num_fdf_faces))
         {
-          it = std::find_if(it, ebf_faces.end(), [](const std::pair<const FaceInfo *, bool> & in) {
-            return in.second;
-          });
+          it = std::find_if(it,
+                            ebf_faces.end(),
+                            [](const std::pair<const FaceInfo *, bool> & in) { return in.second; });
           mooseAssert(it != ebf_faces.end(), "We should have found a fully developed flow face");
 
           const auto starting_index =

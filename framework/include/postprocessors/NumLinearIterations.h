@@ -29,4 +29,3 @@ public:
 
   virtual Real getValue() override;
 };
-

@@ -48,4 +48,3 @@ protected:
   /// The value of the variable at the desired location
   Real _value;
 };
-

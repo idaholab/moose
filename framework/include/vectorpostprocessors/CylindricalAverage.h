@@ -37,4 +37,3 @@ protected:
   /// axis norm
   const Real _cyl_axis_norm;
 };
-

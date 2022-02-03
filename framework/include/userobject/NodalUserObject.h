@@ -58,4 +58,3 @@ protected:
   // Flag for enable/disabling multiple execute calls on nodes that share block ids
   const bool & _unique_node_execute;
 };
-

@@ -379,7 +379,8 @@ PerfGraph::treeTable(const unsigned int level, const bool heaviest /* = false */
 
   auto act = [this, &vtable](const PerfNode & node,
                              const PerfGraphSectionInfo & section_info,
-                             const unsigned int depth) {
+                             const unsigned int depth)
+  {
     vtable.addRow(std::string(depth * 2, ' ') + section_info._name,        // Section Name
                   node.numCalls(),                                         // Calls
                   node.selfTimeSec(),                                      // Self
@@ -422,7 +423,8 @@ PerfGraph::printHeaviestSections(const ConsoleStream & console, const unsigned i
   Moose::indirectSort(_cumulative_section_info_ptrs.begin(),
                       _cumulative_section_info_ptrs.end(),
                       sorted,
-                      [](CumulativeSectionInfo * lhs, CumulativeSectionInfo * rhs) {
+                      [](CumulativeSectionInfo * lhs, CumulativeSectionInfo * rhs)
+                      {
                         if (lhs && rhs)
                           return lhs->_self > rhs->_self;
 

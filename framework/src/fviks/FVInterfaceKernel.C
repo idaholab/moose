@@ -63,7 +63,8 @@ FVInterfaceKernel::validParams()
       "ElementSideNeighborLayers",
       Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC |
           Moose::RelationshipManagerType::COUPLING,
-      [](const InputParameters & obj_params, InputParameters & rm_params) {
+      [](const InputParameters & obj_params, InputParameters & rm_params)
+      {
         rm_params.set<unsigned short>("layers") = obj_params.get<unsigned short>("ghost_layers");
         rm_params.set<bool>("use_point_neighbors") = obj_params.get<bool>("use_point_neighbors");
       });

@@ -41,4 +41,3 @@ protected:
   virtual Real b1() const { return 0.; }
   virtual Real b2() const { return 1.; }
 };
-

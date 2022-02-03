@@ -48,4 +48,3 @@ protected:
   /// Bounding box for testing element centroids against. Note that
   BoundingBox _bounding_box;
 };
-

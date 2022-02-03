@@ -39,9 +39,8 @@ AdvectiveFluxCalculatorBase::validParams()
                                 Moose::RelationshipManagerType::GEOMETRIC |
                                     Moose::RelationshipManagerType::ALGEBRAIC |
                                     Moose::RelationshipManagerType::COUPLING,
-                                [](const InputParameters &, InputParameters & rm_params) {
-                                  rm_params.set<unsigned short>("layers") = 2;
-                                });
+                                [](const InputParameters &, InputParameters & rm_params)
+                                { rm_params.set<unsigned short>("layers") = 2; });
 
   params.set<ExecFlagEnum>("execute_on", true) = {EXEC_LINEAR};
   return params;
@@ -880,9 +879,8 @@ AdvectiveFluxCalculatorBase::buildCommLists()
 
   // exchange this info with other processors, building _nodes_to_send at the same time
   _nodes_to_send.clear();
-  auto nodes_action_functor = [this](processor_id_type pid, const std::vector<dof_id_type> & nts) {
-    _nodes_to_send[pid] = nts;
-  };
+  auto nodes_action_functor = [this](processor_id_type pid, const std::vector<dof_id_type> & nts)
+  { _nodes_to_send[pid] = nts; };
   Parallel::push_parallel_vector_data(this->comm(), _nodes_to_receive, nodes_action_functor);
 
   // At the moment,  _nodes_to_send and _nodes_to_receive contain global node numbers
@@ -928,10 +926,9 @@ AdvectiveFluxCalculatorBase::buildCommLists()
     }
 
   _pairs_to_send.clear();
-  auto pairs_action_functor = [this](processor_id_type pid,
-                                     const std::vector<std::pair<dof_id_type, dof_id_type>> & pts) {
-    _pairs_to_send[pid] = pts;
-  };
+  auto pairs_action_functor =
+      [this](processor_id_type pid, const std::vector<std::pair<dof_id_type, dof_id_type>> & pts)
+  { _pairs_to_send[pid] = pts; };
   Parallel::push_parallel_vector_data(this->comm(), _pairs_to_receive, pairs_action_functor);
 
   // _pairs_to_send and _pairs_to_receive have been built using global node IDs
@@ -976,8 +973,9 @@ AdvectiveFluxCalculatorBase::exchangeGhostedInfo()
       unodal_to_send[pid].push_back(_u_nodal[nd]);
   }
 
-  auto unodal_action_functor = [this](processor_id_type pid,
-                                      const std::vector<Real> & unodal_received) {
+  auto unodal_action_functor =
+      [this](processor_id_type pid, const std::vector<Real> & unodal_received)
+  {
     const std::size_t msg_size = unodal_received.size();
     mooseAssert(msg_size == _nodes_to_receive[pid].size(),
                 "Message size, " << msg_size
@@ -998,7 +996,8 @@ AdvectiveFluxCalculatorBase::exchangeGhostedInfo()
       kij_to_send[pid].push_back(_kij[pr.first][pr.second]);
   }
 
-  auto kij_action_functor = [this](processor_id_type pid, const std::vector<Real> & kij_received) {
+  auto kij_action_functor = [this](processor_id_type pid, const std::vector<Real> & kij_received)
+  {
     const std::size_t msg_size = kij_received.size();
     mooseAssert(msg_size == _pairs_to_receive[pid].size(),
                 "Message size, " << msg_size

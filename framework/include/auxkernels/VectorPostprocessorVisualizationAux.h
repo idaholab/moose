@@ -52,4 +52,3 @@ protected:
   /// Optimization
   processor_id_type _my_pid;
 };
-

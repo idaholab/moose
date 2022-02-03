@@ -174,9 +174,9 @@ std::set<MooseEnumItem>::const_iterator
 MooseEnumBase::find(const std::string & name) const
 {
   std::string upper = MooseUtils::toUpper(name);
-  return std::find_if(_items.begin(), _items.end(), [&upper](MooseEnumItem const & item) {
-    return item.name() == upper;
-  });
+  return std::find_if(_items.begin(),
+                      _items.end(),
+                      [&upper](MooseEnumItem const & item) { return item.name() == upper; });
 }
 
 std::set<MooseEnumItem>::const_iterator
@@ -189,9 +189,9 @@ MooseEnumBase::find(int id) const
 std::set<MooseEnumItem>::const_iterator
 MooseEnumBase::find(const MooseEnumItem & other) const
 {
-  return std::find_if(_items.begin(), _items.end(), [&other](MooseEnumItem const & item) {
-    return item.id() == other.id();
-  });
+  return std::find_if(_items.begin(),
+                      _items.end(),
+                      [&other](MooseEnumItem const & item) { return item.id() == other.id(); });
 }
 
 MooseEnumBase &

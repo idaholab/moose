@@ -69,4 +69,3 @@ protected:
   std::map<std::pair<const Elem *, const Elem *>, ElementPairInfo> _element_pair_info;
   unsigned int _interface_id;
 };
-

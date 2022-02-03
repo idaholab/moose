@@ -56,13 +56,13 @@ public:
 
 protected:
   /**
-  * A helper method to check if the function value contains quotes. This method should
-  * be called from within the initialization list of the object inheriting the
-  * MooseParsedFunctionInterface
-  * @param function_str The name of the ParsedFunction
-  * @return The vector of strings, if the input function is valid
-  * @see ParsedFunction
-  */
+   * A helper method to check if the function value contains quotes. This method should
+   * be called from within the initialization list of the object inheriting the
+   * MooseParsedFunctionInterface
+   * @param function_str The name of the ParsedFunction
+   * @return The vector of strings, if the input function is valid
+   * @see ParsedFunction
+   */
   const std::string verifyFunction(const std::string & function_str);
 
   /// Reference to the FEProblemBase class for this object
@@ -77,4 +77,3 @@ protected:
   /// Pointer to the Parsed function wrapper object for the scalar
   std::unique_ptr<MooseParsedFunctionWrapper> _function_ptr;
 };
-

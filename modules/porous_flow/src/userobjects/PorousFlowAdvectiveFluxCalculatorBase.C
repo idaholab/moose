@@ -357,10 +357,8 @@ PorousFlowAdvectiveFluxCalculatorBase::buildCommLists()
   }
 
   _triples_to_send.clear();
-  auto triples_action_functor = [this](processor_id_type pid,
-                                       const std::vector<dof_id_type> & tts) {
-    _triples_to_send[pid] = tts;
-  };
+  auto triples_action_functor = [this](processor_id_type pid, const std::vector<dof_id_type> & tts)
+  { _triples_to_send[pid] = tts; };
   Parallel::push_parallel_vector_data(this->comm(), _triples_to_receive, triples_action_functor);
 
   // _triples_to_send and _triples_to_receive have been built using global node IDs
@@ -408,8 +406,9 @@ PorousFlowAdvectiveFluxCalculatorBase::exchangeGhostedInfo()
       du_dvar_to_send[pid].push_back(_du_dvar[nd]);
   }
 
-  auto du_action_functor = [this](processor_id_type pid,
-                                  const std::vector<std::vector<Real>> & du_dvar_received) {
+  auto du_action_functor =
+      [this](processor_id_type pid, const std::vector<std::vector<Real>> & du_dvar_received)
+  {
     const std::size_t msg_size = du_dvar_received.size();
     mooseAssert(
         msg_size == _nodes_to_receive[pid].size(),
@@ -438,8 +437,9 @@ PorousFlowAdvectiveFluxCalculatorBase::exchangeGhostedInfo()
     }
   }
 
-  auto dk_action_functor = [this](processor_id_type pid,
-                                  const std::vector<std::vector<Real>> & dkij_dvar_received) {
+  auto dk_action_functor =
+      [this](processor_id_type pid, const std::vector<std::vector<Real>> & dkij_dvar_received)
+  {
     const std::size_t num = _triples_to_receive[pid].size();
     mooseAssert(dkij_dvar_received.size() == num / 3,
                 "Message size, " << dkij_dvar_received.size()

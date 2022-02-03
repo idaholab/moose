@@ -144,7 +144,8 @@ findPointNeighbors(
   // Helper for avoiding extraneous allocation when building side elements
   std::unique_ptr<const Elem> side_helper;
 
-  auto contains_point = [&point, &info, &side_helper](const Elem * const candidate) {
+  auto contains_point = [&point, &info, &side_helper](const Elem * const candidate)
+  {
     if (candidate->contains_point(point))
     {
       std::vector<unsigned short> sides;
@@ -203,7 +204,8 @@ findNodeNeighbors(
   // Helper for avoiding extraneous allocations when building side elements
   std::unique_ptr<const Elem> side_helper;
 
-  auto contains_node = [&node, &elem, &info, &side_helper](const Elem * const candidate) {
+  auto contains_node = [&node, &elem, &info, &side_helper](const Elem * const candidate)
+  {
     // Candidate has this node and it is a vertex - add sides that contain said node
     const auto n = candidate->get_node_index(node);
     if (n != invalid_uint && candidate->is_vertex(n))
@@ -280,7 +282,8 @@ findEdgeNeighbors(
 
   // Lambda that returns whether or not a candidate element contains an edge that is within the
   // target edge defined by node1 and node2. Also fills "info" if a match is found
-  auto within_edge = [&elem, &node1, &node2, &edge_length, &info](const Elem * const candidate) {
+  auto within_edge = [&elem, &node1, &node2, &edge_length, &info](const Elem * const candidate)
+  {
     switch (candidate->type())
     {
       case HEX8:

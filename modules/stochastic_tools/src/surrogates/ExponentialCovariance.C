@@ -25,8 +25,7 @@ ExponentialCovariance::validParams()
 }
 
 ExponentialCovariance::ExponentialCovariance(const InputParameters & parameters)
-  : CovarianceFunctionBase(parameters),
-    _gamma(getParam<Real>("gamma"))
+  : CovarianceFunctionBase(parameters), _gamma(getParam<Real>("gamma"))
 {
   _tunable_hp.insert("noise_variance");
   _tunable_hp.insert("signal_variance");

@@ -35,5 +35,4 @@ private:
   ADMaterialProperty<Real> & _diffusivity;
   const MaterialProperty<Real> & _diffusivity_old;
   const ADVariableValue & _u;
-
 };

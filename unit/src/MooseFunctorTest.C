@@ -71,7 +71,8 @@ TEST(MooseFunctorTest, testArgs)
   auto elem_qp = std::make_tuple(elem.get(), 0, &qrule);
   auto elem_side_qp = std::make_tuple(elem.get(), 0, 0, &qrule);
 
-  auto test_dot = [&test](const auto & arg) {
+  auto test_dot = [&test](const auto & arg)
+  {
     try
     {
       test.dot(arg);
@@ -90,7 +91,8 @@ TEST(MooseFunctorTest, testArgs)
   test_dot(elem_qp);
   test_dot(elem_side_qp);
 
-  auto test_gradient = [&test](const auto & arg) {
+  auto test_gradient = [&test](const auto & arg)
+  {
     try
     {
       test.gradient(arg);
@@ -118,7 +120,8 @@ TEST(MooseFunctorTest, testArgs)
   EXPECT_EQ(cf(elem_qp), 2);
   EXPECT_EQ(cf(elem_side_qp), 2);
 
-  auto constant_gradient_test = [&cf](const auto & arg) {
+  auto constant_gradient_test = [&cf](const auto & arg)
+  {
     const auto result = cf.gradient(arg);
     for (const auto i : make_range(unsigned(LIBMESH_DIM)))
       EXPECT_EQ(result(i), 0);

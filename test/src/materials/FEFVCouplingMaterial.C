@@ -50,20 +50,24 @@ FEFVCouplingMaterial::FEFVCouplingMaterial(const InputParameters & parameters)
   }
   if (_fe_prop)
   {
-    _fe_prop->setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> ADReal {
-      return 1. + _fe_var(r, t);
-    });
+    _fe_prop->setFunctor(_mesh,
+                         blockIDs(),
+                         [this](const auto & r, const auto & t) -> ADReal
+                         { return 1. + _fe_var(r, t); });
     _fe_prop->setCacheClearanceSchedule(
         std::set<ExecFlagType>(_execute_enum.begin(), _execute_enum.end()));
   }
   if (_fv_prop)
   {
-    _fv_prop->setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> ADReal {
-      auto ret = 1. + _fv_var(r, t);
-      if (_retrieved_prop)
-        ret *= (*_retrieved_prop)(r, t);
-      return ret;
-    });
+    _fv_prop->setFunctor(_mesh,
+                         blockIDs(),
+                         [this](const auto & r, const auto & t) -> ADReal
+                         {
+                           auto ret = 1. + _fv_var(r, t);
+                           if (_retrieved_prop)
+                             ret *= (*_retrieved_prop)(r, t);
+                           return ret;
+                         });
     _fv_prop->setCacheClearanceSchedule(
         std::set<ExecFlagType>(_execute_enum.begin(), _execute_enum.end()));
   }

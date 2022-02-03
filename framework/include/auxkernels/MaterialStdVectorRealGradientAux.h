@@ -34,4 +34,3 @@ protected:
   /// component of the real gradient to be extracted
   unsigned int _component;
 };
-

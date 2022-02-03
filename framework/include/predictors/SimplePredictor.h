@@ -48,4 +48,3 @@ public:
   virtual bool shouldApply() override;
   virtual void apply(NumericVector<Number> & sln) override;
 };
-

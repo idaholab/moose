@@ -44,4 +44,3 @@ protected:
   /// The elements that intersect the line
   VectorPostprocessorValue & _elem_ids;
 };
-

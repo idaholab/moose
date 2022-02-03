@@ -36,4 +36,3 @@ private:
   bool _display_ghosting;
   bool _include_local;
 };
-

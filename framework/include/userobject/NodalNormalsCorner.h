@@ -36,4 +36,3 @@ protected:
   AuxiliarySystem & _aux;
   BoundaryID _corner_boundary_id;
 };
-

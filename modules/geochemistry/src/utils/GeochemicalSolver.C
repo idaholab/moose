@@ -250,9 +250,9 @@ GeochemicalSolver::reduceInitialResidual(GeochemicalSystem & egs,
   unsigned ind = 0;
   std::vector<unsigned> res_order(_num_basis_in_algebraic_system);
   std::iota(res_order.begin(), res_order.end(), ind++);
-  std::sort(res_order.begin(), res_order.end(), [&](int i, int j) {
-    return std::abs(_residual(i)) > std::abs(_residual(j));
-  });
+  std::sort(res_order.begin(),
+            res_order.end(),
+            [&](int i, int j) { return std::abs(_residual(i)) > std::abs(_residual(j)); });
 
   const std::vector<Real> & original_molality_and_pot = egs.getAlgebraicVariableValues();
   DenseVector<Real> new_molality_and_pot(original_molality_and_pot);

@@ -85,9 +85,11 @@ JSONOutput::outputReporters()
     r_names.emplace(c_name);
 
   // Is there ANY distributed data
-  _has_distributed = std::any_of(r_names.begin(), r_names.end(), [this](const ReporterName & n) {
-    return _reporter_data.hasReporterWithMode(n.getObjectName(), REPORTER_MODE_DISTRIBUTED);
-  });
+  _has_distributed = std::any_of(
+      r_names.begin(),
+      r_names.end(),
+      [this](const ReporterName & n)
+      { return _reporter_data.hasReporterWithMode(n.getObjectName(), REPORTER_MODE_DISTRIBUTED); });
   if (processor_id() == 0 || _has_distributed)
   {
     // Create the current output node

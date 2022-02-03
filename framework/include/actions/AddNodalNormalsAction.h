@@ -48,4 +48,3 @@ protected:
   /// The supplied boundary name for the corner boundary
   BoundaryName _corner_boundary;
 };
-

@@ -41,4 +41,3 @@ protected:
   /// The nonlinear system this FSP is associated with (convenience reference)
   NonlinearSystemBase & _nl;
 };
-

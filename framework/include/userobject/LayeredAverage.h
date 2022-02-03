@@ -37,4 +37,3 @@ protected:
   /// Value of the volume for each layer
   std::vector<Real> _layer_volumes;
 };
-

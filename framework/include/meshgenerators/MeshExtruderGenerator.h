@@ -67,4 +67,3 @@ protected:
 private:
   void changeID(MeshBase & mesh, const std::vector<BoundaryName> & names, BoundaryID old_id);
 };
-

@@ -31,4 +31,3 @@ private:
   const Real _constant_dt;
   const Real _growth_factor;
 };
-

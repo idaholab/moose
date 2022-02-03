@@ -53,4 +53,3 @@ protected:
    */
   const VariableGradient & _grad_coupled_var;
 };
-

@@ -35,4 +35,3 @@ protected:
   /// The variable to compare to
   const VariableValue & _other_var;
 };
-

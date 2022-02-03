@@ -60,4 +60,3 @@ protected:
   /// Additional factor added to the solution, the b of ax+b
   const Real _add_factor;
 };
-

@@ -40,4 +40,3 @@ protected:
   virtual Real b1() const { return .5; }
   virtual Real b2() const { return .5; }
 };
-

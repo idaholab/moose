@@ -120,8 +120,8 @@ ExecuteMooseObjectWarehouse<T>::~ExecuteMooseObjectWarehouse()
 }
 
 template <typename T>
-const MooseObjectWarehouse<T> & ExecuteMooseObjectWarehouse<T>::
-operator[](ExecFlagType exec_flag) const
+const MooseObjectWarehouse<T> &
+ExecuteMooseObjectWarehouse<T>::operator[](ExecFlagType exec_flag) const
 {
   // Use find to avoid accidental insertion
   const auto iter = _execute_objects.find(exec_flag);
@@ -136,7 +136,8 @@ operator[](ExecFlagType exec_flag) const
 }
 
 template <typename T>
-MooseObjectWarehouse<T> & ExecuteMooseObjectWarehouse<T>::operator[](ExecFlagType exec_flag)
+MooseObjectWarehouse<T> &
+ExecuteMooseObjectWarehouse<T>::operator[](ExecFlagType exec_flag)
 {
   // Use find to avoid accidental insertion
   const auto iter = _execute_objects.find(exec_flag);
@@ -245,4 +246,3 @@ ExecuteMooseObjectWarehouse<T>::sort(THREAD_ID tid /* = 0*/)
   for (auto & object_pair : _execute_objects)
     object_pair.second.sort(tid);
 }
-

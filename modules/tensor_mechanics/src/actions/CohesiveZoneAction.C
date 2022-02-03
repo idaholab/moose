@@ -327,7 +327,9 @@ CohesiveZoneAction::actOutputMatProp()
       InputParameters params = emptyInputParameters();
 
       // RealVectorCartesianComponent
-      if ([&]() {
+      if (
+          [&]()
+          {
             for (const auto & vq : _real_vector_cartesian_component_table)
               for (unsigned int a = 0; a < 3; ++a)
                 if (vq.first + '_' + _component_table[a] == out)
@@ -347,17 +349,20 @@ CohesiveZoneAction::actOutputMatProp()
         continue;
 
       // CZMRealVectorScalar
-      if (setupOutput(
-              out, _vector_direction_table, [&](std::string prop_name, std::string direction) {
-                auto type = "CZMRealVectorScalar";
-                params = _factory.getValidParams(type);
-                params.set<std::string>("real_vector_value") = prop_name;
-                params.set<MooseEnum>("direction") = direction;
-                params.set<MaterialPropertyName>("property_name") = addBaseName(out);
-                params.set<std::vector<BoundaryName>>("boundary") = _boundary;
-                params.set<std::string>("base_name") = _base_name;
-                _problem->addInterfaceMaterial(type, addBaseName(out) + '_' + name(), params);
-              }))
+      if (setupOutput(out,
+                      _vector_direction_table,
+                      [&](std::string prop_name, std::string direction)
+                      {
+                        auto type = "CZMRealVectorScalar";
+                        params = _factory.getValidParams(type);
+                        params.set<std::string>("real_vector_value") = prop_name;
+                        params.set<MooseEnum>("direction") = direction;
+                        params.set<MaterialPropertyName>("property_name") = addBaseName(out);
+                        params.set<std::vector<BoundaryName>>("boundary") = _boundary;
+                        params.set<std::string>("base_name") = _base_name;
+                        _problem->addInterfaceMaterial(
+                            type, addBaseName(out) + '_' + name(), params);
+                      }))
         continue;
 
       mooseError("CZM Master: unable to add output Material");

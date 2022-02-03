@@ -36,4 +36,3 @@ protected:
   /// The number of smoothing passes to do
   unsigned int _iterations;
 };
-

@@ -96,13 +96,15 @@ void
 MeshInfo::possiblyAddSidesetInfo()
 {
   // Helper for adding the sideset names to a given map of sidesets
-  auto add_sideset_names = [&](std::map<BoundaryID, SidesetInfo> & sidesets) {
+  auto add_sideset_names = [&](std::map<BoundaryID, SidesetInfo> & sidesets)
+  {
     for (auto & pair : sidesets)
       pair.second.name = _mesh.get_boundary_info().get_sideset_name(pair.second.id);
   };
 
   // Helper for sorting all of the sides in each sideset
-  auto sort_sides = [](std::map<BoundaryID, SidesetInfo> & sidesets) {
+  auto sort_sides = [](std::map<BoundaryID, SidesetInfo> & sidesets)
+  {
     for (auto & pair : sidesets)
       std::sort(pair.second.sides.begin(), pair.second.sides.end());
   };
@@ -159,17 +161,17 @@ MeshInfo::possiblyAddSidesetInfo()
 
       // Take the received information and insert it into _sideset_elems
       auto accumulate_info =
-          [this](
-              processor_id_type,
-              const std::vector<std::tuple<boundary_id_type, dof_id_type, unsigned int>> & info) {
-            for (const auto & tuple : info)
-            {
-              const auto id = std::get<0>(tuple);
-              auto & entry = _sideset_elems[id];
-              entry.id = id;
-              entry.sides.emplace_back(std::get<1>(tuple), std::get<2>(tuple));
-            }
-          };
+          [this](processor_id_type,
+                 const std::vector<std::tuple<boundary_id_type, dof_id_type, unsigned int>> & info)
+      {
+        for (const auto & tuple : info)
+        {
+          const auto id = std::get<0>(tuple);
+          auto & entry = _sideset_elems[id];
+          entry.id = id;
+          entry.sides.emplace_back(std::get<1>(tuple), std::get<2>(tuple));
+        }
+      };
 
       // Push the information and insert it into _sideset_elems on root
       Parallel::push_parallel_vector_data(comm(), send_info, accumulate_info);
@@ -245,13 +247,15 @@ void
 MeshInfo::possiblyAddSubdomainInfo()
 {
   // Helper for adding the subdomain names to a given map of subdomains
-  auto add_subdomain_names = [&](std::map<SubdomainID, SubdomainInfo> & subdomains) {
+  auto add_subdomain_names = [&](std::map<SubdomainID, SubdomainInfo> & subdomains)
+  {
     for (auto & pair : subdomains)
       pair.second.name = _mesh.subdomain_name(pair.second.id);
   };
 
   // Helper for sorting all of the elems in each subdomain
-  auto sort_elems = [](std::map<SubdomainID, SubdomainInfo> & subdomains) {
+  auto sort_elems = [](std::map<SubdomainID, SubdomainInfo> & subdomains)
+  {
     for (auto & pair : subdomains)
       std::sort(pair.second.elems.begin(), pair.second.elems.end());
   };
@@ -304,14 +308,15 @@ MeshInfo::possiblyAddSubdomainInfo()
       // Take the received information and insert it into _subdomain_elems
       auto accumulate_info =
           [this](processor_id_type,
-                 const std::vector<std::pair<subdomain_id_type, dof_id_type>> & info) {
-            for (const auto & subdomain_elem_pair : info)
-            {
-              auto & entry = _subdomain_elems[subdomain_elem_pair.first];
-              entry.id = subdomain_elem_pair.first;
-              entry.elems.emplace_back(subdomain_elem_pair.second);
-            }
-          };
+                 const std::vector<std::pair<subdomain_id_type, dof_id_type>> & info)
+      {
+        for (const auto & subdomain_elem_pair : info)
+        {
+          auto & entry = _subdomain_elems[subdomain_elem_pair.first];
+          entry.id = subdomain_elem_pair.first;
+          entry.elems.emplace_back(subdomain_elem_pair.second);
+        }
+      };
 
       // Push the information and insert it into _subdomain_elems on root
       Parallel::push_parallel_vector_data(comm(), send_info, accumulate_info);

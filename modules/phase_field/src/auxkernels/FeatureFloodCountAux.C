@@ -84,10 +84,10 @@ FeatureFloodCountAux::precalculateValue()
     case 5: // ACTIVE_BOUNDS
     {
       const auto & var_to_features = _flood_counter.getVarToFeatureVector(_current_elem->id());
-      _value = std::count_if(
-          var_to_features.begin(), var_to_features.end(), [](unsigned int feature_id) {
-            return feature_id != FeatureFloodCount::invalid_id;
-          });
+      _value = std::count_if(var_to_features.begin(),
+                             var_to_features.end(),
+                             [](unsigned int feature_id)
+                             { return feature_id != FeatureFloodCount::invalid_id; });
 
       break;
     }

@@ -73,10 +73,10 @@ void
 StochasticResults::setCurrentLocalVectorPostprocessorValue(
     const std::string & vector_name, const VectorPostprocessorValue && current)
 {
-  auto data_ptr = std::find_if(
-      _sample_vectors.begin(), _sample_vectors.end(), [&vector_name](StochasticResultsData & data) {
-        return data.name == vector_name;
-      });
+  auto data_ptr = std::find_if(_sample_vectors.begin(),
+                               _sample_vectors.end(),
+                               [&vector_name](StochasticResultsData & data)
+                               { return data.name == vector_name; });
 
   mooseAssert(data_ptr != _sample_vectors.end(),
               "Unable to locate a vector with the supplied name of '" << vector_name << "'.");

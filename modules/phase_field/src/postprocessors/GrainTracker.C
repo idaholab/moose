@@ -58,9 +58,8 @@ GrainTracker::validParams()
       "ElementSideNeighborLayers",
       Moose::RelationshipManagerType::GEOMETRIC,
 
-      [](const InputParameters & obj_params, InputParameters & rm_params) {
-        rm_params.set<unsigned short>("layers") = obj_params.get<unsigned short>("halo_level");
-      }
+      [](const InputParameters & obj_params, InputParameters & rm_params)
+      { rm_params.set<unsigned short>("layers") = obj_params.get<unsigned short>("halo_level"); }
 
   );
 
@@ -394,7 +393,8 @@ GrainTracker::broadcastAndUpdateGrainData()
     std::transform(_feature_sets.begin(),
                    _feature_sets.end(),
                    std::back_inserter(root_feature_data),
-                   [](FeatureData & feature) {
+                   [](FeatureData & feature)
+                   {
                      PartialFeatureData partial_feature;
                      partial_feature.boundary_intersection = feature._boundary_intersection;
                      partial_feature.id = feature._id;

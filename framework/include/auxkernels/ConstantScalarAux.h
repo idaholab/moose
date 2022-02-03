@@ -31,4 +31,3 @@ protected:
 
   const Real & _value;
 };
-

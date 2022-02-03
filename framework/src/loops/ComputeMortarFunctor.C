@@ -77,7 +77,8 @@ ComputeMortarFunctor::operator()()
       iterators.push_back(it);
   }
 
-  auto act_functor = [this, &num_cached]() {
+  auto act_functor = [this, &num_cached]()
+  {
     ++num_cached;
     if (!_fe_problem.currentlyComputingJacobian())
     {

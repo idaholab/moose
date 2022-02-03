@@ -31,4 +31,3 @@ public:
 
   ElementH1Error(const InputParameters & parameters);
 };
-

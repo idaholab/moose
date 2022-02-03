@@ -33,4 +33,3 @@ protected:
   virtual Real volume() override;
   Real _volume;
 };
-

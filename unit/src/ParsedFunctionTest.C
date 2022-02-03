@@ -44,7 +44,8 @@ TEST_F(ParsedFunctionTest, basicConstructor)
                   &gradient_traditional,
                   &gradient_functor,
                   &dot_traditional,
-                  &dot_functor]() {
+                  &dot_functor]()
+  {
     EXPECT_EQ(f_traditional, f_functor);
     for (const auto i : make_range(unsigned(LIBMESH_DIM)))
       EXPECT_EQ(gradient_traditional(i), gradient_functor(i));

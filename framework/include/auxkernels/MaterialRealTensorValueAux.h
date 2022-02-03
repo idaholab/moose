@@ -41,4 +41,3 @@ protected:
   /// The column index to output
   unsigned int _col;
 };
-

@@ -63,13 +63,14 @@ GeneralizedPlaneStrainUserObject::GeneralizedPlaneStrainUserObject(
     _subblock_id_provider(nullptr),
     _out_of_plane_pressure_function(parameters.isParamSetByUser("out_of_plane_pressure_function")
                                         ? &getFunction("out_of_plane_pressure_function")
-                                        : parameters.isParamSetByUser("out_of_plane_pressure")
-                                              ? &getFunction("out_of_plane_pressure")
-                                              : nullptr),
+                                    : parameters.isParamSetByUser("out_of_plane_pressure")
+                                        ? &getFunction("out_of_plane_pressure")
+                                        : nullptr),
     _out_of_plane_pressure_material(getMaterialProperty<Real>("out_of_plane_pressure_material")),
     _pressure_factor(parameters.isParamSetByUser("pressure_factor")
                          ? getParam<Real>("pressure_factor")
-                         : parameters.isParamSetByUser("factor") ? getParam<Real>("factor") : 1.0)
+                     : parameters.isParamSetByUser("factor") ? getParam<Real>("factor")
+                                                             : 1.0)
 {
   if (parameters.isParamSetByUser("out_of_plane_pressure_function") &&
       parameters.isParamSetByUser("out_of_plane_pressure"))

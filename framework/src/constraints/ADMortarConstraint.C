@@ -101,7 +101,8 @@ ADMortarConstraint::computeJacobian(Moose::MortarType mortar_type)
 
   auto local_functor = [&](const std::vector<ADReal> & input_residuals,
                            const std::vector<dof_id_type> &,
-                           const std::set<TagID> &) {
+                           const std::set<TagID> &)
+  {
     auto & ce = _assembly.couplingEntries();
     for (const auto & it : ce)
     {

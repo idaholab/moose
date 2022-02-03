@@ -60,20 +60,23 @@ DistributedRectilinearMeshGenerator::validParams()
       "num_side_layers>=1 & num_side_layers<5",
       "Number of layers of off-processor side neighbors is reserved during mesh generation");
 
-  params.addRelationshipManager(
-      "ElementSideNeighborLayers",
-      Moose::RelationshipManagerType::GEOMETRIC,
-      [](const InputParameters & obj_params, InputParameters & rm_params) {
-        // Let this RM safeguard users specified ghosted layers
-        rm_params.set<unsigned short>("layers") = obj_params.get<unsigned>("num_side_layers");
-        // We can not attach geometric early here because some simulation related info, such as,
-        // periodic BCs is not available yet during an early stage. Periodic BCs will be passed
-        // into ghosting functor during initFunctor of ElementSideNeighborLayers. There is no hurt
-        // to attach geometric late for general simulations that do not have extra requirements on
-        // ghosting elements. That is especially true distributed generated meshes since there is
-        // not much redundant info.
-        rm_params.set<bool>("attach_geometric_early") = false;
-      });
+  params.addRelationshipManager("ElementSideNeighborLayers",
+                                Moose::RelationshipManagerType::GEOMETRIC,
+                                [](const InputParameters & obj_params, InputParameters & rm_params)
+                                {
+                                  // Let this RM safeguard users specified ghosted layers
+                                  rm_params.set<unsigned short>("layers") =
+                                      obj_params.get<unsigned>("num_side_layers");
+                                  // We can not attach geometric early here because some simulation
+                                  // related info, such as, periodic BCs is not available yet during
+                                  // an early stage. Periodic BCs will be passed into ghosting
+                                  // functor during initFunctor of ElementSideNeighborLayers. There
+                                  // is no hurt to attach geometric late for general simulations
+                                  // that do not have extra requirements on ghosting elements. That
+                                  // is especially true distributed generated meshes since there is
+                                  // not much redundant info.
+                                  rm_params.set<bool>("attach_geometric_early") = false;
+                                });
 
   MooseEnum partition("graph linear square", "graph", false);
   params.addParam<MooseEnum>(
@@ -943,8 +946,9 @@ DistributedRectilinearMeshGenerator::paritionSquarely<Hex8>(const dof_id_type nx
 {
   /* Try for squarish distribution */
   // The number of processors along y direction
-  processor_id_type py = (processor_id_type)(
-      0.5 + std::pow(((Real)ny * ny) * ((Real)num_procs) / ((Real)nz * nx), (Real)(1. / 3.)));
+  processor_id_type py =
+      (processor_id_type)(0.5 + std::pow(((Real)ny * ny) * ((Real)num_procs) / ((Real)nz * nx),
+                                         (Real)(1. / 3.)));
   if (!py)
     py = 1;
   // The number of processors for pxpz plane
@@ -1152,10 +1156,9 @@ DistributedRectilinearMeshGenerator::buildCube(UnstructuredMesh & mesh,
   // Collect new elements I should own
   std::vector<dof_id_type> my_new_elems;
 
-  auto elements_action_functor = [&my_new_elems](processor_id_type /*pid*/,
-                                                 const std::vector<dof_id_type> & data) {
-    std::copy(data.begin(), data.end(), std::back_inserter(my_new_elems));
-  };
+  auto elements_action_functor =
+      [&my_new_elems](processor_id_type /*pid*/, const std::vector<dof_id_type> & data)
+  { std::copy(data.begin(), data.end(), std::back_inserter(my_new_elems)); };
 
   Parallel::push_parallel_vector_data(comm, pushed_elements_vecs, elements_action_functor);
 
@@ -1206,10 +1209,11 @@ DistributedRectilinearMeshGenerator::buildCube(UnstructuredMesh & mesh,
   }
 
   // Next set ghost object ids from other processors
-  auto gather_functor = [local_elems_begin,
-                         partition_vec](processor_id_type /*pid*/,
-                                        const std::vector<dof_id_type> & coming_ghost_elems,
-                                        std::vector<dof_id_type> & pid_for_ghost_elems) {
+  auto gather_functor =
+      [local_elems_begin, partition_vec](processor_id_type /*pid*/,
+                                         const std::vector<dof_id_type> & coming_ghost_elems,
+                                         std::vector<dof_id_type> & pid_for_ghost_elems)
+  {
     auto num_ghost_elems = coming_ghost_elems.size();
     pid_for_ghost_elems.resize(num_ghost_elems);
 
@@ -1224,12 +1228,13 @@ DistributedRectilinearMeshGenerator::buildCube(UnstructuredMesh & mesh,
   auto action_functor =
       [&ghost_elem_to_pid](processor_id_type /*pid*/,
                            const std::vector<dof_id_type> & my_ghost_elems,
-                           const std::vector<dof_id_type> & pid_for_my_ghost_elems) {
-        dof_id_type num_local_elems = 0;
+                           const std::vector<dof_id_type> & pid_for_my_ghost_elems)
+  {
+    dof_id_type num_local_elems = 0;
 
-        for (auto elem : my_ghost_elems)
-          ghost_elem_to_pid[elem] = pid_for_my_ghost_elems[num_local_elems++];
-      };
+    for (auto elem : my_ghost_elems)
+      ghost_elem_to_pid[elem] = pid_for_my_ghost_elems[num_local_elems++];
+  };
 
   const dof_id_type * ex = nullptr;
   libMesh::Parallel::pull_parallel_vector_data(

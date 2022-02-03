@@ -37,4 +37,3 @@ protected:
   /// List of node IDs
   std::vector<dof_id_type> _node_ids;
 };
-

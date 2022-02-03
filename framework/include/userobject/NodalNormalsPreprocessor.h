@@ -60,4 +60,3 @@ protected:
 
   const VariablePhiGradient & _grad_phi;
 };
-

@@ -78,4 +78,3 @@ protected:
   /// coefficient.
   std::vector<VectorPostprocessorValue *> _coeffs;
 };
-

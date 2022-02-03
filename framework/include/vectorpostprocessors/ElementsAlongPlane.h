@@ -44,4 +44,3 @@ protected:
   /// The elements that intersect the plane
   VectorPostprocessorValue & _elem_ids;
 };
-

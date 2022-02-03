@@ -110,4 +110,3 @@ protected:
   makeKey(const std::string & key0, const std::string & key1, const std::string & key2) const;
   std::map<std::string, FileLineInfo> _map;
 };
-

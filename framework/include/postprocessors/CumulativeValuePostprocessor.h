@@ -43,4 +43,3 @@ protected:
   /// current post-processor value to be added to the cumulative sum
   const PostprocessorValue & _pps_value;
 };
-

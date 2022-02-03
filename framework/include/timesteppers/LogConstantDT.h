@@ -40,4 +40,3 @@ private:
 
   const Real _growth_factor;
 };
-

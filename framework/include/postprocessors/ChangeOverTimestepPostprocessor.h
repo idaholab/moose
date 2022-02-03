@@ -27,4 +27,3 @@ public:
 
   ChangeOverTimestepPostprocessor(const InputParameters & parameters);
 };
-

@@ -51,4 +51,3 @@ protected:
   /// Derivative of _neighbor_value_dot with respect to u
   const VariableValue & _dneighbor_value_dot_du;
 };
-

@@ -29,9 +29,8 @@ NodalVoidVolume::validParams()
                                 Moose::RelationshipManagerType::GEOMETRIC |
                                     Moose::RelationshipManagerType::ALGEBRAIC |
                                     Moose::RelationshipManagerType::COUPLING,
-                                [](const InputParameters &, InputParameters & rm_params) {
-                                  rm_params.set<unsigned short>("layers") = 1;
-                                });
+                                [](const InputParameters &, InputParameters & rm_params)
+                                { rm_params.set<unsigned short>("layers") = 1; });
   params.addClassDescription(
       "UserObject to compute the nodal void volume.  Take care if you block-restrict this "
       "UserObject, since the volumes of the nodes on the block's boundary will not include any "
@@ -121,9 +120,8 @@ NodalVoidVolume::buildCommLists()
 
   // exchange this info with other processors, building global_node_nums_to_send at the same time
   std::map<processor_id_type, std::vector<dof_id_type>> global_node_nums_to_send;
-  auto nodes_action_functor = [&](processor_id_type pid, const std::vector<dof_id_type> & nts) {
-    global_node_nums_to_send[pid] = nts;
-  };
+  auto nodes_action_functor = [&](processor_id_type pid, const std::vector<dof_id_type> & nts)
+  { global_node_nums_to_send[pid] = nts; };
   Parallel::push_parallel_vector_data(
       this->comm(), global_node_nums_to_receive, nodes_action_functor);
 
@@ -154,7 +152,8 @@ NodalVoidVolume::exchangeGhostedInfo()
       pid_entry.push_back(_nodal_void_volume.at(nd));
   }
 
-  auto nvv_action_functor = [this](processor_id_type pid, const std::vector<Real> & nvv_received) {
+  auto nvv_action_functor = [this](processor_id_type pid, const std::vector<Real> & nvv_received)
+  {
     const std::size_t msg_size = nvv_received.size();
     auto & receive_pid_entry = _nodes_to_receive[pid];
     mooseAssert(msg_size == receive_pid_entry.size(),

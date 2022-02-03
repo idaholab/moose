@@ -39,7 +39,8 @@ projectQPoints3d(const Elem * const msm_elem,
   const auto sub_elem = msm_elem->get_extra_integer(sub_elem_index);
   const ElemType primal_type = primal_elem->type();
 
-  auto get_sub_elem_node_indices = [primal_type, sub_elem]() -> std::array<unsigned int, 4> {
+  auto get_sub_elem_node_indices = [primal_type, sub_elem]() -> std::array<unsigned int, 4>
+  {
     switch (primal_type)
     {
       case TRI3:
@@ -83,7 +84,8 @@ projectQPoints3d(const Elem * const msm_elem,
 
   // Transforms quadrature point from first order sub-elements (in case of second-order)
   // to primal element
-  auto transform_qp = [primal_type, sub_elem](const Real nu, const Real xi) {
+  auto transform_qp = [primal_type, sub_elem](const Real nu, const Real xi)
+  {
     switch (primal_type)
     {
       case TRI3:

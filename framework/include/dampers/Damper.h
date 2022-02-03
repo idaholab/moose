@@ -50,4 +50,3 @@ protected:
   /// Minimum allowable value of damping
   const Real & _min_damping;
 };
-

@@ -39,4 +39,3 @@ protected:
 
   std::map<unsigned int, ErrorVector *> _indicator_field_number_to_error_vector;
 };
-

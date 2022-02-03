@@ -50,4 +50,3 @@ protected:
   /// second post-processor value, used as base in relative difference
   const PostprocessorValue & _value2;
 };
-

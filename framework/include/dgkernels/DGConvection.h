@@ -29,4 +29,3 @@ protected:
 
   RealVectorValue _velocity;
 };
-

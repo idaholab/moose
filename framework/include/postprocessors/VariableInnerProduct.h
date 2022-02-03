@@ -30,4 +30,3 @@ protected:
   /// Holds the values of second_variable at current quadrature points
   const VariableValue & _v;
 };
-

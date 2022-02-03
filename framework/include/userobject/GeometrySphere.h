@@ -32,4 +32,3 @@ protected:
   const Point _center;
   const Real _radius;
 };
-

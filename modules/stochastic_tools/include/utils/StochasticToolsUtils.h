@@ -229,8 +229,8 @@ inplaceSort(std::vector<std::vector<T>> & values)
   const std::size_t sz = values[0].size();
   mooseAssert(std::find_if(values.begin(),
                            values.end(),
-                           [&sz](const std::vector<T> & val) { return val.size() != sz; }) ==
-                  values.end(),
+                           [&sz](const std::vector<T> & val)
+                           { return val.size() != sz; }) == values.end(),
               "All vectors must be same size to sort.");
 
   std::vector<T> vals(values.size());

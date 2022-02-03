@@ -71,4 +71,3 @@ protected:
   /// This parameter, if true, allows to split the quadrilateral elements into triangular elements.
   const bool & _triangles;
 };
-

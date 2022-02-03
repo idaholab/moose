@@ -28,5 +28,4 @@ protected:
   MooseVariable & _v_var;
   const ADVariableValue & _v;
   const ADVariableValue & _v_neighbor;
-
 };

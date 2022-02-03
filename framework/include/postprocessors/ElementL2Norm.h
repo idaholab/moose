@@ -29,4 +29,3 @@ public:
 protected:
   virtual Real computeQpIntegral() override;
 };
-

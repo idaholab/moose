@@ -27,4 +27,3 @@ protected:
 
 template <>
 InputParameters validParams<UserForcingFunction>();
-

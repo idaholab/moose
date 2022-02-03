@@ -60,4 +60,3 @@ private:
   /// again.
   bool & _first_time;
 };
-

@@ -280,30 +280,32 @@ template <typename Object, typename Context>
 void
 ReceiveBuffer<Object, Context>::cleanupRequests()
 {
-  _requests.remove_if([&](std::pair<std::shared_ptr<Parallel::Request>,
-                                    std::shared_ptr<std::vector<std::shared_ptr<Object>>>> &
-                              request_pair) {
-    auto req = request_pair.first;
-    auto objects = request_pair.second;
+  _requests.remove_if(
+      [&](std::pair<std::shared_ptr<Parallel::Request>,
+                    std::shared_ptr<std::vector<std::shared_ptr<Object>>>> & request_pair)
+      {
+        auto req = request_pair.first;
+        auto objects = request_pair.second;
 
-    if (req->test()) // See if the receive has completed
-    {
-      req->wait(); // MUST call wait() to do post_wait_work which actually fills the object buffer
+        if (req->test()) // See if the receive has completed
+        {
+          req->wait(); // MUST call wait() to do post_wait_work which actually fills the object
+                       // buffer
 
-      _buffers_received++;
-      _objects_received += objects->size();
+          _buffers_received++;
+          _objects_received += objects->size();
 
-      if (_buffer.capacity() < _buffer.capacity() + objects->size())
-        _buffer.setCapacity(_buffer.capacity() + objects->size());
+          if (_buffer.capacity() < _buffer.capacity() + objects->size())
+            _buffer.setCapacity(_buffer.capacity() + objects->size());
 
-      for (auto & object : *objects)
-        _buffer.move(object);
+          for (auto & object : *objects)
+            _buffer.move(object);
 
-      objects->clear();
+          objects->clear();
 
-      return true;
-    }
-    else
-      return false;
-  });
+          return true;
+        }
+        else
+          return false;
+      });
 }

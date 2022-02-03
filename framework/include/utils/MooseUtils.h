@@ -955,9 +955,12 @@ template <typename C, typename M1, typename M2>
 typename C::iterator
 findPair(C & container, const M1 & first, const M2 & second)
 {
-  return std::find_if(container.begin(), container.end(), [&](auto & item) {
-    return wildcardEqual(first, item.first) && wildcardEqual(second, item.second);
-  });
+  return std::find_if(container.begin(),
+                      container.end(),
+                      [&](auto & item) {
+                        return wildcardEqual(first, item.first) &&
+                               wildcardEqual(second, item.second);
+                      });
 }
 
 /**

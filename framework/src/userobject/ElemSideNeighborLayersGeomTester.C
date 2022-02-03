@@ -31,7 +31,8 @@ ElemSideNeighborLayersGeomTester::validParams()
       "ElementSideNeighborLayers",
       Moose::RelationshipManagerType::GEOMETRIC,
 
-      [](const InputParameters & obj_params, InputParameters & rm_params) {
+      [](const InputParameters & obj_params, InputParameters & rm_params)
+      {
         rm_params.set<unsigned short>("layers") =
             obj_params.get<unsigned short>("element_side_neighbor_layers");
       }

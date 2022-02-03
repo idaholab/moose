@@ -56,12 +56,14 @@ EFAPoint::operator+=(const EFAPoint & point)
   return *this;
 }
 
-EFAPoint EFAPoint::operator*(const double a)
+EFAPoint
+EFAPoint::operator*(const double a)
 {
   return EFAPoint(this->_x * a, this->_y * a, this->_z * a);
 }
 
-double EFAPoint::operator*(const EFAPoint & point)
+double
+EFAPoint::operator*(const EFAPoint & point)
 {
   return this->_x * point._x + this->_y * point._y + this->_z * point._z;
 }

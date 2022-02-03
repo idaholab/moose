@@ -66,4 +66,3 @@ protected:
   // equilateral
   const Real _initial_delta_r;
 };
-

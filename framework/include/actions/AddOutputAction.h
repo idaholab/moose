@@ -33,4 +33,3 @@ public:
 
   virtual void act() override;
 };
-

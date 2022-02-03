@@ -33,9 +33,8 @@ HelmholtzFluidProperties::rho_from_p_T(Real pressure, Real temperature) const
   Real upper_density = 100.0;
 
   // The density is found by finding the zero of the pressure
-  auto pressure_diff = [&pressure, &temperature, this](Real x) {
-    return this->p_from_rho_T(x, temperature) - pressure;
-  };
+  auto pressure_diff = [&pressure, &temperature, this](Real x)
+  { return this->p_from_rho_T(x, temperature) - pressure; };
 
   BrentsMethod::bracket(pressure_diff, lower_density, upper_density);
   density = BrentsMethod::root(pressure_diff, lower_density, upper_density);

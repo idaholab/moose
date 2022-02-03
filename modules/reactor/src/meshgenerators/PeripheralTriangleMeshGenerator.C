@@ -382,13 +382,11 @@ PeripheralTriangleMeshGenerator::createSortedBoundaryNodeList(MeshBase & mesh) c
 
     // create lambda functions to search remaining side list
     // lambda to check if current end_node_id is in pair first position
-    auto node_in_first_pos = [end_node_id](std::pair<dof_id_type, dof_id_type> old_id_pair) {
-      return old_id_pair.first == end_node_id;
-    };
+    auto node_in_first_pos = [end_node_id](std::pair<dof_id_type, dof_id_type> old_id_pair)
+    { return old_id_pair.first == end_node_id; };
     // lambda to check if current end_node_id is in pair second position
-    auto node_in_second_pos = [end_node_id](std::pair<dof_id_type, dof_id_type> old_id_pair) {
-      return old_id_pair.second == end_node_id;
-    };
+    auto node_in_second_pos = [end_node_id](std::pair<dof_id_type, dof_id_type> old_id_pair)
+    { return old_id_pair.second == end_node_id; };
 
     // search for pair with current end_node_id in first position
     auto result =

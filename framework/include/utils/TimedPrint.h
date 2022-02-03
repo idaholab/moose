@@ -15,5 +15,5 @@ public:
   TimedPrint(StreamType &, std::chrono::duration<double>, std::chrono::duration<double>, Args &&...)
   {
     mooseDeprecated("TimedPrint is deprecated, use TIME_SECTION instead");
-    }
+  }
 };

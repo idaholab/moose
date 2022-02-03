@@ -41,4 +41,3 @@ protected:
   /// The current quadrature point
   unsigned int _qp;
 };
-
