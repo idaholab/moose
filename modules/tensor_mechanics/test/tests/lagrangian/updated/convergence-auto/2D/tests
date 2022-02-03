@@ -1,0 +1,68 @@
+[Tests]
+  issues = '#17472'
+  design = 'source/kernels/lagrangian/UpdatedLagrangianStressDivergence.md'
+  [./dirichlet_small_neither]
+    type = PetscJacobianTester
+    input = 'dirichlet.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = "GlobalParams/large_kinematics=false GlobalParams/stabilize_strain=false Kernels/sdx/use_displaced_mesh=false Kernels/sdy/use_displaced_mesh=false"
+    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for small displacements, without stabilization, and Dirichlet BCs'
+  [../]
+  [./neumann_small_neither]
+    type = PetscJacobianTester
+    input = 'neumann.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = "GlobalParams/large_kinematics=false GlobalParams/stabilize_strain=false Kernels/sdx/use_displaced_mesh=false Kernels/sdy/use_displaced_mesh=false"
+    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for small displacements, without stabilization, and Neumann BCs'
+  [../]
+  [./dirichlet_large_neither]
+    type = PetscJacobianTester
+    input = 'dirichlet.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=false"
+    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, without stabilization, and Dirichlet BCs'
+  [../]
+  [./neumann_large_neither]
+    type = PetscJacobianTester
+    input = 'neumann.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=false"
+    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, without stabilization, and Neumann BCs'
+  [../]
+  [./dirichlet_small_right]
+    type = PetscJacobianTester
+    input = 'dirichlet.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = "GlobalParams/large_kinematics=false GlobalParams/stabilize_strain=true Kernels/sdx/use_displaced_mesh=false Kernels/sdy/use_displaced_mesh=false"
+    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for small displacements, with stabilization, and Dirichlet BCs'
+  [../]
+  [./neumann_small_right]
+    type = PetscJacobianTester
+    input = 'neumann.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = "GlobalParams/large_kinematics=false GlobalParams/stabilize_strain=true Kernels/sdx/use_displaced_mesh=false Kernels/sdy/use_displaced_mesh=false"
+    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for small displacements, with stabilization, and Neumann BCs'
+  [../]
+  [./dirichlet_large_right]
+    type = PetscJacobianTester
+    input = 'dirichlet.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=true"
+    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, with stabilization, and Dirichlet BCs'
+  [../]
+  [./neumann_large_right]
+    type = PetscJacobianTester
+    input = 'neumann.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=true"
+    requirement = 'Jacobian is exact with relative tolerance of 1e-7 for large displacements, with stabilization, and Neurmann BCs'
+  [../]
+[]

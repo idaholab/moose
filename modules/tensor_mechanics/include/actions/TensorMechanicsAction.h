@@ -28,6 +28,8 @@ protected:
   void actOutputMatProp();
   void actGatherActionParameters();
   void verifyOrderAndFamilyOutputs();
+  void actLagrangianKernelStrain();
+  void actStressDivergenceTensorsStrain();
 
   virtual std::string getKernelType();
   virtual InputParameters getKernelParameters(std::string type);
@@ -132,6 +134,38 @@ protected:
   const bool _auto_eigenstrain;
 
   std::vector<MaterialPropertyName> _eigenstrain_names;
+
+  /// New or old kernel system
+  const bool _lagrangian_kernels;
+
+  /// Simplified flag for small/large deformations, Lagrangian kernel system
+  const bool _lk_large_kinematics;
+
+  /// New kernel system kinematics types
+  enum class LKFormulation
+  {
+    Total,
+    Updated
+  };
+  const LKFormulation _lk_formulation;
+
+  /// Simplified volumetric locking correction flag for new kernels
+  bool _lk_locking;
+
+  /// Flag indicating if the homogenization system is present for new kernels
+  bool _lk_homogenization;
+
+  // Helper to translate into MOOSE talk
+  static const std::map<unsigned int, std::string> _order_mapper;
+  // Name of the homogenization scalar variable
+  const std::string _hname = "hvar";
+  // Name of the integrator
+  const std::string _integrator_name = "integrator";
+  // Name of the homogenization strain
+  const std::string _homogenization_strain_name = "homogenization_gradient";
+  // Other homogenization info
+  MultiMooseEnum _constraint_types;
+  std::vector<FunctionName> _targets;
 };
 
 template <typename T, typename T2>

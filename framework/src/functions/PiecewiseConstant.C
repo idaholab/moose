@@ -8,85 +8,73 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PiecewiseConstant.h"
+#include "MathUtils.h"
 
 registerMooseObject("MooseApp", PiecewiseConstant);
-
-defineLegacyParams(PiecewiseConstant);
 
 InputParameters
 PiecewiseConstant::validParams()
 {
   InputParameters params = PiecewiseTabularBase::validParams();
-  MooseEnum direction("left right", "left");
+  MooseEnum direction("LEFT RIGHT LEFT_INCLUSIVE RIGHT_INCLUSIVE", "LEFT");
   params.addParam<MooseEnum>(
       "direction", direction, "Direction to look to find value: " + direction.getRawNames());
   params.addClassDescription("Defines data using a set of x-y data pairs");
   return params;
 }
 
-PiecewiseConstant::DirectionEnum
-PiecewiseConstant::getDirection(const std::string & direction)
-{
-  DirectionEnum dir = PiecewiseConstant::UNDEFINED;
-  if (direction == "left")
-  {
-    dir = PiecewiseConstant::LEFT;
-  }
-  else if (direction == "right")
-  {
-    dir = PiecewiseConstant::RIGHT;
-  }
-  else
-  {
-    mooseError("Unknown direction in PiecewiseConstant");
-  }
-  return dir;
-}
-
 PiecewiseConstant::PiecewiseConstant(const InputParameters & parameters)
-  : PiecewiseTabularBase(parameters), _direction(getDirection(getParam<MooseEnum>("direction")))
+  : PiecewiseTabularBase(parameters),
+    _direction(getParam<MooseEnum>("direction").getEnum<Direction>())
 {
 }
 
 Real
 PiecewiseConstant::value(Real t, const Point & p) const
 {
-  Real func_value = 0.0;
   const Real x = _has_axis ? p(_axis) : t;
 
   unsigned i = 1;
   const unsigned len = functionSize();
-  const Real toler = 1e-14;
+  const Real tolerance = 1.0e-14;
 
   // endpoint cases
-  if ((_direction == LEFT && x < (1 + toler) * domain(0)) ||
-      (_direction == RIGHT && x < (1 - toler) * domain(0)))
-  {
-    func_value = range(0);
-    i = len;
-  }
-  if ((_direction == LEFT && x > (1 + toler) * domain(len - 1)) ||
-      (_direction == RIGHT && x > (1 - toler) * domain(len - 1)))
-  {
-    func_value = range(len - 1);
-    i = len;
-  }
+  if ((_direction == Direction::LEFT &&
+       x < (1 + tolerance * MathUtils::sign(domain(0))) * domain(0)) ||
+      (_direction == Direction::RIGHT &&
+       x < (1 - tolerance * MathUtils::sign(domain(0))) * domain(0)) ||
+      (_direction == Direction::LEFT_INCLUSIVE &&
+       x < (1 - tolerance * MathUtils::sign(domain(0))) * domain(0)) ||
+      (_direction == Direction::RIGHT_INCLUSIVE &&
+       x < (1 + tolerance * MathUtils::sign(domain(0))) * domain(0)))
+    return _scale_factor * range(0);
+  else if ((_direction == Direction::LEFT &&
+            x > (1 + tolerance * MathUtils::sign(domain(len - 1))) * domain(len - 1)) ||
+           (_direction == Direction::RIGHT &&
+            x > (1 - tolerance * MathUtils::sign(domain(len - 1))) * domain(len - 1)) ||
+           (_direction == Direction::LEFT_INCLUSIVE &&
+            x > (1 - tolerance * MathUtils::sign(domain(len - 1))) * domain(len - 1)) ||
+           (_direction == Direction::RIGHT_INCLUSIVE &&
+            x > (1 + tolerance * MathUtils::sign(domain(len - 1))) * domain(len - 1)))
+    return _scale_factor * range(len - 1);
 
   for (; i < len; ++i)
   {
-    if (_direction == LEFT && x < (1 + toler) * domain(i))
-    {
-      func_value = range(i - 1);
-      break;
-    }
-    else if ((_direction == RIGHT && x < (1 - toler) * domain(i)))
-    {
-      func_value = range(i);
-      break;
-    }
+    if (_direction == Direction::LEFT &&
+        x < (1 + tolerance * MathUtils::sign(domain(i))) * domain(i))
+      return _scale_factor * range(i - 1);
+    else if (_direction == Direction::LEFT_INCLUSIVE &&
+             x < (1 - tolerance * MathUtils::sign(domain(i))) * domain(i))
+      return _scale_factor * range(i - 1);
+    else if ((_direction == Direction::RIGHT &&
+              x < (1 - tolerance * MathUtils::sign(domain(i))) * domain(i)))
+      return _scale_factor * range(i);
+    else if ((_direction == Direction::RIGHT_INCLUSIVE &&
+              x < (1 + tolerance * MathUtils::sign(domain(i))) * domain(i)))
+      return _scale_factor * range(i);
   }
 
-  return _scale_factor * func_value;
+  return 0.0;
 }
 
 Real
@@ -102,7 +90,7 @@ PiecewiseConstant::integral() const
   Real sum = 0;
   unsigned offset = 0;
 
-  if (_direction == RIGHT)
+  if (_direction == Direction::RIGHT || _direction == Direction::RIGHT_INCLUSIVE)
     offset = 1;
 
   for (unsigned i = 0; i < len - 1; ++i)

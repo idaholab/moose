@@ -1,0 +1,18 @@
+[Tests]
+  issues = '#17472'
+  design = 'source/kernels/lagrangian/UpdatedLagrangianStressDivergence.md'
+  [./L-large]
+    type = CSVDiff
+    input = 'large.i'
+    csvdiff = 'large_out.csv'
+    requirement = "Quadratic convergence in 3D for PresetBCs on a complicated geometry for small deformations, SMP matches FDP."
+    valgrind = HEAVY
+  [../]
+  [./L-small]
+    type = CSVDiff
+    input = 'small.i'
+    csvdiff = 'small_out.csv'
+    requirement = "Quadratic convergence in 3D for PresetBCs on a complicated geometry for large deformations, SMP matches FDP."
+    valgrind = HEAVY
+  [../]
+[]

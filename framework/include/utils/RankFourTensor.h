@@ -22,6 +22,9 @@
 
 #include <petscsys.h>
 
+#include <Eigen/Core>
+#include <Eigen/Dense>
+
 using libMesh::Real;
 using libMesh::tuple_of;
 namespace libMesh
@@ -74,7 +77,8 @@ public:
     initNone,
     initIdentity,
     initIdentityFour,
-    initIdentitySymmetricFour
+    initIdentitySymmetricFour,
+    initIdentityDeviatoric
   };
 
   /**
@@ -139,6 +143,11 @@ public:
   // Named constructors
   static RankFourTensorTempl<T> Identity() { return RankFourTensorTempl<T>(initIdentity); }
   static RankFourTensorTempl<T> IdentityFour() { return RankFourTensorTempl<T>(initIdentityFour); };
+  /// Identity of type \delta_{ik} \delta_{jl} - \delta_{ij} \delta_{kl} / 3
+  static RankFourTensorTempl<T> IdentityDeviatoric()
+  {
+    return RankFourTensorTempl<T>(initIdentityDeviatoric);
+  };
 
   /// Gets the value for the index specified.  Takes index = 0,1,2
   inline T & operator()(unsigned int i, unsigned int j, unsigned int k, unsigned int l)
@@ -234,6 +243,21 @@ public:
    * This routine assumes that C_ijkl = C_jikl = C_ijlk
    */
   RankFourTensorTempl<T> invSymm() const;
+
+  /**
+   * This returns A_ijkl such that C_ijkl*A_klmn = de_im de_jn
+   * i.e. the general rank four inverse
+   */
+  template <typename T2 = T,
+            typename std::enable_if<(RankFourTensorTempl<T2>::N4 * sizeof(T2) >
+                                     EIGEN_STACK_ALLOCATION_LIMIT),
+                                    int>::type = 0>
+  RankFourTensorTempl<T> inverse() const;
+  template <typename T2 = T,
+            typename std::enable_if<(RankFourTensorTempl<T2>::N4 * sizeof(T2) <=
+                                     EIGEN_STACK_ALLOCATION_LIMIT),
+                                    int>::type = 0>
+  RankFourTensorTempl<T> inverse() const;
 
   /**
    * Rotate the tensor using
@@ -333,11 +357,25 @@ public:
   /// Inner product of the major transposed tensor with a rank two tensor
   RankTwoTensorTempl<T> innerProductTranspose(const RankTwoTensorTempl<T> &) const;
 
+  /// Sum C_ijkl M_kl for a given i,j
+  T contractionIj(unsigned int, unsigned int, const RankTwoTensorTempl<T> &) const;
+
+  /// Sum M_ij C_ijkl for a given k,l
+  T contractionKl(unsigned int, unsigned int, const RankTwoTensorTempl<T> &) const;
+
   /// Calculates the sum of Ciijj for i and j varying from 0 to 2
   T sum3x3() const;
 
   /// Calculates the vector a[i] = sum over j Ciijj for i and j varying from 0 to 2
   VectorValue<T> sum3x1() const;
+
+  /// Calculates C_ijkl A_jm B_kn C_lt
+  RankFourTensorTempl<T> tripleProductJkl(const RankTwoTensorTempl<T> &,
+                                          const RankTwoTensorTempl<T> &,
+                                          const RankTwoTensorTempl<T> &) const;
+
+  /// Calculates C_mjkl A_im
+  RankFourTensorTempl<T> singleProductI(const RankTwoTensorTempl<T> &) const;
 
   /// checks if the tensor is symmetric
   bool isSymmetric() const;
@@ -667,4 +705,55 @@ RankFourTensorTempl<T>::fillSymmetric21FromInputVector(const T2 & input)
   (*this)(0, 1, 2, 0) = input[19];
   (*this)(2, 0, 1, 0) = input[19];
   (*this)(1, 0, 2, 0) = input[19];
+}
+
+template <typename T>
+template <typename T2,
+          typename std::enable_if<(RankFourTensorTempl<T2>::N4 * sizeof(T2) >
+                                   EIGEN_STACK_ALLOCATION_LIMIT),
+                                  int>::type>
+RankFourTensorTempl<T>
+RankFourTensorTempl<T>::inverse() const
+{
+  // Allocate on the heap if you're going to exceed the stack size limit
+
+  // The inverse of a 3x3x3x3 in the C_ijkl*A_klmn = de_im de_jn sense is
+  // simply the inverse of the 9x9 matrix of the tensor entries.
+  // So all we need to do is inverse _vals (with the appropriate row-major
+  // storage)
+
+  RankFourTensorTempl<T> result;
+  Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> mat(9, 9);
+  for (auto i : make_range(9 * 9))
+    mat(i) = _vals[i];
+
+  mat = mat.inverse();
+
+  for (auto i : make_range(9 * 9))
+    result._vals[i] = mat(i);
+
+  return result;
+}
+
+template <typename T>
+template <typename T2,
+          typename std::enable_if<(RankFourTensorTempl<T2>::N4 * sizeof(T2) <=
+                                   EIGEN_STACK_ALLOCATION_LIMIT),
+                                  int>::type>
+RankFourTensorTempl<T>
+RankFourTensorTempl<T>::inverse() const
+{
+  // Allocate on the stack if small enough
+
+  // The inverse of a 3x3x3x3 in the C_ijkl*A_klmn = de_im de_jn sense is
+  // simply the inverse of the 9x9 matrix of the tensor entries.
+  // So all we need to do is inverse _vals (with the appropriate row-major
+  // storage)
+
+  RankFourTensorTempl<T> result;
+  const Eigen::Map<const Eigen::Matrix<T, 9, 9, Eigen::RowMajor>> mat(&_vals[0]);
+  Eigen::Map<Eigen::Matrix<T, 9, 9, Eigen::RowMajor>> res(&result._vals[0]);
+  res = mat.inverse();
+
+  return result;
 }

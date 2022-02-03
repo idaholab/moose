@@ -6324,7 +6324,17 @@ FEProblemBase::meshChangedHelper(bool intermediate_change)
                                     _material_props,
                                     _bnd_material_props,
                                     _assembly);
-      Threads::parallel_reduce(*_mesh.refinedElementRange(), pmp);
+      const auto & range = *_mesh.refinedElementRange();
+      Threads::parallel_reduce(range, pmp);
+
+      // Concurrent erasure from the shared hash map is not safe while we are reading from it in
+      // ProjectMaterialProperties, so we handle erasure here. Moreover, erasure based on key is not
+      // thread safe in and of itself because it is a read-write operation
+      for (const auto & elem : range)
+      {
+        _material_props.eraseProperty(elem);
+        _bnd_material_props.eraseProperty(elem);
+      }
     }
 
     {
@@ -6336,7 +6346,17 @@ FEProblemBase::meshChangedHelper(bool intermediate_change)
                                     _material_props,
                                     _bnd_material_props,
                                     _assembly);
-      Threads::parallel_reduce(*_mesh.coarsenedElementRange(), pmp);
+      const auto & range = *_mesh.coarsenedElementRange();
+      Threads::parallel_reduce(range, pmp);
+      for (const auto & elem : range)
+      {
+        auto && coarsened_children = _mesh.coarsenedElementChildren(elem);
+        for (auto && child : coarsened_children)
+        {
+          _material_props.eraseProperty(child);
+          _bnd_material_props.eraseProperty(child);
+        }
+      }
     }
   }
 

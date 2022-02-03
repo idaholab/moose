@@ -1,0 +1,18 @@
+[Tests]
+  issues = '#17472'
+  design = 'source/kernels/lagrangian/UpdatedLagrangianStressDivergence.md'
+  [./small]
+    type = Exodiff
+    input = 'small_patch.i'
+    exodiff = 'small_patch_out.e'
+    requirement = "Small strain uniaxial patch test passes"
+    abs_zero = 1e-6
+  [../]
+  [./large]
+    type = Exodiff
+    input = 'large_patch.i'
+    exodiff = 'large_patch_out.e'
+    requirement = "Large strain uniaxial patch test passes"
+    abs_zero = 1e-6
+  [../]
+[]

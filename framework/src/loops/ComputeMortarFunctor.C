@@ -110,6 +110,7 @@ ComputeMortarFunctor::operator()()
                                         _amg,
                                         _displaced,
                                         _mortar_constraints,
+                                        0,
                                         _secondary_ip_sub_to_mats,
                                         _primary_ip_sub_to_mats,
                                         _secondary_boundary_mats,
