@@ -34,9 +34,11 @@ The following modules are recommended for each of INL's clusters:
 
 !alert note
 If you use HPC modules, you will need to load them every time you log in! One solution is to
-modify the `.bashrc` file and add these `module load` commands there.
+add the `module load` commands to your `~/.bashrc` file. Adding commands to that file means 
+they would run every time you log in. However, modifying your `~/.bashrc` may cause unintended 
+consequences while using other applications or services if the modules are not unloaded first.
 
-### Step 1a: make sure those compilers are used
+### Step 1a: Make sure those compilers are used
 
 Depending on how the MPI modules were built (and 99% of the time, this is not needed),
 it may be that the compilers loaded will not be automatically used when compiling.
@@ -77,7 +79,7 @@ libMesh, you will need to run the `update_and_rebuild_libmesh.sh` script.
   MOOSE_JOBS=6 ./update_and_rebuild_libmesh.sh
 ```
 
-### Step 4: download and install MOOSE and the application you need
+### Step 3: download and install MOOSE and the application you need
 
 MOOSE may be classically obtained from its [GitHub repository](https://github.com/idaholab/moose).
 Many open-source MOOSE applications may also be obtained from GitHub, while others will require
@@ -100,7 +102,9 @@ The following modules are recommended for each of INL's clusters:
 
 !alert note
 If you use HPC modules, you will need to load them every time you log in! One solution is to
-modify the `.bashrc` file and add these `module load` commands there.
+add the `module load` commands to your `~/.bashrc` file. Adding commands to that file means 
+they would run every time you log in. However, modifying your `~/.bashrc` may cause unintended 
+consequences while using other applications or services if the modules are not unloaded first.
 
 ### Step 1a: See Option 2: Step 1a
 
@@ -126,7 +130,9 @@ Please make sure to `export MOOSE_JOBS=6` to control the number of cores used fo
 The [conda-based installation](conda.md) is not recommended for INL HPC, as it does not use
 optimized, architecture-specific compilers. However, if you are not seeking performance,
 and will not use more than one node (to limit the attrition of computational resources),
-you are free to use them.
+you are free to use them. However, use caution when installing conda as running `conda init` may
+have uninted consequences while using other applications or services as it makes changes to your
+`~/.bashrc`.
 
 !alert note
 If you want to use MPI with a conda installation, you will likely need to use the `mpiexec / mpirun`
@@ -136,3 +142,4 @@ in the conda package, not another one from a module.
 Do not use the `miniconda/anaconda` HPC module. Download and install your own conda. If you get permission
 errors when trying to install conda packages, it is likely the HPC conda module is being used.
 `module unload miniconda` should be ran to remove it.
+
