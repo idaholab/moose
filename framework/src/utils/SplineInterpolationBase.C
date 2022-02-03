@@ -168,3 +168,16 @@ SplineInterpolationBase::sample(const std::vector<Real> & x,
   return a * y[klo] + b * y[khi] +
          ((a * a * a - a) * y2[klo] + (b * b * b - b) * y2[khi]) * (h * h) / 6.0;
 }
+
+template Real SplineInterpolationBase::sample<Real>(const std::vector<Real> & x,
+                                                    const std::vector<Real> & y,
+                                                    const std::vector<Real> & y2,
+                                                    const Real & x_int,
+                                                    unsigned int klo,
+                                                    unsigned int khi) const;
+template ADReal SplineInterpolationBase::sample<ADReal>(const std::vector<Real> & x,
+                                                        const std::vector<Real> & y,
+                                                        const std::vector<Real> & y2,
+                                                        const ADReal & x_int,
+                                                        unsigned int klo,
+                                                        unsigned int khi) const;

@@ -63,7 +63,7 @@ PiecewiseMultiInterpolation::~PiecewiseMultiInterpolation() {}
 
 template <bool is_ad>
 MooseADWrapper<PiecewiseMultiInterpolation::GridPoint, is_ad>
-PiecewiseMultiInterpolation::pointInGrid(MooseADWrapper<Real, is_ad> t,
+PiecewiseMultiInterpolation::pointInGrid(const MooseADWrapper<Real, is_ad> & t,
                                          const MooseADWrapper<Point, is_ad> & p) const
 {
   // convert the inputs to an input to the sample function using _axes
@@ -77,6 +77,11 @@ PiecewiseMultiInterpolation::pointInGrid(MooseADWrapper<Real, is_ad> t,
   }
   return point_in_grid;
 }
+
+template PiecewiseMultiInterpolation::GridPoint
+PiecewiseMultiInterpolation::pointInGrid<false>(const Real &, const Point &) const;
+template PiecewiseMultiInterpolation::ADGridPoint
+PiecewiseMultiInterpolation::pointInGrid<true>(const ADReal &, const ADPoint &) const;
 
 Real
 PiecewiseMultiInterpolation::value(Real t, const Point & p) const
