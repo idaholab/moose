@@ -9,18 +9,23 @@
 
 import uuid
 import collections
+import re
+import logging
 import moosetree
 import MooseDocs
-from ..common import exceptions
+from ..common import exceptions, report_error
 from ..base import components, MarkdownReader, LatexRenderer, Extension
 from ..tree import tokens, html, latex
-from . import core
+from . import core, command, heading
+
+LOG = logging.getLogger(__name__)
 
 def make_extension(**kwargs):
     return FloatExtension(**kwargs)
 
 Float = tokens.newToken('Float', img=False, bottom=False, command='figure')
 FloatCaption = tokens.newToken('FloatCaption', key='', prefix='', number='?')
+FloatReference = tokens.newToken('FloatReference', label=None, filename=None)
 
 def create_float(parent, extension, reader, page, settings, bottom=False, img=False,
                  token_type=Float, **kwargs):
@@ -74,7 +79,7 @@ def _add_caption(parent, extension, reader, page, settings):
         reader.tokenize(caption, cap, page, MarkdownReader.INLINE)
     return caption, prefix
 
-class FloatExtension(Extension):
+class FloatExtension(command.CommandExtension):
     """
     Provides ability to add caption float elements (e.g., figures, table, etc.). This is only a
     base extension. It does not provide tables for example, just the tools to make floats
@@ -82,8 +87,10 @@ class FloatExtension(Extension):
     """
     def extend(self, reader, renderer):
         self.requires(core)
+        self.addCommand(reader, FloatReferenceCommand())
         renderer.add('Float', RenderFloat())
         renderer.add('FloatCaption', RenderFloatCaption())
+        renderer.add('FloatReference', RenderFloatReference())
 
         if isinstance(renderer, LatexRenderer):
             renderer.addPackage('caption', labelsep='period')
@@ -91,6 +98,7 @@ class FloatExtension(Extension):
     def postTokenize(self, page, ast):
         """Set float number for each counter."""
         counts = collections.defaultdict(int)
+        floats = dict()
         for node in moosetree.iterate(ast, lambda n: n.name == 'FloatCaption'):
             prefix = node.get('prefix', None)
             if prefix is not None:
@@ -98,6 +106,7 @@ class FloatExtension(Extension):
                 node['number'] = counts[prefix]
             key = node.get('key')
             if key:
+                floats[key] = node.copy()
                 shortcut = core.Shortcut(ast.root, key=key, link='#{}'.format(key))
 
                 # TODO: This is a bit of a hack to get Figure~\ref{} etc. working in general
@@ -107,6 +116,30 @@ class FloatExtension(Extension):
                     tokens.String(shortcut, content='{} {}'.format(prefix.title(), node['number']))
 
         page['counts'] = counts
+        page['floats'] = floats
+
+class FloatReferenceCommand(command.CommandComponent):
+    COMMAND = 'ref'
+    SUBCOMMAND = None
+    LABEL_RE = re.compile(r'((?P<filename>.*?\.md)#)?(?P<label>.+)', flags=re.UNICODE)
+
+    @staticmethod
+    def defaultSettings():
+        settings = command.CommandComponent.defaultSettings()
+        return settings
+
+    def createToken(self, parent, info, page, settings):
+        inline = 'inline' in info
+        if not inline:
+            raise common.exceptions.MooseDocsException("The float reference command is an inline level command.")
+
+        content = info['inline']
+        match = self.LABEL_RE.search(content)
+        if match is None:
+            raise common.exceptions.MooseDocsException("Invalid label format.")
+
+        FloatReference(parent, label=match.group('label'), filename=match.group('filename'))
+        return parent
 
 class RenderFloat(components.RenderComponent):
     def createHTML(self, parent, token, page):
@@ -160,10 +193,63 @@ class RenderFloatCaption(components.RenderComponent):
             heading = html.Tag(caption, 'span', class_="moose-caption-heading")
             html.String(heading, content="{} {}: ".format(prefix, token['number']))
 
-        return html.Tag(caption, 'span', class_="moose-caption-text")
+        return html.Tag(caption, 'span', class_="moose-caption-text", id_=token['key'])
 
     def createLatex(self, parent, token, page):
         caption = latex.Command(parent, 'caption')
         if token['key']:
             latex.Command(caption, 'label', string=token['key'], escape=True)
         return caption
+
+class RenderFloatReference(core.RenderShortcutLink):
+    def createHTML(self, parent, token, page):
+        a = html.Tag(parent, 'a', class_='moose-float-reference')
+
+        float_page = page
+        if token['filename']:
+            float_page = self.translator.findPage(token['filename'], throw_on_zero=False)
+            if float_page is None:
+                a['class'] = 'moose-error'
+                html.String(a, content='{}#{}'.format(token['filename'], key))
+                msg = "Could not find  page {}".format(token['filename'])
+                raise exceptions.MooseDocsException(msg)
+                return None
+
+            head = heading.find_heading(float_page)
+            if head is not None:
+                tok = tokens.Token(None)
+                head.copyToToken(tok)
+                self.renderer.render(a, tok, page)
+                html.String(a, content=', ')
+            else:
+                html.String(a, content=token['filename'] + ', ')
+
+        key = token['label']
+        float_node = float_page['floats'].get(key, None)
+        if float_node is None:
+            a['class'] = 'moose-error'
+            html.String(a, content='{}#{}'.format(float_page.local, key))
+            msg = "Could not find float with key {} on page {}".format(key, float_page.local)
+            raise exceptions.MooseDocsException(msg)
+            return None
+        elif float_page is not page:
+            url = float_page.relativeDestination(page)
+            a['href']='{}#{}'.format(url, key)
+        else:
+            a['href']='#{}'.format(key)
+
+        prefix = float_node.get('prefix', None)
+        prefix = '' if prefix is None else prefix.title()
+        html.String(a, content='{} {}'.format(prefix, float_node['number']))
+
+    def createLatex(self, parent, token, page):
+        float_page = page
+        if token['filename']:
+            float_page = self.translator.findPage(token['filename'], throw_on_zero=False)
+        key = token['label']
+        float_node = float_page['floats'].get(key, None)
+        prefix = float_node.get('prefix', None)
+        prefix = '' if prefix is None else prefix.title()
+        latex.String(parent, content=prefix + '~', escape=False)
+        latex.Command(parent, 'ref', string=token['label'])
+        return parent

@@ -1,0 +1,42 @@
+# Algorithm Extension
+
+!algorithm caption=Test algorithm id=testalgo
+[!function!begin name=testfunction param=a]
+[!procedure!begin name=testprocedure param=b]
+[!for!begin condition=1,N]
+[!while!begin condition=True]
+[!ifthen!if condition=false]
+[!state text=Statement 1]
+[!ifthen!elif condition=false]
+[!state text=Statement 2]
+[!ifthen!else]
+[!state text=Statement 3 comment=Comment]
+[!ifthen!end]
+[!while!end]
+[!for!end]
+[!procedure!end]
+[!function!end]
+
+!algorithm caption=The Bellman-Kalaba algorithm id=bk
+[!function!begin name=BellmanKalab param=$G$, $u$, $l$, $p$}]
+[!for!begin condition=$v\in V(G)$]
+[!state text=$l(v) \leftarrow \infty$]
+[!for!end]
+[!state text=$l(u) \leftarrow 0$]
+[!while!begin condition=$changed$ comment=Intial is $changed \leftarrow \text{True}$]
+[!for!begin condition=$i \leftarrow 1, n$]
+[!state text=$min \leftarrow l(v_i)$]
+[!for!begin condition=$j \leftarrow 1, n$]
+[!ifthen!if condition=$min > e(v_i, v_j) + l(v_j)$]
+[!state text=$min \leftarrow e(v_i, v_j) + l(v_j)$]
+[!state text=$p(i) \leftarrow v_j$]
+[!ifthen!end]
+[!for!end]
+[!state text=$l’(i) \leftarrow min$]
+[!for!end]
+[!state text=$changed \leftarrow l \not= l’$]
+[!state text=$l \leftarrow l’$]
+[!while!end]
+[!function!end]
+
+$y = mx + b$

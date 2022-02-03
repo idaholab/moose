@@ -257,5 +257,20 @@ class TestYouTube(MooseDocsTestCase):
         self.assertHTMLTag(res(0), 'div', size=1)
         self.assertHTMLTag(res(0,0), 'iframe', src="https://www.youtube.com/not_real")
 
+class TestFloatReference(MooseDocsTestCase):
+    EXTENSIONS = [core, command, floats]
+
+    def testLocalReference(self):
+        ast = self.tokenize('[!ref](dummy)')
+        self.assertSize(ast, 1)
+        self.assertToken(ast(0), 'Paragraph', size=1)
+        self.assertToken(ast(0,0), 'FloatReference', size=0, label='dummy', filename=None)
+
+    def testNonLocalReference(self):
+        ast = self.tokenize('[!ref](foo_bar.md#dummy)')
+        self.assertSize(ast, 1)
+        self.assertToken(ast(0), 'Paragraph', size=1)
+        self.assertToken(ast(0,0), 'FloatReference', size=0, label='dummy', filename='foo_bar.md')
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)

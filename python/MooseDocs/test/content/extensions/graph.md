@@ -13,3 +13,11 @@
                       'title':'January 2016 White Elephant Weather Station'}
 
 The data in [white-elephant] is from a weather station in Idaho.
+
+Graph: [!ref](white-elephant)
+
+Idaho Flag: [!ref](media.md#idaho-flag)
+
+Table: [!ref](table.md#float-table)
+
+Algorithm: [!ref](algorithm.md#testalgo)
