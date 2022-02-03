@@ -9,18 +9,18 @@
 
 #pragma once
 
-#include "INSFVElementalKernel.h"
+#include "INSFVFDataKernel.h"
 
 /**
  * Imposes a friction force on the momentum equation in porous media in Rhie-Chow contexts
  */
-class PINSFVMomentumFriction : public INSFVElementalKernel
+class PINSFVMomentumFriction : public INSFVFDataKernel
 {
 public:
   static InputParameters validParams();
   PINSFVMomentumFriction(const InputParameters & params);
 
-  using INSFVElementalKernel::gatherRCData;
+  using INSFVFDataKernel::gatherRCData;
   void gatherRCData(const Elem &) override;
 
 protected:

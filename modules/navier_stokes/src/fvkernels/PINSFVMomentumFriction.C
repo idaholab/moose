@@ -15,7 +15,7 @@ registerMooseObject("NavierStokesApp", PINSFVMomentumFriction);
 InputParameters
 PINSFVMomentumFriction::validParams()
 {
-  InputParameters params = INSFVElementalKernel::validParams();
+  InputParameters params = INSFVFDataKernel::validParams();
   params.addClassDescription(
       "Computes a friction force term on fluid in porous media in the "
       "Navier Stokes i-th momentum equation in Rhie-Chow (incompressible) contexts.");
@@ -28,7 +28,7 @@ PINSFVMomentumFriction::validParams()
 }
 
 PINSFVMomentumFriction::PINSFVMomentumFriction(const InputParameters & params)
-  : INSFVElementalKernel(params),
+  : INSFVFDataKernel(params),
     _cL(isParamValid("Darcy_name") ? &getFunctor<ADRealVectorValue>("Darcy_name") : nullptr),
     _cQ(isParamValid("Forchheimer_name") ? &getFunctor<ADRealVectorValue>("Forchheimer_name")
                                          : nullptr),
@@ -48,11 +48,9 @@ PINSFVMomentumFriction::gatherRCData(const Elem & elem)
   const auto elem_arg = makeElemArg(&elem);
 
   if (_use_Darcy_friction_model)
-    friction_term +=
-        (*_cL)(elem_arg)(_index)*_rho(elem_arg) * _u_functor(elem_arg) / _eps(elem_arg);
+    friction_term += (*_cL)(elem_arg)(_index)*_rho(elem_arg) / _eps(elem_arg);
   if (_use_Forchheimer_friction_model)
-    friction_term +=
-        (*_cQ)(elem_arg)(_index)*_rho(elem_arg) * _u_functor(elem_arg) / _eps(elem_arg);
+    friction_term += (*_cQ)(elem_arg)(_index)*_rho(elem_arg) / _eps(elem_arg);
 
-  _rc_uo.addToB(&elem, _index, friction_term);
+  _rc_uo.addToF(&elem, _index, friction_term * _assembly.elementVolume(&elem));
 }

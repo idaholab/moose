@@ -58,6 +58,8 @@ public:
    */
   void addToA(const libMesh::Elem * elem, unsigned int component, const ADReal & value);
 
+  void addToF(const libMesh::Elem * elem, unsigned int component, const ADReal & value);
+
   /**
    * API that momentum residual objects that have body forces call
    * @param The element we are adding 'B' data for
@@ -82,6 +84,12 @@ public:
    */
   void hasBodyForces(const std::set<SubdomainID> & sub_ids);
 
+  /**
+   * An API for communicating to the user object that body forces including velocity, like friction,
+   * exist on the provided \p sub_ids
+   */
+  void hasFData(const std::set<SubdomainID> & sub_ids);
+
   void initialSetup() override;
   void residualSetup() override;
   void meshChanged() override;
@@ -105,6 +113,12 @@ protected:
    * Whether body forces are present on any portion of this user-object's domain
    */
   bool hasBodyForces() const { return !_sub_ids_with_body_forces.empty(); }
+
+  /**
+   * Whether body forces including velocity, like friction,  are present on any portion of this
+   * user-object's domain
+   */
+  bool hasFData() const { return !_sub_ids_with_f_data.empty(); }
 
   /**
    * perform the setup of this object
@@ -159,21 +173,33 @@ protected:
   /// A map from element IDs to 'a' coefficient data
   std::unordered_map<dof_id_type, libMesh::VectorValue<ADReal>> _a;
 
+  typedef CellCenteredMapFunctor<libMesh::VectorValue<ADReal>,
+                                 std::unordered_map<dof_id_type, libMesh::VectorValue<ADReal>>>
+      MapFunctor;
+
   /// A map from element IDs to 'B' data. After populating the map, this object can be evaluated at
   /// both element and face centers
-  CellCenteredMapFunctor<libMesh::VectorValue<ADReal>,
-                         std::unordered_map<dof_id_type, libMesh::VectorValue<ADReal>>>
-      _b;
+  MapFunctor _b;
 
   /// The result of one interpolation and reconstruction of the 'B' data (built using call to
   /// Moose::FV::interpolateReconstruct). After construction, this object can be evaluated at both
   /// element and face centers
-  CellCenteredMapFunctor<libMesh::VectorValue<ADReal>,
-                         std::unordered_map<dof_id_type, libMesh::VectorValue<ADReal>>>
-      _b2;
+  MapFunctor _b2;
+
+  /// A map from element IDs to 'F' data. After populating the map, this object can be evaluated at
+  /// both element and face centers
+  MapFunctor _f;
+
+  /// The result of one interpolation and reconstruction of the 'F' data (built using call to
+  /// Moose::FV::interpolateReconstruct). After construction, this object can be evaluated at both
+  /// element and face centers
+  MapFunctor _f2;
 
   /// The subdomains that have body force residual objects
   std::set<SubdomainID> _sub_ids_with_body_forces;
+
+  /// The subdomains that have body force residual objects that include velocity, e.g. friction
+  std::set<SubdomainID> _sub_ids_with_f_data;
 
   /// Whether we have performed our initial setup. Ordinarily we would do this in initialSetup but
   /// there are wonky things that happen in other objects initialSetup that affect us, like how
@@ -188,21 +214,24 @@ private:
   void finalizeAData();
 
   /**
-   * Performs the first and second overbar operations on 'B', e.g. one interpolation and one
+   * Performs the first and second overbar operations on 'B' or 'F', e.g. one interpolation and one
    * reconstruction
    */
-  void computeFirstAndSecondOverBars();
+  void computeFirstAndSecondOverBars(MapFunctor & foo0, MapFunctor & foo2, bool interpolate);
 
   /**
-   * Applies the interpolated and reconstructed 'B' data to the momentum residuals
+   * Applies the interpolated and reconstructed 'B' or 'F' data to the momentum residuals
    */
-  void applyBData();
+  void applyFooData(bool is_b_data);
 
   /**
-   * Pushes and pulls 'B' data between processes such that each process has all the 'B'
-   * data necessary to construct any requested Rhie-Chow velocity
+   * Pushes and pulls 'B' or 'F' data between processes such that each process has all the 'B' or
+   * 'F' data necessary to construct any requested Rhie-Chow velocity
    */
-  void finalizeBData();
+  void finalizeInterpolatedData(MapFunctor & foo0,
+                                MapFunctor & foo2,
+                                const std::set<SubdomainID> & foo_sub_ids,
+                                bool interpolate);
 
   /// The velocity variable numbers
   std::vector<unsigned int> _var_numbers;
@@ -219,6 +248,8 @@ private:
   /// If this is true, then interpolation and reconstruction operations will not be performed on the
   /// body forces
   const bool _standard_body_forces;
+  const bool _standard_f_data;
+  const bool _add_f_to_a;
 
   /**
    * @name Body Force Component Functors
@@ -252,6 +283,8 @@ private:
   /// Mutex that prevents multiple threads from saving into the 'B' data at the same time
   Threads::spin_mutex _b_mutex;
 
+  Threads::spin_mutex _f_mutex;
+
   /// A unity functor used in the epsilon virtual method
   const Moose::ConstantFunctor<ADReal> _unity_functor{1};
 };
@@ -272,6 +305,17 @@ INSFVRhieChowInterpolator::addToA(const Elem * const elem,
     _elements_to_push_pull.insert(elem);
 
   _a[elem->id()](component) += value;
+}
+
+inline void
+INSFVRhieChowInterpolator::addToF(const Elem * const elem,
+                                  const unsigned int component,
+                                  const ADReal & value)
+{
+  mooseAssert(elem->processor_id() == this->processor_id(), "Sources should be local");
+
+  Threads::spin_mutex::scoped_lock lock(_f_mutex);
+  _f[elem->id()](component) += value;
 }
 
 inline void
