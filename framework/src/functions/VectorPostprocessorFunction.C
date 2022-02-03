@@ -11,8 +11,6 @@
 
 registerMooseObject("MooseApp", VectorPostprocessorFunction);
 
-defineLegacyParams(VectorPostprocessorFunction);
-
 InputParameters
 VectorPostprocessorFunction::validParams()
 {
@@ -27,7 +25,7 @@ VectorPostprocessorFunction::validParams()
                                        "ordinate (function values) of the sampled "
                                        "function");
 
-  MooseEnum component("x=0 y=1 z=2 time=3 0=4 1=5 2=6", "time");
+  MooseEnum component("x=0 y=1 z=2 time=3", "time");
   params.addParam<MooseEnum>(
       "component",
       component,
@@ -46,18 +44,10 @@ VectorPostprocessorFunction::VectorPostprocessorFunction(const InputParameters &
                                                  getParam<std::string>("argument_column"))),
     _value_column(getVectorPostprocessorValue("vectorpostprocessor_name",
                                               getParam<std::string>("value_column"))),
-    _deprecated("0 1 2 3"),
-    _component(getParam<MooseEnum>("component") > 3 ? _deprecated
-                                                    : getParam<MooseEnum>("component"))
+    _component(getParam<MooseEnum>("component")),
+    _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
+    _last_update({libMesh::invalid_uint, libMesh::invalid_uint})
 {
-  if (&_component == &_deprecated) // are they the same object
-  {
-    paramWarning("component",
-                 "Using an index (0, 1, 2) for the 'component' parameter is deprecated, please use "
-                 "'x', 'y', or 'z'.");
-    _deprecated = getParam<MooseEnum>("component") - 4;
-  }
-
   try
   {
     _linear_interp = std::make_unique<LinearInterpolation>(_argument_column, _value_column);
@@ -85,16 +75,17 @@ T
 VectorPostprocessorFunction::valueInternal(const T & t, const P & p) const
 {
   if (_argument_column.empty())
+    return 0.0;
+
+  const auto now =
+      std::make_pair(_fe_problem.nNonlinearIterations(), _fe_problem.nLinearIterations());
+
+  if (now != _last_update)
   {
-    std::vector<Real> dummy{0};
-    _linear_interp->setData(dummy, dummy);
-  }
-  else
-  {
-    // TODO: figure out a way to only reinitialize the interpolation only once per ...linear
-    // iteration?
     _linear_interp->setData(_argument_column, _value_column);
+    _last_update = now;
   }
+
   const T x = _component == 3 ? t : p(_component);
   return _linear_interp->sample(x);
 }

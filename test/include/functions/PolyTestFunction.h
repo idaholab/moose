@@ -18,6 +18,7 @@ public:
 
   PolyTestFunction(const InputParameters & parameters);
 
+  using Function::value;
   virtual Real value(Real t, const Point & p) const override;
 
   const std::vector<Real> _coeffs;
