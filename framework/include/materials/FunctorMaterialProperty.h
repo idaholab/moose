@@ -110,7 +110,8 @@ FunctorMaterialPropertyImpl<T>::setFunctor(const MooseMesh & mesh,
                                            const std::set<SubdomainID> & block_ids,
                                            PolymorphicLambda my_lammy)
 {
-  auto add_lammy = [this, my_lammy](const SubdomainID block_id) {
+  auto add_lammy = [this, my_lammy](const SubdomainID block_id)
+  {
     auto pr = _elem_functor.emplace(block_id, my_lammy);
     if (!pr.second)
       mooseError("No insertion for the functor material property '",

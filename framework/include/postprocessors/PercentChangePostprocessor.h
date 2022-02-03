@@ -34,4 +34,3 @@ public:
 protected:
   const PostprocessorValue &_postprocessor, &_postprocessor_old;
 };
-

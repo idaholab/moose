@@ -162,9 +162,10 @@ RayTracingMeshOutput::buildIDMap()
   std::unordered_map<processor_id_type, std::set<RayID>> pid_received_ids;
   // Take the required nodes for each Ray and determine on processor 0 the global maximum
   // nodes needed to represent each Ray
-  const auto append_global_max = [&global_needed_nodes, &pid_received_ids](
-                                     processor_id_type pid,
-                                     const std::vector<std::pair<RayID, dof_id_type>> & pairs) {
+  const auto append_global_max =
+      [&global_needed_nodes, &pid_received_ids](
+          processor_id_type pid, const std::vector<std::pair<RayID, dof_id_type>> & pairs)
+  {
     auto & pid_received_entry = pid_received_ids[pid];
     for (const auto & id_max_pair : pairs)
     {
@@ -225,15 +226,16 @@ RayTracingMeshOutput::buildIDMap()
   // Take the starting ID information from processor 0 and store it locally
   const auto append_ids =
       [&](processor_id_type,
-          const std::vector<std::tuple<RayID, dof_id_type, dof_id_type>> & tuples) {
-        for (const auto & tuple : tuples)
-        {
-          const RayID ray_id = std::get<0>(tuple);
-          const dof_id_type node_id = std::get<1>(tuple);
-          const dof_id_type elem_id = std::get<2>(tuple);
-          _ray_starting_id_map.emplace(ray_id, std::make_pair(node_id, elem_id));
-        }
-      };
+          const std::vector<std::tuple<RayID, dof_id_type, dof_id_type>> & tuples)
+  {
+    for (const auto & tuple : tuples)
+    {
+      const RayID ray_id = std::get<0>(tuple);
+      const dof_id_type node_id = std::get<1>(tuple);
+      const dof_id_type elem_id = std::get<2>(tuple);
+      _ray_starting_id_map.emplace(ray_id, std::make_pair(node_id, elem_id));
+    }
+  };
 
   _ray_starting_id_map.clear();
   Parallel::push_parallel_vector_data(comm(), send_ids, append_ids);
@@ -405,19 +407,20 @@ RayTracingMeshOutput::buildSegmentMesh()
   std::unordered_map<processor_id_type, std::vector<dof_id_type>> confirm_node_owners_sends;
   auto decide_node_owners_functor =
       [this, &confirm_node_owners_sends](processor_id_type pid,
-                                         const std::vector<dof_id_type> & incoming_node_ids) {
-        auto & confirm_pid = confirm_node_owners_sends[pid];
-        for (const auto & node_id : incoming_node_ids)
-        {
-          Node * node = _segment_mesh->query_node_ptr(node_id);
-          if (node)
-          {
-            mooseAssert(!node->valid_processor_id(), "Should be invalid");
-            node->processor_id() = std::min(pid, processor_id());
-            confirm_pid.push_back(node_id);
-          }
-        }
-      };
+                                         const std::vector<dof_id_type> & incoming_node_ids)
+  {
+    auto & confirm_pid = confirm_node_owners_sends[pid];
+    for (const auto & node_id : incoming_node_ids)
+    {
+      Node * node = _segment_mesh->query_node_ptr(node_id);
+      if (node)
+      {
+        mooseAssert(!node->valid_processor_id(), "Should be invalid");
+        node->processor_id() = std::min(pid, processor_id());
+        confirm_pid.push_back(node_id);
+      }
+    }
+  };
 
   // Ship the nodes that need owners for and pick an owner when we receive
   Parallel::push_parallel_vector_data(

@@ -178,7 +178,8 @@ ComputeFrictionalForceLMMechanicalContact::communicateVelocities()
   const auto & lm_mesh = _mesh.getMesh();
 
   auto action_functor = [this, &lm_mesh](const processor_id_type libmesh_dbg_var(pid),
-                                         const std::vector<Datum> & sent_data) {
+                                         const std::vector<Datum> & sent_data)
+  {
     mooseAssert(pid != this->processor_id(), "We do not send messages to ourself here");
     for (auto & pr : sent_data)
     {

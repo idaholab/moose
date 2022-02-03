@@ -25,20 +25,21 @@ MortarConstraintBase::validParams()
 
   // Whether on a displaced or undisplaced mesh, coupling ghosting will only happen for
   // cross-interface elements
-  params.addRelationshipManager(
-      "AugmentSparsityOnInterface",
-      Moose::RelationshipManagerType::COUPLING,
-      [](const InputParameters & obj_params, InputParameters & rm_params) {
-        rm_params.set<bool>("use_displaced_mesh") = obj_params.get<bool>("use_displaced_mesh");
-        rm_params.set<BoundaryName>("secondary_boundary") =
-            obj_params.get<BoundaryName>("secondary_boundary");
-        rm_params.set<BoundaryName>("primary_boundary") =
-            obj_params.get<BoundaryName>("primary_boundary");
-        rm_params.set<SubdomainName>("secondary_subdomain") =
-            obj_params.get<SubdomainName>("secondary_subdomain");
-        rm_params.set<SubdomainName>("primary_subdomain") =
-            obj_params.get<SubdomainName>("primary_subdomain");
-      });
+  params.addRelationshipManager("AugmentSparsityOnInterface",
+                                Moose::RelationshipManagerType::COUPLING,
+                                [](const InputParameters & obj_params, InputParameters & rm_params)
+                                {
+                                  rm_params.set<bool>("use_displaced_mesh") =
+                                      obj_params.get<bool>("use_displaced_mesh");
+                                  rm_params.set<BoundaryName>("secondary_boundary") =
+                                      obj_params.get<BoundaryName>("secondary_boundary");
+                                  rm_params.set<BoundaryName>("primary_boundary") =
+                                      obj_params.get<BoundaryName>("primary_boundary");
+                                  rm_params.set<SubdomainName>("secondary_subdomain") =
+                                      obj_params.get<SubdomainName>("secondary_subdomain");
+                                  rm_params.set<SubdomainName>("primary_subdomain") =
+                                      obj_params.get<SubdomainName>("primary_subdomain");
+                                });
 
   params.addParam<VariableName>("secondary_variable", "Primal variable on secondary surface.");
   params.addParam<VariableName>(

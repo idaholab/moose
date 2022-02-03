@@ -33,4 +33,3 @@ protected:
   /// The value being set for the current node/element
   const Real & _value;
 };
-

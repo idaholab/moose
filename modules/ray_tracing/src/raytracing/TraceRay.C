@@ -739,11 +739,11 @@ TraceRay::applyOnExternalBoundary(const std::shared_ptr<Ray> & ray)
   {
     const auto & neighbors = getNeighbors(_current_elem, _intersected_extrema, _intersection_point);
     debugRay("  Found ", neighbors.size(), " vertex/edge neighbors (including self)");
-    traceAssert(
-        std::count_if(neighbors.begin(),
-                      neighbors.end(),
-                      [this](const NeighborInfo & ni) { return ni._elem == _current_elem; }),
-        "_current_elem not in neighbors");
+    traceAssert(std::count_if(neighbors.begin(),
+                              neighbors.end(),
+                              [this](const NeighborInfo & ni)
+                              { return ni._elem == _current_elem; }),
+                "_current_elem not in neighbors");
 
     for (const auto & neighbor_info : neighbors)
     {
@@ -812,9 +812,8 @@ TraceRay::applyOnInternalBoundary(const std::shared_ptr<Ray> & ray)
     debugRay("  Found ", neighbors.size(), " vertex/edge neighbors");
     traceAssert(std::count_if(neighbors.begin(),
                               neighbors.end(),
-                              [this](const NeighborInfo & ni) {
-                                return ni._elem == _current_elem || ni._elem == _last_elem;
-                              }) == 2,
+                              [this](const NeighborInfo & ni)
+                              { return ni._elem == _current_elem || ni._elem == _last_elem; }) == 2,
                 "_current_elem/_last_elem not in neighbors");
 
     for (const auto & neighbor_info : neighbors)

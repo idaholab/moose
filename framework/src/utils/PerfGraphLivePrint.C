@@ -316,21 +316,25 @@ PerfGraphLivePrint::start()
     // can occur - but the predicate here keeps us from doing anything in that case.
     // This will either wait until 1 second has passed, the signal is sent, _or_ a spurious
     // wakeup happens to find that there is work to do.
-    _perf_graph._finished_section.wait_for(lock, std::chrono::duration<Real>(_time_limit), [this] {
-      // Get destructing first so that the execution_list will be in sync
-      this->_currently_destructing = _perf_graph._destructing;
+    _perf_graph._finished_section.wait_for(
+        lock,
+        std::chrono::duration<Real>(_time_limit),
+        [this]
+        {
+          // Get destructing first so that the execution_list will be in sync
+          this->_currently_destructing = _perf_graph._destructing;
 
-      // The end will be one past the last
-      this->_current_execution_list_end =
-          _perf_graph._execution_list_end.load(std::memory_order_relaxed);
+          // The end will be one past the last
+          this->_current_execution_list_end =
+              _perf_graph._execution_list_end.load(std::memory_order_relaxed);
 
-      // Save off the number of things currently printed to the console
-      this->_console_num_printed = _console.numPrinted();
+          // Save off the number of things currently printed to the console
+          this->_console_num_printed = _console.numPrinted();
 
-      // If we are destructing or there is new work to do... allow moving on
-      return this->_currently_destructing ||
-             this->_last_execution_list_end != this->_current_execution_list_end;
-    });
+          // If we are destructing or there is new work to do... allow moving on
+          return this->_currently_destructing ||
+                 this->_last_execution_list_end != this->_current_execution_list_end;
+        });
 
     // If the PerfGraph is destructing and we don't have anything left to print - we need to quit
     // Otherwise, if there are still things to print - do it... afterwards, the loop above

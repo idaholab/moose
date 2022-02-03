@@ -40,12 +40,10 @@ PorousFlowSingleComponentFluid::PorousFlowSingleComponentFluid(const InputParame
     _p_unit(getParam<MooseEnum>("pressure_unit").getEnum<PressureUnitEnum>()),
     _pressure_to_Pascals(_p_unit == PressureUnitEnum::Pa ? 1.0 : 1.0E6),
     _time_unit(getParam<MooseEnum>("time_unit").getEnum<TimeUnitEnum>()),
-    _time_to_seconds(_time_unit == TimeUnitEnum::seconds
-                         ? 1.0
-                         : _time_unit == TimeUnitEnum::hours
-                               ? 3600.0
-                               : _time_unit == TimeUnitEnum::days ? 3600.0 * 24
-                                                                  : 3600 * 24 * 365.25),
+    _time_to_seconds(_time_unit == TimeUnitEnum::seconds ? 1.0
+                     : _time_unit == TimeUnitEnum::hours ? 3600.0
+                     : _time_unit == TimeUnitEnum::days  ? 3600.0 * 24
+                                                         : 3600 * 24 * 365.25),
     _compute_rho_mu(getParam<bool>("compute_density_and_viscosity")),
     _compute_internal_energy(getParam<bool>("compute_internal_energy")),
     _compute_enthalpy(getParam<bool>("compute_enthalpy")),

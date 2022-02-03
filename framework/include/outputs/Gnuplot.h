@@ -53,4 +53,3 @@ private:
   /// Desired file extension
   std::string _extension;
 };
-

@@ -62,4 +62,3 @@ private:
   unsigned int _nonlinear_system_number;
   unsigned int _aux_system_number;
 };
-

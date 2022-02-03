@@ -197,21 +197,22 @@ AugmentSparsityOnInterface::operator()(const MeshBase::const_element_iterator & 
   else if (amg)
   {
     auto ghost_mortar_interface_couplings =
-        [this, p, &coupled_elements, null_mat, amg](const Elem * const elem_arg) {
-          // Look up elem_arg in the mortar_interface_coupling data structure.
-          auto bounds = amg->mortarInterfaceCoupling().equal_range(elem_arg->id());
+        [this, p, &coupled_elements, null_mat, amg](const Elem * const elem_arg)
+    {
+      // Look up elem_arg in the mortar_interface_coupling data structure.
+      auto bounds = amg->mortarInterfaceCoupling().equal_range(elem_arg->id());
 
-          for (const auto & pr : as_range(bounds))
-          {
-            auto coupled_elem_id = pr.second;
-            const Elem * coupled_elem = _mesh->elem_ptr(coupled_elem_id);
-            mooseAssert(coupled_elem,
-                        "The coupled element with id " << coupled_elem_id << " doesn't exist!");
+      for (const auto & pr : as_range(bounds))
+      {
+        auto coupled_elem_id = pr.second;
+        const Elem * coupled_elem = _mesh->elem_ptr(coupled_elem_id);
+        mooseAssert(coupled_elem,
+                    "The coupled element with id " << coupled_elem_id << " doesn't exist!");
 
-            if (coupled_elem->processor_id() != p)
-              coupled_elements.insert(std::make_pair(coupled_elem, null_mat));
-          }
-        };
+        if (coupled_elem->processor_id() != p)
+          coupled_elements.insert(std::make_pair(coupled_elem, null_mat));
+      }
+    };
 
     for (const Elem * const elem : as_range(range_begin, range_end))
     {

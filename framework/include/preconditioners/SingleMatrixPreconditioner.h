@@ -26,4 +26,3 @@ public:
 
   SingleMatrixPreconditioner(const InputParameters & params);
 };
-

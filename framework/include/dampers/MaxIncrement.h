@@ -40,4 +40,3 @@ protected:
    */
   const enum class IncrementTypeEnum { absolute, fractional } _increment_type;
 };
-

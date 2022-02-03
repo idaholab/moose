@@ -31,4 +31,3 @@ protected:
   /// The ExodusII file that is being read
   std::string _mesh_file;
 };
-

@@ -423,7 +423,8 @@ PorousFlowBrineCO2::fugacityCoefficientsLowTemp(const DualReal & pressure,
   const DualReal t15 = std::pow(temperature, 1.5);
 
   // The fugacity coefficients for H2O and CO2
-  auto lnPhi = [V, aCO2, bCO2, t15, this](DualReal a, DualReal b) {
+  auto lnPhi = [V, aCO2, bCO2, t15, this](DualReal a, DualReal b)
+  {
     return std::log(V / (V - bCO2)) + b / (V - bCO2) -
            2.0 * a / (_Rbar * t15 * bCO2) * std::log((V + bCO2) / V) +
            aCO2 * b / (_Rbar * t15 * bCO2 * bCO2) * (std::log((V + bCO2) / V) - bCO2 / (V + bCO2));
@@ -981,7 +982,8 @@ PorousFlowBrineCO2::solveEquilibriumMoleFractionHighTemp(
     };
 
     // Derivative of fy wrt y
-    auto dfy = [mnacl, this](Real A, Real B, Real dA, Real dB) {
+    auto dfy = [mnacl, this](Real A, Real B, Real dA, Real dB)
+    {
       const Real denominator = (1.0 / A - B) * (2.0 * mnacl + _invMh2o) + 2.0 * mnacl * B;
       return 1.0 + _invMh2o * dB / denominator +
              (1.0 - B) * _invMh2o *

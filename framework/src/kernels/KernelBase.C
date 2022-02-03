@@ -51,9 +51,8 @@ KernelBase::validParams()
   // Kernels always couple within their element
   params.addRelationshipManager("ElementSideNeighborLayers",
                                 Moose::RelationshipManagerType::COUPLING,
-                                [](const InputParameters &, InputParameters & rm_params) {
-                                  rm_params.set<unsigned short>("layers") = 0;
-                                });
+                                [](const InputParameters &, InputParameters & rm_params)
+                                { rm_params.set<unsigned short>("layers") = 0; });
   return params;
 }
 

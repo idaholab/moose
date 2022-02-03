@@ -35,4 +35,3 @@ void inverse(const std::vector<std::vector<Real>> & m, std::vector<std::vector<R
  */
 void inverse(std::vector<PetscScalar> & A, unsigned int n);
 }
-

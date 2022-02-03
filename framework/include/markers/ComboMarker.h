@@ -33,4 +33,3 @@ protected:
 
   std::vector<const VariableValue *> _markers;
 };
-

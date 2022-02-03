@@ -21,7 +21,6 @@ public:
 protected:
   virtual ADReal computeQpResidual() override;
 
-
 private:
   const bool & _use_grad;
   const ADVectorVariableValue & _velocity_vector;

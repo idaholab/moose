@@ -57,7 +57,6 @@ public:
                            const int ind);
 
 private:
-
   /// non-negative p factor for use in Matern half-int. \nu = p+(1/2) in terms of general Matern
   unsigned int _p;
 };

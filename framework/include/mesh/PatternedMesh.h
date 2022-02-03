@@ -65,4 +65,3 @@ protected:
   const Real _y_width;
   const Real _z_width;
 };
-

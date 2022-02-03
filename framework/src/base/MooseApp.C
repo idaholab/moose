@@ -2259,9 +2259,8 @@ MooseApp::hasRelationshipManager(const std::string & name) const
 {
   return std::find_if(_relationship_managers.begin(),
                       _relationship_managers.end(),
-                      [&name](const std::shared_ptr<RelationshipManager> & rm) {
-                        return rm->name() == name;
-                      }) != _relationship_managers.end();
+                      [&name](const std::shared_ptr<RelationshipManager> & rm)
+                      { return rm->name() == name; }) != _relationship_managers.end();
 }
 
 namespace

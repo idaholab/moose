@@ -39,31 +39,35 @@ MixingLengthTurbulentViscosityMaterial::MixingLengthTurbulentViscosityMaterial(
     _rho(getFunctor<ADReal>("rho")),
     _total_viscosity(declareFunctorProperty<ADReal>("total_viscosity"))
 {
-  _total_viscosity.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> ADReal {
-    constexpr Real offset = 1e-15; // prevents explosion of sqrt(x) derivative to infinity
-
-    const auto grad_u = _u_vel.gradient(r, t);
-
-    ADReal symmetric_strain_tensor_norm = 2.0 * Utility::pow<2>(grad_u(0));
-    if (_mesh_dimension >= 2)
-    {
-      const auto grad_v = _v_vel->gradient(r, t);
-
-      symmetric_strain_tensor_norm +=
-          2.0 * Utility::pow<2>(grad_v(1)) + Utility::pow<2>(grad_v(0) + grad_u(1));
-      if (_mesh_dimension >= 3)
+  _total_viscosity.setFunctor(
+      _mesh,
+      blockIDs(),
+      [this](const auto & r, const auto & t) -> ADReal
       {
-        const auto grad_w = _w_vel->gradient(r, t);
+        constexpr Real offset = 1e-15; // prevents explosion of sqrt(x) derivative to infinity
 
-        symmetric_strain_tensor_norm += 2.0 * Utility::pow<2>(grad_w(2)) +
-                                        Utility::pow<2>(grad_u(2) + grad_w(0)) +
-                                        Utility::pow<2>(grad_v(2) + grad_w(1));
-      }
-    }
-    symmetric_strain_tensor_norm = std::sqrt(symmetric_strain_tensor_norm + offset);
+        const auto grad_u = _u_vel.gradient(r, t);
 
-    // Return the sum of turbulent viscosity and dynamic viscosity
-    return _mu(r, t) +
-           _rho(r, t) * symmetric_strain_tensor_norm * Utility::pow<2>(_mixing_len(r, t));
-  });
+        ADReal symmetric_strain_tensor_norm = 2.0 * Utility::pow<2>(grad_u(0));
+        if (_mesh_dimension >= 2)
+        {
+          const auto grad_v = _v_vel->gradient(r, t);
+
+          symmetric_strain_tensor_norm +=
+              2.0 * Utility::pow<2>(grad_v(1)) + Utility::pow<2>(grad_v(0) + grad_u(1));
+          if (_mesh_dimension >= 3)
+          {
+            const auto grad_w = _w_vel->gradient(r, t);
+
+            symmetric_strain_tensor_norm += 2.0 * Utility::pow<2>(grad_w(2)) +
+                                            Utility::pow<2>(grad_u(2) + grad_w(0)) +
+                                            Utility::pow<2>(grad_v(2) + grad_w(1));
+          }
+        }
+        symmetric_strain_tensor_norm = std::sqrt(symmetric_strain_tensor_norm + offset);
+
+        // Return the sum of turbulent viscosity and dynamic viscosity
+        return _mu(r, t) +
+               _rho(r, t) * symmetric_strain_tensor_norm * Utility::pow<2>(_mixing_len(r, t));
+      });
 }

@@ -39,4 +39,3 @@ protected:
 
   unsigned int _heaviest_sections;
 };
-

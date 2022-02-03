@@ -112,9 +112,8 @@ VectorPostprocessorContext<T>::finalize()
   ReporterGeneralContext<T>::finalize();
 
   const auto & consumer_modes = this->state().getConsumers();
-  auto func = [](const std::pair<ReporterMode, const MooseObject *> & mode_pair) {
-    return mode_pair.first == REPORTER_MODE_VPP_SCATTER;
-  };
+  auto func = [](const std::pair<ReporterMode, const MooseObject *> & mode_pair)
+  { return mode_pair.first == REPORTER_MODE_VPP_SCATTER; };
   if (std::find_if(consumer_modes.begin(), consumer_modes.end(), func) != consumer_modes.end())
   {
     const T & value = this->state().value();

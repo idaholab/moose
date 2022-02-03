@@ -287,7 +287,8 @@ SONDefinitionFormatter::addParameters(const nlohmann::json & params)
       continue;
 
     // lambda to calculate relative path from the current level to the document root
-    auto backtrack = [](int level) {
+    auto backtrack = [](int level)
+    {
       std::string backtrack_path;
       for (int i = 0; i < level; ++i)
         backtrack_path += "../";

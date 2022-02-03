@@ -166,7 +166,6 @@ protected:
 private:
   /// A reference to the InputParameterWarehouse which is used for access the parameter objects
   InputParameterWarehouse & _input_parameter_warehouse;
-
 };
 
 template <typename T>
@@ -285,4 +284,3 @@ Control::setControllableValueByName(const std::string & tag,
   ControllableParameter helper = getControllableParameterByName(desired);
   helper.set<T>(value);
 }
-

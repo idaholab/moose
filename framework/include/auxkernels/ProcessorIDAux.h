@@ -27,4 +27,3 @@ public:
 protected:
   virtual Real computeValue() override;
 };
-

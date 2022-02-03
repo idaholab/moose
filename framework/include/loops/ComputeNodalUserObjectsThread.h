@@ -33,4 +33,3 @@ public:
 private:
   const TheWarehouse::Query _query;
 };
-

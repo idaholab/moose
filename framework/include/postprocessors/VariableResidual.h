@@ -35,4 +35,3 @@ protected:
   /// The residual of the variable
   Real _var_residual;
 };
-

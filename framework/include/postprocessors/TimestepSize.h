@@ -35,4 +35,3 @@ public:
 protected:
   FEProblemBase & _feproblem;
 };
-

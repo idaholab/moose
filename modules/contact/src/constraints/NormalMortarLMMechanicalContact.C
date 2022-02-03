@@ -40,24 +40,22 @@ NormalMortarLMMechanicalContact::NormalMortarLMMechanicalContact(const InputPara
                           ? &this->_subproblem.getStandardVariable(
                                 _tid, parameters.getMooseType("secondary_disp_y"))
                           : nullptr),
-    _primary_disp_y(isParamValid("primary_disp_y")
-                        ? &this->_subproblem.getStandardVariable(
-                              _tid, parameters.getMooseType("primary_disp_y"))
-                        : isParamValid("secondary_disp_y")
-                              ? &this->_subproblem.getStandardVariable(
-                                    _tid, parameters.getMooseType("secondary_disp_y"))
-                              : nullptr),
+    _primary_disp_y(
+        isParamValid("primary_disp_y") ? &this->_subproblem.getStandardVariable(
+                                             _tid, parameters.getMooseType("primary_disp_y"))
+        : isParamValid("secondary_disp_y") ? &this->_subproblem.getStandardVariable(
+                                                 _tid, parameters.getMooseType("secondary_disp_y"))
+                                           : nullptr),
     _secondary_disp_z(isParamValid("secondary_disp_z")
                           ? &this->_subproblem.getStandardVariable(
                                 _tid, parameters.getMooseType("secondary_disp_z"))
                           : nullptr),
-    _primary_disp_z(isParamValid("primary_disp_z")
-                        ? &this->_subproblem.getStandardVariable(
-                              _tid, parameters.getMooseType("primary_disp_z"))
-                        : isParamValid("secondary_disp_z")
-                              ? &this->_subproblem.getStandardVariable(
-                                    _tid, parameters.getMooseType("secondary_disp_z"))
-                              : nullptr),
+    _primary_disp_z(
+        isParamValid("primary_disp_z") ? &this->_subproblem.getStandardVariable(
+                                             _tid, parameters.getMooseType("primary_disp_z"))
+        : isParamValid("secondary_disp_z") ? &this->_subproblem.getStandardVariable(
+                                                 _tid, parameters.getMooseType("secondary_disp_z"))
+                                           : nullptr),
     _computing_gap_dependence(false),
     _secondary_disp_y_sln(nullptr),
     _primary_disp_y_sln(nullptr),

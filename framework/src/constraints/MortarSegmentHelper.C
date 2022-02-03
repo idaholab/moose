@@ -104,9 +104,8 @@ MortarSegmentHelper::isDisjoint(const std::vector<Point> & poly) const
 
     // If more optimization needed, could store these values for later
     // Check if point is to the left of (or on) clip_edge
-    auto is_inside = [&edg, cp](Point & pt, Real tol) {
-      return pt(0) * edg(1) - pt(1) * edg(0) + cp < -tol;
-    };
+    auto is_inside = [&edg, cp](Point & pt, Real tol)
+    { return pt(0) * edg(1) - pt(1) * edg(0) + cp < -tol; };
 
     bool all_outside = true;
     for (auto pt : poly)
@@ -174,9 +173,8 @@ MortarSegmentHelper::clipPoly(const std::vector<Point> & primary_nodes) const
      * essentially on top of each other (common when meshes match across interface)
      * since finding intersection is ill-conditioned in this case.
      */
-    auto is_inside = [&edg, cp](const Point & pt, Real tol) {
-      return pt(0) * edg(1) - pt(1) * edg(0) + cp < tol;
-    };
+    auto is_inside = [&edg, cp](const Point & pt, Real tol)
+    { return pt(0) * edg(1) - pt(1) * edg(0) + cp < tol; };
 
     // Loop through edges of target polygon (with previous clippings already included)
     for (auto j : index_range(input_poly))

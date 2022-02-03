@@ -38,4 +38,3 @@ protected:
 
   const bool _warnings;
 };
-

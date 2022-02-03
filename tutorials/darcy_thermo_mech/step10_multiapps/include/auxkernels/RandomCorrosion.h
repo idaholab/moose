@@ -71,4 +71,3 @@ private:
   /// System temperature, used for creating a temperature dependence and corrosion
   const PostprocessorValue & _temperature;
 };
-

@@ -41,4 +41,3 @@ protected:
 
   const std::vector<std::vector<MooseVariableFEBase *>> & _aux_vars;
 };
-

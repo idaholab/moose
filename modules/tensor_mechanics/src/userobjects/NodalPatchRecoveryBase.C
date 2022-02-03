@@ -30,9 +30,8 @@ NodalPatchRecoveryBase::validParams()
 
   params.addRelationshipManager("ElementSideNeighborLayers",
                                 Moose::RelationshipManagerType::ALGEBRAIC,
-                                [](const InputParameters &, InputParameters & rm_params) {
-                                  rm_params.set<unsigned short>("layers") = 2;
-                                });
+                                [](const InputParameters &, InputParameters & rm_params)
+                                { rm_params.set<unsigned short>("layers") = 2; });
 
   params.addParamNamesToGroup("patch_polynomial_order", "Advanced");
 
@@ -133,7 +132,8 @@ NodalPatchRecoveryBase::finalize()
   // Answer queries received from other processors
   auto gather_data = [this](const processor_id_type /*pid*/,
                             const std::vector<dof_id_type> & elem_ids,
-                            std::vector<std::vector<Real>> & data_to_fill) {
+                            std::vector<std::vector<Real>> & data_to_fill)
+  {
     data_to_fill.resize(elem_ids.size());
     for (const auto i : index_range(elem_ids))
     {
@@ -153,7 +153,8 @@ NodalPatchRecoveryBase::finalize()
   // Gather answers received from other processors
   auto act_on_data = [this](const processor_id_type /*pid*/,
                             const std::vector<dof_id_type> & elem_ids,
-                            const std::vector<std::vector<Real>> & filled_data) {
+                            const std::vector<std::vector<Real>> & filled_data)
+  {
     for (const auto i : index_range(elem_ids))
     {
       const auto elem_id = elem_ids[i];

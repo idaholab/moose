@@ -40,9 +40,8 @@ PolycrystalUserObjectBase::validParams()
       "ElementSideNeighborLayers",
       Moose::RelationshipManagerType::GEOMETRIC,
 
-      [](const InputParameters & /*obj_params*/, InputParameters & rm_params) {
-        rm_params.set<unsigned short>("layers") = 2;
-      }
+      [](const InputParameters & /*obj_params*/, InputParameters & rm_params)
+      { rm_params.set<unsigned short>("layers") = 2; }
 
   );
 

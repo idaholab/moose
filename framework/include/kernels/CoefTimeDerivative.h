@@ -33,4 +33,3 @@ protected:
   /// The coefficient the time derivative is multiplied with
   Real _coef;
 };
-

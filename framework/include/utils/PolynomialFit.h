@@ -41,4 +41,3 @@ protected:
   /// File number
   static int _file_number;
 };
-

@@ -900,7 +900,8 @@ MooseVariableFV<OutputType>::adGradSln(const Elem * const elem, const bool corre
                                  const FaceInfo * const fi,
                                  const Point & surface_vector,
                                  Real coord,
-                                 const bool elem_has_info) {
+                                 const bool elem_has_info)
+    {
       mooseAssert(fi, "We need a FaceInfo for this action_functor");
       mooseAssert(elem == &functor_elem,
                   "Just a sanity check that the element being passed in is the one we passed out.");

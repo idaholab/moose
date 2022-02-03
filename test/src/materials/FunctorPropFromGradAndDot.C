@@ -33,14 +33,16 @@ FunctorPropFromGradAndDot::FunctorPropFromGradAndDot(const InputParameters & par
         getParam<MaterialPropertyName>("root_functor_prop_name") + "_dot")),
     _functor(getFunctor<ADReal>("functor"))
 {
-  _value_prop.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> ADReal {
-    return _functor(r, t);
-  });
-  _grad_prop.setFunctor(
-      _mesh, blockIDs(), [this](const auto & r, const auto & t) -> ADRealVectorValue {
-        return _functor.gradient(r, t);
-      });
-  _dot_prop.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> ADReal {
-    return _functor.dot(r, t);
-  });
+  _value_prop.setFunctor(_mesh,
+                         blockIDs(),
+                         [this](const auto & r, const auto & t) -> ADReal
+                         { return _functor(r, t); });
+  _grad_prop.setFunctor(_mesh,
+                        blockIDs(),
+                        [this](const auto & r, const auto & t) -> ADRealVectorValue
+                        { return _functor.gradient(r, t); });
+  _dot_prop.setFunctor(_mesh,
+                       blockIDs(),
+                       [this](const auto & r, const auto & t) -> ADReal
+                       { return _functor.dot(r, t); });
 }

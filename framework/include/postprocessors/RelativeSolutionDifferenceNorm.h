@@ -50,4 +50,3 @@ protected:
   /// Transient executioner
   Transient * _trex;
 };
-

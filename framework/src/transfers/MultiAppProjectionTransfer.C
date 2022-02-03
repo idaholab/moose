@@ -346,8 +346,8 @@ MultiAppProjectionTransfer::execute()
   std::map<processor_id_type, std::vector<Point>> incoming_qps;
   if (!_qps_cached)
   {
-    auto qps_action_functor = [&incoming_qps](processor_id_type pid,
-                                              const std::vector<Point> & qps) {
+    auto qps_action_functor = [&incoming_qps](processor_id_type pid, const std::vector<Point> & qps)
+    {
       // Quadrature points from processor 'pid'
       auto & incoming_qps_from_pid = incoming_qps[pid];
       // Store data for late use
@@ -397,13 +397,14 @@ MultiAppProjectionTransfer::execute()
 
   auto evals_action_functor =
       [&incoming_evals_ids](processor_id_type pid,
-                            const std::vector<std::pair<Real, unsigned int>> & evals) {
-        // evals for processor 'pid'
-        auto & incoming_evals_ids_for_pid = incoming_evals_ids[pid];
-        // Copy evals for late use
-        incoming_evals_ids_for_pid.reserve(incoming_evals_ids_for_pid.size() + evals.size());
-        std::copy(evals.begin(), evals.end(), std::back_inserter(incoming_evals_ids_for_pid));
-      };
+                            const std::vector<std::pair<Real, unsigned int>> & evals)
+  {
+    // evals for processor 'pid'
+    auto & incoming_evals_ids_for_pid = incoming_evals_ids[pid];
+    // Copy evals for late use
+    incoming_evals_ids_for_pid.reserve(incoming_evals_ids_for_pid.size() + evals.size());
+    std::copy(evals.begin(), evals.end(), std::back_inserter(incoming_evals_ids_for_pid));
+  };
 
   Parallel::push_parallel_vector_data(comm(), outgoing_evals_ids, evals_action_functor);
 

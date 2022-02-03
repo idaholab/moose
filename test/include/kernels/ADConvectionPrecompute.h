@@ -23,5 +23,4 @@ protected:
 
 private:
   RealVectorValue _velocity;
-
 };

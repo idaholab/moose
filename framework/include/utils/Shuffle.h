@@ -207,8 +207,9 @@ MooseUtils::swap(std::vector<T> & data,
 
     // Collect the values needed by this processor
     std::unordered_map<processor_id_type, std::vector<T>> returns;
-    auto return_functor = [&data, &returns](processor_id_type pid,
-                                            const std::vector<std::size_t> & indices) {
+    auto return_functor =
+        [&data, &returns](processor_id_type pid, const std::vector<std::size_t> & indices)
+    {
       auto & returns_pid = returns[pid];
       for (auto idx : indices)
         returns_pid.push_back(data[idx]);
@@ -217,9 +218,8 @@ MooseUtils::swap(std::vector<T> & data,
 
     // Receive needed values from the others processors
     std::vector<T> incoming;
-    auto recv_functor = [&incoming](processor_id_type /*pid*/, const std::vector<T> & values) {
-      incoming = values;
-    };
+    auto recv_functor = [&incoming](processor_id_type /*pid*/, const std::vector<T> & values)
+    { incoming = values; };
     Parallel::push_parallel_vector_data(*comm_ptr, returns, recv_functor);
 
     if (idx0_rank == rank && idx1_rank == rank)
@@ -297,8 +297,9 @@ MooseUtils::shuffle(std::vector<T> & data,
 
       // Collect the values needed by this processor
       std::unordered_map<processor_id_type, std::vector<T>> returns;
-      auto return_functor = [&data, &returns](processor_id_type pid,
-                                              const std::vector<std::size_t> & indices) {
+      auto return_functor =
+          [&data, &returns](processor_id_type pid, const std::vector<std::size_t> & indices)
+      {
         auto & returns_pid = returns[pid];
         for (auto idx : indices)
           returns_pid.push_back(data[idx]);
@@ -307,9 +308,8 @@ MooseUtils::shuffle(std::vector<T> & data,
 
       // Receive needed values from the others processors
       std::vector<T> incoming;
-      auto recv_functor = [&incoming](processor_id_type /*pid*/, const std::vector<T> & values) {
-        incoming = values;
-      };
+      auto recv_functor = [&incoming](processor_id_type /*pid*/, const std::vector<T> & values)
+      { incoming = values; };
       Parallel::push_parallel_vector_data(*comm_ptr, returns, recv_functor);
 
       if (idx0_rank == rank && idx1_rank == rank)
@@ -401,16 +401,18 @@ MooseUtils::resample(const std::vector<T> & data,
     std::unordered_map<processor_id_type, std::vector<std::pair<T, std::size_t>>> returns;
     auto return_functor =
         [&data, &returns](processor_id_type pid,
-                          const std::vector<std::pair<std::size_t, std::size_t>> & indices) {
-          auto & returns_pid = returns[pid];
-          for (const auto & idx : indices)
-            returns_pid.emplace_back(data[idx.first], idx.second);
-        };
+                          const std::vector<std::pair<std::size_t, std::size_t>> & indices)
+    {
+      auto & returns_pid = returns[pid];
+      for (const auto & idx : indices)
+        returns_pid.emplace_back(data[idx.first], idx.second);
+    };
     Parallel::push_parallel_vector_data(*comm_ptr, needs, return_functor);
 
     // Receive resampled values from the various processors
-    auto recv_functor = [&replicate](processor_id_type,
-                                     const std::vector<std::pair<T, std::size_t>> & values) {
+    auto recv_functor =
+        [&replicate](processor_id_type, const std::vector<std::pair<T, std::size_t>> & values)
+    {
       for (const auto & value : values)
         replicate[value.second] = value.first;
     };
@@ -477,8 +479,9 @@ MooseUtils::resampleWithFunctor(const std::vector<T> & data,
       generator.randl(seed_index, 0, n_global);
 
     // Send the indices to the appropriate rank and have the calculator do its work
-    auto act_functor = [&functor, &data](processor_id_type /*pid*/,
-                                         const std::vector<std::size_t> & indices) {
+    auto act_functor =
+        [&functor, &data](processor_id_type /*pid*/, const std::vector<std::size_t> & indices)
+    {
       for (const auto & idx : indices)
         functor(data[idx]);
     };

@@ -66,4 +66,3 @@ private:
   THREAD_ID _thread_id;
   bool _predicate;
 };
-

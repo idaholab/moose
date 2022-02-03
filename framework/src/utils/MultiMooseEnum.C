@@ -60,25 +60,28 @@ MultiMooseEnum::operator!=(const MultiMooseEnum & value) const
 bool
 MultiMooseEnum::contains(const std::string & value) const
 {
-  return std::find_if(_current.begin(), _current.end(), [&value](const MooseEnumItem & item) {
-           return item == value;
-         }) != _current.end();
+  return std::find_if(_current.begin(),
+                      _current.end(),
+                      [&value](const MooseEnumItem & item)
+                      { return item == value; }) != _current.end();
 }
 
 bool
 MultiMooseEnum::contains(int value) const
 {
-  return std::find_if(_current.begin(), _current.end(), [&value](const MooseEnumItem & item) {
-           return item == value;
-         }) != _current.end();
+  return std::find_if(_current.begin(),
+                      _current.end(),
+                      [&value](const MooseEnumItem & item)
+                      { return item == value; }) != _current.end();
 }
 
 bool
 MultiMooseEnum::contains(unsigned short value) const
 {
-  return std::find_if(_current.begin(), _current.end(), [&value](const MooseEnumItem & item) {
-           return item == value;
-         }) != _current.end();
+  return std::find_if(_current.begin(),
+                      _current.end(),
+                      [&value](const MooseEnumItem & item)
+                      { return item == value; }) != _current.end();
 }
 
 bool
@@ -93,9 +96,10 @@ MultiMooseEnum::contains(const MultiMooseEnum & value) const
 bool
 MultiMooseEnum::contains(const MooseEnumItem & value) const
 {
-  return std::find_if(_current.begin(), _current.end(), [&value](const MooseEnumItem & item) {
-           return item == value;
-         }) != _current.end();
+  return std::find_if(_current.begin(),
+                      _current.end(),
+                      [&value](const MooseEnumItem & item)
+                      { return item == value; }) != _current.end();
 }
 
 MultiMooseEnum &
@@ -158,7 +162,8 @@ MultiMooseEnum::push_back(const std::set<std::string> & names)
   assign(names.begin(), names.end(), true);
 }
 
-const std::string & MultiMooseEnum::operator[](unsigned int i) const
+const std::string &
+MultiMooseEnum::operator[](unsigned int i) const
 {
   mooseAssert(i < _current.size(),
               "Access out of bounds in MultiMooseEnum (i: " << i << " size: " << _current.size()

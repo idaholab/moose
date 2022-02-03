@@ -26,4 +26,3 @@ public:
 
 template <>
 InputParameters validParams<MatDiffusion>();
-

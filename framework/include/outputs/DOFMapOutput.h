@@ -81,4 +81,3 @@ protected:
   /// Reference to the mesh object
   MooseMesh & _mesh;
 };
-

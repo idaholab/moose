@@ -63,4 +63,3 @@ protected:
   /// report peak value for multiple samples in a time step
   const bool _report_peak_value;
 };
-

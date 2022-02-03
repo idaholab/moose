@@ -48,4 +48,3 @@ protected:
   /// Ghosted elems
   libMesh::GhostingFunctor::map_type _ghosted_elems;
 };
-

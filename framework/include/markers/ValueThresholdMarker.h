@@ -33,4 +33,3 @@ protected:
 
   bool _invert;
 };
-

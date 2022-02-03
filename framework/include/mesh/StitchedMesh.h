@@ -57,4 +57,3 @@ protected:
   /// The meshes to be stitched together.  The first entry will be the "real" mesh
   std::vector<std::unique_ptr<ReplicatedMesh>> _meshes;
 };
-

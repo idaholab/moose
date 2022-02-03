@@ -158,8 +158,10 @@ ADInterfaceKernelTempl<T>::computeElemNeighJacobian(Moose::DGJacobianType type)
 
   auto local_functor = [&](const std::vector<ADReal> & input_residuals,
                            const std::vector<dof_id_type> &,
-                           const std::set<TagID> &) {
-    auto compute_jacobian_type = [&](const Moose::DGJacobianType nested_type) {
+                           const std::set<TagID> &)
+  {
+    auto compute_jacobian_type = [&](const Moose::DGJacobianType nested_type)
+    {
       const ADTemplateVariableTestValue<T> & loc_phi =
           (nested_type == Moose::ElementElement || nested_type == Moose::NeighborElement)
               ? _phi
@@ -253,7 +255,8 @@ ADInterfaceKernelTempl<T>::computeOffDiagElemNeighJacobian(Moose::DGJacobianType
 
   auto local_functor = [&](const std::vector<ADReal> & input_residuals,
                            const std::vector<dof_id_type> &,
-                           const std::set<TagID> &) {
+                           const std::set<TagID> &)
+  {
     auto & ce = _assembly.couplingEntries();
     for (const auto & it : ce)
     {
@@ -266,7 +269,8 @@ ADInterfaceKernelTempl<T>::computeOffDiagElemNeighJacobian(Moose::DGJacobianType
       if (ivar != current_ivar)
         continue;
 
-      auto compute_jacobian_type = [&](const Moose::DGJacobianType nested_type) {
+      auto compute_jacobian_type = [&](const Moose::DGJacobianType nested_type)
+      {
         const ADTemplateVariableTestValue<T> & loc_phi =
             (nested_type == Moose::ElementElement || nested_type == Moose::NeighborElement)
                 ? _phi

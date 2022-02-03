@@ -33,4 +33,3 @@ protected:
 
   BoundingBox _bounding_box;
 };
-

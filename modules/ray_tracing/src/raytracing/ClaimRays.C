@@ -67,8 +67,9 @@ ClaimRays::claim()
       }
 
   // Functor for possibly claiming a vector of Rays
-  auto claim_functor = [&](processor_id_type /* pid */,
-                           const std::vector<std::shared_ptr<Ray>> & rays) {
+  auto claim_functor =
+      [&](processor_id_type /* pid */, const std::vector<std::shared_ptr<Ray>> & rays)
+  {
     for (auto & ray : rays)
       possiblyClaim(ray);
   };
@@ -229,8 +230,9 @@ ClaimRays::verifyClaiming()
   // Map from Ray ID -> whether or not it was generated (false) or
   // claimed/possibly also generated (true)
   std::map<RayID, char> local_map;
-  auto add_to_local_map = [this, &local_map](const std::vector<std::shared_ptr<Ray>> & rays,
-                                             const bool claimed_rays) {
+  auto add_to_local_map =
+      [this, &local_map](const std::vector<std::shared_ptr<Ray>> & rays, const bool claimed_rays)
+  {
     for (const auto & ray : rays)
     {
       const auto id = getID(ray);
@@ -262,12 +264,12 @@ ClaimRays::verifyClaiming()
   std::map<RayID, std::vector<std::pair<processor_id_type, char>>> global_map;
 
   // Functor for receiving the generation/claiming information
-  auto receive_functor =
-      [&global_map](processor_id_type pid,
-                    const std::vector<std::pair<RayID, char>> & id_claimed_pairs) {
-        for (const auto & id_claimed_pair : id_claimed_pairs)
-          global_map[id_claimed_pair.first].emplace_back(pid, id_claimed_pair.second);
-      };
+  auto receive_functor = [&global_map](processor_id_type pid,
+                                       const std::vector<std::pair<RayID, char>> & id_claimed_pairs)
+  {
+    for (const auto & id_claimed_pair : id_claimed_pairs)
+      global_map[id_claimed_pair.first].emplace_back(pid, id_claimed_pair.second);
+  };
 
   // Send claiming information to rank 0
   Parallel::push_parallel_vector_data(comm(), send_info, receive_functor);

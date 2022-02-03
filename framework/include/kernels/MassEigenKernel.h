@@ -28,4 +28,3 @@ protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
 };
-

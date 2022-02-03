@@ -40,4 +40,3 @@ protected:
   /// Holds the solution gradient at the current quadrature points
   const VariableGradient & _grad_u;
 };
-

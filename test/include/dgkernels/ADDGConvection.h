@@ -22,5 +22,4 @@ protected:
   ADReal computeQpResidual(Moose::DGResidualType type) override;
 
   RealVectorValue _velocity;
-
 };

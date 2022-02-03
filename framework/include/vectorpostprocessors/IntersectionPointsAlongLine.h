@@ -49,4 +49,3 @@ protected:
   /// Tie them together for convenience
   std::vector<VectorPostprocessorValue *> _intersections;
 };
-

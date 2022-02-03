@@ -53,4 +53,3 @@ protected:
 
   MooseObjectWarehouse<DiracKernel> * _dirac_warehouse;
 };
-

@@ -35,4 +35,3 @@ public:
 protected:
   AuxiliarySystem & _aux;
 };
-

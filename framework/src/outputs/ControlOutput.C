@@ -73,26 +73,26 @@ ControlOutput::outputActiveObjects()
   // Loop through unique objects
   oss << "Active Objects:\n" << COLOR_DEFAULT;
   for (const auto & iter : objects)
+  {
+    std::shared_ptr<InputParameters> ptr = iter.first;
+    if (ptr->get<bool>("enable"))
     {
-      std::shared_ptr<InputParameters> ptr = iter.first;
-      if (ptr->get<bool>("enable"))
+      // We print slightly differently in the first iteration of the loop.
+      bool first_iteration = true;
+      for (const auto & obj_name : iter.second)
       {
-        // We print slightly differently in the first iteration of the loop.
-        bool first_iteration = true;
-        for (const auto & obj_name : iter.second)
+        if (first_iteration)
         {
-          if (first_iteration)
-          {
-            oss << ConsoleUtils::indent(2) << COLOR_YELLOW << obj_name << COLOR_DEFAULT << '\n';
-            first_iteration = false;
-          }
-          else
-            oss << ConsoleUtils::indent(4) << obj_name << '\n';
+          oss << ConsoleUtils::indent(2) << COLOR_YELLOW << obj_name << COLOR_DEFAULT << '\n';
+          first_iteration = false;
         }
+        else
+          oss << ConsoleUtils::indent(4) << obj_name << '\n';
       }
     }
+  }
 
-    _console << oss.str() << std::endl;
+  _console << oss.str() << std::endl;
 }
 
 void

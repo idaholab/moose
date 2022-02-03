@@ -142,7 +142,8 @@ RenameBoundaryGenerator::generate()
 
   // Helper for getting an unused boundary ID, and keeping track of it
   // so that we can generate more later
-  auto get_unused_boundary_id = [this, &boundary_ids, &boundary_info]() {
+  auto get_unused_boundary_id = [this, &boundary_ids, &boundary_info]()
+  {
     for (BoundaryID id = 0; id != Moose::INVALID_BOUNDARY_ID; ++id)
     {
       if (!boundary_ids.count(id) && !boundary_info.get_sideset_name_map().count(id) &&
@@ -158,7 +159,8 @@ RenameBoundaryGenerator::generate()
 
   // Helper for checking whether or not a BoundaryName (which could be an ID or a name)
   // is really input as an ID
-  const auto is_boundary_id = [](const BoundaryName & boundary_name) {
+  const auto is_boundary_id = [](const BoundaryName & boundary_name)
+  {
     std::istringstream ss(boundary_name);
     BoundaryID id;
     return !(!(ss >> id));

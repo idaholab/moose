@@ -28,5 +28,4 @@ protected:
   MaterialProperty<Real> & _regular_mat_prop;
 
   const ADVariableValue & _coupled_var;
-
 };

@@ -31,4 +31,3 @@ public:
 protected:
   static unsigned int _count;
 };
-

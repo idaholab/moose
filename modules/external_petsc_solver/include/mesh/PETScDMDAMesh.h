@@ -35,6 +35,5 @@ public:
   virtual void buildMesh() override;
 
 protected:
-
   DM _dmda;
 };

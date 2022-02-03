@@ -38,4 +38,3 @@ protected:
   Real _refine_cutoff;
   Real _coarsen_cutoff;
 };
-

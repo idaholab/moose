@@ -50,4 +50,3 @@ protected:
   /// initial post-processor value
   Real & _pps_value_initial;
 };
-

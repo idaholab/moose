@@ -55,4 +55,3 @@ protected:
   /// The filehandle to hold the log
   std::ofstream _adaptive_log;
 };
-

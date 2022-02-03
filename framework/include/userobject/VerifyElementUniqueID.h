@@ -33,4 +33,3 @@ public:
 protected:
   std::vector<dof_id_type> _all_ids;
 };
-

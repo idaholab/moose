@@ -28,7 +28,8 @@ MortarConsumerInterface::validParams()
   params.addRelationshipManager(
       "AugmentSparsityOnInterface",
       Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC,
-      [](const InputParameters & obj_params, InputParameters & rm_params) {
+      [](const InputParameters & obj_params, InputParameters & rm_params)
+      {
         rm_params.set<bool>("use_displaced_mesh") = obj_params.get<bool>("use_displaced_mesh");
         rm_params.set<BoundaryName>("secondary_boundary") =
             obj_params.get<BoundaryName>("secondary_boundary");

@@ -162,9 +162,8 @@ BootstrapCalculator<InType, OutType>::computeBootstrapEstimates(const InType & d
 
   // Compute replicate statistics
   std::vector<OutType> values(_replicates);
-  auto calc_update = [this](const typename InType::value_type & val) {
-    _calc.updateCalculator(val);
-  };
+  auto calc_update = [this](const typename InType::value_type & val)
+  { _calc.updateCalculator(val); };
   for (std::size_t i = 0; i < _replicates; ++i)
   {
     _calc.initializeCalculator();

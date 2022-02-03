@@ -155,7 +155,8 @@ FVFluxBC::computeJacobian(const FaceInfo & fi)
 
   mooseAssert(dof_indices.size() == 1, "We're currently built to use CONSTANT MONOMIALS");
 
-  auto local_functor = [&](const ADReal & residual, dof_id_type, const std::set<TagID> &) {
+  auto local_functor = [&](const ADReal & residual, dof_id_type, const std::set<TagID> &)
+  {
     // Even though the elem element is always the non-null pointer on mesh
     // external boundary faces, this could be an "internal" boundary - one
     // created by variable block restriction where the var is only defined on

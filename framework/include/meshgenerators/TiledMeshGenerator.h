@@ -38,4 +38,3 @@ protected:
   Real _y_width;
   Real _z_width;
 };
-

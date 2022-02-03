@@ -32,4 +32,3 @@ public:
 protected:
   std::vector<NonlinearVariableName> _show_var_residual;
 };
-

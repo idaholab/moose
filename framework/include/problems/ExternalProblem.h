@@ -58,4 +58,3 @@ public:
    */
   virtual void addExternalVariables() {}
 };
-

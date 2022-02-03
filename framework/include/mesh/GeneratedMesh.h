@@ -64,4 +64,3 @@ protected:
   /// Boolean to indicate that dimensions may have changed
   bool _dims_may_have_changed;
 };
-

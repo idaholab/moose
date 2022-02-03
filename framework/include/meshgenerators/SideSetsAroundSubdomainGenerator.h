@@ -53,4 +53,3 @@ protected:
   /// if specified, then faces are only added if their normal is close to this
   Point _normal;
 };
-

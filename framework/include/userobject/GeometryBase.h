@@ -47,4 +47,3 @@ protected:
   /// List of boundaries (or node sets) that will be snapped to a geometry
   const std::vector<BoundaryID> _boundary_ids;
 };
-

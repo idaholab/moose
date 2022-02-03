@@ -254,12 +254,13 @@ ElementSubdomainModifier::pushBoundarySideInfo(
 {
   auto elem_action_functor =
       [&mesh, this](processor_id_type,
-                    const std::vector<std::pair<dof_id_type, unsigned int>> & received_elem) {
-        // remove the side
-        for (const auto & pr : received_elem)
-          mesh.getMesh().get_boundary_info().remove_side(
-              mesh.getMesh().elem_ptr(pr.first), pr.second, _moving_boundary_id);
-      };
+                    const std::vector<std::pair<dof_id_type, unsigned int>> & received_elem)
+  {
+    // remove the side
+    for (const auto & pr : received_elem)
+      mesh.getMesh().get_boundary_info().remove_side(
+          mesh.getMesh().elem_ptr(pr.first), pr.second, _moving_boundary_id);
+  };
 
   Parallel::push_parallel_vector_data(
       mesh.getMesh().get_boundary_info().comm(), elems_to_push, elem_action_functor);
@@ -270,8 +271,9 @@ ElementSubdomainModifier::pushBoundaryNodeInfo(
     MooseMesh & mesh,
     std::unordered_map<processor_id_type, std::vector<dof_id_type>> & nodes_to_push)
 {
-  auto node_action_functor = [&mesh, this](processor_id_type,
-                                           const std::vector<dof_id_type> & received_nodes) {
+  auto node_action_functor =
+      [&mesh, this](processor_id_type, const std::vector<dof_id_type> & received_nodes)
+  {
     for (const auto & pr : received_nodes)
       mesh.getMesh().get_boundary_info().remove_node(mesh.getMesh().node_ptr(pr),
                                                      _moving_boundary_id);

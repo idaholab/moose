@@ -34,4 +34,3 @@ protected:
   TagID _tag_id;
   const VariableValue & _v;
 };
-

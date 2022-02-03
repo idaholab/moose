@@ -712,10 +712,11 @@ storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
   for (const auto & reason_flag : reason_flags)
     // Was the option already found in PetscOptions::flags? Or does it exist in PetscOptions::pairs
     // as an iname already? If not, then we add our flag
-    if (!reason_flag.first &&
-        (std::find_if(po.pairs.begin(), po.pairs.end(), [&reason_flag](auto & pair) {
-           return pair.first == reason_flag.second;
-         }) == po.pairs.end()))
+    if (!reason_flag.first && (std::find_if(po.pairs.begin(),
+                                            po.pairs.end(),
+                                            [&reason_flag](auto & pair) {
+                                              return pair.first == reason_flag.second;
+                                            }) == po.pairs.end()))
       po.pairs.emplace_back(reason_flag.second, "::failed");
 #endif
 

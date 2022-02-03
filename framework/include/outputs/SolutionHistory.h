@@ -49,4 +49,3 @@ public:
    */
   virtual std::string filename() override;
 };
-

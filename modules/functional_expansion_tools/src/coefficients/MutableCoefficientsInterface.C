@@ -41,7 +41,8 @@ MutableCoefficientsInterface::MutableCoefficientsInterface(const MooseObject * m
 {
 }
 
-Real MutableCoefficientsInterface::operator[](std::size_t index) const
+Real
+MutableCoefficientsInterface::operator[](std::size_t index) const
 {
   return _coefficients[index];
 }

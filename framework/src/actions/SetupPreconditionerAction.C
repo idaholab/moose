@@ -46,10 +46,10 @@ SetupPreconditionerAction::act()
 
     _problem->getNonlinearSystemBase().setPreconditioner(pc);
 
-/**
- * Go ahead and set common precondition options here.  The child classes will still be called
- * through the action warehouse
- */
+    /**
+     * Go ahead and set common precondition options here.  The child classes will still be called
+     * through the action warehouse
+     */
     Moose::PetscSupport::storePetscOptions(*_problem, _moose_object_pars);
   }
 }

@@ -319,7 +319,8 @@ NestedSolve::nonlinear(V & guess, T compute)
   auto r_square = r0_square;
 
   // lambda to check for convergence and set the state accordingly
-  auto is_converged = [&]() {
+  auto is_converged = [&]()
+  {
     if (r_square < _absolute_tolerance_square)
     {
       _state = State::CONVERGED_ABS;

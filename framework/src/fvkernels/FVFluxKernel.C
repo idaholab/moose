@@ -242,7 +242,8 @@ FVFluxKernel::computeJacobian(const FaceInfo & fi)
   {
     mooseAssert(_var.dofIndices().size() == 1, "We're currently built to use CONSTANT MONOMIALS");
 
-    auto element_functor = [&](const ADReal & residual, dof_id_type, const std::set<TagID> &) {
+    auto element_functor = [&](const ADReal & residual, dof_id_type, const std::set<TagID> &)
+    {
       // jacobian contribution of the residual for the elem element to the elem element's DOF:
       // d/d_elem (residual_elem)
       computeJacobian(Moose::ElementElement, residual);
@@ -278,7 +279,8 @@ FVFluxKernel::computeJacobian(const FaceInfo & fi)
     mooseAssert(_var.dofIndicesNeighbor().size() == 1,
                 "We're currently built to use CONSTANT MONOMIALS");
 
-    auto neighbor_functor = [&](const ADReal & residual, dof_id_type, const std::set<TagID> &) {
+    auto neighbor_functor = [&](const ADReal & residual, dof_id_type, const std::set<TagID> &)
+    {
       // only add residual to elem if the variable is defined there.
       if (ft == FaceInfo::VarFaceNeighbors::BOTH)
         // jacobian contribution of the residual for the neighbor element to the elem element's DOF:

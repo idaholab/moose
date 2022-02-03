@@ -26,7 +26,6 @@ public:
 protected:
   virtual ADReal computeQpResidual() override;
 
-
 private:
   const ADVariableGradient & _velocity_vector;
 

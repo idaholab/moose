@@ -52,4 +52,3 @@ protected:
   /// Control of which portion of mesh will be developed
   MooseEnum _portion;
 };
-

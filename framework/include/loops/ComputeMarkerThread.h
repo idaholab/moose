@@ -44,4 +44,3 @@ protected:
   /// Reference to the Marker warhouse in FEProblemBase
   const MooseObjectWarehouse<Marker> & _marker_whs;
 };
-

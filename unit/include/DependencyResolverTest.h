@@ -57,4 +57,3 @@ protected:
   DependencyResolver<std::string> _strict_ordering;
   DependencyResolver<std::string> _tree;
 };
-

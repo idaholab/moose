@@ -36,4 +36,3 @@ protected:
   const VariableValue & _numerator;
   const VariableValue & _denominator;
 };
-

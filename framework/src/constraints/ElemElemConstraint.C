@@ -118,16 +118,12 @@ ElemElemConstraint::computeElemNeighJacobian(Moose::DGJacobianType type)
   const VariableTestValue & loc_phi =
       (type == Moose::ElementElement || type == Moose::NeighborElement) ? _phi : _phi_neighbor;
   DenseMatrix<Number> & Kxx =
-      type == Moose::ElementElement
-          ? _assembly.jacobianBlock(_var.number(), _var.number())
-          : type == Moose::ElementNeighbor
-                ? _assembly.jacobianBlockNeighbor(
-                      Moose::ElementNeighbor, _var.number(), _var.number())
-                : type == Moose::NeighborElement
-                      ? _assembly.jacobianBlockNeighbor(
-                            Moose::NeighborElement, _var.number(), _var.number())
-                      : _assembly.jacobianBlockNeighbor(
-                            Moose::NeighborNeighbor, _var.number(), _var.number());
+      type == Moose::ElementElement ? _assembly.jacobianBlock(_var.number(), _var.number())
+      : type == Moose::ElementNeighbor
+          ? _assembly.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.number(), _var.number())
+      : type == Moose::NeighborElement
+          ? _assembly.jacobianBlockNeighbor(Moose::NeighborElement, _var.number(), _var.number())
+          : _assembly.jacobianBlockNeighbor(Moose::NeighborNeighbor, _var.number(), _var.number());
 
   for (_qp = 0; _qp < _constraint_q_point.size(); _qp++)
     for (_i = 0; _i < test_space.size(); _i++)

@@ -78,4 +78,3 @@ protected:
   Real _scaling_parameter;
   std::ofstream myfile;
 };
-

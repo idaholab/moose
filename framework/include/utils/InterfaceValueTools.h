@@ -32,4 +32,3 @@ Real getQuantity(const MooseEnum /*interface_value_type*/,
                  const Real /*value_primary*/,
                  const Real /*value_secondary*/);
 }
-

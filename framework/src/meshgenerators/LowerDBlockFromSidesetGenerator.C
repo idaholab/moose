@@ -86,7 +86,8 @@ LowerDBlockFromSidesetGenerator::generate()
   std::sort(side_list.begin(),
             side_list.end(),
             [](std::tuple<dof_id_type, unsigned short int, boundary_id_type> a,
-               std::tuple<dof_id_type, unsigned short int, boundary_id_type> b) {
+               std::tuple<dof_id_type, unsigned short int, boundary_id_type> b)
+            {
               auto a_elem_id = std::get<0>(a);
               auto b_elem_id = std::get<0>(b);
               if (a_elem_id == b_elem_id)

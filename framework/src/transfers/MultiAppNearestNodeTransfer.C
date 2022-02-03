@@ -351,8 +351,8 @@ MultiAppNearestNodeTransfer::execute()
 
     // Quadrature points I will receive from remote processors
     std::map<processor_id_type, std::vector<Point>> incoming_qps;
-    auto qps_action_functor = [&incoming_qps](processor_id_type pid,
-                                              const std::vector<Point> & qps) {
+    auto qps_action_functor = [&incoming_qps](processor_id_type pid, const std::vector<Point> & qps)
+    {
       // Quadrature points from processor 'pid'
       auto & incoming_qps_from_pid = incoming_qps[pid];
       // Store data for late use
@@ -460,8 +460,9 @@ MultiAppNearestNodeTransfer::execute()
     }
   }
 
-  auto evals_action_functor = [&incoming_evals](processor_id_type pid,
-                                                const std::vector<Real> & evals) {
+  auto evals_action_functor =
+      [&incoming_evals](processor_id_type pid, const std::vector<Real> & evals)
+  {
     // evals for processor 'pid'
     auto & incoming_evals_for_pid = incoming_evals[pid];
     // Copy evals for late use

@@ -110,4 +110,3 @@ protected:
    */
   virtual void check();
 };
-
