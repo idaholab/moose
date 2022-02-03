@@ -81,4 +81,13 @@ private:
   bool _extrap;
 };
 
+// for backwards compatibility
 typedef LinearInterpolation ADLinearInterpolation;
+
+// temporary fixes to avoid breaking bison
+template <typename T>
+class LinearInterpolationTempl : public LinearInterpolation
+{
+public:
+  using LinearInterpolation::LinearInterpolation;
+};
