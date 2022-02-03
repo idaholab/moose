@@ -75,3 +75,20 @@ The "id" and "caption" settings are available for both images and videos.
        caption=The Idaho National Laboratory logo.
        style=width:50%;padding:20px;
 !devel-end!
+
+### Float Referencing
+
+Referencing floats is possible using the `!ref` inline command, from both the same page and other pages:
+
+!devel! example id=example-ref-float caption=Example of referencing floats.
+Float from the same page: [!ref](inl-logo)
+
+Figure from different page: [!ref](graph.md#plotly-ext-config)
+
+Table from different page: [!ref](table.md#table-floating)
+
+Algorithm from different page: [!ref](algorithm.md#bk)
+!devel-end!
+
+!devel settings module=MooseDocs.extensions.floats
+                object=FloatReferenceCommand
