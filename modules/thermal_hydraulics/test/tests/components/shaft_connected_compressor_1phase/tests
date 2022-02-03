@@ -1,5 +1,6 @@
 [Tests]
   design = 'ShaftConnectedCompressor1Phase.md'
+  issues = '#19863'
 
   # mass and energy conservation
   [phy:mass_energy_conservation]
@@ -11,6 +12,8 @@
     rel_err = 0
     max_parallel = 1
     ad_indexing_type = 'global'
+
+    requirement = 'The system shall conserve mass and energy when using ShaftConnectedCompressor1Phase.'
   []
 
   [phy:loop]
@@ -22,6 +25,8 @@
     cli_args = 'Outputs/exodus=true'
     max_parallel = 1
     ad_indexing_type = 'global'
+
+    requirement = 'The system shall be able to model a compressor with ShaftConnectedCompressor1Phase.'
   []
 
   [runs_with_zero_shaft_speed]
@@ -37,7 +42,7 @@
     ad_indexing_type = 'global'
 
     requirement = 'The system shall allow ShaftConnectedCompressor1Phase to run with a zero shaft speed.'
-    issues = '#20008 #20009'
+    issues = '#19863 #20008 #20009'
   []
 
   # jacobian test
@@ -51,6 +56,8 @@
     max_threads = 1
     max_parallel = 1
     ad_indexing_type = 'global'
+
+    requirement = 'The system shall correctly compute Jacobians for ShaftConnectedCompressor1Phase.'
   []
 
   [err:not_connected_to_shaft]
@@ -62,6 +69,6 @@
     ad_indexing_type = 'global'
 
     requirement = 'The system shall throw an error if ShaftConnectedCompressor1Phase is not connected to a shaft component.'
-    issues = '#19998'
+    issues = '#19863 #19998'
   []
 []

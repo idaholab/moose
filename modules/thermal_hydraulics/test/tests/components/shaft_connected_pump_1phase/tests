@@ -1,5 +1,6 @@
 [Tests]
   design = 'ShaftConnectedPump1Phase.md'
+  issues = '#19833'
 
   # mass and energy conservation
   [phy:mass_energy_conservation]
@@ -11,6 +12,8 @@
     rel_err = 0
     max_parallel = 1
     ad_indexing_type = 'global'
+
+    requirement = 'The system shall conserve mass and energy when using ShaftConnectedPump1Phase.'
   []
 
   [phy:loop]
@@ -22,6 +25,8 @@
     cli_args = 'Outputs/exodus=true'
     max_parallel = 1
     ad_indexing_type = 'global'
+
+    requirement = 'The system shall be able to model a pump with ShaftConnectedPump1Phase.'
   []
 
   [phy:coastdown]
@@ -33,6 +38,8 @@
     heavy = true
     max_parallel = 1
     ad_indexing_type = 'global'
+
+    requirement = 'The system shall be able to model a pump coastdown with ShaftConnectedPump1Phase.'
   []
 
   # jacobian test
@@ -46,6 +53,8 @@
     max_threads = 1
     max_parallel = 1
     ad_indexing_type = 'global'
+
+    requirement = 'The system shall correctly compute Jacobians for ShaftConnectedPump1Phase.'
   []
 
   [err:not_connected_to_shaft]
@@ -57,6 +66,6 @@
     ad_indexing_type = 'global'
 
     requirement = 'The system shall throw an error if ShaftConnectedPump1Phase is not connected to a shaft component.'
-    issues = '#19998'
+    issues = '#19833 #19998'
   []
 []

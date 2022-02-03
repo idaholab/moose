@@ -1,5 +1,6 @@
 [Tests]
   design = 'ShaftConnectedTurbine1Phase.md'
+  issues = '#19876'
 
   # mass and energy conservation
   [phy:mass_energy_conservation]
@@ -11,6 +12,8 @@
     rel_err = 0
     max_parallel = 1
     ad_indexing_type = 'global'
+
+    requirement = 'The system shall conserve mass and energy when using ShaftConnectedTurbine1Phase.'
   []
 
   [phy:loop]
@@ -22,6 +25,8 @@
     cli_args = 'Outputs/exodus=true'
     max_parallel = 1
     ad_indexing_type = 'global'
+
+    requirement = 'The system shall be able to model a turbine with ShaftConnectedTurbine1Phase.'
   []
 
   [phy:startup]
@@ -34,6 +39,8 @@
     max_parallel = 1
     ad_indexing_type = 'global'
     heavy = true
+
+    requirement = 'The system shall be able to model a turbine startup with ShaftConnectedTurbine1Phase.'
   []
 
   # jacobian test
@@ -47,6 +54,8 @@
     max_threads = 1
     max_parallel = 1
     ad_indexing_type = 'global'
+
+    requirement = 'The system shall correctly compute Jacobians for ShaftConnectedTurbine1Phase.'
   []
 
   [err:not_connected_to_shaft]
@@ -57,6 +66,6 @@
     ad_indexing_type = 'global'
 
     requirement = 'The system shall throw an error if ShaftConnectedTurbine1Phase is not connected to a shaft component.'
-    issues = '#19998'
+    issues = '#19876 #19998'
   []
 []
