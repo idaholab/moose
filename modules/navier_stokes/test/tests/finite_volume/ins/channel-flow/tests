@@ -39,7 +39,6 @@
     ad_indexing_type = 'global'
     cli_args = '-pc_type lu -pc_factor_shift_type NONZERO'
     valgrind = HEAVY
-    exodiff_opts = '-show_all_diffs'
   []
   [scalar-transport]
     type = 'Exodiff'
