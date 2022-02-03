@@ -21,6 +21,7 @@ public:
 
   LevelSetOlssonPlane(const InputParameters & parameters);
 
+  using Function::value;
   virtual Real value(Real /*t*/, const Point & p) const override;
 
   virtual RealGradient gradient(Real /*t*/, const Point & p) const override;

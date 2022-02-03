@@ -26,6 +26,7 @@ public:
 
   Grad2ParsedFunction(const InputParameters & parameters);
 
+  using Function::value;
   virtual Real value(Real t, const Point & pt) const;
 
 protected:

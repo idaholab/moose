@@ -71,7 +71,7 @@ MemoizedFunctionInterface::value(Real time, const Point & point) const
 }
 
 ADReal
-MemoizedFunctionInterface::value(ADReal, const ADPoint &) const
+MemoizedFunctionInterface::value(const ADReal &, const ADPoint &) const
 {
   mooseError("Not implemented");
 }

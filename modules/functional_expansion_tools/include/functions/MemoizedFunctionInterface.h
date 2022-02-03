@@ -40,7 +40,7 @@ public:
   // memoization functionality it implements. Instead, deriving classes should implement
   // evaluateValue().
   virtual Real value(Real time, const Point & point) const final;
-  virtual ADReal value(const ADReal & time, const ADPoint & time) const final;
+  virtual ADReal value(const ADReal & time, const ADPoint & point) const final;
 
 protected:
   /**
