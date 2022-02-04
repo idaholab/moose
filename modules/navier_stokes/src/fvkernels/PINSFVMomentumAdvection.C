@@ -85,7 +85,8 @@ PINSFVMomentumAdvection::coeffCalculator(const Elem & elem) const
                                const FaceInfo * const fi,
                                const Point & surface_vector,
                                Real libmesh_dbg_var(coord),
-                               const bool elem_has_info) {
+                               const bool elem_has_info)
+  {
     mooseAssert(fi, "We need a non-null FaceInfo");
     mooseAssert(&elem == &functor_elem, "Elems don't match");
     mooseAssert((&elem == &fi->elem()) || (&elem == fi->neighborPtr()),

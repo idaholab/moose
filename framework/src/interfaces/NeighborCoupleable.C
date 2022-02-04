@@ -36,9 +36,8 @@ NeighborCoupleable::coupledNeighborValue(const std::string & var_name, unsigned 
 std::vector<const VariableValue *>
 NeighborCoupleable::coupledNeighborValues(const std::string & var_name) const
 {
-  auto func = [this, &var_name](unsigned int comp) {
-    return &coupledNeighborValue(var_name, comp);
-  };
+  auto func = [this, &var_name](unsigned int comp)
+  { return &coupledNeighborValue(var_name, comp); };
   return coupledVectorHelper<const VariableValue *>(var_name, func);
 }
 
@@ -80,9 +79,8 @@ NeighborCoupleable::adCoupledNeighborValueDot(const std::string & var_name, unsi
 std::vector<const ADVariableValue *>
 NeighborCoupleable::adCoupledNeighborValues(const std::string & var_name) const
 {
-  auto func = [this, &var_name](unsigned int comp) {
-    return &adCoupledNeighborValue(var_name, comp);
-  };
+  auto func = [this, &var_name](unsigned int comp)
+  { return &adCoupledNeighborValue(var_name, comp); };
   return coupledVectorHelper<const ADVariableValue *>(var_name, func);
 }
 

@@ -63,7 +63,8 @@ MortarNodalAuxKernelTempl<ComputeValueType>::compute()
   const auto & its = amg().secondariesToMortarSegments(*_current_node);
   std::array<MortarNodalAuxKernelTempl<ComputeValueType> *, 1> consumers = {{this}};
 
-  auto act_functor = [&value, &total_volume, this]() {
+  auto act_functor = [&value, &total_volume, this]()
+  {
     _msm_volume = 0;
     value += computeValue();
     total_volume += _msm_volume;

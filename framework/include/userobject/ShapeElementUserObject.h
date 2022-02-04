@@ -33,4 +33,3 @@ public:
 
   ShapeElementUserObject(const InputParameters & parameters);
 };
-

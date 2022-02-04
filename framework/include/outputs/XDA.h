@@ -48,4 +48,3 @@ private:
   /// Flag for binary output
   bool _binary;
 };
-

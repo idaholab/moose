@@ -38,4 +38,3 @@ protected:
 
   unsigned int _paired_variable;
 };
-

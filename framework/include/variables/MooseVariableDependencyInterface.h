@@ -45,4 +45,3 @@ protected:
 private:
   std::set<MooseVariableFieldBase *> _moose_variable_dependencies;
 };
-

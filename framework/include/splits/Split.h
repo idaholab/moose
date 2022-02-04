@@ -72,4 +72,3 @@ protected:
   /// Additional PETSc options
   Moose::PetscSupport::PetscOptions _petsc_options;
 };
-

@@ -29,4 +29,3 @@ public:
 
   virtual void init() override;
 };
-

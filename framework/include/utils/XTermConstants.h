@@ -18,4 +18,3 @@
 #define XTERM_CYAN "\33[36m"
 #define XTERM_WHITE "\33[37m"
 #define XTERM_DEFAULT "\33[39m"
-

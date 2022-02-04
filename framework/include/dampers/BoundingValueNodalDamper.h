@@ -37,4 +37,3 @@ protected:
   /// Compute the damping for the current node
   virtual Real computeQpDamping() override;
 };
-

@@ -107,4 +107,3 @@ private:
    * re-used, unless the mesh has changed due to adaptivity */
   std::unique_ptr<NumericVector<Number>> _serialized_solution;
 };
-

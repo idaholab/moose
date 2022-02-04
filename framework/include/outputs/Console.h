@@ -94,7 +94,6 @@ public:
   }
 
 protected:
-
   /**
    * Print the input file at the beginning of the simulation
    */

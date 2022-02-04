@@ -43,4 +43,3 @@ public:
    */
   virtual Real getScalarFromProperty(const Real & property, const Point & curr_point) override;
 };
-

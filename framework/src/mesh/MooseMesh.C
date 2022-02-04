@@ -1415,9 +1415,8 @@ MooseMesh::buildPeriodicNodeMap(std::multimap<dof_id_type, dof_id_type> & period
   // sort by boundary id
   std::sort(periodic_nodes.begin(),
             periodic_nodes.end(),
-            [](const PeriodicNodeInfo & a, const PeriodicNodeInfo & b) -> bool {
-              return a.second > b.second;
-            });
+            [](const PeriodicNodeInfo & a, const PeriodicNodeInfo & b) -> bool
+            { return a.second > b.second; });
 
   // build kd-tree
   using KDTreeType = nanoflann::KDTreeSingleIndexAdaptor<

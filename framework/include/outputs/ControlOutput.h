@@ -59,4 +59,3 @@ private:
   /// Flag for showing active objects
   bool _show_active_objects;
 };
-

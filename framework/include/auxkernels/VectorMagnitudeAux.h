@@ -34,4 +34,3 @@ protected:
   const VariableValue & _y;
   const VariableValue & _z;
 };
-

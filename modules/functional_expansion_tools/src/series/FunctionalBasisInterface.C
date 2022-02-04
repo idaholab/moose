@@ -35,7 +35,8 @@ FunctionalBasisInterface::FunctionalBasisInterface(const unsigned int number_of_
   _basis_evaluation.shrink_to_fit();
 }
 
-Real FunctionalBasisInterface::operator[](std::size_t index) const
+Real
+FunctionalBasisInterface::operator[](std::size_t index) const
 {
   return (index > _basis_evaluation.size() ? 0.0 : _basis_evaluation[index]);
 }

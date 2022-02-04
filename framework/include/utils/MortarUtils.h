@@ -332,7 +332,8 @@ setupMortarMaterials(const Consumers & consumers,
   auto get_required_sub_mats =
       [&mat_warehouse, tid, &consumers](
           const SubdomainID sub_id,
-          const Moose::MaterialDataType mat_data_type) -> std::deque<MaterialBase *> {
+          const Moose::MaterialDataType mat_data_type) -> std::deque<MaterialBase *>
+  {
     if (mat_warehouse[mat_data_type].hasActiveBlockObjects(sub_id, tid))
     {
       auto & sub_mats = mat_warehouse[mat_data_type].getActiveBlockObjects(sub_id, tid);

@@ -142,9 +142,8 @@ public:
     _saved = true;
     std::for_each(_states.begin(),
                   _states.end(),
-                  [](std::pair<const std::size_t, std::pair<mt_state, mt_state>> & pair) {
-                    pair.second.second = pair.second.first;
-                  });
+                  [](std::pair<const std::size_t, std::pair<mt_state, mt_state>> & pair)
+                  { pair.second.second = pair.second.first; });
   }
 
   /**
@@ -155,9 +154,8 @@ public:
     mooseAssert(_saved, "saveState() must be called prior to restoreState().");
     std::for_each(_states.begin(),
                   _states.end(),
-                  [](std::pair<const std::size_t, std::pair<mt_state, mt_state>> & pair) {
-                    pair.second.first = pair.second.second;
-                  });
+                  [](std::pair<const std::size_t, std::pair<mt_state, mt_state>> & pair)
+                  { pair.second.first = pair.second.second; });
   }
 
   /**

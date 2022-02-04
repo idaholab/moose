@@ -60,4 +60,3 @@ protected:
   /// Extreme value of the proxy variable
   Real _proxy_value;
 };
-

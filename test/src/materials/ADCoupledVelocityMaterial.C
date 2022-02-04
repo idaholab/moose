@@ -43,23 +43,28 @@ ADCoupledVelocityMaterial::ADCoupledVelocityMaterial(const InputParameters & par
     _vel_z(isParamValid("vel_z") ? &getFunctor<ADReal>("vel_z") : nullptr),
     _rho(getFunctor<ADReal>("rho"))
 {
-  _velocity.setFunctor(
-      _mesh, blockIDs(), [this](const auto & r, const auto & t) -> ADRealVectorValue {
-        ADRealVectorValue velocity(_vel_x(r, t));
-        velocity(1) = _vel_y ? (*_vel_y)(r, t) : ADReal(0);
-        velocity(2) = _vel_z ? (*_vel_z)(r, t) : ADReal(0);
-        return velocity;
-      });
+  _velocity.setFunctor(_mesh,
+                       blockIDs(),
+                       [this](const auto & r, const auto & t) -> ADRealVectorValue
+                       {
+                         ADRealVectorValue velocity(_vel_x(r, t));
+                         velocity(1) = _vel_y ? (*_vel_y)(r, t) : ADReal(0);
+                         velocity(2) = _vel_z ? (*_vel_z)(r, t) : ADReal(0);
+                         return velocity;
+                       });
 
-  _rho_u.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> ADReal {
-    return _rho(r, t) * _vel_x(r, t);
-  });
+  _rho_u.setFunctor(_mesh,
+                    blockIDs(),
+                    [this](const auto & r, const auto & t) -> ADReal
+                    { return _rho(r, t) * _vel_x(r, t); });
 
-  _rho_v.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> ADReal {
-    return _vel_y ? _rho(r, t) * (*_vel_y)(r, t) : ADReal(0);
-  });
+  _rho_v.setFunctor(_mesh,
+                    blockIDs(),
+                    [this](const auto & r, const auto & t) -> ADReal
+                    { return _vel_y ? _rho(r, t) * (*_vel_y)(r, t) : ADReal(0); });
 
-  _rho_w.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> ADReal {
-    return _vel_z ? _rho(r, t) * (*_vel_z)(r, t) : ADReal(0);
-  });
+  _rho_w.setFunctor(_mesh,
+                    blockIDs(),
+                    [this](const auto & r, const auto & t) -> ADReal
+                    { return _vel_z ? _rho(r, t) * (*_vel_z)(r, t) : ADReal(0); });
 }

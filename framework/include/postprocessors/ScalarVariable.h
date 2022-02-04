@@ -35,4 +35,3 @@ protected:
   MooseVariableScalar & _var;
   unsigned int _idx;
 };
-

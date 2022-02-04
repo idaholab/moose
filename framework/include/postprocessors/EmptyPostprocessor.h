@@ -28,4 +28,3 @@ public:
   virtual void execute() override {}
   virtual Real getValue() override { return 0; }
 };
-

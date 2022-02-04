@@ -92,4 +92,3 @@ protected:
   /// The variable used to write out the coefficients of the fit
   VectorPostprocessorValue * _coeffs;
 };
-

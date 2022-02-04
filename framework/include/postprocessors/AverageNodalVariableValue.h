@@ -34,4 +34,3 @@ protected:
   Real _sum;
   unsigned int _n;
 };
-

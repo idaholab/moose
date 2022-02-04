@@ -149,7 +149,8 @@ RenameBlockGenerator::generate()
 
   // Helper for getting an unused block ID, and keeping track of it
   // so that we can generate more later
-  auto get_unused_block_id = [this, &block_ids, &const_mesh]() {
+  auto get_unused_block_id = [this, &block_ids, &const_mesh]()
+  {
     for (const auto id : make_range(Moose::INVALID_BLOCK_ID))
       if (!block_ids.count(id) && !const_mesh.get_subdomain_name_map().count(id))
       {
@@ -164,7 +165,8 @@ RenameBlockGenerator::generate()
 
   // Helper for checking whether or not a SubdomainName (which could be an ID or a name)
   // is really input as an ID
-  const auto is_subdomain_id = [](const SubdomainName & subdomain_name) {
+  const auto is_subdomain_id = [](const SubdomainName & subdomain_name)
+  {
     SubdomainID id = Moose::INVALID_BLOCK_ID;
     std::istringstream ss(subdomain_name);
     return !(!(ss >> id));

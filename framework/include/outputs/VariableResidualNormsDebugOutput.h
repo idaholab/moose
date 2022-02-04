@@ -45,4 +45,3 @@ protected:
   /// Reference to libMesh system
   System & _sys;
 };
-

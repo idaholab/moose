@@ -48,4 +48,3 @@ protected:
   /// Name of the boundary name to assign to the cut surface
   const BoundaryName _boundary_name;
 };
-

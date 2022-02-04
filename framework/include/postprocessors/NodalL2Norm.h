@@ -37,4 +37,3 @@ public:
 protected:
   Real _sum_of_squares;
 };
-

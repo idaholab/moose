@@ -271,10 +271,8 @@ PODReducedBasisTrainer::computeCorrelationMatrix()
       [this, &mesh, &received_vectors, &local_vectors](
           processor_id_type pid,
           const std::vector<
-              std::tuple<unsigned int, unsigned int, std::shared_ptr<DenseVector<Real>>>> &
-              vectors) {
-        PODReducedBasisTrainer::receiveObjects(mesh, received_vectors, local_vectors, pid, vectors);
-      };
+              std::tuple<unsigned int, unsigned int, std::shared_ptr<DenseVector<Real>>>> & vectors)
+  { PODReducedBasisTrainer::receiveObjects(mesh, received_vectors, local_vectors, pid, vectors); };
 
   Parallel::push_parallel_packed_range(_communicator, send_map, (void *)nullptr, functor);
 

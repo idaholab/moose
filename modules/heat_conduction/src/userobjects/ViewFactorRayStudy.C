@@ -428,8 +428,8 @@ ViewFactorRayStudy::generateStartElems()
   if (_internal_convention == 0)
   {
     // Functor that takes in StartElems and appends them to our local list
-    auto append_start_elems = [this](processor_id_type,
-                                     const std::vector<StartElem> & start_elems) {
+    auto append_start_elems = [this](processor_id_type, const std::vector<StartElem> & start_elems)
+    {
       _start_elems.reserve(_start_elems.size() + start_elems.size());
       for (const StartElem & start_elem : start_elems)
         _start_elems.emplace_back(start_elem);

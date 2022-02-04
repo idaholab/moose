@@ -57,4 +57,3 @@ protected:
   /// True if termination of the solve has been requested
   bool _termination_requested;
 };
-

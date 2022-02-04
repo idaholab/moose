@@ -36,4 +36,3 @@ public:
   virtual Real computeDamping(const NumericVector<Number> & solution,
                               const NumericVector<Number> & update) = 0;
 };
-

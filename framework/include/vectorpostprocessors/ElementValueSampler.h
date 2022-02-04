@@ -42,4 +42,3 @@ protected:
   /// So we don't have to create and destroy this vector over and over again
   std::vector<Real> _values;
 };
-

@@ -29,4 +29,3 @@ protected:
   Real _coarsen;
   Real _refine;
 };
-

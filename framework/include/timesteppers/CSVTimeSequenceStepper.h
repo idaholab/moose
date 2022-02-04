@@ -53,4 +53,3 @@ protected:
   /// index of the column containing the time data
   const unsigned int _column_index;
 };
-

@@ -47,4 +47,3 @@ private:
   /// The time to stop enabling the supplied object tags (defaults to the end of the simulation)
   std::vector<Real> _end_time;
 };
-

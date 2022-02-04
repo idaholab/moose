@@ -28,4 +28,3 @@ protected:
 
   MarkerValue _mark;
 };
-

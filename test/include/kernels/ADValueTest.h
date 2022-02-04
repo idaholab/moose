@@ -20,5 +20,4 @@ public:
 
 protected:
   virtual ADReal computeQpResidual();
-
 };

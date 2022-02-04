@@ -74,4 +74,3 @@ protected:
    */
   std::vector<Real> _all;
 };
-

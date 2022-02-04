@@ -40,4 +40,3 @@ protected:
   const unsigned int _l;
   ///@}
 };
-

@@ -28,8 +28,8 @@ MaterialWarehouse::addInterfaceObject(std::shared_ptr<MaterialBase> interface, T
   _interface_materials.addObject(interface, tid);
 }
 
-const MooseObjectWarehouse<MaterialBase> & MaterialWarehouse::
-operator[](Moose::MaterialDataType data_type) const
+const MooseObjectWarehouse<MaterialBase> &
+MaterialWarehouse::operator[](Moose::MaterialDataType data_type) const
 {
   switch (data_type)
   {

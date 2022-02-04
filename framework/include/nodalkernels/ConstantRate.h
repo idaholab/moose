@@ -38,4 +38,3 @@ protected:
   /// The rate
   const Real & _rate;
 };
-

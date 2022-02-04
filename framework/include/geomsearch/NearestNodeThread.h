@@ -38,4 +38,3 @@ protected:
   // The neighborhood nodes associated with each node
   std::map<dof_id_type, std::vector<dof_id_type>> & _neighbor_nodes;
 };
-

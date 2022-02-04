@@ -36,12 +36,17 @@ RhoFromPTFunctorMaterial::RhoFromPTFunctorMaterial(const InputParameters & param
     _rho(declareFunctorProperty<ADReal>(NS::density)),
     _rho_dot(declareFunctorProperty<ADReal>(NS::time_deriv(NS::density)))
 {
-  _rho.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> ADReal {
-    return _fluid.rho_from_p_T(_pressure(r, t), _temperature(r, t));
-  });
-  _rho_dot.setFunctor(_mesh, blockIDs(), [this](const auto & r, const auto & t) -> ADReal {
-    ADReal rho, drho_dp, drho_dT;
-    _fluid.rho_from_p_T(_pressure(r, t), _temperature(r, t), rho, drho_dp, drho_dT);
-    return drho_dp * _pressure.dot(r, t) + drho_dT * _temperature.dot(r, t);
-  });
+  _rho.setFunctor(_mesh,
+                  blockIDs(),
+                  [this](const auto & r, const auto & t) -> ADReal
+                  { return _fluid.rho_from_p_T(_pressure(r, t), _temperature(r, t)); });
+  _rho_dot.setFunctor(_mesh,
+                      blockIDs(),
+                      [this](const auto & r, const auto & t) -> ADReal
+                      {
+                        ADReal rho, drho_dp, drho_dT;
+                        _fluid.rho_from_p_T(
+                            _pressure(r, t), _temperature(r, t), rho, drho_dp, drho_dT);
+                        return drho_dp * _pressure.dot(r, t) + drho_dT * _temperature.dot(r, t);
+                      });
 }

@@ -29,4 +29,3 @@ public:
 };
 
 #endif // LIBMESH_ENABLE_AMR
-

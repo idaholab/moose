@@ -88,7 +88,8 @@ SpiralAnnularMesh::buildMesh()
     // We capture parameters which don't need to change from the current scope at
     // the time this lambda is declared. The values are not updated later, so we
     // can't use this for e.g. f, df, and alpha.
-    auto newton = [this, n](Real & f, Real & df, const Real & alpha) {
+    auto newton = [this, n](Real & f, Real & df, const Real & alpha)
+    {
       f = (1. - std::pow(alpha, n + 1)) / (1. - alpha) -
           (_outer_radius - _inner_radius) / _initial_delta_r;
       df = (-(n + 1) * (1 - alpha) * std::pow(alpha, n) + (1. - std::pow(alpha, n + 1))) /

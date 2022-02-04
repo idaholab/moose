@@ -31,4 +31,3 @@ protected:
   const libMesh::Parallel::Communicator & _comm;
   bool _warn;
 };
-

@@ -121,4 +121,3 @@ protected:
 
   std::vector<VectorPostprocessorValue *> _values;
 };
-

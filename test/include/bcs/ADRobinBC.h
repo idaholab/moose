@@ -20,5 +20,4 @@ public:
 
 protected:
   ADReal computeQpResidual() override;
-
 };

@@ -24,9 +24,7 @@ MaxQpsThread::MaxQpsThread(FEProblemBase & fe_problem)
 
 // Splitting Constructor
 MaxQpsThread::MaxQpsThread(MaxQpsThread & x, Threads::split /*split*/)
-  : _fe_problem(x._fe_problem),
-    _max(x._max),
-    _max_shape_funcs(x._max_shape_funcs)
+  : _fe_problem(x._fe_problem), _max(x._max), _max_shape_funcs(x._max_shape_funcs)
 {
 }
 

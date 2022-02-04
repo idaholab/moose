@@ -37,4 +37,3 @@ protected:
   /// Compute the damping for the current qp
   virtual Real computeQpDamping() override;
 };
-

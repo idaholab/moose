@@ -40,4 +40,3 @@ protected:
   std::string _var_name;
   Elem * _element;
 };
-

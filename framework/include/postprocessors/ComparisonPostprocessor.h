@@ -64,4 +64,3 @@ protected:
   /// Absolute tolerance for "fuzzy" comparisons
   const Real _absolute_tolerance;
 };
-

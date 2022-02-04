@@ -22,5 +22,4 @@ protected:
   virtual ADReal computeQpResidual();
 
   const ADVariableValue & _v;
-
 };

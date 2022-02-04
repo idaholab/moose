@@ -54,4 +54,3 @@ protected:
   /// Stores the last time this was executed
   Real _time;
 };
-

@@ -32,4 +32,3 @@ protected:
 
   bool _lumping;
 };
-

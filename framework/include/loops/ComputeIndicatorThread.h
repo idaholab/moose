@@ -57,4 +57,3 @@ protected:
 
   bool _finalize;
 };
-

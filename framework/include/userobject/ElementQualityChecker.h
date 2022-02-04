@@ -65,4 +65,3 @@ private:
   // the way how check failure should respond: warning or error
   const FailureType _failure_type;
 };
-

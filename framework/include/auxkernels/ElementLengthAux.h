@@ -37,4 +37,3 @@ protected:
   /// The type of calculation to perform min or max
   const bool _use_min;
 };
-

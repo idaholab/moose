@@ -487,9 +487,8 @@ CO2FluidProperties::rho_from_p_T(Real pressure, Real temperature) const
 
   // The density is found by finding the zero of the pressure calculated using the
   // Span and Wagner EOS minus the input pressure
-  auto pressure_diff = [&pressure, &temperature, this](Real x) {
-    return p_from_rho_T(x, temperature) - pressure;
-  };
+  auto pressure_diff = [&pressure, &temperature, this](Real x)
+  { return p_from_rho_T(x, temperature) - pressure; };
 
   BrentsMethod::bracket(pressure_diff, lower_density, upper_density);
   density = BrentsMethod::root(pressure_diff, lower_density, upper_density);

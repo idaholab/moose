@@ -26,8 +26,7 @@ MaternHalfIntCovariance::validParams()
 }
 
 MaternHalfIntCovariance::MaternHalfIntCovariance(const InputParameters & parameters)
-  : CovarianceFunctionBase(parameters),
-    _p(getParam<unsigned int>("p"))
+  : CovarianceFunctionBase(parameters), _p(getParam<unsigned int>("p"))
 {
   _tunable_hp.insert("noise_variance");
   _tunable_hp.insert("signal_variance");

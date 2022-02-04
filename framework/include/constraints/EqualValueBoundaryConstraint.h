@@ -53,4 +53,3 @@ protected:
   // Penalty if constraint is not satisfied
   Real _penalty;
 };
-

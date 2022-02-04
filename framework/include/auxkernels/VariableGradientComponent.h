@@ -42,4 +42,3 @@ private:
   /// Desired component
   int _component;
 };
-

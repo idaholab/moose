@@ -44,4 +44,3 @@ protected:
   Node * _node_ptr;
   const Real _scale_factor;
 };
-

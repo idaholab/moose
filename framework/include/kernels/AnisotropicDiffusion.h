@@ -36,4 +36,3 @@ protected:
 
   RealTensorValue _k;
 };
-

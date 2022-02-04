@@ -60,4 +60,3 @@ private:
   MooseMesh & _mesh;
   NonlinearSystemBase & _nl;
 };
-

@@ -42,4 +42,3 @@ protected:
 
   unsigned int _qp;
 };
-

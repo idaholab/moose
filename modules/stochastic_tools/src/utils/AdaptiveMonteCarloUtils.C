@@ -24,9 +24,10 @@ computeSTD(const std::vector<Real> & data, const unsigned int & start_index)
   {
     const Real mean = computeMean(data, start_index);
     const Real sq_diff =
-        std::accumulate(data.begin() + start_index, data.end(), 0.0, [&mean](Real x, Real y) {
-          return x + (y - mean) * (y - mean);
-        });
+        std::accumulate(data.begin() + start_index,
+                        data.end(),
+                        0.0,
+                        [&mean](Real x, Real y) { return x + (y - mean) * (y - mean); });
     return std::sqrt(sq_diff / (data.size() - start_index));
   }
 }

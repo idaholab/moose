@@ -39,4 +39,3 @@ private:
 
   const MeshBase & _mesh;
 };
-

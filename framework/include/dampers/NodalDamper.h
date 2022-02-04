@@ -75,4 +75,3 @@ protected:
   /// Holds the current solution at the current node
   const VariableValue & _u;
 };
-

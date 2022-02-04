@@ -40,4 +40,3 @@ protected:
   /// The constant amount of the Newton update to take.
   Real _damping;
 };
-

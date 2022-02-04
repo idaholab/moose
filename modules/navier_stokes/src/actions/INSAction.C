@@ -448,7 +448,8 @@ INSAction::act()
 
   if (_current_task == "add_material" && _use_ad)
   {
-    auto set_common_parameters = [&](InputParameters & params) {
+    auto set_common_parameters = [&](InputParameters & params)
+    {
       if (_blocks.size() > 0)
         params.set<std::vector<SubdomainName>>("block") = _blocks;
       params.set<CoupledName>("velocity") = {NS::velocity};
@@ -458,7 +459,8 @@ INSAction::act()
       params.set<MaterialPropertyName>("rho_name") = getParam<MaterialPropertyName>("density_name");
     };
 
-    auto set_common_3eqn_parameters = [&](InputParameters & params) {
+    auto set_common_3eqn_parameters = [&](InputParameters & params)
+    {
       set_common_parameters(params);
       params.set<CoupledName>("temperature") = {_temperature_variable_name};
       params.set<MaterialPropertyName>("cp_name") =

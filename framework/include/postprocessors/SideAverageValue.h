@@ -39,4 +39,3 @@ protected:
   virtual Real volume();
   Real _volume;
 };
-

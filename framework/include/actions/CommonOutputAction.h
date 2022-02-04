@@ -53,4 +53,3 @@ private:
   /// Parameters from the action being created (AddOutputAction)
   InputParameters _action_params;
 };
-

@@ -114,4 +114,3 @@ template <>
 void dataStore(std::ostream & stream, PenetrationInfo *& pinfo, void * context);
 template <>
 void dataLoad(std::istream & stream, PenetrationInfo *& pinfo, void * context);
-

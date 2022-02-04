@@ -35,4 +35,3 @@ public:
 protected:
   MooseEnum _residual_type;
 };
-

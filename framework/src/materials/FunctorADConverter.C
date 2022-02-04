@@ -96,9 +96,10 @@ FunctorADConverterTempl<T>::FunctorADConverterTempl(const InputParameters & para
   {
     const auto & ad_functor = getFunctor<typename Moose::ADType<T>::type>(ad_props_in[i]);
     auto & reg_prop = declareFunctorProperty<T>(reg_props_out[i]);
-    reg_prop.setFunctor(_mesh, blockIDs(), [&ad_functor](const auto & r, const auto & t) -> T {
-      return MetaPhysicL::raw_value(ad_functor(r, t));
-    });
+    reg_prop.setFunctor(_mesh,
+                        blockIDs(),
+                        [&ad_functor](const auto & r, const auto & t) -> T
+                        { return MetaPhysicL::raw_value(ad_functor(r, t)); });
   }
 }
 

@@ -18,7 +18,8 @@ TEST(NestedSolve, FixedSize)
 {
   auto compute = [&](const NestedSolve::Value<2> & guess,
                      NestedSolve::Value<2> & residual,
-                     NestedSolve::Jacobian<2> & jacobian) {
+                     NestedSolve::Jacobian<2> & jacobian)
+  {
     residual(0) = guess(0) + guess(0) * guess(1) - 4;
     residual(1) = guess(0) + guess(1) - 3;
 
@@ -41,7 +42,8 @@ TEST(NestedSolve, DynamicSize)
 {
   auto compute = [&](const NestedSolve::Value<> & guess,
                      NestedSolve::Value<> & residual,
-                     NestedSolve::Jacobian<> & jacobian) {
+                     NestedSolve::Jacobian<> & jacobian)
+  {
     residual(0) = guess(0) + guess(0) * guess(1) - 4;
     residual(1) = guess(0) + guess(1) - 3;
 
@@ -63,13 +65,14 @@ TEST(NestedSolve, DynamicSize)
 
 TEST(NestedSolve, DynamicSizePowell)
 {
-  auto computeResidual = [&](const NestedSolve::Value<> & guess, NestedSolve::Value<> & residual) {
+  auto computeResidual = [&](const NestedSolve::Value<> & guess, NestedSolve::Value<> & residual)
+  {
     residual(0) = guess(0) + guess(0) * guess(1) - 4;
     residual(1) = guess(0) + guess(1) - 3;
   };
 
-  auto computeJacobian = [&](const NestedSolve::Value<> & guess,
-                             NestedSolve::Jacobian<> & jacobian) {
+  auto computeJacobian = [&](const NestedSolve::Value<> & guess, NestedSolve::Jacobian<> & jacobian)
+  {
     jacobian(0, 0) = 1 + guess(1);
     jacobian(0, 1) = guess(0);
     jacobian(1, 0) = 1;
@@ -88,14 +91,15 @@ TEST(NestedSolve, DynamicSizePowell)
 TEST(NestedSolve, RankTwoTensor)
 {
   auto compute =
-      [&](const RealVectorValue & guess, RealVectorValue & residual, RankTwoTensor & jacobian) {
-        //  x + 2 * y - 2 * z + 15 = 0
-        //  2 * x + y - 5 * z + 21 = 0
-        //  x - 4 * y + z -18 = 0
+      [&](const RealVectorValue & guess, RealVectorValue & residual, RankTwoTensor & jacobian)
+  {
+    //  x + 2 * y - 2 * z + 15 = 0
+    //  2 * x + y - 5 * z + 21 = 0
+    //  x - 4 * y + z -18 = 0
 
-        jacobian = RankTwoTensor(1, 2, -2, 2, 1, -5, 1, -4, 1).transpose();
-        residual = jacobian * guess + RealVectorValue(15, 21, -18);
-      };
+    jacobian = RankTwoTensor(1, 2, -2, 2, 1, -5, 1, -4, 1).transpose();
+    residual = jacobian * guess + RealVectorValue(15, 21, -18);
+  };
 
   NestedSolve solver;
   RealVectorValue solution;
@@ -108,7 +112,8 @@ TEST(NestedSolve, RankTwoTensor)
 
 TEST(NestedSolve, RankTwoTensorPowell)
 {
-  auto computeResidual = [&](const RealVectorValue & guess, RealVectorValue & residual) {
+  auto computeResidual = [&](const RealVectorValue & guess, RealVectorValue & residual)
+  {
     //  x + 2 * y - 2 * z + 15 = 0
     //  2 * x + y - 5 * z + 21 = 0
     //  x - 4 * y + z -18 = 0
@@ -116,9 +121,8 @@ TEST(NestedSolve, RankTwoTensorPowell)
     auto jacobian = RankTwoTensor(1, 2, -2, 2, 1, -5, 1, -4, 1).transpose();
     residual = jacobian * guess + RealVectorValue(15, 21, -18);
   };
-  auto computeJacobian = [&](const RealVectorValue & /*guess*/, RankTwoTensor & jacobian) {
-    jacobian = RankTwoTensor(1, 2, -2, 2, 1, -5, 1, -4, 1).transpose();
-  };
+  auto computeJacobian = [&](const RealVectorValue & /*guess*/, RankTwoTensor & jacobian)
+  { jacobian = RankTwoTensor(1, 2, -2, 2, 1, -5, 1, -4, 1).transpose(); };
 
   NestedSolve solver;
   RealVectorValue solution;
@@ -131,7 +135,8 @@ TEST(NestedSolve, RankTwoTensorPowell)
 
 TEST(NestedSolve, Scalar)
 {
-  auto compute = [&](const Real & guess, Real & residual, Real & jacobian) {
+  auto compute = [&](const Real & guess, Real & residual, Real & jacobian)
+  {
     residual = guess * guess * guess - 8;
     jacobian = 3 * guess * guess;
   };
@@ -145,9 +150,8 @@ TEST(NestedSolve, Scalar)
 
 TEST(NestedSolve, ScalarPowell)
 {
-  auto computeResidual = [&](const Real & guess, Real & residual) {
-    residual = guess * guess * guess - 8;
-  };
+  auto computeResidual = [&](const Real & guess, Real & residual)
+  { residual = guess * guess * guess - 8; };
 
   auto computeJacobian = [&](const Real & guess, Real & jacobian) { jacobian = 3 * guess * guess; };
 
@@ -172,7 +176,8 @@ TEST(NestedSolve, PlacementNew)
 
 TEST(NestedSolve, NoConvergence)
 {
-  auto compute = [&](const Real & guess, Real & residual, Real & jacobian) {
+  auto compute = [&](const Real & guess, Real & residual, Real & jacobian)
+  {
     residual = guess * guess + 1.0;
     jacobian = 2.0 * guess;
   };

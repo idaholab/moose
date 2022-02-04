@@ -176,7 +176,8 @@ ControllableItem::check() const
 {
   return std::all_of(_pairs.begin(),
                      _pairs.end(),
-                     [](std::pair<MooseObjectParameterName, libMesh::Parameters::Value *> pair) {
+                     [](std::pair<MooseObjectParameterName, libMesh::Parameters::Value *> pair)
+                     {
                        libMesh::Parameters::Parameter<T> * param =
                            dynamic_cast<libMesh::Parameters::Parameter<T> *>(pair.second);
                        return param != nullptr;

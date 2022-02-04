@@ -53,4 +53,3 @@ protected:
   /// A reference to the variable to compute the norm of.
   const VariableValue & _coupled_var;
 };
-

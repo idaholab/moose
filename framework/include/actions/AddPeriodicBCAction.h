@@ -47,4 +47,3 @@ protected:
 
   MooseMesh * _mesh;
 };
-

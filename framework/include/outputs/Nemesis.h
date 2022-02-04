@@ -95,4 +95,3 @@ private:
   /// Flag if the output has been initialized
   bool _nemesis_initialized;
 };
-

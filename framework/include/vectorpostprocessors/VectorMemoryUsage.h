@@ -63,4 +63,3 @@ protected:
   Real _peak_virtual_mem;
   ///@}
 };
-

@@ -38,4 +38,3 @@ protected:
   /// UserObject to be queried for a value
   const UserObject & _user_object;
 };
-

@@ -30,4 +30,3 @@ std::string getExecutablePath();
  */
 std::string getExecutableName();
 }
-

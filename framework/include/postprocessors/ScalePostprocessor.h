@@ -34,4 +34,3 @@ protected:
   const PostprocessorValue & _value;
   Real _scaling_factor;
 };
-

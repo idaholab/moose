@@ -57,7 +57,6 @@ public:
                            const int ind);
 
 private:
-
   /// gamma exponential factor for use in kernel
   Real _gamma;
 };

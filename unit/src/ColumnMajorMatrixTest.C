@@ -146,15 +146,15 @@ TEST_F(ColumnMajorMatrixTest, reshapeMatrix)
   mat.reshape(2, 3);
 
   /** from:
-  * 1 4
-  * 2 5
-  * 3 6
-  *
-  * to:
-  *
-  * 1 3 5
-  * 2 4 6
-  */
+   * 1 4
+   * 2 5
+   * 3 6
+   *
+   * to:
+   *
+   * 1 3 5
+   * 2 4 6
+   */
 
   EXPECT_EQ(mat(0, 1), 3);
   EXPECT_EQ(mat(1, 2), 6);

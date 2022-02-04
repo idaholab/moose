@@ -26,4 +26,3 @@ public:
   // prepare PETSc options
   void act();
 };
-

@@ -39,7 +39,8 @@ CheckLegacyParamsAction::act()
   // using the legacy method, skipping those registered to MooseApp
   // (which is required so that apps that use legacy params from framework
   // objects still pass while we deprecate)
-  const auto add_registry_objects = [&objects, &for_test](const auto & per_label_map) {
+  const auto add_registry_objects = [&objects, &for_test](const auto & per_label_map)
+  {
     for (const auto & label_entries_pair : per_label_map)
     {
       const auto & label = label_entries_pair.first;

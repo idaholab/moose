@@ -27,4 +27,3 @@ public:
 
   NodalVariableVectorPostprocessor(const InputParameters & parameters);
 };
-

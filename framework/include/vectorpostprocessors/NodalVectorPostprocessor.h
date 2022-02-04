@@ -32,4 +32,3 @@ public:
    */
   virtual void finalize() override {}
 };
-

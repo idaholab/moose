@@ -305,21 +305,22 @@ ReporterData::getReporterStateHelper(const ReporterName & reporter_name,
   if (hasReporterState(reporter_name))
   {
     const auto error_helper =
-        [this, &reporter_name, &moose_object, &declare](const std::string & suffix) {
-          std::stringstream oss;
-          oss << "While " << (declare ? "declaring" : "requesting") << " a "
-              << reporter_name.specialTypeToName() << " value with the name \""
-              << reporter_name.getValueName() << "\"";
-          if (!reporter_name.isPostprocessor() && !reporter_name.isVectorPostprocessor())
-            oss << " and type \"" << MooseUtils::prettyCppType<T>() << "\"";
-          oss << ",\na Reporter with the same name " << suffix << ".\n\n";
-          oss << getReporterInfo(reporter_name);
+        [this, &reporter_name, &moose_object, &declare](const std::string & suffix)
+    {
+      std::stringstream oss;
+      oss << "While " << (declare ? "declaring" : "requesting") << " a "
+          << reporter_name.specialTypeToName() << " value with the name \""
+          << reporter_name.getValueName() << "\"";
+      if (!reporter_name.isPostprocessor() && !reporter_name.isVectorPostprocessor())
+        oss << " and type \"" << MooseUtils::prettyCppType<T>() << "\"";
+      oss << ",\na Reporter with the same name " << suffix << ".\n\n";
+      oss << getReporterInfo(reporter_name);
 
-          if (moose_object)
-            moose_object->mooseError(oss.str());
-          else
-            mooseError(oss.str());
-        };
+      if (moose_object)
+        moose_object->mooseError(oss.str());
+      else
+        mooseError(oss.str());
+    };
 
     if (declare && hasReporterValue(reporter_name))
       error_helper("has already been declared");

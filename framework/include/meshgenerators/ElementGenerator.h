@@ -44,4 +44,3 @@ protected:
   /// The type of element to build.
   const unsigned int _elem_type;
 };
-

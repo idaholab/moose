@@ -35,4 +35,3 @@ protected:
   /// The metric type to use
   ElemQuality _metric_type;
 };
-

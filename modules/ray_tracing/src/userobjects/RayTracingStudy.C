@@ -106,9 +106,8 @@ RayTracingStudy::validParams()
   params.addRelationshipManager("ElementPointNeighborLayers",
                                 Moose::RelationshipManagerType::GEOMETRIC |
                                     Moose::RelationshipManagerType::ALGEBRAIC,
-                                [](const InputParameters &, InputParameters & rm_params) {
-                                  rm_params.set<unsigned short>("layers") = 1;
-                                });
+                                [](const InputParameters &, InputParameters & rm_params)
+                                { rm_params.set<unsigned short>("layers") = 1; });
 
   return params;
 }
@@ -1435,8 +1434,9 @@ RayTracingStudy::verifyUniqueRayIDs(const std::vector<std::shared_ptr<Ray>>::con
     std::map<RayID, processor_id_type> global_map;
 
     // Verify another processor's IDs against the global map on rank 0
-    const auto check_ids = [this, &global_map, &error_suffix](processor_id_type pid,
-                                                              const std::vector<RayID> & ids) {
+    const auto check_ids =
+        [this, &global_map, &error_suffix](processor_id_type pid, const std::vector<RayID> & ids)
+    {
       for (const RayID id : ids)
       {
         const auto emplace_pair = global_map.emplace(id, pid);

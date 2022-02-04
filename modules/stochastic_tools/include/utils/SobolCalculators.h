@@ -24,9 +24,7 @@ template <typename InType, typename OutType>
 class SobolCalculator : public Calculator<std::vector<InType>, std::vector<OutType>>
 {
 public:
-  SobolCalculator(const libMesh::ParallelObject & other,
-                  const std::string & name,
-                  bool resample);
+  SobolCalculator(const libMesh::ParallelObject & other, const std::string & name, bool resample);
 
 protected:
   virtual void initialize() override;

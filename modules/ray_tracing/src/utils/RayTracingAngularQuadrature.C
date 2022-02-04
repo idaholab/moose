@@ -113,9 +113,9 @@ RayTracingAngularQuadrature::gaussLegendre(const unsigned int order,
   // Sort based on the points
   std::vector<std::size_t> sorted_indices(x.size());
   std::iota(sorted_indices.begin(), sorted_indices.end(), 0);
-  std::stable_sort(sorted_indices.begin(), sorted_indices.end(), [&x](size_t i1, size_t i2) {
-    return x[i1] < x[i2];
-  });
+  std::stable_sort(sorted_indices.begin(),
+                   sorted_indices.end(),
+                   [&x](size_t i1, size_t i2) { return x[i1] < x[i2]; });
   const auto x_copy = x;
   const auto w_copy = w;
   for (std::size_t i = 0; i < x.size(); ++i)

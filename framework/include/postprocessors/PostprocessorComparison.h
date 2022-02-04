@@ -52,4 +52,3 @@ protected:
   /// The comparison value; 1 for true and 0 for false
   PostprocessorValue _comparison_value;
 };
-

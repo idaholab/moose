@@ -33,4 +33,3 @@ protected:
 
   NearestNodeLocator & _nearest_node;
 };
-

@@ -122,4 +122,3 @@ protected:
   std::set<std::string> _depend;
   std::set<std::string> _supplied;
 };
-

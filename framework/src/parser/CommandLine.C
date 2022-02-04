@@ -73,8 +73,11 @@ CommandLine::initForMultiApp(const std::string & subapp_full_name)
 
   // "remove" CLI args for other sub-applications; remove_if just moves items to the end, so
   // an erase is needed to actually remove the items
-  auto new_end =
-      std::remove_if(_argv.begin(), _argv.end(), [&sub_name, sub_num](const std::string & arg) {
+  auto new_end = std::remove_if(
+      _argv.begin(),
+      _argv.end(),
+      [&sub_name, sub_num](const std::string & arg)
+      {
         // Determine if the current command line argument ('arg') and extract the sub-application
         // name and number. If 'arg' is not command line argument for sub-application then the regex
         // match fails and the argument is retained.

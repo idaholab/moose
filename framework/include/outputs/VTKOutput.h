@@ -47,4 +47,3 @@ private:
   /// Flag for using binary compression
   bool _binary;
 };
-

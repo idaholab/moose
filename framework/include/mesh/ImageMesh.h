@@ -65,4 +65,3 @@ protected:
    */
   const Real & _cells_per_pixel;
 };
-
