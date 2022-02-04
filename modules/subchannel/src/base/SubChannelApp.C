@@ -33,8 +33,6 @@ SubChannelApp::SubChannelApp(InputParameters parameters) : MooseApp(parameters)
   SubChannelApp::registerAll(_factory, _action_factory, _syntax);
 }
 
-SubChannelApp::~SubChannelApp() {}
-
 void
 SubChannelApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {
