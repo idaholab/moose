@@ -99,8 +99,7 @@ projectQPoints3d(const Elem * const msm_elem,
 
   // Transforms quadrature point from first order sub-elements (in case of second-order)
   // to primal element
-  auto transform_qp = [primal_type, sub_elem](const Real nu, const Real xi)
-  {
+  auto transform_qp = [primal_type, sub_elem](const Real nu, const Real xi) {
     switch (primal_type)
     {
       case TRI3:
@@ -158,6 +157,34 @@ projectQPoints3d(const Elem * const msm_elem,
     }
   };
 
+  auto sub_element_type = [primal_type, sub_elem]() {
+    switch (primal_type)
+    {
+      case TRI3:
+      case QUAD4:
+      case TRI6:
+      case QUAD9:
+        return primal_type;
+      case QUAD8:
+        switch (sub_elem)
+        {
+          case 0:
+          case 1:
+          case 2:
+          case 3:
+            return TRI6;
+          case 4:
+            return primal_type;
+          default:
+            mooseError("sub_element_type: Invalid sub_elem: ", sub_elem);
+        }
+      default:
+        mooseError("sub_element_type: Face element type: ",
+                   libMesh::Utility::enum_to_string<ElemType>(primal_type),
+                   " invalid for 3D mortar");
+    }
+  };
+
   // Get sub-elem node indices
   auto sub_elem_node_indices = get_sub_elem_node_indices();
 
@@ -188,7 +215,7 @@ projectQPoints3d(const Elem * const msm_elem,
     {
       VectorValue<Dual2> x1;
       for (auto n : make_range(sub_elem_node_indices.size()))
-        x1 += Moose::fe_lagrange_2D_shape(primal_type, FIRST, n, xi) *
+        x1 += Moose::fe_lagrange_2D_shape(sub_element_type(), FIRST, n, xi) *
               primal_elem->point(sub_elem_node_indices[n]);
       auto u = x1 - x0;
       VectorValue<Dual2> F(u(1) * normal(2) - u(2) * normal(1),

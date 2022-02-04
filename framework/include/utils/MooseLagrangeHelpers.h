@@ -187,6 +187,34 @@ fe_lagrange_2D_shape(const ElemType type,
     {
       switch (type)
       {
+        case QUAD8:
+        {
+          // Compute quad shape functions as a tensor-product
+          const T xi = p(0);
+          const T eta = p(1);
+
+          libmesh_assert_less(i, 8);
+
+          switch (i)
+          {
+            case 0:
+              return .25 * (1. - xi) * (1. - eta) * (-1. - xi - eta);
+            case 1:
+              return .25 * (1. + xi) * (1. - eta) * (-1. + xi - eta);
+            case 2:
+              return .25 * (1. + xi) * (eta + 1.) * (-1. + xi + eta);
+            case 3:
+              return .25 * (1. - xi) * (eta + 1.) * (-1. - xi + eta);
+            case 4:
+              return .5 * (1. - xi * xi) * (1. - eta);
+            case 5:
+              return .5 * (1. + xi) * (1. - eta * eta);
+            case 6:
+              return .5 * (1. - xi * xi) * (1. + eta);
+            case 7:
+              return .5 * (1. - xi) * (1. - eta * eta);
+          }
+        }
         case QUAD9:
         {
           // Compute quad shape functions as a tensor-product
