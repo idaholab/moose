@@ -95,6 +95,11 @@ public:
   bool isNodal() const { return _nodal; }
 
   /**
+   * @return whether this is a mortar auxiliary kernel
+   */
+  virtual bool isMortar() const { return false; }
+
+  /**
    * Get a reference to a variable this kernel is action on
    * @return reference to a variable this kernel is action on
    */
@@ -217,9 +222,6 @@ protected:
 
   /// reference to the solution vector of auxiliary system
   NumericVector<Number> & _solution;
-
-  /// Flag indicating if this aux kernel is boundary restricted
-  const bool _boundary_restricted;
 
   /// Quadrature point index
   unsigned int _qp;

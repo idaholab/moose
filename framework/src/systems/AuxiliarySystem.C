@@ -19,6 +19,7 @@
 #include "ComputeNodalAuxBcsThread.h"
 #include "ComputeElemAuxVarsThread.h"
 #include "ComputeElemAuxBcsThread.h"
+#include "ComputeMortarNodalAuxBndThread.h"
 #include "Parser.h"
 #include "TimeIntegrator.h"
 #include "Conversion.h"
@@ -45,6 +46,7 @@ AuxiliarySystem::AuxiliarySystem(FEProblemBase & subproblem, const std::string &
     _need_serialized_solution(false),
     _aux_scalar_storage(_app.getExecuteOnEnum()),
     _nodal_aux_storage(_app.getExecuteOnEnum()),
+    _mortar_nodal_aux_storage(_app.getExecuteOnEnum()),
     _elemental_aux_storage(_app.getExecuteOnEnum()),
     _nodal_vec_aux_storage(_app.getExecuteOnEnum()),
     _elemental_vec_aux_storage(_app.getExecuteOnEnum()),
@@ -98,6 +100,9 @@ AuxiliarySystem::initialSetup()
     _nodal_aux_storage.sort(tid);
     _nodal_aux_storage.initialSetup(tid);
 
+    _mortar_nodal_aux_storage.sort(tid);
+    _mortar_nodal_aux_storage.initialSetup(tid);
+
     _nodal_vec_aux_storage.sort(tid);
     _nodal_vec_aux_storage.initialSetup(tid);
 
@@ -124,6 +129,7 @@ AuxiliarySystem::timestepSetup()
   {
     _aux_scalar_storage.timestepSetup(tid);
     _nodal_aux_storage.timestepSetup(tid);
+    _mortar_nodal_aux_storage.timestepSetup(tid);
     _nodal_vec_aux_storage.timestepSetup(tid);
     _nodal_array_aux_storage.timestepSetup(tid);
     _elemental_aux_storage.timestepSetup(tid);
@@ -141,6 +147,7 @@ AuxiliarySystem::subdomainSetup()
   {
     _aux_scalar_storage.subdomainSetup(tid);
     _nodal_aux_storage.subdomainSetup(tid);
+    _mortar_nodal_aux_storage.subdomainSetup(tid);
     _nodal_vec_aux_storage.subdomainSetup(tid);
     _nodal_array_aux_storage.subdomainSetup(tid);
     _elemental_aux_storage.subdomainSetup(tid);
@@ -158,6 +165,7 @@ AuxiliarySystem::jacobianSetup()
   {
     _aux_scalar_storage.jacobianSetup(tid);
     _nodal_aux_storage.jacobianSetup(tid);
+    _mortar_nodal_aux_storage.jacobianSetup(tid);
     _nodal_vec_aux_storage.jacobianSetup(tid);
     _nodal_array_aux_storage.jacobianSetup(tid);
     _elemental_aux_storage.jacobianSetup(tid);
@@ -175,6 +183,7 @@ AuxiliarySystem::residualSetup()
   {
     _aux_scalar_storage.residualSetup(tid);
     _nodal_aux_storage.residualSetup(tid);
+    _mortar_nodal_aux_storage.residualSetup(tid);
     _nodal_vec_aux_storage.residualSetup(tid);
     _nodal_array_aux_storage.residualSetup(tid);
     _elemental_aux_storage.residualSetup(tid);
@@ -188,6 +197,7 @@ AuxiliarySystem::updateActive(THREAD_ID tid)
 {
   _aux_scalar_storage.updateActive(tid);
   _nodal_aux_storage.updateActive(tid);
+  _mortar_nodal_aux_storage.updateActive(tid);
   _nodal_vec_aux_storage.updateActive(tid);
   _nodal_array_aux_storage.updateActive(tid);
   _elemental_aux_storage.updateActive(tid);
@@ -292,7 +302,12 @@ AuxiliarySystem::addKernel(const std::string & kernel_name,
       std::shared_ptr<AuxKernel> kernel =
           _factory.create<AuxKernel>(kernel_name, name, parameters, tid);
       if (kernel->isNodal())
-        _nodal_aux_storage.addObject(kernel, tid);
+      {
+        if (kernel->isMortar())
+          _mortar_nodal_aux_storage.addObject(kernel, tid);
+        else
+          _nodal_aux_storage.addObject(kernel, tid);
+      }
       else
         _elemental_aux_storage.addObject(kernel, tid);
     }
@@ -302,7 +317,11 @@ AuxiliarySystem::addKernel(const std::string & kernel_name,
       std::shared_ptr<VectorAuxKernel> kernel =
           _factory.create<VectorAuxKernel>(kernel_name, name, parameters, tid);
       if (kernel->isNodal())
+      {
+        if (kernel->isMortar())
+          mooseError("Vector mortar aux kernels not yet implemented");
         _nodal_vec_aux_storage.addObject(kernel, tid);
+      }
       else
         _elemental_vec_aux_storage.addObject(kernel, tid);
     }
@@ -312,7 +331,11 @@ AuxiliarySystem::addKernel(const std::string & kernel_name,
       std::shared_ptr<ArrayAuxKernel> kernel =
           _factory.create<ArrayAuxKernel>(kernel_name, name, parameters, tid);
       if (kernel->isNodal())
+      {
+        if (kernel->isMortar())
+          mooseError("Vector mortar aux kernels not yet implemented");
         _nodal_array_aux_storage.addObject(kernel, tid);
+      }
       else
         _elemental_array_aux_storage.addObject(kernel, tid);
     }
@@ -416,6 +439,7 @@ AuxiliarySystem::compute(ExecFlagType type)
     computeNodalArrayVars(type);
     computeNodalVecVars(type);
     computeNodalVars(type);
+    computeMortarNodalVars(type);
     computeElementalArrayVars(type);
     computeElementalVecVars(type);
     computeElementalVars(type);
@@ -471,6 +495,17 @@ AuxiliarySystem::getDependObjects(ExecFlagType type)
   {
     const std::vector<std::shared_ptr<AuxKernel>> & auxs =
         _nodal_aux_storage[type].getActiveObjects();
+    for (const auto & aux : auxs)
+    {
+      const std::set<UserObjectName> & uo = aux->getDependObjects();
+      depend_objects.insert(uo.begin(), uo.end());
+    }
+  }
+
+  // Mortar Nodal AuxKernels
+  {
+    const std::vector<std::shared_ptr<AuxKernel>> & auxs =
+        _mortar_nodal_aux_storage[type].getActiveObjects();
     for (const auto & aux : auxs)
     {
       const std::set<UserObjectName> & uo = aux->getDependObjects();
@@ -544,6 +579,17 @@ AuxiliarySystem::getDependObjects()
   // Nodal AuxKernels
   {
     const std::vector<std::shared_ptr<AuxKernel>> & auxs = _nodal_aux_storage.getActiveObjects();
+    for (const auto & aux : auxs)
+    {
+      const std::set<UserObjectName> & uo = aux->getDependObjects();
+      depend_objects.insert(uo.begin(), uo.end());
+    }
+  }
+
+  // Mortar Nodal AuxKernels
+  {
+    const std::vector<std::shared_ptr<AuxKernel>> & auxs =
+        _mortar_nodal_aux_storage.getActiveObjects();
     for (const auto & aux : auxs)
     {
       const std::set<UserObjectName> & uo = aux->getDependObjects();
@@ -671,6 +717,37 @@ AuxiliarySystem::computeNodalArrayVars(ExecFlagType type)
 }
 
 void
+AuxiliarySystem::computeMortarNodalVars(const ExecFlagType type)
+{
+  TIME_SECTION("computeMortarNodalVars", 3);
+
+  const MooseObjectWarehouse<AuxKernel> & mortar_nodal = _mortar_nodal_aux_storage[type];
+
+  mooseAssert(!mortar_nodal.hasActiveBlockObjects(),
+              "We don't allow creation of block restricted mortar nodal aux kernels.");
+
+  if (mortar_nodal.hasActiveBoundaryObjects())
+  {
+    ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
+    for (const auto & map_pr : mortar_nodal.getActiveBoundaryObjects())
+    {
+      const auto bnd_id = map_pr.first;
+      for (const auto index : index_range(map_pr.second))
+      {
+        PARALLEL_TRY
+        {
+          ComputeMortarNodalAuxBndThread<AuxKernel> mnabt(_fe_problem, mortar_nodal, bnd_id, index);
+          Threads::parallel_reduce(bnd_nodes, mnabt);
+          solution().close();
+          _sys.update();
+        }
+        PARALLEL_CATCH;
+      }
+    }
+  }
+}
+
+void
 AuxiliarySystem::computeElementalVars(ExecFlagType type)
 {
   TIME_SECTION("computeElementalVars", 3);
@@ -698,7 +775,8 @@ AuxiliarySystem::computeElementalArrayVars(ExecFlagType type)
 void
 AuxiliarySystem::augmentSparsity(SparsityPattern::Graph & /*sparsity*/,
                                  std::vector<dof_id_type> & /*n_nz*/,
-                                 std::vector<dof_id_type> & /*n_oz*/)
+                                 std::vector<dof_id_type> &
+                                 /*n_oz*/)
 {
 }
 
@@ -758,8 +836,8 @@ AuxiliarySystem::computeElementalVarsHelper(
     }
     PARALLEL_CATCH;
 
-    // We need to make sure we propagate exceptions to all processes before trying to close here,
-    // which is a parallel operation
+    // We need to make sure we propagate exceptions to all processes before trying to close
+    // here, which is a parallel operation
     solution().close();
     _sys.update();
   }
@@ -784,8 +862,8 @@ AuxiliarySystem::computeElementalVarsHelper(
     }
     PARALLEL_CATCH;
 
-    // We need to make sure we propagate exceptions to all processes before trying to close here,
-    // which is a parallel operation
+    // We need to make sure we propagate exceptions to all processes before trying to close
+    // here, which is a parallel operation
     solution().close();
     _sys.update();
   }

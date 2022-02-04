@@ -13,6 +13,18 @@
 
 #include "libmesh/quadrature.h"
 
+namespace
+{
+const InputParameters &
+setBoundaryParam(const InputParameters & params_in)
+{
+  InputParameters & ret = const_cast<InputParameters &>(params_in);
+  ret.set<std::vector<BoundaryName>>("boundary") = {
+      params_in.get<BoundaryName>("secondary_boundary")};
+  return ret;
+}
+}
+
 template <typename ComputeValueType>
 InputParameters
 MortarNodalAuxKernelTempl<ComputeValueType>::validParams()
@@ -20,13 +32,15 @@ MortarNodalAuxKernelTempl<ComputeValueType>::validParams()
   InputParameters params = AuxKernelTempl<ComputeValueType>::validParams();
   params += MortarConsumerInterface::validParams();
   params.set<bool>("ghost_point_neighbors") = true;
+  params.suppressParameter<std::vector<BoundaryName>>("boundary");
+  params.suppressParameter<std::vector<SubdomainName>>("block");
   return params;
 }
 
 template <typename ComputeValueType>
 MortarNodalAuxKernelTempl<ComputeValueType>::MortarNodalAuxKernelTempl(
     const InputParameters & parameters)
-  : AuxKernelTempl<ComputeValueType>(parameters),
+  : AuxKernelTempl<ComputeValueType>(setBoundaryParam(parameters)),
     MortarExecutorInterface(
         *this->template getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     MortarConsumerInterface(this),
