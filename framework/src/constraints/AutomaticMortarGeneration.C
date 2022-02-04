@@ -296,11 +296,11 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
       new_node->set_unique_id(new_node->id() + node_unique_id_offset);
     }
 
-    Elem * new_elem;
+    std::unique_ptr<Elem> new_elem;
     if (secondary_elem->default_order() == SECOND)
-      new_elem = new Edge3;
+      new_elem = std::make_unique<Edge3>();
     else
-      new_elem = new Edge2;
+      new_elem = std::make_unique<Edge2>();
 
     new_elem->processor_id() = secondary_elem->processor_id();
     new_elem->subdomain_id() = secondary_elem->subdomain_id();
@@ -310,7 +310,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     for (MooseIndex(new_elem->n_nodes()) n = 0; n < new_elem->n_nodes(); ++n)
       new_elem->set_node(n) = new_nodes[n];
 
-    _mortar_segment_mesh->add_elem(new_elem);
+    Elem * new_elem_ptr = _mortar_segment_mesh->add_elem(new_elem.release());
 
     // The xi^(1) values for this mortar segment are initially -1 and 1.
     MortarSegmentInfo msinfo;
@@ -353,14 +353,14 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
       msinfo.primary_elem = node0_primary_candidate;
 
     // Associate this MSM elem with the MortarSegmentInfo.
-    _msm_elem_to_info.emplace(new_elem, msinfo);
+    _msm_elem_to_info.emplace(new_elem_ptr, msinfo);
     _secondary_ip_sub_ids.insert(msinfo.secondary_elem->interior_parent()->subdomain_id());
     if (msinfo.primary_elem)
       _primary_ip_sub_ids.insert(msinfo.primary_elem->interior_parent()->subdomain_id());
 
     // Maintain the mapping between secondary elems and mortar segment elems contained within them.
     // Initially, only the original secondary_elem is present.
-    _secondary_elems_to_mortar_segments[secondary_elem].insert(new_elem);
+    _secondary_elems_to_mortar_segments[secondary_elem].insert(new_elem_ptr);
   }
 
   // 2.) Insert new nodes from primary side and split mortar segments as necessary.
@@ -518,11 +518,11 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     }
 
     // Make an Elem on the left
-    Elem * new_elem_left;
+    std::unique_ptr<Elem> new_elem_left;
     if (order == SECOND)
-      new_elem_left = new Edge3;
+      new_elem_left = std::make_unique<Edge3>();
     else
-      new_elem_left = new Edge2;
+      new_elem_left = std::make_unique<Edge2>();
 
     new_elem_left->processor_id() = current_mortar_segment->processor_id();
     new_elem_left->subdomain_id() = current_mortar_segment->subdomain_id();
@@ -532,11 +532,11 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     new_elem_left->set_node(1) = new_node;
 
     // Make an Elem on the right
-    Elem * new_elem_right;
+    std::unique_ptr<Elem> new_elem_right;
     if (order == SECOND)
-      new_elem_right = new Edge3;
+      new_elem_right = std::make_unique<Edge3>();
     else
-      new_elem_right = new Edge2;
+      new_elem_right = std::make_unique<Edge2>();
 
     new_elem_right->processor_id() = current_mortar_segment->processor_id();
     new_elem_right->subdomain_id() = current_mortar_segment->subdomain_id();
@@ -618,7 +618,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
 
     if (add_left)
     {
-      _mortar_segment_mesh->add_elem(new_elem_left);
+      Elem * msm_new_elem = _mortar_segment_mesh->add_elem(new_elem_left.release());
 
       // Create new MortarSegmentInfo objects for new_elem_left
       MortarSegmentInfo new_msinfo_left;
@@ -634,7 +634,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
       new_msinfo_left.primary_elem = left_primary_elem;
 
       // Add new msinfo objects to the map.
-      _msm_elem_to_info.emplace(new_elem_left, new_msinfo_left);
+      _msm_elem_to_info.emplace(msm_new_elem, new_msinfo_left);
       _secondary_ip_sub_ids.insert(
           new_msinfo_left.secondary_elem->interior_parent()->subdomain_id());
       if (new_msinfo_left.primary_elem)
@@ -642,12 +642,12 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
 
       // We need to insert new_elem_left in
       // the mortar_segment_set for this secondary_elem.
-      mortar_segment_set.insert(new_elem_left);
+      mortar_segment_set.insert(msm_new_elem);
     }
 
     if (add_right)
     {
-      _mortar_segment_mesh->add_elem(new_elem_right);
+      Elem * msm_new_elem = _mortar_segment_mesh->add_elem(new_elem_right.release());
 
       // Create new MortarSegmentInfo objects for new_elem_right
       MortarSegmentInfo new_msinfo_right;
@@ -659,14 +659,14 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
       new_msinfo_right.xi2_a = right_xi2;
       new_msinfo_right.primary_elem = right_primary_elem;
 
-      _msm_elem_to_info.emplace(new_elem_right, new_msinfo_right);
+      _msm_elem_to_info.emplace(msm_new_elem, new_msinfo_right);
       _secondary_ip_sub_ids.insert(
           new_msinfo_right.secondary_elem->interior_parent()->subdomain_id());
       if (new_msinfo_right.primary_elem)
         _primary_ip_sub_ids.insert(
             new_msinfo_right.primary_elem->interior_parent()->subdomain_id());
 
-      mortar_segment_set.insert(new_elem_right);
+      mortar_segment_set.insert(msm_new_elem);
     }
 
     // Erase the MortarSegmentInfo object for current_mortar_segment from the map.
@@ -1393,8 +1393,8 @@ AutomaticMortarGeneration::computeInactiveLMNodes()
   // and store to use later to zero LM DoFs on inactive nodes
   _inactive_local_lm_nodes.clear();
   for (const auto & pr : _primary_secondary_subdomain_id_pairs)
-    for (const auto el :
-         _mesh.active_local_subdomain_elements_ptr_range(/*secondary_subd_id*/ pr.second))
+    for (const auto el : _mesh.active_local_subdomain_elements_ptr_range(
+             /*secondary_subd_id*/ pr.second))
       for (const auto n : make_range(el->n_nodes()))
         if (active_local_nodes.find(el->node_id(n)) == active_local_nodes.end())
           _inactive_local_lm_nodes.insert(el->node_ptr(n));
@@ -1443,8 +1443,8 @@ AutomaticMortarGeneration::computeInactiveLMElems()
   // Take complement of active elements in active local subdomain to get inactive local elements
   _inactive_local_lm_elems.clear();
   for (const auto & pr : _primary_secondary_subdomain_id_pairs)
-    for (const auto el :
-         _mesh.active_local_subdomain_elements_ptr_range(/*secondary_subd_id*/ pr.second))
+    for (const auto el : _mesh.active_local_subdomain_elements_ptr_range(
+             /*secondary_subd_id*/ pr.second))
       if (active_local_elems.find(el) == active_local_elems.end())
         _inactive_local_lm_elems.insert(el);
 }
