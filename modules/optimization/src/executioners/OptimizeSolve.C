@@ -259,9 +259,13 @@ OptimizeSolve::objectiveAndGradientFunctionWrapper(
 }
 
 PetscErrorCode
-OptimizeSolve::hessianFunctionWrapper(
-    Tao /*tao*/, Vec /*x*/, Mat /*hessian*/, Mat /*pc*/, void * /*ctx*/)
+OptimizeSolve::hessianFunctionWrapper(Tao /*tao*/, Vec x, Mat /*hessian*/, Mat /*pc*/, void * ctx)
 {
+  // this will need to set the real parameters (Vec x) on the solver (see ln 250) so that the
+  // current parameter can be used in the applyHessianWrapper.  This is not important for force
+  // inversion because the hessian does not change.  This will be important for material
+  // inversion.
+
   // everything is done by the shell matrix multiply -- applyHessianWrapper
   // This will be needed if the param needs to be set, like for material inversion.
   // For force inversion, this does not do anything.
@@ -294,8 +298,10 @@ OptimizeSolve::applyHessian(libMesh::PetscVector<Number> & s, libMesh::PetscVect
 {
   // What happens for material inversion when the Hessian
   // is dependent on the parameters? Deal with it later???
-
+  // see notes on how this needs to change for Material inversion
   _form_function->updateParameters(s);
+  // this might be exec_forward_hessian so 2 new multiapps for material inversion
+
   if (!_problem.execMultiApps(EXEC_FORWARD))
     mooseError("Forward solve multiapp failed!");
   _obj_iterate++;
