@@ -2,7 +2,7 @@
 
 +Complete input file for this step:+ [01_flow_channel.i](thermal_hydraulics/tutorials/single_phase_flow/01_flow_channel.i)
 
-!media images/tutorials/single_phase_flow/step-01.png
+!media thermal_hydraulics/tutorials/single_phase_flow/step-01.png
        style=width:15%;float:right;margin-left:40px
        caption=Model diagram
        id=fig-model

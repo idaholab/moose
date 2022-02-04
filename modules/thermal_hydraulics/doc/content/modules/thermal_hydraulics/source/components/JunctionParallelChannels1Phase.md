@@ -8,7 +8,7 @@ channel configuration appropriate for this junction. The more general
 [volume junction](source/components/VolumeJunction1Phase.md) formulation is
 recommended to model elbows or tees.
 
-!media images/Junction_parallel_channels.png
+!media thermal_hydraulics/misc/Junction_parallel_channels.png
        id=abrupt_dA
        caption= Junction with parallel flow channels.
        style=width:50%;padding:20px;
@@ -39,7 +39,7 @@ junction, it is assumed that there is an abrupt flow area change within the
 junction. For the case where the inlet flow area is smaller than the outlet flow
 area, the geometry of the junction is shown below.
 
-!media images/parallel_junction_geometry.png  style=width:40%;
+!media thermal_hydraulics/misc/parallel_junction_geometry.png  style=width:40%;
 
 It is assumed that the wall pressure is:
 

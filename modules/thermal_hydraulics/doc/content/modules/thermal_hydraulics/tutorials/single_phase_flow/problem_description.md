@@ -1,6 +1,6 @@
 # Introduction
 
-!media images/tutorials/single_phase_flow/step-05.png
+!media thermal_hydraulics/tutorials/single_phase_flow/step-05.png
        style=width:33%;float:right;margin-left:40px
        caption=Diagram of the system
        id=fig-model

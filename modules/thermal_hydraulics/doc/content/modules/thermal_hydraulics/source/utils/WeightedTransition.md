@@ -26,7 +26,7 @@ The transitioned function $f(x)$ has the following desirable properties:
 An example of the transition is illustrated in [WeightedTransition_discontinuous],
 where is transition is created in the region $x\in(1,5)$ at a discontinuity:
 
-!media images/WeightedTransition_discontinuous.png
+!media thermal_hydraulics/misc/WeightedTransition_discontinuous.png
        id=WeightedTransition_discontinuous
        caption=Weighted transition at a discontinuity
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
@@ -35,7 +35,7 @@ Note that the transition can exit the bounds of the non-transitioned piecewise
 function, which can be undesirable. This is illustrated in [WeightedTransition_continuous],
 where compares this weighted approach with the approach of [CubicTransition.md]:
 
-!media images/WeightedTransition_continuous.png
+!media thermal_hydraulics/misc/WeightedTransition_continuous.png
        id=WeightedTransition_continuous
        caption=Transition at the intersection of two functions
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
