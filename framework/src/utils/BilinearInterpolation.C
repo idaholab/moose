@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "BilinearInterpolation.h"
+#include "libmesh/int_range.h"
 
 int BilinearInterpolation::_file_number = 0;
 
@@ -37,7 +38,7 @@ BilinearInterpolation::getNeighborIndices(const std::vector<Real> & inArr,
   }
   else
   {
-    for (int i = 1; i < N; ++i)
+    for (const auto i : make_range(1, N))
     {
       if (x < inArr[i])
       {
