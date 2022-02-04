@@ -122,6 +122,7 @@ Extensions:
             - test/include
     MooseDocs.extensions.ifelse:
         active: True
+    MooseDocs.extensions.algorithm: default
 
 Translator:
     type: MooseDocs.base.Translator
