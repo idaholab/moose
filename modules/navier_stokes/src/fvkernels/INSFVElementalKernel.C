@@ -14,25 +14,19 @@ INSFVElementalKernel::validParams()
 {
   auto params = FVElementalKernel::validParams();
   params += INSFVMomentumResidualObject::validParams();
-  // We need two ghost layers for the Moukalled body-force correction to the Rhie-Chow velocity
-  params.set<unsigned short>("ghost_layers") = 2;
   return params;
 }
 
 INSFVElementalKernel::INSFVElementalKernel(const InputParameters & params)
   : FVElementalKernel(params), INSFVMomentumResidualObject(*this)
 {
-  std::vector<std::string> tagging_params = {
-      "vector_tags", "matrix_tags", "extra_vector_tags", "extra_matrix_tags"};
-  for (const auto & tparam : tagging_params)
-    if (params.isParamSetByUser(tparam))
-      paramError(
-          tparam,
-          "Tagging parameters have no effect if set on an 'INSFVElementalKernel'. Please set '",
-          tparam,
-          "' on the associated Rhie-Chow user-object '",
-          _rc_uo.name(),
-          "' instead.");
+}
 
-  _rc_uo.hasBodyForces(blockRestricted() ? blockIDs() : _mesh.meshSubdomains());
+void
+INSFVElementalKernel::processResidual(const ADReal & residual, const dof_id_type dof_index)
+{
+  if (_subproblem.currentlyComputingJacobian())
+    _assembly.processDerivatives(residual, dof_index, _matrix_tags);
+  else
+    _assembly.processResidual(residual.value(), dof_index, _vector_tags);
 }

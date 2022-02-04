@@ -58,16 +58,6 @@ public:
    */
   void addToA(const libMesh::Elem * elem, unsigned int component, const ADReal & value);
 
-  void addToF(const libMesh::Elem * elem, unsigned int component, const ADReal & value);
-
-  /**
-   * API that momentum residual objects that have body forces call
-   * @param The element we are adding 'B' data for
-   * @param component The velocity component we are adding 'B' data for
-   * @param value The value of 'B' that we are adding
-   */
-  void addToB(const libMesh::Elem * elem, unsigned int component, const ADReal & value);
-
   /**
    * Retrieve a face velocity
    * @param m The velocity interpolation method. This is either RhieChow or Average. RhieChow is
@@ -79,17 +69,6 @@ public:
   VectorValue<ADReal>
   getVelocity(Moose::FV::InterpMethod m, const FaceInfo & fi, THREAD_ID tid) const;
 
-  /**
-   * An API for communicating to the user object that body forces exist on the provided \p sub_ids
-   */
-  void hasBodyForces(const std::set<SubdomainID> & sub_ids);
-
-  /**
-   * An API for communicating to the user object that body forces including velocity, like friction,
-   * exist on the provided \p sub_ids
-   */
-  void hasFData(const std::set<SubdomainID> & sub_ids);
-
   void initialSetup() override;
   void residualSetup() override;
   void meshChanged() override;
@@ -100,25 +79,9 @@ public:
 
 protected:
   /**
-   * @return whether this face is geometrically relevant to us
-   */
-  bool isFaceGeometricallyRelevant(const FaceInfo & fi) const;
-
-  /**
    * A virtual method that allows us to only implement getVelocity once for free and porous flows
    */
   virtual const Moose::FunctorBase<ADReal> & epsilon(THREAD_ID tid) const;
-
-  /**
-   * Whether body forces are present on any portion of this user-object's domain
-   */
-  bool hasBodyForces() const { return !_sub_ids_with_body_forces.empty(); }
-
-  /**
-   * Whether body forces including velocity, like friction,  are present on any portion of this
-   * user-object's domain
-   */
-  bool hasFData() const { return !_sub_ids_with_f_data.empty(); }
 
   /**
    * perform the setup of this object
@@ -164,42 +127,11 @@ protected:
   /// All the active and elements local to this process that exist on this object's subdomains
   std::unique_ptr<ConstElemRange> _elem_range;
 
-  /// The faces whose neighboring elements can be evaluated on this process
-  std::vector<const FaceInfo *> _evaluable_fi;
-
   /// The subdomain ids this object operates on
   const std::set<SubdomainID> _sub_ids;
 
   /// A map from element IDs to 'a' coefficient data
   std::unordered_map<dof_id_type, libMesh::VectorValue<ADReal>> _a;
-
-  typedef CellCenteredMapFunctor<libMesh::VectorValue<ADReal>,
-                                 std::unordered_map<dof_id_type, libMesh::VectorValue<ADReal>>>
-      MapFunctor;
-
-  /// A map from element IDs to 'B' data. After populating the map, this object can be evaluated at
-  /// both element and face centers
-  MapFunctor _b;
-
-  /// The result of one interpolation and reconstruction of the 'B' data (built using call to
-  /// Moose::FV::interpolateReconstruct). After construction, this object can be evaluated at both
-  /// element and face centers
-  MapFunctor _b2;
-
-  /// A map from element IDs to 'F' data. After populating the map, this object can be evaluated at
-  /// both element and face centers
-  MapFunctor _f;
-
-  /// The result of one interpolation and reconstruction of the 'F' data (built using call to
-  /// Moose::FV::interpolateReconstruct). After construction, this object can be evaluated at both
-  /// element and face centers
-  MapFunctor _f2;
-
-  /// The subdomains that have body force residual objects
-  std::set<SubdomainID> _sub_ids_with_body_forces;
-
-  /// The subdomains that have body force residual objects that include velocity, e.g. friction
-  std::set<SubdomainID> _sub_ids_with_f_data;
 
   /// Whether we have performed our initial setup. Ordinarily we would do this in initialSetup but
   /// there are wonky things that happen in other objects initialSetup that affect us, like how
@@ -207,32 +139,6 @@ protected:
   bool _initial_setup_done = false;
 
 private:
-  /**
-   * Pushes and pulls 'a' coefficient data between processes such that each process has all the 'a'
-   * coefficient data necessary to construct any requested Rhie-Chow velocity
-   */
-  void finalizeAData();
-
-  /**
-   * Performs the first and second overbar operations on 'B' or 'F', e.g. one interpolation and one
-   * reconstruction
-   */
-  void computeFirstAndSecondOverBars(MapFunctor & foo0, MapFunctor & foo2, bool interpolate);
-
-  /**
-   * Applies the interpolated and reconstructed 'B' or 'F' data to the momentum residuals
-   */
-  void applyFooData(bool is_b_data);
-
-  /**
-   * Pushes and pulls 'B' or 'F' data between processes such that each process has all the 'B' or
-   * 'F' data necessary to construct any requested Rhie-Chow velocity
-   */
-  void finalizeInterpolatedData(MapFunctor & foo0,
-                                MapFunctor & foo2,
-                                const std::set<SubdomainID> & foo_sub_ids,
-                                bool interpolate);
-
   /// The velocity variable numbers
   std::vector<unsigned int> _var_numbers;
 
@@ -245,45 +151,8 @@ private:
   /// An example datum used to help communicate AD vector information in parallel
   const VectorValue<ADReal> _example;
 
-  /// If this is true, then interpolation and reconstruction operations will not be performed on the
-  /// body forces
-  const bool _standard_body_forces;
-  const bool _standard_f_data;
-  const bool _add_f_to_a;
-
-  /**
-   * @name Body Force Component Functors
-   * These vector component functors are not used anywhere within this class but they can be used
-   * for outputting, to auxiliary variables, either the non-interpolated or interpolated body
-   * forces
-   */
-  ///@{
-  /// The x-component of the non-interpolated body forces
-  VectorComponentFunctor<ADReal> _bx;
-
-  /// The y-component of the non-interpolated body forces
-  VectorComponentFunctor<ADReal> _by;
-
-  /// The z-component of the non-interpolated body forces
-  VectorComponentFunctor<ADReal> _bz;
-
-  /// The x-component of the interpolated and reconstructed body forces
-  VectorComponentFunctor<ADReal> _b2x;
-
-  /// The y-component of the interpolated and reconstructed body forces
-  VectorComponentFunctor<ADReal> _b2y;
-
-  /// The z-component of the interpolated and reconstructed body forces
-  VectorComponentFunctor<ADReal> _b2z;
-  ///@}
-
   /// Mutex that prevents multiple threads from saving into the 'a' coefficients at the same time
   Threads::spin_mutex _a_mutex;
-
-  /// Mutex that prevents multiple threads from saving into the 'B' data at the same time
-  Threads::spin_mutex _b_mutex;
-
-  Threads::spin_mutex _f_mutex;
 
   /// A unity functor used in the epsilon virtual method
   const Moose::ConstantFunctor<ADReal> _unity_functor{1};
@@ -305,29 +174,4 @@ INSFVRhieChowInterpolator::addToA(const Elem * const elem,
     _elements_to_push_pull.insert(elem);
 
   _a[elem->id()](component) += value;
-}
-
-inline void
-INSFVRhieChowInterpolator::addToF(const Elem * const elem,
-                                  const unsigned int component,
-                                  const ADReal & value)
-{
-  mooseAssert(elem->processor_id() == this->processor_id(), "Sources should be local");
-
-  Threads::spin_mutex::scoped_lock lock(_f_mutex);
-  _f[elem->id()](component) += value;
-}
-
-inline void
-INSFVRhieChowInterpolator::addToB(const Elem * const elem,
-                                  const unsigned int component,
-                                  const ADReal & value)
-{
-  mooseAssert(elem->processor_id() == this->processor_id(), "Sources should be local");
-
-  Threads::spin_mutex::scoped_lock lock(_b_mutex);
-  // We have our users write their RC data imagining that they've moved all terms to the LHS, but
-  // the balance in Moukalled assumes that the body forces are on the RHS with positive sign, e.g.
-  // 0 = -\nabla p + \mathbf{B}, so we must apply a minus sign here
-  _b[elem->id()](component) -= value;
 }

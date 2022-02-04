@@ -15,7 +15,8 @@ registerMooseObject("NavierStokesApp", INSFVMomentumBoussinesq);
 InputParameters
 INSFVMomentumBoussinesq::validParams()
 {
-  InputParameters params = INSFVElementalKernel::validParams();
+  InputParameters params = FVElementalKernel::validParams();
+  params += INSFVMomentumResidualObject::validParams();
   params.addClassDescription("Computes a body force for natural convection buoyancy.");
   params.addRequiredParam<MooseFunctorName>(NS::T_fluid, "the fluid temperature");
   params.addRequiredParam<RealVectorValue>("gravity", "Direction of the gravity vector");
@@ -30,7 +31,8 @@ INSFVMomentumBoussinesq::validParams()
 }
 
 INSFVMomentumBoussinesq::INSFVMomentumBoussinesq(const InputParameters & params)
-  : INSFVElementalKernel(params),
+  : FVElementalKernel(params),
+    INSFVMomentumResidualObject(*this),
     _temperature(getFunctor<ADReal>(NS::T_fluid)),
     _gravity(getParam<RealVectorValue>("gravity")),
     _alpha(getFunctor<ADReal>("alpha_name")),
@@ -44,11 +46,9 @@ INSFVMomentumBoussinesq::INSFVMomentumBoussinesq(const InputParameters & params)
 #endif
 }
 
-void
-INSFVMomentumBoussinesq::gatherRCData(const Elem & elem)
+ADReal
+INSFVMomentumBoussinesq::computeQpResidual()
 {
-  _rc_uo.addToB(&elem,
-                _index,
-                _alpha(makeElemArg(&elem)) * _gravity(_index) * _rho *
-                    (_temperature(makeElemArg(&elem)) - _ref_temperature));
+  return _alpha(makeElemArg(_current_elem)) * _gravity(_index) * _rho *
+         (_temperature(makeElemArg(_current_elem)) - _ref_temperature);
 }

@@ -46,48 +46,6 @@ rho=1.1
   []
 []
 
-[AuxVariables]
-  [bx_out]
-    type = MooseVariableFVReal
-  []
-  [by_out]
-    type = MooseVariableFVReal
-  []
-  [b2x_out]
-    type = MooseVariableFVReal
-  []
-  [b2y_out]
-    type = MooseVariableFVReal
-  []
-[]
-
-[AuxKernels]
-  [bx_out]
-    type = ADFunctorElementalAux
-    variable = bx_out
-    functor = "bx"
-    execute_on = "timestep_end"
-  []
-  [by_out]
-    type = ADFunctorElementalAux
-    variable = by_out
-    functor = "by"
-    execute_on = "timestep_end"
-  []
-  [b2x_out]
-    type = ADFunctorElementalAux
-    variable = b2x_out
-    functor = "b2x"
-    execute_on = "timestep_end"
-  []
-  [b2y_out]
-    type = ADFunctorElementalAux
-    variable = b2y_out
-    functor = "b2y"
-    execute_on = "timestep_end"
-  []
-[]
-
 [ICs]
   [u]
     type = FunctionIC

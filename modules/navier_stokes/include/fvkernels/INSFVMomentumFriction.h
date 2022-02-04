@@ -32,6 +32,4 @@ protected:
   const Moose::Functor<ADReal> * const _quadratic_friction;
   /// Boolean to select the right model
   const bool _use_linear_friction;
-  /// drag quantity
-  const Moose::Functor<ADReal> & _drag_quantity;
 };

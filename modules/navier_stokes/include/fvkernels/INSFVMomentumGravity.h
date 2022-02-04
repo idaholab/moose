@@ -9,21 +9,24 @@
 
 #pragma once
 
-#include "INSFVElementalKernel.h"
+#include "FVElementalKernel.h"
+#include "INSFVMomentumResidualObject.h"
 
 /**
  * Imposes a gravitational force on the momentum equation in Rhie-Chow (incompressible) contexts
  */
-class INSFVMomentumGravity : public INSFVElementalKernel
+class INSFVMomentumGravity : public FVElementalKernel, public INSFVMomentumResidualObject
 {
 public:
   static InputParameters validParams();
   INSFVMomentumGravity(const InputParameters & params);
 
-  using INSFVElementalKernel::gatherRCData;
-  void gatherRCData(const Elem &) override;
+  void gatherRCData(const Elem &) override {}
+  void gatherRCData(const FaceInfo &) override {}
 
 protected:
+  ADReal computeQpResidual() override;
+
   /// The gravity vector
   const RealVectorValue _gravity;
 

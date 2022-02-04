@@ -31,6 +31,11 @@ public:
 protected:
   const Moose::FunctorBase<ADReal> & epsilon(THREAD_ID tid) const override;
 
+  /**
+   * @return whether this face is geometrically relevant to us
+   */
+  bool isFaceGeometricallyRelevant(const FaceInfo & fi) const;
+
   /// The thread 0 copy of the porosity functor held by the subproblem. Initially this functor
   /// should be provided by a functor material property or function. We then perform repeated
   /// interpolations and reconstructions and then reassign the resulting smoothed field to this

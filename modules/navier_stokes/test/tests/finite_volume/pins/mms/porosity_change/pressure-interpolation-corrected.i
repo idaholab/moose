@@ -58,18 +58,6 @@ forch=1.1
   [eps_out]
     type = MooseVariableFVReal
   []
-  [bx_out]
-    type = MooseVariableFVReal
-  []
-  [by_out]
-    type = MooseVariableFVReal
-  []
-  [b2x_out]
-    type = MooseVariableFVReal
-  []
-  [b2y_out]
-    type = MooseVariableFVReal
-  []
 []
 
 [AuxKernels]
@@ -78,30 +66,6 @@ forch=1.1
     variable = eps_out
     functor = porosity
     execute_on = 'timestep_end'
-  []
-  [bx_out]
-    type = ADFunctorElementalAux
-    variable = bx_out
-    functor = "bx"
-    execute_on = "timestep_end"
-  []
-  [by_out]
-    type = ADFunctorElementalAux
-    variable = by_out
-    functor = "by"
-    execute_on = "timestep_end"
-  []
-  [b2x_out]
-    type = ADFunctorElementalAux
-    variable = b2x_out
-    functor = "b2x"
-    execute_on = "timestep_end"
-  []
-  [b2y_out]
-    type = ADFunctorElementalAux
-    variable = b2y_out
-    functor = "b2y"
-    execute_on = "timestep_end"
   []
 []
 

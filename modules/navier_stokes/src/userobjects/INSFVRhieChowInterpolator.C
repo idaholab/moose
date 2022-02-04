@@ -48,15 +48,8 @@ INSFVRhieChowInterpolator::validParams()
   params.addRequiredParam<VariableName>("u", "The x-component of velocity");
   params.addParam<VariableName>("v", "The y-component of velocity");
   params.addParam<VariableName>("w", "The z-component of velocity");
-  params.addParam<bool>(
-      "standard_body_forces", false, "Whether to just apply non-interpolated body forces");
-  params.addParam<bool>(
-      "standard_f_data",
-      false,
-      "Whether to just apply non-interpolated body forces with velocity, e.g. friction");
-  params.addParam<bool>("add_f_to_a", true, "Whether to add F to A");
-  params.addClassDescription("Performs interpolations and reconstructions of body forces and "
-                             "computes face velocities.");
+  params.addClassDescription(
+      "Computes the Rhie-Chow velocity based on gathered 'a' coefficient data.");
   return params;
 }
 
@@ -83,21 +76,8 @@ INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & par
     _vs(libMesh::n_threads(), nullptr),
     _ws(libMesh::n_threads(), nullptr),
     _sub_ids(blockRestricted() ? blockIDs() : _moose_mesh.meshSubdomains()),
-    _b(_moose_mesh, _sub_ids),
-    _b2(_moose_mesh, _sub_ids),
-    _f(_moose_mesh, _sub_ids),
-    _f2(_moose_mesh, _sub_ids),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
-    _example(0),
-    _standard_body_forces(getParam<bool>("standard_body_forces")),
-    _standard_f_data(getParam<bool>("standard_f_data")),
-    _add_f_to_a(getParam<bool>("add_f_to_a")),
-    _bx(_b, 0),
-    _by(_b, 1),
-    _bz(_b, 2),
-    _b2x(_b2, 0),
-    _b2y(_b2, 1),
-    _b2z(_b2, 2)
+    _example(0)
 {
   if (!_p)
     paramError(NS::pressure, "the pressure must be a INSFVPressureVariable.");
@@ -172,13 +152,6 @@ INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & par
         std::set<ExecFlagType>({EXEC_ALWAYS}),
         _moose_mesh,
         blockIDs());
-
-    UserObject::_subproblem.addFunctor("bx", _bx, tid);
-    UserObject::_subproblem.addFunctor("by", _by, tid);
-    UserObject::_subproblem.addFunctor("bz", _bz, tid);
-    UserObject::_subproblem.addFunctor("b2x", _b2x, tid);
-    UserObject::_subproblem.addFunctor("b2y", _b2y, tid);
-    UserObject::_subproblem.addFunctor("b2z", _b2z, tid);
   }
 }
 
@@ -202,118 +175,12 @@ INSFVRhieChowInterpolator::initialSetup()
   }
 }
 
-bool
-INSFVRhieChowInterpolator::isFaceGeometricallyRelevant(const FaceInfo & fi) const
-{
-  if (&fi.elem() == libMesh::remote_elem)
-    return false;
-
-  bool on_us = _sub_ids.count(fi.elem().subdomain_id());
-
-  if (fi.neighborPtr())
-  {
-    if (&fi.neighbor() == libMesh::remote_elem)
-      return false;
-
-    on_us = on_us || _sub_ids.count(fi.neighbor().subdomain_id());
-  }
-
-  if (!on_us)
-    // Neither the element nor neighbor has a subdomain id on which we are active, so this face is
-    // not relevant
-    return false;
-
-  //
-  // Ok, we've established that either the element or neighbor is active on our subdomains and
-  // neither of them are remote elements, so this face is still in the running to be considered
-  // relevant. There is one more caveat to be considered. In the case that we are a boundary face,
-  // we will generally need a two term expansion to compute our value, which will require a
-  // cell-gradient evaluation. If that is the case, then all of our surrounding neighbors cannot be
-  // remote. If we are not a boundary face, then at this point we're safe
-  //
-
-  if (!Moose::FV::onBoundary(_sub_ids, fi))
-    return true;
-
-  const auto & boundary_elem = (fi.neighborPtr() && _sub_ids.count(fi.neighbor().subdomain_id()))
-                                   ? fi.neighbor()
-                                   : fi.elem();
-
-  for (auto * const neighbor : boundary_elem.neighbor_ptr_range())
-  {
-    if (!neighbor)
-      continue;
-
-    if ((neighbor == libMesh::remote_elem))
-      return false;
-  }
-
-  // We made it through all the tests!
-  return true;
-}
-
 void
 INSFVRhieChowInterpolator::insfvSetup()
 {
   _elem_range =
       std::make_unique<ConstElemRange>(_mesh.active_local_subdomain_set_elements_begin(_sub_ids),
                                        _mesh.active_local_subdomain_set_elements_end(_sub_ids));
-
-  const auto & all_fi = _moose_mesh.allFaceInfo();
-  _evaluable_fi.reserve(all_fi.size());
-
-  const auto & eq = UserObject::_subproblem.es();
-  std::vector<const DofMap *> dof_maps(eq.n_systems());
-  for (const auto i : make_range(eq.n_systems()))
-  {
-    const auto & sys = eq.get_system(i);
-    dof_maps[i] = &sys.get_dof_map();
-  }
-
-  auto is_fi_evaluable = [this, &dof_maps](const FaceInfo & fi)
-  {
-    if (!isFaceGeometricallyRelevant(fi))
-      return false;
-
-    auto is_elem_evaluable = [&dof_maps](const Elem & elem)
-    {
-      for (const auto * const dof_map : dof_maps)
-        if (!dof_map->is_evaluable(elem))
-          return false;
-
-      return true;
-    };
-
-    if (!Moose::FV::onBoundary(_sub_ids, fi))
-      // We're on an internal face and interpolation to this face will just entail linear
-      // interpolation from neighboring cell values. We just have to check whether both elements are
-      // evaluable
-      return is_elem_evaluable(fi.elem()) && is_elem_evaluable(fi.neighbor());
-
-    // Else we are on a boundary face. Two-term boundary face extrapolation will require a cell
-    // value and gradient, which will require evaluations on all surrounding elements
-
-    const auto & boundary_elem = (fi.neighborPtr() && _sub_ids.count(fi.neighbor().subdomain_id()))
-                                     ? fi.neighbor()
-                                     : fi.elem();
-
-    for (auto * const neighbor : boundary_elem.neighbor_ptr_range())
-    {
-      if (!neighbor)
-        continue;
-
-      if (!is_elem_evaluable(*neighbor))
-        return false;
-    }
-
-    return true;
-  };
-
-  for (const auto & fi : all_fi)
-    if (is_fi_evaluable(fi))
-      _evaluable_fi.push_back(&fi);
-
-  _evaluable_fi.shrink_to_fit();
 }
 
 void
@@ -335,12 +202,7 @@ void
 INSFVRhieChowInterpolator::initialize()
 {
   _elements_to_push_pull.clear();
-
   _a.clear();
-  _b.clear();
-  _b2.clear();
-  _f.clear();
-  _f2.clear();
 }
 
 void
@@ -373,250 +235,76 @@ INSFVRhieChowInterpolator::execute()
 }
 
 void
-INSFVRhieChowInterpolator::finalizeAData()
+INSFVRhieChowInterpolator::finalize()
 {
 #ifdef MOOSE_GLOBAL_AD_INDEXING
-  if (this->n_processors() != 1)
-  {
-    using Datum = std::pair<dof_id_type, VectorValue<ADReal>>;
-    std::unordered_map<processor_id_type, std::vector<Datum>> push_data;
-    std::unordered_map<processor_id_type, std::vector<dof_id_type>> pull_requests;
-    static const VectorValue<ADReal> example;
-
-    for (auto * const elem : _elements_to_push_pull)
-    {
-      const auto id = elem->id();
-      const auto pid = elem->processor_id();
-      auto it = _a.find(id);
-      mooseAssert(it != _a.end(), "We definitely should have found something");
-      push_data[pid].push_back(std::make_pair(id, it->second));
-      pull_requests[pid].push_back(id);
-    }
-
-    // First push
-    {
-      auto action_functor =
-          [this](const processor_id_type libmesh_dbg_var(pid), const std::vector<Datum> & sent_data)
-      {
-        mooseAssert(pid != this->processor_id(), "We do not send messages to ourself here");
-        for (const auto & pr : sent_data)
-          _a[pr.first] += pr.second;
-      };
-      TIMPI::push_parallel_vector_data(_communicator, push_data, action_functor);
-    }
-
-    // Then pull
-    {
-      auto gather_functor = [this](const processor_id_type libmesh_dbg_var(pid),
-                                   const std::vector<dof_id_type> & elem_ids,
-                                   std::vector<VectorValue<ADReal>> & data_to_fill)
-      {
-        mooseAssert(pid != this->processor_id(), "We shouldn't be gathering from ourselves.");
-        data_to_fill.resize(elem_ids.size());
-        for (const auto i : index_range(elem_ids))
-        {
-          const auto id = elem_ids[i];
-          auto it = _a.find(id);
-          mooseAssert(it != _a.end(), "We should hold the value for this locally");
-          data_to_fill[i] = it->second;
-        }
-      };
-
-      auto action_functor = [this](const processor_id_type libmesh_dbg_var(pid),
-                                   const std::vector<dof_id_type> & elem_ids,
-                                   const std::vector<VectorValue<ADReal>> & filled_data)
-      {
-        mooseAssert(pid != this->processor_id(),
-                    "The request filler shouldn't have been ourselves");
-        mooseAssert(elem_ids.size() == filled_data.size(), "I think these should be the same size");
-        for (const auto i : index_range(elem_ids))
-        {
-          const auto id = elem_ids[i];
-          auto it = _a.find(id);
-          mooseAssert(it != _a.end(), "We requested this so we must have it in the map");
-          it->second = filled_data[i];
-        }
-      };
-      TIMPI::pull_parallel_vector_data(
-          _communicator, pull_requests, gather_functor, action_functor, &example);
-    }
-  }
-
-  if (_add_f_to_a && hasFData())
-    for (auto & map_pr : _a)
-    {
-      auto & elem_a_value = map_pr.second;
-      const auto elem_id = map_pr.first;
-      const auto & value_to_add = libmesh_map_find(_f2, elem_id);
-      elem_a_value += value_to_add;
-    }
-#else
-  mooseError("INSFVRhieChowInterpolator only supported for global AD indexing.");
-#endif
-}
-
-void
-INSFVRhieChowInterpolator::computeFirstAndSecondOverBars(MapFunctor & foo,
-                                                         MapFunctor & foo2,
-                                                         const bool interpolate)
-{
-  foo2.reserve(_fe_problem.getEvaluableElementRange().size());
-
-  if (!interpolate)
-  {
-    for (const auto & pr : foo)
-      foo2[pr.first] = pr.second;
-
+  if (this->n_processors() == 1)
     return;
+
+  using Datum = std::pair<dof_id_type, VectorValue<ADReal>>;
+  std::unordered_map<processor_id_type, std::vector<Datum>> push_data;
+  std::unordered_map<processor_id_type, std::vector<dof_id_type>> pull_requests;
+  static const VectorValue<ADReal> example;
+
+  for (auto * const elem : _elements_to_push_pull)
+  {
+    const auto id = elem->id();
+    const auto pid = elem->processor_id();
+    auto it = _a.find(id);
+    mooseAssert(it != _a.end(), "We definitely should have found something");
+    push_data[pid].push_back(std::make_pair(id, it->second));
+    pull_requests[pid].push_back(id);
   }
 
-  Moose::FV::interpolateReconstruct(foo2, foo, 1, false, _evaluable_fi, *this);
-}
-
-void
-INSFVRhieChowInterpolator::applyFooData(const bool is_b_data)
-{
-  const auto s = _sys.number();
-  for (auto * const elem : *_elem_range)
+  // First push
   {
-    const auto elem_volume = _assembly.elementVolume(elem);
-    for (const auto i : index_range(_var_numbers))
+    auto action_functor =
+        [this](const processor_id_type libmesh_dbg_var(pid), const std::vector<Datum> & sent_data)
     {
-      const auto compute_residual = [this, elem, is_b_data, elem_volume, i]()
-      {
-        if (is_b_data)
-          // Body force term that is not a function of velocity
-          // negative here because we swapped the sign in addToB and so now we need to swap it back
-          return -elem_volume * libmesh_map_find(_b2, elem->id())(i);
-        else
-        {
-          // Body force term that *is* a function of velocity, e.g. friction
-          INSFVVelocityVariable * vel_comp = nullptr;
-          switch (i)
-          {
-            case 0:
-              vel_comp = _u;
-              break;
-            case 1:
-              vel_comp = _v;
-              break;
-            case 2:
-              vel_comp = _w;
-              break;
-            default:
-              mooseError("Invalid component");
-          }
-
-          mooseAssert(vel_comp, "This should be non-null now");
-          return libmesh_map_find(_f2, elem->id())(i) * (*vel_comp)(makeElemArg(elem));
-        }
-      };
-      const auto residual = compute_residual();
-
-      const auto vn = _var_numbers[i];
-      const auto dof_index = elem->dof_number(s, vn, 0);
-
-      if (_fe_problem.currentlyComputingJacobian())
-        _assembly.processDerivatives(residual, dof_index, _matrix_tags);
-      else
-        _assembly.processResidual(residual.value(), dof_index, _vector_tags);
-    }
+      mooseAssert(pid != this->processor_id(), "We do not send messages to ourself here");
+      for (const auto & pr : sent_data)
+        _a[pr.first] += pr.second;
+    };
+    TIMPI::push_parallel_vector_data(_communicator, push_data, action_functor);
   }
 
-  if (_fe_problem.currentlyComputingJacobian())
-    _assembly.addCachedJacobian();
-  else
-    _assembly.addCachedResiduals();
-}
-
-void
-INSFVRhieChowInterpolator::finalizeInterpolatedData(MapFunctor & foo,
-                                                    MapFunctor & foo2,
-                                                    const std::set<SubdomainID> & foo_sub_ids,
-                                                    const bool interpolate)
-{
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-  // First thing we do is to fill our _b map with 0's for any subdomains that do not have body force
-  // kernels active
-  std::set<SubdomainID> forceless_subs;
-  std::set_difference(_sub_ids.begin(),
-                      _sub_ids.end(),
-                      foo_sub_ids.begin(),
-                      foo_sub_ids.end(),
-                      std::inserter(forceless_subs, forceless_subs.end()));
-  for (const auto & elem : _mesh.active_local_subdomain_set_elements_ptr_range(forceless_subs))
-    foo[elem->id()] = 0;
-
-  if (this->n_processors() > 1)
+  // Then pull
   {
-    // We do not have to push foo data because all that data should initially be
-    // local, e.g. we only loop over active local elements for FVElementalKernels
-
-    std::unordered_map<processor_id_type, std::vector<dof_id_type>> pull_requests;
-
-    for (auto * const elem : _fe_problem.getEvaluableElementRange())
-    {
-      const auto pid = elem->processor_id();
-      if (pid != this->processor_id() && _sub_ids.count(elem->subdomain_id()))
-        pull_requests[pid].push_back(elem->id());
-    }
-
-    auto gather_functor = [this, &foo](const processor_id_type libmesh_dbg_var(pid),
-                                       const std::vector<dof_id_type> & elem_ids,
-                                       std::vector<VectorValue<ADReal>> & data_to_fill)
+    auto gather_functor = [this](const processor_id_type libmesh_dbg_var(pid),
+                                 const std::vector<dof_id_type> & elem_ids,
+                                 std::vector<VectorValue<ADReal>> & data_to_fill)
     {
       mooseAssert(pid != this->processor_id(), "We shouldn't be gathering from ourselves.");
       data_to_fill.resize(elem_ids.size());
       for (const auto i : index_range(elem_ids))
       {
         const auto id = elem_ids[i];
-        data_to_fill[i] = libmesh_map_find(foo, id);
+        auto it = _a.find(id);
+        mooseAssert(it != _a.end(), "We should hold the value for this locally");
+        data_to_fill[i] = it->second;
       }
     };
 
-    auto action_functor = [this, &foo](const processor_id_type libmesh_dbg_var(pid),
-                                       const std::vector<dof_id_type> & elem_ids,
-                                       const std::vector<VectorValue<ADReal>> & filled_data)
+    auto action_functor = [this](const processor_id_type libmesh_dbg_var(pid),
+                                 const std::vector<dof_id_type> & elem_ids,
+                                 const std::vector<VectorValue<ADReal>> & filled_data)
     {
       mooseAssert(pid != this->processor_id(), "The request filler shouldn't have been ourselves");
       mooseAssert(elem_ids.size() == filled_data.size(), "I think these should be the same size");
       for (const auto i : index_range(elem_ids))
       {
         const auto id = elem_ids[i];
-        foo[id] = filled_data[i];
+        auto it = _a.find(id);
+        mooseAssert(it != _a.end(), "We requested this so we must have it in the map");
+        it->second = filled_data[i];
       }
     };
     TIMPI::pull_parallel_vector_data(
-        _communicator, pull_requests, gather_functor, action_functor, &_example);
+        _communicator, pull_requests, gather_functor, action_functor, &example);
   }
-
-  // We can proceed to the overbar operations for foo. We only do the first and second overbars. The
-  // third overbar is done on the fly when it is requested
-  computeFirstAndSecondOverBars(foo, foo2, interpolate);
 #else
   mooseError("INSFVRhieChowInterpolator only supported for global AD indexing.");
 #endif
-}
-
-void
-INSFVRhieChowInterpolator::finalize()
-{
-  if (hasBodyForces())
-  {
-    finalizeInterpolatedData(_b, _b2, _sub_ids_with_body_forces, !_standard_body_forces);
-    // Add the b data to the residual/Jacobian
-    applyFooData(true);
-  }
-
-  if (hasFData())
-  {
-    finalizeInterpolatedData(_f, _f2, _sub_ids_with_f_data, !_standard_f_data);
-    // Add the f data to the residual/Jacobian after multiplying by the velocity variable value
-    applyFooData(false);
-  }
-
-  // Must occur after we've interpolated F because we are going to add F into A
-  finalizeAData();
 }
 
 VectorValue<ADReal>
@@ -724,30 +412,12 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
 
   // evaluate face porosity, see (18) in Hanimann 2021 or (11) in Nordlund 2016
   const auto face_eps = epsilon(tid)(face);
-  const auto b1 = hasBodyForces() ? _b(face) : VectorValue<ADReal>(0);
-  const auto b3 = hasBodyForces() ? _b2(face) : VectorValue<ADReal>(0);
 
   // Perform the pressure correction. We don't use skewness-correction on the pressure since
   // it only influences the averaged cell gradients which cancel out in the correction
   // below.
   for (const auto i : make_range(_dim))
-  {
     velocity(i) -= face_D(i) * face_eps * (grad_p(i) - unc_grad_p(i));
-    if (hasBodyForces())
-      velocity(i) += face_D(i) * (b1(i) - b3(i));
-  }
 
   return velocity;
-}
-
-void
-INSFVRhieChowInterpolator::hasBodyForces(const std::set<SubdomainID> & sub_ids)
-{
-  _sub_ids_with_body_forces.insert(sub_ids.begin(), sub_ids.end());
-}
-
-void
-INSFVRhieChowInterpolator::hasFData(const std::set<SubdomainID> & sub_ids)
-{
-  _sub_ids_with_f_data.insert(sub_ids.begin(), sub_ids.end());
 }

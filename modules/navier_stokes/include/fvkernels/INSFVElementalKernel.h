@@ -36,6 +36,11 @@ protected:
     mooseError("INSFVElementalKernels must implement gatherRCData and not computeQpResidual");
   }
 
+  /**
+   * Process into either the system residual or Jacobian
+   */
+  void processResidual(const ADReal & residual, dof_id_type dof);
+
 private:
   using FVElementalKernel::_current_elem;
 };

@@ -25,14 +25,15 @@ PINSFVRhieChowInterpolator::validParams()
       "smoothing_layers",
       0,
       "The number of interpolation-reconstruction operations to perform on the porosity");
-  params.addRelationshipManager(
-      "ElementSideNeighborLayers",
-      Moose::RelationshipManagerType::GEOMETRIC,
-      [](const InputParameters & obj_params, InputParameters & rm_params) {
-        rm_params.set<unsigned short>("layers") =
-            obj_params.get<unsigned short>("smoothing_layers");
-        rm_params.set<bool>("use_displaced_mesh") = obj_params.get<bool>("use_displaced_mesh");
-      });
+  params.addRelationshipManager("ElementSideNeighborLayers",
+                                Moose::RelationshipManagerType::GEOMETRIC,
+                                [](const InputParameters & obj_params, InputParameters & rm_params)
+                                {
+                                  rm_params.set<unsigned short>("layers") =
+                                      obj_params.get<unsigned short>("smoothing_layers");
+                                  rm_params.set<bool>("use_displaced_mesh") =
+                                      obj_params.get<bool>("use_displaced_mesh");
+                                });
   return params;
 }
 
@@ -109,4 +110,54 @@ PINSFVRhieChowInterpolator::pinsfvSetup()
         UserObject::_subproblem.getFunctor<ADReal>(porosity_name, tid, name()));
     other_epss.assign(_smoothed_eps);
   }
+}
+
+bool
+PINSFVRhieChowInterpolator::isFaceGeometricallyRelevant(const FaceInfo & fi) const
+{
+  if (&fi.elem() == libMesh::remote_elem)
+    return false;
+
+  bool on_us = _sub_ids.count(fi.elem().subdomain_id());
+
+  if (fi.neighborPtr())
+  {
+    if (&fi.neighbor() == libMesh::remote_elem)
+      return false;
+
+    on_us = on_us || _sub_ids.count(fi.neighbor().subdomain_id());
+  }
+
+  if (!on_us)
+    // Neither the element nor neighbor has a subdomain id on which we are active, so this face is
+    // not relevant
+    return false;
+
+  //
+  // Ok, we've established that either the element or neighbor is active on our subdomains and
+  // neither of them are remote elements, so this face is still in the running to be considered
+  // relevant. There is one more caveat to be considered. In the case that we are a boundary face,
+  // we will generally need a two term expansion to compute our value, which will require a
+  // cell-gradient evaluation. If that is the case, then all of our surrounding neighbors cannot be
+  // remote. If we are not a boundary face, then at this point we're safe
+  //
+
+  if (!Moose::FV::onBoundary(_sub_ids, fi))
+    return true;
+
+  const auto & boundary_elem = (fi.neighborPtr() && _sub_ids.count(fi.neighbor().subdomain_id()))
+                                   ? fi.neighbor()
+                                   : fi.elem();
+
+  for (auto * const neighbor : boundary_elem.neighbor_ptr_range())
+  {
+    if (!neighbor)
+      continue;
+
+    if ((neighbor == libMesh::remote_elem))
+      return false;
+  }
+
+  // We made it through all the tests!
+  return true;
 }
