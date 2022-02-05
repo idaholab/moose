@@ -52,8 +52,6 @@ MortarNodalAuxKernelTempl<ComputeValueType>::MortarNodalAuxKernelTempl(
     _incremental(this->template getParam<bool>("incremental")),
     _u_old(uOld())
 {
-
-  Moose::out << "Is incremental: " << _incremental << "\n";
   if (!isNodal())
     paramError("variable", "MortarNodalAuxKernel derivatives populate nodal aux variables only.");
 }

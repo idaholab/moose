@@ -25,7 +25,6 @@
     max_parallel = 4
     min_ad_size = '50'
     ad_indexing_type = 'global'
-    heavy = true
     valgrind = 'none'
     requirement = 'Contact module shall compute nodal wear depth values in accordance with Archard '
                   'equation via a mortar auxiliary kernel.'

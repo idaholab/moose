@@ -116,6 +116,9 @@ offset = -0.19
   [accel_z]
     block = '1 2'
   []
+  [gap]
+    block = 3
+  []
 []
 
 [AuxKernels]
@@ -128,42 +131,6 @@ offset = -0.19
     secondary_subdomain = 3
     use_displaced_mesh = true
   []
-  [gap_second]
-    type = WeightedGapAux
-    variable = gap_second
-    primary_boundary = 20
-    secondary_boundary = 10
-    primary_subdomain = 4
-    secondary_subdomain = 3
-    use_displaced_mesh = true
-  []
-  # [gap_vel]
-  #   type = WeightedGapVelAux
-  #   variable = gap_vel
-  #   primary_boundary = 20
-  #   secondary_boundary = 10
-  #   primary_subdomain = 4
-  #   secondary_subdomain = 3
-  #   disp_x = disp_x
-  #   disp_y = disp_y
-  #   boundary = 10
-  #   incremental = false
-  # []
-  # [worn_depth]
-  #   type = MortarArchardsLawAux
-  #   variable = worn_depth
-  #   primary_boundary = 20
-  #   secondary_boundary = 10
-  #   primary_subdomain = 4
-  #   secondary_subdomain = 3
-  #   disp_x = disp_x
-  #   disp_y = disp_y
-  #   boundary = 10
-  #   friction_coefficient = 0.5
-  #   energy_wear_coefficient = 1.0
-  #   normal_pressure = normal_lm
-  #   incremental = true
-  # []
   [accel_x]
     type = NewmarkAccelAux
     variable = accel_x

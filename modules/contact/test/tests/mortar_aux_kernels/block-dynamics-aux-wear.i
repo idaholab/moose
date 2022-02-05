@@ -38,7 +38,7 @@ offset = -0.05
     strain = FINITE
     block = '1 2'
     zeta = 1.0
-    alpha = 0.0
+    hht_alpha = 0.0
   []
   [inertia_x]
     type = InertialForce

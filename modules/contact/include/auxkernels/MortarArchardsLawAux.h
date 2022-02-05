@@ -20,8 +20,7 @@ public:
   static InputParameters validParams();
 
   /**
-   * Factory constructor, takes parameters so that all derived classes can be built using the same
-   * constructor.
+   * Constructor of mortar auxiliary kernel to compute nodal worn-out depth.
    */
   MortarArchardsLawAux(const InputParameters & parameters);
 
@@ -44,11 +43,13 @@ protected:
   /// For 2D mortar contact no displacement will be specified, so const pointers used
   const bool _has_disp_z;
 
-  /// Reference to the secondary variable
+  /// Displacement variables: x direction
   const MooseVariable & _disp_x;
 
+  /// Displacement variables: y direction
   const MooseVariable & _disp_y;
 
+  /// Displacement variables: z direction
   const MooseVariable * _disp_z;
 
   /// x-velocity on the secondary face

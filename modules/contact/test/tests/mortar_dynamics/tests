@@ -41,7 +41,47 @@
     min_ad_size = '50'
     ad_indexing_type = 'global'
     requirement = 'Contact module shall simulate mortar frictional contact between two blocks with '
-                  'weighted gap time stabilization using mortar nodal geometry with a creep material model.'
+                  'weighted gap time stabilization using mortar nodal geometry with a creep material '
+                  'model.'
   []
-
+  [frictional-mortar-3d-dynamics]
+    type = 'CSVDiff'
+    input = 'frictional-mortar-3d-dynamics.i'
+    csvdiff = 'frictional-mortar-3d-dynamics_out_frictional-pressure_0001.csv '
+              'frictional-mortar-3d-dynamics_out_frictional-pressure-3d_0001.csv '
+              'frictional-mortar-3d-dynamics_out_tangent_x_0001.csv '
+              'frictional-mortar-3d-dynamics_out_tangent_y_0001.csv'
+    requirement = 'MOOSE shall solve a dynamic 3D frictional bouncing block problem with mortar '
+                  'constraint using nodal-attached geometry'
+    rel_err = 1.0e-5
+    abs_zero = 1.0e-5
+    min_ad_size = 100
+    max_parallel = 8
+    method = 'opt'
+  []
+  [frictional-mortar-3d-dynamics-light]
+    type = 'Exodiff'
+    exodiff = 'frictional-mortar-3d-dynamics-light_out.e'
+    input = 'frictional-mortar-3d-dynamics-light.i'
+    rel_err = 5.0e-4
+    abs_zero = 1.0e-5
+    min_ad_size = 100
+    ad_indexing_type = 'global'
+    requirement = 'MOOSE shall solve a dynamic 3D frictional one-element bouncing block problem with '
+                  'mortar constraint using nodal-attached geometry and the correct edge dropping '
+                  'setting'
+  []
+  [frictional-mortar-3d-dynamics-light-miss-dropping]
+    type = 'Exodiff'
+    exodiff = 'frictional-mortar-3d-dynamics-light_out.e'
+    input = 'frictional-mortar-3d-dynamics-light.i'
+    rel_err = 5.0e-4
+    abs_zero = 1.0e-5
+    min_ad_size = 100
+    ad_indexing_type = 'global'
+    cli_args = 'Constraints/friction/correct_edge_dropping=false Constraints/normal_x/correct_edge_dropping=false Constraints/normal_y/correct_edge_dropping=false Constraints/normal_z/correct_edge_dropping=false Constraints/tangential_x/correct_edge_dropping=false Constraints/tangential_y/correct_edge_dropping=false Constraints/tangential_z/correct_edge_dropping=false Constraints/tangential_dir_x/correct_edge_dropping=false Constraints/tangential_dir_y/correct_edge_dropping=false Constraints/tangential_dir_z/correct_edge_dropping=false'
+    requirement = 'MOOSE shall solve a dynamic 3D frictional one-element bouncing block problem with '
+                  'mortar constraint using nodal-attached geometry and the incorrect edge dropping '
+                  'setting'
+  []
 []

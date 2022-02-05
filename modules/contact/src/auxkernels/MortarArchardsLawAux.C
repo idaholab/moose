@@ -12,7 +12,7 @@
 #include "FEProblemBase.h"
 #include "Assembly.h"
 
-registerMooseObject("MooseApp", MortarArchardsLawAux);
+registerMooseObject("ContactApp", MortarArchardsLawAux);
 
 InputParameters
 MortarArchardsLawAux::validParams()
@@ -48,7 +48,7 @@ MortarArchardsLawAux::validParams()
 
 MortarArchardsLawAux::MortarArchardsLawAux(const InputParameters & parameters)
   : MortarNodalAuxKernel(parameters),
-    _normal_pressure(coupledValue("normal_pressure")),
+    _normal_pressure(coupledValueLower("normal_pressure")),
     _friction_coefficient(getParam<Real>("friction_coefficient")),
     _energy_wear_coefficient(getParam<Real>("energy_wear_coefficient")),
     _has_disp_z(isCoupled("disp_z")),
@@ -115,7 +115,7 @@ MortarArchardsLawAux::computeQpProperties()
   const Real norm_tangential_vel = gap_velocity_vec.norm();
 
   _worn_out_depth_dt = norm_tangential_vel * _energy_wear_coefficient * _friction_coefficient *
-                       _normal_pressure[_qp] * _dt * _JxW_msm[_qp] * _coord[_qp];
+                       _normal_pressure[0] * _dt * _JxW_msm[_qp] * _coord[_qp];
 
   _msm_volume += _JxW_msm[_qp] * _coord[_qp];
 }

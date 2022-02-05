@@ -2202,8 +2202,7 @@ AutomaticMortarGeneration::secondariesToMortarSegments(const Node & node) const
 
   return ret;
 }
-// FIXME: Put method below in a derived, contact mechanics object
-//
+
 void
 AutomaticMortarGeneration::setNodalWeightedGapMap(const Node * node, const Real weighted_gap)
 {

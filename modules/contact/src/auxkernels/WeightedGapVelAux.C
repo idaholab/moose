@@ -12,7 +12,7 @@
 #include "FEProblemBase.h"
 #include "Assembly.h"
 
-registerMooseObject("MooseApp", WeightedGapVelAux);
+registerMooseObject("ContactApp", WeightedGapVelAux);
 
 InputParameters
 WeightedGapVelAux::validParams()
