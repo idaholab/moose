@@ -134,7 +134,8 @@ PiecewiseByBlockLambdaFunctor<T>::setFunctor(const MooseMesh & mesh,
               "We should always be setting this functor with the same mesh. We may relax this "
               "assertion later");
 
-  auto add_lammy = [this, my_lammy](const SubdomainID block_id) {
+  auto add_lammy = [this, my_lammy](const SubdomainID block_id)
+  {
     auto pr = _elem_functor.emplace(block_id, my_lammy);
     if (!pr.second)
       mooseError("No insertion for the functor material property '",

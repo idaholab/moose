@@ -31,7 +31,7 @@ INSFVEnthalpyMaterial::INSFVEnthalpyMaterial(const InputParameters & parameters)
     _temperature(getFunctor<ADReal>("temperature")),
     _cp(getFunctor<ADReal>("cp_name"))
 {
-  addFunctorProperty<ADReal>("rho_cp_temp", [this](const auto & r, const auto & t) -> ADReal {
-    return _rho(r, t) * _cp(r, t) * _temperature(r, t);
-  });
+  addFunctorProperty<ADReal>("rho_cp_temp",
+                             [this](const auto & r, const auto & t) -> ADReal
+                             { return _rho(r, t) * _cp(r, t) * _temperature(r, t); });
 }

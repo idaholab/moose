@@ -272,7 +272,8 @@ TEST(MooseFunctorTest, testArgs)
   // Test NullFunctor errors
   {
     NullFunctor<Real> null;
-    auto test_null_error = [&null](const auto & arg) {
+    auto test_null_error = [&null](const auto & arg)
+    {
       try
       {
         null(arg);
@@ -300,7 +301,8 @@ TEST(MooseFunctorTest, testArgs)
       PiecewiseByBlockLambdaFunctor<Real> errorful(
           "errorful", dummy_lammy, {EXEC_ALWAYS}, *mesh, {});
 
-      auto test_sub_error = [&errorful](const auto & arg) {
+      auto test_sub_error = [&errorful](const auto & arg)
+      {
         try
         {
           errorful(arg);

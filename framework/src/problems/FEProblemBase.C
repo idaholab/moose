@@ -2028,7 +2028,8 @@ FEProblemBase::addFunction(const std::string & type,
         _factory.create<MooseFunctionBase>(type, name, parameters, tid);
     _functions.addObject(func, tid);
 
-    auto add_functor = [this, &name, tid](const auto & cast_functor) {
+    auto add_functor = [this, &name, tid](const auto & cast_functor)
+    {
       this->addFunctor(name, cast_functor, tid);
       if (_displaced_problem)
         _displaced_problem->addFunctor(name, cast_functor, tid);

@@ -29,7 +29,8 @@ INSFVFluxKernel::INSFVFluxKernel(const InputParameters & params)
 void
 INSFVFluxKernel::processResidual(const ADReal & residual)
 {
-  auto process_residual = [this](const ADReal & residual, const Elem & elem) {
+  auto process_residual = [this](const ADReal & residual, const Elem & elem)
+  {
     const auto dof_index = elem.dof_number(_sys.number(), _var.number(), 0);
 
     if (_subproblem.currentlyComputingJacobian())

@@ -102,7 +102,8 @@ greenGaussGradient(const ElemArg & elem_arg,
                                             const FaceInfo * const fi,
                                             const Point & surface_vector,
                                             Real coord,
-                                            const bool elem_has_info) {
+                                            const bool elem_has_info)
+    {
       mooseAssert(fi, "We need a FaceInfo for this action_functor");
       mooseAssert(elem_arg.elem == &functor_elem,
                   "Just a sanity check that the element being passed in is the one we passed out.");

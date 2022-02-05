@@ -174,7 +174,8 @@ Exodus::outputSetup()
       return;
   }
 
-  auto serialize = [this](auto & moose_mesh) {
+  auto serialize = [this](auto & moose_mesh)
+  {
     auto & lm_mesh = moose_mesh.getMesh();
     // Exodus is serial output so that we have to gather everything to "zero".
     lm_mesh.gather_to_zero();
