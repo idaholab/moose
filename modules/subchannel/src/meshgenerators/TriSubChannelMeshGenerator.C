@@ -53,11 +53,10 @@ TriSubChannelMeshGenerator::TriSubChannelMeshGenerator(const InputParameters & p
   if (_spacer_z.back() > _unheated_length_entry + _heated_length + _unheated_length_exit)
     mooseError(name(), ": Location of spacers should be less than the total bundle length");
 
-  Real L = _unheated_length_entry + _heated_length + _unheated_length_exit;
-  Real dz = L / _n_cells;
-  for (unsigned int i = 0; i < _n_cells + 1; i++)
-    _z_grid.push_back(dz * i);
+  SubChannelMesh::generateZGrid(
+      _unheated_length_entry, _heated_length, _unheated_length_exit, _n_cells, _z_grid);
 
+  Real L = _unheated_length_entry + _heated_length + _unheated_length_exit;
   std::vector<int> spacer_cell;
   for (const auto & elem : _spacer_z)
     spacer_cell.emplace_back(std::round(elem * _n_cells / L));

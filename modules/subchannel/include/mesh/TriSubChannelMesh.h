@@ -99,6 +99,11 @@ public:
   virtual unsigned int getPinIndexFromPoint(const Point & p) const override;
   virtual unsigned int pinIndex(const Point & p) const override;
 
+  /**
+   * Setup the internal maps when there is a outside duct present
+   */
+  void setChannelToDuctMaps(const std::vector<Node *> & duct_nodes);
+
 protected:
   /// number of rings of fuel rods
   unsigned int _n_rings;
@@ -161,10 +166,6 @@ protected:
   /// TODO: channel indices corresponding to a given pin index
   std::vector<std::vector<unsigned int>> _pin_to_chan_map;
 
-private:
-  /// number of corners in the duct x-sec
-  static const unsigned int n_corners = 6;
-
 public:
   static InputParameters validParams();
 
@@ -178,4 +179,7 @@ public:
   rodPositions(std::vector<Point> & positions, unsigned int nrings, Real pitch, Point center);
 
   friend class TriSubChannelMeshGenerator;
+
+  /// number of corners in the duct x-sec
+  static const unsigned int N_CORNERS = 6;
 };

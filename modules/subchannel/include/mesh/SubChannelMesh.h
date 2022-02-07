@@ -178,4 +178,13 @@ protected:
 
 public:
   static InputParameters validParams();
+
+  /**
+   * Generate the spacing in z-direction using heated and unteaded lengths
+   */
+  static void generateZGrid(Real unheated_length_entry,
+                            Real heated_length,
+                            Real unheated_length_exit,
+                            unsigned int n_cells,
+                            std::vector<Real> & z_grid);
 };
