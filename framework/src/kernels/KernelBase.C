@@ -72,7 +72,8 @@ KernelBase::KernelBase(const InputParameters & parameters)
     _has_save_in(false),
     _save_in_strings(parameters.get<std::vector<AuxVariableName>>("save_in")),
     _has_diag_save_in(false),
-    _diag_save_in_strings(parameters.get<std::vector<AuxVariableName>>("diag_save_in"))
+    _diag_save_in_strings(parameters.get<std::vector<AuxVariableName>>("diag_save_in")),
+    _use_displaced_mesh(getParam<bool>("use_displaced_mesh"))
 {
   auto num_disp = coupledComponents("displacements");
   for (decltype(num_disp) i = 0; i < num_disp; ++i)

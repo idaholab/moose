@@ -73,4 +73,7 @@ protected:
   std::vector<AuxVariableName> _diag_save_in_strings;
 
   std::vector<unsigned int> _displacements;
+
+  /// Whether this object is acting on the displaced mesh
+  const bool _use_displaced_mesh;
 };

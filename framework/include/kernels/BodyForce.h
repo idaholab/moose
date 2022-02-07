@@ -41,6 +41,9 @@ protected:
   /// Optional Postprocessor value
   const PostprocessorValue & _postprocessor;
 
+  // AD/non-AD version of the quadrature point coordinates
+  const MooseArray<MooseADWrapper<Point, is_ad>> * _generic_q_point;
+
   usingGenericKernelMembers;
 };
 
