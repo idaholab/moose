@@ -24,6 +24,9 @@ associateSyntax(Syntax & syntax, ActionFactory & /*action_factory*/)
 
   registerSyntax("QuadSubChannelBuildMeshAction", "QuadSubChannelMesh");
   registerSyntax("AddMeshGeneratorAction", "QuadSubChannelMesh/*");
+
+  registerSyntax("TriSubChannelBuildMeshAction", "TriSubChannelMesh");
+  registerSyntax("AddMeshGeneratorAction", "TriSubChannelMesh/*");
 }
 
 }
