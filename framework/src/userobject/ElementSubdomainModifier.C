@@ -107,6 +107,21 @@ ElementSubdomainModifier::execute()
 }
 
 void
+ElementSubdomainModifier::threadJoin(const UserObject & in_uo)
+{
+  // Join the data from uo into _this_ object:
+  const ElementSubdomainModifier & uo = static_cast<const ElementSubdomainModifier &>(in_uo);
+
+  _moved_elems.insert(_moved_elems.end(), uo._moved_elems.begin(), uo._moved_elems.end());
+
+  _moved_displaced_elems.insert(_moved_displaced_elems.end(),
+                                uo._moved_displaced_elems.begin(),
+                                uo._moved_displaced_elems.end());
+
+  _moved_nodes.insert(uo._moved_nodes.begin(), uo._moved_nodes.end());
+}
+
+void
 ElementSubdomainModifier::finalize()
 {
   /*
