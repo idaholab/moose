@@ -21,8 +21,10 @@
 
 #include "libmesh/compare_types.h"
 #include "libmesh/bounding_box.h"
+#include "libmesh/int_range.h"
 #include "metaphysicl/raw_type.h"
 #include "metaphysicl/metaphysicl_version.h"
+#include "metaphysicl/dynamic_std_array_wrapper.h"
 #include "timpi/standard_type.h"
 
 // C++ includes
@@ -991,42 +993,37 @@ buildRequiredMaterials(const Consumers & mat_consumers,
  * Utility class template for a semidynamic vector with a maximum size N
  * and a chosen dynamic size. This container avoids heap allocation and
  * is meant as a replacement for small local std::vector variables.
+ * Note: this class uses default initialization, which will not initialize built-in types.
+ * Note: due to an assertion bug in DynamicStdArrayWrapper we have to allocate one element more
+ * until https://github.com/libMesh/MetaPhysicL/pull/8 in MetaPhysicL is available in MOOSE.
  */
 template <typename T, std::size_t N>
 class SemidynamicVector
+  : public MetaPhysicL::DynamicStdArrayWrapper<T, MetaPhysicL::NWrapper<N + 1>>
 {
+  typedef MetaPhysicL::DynamicStdArrayWrapper<T, MetaPhysicL::NWrapper<N + 1>> Parent;
+
 public:
-  SemidynamicVector(std::size_t size) : _size(size) {}
-
-  typedef typename std::array<T, N>::iterator iterator;
-  typedef typename std::array<T, N>::const_iterator const_iterator;
-
-  iterator begin() { return _data.begin(); }
-  const_iterator begin() const { return _data.begin(); }
-  iterator end() { return _data.begin() + _size; }
-  const_iterator end() const { return _data.begin() + _size; }
-
-  void resize(std::size_t size)
+  SemidynamicVector(std::size_t size) : Parent()
   {
-    mooseAssert(size <= N, "Trying to resize beyond SemidynamicVector::max_size()");
-    _size = size;
+    Parent::resize(size);
+    // TODO: uncomment this once https://github.com/libMesh/MetaPhysicL/pull/8
+    //       makes it all the way into MOOSE.
+    // for (const auto i : make_range(size))
+    //   _data[i] = {};
   }
-  std::size_t size() const { return _size; }
+
+  void resize(std::size_t new_size)
+  {
+    // const auto old_dynamic_n = Parent::size();
+    Parent::resize(new_size);
+    // TODO: uncomment this once https://github.com/libMesh/MetaPhysicL/pull/8
+    //       makes it all the way into MOOSE.
+    // for (const auto i : make_range(old_dynamic_n, _dynamic_n))
+    //   _data[i] = {};
+  }
+
   std::size_t max_size() const { return N; }
-  const T & operator[](std::size_t i) const
-  {
-    mooseAssert(i < _size, "Out of bounds access in SemidynamicVector");
-    return _data[i];
-  }
-  T & operator[](std::size_t i)
-  {
-    mooseAssert(i < _size, "Out of bounds access in SemidynamicVector");
-    return _data[i];
-  }
-
-protected:
-  std::array<T, N> _data;
-  std::size_t _size;
 };
 
 } // MooseUtils namespace
