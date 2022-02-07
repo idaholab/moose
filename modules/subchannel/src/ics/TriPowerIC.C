@@ -92,7 +92,7 @@ void
 TriPowerIC::initialSetup()
 {
   auto n_rods = _mesh.getNumOfRods();
-  auto nz = _mesh.getNumOfAxialNodes();
+  auto nz = _mesh.getNumOfAxialCells();
   auto z_grid = _mesh.getZGrid();
 
   _estimate_power.resize(n_rods);
