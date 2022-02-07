@@ -160,20 +160,21 @@ PerfGraph::addToExecutionList(const PerfID id,
   section_increment._memory = memory;
   section_increment._beginning_num_printed = _console.numPrinted();
 
-  // This will synchronize the above memory changes with the
-  // atomic_thread_fence in the printing thread
-  std::atomic_thread_fence(std::memory_order_release);
-
-  // All of the above memory operations will be seen by the
-  // printing thread before the printing thread sees this new value
-
+  // A note about this next section of code:
+  // It is only EVER run on the main thread - and therefore there can be
+  // no race conditions.  All that is important here is that the print
+  // thread always sees a consistent value for _execution_list_end
   auto next_execution_list_end = _execution_list_end + 1;
 
   // Are we at the end of our circular buffer?
   if (next_execution_list_end >= MAX_EXECUTION_LIST_SIZE)
     next_execution_list_end = 0;
 
-  _execution_list_end.store(next_execution_list_end, std::memory_order_relaxed);
+  // This "release" will synchronize the above memory changes with the
+  // "acquire" in the printing thread
+  // All of the above memory operations will be seen by the
+  // printing thread before the printing thread sees this new value
+  _execution_list_end.store(next_execution_list_end, std::memory_order_release);
 }
 
 void
