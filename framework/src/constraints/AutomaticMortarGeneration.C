@@ -778,7 +778,8 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
 
     // Define expression for getting sub-elements nodes (for sub-dividing secondary elements)
     auto get_sub_elem_nodes = [](const ElemType type,
-                                 const unsigned int sub_elem) -> std::vector<unsigned int> {
+                                 const unsigned int sub_elem) -> std::vector<unsigned int>
+    {
       switch (type)
       {
         case TRI3:
@@ -864,8 +865,8 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
        * For first order face elements (Tri3 and Quad4) elements are simply linearized around center
        * For second order face elements (Tri6 and Quad9), elements are sub-divided into four first
        * order elements then each of the sub-elements is linearized around their respective centers
-       * For Quad8 elements, they are sub-divided into 5 first order elements and each sub-element
-       * is linearized around their respective centers
+       * For Quad8 elements, they are sub-divided into one quad and four triangle elements and each
+       * sub-element is linearized around their respective centers
        */
       for (auto sel : make_range(secondary_side_elem->n_sub_elem()))
       {
@@ -886,7 +887,6 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
           normal += nodal_normals[n];
         }
         center /= sub_elem_nodes.size();
-        normal /= sub_elem_nodes.size();
         normal = normal.unit();
 
         // Build and store linearized sub-elements for later use

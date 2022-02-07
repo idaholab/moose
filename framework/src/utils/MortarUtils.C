@@ -39,7 +39,8 @@ projectQPoints3d(const Elem * const msm_elem,
   const auto sub_elem = msm_elem->get_extra_integer(sub_elem_index);
   const ElemType primal_type = primal_elem->type();
 
-  auto get_sub_elem_node_indices = [primal_type, sub_elem]() -> std::vector<unsigned int> {
+  auto get_sub_elem_node_indices = [primal_type, sub_elem]() -> std::vector<unsigned int>
+  {
     switch (primal_type)
     {
       case TRI3:
@@ -99,7 +100,8 @@ projectQPoints3d(const Elem * const msm_elem,
 
   // Transforms quadrature point from first order sub-elements (in case of second-order)
   // to primal element
-  auto transform_qp = [primal_type, sub_elem](const Real nu, const Real xi) {
+  auto transform_qp = [primal_type, sub_elem](const Real nu, const Real xi)
+  {
     switch (primal_type)
     {
       case TRI3:
@@ -157,14 +159,16 @@ projectQPoints3d(const Elem * const msm_elem,
     }
   };
 
-  auto sub_element_type = [primal_type, sub_elem]() {
+  auto sub_element_type = [primal_type, sub_elem]()
+  {
     switch (primal_type)
     {
       case TRI3:
-      case QUAD4:
       case TRI6:
+        return TRI3;
+      case QUAD4:
       case QUAD9:
-        return primal_type;
+        return QUAD4;
       case QUAD8:
         switch (sub_elem)
         {
@@ -172,9 +176,9 @@ projectQPoints3d(const Elem * const msm_elem,
           case 1:
           case 2:
           case 3:
-            return TRI6;
+            return TRI3;
           case 4:
-            return primal_type;
+            return QUAD4;
           default:
             mooseError("sub_element_type: Invalid sub_elem: ", sub_elem);
         }

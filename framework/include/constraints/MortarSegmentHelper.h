@@ -85,11 +85,6 @@ public:
   const Point & center() const { return _center; }
 
   /**
-   * Get normal of secondary element
-   */
-  const Point & normal() const { return _normal; }
-
-  /**
    * Get area fraction remaining after clipping against primary elements
    */
   Real remainder() const { return _remaining_area_fraction; }

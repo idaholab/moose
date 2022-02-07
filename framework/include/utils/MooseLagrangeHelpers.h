@@ -213,6 +213,8 @@ fe_lagrange_2D_shape(const ElemType type,
               return .5 * (1. - xi * xi) * (1. + eta);
             case 7:
               return .5 * (1. - xi) * (1. - eta * eta);
+            default:
+              mooseError("Invalid shape function index i = ", i);
           }
         }
         case QUAD9:
