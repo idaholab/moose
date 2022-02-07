@@ -27,6 +27,19 @@ SubChannelMesh::SubChannelMesh(const SubChannelMesh & other_mesh)
 {
 }
 
+void
+SubChannelMesh::generateZGrid(Real unheated_length_entry,
+                              Real heated_length,
+                              Real unheated_length_exit,
+                              unsigned int n_cells,
+                              std::vector<Real> & z_grid)
+{
+  Real L = unheated_length_entry + heated_length + unheated_length_exit;
+  Real dz = L / n_cells;
+  for (unsigned int i = 0; i < n_cells + 1; i++)
+    z_grid.push_back(dz * i);
+}
+
 unsigned int
 SubChannelMesh::getZIndex(const Point & point) const
 {
