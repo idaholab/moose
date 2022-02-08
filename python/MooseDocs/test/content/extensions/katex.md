@@ -26,7 +26,7 @@ The fundamental theorem of calculus: [calculus].
 c = \pm\sqrt{a^2 + b^2}\in\RR
 
 !equation
-\pf{T}{t} = c
+\pd{T}{t} = c
 
 
 ## Equation References
