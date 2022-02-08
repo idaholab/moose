@@ -167,6 +167,8 @@ InitialConditionTempl<T>::compute()
       setHermiteVertices();
     else if (_cont == C_ONE)
       setOtherCOneVertices();
+    else if (_cont == SIDE_DISCONTINUOUS)
+      continue;
     else
       libmesh_error();
   } // loop over nodes
