@@ -12,7 +12,6 @@
     input = olsson_bubble_adjac.i
     ratio_tol = 1e-7
     issues = '#20193'
-    ad_mode = sparse
     requirement = "The Olsson bubble function shall return correct derivatives for dual number points."
   [../]
 []

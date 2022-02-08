@@ -42,6 +42,7 @@
 []
 
 [Executioner]
+  solve_type = NEWTON
   type = Transient
   num_steps = 1
 []
