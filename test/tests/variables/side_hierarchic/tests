@@ -1,0 +1,11 @@
+[Tests]
+  [./side_hierarchic]
+    type = Exodiff
+    input = 'side_hierarchic.i'
+    exodiff = 'side_hierarchic_out.e'
+
+    issues = '#20191'
+    design = 'syntax/Variables/index.md'
+    requirement = 'The system shall initialize SIDE_HIERARCHIC variables as instructed'
+  [../]
+[]
