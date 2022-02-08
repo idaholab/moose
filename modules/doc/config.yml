@@ -49,6 +49,9 @@ Extensions:
         executable: ${MOOSE_DIR}/modules/combined
         unregister:
             framework: !include framework/doc/unregister.yml
+            thermal_hydraulics:
+                AddComponentAction: Components/*/*
+                Component: Components/*/*
         remove:
             framework: !include framework/doc/remove.yml
             richards: !include modules/richards/doc/remove.yml
