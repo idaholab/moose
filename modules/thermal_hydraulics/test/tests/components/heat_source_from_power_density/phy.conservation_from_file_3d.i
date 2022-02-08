@@ -36,12 +36,12 @@ E_change = ${fparse power_density * width * height * depth * t}
   []
 []
 
-[HeatStructureMaterials]
-  [main-material]
-    type = SolidMaterialProperties
-    k = ${conductivity}
-    cp = ${specific_heat_capacity}
-    rho = ${density}
+[Materials]
+  [mat]
+    type = ADGenericConstantMaterial
+    block = 'heat_structure:rgn1 heat_structure:rgn2'
+    prop_names = 'density specific_heat thermal_conductivity'
+    prop_values = '${density} ${specific_heat_capacity} ${conductivity}'
   []
 []
 
@@ -50,7 +50,6 @@ E_change = ${fparse power_density * width * height * depth * t}
     type = HeatStructureFromFile3D
     file = box.e
     position = '0 0 0'
-    materials = 'main-material main-material'
     initial_T = 300
   []
   [heat_generation]

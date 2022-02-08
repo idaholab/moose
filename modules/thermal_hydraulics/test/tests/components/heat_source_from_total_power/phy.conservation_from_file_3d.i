@@ -13,12 +13,12 @@ energy_change = ${fparse power_fraction * power * t}
   []
 []
 
-[HeatStructureMaterials]
-  [main-material]
-    type = SolidMaterialProperties
-    k = 1e4
-    cp = 500.0
-    rho = 100.0
+[Materials]
+  [mat]
+    type = ADGenericConstantMaterial
+    block = 'heat_structure:rgn1 heat_structure:rgn2'
+    prop_names = 'density specific_heat thermal_conductivity'
+    prop_values = '100 500 1e4'
   []
 []
 
@@ -27,7 +27,6 @@ energy_change = ${fparse power_fraction * power * t}
     type = HeatStructureFromFile3D
     file = box.e
     position = '0 0 0'
-    materials = 'main-material main-material'
     initial_T = 300
   []
   [heat_generation]
