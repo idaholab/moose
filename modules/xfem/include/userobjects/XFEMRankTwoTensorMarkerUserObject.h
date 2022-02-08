@@ -41,5 +41,12 @@ protected:
   const MooseArray<Real> & _JxW;
   const MooseArray<Real> & _coord;
 
+  /// Whether to allow crack branching
+  bool _crack_branching;
+
+  /// Branching threshold multiplier, threshold over which branching will occur. Multiplier used on crack threshold to calculate branch threshold
+  Real _branch_threshold;
+
   virtual bool doesElementCrack(RealVectorValue & direction) override;
+  virtual bool doesCrackBranch(RealVectorValue & direction) override;
 };
