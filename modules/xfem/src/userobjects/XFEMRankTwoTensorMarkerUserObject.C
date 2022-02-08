@@ -39,6 +39,11 @@ XFEMRankTwoTensorMarkerUserObject::validParams()
       "point2",
       Point(0, 1, 0),
       "End point for axis used to calculate some cylindrical material tensor quantities");
+  params.addParam<bool>("crack_branching", false, "Should cracks branch over a threshold?");
+  params.addParam<Real>(
+      "branch_threshold",
+      2.0,
+      "Threshold multiplier over crack threshold where branching will occur. Default is 2.0");
   return params;
 }
 
@@ -52,7 +57,9 @@ XFEMRankTwoTensorMarkerUserObject::XFEMRankTwoTensorMarkerUserObject(
     _threshold(coupledValue("threshold")),
     _average(getParam<bool>("average")),
     _JxW(_assembly.JxW()),
-    _coord(_assembly.coordTransformation())
+    _coord(_assembly.coordTransformation()),
+    _crack_branching(parameters.get<bool>("crack_branching")),
+    _branch_threshold(parameters.get<Real>("branch_threshold"))
 {
 }
 
@@ -115,4 +122,68 @@ XFEMRankTwoTensorMarkerUserObject::doesElementCrack(RealVectorValue & direction)
   }
 
   return does_it_crack;
+}
+
+bool
+XFEMRankTwoTensorMarkerUserObject::doesCrackBranch(RealVectorValue & direction)
+{
+  bool does_it_branch = false;
+  if (_crack_branching)
+  {
+    unsigned int numqp = _qrule->n_points();
+    Real crack_branching_threshold = _branch_threshold; // branch threshold is 2.0X by default
+    Point zero; // Used for checking whether direction is zero
+
+    if (_average)
+    {
+      Real branch_threshold = 0.0;
+      RankTwoTensor average_tensor;
+      Point average_point;
+      for (unsigned int qp = 0; qp < numqp; ++qp)
+      {
+        if (_threshold[qp] <= 0.0)
+          mooseError("Threshold must be strictly positive in XFEMRankTwoTensorMarkerUserObject");
+        branch_threshold += _JxW[qp] * _coord[qp] * _threshold[qp];
+        average_tensor += _JxW[qp] * _coord[qp] * _tensor[qp];
+        average_point += _JxW[qp] * _coord[qp] * _q_point[qp];
+      }
+      Point point_dir;
+      Real tensor_quantity = RankTwoScalarTools::getQuantity(
+          average_tensor, _scalar_type, _point1, _point2, average_point, point_dir);
+      if (point_dir.absolute_fuzzy_equals(zero))
+        mooseError("Direction has zero length in XFEMRankTwoTensorMarkerUserObject");
+      direction = point_dir;
+      if (tensor_quantity > (branch_threshold * crack_branching_threshold))
+        does_it_branch = true;
+    }
+    else
+    {
+      unsigned int max_index = std::numeric_limits<unsigned int>::max();
+      Real max_ratio = 0.0;
+      std::vector<Point> directions(numqp);
+      for (unsigned int qp = 0; qp < numqp; ++qp)
+      {
+        if (_threshold[qp] <= 0.0)
+          mooseError("Threshold must be strictly positive in XFEMRankTwoTensorMarkerUserObject");
+        const Real tensor_quantity = RankTwoScalarTools::getQuantity(
+            _tensor[qp], _scalar_type, _point1, _point2, _q_point[qp], directions[qp]);
+        if (directions[qp].absolute_fuzzy_equals(zero))
+          mooseError("Direction has zero length in XFEMRankTwoTensorMarkerUserObject");
+        Real ratio = tensor_quantity / _threshold[qp];
+        if (ratio > max_ratio)
+        {
+          max_ratio = ratio;
+          max_index = qp;
+        }
+      }
+      if (max_ratio > crack_branching_threshold)
+      {
+        if (max_index == std::numeric_limits<unsigned int>::max())
+          mooseError("max_index out of bounds in XFEMRankTwoTensorMarkerUserObject");
+        does_it_branch = true;
+        direction = directions[max_index];
+      }
+    }
+  }
+  return does_it_branch;
 }
