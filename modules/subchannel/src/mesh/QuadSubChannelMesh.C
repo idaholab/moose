@@ -73,3 +73,17 @@ QuadSubChannelMesh::getPinIndexFromPoint(const Point & p) const
   unsigned int j = (p(1) + offset_y + 0.5 * _pitch) / _pitch;
   return j * (_nx - 1) + i;
 }
+
+void
+QuadSubChannelMesh::generatePinCenters(
+    unsigned int nx, unsigned int ny, Real pitch, Real elev, std::vector<Point> & pin_centers)
+{
+  mooseAssert(nx >= 2, "Number of channels in x-direction must be 2 or more.");
+  mooseAssert(ny >= 2, "Number of channels in y-direction must be 2 or more.");
+
+  Real offset_x = (nx - 2) * pitch / 2.0;
+  Real offset_y = (ny - 2) * pitch / 2.0;
+  for (unsigned int iy = 0; iy < ny - 1; iy++)
+    for (unsigned int ix = 0; ix < nx - 1; ix++)
+      pin_centers.push_back(Point(pitch * ix - offset_x, pitch * iy - offset_y, elev));
+}

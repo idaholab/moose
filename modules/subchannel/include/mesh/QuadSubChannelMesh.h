@@ -92,6 +92,17 @@ protected:
 public:
   static InputParameters validParams();
 
+  /**
+   * Generate pin centers
+   *
+   * @param nx number of channels in x-direction (must be more than 1)
+   * @param ny number of channels in y-direction (must be more than 1)
+   * @param elev elevation in z-direction
+   * @param pin_centers Positions in 3D space of pin centers
+   */
+  static void generatePinCenters(
+      unsigned int nx, unsigned int ny, Real pitch, Real elev, std::vector<Point> & pin_centers);
+
   friend class QuadSubChannelMeshGenerator;
   friend class PinMeshGenerator;
 };
