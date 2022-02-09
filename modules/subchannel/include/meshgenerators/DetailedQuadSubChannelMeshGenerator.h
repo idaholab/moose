@@ -39,6 +39,8 @@ protected:
   Real _gap;
   /// Subchannel type
   std::vector<EChannelType> _subch_type;
+  /// Subdomain ID used for the mesh block
+  const unsigned int & _block_id;
 
 public:
   static InputParameters validParams();
