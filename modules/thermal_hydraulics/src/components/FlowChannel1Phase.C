@@ -15,6 +15,7 @@ FlowChannel1Phase::validParams()
   params.addParam<FunctionName>("initial_p", "Initial pressure in the flow channel [Pa]");
   params.addParam<FunctionName>("initial_vel", "Initial velocity in the flow channel [m/s]");
   params.addParam<FunctionName>("initial_T", "Initial temperature in the flow channel [K]");
+  params.addParam<FunctionName>("D_h", "Hydraulic diameter [m]");
 
   params.addClassDescription("1-phase 1D flow channel");
 
@@ -76,6 +77,44 @@ FlowChannel1Phase::check() const
         oss << " " << ic_param;
 
     logError("The following initial condition parameters are missing:", oss.str());
+  }
+}
+
+void
+FlowChannel1Phase::addMooseObjects()
+{
+  FlowChannelBase::addMooseObjects();
+
+  if (!_pipe_pars_transferred)
+    addHydraulicDiameterMaterial();
+}
+
+void
+FlowChannel1Phase::addHydraulicDiameterMaterial() const
+{
+  const std::string mat_name = genName(name(), "D_h_material");
+
+  if (isParamValid("D_h"))
+  {
+    const FunctionName & D_h_fn_name = getParam<FunctionName>("D_h");
+
+    const std::string class_name = "GenericFunctionMaterial";
+    InputParameters params = _factory.getValidParams(class_name);
+    params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
+    params.set<std::vector<std::string>>("prop_names") = {FlowModelSinglePhase::HYDRAULIC_DIAMETER};
+    params.set<std::vector<FunctionName>>("prop_values") = {D_h_fn_name};
+    _sim.addMaterial(class_name, mat_name, params);
+
+    makeFunctionControllableIfConstant(D_h_fn_name, "D_h");
+  }
+  else
+  {
+    const std::string class_name = "HydraulicDiameterCircularMaterial";
+    InputParameters params = _factory.getValidParams(class_name);
+    params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
+    params.set<MaterialPropertyName>("D_h_name") = FlowModelSinglePhase::HYDRAULIC_DIAMETER;
+    params.set<std::vector<VariableName>>("A") = {FlowModel::AREA};
+    _sim.addMaterial(class_name, mat_name, params);
   }
 }
 

@@ -14,6 +14,8 @@ class FlowChannel1Phase : public FlowChannelBase
 public:
   FlowChannel1Phase(const InputParameters & params);
 
+  virtual void addMooseObjects() override;
+
   /**
    * Gets 1-phase wall heat transfer coefficient names for connected heat transfers
    */
@@ -25,6 +27,11 @@ protected:
   virtual void init() override;
   virtual std::shared_ptr<FlowModel> buildFlowModel() override;
   virtual void check() const override;
+
+  /**
+   * Adds a material for the hydraulic diameter
+   */
+  virtual void addHydraulicDiameterMaterial() const;
 
   /**
    * Populates heat connection variable names lists

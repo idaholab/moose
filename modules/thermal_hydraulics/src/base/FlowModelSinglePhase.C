@@ -5,6 +5,7 @@ const std::string FlowModelSinglePhase::DENSITY = "rho";
 const std::string FlowModelSinglePhase::FRICTION_FACTOR_DARCY = "f_D";
 const std::string FlowModelSinglePhase::DYNAMIC_VISCOSITY = "mu";
 const std::string FlowModelSinglePhase::HEAT_TRANSFER_COEFFICIENT_WALL = "Hw";
+const std::string FlowModelSinglePhase::HYDRAULIC_DIAMETER = "D_h";
 const std::string FlowModelSinglePhase::PRESSURE = "p";
 const std::string FlowModelSinglePhase::RHOA = "rhoA";
 const std::string FlowModelSinglePhase::RHOEA = "rhoEA";
