@@ -15,11 +15,11 @@
 #include "MooseMesh.h"
 #include "SystemBase.h"
 #include "NS.h"
-#include "Reconstructions.h"
 #include "Assembly.h"
 #include "INSFVVelocityVariable.h"
 #include "INSFVPressureVariable.h"
 #include "PiecewiseByBlockLambdaFunctor.h"
+#include "VectorCompositeFunctor.h"
 
 #include "libmesh/mesh_base.h"
 #include "libmesh/elem_range.h"
@@ -50,6 +50,23 @@ INSFVRhieChowInterpolator::validParams()
   params.addParam<VariableName>("w", "The z-component of velocity");
   params.addClassDescription(
       "Computes the Rhie-Chow velocity based on gathered 'a' coefficient data.");
+  params.addParam<MooseFunctorName>(
+      "a_u",
+      "For simulations in which the advecting velocities are aux variables, this parameter must be "
+      "supplied. It represents the on-diagonal coefficients for the 'x' component velocity, solved "
+      "via the Navier-Stokes equations.");
+  params.addParam<MooseFunctorName>(
+      "a_v",
+      "For simulations in which the advecting velocities are aux variables, this parameter must be "
+      "supplied when the mesh dimension is greater than 1. It represents the on-diagonal "
+      "coefficients for the 'y' component velocity, solved "
+      "via the Navier-Stokes equations.");
+  params.addParam<MooseFunctorName>(
+      "a_w",
+      "For simulations in which the advecting velocities are aux variables, this parameter must be "
+      "supplied when the mesh dimension is greater than 2. It represents the on-diagonal "
+      "coefficients for the 'z' component velocity, solved "
+      "via the Navier-Stokes equations.");
   return params;
 }
 
@@ -76,8 +93,13 @@ INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & par
     _vs(libMesh::n_threads(), nullptr),
     _ws(libMesh::n_threads(), nullptr),
     _sub_ids(blockRestricted() ? blockIDs() : _moose_mesh.meshSubdomains()),
+    _a(_moose_mesh, _sub_ids),
+    _ax(_a, 0),
+    _ay(_a, 1),
+    _az(_a, 2),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
-    _example(0)
+    _example(0),
+    _a_data_provided(false)
 {
   if (!_p)
     paramError(NS::pressure, "the pressure must be a INSFVPressureVariable.");
@@ -157,6 +179,59 @@ INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & par
         _moose_mesh,
         blockIDs());
   }
+
+  fillARead();
+}
+
+void
+INSFVRhieChowInterpolator::fillARead()
+{
+  _a_read.resize(libMesh::n_threads());
+
+  if (isParamValid("a_u"))
+  {
+    if (_dim > 1 && !isParamValid("a_v"))
+      mooseError("If a_u is provided, then a_v must be provided");
+
+    if (_dim > 2 && !isParamValid("a_w"))
+      mooseError("If a_u is provided, then a_w must be provided");
+
+    _a_data_provided = true;
+    _a_aux.resize(libMesh::n_threads());
+  }
+
+  if (_a_data_provided)
+  {
+    for (const auto tid : make_range(libMesh::n_threads()))
+    {
+      const Moose::FunctorBase<ADReal> *v_comp, *w_comp;
+      if (_dim > 1)
+        v_comp = &UserObject::_subproblem.getFunctor<ADReal>(deduceFunctorName("a_v"), tid, name());
+      else
+        v_comp = &_zero_functor;
+      if (_dim > 2)
+        w_comp = &UserObject::_subproblem.getFunctor<ADReal>(deduceFunctorName("a_w"), tid, name());
+      else
+        w_comp = &_zero_functor;
+
+      _a_aux[tid] = std::make_unique<VectorCompositeFunctor<ADReal>>(
+          UserObject::_subproblem.getFunctor<ADReal>(deduceFunctorName("a_u"), tid, name()),
+          *v_comp,
+          *w_comp);
+      _a_read[tid] = _a_aux[tid].get();
+    }
+  }
+  else
+    for (const auto tid : make_range(libMesh::n_threads()))
+    {
+      _a_read[tid] = &_a;
+
+      // We are the fluid flow application, so we should make sure users have the ability to write
+      // 'a' out to aux variables for possible transfer to other applications
+      UserObject::_subproblem.addFunctor("ax", _ax, tid);
+      UserObject::_subproblem.addFunctor("ay", _ay, tid);
+      UserObject::_subproblem.addFunctor("az", _az, tid);
+    }
 }
 
 void
@@ -212,6 +287,9 @@ INSFVRhieChowInterpolator::initialize()
 void
 INSFVRhieChowInterpolator::execute()
 {
+  if (_a_data_provided)
+    return;
+
   // A lot of RC data gathering leverages the automatic differentiation system, e.g. for linear
   // operators we pull out the 'a' coefficents by querying the ADReal residual derivatives member at
   // the element or neighbor dof locations. Consequently we need to enable derivative computation.
@@ -242,7 +320,7 @@ void
 INSFVRhieChowInterpolator::finalize()
 {
 #ifdef MOOSE_GLOBAL_AD_INDEXING
-  if (this->n_processors() == 1)
+  if (_a_data_provided || this->n_processors() == 1)
     return;
 
   using Datum = std::pair<dof_id_type, VectorValue<ADReal>>;
@@ -371,7 +449,7 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
   Real neighbor_volume = fi.neighborVolume();
 
   // Now we need to perform the computations of D
-  const VectorValue<ADReal> & elem_a = libmesh_map_find(_a, elem->id());
+  const auto elem_a = (*_a_read[tid])(makeElemArg(elem));
 
   mooseAssert(UserObject::_subproblem.getCoordSystem(elem->subdomain_id()) ==
                   UserObject::_subproblem.getCoordSystem(neighbor->subdomain_id()),
@@ -391,7 +469,7 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
 
   VectorValue<ADReal> face_D;
 
-  const VectorValue<ADReal> & neighbor_a = libmesh_map_find(_a, neighbor->id());
+  const auto neighbor_a = (*_a_read[tid])(makeElemArg(neighbor));
 
   coordTransformFactor(UserObject::_subproblem, neighbor->subdomain_id(), neighbor_centroid, coord);
   neighbor_volume *= coord;

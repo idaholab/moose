@@ -1,0 +1,11 @@
+[Tests]
+  design = 'INSFVScalarFieldAdvection.md INSFVRhieChowInterpolator.md'
+  issues = '#16585'
+  [multiapp]
+    type = Exodiff
+    input = 'fluid-flow.i'
+    exodiff = 'fluid-flow_out.e fluid-flow_out_scalar0.e'
+    requirement = 'The system shall be able to transport passive scalar quantities in an application different from the fluid flow.'
+    ad_indexing_type = 'global'
+  []
+[]

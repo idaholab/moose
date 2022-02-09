@@ -2,7 +2,6 @@ mu=1.1
 rho=1.1
 
 [GlobalParams]
-  force_boundary_execution = false
   two_term_boundary_expansion = false
   rhie_chow_user_object = 'rc'
   velocity_interp_method = 'rc'

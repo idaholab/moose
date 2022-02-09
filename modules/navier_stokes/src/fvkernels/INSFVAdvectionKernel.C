@@ -64,6 +64,16 @@ INSFVAdvectionKernel::INSFVAdvectionKernel(const InputParameters & params)
   else
     mooseError("Unrecognized interpolation type ",
                static_cast<std::string>(velocity_interp_method));
+
+  auto param_check = [&params, this](const auto & param_name)
+  {
+    if (params.isParamSetByUser(param_name))
+      paramError(
+          param_name, "This parameter is not honored by INSFVAdvectionKernels like '", name(), "'");
+  };
+
+  param_check("force_boundary_execution");
+  param_check("boundaries_to_force");
 }
 
 void

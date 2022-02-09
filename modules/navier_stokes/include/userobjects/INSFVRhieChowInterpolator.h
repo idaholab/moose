@@ -128,7 +128,24 @@ protected:
   const std::set<SubdomainID> _sub_ids;
 
   /// A map from element IDs to 'a' coefficient data
-  std::unordered_map<dof_id_type, libMesh::VectorValue<ADReal>> _a;
+  CellCenteredMapFunctor<ADRealVectorValue, std::unordered_map<dof_id_type, ADRealVectorValue>> _a;
+
+  /**
+   * @name 'a' component functors
+   * These vector component functors are not used anywhere within this class but they can be used
+   * for outputting, to auxiliary variables, the on-diagonal 'a' coefficients for use in
+   * visualization or transfer to other applications
+   */
+  ///@{
+  /// The x-component of 'a'
+  VectorComponentFunctor<ADReal> _ax;
+
+  /// The y-component of 'a'
+  VectorComponentFunctor<ADReal> _ay;
+
+  /// The z-component of 'a'
+  VectorComponentFunctor<ADReal> _az;
+  ///@}
 
   /// Whether we have performed our initial setup. Ordinarily we would do this in initialSetup but
   /// there are wonky things that happen in other objects initialSetup that affect us, like how
@@ -136,6 +153,12 @@ protected:
   bool _initial_setup_done = false;
 
 private:
+  /**
+   * Fills the _a_read data member at construction time with the appropriate functors. _a_read will
+   * be used later when computing the Rhie-Chow velocity
+   */
+  void fillARead();
+
   /// The velocity variable numbers
   std::vector<unsigned int> _var_numbers;
 
@@ -153,6 +176,23 @@ private:
 
   /// A unity functor used in the epsilon virtual method
   const Moose::ConstantFunctor<ADReal> _unity_functor{1};
+
+  /// A zero functor potentially used in _a_read
+  const Moose::ConstantFunctor<ADReal> _zero_functor{0};
+
+  /// A vector sized according to the number of threads that holds the 'a' data we will read from
+  /// when computing the Rhie-Chow velocity
+  std::vector<const Moose::FunctorBase<VectorValue<ADReal>> *> _a_read;
+
+  /// A vector sized according to the number of threads that holds vector composites of 'a'
+  /// component functors. This member is leveraged when advecting velocities are auxiliary variables
+  /// and the 'a' data has been transferred from another application
+  std::vector<std::unique_ptr<Moose::FunctorBase<VectorValue<ADReal>>>> _a_aux;
+
+  /// Whether 'a' data has been provided by the user. This can happen if we are running in an
+  /// application solving precursor advection, and another application has computed the fluid flow
+  /// field
+  bool _a_data_provided;
 };
 
 inline const Moose::FunctorBase<ADReal> & INSFVRhieChowInterpolator::epsilon(THREAD_ID) const
