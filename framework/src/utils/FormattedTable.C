@@ -569,6 +569,8 @@ void
 FormattedTable::clear()
 {
   _data.clear();
+  _output_file.close();
+  _output_row_index = 0;
 }
 
 void
