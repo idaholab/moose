@@ -11,8 +11,6 @@ HeatStructureFromFile3D::validParams()
   InputParameters params = HeatStructureBase::validParams();
   params.addRequiredParam<FileName>("file", "The file name with the mesh (in Exodus format)");
   params.addParam<FunctionName>("initial_T", "Initial temperature [K]");
-  params.addParam<std::vector<std::string>>("materials",
-                                            "Material name for each transverse region");
   // arbitrary non-zero vector
   params.set<RealVectorValue>("orientation") = RealVectorValue(1, 0, 0);
   params.suppressParameter<RealVectorValue>("orientation");
@@ -33,7 +31,6 @@ HeatStructureFromFile3D::validParams()
 HeatStructureFromFile3D::HeatStructureFromFile3D(const InputParameters & params)
   : HeatStructureBase(params), _file_name(getParam<FileName>("file"))
 {
-  _material_names = getParam<std::vector<std::string>>("materials");
   _num_rods = 1;
 
   if (MooseUtils::pathExists(_file_name) && MooseUtils::checkFileReadable(_file_name, false, false))

@@ -4,12 +4,12 @@
   gravity_vector = '0 0 0'
 []
 
-[HeatStructureMaterials]
+[Materials]
   [mat]
-    type = SolidMaterialProperties
-    k = 30
-    cp = 100
-    rho = 1000
+    type = ADGenericConstantMaterial
+    block = 'blk:0'
+    prop_names = 'density specific_heat thermal_conductivity'
+    prop_values = '1000 100 30'
   []
 []
 
@@ -61,7 +61,6 @@
     file = mesh.e
     position = '0 0 0'
     initial_T = 400
-    materials = 'mat'
   []
   [rmax]
     type = HSBoundaryAmbientConvection

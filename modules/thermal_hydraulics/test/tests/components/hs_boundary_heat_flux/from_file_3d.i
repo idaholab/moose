@@ -22,12 +22,12 @@ E_change = ${fparse scale * heat_flux * A * t}
   []
 []
 
-[HeatStructureMaterials]
-  [hs_mat]
-    type = SolidMaterialProperties
-    rho = ${density}
-    cp = ${specific_heat_capacity}
-    k = ${conductivity}
+[Materials]
+  [mat]
+    type = ADGenericConstantMaterial
+    block = 'hs:brick'
+    prop_names = 'density specific_heat thermal_conductivity'
+    prop_values = '${density} ${specific_heat_capacity} ${conductivity}'
   []
 []
 
@@ -36,7 +36,6 @@ E_change = ${fparse scale * heat_flux * A * t}
     type = HeatStructureFromFile3D
     file = box.e
     position = '0 0 0'
-    materials = 'hs_mat'
     initial_T = ${T_hs}
   []
 

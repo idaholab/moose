@@ -1,11 +1,14 @@
 # 2D Heat Structures
 
-A "heat structure" is here defined to be a multi-dimensional domain on which the
-heat conduction equation applies.
+The [heat structures](thermal_hydraulics/component_groups/heat_structure.md)
+that are 2D share parameters that specify how to generate the 2D mesh.
+
+The following components are 2D heat structures:
+
+- [HeatStructureCylindrical.md]
+- [HeatStructurePlate.md]
 
 ## Usage
-
-The initial temperature is given by the function parameter `initial_T`.
 
 The domain may be divided up into any number (say, $n$) of regions in the
 radial direction, which each get their own subdomain names and may use different
@@ -27,14 +30,8 @@ in [matprops_table].
 
 ### Variables and Material Properties
 
-This component creates the variables listed in [vars_table].
-
-!table id=vars_table caption=Variables on a heat structure domain.
-| Variable | Symbol | Description |
-| :- | :- | :- |
-| `T_solid` | $T$ | Temperature \[K\] |
-
-This component creates the material properties listed in [matprops_table].
+If the `materials` parameter is supplied, this component creates the material
+properties in [matprops_table]:
 
 !table id=matprops_table caption=Material properties on a heat structure domain.
 | Material Property | Symbol | Description |
@@ -42,6 +39,9 @@ This component creates the material properties listed in [matprops_table].
 | `density` | $\rho$ | Density \[kg/m$^3$\] |
 | `specific_heat` | $c_p$ | Specific heat capacity \[J/(kg-K)\] |
 | `thermal_conductivity` | $k$ | Thermal conductivity \[W/(m-K)\] |
+
+If the `materials` parameter is omitted, the user is responsible for creating
+these material properties on all of the blocks on the heat structure.
 
 ### Mesh Entities
 
