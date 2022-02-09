@@ -1,5 +1,4 @@
 #include "ADHydraulicDiameterCircularMaterial.h"
-#include "FlowModel.h"
 
 registerMooseObject("ThermalHydraulicsApp", ADHydraulicDiameterCircularMaterial);
 
@@ -7,6 +6,8 @@ InputParameters
 ADHydraulicDiameterCircularMaterial::validParams()
 {
   InputParameters params = Material::validParams();
+  params.addRequiredParam<MaterialPropertyName>("D_h_name",
+                                                "Hydraulic diameter material property name");
   params.addRequiredCoupledVar("A", "Cross-sectional area");
   return params;
 }
@@ -14,7 +15,7 @@ ADHydraulicDiameterCircularMaterial::validParams()
 ADHydraulicDiameterCircularMaterial::ADHydraulicDiameterCircularMaterial(
     const InputParameters & parameters)
   : Material(parameters),
-    _D_h(declareADProperty<Real>(FlowModel::HYDRAULIC_DIAMETER)),
+    _D_h(declareADProperty<Real>(getParam<MaterialPropertyName>("D_h_name"))),
     _area(adCoupledValue("A"))
 {
 }
