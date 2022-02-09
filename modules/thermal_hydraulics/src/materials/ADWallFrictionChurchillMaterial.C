@@ -28,7 +28,7 @@ ADWallFrictionChurchillMaterial::ADWallFrictionChurchillMaterial(const InputPara
     _mu(getADMaterialProperty<Real>("mu")),
     _rho(getADMaterialProperty<Real>("rho")),
     _vel(getADMaterialProperty<Real>("vel")),
-    _D_h(getMaterialProperty<Real>("D_h")),
+    _D_h(getADMaterialProperty<Real>("D_h")),
     _roughness(getParam<Real>("roughness"))
 {
 }

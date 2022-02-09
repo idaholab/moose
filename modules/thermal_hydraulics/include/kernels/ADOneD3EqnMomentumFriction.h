@@ -19,7 +19,7 @@ protected:
   const ADVariableValue & _A;
 
   /// Hydraulic diameter
-  const MaterialProperty<Real> & _D_h;
+  const ADMaterialProperty<Real> & _D_h;
 
   /// Density
   const ADMaterialProperty<Real> & _rho;

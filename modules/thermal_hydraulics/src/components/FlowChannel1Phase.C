@@ -98,7 +98,7 @@ FlowChannel1Phase::addHydraulicDiameterMaterial() const
   {
     const FunctionName & D_h_fn_name = getParam<FunctionName>("D_h");
 
-    const std::string class_name = "GenericFunctionMaterial";
+    const std::string class_name = "ADGenericFunctionMaterial";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
     params.set<std::vector<std::string>>("prop_names") = {FlowModelSinglePhase::HYDRAULIC_DIAMETER};
@@ -109,7 +109,7 @@ FlowChannel1Phase::addHydraulicDiameterMaterial() const
   }
   else
   {
-    const std::string class_name = "HydraulicDiameterCircularMaterial";
+    const std::string class_name = "ADHydraulicDiameterCircularMaterial";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
     params.set<MaterialPropertyName>("D_h_name") = FlowModelSinglePhase::HYDRAULIC_DIAMETER;

@@ -406,7 +406,10 @@ FlowModelSetup1Phase::addMaterials()
   // hydraulic diameter
   {
     InputParameters params = _this_action_factory.getValidParams(class_name);
-    params.set<std::string>("type") = "GenericFunctionMaterial";
+    if (_ad)
+      params.set<std::string>("type") = "ADGenericFunctionMaterial";
+    else
+      params.set<std::string>("type") = "GenericFunctionMaterial";
 
     std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(
         _this_action_factory.create(class_name, "D_h_material", params));

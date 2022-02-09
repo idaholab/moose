@@ -18,7 +18,7 @@ protected:
   /// Nusselt number
   const ADMaterialProperty<Real> & _Nu;
   /// Hydraulic diameter
-  const MaterialProperty<Real> & _D_h;
+  const ADMaterialProperty<Real> & _D_h;
   /// Thermal conductivity
   const ADMaterialProperty<Real> & _k;
 
