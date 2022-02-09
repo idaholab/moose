@@ -33,14 +33,11 @@ class MeshBase;
 }
 
 /**
- * This user-object gathers 'a' (on-diagonal velocity coefficients) and 'B' (body-force) data. It
- * performs an interpolation (first overbar operation) and reconstruction (second overbar operation)
- * of the 'B' data before applying it to the momentum residuals as suggested by Moukalled.
- * Additionally it performs one more interpolation on 'B' to the faces and includes the difference
- * of this third overbar operation and the first overbar operation in the computation of the
- * Rhie-Chow velocity, which this object computes and provides to momentum advection kernels. This
- * class also supports computation of an average face velocity although this is generally not
- * encouraged as it will lead to a checkerboard in the pressure field
+ * This user-object gathers 'a' (on-diagonal velocity coefficients) data. Having the gathered 'a'
+ * data, this object is responsible for the computation of the Rhie-Chow velocity, which can be used
+ * in advection kernels and postprocessors. This class also supports computation of an average face
+ * velocity although this is generally not encouraged as it will lead to a checkerboard in the
+ * pressure field
  */
 class INSFVRhieChowInterpolator : public GeneralUserObject,
                                   public TaggingInterface,

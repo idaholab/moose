@@ -14,10 +14,10 @@
 #include <unordered_map>
 
 /**
- * A class that inherits the free-flow class's implementation of Rhie-Chow data gathering and body
- * force interpolation and adds the ability to perform repeated interpolations and reconstructions
- * of the porosity in order to reduce non-physical oscillations that arise from property
- * discontinuities in a collocated discretization of pressure and velocity
+ * A class that inherits the free-flow class's implementation of Rhie-Chow data gathering and adds
+ * the ability to perform repeated interpolations and reconstructions of the porosity in order to
+ * reduce non-physical oscillations that arise from property discontinuities in a collocated
+ * discretization of pressure and velocity
  */
 class PINSFVRhieChowInterpolator : public INSFVRhieChowInterpolator
 {

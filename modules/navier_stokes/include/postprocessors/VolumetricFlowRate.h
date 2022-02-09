@@ -38,12 +38,12 @@ protected:
 
   /// Whether an advected variable was supplied in the input
   const bool _advected_variable_supplied;
-  /// Variable storing the advected quantity
+  /// Variable storing the advected quantity; used for finite elements
   const VariableValue & _advected_variable;
 
   /// Whether an advected material property was supplied in the input
   const bool _advected_mat_prop_supplied;
-  /// Material property storing the advected quantity
+  /// Material property storing the advected quantity; used for finite elements
   const Moose::Functor<ADReal> & _advected_material_property;
 
   /// The functor representing the advected quantity for finite volume

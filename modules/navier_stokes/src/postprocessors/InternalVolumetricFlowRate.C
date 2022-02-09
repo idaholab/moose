@@ -29,10 +29,14 @@ InternalVolumetricFlowRate::validParams()
                              advected_interp_method,
                              "The interpolation to use for the advected quantity. Options are "
                              "'upwind' and 'average', with the default being 'upwind'.");
-  params.addCoupledVar(
-      "advected_variable", 0, "The advected variable quantity of which to study the flow");
-  params.addParam<MooseFunctorName>(
-      "advected_mat_prop", 0, "The advected material property of which to study the flow");
+  params.addCoupledVar("advected_variable",
+                       0,
+                       "The advected variable quantity of which to study the flow; useful for "
+                       "finite element simulations");
+  params.addParam<MooseFunctorName>("advected_mat_prop",
+                                    0,
+                                    "The advected material property of which to study the flow; "
+                                    "useful for finite element simulations");
   params.addParam<MooseFunctorName>("advected_quantity",
                                     "The quantity to advect. This is the canonical parameter to "
                                     "set the advected quantity when finite volume is being used.");

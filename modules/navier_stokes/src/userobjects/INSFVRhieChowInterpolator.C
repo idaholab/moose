@@ -120,6 +120,8 @@ INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & par
     fill_container("v", _vs);
     check_blocks(*_v);
     _var_numbers.push_back(_v->number());
+    if (_v->faceInterpolationMethod() != _u->faceInterpolationMethod())
+      mooseError("x and y velocity component face interpolation methods do not match");
   }
 
   if (_dim >= 3)
@@ -131,6 +133,8 @@ INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & par
     fill_container("w", _ws);
     check_blocks(*_w);
     _var_numbers.push_back(_w->number());
+    if (_w->faceInterpolationMethod() != _u->faceInterpolationMethod())
+      mooseError("x and z velocity component face interpolation methods do not match");
   }
 
   if (&(UserObject::_subproblem) != &(TaggingInterface::_subproblem))

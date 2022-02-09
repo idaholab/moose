@@ -24,10 +24,14 @@ VolumetricFlowRate::validParams()
   params.addRequiredCoupledVar("vel_x", "The x-axis velocity");
   params.addCoupledVar("vel_y", 0, "The y-axis velocity");
   params.addCoupledVar("vel_z", 0, "The z-axis velocity");
-  params.addCoupledVar(
-      "advected_variable", 0, "The advected variable quantity of which to study the flow");
-  params.addParam<MooseFunctorName>(
-      "advected_mat_prop", 0, "The advected material property of which to study the flow");
+  params.addCoupledVar("advected_variable",
+                       0,
+                       "The advected variable quantity of which to study the flow; useful for "
+                       "finite element simulations");
+  params.addParam<MooseFunctorName>("advected_mat_prop",
+                                    0,
+                                    "The advected material property of which to study the flow; "
+                                    "useful for finite element simulations");
   params.addParam<MooseFunctorName>("advected_quantity",
                                     "The quantity to advect. This is the canonical parameter to "
                                     "set the advected quantity when finite volume is being used.");

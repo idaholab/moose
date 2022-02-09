@@ -204,12 +204,7 @@ rho=1.1
 []
 
 [Outputs]
-  exodus = true
   csv = true
-  [dof]
-    type = DOFMap
-    execute_on = 'initial'
-  []
 []
 
 [Postprocessors]

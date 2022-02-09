@@ -18,8 +18,8 @@ InputParameters
 PINSFVRhieChowInterpolator::validParams()
 {
   auto params = INSFVRhieChowInterpolator::validParams();
-  params.addClassDescription("Performs interpolations and reconstructions of body forces and "
-                             "porosity and computes the Rhie-Chow face velocities.");
+  params.addClassDescription("Performs interpolations and reconstructions of porosity and computes "
+                             "the Rhie-Chow face velocities.");
   params.addRequiredParam<MooseFunctorName>(NS::porosity, "The porosity");
   params.addParam<unsigned short>(
       "smoothing_layers",

@@ -31,6 +31,6 @@ protected:
   /// The functor describing the body force
   const Moose::Functor<ADReal> & _functor;
 
-  /// Optional Postprocessor value
+  /// Optional postprocessor scaling factor of the body force
   const PostprocessorValue & _postprocessor;
 };
