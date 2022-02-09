@@ -1,15 +1,15 @@
-#include "DetailedQuadSubChannelMesh.h"
+#include "DetailedQuadSubChannelMeshGenerator.h"
 #include <array>
 #include <cmath>
 #include "libmesh/cell_prism6.h"
 #include "libmesh/unstructured_mesh.h"
 
-registerMooseObject("SubChannelApp", DetailedQuadSubChannelMesh);
+registerMooseObject("SubChannelApp", DetailedQuadSubChannelMeshGenerator);
 
 InputParameters
-DetailedQuadSubChannelMesh::validParams()
+DetailedQuadSubChannelMeshGenerator::validParams()
 {
-  InputParameters params = MooseMesh::validParams();
+  InputParameters params = MeshGenerator::validParams();
   params.addRequiredParam<Real>("pitch", "Pitch [m]");
   params.addRequiredParam<Real>("rod_diameter", "Rod diameter [m]");
   params.addParam<Real>("unheated_length_entry", 0.0, "Unheated length at entry [m]");
@@ -22,8 +22,9 @@ DetailedQuadSubChannelMesh::validParams()
   return params;
 }
 
-DetailedQuadSubChannelMesh::DetailedQuadSubChannelMesh(const InputParameters & parameters)
-  : MooseMesh(parameters),
+DetailedQuadSubChannelMeshGenerator::DetailedQuadSubChannelMeshGenerator(
+    const InputParameters & parameters)
+  : MeshGenerator(parameters),
     _unheated_length_entry(getParam<Real>("unheated_length_entry")),
     _heated_length(getParam<Real>("heated_length")),
     _unheated_length_exit(getParam<Real>("unheated_length_exit")),
@@ -60,33 +61,12 @@ DetailedQuadSubChannelMesh::DetailedQuadSubChannelMesh(const InputParameters & p
   }
 }
 
-DetailedQuadSubChannelMesh::DetailedQuadSubChannelMesh(
-    const DetailedQuadSubChannelMesh & other_mesh)
-  : MooseMesh(other_mesh),
-    _unheated_length_entry(other_mesh._unheated_length_entry),
-    _heated_length(other_mesh._heated_length),
-    _unheated_length_exit(other_mesh._unheated_length_exit),
-    _z_grid(other_mesh._z_grid),
-    _pitch(other_mesh._pitch),
-    _rod_diameter(other_mesh._rod_diameter),
-    _n_cells(other_mesh._n_cells),
-    _gap(other_mesh._gap)
+std::unique_ptr<MeshBase>
+DetailedQuadSubChannelMeshGenerator::generate()
 {
-}
-
-std::unique_ptr<MooseMesh>
-DetailedQuadSubChannelMesh::safeClone() const
-{
-  return libmesh_make_unique<DetailedQuadSubChannelMesh>(*this);
-}
-
-void
-DetailedQuadSubChannelMesh::buildMesh()
-{
-  UnstructuredMesh & mesh = dynamic_cast<UnstructuredMesh &>(getMesh());
-  mesh.clear();
-  BoundaryInfo & boundary_info = mesh.get_boundary_info();
-  mesh.set_spatial_dimension(3);
+  auto mesh_base = buildMeshBaseObject();
+  BoundaryInfo & boundary_info = mesh_base->get_boundary_info();
+  mesh_base->set_spatial_dimension(3);
   // Define the resolution (the number of points used to represent a circle).
   // This must be divisible by 4.
   const unsigned int theta_res = 16; // TODO: parameterize
@@ -138,8 +118,8 @@ DetailedQuadSubChannelMesh::buildMesh()
       n_corner * elems_per_corner + n_side * elems_per_side + n_center * elems_per_center;
   const unsigned int n_points = points_per_level * (_n_cells + 1);
   const unsigned int n_elems = elems_per_level * _n_cells;
-  mesh.reserve_nodes(n_points);
-  mesh.reserve_elem(n_elems);
+  mesh_base->reserve_nodes(n_points);
+  mesh_base->reserve_elem(n_elems);
   // Build an array of points arranged in a circle on the xy-plane. (last and first node overlap)
   const double radius = _rod_diameter / 2.0;
   std::array<Point, theta_res + 1> circle_points;
@@ -399,22 +379,22 @@ DetailedQuadSubChannelMesh::buildMesh()
           if (_nx == 1 && iy == 0) // vertical orientation
           {
             for (unsigned int i = 0; i < points_per_side; i++)
-              mesh.add_point(bottom_points[i] + x0 + y0 + z0, node_id++);
+              mesh_base->add_point(bottom_points[i] + x0 + y0 + z0, node_id++);
           }
           if (_nx == 1 && iy == 1) // vertical orientation
           {
             for (unsigned int i = 0; i < points_per_side; i++)
-              mesh.add_point(top_points[i] + x0 + y0 + z0, node_id++);
+              mesh_base->add_point(top_points[i] + x0 + y0 + z0, node_id++);
           }
           if (_ny == 1 && ix == 0) // horizontal orientation
           {
             for (unsigned int i = 0; i < points_per_side; i++)
-              mesh.add_point(left_points[i] + x0 + y0 + z0, node_id++);
+              mesh_base->add_point(left_points[i] + x0 + y0 + z0, node_id++);
           }
           if (_ny == 1 && ix == 1) // horizontal orientation
           {
             for (unsigned int i = 0; i < points_per_side; i++)
-              mesh.add_point(right_points[i] + x0 + y0 + z0, node_id++);
+              mesh_base->add_point(right_points[i] + x0 + y0 + z0, node_id++);
           }
         }
       }
@@ -439,17 +419,17 @@ DetailedQuadSubChannelMesh::buildMesh()
             if (iy == 0)
             {
               for (unsigned int i = 0; i < points_per_side; i++)
-                mesh.add_point(bottom_points[i] + x0 + y0 + z0, node_id++);
+                mesh_base->add_point(bottom_points[i] + x0 + y0 + z0, node_id++);
             }
             else if (iy == _ny - 1)
             {
               for (unsigned int i = 0; i < points_per_side; i++)
-                mesh.add_point(top_points[i] + x0 + y0 + z0, node_id++);
+                mesh_base->add_point(top_points[i] + x0 + y0 + z0, node_id++);
             }
             else
             {
               for (unsigned int i = 0; i < points_per_center; i++)
-                mesh.add_point(center_points[i] + x0 + y0 + z0, node_id++);
+                mesh_base->add_point(center_points[i] + x0 + y0 + z0, node_id++);
             }
           }
           else if (_ny == 1)
@@ -457,17 +437,17 @@ DetailedQuadSubChannelMesh::buildMesh()
             if (ix == 0)
             {
               for (unsigned int i = 0; i < points_per_side; i++)
-                mesh.add_point(left_points[i] + x0 + y0 + z0, node_id++);
+                mesh_base->add_point(left_points[i] + x0 + y0 + z0, node_id++);
             }
             else if (ix == _nx - 1)
             {
               for (unsigned int i = 0; i < points_per_side; i++)
-                mesh.add_point(right_points[i] + x0 + y0 + z0, node_id++);
+                mesh_base->add_point(right_points[i] + x0 + y0 + z0, node_id++);
             }
             else
             {
               for (unsigned int i = 0; i < points_per_center; i++)
-                mesh.add_point(center_points[i] + x0 + y0 + z0, node_id++);
+                mesh_base->add_point(center_points[i] + x0 + y0 + z0, node_id++);
             }
           }
         }
@@ -491,7 +471,7 @@ DetailedQuadSubChannelMesh::buildMesh()
           {
             Point z0{0, 0, z};
             for (unsigned int i = 0; i < points_per_corner; i++)
-              mesh.add_point(bl_corner_points[i] + x0 + y0 + z0, node_id++);
+              mesh_base->add_point(bl_corner_points[i] + x0 + y0 + z0, node_id++);
           }
         }
         else if (ix == _nx - 1 && iy == 0) // Bottom right corner
@@ -500,7 +480,7 @@ DetailedQuadSubChannelMesh::buildMesh()
           {
             Point z0{0, 0, z};
             for (unsigned int i = 0; i < points_per_corner; i++)
-              mesh.add_point(br_corner_points[i] + x0 + y0 + z0, node_id++);
+              mesh_base->add_point(br_corner_points[i] + x0 + y0 + z0, node_id++);
           }
         }
         else if (ix == 0 && iy == _ny - 1) // top Left corner
@@ -509,7 +489,7 @@ DetailedQuadSubChannelMesh::buildMesh()
           {
             Point z0{0, 0, z};
             for (unsigned int i = 0; i < points_per_corner; i++)
-              mesh.add_point(tl_corner_points[i] + x0 + y0 + z0, node_id++);
+              mesh_base->add_point(tl_corner_points[i] + x0 + y0 + z0, node_id++);
           }
         }
         else if (ix == _nx - 1 && iy == _ny - 1) // top right corner
@@ -518,7 +498,7 @@ DetailedQuadSubChannelMesh::buildMesh()
           {
             Point z0{0, 0, z};
             for (unsigned int i = 0; i < points_per_corner; i++)
-              mesh.add_point(tr_corner_points[i] + x0 + y0 + z0, node_id++);
+              mesh_base->add_point(tr_corner_points[i] + x0 + y0 + z0, node_id++);
           }
         }
         else if (ix == 0 && (iy != _ny - 1 || iy != 0)) // left side
@@ -527,7 +507,7 @@ DetailedQuadSubChannelMesh::buildMesh()
           {
             Point z0{0, 0, z};
             for (unsigned int i = 0; i < points_per_side; i++)
-              mesh.add_point(left_points[i] + x0 + y0 + z0, node_id++);
+              mesh_base->add_point(left_points[i] + x0 + y0 + z0, node_id++);
           }
         }
         else if (ix == _nx - 1 && (iy != _ny - 1 || iy != 0)) // right side
@@ -536,7 +516,7 @@ DetailedQuadSubChannelMesh::buildMesh()
           {
             Point z0{0, 0, z};
             for (unsigned int i = 0; i < points_per_side; i++)
-              mesh.add_point(right_points[i] + x0 + y0 + z0, node_id++);
+              mesh_base->add_point(right_points[i] + x0 + y0 + z0, node_id++);
           }
         }
         else if (iy == 0 && (ix != _nx - 1 || ix != 0)) // bottom side
@@ -545,7 +525,7 @@ DetailedQuadSubChannelMesh::buildMesh()
           {
             Point z0{0, 0, z};
             for (unsigned int i = 0; i < points_per_side; i++)
-              mesh.add_point(bottom_points[i] + x0 + y0 + z0, node_id++);
+              mesh_base->add_point(bottom_points[i] + x0 + y0 + z0, node_id++);
           }
         }
         else if (iy == _ny - 1 && (ix != _nx - 1 || ix != 0)) // top side
@@ -554,7 +534,7 @@ DetailedQuadSubChannelMesh::buildMesh()
           {
             Point z0{0, 0, z};
             for (unsigned int i = 0; i < points_per_side; i++)
-              mesh.add_point(top_points[i] + x0 + y0 + z0, node_id++);
+              mesh_base->add_point(top_points[i] + x0 + y0 + z0, node_id++);
           }
         }
         else // center
@@ -563,7 +543,7 @@ DetailedQuadSubChannelMesh::buildMesh()
           {
             Point z0{0, 0, z};
             for (unsigned int i = 0; i < points_per_center; i++)
-              mesh.add_point(center_points[i] + x0 + y0 + z0, node_id++);
+              mesh_base->add_point(center_points[i] + x0 + y0 + z0, node_id++);
           }
         }
       }
@@ -587,26 +567,26 @@ DetailedQuadSubChannelMesh::buildMesh()
           {
             Elem * elem = new Prism6;
             elem->set_id(elem_id++);
-            elem = mesh.add_elem(elem);
+            elem = mesh_base->add_elem(elem);
             // index of the central node at base of cell
             unsigned int indx1 = iz * points_per_side + points_per_side * (_n_cells + 1) * i_ch;
             // index of the central node at top of cell
             unsigned int indx2 =
                 (iz + 1) * points_per_side + points_per_side * (_n_cells + 1) * i_ch;
             unsigned int elems_per_channel = elems_per_side;
-            elem->set_node(0) = mesh.node_ptr(indx1);
-            elem->set_node(1) = mesh.node_ptr(indx1 + i + 1);
+            elem->set_node(0) = mesh_base->node_ptr(indx1);
+            elem->set_node(1) = mesh_base->node_ptr(indx1 + i + 1);
             if (i != elems_per_channel - 1)
-              elem->set_node(2) = mesh.node_ptr(indx1 + i + 2);
+              elem->set_node(2) = mesh_base->node_ptr(indx1 + i + 2);
             else
-              elem->set_node(2) = mesh.node_ptr(indx1 + 1);
+              elem->set_node(2) = mesh_base->node_ptr(indx1 + 1);
 
-            elem->set_node(3) = mesh.node_ptr(indx2);
-            elem->set_node(4) = mesh.node_ptr(indx2 + i + 1);
+            elem->set_node(3) = mesh_base->node_ptr(indx2);
+            elem->set_node(4) = mesh_base->node_ptr(indx2 + i + 1);
             if (i != elems_per_channel - 1)
-              elem->set_node(5) = mesh.node_ptr(indx2 + i + 2);
+              elem->set_node(5) = mesh_base->node_ptr(indx2 + i + 2);
             else
-              elem->set_node(5) = mesh.node_ptr(indx2 + 1);
+              elem->set_node(5) = mesh_base->node_ptr(indx2 + 1);
 
             if (iz == 0)
               boundary_info.add_side(elem, 0, 0);
@@ -618,7 +598,7 @@ DetailedQuadSubChannelMesh::buildMesh()
     }
     boundary_info.sideset_name(0) = "inlet";
     boundary_info.sideset_name(1) = "outlet";
-    mesh.prepare_for_use();
+    mesh_base->prepare_for_use();
   }
   else if (_n_channels > 2 && (_ny == 1 || _nx == 1))
   {
@@ -663,21 +643,21 @@ DetailedQuadSubChannelMesh::buildMesh()
           {
             Elem * elem = new Prism6;
             elem->set_id(elem_id++);
-            elem = mesh.add_elem(elem);
+            elem = mesh_base->add_elem(elem);
 
-            elem->set_node(0) = mesh.node_ptr(indx1);
-            elem->set_node(1) = mesh.node_ptr(indx1 + i + 1);
+            elem->set_node(0) = mesh_base->node_ptr(indx1);
+            elem->set_node(1) = mesh_base->node_ptr(indx1 + i + 1);
             if (i != elems_per_channel - 1)
-              elem->set_node(2) = mesh.node_ptr(indx1 + i + 2);
+              elem->set_node(2) = mesh_base->node_ptr(indx1 + i + 2);
             else
-              elem->set_node(2) = mesh.node_ptr(indx1 + 1);
+              elem->set_node(2) = mesh_base->node_ptr(indx1 + 1);
 
-            elem->set_node(3) = mesh.node_ptr(indx2);
-            elem->set_node(4) = mesh.node_ptr(indx2 + i + 1);
+            elem->set_node(3) = mesh_base->node_ptr(indx2);
+            elem->set_node(4) = mesh_base->node_ptr(indx2 + i + 1);
             if (i != elems_per_channel - 1)
-              elem->set_node(5) = mesh.node_ptr(indx2 + i + 2);
+              elem->set_node(5) = mesh_base->node_ptr(indx2 + i + 2);
             else
-              elem->set_node(5) = mesh.node_ptr(indx2 + 1);
+              elem->set_node(5) = mesh_base->node_ptr(indx2 + 1);
 
             if (iz == 0)
               boundary_info.add_side(elem, 0, 0);
@@ -689,7 +669,7 @@ DetailedQuadSubChannelMesh::buildMesh()
     }
     boundary_info.sideset_name(0) = "inlet";
     boundary_info.sideset_name(1) = "outlet";
-    mesh.prepare_for_use();
+    mesh_base->prepare_for_use();
   }
   else
   {
@@ -738,21 +718,21 @@ DetailedQuadSubChannelMesh::buildMesh()
           {
             Elem * elem = new Prism6;
             elem->set_id(elem_id++);
-            elem = mesh.add_elem(elem);
+            elem = mesh_base->add_elem(elem);
 
-            elem->set_node(0) = mesh.node_ptr(indx1);
-            elem->set_node(1) = mesh.node_ptr(indx1 + i + 1);
+            elem->set_node(0) = mesh_base->node_ptr(indx1);
+            elem->set_node(1) = mesh_base->node_ptr(indx1 + i + 1);
             if (i != elems_per_channel - 1)
-              elem->set_node(2) = mesh.node_ptr(indx1 + i + 2);
+              elem->set_node(2) = mesh_base->node_ptr(indx1 + i + 2);
             else
-              elem->set_node(2) = mesh.node_ptr(indx1 + 1);
+              elem->set_node(2) = mesh_base->node_ptr(indx1 + 1);
 
-            elem->set_node(3) = mesh.node_ptr(indx2);
-            elem->set_node(4) = mesh.node_ptr(indx2 + i + 1);
+            elem->set_node(3) = mesh_base->node_ptr(indx2);
+            elem->set_node(4) = mesh_base->node_ptr(indx2 + i + 1);
             if (i != elems_per_channel - 1)
-              elem->set_node(5) = mesh.node_ptr(indx2 + i + 2);
+              elem->set_node(5) = mesh_base->node_ptr(indx2 + i + 2);
             else
-              elem->set_node(5) = mesh.node_ptr(indx2 + 1);
+              elem->set_node(5) = mesh_base->node_ptr(indx2 + 1);
 
             if (iz == 0)
               boundary_info.add_side(elem, 0, 0);
@@ -764,6 +744,8 @@ DetailedQuadSubChannelMesh::buildMesh()
     }
     boundary_info.sideset_name(0) = "inlet";
     boundary_info.sideset_name(1) = "outlet";
-    mesh.prepare_for_use();
+    mesh_base->prepare_for_use();
   }
+
+  return mesh_base;
 }

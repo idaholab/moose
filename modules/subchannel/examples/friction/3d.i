@@ -1,12 +1,14 @@
 [Mesh]
-  type = DetailedQuadSubChannelMesh
-  nx = 1
-  ny = 2
-  n_cells = 50
-  pitch = 0.0126
-  rod_diameter = 0.00950
-  gap = 0.00095
-  heated_length = 10.0
+  [subchannel]
+    type = DetailedQuadSubChannelMeshGenerator
+    nx = 1
+    ny = 2
+    n_cells = 50
+    pitch = 0.0126
+    rod_diameter = 0.00950
+    gap = 0.00095
+    heated_length = 10.0
+  []
 []
 
 [AuxVariables]
