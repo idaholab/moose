@@ -19,6 +19,7 @@ DetailedQuadSubChannelMeshGenerator::validParams()
   params.addRequiredParam<unsigned int>("nx", "Number of channels in the x direction [-]");
   params.addRequiredParam<unsigned int>("ny", "Number of channels in the y direction [-]");
   params.addRequiredParam<Real>("gap", "Half of gap between assemblies [m]");
+  params.addParam<unsigned int>("block_id", 0, "Block ID used for the mesh subdomain.");
   return params;
 }
 
@@ -34,7 +35,8 @@ DetailedQuadSubChannelMeshGenerator::DetailedQuadSubChannelMeshGenerator(
     _nx(getParam<unsigned int>("nx")),
     _ny(getParam<unsigned int>("ny")),
     _n_channels(_nx * _ny),
-    _gap(getParam<Real>("gap"))
+    _gap(getParam<Real>("gap")),
+    _block_id(getParam<unsigned int>("block_id"))
 {
   Real L = _unheated_length_entry + _heated_length + _unheated_length_exit;
   Real dz = L / _n_cells;
@@ -566,6 +568,7 @@ DetailedQuadSubChannelMeshGenerator::generate()
           for (unsigned int i = 0; i < elems_per_side; i++)
           {
             Elem * elem = new Prism6;
+            elem->subdomain_id() = _block_id;
             elem->set_id(elem_id++);
             elem = mesh_base->add_elem(elem);
             // index of the central node at base of cell
@@ -598,6 +601,7 @@ DetailedQuadSubChannelMeshGenerator::generate()
     }
     boundary_info.sideset_name(0) = "inlet";
     boundary_info.sideset_name(1) = "outlet";
+    mesh_base->subdomain_name(_block_id) = name();
     mesh_base->prepare_for_use();
   }
   else if (_n_channels > 2 && (_ny == 1 || _nx == 1))
@@ -642,6 +646,7 @@ DetailedQuadSubChannelMeshGenerator::generate()
           for (unsigned int i = 0; i < elems_per_channel; i++)
           {
             Elem * elem = new Prism6;
+            elem->subdomain_id() = _block_id;
             elem->set_id(elem_id++);
             elem = mesh_base->add_elem(elem);
 
@@ -669,6 +674,7 @@ DetailedQuadSubChannelMeshGenerator::generate()
     }
     boundary_info.sideset_name(0) = "inlet";
     boundary_info.sideset_name(1) = "outlet";
+    mesh_base->subdomain_name(_block_id) = name();
     mesh_base->prepare_for_use();
   }
   else
@@ -717,6 +723,7 @@ DetailedQuadSubChannelMeshGenerator::generate()
           for (unsigned int i = 0; i < elems_per_channel; i++)
           {
             Elem * elem = new Prism6;
+            elem->subdomain_id() = _block_id;
             elem->set_id(elem_id++);
             elem = mesh_base->add_elem(elem);
 
@@ -744,6 +751,7 @@ DetailedQuadSubChannelMeshGenerator::generate()
     }
     boundary_info.sideset_name(0) = "inlet";
     boundary_info.sideset_name(1) = "outlet";
+    mesh_base->subdomain_name(_block_id) = name();
     mesh_base->prepare_for_use();
   }
 

@@ -2,8 +2,32 @@
   [coords]
     type = Exodiff
     input = coords.i
-    exodiff = coords_in.e
-    cli_args = "--mesh-only"
+    exodiff = coords_3x3.e
+    cli_args = "--mesh-only coords_3x3.e"
+    recover = false
+  []
+
+  [1x2]
+    type = Exodiff
+    input = coords.i
+    exodiff = coords_1x2.e
+    cli_args = "--mesh-only coords_1x2.e Mesh/subchannel/nx=1 Mesh/subchannel/ny=2"
+    recover = false
+  []
+
+  [1x3]
+    type = Exodiff
+    input = coords.i
+    exodiff = coords_1x3.e
+    cli_args = "--mesh-only coords_1x3.e Mesh/subchannel/nx=1 Mesh/subchannel/ny=3"
+    recover = false
+  []
+
+  [3x1]
+    type = Exodiff
+    input = coords.i
+    exodiff = coords_3x1.e
+    cli_args = "--mesh-only coords_3x1.e Mesh/subchannel/nx=3 Mesh/subchannel/ny=1"
     recover = false
   []
 []
