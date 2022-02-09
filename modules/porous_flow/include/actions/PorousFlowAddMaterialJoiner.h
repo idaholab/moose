@@ -39,12 +39,18 @@ protected:
    * Helper method to determine if a PorousFLowJoiner material is already present
    * in the input file for the given material property
    * @param property the material property to check
-   * @return true if a PorousFLowJoiner is already present for property, false otherwise
+   * @return true if a PorousFlowJoiner is already present for property, false otherwise
    */
   bool hasJoiner(std::string property);
 
   /// Name of the PorousFlowDictator
   std::string _dictator_name;
+
+  /// whether the Material in that is currently being Joined is block-restricted
+  bool _block_restricted;
+
+  /// if _block_restricted == true, then these are the blocks that the Joiner will be restricted to
+  std::vector<SubdomainName> _blocks;
 
   /// Vector of already joined materials (to avoid joining them again)
   std::vector<std::string> _already_joined;

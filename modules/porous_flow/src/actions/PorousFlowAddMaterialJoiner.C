@@ -61,6 +61,36 @@ PorousFlowAddMaterialJoiner::act()
       {
         const std::string pf_material_type = params.get<std::string>("pf_material_type");
 
+        _block_restricted = params.isParamValid("block");
+        if (_block_restricted &&
+            (pf_material_type == "fluid_properties" || pf_material_type == "relative_permeability"))
+        {
+          // this Material is block-restricted, and we're about to add Joiners for it, so must get
+          // a union of all the blocks for this material type in order to block-restrict the Joiner
+          _blocks.clear();
+          for (auto & mat2 : _problem->getMaterialWarehouse().getObjects())
+          {
+            const InputParameters & params2 = mat2->parameters();
+            if (params2.isParamValid("pf_material_type") &&
+                params2.get<std::string>("pf_material_type") == pf_material_type)
+            {
+              if (!params2.isParamValid("block"))
+              {
+                // a Material of this type is not block-restricted, so the non-block-restricted
+                // Joiner can be added
+                _block_restricted = false;
+                break;
+              }
+              const std::vector<SubdomainName> & bl =
+                  params2.get<std::vector<SubdomainName>>("block");
+              _blocks.insert(_blocks.end(), bl.begin(), bl.end());
+            }
+          }
+          // eliminate any repeated entries in _blocks
+          const std::set<SubdomainName> unique(_blocks.begin(), _blocks.end());
+          _blocks.assign(unique.begin(), unique.end());
+        }
+
         // Check if the material is evaluated at the nodes or qps
         const bool at_nodes = params.get<bool>("at_nodes");
 
@@ -158,6 +188,8 @@ PorousFlowAddMaterialJoiner::addJoiner(bool at_nodes,
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
     params.set<bool>("at_nodes") = at_nodes;
     params.set<std::string>("material_property") = material_property;
+    if (_block_restricted)
+      params.set<std::vector<SubdomainName>>("block") = _blocks;
     _problem->addMaterial(material_type, output_name, params);
 
     // Add material to the already joined list
