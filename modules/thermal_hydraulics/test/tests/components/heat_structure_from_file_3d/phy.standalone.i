@@ -1,9 +1,8 @@
-[HeatStructureMaterials]
+[Materials]
   [mat]
-    type = SolidMaterialProperties
-    k = 1
-    cp = 1
-    rho = 1
+    type = ADGenericConstantMaterial
+    prop_names = 'density specific_heat thermal_conductivity'
+    prop_values = '1 1 1'
   []
 []
 
@@ -13,7 +12,6 @@
     file = box.e
     position = '0 0 0'
     initial_T = 300
-    materials = 'mat'
   []
 
   [left_bnd]

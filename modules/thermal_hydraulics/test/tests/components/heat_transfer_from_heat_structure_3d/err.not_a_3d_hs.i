@@ -2,12 +2,12 @@
   scaling_factor_1phase = '1 1 1e-3'
 []
 
-[HeatStructureMaterials]
+[Materials]
   [mat]
-    type = SolidMaterialProperties
-    k = 30
-    cp = 100
-    rho = 1000
+    type = ADGenericConstantMaterial
+    block = 'blk:0'
+    prop_names = 'density specific_heat thermal_conductivity'
+    prop_values = '1000 100 30'
   []
 []
 

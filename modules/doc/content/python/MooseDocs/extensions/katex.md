@@ -74,7 +74,7 @@ file for contains the following allowing for equation in [katex-macro] to be def
 !listing modules/doc/config.yml start=MooseDocs.extensions.katex end=MooseDocs.extensions.appsyntax
 
 !devel example id=katex-macro caption=Example use of a macro defined in configuration file.
-$\pf{T}{t} = c$
+$\pd{T}{t} = c$
 
 
 [KaTeX]: https://khan.github.io/KaTeX

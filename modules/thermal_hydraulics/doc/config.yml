@@ -53,7 +53,7 @@ Extensions:
     MooseDocs.extensions.bibtex:
         duplicate_warning: False
     MooseDocs.extensions.katex:
-        macros: !include modules/thermal_hydraulics/doc/latex_macros.yml
+        macros: !include modules/doc/katex_macros.yml
     MooseDocs.extensions.template:
         active: True
         args:

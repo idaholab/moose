@@ -44,12 +44,14 @@ Extensions:
     MooseDocs.extensions.bibtex:
         duplicates: !include modules/doc/duplicate_bibs.yml
     MooseDocs.extensions.katex:
-        macros:
-            \pf: "\\frac{\\partial #1}{\\partial #2}"
+        macros: !include modules/doc/katex_macros.yml
     MooseDocs.extensions.appsyntax: # WARNING: this must follow katex for doco pages to work
         executable: ${MOOSE_DIR}/modules/combined
         unregister:
             framework: !include framework/doc/unregister.yml
+            thermal_hydraulics:
+                AddComponentAction: Components/*/*
+                Component: Components/*/*
         remove:
             framework: !include framework/doc/remove.yml
             richards: !include modules/richards/doc/remove.yml
