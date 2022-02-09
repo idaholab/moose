@@ -1,22 +1,20 @@
 #pragma once
 
-#include <vector>
-#include "MooseMesh.h"
+#include "MeshGenerator.h"
 #include "SubChannelEnums.h"
 
 /**
- * Base class for detailed subchannel meshes
+ * Mesh generator that builds a 3D mesh representing quadrilateral subchannels
  */
-class DetailedQuadSubChannelMesh : public MooseMesh
+class DetailedQuadSubChannelMeshGenerator : public MeshGenerator
 {
 public:
-  DetailedQuadSubChannelMesh(const InputParameters & parameters);
-  DetailedQuadSubChannelMesh(const DetailedQuadSubChannelMesh & other_mesh);
-  virtual std::unique_ptr<MooseMesh> safeClone() const override;
-  virtual void buildMesh() override;
-  EChannelType getSubchannelType(unsigned int index) const { return _subch_type[index]; }
+  DetailedQuadSubChannelMeshGenerator(const InputParameters & parameters);
+  virtual std::unique_ptr<MeshBase> generate() override;
 
 protected:
+  EChannelType getSubchannelType(unsigned int index) const { return _subch_type[index]; }
+
   /// unheated length of the fuel rod at the entry of the assembly
   Real _unheated_length_entry;
   /// heated length of the fuel rod
