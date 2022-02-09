@@ -11,29 +11,31 @@
 
 #include "libmesh/utility.h"
 
+template <bool is_ad>
 InputParameters
-NestedSolve::validParams()
+NestedSolveTempl<is_ad>::validParams()
 {
   InputParameters params = emptyInputParameters();
 
   // Newton iteration control parameters
   params.addParam<Real>("relative_tolerance",
-                        NestedSolve::relativeToleranceDefault(),
+                        NestedSolveTempl<is_ad>::relativeToleranceDefault(),
                         "Relative convergence tolerance for Newton iteration");
   params.addParam<Real>("absolute_tolerance",
-                        NestedSolve::absoluteToleranceDefault(),
+                        NestedSolveTempl<is_ad>::absoluteToleranceDefault(),
                         "Absolute convergence tolerance for Newton iteration");
   params.addParam<unsigned int>(
       "min_iterations",
-      NestedSolve::minIterationsDefault(),
+      NestedSolveTempl<is_ad>::minIterationsDefault(),
       "Minimum number of non linear iterations to execute before accepting convergence");
   params.addParam<unsigned int>("max_iterations",
-                                NestedSolve::maxIterationsDefault(),
+                                NestedSolveTempl<is_ad>::maxIterationsDefault(),
                                 "Maximum number of non linear iterations");
   return params;
 }
 
-NestedSolve::NestedSolve()
+template <bool is_ad>
+NestedSolveTempl<is_ad>::NestedSolveTempl()
   : _relative_tolerance_square(Utility::pow<2>(relativeToleranceDefault())),
     _absolute_tolerance_square(Utility::pow<2>(absoluteToleranceDefault())),
     _min_iterations(minIterationsDefault()),
@@ -43,7 +45,8 @@ NestedSolve::NestedSolve()
 {
 }
 
-NestedSolve::NestedSolve(const InputParameters & params)
+template <bool is_ad>
+NestedSolveTempl<is_ad>::NestedSolveTempl(const InputParameters & params)
   : _relative_tolerance_square(Utility::pow<2>(params.get<Real>("relative_tolerance"))),
     _absolute_tolerance_square(Utility::pow<2>(params.get<Real>("absolute_tolerance"))),
     _min_iterations(params.get<unsigned int>("min_iterations")),
@@ -53,24 +56,32 @@ NestedSolve::NestedSolve(const InputParameters & params)
 {
 }
 
+template <bool is_ad>
 void
-NestedSolve::sizeItems(const NestedSolve::DynamicVector & guess,
-                       NestedSolve::DynamicVector & residual,
-                       NestedSolve::DynamicMatrix & jacobian) const
+NestedSolveTempl<is_ad>::sizeItems(const NestedSolveTempl<is_ad>::DynamicVector & guess,
+                                   NestedSolveTempl<is_ad>::DynamicVector & residual,
+                                   NestedSolveTempl<is_ad>::DynamicMatrix & jacobian) const
 {
   const auto N = guess.size();
   residual.resize(N, 1);
   jacobian.resize(N, N);
 }
 
+template <bool is_ad>
 void
-NestedSolve::linear(RankTwoTensor A, RealVectorValue & x, RealVectorValue b) const
+NestedSolveTempl<is_ad>::linear(const NSRankTwoTensor & A,
+                                NSRealVectorValue & x,
+                                const NSRealVectorValue & b) const
 {
   x = A.inverse() * b;
 }
 
+template <bool is_ad>
 Real
-NestedSolve::normSquare(RealVectorValue v) const
+NestedSolveTempl<is_ad>::normSquare(const NSReal & v) const
 {
-  return v.norm_sq();
+  return MetaPhysicL::raw_value(v) * MetaPhysicL::raw_value(v);
 }
+
+template class NestedSolveTempl<false>;
+template class NestedSolveTempl<true>;
