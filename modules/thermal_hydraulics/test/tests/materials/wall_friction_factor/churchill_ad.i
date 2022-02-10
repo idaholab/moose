@@ -6,16 +6,10 @@
 []
 
 [Materials]
-  [D_h]
-    type = GenericConstantMaterial
-    prop_names = 'D_h'
-    prop_values = '0.15'
-  []
-
   [props]
     type = ADGenericConstantMaterial
-    prop_names = 'rho vel mu '
-    prop_values = '1000 0.1 0.001'
+    prop_names = 'rho vel mu D_h'
+    prop_values = '1000 0.1 0.001 0.15'
   []
 
   [fD_material]

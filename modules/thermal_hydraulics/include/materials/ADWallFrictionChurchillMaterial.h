@@ -34,7 +34,7 @@ protected:
   /// Velocity (x-component)
   const ADMaterialProperty<Real> & _vel;
   /// Hydraulic diameter
-  const MaterialProperty<Real> & _D_h;
+  const ADMaterialProperty<Real> & _D_h;
   /// Roughness of the surface
   const Real & _roughness;
 

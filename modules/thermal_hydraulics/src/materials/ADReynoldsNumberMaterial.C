@@ -39,7 +39,7 @@ ADReynoldsNumberMaterial::ADReynoldsNumberMaterial(const InputParameters & param
 
     _vel(getADMaterialProperty<Real>("vel")),
 
-    _D_h(getMaterialProperty<Real>("D_h")),
+    _D_h(getADMaterialProperty<Real>("D_h")),
 
     _mu(getADMaterialProperty<Real>("mu")),
 

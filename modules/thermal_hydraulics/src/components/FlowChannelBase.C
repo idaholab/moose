@@ -65,7 +65,6 @@ FlowChannelBase::validParams()
       "pipe_pars_transferred",
       false,
       "Set to true if Dh, P_hf and A are going to be transferred in from an external source");
-  params.addParam<FunctionName>("D_h", "Hydraulic diameter [m]");
   params.addParam<bool>("lump_mass_matrix", false, "Lump the mass matrix");
   params.addRequiredParam<std::string>("closures", "Closures type");
 
@@ -78,8 +77,6 @@ FlowChannelBase::FlowChannelBase(const InputParameters & params)
     _flow_model(nullptr),
     _closures_name(getParam<std::string>("closures")),
     _pipe_pars_transferred(getParam<bool>("pipe_pars_transferred")),
-    _has_Dh(isParamValid("D_h")),
-    _Dh_function(_has_Dh ? getParam<FunctionName>("D_h") : ""),
     _roughness(getParam<Real>("roughness")),
     _HT_geometry(getEnumParam<EConvHeatTransGeom>("heat_transfer_geom")),
     _PoD(getParam<Real>("PoD")),
@@ -315,32 +312,6 @@ FlowChannelBase::addVariables()
 }
 
 void
-FlowChannelBase::setupDh()
-{
-  const std::string nm = genName(name(), "D_h_material");
-
-  if (_has_Dh)
-  {
-    const std::string class_name = "GenericFunctionMaterial";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
-    params.set<std::vector<std::string>>("prop_names") = {FlowModel::HYDRAULIC_DIAMETER};
-    params.set<std::vector<FunctionName>>("prop_values") = {_Dh_function};
-    _sim.addMaterial(class_name, nm, params);
-
-    makeFunctionControllableIfConstant(_Dh_function, "D_h");
-  }
-  else
-  {
-    const std::string class_name = "HydraulicDiameterCircularMaterial";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
-    params.set<std::vector<VariableName>>("A") = {FlowModel::AREA};
-    _sim.addMaterial(class_name, nm, params);
-  }
-}
-
-void
 FlowChannelBase::addCommonObjects()
 {
   ExecFlagEnum ts_execute_on(MooseUtils::getDefaultExecFlagEnum());
@@ -378,8 +349,6 @@ FlowChannelBase::addCommonObjects()
       _sim.addAuxKernel(class_name, aux_kernel_name, params);
       makeFunctionControllableIfConstant(_area_function, "Area");
     }
-
-    setupDh();
   }
 }
 
