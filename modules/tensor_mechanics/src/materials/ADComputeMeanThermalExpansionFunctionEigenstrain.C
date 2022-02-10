@@ -47,5 +47,5 @@ ADReal
 ADComputeMeanThermalExpansionFunctionEigenstrain::meanThermalExpansionCoefficient(
     const ADReal & temperature)
 {
-  return _thermal_expansion_function.value(temperature, ADPoint());
+  return _thermal_expansion_function.value(temperature);
 }

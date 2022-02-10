@@ -37,5 +37,5 @@ ConditionalFunctionEnableControl::ConditionalFunctionEnableControl(
 bool
 ConditionalFunctionEnableControl::conditionMet(const unsigned int & /*i*/)
 {
-  return _function.value(_t, Point());
+  return _function.value(_t);
 }

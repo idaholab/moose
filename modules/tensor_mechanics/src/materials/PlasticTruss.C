@@ -127,9 +127,7 @@ PlasticTruss::computeHardeningValue(Real scalar)
   if (_hardening_function)
   {
     const Real strain_old = _plastic_strain_old[_qp];
-    const Point p;
-
-    return _hardening_function->value(std::abs(strain_old) + scalar, p) - _yield_stress;
+    return _hardening_function->value(std::abs(strain_old) + scalar) - _yield_stress;
   }
 
   return _hardening_variable_old[_qp] + _hardening_constant * scalar;
@@ -140,9 +138,7 @@ Real PlasticTruss::computeHardeningDerivative(Real /*scalar*/)
   if (_hardening_function)
   {
     const Real strain_old = _plastic_strain_old[_qp];
-    const Point p;
-
-    return _hardening_function->timeDerivative(std::abs(strain_old), p);
+    return _hardening_function->timeDerivative(std::abs(strain_old));
   }
 
   return _hardening_constant;

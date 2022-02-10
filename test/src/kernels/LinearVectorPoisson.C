@@ -35,17 +35,15 @@ LinearVectorPoisson::computeQpResidual()
   const Real x = _q_point[_qp](0);
   const Real y = _q_point[_qp](1);
 
-  const Real fx =
-      -(_x_sln.value(_t, Point(x, y - _eps, 0)) + _x_sln.value(_t, Point(x, y + _eps, 0)) +
-        _x_sln.value(_t, Point(x - _eps, y, 0)) + _x_sln.value(_t, Point(x + _eps, y, 0)) -
-        4. * _x_sln.value(_t, Point(x, y, 0))) /
-      _eps / _eps;
+  const Real fx = -(_x_sln.value(_t, x, y - _eps) + _x_sln.value(_t, x, y + _eps) +
+                    _x_sln.value(_t, x - _eps, y) + _x_sln.value(_t, x + _eps, y) -
+                    4. * _x_sln.value(_t, x, y)) /
+                  _eps / _eps;
 
-  const Real fy =
-      -(_y_sln.value(_t, Point(x, y - _eps, 0)) + _y_sln.value(_t, Point(x, y + _eps, 0)) +
-        _y_sln.value(_t, Point(x - _eps, y, 0)) + _y_sln.value(_t, Point(x + _eps, y, 0)) -
-        4. * _y_sln.value(_t, Point(x, y, 0))) /
-      _eps / _eps;
+  const Real fy = -(_y_sln.value(_t, x, y - _eps) + _y_sln.value(_t, x, y + _eps) +
+                    _y_sln.value(_t, x - _eps, y) + _y_sln.value(_t, x + _eps, y) -
+                    4. * _y_sln.value(_t, x, y)) /
+                  _eps / _eps;
 
   return -RealVectorValue(fx, fy, 0) * _test[_i][_qp];
 }

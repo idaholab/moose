@@ -169,9 +169,7 @@ IsotropicPlasticityStressUpdateTempl<false>::computeHardeningValue(const Real & 
   if (_hardening_function)
   {
     const Real strain_old = this->_effective_inelastic_strain_old[_qp];
-    const Point p;
-
-    return _hardening_function->value(strain_old + scalar, p) - _yield_stress;
+    return _hardening_function->value(strain_old + scalar) - _yield_stress;
   }
 
   return _hardening_variable_old[_qp] + _hardening_slope * scalar;
@@ -184,12 +182,11 @@ IsotropicPlasticityStressUpdateTempl<true>::computeHardeningValue(const ADReal &
   if (_hardening_function)
   {
     const Real strain_old = this->_effective_inelastic_strain_old[_qp];
-    const Point p;
     const Real t = strain_old + MetaPhysicL::raw_value(scalar);
 
-    DualReal hardening_function_value = _hardening_function->value(t, p);
+    DualReal hardening_function_value = _hardening_function->value(t);
     hardening_function_value.derivatives() =
-        (strain_old + scalar).derivatives() * _hardening_function->timeDerivative(t, p);
+        (strain_old + scalar).derivatives() * _hardening_function->timeDerivative(t);
 
     return hardening_function_value - _yield_stress;
   }
@@ -205,9 +202,7 @@ IsotropicPlasticityStressUpdateTempl<is_ad>::computeHardeningDerivative(
   if (_hardening_function)
   {
     const Real strain_old = this->_effective_inelastic_strain_old[_qp];
-    const Point p; // Always (0,0,0)
-
-    return _hardening_function->timeDerivative(strain_old, p);
+    return _hardening_function->timeDerivative(strain_old);
   }
 
   return _hardening_constant;

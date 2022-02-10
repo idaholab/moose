@@ -61,8 +61,8 @@ ConvectiveFluxFunction::computeQpJacobian()
   }
   else
   {
-    const Real coef = _coefficient.value(_u[_qp], Point());
-    const Real dcoef_dT = _coefficient.timeDerivative(_u[_qp], Point());
+    const Real coef = _coefficient.value(_u[_qp]);
+    const Real dcoef_dT = _coefficient.timeDerivative(_u[_qp]);
     return _test[_i][_qp] * (coef + (_u[_qp] - _T_infinity.value(_t, _q_point[_qp])) * dcoef_dT) *
            _phi[_j][_qp];
   }

@@ -147,13 +147,13 @@ ShaftConnectedPump1PhaseUserObject::computeFluxesAndResiduals(const unsigned int
     Real dx_p_drhouA = dx_p_dnu * dv_drhouA;
 
     Real wt = _torque_hydraulic.value(x_p, Point());
-    Real dwt_dx = _torque_hydraulic.timeDerivative(x_p, Point());
+    Real dwt_dx = _torque_hydraulic.timeDerivative(x_p);
     Real dwt_domega = dwt_dx * dx_p_domega;
     Real dwt_drhoA = dwt_dx * dx_p_drhoA;
     Real dwt_drhouA = dwt_dx * dx_p_drhouA;
 
     Real wh = _head.value(x_p, Point());
-    Real dwh_dx = _head.timeDerivative(x_p, Point());
+    Real dwh_dx = _head.timeDerivative(x_p);
     Real dwh_domega = dwh_dx * dx_p_domega;
     Real dwh_drhoA = dwh_dx * dx_p_drhoA;
     Real dwh_drhouA = dwh_dx * dx_p_drhouA;

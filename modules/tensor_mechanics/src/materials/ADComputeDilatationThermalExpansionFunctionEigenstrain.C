@@ -36,5 +36,5 @@ ADReal
 ADComputeDilatationThermalExpansionFunctionEigenstrain::computeDilatation(
     const ADReal & temperature)
 {
-  return _dilatation_function.value(temperature, ADPoint());
+  return _dilatation_function.value(temperature);
 }

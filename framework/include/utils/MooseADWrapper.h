@@ -54,3 +54,39 @@ struct MooseADWrapperStruct<W<T, N>, is_ad>
 
 template <typename T, bool is_ad>
 using MooseADWrapper = typename MooseADWrapperStruct<T, is_ad>::type;
+
+template <typename T>
+struct MooseIsADType
+{
+  static constexpr bool value = false;
+};
+
+template <>
+struct MooseIsADType<ADReal>
+{
+  static constexpr bool value = true;
+};
+
+template <>
+struct MooseIsADType<ADPoint>
+{
+  static constexpr bool value = true;
+};
+
+template <template <typename> class W, typename T>
+struct MooseIsADType<W<T>>
+{
+  static constexpr bool value = MooseIsADType<T>::value;
+};
+
+template <typename T>
+struct MooseIsADType<std::vector<T>>
+{
+  static constexpr bool value = MooseIsADType<T>::value;
+};
+
+template <template <typename, std::size_t> class W, typename T, std::size_t N>
+struct MooseIsADType<W<T, N>>
+{
+  static constexpr bool value = MooseIsADType<T>::value;
+};

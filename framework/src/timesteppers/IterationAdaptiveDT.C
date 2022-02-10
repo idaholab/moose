@@ -385,16 +385,15 @@ IterationAdaptiveDT::limitDTByFunction(Real & limitedDT)
     }
     else if (_timestep_limiting_functions[j])
     {
-      static const Point dummy_point;
-      const Real old_value = _timestep_limiting_functions[j]->value(_time_old, dummy_point);
-      Real new_value = _timestep_limiting_functions[j]->value(_time_old + limitedDT, dummy_point);
+      const Real old_value = _timestep_limiting_functions[j]->value(_time_old);
+      Real new_value = _timestep_limiting_functions[j]->value(_time_old + limitedDT);
       Real change = std::abs(new_value - old_value);
 
       if (_max_function_change > 0.0 && change > _max_function_change)
         do
         {
           limitedDT /= 2.0;
-          new_value = _timestep_limiting_functions[j]->value(_time_old + limitedDT, dummy_point);
+          new_value = _timestep_limiting_functions[j]->value(_time_old + limitedDT);
           change = std::abs(new_value - old_value);
         } while (change > _max_function_change);
     }

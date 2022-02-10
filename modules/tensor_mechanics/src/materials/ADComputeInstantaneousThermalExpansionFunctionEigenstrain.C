@@ -57,11 +57,8 @@ ADComputeInstantaneousThermalExpansionFunctionEigenstrain::computeThermalStrain(
       (_step_one ? MetaPhysicL::raw_value(_stress_free_temperature[_qp]) : _temperature_old[_qp]);
   const ADReal delta_T = _temperature[_qp] - old_temp;
 
-  static const ADPoint p;
-  static const Point rp;
-
-  const auto alpha_current_temp = _thermal_expansion_function.value(_temperature[_qp], p);
-  const Real alpha_old_temp = _thermal_expansion_function.value(old_temp, rp);
+  const auto alpha_current_temp = _thermal_expansion_function.value(_temperature[_qp]);
+  const Real alpha_old_temp = _thermal_expansion_function.value(old_temp);
 
   thermal_strain = _thermal_strain_old[_qp] + delta_T * 0.5 * (alpha_current_temp + alpha_old_temp);
   _thermal_strain[_qp] = thermal_strain;

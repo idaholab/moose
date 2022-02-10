@@ -27,6 +27,7 @@ TEST_F(ParsedFunctionTest, basicConstructor)
   Moose::Functor<Real> f_wrapped(f);
   f.initialSetup();
   EXPECT_EQ(f.value(4, Point(1, 2, 3)), 11);
+  EXPECT_EQ(f.value(4, 1, 2, 3), 11);
 
   //
   // Test the functor interfaces
@@ -150,6 +151,7 @@ TEST_F(ParsedFunctionTest, advancedConstructor)
   // libMesh::ParsedFunction
   fptr(f)->getVarAddress("q") = 4;
   EXPECT_EQ(f.value(0, Point(1, 2)), 7);
+  EXPECT_EQ(f.value(0, 1, 2), 7);
 
   // test the constructor with three variables
   std::vector<std::string> three_vars(3);
@@ -174,6 +176,7 @@ TEST_F(ParsedFunctionTest, advancedConstructor)
   fptr(f2)->getVarAddress("w") = 2;
   fptr(f2)->getVarAddress("r") = 1.5;
   EXPECT_EQ(f2.value(0, Point(2, 4)), 9);
+  EXPECT_EQ(f2.value(0, 2, 4), 9);
 
   // test the constructor with one variable that's set
   std::vector<std::string> one_val(1);
@@ -213,8 +216,10 @@ TEST_F(ParsedFunctionTest, advancedConstructor)
   f4.initialSetup();
   fptr(f4)->getVarAddress("r") = 2;
   EXPECT_EQ(f4.value(0, Point(2, 4)), 6);
+  EXPECT_EQ(f4.value(0, 2, 4), 6);
   fptr(f4)->getVarAddress("r") = 4;
   EXPECT_EQ(f4.value(0, Point(2, 4)), 5);
+  EXPECT_EQ(f4.value(0, 2, 4), 5);
 }
 
 TEST_F(ParsedFunctionTest, testVariables)
@@ -240,10 +245,13 @@ TEST_F(ParsedFunctionTest, testVariables)
   Real & q = fptr(f)->getVarAddress("q");
   q = 4;
   EXPECT_EQ(f.value(0, Point(1, 2)), 7);
+  EXPECT_EQ(f.value(0, 1, 2), 7);
   q = 2;
   EXPECT_EQ(f.value(0, Point(1, 2)), 5);
+  EXPECT_EQ(f.value(0, 1, 2), 5);
   q = -4;
   EXPECT_EQ(f.value(0, Point(1, 2)), -1);
+  EXPECT_EQ(f.value(0, 1, 2), -1);
 
   // test three variables, test updating them randomly
   std::vector<std::string> three_vars(3);

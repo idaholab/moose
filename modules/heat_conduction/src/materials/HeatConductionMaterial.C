@@ -78,9 +78,6 @@ template <bool is_ad>
 void
 HeatConductionMaterialTempl<is_ad>::computeProperties()
 {
-  static const MooseADWrapper<Point, is_ad> p;
-  static const Point rp;
-
   for (unsigned int qp(0); qp < _qrule->n_points(); ++qp)
   {
     auto qp_temperature = _temperature[qp];
@@ -101,10 +98,9 @@ HeatConductionMaterialTempl<is_ad>::computeProperties()
     }
     if (_thermal_conductivity_temperature_function)
     {
-      _thermal_conductivity[qp] =
-          _thermal_conductivity_temperature_function->value(qp_temperature, p);
+      _thermal_conductivity[qp] = _thermal_conductivity_temperature_function->value(qp_temperature);
       _thermal_conductivity_dT[qp] = _thermal_conductivity_temperature_function->timeDerivative(
-          MetaPhysicL::raw_value(qp_temperature), rp);
+          MetaPhysicL::raw_value(qp_temperature));
     }
     else
     {
@@ -113,7 +109,7 @@ HeatConductionMaterialTempl<is_ad>::computeProperties()
     }
 
     if (_specific_heat_temperature_function)
-      _specific_heat[qp] = _specific_heat_temperature_function->value(qp_temperature, p);
+      _specific_heat[qp] = _specific_heat_temperature_function->value(qp_temperature);
     else
       _specific_heat[qp] = _my_specific_heat;
   }
