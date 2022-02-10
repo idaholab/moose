@@ -54,4 +54,14 @@
     ad_indexing_type = 'global'
     requirement = 'The system shall yield a quiescent fluid in an axisymmetric coordinate system with a gravitational force applied and Rhie-Chow interpolation used for the velocity field.'
   []
+  [quiescent_jac]
+    type = PetscJacobianTester
+    run_sim = True
+    input = rz-gravity-quiescent-fluid.i
+    prereq = quiescent
+    cli_args = 'Mesh/gen/nx=3 Mesh/gen/ny=3 Executioner/automatic_scaling=true Executioner/off_diagonals_in_auto_scaling=true'
+    ad_indexing_type = 'global'
+    requirement = 'The system shall compute an accurate Jacobian when a scaling factor is applied to a scalar variable.'
+    difference_tol = 1e-7
+  []
 []
