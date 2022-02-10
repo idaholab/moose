@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 // Navier-Stokes includes
-#include "NSCFLTimeStepSize.h"
+#include "CFLTimeStepSize.h"
 
 // MOOSE includes
 #include "libmesh/quadrature.h"
