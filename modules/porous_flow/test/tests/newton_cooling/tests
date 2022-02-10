@@ -51,13 +51,4 @@
     issues = '#13155'
     design = 'porous_flow/tests/newton_cooling/newton_cooling_tests.md'
   []
-  [multiblock]
-    type = 'CSVDiff'
-    input = multiblock.i
-    threading = '!pthreads'
-    csvdiff = 'multiblock_out.csv'
-    requirement = "PorousFlow shall be able to be block-restricted, specifically so that a model's physics is governed by PorousFlow only on part of the mesh"
-    issues = '#20260'
-    design = 'actions/PorousFlowAddMaterialJoiner.md'
-  []
 []
