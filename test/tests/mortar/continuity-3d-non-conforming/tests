@@ -82,4 +82,17 @@
     partial = True
     ad_indexing_type = global
   []
+  [continuity_sphere_hex20]
+    type = 'Exodiff'
+    min_ad_size = 200
+    input = 'continuity_sphere_hex20.i'
+    exodiff = 'continuity_sphere_hex20_out.e'
+    requirement = 'MOOSE shall be able to produce the expected result for a solution continuity test '
+                  'case using the mortar method on a HEX20 mesh with curved geometry, e.g. the '
+                  'primal variable values across the mortar interface shall be the same.'
+    map = False
+    partial = True
+    ad_indexing_type = global
+    min_parallel = 2
+  []
 []

@@ -19,10 +19,15 @@ block 1 volume 1
 block 2 volume 3
 undo group begin
 set large exodus file off
-export Genesis  "/Users/badgjc/projects/moose/test/tests/mortar/continuity-3d-non-conforming/spheres_hex8.e" overwrite
+export Genesis  "~/projects/moose/test/tests/mortar/continuity-3d-non-conforming/spheres_hex8.e" overwrite
 undo group end
 block all element type hex27
 undo group begin
 set large exodus file off
-export Genesis "/Users/badgjc/projects/moose/test/tests/mortar/continuity-3d-non-conforming/spheres_hex27.e" overwrite
+export Genesis "~/projects/moose/test/tests/mortar/continuity-3d-non-conforming/spheres_hex27.e" overwrite
+block all element type hex20
+undo group begin
+set large exodus file off
+export Genesis "~/projects/moose/test/tests/mortar/continuity-3d-non-conforming/spheres_hex27.e" overwrite
 undo group end
+
