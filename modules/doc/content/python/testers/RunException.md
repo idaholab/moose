@@ -15,7 +15,7 @@ Test configuration options are specified in the `tests` file.
 - should_crash: Indicates that the test is expected to crash or otherwise terminate early. Defaults to True
 
 
-Tests with an `expect_assert` parameter will only be ran in DEBUG and DEVEL mode, not in OPT mode.
+Tests with an `expect_assert` parameter will only be run in DEBUG and DEVEL mode, not in OPT mode.
 Other test commands & restrictions may be found in the [TestHarness documentation](TestHarness.md).
 
 ## Example test configuration in the MOOSE test suite

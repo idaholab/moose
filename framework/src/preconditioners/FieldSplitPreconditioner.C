@@ -36,8 +36,8 @@ FieldSplitPreconditioner::validParams()
   // We should use full coupling Jacobian matrix by default
   params.addParam<bool>("full",
                         true,
-                        "Set to true if you want the full set of couplings between variables. "
-                        "Simply for convenience so you don't have to set every off_diag_row "
+                        "Set to true if you want the full set of couplings between variables "
+                        "simply for convenience so you don't have to set every off_diag_row "
                         "and off_diag_column combination.");
   return params;
 }
@@ -67,7 +67,7 @@ FieldSplitPreconditioner::FieldSplitPreconditioner(const InputParameters & param
 
     // off-diagonal entries
     std::vector<std::vector<unsigned int>> off_diag(n_vars);
-    for (unsigned int i = 0; i < off_diag_rows.size(); i++)
+    for (const auto i : index_range(off_diag_rows))
     {
       unsigned int row = _nl.getVariable(0, off_diag_rows[i]).number();
       unsigned int column = _nl.getVariable(0, off_diag_columns[i]).number();

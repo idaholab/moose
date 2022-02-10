@@ -8,7 +8,7 @@
 Test configuration options are added to the `tests` file.
 
 - `xmldiff`: A list of XML files to compare
-- `gold_dir`: The directory where the \"golden standard\" files reside relative to the TEST_DIR: (default: ./gold/)
+- `gold_dir`: The directory where the \"gold standard\" files reside relative to the TEST_DIR: (default: ./gold/)
 - `abs_zero`: Absolute zero cutoff used in exodiff comparisons, defaults to 1e-10
 - `rel_err`: Relative error value used in exodiff comparisons, defaults to 5.5e-6
 - `ignored_attributes`: Ignore e.g. type and/or version in sample XML block <VTKFile type=\"Foo\" version=\"0.1\">")

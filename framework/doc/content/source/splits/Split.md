@@ -3,12 +3,12 @@
 !syntax description /Preconditioning/Split
 
 This is an alternative syntax to the [FieldSplitPreconditioner.md].
-The field split based preconditioner is entirely set up by defining the relevant Petsc options.
+The field split based preconditioner is entirely set up by defining the relevant PETSc options.
 This syntax offers shorthands for some of the parameters that may be passed to Petsc,
 such as for splitting between variables, blocks or sidesets.
 
 More information about field split preconditioning may be found in the
-[Petsc manual]([here](https://www.mcs.anl.gov/petsc/petsc-current/docs/manualpages/).
+[PETSc manual]([here](https://www.mcs.anl.gov/petsc/petsc-current/docs/manualpages/).
 
 ## Example input syntax
 

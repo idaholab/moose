@@ -5,7 +5,7 @@
 ## Overview
 
 The `FieldSplitPreconditioner` allows for custom preconditioning for each nonlinear variable in the numerical
-system. One or more variables may be targetted in a subsolve that will only consider part of the numerical system.
+system. One or more variables may be targeted in a subsolve that will only consider part of the numerical system.
 The preconditioning defined for these subsolves is used for the relevant block(s) in the global numerical system.
 
 A `FSP` may for example be used for block-diagonal preconditioning by setting `full=false`

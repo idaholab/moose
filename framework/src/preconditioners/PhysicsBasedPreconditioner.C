@@ -80,9 +80,7 @@ PhysicsBasedPreconditioner::PhysicsBasedPreconditioner(const InputParameters & p
 
       // off-diagonal entries
       std::vector<std::vector<unsigned int>> off_diag(n_vars);
-      for (unsigned int i = 0;
-           i < getParam<std::vector<NonlinearVariableName>>("off_diag_row").size();
-           i++)
+      for (const auto i : index_range(getParam<std::vector<NonlinearVariableName>>("off_diag_row")))
       {
         unsigned int row =
             nl.getVariable(0, getParam<std::vector<NonlinearVariableName>>("off_diag_row")[i])
@@ -113,7 +111,7 @@ PhysicsBasedPreconditioner::PhysicsBasedPreconditioner(const InputParameters & p
   // solve order
   const std::vector<std::string> & solve_order = getParam<std::vector<std::string>>("solve_order");
   _solve_order.resize(solve_order.size());
-  for (unsigned int i = 0; i < solve_order.size(); i++)
+  for (const auto i : index_range(solve_order))
     _solve_order[i] = _nl.system().variable_number(solve_order[i]);
 
   // diag and off-diag systems
@@ -125,7 +123,7 @@ PhysicsBasedPreconditioner::PhysicsBasedPreconditioner(const InputParameters & p
   const std::vector<NonlinearVariableName> & odc =
       getParam<std::vector<NonlinearVariableName>>("off_diag_column");
   std::vector<std::vector<unsigned int>> off_diag(n_vars);
-  for (unsigned int i = 0; i < odr.size(); i++)
+  for (const auto i : index_range(odr))
   {
     unsigned int row = _nl.system().variable_number(odr[i]);
     unsigned int column = _nl.system().variable_number(odc[i]);
@@ -162,7 +160,7 @@ PhysicsBasedPreconditioner::addSystem(unsigned int var,
   _pre_type[var] = type;
 
   _off_diag_mats[var].resize(off_diag.size());
-  for (unsigned int i = 0; i < off_diag.size(); i++)
+  for (const auto i : index_range(off_diag))
   {
     // Add the matrix to hold the off-diagonal piece
     _off_diag_mats[var][i] = &precond_system.add_matrix(_nl.system().variable_name(off_diag[i]));
@@ -226,7 +224,7 @@ PhysicsBasedPreconditioner::setup()
       blocks.push_back(block);
     }
 
-    for (unsigned int diag = 0; diag < _off_diag[system_var].size(); diag++)
+    for (const auto diag : index_range(_off_diag[system_var]))
     {
       unsigned int coupled_var = _off_diag[system_var][diag];
       std::string coupled_name = _nl.system().variable_name(coupled_var);
@@ -258,7 +256,7 @@ PhysicsBasedPreconditioner::apply(const NumericVector<Number> & x, NumericVector
     _systems[sys]->solution->zero();
 
   // Loop over solve order
-  for (unsigned int i = 0; i < _solve_order.size(); i++)
+  for (const auto i : index_range(_solve_order))
   {
     unsigned int system_var = _solve_order[i];
 
@@ -270,7 +268,7 @@ PhysicsBasedPreconditioner::apply(const NumericVector<Number> & x, NumericVector
 
     // Modify the RHS by subtracting off the matvecs of the solutions for the other preconditioning
     // systems with the off diagonal blocks in this system.
-    for (unsigned int diag = 0; diag < _off_diag[system_var].size(); diag++)
+    for (const auto diag : index_range(_off_diag[system_var]))
     {
       unsigned int coupled_var = _off_diag[system_var][diag];
       LinearImplicitSystem & coupled_system = *_systems[coupled_var];

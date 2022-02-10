@@ -21,9 +21,9 @@ Test configuration options are added to the `tests` file.
 - `custom_cmp`: use a custom comparison. The output of the comparison
   must match the specified file.
 
-- `map`: Use geometrical mapping to match up elements. This is usually a good idea because it makes files comparable between runs with Serial and Parallel Mesh. Defaults to True.
+- `map`: use geometrical mapping to match up elements. This is usually a good idea because it makes files comparable between runs with Serial and Parallel Mesh. Defaults to True.
 
-- `partial`: Invokes a matching algorithm similar to the -m option.
+- `partial`: invokes a matching algorithm similar to the -m option.
              However this option ignores unmatched nodes and elements.  This allows
              comparison of files that only partially overlap. Defaults to False.
 

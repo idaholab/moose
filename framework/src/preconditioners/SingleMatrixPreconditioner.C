@@ -80,7 +80,7 @@ SingleMatrixPreconditioner::SingleMatrixPreconditioner(const InputParameters & p
         mooseError("No variable name match found for '", e.what(), "'.");
       }
 
-      for (unsigned int j = 0; j < vars.size(); ++j)
+      for (const auto j : index_range(vars))
         for (unsigned int k = j + 1; k < vars.size(); ++k)
         {
           const auto row = nl.getVariable(0, vars[j]).number();

@@ -32,16 +32,16 @@ MoosePreconditioner::validParams()
 
   params.addParam<std::vector<NonlinearVariableName>>(
       "off_diag_row",
-      "The variable names for the off-diagonal rows you want to add into the matrix, they will be "
+      "The variable names for the off-diagonal rows you want to add into the matrix; they will be "
       "associated with an off-diagonal column from the same position in off_diag_column.");
   params.addParam<std::vector<NonlinearVariableName>>(
       "off_diag_column",
-      "The variable names for the off-diagonal columns you want to add into the matrix, they will "
+      "The variable names for the off-diagonal columns you want to add into the matrix; they will "
       "be associated with an off-diagonal row from the same position in off_diag_row.");
   params.addParam<bool>("full",
                         false,
-                        "Set to true if you want the full set of couplings between variables. "
-                        "Simply for convenience so you don't have to set every off_diag_row "
+                        "Set to true if you want the full set of couplings between variables "
+                        "simply for convenience so you don't have to set every off_diag_row "
                         "and off_diag_column combination.");
 
   params += Moose::PetscSupport::getPetscValidParams();
@@ -72,12 +72,8 @@ MoosePreconditioner::MoosePreconditioner(const InputParameters & params)
   {
     if (isParamValid("off_diag_column"))
     {
-      const auto off_diag_rows = getParam<std::vector<NonlinearVariableName>>("off_diag_row");
-      const auto off_diag_columns = getParam<std::vector<NonlinearVariableName>>("off_diag_column");
-      if (off_diag_rows.size() != off_diag_columns.size())
-        paramError("off_diag_row",
-                   "Off-diagonal rows should be paired one to one with "
-                   "off-diagonal columns");
+      const auto off_diag =
+          getParam<NonlinearVariableName, NonlinearVariableName>("off_diag_row", "off_diag_column");
     }
     else
       paramError("off_diag_row",
