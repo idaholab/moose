@@ -7,6 +7,9 @@ four coupled variable values `v` as its input parameters. The coupled variable
 values are substituted for the `x`,`y`,`z`, and `t` function variables in that
 order.
 
+With the [!param](/Materials/CoupledValueFunctionMaterial/parameter_order) a
+custom mapping from coupled variable to function parameters can be supplied.
+
 !syntax parameters /Materials/CoupledValueFunctionMaterial
 
 !syntax inputs /Materials/CoupledValueFunctionMaterial
