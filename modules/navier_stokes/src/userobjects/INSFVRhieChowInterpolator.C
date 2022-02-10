@@ -244,6 +244,7 @@ INSFVRhieChowInterpolator::initialSetup()
         .query()
         .template condition<AttribVar>(static_cast<int>(var_num))
         .template condition<AttribResidualObject>(true)
+        .template condition<AttribSysNum>(_u->sys().number())
         .queryInto(var_objects);
     for (auto * const var_object : var_objects)
       if (!dynamic_cast<INSFVMomentumResidualObject *>(var_object))
