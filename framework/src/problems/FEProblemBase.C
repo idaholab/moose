@@ -62,6 +62,7 @@
 #include "MultiApp.h"
 #include "MultiAppTransfer.h"
 #include "TransientMultiApp.h"
+#include "FullSolveMultiApp.h"
 #include "ElementUserObject.h"
 #include "DomainUserObject.h"
 #include "NodalUserObject.h"
@@ -4519,6 +4520,30 @@ FEProblemBase::backupMultiApps(ExecFlagType type)
     if (_verbose_multiapps)
       _console << COLOR_CYAN << "Finished Backing Up MultiApps on " << type.name() << "\n"
                << COLOR_DEFAULT << std::endl;
+  }
+}
+
+void
+FEProblemBase::restoreFullSolveMultiApps(ExecFlagType type)
+{
+  const auto & multi_apps = _multi_apps[type].getActiveObjects();
+
+  if (multi_apps.size())
+  {
+    _console << COLOR_CYAN << "\nRestoring FullSolveMultiApps on " << type.name() << COLOR_DEFAULT
+             << std::endl;
+
+    for (const auto & multi_app : multi_apps)
+    {
+      std::shared_ptr<FullSolveMultiApp> app_pointer = std::dynamic_pointer_cast<FullSolveMultiApp>(multi_app);
+      if (app_pointer)
+        multi_app->restore();
+    }
+
+    MooseUtils::parallelBarrierNotify(_communicator, _parallel_barrier_messaging);
+
+    _console << COLOR_CYAN << "Finished Restoring FullSolveMultiApps on " << type.name() << "\n"
+             << COLOR_DEFAULT << std::endl;
   }
 }
 

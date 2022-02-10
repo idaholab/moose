@@ -1116,6 +1116,11 @@ public:
   void restoreMultiApps(ExecFlagType type, bool force = false);
 
   /**
+   * Restore the FullSolveMultiApps associated with the ExecFlagType
+   */
+  void restoreFullSolveMultiApps(ExecFlagType type);
+
+  /**
    * Find the smallest timestep over all MultiApps
    */
   Real computeMultiAppsDT(ExecFlagType type);

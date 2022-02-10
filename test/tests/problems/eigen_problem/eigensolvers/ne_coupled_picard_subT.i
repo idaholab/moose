@@ -58,7 +58,6 @@
 [MultiApps]
   [./sub]
     type = FullSolveMultiApp
-    keep_solution_during_restore = true
     input_files = ne_coupled_picard_subT_sub.i
     execute_on = timestep_end
   [../]

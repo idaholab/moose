@@ -325,6 +325,12 @@ FixedPointSolve::solve()
   if (_has_fixed_point_its)
     printFixedPointConvergenceReason();
 
+  if (!_has_fixed_point_its)
+  {
+    _problem.restoreFullSolveMultiApps(EXEC_TIMESTEP_BEGIN);
+    _problem.restoreFullSolveMultiApps(EXEC_TIMESTEP_END);
+  }
+
   return converged;
 }
 
