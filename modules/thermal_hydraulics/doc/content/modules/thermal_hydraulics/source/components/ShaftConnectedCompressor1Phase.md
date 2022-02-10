@@ -34,8 +34,7 @@ S^{\text{momentum}} = \Delta p A_{\text{ref}} \cdot \hat{n}_{\text{out}},
 and
 
 !equation id=energy_source
-S^{\text{energy}} = -(\tau_{\text{isentropic}} + \tau_{\text{dissipation}} + \tau_{\text{friction}}) \omega,
-
+S^{\text{energy}} = -(\tau_{\text{isentropic}} + \tau_{\text{dissipation}}) \omega,
 
 where
 
@@ -43,9 +42,14 @@ where
 - $A_{\text{ref}}$ is the cross-sectional area of the compressor,
 - $\hat{n}_{out}$ is the orientation of the flow channel connected to the compressor outlet,
 - $\tau_{\text{isentropic}}$ is the isentropic torque,
-- $\tau_{\text{dissipation}}$ is the dissipation torque,
-- $\tau_{\text{friction}}$ is the friction torque, and
+- $\tau_{\text{dissipation}}$ is the dissipation torque, and
 - $\omega$ is the shaft speed.
+
+The connected [Shaft.md] receives not only the isentropic and dissipation torque,
+but also a friction torque $\tau_\text{friction}$:
+
+!equation
+\tau_\text{shaft,compressor} = \tau_\text{isentropic} + \tau_\text{dissipation} + \tau_\text{friction} \eqp
 
 #### Compressor performance data id=data
 

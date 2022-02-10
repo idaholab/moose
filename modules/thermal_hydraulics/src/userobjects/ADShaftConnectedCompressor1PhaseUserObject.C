@@ -298,7 +298,7 @@ ADShaftConnectedCompressor1PhaseUserObject::computeFluxesAndResiduals(const unsi
 
     // compute momentum and energy source terms
     // a negative torque value results in a positive S_energy
-    const ADReal S_energy = -_torque * _omega[0];
+    const ADReal S_energy = -(_isentropic_torque + _dissipation_torque) * _omega[0];
 
     const ADRealVectorValue S_momentum = _delta_p * _A_ref * _di_out;
 

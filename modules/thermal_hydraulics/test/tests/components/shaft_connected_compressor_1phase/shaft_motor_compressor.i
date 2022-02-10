@@ -174,9 +174,9 @@ dt = 1.e-3
 
   [S_energy_fcn]
     type = ParsedFunction
-    value = '-(tau_isen+tau_diss+tau_fr)*omega'
-    vars = 'tau_isen tau_diss tau_fr omega'
-    vals = 'compressor:isentropic_torque compressor:dissipation_torque compressor:friction_torque shaft:omega'
+    value = '-(tau_isen+tau_diss)*omega'
+    vars = 'tau_isen tau_diss omega'
+    vals = 'compressor:isentropic_torque compressor:dissipation_torque shaft:omega'
   []
   [energy_conservation_fcn]
     type = ParsedFunction
