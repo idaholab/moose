@@ -32,7 +32,14 @@ protected:
   /// Material defining the Poisson's Ratio
   const ADMaterialProperty<Real> & _poissons_ratio;
 
+  /// Individual elasticity tensor
+  RankFourTensor _Cijkl;
+
   using ADComputeElasticityTensorBase::_elasticity_tensor;
   using ADComputeElasticityTensorBase::_qp;
   using ADComputeElasticityTensorBase::issueGuarantee;
+
+
+  /// Material property for ge matrix
+  const ADMaterialProperty<RankTwoTensor> *_ge;
 };

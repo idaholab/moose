@@ -63,6 +63,9 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("CommonLineElementAction", "Modules/TensorMechanics/LineElementMaster");
   registerSyntax("LineElementAction", "Modules/TensorMechanics/LineElementMaster/*");
 
+  registerSyntax("CommonShellElementAction", "Modules/TensorMechanics/ShellElementMaster");
+  registerSyntax("ShellElementAction", "Modules/TensorMechanics/ShellElementMaster/*");
+
   registerSyntaxTask("DomainIntegralAction", "DomainIntegral", "add_user_object");
   registerSyntaxTask("DomainIntegralAction", "DomainIntegral", "add_aux_variable");
   registerSyntaxTask("DomainIntegralAction", "DomainIntegral", "add_aux_kernel");
