@@ -67,7 +67,7 @@ PorousFlowAddMaterialJoiner::act()
         {
           // this Material is block-restricted, and we're about to add Joiners for it, so must get
           // a union of all the blocks for this material type in order to block-restrict the Joiner
-          _blocks.clear();
+          std::set<SubdomainName> unique_blocks;
           for (auto & mat2 : _problem->getMaterialWarehouse().getObjects())
           {
             const InputParameters & params2 = mat2->parameters();
@@ -83,12 +83,10 @@ PorousFlowAddMaterialJoiner::act()
               }
               const std::vector<SubdomainName> & bl =
                   params2.get<std::vector<SubdomainName>>("block");
-              _blocks.insert(_blocks.end(), bl.begin(), bl.end());
+              std::copy(bl.begin(), bl.end(), std::inserter(unique_blocks, unique_blocks.end()));
             }
           }
-          // eliminate any repeated entries in _blocks
-          const std::set<SubdomainName> unique(_blocks.begin(), _blocks.end());
-          _blocks.assign(unique.begin(), unique.end());
+          _blocks.assign(unique_blocks.begin(), unique_blocks.end());
         }
 
         // Check if the material is evaluated at the nodes or qps

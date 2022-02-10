@@ -46,7 +46,7 @@ protected:
   /// Name of the PorousFlowDictator
   std::string _dictator_name;
 
-  /// whether the Material in that is currently being Joined is block-restricted
+  /// whether the Material that is currently being Joined is block-restricted
   bool _block_restricted;
 
   /// if _block_restricted == true, then these are the blocks that the Joiner will be restricted to
