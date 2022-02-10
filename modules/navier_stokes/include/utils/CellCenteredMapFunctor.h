@@ -57,9 +57,17 @@ public:
   using ElemQpArg = Moose::ElemQpArg;
   using ElemSideQpArg = Moose::ElemSideQpArg;
 
-  CellCenteredMapFunctor(const MooseMesh & mesh) : _mesh(mesh) {}
-  CellCenteredMapFunctor(const MooseMesh & mesh, const std::set<SubdomainID> & sub_ids)
-    : _mesh(mesh), _sub_ids(sub_ids == mesh.meshSubdomains() ? std::set<SubdomainID>() : sub_ids)
+  CellCenteredMapFunctor(const MooseMesh & mesh, const std::string & name)
+    : _mesh(mesh), _name(name)
+  {
+  }
+
+  CellCenteredMapFunctor(const MooseMesh & mesh,
+                         const std::set<SubdomainID> & sub_ids,
+                         const std::string & name)
+    : _mesh(mesh),
+      _sub_ids(sub_ids == mesh.meshSubdomains() ? std::set<SubdomainID>() : sub_ids),
+      _name(name)
   {
   }
 
@@ -73,10 +81,32 @@ private:
   /// on all subdomains
   const std::set<SubdomainID> _sub_ids;
 
+  /// The name of this functor
+  const std::string _name;
+
   ValueType evaluate(const ElemArg & elem_arg, unsigned int) const override final
   {
     const Elem * const elem = elem_arg.elem;
-    return libmesh_map_find(*this, elem->id());
+
+    try
+    {
+      return libmesh_map_find(*this, elem->id());
+    }
+    catch (libMesh::LogicError &)
+    {
+      if (!_sub_ids.empty() && !_sub_ids.count(elem->subdomain_id()))
+        mooseError("Attempted to evaluate CellCenteredMapFunctor '",
+                   _name,
+                   "' with an element subdomain id of '",
+                   elem->subdomain_id(),
+                   "' but that subdomain id is not one of the subdomain ids the functor is "
+                   "restricted to.");
+      else
+        ::mooseError("Attempted access into CellCenteredMapFunctor '",
+                     _name,
+                     "' with a key that does not yet exist in the map. Make sure to fill your "
+                     "CellCenteredMapFunctor for all elements you will attempt to access later.");
+    }
   }
 
   ValueType evaluate(const ElemFromFaceArg & elem_from_face, unsigned int) const override

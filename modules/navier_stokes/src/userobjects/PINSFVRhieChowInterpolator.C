@@ -42,7 +42,7 @@ PINSFVRhieChowInterpolator::PINSFVRhieChowInterpolator(const InputParameters & p
     _eps(const_cast<Moose::Functor<ADReal> &>(getFunctor<ADReal>(NS::porosity))),
     _epss(libMesh::n_threads(), nullptr),
     _smoothing_layers(getParam<unsigned short>("smoothing_layers")),
-    _smoothed_eps(_moose_mesh)
+    _smoothed_eps(_moose_mesh, "smoothed_eps")
 {
   if (_smoothing_layers && _eps.wrapsType<MooseVariableBase>())
     paramError(

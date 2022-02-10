@@ -93,7 +93,7 @@ testReconstruction(const Moose::CoordinateSystemType coord_type)
     auto & lm_mesh = mesh->getMesh();
 
     CellCenteredMapFunctor<RealVectorValue, std::unordered_map<dof_id_type, RealVectorValue>> u(
-        *mesh);
+        *mesh, "u");
     for (auto * const elem : lm_mesh.active_element_ptr_range())
     {
       const auto centroid = elem->vertex_average();
@@ -103,14 +103,15 @@ testReconstruction(const Moose::CoordinateSystemType coord_type)
     }
 
     CellCenteredMapFunctor<RealVectorValue, std::unordered_map<dof_id_type, RealVectorValue>>
-        up_weller(*mesh);
+        up_weller(*mesh, "up_weller");
     std::unordered_map<dof_id_type, RealVectorValue> up_moukalled;
     CellCenteredMapFunctor<RealVectorValue, std::unordered_map<dof_id_type, RealVectorValue>>
-        up_tano(*mesh);
+        up_tano(*mesh, "up_tano");
 
     for (const auto & fi : all_fi)
     {
-      auto moukalled_reconstruct = [&fi](auto & functor, auto & container) {
+      auto moukalled_reconstruct = [&fi](auto & functor, auto & container)
+      {
         auto face = Moose::FV::makeCDFace(fi);
         const RealVectorValue uf(functor(face));
         const Point surface_vector = fi.normal() * fi.faceArea();
@@ -145,7 +146,8 @@ testReconstruction(const Moose::CoordinateSystemType coord_type)
       auto elem_arg = Moose::ElemArg{elem, false, false};
       const RealVectorValue analytic(u(elem_arg));
 
-      auto compute_elem_error = [elem_id, current_h, &analytic](auto & container, auto & error) {
+      auto compute_elem_error = [elem_id, current_h, &analytic](auto & container, auto & error)
+      {
         auto & current = libmesh_map_find(container, elem_id);
         const auto diff = analytic - current;
         error += diff * diff * current_h * current_h;
@@ -173,7 +175,8 @@ testReconstruction(const Moose::CoordinateSystemType coord_type)
       const auto elem_arg = Moose::ElemArg{elem, false, false};
       const RealVectorValue analytic(u(elem_arg));
 
-      auto compute_elem_error = [elem_id, current_h, &analytic](auto & container, auto & error) {
+      auto compute_elem_error = [elem_id, current_h, &analytic](auto & container, auto & error)
+      {
         auto & current = libmesh_map_find(container, elem_id);
         const auto diff = analytic - current;
         error += diff * diff * current_h * current_h;
@@ -182,11 +185,42 @@ testReconstruction(const Moose::CoordinateSystemType coord_type)
     }
     tano_error = std::sqrt(tano_error);
     tano_errors_twice.push_back(tano_error);
+
+    CellCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> unrestricted_error_test(
+        *mesh, "not_restricted");
+    try
+    {
+      unrestricted_error_test(Moose::ElemArg({lm_mesh.elem_ptr(0), false, false}));
+      EXPECT_TRUE(false);
+    }
+    catch (std::runtime_error & e)
+    {
+      EXPECT_TRUE(std::string(e.what()).find("not_restricted") != std::string::npos);
+      EXPECT_TRUE(std::string(e.what()).find("Make sure to fill") != std::string::npos);
+    }
+
+    CellCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> restricted_error_test(
+        *mesh, {1}, "is_restricted");
+    try
+    {
+      restricted_error_test(Moose::ElemArg({lm_mesh.elem_ptr(0), false, false}));
+      EXPECT_TRUE(false);
+    }
+    catch (std::runtime_error & e)
+    {
+      EXPECT_TRUE(std::string(e.what()).find("is_restricted") != std::string::npos);
+      EXPECT_TRUE(std::string(e.what()).find("0") != std::string::npos);
+      EXPECT_TRUE(
+          std::string(e.what()).find(
+              "that subdomain id is not one of the subdomain ids the functor is restricted to") !=
+          std::string::npos);
+    }
   }
 
   std::for_each(h.begin(), h.end(), [](Real & h_elem) { h_elem = std::log(h_elem); });
 
-  auto expect_errors = [&h](auto & errors_arg, Real expected_error) {
+  auto expect_errors = [&h](auto & errors_arg, Real expected_error)
+  {
     std::for_each(
         errors_arg.begin(), errors_arg.end(), [](Real & error) { error = std::log(error); });
     PolynomialFit fit(h, errors_arg, 1);

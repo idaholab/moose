@@ -93,7 +93,7 @@ INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & par
     _vs(libMesh::n_threads(), nullptr),
     _ws(libMesh::n_threads(), nullptr),
     _sub_ids(blockRestricted() ? blockIDs() : _moose_mesh.meshSubdomains()),
-    _a(_moose_mesh, _sub_ids),
+    _a(_moose_mesh, _sub_ids, "a"),
     _ax(_a, 0),
     _ay(_a, 1),
     _az(_a, 2),
