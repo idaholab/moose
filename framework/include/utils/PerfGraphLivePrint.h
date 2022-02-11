@@ -80,10 +80,10 @@ private:
   bool _should_print;
 
   /// Limit (in seconds) before printing
-  Real & _time_limit;
+  std::atomic<Real> & _time_limit;
 
   /// Limit (in MB)
-  unsigned int & _mem_limit;
+  std::atomic<unsigned int> & _mem_limit;
 
   /// This is one beyond the last thing on the stack
   unsigned int _stack_level;

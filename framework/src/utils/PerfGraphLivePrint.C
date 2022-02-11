@@ -278,7 +278,8 @@ PerfGraphLivePrint::iterateThroughExecutionList()
       if (_perf_graph._live_print_all ||
           section_increment_start._state == PerfGraph::IncrementState::PRINTED ||
           section_increment_start._state == PerfGraph::IncrementState::CONTINUED ||
-          time_increment > _time_limit || memory_increment > _mem_limit)
+          time_increment > _time_limit.load(std::memory_order_relaxed) ||
+          memory_increment > _mem_limit.load(std::memory_order_relaxed))
       {
         printStackUpToLast();
 
@@ -318,7 +319,7 @@ PerfGraphLivePrint::start()
     // wakeup happens to find that there is work to do.
     _perf_graph._finished_section.wait_for(
         lock,
-        std::chrono::duration<Real>(_time_limit),
+        std::chrono::duration<Real>(_time_limit.load(std::memory_order_relaxed)),
         [this]
         {
           // Get destructing first so that the execution_list will be in sync
