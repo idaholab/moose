@@ -43,12 +43,13 @@ template <typename T>
 T
 LinearInterpolation::sample(const T & x) const
 {
-  // sanity check (empty LinearInterpolations get constructed in many places
-  // so we cannot put this into the errorCheck)
-  if (_extrap)
-    assert(_x.size() > 1);
-  else
-    assert(_x.size() > 0);
+  // this is a hard error
+  if (_x.empty())
+    mooseError("Trying to evaluate an empty LinearInterpolation");
+
+  // special case for single function nodes
+  if (_x.size() == 1)
+    return _y[0];
 
   // endpoint cases
   if (_extrap)
