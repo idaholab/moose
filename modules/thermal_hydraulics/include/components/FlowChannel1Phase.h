@@ -1,3 +1,12 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #pragma once
 
 #include "FlowChannelBase.h"
@@ -14,6 +23,8 @@ class FlowChannel1Phase : public FlowChannelBase
 public:
   FlowChannel1Phase(const InputParameters & params);
 
+  virtual void addMooseObjects() override;
+
   /**
    * Gets 1-phase wall heat transfer coefficient names for connected heat transfers
    */
@@ -25,6 +36,11 @@ protected:
   virtual void init() override;
   virtual std::shared_ptr<FlowModel> buildFlowModel() override;
   virtual void check() const override;
+
+  /**
+   * Adds a material for the hydraulic diameter
+   */
+  virtual void addHydraulicDiameterMaterial() const;
 
   /**
    * Populates heat connection variable names lists

@@ -1,3 +1,12 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #pragma once
 
 #include "GeometricalFlowComponent.h"
@@ -152,8 +161,6 @@ protected:
    */
   virtual void addCommonObjects();
 
-  virtual void setupDh();
-
   /**
    * Populates heat connection variable names lists
    */
@@ -172,11 +179,6 @@ protected:
   std::shared_ptr<ClosuresBase> _closures;
 
   const bool & _pipe_pars_transferred;
-
-  /// True if the user provided a function describing the hydraulic diameter of the flow channel
-  bool _has_Dh;
-  /// Function describing the hydraulic diameter
-  FunctionName _Dh_function;
 
   /// Roughness of flow channel surface, [m]
   const Real & _roughness;

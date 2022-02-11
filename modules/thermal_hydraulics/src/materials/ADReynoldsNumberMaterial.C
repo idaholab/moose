@@ -1,3 +1,12 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #include "ADReynoldsNumberMaterial.h"
 #include "SinglePhaseFluidProperties.h"
 #include "Numerics.h"
@@ -30,7 +39,7 @@ ADReynoldsNumberMaterial::ADReynoldsNumberMaterial(const InputParameters & param
 
     _vel(getADMaterialProperty<Real>("vel")),
 
-    _D_h(getMaterialProperty<Real>("D_h")),
+    _D_h(getADMaterialProperty<Real>("D_h")),
 
     _mu(getADMaterialProperty<Real>("mu")),
 

@@ -1,3 +1,12 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #include "FlowModelSetup1Phase.h"
 #include "MooseObjectAction.h"
 
@@ -406,7 +415,10 @@ FlowModelSetup1Phase::addMaterials()
   // hydraulic diameter
   {
     InputParameters params = _this_action_factory.getValidParams(class_name);
-    params.set<std::string>("type") = "GenericFunctionMaterial";
+    if (_ad)
+      params.set<std::string>("type") = "ADGenericFunctionMaterial";
+    else
+      params.set<std::string>("type") = "GenericFunctionMaterial";
 
     std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(
         _this_action_factory.create(class_name, "D_h_material", params));

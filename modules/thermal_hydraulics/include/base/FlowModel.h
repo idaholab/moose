@@ -1,3 +1,12 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #pragma once
 
 #include "MooseObject.h"
@@ -90,7 +99,7 @@ protected:
   const FunctionName & getVariableFn(const FunctionName & fn_param_name);
 
   /**
-   * Adds variables common to any flow model (A, D_h, P_hf, ...)
+   * Adds variables common to any flow model (A, P_hf, ...)
    */
   virtual void addCommonVariables();
 
@@ -109,7 +118,6 @@ public:
   static const std::string AREA_LINEAR;
   static const std::string HEAT_FLUX_WALL;
   static const std::string HEAT_FLUX_PERIMETER;
-  static const std::string HYDRAULIC_DIAMETER;
   static const std::string NUSSELT_NUMBER;
   static const std::string SURFACE_TENSION;
   static const std::string TEMPERATURE_WALL;

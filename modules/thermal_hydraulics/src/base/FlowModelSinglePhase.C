@@ -1,3 +1,12 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #include "FlowModelSinglePhase.h"
 #include "FlowChannelBase.h"
 
@@ -5,6 +14,7 @@ const std::string FlowModelSinglePhase::DENSITY = "rho";
 const std::string FlowModelSinglePhase::FRICTION_FACTOR_DARCY = "f_D";
 const std::string FlowModelSinglePhase::DYNAMIC_VISCOSITY = "mu";
 const std::string FlowModelSinglePhase::HEAT_TRANSFER_COEFFICIENT_WALL = "Hw";
+const std::string FlowModelSinglePhase::HYDRAULIC_DIAMETER = "D_h";
 const std::string FlowModelSinglePhase::PRESSURE = "p";
 const std::string FlowModelSinglePhase::RHOA = "rhoA";
 const std::string FlowModelSinglePhase::RHOEA = "rhoEA";

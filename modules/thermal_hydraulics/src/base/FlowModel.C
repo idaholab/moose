@@ -1,3 +1,12 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #include "THMProblem.h"
 #include "Component.h"
 #include "FlowChannelBase.h"
@@ -24,7 +33,6 @@ const std::string FlowModel::AREA = "A";
 const std::string FlowModel::AREA_LINEAR = "A_linear";
 const std::string FlowModel::HEAT_FLUX_WALL = "q_wall";
 const std::string FlowModel::HEAT_FLUX_PERIMETER = "P_hf";
-const std::string FlowModel::HYDRAULIC_DIAMETER = "D_h";
 const std::string FlowModel::NUSSELT_NUMBER = "Nu";
 const std::string FlowModel::TEMPERATURE_WALL = "T_wall";
 const std::string FlowModel::UNITY = "unity";
