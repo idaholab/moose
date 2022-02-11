@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "ADViscoplasticityStressUpdateBase.h"
+#include "ViscoplasticityStressUpdateBase.h"
 #include "ADSingleVariableReturnMappingSolution.h"
 
 class ADViscoplasticityStressUpdate : public ADViscoplasticityStressUpdateBase,
