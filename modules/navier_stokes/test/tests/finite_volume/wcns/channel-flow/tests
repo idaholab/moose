@@ -10,6 +10,7 @@
     ad_indexing_type = 'global'
     abs_zero = 1e-9
     recover = false # see #19126
+    valgrind = HEAVY
   []
   [turbulence]
     type = 'Exodiff'
