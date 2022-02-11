@@ -63,7 +63,7 @@ MultiAppPostprocessorInterpolationTransfer::MultiAppPostprocessorInterpolationTr
   if (_directions.contains(TO_MULTIAPP))
     paramError("Can't interpolate to a MultiApp!");
 
-  auto & to_fe_type = _multi_app->problemBase().getStandardVariable(0, _to_var_name).feType();
+  auto & to_fe_type = _from_multi_app->problemBase().getStandardVariable(0, _to_var_name).feType();
   if ((to_fe_type.order != CONSTANT || to_fe_type.family != MONOMIAL) &&
       (to_fe_type.order != FIRST || to_fe_type.family != LAGRANGE))
     paramError("variable", "Must be either CONSTANT MONOMIAL or FIRST LAGRANGE");
@@ -107,12 +107,12 @@ MultiAppPostprocessorInterpolationTransfer::execute()
       idi->set_field_variables(field_vars);
 
       {
-        for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
+        for (unsigned int i = 0; i < _from_multi_app->numGlobalApps(); i++)
         {
-          if (_multi_app->hasLocalApp(i) && _multi_app->isRootProcessor())
+          if (_from_multi_app->hasLocalApp(i) && _from_multi_app->isRootProcessor())
           {
-            src_pts.push_back(_multi_app->position(i));
-            src_vals.push_back(_multi_app->appPostprocessorValue(i, _postprocessor));
+            src_pts.push_back(_from_multi_app->position(i));
+            src_vals.push_back(_from_multi_app->appPostprocessorValue(i, _postprocessor));
           }
         }
       }
@@ -122,14 +122,14 @@ MultiAppPostprocessorInterpolationTransfer::execute()
 
       // Loop over the master nodes and set the value of the variable
       {
-        System * to_sys = find_sys(_multi_app->problemBase().es(), _to_var_name);
+        System * to_sys = find_sys(_from_multi_app->problemBase().es(), _to_var_name);
 
         unsigned int sys_num = to_sys->number();
         unsigned int var_num = to_sys->variable_number(_to_var_name);
 
         NumericVector<Real> & solution = *to_sys->solution;
 
-        MooseMesh & mesh = _multi_app->problemBase().mesh();
+        MooseMesh & mesh = _from_multi_app->problemBase().mesh();
 
         std::vector<std::string> vars;
 
@@ -187,7 +187,7 @@ MultiAppPostprocessorInterpolationTransfer::execute()
         solution.close();
       }
 
-      _multi_app->problemBase().es().update();
+      _from_multi_app->problemBase().es().update();
 
       delete idi;
 

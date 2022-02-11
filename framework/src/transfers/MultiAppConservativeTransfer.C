@@ -68,7 +68,7 @@ MultiAppConservativeTransfer::MultiAppConservativeTransfer(const InputParameters
 
     if (_current_direction == TO_MULTIAPP)
     {
-      if (_from_postprocessors_to_be_preserved.size() != _multi_app->numGlobalApps() &&
+      if (_from_postprocessors_to_be_preserved.size() != _to_multi_app->numGlobalApps() &&
           _from_postprocessors_to_be_preserved.size() != 1)
         paramError("from_postprocessors_to_be_preserved",
                    "Number of from-postprocessors should equal to the number of subapps, or use "
@@ -83,7 +83,7 @@ MultiAppConservativeTransfer::MultiAppConservativeTransfer(const InputParameters
         paramError("from_postprocessors_to_be_preserved",
                    "Number of from Postprocessors should equal to 1");
 
-      if (_to_postprocessors_to_be_preserved.size() != _multi_app->numGlobalApps() &&
+      if (_to_postprocessors_to_be_preserved.size() != _from_multi_app->numGlobalApps() &&
           _to_postprocessors_to_be_preserved.size() != 1)
         paramError("to_postprocessors_to_be_preserved",
                    "_to_postprocessors_to_be_preserved",
@@ -112,7 +112,7 @@ MultiAppConservativeTransfer::initialSetup()
   {
     if (_from_postprocessors_to_be_preserved.size() == 1 && _current_direction == TO_MULTIAPP)
     {
-      FEProblemBase & from_problem = _multi_app->problemBase();
+      FEProblemBase & from_problem = _to_multi_app->problemBase();
       auto * pps = dynamic_cast<const NearestPointIntegralVariablePostprocessor *>(
           &(from_problem.getUserObjectBase(_from_postprocessors_to_be_preserved[0])));
       if (pps)
@@ -120,17 +120,17 @@ MultiAppConservativeTransfer::initialSetup()
       else
       {
         _use_nearestpoint_pps = false;
-        if (_multi_app->numGlobalApps() > 1)
+        if (_to_multi_app->numGlobalApps() > 1)
           mooseError(
               " You have to specify ",
-              _multi_app->numGlobalApps(),
+              _to_multi_app->numGlobalApps(),
               " regular from-postprocessors, or use NearestPointIntegralVariablePostprocessor ");
       }
     }
 
     if (_to_postprocessors_to_be_preserved.size() == 1 && _current_direction == FROM_MULTIAPP)
     {
-      FEProblemBase & to_problem = _multi_app->problemBase();
+      FEProblemBase & to_problem = _from_multi_app->problemBase();
       auto * pps = dynamic_cast<const NearestPointIntegralVariablePostprocessor *>(
           &(to_problem.getUserObjectBase(_to_postprocessors_to_be_preserved[0])));
       if (pps)
@@ -138,17 +138,19 @@ MultiAppConservativeTransfer::initialSetup()
       else
       {
         _use_nearestpoint_pps = false;
-        if (_multi_app->numGlobalApps() > 1)
+        if (_from_multi_app->numGlobalApps() > 1)
           mooseError(
               " You have to specify ",
-              _multi_app->numGlobalApps(),
+              _from_multi_app->numGlobalApps(),
               " regular to-postprocessors, or use NearestPointIntegralVariablePostprocessor ");
       }
     }
 
+    const auto multi_app = _from_multi_app ? _from_multi_app : _to_multi_app;
+
     // Let us check execute_on here. Users need to specify execute_on='transfer' in their input
     // files for the postprocessors that are used to compute conversative qualities Master app
-    FEProblemBase & master_problem = _multi_app->problemBase();
+    FEProblemBase & master_problem = multi_app->problemBase();
     std::vector<PostprocessorName> pps_empty;
     // PPs for master app
     auto & master_pps =
@@ -167,13 +169,13 @@ MultiAppConservativeTransfer::initialSetup()
     }
 
     // Sub apps
-    for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
+    for (unsigned int i = 0; i < multi_app->numGlobalApps(); i++)
     {
-      // If we dot not have this app, we skip
-      if (!_multi_app->hasLocalApp(i))
+      // If we do not have this app, we skip
+      if (!multi_app->hasLocalApp(i))
         continue;
       // Sub problem for
-      FEProblemBase & sub_problem = _multi_app->appProblemBase(i);
+      FEProblemBase & sub_problem = multi_app->appProblemBase(i);
       // PPs for this subapp
       auto & sub_pps =
           _current_direction == TO_MULTIAPP ? _to_postprocessors_to_be_preserved : pps_empty;
@@ -202,50 +204,50 @@ MultiAppConservativeTransfer::postExecute()
 
     if (_current_direction == TO_MULTIAPP)
     {
-      FEProblemBase & from_problem = _multi_app->problemBase();
+      FEProblemBase & from_problem = _to_multi_app->problemBase();
       if (_use_nearestpoint_pps)
         from_problem.computeUserObjectByName(
             EXEC_TRANSFER, Moose::POST_AUX, _from_postprocessors_to_be_preserved[0]);
 
-      for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
-        if (_multi_app->hasLocalApp(i))
+      for (unsigned int i = 0; i < _to_multi_app->numGlobalApps(); i++)
+        if (_to_multi_app->hasLocalApp(i))
         {
           if (_use_nearestpoint_pps)
             adjustTransferedSolutionNearestPoint(i,
                                                  &from_problem,
                                                  _from_postprocessors_to_be_preserved[0],
-                                                 _multi_app->appProblemBase(i),
+                                                 _to_multi_app->appProblemBase(i),
                                                  _to_postprocessors_to_be_preserved[0]);
           else
             adjustTransferedSolution(&from_problem,
                                      _from_postprocessors_to_be_preserved[i],
-                                     _multi_app->appProblemBase(i),
+                                     _to_multi_app->appProblemBase(i),
                                      _to_postprocessors_to_be_preserved[0]);
         }
     }
 
     else if (_current_direction == FROM_MULTIAPP)
     {
-      FEProblemBase & to_problem = _multi_app->problemBase();
+      FEProblemBase & to_problem = _from_multi_app->problemBase();
       if (_use_nearestpoint_pps)
         to_problem.computeUserObjectByName(
             EXEC_TRANSFER, Moose::POST_AUX, _to_postprocessors_to_be_preserved[0]);
 
-      for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
+      for (unsigned int i = 0; i < _from_multi_app->numGlobalApps(); i++)
       {
         if (_use_nearestpoint_pps)
           adjustTransferedSolutionNearestPoint(
               i,
-              _multi_app->hasLocalApp(i) ? &_multi_app->appProblemBase(i) : nullptr,
+              _from_multi_app->hasLocalApp(i) ? &_from_multi_app->appProblemBase(i) : nullptr,
               _from_postprocessors_to_be_preserved[0],
               to_problem,
               _to_postprocessors_to_be_preserved[0]);
         else
-          adjustTransferedSolution(_multi_app->hasLocalApp(i) ? &_multi_app->appProblemBase(i)
-                                                              : nullptr,
-                                   _from_postprocessors_to_be_preserved[0],
-                                   to_problem,
-                                   _to_postprocessors_to_be_preserved[i]);
+          adjustTransferedSolution(
+              _from_multi_app->hasLocalApp(i) ? &_from_multi_app->appProblemBase(i) : nullptr,
+              _from_postprocessors_to_be_preserved[0],
+              to_problem,
+              _to_postprocessors_to_be_preserved[i]);
       }
 
       // Compute the to-postprocessor again so that it has the right value with the updated solution

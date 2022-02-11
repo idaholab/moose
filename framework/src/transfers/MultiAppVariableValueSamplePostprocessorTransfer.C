@@ -56,7 +56,7 @@ MultiAppVariableValueSamplePostprocessorTransfer::execute()
   {
     case TO_MULTIAPP:
     {
-      FEProblemBase & from_problem = _multi_app->problemBase();
+      FEProblemBase & from_problem = _to_multi_app->problemBase();
       MooseVariableField<Real> & from_var = static_cast<MooseVariableField<Real> &>(
           from_problem.getActualFieldVariable(0, _from_var_name));
       SystemBase & from_system_base = from_var.sys();
@@ -68,13 +68,13 @@ MultiAppVariableValueSamplePostprocessorTransfer::execute()
 
       pl->enable_out_of_mesh_mode();
 
-      for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
+      for (unsigned int i = 0; i < _to_multi_app->numGlobalApps(); i++)
       {
         Real value = -std::numeric_limits<Real>::max();
 
         { // Get the value of the variable at the point where this multiapp is in the master domain
 
-          Point multi_app_position = _multi_app->position(i);
+          Point multi_app_position = _to_multi_app->position(i);
 
           std::vector<Point> point_vec(1, multi_app_position);
 
@@ -93,8 +93,8 @@ MultiAppVariableValueSamplePostprocessorTransfer::execute()
           _communicator.max(value);
         }
 
-        if (_multi_app->hasLocalApp(i))
-          _multi_app->appProblemBase(i).setPostprocessorValueByName(_postprocessor_name, value);
+        if (_to_multi_app->hasLocalApp(i))
+          _to_multi_app->appProblemBase(i).setPostprocessorValueByName(_postprocessor_name, value);
       }
 
       break;

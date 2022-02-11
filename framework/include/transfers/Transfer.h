@@ -103,7 +103,7 @@ protected:
   ///@}
 
   /// The directions this Transfer is to be executed on
-  const MultiMooseEnum _directions;
+  MultiMooseEnum _directions;
 
 public:
   const static Number OutOfMeshValue;

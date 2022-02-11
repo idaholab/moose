@@ -42,7 +42,7 @@ MultiAppVariableValueSampleTransfer::MultiAppVariableValueSampleTransfer(
     _to_var_name(getParam<AuxVariableName>("variable")),
     _from_var_name(getParam<VariableName>("source_variable"))
 {
-  if (_directions.size() != 1)
+  if (_directions.size() != 1 || (isParamValid("from_multiapp") && isParamValid("to_multiapp")))
     paramError("direction", "This transfer is only unidirectional");
 }
 
@@ -51,7 +51,12 @@ MultiAppVariableValueSampleTransfer::initialSetup()
 {
   variableIntegrityCheck(_to_var_name);
 
-  _multi_app->problemBase().mesh().errorIfDistributedMesh("MultiAppVariableValueSampleTransfer");
+  if (isParamValid("from_multiapp"))
+    _from_multi_app->problemBase().mesh().errorIfDistributedMesh(
+        "MultiAppVariableValueSampleTransfer");
+  if (isParamValid("to_multiapp"))
+    _to_multi_app->problemBase().mesh().errorIfDistributedMesh(
+        "MultiAppVariableValueSampleTransfer");
 }
 
 void
@@ -63,7 +68,7 @@ MultiAppVariableValueSampleTransfer::execute()
   {
     case TO_MULTIAPP:
     {
-      FEProblemBase & from_problem = _multi_app->problemBase();
+      FEProblemBase & from_problem = _to_multi_app->problemBase();
       MooseVariableField<Real> & from_var = static_cast<MooseVariableField<Real> &>(
           from_problem.getActualFieldVariable(0, _from_var_name));
       SystemBase & from_system_base = from_var.sys();
@@ -73,13 +78,13 @@ MultiAppVariableValueSampleTransfer::execute()
 
       std::unique_ptr<PointLocatorBase> pl = from_mesh.getPointLocator();
 
-      for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
+      for (unsigned int i = 0; i < _to_multi_app->numGlobalApps(); i++)
       {
         Real value = -std::numeric_limits<Real>::max();
 
         { // Get the value of the variable at the point where this multiapp is in the master domain
 
-          Point multi_app_position = _multi_app->position(i);
+          Point multi_app_position = _to_multi_app->position(i);
 
           std::vector<Point> point_vec(1, multi_app_position);
 
@@ -101,19 +106,19 @@ MultiAppVariableValueSampleTransfer::execute()
             mooseError("Transfer failed to sample point value at point: ", multi_app_position);
         }
 
-        if (_multi_app->hasLocalApp(i))
+        if (_to_multi_app->hasLocalApp(i))
         {
-          Moose::ScopedCommSwapper swapper(_multi_app->comm());
+          Moose::ScopedCommSwapper swapper(_to_multi_app->comm());
 
           // Loop over the master nodes and set the value of the variable
-          System * to_sys = find_sys(_multi_app->appProblemBase(i).es(), _to_var_name);
+          System * to_sys = find_sys(_to_multi_app->appProblemBase(i).es(), _to_var_name);
 
           unsigned int sys_num = to_sys->number();
           unsigned int var_num = to_sys->variable_number(_to_var_name);
 
-          NumericVector<Real> & solution = _multi_app->appTransferVector(i, _to_var_name);
+          NumericVector<Real> & solution = _to_multi_app->appTransferVector(i, _to_var_name);
 
-          MooseMesh & mesh = _multi_app->appProblemBase(i).mesh();
+          MooseMesh & mesh = _to_multi_app->appProblemBase(i).mesh();
 
           for (const auto & node : as_range(mesh.localNodesBegin(), mesh.localNodesEnd()))
           {
@@ -126,7 +131,7 @@ MultiAppVariableValueSampleTransfer::execute()
             }
           }
           solution.close();
-          _multi_app->appProblemBase(i).es().update();
+          _to_multi_app->appProblemBase(i).es().update();
         }
       }
 

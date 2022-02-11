@@ -40,14 +40,22 @@ public:
   void variableIntegrityCheck(const AuxVariableName & var_name) const;
 
   /// Return the MultiApp that this transfer belongs to
-  const std::shared_ptr<MultiApp> getMultiApp() const { return _multi_app; }
+  const std::shared_ptr<MultiApp> getMultiApp() const
+  {
+    if (_from_multi_app && _to_multi_app)
+      mooseError("Unclear which app you want from Transfer ", name());
+    else if (_from_multi_app)
+      return _from_multi_app;
+    else if (_to_multi_app)
+      return _to_multi_app;
+  }
 
   /// Return the execution flags, handling "same_as_multiapp"
   virtual const std::vector<ExecFlagType> & execFlags() const;
 
 protected:
-  /// The MultiApp this Transfer is transferring data to or from
-  std::shared_ptr<MultiApp> _multi_app;
+  /// The MultiApps this Transfer is transferring data to or from
+  std::shared_ptr<MultiApp> _from_multi_app;
   std::shared_ptr<MultiApp> _to_multi_app;
 
   /**

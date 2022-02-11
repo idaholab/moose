@@ -4233,9 +4233,9 @@ FEProblemBase::execMultiAppTransfers(ExecFlagType type, Transfer::DIRECTION dire
   else
     string_direction = " between ";
 
-  const MooseObjectWarehouse<Transfer> & wh =
-      to_multiapp ? _to_multi_app_transfers[type]
-                  : from_multiapp ? _from_multi_app_transfers[type] : _between_multi_app_transfers;
+  const MooseObjectWarehouse<Transfer> & wh = to_multiapp     ? _to_multi_app_transfers[type]
+                                              : from_multiapp ? _from_multi_app_transfers[type]
+                                                              : _between_multi_app_transfers;
 
   if (wh.hasActiveObjects())
   {
