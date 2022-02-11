@@ -1,6 +1,6 @@
 [Tests]
-  design = 'Constraints/index.md'
-  issues = '#13080'
+  design = 'Constraints/index.md ModularGapConductanceConstraint.md'
+  issues = '#13080 #19229'
   [test]
     type = Exodiff
     input = 'gap_heat_transfer_mortar.i'
@@ -18,8 +18,6 @@
     custom_cmp = 'one-variable-temp.cmp'
     partial = True
     map = False
-    design = 'ModularGapConductanceConstraint.md'
-    issues = '#19229'
     requirement = 'We shall be able to produce the expected result for a gap conductance test case '
                   'using the mortar method using the modular gap flux system.'
     ad_indexing_type = 'global'
@@ -29,8 +27,6 @@
     input = 'gap_heat_transfer_radiation_test.i'
     exodiff = 'gap_heat_transfer_radiation_test_out.e'
     abs_zero = 1e-06
-    design = 'ModularGapConductanceConstraint.md'
-    issues = '#19229'
     requirement = 'We shall be able to produce the expected result for a combined gap conductance '
                   'and radiative heat transfer test case using the mortar method using the modular '
                   'gap flux system'
@@ -53,8 +49,6 @@
     custom_cmp = 'one-variable-temp.cmp'
     partial = True
     map = False
-    design = 'ModularGapConductanceConstraint.md'
-    issues = '#19229'
     requirement = 'We shall be able to produce the expected result for a gap conductance test case '
                   'using the mortar method using the modular gap flux system with a displaced mesh.'
     ad_indexing_type = 'global'
@@ -68,8 +62,6 @@
                   'element segments'
   []
   [bc_gap_heat_transfer_displaced_radiation]
-    design = 'ModularGapConductanceConstraint.md'
-    issues = '#19286'
     type = CSVDiff
     input = 'bc_gap_heat_transfer_displaced_radiation.i'
     csvdiff = 'bc_gap_heat_transfer_displaced_radiation_out_NodalTemperature_0001.csv'
@@ -78,8 +70,6 @@
     ad_indexing_type = 'global'
   []
   [modular_gap_heat_transfer_mortar_displaced_radiation]
-    design = 'ModularGapConductanceConstraint.md'
-    issues = '#19286'
     type = CSVDiff
     input = 'modular_gap_heat_transfer_mortar_displaced_radiation.i'
     csvdiff = 'modular_gap_heat_transfer_mortar_displaced_radiation_out_NodalTemperature_0001.csv'
@@ -89,8 +79,6 @@
     ad_indexing_type = 'global'
   []
   [bc_gap_heat_transfer_displaced_conduction]
-    design = 'ModularGapConductanceConstraint.md'
-    issues = '#19286'
     type = CSVDiff
     input = 'bc_gap_heat_transfer_displaced_conduction.i'
     csvdiff = 'bc_gap_heat_transfer_displaced_conduction_out_NodalTemperature_0001.csv'
@@ -99,8 +87,6 @@
     ad_indexing_type = 'global'
   []
   [modular_gap_heat_transfer_mortar_displaced_conduction]
-    design = 'ModularGapConductanceConstraint.md'
-    issues = '#19286'
     type = CSVDiff
     input = 'modular_gap_heat_transfer_mortar_displaced_conduction.i'
     csvdiff = 'modular_gap_heat_transfer_mortar_displaced_conduction_out_NodalTemperature_0001.csv'
@@ -110,8 +96,6 @@
     ad_indexing_type = 'global'
   []
   [large_gap_heat_transfer_test_cylinder]
-    design = 'ModularGapConductanceConstraint.md'
-    issues = '#19286'
     type = CSVDiff
     input = 'large_gap_heat_transfer_test_cylinder.i'
     csvdiff = 'large_gap_heat_transfer_test_cylinder_out_NodalTemperature_0001.csv'
@@ -121,8 +105,6 @@
     ad_indexing_type = 'global'
   []
   [large_gap_heat_transfer_test_cylinder_mortar]
-    design = 'ModularGapConductanceConstraint.md'
-    issues = '#19286'
     type = CSVDiff
     input = 'large_gap_heat_transfer_test_cylinder_mortar.i'
     csvdiff = 'large_gap_heat_transfer_test_cylinder_mortar_out_NodalTemperature_0001.csv'
@@ -133,8 +115,6 @@
     ad_indexing_type = 'global'
   []
   [large_gap_heat_transfer_test_rz_cylinder]
-    design = 'ModularGapConductanceConstraint.md'
-    issues = '#19286'
     type = CSVDiff
     input = 'large_gap_heat_transfer_test_rz_cylinder.i'
     csvdiff = 'large_gap_heat_transfer_test_rz_cylinder_out_NodalTemperature_0001.csv'
@@ -144,8 +124,6 @@
     ad_indexing_type = 'global'
   []
   [large_gap_heat_transfer_test_rz_cylinder_mortar]
-    design = 'ModularGapConductanceConstraint.md'
-    issues = '#19286'
     type = CSVDiff
     input = 'large_gap_heat_transfer_test_rz_cylinder_mortar.i'
     csvdiff = 'large_gap_heat_transfer_test_rz_cylinder_mortar_out_NodalTemperature_0001.csv'
@@ -156,8 +134,6 @@
     ad_indexing_type = 'global'
   []
   [large_gap_heat_transfer_test_sphere]
-    design = 'ModularGapConductanceConstraint.md'
-    issues = '#19286'
     type = CSVDiff
     input = 'large_gap_heat_transfer_test_sphere.i'
     csvdiff = 'large_gap_heat_transfer_test_sphere_out_NodalTemperature_0001.csv'
@@ -167,8 +143,6 @@
     ad_indexing_type = 'global'
   []
   [large_gap_heat_transfer_test_sphere_mortar]
-    design = 'ModularGapConductanceConstraint.md'
-    issues = '#19286'
     type = CSVDiff
     input = 'large_gap_heat_transfer_test_sphere_mortar.i'
     csvdiff = 'large_gap_heat_transfer_test_sphere_mortar_out_NodalTemperature_0001.csv'
@@ -179,8 +153,6 @@
     ad_indexing_type = 'global'
   []
   [modular_gap_heat_transfer_mortar_displaced_radiation_conduction]
-    design = 'ModularGapConductanceConstraint.md'
-    issues = '#19286'
     type = CSVDiff
     input = 'modular_gap_heat_transfer_mortar_displaced_radiation_conduction.i'
     csvdiff = 'modular_gap_heat_transfer_mortar_displaced_radiation_conduction_out_NodalTemperature_0'
@@ -191,8 +163,6 @@
     ad_indexing_type = 'global'
   []
   [modular_gap_heat_transfer_mortar_displaced_radiation_conduction_separate]
-    design = 'ModularGapConductanceConstraint.md'
-    issues = '#19286'
     type = CSVDiff
     input = 'modular_gap_heat_transfer_mortar_displaced_radiation_conduction_separate.i'
     csvdiff = 'modular_gap_heat_transfer_mortar_displaced_radiation_conduction_separate_out_NodalTemp'
@@ -203,8 +173,6 @@
     ad_indexing_type = 'global'
   []
   [large_gap_heat_transfer_test_sphere_mortar_geometry_error]
-    design = 'ModularGapConductanceConstraint.md'
-    issues = '#19286'
     type = RunException
     input = 'large_gap_heat_transfer_test_sphere_mortar_error.i'
     expect_err = 'gap_geometry_type = SPHERE'
@@ -213,8 +181,6 @@
     ad_indexing_type = 'global'
   []
   [large_gap_heat_transfer_test_cylinder_mortar_error]
-    design = 'ModularGapConductanceConstraint.md'
-    issues = '#19286'
     type = RunException
     input = 'large_gap_heat_transfer_test_cylinder_mortar_error.i'
     expect_err = 'gap_geometry_type = CYLINDER'
@@ -223,8 +189,6 @@
     ad_indexing_type = 'global'
   []
   [modular_gap_heat_transfer_mortar_displaced_conduction_function]
-    design = 'ModularGapConductanceConstraint.md'
-    issues = '#19286'
     type = CSVDiff
     input = 'modular_gap_heat_transfer_mortar_displaced_conduction_function.i'
     csvdiff = 'modular_gap_heat_transfer_mortar_displaced_conduction_function_out_NodalTemperature_00'
@@ -236,8 +200,6 @@
     ad_indexing_type = 'global'
   []
   [gap_heat_transfer_3d]
-    design = 'ModularGapConductanceConstraint.md'
-    issues = '#19286'
     input = 'gap_heat_transfer_3D.i'
     type = CSVDiff
     csvdiff = 'gap_heat_transfer_3D_out_NodalTemperature_0001.csv'
@@ -248,9 +210,20 @@
                   'radiation between two blocks in 3D and use it as a reference for mortar-based '
                   'constraints.'
   []
+  [gap_heat_transfer_3d_hex20]
+    input = 'gap_heat_transfer_3D.i'
+    type = CSVDiff
+    csvdiff = 'gap_heat_transfer_3D_hex20_out_NodalTemperature_0001.csv'
+    cli_args = 'Mesh/left_block/elem_type=HEX20 Mesh/right_block/elem_type=HEX20 '
+               'Outputs/file_base=gap_heat_transfer_3D_hex20_out'
+    rel_err = 1e-3
+    abs_zero = 1e-8
+    mesh_mode = 'REPLICATED'
+    requirement = 'We shall be able to generate node-to-segment numerical results for conduction and '
+                  'radiation between two blocks in 3D using HEX20 elements and use it as a reference '
+                  'for mortar-based constraints.'
+  []
   [gap_heat_transfer_3d_mortar]
-    design = 'ModularGapConductanceConstraint.md'
-    issues = '#19286'
     input = 'gap_heat_transfer_3D_mortar.i'
     type = CSVDiff
     csvdiff = 'gap_heat_transfer_3D_mortar_out_NodalTemperature_0001.csv'
@@ -262,5 +235,47 @@
     requirement = 'We shall be able to generate mortar numerical results for conduction and '
                   'radiation between two blocks in 3D and match reasonably well with the '
                   'node-to-segment approach with a refined mesh.'
+  []
+  [gap_heat_transfer_3d_mortar_hex20]
+    input = 'gap_heat_transfer_3d_mortar.i'
+    type = CSVDiff
+    csvdiff = 'gap_heat_transfer_3D_mortar_hex20_out_NodalTemperature_0001.csv'
+    cli_args = 'Mesh/left_block/elem_type=HEX20 Mesh/right_block/elem_type=HEX20 '
+               'Outputs/file_base=gap_heat_transfer_3D_mortar_hex20_out'
+    rel_err = 4e-2
+    abs_zero = 1e-8
+    min_ad_size = 100
+    ad_indexing_type = 'global'
+    mesh_mode = 'REPLICATED'
+    requirement = 'We shall be able to generate mortar numerical results for conduction and '
+                  'radiation between two blocks in 3D using HEX20 elements and match reasonably well '
+                  'with the node-to-segment approach with a refined mesh.'
+  []
+  [gap_heat_transfer_sphere3d]
+    input = 'gap_heat_transfer_sphere3D.i'
+    type = CSVDiff
+    csvdiff = 'gap_heat_transfer_sphere3D_out_NodalTemperature_0001.csv'
+    rel_err = 1e-3
+    abs_zero = 1e-8
+    min_ad_size = 100
+    ad_indexing_type = 'global'
+    mesh_mode = 'REPLICATED'
+    requirement = 'We shall be able to generate node-to-segment numerical results using thermal '
+                  'contact that resolves spherical heat transfer for a constant conductivity gap in '
+                  '3D using HEX20 elements'
+  []
+  [gap_heat_transfer_sphere3d_mortar]
+    input = 'gap_heat_transfer_sphere3D_mortar.i'
+    type = CSVDiff
+    csvdiff = 'gap_heat_transfer_sphere3D_mortar_out_NodalTemperature_0001.csv'
+    rel_err = 4e-2
+    abs_zero = 1e-8
+    min_ad_size = 100
+    ad_indexing_type = 'global'
+    mesh_mode = 'REPLICATED'
+    requirement = 'We shall be able to generate mortar numerical results using thermal contact that '
+                  'resolves spherical heat transfer for a constant conductivity gap in 3D using '
+                  'HEX20 elements and match reasonably well with the node-to-segment approach with a '
+                  'refined mesh.'
   []
 []
