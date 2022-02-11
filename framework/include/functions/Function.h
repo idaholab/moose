@@ -77,9 +77,9 @@ public:
 
   ///@{ Helpers to call value(t,x,y,z)
   template <typename U>
-  U value(const U & t) const;
+  auto value(const U & t) const;
   template <typename U>
-  U value(const U & t, const U & x, const U & y = 0, const U & z = 0) const;
+  auto value(const U & t, const U & x, const U & y = 0, const U & z = 0) const;
   ///@}
 
   /**
@@ -120,9 +120,9 @@ public:
 
   ///@{ Helpers to call timeDerivative(t,x,y,z)
   template <typename U>
-  U timeDerivative(const U & t) const;
+  auto timeDerivative(const U & t) const;
   template <typename U>
-  U timeDerivative(const U & t, const U & x, const U & y = 0, const U & z = 0) const;
+  auto timeDerivative(const U & t, const U & x, const U & y = 0, const U & z = 0) const;
   ///@}
 
   // Not defined
@@ -210,7 +210,7 @@ private:
 
 template <typename T>
 template <typename U>
-U
+auto
 FunctionTempl<T>::value(const U & t) const
 {
   static const MooseADWrapper<Point, MooseIsADType<U>::value> p;
@@ -219,7 +219,7 @@ FunctionTempl<T>::value(const U & t) const
 
 template <typename T>
 template <typename U>
-U
+auto
 FunctionTempl<T>::value(const U & t, const U & x, const U & y, const U & z) const
 {
   MooseADWrapper<Point, MooseIsADType<U>::value> p(x, y, z);
@@ -228,7 +228,7 @@ FunctionTempl<T>::value(const U & t, const U & x, const U & y, const U & z) cons
 
 template <typename T>
 template <typename U>
-U
+auto
 FunctionTempl<T>::timeDerivative(const U & t) const
 {
   static const MooseADWrapper<Point, MooseIsADType<U>::value> p;
@@ -237,7 +237,7 @@ FunctionTempl<T>::timeDerivative(const U & t) const
 
 template <typename T>
 template <typename U>
-U
+auto
 FunctionTempl<T>::timeDerivative(const U & t, const U & x, const U & y, const U & z) const
 {
   MooseADWrapper<Point, MooseIsADType<U>::value> p(x, y, z);
