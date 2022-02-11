@@ -35,6 +35,7 @@ ElementPropertyReadFile::validParams()
       "rve_type",
       MooseEnum("periodic none", "none"),
       "Periodic or non-periodic grain distribution: Default is non-periodic");
+  params.addParam<bool>("blocks_zero_numbered", true, "Are the blocks numbered starting at zero?");
   return params;
 }
 
@@ -48,6 +49,7 @@ ElementPropertyReadFile::ElementPropertyReadFile(const InputParameters & paramet
     _read_type(getParam<MooseEnum>("read_type").getEnum<ReadType>()),
     _rand_seed(getParam<unsigned int>("rand_seed")),
     _rve_type(getParam<MooseEnum>("rve_type")),
+    _block_zero(getParam<bool>("blocks_zero_numbered")),
     _mesh(_fe_problem.mesh())
 {
   _nelem = _mesh.nElem();
@@ -156,14 +158,18 @@ ElementPropertyReadFile::getElementData(const Elem * elem, unsigned int prop_num
 Real
 ElementPropertyReadFile::getBlockData(const Elem * elem, unsigned int prop_num) const
 {
+  unsigned int offset = 0;
+  if (!_block_zero)
+    offset = 1;
+
   unsigned int elem_subdomain_id = elem->subdomain_id();
-  if (elem_subdomain_id >= _nblock)
+  if (elem_subdomain_id >= _nblock + offset)
     paramError("nblock",
                "Element block id ",
                elem_subdomain_id,
                " greater than than total number of blocks in mesh ",
                _nblock);
-  return _reader.getData(elem_subdomain_id)[prop_num];
+  return _reader.getData(elem_subdomain_id - offset)[prop_num];
 }
 
 Real

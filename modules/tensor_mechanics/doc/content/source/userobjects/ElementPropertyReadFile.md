@@ -15,6 +15,9 @@ element ID is performed. In +grain+ mode the centroid of the passed in element
 is taken and the grain ID is determined as the ID of the Voronoi center closest
 to the element centroid.
 
+The `blocks_zero_numbered` parameter indicates whether the block numbers start
+with zero (`true`) or one (`false`).
+
 !syntax parameters /UserObjects/ElementPropertyReadFile
 
 !syntax inputs /UserObjects/ElementPropertyReadFile
