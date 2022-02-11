@@ -39,7 +39,7 @@ private:
   const std::string _base_name;
 
   /// The strain energy density material property
-  GenericMaterialProperty<Real, is_ad> & _strain_energy_rate_density;
+  MaterialProperty<Real> & _strain_energy_rate_density;
 
   /// Current and old values of stress
   const GenericMaterialProperty<RankTwoTensor, is_ad> & _stress;

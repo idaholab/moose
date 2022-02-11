@@ -12,9 +12,11 @@
 #include "MooseMesh.h"
 
 registerMooseObject("TensorMechanicsApp", StrainEnergyDensity);
+registerMooseObject("TensorMechanicsApp", ADStrainEnergyDensity);
 
+template <bool is_ad>
 InputParameters
-StrainEnergyDensity::validParams()
+StrainEnergyDensityTempl<is_ad>::validParams()
 {
   InputParameters params = Material::validParams();
   params.addClassDescription("Computes the strain energy density using a combination of the "
@@ -30,20 +32,26 @@ StrainEnergyDensity::validParams()
   return params;
 }
 
-StrainEnergyDensity::StrainEnergyDensity(const InputParameters & parameters)
+template <bool is_ad>
+StrainEnergyDensityTempl<is_ad>::StrainEnergyDensityTempl(const InputParameters & parameters)
   : DerivativeMaterialInterface<Material>(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _strain_energy_density(declareProperty<Real>(_base_name + "strain_energy_density")),
     _strain_energy_density_old(getMaterialPropertyOld<Real>(_base_name + "strain_energy_density")),
-    _stress(getMaterialProperty<RankTwoTensor>(_base_name + "stress")),
+    _stress(getGenericMaterialProperty<RankTwoTensor, is_ad>(_base_name + "stress")),
     _stress_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "stress")),
-    _mechanical_strain(getMaterialProperty<RankTwoTensor>(_base_name + "mechanical_strain")),
-    _strain_increment(getOptionalMaterialProperty<RankTwoTensor>(_base_name + "strain_increment"))
+    _mechanical_strain(
+        getGenericMaterialProperty<RankTwoTensor, is_ad>(_base_name + "mechanical_strain")),
+    _strain_increment(
+        (isParamValid("incremental") && getParam<bool>("incremental"))
+            ? &getGenericMaterialProperty<RankTwoTensor, is_ad>(_base_name + "strain_increment")
+            : nullptr)
 {
 }
 
+template <bool is_ad>
 void
-StrainEnergyDensity::initialSetup()
+StrainEnergyDensityTempl<is_ad>::initialSetup()
 {
   // optional error checking
   if (isParamValid("incremental"))
@@ -57,21 +65,28 @@ StrainEnergyDensity::initialSetup()
                  "incremental.");
   }
 }
-
+template <bool is_ad>
 void
-StrainEnergyDensity::initQpStatefulProperties()
+StrainEnergyDensityTempl<is_ad>::initQpStatefulProperties()
 {
   _strain_energy_density[_qp] = 0.0;
 }
 
+template <bool is_ad>
 void
-StrainEnergyDensity::computeQpProperties()
+StrainEnergyDensityTempl<is_ad>::computeQpProperties()
 {
 
   if (_strain_increment)
-    _strain_energy_density[_qp] = _strain_energy_density_old[_qp] +
-                                  _stress[_qp].doubleContraction(_strain_increment[_qp]) / 2.0 +
-                                  _stress_old[_qp].doubleContraction(_strain_increment[_qp]) / 2.0;
+    _strain_energy_density[_qp] =
+        _strain_energy_density_old[_qp] +
+        MetaPhysicL::raw_value(_stress[_qp])
+                .doubleContraction(MetaPhysicL::raw_value((*_strain_increment)[_qp])) /
+            2.0 +
+        _stress_old[_qp].doubleContraction(MetaPhysicL::raw_value((*_strain_increment)[_qp])) / 2.0;
   else
-    _strain_energy_density[_qp] = _stress[_qp].doubleContraction((_mechanical_strain)[_qp]) / 2.0;
+    _strain_energy_density[_qp] =
+        MetaPhysicL::raw_value(_stress[_qp])
+            .doubleContraction((MetaPhysicL::raw_value(_mechanical_strain[_qp]))) /
+        2.0;
 }

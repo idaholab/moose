@@ -12,16 +12,18 @@
 #include "Material.h"
 #include "DerivativeMaterialInterface.h"
 #include "RankTwoTensorForward.h"
+#include "MooseTypes.h"
 
 /**
  * EshelbyTensor defines a strain increment and rotation increment, for finite strains.
  */
-class EshelbyTensor : public DerivativeMaterialInterface<Material>
+template <bool is_ad>
+class EshelbyTensorTempl : public DerivativeMaterialInterface<Material>
 {
 public:
   static InputParameters validParams();
 
-  EshelbyTensor(const InputParameters & parameters);
+  EshelbyTensorTempl(const InputParameters & parameters);
 
   virtual void initialSetup() override;
   virtual void initQpStatefulProperties() override;
@@ -41,7 +43,7 @@ protected:
   MaterialProperty<RankTwoTensor> * _eshelby_tensor_dissipation;
 
   /// The stress tensor
-  const MaterialProperty<RankTwoTensor> & _stress;
+  const GenericMaterialProperty<RankTwoTensor, is_ad> & _stress;
 
   /// The old stress tensor
   const MaterialProperty<RankTwoTensor> & _stress_old;
@@ -54,3 +56,6 @@ protected:
   const bool _has_temp;
   const OptionalMaterialProperty<RankTwoTensor> & _total_deigenstrain_dT;
 };
+
+typedef EshelbyTensorTempl<false> EshelbyTensor;
+typedef EshelbyTensorTempl<true> ADEshelbyTensor;

@@ -12,16 +12,18 @@
 #include "Material.h"
 #include "DerivativeMaterialInterface.h"
 #include "RankTwoTensorForward.h"
+#include "MooseTypes.h"
 
 /**
  * StrainEnergyDensity calculates the strain energy density.
  */
-class StrainEnergyDensity : public DerivativeMaterialInterface<Material>
+template <bool is_ad>
+class StrainEnergyDensityTempl : public DerivativeMaterialInterface<Material>
 {
 public:
   static InputParameters validParams();
 
-  StrainEnergyDensity(const InputParameters & parameters);
+  StrainEnergyDensityTempl(const InputParameters & parameters);
 
   virtual void initialSetup() override;
 
@@ -37,14 +39,17 @@ protected:
   const MaterialProperty<Real> & _strain_energy_density_old;
 
   ///{@ Current and old values of stress
-  const MaterialProperty<RankTwoTensor> & _stress;
+  const GenericMaterialProperty<RankTwoTensor, is_ad> & _stress;
   const MaterialProperty<RankTwoTensor> & _stress_old;
   ///@}
 
   /// Current value of mechanical strain which includes elastic and
   /// inelastic components of the strain
-  const MaterialProperty<RankTwoTensor> & _mechanical_strain;
+  const GenericMaterialProperty<RankTwoTensor, is_ad> & _mechanical_strain;
 
   /// Current value of the strain increment for incremental models
-  const OptionalMaterialProperty<RankTwoTensor> & _strain_increment;
+  const GenericMaterialProperty<RankTwoTensor, is_ad> * _strain_increment;
 };
+
+typedef StrainEnergyDensityTempl<false> StrainEnergyDensity;
+typedef StrainEnergyDensityTempl<true> ADStrainEnergyDensity;
