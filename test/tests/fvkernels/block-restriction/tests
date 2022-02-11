@@ -6,6 +6,7 @@
     input = 1d.i
     exodiff = 1d_out.e
     requirement = 'The system shall support block restriction of finite volume variables and kernels, and shall properly handle material evaluation in block-restricted settings, in a one-dimensional example.'
+    ad_indexing_type = 'global'
   []
   [overlapping-mats]
     type = Exodiff
@@ -39,6 +40,7 @@
     input = 'just-mat-blk-restriction.i'
     exodiff = 'just-mat-blk-restriction_out.e'
     requirement = 'The system shall allow different materials to define the same material property name on different sides of an interface when the finite volume physics is the same on both sides of the interface.'
+    ad_indexing_type = 'global'
   []
   [just-mat-blk-restriction-jac]
     type = PetscJacobianTester
@@ -47,5 +49,6 @@
     requirement = 'The system shall compute a perfect Jacobian when different materials define the same material property on different sides of a interface and the finite volume physics are the same on both sides of the interface.'
     difference_tol = 1e-4
     ratio_tol = 1e-7
+    ad_indexing_type = 'global'
   []
 []

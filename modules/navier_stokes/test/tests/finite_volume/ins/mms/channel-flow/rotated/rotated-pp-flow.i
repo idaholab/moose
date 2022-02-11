@@ -27,6 +27,19 @@ two_term_boundary_expansion=true
   fv_bcs_integrity_check = true
 []
 
+[GlobalParams]
+  rhie_chow_user_object = 'rc'
+[]
+
+[UserObjects]
+  [rc]
+    type = INSFVRhieChowInterpolator
+    u = u
+    v = v
+    pressure = pressure
+  []
+[]
+
 [AuxVariables]
   [vel_exact_x][]
   [vel_exact_y][]
@@ -74,11 +87,6 @@ two_term_boundary_expansion=true
     variable = pressure
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
-    vel = 'velocity'
-    pressure = pressure
-    u = u
-    v = v
-    mu = ${mu}
     rho = ${rho}
   []
   [mass_forcing]
@@ -90,20 +98,16 @@ two_term_boundary_expansion=true
   [u_advection]
     type = INSFVMomentumAdvection
     variable = u
-    advected_quantity = 'rhou'
-    vel = 'velocity'
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
-    pressure = pressure
-    u = u
-    v = v
-    mu = ${mu}
     rho = ${rho}
+    momentum_component = 'x'
   []
   [u_viscosity]
-    type = FVDiffusion
+    type = INSFVMomentumDiffusion
     variable = u
-    coeff = ${mu}
+    mu = ${mu}
+    momentum_component = 'x'
   []
   [u_pressure]
     type = INSFVMomentumPressure
@@ -112,28 +116,25 @@ two_term_boundary_expansion=true
     pressure = pressure
   []
   [u_forcing]
-    type = FVBodyForce
+    type = INSFVBodyForce
     variable = u
-    function = forcing_u
+    functor = forcing_u
+    momentum_component = 'x'
   []
 
   [v_advection]
     type = INSFVMomentumAdvection
     variable = v
-    advected_quantity = 'rhov'
-    vel = 'velocity'
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
-    pressure = pressure
-    u = u
-    v = v
-    mu = ${mu}
     rho = ${rho}
+    momentum_component = 'y'
   []
   [v_viscosity]
-    type = FVDiffusion
+    type = INSFVMomentumDiffusion
     variable = v
-    coeff = ${mu}
+    mu = ${mu}
+    momentum_component = 'y'
   []
   [v_pressure]
     type = INSFVMomentumPressure
@@ -142,9 +143,10 @@ two_term_boundary_expansion=true
     pressure = pressure
   []
   [v_forcing]
-    type = FVBodyForce
+    type = INSFVBodyForce
     variable = v
-    function = forcing_v
+    functor = forcing_v
+    momentum_component = 'y'
   []
 []
 
@@ -181,57 +183,47 @@ two_term_boundary_expansion=true
   []
 []
 
-[Materials]
-  [ins_fv]
-    type = INSFVMaterial
-    u = 'u'
-    v = 'v'
-    pressure = 'pressure'
-    rho = ${rho}
-  []
-[]
-
 [Functions]
-[exact_u]
-  type = ParsedFunction
-  value = '0.25*sqrt(2)*(1.0 - 1/2*(-x + y)^2)/mu'
-  vars = 'mu'
-  vals = '${mu}'
-[]
-[exact_rhou]
-  type = ParsedFunction
-  value = '0.25*sqrt(2)*rho*(1.0 - 1/2*(-x + y)^2)/mu'
-  vars = 'mu rho'
-  vals = '${mu} ${rho}'
-[]
-[forcing_u]
-  type = ParsedFunction
-  value = '0'
-[]
-[exact_v]
-  type = ParsedFunction
-  value = '0.25*sqrt(2)*(1.0 - 1/2*(-x + y)^2)/mu'
-  vars = 'mu'
-  vals = '${mu}'
-[]
-[exact_rhov]
-  type = ParsedFunction
-  value = '0.25*sqrt(2)*rho*(1.0 - 1/2*(-x + y)^2)/mu'
-  vars = 'mu rho'
-  vals = '${mu} ${rho}'
-[]
-[forcing_v]
-  type = ParsedFunction
-  value = '0'
-[]
-[exact_p]
-  type = ParsedFunction
-  value = '-1/2*sqrt(2)*(x + y) + 10.0'
-[]
-[forcing_p]
-  type = ParsedFunction
-  value = '0'
-[]
+  [exact_u]
+    type = ParsedFunction
+    value = '0.25*sqrt(2)*(1.0 - 1/2*(-x + y)^2)/mu'
+    vars = 'mu'
+    vals = '${mu}'
+  []
+  [exact_rhou]
+    type = ParsedFunction
+    value = '0.25*sqrt(2)*rho*(1.0 - 1/2*(-x + y)^2)/mu'
+    vars = 'mu rho'
+    vals = '${mu} ${rho}'
+  []
+  [forcing_u]
+    type = ADParsedFunction
+    value = '0'
+  []
+  [exact_v]
+    type = ParsedFunction
+    value = '0.25*sqrt(2)*(1.0 - 1/2*(-x + y)^2)/mu'
+    vars = 'mu'
+    vals = '${mu}'
+  []
+  [exact_rhov]
+    type = ParsedFunction
+    value = '0.25*sqrt(2)*rho*(1.0 - 1/2*(-x + y)^2)/mu'
+    vars = 'mu rho'
+    vals = '${mu} ${rho}'
+  []
+  [forcing_v]
+    type = ADParsedFunction
+    value = '0'
+  []
+  [exact_p]
+    type = ParsedFunction
+    value = '-1/2*sqrt(2)*(x + y) + 10.0'
+  []
+  [forcing_p]
+    type = ParsedFunction
+    value = '0'
+  []
 []
 
 [Executioner]

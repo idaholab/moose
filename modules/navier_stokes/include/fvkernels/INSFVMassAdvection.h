@@ -9,12 +9,12 @@
 
 #pragma once
 
-#include "INSFVMomentumAdvection.h"
+#include "INSFVAdvectionKernel.h"
 
 /**
  * A flux kernel transporting mass across cell faces
  */
-class INSFVMassAdvection : public INSFVMomentumAdvection
+class INSFVMassAdvection : public INSFVAdvectionKernel
 {
 public:
   static InputParameters validParams();
@@ -22,4 +22,7 @@ public:
 
 protected:
   ADReal computeQpResidual() override;
+
+  /// Density
+  const Moose::Functor<ADReal> & _rho;
 };

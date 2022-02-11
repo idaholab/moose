@@ -6,6 +6,7 @@
     input = advection-diffusion.i
     exodiff = advection-diffusion_out.e
     requirement = 'The system shall be able to to solve an advection-diffusion equation with a dirichlet condition on the left boundary and a zero gradient condition on the right boundary and display second order convergence with the finite volume method.'
+    ad_indexing_type = 'global'
   []
   [outflow]
     type = PythonUnitTest

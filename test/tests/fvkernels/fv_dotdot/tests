@@ -7,5 +7,6 @@
     csvdiff = 'fv_dotdot_out.csv'
     requirement = 'The system shall be able to compute the second time derivative of a variable when using the finite volume method and automatic differentiation.'
     method = '!dbg'
+    ad_indexing_type = 'global'
   []
 []

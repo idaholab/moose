@@ -9,22 +9,30 @@
 
 #pragma once
 
-#include "FVFluxKernel.h"
+#include "INSFVFluxKernel.h"
+#include "INSFVMomentumResidualObject.h"
 
 // Forward declare variable class
 class INSFVVelocityVariable;
 
-class INSFVMixingLengthReynoldsStress : public FVFluxKernel
+class INSFVMixingLengthReynoldsStress : public INSFVFluxKernel
 {
 public:
   static InputParameters validParams();
 
   INSFVMixingLengthReynoldsStress(const InputParameters & params);
 
-protected:
-  ADReal computeQpResidual() override;
+  using INSFVFluxKernel::gatherRCData;
+  void gatherRCData(const FaceInfo &) override final;
 
-  /// the dimension of the simulation
+protected:
+  /**
+   * Routine to compute this object's strong residual (e.g. not multipled by area). This routine
+   * should also populate the _ae and _an coefficients
+   */
+  ADReal computeStrongResidual();
+
+  /// The dimension of the simulation
   const unsigned int _dim;
 
   /// index x|y|z
@@ -42,4 +50,10 @@ protected:
 
   /// Turbulent eddy mixing length
   const Moose::Functor<ADReal> & _mixing_len;
+
+  /// Rhie-Chow element coefficient
+  ADReal _ae = 0;
+
+  /// Rhie-Chow neighbor coefficient
+  ADReal _an = 0;
 };

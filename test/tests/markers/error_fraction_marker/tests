@@ -26,5 +26,6 @@
     exodiff = 'error_fraction_marker_fv_out.e'
     issues = '#16069'
     requirement = "The system shall include a means for setting mesh refinement flags based on percent of error for a sorted vector of error values computed for each finite element using FV variables"
+    ad_indexing_type = 'global'
   []
 []

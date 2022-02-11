@@ -10,12 +10,17 @@
 #pragma once
 
 #include "FVElementalKernel.h"
+#include "INSFVMomentumResidualObject.h"
 
-class INSFVMomentumPressure : public FVElementalKernel
+class INSFVMomentumPressure : public FVElementalKernel, public INSFVMomentumResidualObject
 {
 public:
   static InputParameters validParams();
   INSFVMomentumPressure(const InputParameters & params);
+
+  // This object neither contributes to the A coefficients nor to the B (source) coefficients
+  void gatherRCData(const Elem &) override {}
+  void gatherRCData(const FaceInfo &) override {}
 
 protected:
   ADReal computeQpResidual() override;

@@ -38,7 +38,7 @@
  */
 template <typename OutputType>
 class MooseVariableField : public MooseVariableFieldBase,
-                           public Moose::Functor<typename Moose::ADType<OutputType>::type>,
+                           public Moose::FunctorBase<typename Moose::ADType<OutputType>::type>,
                            public MeshChangedInterface
 
 {
@@ -341,14 +341,15 @@ public:
 
 protected:
   using FunctorArg = typename Moose::ADType<OutputType>::type;
-  using Moose::Functor<FunctorArg>::evaluate;
-  using Moose::Functor<FunctorArg>::evaluateGradient;
-  using Moose::Functor<FunctorArg>::evaluateDot;
-  using typename Moose::Functor<FunctorArg>::ValueType;
-  using typename Moose::Functor<FunctorArg>::DotType;
-  using typename Moose::Functor<FunctorArg>::GradientType;
-  using typename Moose::Functor<FunctorArg>::ElemQpArg;
-  using typename Moose::Functor<FunctorArg>::ElemSideQpArg;
+  using Moose::FunctorBase<FunctorArg>::evaluate;
+  using Moose::FunctorBase<FunctorArg>::evaluateGradient;
+  using Moose::FunctorBase<FunctorArg>::evaluateDot;
+  using typename Moose::FunctorBase<FunctorArg>::ValueType;
+  using typename Moose::FunctorBase<FunctorArg>::DotType;
+  using typename Moose::FunctorBase<FunctorArg>::GradientType;
+
+  using ElemQpArg = Moose::ElemQpArg;
+  using ElemSideQpArg = Moose::ElemSideQpArg;
 
   ValueType evaluate(const ElemQpArg & elem_qp, unsigned int state) const override final;
   ValueType evaluate(const ElemSideQpArg & elem_side_qp, unsigned int state) const override final;

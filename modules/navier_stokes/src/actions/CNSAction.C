@@ -288,7 +288,8 @@ CNSAction::act()
       params.set<Real>("initial_temperature") = _initial_temperature;
       params.set<RealVectorValue>("initial_velocity") = _initial_velocity;
       params.set<UserObjectName>("fluid_properties") = _fp_name;
-      params.set<std::string>("pressure_variable_name") = _pressure_variable_name;
+      if (name == _pressure_variable_name)
+        params.set<MooseEnum>("variable_type") = NS::pressure;
       _problem->addInitialCondition("NSInitialCondition", name + std::string("_ic"), params);
     }
   }

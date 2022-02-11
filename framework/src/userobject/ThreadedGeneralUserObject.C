@@ -18,12 +18,6 @@ ThreadedGeneralUserObject::validParams()
 ThreadedGeneralUserObject::ThreadedGeneralUserObject(const InputParameters & parameters)
   : GeneralUserObject(parameters)
 {
-#if !defined(LIBMESH_HAVE_OPENMP) && !defined(LIBMESH_HAVE_TBB_API)
-  if (libMesh::n_threads() > 1)
-    mooseError(name(),
-               ": You cannot use threaded general user objects with pthreads. To enable this "
-               "functionality configure libMesh with OpenMP or TBB.");
-#endif
 }
 
 void

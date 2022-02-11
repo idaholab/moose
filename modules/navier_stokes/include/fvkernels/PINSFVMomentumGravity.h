@@ -21,10 +21,6 @@ public:
   static InputParameters validParams();
   PINSFVMomentumGravity(const InputParameters & params);
 
-  // requires RC implementation
-  // using INSFVMomentumGravity::gatherRCData;
-  // void gatherRCData(const Elem &) override {}
-
 protected:
   ADReal computeQpResidual() override;
 

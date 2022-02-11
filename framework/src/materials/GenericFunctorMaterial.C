@@ -77,16 +77,12 @@ GenericFunctorMaterialTempl<is_ad>::GenericFunctorMaterialTempl(const InputParam
 
   const std::set<ExecFlagType> clearance_schedule(_execute_enum.begin(), _execute_enum.end());
   for (const auto i : make_range(_num_props))
-  {
-    auto & prop = declareFunctorProperty<GenericReal<is_ad>>(_prop_names[i]);
-    prop.setFunctor(_mesh,
-                    blockIDs(),
-                    [this, i](const auto & r, const auto & t) -> GenericReal<is_ad> {
-                      return (*_functors[i])(r, t);
-                    });
-
-    prop.setCacheClearanceSchedule(clearance_schedule);
-  }
+    addFunctorProperty<GenericReal<is_ad>>(
+        _prop_names[i],
+        [this, i](const auto & r, const auto & t) -> GenericReal<is_ad> {
+          return (*_functors[i])(r, t);
+        },
+        clearance_schedule);
 }
 
 template class GenericFunctorMaterialTempl<false>;

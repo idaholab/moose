@@ -4,8 +4,8 @@ import mms
 import sympy
 
 # Zero value: left bottom right
-# Zero gradient: top
-u = 'sin(pi * y / 2) * sin(x * pi)'
+# Zero gradient: top, left
+u = 'sin(pi * y / 2) * sin(x * pi) * sin(x * pi)'
 
 # Prescribed value: bottom
 # Zero gradient: left right top

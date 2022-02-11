@@ -33,38 +33,29 @@ ADCoupledVelocityMaterial::validParams()
 
 ADCoupledVelocityMaterial::ADCoupledVelocityMaterial(const InputParameters & parameters)
   : FunctorMaterial(parameters),
-    _velocity(
-        declareFunctorProperty<ADRealVectorValue>(getParam<MaterialPropertyName>("velocity"))),
-    _rho_u(declareFunctorProperty<ADReal>(getParam<MaterialPropertyName>("rho_u"))),
-    _rho_v(declareFunctorProperty<ADReal>(getParam<MaterialPropertyName>("rho_v"))),
-    _rho_w(declareFunctorProperty<ADReal>(getParam<MaterialPropertyName>("rho_w"))),
     _vel_x(getFunctor<ADReal>("vel_x")),
     _vel_y(isParamValid("vel_y") ? &getFunctor<ADReal>("vel_y") : nullptr),
     _vel_z(isParamValid("vel_z") ? &getFunctor<ADReal>("vel_z") : nullptr),
     _rho(getFunctor<ADReal>("rho"))
 {
-  _velocity.setFunctor(_mesh,
-                       blockIDs(),
-                       [this](const auto & r, const auto & t) -> ADRealVectorValue
-                       {
-                         ADRealVectorValue velocity(_vel_x(r, t));
-                         velocity(1) = _vel_y ? (*_vel_y)(r, t) : ADReal(0);
-                         velocity(2) = _vel_z ? (*_vel_z)(r, t) : ADReal(0);
-                         return velocity;
-                       });
+  addFunctorProperty<ADRealVectorValue>(getParam<MaterialPropertyName>("velocity"),
+                                        [this](const auto & r, const auto & t) -> ADRealVectorValue
+                                        {
+                                          ADRealVectorValue velocity(_vel_x(r, t));
+                                          velocity(1) = _vel_y ? (*_vel_y)(r, t) : ADReal(0);
+                                          velocity(2) = _vel_z ? (*_vel_z)(r, t) : ADReal(0);
+                                          return velocity;
+                                        });
 
-  _rho_u.setFunctor(_mesh,
-                    blockIDs(),
-                    [this](const auto & r, const auto & t) -> ADReal
-                    { return _rho(r, t) * _vel_x(r, t); });
+  addFunctorProperty<ADReal>(getParam<MaterialPropertyName>("rho_u"),
+                             [this](const auto & r, const auto & t) -> ADReal
+                             { return _rho(r, t) * _vel_x(r, t); });
 
-  _rho_v.setFunctor(_mesh,
-                    blockIDs(),
-                    [this](const auto & r, const auto & t) -> ADReal
-                    { return _vel_y ? _rho(r, t) * (*_vel_y)(r, t) : ADReal(0); });
+  addFunctorProperty<ADReal>(getParam<MaterialPropertyName>("rho_v"),
+                             [this](const auto & r, const auto & t) -> ADReal
+                             { return _vel_y ? _rho(r, t) * (*_vel_y)(r, t) : ADReal(0); });
 
-  _rho_w.setFunctor(_mesh,
-                    blockIDs(),
-                    [this](const auto & r, const auto & t) -> ADReal
-                    { return _vel_z ? _rho(r, t) * (*_vel_z)(r, t) : ADReal(0); });
+  addFunctorProperty<ADReal>(getParam<MaterialPropertyName>("rho_w"),
+                             [this](const auto & r, const auto & t) -> ADReal
+                             { return _vel_z ? _rho(r, t) * (*_vel_z)(r, t) : ADReal(0); });
 }

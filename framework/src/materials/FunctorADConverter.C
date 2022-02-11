@@ -84,22 +84,19 @@ FunctorADConverterTempl<T>::FunctorADConverterTempl(const InputParameters & para
   for (const auto i : make_range(reg_props_in.size()))
   {
     const auto & reg_functor = getFunctor<T>(reg_props_in[i]);
-    auto & ad_prop = declareFunctorProperty<typename Moose::ADType<T>::type>(ad_props_out[i]);
-    ad_prop.setFunctor(_mesh,
-                       blockIDs(),
-                       [&reg_functor](const auto & r, const auto & t) ->
-                       typename Moose::ADType<T>::type { return reg_functor(r, t); });
+    addFunctorProperty<typename Moose::ADType<T>::type>(
+        ad_props_out[i],
+        [&reg_functor](const auto & r, const auto & t) -> typename Moose::ADType<T>::type
+        { return reg_functor(r, t); });
   }
 
   // Define the regular functors
   for (const auto i : make_range(ad_props_in.size()))
   {
     const auto & ad_functor = getFunctor<typename Moose::ADType<T>::type>(ad_props_in[i]);
-    auto & reg_prop = declareFunctorProperty<T>(reg_props_out[i]);
-    reg_prop.setFunctor(_mesh,
-                        blockIDs(),
-                        [&ad_functor](const auto & r, const auto & t) -> T
-                        { return MetaPhysicL::raw_value(ad_functor(r, t)); });
+    addFunctorProperty<T>(reg_props_out[i],
+                          [&ad_functor](const auto & r, const auto & t) -> T
+                          { return MetaPhysicL::raw_value(ad_functor(r, t)); });
   }
 }
 

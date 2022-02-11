@@ -23,4 +23,4 @@
  * @param dist the element centroid distance to the wall
  * @return the velocity at the wall
  */
-ADReal findUStar(const ADReal mu, const ADReal rho, ADReal u, const Real dist);
+ADReal findUStar(const ADReal & mu, const ADReal & rho, const ADReal & u, Real dist);

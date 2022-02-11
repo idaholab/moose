@@ -19,6 +19,7 @@
     cli_args = "Outputs/file_base=global_porosity_out GlobalParams/splitting='porosity' GlobalParams/locality='global'"
     requirement = "The system shall provide a boundary condition to split a constant heat flux according to domain-averaged values "
                   "of porosity, using functor material properties."
+    ad_indexing_type = 'global'
   []
   [local_k]
     type = Exodiff
@@ -38,6 +39,7 @@
     cli_args = "Outputs/file_base=global_k_out GlobalParams/splitting='thermal_conductivity' GlobalParams/locality='global'"
     requirement = "The system shall provide a boundary condition to split a constant heat flux according to domain-averaged values "
                   "of thermal conductivity, using functor material properties."
+    ad_indexing_type = 'global'
   []
   [local_kappa]
     type = Exodiff
@@ -57,5 +59,6 @@
     cli_args = "Outputs/file_base=global_kappa_out GlobalParams/splitting='effective_thermal_conductivity' GlobalParams/locality='global'"
     requirement = "The system shall provide a boundary condition to split a constant heat flux according to domain-averaged values "
                   "of effective thermal conductivity, using functor material properties."
+    ad_indexing_type = 'global'
   []
 []

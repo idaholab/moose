@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "INSFVMixingLengthScalarDiffusion.h"
+#include "MathFVUtils.h"
 
 registerMooseObject("NavierStokesApp", INSFVMixingLengthScalarDiffusion);
 
@@ -85,8 +86,8 @@ INSFVMixingLengthScalarDiffusion::computeQpResidual()
   symmetric_strain_tensor_norm = std::sqrt(symmetric_strain_tensor_norm + offset);
 
   // Interpolate the mixing length to the face
-  ADReal mixing_len = _mixing_len(std::make_tuple(
-      _face_info, Moose::FV::LimiterType::CentralDifference, true, faceArgSubdomains(_face_info)));
+  ADReal mixing_len =
+      _mixing_len(Moose::FV::makeCDFace(*_face_info, faceArgSubdomains(_face_info)));
 
   // Compute the eddy diffusivity for momentum
   ADReal eddy_diff = symmetric_strain_tensor_norm * mixing_len * mixing_len;

@@ -11,15 +11,22 @@
 
 #include "FVFluxBC.h"
 #include "INSFVFlowBC.h"
+#include "INSFVMomentumResidualObject.h"
 
 /**
  * Flux boundary conditions for the weakly compressible boundary equation
  */
-class WCNSFVMomentumFluxBC : public FVFluxBC, public INSFVFlowBC
+class WCNSFVMomentumFluxBC : public FVFluxBC, public INSFVFlowBC, public INSFVMomentumResidualObject
 {
 public:
   static InputParameters validParams();
   WCNSFVMomentumFluxBC(const InputParameters & params);
+
+  void gatherRCData(const Elem &) override {}
+
+  // This object supplies a flux for which we do not know any explicit dependence on our variable's
+  // boundary degree of freedom
+  void gatherRCData(const FaceInfo &) override {}
 
 protected:
   ADReal computeQpResidual() override;

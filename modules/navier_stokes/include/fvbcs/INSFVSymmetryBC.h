@@ -9,16 +9,15 @@
 
 #pragma once
 
-#include "FVFluxBC.h"
-
 class InputParameters;
 
 /**
- * A parent class for symmetry boundary conditions
+ * A parent class for INSFV symmetry boundary conditions
  */
-class INSFVSymmetryBC : public FVFluxBC
+class INSFVSymmetryBC
 {
 public:
   static InputParameters validParams();
   INSFVSymmetryBC(const InputParameters & params);
+  virtual ~INSFVSymmetryBC() = default;
 };

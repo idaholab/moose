@@ -1056,7 +1056,7 @@ public:
 
   ///@{ accessors for the FaceInfo objects
   unsigned int nFace() const { return _face_info.size(); }
-  /// Accessor for all local \p FaceInfo objects.
+  /// Accessor for local \p FaceInfo objects.
   const std::vector<const FaceInfo *> & faceInfo() const
   {
     buildFaceInfo();
@@ -1064,6 +1064,12 @@ public:
   }
   /// Accessor for the local FaceInfo object on the side of one element. Returns null if ghosted.
   const FaceInfo * faceInfo(const Elem * elem, unsigned int side) const;
+  /// Accessor for all \p FaceInfo objects.
+  const std::vector<FaceInfo> & allFaceInfo() const
+  {
+    buildFaceInfo();
+    return _all_face_info;
+  }
   ///@}
 
   /**
@@ -1077,7 +1083,7 @@ public:
    * coordinate value associated with the coordinate system. For Cartesian coordinate systems,
    * 'coordinate' is simply '1'; in RZ, '2*pi*r', and in spherical, '4*pi*r^2'
    */
-  void computeFaceInfoFaceCoords(const SubProblem & subproblem);
+  void computeFaceInfoFaceCoords();
 
   /**
    * Set whether this mesh is displaced
@@ -1096,6 +1102,46 @@ public:
   {
     return _node_set_nodes;
   }
+
+  /**
+   * Get the coordinate system type, e.g. xyz, rz, or r-spherical, for the provided subdomain id \p
+   * sid
+   */
+  Moose::CoordinateSystemType getCoordSystem(SubdomainID sid) const;
+
+  /**
+   * Set the coordinate system for the provided blocks to \p coord_sys
+   */
+  void setCoordSystem(const std::vector<SubdomainName> & blocks, const MultiMooseEnum & coord_sys);
+
+  /**
+   * For axisymmetric simulations, set the symmetry coordinate axis. For r in the x-direction, z in
+   * the y-direction the coordinate axis would be y
+   */
+  void setAxisymmetricCoordAxis(const MooseEnum & rz_coord_axis);
+
+  /**
+   * Returns the desired radial direction for RZ coordinate transformation
+   * @return The coordinate direction for the radial direction
+   */
+  unsigned int getAxisymmetricRadialCoord() const;
+
+  /**
+   * Performs a sanity check for every element in the mesh. If an element dimension is 3 and the
+   * corresponding coordinate system is RZ, then this will error. If an element dimension is greater
+   * than 1 and the corresponding system is RPSHERICAL then this will error
+   */
+  void checkCoordinateSystems();
+
+  /**
+   * Set the coordinate system data to that of \p other_mesh
+   */
+  void setCoordData(const MooseMesh & other_mesh);
+
+  /**
+   * Mark the face information as dirty
+   */
+  void faceInfoDirty() { _face_info_dirty = true; }
 
 protected:
   /// Deprecated (DO NOT USE)
@@ -1455,6 +1501,12 @@ private:
 
   /// Build lower-d mesh for all sides
   void buildLowerDMesh();
+
+  /// Type of coordinate system per subdomain
+  std::map<SubdomainID, Moose::CoordinateSystemType> _coord_sys;
+
+  /// Storage for RZ axis selection
+  unsigned int _rz_coord_axis;
 
   template <typename T>
   struct MeshType;

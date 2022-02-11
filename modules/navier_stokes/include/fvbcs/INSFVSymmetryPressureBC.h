@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "FVFluxBC.h"
 #include "INSFVSymmetryBC.h"
 
 class InputParameters;
@@ -16,7 +17,7 @@ class InputParameters;
 /**
  * A symmetry boundary condition for the pressure variable
  */
-class INSFVSymmetryPressureBC : public INSFVSymmetryBC
+class INSFVSymmetryPressureBC : public FVFluxBC, public INSFVSymmetryBC
 {
 public:
   static InputParameters validParams();

@@ -1,6 +1,5 @@
 rho = 'rho'
 l = 10
-vel = 'velocity'
 velocity_interp_method = 'rc'
 advected_interp_method = 'average'
 
@@ -26,6 +25,19 @@ inlet_velocity = 0.001
     ymax = 1
     nx = 10
     ny = 5
+  []
+[]
+
+[GlobalParams]
+  rhie_chow_user_object = 'rc'
+[]
+
+[UserObjects]
+  [rc]
+    type = INSFVRhieChowInterpolator
+    u = u
+    v = v
+    pressure = pressure
   []
 []
 
@@ -68,13 +80,8 @@ inlet_velocity = 0.001
   [mass]
     type = INSFVMassAdvection
     variable = pressure
-    vel = ${vel}
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
-    u = u
-    v = v
-    pressure = pressure
-    mu = ${mu}
     rho = ${rho}
   []
 
@@ -83,24 +90,21 @@ inlet_velocity = 0.001
     variable = u
     drho_dt = drho_dt
     rho = rho
+    momentum_component = 'x'
   []
   [u_advection]
     type = INSFVMomentumAdvection
     variable = u
-    advected_quantity = 'rhou'
-    vel = ${vel}
     velocity_interp_method = ${velocity_interp_method}
     advected_interp_method = ${advected_interp_method}
-    pressure = pressure
-    u = u
-    v = v
-    mu = ${mu}
     rho = ${rho}
+    momentum_component = 'x'
   []
   [u_viscosity]
-    type = FVDiffusion
+    type = INSFVMomentumDiffusion
     variable = u
-    coeff = ${mu}
+    mu = ${mu}
+    momentum_component = 'x'
   []
   [u_pressure]
     type = INSFVMomentumPressure
@@ -114,24 +118,21 @@ inlet_velocity = 0.001
     variable = v
     drho_dt = drho_dt
     rho = rho
+    momentum_component = 'y'
   []
   [v_advection]
     type = INSFVMomentumAdvection
     variable = v
-    advected_quantity = 'rhov'
-    vel = ${vel}
     velocity_interp_method = ${velocity_interp_method}
     advected_interp_method = ${advected_interp_method}
-    pressure = pressure
-    u = u
-    v = v
-    mu = ${mu}
     rho = ${rho}
+    momentum_component = 'y'
   []
   [v_viscosity]
-    type = FVDiffusion
+    type = INSFVMomentumDiffusion
     variable = v
-    coeff = ${mu}
+    mu = ${mu}
+    momentum_component = 'y'
   []
   [v_pressure]
     type = INSFVMomentumPressure
@@ -156,14 +157,8 @@ inlet_velocity = 0.001
   [temp_advection]
     type = INSFVEnergyAdvection
     variable = T
-    vel = ${vel}
     velocity_interp_method = ${velocity_interp_method}
     advected_interp_method = ${advected_interp_method}
-    pressure = pressure
-    u = u
-    v = v
-    mu = ${mu}
-    rho = ${rho}
   []
   [heat_source]
     type = FVCoupledForce
@@ -179,14 +174,8 @@ inlet_velocity = 0.001
   [scalar_advection]
     type = INSFVScalarFieldAdvection
     variable = scalar
-    vel = ${vel}
     velocity_interp_method = ${velocity_interp_method}
     advected_interp_method = ${advected_interp_method}
-    pressure = pressure
-    u = u
-    v = v
-    mu = ${mu}
-    rho = ${rho}
   []
   [scalar_diffusion]
     type = FVDiffusion
@@ -215,6 +204,7 @@ inlet_velocity = 0.001
     boundary = 'left'
     velocity_pp = 'inlet_u'
     rho = 'rho'
+    momentum_component = 'x'
   []
   [inlet_v]
     type = WCNSFVMomentumFluxBC
@@ -222,6 +212,7 @@ inlet_velocity = 0.001
     boundary = 'left'
     velocity_pp = 0
     rho = 'rho'
+    momentum_component = 'y'
   []
   [inlet_T]
     type = WCNSFVEnergyFluxBC
@@ -304,10 +295,7 @@ inlet_velocity = 0.001
     pressure = pressure
   []
   [ins_fv]
-    type = INSFVMaterial
-    u = 'u'
-    v = 'v'
-    pressure = 'pressure'
+    type = INSFVEnthalpyMaterial
     temperature = 'T'
     rho = ${rho}
   []

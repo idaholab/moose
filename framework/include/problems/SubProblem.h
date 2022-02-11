@@ -51,7 +51,7 @@ class FaceInfo;
 class MooseObjectName;
 namespace Moose
 {
-class FunctorBase;
+class FunctorEnvelopeBase;
 }
 
 // libMesh forward declarations
@@ -305,7 +305,7 @@ public:
   virtual void prepareShapes(unsigned int var, THREAD_ID tid) = 0;
   virtual void prepareFaceShapes(unsigned int var, THREAD_ID tid) = 0;
   virtual void prepareNeighborShapes(unsigned int var, THREAD_ID tid) = 0;
-  virtual Moose::CoordinateSystemType getCoordSystem(SubdomainID sid) const = 0;
+  Moose::CoordinateSystemType getCoordSystem(SubdomainID sid) const;
 
   /**
    * Returns the desired radial direction for RZ coordinate transformation
@@ -770,33 +770,6 @@ public:
   void clearAllDofIndices();
 
   /**
-   * @tparam T The type that the functor material property will return when evaluated, e.g. \p
-               ADReal or \p Real
-   * @tparam P \p P<T> corresponds to the functor material property class. If a \p P argument is not
-               provided to this method, then we will create a \p FunctorMaterialProperty. This
-               template parameter exists in order to enable users to create derivatives of \p
-               FunctorMaterialProperty
-   * @param name The name of the functor material property to declare
-   * @param tid The thread ID that we are declaring the functor property for
-   * @param called_from_getter Whether this method is being called from \p getFunctorProperty. This
-                               is useful for determining whether we are actually declaring the
-                               property or we are creating this property for a requestor and we are
-                               hoping that someone will actually declare the property later
-   * @param construction_args Optional arguments that may be used to help construct derivatives of
-                              \p FunctorMaterialProperty. These will be forwarded, along with the
-                              name of the property (which will be the first constructor argument),
-                              to the functor material property (potentially derivative) constructor
-   * @return a non-constant reference to the functor material property
-   */
-  template <typename T,
-            template <typename> class P = FunctorMaterialPropertyImpl,
-            class... ConstructionArgs>
-  FunctorMaterialProperty<T> & declareFunctorProperty(const std::string & name,
-                                                      THREAD_ID tid,
-                                                      bool called_from_getter,
-                                                      ConstructionArgs &&... construction_args);
-
-  /**
    * @tparam T The type that the functor will return when evaluated, e.g. \p
                ADReal or \p Real
    * @param name The name of the functor to retrieve
@@ -816,7 +789,30 @@ public:
   /**
    * add a functor to the problem functor container
    */
-  void addFunctor(const std::string & name, const Moose::FunctorBase * functor, THREAD_ID tid);
+  template <typename T>
+  void addFunctor(const std::string & name, const Moose::FunctorBase<T> & functor, THREAD_ID tid);
+
+  /**
+   * Add a functor that has blockwise lambda definitions, e.g. the evaluations of the functor are
+   * based on a user-provided lambda expression.
+   * @param name The name of the functor to add
+   * @param my_lammy The lambda expression that will be called when the functor is evaluated
+   * @param clearance_schedule How often to clear functor evaluations. The default value is always,
+   * which means that the functor will be re-evaluated every time it is called. If it is something
+   * other than always, than cached values may be returned
+   * @param mesh The mesh on which this functor operates
+   * @param block_ids The blocks on which the lambda expression is defined
+   * @param tid The thread on which the functor we are adding will run
+   * @return The added functor
+   */
+  template <typename T, typename PolymorphicLambda>
+  const Moose::Functor<T> &
+  addPiecewiseByBlockLambdaFunctor(const std::string & name,
+                                   PolymorphicLambda my_lammy,
+                                   const std::set<ExecFlagType> & clearance_schedule,
+                                   const MooseMesh & mesh,
+                                   const std::set<SubdomainID> & block_ids,
+                                   THREAD_ID tid);
 
   virtual void initialSetup();
   virtual void timestepSetup();
@@ -850,9 +846,6 @@ protected:
   Factory & _factory;
 
   CouplingMatrix _nonlocal_cm; /// nonlocal coupling matrix;
-
-  /// Type of coordinate system per subdomain
-  std::map<SubdomainID, Moose::CoordinateSystemType> _coord_sys;
 
   DiracKernelInfo _dirac_kernel_info;
 
@@ -906,9 +899,6 @@ protected:
   /// Elements that should have Dofs ghosted to the local processor
   std::set<dof_id_type> _ghosted_elems;
 
-  /// Storage for RZ axis selection
-  unsigned int _rz_coord_axis;
-
   /// Flag to determine whether the problem is currently computing Jacobian
   bool _currently_computing_jacobian;
 
@@ -928,17 +918,8 @@ protected:
   bool _have_ad_objects;
 
 private:
-  /// Functor material properties for this problem. Outer vector is indexed by thread ID. Map key
-  /// corresponds to the functor material property name. Map values are pairs where the first member
-  /// of the pair is a boolean that indicates whether the functor property has been declared (if
-  /// we've created a name key then by the time we're setting up the problem this boolean must
-  /// evaluate to true or else it means someone has requested property that won't be provided) and
-  /// the second member of the pair is a unique pointer to the functor material property object
-  std::vector<std::map<std::string, std::pair<bool, std::unique_ptr<Moose::FunctorBase>>>>
-      _functor_material_properties;
-
   /// A container holding pointers to all the functors in our problem
-  std::vector<std::multimap<std::string, const Moose::FunctorBase *>> _functors;
+  std::vector<std::multimap<std::string, std::unique_ptr<Moose::FunctorEnvelopeBase>>> _functors;
 
 private:
   /// The requestors of functors where the key is the prop name and the value is a set of names of
@@ -977,76 +958,6 @@ private:
   friend class Restartable;
 };
 
-template <typename T, template <typename> class P, class... ConstructionArgs>
-FunctorMaterialProperty<T> &
-SubProblem::declareFunctorProperty(const std::string & name,
-                                   const THREAD_ID tid,
-                                   const bool called_from_getter,
-                                   ConstructionArgs &&... construction_args)
-{
-  mooseAssert(tid < _functor_material_properties.size(),
-              "Requested thread ID " << std::to_string(tid) << " too large");
-  const bool actually_declaring_property = !called_from_getter;
-  auto & functor_material_properties = _functor_material_properties[tid];
-  auto it = functor_material_properties.find(name);
-  if (it == functor_material_properties.end())
-  {
-    // No material property created yet so create it
-    it = functor_material_properties
-             .emplace(
-                 name,
-                 std::make_pair(actually_declaring_property,
-                                std::make_unique<FunctorMaterialProperty<T>>(std::make_unique<P<T>>(
-                                    name, std::forward<ConstructionArgs>(construction_args)...))))
-             .first;
-    // And add it to our all-functors container
-    auto & functors = _functors[tid];
-    functors.emplace(std::make_pair(name, it->second.second.get()));
-  }
-  else
-  // The property already exists
-  {
-    auto & prop_pair = it->second;
-    bool & already_declared = prop_pair.first;
-    auto * const wrapper_property =
-        dynamic_cast<FunctorMaterialProperty<T> *>(prop_pair.second.get());
-    if (!wrapper_property)
-      mooseError("Inconsistent return types for functor material property '",
-                 name,
-                 "'. Did you declare and retrieve the property with different return types?");
-
-    if (actually_declaring_property)
-    {
-      if (already_declared)
-      {
-        // Let's make sure all of our declarations of a given property have the same template P,
-        // e.g. underlying/wrapped type
-        if (!wrapper_property->template wrapsType<P<T>>())
-          mooseError("Inconsistent types for functor material property '",
-                     name,
-                     "'. Did you declare this property name with different types in different "
-                     "FunctorMaterials?");
-      }
-      else
-      {
-        // Let's make sure we're the correct template P. If we're not, this is the first
-        // declaration so we're free to re-create with the correct P (if we're not the correct P,
-        // it means P is a derived class of FunctorMaterialPropertyImpl)
-        if (!wrapper_property->template wrapsType<P<T>>())
-          (*wrapper_property) =
-              std::make_unique<P<T>>(name, std::forward<ConstructionArgs>(construction_args)...);
-
-        // Now we can update the declaration status
-        already_declared = true;
-      }
-    }
-  }
-
-  auto * const property = dynamic_cast<FunctorMaterialProperty<T> *>(it->second.second.get());
-  mooseAssert(property, "We should have handled all cases");
-  return *property;
-}
-
 template <typename T>
 const Moose::Functor<T> &
 SubProblem::getFunctor(const std::string & name,
@@ -1059,9 +970,9 @@ SubProblem::getFunctor(const std::string & name,
   _functor_to_requestors[name].insert(requestor_name);
 
   // Get the requested functor if we already have it
-  const auto & functors = _functors[tid];
-  auto it = functors.find(name);
-  if (it != functors.end())
+  auto & functors = _functors[tid];
+  auto find_ret = functors.find(name);
+  if (find_ret != functors.end())
   {
     if (functors.count(name) > 1)
       mooseError("Attempted to get a functor with the name '",
@@ -1069,20 +980,83 @@ SubProblem::getFunctor(const std::string & name,
                  "' but multiple functors match. Make sure that you do not have functor material "
                  "properties, functions, and variables with the same names");
 
-    const auto * const functor = dynamic_cast<const Moose::Functor<T> *>(it->second);
+    auto * const functor = dynamic_cast<Moose::Functor<T> *>(find_ret->second.get());
     if (!functor)
       mooseError("A call to SubProblem::getFunctor requested a functor named '",
                  name,
-                 "' that returns the type: ",
+                 "' that returns the type: '",
                  libMesh::demangle(typeid(T).name()),
-                 ". However, that functor already exists and returns a different type.");
+                 "'. However, that functor already exists and returns a different type: '",
+                 find_ret->second->returnType(),
+                 "'");
     return *functor;
   }
 
-  // If we don't already have the functor then we're going to assume for now that it will be created
-  // in the future as a functor material property. We will almost certainly want to change this
-  // assumption eventually if functors take over the world
-  return declareFunctorProperty<T>(name, tid, true);
+  // We don't have the functor yet but we could have it in the future. We'll create a null-functor
+  // for now
+  auto emplace_ret = functors.emplace(std::make_pair(
+      name, std::make_unique<Moose::Functor<T>>(std::make_unique<Moose::NullFunctor<T>>())));
+  return static_cast<Moose::Functor<T> &>(*emplace_ret->second);
+}
+
+template <typename T, typename PolymorphicLambda>
+const Moose::Functor<T> &
+SubProblem::addPiecewiseByBlockLambdaFunctor(const std::string & name,
+                                             PolymorphicLambda my_lammy,
+                                             const std::set<ExecFlagType> & clearance_schedule,
+                                             const MooseMesh & mesh,
+                                             const std::set<SubdomainID> & block_ids,
+                                             const THREAD_ID tid)
+{
+  auto & wrapper = const_cast<Moose::Functor<T> &>(getFunctor<T>(name, tid, "subproblem"));
+  if (wrapper.template wrapsType<Moose::NullFunctor<T>>())
+    wrapper.assign(std::make_unique<PiecewiseByBlockLambdaFunctor<T>>(
+        name, my_lammy, clearance_schedule, mesh, block_ids));
+  else if (wrapper.template wrapsType<PiecewiseByBlockLambdaFunctor<T>>())
+  {
+    mooseAssert(wrapper._owned,
+                "This API is for creating functors that are owned by the subproblem. If you are "
+                "calling this once for '"
+                    << name
+                    << "', then hopefully you have not used the non-owning functor API additions "
+                       "for the same functor name.");
+    static_cast<PiecewiseByBlockLambdaFunctor<T> *>(wrapper._owned.get())
+        ->setFunctor(mesh, block_ids, my_lammy);
+  }
+  else
+    mooseError("Attempted to add a lambda functor with the name '",
+               name,
+               "' but another functor of different type has that name. Make sure that you do not "
+               "have functor material properties, functions, and variables with the same names");
+
+  return wrapper;
+}
+
+template <typename T>
+void
+SubProblem::addFunctor(const std::string & name,
+                       const Moose::FunctorBase<T> & functor,
+                       const THREAD_ID tid)
+{
+  mooseAssert(tid < _functors.size(), "Too large a thread ID");
+
+  auto & functors = _functors[tid];
+  auto it = functors.find(name);
+  if (it != functors.end())
+  {
+    // We have this functor already. If it's a null functor, we want to replace it with the valid
+    // functor we have now. If it's not then we'll add a new entry into the multimap and then we'll
+    // error later if a user requests a functor because their request is ambiguous
+    auto * const existing_wrapper = dynamic_cast<Moose::Functor<T> *>(it->second.get());
+    if (existing_wrapper && existing_wrapper->template wrapsType<Moose::NullFunctor<T>>())
+    {
+      existing_wrapper->assign(functor);
+      return;
+    }
+  }
+
+  auto new_wrapper = std::make_unique<Moose::Functor<T>>(functor);
+  _functors[tid].emplace(std::make_pair(name, std::move(new_wrapper)));
 }
 
 namespace Moose

@@ -10,7 +10,6 @@
     # use a custom comparison file to switch those components to
     # absolute comparisons.
     custom_cmp = 'bump_out.cmp'
-    threading = '!pthreads'
     requirement = 'The system shall be able to solve the Euler equations for subsonic flow with a bump in the channel.'
   [../]
 []

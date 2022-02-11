@@ -82,18 +82,20 @@ protected:
    * @param fi the FaceInfo for this face
    * @param limiter_type the limiter type, to be specified if more than the default average
    *        interpolation is required for the parameters of the functor
+   * @param correct_skewness whether to perform skew correction at the face
    */
-  std::tuple<const FaceInfo *, Moose::FV::LimiterType, bool, SubdomainID> singleSidedFaceArg(
+  Moose::SingleSidedFaceArg singleSidedFaceArg(
       const FaceInfo * fi = nullptr,
-      Moose::FV::LimiterType limiter_type = Moose::FV::LimiterType::CentralDifference) const;
+      Moose::FV::LimiterType limiter_type = Moose::FV::LimiterType::CentralDifference,
+      bool correct_skewness = false) const;
 
   MooseVariableFV<Real> & _var;
 
   /// Reference to SubProblem
   SubProblem & _subproblem;
 
-  /// Reference to FEProblemBase
-  FEProblemBase & _fe_problem;
+  /// Reference to the ruling finite volume problem
+  FVProblemBase & _fv_problem;
 
   /// Reference to SystemBase
   SystemBase & _sys;

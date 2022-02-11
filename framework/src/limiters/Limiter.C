@@ -15,6 +15,7 @@
 #include "SOULimiter.h"
 #include "QUICKLimiter.h"
 #include "MooseError.h"
+#include "MathFVUtils.h"
 
 #include <memory>
 
@@ -51,6 +52,22 @@ Limiter<T>::build(const LimiterType limiter)
 
     default:
       mooseError("Unrecognized limiter type ", unsigned(limiter));
+  }
+}
+
+LimiterType
+limiterType(const InterpMethod interp_method)
+{
+  switch (interp_method)
+  {
+    case InterpMethod::Average:
+      return LimiterType::CentralDifference;
+
+    case InterpMethod::Upwind:
+      return LimiterType::Upwind;
+
+    default:
+      mooseError("Unrecognized interpolation method type.");
   }
 }
 

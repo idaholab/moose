@@ -34,6 +34,10 @@ enum class INSFVBCs
     return h;                                                                                      \
   }
 
+/**
+ * An attribute specifying that a boundary condition is a member of a subset of boundary conditions
+ * appropriate for incompressible or weakly compressible flow physics
+ */
 class AttribINSFVBCs : public Attribute
 {
 public:
@@ -54,6 +58,33 @@ public:
 
 private:
   uint64_t _val = 0;
+};
+
+/**
+ * An attribute specifying that an object is a residual object applicable to the Navier-Stokes
+ * momentum equation for incompressible or weakly compressible flows
+ */
+class AttribINSFVMomentumResidualObject : public Attribute
+{
+public:
+  typedef bool Key;
+  void setFrom(const Key k) { _val = k; }
+  AttribINSFVMomentumResidualObject(TheWarehouse & w)
+    : Attribute(w, "insfv_residual_object"), _val(false)
+  {
+  }
+  AttribINSFVMomentumResidualObject(TheWarehouse & w, Key k)
+    : Attribute(w, "insfv_residual_object"), _val(k)
+  {
+  }
+  void initFrom(const MooseObject * obj) override;
+  bool isMatch(const Attribute & other) const override;
+  bool isEqual(const Attribute & other) const override;
+  hashfunc(_val);
+  clonefunc(AttribINSFVMomentumResidualObject);
+
+private:
+  Key _val;
 };
 
 #undef clonefunc

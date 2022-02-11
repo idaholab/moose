@@ -41,7 +41,7 @@ AC_ARG_WITH(derivative-type,
 AC_ARG_WITH(derivative-size,
             AS_HELP_STRING([--with-derivative-size=<n>], [Specify the size of the derivative backing array]),
             [derivative_size="$withval"],
-            [derivative_size=50])
+            [derivative_size=53])
 
 AC_DEFINE_UNQUOTED(AD_MAX_DOFS_PER_ELEM, [$derivative_size], [The size of the derivative backing array])
 

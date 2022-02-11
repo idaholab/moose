@@ -14,27 +14,15 @@ registerMooseObject("NavierStokesApp", PINSFVSymmetryVelocityBC);
 InputParameters
 PINSFVSymmetryVelocityBC::validParams()
 {
-  InputParameters params = INSFVSymmetryVelocityBC::validParams();
-  params.addClassDescription(
-      "Implements a free slip boundary condition using a penalty formulation.");
-  params.addRequiredCoupledVar("porosity", "The porosity.");
-  return params;
+  return INSFVSymmetryVelocityBC::validParams();
 }
 
 PINSFVSymmetryVelocityBC::PINSFVSymmetryVelocityBC(const InputParameters & params)
-  : INSFVSymmetryVelocityBC(params),
-    _eps_var(dynamic_cast<const MooseVariableFV<Real> *>(getFieldVar("porosity", 0)))
+  : INSFVSymmetryVelocityBC(params)
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError("PINSFV is not supported by local AD indexing. In order to use PINSFV, please run "
              "the configure script in the root MOOSE directory with the configure option "
              "'--with-ad-indexing-type=global'");
 #endif
-}
-
-ADReal
-PINSFVSymmetryVelocityBC::computeQpResidual()
-{
-  const auto & eps_face = _eps_var->getBoundaryFaceValue(*_face_info);
-  return INSFVSymmetryVelocityBC::computeQpResidual() / eps_face;
 }

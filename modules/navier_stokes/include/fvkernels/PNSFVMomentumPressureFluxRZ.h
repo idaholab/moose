@@ -10,6 +10,7 @@
 #pragma once
 
 #include "FVElementalKernel.h"
+#include "INSFVMomentumResidualObject.h"
 
 /**
  * This object adds a residual equivalent to
@@ -19,11 +20,15 @@
  * for use when performing axisymmetric simulations and the \f$\epsilon \nabla p\f$ term has been
  * integrated by parts as is done for both HLLC and Kurganov-Tadmor schemes
  */
-class PNSFVMomentumPressureFluxRZ : public FVElementalKernel
+class PNSFVMomentumPressureFluxRZ : public FVElementalKernel, public INSFVMomentumResidualObject
 {
 public:
   static InputParameters validParams();
   PNSFVMomentumPressureFluxRZ(const InputParameters & params);
+
+  // pressure kernel
+  void gatherRCData(const Elem &) override {}
+  void gatherRCData(const FaceInfo &) override {}
 
 protected:
   ADReal computeQpResidual() override;

@@ -19,8 +19,5 @@ public:
   FunctorPropFromGradAndDot(const InputParameters & parameters);
 
 private:
-  FunctorMaterialProperty<ADReal> & _value_prop;
-  FunctorMaterialProperty<ADRealVectorValue> & _grad_prop;
-  FunctorMaterialProperty<ADReal> & _dot_prop;
   const Moose::Functor<ADReal> & _functor;
 };

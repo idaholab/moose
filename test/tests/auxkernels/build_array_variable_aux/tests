@@ -7,6 +7,7 @@
     input = 'build_array_variable_aux.i'
     exodiff = 'build_array_variable_aux_out.e'
     requirement = 'The system shall support the copy the values of standard variables into the component fields of an array variable.'
+    ad_indexing_type = 'global'
   []
 
   [error]
@@ -18,6 +19,7 @@
       cli_args = 'AuxVariables/ab/components=3'
       expect_err = 'The array variable has 3 components, but'
       detail = 'the variables have inconsistent sizes or'
+      ad_indexing_type = 'global'
     []
 
     [type]
@@ -26,6 +28,7 @@
       cli_args = 'Variables/a/order=SECOND'
       expect_err = 'The input and output variables must'
       detail = 'when the variables have inconsistent types.'
+      ad_indexing_type = 'global'
     []
   []
 []

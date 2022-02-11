@@ -11,11 +11,6 @@
 
 #include "Material.h"
 
-template <typename>
-class FunctorMaterialProperty;
-template <typename>
-class FunctorMaterialPropertyImpl;
-
 /**
  * FunctorMaterials compute functor material properties
  */
@@ -31,25 +26,46 @@ protected:
   void computeQpProperties() override final {}
 
   /**
-   * Declare a functor material property that this object will responsible for providing
+   * Declare a functor material property
    */
-  template <typename T,
-            template <typename> class P = FunctorMaterialPropertyImpl,
-            class... ConstructionArgs>
-  FunctorMaterialProperty<T> & declareFunctorProperty(const std::string & name,
-                                                      ConstructionArgs &&... construction_args);
+  template <typename T, typename PolymorphicLambda>
+  const Moose::Functor<T> &
+  addFunctorProperty(const std::string & name,
+                     PolymorphicLambda my_lammy,
+                     const std::set<ExecFlagType> & clearance_schedule = {EXEC_ALWAYS});
+
+  /**
+   * Declare a functor material property with specified subdomain ids
+   */
+  template <typename T, typename PolymorphicLambda>
+  const Moose::Functor<T> &
+  addFunctorPropertyByBlocks(const std::string & name,
+                             PolymorphicLambda my_lammy,
+                             const std::set<SubdomainID> & sub_ids,
+                             const std::set<ExecFlagType> & clearance_schedule = {EXEC_ALWAYS});
 };
 
-template <typename T, template <typename> class P, class... ConstructionArgs>
-FunctorMaterialProperty<T> &
-FunctorMaterial::declareFunctorProperty(const std::string & name,
-                                        ConstructionArgs &&... construction_args)
+template <typename T, typename PolymorphicLambda>
+const Moose::Functor<T> &
+FunctorMaterial::addFunctorProperty(const std::string & name,
+                                    PolymorphicLambda my_lammy,
+                                    const std::set<ExecFlagType> & clearance_schedule)
+{
+  return addFunctorPropertyByBlocks<T>(name, my_lammy, blockIDs(), clearance_schedule);
+}
+
+template <typename T, typename PolymorphicLambda>
+const Moose::Functor<T> &
+FunctorMaterial::addFunctorPropertyByBlocks(const std::string & name,
+                                            PolymorphicLambda my_lammy,
+                                            const std::set<SubdomainID> & sub_ids,
+                                            const std::set<ExecFlagType> & clearance_schedule)
 {
   // Check if the supplied parameter is a valid input parameter key
   std::string prop_name = name;
   if (_pars.have_parameter<MaterialPropertyName>(name))
     prop_name = _pars.get<MaterialPropertyName>(name);
 
-  return _subproblem.declareFunctorProperty<T, P>(
-      prop_name, _tid, false, std::forward<ConstructionArgs>(construction_args)...);
+  return _subproblem.addPiecewiseByBlockLambdaFunctor<T>(
+      prop_name, my_lammy, clearance_schedule, _mesh, sub_ids, _tid);
 }
