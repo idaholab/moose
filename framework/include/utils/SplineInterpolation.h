@@ -52,6 +52,7 @@ public:
    * based on the generated fit
    */
   Real sample(Real x) const;
+  ADReal sample(const ADReal & x) const;
 
   Real sampleDerivative(Real x) const;
 

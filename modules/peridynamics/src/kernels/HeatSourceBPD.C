@@ -34,10 +34,9 @@ HeatSourceBPD::HeatSourceBPD(const InputParameters & parameters)
 void
 HeatSourceBPD::computeLocalResidual()
 {
-  Point p;
   for (unsigned int nd = 0; nd < _nnodes; ++nd)
   {
     std::vector<dof_id_type> neighbors = _pdmesh.getNeighbors(_current_elem->node_id(nd));
-    _local_re(nd) = -_power_density.value(_t, p) * _node_vol[nd] / neighbors.size();
+    _local_re(nd) = -_power_density.value(_t) * _node_vol[nd] / neighbors.size();
   }
 }

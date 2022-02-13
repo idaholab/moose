@@ -346,6 +346,9 @@ public:
     return _ad_q_points_face;
   }
 
+  template <bool is_ad>
+  const MooseArray<MooseADWrapper<Point, is_ad>> & genericQPoints() const;
+
   /**
    * Return the current element
    * @return A _reference_.  Make sure to store this as a reference!

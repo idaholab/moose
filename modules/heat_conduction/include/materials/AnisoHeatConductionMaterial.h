@@ -48,9 +48,10 @@ protected:
   MaterialProperty<Real> & _dspecific_heat_dT;
   const Function * const _specific_heat_function;
 
-  void
-  setDerivatives(GenericRankTwoTensor<is_ad> & prop, RankTwoTensor dprop_dT, const ADReal & ad_T);
-  void setDerivatives(GenericReal<is_ad> & prop, Real dprop_dT, const ADReal & ad_T);
+  const MooseArray<ADPoint> * _ad_q_point;
+
+private:
+  auto genericQPoints();
 };
 
 typedef AnisoHeatConductionMaterialTempl<false> AnisoHeatConductionMaterial;

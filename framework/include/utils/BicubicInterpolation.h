@@ -42,7 +42,8 @@ public:
   /**
    * Samples value at point (x1, x2)
    */
-  Real sample(Real x1, Real x2);
+  Real sample(Real x1, Real x2) const;
+  ADReal sample(const ADReal & x1, const ADReal & x2) const;
 
   /**
    * Samples value and first derivatives at point (x1, x2)
@@ -50,17 +51,17 @@ public:
    * as it minimizes the amount of time spent locating the point in the
    * tabulated data
    */
-  void sampleValueAndDerivatives(Real x1, Real x2, Real & y, Real & dy1, Real & dy2);
+  void sampleValueAndDerivatives(Real x1, Real x2, Real & y, Real & dy1, Real & dy2) const;
 
   /**
    * Samples first derivative at point (x1, x2)
    */
-  Real sampleDerivative(Real x1, Real x2, unsigned int deriv_var);
+  Real sampleDerivative(Real x1, Real x2, unsigned int deriv_var) const;
 
   /**
    * Samples second derivative at point (x1, x2)
    */
-  Real sample2ndDerivative(Real x1, Real x2, unsigned int deriv_var);
+  Real sample2ndDerivative(Real x1, Real x2, unsigned int deriv_var) const;
 
   /**
    * Precompute all of the coefficients for the bicubic interpolation to avoid
@@ -72,8 +73,15 @@ protected:
   /**
    * Find the indices of the dependent values axis which bracket the point xi
    */
-  void findInterval(
-      const std::vector<Real> & x, Real xi, unsigned int & klo, unsigned int & khi, Real & xs);
+  template <typename T>
+  void findInterval(const std::vector<Real> & x,
+                    const T & xi,
+                    unsigned int & klo,
+                    unsigned int & khi,
+                    T & xs) const;
+
+  template <typename T>
+  T sampleInternal(T x1, T x2) const;
 
   /**
    * Provides the values of the first derivatives in each direction at all

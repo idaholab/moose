@@ -46,7 +46,7 @@ Real
 ComputeMeanThermalExpansionFunctionEigenstrain::meanThermalExpansionCoefficient(
     const Real temperature)
 {
-  return _thermal_expansion_function.value(temperature, Point());
+  return _thermal_expansion_function.value(temperature);
 }
 
 Real

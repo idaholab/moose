@@ -137,22 +137,8 @@ ShaftConnectedPump1PhaseUserObject::computeFluxesAndResiduals(const unsigned int
     Real dv_drhoA = dQ_in_drhoA / _volumetric_rated;
     Real dv_drhouA = dQ_in_drhouA / _volumetric_rated;
 
-    Real c_coef;
-    if ((alpha >= 0) & (nu >= 0))
-      c_coef = 0;
-    else if ((alpha > 0) & (nu < 0))
-      c_coef = libMesh::pi;
-    else if ((alpha <= 0) & (nu <= 0))
-      c_coef = libMesh::pi;
-    else if ((alpha < 0) & (nu > 0))
-      c_coef = 2 * libMesh::pi;
-    else
-    {
-      mooseError(_pump_name, ": The pump is outside normal operating regime.");
-    }
-
     // Head and torque
-    Real x_p = c_coef + std::atan(alpha / nu);
+    Real x_p = std::atan2(alpha, nu);
     Real dx_p_dalpha = nu / (alpha * alpha + nu * nu);
     Real dx_p_dnu = -alpha / (alpha * alpha + nu * nu);
 
@@ -161,13 +147,13 @@ ShaftConnectedPump1PhaseUserObject::computeFluxesAndResiduals(const unsigned int
     Real dx_p_drhouA = dx_p_dnu * dv_drhouA;
 
     Real wt = _torque_hydraulic.value(x_p, Point());
-    Real dwt_dx = _torque_hydraulic.timeDerivative(x_p, Point());
+    Real dwt_dx = _torque_hydraulic.timeDerivative(x_p);
     Real dwt_domega = dwt_dx * dx_p_domega;
     Real dwt_drhoA = dwt_dx * dx_p_drhoA;
     Real dwt_drhouA = dwt_dx * dx_p_drhouA;
 
     Real wh = _head.value(x_p, Point());
-    Real dwh_dx = _head.timeDerivative(x_p, Point());
+    Real dwh_dx = _head.timeDerivative(x_p);
     Real dwh_domega = dwh_dx * dx_p_domega;
     Real dwh_drhoA = dwh_dx * dx_p_drhoA;
     Real dwh_drhouA = dwh_dx * dx_p_drhouA;

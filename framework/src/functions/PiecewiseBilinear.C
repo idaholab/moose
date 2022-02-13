@@ -116,12 +116,25 @@ PiecewiseBilinear::~PiecewiseBilinear() {}
 Real
 PiecewiseBilinear::value(Real t, const Point & p) const
 {
-  Real retVal(0);
+  return valueInternal(t, p);
+}
+
+ADReal
+PiecewiseBilinear::value(const ADReal & t, const ADPoint & p) const
+{
+  return valueInternal(t, p);
+}
+
+template <typename T, typename P>
+T
+PiecewiseBilinear::valueInternal(T t, const P & p) const
+{
+  T retVal = 0.0;
   if (_yaxisValid && _xaxisValid && _radial)
   {
-    Real rx = p(_xaxis) * p(_xaxis);
-    Real ry = p(_yaxis) * p(_yaxis);
-    Real r = std::sqrt(rx + ry);
+    const auto rx = p(_xaxis) * p(_xaxis);
+    const auto ry = p(_yaxis) * p(_yaxis);
+    const auto r = std::sqrt(rx + ry);
     retVal = _bilinear_interp->sample(r, t);
   }
   else if (_axisValid)

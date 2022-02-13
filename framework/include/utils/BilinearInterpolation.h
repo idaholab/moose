@@ -52,9 +52,11 @@ public:
    * This function will take an independent variable input and will
    * return the dependent variable based on the generated fit.
    */
-  Real sample(Real xcoord, Real ycoord);
+  template <typename T>
+  T sample(const T & xcoord, const T & ycoord) const;
 
-  void getNeighborIndices(const std::vector<Real> & inArr, Real x, int & lowerX, int & upperX);
+  void
+  getNeighborIndices(const std::vector<Real> & inArr, Real x, int & lowerX, int & upperX) const;
 
 private:
   std::vector<Real> _xAxis;

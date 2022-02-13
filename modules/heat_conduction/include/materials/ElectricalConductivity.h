@@ -11,8 +11,6 @@
 
 #include "Material.h"
 
-// Forward Declarations
-
 /**
  * Calculates resistivity and electrical conductivity as a function of temperature.
  * It is assumed that resistivity varies linearly with temperature.
@@ -33,14 +31,11 @@ private:
   const Real _temp_coeff;
   const Real _ref_temp;
   const bool _has_temp;
-  const VariableValue & _T;
-  const ADVariableValue & _ad_T;
+  const GenericVariableValue<is_ad> & _T;
 
   const std::string _base_name;
   GenericMaterialProperty<Real, is_ad> & _electric_conductivity;
   MaterialProperty<Real> & _delectric_conductivity_dT;
-
-  void setDerivatives(GenericReal<is_ad> & prop, Real dprop_dT, const ADReal & ad_T);
 };
 
 typedef ElectricalConductivityTempl<false> ElectricalConductivity;

@@ -46,9 +46,8 @@ PresetDisplacement::PresetDisplacement(const InputParameters & parameters)
 Real
 PresetDisplacement::computeQpValue()
 {
-  Point p;
-  Real vel = _function.timeDerivative(_t, p);
-  Real vel_old = _function.timeDerivative(_t - _dt, p);
+  Real vel = _function.timeDerivative(_t);
+  Real vel_old = _function.timeDerivative(_t - _dt);
   Real accel = (vel - vel_old) / _dt;
 
   return _u_old[_qp] + _dt * _vel_old[_qp] +

@@ -12,6 +12,8 @@
 #include "MathUtils.h"
 #include "MooseUtils.h"
 
+#include "libmesh/int_range.h"
+
 BicubicInterpolation::BicubicInterpolation(const std::vector<Real> & x1,
                                            const std::vector<Real> & x2,
                                            const std::vector<std::vector<Real>> & y)
@@ -24,13 +26,13 @@ BicubicInterpolation::BicubicInterpolation(const std::vector<Real> & x1,
   auto n = _x2.size();
 
   _bicubic_coeffs.resize(m - 1);
-  for (MooseIndex(_bicubic_coeffs) i = 0; i < _bicubic_coeffs.size(); ++i)
+  for (const auto i : index_range(_bicubic_coeffs))
   {
     _bicubic_coeffs[i].resize(n - 1);
-    for (MooseIndex(_bicubic_coeffs) j = 0; j < _bicubic_coeffs[i].size(); ++j)
+    for (const auto j : index_range(_bicubic_coeffs[i]))
     {
       _bicubic_coeffs[i][j].resize(4);
-      for (unsigned int k = 0; k < 4; ++k)
+      for (const auto k : make_range(4))
         _bicubic_coeffs[i][j][k].resize(4);
     }
   }
@@ -40,23 +42,39 @@ BicubicInterpolation::BicubicInterpolation(const std::vector<Real> & x1,
 }
 
 Real
-BicubicInterpolation::sample(Real x1, Real x2)
+BicubicInterpolation::sample(Real x1, Real x2) const
+{
+  return sampleInternal(x1, x2);
+}
+
+ADReal
+BicubicInterpolation::sample(const ADReal & x1, const ADReal & x2) const
+{
+  return sampleInternal(x1, x2);
+}
+
+template <typename T>
+T
+BicubicInterpolation::sampleInternal(T x1, T x2) const
 {
   unsigned int x1l, x1u, x2l, x2u;
-  Real t, u;
+  T t, u;
   findInterval(_x1, x1, x1l, x1u, t);
   findInterval(_x2, x2, x2l, x2u, u);
 
-  Real sample = 0.0;
-  for (unsigned int i = 0; i < 4; ++i)
-    for (unsigned int j = 0; j < 4; ++j)
+  T sample = 0.0;
+  for (const auto i : make_range(4))
+    for (const auto j : make_range(4))
       sample += _bicubic_coeffs[x1l][x2l][i][j] * MathUtils::pow(t, i) * MathUtils::pow(u, j);
 
   return sample;
 }
 
+template Real BicubicInterpolation::sampleInternal(Real x1, Real x2) const;
+template ADReal BicubicInterpolation::sampleInternal(ADReal x1, ADReal x2) const;
+
 Real
-BicubicInterpolation::sampleDerivative(Real x1, Real x2, unsigned int deriv_var)
+BicubicInterpolation::sampleDerivative(Real x1, Real x2, unsigned int deriv_var) const
 {
   unsigned int x1l, x1u, x2l, x2u;
   Real t, u;
@@ -68,8 +86,8 @@ BicubicInterpolation::sampleDerivative(Real x1, Real x2, unsigned int deriv_var)
   if (deriv_var == 1)
   {
     Real sample_deriv = 0.0;
-    for (unsigned int i = 1; i < 4; ++i)
-      for (unsigned int j = 0; j < 4; ++j)
+    for (const auto i : make_range(1, 4))
+      for (const auto j : make_range(4))
         sample_deriv +=
             i * _bicubic_coeffs[x1l][x2l][i][j] * MathUtils::pow(t, i - 1) * MathUtils::pow(u, j);
 
@@ -86,8 +104,9 @@ BicubicInterpolation::sampleDerivative(Real x1, Real x2, unsigned int deriv_var)
   else if (deriv_var == 2)
   {
     Real sample_deriv = 0.0;
-    for (unsigned int i = 0; i < 4; ++i)
-      for (unsigned int j = 1; j < 4; ++j)
+
+    for (const auto i : make_range(4))
+      for (const auto j : make_range(1, 4))
         sample_deriv +=
             j * _bicubic_coeffs[x1l][x2l][i][j] * MathUtils::pow(t, i) * MathUtils::pow(u, j - 1);
 
@@ -104,7 +123,7 @@ BicubicInterpolation::sampleDerivative(Real x1, Real x2, unsigned int deriv_var)
 }
 
 Real
-BicubicInterpolation::sample2ndDerivative(Real x1, Real x2, unsigned int deriv_var)
+BicubicInterpolation::sample2ndDerivative(Real x1, Real x2, unsigned int deriv_var) const
 {
   unsigned int x1l, x1u, x2l, x2u;
   Real t, u;
@@ -116,8 +135,8 @@ BicubicInterpolation::sample2ndDerivative(Real x1, Real x2, unsigned int deriv_v
   if (deriv_var == 1)
   {
     Real sample_deriv = 0.0;
-    for (unsigned int i = 2; i < 4; ++i)
-      for (unsigned int j = 0; j < 4; ++j)
+    for (const auto i : make_range(2, 4))
+      for (const auto j : make_range(4))
         sample_deriv += i * (i - 1) * _bicubic_coeffs[x1l][x2l][i][j] * MathUtils::pow(t, i - 2) *
                         MathUtils::pow(u, j);
 
@@ -134,8 +153,8 @@ BicubicInterpolation::sample2ndDerivative(Real x1, Real x2, unsigned int deriv_v
   else if (deriv_var == 2)
   {
     Real sample_deriv = 0.0;
-    for (unsigned int i = 0; i < 4; ++i)
-      for (unsigned int j = 2; j < 4; ++j)
+    for (const auto i : make_range(4))
+      for (const auto j : make_range(2, 4))
         sample_deriv += j * (j - 1) * _bicubic_coeffs[x1l][x2l][i][j] * MathUtils::pow(t, i) *
                         MathUtils::pow(u, j - 2);
 
@@ -152,7 +171,8 @@ BicubicInterpolation::sample2ndDerivative(Real x1, Real x2, unsigned int deriv_v
 }
 
 void
-BicubicInterpolation::sampleValueAndDerivatives(Real x1, Real x2, Real & y, Real & dy1, Real & dy2)
+BicubicInterpolation::sampleValueAndDerivatives(
+    Real x1, Real x2, Real & y, Real & dy1, Real & dy2) const
 {
   unsigned int x1l, x1u, x2l, x2u;
   Real t, u;
@@ -160,20 +180,20 @@ BicubicInterpolation::sampleValueAndDerivatives(Real x1, Real x2, Real & y, Real
   findInterval(_x2, x2, x2l, x2u, u);
 
   y = 0.0;
-  for (unsigned int i = 0; i < 4; ++i)
-    for (unsigned int j = 0; j < 4; ++j)
+  for (const auto i : make_range(4))
+    for (const auto j : make_range(4))
       y += _bicubic_coeffs[x1l][x2l][i][j] * MathUtils::pow(t, i) * MathUtils::pow(u, j);
 
   // Note: sum from i = 1 as the first term is zero
   dy1 = 0.0;
-  for (unsigned int i = 1; i < 4; ++i)
-    for (unsigned int j = 0; j < 4; ++j)
+  for (const auto i : make_range(1, 4))
+    for (const auto j : make_range(4))
       dy1 += i * _bicubic_coeffs[x1l][x2l][i][j] * MathUtils::pow(t, i - 1) * MathUtils::pow(u, j);
 
   // Note: sum from j = 1 as the first term is zero
   dy2 = 0.0;
-  for (unsigned int i = 0; i < 4; ++i)
-    for (unsigned int j = 1; j < 4; ++j)
+  for (const auto i : make_range(4))
+    for (const auto j : make_range(1, 4))
       dy2 += j * _bicubic_coeffs[x1l][x2l][i][j] * MathUtils::pow(t, i) * MathUtils::pow(u, j - 1);
 
   Real d1 = _x1[x1u] - _x1[x1l];
@@ -196,8 +216,8 @@ BicubicInterpolation::precomputeCoefficients()
   tableDerivatives(dy_dx1, dy_dx2, d2y_dx1x2);
 
   // Now solve for the coefficients at each point in the grid
-  for (MooseIndex(_bicubic_coeffs) i = 0; i < _bicubic_coeffs.size(); ++i)
-    for (MooseIndex(_bicubic_coeffs) j = 0; j < _bicubic_coeffs[i].size(); ++j)
+  for (const auto i : index_range(_bicubic_coeffs))
+    for (const auto j : index_range(_bicubic_coeffs[i]))
     {
       // Distance between corner points in each direction
       const Real d1 = _x1[i + 1] - _x1[i];
@@ -217,7 +237,7 @@ BicubicInterpolation::precomputeCoefficients()
       unsigned int count = 0;
 
       // Temporary vector used in the matrix multiplication
-      for (unsigned int k = 0; k < 4; ++k)
+      for (const auto k : make_range(4))
       {
         x[k] = y[k];
         x[k + 4] = y1[k] * d1;
@@ -226,18 +246,18 @@ BicubicInterpolation::precomputeCoefficients()
       }
 
       // Multiply by the matrix of constants
-      for (unsigned int k = 0; k < 16; ++k)
+      for (const auto k : make_range(16))
       {
         xx = 0.0;
-        for (unsigned int q = 0; q < 16; ++q)
+        for (const auto q : make_range(16))
           xx += _wt[k][q] * x[q];
 
         cl[k] = xx;
       }
 
       // Unpack results into coefficient table
-      for (unsigned int k = 0; k < 4; ++k)
-        for (unsigned int q = 0; q < 4; ++q)
+      for (const auto k : make_range(4))
+        for (const auto q : make_range(4))
         {
           _bicubic_coeffs[i][j][k][q] = cl[count];
           count++;
@@ -250,12 +270,13 @@ BicubicInterpolation::tableDerivatives(std::vector<std::vector<Real>> & dy_dx1,
                                        std::vector<std::vector<Real>> & dy_dx2,
                                        std::vector<std::vector<Real>> & d2y_dx1x2)
 {
-  auto m = _x1.size(), n = _x2.size();
+  const auto m = _x1.size();
+  const auto n = _x2.size();
   dy_dx1.resize(m);
   dy_dx2.resize(m);
   d2y_dx1x2.resize(m);
 
-  for (MooseIndex(_x1) i = 0; i < m; ++i)
+  for (const auto i : make_range(m))
   {
     dy_dx1[i].resize(n);
     dy_dx2[i].resize(n);
@@ -263,8 +284,8 @@ BicubicInterpolation::tableDerivatives(std::vector<std::vector<Real>> & dy_dx1,
   }
 
   // Central difference calculations of derivatives
-  for (MooseIndex(_y) i = 0; i < m; ++i)
-    for (MooseIndex(_y) j = 0; j < n; ++j)
+  for (const auto i : make_range(m))
+    for (const auto j : make_range(n))
     {
       // Derivative wrt x1
       if (i == 0)
@@ -316,9 +337,10 @@ BicubicInterpolation::tableDerivatives(std::vector<std::vector<Real>> & dy_dx1,
     }
 }
 
+template <typename T>
 void
 BicubicInterpolation::findInterval(
-    const std::vector<Real> & x, Real xi, unsigned int & klo, unsigned int & khi, Real & xs)
+    const std::vector<Real> & x, const T & xi, unsigned int & klo, unsigned int & khi, T & xs) const
 {
   // Find the indices that bracket the point xi
   klo = 0;
@@ -343,6 +365,17 @@ BicubicInterpolation::findInterval(
     xs /= d;
 }
 
+template void BicubicInterpolation::findInterval(const std::vector<Real> & x,
+                                                 const Real & xi,
+                                                 unsigned int & klo,
+                                                 unsigned int & khi,
+                                                 Real & xs) const;
+template void BicubicInterpolation::findInterval(const std::vector<Real> & x,
+                                                 const ADReal & xi,
+                                                 unsigned int & klo,
+                                                 unsigned int & khi,
+                                                 ADReal & xs) const;
+
 void
 BicubicInterpolation::errorCheck()
 {
@@ -351,7 +384,7 @@ BicubicInterpolation::errorCheck()
   if (_y.size() != m)
     mooseError("y row dimension does not match the size of x1 in BicubicInterpolation");
   else
-    for (MooseIndex(_y) i = 0; i < _y.size(); ++i)
+    for (const auto i : index_range(_y))
       if (_y[i].size() != n)
         mooseError("y column dimension does not match the size of x2 in BicubicInterpolation");
 }

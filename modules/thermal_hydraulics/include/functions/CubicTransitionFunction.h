@@ -24,6 +24,7 @@ class CubicTransitionFunction : public SmoothTransitionFunction
 public:
   CubicTransitionFunction(const InputParameters & parameters);
 
+  using Function::value;
   virtual Real value(Real t, const Point & p) const;
   virtual RealVectorValue gradient(Real t, const Point & p) const;
 

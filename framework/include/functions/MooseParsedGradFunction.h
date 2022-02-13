@@ -42,6 +42,7 @@ public:
    */
   virtual ~MooseParsedGradFunction();
 
+  using Function::value;
   /**
    * Return a scalar value from the function
    * @param t Current time

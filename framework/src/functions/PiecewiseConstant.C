@@ -77,6 +77,13 @@ PiecewiseConstant::value(Real t, const Point & p) const
   return 0.0;
 }
 
+ADReal
+PiecewiseConstant::value(const ADReal & t, const ADPoint & p) const
+{
+  // piecewise constant has all zero derivatives (ignoring discontinuities)
+  return value(MetaPhysicL::raw_value(t), MetaPhysicL::raw_value(p));
+}
+
 Real
 PiecewiseConstant::timeDerivative(Real /*t*/, const Point & /*p*/) const
 {

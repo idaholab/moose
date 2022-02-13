@@ -22,7 +22,22 @@ public:
 
   PiecewiseConstant(const InputParameters & parameters);
 
-  virtual Real value(Real t, const Point & pt) const override;
+  using Function::value;
+  /**
+   * Get the value of the function (based on time only)
+   * \param t The time
+   * \param pt The point in space (x,y,z) (unused)
+   * \return The value of the function at the specified time
+   */
+  virtual Real value(Real t, const Point & p) const override;
+  virtual ADReal value(const ADReal & t, const ADPoint & p) const override;
+
+  /**
+   * Get the time derivative of the function (based on time only)
+   * \param t The time
+   * \param pt The point in space (x,y,z) (unused)
+   * \return The time derivative of the function at the specified time
+   */
   virtual Real timeDerivative(Real t, const Point & pt) const override;
   virtual Real integral() const override;
   virtual Real average() const override;

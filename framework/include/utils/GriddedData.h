@@ -9,9 +9,11 @@
 
 #pragma once
 
-#include "libmesh/libmesh_common.h" // Real
+#include "MooseTypes.h"
+#include "MooseError.h"
+#include "MooseUtils.h"
 
-using namespace libMesh;
+// using namespace libMesh;
 
 #include <iosfwd>
 #include <string>
@@ -38,6 +40,10 @@ public:
   GriddedData(std::string file_name);
 
   virtual ~GriddedData() = default;
+
+  typedef MooseUtils::SemidynamicVector<Real, 4> GridPoint;
+  typedef MooseUtils::SemidynamicVector<ADReal, 4> ADGridPoint;
+  typedef MooseUtils::SemidynamicVector<unsigned int, 4> GridIndex;
 
   /**
    * Returns the dimensionality of the grid.
@@ -73,7 +79,7 @@ public:
    * For instance, evaluateFcn({n,m}) = value at (grid[0][n], grid[1][m]), for a function defined on
    * a 2D grid
    */
-  Real evaluateFcn(const std::vector<unsigned int> & ijk);
+  Real evaluateFcn(const GridIndex & ijk);
 
 private:
   unsigned int _dim;

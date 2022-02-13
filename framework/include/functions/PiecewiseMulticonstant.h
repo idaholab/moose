@@ -21,11 +21,6 @@ class GriddedData;
  * Gridded data can be 1D, 2D, 3D or 4D.
  * See GriddedData for examples of file format.
  */
-class PiecewiseMulticonstant;
-
-template <>
-InputParameters validParams<PiecewiseMulticonstant>();
-
 class PiecewiseMulticonstant : public PiecewiseMultiInterpolation
 {
 public:
@@ -33,11 +28,15 @@ public:
 
   PiecewiseMulticonstant(const InputParameters & parameters);
 
+  using PiecewiseMultiInterpolation::value;
+  virtual ADReal value(const ADReal & t, const ADPoint & p) const override;
+
   virtual RealGradient gradient(Real t, const Point & p) const override;
   virtual Real timeDerivative(Real t, const Point & p) const override;
 
 protected:
-  virtual Real sample(const std::vector<Real> & pt) const override;
+  using PiecewiseMultiInterpolation::sample;
+  virtual Real sample(const GridPoint & pt) const override;
 
 private:
   /// direction where to look for value if interpolation order is constant
