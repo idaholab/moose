@@ -8,6 +8,19 @@ TriSubChannelBaseIC::validParams()
 }
 
 TriSubChannelBaseIC::TriSubChannelBaseIC(const InputParameters & params)
-  : InitialCondition(params), _mesh(dynamic_cast<TriSubChannelMesh &>(_fe_problem.mesh()))
+  : InitialCondition(params), _mesh(getMesh(_fe_problem.mesh()))
 {
+}
+
+TriSubChannelMesh &
+TriSubChannelBaseIC::getMesh(MooseMesh & mesh)
+{
+  TriSubChannelMesh * m = dynamic_cast<TriSubChannelMesh *>(&mesh);
+  if (m)
+    return dynamic_cast<TriSubChannelMesh &>(mesh);
+  else
+    mooseError(name(),
+               ": This initial condition works only with triangular subchannel geometry. Update "
+               "your input "
+               "file to use TriSubChannelMesh in the mesh block.");
 }
