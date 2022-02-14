@@ -7,14 +7,15 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ADViscoplasticityStressUpdateBase.h"
+#include "ViscoplasticityStressUpdateBase.h"
 
+template <bool is_ad>
 InputParameters
-ADViscoplasticityStressUpdateBase::validParams()
+ViscoplasticityStressUpdateBaseTempl<is_ad>::validParams()
 {
-  InputParameters params = ADStressUpdateBase::validParams();
+  InputParameters params = StressUpdateBaseTempl<is_ad>::validParams();
   params.addClassDescription("Base class used to calculate viscoplastic responses to be used in "
-                             "ADComputeMultiplePorousInelasticStress");
+                             "ComputeMultiplePorousInelasticStress");
   params.addParam<Real>("max_inelastic_increment",
                         1.0e-4,
                         "The maximum inelastic strain increment allowed in a time step");
@@ -36,48 +37,53 @@ ADViscoplasticityStressUpdateBase::validParams()
   return params;
 }
 
-ADViscoplasticityStressUpdateBase::ADViscoplasticityStressUpdateBase(
+template <bool is_ad>
+ViscoplasticityStressUpdateBaseTempl<is_ad>::ViscoplasticityStressUpdateBaseTempl(
     const InputParameters & parameters)
-  : ADStressUpdateBase(parameters),
-    _total_strain_base_name(isParamValid("total_strain_base_name")
-                                ? getParam<std::string>("total_strain_base_name") + "_"
+  : StressUpdateBaseTempl<is_ad>(parameters),
+    _total_strain_base_name(this->isParamValid("total_strain_base_name")
+                                ? this->template getParam<std::string>("total_strain_base_name") +
+                                      "_"
                                 : ""),
-    _strain_increment(
-        getADMaterialProperty<RankTwoTensor>(_total_strain_base_name + "strain_increment")),
-    _effective_inelastic_strain(declareADProperty<Real>(
-        _base_name + "effective_" + getParam<std::string>("inelastic_strain_name"))),
-    _effective_inelastic_strain_old(getMaterialPropertyOld<Real>(
-        _base_name + "effective_" + getParam<std::string>("inelastic_strain_name"))),
-    _inelastic_strain(declareADProperty<RankTwoTensor>(
-        _base_name + getParam<std::string>("inelastic_strain_name"))),
-    _inelastic_strain_old(getMaterialPropertyOld<RankTwoTensor>(
-        _base_name + getParam<std::string>("inelastic_strain_name"))),
-    _max_inelastic_increment(getParam<Real>("max_inelastic_increment")),
+    _strain_increment(this->template getGenericMaterialProperty<RankTwoTensor, is_ad>(
+        _total_strain_base_name + "strain_increment")),
+    _effective_inelastic_strain(this->template declareGenericProperty<Real, is_ad>(
+        _base_name + "effective_" + this->template getParam<std::string>("inelastic_strain_name"))),
+    _effective_inelastic_strain_old(this->template getMaterialPropertyOld<Real>(
+        _base_name + "effective_" + this->template getParam<std::string>("inelastic_strain_name"))),
+    _inelastic_strain(this->template declareGenericProperty<RankTwoTensor, is_ad>(
+        _base_name + this->template getParam<std::string>("inelastic_strain_name"))),
+    _inelastic_strain_old(this->template getMaterialPropertyOld<RankTwoTensor>(
+        _base_name + this->template getParam<std::string>("inelastic_strain_name"))),
+    _max_inelastic_increment(this->template getParam<Real>("max_inelastic_increment")),
     _intermediate_porosity(0.0),
-    _porosity_old(getMaterialPropertyOld<Real>(getParam<MaterialPropertyName>("porosity_name"))),
-    _verbose(getParam<bool>("verbose")),
-    _initial_porosity(getParam<Real>("initial_porosity")),
+    _porosity_old(this->template getMaterialPropertyOld<Real>("porosity_name")),
+    _verbose(this->template getParam<bool>("verbose")),
+    _initial_porosity(this->template getParam<Real>("initial_porosity")),
     _negative_behavior(this->template getParam<MooseEnum>("negative_behavior")
                            .template getEnum<NegativeBehavior>())
 {
 }
 
+template <bool is_ad>
 void
-ADViscoplasticityStressUpdateBase::initQpStatefulProperties()
+ViscoplasticityStressUpdateBaseTempl<is_ad>::initQpStatefulProperties()
 {
   _effective_inelastic_strain[_qp] = 0.0;
   _inelastic_strain[_qp].zero();
 }
 
+template <bool is_ad>
 void
-ADViscoplasticityStressUpdateBase::propagateQpStatefulProperties()
+ViscoplasticityStressUpdateBaseTempl<is_ad>::propagateQpStatefulProperties()
 {
   _effective_inelastic_strain[_qp] = _effective_inelastic_strain_old[_qp];
   _inelastic_strain[_qp] = _inelastic_strain_old[_qp];
 }
 
+template <bool is_ad>
 Real
-ADViscoplasticityStressUpdateBase::computeTimeStepLimit()
+ViscoplasticityStressUpdateBaseTempl<is_ad>::computeTimeStepLimit()
 {
   const Real scalar_inelastic_strain_incr =
       std::abs(MetaPhysicL::raw_value(_effective_inelastic_strain[_qp]) -
@@ -89,9 +95,10 @@ ADViscoplasticityStressUpdateBase::computeTimeStepLimit()
   return _dt * _max_inelastic_increment / scalar_inelastic_strain_incr;
 }
 
+template <bool is_ad>
 void
-ADViscoplasticityStressUpdateBase::updateIntermediatePorosity(
-    const ADRankTwoTensor & elastic_strain_increment)
+ViscoplasticityStressUpdateBaseTempl<is_ad>::updateIntermediatePorosity(
+    const GenericRankTwoTensor<is_ad> & elastic_strain_increment)
 {
   // Subtract elastic strain from strain increment to find all inelastic strain increments
   // calculated so far except the one that we're about to calculate. Then calculate intermdiate
@@ -114,3 +121,6 @@ ADViscoplasticityStressUpdateBase::updateIntermediatePorosity(
   if (std::isnan(_intermediate_porosity))
     mooseException("In ", _name, ": porosity is nan. Cutting timestep.");
 }
+
+template class ViscoplasticityStressUpdateBaseTempl<false>;
+template class ViscoplasticityStressUpdateBaseTempl<true>;
