@@ -1118,7 +1118,7 @@ public:
   /**
    * Restore the FullSolveMultiApps associated with the ExecFlagType
    */
-  void restoreFullSolveMultiApps(ExecFlagType type);
+  void reinitMultiApps(ExecFlagType type, std::string type_name, bool solved = false);
 
   /**
    * Find the smallest timestep over all MultiApps

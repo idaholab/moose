@@ -29,6 +29,11 @@ FullSolveMultiApp::validParams()
       "True to turn off backup/restore for this multiapp. This is useful when doing steady-state "
       "Picard iterations where we want to use the solution of previous Picard iteration as the "
       "initial guess of the current Picard iteration");
+  params.addParam<bool>("reinit_after_solve",
+                        false,
+                        "Switch used to reint the multiapp to the initial conditions after every "
+                        "fixed-point solve. This is used to enable the repeated solution of the "
+                        "same problem with changing conditions (like parameters).");
   params.addParam<bool>(
       "keep_full_output_history",
       false,
@@ -60,6 +65,15 @@ FullSolveMultiApp::restore(bool /*force*/)
     return;
   else
     MultiApp::restore();
+}
+
+void
+FullSolveMultiApp::initialSetup(bool solved)
+{
+  if (!solved)
+    initialSetup();
+  else if (getParam<bool>("reinit_after_solve"))
+    initialSetup();
 }
 
 void

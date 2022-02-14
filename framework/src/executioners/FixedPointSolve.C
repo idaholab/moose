@@ -327,8 +327,8 @@ FixedPointSolve::solve()
 
   if (!_has_fixed_point_its)
   {
-    _problem.restoreFullSolveMultiApps(EXEC_TIMESTEP_BEGIN);
-    _problem.restoreFullSolveMultiApps(EXEC_TIMESTEP_END);
+    _problem.reinitMultiApps(EXEC_TIMESTEP_BEGIN, "FullSolveMultiApp", /*solved=*/true);
+    _problem.reinitMultiApps(EXEC_TIMESTEP_END, "FullSolveMultiApp", /*solved=*/true);
   }
 
   return converged;

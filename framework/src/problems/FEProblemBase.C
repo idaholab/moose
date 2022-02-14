@@ -4524,26 +4524,23 @@ FEProblemBase::backupMultiApps(ExecFlagType type)
 }
 
 void
-FEProblemBase::restoreFullSolveMultiApps(ExecFlagType type)
+FEProblemBase::reinitMultiApps(ExecFlagType type, std::string type_name, bool solved)
 {
   const auto & multi_apps = _multi_apps[type].getActiveObjects();
 
   if (multi_apps.size())
   {
-    _console << COLOR_CYAN << "\nRestoring FullSolveMultiApps on " << type.name() << COLOR_DEFAULT
-             << std::endl;
+    _console << COLOR_CYAN << "\nReinitializing " << type_name << "s on " << type.name()
+             << COLOR_DEFAULT << std::endl;
 
-    for (const auto & multi_app : multi_apps)
-    {
-      std::shared_ptr<FullSolveMultiApp> app_pointer =
-          std::dynamic_pointer_cast<FullSolveMultiApp>(multi_app);
-      if (app_pointer)
-        multi_app->initialSetup();
-    }
+    for (const auto & app : multi_apps)
+      if (app->type() == type_name)
+        app->initialSetup(solved);
 
     MooseUtils::parallelBarrierNotify(_communicator, _parallel_barrier_messaging);
 
-    _console << COLOR_CYAN << "Finished Restoring FullSolveMultiApps on " << type.name() << "\n"
+    _console << COLOR_CYAN << "Finished reinitializing " << type_name << "s on " << type.name()
+             << "\n"
              << COLOR_DEFAULT << std::endl;
   }
 }
