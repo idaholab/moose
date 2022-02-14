@@ -13,6 +13,11 @@ public:
   TriSubChannelBaseIC(const InputParameters & params);
 
 protected:
+  /**
+   * Check that `mesh` is TriSubChannelMesh and if not, report an error.
+   */
+  TriSubChannelMesh & getMesh(MooseMesh & mesh);
+
   TriSubChannelMesh & _mesh;
 
 public:
