@@ -13,6 +13,11 @@ public:
   QuadSubChannelBaseIC(const InputParameters & params);
 
 protected:
+  /**
+   * Check that `mesh` is QuadSubChannelMesh and if not, report an error.
+   */
+  QuadSubChannelMesh & getMesh(MooseMesh & mesh);
+
   QuadSubChannelMesh & _mesh;
 
 public:
