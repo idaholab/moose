@@ -4538,7 +4538,7 @@ FEProblemBase::restoreFullSolveMultiApps(ExecFlagType type)
       std::shared_ptr<FullSolveMultiApp> app_pointer =
           std::dynamic_pointer_cast<FullSolveMultiApp>(multi_app);
       if (app_pointer)
-        multi_app->restore();
+        multi_app->initialSetup();
     }
 
     MooseUtils::parallelBarrierNotify(_communicator, _parallel_barrier_messaging);
