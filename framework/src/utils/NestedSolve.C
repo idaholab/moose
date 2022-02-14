@@ -83,5 +83,12 @@ NestedSolveTempl<is_ad>::normSquare(const NSReal & v) const
   return MetaPhysicL::raw_value(v) * MetaPhysicL::raw_value(v);
 }
 
+template <bool is_ad>
+Real
+NestedSolveTempl<is_ad>::normSquare(const NSRealVectorValue & v) const
+{
+  return MetaPhysicL::raw_value(v) * MetaPhysicL::raw_value(v);
+}
+
 template class NestedSolveTempl<false>;
 template class NestedSolveTempl<true>;

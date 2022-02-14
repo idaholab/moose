@@ -40,20 +40,25 @@ struct CorrespondingJacobianTempl;
 template <bool is_ad>
 class NestedSolveTempl
 {
-  /// AD/non-AD switched type shortcuts
-  using NSReal = MooseADWrapper<Real, is_ad>;
-  using NSRealVectorValue = MooseADWrapper<RealVectorValue, is_ad>;
-  using NSRankTwoTensor = MooseADWrapper<RankTwoTensor, is_ad>;
-
 public:
   static InputParameters validParams();
 
   NestedSolveTempl();
   NestedSolveTempl(const InputParameters & params);
 
+  /// AD/non-AD switched type shortcuts
+  using NSReal = MooseADWrapper<Real, is_ad>;
+  using NSRealVectorValue = MooseADWrapper<RealVectorValue, is_ad>;
+  using NSRankTwoTensor = MooseADWrapper<RankTwoTensor, is_ad>;
   /// Eigen type shortcuts
   using DynamicVector = Eigen::Matrix<NSReal, Eigen::Dynamic, 1>;
   using DynamicMatrix = Eigen::Matrix<NSReal, Eigen::Dynamic, Eigen::Dynamic>;
+  ///@{ Deduce the Jacobian type from the solution type
+  template <typename T>
+  struct CorrespondingJacobianTempl;
+  template <typename T>
+  using CorrespondingJacobian = typename NestedSolveInternal::CorrespondingJacobianTempl<T>::type;
+  ///@}
 
   /// Residual and solution type
   template <int N = 0>
@@ -123,13 +128,6 @@ protected:
   /// number of nested iterations
   std::size_t _n_iterations;
 
-  ///@{ Deduce the Jacobian type from the solution type
-  template <typename T>
-  struct CorrespondingJacobianTempl;
-  template <typename T>
-  using CorrespondingJacobian = typename NestedSolveInternal::CorrespondingJacobianTempl<T>::type;
-  ///@}
-
   /// Size a dynamic Jacobian matrix correctly
   void sizeItems(const NestedSolveTempl<is_ad>::DynamicVector & guess,
                  NestedSolveTempl<is_ad>::DynamicVector & residual,
@@ -154,6 +152,15 @@ protected:
   Real normSquare(const NSReal & v) const;
   Real normSquare(const NSRealVectorValue & v) const;
   ///@}
+
+private:
+  /// Build a suitable Eigen adaptor functor
+  template <typename R, typename J>
+  auto make_adaptor(R residual, J jacobian);
+  template <typename R, typename J>
+  auto make_real_adaptor(R residual, J jacobian);
+  template <typename R, typename J>
+  auto make_realvector_adaptor(R residual, J jacobian);
 };
 
 template <bool is_ad>
@@ -163,30 +170,8 @@ NestedSolveTempl<is_ad>::nonlinear(NestedSolveTempl<is_ad>::DynamicVector & gues
                                    R computeResidual,
                                    J computeJacobian)
 {
-  using V = NestedSolveTempl<is_ad>::DynamicVector;
-
-  class EigenAdaptorFunctor
-  {
-  public:
-    EigenAdaptorFunctor(R & residual, J & jacobian) : _residual(residual), _jacobian(jacobian) {}
-    int operator()(V & guess, V & residual)
-    {
-      _residual(guess, residual);
-      return 0;
-    }
-    int df(V & guess, NestedSolveTempl<is_ad>::CorrespondingJacobian<V> & jacobian)
-    {
-      _jacobian(guess, jacobian);
-      return 0;
-    }
-
-  private:
-    R & _residual;
-    J & _jacobian;
-  };
-
   // adaptor functor to utilize the Eigen non-linear solver
-  auto functor = EigenAdaptorFunctor(computeResidual, computeJacobian);
+  auto functor = make_adaptor(computeResidual, computeJacobian);
   Eigen::HybridNonLinearSolver<decltype(functor), NSReal> solver(functor);
   auto status = solver.solve(guess);
 
@@ -203,28 +188,8 @@ NestedSolveTempl<is_ad>::nonlinear(NSReal & guess, R computeResidual, J computeJ
 {
   using V = NestedSolveTempl<is_ad>::DynamicVector;
 
-  class EigenAdaptorFunctor
-  {
-  public:
-    EigenAdaptorFunctor(R & residual, J & jacobian) : _residual(residual), _jacobian(jacobian) {}
-    int operator()(V & guess, V & residual)
-    {
-      _residual(guess(0), residual(0, 0));
-      return 0;
-    }
-    int df(V & guess, NestedSolveTempl<is_ad>::CorrespondingJacobian<V> & jacobian)
-    {
-      _jacobian(guess(0), jacobian(0, 0));
-      return 0;
-    }
-
-  private:
-    R & _residual;
-    J & _jacobian;
-  };
-
   // adaptor functor to utilize the Eigen non-linear solver
-  auto functor = EigenAdaptorFunctor(computeResidual, computeJacobian);
+  auto functor = make_real_adaptor(computeResidual, computeJacobian);
   Eigen::HybridNonLinearSolver<decltype(functor), NSReal> solver(functor);
   V guess_eigen(1);
   guess_eigen << guess;
@@ -244,36 +209,8 @@ NestedSolveTempl<is_ad>::nonlinear(NSRealVectorValue & guess, R computeResidual,
 {
   using V = NestedSolveTempl<is_ad>::DynamicVector;
 
-  class EigenAdaptorFunctor
-  {
-  public:
-    EigenAdaptorFunctor(R & residual, J & jacobian) : _residual(residual), _jacobian(jacobian) {}
-    int operator()(V & guess, V & residual)
-    {
-      RealVectorValue guess_moose(guess(0), guess(1), guess(2));
-      RealVectorValue residual_moose;
-      _residual(guess_moose, residual_moose);
-      residual(0) = residual_moose(0);
-      residual(1) = residual_moose(1);
-      residual(2) = residual_moose(2);
-      return 0;
-    }
-    int df(V & guess, NestedSolveTempl<is_ad>::CorrespondingJacobian<V> & jacobian)
-    {
-      RealVectorValue guess_moose(guess(0), guess(1), guess(2));
-      RankTwoTensor jacobian_moose;
-      _jacobian(guess_moose, jacobian_moose);
-      jacobian = Eigen::Map<NestedSolveTempl<is_ad>::DynamicMatrix>(&jacobian_moose(0, 0), 3, 3);
-      return 0;
-    }
-
-  private:
-    R & _residual;
-    J & _jacobian;
-  };
-
   // adaptor functor to utilize the Eigen non-linear solver
-  auto functor = EigenAdaptorFunctor(computeResidual, computeJacobian);
+  auto functor = make_realvector_adaptor(computeResidual, computeJacobian);
   Eigen::HybridNonLinearSolver<decltype(functor), NSReal> solver(functor);
   V guess_eigen(3);
   guess_eigen << guess(0), guess(1), guess(2);
@@ -424,7 +361,125 @@ struct CorrespondingJacobianTempl<typename Eigen::Matrix<ADReal, N, 1>>
   using type = Eigen::Matrix<ADReal, N, N>;
 };
 
+/**
+ * Adaptor functor for Eigen::Matrix based residual and Jacobian types. No type conversion required.
+ */
+template <bool is_ad, typename R, typename J>
+class DynamicMatrixEigenAdaptorFunctor
+{
+  using V = typename NestedSolveTempl<is_ad>::DynamicVector;
+
+public:
+  DynamicMatrixEigenAdaptorFunctor(R & residual, J & jacobian)
+    : _residual(residual), _jacobian(jacobian)
+  {
+  }
+  int operator()(V & guess, V & residual)
+  {
+    _residual(guess, residual);
+    return 0;
+  }
+  int df(V & guess, typename NestedSolveTempl<is_ad>::template CorrespondingJacobian<V> & jacobian)
+  {
+    _jacobian(guess, jacobian);
+    return 0;
+  }
+
+private:
+  R & _residual;
+  J & _jacobian;
+};
+
+/**
+ * Adaptor functor for scalar Real valued residual and Jacobian types. Picks the single scalar
+ * component.
+ */
+template <bool is_ad, typename R, typename J>
+class RealEigenAdaptorFunctor
+{
+  using V = typename NestedSolveTempl<is_ad>::DynamicVector;
+
+public:
+  RealEigenAdaptorFunctor(R & residual, J & jacobian) : _residual(residual), _jacobian(jacobian) {}
+  int operator()(V & guess, V & residual)
+  {
+    _residual(guess(0), residual(0, 0));
+    return 0;
+  }
+  int df(V & guess, typename NestedSolveTempl<is_ad>::template CorrespondingJacobian<V> & jacobian)
+  {
+    _jacobian(guess(0), jacobian(0, 0));
+    return 0;
+  }
+
+private:
+  R & _residual;
+  J & _jacobian;
+};
+
+/**
+ * Adaptor functor for MOOSE RealVectorValue/RankTwoTensor residual and Jacobian types. Performs
+ * type conversion.
+ */
+template <bool is_ad, typename R, typename J>
+class RealVectorEigenAdaptorFunctor
+{
+  using V = typename NestedSolveTempl<is_ad>::DynamicVector;
+
+public:
+  RealVectorEigenAdaptorFunctor(R & residual, J & jacobian)
+    : _residual(residual), _jacobian(jacobian)
+  {
+  }
+  int operator()(V & guess, V & residual)
+  {
+    typename NestedSolveTempl<is_ad>::NSRealVectorValue guess_moose(guess(0), guess(1), guess(2));
+    typename NestedSolveTempl<is_ad>::NSRealVectorValue residual_moose;
+    _residual(guess_moose, residual_moose);
+    residual(0) = residual_moose(0);
+    residual(1) = residual_moose(1);
+    residual(2) = residual_moose(2);
+    return 0;
+  }
+  int df(V & guess, typename NestedSolveTempl<is_ad>::template CorrespondingJacobian<V> & jacobian)
+  {
+    typename NestedSolveTempl<is_ad>::NSRealVectorValue guess_moose(guess(0), guess(1), guess(2));
+    typename NestedSolveTempl<is_ad>::NSRankTwoTensor jacobian_moose;
+    _jacobian(guess_moose, jacobian_moose);
+    jacobian =
+        Eigen::Map<typename NestedSolveTempl<is_ad>::DynamicMatrix>(&jacobian_moose(0, 0), 3, 3);
+    return 0;
+  }
+
+private:
+  R & _residual;
+  J & _jacobian;
+};
+
 } // namespace NestedSolveInternal
+
+template <bool is_ad>
+template <typename R, typename J>
+auto
+NestedSolveTempl<is_ad>::make_adaptor(R residual, J jacobian)
+{
+  return NestedSolveInternal::DynamicMatrixEigenAdaptorFunctor<is_ad, R, J>(residual, jacobian);
+}
+template <bool is_ad>
+template <typename R, typename J>
+auto
+NestedSolveTempl<is_ad>::make_real_adaptor(R residual, J jacobian)
+{
+  return NestedSolveInternal::RealEigenAdaptorFunctor<is_ad, R, J>(residual, jacobian);
+}
+
+template <bool is_ad>
+template <typename R, typename J>
+auto
+NestedSolveTempl<is_ad>::make_realvector_adaptor(R residual, J jacobian)
+{
+  return NestedSolveInternal::RealVectorEigenAdaptorFunctor<is_ad, R, J>(residual, jacobian);
+}
 
 typedef NestedSolveTempl<false> NestedSolve;
 typedef NestedSolveTempl<true> ADNestedSolve;
