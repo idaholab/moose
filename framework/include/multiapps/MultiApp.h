@@ -137,7 +137,7 @@ public:
   /**
    * Method which can be used for state-dependent reinitialization of the multiapp.
    */
-  virtual void initialSetup(bool /*solved*/) {}
+  virtual void reinitialize(bool /*solved*/) {}
 
   /**
    * Gets called just before transfers are done _to_ the MultiApp

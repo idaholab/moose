@@ -25,7 +25,7 @@ public:
 
   virtual void initialSetup() override;
 
-  virtual void initialSetup(bool solved) override;
+  virtual void reinitialize(bool solved) override;
 
   virtual bool solveStep(Real dt, Real target_time, bool auto_advance = true) override;
 

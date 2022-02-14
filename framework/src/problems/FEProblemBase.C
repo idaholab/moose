@@ -4535,7 +4535,7 @@ FEProblemBase::reinitMultiApps(ExecFlagType type, std::string type_name, bool so
 
     for (const auto & app : multi_apps)
       if (app->type() == type_name)
-        app->initialSetup(solved);
+        app->reinitialize(solved);
 
     MooseUtils::parallelBarrierNotify(_communicator, _parallel_barrier_messaging);
 
