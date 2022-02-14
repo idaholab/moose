@@ -172,7 +172,8 @@ FVFluxKernel::computeResidualAndJacobian(const FaceInfo & fi)
   _face_type = fi.faceType(_var.name());
   const auto residual = fi.faceArea() * fi.faceCoord() * computeQpResidual();
 
-  auto process_residual = [this](const ADReal & residual, const Elem & elem) {
+  auto process_residual = [this](const ADReal & residual, const Elem & elem)
+  {
     const auto dof_index = elem.dof_number(_sys.number(), _var.number(), 0);
 
     _assembly.processDerivatives(residual, dof_index, _matrix_tags);
