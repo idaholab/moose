@@ -78,6 +78,10 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
   if (_extrude && getMeshProperty<unsigned int>("mesh_dimensions", _reactor_params) != 3)
     mooseError("This is a 2 dimensional mesh, you cannot extrude it. Check your ReactorMeshParams "
                "inputs\n");
+  if (_extrude && (!hasMeshProperty("top_boundary_id", _reactor_params) ||
+                   !hasMeshProperty("bottom_boundary_id", _reactor_params)))
+    mooseError("Both top_boundary_id and bottom_boundary_id must be provided in ReactorMeshParams "
+               "if using extruded geometry");
 
   std::size_t empty_pattern_loc = 0;
   bool make_empty = false;
@@ -272,6 +276,9 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
   {
     std::vector<Real> axial_boundaries =
         getMeshProperty<std::vector<Real>>("axial_boundaries", _reactor_params);
+    const auto top_boundary = getMeshProperty<boundary_id_type>("top_boundary_id", _reactor_params);
+    const auto bottom_boundary =
+        getMeshProperty<boundary_id_type>("bottom_boundary_id", _reactor_params);
     {
       declareMeshProperty("extruded", true);
       auto params = _app.getFactory().getValidParams("FancyExtruderGenerator");
@@ -282,8 +289,8 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
       params.set<std::vector<unsigned int>>("num_layers") =
           getMeshProperty<std::vector<unsigned int>>("axial_mesh_intervals", _reactor_params);
       params.set<std::vector<Real>>("heights") = axial_boundaries;
-      params.set<boundary_id_type>("bottom_boundary") = 202;
-      params.set<boundary_id_type>("top_boundary") = 201;
+      params.set<boundary_id_type>("bottom_boundary") = bottom_boundary;
+      params.set<boundary_id_type>("top_boundary") = top_boundary;
 
       addMeshSubgenerator("FancyExtruderGenerator", name() + "_extruded", params);
     }

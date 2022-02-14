@@ -28,7 +28,7 @@ The `PinMeshGenerator` object also automatically tags the mesh with the [!param]
 
 The `PinMeshGenerator` object automatically assigns boundary information derived from the [!param](/Mesh/PinMeshGenerator/pin_type) parameter. The exterior pin boundary is assigned the ID equal to 20000 + the pin type ID and is named "outer_pin_<pin_type_id>" (for example a pin with a pin type ID of 1 will have a boundary ID of 20001 and boundary name of "outer_pin_1").
 
-If the core is extruded to three dimensions the top-most boundary will be assigned an ID equal to 201 and the name "top", while the bottom-most boundary will be assigned an ID equal to 202 and the name "bottom".
+If the pin is extruded to three dimensions the top-most boundary ID must be assigned using [!param](/Mesh/ReactorMeshParams/top_boundary_id) and will have the name "top", while the bottom-most boundary must be assigned using [!param](/Mesh/ReactorMeshParams/bottom_boundary_id) and will have the name "bottom".
 
 ## Example Syntax
 

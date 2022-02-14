@@ -12,7 +12,8 @@
 #include "MeshGenerator.h"
 
 /**
- * Generates a pin-like structure for a square or hexagonal grid with the option to be 2- or 3-D.
+ * Mesh generator for defining a reactor pin with background and duct regions, with the option to be
+ * 2-D or 3-D.
  */
 class PinMeshGenerator : public MeshGenerator
 {

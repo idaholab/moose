@@ -39,4 +39,10 @@ protected:
 
   ///The number of mesh divisions in each axial region.
   const std::vector<unsigned int> _axial_mesh_intervals;
+
+  ///Boundary id assigned to top boundary of extruded mesh.
+  boundary_id_type _top_boundary;
+
+  ///Boundary id assigned to bottom boundary of extruded mesh.
+  boundary_id_type _bottom_boundary;
 };
