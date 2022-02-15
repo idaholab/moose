@@ -97,6 +97,9 @@ protected:
   /// A functor for computing the (non-RC corrected) velocity
   std::vector<std::unique_ptr<PiecewiseByBlockLambdaFunctor<ADRealVectorValue>>> _vel;
 
+  /// The interpolation method to use for the velocity
+  Moose::FV::InterpMethod _velocity_interp_method;
+
   /// The thread 0 copy of the pressure variable
   INSFVPressureVariable * const _p;
 
