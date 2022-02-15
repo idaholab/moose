@@ -1,22 +1,22 @@
 [Tests]
   design = 'fv_design.md'
   issues = '#14549'
-  [./dirichlet]
+  [dirichlet]
     type = 'Exodiff'
     input = 'dirichlet.i'
     exodiff = 'dirichlet_out.e'
 
     requirement = 'The system shall run a simple 2D linear diffusion problem using the finite volume method with Dirichlet boundary conditions on a regular mesh.'
     ad_indexing_type = 'global'
-  [../]
-  [./dirichlet_rz]
+  []
+  [dirichlet_rz]
     type = 'Exodiff'
     input = 'dirichlet_rz.i'
     exodiff = 'dirichlet_rz_out.e'
     requirement = 'The system shall run a simple 2D linear diffusion problem in RZ coordinates using the finite volume method with Dirichlet boundary conditions on a regular mesh.'
     ad_indexing_type = 'global'
-  [../]
-  [./dirichlet_full_jac]
+  []
+  [dirichlet_full_jac]
     type = 'Exodiff'
     input = 'dirichlet.i'
     exodiff = 'dirichlet_out.e'
@@ -25,24 +25,35 @@
 
     requirement = 'The system shall be able to compute a full Jacobian matrix when performing finite volume computations'
     ad_indexing_type = 'global'
-  [../]
+  []
 
-  [./neumann]
-    type = 'Exodiff'
-    input = 'neumann.i'
-    exodiff = 'neumann_out.e'
-    requirement = 'The system shall run a simple 2D linear diffusion problem using the finite volume method with Neumann and Dirichlet boundary conditions on a regular mesh.'
-    ad_indexing_type = 'global'
-  [../]
+  [neumann]
+    requirement = 'The system shall run a simple 2D linear diffusion problem using the finite volume method with Neumann and Dirichlet boundary conditions on a regular mesh, computing the Jacobian and residual:'
+    [neumann]
+      type = 'Exodiff'
+      input = 'neumann.i'
+      exodiff = 'neumann_out.e'
+      ad_indexing_type = 'global'
+      detail = 'separately'
+    []
+    [neumann_together]
+      type = 'Exodiff'
+      input = 'neumann.i'
+      exodiff = 'neumann_together.e'
+      ad_indexing_type = 'global'
+      detail = 'together'
+      cli_args = 'Outputs/file_base=neumann_together Executioner/resid_and_jacobian_together=true'
+    []
+  []
 
-  [./transient]
+  [transient]
     type = 'Exodiff'
     input = 'transient.i'
     exodiff = 'transient_out.e'
     requirement = 'The system shall run a simple 2D transient linear diffusion problem using the finite volume method with Dirichlet boundary conditions on a regular mesh.'
     method = '!dbg'
     ad_indexing_type = 'global'
-  [../]
+  []
 
   [refinement]
     requirement = 'The system shall be able to solve a finite-volume-only problem'
