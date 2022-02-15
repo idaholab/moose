@@ -1,6 +1,5 @@
 [Tests]
   design = 'INSFVScalarFieldAdvection.md INSFVRhieChowInterpolator.md'
-  issues = '#16585'
   [multiapp]
     type = Exodiff
     input = 'fluid-flow.i'
@@ -8,5 +7,46 @@
     requirement = 'The system shall be able to transport passive scalar quantities in an application different from the fluid flow.'
     ad_indexing_type = 'global'
     valgrind = HEAVY
+    issues = '#16585'
+  []
+
+  # Exception checking
+  [average_yet_a_provided]
+    type = RunException
+    input = 'scalar-transport.i'
+    cli_args =  "UserObjects/rc/velocity_interp_method='average'"
+    expect_err = 'Rhie Chow coefficients may not be specified for average velocity interpolation'
+    requirement = 'The system shall error out if both average and Rhie Chow velocity interpolation parameters are provided.'
+    issues = '#20294'
+    ad_indexing_type = 'global'
+  []
+  [RC_yet_a_not_provided]
+    type = RunException
+    input = 'scalar-transport.i'
+    cli_args =  "UserObjects/active='rc_bad' GlobalParams/rhie_chow_user_object='rc_bad'"
+    expect_err = 'No INSFVKernels detected for the velocity variables*'
+    requirement = 'The system shall error out if Rhie Chow velocity interpolation is requested but the a coefficients are not provided and cannot be computed from the momemtum equation.'
+    issues = '#20294'
+    ad_indexing_type = 'global'
+  []
+  [bad_a_components]
+    requirement = 'The system shall error out if the Rhie Chow a coefficients are provided in a manner inconsistent with the dimension of the problem g'
+    issues = '#20294'
+    [vu]
+      type = RunException
+      input = 'scalar-transport.i'
+      cli_args =  "UserObjects/active='rc_bad' GlobalParams/rhie_chow_user_object='rc_bad' UserObjects/rc_bad/a_v=ay"
+      expect_err = 'If the a_v coefficients are provided, then a_u must be provided'
+      detail = 'for example with the Y coefficient but not the X one'
+      ad_indexing_type = 'global'
+    []
+    [bad_a_components_wu]
+      type = RunException
+      input = 'scalar-transport.i'
+      cli_args =  "UserObjects/active='rc_bad' GlobalParams/rhie_chow_user_object='rc_bad' UserObjects/rc_bad/a_w=ay"
+      expect_err = 'If the a_w coefficients are provided, then a_u must be provided'
+      detail = 'for example with the Z coefficient but not the X one'
+      ad_indexing_type = 'global'
+    []
   []
 []

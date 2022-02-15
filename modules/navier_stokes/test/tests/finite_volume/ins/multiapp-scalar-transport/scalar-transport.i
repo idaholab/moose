@@ -7,6 +7,7 @@ velocity_interp_method='rc'
 []
 
 [UserObjects]
+  active = 'rc'
   [rc]
     type = INSFVRhieChowInterpolator
     u = u
@@ -14,6 +15,13 @@ velocity_interp_method='rc'
     pressure = pressure
     a_u = ax
     a_v = ay
+  []
+
+  [rc_bad]
+    type = INSFVRhieChowInterpolator
+    u = u
+    v = v
+    pressure = pressure
   []
 []
 
