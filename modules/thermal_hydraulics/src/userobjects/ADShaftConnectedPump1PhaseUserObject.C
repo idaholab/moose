@@ -122,7 +122,7 @@ ADShaftConnectedPump1PhaseUserObject::computeFluxesAndResiduals(const unsigned i
   {
     ADReal alpha = _omega[0] / _omega_rated;
 
-    ADReal Q_in = (_rhouA[0] / _rhoA[0]) * _A_ref;
+    ADReal Q_in = (_rhouA[0] / _rhoA[0]) * _A[0];
 
     ADReal nu = Q_in / _volumetric_rated;
 
