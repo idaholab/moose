@@ -1,0 +1,9 @@
+The user must supply the name of the
+[heat structure](thermal_hydraulics/component_groups/heat_structure.md) via the
+parameter [!param](/Components/{{name}}/hs) and then the applicable regions of
+the heat structure using the [!param](/Components/{{name}}/regions) parameter.
+For a [2D heat structure](thermal_hydraulics/component_groups/heat_structure_2d.md),
+[!param](/Components/{{name}}/regions) may include any set of the heat
+structure's `names` parameter. For [HeatStructureFromFile3D.md],
+[!param](/Components/{{name}}/regions) may include any set of blocks existing in
+the mesh file.
