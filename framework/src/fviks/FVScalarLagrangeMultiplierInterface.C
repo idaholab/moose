@@ -31,26 +31,39 @@ FVScalarLagrangeMultiplierInterface::FVScalarLagrangeMultiplierInterface(
 }
 
 void
+FVScalarLagrangeMultiplierInterface::computeResidualAndJacobian(const FaceInfo & fi)
+{
+  setupData(fi);
+
+  const auto var_elem_num = _elem_is_one ? var1().number() : var2().number();
+  const auto var_neigh_num = _elem_is_one ? var2().number() : var1().number();
+
+  const auto & elem_dof_indices = _elem_is_one ? var1().dofIndices() : var2().dofIndices();
+  const auto & neigh_dof_indices =
+      _elem_is_one ? var2().dofIndicesNeighbor() : var1().dofIndicesNeighbor();
+  mooseAssert((elem_dof_indices.size() == 1) && (neigh_dof_indices.size() == 1),
+              "We're currently built to use CONSTANT MONOMIALS");
+
+  const auto primal_r = _lambda[0] * fi.faceArea() * fi.faceCoord() * (2 * _elem_is_one - 1);
+
+  // Primal residual
+  processResidual(MetaPhysicL::raw_value(primal_r), var_elem_num, false);
+  processResidual(MetaPhysicL::raw_value(-primal_r), var_neigh_num, true);
+  _assembly.processDerivatives(primal_r, elem_dof_indices[0], _matrix_tags);
+  _assembly.processDerivatives(-primal_r, neigh_dof_indices[0], _matrix_tags);
+
+  // LM residual. We may not have any actual ScalarKernels in our simulation so we need to manually
+  // make sure the scalar residuals get cached for later addition
+  const auto lm_r = computeQpResidual() * fi.faceArea() * fi.faceCoord();
+  _assembly.processResidual(
+      MetaPhysicL::raw_value(lm_r), _lambda_var.dofIndices()[0], _vector_tags);
+  _assembly.processDerivatives(lm_r, _lambda_var.dofIndices()[0], _matrix_tags);
+}
+
+void
 FVScalarLagrangeMultiplierInterface::computeResidual(const FaceInfo & fi)
 {
-  _face_info = &fi;
-  _normal = fi.normal();
-  _elem_is_one = sub1().find(fi.elem().subdomain_id()) != sub1().end();
-
-#ifndef NDEBUG
-  const auto ft1 = fi.faceType(var1().name());
-  const auto ft2 = fi.faceType(var2().name());
-  constexpr auto ft_both = FaceInfo::VarFaceNeighbors::BOTH;
-  constexpr auto ft_elem = FaceInfo::VarFaceNeighbors::ELEM;
-  constexpr auto ft_neigh = FaceInfo::VarFaceNeighbors::NEIGHBOR;
-  mooseAssert(((ft1 == ft_both) && (ft2 == ft_both)) ||
-                  (_elem_is_one && (ft1 == ft_elem) && (ft2 == ft_neigh)) ||
-                  (!_elem_is_one && (ft1 == ft_neigh) && (ft2 == ft_elem)),
-              "These seem like the reasonable combinations of face types.");
-#endif
-  mooseAssert(_lambda.size() == 1 && _lambda_var.order() == 1,
-              "The lambda variable should be first order");
-  mooseAssert(_lambda_var.dofIndices().size() == 1, "We should only have a single dof");
+  setupData(fi);
 
   const auto var_elem_num = _elem_is_one ? var1().number() : var2().number();
   const auto var_neigh_num = _elem_is_one ? var2().number() : var1().number();
@@ -59,40 +72,19 @@ FVScalarLagrangeMultiplierInterface::computeResidual(const FaceInfo & fi)
       MetaPhysicL::raw_value(_lambda[0]) * fi.faceArea() * fi.faceCoord() * (2 * _elem_is_one - 1);
 
   // Primal residual
-  prepareVectorTag(_assembly, var_elem_num);
-  mooseAssert(_local_re.size() == 1, "We should only have a single dof");
-  _local_re(0) = r;
-  accumulateTaggedLocalResidual();
-  prepareVectorTagNeighbor(_assembly, var_neigh_num);
-  _local_re(0) = -r;
-  accumulateTaggedLocalResidual();
+  processResidual(r, var_elem_num, false);
+  processResidual(-r, var_neigh_num, true);
 
   // LM residual. We may not have any actual ScalarKernels in our simulation so we need to manually
   // make sure the scalar residuals get cached for later addition
   const auto lm_r = MetaPhysicL::raw_value(computeQpResidual()) * fi.faceArea() * fi.faceCoord();
-  _assembly.cacheResidual(_lambda_var.dofIndices()[0], lm_r, _vector_tags);
+  _assembly.processResidual(lm_r, _lambda_var.dofIndices()[0], _vector_tags);
 }
 
 void
 FVScalarLagrangeMultiplierInterface::computeJacobian(const FaceInfo & fi)
 {
-  _face_info = &fi;
-  _normal = fi.normal();
-  _elem_is_one = sub1().find(fi.elem().subdomain_id()) != sub1().end();
-
-#ifndef NDEBUG
-  const auto ft1 = fi.faceType(var1().name());
-  const auto ft2 = fi.faceType(var2().name());
-  constexpr auto ft_both = FaceInfo::VarFaceNeighbors::BOTH;
-  constexpr auto ft_elem = FaceInfo::VarFaceNeighbors::ELEM;
-  constexpr auto ft_neigh = FaceInfo::VarFaceNeighbors::NEIGHBOR;
-  mooseAssert(((ft1 == ft_both) && (ft2 == ft_both)) ||
-                  (_elem_is_one && (ft1 == ft_elem) && (ft2 == ft_neigh)) ||
-                  (!_elem_is_one && (ft1 == ft_neigh) && (ft2 == ft_elem)),
-              "These seem like the reasonable combinations of face types.");
-#endif
-  mooseAssert(_lambda.size() == 1 && _lambda_var.order() == 1,
-              "The lambda variable should be first order");
+  setupData(fi);
 
   const auto & elem_dof_indices = _elem_is_one ? var1().dofIndices() : var2().dofIndices();
   const auto & neigh_dof_indices =

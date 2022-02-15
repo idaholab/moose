@@ -1,12 +1,24 @@
 [Tests]
   [continuity]
-    type = Exodiff
+    requirement = 'The system shall be able to solve a diffusion problem with finite volumes with the domain split in half and force the two variables living on each side of the domain to match on the interface., when the residual and Jacobian are computed:'
     issues = '#17638'
     design = 'FVTwoVarContinuityConstraint.md'
-    requirement = 'The system shall be able to solve a diffusion problem with finite volumes with the domain split in half and force the two variables living on each side of the domain to match on the interface.'
-    input = test.i
-    exodiff = 'test_out.e'
-    ad_indexing_type = 'global'
-    max_parallel = 20
+    [continuity]
+      type = Exodiff
+      detail = 'separately'
+      input = test.i
+      exodiff = 'test_out.e'
+      ad_indexing_type = 'global'
+      max_parallel = 20
+    []
+    [continuity_together]
+      type = Exodiff
+      detail = 'together'
+      input = test.i
+      exodiff = 'test_together.e'
+      ad_indexing_type = 'global'
+      max_parallel = 20
+      cli_args = 'Outputs/file_base=test_together Executioner/resid_and_jacobian_together=true'
+    []
   []
 []

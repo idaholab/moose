@@ -17,6 +17,7 @@ public:
   static InputParameters validParams();
   FVScalarLagrangeMultiplierInterface(const InputParameters & params);
 
+  void computeResidualAndJacobian(const FaceInfo & fi) override final;
   void computeResidual(const FaceInfo & fi) override final;
   void computeJacobian(const FaceInfo &) override final;
 
