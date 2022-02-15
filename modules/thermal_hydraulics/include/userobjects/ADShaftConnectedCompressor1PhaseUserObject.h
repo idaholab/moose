@@ -41,6 +41,10 @@ public:
   ADReal getFrictionTorque() const;
   /// Compressor head computed in the 1-phase shaft-connected compressor
   ADReal getCompressorDeltaP() const;
+  /// Gets the pressure ratio
+  ADReal getPressureRatio() const;
+  /// Gets the efficiency
+  ADReal getEfficiency() const;
 
   virtual void finalize() override;
   virtual void threadJoin(const UserObject & uo) override;
@@ -50,6 +54,8 @@ protected:
 
   /// Direction of the compressor outlet
   Point _di_out;
+  /// Treat the compressor as a turbine?
+  const bool _treat_as_turbine;
   /// Rated compressor speed
   const Real & _omega_rated;
   /// Rated compressor mass flow rate
@@ -82,6 +88,10 @@ protected:
   std::vector<const Function *> _Rp_functions;
   /// Adiabatic efficiency functions
   std::vector<const Function *> _eff_functions;
+  /// Minimum pressure ratio
+  const Real & _Rp_min;
+  /// Maximum pressure ratio
+  const Real & _Rp_max;
 
   /// Compressor name
   const std::string & _compressor_name;
@@ -96,6 +106,10 @@ protected:
   ADReal _friction_torque;
   /// Compressor delta p
   ADReal _delta_p;
+  /// Pressure ratio
+  ADReal _Rp;
+  /// Efficiency
+  ADReal _eff;
 
   /// Jacobian entries of junction variables wrt shaft variables
   std::vector<DenseMatrix<Real>> _residual_jacobian_omega_var;

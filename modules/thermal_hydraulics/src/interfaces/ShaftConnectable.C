@@ -20,8 +20,16 @@ ShaftConnectable::validParams()
 ShaftConnectable::ShaftConnectable(const Component * const component)
   : _moment_of_inertia_var_name(component->genName(component->name(), "moment_of_inertia")),
     _torque_var_name(component->genName(component->name(), "torque")),
-    _user_object_name(component->genName(component->name(), "shaftconnected_uo"))
+    _user_object_name(component->genName(component->name(), "shaftconnected_uo")),
+    _connected_to_shaft(false)
 {
+}
+
+void
+ShaftConnectable::checkShaftConnection(const Component * const component) const
+{
+  if (!_connected_to_shaft)
+    component->logError("This component must be connected to a shaft.");
 }
 
 VariableName
@@ -46,4 +54,5 @@ void
 ShaftConnectable::setShaftName(const std::string & name) const
 {
   _shaft_name = name;
+  _connected_to_shaft = true;
 }

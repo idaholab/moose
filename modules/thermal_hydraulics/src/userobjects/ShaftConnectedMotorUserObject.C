@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ShaftConnectedMotorUserObject.h"
+#include "Function.h"
 
 registerMooseObject("ThermalHydraulicsApp", ShaftConnectedMotorUserObject);
 
@@ -16,24 +17,26 @@ ShaftConnectedMotorUserObject::validParams()
 {
   InputParameters params = GeneralUserObject::validParams();
   params += ShaftConnectableUserObjectInterface::validParams();
-  params.addRequiredParam<Real>("torque", "Driving torque supplied by the motor");
-  params.addRequiredParam<Real>("inertia", "Moment of inertia from the motor");
-  params.declareControllable("torque inertia");
+  params.addRequiredParam<FunctionName>("torque", "Torque as a function of shaft speed");
+  params.addRequiredParam<FunctionName>("inertia",
+                                        "Moment of inertia as a function of shaft speed");
+  params.addRequiredCoupledVar("shaft_speed", "Shaft speed");
   return params;
 }
 
 ShaftConnectedMotorUserObject::ShaftConnectedMotorUserObject(const InputParameters & params)
   : GeneralUserObject(params),
     ShaftConnectableUserObjectInterface(this),
-    _torque(getParam<Real>("torque")),
-    _inertia(getParam<Real>("inertia"))
+    _torque_fn(getFunction("torque")),
+    _inertia_fn(getFunction("inertia")),
+    _shaft_speed(coupledScalarValue("shaft_speed"))
 {
 }
 
 Real
 ShaftConnectedMotorUserObject::getTorque() const
 {
-  return _torque;
+  return _torque_fn.value(_shaft_speed[0], Point());
 }
 
 void
@@ -45,7 +48,7 @@ ShaftConnectedMotorUserObject::getTorqueJacobianData(DenseMatrix<Real> & /*jacob
 Real
 ShaftConnectedMotorUserObject::getMomentOfInertia() const
 {
-  return _inertia;
+  return _inertia_fn.value(_shaft_speed[0], Point());
 }
 
 void

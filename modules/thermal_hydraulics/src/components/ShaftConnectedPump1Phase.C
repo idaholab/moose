@@ -104,6 +104,13 @@ ShaftConnectedPump1Phase::init()
 }
 
 void
+ShaftConnectedPump1Phase::check() const
+{
+  VolumeJunction1Phase::check();
+  checkShaftConnection(this);
+}
+
+void
 ShaftConnectedPump1Phase::buildVolumeJunctionUserObject()
 {
   const Component & c = getComponentByName<Component>(_shaft_name);
