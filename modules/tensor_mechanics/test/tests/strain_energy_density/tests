@@ -1,95 +1,94 @@
 [Tests]
- issues = '#10972'
- [./incr_elas]
-   type = 'CSVDiff'
-   input = 'incr_model.i'
-   csvdiff = 'incr_model_out.csv'
-   rel_err = 1e-6
-   abs_zero = 1e-8
-   design = 'StrainEnergyDensity.md'
-   requirement = 'Moose shall be capable of calculating strain energy density '
-                 'incrementally in materials with elastic stress and finite '
-                 'strain.'
- [../]
- [./incr_chk1]
-   type = 'RunException'
-   input = 'incr_model.i'
-   cli_args = 'Materials/strain_energy_density/incremental=false'
-   design = 'StrainEnergyDensity.md'
-   expect_err = 'StrainEnergyDensity: Specified incremental = false, but material model is incremental.'
-   requirement = 'Moose shall be capable of informing a user when they '
-                 'incorrectly choose not to use the incremental strain '
-                 'energy density formulation with an incremental material '
-                 'model.'
- [../]
- [./tot_elas]
-   type = 'CSVDiff'
-   input = 'tot_model.i'
-   csvdiff = 'tot_model_out.csv'
-   rel_err = 1e-6
-   design = 'StrainEnergyDensity.md'
-   requirement = 'Moose shall be capable of calculating strain energy density '
-                 'for materials with elastic stress and small strain.'
- [../]
- [./tot_chk1]
-   type = 'RunException'
-   input = 'tot_model.i'
-   cli_args = 'Materials/strain_energy_density/incremental=true'
-   design = 'StrainEnergyDensity.md'
-   expect_err = "StrainEnergyDensity: Specified incremental = true, but material model is not incremental."
-   requirement = 'Moose shall be capable of informing a user when they '
-                 'incorrectly choose to use the incremental strain energy '
-                 'density formulation in a material utilizing small strain.'
- [../]
- [./incr_elas_plas]
-   type = 'CSVDiff'
-   input = 'incr_model_elas_plas.i'
-   csvdiff = 'incr_model_elas_plas_out.csv'
-   rel_err = 1e-6
-   design = 'StrainEnergyDensity.md'
-   requirement = 'Moose shall be capable of calculating strain energy density '
-                 'incrementally in materials with inelastic stress and '
-                 'isotropic plasticity.'
- [../]
- [./rate_model]
-   type = 'CSVDiff'
-   input = 'rate_model.i'
-   csvdiff = 'rate_model_out.csv'
-   rel_err = 1e-6
-   abs_zero = 1e-8
-   design = 'StrainEnergyRateDensity.md'
-   requirement = 'Moose shall be capable of calculating strain energy rate density '
-                 'with elastic stress and finite strain.'
- [../]
- [./rate_model_small]
-   type = 'CSVDiff'
-   input = 'rate_model_small.i'
-   csvdiff = 'rate_model_small_out.csv'
-   rel_err = 1e-6
-   design = 'StrainEnergyRateDensity.md'
-   requirement = 'Moose shall be capable of calculating strain energy rate density '
-                 'when using small strain assumptions.'
- [../]
+  issues = '#10972'
+  [incr_elas]
+    type = 'CSVDiff'
+    input = 'incr_model.i'
+    csvdiff = 'incr_model_out.csv'
+    rel_err = 1e-6
+    abs_zero = 1e-8
+    design = 'StrainEnergyDensity.md'
+    requirement = 'Moose shall be capable of calculating strain energy density incrementally in '
+                  'materials with elastic stress and finite strain.'
+  []
+  [incr_chk1]
+    type = 'RunException'
+    input = 'incr_model.i'
+    cli_args = 'Materials/strain_energy_density/incremental=false'
+    design = 'StrainEnergyDensity.md'
+    expect_err = 'StrainEnergyDensity: Specified incremental = false, but material model is '
+                 'incremental.'
+    requirement = 'Moose shall be capable of informing a user when they incorrectly choose not to '
+                  'use the incremental strain energy density formulation with an incremental '
+                  'material model.'
+  []
+  [tot_elas]
+    type = 'CSVDiff'
+    input = 'tot_model.i'
+    csvdiff = 'tot_model_out.csv'
+    rel_err = 1e-6
+    design = 'StrainEnergyDensity.md'
+    requirement = 'Moose shall be capable of calculating strain energy density for materials with '
+                  'elastic stress and small strain.'
+  []
+  [tot_chk1]
+    type = 'RunException'
+    input = 'tot_model.i'
+    cli_args = 'Materials/strain_energy_density/incremental=true'
+    design = 'StrainEnergyDensity.md'
+    expect_err = "StrainEnergyDensity: Specified incremental = true, but material model is not "
+                 "incremental."
+    requirement = 'Moose shall be capable of informing a user when they incorrectly choose to use '
+                  'the incremental strain energy density formulation in a material utilizing small '
+                  'strain.'
+  []
+  [incr_elas_plas]
+    type = 'CSVDiff'
+    input = 'incr_model_elas_plas.i'
+    csvdiff = 'incr_model_elas_plas_out.csv'
+    rel_err = 1e-6
+    design = 'StrainEnergyDensity.md'
+    requirement = 'Moose shall be capable of calculating strain energy density incrementally in '
+                  'materials with inelastic stress and isotropic plasticity.'
+  []
+  [rate_model]
+    type = 'CSVDiff'
+    input = 'rate_model.i'
+    csvdiff = 'rate_model_out.csv'
+    rel_err = 1e-6
+    abs_zero = 1e-8
+    design = 'StrainEnergyRateDensity.md'
+    requirement = 'Moose shall be capable of calculating strain energy rate density with elastic '
+                  'stress and finite strain.'
+  []
+  [rate_model_small]
+    type = 'CSVDiff'
+    input = 'rate_model_small.i'
+    csvdiff = 'rate_model_small_out.csv'
+    rel_err = 1e-6
+    design = 'StrainEnergyRateDensity.md'
+    requirement = 'Moose shall be capable of calculating strain energy rate density when using small '
+                  'strain assumptions.'
+  []
 
- [./ad_rate_model_weak_plane]
-   type = 'CSVDiff'
-   input = 'ad_rate_model_weak_plane.i'
-   csvdiff = 'ad_rate_model_weak_plane_out.csv'
-   rel_err = 1e-6
-   abs_zero = 1e-8
-   design = 'StrainEnergyRateDensity.md'
-   requirement = 'Moose shall be capable of calculating strain energy rate density '
-                 'when using automatic differentiation and weak plane stress.'
- [../]
+  [ad_rate_model_weak_plane]
+    type = 'CSVDiff'
+    input = 'ad_rate_model_weak_plane.i'
+    csvdiff = 'ad_rate_model_weak_plane_out.csv'
+    rel_err = 1e-6
+    abs_zero = 1e-8
+    design = 'StrainEnergyRateDensity.md'
+    requirement = 'Moose shall be capable of calculating strain energy rate density when using '
+                  'automatic differentiation and weak plane stress.'
+  []
 
- [./nonAD_rate_model_weak_plane]
-   type = 'CSVDiff'
-   input = 'nonAD_rate_model_weak_plane.i'
-   csvdiff = 'nonAD_rate_model_weak_plane_out.csv'
-   rel_err = 1e-6
-   abs_zero = 1e-8
-   design = 'StrainEnergyRateDensity.md'
-   requirement = 'Moose shall be capable of calculating strain energy rate density '
-                 'when using hand-coded Jacobian and weak plane stress.'
- [../]
+  [nonAD_rate_model_weak_plane]
+    type = 'CSVDiff'
+    input = 'nonAD_rate_model_weak_plane.i'
+    csvdiff = 'nonAD_rate_model_weak_plane_out.csv'
+    rel_err = 1e-6
+    abs_zero = 1e-8
+    design = 'StrainEnergyRateDensity.md'
+    requirement = 'Moose shall be capable of calculating strain energy rate density when using '
+                  'hand-coded Jacobian and weak plane stress.'
+  []
 []

@@ -48,7 +48,7 @@ protected:
   const GenericMaterialProperty<RankTwoTensor, is_ad> & _mechanical_strain;
 
   /// Current value of the strain increment for incremental models
-  const GenericMaterialProperty<RankTwoTensor, is_ad> * _strain_increment;
+  const GenericOptionalMaterialProperty<RankTwoTensor, is_ad> & _strain_increment;
 };
 
 typedef StrainEnergyDensityTempl<false> StrainEnergyDensity;

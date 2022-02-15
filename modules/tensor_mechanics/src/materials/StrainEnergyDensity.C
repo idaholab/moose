@@ -43,9 +43,7 @@ StrainEnergyDensityTempl<is_ad>::StrainEnergyDensityTempl(const InputParameters 
     _mechanical_strain(
         getGenericMaterialProperty<RankTwoTensor, is_ad>(_base_name + "mechanical_strain")),
     _strain_increment(
-        (isParamValid("incremental") && getParam<bool>("incremental"))
-            ? &getGenericMaterialProperty<RankTwoTensor, is_ad>(_base_name + "strain_increment")
-            : nullptr)
+        getGenericOptionalMaterialProperty<RankTwoTensor, is_ad>(_base_name + "strain_increment"))
 {
 }
 
@@ -81,9 +79,9 @@ StrainEnergyDensityTempl<is_ad>::computeQpProperties()
     _strain_energy_density[_qp] =
         _strain_energy_density_old[_qp] +
         MetaPhysicL::raw_value(_stress[_qp])
-                .doubleContraction(MetaPhysicL::raw_value((*_strain_increment)[_qp])) /
+                .doubleContraction(MetaPhysicL::raw_value(_strain_increment[_qp])) /
             2.0 +
-        _stress_old[_qp].doubleContraction(MetaPhysicL::raw_value((*_strain_increment)[_qp])) / 2.0;
+        _stress_old[_qp].doubleContraction(MetaPhysicL::raw_value(_strain_increment[_qp])) / 2.0;
   else
     _strain_energy_density[_qp] =
         MetaPhysicL::raw_value(_stress[_qp])

@@ -834,23 +834,24 @@ DomainIntegralAction::act()
       params.set<std::vector<SubdomainName>>("block") = {_blocks};
       _problem->addMaterial(mater_type_name, mater_name, params);
 
-      std::string mater_name2;
-      const std::string mater_type_name2(ad_prepend + "EshelbyTensor");
-      mater_name2 = ad_prepend + "EshelbyTensor";
+      {
+        std::string mater_name;
+        const std::string mater_type_name(ad_prepend + "EshelbyTensor");
+        mater_name = ad_prepend + "EshelbyTensor";
 
-      InputParameters params2 = _factory.getValidParams(mater_type_name2);
-      _displacements = getParam<std::vector<VariableName>>("displacements");
-      params2.set<std::vector<VariableName>>("displacements") = _displacements;
-      params2.set<std::vector<SubdomainName>>("block") = {_blocks};
+        InputParameters params = _factory.getValidParams(mater_type_name);
+        _displacements = getParam<std::vector<VariableName>>("displacements");
+        params.set<std::vector<VariableName>>("displacements") = _displacements;
+        params.set<std::vector<SubdomainName>>("block") = {_blocks};
 
-      if (have_c_integral)
-        params2.set<bool>("compute_dissipation") = true;
+        if (have_c_integral)
+          params.set<bool>("compute_dissipation") = true;
 
-      if (_temp != "")
-        params2.set<std::vector<VariableName>>("temperature") = {_temp};
+        if (_temp != "")
+          params.set<std::vector<VariableName>>("temperature") = {_temp};
 
-      _problem->addMaterial(mater_type_name2, mater_name2, params2);
-
+        _problem->addMaterial(mater_type_name, mater_name, params);
+      }
       // Strain energy rate density needed for C(t)/C* integral
       if (have_c_integral)
       {
