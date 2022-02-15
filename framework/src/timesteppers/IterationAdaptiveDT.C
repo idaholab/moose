@@ -51,6 +51,9 @@ IterationAdaptiveDT::validParams()
                         "Forces the timestepper to take "
                         "a step that is consistent with "
                         "points defined in the function");
+  params.addParam<Real>("post_function_sync_dt",
+                        "Timestep to apply after time sync with function point. To be used in "
+                        "conjunction with 'force_step_every_function_point'.");
   params.addRequiredParam<Real>("dt", "The default timestep size between solves");
   params.addParam<std::vector<Real>>("time_t", "The values of t");
   params.addParam<std::vector<Real>>("time_dt", "The values of dt");
@@ -102,6 +105,10 @@ IterationAdaptiveDT::IterationAdaptiveDT(const InputParameters & parameters)
     _times(0),
     _max_function_change(-1),
     _force_step_every_function_point(getParam<bool>("force_step_every_function_point")),
+    _post_function_sync_dt(isParamValid("force_step_every_function_point") &&
+                                   isParamValid("post_function_sync_dt")
+                               ? getParam<Real>("post_function_sync_dt")
+                               : 0.0),
     _tfunc_times(getParam<std::vector<Real>>("time_t").begin(),
                  getParam<std::vector<Real>>("time_t").end()),
     _time_ipol(getParam<std::vector<Real>>("time_t"), getParam<std::vector<Real>>("time_dt")),
@@ -144,6 +151,10 @@ IterationAdaptiveDT::IterationAdaptiveDT(const InputParameters & parameters)
       mooseError("'timestep_limiting_function' must be used for 'force_step_every_function_point' "
                  "to be used");
   }
+
+  if (!isParamValid("force_step_every_function_point") && isParamValid("post_function_sync_dt"))
+    paramWarning("post_function_sync_dt",
+                 "Not applicable if 'force_step_every_function_point = false'");
 }
 
 void
@@ -230,7 +241,10 @@ IterationAdaptiveDT::computeDT()
   else if (_sync_last_step)
   {
     _sync_last_step = false;
-    dt = _dt_old;
+    if (_post_function_sync_dt)
+      dt = _post_function_sync_dt;
+    else
+      dt = _dt_old;
 
     if (_verbose)
       _console << "Setting dt to value used before sync: " << std::setw(9) << dt << std::endl;

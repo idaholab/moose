@@ -84,7 +84,9 @@ protected:
 
   Real _max_function_change;
   /// insert sync points at the time nodes of the _piecewise_timestep_limiting_function
-  bool _force_step_every_function_point;
+  const bool _force_step_every_function_point;
+  /// Set timestep size if previous timestep is synced with function
+  const Real _post_function_sync_dt;
 
   std::set<Real> _tfunc_times;
 
