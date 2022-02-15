@@ -164,12 +164,14 @@ CrystalPlasticityTwinningKalidindiUpdate::calculateSlipRate()
         _slip_increment[_qp][i] = 0.0;
 
       // Check for allowable plastic strain due to twin propagation
-      if (_slip_increment[_qp][i] * _substep_dt > _slip_incr_tol)
+      if (_slip_increment[_qp][i] > _slip_incr_tol)
       {
         if (_print_convergence_message)
           mooseWarning("Maximum allowable plastic slip increment due to twinning exceeded the "
-                       "user-defined tolerance with a value of",
-                       _slip_increment[_qp][i] * _substep_dt,
+                       "user-defined tolerance on twin system ",
+                       i,
+                       ", with a value of",
+                       _slip_increment[_qp][i],
                        " when the increment tolerance is set at ",
                        _slip_incr_tol);
 

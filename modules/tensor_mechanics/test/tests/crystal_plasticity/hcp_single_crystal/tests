@@ -30,6 +30,14 @@
                'planes and the substructure density when the crystal is loaded in '
                'an appropriate orientation.'
     []
+    [update_method_hcp_basal_active]
+      type = 'CSVDiff'
+      input = 'update_method_hcp_basal_active.i'
+      csvdiff = 'update_method_hcp_basal_active_out.csv'
+      allow_warnings = true
+      detail = 'evolve the forest dislocation densities on basal <a> slip '
+               'planes when the crystal is loaded in an appropriate orientation.'
+    []
     [update_method_hcp_no_substructure]
       type = 'CSVDiff'
       input = 'update_method_hcp_no_substructure.i'
@@ -168,7 +176,7 @@
                    'assumption for HCP crystals. This file should represent both the '
                    'slip plane normal and the slip direction with 4-indices each.'
       detail = 'ensure that eight indices are given for the '
-               'Miller-Bravis notation for HCP slip systems;'
+               'Miller-Bravais notation for HCP slip systems;'
     []
     [update_method_hcp_representative_incorrect_basal_plane]
       type = 'RunException'
@@ -182,7 +190,7 @@
     [update_method_hcp_convergence_issue_flag]
       type = 'RunException'
       input = 'update_method_hcp_convergence_issue_flag.i'
-      expect_err = 'ComputeMultipleCrystalPlasticityStress: Stress Integration error rmax ='
+      expect_err = 'Maximum allowable slip increment exceeded'
       detail = ' provide warning messages about constitutive model and stress '
                'convergence issues when the corresponding input file parameter '
                'is set to true.'

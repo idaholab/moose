@@ -182,7 +182,6 @@ CrystalPlasticityStressUpdateBase::getSlipSystems()
 
     if (_crystal_lattice_type != CrystalLatticeType::HCP)
     {
-      // check if slip direction is normal to the slip plane normal
       auto magnitude = _slip_plane_normal[i] * _slip_direction[i];
       if (std::abs(magnitude) > libMesh::TOLERANCE)
       {
@@ -203,8 +202,7 @@ CrystalPlasticityStressUpdateBase::transformHexagonalMillerBravisSlipSystems(
     const MooseUtils::DelimitedFileReader & reader)
 {
   const unsigned int miller_bravis_indices = 4;
-  std::vector<Real> miller_bravis_slip_direction, temporary_slip_direction, temporary_slip_plane;
-  miller_bravis_slip_direction.resize(miller_bravis_indices);
+  std::vector<Real> temporary_slip_direction, temporary_slip_plane;
   temporary_slip_plane.resize(LIBMESH_DIM);
   temporary_slip_direction.resize(LIBMESH_DIM);
 
@@ -220,23 +218,18 @@ CrystalPlasticityStressUpdateBase::transformHexagonalMillerBravisSlipSystems(
                "slip plane normal and the slip direction with 4-indices each.");
 
   // set up the tranformation matrices
-  RankTwoTensor transform_planes, transform_directions;
-  transform_planes(0, 0) = 1.0 / _unit_cell_dimension[0];
-  transform_planes(1, 0) = 1.0 / (_unit_cell_dimension[0] * std::sqrt(3.0));
-  transform_planes(1, 1) = 2.0 / (_unit_cell_dimension[0] * std::sqrt(3.0));
-  transform_planes(2, 2) = 1.0 / (_unit_cell_dimension[2]);
-
-  transform_directions(0, 0) = _unit_cell_dimension[0];
-  transform_directions(0, 1) = -1.0 / (2 * _unit_cell_dimension[0]);
-  transform_directions(1, 1) = std::sqrt(3.0) * _unit_cell_dimension[0] / 2.0;
-  transform_directions(2, 2) = _unit_cell_dimension[2];
+  RankTwoTensor transform_matrix;
+  transform_matrix(0, 0) = 1.0 / _unit_cell_dimension[0];
+  transform_matrix(1, 0) = 1.0 / (_unit_cell_dimension[0] * std::sqrt(3.0));
+  transform_matrix(1, 1) = 2.0 / (_unit_cell_dimension[0] * std::sqrt(3.0));
+  transform_matrix(2, 2) = 1.0 / (_unit_cell_dimension[2]);
 
   for (auto i : make_range(_number_slip_systems))
   {
     // read in raw data from file and store in the temporary vectors
     for (unsigned int j = 0; j < reader.getData(i).size(); ++j)
     {
-      // Check that the indices of the basal plane sum to zero for consistency
+      // Check that the slip plane normal indices of the basal plane sum to zero for consistency
       Real basal_pl_sum = 0.0;
       for (auto k : make_range(LIBMESH_DIM))
         basal_pl_sum += reader.getData(i)[k];
@@ -245,6 +238,17 @@ CrystalPlasticityStressUpdateBase::transformHexagonalMillerBravisSlipSystems(
         mooseError(
             "CrystalPlasticityStressUpdateBase Error: The specified HCP basal plane Miller-Bravis "
             "indices do not sum to zero. Check the values supplied in the associated text file.");
+
+      // Check that the slip direction indices of the basal plane sum to zero for consistency
+      Real basal_dir_sum = 0.0;
+      for (auto k : make_range(miller_bravis_indices, miller_bravis_indices + LIBMESH_DIM))
+        basal_dir_sum += reader.getData(i)[k];
+
+      if (basal_dir_sum > _zero_tol)
+        mooseError("CrystalPlasticityStressUpdateBase Error: The specified HCP slip direction "
+                   "Miller-Bravis indices in the basal plane (U, V, and T) do not sum to zero "
+                   "within the user specified tolerance (try loosing zero_tol if using the default "
+                   "value). Check the values supplied in the associated text file.");
 
       if (j < miller_bravis_indices)
       {
@@ -258,22 +262,24 @@ CrystalPlasticityStressUpdateBase::transformHexagonalMillerBravisSlipSystems(
           temporary_slip_plane[j - 1] = reader.getData(i)[j];
       }
       else
-        miller_bravis_slip_direction[j - miller_bravis_indices] = reader.getData(i)[j];
+      {
+        auto direction_j = j - miller_bravis_indices;
+        // Store the first two indices for the slip direction in the basal plane,
+        //(U, V), and drop the redundant third basal plane index (T)
+        if (direction_j < 2)
+          temporary_slip_direction[direction_j] = reader.getData(i)[j];
+        // Store the c-axis index as the third entry in the orthorombic index convention
+        else if (direction_j == 3)
+          temporary_slip_direction[direction_j - 1] = reader.getData(i)[j];
+      }
     }
-
-    // save the 3-index combinations, with the convention a_1 = x
-    temporary_slip_direction[0] =
-        2.0 * miller_bravis_slip_direction[0] + miller_bravis_slip_direction[1];
-    temporary_slip_direction[1] =
-        miller_bravis_slip_direction[0] + 2.0 * miller_bravis_slip_direction[1];
-    temporary_slip_direction[2] = miller_bravis_slip_direction[3];
 
     // perform transformation calculation
     for (auto j : make_range(LIBMESH_DIM))
       for (auto k : make_range(LIBMESH_DIM))
       {
-        _slip_direction[i](j) += transform_directions(j, k) * temporary_slip_direction[k];
-        _slip_plane_normal[i](j) += transform_planes(j, k) * temporary_slip_plane[k];
+        _slip_direction[i](j) += transform_matrix(j, k) * temporary_slip_direction[k];
+        _slip_plane_normal[i](j) += transform_matrix(j, k) * temporary_slip_plane[k];
       }
   }
 }
