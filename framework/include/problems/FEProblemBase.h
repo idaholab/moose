@@ -1116,9 +1116,9 @@ public:
   void restoreMultiApps(ExecFlagType type, bool force = false);
 
   /**
-   * Restore the FullSolveMultiApps associated with the ExecFlagType
+   * Reinitalize multiapps of a given type at a given ExecFlag.
    */
-  void reinitMultiApps(ExecFlagType type, std::string type_name, bool solved = false);
+  void reinitMultiApps(ExecFlagType type, std::string type_name);
 
   /**
    * Find the smallest timestep over all MultiApps

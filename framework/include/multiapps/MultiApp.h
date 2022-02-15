@@ -135,9 +135,9 @@ public:
   virtual void initialSetup() override;
 
   /**
-   * Method which can be used for state-dependent reinitialization of the multiapp.
+   * Method which can be used for the reinitialization of the multiapp.
    */
-  virtual void reinitialize(bool /*solved*/) {}
+  virtual void reinitialize() {}
 
   /**
    * Gets called just before transfers are done _to_ the MultiApp

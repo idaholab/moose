@@ -68,12 +68,16 @@ FullSolveMultiApp::restore(bool /*force*/)
 }
 
 void
-FullSolveMultiApp::reinitialize(bool solved)
+FullSolveMultiApp::reinitialize()
 {
-  if (!solved)
-    initialSetup();
-  else if (getParam<bool>("reinit_after_solve"))
-    initialSetup();
+  // Similarly to restore, which is used for the fixed-point iteration,
+  // we reinitialize our problem if it is requested by the user.
+  if (getParam<bool>("reinit_after_solve") && _has_an_app)
+    for (unsigned int i = 0; i < _my_num_apps; i++)
+    {
+      resetApp(i);
+      initialSetup();
+    }
 }
 
 void

@@ -1,0 +1,20 @@
+[Tests]
+  issues = '#20262'
+  design = 'FullSolveMultiApp.md'
+
+  [noreset]
+    requirement = "The system should be capable of running the same FullSolveMultiapp multiple times without reinitializing the subapp "
+    type = 'CSVDiff'
+    csvdiff = 'noreset.csv'
+    input = 'main.i'
+    cli_args = 'MultiApps/full_solve/reinit_after_solve=false'
+  []
+
+  [reset]
+    requirement = "The system should be capable of running the same FullSolveMultiapp multiple times with reinitializing the subapp "
+    type = 'CSVDiff'
+    csvdiff = 'reset.csv'
+    input = 'main.i'
+    cli_args = 'MultiApps/full_solve/reinit_after_solve=true full_solve:Outputs/file_base="reset"'
+  []
+[]

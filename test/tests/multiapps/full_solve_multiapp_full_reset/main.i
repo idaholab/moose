@@ -30,5 +30,6 @@
     type = FullSolveMultiApp
     input_files = sub.i
     no_backup_and_restore = false
+    reinit_after_solve = false
   [../]
 []
