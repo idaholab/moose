@@ -1,0 +1,7 @@
+The user must supply the name of the connected
+[flow channel](thermal_hydraulics/component_groups/flow_channel.md) via the
+parameter [!param](/Components/{{name}}/flow_channel).
+
+The parameter [!param](/Components/{{name}}/P_hf) is optional and specifies the
+heated perimeter $P_\text{heat}$; if unspecified, this is computed from the
+cross-sectional area assuming a circular cross section.
