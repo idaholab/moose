@@ -128,6 +128,8 @@ HeatStructureBase::build2DMesh()
     _outer_heat_node_ids.push_back(node_ids[i][_total_elem_number]);
   }
 
+  auto & boundary_info = _mesh.getMesh().get_boundary_info();
+
   // create elements from nodes
   elem_ids.resize(_n_elem);
   unsigned int i = 0;
@@ -154,12 +156,12 @@ HeatStructureBase::build2DMesh()
           // exterior axial boundaries (all radial sections)
           if (i == 0)
           {
-            _mesh.getMesh().boundary_info->add_side(elem, 0, _start_bc_id[0]);
+            boundary_info.add_side(elem, 0, _start_bc_id[0]);
             _start_bnd_info.push_back(std::tuple<dof_id_type, unsigned short int>(elem->id(), 0));
           }
           if (i == _n_elem - 1)
           {
-            _mesh.getMesh().boundary_info->add_side(elem, 2, _end_bc_id[0]);
+            boundary_info.add_side(elem, 2, _end_bc_id[0]);
             _end_bnd_info.push_back(std::tuple<dof_id_type, unsigned short int>(elem->id(), 2));
           }
 
@@ -167,9 +169,9 @@ HeatStructureBase::build2DMesh()
           if (_names.size() > 1)
           {
             if (i == 0)
-              _mesh.getMesh().boundary_info->add_side(elem, 0, _radial_start_bc_id[j_section]);
+              boundary_info.add_side(elem, 0, _radial_start_bc_id[j_section]);
             if (i == _n_elem - 1)
-              _mesh.getMesh().boundary_info->add_side(elem, 2, _radial_end_bc_id[j_section]);
+              boundary_info.add_side(elem, 2, _radial_end_bc_id[j_section]);
           }
 
           // interior axial boundaries (per radial section)
@@ -177,19 +179,18 @@ HeatStructureBase::build2DMesh()
               i_section != _n_sections - 1 && i == i_section_end)
           {
             const unsigned int k = i_section * _number_of_hs + j_section;
-            _mesh.getMesh().boundary_info->add_side(
-                elem, 2, _interior_axial_per_radial_section_bc_id[k]);
+            boundary_info.add_side(elem, 2, _interior_axial_per_radial_section_bc_id[k]);
           }
 
           // exterior radial boundaries (all axial sections)
           if (j == 0)
           {
-            _mesh.getMesh().boundary_info->add_side(elem, 1, _inner_bc_id[0]);
+            boundary_info.add_side(elem, 1, _inner_bc_id[0]);
             _inner_bnd_info.push_back(std::tuple<dof_id_type, unsigned short int>(elem->id(), 1));
           }
           if (j == _total_elem_number - 1)
           {
-            _mesh.getMesh().boundary_info->add_side(elem, 3, _outer_bc_id[0]);
+            boundary_info.add_side(elem, 3, _outer_bc_id[0]);
             _outer_bnd_info.push_back(std::tuple<dof_id_type, unsigned short int>(elem->id(), 3));
           }
 
@@ -197,9 +198,9 @@ HeatStructureBase::build2DMesh()
           if (_n_sections > 1 && _axial_region_names.size() == _n_sections)
           {
             if (j == 0)
-              _mesh.getMesh().boundary_info->add_side(elem, 1, _axial_inner_bc_id[i_section]);
+              boundary_info.add_side(elem, 1, _axial_inner_bc_id[i_section]);
             if (j == _total_elem_number - 1)
-              _mesh.getMesh().boundary_info->add_side(elem, 3, _axial_outer_bc_id[i_section]);
+              boundary_info.add_side(elem, 3, _axial_outer_bc_id[i_section]);
           }
 
           // interior radial boundaries (all axial sections)
@@ -210,7 +211,7 @@ HeatStructureBase::build2DMesh()
               j_section_begin += _n_part_elems[jj_section];
 
             if (j == j_section_begin)
-              _mesh.getMesh().boundary_info->add_side(elem, 1, _inner_radial_bc_id[j_section - 1]);
+              boundary_info.add_side(elem, 1, _inner_radial_bc_id[j_section - 1]);
           }
 
           j++;
@@ -256,6 +257,8 @@ HeatStructureBase::build2DMesh2ndOrder()
     _outer_heat_node_ids.push_back(node_ids[i][_total_elem_number * 2]);
   }
 
+  auto & boundary_info = _mesh.getMesh().get_boundary_info();
+
   // create elements from nodes
   elem_ids.resize(_n_elem);
   unsigned int i = 0;
@@ -281,39 +284,39 @@ HeatStructureBase::build2DMesh2ndOrder()
 
           if (i == 0)
           {
-            _mesh.getMesh().boundary_info->add_side(elem, 0, _start_bc_id[0]);
+            boundary_info.add_side(elem, 0, _start_bc_id[0]);
             _start_bnd_info.push_back(std::tuple<dof_id_type, unsigned short int>(elem->id(), 0));
           }
           if (i == _n_elem - 1)
           {
-            _mesh.getMesh().boundary_info->add_side(elem, 2, _end_bc_id[0]);
+            boundary_info.add_side(elem, 2, _end_bc_id[0]);
             _end_bnd_info.push_back(std::tuple<dof_id_type, unsigned short int>(elem->id(), 2));
           }
           if (_names.size() > 1)
           {
             if (i == 0)
-              _mesh.getMesh().boundary_info->add_side(elem, 0, _radial_start_bc_id[j_section]);
+              boundary_info.add_side(elem, 0, _radial_start_bc_id[j_section]);
             if (i == _n_elem - 1)
-              _mesh.getMesh().boundary_info->add_side(elem, 2, _radial_end_bc_id[j_section]);
+              boundary_info.add_side(elem, 2, _radial_end_bc_id[j_section]);
           }
 
           if (j == 0)
           {
-            _mesh.getMesh().boundary_info->add_side(elem, 3, _inner_bc_id[0]);
+            boundary_info.add_side(elem, 3, _inner_bc_id[0]);
             _inner_bnd_info.push_back(std::tuple<dof_id_type, unsigned short int>(elem->id(), 3));
           }
           if (j == _total_elem_number - 1)
           {
-            _mesh.getMesh().boundary_info->add_side(elem, 1, _outer_bc_id[0]);
+            boundary_info.add_side(elem, 1, _outer_bc_id[0]);
             _outer_bnd_info.push_back(std::tuple<dof_id_type, unsigned short int>(elem->id(), 1));
           }
 
           if (_n_sections > 1 && _axial_region_names.size() == _n_sections)
           {
             if (j == 0)
-              _mesh.getMesh().boundary_info->add_side(elem, 1, _axial_inner_bc_id[i_section]);
+              boundary_info.add_side(elem, 1, _axial_inner_bc_id[i_section]);
             if (j == _total_elem_number - 1)
-              _mesh.getMesh().boundary_info->add_side(elem, 3, _axial_outer_bc_id[i_section]);
+              boundary_info.add_side(elem, 3, _axial_outer_bc_id[i_section]);
           }
 
           // interior radial boundaries
@@ -324,7 +327,7 @@ HeatStructureBase::build2DMesh2ndOrder()
               j_section_begin += _n_part_elems[jj_section];
 
             if (j == j_section_begin)
-              _mesh.getMesh().boundary_info->add_side(elem, 1, _inner_radial_bc_id[j_section - 1]);
+              boundary_info.add_side(elem, 1, _inner_radial_bc_id[j_section - 1]);
           }
 
           j++;

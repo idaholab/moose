@@ -29,6 +29,8 @@ FlowJunction::setupMesh()
 
   const BoundaryID boundary_id = _mesh.getNextBoundaryId();
 
+  auto & boundary_info = _mesh.getMesh().get_boundary_info();
+
   for (const auto & connection : getConnections())
   {
     const std::string & comp_name = connection._geometrical_component_name;
@@ -38,7 +40,7 @@ FlowJunction::setupMesh()
       const GeometricalFlowComponent & gc = getComponentByName<GeometricalFlowComponent>(comp_name);
       for (auto && conn : gc.getConnections(connection._end_type))
         // add connection's node to nodeset of all nodes connected to this zero-D component
-        _mesh.getMesh().boundary_info->add_node(conn._node, boundary_id);
+        boundary_info.add_node(conn._node, boundary_id);
     }
   }
 
