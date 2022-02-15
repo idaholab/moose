@@ -82,6 +82,10 @@ FVBoundaryCondition::FVBoundaryCondition(const InputParameters & parameters)
 
   if (getParam<bool>("use_displaced_mesh"))
     paramError("use_displaced_mesh", "FV boundary conditions do not yet support displaced mesh");
+
+  if (_var.kind() == Moose::VarKindType::VAR_AUXILIARY)
+    paramError("variable",
+        "There should not be a need to specify boundary conditions for auxiliary variables.");
 }
 
 Moose::SingleSidedFaceArg
