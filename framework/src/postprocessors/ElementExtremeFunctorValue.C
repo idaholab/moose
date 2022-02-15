@@ -78,21 +78,24 @@ template <bool is_ad>
 void
 ElementExtremeFunctorValueTempl<is_ad>::computeValue()
 {
+  // Most element evaluations do not use skewness correction,
+  // but this could become a parameter in the future
+  Moose::ElemArg elem{_current_elem, false, false};
   switch (_type)
   {
     case MAX:
-      if (_proxy_functor(_current_elem) > _proxy_value)
+      if (_proxy_functor(elem) > _proxy_value)
       {
-        _proxy_value = MetaPhysicL::raw_value(_proxy_functor(_current_elem));
-        _value = MetaPhysicL::raw_value(_functor(_current_elem));
+        _proxy_value = MetaPhysicL::raw_value(_proxy_functor(elem));
+        _value = MetaPhysicL::raw_value(_functor(elem));
       }
       break;
 
     case MIN:
-      if (_proxy_functor(_current_elem) < _proxy_value)
+      if (_proxy_functor(elem) < _proxy_value)
       {
-        _proxy_value = MetaPhysicL::raw_value(_proxy_functor(_current_elem));
-        _value = MetaPhysicL::raw_value(_functor(_current_elem));
+        _proxy_value = MetaPhysicL::raw_value(_proxy_functor(elem));
+        _value = MetaPhysicL::raw_value(_functor(elem));
       }
       break;
   }
