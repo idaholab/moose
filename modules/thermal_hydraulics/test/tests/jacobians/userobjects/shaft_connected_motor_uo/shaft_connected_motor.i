@@ -9,6 +9,7 @@
     type = ShaftConnectedMotorUserObject
     torque = 12
     inertia = 23
+    shaft_speed = shaft_omega
   []
 []
 

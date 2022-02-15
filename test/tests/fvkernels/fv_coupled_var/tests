@@ -12,6 +12,7 @@
       exodiff = coupled_out.e
 
       detail = "using both finite element and finite volume discretizations with"
+      ad_indexing_type = 'global'
     []
     [jac]
       type = 'PetscJacobianTester'
@@ -21,6 +22,7 @@
       cli_args = 'Mesh/nx=2'
 
       detail = "the correct Jacobian entries."
+      ad_indexing_type = 'global'
     []
   []
 []

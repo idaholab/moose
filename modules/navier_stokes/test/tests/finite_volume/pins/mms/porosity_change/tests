@@ -21,4 +21,24 @@
     ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
   []
+  [pressure-corrected]
+    type = PythonUnitTest
+    input = test.py
+    test_case = TestPressureCorrected
+    requirement = 'The system shall show second order convergence for all variables when the porosity is interpolated and reconstructed multiple times and when a correction is applied to the pressure interpolation.'
+    method = '!dbg'
+    min_parallel = 8
+    ad_indexing_type = 'global'
+    required_python_packages = 'pandas matplotlib'
+  []
+  [pressure-corrected-jac]
+    type = 'PetscJacobianTester'
+    input = pressure-interpolation-corrected.i
+    run_sim = True
+    requirement = 'The system shall show a perfect Jacobian when the porosity is interpolated and reconstructed multiple times and when a correction is applied to the pressure interpolation.'
+    ad_indexing_type = 'global'
+    difference_tol = 1e-6
+    cli_args = "Mesh/gen/nx=2 Mesh/gen/ny=2"
+    ratio_tol = 2e-8
+  []
 []

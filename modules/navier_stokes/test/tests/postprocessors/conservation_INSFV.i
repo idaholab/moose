@@ -1,7 +1,22 @@
-mu=1.1
+mu=1
 rho=1
 advected_interp_method='average'
-velocity_interp_method='average'
+velocity_interp_method='rc'
+
+[GlobalParams]
+  rhie_chow_user_object = 'rc'
+  advected_interp_method = ${advected_interp_method}
+  velocity_interp_method = ${velocity_interp_method}
+[]
+
+[UserObjects]
+  [rc]
+    type = INSFVRhieChowInterpolator
+    u = u
+    v = v
+    pressure = pressure
+  []
+[]
 
 [Mesh]
   inactive = 'mesh internal_boundary_bot internal_boundary_top'
@@ -70,34 +85,21 @@ velocity_interp_method='average'
   [mass]
     type = INSFVMassAdvection
     variable = pressure
-    advected_interp_method = ${advected_interp_method}
-    velocity_interp_method = ${velocity_interp_method}
-    vel = 'velocity'
-    pressure = pressure
-    u = u
-    v = v
-    mu = ${mu}
     rho = ${rho}
   []
 
   [u_advection]
     type = INSFVMomentumAdvection
     variable = u
-    advected_quantity = 'rhou'
-    vel = 'velocity'
-    advected_interp_method = ${advected_interp_method}
-    velocity_interp_method = ${velocity_interp_method}
-    pressure = pressure
-    u = u
-    v = v
-    mu = ${mu}
     rho = ${rho}
+    momentum_component = 'x'
   []
   [u_viscosity]
-    type = FVDiffusion
+    type = INSFVMomentumDiffusion
     variable = u
-    coeff = ${mu}
+    mu = ${mu}
     force_boundary_execution = true
+    momentum_component = 'x'
   []
   [u_pressure]
     type = INSFVMomentumPressure
@@ -109,21 +111,15 @@ velocity_interp_method='average'
   [v_advection]
     type = INSFVMomentumAdvection
     variable = v
-    advected_quantity = 'rhov'
-    vel = 'velocity'
-    advected_interp_method = ${advected_interp_method}
-    velocity_interp_method = ${velocity_interp_method}
-    pressure = pressure
-    u = u
-    v = v
-    mu = ${mu}
     rho = ${rho}
+    momentum_component = 'y'
   []
   [v_viscosity]
-    type = FVDiffusion
+    type = INSFVMomentumDiffusion
     variable = v
-    coeff = ${mu}
+    mu = ${mu}
     force_boundary_execution = true
+    momentum_component = 'y'
   []
   [v_pressure]
     type = INSFVMomentumPressure
@@ -134,15 +130,8 @@ velocity_interp_method='average'
 
   [temp_advection]
     type = INSFVEnergyAdvection
-    vel = 'velocity'
     variable = temperature
-    advected_interp_method = ${advected_interp_method}
-    velocity_interp_method = ${velocity_interp_method}
-    pressure = pressure
-    u = u
-    v = v
-    mu = ${mu}
-    rho = ${rho}
+    advected_interp_method = 'upwind'
   []
   [temp_source]
     type = FVBodyForce
@@ -182,11 +171,13 @@ velocity_interp_method='average'
     type = INSFVNaturalFreeSlipBC
     boundary = 'right'
     variable = u
+    momentum_component = 'x'
   []
   [free-slip-v]
     type = INSFVNaturalFreeSlipBC
     boundary = 'right'
     variable = v
+    momentum_component = 'y'
   []
   [axis-u]
     type = INSFVSymmetryVelocityBC
@@ -227,10 +218,7 @@ velocity_interp_method='average'
 
 [Materials]
   [ins_fv]
-    type = INSFVMaterial
-    u = 'u'
-    v = 'v'
-    pressure = 'pressure'
+    type = INSFVEnthalpyMaterial
     temperature = 'temperature'
     rho = ${rho}
   []
@@ -256,25 +244,23 @@ velocity_interp_method='average'
     boundary = bottom
     vel_x = u
     vel_y = v
-    advected_variable = advected_density
+    advected_quantity = advected_density
     fv = true
-    advected_interp_method = ${advected_interp_method}
   []
   [inlet_mass_constant]
     type = VolumetricFlowRate
     boundary = bottom
     vel_x = u
     vel_y = v
-    advected_variable = ${rho}
+    advected_quantity = ${rho}
     fv = true
-    advected_interp_method = ${advected_interp_method}
   []
   [inlet_mass_matprop]
     type = VolumetricFlowRate
     boundary = bottom
     vel_x = u
     vel_y = v
-    advected_mat_prop = 'advected_rho'
+    advected_quantity = 'advected_rho'
     fv = true
   []
   [mid1_mass]
@@ -283,7 +269,7 @@ velocity_interp_method='average'
     vel_x = u
     vel_y = v
     fv = true
-    advected_interp_method = ${advected_interp_method}
+    advected_quantity = ${rho}
   []
   [mid2_mass]
     type = InternalVolumetricFlowRate
@@ -291,7 +277,7 @@ velocity_interp_method='average'
     vel_x = u
     vel_y = v
     fv = true
-    advected_interp_method = ${advected_interp_method}
+    advected_quantity = ${rho}
   []
   [outlet_mass]
     type = VolumetricFlowRate
@@ -299,7 +285,7 @@ velocity_interp_method='average'
     vel_x = u
     vel_y = v
     fv = true
-    advected_interp_method = ${advected_interp_method}
+    advected_quantity = ${rho}
   []
 
   [inlet_momentum_x]
@@ -307,36 +293,8 @@ velocity_interp_method='average'
     boundary = bottom
     vel_x = u
     vel_y = v
-    advected_variable = u
+    advected_quantity = u
     fv = true
-    advected_interp_method = ${advected_interp_method}
-  []
-  [mid1_momentum_x]
-    type = InternalVolumetricFlowRate
-    boundary = internal_bot
-    vel_x = u
-    vel_y = v
-    advected_variable = u
-    fv = true
-    advected_interp_method = ${advected_interp_method}
-  []
-  [mid2_momentum_x]
-    type = InternalVolumetricFlowRate
-    boundary = internal_top
-    vel_x = u
-    vel_y = v
-    advected_variable = u
-    fv = true
-    advected_interp_method = ${advected_interp_method}
-  []
-  [outlet_momentum_x]
-    type = VolumetricFlowRate
-    boundary = top
-    vel_x = u
-    vel_y = v
-    advected_variable = u
-    fv = true
-    advected_interp_method = ${advected_interp_method}
   []
 
   [inlet_momentum_y]
@@ -344,96 +302,40 @@ velocity_interp_method='average'
     boundary = bottom
     vel_x = u
     vel_y = v
-    advected_variable = v
+    advected_quantity = v
     fv = true
-    advected_interp_method = ${advected_interp_method}
-  []
-  [mid1_momentum_y]
-    type = InternalVolumetricFlowRate
-    boundary = internal_bot
-    vel_x = u
-    vel_y = v
-    advected_variable = v
-    fv = true
-    advected_interp_method = ${advected_interp_method}
-  []
-  [mid2_momentum_y]
-    type = InternalVolumetricFlowRate
-    boundary = internal_top
-    vel_x = u
-    vel_y = v
-    advected_variable = v
-    fv = true
-    advected_interp_method = ${advected_interp_method}
-  []
-  [outlet_momentum_y]
-    type = VolumetricFlowRate
-    boundary = top
-    vel_x = u
-    vel_y = v
-    advected_variable = v
-    fv = true
-    advected_interp_method = ${advected_interp_method}
   []
 
-  [inlet_advected_energy]
-    type = VolumetricFlowRate
-    boundary = bottom
-    vel_x = u
-    vel_y = v
-    advected_mat_prop = 'rho_cp_temp'
-    fv = true
-  []
   [mid1_advected_energy]
     type = InternalVolumetricFlowRate
     boundary = internal_bot
     vel_x = u
     vel_y = v
-    advected_mat_prop = 'rho_cp_temp'
+    advected_quantity = 'rho_cp_temp'
     fv = true
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method = 'upwind'
   []
   [mid2_advected_energy]
     type = InternalVolumetricFlowRate
     boundary = internal_top
     vel_x = u
     vel_y = v
-    advected_mat_prop = 'rho_cp_temp'
+    advected_quantity = 'rho_cp_temp'
     fv = true
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method = 'upwind'
   []
   [outlet_advected_energy]
     type = VolumetricFlowRate
     boundary = top
     vel_x = u
     vel_y = v
-    advected_mat_prop = 'rho_cp_temp'
+    advected_quantity = 'rho_cp_temp'
     fv = true
+    advected_interp_method = 'upwind'
   []
 []
 
 [Outputs]
-  exodus = false
+  exodus = true
   csv = true
-  inactive = 'console_mass console_momentum_x console_momentum_y console_energy'
-  [console_mass]
-    type = Console
-    start_step = 1
-    show = 'inlet_mass_variable inlet_mass_constant inlet_mass_matprop mid1_mass mid2_mass outlet_mass'
-  []
-  [console_momentum_x]
-    type = Console
-    start_step = 1
-    show = 'inlet_momentum_x mid1_momentum_x mid2_momentum_x outlet_momentum_x'
-  []
-  [console_momentum_y]
-    type = Console
-    start_step = 1
-    show = 'inlet_momentum_y mid1_momentum_y mid2_momentum_y outlet_momentum_y'
-  []
-  [console_energy]
-    type = Console
-    start_step = 1
-    show = 'inlet_advected_energy mid1_advected_energy mid2_advected_energy outlet_advected_energy'
-  []
 []

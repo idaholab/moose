@@ -433,3 +433,30 @@ TEST(MooseUtils, globCompare)
   EXPECT_FALSE(MooseUtils::globCompare("FEM", "?EN"));
   EXPECT_FALSE(MooseUtils::globCompare("Three", "????"));
 }
+
+TEST(MooseUtils, SemidynamicVector)
+{
+  MooseUtils::SemidynamicVector<int, 10> test(4);
+  EXPECT_EQ(test.size(), 4);
+  EXPECT_EQ(test.max_size(), 10);
+
+  // test iterator
+  unsigned int count = 0;
+  for (auto & i : test)
+    i = ++count;
+  EXPECT_EQ(count, 4);
+
+  // test resize
+  test.resize(6);
+  count = 0;
+  for (auto & i : test)
+    i = ++count;
+  EXPECT_EQ(count, 6);
+
+  // test const_iterator
+  const auto & ctest = test;
+  count = 0;
+  for (auto & i : ctest)
+    count += i;
+  EXPECT_EQ(count, 1 + 2 + 3 + 4 + 5 + 6);
+}

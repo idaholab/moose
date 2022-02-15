@@ -45,6 +45,7 @@ public:
 
   RichardsExcavGeom(const InputParameters & parameters);
 
+  using Function::value;
   virtual Real value(Real t, const Point & p) const;
 
 protected:

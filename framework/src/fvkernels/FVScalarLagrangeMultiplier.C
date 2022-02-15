@@ -60,7 +60,7 @@ FVScalarLagrangeMultiplier::computeResidual()
   // make sure the scalar residuals get cached for later addition
   const auto lm_r = (MetaPhysicL::raw_value(_u[_qp]) - _phi0) * _assembly.elemVolume();
   mooseAssert(_lambda_var.dofIndices().size() == 1, "We should only have a single dof");
-  _assembly.cacheResidual(_lambda_var.dofIndices()[0], lm_r, _vector_tags);
+  _assembly.processResidual(lm_r, _lambda_var.dofIndices()[0], _vector_tags);
 }
 
 void

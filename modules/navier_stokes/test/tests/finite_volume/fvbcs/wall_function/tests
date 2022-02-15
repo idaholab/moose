@@ -11,7 +11,7 @@
     issues = '#18273'
     design = 'rans_theory.md INSFVWallFunctionBC.md'
     mesh_mode = REPLICATED
-    valgrind = HEAVY
+    valgrind = 'none'
     recover = false
   []
 []

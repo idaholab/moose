@@ -30,6 +30,7 @@ public:
 
 protected:
   virtual void init() override;
+  virtual void check() const override;
   virtual void buildVolumeJunctionUserObject() override;
 
   /// Pump inlet

@@ -29,6 +29,7 @@ ShaftConnectedCompressor1Phase::validParams()
   params.addRequiredParam<BoundaryName>("inlet", "Compressor inlet");
   params.addRequiredParam<BoundaryName>("outlet", "Compressor outlet");
   params.suppressParameter<std::vector<BoundaryName>>("connections");
+  params.addParam<bool>("treat_as_turbine", false, "Treat the compressor as a turbine?");
   params.addRequiredParam<Real>("omega_rated", "Rated compressor speed [rad/s]");
   params.addRequiredParam<Real>("mdot_rated", "Rated compressor mass flow rate [kg/s]");
   params.addRequiredParam<Real>("rho0_rated", "Rated compressor stagnation fluid density [kg/m^3]");
@@ -55,6 +56,8 @@ ShaftConnectedCompressor1Phase::validParams()
       "Functions of adiabatic efficiency versus relative corrected flow. Each function is for a "
       "different, constant relative corrected speed. The order of function names should correspond "
       "to the order of speeds in the `speeds` parameter [-]");
+  params.addParam<Real>("min_pressure_ratio", 0.0, "Minimum pressure ratio");
+  params.addParam<Real>("max_pressure_ratio", 50.0, "Maximum pressure ratio");
 
   params.addClassDescription(
       "1-phase compressor that must be connected to a Shaft component. Compressor speed "
@@ -112,6 +115,13 @@ ShaftConnectedCompressor1Phase::init()
 }
 
 void
+ShaftConnectedCompressor1Phase::check() const
+{
+  VolumeJunction1Phase::check();
+  checkShaftConnection(this);
+}
+
+void
 ShaftConnectedCompressor1Phase::buildVolumeJunctionUserObject()
 {
   const Component & c = getComponentByName<Component>(_shaft_name);
@@ -140,6 +150,7 @@ ShaftConnectedCompressor1Phase::buildVolumeJunctionUserObject()
     // the direction of the outlet channel
     params.set<Point>("di_out") = _directions[1].unit();
     params.set<Real>("omega_rated") = _omega_rated;
+    params.set<bool>("treat_as_turbine") = getParam<bool>("treat_as_turbine");
     params.set<Real>("mdot_rated") = _mdot_rated;
     params.set<Real>("rho0_rated") = _rho0_rated;
     params.set<Real>("c0_rated") = _c0_rated;
@@ -152,6 +163,8 @@ ShaftConnectedCompressor1Phase::buildVolumeJunctionUserObject()
     params.set<std::vector<Real>>("speeds") = _speeds;
     params.set<std::vector<FunctionName>>("Rp_functions") = _Rp_functions;
     params.set<std::vector<FunctionName>>("eff_functions") = _eff_functions;
+    params.set<Real>("min_pressure_ratio") = getParam<Real>("min_pressure_ratio");
+    params.set<Real>("max_pressure_ratio") = getParam<Real>("max_pressure_ratio");
     params.set<std::vector<VariableName>>("omega") = {omega_var_name};
     params.set<Real>("A_ref") = getParam<Real>("A_ref");
     params.set<Real>("K") = getParam<Real>("K");
@@ -229,5 +242,13 @@ ShaftConnectedCompressor1Phase::addMooseObjects()
     params.set<UserObjectName>("compressor_uo") = getShaftConnectedUserObjectName();
 
     _sim.addAuxScalarKernel(class_name, Component::genName(name(), "inertia_aux"), params);
+  }
+  {
+    const std::string class_name = "ShaftConnectedCompressor1PhasePostprocessor";
+    InputParameters params = _factory.getValidParams(class_name);
+    params.set<MooseEnum>("quantity") = "pressure_ratio";
+    params.set<UserObjectName>("compressor_uo") = getShaftConnectedUserObjectName();
+    params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
+    _sim.addPostprocessor(class_name, Component::genName(name(), "pressure_ratio"), params);
   }
 }

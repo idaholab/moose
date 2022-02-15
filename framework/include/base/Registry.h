@@ -9,10 +9,13 @@
 
 #pragma once
 
+#include "InputParameters.h"
+
 #include <string>
 #include <vector>
 #include <set>
 #include <map>
+#include <memory>
 
 #define combineNames1(X, Y) X##Y
 #define combineNames(X, Y) combineNames1(X, Y)
@@ -97,7 +100,6 @@
 struct RegistryEntry;
 class Factory;
 class ActionFactory;
-class InputParameters;
 class MooseObject;
 class Action;
 

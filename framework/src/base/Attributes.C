@@ -393,6 +393,7 @@ AttribSystem::initFrom(const MooseObject * obj)
                "'registerSystemAttributeName' method in the validParams function.");
   _val = obj->getParam<std::string>("_moose_warehouse_system_name");
 }
+
 bool
 AttribSystem::isMatch(const Attribute & other) const
 {
@@ -402,6 +403,26 @@ AttribSystem::isMatch(const Attribute & other) const
 
 bool
 AttribSystem::isEqual(const Attribute & other) const
+{
+  return isMatch(other);
+}
+
+void
+AttribResidualObject::initFrom(const MooseObject * obj)
+{
+  _val = obj->getParam<bool>("_residual_object");
+  _initd = true;
+}
+
+bool
+AttribResidualObject::isMatch(const Attribute & other) const
+{
+  auto a = dynamic_cast<const AttribResidualObject *>(&other);
+  return _initd && a && a->_initd && (a->_val == _val);
+}
+
+bool
+AttribResidualObject::isEqual(const Attribute & other) const
 {
   return isMatch(other);
 }
@@ -417,7 +438,7 @@ bool
 AttribVar::isMatch(const Attribute & other) const
 {
   auto a = dynamic_cast<const AttribVar *>(&other);
-  return a && (a->_val == _val);
+  return a && (_val != -1) && (a->_val == _val);
 }
 
 bool

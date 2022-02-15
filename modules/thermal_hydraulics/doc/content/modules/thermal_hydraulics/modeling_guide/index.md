@@ -2,4 +2,4 @@
 
 # Modeling Guide
 
-A list of modeling and post-processing objectives and how to accomplish them.
+- [thermal_hydraulics/modeling_guide/brayton_cycle/brayton_cycle.md]

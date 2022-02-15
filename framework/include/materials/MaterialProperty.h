@@ -231,6 +231,14 @@ rawValueEqualityHelper(std::vector<T1> & out, const std::vector<T2> & in)
   for (MooseIndex(in) i = 0; i < in.size(); ++i)
     rawValueEqualityHelper(out[i], in[i]);
 }
+
+template <typename T1, typename T2, std::size_t N>
+void
+rawValueEqualityHelper(std::array<T1, N> & out, const std::array<T2, N> & in)
+{
+  for (MooseIndex(in) i = 0; i < in.size(); ++i)
+    rawValueEqualityHelper(out[i], in[i]);
+}
 }
 }
 

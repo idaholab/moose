@@ -78,5 +78,9 @@ public:
   static std::unique_ptr<Limiter> build(LimiterType limiter);
 };
 
+/**
+ * Return the limiter type associated with the supplied interpolation method
+ */
+LimiterType limiterType(InterpMethod interp_method);
 }
 }

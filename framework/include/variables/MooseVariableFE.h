@@ -88,10 +88,10 @@ public:
   using DoFValue = typename MooseVariableField<OutputType>::DoFValue;
 
   using FunctorArg = typename Moose::ADType<OutputType>::type;
-  using typename Moose::Functor<FunctorArg>::FunctorReturnType;
-  using typename Moose::Functor<FunctorArg>::ValueType;
-  using typename Moose::Functor<FunctorArg>::GradientType;
-  using typename Moose::Functor<FunctorArg>::DotType;
+  using typename Moose::FunctorBase<FunctorArg>::FunctorReturnType;
+  using typename Moose::FunctorBase<FunctorArg>::ValueType;
+  using typename Moose::FunctorBase<FunctorArg>::GradientType;
+  using typename Moose::FunctorBase<FunctorArg>::DotType;
 
   MooseVariableFE(const InputParameters & parameters);
 
@@ -686,11 +686,15 @@ protected:
   std::unique_ptr<MooseVariableData<OutputType>> _lower_data;
 
 private:
-  using typename Moose::Functor<FunctorArg>::FaceArg;
-  using typename Moose::Functor<FunctorArg>::SingleSidedFaceArg;
-  using typename Moose::Functor<FunctorArg>::ElemFromFaceArg;
   using MooseVariableField<OutputType>::evaluate;
-  ValueType evaluate(const Elem * const &, unsigned int) const override final
+  using ElemArg = Moose::ElemArg;
+  using ElemFromFaceArg = Moose::ElemFromFaceArg;
+  using ElemQpArg = Moose::ElemQpArg;
+  using ElemSideQpArg = Moose::ElemSideQpArg;
+  using FaceArg = Moose::FaceArg;
+  using SingleSidedFaceArg = Moose::SingleSidedFaceArg;
+
+  ValueType evaluate(const ElemArg &, unsigned int) const override final
   {
     mooseError("Elem functor overload not yet implemented for finite element variables");
   }

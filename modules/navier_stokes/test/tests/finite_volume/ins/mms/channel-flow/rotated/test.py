@@ -13,7 +13,7 @@ def run_spatial(*args, **kwargs):
 class TestPlanePoiseuilleAverage(unittest.TestCase):
     def test(self):
         labels = ['L2u', 'L2v', 'L2p']
-        df1 = run_spatial('rotated-pp-flow.i', 6, "velocity_interp_method='average'", y_pp=labels, mpi=8)
+        df1 = run_spatial('rotated-pp-flow.i', 6, "velocity_interp_method='average'", "--error", y_pp=labels, mpi=8)
 
         fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
         fig.plot(df1, label=labels, marker='o', markersize=8, num_fitted_points=3, slope_precision=1)
@@ -25,7 +25,7 @@ class TestPlanePoiseuilleAverage(unittest.TestCase):
 class TestPlanePoiseuilleRC(unittest.TestCase):
     def test(self):
         labels = ['L2u', 'L2v', 'L2p']
-        df1 = run_spatial('rotated-pp-flow.i', 7, "velocity_interp_method='rc'", y_pp=labels, mpi=16)
+        df1 = run_spatial('rotated-pp-flow.i', 6, "velocity_interp_method='rc'", "--error", y_pp=labels, mpi=8)
 
         fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
         fig.plot(df1, label=labels, marker='o', markersize=8, num_fitted_points=3, slope_precision=1)
@@ -37,7 +37,7 @@ class TestPlanePoiseuilleRC(unittest.TestCase):
 class TestPlanePoiseuilleAverageFirst(unittest.TestCase):
     def test(self):
         labels = ['L2u', 'L2v', 'L2p']
-        df1 = run_spatial('rotated-pp-flow.i', 7, "velocity_interp_method='average'", 'two_term_boundary_expansion=false', y_pp=labels, mpi=16)
+        df1 = run_spatial('rotated-pp-flow.i', 6, "velocity_interp_method='average'", 'two_term_boundary_expansion=false', "--error", y_pp=labels, mpi=8)
 
         fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
         fig.plot(df1, label=labels, marker='o', markersize=8, num_fitted_points=3, slope_precision=1)
@@ -51,7 +51,7 @@ class TestPlanePoiseuilleAverageFirst(unittest.TestCase):
 class TestPlanePoiseuilleRCFirst(unittest.TestCase):
     def test(self):
         labels = ['L2u', 'L2v', 'L2p']
-        df1 = run_spatial('rotated-pp-flow.i', 7, "velocity_interp_method='rc'", 'two_term_boundary_expansion=false', y_pp=labels, mpi=16)
+        df1 = run_spatial('rotated-pp-flow.i', 6, "velocity_interp_method='rc'", 'two_term_boundary_expansion=false', "--error", y_pp=labels, mpi=8)
 
         fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
         fig.plot(df1, label=labels, marker='o', markersize=8, num_fitted_points=3, slope_precision=1)

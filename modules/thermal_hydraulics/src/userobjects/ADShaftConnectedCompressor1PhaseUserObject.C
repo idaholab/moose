@@ -26,6 +26,7 @@ ADShaftConnectedCompressor1PhaseUserObject::validParams()
   params.addParam<BoundaryName>("inlet", "Compressor inlet");
   params.addParam<BoundaryName>("outlet", "Compressor outlet");
   params.addRequiredParam<Point>("di_out", "Direction of connected outlet");
+  params.addRequiredParam<bool>("treat_as_turbine", "Treat the compressor as a turbine?");
   params.addRequiredParam<Real>("omega_rated", "Rated compressor speed [rad/s]");
   params.addRequiredParam<Real>("mdot_rated", "Rated compressor mass flow rate [kg/s]");
   params.addRequiredParam<Real>("rho0_rated",
@@ -52,6 +53,8 @@ ADShaftConnectedCompressor1PhaseUserObject::validParams()
       "Functions of adiabatic efficiency versus relative corrected flow. Each function is for a "
       "different, constant relative corrected speed. The order of function names should correspond "
       "to the order of speeds in the `speeds` parameter [-]");
+  params.addRequiredParam<Real>("min_pressure_ratio", "Minimum pressure ratio");
+  params.addRequiredParam<Real>("max_pressure_ratio", "Maximum pressure ratio");
   params.addRequiredParam<std::string>("compressor_name",
                                        "Name of the instance of this compressor component");
   params.addRequiredCoupledVar("omega", "Shaft rotational speed [rad/s]");
@@ -69,6 +72,7 @@ ADShaftConnectedCompressor1PhaseUserObject::ADShaftConnectedCompressor1PhaseUser
     ADShaftConnectableUserObjectInterface(this),
 
     _di_out(getParam<Point>("di_out")),
+    _treat_as_turbine(getParam<bool>("treat_as_turbine")),
     _omega_rated(getParam<Real>("omega_rated")),
     _mdot_rated(getParam<Real>("mdot_rated")),
     _rho0_rated(getParam<Real>("rho0_rated")),
@@ -85,6 +89,8 @@ ADShaftConnectedCompressor1PhaseUserObject::ADShaftConnectedCompressor1PhaseUser
     _n_speeds(_speeds.size()),
     _Rp_functions(_n_speeds),
     _eff_functions(_n_speeds),
+    _Rp_min(getParam<Real>("min_pressure_ratio")),
+    _Rp_max(getParam<Real>("max_pressure_ratio")),
     _compressor_name(getParam<std::string>("compressor_name")),
     _omega(adCoupledScalarValue("omega"))
 {
@@ -122,6 +128,8 @@ ADShaftConnectedCompressor1PhaseUserObject::initialize()
   _dissipation_torque = 0;
   _friction_torque = 0;
   _delta_p = 0;
+  _Rp = 0;
+  _eff = 0;
 }
 
 void
@@ -170,55 +178,91 @@ ADShaftConnectedCompressor1PhaseUserObject::computeFluxesAndResiduals(const unsi
     const ADReal flow_rel_corr = flow_A / flow_B;
     const ADReal speed_rel_corr = (_omega[0] / _omega_rated) * (_c0_rated / c0_in);
 
-    if (MetaPhysicL::raw_value(speed_rel_corr) < _speeds[0])
-      mooseError(_compressor_name,
-                 ": is attempting to operate at speeds less than allowed by functions ",
-                 _Rp_function_names[0],
-                 " and ",
-                 _eff_function_names[0],
-                 ".");
+    // If speed_rel_corr == _speeds[0], then the lower index x1 is determined to be -1
+    if (speed_rel_corr == _speeds[0])
+    {
+      _Rp = _Rp_functions[0]->value(flow_rel_corr, ADPoint());
+      _eff = _eff_functions[0]->value(flow_rel_corr, ADPoint());
+    }
+    else if (std::isnan(speed_rel_corr)) // NaN; unguarded, gives segmentation fault
+    {
+      _Rp = std::nan("");
+      _eff = std::nan("");
+    }
+    else // linear interpolation/extrapolation
+    {
+      unsigned int x1, x2;
+      if (speed_rel_corr < _speeds[0]) // extrapolation past minimum
+      {
+        x1 = 0;
+        x2 = 1;
+      }
+      else if (speed_rel_corr > _speeds.back()) // extrapolation past maximum
+      {
+        x1 = _n_speeds - 1;
+        x2 = x1 - 1;
+      }
+      else // interpolation
+      {
+        auto x1_iter = std::lower_bound(_speeds.begin(), _speeds.end(), speed_rel_corr);
+        auto x2_iter = std::upper_bound(_speeds.begin(), _speeds.end(), speed_rel_corr);
 
-    if (speed_rel_corr > _speeds.back())
-      mooseError(_compressor_name,
-                 ": is attempting to operate at speeds greater than allowed by functions ",
-                 _Rp_function_names.back(),
-                 " and ",
-                 _eff_function_names.back(),
-                 ".");
+        x1 = (x1_iter - _speeds.begin()) - 1; // _speeds index for entry <= speed_rel_corr
+        x2 = (x2_iter - _speeds.begin());     // _speeds index for entry > speed_rel_corr
+      }
 
-    auto x1_iter = std::lower_bound(_speeds.begin(), _speeds.end(), speed_rel_corr);
-    auto x2_iter = std::upper_bound(_speeds.begin(), _speeds.end(), speed_rel_corr);
+      const Real x1_spd = _speeds[x1];
+      const Real x2_spd = _speeds[x2];
 
-    auto x1 = (x1_iter - _speeds.begin()) - 1; // _speeds index for entry <= speed_rel_corr
-    auto x2 = (x2_iter - _speeds.begin());     // _speeds index for entry > speed_rel_corr
-    const Real x1_spd = _speeds[x1];
-    const Real x2_spd = _speeds[x2];
+      const ADReal y1_Rp = _Rp_functions[x1]->value(flow_rel_corr, ADPoint());
+      const ADReal y2_Rp = _Rp_functions[x2]->value(flow_rel_corr, ADPoint());
+      const ADReal Rp_m = (y2_Rp - y1_Rp) / (x2_spd - x1_spd);
+      _Rp = y1_Rp + (speed_rel_corr - x1_spd) * Rp_m;
 
-    const Real y1_Rp = _Rp_functions[x1]->value(MetaPhysicL::raw_value(flow_rel_corr), Point());
-    const Real y2_Rp = _Rp_functions[x2]->value(MetaPhysicL::raw_value(flow_rel_corr), Point());
-    const ADReal Rp_m = (y2_Rp - y1_Rp) / (x2_spd - x1_spd);
-    const ADReal Rp = y1_Rp + (speed_rel_corr - x1_spd) * Rp_m;
-    const ADReal y1_eff = _eff_functions[x1]->value(MetaPhysicL::raw_value(flow_rel_corr), Point());
-    const ADReal y2_eff = _eff_functions[x2]->value(MetaPhysicL::raw_value(flow_rel_corr), Point());
-    const ADReal eff_m = (y2_eff - y1_eff) / (x2_spd - x1_spd);
-    const ADReal eff = y1_eff + (speed_rel_corr - x1_spd) * eff_m;
-    const ADReal p0_out = p0_in * Rp;
+      const ADReal y1_eff = _eff_functions[x1]->value(flow_rel_corr, ADPoint());
+      const ADReal y2_eff = _eff_functions[x2]->value(flow_rel_corr, ADPoint());
+      const ADReal eff_m = (y2_eff - y1_eff) / (x2_spd - x1_spd);
+      _eff = y1_eff + (speed_rel_corr - x1_spd) * eff_m;
+    }
+
+    // Apply bounds
+    _Rp = std::max(_Rp_min, std::min(_Rp_max, _Rp));
+
+    // Invert if treating as turbine
+    ADReal Rp_comp, eff_comp;
+    if (_treat_as_turbine)
+    {
+      Rp_comp = 1.0 / _Rp;
+      eff_comp = 1.0 / _eff;
+    }
+    else
+    {
+      Rp_comp = _Rp;
+      eff_comp = _eff;
+    }
+
+    const ADReal p0_out = p0_in * Rp_comp;
     const ADReal rho0_out_isen = _fp.rho_from_p_s(p0_out, s_out);
 
     const ADReal e0_out_isen = _fp.e_from_p_rho(p0_out, rho0_out_isen);
 
-    _delta_p = p0_in * (Rp - 1.0);
+    _delta_p = p0_in * (Rp_comp - 1.0);
 
-    const ADReal h0_out_isen = THM::h_from_e_p_rho(e0_out_isen, p0_out, rho0_out_isen);
+    if (MooseUtils::absoluteFuzzyEqual(_omega[0], 0.0))
+    {
+      _isentropic_torque = 0.0;
+      _dissipation_torque = 0.0;
+    }
+    else
+    {
+      const ADReal h0_out_isen = THM::h_from_e_p_rho(e0_out_isen, p0_out, rho0_out_isen);
+      _isentropic_torque = -(rhouA_in / _omega[0]) * (h0_out_isen - h0_in); // tau_isen
 
-    _isentropic_torque = -(rhouA_in / _omega[0]) * (h0_out_isen - h0_in); // tau_isen
+      const ADReal g_x = h0_out_isen - h0_in + h0_in * eff_comp;
+      const ADReal h0_out = g_x / eff_comp;
 
-    // f(x) = g(x) / h(x)
-    // f'(x) = (g'(x)*h(x) - g(x)*h'(x)) / (h(x)*h(x))
-    const ADReal g_x = h0_out_isen - h0_in + h0_in * eff;
-    const ADReal h0_out = g_x / eff;
-
-    _dissipation_torque = -(rhouA_in / _omega[0]) * (h0_out - h0_out_isen);
+      _dissipation_torque = -(rhouA_in / _omega[0]) * (h0_out - h0_out_isen);
+    }
 
     const ADReal alpha = _omega[0] / _omega_rated;
 
@@ -254,7 +298,7 @@ ADShaftConnectedCompressor1PhaseUserObject::computeFluxesAndResiduals(const unsi
 
     // compute momentum and energy source terms
     // a negative torque value results in a positive S_energy
-    const ADReal S_energy = -_torque * _omega[0];
+    const ADReal S_energy = -(_isentropic_torque + _dissipation_torque) * _omega[0];
 
     const ADRealVectorValue S_momentum = _delta_p * _A_ref * _di_out;
 
@@ -290,6 +334,18 @@ ADShaftConnectedCompressor1PhaseUserObject::getCompressorDeltaP() const
   return _delta_p;
 }
 
+ADReal
+ADShaftConnectedCompressor1PhaseUserObject::getPressureRatio() const
+{
+  return _Rp;
+}
+
+ADReal
+ADShaftConnectedCompressor1PhaseUserObject::getEfficiency() const
+{
+  return _eff;
+}
+
 void
 ADShaftConnectedCompressor1PhaseUserObject::finalize()
 {
@@ -312,4 +368,6 @@ ADShaftConnectedCompressor1PhaseUserObject::threadJoin(const UserObject & uo)
   _dissipation_torque += scpuo._dissipation_torque;
   _friction_torque += scpuo._friction_torque;
   _delta_p += scpuo._delta_p;
+  _Rp += scpuo._Rp;
+  _eff += scpuo._eff;
 }

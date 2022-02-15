@@ -89,8 +89,5 @@ ADPiecewiseLinearInterpolationMaterial::ADPiecewiseLinearInterpolationMaterial(
 void
 ADPiecewiseLinearInterpolationMaterial::computeQpProperties()
 {
-  _property[_qp].value() = _scale_factor * _linear_interp->sample(_coupled_var[_qp].value());
-  _property[_qp].derivatives() = _scale_factor *
-                                 _linear_interp->sampleDerivative(_coupled_var[_qp].value()) *
-                                 _coupled_var[_qp].derivatives();
+  _property[_qp] = _scale_factor * _linear_interp->sample(_coupled_var[_qp]);
 }

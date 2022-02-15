@@ -19,11 +19,6 @@ public:
   ADCoupledVelocityMaterial(const InputParameters & parameters);
 
 protected:
-  FunctorMaterialProperty<ADRealVectorValue> & _velocity;
-  FunctorMaterialProperty<ADReal> & _rho_u;
-  FunctorMaterialProperty<ADReal> & _rho_v;
-  FunctorMaterialProperty<ADReal> & _rho_w;
-
   const Moose::Functor<ADReal> & _vel_x;
   const Moose::Functor<ADReal> * const _vel_y;
   const Moose::Functor<ADReal> * const _vel_z;

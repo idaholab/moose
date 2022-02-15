@@ -37,13 +37,4 @@
     issues = '#16809'
     ad_indexing_type = 'global'
   []
-  [custom_functor_props]
-    type = Exodiff
-    exodiff = custom-functor-props_out.e
-    input = custom-functor-props.i
-    ad_indexing_type = 'global'
-    requirement = 'The system shall allow a developer to create custom functor material property templates.'
-    design = 'syntax/Materials/index.md'
-    issues = '#16809'
-  []
 []

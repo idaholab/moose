@@ -14,14 +14,17 @@
 #include "InfixIterator.h"
 #include "MooseEnumItem.h"
 #include "MooseError.h"
+#include "MooseADWrapper.h"
 #include "Moose.h"
 #include "DualReal.h"
 #include "ExecutablePath.h"
 
 #include "libmesh/compare_types.h"
 #include "libmesh/bounding_box.h"
+#include "libmesh/int_range.h"
 #include "metaphysicl/raw_type.h"
 #include "metaphysicl/metaphysicl_version.h"
+#include "metaphysicl/dynamic_std_array_wrapper.h"
 #include "timpi/standard_type.h"
 
 // C++ includes
@@ -985,6 +988,43 @@ std::deque<MaterialBase *>
 buildRequiredMaterials(const Consumers & mat_consumers,
                        const std::vector<std::shared_ptr<MaterialBase>> & mats,
                        const bool allow_stateful);
+
+/**
+ * Utility class template for a semidynamic vector with a maximum size N
+ * and a chosen dynamic size. This container avoids heap allocation and
+ * is meant as a replacement for small local std::vector variables.
+ * Note: this class uses default initialization, which will not initialize built-in types.
+ * Note: due to an assertion bug in DynamicStdArrayWrapper we have to allocate one element more
+ * until https://github.com/libMesh/MetaPhysicL/pull/8 in MetaPhysicL is available in MOOSE.
+ */
+template <typename T, std::size_t N>
+class SemidynamicVector
+  : public MetaPhysicL::DynamicStdArrayWrapper<T, MetaPhysicL::NWrapper<N + 1>>
+{
+  typedef MetaPhysicL::DynamicStdArrayWrapper<T, MetaPhysicL::NWrapper<N + 1>> Parent;
+
+public:
+  SemidynamicVector(std::size_t size) : Parent()
+  {
+    Parent::resize(size);
+    // TODO: uncomment this once https://github.com/libMesh/MetaPhysicL/pull/8
+    //       makes it all the way into MOOSE.
+    // for (const auto i : make_range(size))
+    //   _data[i] = {};
+  }
+
+  void resize(std::size_t new_size)
+  {
+    // const auto old_dynamic_n = Parent::size();
+    Parent::resize(new_size);
+    // TODO: uncomment this once https://github.com/libMesh/MetaPhysicL/pull/8
+    //       makes it all the way into MOOSE.
+    // for (const auto i : make_range(old_dynamic_n, _dynamic_n))
+    //   _data[i] = {};
+  }
+
+  std::size_t max_size() const { return N; }
+};
 
 } // MooseUtils namespace
 

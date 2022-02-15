@@ -10,7 +10,7 @@
 #include "INSFVMethods.h"
 
 ADReal
-findUStar(const ADReal mu, const ADReal rho, ADReal u, const Real dist)
+findUStar(const ADReal & mu, const ADReal & rho, const ADReal & u, const Real dist)
 {
   // usually takes about 3-4 iterations
   constexpr int MAX_ITERS{50};

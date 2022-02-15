@@ -24,5 +24,6 @@
     exodiff = 'fv_material_quadrature_out.e'
     issues = '#15194'
     requirement = 'The system shall provide location dependent boundary material property evaluations with finite volume variables.'
+    ad_indexing_type = 'global'
   [../]
 []

@@ -55,22 +55,13 @@
       cli_args = "Mesh/diverging_mesh/file='expansion_tri.e' Outputs/file_base='diverging_INSFV_tri_xy' GlobalParams/two_term_boundary_expansion=false"
       ad_indexing_type = 'global'
     []
-    [insfv_quad_xy_rc]
-      type = CSVDiff
-      input = conservation_INSFV.i
-      csvdiff = diverging_INSFV_quad_xy_rc.csv
-      abs_zero = 1e-8
-      detail = 'with Rhie Chow velocity interpolation,'
-      cli_args = "velocity_interp_method='rc' Outputs/file_base='diverging_INSFV_quad_xy_rc'"
-      ad_indexing_type = 'global'
-    []
     [insfv_quad_xy_upwind]
       type = CSVDiff
       input = conservation_INSFV.i
       csvdiff = diverging_INSFV_quad_xy_upwind.csv
       abs_zero = 1e-8
       detail = 'with upwind interpolation of advected quantities,'
-      cli_args = "advected_interp_method='upwind' Outputs/file_base='diverging_INSFV_quad_xy_upwind'"
+      cli_args = "advected_interp_method='upwind' Outputs/file_base='diverging_INSFV_quad_xy_upwind' Postprocessors/inactive='inlet_momentum_x inlet_momentum_y'"
       ad_indexing_type = 'global'
     []
     [insfv_quad_xy_noslip]
@@ -112,22 +103,13 @@
       cli_args = "Problem/coord_type=RZ Outputs/file_base='diverging_PINSFV_quad_rz'"
       ad_indexing_type = 'global'
     []
-    [pinsfv_quad_xy_rc]
-      type = CSVDiff
-      input = conservation_PINSFV.i
-      csvdiff = diverging_PINSFV_quad_xy_rc.csv
-      abs_zero = 1e-8
-      detail = 'with Rhie Chow velocity interpolation,'
-      cli_args = "velocity_interp_method='rc' Outputs/file_base='diverging_PINSFV_quad_xy_rc'"
-      ad_indexing_type = 'global'
-    []
     [pinsfv_quad_xy_upwind]
       type = CSVDiff
       input = conservation_PINSFV.i
       csvdiff = diverging_PINSFV_quad_xy_upwind.csv
       abs_zero = 1e-8
       detail = 'with upwind interpolation of advected quantities,'
-      cli_args = "advected_interp_method='upwind' Outputs/file_base='diverging_PINSFV_quad_xy_upwind'"
+      cli_args = "advected_interp_method='upwind' Outputs/file_base='diverging_PINSFV_quad_xy_upwind' Postprocessors/inactive='inlet_momentum_x inlet_momentum_y'"
       ad_indexing_type = 'global'
     []
     [pinsfv_quad_xy_noslip]

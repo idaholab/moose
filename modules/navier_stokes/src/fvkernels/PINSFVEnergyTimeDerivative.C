@@ -61,13 +61,17 @@ PINSFVEnergyTimeDerivative::computeQpResidual()
     return 0.0;
   else
   {
-    auto time_derivative =
-        _rho(_current_elem) * _cp(_current_elem) * FVTimeKernel::computeQpResidual();
+    auto time_derivative = _rho(makeElemArg(_current_elem)) * _cp(makeElemArg(_current_elem)) *
+                           FVTimeKernel::computeQpResidual();
     if (_rho_dot)
-      time_derivative += (*_rho_dot)(_current_elem)*_cp(_current_elem) * _var(_current_elem);
+      time_derivative += (*_rho_dot)(makeElemArg(_current_elem)) * _cp(makeElemArg(_current_elem)) *
+                         _var(makeElemArg(_current_elem));
     if (_cp_dot)
-      time_derivative += _rho(_current_elem) * (*_cp_dot)(_current_elem)*_var(_current_elem);
+      time_derivative += _rho(makeElemArg(_current_elem)) * (*_cp_dot)(makeElemArg(_current_elem)) *
+                         _var(makeElemArg(_current_elem));
 
-    return _scaling * (_is_solid ? 1 - _eps(_current_elem) : _eps(_current_elem)) * time_derivative;
+    return _scaling *
+           (_is_solid ? 1 - _eps(makeElemArg(_current_elem)) : _eps(makeElemArg(_current_elem))) *
+           time_derivative;
   }
 }

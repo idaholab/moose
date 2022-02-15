@@ -26,7 +26,7 @@ PINSFVMomentumPressurePorosityGradient::validParams()
       "momentum_component",
       momentum_component,
       "The component of the momentum equation that this kernel applies to.");
-  params.addRequiredCoupledVar(NS::porosity, "Porosity auxiliary variable");
+  params.addRequiredParam<MooseFunctorName>(NS::porosity, "Porosity auxiliary variable");
 
   return params;
 }
@@ -35,7 +35,7 @@ PINSFVMomentumPressurePorosityGradient::PINSFVMomentumPressurePorosityGradient(
     const InputParameters & params)
   : FVElementalKernel(params),
     _p(coupledValue(NS::pressure)),
-    _eps_var(dynamic_cast<const MooseVariableFVReal *>(getFieldVar(NS::porosity, 0))),
+    _eps(getFunctor<ADReal>(NS::porosity)),
     _index(getParam<MooseEnum>("momentum_component"))
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
@@ -48,12 +48,10 @@ PINSFVMomentumPressurePorosityGradient::PINSFVMomentumPressurePorosityGradient(
     mooseError(
         "PINSFVMomentumPressurePorosityGradient may only be used with a superficial velocity "
         "variable, of variable type PINSFVSuperficialVelocityVariable.");
-  if (!_eps_var)
-    paramError("eps", "The porosity must be a finite volume variable");
 }
 
 ADReal
 PINSFVMomentumPressurePorosityGradient::computeQpResidual()
 {
-  return -_p[_qp] * _eps_var->adGradSln(_current_elem)(_index);
+  return -_p[_qp] * _eps.gradient(makeElemArg(_current_elem))(_index);
 }

@@ -9,14 +9,14 @@
 
 #pragma once
 
-#include "FVFluxBC.h"
+#include "INSFVFluxBC.h"
 
 class InputParameters;
 
 /**
  * A parent class for slip/no-slip wall boundary conditions
  */
-class INSFVSlipWallBC : public FVFluxBC
+class INSFVSlipWallBC : public INSFVFluxBC
 {
 public:
   static InputParameters validParams();

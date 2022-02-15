@@ -38,12 +38,19 @@ PiecewiseMulticonstant::PiecewiseMulticonstant(const InputParameters & parameter
     mooseError("Parameter direction must have a size identical to ", _dim);
 }
 
-Real
-PiecewiseMulticonstant::sample(const std::vector<Real> & pt) const
+ADReal
+PiecewiseMulticonstant::value(const ADReal & t, const ADPoint & p) const
 {
-  std::vector<unsigned int> left(_dim);
-  std::vector<unsigned int> right(_dim);
-  std::vector<unsigned int> arg(_dim);
+  // piecewise constant derivatives are zero everywhere (ignore discontinuities)
+  return value(MetaPhysicL::raw_value(t), MetaPhysicL::raw_value(p));
+}
+
+Real
+PiecewiseMulticonstant::sample(const GridPoint & pt) const
+{
+  GridIndex left(_dim);
+  GridIndex right(_dim);
+  GridIndex arg(_dim);
   for (unsigned int i = 0; i < _dim; ++i)
   {
     getNeighborIndices(_grid[i], pt[i], left[i], right[i]);

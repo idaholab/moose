@@ -15,5 +15,6 @@
     exodiff = 'value_jump_indicator_fv_out.e'
 
     requirement = "The system shall include the ability to compute the square of the change in a FV variable across element boundaries for the purpose of performing automatic mesh adaptivity:"
+    ad_indexing_type = 'global'
   []
 []

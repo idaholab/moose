@@ -14,30 +14,22 @@ registerMooseObject("NavierStokesApp", INSFVSymmetryVelocityBC);
 InputParameters
 INSFVSymmetryVelocityBC::validParams()
 {
-  InputParameters params = INSFVSymmetryBC::validParams();
-  params.addClassDescription(
-      "Implements a free slip boundary condition using a penalty formulation.");
-  params.addRequiredCoupledVar("u", "The velocity in the x direction.");
-  params.addCoupledVar("v", 0, "The velocity in the y direction.");
-  params.addCoupledVar("w", 0, "The velocity in the z direction.");
-  MooseEnum momentum_component("x=0 y=1 z=2");
-  params.addRequiredParam<MooseEnum>(
-      "momentum_component",
-      momentum_component,
-      "The component of the momentum equation that this BC applies to.");
+  InputParameters params = INSFVFluxBC::validParams();
+  params += INSFVSymmetryBC::validParams();
+  params.addClassDescription("Implements a symmetry boundary condition for the velocity.");
+  params.addRequiredParam<MooseFunctorName>("u", "The velocity in the x direction.");
+  params.addParam<MooseFunctorName>("v", 0, "The velocity in the y direction.");
+  params.addParam<MooseFunctorName>("w", 0, "The velocity in the z direction.");
   params.addRequiredParam<MaterialPropertyName>("mu", "The viscosity");
   return params;
 }
 
 INSFVSymmetryVelocityBC::INSFVSymmetryVelocityBC(const InputParameters & params)
-  : INSFVSymmetryBC(params),
-    _u_elem(adCoupledValue("u")),
-    _v_elem(adCoupledValue("v")),
-    _w_elem(adCoupledValue("w")),
-    _u_neighbor(adCoupledNeighborValue("u")),
-    _v_neighbor(adCoupledNeighborValue("v")),
-    _w_neighbor(adCoupledNeighborValue("w")),
-    _comp(getParam<MooseEnum>("momentum_component")),
+  : INSFVFluxBC(params),
+    INSFVSymmetryBC(params),
+    _u_functor(getFunctor<ADReal>("u")),
+    _v_functor(getFunctor<ADReal>("v")),
+    _w_functor(getFunctor<ADReal>("w")),
     _mu(getFunctor<ADReal>("mu")),
     _dim(_subproblem.mesh().dimension())
 {
@@ -48,36 +40,47 @@ INSFVSymmetryVelocityBC::INSFVSymmetryVelocityBC(const InputParameters & params)
 #endif
 }
 
-ADReal
-INSFVSymmetryVelocityBC::computeQpResidual()
+void
+INSFVSymmetryVelocityBC::gatherRCData(const FaceInfo & fi)
 {
+  _face_info = &fi;
+  _face_type = fi.faceType(_var.name());
+
   const bool use_elem = _face_info->faceType(_var.name()) == FaceInfo::VarFaceNeighbors::ELEM;
+  const auto elem_arg =
+      use_elem ? makeElemArg(&_face_info->elem()) : makeElemArg(_face_info->neighborPtr());
+  const auto normal = use_elem ? _face_info->normal() : Point(-_face_info->normal());
   const Point & cell_centroid =
       use_elem ? _face_info->elemCentroid() : _face_info->neighborCentroid();
-  const auto & u_C = use_elem ? _u_elem : _u_neighbor;
-  const auto & v_C = use_elem ? _v_elem : _v_neighbor;
-  const auto & w_C = use_elem ? _w_elem : _w_neighbor;
+  const auto u_C = _u_functor(elem_arg);
+  const auto v_C = _v_functor(elem_arg);
+  const auto w_C = _w_functor(elem_arg);
 
-  // Evaluate viscosity on the face
-  const auto mu_b = use_elem ? _mu(std::make_tuple(_face_info,
-                                                   Moose::FV::LimiterType::CentralDifference,
-                                                   true,
-                                                   _face_info->elem().subdomain_id()))
-                             : _mu(std::make_tuple(_face_info,
-                                                   Moose::FV::LimiterType::CentralDifference,
-                                                   true,
-                                                   _face_info->neighborPtr()->subdomain_id()));
-
-  const auto d_perpendicular = std::abs((_face_info->faceCentroid() - cell_centroid) * _normal);
+  const auto d_perpendicular = std::abs((_face_info->faceCentroid() - cell_centroid) * normal);
 
   // See Moukalled 15.150. Recall that we multiply by the area in the base class, so S_b ->
-  // _normal.norm() here
+  // normal.norm() -> 1 here.
 
-  ADReal v_dot_n = u_C[_qp] * _normal(0);
+  const auto face = singleSidedFaceArg();
+  const auto mu_b = _mu(face);
+
+  ADReal v_dot_n = u_C * normal(0);
   if (_dim > 1)
-    v_dot_n += v_C[_qp] * _normal(1);
+    v_dot_n += v_C * normal(1);
   if (_dim > 2)
-    v_dot_n += w_C[_qp] + _normal(2);
+    v_dot_n += w_C * normal(2);
 
-  return 2. * mu_b * _normal.norm() / d_perpendicular * v_dot_n * _normal(_comp);
+  const auto strong_resid = mu_b / d_perpendicular * normal(_index) * v_dot_n;
+
+  // The strong residual for this object is a superposition of all the velocity components, however,
+  // for the on-diagonal 'a' coefficient, we only care about the coefficient multiplying the
+  // velocity component corresponding to _index, hence v_dot_n -> normal(_index) when moving from
+  // strong_resid -> a
+  const auto a = mu_b / d_perpendicular * normal(_index) * normal(_index);
+
+  _rc_uo.addToA((_face_type == FaceInfo::VarFaceNeighbors::ELEM) ? &fi.elem() : fi.neighborPtr(),
+                _index,
+                a * (fi.faceArea() * fi.faceCoord()));
+
+  processResidual(strong_resid * (fi.faceArea() * fi.faceCoord()));
 }

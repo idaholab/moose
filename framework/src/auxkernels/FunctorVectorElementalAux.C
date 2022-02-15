@@ -42,6 +42,7 @@ template <bool is_ad>
 Real
 FunctorVectorElementalAuxTempl<is_ad>::computeValue()
 {
-  return MetaPhysicL::raw_value(_factor(_current_elem)) *
-         MetaPhysicL::raw_value(_functor(_current_elem)(_component));
+  const auto elem_arg = makeElemArg(_current_elem);
+  return MetaPhysicL::raw_value(_factor(elem_arg)) *
+         MetaPhysicL::raw_value(_functor(elem_arg)(_component));
 }

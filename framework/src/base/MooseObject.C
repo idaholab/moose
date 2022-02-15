@@ -49,6 +49,7 @@ MooseObject::validParams()
   params.addPrivateParam<AuxiliarySystem *>("_aux_sys", nullptr);
   params.addPrivateParam<Transient *>("_executioner", nullptr);
   params.addPrivateParam<THREAD_ID>("_tid");
+  params.addPrivateParam<bool>("_residual_object", false);
   return params;
 }
 

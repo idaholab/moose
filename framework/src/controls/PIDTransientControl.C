@@ -87,8 +87,6 @@ PIDTransientControl::PIDTransientControl(const InputParameters & parameters)
 void
 PIDTransientControl::execute()
 {
-  Point dummy;
-
   if (_t >= _start_time && _t < _stop_time)
   {
     // Get the current value of the controllable parameter
@@ -122,7 +120,7 @@ PIDTransientControl::execute()
     }
 
     // Compute the delta between the current value of the postprocessor and the desired value
-    Real delta = _current - _target.value(_t, dummy);
+    Real delta = _current - _target.value(_t);
 
     // If desired, reset integral of the error if the error crosses zero
     if (_reset_integral_windup && delta * _old_delta < 0)

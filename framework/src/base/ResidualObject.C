@@ -25,6 +25,7 @@ ResidualObject::validParams()
       "variable", "The name of the variable that this residual object operates on");
 
   params.declareControllable("enable");
+  params.set<bool>("_residual_object") = true;
   return params;
 }
 

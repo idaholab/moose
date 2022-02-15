@@ -18,6 +18,7 @@
 #include "INSFVAttributes.h"
 #include "SystemBase.h"
 #include "FVDirichletBCBase.h"
+#include "Assembly.h"
 
 #include "libmesh/elem.h"
 #include "libmesh/vector_value.h"
@@ -28,6 +29,28 @@
 
 #include <vector>
 #include <utility>
+
+namespace Moose
+{
+namespace FV
+{
+template <typename ActionFunctor>
+void
+loopOverElemFaceInfo(const Elem & elem,
+                     const MooseMesh & mesh,
+                     const SubProblem & subproblem,
+                     ActionFunctor & act)
+{
+  const auto coord_type = subproblem.getCoordSystem(elem.subdomain_id());
+  loopOverElemFaceInfo(elem,
+                       mesh,
+                       act,
+                       coord_type,
+                       coord_type == Moose::COORD_RZ ? subproblem.getAxisymmetricRadialCoord()
+                                                     : libMesh::invalid_uint);
+}
+}
+}
 
 registerMooseObject("NavierStokesApp", INSFVVelocityVariable);
 
@@ -181,8 +204,7 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem, bool correct_skewness)
           grad_b += surface_vector * elem_value;
       }
       else if (isInternalFace(*fi))
-        grad_b +=
-            surface_vector * getInternalFaceValue(neighbor, *fi, elem_value, correct_skewness);
+        grad_b += surface_vector * getInternalFaceValue(*fi, correct_skewness);
       else
       {
         mooseAssert(isDirichletBoundaryFace(*fi), "We've run out of face types");

@@ -23,7 +23,9 @@ public:
 
   FourierNoise(const InputParameters & parameters);
 
+  using Function::value;
   virtual Real value(Real, const Point & p) const override;
+  virtual ADReal value(const ADReal &, const ADPoint & p) const override;
 
 protected:
   struct SeriesItem

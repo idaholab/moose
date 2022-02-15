@@ -14,5 +14,6 @@
     exodiff = test_functor_out.e
     requirement = 'The system shall provide a material object that can, for a single functor material property, map subdomain IDs to different functors.'
     design = 'PiecewiseByBlockFunctorMaterial.md'
+    ad_indexing_type = 'global'
   []
 []

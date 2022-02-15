@@ -73,6 +73,18 @@
     issues = '#16794 #16937'
     mesh_mode = REPLICATED
   []
+  [mixing-length-jac]
+    type = 'PetscJacobianTester'
+    input = 2d-mixing-length.i
+    run_sim = True
+    requirement = 'The system shall be able to model the effect of Reynolds-averaged parameters on the momentum and passive scalar advection equations using a mixing length model and show a perfect Jacobian'
+    ad_indexing_type = 'global'
+    design = 'navier_stokes/rans_theory.md'
+    issues = '#16794 #16937'
+    mesh_mode = REPLICATED
+    difference_tol = 1e-7
+    cli_args = "Mesh/gen/nx=2 Mesh/gen/ny=2"
+  []
   [linear-friction]
     type = 'Exodiff'
     input = 2d-rc-friction.i
@@ -113,6 +125,7 @@
       ad_indexing_type = 'global'
       valgrind = HEAVY
       detail = 'two-dimensional triangular elements'
+      abs_zero = 1e-9
     []
     [tets]
       type = 'Exodiff'
@@ -139,5 +152,13 @@
     exodiff = one-elem-wide-channel_out.e
     issues = '#16822'
     requirement = 'The system shall be able to compute gradients, when extrapolated boundary face values make the gradient computation singular, by catching the singularity error and re-running without doing boundary face value extrapolation.'
+  []
+  [discontinuous]
+    type = 'Exodiff'
+    ad_indexing_type = 'global'
+    input = discontinuous-body-forces.i
+    exodiff = discontinuous-body-forces_out.e
+    design = INSFVRhieChowInterpolator.md
+    requirement = 'The system shall show a monotone pressure profile in the presence of discontinuous body forces, in this case a transient from free flow to linear drag.'
   []
 []

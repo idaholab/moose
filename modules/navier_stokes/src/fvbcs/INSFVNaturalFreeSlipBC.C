@@ -23,9 +23,3 @@ INSFVNaturalFreeSlipBC::INSFVNaturalFreeSlipBC(const InputParameters & params)
   : INSFVSlipWallBC(params)
 {
 }
-
-ADReal
-INSFVNaturalFreeSlipBC::computeQpResidual()
-{
-  return 0;
-}

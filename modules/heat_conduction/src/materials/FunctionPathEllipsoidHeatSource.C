@@ -57,13 +57,10 @@ FunctionPathEllipsoidHeatSource::computeQpProperties()
   const Real & y = _q_point[_qp](1);
   const Real & z = _q_point[_qp](2);
 
-  // The functions that define the path is only time dependent
-  const static Point dummy;
-
   // center of the heat source
-  Real x_t = _function_x.value(_t, dummy);
-  Real y_t = _function_y.value(_t, dummy);
-  Real z_t = _function_z.value(_t, dummy);
+  Real x_t = _function_x.value(_t);
+  Real y_t = _function_y.value(_t);
+  Real z_t = _function_z.value(_t);
 
   _volumetric_heat[_qp] = 6.0 * std::sqrt(3.0) * _P * _eta * _f /
                           (_rx * _ry * _rz * std::pow(libMesh::pi, 1.5)) *

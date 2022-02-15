@@ -14,19 +14,39 @@ registerMooseObject("NavierStokesApp", INSFVEnergyAdvection);
 InputParameters
 INSFVEnergyAdvection::validParams()
 {
-  auto params = INSFVMomentumAdvection::validParams();
+  auto params = INSFVAdvectionKernel::validParams();
   params.addClassDescription("Advects energy, e.g. rho*cp*T. A user may still override what "
                              "quantity is advected, but the default is rho*cp*T");
-  params.set<MooseFunctorName>("advected_quantity") = "rho_cp_temp";
+  params.addParam<MooseFunctorName>(
+      "advected_quantity", "rho_cp_temp", "The heat quantity to advect.");
   return params;
 }
 
 INSFVEnergyAdvection::INSFVEnergyAdvection(const InputParameters & params)
-  : INSFVMomentumAdvection(params)
+  : INSFVAdvectionKernel(params), _adv_quant(getFunctor<ADReal>("advected_quantity"))
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
              "configure script in the root MOOSE directory with the configure option "
              "'--with-ad-indexing-type=global'");
 #endif
+}
+
+ADReal
+INSFVEnergyAdvection::computeQpResidual()
+{
+  ADReal adv_quant_interface;
+
+  const auto elem_face = elemFromFace();
+  const auto neighbor_face = neighborFromFace();
+
+  const auto v = _rc_vel_provider.getVelocity(_velocity_interp_method, *_face_info, _tid);
+  Moose::FV::interpolate(_advected_interp_method,
+                         adv_quant_interface,
+                         _adv_quant(elem_face),
+                         _adv_quant(neighbor_face),
+                         v,
+                         *_face_info,
+                         true);
+  return _normal * v * adv_quant_interface;
 }

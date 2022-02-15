@@ -16,6 +16,8 @@
 #include "Function.h"
 #include "Numerics.h"
 
+#include "libmesh/utility.h"
+
 registerMooseObject("ThermalHydraulicsApp", ADShaftConnectedTurbine1PhaseUserObject);
 
 InputParameters
@@ -119,11 +121,11 @@ ADShaftConnectedTurbine1PhaseUserObject::computeFluxesAndResiduals(const unsigne
 
     _flow_coeff = Q_in / (_omega[0] * _D_wheel * _D_wheel * _D_wheel);
 
-    const Real head_coeff = _head_coefficient.value(MetaPhysicL::raw_value(_flow_coeff), Point());
+    const auto head_coeff = _head_coefficient.value(_flow_coeff, ADPoint());
 
     const ADReal gH = head_coeff * _D_wheel * _D_wheel * _omega[0] * _omega[0];
 
-    const Real power_coeff = _power_coefficient.value(MetaPhysicL::raw_value(_flow_coeff), Point());
+    const auto power_coeff = _power_coefficient.value(_flow_coeff, ADPoint());
 
     // friction torque
     ADReal alpha = _omega[0] / _omega_rated;
@@ -144,7 +146,7 @@ ADShaftConnectedTurbine1PhaseUserObject::computeFluxesAndResiduals(const unsigne
     }
 
     _driving_torque =
-        power_coeff * (_rhoV[0] / _volume) * _omega[0] * _omega[0] * std::pow(_D_wheel, 5);
+        power_coeff * (_rhoV[0] / _volume) * _omega[0] * _omega[0] * Utility::pow<5>(_D_wheel);
 
     _torque += _driving_torque + _friction_torque;
 

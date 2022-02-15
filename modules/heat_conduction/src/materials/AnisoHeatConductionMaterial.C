@@ -65,7 +65,8 @@ AnisoHeatConductionMaterialTempl<is_ad>::AnisoHeatConductionMaterialTempl(
 
     _specific_heat(declareGenericProperty<Real, is_ad>(_base_name + "specific_heat")),
     _dspecific_heat_dT(declarePropertyDerivative<Real>(_base_name + "specific_heat", _T_name)),
-    _specific_heat_function(&getFunction("specific_heat"))
+    _specific_heat_function(&getFunction("specific_heat")),
+    _ad_q_point(is_ad ? &_assembly.adQPoints() : nullptr)
 {
 }
 
@@ -77,80 +78,46 @@ AnisoHeatConductionMaterialTempl<is_ad>::initQpStatefulProperties()
   DerivativeMaterialInterface::initQpStatefulProperties();
 }
 
-template <bool is_ad>
-void
-AnisoHeatConductionMaterialTempl<is_ad>::setDerivatives(GenericRankTwoTensor<is_ad> & prop,
-                                                        RankTwoTensor dprop_dT,
-                                                        const ADReal & T)
+template <>
+auto
+AnisoHeatConductionMaterialTempl<true>::genericQPoints()
 {
-  for (unsigned int i = 0; i < _dim; ++i)
-    for (unsigned int j = 0; j < _dim; ++j)
-    {
-      if (T < 0)
-        prop(i, j).derivatives() = 0.0;
-      else
-        prop(i, j).derivatives() = dprop_dT(i, j) * T.derivatives();
-    }
+  return (*_ad_q_point)[_qp];
 }
 
 template <>
-void
-AnisoHeatConductionMaterialTempl<false>::setDerivatives(GenericRankTwoTensor<false> &,
-                                                        RankTwoTensor,
-                                                        const ADReal &)
+auto
+AnisoHeatConductionMaterialTempl<false>::genericQPoints()
 {
-  mooseError("Mistaken call of setDerivatives in a non-AD AnisoHeatConductionMaterial");
-}
-
-template <bool is_ad>
-void
-AnisoHeatConductionMaterialTempl<is_ad>::setDerivatives(GenericReal<is_ad> & prop,
-                                                        Real dprop_dT,
-                                                        const ADReal & T)
-{
-  if (T < 0)
-    prop.derivatives() = 0;
-  else
-    prop.derivatives() = dprop_dT * T.derivatives();
-}
-
-template <>
-void
-AnisoHeatConductionMaterialTempl<false>::setDerivatives(Real &, Real, const ADReal &)
-{
-  mooseError("Mistaken call of setDerivatives in a non-AD AnisoHeatConductionMaterial version");
+  return _q_point[_qp];
 }
 
 template <bool is_ad>
 void
 AnisoHeatConductionMaterialTempl<is_ad>::computeQpProperties()
 {
-  Real temp_qp = MetaPhysicL::raw_value(_T[_qp]);
+  const auto & temp_qp = _T[_qp];
+  const auto & p = genericQPoints();
 
   if (_thermal_conductivity_temperature_coefficient_function)
   {
-    const auto & p = _q_point[_qp];
+
     _thermal_conductivity[_qp] =
         _user_provided_thermal_conductivity *
-        (1 + _thermal_conductivity_temperature_coefficient_function->value(temp_qp, p) *
-                 (temp_qp - _ref_temp));
+        (1.0 + _thermal_conductivity_temperature_coefficient_function->value(temp_qp, p) *
+                   (temp_qp - _ref_temp));
     _dthermal_conductivity_dT[_qp] =
         _user_provided_thermal_conductivity *
-        _thermal_conductivity_temperature_coefficient_function->timeDerivative(temp_qp, p) *
-        (temp_qp - _ref_temp);
-    if (is_ad)
-      setDerivatives(_thermal_conductivity[_qp], _dthermal_conductivity_dT[_qp], _T[_qp]);
+        _thermal_conductivity_temperature_coefficient_function->timeDerivative(
+            MetaPhysicL::raw_value(temp_qp), _q_point[_qp]) *
+        MetaPhysicL::raw_value(temp_qp - _ref_temp);
   }
   else
     _thermal_conductivity[_qp] = _user_provided_thermal_conductivity;
 
-  const auto & p = _q_point[_qp];
   _specific_heat[_qp] = _specific_heat_function->value(temp_qp, p);
-  if (is_ad && (dynamic_cast<const ConstantFunction *>(_specific_heat_function) == nullptr))
-  {
-    _dspecific_heat_dT[_qp] = _specific_heat_function->timeDerivative(temp_qp, p);
-    setDerivatives(_specific_heat[_qp], _dspecific_heat_dT[_qp], _T[_qp]);
-  }
+  _dspecific_heat_dT[_qp] =
+      _specific_heat_function->timeDerivative(MetaPhysicL::raw_value(temp_qp), _q_point[_qp]);
 }
 
 template class AnisoHeatConductionMaterialTempl<false>;

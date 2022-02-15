@@ -1,0 +1,18 @@
+[Tests]
+  issues = '#20281'
+  [./without_correction]
+    type = RunApp
+    input = 'simple_test.i'
+    design = 'source/actions/TensorMechanicsAction.md'
+    requirement = "Can run second order problem without stabilization"
+    cli_args = "Modules/TensorMechanics/Master/all/volumetric_locking_correction=false"
+  [../]
+  [./with_correction]
+    type = RunException
+    input = 'simple_test.i'
+    design = 'source/actions/TensorMechanicsAction.md'
+    requirement = "Cannot run second order problem with stabilization"
+    cli_args = "Modules/TensorMechanics/Master/all/volumetric_locking_correction=true"
+    expect_err = "Volumetric locking correction should not be used for higher-order elements."
+  [../]
+[]

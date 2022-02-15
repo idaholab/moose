@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "FVMatAdvectionOutflowBC.h"
+#include "INSFVFluxBC.h"
 #include "INSFVFullyDevelopedFlowBC.h"
 
 class INSFVVelocityVariable;
@@ -19,15 +19,20 @@ class INSFVVelocityVariable;
  * It advects momentum at the outflow, and may replace outlet pressure boundary conditions
  * when selecting a mean-pressure approach.
  */
-class INSFVMomentumAdvectionOutflowBC : public FVMatAdvectionOutflowBC,
-                                        public INSFVFullyDevelopedFlowBC
+class INSFVMomentumAdvectionOutflowBC : public INSFVFluxBC, public INSFVFullyDevelopedFlowBC
 {
 public:
   static InputParameters validParams();
   INSFVMomentumAdvectionOutflowBC(const InputParameters & params);
 
+  using INSFVFluxBC::gatherRCData;
+  void gatherRCData(const FaceInfo &) override;
+
 protected:
-  virtual ADReal computeQpResidual() override;
+  /**
+   * A virtual method that can be overridden in PINSFV classes to return a non-unity porosity
+   */
+  virtual const Moose::FunctorBase<ADReal> & epsFunctor() const { return _unity_functor; }
 
   /// x-velocity
   const INSFVVelocityVariable * const _u_var;
@@ -38,4 +43,10 @@ protected:
 
   /// the dimension of the simulation
   const unsigned int _dim;
+
+  /// The density
+  const Moose::Functor<ADReal> & _rho;
+
+  /// A unity functor used in the \p epsFunctor virtual method
+  const Moose::ConstantFunctor<ADReal> _unity_functor{1};
 };

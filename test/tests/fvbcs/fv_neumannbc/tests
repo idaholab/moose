@@ -6,6 +6,7 @@
     input = 'fv_neumannbc.i'
     exodiff = 'fv_neumannbc_out.e'
     requirement = 'The system shall run a simple 1D diffusion problem with a Neumann BC value.'
+    ad_indexing_type = 'global'
   []
   [fvbcs_internal]
     design = 'FVNeumannBC.md'
@@ -15,6 +16,7 @@
     cli_args = "FVBCs/inactive=''"
     expect_err = 'A FVFluxBC is being triggered on an internal face'
     requirement = 'The system shall error out if a finite volume flux boundary condition, in this case a finite volume Neumann boundary condition, is used inside the domain.'
+    ad_indexing_type = 'global'
   []
   [fvbcs_disconnected_from_variable]
     design = 'FVNeumannBC.md'
@@ -24,5 +26,6 @@
     expect_err = 'A FVFluxBC is being triggered on a face which does not connect to a block with the relevant finite volume variable.'
     cli_args = "Mesh/mesh/subdomain_id='1 2' Problem/kernel_coverage_check=false"
     requirement = 'The system shall error out if a finite volume flux boundary condition is used on a mesh element face that is not connected to an element with the corresponding finite volume variable.'
+    ad_indexing_type = 'global'
   []
 []

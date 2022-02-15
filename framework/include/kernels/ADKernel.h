@@ -114,9 +114,6 @@ protected:
   /// The current gradient of the shape functions without possible displacement derivatives
   const typename OutputTools<T>::VariablePhiGradient & _regular_grad_phi;
 
-  /// Whether this object is acting on the displaced mesh
-  const bool _use_displaced_mesh;
-
 private:
   /**
    * Add the Jacobian contribution for the provided variable

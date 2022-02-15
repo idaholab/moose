@@ -38,6 +38,7 @@
       input = 'fv_simple_diffusion_line_integral.i'
       csvdiff = 'fv_simple_diffusion_line_integral_out.csv'
       detail = 'and finite volumes.'
+      ad_indexing_type = 'global'
     []
   []
 []

@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "GriddedData.h"
-#include "MooseError.h"
 #include "MooseUtils.h"
 #include <fstream>
 #include <algorithm>
@@ -90,7 +89,7 @@ GriddedData::getFcn(std::vector<Real> & fcn)
 }
 
 Real
-GriddedData::evaluateFcn(const std::vector<unsigned int> & ijk)
+GriddedData::evaluateFcn(const GridIndex & ijk)
 {
   if (ijk.size() != _dim)
     mooseError(

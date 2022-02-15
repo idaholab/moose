@@ -3,7 +3,7 @@
     type = Exodiff
     input = 'gate_valve_1phase.i'
     exodiff = 'gate_valve_1phase_out.e'
-    rel_err = 1e-5
+    rel_err = 5e-5
     abs_zero = 1e-8
     heavy = true
     ad_indexing_type = 'global'

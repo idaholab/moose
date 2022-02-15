@@ -1,0 +1,18 @@
+[Tests]
+  design = 'INSFVRhieChowInterpolator.md'
+  issues = '#18215'
+  [bad_ro]
+    type = RunException
+    input = 'bad-ro.i'
+    expect_err = "is not a INSFVMomentumResidualObject"
+    requirement = 'The system shall error if a user specifies a residual object for the momentum equation that is not a incompressible Navier-Stokes finite volume momentum residual object.'
+    ad_indexing_type = 'global'
+  []
+  [bad_restriction]
+    type = RunException
+    input = bad-restriction.i
+    expect_err = "Block restriction of interpolator user object.* doesn't match the block restriction of variable"
+    requirement = 'The system shall error if the interpolation object has block restriction different from the nonlinear flow variables.'
+    ad_indexing_type = 'global'
+  []
+[]

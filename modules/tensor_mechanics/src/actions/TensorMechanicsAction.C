@@ -935,7 +935,7 @@ TensorMechanicsAction::actLagrangianKernelStrain()
   params.set<bool>("large_kinematics") = _lk_large_kinematics;
 
   // Error if volumetric locking correction is on for higher-order elements
-  if (_problem->mesh().hasSecondOrderElements())
+  if (_problem->mesh().hasSecondOrderElements() && _lk_locking)
     mooseError("Volumetric locking correction should not be used for "
                "higher-order elements.");
 

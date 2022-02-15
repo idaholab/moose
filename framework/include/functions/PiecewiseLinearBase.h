@@ -29,7 +29,11 @@ public:
   PiecewiseLinearBase(const InputParameters & parameters);
 
   virtual void initialSetup() override;
+
+  using Function::value;
   virtual Real value(Real t, const Point & p) const override;
+  virtual ADReal value(const ADReal & t, const ADPoint & p) const override;
+
   virtual Real timeDerivative(Real t, const Point &) const override;
   virtual RealGradient gradient(Real, const Point & p) const override;
   virtual Real integral() const override;

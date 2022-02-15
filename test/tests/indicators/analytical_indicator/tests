@@ -15,5 +15,6 @@
     input = 'analytical_indicator_fv.i'
     exodiff = 'analytical_indicator_fv_out.e'
     requirement = "The system shall include the ability to compute the square of the difference between a FV solution variable and an analytical function for the purpose of performing automatic mesh adaptivity."
+    ad_indexing_type = 'global'
   []
 []

@@ -42,7 +42,4 @@ protected:
 
   /// density
   const Moose::Functor<ADReal> & _rho;
-
-  // Total viscosity
-  FunctorMaterialProperty<ADReal> & _total_viscosity;
 };

@@ -8,7 +8,7 @@
     method = "!dbg"
     requirement = 'The system shall be able to model a smooth porosity gradient in a 2D channel.'
     ad_indexing_type = 'global'
-    cli_args = "Outputs/file_base='rc-smooth-epsjump' ICs/inactive='porosity_1 porosity_2' FVKernels/inactive='' GlobalParams/smooth_porosity=true"
+    cli_args = "Outputs/file_base='rc-smooth-epsjump' ICs/inactive='porosity_1 porosity_2' Materials/inactive='jump smooth'"
   []
   [1d-discontinuous-jump-average-average]
     type = 'Exodiff'
@@ -52,6 +52,22 @@
     recover = false
     max_parallel = 1
     ad_indexing_type = 'global'
-    cli_args = "Outputs/file_base='rc-discontinuous-epsjump'"
+    cli_args = "Outputs/file_base='rc-discontinuous-epsjump' Materials/inactive='jump smooth'"
+  []
+  [reconstruct-porosity]
+    type = 'Exodiff'
+    input = 2d-rc-epsjump.i
+    exodiff = reconstructed.e
+    cli_args = "Outputs/file_base=reconstructed UserObjects/rc/smoothing_layers=20 AuxVariables/active='' ICs/inactive='porosity_1 porosity_2 porosity_continuous'"
+    ad_indexing_type = 'global'
+    requirement = 'The system shall exhibit a monotonic pressure profile when a number of reconstructions (essentially smoothing) are applied to the porosity.'
+  []
+  [reconstruct-error]
+    type = RunException
+    input = 2d-rc-epsjump.i
+    cli_args = 'UserObjects/rc/smoothing_layers=1'
+    expect_err = 'If we are reconstructing porosity, then the input porosity to this user object cannot be a Moose variable'
+    ad_indexing_type = 'global'
+    requirement = 'The system shall error if the user attempts to create a reconstructed field from a variable.'
   []
 []

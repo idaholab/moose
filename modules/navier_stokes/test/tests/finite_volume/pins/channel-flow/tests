@@ -57,7 +57,7 @@
     requirement = 'The system shall be able to model no-slip conditions in a porous media channel using an average interpolation for velocity; specifically, moving down the channel, the tangential velocity shall develop a parabolic profile.'
     abs_zero = 1e-9
     ad_indexing_type = 'global'
-    cli_args = "velocity_interp_method='average' FVBCs/active='inlet-u inlet-v outlet-p no-slip-u no-slip-v' Outputs/file_base='rc-no-slip-average-velocity' -pc_type lu -pc_factor_shift_type NONZERO"
+    cli_args = "GlobalParams/velocity_interp_method='average' FVBCs/active='inlet-u inlet-v outlet-p no-slip-u no-slip-v' Outputs/file_base='rc-no-slip-average-velocity' -pc_type lu -pc_factor_shift_type NONZERO"
   []
   [no-slip-match]
     type = 'Exodiff'

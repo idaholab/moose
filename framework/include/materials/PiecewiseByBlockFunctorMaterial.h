@@ -21,10 +21,6 @@ class PiecewiseByBlockFunctorMaterialTempl : public FunctorMaterial
 public:
   PiecewiseByBlockFunctorMaterialTempl(const InputParameters & parameters);
   static InputParameters validParams();
-
-private:
-  /// Material property functor defined
-  FunctorMaterialProperty<GenericReal<is_ad>> & _prop;
 };
 
 typedef PiecewiseByBlockFunctorMaterialTempl<false> PiecewiseByBlockFunctorMaterial;

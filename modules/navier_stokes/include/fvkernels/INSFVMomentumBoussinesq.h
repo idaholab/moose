@@ -10,16 +10,20 @@
 #pragma once
 
 #include "FVElementalKernel.h"
+#include "INSFVMomentumResidualObject.h"
 
 /**
  * Imposes a Boussinesq force on the momentum equation. Useful for modeling natural convection
- * within an incompressible Navier-Stokes approximation
+ * within an incompressible formulation of the Navier-Stokes equations
  */
-class INSFVMomentumBoussinesq : public FVElementalKernel
+class INSFVMomentumBoussinesq : public FVElementalKernel, public INSFVMomentumResidualObject
 {
 public:
   static InputParameters validParams();
   INSFVMomentumBoussinesq(const InputParameters & params);
+
+  void gatherRCData(const Elem &) override {}
+  void gatherRCData(const FaceInfo &) override {}
 
 protected:
   ADReal computeQpResidual() override;
@@ -34,6 +38,4 @@ protected:
   const Real _ref_temperature;
   /// the density
   const Real & _rho;
-  /// index x|y|z
-  const unsigned int _index;
 };

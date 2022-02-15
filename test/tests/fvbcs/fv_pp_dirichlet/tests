@@ -6,5 +6,6 @@
     input = 'fv_pp_dirichlet.i'
     exodiff = 'fv_pp_dirichlet_out.e'
     requirement = 'The system shall run a simple 1D diffusion problem with a Dirichlet BC value set by a postprocessor.'
+    ad_indexing_type = 'global'
   []
 []

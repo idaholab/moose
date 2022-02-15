@@ -24,25 +24,16 @@ FunctorPropFromGradAndDot::validParams()
 }
 
 FunctorPropFromGradAndDot::FunctorPropFromGradAndDot(const InputParameters & parameters)
-  : FunctorMaterial(parameters),
-    _value_prop(declareFunctorProperty<ADReal>(
-        getParam<MaterialPropertyName>("root_functor_prop_name") + "_value")),
-    _grad_prop(declareFunctorProperty<ADRealVectorValue>(
-        getParam<MaterialPropertyName>("root_functor_prop_name") + "_grad")),
-    _dot_prop(declareFunctorProperty<ADReal>(
-        getParam<MaterialPropertyName>("root_functor_prop_name") + "_dot")),
-    _functor(getFunctor<ADReal>("functor"))
+  : FunctorMaterial(parameters), _functor(getFunctor<ADReal>("functor"))
 {
-  _value_prop.setFunctor(_mesh,
-                         blockIDs(),
-                         [this](const auto & r, const auto & t) -> ADReal
-                         { return _functor(r, t); });
-  _grad_prop.setFunctor(_mesh,
-                        blockIDs(),
-                        [this](const auto & r, const auto & t) -> ADRealVectorValue
-                        { return _functor.gradient(r, t); });
-  _dot_prop.setFunctor(_mesh,
-                       blockIDs(),
-                       [this](const auto & r, const auto & t) -> ADReal
-                       { return _functor.dot(r, t); });
+  addFunctorProperty<ADReal>(getParam<MaterialPropertyName>("root_functor_prop_name") + "_value",
+                             [this](const auto & r, const auto & t) -> ADReal
+                             { return _functor(r, t); });
+  addFunctorProperty<ADRealVectorValue>(getParam<MaterialPropertyName>("root_functor_prop_name") +
+                                            "_grad",
+                                        [this](const auto & r, const auto & t) -> ADRealVectorValue
+                                        { return _functor.gradient(r, t); });
+  addFunctorProperty<ADReal>(getParam<MaterialPropertyName>("root_functor_prop_name") + "_dot",
+                             [this](const auto & r, const auto & t) -> ADReal
+                             { return _functor.dot(r, t); });
 }

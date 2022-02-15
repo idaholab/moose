@@ -30,7 +30,7 @@ NSFVFunctorHeatFluxBC::validParams()
       "whether to use local (at the boundary) or global (domain-averaged) "
       "parameter values");
 
-  params.addCoupledVar(NS::porosity, "porosity");
+  params.addParam<MooseFunctorName>(NS::porosity, "porosity");
   params.addParam<PostprocessorName>("average_porosity",
                                      "postprocessor that provides domain-averaged proosity");
 

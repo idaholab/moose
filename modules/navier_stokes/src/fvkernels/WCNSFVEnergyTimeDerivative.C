@@ -42,7 +42,10 @@ WCNSFVEnergyTimeDerivative::WCNSFVEnergyTimeDerivative(const InputParameters & p
 ADReal
 WCNSFVEnergyTimeDerivative::computeQpResidual()
 {
-  return _rho_dot(_current_elem) * _cp(_current_elem) * _var(_current_elem) +
-         _rho(_current_elem) * _cp_dot(_current_elem) * _var(_current_elem) +
-         _rho(_current_elem) * _cp(_current_elem) * _var.dot(_current_elem);
+  return _rho_dot(makeElemArg(_current_elem)) * _cp(makeElemArg(_current_elem)) *
+             _var(makeElemArg(_current_elem)) +
+         _rho(makeElemArg(_current_elem)) * _cp_dot(makeElemArg(_current_elem)) *
+             _var(makeElemArg(_current_elem)) +
+         _rho(makeElemArg(_current_elem)) * _cp(makeElemArg(_current_elem)) *
+             _var.dot(makeElemArg(_current_elem));
 }

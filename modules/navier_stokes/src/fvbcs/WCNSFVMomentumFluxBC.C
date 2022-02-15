@@ -21,6 +21,7 @@ WCNSFVMomentumFluxBC::validParams()
   // this is not really necessary, since advection kernel wont be executed on
   // this flux boundary
   params += INSFVFlowBC::validParams();
+  params += INSFVMomentumResidualObject::validParams();
   params.addClassDescription("Flux boundary conditions for momentum advection.");
 
   params.addParam<Real>("scaling_factor", 1, "To scale the momentum flux");
@@ -40,6 +41,7 @@ WCNSFVMomentumFluxBC::validParams()
 WCNSFVMomentumFluxBC::WCNSFVMomentumFluxBC(const InputParameters & params)
   : FVFluxBC(params),
     INSFVFlowBC(params),
+    INSFVMomentumResidualObject(*this),
     _scaling_factor(getParam<Real>("scaling_factor")),
     _velocity_pp(isParamValid("velocity_pp") ? &getPostprocessorValue("velocity_pp") : nullptr),
     _mdot_pp(isParamValid("mdot_pp") ? &getPostprocessorValue("mdot_pp") : nullptr),

@@ -53,7 +53,6 @@ ADKernelTempl<T>::ADKernelTempl(const InputParameters & parameters)
     _phi(_assembly.phi(_var)),
     _grad_phi(_assembly.template adGradPhi<T>(_var)),
     _regular_grad_phi(_assembly.gradPhi(_var)),
-    _use_displaced_mesh(getParam<bool>("use_displaced_mesh")),
     _my_elem(nullptr)
 {
   _subproblem.haveADObjects(true);

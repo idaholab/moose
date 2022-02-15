@@ -80,7 +80,7 @@ public:
 
   virtual void operator()(const RangeType & range, bool bypass_threading = false);
 
-  void join(const ThreadedFaceLoop & /*y*/){};
+  void join(const ThreadedFaceLoop & /*y*/) {}
 
   virtual void onFace(const FaceInfo & fi) = 0;
   /// This is called once for each face after all face and boundary callbacks have been
@@ -107,7 +107,7 @@ public:
   }
 
   /// Called if a MooseException is caught anywhere during the computation.
-  virtual void caughtMooseException(MooseException &){};
+  virtual void caughtMooseException(MooseException &) {}
 
 protected:
   FEProblemBase & _fe_problem;

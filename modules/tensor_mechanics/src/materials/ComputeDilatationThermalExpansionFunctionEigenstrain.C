@@ -42,5 +42,5 @@ Real
 ComputeDilatationThermalExpansionFunctionEigenstrain::computeDilatationDerivative(
     const Real & temperature)
 {
-  return _dilatation_function.timeDerivative(temperature, Point());
+  return _dilatation_function.timeDerivative(temperature);
 }

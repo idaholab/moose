@@ -11,6 +11,7 @@
 
 #include <tuple>
 
+#include "MooseFunctorForward.h"
 #include "MooseMesh.h"
 #include "MooseTypes.h"
 #include "MooseError.h"
@@ -29,114 +30,212 @@ class FaceInfo;
 namespace Moose
 {
 /**
- * A non-templated base class for functors that allow an owner object to hold
- * different class template instantiations of \p Functor in a single container
+ * A structure that is used to evaluate Moose functors logically at an element/cell center
  */
-class FunctorBase
+struct ElemArg
 {
-public:
-  FunctorBase() = default;
-  virtual ~FunctorBase() = default;
+  const libMesh::Elem * elem;
+  bool correct_skewness;
+  bool apply_gradient_to_skewness;
+};
+
+/**
+ * People should think of this geometric argument to Moose functors as corresponding to the location
+ * in space of the provided element centroid, \b not as corresponding to the location of the
+ * provided face information.
+ */
+struct ElemFromFaceArg
+{
+  /// an element, whose centroid we should think of as the evaluation point. It is possible that
+  /// the element will be a nullptr in which case, the evaluation point should be thought of as
+  /// the location of a ghosted element centroid
+  const libMesh::Elem * elem;
+
+  /// a face information object. When the provided element is null or for instance when the
+  /// functor is a variable that does not exist on the provided element subdomain, this face
+  /// information object will be used to help construct a ghost value evaluation
+  const FaceInfo * fi;
+
+  /// Whether to apply skew correction weights
+  bool correct_skewness;
+
+  /// Whether to apply the face gradient when computing a skew corrected face value. A true value
+  /// for this data member in conjunction with a false value for \p correct_skewness does not make
+  /// sense
+  bool apply_gradient_to_skewness;
+
+  /// a subdomain ID. This is useful when the functor is a material property and the user wants
+  /// to indicate which material property definition should be used to evaluate the functor. For
+  /// instance if we are using a flux kernel that is not defined on one side of the face, the
+  /// subdomain ID will allow us to compute a ghost material property evaluation
+  SubdomainID sub_id;
+
+  /**
+   * Make a \p ElemArg from our data
+   */
+  ElemArg makeElem() const { return {elem, correct_skewness, apply_gradient_to_skewness}; }
+};
+
+/**
+ * A structure defining a "face" evaluation calling argument for Moose functors
+ */
+struct FaceArg
+{
+  /// a face information object which defines our location in space
+  const FaceInfo * fi;
+
+  /// a limiter which defines how the functor evaluated on either side of the face should be
+  /// interpolated to the face
+  Moose::FV::LimiterType limiter_type;
+
+  /// a boolean which states whether the face information element is upwind of the face
+  bool elem_is_upwind;
+
+  /// Whether to apply skew correction weights
+  bool correct_skewness;
+
+  /// Whether to apply the face gradient when computing a skew corrected face value. A true value
+  /// for this data member in conjunction with a false value for \p correct_skewness does not make
+  /// sense
+  bool apply_gradient_to_skewness;
 
   ///@{
   /**
-   * Virtual methods meant to be used for handling functor evaluation cache clearance
+   * a pair of subdomain IDs. These do not always correspond to the face info element subdomain
+   * ID and face info neighbor subdomain ID. For instance if a flux kernel is operating at a
+   * subdomain boundary on which the kernel is defined on one side but not the other, the
+   * passed-in subdomain IDs will both correspond to the subdomain ID that the flux kernel is
+   * defined on
    */
-  virtual void timestepSetup() = 0;
-  virtual void residualSetup() = 0;
-  virtual void jacobianSetup() = 0;
+  SubdomainID elem_sub_id;
+  SubdomainID neighbor_sub_id;
   ///@}
+
+  /**
+   * Make a \p ElemArg from our data using the face information element
+   */
+  ElemArg makeElem() const { return {&fi->elem(), correct_skewness, apply_gradient_to_skewness}; }
+
+  /**
+   * Make a \p ElemArg from our data using the face information neighbor
+   */
+  ElemArg makeNeighbor() const
+  {
+    return {fi->neighborPtr(), correct_skewness, apply_gradient_to_skewness};
+  }
+
+  /**
+   * Make a \p ElemFromFaceArg from our data using the face information element
+   */
+  ElemFromFaceArg elemFromFace() const
+  {
+    return {&fi->elem(), fi, correct_skewness, apply_gradient_to_skewness, elem_sub_id};
+  }
+
+  /**
+   * Make a \p ElemFromFaceArg from our data using the face information neighbor
+   */
+  ElemFromFaceArg neighborFromFace() const
+  {
+    return {fi->neighborPtr(), fi, correct_skewness, apply_gradient_to_skewness, neighbor_sub_id};
+  }
 };
+
+/**
+ * A structure defining a "single-sided face" evaluation argument for Moose functors. This is
+ * identical to the \p FaceArg argument with the exception that a single SubdomainID is given as the
+ * last argument to the tuple. This allows disambiguation, in \p FunctorMaterialProperty contexts,
+ * of which property definition to use at a face on which there may be different property
+ * definitions on either side of the face. Additionally this overload can be useful when on an
+ * external boundary face when we want to avoid using ghost information
+ */
+struct SingleSidedFaceArg
+{
+  /// a face information object which defines our location in space
+  const FaceInfo * fi;
+
+  /// a limiter which defines how the functor evaluated on this side of the face should be
+  /// interpolated to the face
+  Moose::FV::LimiterType limiter_type;
+
+  /// a boolean which states whether the face information element is upwind of the face
+  bool elem_is_upwind;
+
+  /// Whether to apply skew correction weights
+  bool correct_skewness;
+
+  /// Whether to apply the face gradient when computing a skew corrected face value. A true value
+  /// for this data member in conjunction with a false value for \p correct_skewness does not make
+  /// sense
+  bool apply_gradient_to_skewness;
+
+  /// The subdomain ID which denotes the side of the face information we are evaluating on
+  SubdomainID sub_id;
+
+  /**
+   * Make a \p ElemArg from our data using the face information element
+   */
+  ElemArg makeElem() const { return {&fi->elem(), correct_skewness, apply_gradient_to_skewness}; }
+
+  /**
+   * Make a \p ElemArg from our data using the face information neighbor
+   */
+  ElemArg makeNeighbor() const
+  {
+    return {fi->neighborPtr(), correct_skewness, apply_gradient_to_skewness};
+  }
+};
+
+/**
+ * Argument for requesting functor evaluation at a quadrature point location in an element. Data
+ * in the argument:
+ * - The element containing the quadrature point
+ * - The quadrature point index, e.g. if there are \p n quadrature points, we are requesting the\n
+ *   evaluation of the ith point
+ * - The quadrature rule that can be used to initialize the functor on the given element
+ */
+using ElemQpArg = std::tuple<const libMesh::Elem *, unsigned int, const QBase *>;
+
+/**
+ * Argument for requesting functor evaluation at quadrature point locations on an element side.
+ * Data in the argument:
+ * - The element
+ * - The element side on which the quadrature points are located
+ * - The quadrature point index, e.g. if there are \p n quadrature points, we are requesting the\n
+ *   evaluation of the ith point
+ * - The quadrature rule that can be used to initialize the functor on the given element and side
+ */
+using ElemSideQpArg = std::tuple<const libMesh::Elem *, unsigned int, unsigned int, const QBase *>;
 
 /**
  * Base class template for functor objects. This class template defines various \p operator()
  * overloads that allow a user to evaluate the functor at arbitrary geometric locations. This
- * template is meant to enable highly flexible on-the-fly variable and material property evaluations
+ * template is meant to enable highly flexible on-the-fly variable and material property
+ * evaluations
  */
 template <typename T>
-class Functor : public FunctorBase
+class FunctorBase
 {
 public:
-  /**
-   * A typedef defining a "face" evaluation calling argument. This is composed of
-   * - a face information object which defines our location in space
-   * - a limiter which defines how the functor evaluated on either side of the face should be\n
-   *   interpolated to the face
-   * - a boolean which states whether the face information element is upwind of the face
-   * - a pair of subdomain IDs. These do not always correspond to the face info element subdomain\n
-   *   ID and face info neighbor subdomain ID. For instance if a flux kernel is operating at a\n
-   *   subdomain boundary on which the kernel is defined on one side but not the other, the\n
-   *   passed-in subdomain IDs will both correspond to the subdomain ID that the flux kernel is\n
-   *   defined on
-   */
-  using FaceArg = std::
-      tuple<const FaceInfo *, Moose::FV::LimiterType, bool, std::pair<SubdomainID, SubdomainID>>;
-
-  /**
-   * A typedef defining a "single-sided face" evaluation calling argument. This is identical to the
-   * \p FaceArg argument with the exception that a single SubdomainID is given as the last argument
-   * to the tuple. This allows disambiguation, in \p FunctorMaterialProperty contexts, of which
-   * property definition to use at a face on which there may be different property definitions on
-   * either side of the face. Additionally this overload can be useful when on an external boundary
-   * face when we want to avoid using ghost information
-   */
-  using SingleSidedFaceArg =
-      std::tuple<const FaceInfo *, Moose::FV::LimiterType, bool, SubdomainID>;
-
-  /**
-   * People should think of this geometric argument as corresponding to the location in space of the
-   * provided element centroid, \b not as corresponding to the location of the provided face
-   * information. Summary of data in this argument:
-   * - an element, whose centroid we should think of as the evaluation point. It is possible that\n
-   *   the element will be a nullptr in which case, the evaluation point should be thought of as\n
-   *   the location of a ghosted element centroid
-   * - a face information object. When the provided element is null or for instance when the\n
-   *   functoris a variable that does not exist on the provided element subdomain, this face\n
-   *   information object will be used to help construct a ghost value evaluation
-   * - a subdomain ID. This is useful when the functor is a material property and the user wants\n
-   *   to indicate which material property definition should be used to evaluate the functor. For\n
-   *   instance if we are using a flux kernel that is not defined on one side of the face, the\n
-   *   subdomain ID will allow us to compute a ghost material property evaluation
-   */
-  using ElemFromFaceArg = std::tuple<const libMesh::Elem *, const FaceInfo *, SubdomainID>;
-
-  /**
-   * Argument for requesting functor evaluation at a quadrature point location in an element. Data
-   * in the argument:
-   * - The element containing the quadrature point
-   * - The quadrature point index, e.g. if there are \p n quadrature points, we are requesting the\n
-   *   evaluation of the ith point
-   * - The quadrature rule that can be used to initialize the functor on the given element
-   */
-  using ElemQpArg = std::tuple<const libMesh::Elem *, unsigned int, const QBase *>;
-
-  /**
-   * Argument for requesting functor evaluation at quadrature point locations on an element side.
-   * Data in the argument:
-   * - The element
-   * - The element side on which the quadrature points are located
-   * - The quadrature point index, e.g. if there are \p n quadrature points, we are requesting the\n
-   *   evaluation of the ith point
-   * - The quadrature rule that can be used to initialize the functor on the given element and side
-   */
-  using ElemSideQpArg =
-      std::tuple<const libMesh::Elem *, unsigned int, unsigned int, const QBase *>;
-
-  using FunctorType = Functor<T>;
+  using FunctorType = FunctorBase<T>;
   using FunctorReturnType = T;
   using ValueType = T;
   using GradientType = typename libMesh::TensorTools::IncrementRank<T>::type;
   using DotType = ValueType;
 
-  virtual ~Functor() = default;
-  Functor() : _clearance_schedule({EXEC_ALWAYS}) {}
+  virtual ~FunctorBase() = default;
+  FunctorBase() : _clearance_schedule({EXEC_ALWAYS}) {}
+  FunctorBase(const std::set<ExecFlagType> & clearance_schedule)
+    : _clearance_schedule(clearance_schedule)
+  {
+  }
 
   ///@{
   /**
    * Same as their \p evaluate overloads with the same arguments but allows for caching
    * implementation. These are the methods a user will call in their code
    */
-  ValueType operator()(const libMesh::Elem * const & elem, unsigned int state = 0) const;
+  ValueType operator()(const ElemArg & elem, unsigned int state = 0) const;
   ValueType operator()(const ElemFromFaceArg & elem_from_face, unsigned int state = 0) const;
   ValueType operator()(const FaceArg & face, unsigned int state = 0) const;
   ValueType operator()(const SingleSidedFaceArg & face, unsigned int state = 0) const;
@@ -149,7 +248,7 @@ public:
    * Same as their \p evaluateGradient overloads with the same arguments but allows for caching
    * implementation. These are the methods a user will call in their code
    */
-  GradientType gradient(const libMesh::Elem * const & elem, unsigned int state = 0) const;
+  GradientType gradient(const ElemArg & elem, unsigned int state = 0) const;
   GradientType gradient(const ElemFromFaceArg & elem_from_face, unsigned int state = 0) const;
   GradientType gradient(const FaceArg & face, unsigned int state = 0) const;
   GradientType gradient(const SingleSidedFaceArg & face, unsigned int state = 0) const;
@@ -162,7 +261,7 @@ public:
    * Same as their \p evaluateDot overloads with the same arguments but allows for caching
    * implementation. These are the methods a user will call in their code
    */
-  DotType dot(const libMesh::Elem * const & elem, unsigned int state = 0) const;
+  DotType dot(const ElemArg & elem, unsigned int state = 0) const;
   DotType dot(const ElemFromFaceArg & elem_from_face, unsigned int state = 0) const;
   DotType dot(const FaceArg & face, unsigned int state = 0) const;
   DotType dot(const SingleSidedFaceArg & face, unsigned int state = 0) const;
@@ -170,21 +269,26 @@ public:
   DotType dot(const ElemSideQpArg & qp, unsigned int state = 0) const;
   ///@}
 
-  void residualSetup() override;
-  void jacobianSetup() override;
-  void timestepSetup() override;
+  virtual void residualSetup();
+  virtual void jacobianSetup();
+  virtual void timestepSetup();
 
   /**
    * Set how often to clear the functor evaluation cache
    */
   void setCacheClearanceSchedule(const std::set<ExecFlagType> & clearance_schedule);
 
+  /**
+   * Returns whether this face is an extrapolated boundary face for this functor
+   */
+  virtual bool isExtrapolatedBoundaryFace(const FaceInfo &) const { mooseError("not implemented"); }
+
 protected:
   /**
    * Evaluate the functor with a given element. Some example implementations of this method
    * could compute an element-average or evaluate at the element centroid
    */
-  virtual ValueType evaluate(const libMesh::Elem * const & elem, unsigned int state) const = 0;
+  virtual ValueType evaluate(const ElemArg & elem, unsigned int state) const = 0;
 
   /**
    * @param elem_from_face See the \p ElemFromFaceArg doxygen
@@ -227,10 +331,10 @@ protected:
   virtual ValueType evaluate(const ElemSideQpArg & side_qp, unsigned int state) const = 0;
 
   /**
-   * Evaluate the functor gradient with a given element. Some example implementations of this method
-   * could compute an element-average or evaluate at the element centroid
+   * Evaluate the functor gradient with a given element. Some example implementations of this
+   * method could compute an element-average or evaluate at the element centroid
    */
-  virtual GradientType evaluateGradient(const libMesh::Elem * const &, unsigned int) const
+  virtual GradientType evaluateGradient(const ElemArg &, unsigned int) const
   {
     mooseError("not implemented");
   }
@@ -291,10 +395,10 @@ protected:
   }
 
   /**
-   * Evaluate the functor time derivative with a given element. Some example implementations of this
-   * method could compute an element-average or evaluate at the element centroid
+   * Evaluate the functor time derivative with a given element. Some example implementations of
+   * this method could compute an element-average or evaluate at the element centroid
    */
-  virtual DotType evaluateDot(const libMesh::Elem * const &, unsigned int) const
+  virtual DotType evaluateDot(const ElemArg &, unsigned int) const
   {
     mooseError("not implemented");
   }
@@ -373,8 +477,8 @@ private:
   /// How often to clear the material property cache
   std::set<ExecFlagType> _clearance_schedule;
 
-  // Data for traditional element-quadrature point property evaluations which are useful for caching
-  // implementation
+  // Data for traditional element-quadrature point property evaluations which are useful for
+  // caching implementation
 
   /// Current key for qp map cache
   mutable dof_id_type _current_qp_map_key = DofObject::invalid_id;
@@ -409,44 +513,44 @@ private:
 };
 
 template <typename T>
-typename Functor<T>::ValueType
-Functor<T>::operator()(const Elem * const & elem, const unsigned int state) const
+typename FunctorBase<T>::ValueType
+FunctorBase<T>::operator()(const ElemArg & elem, const unsigned int state) const
 {
   return evaluate(elem, state);
 }
 
 template <typename T>
-typename Functor<T>::ValueType
-Functor<T>::operator()(const ElemFromFaceArg & elem_from_face, const unsigned int state) const
+typename FunctorBase<T>::ValueType
+FunctorBase<T>::operator()(const ElemFromFaceArg & elem_from_face, const unsigned int state) const
 {
   return evaluate(elem_from_face, state);
 }
 
 template <typename T>
-typename Functor<T>::ValueType
-Functor<T>::operator()(const FaceArg & face, const unsigned int state) const
+typename FunctorBase<T>::ValueType
+FunctorBase<T>::operator()(const FaceArg & face, const unsigned int state) const
 {
   return evaluate(face, state);
 }
 
 template <typename T>
-typename Functor<T>::ValueType
-Functor<T>::operator()(const SingleSidedFaceArg & face, const unsigned int state) const
+typename FunctorBase<T>::ValueType
+FunctorBase<T>::operator()(const SingleSidedFaceArg & face, const unsigned int state) const
 {
   return evaluate(face, state);
 }
 
 template <typename T>
 template <typename SpaceArg, typename TimeArg>
-typename Functor<T>::ValueType
-Functor<T>::queryQpCache(const unsigned int qp,
-                         const QBase & qrule,
-                         std::vector<std::pair<bool, T>> & qp_cache_data,
-                         const SpaceArg & space,
-                         const TimeArg & time) const
+typename FunctorBase<T>::ValueType
+FunctorBase<T>::queryQpCache(const unsigned int qp,
+                             const QBase & qrule,
+                             std::vector<std::pair<bool, T>> & qp_cache_data,
+                             const SpaceArg & space,
+                             const TimeArg & time) const
 {
-  // Check and see whether we even have sized for this quadrature point. If we haven't then we must
-  // evaluate
+  // Check and see whether we even have sized for this quadrature point. If we haven't then we
+  // must evaluate
   if (qp >= qp_cache_data.size())
   {
     qp_cache_data.resize(qrule.n_points(), std::make_pair(false, T()));
@@ -468,8 +572,8 @@ Functor<T>::queryQpCache(const unsigned int qp,
 }
 
 template <typename T>
-typename Functor<T>::ValueType
-Functor<T>::operator()(const ElemQpArg & elem_qp, const unsigned int state) const
+typename FunctorBase<T>::ValueType
+FunctorBase<T>::operator()(const ElemQpArg & elem_qp, const unsigned int state) const
 {
   if (_clearance_schedule.count(EXEC_ALWAYS))
     return evaluate(elem_qp, state);
@@ -489,8 +593,8 @@ Functor<T>::operator()(const ElemQpArg & elem_qp, const unsigned int state) cons
 }
 
 template <typename T>
-typename Functor<T>::ValueType
-Functor<T>::operator()(const ElemSideQpArg & elem_side_qp, const unsigned int state) const
+typename FunctorBase<T>::ValueType
+FunctorBase<T>::operator()(const ElemSideQpArg & elem_side_qp, const unsigned int state) const
 {
   if (_clearance_schedule.count(EXEC_ALWAYS))
     return evaluate(elem_side_qp, state);
@@ -520,14 +624,14 @@ Functor<T>::operator()(const ElemSideQpArg & elem_side_qp, const unsigned int st
 
 template <typename T>
 void
-Functor<T>::setCacheClearanceSchedule(const std::set<ExecFlagType> & clearance_schedule)
+FunctorBase<T>::setCacheClearanceSchedule(const std::set<ExecFlagType> & clearance_schedule)
 {
   _clearance_schedule = clearance_schedule;
 }
 
 template <typename T>
 void
-Functor<T>::clearCacheData()
+FunctorBase<T>::clearCacheData()
 {
   for (auto & map_pr : _qp_to_value)
     for (auto & pr : map_pr.second)
@@ -549,7 +653,7 @@ Functor<T>::clearCacheData()
 
 template <typename T>
 void
-Functor<T>::timestepSetup()
+FunctorBase<T>::timestepSetup()
 {
   if (_clearance_schedule.count(EXEC_TIMESTEP_BEGIN))
     clearCacheData();
@@ -557,7 +661,7 @@ Functor<T>::timestepSetup()
 
 template <typename T>
 void
-Functor<T>::residualSetup()
+FunctorBase<T>::residualSetup()
 {
   if (_clearance_schedule.count(EXEC_LINEAR))
     clearCacheData();
@@ -565,161 +669,400 @@ Functor<T>::residualSetup()
 
 template <typename T>
 void
-Functor<T>::jacobianSetup()
+FunctorBase<T>::jacobianSetup()
 {
   if (_clearance_schedule.count(EXEC_NONLINEAR))
     clearCacheData();
 }
 
 template <typename T>
-typename Functor<T>::GradientType
-Functor<T>::gradient(const Elem * const & elem, const unsigned int state) const
+typename FunctorBase<T>::GradientType
+FunctorBase<T>::gradient(const ElemArg & elem, const unsigned int state) const
 {
   return evaluateGradient(elem, state);
 }
 
 template <typename T>
-typename Functor<T>::GradientType
-Functor<T>::gradient(const ElemFromFaceArg & elem_from_face, const unsigned int state) const
+typename FunctorBase<T>::GradientType
+FunctorBase<T>::gradient(const ElemFromFaceArg & elem_from_face, const unsigned int state) const
 {
   return evaluateGradient(elem_from_face, state);
 }
 
 template <typename T>
-typename Functor<T>::GradientType
-Functor<T>::gradient(const FaceArg & face, const unsigned int state) const
+typename FunctorBase<T>::GradientType
+FunctorBase<T>::gradient(const FaceArg & face, const unsigned int state) const
 {
   return evaluateGradient(face, state);
 }
 
 template <typename T>
-typename Functor<T>::GradientType
-Functor<T>::gradient(const SingleSidedFaceArg & face, const unsigned int state) const
+typename FunctorBase<T>::GradientType
+FunctorBase<T>::gradient(const SingleSidedFaceArg & face, const unsigned int state) const
 {
   return evaluateGradient(face, state);
 }
 
 template <typename T>
-typename Functor<T>::GradientType
-Functor<T>::gradient(const ElemQpArg & elem_qp, const unsigned int state) const
+typename FunctorBase<T>::GradientType
+FunctorBase<T>::gradient(const ElemQpArg & elem_qp, const unsigned int state) const
 {
   return evaluateGradient(elem_qp, state);
 }
 
 template <typename T>
-typename Functor<T>::GradientType
-Functor<T>::gradient(const ElemSideQpArg & elem_side_qp, const unsigned int state) const
+typename FunctorBase<T>::GradientType
+FunctorBase<T>::gradient(const ElemSideQpArg & elem_side_qp, const unsigned int state) const
 {
   return evaluateGradient(elem_side_qp, state);
 }
 
 template <typename T>
-typename Functor<T>::DotType
-Functor<T>::dot(const Elem * const & elem, const unsigned int state) const
+typename FunctorBase<T>::DotType
+FunctorBase<T>::dot(const ElemArg & elem, const unsigned int state) const
 {
   return evaluateDot(elem, state);
 }
 
 template <typename T>
-typename Functor<T>::DotType
-Functor<T>::dot(const ElemFromFaceArg & elem_from_face, const unsigned int state) const
+typename FunctorBase<T>::DotType
+FunctorBase<T>::dot(const ElemFromFaceArg & elem_from_face, const unsigned int state) const
 {
   return evaluateDot(elem_from_face, state);
 }
 
 template <typename T>
-typename Functor<T>::DotType
-Functor<T>::dot(const FaceArg & face, const unsigned int state) const
+typename FunctorBase<T>::DotType
+FunctorBase<T>::dot(const FaceArg & face, const unsigned int state) const
 {
   return evaluateDot(face, state);
 }
 
 template <typename T>
-typename Functor<T>::DotType
-Functor<T>::dot(const SingleSidedFaceArg & face, const unsigned int state) const
+typename FunctorBase<T>::DotType
+FunctorBase<T>::dot(const SingleSidedFaceArg & face, const unsigned int state) const
 {
   return evaluateDot(face, state);
 }
 
 template <typename T>
-typename Functor<T>::DotType
-Functor<T>::dot(const ElemQpArg & elem_qp, const unsigned int state) const
+typename FunctorBase<T>::DotType
+FunctorBase<T>::dot(const ElemQpArg & elem_qp, const unsigned int state) const
 {
   return evaluateDot(elem_qp, state);
 }
 
 template <typename T>
-typename Functor<T>::DotType
-Functor<T>::dot(const ElemSideQpArg & elem_side_qp, const unsigned int state) const
+typename FunctorBase<T>::DotType
+FunctorBase<T>::dot(const ElemSideQpArg & elem_side_qp, const unsigned int state) const
 {
   return evaluateDot(elem_side_qp, state);
 }
 
 /**
- * Class template for creating constants
+ * A non-templated base class for functors that allow an owner object to hold
+ * different class template instantiations of \p Functor in a single container
  */
-template <typename T>
-class ConstantFunctor : public Functor<T>
+class FunctorEnvelopeBase
 {
 public:
-  using typename Functor<T>::FaceArg;
-  using typename Functor<T>::SingleSidedFaceArg;
-  using typename Functor<T>::ElemFromFaceArg;
-  using typename Functor<T>::ElemQpArg;
-  using typename Functor<T>::ElemSideQpArg;
-  using typename Functor<T>::FunctorType;
-  using typename Functor<T>::FunctorReturnType;
-  using typename Functor<T>::ValueType;
-  using typename Functor<T>::GradientType;
-  using typename Functor<T>::DotType;
+  FunctorEnvelopeBase() = default;
+  virtual ~FunctorEnvelopeBase() = default;
+
+  ///@{
+  /**
+   * Virtual methods meant to be used for handling functor evaluation cache clearance
+   */
+  virtual void timestepSetup() = 0;
+  virtual void residualSetup() = 0;
+  virtual void jacobianSetup() = 0;
+  virtual bool wrapsNull() const = 0;
+  virtual std::string returnType() const = 0;
+  ///@}
+};
+
+/**
+ * This is a wrapper that forwards calls to the implementation,
+ * which can be switched out at any time without disturbing references to
+ * FunctorBase. Implementation motivated by https://stackoverflow.com/a/65455485/4493669
+ */
+template <typename T>
+class FunctorEnvelope final : public FunctorBase<T>, public FunctorEnvelopeBase
+{
+public:
+  using typename Moose::FunctorBase<T>::ValueType;
+  using typename Moose::FunctorBase<T>::GradientType;
+  using typename Moose::FunctorBase<T>::DotType;
+
+  /**
+   * @param wrapped The functor to wrap. We will *not* not own the wrapped object
+   */
+  FunctorEnvelope(const FunctorBase<T> & wrapped) : FunctorEnvelopeBase(), _wrapped(&wrapped) {}
+
+  /**
+   * @param wrapped A unique pointer around the functor to wrap. We *will* own the wrapped object,
+   * e.g. if we are ever destructed or we are reassigned to wrap another functor, then this functor
+   * will be destructed
+   */
+  FunctorEnvelope(std::unique_ptr<FunctorBase<T>> && wrapped)
+    : FunctorEnvelopeBase(), _owned(std::move(wrapped)), _wrapped(_owned.get())
+  {
+  }
+
+  /**
+   * Prevent wrapping of a temporary object. If we are to own a functor, the unique_ptr constructor
+   * overload should be used
+   */
+  FunctorEnvelope(FunctorBase<T> &&) = delete;
+
+  /**
+   * @param wrapped The functor to wrap. We will *not* not own the wrapped object. If we previously
+   * owned a functor, it will be destructed
+   */
+  void assign(const FunctorBase<T> & wrapped)
+  {
+    _owned.reset();
+    _wrapped = &wrapped;
+  }
+
+  /**
+   * @param wrapped A unique pointer around the functor to wrap. We *will* own the wrapped object.
+   * If we previously owned a functor, it will be destructed
+   */
+  void assign(std::unique_ptr<FunctorBase<T>> && wrapped)
+  {
+    _owned = std::move(wrapped);
+    _wrapped = _owned.get();
+  }
+
+  /**
+   * Prevent wrapping of a temporary object. If we are to own a functor, the unique_ptr assign
+   * overload should be used
+   */
+  void assign(FunctorBase<T> &&) = delete;
+
+  FunctorEnvelope(const FunctorEnvelope &) = delete;
+  FunctorEnvelope(FunctorEnvelope &&) = delete;
+  FunctorEnvelope & operator=(const FunctorEnvelope &) = delete;
+  FunctorEnvelope & operator=(FunctorEnvelope &&) = delete;
+
+  virtual ~FunctorEnvelope() = default;
+
+  /**
+   * @return whether this object wraps a null functor
+   */
+  bool wrapsNull() const override { return wrapsType<NullFunctor<T>>(); }
+
+  /**
+   * @return a string representation of the return type of this functor
+   */
+  std::string returnType() const override { return libMesh::demangle(typeid(T).name()); }
+
+  /**
+   * @return whether the wrapped object is of the requested type
+   */
+  template <typename T2>
+  bool wrapsType() const
+  {
+    return dynamic_cast<const T2 *>(_wrapped);
+  }
+
+  void timestepSetup() override
+  {
+    if (_owned)
+      _owned->timestepSetup();
+  }
+  void residualSetup() override
+  {
+    if (_owned)
+      _owned->residualSetup();
+  }
+  void jacobianSetup() override
+  {
+    if (_owned)
+      _owned->jacobianSetup();
+  }
+
+protected:
+  ///@{
+  /**
+   * Forward calls to wrapped object
+   */
+  ValueType evaluate(const ElemArg & elem, unsigned int state = 0) const override
+  {
+    return _wrapped->operator()(elem, state);
+  }
+  ValueType evaluate(const ElemFromFaceArg & elem_from_face, unsigned int state = 0) const override
+  {
+    return _wrapped->operator()(elem_from_face, state);
+  }
+  ValueType evaluate(const FaceArg & face, unsigned int state = 0) const override
+  {
+    return _wrapped->operator()(face, state);
+  }
+  ValueType evaluate(const SingleSidedFaceArg & face, unsigned int state = 0) const override
+  {
+    return _wrapped->operator()(face, state);
+  }
+  ValueType evaluate(const ElemQpArg & qp, unsigned int state = 0) const override
+  {
+    return _wrapped->operator()(qp, state);
+  }
+  ValueType evaluate(const ElemSideQpArg & qp, unsigned int state = 0) const override
+  {
+    return _wrapped->operator()(qp, state);
+  }
+
+  GradientType evaluateGradient(const ElemArg & elem, unsigned int state = 0) const override
+  {
+    return _wrapped->gradient(elem, state);
+  }
+  GradientType evaluateGradient(const ElemFromFaceArg & elem_from_face,
+                                unsigned int state = 0) const override
+  {
+    return _wrapped->gradient(elem_from_face, state);
+  }
+  GradientType evaluateGradient(const FaceArg & face, unsigned int state = 0) const override
+  {
+    return _wrapped->gradient(face, state);
+  }
+  GradientType evaluateGradient(const SingleSidedFaceArg & face,
+                                unsigned int state = 0) const override
+  {
+    return _wrapped->gradient(face, state);
+  }
+  GradientType evaluateGradient(const ElemQpArg & qp, unsigned int state = 0) const override
+  {
+    return _wrapped->gradient(qp, state);
+  }
+  GradientType evaluateGradient(const ElemSideQpArg & qp, unsigned int state = 0) const override
+  {
+    return _wrapped->gradient(qp, state);
+  }
+
+  DotType evaluateDot(const ElemArg & elem, unsigned int state = 0) const override
+  {
+    return _wrapped->dot(elem, state);
+  }
+  DotType evaluateDot(const ElemFromFaceArg & elem_from_face, unsigned int state = 0) const override
+  {
+    return _wrapped->dot(elem_from_face, state);
+  }
+  DotType evaluateDot(const FaceArg & face, unsigned int state = 0) const override
+  {
+    return _wrapped->dot(face, state);
+  }
+  DotType evaluateDot(const SingleSidedFaceArg & face, unsigned int state = 0) const override
+  {
+    return _wrapped->dot(face, state);
+  }
+  DotType evaluateDot(const ElemQpArg & qp, unsigned int state = 0) const override
+  {
+    return _wrapped->dot(qp, state);
+  }
+  DotType evaluateDot(const ElemSideQpArg & qp, unsigned int state = 0) const override
+  {
+    return _wrapped->dot(qp, state);
+  }
+  ///@}
+
+private:
+  /// Our wrapped object
+  std::unique_ptr<FunctorBase<T>> _owned;
+  const FunctorBase<T> * _wrapped;
+
+  friend class ::SubProblem;
+};
+
+/**
+ * Class template for creating constant functors
+ */
+template <typename T>
+class ConstantFunctor final : public FunctorBase<T>
+{
+public:
+  using typename FunctorBase<T>::FunctorType;
+  using typename FunctorBase<T>::FunctorReturnType;
+  using typename FunctorBase<T>::ValueType;
+  using typename FunctorBase<T>::GradientType;
+  using typename FunctorBase<T>::DotType;
 
   ConstantFunctor(const ValueType & value) : _value(value) {}
   ConstantFunctor(ValueType && value) : _value(value) {}
 
 private:
-  ValueType evaluate(const libMesh::Elem * const &, unsigned int) const override final
-  {
-    return _value;
-  }
-  ValueType evaluate(const ElemFromFaceArg &, unsigned int) const override final { return _value; }
-  ValueType evaluate(const FaceArg &, unsigned int) const override final { return _value; }
-  ValueType evaluate(const SingleSidedFaceArg &, unsigned int) const override final
-  {
-    return _value;
-  }
-  ValueType evaluate(const ElemQpArg &, unsigned int) const override final { return _value; }
-  ValueType evaluate(const ElemSideQpArg &, unsigned int) const override final { return _value; }
+  ValueType evaluate(const ElemArg &, unsigned int) const override { return _value; }
+  ValueType evaluate(const ElemFromFaceArg &, unsigned int) const override { return _value; }
+  ValueType evaluate(const FaceArg &, unsigned int) const override { return _value; }
+  ValueType evaluate(const SingleSidedFaceArg &, unsigned int) const override { return _value; }
+  ValueType evaluate(const ElemQpArg &, unsigned int) const override { return _value; }
+  ValueType evaluate(const ElemSideQpArg &, unsigned int) const override { return _value; }
 
-  GradientType evaluateGradient(const libMesh::Elem * const &, unsigned int) const override final
+  GradientType evaluateGradient(const ElemArg &, unsigned int) const override { return 0; }
+  GradientType evaluateGradient(const ElemFromFaceArg &, unsigned int) const override { return 0; }
+  GradientType evaluateGradient(const FaceArg &, unsigned int) const override { return 0; }
+  GradientType evaluateGradient(const SingleSidedFaceArg &, unsigned int) const override
   {
     return 0;
   }
-  GradientType evaluateGradient(const ElemFromFaceArg &, unsigned int) const override final
-  {
-    return 0;
-  }
-  GradientType evaluateGradient(const FaceArg &, unsigned int) const override final { return 0; }
-  GradientType evaluateGradient(const SingleSidedFaceArg &, unsigned int) const override final
-  {
-    return 0;
-  }
-  GradientType evaluateGradient(const ElemQpArg &, unsigned int) const override final { return 0; }
-  GradientType evaluateGradient(const ElemSideQpArg &, unsigned int) const override final
-  {
-    return 0;
-  }
+  GradientType evaluateGradient(const ElemQpArg &, unsigned int) const override { return 0; }
+  GradientType evaluateGradient(const ElemSideQpArg &, unsigned int) const override { return 0; }
 
-  DotType evaluateDot(const libMesh::Elem * const &, unsigned int) const override final
-  {
-    return 0;
-  }
-  DotType evaluateDot(const ElemFromFaceArg &, unsigned int) const override final { return 0; }
-  DotType evaluateDot(const FaceArg &, unsigned int) const override final { return 0; }
-  DotType evaluateDot(const SingleSidedFaceArg &, unsigned int) const override final { return 0; }
-  DotType evaluateDot(const ElemQpArg &, unsigned int) const override final { return 0; }
-  DotType evaluateDot(const ElemSideQpArg &, unsigned int) const override final { return 0; }
+  DotType evaluateDot(const ElemArg &, unsigned int) const override { return 0; }
+  DotType evaluateDot(const ElemFromFaceArg &, unsigned int) const override { return 0; }
+  DotType evaluateDot(const FaceArg &, unsigned int) const override { return 0; }
+  DotType evaluateDot(const SingleSidedFaceArg &, unsigned int) const override { return 0; }
+  DotType evaluateDot(const ElemQpArg &, unsigned int) const override { return 0; }
+  DotType evaluateDot(const ElemSideQpArg &, unsigned int) const override { return 0; }
 
 private:
   ValueType _value;
+};
+
+/**
+ * A functor that serves as a placeholder during the simulation setup phase if a functor consumer
+ * requests a functor that has not yet been constructed.
+ */
+template <typename T>
+class NullFunctor final : public FunctorBase<T>
+{
+public:
+  using typename FunctorBase<T>::FunctorType;
+  using typename FunctorBase<T>::FunctorReturnType;
+  using typename FunctorBase<T>::ValueType;
+  using typename FunctorBase<T>::GradientType;
+  using typename FunctorBase<T>::DotType;
+
+private:
+  ValueType evaluate(const ElemArg &, unsigned int) const override
+  {
+    mooseError("We should never get here. If you have, contact a MOOSE developer and tell them "
+               "they've written broken code");
+  }
+  ValueType evaluate(const ElemFromFaceArg &, unsigned int) const override
+  {
+    mooseError("We should never get here. If you have, contact a MOOSE developer and tell them "
+               "they've written broken code");
+  }
+  ValueType evaluate(const FaceArg &, unsigned int) const override
+  {
+    mooseError("We should never get here. If you have, contact a MOOSE developer and tell them "
+               "they've written broken code");
+  }
+  ValueType evaluate(const SingleSidedFaceArg &, unsigned int) const override
+  {
+    mooseError("We should never get here. If you have, contact a MOOSE developer and tell them "
+               "they've written broken code");
+  }
+  ValueType evaluate(const ElemQpArg &, unsigned int) const override
+  {
+    mooseError("We should never get here. If you have, contact a MOOSE developer and tell them "
+               "they've written broken code");
+  }
+  ValueType evaluate(const ElemSideQpArg &, unsigned int) const override
+  {
+    mooseError("We should never get here. If you have, contact a MOOSE developer and tell them "
+               "they've written broken code");
+  }
 };
 }
