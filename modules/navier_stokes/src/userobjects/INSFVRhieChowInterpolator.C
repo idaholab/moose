@@ -44,6 +44,13 @@ INSFVRhieChowInterpolator::validParams()
   exec_enum.addAvailableFlags(EXEC_PRE_KERNELS);
   exec_enum = {EXEC_PRE_KERNELS};
   params.suppressParameter<ExecFlagEnum>("execute_on");
+
+  MooseEnum velocity_interp_method("average rc", "rc");
+  params.addParam<MooseEnum>(
+      "velocity_interp_method",
+      velocity_interp_method,
+      "The interpolation to use for the velocity. Options are "
+      "'average' and 'rc' which stands for Rhie-Chow. The default is Rhie-Chow.");
   params.addRequiredParam<VariableName>(NS::pressure, "The pressure variable.");
   params.addRequiredParam<VariableName>("u", "The x-component of velocity");
   params.addParam<VariableName>("v", "The y-component of velocity");
@@ -180,7 +187,19 @@ INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & par
         blockIDs());
   }
 
-  fillARead();
+  const auto & velocity_interp_method = params.get<MooseEnum>("velocity_interp_method");
+  if (velocity_interp_method == "average")
+  {
+    _velocity_interp_method = Moose::FV::InterpMethod::Average;
+    if (isParamValid("a_u"))
+      paramError("a_u",
+                 "Rhie Chow coefficients may not be specified for average velocity interpolation");
+  }
+  else if (velocity_interp_method == "rc")
+    _velocity_interp_method = Moose::FV::InterpMethod::RhieChow;
+
+  if (_velocity_interp_method != Moose::FV::InterpMethod::Average)
+    fillARead();
 }
 
 void
@@ -199,6 +218,10 @@ INSFVRhieChowInterpolator::fillARead()
     _a_data_provided = true;
     _a_aux.resize(libMesh::n_threads());
   }
+  else if (isParamValid("a_v"))
+    paramError("a_v", "If the a_v coefficients are provided, then a_u must be provided");
+  else if (isParamValid("a_w"))
+    paramError("a_w", "If the a_w coefficients are provided, then a_u must be provided");
 
   if (_a_data_provided)
   {
@@ -237,6 +260,8 @@ INSFVRhieChowInterpolator::fillARead()
 void
 INSFVRhieChowInterpolator::initialSetup()
 {
+  if (_velocity_interp_method == Moose::FV::InterpMethod::Average)
+    return;
   for (const auto var_num : _var_numbers)
   {
     std::vector<MooseObject *> var_objects;
@@ -252,6 +277,11 @@ INSFVRhieChowInterpolator::initialSetup()
                    var_object->name(),
                    " is not a INSFVMomentumResidualObject. Make sure that all the objects applied "
                    "to the momentum equation are INSFV or derived objects.");
+    if (var_objects.size() == 0 && !_a_data_provided)
+      mooseError(
+          "No INSFVKernels detected for the velocity variables. "
+          "If you are trying to use auxiliary variables for advection, please specify the a_u/v/w "
+          "coefficients. If not, please specify INSFVKernels for the momentum equations.");
   }
 }
 
@@ -291,6 +321,10 @@ INSFVRhieChowInterpolator::execute()
   if (_a_data_provided)
     return;
 
+  // If advecting with auxiliary variables, no need to try to run those kernels
+  if (_sys.number() != _u->sys().number())
+    return;
+
   // A lot of RC data gathering leverages the automatic differentiation system, e.g. for linear
   // operators we pull out the 'a' coefficents by querying the ADReal residual derivatives member at
   // the element or neighbor dof locations. Consequently we need to enable derivative computation.
@@ -321,7 +355,8 @@ void
 INSFVRhieChowInterpolator::finalize()
 {
 #ifdef MOOSE_GLOBAL_AD_INDEXING
-  if (_a_data_provided || this->n_processors() == 1)
+  if (_a_data_provided || this->n_processors() == 1 ||
+      _velocity_interp_method == Moose::FV::InterpMethod::Average)
     return;
 
   using Datum = std::pair<dof_id_type, VectorValue<ADReal>>;
@@ -432,6 +467,9 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
   // Return if Rhie-Chow was not requested
   if (m == Moose::FV::InterpMethod::Average)
     return velocity;
+  mooseAssert((m == _velocity_interp_method) || _a_data_provided,
+              "The 'a' coefficients have not been generated or provided for "
+              "Rhie Chow velocity interpolation.");
 
   mooseAssert(neighbor && this->hasBlocks(neighbor->subdomain_id()),
               "We should be on an internal face...");
