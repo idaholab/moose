@@ -24,9 +24,9 @@ MortarArchardsLawAux::validParams()
   params.addCoupledVar("v",
                        "Optional variable to take the value of. If omitted the value of the "
                        "`variable` itself is returned.");
-  params.addRequiredCoupledVar("disp_x", "The x displacement variable");
-  params.addRequiredCoupledVar("disp_y", "The y displacement variable");
-  params.addCoupledVar("disp_z", "The z displacement variable");
+  params.addRequiredCoupledVar("displacements",
+                               "The displacement variables. This mortar nodal auxiliary kernel can "
+                               "take two or three displacements");
   params.addRequiredCoupledVar("normal_pressure",
                                "The name of the Lagrange multiplier that holds the normal contact "
                                "pressure in mortar formulations");
@@ -51,16 +51,15 @@ MortarArchardsLawAux::MortarArchardsLawAux(const InputParameters & parameters)
     _normal_pressure(coupledValueLower("normal_pressure")),
     _friction_coefficient(getParam<Real>("friction_coefficient")),
     _energy_wear_coefficient(getParam<Real>("energy_wear_coefficient")),
-    _has_disp_z(isCoupled("disp_z")),
-    _disp_x(*getVar("disp_x", 0)),
-    _disp_y(*getVar("disp_y", 0)),
-    _disp_z(getVar("disp_z", 0)),
-    _secondary_x_dot(_disp_x.adUDot()),
-    _primary_x_dot(_disp_x.adUDotNeighbor()),
-    _secondary_y_dot(_disp_y.adUDot()),
-    _primary_y_dot(_disp_y.adUDotNeighbor()),
-    _secondary_z_dot(_has_disp_z ? &_disp_z->adUDot() : nullptr),
-    _primary_z_dot(_has_disp_z ? &_disp_z->adUDotNeighbor() : nullptr),
+    _displacements(
+        {getVar("displacements", 0), getVar("displacements", 1), getVar("displacements", 2)}),
+    _has_disp_z(_displacements[2] ? true : false),
+    _secondary_x_dot(_displacements[0]->adUDot()),
+    _primary_x_dot(_displacements[0]->adUDotNeighbor()),
+    _secondary_y_dot(_displacements[1]->adUDot()),
+    _primary_y_dot(_displacements[1]->adUDotNeighbor()),
+    _secondary_z_dot(_has_disp_z ? &_displacements[2]->adUDot() : nullptr),
+    _primary_z_dot(_has_disp_z ? &_displacements[2]->adUDotNeighbor() : nullptr),
     _worn_depth(0),
     _worn_out_depth_dt(0),
     _qp_gap_velocity_nodal(0),

@@ -33,8 +33,6 @@ public:
 
   void mortarSetup() override;
 
-  bool isMortar() const override { return true; }
-
 protected:
   void precalculateValue() override final;
 

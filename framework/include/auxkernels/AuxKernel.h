@@ -97,7 +97,7 @@ public:
   /**
    * @return whether this is a mortar auxiliary kernel
    */
-  virtual bool isMortar() const { return false; }
+  bool isMortar();
 
   /**
    * Get a reference to a variable this kernel is action on

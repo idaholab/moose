@@ -40,17 +40,11 @@ protected:
   /// Typically a constant used to characterize wear behavior of a material surface
   const Real _energy_wear_coefficient;
 
+  /// Displacement variables
+  const std::vector<const MooseVariable *> _displacements;
+
   /// For 2D mortar contact no displacement will be specified, so const pointers used
   const bool _has_disp_z;
-
-  /// Displacement variables: x direction
-  const MooseVariable & _disp_x;
-
-  /// Displacement variables: y direction
-  const MooseVariable & _disp_y;
-
-  /// Displacement variables: z direction
-  const MooseVariable * _disp_z;
 
   /// x-velocity on the secondary face
   const ADVariableValue & _secondary_x_dot;

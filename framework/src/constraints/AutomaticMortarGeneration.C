@@ -2202,9 +2202,3 @@ AutomaticMortarGeneration::secondariesToMortarSegments(const Node & node) const
 
   return ret;
 }
-
-void
-AutomaticMortarGeneration::setNodalWeightedGapMap(const Node * node, const Real weighted_gap)
-{
-  _node_to_weighted_gap.emplace(node, weighted_gap);
-}

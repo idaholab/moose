@@ -50,11 +50,11 @@ ComputeDynamicWeightedGapLMMechanicalContact::ComputeDynamicWeightedGapLMMechani
     _newmark_gamma(getParam<Real>("newmark_gamma"))
 {
   mooseAssert(!_interpolate_normals,
-              "Dynamic mortar mechanical contact constraints require the surface geometry be "
+              "Dynamic mortar mechanical contact constraints require the surface geometry to be "
               "attached to nodes");
 
   if (!useDual())
-    mooseError("Dynamic mortar contact constraints requires the use of Lagrange's multipliers dual "
+    mooseError("Dynamic mortar contact constraints requires the use of Lagrange multipliers dual "
                "interpolation");
 }
 

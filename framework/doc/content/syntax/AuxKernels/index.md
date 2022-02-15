@@ -63,6 +63,16 @@ Nodal AuxKernel objects abuse the notion of quadrature points, the `_qp` member 
 to zero, but still must be used to access coupled variable values and material properties. This
 is done to allow the syntax to be consistent regardless of the AuxKernel flavor: nodal or elemental.
 
+## Mortar Nodal Auxiliary Kernel Objects
+
+In order to compute properties in the mortar sense, it is necessary to loop over the mortar segment
+mesh to spatially integrate variables. `MortarNodalAuxKernel`s offer this functionality where these "weighted" variables,
+which intervene in the computation of contact constraints and their residuals, can be coupled to generate the desired ouput value. 
+Therefore, if postprocessing of mortar quantities is required, nodal mortar auxiliary kernels can be employed. 
+Objects inheriting from `MortarNodalAuxKernel` allow for said operations on the mortar lower-dimensional domains featuring similar
+functionality to other nodal auxiliary kernels, including the possibility of computing quantities in an
+`incremental` manner.
+ 
 ## Execute Flags
 
 AuxKernel objects inherit from the [SetupInterface.md] so they include the "execute_on" variable.

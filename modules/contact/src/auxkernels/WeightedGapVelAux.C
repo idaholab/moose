@@ -51,7 +51,6 @@ WeightedGapVelAux::WeightedGapVelAux(const InputParameters & parameters)
     _i(0),
     _qp(0)
 {
-
   if (!_displaced)
     paramWarning(
         "use_displaced_mesh",

@@ -15,6 +15,7 @@
 #include "AuxiliarySystem.h"
 #include "MooseTypes.h"
 #include "Assembly.h"
+#include "MortarNodalAuxKernel.h"
 
 #include "libmesh/numeric_vector.h"
 #include "libmesh/dof_map.h"
@@ -431,6 +432,13 @@ AuxKernelTempl<ComputeValueType>::uOlder() const
                "Make sure to call uOlder() within the object constructor.");
 
   return _nodal ? _var.nodalValueOlderArray() : _var.slnOlder();
+}
+
+template <typename ComputeValueType>
+bool
+AuxKernelTempl<ComputeValueType>::isMortar()
+{
+  return dynamic_cast<MortarNodalAuxKernelTempl<ComputeValueType> *>(this) != nullptr;
 }
 
 // Explicitly instantiates the two versions of the AuxKernelTempl class
