@@ -1,0 +1,4 @@
+The parameter [!param](/Components/{{name}}/hs) specifies the name of the heat
+structure component, and [!param](/Components/{{name}}/boundary) is a list of
+boundary names on the heat structure where the boundary condition is to be
+applied.
