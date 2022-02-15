@@ -184,19 +184,6 @@ FixedPointSolve::solve()
 {
   TIME_SECTION("PicardSolve", 1);
 
-  // If the user requires, we reset the given FullSolveMultiApps
-  // by reinitializing our problem. This allows the execution of
-  // the same problem multiple times with changing parameters/object.
-  if (_problem.isTransient())
-  {
-    // We don't need to reinitialize in the first timestep
-    if (!(_problem.time() == _app.getStartTime()))
-    {
-      _problem.reinitMultiApps(EXEC_TIMESTEP_BEGIN, "FullSolveMultiApp");
-      _problem.reinitMultiApps(EXEC_TIMESTEP_END, "FullSolveMultiApp");
-    }
-  }
-
   Real current_dt = _problem.dt();
 
   _fixed_point_timestep_begin_norm.clear();
@@ -338,6 +325,15 @@ FixedPointSolve::solve()
 
   if (_has_fixed_point_its)
     printFixedPointConvergenceReason();
+
+  // If the user requires, we reset the given FullSolveMultiApps
+  // by reinitializing our problem. This allows the execution of
+  // the same problem multiple times with changing parameters/object.
+  if (_problem.isTransient())
+  {
+    _problem.reinitMultiApps(EXEC_TIMESTEP_BEGIN, "FullSolveMultiApp");
+    _problem.reinitMultiApps(EXEC_TIMESTEP_END, "FullSolveMultiApp");
+  }
 
   return converged;
 }
