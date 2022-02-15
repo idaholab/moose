@@ -8,6 +8,7 @@
     csvdiff = 'noreset.csv'
     input = 'main.i'
     cli_args = 'MultiApps/full_solve/reinit_after_solve=false'
+    recover = false
   []
 
   [reset]
@@ -16,5 +17,6 @@
     csvdiff = 'reset.csv'
     input = 'main.i'
     cli_args = 'MultiApps/full_solve/reinit_after_solve=true full_solve:Outputs/file_base="reset"'
+    recover = false
   []
 []

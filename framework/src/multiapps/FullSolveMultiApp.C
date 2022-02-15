@@ -75,7 +75,8 @@ FullSolveMultiApp::reinitialize()
   if (getParam<bool>("reinit_after_solve") && _has_an_app)
     for (unsigned int i = 0; i < _my_num_apps; i++)
     {
-      resetApp(i);
+      auto & app = _apps[i];
+      resetApp(i, app->getStartTime());
       initialSetup();
     }
 }
