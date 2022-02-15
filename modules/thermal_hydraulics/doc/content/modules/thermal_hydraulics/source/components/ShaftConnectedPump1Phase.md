@@ -33,7 +33,7 @@ The pump moment of inertia affects how the pump accelerates. The user inputs val
 The conservation of mass, momentum, and energy equations for the pump volume are similar to the equations used by [VolumeJunction1Phase](VolumeJunction1Phase.md) but add the pump momentum and energy source terms,
 
 !equation id=momentum_source
-S^{\text{momentum}} = \rho_{\text{pump}} \left \| \vec{g} \right \| H A_{\text{ref}} \cdot \hat{n}_{out},
+S^{\text{momentum}} = \rho_{\text{in}} \left \| \vec{g} \right \| H A_{\text{ref}} \cdot \hat{n}_{out},
 
 and
 
@@ -43,7 +43,7 @@ S^{\text{energy}} = -(\tau_{\text{hydraulic}} + \tau_{\text{friction}}) \omega,
 
 where
 
-- $\rho_{\text{pump}}$ is the density of the fluid in the pump volume,
+- $\rho_{\text{in}}$ is the density of the fluid at the pump inlet,
 - $\left \| \vec{g} \right \|$ is the magnitude of the gravity vector,
 - $H$ is the pump head,
 - $A_{\text{ref}}$ is the cross-sectional area of the pump,
@@ -126,7 +126,7 @@ The input parameters [!param](/Components/ShaftConnectedPump1Phase/head) and [!p
 H = (\alpha^{2} + \nu^{2}) * W_{H} * H_{R}
 
 !equation
-\tau_{\text{hydraulic}} = (\alpha^{2} + \nu^{2}) * W_{T} * \tau_{R} * \frac{\rho_{\text{pump}}}{\rho_{R}}
+\tau_{\text{hydraulic}} = (\alpha^{2} + \nu^{2}) * W_{T} * \tau_{R} * \frac{\rho_{\text{in}}}{\rho_{R}}
 
 ### Friction torque id=friction
 

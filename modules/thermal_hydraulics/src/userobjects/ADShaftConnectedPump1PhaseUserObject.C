@@ -137,7 +137,7 @@ ADShaftConnectedPump1PhaseUserObject::computeFluxesAndResiduals(const unsigned i
 
     // Real homologous_torque = -(alpha * alpha + nu * nu) * wt * _torque_rated;
     const ADReal homologous_torque = -y * zt;
-    _hydraulic_torque = homologous_torque * ((_rhoV[0] / _volume) / _density_rated);
+    _hydraulic_torque = homologous_torque * ((_rhoA[0] / _A[0]) / _density_rated);
 
     const auto zh = wh * _head_rated;
 
@@ -181,7 +181,7 @@ ADShaftConnectedPump1PhaseUserObject::computeFluxesAndResiduals(const unsigned i
     const ADReal S_energy = -(_hydraulic_torque + _friction_torque) * _omega[0];
 
     // a positive head value results in a positive S_momentum
-    const ADRealVectorValue S_momentum = (_rhoV[0] / _volume) * _g * _pump_head * _A_ref * _di_out;
+    const ADRealVectorValue S_momentum = (_rhoA[0] / _A[0]) * _g * _pump_head * _A_ref * _di_out;
     //
 
     _residual[VolumeJunction1Phase::RHOEV_INDEX] -= S_energy;
