@@ -1,6 +1,7 @@
 reset
 
 create sphere radius 5 xpositive 
+volume 1  size 0.5
 volume 1  Scheme Tetmesh proximity layers off geometry approximation angle 15 
 volume 1  tetmesh growth_factor 1 
 mesh volume 1 
@@ -9,5 +10,20 @@ Sideset 1 name 'flat'
 Sideset 2 add surface 2  
 Sideset 2 name 'round'
 block 1 add volume 1  
-export mesh "/Users/mundlb/projects/isopod/examples/spherical_point_sources/halfSphere.e" block all overwrite
+
+Sideset 100 add tri with y_min < -4 and y_min > -5.1 in surface 1
+Sideset 101 add tri with y_min < -3 and y_min > -4 in surface 1
+Sideset 102 add tri with y_min < -2 and y_min > -3 in surface 1
+Sideset 103 add tri with y_min < -1 and y_min > -2 in surface 1
+Sideset 104 add tri with y_min < -0 and y_min > -1 in surface 1
+Sideset 105 add tri with y_min < 1 and y_min > 0 in surface 1
+Sideset 106 add tri with y_min < 2 and y_min > 1 in surface 1
+Sideset 107 add tri with y_min < 3 and y_min > 2 in surface 1
+Sideset 108 add tri with y_min < 4 and y_min > 3 in surface 1
+Sideset 109 add tri with y_min < 5.1 and y_min > 4 in surface 1
+
+export mesh "/Users/mundlb/projects/isopod/examples/thermal_flux_patch_load/halfSphere.e" block all overwrite
+
+
+
 

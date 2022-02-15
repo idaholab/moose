@@ -3,12 +3,6 @@
     type = FileMeshGenerator
     file = halfSphere.e
   []
-  [patch]
-    type = PatchSidesetGenerator
-    boundary = flat
-    n_patches = 5
-    input = fmg
-  []
 []
 
 [Variables]
@@ -75,37 +69,38 @@
 
 [Executioner]
   type = Steady
-  solve_type = PJFNK
+  solve_type = NEWTON
   nl_abs_tol = 1e-6
   nl_rel_tol = 1e-8
-  petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre boomeramg'
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
+  petsc_options_value = 'lu       superlu_dist'
+  nl_forced_its = 1
 []
 
 [Postprocessors]
   [adjoint_0]
     type = SideIntegralVariablePostprocessor
-    boundary = flat_0
+    boundary = '100 101'
     variable = temperature
   []
   [adjoint_1]
     type = SideIntegralVariablePostprocessor
-    boundary = flat_1
+    boundary = '102 103'
     variable = temperature
   []
   [adjoint_2]
     type = SideIntegralVariablePostprocessor
-    boundary = flat_2
+    boundary = '104 105'
     variable = temperature
   []
   [adjoint_3]
     type = SideIntegralVariablePostprocessor
-    boundary = flat_3
+    boundary = '106 107'
     variable = temperature
   []
   [adjoint_4]
     type = SideIntegralVariablePostprocessor
-    boundary = flat_4
+    boundary = '108 109'
     variable = temperature
   []
 []
@@ -136,5 +131,6 @@
 [Outputs]
   console = true
   exodus = true
+  csv = true
   file_base = 'adjoint'
 []

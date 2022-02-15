@@ -36,12 +36,12 @@
 [MultiApps]
   [forward]
     type = OptimizeFullSolveMultiApp
-    input_files = forward.i
+    input_files = forward_20ss.i
     execute_on = "FORWARD"
   []
   [adjoint]
     type = OptimizeFullSolveMultiApp
-    input_files = adjoint.i
+    input_files = adjoint_20ss.i
     execute_on = "ADJOINT"
   []
 []

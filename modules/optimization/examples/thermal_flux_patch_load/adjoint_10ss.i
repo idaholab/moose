@@ -3,12 +3,6 @@
     type = FileMeshGenerator
     file = halfSphere.e
   []
-  [patch]
-    type = PatchSidesetGenerator
-    boundary = flat
-    n_patches = 10
-    input = fmg
-  []
 []
 
 [Variables]
@@ -75,62 +69,63 @@
 
 [Executioner]
   type = Steady
-  solve_type = PJFNK
+  solve_type = NEWTON
   nl_abs_tol = 1e-6
   nl_rel_tol = 1e-8
-  petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre boomeramg'
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
+  petsc_options_value = 'lu       superlu_dist'
+  nl_forced_its = 1
 []
 
 [Postprocessors]
   [adjoint_0]
     type = SideIntegralVariablePostprocessor
-    boundary = flat_0
+    boundary = 100
     variable = temperature
   []
   [adjoint_1]
     type = SideIntegralVariablePostprocessor
-    boundary = flat_1
+    boundary = 101
     variable = temperature
   []
   [adjoint_2]
     type = SideIntegralVariablePostprocessor
-    boundary = flat_2
+    boundary = 102
     variable = temperature
   []
   [adjoint_3]
     type = SideIntegralVariablePostprocessor
-    boundary = flat_3
+    boundary = 103
     variable = temperature
   []
   [adjoint_4]
     type = SideIntegralVariablePostprocessor
-    boundary = flat_4
+    boundary = 104
     variable = temperature
   []
   [adjoint_5]
     type = SideIntegralVariablePostprocessor
-    boundary = flat_5
+    boundary = 105
     variable = temperature
   []
   [adjoint_6]
     type = SideIntegralVariablePostprocessor
-    boundary = flat_6
+    boundary = 106
     variable = temperature
   []
   [adjoint_7]
     type = SideIntegralVariablePostprocessor
-    boundary = flat_7
+    boundary = 107
     variable = temperature
   []
   [adjoint_8]
     type = SideIntegralVariablePostprocessor
-    boundary = flat_8
+    boundary = 108
     variable = temperature
   []
   [adjoint_9]
     type = SideIntegralVariablePostprocessor
-    boundary = flat_9
+    boundary = 109
     variable = temperature
   []
 []

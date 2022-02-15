@@ -3,12 +3,6 @@
     type = FileMeshGenerator
     file = halfSphere.e
   []
-  [patch]
-    type = PatchSidesetGenerator
-    boundary = flat
-    n_patches = 10
-    input = fmg
-  []
 []
 
 [Variables]
@@ -42,61 +36,61 @@
   [flat_0]
     type = PostprocessorNeumannBC
     variable = temperature
-    boundary = flat_0
+    boundary = 100
     postprocessor = p0
   []
   [flat_1]
     type = PostprocessorNeumannBC
     variable = temperature
-    boundary = flat_1
+    boundary = 101
     postprocessor = p1
   []
   [flat_2]
     type = PostprocessorNeumannBC
     variable = temperature
-    boundary = flat_2
+    boundary = 102
     postprocessor = p2
   []
   [flat_3]
     type = PostprocessorNeumannBC
     variable = temperature
-    boundary = flat_3
+    boundary = 103
     postprocessor = p3
   []
   [flat_4]
     type = PostprocessorNeumannBC
     variable = temperature
-    boundary = flat_4
+    boundary = 104
     postprocessor = p4
   []
   [flat_5]
     type = PostprocessorNeumannBC
     variable = temperature
-    boundary = flat_5
+    boundary = 105
     postprocessor = p5
   []
   [flat_6]
     type = PostprocessorNeumannBC
     variable = temperature
-    boundary = flat_6
+    boundary = 106
     postprocessor = p6
   []
   [flat_7]
     type = PostprocessorNeumannBC
     variable = temperature
-    boundary = flat_7
+    boundary = 107
     postprocessor = p7
   []
   [flat_8]
     type = PostprocessorNeumannBC
     variable = temperature
-    boundary = flat_8
+    boundary = 108
     postprocessor = p8
   []
   [flat_9]
     type = PostprocessorNeumannBC
     variable = temperature
-    boundary = flat_9
+    boundary = 109
     postprocessor = p9
   []
 []
@@ -168,11 +162,12 @@
 
 [Executioner]
   type = Steady
-  solve_type = PJFNK
+  solve_type = NEWTON
   nl_abs_tol = 1e-6
   nl_rel_tol = 1e-8
-  petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre boomeramg'
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
+  petsc_options_value = 'lu       superlu_dist'
+  nl_forced_its = 1
 []
 
 [VectorPostprocessors]

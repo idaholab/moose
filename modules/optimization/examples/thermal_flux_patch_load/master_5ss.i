@@ -27,24 +27,24 @@
 
 [Executioner]
   type = Optimize
-  tao_solver = taolmvm
+  tao_solver = taonm
   # petsc_options_iname = '-tao_gatol'# -tao_cg_delta_max'
   # petsc_options_value = '1e-2'
 
-  petsc_options_iname='-tao_max_it -tao_fd_test -tao_test_gradient -tao_fd_gradient -tao_fd_delta -tao_gatol'
-  petsc_options_value='3 true true false 0.0001 0.0001'
+  # petsc_options_iname='-tao_max_it -tao_fd_test -tao_test_gradient -tao_fd_gradient -tao_fd_delta -tao_gatol'
+  # petsc_options_value='3 true true false 0.0001 0.0001'
   verbose = true
 []
 
 [MultiApps]
   [forward]
     type = OptimizeFullSolveMultiApp
-    input_files = forward.i
+    input_files = forward_5ss.i
     execute_on = "FORWARD"
   []
   [adjoint]
     type = OptimizeFullSolveMultiApp
-    input_files = adjoint.i
+    input_files = adjoint_5ss.i
     execute_on = "ADJOINT"
   []
 []
