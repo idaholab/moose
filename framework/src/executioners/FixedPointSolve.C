@@ -326,7 +326,7 @@ FixedPointSolve::solve()
   if (_has_fixed_point_its)
     printFixedPointConvergenceReason();
 
-  // If the user requires, we reset the given FullSolveMultiApps
+  // If the user requests it, we reset the given FullSolveMultiApps
   // by reinitializing our problem. This allows the execution of
   // the same problem multiple times with changing parameters/object.
   if (_problem.isTransient())
