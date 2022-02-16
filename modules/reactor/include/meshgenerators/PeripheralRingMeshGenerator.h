@@ -30,6 +30,20 @@ protected:
   const MeshGeneratorName _input_name;
   /// Number of layers of elements of the peripheral region in radial direction
   const unsigned int _peripheral_layer_num;
+  /// Bias value used to induce biasing to radial meshing in peripheral ring region
+  const Real _peripheral_radial_bias;
+  /// Width of the peripheral ring region to be used as inner boundary layer
+  const Real _peripheral_inner_boundary_layer_width;
+  /// Number of radial sectors of the inner boundary layer mesh of the peripheral ring region
+  const unsigned int _peripheral_inner_boundary_layer_intervals;
+  /// Growth factor used to bias radial meshing of the inner boundary layer of the peripheral ring region
+  const Real _peripheral_inner_boundary_layer_bias;
+  /// Width of the peripheral ring region to be used as outer boundary layer
+  const Real _peripheral_outer_boundary_layer_width;
+  /// Number of radial sectors of the outer boundary layer mesh of the peripheral ring region
+  const unsigned int _peripheral_outer_boundary_layer_intervals;
+  /// Growth factor used to bias radial meshing of the outer boundary layer of the peripheral ring region
+  const Real _peripheral_outer_boundary_layer_bias;
   /// Radius of the peripheral region's outer circular boundary
   const Real _peripheral_ring_radius;
   /// Volume preserving function is optional
