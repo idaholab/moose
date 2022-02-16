@@ -54,8 +54,10 @@ public:
   const Real & getGap() const { return _gap; }
 
   unsigned int getSubchannelIndexFromPoint(const Point & p) const override;
+  virtual unsigned int channelIndex(const Point & point) const override;
 
   unsigned int getPinIndexFromPoint(const Point & p) const override;
+  virtual unsigned int pinIndex(const Point & p) const override;
 
   virtual EChannelType getSubchannelType(unsigned int index) const override
   {

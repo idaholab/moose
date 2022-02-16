@@ -65,12 +65,50 @@ QuadSubChannelMesh::getSubchannelIndexFromPoint(const Point & p) const
 }
 
 unsigned int
+QuadSubChannelMesh::channelIndex(const Point & pt) const
+{
+  // this is identical to getSubchannelIndexFromPoint, but when it is given a point "outside" the
+  // normal subchannel geometry (i.e. a point that lies in a gap around the lattice) we still report
+  // a valid subchannel index this is needed for transferring the solution onto a visualization mesh
+
+  Real offset_x = (_nx - 1) * _pitch / 2.0;
+  Real offset_y = (_ny - 1) * _pitch / 2.0;
+  int i = (pt(0) + offset_x + 0.5 * _pitch) / _pitch;
+  int j = (pt(1) + offset_y + 0.5 * _pitch) / _pitch;
+
+  i = std::max(0, i);
+  i = std::min(i, (int)(_nx - 1));
+
+  j = std::max(0, j);
+  j = std::min(j, (int)(_ny - 1));
+
+  return j * _nx + i;
+}
+
+unsigned int
 QuadSubChannelMesh::getPinIndexFromPoint(const Point & p) const
 {
   Real offset_x = (_nx - 2) * _pitch / 2.0;
   Real offset_y = (_ny - 2) * _pitch / 2.0;
   unsigned int i = (p(0) + offset_x + 0.5 * _pitch) / _pitch;
   unsigned int j = (p(1) + offset_y + 0.5 * _pitch) / _pitch;
+  return j * (_nx - 1) + i;
+}
+
+unsigned int
+QuadSubChannelMesh::pinIndex(const Point & p) const
+{
+  Real offset_x = (_nx - 2) * _pitch / 2.0;
+  Real offset_y = (_ny - 2) * _pitch / 2.0;
+  int i = (p(0) + offset_x + 0.5 * _pitch) / _pitch;
+  int j = (p(1) + offset_y + 0.5 * _pitch) / _pitch;
+
+  i = std::max(0, i);
+  i = std::min(i, (int)(_nx - 2));
+
+  j = std::max(0, j);
+  j = std::min(j, (int)(_ny - 2));
+
   return j * (_nx - 1) + i;
 }
 

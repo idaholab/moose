@@ -26,3 +26,29 @@ SubChannelMesh::SubChannelMesh(const SubChannelMesh & other_mesh)
     _n_blocks(other_mesh._n_blocks)
 {
 }
+
+unsigned int
+SubChannelMesh::getZIndex(const Point & point) const
+{
+  if (_z_grid.size() == 0)
+    mooseError("_z_grid is empty.");
+
+  if (point(2) <= _z_grid[0])
+    return 0;
+  if (point(2) >= _z_grid[_z_grid.size() - 1])
+    return _z_grid.size() - 1;
+
+  unsigned int lo = 0;
+  unsigned int hi = _z_grid.size();
+  while (lo < hi)
+  {
+    unsigned int mid = (lo + hi) / 2;
+    if (std::abs(_z_grid[mid] - point(2)) < 1e-5)
+      return mid;
+    else if (_z_grid[mid] < point(2))
+      lo = mid;
+    else
+      hi = mid;
+  }
+  return lo;
+}

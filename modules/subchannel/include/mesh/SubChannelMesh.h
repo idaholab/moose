@@ -18,6 +18,8 @@ public:
    */
   virtual const std::vector<Real> & getZGrid() const { return _z_grid; }
 
+  virtual unsigned int getZIndex(const Point & point) const;
+
   /**
    * Get axial cell location and value of loss coefficient
    */
@@ -129,10 +131,14 @@ public:
    */
   virtual unsigned int getSubchannelIndexFromPoint(const Point & p) const = 0;
 
+  virtual unsigned int channelIndex(const Point & point) const = 0;
+
   /**
    * Return a pin index for a given physical point `p`
    */
   virtual unsigned int getPinIndexFromPoint(const Point & p) const = 0;
+
+  virtual unsigned int pinIndex(const Point & p) const = 0;
 
   /**
    * Return the type of the subchannel for given subchannel index
