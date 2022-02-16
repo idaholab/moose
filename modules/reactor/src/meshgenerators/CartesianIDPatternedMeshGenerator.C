@@ -81,6 +81,7 @@ CartesianIDPatternedMeshGenerator::generate()
 
   // patternedMeshGenerator for Carterisan lattice does not support duct structures
   const bool has_assembly_duct = false;
+  const std::set<subdomain_id_type> duct_block_ids;
   // asssign reporting IDs to individual elements
   ReportingIDGeneratorUtils::assignReportingIDs(mesh,
                                                 extra_id_index,
@@ -88,6 +89,7 @@ CartesianIDPatternedMeshGenerator::generate()
                                                 _use_exclude_id,
                                                 _exclude_ids,
                                                 has_assembly_duct,
+                                                duct_block_ids,
                                                 _meshes,
                                                 _pattern,
                                                 _id_pattern);

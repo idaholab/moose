@@ -64,14 +64,16 @@ std::set<SubdomainID> getCellBlockIDs(const std::vector<std::unique_ptr<Replicat
 /**
  * get list of block IDs for the assembly duck regions
  * @param mesh  output mesh from the cartesian or hexagonal patterned mesh generator
- * @param has_assembly_duct flag to indicate if assembly duct exists
+ * @param has_assembly_boundary flag to indicate if assembly boundary exists
  * @param blks list of block defined in the input meshes of the cartesian or hexagonal patterned
  *mesh generator
  * @return list of block ids in the assembly duct region
  **/
-std::map<SubdomainID, unsigned int> getDuckBlockIDs(const std::unique_ptr<MeshBase> & mesh,
-                                                    const bool has_assembly_duct,
-                                                    const std::set<SubdomainID> & blks);
+std::map<SubdomainID, unsigned int>
+getDuckBlockIDs(const std::unique_ptr<MeshBase> & mesh,
+                const bool has_assembly_boundary,
+                const std::set<subdomain_id_type> background_blk_ids,
+                const std::set<SubdomainID> & blks);
 
 /**
  * assign the reporting IDs to the output mesh from the cartesian or hexagonal patterned mesh
@@ -81,7 +83,7 @@ std::map<SubdomainID, unsigned int> getDuckBlockIDs(const std::unique_ptr<MeshBa
  * @param assign_type type of integer ID assignment
  * @param use_exclude_id flag to indicate if exclude_id is defined
  * @param exclude_ids flag to indicate if exclude_id is used for each input mesh
- * @param has_assembly_duct flag to indicate if assembly duct exists
+ * @param has_assembly_boundary flag to indicate if assembly boundary exists
  * @param input_meshes input meshes of the cartesian or hexagonal patterned mesh generator
  * @param pattern 2D vector of the mesh pattern
  * @param id_pattern user-defined integer ID for each input pattern cell
@@ -92,7 +94,8 @@ void assignReportingIDs(std::unique_ptr<MeshBase> & mesh,
                         const std::string assign_type,
                         const bool use_exclude_id,
                         const std::vector<bool> & exclude_ids,
-                        const bool has_assembly_duct,
+                        const bool has_assembly_boundary,
+                        const std::set<subdomain_id_type> background_block_ids,
                         const std::vector<std::unique_ptr<ReplicatedMesh>> & input_meshes,
                         const std::vector<std::vector<unsigned int>> & pattern,
                         const std::vector<std::vector<dof_id_type>> & id_pattern);
