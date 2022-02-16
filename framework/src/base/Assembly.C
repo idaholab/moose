@@ -3460,17 +3460,8 @@ Assembly::processResidual(const ADReal & residual,
                           const std::set<TagID> & vector_tags,
                           const std::set<TagID> & matrix_tags)
 {
-  if (_sys.residAndJacobianTogether())
-  {
-    processResidual(MetaPhysicL::raw_value(residual), row_index, vector_tags);
-    processDerivatives(residual, row_index, matrix_tags);
-    return;
-  }
-
-  if (_subproblem.currentlyComputingJacobian())
-    processDerivatives(residual, row_index, matrix_tags);
-  else
-    processResidual(MetaPhysicL::raw_value(residual), row_index, vector_tags);
+  processResidual(MetaPhysicL::raw_value(residual), row_index, vector_tags);
+  processDerivatives(residual, row_index, matrix_tags);
 }
 
 void
@@ -4651,6 +4642,40 @@ Assembly::processUnconstrainedDerivatives(const std::vector<ADReal> & residuals,
       cacheJacobian(row_index, column_indices[j], raw_derivatives[j] * scalar, matrix_tags);
   }
 }
+
+void
+Assembly::processUnconstrainedResiduals(const std::vector<ADReal> & residuals,
+                                        const std::vector<dof_id_type> & row_indices,
+                                        const std::set<TagID> & vector_tags,
+                                        const std::set<TagID> & matrix_tags)
+{
+  mooseAssert(residuals.size() == row_indices.size(),
+              "The number of residuals should match the number of dof indices");
+  mooseAssert(residuals.size() >= 1, "Why you calling me with no residuals?");
+
+  std::vector<Real> scaling_factors(row_indices.size());
+  for (const auto i : index_range(row_indices))
+    scaling_factors[i] = _scaling_vector ? (*_scaling_vector)(row_indices[i]) : 1.;
+
+  // First handle the residuals
+  if (!vector_tags.empty())
+    for (const auto i : index_range(row_indices))
+      cacheResidual(row_indices[i], residuals[i].value() * scaling_factors[i], vector_tags);
+
+  if (!matrix_tags.empty())
+    for (const auto i : index_range(row_indices))
+    {
+      const auto row_index = row_indices[i];
+      const auto scalar = scaling_factors[i];
+
+      const auto & sparse_derivatives = residuals[i].derivatives();
+      const auto & column_indices = sparse_derivatives.nude_indices();
+      const auto & raw_derivatives = sparse_derivatives.nude_data();
+
+      for (std::size_t j = 0; j < column_indices.size(); ++j)
+        cacheJacobian(row_index, column_indices[j], raw_derivatives[j] * scalar, matrix_tags);
+    }
+}
 #endif
 
 template <>
@@ -4837,6 +4862,7 @@ Assembly::processResiduals(const std::vector<ADReal> & residuals,
     scaling_factors[i] = _scaling_vector ? (*_scaling_vector)(input_row_indices[i]) : 1.;
 
   // First handle the residuals
+  if (!vector_tags.empty())
   {
     // Need to make a copy because we might modify this in constrain_element_vector
     std::vector<dof_id_type> row_indices = input_row_indices;
@@ -4873,7 +4899,7 @@ Assembly::processResiduals(const std::vector<ADReal> & residuals,
 
   // If there's no derivatives then there is nothing to do. Moreover, if we pass zero size column
   // indices to constrain_element_matrix then we will potentially get errors out of BLAS
-  if (!column_indices.size())
+  if (!column_indices.size() || matrix_tags.empty())
     return;
 
   // Now the Jacobian

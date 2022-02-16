@@ -38,6 +38,13 @@ protected:
 
   const ADRealVectorValue & normal() const { return _normal; }
 
+  /**
+   * compute the AD residuals and feed the results into the supplied vector and matrix tags
+   */
+  void computeResidual(const FaceInfo & fi,
+                       const std::set<TagID> & vector_tags,
+                       const std::set<TagID> & matrix_tags);
+
   const unsigned int _qp = 0;
   const ADVariableValue & _u;
   const ADVariableValue & _u_neighbor;

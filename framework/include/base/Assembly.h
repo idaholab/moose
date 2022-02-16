@@ -1748,6 +1748,10 @@ public:
   void processUnconstrainedDerivatives(const std::vector<ADReal> & residuals,
                                        const std::vector<dof_id_type> & row_indices,
                                        const std::set<TagID> & matrix_tags);
+  void processUnconstrainedResiduals(const std::vector<ADReal> & residuals,
+                                     const std::vector<dof_id_type> & row_indices,
+                                     const std::set<TagID> & vector_tags,
+                                     const std::set<TagID> & matrix_tags);
 
   /**
    * signals this object that a vector containing variable scaling factors should be used when
@@ -2829,53 +2833,7 @@ Assembly::processDerivatives(const std::vector<ADReal> & residuals,
 )
 {
 #ifdef MOOSE_GLOBAL_AD_INDEXING
-  // Need to make a copy because we might modify this in constrain_element_matrix
-  std::vector<dof_id_type> row_indices = input_row_indices;
-
-  mooseAssert(residuals.size() == row_indices.size(),
-              "The number of residuals should match the number of dof indices");
-  mooseAssert(residuals.size() >= 1, "Why you calling me with no residuals?");
-
-  const auto & compare_dofs = residuals[0].derivatives().nude_indices();
-#ifndef NDEBUG
-  auto compare_dofs_set = std::set<dof_id_type>(compare_dofs.begin(), compare_dofs.end());
-
-  for (auto resid_it = residuals.begin() + 1; resid_it != residuals.end(); ++resid_it)
-  {
-    auto current_dofs_set = std::set<dof_id_type>(resid_it->derivatives().nude_indices().begin(),
-                                                  resid_it->derivatives().nude_indices().end());
-    mooseAssert(compare_dofs_set == current_dofs_set,
-                "We're going to see whether the dof sets are the same. IIRC the degree of freedom "
-                "dependence (as indicated by the dof index set held by the ADReal) has to be the "
-                "same for every residual passed to this method otherwise constrain_element_matrix "
-                "will not work.");
-  }
-#endif
-  auto column_indices = std::vector<dof_id_type>(compare_dofs.begin(), compare_dofs.end());
-
-  // If there's no derivatives then there is nothing to do. Moreover, if we pass zero size column
-  // indices to constrain_element_matrix then we will potentially get errors out of BLAS
-  if (!column_indices.size())
-    return;
-
-  DenseMatrix<Number> element_matrix(row_indices.size(), column_indices.size());
-  for (const auto i : index_range(row_indices))
-  {
-    const auto row_index = row_indices[i];
-    const Real scalar = _scaling_vector ? (*_scaling_vector)(row_index) : 1.;
-
-    const auto & sparse_derivatives = residuals[i].derivatives();
-
-    for (const auto j : index_range(column_indices))
-      element_matrix(i, j) = sparse_derivatives[column_indices[j]] * scalar;
-  }
-
-  _dof_map.constrain_element_matrix(element_matrix, row_indices, column_indices);
-
-  for (const auto i : index_range(row_indices))
-    for (const auto j : index_range(column_indices))
-      cacheJacobian(row_indices[i], column_indices[j], element_matrix(i, j), matrix_tags);
-
+  processResiduals(residuals, input_row_indices, {}, matrix_tags);
 #else
   local_functor(residuals, input_row_indices, matrix_tags);
 #endif

@@ -53,12 +53,14 @@ protected:
                               DualNumbers & ad_vars,
                               const bool is_secondary);
 #endif
-  /**
-   * compute the residual and Jacobian for the specified element type
-   */
-  void computeResidualAndJacobian(Moose::MortarType mortar_type);
-
   void computeResidualAndJacobian() override;
+
+  /**
+   * compute the AD residuals and feed the results into the supplied vector and matrix tags
+   */
+  void computeResidual(Moose::MortarType mortar_type,
+                       const std::set<TagID> & vector_tags,
+                       const std::set<TagID> & matrix_tags);
 
 private:
   /// A dummy object useful for constructing _lambda when not using Lagrange multipliers

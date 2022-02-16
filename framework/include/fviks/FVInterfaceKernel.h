@@ -79,6 +79,13 @@ public:
 
 protected:
   /**
+   * compute the AD residuals and feed the results into the supplied vector and matrix tags
+   */
+  virtual void computeResidual(const FaceInfo & fi,
+                               const std::set<TagID> & vector_tags,
+                               const std::set<TagID> & matrix_tags);
+
+  /**
    * @return Interface residual terms. The result will be multiplied by the face area
    */
   virtual ADReal computeQpResidual() = 0;
