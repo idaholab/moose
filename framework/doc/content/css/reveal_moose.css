@@ -233,7 +233,8 @@
 .reveal .moose-parameter-description-title,
 .reveal .moose-parameter-options-title,
 .reveal .moose-parameter-default-title,
-.reveal .moose-parameter-cpptype-title{
+.reveal .moose-parameter-cpptype-title,
+.reveal .moose-parameter-controllable-title{
     font-style:italic;
     font-weight: 200;
 }
