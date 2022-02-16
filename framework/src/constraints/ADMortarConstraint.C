@@ -68,7 +68,7 @@ void
 ADMortarConstraint::computeJacobian(Moose::MortarType mortar_type)
 {
   std::vector<DualReal> residuals;
-  size_t test_space_size = 0;
+  std::size_t test_space_size = 0;
   typedef Moose::ConstraintJacobianType JType;
   typedef Moose::MortarType MType;
   std::vector<JType> jacobian_types;
@@ -135,7 +135,7 @@ ADMortarConstraint::computeJacobian(Moose::MortarType mortar_type)
       }
 
       // Derivatives are offset by the variable number
-      std::vector<size_t> ad_offsets{
+      std::vector<std::size_t> ad_offsets{
           Moose::adOffset(jvar, _sys.getMaxVarNDofsPerElem(), Moose::ElementType::Element),
           Moose::adOffset(jvar,
                           _sys.getMaxVarNDofsPerElem(),
@@ -145,9 +145,9 @@ ADMortarConstraint::computeJacobian(Moose::MortarType mortar_type)
                           _sys.getMaxVarNDofsPerElem(),
                           Moose::ElementType::Lower,
                           _sys.system().n_vars())};
-      std::vector<size_t> shape_space_sizes{jvariable.dofIndices().size(),
-                                            jvariable.dofIndicesNeighbor().size(),
-                                            jvariable.dofIndicesLower().size()};
+      std::vector<std::size_t> shape_space_sizes{jvariable.dofIndices().size(),
+                                                 jvariable.dofIndicesNeighbor().size(),
+                                                 jvariable.dofIndicesLower().size()};
 
       for (MooseIndex(3) type_index = 0; type_index < 3; ++type_index)
       {
@@ -201,3 +201,60 @@ ADMortarConstraint::trimDerivative(const dof_id_type remove_derivative_index, AD
   dual_number.derivatives().nude_data().resize(n_indices);
 }
 #endif
+
+void
+ADMortarConstraint::computeResidualAndJacobian()
+{
+  setNormals();
+
+  if (_compute_primal_residuals)
+  {
+    // Compute the residual/jacobian for the secondary interior primal dofs
+    computeResidualAndJacobian(Moose::MortarType::Secondary);
+
+    // Compute the residual/jacobian for the primary interior primal dofs.
+    computeResidualAndJacobian(Moose::MortarType::Primary);
+  }
+
+  if (_compute_lm_residuals)
+    // Compute the residual/jacobian for the lower dimensional LM dofs (if we even have an LM
+    // variable)
+    computeResidualAndJacobian(Moose::MortarType::Lower);
+}
+
+void
+ADMortarConstraint::computeResidualAndJacobian(Moose::MortarType mortar_type)
+{
+#ifndef MOOSE_GLOBAL_AD_INDEXING
+  mooseError("Compute residual and Jacobian is only implemented for ADMortarConstraints for global "
+             "AD indexing");
+#endif
+
+  std::vector<DualReal> residuals;
+  typedef Moose::MortarType MType;
+  std::vector<dof_id_type> dof_indices;
+
+  switch (mortar_type)
+  {
+    case MType::Secondary:
+      dof_indices = _secondary_var.dofIndices();
+      break;
+
+    case MType::Primary:
+      dof_indices = _primary_var.dofIndicesNeighbor();
+      break;
+
+    case MType::Lower:
+      mooseAssert(_var, "The Lagrange Multiplier should be non-null if this is getting called");
+      dof_indices = _var->dofIndicesLower();
+      break;
+  }
+  const auto test_space_size = dof_indices.size();
+
+  residuals.resize(test_space_size, 0);
+  for (_qp = 0; _qp < _qrule_msm->n_points(); _qp++)
+    for (_i = 0; _i < test_space_size; _i++)
+      residuals[_i] += _JxW_msm[_qp] * _coord[_qp] * computeQpResidual(mortar_type);
+
+  _assembly.processResiduals(residuals, dof_indices, _vector_tags, _matrix_tags);
+}

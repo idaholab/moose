@@ -747,7 +747,7 @@ protected:
   /**
    * Do mortar constraint residual/jacobian computations
    */
-  void mortarConstraints();
+  void mortarConstraints(Moose::ComputeType compute_type);
 
   /**
    * Compute a "Jacobian" for automatic scaling purposes

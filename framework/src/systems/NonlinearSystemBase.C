@@ -1634,7 +1634,7 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
   }
   PARALLEL_CATCH;
 
-  mortarConstraints();
+  mortarConstraints(Moose::ComputeType::Residual);
 
   if (_need_residual_copy)
   {
@@ -1745,6 +1745,8 @@ NonlinearSystemBase::computeResidualAndJacobianInternal(const std::set<TagID> & 
       FVRange faces(_fe_problem.mesh().faceInfo().begin(), _fe_problem.mesh().faceInfo().end());
       Threads::parallel_reduce(faces, fvrj);
     }
+
+    mortarConstraints(Moose::ComputeType::ResidualAndJacobian);
 
     unsigned int n_threads = libMesh::n_threads();
     for (unsigned int i = 0; i < n_threads;
@@ -2588,7 +2590,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
       Threads::parallel_reduce(faces, fvj);
     }
 
-    mortarConstraints();
+    mortarConstraints(Moose::ComputeType::Jacobian);
 
     // Get our element range for looping over
     ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
@@ -3470,15 +3472,15 @@ NonlinearSystemBase::setPreviousNewtonSolution(const NumericVector<Number> & sol
 }
 
 void
-NonlinearSystemBase::mortarConstraints()
+NonlinearSystemBase::mortarConstraints(const Moose::ComputeType compute_type)
 {
   try
   {
     for (auto & map_pr : _undisplaced_mortar_functors)
-      map_pr.second();
+      map_pr.second(compute_type);
 
     for (auto & map_pr : _displaced_mortar_functors)
-      map_pr.second();
+      map_pr.second(compute_type);
   }
   catch (MetaPhysicL::LogicError &)
   {

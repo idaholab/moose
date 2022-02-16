@@ -55,7 +55,7 @@ ComputeMortarFunctor::mortarSetup()
 }
 
 void
-ComputeMortarFunctor::operator()()
+ComputeMortarFunctor::operator()(const Moose::ComputeType compute_type)
 {
   unsigned int num_cached = 0;
 
@@ -77,30 +77,56 @@ ComputeMortarFunctor::operator()()
       iterators.push_back(it);
   }
 
-  auto act_functor = [this, &num_cached]()
+  auto act_functor = [this, &num_cached, compute_type]()
   {
     ++num_cached;
-    if (!_fe_problem.currentlyComputingJacobian())
+
+    switch (compute_type)
     {
-      for (auto * const mc : _mortar_constraints)
-        mc->computeResidual();
+      case Moose::ComputeType::Residual:
+      {
+        for (auto * const mc : _mortar_constraints)
+          mc->computeResidual();
 
-      _assembly.cacheResidual();
-      _assembly.cacheResidualNeighbor();
-      _assembly.cacheResidualLower();
+        _assembly.cacheResidual();
+        _assembly.cacheResidualNeighbor();
+        _assembly.cacheResidualLower();
 
-      if (num_cached % 20 == 0)
-        _assembly.addCachedResiduals();
-    }
-    else
-    {
-      for (auto * const mc : _mortar_constraints)
-        mc->computeJacobian();
+        if (num_cached % 20 == 0)
+          _assembly.addCachedResiduals();
 
-      _assembly.cacheJacobianMortar();
+        break;
+      }
 
-      if (num_cached % 20 == 0)
-        _assembly.addCachedJacobian();
+      case Moose::ComputeType::Jacobian:
+      {
+        for (auto * const mc : _mortar_constraints)
+          mc->computeJacobian();
+
+        _assembly.cacheJacobianMortar();
+
+        if (num_cached % 20 == 0)
+          _assembly.addCachedJacobian();
+        break;
+      }
+
+      case Moose::ComputeType::ResidualAndJacobian:
+      {
+        for (auto * const mc : _mortar_constraints)
+          mc->computeResidualAndJacobian();
+
+        _assembly.cacheResidual();
+        _assembly.cacheResidualNeighbor();
+        _assembly.cacheResidualLower();
+        _assembly.cacheJacobianMortar();
+
+        if (num_cached % 20 == 0)
+        {
+          _assembly.addCachedResiduals();
+          _assembly.addCachedJacobian();
+        }
+        break;
+      }
     }
   };
 

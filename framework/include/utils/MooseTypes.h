@@ -594,6 +594,16 @@ enum class MortarType : unsigned int
 };
 
 /**
+ * The type of nonlinear computation being performed
+ */
+enum class ComputeType
+{
+  Residual,
+  Jacobian,
+  ResidualAndJacobian
+};
+
+/**
  * The filter type applied to a particular piece of "restartable" data. These filters
  * will be applied during deserialization to include or exclude data as appropriate.
  */

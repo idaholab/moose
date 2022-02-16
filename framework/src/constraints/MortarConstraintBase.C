@@ -114,6 +114,11 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
     Order q_order = static_cast<Order>(2 * Utility::string_to_enum<Order>(p_order) + 1);
     _assembly.setMortarQRule(q_order);
   }
+
+  if (_var)
+    addMooseVariableDependency(_var);
+  addMooseVariableDependency(&_secondary_var);
+  addMooseVariableDependency(&_primary_var);
 }
 
 void

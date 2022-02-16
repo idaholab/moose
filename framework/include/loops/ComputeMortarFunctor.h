@@ -43,7 +43,7 @@ public:
   /**
    * Loops over the mortar segment mesh and computes the residual/Jacobian
    */
-  void operator()();
+  void operator()(Moose::ComputeType compute_type);
 
   void mortarSetup() override;
 
