@@ -28,7 +28,7 @@
 
 [AuxKernels]
   [strain_energy_rate_density]
-    type = ADMaterialRealAux
+    type = MaterialRealAux
     variable = strain_energy_rate_density
     property = strain_energy_rate_density
     execute_on = timestep_end
