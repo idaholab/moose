@@ -37,8 +37,8 @@ FVFluxBC::FVFluxBC(const InputParameters & parameters)
 {
   if (_var.kind() == Moose::VarKindType::VAR_AUXILIARY)
     paramError("variable",
-        "There should not be a need to specify a flux "
-        "boundary condition for an auxiliary variable.");
+               "There should not be a need to specify a flux "
+               "boundary condition for an auxiliary variable.");
 }
 
 void

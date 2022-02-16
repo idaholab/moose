@@ -43,7 +43,7 @@ WallFunctionYPlusAux::WallFunctionYPlusAux(const InputParameters & params)
     _wall_boundary_names(getParam<std::vector<BoundaryName>>("walls"))
 {
   if (!_u_var)
-  paramError("u", "the u velocity must be an INSFVVelocityVariable.");
+    paramError("u", "the u velocity must be an INSFVVelocityVariable.");
 
   if (_dim >= 2 && !_v_var)
     paramError("v",
