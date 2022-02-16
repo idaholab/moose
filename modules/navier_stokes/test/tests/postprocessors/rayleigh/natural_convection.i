@@ -3,7 +3,6 @@ rho = 1.1
 beta = 1e-4
 k = .01
 cp = 1000
-vel = 'velocity'
 velocity_interp_method = 'rc'
 advected_interp_method = 'average'
 l = 4
@@ -36,6 +35,15 @@ l = 4
   []
 []
 
+[UserObjects]
+  [rc]
+    type = INSFVRhieChowInterpolator
+    u = u
+    v = v
+    pressure = pressure
+  []
+[]
+
 [FVKernels]
   [mass_time]
     type = WCNSFVMassTimeDerivative
@@ -45,14 +53,10 @@ l = 4
   [mass]
     type = INSFVMassAdvection
     variable = pressure
-    vel = ${vel}
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
-    u = u
-    v = v
-    pressure = pressure
-    mu = ${mu}
     rho = ${rho}
+    rhie_chow_user_object = 'rc'
   []
 
   [u_time]
@@ -60,30 +64,31 @@ l = 4
     variable = u
     drho_dt = drho_dt
     rho = rho
+    momentum_component = 'x'
+    rhie_chow_user_object = 'rc'
   []
   [u_advection]
     type = INSFVMomentumAdvection
     variable = u
-    advected_quantity = 'rhou'
-    vel = ${vel}
     velocity_interp_method = ${velocity_interp_method}
     advected_interp_method = ${advected_interp_method}
-    pressure = pressure
-    u = u
-    v = v
-    mu = ${mu}
     rho = ${rho}
+    momentum_component = 'x'
+    rhie_chow_user_object = 'rc'
   []
   [u_viscosity]
-    type = FVDiffusion
+    type = INSFVMomentumDiffusion
     variable = u
-    coeff = ${mu}
+    mu = ${mu}
+    momentum_component = 'x'
+    rhie_chow_user_object = 'rc'
   []
   [u_pressure]
     type = INSFVMomentumPressure
     variable = u
     momentum_component = 'x'
     pressure = pressure
+    rhie_chow_user_object = 'rc'
   []
 
   [v_time]
@@ -91,30 +96,31 @@ l = 4
     variable = v
     drho_dt = drho_dt
     rho = rho
+    momentum_component = 'y'
+    rhie_chow_user_object = 'rc'
   []
   [v_advection]
     type = INSFVMomentumAdvection
     variable = v
-    advected_quantity = 'rhov'
-    vel = ${vel}
     velocity_interp_method = ${velocity_interp_method}
     advected_interp_method = ${advected_interp_method}
-    pressure = pressure
-    u = u
-    v = v
-    mu = ${mu}
     rho = ${rho}
+    momentum_component = 'y'
+    rhie_chow_user_object = 'rc'
   []
   [v_viscosity]
-    type = FVDiffusion
+    type = INSFVMomentumDiffusion
     variable = v
-    coeff = ${mu}
+    mu = ${mu}
+    momentum_component = 'y'
+    rhie_chow_user_object = 'rc'
   []
   [v_pressure]
     type = INSFVMomentumPressure
     variable = v
     momentum_component = 'y'
     pressure = pressure
+    rhie_chow_user_object = 'rc'
   []
 
   [temp_time]
@@ -133,14 +139,9 @@ l = 4
   [temp_advection]
     type = INSFVEnergyAdvection
     variable = T
-    vel = ${vel}
     velocity_interp_method = ${velocity_interp_method}
     advected_interp_method = ${advected_interp_method}
-    pressure = pressure
-    u = u
-    v = v
-    mu = ${mu}
-    rho = ${rho}
+    rhie_chow_user_object = 'rc'
   []
 []
 
@@ -197,10 +198,7 @@ l = 4
     prop_values = '${cp} ${k}'
   []
   [ins_fv]
-    type = INSFVMaterial
-    u = 'u'
-    v = 'v'
-    pressure = 'pressure'
+    type = INSFVEnthalpyMaterial
     temperature = 'T'
     rho = ${rho}
   []

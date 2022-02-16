@@ -34,6 +34,8 @@ PorousFlowDarcyVelocityComponentLowerDimensional::PorousFlowDarcyVelocityCompone
     const InputParameters & parameters)
   : PorousFlowDarcyVelocityComponent(parameters), _aperture(coupledValue("aperture"))
 {
+  if (isNodal())
+    paramError("variable", "This AuxKernel only supports Elemental fields");
 }
 
 Real

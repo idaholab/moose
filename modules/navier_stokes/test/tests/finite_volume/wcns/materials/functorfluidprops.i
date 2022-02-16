@@ -85,50 +85,73 @@ inlet_v = 4
     initial_condition = 0.4
   []
   [rho_var]
+    type = MooseVariableFVReal
   []
   [drho_dp_var]
+    type = MooseVariableFVReal
   []
   [drho_dT_var]
+    type = MooseVariableFVReal
   []
   [rho_dot_var]
+    type = MooseVariableFVReal
   []
   [cp_var]
+    type = MooseVariableFVReal
   []
   [dcp_dp_var]
+    type = MooseVariableFVReal
   []
   [dcp_dT_var]
+    type = MooseVariableFVReal
   []
   [cp_dot_var]
+    type = MooseVariableFVReal
   []
   [cv_var]
+    type = MooseVariableFVReal
   []
   [mu_var]
+    type = MooseVariableFVReal
   []
   [dmu_dp_var]
+    type = MooseVariableFVReal
   []
   [dmu_dT_var]
+    type = MooseVariableFVReal
   []
   [k_var]
+    type = MooseVariableFVReal
   []
   [dk_dp_var]
+    type = MooseVariableFVReal
   []
   [dk_dT_var]
+    type = MooseVariableFVReal
   []
   [Pr_var]
+    type = MooseVariableFVReal
   []
   [dPr_dp_var]
+    type = MooseVariableFVReal
   []
   [dPr_dT_var]
+    type = MooseVariableFVReal
   []
   [Re_var]
+    type = MooseVariableFVReal
   []
   [dRe_dp_var]
+    type = MooseVariableFVReal
   []
   [dRe_dT_var]
+    type = MooseVariableFVReal
   []
   [Re_h_var]
+    type = MooseVariableFVReal
   []
   [Re_i_var]
+    type = MooseVariableFVReal
   []
 []
 

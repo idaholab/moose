@@ -42,6 +42,18 @@ WallFunctionYPlusAux::WallFunctionYPlusAux(const InputParameters & params)
     _mu(getFunctor<ADReal>("mu")),
     _wall_boundary_names(getParam<std::vector<BoundaryName>>("walls"))
 {
+  if (!_u_var)
+  paramError("u", "the u velocity must be an INSFVVelocityVariable.");
+
+  if (_dim >= 2 && !_v_var)
+    paramError("v",
+               "In two or more dimensions, the v velocity must be supplied and it must be an "
+               "INSFVVelocityVariable.");
+
+  if (_dim >= 3 && !params.isParamValid("w"))
+    paramError("w",
+               "In three-dimensions, the w velocity must be supplied and it must be an "
+               "INSFVVelocityVariable.");
 }
 
 Real
@@ -105,8 +117,9 @@ WallFunctionYPlusAux::computeValue()
     return parallel_speed.value();
 
   // Compute the friction velocity and the wall shear stress
-  const auto rho = _rho(_current_elem);
-  const auto mu = _mu(_current_elem);
+  const auto elem_arg = makeElemArg(_current_elem);
+  const auto rho = _rho(elem_arg);
+  const auto mu = _mu(elem_arg);
   ADReal u_star = findUStar(mu.value(), rho.value(), parallel_speed, dist);
   ADReal tau = u_star * u_star * rho;
 

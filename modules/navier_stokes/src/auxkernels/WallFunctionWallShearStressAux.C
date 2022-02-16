@@ -123,8 +123,9 @@ WallFunctionWallShearStressAux::computeValue()
     return parallel_speed.value();
 
   // Compute the friction velocity and the wall shear stress
-  const auto rho = _rho(_current_elem);
-  const auto mu = _mu(_current_elem);
+  const auto elem_arg = makeElemArg(_current_elem);
+  const auto rho = _rho(elem_arg);
+  const auto mu = _mu(elem_arg);
   ADReal u_star = findUStar(mu.value(), rho.value(), parallel_speed, dist);
   ADReal tau = u_star * u_star * rho.value();
 

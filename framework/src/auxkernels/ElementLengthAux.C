@@ -29,6 +29,8 @@ ElementLengthAux::validParams()
 ElementLengthAux::ElementLengthAux(const InputParameters & parameters)
   : AuxKernel(parameters), _use_min(getParam<MooseEnum>("method") == "min")
 {
+  if (isNodal())
+    paramError("variable", "This AuxKernel only supports Elemental fields");
 }
 
 Real

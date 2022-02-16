@@ -30,6 +30,8 @@ InterfaceValueUserObjectAux::InterfaceValueUserObjectAux(const InputParameters &
     _interface_uo(getUserObject<InterfaceQpUserObjectBase>("interface_uo_name")),
     _return_side_average(getParam<bool>("return_side_average"))
 {
+  if (isNodal())
+    paramError("variable", "This AuxKernel only supports Elemental fields");
 }
 
 Real

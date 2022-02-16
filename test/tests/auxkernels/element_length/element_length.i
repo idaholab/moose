@@ -7,6 +7,8 @@
 
 [AuxVariables]
   [./min]
+    order = CONSTANT
+    family = MONOMIAL
   [../]
   [./max]
     order = CONSTANT
