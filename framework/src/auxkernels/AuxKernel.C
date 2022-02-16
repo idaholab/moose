@@ -15,6 +15,7 @@
 #include "AuxiliarySystem.h"
 #include "MooseTypes.h"
 #include "Assembly.h"
+#include "MortarNodalAuxKernel.h"
 
 #include "libmesh/numeric_vector.h"
 #include "libmesh/dof_map.h"
@@ -141,8 +142,7 @@ AuxKernelTempl<ComputeValueType>::AuxKernelTempl(const InputParameters & paramet
 
     _current_node(_assembly.node()),
     _current_boundary_id(_assembly.currentBoundaryID()),
-    _solution(_aux_sys.solution()),
-    _boundary_restricted(boundaryRestricted())
+    _solution(_aux_sys.solution())
 {
   addMooseVariableDependency(&_var);
   _supplied_vars.insert(parameters.get<AuxVariableName>("variable"));
@@ -152,7 +152,7 @@ AuxKernelTempl<ComputeValueType>::AuxKernelTempl(const InputParameters & paramet
     for (const auto & var : it.second)
       _depend_vars.insert(var->name());
 
-  if (_boundary_restricted && !isNodal() && _check_boundary_restricted)
+  if (_bnd && !isNodal() && _check_boundary_restricted)
   {
     // when the variable is elemental and this aux kernel operates on boundaries,
     // we need to check that no elements are visited more than once through visiting
@@ -325,7 +325,7 @@ AuxKernelTempl<ComputeValueType>::compute()
 
       // mass matrix is always SPD but in case of boundary restricted, it will be rank deficient
       _local_sol.resize(_n_local_dofs);
-      if (_boundary_restricted)
+      if (_bnd)
         _local_ke.svd_solve(_local_re, _local_sol);
       else
         _local_ke.cholesky_solve(_local_re, _local_sol);
@@ -394,7 +394,7 @@ AuxKernelTempl<RealEigenVector>::compute()
         for (unsigned int j = 0; j < _n_local_dofs; ++j)
           re(j) = _local_re(j)(i);
 
-        if (_boundary_restricted)
+        if (_bnd)
           _local_ke.svd_solve(re, sol);
         else
           _local_ke.cholesky_solve(re, sol);
@@ -432,6 +432,13 @@ AuxKernelTempl<ComputeValueType>::uOlder() const
                "Make sure to call uOlder() within the object constructor.");
 
   return _nodal ? _var.nodalValueOlderArray() : _var.slnOlder();
+}
+
+template <typename ComputeValueType>
+bool
+AuxKernelTempl<ComputeValueType>::isMortar()
+{
+  return dynamic_cast<MortarNodalAuxKernelTempl<ComputeValueType> *>(this) != nullptr;
 }
 
 // Explicitly instantiates the two versions of the AuxKernelTempl class

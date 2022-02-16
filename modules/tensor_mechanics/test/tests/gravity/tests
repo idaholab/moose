@@ -38,4 +38,15 @@
     issues = '#13100'
     design = 'MaterialVectorBodyForce.md'
   []
+  [block-gravity-kinetic-energy]
+    issues = '#19671'
+    design = 'KineticEnergyAux.md'
+    type = CSVDiff
+    csvdiff = 'block-gravity-kinetic-energy_out.csv'
+    input = 'block-gravity-kinetic-energy.i'
+    requirement = 'MOOSE shall provide a way to compute the system total kinetic energy through the '
+                  'use of auxiliary kernels and postprocessors. This test verifies that a body falls '
+                  'at the right acceleration under the action of gravity and that the computed '
+                  'kinetic energy matches the analytical expression.'
+  []
 []
