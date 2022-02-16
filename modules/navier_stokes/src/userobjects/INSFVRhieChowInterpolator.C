@@ -467,7 +467,8 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
   // Return if Rhie-Chow was not requested
   if (m == Moose::FV::InterpMethod::Average)
     return velocity;
-  mooseAssert((m == _velocity_interp_method) || _a_data_provided,
+  mooseAssert(((m == Moose::FV::InterpMethod::RhieChow) &&
+               (_velocity_interp_method == Moose::FV::InterpMethod::RhieChow)) || _a_data_provided,
               "The 'a' coefficients have not been generated or provided for "
               "Rhie Chow velocity interpolation.");
 
