@@ -242,7 +242,7 @@ ElementSubdomainModifier::updateBoundaryInfo(MooseMesh & mesh,
         auto top_parent = elem->top_parent();
         std::vector<const Elem *> active_family;
         top_parent->active_family_tree(active_family);
-        for (auto felem: active_family)
+        for (auto felem : active_family)
           boundary_elem_candidates.insert((Elem *)felem);
       }
       to_be_cleared.emplace_back(elem, pr.second.first);
@@ -250,7 +250,7 @@ ElementSubdomainModifier::updateBoundaryInfo(MooseMesh & mesh,
   }
 
   /* Delete the old moving boundary */
-  for (auto & elem_side: to_be_cleared)
+  for (auto & elem_side : to_be_cleared)
   {
     bnd_info.remove_side(elem_side.first, elem_side.second);
   }
@@ -277,16 +277,16 @@ ElementSubdomainModifier::updateBoundaryInfo(MooseMesh & mesh,
       }
       /* If elem's neighbor is not active, we need to check family members of the neighbor.
          In this case, the neighbor's children are on the current side and the children are
-         "smaller" than the current element. We so add the neighboring children to the moving boundary
-         list. Assigning "smaller" elements to the moving_boundary list is necessary in order to
-         correctly represent the moving boundary.
+         "smaller" than the current element. We so add the neighboring children to the moving
+         boundary list. Assigning "smaller" elements to the moving_boundary list is necessary in
+         order to correctly represent the moving boundary.
        */
       else if (neighbor && !neighbor->active() && neighbor != libMesh::remote_elem)
       {
         std::vector<const Elem *> active_family;
         auto top_parent = neighbor->top_parent();
         top_parent->active_family_tree_by_neighbor(active_family, elem);
-        for (auto felem: active_family)
+        for (auto felem : active_family)
         {
           if (felem->subdomain_id() != elem->subdomain_id())
           {
@@ -299,37 +299,37 @@ ElementSubdomainModifier::updateBoundaryInfo(MooseMesh & mesh,
     }
   }
 
-   /* Delete the corresponding nodeset as well */
-   auto & nodeset_map = bnd_info.get_nodeset_map();
-   std::vector<const Node *> nodes_to_be_cleared;
-   for (const auto & pair: nodeset_map)
-   {
-     if(pair.second == _moving_boundary_id)
-        nodes_to_be_cleared.push_back(pair.first);
-   }
+  /* Delete the corresponding nodeset as well */
+  auto & nodeset_map = bnd_info.get_nodeset_map();
+  std::vector<const Node *> nodes_to_be_cleared;
+  for (const auto & pair : nodeset_map)
+  {
+    if (pair.second == _moving_boundary_id)
+      nodes_to_be_cleared.push_back(pair.first);
+  }
 
-   for (const auto node: nodes_to_be_cleared)
-   {
-      bnd_info.remove_node(node, _moving_boundary_id);
-   }
+  for (const auto node : nodes_to_be_cleared)
+  {
+    bnd_info.remove_node(node, _moving_boundary_id);
+  }
 
-   /* Reconstruct a new nodeset from the updated sideset */
-   std::set<const Node *> boundary_nodes;
-   for (const auto & pr : elem_side_bnd_ids)
-   {
-     if (pr.second.second == _moving_boundary_id)
-     {
-       auto nodes = pr.first->nodes_on_side(pr.second.first);
-       for (auto node: nodes)
-       {
-         boundary_nodes.insert(&(pr.first->node_ref(node)));
-       }
-     }
-   }
-   for (auto bnode: boundary_nodes)
-   {
-     bnd_info.add_node(bnode, _moving_boundary_id);
-   }
+  /* Reconstruct a new nodeset from the updated sideset */
+  std::set<const Node *> boundary_nodes;
+  for (const auto & pr : elem_side_bnd_ids)
+  {
+    if (pr.second.second == _moving_boundary_id)
+    {
+      auto nodes = pr.first->nodes_on_side(pr.second.first);
+      for (auto node : nodes)
+      {
+        boundary_nodes.insert(&(pr.first->node_ref(node)));
+      }
+    }
+  }
+  for (auto bnode : boundary_nodes)
+  {
+    bnd_info.add_node(bnode, _moving_boundary_id);
+  }
 
   /* Sync all side and node set ids */
   mesh.getMesh().get_boundary_info().parallel_sync_side_ids();
