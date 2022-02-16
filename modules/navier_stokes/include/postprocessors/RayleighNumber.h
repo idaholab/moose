@@ -23,9 +23,9 @@ public:
   RayleighNumber(const InputParameters & parameters);
 
 protected:
-  virtual void initialize() override {}
-  virtual void execute() override {}
-  virtual Real getValue() override;
+  void initialize() override {}
+  void execute() override {}
+  Real getValue() override;
 
   /// Minimum density
   const PostprocessorValue * const _rho_min;

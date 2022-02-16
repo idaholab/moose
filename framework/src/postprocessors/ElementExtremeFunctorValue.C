@@ -54,6 +54,8 @@ ElementExtremeFunctorValueTempl<is_ad>::ElementExtremeFunctorValueTempl(
     _proxy_functor(isParamValid("proxy_functor") ? getFunctor<GenericReal<is_ad>>("proxy_functor")
                                                  : getFunctor<GenericReal<is_ad>>("functor"))
 {
+  if (isNodal())
+    paramError("variable", "This AuxKernel only supports Elemental fields");
 }
 
 template <bool is_ad>
@@ -80,7 +82,7 @@ ElementExtremeFunctorValueTempl<is_ad>::computeValue()
 {
   // Most element evaluations do not use skewness correction,
   // but this could become a parameter in the future
-  Moose::ElemArg elem{_current_elem, false, false};
+  Moose::ElemArg elem = makeElemArg(_current_elem);
   switch (_type)
   {
     case MAX:
