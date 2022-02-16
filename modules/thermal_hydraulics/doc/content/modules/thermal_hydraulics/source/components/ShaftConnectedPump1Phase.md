@@ -38,7 +38,7 @@ S^{\text{momentum}} = \rho_{\text{in}} \left \| \vec{g} \right \| H A_{\text{ref
 and
 
 !equation id=energy_source
-S^{\text{energy}} = -(\tau_{\text{hydraulic}} + \tau_{\text{friction}}) \omega,
+S^{\text{energy}} = - \tau_{\text{hydraulic}} \omega,
 
 
 where
@@ -48,8 +48,7 @@ where
 - $H$ is the pump head,
 - $A_{\text{ref}}$ is the cross-sectional area of the pump,
 - $\hat{n}_{out}$ is the orientation of the flow channel connected to the pump outlet,
-- $\tau_{\text{hydraulic}}$ is the hydraulic torque,
-- $\tau_{\text{friction}}$ is the friction torque, and
+- $\tau_{\text{hydraulic}}$ is the hydraulic torque, and
 - $\omega$ is the shaft speed.
 
 ### Head and hydraulic torque id=headntorque

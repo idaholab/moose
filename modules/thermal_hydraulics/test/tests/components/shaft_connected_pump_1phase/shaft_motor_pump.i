@@ -90,9 +90,9 @@ dt = 1.e-2
 
   [S_energy_fcn]
     type = ParsedFunction
-    value = '-(tau_hyd+tau_fr)*omega'
-    vars = 'tau_hyd tau_fr omega'
-    vals = 'pump:hydraulic_torque pump:friction_torque shaft:omega'
+    value = '-tau_hyd * omega'
+    vars = 'tau_hyd  omega'
+    vals = 'pump:hydraulic_torque shaft:omega'
   []
   [energy_conservation_fcn]
     type = ParsedFunction

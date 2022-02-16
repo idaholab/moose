@@ -178,7 +178,7 @@ ADShaftConnectedPump1PhaseUserObject::computeFluxesAndResiduals(const unsigned i
 
     // compute momentum and energy source terms
     // a negative torque value results in a positive S_energy
-    const ADReal S_energy = -(_hydraulic_torque + _friction_torque) * _omega[0];
+    const ADReal S_energy = -_hydraulic_torque * _omega[0];
 
     // a positive head value results in a positive S_momentum
     const ADRealVectorValue S_momentum = (_rhoA[0] / _A[0]) * _g * _pump_head * _A_ref * _di_out;
