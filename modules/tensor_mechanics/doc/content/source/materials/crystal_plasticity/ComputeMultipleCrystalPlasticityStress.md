@@ -200,18 +200,18 @@ the pull back of Cauchy stress is via the elastic part of the deformation gradie
 
 The calculation of the flow direction Schmid tensor, the dyadic product of the slip direction and slip plane normal unit vectors, $\boldsymbol{s}_{i,o}^{\alpha} \otimes \boldsymbol{m}_{i,o}^{\alpha}$, is straight forward for the case of cubic crystals, including Face Centered Cubic (FCC) and Body Centered Cubic (BCC) crystals. The 3-index Miller indices commonly used to describe the slip direction and slip plane normals are first normalized individually normalized and then directly used in the dyadic product.
 
-#### Conversion of Miller-Bravis Indices for HCP to Cartesian System
+#### Conversion of Miller-Bravais Indices for HCP to Cartesian System
 
-Hexagonal Close Packed (HCP) crystals are often described with the 4-index Miller Bravis system:
+Hexagonal Close Packed (HCP) crystals are often described with the 4-index Miller-Bravais system:
 \begin{equation}
-  \label{eqn:millerBravisHCPIndices}
+  \label{eqn:millerBravaisHCPIndices}
   (HKIL) [UVTW]
 \end{equation}
 To compute the Schmid tensor from these slip direction and slip plane normals, the indices must first be transformed to the Cartesian coordinate system. Within the associated `ComputeMultipleCrystalPlasticityStress` implementation, this conversion uses the assumption that the a$_1$-axis, or the H index, align with the x-axis in the basal plane of the HCP crystal lattice, see [xtalpl_hcp_basalplane_notation]. The c-axis, the L index, is assumed to be paralled to the z-axis of the Cartesian system.
 
 !media tensor_mechanics/crystal_plasticity/HCP_basal_plane_diagram.png
     id=xtalpl_hcp_basalplane_notation
-    caption=The convention used to transform the 4-index Miller-Bravis indices to the 3-index Cartesian system aligns the x-axis with the a$_1$-axis in the basal plane in this implementation.
+    caption=The convention used to transform the 4-index Miller-Bravais indices to the 3-index Cartesian system aligns the x-axis with the a$_1$-axis in the basal plane in this implementation.
     style=display:block;margin-left:auto;margin-right:auto;width:40%
 
 The slip plane directions are transformed to the Cartesian system with the matrix equation
@@ -269,7 +269,7 @@ The slip plane normals are similiarly transformed as
 Once transformed to the Cartesian system, these vectors are normalized and then used to compute the Schmid tensor.
 
 !alert note
-The alignment of the a$_1$ axis of the Miller-Bravis notation and the x-axis of the Cartesian system within the basal plane of the unit HCP is specifically adopted for the conversion implementation in the `ComputeMultipleCrystalPlasticityStress` associated classes. While there is broad consensus in the alignment of the HPC c-axis with the Cartesian z-axis, no standard for alignment within the basal plane is observed. Users should note this assumption in the construction of their simulations and the interpretations of the simulation results.
+The alignment of the a$_1$ axis of the Miller-Bravais notation and the x-axis of the Cartesian system within the basal plane of the unit HCP is specifically adopted for the conversion implementation in the `ComputeMultipleCrystalPlasticityStress` associated classes. While there is broad consensus in the alignment of the HPC c-axis with the Cartesian z-axis, no standard for alignment within the basal plane is clear. Users should note this assumption in the construction of their simulations and the interpretations of the simulation results.
 
 ## Calculation of Crystal Rotation
 

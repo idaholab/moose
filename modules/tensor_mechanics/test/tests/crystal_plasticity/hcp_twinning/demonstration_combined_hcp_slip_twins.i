@@ -41,35 +41,7 @@
     order = CONSTANT
     family = MONOMIAL
   []
-  [slip_increment_1]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [slip_increment_2]
-    order = CONSTANT
-    family = MONOMIAL
-  []
   [slip_increment_3]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [slip_increment_4]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [slip_increment_5]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [slip_increment_6]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [slip_increment_7]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [slip_increment_8]
     order = CONSTANT
     family = MONOMIAL
   []
@@ -77,83 +49,7 @@
     order = CONSTANT
     family = MONOMIAL
   []
-  [slip_increment_10]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [slip_increment_11]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [slip_increment_12]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [slip_increment_13]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [slip_increment_14]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [twin_volume_fraction_0]
-   order = CONSTANT
-   family = MONOMIAL
-  []
-  [twin_volume_fraction_1]
-   order = CONSTANT
-   family = MONOMIAL
-  []
-  [twin_volume_fraction_2]
-   order = CONSTANT
-   family = MONOMIAL
-  []
-  [twin_volume_fraction_3]
-   order = CONSTANT
-   family = MONOMIAL
-  []
-  [twin_volume_fraction_4]
-   order = CONSTANT
-   family = MONOMIAL
-  []
-  [twin_volume_fraction_5]
-   order = CONSTANT
-   family = MONOMIAL
-  []
-  [resolved_shear_stress_0]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [resolved_shear_stress_1]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [resolved_shear_stress_2]
-    order = CONSTANT
-    family = MONOMIAL
-  []
   [resolved_shear_stress_3]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [resolved_shear_stress_4]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [resolved_shear_stress_5]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [resolved_shear_stress_6]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [resolved_shear_stress_7]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [resolved_shear_stress_8]
     order = CONSTANT
     family = MONOMIAL
   []
@@ -161,35 +57,7 @@
     order = CONSTANT
     family = MONOMIAL
   []
-  [resolved_shear_stress_10]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [resolved_shear_stress_11]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [resolved_shear_stress_12]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [resolved_shear_stress_13]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [resolved_shear_stress_14]
-    order = CONSTANT
-    family = MONOMIAL
-  []
   [slip_resistance_0]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [slip_resistance_1]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [slip_resistance_2]
     order = CONSTANT
     family = MONOMIAL
   []
@@ -197,47 +65,7 @@
     order = CONSTANT
     family = MONOMIAL
   []
-  [slip_resistance_4]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [slip_resistance_5]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [slip_resistance_6]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [slip_resistance_7]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [slip_resistance_8]
-    order = CONSTANT
-    family = MONOMIAL
-  []
   [slip_resistance_9]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [slip_resistance_10]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [slip_resistance_11]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [slip_resistance_12]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [slip_resistance_13]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [slip_resistance_14]
     order = CONSTANT
     family = MONOMIAL
   []
@@ -245,23 +73,7 @@
     order = CONSTANT
     family = MONOMIAL
   []
-  [resolved_twin_stress_1]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [resolved_twin_stress_2]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [resolved_twin_stress_3]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [resolved_twin_stress_4]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [resolved_twin_stress_5]
+  [twin_resistance_0]
     order = CONSTANT
     family = MONOMIAL
   []
@@ -319,60 +131,11 @@
    index = 0
    execute_on = timestep_end
   []
-  [slip_increment_1]
-   type = MaterialStdVectorAux
-   variable = slip_increment_1
-   property = slip_increment
-   index = 1
-   execute_on = timestep_end
-  []
-  [slip_increment_2]
-   type = MaterialStdVectorAux
-   variable = slip_increment_2
-   property = slip_increment
-   index = 2
-   execute_on = timestep_end
-  []
   [slip_increment_3]
    type = MaterialStdVectorAux
    variable = slip_increment_3
    property = slip_increment
    index = 3
-   execute_on = timestep_end
-  []
-  [slip_increment_4]
-   type = MaterialStdVectorAux
-   variable = slip_increment_4
-   property = slip_increment
-   index = 4
-   execute_on = timestep_end
-  []
-  [slip_increment_5]
-   type = MaterialStdVectorAux
-   variable = slip_increment_5
-   property = slip_increment
-   index = 5
-   execute_on = timestep_end
-  []
-  [slip_increment_6]
-   type = MaterialStdVectorAux
-   variable = slip_increment_6
-   property = slip_increment
-   index = 6
-   execute_on = timestep_end
-  []
-  [slip_increment_7]
-   type = MaterialStdVectorAux
-   variable = slip_increment_7
-   property = slip_increment
-   index = 7
-   execute_on = timestep_end
-  []
-  [slip_increment_8]
-   type = MaterialStdVectorAux
-   variable = slip_increment_8
-   property = slip_increment
-   index = 8
    execute_on = timestep_end
   []
   [slip_increment_9]
@@ -382,144 +145,11 @@
    index = 9
    execute_on = timestep_end
   []
-  [slip_increment_10]
-   type = MaterialStdVectorAux
-   variable = slip_increment_10
-   property = slip_increment
-   index = 10
-   execute_on = timestep_end
-  []
-  [slip_increment_11]
-   type = MaterialStdVectorAux
-   variable = slip_increment_11
-   property = slip_increment
-   index = 11
-   execute_on = timestep_end
-  []
-  [slip_increment_12]
-   type = MaterialStdVectorAux
-   variable = slip_increment_12
-   property = slip_increment
-   index = 12
-   execute_on = timestep_end
-  []
-  [slip_increment_13]
-   type = MaterialStdVectorAux
-   variable = slip_increment_13
-   property = slip_increment
-   index = 13
-   execute_on = timestep_end
-  []
-  [slip_increment_14]
-   type = MaterialStdVectorAux
-   variable = slip_increment_14
-   property = slip_increment
-   index = 14
-   execute_on = timestep_end
-  []
-  [twin_volume_fraction_0]
-   type = MaterialStdVectorAux
-   variable = twin_volume_fraction_0
-   property = twin_twin_system_volume_fraction
-   index = 0
-   execute_on = timestep_end
-  []
-  [twin_volume_fraction_1]
-   type = MaterialStdVectorAux
-   variable = twin_volume_fraction_1
-   property = twin_twin_system_volume_fraction
-   index = 1
-   execute_on = timestep_end
-  []
-  [twin_volume_fraction_2]
-   type = MaterialStdVectorAux
-   variable = twin_volume_fraction_2
-   property = twin_twin_system_volume_fraction
-   index = 2
-   execute_on = timestep_end
-  []
-  [twin_volume_fraction_3]
-   type = MaterialStdVectorAux
-   variable = twin_volume_fraction_3
-   property = twin_twin_system_volume_fraction
-   index = 3
-   execute_on = timestep_end
-  []
-  [twin_volume_fraction_4]
-   type = MaterialStdVectorAux
-   variable = twin_volume_fraction_4
-   property = twin_twin_system_volume_fraction
-   index = 4
-   execute_on = timestep_end
-  []
-  [twin_volume_fraction_5]
-   type = MaterialStdVectorAux
-   variable = twin_volume_fraction_5
-   property = twin_twin_system_volume_fraction
-   index = 5
-   execute_on = timestep_end
-  []
-  [tau_0]
-    type = MaterialStdVectorAux
-    variable = resolved_shear_stress_0
-    property = applied_shear_stress
-    index = 0
-    execute_on = timestep_end
-  []
-  [tau_1]
-    type = MaterialStdVectorAux
-    variable = resolved_shear_stress_1
-    property = applied_shear_stress
-    index = 1
-    execute_on = timestep_end
-  []
-  [tau_2]
-    type = MaterialStdVectorAux
-    variable = resolved_shear_stress_2
-    property = applied_shear_stress
-    index = 2
-    execute_on = timestep_end
-  []
   [tau_3]
     type = MaterialStdVectorAux
     variable = resolved_shear_stress_3
     property = applied_shear_stress
     index = 3
-    execute_on = timestep_end
-  []
-  [tau_4]
-    type = MaterialStdVectorAux
-    variable = resolved_shear_stress_4
-    property = applied_shear_stress
-    index = 4
-    execute_on = timestep_end
-  []
-  [tau_5]
-    type = MaterialStdVectorAux
-    variable = resolved_shear_stress_5
-    property = applied_shear_stress
-    index = 5
-    execute_on = timestep_end
-  []
-  [tau_6]
-    type = MaterialStdVectorAux
-    variable = resolved_shear_stress_6
-    property = applied_shear_stress
-    index = 6
-    execute_on = timestep_end
-  []
-  [tau_7]
-    type = MaterialStdVectorAux
-    variable = resolved_shear_stress_7
-    property = applied_shear_stress
-    index = 7
-    execute_on = timestep_end
-  []
-  [tau_8]
-    type = MaterialStdVectorAux
-    variable = resolved_shear_stress_8
-    property = applied_shear_stress
-    index = 8
     execute_on = timestep_end
   []
   [tau_9]
@@ -529,60 +159,11 @@
     index = 9
     execute_on = timestep_end
   []
-  [tau_10]
-    type = MaterialStdVectorAux
-    variable = resolved_shear_stress_10
-    property = applied_shear_stress
-    index = 10
-    execute_on = timestep_end
-  []
-  [tau_11]
-    type = MaterialStdVectorAux
-    variable = resolved_shear_stress_11
-    property = applied_shear_stress
-    index = 11
-    execute_on = timestep_end
-  []
-  [tau_12]
-    type = MaterialStdVectorAux
-    variable = resolved_shear_stress_12
-    property = applied_shear_stress
-    index = 12
-    execute_on = timestep_end
-  []
-  [tau_13]
-    type = MaterialStdVectorAux
-    variable = resolved_shear_stress_13
-    property = applied_shear_stress
-    index = 13
-    execute_on = timestep_end
-  []
-  [tau_14]
-    type = MaterialStdVectorAux
-    variable = resolved_shear_stress_14
-    property = applied_shear_stress
-    index = 14
-    execute_on = timestep_end
-  []
   [slip_resistance_0]
     type = MaterialStdVectorAux
     variable = slip_resistance_0
     property = slip_resistance
     index = 0
-    execute_on = timestep_end
-  []
-  [slip_resistance_1]
-    type = MaterialStdVectorAux
-    variable = slip_resistance_1
-    property = slip_resistance
-    index = 1
-    execute_on = timestep_end
-  []
-  [slip_resistance_2]
-    type = MaterialStdVectorAux
-    variable = slip_resistance_2
-    property = slip_resistance
-    index = 2
     execute_on = timestep_end
   []
   [slip_resistance_3]
@@ -592,81 +173,11 @@
     index = 3
     execute_on = timestep_end
   []
-  [slip_resistance_4]
-    type = MaterialStdVectorAux
-    variable = slip_resistance_4
-    property = slip_resistance
-    index = 4
-    execute_on = timestep_end
-  []
-  [slip_resistance_5]
-    type = MaterialStdVectorAux
-    variable = slip_resistance_5
-    property = slip_resistance
-    index = 5
-    execute_on = timestep_end
-  []
-  [slip_resistance_6]
-    type = MaterialStdVectorAux
-    variable = slip_resistance_6
-    property = slip_resistance
-    index = 6
-    execute_on = timestep_end
-  []
-  [slip_resistance_7]
-    type = MaterialStdVectorAux
-    variable = slip_resistance_7
-    property = slip_resistance
-    index = 7
-    execute_on = timestep_end
-  []
-  [slip_resistance_8]
-    type = MaterialStdVectorAux
-    variable = slip_resistance_8
-    property = slip_resistance
-    index = 8
-    execute_on = timestep_end
-  []
   [slip_resistance_9]
     type = MaterialStdVectorAux
     variable = slip_resistance_9
     property = slip_resistance
     index = 9
-    execute_on = timestep_end
-  []
-  [slip_resistance_10]
-    type = MaterialStdVectorAux
-    variable = slip_resistance_10
-    property = slip_resistance
-    index = 10
-    execute_on = timestep_end
-  []
-  [slip_resistance_11]
-    type = MaterialStdVectorAux
-    variable = slip_resistance_11
-    property = slip_resistance
-    index = 11
-    execute_on = timestep_end
-  []
-  [slip_resistance_12]
-    type = MaterialStdVectorAux
-    variable = slip_resistance_12
-    property = slip_resistance
-    index = 12
-    execute_on = timestep_end
-  []
-  [slip_resistance_13]
-    type = MaterialStdVectorAux
-    variable = slip_resistance_13
-    property = slip_resistance
-    index = 13
-    execute_on = timestep_end
-  []
-  [slip_resistance_14]
-    type = MaterialStdVectorAux
-    variable = slip_resistance_14
-    property = slip_resistance
-    index = 14
     execute_on = timestep_end
   []
   [twin_tau_0]
@@ -676,39 +187,11 @@
     index = 0
     execute_on = timestep_end
   []
-  [twin_tau_1]
+  [twin_resistance_0]
     type = MaterialStdVectorAux
-    variable = resolved_twin_stress_1
-    property = twin_applied_shear_stress
-    index = 1
-    execute_on = timestep_end
-  []
-  [twin_tau_2]
-    type = MaterialStdVectorAux
-    variable = resolved_twin_stress_2
-    property = twin_applied_shear_stress
-    index = 2
-    execute_on = timestep_end
-  []
-  [twin_tau_3]
-    type = MaterialStdVectorAux
-    variable = resolved_twin_stress_3
-    property = twin_applied_shear_stress
-    index = 3
-    execute_on = timestep_end
-  []
-  [twin_tau_4]
-    type = MaterialStdVectorAux
-    variable = resolved_twin_stress_4
-    property = twin_applied_shear_stress
-    index = 4
-    execute_on = timestep_end
-  []
-  [twin_tau_5]
-    type = MaterialStdVectorAux
-    variable = resolved_twin_stress_5
-    property = twin_applied_shear_stress
-    index = 5
+    variable = twin_resistance_0
+    property = twin_slip_resistance
+    index = 0
     execute_on = timestep_end
   []
 []
@@ -737,7 +220,7 @@
     type = FunctionDirichletBC
     variable = disp_z
     boundary = front
-    function = '0.001*t'
+    function = '0.005*t'
   []
 []
 
@@ -787,7 +270,6 @@
     non_coplanar_coefficient_twin_hardening = 10000
     coplanar_coefficient_twin_hardening = 1000
     characteristic_twin_shear = 0.167
-    print_state_variable_convergence_error_messages = true
   []
 []
 
@@ -820,229 +302,41 @@
     type = ElementAverageValue
     variable = slip_increment_0
   []
-  [slip_increment_1]
-    type = ElementAverageValue
-    variable = slip_increment_1
-  []
-  [slip_increment_2]
-    type = ElementAverageValue
-    variable = slip_increment_2
-  []
   [slip_increment_3]
     type = ElementAverageValue
     variable = slip_increment_3
-  []
-  [slip_increment_4]
-    type = ElementAverageValue
-    variable = slip_increment_4
-  []
-  [slip_increment_5]
-    type = ElementAverageValue
-    variable = slip_increment_5
-  []
-  [slip_increment_6]
-    type = ElementAverageValue
-    variable = slip_increment_6
-  []
-  [slip_increment_7]
-    type = ElementAverageValue
-    variable = slip_increment_7
-  []
-  [slip_increment_8]
-    type = ElementAverageValue
-    variable = slip_increment_8
   []
   [slip_increment_9]
     type = ElementAverageValue
     variable = slip_increment_9
   []
-  [slip_increment_10]
-    type = ElementAverageValue
-    variable = slip_increment_10
-  []
-  [slip_increment_11]
-    type = ElementAverageValue
-    variable = slip_increment_11
-  []
-  [slip_increment_12]
-    type = ElementAverageValue
-    variable = slip_increment_12
-  []
-  [slip_increment_13]
-    type = ElementAverageValue
-    variable = slip_increment_13
-  []
-  [slip_increment_14]
-    type = ElementAverageValue
-    variable = slip_increment_14
-  []
-  [twin_volume_fraction_0]
-    type = ElementAverageValue
-    variable = twin_volume_fraction_0
-  []
-  [twin_volume_fraction_1]
-    type = ElementAverageValue
-    variable = twin_volume_fraction_1
-  []
-  [twin_volume_fraction_2]
-    type = ElementAverageValue
-    variable = twin_volume_fraction_2
-  []
-  [twin_volume_fraction_3]
-    type = ElementAverageValue
-    variable = twin_volume_fraction_3
-  []
-  [twin_volume_fraction_4]
-    type = ElementAverageValue
-    variable = twin_volume_fraction_4
-  []
-  [twin_volume_fraction_5]
-    type = ElementAverageValue
-    variable = twin_volume_fraction_5
-  []
-  [tau_0]
-    type = ElementAverageValue
-    variable = resolved_shear_stress_0
-  []
-  [tau_1]
-    type = ElementAverageValue
-    variable = resolved_shear_stress_1
-  []
-  [tau_2]
-    type = ElementAverageValue
-    variable = resolved_shear_stress_2
-  []
   [tau_3]
     type = ElementAverageValue
     variable = resolved_shear_stress_3
-  []
-  [tau_4]
-    type = ElementAverageValue
-    variable = resolved_shear_stress_4
-  []
-  [tau_5]
-    type = ElementAverageValue
-    variable = resolved_shear_stress_5
-  []
-  [tau_6]
-    type = ElementAverageValue
-    variable = resolved_shear_stress_6
-  []
-  [tau_7]
-    type = ElementAverageValue
-    variable = resolved_shear_stress_7
-  []
-  [tau_8]
-    type = ElementAverageValue
-    variable = resolved_shear_stress_8
   []
   [tau_9]
     type = ElementAverageValue
     variable = resolved_shear_stress_9
   []
-  [tau_10]
-    type = ElementAverageValue
-    variable = resolved_shear_stress_10
-  []
-  [tau_11]
-    type = ElementAverageValue
-    variable = resolved_shear_stress_11
-  []
-  [tau_12]
-    type = ElementAverageValue
-    variable = resolved_shear_stress_12
-  []
-  [tau_13]
-    type = ElementAverageValue
-    variable = resolved_shear_stress_13
-  []
-  [tau_14]
-    type = ElementAverageValue
-    variable = resolved_shear_stress_14
-  []
   [slip_resistance_0]
     type = ElementAverageValue
     variable = slip_resistance_0
-  []
-  [slip_resistance_1]
-    type = ElementAverageValue
-    variable = slip_resistance_1
-  []
-  [slip_resistance_2]
-    type = ElementAverageValue
-    variable = slip_resistance_2
   []
   [slip_resistance_3]
     type = ElementAverageValue
     variable = slip_resistance_3
   []
-  [slip_resistance_4]
-    type = ElementAverageValue
-    variable = slip_resistance_4
-  []
-  [slip_resistance_5]
-    type = ElementAverageValue
-    variable = slip_resistance_5
-  []
-  [slip_resistance_6]
-    type = ElementAverageValue
-    variable = slip_resistance_6
-  []
-  [slip_resistance_7]
-    type = ElementAverageValue
-    variable = slip_resistance_7
-  []
-  [slip_resistance_8]
-    type = ElementAverageValue
-    variable = slip_resistance_8
-  []
   [slip_resistance_9]
     type = ElementAverageValue
     variable = slip_resistance_9
-  []
-  [slip_resistance_10]
-    type = ElementAverageValue
-    variable = slip_resistance_10
-  []
-  [slip_resistance_11]
-    type = ElementAverageValue
-    variable = slip_resistance_11
-  []
-  [slip_resistance_12]
-    type = ElementAverageValue
-    variable = slip_resistance_12
-  []
-  [slip_resistance_13]
-    type = ElementAverageValue
-    variable = slip_resistance_13
-  []
-  [slip_resistance_14]
-    type = ElementAverageValue
-    variable = slip_resistance_14
   []
   [twin_tau_0]
     type = ElementAverageValue
     variable = resolved_twin_stress_0
   []
-  [twin_tau_1]
+  [twin_resistance_0]
     type = ElementAverageValue
-    variable = resolved_twin_stress_1
-  []
-  [twin_tau_2]
-    type = ElementAverageValue
-    variable = resolved_twin_stress_2
-  []
-  [twin_tau_3]
-    type = ElementAverageValue
-    variable = resolved_twin_stress_3
-  []
-  [twin_tau_4]
-    type = ElementAverageValue
-    variable = resolved_twin_stress_4
-  []
-  [twin_tau_5]
-    type = ElementAverageValue
-    variable = resolved_twin_stress_5
+    variable = twin_resistance_0
   []
 []
 
@@ -1059,14 +353,13 @@
 
   petsc_options_iname = '-pc_type -pc_asm_overlap -sub_pc_type -ksp_type -ksp_gmres_restart'
   petsc_options_value = ' asm      2              lu            gmres     200'
-  nl_abs_tol = 1e-10
-  nl_rel_tol = 1e-10
+  nl_rel_tol = 1e-12
   nl_abs_step_tol = 1e-10
 
   dt = 0.5
   dtmin = 1.0e-2
   dtmax = 10.0
-  end_time = 5
+  end_time = 2.25
 []
 
 [Outputs]

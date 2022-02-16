@@ -374,7 +374,7 @@
     type = FunctionDirichletBC
     variable = disp_z
     boundary = front
-    function = '0.001*t'
+    function = '0.01*t'
   []
 []
 
@@ -400,7 +400,6 @@
     non_coplanar_coefficient_twin_hardening = 10000
     coplanar_coefficient_twin_hardening = 1000
     characteristic_twin_shear = 0.167
-    print_state_variable_convergence_error_messages = true
   []
 []
 
@@ -547,7 +546,7 @@
   dt = 0.5
   dtmin = 1.0e-2
   dtmax = 10.0
-  end_time = 5
+  end_time = 2.5
 []
 
 [Outputs]

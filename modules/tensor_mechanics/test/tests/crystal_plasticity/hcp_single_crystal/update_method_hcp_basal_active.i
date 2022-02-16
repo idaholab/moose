@@ -17,14 +17,6 @@
   [temperature]
     initial_condition = 300
   []
-  [pk2_xx]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [pk2_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  []
   [pk2_zz]
     order = CONSTANT
     family = MONOMIAL
@@ -61,10 +53,6 @@
     order = CONSTANT
     family = MONOMIAL
   []
-  [slip_increment_2]
-    order = CONSTANT
-    family = MONOMIAL
-  []
   [resolved_shear_stress_0]
     order = CONSTANT
     family = MONOMIAL
@@ -98,22 +86,6 @@
 []
 
 [AuxKernels]
-  [pk2_xx]
-    type = RankTwoAux
-    variable = pk2_xx
-    rank_two_tensor = second_piola_kirchhoff_stress
-    index_j = 0
-    index_i = 0
-    execute_on = timestep_end
-  []
-  [pk2_yy]
-    type = RankTwoAux
-    variable = pk2_yy
-    rank_two_tensor = second_piola_kirchhoff_stress
-    index_j = 1
-    index_i = 1
-    execute_on = timestep_end
-  []
   [pk2_zz]
     type = RankTwoAux
     variable = pk2_zz
@@ -182,13 +154,6 @@
    variable = slip_increment_1
    property = slip_increment
    index = 1
-   execute_on = timestep_end
-  []
-  [slip_increment_2]
-   type = MaterialStdVectorAux
-   variable = slip_increment_2
-   property = slip_increment
-   index = 2
    execute_on = timestep_end
   []
   [tau_0]
@@ -307,14 +272,6 @@
     type = ElementAverageValue
     variable = stress_zz
   []
-  [pk2_xx]
-    type = ElementAverageValue
-    variable = pk2_xx
-  []
-  [pk2_yy]
-    type = ElementAverageValue
-    variable = pk2_yy
-  []
   [pk2_zz]
     type = ElementAverageValue
     variable = pk2_zz
@@ -350,10 +307,6 @@
   [slip_increment_1]
     type = ElementAverageValue
     variable = slip_increment_1
-  []
-  [slip_increment_2]
-    type = ElementAverageValue
-    variable = slip_increment_2
   []
   [tau_0]
     type = ElementAverageValue

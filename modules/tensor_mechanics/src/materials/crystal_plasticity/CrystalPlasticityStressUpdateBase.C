@@ -219,6 +219,7 @@ CrystalPlasticityStressUpdateBase::transformHexagonalMillerBravisSlipSystems(
 
   // set up the tranformation matrices
   RankTwoTensor transform_matrix;
+  transform_matrix.zero();
   transform_matrix(0, 0) = 1.0 / _unit_cell_dimension[0];
   transform_matrix(1, 0) = 1.0 / (_unit_cell_dimension[0] * std::sqrt(3.0));
   transform_matrix(1, 1) = 2.0 / (_unit_cell_dimension[0] * std::sqrt(3.0));
