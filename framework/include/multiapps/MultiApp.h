@@ -137,7 +137,11 @@ public:
   /**
    * Method which can be used for the reinitialization of the multiapp.
    */
-  virtual void reinitialize() {}
+  virtual void reinitialize()
+  {
+    mooseError("reinitialize() is not implemented in the base class, please override it in the "
+               "derived class!");
+  }
 
   /**
    * Gets called just before transfers are done _to_ the MultiApp

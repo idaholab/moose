@@ -1117,6 +1117,8 @@ public:
 
   /**
    * Reinitalize multiapps of a given type at a given ExecFlag.
+   * @param type The execution-flag which is used to filter MultiApps
+   * @param type_name The type of the multiapps which is used to filter MultiApps
    */
   void reinitMultiApps(ExecFlagType type, std::string type_name);
 

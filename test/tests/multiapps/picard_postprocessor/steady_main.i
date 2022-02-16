@@ -81,8 +81,6 @@
     # we keep the full postprocessor output history of the subapp
     keep_full_output_history = true
 
-    keep_full_output_history = true
-
     relaxation_factor = 0.8
     transformed_postprocessors = 'from_main'
   []
