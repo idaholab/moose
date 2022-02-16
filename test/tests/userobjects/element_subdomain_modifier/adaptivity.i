@@ -80,11 +80,13 @@
     variable = phi
   []
   [Markers/marker]
-    type = ErrorFractionMarker
+    type = BoundaryPreservedMarker
+    preserved_boundary = moving_boundary
+#    type = ErrorFractionMarker
+#    check_subdomain_consistent_for_coarsen = true
     indicator = indicator
     coarsen = 0.2
     refine = 0.5
-    check_subdomain_consistent_for_coarsen = true
   []
 []
 

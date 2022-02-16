@@ -80,7 +80,6 @@ ElementSubdomainModifier::execute()
 {
   // First, compute the desired subdomain ID for the current element.
   SubdomainID subdomain_id = computeSubdomainID();
-
   // If the current element's subdomain ID isn't what we want
   if (subdomain_id != std::numeric_limits<SubdomainID>::max() &&
       _current_elem->subdomain_id() != subdomain_id)
@@ -172,30 +171,6 @@ ElementSubdomainModifier::finalize()
 
   // Initialize stateful material properties for the newly activated elements
   _fe_problem.initElementStatefulProps(movedElemsRange());
-}
-
-void
-ElementSubdomainModifier::clearOldMovingBoundary(MooseMesh & mesh)
-{
-  std::vector<std::pair<Elem *, unsigned int>> to_be_cleared;
-  //auto & elem_side_bnd_ids = _mesh.getMesh().get_sideset_map();
-  BoundaryInfo & bnd_info = mesh.getMesh().get_boundary_info();
-  auto & elem_side_bnd_ids = bnd_info.get_sideset_map();
-  for (const auto & pr : elem_side_bnd_ids)
-  {
-    if (pr.second.second == _moving_boundary_id)
-    {
-      Elem * elem = _mesh.elemPtr(pr.first->id());
-      const Elem * neighbor = elem->neighbor_ptr(pr.second.first);
-      if (elem->subdomain_id() == neighbor->subdomain_id())
-        to_be_cleared.emplace_back(elem, pr.second.first);
-    }
-  }
-
-  for (auto & elem_side: to_be_cleared)
-  {
-    bnd_info.remove_side(elem_side.first, elem_side.second);
-  }
 }
 
 void
