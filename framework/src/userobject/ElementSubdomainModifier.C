@@ -151,10 +151,10 @@ ElementSubdomainModifier::finalize()
     updateBoundaryInfo(_displaced_problem->mesh(), _moved_displaced_elems);
   }
 
-  clearOldMovingBoundary(_mesh);
+  //clearOldMovingBoundary(_mesh);
 
-  if (_displaced_problem)
-    clearOldMovingBoundary(_displaced_problem->mesh());
+  //if (_displaced_problem)
+  //  clearOldMovingBoundary(_displaced_problem->mesh());
 
   // Reinit equation systems
   _fe_problem.meshChanged();
@@ -217,70 +217,100 @@ ElementSubdomainModifier::updateBoundaryInfo(MooseMesh & mesh,
       ghost_sides_to_remove;
   std::unordered_map<processor_id_type, std::vector<dof_id_type>> ghost_nodes_to_remove;
 
-  // The logic below updates the side set and the node set associated with the moving boundary.
-  std::set<dof_id_type> added_nodes, removed_nodes;
+  auto & elem_side_bnd_ids = bnd_info.get_sideset_map();
+  std::set<const Elem *> boundary_elem_candidates;
+  std::vector<std::pair<const Elem *, unsigned int>> to_be_cleared;
+  for (const auto & pr : elem_side_bnd_ids)
+  {
+    if (pr.second.second == _moving_boundary_id)
+    {
+      auto & elem = pr.first;
+      if (elem->active())
+        boundary_elem_candidates.insert(elem);
+      else
+      {
+        auto top_parent = elem->top_parent();
+        std::vector<const Elem *> active_family;
+        top_parent->active_family_tree(active_family);
+        for (auto felem: active_family)
+          boundary_elem_candidates.insert((Elem *)felem);
+      }
+      to_be_cleared.emplace_back(elem, pr.second.first);
+    }
+  }
+
+  for (auto & elem_side: to_be_cleared)
+  {
+    bnd_info.remove_side(elem_side.first, elem_side.second);
+  }
+
   for (auto elem : moved_elems)
+  {
+    boundary_elem_candidates.insert(elem);
+  }
+
+  for (auto elem : boundary_elem_candidates)
   {
     // First loop over all the sides of the element
     for (auto side : elem->side_index_range())
     {
       const Elem * neighbor = elem->neighbor_ptr(side);
-
-      if (neighbor && neighbor != libMesh::remote_elem)
+      if (neighbor && neighbor->active() && neighbor != libMesh::remote_elem)
       {
-        // Add all the sides to the boundary first and remove excessive sides later
-        bnd_info.add_side(elem, side, _moving_boundary_id);
-        // If this element and neighbor element are in the same subdomain, remove this side and the
-        // neighbor side from the boundary.
-        if (neighbor->subdomain_id() == elem->subdomain_id())
+        if (neighbor->subdomain_id() != elem->subdomain_id())
         {
-          bnd_info.remove_side(elem, side, _moving_boundary_id);
-          unsigned int neighbor_side = neighbor->which_neighbor_am_i(elem);
-          // nothing happens if the neighbor side does not exist in the subdomain
-          bnd_info.remove_side(neighbor, neighbor_side, _moving_boundary_id);
-          if (neighbor->processor_id() != this->processor_id())
-            ghost_sides_to_remove[neighbor->processor_id()].emplace_back(neighbor->id(),
-                                                                         neighbor_side);
+          // Add all the sides to the boundary first and remove excessive sides later
+          bnd_info.add_side(elem, side, _moving_boundary_id);
+        }
+      } else if (neighbor && !neighbor->active() && neighbor != libMesh::remote_elem)
+      {
+        std::vector<const Elem *> active_family;
+        auto top_parent = neighbor->top_parent();
+        top_parent->active_family_tree_by_neighbor(active_family, elem);
+        for (auto felem: active_family)
+        {
+          if (felem->subdomain_id() != elem->subdomain_id())
+          {
+            auto cside = felem->which_neighbor_am_i(elem);
+            // Add all the sides to the boundary first and remove excessive sides later
+            bnd_info.add_side(felem, cside, _moving_boundary_id);
+          }
         }
       }
     }
-
-    // Then loop over all the nodes of the element
-    for (auto node : elem->node_index_range())
-    {
-      // Find the point neighbors
-      std::set<const Elem *> neighbor_set;
-      elem->find_point_neighbors(elem->node_ref(node), neighbor_set);
-      for (auto neighbor : neighbor_set)
-        if (neighbor != libMesh::remote_elem)
-        {
-          // If the neighbor has a different subdomain ID, then this node should be added to
-          // the moving boundary
-          if (neighbor->subdomain_id() != elem->subdomain_id())
-            added_nodes.insert(elem->node_id(node));
-          // Otherwise remove this node from the boundary.
-          else
-          {
-            removed_nodes.insert(elem->node_id(node));
-            if (neighbor->processor_id() != this->processor_id())
-              ghost_nodes_to_remove[neighbor->processor_id()].push_back(elem->node_id(node));
-          }
-        }
-    }
   }
 
-  // make sure to remove nodes that are not in the add set
-  std::set<dof_id_type> nodes_to_remove;
-  std::set_difference(removed_nodes.begin(),
-                      removed_nodes.end(),
-                      added_nodes.begin(),
-                      added_nodes.end(),
-                      std::inserter(nodes_to_remove, nodes_to_remove.end()));
-  for (auto node_id : nodes_to_remove)
-    mesh.getMesh().get_boundary_info().remove_node(mesh.nodePtr(node_id), _moving_boundary_id);
-  // synchronize boundary information across processors
-  pushBoundarySideInfo(mesh, ghost_sides_to_remove);
-  pushBoundaryNodeInfo(mesh, ghost_nodes_to_remove);
+   auto & nodeset_map = bnd_info.get_nodeset_map();
+   std::vector<const Node *> nodes_to_be_cleared;
+   for (const auto & pair: nodeset_map)
+   {
+     if(pair.second == _moving_boundary_id)
+        nodes_to_be_cleared.push_back(pair.first);
+   }
+
+   for (const auto node: nodes_to_be_cleared)
+   {
+      bnd_info.remove_node(node, _moving_boundary_id);
+   }
+
+   std::set<const Node *> boundary_nodes;
+   for (const auto & pr : elem_side_bnd_ids)
+   {
+     if (pr.second.second == _moving_boundary_id)
+     {
+       auto nodes = pr.first->nodes_on_side(pr.second.first);
+       for (auto node: nodes)
+       {
+         boundary_nodes.insert(&(pr.first->node_ref(node)));
+       }
+     }
+   }
+
+   for (auto bnode: boundary_nodes)
+   {
+     bnd_info.add_node(bnode, _moving_boundary_id);
+   }
+
   mesh.getMesh().get_boundary_info().parallel_sync_side_ids();
   mesh.getMesh().get_boundary_info().parallel_sync_node_ids();
   mesh.update();

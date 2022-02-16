@@ -81,22 +81,13 @@ ErrorFractionMarker::markerSetup()
 bool
 ErrorFractionMarker::checkElementSubdomainConsistent(const Elem * const & _current_elem)
 {
-  auto parent = _current_elem->parent();
+  auto & elem_side_bnd_ids = _mesh.getMesh().get_boundary_info().get_sideset_map();
 
-  if (parent)
-  {
-    std::set<subdomain_id_type> subdomain_ids;
-    for (auto & c : parent->child_ref_range())
-    {
-      subdomain_ids.insert(c.subdomain_id());
-    }
-    if (subdomain_ids.size() > 1)
+  for (const auto & pr : as_range(elem_side_bnd_ids.equal_range(_current_elem)))
+    if (pr.second.second == 4)
       return false;
-    else
-      return true;
-  }
-  else
-    return true; // Level-0 element will be fine
+
+  return true;
 }
 
 Marker::MarkerValue
