@@ -155,8 +155,8 @@ ComputeMortarFunctor::operator()(const Moose::ComputeType compute_type)
   }
 
   // Make sure any remaining cached residuals/Jacobians get added
-  if (!_fe_problem.currentlyComputingJacobian())
+  if (_assembly.computingResidual())
     _assembly.addCachedResiduals();
-  else
+  if (_assembly.computingJacobian())
     _assembly.addCachedJacobian();
 }

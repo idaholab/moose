@@ -48,6 +48,7 @@ SubProblem::SubProblem(const InputParameters & parameters)
     _requires_nonlocal_coupling(false),
     _default_ghosting(getParam<bool>("default_ghosting")),
     _currently_computing_jacobian(false),
+    _currently_computing_residual_and_jacobian(false),
     _computing_nonlinear_residual(false),
     _currently_computing_residual(false),
     _safe_access_tagged_matrices(false),

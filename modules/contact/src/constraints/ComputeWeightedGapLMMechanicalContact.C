@@ -299,10 +299,5 @@ ComputeWeightedGapLMMechanicalContact::enforceConstraintOnDof(const DofObject * 
 
   const ADReal dof_residual = std::min(lm_value, weighted_gap * c);
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-  if (_subproblem.currentlyComputingJacobian())
-    _assembly.processUnconstrainedDerivatives({dof_residual}, {dof_index}, _matrix_tags);
-  else
-    _assembly.processResidual(dof_residual.value(), dof_index, _vector_tags);
-#endif
+  _assembly.processResidual(dof_residual, dof_index, _vector_tags, _matrix_tags);
 }

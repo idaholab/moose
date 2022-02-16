@@ -52,9 +52,7 @@ FVScalarLagrangeMultiplierInterface::computeResidual(const FaceInfo & fi)
 }
 
 void
-FVScalarLagrangeMultiplierInterface::computeResidual(const FaceInfo & fi,
-                                                     const std::set<TagID> & vector_tags,
-                                                     const std::set<TagID> & matrix_tags)
+FVScalarLagrangeMultiplierInterface::computeJacobian(const FaceInfo & fi)
 {
   setupData(fi);
 
@@ -66,11 +64,11 @@ FVScalarLagrangeMultiplierInterface::computeResidual(const FaceInfo & fi,
 
   // Primal
   const auto primal_r = _lambda[0] * fi.faceArea() * fi.faceCoord() * (2 * _elem_is_one - 1);
-  _assembly.processResidual(primal_r, elem_dof_indices[0], vector_tags, matrix_tags);
-  _assembly.processResidual(-primal_r, neigh_dof_indices[0], vector_tags, matrix_tags);
+  _assembly.processResidual(primal_r, elem_dof_indices[0], _vector_tags, _matrix_tags);
+  _assembly.processResidual(-primal_r, neigh_dof_indices[0], _vector_tags, _matrix_tags);
 
   // LM
   const auto lm_r = computeQpResidual() * fi.faceArea() * fi.faceCoord();
   mooseAssert(_lambda_var.dofIndices().size() == 1, "We should only have one dof");
-  _assembly.processResidual(lm_r, _lambda_var.dofIndices()[0], vector_tags, matrix_tags);
+  _assembly.processResidual(lm_r, _lambda_var.dofIndices()[0], _vector_tags, _matrix_tags);
 }

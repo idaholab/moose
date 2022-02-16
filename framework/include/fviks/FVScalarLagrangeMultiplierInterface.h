@@ -18,15 +18,9 @@ public:
   FVScalarLagrangeMultiplierInterface(const InputParameters & params);
 
   void computeResidual(const FaceInfo & fi) override final;
+  void computeJacobian(const FaceInfo & fi) override final;
 
 protected:
-  /**
-   * compute the AD residuals and feed the results into the supplied vector and matrix tags
-   */
-  void computeResidual(const FaceInfo & fi,
-                       const std::set<TagID> & vector_tags,
-                       const std::set<TagID> & matrix_tags) override final;
-
   ADReal computeQpResidual() override = 0;
 
   /// The Lagrange Multiplier variable

@@ -363,19 +363,8 @@ ComputeDynamicFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(
     dof_residual_dir = term_1_y - term_2_y;
   }
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-  if (_subproblem.currentlyComputingJacobian())
-  {
-    _assembly.processUnconstrainedDerivatives({dof_residual, dof_residual_dir},
-                                              {friction_dof_indices[0], friction_dof_indices[1]},
-                                              _matrix_tags);
-  }
-  else
-  {
-    _assembly.processResidual(dof_residual.value(), friction_dof_indices[0], _vector_tags);
-    _assembly.processResidual(dof_residual_dir.value(), friction_dof_indices[1], _vector_tags);
-  }
-#endif
+  _assembly.processResidual(dof_residual, friction_dof_indices[0], _vector_tags, _matrix_tags);
+  _assembly.processResidual(dof_residual_dir, friction_dof_indices[1], _vector_tags, _matrix_tags);
 }
 
 void
@@ -419,12 +408,7 @@ ComputeDynamicFrictionalForceLMMechanicalContact::enforceConstraintOnDof(
     dof_residual = term_1 - term_2;
   }
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-  if (_subproblem.currentlyComputingJacobian())
-    _assembly.processUnconstrainedDerivatives({dof_residual}, {friction_dof_index}, _matrix_tags);
-  else
-    _assembly.processResidual(dof_residual.value(), friction_dof_index, _vector_tags);
-#endif
+  _assembly.processResidual(dof_residual, friction_dof_index, _vector_tags, _matrix_tags);
 }
 
 ADReal

@@ -43,13 +43,6 @@ public:
   const MooseVariableFV<Real> & variable() const { return _var; }
 
 protected:
-  /**
-   * compute the AD residuals and feed the results into the supplied vector and matrix tags
-   */
-  void computeResidual(const FaceInfo & fi,
-                       const std::set<TagID> & vector_tags,
-                       const std::set<TagID> & matrix_tags);
-
   /// This is the primary function that must be implemented for flux kernel
   /// terms.  Material properties will be initialized on the face - using any
   /// reconstructed fv variable gradients if any.  Values for the solution are

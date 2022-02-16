@@ -170,11 +170,6 @@ MortarConstraintBase::zeroInactiveLMDofs(const std::unordered_set<const Node *> 
   const auto sn = _sys.number();
   const auto vn = _var->number();
 
-  if (_subproblem.currentlyComputingJacobian())
-    prepareMatrixTagLower(_assembly, vn, vn, Moose::ConstraintJacobianType::LowerLower);
-  else
-    prepareVectorTagLower(_assembly, vn);
-
   // If variable is nodal, zero DoFs based on inactive LM nodes
   if (_var->isNodal())
   {
@@ -185,9 +180,10 @@ MortarConstraintBase::zeroInactiveLMDofs(const std::unordered_set<const Node *> 
         continue;
 
       const auto dof_index = node->dof_number(sn, vn, 0);
-      if (_subproblem.currentlyComputingJacobian())
+      if (_subproblem.currentlyComputingJacobian() ||
+          _subproblem.currentlyComputingResidualAndJacobian())
         _assembly.cacheJacobian(dof_index, dof_index, 1., _matrix_tags);
-      else
+      if (!_subproblem.currentlyComputingJacobian())
       {
         Real lm_value = _var->getNodalValue(*node);
         _assembly.cacheResidual(dof_index, lm_value, _vector_tags);
@@ -204,10 +200,9 @@ MortarConstraintBase::zeroInactiveLMDofs(const std::unordered_set<const Node *> 
       for (const auto comp : make_range(n_comp))
       {
         const auto dof_index = el->dof_number(sn, vn, comp);
-        // Insert to system
-        if (_subproblem.currentlyComputingJacobian())
+        if (_assembly.computingJacobian())
           _assembly.cacheJacobian(dof_index, dof_index, 1., _matrix_tags);
-        else
+        if (_assembly.computingResidual())
         {
           const Real lm_value = _var->getElementalValue(el, comp);
           _assembly.cacheResidual(dof_index, lm_value, _vector_tags);

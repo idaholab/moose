@@ -194,13 +194,11 @@ FVInterfaceKernel::computeResidual(const FaceInfo & fi)
 void
 FVInterfaceKernel::computeResidualAndJacobian(const FaceInfo & fi)
 {
-  computeResidual(fi, _vector_tags, _matrix_tags);
+  computeJacobian(fi);
 }
 
 void
-FVInterfaceKernel::computeResidual(const FaceInfo & fi,
-                                   const std::set<TagID> & vector_tags,
-                                   const std::set<TagID> & matrix_tags)
+FVInterfaceKernel::computeJacobian(const FaceInfo & fi)
 {
   setupData(fi);
 
@@ -212,14 +210,8 @@ FVInterfaceKernel::computeResidual(const FaceInfo & fi,
 
   const auto r = fi.faceArea() * fi.faceCoord() * computeQpResidual();
 
-  _assembly.processResidual(r, elem_dof_indices[0], vector_tags, matrix_tags);
-  _assembly.processResidual(-r, neigh_dof_indices[0], vector_tags, matrix_tags);
-}
-
-void
-FVInterfaceKernel::computeJacobian(const FaceInfo & fi)
-{
-  computeResidual(fi, {}, _matrix_tags);
+  _assembly.processResidual(r, elem_dof_indices[0], _vector_tags, _matrix_tags);
+  _assembly.processResidual(-r, neigh_dof_indices[0], _vector_tags, _matrix_tags);
 }
 
 Moose::ElemFromFaceArg

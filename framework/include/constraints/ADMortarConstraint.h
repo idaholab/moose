@@ -55,13 +55,6 @@ protected:
 #endif
   void computeResidualAndJacobian() override;
 
-  /**
-   * compute the AD residuals and feed the results into the supplied vector and matrix tags
-   */
-  void computeResidual(Moose::MortarType mortar_type,
-                       const std::set<TagID> & vector_tags,
-                       const std::set<TagID> & matrix_tags);
-
 private:
   /// A dummy object useful for constructing _lambda when not using Lagrange multipliers
   const ADVariableValue _lambda_dummy;

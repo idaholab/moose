@@ -218,9 +218,7 @@ FVFluxKernel::computeJacobian(Moose::DGJacobianType type, const ADReal & residua
 }
 
 void
-FVFluxKernel::computeResidual(const FaceInfo & fi,
-                              const std::set<TagID> & vector_tags,
-                              const std::set<TagID> & matrix_tags)
+FVFluxKernel::computeJacobian(const FaceInfo & fi)
 {
   if (skipForBoundary(fi))
     return;
@@ -244,6 +242,9 @@ FVFluxKernel::computeResidual(const FaceInfo & fi,
   {
     mooseAssert(_var.dofIndices().size() == 1, "We're currently built to use CONSTANT MONOMIALS");
 
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+    _assembly.processResidual(r, _var.dofIndices()[0], _vector_tags, _matrix_tags);
+#else
     auto element_functor = [&](const ADReal & residual, dof_id_type, const std::set<TagID> &)
     {
       // jacobian contribution of the residual for the elem element to the elem element's DOF:
@@ -264,11 +265,7 @@ FVFluxKernel::computeResidual(const FaceInfo & fi,
         // d/d_neighbor (residual_elem)
         computeJacobian(Moose::ElementNeighbor, residual);
     };
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-    _assembly.processResidual(r, _var.dofIndices()[0], vector_tags, matrix_tags);
-#else
-    mooseAssert(vector_tags.empty(), "We don't support residual processing here for non-global");
-    _assembly.processDerivatives(r, _var.dofIndices()[0], matrix_tags, element_functor);
+    _assembly.processDerivatives(r, _var.dofIndices()[0], _matrix_tags, element_functor);
 #endif
   }
 
@@ -288,6 +285,9 @@ FVFluxKernel::computeResidual(const FaceInfo & fi,
     mooseAssert(_var.dofIndicesNeighbor().size() == 1,
                 "We're currently built to use CONSTANT MONOMIALS");
 
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+    _assembly.processResidual(neighbor_r, _var.dofIndicesNeighbor()[0], _vector_tags, _matrix_tags);
+#else
     auto neighbor_functor = [&](const ADReal & residual, dof_id_type, const std::set<TagID> &)
     {
       // only add residual to elem if the variable is defined there.
@@ -301,26 +301,19 @@ FVFluxKernel::computeResidual(const FaceInfo & fi,
       computeJacobian(Moose::NeighborNeighbor, residual);
     };
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-    _assembly.processResidual(neighbor_r, _var.dofIndicesNeighbor()[0], vector_tags, matrix_tags);
-#else
-    mooseAssert(vector_tags.empty(), "We don't support residual processing here for non-global");
     _assembly.processDerivatives(
-        neighbor_r, _var.dofIndicesNeighbor()[0], matrix_tags, neighbor_functor);
+        neighbor_r, _var.dofIndicesNeighbor()[0], _matrix_tags, neighbor_functor);
 #endif
   }
 }
 
 void
-FVFluxKernel::computeJacobian(const FaceInfo & fi)
-{
-  computeResidual(fi, {}, _matrix_tags);
-}
-
-void
 FVFluxKernel::computeResidualAndJacobian(const FaceInfo & fi)
 {
-  computeResidual(fi, _vector_tags, _matrix_tags);
+#ifndef MOOSE_GLOBAL_AD_INDEXING
+  mooseError("computeResidualAndJacobian not supported for ", name());
+#endif
+  computeJacobian(fi);
 }
 
 ADReal

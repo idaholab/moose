@@ -1770,6 +1770,16 @@ public:
    */
   void modifyArbitraryWeights(const std::vector<Real> & weights);
 
+  /**
+   * @return whether we are computing a residual
+   */
+  bool computingResidual() const { return !_computing_jacobian; }
+
+  /**
+   * @return whether we are computing a Jacobian
+   */
+  bool computingJacobian() const { return _computing_jacobian || _computing_residual_and_jacobian; }
+
 protected:
   /**
    * Just an internal helper function to reinit the volume FE objects.
@@ -2081,7 +2091,11 @@ private:
   const CouplingMatrix * _cm;
   const CouplingMatrix & _nonlocal_cm;
 
+  /// Whether we are currently computing the Jacobian
   const bool & _computing_jacobian;
+
+  /// Whether we are currently computing the residual and Jacobian
+  const bool & _computing_residual_and_jacobian;
 
   /// Entries in the coupling matrix for field variables
   std::vector<std::pair<MooseVariableFieldBase *, MooseVariableFieldBase *>> _cm_ff_entry;

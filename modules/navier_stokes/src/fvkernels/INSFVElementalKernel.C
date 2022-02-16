@@ -25,8 +25,5 @@ INSFVElementalKernel::INSFVElementalKernel(const InputParameters & params)
 void
 INSFVElementalKernel::processResidual(const ADReal & residual, const dof_id_type dof_index)
 {
-  if (_subproblem.currentlyComputingJacobian())
-    _assembly.processDerivatives(residual, dof_index, _matrix_tags);
-  else
-    _assembly.processResidual(residual.value(), dof_index, _vector_tags);
+  _assembly.processResidual(residual, dof_index, _vector_tags, _matrix_tags);
 }

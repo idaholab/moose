@@ -626,6 +626,16 @@ public:
   }
 
   /**
+   * Returns true if the problem is in the process of computing the residual and the Jacobian
+   */
+  const bool & currentlyComputingResidualAndJacobian() const;
+
+  /**
+   * Set whether or not the problem is in the process of computing the Jacobian
+   */
+  void setCurrentlyComputingResidualAndJacobian(bool currently_computing_residual_and_jacobian);
+
+  /**
    * Returns true if the problem is in the process of computing the nonlinear residual
    */
   bool computingNonlinearResid() const { return _computing_nonlinear_residual; }
@@ -904,6 +914,9 @@ protected:
   /// Flag to determine whether the problem is currently computing Jacobian
   bool _currently_computing_jacobian;
 
+  /// Flag to determine whether the problem is currently computing the residual and Jacobian
+  bool _currently_computing_residual_and_jacobian;
+
   /// Whether the non-linear residual is being evaluated
   bool _computing_nonlinear_residual;
 
@@ -1072,6 +1085,19 @@ SubProblem::addFunctor(const std::string & name,
 
   auto new_wrapper = std::make_unique<Moose::Functor<T>>(functor);
   _functors[tid].emplace(std::make_pair("wraps_" + name, std::move(new_wrapper)));
+}
+
+inline const bool &
+SubProblem::currentlyComputingResidualAndJacobian() const
+{
+  return _currently_computing_residual_and_jacobian;
+}
+
+inline void
+SubProblem::setCurrentlyComputingResidualAndJacobian(
+    const bool currently_computing_residual_and_jacobian)
+{
+  _currently_computing_residual_and_jacobian = currently_computing_residual_and_jacobian;
 }
 
 namespace Moose

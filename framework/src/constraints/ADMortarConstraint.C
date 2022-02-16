@@ -65,9 +65,7 @@ ADMortarConstraint::computeResidual(Moose::MortarType mortar_type)
 }
 
 void
-ADMortarConstraint::computeResidual(Moose::MortarType mortar_type,
-                                    const std::set<TagID> & vector_tags,
-                                    const std::set<TagID> & matrix_tags)
+ADMortarConstraint::computeJacobian(Moose::MortarType mortar_type)
 {
   std::vector<DualReal> residuals;
   std::size_t test_space_size = 0;
@@ -102,10 +100,8 @@ ADMortarConstraint::computeResidual(Moose::MortarType mortar_type,
       residuals[_i] += _JxW_msm[_qp] * _coord[_qp] * computeQpResidual(mortar_type);
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
-  _assembly.processUnconstrainedResiduals(residuals, dof_indices, vector_tags, matrix_tags);
+  _assembly.processUnconstrainedResiduals(residuals, dof_indices, _vector_tags, _matrix_tags);
 #else
-  mooseAssert(vector_tags.empty(), "For local AD indexing, we cannot use the processResiduals API");
-
   auto local_functor = [&](const std::vector<ADReal> & input_residuals,
                            const std::vector<dof_id_type> &,
                            const std::set<TagID> &)
@@ -174,6 +170,8 @@ ADMortarConstraint::computeResidual(Moose::MortarType mortar_type,
       }
     }
   };
+
+  _assembly.processDerivatives(residuals, dof_indices, _matrix_tags, local_functor);
 #endif
 }
 
@@ -204,27 +202,10 @@ ADMortarConstraint::trimDerivative(const dof_id_type remove_derivative_index, AD
 #endif
 
 void
-ADMortarConstraint::computeJacobian(Moose::MortarType mortar_type)
-{
-  computeResidual(mortar_type, {}, _matrix_tags);
-}
-
-void
 ADMortarConstraint::computeResidualAndJacobian()
 {
-  setNormals();
-
-  if (_compute_primal_residuals)
-  {
-    // Compute the residual/jacobian for the secondary interior primal dofs
-    computeResidual(Moose::MortarType::Secondary, _vector_tags, _matrix_tags);
-
-    // Compute the residual/jacobian for the primary interior primal dofs.
-    computeResidual(Moose::MortarType::Primary, _vector_tags, _matrix_tags);
-  }
-
-  if (_compute_lm_residuals)
-    // Compute the residual/jacobian for the lower dimensional LM dofs (if we even have an LM
-    // variable)
-    computeResidual(Moose::MortarType::Lower, _vector_tags, _matrix_tags);
+#ifndef MOOSE_GLOBAL_AD_INDEXING
+  mooseError("computeResidualAndJacobian not supported for ", name());
+#endif
+  computeJacobian();
 }

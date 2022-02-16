@@ -3785,12 +3785,6 @@ FEProblemBase::execute(const ExecFlagType & exec_type)
 {
   // Set the current flag
   setCurrentExecuteOnFlag(exec_type);
-  if (exec_type == EXEC_NONLINEAR)
-  {
-    _currently_computing_jacobian = true;
-    if (_displaced_problem)
-      _displaced_problem->setCurrentlyComputingJacobian(true);
-  }
 
   if (exec_type != EXEC_INITIAL)
     executeControls(exec_type);
@@ -3814,9 +3808,6 @@ FEProblemBase::execute(const ExecFlagType & exec_type)
 
   // Return the current flag to None
   setCurrentExecuteOnFlag(EXEC_NONE);
-  _currently_computing_jacobian = false;
-  if (_displaced_problem)
-    _displaced_problem->setCurrentlyComputingJacobian(false);
 }
 
 void
@@ -5549,6 +5540,10 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
     for (const auto & it : _random_data_objects)
       it.second->updateSeeds(EXEC_LINEAR);
 
+    _currently_computing_residual_and_jacobian = true;
+    if (_displaced_problem)
+      _displaced_problem->setCurrentlyComputingResidualAndJacobian(true);
+
     execTransfers(EXEC_LINEAR);
 
     execMultiApps(EXEC_LINEAR);
@@ -5635,6 +5630,10 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
 
     _nl->disassociateMatrixFromTag(jacobian, _nl->systemMatrixTag());
     _nl->disassociateVectorFromTag(residual, _nl->residualVectorTag());
+
+    _currently_computing_residual_and_jacobian = false;
+    if (_displaced_problem)
+      _displaced_problem->setCurrentlyComputingResidualAndJacobian(false);
   }
   catch (MooseException & e)
   {

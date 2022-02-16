@@ -71,6 +71,7 @@ Assembly::Assembly(SystemBase & sys, THREAD_ID tid)
     _displaced(dynamic_cast<DisplacedSystem *>(&sys) ? true : false),
     _nonlocal_cm(_subproblem.nonlocalCouplingMatrix()),
     _computing_jacobian(_subproblem.currentlyComputingJacobian()),
+    _computing_residual_and_jacobian(_subproblem.currentlyComputingResidualAndJacobian()),
     _dof_map(_sys.dofMap()),
     _tid(tid),
     _mesh(sys.mesh()),
@@ -991,7 +992,7 @@ Assembly::computeAffineMapAD(const Elem * elem,
         const Node & node = *elem_nodes[i];
         VectorValue<DualReal> elem_point = node;
         unsigned dimension = 0;
-        if (_computing_jacobian)
+        if (computingJacobian())
           for (const auto & disp_num : _displacements)
             if (node.n_dofs(sys_num, disp_num))
               Moose::derivInsert(elem_point(dimension++).derivatives(),
@@ -1110,7 +1111,7 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
         const Node & node = *elem_nodes[i];
         libMesh::VectorValue<DualReal> elem_point = node;
         unsigned dimension = 0;
-        if (_computing_jacobian)
+        if (computingJacobian())
           for (const auto & disp_num : _displacements)
             if (node.n_dofs(sys_num, disp_num))
               Moose::derivInsert(elem_point(dimension++).derivatives(),
@@ -1167,7 +1168,7 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
         const Node & node = *elem_nodes[i];
         libMesh::VectorValue<DualReal> elem_point = node;
         unsigned dimension = 0;
-        if (_computing_jacobian)
+        if (computingJacobian())
           for (const auto & disp_num : _displacements)
             Moose::derivInsert(elem_point(dimension++).derivatives(),
 #ifdef MOOSE_GLOBAL_AD_INDEXING
@@ -1250,7 +1251,7 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
         const Node & node = *elem_nodes[i];
         libMesh::VectorValue<DualReal> elem_point = node;
         unsigned dimension = 0;
-        if (_computing_jacobian)
+        if (computingJacobian())
           for (const auto & disp_num : _displacements)
             Moose::derivInsert(elem_point(dimension++).derivatives(),
 #ifdef MOOSE_GLOBAL_AD_INDEXING
@@ -1440,7 +1441,7 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
 #endif
 
         unsigned dimension = 0;
-        if (_computing_jacobian)
+        if (computingJacobian())
           for (const auto & disp_num : _displacements)
             Moose::derivInsert(side_point(dimension++).derivatives(),
 #ifdef MOOSE_GLOBAL_AD_INDEXING
@@ -1494,7 +1495,7 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
 #endif
 
         unsigned dimension = 0;
-        if (_computing_jacobian)
+        if (computingJacobian())
           for (const auto & disp_num : _displacements)
             Moose::derivInsert(side_point(dimension++).derivatives(),
 #ifdef MOOSE_GLOBAL_AD_INDEXING
@@ -1570,7 +1571,7 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
 #endif
 
         unsigned dimension = 0;
-        if (_computing_jacobian)
+        if (computingJacobian())
           for (const auto & disp_num : _displacements)
             Moose::derivInsert(side_point(dimension++).derivatives(),
 #ifdef MOOSE_GLOBAL_AD_INDEXING
@@ -3460,8 +3461,14 @@ Assembly::processResidual(const ADReal & residual,
                           const std::set<TagID> & vector_tags,
                           const std::set<TagID> & matrix_tags)
 {
-  processResidual(MetaPhysicL::raw_value(residual), row_index, vector_tags);
-  processDerivatives(residual, row_index, matrix_tags);
+  mooseAssert(!(_computing_jacobian && _computing_residual_and_jacobian),
+              "These should never be true at the same time");
+
+  if (computingResidual())
+    processResidual(MetaPhysicL::raw_value(residual), row_index, vector_tags);
+
+  if (computingJacobian())
+    processDerivatives(residual, row_index, matrix_tags);
 }
 
 void
@@ -4658,11 +4665,11 @@ Assembly::processUnconstrainedResiduals(const std::vector<ADReal> & residuals,
     scaling_factors[i] = _scaling_vector ? (*_scaling_vector)(row_indices[i]) : 1.;
 
   // First handle the residuals
-  if (!vector_tags.empty())
+  if (computingResidual() && !vector_tags.empty())
     for (const auto i : index_range(row_indices))
       cacheResidual(row_indices[i], residuals[i].value() * scaling_factors[i], vector_tags);
 
-  if (!matrix_tags.empty())
+  if (computingJacobian() && !matrix_tags.empty())
     for (const auto i : index_range(row_indices))
     {
       const auto row_index = row_indices[i];
@@ -4862,7 +4869,7 @@ Assembly::processResiduals(const std::vector<ADReal> & residuals,
     scaling_factors[i] = _scaling_vector ? (*_scaling_vector)(input_row_indices[i]) : 1.;
 
   // First handle the residuals
-  if (!vector_tags.empty())
+  if (computingResidual() && !vector_tags.empty())
   {
     // Need to make a copy because we might modify this in constrain_element_vector
     std::vector<dof_id_type> row_indices = input_row_indices;
@@ -4899,7 +4906,7 @@ Assembly::processResiduals(const std::vector<ADReal> & residuals,
 
   // If there's no derivatives then there is nothing to do. Moreover, if we pass zero size column
   // indices to constrain_element_matrix then we will potentially get errors out of BLAS
-  if (!column_indices.size() || matrix_tags.empty())
+  if (!column_indices.size() || !computingJacobian() || matrix_tags.empty())
     return;
 
   // Now the Jacobian

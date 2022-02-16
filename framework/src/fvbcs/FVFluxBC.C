@@ -84,7 +84,10 @@ FVFluxBC::computeResidual(const FaceInfo & fi)
 void
 FVFluxBC::computeResidualAndJacobian(const FaceInfo & fi)
 {
-  computeResidual(fi, _vector_tags, _matrix_tags);
+#ifndef MOOSE_GLOBAL_AD_INDEXING
+  mooseError("computeResidualAndJacobian not supported for ", name());
+#endif
+  computeJacobian(fi);
 }
 
 void
@@ -143,9 +146,7 @@ FVFluxBC::computeJacobian(Moose::DGJacobianType type, const ADReal & residual)
 }
 
 void
-FVFluxBC::computeResidual(const FaceInfo & fi,
-                          const std::set<TagID> & vector_tags,
-                          const std::set<TagID> & matrix_tags)
+FVFluxBC::computeJacobian(const FaceInfo & fi)
 {
   _face_info = &fi;
   _normal = fi.normal();
@@ -170,7 +171,7 @@ FVFluxBC::computeResidual(const FaceInfo & fi,
   mooseAssert(dof_indices.size() == 1, "We're currently built to use CONSTANT MONOMIALS");
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
-  _assembly.processResidual(r, dof_indices[0], vector_tags, matrix_tags);
+  _assembly.processResidual(r, dof_indices[0], _vector_tags, _matrix_tags);
 #else
 
   auto local_functor = [&](const ADReal & residual, dof_id_type, const std::set<TagID> &)
@@ -199,12 +200,6 @@ FVFluxBC::computeResidual(const FaceInfo & fi,
 
   _assembly.processDerivatives(r, dof_indices[0], _matrix_tags, local_functor);
 #endif
-}
-
-void
-FVFluxBC::computeJacobian(const FaceInfo & fi)
-{
-  computeResidual(fi, {}, _matrix_tags);
 }
 
 const ADReal &
