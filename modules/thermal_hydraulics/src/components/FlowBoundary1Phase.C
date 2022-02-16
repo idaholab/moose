@@ -46,7 +46,7 @@ FlowBoundary1Phase::setupMesh()
 
     // create a nodeset/sideset corresponding to the node of the connected pipe end
     const BoundaryID boundary_id = _mesh.getNextBoundaryId();
-    _mesh.getMesh().boundary_info->add_node(_node, boundary_id);
+    _mesh.getMesh().get_boundary_info().add_node(_node, boundary_id);
     _mesh.setBoundaryName(boundary_id, name());
   }
 }
