@@ -1,0 +1,16 @@
+Complex multidimensional interactions inside the junction cannot be practically
+modeled mechanistically but are instead approximated using a form loss factor
+$K$, which gives rise to source terms on the momentum and energy equations:
+
+!equation id=formloss_momentum
+\mathbf{S}^{\text{momentum}} = - K (p_{0,1} - p_1) A_\text{ref} \frac{\mathbf{u}_1}{\|\mathbf{u}_1\|} \eqc
+
+!equation id=formloss_energy
+S^{\text{energy}} = - K (p_{0,1} - p_1) A_\text{ref} \|\mathbf{u}_1\| \eqc
+
+where
+
+- $p_{0,1}$ is the stagnation pressure of the first flow channel (see [#usage]),
+- $p_1$ is the static pressure of the first flow channel,
+- $A_\text{ref}$ is the reference cross-sectional area, and
+- $\mathbf{u}_1$ is the velocity in the first connected flow channel.
