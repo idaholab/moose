@@ -180,6 +180,8 @@ HeatStructureFromFile3D::buildMesh()
     new_ids_to_names.emplace(bc_id, sideset_name);
   }
 
+  auto & boundary_info = _mesh.getMesh().get_boundary_info();
+
   for (auto e : index_range(exio_helper.elem_list))
   {
     int ex_elem_id = exio_helper.elem_num_map[exio_helper.elem_list[e] - 1];
@@ -192,7 +194,7 @@ HeatStructureFromFile3D::buildMesh()
     unsigned int side_index = static_cast<unsigned int>(raw_side_index - side_index_offset);
     int mapped_side = conv.get_side_map(side_index);
     unsigned int bc_id = thm_bc_id_map[exio_helper.id_list[e]];
-    _mesh.getMesh().boundary_info->add_side(elem, mapped_side, bc_id);
+    boundary_info.add_side(elem, mapped_side, bc_id);
   }
   for (const auto & pr : new_ids_to_names)
     _mesh.setBoundaryName(pr.first, genName(_name, pr.second));
