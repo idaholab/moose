@@ -270,5 +270,5 @@ ComputeWeightedGapLMMechanicalContact::enforceConstraintOnDof(const DofObject * 
   if (_subproblem.currentlyComputingJacobian())
     _assembly.processDerivatives(dof_residual, dof_index, _matrix_tags);
   else
-    _assembly.cacheResidual(dof_index, dof_residual.value(), _vector_tags);
+    _assembly.processResidual(dof_residual.value(), dof_index, _vector_tags);
 }

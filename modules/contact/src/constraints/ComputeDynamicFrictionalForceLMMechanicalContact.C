@@ -323,8 +323,8 @@ ComputeDynamicFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(
   }
   else
   {
-    _assembly.cacheResidual(friction_dof_indices[0], dof_residual.value(), _vector_tags);
-    _assembly.cacheResidual(friction_dof_indices[1], dof_residual_dir.value(), _vector_tags);
+    _assembly.processResidual(dof_residual.value(), friction_dof_indices[0], _vector_tags);
+    _assembly.processResidual(dof_residual_dir.value(), friction_dof_indices[1], _vector_tags);
   }
 }
 
@@ -367,5 +367,5 @@ ComputeDynamicFrictionalForceLMMechanicalContact::enforceConstraintOnDof(
   if (_subproblem.currentlyComputingJacobian())
     _assembly.processDerivatives(dof_residual, friction_dof_index, _matrix_tags);
   else
-    _assembly.cacheResidual(friction_dof_index, dof_residual.value(), _vector_tags);
+    _assembly.processResidual(dof_residual.value(), friction_dof_index, _vector_tags);
 }
