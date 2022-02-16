@@ -90,9 +90,6 @@ private:
   // Change the subdomain ID of all ancestor elements
   void setAncestorsSubdomainIDs(const SubdomainID & subdomain_id, const dof_id_type & elem_id);
 
-  // Clear old moving boundaries
-  void clearOldMovingBoundary(MooseMesh & mesh);
-
   // Elements on the undisplaced mesh whose subdomain IDs have changed
   std::vector<const Elem *> _moved_elems;
 

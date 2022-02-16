@@ -151,11 +151,6 @@ ElementSubdomainModifier::finalize()
     updateBoundaryInfo(_displaced_problem->mesh(), _moved_displaced_elems);
   }
 
-  //clearOldMovingBoundary(_mesh);
-
-  //if (_displaced_problem)
-  //  clearOldMovingBoundary(_displaced_problem->mesh());
-
   // Reinit equation systems
   _fe_problem.meshChanged();
 
@@ -210,16 +205,31 @@ ElementSubdomainModifier::updateBoundaryInfo(MooseMesh & mesh,
   if (!_moving_boundary_specified)
     return;
 
+  /*
+    There are a couple of steps to reconstruct the moving boundary.
+    1) Retrieve all the active elements associated with the moving boundary
+     in a previous step. These elements and their neighbors will serve as
+     boundary element candidates for the current step.
+    2) Remove all the elements from the moving boundary. That literately
+     deletes the moving boundary from the database.
+    3) Append moved elements to the boundary element candidates.
+    4) Rectrouct the moving boundary using the boundary element candidates by
+     computing the sides that are shared by two subdomains
+    5) Delete the old nodeset.
+    6) Reconstruct a new nodeset using the new sideset.
+    7) Sync boundary information
+  */
   BoundaryInfo & bnd_info = mesh.getMesh().get_boundary_info();
-
-  // save the removed ghost sides and associated nodes to sync across processors
-  std::unordered_map<processor_id_type, std::vector<std::pair<dof_id_type, unsigned int>>>
-      ghost_sides_to_remove;
-  std::unordered_map<processor_id_type, std::vector<dof_id_type>> ghost_nodes_to_remove;
-
   auto & elem_side_bnd_ids = bnd_info.get_sideset_map();
   std::set<const Elem *> boundary_elem_candidates;
   std::vector<std::pair<const Elem *, unsigned int>> to_be_cleared;
+  /*
+   Check all the elements in the current moving boundary.
+   If an element is active, add it to the boundary element list;
+   otherwise, add active family members.
+   At the same time, append all the elements, including the active and
+   inactive, to a list being deleted later.
+  */
   for (const auto & pr : elem_side_bnd_ids)
   {
     if (pr.second.second == _moving_boundary_id)
@@ -239,30 +249,39 @@ ElementSubdomainModifier::updateBoundaryInfo(MooseMesh & mesh,
     }
   }
 
+  /* Delete the old moving boundary */
   for (auto & elem_side: to_be_cleared)
   {
     bnd_info.remove_side(elem_side.first, elem_side.second);
   }
 
+  /* Append moved elements to the boundary element candidate list */
   for (auto elem : moved_elems)
   {
     boundary_elem_candidates.insert(elem);
   }
 
+  /* Go through the boundary element candidate lsit */
   for (auto elem : boundary_elem_candidates)
   {
-    // First loop over all the sides of the element
     for (auto side : elem->side_index_range())
     {
       const Elem * neighbor = elem->neighbor_ptr(side);
+      /* If elem's neighbor is active and has a different subdomain, we add the current side
+         to the moving boundary
+      */
       if (neighbor && neighbor->active() && neighbor != libMesh::remote_elem)
       {
         if (neighbor->subdomain_id() != elem->subdomain_id())
-        {
-          // Add all the sides to the boundary first and remove excessive sides later
           bnd_info.add_side(elem, side, _moving_boundary_id);
-        }
-      } else if (neighbor && !neighbor->active() && neighbor != libMesh::remote_elem)
+      }
+      /* If elem's neighbor is not active, we need to check family members of the neighbor.
+         In this case, the neighbor's children are on the current side and the children are
+         "smaller" than the current element. We so add the neighboring children to the moving boundary
+         list. Assigning "smaller" elements to the moving_boundary list is necessary in order to
+         correctly represent the moving boundary.
+       */
+      else if (neighbor && !neighbor->active() && neighbor != libMesh::remote_elem)
       {
         std::vector<const Elem *> active_family;
         auto top_parent = neighbor->top_parent();
@@ -280,6 +299,7 @@ ElementSubdomainModifier::updateBoundaryInfo(MooseMesh & mesh,
     }
   }
 
+   /* Delete the corresponding nodeset as well */
    auto & nodeset_map = bnd_info.get_nodeset_map();
    std::vector<const Node *> nodes_to_be_cleared;
    for (const auto & pair: nodeset_map)
@@ -293,6 +313,7 @@ ElementSubdomainModifier::updateBoundaryInfo(MooseMesh & mesh,
       bnd_info.remove_node(node, _moving_boundary_id);
    }
 
+   /* Reconstruct a new nodeset from the updated sideset */
    std::set<const Node *> boundary_nodes;
    for (const auto & pr : elem_side_bnd_ids)
    {
@@ -305,12 +326,12 @@ ElementSubdomainModifier::updateBoundaryInfo(MooseMesh & mesh,
        }
      }
    }
-
    for (auto bnode: boundary_nodes)
    {
      bnd_info.add_node(bnode, _moving_boundary_id);
    }
 
+  /* Sync all side and node set ids */
   mesh.getMesh().get_boundary_info().parallel_sync_side_ids();
   mesh.getMesh().get_boundary_info().parallel_sync_node_ids();
   mesh.update();
