@@ -4178,7 +4178,7 @@ FEProblemBase::addMultiApp(const std::string & multi_app_name,
 
   _multi_apps.addObject(multi_app);
 
-  // Store TranseintMultiApp objects in another container, this is needed for calling computeDT
+  // Store TransientMultiApp objects in another container, this is needed for calling computeDT
   std::shared_ptr<TransientMultiApp> trans_multi_app =
       std::dynamic_pointer_cast<TransientMultiApp>(multi_app);
   if (trans_multi_app)

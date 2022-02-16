@@ -35,6 +35,10 @@ FVFluxBC::FVFluxBC(const InputParameters & parameters)
     _u(_var.adSln()),
     _u_neighbor(_var.adSlnNeighbor())
 {
+  if (_var.kind() == Moose::VarKindType::VAR_AUXILIARY)
+    paramError("variable",
+        "There should not be a need to specify a flux "
+        "boundary condition for an auxiliary variable.");
 }
 
 void
