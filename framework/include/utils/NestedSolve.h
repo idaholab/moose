@@ -91,6 +91,11 @@ public:
   void nonlinear(NSRealVectorValue & guess, R computeResidual, J computeJacobian);
   ///@}
 
+  /// @{ Perform a bounded solve use Eigen::HybridNonLinearSolver
+  template <typename R, typename J, typename B>
+  void nonlinearBounded(NSReal & guess, R computeResidual, J computeJacobian, B computeBounds);
+  ///@}
+
   ///@{ default values
   static Real relativeToleranceDefault() { return 1e-8; }
   static Real absoluteToleranceDefault() { return 1e-13; }
@@ -112,6 +117,7 @@ public:
     NONE,
     CONVERGED_ABS,
     CONVERGED_REL,
+    CONVERGED_BOUNDS,
     EXACT_GUESS,
     NOT_CONVERGED
   };
@@ -200,6 +206,56 @@ NestedSolveTempl<is_ad>::nonlinear(NSReal & guess, R computeResidual, J computeJ
     _state = State::CONVERGED_REL;
   else
     _state = State::NOT_CONVERGED;
+}
+
+template <bool is_ad>
+template <typename R, typename J, typename B>
+void
+NestedSolveTempl<is_ad>::nonlinearBounded(NSReal & guess,
+                                          R computeResidual,
+                                          J computeJacobian,
+                                          B computeBounds)
+{
+  auto functor = make_real_adaptor(computeResidual, computeJacobian);
+  Eigen::HybridNonLinearSolver<decltype(functor), NSReal> solver(functor);
+
+  NestedSolveTempl<is_ad>::DynamicVector guess_eigen(1);
+  guess_eigen << guess;
+
+  auto status = solver.solveInit(guess_eigen);
+  if (status == Eigen::HybridNonLinearSolverSpace::ImproperInputParameters)
+    return;
+
+  bool bounds_hit = false;
+  while (status == Eigen::HybridNonLinearSolverSpace::Running)
+  {
+    status = solver.solveOneStep(guess_eigen);
+    const std::pair<Real, Real> & bounds = computeBounds();
+
+    // Snap to bounds. Terminate solve if we snap twice consecutively.
+    if (guess_eigen(0) < bounds.first || guess_eigen(0) > bounds.second)
+    {
+      if (guess_eigen(0) < bounds.first)
+        guess_eigen(0) = bounds.first;
+      else
+        guess_eigen(0) = bounds.second;
+
+      if (bounds_hit)
+      {
+        _state = State::CONVERGED_BOUNDS;
+        return;
+      }
+
+      bounds_hit = true;
+    }
+  }
+
+  if (status == Eigen::HybridNonLinearSolverSpace::RelativeErrorTooSmall)
+    _state = State::CONVERGED_REL;
+  else
+    _state = State::NOT_CONVERGED;
+
+  guess = guess_eigen(0);
 }
 
 template <bool is_ad>
@@ -362,7 +418,8 @@ struct CorrespondingJacobianTempl<typename Eigen::Matrix<ADReal, N, 1>>
 };
 
 /**
- * Adaptor functor for Eigen::Matrix based residual and Jacobian types. No type conversion required.
+ * Adaptor functor for Eigen::Matrix based residual and Jacobian types. No type conversion
+ * required.
  */
 template <bool is_ad, typename R, typename J>
 class DynamicMatrixEigenAdaptorFunctor
