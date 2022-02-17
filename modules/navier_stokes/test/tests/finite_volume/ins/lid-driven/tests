@@ -11,7 +11,7 @@
   [exo-action]
     type = 'Exodiff'
     input = 'lid-driven-action.i'
-    exodiff = 'lid-driven_out.e'
+    exodiff = 'lid-driven-action_out.e'
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in a lid-driven cavity using the finite volume Navier-Stokes action.'
     ad_indexing_type = 'global'
   []
@@ -39,6 +39,16 @@
     input = 'lid-driven-with-energy.i'
     exodiff = 'lid-driven-with-energy_out.e'
     requirement = 'The system shall be able to transport scalar quantities using the simultaneously calculated velocity field from the incompressible Navier Stokes equations.'
+    method = '!dbg'
+    ad_indexing_type = 'global'
+    valgrind = HEAVY
+    cli_args = '-pc_type lu -pc_factor_shift_type NONZERO'
+  []
+  [with-temp-action]
+    type = 'Exodiff'
+    input = 'lid-driven-with-energy-action.i'
+    exodiff = 'lid-driven-with-energy-action_out.e'
+    requirement = 'The system shall be able to get the same result as the enthalpy transport example using the NSFVAction to set up the run.'
     method = '!dbg'
     ad_indexing_type = 'global'
     valgrind = HEAVY

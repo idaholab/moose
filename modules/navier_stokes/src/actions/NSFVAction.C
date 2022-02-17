@@ -551,14 +551,12 @@ NSFVAction::act()
       {
         InputParameters params = _factory.getValidParams("INSFVEnthalpyMaterial");
 
-        params.set<MooseFunctorName>("rho") = _density_name;
         if (_blocks.size() > 0)
           params.set<std::vector<SubdomainName>>("block") = _blocks;
 
         params.set<MooseFunctorName>(NS::density) = _density_name;
-        params.set<MooseFunctorName>(NS::cp) = _specific_heat_name;
-        params.set<MooseFunctorName>(NS::time_deriv(NS::cp)) = NS::time_deriv(_specific_heat_name);
-        _problem->addMaterial("INSFVEnthalpyMaterial", "ins_material", params);
+        params.set<MooseFunctorName>("temperature") = NS::T_fluid;
+        _problem->addMaterial("INSFVEnthalpyMaterial", "ins_enthalpy_material", params);
       }
     }
     else
@@ -1024,7 +1022,6 @@ NSFVAction::addCNSMomentum()
 void
 NSFVAction::addINSEnergy()
 {
-  const std::string u_names[3] = {"u", "v", "w"};
   if (_porous_medium_treatment)
   {
     {
@@ -1034,12 +1031,10 @@ NSFVAction::addINSEnergy()
       if (_blocks.size() > 0)
         params.set<std::vector<SubdomainName>>("block") = _blocks;
 
-      params.set<MooseFunctorName>(NS::density) = _density_name;
       params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
-      params.set<MooseEnum>("velocity_interp_method") = "pins_rhie_chow_interpolator";
+      params.set<MooseEnum>("velocity_interp_method") = "rc";
+      params.set<UserObjectName>("rhie_chow_user_object") = "pins_rhie_chow_interpolator";
       params.set<MooseEnum>("advected_interp_method") = "average";
-      for (unsigned int d = 0; d < _dim; ++d)
-        params.set<VariableName>(u_names[d]) = NS::superficial_velocity_vector[d];
 
       _problem->addFVKernel(kernel_type, "pins_energy_advection", params);
     }
@@ -1069,22 +1064,20 @@ NSFVAction::addINSEnergy()
       if (_blocks.size() > 0)
         params.set<std::vector<SubdomainName>>("block") = _blocks;
 
-      params.set<MooseFunctorName>(NS::density) = _density_name;
-      params.set<MooseEnum>("velocity_interp_method") = "ins_rhie_chow_interpolator";
+      params.set<MooseEnum>("velocity_interp_method") = "rc";
+      params.set<UserObjectName>("rhie_chow_user_object") = "ins_rhie_chow_interpolator";
       params.set<MooseEnum>("advected_interp_method") = "average";
-      for (unsigned int d = 0; d < _dim; ++d)
-        params.set<VariableName>(u_names[d]) = NS::velocity_vector[d];
 
       _problem->addFVKernel(kernel_type, "ins_energy_convection", params);
     }
     {
-      const std::string kernel_type = "PINSFVEnergyDiffusion";
+      const std::string kernel_type = "FVDiffusion";
       InputParameters params = _factory.getValidParams(kernel_type);
       params.set<NonlinearVariableName>("variable") = NS::T_fluid;
       if (_blocks.size() > 0)
         params.set<std::vector<SubdomainName>>("block") = _blocks;
 
-      params.set<MooseFunctorName>(NS::k) = _thermal_conductivity_name;
+      params.set<MooseFunctorName>("coeff") = _thermal_conductivity_name;
 
       _problem->addFVKernel(kernel_type, "ins_energy_diffusion", params);
     }
@@ -1152,34 +1145,6 @@ NSFVAction::addINSInletBC()
                    " inlet BC is not supported for INS simulations at the moment!");
     }
   }
-}
-
-void
-NSFVAction::addRelationshipManager(std::string name,
-                                   unsigned int no_layers,
-                                   const InputParameters & obj_params)
-{
-  auto & factory = _app.getFactory();
-  auto rm_params = factory.getValidParams("ElementSideNeighborLayers");
-
-  rm_params.set<std::string>("for_whom") = name;
-  rm_params.set<MooseMesh *>("mesh") = _mesh.get();
-  rm_params.set<Moose::RelationshipManagerType>("rm_type") =
-      Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC |
-      Moose::RelationshipManagerType::COUPLING;
-  rm_params.set<unsigned short>("layers") = no_layers;
-  rm_params.set<bool>("attach_geometric_early") = false;
-  if (obj_params.isParamValid("use_point_neighbors"))
-    rm_params.set<bool>("use_point_neighbors") = obj_params.get<bool>("use_point_neighbors");
-
-  rm_params.set<bool>("use_displaced_mesh") = obj_params.get<bool>("use_displaced_mesh");
-  mooseAssert(rm_params.areAllRequiredParamsValid(),
-              "All relationship manager parameters should be valid.");
-
-  auto rm_obj = factory.create<RelationshipManager>("ElementSideNeighborLayers", name, rm_params);
-
-  if (!_app.addRelationshipManager(rm_obj))
-    factory.releaseSharedObjects(*rm_obj);
 }
 
 void
@@ -1424,4 +1389,32 @@ NSFVAction::addINSWallBC()
                    " wall BC is not supported for INS simulations at the moment!");
     }
   }
+}
+
+void
+NSFVAction::addRelationshipManager(std::string name,
+                                   unsigned int no_layers,
+                                   const InputParameters & obj_params)
+{
+  auto & factory = _app.getFactory();
+  auto rm_params = factory.getValidParams("ElementSideNeighborLayers");
+
+  rm_params.set<std::string>("for_whom") = name;
+  rm_params.set<MooseMesh *>("mesh") = _mesh.get();
+  rm_params.set<Moose::RelationshipManagerType>("rm_type") =
+      Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC |
+      Moose::RelationshipManagerType::COUPLING;
+  rm_params.set<unsigned short>("layers") = no_layers;
+  rm_params.set<bool>("attach_geometric_early") = false;
+  if (obj_params.isParamValid("use_point_neighbors"))
+    rm_params.set<bool>("use_point_neighbors") = obj_params.get<bool>("use_point_neighbors");
+
+  rm_params.set<bool>("use_displaced_mesh") = obj_params.get<bool>("use_displaced_mesh");
+  mooseAssert(rm_params.areAllRequiredParamsValid(),
+              "All relationship manager parameters should be valid.");
+
+  auto rm_obj = factory.create<RelationshipManager>("ElementSideNeighborLayers", name, rm_params);
+
+  if (!_app.addRelationshipManager(rm_obj))
+    factory.releaseSharedObjects(*rm_obj);
 }
