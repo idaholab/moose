@@ -22,7 +22,6 @@ public:
 
 protected:
   virtual MarkerValue computeElementMarker() override;
-  bool checkElementSubdomainConsistent(const Elem * const & _current_elem);
 
   Real _coarsen;
   Real _refine;

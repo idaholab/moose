@@ -76,18 +76,6 @@ ErrorFractionMarker::markerSetup()
   _coarsen_cutoff = _coarsen * _delta + _min;
 }
 
-bool
-ErrorFractionMarker::checkElementSubdomainConsistent(const Elem * const & _current_elem)
-{
-  auto & elem_side_bnd_ids = _mesh.getMesh().get_boundary_info().get_sideset_map();
-
-  for (const auto & pr : as_range(elem_side_bnd_ids.equal_range(_current_elem)))
-    if (pr.second.second == 4)
-      return false;
-
-  return true;
-}
-
 Marker::MarkerValue
 ErrorFractionMarker::computeElementMarker()
 {
@@ -96,12 +84,7 @@ ErrorFractionMarker::computeElementMarker()
   if (error > _refine_cutoff)
     return REFINE;
   else if (error < _coarsen_cutoff)
-  {
-     if (!_is_subdomain_consistent || (_is_subdomain_consistent && checkElementSubdomainConsistent(_current_elem)))
-       return COARSEN;
-     else
-       return DO_NOTHING;
-  }
+    return COARSEN;
 
   return DO_NOTHING;
 }
