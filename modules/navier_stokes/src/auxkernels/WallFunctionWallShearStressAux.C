@@ -21,9 +21,10 @@ WallFunctionWallShearStressAux::validParams()
   params.addRequiredCoupledVar("u", "The velocity in the x direction.");
   params.addCoupledVar("v", "The velocity in the y direction.");
   params.addCoupledVar("w", "The velocity in the z direction.");
-  params.addParam<Real>("rho", "fluid density");
-  params.addRequiredParam<MaterialPropertyName>("mu", "Dynamic viscosity");
-  params.addParam<std::vector<BoundaryName>>("walls", "Boundaries that correspond to solid walls");
+  params.addRequiredParam<MooseFunctorName>("rho", "fluid density");
+  params.addRequiredParam<MooseFunctorName>("mu", "Dynamic viscosity");
+  params.addRequiredParam<std::vector<BoundaryName>>("walls",
+                                                     "Boundaries that correspond to solid walls");
   return params;
 }
 
@@ -37,8 +38,8 @@ WallFunctionWallShearStressAux::WallFunctionWallShearStressAux(const InputParame
     _w_var(params.isParamValid("w")
                ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("w", 0))
                : nullptr),
-    _rho(getParam<Real>("rho")),
-    _mu(getADMaterialProperty<Real>("mu")),
+    _rho(getFunctor<ADReal>("rho")),
+    _mu(getFunctor<ADReal>("mu")),
     _wall_boundary_names(getParam<std::vector<BoundaryName>>("walls"))
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
@@ -122,8 +123,11 @@ WallFunctionWallShearStressAux::computeValue()
     return parallel_speed.value();
 
   // Compute the friction velocity and the wall shear stress
-  ADReal u_star = findUStar(_mu[_qp].value(), _rho, parallel_speed, dist);
-  ADReal tau = u_star * u_star * _rho;
+  const auto elem_arg = makeElemArg(_current_elem);
+  const auto rho = _rho(elem_arg);
+  const auto mu = _mu(elem_arg);
+  ADReal u_star = findUStar(mu.value(), rho.value(), parallel_speed, dist);
+  ADReal tau = u_star * u_star * rho.value();
 
   return tau.value();
 }

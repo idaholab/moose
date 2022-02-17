@@ -28,6 +28,8 @@ EBSDReaderPointDataAux::EBSDReaderPointDataAux(const InputParameters & parameter
     _data_name(getParam<MooseEnum>("data_name")),
     _val(_ebsd_reader.getPointDataAccessFunctor(_data_name))
 {
+  if (isNodal())
+    mooseError("This AuxKernel only supports Elemental fields");
 }
 
 void
