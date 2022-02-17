@@ -547,21 +547,19 @@ NSFVAction::act()
   {
     if (_compressibility == "incompressible" || _compressibility == "weakly-compressible")
     {
-      const std::string u_names[3] = {"u", "v", "w"};
-      InputParameters params = _factory.getValidParams("INSFVMaterial");
-
-      if (_blocks.size() > 0)
-        params.set<std::vector<SubdomainName>>("block") = _blocks;
-
-      params.set<MaterialPropertyName>("rho") = _density_name;
       if (getParam<bool>("add_energy_equation"))
       {
+        InputParameters params = _factory.getValidParams("INSFVEnthalpyMaterial");
+
+        params.set<MooseFunctorName>("rho") = _density_name;
+        if (_blocks.size() > 0)
+          params.set<std::vector<SubdomainName>>("block") = _blocks;
+
         params.set<MooseFunctorName>(NS::density) = _density_name;
         params.set<MooseFunctorName>(NS::cp) = _specific_heat_name;
         params.set<MooseFunctorName>(NS::time_deriv(NS::cp)) = NS::time_deriv(_specific_heat_name);
+        _problem->addMaterial("INSFVEnthalpyMaterial", "ins_material", params);
       }
-
-      _problem->addMaterial("INSFVMaterial", "ins_material", params);
     }
     else
     {
@@ -743,7 +741,6 @@ NSFVAction::addCNSTimeKernels()
 void
 NSFVAction::addINSMass()
 {
-  const std::string u_names[3] = {"u", "v", "w"};
   if (_porous_medium_treatment)
   {
     const std::string kernel_type = "PINSFVMassAdvection";
@@ -757,9 +754,6 @@ NSFVAction::addINSMass()
     params.set<MooseEnum>("velocity_interp_method") = "rc";
     params.set<UserObjectName>("rhie_chow_user_object") = "pins_rhie_chow_interpolator";
     params.set<MooseEnum>("advected_interp_method") = "average";
-
-    for (unsigned int d = 0; d < _dim; ++d)
-      params.set<CoupledName>(u_names[d]) = {NS::superficial_velocity_vector[d]};
 
     _problem->addFVKernel(kernel_type, "pins_mass_advection", params);
   }
@@ -775,9 +769,6 @@ NSFVAction::addINSMass()
     params.set<MooseEnum>("velocity_interp_method") = "rc";
     params.set<UserObjectName>("rhie_chow_user_object") = "ins_rhie_chow_interpolator";
     params.set<MooseEnum>("advected_interp_method") = "average";
-
-    for (unsigned int d = 0; d < _dim; ++d)
-      params.set<CoupledName>(u_names[d]) = {NS::velocity_vector[d]};
 
     _problem->addFVKernel(kernel_type, "ins_mass_advection", params);
   }
@@ -806,7 +797,6 @@ NSFVAction::addCNSMass()
 void
 NSFVAction::addINSMomentum()
 {
-  const std::string u_names[3] = {"u", "v", "w"};
   if (_porous_medium_treatment)
   {
     {
@@ -820,8 +810,6 @@ NSFVAction::addINSMomentum()
       params.set<MooseEnum>("velocity_interp_method") = "rc";
       params.set<UserObjectName>("rhie_chow_user_object") = "pins_rhie_chow_interpolator";
       params.set<MooseEnum>("advected_interp_method") = "average";
-      for (unsigned int d = 0; d < _dim; ++d)
-        params.set<CoupledName>(u_names[d]) = {NS::superficial_velocity_vector[d]};
 
       for (unsigned int d = 0; d < _dim; ++d)
       {
@@ -931,8 +919,6 @@ NSFVAction::addINSMomentum()
       params.set<MooseEnum>("velocity_interp_method") = "rc";
       params.set<UserObjectName>("rhie_chow_user_object") = "ins_rhie_chow_interpolator";
       params.set<MooseEnum>("advected_interp_method") = "average";
-      for (unsigned int d = 0; d < _dim; ++d)
-        params.set<CoupledName>(u_names[d]) = {NS::velocity_vector[d]};
 
       for (unsigned int d = 0; d < _dim; ++d)
       {

@@ -19,36 +19,31 @@ INSFVEnergyTimeDerivative::validParams()
   InputParameters params = FVTimeKernel::validParams();
   params.addClassDescription(
       "Adds the time derivative term to the incompressible Navier-Stokes energy equation.");
-  params.addRequiredParam<MooseFunctorName>(NS::density, "Density");
-  params.addParam<MooseFunctorName>(NS::time_deriv(NS::density), "Density time derivative functor");
-  params.addRequiredParam<MooseFunctorName>(NS::cp, "Specific heat capacity");
-  params.addParam<MooseFunctorName>(NS::time_deriv(NS::cp),
-                                    "Specific heat capacity time derivative functor");
+  params.addRequiredParam<MaterialPropertyName>(NS::density, "Density");
+  params.addRequiredParam<MaterialPropertyName>(NS::cp, "Specific heat capacity");
+  params.addParam<MaterialPropertyName>(NS::time_deriv(NS::cp),
+                                        "Specific heat capacity time derivative functor");
   return params;
 }
 
 INSFVEnergyTimeDerivative::INSFVEnergyTimeDerivative(const InputParameters & params)
   : FVTimeKernel(params),
-    _rho(getFunctor<ADReal>(NS::density)),
-    _rho_dot(isParamValid(NS::time_deriv(NS::density))
-                 ? &getFunctor<ADReal>(NS::time_deriv(NS::density))
-                 : nullptr),
-    _cp(getFunctor<ADReal>(NS::cp)),
-    _cp_dot(isParamValid(NS::time_deriv(NS::cp)) ? &getFunctor<ADReal>(NS::time_deriv(NS::cp))
-                                                 : nullptr)
+    _rho(getFunctor<ADReal>(getParam<MaterialPropertyName>(NS::density))),
+    _cp(getFunctor<ADReal>(getParam<MaterialPropertyName>(NS::cp))),
+    _cp_dot(isParamValid(NS::time_deriv(NS::cp))
+                ? &getFunctor<ADReal>(getParam<MaterialPropertyName>(NS::time_deriv(NS::cp)))
+                : nullptr)
 {
 }
 
 ADReal
 INSFVEnergyTimeDerivative::computeQpResidual()
 {
-  auto time_derivative = _rho(makeElemArg(_current_elem)) * _cp(makeElemArg(_current_elem)) *
-                         FVTimeKernel::computeQpResidual();
-  if (_rho_dot)
-    time_derivative += (*_rho_dot)(makeElemArg(_current_elem)) * _cp(makeElemArg(_current_elem)) *
-                       _var(makeElemArg(_current_elem));
+  auto elem_arg = makeElemArg(_current_elem);
+  auto time_derivative = _rho(elem_arg) * _cp(elem_arg) * FVTimeKernel::computeQpResidual();
+
   if (_cp_dot)
-    time_derivative += _rho(makeElemArg(_current_elem)) * (*_cp_dot)(makeElemArg(_current_elem)) *
-                       _var(makeElemArg(_current_elem));
+    time_derivative += _rho(elem_arg) * (*_cp_dot)(elem_arg)*_var(elem_arg);
+
   return time_derivative;
 }

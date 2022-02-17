@@ -16,36 +16,29 @@ registerMooseObject("NavierStokesApp", WCNSFVEnergyTimeDerivative);
 InputParameters
 WCNSFVEnergyTimeDerivative::validParams()
 {
-  InputParameters params = FVTimeKernel::validParams();
+  InputParameters params = INSFVEnergyTimeDerivative::validParams();
   params.addClassDescription(
       "Adds the time derivative term to the incompressible Navier-Stokes momentum equation.");
-  params.addRequiredParam<MaterialPropertyName>(NS::density, "The density material property");
-  params.addRequiredParam<MaterialPropertyName>(NS::cp,
-                                                "The specific heat capacity material property");
+
   params.addRequiredParam<MaterialPropertyName>(
       NS::time_deriv(NS::density), "The time derivative of the density material property");
-  params.addRequiredParam<MaterialPropertyName>(
-      NS::time_deriv(NS::cp),
-      "The time derivative of the specific heat capacity material property");
   return params;
 }
 
 WCNSFVEnergyTimeDerivative::WCNSFVEnergyTimeDerivative(const InputParameters & params)
-  : FVTimeKernel(params),
-    _rho(getFunctor<ADReal>(NS::density)),
-    _cp(getFunctor<ADReal>(NS::cp)),
-    _rho_dot(getFunctor<ADReal>(NS::time_deriv(NS::density))),
-    _cp_dot(getFunctor<ADReal>(NS::time_deriv(NS::cp)))
+  : INSFVEnergyTimeDerivative(params),
+    _rho_dot(getFunctor<ADReal>(getParam<MaterialPropertyName>(NS::time_deriv(NS::density))))
 {
+  if (!_cp_dot)
+    paramError(NS::time_deriv(NS::cp),
+               "The time derivative of the specific heat must be specified for weakly-compressible "
+               "simulations!");
 }
 
 ADReal
 WCNSFVEnergyTimeDerivative::computeQpResidual()
 {
-  return _rho_dot(makeElemArg(_current_elem)) * _cp(makeElemArg(_current_elem)) *
-             _var(makeElemArg(_current_elem)) +
-         _rho(makeElemArg(_current_elem)) * _cp_dot(makeElemArg(_current_elem)) *
-             _var(makeElemArg(_current_elem)) +
-         _rho(makeElemArg(_current_elem)) * _cp(makeElemArg(_current_elem)) *
-             _var.dot(makeElemArg(_current_elem));
+  auto elem_arg = makeElemArg(_current_elem);
+  return INSFVEnergyTimeDerivative::computeQpResidual() +
+         _rho_dot(elem_arg) * _cp(elem_arg) * _var(elem_arg);
 }

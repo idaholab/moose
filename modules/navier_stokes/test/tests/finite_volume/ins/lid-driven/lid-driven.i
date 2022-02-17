@@ -76,7 +76,7 @@ rho=1
 
   [u_advection]
     type = INSFVMomentumAdvection
-    variable = u
+    variable = vel_x
     rho = ${rho}
     momentum_component = 'x'
   []
@@ -97,7 +97,7 @@ rho=1
 
   [v_advection]
     type = INSFVMomentumAdvection
-    variable = v
+    variable = vel_y
     rho = ${rho}
     momentum_component = 'y'
   []
