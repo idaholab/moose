@@ -15,7 +15,7 @@ The `AssemblyMeshGenerator` object adopts much of the existing input structure o
 
 The [!param](/Mesh/AssemblyMeshGenerator/background_region_id) and [!param](/Mesh/AssemblyMeshGenerator/duct_region_ids) parameters are used to identify regions within the assembly, that do not belong to one of the constituent pins, that belong to the same block both radially and axially. This functionality is intended for easy identification of regions within the mesh that will have the same properties, such as material assignments, and will assign the region ID to both the subdomain (block) ID and name.
 
-The user defined ID assignment using [!param](/Mesh/AssemblyMeshGenerator/background_region_id) and [!param](/Mesh/AssemblyMeshGenerator/duct_region_ids) should be given as a single value per axial layer for the background region and a vector, starting from the inner-most duct region, of the IDs for the appropriate axial layer starting from the bottom of the geometry. 
+The user defined ID assignment using [!param](/Mesh/AssemblyMeshGenerator/background_region_id) is given as a 1-D vector of size `A`, where `A` is the number of axial levels. This vector defines the background block IDs (single value per axial layer) starting from the bottom axial layer and ending with the top axial layer. Similarly, [!param](/Mesh/AssemblyMeshGenerator/duct_region_ids) is given as an `A` by `D` vector, where `D` is the number of duct intervals per axial layer. This vector assignment starts from the innermost duct region of the bottom axial layer, and extends out first radially and then axially.
 
 ## Reporting ID Information
 
@@ -31,7 +31,9 @@ If the assembly is extruded to three dimensions the top-most boundary ID must be
 
 ## Example Syntax
 
-!listing modules/reactor/test/tests/meshgenerators/assembly_mesh_generator/assembly_only.i block=Mesh/amg
+!listing modules/reactor/test/tests/meshgenerators/assembly_mesh_generator/assembly_only.i block=Mesh
+
+!media reactor/meshgenerators/assembly_mesh_generator.png
 
 !syntax parameters /Mesh/AssemblyMeshGenerator
 

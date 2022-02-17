@@ -7,6 +7,7 @@
     input = 'assembly_only.i'
     cli_args = "Mesh/pin1/region_ids='1 2 5; 11 12 15'
                 Mesh/pin2/region_ids='3; 13'
+                Mesh/rmp/assembly_pitch=2.84126
                 --mesh-only assembly_only_in.e"
     exodiff = 'assembly_only_in.e'
     recover = false

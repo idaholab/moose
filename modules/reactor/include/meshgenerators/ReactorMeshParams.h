@@ -45,4 +45,7 @@ protected:
 
   ///Boundary id assigned to bottom boundary of extruded mesh.
   boundary_id_type _bottom_boundary;
+
+  ///Boundary id assigned to outer radial boundary of core mesh.
+  boundary_id_type _radial_boundary;
 };

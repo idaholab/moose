@@ -43,7 +43,7 @@ protected:
   ///The number of divisions in the meshes of the ducts
   const std::vector<unsigned int> _duct_intervals;
 
-  ///The ID for the background region that will be assigned to the block ID, name, and an extra element integer
+  ///The IDs for the background axial region that will be assigned to the block ID, name, and an extra element integer
   std::vector<subdomain_id_type> _background_region_id;
 
   ///The ID for the duct regions that will be assigned to the block ID, name, and an extra element integer

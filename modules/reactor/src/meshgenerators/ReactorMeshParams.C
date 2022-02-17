@@ -34,9 +34,12 @@ ReactorMeshParams::validParams()
 
   params.addRequiredParam<Real>("assembly_pitch", "Center to center distance of assemblies");
   params.addParam<boundary_id_type>("top_boundary_id",
-                                    "The boundary ID to set on top boundary of extruded mesh");
-  params.addParam<boundary_id_type>("bottom_boundary_id",
-                                    "The boundary ID to set on bottom boundary of extruded mesh");
+                                    "The boundary ID to set on top boundary of the extruded mesh");
+  params.addParam<boundary_id_type>(
+      "bottom_boundary_id", "The boundary ID to set on bottom boundary of the extruded mesh");
+  params.addParam<boundary_id_type>(
+      "radial_boundary_id",
+      "The boundary ID to set on the outer radial boundary of a CoreMeshGenerator object");
   params.addParam<std::vector<Real>>(
       "axial_regions", std::vector<Real>(1), "Length of each axial region");
   params.addParam<std::vector<unsigned int>>(
@@ -74,6 +77,15 @@ ReactorMeshParams::ReactorMeshParams(const InputParameters & parameters)
   {
     _bottom_boundary = getParam<boundary_id_type>("bottom_boundary_id");
     this->declareMeshProperty("bottom_boundary_id", _bottom_boundary);
+  }
+  if (isParamValid("radial_boundary_id"))
+  {
+    _radial_boundary = getParam<boundary_id_type>("radial_boundary_id");
+    this->declareMeshProperty("radial_boundary_id", _radial_boundary);
+    if (isParamValid("top_boundary_id") && _radial_boundary == _top_boundary)
+      mooseError("top_boundary_id and radial_boundary_id must be unique values");
+    if (isParamValid("bottom_boundary_id") && _radial_boundary == _bottom_boundary)
+      mooseError("bottom_boundary_id and radial_boundary_id must be unique values");
   }
   if (isParamValid("top_boundary_id") && isParamValid("bottom_boundary_id") &&
       (_bottom_boundary == _top_boundary))

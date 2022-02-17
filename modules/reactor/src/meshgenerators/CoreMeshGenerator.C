@@ -82,6 +82,8 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
                    !hasMeshProperty("bottom_boundary_id", _reactor_params)))
     mooseError("Both top_boundary_id and bottom_boundary_id must be provided in ReactorMeshParams "
                "if using extruded geometry");
+  if (!hasMeshProperty("radial_boundary_id", _reactor_params))
+    mooseError("radial_boundary_id must be provided in ReactorMeshParams for CoreMeshGenerators");
 
   std::size_t empty_pattern_loc = 0;
   bool make_empty = false;
@@ -107,7 +109,6 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
       }
     }
   }
-  //***Add checks for pins to be the same size and pin sizes to add to Assembly pitch
 
   if (_geom_type == "Square")
   {
@@ -212,7 +213,9 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
             std::vector<MeshGeneratorName>{_empty_key};
       }
 
-      params.set<boundary_id_type>("external_boundary_id") = 200;
+      const auto radial_boundary =
+          getMeshProperty<boundary_id_type>("radial_boundary_id", _reactor_params);
+      params.set<boundary_id_type>("external_boundary_id") = radial_boundary;
       params.set<std::string>("external_boundary_name") = "outer_core";
 
       _build_mesh =
@@ -300,7 +303,8 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
 
       params.set<MeshGeneratorName>("input") = name() + "_extruded";
       params.set<std::vector<BoundaryName>>("old_boundary") = {
-          "201", "202"}; // hard coded boundary IDs in patterned mesh generator
+          std::to_string(top_boundary),
+          std::to_string(bottom_boundary)}; // hard coded boundary IDs in patterned mesh generator
       params.set<std::vector<BoundaryName>>("new_boundary") = {"top", "bottom"};
 
       addMeshSubgenerator("RenameBoundaryGenerator", name() + "_change_plane_name", params);
@@ -412,13 +416,17 @@ CoreMeshGenerator::generate()
     // the boundaries need to be directly assigned for cartesian cores
     // since the CartesianIDPatternedMeshGenerator lacks the ability
     // to assign them during construction.
-    MooseMesh::changeBoundaryId(*(_build_mesh->get()), 10001, 200, false);
-    MooseMesh::changeBoundaryId(*(_build_mesh->get()), 10002, 200, false);
-    MooseMesh::changeBoundaryId(*(_build_mesh->get()), 10003, 200, false);
-    MooseMesh::changeBoundaryId(*(_build_mesh->get()), 10004, 200, false);
+    MeshGeneratorName _reactor_params =
+        MeshGeneratorName(getMeshProperty<std::string>("reactor_params_name", _inputs[0]));
+    const auto radial_boundary =
+        getMeshProperty<boundary_id_type>("radial_boundary_id", _reactor_params);
+    MooseMesh::changeBoundaryId(*(_build_mesh->get()), 10001, radial_boundary, false);
+    MooseMesh::changeBoundaryId(*(_build_mesh->get()), 10002, radial_boundary, false);
+    MooseMesh::changeBoundaryId(*(_build_mesh->get()), 10003, radial_boundary, false);
+    MooseMesh::changeBoundaryId(*(_build_mesh->get()), 10004, radial_boundary, false);
 
-    (*_build_mesh)->get_boundary_info().sideset_name(200) = "outer_core";
-    (*_build_mesh)->get_boundary_info().nodeset_name(200) = "outer_core";
+    (*_build_mesh)->get_boundary_info().sideset_name(radial_boundary) = "outer_core";
+    (*_build_mesh)->get_boundary_info().nodeset_name(radial_boundary) = "outer_core";
   }
 
   (*_build_mesh)->set_subdomain_name_map() = subdomain_name_map;

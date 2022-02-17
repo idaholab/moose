@@ -116,7 +116,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
     mooseError("Both top_boundary_id and bottom_boundary_id must be provided in ReactorMeshParams "
                "if using extruded geometry");
 
-  Real base_pitch;
+  Real base_pitch = 0.0;
   for (const auto i : make_range(_inputs.size()))
   {
     auto pin = _inputs[i];
@@ -132,12 +132,25 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
       mooseError("Pins that have already been extruded cannot be used in AssemblyMeshGenerator "
                  "definition.\n");
   }
-  if ((_geom_type == "Square") &&
-      (_duct_sizes.size() != 0 || _duct_intervals.size() != 0 || _background_intervals != 0))
-    mooseError("Ducts and background regions are not currently supported for square assemblies");
+  auto assembly_pitch = getMeshProperty<Real>("assembly_pitch", _reactor_params);
+  if (_geom_type == "Square")
+  {
+    if (_duct_sizes.size() != 0 || _duct_intervals.size() != 0 || _background_intervals != 0)
+      mooseError("Ducts and background regions are not currently supported for square assemblies");
+    if ((base_pitch * _pattern.size() != assembly_pitch) ||
+        (base_pitch * _pattern[0].size() != assembly_pitch))
+      mooseError("Assembly pitch must be equal to lattice dimension times pin pitch for Cartesian "
+                 "assemblies");
+  }
 
-  if ((_geom_type == "Hex") && ((_background_region_id.size() == 0) || _background_intervals == 0))
-    mooseError("Hexagonal assemblies must have a background region defined");
+  if (_geom_type == "Hex")
+  {
+    if ((_background_region_id.size() == 0) || _background_intervals == 0)
+      mooseError("Hexagonal assemblies must have a background region defined");
+    if (assembly_pitch < _pattern.size() * base_pitch)
+      mooseError(
+          "Assembly pitch must be larger than the number of assembly rows times the pin pitch");
+  }
 
   if (_duct_sizes.size() != _duct_intervals.size())
     mooseError("If ducts are defined then \"duct_intervals\" and \"duct_region_ids\" must also be "
@@ -324,7 +337,8 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
 
       params.set<MeshGeneratorName>("input") = name() + "_extruded";
       params.set<std::vector<BoundaryName>>("old_boundary") = {
-          "201", "202"}; // hard coded boundary IDs in patterned mesh generator
+          std::to_string(top_boundary),
+          std::to_string(bottom_boundary)}; // hard coded boundary IDs in patterned mesh generator
       params.set<std::vector<BoundaryName>>("new_boundary") = {"top", "bottom"};
 
       addMeshSubgenerator("RenameBoundaryGenerator", name() + "_change_plane_name", params);

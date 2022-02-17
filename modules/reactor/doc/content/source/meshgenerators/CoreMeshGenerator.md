@@ -6,7 +6,7 @@
 
 This object is designed to be used in the Reactor MeshGenerator workflow, which also consists of [`ReactorMeshParams`](ReactorMeshParams.md), [`PinMeshGenerator`](PinMeshGenerator.md), and [`AssemblyMeshGenerator`](AssemblyMeshGenerator.md).
 
-The `CoreMeshGenerator` object generates core-like reactor geometry structures in either square or hexagonal geometries with `reporting ID` and block ID assignments. There is expected to only be a single `CoreMeshGenerator` in a Mesh definition.
+The `CoreMeshGenerator` object generates core-like reactor geometry structures in either square or hexagonal geometries with block ID assignments and reporting (extra integer) IDs, as described in [`CartesianIDPatternedMeshGenerator`](CartesianIDPatternedMeshGenerator.md and [`HexIDPatternedMeshGenerator`](HexIDPatternedMeshGenerator.md). There is expected to only be a single `CoreMeshGenerator` in a Mesh definition.
 
 This object automates the use and functionality of the [`CartesianIDPatternedMeshGenerator`](CartesianIDPatternedMeshGenerator.md) for cartesian  reactor geometry, [`HexIDPatternedMeshGenerator`](HexIDPatternedMeshGenerator.md) for hexagonal reactor geometry and, if extruding to three dimensions, the [`FancyExtruderGenerator'](FancyExtruderGenerator.md) through the use of the `MeshSubgenerator` functionality and supporting functionality from [`RenameBoundaryGenerator`](RenameBoundaryGenerator.md) and [`PlaneIDMeshGenerator'](PlaneIDMeshGenerator.md). In addition to the functionality of the `MeshGenerators` used, this object also automates boundary ID and name assignment.
 
@@ -20,13 +20,15 @@ The `CoreMeshGenerator` object automatically tags the mesh, if three dimensional
 
 ## Exterior Boundary ID Information
 
-The `CoreMeshGenerator` objects automatically assigns boundary information. The exterior core boundary is assigned the ID equal to 200 is named "outer_core".
+The `CoreMeshGenerator` objects automatically assigns boundary information. The exterior core boundary ID is assigned with the parameter [!param](/Mesh/ReactorMeshParams/radial_boundary_id) and will have the name "outer_core".
 
 If the core is extruded to three dimensions the top-most boundary ID must be assigned using [!param](/Mesh/ReactorMeshParams/top_boundary_id) and will have the name "top", while the bottom-most boundary must be assigned using [!param](/Mesh/ReactorMeshParams/bottom_boundary_id) and will have the name "bottom".
 
 ## Example Syntax
 
-!listing modules/reactor/test/tests/meshgenerators/core_mesh_generator/core.i block=Mesh/cmg
+!listing modules/reactor/test/tests/meshgenerators/core_mesh_generator/core.i block=Mesh
+
+!media reactor/meshgenerators/core_mesh_generator.png
 
 !syntax parameters /Mesh/CoreMeshGenerator
 

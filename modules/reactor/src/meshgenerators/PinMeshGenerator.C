@@ -211,7 +211,6 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
       params.set<MooseEnum>("transform") = 4;
       params.set<RealVectorValue>("vector_value") = RealVectorValue(0, 0, 45);
 
-      //_build_mesh = &addMeshSubgenerator("TransformGenerator", name() + "_2D", params);
       addMeshSubgenerator("TransformGenerator", name() + "trans", params);
     }
 
@@ -390,7 +389,8 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
 
       params.set<MeshGeneratorName>("input") = name() + "_extruded";
       params.set<std::vector<BoundaryName>>("old_boundary") = {
-          "201", "202"}; // hard coded boundary IDs in patterned mesh generator
+          std::to_string(top_boundary),
+          std::to_string(bottom_boundary)}; // hard coded boundary IDs in patterned mesh generator
       params.set<std::vector<BoundaryName>>("new_boundary") = {"top", "bottom"};
 
       addMeshSubgenerator("RenameBoundaryGenerator", name() + "_change_plane_name", params);

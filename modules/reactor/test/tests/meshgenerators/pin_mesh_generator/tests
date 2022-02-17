@@ -37,7 +37,6 @@
     type = 'Exodiff'
     input = 'pin_only.i'
     cli_args = 'Mesh/rmp/geom="Hex"
-                Mesh/rmp/procedural_region_ids=false
                 Mesh/pin1/quad_center_elements=true
                 Mesh/pin1/region_ids="1; 2"
                 --mesh-only pin_only_hex_in.e'

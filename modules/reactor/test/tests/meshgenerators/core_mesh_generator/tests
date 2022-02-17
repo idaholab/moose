@@ -8,6 +8,7 @@
     cli_args = "Mesh/pin1/region_ids='1 2 5'
                 Mesh/pin2/region_ids='2'
                 Mesh/pin3/region_ids='3 4'
+                Mesh/rmp/assembly_pitch=2.84126
                 --mesh-only core_in.e"
     exodiff = 'core_in.e'
     recover = false
@@ -19,6 +20,7 @@
     cli_args = "Mesh/pin1/region_ids='1 2 5'
                 Mesh/pin2/region_ids='2'
                 Mesh/pin3/region_ids='3 4'
+                Mesh/rmp/assembly_pitch=2.84126
                 Mesh/cmg/pattern='2 1; 1 0'
                 --mesh-only core_empty_in.e"
     exodiff = 'core_empty_in.e'

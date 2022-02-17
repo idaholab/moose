@@ -65,6 +65,7 @@ std::set<SubdomainID> getCellBlockIDs(const std::vector<std::unique_ptr<Replicat
  * get list of block IDs for the assembly duck regions
  * @param mesh  output mesh from the cartesian or hexagonal patterned mesh generator
  * @param has_assembly_boundary flag to indicate if assembly boundary exists
+ * @param background_blk_ids list of block ID assigned to background regions
  * @param blks list of block defined in the input meshes of the cartesian or hexagonal patterned
  *mesh generator
  * @return list of block ids in the assembly duct region
@@ -84,6 +85,7 @@ getDuckBlockIDs(const std::unique_ptr<MeshBase> & mesh,
  * @param use_exclude_id flag to indicate if exclude_id is defined
  * @param exclude_ids flag to indicate if exclude_id is used for each input mesh
  * @param has_assembly_boundary flag to indicate if assembly boundary exists
+ * @param background_block_ids list of block ID assigned to background regions
  * @param input_meshes input meshes of the cartesian or hexagonal patterned mesh generator
  * @param pattern 2D vector of the mesh pattern
  * @param id_pattern user-defined integer ID for each input pattern cell
