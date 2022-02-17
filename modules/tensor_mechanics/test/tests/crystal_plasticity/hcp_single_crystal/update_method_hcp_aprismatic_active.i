@@ -410,10 +410,10 @@
   nl_max_its = 20
   l_max_its = 50
 
-  dt = 0.015
+  dt = 0.005
   dtmin = 1.0e-4
   dtmax = 0.1
-  end_time = 0.15
+  end_time = 0.09
 []
 
 [Outputs]
