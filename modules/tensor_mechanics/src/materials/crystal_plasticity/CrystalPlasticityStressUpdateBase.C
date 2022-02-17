@@ -242,7 +242,7 @@ CrystalPlasticityStressUpdateBase::transformHexagonalMillerBravisSlipSystems(
 
       // Check that the slip direction indices of the basal plane sum to zero for consistency
       Real basal_dir_sum = 0.0;
-      for (auto k : make_range(miller_bravis_indices, miller_bravis_indices + LIBMESH_DIM))
+      for (const auto k : make_range(miller_bravis_indices, miller_bravis_indices + LIBMESH_DIM))
         basal_dir_sum += reader.getData(i)[k];
 
       if (basal_dir_sum > _zero_tol)
