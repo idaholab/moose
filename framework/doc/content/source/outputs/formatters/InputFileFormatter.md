@@ -10,7 +10,7 @@ application developer, either directly or using an [AdvancedOutput](syntax/Outpu
 ## Example output
 
 The snippet below shows the output for `--show-input` for the boundary condition and executioner
-blocks of the simple_diffusion test, shown further below. We can see additional metadata about each object,
+blocks of the `simple_diffusion` test, shown further below. We can see additional metadata about each object,
 some default parameters that are not explicitly written in the input files, as well as
 disabled invalid parameters.
 

@@ -11,7 +11,7 @@ application developer, either directly or using an [AdvancedOutput](syntax/Outpu
 
 We reproduce here the output of the `InputParameters` YAML dump for the [Functions](syntax/Functions/index.md)
 block and the [MooseParsedFunction.md]. We can see metadata about each parameter, such as their
-C++ type, their default or description.
+C++ type, their default, or their description.
 
 ```
 - name: /Functions/ADParsedFunction
