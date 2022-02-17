@@ -116,4 +116,7 @@ private:
 
   /// The Id of the moving boundary
   BoundaryID _moving_boundary_id;
+
+  /// Subdomains between that the moving boundary is
+  std::set<SubdomainID> _moving_boundary_subdomains;
 };
