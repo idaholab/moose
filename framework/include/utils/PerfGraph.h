@@ -147,12 +147,18 @@ public:
   /**
    * Set the time limit before a message prints
    */
-  void setLiveTimeLimit(Real time_limit) { _live_print_time_limit = time_limit; }
+  void setLiveTimeLimit(Real time_limit)
+  {
+    _live_print_time_limit.store(time_limit, std::memory_order_relaxed);
+  }
 
   /**
    * Sert the memory limit before a message prints
    */
-  void setLiveMemoryLimit(unsigned int mem_limit) { _live_print_mem_limit = mem_limit; }
+  void setLiveMemoryLimit(unsigned int mem_limit)
+  {
+    _live_print_mem_limit.store(mem_limit, std::memory_order_relaxed);
+  }
 
   /**
    * Gets a PerfGraph result pertaining to a section
@@ -397,10 +403,10 @@ protected:
   std::condition_variable _finished_section;
 
   /// The time limit before a message is printed (in seconds)
-  Real _live_print_time_limit;
+  std::atomic<Real> _live_print_time_limit;
 
   /// The memory limit before a message is printed (in MB)
-  unsigned int _live_print_mem_limit;
+  std::atomic<unsigned int> _live_print_mem_limit;
 
   /// The object that is doing live printing
   const std::unique_ptr<PerfGraphLivePrint> _live_print;
