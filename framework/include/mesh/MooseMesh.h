@@ -1118,6 +1118,11 @@ public:
   Moose::CoordinateSystemType getCoordSystem(SubdomainID sid) const;
 
   /**
+   * Get the map from subdomain ID to coordinate system type, e.g. xyz, rz, or r-spherical
+   */
+  const std::map<SubdomainID, Moose::CoordinateSystemType> & getCoordSystem() const;
+
+  /**
    * Set the coordinate system for the provided blocks to \p coord_sys
    */
   void setCoordSystem(const std::vector<SubdomainName> & blocks, const MultiMooseEnum & coord_sys);

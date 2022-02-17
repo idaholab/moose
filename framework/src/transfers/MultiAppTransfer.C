@@ -15,6 +15,7 @@
 #include "DisplacedProblem.h"
 #include "MultiApp.h"
 #include "MooseMesh.h"
+#include "MooseCoordTransform.h"
 
 #include "libmesh/parallel_algebra.h"
 #include "libmesh/mesh_tools.h"
@@ -200,6 +201,8 @@ MultiAppTransfer::getAppInfo()
   _to_meshes.clear();
   _to_positions.clear();
   _from_positions.clear();
+  _to_transforms.clear();
+  _from_transforms.clear();
   // Clear this map since we build it from scratch every time we transfer
   // Otherwise, this will cause two issues: 1) increasing memory usage
   // for a simulation that requires many transfers, 2) producing wrong results
@@ -212,6 +215,7 @@ MultiAppTransfer::getAppInfo()
   {
     _to_problems.push_back(&_from_multi_app->problemBase());
     _to_positions.push_back(Point(0., 0., 0.));
+    _to_transforms.push_back(&_from_multi_app->problemBase().coordTransform());
 
     getFromMultiAppInfo();
   }
@@ -220,12 +224,17 @@ MultiAppTransfer::getAppInfo()
   {
     _from_problems.push_back(&_to_multi_app->problemBase());
     _from_positions.push_back(Point(0., 0., 0.));
+    _from_transforms.push_back(&_to_multi_app->problemBase().coordTransform());
 
     getToMultiAppInfo();
   }
 
   if (_current_direction == BETWEEN_MULTIAPP)
   {
+    mooseAssert(&_from_multi_app->problemBase().coordTransform() ==
+                    &_to_multi_app->problemBase().coordTransform(),
+                "I believe these should be the same. If not, then it will be difficult to define a "
+                "canonical reference frame.");
     getToMultiAppInfo();
     getFromMultiAppInfo();
   }
@@ -251,21 +260,56 @@ MultiAppTransfer::getAppInfo()
   }
 }
 
+namespace
+{
+void
+fillInfo(MultiApp & multi_app,
+         std::vector<unsigned int> & map,
+         std::vector<FEProblemBase *> & problems,
+         std::vector<Point> & positions,
+         std::vector<MooseCoordTransform *> & transforms)
+{
+  auto & main_problem = multi_app.problemBase();
+  auto & main_transform = main_problem.coordTransform();
+
+  for (unsigned int i_app = 0; i_app < multi_app.numGlobalApps(); i_app++)
+  {
+    if (!multi_app.hasLocalApp(i_app))
+      continue;
+
+    auto & subapp_problem = multi_app.appProblemBase(i_app);
+    const auto position = multi_app.position(i_app);
+    auto & subapp_transform = subapp_problem.coordTransform();
+    subapp_transform.setTranslationVector(main_transform(position));
+
+    map.push_back(i_app);
+    problems.push_back(&subapp_problem);
+    positions.push_back(position);
+    transforms.push_back(&subapp_transform);
+  }
+
+  if (transforms.empty())
+    // Can happen if there are no local apps
+    return;
+
+  const auto first_transform = transforms[0]->coordinateSystem();
+  std::for_each(transforms.begin() + 1,
+                transforms.end(),
+                [first_transform](const auto * const transform_obj)
+                {
+                  if (transform_obj->coordinateSystem() != first_transform)
+                    mooseError("Coordinate systems must be consistent between multiapps");
+                });
+}
+}
+
 void
 MultiAppTransfer::getToMultiAppInfo()
 {
   if (!_to_multi_app)
     mooseError("There is no to_multiapp to get info from");
 
-  for (unsigned int i_app = 0; i_app < _to_multi_app->numGlobalApps(); i_app++)
-  {
-    if (!_to_multi_app->hasLocalApp(i_app))
-      continue;
-
-    _to_local2global_map.push_back(i_app);
-    _to_problems.push_back(&_to_multi_app->appProblemBase(i_app));
-    _to_positions.push_back(_to_multi_app->position(i_app));
-  }
+  fillInfo(*_to_multi_app, _to_local2global_map, _to_problems, _to_positions, _to_transforms);
 }
 
 void
@@ -274,15 +318,8 @@ MultiAppTransfer::getFromMultiAppInfo()
   if (!_from_multi_app)
     mooseError("There is no from_multiapp to get info from");
 
-  for (unsigned int i_app = 0; i_app < _from_multi_app->numGlobalApps(); i_app++)
-  {
-    if (!_from_multi_app->hasLocalApp(i_app))
-      continue;
-
-    _from_local2global_map.push_back(i_app);
-    _from_problems.push_back(&_from_multi_app->appProblemBase(i_app));
-    _from_positions.push_back(_from_multi_app->position(i_app));
-  }
+  fillInfo(
+      *_from_multi_app, _from_local2global_map, _from_problems, _from_positions, _from_transforms);
 }
 
 std::vector<BoundingBox>
@@ -296,8 +333,8 @@ MultiAppTransfer::getFromBoundingBoxes()
     BoundingBox bbox = MeshTools::create_local_bounding_box(*_from_meshes[i]);
 
     // Translate the bounding box to the from domain's position.
-    bbox.first += _from_positions[i];
-    bbox.second += _from_positions[i];
+    bbox.first = (*_from_transforms[i])(bbox.first);
+    bbox.second = (*_from_transforms[i])(bbox.second);
 
     // Cast the bounding box into a pair of points (so it can be put through
     // MPI communication).
@@ -352,8 +389,8 @@ MultiAppTransfer::getFromBoundingBoxes(BoundaryID boundary_id)
     else
     {
       // Translate the bounding box to the from domain's position.
-      bbox.first += _from_positions[i];
-      bbox.second += _from_positions[i];
+      bbox.first = (*_from_transforms[i])(bbox.first);
+      bbox.second = (*_from_transforms[i])(bbox.second);
     }
 
     // Cast the bounding box into a pair of points (so it can be put through

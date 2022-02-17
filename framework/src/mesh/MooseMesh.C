@@ -3487,6 +3487,12 @@ MooseMesh::getCoordSystem(SubdomainID sid) const
     mooseError("Requested subdomain ", sid, " does not exist.");
 }
 
+const std::map<SubdomainID, Moose::CoordinateSystemType> &
+MooseMesh::getCoordSystem() const
+{
+  return _coord_sys;
+}
+
 void
 MooseMesh::setAxisymmetricCoordAxis(const MooseEnum & rz_coord_axis)
 {

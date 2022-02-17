@@ -17,6 +17,7 @@
 #include "libmesh/bounding_box.h"
 
 class MooseMesh;
+class MooseCoordTransform;
 
 /**
  * Base class for all MultiAppTransfer objects.
@@ -127,6 +128,8 @@ protected:
   std::vector<MooseMesh *> _from_meshes;
   std::vector<Point> _to_positions;
   std::vector<Point> _from_positions;
+  std::vector<MooseCoordTransform *> _to_transforms;
+  std::vector<MooseCoordTransform *> _from_transforms;
 
   /// True if displaced mesh is used for the source mesh, otherwise false
   bool _displaced_source_mesh;

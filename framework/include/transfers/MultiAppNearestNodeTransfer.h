@@ -16,6 +16,7 @@ namespace libMesh
 {
 class DofObject;
 }
+class MooseCoordTransform;
 
 /**
  * Copy the value to the target domain from the nearest node in the source domain.
@@ -30,16 +31,6 @@ public:
   virtual void execute() override;
 
 protected:
-  /**
-   * Return the nearest node to the point p.
-   * @param p The point you want to find the nearest node to.
-   * @param distance This will hold the distance between the returned node and p
-   * @param mesh The mesh in which we search for the node
-   * @param local true if we look at local nodes, otherwise we look at all nodes
-   * @return The Node closest to point p.
-   */
-  Node * getNearestNode(const Point & p, Real & distance, MooseMesh * mesh, bool local);
-
   /**
    * Return the distance between the given point and the farthest corner of the
    * given bounding box.

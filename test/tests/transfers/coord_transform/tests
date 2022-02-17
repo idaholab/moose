@@ -1,0 +1,16 @@
+[Tests]
+  design = 'Transfers/index.md'
+  issues = '#12293'
+  [single-app]
+    type = Exodiff
+    input = single-app.i
+    exodiff = single-app_out.e
+    requirement = 'The system shall be able to solve a diffusion problem with a coupled force provided by another variable.'
+  []
+  [multi-app]
+    type = Exodiff
+    input = main-app.i
+    exodiff = main-app_out.e
+    requirement = 'The system shall be able to transfer information from a scaled, rotated, translated application into another application and reproduce the results from an equivalent single-application simulation.'
+  []
+[]

@@ -103,6 +103,7 @@
 #include "BoundaryNodeIntegrityCheckThread.h"
 #include "BoundaryElemIntegrityCheckThread.h"
 #include "NodalBCBase.h"
+#include "MooseCoordTransform.h"
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature.h"
@@ -182,6 +183,38 @@ FEProblemBase::validParams()
       "coord_type", coord_types, "Type of the coordinate system per block param");
   params.addParam<MooseEnum>(
       "rz_coord_axis", rz_coord_axis, "The rotation axis (X | Y) for axisymetric coordinates");
+  params.addParam<Real>("length_units_per_meter",
+                        "How many mesh length units are in a meter, e.g. if your mesh units are "
+                        "centimeters, then this parameter value should be 100.");
+  params.addRangeCheckedParam<Real>(
+      "alpha_rotation",
+      "-180<alpha_rotation<=180",
+      "The number of degrees that the domain should be alpha-rotated using the Euler "
+      "angle ZXZ convention from https://en.wikipedia.org/wiki/Euler_angles#Rotation_matrix in "
+      "order to align with a canonical physical space of your choosing.");
+  params.addRangeCheckedParam<Real>(
+      "beta_rotation",
+      "-180<beta_rotation<=180",
+      "The number of degrees that the domain should be beta-rotated using the Euler "
+      "angle ZXZ convention from https://en.wikipedia.org/wiki/Euler_angles#Rotation_matrix in "
+      "order to align with a canonical physical space of your choosing.");
+  params.addRangeCheckedParam<Real>(
+      "gamma_rotation",
+      "-180<gamma_rotation<=180",
+      "The number of degrees that the domain should be gamma-rotated using the Euler "
+      "angle ZXZ convention from https://en.wikipedia.org/wiki/Euler_angles#Rotation_matrix in "
+      "order to align with a canonical physical space of your choosing.");
+  MooseEnum up_direction("X=0 Y=1 Z=2");
+  params.addParam<MooseEnum>(
+      "up_direction",
+      up_direction,
+      "Specify what axis corresponds to the up direction in physical space (the opposite of the "
+      "gravity vector if you will). If this parameter is provided, we will perform a single 90 "
+      "degree rotation of the domain--if the provided axis is 'x' or 'z', we will not rotate if "
+      "the axis is 'y'--such that a point which was on the provided axis will now lie on the "
+      "y-axis, e.g. the y-axis is our canonical up direction. If you want finer grained control "
+      "than this, please use the 'alpha_rotation', 'beta_rotation', and 'gamma_rotation' "
+      "parameters.");
   params.addParam<bool>(
       "kernel_coverage_check", true, "Set to false to disable kernel->subdomain coverage check");
   params.addParam<bool>(
@@ -339,6 +372,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _num_grid_steps(0),
     _displaced_neighbor_ref_pts("invert_elem_phys use_undisplaced_ref unset", "unset")
 {
+
   //  Initialize static do_derivatives member. We initialize this to true so that all the default AD
   //  things that we setup early in the simulation actually get their derivative vectors initalized.
   //  We will toggle this to false when doing residual evaluations
@@ -391,6 +425,8 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
   setCoordSystem(getParam<std::vector<SubdomainName>>("block"),
                  getParam<MultiMooseEnum>("coord_type"));
   setAxisymmetricCoordAxis(getParam<MooseEnum>("rz_coord_axis"));
+
+  _coord_transform = std::make_unique<MooseCoordTransform>(parameters);
 
   if (isParamValid("restart_file_base"))
   {
