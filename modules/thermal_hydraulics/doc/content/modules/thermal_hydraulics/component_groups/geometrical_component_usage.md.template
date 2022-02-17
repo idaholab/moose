@@ -1,0 +1,7 @@
+The parameters
+[!param](/Components/{{name}}/position),
+[!param](/Components/{{name}}/orientation),
+[!param](/Components/{{name}}/length),
+[!param](/Components/{{name}}/n_elems), and
+[!param](/Components/{{name}}/axial_region_names)
+are discussed in [#mesh_axial].

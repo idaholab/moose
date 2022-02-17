@@ -1,0 +1,19 @@
+The parameters
+[!param](/Components/{{name}}/names),
+[!param](/Components/{{name}}/widths), and
+[!param](/Components/{{name}}/n_part_elems) are discussed in [#mesh_radial].
+
+The parameter [!param](/Components/{{name}}/materials) specifies the names of
+[HeatStructureMaterials](HeatStructureMaterials/index.md) objects to use in
+each region. Each entry in this parameter corresponds to the entries in the parameters
+[!param](/Components/{{name}}/names), [!param](/Components/{{name}}/widths),
+and [!param](/Components/{{name}}/n_part_elems).
+Note that this parameter is optional; if omitted, the user must
+create [Materials](Materials/index.md) supplying the following material properties
+on all blocks (see [#mesh_blocks]) of the heat structure mesh:
+
+| Material Property | Symbol | Description |
+| :- | :- | :- |
+| `density` | $\rho$ | Density \[kg/m$^3$\] |
+| `specific_heat` | $c_p$ | Specific heat capacity \[J/(kg-K)\] |
+| `thermal_conductivity` | $k$ | Thermal conductivity \[W/(m-K)\] |

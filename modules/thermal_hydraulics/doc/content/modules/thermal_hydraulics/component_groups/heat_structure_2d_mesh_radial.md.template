@@ -1,0 +1,14 @@
+The domain may be divided up into any number (say, $n$) of regions in the
+radial direction, which each get their own subdomain names and may use different
+thermal properties. For example, if the domain were a fuel rod, two regions
+could be used: the fuel itself and the cladding. The parameters
+[!param](/Components/{{name}}/names),
+[!param](/Components/{{name}}/widths), and
+[!param](/Components/{{name}}/n_part_elems) are all lists of size
+$n$, with entries corresponding to each radial region, ordered from the side
+closest to the axis of the component. [!param](/Components/{{name}}/names) is a list of names
+to assign to each region, which will be used to create subdomain names and to
+refer to the regions in some objects. The radial width (thickness) of each region
+is specified using [!param](/Components/{{name}}/widths), and the number of
+radial elements in each region is given by
+[!param](/Components/{{name}}/n_part_elems).
