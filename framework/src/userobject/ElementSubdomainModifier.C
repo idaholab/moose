@@ -73,6 +73,7 @@ ElementSubdomainModifier::initialize()
   _moved_elems.clear();
   _moved_displaced_elems.clear();
   _moved_nodes.clear();
+  _moving_boundary_subdomains.clear();
 }
 
 void
@@ -84,6 +85,8 @@ ElementSubdomainModifier::execute()
   if (subdomain_id != std::numeric_limits<SubdomainID>::max() &&
       _current_elem->subdomain_id() != subdomain_id)
   {
+    _moving_boundary_subdomains.insert(subdomain_id);
+    _moving_boundary_subdomains.insert(_current_elem->subdomain_id());
     // Current element ID, used to index both the element on the displaced and undisplaced meshes.
     dof_id_type elem_id = _current_elem->id();
     // Change the element's subdomain
@@ -180,6 +183,8 @@ ElementSubdomainModifier::updateBoundaryInfo(MooseMesh & mesh,
   if (!_moving_boundary_specified)
     return;
 
+  if (_moving_boundary_subdomains.size())
+    mooseAssert(boundary_ids.size() == 2, "The number of moving subdomains should be two");
   /*
     There are a couple of steps to reconstruct the moving boundary.
     1) Retrieve all the active elements associated with the moving boundary
@@ -195,6 +200,11 @@ ElementSubdomainModifier::updateBoundaryInfo(MooseMesh & mesh,
     7) Sync boundary information
   */
   BoundaryInfo & bnd_info = mesh.getMesh().get_boundary_info();
+  /*
+   * Names can be deleted in the previous step if there is no side on this boundary
+   */
+  bnd_info.sideset_name(_moving_boundary_id) = _moving_boundary_name;
+  bnd_info.nodeset_name(_moving_boundary_id) = _moving_boundary_name;
   auto & elem_side_bnd_ids = bnd_info.get_sideset_map();
   std::set<const Elem *> boundary_elem_candidates;
   std::vector<std::pair<const Elem *, unsigned int>> to_be_cleared;
@@ -248,7 +258,21 @@ ElementSubdomainModifier::updateBoundaryInfo(MooseMesh & mesh,
       if (neighbor && neighbor->active() && neighbor != libMesh::remote_elem)
       {
         if (neighbor->subdomain_id() != elem->subdomain_id())
-          bnd_info.add_side(elem, side, _moving_boundary_id);
+        {
+          /*
+           * If there is no new moved element, and then the elements from the original
+           * moving boundary should be safe to use
+           * If there are some new moved elements, then we need to check whether or not the
+           * interface is between the moving subdomains
+           */
+          if (!_moving_boundary_subdomains.size() ||
+              (_moving_boundary_subdomains.size() &&
+               _moving_boundary_subdomains.find(neighbor->subdomain_id()) !=
+                   _moving_boundary_subdomains.end() &&
+               _moving_boundary_subdomains.find(elem->subdomain_id()) !=
+                   _moving_boundary_subdomains.end()))
+            bnd_info.add_side(elem, side, _moving_boundary_id);
+        }
       }
       /* If elem's neighbor is not active, we need to check family members of the neighbor.
          In this case, the neighbor's children are on the current side and the children are
