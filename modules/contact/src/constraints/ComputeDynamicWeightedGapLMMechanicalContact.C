@@ -23,11 +23,19 @@ ComputeDynamicWeightedGapLMMechanicalContact::validParams()
   InputParameters params = ComputeWeightedGapLMMechanicalContact::validParams();
   params.addClassDescription(
       "Computes the normal contact mortar constraints for dynamic simulations");
-  params.addRangeCheckedParam<Real>("capture_tolerance",
+  params.addParam<Real>("capture_tolerance",
+                        1.0e-5,
+                        "Parameter describing a gap threshold for the application of "
+                        "the persistency constraint in dynamic simulations.");
+  params.addCoupledVar("wear_depth", "The name of the mortar auxiliary variable that ");
+  /*
+   *   params.addRangeCheckedParam<Real>("capture_tolerance",
                                     1.0e-5,
                                     "capture_tolerance>=0",
                                     "Parameter describing a gap threshold for the application of "
                                     "the persistency constraint in dynamic simulations.");
+  params.addCoupledVar("wear_depth", "The name of the mortar auxiliary variable that ");
+  */
   params.addRequiredRangeCheckedParam<Real>(
       "newmark_beta", "newmark_beta > 0", "Beta parameter for the Newmark time integrator");
   params.addRequiredRangeCheckedParam<Real>(
@@ -46,6 +54,9 @@ ComputeDynamicWeightedGapLMMechanicalContact::ComputeDynamicWeightedGapLMMechani
     _primary_y_dot(adCoupledNeighborValueDot("disp_y")),
     _secondary_z_dot(_has_disp_z ? &adCoupledDot("disp_z") : nullptr),
     _primary_z_dot(_has_disp_z ? &adCoupledNeighborValueDot("disp_z") : nullptr),
+    _wear_depth(coupledValueLower("wear_depth")),
+    _wear_depth_old(getVar("wear_depth", 0)->slnLowerOld()),
+    _has_wear(isParamValid("wear_depth")),
     _newmark_beta(getParam<Real>("newmark_beta")),
     _newmark_gamma(getParam<Real>("newmark_gamma"))
 {
@@ -108,11 +119,17 @@ ComputeDynamicWeightedGapLMMechanicalContact::computeQpIProperties()
                               ? static_cast<const DofObject *>(_lower_secondary_elem->node_ptr(_i))
                               : static_cast<const DofObject *>(_lower_secondary_elem);
 
-  _dof_to_weighted_gap[dof].first += _test[_i][_qp] * _qp_gap_nodal * _normals[_i];
+  // Regular normal contact constraint: Use before contact is established for contact detection
+  _dof_to_weighted_gap[dof].first += _test[_i][_qp] * (_qp_gap_nodal * _normals[_i]);
 
+  // Integrated part of the "persistency" constraint
   _dof_to_weighted_gap_dynamics[dof] += _test[_i][_qp] * _qp_gap_nodal_dynamics * _normals[_i];
-
   _dof_to_velocity[dof] += _test[_i][_qp] * _qp_velocity * _normals[_i];
+
+  _dof_to_nodal_wear_depth[dof] += _test[_i][_qp] * _wear_depth[_qp] * _JxW_msm[_qp] * _coord[_qp];
+
+  //  if (_has_wear)
+  //    _dof_to_weighted_gap[dof].first += _dof_to_nodal_wear_depth[dof];
 
   if (_normalize_c)
     _dof_to_weighted_gap[dof].second += _test[_i][_qp] * _qp_factor;
@@ -129,6 +146,9 @@ ComputeDynamicWeightedGapLMMechanicalContact::timestepSetup()
 
   for (auto & map_pr : _dof_to_velocity)
     _dof_to_old_velocity.emplace(map_pr);
+
+  for (auto & map_pr : _dof_to_nodal_wear_depth)
+    _dof_to_nodal_old_wear_depth.emplace(map_pr);
 }
 
 void
@@ -137,6 +157,10 @@ ComputeDynamicWeightedGapLMMechanicalContact::residualSetup()
   ComputeWeightedGapLMMechanicalContact::residualSetup();
   _dof_to_weighted_gap_dynamics.clear();
   _dof_to_velocity.clear();
+
+  // Wear
+  _dof_to_nodal_wear_depth.clear();
+  _dof_to_nodal_old_wear_depth.clear();
 }
 
 void
@@ -151,6 +175,12 @@ ComputeDynamicWeightedGapLMMechanicalContact::post()
   {
     if (pr.first->processor_id() != this->processor_id())
       continue;
+
+    //
+    _dof_to_weighted_gap[pr.first].first += _dof_to_nodal_wear_depth[pr.first];
+    _dof_to_weighted_gap_dynamics[pr.first] +=
+        _newmark_gamma / _newmark_beta * _dof_to_nodal_wear_depth[pr.first] / _dt;
+    //
 
     const auto is_dof_on_map = _dof_to_old_weighted_gap.find(pr.first);
 
@@ -185,6 +215,11 @@ ComputeDynamicWeightedGapLMMechanicalContact::incorrectEdgeDroppingPost(
         (pr.first->processor_id() != this->processor_id()))
       continue;
 
+    //
+    _dof_to_weighted_gap[pr.first].first += _dof_to_nodal_wear_depth[pr.first];
+    _dof_to_weighted_gap_dynamics[pr.first] +=
+        _newmark_gamma / _newmark_beta * _dof_to_nodal_wear_depth[pr.first] / _dt;
+    //
     const auto is_dof_on_map = _dof_to_old_weighted_gap.find(pr.first);
 
     // If is_dof_on_map isn't on map, it means it's an initial step

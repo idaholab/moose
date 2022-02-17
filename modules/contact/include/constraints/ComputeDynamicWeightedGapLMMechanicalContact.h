@@ -52,6 +52,15 @@ protected:
   const ADVariableValue * _secondary_z_dot;
   const ADVariableValue * _primary_z_dot;
 
+  /// Wear depth to include contact
+  const VariableValue & _wear_depth;
+
+  /// Wear depth to include contact (previous step)
+  const VariableValue & _wear_depth_old;
+
+  /// Flag to determine whether wear needs to be included in the contact constraints
+  const bool _has_wear;
+
   /// A map from dof-object to the old weighted gap
   std::unordered_map<const DofObject *, ADReal> _dof_to_old_weighted_gap;
 
@@ -74,4 +83,10 @@ protected:
 
   // Newmark-beta gamma parameter
   const Real _newmark_gamma;
+
+  /// A map from node to wear in this step
+  std::unordered_map<const DofObject *, ADReal> _dof_to_nodal_wear_depth;
+
+  /// A map from node to wear in old step
+  std::unordered_map<const DofObject *, ADReal> _dof_to_nodal_old_wear_depth;
 };
