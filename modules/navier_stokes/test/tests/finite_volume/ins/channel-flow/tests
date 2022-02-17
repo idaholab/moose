@@ -152,7 +152,7 @@
     exodiff = one-elem-wide-channel_out.e
     issues = '#16822'
     requirement = 'The system shall be able to compute gradients, when extrapolated boundary face values make the gradient computation singular, by catching the singularity error and re-running without doing boundary face value extrapolation.'
-    # currently throws a deprecation warning which is non-deterministic with threads, see #20326
+    # currently throws a warning which is non-deterministic with threads, see #20326
     max_threads = 1
   []
   [discontinuous]
