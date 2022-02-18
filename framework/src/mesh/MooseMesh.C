@@ -2455,26 +2455,50 @@ MooseMesh::sideWithBoundaryID(const Elem * const elem, const BoundaryID boundary
   return getMesh().get_boundary_info().side_with_boundary_id(elem, boundary_id);
 }
 
-MeshBase::const_node_iterator
+MeshBase::node_iterator
 MooseMesh::localNodesBegin()
 {
   return getMesh().local_nodes_begin();
 }
 
-MeshBase::const_node_iterator
+MeshBase::node_iterator
 MooseMesh::localNodesEnd()
 {
   return getMesh().local_nodes_end();
 }
 
-MeshBase::const_element_iterator
+MeshBase::const_node_iterator
+MooseMesh::localNodesBegin() const
+{
+  return getMesh().local_nodes_begin();
+}
+
+MeshBase::const_node_iterator
+MooseMesh::localNodesEnd() const
+{
+  return getMesh().local_nodes_end();
+}
+
+MeshBase::element_iterator
 MooseMesh::activeLocalElementsBegin()
 {
   return getMesh().active_local_elements_begin();
 }
 
-const MeshBase::const_element_iterator
+const MeshBase::element_iterator
 MooseMesh::activeLocalElementsEnd()
+{
+  return getMesh().active_local_elements_end();
+}
+
+MeshBase::const_element_iterator
+MooseMesh::activeLocalElementsBegin() const
+{
+  return getMesh().active_local_elements_begin();
+}
+
+const MeshBase::const_element_iterator
+MooseMesh::activeLocalElementsEnd() const
 {
   return getMesh().active_local_elements_end();
 }

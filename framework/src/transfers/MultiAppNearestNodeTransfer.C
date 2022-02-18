@@ -756,7 +756,7 @@ MultiAppNearestNodeTransfer::getLocalEntitiesAndComponents(
 {
   mooseAssert(mesh, "mesh should not be a nullptr");
   mooseAssert(local_entities.empty(), "local_entities should be empty");
-  const MeshBase & mesh_base = mesh->getMesh();
+  MeshBase & mesh_base = mesh->getMesh();
 
   if (isParamValid("source_boundary"))
   {
@@ -846,7 +846,7 @@ MultiAppNearestNodeTransfer::getLocalEntities(
     MooseMesh * mesh, std::vector<std::pair<Point, DofObject *>> & local_entities, bool is_nodal)
 {
   mooseAssert(local_entities.empty(), "local_entities should be empty");
-  const MeshBase & mesh_base = mesh->getMesh();
+  MeshBase & mesh_base = mesh->getMesh();
 
   if (isParamValid("source_boundary"))
   {
@@ -889,7 +889,7 @@ const std::vector<Node *> &
 MultiAppNearestNodeTransfer::getTargetLocalNodes(const unsigned int to_problem_id)
 {
   _target_local_nodes.clear();
-  const MeshBase & to_mesh = _to_meshes[to_problem_id]->getMesh();
+  MeshBase & to_mesh = _to_meshes[to_problem_id]->getMesh();
 
   if (isParamValid("target_boundary"))
   {

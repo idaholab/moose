@@ -282,14 +282,18 @@ public:
   /**
    * Calls local_nodes_begin/end() on the underlying libMesh mesh object.
    */
-  MeshBase::const_node_iterator localNodesBegin();
-  MeshBase::const_node_iterator localNodesEnd();
+  MeshBase::node_iterator localNodesBegin();
+  MeshBase::node_iterator localNodesEnd();
+  MeshBase::const_node_iterator localNodesBegin() const;
+  MeshBase::const_node_iterator localNodesEnd() const;
 
   /**
    * Calls active_local_nodes_begin/end() on the underlying libMesh mesh object.
    */
-  MeshBase::const_element_iterator activeLocalElementsBegin();
-  const MeshBase::const_element_iterator activeLocalElementsEnd();
+  MeshBase::element_iterator activeLocalElementsBegin();
+  const MeshBase::element_iterator activeLocalElementsEnd();
+  MeshBase::const_element_iterator activeLocalElementsBegin() const;
+  const MeshBase::const_element_iterator activeLocalElementsEnd() const;
 
   /**
    * Calls n_nodes/elem() on the underlying libMesh mesh object.
