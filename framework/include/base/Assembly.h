@@ -1715,6 +1715,20 @@ public:
                           LocalFunctor & local_functor);
 
   /**
+   * Process the supplied residual values. This is a mirror of of the non-templated version of \p
+   * processResiduals except that it's meant for \emph only processing residuals (and not their
+   * derivatives/Jacobian). We supply this API such that residual objects that leverage the AD
+   * version of this method when computing the Jacobian (or residual + Jacobian) can mirror the same
+   * behavior when doing pure residual evaluations, such as when evaluting linear residuals during
+   * (P)JFNK. This method will call \p constrain_element_vector on the supplied residuals
+   */
+  template <typename T>
+  void processResiduals(const std::vector<T> & residuals,
+                        const std::vector<dof_id_type> & row_indices,
+                        const std::set<TagID> & vector_tags,
+                        Real scaling_factor);
+
+  /**
    * Process the value and \p derivatives() data of a vector of \p ADReals. When using global
    * indexing, this method simply caches the value (residual) for the provided \p vector_tags and
    * derivative values (Jacobian) for the corresponding column indices for the provided \p
@@ -1725,7 +1739,8 @@ public:
   void processResiduals(const std::vector<ADReal> & residuals,
                         const std::vector<dof_id_type> & row_indices,
                         const std::set<TagID> & vector_tags,
-                        const std::set<TagID> & matrix_tags);
+                        const std::set<TagID> & matrix_tags,
+                        Real scaling_factor);
 
   /**
    * Process the \p derivatives() data of a vector of \p ADReals. When using global indexing, this
@@ -1742,16 +1757,22 @@ public:
   void processDerivatives(const std::vector<ADReal> & residuals,
                           const std::vector<dof_id_type> & row_indices,
                           const std::set<TagID> & matrix_tags,
+                          Real scaling_factor,
                           LocalFunctor & local_functor);
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
-  void processUnconstrainedDerivatives(const std::vector<ADReal> & residuals,
-                                       const std::vector<dof_id_type> & row_indices,
-                                       const std::set<TagID> & matrix_tags);
+  /**
+   * Same as \p processResiduals with the exception that constrain_element_vector and
+   * constrain_element_matrix will not be applied. This should only be used when the contributions
+   * of these residuals to libmesh constrained degrees of freedom should be 0, e.g. if the residuals
+   * correspond to mortar constraint residuals along faces such that interior hanging nodes will not
+   * feel the contribution
+   */
   void processUnconstrainedResiduals(const std::vector<ADReal> & residuals,
                                      const std::vector<dof_id_type> & row_indices,
                                      const std::set<TagID> & vector_tags,
-                                     const std::set<TagID> & matrix_tags);
+                                     const std::set<TagID> & matrix_tags,
+                                     Real scaling_factor);
 
   /**
    * signals this object that a vector containing variable scaling factors should be used when
@@ -2840,6 +2861,11 @@ void
 Assembly::processDerivatives(const std::vector<ADReal> & residuals,
                              const std::vector<dof_id_type> & input_row_indices,
                              const std::set<TagID> & matrix_tags,
+                             const Real
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+                                 scaling_factor
+#endif
+                             ,
                              LocalFunctor &
 #ifndef MOOSE_GLOBAL_AD_INDEXING
                                  local_functor
@@ -2847,10 +2873,40 @@ Assembly::processDerivatives(const std::vector<ADReal> & residuals,
 )
 {
 #ifdef MOOSE_GLOBAL_AD_INDEXING
-  processResiduals(residuals, input_row_indices, {}, matrix_tags);
+  processResiduals(residuals, input_row_indices, {}, matrix_tags, scaling_factor);
 #else
   local_functor(residuals, input_row_indices, matrix_tags);
 #endif
+}
+
+template <typename T>
+void
+Assembly::processResiduals(const std::vector<T> & residuals,
+                           const std::vector<dof_id_type> & input_row_indices,
+                           const std::set<TagID> & vector_tags,
+                           const Real scaling_factor)
+{
+  if (!computingResidual() || vector_tags.empty())
+    return;
+
+  mooseAssert(residuals.size() == input_row_indices.size(),
+              "The number of residuals should match the number of dof indices");
+  mooseAssert(residuals.size() >= 1, "Why you calling me with no residuals?");
+
+  // Need to make a copy because we might modify this in constrain_element_vector
+  std::vector<dof_id_type> row_indices = input_row_indices;
+
+  DenseVector<Number> element_vector(row_indices.size());
+  for (const auto i : index_range(row_indices))
+    element_vector(i) = MetaPhysicL::raw_value(residuals[i]) * scaling_factor;
+
+  // At time of writing, this method doesn't do anything with the asymmetric_constraint_rows
+  // argument, but we set it to false to be consistent with processLocalResidual
+  _dof_map.constrain_element_vector(
+      element_vector, row_indices, /*asymmetric_constraint_rows=*/false);
+
+  for (const auto i : index_range(row_indices))
+    cacheResidual(row_indices[i], element_vector(i), vector_tags);
 }
 
 inline const Real &

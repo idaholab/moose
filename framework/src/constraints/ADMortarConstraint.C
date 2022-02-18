@@ -73,23 +73,27 @@ ADMortarConstraint::computeJacobian(Moose::MortarType mortar_type)
   typedef Moose::MortarType MType;
   std::vector<JType> jacobian_types;
   std::vector<dof_id_type> dof_indices;
+  Real scaling_factor = 1;
 
   switch (mortar_type)
   {
     case MType::Secondary:
       dof_indices = _secondary_var.dofIndices();
       jacobian_types = {JType::SecondarySecondary, JType::SecondaryPrimary, JType::SecondaryLower};
+      scaling_factor = _secondary_var.scalingFactor();
       break;
 
     case MType::Primary:
       dof_indices = _primary_var.dofIndicesNeighbor();
       jacobian_types = {JType::PrimarySecondary, JType::PrimaryPrimary, JType::PrimaryLower};
+      scaling_factor = _primary_var.scalingFactor();
       break;
 
     case MType::Lower:
       mooseAssert(_var, "The Lagrange Multiplier should be non-null if this is getting called");
       dof_indices = _var->dofIndicesLower();
       jacobian_types = {JType::LowerSecondary, JType::LowerPrimary, JType::LowerLower};
+      scaling_factor = _var->scalingFactor();
       break;
   }
   test_space_size = dof_indices.size();
@@ -100,7 +104,8 @@ ADMortarConstraint::computeJacobian(Moose::MortarType mortar_type)
       residuals[_i] += _JxW_msm[_qp] * _coord[_qp] * computeQpResidual(mortar_type);
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
-  _assembly.processUnconstrainedResiduals(residuals, dof_indices, _vector_tags, _matrix_tags);
+  _assembly.processUnconstrainedResiduals(
+      residuals, dof_indices, _vector_tags, _matrix_tags, scaling_factor);
 #else
   auto local_functor = [&](const std::vector<ADReal> & input_residuals,
                            const std::vector<dof_id_type> &,
@@ -171,7 +176,7 @@ ADMortarConstraint::computeJacobian(Moose::MortarType mortar_type)
     }
   };
 
-  _assembly.processDerivatives(residuals, dof_indices, _matrix_tags, local_functor);
+  _assembly.processDerivatives(residuals, dof_indices, _matrix_tags, scaling_factor, local_functor);
 #endif
 }
 

@@ -4628,59 +4628,33 @@ Assembly::modifyArbitraryWeights(const std::vector<Real> & weights)
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
 void
-Assembly::processUnconstrainedDerivatives(const std::vector<ADReal> & residuals,
-                                          const std::vector<dof_id_type> & row_indices,
-                                          const std::set<TagID> & matrix_tags)
-{
-  mooseAssert(residuals.size() == row_indices.size(),
-              "The number of residuals should match the number of dof indices");
-  mooseAssert(residuals.size() >= 1, "Why you calling me with no residuals?");
-
-  for (const auto i : index_range(row_indices))
-  {
-    const auto row_index = row_indices[i];
-    const Real scalar = _scaling_vector ? (*_scaling_vector)(row_index) : 1.;
-
-    const auto & sparse_derivatives = residuals[i].derivatives();
-    const auto & column_indices = sparse_derivatives.nude_indices();
-    const auto & raw_derivatives = sparse_derivatives.nude_data();
-
-    for (std::size_t j = 0; j < column_indices.size(); ++j)
-      cacheJacobian(row_index, column_indices[j], raw_derivatives[j] * scalar, matrix_tags);
-  }
-}
-
-void
 Assembly::processUnconstrainedResiduals(const std::vector<ADReal> & residuals,
                                         const std::vector<dof_id_type> & row_indices,
                                         const std::set<TagID> & vector_tags,
-                                        const std::set<TagID> & matrix_tags)
+                                        const std::set<TagID> & matrix_tags,
+                                        const Real scaling_factor)
 {
   mooseAssert(residuals.size() == row_indices.size(),
               "The number of residuals should match the number of dof indices");
   mooseAssert(residuals.size() >= 1, "Why you calling me with no residuals?");
-
-  std::vector<Real> scaling_factors(row_indices.size());
-  for (const auto i : index_range(row_indices))
-    scaling_factors[i] = _scaling_vector ? (*_scaling_vector)(row_indices[i]) : 1.;
 
   // First handle the residuals
   if (computingResidual() && !vector_tags.empty())
     for (const auto i : index_range(row_indices))
-      cacheResidual(row_indices[i], residuals[i].value() * scaling_factors[i], vector_tags);
+      cacheResidual(row_indices[i], residuals[i].value() * scaling_factor, vector_tags);
 
   if (computingJacobian() && !matrix_tags.empty())
     for (const auto i : index_range(row_indices))
     {
       const auto row_index = row_indices[i];
-      const auto scalar = scaling_factors[i];
 
       const auto & sparse_derivatives = residuals[i].derivatives();
       const auto & column_indices = sparse_derivatives.nude_indices();
       const auto & raw_derivatives = sparse_derivatives.nude_data();
 
       for (std::size_t j = 0; j < column_indices.size(); ++j)
-        cacheJacobian(row_index, column_indices[j], raw_derivatives[j] * scalar, matrix_tags);
+        cacheJacobian(
+            row_index, column_indices[j], raw_derivatives[j] * scaling_factor, matrix_tags);
     }
 }
 #endif
@@ -4858,34 +4832,18 @@ void
 Assembly::processResiduals(const std::vector<ADReal> & residuals,
                            const std::vector<dof_id_type> & input_row_indices,
                            const std::set<TagID> & vector_tags,
-                           const std::set<TagID> & matrix_tags)
+                           const std::set<TagID> & matrix_tags,
+                           const Real scaling_factor)
 {
-  mooseAssert(residuals.size() == input_row_indices.size(),
-              "The number of residuals should match the number of dof indices");
-  mooseAssert(residuals.size() >= 1, "Why you calling me with no residuals?");
-
-  std::vector<Real> scaling_factors(input_row_indices.size());
-  for (const auto i : index_range(input_row_indices))
-    scaling_factors[i] = _scaling_vector ? (*_scaling_vector)(input_row_indices[i]) : 1.;
-
   // First handle the residuals
-  if (computingResidual() && !vector_tags.empty())
-  {
-    // Need to make a copy because we might modify this in constrain_element_vector
-    std::vector<dof_id_type> row_indices = input_row_indices;
+  processResiduals(residuals, input_row_indices, vector_tags, scaling_factor);
 
-    DenseVector<Number> element_vector(row_indices.size());
-    for (const auto i : index_range(row_indices))
-      element_vector(i) = MetaPhysicL::raw_value(residuals[i]);
+  //
+  // Now the Jacobian
+  //
 
-    // At time of writing, this method doesn't do anything with the asymmetric_constraint_rows
-    // argument, but we set it to false to be consistent with processLocalResidual
-    _dof_map.constrain_element_vector(
-        element_vector, row_indices, /*asymmetric_constraint_rows=*/false);
-
-    for (const auto i : index_range(row_indices))
-      cacheResidual(row_indices[i], element_vector(i), vector_tags);
-  }
+  if (!computingJacobian() || matrix_tags.empty())
+    return;
 
   const auto & compare_dofs = residuals[0].derivatives().nude_indices();
 #ifndef NDEBUG
@@ -4906,39 +4864,34 @@ Assembly::processResiduals(const std::vector<ADReal> & residuals,
 
   // If there's no derivatives then there is nothing to do. Moreover, if we pass zero size column
   // indices to constrain_element_matrix then we will potentially get errors out of BLAS
-  if (!column_indices.size() || !computingJacobian() || matrix_tags.empty())
+  if (!column_indices.size())
     return;
 
-  // Now the Jacobian
+  // Need to make a copy because we might modify this in constrain_element_matrix
+  std::vector<dof_id_type> row_indices = input_row_indices;
+
+  DenseMatrix<Number> element_matrix(row_indices.size(), column_indices.size());
+  for (const auto i : index_range(row_indices))
   {
-    // Need to make a copy because we might modify this in constrain_element_matrix
-    std::vector<dof_id_type> row_indices = input_row_indices;
+    const auto & sparse_derivatives = residuals[i].derivatives();
 
-    DenseMatrix<Number> element_matrix(row_indices.size(), column_indices.size());
-    for (const auto i : index_range(row_indices))
-    {
-      const auto row_index = row_indices[i];
-      const Real scalar = _scaling_vector ? (*_scaling_vector)(row_index) : 1.;
-
-      const auto & sparse_derivatives = residuals[i].derivatives();
-
-      for (const auto j : index_range(column_indices))
-        element_matrix(i, j) = sparse_derivatives[column_indices[j]] * scalar;
-    }
-
-    _dof_map.constrain_element_matrix(element_matrix, row_indices, column_indices);
-
-    for (const auto i : index_range(row_indices))
-      for (const auto j : index_range(column_indices))
-        cacheJacobian(row_indices[i], column_indices[j], element_matrix(i, j), matrix_tags);
+    for (const auto j : index_range(column_indices))
+      element_matrix(i, j) = sparse_derivatives[column_indices[j]] * scaling_factor;
   }
+
+  _dof_map.constrain_element_matrix(element_matrix, row_indices, column_indices);
+
+  for (const auto i : index_range(row_indices))
+    for (const auto j : index_range(column_indices))
+      cacheJacobian(row_indices[i], column_indices[j], element_matrix(i, j), matrix_tags);
 }
 #else
 void
 Assembly::processResiduals(const std::vector<ADReal> &,
                            const std::vector<dof_id_type> &,
                            const std::set<TagID> &,
-                           const std::set<TagID> &)
+                           const std::set<TagID> &,
+                           Real)
 {
   mooseError("This method should not be used if using local AD indexing");
 }

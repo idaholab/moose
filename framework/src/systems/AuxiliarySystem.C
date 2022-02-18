@@ -923,12 +923,6 @@ AuxiliarySystem::computeNodalVarsHelper(
   }
 }
 
-bool
-AuxiliarySystem::residAndJacobianTogether() const
-{
-  mooseError("The aux system shouldn't be queried for this information");
-}
-
 template void AuxiliarySystem::computeElementalVarsHelper<AuxKernel>(
     const MooseObjectWarehouse<AuxKernel> &,
     const std::vector<std::vector<MooseVariableFEBase *>> &);

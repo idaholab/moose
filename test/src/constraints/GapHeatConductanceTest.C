@@ -82,23 +82,27 @@ GapHeatConductanceTest::computeJacobian(Moose::MortarType mortar_type)
   typedef Moose::MortarType MType;
   std::vector<JType> jacobian_types;
   std::vector<dof_id_type> dof_indices;
+  Real scaling_factor = 1;
 
   switch (mortar_type)
   {
     case MType::Secondary:
       dof_indices = _secondary_var.dofIndices();
       jacobian_types = {JType::SecondarySecondary, JType::SecondaryPrimary, JType::SecondaryLower};
+      scaling_factor = _secondary_var.scalingFactor();
       break;
 
     case MType::Primary:
       dof_indices = _primary_var.dofIndicesNeighbor();
       jacobian_types = {JType::PrimarySecondary, JType::PrimaryPrimary, JType::PrimaryLower};
+      scaling_factor = _primary_var.scalingFactor();
       break;
 
     case MType::Lower:
       if (_var)
         dof_indices = _var->dofIndicesLower();
       jacobian_types = {JType::LowerSecondary, JType::LowerPrimary, JType::LowerLower};
+      scaling_factor = _var->scalingFactor();
       break;
   }
   test_space_size = dof_indices.size();
@@ -118,7 +122,8 @@ GapHeatConductanceTest::computeJacobian(Moose::MortarType mortar_type)
 
   trimInteriorNodeDerivatives(secondary_ip_lowerd_map, var_array, residuals, true);
   trimInteriorNodeDerivatives(primary_ip_lowerd_map, var_array, residuals, false);
-  _assembly.processUnconstrainedDerivatives(residuals, dof_indices, _matrix_tags);
+  _assembly.processUnconstrainedResiduals(
+      residuals, dof_indices, _vector_tags, _matrix_tags, scaling_factor);
 
 #else
 
@@ -191,6 +196,6 @@ GapHeatConductanceTest::computeJacobian(Moose::MortarType mortar_type)
     }
   };
 
-  _assembly.processDerivatives(residuals, dof_indices, _matrix_tags, local_functor);
+  _assembly.processDerivatives(residuals, dof_indices, _matrix_tags, scaling_factor, local_functor);
 #endif
 }

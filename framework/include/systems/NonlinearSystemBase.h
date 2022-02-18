@@ -640,10 +640,9 @@ public:
   TagID systemMatrixTag() const override { return _Ke_system_tag; }
 
   /**
-   * Set whether to compute the residual and Jacobian together
+   * Call this method if you want the residual and Jacobian to be computed simultaneously
    */
-  void residAndJacobianTogether(bool resid_and_jacobian_together);
-  bool residAndJacobianTogether() const override { return _resid_and_jacobian_together; }
+  virtual void residAndJacobianTogether() = 0;
 
   bool computeScalingOnce() const { return _compute_scaling_once; }
   void computeScalingOnce(bool compute_scaling_once)
@@ -972,9 +971,6 @@ protected:
   /// A diagonal matrix used for computing scaling
   std::unique_ptr<DiagonalMatrix<Number>> _scaling_matrix;
 
-  /// Whether to compute the residual and Jacobian together
-  bool _resid_and_jacobian_together;
-
 private:
   /**
    * Finds the implicit sparsity graph between geometrically related dofs.
@@ -1013,9 +1009,3 @@ private:
   /// The number of scaling groups
   std::size_t _num_scaling_groups;
 };
-
-inline void
-NonlinearSystemBase::residAndJacobianTogether(bool resid_and_jacobian_together)
-{
-  _resid_and_jacobian_together = resid_and_jacobian_together;
-}

@@ -69,6 +69,8 @@ public:
 
   virtual void attachPreconditioner(Preconditioner<Number> * preconditioner) override;
 
+  void residAndJacobianTogether() override;
+
 protected:
   void computeScalingJacobian() override;
   void computeScalingResidual() override;

@@ -161,8 +161,6 @@ public:
   const ExecuteMooseObjectWarehouse<VectorAuxKernel> & elemVectorAuxWarehouse() const;
   const ExecuteMooseObjectWarehouse<ArrayAuxKernel> & elemArrayAuxWarehouse() const;
 
-  bool residAndJacobianTogether() const override;
-
 protected:
   void computeScalarVars(ExecFlagType type);
   void computeNodalVars(ExecFlagType type);

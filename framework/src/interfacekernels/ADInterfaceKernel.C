@@ -195,12 +195,13 @@ ADInterfaceKernelTempl<T>::computeElemNeighJacobian(Moose::DGJacobianType type)
     }
   };
 
-  _assembly.processDerivatives(residuals,
-                               (type == Moose::ElementElement || type == Moose::ElementNeighbor)
-                                   ? _var.dofIndices()
-                                   : _neighbor_var.dofIndicesNeighbor(),
-                               _matrix_tags,
-                               local_functor);
+  const bool element_var_is_var = (type == Moose::ElementElement || type == Moose::ElementNeighbor);
+  _assembly.processDerivatives(
+      residuals,
+      element_var_is_var ? _var.dofIndices() : _neighbor_var.dofIndicesNeighbor(),
+      _matrix_tags,
+      element_var_is_var ? _var.scalingFactor() : _neighbor_var.scalingFactor(),
+      local_functor);
 }
 
 template <typename T>
@@ -313,11 +314,13 @@ ADInterfaceKernelTempl<T>::computeOffDiagElemNeighJacobian(Moose::DGJacobianType
     }
   };
 
-  _assembly.processDerivatives(residuals,
-                               type == Moose::ElementElement ? _var.dofIndices()
-                                                             : _neighbor_var.dofIndicesNeighbor(),
-                               _matrix_tags,
-                               local_functor);
+  // We assert earlier that the type cannot be Moose::ElementNeighbor (nor Moose::NeighborElement)
+  _assembly.processDerivatives(
+      residuals,
+      type == Moose::ElementElement ? _var.dofIndices() : _neighbor_var.dofIndicesNeighbor(),
+      _matrix_tags,
+      type == Moose::ElementElement ? _var.scalingFactor() : _neighbor_var.scalingFactor(),
+      local_functor);
 }
 
 template <typename T>

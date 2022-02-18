@@ -212,6 +212,7 @@ ADDGKernel::computeElemNeighJacobian(Moose::DGJacobianType type)
                                type == Moose::ElementElement ? _var.dofIndices()
                                                              : _var.dofIndicesNeighbor(),
                                _matrix_tags,
+                               _var.scalingFactor(),
                                local_functor);
 
   if (_has_diag_save_in)
@@ -326,5 +327,6 @@ ADDGKernel::computeOffDiagElemNeighJacobian(Moose::DGJacobianType type, const Mo
                                type == Moose::ElementElement ? _var.dofIndices()
                                                              : _var.dofIndicesNeighbor(),
                                _matrix_tags,
+                               _var.scalingFactor(),
                                local_functor);
 }

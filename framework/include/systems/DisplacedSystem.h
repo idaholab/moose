@@ -237,8 +237,6 @@ public:
   using SystemBase::addTimeIntegrator;
   void addTimeIntegrator(std::shared_ptr<TimeIntegrator> ti) override;
 
-  bool residAndJacobianTogether() const override;
-
 protected:
   NumericVector<Number> & solutionInternal() const override
   {

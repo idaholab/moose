@@ -166,6 +166,8 @@ public:
 
   virtual void turnOffJacobian() override;
 
+  void residAndJacobianTogether() override;
+
 protected:
   virtual void postAddResidualObject(ResidualObject & object) override;
 
