@@ -180,6 +180,7 @@ e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.7722V'
     type = CSVDiff
     input = 'mixing_seawater_step2.i'
     csvdiff = 'mixing_seawater_step2_out.csv'
+    rel_err = 1.4E-5
     requirement = "The geochemistry module shall be able to record molalities as AuxVariables in order to assist with fluid-mixing problems, including the case with precipitates"
     issues = '#15330'
     design = 'pickup.md'
