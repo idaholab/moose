@@ -37,6 +37,7 @@
     requirement = 'The system shall be able to model no-slip conditions in a channel using incompressible Navier Stokes action.'
     abs_zero = 1e-9
     ad_indexing_type = 'global'
+    issues = '#19472'
     cli_args = '-pc_type lu -pc_factor_shift_type NONZERO'
     valgrind = HEAVY
   []
@@ -121,6 +122,15 @@
     csvdiff = 2d-rc-ambient-convection_out.csv
     requirement = 'The system shall be able to model ambient volumetric convection in a channel.'
     issues = '#16948'
+    ad_indexing_type = 'global'
+    design = 'NSFVEnergyAmbientConvection.md'
+  []
+  [ambient-convection-action]
+    type = 'CSVDiff'
+    input = 2d-rc-ambient-convection-action.i
+    csvdiff = 2d-rc-ambient-convection-action_out.csv
+    requirement = 'The system shall be able to model ambient volumetric convection in a channel using the Navier-Stokes action.'
+    issues = '#19472'
     ad_indexing_type = 'global'
     design = 'NSFVEnergyAmbientConvection.md'
   []

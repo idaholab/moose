@@ -11,21 +11,22 @@ NSFVEnergyAmbientConvection::validParams()
       "Implements a solid-fluid ambient convection volumetric term "
       "proportional to the difference between the fluid and ambient temperatures : "
       "$q''' = \\alpha (T_{fluid} - T_{ambient})$.");
-  params.addRequiredParam<MaterialPropertyName>("alpha",
+  params.addRequiredParam<MaterialPropertyName>(NS::alpha,
                                                 "Name of the convective heat transfer coefficient");
-  params.addRequiredCoupledVar("T_ambient", "Solid ambient temperature");
+  params.addRequiredParam<MooseFunctorName>("T_ambient", "The ambient temperature");
   return params;
 }
 
 NSFVEnergyAmbientConvection::NSFVEnergyAmbientConvection(const InputParameters & parameters)
   : FVElementalKernel(parameters),
-    _alpha(getADMaterialProperty<Real>(NS::alpha)),
-    _temp_ambient(adCoupledValue("T_ambient"))
+    _alpha(getFunctor<ADReal>(NS::alpha)),
+    _temp_ambient(getFunctor<ADReal>("T_ambient"))
 {
 }
 
 ADReal
 NSFVEnergyAmbientConvection::computeQpResidual()
 {
-  return _alpha[_qp] * (_u[_qp] - _temp_ambient[_qp]);
+  auto elem_arg = makeElemArg(_current_elem);
+  return _alpha(elem_arg) * (_var(elem_arg) - _temp_ambient(elem_arg));
 }

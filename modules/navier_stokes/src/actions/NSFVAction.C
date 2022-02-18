@@ -35,9 +35,11 @@ InputParameters
 NSFVAction::validParams()
 {
   InputParameters params = Action::validParams();
-  params.addClassDescription("This class allows us to have a section of the input file for "
-                             "setting up incompressible Navier-Stokes equations.");
+  params.addClassDescription(
+      "This class allows us to have a section of the input file for "
+      "setting up Navier-Stokes equations for porous medium or clean fluid flows.");
 
+  // General simulation control parameters
   MooseEnum sim_type("steady-state transient", "steady-state");
   params.addParam<MooseEnum>("simulation_type", sim_type, "Navier-Stokes equation type");
 
@@ -60,31 +62,23 @@ NSFVAction::validParams()
   params.addParam<std::vector<SubdomainName>>(
       "block", "The list of block ids (SubdomainID) on which NS equation is defined on");
 
-  // temperature equation parameters
-  params.addParam<bool>("boussinesq_approximation", false, "True to have Boussinesq approximation");
-  params.addParam<Real>("ref_temperature",
-                        273.15,
-                        "Value for reference temperature in case of Boussinesq approximation");
-  params.addParam<MaterialPropertyName>(
-      "thermal_expansion", NS::alpha, "The name of the thermal expansion");
-  params.addParam<bool>("add_energy_equation", false, "True to add energy equation");
+  // Parameters used for defining boundaries
 
-  params.addParam<VariableName>("solid_temperature_variable",
-                                NS::T_solid,
-                                "Solid subscale structure temperature variable name");
-  params.addParam<Real>(
-      "initial_temperature", 0, "The initial temperature, assumed constant everywhere");
-  params.addParam<MaterialPropertyName>(
-      "thermal_conductivity", NS::k, "The name of the thermal conductivity");
-  params.addParam<MaterialPropertyName>("specific_heat", NS::cp, "The name of the specific heat");
+  params.addParam<std::vector<BoundaryName>>(
+      "inlet_boundaries", std::vector<BoundaryName>(), "Names of inlet boundaries");
+  params.addParam<std::vector<BoundaryName>>(
+      "outlet_boundaries", std::vector<BoundaryName>(), "Names of outlet boundaries");
+  params.addParam<std::vector<BoundaryName>>(
+      "wall_boundaries", std::vector<BoundaryName>(), "Names of wall boundaries");
 
-  params.addParam<bool>(
-      "has_heat_source", false, "Whether there is a heat source function object in the simulation");
-  params.addParam<FunctionName>("heat_source_function", "The function describing the heat source");
-  params.addCoupledVar("heat_source_var", "The coupled variable describing the heat source");
+  // Momentum and Mass equation related parameters
 
-  params.addParam<RealVectorValue>(
-      "gravity", RealVectorValue(0, 0, 0), "The gravitational acceleration vector.");
+  params.addParam<RealVectorValue>("initial_velocity",
+                                   RealVectorValue(1e-15, 1e-15, 1e-15),
+                                   "The initial velocity, assumed constant everywhere");
+  params.addParam<RealVectorValue>("initial_momentum",
+                                   RealVectorValue(1e-15, 1e-15, 1e-15),
+                                   "The initial momentum, assumed constant everywhere");
 
   params.addParam<MaterialPropertyName>(
       "dynamic_viscosity", NS::mu, "The name of the dynamic viscosity");
@@ -98,12 +92,8 @@ NSFVAction::validParams()
   params.addParam<std::vector<FunctionName>>("coupled_force_vector_function",
                                              "The function(s) standing in as a coupled force");
 
-  params.addParam<std::vector<BoundaryName>>(
-      "inlet_boundaries", std::vector<BoundaryName>(), "Names of inlet boundaries");
-  params.addParam<std::vector<BoundaryName>>(
-      "outlet_boundaries", std::vector<BoundaryName>(), "Names of outlet boundaries");
-  params.addParam<std::vector<BoundaryName>>(
-      "wall_boundaries", std::vector<BoundaryName>(), "Names of wall boundaries");
+  params.addParam<RealVectorValue>(
+      "gravity", RealVectorValue(0, 0, 0), "The gravitational acceleration vector.");
 
   MultiMooseEnum mom_inlet_type("fixed-velocity fixed-massflow", "fixed-velocity");
   params.addParam<MultiMooseEnum>("momentum_inlet_types",
@@ -127,28 +117,6 @@ NSFVAction::validParams()
   params.addParam<MultiMooseEnum>(
       "momentum_wall_types", mom_wall_type, "Types of wall boundaries for them momentum equation");
 
-  MultiMooseEnum en_inlet_type("fixed-temperature fixed-enthalpy fixed-totalenergy",
-                               "fixed-temperature");
-  params.addParam<MultiMooseEnum>("energy_inlet_types",
-                                  en_inlet_type,
-                                  "Types for the inlet boundaries for the energy equation.");
-
-  params.addParam<std::vector<FunctionName>>(
-      "energy_inlet_function",
-      std::vector<FunctionName>(),
-      "Functions for fixed-value boundaries in the energy equation.");
-
-  MultiMooseEnum en_wall_type("fixed-temperature heatflux symmetry wallfunction", "symmetry");
-  params.addParam<MultiMooseEnum>(
-      "energy_wall_types", en_wall_type, "Types for the wall boundaries for the energy equation.");
-
-  params.addParam<std::vector<FunctionName>>(
-      "energy_wall_function",
-      std::vector<FunctionName>(),
-      "Functions for Dirichlet/Neumann boundaries in the energy equation.");
-
-  addAmbientConvectionParams(params);
-
   params.addParam<bool>(
       "pin_pressure", false, "Switch to enable pressure shifting for incompressible simulations.");
 
@@ -169,14 +137,68 @@ NSFVAction::validParams()
 
   params.addParam<Real>("initial_pressure", 0, "The initial pressure, assumed constant everywhere");
 
-  // We perturb slightly from zero to avoid divide by zero exceptions from stabilization terms
-  // involving a velocity norm in the denominator
-  params.addParam<RealVectorValue>("initial_velocity",
-                                   RealVectorValue(1e-15, 1e-15, 1e-15),
-                                   "The initial velocity, assumed constant everywhere");
-  params.addParam<RealVectorValue>("initial_momentum",
-                                   RealVectorValue(1e-15, 1e-15, 1e-15),
-                                   "The initial momentum, assumed constant everywhere");
+  // Energy equation related parameters
+
+  params.addParam<bool>("boussinesq_approximation", false, "True to have Boussinesq approximation");
+  params.addParam<Real>("ref_temperature",
+                        273.15,
+                        "Value for reference temperature in case of Boussinesq approximation");
+  params.addParam<MaterialPropertyName>(
+      "thermal_expansion", NS::alpha, "The name of the thermal expansion");
+  params.addParam<bool>("add_energy_equation", false, "True to add energy equation");
+
+  params.addParam<VariableName>("solid_temperature_variable",
+                                NS::T_solid,
+                                "Solid subscale structure temperature variable name");
+  params.addParam<Real>(
+      "initial_temperature", 0, "The initial temperature, assumed constant everywhere");
+  params.addParam<MaterialPropertyName>(
+      "thermal_conductivity", NS::k, "The name of the thermal conductivity");
+  params.addParam<MaterialPropertyName>("specific_heat", NS::cp, "The name of the specific heat");
+
+  params.addParam<bool>(
+      "has_heat_source", false, "Whether there is a heat source function object in the simulation");
+  params.addParam<FunctionName>("heat_source_function", "The function describing the heat source");
+  params.addCoupledVar("heat_source_var", "The coupled variable describing the heat source");
+
+  MultiMooseEnum en_inlet_type("fixed-temperature fixed-enthalpy fixed-totalenergy",
+                               "fixed-temperature");
+  params.addParam<MultiMooseEnum>("energy_inlet_types",
+                                  en_inlet_type,
+                                  "Types for the inlet boundaries for the energy equation.");
+
+  params.addParam<std::vector<FunctionName>>(
+      "energy_inlet_function",
+      std::vector<FunctionName>(),
+      "Functions for fixed-value boundaries in the energy equation.");
+
+  MultiMooseEnum en_wall_type("fixed-temperature heatflux symmetry wallfunction", "symmetry");
+  params.addParam<MultiMooseEnum>(
+      "energy_wall_types", en_wall_type, "Types for the wall boundaries for the energy equation.");
+
+  params.addParam<std::vector<FunctionName>>(
+      "energy_wall_function",
+      std::vector<FunctionName>(),
+      "Functions for Dirichlet/Neumann boundaries in the energy equation.");
+
+  params.addParam<std::vector<SubdomainName>>(
+      "ambient_convection_blocks",
+      std::vector<SubdomainName>(),
+      "The blocks where the ambient convection is present.");
+
+  params.addParam<std::vector<MaterialPropertyName>>(
+      "ambient_convection_alpha",
+      std::vector<MaterialPropertyName>(),
+      "The heat exchange coefficients for each block in 'ambient_convection_blocks'.");
+
+  // params.addCoupledVar("ambient_temperature",
+  //                      "The ambient temperature for each block in 'ambient_convection_blocks'.");
+  params.addParam<std::vector<MooseFunctorName>>(
+      "ambient_temperature",
+      std::vector<MooseFunctorName>(),
+      "The ambient temperature for each block in 'ambient_convection_blocks'.");
+
+  // Create input parameter groups
 
   params.addParamNamesToGroup(
       "simulation_type compressibility porous_medium_treatment turbulence_handling", "Base");
@@ -213,6 +235,7 @@ NSFVAction::NSFVAction(InputParameters parameters)
     _energy_wall_types(getParam<MultiMooseEnum>("energy_wall_types")),
     _energy_wall_function(getParam<std::vector<FunctionName>>("energy_wall_function")),
     _pressure_function(getParam<std::vector<FunctionName>>("pressure_function")),
+    _ambient_convection_blocks(getParam<std::vector<SubdomainName>>("ambient_convection_blocks")),
     _solid_temperature_variable_name(getParam<VariableName>("solid_temperature_variable")),
     _density_name(getParam<MaterialPropertyName>("density")),
     _dynamic_viscosity_name(getParam<MaterialPropertyName>("dynamic_viscosity")),
@@ -236,16 +259,12 @@ NSFVAction::NSFVAction(InputParameters parameters)
                  "pin_pressure or change the compressibility settings!");
 
   if (_outlet_boundaries.size() > 0 && _outlet_boundaries.size() != _momentum_outlet_types.size())
-  {
     paramError("velocity_outlet_types",
                "Size is not the same as the number of outlet boundaries in 'outlet_boundaries'");
-  }
 
   if (_wall_boundaries.size() > 0 && _wall_boundaries.size() != _momentum_wall_types.size())
-  {
     paramError("velocity_wall_types",
                "Size is not the same as the number of wall boundaries in 'wall_boundaries'");
-  }
 
   if (getParam<bool>("add_energy_equation"))
   {
@@ -267,26 +286,54 @@ NSFVAction::NSFVAction(InputParameters parameters)
                      std::to_string(no_fixed_energy_walls) + ")");
 
     if (_inlet_boundaries.size() > 0 && _inlet_boundaries.size() != _energy_inlet_types.size())
-    {
       paramError("energy_inlet_types",
                  "Size is not the same as the number of inlet boundaries in 'inlet_boundaries'");
-    }
 
     if (_wall_boundaries.size() > 0 && _wall_boundaries.size() != _energy_wall_types.size())
-    {
       paramError("energy_wall_types",
                  "Size is not the same as the number of wall boundaries in 'wall_boundaries'");
-    }
 
-    if (getParam<bool>("has_ambient_convection"))
+    if (_ambient_convection_blocks.size() && _blocks.size())
     {
-      if (!isParamValid("ambient_convection_alpha"))
-        mooseError(
-            "If 'has_ambient_convection' is true, then 'ambient_convection_alpha' must be set.");
+      _ambient_convection_alpha =
+          getParam<std::vector<MaterialPropertyName>>("ambient_convection_alpha");
+      _ambient_temperature = getParam<std::vector<MooseFunctorName>>("ambient_temperature");
 
-      if (!isParamValid("ambient_temperature"))
-        mooseError("If 'has_ambient_convection' is true, then 'ambient_temperature' must be set.");
+      for (auto const & block : _ambient_convection_blocks)
+        if (std::find(_blocks.begin(), _blocks.end(), block) == _blocks.end())
+          paramError("ambient_convection_blocks",
+                     "Block '" + block + "' is not present in the block IDs of the module!");
+
+      if (_ambient_convection_blocks.size() != _ambient_convection_alpha.size())
+        paramError("ambient_convection_alpha",
+                   "The number of heat exchange coefficients is not the same as the number of "
+                   "ambient convection blocks!");
+
+      if (_ambient_convection_blocks.size() != _ambient_temperature.size())
+        paramError("ambient_temperature",
+                   "The number of ambient temperatures is not the same as the number of "
+                   "ambient convection blocks!");
     }
+    else if (!_ambient_convection_blocks.size() && !_blocks.size())
+    {
+      _ambient_convection_alpha =
+          getParam<std::vector<MaterialPropertyName>>("ambient_convection_alpha");
+      _ambient_temperature = getParam<std::vector<MooseFunctorName>>("ambient_temperature");
+
+      if (_ambient_convection_alpha.size() != 1)
+        paramError("ambient_convection_alpha",
+                   "The user should only use one heat exchange coefficient if the ambient "
+                   "convection blocks are not defined!");
+
+      if (_ambient_temperature.size() != 1)
+        paramError("ambient_temperature",
+                   "The user should only use one ambient temperature if the ambient "
+                   "convection blocks are not defined!");
+    }
+    else if (_ambient_convection_blocks.size() && !_blocks.size())
+      paramError("ambient_convection_blocks",
+                 "If there are no subdomains defined in 'blocks', ambient convection blocks should "
+                 "not be defined either!");
 
     if (getParam<bool>("has_heat_source"))
     {
@@ -1081,10 +1128,38 @@ NSFVAction::addINSEnergy()
 
       _problem->addFVKernel(kernel_type, "ins_energy_diffusion", params);
     }
+
     if (_turbulence_handling == "mixing-length")
     {
       mooseError("Turbulence handling is not implemented yet!");
     }
+  }
+
+  if (_ambient_convection_blocks.size())
+  {
+    for (unsigned int block_i = 0; block_i < _ambient_convection_blocks.size(); ++block_i)
+    {
+      const std::string kernel_type = "NSFVEnergyAmbientConvection";
+      InputParameters params = _factory.getValidParams(kernel_type);
+      params.set<NonlinearVariableName>("variable") = NS::T_fluid;
+      params.set<std::vector<SubdomainName>>("block") = {_ambient_convection_blocks[block_i]};
+      params.set<MaterialPropertyName>("alpha") = _ambient_convection_alpha[block_i];
+      params.set<MooseFunctorName>("T_ambient") = _ambient_temperature[block_i];
+
+      _problem->addFVKernel(
+          kernel_type, "ambient_convection_" + _ambient_convection_blocks[block_i], params);
+    }
+  }
+  else
+  {
+    const std::string kernel_type = "NSFVEnergyAmbientConvection";
+    InputParameters params = _factory.getValidParams(kernel_type);
+    params.set<NonlinearVariableName>("variable") = NS::T_fluid;
+    params.set<std::vector<SubdomainName>>("block") = _ambient_convection_blocks;
+    params.set<MaterialPropertyName>("alpha") = _ambient_convection_alpha[0];
+    params.set<MooseFunctorName>("T_ambient") = _ambient_temperature[0];
+
+    _problem->addFVKernel(kernel_type, "ambient_convection", params);
   }
 }
 

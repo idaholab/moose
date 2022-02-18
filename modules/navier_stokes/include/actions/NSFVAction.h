@@ -32,6 +32,9 @@ public:
   virtual void act() override;
 
 protected:
+  /// Type that we use in Actions for declaring coupling
+  typedef std::vector<VariableName> CoupledName;
+
   void addINSTimeKernels();
   void addINSMass();
   void addINSMomentum();
@@ -102,15 +105,15 @@ protected:
   /// Energy function names at wall boundaries
   std::vector<FunctionName> _energy_wall_function;
 
-  /// Boundaries with pressure specified
-  std::vector<BoundaryName> _pressure_boundary;
   /// Pressure function names at pressure boundaries
   std::vector<FunctionName> _pressure_function;
 
-  /// Boundaries with temperature specified
-  std::vector<BoundaryName> _fixed_temperature_boundary;
-  /// Temperature function names at fixed temperature boundaries
-  std::vector<FunctionName> _temperature_function;
+  /// Subdomains where we want to have ambient convection
+  std::vector<SubdomainName> _ambient_convection_blocks;
+  /// The heat exchange coefficients for ampient convection
+  std::vector<MaterialPropertyName> _ambient_convection_alpha;
+  /// The ambient temperature
+  std::vector<MooseFunctorName> _ambient_temperature;
 
   /// Temperature variable name in the solid subscale structure (in porous medium treatment)
   /// to facilitate temperature variable added outside
@@ -128,7 +131,4 @@ protected:
   MaterialPropertyName _thermal_conductivity_name;
   /// NAme of the thermal expansion material property
   MaterialPropertyName _thermal_expansion_name;
-
-  /// Type that we use in Actions for declaring coupling
-  typedef std::vector<VariableName> CoupledName;
 };
