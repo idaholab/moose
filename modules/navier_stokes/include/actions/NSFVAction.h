@@ -35,6 +35,18 @@ protected:
   /// Type that we use in Actions for declaring coupling
   typedef std::vector<VariableName> CoupledName;
 
+  /// Functions for defining the variables depending on the compressibility option
+  /// selected by the user
+  void addINSVariables();
+  void addCNSVariables();
+
+  /// Function which adds the RhieChow interpolator user objects
+  void addRhieChowUserObjects();
+
+  /// Functions that add the initial conditions for the variables
+  void addINSInitialConditions();
+  void addCNSInitialConditions();
+
   void addINSTimeKernels();
   void addINSMass();
   void addINSMomentum();
@@ -57,6 +69,9 @@ protected:
   void addCNSInletBC();
   void addCNSOutletBC();
   void addCNSWallBC();
+
+  /// Add Enthalpy material for incompressible simulations
+  void addEnthalpyMaterial();
 
   void addRelationshipManager(std::string name,
                               unsigned int no_layers,
@@ -145,4 +160,13 @@ protected:
   Real _energy_scaling;
   /// The scaling factor for the mass variables (for incompressible simulation this is pressure scaling)
   Real _mass_scaling;
+
+private:
+
+  /// Process the mesh data and convert block names to block IDs
+  void processBlocks();
+  /// Check errors regarding the user defined boundary treatments
+  void checkBoundaryParameterErrors();
+  /// Check errors regarding the user defined ambient convection parameters
+  void checkAmbientConvectionParameterErrors();
 };

@@ -35,9 +35,8 @@ InputParameters
 NSFVAction::validParams()
 {
   InputParameters params = Action::validParams();
-  params.addClassDescription(
-      "This class allows us to have a section of the input file for "
-      "setting up Navier-Stokes equations for porous medium or clean fluid flows.");
+  params.addClassDescription("This class allows us to set up Navier-Stokes equations for porous "
+                             "medium or clean fluid flows using finite volume discretization.");
 
   // General simulation control parameters
   MooseEnum sim_type("steady-state transient", "steady-state");
@@ -50,7 +49,7 @@ NSFVAction::validParams()
   params.addParam<bool>(
       "porous_medium_treatment", false, "Whether to use porous medium solvers or not.");
 
-  params.addParam<AuxVariableName>(
+  params.addParam<MooseFunctorName>(
       "porosity", NS::porosity, "The name of the auxiliary variable for the porosity field.");
 
   MooseEnum turbulence_type("mixing-length none", "none");
@@ -241,7 +240,7 @@ NSFVAction::NSFVAction(InputParameters parameters)
     _type(getParam<MooseEnum>("simulation_type")),
     _compressibility(getParam<MooseEnum>("compressibility")),
     _porous_medium_treatment(getParam<bool>("porous_medium_treatment")),
-    _porosity_name(getParam<AuxVariableName>("porosity")),
+    _porosity_name(getParam<MooseFunctorName>("porosity")),
     _turbulence_handling(getParam<MooseEnum>("turbulence_handling")),
     _blocks(getParam<std::vector<SubdomainName>>("block")),
     _inlet_boundaries(getParam<std::vector<BoundaryName>>("inlet_boundaries")),
@@ -257,6 +256,9 @@ NSFVAction::NSFVAction(InputParameters parameters)
     _energy_wall_function(getParam<std::vector<FunctionName>>("energy_wall_function")),
     _pressure_function(getParam<std::vector<FunctionName>>("pressure_function")),
     _ambient_convection_blocks(getParam<std::vector<SubdomainName>>("ambient_convection_blocks")),
+    _ambient_convection_alpha(
+        getParam<std::vector<MaterialPropertyName>>("ambient_convection_alpha")),
+    _ambient_temperature(getParam<std::vector<MooseFunctorName>>("ambient_temperature")),
     _solid_temperature_variable_name(getParam<VariableName>("solid_temperature_variable")),
     _density_name(getParam<MaterialPropertyName>("density")),
     _dynamic_viscosity_name(getParam<MaterialPropertyName>("dynamic_viscosity")),
@@ -270,120 +272,12 @@ NSFVAction::NSFVAction(InputParameters parameters)
     _energy_scaling(getParam<Real>("energy_scaling")),
     _mass_scaling(getParam<Real>("mass_scaling"))
 {
-  unsigned int no_pressure_outlets = 0;
-  for (unsigned int enum_ind = 0; enum_ind < _outlet_boundaries.size(); ++enum_ind)
-    if (_momentum_outlet_types[enum_ind] == "fixed-pressure" ||
-        _momentum_outlet_types[enum_ind] == "fixed-pressure-zero-gradient")
-      no_pressure_outlets += 1;
+  checkBoundaryParameterErrors();
 
-  if (_outlet_boundaries.size() > 0 && _pressure_function.size() != no_pressure_outlets)
-    paramError("pressure_function",
-               "Size is not the same as the number of pressure outlet boundaries!");
+  checkAmbientConvectionParameterErrors();
 
-  if (_compressibility == "incompressible")
-    if (no_pressure_outlets == 0 && !(getParam<bool>("pin_pressure")))
-      mooseError("The pressure must be fixed for an incompressible simulation! Try setting "
-                 "pin_pressure or change the compressibility settings!");
-
-  if (_outlet_boundaries.size() > 0 && _outlet_boundaries.size() != _momentum_outlet_types.size())
-    paramError("velocity_outlet_types",
-               "Size is not the same as the number of outlet boundaries in 'outlet_boundaries'");
-
-  if (_wall_boundaries.size() > 0 && _wall_boundaries.size() != _momentum_wall_types.size())
-    paramError("velocity_wall_types",
-               "Size is not the same as the number of wall boundaries in 'wall_boundaries'");
-
-  if (getParam<bool>("add_energy_equation"))
-  {
-    if (_inlet_boundaries.size() > 0 && _energy_inlet_types.size() != _energy_inlet_function.size())
-      paramError("energy_inlet_function",
-                 "Size is not the same as the number of boundaries in 'energy_inlet_types'");
-
-    unsigned int no_fixed_energy_walls = 0;
-    for (unsigned int enum_ind = 0; enum_ind < _energy_wall_types.size(); ++enum_ind)
-      if (_energy_wall_types[enum_ind] == "fixed-temperature" ||
-          _energy_wall_types[enum_ind] == "heatflux")
-        no_fixed_energy_walls += 1;
-
-    if (_wall_boundaries.size() > 0 && _energy_wall_function.size() != no_fixed_energy_walls)
-      paramError("energy_wall_function",
-                 "Size " + std::to_string(_energy_wall_function.size()) +
-                     " is not the same as the number of Dirichlet/Neumann conditions in "
-                     "'energy_wall_types' (" +
-                     std::to_string(no_fixed_energy_walls) + ")");
-
-    if (_inlet_boundaries.size() > 0 && _inlet_boundaries.size() != _energy_inlet_types.size())
-      paramError("energy_inlet_types",
-                 "Size is not the same as the number of inlet boundaries in 'inlet_boundaries'");
-
-    if (_wall_boundaries.size() > 0 && _wall_boundaries.size() != _energy_wall_types.size())
-      paramError("energy_wall_types",
-                 "Size is not the same as the number of wall boundaries in 'wall_boundaries'");
-
-    if (_ambient_convection_blocks.size() && _blocks.size())
-    {
-      _ambient_convection_alpha =
-          getParam<std::vector<MaterialPropertyName>>("ambient_convection_alpha");
-      _ambient_temperature = getParam<std::vector<MooseFunctorName>>("ambient_temperature");
-
-      for (auto const & block : _ambient_convection_blocks)
-        if (std::find(_blocks.begin(), _blocks.end(), block) == _blocks.end())
-          paramError("ambient_convection_blocks",
-                     "Block '" + block + "' is not present in the block IDs of the module!");
-
-      if (_ambient_convection_blocks.size() != _ambient_convection_alpha.size())
-        paramError("ambient_convection_alpha",
-                   "The number of heat exchange coefficients is not the same as the number of "
-                   "ambient convection blocks!");
-
-      if (_ambient_convection_blocks.size() != _ambient_temperature.size())
-        paramError("ambient_temperature",
-                   "The number of ambient temperatures is not the same as the number of "
-                   "ambient convection blocks!");
-    }
-    else if ((!_ambient_convection_blocks.size() && !_blocks.size()) ||
-             (!_ambient_convection_blocks.size() && _blocks.size()))
-    {
-      if (!_ambient_convection_blocks.size() && _blocks.size())
-        _ambient_convection_blocks = _blocks;
-      _ambient_convection_alpha =
-          getParam<std::vector<MaterialPropertyName>>("ambient_convection_alpha");
-      _ambient_temperature = getParam<std::vector<MooseFunctorName>>("ambient_temperature");
-
-      if (_ambient_convection_alpha.size() > 1)
-        paramError("ambient_convection_alpha",
-                   "The user should only use one or zero heat exchange coefficient if the ambient "
-                   "convection blocks are not defined!");
-      if (_ambient_convection_alpha.size() != _ambient_temperature.size())
-        paramError("ambient_temperature",
-                   "The number of ambient temperatures is not the same as the number of "
-                   "heat exchange coefficients!");
-    }
-    else if (_ambient_convection_blocks.size() && !_blocks.size())
-      paramError("ambient_convection_blocks",
-                 "If there are no subdomains defined in 'blocks', ambient convection blocks should "
-                 "not be defined either!");
-
-    if (getParam<bool>("has_heat_source"))
-    {
-      bool has_coupled = isParamValid("heat_source_var");
-      bool has_function = isParamValid("heat_source_function");
-      if (!has_coupled && !has_function)
-        mooseError("Either the 'heat_source_var' or 'heat_source_function' param must be set.");
-      else if (has_coupled && has_function)
-        mooseError("Both the 'heat_source_var' or 'heat_source_function' param are set."
-                   "Please use one or the other.");
-    }
-  }
-
-  if (getParam<bool>("has_coupled_force"))
-  {
-    bool has_coupled = isParamValid("coupled_force_var");
-    bool has_function = isParamValid("coupled_force_vector_function");
-    if (!has_coupled && !has_function)
-      mooseError(
-          "Either the 'coupled_force_var' or 'coupled_force_vector_function' param must be set.");
-  }
+  if (!_ambient_convection_blocks.size() && _blocks.size())
+    _ambient_convection_blocks = _blocks;
 }
 
 void
@@ -391,187 +285,26 @@ NSFVAction::act()
 {
   if (_current_task == "add_navier_stokes_variables")
   {
-    _dim = _mesh->dimension();
-    _problem->needFV();
-
-    for (const auto & subdomain_name : _blocks)
-    {
-      SubdomainID id = _mesh->getSubdomainID(subdomain_name);
-      _block_ids.insert(id);
-      if (_problem->getCoordSystem(id) != Moose::COORD_XYZ)
-        mooseError("RZ has not been added in action");
-    }
-    if (_blocks.size() == 0)
-    {
-      for (auto & id : _mesh->meshSubdomains())
-        if (_problem->getCoordSystem(id) != Moose::COORD_XYZ)
-          mooseError("RZ has not been added in action");
-    }
-
-    if (_momentum_inlet_function.size() != _inlet_boundaries.size() * _dim)
-      paramError("momentum_inlet_function",
-                 "Size is not the same as the number of boundaries in 'inlet_boundaries' times "
-                 "the mesh dimension");
-
-    auto base_params = _factory.getValidParams("MooseVariableFVReal");
-    if (_block_ids.size() != 0)
-      for (const SubdomainID & id : _block_ids)
-        base_params.set<std::vector<SubdomainName>>("block").push_back(Moose::stringify(id));
+    processBlocks();
 
     if (_compressibility == "compressible")
-    {
-      if (_porous_medium_treatment)
-        for (unsigned int d = 0; d < _dim; ++d)
-          _problem->addVariable(
-              "MooseVariableFVReal", NS::superficial_momentum_vector[d], base_params);
-      else
-        for (unsigned int d = 0; d < _dim; ++d)
-          _problem->addVariable("MooseVariableFVReal", NS::momentum_vector[d], base_params);
-
-      _problem->addVariable("MooseVariableFVReal", NS::pressure, base_params);
-      _problem->addVariable("MooseVariableFVReal", NS::T_fluid, base_params);
-
-      for (unsigned int d = 0; d < _dim; ++d)
-        _problem->addVariable("MooseVariableFVReal", NS::velocity_vector[d], base_params);
-    }
+      addCNSVariables();
     else if (_compressibility == "weakly-compressible" || _compressibility == "incompressible")
-    {
-      if (_porous_medium_treatment)
-      {
-        base_params.set<std::vector<Real>>("scaling") = {_momentum_scaling};
-        for (unsigned int d = 0; d < _dim; ++d)
-          _problem->addVariable(
-              "PINSFVSuperficialVelocityVariable", NS::superficial_velocity_vector[d], base_params);
-
-        for (unsigned int d = 0; d < _dim; ++d)
-          _problem->addAuxVariable("INSFVVelocityVariable", NS::velocity_vector[d], base_params);
-      }
-      else
-      {
-        base_params.set<std::vector<Real>>("scaling") = {_momentum_scaling};
-        for (unsigned int d = 0; d < _dim; ++d)
-          _problem->addVariable("INSFVVelocityVariable", NS::velocity_vector[d], base_params);
-      }
-
-      _problem->addVariable("INSFVPressureVariable", NS::pressure, base_params);
-      if (getParam<bool>("pin_pressure"))
-      {
-        auto lm_params = _factory.getValidParams("MooseVariableScalar");
-        lm_params.set<MooseEnum>("family") = "scalar";
-        lm_params.set<MooseEnum>("order") = "first";
-        base_params.set<std::vector<Real>>("scaling") = {_mass_scaling};
-        _problem->addVariable("MooseVariableScalar", "lambda", lm_params);
-      }
-
-      if (getParam<bool>("add_energy_equation"))
-      {
-        base_params.set<std::vector<Real>>("scaling") = {_energy_scaling};
-        _problem->addVariable("INSFVEnergyVariable", NS::T_fluid, base_params);
-      }
-    }
+      addINSVariables();
   }
 
   if (_current_task == "add_navier_stokes_user_objects")
   {
     if (_compressibility == "incompressible" || _compressibility == "weakly-compressible")
-    {
-      const std::string u_names[3] = {"u", "v", "w"};
-      if (_porous_medium_treatment)
-      {
-        auto params = _factory.getValidParams("PINSFVRhieChowInterpolator");
-        for (unsigned int d = 0; d < _dim; ++d)
-          params.set<VariableName>(u_names[d]) = NS::superficial_velocity_vector[d];
-
-        params.set<VariableName>("pressure") = NS::pressure;
-        params.set<AuxVariableName>(NS::porosity) = _porosity_name;
-
-        _problem->addUserObject(
-            "PINSFVRhieChowInterpolator", "pins_rhie_chow_interpolator", params);
-      }
-      else
-      {
-        auto params = _factory.getValidParams("INSFVRhieChowInterpolator");
-        for (unsigned int d = 0; d < _dim; ++d)
-          params.set<VariableName>(u_names[d]) = NS::velocity_vector[d];
-
-        params.set<VariableName>("pressure") = NS::pressure;
-
-        _problem->addUserObject("INSFVRhieChowInterpolator", "ins_rhie_chow_interpolator", params);
-      }
-    }
+      addRhieChowUserObjects();
   }
 
   if (_current_task == "add_navier_stokes_ics")
   {
-    Real pvalue = getParam<Real>("initial_pressure");
-
     if (_compressibility == "compressible")
-    {
-      auto mvalue = getParam<RealVectorValue>("initial_momentum");
-
-      if (_porous_medium_treatment)
-        for (unsigned int d = 0; d < _dim; ++d)
-        {
-          InputParameters params = _factory.getValidParams("ConstantIC");
-          params.set<VariableName>("variable") = NS::superficial_momentum_vector[d];
-          params.set<Real>("value") = mvalue(d);
-          _problem->addInitialCondition(
-              "ConstantIC", NS::superficial_momentum_vector[d] + "_ic", params);
-        }
-      else
-        for (unsigned int d = 0; d < _dim; ++d)
-        {
-          InputParameters params = _factory.getValidParams("ConstantIC");
-          params.set<VariableName>("variable") = NS::momentum_vector[d];
-          params.set<Real>("value") = mvalue(d);
-          _problem->addInitialCondition("ConstantIC", NS::momentum_vector[d] + "_ic", params);
-        }
-
-      Real tvalue = getParam<Real>("initial_temperature");
-      InputParameters params = _factory.getValidParams("ConstantIC");
-      params.set<VariableName>("variable") = NS::T_fluid;
-      params.set<Real>("value") = tvalue;
-      _problem->addInitialCondition("ConstantIC", NS::T_fluid + "_ic", params);
-    }
+      addCNSInitialConditions();
     else if (_compressibility == "weakly-compressible" || _compressibility == "incompressible")
-    {
-      auto vvalue = getParam<RealVectorValue>("initial_velocity");
-
-      if (_porous_medium_treatment)
-        for (unsigned int d = 0; d < _dim; ++d)
-        {
-          InputParameters params = _factory.getValidParams("ConstantIC");
-          params.set<VariableName>("variable") = NS::superficial_velocity_vector[d];
-          params.set<Real>("value") = vvalue(d);
-          _problem->addInitialCondition(
-              "ConstantIC", NS::superficial_velocity_vector[d] + "_ic", params);
-        }
-      else
-        for (unsigned int d = 0; d < _dim; ++d)
-        {
-          InputParameters params = _factory.getValidParams("ConstantIC");
-          params.set<VariableName>("variable") = NS::velocity_vector[d];
-          params.set<Real>("value") = vvalue(d);
-          _problem->addInitialCondition("ConstantIC", NS::velocity_vector[d] + "_ic", params);
-        }
-
-      if (getParam<bool>("add_energy_equation"))
-      {
-        Real tvalue = getParam<Real>("initial_temperature");
-        InputParameters params = _factory.getValidParams("ConstantIC");
-        params.set<VariableName>("variable") = NS::T_fluid;
-        params.set<Real>("value") = tvalue;
-        _problem->addInitialCondition("ConstantIC", NS::T_fluid + "_ic", params);
-      }
-    }
-
-    if (pvalue != 0)
-    {
-      InputParameters params = _factory.getValidParams("ConstantIC");
-      params.set<VariableName>("variable") = NS::pressure;
-      params.set<Real>("value") = pvalue;
-      _problem->addInitialCondition("ConstantIC", "pressure_ic", params);
-    }
+      addINSInitialConditions();
   }
 
   if (_current_task == "add_navier_stokes_kernels")
@@ -632,22 +365,162 @@ NSFVAction::act()
     if (_compressibility == "incompressible" || _compressibility == "weakly-compressible")
     {
       if (getParam<bool>("add_energy_equation"))
-      {
-        InputParameters params = _factory.getValidParams("INSFVEnthalpyMaterial");
-
-        if (_blocks.size() > 0)
-          params.set<std::vector<SubdomainName>>("block") = _blocks;
-
-        params.set<MooseFunctorName>(NS::density) = _density_name;
-        params.set<MooseFunctorName>("temperature") = NS::T_fluid;
-        _problem->addMaterial("INSFVEnthalpyMaterial", "ins_enthalpy_material", params);
-      }
+        addEnthalpyMaterial();
     }
     else
-    {
       mooseError("Compressible simulations are not supported yet.");
-    }
   }
+}
+
+void
+NSFVAction::addINSVariables()
+{
+  auto params = _factory.getValidParams("MooseVariableFVReal");
+  params.set<std::vector<SubdomainName>>("block") = _blocks;
+
+  params.set<std::vector<Real>>("scaling") = {_momentum_scaling};
+  if (_porous_medium_treatment)
+  {
+    for (unsigned int d = 0; d < _dim; ++d)
+      _problem->addVariable(
+          "PINSFVSuperficialVelocityVariable", NS::superficial_velocity_vector[d], params);
+
+    for (unsigned int d = 0; d < _dim; ++d)
+      _problem->addAuxVariable("INSFVVelocityVariable", NS::velocity_vector[d], params);
+  }
+  else
+    for (unsigned int d = 0; d < _dim; ++d)
+      _problem->addVariable("INSFVVelocityVariable", NS::velocity_vector[d], params);
+
+  params.set<std::vector<Real>>("scaling") = {_mass_scaling};
+  _problem->addVariable("INSFVPressureVariable", NS::pressure, params);
+
+  if (getParam<bool>("pin_pressure"))
+  {
+    auto lm_params = _factory.getValidParams("MooseVariableScalar");
+    lm_params.set<MooseEnum>("family") = "scalar";
+    lm_params.set<MooseEnum>("order") = "first";
+    _problem->addVariable("MooseVariableScalar", "lambda", lm_params);
+  }
+
+  if (getParam<bool>("add_energy_equation"))
+  {
+    params.set<std::vector<Real>>("scaling") = {_energy_scaling};
+    _problem->addVariable("INSFVEnergyVariable", NS::T_fluid, params);
+  }
+}
+
+void
+NSFVAction::addCNSVariables()
+{
+  auto params = _factory.getValidParams("MooseVariableFVReal");
+  params.set<std::vector<SubdomainName>>("block") = _blocks;
+
+  params.set<std::vector<Real>>("scaling") = {_momentum_scaling};
+  if (_porous_medium_treatment)
+    for (unsigned int d = 0; d < _dim; ++d)
+      _problem->addVariable("MooseVariableFVReal", NS::superficial_momentum_vector[d], params);
+  else
+    for (unsigned int d = 0; d < _dim; ++d)
+      _problem->addVariable("MooseVariableFVReal", NS::momentum_vector[d], params);
+
+  params.set<std::vector<Real>>("scaling") = {_mass_scaling};
+  _problem->addVariable("MooseVariableFVReal", NS::pressure, params);
+
+  params.set<std::vector<Real>>("scaling") = {_energy_scaling};
+  _problem->addVariable("MooseVariableFVReal", NS::T_fluid, params);
+
+  for (unsigned int d = 0; d < _dim; ++d)
+    _problem->addAuxVariable("MooseVariableFVReal", NS::velocity_vector[d], params);
+}
+
+void
+NSFVAction::addRhieChowUserObjects()
+{
+  const std::string u_names[3] = {"u", "v", "w"};
+  if (_porous_medium_treatment)
+  {
+    auto params = _factory.getValidParams("PINSFVRhieChowInterpolator");
+    for (unsigned int d = 0; d < _dim; ++d)
+      params.set<VariableName>(u_names[d]) = NS::superficial_velocity_vector[d];
+
+    params.set<VariableName>("pressure") = NS::pressure;
+    params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
+
+    _problem->addUserObject("PINSFVRhieChowInterpolator", "pins_rhie_chow_interpolator", params);
+  }
+  else
+  {
+    auto params = _factory.getValidParams("INSFVRhieChowInterpolator");
+    for (unsigned int d = 0; d < _dim; ++d)
+      params.set<VariableName>(u_names[d]) = NS::velocity_vector[d];
+
+    params.set<VariableName>("pressure") = NS::pressure;
+
+    _problem->addUserObject("INSFVRhieChowInterpolator", "ins_rhie_chow_interpolator", params);
+  }
+}
+
+void
+NSFVAction::addINSInitialConditions()
+{
+  InputParameters params = _factory.getValidParams("ConstantIC");
+  auto vvalue = getParam<RealVectorValue>("initial_velocity");
+
+  if (_porous_medium_treatment)
+    for (unsigned int d = 0; d < _dim; ++d)
+    {
+      params.set<VariableName>("variable") = NS::superficial_velocity_vector[d];
+      params.set<Real>("value") = vvalue(d);
+      _problem->addInitialCondition(
+          "ConstantIC", NS::superficial_velocity_vector[d] + "_ic", params);
+    }
+  else
+    for (unsigned int d = 0; d < _dim; ++d)
+    {
+      params.set<VariableName>("variable") = NS::velocity_vector[d];
+      params.set<Real>("value") = vvalue(d);
+      _problem->addInitialCondition("ConstantIC", NS::velocity_vector[d] + "_ic", params);
+    }
+
+  params.set<VariableName>("variable") = NS::pressure;
+  params.set<Real>("value") = getParam<Real>("initial_pressure");
+  _problem->addInitialCondition("ConstantIC", "pressure_ic", params);
+
+  if (getParam<bool>("add_energy_equation"))
+  {
+    params.set<VariableName>("variable") = NS::T_fluid;
+    params.set<Real>("value") = getParam<Real>("initial_temperature");
+    _problem->addInitialCondition("ConstantIC", NS::T_fluid + "_ic", params);
+  }
+}
+
+void
+NSFVAction::addCNSInitialConditions()
+{
+  InputParameters params = _factory.getValidParams("ConstantIC");
+  auto mvalue = getParam<RealVectorValue>("initial_momentum");
+
+  if (_porous_medium_treatment)
+    for (unsigned int d = 0; d < _dim; ++d)
+    {
+      params.set<VariableName>("variable") = NS::superficial_momentum_vector[d];
+      params.set<Real>("value") = mvalue(d);
+      _problem->addInitialCondition(
+          "ConstantIC", NS::superficial_momentum_vector[d] + "_ic", params);
+    }
+  else
+    for (unsigned int d = 0; d < _dim; ++d)
+    {
+      params.set<VariableName>("variable") = NS::momentum_vector[d];
+      params.set<Real>("value") = mvalue(d);
+      _problem->addInitialCondition("ConstantIC", NS::momentum_vector[d] + "_ic", params);
+    }
+
+  params.set<VariableName>("variable") = NS::T_fluid;
+  params.set<Real>("value") = getParam<Real>("initial_temperature");
+  ;
+  _problem->addInitialCondition("ConstantIC", NS::T_fluid + "_ic", params);
 }
 
 void
@@ -1519,6 +1392,19 @@ NSFVAction::addINSWallBC()
 }
 
 void
+NSFVAction::addEnthalpyMaterial()
+{
+  InputParameters params = _factory.getValidParams("INSFVEnthalpyMaterial");
+
+  if (_blocks.size() > 0)
+    params.set<std::vector<SubdomainName>>("block") = _blocks;
+
+  params.set<MooseFunctorName>(NS::density) = _density_name;
+  params.set<MooseFunctorName>("temperature") = NS::T_fluid;
+  _problem->addMaterial("INSFVEnthalpyMaterial", "ins_enthalpy_material", params);
+}
+
+void
 NSFVAction::addRelationshipManager(std::string name,
                                    unsigned int no_layers,
                                    const InputParameters & obj_params)
@@ -1544,4 +1430,126 @@ NSFVAction::addRelationshipManager(std::string name,
 
   if (!_app.addRelationshipManager(rm_obj))
     factory.releaseSharedObjects(*rm_obj);
+}
+
+void
+NSFVAction::processBlocks()
+{
+  _dim = _mesh->dimension();
+  _problem->needFV();
+
+  for (const auto & subdomain_name : _blocks)
+  {
+    SubdomainID id = _mesh->getSubdomainID(subdomain_name);
+    _block_ids.insert(id);
+    if (_problem->getCoordSystem(id) != Moose::COORD_XYZ)
+      mooseError("RZ has not been added in action");
+  }
+  if (_blocks.size() == 0)
+  {
+    for (auto & id : _mesh->meshSubdomains())
+      if (_problem->getCoordSystem(id) != Moose::COORD_XYZ)
+        mooseError("RZ has not been added in action");
+  }
+
+  if (_momentum_inlet_function.size() != _inlet_boundaries.size() * _dim)
+    paramError("momentum_inlet_function",
+               "Size is not the same as the number of boundaries in 'inlet_boundaries' times "
+               "the mesh dimension");
+}
+
+void
+NSFVAction::checkBoundaryParameterErrors()
+{
+  unsigned int no_pressure_outlets = 0;
+  for (unsigned int enum_ind = 0; enum_ind < _outlet_boundaries.size(); ++enum_ind)
+    if (_momentum_outlet_types[enum_ind] == "fixed-pressure" ||
+        _momentum_outlet_types[enum_ind] == "fixed-pressure-zero-gradient")
+      no_pressure_outlets += 1;
+
+  if (_outlet_boundaries.size() > 0 && _pressure_function.size() != no_pressure_outlets)
+    paramError("pressure_function",
+               "Size is not the same as the number of pressure outlet boundaries!");
+
+  if (_compressibility == "incompressible")
+    if (no_pressure_outlets == 0 && !(getParam<bool>("pin_pressure")))
+      mooseError("The pressure must be fixed for an incompressible simulation! Try setting "
+                 "pin_pressure or change the compressibility settings!");
+
+  if (_outlet_boundaries.size() > 0 && _outlet_boundaries.size() != _momentum_outlet_types.size())
+    paramError("velocity_outlet_types",
+               "Size is not the same as the number of outlet boundaries in 'outlet_boundaries'");
+
+  if (_wall_boundaries.size() > 0 && _wall_boundaries.size() != _momentum_wall_types.size())
+    paramError("velocity_wall_types",
+               "Size is not the same as the number of wall boundaries in 'wall_boundaries'");
+
+  if (getParam<bool>("add_energy_equation"))
+  {
+    if (_inlet_boundaries.size() > 0 && _energy_inlet_types.size() != _energy_inlet_function.size())
+      paramError("energy_inlet_function",
+                 "Size is not the same as the number of boundaries in 'energy_inlet_types'");
+
+    unsigned int no_fixed_energy_walls = 0;
+    for (unsigned int enum_ind = 0; enum_ind < _energy_wall_types.size(); ++enum_ind)
+      if (_energy_wall_types[enum_ind] == "fixed-temperature" ||
+          _energy_wall_types[enum_ind] == "heatflux")
+        no_fixed_energy_walls += 1;
+
+    if (_wall_boundaries.size() > 0 && _energy_wall_function.size() != no_fixed_energy_walls)
+      paramError("energy_wall_function",
+                 "Size " + std::to_string(_energy_wall_function.size()) +
+                     " is not the same as the number of Dirichlet/Neumann conditions in "
+                     "'energy_wall_types' (" +
+                     std::to_string(no_fixed_energy_walls) + ")");
+
+    if (_inlet_boundaries.size() > 0 && _inlet_boundaries.size() != _energy_inlet_types.size())
+      paramError("energy_inlet_types",
+                 "Size is not the same as the number of inlet boundaries in 'inlet_boundaries'");
+
+    if (_wall_boundaries.size() > 0 && _wall_boundaries.size() != _energy_wall_types.size())
+      paramError("energy_wall_types",
+                 "Size is not the same as the number of wall boundaries in 'wall_boundaries'");
+  }
+}
+
+void
+NSFVAction::checkAmbientConvectionParameterErrors()
+{
+  if (getParam<bool>("add_energy_equation"))
+  {
+    if (_ambient_convection_blocks.size() && _blocks.size())
+    {
+      for (auto const & block : _ambient_convection_blocks)
+        if (std::find(_blocks.begin(), _blocks.end(), block) == _blocks.end())
+          paramError("ambient_convection_blocks",
+                     "Block '" + block + "' is not present in the block IDs of the module!");
+
+      if (_ambient_convection_blocks.size() != _ambient_convection_alpha.size())
+        paramError("ambient_convection_alpha",
+                   "The number of heat exchange coefficients is not the same as the number of "
+                   "ambient convection blocks!");
+
+      if (_ambient_convection_blocks.size() != _ambient_temperature.size())
+        paramError("ambient_temperature",
+                   "The number of ambient temperatures is not the same as the number of "
+                   "ambient convection blocks!");
+    }
+    else if ((!_ambient_convection_blocks.size() && !_blocks.size()) ||
+             (!_ambient_convection_blocks.size() && _blocks.size()))
+    {
+      if (_ambient_convection_alpha.size() > 1)
+        paramError("ambient_convection_alpha",
+                   "The user should only use one or zero heat exchange coefficient if the ambient "
+                   "convection blocks are not defined!");
+      if (_ambient_convection_alpha.size() != _ambient_temperature.size())
+        paramError("ambient_temperature",
+                   "The number of ambient temperatures is not the same as the number of "
+                   "heat exchange coefficients!");
+    }
+    else if (_ambient_convection_blocks.size() && !_blocks.size())
+      paramError("ambient_convection_blocks",
+                 "If there are no subdomains defined in 'blocks', ambient convection blocks should "
+                 "not be defined either!");
+  }
 }
