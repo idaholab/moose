@@ -7,7 +7,11 @@ efficiency as functions of shaft speed and mass flow rate. The compressor then
 applies a pressure rise and work to the working fluid, according to the current
 flow conditions.
 
-## Usage
+## Usage id=usage
+
+!template load file=volume_junction_usage.md.template name=ShaftConnectedCompressor1Phase
+
+!template load file=volume_junction_1phase_usage.md.template name=ShaftConnectedCompressor1Phase
 
 This component must be must be connected to a [Shaft](Shaft.md) component, which
 controls the compressor rotational speed. The user must specify which flow
@@ -54,10 +58,7 @@ corresponds to the reference area $A_\text{ref}$ (see [momentum]). It
 should generally be assigned a value between the inlet area and outlet area.
 `A_ref` can act as a means to scale the compressor head and can also be used in
 combination with [!param](/Components/ShaftConnectedCompressor1Phase/K) to apply
-a pressure drop due to form loss. The compressor volume,
-[!param](/Components/ShaftConnectedCompressor1Phase/volume), should be a
-reasonable estimate of the inlet to outlet fluid volume of the modeled
-compressor.
+a pressure drop due to form loss.
 
 !syntax parameters /Components/ShaftConnectedCompressor1Phase
 
@@ -214,5 +215,8 @@ otherwise, $I_{\text{compressor}}$ is a function of shaft speed and inertia coef
 !equation
 I_{\text{compressor}} = I_{\text{coeff}}[0] + I_{\text{coeff}}[1] \mid \alpha \mid + I_{\text{coeff}}[2] \mid\alpha \mid^{2} + I_{\text{coeff}}[3] \mid \alpha \mid^{3}.
 
+### Form Loss
+
+!template load file=volume_junction_1phase_formulation_formloss.md.template name=ShaftConnectedCompressor1Phase
 
 !bibtex bibliography

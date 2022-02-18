@@ -1,0 +1,4 @@
+The parameter [!param](/Components/{{name}}/volume) specifies the volume of the
+junction, and the parameter [!param](/Components/{{name}}/position) specifies
+the spatial location of the center of the junction, which is used for plotting
+purposes only.

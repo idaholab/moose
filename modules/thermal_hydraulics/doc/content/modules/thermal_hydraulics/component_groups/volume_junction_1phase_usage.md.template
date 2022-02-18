@@ -1,0 +1,7 @@
+Initial conditions are specified with the following parameters:
+
+- [!param](/Components/{{name}}/initial_T): temperature
+- [!param](/Components/{{name}}/initial_p): pressure
+- [!param](/Components/{{name}}/initial_vel_x): x-velocity
+- [!param](/Components/{{name}}/initial_vel_y): y-velocity
+- [!param](/Components/{{name}}/initial_vel_z): z-velocity

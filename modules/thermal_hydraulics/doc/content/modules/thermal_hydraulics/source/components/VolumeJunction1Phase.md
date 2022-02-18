@@ -1,30 +1,36 @@
 # VolumeJunction1Phase
 
-!syntax description /Components/VolumeJunction1Phase
+This is a [flow junction](component_groups/flow_junction.md) that has a volume
+and can connect 2 or more [FlowChannel1Phase.md] components in any orientation.
 
-This component implements a junction model for 1-phase flow that has a volume.
-A form loss coefficient
-[!param](/Components/VolumeJunction1Phase/K) can be supplied by the user. The source term on the momentum equation is:
+## Usage id=usage
 
-!equation id=momentum_source
-S^{\text{momentum}} = - K (p_0 - p) A  \hat{n}_1,
+!template load file=flow_junction_usage.md.template name=VolumeJunction1Phase
 
+!alert note title=Order-dependent connections
+Several quantities in the form loss source terms given by [formloss_momentum] and [formloss_energy]
+are taken from the first connection in [!param](/Components/VolumeJunction1Phase/connections),
+so using different connections in the first entry gives different results.
 
-where
+The parameter [!param](/Components/VolumeJunction1Phase/A_ref) is the reference
+cross-sectional area $A_\text{ref}$ used in [formloss_momentum] and [formloss_energy]. If it is
+not provided, the cross-sectional area of the first connection in
+[!param](/Components/VolumeJunction1Phase/connections) is used.
 
-- $p_0$ is the stagnation pressure of the first [flow channel](FlowChannel1Phase.md) connected to the junction in [!param](/Components/VolumeJunction1Phase/connections),
-- $p$ is the pressure of the first [flow channel](FlowChannel1Phase.md) connected to the junction,
-- A is the flow area of the first [flow channel](FlowChannel1Phase.md) connected to the junction or [!param](/Components/VolumeJunction1Phase/A_ref) if it was supplied by the user, and
-- $\hat{n}_1$ is the direction of the flow in the first [flow channel](FlowChannel1Phase.md) connected to the junction.
+A form loss coefficient $K$ may be specified using the parameter
+[!param](/Components/VolumeJunction1Phase/K).
 
-The source term on the energy equation is
-
-!equation id=momentum_energy
-S^{\text{momentum}} = - K (p_0 - p) A |u|,
-
-where $u$ is the velocity in the first connected flow channel.
+!template load file=volume_junction_1phase_usage.md.template name=VolumeJunction1Phase
 
 !syntax parameters /Components/VolumeJunction1Phase
+
+## Formulation
+
+See [!cite](relap7theory) for a description of this junction formulation.
+
+### Form Losses
+
+!template load file=volume_junction_1phase_formulation_formloss.md.template name=VolumeJunction1Phase
 
 !syntax inputs /Components/VolumeJunction1Phase
 

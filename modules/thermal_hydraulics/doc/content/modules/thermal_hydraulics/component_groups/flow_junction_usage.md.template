@@ -1,0 +1,2 @@
+The parameter [!param](/Components/{{name}}/connections) specifies ends of
+[flow channel](component_groups/flow_channel.md) components to connect.
