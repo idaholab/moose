@@ -53,6 +53,8 @@ public:
 
   virtual void neighborSubdomainChanged() override;
 
+  void pre() override;
+
 protected:
   FEProblemBase & _fe_problem;
 };
@@ -73,6 +75,13 @@ ThreadedElementLoop<RangeType>::ThreadedElementLoop(ThreadedElementLoop & x,
 template <typename RangeType>
 ThreadedElementLoop<RangeType>::~ThreadedElementLoop()
 {
+}
+
+template <typename RangeType>
+void
+ThreadedElementLoop<RangeType>::pre()
+{
+  ADReal::do_derivatives = _fe_problem.doDerivatives();
 }
 
 template <typename RangeType>

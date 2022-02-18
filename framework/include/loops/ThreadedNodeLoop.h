@@ -119,6 +119,7 @@ template <typename RangeType, typename IteratorType>
 void
 ThreadedNodeLoop<RangeType, IteratorType>::pre()
 {
+  ADReal::do_derivatives = _fe_problem.doDerivatives();
 }
 
 template <typename RangeType, typename IteratorType>

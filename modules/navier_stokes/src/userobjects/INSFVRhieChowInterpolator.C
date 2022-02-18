@@ -325,13 +325,6 @@ INSFVRhieChowInterpolator::execute()
   if (_sys.number() != _u->sys().number())
     return;
 
-  // A lot of RC data gathering leverages the automatic differentiation system, e.g. for linear
-  // operators we pull out the 'a' coefficents by querying the ADReal residual derivatives member at
-  // the element or neighbor dof locations. Consequently we need to enable derivative computation.
-  // We do this here outside the threaded regions
-  const auto saved_do_derivatives = ADReal::do_derivatives;
-  ADReal::do_derivatives = true;
-
   PARALLEL_TRY
   {
     GatherRCDataElementThread et(_fe_problem, _var_numbers);
@@ -347,8 +340,6 @@ INSFVRhieChowInterpolator::execute()
     Threads::parallel_reduce(faces, fvr);
   }
   PARALLEL_CATCH;
-
-  ADReal::do_derivatives = saved_do_derivatives;
 }
 
 void

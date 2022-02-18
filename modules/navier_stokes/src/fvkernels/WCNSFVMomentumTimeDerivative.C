@@ -41,12 +41,15 @@ WCNSFVMomentumTimeDerivative::gatherRCData(const Elem & elem)
 
   const auto elem_arg = makeElemArg(&elem);
   const auto rho_dot = _rho_dot(elem_arg);
+  const auto saved_do_derivatives = ADReal::do_derivatives;
+  ADReal::do_derivatives = true;
   const auto var_dot = _var.dot(elem_arg);
+  ADReal::do_derivatives = saved_do_derivatives;
   const auto rho = _rho(elem_arg);
   const auto var = _var(elem_arg);
 
   const auto dof_number = elem.dof_number(_sys.number(), _var.number(), 0);
-  mooseAssert(var.derivatives()[dof_number] == 1.,
+  mooseAssert(!saved_do_derivatives || var.derivatives()[dof_number] == 1.,
               "This is an implicit assumption in our coefficient calculation.");
 
   const auto strong_resid = rho_dot * var + rho * var_dot;

@@ -90,9 +90,12 @@ PINSFVFunctorBC::computeQpResidual()
   // matter
   const auto boundary_face = singleSidedFaceArg();
 
+  const auto saved_do_derivatives = ADReal::do_derivatives;
+  ADReal::do_derivatives = true;
   const VectorValue<ADReal> sup_vel(_sup_vel_x(boundary_face),
                                     _sup_vel_y ? (*_sup_vel_y)(boundary_face) : ADReal(0),
                                     _sup_vel_z ? (*_sup_vel_z)(boundary_face) : ADReal(0));
+  ADReal::do_derivatives = saved_do_derivatives;
   const auto rho = _rho(boundary_face);
 
   if (_eqn == "mass")

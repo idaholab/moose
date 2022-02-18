@@ -32,7 +32,11 @@ INSFVMomentumTimeDerivative::INSFVMomentumTimeDerivative(const InputParameters &
 void
 INSFVMomentumTimeDerivative::gatherRCData(const Elem & elem)
 {
+  const auto saved_do_derivatives = ADReal::do_derivatives;
+  ADReal::do_derivatives = true;
   const auto residual = _rho * _var.dot(makeElemArg(&elem)) * _assembly.elementVolume(&elem);
+  ADReal::do_derivatives = saved_do_derivatives;
+
   const auto dof_number = elem.dof_number(_sys.number(), _var.number(), 0);
   const Real a = residual.derivatives()[dof_number];
 

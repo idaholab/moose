@@ -36,11 +36,12 @@ namespace FV
  */
 template <typename T>
 VectorValue<T>
-greenGaussGradient(const ElemArg & elem_arg,
-                   const FunctorBase<T> & functor,
-                   const bool two_term_boundary_expansion,
-                   const MooseMesh & mesh,
-                   std::unordered_map<const FaceInfo *, T> * const face_to_value_cache = nullptr)
+greenGaussGradient(
+    const ElemArg & elem_arg,
+    const FunctorBase<T> & functor,
+    const bool two_term_boundary_expansion,
+    const MooseMesh & mesh,
+    std::unordered_map<const FaceInfo *, std::pair<bool, T>> * const face_to_value_cache = nullptr)
 {
   mooseAssert(elem_arg.elem, "This should be non-null");
   const auto coord_type = mesh.getCoordSystem(elem_arg.elem->subdomain_id());
@@ -225,7 +226,8 @@ greenGaussGradient(const ElemArg & elem_arg,
       // Optionally cache the face value information
       if (face_to_value_cache)
         for (const auto j : make_range(num_ebfs))
-          face_to_value_cache->emplace(ebf_faces[j], x(LIBMESH_DIM + j));
+          face_to_value_cache->emplace(ebf_faces[j],
+                                       std::make_pair(ADReal::do_derivatives, x(LIBMESH_DIM + j)));
     }
 
     return grad;
@@ -244,7 +246,7 @@ greenGaussGradient(const ElemArg & elem_arg,
     // set the boundary face values to the cell centroid value
     if (face_to_value_cache)
       for (auto * const ebf_face : ebf_faces)
-        face_to_value_cache->emplace(ebf_face, elem_value);
+        face_to_value_cache->emplace(ebf_face, std::make_pair(ADReal::do_derivatives, elem_value));
 
     return grad;
   }
@@ -252,11 +254,12 @@ greenGaussGradient(const ElemArg & elem_arg,
 
 template <typename T>
 TensorValue<T>
-greenGaussGradient(const ElemArg & elem_arg,
-                   const Moose::FunctorBase<VectorValue<T>> & functor,
-                   const bool two_term_boundary_expansion,
-                   const MooseMesh & mesh,
-                   std::unordered_map<const FaceInfo *, T> * const face_to_value_cache = nullptr)
+greenGaussGradient(
+    const ElemArg & elem_arg,
+    const Moose::FunctorBase<VectorValue<T>> & functor,
+    const bool two_term_boundary_expansion,
+    const MooseMesh & mesh,
+    std::unordered_map<const FaceInfo *, std::pair<bool, T>> * const face_to_value_cache = nullptr)
 {
   TensorValue<T> ret;
   for (const auto i : make_range(unsigned(LIBMESH_DIM)))

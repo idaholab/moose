@@ -104,8 +104,11 @@ PINSFVMomentumFrictionCorrection::gatherRCData(const FaceInfo & fi)
               true);
 
   // Compute face superficial velocity gradient
+  const auto saved_do_derivatives = ADReal::do_derivatives;
+  ADReal::do_derivatives = true;
   auto dudn =
       _var.gradient(Moose::FV::makeCDFace(*_face_info, faceArgSubdomains())) * _face_info->normal();
+  ADReal::do_derivatives = saved_do_derivatives;
 
   if (_face_type == FaceInfo::VarFaceNeighbors::ELEM ||
       _face_type == FaceInfo::VarFaceNeighbors::BOTH)
