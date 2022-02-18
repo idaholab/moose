@@ -1,9 +1,8 @@
-# Flow Junctions
+# Volume Junctions
 
-These 0D components connect two or more [flow channels](component_groups/flow_channel.md):
+These are [flow junctions](component_groups/volume_junction.md) that have a
+volume (not just a zero-volume interface):
 
-- [GateValve1Phase.md]
-- [JunctionOneToOne1Phase.md]
 - [JunctionParallelChannels1Phase.md]
 - [Pump1Phase.md]
 - [ShaftConnectedCompressor1Phase.md]

@@ -1,0 +1,18 @@
+The user-given name to the flow channel component, say, `<flow_channel>`, is
+used internally to create a subdomain (also called a "block") name. If
+[!param](/Components/{{name}}/length) has only one entry, then a single block
+of the name `<flow_channel>` is created; else the blocks `<flow_channel>:<region>`
+are created, where `<region>` is an entry in the
+[!param](/Components/{{name}}/axial_region_names) parameter:
+
+| Block | Description |
+| :- | :- |
+| `<flow_channel>` | The 1D flow channel mesh (if only one entry in [!param](/Components/{{name}}/length)) |
+| `<flow_channel>:<region>` | The 1D flow channel mesh for region `<region>` (if more than one entry in [!param](/Components/{{name}}/length)) |
+
+Additionally, two boundary names are created with the following convention:
+
+| Boundary | Description |
+| :- | :- |
+| `<flow_channel_name>:in` | The "start" end of the 1D flow channel mesh |
+| `<flow_channel_name>:out` | The "end" end of the 1D flow channel mesh |
