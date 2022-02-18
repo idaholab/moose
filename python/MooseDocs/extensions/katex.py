@@ -293,7 +293,13 @@ class RenderEquationReference(core.RenderShortcutLink):
         else:
             a['href']='#{}'.format(id_)
 
-        html.String(a, content='{} ({})'.format(self.extension['prefix'], num))
+        if num is None:
+            a['class'] = 'moose-error'
+            html.String(a, content='{}#{}'.format(eq_page.local, token['label']))
+            msg = "Could not find equation with key {} on page {}".format(token['label'], eq_page.local)
+            raise common.exceptions.MooseDocsException(msg)
+        else:
+            html.String(a, content='{} ({})'.format(self.extension['prefix'], num))
 
     def createLatex(self, parent, token, page):
         key = token['label']

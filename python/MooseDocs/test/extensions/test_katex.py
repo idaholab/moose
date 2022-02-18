@@ -153,6 +153,18 @@ class TestRenderEquationReference(MooseDocsTestCase):
         self.assertLatexString(res(0), content='Eq.~')
         self.assertLatexCommand(res(1), 'eqref', string='second_law')
 
+    def testExceptions(self):
+        ast = katex.EquationReference(None, label='first_law', filename='katex_include2.md')
+        with self.assertLogs(level=logging.ERROR) as cm:
+            res = self.render(ast, renderer=base.HTMLRenderer())
+        self.assertHTMLTag(res, 'body', size=1)
+        self.assertHTMLTag(res(0), 'a', size=9, class_='moose-error')
+        self.assertIn('extensions/katex_include2.html#None', res(0)['href'])
+        self.assertIn('Equations', res(0,0)['content'])
+        self.assertIn('extensions/katex_include2.md#first_law', res(0,8)['content'])
+        self.assertEqual(len(cm.output), 2)
+        self.assertIn('Could not find equation with key first_law on page extensions/katex_include2.md', cm.output[1])
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2, buffer=False)
