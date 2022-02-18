@@ -82,9 +82,6 @@ INSFVMixingLengthReynoldsStress::computeStrongResidual()
 
   const auto face = Moose::FV::makeCDFace(*_face_info, faceArgSubdomains());
 
-  const auto saved_do_derivatives = ADReal::do_derivatives;
-  ADReal::do_derivatives = true;
-
   const auto & grad_u = _u_var->adGradSln(*_face_info);
   // Compute the dot product of the strain rate tensor and the normal vector
   // aka (grad_v + grad_v^T) * n_hat
@@ -103,8 +100,6 @@ INSFVMixingLengthReynoldsStress::computeStrongResidual()
   }
   const ADRealVectorValue & var_grad = _index == 0 ? grad_u : (_index == 1 ? *grad_v : *grad_w);
   norm_strain_rate += var_grad * _normal;
-
-  ADReal::do_derivatives = saved_do_derivatives;
 
   ADReal symmetric_strain_tensor_norm = 2.0 * Utility::pow<2>(grad_u(0));
   if (_dim >= 2)

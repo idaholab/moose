@@ -61,10 +61,7 @@ ADReal
 INSFVMomentumDiffusion::computeStrongResidual()
 {
   const auto face = Moose::FV::makeCDFace(*_face_info, faceArgSubdomains());
-  const auto saved_do_derivatives = ADReal::do_derivatives;
-  ADReal::do_derivatives = true;
   const auto dudn = gradUDotNormal();
-  ADReal::do_derivatives = saved_do_derivatives;
   const auto face_mu = _mu(face);
 
   if (_face_type == FaceInfo::VarFaceNeighbors::ELEM ||

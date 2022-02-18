@@ -319,7 +319,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
   //  Initialize static do_derivatives member. We initialize this to true so that all the default AD
   //  things that we setup early in the simulation actually get their derivative vectors initalized.
   //  We will toggle this to false when doing residual evaluations
-  _main_thread_dn.do_derivatives = true;
+  ADReal::do_derivatives = true;
 
   _time = 0.0;
   _time_old = 0.0;
@@ -5299,11 +5299,11 @@ FEProblemBase::computeResidualSys(NonlinearImplicitSystem & /*sys*/,
 {
   TIME_SECTION("computeResidualSys", 5);
 
-  _main_thread_dn.do_derivatives = false;
+  ADReal::do_derivatives = false;
 
   computeResidual(soln, residual);
 
-  _main_thread_dn.do_derivatives = true;
+  ADReal::do_derivatives = true;
 }
 
 void

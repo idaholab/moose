@@ -819,11 +819,6 @@ public:
   virtual void residualSetup();
   virtual void jacobianSetup();
 
-  /**
-   * @return the current main-thread value for do_derivatives
-   */
-  bool doDerivatives() const { return _main_thread_dn.do_derivatives; }
-
 protected:
   /**
    * Helper function called by getVariable that handles the logic for
@@ -922,14 +917,11 @@ protected:
   /// AD flag indicating whether **any** AD objects have been added
   bool _have_ad_objects;
 
-  /// A main thread copy of ADReal used for setting and communicating the main-thread value of
-  /// do_derivatives
-  ADReal _main_thread_dn;
-
 private:
   /// A container holding pointers to all the functors in our problem
   std::vector<std::multimap<std::string, std::unique_ptr<Moose::FunctorEnvelopeBase>>> _functors;
 
+private:
   /// The requestors of functors where the key is the prop name and the value is a set of names of
   /// requestors
   std::map<std::string, std::set<std::string>> _functor_to_requestors;

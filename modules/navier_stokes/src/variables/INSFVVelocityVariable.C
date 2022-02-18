@@ -76,8 +76,8 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem, bool correct_skewness)
   {
     auto it = _elem_to_grad.find(elem);
 
-    if (it != _elem_to_grad.end() && it->second.first >= ADReal::do_derivatives)
-      return it->second.second;
+    if (it != _elem_to_grad.end())
+      return it->second;
   }
 
   ADReal elem_value = getElemValue(elem);
@@ -330,8 +330,7 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem, bool correct_skewness)
 
       // Cache the face value information
       for (const auto ebf_index : make_range(num_ebfs))
-        _face_to_value.emplace(ebf_faces[ebf_index].first,
-                               std::make_pair(ADReal::do_derivatives, x(lm_dim + ebf_index)));
+        _face_to_value.emplace(ebf_faces[ebf_index].first, x(lm_dim + ebf_index));
 
       if (_cache_face_gradients && !correct_skewness)
       {
@@ -347,11 +346,10 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem, bool correct_skewness)
           const auto starting_index =
               static_cast<unsigned int>(lm_dim + num_ebfs + lm_dim * fdf_index);
 
-          auto pr = _face_to_unc_grad.emplace(
-              it->first, std::make_pair(ADReal::do_derivatives, VectorValue<ADReal>()));
+          auto pr = _face_to_unc_grad.emplace(it->first, VectorValue<ADReal>());
           mooseAssert(pr.second, "We should have inserted a new face gradient");
           for (const auto lm_index : make_range(lm_dim))
-            pr.first->second.second(lm_index) = x(starting_index + lm_index);
+            pr.first->second(lm_index) = x(starting_index + lm_index);
 
           // increment the iterator so we don't find the same element again
           ++it;
@@ -361,10 +359,9 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem, bool correct_skewness)
 
     if (_cache_cell_gradients && !correct_skewness)
     {
-      auto pr =
-          _elem_to_grad.emplace(elem, std::make_pair(ADReal::do_derivatives, std::move(grad)));
+      auto pr = _elem_to_grad.emplace(elem, std::move(grad));
       mooseAssert(pr.second, "Insertion should have just happened.");
-      return pr.first->second.second;
+      return pr.first->second;
     }
     else
       return grad;
@@ -383,7 +380,7 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem, bool correct_skewness)
     // getExtrapolatedBoundaryFaceValue) so we populate them here with one-term expansion, e.g. we
     // set the boundary face values to the cell centroid value
     for (const auto & ebf_face_pr : ebf_faces)
-      _face_to_value.emplace(ebf_face_pr.first, std::make_pair(ADReal::do_derivatives, elem_value));
+      _face_to_value.emplace(ebf_face_pr.first, elem_value);
 
     // Two term boundary expansion should only fail at domain corners. We want to keep trying it at
     // other boundary locations

@@ -71,6 +71,12 @@ INSFVMomentumAdvectionOutflowBC::gatherRCData(const FaceInfo & fi)
   if (_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR)
     _normal = -_normal;
 
+  ADRealVectorValue v(_u_var->getBoundaryFaceValue(*_face_info));
+  if (_v_var)
+    v(1) = _v_var->getBoundaryFaceValue(*_face_info);
+  if (_w_var)
+    v(2) = _w_var->getBoundaryFaceValue(*_face_info);
+
   const auto & elem = (_face_type == FaceInfo::VarFaceNeighbors::ELEM) ? _face_info->elem()
                                                                        : _face_info->neighbor();
   const auto boundary_face = singleSidedFaceArg();
@@ -82,19 +88,9 @@ INSFVMomentumAdvectionOutflowBC::gatherRCData(const FaceInfo & fi)
   // term expansion, this boundary value will actually be a function of more than just the degree of
   // freedom at the cell centroid adjacent to the face, e.g. it can/will depend on surrounding cell
   // degrees of freedom as well
-  const auto saved_do_derivatives = ADReal::do_derivatives;
-  ADReal::do_derivatives = true;
   auto var_boundary = _var(boundary_face);
-  ADReal::do_derivatives = saved_do_derivatives;
   const auto dof_number = elem.dof_number(_sys.number(), _var.number(), 0);
   ADReal a = var_boundary.derivatives()[dof_number];
-
-  ADRealVectorValue v(_u_var->getBoundaryFaceValue(*_face_info));
-  if (_v_var)
-    v(1) = _v_var->getBoundaryFaceValue(*_face_info);
-  if (_w_var)
-    v(2) = _w_var->getBoundaryFaceValue(*_face_info);
-
   a *= _normal * v * rho_boundary / eps_boundary;
 
   const auto strong_resid = _normal * v * rho_boundary / eps_boundary * var_boundary;

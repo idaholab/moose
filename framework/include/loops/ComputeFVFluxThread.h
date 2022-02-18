@@ -87,7 +87,7 @@ public:
   /// finished for that face.
   virtual void postFace(const FaceInfo & /*fi*/) {}
   /// This is called once before all face-looping
-  virtual void pre() { ADReal::do_derivatives = _fe_problem.doDerivatives(); }
+  virtual void pre() {}
   /// This is called once after all face-looping is finished.
   virtual void post() {}
 
@@ -731,8 +731,6 @@ template <typename RangeType>
 void
 ComputeFVFluxThread<RangeType>::pre()
 {
-  ADReal do_derivatives = _fe_problem.doDerivatives();
-
   std::vector<FVFluxBC *> bcs;
   _fe_problem.theWarehouse()
       .query()

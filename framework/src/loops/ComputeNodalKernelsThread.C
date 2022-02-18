@@ -46,8 +46,6 @@ ComputeNodalKernelsThread::ComputeNodalKernelsThread(ComputeNodalKernelsThread &
 void
 ComputeNodalKernelsThread::pre()
 {
-  ADReal::do_derivatives = _fe_problem.doDerivatives();
-
   _num_cached = 0;
 
   if (!_tags.size() || _tags.size() == _fe_problem.numVectorTags(Moose::VECTOR_TAG_RESIDUAL))

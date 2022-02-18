@@ -604,13 +604,13 @@ MooseVariableFV<OutputType>::getInternalFaceValue(const FaceInfo & fi,
   // quantities.
   if (_cache_face_values && !correct_skewness)
   {
-    auto pr = _face_to_value.emplace(&fi, std::make_pair(ADReal::do_derivatives, 0));
+    auto pr = _face_to_value.emplace(&fi, 0);
 
-    if (!pr.second && pr.first->second.first >= ADReal::do_derivatives)
+    if (!pr.second)
       // Insertion didn't happen...we already have a value ready to go
-      return pr.first->second.second;
+      return pr.first->second;
 
-    value_pointer = &pr.first->second.second;
+    value_pointer = &pr.first->second;
   }
 
   ADReal & value = *value_pointer;
@@ -665,13 +665,13 @@ MooseVariableFV<OutputType>::getDirichletBoundaryFaceValue(const FaceInfo & fi) 
   ADReal * value_pointer = &_temp_face_value;
   if (_cache_face_values)
   {
-    auto pr = _face_to_value.emplace(&fi, std::make_pair(ADReal::do_derivatives, 0));
+    auto pr = _face_to_value.emplace(&fi, 0);
 
-    if (!pr.second && pr.first->second.first >= ADReal::do_derivatives)
+    if (!pr.second)
       // Insertion didn't happen...we already have a value ready to go
-      return pr.first->second.second;
+      return pr.first->second;
 
-    value_pointer = &pr.first->second.second;
+    value_pointer = &pr.first->second;
   }
 
   ADReal & value = *value_pointer;
@@ -708,8 +708,8 @@ MooseVariableFV<OutputType>::getExtrapolatedBoundaryFaceValue(const FaceInfo & f
               "This function should only be called on extrapolated boundary faces");
 
   auto it = _face_to_value.find(&fi);
-  if (it != _face_to_value.end() && it->second.first >= ADReal::do_derivatives)
-    return it->second.second;
+  if (it != _face_to_value.end())
+    return it->second;
 
   const auto & tup = Moose::FV::determineElemOneAndTwo(fi, *this);
   const Elem * const elem = std::get<0>(tup);
@@ -724,17 +724,16 @@ MooseVariableFV<OutputType>::getExtrapolatedBoundaryFaceValue(const FaceInfo & f
     mooseAssert(it != _face_to_value.end(),
                 "adGradSln(elem) should have generated the boundary face value for us");
 
-    return it->second.second;
+    return it->second;
   }
   else
   {
     // We are doing a one-term Taylor expansion and the face value is simply the centroid value
     if (_cache_face_values)
     {
-      const auto & pr =
-          _face_to_value.emplace(&fi, std::make_pair(ADReal::do_derivatives, getElemValue(elem)));
+      const auto & pr = _face_to_value.emplace(&fi, getElemValue(elem));
       mooseAssert(pr.second, "This should have inserted a new key-value pair");
-      return pr.first->second.second;
+      return pr.first->second;
     }
     else
     {
@@ -758,8 +757,8 @@ MooseVariableFV<OutputType>::getBoundaryFaceValue(const FaceInfo & fi) const
   {
     // Check to see whether it's already in our cache
     auto it = _face_to_value.find(&fi);
-    if (it != _face_to_value.end() && it->second.first >= ADReal::do_derivatives)
-      return it->second.second;
+    if (it != _face_to_value.end())
+      return it->second;
   }
 
   if (isDirichletBoundaryFace(fi))
@@ -784,8 +783,8 @@ MooseVariableFV<OutputType>::adGradSln(const Elem * const elem, const bool corre
   {
     auto it = _elem_to_grad.find(elem);
 
-    if (it != _elem_to_grad.end() && it->second.first >= ADReal::do_derivatives)
-      return it->second.second;
+    if (it != _elem_to_grad.end())
+      return it->second;
   }
 
   auto grad = FV::greenGaussGradient(
@@ -798,9 +797,9 @@ MooseVariableFV<OutputType>::adGradSln(const Elem * const elem, const bool corre
 
   if (_cache_cell_gradients && !correct_skewness)
   {
-    auto pr = _elem_to_grad.emplace(elem, std::make_pair(ADReal::do_derivatives, std::move(grad)));
+    auto pr = _elem_to_grad.emplace(elem, std::move(grad));
     mooseAssert(pr.second, "Insertion should have just happened.");
-    return pr.first->second.second;
+    return pr.first->second;
   }
   else
   {
@@ -824,8 +823,8 @@ MooseVariableFV<OutputType>::uncorrectedAdGradSln(const FaceInfo & fi,
   {
     auto it = _face_to_unc_grad.find(&fi);
 
-    if (it != _face_to_unc_grad.end() && it->second.first >= ADReal::do_derivatives)
-      return it->second.second;
+    if (it != _face_to_unc_grad.end())
+      return it->second;
   }
 
   auto tup = Moose::FV::determineElemOneAndTwo(fi, *this);
@@ -843,12 +842,11 @@ MooseVariableFV<OutputType>::uncorrectedAdGradSln(const FaceInfo & fi,
   {
     // Returns a pair with the first being an iterator pointing to the key-value pair and the second
     // a boolean denoting whether a new insertion took place
-    auto emplace_ret = _face_to_unc_grad.emplace(
-        &fi, std::make_pair(ADReal::do_derivatives, std::move(elem_one_grad)));
+    auto emplace_ret = _face_to_unc_grad.emplace(&fi, elem_one_grad);
 
     mooseAssert(emplace_ret.second, "We should have inserted a new key-value pair");
 
-    unc_face_grad_pointer = &emplace_ret.first->second.second;
+    unc_face_grad_pointer = &emplace_ret.first->second;
   }
   else
     *unc_face_grad_pointer = elem_one_grad;
@@ -893,17 +891,16 @@ MooseVariableFV<OutputType>::adGradSln(const FaceInfo & fi, const bool correct_s
   {
     auto it = _face_to_grad.find(&fi);
 
-    if (it != _face_to_grad.end() && it->second.first >= ADReal::do_derivatives)
-      return it->second.second;
+    if (it != _face_to_grad.end())
+      return it->second;
 
     // Returns a pair with the first being an iterator pointing to the key-value pair and the second
     // a boolean denoting whether a new insertion took place
-    auto emplace_ret = _face_to_grad.emplace(
-        &fi, std::make_pair(ADReal::do_derivatives, uncorrectedAdGradSln(fi, correct_skewness)));
+    auto emplace_ret = _face_to_grad.emplace(&fi, uncorrectedAdGradSln(fi, correct_skewness));
 
     mooseAssert(emplace_ret.second, "We should have inserted a new key-value pair");
 
-    face_grad_pointer = &emplace_ret.first->second.second;
+    face_grad_pointer = &emplace_ret.first->second;
   }
   else
     *face_grad_pointer = uncorrectedAdGradSln(fi, correct_skewness);

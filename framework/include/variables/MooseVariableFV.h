@@ -646,14 +646,13 @@ private:
 
 protected:
   /// A cache for storing gradients on elements
-  mutable std::unordered_map<const Elem *, std::pair<bool, VectorValue<ADReal>>> _elem_to_grad;
+  mutable std::unordered_map<const Elem *, VectorValue<ADReal>> _elem_to_grad;
 
   /// A cache for storing uncorrected gradients on faces
-  mutable std::unordered_map<const FaceInfo *, std::pair<bool, VectorValue<ADReal>>>
-      _face_to_unc_grad;
+  mutable std::unordered_map<const FaceInfo *, VectorValue<ADReal>> _face_to_unc_grad;
 
   /// A cache that maps from faces to face values
-  mutable std::unordered_map<const FaceInfo *, std::pair<bool, ADReal>> _face_to_value;
+  mutable std::unordered_map<const FaceInfo *, ADReal> _face_to_value;
 
   /// Whether to use a two term expansion for computing boundary face values
   bool _two_term_boundary_expansion;
@@ -702,7 +701,7 @@ private:
   DotType evaluateFaceDotHelper(const FaceCallingArg & face) const;
 
   /// A cache for storing gradients on faces
-  mutable std::unordered_map<const FaceInfo *, std::pair<bool, VectorValue<ADReal>>> _face_to_grad;
+  mutable std::unordered_map<const FaceInfo *, VectorValue<ADReal>> _face_to_grad;
 
   /// A cache that maps from mesh vertices to interpolated finite volume solutions at those vertices
   mutable std::unordered_map<const Node *, ADReal> _vertex_to_value;
