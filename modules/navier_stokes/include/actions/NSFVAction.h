@@ -47,9 +47,22 @@ protected:
   void addINSInitialConditions();
   void addCNSInitialConditions();
 
-  void addINSTimeKernels();
-  void addINSMass();
-  void addINSMomentum();
+  /// Fnction adding kernels for the incompressible continuity equation
+  void addINSMassKernels();
+
+  /// Functions adding kernels for the incompressible momentum equation
+  void addINSMomentumTimeKernels();
+  void addINSMomentumDiffusionKernels();
+  void addINSMomentumAdvectionKernels();
+  void addINSMomentumPressureKernels();
+  void addINSMomentumGravityKernels();
+
+  /// Functions adding kernels for the ethalpy equation in an incompressible
+  /// Navier-Stokes setting
+  void addINSEnergyTimeKernels();
+  void addINSEnergyDiffusionKernels();
+  void addINSEnergyAdvectionKernels();
+
   void addINSEnergy();
   void addINSInletBC();
   void addINSOutletBC();
@@ -85,6 +98,12 @@ protected:
   MooseEnum _compressibility;
   /// Swich dedicated to show if porous medium treatment is requested or not
   bool _porous_medium_treatment;
+  /// Switch that can be used to create an integrated energy equation for
+  /// incompressible/weakly compressible simulations.
+  bool _has_energy_equation;
+  /// Switch to use to enable the Boussinesq approximation for incompressible
+  /// fluid simulations
+  bool _boussinesq_approximation;
   /// The name of the auxiliary variable for the porosity field
   AuxVariableName _porosity_name;
   /// Turbulent diffusivity handling type (mixing-length, etc.)
@@ -164,6 +183,8 @@ protected:
 private:
   /// Process the mesh data and convert block names to block IDs
   void processBlocks();
+  /// Check for general user errors in the parameters
+  void checkGeneralControErrors();
   /// Check errors regarding the user defined boundary treatments
   void checkBoundaryParameterErrors();
   /// Check errors regarding the user defined ambient convection parameters
