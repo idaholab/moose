@@ -23,6 +23,8 @@ VoronoiICAux::VoronoiICAux(const InputParameters & parameters)
   : AuxKernel(parameters),
     _poly_ic_uo(getUserObject<PolycrystalUserObjectBase>("polycrystal_ic_uo"))
 {
+  if (isNodal())
+    mooseError("This AuxKernel only supports Elemental fields");
 }
 
 Real

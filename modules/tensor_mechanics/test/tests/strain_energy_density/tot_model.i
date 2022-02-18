@@ -17,129 +17,129 @@
 []
 
 [AuxVariables]
-  [./SED]
+  [SED]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [Functions]
-  [./rampConstantUp]
+  [rampConstantUp]
     type = PiecewiseLinear
     x = '0. 1.'
     y = '0. 1.'
     scale_factor = -100
-  [../]
+  []
 []
 
 [Modules/TensorMechanics/Master]
-  [./master]
+  [master]
     strain = SMALL
     add_variables = true
     incremental = false
     generate_output = 'stress_xx stress_yy stress_zz vonmises_stress strain_xx strain_yy strain_zz'
     planar_formulation = PLANE_STRAIN
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./SED]
+  [SED]
     type = MaterialRealAux
     variable = SED
     property = strain_energy_density
     execute_on = timestep_end
-  [../]
+  []
 []
 
 [BCs]
-  [./no_x]
+  [no_x]
     type = DirichletBC
     variable = disp_x
     boundary = 'left'
     value = 0.0
-  [../]
-  [./no_y]
+  []
+  [no_y]
     type = DirichletBC
     variable = disp_y
     boundary = 'bottom'
     value = 0.0
-  [../]
-  [./Pressure]
-    [./top]
+  []
+  [Pressure]
+    [top]
       boundary = 'top'
       function = rampConstantUp
-    [../]
-  [../]
+    []
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 30e+6
     poissons_ratio = 0.3
-  [../]
-  [./elastic_stress]
+  []
+  [elastic_stress]
     type = ComputeLinearElasticStress
-  [../]
-  [./strain_energy_density]
+  []
+  [strain_energy_density]
     type = StrainEnergyDensity
     incremental = false
-  [../]
+  []
 []
 
 [Executioner]
-   type = Transient
+  type = Transient
 
   petsc_options_iname = '-ksp_gmres_restart -pc_type -pc_hypre_type -pc_hypre_boomeramg_max_iter'
   petsc_options_value = '201                hypre    boomeramg      4'
 
   line_search = 'none'
 
-   l_max_its = 50
-   nl_max_its = 20
-   nl_abs_tol = 3e-7
-   nl_rel_tol = 1e-12
-   l_tol = 1e-2
+  l_max_its = 50
+  nl_max_its = 20
+  nl_abs_tol = 3e-7
+  nl_rel_tol = 1e-12
+  l_tol = 1e-2
 
-   start_time = 0.0
-   dt = 1
+  start_time = 0.0
+  dt = 1
 
-   end_time = 1
-   num_steps = 1
+  end_time = 1
+  num_steps = 1
 []
 
 [Postprocessors]
-  [./epxx]
+  [epxx]
     type = ElementalVariableValue
     variable = strain_xx
     elementid = 0
-  [../]
-  [./epyy]
+  []
+  [epyy]
     type = ElementalVariableValue
     variable = strain_yy
     elementid = 0
-  [../]
-  [./epzz]
+  []
+  [epzz]
     type = ElementalVariableValue
     variable = strain_zz
     elementid = 0
-  [../]
-  [./sigxx]
+  []
+  [sigxx]
     type = ElementAverageValue
     variable = stress_xx
-  [../]
-  [./sigyy]
+  []
+  [sigyy]
     type = ElementAverageValue
     variable = stress_yy
-  [../]
-  [./sigzz]
+  []
+  [sigzz]
     type = ElementAverageValue
     variable = stress_zz
-  [../]
-  [./SED]
+  []
+  [SED]
     type = ElementAverageValue
     variable = SED
-  [../]
+  []
 []
 
 [Outputs]

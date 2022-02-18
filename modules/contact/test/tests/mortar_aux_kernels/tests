@@ -1,0 +1,51 @@
+[Tests]
+  design = 'constraints/ComputeDynamicFrictionalForceLMMechanicalContact.md '
+           'constraints/ComputeDynamicFrictionalForceLMMechanicalContact.md'
+  issues = '#19671'
+  [block-dynamics-aux-vel]
+    type = 'Exodiff'
+    exodiff = 'block-dynamics-aux-vel_out.e'
+    input = 'block-dynamics-aux-vel.i'
+    rel_err = 5.0e-4
+    abs_zero = 1.0e-5
+    min_parallel = 1
+    max_parallel = 4
+    min_ad_size = '50'
+    ad_indexing_type = 'global'
+    requirement = 'Contact module shall compute nodal weighted gap distance velocity values via a '
+                  'mortar auxiliary kernel.'
+  []
+  [block-dynamics-aux-wear]
+    type = 'Exodiff'
+    exodiff = 'block-dynamics-aux-wear_out.e'
+    input = 'block-dynamics-aux-wear.i'
+    rel_err = 5.0e-4
+    abs_zero = 1.0e-5
+    min_parallel = 1
+    max_parallel = 4
+    min_ad_size = '50'
+    ad_indexing_type = 'global'
+    valgrind = 'none'
+    requirement = 'Contact module shall compute nodal wear depth values in accordance with Archard '
+                  'equation via a mortar auxiliary kernel.'
+
+  []
+  [block-dynamics-aux-wear-vel]
+    type = 'Exodiff'
+    exodiff = 'block-dynamics-aux-wear-vel_out.e'
+    input = 'block-dynamics-aux-wear-vel.i'
+    rel_err = 1.0e-3
+    abs_zero = 1.0e-4
+    min_parallel = 1
+    max_parallel = 4
+    min_ad_size = '50'
+    ad_indexing_type = 'global'
+    heavy = true
+    method = 'opt'
+    valgrind = 'none'
+    requirement = 'Contact module shall compute nodal wear depth values in accordance with Archard '
+                  'equation and the mortar gap velocity via mortar auxiliary kernels in the same '
+                  'input file.'
+
+  []
+[]

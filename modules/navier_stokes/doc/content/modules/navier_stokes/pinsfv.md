@@ -3,28 +3,28 @@
 ## Equations
 
 This module implements the porous media Navier Stokes equations. They are expressed in terms of the superficial
-viscosity $\vec{v}_d = \eps \vec{V}$ where $\eps$ is the porosity and $\vec{V}$ the interstitial velocity. The
+viscosity $\vec{v}_d = \epsilon \vec{V}$ where $\epsilon$ is the porosity and $\vec{V}$ the interstitial velocity. The
 superficial viscosity is also known as the extrinsic or Darcy velocity. The other non-linear variables used are
 pressure and temperature. This is known as the primitive superficial set of variables.
 
 Mass equation:
 \begin{equation}
-\div (\rho \vec{v}_d = 0)
+\nabla \cdot \rho \vec{v}_d = 0
 \end{equation}
 
 Momentum equation, with friction and gravity force as example forces:
 \begin{equation}
-\dfrac{\partial \rho \mathbf{v}_D}{\partial t} + \nabla \cdot (\dfrac{\rho}{\epsilon} \mathbf{v}_D \otimes \mathbf{v}_D) &= \nabla \cdot (\mu \nabla \dfrac{\mathbf{v}_D}{\epsilon}) - \epsilon \nabla p + \epsilon (\mathbf{F}_g + \mathbf{F}_f)
+\dfrac{\partial \rho \mathbf{v}_D}{\partial t} + \nabla \cdot (\dfrac{\rho}{\epsilon} \mathbf{v}_D \otimes \mathbf{v}_D) = \nabla \cdot (\mu \nabla \dfrac{\mathbf{v}_D}{\epsilon}) - \epsilon \nabla p + \epsilon (\mathbf{F}_g + \mathbf{F}_f)
 \end{equation}
 
 Fluid phase energy equation, with a convective heat transfer term:
 \begin{equation}
-\dfrac{\partial \epsilon \rho c_p T_f}{\partial t} + \nabla \cdot (\dfrac{\rho}{\epsilon} \mathbf{v}_D \rho c_{pf} T_f) &= \nabla \cdot (\kappa_f \nabla T_f) - \epsilon \alpha (T_f - T_s)
+\dfrac{\partial \epsilon \rho c_p T_f}{\partial t} + \nabla \cdot (\dfrac{\rho}{\epsilon} \mathbf{v}_D \rho c_{pf} T_f) = \nabla \cdot (\kappa_f \nabla T_f) - \epsilon \alpha (T_f - T_s)
 \end{equation}
 
 Solid phase energy equation, with convective heat transfer and an energy source $\dot{Q}$:
 \begin{equation}
-\dfrac{\partial (1-\epsilon) \rho c_{ps} T_s}{\partial t} &= \nabla \cdot (\kappa_s \nabla T_s) + (1-\epsilon) \alpha (T_f - T_s) + (1-\epsilon) \dot{Q}
+\dfrac{\partial (1-\epsilon) \rho c_{ps} T_s}{\partial t} = \nabla \cdot (\kappa_s \nabla T_s) + (1-\epsilon) \alpha (T_f - T_s) + (1-\epsilon) \dot{Q}
 \end{equation}
 
 where $\rho$ is the fluid density, $\mu$ the viscosity, $c_p$ the specific heat capacity $\alpha$ the convective heat transfer coefficient.
@@ -138,7 +138,7 @@ One of the tests to verify the conservation of mass, momentum and energy, featur
 a diverging channel. The test also features postprocessors to measure the flow of the conserved quantities on
 both internal and external boundaries. The geometry can be switched using the `inactive` parameter of the `Mesh` block.
 
-!listing modules/navier_stokes/test/tests/postprocessors/conservation_PINSFV.i
+!listing modules/navier_stokes/test/tests/postprocessors/flow_rates/conservation_PINSFV.i
 
 ## Pronghorn
 

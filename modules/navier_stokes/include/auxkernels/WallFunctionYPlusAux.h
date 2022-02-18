@@ -36,10 +36,10 @@ protected:
   const INSFVVelocityVariable * const _w_var;
 
   /// Density
-  const Real & _rho;
+  const Moose::Functor<ADReal> & _rho;
 
   /// Dynamic viscosity
-  const ADMaterialProperty<Real> & _mu;
+  const Moose::Functor<ADReal> & _mu;
 
   /// Wall boundaries
   std::vector<BoundaryName> _wall_boundary_names;

@@ -41,6 +41,8 @@ FunctorElementalAuxTempl<is_ad>::FunctorElementalAuxTempl(const InputParameters 
     _functor(getFunctor<GenericReal<is_ad>>("functor")),
     _factor(getFunctor<GenericReal<is_ad>>("factor"))
 {
+  if (isNodal())
+    paramError("variable", "This AuxKernel only supports Elemental fields");
 }
 
 template <bool is_ad>

@@ -416,7 +416,7 @@ private:
   /// Map from full dimensional secondary element id to lower dimensional secondary element
   std::unordered_map<dof_id_type, const Elem *> _secondary_element_to_secondary_lowerd_element;
 
-  /// List of inactive lagrange multiplier nodes (for nodal variables)
+  // List of inactive lagrange multiplier nodes (for nodal variables)
   std::unordered_set<const Node *> _inactive_local_lm_nodes;
 
   /// List of inactive lagrange multiplier nodes (for elemental variables)

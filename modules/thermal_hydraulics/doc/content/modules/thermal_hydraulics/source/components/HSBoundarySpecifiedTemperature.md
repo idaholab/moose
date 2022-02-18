@@ -1,9 +1,12 @@
 # HSBoundarySpecifiedTemperature
 
-This component is a heat structure boundary condition that applies Dirichlet
-boundary conditions.
+This component is a
+[heat structure boundary](thermal_hydraulics/component_groups/heat_structure_boundary.md)
+that applies Dirichlet boundary conditions.
 
 ## Usage
+
+!template load file=heat_structure_boundary_usage.md.template name=HSBoundarySpecifiedTemperature
 
 The parameter [!param](/Components/HSBoundarySpecifiedTemperature/T) specifies
 the temperature function $T_b$ to strongly impose on the boundary.
@@ -12,16 +15,7 @@ the temperature function $T_b$ to strongly impose on the boundary.
 
 ## Formulation
 
-This boundary condition ensures the following:
-
-!equation
-T(\mathbf{r},t) = T_b(\mathbf{r},t) \qquad \mathbf{r} \in \Gamma
-
-where
-
-- $T$ is the temperature solution,
-- $T_b$ is the imposed temperature function, and
-- $\Gamma$ is the chosen boundary.
+!include heat_structure_boundary_formulation_dirichlet.md
 
 !syntax inputs /Components/HSBoundarySpecifiedTemperature
 

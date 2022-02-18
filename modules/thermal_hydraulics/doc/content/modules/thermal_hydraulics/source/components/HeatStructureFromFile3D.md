@@ -9,15 +9,20 @@ using the `hs:body` name, and similarly for sidesets and nodesets.
 
 ## Usage
 
-In addition to the parameters discussed in [thermal_hydraulics/component_groups/heat_structure.md],
-the following parameters need to be specified:
+!template load file=heat_structure_usage.md.template name=HeatStructureFromFile3D
 
-- `position`: The location in 3D space where the origin of the mesh will be placed. This can be used to move the mesh from its original location specified in the file.
-- `file`: the ExodusII file name with the mesh to load. Note that ExodusII is the only supported format at the moment.
+The following parameters need to be specified:
+
+- [!param](/Components/HeatStructureFromFile3D/position): The location in 3D
+  space where the origin of the mesh will be placed. This can be used to move
+  the mesh from its original location specified in the file.
+- [!param](/Components/HeatStructureFromFile3D/file): the ExodusII file name
+  with the mesh to load. Note that ExodusII is the only supported format at the
+  moment.
 
 To define the material properties used by the heat conduction model, users must
 create materials that define the following AD material properties on all of
-their blocks:
+their blocks (see [#mesh]):
 
 | Material Property | Symbol | Description |
 | :- | :- | :- |
@@ -26,6 +31,21 @@ their blocks:
 | `thermal_conductivity` | $k$ | Thermal conductivity \[W/(m-K)\] |
 
 !syntax parameters /Components/HeatStructureFromFile3D
+
+## Mesh id=mesh
+
+The block and sideset names in the loaded mesh file are prepended with the name
+of the component. For example if the heat structure component name is `myhs`
+and the mesh file has the block `myblock`, then the block `myhs:myblock` is
+created.
+
+## Variables
+
+!include heat_structure_variables.md
+
+## Formulation
+
+!include heat_structure_formulation.md
 
 !syntax inputs /Components/HeatStructureFromFile3D
 

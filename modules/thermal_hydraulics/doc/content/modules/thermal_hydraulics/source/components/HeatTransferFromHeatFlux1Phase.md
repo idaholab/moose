@@ -1,18 +1,24 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # HeatTransferFromHeatFlux1Phase
 
-!alert construction title=Undocumented Class
-The HeatTransferFromHeatFlux1Phase has not been documented. The content contained on this page includes the
-typical automatic documentation associated with a MooseObject; however, what is contained is
-ultimately determined by what is necessary to make the documentation clear for users.
+This component is a
+[single-phase heat transfer component](thermal_hydraulics/component_groups/heat_transfer_1phase.md)
+that uses a wall heat flux from a user-provided function.
 
-!syntax description /Components/HeatTransferFromHeatFlux1Phase
+## Usage
+
+!template load file=heat_transfer_usage.md.template name=HeatTransferFromHeatFlux1Phase
+
+!template load file=heat_transfer_1phase_usage.md.template name=HeatTransferFromHeatFlux1Phase
+
+The parameter [!param](/Components/HeatTransferFromHeatFlux1Phase/q_wall)
+specifies the wall heat flux function $q_\text{wall}$.
 
 !syntax parameters /Components/HeatTransferFromHeatFlux1Phase
+
+## Formulation
+
+!include heat_transfer_1phase_formulation.md
 
 !syntax inputs /Components/HeatTransferFromHeatFlux1Phase
 
 !syntax children /Components/HeatTransferFromHeatFlux1Phase
-
-!bibtex bibliography

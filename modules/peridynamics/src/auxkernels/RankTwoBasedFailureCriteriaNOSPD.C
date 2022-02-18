@@ -41,6 +41,9 @@ RankTwoBasedFailureCriteriaNOSPD::RankTwoBasedFailureCriteriaNOSPD(
   else
     mooseError("Error in RankTwoBasedFailureCriteriaNOSPD! Required rank two tensor is not "
                "available for current peridynamics model!");
+
+  if (isNodal())
+    paramError("variable", "This AuxKernel only supports Elemental fields");
 }
 
 Real

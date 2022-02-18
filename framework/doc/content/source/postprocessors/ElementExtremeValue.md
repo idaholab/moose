@@ -12,6 +12,8 @@ evaluated at nodes is [NodalExtremeValue](NodalExtremeValue.md)
 
 ## Example Input File Syntax
 
+!listing test/tests/postprocessors/element_extreme_value/element_extreme_value.i block=Postprocessors
+
 !syntax parameters /Postprocessors/ElementExtremeValue
 
 !syntax inputs /Postprocessors/ElementExtremeValue

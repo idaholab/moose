@@ -156,6 +156,7 @@ public:
 protected:
   void computeScalarVars(ExecFlagType type);
   void computeNodalVars(ExecFlagType type);
+  void computeMortarNodalVars(ExecFlagType type);
   void computeNodalVecVars(ExecFlagType type);
   void computeNodalArrayVars(ExecFlagType type);
   void computeElementalVars(ExecFlagType type);
@@ -215,6 +216,7 @@ protected:
 
   // Storage for AuxKernel objects
   ExecuteMooseObjectWarehouse<AuxKernel> _nodal_aux_storage;
+  ExecuteMooseObjectWarehouse<AuxKernel> _mortar_nodal_aux_storage;
   ExecuteMooseObjectWarehouse<AuxKernel> _elemental_aux_storage;
 
   // Storage for VectorAuxKernel objects

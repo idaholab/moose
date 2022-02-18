@@ -32,6 +32,8 @@ INSCourant::INSCourant(const InputParameters & parameters)
     _v_vel(_mesh.dimension() >= 2 ? coupledValue("v") : _zero),
     _w_vel(_mesh.dimension() == 3 ? coupledValue("w") : _zero)
 {
+  if (isNodal())
+    mooseError("This AuxKernel only supports Elemental fields");
 }
 
 Real

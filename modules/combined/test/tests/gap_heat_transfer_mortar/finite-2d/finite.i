@@ -99,7 +99,6 @@ name = 'finite'
   [frictionless_normal_lm]
     order = FIRST
     block = 'frictionless_secondary_subdomain'
-    scaling = 1e3
     use_dual = true
   []
 []

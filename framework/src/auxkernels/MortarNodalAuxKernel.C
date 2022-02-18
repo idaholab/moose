@@ -13,6 +13,18 @@
 
 #include "libmesh/quadrature.h"
 
+namespace
+{
+const InputParameters &
+setBoundaryParam(const InputParameters & params_in)
+{
+  InputParameters & ret = const_cast<InputParameters &>(params_in);
+  ret.set<std::vector<BoundaryName>>("boundary") = {
+      params_in.get<BoundaryName>("secondary_boundary")};
+  return ret;
+}
+}
+
 template <typename ComputeValueType>
 InputParameters
 MortarNodalAuxKernelTempl<ComputeValueType>::validParams()
@@ -20,19 +32,25 @@ MortarNodalAuxKernelTempl<ComputeValueType>::validParams()
   InputParameters params = AuxKernelTempl<ComputeValueType>::validParams();
   params += MortarConsumerInterface::validParams();
   params.set<bool>("ghost_point_neighbors") = true;
+  params.suppressParameter<std::vector<BoundaryName>>("boundary");
+  params.suppressParameter<std::vector<SubdomainName>>("block");
+  params.addParam<bool>(
+      "incremental", false, "Whether to accumulate mortar auxiliary kernel value");
   return params;
 }
 
 template <typename ComputeValueType>
 MortarNodalAuxKernelTempl<ComputeValueType>::MortarNodalAuxKernelTempl(
     const InputParameters & parameters)
-  : AuxKernelTempl<ComputeValueType>(parameters),
+  : AuxKernelTempl<ComputeValueType>(setBoundaryParam(parameters)),
     MortarExecutorInterface(
         *this->template getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     MortarConsumerInterface(this),
     _displaced(this->template getParam<bool>("use_displaced_mesh")),
     _fe_problem(*this->template getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
-    _msm_volume(0)
+    _msm_volume(0),
+    _incremental(this->template getParam<bool>("incremental")),
+    _u_old(uOld())
 {
   if (!isNodal())
     paramError("variable", "MortarNodalAuxKernel derivatives populate nodal aux variables only.");
@@ -85,7 +103,16 @@ MortarNodalAuxKernelTempl<ComputeValueType>::compute()
 
   // We have to reinit the node for this variable in order to get the dof index set for the node
   _var.reinitNode();
-  _var.setNodalValue(value / total_volume);
+
+  // Allow mortar auxiliary kernels to compute quantities incrementally
+  if (!_incremental)
+    _var.setNodalValue(value / total_volume);
+  else
+  {
+    mooseAssert(_u_old.size() == 1,
+                "Expected 1 value in MortarNodalAuxKernel, but got " << _u_old.size());
+    _var.setNodalValue(value / total_volume + _u_old[0]);
+  }
 }
 
 template <typename ComputeValueType>

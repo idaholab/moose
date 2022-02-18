@@ -28,6 +28,8 @@ BondStatusBasePD::BondStatusBasePD(const InputParameters & parameters)
     _bond_status_var(&_subproblem.getStandardVariable(_tid, "bond_status")),
     _critical_val(coupledValue("critical_variable"))
 {
+  if (isNodal())
+    paramError("variable", "This AuxKernel only supports Elemental fields");
 }
 
 Real

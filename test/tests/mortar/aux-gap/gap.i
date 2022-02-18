@@ -41,7 +41,6 @@
     secondary_boundary = 1
     primary_subdomain = 20
     secondary_subdomain = 10
-    block = '10'
   []
 []
 

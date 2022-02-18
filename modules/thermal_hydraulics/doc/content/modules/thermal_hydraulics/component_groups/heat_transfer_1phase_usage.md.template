@@ -1,0 +1,4 @@
+The parameter [!param](/Components/{{name}}/Hw) is optional and specifies the
+heat transfer coefficient $\mathcal{H}$; if unspecified, it is computed using
+the selected closures. Note that depending on the type of heat transfer and the
+chosen closures, it may not be relevant.

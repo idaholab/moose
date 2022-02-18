@@ -17,5 +17,6 @@
     allow_test_objects = true
 
     requirement = "The system shall support the ability to compute Sobol sensitivity indices for vector-type data."
+    method = 'opt'
   []
 []
