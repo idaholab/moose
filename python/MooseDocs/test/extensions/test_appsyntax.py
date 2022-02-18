@@ -128,7 +128,7 @@ class TestParameters(AppSyntaxTestCase):
 
         self.assertHTMLTag(res(2,0,1), 'div', size=3, class_='collapsible-body')
         self.assertHTMLTag(res(2,0,1,0), 'p', size=2, class_='moose-parameter-description-cpptype')
-        self.assertHTMLTag(res(2,0,1,1), 'p', size=2, class_='moose-parameter-description-options')
+        self.assertHTMLTag(res(2,0,1,1), 'p', size=2, class_='moose-parameter-description-controllable')
         self.assertHTMLTag(res(2,0,1,2), 'p', size=2, class_='moose-parameter-description')
 
         self.assertHTMLTag(res(3), 'h3')
@@ -186,6 +186,7 @@ class TestParam(AppSyntaxTestCase):
         self.assertEqual(param[u'group_name'], u'')
         self.assertEqual(param[u'options'], u'')
         self.assertEqual(param[u'required'], True)
+        self.assertEqual(param[u'controllable'], False)
 
     def testHTML(self):
         _, res = self.execute(self.TEXT, renderer=base.HTMLRenderer())
@@ -195,7 +196,6 @@ class TestParam(AppSyntaxTestCase):
 
     def testMaterialize(self):
         _, res = self.execute(self.TEXT, renderer=base.MaterializeRenderer())
-        print(res)
         self.assertHTMLTag(res, 'div', size=2)
         self.assertHTMLTag(res(0), 'p', size=1)
         self.assertHTMLTag(res(0,0), 'a', string=u'"variable"', class_='moose-modal-link modal-trigger')
@@ -205,7 +205,8 @@ class TestParam(AppSyntaxTestCase):
         self.assertHTMLTag(res(1, 0, 0), 'h4', size=1, string=u'variable')
         self.assertHTMLTag(res(1, 0, 1), 'p', size=2, class_='moose-parameter-description-cpptype')
         self.assertEqual(u"NonlinearVariableName", res(1, 0, 1, 1)['content'])
-        self.assertHTMLTag(res(1, 0, 2), 'p', size=2, class_='moose-parameter-description-options')
+        self.assertHTMLTag(res(1, 0, 2), 'p', size=2, class_='moose-parameter-description-controllable')
+        self.assertHTMLString(res(1, 0, 2, 1), 'No')
         self.assertHTMLTag(res(1, 0, 3), 'p', size=2, class_='moose-parameter-description')
         self.assertIn(u"The name of the variable", res(1, 0, 3, 1)['content'])
 
