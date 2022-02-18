@@ -278,7 +278,8 @@ PerfGraphLivePrint::iterateThroughExecutionList()
       if (_perf_graph._live_print_all ||
           section_increment_start._state == PerfGraph::IncrementState::PRINTED ||
           section_increment_start._state == PerfGraph::IncrementState::CONTINUED ||
-          time_increment > _time_limit || memory_increment > _mem_limit)
+          time_increment > _time_limit.load(std::memory_order_relaxed) ||
+          memory_increment > _mem_limit.load(std::memory_order_relaxed))
       {
         printStackUpToLast();
 
@@ -318,15 +319,18 @@ PerfGraphLivePrint::start()
     // wakeup happens to find that there is work to do.
     _perf_graph._finished_section.wait_for(
         lock,
-        std::chrono::duration<Real>(_time_limit),
+        std::chrono::duration<Real>(_time_limit.load(std::memory_order_relaxed)),
         [this]
         {
           // Get destructing first so that the execution_list will be in sync
           this->_currently_destructing = _perf_graph._destructing;
 
           // The end will be one past the last
+          // This "acquire" synchronizes with the "release" in the PerfGraph
+          // to ensure that all of the writes to the execution list have been
+          // published to this thread for the "end" we're reading
           this->_current_execution_list_end =
-              _perf_graph._execution_list_end.load(std::memory_order_relaxed);
+              _perf_graph._execution_list_end.load(std::memory_order_acquire);
 
           // Save off the number of things currently printed to the console
           this->_console_num_printed = _console.numPrinted();
@@ -354,10 +358,6 @@ PerfGraphLivePrint::start()
     _current_execution_list_last = static_cast<long int>(_current_execution_list_end) - 1 >= 0
                                        ? _current_execution_list_end - 1
                                        : MAX_EXECUTION_LIST_SIZE;
-
-    // This will synchronize with the thread_fence in addToExecutionList() so that all of the below
-    // reads, will be reading synchronized memory
-    std::atomic_thread_fence(std::memory_order_acquire);
 
     // Only happens if nothing has been added
     if (_current_execution_list_end == 0 && _last_execution_list_end == _current_execution_list_end)
