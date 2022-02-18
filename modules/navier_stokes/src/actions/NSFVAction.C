@@ -354,10 +354,10 @@ NSFVAction::NSFVAction(InputParameters parameters)
         paramError("ambient_convection_alpha",
                    "The user should only use one or zero heat exchange coefficient if the ambient "
                    "convection blocks are not defined!");
-      if (_ambient_convection_blocks.size() != _ambient_temperature.size())
+      if (_ambient_convection_alpha.size() != _ambient_temperature.size())
         paramError("ambient_temperature",
                    "The number of ambient temperatures is not the same as the number of "
-                   "ambient convection blocks!");
+                   "heat exchange coefficients!");
     }
     else if (_ambient_convection_blocks.size() && !_blocks.size())
       paramError("ambient_convection_blocks",
