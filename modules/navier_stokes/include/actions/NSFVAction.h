@@ -162,7 +162,6 @@ protected:
   Real _mass_scaling;
 
 private:
-
   /// Process the mesh data and convert block names to block IDs
   void processBlocks();
   /// Check errors regarding the user defined boundary treatments
