@@ -18,6 +18,15 @@
     ad_indexing_type = 'global'
     valgrind = HEAVY
   []
+  [free-slip-action]
+    type = 'Exodiff'
+    input = 2d-rc-action.i
+    exodiff = 2d-rc-action_out.e
+    method = "!dbg"
+    requirement = 'The system shall be able to model free-slip conditions in a channel using the NSFV action.'
+    ad_indexing_type = 'global'
+    valgrind = HEAVY
+  []
   [no-slip]
     type = 'Exodiff'
     input = 2d-rc-no-slip.i
