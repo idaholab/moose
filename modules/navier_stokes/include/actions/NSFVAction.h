@@ -131,4 +131,18 @@ protected:
   MaterialPropertyName _thermal_conductivity_name;
   /// NAme of the thermal expansion material property
   MaterialPropertyName _thermal_expansion_name;
+
+  /// The type of the advected quantity interpolation method for momentum/velocity
+  std::string _momentum_advection_interpolation;
+  /// The type of the advected quantity interpolation method for energy/temperature
+  std::string _energy_advection_interpolation;
+  /// The type of the advected quantity interpolation method for continuity equation
+  std::string _mass_advection_interpolation;
+
+  /// The scaling factor for the momentum variables
+  Real _momentum_scaling;
+  /// The scaling factor for the energy variables
+  Real _energy_scaling;
+  /// The scaling factor for the mass variables (for incompressible simulation this is pressure scaling)
+  Real _mass_scaling;
 };

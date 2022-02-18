@@ -25,8 +25,8 @@ INSFVMomentumBoussinesq::validParams()
                                     "The name of the thermal expansion coefficient"
                                     "this is of the form rho = rho*(1-alpha (T-T_ref))");
   params.addRequiredParam<Real>("ref_temperature", "The value for the reference temperature.");
-  params.addRequiredParam<Real>("rho", "The value for the density");
-  params.declareControllable("rho");
+  params.addRequiredParam<MooseFunctorName>(NS::density, "The value for the density");
+  params.declareControllable(NS::density);
   return params;
 }
 
@@ -37,7 +37,7 @@ INSFVMomentumBoussinesq::INSFVMomentumBoussinesq(const InputParameters & params)
     _gravity(getParam<RealVectorValue>("gravity")),
     _alpha(getFunctor<ADReal>("alpha_name")),
     _ref_temperature(getParam<Real>("ref_temperature")),
-    _rho(getParam<Real>(NS::density))
+    _rho(getFunctor<ADReal>(NS::density))
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
@@ -49,6 +49,6 @@ INSFVMomentumBoussinesq::INSFVMomentumBoussinesq(const InputParameters & params)
 ADReal
 INSFVMomentumBoussinesq::computeQpResidual()
 {
-  return _alpha(makeElemArg(_current_elem)) * _gravity(_index) * _rho *
-         (_temperature(makeElemArg(_current_elem)) - _ref_temperature);
+  auto elem = makeElemArg(_current_elem);
+  return _alpha(elem) * _gravity(_index) * _rho(elem) * (_temperature(elem) - _ref_temperature);
 }
