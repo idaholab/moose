@@ -24,4 +24,3 @@
     piecewise_linear_interpolation = true # for comparison with GWB
   []
 []
-
