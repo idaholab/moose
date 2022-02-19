@@ -14,7 +14,7 @@
 #include <iterator>
 
 /**
- * This class produces produces a yaml dump of the InputFileParameters that is machine parsable by
+ * This class produces produces a yaml dump of the InputParameters that is machine parsable by
  * any YAML formatter.
  */
 class YAMLFormatter : public SyntaxTree

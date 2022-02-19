@@ -60,6 +60,7 @@ Extensions:
         hide_source: True
         exceptions:
             - '*.C'
+            - '*.h'
             - '*.yml'
             - '*.i'
             - '*tests'

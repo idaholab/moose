@@ -11,6 +11,9 @@
 
 #include "InputFileFormatter.h"
 
+/*
+ * Dumps the input file in the Exodus output
+ */
 class ExodusFormatter : public InputFileFormatter
 {
 public:

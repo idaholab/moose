@@ -26,8 +26,9 @@ be a single value or a space separated list of parameters.
          id=declare_controllable
          caption=Example `validParams` method that declares a parameter as controllable.
 
-!alert note
-The `declareControllable` method also accepts a space separated list of parameters.
+!alert tip
+The documentation for a given parameter will indicate whether it is controllable. For example, see
+the [DirichletBC](source/bcs/DirichletBC.md#input-parameters) page.
 
 ## Create a Control object
 

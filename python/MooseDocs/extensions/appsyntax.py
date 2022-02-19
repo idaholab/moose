@@ -766,10 +766,14 @@ class RenderParameterToken(components.RenderComponent):
         html.Tag(p, 'span', string='C++ Type:')
         html.String(p, content=cpp_type, escape=True)
 
-        if 'options' in param:
+        if param['options']:
             p = html.Tag(body, 'p', class_='moose-parameter-description-options')
             html.Tag(p, 'span', string='Options:')
             html.String(p, content=", ".join(param['options'].split()))
+
+        p = html.Tag(body, 'p', class_='moose-parameter-description-controllable')
+        html.Tag(p, 'span', string='Controllable:')
+        html.String(p, content=('Yes' if param['controllable'] else 'No'))
 
         p = html.Tag(body, 'p', class_='moose-parameter-description')
         if desc:
