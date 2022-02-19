@@ -48,6 +48,8 @@ public:
       return _from_multi_app;
     else if (_to_multi_app)
       return _to_multi_app;
+    else
+      mooseError("Should not get here, there should be a multiapp");
   }
 
   /// Return the execution flags, handling "same_as_multiapp"

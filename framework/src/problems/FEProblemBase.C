@@ -4501,7 +4501,15 @@ FEProblemBase::addTransfer(const std::string & transfer_name,
   if (parameters.get<ExecFlagEnum>("execute_on").contains(EXEC_SAME_AS_MULTIAPP))
   {
     ExecFlagEnum & exec_enum = parameters.set<ExecFlagEnum>("execute_on", true);
-    std::shared_ptr<MultiApp> multiapp = getMultiApp(parameters.get<MultiAppName>("multi_app"));
+    std::shared_ptr<MultiApp> multiapp;
+    if (parameters.isParamValid("multi_app"))
+      multiapp = getMultiApp(parameters.get<MultiAppName>("multi_app"));
+    else if (parameters.isParamValid("from_multi_app"))
+      multiapp = getMultiApp(parameters.get<MultiAppName>("from_multi_app"));
+    else if (parameters.isParamValid("to_multi_app"))
+      multiapp = getMultiApp(parameters.get<MultiAppName>("to_multi_app"));
+    else
+      mooseError("Should not reach here");
     exec_enum = multiapp->getParam<ExecFlagEnum>("execute_on");
   }
 

@@ -36,7 +36,7 @@ PODResidualTransfer::execute()
 
   // Looping over sub-apps
   for (unsigned int base_i = 0; base_i < total_base_num; ++base_i)
-    if (_multi_app->hasLocalApp(base_i))
+    if (_from_multi_app->hasLocalApp(base_i))
       transferResidual(base_i, base_i);
 }
 
@@ -54,7 +54,7 @@ PODResidualTransfer::transferResidual(dof_id_type base_i, dof_id_type multi_app_
   const std::vector<std::string> & tag_types = _trainer.getTagTypes();
 
   // Getting reference to the non-linear system
-  FEProblemBase & app_problem = _multi_app->appProblemBase(multi_app_i);
+  FEProblemBase & app_problem = _from_multi_app->appProblemBase(multi_app_i);
   NonlinearSystemBase & nl = app_problem.getNonlinearSystemBase();
 
   // Looping over the residual tags and extracting the corresponding vector.

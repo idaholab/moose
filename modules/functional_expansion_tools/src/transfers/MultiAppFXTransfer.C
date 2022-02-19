@@ -45,28 +45,32 @@ MultiAppFXTransfer::MultiAppFXTransfer(const InputParameters & parameters)
 {
   if (_directions.size() != 1)
     paramError("direction", "This transfer is only unidirectional");
+  if (_to_multi_app && _from_multi_app)
+    mooseError("This transfer does not currently support between_multiapp transfer");
 }
 
 void
 MultiAppFXTransfer::initialSetup()
 {
+  const auto multi_app = _from_multi_app ? _from_multi_app : _to_multi_app;
+
   // Search for the _this_app_object_name in the LocalApp
   getMultiAppObject =
-      scanProblemBaseForObject(_multi_app->problemBase(), _this_app_object_name, "MultiApp");
+      scanProblemBaseForObject(multi_app->problemBase(), _this_app_object_name, "MultiApp");
   if (getMultiAppObject == NULL)
     mooseError(
         "Transfer '", name(), "': Cannot find object '", _this_app_object_name, "' in MultiApp");
 
   // Search for the _multi_app_object_name in each of the MultiApps
-  for (std::size_t i = 0; i < _multi_app->numGlobalApps(); ++i)
-    if (_multi_app->hasLocalApp(i))
+  for (std::size_t i = 0; i < multi_app->numGlobalApps(); ++i)
+    if (multi_app->hasLocalApp(i))
     {
       if (i == 0) // First time through, assign without checking against previous values
         getSubAppObject = scanProblemBaseForObject(
-            _multi_app->appProblemBase(i), _multi_app_object_name, _multi_app->name());
-      else if (getSubAppObject != scanProblemBaseForObject(_multi_app->appProblemBase(i),
+            multi_app->appProblemBase(i), _multi_app_object_name, multi_app->name());
+      else if (getSubAppObject != scanProblemBaseForObject(multi_app->appProblemBase(i),
                                                            _multi_app_object_name,
-                                                           _multi_app->name()))
+                                                           multi_app->name()))
         mooseError("The name '",
                    _multi_app_object_name,
                    "' is assigned to two different object types. Please modify your input file and "
@@ -164,16 +168,16 @@ MultiAppFXTransfer::execute()
     {
       // Get a reference to the object in the LocalApp
       const MutableCoefficientsInterface & from_object =
-          (this->*getMultiAppObject)(_multi_app->problemBase(), _this_app_object_name, 0);
+          (this->*getMultiAppObject)(_to_multi_app->problemBase(), _this_app_object_name, 0);
 
-      for (unsigned int i = 0; i < _multi_app->numGlobalApps(); ++i)
+      for (unsigned int i = 0; i < _to_multi_app->numGlobalApps(); ++i)
       {
-        if (_multi_app->hasLocalApp(i))
+        if (_to_multi_app->hasLocalApp(i))
           for (THREAD_ID t = 0; t < libMesh::n_threads(); ++t)
           {
             // Get a reference to the object in each MultiApp
-            MutableCoefficientsInterface & to_object =
-                (this->*getSubAppObject)(_multi_app->appProblemBase(i), _multi_app_object_name, t);
+            MutableCoefficientsInterface & to_object = (this->*getSubAppObject)(
+                _to_multi_app->appProblemBase(i), _multi_app_object_name, t);
 
             if (to_object.isCompatibleWith(from_object))
               to_object.importCoefficients(from_object);
@@ -196,17 +200,17 @@ MultiAppFXTransfer::execute()
        * among all instances, thus we only need to grab the set of coefficients from the first
        * SubApp.
        */
-      if (_multi_app->hasLocalApp(0))
+      if (_from_multi_app->hasLocalApp(0))
       {
         // Get a reference to the first thread object in the first MultiApp
         const MutableCoefficientsInterface & from_object =
-            (this->*getSubAppObject)(_multi_app->appProblemBase(0), _multi_app_object_name, 0);
+            (this->*getSubAppObject)(_from_multi_app->appProblemBase(0), _multi_app_object_name, 0);
 
         for (THREAD_ID t = 0; t < libMesh::n_threads(); ++t)
         {
           // Get a reference to the object in each LocalApp instance
           MutableCoefficientsInterface & to_object =
-              (this->*getMultiAppObject)(_multi_app->problemBase(), _this_app_object_name, t);
+              (this->*getMultiAppObject)(_from_multi_app->problemBase(), _this_app_object_name, t);
 
           if (to_object.isCompatibleWith(from_object))
             to_object.importCoefficients(from_object);

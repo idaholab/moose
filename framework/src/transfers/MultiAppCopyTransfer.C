@@ -33,7 +33,7 @@ MultiAppCopyTransfer::MultiAppCopyTransfer(const InputParameters & parameters)
     _from_var_names(getParam<std::vector<VariableName>>("source_variable")),
     _to_var_names(getParam<std::vector<AuxVariableName>>("variable"))
 {
-  /* Right now, most of transfers support one variable only */
+  /* Right now, most of derived transfers support one variable only */
   _to_var_name = _to_var_names[0];
   _from_var_name = _from_var_names[0];
 }
@@ -61,7 +61,7 @@ MultiAppCopyTransfer::execute()
 
   else if (_current_direction == BETWEEN_MULTIAPP)
   {
-    bool transfer_done = false;
+    int transfers_done = 0;
     for (unsigned int i = 0; i < _from_multi_app->numGlobalApps(); i++)
     {
       if (_from_multi_app->hasLocalApp(i))
@@ -71,13 +71,14 @@ MultiAppCopyTransfer::execute()
           if (_to_multi_app->hasLocalApp(j))
           {
             transfer(_to_multi_app->appProblemBase(j), _from_multi_app->appProblemBase(i));
-            transfer_done = true;
+            transfers_done++;
           }
         }
       }
     }
-    if (!transfer_done)
-      mooseError("BETWEEN_MULTIAPP transfer not supported with more than one rank");
+    if (!transfers_done)
+      mooseError("BETWEEN_MULTIAPP transfer not supported if there is not at least one subapp "
+                 "per multiapp involved on each rank");
   }
 
   _console << "Finished MultiAppCopyTransfer " << name() << std::endl;

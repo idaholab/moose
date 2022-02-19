@@ -49,7 +49,7 @@ void
 SamplerParameterTransfer::execute()
 {
   mooseAssert((_sampler_ptr->getNumberOfLocalRows() == 0) ||
-                  (_sampler_ptr->getNumberOfLocalRows() == _multi_app->numLocalApps()),
+                  (_sampler_ptr->getNumberOfLocalRows() == _to_multi_app->numLocalApps()),
               "The number of MultiApps and the number of sample rows must be the same.");
 
   // Loop over all sub-apps
@@ -57,7 +57,7 @@ SamplerParameterTransfer::execute()
        row_index < _sampler_ptr->getLocalRowEnd();
        row_index++)
   {
-    mooseAssert(_multi_app->hasLocalApp(row_index),
+    mooseAssert(_to_multi_app->hasLocalApp(row_index),
                 "The current sample row index is not a valid global MultiApp index.");
 
     // Get the sub-app SamplerReceiver object and perform error checking
@@ -74,7 +74,7 @@ SamplerParameterTransfer::execute()
 void
 SamplerParameterTransfer::executeToMultiapp()
 {
-  if (_multi_app->isRootProcessor())
+  if (_to_multi_app->isRootProcessor())
   {
     SamplerReceiver * ptr = getReceiver(_app_index);
     ptr->transfer(_parameter_names, _row_data);
@@ -85,11 +85,11 @@ SamplerReceiver *
 SamplerParameterTransfer::getReceiver(unsigned int app_index)
 {
   // Test that the sub-application has the given Control object
-  FEProblemBase & to_problem = _multi_app->appProblemBase(app_index);
+  FEProblemBase & to_problem = _to_multi_app->appProblemBase(app_index);
   ExecuteMooseObjectWarehouse<Control> & control_wh = to_problem.getControlWarehouse();
   if (!control_wh.hasActiveObject(_receiver_name))
     mooseError("The sub-application (",
-               _multi_app->name(),
+               _to_multi_app->name(),
                ") does not contain a Control object with the name '",
                _receiver_name,
                "'.");
@@ -100,7 +100,7 @@ SamplerParameterTransfer::getReceiver(unsigned int app_index)
   if (!ptr)
     mooseError(
         "The sub-application (",
-        _multi_app->name(),
+        _to_multi_app->name(),
         ") Control object for the 'to_control' parameter must be of type 'SamplerReceiver'.");
 
   return ptr;

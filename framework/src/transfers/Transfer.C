@@ -36,7 +36,7 @@ Transfer::validParams()
   params += SetupInterface::validParams();
   params.set<ExecFlagEnum>("execute_on", true) = EXEC_TIMESTEP_BEGIN;
 
-  MultiMooseEnum possible_directions(Transfer::possibleDirections(), "");
+  MultiMooseEnum possible_directions(Transfer::possibleDirections());
   params.addDeprecatedParam<MultiMooseEnum>(
       "direction",
       possible_directions,
@@ -61,7 +61,8 @@ Transfer::Transfer(const InputParameters & parameters)
     _tid(parameters.get<THREAD_ID>("_tid")),
     _direction(possibleDirections()),
     _current_direction(possibleDirections()),
-    _directions(getParam<MultiMooseEnum>("direction"))
+    _directions(isParamValid("direction") ? getParam<MultiMooseEnum>("direction")
+                                          : possibleDirections())
 {
   if (parameters.isParamSetByUser("direction") && _directions.size() == 0)
     paramError("direction", "At least one direction is required");

@@ -54,6 +54,9 @@ MultiAppCloneReporterTransfer::MultiAppCloneReporterTransfer(const InputParamete
                                                     _from_reporter_names)
                            : getReporterNamesHelper(_name, _to_obj_name, _from_reporter_names))
 {
+  if (isParamValid("to_multiapp"))
+    paramError("to_multiapp",
+               "Sibling or to_multiapp transfer have not been implemented for this transfer.");
 }
 
 void
