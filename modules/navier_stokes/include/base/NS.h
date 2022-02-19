@@ -67,6 +67,11 @@ static const std::string enthalpy_density = "rho_h";
 static const std::string total_enthalpy_density = "rho_ht";
 static const std::string superficial_total_enthalpy_density = "superficial_rho_ht";
 
+static const std::string mixing_length = "mixing_length";
+static const std::string wall_shear_stress = "wall_shear_stress";
+static const std::string wall_yplus = "wall_yplus";
+static const std::string eddy_viscosity = "eddy_viscosity";
+
 static const std::string mach_number = "Mach";
 static const std::string specific_volume = "specific_volume";
 

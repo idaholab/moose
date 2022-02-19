@@ -387,23 +387,33 @@ NSFVAction::act()
 void
 NSFVAction::addINSVariables()
 {
-  auto params = _factory.getValidParams("MooseVariableFVReal");
-  params.set<std::vector<SubdomainName>>("block") = _blocks;
 
-  params.set<std::vector<Real>>("scaling") = {_momentum_scaling};
   if (_porous_medium_treatment)
   {
+    auto params = _factory.getValidParams("PINSFVSuperficialVelocityVariable");
+    params.set<std::vector<SubdomainName>>("block") = _blocks;
+
+    params.set<std::vector<Real>>("scaling") = {_momentum_scaling};
     for (unsigned int d = 0; d < _dim; ++d)
       _problem->addVariable(
           "PINSFVSuperficialVelocityVariable", NS::superficial_velocity_vector[d], params);
 
+    params = _factory.getValidParams("INSFVVelocityVariable");
+    params.set<std::vector<SubdomainName>>("block") = _blocks;
     for (unsigned int d = 0; d < _dim; ++d)
       _problem->addAuxVariable("INSFVVelocityVariable", NS::velocity_vector[d], params);
   }
   else
+  {
+    auto params = _factory.getValidParams("INSFVVelocityVariable");
+    params.set<std::vector<SubdomainName>>("block") = _blocks;
+
     for (unsigned int d = 0; d < _dim; ++d)
       _problem->addVariable("INSFVVelocityVariable", NS::velocity_vector[d], params);
+  }
 
+  auto params = _factory.getValidParams("INSFVPressureVariable");
+  params.set<std::vector<SubdomainName>>("block") = _blocks;
   params.set<std::vector<Real>>("scaling") = {_mass_scaling};
   _problem->addVariable("INSFVPressureVariable", NS::pressure, params);
 
@@ -415,8 +425,20 @@ NSFVAction::addINSVariables()
     _problem->addVariable("MooseVariableScalar", "lambda", lm_params);
   }
 
+  if (_turbulence_handling == "mixing-length")
+  {
+    auto params = _factory.getValidParams("MooseVariableFVReal");
+    params.set<std::vector<SubdomainName>>("block") = _blocks;
+    _problem->addAuxVariable("MooseVariableFVReal", NS::mixing_length, params);
+    _problem->addAuxVariable("MooseVariableFVReal", NS::wall_shear_stress, params);
+    _problem->addAuxVariable("MooseVariableFVReal", NS::wall_yplus, params);
+    _problem->addAuxVariable("MooseVariableFVReal", NS::eddy_viscosity, params);
+  }
+
   if (_has_energy_equation)
   {
+    auto params = _factory.getValidParams("INSFVEnergyVariable");
+    params.set<std::vector<SubdomainName>>("block") = _blocks;
     params.set<std::vector<Real>>("scaling") = {_energy_scaling};
     _problem->addVariable("INSFVEnergyVariable", NS::T_fluid, params);
   }
@@ -835,9 +857,22 @@ NSFVAction::addINSMomentumDiffusionKernels()
       _problem->addFVKernel(
           diff_kernel_type, "ins_momentum_" + NS::directions[d] + "_diffusion", params);
     }
+
+    // if (_turbulence_handling == "mixing-length")
+    // {
+    //   mooseError("Turbulence handling is not implemented yet!");
+    //   const std::string u_names[3] = {"u", "v", "w"};
+    //
+    //   const std::string kernel_type = "INSFVMixingLengthReynoldsStress";
+    //   InputParameters params = _factory.getValidParams(kernel_type);
+    //
+    //   params.set<UserObjectName>("rhie_chow_user_object") = "ins_rhie_chow_interpolator";
+    //   params.set<MooseFunctorName>(NS::density) = NS::density;
+    //   params.set<MooseFunctorName>(NS::mixing_length) = NS::mixing_length;
+    //   for (unsigned int dim_i = 0; dim_i < _dim; ++dim_i)
+    //     params.set<MooseFunctorName>(u_names[dim_i]) = NS::velocity_vector[dim_i];
+    // }
   }
-  if (_turbulence_handling == "mixing-length")
-    mooseError("Turbulence handling is not implemented yet!");
 }
 
 void
