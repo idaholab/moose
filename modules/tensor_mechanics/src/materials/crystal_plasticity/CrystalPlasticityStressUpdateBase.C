@@ -122,7 +122,7 @@ CrystalPlasticityStressUpdateBase::initQpStatefulProperties()
   _tau[_qp].resize(_number_slip_systems);
 
   _flow_direction[_qp].resize(_number_slip_systems);
-  for (auto i : make_range(_number_slip_systems))
+  for (const auto i : make_range(_number_slip_systems))
   {
     _flow_direction[_qp][i].zero();
     _tau[_qp][i] = 0.0;
@@ -148,7 +148,7 @@ CrystalPlasticityStressUpdateBase::getSlipSystems()
         "number_slip_systems",
         "The number of rows in the slip system file should match the number of slip system.");
 
-  for (auto i : make_range(_number_slip_systems))
+  for (const auto i : make_range(_number_slip_systems))
   {
     // initialize to zero
     _slip_direction[i].zero();
@@ -160,10 +160,10 @@ CrystalPlasticityStressUpdateBase::getSlipSystems()
   else if (_crystal_lattice_type == CrystalLatticeType::BCC ||
            _crystal_lattice_type == CrystalLatticeType::FCC)
   {
-    for (auto i : make_range(_number_slip_systems))
+    for (const auto i : make_range(_number_slip_systems))
     {
       // directly grab the raw data and scale it by the unit cell dimension
-      for (auto j : make_range(_reader.getData(i).size()))
+      for (const auto j : make_range(_reader.getData(i).size()))
       {
         if (j < LIBMESH_DIM)
           _slip_plane_normal[i](j) = _reader.getData(i)[j] / _unit_cell_dimension[j];
@@ -174,7 +174,7 @@ CrystalPlasticityStressUpdateBase::getSlipSystems()
     }
   }
 
-  for (auto i : make_range(_number_slip_systems))
+  for (const auto i : make_range(_number_slip_systems))
   {
     // normalize
     _slip_plane_normal[i] /= _slip_plane_normal[i].norm();
@@ -182,7 +182,7 @@ CrystalPlasticityStressUpdateBase::getSlipSystems()
 
     if (_crystal_lattice_type != CrystalLatticeType::HCP)
     {
-      auto magnitude = _slip_plane_normal[i] * _slip_direction[i];
+      const auto magnitude = _slip_plane_normal[i] * _slip_direction[i];
       if (std::abs(magnitude) > libMesh::TOLERANCE)
       {
         orthonormal_error = true;
@@ -264,7 +264,7 @@ CrystalPlasticityStressUpdateBase::transformHexagonalMillerBravaisSlipSystems(
       }
       else
       {
-        auto direction_j = j - miller_bravais_indices;
+        const auto direction_j = j - miller_bravais_indices;
         // Store the first two indices for the slip direction in the basal plane,
         //(U, V), and drop the redundant third basal plane index (T)
         if (direction_j < 2)
@@ -380,13 +380,13 @@ CrystalPlasticityStressUpdateBase::calculateSchmidTensor(
   local_plane_normal.resize(number_slip_systems);
 
   // Update slip direction and normal with crystal orientation
-  for (auto i : make_range(_number_slip_systems))
+  for (const auto i : make_range(_number_slip_systems))
   {
     local_direction_vector[i].zero();
     local_plane_normal[i].zero();
 
-    for (auto j : make_range(LIBMESH_DIM))
-      for (auto k : make_range(LIBMESH_DIM))
+    for (const auto j : make_range(LIBMESH_DIM))
+      for (const auto k : make_range(LIBMESH_DIM))
       {
         local_direction_vector[i](j) =
             local_direction_vector[i](j) + crysrot(j, k) * direction_vector[i](k);
@@ -396,8 +396,8 @@ CrystalPlasticityStressUpdateBase::calculateSchmidTensor(
       }
 
     // Calculate Schmid tensor
-    for (auto j : make_range(LIBMESH_DIM))
-      for (auto k : make_range(LIBMESH_DIM))
+    for (const auto j : make_range(LIBMESH_DIM))
+      for (const auto k : make_range(LIBMESH_DIM))
       {
         schmid_tensor[i](j, k) = local_direction_vector[i](j) * local_plane_normal[i](k);
       }
@@ -412,14 +412,14 @@ CrystalPlasticityStressUpdateBase::calculateShearStress(
 {
   if (!num_eigenstrains)
   {
-    for (auto i : make_range(_number_slip_systems))
+    for (const auto i : make_range(_number_slip_systems))
       _tau[_qp][i] = pk2.doubleContraction(_flow_direction[_qp][i]);
 
     return;
   }
 
   RankTwoTensor eigenstrain_deformation_grad = inverse_eigenstrain_deformation_grad.inverse();
-  for (auto i : make_range(_number_slip_systems))
+  for (const auto i : make_range(_number_slip_systems))
   {
     // compute PK2_hat using deformation gradient
     RankTwoTensor pk2_hat = eigenstrain_deformation_grad.det() *
@@ -442,7 +442,7 @@ CrystalPlasticityStressUpdateBase::calculateTotalPlasticDeformationGradientDeriv
 
   calculateConstitutiveSlipDerivative(dslip_dtau);
 
-  for (auto j : make_range(_number_slip_systems))
+  for (const auto j : make_range(_number_slip_systems))
   {
     if (num_eigenstrains)
     {
@@ -463,7 +463,7 @@ CrystalPlasticityStressUpdateBase::calculateEquivalentSlipIncrement(
     RankTwoTensor & equivalent_slip_increment)
 {
   // Sum up the slip increments to find the equivalent plastic strain due to slip
-  for (auto i : make_range(_number_slip_systems))
+  for (const auto i : make_range(_number_slip_systems))
     equivalent_slip_increment += _flow_direction[_qp][i] * _slip_increment[_qp][i] * _substep_dt;
 }
 
@@ -496,7 +496,7 @@ CrystalPlasticityStressUpdateBase::isConstitutiveStateVariableConverged(
 
   Real diff_val = 0.0;
   Real abs_prev_substep_val = 0.0;
-  for (auto i : make_range(sz))
+  for (const auto i : make_range(sz))
   {
     diff_val = std::abs(var_before_update[i] - current_var[i]);
     abs_prev_substep_val = std::abs(previous_substep_var[i]);

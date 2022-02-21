@@ -605,7 +605,7 @@ ComputeMultipleCrystalPlasticityStress::elastoPlasticTangentModuli(RankFourTenso
 
   tan_mod += dsigdpk2dfe;
 
-  auto je = _elastic_deformation_gradient.det();
+  const auto je = _elastic_deformation_gradient.det();
   if (je > 0.0)
     tan_mod /= je;
 
@@ -658,11 +658,11 @@ ComputeMultipleCrystalPlasticityStress::lineSearchUpdate(const Real & rnorm_prev
 
     calculateResidual();
     auto s_b = _residual_tensor.doubleContraction(dpk2);
-    auto rnorm1 = _residual_tensor.L2norm();
+    const auto rnorm1 = _residual_tensor.L2norm();
     _pk2[_qp] = _pk2[_qp] - dpk2;
     calculateResidual();
     auto s_a = _residual_tensor.doubleContraction(dpk2);
-    auto rnorm0 = _residual_tensor.L2norm();
+    const auto rnorm0 = _residual_tensor.L2norm();
     _pk2[_qp] = _pk2[_qp] + dpk2;
 
     if ((rnorm1 / rnorm0) < _line_search_tolerance || s_a * s_b > 0)
