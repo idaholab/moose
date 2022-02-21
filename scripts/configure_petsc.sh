@@ -31,9 +31,63 @@ function configure_petsc()
     SHARED=1
   fi
 
+  # Check to see if HDF5 exists using environment variables and expected locations.
+  # If it does, use it.
+  echo "INFO: Checking for HDF5..."
+
+  # Prioritize user-set environment variables HDF5_DIR, HDF5DIR, and HDF5_ROOT,
+  # with the first taking the greatest priority
+  if [ ! -z "$HDF5_DIR" ]; then
+    echo "INFO: HDF5 installation location was set using HDF5_DIR=$HDF5_DIR"
+    HDF5_STR="--with-hdf5-dir=$HDF5_DIR"
+  elif [ ! -z "$HDF5DIR" ]; then
+    echo "INFO: HDF5 installation location was set using HDF5DIR=$HDF5DIR"
+    HDF5_STR="--with-hdf5-dir=$HDF5DIR"
+  elif [ ! -z "$HDF5_ROOT" ]; then
+    echo "INFO: HDF5 installation location was set using HDF5_ROOT=$HDF5_ROOT"
+    HDF5_STR="--with-hdf5-dir=$HDF5_ROOT"
+  fi
+
+  # If not found using a variable, look at a few common library locations
+  HDF5_PATHS=/usr/lib/hdf5:/usr/local/hdf5:/usr/share/hdf5:/usr/local/hdf5/share:$HOME/.local
+  if [ -z "$HDF5_STR" ]; then
+    # Set path delimiter
+    IFS=:
+    for p in $HDF5_PATHS; do
+      # When first instance of hdf5 header is found, report finding, set HDF5_STR,
+      # and break
+      loc=$(find "$p" -name 'hdf5.h' -print -quit 2>/dev/null)
+      if [ ! -z "$loc" ]; then
+        echo "INFO: HDF5 header location was found at: $loc"
+        echo "INFO: Using this HDF5 installation to configure and build PETSc."
+        echo "INFO: If another HDF5 is desired, please set HDF5_DIR and re-run this script."
+        HDF5_STR="--with-hdf5-dir=$loc/../../"
+        break
+      fi
+    done
+    unset IFS
+  fi
+
+  # If HDF5 is not found locally, download it via PETSc (except for Darwin)
+  if [ -z "$HDF5_STR" ]; then
+    if [[ $(uname) == Darwin ]]; then
+      # HDF5 currently doesn't configure properly on macOS due to a gfortran io
+      # buffer bug: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=102992
+      # So, we won't be downloading it by default for now if it isn't found.
+      # Instead, if a user has it installed somewhere, we'll note the variable
+      # they need to set.
+      echo "INFO: HDF5 library not detected; HDF5 related PETSc features will not be enabled."
+      echo "INFO: Set HDF5_DIR to the location of HDF5 and re-run this script, if desired."
+    else
+      HDF5_STR="--download-hdf5=1"
+      echo "INFO: HDF5 library not detected, opting to download via PETSc..."
+    fi
+  fi
+
   cd $PETSC_DIR
   python ./configure --download-hypre=1 \
       --with-shared-libraries=$SHARED \
+      "$HDF5_STR" \
       --with-debugging=no \
       --download-fblaslapack=1 \
       --download-metis=1 \
