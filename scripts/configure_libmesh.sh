@@ -47,6 +47,7 @@ function configure_libmesh()
                --disable-warnings \
                --with-thread-model=openmp \
                --disable-maintainer-mode \
+               --enable-hdf5 \
                --enable-petsc-hypre-required \
                --enable-metaphysicl-required \
                --with-cxx-std-min=2014 \
