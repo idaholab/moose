@@ -2035,7 +2035,8 @@ FEProblemBase::addFunction(const std::string & type,
         _factory.create<MooseFunctionBase>(type, name, parameters, tid);
     _functions.addObject(func, tid);
 
-    auto add_functor = [this, &name, tid](const auto & cast_functor) {
+    auto add_functor = [this, &name, tid](const auto & cast_functor)
+    {
       this->addFunctor(name, cast_functor, tid);
       if (_displaced_problem)
         _displaced_problem->addFunctor(name, cast_functor, tid);
@@ -5474,12 +5475,11 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
 
   if (_displaced_problem)
   {
+    _aux->compute(EXEC_PRE_DISPLACE);
     try
     {
       try
       {
-        _aux->compute(EXEC_PRE_DISPLACE);
-
         _displaced_problem->updateMesh();
         if (_mortar_data.hasDisplacedObjects())
           updateMortarMesh();
