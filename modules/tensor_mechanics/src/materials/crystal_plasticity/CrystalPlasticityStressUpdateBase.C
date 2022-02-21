@@ -225,14 +225,14 @@ CrystalPlasticityStressUpdateBase::transformHexagonalMillerBravaisSlipSystems(
   transform_matrix(1, 1) = 2.0 / (_unit_cell_dimension[0] * std::sqrt(3.0));
   transform_matrix(2, 2) = 1.0 / (_unit_cell_dimension[2]);
 
-  for (auto i : make_range(_number_slip_systems))
+  for (const auto i : make_range(_number_slip_systems))
   {
     // read in raw data from file and store in the temporary vectors
-    for (unsigned int j = 0; j < reader.getData(i).size(); ++j)
+    for (const auto j : index_range(reader.getData(i)))
     {
       // Check that the slip plane normal indices of the basal plane sum to zero for consistency
       Real basal_pl_sum = 0.0;
-      for (auto k : make_range(LIBMESH_DIM))
+      for (const auto k : make_range(LIBMESH_DIM))
         basal_pl_sum += reader.getData(i)[k];
 
       if (basal_pl_sum > _zero_tol)
