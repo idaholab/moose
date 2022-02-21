@@ -11,8 +11,6 @@
 
 #include "AuxKernel.h"
 
-// Forward Declarations
-
 /**
  * Computes rho*u*L/mu where L is the maximum element dimension
  */

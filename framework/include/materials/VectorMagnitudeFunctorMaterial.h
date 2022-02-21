@@ -12,7 +12,7 @@
 #include "FunctorMaterial.h"
 
 /**
- * This class takes up to three functors corresponding to vector "components and computes the
+ * This class takes up to three functors corresponding to vector components and computes the
  * Euclidean norm from them.
  */
 template <bool is_ad>
