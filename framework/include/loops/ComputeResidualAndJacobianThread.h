@@ -9,10 +9,7 @@
 
 #pragma once
 
-#include "ThreadedElementLoop.h"
-#include "MooseObjectTagWarehouse.h"
-
-#include "libmesh/elem_range.h"
+#include "NonlinearThread.h"
 
 // Forward declarations
 class FEProblemBase;
@@ -24,36 +21,31 @@ class TimeKernel;
 class KernelBase;
 class Kernel;
 
-class ComputeResidualAndJacobianThread : public ThreadedElementLoop<ConstElemRange>
+class ComputeResidualAndJacobianThread : public NonlinearThread
 {
 public:
   ComputeResidualAndJacobianThread(FEProblemBase & fe_problem,
                                    const std::set<TagID> & vector_tags,
-                                   const std::set<TagID> & /*matrix_tags*/);
+                                   const std::set<TagID> & matrix_tags);
 
   // Splitting Constructor
   ComputeResidualAndJacobianThread(ComputeResidualAndJacobianThread & x, Threads::split split);
 
   virtual ~ComputeResidualAndJacobianThread();
 
-  void subdomainChanged() override;
-  void onElement(const Elem * elem) override;
-  void onBoundary(const Elem * elem,
-                  unsigned int side,
-                  BoundaryID bnd_id,
-                  const Elem * /*lower_d_elem*/ = nullptr) override;
-  void postElement(const Elem * /*elem*/) override;
-
   void join(const ComputeResidualAndJacobianThread & /*y*/);
 
 protected:
-  NonlinearSystemBase & _nl;
-  const std::set<TagID> & _tags;
-  unsigned int _num_cached;
+  void compute(ResidualObject & ro) override;
+  void accumulateNeighbor() override;
+  void accumulateNeighborLower() override;
+  void accumulateLower() override;
+  void accumulate() override;
+  void determineResidualObjects() override;
 
-  /// Reference to BC storage structures
-  MooseObjectTagWarehouse<IntegratedBCBase> & _integrated_bcs;
+  /// the tags denoting the vectors we want our residual objects to fill
+  const std::set<TagID> & _vector_tags;
 
-  /// Reference to Kernel storage structures
-  MooseObjectTagWarehouse<KernelBase> & _kernels;
+  /// the tags denoting the matrices we want our residual objects to fill
+  const std::set<TagID> & _matrix_tags;
 };

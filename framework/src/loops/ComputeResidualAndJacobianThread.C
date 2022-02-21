@@ -25,108 +25,50 @@
 ComputeResidualAndJacobianThread::ComputeResidualAndJacobianThread(
     FEProblemBase & fe_problem,
     const std::set<TagID> & vector_tags,
-    const std::set<TagID> & /*matrix_tags*/)
-  : ThreadedElementLoop<ConstElemRange>(fe_problem),
-    _nl(fe_problem.getNonlinearSystemBase()),
-    _tags(vector_tags),
-    _num_cached(0),
-    _integrated_bcs(_nl.getIntegratedBCWarehouse()),
-    _kernels(_nl.getKernelWarehouse())
+    const std::set<TagID> & matrix_tags)
+  : NonlinearThread(fe_problem), _vector_tags(vector_tags), _matrix_tags(matrix_tags)
 {
 }
 
 // Splitting Constructor
 ComputeResidualAndJacobianThread::ComputeResidualAndJacobianThread(
     ComputeResidualAndJacobianThread & x, Threads::split split)
-  : ThreadedElementLoop<ConstElemRange>(x, split),
-    _nl(x._nl),
-    _tags(x._tags),
-    _num_cached(0),
-    _integrated_bcs(x._integrated_bcs),
-    _kernels(x._kernels)
+  : NonlinearThread(x, split), _vector_tags(x._vector_tags), _matrix_tags(x._matrix_tags)
 {
 }
 
 ComputeResidualAndJacobianThread::~ComputeResidualAndJacobianThread() {}
 
 void
-ComputeResidualAndJacobianThread::subdomainChanged()
+ComputeResidualAndJacobianThread::compute(ResidualObject & ro)
 {
-  _fe_problem.subdomainSetup(_subdomain, _tid);
-
-  // Update variable Dependencies
-  std::set<MooseVariableFEBase *> needed_moose_vars;
-  _kernels.updateBlockVariableDependency(_subdomain, needed_moose_vars, _tid);
-  _integrated_bcs.updateBoundaryVariableDependency(needed_moose_vars, _tid);
-
-  // Update material dependencies
-  std::set<unsigned int> needed_mat_props;
-  _kernels.updateBlockMatPropDependency(_subdomain, needed_mat_props, _tid);
-  _integrated_bcs.updateBoundaryMatPropDependency(needed_mat_props, _tid);
-
-  if (_fe_problem.haveFV())
-  {
-    std::vector<FVElementalKernel *> fv_kernels;
-    _fe_problem.theWarehouse()
-        .query()
-        .template condition<AttribSystem>("FVElementalKernel")
-        .template condition<AttribSubdomains>(_subdomain)
-        .template condition<AttribThread>(_tid)
-        .template condition<AttribVectorTags>(_tags)
-        .queryInto(fv_kernels);
-    for (const auto fv_kernel : fv_kernels)
-    {
-      const auto & fv_mv_deps = fv_kernel->getMooseVariableDependencies();
-      needed_moose_vars.insert(fv_mv_deps.begin(), fv_mv_deps.end());
-      const auto & fv_mp_deps = fv_kernel->getMatPropDependencies();
-      needed_mat_props.insert(fv_mp_deps.begin(), fv_mp_deps.end());
-    }
-  }
-
-  _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
-  _fe_problem.setActiveMaterialProperties(needed_mat_props, _tid);
-  _fe_problem.prepareMaterials(_subdomain, _tid);
+  ro.computeResidualAndJacobian();
 }
 
 void
-ComputeResidualAndJacobianThread::onElement(const Elem * elem)
+ComputeResidualAndJacobianThread::accumulateLower()
 {
-  _fe_problem.prepare(elem, _tid);
-  _fe_problem.reinitElem(elem, _tid);
-
-  // Set up Sentinel class so that, even if reinitMaterials() throws, we
-  // still remember to swap back during stack unwinding.
-  SwapBackSentinel sentinel(_fe_problem, &FEProblem::swapBackMaterials, _tid);
-
-  _fe_problem.reinitMaterials(_subdomain, _tid);
-
-  if (_kernels.hasActiveBlockObjects(_subdomain, _tid))
-  {
-    const auto & kernels = _kernels.getActiveBlockObjects(_subdomain, _tid);
-    for (const auto & kernel : kernels)
-      kernel->computeResidualAndJacobian();
-  }
-
-  // TODO: use a querycache here and then we probably won't need the if-guard
-  // anymore.
-  if (_fe_problem.haveFV())
-  {
-    std::vector<FVElementalKernel *> kernels;
-    _fe_problem.theWarehouse()
-        .query()
-        .template condition<AttribSystem>("FVElementalKernel")
-        .template condition<AttribSubdomains>(_subdomain)
-        .template condition<AttribThread>(_tid)
-        .template condition<AttribVectorTags>(_tags)
-        .queryInto(kernels);
-
-    for (auto * const kernel : kernels)
-      kernel->computeResidualAndJacobian();
-  }
+  _fe_problem.addResidualLower(_tid);
+  _fe_problem.addJacobianLowerD(_tid);
 }
 
 void
-ComputeResidualAndJacobianThread::postElement(const Elem * /*elem*/)
+ComputeResidualAndJacobianThread::accumulateNeighborLower()
+{
+  _fe_problem.addResidualNeighbor(_tid);
+  _fe_problem.addResidualLower(_tid);
+  _fe_problem.addJacobianNeighborLowerD(_tid);
+}
+
+void
+ComputeResidualAndJacobianThread::accumulateNeighbor()
+{
+  _fe_problem.addResidualNeighbor(_tid);
+  _fe_problem.addJacobianNeighbor(_tid);
+}
+
+void
+ComputeResidualAndJacobianThread::accumulate()
 {
   _fe_problem.cacheResidual(_tid);
   _fe_problem.cacheJacobian(_tid);
@@ -141,33 +83,35 @@ ComputeResidualAndJacobianThread::postElement(const Elem * /*elem*/)
 }
 
 void
-ComputeResidualAndJacobianThread::onBoundary(const Elem * elem,
-                                             unsigned int side,
-                                             BoundaryID bnd_id,
-                                             const Elem *)
+ComputeResidualAndJacobianThread::join(const ComputeResidualAndJacobianThread & /*y*/)
 {
-  if (_integrated_bcs.hasActiveBoundaryObjects(bnd_id, _tid))
-  {
-    const auto & bcs = _integrated_bcs.getActiveBoundaryObjects(bnd_id, _tid);
-
-    _fe_problem.reinitElemFace(elem, side, bnd_id, _tid);
-
-    // Set up Sentinel class so that, even if reinitMaterialsFace() throws, we
-    // still remember to swap back during stack unwinding.
-    SwapBackSentinel sentinel(_fe_problem, &FEProblem::swapBackMaterialsFace, _tid);
-
-    _fe_problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
-    _fe_problem.reinitMaterialsBoundary(bnd_id, _tid);
-
-    for (const auto & bc : bcs)
-    {
-      if (bc->shouldApply())
-        bc->computeResidualAndJacobian();
-    }
-  }
 }
 
 void
-ComputeResidualAndJacobianThread::join(const ComputeResidualAndJacobianThread & /*y*/)
+ComputeResidualAndJacobianThread::determineResidualObjects()
 {
+  if (_vector_tags.size() &&
+      _vector_tags.size() != _fe_problem.numVectorTags(Moose::VECTOR_TAG_RESIDUAL))
+    mooseError("Can only currently compute the residual and Jacobian together if we are computing "
+               "the full suite of residual tags");
+
+  if (_matrix_tags.size() && _matrix_tags.size() != _fe_problem.numMatrixTags())
+    mooseError("Can only currently compute the residual and Jacobian together if we are computing "
+               "the full suite of Jacobian tags");
+
+  _tag_kernels = &_kernels;
+  _dg_warehouse = &_dg_kernels;
+  _ibc_warehouse = &_integrated_bcs;
+  _ik_warehouse = &_interface_kernels;
+
+  if (_fe_problem.haveFV())
+  {
+    _fv_kernels.clear();
+    _fe_problem.theWarehouse()
+        .query()
+        .template condition<AttribSystem>("FVElementalKernel")
+        .template condition<AttribSubdomains>(_subdomain)
+        .template condition<AttribThread>(_tid)
+        .queryInto(_fv_kernels);
+  }
 }
