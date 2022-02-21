@@ -86,6 +86,10 @@ protected:
   /// Add Enthalpy material for incompressible simulations
   void addEnthalpyMaterial();
 
+  /// Add mixing length material for turbulence handling
+  void addMixingLengthMaterial();
+
+  /// Add relationship manager to extend the number of ghosted layers
   void addRelationshipManager(std::string name,
                               unsigned int no_layers,
                               const InputParameters & obj_params);

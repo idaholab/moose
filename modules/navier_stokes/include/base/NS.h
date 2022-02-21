@@ -71,6 +71,7 @@ static const std::string mixing_length = "mixing_length";
 static const std::string wall_shear_stress = "wall_shear_stress";
 static const std::string wall_yplus = "wall_yplus";
 static const std::string eddy_viscosity = "eddy_viscosity";
+static const std::string total_viscosity = "total_viscosity";
 
 static const std::string mach_number = "Mach";
 static const std::string specific_volume = "specific_volume";

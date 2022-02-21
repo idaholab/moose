@@ -216,6 +216,26 @@ NSFVAction::validParams()
                         "The scaling factor for the mass variables (for incompressible simulation "
                         "this is pressure scaling).");
 
+  // Turbulence-related parameters
+  params.addParam<std::vector<BoundaryName>>(
+      "mixing_length_walls",
+      std::vector<BoundaryName>(),
+      "Walls where the mixing length model should be utilized.");
+
+  ExecFlagEnum exec_enum = MooseUtils::getDefaultExecFlagEnum();
+  params.addParam<ExecFlagEnum>("mixing_length_aux_execute_on",
+                                exec_enum,
+                                "When the mixing length aux kernels should be executed.");
+
+  params.addParam<Real>(
+      "von_karman_const", 0.41, "Von Karman parameter for the mixing length model");
+  params.addParam<Real>("von_karman_const_0", 0.09, "Escudier' model parameter");
+  params.addParam<Real>(
+      "mixing_length_delta",
+      1e9,
+      "Tunable parameter related to the thickness of the boundary layer."
+      "When it is not specified, Prandtl's original mixing length model is retrieved.");
+
   // Create input parameter groups
 
   params.addParamNamesToGroup(
@@ -378,6 +398,8 @@ NSFVAction::act()
     {
       if (_has_energy_equation)
         addEnthalpyMaterial();
+      if (_turbulence_handling == "mixing-length")
+        addMixingLengthMaterial();
     }
     else
       mooseError("Compressible simulations are not supported yet.");
@@ -430,9 +452,6 @@ NSFVAction::addINSVariables()
     auto params = _factory.getValidParams("MooseVariableFVReal");
     params.set<std::vector<SubdomainName>>("block") = _blocks;
     _problem->addAuxVariable("MooseVariableFVReal", NS::mixing_length, params);
-    _problem->addAuxVariable("MooseVariableFVReal", NS::wall_shear_stress, params);
-    _problem->addAuxVariable("MooseVariableFVReal", NS::wall_yplus, params);
-    _problem->addAuxVariable("MooseVariableFVReal", NS::eddy_viscosity, params);
   }
 
   if (_has_energy_equation)
@@ -858,20 +877,47 @@ NSFVAction::addINSMomentumDiffusionKernels()
           diff_kernel_type, "ins_momentum_" + NS::directions[d] + "_diffusion", params);
     }
 
-    // if (_turbulence_handling == "mixing-length")
-    // {
-    //   mooseError("Turbulence handling is not implemented yet!");
-    //   const std::string u_names[3] = {"u", "v", "w"};
-    //
-    //   const std::string kernel_type = "INSFVMixingLengthReynoldsStress";
-    //   InputParameters params = _factory.getValidParams(kernel_type);
-    //
-    //   params.set<UserObjectName>("rhie_chow_user_object") = "ins_rhie_chow_interpolator";
-    //   params.set<MooseFunctorName>(NS::density) = NS::density;
-    //   params.set<MooseFunctorName>(NS::mixing_length) = NS::mixing_length;
-    //   for (unsigned int dim_i = 0; dim_i < _dim; ++dim_i)
-    //     params.set<MooseFunctorName>(u_names[dim_i]) = NS::velocity_vector[dim_i];
-    // }
+    if (_turbulence_handling == "mixing-length")
+    {
+      const std::string u_names[3] = {"u", "v", "w"};
+
+      const std::string kernel_type = "INSFVMixingLengthReynoldsStress";
+      InputParameters params = _factory.getValidParams(kernel_type);
+      params.set<std::vector<SubdomainName>>("block") = _blocks;
+
+      params.set<UserObjectName>("rhie_chow_user_object") = "ins_rhie_chow_interpolator";
+      params.set<MooseFunctorName>(NS::density) = NS::density;
+      params.set<MooseFunctorName>(NS::mixing_length) = NS::mixing_length;
+      for (unsigned int dim_i = 0; dim_i < _dim; ++dim_i)
+        params.set<CoupledName>(u_names[dim_i]) = {NS::velocity_vector[dim_i]};
+
+      for (unsigned int d = 0; d < _dim; ++d)
+      {
+        params.set<NonlinearVariableName>("variable") = NS::velocity_vector[d];
+        params.set<MooseEnum>("momentum_component") = NS::directions[d];
+        _problem->addFVKernel(kernel_type,
+                              "ins_momentum_" + NS::directions[d] +
+                                  "_mixing_length_reynolds_stress",
+                              params);
+        addRelationshipManager(
+            "ins_momentum_" + NS::directions[d] + "_mixing_length_reynolds_stress", 3, params);
+      }
+
+      const std::string ml_kernel_type = "WallDistanceMixingLengthAux";
+      InputParameters ml_params = _factory.getValidParams(ml_kernel_type);
+      ml_params.set<std::vector<SubdomainName>>("block") = _blocks;
+      ml_params.set<AuxVariableName>("variable") = NS::mixing_length;
+      ml_params.set<std::vector<BoundaryName>>("walls") =
+          getParam<std::vector<BoundaryName>>("mixing_length_walls");
+      if (isParamValid("mixing_length_aux_execute_on"))
+        ml_params.set<ExecFlagEnum>("execute_on") =
+            getParam<ExecFlagEnum>("mixing_length_aux_execute_on");
+      ml_params.set<Real>("von_karman_const") = getParam<Real>("von_karman_const");
+      ml_params.set<Real>("von_karman_const_0") = getParam<Real>("von_karman_const_0");
+      ml_params.set<Real>("delta") = getParam<Real>("mixing_length_delta");
+
+      _problem->addAuxKernel(ml_kernel_type, "mixing_length_aux ", ml_params);
+    }
   }
 }
 
@@ -1139,6 +1185,7 @@ NSFVAction::addINSInletBC()
     {
       const std::string bc_type = "INSFVInletVelocityBC";
       InputParameters params = _factory.getValidParams(bc_type);
+      params.set<std::vector<BoundaryName>>("boundary") = {_inlet_boundaries[bc_ind]};
 
       for (unsigned int d = 0; d < _dim; ++d)
       {
@@ -1150,7 +1197,6 @@ NSFVAction::addINSInletBC()
 
         params.set<NonlinearVariableName>("variable") = vname;
         params.set<FunctionName>("function") = _momentum_inlet_function[bc_ind * _dim + d];
-        params.set<std::vector<BoundaryName>>("boundary") = {_inlet_boundaries[bc_ind]};
 
         _problem->addFVBC(bc_type, vname + "_" + _inlet_boundaries[bc_ind], params);
       }
@@ -1225,6 +1271,7 @@ NSFVAction::addINSOutletBC()
       {
         const std::string bc_type = "INSFVMomentumAdvectionOutflowBC";
         InputParameters params = _factory.getValidParams(bc_type);
+        params.set<std::vector<BoundaryName>>("boundary") = {_outlet_boundaries[bc_ind]};
 
         for (unsigned int d = 0; d < _dim; ++d)
         {
@@ -1247,7 +1294,6 @@ NSFVAction::addINSOutletBC()
           params.set<NonlinearVariableName>("variable") = vname;
           params.set<MooseEnum>("momentum_component") = NS::directions[d];
           params.set<MooseFunctorName>(NS::density) = _density_name;
-          params.set<std::vector<BoundaryName>>("boundary") = {_outlet_boundaries[bc_ind]};
 
           _problem->addFVBC(bc_type, vname + "_" + _outlet_boundaries[bc_ind], params);
         }
@@ -1258,6 +1304,7 @@ NSFVAction::addINSOutletBC()
       {
         const std::string bc_type = "INSFVMomentumAdvectionOutflowBC";
         InputParameters params = _factory.getValidParams(bc_type);
+        params.set<std::vector<BoundaryName>>("boundary") = {_outlet_boundaries[bc_ind]};
 
         for (unsigned int d = 0; d < _dim; ++d)
         {
@@ -1280,7 +1327,6 @@ NSFVAction::addINSOutletBC()
           params.set<NonlinearVariableName>("variable") = vname;
           params.set<MooseEnum>("momentum_component") = NS::directions[d];
           params.set<MooseFunctorName>(NS::density) = _density_name;
-          params.set<std::vector<BoundaryName>>("boundary") = {_outlet_boundaries[bc_ind]};
 
           _problem->addFVBC(bc_type, vname + "_" + _outlet_boundaries[bc_ind], params);
         }
@@ -1310,6 +1356,7 @@ NSFVAction::addINSWallBC()
     {
       const std::string bc_type = "INSFVNoSlipWallBC";
       InputParameters params = _factory.getValidParams(bc_type);
+      params.set<std::vector<BoundaryName>>("boundary") = {_wall_boundaries[bc_ind]};
 
       for (unsigned int d = 0; d < _dim; ++d)
       {
@@ -1320,8 +1367,42 @@ NSFVAction::addINSWallBC()
           vname = NS::velocity_vector[d];
 
         params.set<NonlinearVariableName>("variable") = vname;
-        params.set<std::vector<BoundaryName>>("boundary") = {_wall_boundaries[bc_ind]};
         params.set<FunctionName>("function") = "0";
+
+        _problem->addFVBC(bc_type, vname + "_" + _wall_boundaries[bc_ind], params);
+      }
+    }
+    if (_momentum_wall_types[bc_ind] == "wallfunction")
+    {
+      const std::string bc_type = "INSFVWallFunctionBC";
+      InputParameters params = _factory.getValidParams(bc_type);
+      params.set<MaterialPropertyName>(NS::mu) = _dynamic_viscosity_name;
+      params.set<MaterialPropertyName>(NS::density) = _density_name;
+      params.set<std::vector<BoundaryName>>("boundary") = {_wall_boundaries[bc_ind]};
+
+      if (_porous_medium_treatment)
+      {
+        params.set<UserObjectName>("rhie_chow_user_object") = "pins_rhie_chow_interpolator";
+        for (unsigned int d = 0; d < _dim; ++d)
+          params.set<CoupledName>(u_names[d]) = {NS::superficial_velocity_vector[d]};
+      }
+      else
+      {
+        params.set<UserObjectName>("rhie_chow_user_object") = "ins_rhie_chow_interpolator";
+        for (unsigned int d = 0; d < _dim; ++d)
+          params.set<CoupledName>(u_names[d]) = {NS::velocity_vector[d]};
+      }
+
+      for (unsigned int d = 0; d < _dim; ++d)
+      {
+        NonlinearVariableName vname;
+        if (_porous_medium_treatment)
+          vname = NS::superficial_velocity_vector[d];
+        else
+          vname = NS::velocity_vector[d];
+
+        params.set<NonlinearVariableName>("variable") = vname;
+        params.set<MooseEnum>("momentum_component") = NS::directions[d];
 
         _problem->addFVBC(bc_type, vname + "_" + _wall_boundaries[bc_ind], params);
       }
@@ -1330,6 +1411,7 @@ NSFVAction::addINSWallBC()
     {
       const std::string bc_type = "INSFVNaturalFreeSlipBC";
       InputParameters params = _factory.getValidParams(bc_type);
+      params.set<std::vector<BoundaryName>>("boundary") = {_wall_boundaries[bc_ind]};
 
       for (unsigned int d = 0; d < _dim; ++d)
       {
@@ -1347,7 +1429,6 @@ NSFVAction::addINSWallBC()
 
         params.set<NonlinearVariableName>("variable") = vname;
         params.set<MooseEnum>("momentum_component") = NS::directions[d];
-        params.set<std::vector<BoundaryName>>("boundary") = {_wall_boundaries[bc_ind]};
 
         _problem->addFVBC(bc_type, vname + "_" + _wall_boundaries[bc_ind], params);
       }
@@ -1357,6 +1438,12 @@ NSFVAction::addINSWallBC()
       {
         const std::string bc_type = "INSFVSymmetryVelocityBC";
         InputParameters params = _factory.getValidParams(bc_type);
+        params.set<std::vector<BoundaryName>>("boundary") = {_wall_boundaries[bc_ind]};
+
+        MaterialPropertyName viscosity_name = _dynamic_viscosity_name;
+        if (_turbulence_handling != "none")
+          viscosity_name = NS::total_viscosity;
+        params.set<MaterialPropertyName>(NS::mu) = viscosity_name;
 
         for (unsigned int d = 0; d < _dim; ++d)
         {
@@ -1365,20 +1452,19 @@ NSFVAction::addINSWallBC()
           {
             vname = NS::superficial_velocity_vector[d];
             for (unsigned int d = 0; d < _dim; ++d)
-              params.set<VariableName>(u_names[d]) = NS::superficial_velocity_vector[d];
+              params.set<MooseFunctorName>(u_names[d]) = NS::superficial_velocity_vector[d];
             params.set<UserObjectName>("rhie_chow_user_object") = "pins_rhie_chow_interpolator";
           }
           else
           {
             vname = NS::velocity_vector[d];
             for (unsigned int d = 0; d < _dim; ++d)
-              params.set<VariableName>(u_names[d]) = NS::velocity_vector[d];
+              params.set<MooseFunctorName>(u_names[d]) = NS::velocity_vector[d];
             params.set<UserObjectName>("rhie_chow_user_object") = "ins_rhie_chow_interpolator";
           }
 
           params.set<NonlinearVariableName>("variable") = vname;
           params.set<MooseEnum>("momentum_component") = NS::directions[d];
-          params.set<std::vector<BoundaryName>>("boundary") = {_wall_boundaries[bc_ind]};
 
           _problem->addFVBC(bc_type, vname + "_" + _wall_boundaries[bc_ind], params);
         }
@@ -1434,13 +1520,32 @@ void
 NSFVAction::addEnthalpyMaterial()
 {
   InputParameters params = _factory.getValidParams("INSFVEnthalpyMaterial");
-
-  if (_blocks.size() > 0)
-    params.set<std::vector<SubdomainName>>("block") = _blocks;
+  params.set<std::vector<SubdomainName>>("block") = _blocks;
 
   params.set<MooseFunctorName>(NS::density) = _density_name;
   params.set<MooseFunctorName>("temperature") = NS::T_fluid;
   _problem->addMaterial("INSFVEnthalpyMaterial", "ins_enthalpy_material", params);
+}
+
+void
+NSFVAction::addMixingLengthMaterial()
+{
+  const std::string u_names[3] = {"u", "v", "w"};
+  InputParameters params = _factory.getValidParams("MixingLengthTurbulentViscosityMaterial");
+  params.set<std::vector<SubdomainName>>("block") = _blocks;
+
+  if (_porous_medium_treatment)
+    for (unsigned int d = 0; d < _dim; ++d)
+      params.set<CoupledName>(u_names[d]) = {NS::superficial_velocity_vector[d]};
+  else
+    for (unsigned int d = 0; d < _dim; ++d)
+      params.set<CoupledName>(u_names[d]) = {NS::velocity_vector[d]};
+  params.set<CoupledName>(NS::mixing_length) = {NS::mixing_length};
+
+  params.set<MaterialPropertyName>(NS::density) = _density_name;
+  params.set<MaterialPropertyName>(NS::mu) = _dynamic_viscosity_name;
+
+  _problem->addMaterial("MixingLengthTurbulentViscosityMaterial", "mixing_length_material", params);
 }
 
 void
