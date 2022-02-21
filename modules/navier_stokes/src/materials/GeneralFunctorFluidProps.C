@@ -253,7 +253,7 @@ GeneralFunctorFluidProps::GeneralFunctorFluidProps(const InputParameters & param
                                                                 _eps(r, t) * _speed(r, t),
                                                                 _d,
                                                                 std::max(mu(r, t), small_number)),
-                                                   1.0);
+                                                   small_number);
                                  });
 
   addFunctorProperty<Real>(
