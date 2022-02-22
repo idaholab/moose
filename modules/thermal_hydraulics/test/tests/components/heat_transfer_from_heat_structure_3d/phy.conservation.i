@@ -1,5 +1,8 @@
+# Testing energy conservation with fluid at rest
+
+P_hf = ${fparse 0.6 * sin (pi/24)}
+
 [GlobalParams]
-  scaling_factor_1phase = '1 1 1e-3'
   gravity_vector = '0 0 0'
 []
 
@@ -37,29 +40,52 @@
 []
 
 [Components]
-  [fch]
+  [in1]
+    type = SolidWall1Phase
+    input = 'fch1:in'
+  []
+  [fch1]
     type = FlowChannel1Phase
-    position = '0 0 0'
+    position = '0.15 0 0'
     orientation = '0 0 1'
     fp = fp
-    n_elems = 6
+    n_elems = 10
     length = 1
     initial_T = 300
     initial_p = 1.01e5
     initial_vel = 0
     closures = simple_closures
-    A   = 0.00314159
-    D_h  = 0.2
-    f = 0.01
+    A = 0.00314159
+    f = 0.0
   []
-  [in]
+  [out1]
     type = SolidWall1Phase
-    input = 'fch:in'
+    input = 'fch1:out'
   []
-  [out]
+
+  [in2]
     type = SolidWall1Phase
-    input = 'fch:out'
+    input = 'fch2:in'
   []
+  [fch2]
+    type = FlowChannel1Phase
+    position = '0 0.15 0'
+    orientation = '0 0 1'
+    fp = fp
+    n_elems = 10
+    length = 1
+    initial_T = 350
+    initial_p = 1.01e5
+    initial_vel = 0
+    closures = simple_closures
+    A = 0.00314159
+    f = 0.0
+  []
+  [out2]
+    type = SolidWall1Phase
+    input = 'fch2:out'
+  []
+
   [blk]
     type = HeatStructureFromFile3D
     file = mesh.e
@@ -68,11 +94,11 @@
   []
   [ht]
     type = HeatTransferFromHeatStructure3D1Phase
-    flow_channels = 'fch'
+    flow_channels = 'fch1 fch2'
     hs = blk
     boundary = blk:rmin
     Hw = 10000
-    P_hf = 0.1564344650402309
+    P_hf = ${P_hf}
   []
 []
 
@@ -82,15 +108,21 @@
     block = blk:0
     execute_on = 'INITIAL TIMESTEP_END'
   []
-  [energy_fch]
+  [energy_fch1]
     type = ElementIntegralVariablePostprocessor
-    block = fch
+    block = fch1
+    variable = rhoEA
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [energy_fch2]
+    type = ElementIntegralVariablePostprocessor
+    block = fch2
     variable = rhoEA
     execute_on = 'INITIAL TIMESTEP_END'
   []
   [total_energy]
     type = SumPostprocessor
-    values = 'energy_fch energy_hs'
+    values = 'energy_fch1 energy_fch2 energy_hs'
     execute_on = 'INITIAL TIMESTEP_END'
   []
   [energy_change]
@@ -115,7 +147,7 @@
   dt = 0.1
   num_steps = 10
 
-  solve_type = PJFNK
+  solve_type = NEWTON
   line_search = basic
   abort_on_solve_fail = true
   nl_abs_tol = 1e-8
