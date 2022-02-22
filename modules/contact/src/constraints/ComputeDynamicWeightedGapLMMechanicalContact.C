@@ -23,19 +23,16 @@ ComputeDynamicWeightedGapLMMechanicalContact::validParams()
   InputParameters params = ComputeWeightedGapLMMechanicalContact::validParams();
   params.addClassDescription(
       "Computes the normal contact mortar constraints for dynamic simulations");
-  params.addParam<Real>("capture_tolerance",
-                        1.0e-5,
-                        "Parameter describing a gap threshold for the application of "
-                        "the persistency constraint in dynamic simulations.");
   params.addCoupledVar("wear_depth", "The name of the mortar auxiliary variable that ");
-  /*
-   *   params.addRangeCheckedParam<Real>("capture_tolerance",
+
+  params.addRangeCheckedParam<Real>("capture_tolerance",
                                     1.0e-5,
                                     "capture_tolerance>=0",
                                     "Parameter describing a gap threshold for the application of "
                                     "the persistency constraint in dynamic simulations.");
-  params.addCoupledVar("wear_depth", "The name of the mortar auxiliary variable that ");
-  */
+  params.addCoupledVar("wear_depth",
+                       "The name of the mortar auxiliary variable that is used to modify the "
+                       "weighted gap definition");
   params.addRequiredRangeCheckedParam<Real>(
       "newmark_beta", "newmark_beta > 0", "Beta parameter for the Newmark time integrator");
   params.addRequiredRangeCheckedParam<Real>(
@@ -59,6 +56,7 @@ ComputeDynamicWeightedGapLMMechanicalContact::ComputeDynamicWeightedGapLMMechani
     _has_wear(isParamValid("wear_depth")),
     _newmark_beta(getParam<Real>("newmark_beta")),
     _newmark_gamma(getParam<Real>("newmark_gamma"))
+
 {
   mooseAssert(!_interpolate_normals,
               "Dynamic mortar mechanical contact constraints require the surface geometry to be "
