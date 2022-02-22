@@ -92,8 +92,10 @@ MultiAppTransfer::MultiAppTransfer(const InputParameters & parameters)
   }
 
   // Check for different number of subapps
-  if (_to_multi_app && _from_multi_app && _from_multi_app->numGlobalApps() != _to_multi_app->numGlobalApps())
-    mooseError("Between multiapp transfer is only supported with the same number of subapps per MultiApp");
+  if (_to_multi_app && _from_multi_app &&
+      _from_multi_app->numGlobalApps() != _to_multi_app->numGlobalApps())
+    mooseError(
+        "Between multiapp transfer is only supported with the same number of subapps per MultiApp");
 
   // Handle deprecated parameters
   if (parameters.isParamSetByUser("directions"))
@@ -129,21 +131,29 @@ void
 MultiAppTransfer::variableIntegrityCheck(const AuxVariableName & var_name) const
 {
   bool variable_found = false;
+  bool has_an_app = false;
 
   // Check the from_multi_app for the variable
   if (_from_multi_app)
     for (unsigned int i = 0; i < _from_multi_app->numGlobalApps(); i++)
-      if (_from_multi_app->hasLocalApp(i) &&
-          _from_multi_app->appProblemBase(i).hasVariable(var_name))
-        variable_found = true;
+      if (_from_multi_app->hasLocalApp(i))
+      {
+        has_an_app = true;
+        if (_from_multi_app->appProblemBase(i).hasVariable(var_name))
+          variable_found = true;
+      }
 
   // Check the to_multi_app for the variable
   if (_to_multi_app)
     for (unsigned int i = 0; i < _to_multi_app->numGlobalApps(); i++)
-      if (_to_multi_app->hasLocalApp(i) && _to_multi_app->appProblemBase(i).hasVariable(var_name))
-        variable_found = true;
+      if (_to_multi_app->hasLocalApp(i))
+      {
+        has_an_app = true;
+        if (_to_multi_app->appProblemBase(i).hasVariable(var_name))
+          variable_found = true;
+      }
 
-  if (!variable_found)
+  if (!variable_found && has_an_app)
     mooseError("Cannot find variable ", var_name, " for ", name(), " Transfer");
 }
 
@@ -333,7 +343,7 @@ MultiAppTransfer::getFromsPerProc()
 NumericVector<Real> &
 MultiAppTransfer::getTransferVector(unsigned int i_local, std::string var_name)
 {
-  mooseAssert(!_from_multi_app, "getTransferVector only works for transfers to multiapps");
+  mooseAssert(_to_multi_app, "getTransferVector only works for transfers to multiapps");
 
   return _to_multi_app->appTransferVector(_local2global_map[i_local], var_name);
 }

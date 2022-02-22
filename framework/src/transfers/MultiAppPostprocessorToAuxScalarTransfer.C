@@ -28,11 +28,9 @@ MultiAppPostprocessorToAuxScalarTransfer::validParams()
   InputParameters params = MultiAppTransfer::validParams();
   params.addClassDescription("Transfers from a postprocessor to an scalar auxiliary variable.");
   params.addRequiredParam<PostprocessorName>(
-      "from_postprocessor",
-      "The name of the Postprocessor to transfer the value from.");
+      "from_postprocessor", "The name of the Postprocessor to transfer the value from.");
   params.addRequiredParam<VariableName>(
-      "to_aux_scalar",
-      "The name of the scalar AuxVariable to transfer the value to.");
+      "to_aux_scalar", "The name of the scalar AuxVariable to transfer the value to.");
   return params;
 }
 

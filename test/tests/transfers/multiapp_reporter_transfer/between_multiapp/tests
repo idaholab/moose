@@ -1,0 +1,15 @@
+[Tests]
+  issues = '#19451'
+  design = 'MultiAppReporterTransfer.md'
+
+  [transfer]
+    type = 'CSVDiff'
+    input = 'main.i'
+    csvdiff = 'main_out_pp_sub_00_base_sub0_vpp_0002.csv main_out_pp_sub_00_from_sub1_vpp_0002.csv
+               main_out_pp_sub_01_base_sub0_vpp_0002.csv main_out_pp_sub_01_from_sub1_vpp_0002.csv
+               main_out_pp_sub_10_base_sub1_vpp_0002.csv main_out_pp_sub_10_from_sub0_vpp_0002.csv
+               main_out_pp_sub_11_base_sub1_vpp_0002.csv main_out_pp_sub_11_from_sub0_vpp_0002.csv'
+
+    requirement = "The system shall support the transfer of reporter data between multiapps"
+  []
+[]

@@ -26,8 +26,8 @@ InputParameters
 MultiAppScalarToAuxScalarTransfer::validParams()
 {
   InputParameters params = MultiAppTransfer::validParams();
-  params.addClassDescription(
-      "Transfers data from a scalar variable to an auxiliary scalar variable from different applications.");
+  params.addClassDescription("Transfers data from a scalar variable to an auxiliary scalar "
+                             "variable from different applications.");
   params.addRequiredParam<VariableName>("source_variable",
                                         "The name of the scalar variable to "
                                         "transfer the value from.");

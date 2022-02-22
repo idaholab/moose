@@ -5,7 +5,8 @@
   [transfer]
     type = 'CSVDiff'
     input = 'main.i'
-    exodiff = 'main_out_pp_sub_00.csv main_out_pp_sub_01.csv main_out_pp_sub_10.csv main_out_pp_sub_11.csv'
+    csvdiff = 'main_out_pp_sub_00.csv main_out_pp_sub_01.csv main_out_pp_sub_10.csv main_out_pp_sub_11.csv'
 
     requirement = "The system shall support the transfer of scalar post processing data between multiapps"
+  []
 []

@@ -17,8 +17,7 @@ MultiAppReporterTransfer::validParams()
 {
   InputParameters params = MultiAppTransfer::validParams();
   params += ReporterTransferInterface::validParams();
-  params.addClassDescription(
-      "Transfers reporter data between the main application and sub-application(s).");
+  params.addClassDescription("Transfers reporter data between two applications.");
   params.addRequiredParam<std::vector<ReporterName>>(
       "from_reporters",
       "List of the reporter names (object_name/value_name) to transfer the value from.");
@@ -47,6 +46,10 @@ MultiAppReporterTransfer::MultiAppReporterTransfer(const InputParameters & param
 
   if (_directions.size() > 1)
     paramError("direction", "This transfer only supports a single direction.");
+
+  if (_to_multi_app && _from_multi_app && _subapp_index != std::numeric_limits<unsigned int>::max())
+    paramError("subapp_index",
+               "The subapp_index parameter is not supported for transfers between two multiapps");
 
   const auto multi_app = _from_multi_app ? _from_multi_app : _to_multi_app;
   // Errors for sub app index.
@@ -95,11 +98,12 @@ MultiAppReporterTransfer::executeToMultiapp()
     indices = {_subapp_index};
 
   for (const auto & ind : indices)
-    if (_to_multi_app->hasLocalApp(ind))
+    if (_to_multi_app->hasLocalApp(ind) && (!_from_multi_app || _from_multi_app->hasLocalApp(ind)))
       for (unsigned int n = 0; n < _from_reporter_names.size(); ++n)
         transferReporter(_from_reporter_names[n],
                          _to_reporter_names[n],
-                         _to_multi_app->problemBase(),
+                         _from_multi_app ? _from_multi_app->appProblemBase(ind)
+                                         : _to_multi_app->problemBase(),
                          _to_multi_app->appProblemBase(ind));
 }
 
@@ -107,12 +111,13 @@ void
 MultiAppReporterTransfer::executeFromMultiapp()
 {
   unsigned int ind = _subapp_index != std::numeric_limits<unsigned int>::max() ? _subapp_index : 0;
-  if (_from_multi_app->hasLocalApp(ind))
+  if (_from_multi_app->hasLocalApp(ind) && (!_to_multi_app || _to_multi_app->hasLocalApp(ind)))
     for (unsigned int n = 0; n < _from_reporter_names.size(); ++n)
       transferReporter(_from_reporter_names[n],
                        _to_reporter_names[n],
                        _from_multi_app->appProblemBase(ind),
-                       _from_multi_app->problemBase());
+                       _to_multi_app ? _to_multi_app->appProblemBase(ind)
+                                     : _from_multi_app->problemBase());
 }
 
 void
