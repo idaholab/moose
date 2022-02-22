@@ -27,12 +27,12 @@ MultiAppScalarToAuxScalarTransfer::validParams()
 {
   InputParameters params = MultiAppTransfer::validParams();
   params.addClassDescription(
-      "Transfers data between a scalar non-linear variable and a scalar auxiliary variable.");
+      "Transfers data from a scalar variable to an auxiliary scalar variable from different applications.");
   params.addRequiredParam<VariableName>("source_variable",
-                                        "The name of the scalar variable in the MultiApp to "
+                                        "The name of the scalar variable to "
                                         "transfer the value from.");
   params.addRequiredParam<VariableName>("to_aux_scalar",
-                                        "The name of the scalar Aux variable in the MultiApp to "
+                                        "The name of the scalar auxiliary variable to "
                                         "transfer the value to.");
   return params;
 }
@@ -55,7 +55,7 @@ MultiAppScalarToAuxScalarTransfer::execute()
   // Perform action based on the transfer direction
   switch (_current_direction)
   {
-    // MasterApp -> SubApp
+    // main app to multi_app
     case TO_MULTIAPP:
     {
       // Extract the scalar variable that is being transferred
@@ -91,10 +91,10 @@ MultiAppScalarToAuxScalarTransfer::execute()
       break;
     }
 
-    // SubApp -> MasterApp
+    // multi_app to main app
     case FROM_MULTIAPP:
     {
-      // The AuxVariable that will be read from the subApp
+      // The AuxVariable that will be modified with data from the subapp
       MooseVariableScalar * to_variable =
           &_from_multi_app->problemBase().getScalarVariable(_tid, _to_aux_name);
 
@@ -129,6 +129,52 @@ MultiAppScalarToAuxScalarTransfer::execute()
       }
       to_variable->sys().solution().close();
 
+      break;
+    }
+
+    // multi_app to multi_app
+    case BETWEEN_MULTIAPP:
+    {
+      for (unsigned int i = 0; i < _from_multi_app->numGlobalApps(); i++)
+      {
+        if (_from_multi_app->hasLocalApp(i))
+        {
+          // The AuxVariable that will be modified with data from the subapp
+          MooseVariableScalar * from_variable =
+              &_from_multi_app->appProblemBase(i).getScalarVariable(_tid, _from_variable_name);
+
+          // Ensure that the variable is up to date
+          from_variable->reinit();
+
+          // Loop through each of the sub apps
+          for (unsigned int j = 0; j < _to_multi_app->numGlobalApps(); j++)
+          {
+            if (_to_multi_app->hasLocalApp(j))
+            {
+              // Get reference to the scalar variable that will be written
+              MooseVariableScalar * to_variable =
+                  &_to_multi_app->appProblemBase(j).getScalarVariable(_tid, _to_aux_name);
+
+              to_variable->reinit();
+
+              // Determine number of DOFs that we're going to read and write
+              auto && to_dof = to_variable->dofIndices();
+              auto & from_values = from_variable->sln();
+
+              // Check that the DOF matches
+              if (from_variable->sln().size() != to_variable->sln().size())
+                mooseError("Order of SCALAR variables do not match for sending and "
+                           "receiving data for the "
+                           "MultiAppScalarToAuxScalarTransfer!");
+
+              for (MooseIndex(from_values) k = 0; k < from_values.size(); ++k)
+                to_variable->sys().solution().set(to_dof[k], from_values[k]);
+
+              to_variable->sys().solution().close();
+            }
+          }
+        }
+      }
       break;
     }
   }
