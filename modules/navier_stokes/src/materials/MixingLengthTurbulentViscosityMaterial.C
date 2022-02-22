@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MixingLengthTurbulentViscosityMaterial.h"
+#include "NS.h"
 
 registerMooseObject("NavierStokesApp", MixingLengthTurbulentViscosityMaterial);
 
