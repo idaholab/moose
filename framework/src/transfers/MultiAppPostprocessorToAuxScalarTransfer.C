@@ -65,23 +65,21 @@ MultiAppPostprocessorToAuxScalarTransfer::execute()
           FEProblemBase & from_problem = _from_multi_app->appProblemBase(i);
           Real pp_value = from_problem.getPostprocessorValueByName(_from_pp_name);
 
-          // Loop through each of the sub apps
-          for (unsigned int j = 0; j < _to_multi_app->numGlobalApps(); j++)
-            if (_to_multi_app->hasLocalApp(i))
-            {
-              // Get reference to the AuxVariable where the postprocessor will be passed
-              MooseVariableScalar & scalar =
-                  _to_multi_app->appProblemBase(i).getScalarVariable(_tid, _to_aux_name);
+          if (_to_multi_app->hasLocalApp(i))
+          {
+            // Get reference to the AuxVariable where the postprocessor will be passed
+            MooseVariableScalar & scalar =
+                _to_multi_app->appProblemBase(i).getScalarVariable(_tid, _to_aux_name);
 
-              scalar.reinit();
+            scalar.reinit();
 
-              // Set all values of the AuxVariable to the value of the postprocessor
-              scalar.setValues(pp_value);
+            // Set all values of the AuxVariable to the value of the postprocessor
+            scalar.setValues(pp_value);
 
-              // Update the solution
-              scalar.insert(scalar.sys().solution());
-              scalar.sys().solution().close();
-            }
+            // Update the solution
+            scalar.insert(scalar.sys().solution());
+            scalar.sys().solution().close();
+          }
         }
       }
       break;

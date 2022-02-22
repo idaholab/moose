@@ -66,13 +66,10 @@ MultiAppCopyTransfer::execute()
     {
       if (_from_multi_app->hasLocalApp(i))
       {
-        for (unsigned int j = 0; j < _to_multi_app->numGlobalApps(); j++)
+        if (_to_multi_app->hasLocalApp(i))
         {
-          if (_to_multi_app->hasLocalApp(j))
-          {
-            transfer(_to_multi_app->appProblemBase(j), _from_multi_app->appProblemBase(i));
-            transfers_done++;
-          }
+          transfer(_to_multi_app->appProblemBase(i), _from_multi_app->appProblemBase(i));
+          transfers_done++;
         }
       }
     }

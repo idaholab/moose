@@ -91,6 +91,10 @@ MultiAppTransfer::MultiAppTransfer(const InputParameters & parameters)
       _directions.push_back("between_multiapp");
   }
 
+  // Check for different number of subapps
+  if (_to_multi_app && _from_multi_app && _from_multi_app->numGlobalApps() != _to_multi_app->numGlobalApps())
+    mooseError("Between multiapp transfer is only supported with the same number of subapps per MultiApp");
+
   // Handle deprecated parameters
   if (parameters.isParamSetByUser("directions"))
   {

@@ -75,9 +75,8 @@ MultiAppPostprocessorTransfer::execute()
           FEProblemBase & from_problem = _from_multi_app->appProblemBase(i);
           const Real & pp_value = from_problem.getPostprocessorValueByName(_from_pp_name);
 
-            for (unsigned int j = 0; j < _to_multi_app->numGlobalApps(); j++)
-              if (_to_multi_app->hasLocalApp(j))
-                _to_multi_app->appProblemBase(j).setPostprocessorValueByName(_to_pp_name, pp_value);
+          if (_to_multi_app->hasLocalApp(i))
+            _to_multi_app->appProblemBase(i).setPostprocessorValueByName(_to_pp_name, pp_value);
         }
       }
       break;

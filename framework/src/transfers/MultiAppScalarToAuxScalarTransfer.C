@@ -146,32 +146,28 @@ MultiAppScalarToAuxScalarTransfer::execute()
           // Ensure that the variable is up to date
           from_variable->reinit();
 
-          // Loop through each of the sub apps
-          for (unsigned int j = 0; j < _to_multi_app->numGlobalApps(); j++)
+          if (_to_multi_app->hasLocalApp(i))
           {
-            if (_to_multi_app->hasLocalApp(j))
-            {
-              // Get reference to the scalar variable that will be written
-              MooseVariableScalar * to_variable =
-                  &_to_multi_app->appProblemBase(j).getScalarVariable(_tid, _to_aux_name);
+            // Get reference to the scalar variable that will be written
+            MooseVariableScalar * to_variable =
+                &_to_multi_app->appProblemBase(i).getScalarVariable(_tid, _to_aux_name);
 
-              to_variable->reinit();
+            to_variable->reinit();
 
-              // Determine number of DOFs that we're going to read and write
-              auto && to_dof = to_variable->dofIndices();
-              auto & from_values = from_variable->sln();
+            // Determine number of DOFs that we're going to read and write
+            auto && to_dof = to_variable->dofIndices();
+            auto & from_values = from_variable->sln();
 
-              // Check that the DOF matches
-              if (from_variable->sln().size() != to_variable->sln().size())
-                mooseError("Order of SCALAR variables do not match for sending and "
-                           "receiving data for the "
-                           "MultiAppScalarToAuxScalarTransfer!");
+            // Check that the DOF matches
+            if (from_variable->sln().size() != to_variable->sln().size())
+              mooseError("Order of SCALAR variables do not match for sending and "
+                         "receiving data for the "
+                         "MultiAppScalarToAuxScalarTransfer!");
 
-              for (MooseIndex(from_values) k = 0; k < from_values.size(); ++k)
-                to_variable->sys().solution().set(to_dof[k], from_values[k]);
+            for (MooseIndex(from_values) k = 0; k < from_values.size(); ++k)
+              to_variable->sys().solution().set(to_dof[k], from_values[k]);
 
-              to_variable->sys().solution().close();
-            }
+            to_variable->sys().solution().close();
           }
         }
       }
