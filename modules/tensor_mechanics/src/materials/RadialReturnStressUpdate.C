@@ -160,9 +160,13 @@ RadialReturnStressUpdateTempl<false>::computeTangentOperator(Real effective_tria
       mooseAssert(_three_shear_modulus != 0.0, "Shear modulus is zero");
 
       const RankTwoTensor deviatoric_stress = stress_new.deviatoric();
-      const Real norm_dev_stress =
-          std::sqrt(deviatoric_stress.doubleContraction(deviatoric_stress));
-      mooseAssert(norm_dev_stress != 0.0, "Norm of the deviatoric is zero");
+      const Real norm_dev_stress_squared = deviatoric_stress.doubleContraction(deviatoric_stress);
+      if (MooseUtils::absoluteFuzzyEqual(norm_dev_stress_squared, 0.0))
+      {
+        tangent_operator.zero();
+        return;
+      }
+      const Real norm_dev_stress = std::sqrt(norm_dev_stress_squared);
 
       const RankTwoTensor flow_direction = deviatoric_stress / norm_dev_stress;
       const RankFourTensor flow_direction_dyad = flow_direction.outerProduct(flow_direction);
