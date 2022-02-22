@@ -65,7 +65,7 @@ CrystalPlasticityKalidindiUpdate::initQpStatefulProperties()
 {
   CrystalPlasticityStressUpdateBase::initQpStatefulProperties();
 
-  for (auto i : make_range(_number_slip_systems))
+  for (const auto i : make_range(_number_slip_systems))
   {
     _slip_resistance[_qp][i] = _gss_initial;
     _slip_increment[_qp][i] = 0.0;
@@ -90,7 +90,7 @@ CrystalPlasticityKalidindiUpdate::setSubstepConstitutiveVariableValues()
 bool
 CrystalPlasticityKalidindiUpdate::calculateSlipRate()
 {
-  for (auto i : make_range(_number_slip_systems))
+  for (const auto i : make_range(_number_slip_systems))
   {
     _slip_increment[_qp][i] =
         _ao * std::pow(std::abs(_tau[_qp][i] / _slip_resistance[_qp][i]), 1.0 / _xm);
@@ -115,7 +115,7 @@ CrystalPlasticityKalidindiUpdate::calculateEquivalentSlipIncrement(
 {
   if (_include_twinning_in_Lp)
   {
-    for (auto i : make_range(_number_slip_systems))
+    for (const auto i : make_range(_number_slip_systems))
       equivalent_slip_increment += (1.0 - (*_twin_volume_fraction_total)[_qp]) *
                                    _flow_direction[_qp][i] * _slip_increment[_qp][i] * _substep_dt;
   }
@@ -127,7 +127,7 @@ void
 CrystalPlasticityKalidindiUpdate::calculateConstitutiveSlipDerivative(
     std::vector<Real> & dslip_dtau)
 {
-  for (auto i : make_range(_number_slip_systems))
+  for (const auto i : make_range(_number_slip_systems))
   {
     if (MooseUtils::absoluteFuzzyEqual(_tau[_qp][i], 0.0))
       dslip_dtau[i] = 0.0;
@@ -163,7 +163,7 @@ CrystalPlasticityKalidindiUpdate::cacheStateVariablesBeforeUpdate()
 void
 CrystalPlasticityKalidindiUpdate::calculateStateVariableEvolutionRateComponent()
 {
-  for (auto i : make_range(_number_slip_systems))
+  for (const auto i : make_range(_number_slip_systems))
   {
     // Clear out increment from the previous iteration
     _slip_resistance_increment[i] = 0.0;
@@ -174,9 +174,9 @@ CrystalPlasticityKalidindiUpdate::calculateStateVariableEvolutionRateComponent()
       _hb[i] *= -1.0;
   }
 
-  for (auto i : make_range(_number_slip_systems))
+  for (const auto i : make_range(_number_slip_systems))
   {
-    for (auto j : make_range(_number_slip_systems))
+    for (const auto j : make_range(_number_slip_systems))
     {
       unsigned int iplane, jplane;
       iplane = i / 3;
@@ -196,7 +196,7 @@ bool
 CrystalPlasticityKalidindiUpdate::updateStateVariables()
 {
   // Now perform the check to see if the slip system should be updated
-  for (auto i : make_range(_number_slip_systems))
+  for (const auto i : make_range(_number_slip_systems))
   {
     _slip_resistance_increment[i] *= _substep_dt;
     if (_previous_substep_slip_resistance[i] < _zero_tol && _slip_resistance_increment[i] < 0.0)

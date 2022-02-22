@@ -1,0 +1,23 @@
+[Tests]
+  [coupling_demonstration]
+    issues = '#18846'
+    design = '/ComputeMultipleCrystalPlasticityStress.md /CrystalPlasticityHCPDislocationSlipBeyerleinUpdate.md /CrystalPlasticityTwinningKalidindiUpdate.md'
+    requirement = 'The crystal plasticity HCP system shall: '
+    [modified_kalidindi_for_hcp]
+      type = CSVDiff
+      input = 'modified_kalidindi_for_hcp.i'
+      csvdiff = 'modified_kalidindi_for_hcp_out.csv'
+      detail = 'calculate the Schmid tensor for a set of HCP twin systems given '
+               'in Miller-Bravais indices and shall calculate a twin volume '
+               'fraction when using the FCC Kalidindi twinning model with a '
+               'modified input file.'
+    []
+    [demonstration_combined_hcp_slip_twins]
+      type = CSVDiff
+      input = 'demonstration_combined_hcp_slip_twins.i'
+      csvdiff = 'demonstration_combined_hcp_slip_twins_out.csv'
+      detail = 'compute a plastic velocity gradient that accounts for deformation '
+               'contributions from both slip and twinning in an HCP crystal.'
+    []
+  []
+[]

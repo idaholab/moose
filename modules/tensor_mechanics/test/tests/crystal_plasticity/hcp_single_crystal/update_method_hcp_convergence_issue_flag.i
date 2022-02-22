@@ -132,9 +132,9 @@
   nl_max_its = 20
   l_max_its = 50
 
-  dt = 0.03
+  dt = 0.3
   dtmin = 1.0e-4
-  dtmax = 0.2
+  dtmax = 0.1
   num_steps = 1
 []
 

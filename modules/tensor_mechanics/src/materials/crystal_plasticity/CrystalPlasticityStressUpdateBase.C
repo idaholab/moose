@@ -122,7 +122,7 @@ CrystalPlasticityStressUpdateBase::initQpStatefulProperties()
   _tau[_qp].resize(_number_slip_systems);
 
   _flow_direction[_qp].resize(_number_slip_systems);
-  for (auto i : make_range(_number_slip_systems))
+  for (const auto i : make_range(_number_slip_systems))
   {
     _flow_direction[_qp][i].zero();
     _tau[_qp][i] = 0.0;
@@ -148,7 +148,7 @@ CrystalPlasticityStressUpdateBase::getSlipSystems()
         "number_slip_systems",
         "The number of rows in the slip system file should match the number of slip system.");
 
-  for (auto i : make_range(_number_slip_systems))
+  for (const auto i : make_range(_number_slip_systems))
   {
     // initialize to zero
     _slip_direction[i].zero();
@@ -156,14 +156,14 @@ CrystalPlasticityStressUpdateBase::getSlipSystems()
   }
 
   if (_crystal_lattice_type == CrystalLatticeType::HCP)
-    transformHexagonalMillerBravisSlipSystems(_reader);
+    transformHexagonalMillerBravaisSlipSystems(_reader);
   else if (_crystal_lattice_type == CrystalLatticeType::BCC ||
            _crystal_lattice_type == CrystalLatticeType::FCC)
   {
-    for (auto i : make_range(_number_slip_systems))
+    for (const auto i : make_range(_number_slip_systems))
     {
       // directly grab the raw data and scale it by the unit cell dimension
-      for (auto j : make_range(_reader.getData(i).size()))
+      for (const auto j : make_range(_reader.getData(i).size()))
       {
         if (j < LIBMESH_DIM)
           _slip_plane_normal[i](j) = _reader.getData(i)[j] / _unit_cell_dimension[j];
@@ -174,7 +174,7 @@ CrystalPlasticityStressUpdateBase::getSlipSystems()
     }
   }
 
-  for (auto i : make_range(_number_slip_systems))
+  for (const auto i : make_range(_number_slip_systems))
   {
     // normalize
     _slip_plane_normal[i] /= _slip_plane_normal[i].norm();
@@ -182,8 +182,7 @@ CrystalPlasticityStressUpdateBase::getSlipSystems()
 
     if (_crystal_lattice_type != CrystalLatticeType::HCP)
     {
-      // check if slip direction is normal to the slip plane normal
-      auto magnitude = _slip_plane_normal[i] * _slip_direction[i];
+      const auto magnitude = _slip_plane_normal[i] * _slip_direction[i];
       if (std::abs(magnitude) > libMesh::TOLERANCE)
       {
         orthonormal_error = true;
@@ -199,82 +198,86 @@ CrystalPlasticityStressUpdateBase::getSlipSystems()
 }
 
 void
-CrystalPlasticityStressUpdateBase::transformHexagonalMillerBravisSlipSystems(
+CrystalPlasticityStressUpdateBase::transformHexagonalMillerBravaisSlipSystems(
     const MooseUtils::DelimitedFileReader & reader)
 {
-  const unsigned int miller_bravis_indices = 4;
-  std::vector<Real> miller_bravis_slip_direction, temporary_slip_direction, temporary_slip_plane;
-  miller_bravis_slip_direction.resize(miller_bravis_indices);
-  temporary_slip_plane.resize(LIBMESH_DIM);
-  temporary_slip_direction.resize(LIBMESH_DIM);
+  const unsigned int miller_bravais_indices = 4;
+  RealVectorValue temporary_slip_direction, temporary_slip_plane;
+  // temporary_slip_plane.resize(LIBMESH_DIM);
+  // temporary_slip_direction.resize(LIBMESH_DIM);
 
   if (_unit_cell_dimension[0] != _unit_cell_dimension[1] ||
       _unit_cell_dimension[0] == _unit_cell_dimension[2])
     mooseError("CrystalPlasticityStressUpdateBase Error: The specified unit cell dimensions are "
                "not consistent with expectations for "
                "HCP crystal hexagonal lattices.");
-  else if (reader.getData(0).size() != miller_bravis_indices * 2)
+  else if (reader.getData(0).size() != miller_bravais_indices * 2)
     mooseError("CrystalPlasticityStressUpdateBase Error: The number of entries in the first row of "
                "the slip system file is not consistent with the expectations for the 4-index "
-               "Miller-Bravis assumption for HCP crystals. This file should represent both the "
+               "Miller-Bravais assumption for HCP crystals. This file should represent both the "
                "slip plane normal and the slip direction with 4-indices each.");
 
   // set up the tranformation matrices
-  RankTwoTensor transform_planes, transform_directions;
-  transform_planes(0, 0) = 1.0 / _unit_cell_dimension[0];
-  transform_planes(1, 0) = 1.0 / (_unit_cell_dimension[0] * std::sqrt(3.0));
-  transform_planes(1, 1) = 2.0 / (_unit_cell_dimension[0] * std::sqrt(3.0));
-  transform_planes(2, 2) = 1.0 / (_unit_cell_dimension[2]);
+  RankTwoTensor transform_matrix;
+  transform_matrix.zero();
+  transform_matrix(0, 0) = 1.0 / _unit_cell_dimension[0];
+  transform_matrix(1, 0) = 1.0 / (_unit_cell_dimension[0] * std::sqrt(3.0));
+  transform_matrix(1, 1) = 2.0 / (_unit_cell_dimension[0] * std::sqrt(3.0));
+  transform_matrix(2, 2) = 1.0 / (_unit_cell_dimension[2]);
 
-  transform_directions(0, 0) = _unit_cell_dimension[0];
-  transform_directions(0, 1) = -1.0 / (2 * _unit_cell_dimension[0]);
-  transform_directions(1, 1) = std::sqrt(3.0) * _unit_cell_dimension[0] / 2.0;
-  transform_directions(2, 2) = _unit_cell_dimension[2];
-
-  for (auto i : make_range(_number_slip_systems))
+  for (const auto i : make_range(_number_slip_systems))
   {
     // read in raw data from file and store in the temporary vectors
-    for (unsigned int j = 0; j < reader.getData(i).size(); ++j)
+    for (const auto j : index_range(reader.getData(i)))
     {
-      // Check that the indices of the basal plane sum to zero for consistency
+      // Check that the slip plane normal indices of the basal plane sum to zero for consistency
       Real basal_pl_sum = 0.0;
-      for (auto k : make_range(LIBMESH_DIM))
+      for (const auto k : make_range(LIBMESH_DIM))
         basal_pl_sum += reader.getData(i)[k];
 
       if (basal_pl_sum > _zero_tol)
         mooseError(
-            "CrystalPlasticityStressUpdateBase Error: The specified HCP basal plane Miller-Bravis "
+            "CrystalPlasticityStressUpdateBase Error: The specified HCP basal plane Miller-Bravais "
             "indices do not sum to zero. Check the values supplied in the associated text file.");
 
-      if (j < miller_bravis_indices)
+      // Check that the slip direction indices of the basal plane sum to zero for consistency
+      Real basal_dir_sum = 0.0;
+      for (const auto k : make_range(miller_bravais_indices, miller_bravais_indices + LIBMESH_DIM))
+        basal_dir_sum += reader.getData(i)[k];
+
+      if (basal_dir_sum > _zero_tol)
+        mooseError("CrystalPlasticityStressUpdateBase Error: The specified HCP slip direction "
+                   "Miller-Bravais indices in the basal plane (U, V, and T) do not sum to zero "
+                   "within the user specified tolerance (try loosing zero_tol if using the default "
+                   "value). Check the values supplied in the associated text file.");
+
+      if (j < miller_bravais_indices)
       {
         // Planes are directly copied over, per a_1 = x convention used here:
         // Store the first two indices for the basal plane, (h and k), and drop
         // the redundant third basal plane index (i)
         if (j < 2)
-          temporary_slip_plane[j] = reader.getData(i)[j];
+          temporary_slip_plane(j) = reader.getData(i)[j];
         // Store the c-axis index as the third entry in the orthorombic index convention
         else if (j == 3)
-          temporary_slip_plane[j - 1] = reader.getData(i)[j];
+          temporary_slip_plane(j - 1) = reader.getData(i)[j];
       }
       else
-        miller_bravis_slip_direction[j - miller_bravis_indices] = reader.getData(i)[j];
+      {
+        const auto direction_j = j - miller_bravais_indices;
+        // Store the first two indices for the slip direction in the basal plane,
+        //(U, V), and drop the redundant third basal plane index (T)
+        if (direction_j < 2)
+          temporary_slip_direction(direction_j) = reader.getData(i)[j];
+        // Store the c-axis index as the third entry in the orthorombic index convention
+        else if (direction_j == 3)
+          temporary_slip_direction(direction_j - 1) = reader.getData(i)[j];
+      }
     }
 
-    // save the 3-index combinations, with the convention a_1 = x
-    temporary_slip_direction[0] =
-        2.0 * miller_bravis_slip_direction[0] + miller_bravis_slip_direction[1];
-    temporary_slip_direction[1] =
-        miller_bravis_slip_direction[0] + 2.0 * miller_bravis_slip_direction[1];
-    temporary_slip_direction[2] = miller_bravis_slip_direction[3];
-
     // perform transformation calculation
-    for (auto j : make_range(LIBMESH_DIM))
-      for (auto k : make_range(LIBMESH_DIM))
-      {
-        _slip_direction[i](j) += transform_directions(j, k) * temporary_slip_direction[k];
-        _slip_plane_normal[i](j) += transform_planes(j, k) * temporary_slip_plane[k];
-      }
+    _slip_direction[i] = transform_matrix * temporary_slip_direction;
+    _slip_plane_normal[i] = transform_matrix * temporary_slip_plane;
   }
 }
 
@@ -377,13 +380,13 @@ CrystalPlasticityStressUpdateBase::calculateSchmidTensor(
   local_plane_normal.resize(number_slip_systems);
 
   // Update slip direction and normal with crystal orientation
-  for (auto i : make_range(_number_slip_systems))
+  for (const auto i : make_range(_number_slip_systems))
   {
     local_direction_vector[i].zero();
     local_plane_normal[i].zero();
 
-    for (auto j : make_range(LIBMESH_DIM))
-      for (auto k : make_range(LIBMESH_DIM))
+    for (const auto j : make_range(LIBMESH_DIM))
+      for (const auto k : make_range(LIBMESH_DIM))
       {
         local_direction_vector[i](j) =
             local_direction_vector[i](j) + crysrot(j, k) * direction_vector[i](k);
@@ -393,8 +396,8 @@ CrystalPlasticityStressUpdateBase::calculateSchmidTensor(
       }
 
     // Calculate Schmid tensor
-    for (auto j : make_range(LIBMESH_DIM))
-      for (auto k : make_range(LIBMESH_DIM))
+    for (const auto j : make_range(LIBMESH_DIM))
+      for (const auto k : make_range(LIBMESH_DIM))
       {
         schmid_tensor[i](j, k) = local_direction_vector[i](j) * local_plane_normal[i](k);
       }
@@ -409,14 +412,14 @@ CrystalPlasticityStressUpdateBase::calculateShearStress(
 {
   if (!num_eigenstrains)
   {
-    for (auto i : make_range(_number_slip_systems))
+    for (const auto i : make_range(_number_slip_systems))
       _tau[_qp][i] = pk2.doubleContraction(_flow_direction[_qp][i]);
 
     return;
   }
 
   RankTwoTensor eigenstrain_deformation_grad = inverse_eigenstrain_deformation_grad.inverse();
-  for (auto i : make_range(_number_slip_systems))
+  for (const auto i : make_range(_number_slip_systems))
   {
     // compute PK2_hat using deformation gradient
     RankTwoTensor pk2_hat = eigenstrain_deformation_grad.det() *
@@ -439,7 +442,7 @@ CrystalPlasticityStressUpdateBase::calculateTotalPlasticDeformationGradientDeriv
 
   calculateConstitutiveSlipDerivative(dslip_dtau);
 
-  for (auto j : make_range(_number_slip_systems))
+  for (const auto j : make_range(_number_slip_systems))
   {
     if (num_eigenstrains)
     {
@@ -460,7 +463,7 @@ CrystalPlasticityStressUpdateBase::calculateEquivalentSlipIncrement(
     RankTwoTensor & equivalent_slip_increment)
 {
   // Sum up the slip increments to find the equivalent plastic strain due to slip
-  for (auto i : make_range(_number_slip_systems))
+  for (const auto i : make_range(_number_slip_systems))
     equivalent_slip_increment += _flow_direction[_qp][i] * _slip_increment[_qp][i] * _substep_dt;
 }
 
@@ -493,7 +496,7 @@ CrystalPlasticityStressUpdateBase::isConstitutiveStateVariableConverged(
 
   Real diff_val = 0.0;
   Real abs_prev_substep_val = 0.0;
-  for (auto i : make_range(sz))
+  for (const auto i : make_range(sz))
   {
     diff_val = std::abs(var_before_update[i] - current_var[i]);
     abs_prev_substep_val = std::abs(previous_substep_var[i]);

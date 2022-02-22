@@ -118,7 +118,7 @@ CrystalPlasticityTwinningKalidindiUpdate::initQpStatefulProperties()
   _total_twin_volume_fraction[_qp] = _initial_total_twin_volume_fraction;
   const Real twin_volume_fraction_per_system =
       _initial_total_twin_volume_fraction / _number_slip_systems;
-  for (auto i : make_range(_number_slip_systems))
+  for (const auto i : make_range(_number_slip_systems))
   {
     _twin_volume_fraction[_qp][i] = twin_volume_fraction_per_system;
     _slip_resistance[_qp][i] = _twin_initial_lattice_friction;
@@ -147,12 +147,12 @@ bool
 CrystalPlasticityTwinningKalidindiUpdate::calculateSlipRate()
 {
   Real total_twin_volume_fraction = 0.0;
-  for (auto i : make_range(_number_slip_systems))
+  for (const auto i : make_range(_number_slip_systems))
     total_twin_volume_fraction += _twin_volume_fraction[_qp][i];
 
   if (total_twin_volume_fraction < _limit_twin_volume_fraction)
   {
-    for (auto i : make_range(_number_slip_systems))
+    for (const auto i : make_range(_number_slip_systems))
     {
       if (_tau[_qp][i] > 0.0)
       {
@@ -164,12 +164,14 @@ CrystalPlasticityTwinningKalidindiUpdate::calculateSlipRate()
         _slip_increment[_qp][i] = 0.0;
 
       // Check for allowable plastic strain due to twin propagation
-      if (_slip_increment[_qp][i] * _substep_dt > _slip_incr_tol)
+      if (_slip_increment[_qp][i] > _slip_incr_tol)
       {
         if (_print_convergence_message)
           mooseWarning("Maximum allowable plastic slip increment due to twinning exceeded the "
-                       "user-defined tolerance with a value of",
-                       _slip_increment[_qp][i] * _substep_dt,
+                       "user-defined tolerance on twin system ",
+                       i,
+                       ", with a value of",
+                       _slip_increment[_qp][i],
                        " when the increment tolerance is set at ",
                        _slip_incr_tol);
 
@@ -188,7 +190,7 @@ CrystalPlasticityTwinningKalidindiUpdate::calculateConstitutiveSlipDerivative(
     std::vector<Real> & dslip_dtau)
 {
   Real total_twin_volume_fraction = 0.0;
-  for (auto i : make_range(_number_slip_systems))
+  for (const auto i : make_range(_number_slip_systems))
     total_twin_volume_fraction += _twin_volume_fraction[_qp][i];
 
   // Once reach the limit of volume fraction, all plastic slip increments will be zero
@@ -196,7 +198,7 @@ CrystalPlasticityTwinningKalidindiUpdate::calculateConstitutiveSlipDerivative(
     std::fill(dslip_dtau.begin(), dslip_dtau.end(), 0.0);
   else
   {
-    for (auto i : make_range(_number_slip_systems))
+    for (const auto i : make_range(_number_slip_systems))
     {
       if (_tau[_qp][i] <= 0.0)
         dslip_dtau[i] = 0.0;
@@ -239,7 +241,7 @@ CrystalPlasticityTwinningKalidindiUpdate::cacheStateVariablesBeforeUpdate()
 void
 CrystalPlasticityTwinningKalidindiUpdate::calculateStateVariableEvolutionRateComponent()
 {
-  for (auto i : make_range(_number_slip_systems))
+  for (const auto i : make_range(_number_slip_systems))
     _twin_volume_fraction_increment[_qp][i] =
         _slip_increment[_qp][i] / _characteristic_twin_shear * _substep_dt;
 }
@@ -258,7 +260,7 @@ CrystalPlasticityTwinningKalidindiUpdate::calculateTwinVolumeFraction()
 {
   _total_twin_volume_fraction[_qp] = 0.0;
 
-  for (auto i : make_range(_number_slip_systems))
+  for (const auto i : make_range(_number_slip_systems))
   {
     if (_previous_substep_twin_volume_fraction[i] < _zero_tol &&
         _twin_volume_fraction_increment[_qp][i] < 0.0)
@@ -305,10 +307,10 @@ CrystalPlasticityTwinningKalidindiUpdate::calculateTwinResistance()
 {
   DenseVector<Real> twin_hardening_increment(_number_slip_systems);
 
-  for (auto i : make_range(_number_slip_systems))
+  for (const auto i : make_range(_number_slip_systems))
   {
     twin_hardening_increment(i) = 0.0;
-    for (auto j : make_range(_number_slip_systems))
+    for (const auto j : make_range(_number_slip_systems))
     {
       if (MooseUtils::relativeFuzzyEqual(_slip_plane_normal[j](0), _slip_plane_normal[i](0)) &&
           MooseUtils::relativeFuzzyEqual(_slip_plane_normal[j](1), _slip_plane_normal[i](1)))
@@ -330,7 +332,7 @@ CrystalPlasticityTwinningKalidindiUpdate::calculateTwinResistance()
     }
   }
 
-  for (auto i : make_range(_number_slip_systems))
+  for (const auto i : make_range(_number_slip_systems))
   {
     twin_hardening_increment(i) *= _characteristic_twin_shear;
     if (twin_hardening_increment(i) <= 0.0)
