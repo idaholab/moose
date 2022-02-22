@@ -1268,33 +1268,47 @@ NSFVAction::addINSOutletBC()
       }
 
       {
-        const std::string bc_type = "INSFVMomentumAdvectionOutflowBC";
-        InputParameters params = _factory.getValidParams(bc_type);
-        params.set<std::vector<BoundaryName>>("boundary") = {_outlet_boundaries[bc_ind]};
-
-        for (unsigned int d = 0; d < _dim; ++d)
+        if (_porous_medium_treatment)
         {
-          NonlinearVariableName vname;
-          if (_porous_medium_treatment)
-          {
-            vname = NS::superficial_velocity_vector[d];
-            for (unsigned int d = 0; d < _dim; ++d)
-              params.set<CoupledName>(u_names[d]) = {NS::superficial_velocity_vector[d]};
-            params.set<UserObjectName>("rhie_chow_user_object") = "pins_rhie_chow_interpolator";
-          }
-          else
-          {
-            vname = NS::velocity_vector[d];
-            for (unsigned int d = 0; d < _dim; ++d)
-              params.set<CoupledName>(u_names[d]) = {NS::velocity_vector[d]};
-            params.set<UserObjectName>("rhie_chow_user_object") = "ins_rhie_chow_interpolator";
-          }
-
-          params.set<NonlinearVariableName>("variable") = vname;
-          params.set<MooseEnum>("momentum_component") = NS::directions[d];
+          const std::string bc_type = "PINSFVMomentumAdvectionOutflowBC";
+          InputParameters params = _factory.getValidParams(bc_type);
+          params.set<std::vector<BoundaryName>>("boundary") = {_outlet_boundaries[bc_ind]};
+          params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
+          params.set<UserObjectName>("rhie_chow_user_object") = "pins_rhie_chow_interpolator";
           params.set<MooseFunctorName>(NS::density) = _density_name;
 
-          _problem->addFVBC(bc_type, vname + "_" + _outlet_boundaries[bc_ind], params);
+          for (unsigned int i = 0; i < _dim; ++i)
+            params.set<CoupledName>(u_names[i]) = {NS::superficial_velocity_vector[i]};
+
+          for (unsigned int d = 0; d < _dim; ++d)
+          {
+            params.set<NonlinearVariableName>("variable") = NS::superficial_velocity_vector[d];
+            params.set<MooseEnum>("momentum_component") = NS::directions[d];
+
+            _problem->addFVBC(bc_type,
+                              NS::superficial_velocity_vector[d] + "_" + _outlet_boundaries[bc_ind],
+                              params);
+          }
+        }
+        else
+        {
+          const std::string bc_type = "PINSFVMomentumAdvectionOutflowBC";
+          InputParameters params = _factory.getValidParams(bc_type);
+          params.set<std::vector<BoundaryName>>("boundary") = {_outlet_boundaries[bc_ind]};
+          params.set<UserObjectName>("rhie_chow_user_object") = "ins_rhie_chow_interpolator";
+          params.set<MooseFunctorName>(NS::density) = _density_name;
+
+          for (unsigned int i = 0; i < _dim; ++i)
+            params.set<CoupledName>(u_names[i]) = {NS::velocity_vector[i]};
+
+          for (unsigned int d = 0; d < _dim; ++d)
+          {
+            params.set<NonlinearVariableName>("variable") = NS::velocity_vector[d];
+            params.set<MooseEnum>("momentum_component") = NS::directions[d];
+
+            _problem->addFVBC(
+                bc_type, NS::velocity_vector[d] + "_" + _outlet_boundaries[bc_ind], params);
+          }
         }
       }
     }
