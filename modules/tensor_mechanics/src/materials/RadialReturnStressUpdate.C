@@ -196,41 +196,51 @@ RadialReturnStressUpdateTempl<false>::updateState(RankTwoTensor & strain_increme
   // compute the effective trial stress
   Real dev_trial_stress_squared =
       deviatoric_trial_stress.doubleContraction(deviatoric_trial_stress);
-  Real effective_trial_stress = std::sqrt(3.0 / 2.0 * dev_trial_stress_squared);
 
-  // Set the value of 3 * shear modulus for use as a reference residual value
-  _three_shear_modulus = 3.0 * ElasticityTensorTools::getIsotropicShearModulus(elasticity_tensor);
-
-  computeStressInitialize(effective_trial_stress, elasticity_tensor);
-
-  // Use Newton iteration to determine the scalar effective inelastic strain increment
-  _scalar_effective_inelastic_strain = 0.0;
-  if (!MooseUtils::absoluteFuzzyEqual(effective_trial_stress, 0.0))
+  if (MooseUtils::absoluteFuzzyEqual(dev_trial_stress_squared, 0.0))
   {
-    returnMappingSolve(effective_trial_stress, _scalar_effective_inelastic_strain, _console);
-    if (_scalar_effective_inelastic_strain != 0.0)
-      inelastic_strain_increment =
-          deviatoric_trial_stress *
-          (1.5 * _scalar_effective_inelastic_strain / effective_trial_stress);
-    else
-      inelastic_strain_increment.zero();
+    inelastic_strain_increment.zero();
+    _effective_inelastic_strain[_qp] = _effective_inelastic_strain_old[_qp];
+    stress_new = elasticity_tensor * (strain_increment + elastic_strain_old);
+    computeStressFinalize(inelastic_strain_increment);
+    tangent_operator.zero();
   }
   else
-    inelastic_strain_increment.zero();
+  {
+    Real effective_trial_stress = std::sqrt(3.0 / 2.0 * dev_trial_stress_squared);
 
-  strain_increment -= inelastic_strain_increment;
-  _effective_inelastic_strain[_qp] =
-      _effective_inelastic_strain_old[_qp] + _scalar_effective_inelastic_strain;
+    // Set the value of 3 * shear modulus for use as a reference residual value
+    _three_shear_modulus = 3.0 * ElasticityTensorTools::getIsotropicShearModulus(elasticity_tensor);
 
-  // Use the old elastic strain here because we require tensors used by this class
-  // to be isotropic and this method natively allows for changing in time
-  // elasticity tensors
-  stress_new = elasticity_tensor * (strain_increment + elastic_strain_old);
+    computeStressInitialize(effective_trial_stress, elasticity_tensor);
 
-  computeStressFinalize(inelastic_strain_increment);
+    // Use Newton iteration to determine the scalar effective inelastic strain increment
+    _scalar_effective_inelastic_strain = 0.0;
+    if (!MooseUtils::absoluteFuzzyEqual(effective_trial_stress, 0.0))
+    {
+      returnMappingSolve(effective_trial_stress, _scalar_effective_inelastic_strain, _console);
+      if (_scalar_effective_inelastic_strain != 0.0)
+        inelastic_strain_increment =
+            deviatoric_trial_stress *
+            (1.5 * _scalar_effective_inelastic_strain / effective_trial_stress);
+      else
+        inelastic_strain_increment.zero();
+    }
+    else
+      inelastic_strain_increment.zero();
 
-  computeTangentOperator(
-      effective_trial_stress, stress_new, compute_full_tangent_operator, tangent_operator);
+    strain_increment -= inelastic_strain_increment;
+    _effective_inelastic_strain[_qp] =
+        _effective_inelastic_strain_old[_qp] + _scalar_effective_inelastic_strain;
+
+    // Use the old elastic strain here because we require tensors used by this class
+    // to be isotropic and this method natively allows for changing in time
+    // elasticity tensors
+    stress_new = elasticity_tensor * (strain_increment + elastic_strain_old);
+    computeStressFinalize(inelastic_strain_increment);
+    computeTangentOperator(
+        effective_trial_stress, stress_new, compute_full_tangent_operator, tangent_operator);
+  }
 }
 
 template <>

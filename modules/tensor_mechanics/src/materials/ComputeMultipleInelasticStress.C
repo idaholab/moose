@@ -125,7 +125,7 @@ ComputeMultipleInelasticStress::initialSetup()
 
   std::vector<MaterialName> models = getParam<std::vector<MaterialName>>("inelastic_models");
 
-  for (unsigned int i = 0; i < _num_models; ++i)
+  for (const auto i : make_range(_num_models))
   {
     StressUpdateBase * rrr = dynamic_cast<StressUpdateBase *>(&getMaterialByName(models[i]));
 
@@ -153,7 +153,7 @@ ComputeMultipleInelasticStress::initialSetup()
   {
     bool full_present = false;
     bool partial_present = false;
-    for (unsigned int i = 0; i < _num_models; ++i)
+    for (const auto i : make_range(_num_models))
     {
       if (_models[i]->getTangentCalculationMethod() == TangentCalculationMethod::FULL)
       {
@@ -182,7 +182,7 @@ ComputeMultipleInelasticStress::initialSetup()
                    " is not compatible with ComputeMultipleInelasticStress");
 
   // This check prevents the hierarchy from silently skipping substepping without informing the user
-  for (auto model_number : index_range(_models))
+  for (const auto model_number : index_range(_models))
   {
     const bool use_substep = _models[model_number]->substeppingCapabilityRequested();
     if (use_substep && !_models[model_number]->substeppingCapabilityEnabled())
@@ -296,14 +296,14 @@ ComputeMultipleInelasticStress::updateQpState(RankTwoTensor & elastic_strain_inc
   std::vector<RankTwoTensor> inelastic_strain_increment;
   inelastic_strain_increment.resize(_num_models);
 
-  for (unsigned i_rmm = 0; i_rmm < _models.size(); ++i_rmm)
+  for (const auto i_rmm : index_range(_models))
     inelastic_strain_increment[i_rmm].zero();
 
   RankTwoTensor stress_max, stress_min;
 
   do
   {
-    for (unsigned i_rmm = 0; i_rmm < _num_models; ++i_rmm)
+    for (const auto i_rmm : index_range(_models))
     {
       _models[i_rmm]->setQp(_qp);
 
@@ -311,7 +311,7 @@ ComputeMultipleInelasticStress::updateQpState(RankTwoTensor & elastic_strain_inc
       elastic_strain_increment = _strain_increment[_qp];
       // and subtract off all inelastic strain increments calculated so far
       // except the one that we're about to calculate
-      for (unsigned j_rmm = 0; j_rmm < _num_models; ++j_rmm)
+      for (const auto j_rmm : make_range(_num_models))
         if (i_rmm != j_rmm)
           elastic_strain_increment -= inelastic_strain_increment[j_rmm];
 
@@ -343,9 +343,9 @@ ComputeMultipleInelasticStress::updateQpState(RankTwoTensor & elastic_strain_inc
       }
       else
       {
-        for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+        for (const auto i : make_range(LIBMESH_DIM))
         {
-          for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
+          for (const auto j : make_range(LIBMESH_DIM))
           {
             if (_stress[_qp](i, j) > stress_max(i, j))
               stress_max(i, j) = _stress[_qp](i, j);
@@ -384,7 +384,7 @@ ComputeMultipleInelasticStress::updateQpState(RankTwoTensor & elastic_strain_inc
     throw MooseException("Max stress iteration hit during ComputeMultipleInelasticStress solve!");
 
   combined_inelastic_strain_increment.zero();
-  for (unsigned i_rmm = 0; i_rmm < _num_models; ++i_rmm)
+  for (const auto i_rmm : make_range(_num_models))
     combined_inelastic_strain_increment +=
         _inelastic_weights[i_rmm] * inelastic_strain_increment[i_rmm];
 
@@ -392,7 +392,7 @@ ComputeMultipleInelasticStress::updateQpState(RankTwoTensor & elastic_strain_inc
     computeQpJacobianMult();
 
   _material_timestep_limit[_qp] = 0.0;
-  for (unsigned i_rmm = 0; i_rmm < _num_models; ++i_rmm)
+  for (const auto i_rmm : make_range(_num_models))
     _material_timestep_limit[_qp] += 1.0 / _models[i_rmm]->computeTimeStepLimit();
 
   if (MooseUtils::absoluteFuzzyEqual(_material_timestep_limit[_qp], 0.0))
@@ -409,7 +409,7 @@ ComputeMultipleInelasticStress::computeQpJacobianMult()
   else if (_tangent_calculation_method == TangentCalculationMethod::PARTIAL)
   {
     RankFourTensor A = _identity_symmetric_four;
-    for (unsigned i_rmm = 0; i_rmm < _num_models; ++i_rmm)
+    for (const auto i_rmm : make_range(_num_models))
       A += _consistent_tangent_operator[i_rmm];
     mooseAssert(A.isSymmetric(), "Tangent operator isn't symmetric");
     _Jacobian_mult[_qp] = A.invSymm() * _elasticity_tensor[_qp];
@@ -418,7 +418,7 @@ ComputeMultipleInelasticStress::computeQpJacobianMult()
   {
     const RankFourTensor E_inv = _elasticity_tensor[_qp].invSymm();
     _Jacobian_mult[_qp] = _consistent_tangent_operator[0];
-    for (unsigned i_rmm = 1; i_rmm < _num_models; ++i_rmm)
+    for (const auto i_rmm : make_range(1u, _num_models))
       _Jacobian_mult[_qp] = _consistent_tangent_operator[i_rmm] * E_inv * _Jacobian_mult[_qp];
   }
 }
@@ -469,7 +469,7 @@ ComputeMultipleInelasticStress::updateQpStateSingleModel(
 
   /* propagate internal variables, etc, to this timestep for those inelastic models where
    * "updateState" is not called */
-  for (unsigned i_rmm = 0; i_rmm < _num_models; ++i_rmm)
+  for (const auto i_rmm : make_range(_num_models))
     if (i_rmm != model_number)
       _models[i_rmm]->propagateQpStatefulProperties();
 }
