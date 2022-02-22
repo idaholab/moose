@@ -1351,9 +1351,6 @@ NSFVAction::addINSWallBC()
   const std::string u_names[3] = {"u", "v", "w"};
   for (unsigned int bc_ind = 0; bc_ind < _wall_boundaries.size(); ++bc_ind)
   {
-    std::cout << _momentum_wall_types[bc_ind] << " "
-              << "noslip" << std::endl;
-    std::cout << (_momentum_wall_types[bc_ind] == "noslip") << std::endl;
     if (_momentum_wall_types[bc_ind] == "noslip")
     {
       const std::string bc_type = "INSFVNoSlipWallBC";
