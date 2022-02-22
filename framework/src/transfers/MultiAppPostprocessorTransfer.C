@@ -54,6 +54,9 @@ MultiAppPostprocessorTransfer::MultiAppPostprocessorTransfer(const InputParamete
     if (!_reduction_type.isValid())
       mooseError("In MultiAppPostprocessorTransfer, must specify 'reduction_type' if direction = "
                  "from_multiapp");
+
+  if (_to_multi_app && _from_multi_app && isParamValid("reduction_type"))
+    mooseError("Reductions are not supported for multiapp sibling transfers");
 }
 
 void
@@ -63,6 +66,21 @@ MultiAppPostprocessorTransfer::execute()
 
   switch (_current_direction)
   {
+    case BETWEEN_MULTIAPP:
+      for (unsigned int i = 0; i < _from_multi_app->numGlobalApps(); i++)
+      {
+        if (_from_multi_app->hasLocalApp(i))
+        {
+          // Get source postprocessor value
+          FEProblemBase & from_problem = _from_multi_app->appProblemBase(i);
+          const Real & pp_value = from_problem.getPostprocessorValueByName(_from_pp_name);
+
+            for (unsigned int j = 0; j < _to_multi_app->numGlobalApps(); j++)
+              if (_to_multi_app->hasLocalApp(j))
+                _to_multi_app->appProblemBase(j).setPostprocessorValueByName(_to_pp_name, pp_value);
+        }
+      }
+      break;
     case TO_MULTIAPP:
     {
       FEProblemBase & from_problem = _to_multi_app->problemBase();
