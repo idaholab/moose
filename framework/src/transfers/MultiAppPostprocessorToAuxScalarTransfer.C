@@ -29,10 +29,10 @@ MultiAppPostprocessorToAuxScalarTransfer::validParams()
   params.addClassDescription("Transfers from a postprocessor to an scalar auxiliary variable.");
   params.addRequiredParam<PostprocessorName>(
       "from_postprocessor",
-      "The name of the Postprocessor in the Master to transfer the value from.");
+      "The name of the Postprocessor to transfer the value from.");
   params.addRequiredParam<VariableName>(
       "to_aux_scalar",
-      "The name of the scalar Aux variable in the MultiApp to transfer the value to.");
+      "The name of the scalar AuxVariable to transfer the value to.");
   return params;
 }
 
@@ -54,10 +54,43 @@ MultiAppPostprocessorToAuxScalarTransfer::execute()
   // Perform action based on the transfer direction
   switch (_current_direction)
   {
-    // MasterApp -> SubApp
+    // MultiApp -> MultiApp
+    case BETWEEN_MULTIAPP:
+    {
+      for (unsigned int i = 0; i < _from_multi_app->numGlobalApps(); i++)
+      {
+        if (_from_multi_app->hasLocalApp(i))
+        {
+          // Extract the postprocessor that is being transferred
+          FEProblemBase & from_problem = _from_multi_app->appProblemBase(i);
+          Real pp_value = from_problem.getPostprocessorValueByName(_from_pp_name);
+
+          // Loop through each of the sub apps
+          for (unsigned int j = 0; j < _to_multi_app->numGlobalApps(); j++)
+            if (_to_multi_app->hasLocalApp(i))
+            {
+              // Get reference to the AuxVariable where the postprocessor will be passed
+              MooseVariableScalar & scalar =
+                  _to_multi_app->appProblemBase(i).getScalarVariable(_tid, _to_aux_name);
+
+              scalar.reinit();
+
+              // Set all values of the AuxVariable to the value of the postprocessor
+              scalar.setValues(pp_value);
+
+              // Update the solution
+              scalar.insert(scalar.sys().solution());
+              scalar.sys().solution().close();
+            }
+        }
+      }
+      break;
+    }
+
+    // main app -> MultiApp
     case TO_MULTIAPP:
     {
-      // Extract the postprocessor that is being transferd
+      // Extract the postprocessor that is being transferred
       FEProblemBase & from_problem = _to_multi_app->problemBase();
       Real pp_value = from_problem.getPostprocessorValueByName(_from_pp_name);
 
@@ -81,7 +114,7 @@ MultiAppPostprocessorToAuxScalarTransfer::execute()
       break;
     }
 
-    // SubApp -> MasterApp
+    // MultiApp -> main app
     case FROM_MULTIAPP:
     {
       // The number of sub applications
