@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#16756'
+  issues = '#16756 #19472'
   design = 'navier_stokes/pinsfv.md'
   [free-slip]
     type = 'Exodiff'
@@ -9,6 +9,15 @@
     requirement = 'The system shall be able to model free-slip conditions in a porous media channel; specifically the tangential velocity shall have a uniform value of unity, the normal velocity shall have a uniform value of zero, and the pressure shall not change.'
     ad_indexing_type = 'global'
     cli_args = "Outputs/file_base='rc'"
+  []
+  [free-slip-action]
+    type = 'Exodiff'
+    input = 2d-rc-action.i
+    exodiff = rc-action.e
+    method = "!dbg"
+    requirement = 'The system should be able to run a porous medium channel computation using the NSFV action.'
+    ad_indexing_type = 'global'
+    cli_args = "Outputs/file_base='rc-action'"
   []
   [free-slip-rz]
     type = 'Exodiff'
@@ -49,6 +58,16 @@
     ad_indexing_type = 'global'
     cli_args = "Variables/inactive='' FVKernels/inactive='' FVBCs/active='inlet-u inlet-v outlet-p-novalue outlet-u outlet-v no-slip-u no-slip-v' Outputs/file_base='rc-no-slip-mean-pressure'"
   []
+  #[no-slip-pressure-average-action]
+  #  type = 'Exodiff'
+  #  input = 2d-rc-action.i
+  #  exodiff = rc-no-slip-mean-pressure-action.e
+  #  method = "!dbg"
+  #  requirement = 'The system shall be able to model no-slip conditions in a porous media channel using the NSFV action and a set mean pressure.'
+  #  abs_zero = 1e-9
+  #  ad_indexing_type = 'global'
+  #  cli_args = "Modules/NavierStokesFV/momentum_wall_types='noslip noslip' Modules/NavierStokesFV/momentum_outlet_types='massflow'  Modules/NavierStokesFV/pin_pressure=true  Modules/NavierStokesFV/pinned_pressure_type=average  Modules/NavierStokesFV/pinned_pressure_value=0.01  Outputs/file_base='rc-no-slip-mean-pressure-action'"
+  #[]
   [no-slip-average]
     type = 'Exodiff'
     input = 2d-rc.i
@@ -78,6 +97,16 @@
     abs_zero = 1e-9
     ad_indexing_type = 'global'
     cli_args = "FVBCs/no-slip-u/boundary='top' FVBCs/no-slip-v/boundary='top' FVBCs/active='inlet-u inlet-v outlet-p no-slip-u no-slip-v symmetry-u symmetry-v symmetry-p' Outputs/file_base='rc-no-slip-symmetry'"
+  []
+  [symmetry-action]
+    type = 'Exodiff'
+    input = 2d-rc-action.i
+    exodiff = rc-no-slip-symmetry-action.e
+    method = "!dbg"
+    requirement = 'The system shall be able to model no-slip conditions in a symmetric porous media channel using the NSFV action.'
+    abs_zero = 1e-9
+    ad_indexing_type = 'global'
+    cli_args = "Modules/NavierStokesFV/momentum_wall_types='noslip symmetry' Outputs/file_base='rc-no-slip-symmetry-action'"
   []
   [symmetry-rz]
     type = 'Exodiff'

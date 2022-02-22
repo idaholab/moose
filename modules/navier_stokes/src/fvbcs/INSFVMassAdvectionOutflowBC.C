@@ -11,6 +11,7 @@
 #include "INSFVVelocityVariable.h"
 #include "SubProblem.h"
 #include "MooseMesh.h"
+#include "NS.h"
 
 registerADMooseObject("NavierStokesApp", INSFVMassAdvectionOutflowBC);
 

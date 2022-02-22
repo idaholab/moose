@@ -420,10 +420,10 @@ NSFVAction::addINSVariables()
       _problem->addVariable(
           "PINSFVSuperficialVelocityVariable", NS::superficial_velocity_vector[d], params);
 
-    params = _factory.getValidParams("INSFVVelocityVariable");
-    params.set<std::vector<SubdomainName>>("block") = _blocks;
-    for (unsigned int d = 0; d < _dim; ++d)
-      _problem->addAuxVariable("INSFVVelocityVariable", NS::velocity_vector[d], params);
+    // params = _factory.getValidParams("INSFVVelocityVariable");
+    // params.set<std::vector<SubdomainName>>("block") = _blocks;
+    // for (unsigned int d = 0; d < _dim; ++d)
+    //   _problem->addAuxVariable("INSFVVelocityVariable", NS::velocity_vector[d], params);
   }
   else
   {
@@ -748,7 +748,6 @@ NSFVAction::addINSMassKernels()
     params.set<std::vector<SubdomainName>>("block") = _blocks;
 
     params.set<NonlinearVariableName>("variable") = NS::pressure;
-    params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
     params.set<MooseFunctorName>(NS::density) = _density_name;
     params.set<MooseEnum>("velocity_interp_method") = "rc";
     params.set<UserObjectName>("rhie_chow_user_object") = "pins_rhie_chow_interpolator";
@@ -1352,6 +1351,9 @@ NSFVAction::addINSWallBC()
   const std::string u_names[3] = {"u", "v", "w"};
   for (unsigned int bc_ind = 0; bc_ind < _wall_boundaries.size(); ++bc_ind)
   {
+    std::cout << _momentum_wall_types[bc_ind] << " "
+              << "noslip" << std::endl;
+    std::cout << (_momentum_wall_types[bc_ind] == "noslip") << std::endl;
     if (_momentum_wall_types[bc_ind] == "noslip")
     {
       const std::string bc_type = "INSFVNoSlipWallBC";
@@ -1372,7 +1374,7 @@ NSFVAction::addINSWallBC()
         _problem->addFVBC(bc_type, vname + "_" + _wall_boundaries[bc_ind], params);
       }
     }
-    if (_momentum_wall_types[bc_ind] == "wallfunction")
+    else if (_momentum_wall_types[bc_ind] == "wallfunction")
     {
       const std::string bc_type = "INSFVWallFunctionBC";
       InputParameters params = _factory.getValidParams(bc_type);
@@ -1436,7 +1438,12 @@ NSFVAction::addINSWallBC()
     else if (_momentum_wall_types[bc_ind] == "symmetry")
     {
       {
-        const std::string bc_type = "INSFVSymmetryVelocityBC";
+        std::string bc_type;
+        if (_porous_medium_treatment)
+          bc_type = "PINSFVSymmetryVelocityBC";
+        else
+          bc_type = "INSFVSymmetryVelocityBC";
+
         InputParameters params = _factory.getValidParams(bc_type);
         params.set<std::vector<BoundaryName>>("boundary") = {_wall_boundaries[bc_ind]};
 
@@ -1510,8 +1517,9 @@ NSFVAction::addINSWallBC()
         _problem->addFVBC(bc_type, NS::T_fluid + "_" + _wall_boundaries[bc_ind], params);
       }
       else
-        mooseError(_energy_wall_types[bc_ind] +
-                   " wall BC is not supported for INS simulations at the moment!");
+        mooseError(
+            _energy_wall_types[bc_ind] +
+            " wall BC is not supported for for energy equation in INS simulations at the moment!");
     }
   }
 }
