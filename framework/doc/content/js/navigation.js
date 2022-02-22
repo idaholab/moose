@@ -62,6 +62,9 @@ function mooseSearch() {
     var element = document.getElementById("moose-search-results");
     var box = document.getElementById("moose-search-box");
 
+    var home = document.getElementById("home-button").href;
+    const homedir = home.substr(0, home.lastIndexOf("/"));
+
     var fuse = new Fuse(index_data, options);
     var results = fuse.search(box.value);
 
@@ -82,7 +85,7 @@ function mooseSearch() {
                 title.className = 'moose-search-result-title';
                 var a = document.createElement("a");
                 a.innerHTML = item.title;
-                a.setAttribute("href", item.location);
+                a.setAttribute("href", homedir + '/' + item.location);
                 title.appendChild(a);
             }
 

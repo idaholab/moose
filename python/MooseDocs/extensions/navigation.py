@@ -171,7 +171,7 @@ class NavigationExtension(Extension):
 
         for page in self.translator.getPages():
             if isinstance(home, pages.Page):
-                location = home.relativeDestination(page)
+                location = page.relativeDestination(home)
             else:
                 location = page.destination.replace(dest, home)
 
@@ -206,7 +206,8 @@ class NavigationExtension(Extension):
         if name is not None:
             a = html.Tag(None, 'a', class_='left moose-logo hide-on-med-and-down',
                          href=href,
-                         string=str(name))
+                         string=str(name),
+                         id_='home-button')
             nav.insert(0, a)
 
     def _addRepo(self, nav, page):
