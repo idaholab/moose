@@ -59,8 +59,7 @@
   []
   [x_transfer]
     type = MultiAppReporterTransfer
-    multi_app = runner
-    direction = from_multiapp
+    from_multi_app = runner
     subapp_index = 0
     from_reporters = T_vec/x
     to_reporters = const/x

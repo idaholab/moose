@@ -90,15 +90,13 @@
 [Transfers]
   [T_to_matrix]
     type = MultiAppCopyTransfer
-    direction = to_multiapp
-    multi_app = matrix_app
+    to_multi_app = matrix_app
     source_variable = frac_T
     variable = transferred_frac_T
   []
   [T_from_matrix]
     type = MultiAppCopyTransfer
-    direction = from_multiapp
-    multi_app = matrix_app
+    from_multi_app = matrix_app
     source_variable = matrix_T
     variable = transferred_matrix_T
   []

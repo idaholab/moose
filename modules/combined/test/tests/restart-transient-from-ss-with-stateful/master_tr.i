@@ -110,8 +110,7 @@
 [Transfers]
   [./to_bison_mechanics]
     type = MultiAppProjectionTransfer
-    direction = to_multiapp
-    multi_app = bison
+    to_multi_app = bison
     variable = temp
     source_variable = temp
     execute_on = 'timestep_end'

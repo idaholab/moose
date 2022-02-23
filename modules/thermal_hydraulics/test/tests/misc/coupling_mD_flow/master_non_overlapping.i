@@ -112,81 +112,72 @@ pout = 7e6
   ## transfers from thm
   [core_inlet_mdot]
     type = MultiAppPostprocessorTransfer
-    direction = from_multiapp
     from_postprocessor = core_inlet_mdot
     to_postprocessor = core_inlet_mdot
     reduction_type = maximum
-    multi_app = thm
+    from_multi_app = thm
   []
 
   [core_inlet_temperature]
     type = MultiAppPostprocessorTransfer
-    direction = from_multiapp
     to_postprocessor = core_inlet_temperature
     from_postprocessor = core_inlet_temperature
     reduction_type = maximum
-    multi_app = thm
+    from_multi_app = thm
   []
 
   [core_outlet_pressure]
     type = MultiAppPostprocessorTransfer
-    direction = from_multiapp
     to_postprocessor = core_outlet_pressure
     from_postprocessor = core_outlet_pressure
     reduction_type = maximum
-    multi_app = thm
+    from_multi_app = thm
   []
 
   [bypass_mdot]
     type = MultiAppPostprocessorTransfer
-    direction = from_multiapp
     to_postprocessor = bypass_mdot
     from_postprocessor = bypass_mdot
     reduction_type = maximum
-    multi_app = thm
+    from_multi_app = thm
   []
 
   [inlet_mdot]
     type = MultiAppPostprocessorTransfer
-    direction = from_multiapp
     to_postprocessor = inlet_mdot
     from_postprocessor = inlet_mdot
     reduction_type = maximum
-    multi_app = thm
+    from_multi_app = thm
   []
 
   [outlet_mdot]
     type = MultiAppPostprocessorTransfer
-    direction = from_multiapp
     to_postprocessor = outlet_mdot
     from_postprocessor = outlet_mdot
     reduction_type = maximum
-    multi_app = thm
+    from_multi_app = thm
   []
 
   ## transfers to thm
   [core_outlet_mdot]
     type = MultiAppPostprocessorTransfer
-    direction = to_multiapp
     from_postprocessor = core_outlet_mdot
     to_postprocessor = core_outlet_mdot
-    multi_app = thm
+    to_multi_app = thm
   []
 
   [core_outlet_temperature]
     type = MultiAppPostprocessorTransfer
-    direction = to_multiapp
     from_postprocessor = core_outlet_temperature
     to_postprocessor = core_outlet_temperature
-    multi_app = thm
+    to_multi_app = thm
   []
 
   [core_inlet_pressure]
     type = MultiAppPostprocessorTransfer
-    direction = to_multiapp
     from_postprocessor = core_inlet_pressure
     to_postprocessor = core_inlet_pressure
-    multi_app = thm
+    to_multi_app = thm
   []
 []
 

@@ -39,8 +39,7 @@
   [./Periodic]
     [./all]
       variable = phi
-      auto_direction = 'x y'
-    [../]
+    to_multi_app = sub
   [../]
 []
 
@@ -118,8 +117,7 @@
     type = MultiAppCopyTransfer
     variable = phi
     source_variable = phi
-    direction = to_multiapp
-    multi_app = reinit
+    to_multi_app = reinit
     execute_on = 'timestep_end'
   [../]
 
@@ -127,8 +125,7 @@
     type = MultiAppCopyTransfer
     variable = phi_0
     source_variable = phi
-    direction = to_multiapp
-    multi_app = reinit
+    to_multi_app = reinit
     execute_on = 'timestep_end'
   [../]
 
@@ -136,8 +133,7 @@
     type = MultiAppCopyTransfer
     variable = phi
     source_variable = phi
-    direction = from_multiapp
-    multi_app = reinit
+    from_multi_app = reinit
     execute_on = timestep_end
   [../]
 []
