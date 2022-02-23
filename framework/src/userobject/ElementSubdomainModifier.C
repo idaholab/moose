@@ -185,7 +185,8 @@ ElementSubdomainModifier::updateBoundaryInfo(MooseMesh & mesh,
     return;
 
   if (_moving_boundary_subdomains.size())
-    mooseAssert(_moving_boundary_subdomains.size() == 2, "The number of moving subdomains should be two");
+    mooseAssert(_moving_boundary_subdomains.size() == 2,
+                "The number of moving subdomains should be two");
   /*
     There are a couple of steps to reconstruct the moving boundary.
     1) Retrieve all the active elements associated with the moving boundary
