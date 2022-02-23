@@ -6,8 +6,8 @@
     # The gold file was actually produced with equal_area_no_junction.i and
     # then renamed to equal_area_with_junction_out.csv.
     csvdiff = 'equal_area_with_junction_out.csv'
-    max_parallel = 1
     ad_indexing_type = 'global'
+    mesh_mode = 'replicated'
   []
   [equal_area_not_x_direction]
     type = 'CSVDiff'
@@ -24,8 +24,8 @@
       Postprocessors/junction_rhou/variable=junction:rhovV'
     csvdiff = 'equal_area_with_junction_out.csv'
     prereq = 'equal_area_x_direction'
-    max_parallel = 1
     ad_indexing_type = 'global'
+    mesh_mode = 'replicated'
   []
 
   [phy:unequal_area]
@@ -35,8 +35,8 @@
     abs_zero = 5e-5
     rel_err = 0
     recover = false
-    max_parallel = 1
     ad_indexing_type = 'global'
+    mesh_mode = 'replicated'
   []
 
   [phy:deadend]
@@ -45,8 +45,8 @@
     csvdiff = 'phy.deadend_out.csv'
     abs_zero = 1e-5
     rel_err = 0
-    max_parallel = 1
     ad_indexing_type = 'global'
+    mesh_mode = 'replicated'
   []
 
 
@@ -55,8 +55,8 @@
     input = 'phy.shower.i'
     check_input = true
     recover = false
-    max_parallel = 1
     ad_indexing_type = 'global'
+    mesh_mode = 'replicated'
   []
 
   [phy:shower]
@@ -66,8 +66,8 @@
     abs_zero = 2e-10
     rel_err = 0
     heavy = true
-    max_parallel = 1
     ad_indexing_type = 'global'
+    mesh_mode = 'replicated'
   []
 
   # Tests conservation of mass and energy for 1-phase flow.
@@ -76,8 +76,8 @@
     input = 't_junction_1phase.i'
     csvdiff = 't_junction_1phase_out.csv'
     abs_zero = 1e-10
-    max_parallel = 1
     ad_indexing_type = 'global'
+    mesh_mode = 'replicated'
   []
 
   [phy.form_loss]
@@ -87,8 +87,8 @@
     cli_args = 'Components/junction/K=1 Outputs/file_base=phy.form_loss'
     rel_err = 2e-4
     recover = false
-    max_parallel = 1
     ad_indexing_type = 'global'
+    mesh_mode = 'replicated'
   []
 
   [phy.form_loss_Aref]
@@ -98,8 +98,8 @@
     cli_args = 'Components/junction/K=1 Components/junction/A_ref=0.2 Outputs/file_base=phy.form_loss_Aref'
     rel_err = 2e-4
     recover = false
-    max_parallel = 1
     ad_indexing_type = 'global'
+    mesh_mode = 'replicated'
   []
 
   # error checking
@@ -107,6 +107,7 @@
     type = 'RunException'
     input = 'err.missing_ics.i'
     expect_err = "junction: The following initial condition parameters are missing: initial_p initial_T initial_vel_x initial_vel_y initial_vel_z"
+    mesh_mode = 'replicated'
   []
 
   [err.missing_K]
@@ -114,5 +115,6 @@
     input = 'phy.form_loss.i'
     cli_args = '--error Components/junction/A_ref=1'
     expect_err = "junction: Parameter 'A_ref' is specified, but 'K' is not specified, so the junction will behave as if there were no form loss."
+    mesh_mode = 'replicated'
   []
 []

@@ -24,3 +24,22 @@ VolumeJunctionBase::VolumeJunctionBase(const InputParameters & params)
   : FlowJunction(params), _volume(getParam<Real>("volume")), _position(getParam<Point>("position"))
 {
 }
+
+void
+VolumeJunctionBase::setupMesh()
+{
+  FlowJunction::setupMesh();
+
+  const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem = _mesh.nodeToElemMap();
+  for (auto & nid : _nodes)
+  {
+    const auto & it = node_to_elem.find(nid);
+    if (it == node_to_elem.end())
+      mooseError(name(), ": failed to find node ", nid, "in the mesh!");
+
+    const std::vector<dof_id_type> & elems = it->second;
+    for (const auto & e : elems)
+      _connected_elems.push_back(e);
+  }
+
+}
