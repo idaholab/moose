@@ -20,7 +20,6 @@ class HeatTransferFromHeatStructure3D1Phase : public HeatTransferFromTemperature
 {
 public:
   HeatTransferFromHeatStructure3D1Phase(const InputParameters & parameters);
-  ~HeatTransferFromHeatStructure3D1Phase();
 
   virtual void addVariables() override;
   virtual void addMooseObjects() override;
@@ -53,7 +52,7 @@ protected:
   /// Heat structure name
   const std::string & _hs_name;
   /// Flow channel alignment object
-  std::vector<FlowChannel3DAlignment *> _fch_alignments;
+  FlowChannel3DAlignment _fch_alignment;
   /// Number of layers in the flow channel direction
   unsigned int _num_layers;
   /// Direction for layered average user objects
