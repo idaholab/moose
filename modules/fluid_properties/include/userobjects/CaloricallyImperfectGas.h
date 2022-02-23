@@ -16,16 +16,17 @@
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
 
 /**
- * Ideal gas fluid properties
- * Default parameters are for air at atmospheric pressure and temperature
+ * A calorically imperfect gas fluid property class
+ * This fluid property assumes that internal energy is
+ * a general monotonic function of temperature; behaves
+ * like an ideal gas otherwise
  */
-class CaloricImperfectGas : public SinglePhaseFluidProperties, public NaNInterface
+class CaloricallyImperfectGas : public SinglePhaseFluidProperties, public NaNInterface
 {
 public:
   static InputParameters validParams();
 
-  CaloricImperfectGas(const InputParameters & parameters);
-  virtual ~CaloricImperfectGas();
+  CaloricallyImperfectGas(const InputParameters & parameters);
 
   virtual void initialSetup() override;
 
@@ -52,8 +53,6 @@ public:
   virtual Real s_from_h_p(Real h, Real p) const override;
   virtual void s_from_h_p(Real h, Real p, Real & s, Real & ds_dh, Real & ds_dp) const override;
   virtual Real rho_from_p_s(Real p, Real s) const override;
-  virtual void
-  rho_from_p_s(Real p, Real s, Real & rho, Real & drho_dp, Real & drho_ds) const override;
   virtual Real e_from_v_h(Real v, Real h) const override;
   virtual void e_from_v_h(Real v, Real h, Real & e, Real & de_dv, Real & de_dh) const override;
   virtual Real rho_from_p_T(Real p, Real T) const override;
@@ -86,9 +85,6 @@ public:
   virtual Real e_from_p_T(Real p, Real T) const override;
   virtual ADReal e_from_p_T(ADReal p, ADReal T) const;
   virtual void e_from_p_T(Real p, Real T, Real & e, Real & de_dp, Real & de_dT) const override;
-  virtual Real p_from_h_s(Real h, Real s) const override;
-  virtual void p_from_h_s(Real h, Real s, Real & p, Real & dp_dh, Real & dp_ds) const override;
-  virtual Real g_from_v_e(Real v, Real e) const override;
   virtual Real T_from_p_h(Real p, Real h) const override;
   virtual void T_from_p_h(Real p, Real h, Real & T, Real & dT_dp, Real & dT_dh) const override;
   virtual Real cv_from_p_T(Real p, Real T) const override;
@@ -127,8 +123,6 @@ public:
   virtual ADReal c_from_p_T(const ADReal & p, const ADReal & T) const override;
   virtual void c_from_p_T(Real /*p*/, Real T, Real & c, Real & dc_dp, Real & dc_dT) const override;
 
-  virtual Real pp_sat_from_p_T(Real /*p*/, Real /*T*/) const override;
-
 protected:
   /// sets up the T(e) reverse lookup table
   void setupLookupTables();
@@ -163,24 +157,18 @@ protected:
   Real _max_temperature;
   ///@}
 
+  /// temperature interval in lookup tables
+  Real _delta_T;
+
   // tolerance for checking monotonicity of T for h(T) & e(T)
   Real _tol;
 
-  /// Enthalpy as function of temperature
-  const Function * _h_T;
   /// Internal energy as a function of temperature
   const Function * _e_T;
-  /// Specific heat at constant pressure as function of temperature
-  const Function * _cp_T;
-  /// Specific heat at constant volume energy as a function of temperature
-  const Function * _cv_T;
   /// Dynamic viscosity
   const Function * _mu_T;
   /// Thermal conductivity
   const Function * _k_T;
-
-  /// temperature interval in lookup tables
-  Real _delta_T;
 
   ///@{ internal energy and enthalpy limits when creating lookup tables
   Real _min_e;
