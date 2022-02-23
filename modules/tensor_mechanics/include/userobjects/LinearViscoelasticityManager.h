@@ -32,11 +32,13 @@ public:
 
   LinearViscoelasticityManager(const InputParameters & parameters);
 
+  virtual void initialSetup() override;
+
 protected:
-  virtual void initialize() override;
+  virtual void initialize() override {}
   virtual void execute() override;
-  virtual void threadJoin(const UserObject & /*uo*/) override{};
-  virtual void finalize() override{};
+  virtual void threadJoin(const UserObject & /*uo*/) override {}
+  virtual void finalize() override {}
 
   std::string _stress_name;
   /*
@@ -56,5 +58,5 @@ protected:
   /// Name of the viscoelastic model to update
   std::string _viscoelastic_model_name;
   /// Pointer to the viscoelastic model to update
-  std::shared_ptr<LinearViscoelasticityBase> _viscoelastic_model;
+  LinearViscoelasticityBase * _viscoelastic_model;
 };

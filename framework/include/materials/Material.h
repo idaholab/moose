@@ -131,6 +131,25 @@ public:
   const MaterialProperty<T> & getMaterialPropertyOlderByName(const std::string & prop_name);
   ///@}
 
+  /**
+   * Retrieve the discrete material with a given parameter key named "name"
+   */
+  MaterialBase & getMaterial(const std::string & name)
+  {
+    return getMaterialByName(parameters().get<MaterialName>(name));
+  }
+
+  /**
+   * Retrieve the discrete material named "name".
+   *
+   * @param no_warn If true, suppress warning about retrieving the material potentially during its
+   * calculation. If you don't know what this is/means, then you don't need it.
+   * @param no_dep Use no_dep = true if no dependency resolution for the material is required. Using
+   * no_dep = false is useful for discrete materials.
+   */
+  MaterialBase &
+  getMaterialByName(const std::string & name, bool no_warn = false, bool no_dep = false);
+
   ///@{ Optional material property getters
   template <typename T, bool is_ad>
   const GenericOptionalMaterialProperty<T, is_ad> &
