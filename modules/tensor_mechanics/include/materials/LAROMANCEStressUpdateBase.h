@@ -11,23 +11,9 @@
 
 #include "RadialReturnCreepStressUpdateBase.h"
 
-enum class ROMInputTransform
-{
-  LINEAR,
-  LOG,
-  EXP
-};
-
 template <bool is_ad>
 class LAROMANCEStressUpdateBaseTempl : public RadialReturnCreepStressUpdateBaseTempl<is_ad>
 {
-  using Material::_dt;
-  using Material::_q_point;
-  using Material::_qp;
-  using Material::_t;
-  using Material::coupledGenericValue;
-  using RadialReturnCreepStressUpdateBaseTempl<is_ad>::computeResidual;
-  using RadialReturnCreepStressUpdateBaseTempl<is_ad>::computeDerivative;
 
 public:
   static InputParameters validParams();
@@ -39,6 +25,13 @@ public:
   storeIncrementalMaterialProperties(const unsigned int total_number_substeps) override;
 
 protected:
+  enum class ROMInputTransform
+  {
+    LINEAR,
+    LOG,
+    EXP
+  };
+
   virtual void initialSetup() override;
 
   // Setup unit conversion factors. The required units in the ROM are:
@@ -70,6 +63,14 @@ protected:
   maximumPermissibleValue(const GenericReal<is_ad> & effective_trial_stress) const override;
   virtual Real computeTimeStepLimit() override;
 
+  void outputIterationSummary(std::stringstream * iter_output,
+                              const unsigned int total_it) override;
+
+  virtual void outputIterationStep(std::stringstream * iter_output,
+                                   const GenericReal<is_ad> & effective_trial_stress,
+                                   const GenericReal<is_ad> & scalar,
+                                   const Real reference_residual) override;
+
   /// Enum to error, warn, ignore, or extrapolate if input is outside of window of applicability
   enum class WindowFailure
   {
@@ -77,6 +78,8 @@ protected:
     WARN,
     IGNORE,
     EXCEPTION,
+    DONOTHING,
+    USELIMIT,
     EXTRAPOLATE
   };
 
@@ -91,21 +94,45 @@ protected:
   /**
    * Computes the ROM calculated increment for a given output and tile.
    * @param tile Tile index
+   * @param partition Partition index
    * @param out_index Output index
    * @param derivative Optional flag to return derivative of ROM increment with respect to stress.
    * @return ROM computed increment
    */
-  GenericReal<is_ad>
-  computeROM(const unsigned int tile, const unsigned out_index, const bool derivative = false);
+  GenericReal<is_ad> computeROM(const unsigned int tile,
+                                const unsigned int partition,
+                                const unsigned out_index,
+                                const bool derivative = false);
 
+  /**
+   * Checks if the input combination is in a specific tile
+   * @param p Partition index
+   * @param t Tile index
+   * @return bool if in tile
+   */
+  bool checkInTile(const unsigned int p, const unsigned int t) const;
+
+  /**
+   * Checks if two tile domains are equal
+   * @param p Partition index
+   * @param t Tile 1 index
+   * @param tt Tile 2 index
+   * @param in_index input index
+   * @return integer 0 (false) or 1 (true)
+   */
+  bool areTilesNotIdentical(const unsigned int p,
+                            const unsigned int t,
+                            const unsigned int tt,
+                            const unsigned int in_index);
   /**
    * Method to check input values against applicability windows set by ROM data set.
    * @param input Input value
-   * @param behavior WindowFailure enum indicating what to do if input is outside of limits
+   * @param vector for upper and lower WindowFailure enums indicating what to do if input is outside
+   * of limits
    * @param global_limits Vector of lower and upper global limits of the input
    */
   void checkInputWindow(const GenericReal<is_ad> & input,
-                        const WindowFailure behavior,
+                        const std::vector<WindowFailure> behavior,
                         const std::vector<Real> & global_limits);
 
   /**
@@ -126,12 +153,14 @@ protected:
 
   /**
    * Assemble the array of Legendre polynomials to be multiplied by the ROM coefficients
+   * @param p Partition index
    * @param rom_input ROM input
    * @param polynomial_inputs Vector of transformed Legendre polynomials
    * @param drom_input Optional derivative of ROM input with respect to stress
    * @param derivative Optional flag to return derivative of converted input with respect to stress.
    */
-  void buildPolynomials(const GenericReal<is_ad> & rom_input,
+  void buildPolynomials(const unsigned int p,
+                        const GenericReal<is_ad> & rom_input,
                         std::vector<GenericReal<is_ad>> & polynomial_inputs,
                         const GenericReal<is_ad> & drom_input = 0,
                         const bool derivative = false);
@@ -140,11 +169,13 @@ protected:
    * Arranges the calculated Legendre polynomials into the proper oder and multiplies the Legendre
    * polynomials by the ROM coefficients to compute the predicted output values. This method works
    * with all inputs besides stress, while stress is handled by computeValues
+   * @param p Partition index
    * @param coefs Legendre polynomial coefficients
    * @param polynomial_inputs Vector of transformed Legendre polynomial
    * @param precomputed Vector that holds the precomputed ROM values
    */
-  void precomputeValues(const std::vector<Real> & coefs,
+  void precomputeValues(const unsigned int p,
+                        const std::vector<Real> & coefs,
                         const std::vector<std::vector<GenericReal<is_ad>>> & polynomial_inputs,
                         std::vector<GenericReal<is_ad>> & precomputed);
 
@@ -152,6 +183,7 @@ protected:
    * Arranges the calculated Legendre polynomials into the proper oder and multiplies the Legendre
    * polynomials by the ROM coefficients to compute the predicted output values. This method only
    * manipulates the stress input, with all others handled in precomputeValues
+   * @param p Partition index
    * @param precomputed Precomputed multiplication of polynomials
    * @param polynomial_inputs Vector of Legendre polynomial transformation
    * @param dpolynomial_inputs Vector of derivative of Legendre polynomial transformation with
@@ -161,7 +193,8 @@ protected:
    * @return ROM output
    */
   GenericReal<is_ad>
-  computeValues(const std::vector<GenericReal<is_ad>> & precomputed,
+  computeValues(const unsigned int p,
+                const std::vector<GenericReal<is_ad>> & precomputed,
                 const std::vector<std::vector<GenericReal<is_ad>>> & polynomial_inputs,
                 const std::vector<GenericReal<is_ad>> & dpolynomial_inputs = {},
                 const bool derivative = false);
@@ -169,6 +202,7 @@ protected:
   /**
    * Computes the output variable increments from the ROM predictions by bringing out of the
    * normalized map to the actual physical values
+   * @param p Partition index
    * @param old_input_values Previous timestep values of ROM inputs
    * @param rom_output Outputs from ROM
    * @param out_index Output index
@@ -176,19 +210,12 @@ protected:
    * @param derivative Optional flag to return derivative of output with respect to stress.
    * @return Converted ROM output
    */
-  GenericReal<is_ad> convertOutput(const std::vector<Real> & old_input_values,
-                                   const GenericReal<is_ad> & rom_output,
-                                   const unsigned out_index,
-                                   const GenericReal<is_ad> & drom_output = 0.0,
-                                   const bool derivative = false);
-
-  /**
-   * Returns the material specific value for the low bound cutoff of the ROM output,
-   * before transformation, and prevents the calculation of a strain value outside
-   * the ROM calibration database. Should be overwritten by inheriting classes.
-   * @return value of the ROM specific strain calibration bound
-   */
-  virtual Real romStrainCutoff() = 0;
+  virtual GenericReal<is_ad> convertOutput(const unsigned int p,
+                                           const std::vector<Real> & old_input_values,
+                                           const GenericReal<is_ad> & rom_output,
+                                           const unsigned out_index,
+                                           const GenericReal<is_ad> & drom_output = 0.0,
+                                           const bool derivative = false);
 
   /**
    * Calculate the value or derivative of Legendre polynomial up to 3rd order
@@ -215,16 +242,39 @@ protected:
                              const bool derivative = false);
 
   /**
-   * Compute the weight for applied to each tile based on the location in input-space
+   * Compute the contribution (weight) of each tile in each partition,
+   * based on the input and tile boundaries (in terms of input domain).
    * @param weights Weights for each tile
    * @param input Input value
    * @param in_index Input index
    * @param derivative Optional flag to return derivative of the sigmoid w.r.t. the input
    */
-  void computeTileWeight(std::vector<GenericReal<is_ad>> & weights,
+  void computeTileWeight(std::vector<std::vector<GenericReal<is_ad>>> & weights,
                          GenericReal<is_ad> & input,
                          const unsigned int in_index,
                          const bool derivative = false);
+
+  /**
+   * Compute the weight of the different partitions
+   * @param weights Weights for each partition
+   * @param derivative Optional flag to return derivative of the sigmoid w.r.t. the input
+   */
+  void computePartitionWeights(std::vector<GenericReal<is_ad>> & weights,
+                               std::vector<GenericReal<is_ad>> & dweights_dstress);
+
+  /**
+   * Compute the partition weight on the location in input-space,
+   * based on a calibrated Gaussian Process Regression model
+   */
+  virtual GenericReal<is_ad> computeSecondPartitionWeight() { return 0.0; };
+
+  /**
+   * Compute the derivative of the partition weight of the second partition w.r.t. stress
+   */
+  virtual void
+  computeDSecondPartitionWeightDStress(GenericReal<is_ad> & /*dsecond_partition_weight_dstress*/)
+  {
+  }
 
   /**
    * Convert input based on the transform type
@@ -265,13 +315,14 @@ protected:
 
   /*
    * Calculates and returns vector utilized in assign values
+   * @param p Partition index
    * @return Vector that preallocates indexing calculations for polynomial calculation
    */
-  std::vector<unsigned int> getMakeFrameHelper() const;
+  std::vector<unsigned int> getMakeFrameHelper(const unsigned int p) const;
 
   /*
    * Calculates and returns the transformed limits for the ROM calculations
-   * Indexes are [tile][output][input].
+   * Indexes are [partition][tile][output][input].
    * Inputs ordering is
    * input[0]: cell_old
    * input[1]: wall_old
@@ -283,15 +334,17 @@ protected:
    * output[0]: cell dislocations increment
    * output[1]: wall dislocations increment
    * output[2]: strain increment
+   * @param p Partition index
    * @param limits Human readable limits
    * @return Multi-dimentional vector of transformed limits
    */
   std::vector<std::vector<std::vector<std::vector<Real>>>>
-  getTransformedLimits(const std::vector<std::vector<std::vector<Real>>> limits);
+  getTransformedLimits(const unsigned int p,
+                       const std::vector<std::vector<std::vector<Real>>> limits);
 
   /*
    * Returns vector of the functions to use for the conversion of input variables.
-   * Indexes are [tile][output][input].
+   * Indexes are [partition][tile][output][input].
    * Inputs ordering is
    * input[0]: cell_old
    * input[1]: wall_old
@@ -305,11 +358,11 @@ protected:
    * output[2]: strain increment
    * @return vector of the functions to use for the conversion of input variables.
    */
-  virtual std::vector<std::vector<std::vector<ROMInputTransform>>> getTransform() = 0;
+  virtual std::vector<std::vector<std::vector<std::vector<ROMInputTransform>>>> getTransform() = 0;
 
   /*
    * Returns factors for the functions for the conversion functions given in getTransform
-   * Indexes are [tile][output][input].
+   * Indexes are [partition][tile][output][input].
    * Inputs ordering is
    * input[0]: cell_old
    * input[1]: wall_old
@@ -323,11 +376,11 @@ protected:
    * output[2]: strain increment
    * @return factors for the functions for the conversion functions given in getTransform
    */
-  virtual std::vector<std::vector<std::vector<Real>>> getTransformCoefs() = 0;
+  virtual std::vector<std::vector<std::vector<std::vector<Real>>>> getTransformCoefs() = 0;
 
   /* Optional method that returns human-readable limits used for normalization. Default is to just
    * use the input limits.
-   * Indexes are [tile][input][upper/lower].
+   * Indexes are [partition][tile][input][upper/lower].
    * Inputs ordering is
    * input[0]: cell_old
    * input[1]: wall_old
@@ -337,13 +390,13 @@ protected:
    * input[5]: environmental factor (optional)
    * @return human-readable limits for the normalization limits
    */
-  virtual std::vector<std::vector<std::vector<Real>>> getNormalizationLimits()
+  virtual std::vector<std::vector<std::vector<std::vector<Real>>>> getNormalizationLimits()
   {
     return getInputLimits();
   }
 
   /* Returns human-readable limits for the inputs.
-   * Indexes are [tile][input][upper/lower].
+   * Indexes are [partition][tile][input][upper/lower].
    * Inputs ordering is
    * input[0]: cell_old
    * input[1]: wall_old
@@ -353,26 +406,33 @@ protected:
    * input[5]: environmental factor (optional)
    * @return human-readable limits for the input limits
    */
-  virtual std::vector<std::vector<std::vector<Real>>> getInputLimits() = 0;
+  virtual std::vector<std::vector<std::vector<std::vector<Real>>>> getInputLimits() = 0;
 
   /*
    * Material specific coefficients multiplied by the Legendre polynomials for each of the input
    * variables
    * @return Legendre polynomial coefficients
    */
-  virtual std::vector<std::vector<std::vector<Real>>> getCoefs() = 0;
+  virtual std::vector<std::vector<std::vector<std::vector<Real>>>> getCoefs() = 0;
 
   /*
    * Material specific orientations of tiling
    * variables
    * @return Vector declaring tiling orientation
    */
-  virtual std::vector<unsigned int> getTilings()
+  virtual std::vector<std::vector<unsigned int>> getTilings()
   {
     if (_environmental)
-      return {1, 1, 1, 1, 1, 1};
-    return {1, 1, 1, 1, 1};
+      return {{1, 1, 1, 1, 1, 1}};
+    return {{1, 1, 1, 1, 1}};
   };
+
+  /*
+   * Minimum strain value allowed by the ROM. This is material specific, and needs to be overwritten
+   * by individual roms.
+   * @return Material specific ROM low strain value for each partition
+   */
+  virtual std::vector<Real> getStrainCutoff() = 0;
 
   /// Coupled temperature variable
   const GenericVariableValue<is_ad> & _temperature;
@@ -380,8 +440,11 @@ protected:
   /// Optionally coupled environmental factor
   const GenericMaterialProperty<Real, is_ad> * _environmental;
 
-  /// Vector of WindowFailure enum that informs how to handle input that is outside of the limits
-  std::vector<WindowFailure> _window_failure;
+  /*
+   * Vector of vectors WindowFailure enum that informs how to handle input that is outside of the
+   * limits. Shape is number of inputs by 2 (lower and upper window enum)
+   */
+  std::vector<std::vector<WindowFailure>> _window_failure;
 
   /// Flag to output verbose infromation
   const bool _verbose;
@@ -390,9 +453,6 @@ protected:
   GenericMaterialProperty<Real, is_ad> & _cell_dislocations;
   const MaterialProperty<Real> & _cell_dislocations_old;
   ///@}
-
-  /// Initial cell dislocation value
-  const Real _initial_cell_dislocations;
 
   /// Maximum cell dislocation increment
   const Real _max_cell_increment;
@@ -408,14 +468,14 @@ protected:
   const MaterialProperty<Real> & _wall_dislocations_old;
   ///@}
 
-  /// Initial wall dislocation value
-  const Real _initial_wall_dislocations;
-
   /// Maximum wall dislocation increment
   const Real _max_wall_increment;
 
   /// Optional wall dislocation forcing function
   const Function * const _wall_function;
+
+  /// Optiontal effective stress forcing function
+  const Function * const _stress_function;
 
   /// Container for wall dislocation increment
   GenericReal<is_ad> _wall_dislocation_increment;
@@ -450,8 +510,11 @@ protected:
   /// Optional old creep strain forcing function
   const Function * const _creep_strain_old_forcing_function;
 
-  /// Number of ROM tiles
-  unsigned int _num_tiles;
+  /// Number of partitions
+  unsigned int _num_partitions;
+
+  /// Number of ROM tiles per partition
+  std::vector<unsigned int> _num_tiles;
 
   /// Number of inputs for the ROM data set
   unsigned int _num_inputs;
@@ -459,32 +522,33 @@ protected:
   /// Number of inputs to the ROM data set
   unsigned int _num_outputs;
 
-  /// Legendre polynomial degree for the ROM data set
-  unsigned int _degree;
+  /// Legendre polynomial degree for the ROM data set for each partition
+  std::vector<unsigned int> _degree;
 
-  /// Total number of Legendre polynomial coefficients for the ROM data set
-  unsigned int _num_coefs;
+  /// Total number of Legendre polynomial coefficients for the ROM data set in each parition
+  std::vector<unsigned int> _num_coefs;
 
-  /// Transform rules defined by the ROM data set
-  std::vector<std::vector<std::vector<ROMInputTransform>>> _transform;
+  /// Transform rules defined by the ROM data set for each partition
+  std::vector<std::vector<std::vector<std::vector<ROMInputTransform>>>> _transform;
 
-  /// Transform coefficients defined by the ROM data set
-  std::vector<std::vector<std::vector<Real>>> _transform_coefs;
+  /// Transform coefficients defined by the ROM data set for each partition
+  std::vector<std::vector<std::vector<std::vector<Real>>>> _transform_coefs;
 
-  /// Input limits defined by the ROM data set
-  std::vector<std::vector<std::vector<Real>>> _input_limits;
+  /// Input limits defined by the ROM data set for each partition
+  std::vector<std::vector<std::vector<std::vector<Real>>>> _input_limits;
 
-  /// Normalization limits defined by the ROM data set
-  std::vector<std::vector<std::vector<Real>>> _normalization_limits;
+  /// Normalization limits defined by the ROM data set for each partition
+  std::vector<std::vector<std::vector<std::vector<Real>>>> _normalization_limits;
 
-  /// Coefficients used with Legendre polynomials defined by the ROM data set
-  std::vector<std::vector<std::vector<Real>>> _coefs;
+  /// Coefficients used with Legendre polynomials defined by the ROM data set for each partition
+  std::vector<std::vector<std::vector<std::vector<Real>>>> _coefs;
 
   /// Limits transformed from readabile input to ROM readable limits for normalization
-  std::vector<std::vector<std::vector<std::vector<Real>>>> _transformed_normalization_limits;
+  std::vector<std::vector<std::vector<std::vector<std::vector<Real>>>>>
+      _transformed_normalization_limits;
 
   /// Helper container defined by the ROM data set
-  std::vector<unsigned int> _makeframe_helper;
+  std::vector<std::vector<unsigned int>> _makeframe_helper;
 
   /// Creep rate material property
   GenericMaterialProperty<Real, is_ad> & _creep_rate;
@@ -498,6 +562,9 @@ protected:
   /// Material property to hold smootherstep applied in order to extrapolate.
   MaterialProperty<Real> & _extrapolation;
 
+  /// Material property to store partition weight.
+  GenericMaterialProperty<Real, is_ad> & _second_partition_weight;
+
   /// Container for derivative of creep increment with respect to strain
   GenericReal<is_ad> _derivative;
 
@@ -508,25 +575,34 @@ protected:
   std::vector<Real> _old_input_values;
 
   /// Container for converted rom_inputs
-  std::vector<std::vector<GenericReal<is_ad>>> _rom_inputs;
+  std::vector<std::vector<std::vector<GenericReal<is_ad>>>> _rom_inputs;
 
   /// Container for ROM polynomial inputs
-  std::vector<std::vector<std::vector<GenericReal<is_ad>>>> _polynomial_inputs;
+  std::vector<std::vector<std::vector<std::vector<GenericReal<is_ad>>>>> _polynomial_inputs;
 
   /// Container for ROM precomputed values
-  std::vector<std::vector<GenericReal<is_ad>>> _precomputed_vals;
+  std::vector<std::vector<std::vector<GenericReal<is_ad>>>> _precomputed_vals;
 
   /// Container for global limits
   std::vector<std::vector<Real>> _global_limits;
 
   /// Container for weights for each tile as computed for all input values beside stress
-  std::vector<GenericReal<is_ad>> _non_stress_weights;
+  std::vector<std::vector<GenericReal<is_ad>>> _non_stress_weights;
 
   /// Container for weights for each tile as computed for all input values beside stress
-  std::vector<GenericReal<is_ad>> _weights;
+  std::vector<std::vector<GenericReal<is_ad>>> _weights;
+
+  /// Container for weights for each tile as computed for all input values beside stress
+  std::vector<GenericReal<is_ad>> _partition_weights;
+
+  /// Container for d_parition_weights d_stress
+  std::vector<GenericReal<is_ad>> _dpartition_weight_dstress;
 
   /// Container for tiling orientations
-  std::vector<unsigned int> _tiling;
+  std::vector<std::vector<unsigned int>> _tiling;
+
+  /// Container for strain cutoff
+  std::vector<Real> _cutoff;
 
   /// Unit conversion factors required to convert from the specified unit to MPa
   Real _stress_ucf;
@@ -541,6 +617,19 @@ protected:
 
   /// Material property capturing number of substeps for output purposes (defaults to one if substepping isn't used)
   MaterialProperty<Real> & _number_of_substeps;
+
+  using Material::_dt;
+  using Material::_name;
+  using Material::_q_point;
+  using Material::_qp;
+  using Material::_t;
+  using Material::coupledGenericValue;
+  using RadialReturnCreepStressUpdateBaseTempl<is_ad>::computeResidual;
+  using RadialReturnCreepStressUpdateBaseTempl<is_ad>::computeDerivative;
+  using RadialReturnCreepStressUpdateBaseTempl<is_ad>::_apply_strain;
+  using RadialReturnCreepStressUpdateBaseTempl<is_ad>::initQpStatefulProperties;
+  using RadialReturnCreepStressUpdateBaseTempl<is_ad>::outputIterationStep;
+  using RadialReturnCreepStressUpdateBaseTempl<is_ad>::outputIterationSummary;
 };
 
 typedef LAROMANCEStressUpdateBaseTempl<false> LAROMANCEStressUpdateBase;

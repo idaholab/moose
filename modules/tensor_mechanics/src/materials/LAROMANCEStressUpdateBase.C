@@ -10,6 +10,7 @@
 #include "LAROMANCEStressUpdateBase.h"
 #include "Function.h"
 #include "MathUtils.h"
+#include "MooseRandom.h"
 #include "Units.h"
 
 template <bool is_ad>
@@ -17,46 +18,83 @@ InputParameters
 LAROMANCEStressUpdateBaseTempl<is_ad>::validParams()
 {
   InputParameters params = RadialReturnCreepStressUpdateBaseTempl<is_ad>::validParams();
-  params.addClassDescription(
-      "Calculates the effective creep strain based on the rates predicted by a material "
-      "specific Los Alamos Reduced Order Model derived from a Visco-Plastic Self Consistent "
-      "calculations.");
+  params.addClassDescription("Base class to calculate the effective creep strain based on the "
+                             "rates predicted by a material  specific Los Alamos Reduced Order "
+                             "Model derived from a Visco-Plastic Self Consistent calculations.");
 
   params.addRequiredCoupledVar("temperature", "The coupled temperature (K)");
   params.addParam<MaterialPropertyName>("environmental_factor",
                                         "Optional coupled environmental factor");
 
-  MooseEnum error_limit_behavior("ERROR WARN IGNORE EXCEPTION", "EXCEPTION");
-  params.addParam<MooseEnum>("cell_input_window_failure",
-                             error_limit_behavior,
-                             "What to do if cell dislocation concentration is outside the global "
-                             "window of applicability.");
-  params.addParam<MooseEnum>("wall_input_window_failure",
+  // Forbid extrapolation of cell, wall, and old strain input parameters
+  MooseEnum error_limit_behavior("ERROR WARN IGNORE EXCEPTION DONTHING USELIMIT", "EXCEPTION");
+  params.addParam<MooseEnum>(
+      "cell_input_window_low_failure",
+      error_limit_behavior,
+      "What to do if cell dislocation concentration is outside the lower global "
+      "window of applicability.");
+  params.addParam<MooseEnum>(
+      "cell_input_window_high_failure",
+      error_limit_behavior,
+      "What to do if cell dislocation concentration is outside the upper global "
+      "window of applicability.");
+  params.addParam<MooseEnum>("wall_input_window_low_failure",
                              error_limit_behavior,
                              "What to do if wall dislocation concentration is outside the "
-                             "global window of applicability.");
+                             "lower global window of applicability.");
+  params.addParam<MooseEnum>("wall_input_window_high_failure",
+                             error_limit_behavior,
+                             "What to do if wall dislocation concentration is outside the "
+                             "upper global window of applicability.");
   params.addParam<MooseEnum>(
-      "old_strain_input_window_failure",
+      "old_strain_input_window_low_failure",
       error_limit_behavior,
-      "What to do if old strain is outside the global window of applicability.");
+      "What to do if old strain is outside the lower global window of applicability.");
+  params.addParam<MooseEnum>(
+      "old_strain_input_window_high_failure",
+      error_limit_behavior,
+      "What to do if old strain is outside the upper global window of applicability.");
 
-  MooseEnum extrapolated_limit_behavior("ERROR WARN IGNORE EXCEPTION EXTRAPOLATE", "EXTRAPOLATE");
-  params.addParam<MooseEnum>("stress_input_window_failure",
-                             extrapolated_limit_behavior,
-                             "What to do if stress is outside the global window of applicability.");
+  MooseEnum extrapolated_lower_limit_behavior(
+      "ERROR WARN IGNORE EXCEPTION DONOTHING USELIMIT EXTRAPOLATE", "EXTRAPOLATE");
+  // Forbid extrapolation of on high end of limit
+  MooseEnum extrapolated_upper_limit_behavior("ERROR WARN IGNORE EXCEPTION DONOTHING USELIMIT",
+                                              "USELIMIT");
   params.addParam<MooseEnum>(
-      "temperature_input_window_failure",
-      extrapolated_limit_behavior,
-      "What to do if temperature is outside the global window of applicability.");
+      "stress_input_window_low_failure",
+      extrapolated_lower_limit_behavior,
+      "What to do if stress is outside the lower global window of applicability.");
   params.addParam<MooseEnum>(
-      "environment_input_window_failure",
-      extrapolated_limit_behavior,
+      "stress_input_window_high_failure",
+      extrapolated_upper_limit_behavior,
+      "What to do if stress is outside the upper global window of applicability.");
+  params.addParam<MooseEnum>(
+      "temperature_input_window_low_failure",
+      extrapolated_lower_limit_behavior,
+      "What to do if temperature is outside the lower global window of applicability.");
+  params.addParam<MooseEnum>(
+      "temperature_input_window_high_failure",
+      extrapolated_upper_limit_behavior,
+      "What to do if temperature is outside the upper global window of applicability.");
+  params.addParam<MooseEnum>(
+      "environment_input_window_low_failure",
+      extrapolated_lower_limit_behavior,
+      "What to do if environmental factor is outside the lower global window of applicability.");
+  params.addParam<MooseEnum>(
+      "environment_input_window_high_failure",
+      extrapolated_upper_limit_behavior,
       "What to do if environmental factor is outside the global window of applicability.");
 
   params.addRequiredRangeCheckedParam<Real>(
       "initial_cell_dislocation_density",
       "initial_cell_dislocation_density >= 0.0",
       "Initial density of cell (glissile) dislocations (1/m^2)");
+  params.addRangeCheckedParam<Real>(
+      "cell_dislocations_normal_distribution_width",
+      0.0,
+      "cell_dislocations_normal_distribution_width >= 0.0",
+      "Width of the normal distribution to assign to the initial cell dislocation value. This is "
+      "given as a fraction of the initial_cell_dislocation_density.");
   params.addRangeCheckedParam<Real>(
       "max_relative_cell_dislocation_increment",
       0.5,
@@ -67,6 +105,12 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::validParams()
       "initial_wall_dislocation_density",
       "initial_wall_dislocation_density >= 0.0",
       "wall (locked) dislocation density initial value (1/m^2).");
+  params.addRangeCheckedParam<Real>(
+      "wall_dislocations_normal_distribution_width",
+      0.0,
+      "wall_dislocations_normal_distribution_width >= 0.0",
+      "Width of the normal distribution to assign to the initial wall dislocation value. This is "
+      "given as a fraction of the initial_wall_dislocation_density.");
   params.addRangeCheckedParam<Real>(
       "max_relative_wall_dislocation_increment",
       0.5,
@@ -90,13 +134,19 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::validParams()
       "Optional forcing function for the creep strain from the previous timestep. If provided, "
       "the old creep strain will be reset to the function value at the beginning of the "
       "timestep. Used for testing purposes only.");
+  params.addParam<FunctionName>(
+      "effective_stress_forcing_function",
+      "Optional forcing function for the effective stress. If provided, the effective stress will "
+      "be reset to the function value at the beginning of the timestep. Used for testing purposes "
+      "only.");
+
+  params.addParam<unsigned int>("seed", 0, "Random number generator seed");
+  params.addParam<std::string>("stress_unit", "Pa", "unit of stress");
+
   params.addParamNamesToGroup(
       "cell_dislocation_density_forcing_function wall_dislocation_density_forcing_function "
-      "old_creep_strain_forcing_function",
+      "old_creep_strain_forcing_function effective_stress_forcing_function seed stress_unit",
       "Advanced");
-
-  params.addParam<std::string>("stress_unit", "Pa", "unit of stress");
-  params.addParamNamesToGroup("stress_unit", "Advanced");
 
   return params;
 }
@@ -117,7 +167,6 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::LAROMANCEStressUpdateBaseTempl(
         this->template declareGenericProperty<Real, is_ad>(this->_base_name + "cell_dislocations")),
     _cell_dislocations_old(
         this->template getMaterialPropertyOld<Real>(this->_base_name + "cell_dislocations")),
-    _initial_cell_dislocations(this->template getParam<Real>("initial_cell_dislocation_density")),
     _max_cell_increment(this->template getParam<Real>("max_relative_cell_dislocation_increment")),
     _cell_function(this->isParamValid("cell_dislocation_density_forcing_function")
                        ? &this->getFunction("cell_dislocation_density_forcing_function")
@@ -127,11 +176,13 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::LAROMANCEStressUpdateBaseTempl(
         this->template declareGenericProperty<Real, is_ad>(this->_base_name + "wall_dislocations")),
     _wall_dislocations_old(
         this->template getMaterialPropertyOld<Real>(this->_base_name + "wall_dislocations")),
-    _initial_wall_dislocations(this->template getParam<Real>("initial_wall_dislocation_density")),
     _max_wall_increment(this->template getParam<Real>("max_relative_wall_dislocation_increment")),
     _wall_function(this->isParamValid("wall_dislocation_density_forcing_function")
                        ? &this->getFunction("wall_dislocation_density_forcing_function")
                        : NULL),
+    _stress_function(this->isParamValid("effective_stress_forcing_function")
+                         ? &this->getFunction("effective_stress_forcing_function")
+                         : NULL),
     _wall_dislocation_increment(0.0),
     _cell_input_index(0),
     _wall_input_index(1),
@@ -154,6 +205,8 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::LAROMANCEStressUpdateBaseTempl(
     _wall_rate(this->template declareGenericProperty<Real, is_ad>(this->_base_name +
                                                                   "wall_dislocation_rate")),
     _extrapolation(this->template declareProperty<Real>("ROM_extrapolation")),
+    _second_partition_weight(
+        this->template declareGenericProperty<Real, is_ad>("partition_weight")),
 
     _derivative(0.0),
     _old_input_values(3),
@@ -165,21 +218,38 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::LAROMANCEStressUpdateBaseTempl(
     _number_of_substeps(
         this->template declareProperty<Real>(this->_base_name + "number_of_substeps"))
 {
-  this->_check_range = true;
+  this->_check_range = true; // todo, this may not be necessary?
 
-  _window_failure[_cell_input_index] =
-      parameters.get<MooseEnum>("cell_input_window_failure").getEnum<WindowFailure>();
-  _window_failure[_wall_input_index] =
-      parameters.get<MooseEnum>("wall_input_window_failure").getEnum<WindowFailure>();
-  _window_failure[_stress_input_index] =
-      parameters.get<MooseEnum>("stress_input_window_failure").getEnum<WindowFailure>();
-  _window_failure[_old_strain_input_index] =
-      parameters.get<MooseEnum>("old_strain_input_window_failure").getEnum<WindowFailure>();
-  _window_failure[_temperature_input_index] =
-      parameters.get<MooseEnum>("temperature_input_window_failure").getEnum<WindowFailure>();
+  for (unsigned int i = 0; i < _window_failure.size(); ++i)
+    _window_failure[i].resize(2);
+
+  _window_failure[_cell_input_index][0] =
+      parameters.get<MooseEnum>("cell_input_window_low_failure").getEnum<WindowFailure>();
+  _window_failure[_cell_input_index][1] =
+      parameters.get<MooseEnum>("cell_input_window_high_failure").getEnum<WindowFailure>();
+  _window_failure[_wall_input_index][0] =
+      parameters.get<MooseEnum>("wall_input_window_low_failure").getEnum<WindowFailure>();
+  _window_failure[_wall_input_index][1] =
+      parameters.get<MooseEnum>("wall_input_window_high_failure").getEnum<WindowFailure>();
+  _window_failure[_stress_input_index][0] =
+      parameters.get<MooseEnum>("stress_input_window_low_failure").getEnum<WindowFailure>();
+  _window_failure[_stress_input_index][1] =
+      parameters.get<MooseEnum>("stress_input_window_high_failure").getEnum<WindowFailure>();
+  _window_failure[_old_strain_input_index][0] =
+      parameters.get<MooseEnum>("old_strain_input_window_low_failure").getEnum<WindowFailure>();
+  _window_failure[_old_strain_input_index][1] =
+      parameters.get<MooseEnum>("old_strain_input_window_high_failure").getEnum<WindowFailure>();
+  _window_failure[_temperature_input_index][0] =
+      parameters.get<MooseEnum>("temperature_input_window_low_failure").getEnum<WindowFailure>();
+  _window_failure[_temperature_input_index][1] =
+      parameters.get<MooseEnum>("temperature_input_window_high_failure").getEnum<WindowFailure>();
   if (_environmental)
-    _window_failure[_environmental_input_index] =
-        parameters.get<MooseEnum>("environment_input_window_failure").getEnum<WindowFailure>();
+  {
+    _window_failure[_environmental_input_index][0] =
+        parameters.get<MooseEnum>("environment_input_window_low_failure").getEnum<WindowFailure>();
+    _window_failure[_environmental_input_index][1] =
+        parameters.get<MooseEnum>("environment_input_window_high_failure").getEnum<WindowFailure>();
+  }
 
   setupUnitConversionFactors(parameters);
 }
@@ -206,119 +276,146 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::initialSetup()
   _normalization_limits = getNormalizationLimits();
   _coefs = getCoefs();
   _tiling = getTilings();
-
-  _num_tiles = _transform.size();
-  if (!_num_tiles)
-    mooseError("In ", this->_name, ": No tiles detected. Double check your ROM input");
-
-  _num_outputs = _transform[0].size();
+  _cutoff = getStrainCutoff();
+  // resize containers to be filled later based on partition dimension
+  // and immediately run some sanity checks
+  _num_partitions = _transform.size();
+  if (_num_partitions < 1 || _num_partitions > 2)
+    mooseError(
+        "In ", _name, ": First dimension of getTransform must be either size one or size two");
+  if (_transform[0].size() < 1)
+    mooseError("In ", _name, ": Transform is not the correct shape");
+  _num_outputs = _transform[0][0].size();
   if (_num_outputs != 3)
     mooseError("In ",
-               this->_name,
+               _name,
                ": ",
                _num_outputs,
                " outputs detected. Three and only three outputs are currently supported.");
 
-  _num_inputs = _transform[0][0].size();
+  _num_inputs = _transform[0][0][0].size();
   if (_num_inputs != 5 && _num_inputs != 6)
     mooseError("In ",
-               this->_name,
+               _name,
                ": ",
                _num_inputs,
                " inputs detected. Only five or six inputs currently supported.");
   if (_num_inputs == 6 && !_environmental)
     this->template paramError(
-        "environmental",
+        "environmental_factor",
         "Number of ROM inputs indicate environmental factor is required to be coupled.");
   if (_num_inputs != 6 && _environmental)
     this->template paramError(
-        "environmental",
+        "environmental_factor",
         "Number of ROM inputs indicate environmental factor is not implemented, but "
         "environmental factor coupled.");
-
-  bool correct_shape = true;
-  if (_transform.size() != _num_tiles || _transform_coefs.size() != _num_tiles ||
-      _input_limits.size() != _num_tiles || _normalization_limits.size() != _num_tiles ||
-      _coefs.size() != _num_tiles)
-    correct_shape = false;
-  if (_tiling.size() != _num_inputs)
-    correct_shape = false;
-
-  if (_coefs[0].size() == 0)
-    correct_shape = false;
-  _num_coefs = _coefs[0][0].size();
-  for (unsigned int t = 0; t < _num_tiles; ++t)
-  {
-    if (_transform[t].size() != _num_outputs || _transform_coefs[t].size() != _num_outputs ||
-        _coefs[t].size() != _num_outputs)
-      correct_shape = false;
-    for (unsigned int o = 0; o < _num_outputs; ++o)
-      if (_transform[t][o].size() != _num_inputs || _transform_coefs[t][o].size() != _num_inputs ||
-          _coefs[t][o].size() != _num_coefs)
-        correct_shape = false;
-    if (_input_limits[t].size() != _num_inputs || _normalization_limits[t].size() != _num_inputs)
-      correct_shape = false;
-    for (unsigned int i = 0; i < _num_inputs; ++i)
-      if (_input_limits[t][i].size() != 2 || _normalization_limits[t][i].size() != 2)
-        correct_shape = false;
-  }
-
-  if (!correct_shape)
-    mooseError("In ", this->_name, ": ROM data is not the right shape.");
-
-  unsigned int tiles_check = 1;
-  for (unsigned int i = 0; i < _num_inputs; ++i)
-    tiles_check *= _tiling[i];
-  if (tiles_check != _num_tiles)
-    mooseError("In ",
-               this->_name,
-               ": Product of getTiles (",
-               tiles_check,
-               ") is not the same as num_tiles (",
-               _num_tiles,
-               ")");
-
-  _degree = std::pow(_num_coefs, 1.0 / _num_inputs);
-  if (!_degree || _degree > 4)
-    mooseError("In ", this->_name, ": degree must be 1, 2, 3 or 4.");
-
-  // Check input limits and find global limits
+  _num_tiles.resize(_num_partitions);
+  _num_coefs.resize(_num_partitions);
+  _degree.resize(_num_partitions);
+  _precomputed_vals.resize(_num_partitions);
+  _rom_inputs.resize(_num_partitions);
+  _polynomial_inputs.resize(_num_partitions);
+  _non_stress_weights.resize(_num_partitions);
+  _weights.resize(_num_partitions);
+  _partition_weights.resize(_num_partitions);
+  _dpartition_weight_dstress.resize(_num_partitions);
+  _transformed_normalization_limits.resize(_num_partitions);
+  _makeframe_helper.resize(_num_partitions);
   _global_limits.resize(_num_inputs, std::vector<Real>(2));
+  // temporarily fill global limits with extreme numerical values, to later update
   for (unsigned int i = 0; i < _num_inputs; ++i)
   {
     _global_limits[i][0] = std::numeric_limits<Real>::max();
     _global_limits[i][1] = 0.0;
-    for (unsigned int t = 0; t < _num_tiles; ++t)
-    {
-      if (_input_limits[t][i][0] >= _input_limits[t][i][1])
-        mooseError("In ", this->_name, ": Input limits are ordered incorrectly");
-      _global_limits[i][0] = std::min(_global_limits[i][0], _input_limits[t][i][0]);
-      _global_limits[i][1] = std::max(_global_limits[i][1], _input_limits[t][i][1]);
-    }
   }
 
-  // Precompute helper containers
-  _transformed_normalization_limits = getTransformedLimits(_normalization_limits);
-  _makeframe_helper = getMakeFrameHelper();
+  // start loop over partitions to perform sanity checks, set global limits,
+  // and print global configurations
+  for (unsigned int p = 0; p < _num_partitions; ++p)
+  {
+    _num_tiles[p] = _transform[p].size();
+    if (!_num_tiles[p])
+      mooseError("In ", _name, ": No tiles detected. Double check your ROM input");
 
-  // Prepare containers
+    bool correct_shape = true;
+    if (_transform[p].size() != _num_tiles[p] || _transform_coefs[p].size() != _num_tiles[p] ||
+        _input_limits[p].size() != _num_tiles[p] ||
+        _normalization_limits[p].size() != _num_tiles[p] || _coefs[p].size() != _num_tiles[p])
+      correct_shape = false;
+    if (_tiling[p].size() != _num_inputs)
+      correct_shape = false;
+    if (_coefs[p][0].size() == 0)
+      correct_shape = false;
+    _num_coefs[p] = _coefs[p][0][0].size();
+
+    // start loop over tiles to perform sanity checks.
+    for (unsigned int t = 0; t < _num_tiles[p]; ++t)
+    {
+      if (_transform[p][t].size() != _num_outputs ||
+          _transform_coefs[p][t].size() != _num_outputs || _coefs[p][t].size() != _num_outputs)
+        correct_shape = false;
+      for (unsigned int o = 0; o < _num_outputs; ++o)
+        if (_transform[p][t][o].size() != _num_inputs ||
+            _transform_coefs[p][t][o].size() != _num_inputs ||
+            _coefs[p][t][o].size() != _num_coefs[p])
+          correct_shape = false;
+      if (_input_limits[p][t].size() != _num_inputs ||
+          _normalization_limits[p][t].size() != _num_inputs)
+        correct_shape = false;
+      for (unsigned int i = 0; i < _num_inputs; ++i)
+        if (_input_limits[p][t][i].size() != 2 || _normalization_limits[p][t][i].size() != 2)
+          correct_shape = false;
+    }
+
+    if (!correct_shape)
+      mooseError("In ", _name, ": ROM data is not the right shape.");
+
+    _degree[p] = std::pow(_num_coefs[p], 1.0 / _num_inputs);
+    if (!_degree[p] || _degree[p] > 4)
+      mooseError("In ", _name, ": degree must be 1, 2, 3 or 4.");
+
+    // Check input limits and find global limits of all partitions
+    for (unsigned int i = 0; i < _num_inputs; ++i)
+    {
+      for (unsigned int t = 0; t < _num_tiles[p]; ++t)
+      {
+        if (_input_limits[p][t][i][0] >= _input_limits[p][t][i][1])
+          mooseError("In ", _name, ": Input limits are ordered incorrectly");
+        _global_limits[i][0] = std::min(_global_limits[i][0], _input_limits[p][t][i][0]);
+        _global_limits[i][1] = std::max(_global_limits[i][1], _input_limits[p][t][i][1]);
+      }
+    }
+
+    // Precompute helper containers
+    _transformed_normalization_limits[p] = getTransformedLimits(p, _normalization_limits[p]);
+    _makeframe_helper[p] = getMakeFrameHelper(p);
+
+    // Prepare containers for each partition
+    _precomputed_vals[p].resize(_num_tiles[p], std::vector<GenericReal<is_ad>>(_num_coefs[p]));
+    _rom_inputs[p].resize(_num_tiles[p], std::vector<GenericReal<is_ad>>(_num_inputs));
+    _polynomial_inputs[p].resize(_num_tiles[p],
+                                 std::vector<std::vector<GenericReal<is_ad>>>(
+                                     _num_inputs, std::vector<GenericReal<is_ad>>(_degree[p])));
+    _non_stress_weights[p].resize(_num_tiles[p]);
+    _weights[p].resize(_num_tiles[p], 0);
+  }
+  // Prepare containers independent of partition
   _input_values.resize(_num_inputs);
-  _precomputed_vals.resize(_num_tiles, std::vector<GenericReal<is_ad>>(_num_coefs));
-  _rom_inputs.resize(_num_tiles, std::vector<GenericReal<is_ad>>(_num_inputs));
-  _polynomial_inputs.resize(_num_tiles,
-                            std::vector<std::vector<GenericReal<is_ad>>>(
-                                _num_inputs, std::vector<GenericReal<is_ad>>(_degree)));
-  _non_stress_weights.resize(_num_tiles);
-  _weights.resize(_num_tiles);
 
   if (_verbose)
   {
-    Moose::err << "ROM model info: " << this->_name << "\n";
-    Moose::err << " number of tiles: " << _num_tiles << "\n";
+    Moose::err << "ROM model info: " << _name << "\n";
+    Moose::err << " number of tiles, partition 1: " << _num_tiles[0] << "\n";
+    if (_num_partitions > 1)
+      Moose::err << " number of tiles, partition 2: " << _num_tiles[1] << "\n";
     Moose::err << " number of outputs: " << _num_outputs << "\n";
     Moose::err << " number of inputs: " << _num_inputs << "\n";
-    Moose::err << " degree (max Legendre degree + constant): " << _degree << "\n";
-    Moose::err << " number of coefficients: " << _num_coefs << "\n";
+    Moose::err << " degree (max Legendre degree + constant), partition 1: " << _degree[0] << "\n";
+    if (_num_partitions > 1)
+      Moose::err << " degree (max Legendre degree + constant), partition 2: " << _degree[1] << "\n";
+    Moose::err << " number of coefficients, partition 1: " << _num_coefs[0] << "\n";
+    if (_num_partitions > 1)
+      Moose::err << " number of coefficients, partition 2: " << _num_coefs[1] << "\n";
     Moose::err << " Global limits:\n  cell dislocations (" << _global_limits[_cell_input_index][0]
                << " - " << _global_limits[_cell_input_index][1] << ")\n";
     Moose::err << "  wall dislocations (" << _global_limits[_wall_input_index][0] << " - "
@@ -340,8 +437,17 @@ template <bool is_ad>
 void
 LAROMANCEStressUpdateBaseTempl<is_ad>::initQpStatefulProperties()
 {
-  _cell_dislocations[_qp] = _initial_cell_dislocations;
-  _wall_dislocations[_qp] = _initial_wall_dislocations;
+  MooseRandom rng;
+  rng.seed(0, this->template getParam<unsigned int>("seed"));
+
+  _cell_dislocations[_qp] = rng.randNormal(
+      this->template getParam<Real>("initial_cell_dislocation_density"),
+      this->template getParam<Real>("initial_cell_dislocation_density") *
+          this->template getParam<Real>("cell_dislocations_normal_distribution_width"));
+  _wall_dislocations[_qp] = rng.randNormal(
+      this->template getParam<Real>("initial_wall_dislocation_density"),
+      this->template getParam<Real>("initial_wall_dislocation_density") *
+          this->template getParam<Real>("wall_dislocations_normal_distribution_width"));
 
   RadialReturnCreepStressUpdateBaseTempl<is_ad>::initQpStatefulProperties();
 }
@@ -408,14 +514,16 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::computeStressInitialize(
   // Prepare input
   _input_values[_cell_input_index] = _old_input_values[_cell_output_index];
   _input_values[_wall_input_index] = _old_input_values[_wall_output_index];
-  _input_values[_stress_input_index] = effective_trial_stress * 1.0e-6;
+  _input_values[_stress_input_index] = _stress_function ? _stress_function->value(_t, _q_point[_qp])
+                                                        : effective_trial_stress * 1.0e-6;
   _input_values[_old_strain_input_index] = _old_input_values[_strain_output_index];
   _input_values[_temperature_input_index] = _temperature[_qp];
   if (_environmental)
     _input_values[_environmental_input_index] = (*_environmental)[_qp];
 
-  // Determine tile mixing weight and check to see if input is in range
-  std::fill(_non_stress_weights.begin(), _non_stress_weights.end(), 1.0);
+  // Determine tile weight and check if input is in range
+  for (unsigned int p = 0; p < _num_partitions; ++p)
+    std::fill(_non_stress_weights[p].begin(), _non_stress_weights[p].end(), 1.0);
   for (unsigned int i = 0; i < _num_inputs; i++)
   {
     if (i != _stress_input_index)
@@ -431,111 +539,185 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::computeStressInitialize(
 
 template <bool is_ad>
 void
-LAROMANCEStressUpdateBaseTempl<is_ad>::computeTileWeight(std::vector<GenericReal<is_ad>> & weights,
-                                                         GenericReal<is_ad> & input,
-                                                         const unsigned int in_index,
-                                                         const bool derivative)
+LAROMANCEStressUpdateBaseTempl<is_ad>::computeTileWeight(
+    std::vector<std::vector<GenericReal<is_ad>>> & weights,
+    GenericReal<is_ad> & input,
+    const unsigned int in_index,
+    const bool derivative)
 {
-  for (unsigned int t = 0; t < _num_tiles; ++t)
+  mooseAssert(std::isfinite(MetaPhysicL::raw_value(input)),
+              "computeTileWeight input must be finite");
+
+  for (unsigned int p = 0; p < _num_partitions; ++p)
   {
-    // If tiling is not available for this input
-    if (_tiling[in_index] < 2)
-    {
-      // Extrapolate if input limit of the current tile is the global min
-      if (_window_failure[in_index] == WindowFailure::EXTRAPOLATE &&
-          _input_limits[t][in_index][0] == _global_limits[in_index][0] &&
-          input < _input_limits[t][in_index][0])
-      {
-        if (derivative)
-          weights[t] *= -sigmoid(0.0, _global_limits[in_index][0], input, true);
-        else
-          weights[t] *= (1.0 - sigmoid(0.0, _global_limits[in_index][0], input));
-        input = _global_limits[in_index][0];
-      }
-    }
-    else
+    for (unsigned int t = 0; t < _num_tiles[p]; ++t)
     {
       // If input is within a specfic tile's window of applicability
-      if (input >= _input_limits[t][in_index][0] && input < _input_limits[t][in_index][1])
+      if (input >= _input_limits[p][t][in_index][0] && input <= _input_limits[p][t][in_index][1])
       {
-        // Flag to ensure weights are applied only once
-        bool overlap = false;
-        for (unsigned int tt = 0; tt < _num_tiles; ++tt)
+        // If there is not more than one tile for this input, set derivative of
+        // weight to zero
+        if (_tiling[p][in_index] == 1)
         {
-          if (!overlap && t != tt)
+          if (derivative)
+            weights[p][t] = 0.0;
+        }
+        else
+        {
+          // Flag to ensure weights are applied only once
+          bool overlap = false;
+          for (unsigned int tt = 0; tt < _num_tiles[p]; ++tt)
           {
-            // If input is within another tile's window of applicability, i.e. tiled
-            if ((_input_limits[t][in_index][0] != _input_limits[tt][in_index][0] ||
-                 _input_limits[t][in_index][1] != _input_limits[tt][in_index][1]) &&
-                input >= _input_limits[tt][in_index][0] && input < _input_limits[tt][in_index][1])
+            if (!overlap && t != tt)
             {
-              overlap = true;
-              // If current tile is below the second tile's window of applicability
-              if (_input_limits[t][in_index][0] < _input_limits[tt][in_index][0] &&
-                  _input_limits[t][in_index][1] > _input_limits[tt][in_index][0])
+              // If input is within another tile's window of applicability, check to see if inputs
+              // place us in that tile and ensure the two tiles are different in the dimension of
+              // interest
+              if (areTilesNotIdentical(p, t, tt, in_index) && checkInTile(p, tt))
               {
-                weights[t] *= sigmoid(_input_limits[tt][in_index][0],
-                                      _input_limits[t][in_index][1],
-                                      input,
-                                      derivative);
-              }
-              // If current tile is above the second tile's window of applicability
-              else if (_input_limits[t][in_index][0] > _input_limits[tt][in_index][0] &&
-                       _input_limits[t][in_index][0] < _input_limits[tt][in_index][1])
-              {
-                if (derivative)
-                  weights[t] *= -sigmoid(_input_limits[t][in_index][0],
-                                         _input_limits[tt][in_index][1],
-                                         input,
-                                         derivative);
-                else
-                  weights[t] *= (1.0 - sigmoid(_input_limits[t][in_index][0],
-                                               _input_limits[tt][in_index][1],
-                                               input));
+                overlap = true;
+
+                // If current tile is below the second tile's window of applicability
+                if (_input_limits[p][t][in_index][0] < _input_limits[p][tt][in_index][0] &&
+                    _input_limits[p][t][in_index][1] > _input_limits[p][tt][in_index][0])
+                {
+                  weights[p][t] *= sigmoid(_input_limits[p][tt][in_index][0],
+                                           _input_limits[p][t][in_index][1],
+                                           input,
+                                           derivative);
+                }
+                // If current tile is above the second tile's window of applicability
+                else if (_input_limits[p][t][in_index][0] > _input_limits[p][tt][in_index][0] &&
+                         _input_limits[p][t][in_index][0] < _input_limits[p][tt][in_index][1])
+                {
+                  if (derivative)
+                    weights[p][t] *= -sigmoid(_input_limits[p][t][in_index][0],
+                                              _input_limits[p][tt][in_index][1],
+                                              input,
+                                              derivative);
+                  else
+                    weights[p][t] *= (1.0 - sigmoid(_input_limits[p][t][in_index][0],
+                                                    _input_limits[p][tt][in_index][1],
+                                                    input));
+                }
               }
             }
           }
+
+          // If not overlapping, weight is not updated, and the derivative of tile weight is set to
+          // zero
+          if (!overlap && derivative)
+            weights[p][t] = 0.0;
         }
-        // If not overlapping, weight = 1, and there is no derivative
-        if (!overlap && derivative)
-          weights[t] *= 0.0;
+      }
+      // If input is below the lower tile limit
+      else if (input < _input_limits[p][t][in_index][0])
+      {
+        // If the lower tile limit equals the lower global limit
+        if (_input_limits[p][t][in_index][0] == _global_limits[in_index][0])
+        {
+          if (_window_failure[in_index][0] == WindowFailure::EXTRAPOLATE)
+          {
+            if (derivative)
+              weights[p][t] *= -sigmoid(0.0, _global_limits[in_index][0], input, derivative);
+            else
+              weights[p][t] *= (1.0 - sigmoid(0.0, _global_limits[in_index][0], input));
+            input = _global_limits[in_index][0];
+          }
+          else if (_window_failure[in_index][0] == WindowFailure::DONOTHING)
+            weights[p][t] = 0.0;
+          else if (_window_failure[in_index][0] == WindowFailure::USELIMIT)
+            input = _global_limits[in_index][0];
+          else
+            weights[p][t] = 0.0;
+        }
+        // if input below tile limit, update weight of tile to be zero
+        else
+          weights[p][t] = 0.0;
+      }
+      // If input is above the upper tile limit
+      else if (input > _input_limits[p][t][in_index][1])
+      {
+        if (_input_limits[p][t][in_index][1] == _global_limits[in_index][1])
+        {
+          if (_window_failure[in_index][1] == WindowFailure::EXTRAPOLATE)
+            mooseError("Internal error. Extrapolate not appropriate for upper bound");
+          else if (_window_failure[in_index][1] == WindowFailure::DONOTHING)
+            weights[p][t] = 0.0;
+          else if (_window_failure[in_index][1] == WindowFailure::USELIMIT)
+            input = _global_limits[in_index][1];
+          else
+            weights[p][t] = 0.0;
+        }
+        // if input above tile limit, update weight of tile to be zero
+        else
+          weights[p][t] = 0.0;
       }
       // If input is outside window of applicability, weight is zero
       else
-        weights[t] *= 0.0;
+        mooseError("In ", _name, ": Internal error. Outside input limits, input=", input);
     }
   }
 }
 
 template <bool is_ad>
+bool
+LAROMANCEStressUpdateBaseTempl<is_ad>::checkInTile(const unsigned int p, const unsigned int t) const
+{
+  bool check = true;
+  for (unsigned int i = 0; i < _num_inputs; ++i)
+    check *= (_input_values[i] >= _input_limits[p][t][i][0] &&
+              _input_values[i] <= _input_limits[p][t][i][1]);
+  return check;
+}
+
+template <bool is_ad>
+bool
+LAROMANCEStressUpdateBaseTempl<is_ad>::areTilesNotIdentical(const unsigned int p,
+                                                            const unsigned int t,
+                                                            const unsigned int tt,
+                                                            const unsigned int in_index)
+{
+  bool check = true;
+  check *= (_input_limits[p][t][in_index][0] != _input_limits[p][tt][in_index][0] ||
+            _input_limits[p][t][in_index][1] != _input_limits[p][tt][in_index][1]);
+  return check;
+}
+
+template <bool is_ad>
 void
 LAROMANCEStressUpdateBaseTempl<is_ad>::checkInputWindow(const GenericReal<is_ad> & input,
-                                                        const WindowFailure behavior,
+                                                        const std::vector<WindowFailure> behavior,
                                                         const std::vector<Real> & global_limits)
 {
-  if (behavior == WindowFailure::IGNORE || behavior == WindowFailure::EXTRAPOLATE)
-    return;
-
-  if (input < global_limits[0] || input > global_limits[1])
+  // checkInputWindow assumes rectangular tile-sets and the extreme global limits thereof. This is
+  // not a generic implementation, so use with caution in case of non-rectangular tile-sets.
+  if (input < global_limits[0])
   {
     std::stringstream msg;
-    msg << "In " << this->_name << ": input parameter with value (" << MetaPhysicL::raw_value(input)
-        << ") is out of global range (" << global_limits[0] << " - " << global_limits[1] << ")";
+    msg << "In " << _name << ": input parameter with value (" << MetaPhysicL::raw_value(input)
+        << ") is out of lower global range (" << global_limits[0] << ")";
 
-    switch (behavior)
-    {
-      case WindowFailure::WARN:
-        mooseDoOnce(mooseWarning(msg.str()));
-        break;
-      case WindowFailure::EXCEPTION:
-        mooseException(msg.str());
-        break;
-      case WindowFailure::ERROR:
-        mooseError(msg.str());
-        break;
-      default:
-        mooseError("Internal enum error");
-    }
+    if (behavior[0] == WindowFailure::WARN)
+      mooseWarning(msg.str());
+    else if (behavior[0] == WindowFailure::ERROR)
+      mooseError(msg.str());
+    else if (behavior[0] == WindowFailure::EXCEPTION)
+      mooseException(msg.str());
+  }
+
+  if (input > global_limits[1])
+  {
+    std::stringstream msg;
+    msg << "In " << _name << ": input parameter with value (" << MetaPhysicL::raw_value(input)
+        << ") is out of upper global range (" << global_limits[1] << ")";
+
+    if (behavior[1] == WindowFailure::WARN)
+      mooseWarning(msg.str());
+    else if (behavior[1] == WindowFailure::ERROR)
+      mooseError(msg.str());
+    else if (behavior[1] == WindowFailure::EXCEPTION)
+      mooseException(msg.str());
   }
 }
 
@@ -544,8 +726,14 @@ GenericReal<is_ad>
 LAROMANCEStressUpdateBaseTempl<is_ad>::computeResidual(
     const GenericReal<is_ad> & effective_trial_stress, const GenericReal<is_ad> & scalar)
 {
+  mooseAssert(std::isfinite(MetaPhysicL::raw_value(effective_trial_stress)),
+              "computeResidual: effective_trial_stress must be finite");
+  mooseAssert(std::isfinite(MetaPhysicL::raw_value(scalar)),
+              "computeResidual: scalar must be finite!");
   // Update new stress
-  auto trial_stress_mpa = effective_trial_stress * _stress_ucf;
+  GenericReal<is_ad> trial_stress_mpa = _stress_function
+                                            ? _stress_function->value(_t, _q_point[_qp])
+                                            : effective_trial_stress * _stress_ucf;
   GenericReal<is_ad> dtrial_stress_dscalar = 0.0;
 
   // Update stress if strain is being applied, i.e. non-testing simulation
@@ -556,8 +744,9 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::computeResidual(
   }
   _input_values[_stress_input_index] = trial_stress_mpa;
 
-  // Update weights with new stress
-  _weights = _non_stress_weights;
+  // Update weights for each partition with new stress
+  for (unsigned int p = 0; p < _num_partitions; ++p)
+    _weights[p] = _non_stress_weights[p];
   computeTileWeight(_weights, _input_values[_stress_input_index], _stress_input_index);
   auto dweights_dstress = _non_stress_weights;
   computeTileWeight(
@@ -568,53 +757,88 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::computeResidual(
                    _window_failure[_stress_input_index],
                    _global_limits[_stress_input_index]);
 
-  // Save extrapolation as a material proeprty in order quantify adequate tiling range
+  computePartitionWeights(_partition_weights, _dpartition_weight_dstress);
+
+  // Save extrapolation as a material property in order quantify adequate tiling range
   _extrapolation[_qp] = 0.0;
-  for (unsigned int t = 0; t < _num_tiles; ++t)
-    _extrapolation[_qp] += MetaPhysicL::raw_value(_weights[t]);
+  for (unsigned int p = 0; p < _num_partitions; ++p)
+    for (unsigned int t = 0; t < _num_tiles[p]; ++t)
+      _extrapolation[_qp] += MetaPhysicL::raw_value(_weights[p][t] * _partition_weights[p]);
 
   GenericReal<is_ad> total_rom_effective_strain_inc = 0.0;
   GenericReal<is_ad> dtotal_rom_effective_strain_inc_dstress = 0.0;
 
   // Run ROM if all values are within windows.
-  for (unsigned int t = 0; t < _num_tiles; ++t)
+  for (unsigned int p = 0; p < _num_partitions; p++)
   {
-    if (_weights[t])
-    {
-      const GenericReal<is_ad> rom = computeROM(t, _strain_output_index);
-      total_rom_effective_strain_inc += _weights[t] * rom;
-      dtotal_rom_effective_strain_inc_dstress +=
-          _weights[t] * computeROM(t, _strain_output_index, true) + dweights_dstress[t] * rom;
-    }
+    if (_partition_weights[p])
+      for (unsigned int t = 0; t < _num_tiles[p]; ++t)
+      {
+        if (_weights[p][t])
+        {
+          const GenericReal<is_ad> rom = computeROM(t, p, _strain_output_index);
+          if (rom == std::numeric_limits<float>::infinity())
+            mooseError("In ", _name, ": Output for strain increment reaches infinity: ", rom);
+
+          total_rom_effective_strain_inc += _partition_weights[p] * _weights[p][t] * rom;
+
+          dtotal_rom_effective_strain_inc_dstress =
+              _partition_weights[p] * _weights[p][t] * computeROM(t, p, _strain_output_index, true);
+          if (_dpartition_weight_dstress[p])
+            dtotal_rom_effective_strain_inc_dstress +=
+                _dpartition_weight_dstress[p] * _weights[p][t] * rom;
+          if (dweights_dstress[p][t])
+            dtotal_rom_effective_strain_inc_dstress +=
+                _partition_weights[p] * dweights_dstress[p][t] * rom;
+        }
+      }
   }
 
   if (_verbose)
   {
+    Moose::err << std::setprecision(9);
     GenericReal<is_ad> environmental = 0.0;
     if (_environmental)
       environmental = (*_environmental)[_qp];
-    Moose::err << "Verbose information from " << this->_name << ": \n";
-    Moose::err << "  dt: " << _dt << "\n";
-    Moose::err << "  old cell disl: " << _old_input_values[_cell_output_index] << "\n";
-    Moose::err << "  old wall disl: " << _old_input_values[_wall_output_index] << "\n";
-    Moose::err << "  initial stress (MPa): "
+    Moose::err << "Verbose information from " << _name << ": \n";
+    Moose::err << " dt: " << _dt << "\n";
+    Moose::err << " old cell disl: " << _old_input_values[_cell_output_index] << "\n";
+    Moose::err << " old wall disl: " << _old_input_values[_wall_output_index] << "\n";
+    Moose::err << " initial stress (MPa): "
                << MetaPhysicL::raw_value(effective_trial_stress) * _stress_ucf << "\n";
-    Moose::err << "  temperature: " << MetaPhysicL::raw_value(_temperature[_qp]) << "\n";
-    Moose::err << "  environmental factor: " << MetaPhysicL::raw_value(environmental) << "\n";
-    Moose::err << "  calculated scalar strain value: " << MetaPhysicL::raw_value(scalar) << "\n";
-    Moose::err << "  trial stress into rom (MPa): " << MetaPhysicL::raw_value(trial_stress_mpa)
+    Moose::err << " temperature: " << MetaPhysicL::raw_value(_temperature[_qp]) << "\n";
+    Moose::err << " environmental factor: " << MetaPhysicL::raw_value(environmental) << "\n";
+    Moose::err << " calculated scalar strain value: " << MetaPhysicL::raw_value(scalar) << "\n";
+    Moose::err << " trial stress into rom (MPa): " << MetaPhysicL::raw_value(trial_stress_mpa)
                << "\n";
-    Moose::err << "  old effective strain: " << _old_input_values[_strain_output_index] << "\n";
-    Moose::err << "  extrapolation: " << MetaPhysicL::raw_value(_extrapolation[_qp]) << "\n";
-    Moose::err << "  weights by tile: ";
-    for (unsigned int t = 0; t < _num_tiles; ++t)
-      Moose::err << " (" << t << ", " << MetaPhysicL::raw_value(_weights[t]) << ") ";
+    Moose::err << " old effective strain: " << _old_input_values[_strain_output_index] << "\n";
+    Moose::err << " extrapolation: " << MetaPhysicL::raw_value(_extrapolation[_qp]) << "\n";
+    Moose::err << " partition 2 weight: " << MetaPhysicL::raw_value(_second_partition_weight[_qp])
+               << "\n";
+    Moose::err << " weights by tile, partition 1: ";
+    for (unsigned int t = 0; t < _num_tiles[0]; ++t)
+      Moose::err << " (" << t << ", " << MetaPhysicL::raw_value(_weights[0][t]) << ") ";
     Moose::err << "\n";
-    Moose::err << "  nonstress weights by tile: ";
-    for (unsigned int t = 0; t < _num_tiles; ++t)
-      Moose::err << " (" << t << ", " << MetaPhysicL::raw_value(_non_stress_weights[t]) << ") ";
+    if (_num_partitions > 1)
+    {
+      Moose::err << " weights by tile, partition 2: ";
+      for (unsigned int t = 0; t < _num_tiles[1]; ++t)
+        Moose::err << " (" << t << ", " << MetaPhysicL::raw_value(_weights[1][t]) << ") ";
+    }
     Moose::err << "\n";
-    Moose::err << "  effective strain increment: "
+    Moose::err << " nonstress weights by tile, partition 1: ";
+    for (unsigned int t = 0; t < _num_tiles[0]; ++t)
+      Moose::err << " (" << t << ", " << MetaPhysicL::raw_value(_non_stress_weights[0][t]) << ") ";
+    Moose::err << "\n";
+    if (_num_partitions > 1)
+    {
+      Moose::err << " nonstress weights by tile, partition 2: ";
+      for (unsigned int t = 0; t < _num_tiles[1]; ++t)
+        Moose::err << " (" << t << ", " << MetaPhysicL::raw_value(_non_stress_weights[1][t])
+                   << ") ";
+    }
+    Moose::err << "\n";
+    Moose::err << " effective strain increment: "
                << MetaPhysicL::raw_value(total_rom_effective_strain_inc) << std::endl;
   }
 
@@ -633,25 +857,93 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::computeResidual(
 
 template <bool is_ad>
 void
+LAROMANCEStressUpdateBaseTempl<is_ad>::computePartitionWeights(
+    std::vector<GenericReal<is_ad>> & weights, std::vector<GenericReal<is_ad>> & dweights_dstress)
+{
+  if (_num_partitions == 1) // If only one parition present, all weights are one
+  {
+    weights[0] = 1.0;
+    dweights_dstress[0] = 0.0;
+  }
+  else if (_num_partitions == 2)
+  {
+    std::vector<bool> in_partition(_num_partitions, false);
+    for (unsigned int p = 0; p < _num_partitions; ++p)
+      for (unsigned int t = 0; t < _num_tiles[p]; ++t)
+        if (!in_partition[p] && checkInTile(p, t))
+          in_partition[p] = true;
+
+    const unsigned int num_partitions_active = in_partition[0] + in_partition[1];
+    if (num_partitions_active == 1) // If only present in one partition, math is easy
+    {
+      std::fill(dweights_dstress.begin(), dweights_dstress.end(), 0.0);
+
+      if (in_partition[0])
+        weights[1] = 0.0;
+      else if (in_partition[1])
+        weights[1] = 1.0;
+      else
+        mooseError("Internal error: Parition weight calculation incorrect when only one "
+                   "partition is applicable");
+    }
+    else if (num_partitions_active == 2) // If present in two partitions, compute weights
+    {
+      weights[1] = computeSecondPartitionWeight();
+
+      computeDSecondPartitionWeightDStress(dweights_dstress[1]);
+      dweights_dstress[0] = -dweights_dstress[1];
+    }
+    else
+      mooseError("Internal error: Number of active partitions (",
+                 num_partitions_active,
+                 ") out of total number of partitions (",
+                 _num_partitions,
+                 ") is not one or two");
+
+    weights[0] = 1.0 - weights[1];
+  }
+  else
+    mooseError("Internal error: number of partitions can only be 1 or 2");
+
+  if (_num_partitions == 2)
+    _second_partition_weight[_qp] = _partition_weights[1];
+  else
+    _second_partition_weight[_qp] = 0.0;
+
+  // Given the weight, compute the sigmoid transformed value to smoothly transition
+  for (unsigned int p = 0; p < _num_partitions; ++p)
+  {
+    weights[p] = (1.0 - sigmoid(0.0, 1.0, weights[p]));
+    dweights_dstress[p] *= -sigmoid(0.0, 1.0, weights[p], true);
+  }
+}
+
+template <bool is_ad>
+void
 LAROMANCEStressUpdateBaseTempl<is_ad>::precomputeROM(const unsigned out_index)
 {
-  for (unsigned int t = 0; t < _num_tiles; ++t)
+  for (unsigned int p = 0; p < _num_partitions; ++p)
   {
-    // Only precompute for tiles that don't have zero weight
-    if (_non_stress_weights[t])
+    for (unsigned int t = 0; t < _num_tiles[p]; ++t)
     {
-      for (unsigned int i = 0; i < _num_inputs; ++i)
+      // Only precompute for tiles that don't have zero weight
+      if (_non_stress_weights[p][t])
       {
-        if (i != _stress_input_index)
+        for (unsigned int i = 0; i < _num_inputs; ++i)
         {
-          _rom_inputs[t][i] = normalizeInput(_input_values[i],
-                                             _transform[t][out_index][i],
-                                             _transform_coefs[t][out_index][i],
-                                             _transformed_normalization_limits[t][out_index][i]);
-          buildPolynomials(_rom_inputs[t][i], _polynomial_inputs[t][i]);
+          if (i != _stress_input_index)
+          {
+            _rom_inputs[p][t][i] =
+                normalizeInput(_input_values[i],
+                               _transform[p][t][out_index][i],
+                               _transform_coefs[p][t][out_index][i],
+                               _transformed_normalization_limits[p][t][out_index][i]);
+            buildPolynomials(p, _rom_inputs[p][t][i], _polynomial_inputs[p][t][i]);
+          }
         }
+        precomputeValues(
+            p, _coefs[p][t][out_index], _polynomial_inputs[p][t], _precomputed_vals[p][t]);
       }
-      precomputeValues(_coefs[t][out_index], _polynomial_inputs[t], _precomputed_vals[t]);
     }
   }
 }
@@ -659,38 +951,42 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::precomputeROM(const unsigned out_index)
 template <bool is_ad>
 GenericReal<is_ad>
 LAROMANCEStressUpdateBaseTempl<is_ad>::computeROM(const unsigned int t,
+                                                  const unsigned int p,
                                                   const unsigned out_index,
                                                   const bool derivative)
 {
   // Update due to new stress
-  _rom_inputs[t][_stress_input_index] =
+  _rom_inputs[p][t][_stress_input_index] =
       normalizeInput(_input_values[_stress_input_index],
-                     _transform[t][out_index][_stress_input_index],
-                     _transform_coefs[t][out_index][_stress_input_index],
-                     _transformed_normalization_limits[t][out_index][_stress_input_index]);
-  buildPolynomials(_rom_inputs[t][_stress_input_index], _polynomial_inputs[t][_stress_input_index]);
+                     _transform[p][t][out_index][_stress_input_index],
+                     _transform_coefs[p][t][out_index][_stress_input_index],
+                     _transformed_normalization_limits[p][t][out_index][_stress_input_index]);
+
+  buildPolynomials(
+      p, _rom_inputs[p][t][_stress_input_index], _polynomial_inputs[p][t][_stress_input_index]);
 
   // Compute ROM values
-  const GenericReal<is_ad> rom_output = computeValues(_precomputed_vals[t], _polynomial_inputs[t]);
+  const GenericReal<is_ad> rom_output =
+      computeValues(p, _precomputed_vals[p][t], _polynomial_inputs[p][t]);
 
   // Return converted output if not derivative
   if (!derivative)
-    return convertOutput(_old_input_values, rom_output, out_index);
+    return convertOutput(p, _old_input_values, rom_output, out_index);
 
   const GenericReal<is_ad> drom_input =
       normalizeInput(_input_values[_stress_input_index],
-                     _transform[t][out_index][_stress_input_index],
-                     _transform_coefs[t][out_index][_stress_input_index],
-                     _transformed_normalization_limits[t][out_index][_stress_input_index],
+                     _transform[p][t][out_index][_stress_input_index],
+                     _transform_coefs[p][t][out_index][_stress_input_index],
+                     _transformed_normalization_limits[p][t][out_index][_stress_input_index],
                      derivative);
 
-  std::vector<GenericReal<is_ad>> dpolynomial_inputs(_degree, 0.0);
-  buildPolynomials(_rom_inputs[t][_stress_input_index], dpolynomial_inputs, drom_input, derivative);
+  std::vector<GenericReal<is_ad>> dpolynomial_inputs(_degree[p], 0.0);
+  buildPolynomials(
+      p, _rom_inputs[p][t][_stress_input_index], dpolynomial_inputs, drom_input, derivative);
 
-  const GenericReal<is_ad> drom_output =
-      computeValues(_precomputed_vals[t], _polynomial_inputs[t], dpolynomial_inputs, derivative);
-
-  return convertOutput(_old_input_values, rom_output, out_index, drom_output, derivative);
+  const GenericReal<is_ad> drom_output = computeValues(
+      p, _precomputed_vals[p][t], _polynomial_inputs[p][t], dpolynomial_inputs, derivative);
+  return convertOutput(p, _old_input_values, rom_output, out_index, drom_output, derivative);
 }
 
 template <bool is_ad>
@@ -714,14 +1010,16 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::normalizeInput(const GenericReal<is_ad> &
 template <bool is_ad>
 void
 LAROMANCEStressUpdateBaseTempl<is_ad>::buildPolynomials(
+    const unsigned int p,
     const GenericReal<is_ad> & rom_input,
     std::vector<GenericReal<is_ad>> & polynomial_inputs,
     const GenericReal<is_ad> & drom_input,
     const bool derivative)
 {
-  for (unsigned int d = 0; d < _degree; ++d)
+  for (unsigned int d = 0; d < _degree[p]; ++d)
   {
     polynomial_inputs[d] = computePolynomial(rom_input, d);
+
     if (derivative)
       polynomial_inputs[d] = drom_input * computePolynomial(rom_input, d, derivative);
   }
@@ -730,44 +1028,50 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::buildPolynomials(
 template <bool is_ad>
 void
 LAROMANCEStressUpdateBaseTempl<is_ad>::precomputeValues(
+    const unsigned int p,
     const std::vector<Real> & coefs,
     const std::vector<std::vector<GenericReal<is_ad>>> & polynomial_inputs,
     std::vector<GenericReal<is_ad>> & precomputed)
 {
-  for (unsigned int c = 0; c < _num_coefs; ++c)
+  for (unsigned int c = 0; c < _num_coefs[p]; ++c)
   {
     precomputed[c] = coefs[c];
     for (unsigned int i = 0; i < _num_inputs; ++i)
       if (i != _stress_input_index)
-        precomputed[c] *= polynomial_inputs[i][_makeframe_helper[c + _num_coefs * i]];
+        precomputed[c] *= polynomial_inputs[i][_makeframe_helper[p][c + _num_coefs[p] * i]];
   }
 }
 
 template <bool is_ad>
 GenericReal<is_ad>
 LAROMANCEStressUpdateBaseTempl<is_ad>::computeValues(
+    const unsigned int p,
     const std::vector<GenericReal<is_ad>> & precomputed,
     const std::vector<std::vector<GenericReal<is_ad>>> & polynomial_inputs,
     const std::vector<GenericReal<is_ad>> & dpolynomial_inputs,
     const bool derivative)
 {
   GenericReal<is_ad> rom_output = 0.0;
-  for (unsigned int c = 0; c < _num_coefs; ++c)
+  for (unsigned int c = 0; c < _num_coefs[p]; ++c)
   {
     if (!derivative)
-      rom_output += precomputed[c] *
-                    polynomial_inputs[_stress_input_index]
-                                     [_makeframe_helper[c + _num_coefs * _stress_input_index]];
+      rom_output +=
+          precomputed[c] *
+          polynomial_inputs[_stress_input_index]
+                           [_makeframe_helper[p][c + _num_coefs[p] * _stress_input_index]];
+
     else
-      rom_output += precomputed[c] *
-                    dpolynomial_inputs[_makeframe_helper[c + _num_coefs * _stress_input_index]];
+      rom_output +=
+          precomputed[c] *
+          dpolynomial_inputs[_makeframe_helper[p][c + _num_coefs[p] * _stress_input_index]];
   }
   return rom_output;
 }
 
 template <bool is_ad>
 GenericReal<is_ad>
-LAROMANCEStressUpdateBaseTempl<is_ad>::convertOutput(const std::vector<Real> & old_input_values,
+LAROMANCEStressUpdateBaseTempl<is_ad>::convertOutput(const unsigned int p,
+                                                     const std::vector<Real> & old_input_values,
                                                      const GenericReal<is_ad> & rom_output,
                                                      const unsigned out_index,
                                                      const GenericReal<is_ad> & drom_output,
@@ -785,13 +1089,12 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::convertOutput(const std::vector<Real> & o
     return 0.0;
 
   GenericReal<is_ad> expout = std::exp(rom_output);
-  mooseAssert(expout > 0.0, "ROM calculated strain increment is not strictly positive");
+  mooseAssert(expout > 0.0, "ROM calculated strain increment must be positive");
 
-  const Real rom_strain_cutoff_value = romStrainCutoff();
-  if (expout > rom_strain_cutoff_value)
-    expout -= rom_strain_cutoff_value;
+  if (expout > _cutoff[p])
+    expout -= _cutoff[p];
   else
-    expout = -rom_strain_cutoff_value * rom_strain_cutoff_value / expout + rom_strain_cutoff_value;
+    expout = -_cutoff[p] * _cutoff[p] / expout + _cutoff[p];
 
   return -expout * old_input_values[out_index] * _dt;
 }
@@ -831,14 +1134,13 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::computePolynomial(const GenericReal<is_ad
 template <bool is_ad>
 std::vector<std::vector<std::vector<std::vector<Real>>>>
 LAROMANCEStressUpdateBaseTempl<is_ad>::getTransformedLimits(
-    const std::vector<std::vector<std::vector<Real>>> limits)
+    const unsigned int p, const std::vector<std::vector<std::vector<Real>>> limits)
 {
   std::vector<std::vector<std::vector<std::vector<Real>>>> transformed_limits(
-      _num_tiles,
+      _num_tiles[p],
       std::vector<std::vector<std::vector<Real>>>(
           _num_outputs, std::vector<std::vector<Real>>(_num_inputs, std::vector<Real>(3))));
-
-  for (unsigned int t = 0; t < _num_tiles; ++t)
+  for (unsigned int t = 0; t < _num_tiles[p]; ++t)
   {
     for (unsigned int o = 0; o < _num_outputs; ++o)
     {
@@ -848,26 +1150,26 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::getTransformedLimits(
         {
           transformed_limits[t][o][i][k] = limits[t][i][k];
           convertValue(
-              transformed_limits[t][o][i][k], _transform[t][o][i], _transform_coefs[t][o][i]);
+              transformed_limits[t][o][i][k], _transform[p][t][o][i], _transform_coefs[p][t][o][i]);
         }
         transformed_limits[t][o][i][2] =
             (transformed_limits[t][o][i][1] - transformed_limits[t][o][i][0]) / 2.0;
       }
     }
   }
-
   return transformed_limits;
 }
 
 template <bool is_ad>
 std::vector<unsigned int>
-LAROMANCEStressUpdateBaseTempl<is_ad>::getMakeFrameHelper() const
+LAROMANCEStressUpdateBaseTempl<is_ad>::getMakeFrameHelper(const unsigned int p) const
 {
-  std::vector<unsigned int> v(_num_coefs * _num_inputs);
+  std::vector<unsigned int> v(_num_coefs[p] * _num_inputs);
 
-  for (unsigned int numcoeffs = 0; numcoeffs < _num_coefs; ++numcoeffs)
+  for (unsigned int numcoeffs = 0; numcoeffs < _num_coefs[p]; ++numcoeffs)
     for (unsigned int invar = 0; invar < _num_inputs; ++invar)
-      v[numcoeffs + _num_coefs * invar] = numcoeffs / MathUtils::pow(_degree, invar) % _degree;
+      v[numcoeffs + _num_coefs[p] * invar] =
+          numcoeffs / MathUtils::pow(_degree[p], invar) % _degree[p];
 
   return v;
 }
@@ -879,20 +1181,26 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::computeStressFinalize(
 {
   _cell_dislocation_increment = 0.0;
   _wall_dislocation_increment = 0.0;
-
-  precomputeROM(_cell_output_index);
-  for (unsigned int t = 0; t < _num_tiles; ++t)
-    if (_weights[t])
-      _cell_dislocation_increment += _weights[t] * computeROM(t, _cell_output_index);
-
-  precomputeROM(_wall_output_index);
-  for (unsigned int t = 0; t < _num_tiles; ++t)
-    if (_weights[t])
-      _wall_dislocation_increment += _weights[t] * computeROM(t, _wall_output_index);
+  if (_input_values[_stress_input_index])
+  {
+    precomputeROM(_cell_output_index);
+    for (unsigned int p = 0; p < _num_partitions; ++p)
+      if (_partition_weights[p])
+        for (unsigned int t = 0; t < _num_tiles[p]; ++t)
+          if (_weights[p][t])
+            _cell_dislocation_increment +=
+                _partition_weights[p] * _weights[p][t] * computeROM(t, p, _cell_output_index);
+    precomputeROM(_wall_output_index);
+    for (unsigned int p = 0; p < _num_partitions; ++p)
+      if (_partition_weights[p])
+        for (unsigned int t = 0; t < _num_tiles[p]; ++t)
+          if (_weights[p][t])
+            _wall_dislocation_increment +=
+                _partition_weights[p] * _weights[p][t] * computeROM(t, p, _wall_output_index);
+  }
 
   _cell_rate[_qp] = _cell_dislocation_increment / _dt;
   _wall_rate[_qp] = _wall_dislocation_increment / _dt;
-
   _cell_dislocations[_qp] = _old_input_values[_cell_output_index] + _cell_dislocation_increment;
   _wall_dislocations[_qp] = _old_input_values[_wall_output_index] + _wall_dislocation_increment;
 
@@ -900,19 +1208,22 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::computeStressFinalize(
   _plastic_strain_increment += MetaPhysicL::raw_value(plastic_strain_increment);
 
   // Prevent the ROM from calculating and proceeding with negative dislocations
-  if ((_cell_dislocations[_qp] < 0.0 || _wall_dislocations[_qp] < 0.0) && (this->_apply_strain))
-  {
-    const Real negative_cell_dislocations = MetaPhysicL::raw_value(_cell_dislocations[_qp]);
-    const Real negative_wall_dislocations = MetaPhysicL::raw_value(_wall_dislocations[_qp]);
-    _cell_dislocations[_qp] = _old_input_values[_cell_output_index];
-    _wall_dislocations[_qp] = _old_input_values[_wall_output_index];
-
-    mooseException("The negative values of the cell dislocation density, ",
-                   negative_cell_dislocations,
-                   ", and/or wall dislocation density, ",
-                   negative_wall_dislocations,
-                   ". Cutting timestep.");
-  }
+  if (_apply_strain && (_cell_dislocations[_qp] < 0.0 || _wall_dislocations[_qp] < 0.0))
+    mooseException("In ",
+                   _name,
+                   ": Negative disclocation density calculated for cell (old : ",
+                   MetaPhysicL::raw_value(_old_input_values[_cell_output_index]),
+                   " increment: ",
+                   MetaPhysicL::raw_value(_cell_dislocation_increment),
+                   " value: ",
+                   MetaPhysicL::raw_value(_cell_dislocations[_qp]),
+                   ") or wall (old : ",
+                   MetaPhysicL::raw_value(_old_input_values[_wall_output_index]),
+                   " increment: ",
+                   MetaPhysicL::raw_value(_wall_dislocation_increment),
+                   " value: ",
+                   MetaPhysicL::raw_value(_wall_dislocations[_qp]),
+                   ").");
 
   if (_verbose)
   {
@@ -945,7 +1256,7 @@ template <bool is_ad>
 Real
 LAROMANCEStressUpdateBaseTempl<is_ad>::computeTimeStepLimit()
 {
-  Real limited_dt = RadialReturnStressUpdateTempl<is_ad>::computeTimeStepLimit();
+  Real limited_dt = RadialReturnCreepStressUpdateBaseTempl<is_ad>::computeTimeStepLimit();
 
   Real cell_strain_inc = std::abs(MetaPhysicL::raw_value(_cell_dislocation_increment));
   if (cell_strain_inc && _old_input_values[_cell_output_index])
@@ -968,17 +1279,110 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::sigmoid(const Real lower,
                                                const GenericReal<is_ad> & val,
                                                const bool derivative)
 {
-  GenericReal<is_ad> x = (val - lower) / (upper - lower);
-  x = 2.0 * x - 1.0;
-  GenericReal<is_ad> plus = std::exp(-2.0 / (1.0 + x));
-  GenericReal<is_ad> minus = std::exp(-2.0 / (1.0 - x));
-  if (!derivative)
-    return 1.0 - plus / (plus + minus);
+  mooseAssert(std::isfinite(MetaPhysicL::raw_value(val)), "Sigmoid value should must be infinite");
+  mooseAssert(MetaPhysicL::raw_value(val) >= lower, "Input value must be greater than lower limit");
+  mooseAssert(MetaPhysicL::raw_value(val) <= upper, "Input value must be greater than upper limit");
 
-  GenericReal<is_ad> dplus = plus * 2.0 / Utility::pow<2>(1.0 + x);
-  GenericReal<is_ad> dminus = -minus * 2.0 / Utility::pow<2>(1.0 - x);
+  // normalize val between 0 and 1, then shift between -1 and 1
+  const GenericReal<is_ad> x = 2.0 * (val - lower) / (upper - lower) - 1.0;
 
-  return (plus * dminus - dplus * minus) / Utility::pow<2>(plus + minus) * 2.0 / (upper - lower);
+  if (x == -1.0)
+  {
+    if (derivative)
+      return 0.0;
+    else
+      return 1.0;
+  }
+  else if (x == 1.0)
+  {
+    if (derivative)
+      return 0.0;
+    else
+      return 0.0;
+  }
+  else if (x < 1.0 && x > -1.0)
+  {
+    const GenericReal<is_ad> plus = std::exp(-2.0 / (1.0 + x));
+    const GenericReal<is_ad> minus = std::exp(-2.0 / (1.0 - x));
+
+    if (!derivative)
+      return 1.0 - plus / (plus + minus);
+
+    const GenericReal<is_ad> dplus_dx = plus * 2.0 / Utility::pow<2>(1.0 + x);
+    const GenericReal<is_ad> dminus_dx = -minus * 2.0 / Utility::pow<2>(1.0 - x);
+
+    return (plus * dminus_dx - dplus_dx * minus) / Utility::pow<2>(plus + minus) * 2.0 /
+           (upper - lower);
+  }
+  else
+    mooseError("Internal error: Sigmoid, value: x is out of bounds. val=",
+               val,
+               " low=",
+               lower,
+               " high=",
+               upper);
+}
+
+template <bool is_ad>
+void
+LAROMANCEStressUpdateBaseTempl<is_ad>::outputIterationSummary(std::stringstream * iter_output,
+                                                              const unsigned int total_it)
+{
+  if (iter_output)
+  {
+    *iter_output << "At element " << this->_current_elem->id() << " _qp=" << _qp << " Coordinates "
+                 << _q_point[_qp] << " block=" << this->_current_elem->subdomain_id() << '\n';
+    *iter_output << " dt " << _dt << " old cell disl: " << _old_input_values[_cell_output_index]
+                 << " old wall disl: " << _old_input_values[_wall_output_index]
+                 << " old effective strain: " << _old_input_values[_strain_output_index] << "\n";
+
+    *iter_output << " temp: " << MetaPhysicL::raw_value(_temperature[_qp]) << " environmental: "
+                 << (_environmental ? MetaPhysicL::raw_value((*_environmental)[_qp]) : 0.0)
+                 << " trial stress into rom (MPa): "
+                 << MetaPhysicL::raw_value(_input_values[_stress_input_index])
+                 << " cell: " << MetaPhysicL::raw_value(_input_values[_cell_input_index])
+                 << " wall: " << MetaPhysicL::raw_value(_input_values[_wall_input_index])
+                 << " old strain: "
+                 << MetaPhysicL::raw_value(_input_values[_old_strain_input_index]) << "\n";
+    *iter_output << "  partition 2 weight: "
+                 << MetaPhysicL::raw_value(_second_partition_weight[_qp]) << "\n";
+    *iter_output << "  weights by tile, partition 1: ";
+    for (unsigned int t = 0; t < _num_tiles[0]; ++t)
+      *iter_output << " (" << t << ", " << MetaPhysicL::raw_value(_weights[0][t]) << ") ";
+    *iter_output << "\n";
+    *iter_output << "  weights by tile, partition 2: ";
+    for (unsigned int t = 0; t < _num_tiles[1]; ++t)
+      *iter_output << " (" << t << ", " << MetaPhysicL::raw_value(_weights[1][t]) << ") ";
+    *iter_output << "\n";
+    *iter_output << "  nonstress weights by tile, partition 1: ";
+    for (unsigned int t = 0; t < _num_tiles[0]; ++t)
+      *iter_output << " (" << t << ", " << MetaPhysicL::raw_value(_non_stress_weights[0][t])
+                   << ") ";
+    *iter_output << "\n";
+    *iter_output << "  nonstress weights by tile, partition 2: ";
+    for (unsigned int t = 0; t < _num_tiles[1]; ++t)
+      *iter_output << " (" << t << ", " << MetaPhysicL::raw_value(_non_stress_weights[1][t])
+                   << ") ";
+    *iter_output << "\n";
+  }
+
+  SingleVariableReturnMappingSolutionTempl<is_ad>::outputIterationSummary(iter_output, total_it);
+}
+
+template <bool is_ad>
+void
+LAROMANCEStressUpdateBaseTempl<is_ad>::outputIterationStep(
+    std::stringstream * iter_output,
+    const GenericReal<is_ad> & effective_trial_stress,
+    const GenericReal<is_ad> & scalar,
+    const Real reference_residual)
+{
+  SingleVariableReturnMappingSolutionTempl<is_ad>::outputIterationStep(
+      iter_output, effective_trial_stress, scalar, reference_residual);
+  if (iter_output)
+    *iter_output << " derivative: "
+                 << MetaPhysicL::raw_value(computeDerivative(effective_trial_stress, scalar))
+                 << std::endl;
 }
 
 template class LAROMANCEStressUpdateBaseTempl<false>;
