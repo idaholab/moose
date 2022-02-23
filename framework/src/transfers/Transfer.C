@@ -36,6 +36,7 @@ Transfer::validParams()
   params += SetupInterface::validParams();
   params.set<ExecFlagEnum>("execute_on", true) = EXEC_TIMESTEP_BEGIN;
 
+  params.set<bool>("_called_legacy_params") = true;
   MultiMooseEnum possible_directions(Transfer::possibleDirections());
   params.addDeprecatedParam<MultiMooseEnum>(
       "direction",
