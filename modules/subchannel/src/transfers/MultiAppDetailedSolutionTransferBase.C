@@ -44,8 +44,8 @@ MultiAppDetailedSolutionTransferBase::transferToMultiApps()
   if (dynamic_cast<SubChannelMesh *>(_from_meshes[0]) == nullptr)
     mooseError("This transfer works only with SubChannelMesh classes.");
 
-  for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
-    if (_multi_app->hasLocalApp(i))
+  for (unsigned int i = 0; i < _to_multi_app->numGlobalApps(); i++)
+    if (_to_multi_app->hasLocalApp(i))
       transferVarsToApp(i);
 }
 
@@ -58,9 +58,9 @@ MultiAppDetailedSolutionTransferBase::transferVarsToApp(unsigned int app_idx)
 void
 MultiAppDetailedSolutionTransferBase::transferNodalVars(unsigned int app_idx)
 {
-  Moose::ScopedCommSwapper swapper(_multi_app->comm());
+  Moose::ScopedCommSwapper swapper(_to_multi_app->comm());
 
-  FEProblemBase & to_problem = _multi_app->appProblemBase(app_idx);
+  FEProblemBase & to_problem = _to_multi_app->appProblemBase(app_idx);
   MooseMesh * mesh = NULL;
   if (_displaced_target_mesh && to_problem.getDisplacedProblem())
     mesh = &to_problem.getDisplacedProblem()->mesh();
@@ -92,7 +92,7 @@ MultiAppDetailedSolutionTransferBase::transferNodalVars(unsigned int app_idx)
         Real from_value = (*from_solution)(from_dof);
         swapper.forceSwap();
 
-        NumericVector<Real> & to_solution = _multi_app->appTransferVector(app_idx, var_name);
+        NumericVector<Real> & to_solution = _to_multi_app->appTransferVector(app_idx, var_name);
         dof_id_type to_dof = node->dof_number(to_sys_num, to_var_num, 0);
         to_solution.set(to_dof, from_value);
       }
@@ -101,7 +101,7 @@ MultiAppDetailedSolutionTransferBase::transferNodalVars(unsigned int app_idx)
 
   for (auto & var_name : _var_names)
   {
-    _multi_app->appTransferVector(app_idx, var_name).close();
+    _to_multi_app->appTransferVector(app_idx, var_name).close();
     find_sys(to_problem.es(), var_name)->update();
   }
 }

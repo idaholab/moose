@@ -178,8 +178,7 @@ P_out = 155e+5 # Pa
 [Transfers]
   [xfer]
     type = MultiAppDetailedSolutionTransfer
-    multi_app = viz
-    direction = to_multiapp
+    to_multi_app = viz
     variable = 'mdot SumWij P DP h T rho mu q_prime S'
   []
 []

@@ -78,14 +78,12 @@
 [Transfers]
   [P_transfer]
     type = MultiAppDetailedSolutionTransfer
-    direction = to_multiapp
-    multi_app = viz
+    to_multi_app = viz
     variable = 'P'
   []
   [T_transfer]
     type = MultiAppDetailedPinSolutionTransfer
-    direction = to_multiapp
-    multi_app = viz
+    to_multi_app = viz
     variable = 'T'
   []
 []
