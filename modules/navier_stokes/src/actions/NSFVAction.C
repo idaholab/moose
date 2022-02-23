@@ -1187,7 +1187,6 @@ NSFVAction::addINSEnergy()
       if (_blocks.size() > 0)
         params.set<std::vector<SubdomainName>>("block") = _blocks;
 
-      params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
       params.set<MooseEnum>("velocity_interp_method") = "rc";
       params.set<UserObjectName>("rhie_chow_user_object") = "pins_rhie_chow_interpolator";
       params.set<MooseEnum>("advected_interp_method") = _energy_advection_interpolation;
@@ -1248,12 +1247,14 @@ NSFVAction::addINSEnergy()
   {
     for (unsigned int block_i = 0; block_i < _ambient_convection_blocks.size(); ++block_i)
     {
-      const std::string kernel_type = "NSFVEnergyAmbientConvection";
+      const std::string kernel_type = "PINSFVEnergyAmbientConvection";
       InputParameters params = _factory.getValidParams(kernel_type);
       params.set<NonlinearVariableName>("variable") = NS::T_fluid;
       params.set<std::vector<SubdomainName>>("block") = {_ambient_convection_blocks[block_i]};
-      params.set<MaterialPropertyName>("alpha") = _ambient_convection_alpha[block_i];
-      params.set<MooseFunctorName>("T_ambient") = _ambient_temperature[block_i];
+      params.set<MooseFunctorName>("h_solid_fluid") = _ambient_convection_alpha[block_i];
+      params.set<MooseFunctorName>(NS::T_solid) = _ambient_temperature[block_i];
+      params.set<MooseFunctorName>(NS::T_fluid) = NS::T_fluid;
+      params.set<bool>("is_solid") = false;
 
       _problem->addFVKernel(
           kernel_type, "ambient_convection_" + _ambient_convection_blocks[block_i], params);
@@ -1263,12 +1264,14 @@ NSFVAction::addINSEnergy()
   {
     if (_ambient_convection_alpha.size())
     {
-      const std::string kernel_type = "NSFVEnergyAmbientConvection";
+      const std::string kernel_type = "PINSFVEnergyAmbientConvection";
       InputParameters params = _factory.getValidParams(kernel_type);
       params.set<NonlinearVariableName>("variable") = NS::T_fluid;
       params.set<std::vector<SubdomainName>>("block") = _ambient_convection_blocks;
-      params.set<MaterialPropertyName>("alpha") = _ambient_convection_alpha[0];
-      params.set<MooseFunctorName>("T_ambient") = _ambient_temperature[0];
+      params.set<MooseFunctorName>("h_solid_fluid") = _ambient_convection_alpha[0];
+      params.set<MooseFunctorName>(NS::T_solid) = _ambient_temperature[0];
+      params.set<MooseFunctorName>(NS::T_fluid) = NS::T_fluid;
+      params.set<bool>("is_solid") = false;
 
       _problem->addFVKernel(kernel_type, "ambient_convection", params);
     }

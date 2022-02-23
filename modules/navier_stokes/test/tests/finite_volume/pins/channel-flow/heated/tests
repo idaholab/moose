@@ -1,6 +1,6 @@
 [Tests]
   [heated]
-    issues = '#16756'
+    issues = '#16756 #19472'
     requirement = 'The system shall be able to solve for fluid energy diffusion, advection and convection with the solid phase in a 2D channel'
     design = 'PINSFVEnergyAdvection.md'
     [fluid_only]
@@ -48,7 +48,20 @@
     ad_indexing_type = 'global'
     valgrind = HEAVY
     design = 'PINSFVEnergyAmbientConvection.md'
-    cli_args = "Variables/inactive='' AuxVariables/inactive='temp_solid' FVKernels/inactive='' FVBCs/inactive='' Outputs/file_base='rc-heated-solid-fluid'"
+    cli_args = "Variables/inactive='' AuxVariables/inactive='T_solid' FVKernels/inactive='' FVBCs/inactive='' Outputs/file_base='rc-heated-solid-fluid'"
+  []
+  [solid-fluid-action]
+    type = 'Exodiff'
+    input = 2d-rc-heated-action.i
+    exodiff = rc-heated-solid-fluid-action.e
+    method = "!dbg"
+    abs_zero = 1e-9
+    issues = '#19472'
+    requirement = 'The system shall be able to solve for fluid energy diffusion, advection and convection with the solid phase in a 2D channel using the NSFV action syntax.'
+    ad_indexing_type = 'global'
+    valgrind = HEAVY
+    cli_args = "Outputs/file_base='rc-heated-solid-fluid-action'"
+
   []
   [transient]
     type = 'Exodiff'
