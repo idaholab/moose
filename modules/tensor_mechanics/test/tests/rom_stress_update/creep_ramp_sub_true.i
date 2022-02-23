@@ -143,11 +143,16 @@
     substep_strain_tolerance = 1.0e-5
     use_substep_integration_error = true
 
-    stress_input_window_failure = WARN
-    cell_input_window_failure = ERROR
-    wall_input_window_failure = ERROR
-    temperature_input_window_failure = ERROR
-    environment_input_window_failure = ERROR #This is the phase fraction, below
+    stress_input_window_low_failure = WARN
+    stress_input_window_high_failure = WARN
+    cell_input_window_high_failure = ERROR
+    cell_input_window_low_failure = ERROR
+    wall_input_window_low_failure = ERROR
+    wall_input_window_high_failure = ERROR
+    temperature_input_window_high_failure = ERROR
+    temperature_input_window_low_failure = ERROR
+    environment_input_window_high_failure = ERROR
+    environment_input_window_low_failure = ERROR
   []
 []
 
