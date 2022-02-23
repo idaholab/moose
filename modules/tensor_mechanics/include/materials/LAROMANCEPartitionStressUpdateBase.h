@@ -23,25 +23,25 @@ protected:
   virtual void computeDSecondPartitionWeightDStress(
       GenericReal<is_ad> & dsecond_partition_weight_dstress) override;
 
-  /// todo
+  /// get the Gaussian Process Regression lower triangular covariance matrix
   virtual std::vector<std::vector<Real>> getClassificationLuu() = 0;
 
   /// get the Gaussian Process Regression model training points
   virtual std::vector<std::vector<Real>> getClassificationXu() = 0;
 
-  /// get some Gaussian Process Regression model scaling parameters
+  /// get the inducing points of the Gaussian Process Regression model
   virtual std::vector<Real> getClassificationVind() = 0;
 
-  /// todo
+  /// get the mean values of the training input
   virtual std::vector<Real> getClassificationMmean() = 0;
 
-  /// todo
+  /// get the scale factor of the training input points to normalize all input parameters to equivalent values
   virtual std::vector<Real> getClassificationMscale() = 0;
 
-  /// todo
+  /// get the calibrated Gaussian Regression Model hyperparameter "Ell", which controls the decay of the covariance as a function of distance
   virtual Real getClassificationEll() = 0;
 
-  /// todo
+  /// get the calibrated Gaussian Regression Model hyperparameter "Eta", which is a scale factor that controls the amplitude of the mean
   virtual Real getClassificationEta() = 0;
 
   using LAROMANCEStressUpdateBaseTempl<is_ad>::_input_values;
