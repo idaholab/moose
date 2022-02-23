@@ -34,11 +34,6 @@ ErrorFractionMarker::validParams()
                         " Changing this to `false` will result in the global extremes ever "
                         "encountered during the run to be used as the min and max error.");
 
-  params.addParam<bool>("check_subdomain_consistent_for_coarsen",
-                        false,
-                        "Whether or not to check the consistency of subdomain ids when coarsening."
-                        "The motivation is that coarsening on the moving boundary results in geometry accuracy lose");
-
   params.addClassDescription("Marks elements for refinement or coarsening based on the fraction of "
                              "the min/max error from the supplied indicator.");
   return params;
@@ -49,7 +44,6 @@ ErrorFractionMarker::ErrorFractionMarker(const InputParameters & parameters)
     _coarsen(parameters.get<Real>("coarsen")),
     _refine(parameters.get<Real>("refine")),
     _clear_extremes(parameters.get<bool>("clear_extremes")),
-    _is_subdomain_consistent(parameters.get<bool>("check_subdomain_consistent_for_coarsen")),
     _max(0),
     _min(std::numeric_limits<Real>::max())
 {
