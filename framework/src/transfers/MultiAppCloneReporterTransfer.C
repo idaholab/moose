@@ -38,7 +38,6 @@ MultiAppCloneReporterTransfer::validParams()
       "but if some processors do not have a sub-app, for instance if the max_procs_per_app "
       "parameter is used in the MultiApp, then this is required.");
 
-  params.set<MultiMooseEnum>("direction") = "from_multiapp";
   params.suppressParameter<MultiMooseEnum>("direction");
   return params;
 }
@@ -54,8 +53,14 @@ MultiAppCloneReporterTransfer::MultiAppCloneReporterTransfer(const InputParamete
                                                     _from_reporter_names)
                            : getReporterNamesHelper(_name, _to_obj_name, _from_reporter_names))
 {
-  if (isParamValid("to_multiapp"))
-    paramError("to_multiapp",
+  _current_direction = FROM_MULTIAPP;
+  _direction = FROM_MULTIAPP;
+  _directions.clear();
+  _directions.push_back("from_multiapp");
+  std::cout << _directions.size() << std::endl;
+
+  if (isParamValid("to_multi_app"))
+    paramError("to_multi_app",
                "Sibling or to_multiapp transfer have not been implemented for this transfer.");
 }
 

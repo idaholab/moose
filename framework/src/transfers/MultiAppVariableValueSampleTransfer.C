@@ -42,7 +42,7 @@ MultiAppVariableValueSampleTransfer::MultiAppVariableValueSampleTransfer(
     _to_var_name(getParam<AuxVariableName>("variable")),
     _from_var_name(getParam<VariableName>("source_variable"))
 {
-  if (_directions.size() != 1 || (isParamValid("from_multiapp") && isParamValid("to_multiapp")))
+  if (_directions.size() != 1 || (isParamValid("from_multi_app") && isParamValid("to_multi_app")))
     paramError("direction", "This transfer is only unidirectional");
 }
 
@@ -51,10 +51,10 @@ MultiAppVariableValueSampleTransfer::initialSetup()
 {
   variableIntegrityCheck(_to_var_name);
 
-  if (isParamValid("from_multiapp"))
+  if (isParamValid("from_multi_app"))
     _from_multi_app->problemBase().mesh().errorIfDistributedMesh(
         "MultiAppVariableValueSampleTransfer");
-  if (isParamValid("to_multiapp"))
+  if (isParamValid("to_multi_app"))
     _to_multi_app->problemBase().mesh().errorIfDistributedMesh(
         "MultiAppVariableValueSampleTransfer");
 }

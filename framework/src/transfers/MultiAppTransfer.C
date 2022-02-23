@@ -73,7 +73,7 @@ MultiAppTransfer::MultiAppTransfer(const InputParameters & parameters)
         _to_multi_app = _fe_problem.getMultiApp(getParam<MultiAppName>("multi_app"));
       else
         paramError("direction",
-                   "BETWEN_MULTIAPP transfers should be specified using to/from_multiapp");
+                   "BETWEN_MULTIAPP transfers should be specified using to/from_multi_app");
     }
   }
 
@@ -100,11 +100,11 @@ MultiAppTransfer::MultiAppTransfer(const InputParameters & parameters)
   // Handle deprecated parameters
   if (parameters.isParamSetByUser("directions"))
   {
-    if (!isParamValid("multiapp"))
+    if (!isParamValid("multi_app"))
       paramError("directions",
                  "The deprecated directions parameter is meant to be used in conjunction with the "
                  "multi_app parameter");
-    if (isParamValid("to_multiapp") || isParamValid("from_multiapp"))
+    if (isParamValid("to_multi_app") || isParamValid("from_multi_app"))
       paramError("directions",
                  "The deprecated directions parameter is not meant to be used in conjunction with "
                  "the from_multi_app or to_multi_app parameters");

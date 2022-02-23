@@ -90,7 +90,7 @@ MultiAppUserObjectTransfer::MultiAppUserObjectTransfer(const InputParameters & p
     mooseError(name(), ": Transfer can be either block- or boundary-restricted. Not both.");
 
   if (_to_multi_app && _from_multi_app && _to_multi_app != _from_multi_app)
-    paramError("to_multiapp",
+    paramError("to_multi_app",
                "Sibling multiapp transfer has not been implemented for this transfer.");
 }
 
