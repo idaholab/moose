@@ -56,6 +56,7 @@ protected:
   void addINSMomentumAdvectionKernels();
   void addINSMomentumPressureKernels();
   void addINSMomentumGravityKernels();
+  void addINSMomentumFrictionKernels();
 
   /// Functions adding kernels for the ethalpy equation in an incompressible
   /// Navier-Stokes setting
@@ -153,6 +154,13 @@ protected:
   /// The ambient temperature
   std::vector<MooseFunctorName> _ambient_temperature;
 
+  /// Subdomains where we want to have ambient convection
+  std::vector<SubdomainName> _friction_blocks;
+  /// The friction correlation types used for each block
+  std::vector<std::vector<std::string>> _friction_types;
+  /// The coefficients used for each item if friction type
+  std::vector<std::vector<std::string>> _friction_coeffs;
+
   /// Temperature variable name in the solid subscale structure (in porous medium treatment)
   /// to facilitate temperature variable added outside
   VariableName _solid_temperature_variable_name;
@@ -193,4 +201,6 @@ private:
   void checkBoundaryParameterErrors();
   /// Check errors regarding the user defined ambient convection parameters
   void checkAmbientConvectionParameterErrors();
+  /// Check errors regarding the friction parameters
+  void checkFrictionParameterErrors();
 };

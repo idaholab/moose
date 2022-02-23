@@ -138,6 +138,16 @@
     ad_indexing_type = 'global'
     cli_args = "Outputs/file_base='rc-friction' -pc_type lu -pc_factor_shift_type NONZERO"
   []
+  [friction-action]
+    type = 'Exodiff'
+    input = 2d-rc-friction-action.i
+    exodiff = rc-friction-action.e
+    method = "!dbg"
+    requirement = 'The system shall be able to model porous flow with volumetric friction, using the Darcy and Forchheimer friction models and the NSFV action input syntax.'
+    abs_zero = 1e-9
+    ad_indexing_type = 'global'
+    cli_args = "Outputs/file_base='rc-friction-action' -pc_type lu -pc_factor_shift_type NONZERO"
+  []
   [friction-free-slip]
     type = 'Exodiff'
     input = 2d-rc-friction.i
