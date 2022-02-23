@@ -48,19 +48,19 @@
     type = MultiAppCloneReporterTransfer
     from_reporters = 'from_sub_vpp/a from_sub_vpp/b'
     to_reporter = receiver
-    multi_app = multi_vector
+    from_multi_app = multi_vector
   []
   [multi_rep]
     type = MultiAppCloneReporterTransfer
     from_reporters = 'from_sub_pp/value from_sub_rep/int from_sub_rep/str'
     to_reporter = receiver
-    multi_app = multi_reporter
+    from_multi_app = multi_reporter
   []
   [single]
     type = MultiAppCloneReporterTransfer
     from_reporters = 'from_sub_pp/value from_sub_rep/int from_sub_rep/str'
     to_reporter = receiver
-    multi_app = single_app
+    from_multi_app = single_app
   []
 []
 

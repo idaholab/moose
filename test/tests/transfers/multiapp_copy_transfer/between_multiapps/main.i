@@ -19,7 +19,6 @@
 
 [Transfers/from_sub1_to_sub2]
   type = MultiAppCopyTransfer
-  direction = between_multiapp
   from_multi_app = sub1
   to_multi_app = sub2
   source_variable = x1
