@@ -8,7 +8,7 @@ in MOOSE to evaluate the quality of the Jacobians in the specified tests.
 
 Test configuration options are added to the `tests` file.
 
-- `expect_out`: A regular expression that must occur in the input in order for the test to be considered passing.
+- `expect_out`: a regular expression that must occur in the input in order for the test to be considered passing.
 
 - `resize_mesh`: whether to resize the input mesh, defaults to `False`
 
@@ -22,7 +22,7 @@ Other test commands & restrictions may be found in the [TestHarness documentatio
 ## Example test configuration in the MOOSE test suite
 
 In this example, three `AnalyzeJacobian` tests are created to check the Jacobian created by a finite difference
-preconditioner. The sucess of the Jacobian analysis is checked by looking for the string "No errors detected"
+preconditioner. The success of the Jacobian analysis is checked by looking for the string "No errors detected"
 in the output.
 
 !listing test/tests/preconditioners/fdp/tests

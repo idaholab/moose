@@ -493,7 +493,7 @@ petscSetKSPDefaults(FEProblemBase & problem, KSP ksp)
 void
 petscSetDefaults(FEProblemBase & problem)
 {
-  // dig out Petsc solver
+  // dig out PETSc solver
   NonlinearSystemBase & nl = problem.getNonlinearSystemBase();
   PetscNonlinearSolver<Number> * petsc_solver =
       dynamic_cast<PetscNonlinearSolver<Number> *>(nl.nonlinearSolver());

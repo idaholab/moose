@@ -1,6 +1,6 @@
 # CSVValidationTester
 
-The CSVValidationTester can be used for validation purposes.  It compares two CSV files: one
+The CSVValidationTester can be used for validation purposes.  It compares two `CSV` files: one
 produced by a simulation and one containing measured data.  Then, it computes mean and standard
 deviation of relative or absolute error between measured and simulated data points.
 

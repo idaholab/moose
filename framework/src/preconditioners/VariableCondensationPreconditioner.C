@@ -735,7 +735,7 @@ VariableCondensationPreconditioner::findZeroDiagonals(SparseMatrix<Number> & mat
   PetscErrorCode ierr;
   const PetscInt * petsc_idx;
   PetscInt nrows;
-  // make sure we have a petsc matrix
+  // make sure we have a PETSc matrix
   PetscMatrix<Number> * petsc_mat = cast_ptr<PetscMatrix<Number> *>(&mat);
   ierr = MatFindZeroDiagonals(petsc_mat->mat(), &zerodiags);
   LIBMESH_CHKERR(ierr);

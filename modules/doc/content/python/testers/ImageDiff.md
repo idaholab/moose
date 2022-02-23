@@ -25,6 +25,6 @@ Other test commands & restrictions may be found in the [TestHarness documentatio
 ## Example test configuration in the MOOSE test suite
 
 In this example, the `ImageDiff` tester is used to check that the plots of the spatial distributions
-of temperature in the simulation, output to CSV then plotted by a python script, match reference images.
+of temperature in the simulation, output to `CSV` then plotted by a python script, match reference images.
 
 !listing heat_conduction/tutorials/introduction/tests

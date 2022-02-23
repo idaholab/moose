@@ -1,7 +1,7 @@
 # PetscJacobianTester
 
 The `PetscJacobianTester` tester uses the `-snes_test_jacobian` command line option
-in Petsc to evaluate the quality of the Jacobian in the specified tests.
+in PETSc to evaluate the quality of the Jacobian in the specified tests.
 
 ## Options
 

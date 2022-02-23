@@ -15,7 +15,7 @@ Test configuration options are specified in the `tests` file.
 
 - `test_case`: The specific test case to run. Defaults to all test cases in the module
 
-- `buffer`: Equivalent to passing -b or --buffer to the unittest. Defaults to False
+- `buffer`: Equivalent to passing `-b` or `--buffer` to the unittest. Defaults to False
 
 - `separate`: Run each test in the file in a separate subprocess. Defaults to False
 

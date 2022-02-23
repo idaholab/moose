@@ -32,7 +32,7 @@ FieldSplitPreconditioner::validParams()
   params.addClassDescription("Preconditioner designed to map onto PETSc's PCFieldSplit.");
 
   params.addRequiredParam<std::vector<std::string>>(
-      "topsplit", "entrance to splits, the top split will specify how splits will go.");
+      "topsplit", "Entrance to splits, the top split will specify how splits will go.");
   // We should use full coupling Jacobian matrix by default
   params.addParam<bool>("full",
                         true,

@@ -37,7 +37,7 @@ SlepcEigenSolverConfiguration::configure_solver()
     // Let us remove extra "eps_power" from SNES since users do not like it
     ierr = Moose::SlepcSupport::mooseSlepcEPSSNESSetUpOptionPrefix(_slepc_solver.eps());
     LIBMESH_CHKERR(ierr);
-    // Let us hook up a customize PC if users ask. Users still can use petsc options to override
+    // Let us hook up a customize PC if users ask. Users still can use PETSc options to override
     // this setting
     if (_eigen_problem.solverParams()._customized_pc_for_eigen)
     {
