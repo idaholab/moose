@@ -580,8 +580,6 @@ RayTracingMeshOutput::buildBoundingBoxes()
   if (_communicator.size() == 1)
     return;
 
-  const BoundingBox previous_bbox = _bbox;
-
   // Local bounding box
   _bbox = MeshTools::create_local_bounding_box(_mesh_ptr->getMesh());
 
