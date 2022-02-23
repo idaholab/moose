@@ -40,8 +40,7 @@ ElementSubdomainModifier::ElementSubdomainModifier(const InputParameters & param
     _displaced_problem(_fe_problem.getDisplacedProblem().get()),
     _apply_ic(getParam<bool>("apply_initial_conditions")),
     _moving_boundary_specified(isParamValid("moving_boundary_name")),
-	_moving_boundary_name(getParam<BoundaryName>("moving_boundary_name")),
-	_moving_boundary_id(-1)
+    _moving_boundary_id(-1)
 {
 }
 
@@ -61,7 +60,7 @@ void
 ElementSubdomainModifier::setMovingBoundaryName(MooseMesh & mesh)
 {
   // We only need one boundary to modify. Create a dummy vector just to use the API.
-  const std::vector<BoundaryID> boundary_ids = mesh.getBoundaryIDs({_moving_boundary_name}, true); // @suppress("Invalid arguments")
+  const std::vector<BoundaryID> boundary_ids = mesh.getBoundaryIDs({_moving_boundary_name}, true);
   mooseAssert(boundary_ids.size() == 1, "Expect exactly one boundary ID.");
   _moving_boundary_id = boundary_ids[0];
   mesh.setBoundaryName(_moving_boundary_id, _moving_boundary_name);
@@ -432,7 +431,7 @@ ElementSubdomainModifier::buildMovedBndNodesRange()
   const auto bnd_nodes_end = MooseMesh::const_bnd_node_iterator(
       bnd_node_itr_end, bnd_node_itr_end, Predicates::NotNull<const BndNode * const *>());
 
-  _moved_bnd_nodes_range = std::make_unique<ConstBndNodeRange>(bnd_nodes_begin, bnd_nodes_end); // @suppress("Symbol is not resolved")
+  _moved_bnd_nodes_range = std::make_unique<ConstBndNodeRange>(bnd_nodes_begin, bnd_nodes_end);
 }
 
 void

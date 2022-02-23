@@ -31,7 +31,6 @@ protected:
   Real _coarsen;
   Real _refine;
   bool _clear_extremes;
-  bool _is_subdomain_consistent;
 
   Real _max;
   Real _min;
