@@ -67,8 +67,7 @@
 [Transfers]
   [./sub_to_master_pp]
     type = MultiAppPostprocessorInterpolationTransfer
-    direction = from_multiapp
-    multi_app = quad
+    from_multi_app = quad
     variable = pp_aux
     postprocessor = pp
   [../]

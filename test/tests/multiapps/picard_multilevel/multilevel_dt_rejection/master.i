@@ -78,8 +78,7 @@
 [Transfers]
   [./u_to_v2]
     type = MultiAppNearestNodeTransfer
-    direction = to_multiapp
-    multi_app = sub1
+    to_multi_app = sub1
     source_variable = u
     variable = v2
   [../]
@@ -87,15 +86,13 @@
     type = MultiAppPostprocessorTransfer
     from_postprocessor = time
     to_postprocessor = master_time
-    direction = to_multiapp
-    multi_app = sub1
+    to_multi_app = sub1
   []
   [dt_to_sub]
     type = MultiAppPostprocessorTransfer
     from_postprocessor = dt
     to_postprocessor = master_dt
-    direction = to_multiapp
-    multi_app = sub1
+    to_multi_app = sub1
   []
 []
 

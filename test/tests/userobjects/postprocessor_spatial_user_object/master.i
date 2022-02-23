@@ -65,16 +65,14 @@
 [Transfers]
   [./master_to_sub]
     type = MultiAppNearestNodeTransfer
-    direction = to_multiapp
-    multi_app = sub
+    to_multi_app = sub
     source_variable = u
     variable = a
   [../]
 
   [./sub_to_master]
     type = MultiAppUserObjectTransfer
-    direction = from_multiapp
-    multi_app = sub
+    from_multi_app = sub
     user_object = fn_uo
     variable = a
   [../]

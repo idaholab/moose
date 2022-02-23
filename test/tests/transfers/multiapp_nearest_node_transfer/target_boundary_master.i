@@ -52,8 +52,7 @@
   [target_boundary]
     type = MultiAppNearestNodeTransfer
     source_variable = u
-    direction = to_multiapp
-    multi_app = sub
+    to_multi_app = sub
     variable = source
     target_boundary = 'right'
   []

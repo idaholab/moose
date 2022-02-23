@@ -64,8 +64,7 @@
 [Transfers]
   [./average_transfer]
     type = MultiAppPostprocessorToAuxScalarTransfer
-    direction = from_multiapp
-    multi_app = sub
+    from_multi_app = sub
     from_postprocessor = average
     to_aux_scalar = average_scalar
   [../]

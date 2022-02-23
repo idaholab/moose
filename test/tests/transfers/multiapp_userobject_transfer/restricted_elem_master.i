@@ -99,8 +99,7 @@ num_layers = 2
   [from_ch0]
     type = MultiAppUserObjectTransfer
     boundary = back
-    direction = from_multiapp
-    multi_app = ch0
+    from_multi_app = ch0
     variable = a
     user_object = A_avg
   []
@@ -108,8 +107,7 @@ num_layers = 2
   [from_ch1]
     type = MultiAppUserObjectTransfer
     boundary = front
-    direction = from_multiapp
-    multi_app = ch1
+    from_multi_app = ch1
     variable = a
     user_object = A_avg
   []
@@ -117,8 +115,7 @@ num_layers = 2
   [to_ch0]
     type = MultiAppUserObjectTransfer
     block = 20
-    direction = to_multiapp
-    multi_app = ch0
+    to_multi_app = ch0
     variable = S
     user_object = S_avg_back
   []
@@ -126,8 +123,7 @@ num_layers = 2
   [to_ch1]
     type = MultiAppUserObjectTransfer
     block = 20
-    direction = to_multiapp
-    multi_app = ch1
+    to_multi_app = ch1
     variable = S
     user_object = S_avg_front
   []

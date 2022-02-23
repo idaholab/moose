@@ -65,8 +65,7 @@
     vector_postprocessor = sample_points
     postprocessor = receive
     vector_name = v
-    direction = to_multiapp
-    multi_app = sub
+    to_multi_app = sub
   [../]
 
   [./receive]
@@ -74,8 +73,7 @@
     vector_postprocessor = receive_values
     postprocessor = send
     vector_name = v
-    direction = from_multiapp
-    multi_app = sub
+    from_multi_app = sub
   [../]
 []
 

@@ -71,8 +71,7 @@
 [Transfers]
   [./pp_transfer]
     type = MultiAppPostprocessorToAuxScalarTransfer
-    direction = to_multiapp
-    multi_app = pp_sub
+    to_multi_app = pp_sub
     from_postprocessor = average
     to_aux_scalar = from_master_app
   [../]

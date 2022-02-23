@@ -47,8 +47,7 @@
 [Transfers]
   [to_sub]
     type = MultiAppPostprocessorTransfer
-    direction = to_multiapp
-    multi_app = sub
+    to_multi_app = sub
     from_postprocessor = c
     to_postprocessor = receiver
   []

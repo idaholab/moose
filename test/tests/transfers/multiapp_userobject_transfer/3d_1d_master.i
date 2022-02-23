@@ -97,18 +97,16 @@
 [Transfers]
   [layered_transfer_to_sub_app]
     type = MultiAppUserObjectTransfer
-    direction = to_multiapp
     user_object = master_uo
     variable = sub_app_var
-    multi_app = sub_app
+    to_multi_app = sub_app
     displaced_target_mesh = true
   []
   [layered_transfer_from_sub_app]
     type = MultiAppUserObjectTransfer
-    direction = from_multiapp
     user_object = sub_app_uo
     variable = from_sub_app_var
-    multi_app = sub_app
+    from_multi_app = sub_app
     displaced_source_mesh = true
   []
 []

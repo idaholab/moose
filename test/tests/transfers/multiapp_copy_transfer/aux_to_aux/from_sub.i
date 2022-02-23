@@ -14,8 +14,7 @@
 
 [Transfers/from_sub]
   type = MultiAppCopyTransfer
-  direction = from_multiapp
-  multi_app = sub
+  from_multi_app = sub
   source_variable = aux
   variable = x
 []

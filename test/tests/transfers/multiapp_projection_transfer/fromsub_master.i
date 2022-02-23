@@ -77,29 +77,25 @@
 [Transfers]
   [v_nodal_tr]
     type = MultiAppProjectionTransfer
-    direction = from_multiapp
-    multi_app = sub
+    from_multi_app = sub
     source_variable = v
     variable = v_nodal
   []
   [v_elemental_tr]
     type = MultiAppProjectionTransfer
-    direction = from_multiapp
-    multi_app = sub
+    from_multi_app = sub
     source_variable = v
     variable = v_elemental
   []
   [x_elemental_tr]
     type = MultiAppProjectionTransfer
-    direction = from_multiapp
-    multi_app = sub
+    from_multi_app = sub
     source_variable = x
     variable = x_elemental
   []
   [x_nodal_tr]
     type = MultiAppProjectionTransfer
-    direction = from_multiapp
-    multi_app = sub
+    from_multi_app = sub
     source_variable = x
     variable = x_nodal
   []
