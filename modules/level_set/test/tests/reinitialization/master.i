@@ -39,7 +39,8 @@
   [./Periodic]
     [./all]
       variable = phi
-    to_multi_app = sub
+      auto_direction = 'x y'
+    [../]
   [../]
 []
 
