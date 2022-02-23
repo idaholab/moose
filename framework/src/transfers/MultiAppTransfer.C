@@ -65,7 +65,7 @@ MultiAppTransfer::MultiAppTransfer(const InputParameters & parameters)
   else
   {
     // Check deprecated direction parameter
-    for (const auto dir : _directions)
+    for (const auto & dir : _directions)
     {
       if (dir == FROM_MULTIAPP)
         _from_multi_app = _fe_problem.getMultiApp(getParam<MultiAppName>("multi_app"));
