@@ -35,7 +35,8 @@ ElementPropertyReadFile::validParams()
       "rve_type",
       MooseEnum("periodic none", "none"),
       "Periodic or non-periodic grain distribution: Default is non-periodic");
-  params.addParam<bool>("blocks_zero_numbered", true, "Are the blocks numbered starting at zero?");
+  params.addParam<bool>(
+      "use_zero_based_block_indexing", true, "Are the blocks numbered starting at zero?");
   return params;
 }
 
@@ -49,7 +50,7 @@ ElementPropertyReadFile::ElementPropertyReadFile(const InputParameters & paramet
     _read_type(getParam<MooseEnum>("read_type").getEnum<ReadType>()),
     _rand_seed(getParam<unsigned int>("rand_seed")),
     _rve_type(getParam<MooseEnum>("rve_type")),
-    _block_zero(getParam<bool>("blocks_zero_numbered")),
+    _block_zero(getParam<bool>("use_zero_based_block_indexing")),
     _mesh(_fe_problem.mesh())
 {
   _nelem = _mesh.nElem();
