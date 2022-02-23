@@ -38,6 +38,7 @@
     type = PythonUnitTest
     input = test_modulehash.py
     issues = '#20336'
+    design = 'python/index.md'
     requirement = "The system shall include a utility for generating a unique hash that represents a moose environment module"
   []
 []
