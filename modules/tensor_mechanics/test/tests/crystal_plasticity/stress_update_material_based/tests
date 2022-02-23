@@ -25,7 +25,7 @@
     allow_warnings = true
     issues = '#16064'
     requirement = 'A constitutive failure shall trigger an exception leading to a cut time step '
-                  'rather than a failed solve'
+                  'rather than a failed solve using the stress-update based crystal plasticity implementation'
     design = '/ComputeMultipleCrystalPlasticityStress.md /CrystalPlasticityKalidindiUpdate.md'
   []
   [substep]
@@ -35,7 +35,7 @@
     allow_warnings = true
     issues = '#6097'
     requirement = 'The crystal plasticity system shall provide a substepping capability for improved '
-                  'convergence'
+                  'convergence using the stress-update based crystal plasticity implementation'
     design = '/ComputeMultipleCrystalPlasticityStress.md /CrystalPlasticityKalidindiUpdate.md'
   []
   [linesearch]
@@ -44,7 +44,7 @@
     exodiff = 'linesearch_out.e'
     issues = '#16064'
     requirement = 'The crystal plasticity system shall implement a line search capability for '
-                  'accellerated internal Newton solves'
+                  'accelerated internal Newton solves using the stress-update based crystal plasticity implementation'
     design = '/CrystalPlasticityKalidindiUpdate.md'
   []
   [orthotropic_rotation_Cijkl]
@@ -53,7 +53,7 @@
     csvdiff = 'orthotropic_rotation_Cijkl_out.csv'
     issues = '#10629'
     requirement = 'The crystal plasticity rotations shall correctly rotate the elasticity tensors at '
-                  'each material point'
+                  'each material point using the stress-update based crystal plasticity implementation'
     design = '/ComputeElasticityTensorConstantRotationCP.md'
   []
   [patch_recovery]
@@ -63,8 +63,8 @@
     abs_zero = 1e-8
     mesh_mode = replicated
     requirement = "The Zienkiewicz-Zhu patch shall calculate the stress components at the nodes, "
-                  "with equivalent results in both serial and parallel simulations, in a crystal "
-                  "plasticity finite strain application."
+                  "with equivalent results in both serial and parallel simulations, in "
+                  "the stress-update based crystal plasticity implementation"
     design = 'nodal_patch_recovery.md'
     issues = '#18721'
   []
@@ -76,7 +76,7 @@
     valgrind = HEAVY
     issues = '#17340'
     requirement = 'The system shall apply correct boundary condition after timestep being cut during '
-                  'substepping'
+                  'substepping using the stress-update based crystal plasticity implementation'
     design = '/ComputeMultipleCrystalPlasticityStress.md'
   []
   [thermal_eigenstrain]
@@ -113,7 +113,7 @@
     allow_warnings = true
     issues = '#17734'
     requirement = 'The system shall produce correct thermal deformation gradient values with '
-                  'changing temperature'
+                  'changing temperature under a 011 loading orientation'
     design = '/ComputeCrystalPlasticityThermalEigenstrain.md '
              '/ComputeMultipleCrystalPlasticityStress.md'
   []

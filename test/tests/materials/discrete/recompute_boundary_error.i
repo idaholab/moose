@@ -5,48 +5,46 @@
     nx = 10
     ny = 1
   []
-  [./left_domain]
+  [left_domain]
     input = gen
     type = SubdomainBoundingBoxGenerator
     bottom_left = '0 0 0'
     top_right = '0.5 1 0'
     block_id = 10
-  [../]
+  []
 []
 
-
 [Variables]
-  [./u]
+  [u]
     initial_condition = 2
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
-    type = MatDiffusionTest
+  [diff]
+    type = Diffusion
     variable = u
-    prop_name = 'p'
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 2
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 3
-  [../]
+  []
 []
 
 [Materials]
 
-  [./recompute_props]
+  [recompute_props]
     type = RecomputeMaterial
     boundary = 'left'
     f_name = 'f'
@@ -54,9 +52,9 @@
     p_name = 'p'
     outputs = all
     output_properties = 'f f_prime p'
-  [../]
+  []
 
-  [./newton]
+  [newton]
     type = NewtonMaterial
     boundary = 'left right'
     outputs = all
@@ -64,15 +62,15 @@
     f_prime_name = 'f_prime'
     p_name = 'p'
     material = 'recompute_props'
-  [../]
+  []
 
-  [./left]
+  [left]
     type = GenericConstantMaterial
-    prop_names =  'f f_prime'
+    prop_names = 'f f_prime'
     prop_values = '1 0.5    '
     block = '10 0'
     outputs = all
-  [../]
+  []
 []
 
 [Executioner]

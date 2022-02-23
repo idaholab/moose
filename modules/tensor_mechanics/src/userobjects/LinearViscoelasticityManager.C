@@ -49,6 +49,18 @@ LinearViscoelasticityManager::LinearViscoelasticityManager(const InputParameters
 }
 
 void
+LinearViscoelasticityManager::initialSetup()
+{
+  MaterialBase * test = &getMaterialByName(_viscoelastic_model_name, /*no_warn =*/true);
+  if (!test)
+    mooseError(_viscoelastic_model_name + " does not exist");
+
+  _viscoelastic_model = dynamic_cast<LinearViscoelasticityBase *>(test);
+  if (!_viscoelastic_model)
+    mooseError(_viscoelastic_model_name + " is not a LinearViscoelasticityBase object");
+}
+
+void
 LinearViscoelasticityManager::execute()
 {
   if (_mi_feproblem.getCurrentExecuteOnFlag() == EXEC_TIMESTEP_BEGIN)
@@ -56,19 +68,4 @@ LinearViscoelasticityManager::execute()
     for (unsigned int _qp = 0; _qp < _qrule->n_points(); ++_qp)
       _viscoelastic_model->recomputeQpApparentProperties(_qp);
   }
-}
-
-void
-LinearViscoelasticityManager::initialize()
-{
-  std::shared_ptr<MaterialBase> test =
-      _mi_feproblem.getMaterial(_viscoelastic_model_name, _material_data_type, _mi_tid, true);
-
-  if (!test)
-    mooseError(_viscoelastic_model_name + " does not exist");
-
-  _viscoelastic_model = std::dynamic_pointer_cast<LinearViscoelasticityBase>(test);
-
-  if (!_viscoelastic_model)
-    mooseError(_viscoelastic_model_name + " is not a LinearViscoelasticityBase object");
 }

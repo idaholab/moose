@@ -1,0 +1,21 @@
+[Tests]
+  design = ReynoldsNumberFunctorAux.md
+  issues = '#20359'
+  [reynolds]
+    requirement = 'The system shall be able to compute element Reynolds numbers for:'
+    [fv]
+      type = Exodiff
+      input = fv.i
+      exodiff = fv_out.e
+      detail = 'finite volume discretizations'
+      ad_indexing_type = 'global'
+    []
+    [fe]
+      type = Exodiff
+      input = fe.i
+      exodiff = fe_out.e
+      detail = 'finite element discretizations'
+      ad_indexing_type = 'global'
+    []
+  []
+[]

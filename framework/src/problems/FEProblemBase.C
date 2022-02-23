@@ -791,6 +791,15 @@ FEProblemBase::initialSetup()
 
       // Call initialSetup on all material objects
       _all_materials.initialSetup(tid);
+
+      // Discrete materials may insert additional dependencies on materials during the initial
+      // setup. Therefore we resolve the dependencies once more, now with the additional
+      // dependencies due to discrete materials.
+      if (_discrete_materials.hasActiveObjects())
+      {
+        _materials.sort(tid);
+        _interface_materials.sort(tid);
+      }
     }
 
     {

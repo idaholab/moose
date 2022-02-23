@@ -63,8 +63,13 @@ FunctorMaterial::addFunctorPropertyByBlocks(const std::string & name,
 {
   // Check if the supplied parameter is a valid input parameter key
   std::string prop_name = name;
-  if (_pars.have_parameter<MaterialPropertyName>(name))
-    prop_name = _pars.get<MaterialPropertyName>(name);
+  if (_pars.isParamValid(name))
+  {
+    if (_pars.have_parameter<MaterialPropertyName>(name))
+      prop_name = _pars.get<MaterialPropertyName>(name);
+    if (_pars.have_parameter<MooseFunctorName>(name))
+      prop_name = _pars.get<MooseFunctorName>(name);
+  }
 
   return _subproblem.addPiecewiseByBlockLambdaFunctor<T>(
       prop_name, my_lammy, clearance_schedule, _mesh, sub_ids, _tid);
