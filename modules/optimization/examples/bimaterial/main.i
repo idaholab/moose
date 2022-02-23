@@ -48,23 +48,20 @@
 [Transfers]
   [diffusivity_to_model]
     type = MultiAppReporterTransfer
-    multi_app = model
-    direction = to_multiapp
+    to_multi_app = model
     from_reporters = 'OptimizationReporter/diffusivity_values'
     to_reporters = 'vector_pp/diffusivity_values'
   []
   [toForward_measument]
     type = MultiAppReporterTransfer
-    multi_app = model
-    direction = to_multiapp
+    to_multi_app = model
     from_reporters = 'OptimizationReporter/measurement_xcoord OptimizationReporter/measurement_ycoord OptimizationReporter/measurement_zcoord'
     to_reporters = 'measure_data/measurement_xcoord measure_data/measurement_ycoord measure_data/measurement_zcoord'
   []
 
   [from_model]
     type = MultiAppReporterTransfer
-    multi_app = model
-    direction = from_multiapp
+    from_multi_app = model
     from_reporters = 'data_pt/temperature data_pt/temperature vector_pp/diffusivity_values'
     to_reporters = 'OptimizationReporter/simulation_values temperature_at_observation_points/values diffusivities/values'
   []

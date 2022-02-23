@@ -39,30 +39,26 @@
 [Transfers]
   [toforward]
     type = MultiAppReporterTransfer
-    multi_app = forward
-    direction = to_multiapp
+    to_multi_app = forward
     from_reporters = 'OptimizationReporter/parameter_results'
     to_reporters = 'point_source/value'
   []
   [fromforward]
     type = MultiAppReporterTransfer
-    multi_app = forward
-    direction = from_multiapp
+    from_multi_app = forward
     from_reporters = 'dr/temperature_difference dr/temperature'
     to_reporters = 'OptimizationReporter/misfit measured/values'
   []
 
   [toadjoint]
     type = MultiAppReporterTransfer
-    multi_app = adjoint
-    direction = to_multiapp
+    to_multi_app = adjoint
     from_reporters = 'OptimizationReporter/misfit'
     to_reporters = 'point_source/value'
   []
   [fromadjoint]
     type = MultiAppReporterTransfer
-    multi_app = adjoint
-    direction = from_multiapp
+    from_multi_app = adjoint
     from_reporters = 'ar/temperature'
     to_reporters = 'OptimizationReporter/adjoint'
   []

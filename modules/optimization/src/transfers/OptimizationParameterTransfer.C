@@ -23,6 +23,7 @@ OptimizationParameterTransfer::validParams()
                                        "to which the optimization parameters will be transferred.");
   params.set<MultiMooseEnum>("direction") = "to_multiapp";
   params.suppressParameter<MultiMooseEnum>("direction");
+  params.suppressParameter<MultiAppName>("from_multi_app");
 
   return params;
 }
@@ -56,8 +57,8 @@ OptimizationParameterTransfer::execute()
   for (const auto & v : _values)
     values_full.insert(values_full.end(), v->begin(), v->end());
 
-  for (unsigned int i = 0; i < _multi_app->numGlobalApps(); ++i)
-    if (_multi_app->hasLocalApp(i))
+  for (unsigned int i = 0; i < _to_multi_app->numGlobalApps(); ++i)
+    if (_to_multi_app->hasLocalApp(i))
     {
       ControlsReceiver * ptr = getReceiver(i);
       ptr->transfer(_parameters, values_full);
@@ -68,11 +69,11 @@ ControlsReceiver *
 OptimizationParameterTransfer::getReceiver(unsigned int app_index)
 {
   // Test that the sub-application has the given Control object
-  FEProblemBase & to_problem = _multi_app->appProblemBase(app_index);
+  FEProblemBase & to_problem = _to_multi_app->appProblemBase(app_index);
   ExecuteMooseObjectWarehouse<Control> & control_wh = to_problem.getControlWarehouse();
   if (!control_wh.hasActiveObject(_receiver_name))
     mooseError("The sub-application (",
-               _multi_app->name(),
+               _to_multi_app->name(),
                ") does not contain a Control object with the name '",
                _receiver_name,
                "'.");
@@ -83,7 +84,7 @@ OptimizationParameterTransfer::getReceiver(unsigned int app_index)
   if (!ptr)
     mooseError(
         "The sub-application (",
-        _multi_app->name(),
+        _to_multi_app->name(),
         ") Control object for the 'to_control' parameter must be of type 'ControlsReceiver'.");
 
   return ptr;

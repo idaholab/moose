@@ -45,15 +45,13 @@
 [Transfers]
   [fromForward]
     type = MultiAppReporterTransfer
-    multi_app = forward
-    direction = from_multiapp
+    from_multi_app = forward
     from_reporters = 'data_pt/temperature data_pt/temperature'
     to_reporters = 'OptimizationReporter/simulation_values receiver/measured'
   []
   [toForward_measument]
     type = MultiAppReporterTransfer
-    multi_app = forward
-    direction = to_multiapp
+    to_multi_app = forward
     from_reporters = 'OptimizationReporter/measurement_xcoord OptimizationReporter/measurement_ycoord OptimizationReporter/measurement_zcoord'
     to_reporters = 'measure_data/measurement_xcoord measure_data/measurement_ycoord measure_data/measurement_zcoord'
   []

@@ -56,16 +56,14 @@
 [Transfers]
   [fromForward]
     type = MultiAppReporterTransfer
-    multi_app = forward
-    direction = from_multiapp
+    from_multi_app = forward
     #the second vector in the reporterTransfer just writes to teh constantReporter below for the csvDiff in the test file
     from_reporters = 'data_pt/temperature'
     to_reporters = 'OptimizationReporter/simulation_values'
   []
   [toAdjoint]
     type = MultiAppReporterTransfer
-    multi_app = adjoint
-    direction = to_multiapp
+    to_multi_app = adjoint
     from_reporters = 'OptimizationReporter/measurement_xcoord OptimizationReporter/measurement_ycoord OptimizationReporter/measurement_zcoord OptimizationReporter/misfit_values'
     to_reporters = 'misfit/measurement_xcoord misfit/measurement_ycoord misfit/measurement_zcoord misfit/misfit_values'
   []
@@ -78,7 +76,7 @@
   []
   [fromadjoint]
     type = MultiAppReporterTransfer
-    multi_app = adjoint
+    from_multi_app = adjoint
     from_reporters = 'adjoint_pt/adjoint_pt'
     to_reporters = 'OptimizationReporter/adjoint'
     direction = from_multiapp

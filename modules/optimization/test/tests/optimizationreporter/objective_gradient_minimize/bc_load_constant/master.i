@@ -51,22 +51,19 @@
   #these are usually the same for all input files.
     [fromForward]
       type = MultiAppReporterTransfer
-      multi_app = forward
-      direction = from_multiapp
+      from_multi_app = forward
       from_reporters = 'data_pt/temperature data_pt/temperature'
       to_reporters = 'OptimizationReporter/simulation_values receiver/measured'
     []
     [toAdjoint]
       type = MultiAppReporterTransfer
-      multi_app = adjoint
-      direction = to_multiapp
+      to_multi_app = adjoint
       from_reporters = 'OptimizationReporter/measurement_xcoord OptimizationReporter/measurement_ycoord OptimizationReporter/measurement_zcoord OptimizationReporter/misfit_values'
       to_reporters = 'misfit/measurement_xcoord misfit/measurement_ycoord misfit/measurement_zcoord misfit/misfit_values'
     []
     [toForward_measument]
       type = MultiAppReporterTransfer
-      multi_app = forward
-      direction = to_multiapp
+      to_multi_app = forward
       from_reporters = 'OptimizationReporter/measurement_xcoord OptimizationReporter/measurement_ycoord OptimizationReporter/measurement_zcoord'
       to_reporters = 'measure_data/measurement_xcoord measure_data/measurement_ycoord measure_data/measurement_zcoord'
     []
@@ -84,10 +81,9 @@
   []
   [fromAdjoint]
     type = MultiAppReporterTransfer
-    multi_app = adjoint
+    from_multi_app = adjoint
     from_reporters = 'adjoint_pt/adjoint_pt'
     to_reporters = 'OptimizationReporter/adjoint'
-    direction = from_multiapp
   []
 []
 
