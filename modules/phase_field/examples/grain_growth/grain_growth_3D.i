@@ -343,7 +343,7 @@
 [Outputs]
   exodus = true
   csv = true
-  [./perf_graph]
+  [./pg]
     type = PerfGraphOutput
     execute_on = 'initial final'  # Default is "final"
     level = 2                     # Default is 1
