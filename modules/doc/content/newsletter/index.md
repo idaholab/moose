@@ -7,6 +7,7 @@ provided below.
 
 ## 2022
 
+- [February, 2022](2022_02.md)
 - [January, 2022](2022_01.md)
 
 ## 2021
