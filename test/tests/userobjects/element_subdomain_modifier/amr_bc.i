@@ -96,11 +96,18 @@
 []
 
 [BCs]
+ active = 'mbc leftright'
  [mbc]
    type = DirichletBC
    variable = u
    boundary = moving_boundary
    value = 1
+ []
+ [nbc]
+  type = NeumannBC
+  variable = u
+  boundary = moving_boundary
+  value = 10
  []
  [leftright]
    type = DirichletBC
