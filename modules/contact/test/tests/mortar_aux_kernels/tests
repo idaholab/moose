@@ -48,4 +48,17 @@
                   'input file.'
 
   []
+  [frictional-mortar-3d-status]
+    type = 'Exodiff'
+    exodiff = 'frictional-mortar-3d-status_out.e'
+    input = 'frictional-mortar-3d-status.i'
+    rel_err = 1.0e-3
+    abs_zero = 1.0e-4
+    min_parallel = 1
+    max_parallel = 2
+    min_ad_size = '50'
+    ad_indexing_type = 'global'
+    requirement = 'Contact module shall compute nodal frictional status of mortar surfaces for a '
+                  'simple problem in which nodes are in stick and slip states.'
+  []
 []
