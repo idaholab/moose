@@ -32,9 +32,8 @@ PolycrystalRandomIC::PolycrystalRandomIC(const InputParameters & parameters)
 }
 
 Real
-PolycrystalRandomIC::value(const Point & p)
+PolycrystalRandomIC::value(const Point &)
 {
-  Point cur_pos = p;
   Real val = generateRandom();
 
   switch (_random_type)
