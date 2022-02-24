@@ -153,7 +153,6 @@ PorousFlowDispersiveFlux::computeQpJac(unsigned int jvar) const
   RankTwoTensor dispersion;
   dispersion.zero();
   Real diffusion;
-  RealVectorValue flux = 0.0;
   RealVectorValue dflux = 0.0;
 
   for (unsigned int ph = 0; ph < _num_phases; ++ph)
