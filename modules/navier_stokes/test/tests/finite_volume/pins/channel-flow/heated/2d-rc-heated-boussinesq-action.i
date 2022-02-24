@@ -20,15 +20,11 @@ T_inlet=200
 
 [AuxVariables]
   [T_solid]
-    family = 'MONOMIAL'
-    order = 'CONSTANT'
-    fv = true
+    type = MooseVariableFVReal
     initial_condition = 100
   []
   [porosity]
-    family = MONOMIAL
-    order = CONSTANT
-    fv = true
+    type = MooseVariableFVReal
     initial_condition = 0.4
   []
 []

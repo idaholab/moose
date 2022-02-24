@@ -22,5 +22,5 @@ public:
 
 protected:
   /// The density
-  const Real & _rho;
+  const Moose::Functor<ADReal> & _rho;
 };

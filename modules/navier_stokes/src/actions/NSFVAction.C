@@ -608,12 +608,15 @@ NSFVAction::addINSMomentumTimeKernels()
     const std::string mom_kernel_type = "PINSFVMomentumTimeDerivative";
     InputParameters params = _factory.getValidParams(mom_kernel_type);
     params.set<std::vector<SubdomainName>>("block") = _blocks;
-    params.set<MaterialPropertyName>(NS::density) = _density_name;
+    params.set<MooseFunctorName>(NS::density) = _density_name;
+    params.set<UserObjectName>("rhie_chow_user_object") = "pins_rhie_chow_interpolator";
 
     for (unsigned int d = 0; d < _dim; ++d)
     {
       params.set<NonlinearVariableName>("variable") = NS::superficial_velocity_vector[d];
-      _problem->addKernel(mom_kernel_type, "pins_momentum_" + NS::directions[d] + "_time", params);
+      params.set<MooseEnum>("momentum_component") = NS::directions[d];
+      _problem->addFVKernel(
+          mom_kernel_type, "pins_momentum_" + NS::directions[d] + "_time", params);
     }
   }
   else
@@ -621,12 +624,14 @@ NSFVAction::addINSMomentumTimeKernels()
     const std::string mom_kernel_type = "INSFVMomentumTimeDerivative";
     InputParameters params = _factory.getValidParams(mom_kernel_type);
     params.set<std::vector<SubdomainName>>("block") = _blocks;
-    params.set<MaterialPropertyName>(NS::density) = _density_name;
+    params.set<MooseFunctorName>(NS::density) = _density_name;
+    params.set<UserObjectName>("rhie_chow_user_object") = "ins_rhie_chow_interpolator";
 
     for (unsigned int d = 0; d < _dim; ++d)
     {
       params.set<NonlinearVariableName>("variable") = NS::velocity_vector[d];
-      _problem->addKernel(mom_kernel_type, "ins_momentum_" + NS::directions[d] + "_time", params);
+      params.set<MooseEnum>("momentum_component") = NS::directions[d];
+      _problem->addFVKernel(mom_kernel_type, "ins_momentum_" + NS::directions[d] + "_time", params);
     }
   }
 }
@@ -643,10 +648,15 @@ NSFVAction::addINSEnergyTimeKernels()
     params.set<NonlinearVariableName>("variable") = NS::T_fluid;
     params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
     params.set<MooseFunctorName>(NS::density) = _density_name;
-    params.set<MooseFunctorName>(NS::time_deriv(NS::density)) = NS::time_deriv(_density_name);
+    if (_problem->hasFunctor(NS::time_deriv(NS::density),
+                             _problem->parameters().get<THREAD_ID>("_tid")))
+      params.set<MooseFunctorName>(NS::time_deriv(NS::density)) = NS::time_deriv(_density_name);
     params.set<MooseFunctorName>(NS::cp) = _specific_heat_name;
-    params.set<MooseFunctorName>(NS::time_deriv(NS::cp)) = NS::time_deriv(_specific_heat_name);
-    _problem->addKernel(en_kernel_type, "pins_energy_time", params);
+    if (_problem->hasFunctor(NS::time_deriv(_specific_heat_name),
+                             _problem->parameters().get<THREAD_ID>("_tid")))
+      params.set<MooseFunctorName>(NS::time_deriv(NS::cp)) = NS::time_deriv(_specific_heat_name);
+    params.set<bool>("is_solid") = false;
+    _problem->addFVKernel(en_kernel_type, "pins_energy_time", params);
   }
   else
   {
@@ -656,10 +666,12 @@ NSFVAction::addINSEnergyTimeKernels()
 
     params.set<NonlinearVariableName>("variable") = NS::T_fluid;
     params.set<MooseFunctorName>(NS::density) = _density_name;
-    params.set<MooseFunctorName>(NS::time_deriv(NS::density)) = NS::time_deriv(_density_name);
+    if (_problem->hasFunctor(NS::time_deriv(NS::density), params.get<THREAD_ID>("_tid")))
+      params.set<MooseFunctorName>(NS::time_deriv(_density_name)) = NS::time_deriv(_density_name);
     params.set<MooseFunctorName>(NS::cp) = _specific_heat_name;
-    params.set<MooseFunctorName>(NS::time_deriv(NS::cp)) = NS::time_deriv(_specific_heat_name);
-    _problem->addKernel(en_kernel_type, "ins_energy_time", params);
+    if (_problem->hasFunctor(NS::time_deriv(_specific_heat_name), params.get<THREAD_ID>("_tid")))
+      params.set<MooseFunctorName>(NS::time_deriv(NS::cp)) = NS::time_deriv(_specific_heat_name);
+    _problem->addFVKernel(en_kernel_type, "ins_energy_time", params);
   }
 }
 

@@ -1,9 +1,20 @@
-mu=1
-rho=1
-k=1e-3
-cp=1
-u_inlet=1
-T_inlet=200
+# Fluid properties
+mu = 1
+rho = 1
+cp = 1
+k = 1e-3
+
+# Solid properties
+cp_s = 2
+rho_s = 4
+k_s = 1e-2
+h_fs = 10
+
+# Operating conditions
+u_inlet = 1
+T_inlet = 200
+p_outlet = 10
+top_side_temperature = 150
 
 [Mesh]
   [gen]
@@ -21,6 +32,7 @@ T_inlet=200
 [Variables]
   [T_solid]
     type = MooseVariableFVReal
+    initial_condition = 100
   []
 []
 
@@ -33,7 +45,7 @@ T_inlet=200
 
 [Modules]
   [NavierStokesFV]
-    simulation_type = 'steady-state'
+    simulation_type = 'transient'
     compressibility = 'incompressible'
     porous_medium_treatment = true
     add_energy_equation = true
@@ -45,6 +57,7 @@ T_inlet=200
     porosity = 'porosity'
 
     initial_velocity = '${u_inlet} 1e-6 0'
+    initial_pressure = ${p_outlet}
 
     inlet_boundaries = 'left'
     momentum_inlet_types = 'fixed-velocity'
@@ -59,7 +72,7 @@ T_inlet=200
 
     outlet_boundaries = 'right'
     momentum_outlet_types = 'fixed-pressure'
-    pressure_function = '0.1'
+    pressure_function = '${p_outlet}'
 
     ambient_convection_alpha = 'h_cv'
     ambient_temperature = 'T_solid'
@@ -67,17 +80,25 @@ T_inlet=200
 []
 
 [FVKernels]
+  [solid_energy_time]
+    type = PINSFVEnergyTimeDerivative
+    variable = T_solid
+    cp = ${cp_s}
+    rho = ${rho_s}
+    is_solid = true
+    porosity = porosity
+  []
   [solid_energy_diffusion]
     type = FVDiffusion
-    coeff = ${k}
     variable = T_solid
+    coeff = ${k_s}
   []
   [solid_energy_convection]
     type = PINSFVEnergyAmbientConvection
-    variable = 'T_solid'
+    variable = T_solid
     is_solid = true
-    T_fluid = 'T_fluid'
-    T_solid = 'T_solid'
+    T_fluid = T_fluid
+    T_solid = T_solid
     h_solid_fluid = 'h_cv'
   []
 []
@@ -87,7 +108,7 @@ T_inlet=200
     type = FVDirichletBC
     boundary = 'top'
     variable = 'T_solid'
-    value = 150
+    value = ${top_side_temperature}
   []
 []
 
@@ -95,17 +116,19 @@ T_inlet=200
   [constants]
     type = ADGenericFunctorMaterial
     prop_names = 'h_cv cp rho mu k'
-    prop_values = '1 ${cp} ${rho} ${mu} ${k}'
+    prop_values = '${h_fs} ${cp} ${rho} ${mu} ${k}'
   []
 []
 
 [Executioner]
-  type = Steady
+  type = Transient
   solve_type = 'NEWTON'
   petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_pc_type -sub_pc_factor_shift_type'
   petsc_options_value = 'asm      100                lu           NONZERO'
   line_search = 'none'
   nl_rel_tol = 1e-12
+
+  end_time = 1.5
 []
 
 # Some basic Postprocessors to examine the solution

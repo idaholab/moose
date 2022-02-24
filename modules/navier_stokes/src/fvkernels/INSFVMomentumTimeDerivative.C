@@ -19,20 +19,20 @@ INSFVMomentumTimeDerivative::validParams()
   InputParameters params = INSFVTimeKernel::validParams();
   params.addClassDescription(
       "Adds the time derivative term to the incompressible Navier-Stokes momentum equation.");
-  params.addRequiredParam<Real>(NS::density, "The value for the density");
-  params.declareControllable(NS::density);
+  params.addRequiredParam<MooseFunctorName>(NS::density, "The the density");
   return params;
 }
 
 INSFVMomentumTimeDerivative::INSFVMomentumTimeDerivative(const InputParameters & params)
-  : INSFVTimeKernel(params), _rho(getParam<Real>(NS::density))
+  : INSFVTimeKernel(params), _rho(getFunctor<ADReal>(NS::density))
 {
 }
 
 void
 INSFVMomentumTimeDerivative::gatherRCData(const Elem & elem)
 {
-  const auto residual = _rho * _var.dot(makeElemArg(&elem)) * _assembly.elementVolume(&elem);
+  const auto e = makeElemArg(&elem);
+  const auto residual = _rho(e) * _var.dot(e) * _assembly.elementVolume(&elem);
   const auto dof_number = elem.dof_number(_sys.number(), _var.number(), 0);
   const Real a = residual.derivatives()[dof_number];
 

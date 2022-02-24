@@ -75,6 +75,17 @@
     valgrind = 'none'
     design = 'PINSFVEnergyTimeDerivative.md INSFVMomentumTimeDerivative.md'
   []
+  [transient-action]
+    type = 'Exodiff'
+    input = 2d-transient-action.i
+    exodiff = 2d-transient-action_out.e
+    method = "!dbg"
+    abs_zero = 1e-9
+    issues = '#19472'
+    requirement = 'The system shall be able to run transient simulations with fluid energy diffusion, advection and convection with the solid phase in a 2D channel, modeling both fluid and solid temperature using the NSFV action syntax.'
+    ad_indexing_type = 'global'
+    valgrind = 'none'
+  []
   [boussinesq]
     type = 'Exodiff'
     input = 2d-rc-heated-boussinesq.i

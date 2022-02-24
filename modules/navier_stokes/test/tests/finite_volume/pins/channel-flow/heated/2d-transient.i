@@ -40,19 +40,19 @@ velocity_interp_method='rc'
 [UserObjects]
   [rc]
     type = PINSFVRhieChowInterpolator
-    u = u
-    v = v
+    u = superficial_vel_x
+    v = superficial_vel_y
     pressure = pressure
     porosity = porosity
   []
 []
 
 [Variables]
-  [u]
+  [superficial_vel_x]
     type = PINSFVSuperficialVelocityVariable
     initial_condition = ${u_inlet}
   []
-  [v]
+  [superficial_vel_y]
     type = PINSFVSuperficialVelocityVariable
     initial_condition = 1e-6
   []
@@ -60,10 +60,10 @@ velocity_interp_method='rc'
     type = INSFVPressureVariable
     initial_condition = ${p_outlet}
   []
-  [temp_fluid]
+  [T_fluid]
     type = INSFVEnergyVariable
   []
-  [temp_solid]
+  [T_solid]
     type = MooseVariableFVReal
     initial_condition = 100
   []
@@ -87,13 +87,13 @@ velocity_interp_method='rc'
 
   [u_time]
     type = INSFVMomentumTimeDerivative
-    variable = u
+    variable = superficial_vel_x
     rho = ${rho}
     momentum_component = 'x'
   []
   [u_advection]
     type = PINSFVMomentumAdvection
-    variable = u
+    variable = superficial_vel_x
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
     rho = ${rho}
@@ -102,14 +102,14 @@ velocity_interp_method='rc'
   []
   [u_viscosity]
     type = PINSFVMomentumDiffusion
-    variable = u
+    variable = superficial_vel_x
     mu = ${mu}
     porosity = porosity
     momentum_component = 'x'
   []
   [u_pressure]
     type = PINSFVMomentumPressure
-    variable = u
+    variable = superficial_vel_x
     momentum_component = 'x'
     pressure = pressure
     porosity = porosity
@@ -117,13 +117,13 @@ velocity_interp_method='rc'
 
   [v_time]
     type = INSFVMomentumTimeDerivative
-    variable = v
+    variable = superficial_vel_y
     rho = ${rho}
     momentum_component = 'y'
   []
   [v_advection]
     type = PINSFVMomentumAdvection
-    variable = v
+    variable = superficial_vel_y
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
     rho = ${rho}
@@ -132,14 +132,14 @@ velocity_interp_method='rc'
   []
   [v_viscosity]
     type = PINSFVMomentumDiffusion
-    variable = v
+    variable = superficial_vel_y
     mu = ${mu}
     porosity = porosity
     momentum_component = 'y'
   []
   [v_pressure]
     type = PINSFVMomentumPressure
-    variable = v
+    variable = superficial_vel_y
     momentum_component = 'y'
     pressure = pressure
     porosity = porosity
@@ -147,7 +147,7 @@ velocity_interp_method='rc'
 
   [energy_time]
     type = PINSFVEnergyTimeDerivative
-    variable = temp_fluid
+    variable = T_fluid
     cp = ${cp}
     rho = ${rho}
     is_solid = false
@@ -155,28 +155,28 @@ velocity_interp_method='rc'
   []
   [energy_advection]
     type = PINSFVEnergyAdvection
-    variable = temp_fluid
+    variable = T_fluid
     velocity_interp_method = ${velocity_interp_method}
     advected_interp_method = ${advected_interp_method}
   []
   [energy_diffusion]
     type = PINSFVEnergyDiffusion
-    variable = temp_fluid
+    variable = T_fluid
     k = ${k}
     porosity = porosity
   []
   [energy_convection]
     type = PINSFVEnergyAmbientConvection
-    variable = temp_fluid
+    variable = T_fluid
     is_solid = false
-    T_fluid = temp_fluid
-    T_solid = temp_solid
+    T_fluid = 'T_fluid'
+    T_solid = 'T_solid'
     h_solid_fluid = 'h_cv'
   []
 
   [solid_energy_time]
     type = PINSFVEnergyTimeDerivative
-    variable = temp_solid
+    variable = T_solid
     cp = ${cp_s}
     rho = ${rho_s}
     is_solid = true
@@ -184,15 +184,15 @@ velocity_interp_method='rc'
   []
   [solid_energy_diffusion]
     type = FVDiffusion
-    variable = temp_solid
+    variable = T_solid
     coeff = ${k_s}
   []
   [solid_energy_convection]
     type = PINSFVEnergyAmbientConvection
-    variable = temp_solid
+    variable = T_solid
     is_solid = true
-    T_fluid = temp_fluid
-    T_solid = temp_solid
+    T_fluid = 'T_fluid'
+    T_solid = 'T_solid'
     h_solid_fluid = 'h_cv'
   []
 []
@@ -201,18 +201,18 @@ velocity_interp_method='rc'
   [inlet-u]
     type = INSFVInletVelocityBC
     boundary = 'left'
-    variable = u
+    variable = superficial_vel_x
     function = ${u_inlet}
   []
   [inlet-v]
     type = INSFVInletVelocityBC
     boundary = 'left'
-    variable = v
+    variable = superficial_vel_y
     function = 0
   []
   [inlet-T]
     type = FVNeumannBC
-    variable = temp_fluid
+    variable = T_fluid
     value = ${fparse u_inlet * rho * cp * T_inlet}
     boundary = 'left'
   []
@@ -220,37 +220,37 @@ velocity_interp_method='rc'
   [no-slip-u]
     type = INSFVNoSlipWallBC
     boundary = 'top'
-    variable = u
+    variable = superficial_vel_x
     function = 0
   []
   [no-slip-v]
     type = INSFVNoSlipWallBC
     boundary = 'top'
-    variable = v
+    variable = superficial_vel_y
     function = 0
   []
   [heated-side]
     type = FVDirichletBC
     boundary = 'top'
-    variable = 'temp_solid'
+    variable = 'T_solid'
     value = ${top_side_temperature}
   []
 
   [symmetry-u]
     type = PINSFVSymmetryVelocityBC
     boundary = 'bottom'
-    variable = u
-    u = u
-    v = v
+    variable = superficial_vel_x
+    u = superficial_vel_x
+    v = superficial_vel_y
     mu = ${mu}
     momentum_component = 'x'
   []
   [symmetry-v]
     type = PINSFVSymmetryVelocityBC
     boundary = 'bottom'
-    variable = v
-    u = u
-    v = v
+    variable = superficial_vel_y
+    u = superficial_vel_x
+    v = superficial_vel_y
     mu = ${mu}
     momentum_component = 'y'
   []
@@ -282,7 +282,7 @@ velocity_interp_method='rc'
   [ins_fv]
     type = INSFVEnthalpyMaterial
     rho = ${rho}
-    temperature = 'temp_fluid'
+    temperature = 'T_fluid'
   []
 []
 
@@ -306,17 +306,17 @@ velocity_interp_method='rc'
   []
   [outlet-u]
     type = SideAverageValue
-    variable = u
+    variable = superficial_vel_x
     boundary = 'right'
   []
   [outlet-temp]
     type = SideAverageValue
-    variable = temp_fluid
+    variable = T_fluid
     boundary = 'right'
   []
   [solid-temp]
     type = ElementAverageValue
-    variable = temp_solid
+    variable = T_solid
   []
 []
 
