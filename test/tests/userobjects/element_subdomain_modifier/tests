@@ -81,4 +81,14 @@
 
     requirement = 'The framework shall support applying nodal BCs on the moving boundary with AMR in the element subdomain modifier'
   []
+
+  [amr_nbc]
+    type = 'Exodiff'
+    input = 'amr_bc.i'
+    cli_args = "BCs/active='mbc leftright' Outputs/file_base=amr_integral_bc_out"
+    exodiff = 'amr_integral_bc_out.e amr_integral_bc_out.e-s002
+    amr_integral_bc_out.e-s003 amr_integral_bc_out.e-s004 amr_integral_bc_out.e-s005 amr_integral_bc_out.e-s006'
+
+    requirement = 'The framework shall support applying integral BCs on the moving boundary with AMR in the element subdomain modifier'
+  []
 []
