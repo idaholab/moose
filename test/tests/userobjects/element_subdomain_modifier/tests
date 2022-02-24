@@ -52,25 +52,33 @@
     requirement = 'The framework shall include the ability to change element subdomain for a steady '
                   'state simulation'
   []
-  
+
   [amr_moving_boundary]
     type = 'Exodiff'
     input = 'adaptivity_moving_boundary.i'
-    exodiff = 'adaptivity_moving_boundary_out.e 
+    exodiff = 'adaptivity_moving_boundary_out.e
     adaptivity_moving_boundary_out.e-s002 adaptivity_moving_boundary_out.e-s003 adaptivity_moving_boundary_out.e-s004
     adaptivity_moving_boundary_out.e-s005 adaptivity_moving_boundary_out.e-s006 adaptivity_moving_boundary_out.e-s007
     adaptivity_moving_boundary_out.e-s008 adaptivity_moving_boundary_out.e-s009 adaptivity_moving_boundary_out.e-s010'
-    
+
     requirement = 'The framework shall support adaptive mesh refinement in the element subdomain modifier'
   []
-  
+
   [amr_moving_boundary_3d]
     type = 'Exodiff'
     input = 'adaptivity_moving_boundary_3d.i'
-    exodiff = 'adaptivity_moving_boundary_3d_out.e 
+    exodiff = 'adaptivity_moving_boundary_3d_out.e
     adaptivity_moving_boundary_3d_out.e-s002 adaptivity_moving_boundary_3d_out.e-s003 adaptivity_moving_boundary_3d_out.e-s004
     adaptivity_moving_boundary_3d_out.e-s005 adaptivity_moving_boundary_3d_out.e-s006'
-    
+
     requirement = 'The framework shall support adaptive mesh refinement in the element subdomain modifier for 3D problems'
+  []
+
+  [amr_bc]
+    type = 'Exodiff'
+    input = 'amr_bc.i'
+    exodiff = 'amr_bc_out.e amr_bc_out.e-s002 amr_bc_out.e-s003 amr_bc_out.e-s004 amr_bc_out.e-s005 amr_bc_out.e-s006'
+
+    requirement = 'The framework shall support applying nodal BCs on the moving boundary with AMR in the element subdomain modifier'
   []
 []
