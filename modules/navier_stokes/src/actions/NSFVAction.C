@@ -1030,7 +1030,7 @@ NSFVAction::addINSMomentumGravityKernels()
         {
           params.set<MooseEnum>("momentum_component") = NS::directions[d];
           params.set<NonlinearVariableName>("variable") = NS::superficial_velocity_vector[d];
-          _problem->addKernel(
+          _problem->addFVKernel(
               boussinesq_kernel_type, "pins_momentum_" + NS::directions[d] + "_boussinesq", params);
         }
       }

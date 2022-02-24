@@ -87,4 +87,15 @@
     design = 'PINSFVMomentumBoussinesq.md'
     cli_args = "Outputs/file_base='rc-heated-boussinesq'"
   []
+  [boussinesq-action]
+    type = 'Exodiff'
+    input = 2d-rc-heated-boussinesq-action.i
+    exodiff = rc-heated-boussinesq-action.e
+    method = "!dbg"
+    issues = '#19472'
+    requirement = 'The system shall be able to solve for fluid energy diffusion, advection and convection with the solid phase in a 2D channel with a Boussinesq approximation using the NSFV action syntax.'
+    ad_indexing_type = 'global'
+    valgrind = HEAVY
+    cli_args = "Outputs/file_base='rc-heated-boussinesq-action'"
+  []
 []
