@@ -66,6 +66,7 @@ ElementSubdomainModifier::setMovingBoundaryName(MooseMesh & mesh)
   mesh.setBoundaryName(_moving_boundary_id, _moving_boundary_name);
   mesh.getMesh().get_boundary_info().sideset_name(_moving_boundary_id) = _moving_boundary_name;
   mesh.getMesh().get_boundary_info().nodeset_name(_moving_boundary_id) = _moving_boundary_name;
+  mesh.getMesh().get_boundary_info().allow_children_on_boundary_side(true);
 }
 
 void
@@ -273,7 +274,9 @@ ElementSubdomainModifier::updateBoundaryInfo(MooseMesh & mesh,
                    _moving_boundary_subdomains.end() &&
                _moving_boundary_subdomains.find(elem->subdomain_id()) !=
                    _moving_boundary_subdomains.end()))
+          {
             bnd_info.add_side(elem, side, _moving_boundary_id);
+          }
         }
       }
       /* If elem's neighbor is not active, we need to check family members of the neighbor.
