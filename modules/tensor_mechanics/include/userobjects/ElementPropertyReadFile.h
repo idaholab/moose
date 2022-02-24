@@ -89,6 +89,8 @@ protected:
   unsigned int _rand_seed;
   ///Type of grain structure - non-periodic default
   MooseEnum _rve_type;
+  /// Do the block numbers start with zero or one?
+  bool _block_zero;
 
   MooseMesh & _mesh;
   std::vector<Point> _center;
