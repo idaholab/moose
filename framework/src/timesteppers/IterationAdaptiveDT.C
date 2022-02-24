@@ -153,8 +153,8 @@ IterationAdaptiveDT::IterationAdaptiveDT(const InputParameters & parameters)
   }
 
   if (!isParamValid("force_step_every_function_point") && isParamValid("post_function_sync_dt"))
-    paramWarning("post_function_sync_dt",
-                 "Not applicable if 'force_step_every_function_point = false'");
+    paramError("post_function_sync_dt",
+               "Not applicable if 'force_step_every_function_point = false'");
 }
 
 void
@@ -258,6 +258,10 @@ IterationAdaptiveDT::computeDT()
     dt *= _growth_factor;
     if (dt > _dt_old * _growth_factor)
       dt = _dt_old * _growth_factor;
+    if (_verbose)
+      _console << "Growing dt based on growth factor (" << _growth_factor
+               << ") and previous dt before sync (" << _dt_old << ") : " << std::setw(9) << dt
+               << std::endl;
   }
 
   return dt;

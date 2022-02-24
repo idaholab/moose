@@ -60,8 +60,8 @@ protected:
   /// The dt from the input file.
   const Real _input_dt;
 
-  bool _tfunc_last_step;
-  bool _sync_last_step;
+  bool & _tfunc_last_step;
+  bool & _sync_last_step;
 
   /// Adapt the timestep to maintain this non-linear iteration count...
   int _optimal_iterations;
