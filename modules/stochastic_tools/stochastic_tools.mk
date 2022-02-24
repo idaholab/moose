@@ -1,9 +1,9 @@
+app_non_unity_dirs = %src/surrogates %src/utils
+
 # Looking for the installation (maybe it is in the default location)
 ifeq ($(TORCH_DIR),)
   TORCH_DIR ?= $(APPLICATION_DIR)/libtorch
 endif
-
-$(info $(TORCH_DIR))
 
 ifneq ($(TORCH_DIR),)
 	UNAME_S := $(shell uname -s)
@@ -16,9 +16,10 @@ ifneq ($(TORCH_DIR),)
     # Enabling parts that have pytorch dependencies
     libmesh_CXXFLAGS += -DTORCH_ENABLED
 
-    # Adding the include directories
-    libmesh_CXXFLAGS += -I$(TORCH_DIR)/include/torch/csrc/api/include
-    libmesh_CXXFLAGS += -I$(TORCH_DIR)/include
+    # Adding the include directories, we use -isystem to silence the warning coming from
+		# libtorch (which would cause errors in the testing phase)
+    libmesh_CXXFLAGS += -isystem $(TORCH_DIR)/include/torch/csrc/api/include
+    libmesh_CXXFLAGS += -isystem $(TORCH_DIR)/include
 
     # Dynamically linking with the available pytorch library
     libmesh_LDFLAGS += -Wl,-rpath,$(TORCH_DIR)/lib

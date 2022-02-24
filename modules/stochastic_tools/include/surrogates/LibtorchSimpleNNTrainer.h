@@ -41,7 +41,7 @@ protected:
     MyData(torch::Tensor dt, torch::Tensor rt) : _data_tensor(dt), _response_tensor(rt) {}
     torch::data::Example<> get(size_t index) override
     {
-      return {_data_tensor.slice(0, index, index + 1), _response_tensor[index]};
+      return {_data_tensor[index], _response_tensor[index]};
     }
 
     torch::optional<size_t> size() const override { return _response_tensor.sizes()[0]; }
