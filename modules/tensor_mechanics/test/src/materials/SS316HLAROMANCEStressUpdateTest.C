@@ -52,13 +52,6 @@ SS316HLAROMANCEStressUpdateTestTempl<is_ad>::SS316HLAROMANCEStressUpdateTestTemp
 }
 
 template <bool is_ad>
-bool
-SS316HLAROMANCEStressUpdateTestTempl<is_ad>::substeppingCapabilityEnabled()
-{
-  return this->template getParam<bool>("use_substep");
-}
-
-template <bool is_ad>
 std::vector<std::vector<
     std::vector<std::vector<typename LAROMANCEStressUpdateBaseTempl<is_ad>::ROMInputTransform>>>>
 SS316HLAROMANCEStressUpdateTestTempl<is_ad>::getTransform()

@@ -25,6 +25,8 @@ public:
   storeIncrementalMaterialProperties(const unsigned int total_number_substeps) override;
 
 protected:
+  virtual bool substeppingCapabilityEnabled() override;
+
   enum class ROMInputTransform
   {
     LINEAR,
