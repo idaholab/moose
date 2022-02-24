@@ -89,6 +89,10 @@ MultiAppTransfer::MultiAppTransfer(const InputParameters & parameters)
       _directions.push_back("to_multiapp");
     else
       _directions.push_back("between_multiapp");
+
+    // So it's available in the next constructors
+    _direction = _directions[0];
+    _current_direction = _directions[0];
   }
 
   // Check for different number of subapps
@@ -191,7 +195,7 @@ MultiAppTransfer::getAppInfo()
   _local2global_map.clear();
 
   // Build the vectors for to problems, from problems, and subapps positions.
-  if (_from_multi_app)
+  if (_current_direction == FROM_MULTIAPP || _current_direction == BETWEEN_MULTIAPP)
   {
     _to_problems.push_back(&_from_multi_app->problemBase());
     _to_positions.push_back(Point(0., 0., 0.));
@@ -205,7 +209,7 @@ MultiAppTransfer::getAppInfo()
     }
   }
 
-  if (_to_multi_app)
+  if (_current_direction == TO_MULTIAPP || _current_direction == BETWEEN_MULTIAPP)
   {
     _from_problems.push_back(&_to_multi_app->problemBase());
     _from_positions.push_back(Point(0., 0., 0.));

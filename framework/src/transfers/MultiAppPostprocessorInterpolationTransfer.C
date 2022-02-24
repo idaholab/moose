@@ -63,6 +63,9 @@ MultiAppPostprocessorInterpolationTransfer::MultiAppPostprocessorInterpolationTr
   if (_directions.contains(TO_MULTIAPP))
     paramError("Can't interpolate to a MultiApp!");
 
+  if (_from_multi_app && _to_multi_app)
+    mooseError("Bi-directional or MultiApp-to-MultiApp transfers are not implemented");
+
   auto & to_fe_type = _from_multi_app->problemBase().getStandardVariable(0, _to_var_name).feType();
   if ((to_fe_type.order != CONSTANT || to_fe_type.family != MONOMIAL) &&
       (to_fe_type.order != FIRST || to_fe_type.family != LAGRANGE))
@@ -80,7 +83,8 @@ MultiAppPostprocessorInterpolationTransfer::execute()
   {
     case TO_MULTIAPP:
     {
-      mooseError("Can't interpolate to a MultiApp!!");
+      mooseError("Interpolation from a variable to a MultiApp postprocessors has not been "
+                 "implemented. Use MultiAppVariableValueSamplePostprocessorTransfer!");
       break;
     }
     case FROM_MULTIAPP:
