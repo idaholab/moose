@@ -50,7 +50,7 @@ class MooseSourceParser(object):
             return
 
         # Build the flags to pass to clang
-        includes = ['-x', 'c++', '-std=c++11']
+        includes = ['-x', 'c++', '-std=c++17']
         includes += self._includes
 
         # Build clang translation unit
