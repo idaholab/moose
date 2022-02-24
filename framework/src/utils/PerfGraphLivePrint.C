@@ -251,6 +251,7 @@ PerfGraphLivePrint::iterateThroughExecutionList()
 
     auto & section_increment = _execution_list[p];
 
+    std::lock_guard<std::mutex> lock(_perf_graph._section_increment_mutex);
     // New section, add to the stack
     if (section_increment._state == PerfGraph::IncrementState::STARTED)
     {
@@ -330,7 +331,7 @@ PerfGraphLivePrint::start()
           // to ensure that all of the writes to the execution list have been
           // published to this thread for the "end" we're reading
           this->_current_execution_list_end =
-              _perf_graph._execution_list_end.load(std::memory_order_acquire);
+              _perf_graph._execution_list_end.load(std::memory_order_relaxed);
 
           // Save off the number of things currently printed to the console
           this->_console_num_printed = _console.numPrinted();

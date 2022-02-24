@@ -399,6 +399,9 @@ protected:
   /// The mutex to use with a condition_variable predicate to guard _destructing
   std::mutex _destructing_mutex;
 
+  /// A mutex to prevent concurrent thread reading and writing of section increment data
+  std::mutex _section_increment_mutex;
+
   /// The condition_variable to wake the print thread
   std::condition_variable _finished_section;
 

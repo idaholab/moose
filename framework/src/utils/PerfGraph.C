@@ -154,11 +154,14 @@ PerfGraph::addToExecutionList(const PerfID id,
 {
   auto & section_increment = _execution_list[_execution_list_end];
 
-  section_increment._id = id;
-  section_increment._state = state;
-  section_increment._time = time;
-  section_increment._memory = memory;
-  section_increment._beginning_num_printed = _console.numPrinted();
+  {
+    std::lock_guard<std::mutex> lock(_section_increment_mutex);
+    section_increment._id = id;
+    section_increment._state = state;
+    section_increment._time = time;
+    section_increment._memory = memory;
+    section_increment._beginning_num_printed = _console.numPrinted();
+  }
 
   // A note about this next section of code:
   // It is only EVER run on the main thread - and therefore there can be
@@ -174,7 +177,7 @@ PerfGraph::addToExecutionList(const PerfID id,
   // "acquire" in the printing thread
   // All of the above memory operations will be seen by the
   // printing thread before the printing thread sees this new value
-  _execution_list_end.store(next_execution_list_end, std::memory_order_release);
+  _execution_list_end.store(next_execution_list_end, std::memory_order_relaxed);
 }
 
 void
