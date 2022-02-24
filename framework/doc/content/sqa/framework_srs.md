@@ -68,7 +68,7 @@ behaviors of each user-defined object.
   versions of Linux.
 - 4 GB of RAM for optimized compilation (8 GB for debug compilation), 2 GB per core execution
 - 100 GB disk space
-- C++14 compatible compiler (GCC, Clang)
+- C++17 compatible compiler (GCC, Clang)
 - Python 3.6+
 - Git
 !template-end!

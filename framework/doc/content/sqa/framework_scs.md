@@ -108,7 +108,7 @@ List captured variables (by value or reference) in the capture list explicitly w
   });
 ```
 
-## Other C++14 Notes
+## Other C++ Notes
 
 - Use the `override` keyword on overridden `virtual` methods
 - Use `std::make_shared<T>()` when allocating new memory for shared pointers

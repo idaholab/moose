@@ -6,7 +6,7 @@ If instead, you are here interested in allowing MOOSE-based development to be ma
 
 ## Pre-Reqs
 
-What ever compiler you choose to use on your cluster (GCC/Clang, MPICH/OpenMPI), the minimum requirement, is that it must be C++14 compatible. If you are unsure, please consult with your system admins for your cluster on which compiler to use (and how to use it).
+What ever compiler you choose to use on your cluster (GCC/Clang, MPICH/OpenMPI), the minimum requirement, is that it must be C++17 compatible. If you are unsure, please consult with your system admins for your cluster on which compiler to use (and how to use it).
 
 - +CMake+. A modern version of CMake (>3.5) is required to build some of the meta packages we need to include in PETSc.
 
