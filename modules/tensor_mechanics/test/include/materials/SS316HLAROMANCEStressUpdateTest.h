@@ -27,8 +27,6 @@ protected:
   virtual std::vector<std::vector<std::vector<std::vector<Real>>>> getInputLimits() override;
   virtual std::vector<std::vector<std::vector<std::vector<Real>>>> getCoefs() override;
   virtual std::vector<Real> getStrainCutoff() override { return {1.0e-10}; }
-
-  virtual bool substeppingCapabilityEnabled() override;
 };
 
 typedef SS316HLAROMANCEStressUpdateTestTempl<false> SS316HLAROMANCEStressUpdateTest;

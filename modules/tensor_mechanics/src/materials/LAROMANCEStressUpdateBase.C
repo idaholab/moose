@@ -255,6 +255,13 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::LAROMANCEStressUpdateBaseTempl(
 }
 
 template <bool is_ad>
+bool
+LAROMANCEStressUpdateBaseTempl<is_ad>::substeppingCapabilityEnabled()
+{
+  return this->template getParam<bool>("use_substep");
+}
+
+template <bool is_ad>
 void
 LAROMANCEStressUpdateBaseTempl<is_ad>::setupUnitConversionFactors(
     const InputParameters & parameters)
