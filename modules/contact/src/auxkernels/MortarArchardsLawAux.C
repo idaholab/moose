@@ -100,7 +100,7 @@ MortarArchardsLawAux::computeValue()
 void
 MortarArchardsLawAux::computeQpProperties()
 {
-  RealVectorValue gap_velocity_vec(0, 0, 0);
+  RealVectorValue gap_velocity_vec;
   gap_velocity_vec(0) = MetaPhysicL::raw_value(_secondary_x_dot[_qp] - _primary_x_dot[_qp]);
   gap_velocity_vec(1) = MetaPhysicL::raw_value(_secondary_y_dot[_qp] - _primary_y_dot[_qp]);
 
