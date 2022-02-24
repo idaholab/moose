@@ -10,9 +10,9 @@
     xmax = 1
     ymin = -1
     ymax = 1
-    nx = 16
-    ny = 16
-    nz = 16
+    nx = 10
+    ny = 10
+    nz = 6
   []
   [left]
     type = SubdomainBoundingBoxGenerator
