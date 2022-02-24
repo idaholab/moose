@@ -420,7 +420,6 @@ MultiAppProjectionTransfer::execute()
     std::unique_ptr<FEBase> fe(FEBase::build(to_mesh.mesh_dimension(), fe_type));
     QGauss qrule(to_mesh.mesh_dimension(), fe_type.default_quadrature_order());
     fe->attach_quadrature_rule(&qrule);
-    const std::vector<Point> & xyz = fe->get_xyz();
 
     for (const auto & elem : to_mesh.active_local_element_ptr_range())
     {
@@ -431,8 +430,6 @@ MultiAppProjectionTransfer::execute()
 
       for (unsigned int qp = 0; qp < qrule.n_points(); qp++)
       {
-        Point qpt = xyz[qp];
-
         unsigned int lowest_app_rank = libMesh::invalid_uint;
         for (auto & values_ids : incoming_evals_ids)
         {
