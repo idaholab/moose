@@ -9,7 +9,7 @@
                 Mesh/pin2/region_ids='2'
                 Mesh/pin3/region_ids='3 4'
                 Mesh/rmp/assembly_pitch=2.84126
-                --mesh-only core_in.e"
+                Outputs/file_base=core_in"
     exodiff = 'core_in.e'
     recover = false
   []
@@ -22,7 +22,7 @@
                 Mesh/pin3/region_ids='3 4'
                 Mesh/rmp/assembly_pitch=2.84126
                 Mesh/cmg/pattern='2 1; 1 0'
-                --mesh-only core_empty_in.e"
+                Outputs/file_base=core_empty_in"
     exodiff = 'core_empty_in.e'
     recover = false
   []
@@ -40,17 +40,17 @@
                 Mesh/pin3/region_ids='31 32'
                 Mesh/amg1/pattern='  0   0; 0   0   0; 0   0'
                 Mesh/amg1/background_intervals=1
-                Mesh/amg1/background_region_id=10000
+                Mesh/amg1/background_region_id=41
                 Mesh/amg2/inputs='pin1 pin3'
                 Mesh/amg2/pattern='  0   0; 0   1   0; 0   0'
-                Mesh/amg2/background_region_id=20000
+                Mesh/amg2/background_region_id=51
                 Mesh/amg2/background_intervals=1
-                Mesh/amg2/duct_region_ids=20001
+                Mesh/amg2/duct_region_ids=52
                 Mesh/amg2/duct_halfpitch='3.5'
                 Mesh/amg2/duct_intervals='1' 
                 Mesh/cmg/inputs='amg1 amg2 empty'                
                 Mesh/cmg/pattern='  2 1; 1 0 2 ; 2 1'
-                --mesh-only core_hex_in.e"
+                Outputs/file_base=core_hex_in"
     exodiff = 'core_hex_in.e'
     recover = false
   []
