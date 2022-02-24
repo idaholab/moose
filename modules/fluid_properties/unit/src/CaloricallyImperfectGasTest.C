@@ -44,6 +44,7 @@ TEST_F(CaloricallyImperfectGasTest, testAll)
   uo_pars.set<FunctionName>("k") = "k_fn";
   uo_pars.set<Real>("min_temperature") = 100.0;
   uo_pars.set<Real>("max_temperature") = 500.0;
+  uo_pars.set<Real>("temperature_resolution") = 0.01;
   _fe_problem->addUserObject("CaloricallyImperfectGas", "fp", uo_pars);
   fp = &_fe_problem->getUserObject<CaloricallyImperfectGas>("fp");
 
@@ -51,21 +52,65 @@ TEST_F(CaloricallyImperfectGasTest, testAll)
 
   Real min_T = 100.0;
   Real max_T = 500.0;
-  unsigned int np = 100;
+  unsigned int np = 200;
   Real dT = (max_T - min_T) / ((Real)np - 1.0);
 
-  // Test the T -> e, h -> T rountrip lookup
+  // Consistency checks
   {
-    for (unsigned int j = 0; j < np; ++j)
+    for (unsigned int j = 1; j < np - 1; ++j)
     {
-      // the 1 arguments are not used
       Real T = min_T + j * dT;
-      Real h = fp->h_from_p_T(1, T);
-      Real e = fp->e_from_p_T(1, T);
-      Real TT1 = fp->T_from_v_e(1, e);
-      Real TT2 = fp->T_from_p_h(1, h);
-      REL_TEST(T, TT1, 1e-5);
-      REL_TEST(T, TT2, 1e-5);
+      Real p = 1.0e6;
+      const Real rho = fp->rho_from_p_T(p, T);
+      const Real v = 1.0 / rho;
+      Real h = fp->h_from_p_T(p, T);
+      Real e = fp->e_from_p_T(p, T);
+      Real cp = fp->cp_from_p_T(p, T);
+      Real cv = fp->cv_from_p_T(p, T);
+      Real k = fp->k_from_p_T(p, T);
+      Real mu = fp->mu_from_p_T(p, T);
+
+      // test e_from_x_y functions
+      Real e_1 = fp->e_from_v_h(v, h);
+      Real e_2 = fp->e_from_p_rho(p, rho);
+      Real e_3 = fp->e_from_T_v(T, v);
+      REL_TEST(e_1, e, 10.0 * REL_TOL_CONSISTENCY);
+      REL_TEST(e_2, e, 10.0 * REL_TOL_CONSISTENCY);
+      REL_TEST(e_3, e, 10.0 * REL_TOL_CONSISTENCY);
+
+      // test cv_x_y  functions
+      Real cv_1 = fp->cv_from_T_v(T, v);
+      Real cv_2 = fp->cv_from_v_e(v, e);
+      REL_TEST(cv_1, cv, 10.0 * REL_TOL_CONSISTENCY);
+      REL_TEST(cv_2, cv, 10.0 * REL_TOL_CONSISTENCY);
+
+      // test cp_x_y  functions
+      Real cp_1 = fp->cp_from_v_e(v, e);
+      REL_TEST(cp_1, cp, 10.0 * REL_TOL_CONSISTENCY);
+
+      // test h_from_x_y functions
+      Real h_1 = fp->h_from_T_v(T, v);
+      REL_TEST(h_1, h, 10.0 * REL_TOL_CONSISTENCY);
+
+      // test p_from_x_y functions
+      Real p_1 = fp->p_from_v_e(v, e);
+      Real p_2 = fp->p_from_T_v(T, v);
+      REL_TEST(p_1, p, 10.0 * REL_TOL_CONSISTENCY);
+      REL_TEST(p_2, p, 10.0 * REL_TOL_CONSISTENCY);
+
+      // test T_from_x_y functions
+      Real T_1 = fp->T_from_p_h(p, h);
+      Real T_2 = fp->T_from_v_e(v, e);
+      REL_TEST(T_1, T, 10.0 * REL_TOL_CONSISTENCY);
+      REL_TEST(T_2, T, 10.0 * REL_TOL_CONSISTENCY);
+
+      // test k_from_x_y functions
+      Real k_1 = fp->k_from_v_e(v, e);
+      REL_TEST(k_1, k, 10.0 * REL_TOL_CONSISTENCY);
+
+      // test mu_from_x_y functions
+      Real mu_1 = fp->mu_from_v_e(v, e);
+      REL_TEST(mu_1, mu, 10.0 * REL_TOL_CONSISTENCY);
     }
   }
 
