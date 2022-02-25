@@ -104,21 +104,25 @@ public:
     general = 9
   };
 
-  // deprecated constructor (replaced by initializeFrom)
+  // Deprecated constructor (replaced by initializeFromRows)
   RankTwoTensorTempl(const TypeVector<T> & row1,
                      const TypeVector<T> & row2,
                      const TypeVector<T> & row3);
 
-  /// named constructor for initializing symetrically
+  /**
+   * Named constructor for initializing symetrically. The supplied vectors are
+   * uses as row and column vectors to construct two tensors respectively, that
+   * are averaged to create a symmetric tensor.
+   */
   static RankTwoTensorTempl
   initializeSymmetric(const TypeVector<T> & v0, const TypeVector<T> & v1, const TypeVector<T> & v2);
 
-  /// named constructor for initializing from row vectors
+  /// Named constructor for initializing from row vectors
   static RankTwoTensorTempl initializeFromRows(const TypeVector<T> & row0,
                                                const TypeVector<T> & row1,
                                                const TypeVector<T> & row2);
 
-  /// named constructor for initializing from column vectors
+  /// Named constructor for initializing from column vectors
   static RankTwoTensorTempl initializeFromColumns(const TypeVector<T> & col0,
                                                   const TypeVector<T> & col1,
                                                   const TypeVector<T> & col2);
@@ -208,7 +212,7 @@ public:
   /**
    * Returns the matrix squared
    */
-  RankTwoTensorTempl<T> sqr() const;
+  RankTwoTensorTempl<T> square() const;
 
   /**
    * Returns a rotated version of the tensor data given a rank two tensor rotation tensor
@@ -557,9 +561,12 @@ public:
   /// set the tensor to the identity matrix
   void setToIdentity();
 
-private:
-  static constexpr unsigned int N = LIBMESH_DIM;
+  ///@{ tensor dimension and dimension squared
+  static constexpr unsigned int N = 3;
   static constexpr unsigned int N2 = N * N;
+  ///@}
+
+private:
   static constexpr Real identityCoords[N2] = {1, 0, 0, 0, 1, 0, 0, 0, 1};
 
   template <class T2>
@@ -583,8 +590,8 @@ struct RawType<RankTwoTensorTempl<T>>
   static value_type value(const RankTwoTensorTempl<T> & in)
   {
     value_type ret;
-    for (auto i : make_range(LIBMESH_DIM))
-      for (auto j : make_range(LIBMESH_DIM))
+    for (auto i : make_range(RankTwoTensorTempl<T>::N))
+      for (auto j : make_range(RankTwoTensorTempl<T>::N))
         ret(i, j) = raw_value(in(i, j));
 
     return ret;

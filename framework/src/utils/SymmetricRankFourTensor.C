@@ -11,7 +11,7 @@
 #include "SymmetricRankFourTensorImplementation.h"
 
 template class SymmetricRankFourTensorTempl<Real>;
-template class SymmetricRankFourTensorTempl<DualReal>;
+template class SymmetricRankFourTensorTempl<ADReal>;
 
 namespace MathUtils
 {
@@ -29,41 +29,17 @@ mooseSetToZero<ADSymmetricRankFourTensor>(ADSymmetricRankFourTensor & v)
 }
 }
 
-#define SymmetricRankTwoTensorMultInstantiate(TemplateClass)                                       \
-  template SymmetricRankTwoTensor SymmetricRankFourTensor::operator*(                              \
+#define SymmetricRankFourTensorMultInstantiate(TemplateClass, opname)                              \
+  template TemplateClass<Real> SymmetricRankFourTensor::operator opname(                           \
       const TemplateClass<Real> & a) const;                                                        \
-  template ADSymmetricRankTwoTensor ADSymmetricRankFourTensor::operator*(                          \
+  template TemplateClass<ADReal> ADSymmetricRankFourTensor::operator opname(                       \
       const TemplateClass<Real> & a) const;                                                        \
-  template ADSymmetricRankTwoTensor SymmetricRankFourTensor::operator*(                            \
-      const TemplateClass<DualReal> & a) const;                                                    \
-  template ADSymmetricRankTwoTensor ADSymmetricRankFourTensor::operator*(                          \
-      const TemplateClass<DualReal> & a) const
+  template TemplateClass<ADReal> SymmetricRankFourTensor::operator opname(                         \
+      const TemplateClass<ADReal> & a) const;                                                      \
+  template TemplateClass<ADReal> ADSymmetricRankFourTensor::operator opname(                       \
+      const TemplateClass<ADReal> & a) const
 
-SymmetricRankTwoTensorMultInstantiate(SymmetricRankTwoTensorTempl);
-
-template SymmetricRankFourTensor
-SymmetricRankFourTensor::operator+(const SymmetricRankFourTensor & a) const;
-template ADSymmetricRankFourTensor
-ADSymmetricRankFourTensor::operator+(const SymmetricRankFourTensor & a) const;
-template ADSymmetricRankFourTensor
-SymmetricRankFourTensor::operator+(const ADSymmetricRankFourTensor & a) const;
-template ADSymmetricRankFourTensor
-ADSymmetricRankFourTensor::operator+(const ADSymmetricRankFourTensor & a) const;
-
-template SymmetricRankFourTensor
-SymmetricRankFourTensor::operator-(const SymmetricRankFourTensor & a) const;
-template ADSymmetricRankFourTensor
-ADSymmetricRankFourTensor::operator-(const SymmetricRankFourTensor & a) const;
-template ADSymmetricRankFourTensor
-SymmetricRankFourTensor::operator-(const ADSymmetricRankFourTensor & a) const;
-template ADSymmetricRankFourTensor
-ADSymmetricRankFourTensor::operator-(const ADSymmetricRankFourTensor & a) const;
-
-template SymmetricRankFourTensor
-SymmetricRankFourTensor::operator*(const SymmetricRankFourTensor & a) const;
-template ADSymmetricRankFourTensor
-ADSymmetricRankFourTensor::operator*(const SymmetricRankFourTensor & a) const;
-template ADSymmetricRankFourTensor
-SymmetricRankFourTensor::operator*(const ADSymmetricRankFourTensor & a) const;
-template ADSymmetricRankFourTensor
-ADSymmetricRankFourTensor::operator*(const ADSymmetricRankFourTensor & a) const;
+SymmetricRankFourTensorMultInstantiate(SymmetricRankTwoTensorTempl, *);
+SymmetricRankFourTensorMultInstantiate(SymmetricRankFourTensorTempl, *);
+SymmetricRankFourTensorMultInstantiate(SymmetricRankFourTensorTempl, +);
+SymmetricRankFourTensorMultInstantiate(SymmetricRankFourTensorTempl, -);

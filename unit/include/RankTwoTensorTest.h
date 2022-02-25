@@ -51,4 +51,7 @@ protected:
   RealVectorValue _v;
   RankThreeTensor _r3;
   RankFourTensor _r4;
+
+private:
+  static constexpr auto N = RankTwoTensor::N;
 };

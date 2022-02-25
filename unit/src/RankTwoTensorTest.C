@@ -634,7 +634,7 @@ TEST_F(RankTwoTensorTest, plusTranspose)
 TEST_F(RankTwoTensorTest, sqr)
 {
   auto B = RankTwoTensor(14, 16, 18, -26, -31, -36, 38, 46, 54);
-  EXPECT_NEAR(0, (_unsymmetric0.sqr() - B).L2norm(), 1e-9);
+  EXPECT_NEAR(0, (_unsymmetric0.square() - B).L2norm(), 1e-9);
 }
 
 TEST_F(RankTwoTensorTest, vectorOuterProduct)

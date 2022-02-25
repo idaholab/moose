@@ -15,7 +15,6 @@
 #include "ADSymmetricRankFourTensorForward.h"
 #include "MooseUtils.h"
 
-// Any requisite includes here
 #include "libmesh/libmesh.h"
 #include "libmesh/tensor_value.h"
 
@@ -65,12 +64,17 @@ void mooseSetToZero<ADSymmetricRankTwoTensor>(ADSymmetricRankTwoTensor & v);
  * SymmetricRankTwoTensorTempl is designed to handle the Stress or Strain Tensor for
  * an anisotropic material. It is designed to reduce the redundancies of the
  * Complete tensor classes for regular mechanics problems and to enable use of the
- * Voigt notation.
+ * Mandel notation.
  */
 template <typename T>
 class SymmetricRankTwoTensorTempl
 {
 public:
+  ///@{ tensor dimension and Mandel vector length
+  static constexpr unsigned int Ndim = 3;
+  static constexpr unsigned int N = 2 * Ndim;
+  ///@}
+
   // Select initialization
   enum InitMethod
   {
@@ -85,7 +89,7 @@ public:
   SymmetricRankTwoTensorTempl(const InitMethod);
 
   /**
-   * To fill up the 9 entries in the 2nd-order tensor, fillFromInputVector
+   * To fill up the 6 entries in the 2nd-order tensor, fillFromInputVector
    * is called with one of the following fill_methods.
    * See the fill*FromInputVector functions for more details
    */
@@ -162,16 +166,7 @@ public:
   /// Static method for use in validParams for getting the "fill_method"
   static MooseEnum fillMethodEnum();
 
-  /**
-   * fillFromInputVector takes 6 or 9 inputs to fill in the Rank-2 tensor.
-   * If 6 inputs, then symmetry is assumed S_ij = S_ji, and
-   *   _vals[0][0] = input[0]
-   *   _vals[1][1] = input[1]
-   *   _vals[2][2] = input[2]
-   *   _vals[1][2] = input[3]
-   *   _vals[0][2] = input[4]
-   *   _vals[0][1] = input[5]
-   */
+  /// fillFromInputVector takes 1, 3, or 6 inputs to fill in the symmmetric Rank-2 tensor.
   void fillFromInputVector(const std::vector<T> & input, FillMethod fill_method = autodetect);
 
   /**
@@ -195,7 +190,7 @@ public:
   static SymmetricRankTwoTensorTempl<T> plusTranspose(const SymmetricRankTwoTensorTempl<T> &);
 
   /// Returns the matrix squared
-  SymmetricRankTwoTensorTempl<T> sqr() const;
+  SymmetricRankTwoTensorTempl<T> square() const;
 
   /// Returns the trace
   T tr() const { return _vals[0] + _vals[1] + _vals[2]; }
@@ -466,9 +461,6 @@ public:
   /// set the tensor to the identity matrix
   void setToIdentity();
 
-  static constexpr unsigned int Ndim = 3;
-  static constexpr unsigned int N = 2 * Ndim;
-
 private:
   static constexpr std::array<Real, N> identityCoords = {{1, 1, 1, 0, 0, 0}};
 
@@ -582,7 +574,7 @@ SymmetricRankTwoTensorTempl<T>::positiveProjectionEigenDecomposition(
       Gba = Mb.mixedProductIkJl(Ma) + Mb.mixedProductIlJk(Ma);
 
       T theta_ab;
-      if (!MooseUtils::absoluteFuzzyEqual(eigval[a], eigval[b]))
+      if (!MooseUtils::relativeFuzzyEqual(eigval[a], eigval[b]))
         theta_ab = 0.5 * (epos[a] - epos[b]) / (eigval[a] - eigval[b]);
       else
         theta_ab = 0.25 * (d[a] + d[b]);

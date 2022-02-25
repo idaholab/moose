@@ -46,7 +46,8 @@ SymmetricRankFourTensorTempl<T>::fillMethodEnum()
 template <typename T>
 SymmetricRankFourTensorTempl<T>::SymmetricRankFourTensorTempl()
 {
-  mooseAssert(N == 6, "SymmetricRankFourTensorTempl<T> is currently only tested for 3 dimensions.");
+  mooseAssert(Ndim == 3,
+              "SymmetricRankFourTensorTempl<T> is designed to only work in 3 dimensions.");
   zero();
 }
 
@@ -447,9 +448,9 @@ SymmetricRankFourTensorTempl<T>::fillGeneralOrthotropicFromInputVector(const std
   const T & nubc = input[11];
 
   // Input must satisfy constraints.
-  bool preserve_symmetry = MooseUtils::absoluteFuzzyEqual(nuab * Eb, nuba * Ea) &&
-                           MooseUtils::absoluteFuzzyEqual(nuca * Ea, nuac * Ec) &&
-                           MooseUtils::absoluteFuzzyEqual(nubc * Ec, nucb * Eb);
+  bool preserve_symmetry = MooseUtils::relativeFuzzyEqual(nuab * Eb, nuba * Ea) &&
+                           MooseUtils::relativeFuzzyEqual(nuca * Ea, nuac * Ec) &&
+                           MooseUtils::relativeFuzzyEqual(nubc * Ec, nucb * Eb);
 
   if (!preserve_symmetry)
     mooseError("Orthotropic elasticity tensor input is not consistent with symmetry requirements. "
@@ -464,7 +465,6 @@ SymmetricRankFourTensorTempl<T>::fillGeneralOrthotropicFromInputVector(const std
     mooseError("Orthotropic elasticity tensor input is not positive definite. Check input for "
                "accuracy");
 
-  // double check if this is Mandel (probably not)
   _vals[0] = Ea * (1 - nubc * nucb) / k;
   _vals[1] = Ea * (nubc * nuca + nuba) / k;
   _vals[2] = Ea * (nuba * nucb + nuca) / k;

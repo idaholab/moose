@@ -94,7 +94,6 @@ RankTwoTensorTempl<T>::RankTwoTensorTempl(const InitMethod init)
   }
 }
 
-/// TODO: deprecate this method in favor of initializeFromRows
 template <typename T>
 RankTwoTensorTempl<T>::RankTwoTensorTempl(const TypeVector<T> & row1,
                                           const TypeVector<T> & row2,
@@ -114,7 +113,6 @@ RankTwoTensorTempl<T>::RankTwoTensorTempl(const TypeVector<T> & row1,
     this->_coords[2 * N + i] = row3(i);
 }
 
-/// named constructor for initializing symmetrically
 template <typename T>
 RankTwoTensorTempl<T>
 RankTwoTensorTempl<T>::initializeSymmetric(const TypeVector<T> & v0,
@@ -279,13 +277,12 @@ RankTwoTensorTempl<T>::column(const unsigned int c) const
   return result;
 }
 
-/// multiply vector v with row n of this tensor
 template <typename T>
 T
 RankTwoTensorTempl<T>::rowMultiply(std::size_t n, const TypeVector<T> & v) const
 {
   T sum = 0.0;
-  for (auto i : make_range(LIBMESH_DIM))
+  for (auto i : make_range(N))
     sum += (*this)(n, i) * v(i);
   return sum;
 }
@@ -306,7 +303,7 @@ RankTwoTensorTempl<T>::plusTranspose(const RankTwoTensorTempl<T> & a)
 
 template <typename T>
 RankTwoTensorTempl<T>
-RankTwoTensorTempl<T>::sqr() const
+RankTwoTensorTempl<T>::square() const
 {
   return *this * *this;
 }
@@ -680,7 +677,7 @@ template <typename T>
 T
 RankTwoTensorTempl<T>::thirdInvariant() const
 {
-  auto s = RankTwoTensorTempl<T>::plusTranspose(deviatoric()) * 0.5;
+  const auto s = RankTwoTensorTempl<T>::plusTranspose(deviatoric()) * 0.5;
   return s(0, 0) * (s(1, 1) * s(2, 2) - s(2, 1) * s(1, 2)) -
          s(1, 0) * (s(0, 1) * s(2, 2) - s(2, 1) * s(0, 2)) +
          s(2, 0) * (s(0, 1) * s(1, 2) - s(1, 1) * s(0, 2));
@@ -690,8 +687,8 @@ template <typename T>
 RankTwoTensorTempl<T>
 RankTwoTensorTempl<T>::dthirdInvariant() const
 {
-  auto s = RankTwoTensorTempl<T>::plusTranspose(deviatoric()) * 0.5;
-  T s3 = secondInvariant() / 3.0;
+  const auto s = RankTwoTensorTempl<T>::plusTranspose(deviatoric()) * 0.5;
+  const T s3 = secondInvariant() / 3.0;
 
   RankTwoTensorTempl<T> d;
   d(0, 0) = s(1, 1) * s(2, 2) - s(2, 1) * s(1, 2) + s3;
@@ -710,7 +707,7 @@ template <typename T>
 RankFourTensorTempl<T>
 RankTwoTensorTempl<T>::d2thirdInvariant() const
 {
-  auto s = RankTwoTensorTempl<T>::plusTranspose(deviatoric()) * 0.5;
+  const auto s = RankTwoTensorTempl<T>::plusTranspose(deviatoric()) * 0.5;
 
   RankFourTensorTempl<T> d2;
   for (auto i : make_range(N))

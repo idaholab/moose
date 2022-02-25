@@ -143,7 +143,7 @@ ADComputeFiniteStrainTempl<R2, R4>::computeQpIncrements(ADR2 & total_strain_incr
       ADR2 Cinv_I = ADR2::timesTranspose(A) - ADR2::plusTranspose(A);
 
       // strain rate D from Taylor expansion, Chat = (-1/2(Chat^-1 - I) + 1/4*(Chat^-1 - I)^2 + ...
-      total_strain_increment = -Cinv_I * 0.5 + Cinv_I.sqr() * 0.25;
+      total_strain_increment = -Cinv_I * 0.5 + Cinv_I.square() * 0.25;
 
       const ADReal a[3] = {invFhat(1, 2) - invFhat(2, 1),
                            invFhat(2, 0) - invFhat(0, 2),

@@ -26,7 +26,7 @@ file.
 
 - `SymmetricRankTwoTensor` uses the 6-vector representation of a symmetric rank two tensor.
 
-- `SymmetricRankFourTensor` uses the 6x6 matrix representation with Mandel notation coefficients. The Mandel notation was chosen as it yields meaningful Eigenvectors.
+- `SymmetricRankFourTensor` uses the 6x6 matrix representation with Mandel notation coefficients. The Mandel notation was chosen as it yields meaningful eigenvectors.
 
 ## Getting and Setting Specific Component Values
 

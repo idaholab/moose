@@ -310,7 +310,7 @@ SymmetricRankTwoTensorTempl<T>::plusTranspose(const SymmetricRankTwoTensorTempl<
 
 template <typename T>
 SymmetricRankTwoTensorTempl<T>
-SymmetricRankTwoTensorTempl<T>::sqr() const
+SymmetricRankTwoTensorTempl<T>::square() const
 {
   return SymmetricRankTwoTensorTempl<T>::timesTranspose(*this);
 }

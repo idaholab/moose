@@ -27,6 +27,11 @@ TEST_F(SymmetricRankTwoTensorTest, L2norm)
   EXPECT_NEAR(1.732051, _m1.L2norm(), 1e-5);
   EXPECT_NEAR(3.741657, _m2.L2norm(), 1e-5);
   EXPECT_NEAR(14.31782, _m3.L2norm(), 1e-5);
+
+  EXPECT_NEAR(RankTwoTensor(_m0).L2norm(), _m0.L2norm(), 1e-5);
+  EXPECT_NEAR(RankTwoTensor(_m1).L2norm(), _m1.L2norm(), 1e-5);
+  EXPECT_NEAR(RankTwoTensor(_m2).L2norm(), _m2.L2norm(), 1e-5);
+  EXPECT_NEAR(RankTwoTensor(_m3).L2norm(), _m3.L2norm(), 1e-5);
 }
 
 TEST_F(SymmetricRankTwoTensorTest, initIdentity)
@@ -171,10 +176,10 @@ TEST_F(SymmetricRankTwoTensorTest, plusTranspose)
   EXPECT_NEAR((RankTwoTensor(A) - B).L2norm(), 0, 1e-9);
 }
 
-TEST_F(SymmetricRankTwoTensorTest, sqr)
+TEST_F(SymmetricRankTwoTensorTest, square)
 {
-  auto A = _m3.sqr();
-  auto B = RankTwoTensor(_m3).sqr();
+  auto A = _m3.square();
+  auto B = RankTwoTensor(_m3).square();
   EXPECT_NEAR((RankTwoTensor(A) - B).L2norm(), 0, 1e-9);
 }
 

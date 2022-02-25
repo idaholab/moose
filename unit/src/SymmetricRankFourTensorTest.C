@@ -145,8 +145,9 @@ TEST_F(SymmetricRankFourTensorTest, printReal)
 
 TEST_F(SymmetricRankFourTensorTest, L2norm)
 {
-  auto b = RankFourTensor(_s3);
-  EXPECT_NEAR(_s3.L2norm(), b.L2norm(), 1E-9);
+  EXPECT_NEAR(RankFourTensor(_s1).L2norm(), _s1.L2norm(), 1E-5);
+  EXPECT_NEAR(RankFourTensor(_s2).L2norm(), _s2.L2norm(), 1E-5);
+  EXPECT_NEAR(RankFourTensor(_s3).L2norm(), _s3.L2norm(), 1E-5);
 }
 
 TEST_F(SymmetricRankFourTensorTest, r4r2multiply)

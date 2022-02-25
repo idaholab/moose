@@ -59,25 +59,21 @@ void mooseSetToZero<ADSymmetricRankFourTensor>(ADSymmetricRankFourTensor & v);
 }
 
 /**
- * SymmetricRankFourTensorTempl is designed to handle any N-dimensional fourth order tensor, C.
- *
- * It is designed to allow for maximum clarity of the mathematics and ease of use.
- * Original class authors: A. M. Jokisaari, O. Heinonen, M.R. Tonks
- *
- * Since N is hard-coded to 3, SymmetricRankFourTensorTempl holds 81 separate C_ijkl entries.
- * Within the code i = 0, 1, 2, but this object provides methods to extract the entries
- * with i = 1, 2, 3, and some of the documentation is also written in this way.
+ * SymmetricRankFourTensorTempl is designed to handle a symmetric N-dimensional fourth order tensor,
+ * C. Since N is hard-coded to 3, SymmetricRankFourTensorTempl holds 36 separate C_ij entries.
+ * Within the code i,j = 0, .., 5.
  */
 template <typename T>
 class SymmetricRankFourTensorTempl
 {
 public:
-  /// Dimensionality of rank-four tensor
+  ///@{ tensor dimension, Mandel matrix dimension, and Mandel matrix size
   static constexpr unsigned int Ndim = 3;
   static constexpr unsigned int N = 2 * Ndim;
   static constexpr unsigned int N2 = N * N;
+  ///@}
 
-  /// returns the 1, sqrt(2), or 2 prefactor in the Mandel notation
+  /// returns the 1, sqrt(2), or 2 prefactor in the Mandel notation for the indices i,j ranging from 0-5.
   static constexpr Real mandelFactor(unsigned int i, unsigned int j)
   {
     return i < 3 ? (j < 3 ? 1.0 : MathUtils::sqrt2) : (j < 3 ? MathUtils::sqrt2 : 2.0);
@@ -159,14 +155,14 @@ public:
     return SymmetricRankFourTensorTempl<T>(initIdentitySymmetricFour);
   };
 
-  /// Gets the value for the index specified.  Takes index = 0,1,2,3,4,5
+  /// Gets the value for the indices specified. Takes indices ranging from 0-5 for i and j.
   inline T & operator()(unsigned int i, unsigned int j) { return _vals[i * N + j]; }
 
   /**
-   * Gets the value for the index specified.  Takes index = 0,1,2,3,4,5
+   * Gets the value for the indices specified. Takes indices ranging from 0-5 for i and j.
    * used for const
    */
-  inline T operator()(unsigned int i, unsigned int j) const { return _vals[i * N + j]; }
+  inline const T & operator()(unsigned int i, unsigned int j) const { return _vals[i * N + j]; }
 
   /// Zeros out the tensor.
   void zero();
@@ -315,11 +311,11 @@ public:
   void fillSymmetric9FromInputVector(const T2 & input);
 
   /**
-   * fillSymmetric21FromInputVector takes either 21 inputs to fill in
-   * the Rank-4 tensor with the appropriate crystal symmetries maintained. I.e., C_ijkl = C_klij,
-   * C_ijkl = C_ijlk, C_ijkl = C_jikl
-   * @param input is
-   *                C1111 C1122 C1133 C1123 C1113 C1112 C2222 C2233 C2223 C2213 C2212 C3333 C3323
+   * fillSymmetric21FromInputVector takes 21 inputs to fill in the Rank-4 tensor with the
+   * appropriate crystal symmetries maintained.
+   * I.e., C_ijkl = C_klij, C_ijkl = C_ijlk, C_ijkl = C_jikl
+   *
+   * @param input is C1111 C1122 C1133 C1123 C1113 C1112 C2222 C2233 C2223 C2213 C2212 C3333 C3323
    * C3313 C3312 C2323 C2313 C2312 C1313 C1312 C1212
    */
   template <typename T2>
