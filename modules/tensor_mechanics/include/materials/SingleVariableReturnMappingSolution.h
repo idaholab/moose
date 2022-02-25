@@ -83,7 +83,7 @@ protected:
    * @param effective_trial_stress Effective trial stress
    * @param scalar                 Inelastic strain increment magnitude being solved for
    */
-  virtual ChainedReal computeResidualAndDerivative(const ChainedReal & /*effective_trial_stress*/,
+  virtual ChainedReal computeResidualAndDerivative(const Real & /*effective_trial_stress*/,
                                                    const ChainedReal & /*scalar*/)
   {
     mooseError("Not implemented");

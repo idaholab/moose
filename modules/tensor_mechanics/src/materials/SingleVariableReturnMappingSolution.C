@@ -302,8 +302,8 @@ SingleVariableReturnMappingSolution::computeResidualAndDerivativeHelper(
 {
   if (_ad_derivative)
   {
-    ChainedReal residual_and_derivative = computeResidualAndDerivative(
-        ChainedReal(effective_trial_stress, 0), ChainedReal(scalar, 1));
+    ChainedReal residual_and_derivative =
+        computeResidualAndDerivative(effective_trial_stress, ChainedReal(scalar, 1));
     _residual = residual_and_derivative.value();
     _derivative = residual_and_derivative.derivatives();
   }

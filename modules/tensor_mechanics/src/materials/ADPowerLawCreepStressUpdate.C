@@ -58,12 +58,13 @@ ADPowerLawCreepStressUpdate::computeStressInitialize(const ADReal & /*effective_
   _exp_time = std::pow(_t - _start_time, _m_exponent);
 }
 
-ADReal
-ADPowerLawCreepStressUpdate::computeResidual(const ADReal & effective_trial_stress,
-                                             const ADReal & scalar)
+template <typename ScalarType>
+ScalarType
+ADPowerLawCreepStressUpdate::computeResidualInternal(const ADReal & effective_trial_stress,
+                                                     const ScalarType & scalar)
 {
-  const ADReal stress_delta = effective_trial_stress - _three_shear_modulus * scalar;
-  const ADReal creep_rate =
+  const ScalarType stress_delta = effective_trial_stress - _three_shear_modulus * scalar;
+  const ScalarType creep_rate =
       _coefficient * std::pow(stress_delta, _n_exponent) * _exponential * _exp_time;
   return creep_rate * _dt - scalar;
 }
@@ -77,17 +78,6 @@ ADPowerLawCreepStressUpdate::computeDerivative(const ADReal & effective_trial_st
                                        std::pow(stress_delta, _n_exponent - 1.0) * _exponential *
                                        _exp_time;
   return creep_rate_derivative * _dt - 1.0;
-}
-
-ChainedADReal
-ADPowerLawCreepStressUpdate::computeResidualAndDerivative(
-    const ChainedADReal & effective_trial_stress, const ChainedADReal & scalar)
-{
-  const ChainedADReal stress_delta =
-      effective_trial_stress - ChainedADReal(_three_shear_modulus, 0) * scalar;
-  const ChainedADReal creep_rate = ChainedADReal(_coefficient * _exponential * _exp_time, 0) *
-                                   std::pow(stress_delta, _n_exponent);
-  return creep_rate * _dt - scalar;
 }
 
 Real
