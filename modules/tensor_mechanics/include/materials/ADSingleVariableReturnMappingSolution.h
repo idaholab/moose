@@ -11,6 +11,7 @@
 
 #include "MooseTypes.h"
 #include "DualRealOps.h"
+#include "ChainedADReal.h"
 #include "InputParameters.h"
 
 class ConsoleStream;
@@ -67,7 +68,8 @@ protected:
    * @param effective_trial_stress Effective trial stress
    * @param scalar                 Inelastic strain increment magnitude being solved for
    */
-  virtual ADReal computeResidual(const ADReal & effective_trial_stress, const ADReal & scalar) = 0;
+  virtual ADReal computeResidual(const ADReal & /*effective_trial_stress*/,
+                                 const ADReal & /*scalar*/) = 0;
 
   /**
    * Compute the derivative of the residual as a function of the scalar variable.  The
@@ -75,8 +77,22 @@ protected:
    * @param effective_trial_stress Effective trial stress
    * @param scalar                 Inelastic strain increment magnitude being solved for
    */
-  virtual ADReal computeDerivative(const ADReal & effective_trial_stress,
-                                   const ADReal & scalar) = 0;
+  virtual ADReal computeDerivative(const ADReal & /*effective_trial_stress*/,
+                                   const ADReal & /*scalar*/) = 0;
+
+  /**
+   * Compute the residual for a predicted value of the scalar.  This residual should be
+   * in strain increment units for all models for consistency.
+   * @param effective_trial_stress Effective trial stress
+   * @param scalar                 Inelastic strain increment magnitude being solved for
+   */
+  virtual ChainedADReal
+  computeResidualAndDerivative(const ChainedADReal & /*effective_trial_stress*/,
+                               const ChainedADReal & /*scalar*/)
+  {
+    mooseError("Not implemented");
+    return 0;
+  };
 
   /**
    * Compute a reference quantity to be used for checking relative convergence. This should
@@ -131,6 +147,10 @@ protected:
   bool converged(const ADReal & residual, const Real reference);
 
 private:
+  /// Helper function to compute and set the _residual and _derivative
+  void computeResidualAndDerivativeHelper(const ADReal & effective_trial_stress,
+                                          const ADReal & scalar);
+
   enum class InternalSolveOutput
   {
     NEVER,
@@ -161,6 +181,11 @@ private:
   /// Multiplier applied to relative and absolute tolerances for acceptable convergence
   Real _acceptable_multiplier;
 
+  // Whether to use automatic differentiation to calculate the derivative. If set to false, you must
+  // override both computeResidual and computeDerivative methods. If set to true, you must override
+  // the computeResidualAndDerivative method.
+  const bool _ad_derivative;
+
   /// Number of residuals to be stored in history
   const std::size_t _num_resids;
 
@@ -174,6 +199,9 @@ private:
   ADReal _initial_residual;
   ADReal _residual;
   ///@}
+
+  /// Derivative of the residual
+  ADReal _derivative;
 
   /// MOOSE input name of the object performing the solve
   const std::string _svrms_name;

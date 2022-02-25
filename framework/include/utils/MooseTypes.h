@@ -14,6 +14,8 @@
 #include "ADRankTwoTensorForward.h"
 #include "ADRankThreeTensorForward.h"
 #include "ADRankFourTensorForward.h"
+#include "ChainedReal.h"
+#include "ChainedADReal.h"
 
 #include "libmesh/libmesh.h"
 #include "libmesh/id_types.h"
@@ -342,6 +344,11 @@ struct ADType<Real>
   typedef ADReal type;
 };
 template <>
+struct ADType<ChainedReal>
+{
+  typedef ChainedADReal type;
+};
+template <>
 struct ADType<RankTwoTensor>
 {
   typedef ADRankTwoTensor type;
@@ -437,6 +444,8 @@ using GenericType = typename std::conditional<is_ad, typename ADType<T>::type, T
 
 template <bool is_ad>
 using GenericReal = typename Moose::GenericType<Real, is_ad>;
+template <bool is_ad>
+using GenericChainedReal = typename Moose::GenericType<ChainedReal, is_ad>;
 template <bool is_ad>
 using GenericRealVectorValue = typename Moose::GenericType<RealVectorValue, is_ad>;
 template <bool is_ad>

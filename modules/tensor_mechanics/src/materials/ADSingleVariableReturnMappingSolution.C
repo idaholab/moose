@@ -49,6 +49,10 @@ ADSingleVariableReturnMappingSolution::validParams()
                         "output.");
   params.addParamNamesToGroup("internal_solve_output_on internal_solve_full_iteration_history",
                               "Debug");
+
+  params.addParam<bool>("AD_return_mapping",
+                        false,
+                        "Whether to use automatic differentiation to compute the derivative.");
   return params;
 }
 
@@ -65,6 +69,7 @@ ADSingleVariableReturnMappingSolution::ADSingleVariableReturnMappingSolution(
     _relative_tolerance(parameters.get<Real>("relative_tolerance")),
     _absolute_tolerance(parameters.get<Real>("absolute_tolerance")),
     _acceptable_multiplier(parameters.get<Real>("acceptable_multiplier")),
+    _ad_derivative(parameters.get<bool>("AD_return_mapping")),
     _num_resids(30),
     _residual_history(_num_resids, std::numeric_limits<Real>::max()),
     _iteration(0),
@@ -163,7 +168,8 @@ ADSingleVariableReturnMappingSolution::internalSolve(const ADReal effective_tria
   ADReal scalar_lower_bound = min_permissible_scalar;
   _iteration = 0;
 
-  _initial_residual = _residual = computeResidual(effective_trial_stress, scalar);
+  computeResidualAndDerivativeHelper(effective_trial_stress, scalar);
+  _initial_residual = _residual;
 
   ADReal residual_old = _residual;
   Real init_resid_sign = MathUtils::sign(MetaPhysicL::raw_value(_residual));
@@ -182,7 +188,7 @@ ADSingleVariableReturnMappingSolution::internalSolve(const ADReal effective_tria
   while (_iteration < _max_its && !converged(_residual, reference_residual) &&
          !convergedAcceptable(_iteration, reference_residual))
   {
-    scalar_increment = -_residual / computeDerivative(effective_trial_stress, scalar);
+    scalar_increment = -_residual / _derivative;
     scalar = scalar_old + scalar_increment;
 
     if (_check_range)
@@ -193,7 +199,7 @@ ADSingleVariableReturnMappingSolution::internalSolve(const ADReal effective_tria
                             max_permissible_scalar,
                             iter_output);
 
-    _residual = computeResidual(effective_trial_stress, scalar);
+    computeResidualAndDerivativeHelper(effective_trial_stress, scalar);
     reference_residual = computeReferenceResidual(effective_trial_stress, scalar);
     iterationFinalize(scalar);
 
@@ -257,7 +263,7 @@ ADSingleVariableReturnMappingSolution::internalSolve(const ADReal effective_tria
       if (modified_increment)
       {
         scalar = scalar_old + scalar_increment;
-        _residual = computeResidual(effective_trial_stress, scalar);
+        computeResidualAndDerivativeHelper(effective_trial_stress, scalar);
         reference_residual = computeReferenceResidual(effective_trial_stress, scalar);
         iterationFinalize(scalar);
 
@@ -286,6 +292,24 @@ ADSingleVariableReturnMappingSolution::internalSolve(const ADReal effective_tria
     return SolveState::EXCEEDED_ITERATIONS;
 
   return SolveState::SUCCESS;
+}
+
+void
+ADSingleVariableReturnMappingSolution::computeResidualAndDerivativeHelper(
+    const ADReal & effective_trial_stress, const ADReal & scalar)
+{
+  if (_ad_derivative)
+  {
+    ChainedADReal residual_and_derivative = computeResidualAndDerivative(
+        ChainedADReal(effective_trial_stress, 0), ChainedADReal(scalar, 1));
+    _residual = residual_and_derivative.value();
+    _derivative = residual_and_derivative.derivatives();
+  }
+  else
+  {
+    _residual = computeResidual(effective_trial_stress, scalar);
+    _derivative = computeDerivative(effective_trial_stress, scalar);
+  }
 }
 
 bool

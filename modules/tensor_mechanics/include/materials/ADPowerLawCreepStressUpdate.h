@@ -46,6 +46,8 @@ protected:
                                  const ADReal & scalar) override;
   virtual ADReal computeDerivative(const ADReal & effective_trial_stress,
                                    const ADReal & scalar) override;
+  virtual ChainedADReal computeResidualAndDerivative(const ChainedADReal & effective_trial_stress,
+                                                     const ChainedADReal & scalar) override;
 
   /// Temperature variable value
   const ADVariableValue * const _temperature;

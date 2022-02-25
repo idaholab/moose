@@ -79,6 +79,17 @@ ADPowerLawCreepStressUpdate::computeDerivative(const ADReal & effective_trial_st
   return creep_rate_derivative * _dt - 1.0;
 }
 
+ChainedADReal
+ADPowerLawCreepStressUpdate::computeResidualAndDerivative(
+    const ChainedADReal & effective_trial_stress, const ChainedADReal & scalar)
+{
+  const ChainedADReal stress_delta =
+      effective_trial_stress - ChainedADReal(_three_shear_modulus, 0) * scalar;
+  const ChainedADReal creep_rate = ChainedADReal(_coefficient * _exponential * _exp_time, 0) *
+                                   std::pow(stress_delta, _n_exponent);
+  return creep_rate * _dt - scalar;
+}
+
 Real
 ADPowerLawCreepStressUpdate::computeStrainEnergyRateDensity(
     const ADMaterialProperty<RankTwoTensor> & stress,
