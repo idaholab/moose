@@ -18,11 +18,14 @@ InputParameters
 CoupledDirectionalMeshHeightInterpolation::validParams()
 {
   InputParameters params = AuxKernel::validParams();
-  params.addRequiredCoupledVar("coupled_var",
-                               "The variable whose values are going to be interpolated.");
+  params.addRequiredCoupledVar(
+      "coupled_var",
+      "The variable whose values are scaled based on position relative to the model bounds.");
 
   MooseEnum directions("x y z");
   params.addRequiredParam<MooseEnum>("direction", directions, "The direction to interpolate in.");
+  params.addClassDescription(
+      "Scales a variable based on position relative to the model bounds in a specified direction");
 
   return params;
 }
@@ -44,8 +47,8 @@ CoupledDirectionalMeshHeightInterpolation::computeValue()
 {
   const Node & current_pos = *_current_node;
 
-  Real percentage_along_direction =
+  const Real fraction_along_direction =
       (current_pos(_direction) - _direction_min) / (_direction_max - _direction_min);
 
-  return percentage_along_direction * _coupled_val[_qp];
+  return fraction_along_direction * _coupled_val[_qp];
 }

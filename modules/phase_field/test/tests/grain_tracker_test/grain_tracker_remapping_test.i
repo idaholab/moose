@@ -273,7 +273,7 @@
 [Outputs]
   csv = true
   exodus = true
-  [./perf_graph]
+  [./pg]
     type = PerfGraphOutput
     level = 2                     # Default is 1
   [../]
