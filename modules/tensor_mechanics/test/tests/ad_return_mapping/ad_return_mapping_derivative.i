@@ -107,4 +107,5 @@
 
 [Outputs]
   exodus = true
+  file_base = reference
 []
