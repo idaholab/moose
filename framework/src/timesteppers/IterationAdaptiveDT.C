@@ -51,9 +51,11 @@ IterationAdaptiveDT::validParams()
                         "Forces the timestepper to take "
                         "a step that is consistent with "
                         "points defined in the function");
-  params.addParam<Real>("post_function_sync_dt",
-                        "Timestep to apply after time sync with function point. To be used in "
-                        "conjunction with 'force_step_every_function_point'.");
+  params.addRangeCheckedParam<Real>(
+      "post_function_sync_dt",
+      "post_function_sync_dt>0",
+      "Timestep to apply after time sync with function point. To be used in "
+      "conjunction with 'force_step_every_function_point'.");
   params.addRequiredParam<Real>("dt", "The default timestep size between solves");
   params.addParam<std::vector<Real>>("time_t", "The values of t");
   params.addParam<std::vector<Real>>("time_dt", "The values of dt");
@@ -210,7 +212,21 @@ IterationAdaptiveDT::preExecute()
 Real
 IterationAdaptiveDT::computeInitialDT()
 {
-  return _input_dt;
+  Real dt;
+  if (_tfunc_last_step)
+  {
+    dt = _time_ipol.sample(_time_old);
+    if (_verbose)
+      _console << "Setting initial dt to value specified by dt function: " << std::setw(9) << dt
+               << std::endl;
+  }
+  else
+  {
+    dt = _input_dt;
+    if (_verbose)
+      _console << "Setting initial dt to input value: " << std::setw(9) << dt << std::endl;
+  }
+  return dt;
 }
 
 Real
@@ -230,7 +246,6 @@ IterationAdaptiveDT::computeDT()
   }
   else if (_tfunc_last_step)
   {
-    _tfunc_last_step = false;
     _sync_last_step = false;
     dt = _time_ipol.sample(_time_old);
 
@@ -508,6 +523,7 @@ IterationAdaptiveDT::acceptStep()
 {
   TimeStepper::acceptStep();
 
+  _tfunc_last_step = false;
   while (!_tfunc_times.empty() && _time + _timestep_tolerance >= *_tfunc_times.begin())
   {
     if (std::abs(_time - *_tfunc_times.begin()) <= _timestep_tolerance)

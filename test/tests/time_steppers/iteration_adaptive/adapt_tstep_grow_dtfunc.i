@@ -1,50 +1,25 @@
 [Mesh]
   type = GeneratedMesh
-  dim = 2
-  nx = 50
-  ny = 2
-  xmax = 5
+  dim = 1
 []
 
 [Variables]
-  [./u]
-    order = FIRST
-    family = LAGRANGE
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
-    type = Diffusion
-    variable = u
-  [../]
-  [./dt]
+  [dt]
     type = TimeDerivative
     variable = u
-  [../]
-[]
-
-[BCs]
-  [./left]
-    type = DirichletBC
-    variable = u
-    preset = false
-    boundary = left
-    value = 10
-  [../]
-  [./right]
-    type = NeumannBC
-    variable = u
-    boundary = right
-    value = -1
-  [../]
+  []
 []
 
 [Executioner]
   type = Transient
-  solve_type = NEWTON
-  start_time = 0.0
-  end_time = 5.0
+  end_time = 20.0
+  verbose = true
+
   [TimeStepper]
     type = IterationAdaptiveDT
     dt = 1.0
@@ -55,13 +30,16 @@
 []
 
 [Postprocessors]
-  [./_dt]
+  [_dt]
     type = TimestepSize
-  [../]
+  []
 []
 
 [Outputs]
-  execute_on = 'timestep_end'
-  exodus = true
+  csv = true
   checkpoint = true
+  [ckp]
+    type = Checkpoint
+    num_files = 3
+  []
 []
