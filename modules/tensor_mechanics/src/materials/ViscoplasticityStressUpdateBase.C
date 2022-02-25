@@ -101,7 +101,7 @@ ViscoplasticityStressUpdateBaseTempl<is_ad>::updateIntermediatePorosity(
     const GenericRankTwoTensor<is_ad> & elastic_strain_increment)
 {
   // Subtract elastic strain from strain increment to find all inelastic strain increments
-  // calculated so far except the one that we're about to calculate. Then calculate intermdiate
+  // calculated so far except the one that we're about to calculate. Then calculate intermediate
   // porosity from all inelastic strain increments calculated so far except the one that we're about
   // to calculate
   _intermediate_porosity =
