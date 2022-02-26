@@ -14,6 +14,11 @@
 
 typedef DualNumber<ADReal, ADReal> ChainedADReal;
 
+/**
+ * We need to instantiate the following CompareTypes to tell the compiler that ADReal is a subtype
+ * of ChainedADReal. Otherwise specialization of operators on DualNumber<T, D> and DualNumber<T2,
+ * D2> is ambiguous.
+ */
 namespace MetaPhysicL
 {
 #define CompareTypes_default_Types(typenames, typename1, typename2, enabletype)                    \

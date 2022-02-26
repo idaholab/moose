@@ -94,11 +94,12 @@
 
   petsc_options_iname = '-pc_type '
   petsc_options_value = 'lu     '
+  automatic_scaling = true
 
   line_search = 'none'
 
   nl_max_its = 10
-  nl_rel_tol = 1e-6
+  nl_rel_tol = 1e-10
   nl_abs_tol = 1e-10
 
   end_time = 0.1
