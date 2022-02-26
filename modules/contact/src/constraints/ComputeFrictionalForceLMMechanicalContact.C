@@ -181,15 +181,15 @@ ComputeFrictionalForceLMMechanicalContact::communicateVelocities()
                                          const std::vector<Datum> & sent_data)
   {
     mooseAssert(pid != this->processor_id(), "We do not send messages to ourself here");
-    for (auto & tup : sent_data)
+    for (auto & pr : sent_data)
     {
-      const auto dof_id = std::get<0>(tup);
+      const auto dof_id = pr.first;
       const auto * const dof_object =
           _nodal ? static_cast<const DofObject *>(lm_mesh.node_ptr(dof_id))
                  : static_cast<const DofObject *>(lm_mesh.elem_ptr(dof_id));
       mooseAssert(dof_object, "This should be non-null");
-      _dof_to_weighted_tangential_velocity[dof_object][0] += std::move(std::get<1>(tup)[0]);
-      _dof_to_weighted_tangential_velocity[dof_object][1] += std::move(std::get<1>(tup)[1]);
+      _dof_to_weighted_tangential_velocity[dof_object][0] += std::move(pr.second[0]);
+      _dof_to_weighted_tangential_velocity[dof_object][1] += std::move(pr.second[1]);
     }
   };
 
@@ -244,6 +244,7 @@ ComputeFrictionalForceLMMechanicalContact::incorrectEdgeDroppingPost(
       continue;
 
     _weighted_gap_ptr = &_dof_to_weighted_gap[dof].first;
+    _normalization_ptr = &_dof_to_weighted_gap[dof].second;
     _tangential_vel_ptr[0] = &pr.second[0];
 
     if (_3d)

@@ -26,13 +26,13 @@ protected:
 
 private:
   /// Tangent along the first direction
-  const MooseArray<Real> * const _tangent_one;
+  const MooseArray<Real> & _tangent_one;
 
   /// Tangent along the second direction
-  const MooseArray<Real> * const _tangent_two;
+  const MooseArray<Real> & _tangent_two;
 
   /// Normal contact pressure
-  const MooseArray<Real> * const _contact_pressure;
+  const MooseArray<Real> & _contact_pressure;
 
   /// Whether to use displaced mesh (required for this auxiliary kernel)
   const bool _use_displaced_mesh;

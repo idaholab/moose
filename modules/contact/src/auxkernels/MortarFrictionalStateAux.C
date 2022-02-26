@@ -22,9 +22,9 @@ MortarFrictionalStateAux::validParams()
   params.addRequiredCoupledVar("tangent_one",
                                "First tangent vector Lagrange multiplier for computing the mortar "
                                "frictional pressure vector.");
-  params.addRequiredCoupledVar("tangent_two",
-                               "Second tangent vector Lagrange multiplier for computing the mortar "
-                               "frictional pressure vector.");
+  params.addCoupledVar("tangent_two",
+                       "Second tangent vector Lagrange multiplier for computing the mortar "
+                       "frictional pressure vector.");
   params.addRequiredCoupledVar(
       "contact_pressure",
       "Normal contact pressure Lagrange multiplier from the mortar contact enforcement.");
@@ -37,17 +37,16 @@ MortarFrictionalStateAux::validParams()
 
 MortarFrictionalStateAux::MortarFrictionalStateAux(const InputParameters & params)
   : AuxKernel(params),
-    _tangent_one(&coupledValueLower("tangent_one")),
-    _tangent_two(&coupledValueLower("tangent_two")),
-    _contact_pressure(&coupledValueLower("contact_pressure")),
+    _tangent_one(coupledValueLower("tangent_one")),
+    _tangent_two(isParamValid("tangent_two") ? coupledValueLower("tangent_two") : _zero),
+    _contact_pressure(coupledValueLower("contact_pressure")),
     _use_displaced_mesh(getParam<bool>("use_displaced_mesh")),
     _mu(getParam<Real>("mu")),
     _tolerance(getParam<Real>("tolerance"))
 {
   // Only consider nodal quantities
   if (!isNodal())
-    mooseError(
-        "MortarFrictionalPressureVector auxiliary kernel can only be used with nodal kernels.");
+    mooseError("MortarFrictionalStateAux auxiliary kernel can only be used with nodal kernels.");
 
   if (!_use_displaced_mesh)
     paramError("use_displaced_mesh",
@@ -57,7 +56,7 @@ MortarFrictionalStateAux::MortarFrictionalStateAux(const InputParameters & param
   // Kernel need to be boundary restricted
   if (!this->_bnd)
     paramError("boundary",
-               "MortarFrictionalPressureVector auxiliary kernel must be restricted to a boundary.");
+               "MortarFrictionalStateAux auxiliary kernel must be restricted to a boundary.");
 }
 
 Real
@@ -70,13 +69,13 @@ MortarFrictionalStateAux::computeValue()
 
   Real status = 1;
 
-  if ((*_contact_pressure)[_qp] > _tolerance)
+  if (_contact_pressure[_qp] > _tolerance)
     status = 2;
 
-  Real tangential_pressure = std::sqrt((*_tangent_one)[_qp] * (*_tangent_one)[_qp] +
-                                       (*_tangent_two)[_qp] * (*_tangent_two)[_qp]);
+  Real tangential_pressure =
+      std::sqrt(_tangent_one[_qp] * _tangent_one[_qp] + _tangent_two[_qp] * _tangent_two[_qp]);
 
-  Real tangential_pressure_sat = _mu * (*_contact_pressure)[_qp];
+  Real tangential_pressure_sat = _mu * _contact_pressure[_qp];
 
   if (status == 2 && tangential_pressure * (1.0 + _tolerance) > tangential_pressure_sat)
     status = 3;
