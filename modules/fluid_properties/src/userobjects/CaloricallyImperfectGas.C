@@ -94,6 +94,7 @@ CaloricallyImperfectGas::setupLookupTables()
 
   _T_e_lookup.resize(n);
   _T_h_lookup.resize(n);
+  _Z_T_lookup.resize(n);
   for (unsigned int j = 0; j < n; ++j)
   {
     // internal energy
@@ -130,6 +131,21 @@ CaloricallyImperfectGas::setupLookupTables()
       Real temperature = BrentsMethod::root(h_diff, min, max);
       _T_h_lookup[j] = temperature;
     }
+
+    // Z(T)
+    {
+      if (j == 0)
+        _Z_T_lookup[j] = 0;
+      else
+      {
+        Real temperature = _min_temperature + j * _delta_T;
+        Real temperature_prev = _min_temperature + (j - 1) * _delta_T;
+        Real f1 = cv_from_T(temperature) / temperature;
+        Real f2 = cv_from_T(temperature_prev) / temperature_prev;
+        _Z_T_lookup[j] = _Z_T_lookup[j - 1] + 0.5 * _delta_T * (f1 + f2);
+      }
+    }
+
   }
 }
 
@@ -226,6 +242,17 @@ CaloricallyImperfectGas::T_from_h(Real h) const
   unsigned int index = std::floor((h - _min_h) / _delta_h);
   Real x = (h - _min_h - index * _delta_h) / _delta_h;
   return x * _T_h_lookup[index + 1] + (1 - x) * _T_h_lookup[index];
+}
+
+Real
+CaloricallyImperfectGas::Z_from_T(Real T) const
+{
+  if (T < _min_temperature || T > _max_temperature)
+    outOfBounds("Z_from_T", T, _min_temperature, _max_temperature);
+
+  unsigned int index = std::floor((T - _min_temperature) / _delta_T);
+  Real x = (T - _min_temperature - index * _delta_T) / _delta_T;
+  return x * _Z_T_lookup[index + 1] + (1 - x) * _Z_T_lookup[index];
 }
 
 Real
@@ -523,110 +550,51 @@ CaloricallyImperfectGas::k_from_v_e(Real v, Real e, Real & k, Real & dk_dv, Real
 Real
 CaloricallyImperfectGas::s_from_v_e(Real v, Real e) const
 {
-  const Real T = T_from_v_e(v, e);
-  const Real p = p_from_v_e(v, e);
-  Real gamma = gamma_from_v_e(v, e);
-  const Real n = std::pow(T, gamma) / std::pow(p, gamma - 1.0);
-  if (n <= 0.0)
-    return getNaN("Negative argument in the ln() function.");
-  return cv_from_p_T(p, T) * std::log(n);
+  Real T = T_from_v_e(v, e);
+  Real Z = Z_from_T(T);
+  return Z + _R_specific * std::log(v);
 }
 
 void
 CaloricallyImperfectGas::s_from_v_e(Real v, Real e, Real & s, Real & ds_dv, Real & ds_de) const
 {
-  Real T, dT_dv, dT_de;
-  T_from_v_e(v, e, T, dT_dv, dT_de);
-
-  Real p, dp_dv, dp_de;
-  p_from_v_e(v, e, p, dp_dv, dp_de);
-
-  Real gamma = gamma_from_v_e(v, e);
-
-  const Real n = std::pow(T, gamma) / std::pow(p, gamma - 1.0);
-  if (n <= 0.0)
-  {
-    s = getNaN("Negative argument in the ln() function.");
-    ds_dv = getNaN();
-    ds_de = getNaN();
-  }
-  else
-  {
-    Real cv = cv_from_p_T(p, T);
-
-    s = cv * std::log(n);
-
-    const Real dn_dT = gamma * std::pow(T, gamma - 1.0) / std::pow(p, gamma - 1.0);
-    const Real dn_dp = std::pow(T, gamma) * (1.0 - gamma) * std::pow(p, -gamma);
-
-    const Real dn_dv = dn_dT * dT_dv + dn_dp * dp_dv;
-    const Real dn_de = dn_dT * dT_de + dn_dp * dp_de;
-
-    ds_dv = cv / n * dn_dv;
-    ds_de = cv / n * dn_de;
-  }
+  s = s_from_v_e(v, e);
+  // see documentation for derivation
+  ds_dv = _R_specific / v;
+  ds_de = 1.0 / T_from_v_e(v, e);
 }
 
 Real
 CaloricallyImperfectGas::s_from_p_T(Real p, Real T) const
 {
-  Real gamma = gamma_from_p_T(p, T);
-  const Real n = std::pow(T, gamma) / std::pow(p, gamma - 1.0);
-  if (n <= 0.0)
-    return getNaN("Negative argument in the ln() function.");
-  return cv_from_p_T(p, T) * std::log(n);
+  Real Z = Z_from_T(T);
+  Real v = 1.0 / rho_from_p_T(p, T);
+  return Z + _R_specific * std::log(v);
 }
 
 void
 CaloricallyImperfectGas::s_from_p_T(Real p, Real T, Real & s, Real & ds_dp, Real & ds_dT) const
 {
-  Real gamma = gamma_from_p_T(p, T);
-  const Real n = std::pow(T, gamma) / std::pow(p, gamma - 1.0);
-  if (n <= 0.0)
-  {
-    s = getNaN("Negative argument in the ln() function.");
-    ds_dp = getNaN();
-    ds_dT = getNaN();
-  }
-  else
-  {
-    Real cv = cv_from_p_T(p, T);
-    s = cv * std::log(n);
-
-    const Real dn_dT = gamma * std::pow(T, gamma - 1.0) / std::pow(p, gamma - 1.0);
-    const Real dn_dp = std::pow(T, gamma) * (1.0 - gamma) * std::pow(p, -gamma);
-
-    ds_dp = cv / n * dn_dp;
-    ds_dT = cv / n * dn_dT;
-  }
+  s = s_from_p_T(p, T);
+  ds_dp = -_R_specific / p;
+  ds_dT = cp_from_p_T(p, T) / T;
 }
 
 Real
 CaloricallyImperfectGas::s_from_h_p(Real h, Real p) const
 {
   Real T = T_from_p_h(p, h);
-  Real cv = cv_from_p_T(p, T);
-  Real gamma = gamma_from_p_T(p, T);
-  const Real aux = p * std::pow(h / (gamma * cv), -gamma / (gamma - 1));
-  if (aux <= 0.0)
-    return getNaN("Non-positive argument in the ln() function.");
-  return -(gamma - 1) * cv * std::log(aux);
+  Real v = 1.0 / rho_from_p_T(p, T);
+  Real Z = Z_from_T(T);
+  return Z + _R_specific * std::log(v);
 }
 
-// not sure it's correct to just replace _cv by cv(T(h))
 void
 CaloricallyImperfectGas::s_from_h_p(Real h, Real p, Real & s, Real & ds_dh, Real & ds_dp) const
 {
   s = s_from_h_p(h, p);
-  Real T = T_from_p_h(p, h);
-  Real cv = cv_from_p_T(p, T);
-  Real gamma = gamma_from_p_T(p, T);
-  const Real aux = p * std::pow(h / (gamma * cv), -gamma / (gamma - 1));
-  const Real daux_dh = p * std::pow(h / (gamma * cv), -gamma / (gamma - 1) - 1) *
-                       (-gamma / (gamma - 1)) / (gamma * cv);
-  const Real daux_dp = std::pow(h / (gamma * cv), -gamma / (gamma - 1));
-  ds_dh = -(gamma - 1) * cv / aux * daux_dh;
-  ds_dp = -(gamma - 1) * cv / aux * daux_dp;
+  ds_dh = 1.0 / T_from_p_h(p, h);
+  ds_dp = -_R_specific / p;
 }
 
 Real

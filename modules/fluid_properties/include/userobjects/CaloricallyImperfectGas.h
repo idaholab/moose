@@ -139,6 +139,7 @@ protected:
   Real cp_from_T(Real T) const;
   void cv_from_T(Real T, Real & cv, Real & dcv_dT) const;
   void cp_from_T(Real T, Real & cp, Real & dcp_dT) const;
+  Real Z_from_T(Real T) const;
   ///@}
 
   /// molar mass
@@ -186,6 +187,9 @@ protected:
   std::vector<Real> _T_h_lookup;
   std::vector<Real> _T_e_lookup;
   ///@}
+
+  /// Z(T) lookup table on uniform grid between _min_temperature and _max_temperature
+  std::vector<Real> _Z_T_lookup;
 };
 
 #pragma GCC diagnostic pop

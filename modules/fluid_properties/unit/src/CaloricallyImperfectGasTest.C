@@ -54,6 +54,8 @@ TEST_F(CaloricallyImperfectGasTest, testAll)
   Real max_T = 500.0;
   unsigned int np = 200;
   Real dT = (max_T - min_T) / ((Real)np - 1.0);
+  Real Ru = 8.31446261815324;
+  Real Rs = Ru / 0.002;
 
   // Consistency checks
   {
@@ -228,6 +230,79 @@ TEST_F(CaloricallyImperfectGasTest, testAll)
     Real dk_dv, dk_de;
     fp->k_from_v_e(v, e, k, dk_dv, dk_de);
     REL_TEST(dk_de, -0.025 / cv, 0.001);
+  }
+
+  // test entropy functions
+  {
+    Real T = 489.305;
+    Real Z = 0.5 * (80459 + 80460.7);
+    Real p = 1.0e6;
+    const Real rho = fp->rho_from_p_T(p, T);
+    const Real v = 1.0 / rho;
+    const Real v0 = 1.0;
+    Real e = fp->e_from_p_T(p, T);
+    Real h = fp->h_from_p_T(p, T);
+    Real s = Z + Rs * std::log(v / v0);
+
+    Real s_pT = fp->s_from_p_T(p, T);
+    REL_TEST(s_pT, s, 1e-6);
+
+    Real s_ve = fp->s_from_v_e(v, e);
+    REL_TEST(s_ve, s, 1e-6);
+
+    Real s_hp = fp->s_from_h_p(h, p);
+    REL_TEST(s_hp, s, 1e-6);
+
+    Real s_Tv = fp->s_from_T_v(T, v);
+    REL_TEST(s_Tv, s, 1e-6);
+
+    // test 5 arg functions with derivatives for s(p, T)
+    {
+      Real s_alt, ds_dp, ds_dT;
+      fp->s_from_p_T(p, T, s_alt, ds_dp, ds_dT);
+      REL_TEST(s_alt, s, 1e-5);
+      Real eps = 1e-4;
+      Real pp1 = p * (1 + eps);
+      Real pp2 = p * (1 - eps);
+      Real TT1 = T * (1 + eps);
+      Real TT2 = T * (1 - eps);
+      Real ds_dp_fd = (fp->s_from_p_T(pp1, T) - fp->s_from_p_T(pp2, T)) / (2 * eps * p);
+      REL_TEST(ds_dp_fd, ds_dp, 1e-3);
+      Real ds_dT_fd = (fp->s_from_p_T(p, TT1) - fp->s_from_p_T(p, TT2)) / (2 * eps * T);
+      REL_TEST(ds_dT_fd, ds_dT, 1e-3);
+    }
+
+    // test 5 arg functions with derivatives for s(e, v)
+    {
+      Real s_alt, ds_dv, ds_de;
+      fp->s_from_v_e(v, e, s_alt, ds_dv, ds_de);
+      REL_TEST(s_alt, s, 1e-5);
+      Real eps = 1e-4;
+      Real vv1 = v * (1 + eps);
+      Real vv2 = v * (1 - eps);
+      Real ee1 = e * (1 + eps);
+      Real ee2 = e * (1 - eps);
+      Real ds_dv_fd = (fp->s_from_v_e(vv1, e) - fp->s_from_v_e(vv2, e)) / (2 * eps * v);
+      REL_TEST(ds_dv_fd, ds_dv, 1e-3);
+      Real ds_de_fd = (fp->s_from_v_e(v, ee1) - fp->s_from_v_e(v, ee2)) / (2 * eps * e);
+      REL_TEST(ds_de_fd, ds_de, 1e-3);
+    }
+
+    // test 5 arg functions with derivatives for s(h, p)
+    {
+      Real s_alt, ds_dh, ds_dp;
+      fp->s_from_h_p(h, p, s_alt, ds_dh, ds_dp);
+      REL_TEST(s_alt, s, 1e-5);
+      Real eps = 1e-4;
+      Real hh1 = h * (1 + eps);
+      Real hh2 = h * (1 - eps);
+      Real pp1 = p * (1 + eps);
+      Real pp2 = p * (1 - eps);
+      Real ds_dh_fd = (fp->s_from_h_p(hh1, p) - fp->s_from_h_p(hh2, p)) / (2 * eps * h);
+      REL_TEST(ds_dh_fd, ds_dh, 1e-3);
+      Real ds_dp_fd = (fp->s_from_h_p(h, pp1) - fp->s_from_h_p(h, pp2)) / (2 * eps * p);
+      REL_TEST(ds_dp_fd, ds_dp, 1e-3);
+    }
   }
 
   // test out of bounds call for temperature
