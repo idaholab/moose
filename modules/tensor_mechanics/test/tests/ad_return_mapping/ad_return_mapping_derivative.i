@@ -83,7 +83,7 @@
     use_substep = true
     substep_strain_tolerance = 0.1
     max_inelastic_increment = 0.01
-    AD_return_mapping = true
+    automatic_differentiation_return_mapping = true
   []
 []
 

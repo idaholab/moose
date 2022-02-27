@@ -50,7 +50,7 @@ ADSingleVariableReturnMappingSolution::validParams()
   params.addParamNamesToGroup("internal_solve_output_on internal_solve_full_iteration_history",
                               "Debug");
 
-  params.addParam<bool>("AD_return_mapping",
+  params.addParam<bool>("automatic_differentiation_return_mapping",
                         false,
                         "Whether to use automatic differentiation to compute the derivative.");
   return params;
@@ -69,7 +69,7 @@ ADSingleVariableReturnMappingSolution::ADSingleVariableReturnMappingSolution(
     _relative_tolerance(parameters.get<Real>("relative_tolerance")),
     _absolute_tolerance(parameters.get<Real>("absolute_tolerance")),
     _acceptable_multiplier(parameters.get<Real>("acceptable_multiplier")),
-    _ad_derivative(parameters.get<bool>("AD_return_mapping")),
+    _ad_derivative(parameters.get<bool>("automatic_differentiation_return_mapping")),
     _num_resids(30),
     _residual_history(_num_resids, std::numeric_limits<Real>::max()),
     _iteration(0),

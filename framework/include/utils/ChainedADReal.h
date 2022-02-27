@@ -30,8 +30,8 @@ namespace MetaPhysicL
   CompareTypes_default_Type(Or, typenames, typename1, typename2, enabletype)
 
 #define CompareTypes_super(a, b, super)                                                            \
-  template <bool reverseorder, typename Enable>                                                    \
-  struct CompareTypes<a, b, reverseorder, Enable>                                                  \
+  template <bool reverse_order, typename Enable>                                                   \
+  struct CompareTypes<a, b, reverse_order, Enable>                                                 \
   {                                                                                                \
     typedef super supertype;                                                                       \
   };                                                                                               \
