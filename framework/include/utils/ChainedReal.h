@@ -24,6 +24,7 @@ class DualNumber;
 #endif
 }
 
+using libMesh::Real;
 using MetaPhysicL::DualNumber;
 
 typedef DualNumber<Real, Real> ChainedReal;
