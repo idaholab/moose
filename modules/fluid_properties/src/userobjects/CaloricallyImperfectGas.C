@@ -143,7 +143,7 @@ Real
 CaloricallyImperfectGas::e_from_T(Real T) const
 {
   if (T < _min_temperature || T > _max_temperature)
-    outOfBounds();
+    outOfBounds("e_from_T", T, _min_temperature, _max_temperature);
 
   return _e_T->value(T, Point());
 }
@@ -152,7 +152,7 @@ Real
 CaloricallyImperfectGas::h_from_T(Real T) const
 {
   if (T < _min_temperature || T > _max_temperature)
-    outOfBounds();
+    outOfBounds("h_from_T", T, _min_temperature, _max_temperature);
   return _e_T->value(T, Point()) + _R_specific * T;
 }
 
@@ -160,7 +160,8 @@ Real
 CaloricallyImperfectGas::cp_from_T(Real T) const
 {
   if (T < _min_temperature || T > _max_temperature)
-    outOfBounds();
+    outOfBounds("cp_from_T", T, _min_temperature, _max_temperature);
+
   return _e_T->timeDerivative(T, Point()) + _R_specific;
 }
 
@@ -168,7 +169,8 @@ Real
 CaloricallyImperfectGas::cv_from_T(Real T) const
 {
   if (T < _min_temperature || T > _max_temperature)
-    outOfBounds();
+    outOfBounds("cv_from_T", T, _min_temperature, _max_temperature);
+
   return _e_T->timeDerivative(T, Point());
 }
 
@@ -176,7 +178,7 @@ void
 CaloricallyImperfectGas::cv_from_T(Real T, Real & cv, Real & dcv_dT) const
 {
   if (T < _min_temperature || T > _max_temperature)
-    outOfBounds();
+    outOfBounds("cv_from_T (3 args)", T, _min_temperature, _max_temperature);
   Real pert = 1.0e-7;
   cv = cv_from_T(T);
   Real cv_pert = cv_from_T(T * (1 + pert));
@@ -187,7 +189,7 @@ void
 CaloricallyImperfectGas::cp_from_T(Real T, Real & cp, Real & dcp_dT) const
 {
   if (T < _min_temperature || T > _max_temperature)
-    outOfBounds();
+    outOfBounds("cp_from_T (3 args)", T, _min_temperature, _max_temperature);
   Real pert = 1.0e-7;
   cp = cp_from_T(T);
   Real cp_pert = cp_from_T(T * (1 + pert));
@@ -198,7 +200,7 @@ Real
 CaloricallyImperfectGas::T_from_e(Real e) const
 {
   if (e < _min_e || e > _max_e)
-    outOfBounds();
+    outOfBounds("T_from_e", e, _min_e, _max_e);
 
   if (e < _min_e)
     return _T_e_lookup[0];
@@ -214,7 +216,7 @@ Real
 CaloricallyImperfectGas::T_from_h(Real h) const
 {
   if (h < _min_h || h > _max_h)
-    outOfBounds();
+    outOfBounds("h_from_e", h, _min_h, _max_h);
 
   if (h < _min_h)
     return _T_h_lookup[0];
@@ -470,8 +472,7 @@ CaloricallyImperfectGas::gamma_from_p_T(ADReal p, ADReal T) const
   Real raw2 = T.value();
   Real dxd1 = 0;
   Real dxd2 = 0;
-  gamma_from_v_e(raw1, raw2, x, dxd1, dxd2);
-
+  gamma_from_p_T(raw1, raw2, x, dxd1, dxd2);
   DualReal result = x;
   result.derivatives() = p.derivatives() * dxd1 + T.derivatives() * dxd2;
   return result;
@@ -943,4 +944,16 @@ CaloricallyImperfectGas::k_from_p_T(Real p, Real T, Real & k, Real & dk_dp, Real
   Real pert = 1.0e-7;
   Real k2 = this->k_from_p_T(p, T * (1 + pert));
   dk_dT = (k2 - k) / (T * pert);
+}
+
+void
+CaloricallyImperfectGas::outOfBounds(const std::string & function,
+                                     Real value,
+                                     Real min,
+                                     Real max) const
+{
+  std::stringstream ss;
+  ss << "Function " << function << " encountered argument value of " << value
+     << " which is outside of the bounds of " << min << " .. " << max;
+  mooseError(ss.str());
 }

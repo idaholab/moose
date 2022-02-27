@@ -128,7 +128,7 @@ protected:
   void setupLookupTables();
 
   /// function that handles exceeding parameter limits
-  void outOfBounds() const { mooseError("Out of bounds. Implement sensible error handling."); }
+  void outOfBounds(const std::string & function, Real value, Real min, Real max) const;
 
   ///@{ helper functions for e(T) and h(T), T(e), T(h), cv(T), cp(T)
   Real e_from_T(Real T) const;
