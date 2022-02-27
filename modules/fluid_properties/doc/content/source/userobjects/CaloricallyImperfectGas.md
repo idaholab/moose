@@ -74,6 +74,60 @@ for $T_j$. Create tabulation ${e_j, T_j}$. Create a similar tabulation for entha
 
 4. Evaluating $T(e)$ uses linear interpolation in ${e_j, T_j}$.
 
+## Evaluating Entropy
+
+From the first and second law of thermodynamics is follows that:
+
+!equation
+\begin{aligned}
+dq &= de + pdv \\
+ds &= dq/T,
+\end{aligned}
+
+where $dq$ is an infinitesimal amount of heat. Solving for $ds$ and using the ideal gas law leads to:
+
+\begin{equation}
+ ds = \frac{de}{T} + R_s \frac{dv}{v}.
+\end{equation}
+
+Integrating this equation leads to an expression for the entroy:
+
+\begin{equation}
+ s(e, v) - s(e_0, v_0) = \int\limits_{e_0}^e \frac{de'}{T'} + R_s \log \frac{v}{v_0},
+\end{equation}
+
+where the prime indicates that these variables are dummy variables of integration.
+We are free to select a zero-point for entropy and we select $s(e_0, v_0) = 0$.
+We also select $v_0 = 1$ and $e_0 = e(T_{min})$. The we define:
+
+\begin{equation}
+ Z(T) = \int\limits_{e_0}^{e(T)} \frac{de'}{T'} = \int\limits_{T_{min}}^{T} \frac{c_v(T')}{T'} dT'.
+\end{equation}
+
+Entropy is computed from the expression:
+
+\begin{equation}
+ s(e, v) = Z(T(e)) + R_s \log v,
+\end{equation}
+
+where $Z(T)$ is computed using a trapezoidal rule and tabulated between $T_{min}$ and $T_{max}$.
+It is linearly interpolated.
+
+The derivatives of entropy with respect to $T$, $e$, $h$, $v$ are given by:
+
+!equation
+\begin{aligned}
+\left(\frac{\partial s}{\partial e}\right)_v &= \frac{1}{T(e)} \\
+\left(\frac{\partial s}{\partial v}\right)_e &= \frac{R_s}{v} \\
+\left(\frac{\partial s}{\partial p}\right)_T &= -\frac{R_s}{p} \\
+\left(\frac{\partial s}{\partial T}\right)_p &= \frac{c_p(T)}{T} \\
+\left(\frac{\partial s}{\partial p}\right)_h &= -\frac{R_s}{p} \\
+\left(\frac{\partial s}{\partial h}\right)_p &= \frac{1}{T}.
+\end{aligned}
+
+These derivatives are implemented in the 5 argument versions of the `s_from_x_y`
+functions.
+
 !syntax parameters /Modules/FluidProperties/CaloricallyImperfectGas
 
 !syntax inputs /Modules/FluidProperties/CaloricallyImperfectGas
