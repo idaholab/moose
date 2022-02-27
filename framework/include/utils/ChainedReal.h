@@ -10,6 +10,8 @@
 #pragma once
 
 #include "libmesh/libmesh_common.h"
+#include "libmesh/compare_types.h"
+
 #include "metaphysicl/metaphysicl_version.h"
 
 namespace MetaPhysicL
