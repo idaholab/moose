@@ -109,6 +109,7 @@ public:
   virtual ADReal gamma_from_p_T(ADReal p, ADReal T) const;
   virtual void
   gamma_from_p_T(Real p, Real T, Real & gamma, Real & dgamma_dp, Real & dgamma_dT) const override;
+  virtual Real g_from_v_e(Real v, Real e) const override;
   /**
    * This fluid property is calorically imperfect but
    * otherwise it is still an ideal gas. In particular gamma = constant

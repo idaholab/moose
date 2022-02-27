@@ -145,7 +145,6 @@ CaloricallyImperfectGas::setupLookupTables()
         _Z_T_lookup[j] = _Z_T_lookup[j - 1] + 0.5 * _delta_T * (f1 + f2);
       }
     }
-
   }
 }
 
@@ -912,6 +911,15 @@ CaloricallyImperfectGas::k_from_p_T(Real p, Real T, Real & k, Real & dk_dp, Real
   Real pert = 1.0e-7;
   Real k2 = this->k_from_p_T(p, T * (1 + pert));
   dk_dT = (k2 - k) / (T * pert);
+}
+
+Real
+CaloricallyImperfectGas::g_from_v_e(Real v, Real e) const
+{
+  // use the definition of the Gibbs free energy
+  Real T = T_from_v_e(v, e);
+  Real p = p_from_v_e(v, e);
+  return h_from_p_T(p, T) - T * s_from_p_T(p, T);
 }
 
 void
