@@ -114,6 +114,56 @@ TEST_F(CaloricallyImperfectGasTest, testAll)
     }
   }
 
+  // AD consistency checks
+  {
+    for (unsigned int j = 1; j < np - 1; ++j)
+    {
+      Real T = min_T + j * dT;
+      Real p = 1.0e6;
+      const Real rho = fp->rho_from_p_T(p, T);
+      const Real v = 1.0 / rho;
+      Real e = fp->e_from_p_T(p, T);
+      Real cv = fp->cv_from_p_T(p, T);
+      Real c = fp->c_from_p_T(p, T);
+
+      ADReal ad_e = e;
+      ADReal ad_v = v;
+      ADReal ad_p = fp->p_from_v_e(ad_v, ad_e);
+      REL_TEST(MetaPhysicL::raw_value(ad_p), p, 10.0 * REL_TOL_CONSISTENCY);
+
+      ADReal ad_T = fp->T_from_v_e(ad_v, ad_e);
+      REL_TEST(MetaPhysicL::raw_value(ad_T), T, 10.0 * REL_TOL_CONSISTENCY);
+
+      ADReal ad_cv = fp->cv_from_v_e(ad_v, ad_e);
+      REL_TEST(MetaPhysicL::raw_value(ad_cv), cv, 10.0 * REL_TOL_CONSISTENCY);
+
+      ADReal ad_rho = fp->rho_from_p_T(ad_p, ad_T);
+      REL_TEST(MetaPhysicL::raw_value(ad_rho), rho, 10.0 * REL_TOL_CONSISTENCY);
+
+      ADReal ad_ee = fp->e_from_p_rho(ad_p, ad_rho);
+      REL_TEST(MetaPhysicL::raw_value(ad_ee), e, 10.0 * REL_TOL_CONSISTENCY);
+
+      ADReal ad_eee = fp->e_from_T_v(ad_T, ad_v);
+      REL_TEST(MetaPhysicL::raw_value(ad_eee), e, 10.0 * REL_TOL_CONSISTENCY);
+
+      ADReal ad_4e = fp->e_from_p_T(ad_p, ad_T);
+      REL_TEST(MetaPhysicL::raw_value(ad_4e), e, 10.0 * REL_TOL_CONSISTENCY);
+
+      ADReal ad_gamma = fp->gamma_from_v_e(ad_v, ad_e);
+      ADReal gamma = fp->gamma_from_v_e(v, e);
+      REL_TEST(MetaPhysicL::raw_value(ad_gamma), gamma, 10.0 * REL_TOL_CONSISTENCY);
+
+      ADReal ad_gamma_pt = fp->gamma_from_p_T(ad_p, ad_T);
+      ADReal gamma_pt = fp->gamma_from_p_T(ad_p, ad_T);
+      REL_TEST(MetaPhysicL::raw_value(ad_gamma_pt), gamma_pt, 10.0 * REL_TOL_CONSISTENCY);
+
+      ADReal ad_c = fp->c_from_v_e(ad_v, ad_e);
+      REL_TEST(MetaPhysicL::raw_value(ad_c), c, 10.0 * REL_TOL_CONSISTENCY);
+      ADReal ad_cc = fp->c_from_p_T(ad_p, ad_T);
+      REL_TEST(MetaPhysicL::raw_value(ad_cc), c, 10.0 * REL_TOL_CONSISTENCY);
+    }
+  }
+
   // check e/h lookups for T = 325.0 & e_from_v_h
   {
     Real T = 325.0;
@@ -189,7 +239,7 @@ TEST_F(CaloricallyImperfectGasTest, testAll)
     }
     catch (const std::exception & err)
     {
-      std::size_t pos = std::string(err.what()).find("Out of bounds.");
+      std::size_t pos = std::string(err.what()).find("which is outside of the bounds of");
       ASSERT_TRUE(pos != std::string::npos);
     }
 
@@ -200,7 +250,7 @@ TEST_F(CaloricallyImperfectGasTest, testAll)
     }
     catch (const std::exception & err)
     {
-      std::size_t pos = std::string(err.what()).find("Out of bounds.");
+      std::size_t pos = std::string(err.what()).find("which is outside of the bounds of");
       ASSERT_TRUE(pos != std::string::npos);
     }
   }
