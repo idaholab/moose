@@ -22,7 +22,7 @@ The internal energy $e$ is a user-provided function of temperature:
   e = e(T).
 \end{equation}  
 
-The function $e(T)$ is provided via parameter `e`. The time argument is interpreted
+The function $e(T)$ is provided via parameter [!param](/Modules/FluidProperties/CaloricallyImperfectGas/e). The time argument is interpreted
 as temperature.
 
 The enthalpy is computed by:
@@ -40,6 +40,7 @@ c_v &= \frac{de}{dT} \\
 c_p &= \frac{de}{dT} + R_s.
 \end{aligned}
 
+!alert warning
 The specific heat capacities are computed from $e(T)$ using the `timeDerivative` method
 of the `Function` class. The type of function that is used for $e(T)$ *must* implement
 the `timeDerivative` method.
@@ -60,19 +61,19 @@ h_{max} &= h(T_{max}) \\
 
 3. Sample
 
-\begin{equation}
-e_j = e_{min} + j \frac{e_{max}-e_{min}}{N}, j=0,..,N.
-\end{equation}
+   \begin{equation}
+   e_j = e_{min} + j \frac{e_{max}-e_{min}}{N},\qquad j=0,..,N.
+   \end{equation}
 
-and for each $e_j$ solve
+   and for each $e_j$ solve
 
-\begin{equation}
-e_j - e(T_j)= 0,
-\end{equation}
+   \begin{equation}
+   e_j - e(T_j)= 0,
+   \end{equation}
 
-for $T_j$. Create tabulation ${e_j, T_j}$. Create a similar tabulation for enthalpy.
+   for $T_j$. Create tabulation $\{e_j, T_j\}$. Create a similar tabulation for enthalpy.
 
-4. Evaluating $T(e)$ uses linear interpolation in ${e_j, T_j}$.
+4. Evaluating $T(e)$ uses linear interpolation in $\{e_j, T_j\}$.
 
 ## Evaluating Entropy
 
@@ -90,7 +91,7 @@ where $dq$ is an infinitesimal amount of heat. Solving for $ds$ and using the id
  ds = \frac{de}{T} + R_s \frac{dv}{v}.
 \end{equation}
 
-Integrating this equation leads to an expression for the entroy:
+Integrating this equation leads to an expression for the entropy:
 
 \begin{equation}
  s(e, v) - s(e_0, v_0) = \int\limits_{e_0}^e \frac{de'}{T'} + R_s \log \frac{v}{v_0},
@@ -98,7 +99,7 @@ Integrating this equation leads to an expression for the entroy:
 
 where the prime indicates that these variables are dummy variables of integration.
 We are free to select a zero-point for entropy and we select $s(e_0, v_0) = 0$.
-We also select $v_0 = 1$ and $e_0 = e(T_{min})$. The we define:
+We also select $v_0 = 1$ and $e_0 = e(T_{min})$. Then we define:
 
 \begin{equation}
  Z(T) = \int\limits_{e_0}^{e(T)} \frac{de'}{T'} = \int\limits_{T_{min}}^{T} \frac{c_v(T')}{T'} dT'.
