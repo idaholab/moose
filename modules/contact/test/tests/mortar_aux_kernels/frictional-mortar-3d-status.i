@@ -59,7 +59,6 @@ offset = 0.00
   [frictional_state]
     type = MortarFrictionalStateAux
     tangent_one = mortar_tangential_lm
-    tangent_two = mortar_tangential_3d_lm
     boundary = 'top_bottom'
     contact_pressure = mortar_normal_lm
     variable = frictional_status

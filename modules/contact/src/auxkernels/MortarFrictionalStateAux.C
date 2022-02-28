@@ -57,6 +57,12 @@ MortarFrictionalStateAux::MortarFrictionalStateAux(const InputParameters & param
   if (!this->_bnd)
     paramError("boundary",
                "MortarFrictionalStateAux auxiliary kernel must be restricted to a boundary.");
+
+  const auto mortar_dimension = _subproblem.mesh().dimension() - 1;
+  if (mortar_dimension == 2 && !isParamValid("tangent_two"))
+    paramError("tangent_two",
+               "MortarFrictionalStateAux auxiliary kernel requires a second tangent Lagrange "
+               "multiplier for three-dimensional problems");
 }
 
 Real
@@ -72,10 +78,10 @@ MortarFrictionalStateAux::computeValue()
   if (_contact_pressure[_qp] > _tolerance)
     status = 2;
 
-  Real tangential_pressure =
+  const Real tangential_pressure =
       std::sqrt(_tangent_one[_qp] * _tangent_one[_qp] + _tangent_two[_qp] * _tangent_two[_qp]);
 
-  Real tangential_pressure_sat = _mu * _contact_pressure[_qp];
+  const Real tangential_pressure_sat = _mu * _contact_pressure[_qp];
 
   if (status == 2 && tangential_pressure * (1.0 + _tolerance) > tangential_pressure_sat)
     status = 3;
