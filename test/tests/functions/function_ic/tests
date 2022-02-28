@@ -2,7 +2,7 @@
   issues = 'f792fc7ff9f8d8dfa8b3272117745fc422295ca1'
   design = 'source/ics/FunctionIC.md'
   [test]
-    requirement = "MOOSE shall be able to initialize a variable with values computed using a user-specified function"
+    requirement = "The system shall be able to initialize a variable with values computed using a user-specified function"
     [basic]
       type = 'Exodiff'
       input = 'function_ic_test.i'

@@ -6,6 +6,6 @@
     abs_zero = 1e-9
     issues = '#15811'
     design = 'auxkernels/FunctionArrayAux.md'
-    requirement = "MOOSE shall include the ability to set the value of an array variable using a function."
+    requirement = "The system shall include the ability to set the value of an array variable using a function."
   [../]
 []

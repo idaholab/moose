@@ -39,6 +39,6 @@
     input = 'gap_thermal_1D.i'
     cli_args = 'DGKernels/dg_diff/exclude_boundary="fake_interface another_fake last_one"'
     expect_err = "DGKernel 'dg_diff' contains the following boundary names that do not exist on the mesh: fake_interface, another_fake, last_one"
-    requirement = 'MOOSE shall throw an error if the inputted boundary does not exist.'
+    requirement = 'The system shall throw an error if the specified boundary does not exist when using the DGDiffusion DGKernel.'
   [../]
 []

@@ -4,7 +4,7 @@
     input = 'heat_source_bar.i'
     exodiff = 'heat_source_bar_out.e'
     abs_zero = 1e-7
-    requirement = 'MOOSE shall reproduce an analytical solution of a heat source in a 1D ceramic bar'
+    requirement = 'The system shall reproduce an analytical solution of a heat source in a 1D ceramic bar.'
     design = "HeatSource.md"
     issues = "#2582"
   [../]
@@ -13,7 +13,7 @@
     input = 'ad_heat_source_bar.i'
     exodiff = 'ad_heat_source_bar_out.e'
     abs_zero = 1e-7
-    requirement = 'MOOSE shall reproduce an analytical solution of a heat source in a 1D ceramic bar using AD kernels'
+    requirement = 'The system shall reproduce an analytical solution of a heat source in a 1D ceramic bar using AD kernels.'
     design = "ADMatHeatSource.md"
     issues = "#12633"
     custom_cmp = 'ad_heat_source_bar.cmp'
@@ -24,7 +24,7 @@
     ratio_tol = 2e-7
     difference_tol = 1e-2
     run_sim = True
-    requirement = 'The AD heat conduction and heat source Jacobian shall be beautiful'
+    requirement = 'The system shall produce correct Jacobians for the AD heat conduction and heat source kernel objects.'
     design = "ADMatHeatSource.md"
     issues = "#5658 #12633"
     prereq = 'ad_heat_source_bar' # same input file

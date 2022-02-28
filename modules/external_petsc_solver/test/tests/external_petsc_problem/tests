@@ -6,7 +6,7 @@
     type = 'Exodiff'
     input = 'moose_as_master.i'
     exodiff = 'moose_as_master_out.e moose_as_master_out_sub_app0.e'
-    requirement = "MOOSE shall support an code coupling interface for PETSc external solver."
+    requirement = "The system shall support an code coupling interface for PETSc external solver."
     cli_args = 'sub_app:Outputs/hide="pid" Outputs/hide="picard_its"'
     allow_warnings = true
     issues = "#12595"
@@ -23,7 +23,7 @@
     prereq = 'external_petsc'
     petsc_version = '>=3.8.0'
     library_mode = 'DYNAMIC'
-    requirement = "MOOSE shall be able to couple the PETSc external solver with subcycling."
+    requirement = "The system shall be able to couple the PETSc external solver with subcycling."
   []
 
   [external_petsc_subcycling_multistep]
@@ -34,7 +34,7 @@
     allow_warnings = true
     petsc_version = '>=3.8.0'
     library_mode = 'DYNAMIC'
-    requirement = "MOOSE shall be able to couple with the PETSc external solver with multistep subcycling."
+    requirement = "The system shall be able to couple with the PETSc external solver with multistep subcycling."
   []
 
   [external_petsc_small_dt]
@@ -46,7 +46,7 @@
     issues = "#12595"
     petsc_version = '>=3.8.0'
     library_mode = 'DYNAMIC'
-    requirement = "MOOSE shall handle the simulation correctly when dt in the external petsc solver is smaller than master app."
+    requirement = "The system shall handle the simulation correctly when dt in the external petsc solver is smaller than master app."
   []
 
   [external_petsc_large_dt]
@@ -59,7 +59,7 @@
     issues = "#12595"
     petsc_version = '>=3.8.0'
     library_mode = 'DYNAMIC'
-    requirement = "MOOSE shall handle the simulation correctly when dt in the external petsc solver is larger than master app."
+    requirement = "The system shall handle the simulation correctly when dt in the external petsc solver is larger than master app."
   []
 
   [petsc_as_master]
@@ -72,7 +72,7 @@
     petsc_version = '>=3.8.0'
     rel_err = 1e-5 # distributed mesh causes small diffs
     executable_pattern = 'external_petsc_solver*'
-    requirement = "MOOSE shall be able to run the PETSc external solver as master."
+    requirement = "The system shall be able to run the PETSc external solver as master."
   []
 
   [petsc_as_master_sub_cycling]
@@ -87,7 +87,7 @@
     prereq = 'petsc_as_master'
 
     executable_pattern = 'external_petsc_solver*'
-    requirement = "MOOSE shall be able to run the PETSc external solver as master with sub_cycling."
+    requirement = "The system shall be able to run the PETSc external solver as master with sub_cycling."
   []
 
   [petsc_as_master_large_dt]
@@ -102,7 +102,7 @@
     prereq = 'petsc_as_master_sub_cycling'
 
     executable_pattern = 'external_petsc_solver*'
-    requirement = "MOOSE shall be able to run the PETSc external solver as master with a larger dt in moose subapp."
+    requirement = "The system shall be able to run the PETSc external solver as master with a larger dt in moose subapp."
   []
 
   [petsc_as_master_sub_cycling_multistep]
@@ -116,7 +116,7 @@
     prereq = 'petsc_as_master'
 
     executable_pattern = 'external_petsc_solver*'
-    requirement = "MOOSE shall be able to run the PETSc external solver as master with sub_cycling and different time steps."
+    requirement = "The system shall be able to run the PETSc external solver as master with sub_cycling and different time steps."
   []
 
   [petsc_as_master_small_dt]
@@ -130,6 +130,6 @@
     rel_err = 5e-5
 
     executable_pattern = 'external_petsc_solver*'
-    requirement = "MOOSE shall be able to run the PETSc external solver as master with a smaller dt in moose subapp."
+    requirement = "The system shall be able to run the PETSc external solver as master with a smaller dt in moose subapp."
   []
 []

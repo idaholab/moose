@@ -5,6 +5,6 @@
     exodiff = 'ElectrochemicalSintering_test_out.e'
     issues = '#19339'
     design = '/ElectrochemicalSinteringMaterial.md'
-    requirement = 'MOOSE shall provide a Grand Potential based electrochemical sintering model'
+    requirement = 'The system shall provide a Grand Potential based electrochemical sintering model'
   []
 []

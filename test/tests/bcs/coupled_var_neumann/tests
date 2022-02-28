@@ -5,7 +5,7 @@
     type = 'Exodiff'
     input = 'coupled_var_neumann.i'
     exodiff = 'coupled_var_neumann_out.e'
-    requirement = "MOOSE shall support coupled Neumann type boundary conditions."
+    requirement = "The system shall support coupled Neumann type boundary conditions."
   [../]
 
   [./on_off]

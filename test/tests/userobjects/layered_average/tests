@@ -4,7 +4,7 @@
     input = 'layered_average.i'
     exodiff = 'layered_average_out.e'
 
-    requirement = "MOOSE shall allow taking averages of variables along a coordinate axis in layers"
+    requirement = "The system shall allow taking averages of variables along a coordinate axis in layers"
     design = '/LayeredAverage.md'
     issues = '#1737'
   []
@@ -14,7 +14,7 @@
     input = 'layered_average.i'
     csvdiff = 'layered_average_out_avg_0001.csv'
 
-    requirement = "MOOSE shall allow automatic specification of points to output the unique user object values"
+    requirement = "The system shall allow automatic specification of points to output the unique user object values"
     design = '/LayeredAverage.md'
     issues = '#19220'
   []
@@ -31,7 +31,7 @@
   []
 
   [errors]
-    requirement = "The system shall shall error when computing layered averages of a variable if"
+    requirement = "The system shall error when computing layered averages of a variable if"
     design = '/LayeredAverage.md'
     issues = '#2941 #2567'
 
@@ -67,7 +67,7 @@
     input = 'layered_average_interpolate.i'
     exodiff = 'layered_average_interpolate_out.e'
 
-    requirement = "MOOSE shall allow interpolating between layers for layered averages"
+    requirement = "The system shall allow interpolating between layers for layered averages"
     design = '/LayeredAverage.md'
     issues = '#1845'
   []
@@ -76,7 +76,7 @@
     type = 'Exodiff'
     input = 'layered_average_1d_displaced.i'
     exodiff = 'layered_average_1d_displaced_out.e'
-    requirement = "MOOSE shall respect mesh displacements in layered average"
+    requirement = "The system shall respect mesh displacements in layered average"
     design = '/LayeredAverage.md'
     issues = '#10960'
   []
@@ -110,7 +110,7 @@
     exodiff = 'block_restricted_num_layers_out.e'
     cli_args = 'UserObjects/master_uo/num_layers=2 Outputs/file_base=block_restricted_num_layers_out'
 
-    requirement = "MOOSE shall respect block restriction for layered averages even when using "
+    requirement = "The system shall respect block restriction for layered averages even when using "
                   "num_layers"
     design = '/LayeredAverage.md'
     issues = '#8835 #12152'
@@ -120,7 +120,7 @@
     input = 'layered_average_bounding_block.i'
     exodiff = 'layered_average_bounding_block_out.e'
 
-    requirement = "MOOSE shall allow bounds for layered averages when using num_layers to come from "
+    requirement = "The system shall allow bounds for layered averages when using num_layers to come from "
                   "a block different than the block restriction"
     design = '/LayeredAverage.md'
     issues = '#12479'

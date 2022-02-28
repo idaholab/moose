@@ -5,12 +5,12 @@
       type = 'Exodiff'
       input = 'polycrystal_void_diffusion.i'
       exodiff = 'polycrystal_void_diffusion_out.e'
-      requirement = 'Moose shall provide a material to assign location specific diffusivities in a polycrysatal structure, compatible with multiphase switching functions'
+      requirement = 'The system shall provide a material to assign location specific diffusivities in a polycrysatal structure, compatible with multiphase switching functions'
     []
     [polycrystal_void_diffusion_parsed]
       type = 'Exodiff'
       input = 'polycrystal_void_diffusion_parsed.i'
       exodiff = 'polycrystal_void_diffusion_parsed_out.e'
-      requirement = 'Moose shall provide a material to assign location specific diffusivities in a polycrysatal structure, compatible with any use-specified switching functions'
+      requirement = 'The system shall provide a material to assign location specific diffusivities in a polycrysatal structure, compatible with any use-specified switching functions'
     []
 []

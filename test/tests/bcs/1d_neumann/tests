@@ -5,12 +5,12 @@
     type = 'Exodiff'
     input = '1d_neumann.i'
     exodiff = '1d_neumann_out.e'
-    requirement = "MOOSE shall support Neumann type boundary conditions for a 1D problem."
+    requirement = "The system shall support Neumann type boundary conditions for a 1D problem."
   [../]
   [./from_cubit]
     type = 'Exodiff'
     input = 'from_cubit.i'
     exodiff = 'from_cubit_out.e'
-    requirement = "MOOSE shall support Neumann type boundary conditions for a 1D problem using an imported mesh."
+    requirement = "The system shall support Neumann type boundary conditions for a 1D problem using an imported mesh."
   [../]
 []

@@ -5,7 +5,7 @@
     input = 'steady-adapt.i'
     exodiff = 'out_steady_adapt.e-s004'
     group = 'adaptive'
-    requirement = "MOOSE shall support adaptive solves for steady-state execution."
+    requirement = "The system shall support adaptive solves for steady-state execution."
     issues = '#1405'
   [../]
 
@@ -13,7 +13,7 @@
     type = 'Exodiff'
     input = 'steady_state_check_test.i'
     exodiff = 'out_ss_check.e'
-    requirement = "MOOSE shall be able to detect steady state conditions during execution."
+    requirement = "The system shall be able to detect steady state conditions during execution."
     issues = '#1927'
   [../]
 
@@ -22,7 +22,7 @@
     input = 'steady.i'
     exodiff = 'out_steady.e'
     abs_zero = 1e-9
-    requirement = "MOOSE shall be capable of solving a steady state diffusion problem."
+    requirement = "The system shall be capable of solving a steady state diffusion problem."
     issues = '#1405'
   [../]
 
@@ -30,7 +30,7 @@
     type = 'Exodiff'
     input = 'transient.i'
     exodiff = 'out_transient.e'
-    requirement = "MOOSE shall be capable of solving a transient diffusion problem."
+    requirement = "The system shall be capable of solving a transient diffusion problem."
     issues = '#1405'
   [../]
 
@@ -41,7 +41,7 @@
     expect_out = "Automatic scaling factors:\s+u: 0\.175781"
     petsc_version = '>=3.9.0'
     max_parallel = 4
-    requirement = "MOOSE shall print automatic scaling factors if specified."
+    requirement = "The system shall print automatic scaling factors if specified."
     issues = '#13795'
   [../]
 
@@ -52,7 +52,7 @@
     absent_out = "Automatic scaling factors:"
     petsc_version = '>=3.9.0'
     max_parallel = 4
-    requirement = "MOOSE shall not print automatic scaling factors if not specified."
+    requirement = "The system shall not print automatic scaling factors if not specified."
     issues = '#13795'
   [../]
 []

@@ -7,7 +7,7 @@
     csvdiff = 'orthotropic_out.csv'
     rel_err = 1.0E-4
     abs_zero = 1.0E-4
-    requirement = 'Moose shall be capable of simulating materials that exhibit '
+    requirement = 'The system shall be capable of simulating materials that exhibit '
                   'orthotropic plasticity with constant hardening and linear '
                   'strain applied in the x and y directions.'
   [../]
@@ -18,7 +18,7 @@
     csvdiff = 'powerRuleHardening_out.csv'
     rel_err = 1.0E-2
     abs_zero = 1.0E-2
-    requirement = 'Moose shall be capable of simulating materials that exhibit '
+    requirement = 'The system shall be capable of simulating materials that exhibit '
                   'orthotropic plasticity with power rule hardening and linear '
                   'strain applied in the x direction.'
   [../]

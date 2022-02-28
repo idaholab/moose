@@ -5,6 +5,6 @@
     type = 'Exodiff'
     input = '1d_advection_dg.i'
     exodiff = '1d_advection_dg_out.e'
-    requirement = "MOOSE shall support solving 1D advection using the discontinous Galerkin method."
+    requirement = "The system shall support solving 1D advection using the discontinous Galerkin method."
   [../]
 []

@@ -6,7 +6,7 @@
     type = Exodiff
     input = coord_type_rz.i
     exodiff = coord_type_rz_out.e
-    requirement = "MOOSE shall support cylindrical coordinates with the radial direction in the 'x' direction."
+    requirement = "The system shall support cylindrical coordinates with the radial direction in the 'x' direction."
   [../]
   [./rz-x-rotation]
     # Simple diffusion with rotation around the x-axis
@@ -14,14 +14,14 @@
     input = coord_type_rz.i
     exodiff = coord_type_rz_x_rotation.e
     cli_args = 'Problem/rz_coord_axis=X Outputs/file_base=coord_type_rz_x_rotation'
-    requirement = "MOOSE shall support cylindrical coordinates with the radial direction in the 'y' direction."
+    requirement = "The system shall support cylindrical coordinates with the radial direction in the 'y' direction."
   [../]
   [./rz-integrated-y-rotation]
     # DGDiffusion with multiple integrated BCs; rotation around y-axis
     type = Exodiff
     input = coord_type_rz_integrated.i
     exodiff = coord_type_rz_integrated_out.e
-    requirement = "MOOSE shall support cylindrical coordinates with the radial direction in the 'x' direction with discontinous Galkerin and integrated boundary conditions."
+    requirement = "The system shall support cylindrical coordinates with the radial direction in the 'x' direction with discontinous Galkerin and integrated boundary conditions."
   [../]
   [./rz-integrated-x-rotation]
     # DGDiffusion with multiple integrated BCs; rotation around x-axis
@@ -30,6 +30,6 @@
     exodiff = coord_type_rz_integrated_x_rotation_out.e
     rel_err = 1e-4
     cli_args = 'Problem/rz_coord_axis=X Outputs/file_base=coord_type_rz_integrated_x_rotation_out'
-    requirement = "MOOSE shall support cylindrical coordinates with the radial direction in the 'y' direction with discontinous Galkerin and integrated boundary conditions."
+    requirement = "The system shall support cylindrical coordinates with the radial direction in the 'y' direction with discontinous Galkerin and integrated boundary conditions."
   [../]
 []

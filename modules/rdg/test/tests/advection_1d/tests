@@ -7,7 +7,7 @@
     rel_err = 5e-5
     threading = '!pthreads'
 
-    requirement = 'MOOSE shall provide classes to use an RDG spatial discretization'
+    requirement = 'The system shall provide classes to use an RDG spatial discretization'
                   'with no slope reconstruction.'
     design = 'rdg/index.md'
     issues = '#7967'
@@ -21,7 +21,7 @@
     rel_err = 5e-5
     threading = '!pthreads'
 
-    requirement = 'MOOSE shall provide classes to use an RDG spatial discretization'
+    requirement = 'The system shall provide classes to use an RDG spatial discretization'
                   'with Minmod slope reconstruction.'
     design = 'rdg/index.md'
     issues = '#7967'
@@ -35,7 +35,7 @@
     rel_err = 5e-5
     threading = '!pthreads'
 
-    requirement = 'MOOSE shall provide classes to use an RDG spatial discretization'
+    requirement = 'The system shall provide classes to use an RDG spatial discretization'
                   'with MC slope reconstruction.'
     design = 'rdg/index.md'
     issues = '#7967'
@@ -49,7 +49,7 @@
     rel_err = 5e-5
     threading = '!pthreads'
 
-    requirement = 'MOOSE shall provide classes to use an RDG spatial discretization'
+    requirement = 'The system shall provide classes to use an RDG spatial discretization'
                   'with Superbee slope reconstruction.'
     design = 'rdg/index.md'
     issues = '#7967'
@@ -62,7 +62,7 @@
     rel_err = 5e-5
     threading = '!pthreads'
 
-    requirement = 'MOOSE shall allow RDG user objects to be block-restrictable.'
+    requirement = 'The system shall allow RDG user objects to be block-restrictable.'
     design = 'rdg/index.md'
     issues = '#8357'
   [../]
@@ -73,7 +73,7 @@
     csvdiff = 'rdgP0_out_tracer_0011.csv'
     abs_zero = 1.0E-5
     threading = '!pthreads'
-    requirement = "1D RDG shall allow arbitrary 1D velocities to be specified."
+    requirement = "The system, with 1D RDG, shall allow arbitrary 1D velocities to be specified."
     issues = '#12346'
     design = 'porous_flow/numerical_diffusion.md'
   [../]

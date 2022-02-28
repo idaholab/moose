@@ -6,25 +6,25 @@
     type = 'Exodiff'
     input = 'array_variable_test.i'
     exodiff = 'array_variable_test_out.e'
-    requirement = 'MOOSE shall provide an ability to add array variables with constant initial conditions.'
+    requirement = 'The system shall provide an ability to add array variables with constant initial conditions.'
   []
   [size_one]
     type = 'Exodiff'
     input = 'array_variable_size_one_test.i'
     exodiff = 'array_variable_size_one_test_out.e'
-    requirement = 'MOOSE shall be able to define an array variable with component size one.'
+    requirement = 'The system shall be able to define an array variable with component size one.'
   []
   [array_false_error]
     type = 'RunException'
     input = 'array_variable_size_one_test.i'
     cli_args = 'Variables/u/components=2 Variables/u/array=false'
-    requirement = 'MOOSE shall report a reasonable error when defining a variable with multiple components not as an array variable.'
+    requirement = 'The system shall report a reasonable error when defining a variable with multiple components not as an array variable.'
     expect_err = "'array' is set to false."
   []
   [action]
     type = 'Exodiff'
     input = 'array_variable_action.i'
     exodiff = 'array_variable_action_out.e'
-    requirement = 'MOOSE shall support the automated creation of array variables.'
+    requirement = 'The system shall support the automated creation of array variables.'
   []
 []

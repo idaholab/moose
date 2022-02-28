@@ -5,7 +5,7 @@
     input = 'normalization_aux.i'
     exodiff = 'normalization_aux_out.e'
     cli_args = 'AuxKernels/normalization_auxkernel/normalization=unorm'
-    requirement = "MOOSE shall include the ability to normalize a variable based on a Postprocessor value."
+    requirement = "The system shall include the ability to normalize a variable based on a Postprocessor value."
     issues = '#4281'
   [../]
   [./normalization_aux_shift]
@@ -13,7 +13,7 @@
     input = 'normalization_aux.i'
     exodiff = 'normalization_aux_shift.e'
     cli_args = 'Outputs/file_base=normalization_aux_shift AuxKernels/normalization_auxkernel/normal_factor=1.0 AuxKernels/normalization_auxkernel/shift=u0'
-    requirement = "MOOSE shall include the ability to normalize and shift a variable based on a Postprocessor value."
+    requirement = "The system shall include the ability to normalize and shift a variable based on a Postprocessor value."
     issues = '#12401'
   [../]
 []

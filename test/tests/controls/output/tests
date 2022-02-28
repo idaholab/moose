@@ -20,7 +20,7 @@
     cli_args = "--show-controls"
     expect_out = "Controls:.*Active Controls:"
     absent_out = "Controls:.*Active Controls:.*Active Controls:"
-    requirement = "MOOSE shall include a command line flag for displaying controllable parameter information."
+    requirement = "The system shall include a command line flag for displaying controllable parameter information."
 
   [../]
   [./active]

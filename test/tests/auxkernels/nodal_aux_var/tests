@@ -5,21 +5,21 @@
     type = 'Exodiff'
     input = 'nodal_aux_init_test.i'
     exodiff = 'out_init.e'
-    requirement = "MOOSE shall include the ability to limit the execution of an AuxKernel object to initial setup."
+    requirement = "The system shall include the ability to limit the execution of an AuxKernel object to initial setup."
   [../]
 
   [./test]
     type = 'Exodiff'
     input = 'nodal_aux_var_test.i'
     exodiff = 'out.e'
-    requirement = "MOOSE shall include the ability to couple auxiliary variables."
+    requirement = "The system shall include the ability to couple auxiliary variables."
   [../]
 
   [./sort_test]
     type = 'Exodiff'
     input = 'nodal_sort_test.i'
     exodiff = 'nodal_sort_test_out.e'
-    requirement = "MOOSE shall be capable of resolving dependencies between AuxKernel objects regardless of input file order."
+    requirement = "The system shall be capable of resolving dependencies between AuxKernel objects regardless of input file order."
   [../]
 
   [./multi_update_test]

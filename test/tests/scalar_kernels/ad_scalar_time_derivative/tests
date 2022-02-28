@@ -7,6 +7,6 @@
     ad_indexing_type = 'global'
     design = 'ADScalarTimeDerivative.md'
     issues = '#18535'
-    requirement = 'MOOSE shall provide the ability to compute the time derivative of a scalar variable and have its Jacobian computed using automatic differentiation.'
+    requirement = 'The system shall provide the ability to compute the time derivative of a scalar variable and have its Jacobian computed using automatic differentiation.'
   []
 []

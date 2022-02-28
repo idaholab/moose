@@ -6,7 +6,7 @@
     input = 'equal_value_boundary_constraint_test.i'
     exodiff = 'out.e'
     abs_zero = 1e-9
-    requirement = "MOOSE shall include the ability to constrain the values on a boundary to a value "
+    requirement = "The system shall include the ability to constrain the values on a boundary to a value "
                   "at a prescribed node."
   []
   [adaptivity]
@@ -14,7 +14,7 @@
     input = 'adaptivity.i'
     exodiff = 'adaptivity_out.e adaptivity_out.e-s002 adaptivity_out.e-s003'
     mesh_mode = REPLICATED
-    requirement = "MOOSE shall be able to enforce the equal value boundary constraint in parallel "
+    requirement = "The system shall be able to enforce the equal value boundary constraint in parallel "
                   "with adaptivity."
   []
 []

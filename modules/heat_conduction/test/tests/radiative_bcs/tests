@@ -3,7 +3,7 @@
     type = CSVDiff
     input = 'radiative_bc_cyl.i'
     csvdiff = 'radiative_bc_cyl_out.csv'
-    requirement = "Moose shall be able to model radiative transfer from a cylindrical surface as boundary condition."
+    requirement = "The system shall be able to model radiative transfer from a cylindrical surface as a boundary condition."
     design = 'source/bcs/InfiniteCylinderRadiativeBC.md'
     issues = "#13053"
   [../]
@@ -11,7 +11,7 @@
     type = CSVDiff
     input = 'ad_radiative_bc_cyl.i'
     csvdiff = 'radiative_bc_cyl_out.csv'
-    requirement = "MOOSE shall be able to model radiative transfer from a cylindrical surface as boundary condition with automated differentiation."
+    requirement = "The system shall be able to model radiative transfer from a cylindrical surface as boundary condition with automated differentiation."
     design = 'source/bcs/ADInfiniteCylinderRadiativeBC.md'
     issues = "#13053"
     cli_args = "Outputs/file_base=radiative_bc_cyl_out"
@@ -21,7 +21,7 @@
     input = 'ad_radiative_bc_cyl.i'
     ratio_tol = 1e-7
     difference_tol = 2
-    requirement = "MOOSE shall be able to model radiative transfer from a cylindrical surface as boundary condition with automated differentiation and provide exact Jacobian."
+    requirement = "The system shall be able to model radiative transfer from a cylindrical surface as boundary condition with automated differentiation and provide exact Jacobian."
     design = 'source/bcs/ADInfiniteCylinderRadiativeBC.md'
     issues = "#13053"
   []
@@ -29,7 +29,7 @@
     type = Exodiff
     input = 'function_radiative_bc.i'
     exodiff = 'function_radiative_bc_out.e'
-    requirement = "MOOSE shall be able to model radiative heat transfer using a user-specified emissivity function."
+    requirement = "The system shall be able to model radiative heat transfer using a user-specified emissivity function."
     design = 'source/bcs/FunctionRadiativeBC.md'
     issues = "#13053"
     mesh_mode = REPLICATED
@@ -38,7 +38,7 @@
     type = Exodiff
     input = 'ad_function_radiative_bc.i'
     exodiff = 'function_radiative_bc_out.e'
-    requirement = "MOOSE shall be able to model radiative heat transfer using a user-specified emissivity function with automated differentiation."
+    requirement = "The system shall be able to model radiative heat transfer using a user-specified emissivity function with automated differentiation."
     design = 'source/bcs/ADFunctionRadiativeBC.md'
     issues = "#13053"
     mesh_mode = REPLICATED
@@ -50,7 +50,7 @@
     ratio_tol = 1e-7
     difference_tol = 5e-5
     cli_args = "Executioner/num_steps=1"
-    requirement = "MOOSE shall be able to model radiative heat transfer using a user-specified emissivity function with automated differentiation and provide exact Jacobian."
+    requirement = "The system shall be able to model radiative heat transfer using a user-specified emissivity function with automated differentiation and provide exact Jacobian."
     design = 'source/bcs/ADFunctionRadiativeBC.md'
     issues = "#13053"
     mesh_mode = REPLICATED

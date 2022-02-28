@@ -3,7 +3,7 @@
     type = 'Exodiff'
     input = 'mesh_generation_test.i'
     exodiff = 'out.e'
-    requirement = 'MOOSE shall generate a structured mesh on a Cartesian domain.'
+    requirement = 'The system shall generate a structured mesh on a Cartesian domain.'
     design = 'mesh/GeneratedMesh.md'
     issues = '#760'
   []
@@ -14,7 +14,7 @@
     cli_args = '--mesh-only'
     exodiff = 'mesh_bias_in.e'
     recover = false
-    requirement = 'MOOSE shall generate first-order, structured meshes with biasing in the x, y, and '
+    requirement = 'The system shall generate first-order, structured meshes with biasing in the x, y, and '
                   'z directions.'
     design = 'mesh/GeneratedMesh.md'
     issues = '#6129'
@@ -26,7 +26,7 @@
     cli_args = 'Mesh/elem_type=HEX27 --mesh-only mesh_bias_quadratic_in.e'
     exodiff = 'mesh_bias_quadratic_in.e'
     recover = false
-    requirement = 'MOOSE shall generate second-order, structured meshes with biasing in the x, y, '
+    requirement = 'The system shall generate second-order, structured meshes with biasing in the x, y, '
                   'and z directions.'
     design = 'mesh/GeneratedMesh.md'
     issues = '#6129'
@@ -138,7 +138,7 @@
     cli_args = '--mesh-only'
     exodiff = 'spiral_mesh_in.e'
     recover = false
-    requirement = 'MOOSE shall have an algorithm for meshing an annular region with triangular '
+    requirement = 'The system shall have an algorithm for meshing an annular region with triangular '
                   'elements.'
     design = 'mesh/SpiralAnnularMesh.md'
     issues = '#12205'
@@ -151,7 +151,7 @@
     exodiff = 'ringleb_mesh_in.e'
     recover = false
     design = 'mesh/RinglebMesh.md'
-    requirement = 'MOOSE shall have an algorithm for generating triangular and quadrilateral meshes '
+    requirement = 'The system shall have an algorithm for generating triangular and quadrilateral meshes '
                   'for the Ringleb problem.'
     issues = '#12246'
   []

@@ -6,7 +6,7 @@
     scale_refine = 3
     issues = '#000'
     design = 'TimeDerivative.md'
-    requirement = 'MOOSE shall be able to run a transient diffusion problem'
+    requirement = 'The system shall be able to run a transient diffusion problem'
   [../]
   [./test_mallocs]
     type = 'RunApp'
@@ -14,7 +14,7 @@
     cli_args = 'Outputs/exodus=false Problem/error_on_jacobian_nonzero_reallocation=true'
     issues = '#13736'
     design = 'TimeDerivative.md'
-    requirement = 'MOOSE shall not do any mallocs in MatSetValues for simple kernels'
+    requirement = 'The system shall not do any mallocs in MatSetValues for simple kernels'
     prereq = 'test' # for no checkpoint clobber potential during recover testing
   [../]
   [cant-solve-poorly-scaled]

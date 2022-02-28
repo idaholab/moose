@@ -6,7 +6,7 @@
     input = recover.i
     exodiff = recover_out.e
     superlu = true
-    requirement = 'MOOSE shall run a simulation with heat conduction, a heat source, thermal contact, and boundary conditions.'
+    requirement = 'The system shall run a simulation with heat conduction, a heat source, thermal contact, and boundary conditions.'
   [../]
   [./recover_2]
     type = RunApp
@@ -14,7 +14,7 @@
     prereq = recover_1
     cli_args = 'Outputs/checkpoint=true Executioner/num_steps=5'
     superlu = true
-    requirement = 'MOOSE shall run a short simulation with heat conduction, a heat source, thermal contact, and boundary conditions.'
+    requirement = 'The system shall run a short simulation with heat conduction, a heat source, thermal contact, and boundary conditions.'
   [../]
   [./recover_3]
     type = Exodiff
@@ -24,7 +24,7 @@
     delete_output_before_running = false
     cli_args = '--recover recover_out_cp/0005'
     superlu = true
-    requirement = 'MOOSE shall be able to recover from a short simulation and reproduce a the full time scale simulation with heat conduction, a heat source, thermal contact, and boundary conditions.'
+    requirement = 'The system shall be able to recover from a short simulation and reproduce a the full time scale simulation with heat conduction, a heat source, thermal contact, and boundary conditions.'
   [../]
 
   [./ad_recover_1]
@@ -32,7 +32,7 @@
     input = ad_recover.i
     exodiff = ad_recover_out.e
     superlu = true
-    requirement = 'MOOSE shall run a simulation with heat conduction, a heat source, thermal contact, and boundary conditions with automatic differentiation.'
+    requirement = 'The system shall run a simulation with heat conduction, a heat source, thermal contact, and boundary conditions with automatic differentiation.'
   [../]
   [./ad_recover_2]
     type = RunApp
@@ -40,7 +40,7 @@
     prereq = ad_recover_1
     cli_args = 'Outputs/checkpoint=true Executioner/num_steps=5'
     superlu = true
-    requirement = 'MOOSE shall run a short simulation with heat conduction, a heat source, thermal contact, and boundary conditions with automatic differentiation.'
+    requirement = 'The system shall run a short simulation with heat conduction, a heat source, thermal contact, and boundary conditions with automatic differentiation.'
   [../]
   [./ad_recover_3]
     type = Exodiff
@@ -50,7 +50,7 @@
     delete_output_before_running = false
     cli_args = '--recover ad_recover_out_cp/0005'
     superlu = true
-    requirement = 'MOOSE shall be able to recover from a short simulation and reproduce a the full time scale simulation with heat conduction, a heat source, thermal contact, and boundary conditions with automatic differentiation.'
+    requirement = 'The system shall be able to recover from a short simulation and reproduce a the full time scale simulation with heat conduction, a heat source, thermal contact, and boundary conditions with automatic differentiation.'
   [../]
 
   [./ad_recover_jacobian]
@@ -63,7 +63,7 @@
     method = 'OPT'
     cli_args = 'Executioner/num_steps=2'
     skip = 'AD Thermal Contact not yet implemented'
-    requirement = 'AD heat conduction and the Jacobian shall be beautiful'
+    requirement = 'The system shall produce a correct Jacobian for heat conduction with thermal contact based on automatic differentiation.'
     issues = "#5658 #12633"
   [../]
 []

@@ -5,13 +5,13 @@
     input = 'mesh_integer.i'
     exodiff = 'mesh_integer_out.e'
     issues = '#13764'
-    requirement = "MOOSE shall include the ability to use extra element integers."
+    requirement = "The system shall include the ability to use extra element integers."
   [../]
   [./dg_mesh_integer]
     type = 'Exodiff'
     input = 'dg_mesh_integer.i'
     exodiff = 'dg_mesh_integer_out.e'
     issues = '#16005'
-    requirement = "MOOSE shall include the ability to use extra element integers on element faces."
+    requirement = "The system shall include the ability to use extra element integers on element faces."
   [../]
 []

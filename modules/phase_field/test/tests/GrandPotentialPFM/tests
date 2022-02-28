@@ -5,7 +5,7 @@
     exodiff = 'GrandPotentialPFM_out.e'
     issues = '#6977'
     design = '/GrandPotentialKernelAction.md'
-    requirement = 'MOOSE shall provide classes to implement a Grand Potential phase field formulation'
+    requirement = 'The system shall provide classes to implement a Grand Potential phase field formulation'
   [../]
   [./GrandPotentialMultiphase]
     type = 'Exodiff'
@@ -13,7 +13,7 @@
     exodiff = 'GrandPotentialMultiphase_out.e'
     issues = '#8213'
     design = '/ACSwitching.md'
-    requirement = 'MOOSE shall provide a Grand Potential based multiphase model'
+    requirement = 'The system shall provide a Grand Potential based multiphase model'
   [../]
   [./GrandPotentialAnisotropy]
     type = 'Exodiff'
@@ -22,7 +22,7 @@
     abs_zero = 1e-8
     issues = '#11802 #12554'
     design = '/ACInterface2DMultiPhase1.md /ACInterface2DMultiPhase2.md /InterfaceOrientationMultiphaseMaterial.md'
-    requirement = 'MOOSE shall provide a Grand Potential based dendritic solidification capability in 2D'
+    requirement = 'The system shall provide a Grand Potential based dendritic solidification capability in 2D'
   [../]
 
   [./GrandPotentialInterface]
@@ -31,7 +31,7 @@
     csvdiff = 'GrandPotentialInterface_out_mat_0001.csv'
     issues = '#12147'
     design = '/GrandPotentialInterface.md'
-    requirement = 'MOOSE shall provide a material to automatically compute grand potential model interface parameters based on provided interfacial free energies and widths'
+    requirement = 'The system shall provide a material to automatically compute grand potential model interface parameters based on provided interfacial free energies and widths'
   [../]
   [./GrandPotentialAnisotropyAntitrap]
     type = 'Exodiff'
@@ -39,7 +39,7 @@
     exodiff = 'GrandPotentialAnisotropyAntitrap_out.e'
     issues = '#13373'
     design = '/AntitrappingCurrent.md'
-    requirement = 'MOOSE shall provide a Grand Potential based dendritic solidification capability for alloy with antitrapping current'
+    requirement = 'The system shall provide a Grand Potential based dendritic solidification capability for alloy with antitrapping current'
   [../]
   [./SinteringBase]
     type = 'Exodiff'
@@ -47,7 +47,7 @@
     exodiff = 'SinteringBase_out.e'
     issues = '#18420'
     design = '/GrandPotentialSinteringMaterial.md'
-    requirement = 'MOOSE shall provide a Grand Potential based sintering model'
+    requirement = 'The system shall provide a Grand Potential based sintering model'
   [../]
   [./SinteringParabolic]
     type = 'Exodiff'
@@ -55,7 +55,7 @@
     exodiff = 'SinteringParabolic_out.e'
     issues = '#18420'
     design = '/GrandPotentialSinteringMaterial.md'
-    requirement = 'MOOSE shall provide a Grand Potential based sintering model with parabolic defect free energies'
+    requirement = 'The system shall provide a Grand Potential based sintering model with parabolic defect free energies'
   [../]
   [./SinteringDilute]
     type = 'Exodiff'
@@ -63,7 +63,7 @@
     exodiff = 'SinteringDilute_out.e'
     issues = '#18420'
     design = '/GrandPotentialSinteringMaterial.md'
-    requirement = 'MOOSE shall provide a Grand Potential based sintering model with dilute solution defect free energies'
+    requirement = 'The system shall provide a Grand Potential based sintering model with dilute solution defect free energies'
   [../]
   [./SinteringIdeal]
     type = 'Exodiff'
@@ -71,6 +71,6 @@
     exodiff = 'SinteringIdeal_out.e'
     issues = '#18420'
     design = '/GrandPotentialSinteringMaterial.md'
-    requirement = 'MOOSE shall provide a Grand Potential based sintering model with ideal solution defect free energies'
+    requirement = 'The system shall provide a Grand Potential based sintering model with ideal solution defect free energies'
   [../]
 []

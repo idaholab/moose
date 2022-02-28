@@ -155,7 +155,7 @@
   [../]
 
   [./chaco]
-    requirement = 'MOOSE shall support a serial partitioner Chaco'
+    requirement = 'The system shall support a serial partitioner Chaco'
     type = 'Exodiff'
     input = 'petsc_partitioner.i'
     exodiff = 'petsc_partitioner_chaco_out.e'
@@ -171,7 +171,7 @@
   [../]
 
   [./party]
-    requirement = 'MOOSE shall support a serial partitioner party'
+    requirement = 'The system shall support a serial partitioner party'
     type = 'Exodiff'
     input = 'petsc_partitioner.i'
     exodiff = 'petsc_partitioner_party_out.e'

@@ -6,7 +6,7 @@
     input = 'admatreaction.i'
     exodiff = 'admatreaction_out.e'
     allow_test_objects = true
-    requirement = 'MOOSE shall provide an automatic differentiation mat reaction kernel'
+    requirement = 'The system shall provide an automatic differentiation mat reaction kernel'
   [../]
   [./admatreaction-jac]
     type = 'PetscJacobianTester'
