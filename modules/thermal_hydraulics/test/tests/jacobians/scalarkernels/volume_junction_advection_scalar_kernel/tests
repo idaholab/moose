@@ -8,6 +8,7 @@
     max_threads = 1
     max_parallel = 1
     allow_test_objects = true
+    ad_indexing_type = 'global'
   []
   [rhouV]
     type = 'PetscJacobianTester'
@@ -20,6 +21,7 @@
     max_threads = 1
     max_parallel = 1
     allow_test_objects = true
+    ad_indexing_type = 'global'
   []
   [rhovV]
     type = 'PetscJacobianTester'
@@ -32,6 +34,7 @@
     max_threads = 1
     max_parallel = 1
     allow_test_objects = true
+    ad_indexing_type = 'global'
   []
   [rhowV]
     type = 'PetscJacobianTester'
@@ -44,6 +47,7 @@
     max_threads = 1
     max_parallel = 1
     allow_test_objects = true
+    ad_indexing_type = 'global'
   []
   [rhoEV]
     type = 'PetscJacobianTester'
@@ -56,5 +60,6 @@
     max_threads = 1
     max_parallel = 1
     allow_test_objects = true
+    ad_indexing_type = 'global'
   []
 []

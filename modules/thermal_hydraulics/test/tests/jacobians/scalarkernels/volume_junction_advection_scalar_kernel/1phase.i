@@ -16,7 +16,7 @@
 
 [ScalarKernels]
   [scalar_kernel]
-    type = VolumeJunctionAdvectionScalarKernel
+    type = ADVolumeJunctionAdvectionScalarKernel
     variable = rhoV
     equation_index = 0
     volume_junction_uo = volume_junction_uo
@@ -31,17 +31,17 @@
 
 [UserObjects]
   [numerical_flux1]
-    type = NumericalFlux3EqnCentered
+    type = ADNumericalFlux3EqnCentered
     fluid_properties = fp
     execute_on = 'initial linear nonlinear'
   []
   [numerical_flux2]
-    type = NumericalFlux3EqnCentered
+    type = ADNumericalFlux3EqnCentered
     fluid_properties = fp
     execute_on = 'initial linear nonlinear'
   []
   [volume_junction_uo]
-    type = VolumeJunction1PhaseUserObject
+    type = ADVolumeJunction1PhaseUserObject
     volume = 0.3
     A = A_elem
     rhoA = rhoA
