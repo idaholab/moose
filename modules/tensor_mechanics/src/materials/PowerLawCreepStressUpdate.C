@@ -113,3 +113,7 @@ PowerLawCreepStressUpdate::substeppingCapabilityEnabled()
 {
   return getParam<bool>("use_substep");
 }
+
+template Real PowerLawCreepStressUpdate::computeResidualInternal<Real>(const Real &, const Real &);
+template ChainedReal
+PowerLawCreepStressUpdate::computeResidualInternal<ChainedReal>(const Real &, const ChainedReal &);

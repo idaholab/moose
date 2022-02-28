@@ -110,3 +110,9 @@ ADPowerLawCreepStressUpdate::substeppingCapabilityEnabled()
 {
   return getParam<bool>("use_substep");
 }
+
+template ADReal ADPowerLawCreepStressUpdate::computeResidualInternal<ADReal>(const ADReal &,
+                                                                             const ADReal &);
+template ChainedADReal
+ADPowerLawCreepStressUpdate::computeResidualInternal<ChainedADReal>(const ADReal &,
+                                                                    const ChainedADReal &);
