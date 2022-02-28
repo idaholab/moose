@@ -15,7 +15,7 @@ import moosetree
 import mooseutils
 from .nodes import SyntaxNode, MooseObjectNode, ActionNode, MooseObjectActionNode
 
-def get_moose_syntax_tree(exe, remove=None, alias=None, unregister=None):
+def get_moose_syntax_tree(exe, remove=None, alias=None, unregister=None, markdown=None):
     """
     Creates a tree structure representing the MooseApp syntax for the given executable using --json.
 
@@ -48,6 +48,7 @@ def get_moose_syntax_tree(exe, remove=None, alias=None, unregister=None):
     removed = __build_set_from_yaml(remove)
     unregister = __build_dict_from_yaml(unregister or dict())
     alias = alias or dict()
+    markdown = __build_dict_from_yaml(markdown or dict())
 
     # Apply remove/alias/unregister restrictions
     for node in moosetree.iterate(root):
@@ -72,6 +73,10 @@ def get_moose_syntax_tree(exe, remove=None, alias=None, unregister=None):
         # Mark 'Test' objects
         if node.groups() and all(grp.endswith('TestApp') for grp in node.groups()):
             node.test =  True
+
+        # Explicitly set markdown files
+        if (node.fullpath() in markdown):
+            node.markdown = markdown[node.fullpath()]
 
     return root
 
