@@ -38,7 +38,7 @@
     []
   []
 
-  # The following tests do not use RunCommand, but use the 'command' parameter to deomonstrate
+  # The following tests do not use RunCommand, but use the 'command' parameter to demonstrate
   # the actual command being run for usability. The application of mpiexec by RunApp/Exception
   # is not designed to be used with 'command', so 'max_parallel' is set to one.
   [message]

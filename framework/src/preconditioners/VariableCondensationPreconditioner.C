@@ -48,23 +48,9 @@ VariableCondensationPreconditioner::validParams()
       "be solved by the underlying preconditioners.");
 
   params.addParam<std::vector<NonlinearVariableName>>(
-      "off_diag_row",
-      "The off diagonal row you want to add into the matrix, it will be associated "
-      "with an off diagonal column from the same position in off_diag_colum.");
-  params.addParam<std::vector<NonlinearVariableName>>(
-      "off_diag_column",
-      "The off diagonal column you want to add into the matrix, it will be "
-      "associated with an off diagonal row from the same position in "
-      "off_diag_row.");
-  params.addParam<std::vector<NonlinearVariableName>>(
       "coupled_groups",
       "List multiple space separated groups of comma separated variables. "
       "Off-diagonal jacobians will be generated for all pairs within a group.");
-  params.addParam<bool>("full",
-                        false,
-                        "Set to true if you want the full set of couplings.  Simply "
-                        "for convenience so you don't have to set every "
-                        "off_diag_row and off_diag_column combination.");
 
   params.addParam<bool>(
       "is_lm_coupling_diagonal",
@@ -749,7 +735,7 @@ VariableCondensationPreconditioner::findZeroDiagonals(SparseMatrix<Number> & mat
   PetscErrorCode ierr;
   const PetscInt * petsc_idx;
   PetscInt nrows;
-  // make sure we have a petsc matrix
+  // make sure we have a PETSc matrix
   PetscMatrix<Number> * petsc_mat = cast_ptr<PetscMatrix<Number> *>(&mat);
   ierr = MatFindZeroDiagonals(petsc_mat->mat(), &zerodiags);
   LIBMESH_CHKERR(ierr);

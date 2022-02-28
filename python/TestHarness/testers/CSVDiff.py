@@ -21,8 +21,6 @@ class CSVDiff(FileTester):
         params.addParam('override_rel_err',   [], "A list of customized relative error tolerances.")
         params.addParam('override_abs_zero',   [], "A list of customized absolute zero tolerances.")
         params.addParam('comparison_file', "Use supplied custom comparison config file.")
-        params.addParam('rel_err', "A customized relative error tolerances.")
-        params.addParam('abs_zero', "A customized relative error tolerances.")
 
         return params
 
@@ -87,7 +85,7 @@ class CSVDiff(FileTester):
         if options.scaling and self.specs['scale_refine']:
             return output
 
-        # Make sure that all of the Exodiff files are actually available
+        # Make sure that all of the CSVDiff files are actually available
         for file in self.specs['csvdiff']:
             if not os.path.exists(os.path.join(self.getTestDir(), self.specs['gold_dir'], file)):
                 output += "File Not Found: " + os.path.join(self.getTestDir(), self.specs['gold_dir'], file)

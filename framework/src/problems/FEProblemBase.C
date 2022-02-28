@@ -5021,7 +5021,7 @@ FEProblemBase::solve()
   // Each app should have only one database
   if (!_app.isUltimateMaster())
     PetscOptionsPush(_petsc_option_data_base);
-  // We did not add petsc options to database yet
+  // We did not add PETSc options to database yet
   if (!_is_petsc_options_inserted)
   {
     Moose::PetscSupport::petscSetOptions(*this);
@@ -6773,7 +6773,7 @@ FEProblemBase::checkNonlinearConvergence(std::string & msg,
   if ((it >= _nl_forced_its) && it && reason == MooseNonlinearConvergenceReason::ITERATING)
   {
     // If compute_initial_residual_before_preset_bcs==false, then use the
-    // first residual computed by Petsc to determine convergence.
+    // first residual computed by PETSc to determine convergence.
     Real the_residual = system._compute_initial_residual_before_preset_bcs
                             ? initial_residual_before_preset_bcs
                             : system._initial_residual_after_preset_bcs;

@@ -30,22 +30,15 @@ FieldSplitPreconditioner::validParams()
 {
   InputParameters params = MoosePreconditioner::validParams();
   params.addClassDescription("Preconditioner designed to map onto PETSc's PCFieldSplit.");
-  params.addParam<std::vector<std::string>>(
-      "off_diag_row",
-      "The off diagonal row you want to add into the matrix, it will be associated "
-      "with an off diagonal column from the same position in off_diag_colum.");
-  params.addParam<std::vector<std::string>>("off_diag_column",
-                                            "The off diagonal column you want to add into the "
-                                            "matrix, it will be associated with an off diagonal "
-                                            "row from the same position in off_diag_row.");
+
+  params.addRequiredParam<std::vector<std::string>>(
+      "topsplit", "Entrance to splits, the top split will specify how splits will go.");
   // We should use full coupling Jacobian matrix by default
   params.addParam<bool>("full",
                         true,
-                        "Set to true if you want the full set of couplings.  Simply "
-                        "for convenience so you don't have to set every off_diag_row "
+                        "Set to true if you want the full set of couplings between variables "
+                        "simply for convenience so you don't have to set every off_diag_row "
                         "and off_diag_column combination.");
-  params.addRequiredParam<std::vector<std::string>>(
-      "topsplit", "entrance to splits, the top split will specify how splits will go.");
   return params;
 }
 
@@ -60,22 +53,24 @@ FieldSplitPreconditioner::FieldSplitPreconditioner(const InputParameters & param
   // it is recommended to have a full Jacobian for using
   // the fieldSplit preconditioner
   bool full = getParam<bool>("full");
+
   // how variables couple
   std::unique_ptr<CouplingMatrix> cm = std::make_unique<CouplingMatrix>(n_vars);
   if (!full)
   {
+    const auto off_diag_rows = getParam<std::vector<NonlinearVariableName>>("off_diag_row");
+    const auto off_diag_columns = getParam<std::vector<NonlinearVariableName>>("off_diag_column");
+
     // put 1s on diagonal
     for (unsigned int i = 0; i < n_vars; i++)
       (*cm)(i, i) = 1;
 
     // off-diagonal entries
     std::vector<std::vector<unsigned int>> off_diag(n_vars);
-    for (unsigned int i = 0; i < getParam<std::vector<std::string>>("off_diag_row").size(); i++)
+    for (const auto i : index_range(off_diag_rows))
     {
-      unsigned int row =
-          _nl.getVariable(0, getParam<std::vector<std::string>>("off_diag_row")[i]).number();
-      unsigned int column =
-          _nl.getVariable(0, getParam<std::vector<std::string>>("off_diag_column")[i]).number();
+      unsigned int row = _nl.getVariable(0, off_diag_rows[i]).number();
+      unsigned int column = _nl.getVariable(0, off_diag_columns[i]).number();
       (*cm)(row, column) = 1;
     }
   }

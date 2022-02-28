@@ -30,6 +30,20 @@ MoosePreconditioner::validParams()
       "ksp_norm", ksp_norm, "Sets the norm that is used for convergence testing");
   params.registerBase("MoosePreconditioner");
 
+  params.addParam<std::vector<NonlinearVariableName>>(
+      "off_diag_row",
+      "The variable names for the off-diagonal rows you want to add into the matrix; they will be "
+      "associated with an off-diagonal column from the same position in off_diag_column.");
+  params.addParam<std::vector<NonlinearVariableName>>(
+      "off_diag_column",
+      "The variable names for the off-diagonal columns you want to add into the matrix; they will "
+      "be associated with an off-diagonal row from the same position in off_diag_row.");
+  params.addParam<bool>("full",
+                        false,
+                        "Set to true if you want the full set of couplings between variables "
+                        "simply for convenience so you don't have to set every off_diag_row "
+                        "and off_diag_column combination.");
+
   params += Moose::PetscSupport::getPetscValidParams();
 
   return params;
@@ -44,6 +58,32 @@ MoosePreconditioner::MoosePreconditioner(const InputParameters & params)
   _fe_problem.getNonlinearSystemBase().setPCSide(getParam<MooseEnum>("pc_side"));
 
   _fe_problem.getNonlinearSystemBase().setMooseKSPNormType(getParam<MooseEnum>("ksp_norm"));
+
+  bool full = getParam<bool>("full");
+
+  // We either have a full coupling or a custom coupling
+  if (full && isParamValid("off_diag_row"))
+    paramError("off_diag_row", "Set full=false to specify the off-diagonal rows manually");
+  if (full && isParamValid("off_diag_column"))
+    paramError("off_diag_column", "Set full=false to specify the off-diagonal columns manually");
+
+  // Off-diagonal rows and colums must match
+  if (isParamValid("off_diag_row"))
+  {
+    if (isParamValid("off_diag_column"))
+    {
+      const auto off_diag =
+          getParam<NonlinearVariableName, NonlinearVariableName>("off_diag_row", "off_diag_column");
+    }
+    else
+      paramError("off_diag_row",
+                 "If off-diagonal rows are specified, matching off-diagonal "
+                 "columns must be specified as well");
+  }
+  else if (isParamValid("off_diag_column"))
+    paramError("off_diag_column",
+               "If off-diagonal columns are specified, matching off-diagonal "
+               "rows must be specified as well");
 }
 
 void

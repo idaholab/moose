@@ -24,7 +24,7 @@
 MooseInit::MooseInit(int argc, char * argv[], MPI_Comm COMM_WORLD_IN)
   : LibMeshInit(argc, argv, COMM_WORLD_IN)
 {
-  PetscPopSignalHandler(); // get rid of Petsc error handler
+  PetscPopSignalHandler(); // get rid of PETSc error handler
 
 // Set the number of OpenMP threads to the same as the number of threads libMesh is going to use
 #ifdef LIBMESH_HAVE_OPENMP
