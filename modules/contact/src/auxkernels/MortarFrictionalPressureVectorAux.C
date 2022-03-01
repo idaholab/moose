@@ -95,15 +95,10 @@ Real
 MortarFrictionalPressureVectorAux::computeValue()
 {
 
-  // Note: Nodal kernels cannot make use of _current_elem
-  const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map = _mesh.nodeToElemMap();
-  auto node_to_elem_pair = node_to_elem_map.find(_current_node->id());
-  mooseAssert(node_to_elem_pair != node_to_elem_map.end(), "Missing entry in node to elem map");
-  std::vector<dof_id_type> element_ids = node_to_elem_pair->second;
-
-  // We can pick any element id since we are looping over nodes below.
+  // A node id may correspond to more than one lower-d elements on the secondary surface.
+  // However, we are looping over nodes below, so we will locate the correct geometry
   const Elem * lower_dimensional_element =
-      _mortar_generation_object->getSecondaryLowerdElemFromSecondaryElem(element_ids[0]);
+      _mortar_generation_object->nodesToSecondaryElem().at(_current_node->id())[0];
 
   // Get nodal tangents for this element
   std::array<std::vector<Point>, 2> nodal_tangents =
