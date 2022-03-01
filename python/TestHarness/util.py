@@ -585,6 +585,14 @@ def getIfAsioExists(moose_dir):
         option_set.add('FALSE')
     return option_set
 
+def getIfLibtorchExists(moose_dir):
+    option_set = set(['ALL'])
+    if os.path.exists(f'{moose_dir}/modules/stochastic_tools/libtorch'):
+        option_set.add('TRUE')
+    else:
+        option_set.add('FALSE')
+    return option_set
+
 def getConfigOption(config_files, option, options):
     # Some tests work differently with parallel mesh enabled
     # We need to detect this condition

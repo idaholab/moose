@@ -9,7 +9,7 @@
     allow_test_objects = true
     cli_args = "Trainers/train/read_from_file=false"
     csvdiff = 'train_and_evaluate_out_results_0002.csv'
-    # libtorch = true (we would like to have something like this)
+    libtorch = true
   []
   [train]
     requirement = 'The system shall be able to train a libtorch-based neural network.'
@@ -18,7 +18,7 @@
     check_files = 'train_out_train.rd mynet.pt'
     cli_args = "Trainers/train/read_from_file=false"
     allow_test_objects = true
-    # libtorch = true (we would like to have something like this)
+    libtorch = true
   []
   [evaluate]
     requirement = 'The system shall be able to evaluate a previously trained, libtorch-based neural network.'
@@ -27,7 +27,7 @@
     allow_test_objects = true
     csvdiff = 'evaluate_out_results_0002.csv'
     prereq = train
-    # libtorch = true (we would like to have something like this)
+    libtorch = true
   []
   [retrain]
     requirement = 'The system shall be able to retrain a pretrained and saved libtorch-based neural network.'
@@ -37,6 +37,6 @@
     cli_args = "Trainers/train/read_from_file=true"
     csvdiff = 'retrain_out_results_0002.csv'
     prereq = evaluate
-    # libtorch = true (we would like to have something like this)
+    libtorch = true
   []
 []
