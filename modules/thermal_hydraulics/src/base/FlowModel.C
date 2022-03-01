@@ -92,9 +92,8 @@ FlowModel::addCommonInitialConditions()
       const Function & fn = _sim.getFunction(area_function);
       _sim.addConstantIC(AREA, fn.value(0, Point()), block);
       _sim.addConstantIC(AREA_LINEAR, fn.value(0, Point()), block);
-      // FIXME: eventually use Component::makeFunctionControllableIfConstant
-      if (dynamic_cast<const ConstantFunction *>(&fn) != nullptr)
-        _flow_channel.connectObject(fn.parameters(), area_function, "Area", "value");
+
+      _flow_channel.makeFunctionControllableIfConstant(area_function, "Area", "value");
     }
     else
     {
