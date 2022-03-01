@@ -150,5 +150,10 @@ class TestSyntaxTree(unittest.TestCase):
         self.assertTrue(node(0).test)
         self.assertTrue(node(0,0).test)
 
+    def testMarkdown(self):
+        root = moosesyntax.get_moose_syntax_tree(self.json, markdown={'/AuxKernels/ADMaterialRealAux' : 'auxkernels/ADMaterialRealAux.md'})
+        node = moosetree.find(root, lambda n: n.fullpath() == '/AuxKernels/ADMaterialRealAux')
+        self.assertEqual(node.markdown, 'auxkernels/ADMaterialRealAux.md')
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)
