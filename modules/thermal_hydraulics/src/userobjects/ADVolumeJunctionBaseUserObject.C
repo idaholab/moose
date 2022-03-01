@@ -52,7 +52,7 @@ void
 ADVolumeJunctionBaseUserObject::initialize()
 {
   _flux.assign(_n_connections, std::vector<ADReal>(_n_flux_eq, 0.0));
-  std::fill(_residual.begin(), _residual.end(), 0.0);
+  std::fill(_residual.begin(), _residual.end(), ADReal(0.0, DNDerivativeType()));
   _connection_indices.clear();
 }
 
