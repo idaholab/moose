@@ -34,6 +34,10 @@ AnnularMeshGenerator::validParams()
   params.addRequiredParam<Real>("rmax", "Outer radius");
   params.addParam<std::vector<Real>>("radial_positions",
                                      "Directly prescribed positions of intermediate radial nodes");
+  params.addParam<bool>("equal_area",
+                        false,
+                        "Whether to select the radial discretization "
+                        "to achieve equal areas of each ring");
   params.addDeprecatedParam<Real>("tmin",
                                   0.0,
                                   "Minimum angle, measured in radians anticlockwise from x axis",
@@ -93,7 +97,8 @@ AnnularMeshGenerator::AnnularMeshGenerator(const InputParameters & parameters)
                                 (1.0 - std::pow(std::abs(_growth_r), _nr))),
     _full_annulus(_dmin == 0.0 && _dmax == 360),
     _quad_subdomain_id(getParam<SubdomainID>("quad_subdomain_id")),
-    _tri_subdomain_id(getParam<SubdomainID>("tri_subdomain_id"))
+    _tri_subdomain_id(getParam<SubdomainID>("tri_subdomain_id")),
+    _equal_area(getParam<bool>("equal_area"))
 {
   if ((parameters.isParamSetByUser("tmin") || parameters.isParamSetByUser("tmax")) &&
       (parameters.isParamSetByUser("dmin") || parameters.isParamSetByUser("dmax")))
@@ -104,6 +109,9 @@ AnnularMeshGenerator::AnnularMeshGenerator(const InputParameters & parameters)
   {
     if (parameters.isParamSetByUser("nr"))
       paramError("nr", "The 'nr' parameter cannot be specified together with 'radial_positions'");
+    if (parameters.isParamSetByUser("equal_area"))
+      paramError("equal_area",
+                 "The 'equal_area' parameter cannot be specified together with 'radial_positions'");
     if (parameters.isParamSetByUser("growth_r"))
       paramError("growth_r",
                  "The 'growth_r' parameter cannot be specified together with 'radial_positions'");
@@ -114,6 +122,9 @@ AnnularMeshGenerator::AnnularMeshGenerator(const InputParameters & parameters)
             "The following provided value is not within the bounds between 'rmin' and 'rmax': ",
             rpos);
   }
+
+  if (_equal_area && parameters.isParamSetByUser("growth_r"))
+    paramError("growth_r", "The 'growth_r' parameter cannot be combined with 'equal_area'");
 
   if (_rmax <= _rmin)
     paramError("rmax", "rmax must be greater than rmin");
@@ -159,6 +170,9 @@ AnnularMeshGenerator::generate()
     node_id++;
   }
 
+  // first value for the ring outer radius, only used for _equal_area
+  Real outer_r = _rmax;
+
   // add nodes at smaller radii, and connect them with elements
   for (unsigned layer_num = _nr; layer_num > min_nonzero_layer_num; --layer_num)
   {
@@ -168,10 +182,19 @@ AnnularMeshGenerator::generate()
       current_r = _radial_positions[layer_num - 2];
     else
     {
-      if (_growth_r > 0)
-        current_r -= _len * std::pow(_growth_r, layer_num - 1);
+      if (_equal_area)
+      {
+        const Real ring_area = (_rmax * _rmax - _rmin * _rmin) / _nr;
+        current_r = std::sqrt(outer_r * outer_r - ring_area);
+        outer_r = current_r;
+      }
       else
-        current_r -= _len * std::pow(std::abs(_growth_r), _nr - layer_num);
+      {
+        if (_growth_r > 0)
+          current_r -= _len * std::pow(_growth_r, layer_num - 1);
+        else
+          current_r -= _len * std::pow(std::abs(_growth_r), _nr - layer_num);
+      }
     }
 
     // add node at angle = _dmin
