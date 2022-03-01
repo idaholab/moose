@@ -27,217 +27,224 @@
 #include "timpi/communicator.h"
 #include "timpi/parallel_sync.h"
 
-
 // Anonymous namespace for data, functors to use with GenericProjector.
-namespace {
+namespace
+{
 
-  // Transfer::OutOfMeshValue is an actual number.  Why?  Why!
-  static_assert(std::numeric_limits<Real>::has_infinity,
-                "What are you trying to use for Real?  It lacks infinity!");
-  Number BetterOutOfMeshValue = std::numeric_limits<Real>::infinity();
+// Transfer::OutOfMeshValue is an actual number.  Why?  Why!
+static_assert(std::numeric_limits<Real>::has_infinity,
+              "What are you trying to use for Real?  It lacks infinity!");
+Number BetterOutOfMeshValue = std::numeric_limits<Real>::infinity();
 
-  inline bool isBetterOutOfMeshValue (Number val)
-  {
-    // Might need to be changed for e.g. NaN
-    return val == BetterOutOfMeshValue;
-  }
-
-  // We need two functors that record point (value and gradient,
-  // respectively) requests, so we know what queries we need to make
-  // to other processors
-
-  /**
-   * Value request recording base class
-   */
-  template <typename Output>
-  class RecordRequests {
-    protected:
-      typedef typename TensorTools::MakeBaseNumber<Output>::type DofValueType;
-
-    public:
-      typedef typename TensorTools::MakeReal<Output>::type RealType;
-      typedef DofValueType ValuePushType;
-      typedef Output FunctorValue;
-
-      RecordRequests() {}
-
-      RecordRequests(RecordRequests & primary) : _primary(&primary) {}
-
-      ~RecordRequests() {
-        if (_primary)
-          {
-            Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-            _primary->_points_requested.insert
-              (_primary->_points_requested.end(),
-               _points_requested.begin(), _points_requested.end());
-          }
-      }
-
-      void init_context (FEMContext &) {}
-
-      Output eval_at_node (const FEMContext &,
-                           unsigned int libmesh_dbg_var(i),
-                           unsigned int /*elem_dim*/,
-                           const Node & n,
-                           bool /*extra_hanging_dofs*/,
-                           const Real /*time*/)
-      {
-        libmesh_assert_not_equal_to(i,0);
-        _points_requested.push_back(n);
-        return 0;
-      }
-
-      Output eval_at_point (const FEMContext &,
-                            unsigned int libmesh_dbg_var(i),
-                            const Point & n,
-                            const Real /*time*/,
-                            bool /*skip_context_check*/)
-      {
-        libmesh_assert_not_equal_to(i,0);
-        _points_requested.push_back(n);
-        return 0;
-      }
-
-    bool is_grid_projection() { return false; }
-
-    void eval_mixed_derivatives (const FEMContext & /*c*/,
-                                 unsigned int /*i*/,
-                                 unsigned int /*dim*/,
-                                 const Node & /*n*/,
-                                 std::vector<Output> & /*derivs*/)
-    { libmesh_error(); } // this is only for grid projections
-
-    void eval_old_dofs (const Elem &,
-                        unsigned int,
-                        unsigned int,
-                        std::vector<dof_id_type> &,
-                        std::vector<Output> &)
-    { libmesh_error(); }
-
-    void eval_old_dofs (const Elem &,
-                        const FEType &,
-                        unsigned int,
-                        unsigned int,
-                        std::vector<dof_id_type> &,
-                        std::vector<Output> &)
-    { libmesh_error(); }
-
-    std::vector<Point> & points_requested() { return _points_requested; }
-
-    private:
-      std::vector<Point> _points_requested;
-
-      RecordRequests * _primary = nullptr;
-  };
-
-
-  // We need a null action functor to use
-  // with them (because we won't be ready to set any values at that
-  // point)
-  template <typename Val>
-  class NullAction
-  {
-  public:
-    typedef Val InsertInput;
-
-    NullAction() {}
-
-    void insert(dof_id_type, Val) {}
-
-    void insert(const std::vector<dof_id_type> &,
-                const DenseVector<Val> &) {}
-  };
-
-
-  // We need two functors that respond to point (value and gradient,
-  // respectively) requests based on the cached values of queries answered by
-  // other processors.
-
-  /**
-   * Value request response base class
-   */
-  template <typename Output>
-  class CachedData {
-    protected:
-      typedef typename TensorTools::MakeBaseNumber<Output>::type DofValueType;
-
-    public:
-      typedef std::unordered_map<Point, Output, MultiAppGeneralFieldTransfer::hash_point> Cache;
-
-      typedef typename TensorTools::MakeReal<Output>::type RealType;
-      typedef DofValueType ValuePushType;
-      typedef Output FunctorValue;
-
-      CachedData(const Cache & cache,
-                 const FunctionBase<Output> & backup) : _cache(cache), _backup(backup.clone()) {}
-
-      CachedData(const CachedData & primary) : _cache(primary._cache), _backup(primary._backup->clone()) {}
-
-      void init_context (FEMContext &) {}
-
-      Output eval_at_node (const FEMContext &,
-                           unsigned int /*i*/,
-                           unsigned int /*elem_dim*/,
-                           const Node & n,
-                           bool /*extra_hanging_dofs*/,
-                           const Real /*time*/)
-      {
-        auto it = _cache.find(n);
-        if (it == _cache.end())
-          return (*_backup)(n);
-        else
-          return it->second;
-      }
-
-      Output eval_at_point (const FEMContext &,
-                            unsigned int /*i*/,
-                            const Point & n,
-                            const Real /*time*/,
-                            bool /*skip_context_check*/)
-      {
-        auto it = _cache.find(n);
-        if (it == _cache.end())
-          return (*_backup)(n);
-        else
-          return it->second;
-      }
-
-    bool is_grid_projection() { return false; }
-
-    void eval_mixed_derivatives (const FEMContext & /*c*/,
-                                 unsigned int /*i*/,
-                                 unsigned int /*dim*/,
-                                 const Node & /*n*/,
-                                 std::vector<Output> & /*derivs*/)
-    { libmesh_error(); } // this is only for grid projections
-
-    void eval_old_dofs (const Elem &,
-                        unsigned int,
-                        unsigned int,
-                        std::vector<dof_id_type> &,
-                        std::vector<Output> &)
-    { libmesh_error(); }
-
-    void eval_old_dofs (const Elem &,
-                        const FEType &,
-                        unsigned int,
-                        unsigned int,
-                        std::vector<dof_id_type> &,
-                        std::vector<Output> &)
-    { libmesh_error(); }
-
-    private:
-      // Data to return for cached points
-      const Cache & _cache;
-
-      // Function to evaluate for uncached points
-      std::unique_ptr<FunctionBase<Output>> _backup;
-  };
-
-
-
+inline bool
+isBetterOutOfMeshValue(Number val)
+{
+  // Might need to be changed for e.g. NaN
+  return val == BetterOutOfMeshValue;
 }
 
+// We need two functors that record point (value and gradient,
+// respectively) requests, so we know what queries we need to make
+// to other processors
+
+/**
+ * Value request recording base class
+ */
+template <typename Output>
+class RecordRequests
+{
+protected:
+  typedef typename TensorTools::MakeBaseNumber<Output>::type DofValueType;
+
+public:
+  typedef typename TensorTools::MakeReal<Output>::type RealType;
+  typedef DofValueType ValuePushType;
+  typedef Output FunctorValue;
+
+  RecordRequests() {}
+
+  RecordRequests(RecordRequests & primary) : _primary(&primary) {}
+
+  ~RecordRequests()
+  {
+    if (_primary)
+    {
+      Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+      _primary->_points_requested.insert(
+          _primary->_points_requested.end(), _points_requested.begin(), _points_requested.end());
+    }
+  }
+
+  void init_context(FEMContext &) {}
+
+  Output eval_at_node(const FEMContext &,
+                      unsigned int libmesh_dbg_var(i),
+                      unsigned int /*elem_dim*/,
+                      const Node & n,
+                      bool /*extra_hanging_dofs*/,
+                      const Real /*time*/)
+  {
+    libmesh_assert_not_equal_to(i, 0);
+    _points_requested.push_back(n);
+    return 0;
+  }
+
+  Output eval_at_point(const FEMContext &,
+                       unsigned int libmesh_dbg_var(i),
+                       const Point & n,
+                       const Real /*time*/,
+                       bool /*skip_context_check*/)
+  {
+    libmesh_assert_not_equal_to(i, 0);
+    _points_requested.push_back(n);
+    return 0;
+  }
+
+  bool is_grid_projection() { return false; }
+
+  void eval_mixed_derivatives(const FEMContext & /*c*/,
+                              unsigned int /*i*/,
+                              unsigned int /*dim*/,
+                              const Node & /*n*/,
+                              std::vector<Output> & /*derivs*/)
+  {
+    libmesh_error();
+  } // this is only for grid projections
+
+  void eval_old_dofs(
+      const Elem &, unsigned int, unsigned int, std::vector<dof_id_type> &, std::vector<Output> &)
+  {
+    libmesh_error();
+  }
+
+  void eval_old_dofs(const Elem &,
+                     const FEType &,
+                     unsigned int,
+                     unsigned int,
+                     std::vector<dof_id_type> &,
+                     std::vector<Output> &)
+  {
+    libmesh_error();
+  }
+
+  std::vector<Point> & points_requested() { return _points_requested; }
+
+private:
+  std::vector<Point> _points_requested;
+
+  RecordRequests * _primary = nullptr;
+};
+
+// We need a null action functor to use
+// with them (because we won't be ready to set any values at that
+// point)
+template <typename Val>
+class NullAction
+{
+public:
+  typedef Val InsertInput;
+
+  NullAction() {}
+
+  void insert(dof_id_type, Val) {}
+
+  void insert(const std::vector<dof_id_type> &, const DenseVector<Val> &) {}
+};
+
+// We need two functors that respond to point (value and gradient,
+// respectively) requests based on the cached values of queries answered by
+// other processors.
+
+/**
+ * Value request response base class
+ */
+template <typename Output>
+class CachedData
+{
+protected:
+  typedef typename TensorTools::MakeBaseNumber<Output>::type DofValueType;
+
+public:
+  typedef std::unordered_map<Point, Output, MultiAppGeneralFieldTransfer::hash_point> Cache;
+
+  typedef typename TensorTools::MakeReal<Output>::type RealType;
+  typedef DofValueType ValuePushType;
+  typedef Output FunctorValue;
+
+  CachedData(const Cache & cache, const FunctionBase<Output> & backup)
+    : _cache(cache), _backup(backup.clone())
+  {
+  }
+
+  CachedData(const CachedData & primary) : _cache(primary._cache), _backup(primary._backup->clone())
+  {
+  }
+
+  void init_context(FEMContext &) {}
+
+  Output eval_at_node(const FEMContext &,
+                      unsigned int /*i*/,
+                      unsigned int /*elem_dim*/,
+                      const Node & n,
+                      bool /*extra_hanging_dofs*/,
+                      const Real /*time*/)
+  {
+    auto it = _cache.find(n);
+    if (it == _cache.end())
+      return (*_backup)(n);
+    else
+      return it->second;
+  }
+
+  Output eval_at_point(const FEMContext &,
+                       unsigned int /*i*/,
+                       const Point & n,
+                       const Real /*time*/,
+                       bool /*skip_context_check*/)
+  {
+    auto it = _cache.find(n);
+    if (it == _cache.end())
+      return (*_backup)(n);
+    else
+      return it->second;
+  }
+
+  bool is_grid_projection() { return false; }
+
+  void eval_mixed_derivatives(const FEMContext & /*c*/,
+                              unsigned int /*i*/,
+                              unsigned int /*dim*/,
+                              const Node & /*n*/,
+                              std::vector<Output> & /*derivs*/)
+  {
+    libmesh_error();
+  } // this is only for grid projections
+
+  void eval_old_dofs(
+      const Elem &, unsigned int, unsigned int, std::vector<dof_id_type> &, std::vector<Output> &)
+  {
+    libmesh_error();
+  }
+
+  void eval_old_dofs(const Elem &,
+                     const FEType &,
+                     unsigned int,
+                     unsigned int,
+                     std::vector<dof_id_type> &,
+                     std::vector<Output> &)
+  {
+    libmesh_error();
+  }
+
+private:
+  // Data to return for cached points
+  const Cache & _cache;
+
+  // Function to evaluate for uncached points
+  std::unique_ptr<FunctionBase<Output>> _backup;
+};
+
+}
 
 registerMooseObject("MooseApp", MultiAppGeneralFieldTransfer);
 
@@ -343,28 +350,33 @@ MultiAppGeneralFieldTransfer::transferVariable(unsigned int i)
   auto gather_functor =
       [this, &local_bboxes, &local_meshfuns](processor_id_type /*pid*/,
                                              const std::vector<Point> & incoming_points,
-                                             std::vector<Real> & outgoing_vals) {
-        outgoing_vals.resize(incoming_points.size(), BetterOutOfMeshValue);
-        // Evaluate interpolation values for these incoming points
-        evaluateInterpValues(local_bboxes, local_meshfuns, incoming_points, outgoing_vals);
-      };
+                                             std::vector<Real> & outgoing_vals)
+  {
+    outgoing_vals.resize(incoming_points.size(), BetterOutOfMeshValue);
+    // Evaluate interpolation values for these incoming points
+    evaluateInterpValues(local_bboxes, local_meshfuns, incoming_points, outgoing_vals);
+  };
 
   DofobjectToInterpValVec dofobject_to_valsvec(_to_problems.size());
   InterpCaches interp_caches(_to_problems.size());
 
   // Copy data out to incoming_vals_ids
-  auto action_functor =
-      [this, &i, &dofobject_to_valsvec, &interp_caches]
-      (processor_id_type pid,
-       const std::vector<Point> & my_outgoing_points,
-       const std::vector<Real> & incoming_vals) {
-        auto & pointInfoVec = _processor_to_pointInfoVec[pid];
+  auto action_functor = [this, &i, &dofobject_to_valsvec, &interp_caches](
+                            processor_id_type pid,
+                            const std::vector<Point> & my_outgoing_points,
+                            const std::vector<Real> & incoming_vals)
+  {
+    auto & pointInfoVec = _processor_to_pointInfoVec[pid];
 
-        // Cache interpolation values for each dof object
-        cacheIncomingInterpVals(
-            pid, _to_var_names[i], pointInfoVec, my_outgoing_points,
-            incoming_vals, dofobject_to_valsvec, interp_caches);
-      };
+    // Cache interpolation values for each dof object
+    cacheIncomingInterpVals(pid,
+                            _to_var_names[i],
+                            pointInfoVec,
+                            my_outgoing_points,
+                            incoming_vals,
+                            dofobject_to_valsvec,
+                            interp_caches);
+  };
 
   // We assume incoming_vals_ids is ordered in the same way as outgoing_points
   // Hopefully, pull_parallel_vector_data will not mess up this
@@ -416,7 +428,7 @@ MultiAppGeneralFieldTransfer::cacheOutgoingPointInfor(const Point point,
     outgoing_points[pid].push_back(point);
     // Store point information
     // We can use these information when insert values to solution vector
-    PointInfo pointinfo;
+    PointInfor pointinfo;
     pointinfo.problem_id = problem_id;
     pointinfo.dof_object_id = dof_object_id;
     pointinfo.offset = 0;
@@ -461,7 +473,7 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const VariableName & var_nam
       // User input block names
       auto & blocks = getParam<std::vector<SubdomainName>>("to_blocks");
       // Subdomain ids
-     std::vector<SubdomainID> ids = to_moose_mesh->getSubdomainIDs(blocks);
+      std::vector<SubdomainID> ids = to_moose_mesh->getSubdomainIDs(blocks);
       // Store these ids
       _to_blocks.insert(ids.begin(), ids.end());
     }
@@ -476,33 +488,33 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const VariableName & var_nam
 
       libMesh::GenericProjector<RecordRequests<Number>,
                                 RecordRequests<Gradient>,
-                                Number, NullAction<Number>>
-        request_gather(*to_sys, f, &g, nullsetter, varvec);
+                                Number,
+                                NullAction<Number>>
+          request_gather(*to_sys, f, &g, nullsetter, varvec);
 
+      const MeshBase::element_iterator to_begin =
+          _to_blocks.empty() ? to_mesh.active_local_elements_begin()
+                             : to_mesh.active_local_subdomain_set_elements_begin(_to_blocks);
 
-      const MeshBase::element_iterator to_begin = _to_blocks.empty() ?
-        to_mesh.active_local_elements_begin() :
-        to_mesh.active_local_subdomain_set_elements_begin(_to_blocks);
+      const MeshBase::element_iterator to_end =
+          _to_blocks.empty() ? to_mesh.active_local_elements_end()
+                             : to_mesh.active_local_subdomain_set_elements_end(_to_blocks);
 
-      const MeshBase::element_iterator to_end = _to_blocks.empty() ?
-        to_mesh.active_local_elements_end() :
-        to_mesh.active_local_subdomain_set_elements_end(_to_blocks);
-
-      ConstElemRange to_elem_range (to_begin, to_end);
+      ConstElemRange to_elem_range(to_begin, to_end);
 
       request_gather.project(to_elem_range);
 
       for (Point p : f.points_requested())
-        {
-          // using dof_object_id 0 for value requests
-          this->cacheOutgoingPointInfor(p, 0, i_to, outgoing_points);
-        }
+      {
+        // using dof_object_id 0 for value requests
+        this->cacheOutgoingPointInfor(p, 0, i_to, outgoing_points);
+      }
 
       // This is going to require more complicated transfer work
       if (!g.points_requested().empty())
-        {
-          mooseError("We don't currently support variables with gradient degrees of freedom");
-        }
+      {
+        mooseError("We don't currently support variables with gradient degrees of freedom");
+      }
     }
     else if (is_nodal)
     {
@@ -619,7 +631,7 @@ void
 MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
     processor_id_type pid,
     const VariableName & var_name,
-    std::vector<PointInfo> & pointInfoVec,
+    std::vector<PointInfor> & pointInfoVec,
     const std::vector<Point> & point_requests,
     const std::vector<Real> & incoming_vals,
     DofobjectToInterpValVec & dofobject_to_valsvec,
@@ -642,9 +654,9 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
     System * to_sys = find_sys(es, var_name);
 
     // libMesh mesh
-    MeshBase & to_mesh = _to_meshes[problem_id]->getMesh();
+    // MeshBase & to_mesh = _to_meshes[problem_id]->getMesh();
     auto var_num = to_sys->variable_number(var_name);
-    auto sys_num = to_sys->number();
+    // auto sys_num = to_sys->number();
     auto & fe_type = to_sys->variable_type(var_num);
     bool is_nodal = fe_type.family == LAGRANGE;
 
@@ -662,21 +674,20 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
     {
       // Use this dof object pointer, so we can handle
       // both element and node using the same code
-      DofObject * dof_object_ptr = nullptr;
+      // DofObject * dof_object_ptr = nullptr;
       // It is a node
-      if (is_nodal)
-        dof_object_ptr = to_mesh.node_ptr(dof_object_id);
+      // if (is_nodal)
+      //  dof_object_ptr = to_mesh.node_ptr(dof_object_id);
       // It is an element
-      else
-        dof_object_ptr = to_mesh.elem_ptr(dof_object_id);
+      // else
+      //  dof_object_ptr = to_mesh.elem_ptr(dof_object_id);
 
       // We should only be supporting nodal and constant elemental
       // variables in this code path; if we see multiple DoFs on one
       // object we should have been using GenericProjector
-      mooseAssert(dof_object_ptr->n_dofs(sys_num, var_num) == 1,
-                  "Unexpectedly found " <<
-                  dof_object_ptr->n_dofs(sys_num, var_num) <<
-                  "dofs instead of 1");
+      // mooseAssert(dof_object_ptr->n_dofs(sys_num, var_num) == 1,
+      //            "Unexpectedly found " << dof_object_ptr->n_dofs(sys_num, var_num)
+      //                                  << "dofs instead of 1");
 
       auto & dofobject_to_val = dofobject_to_valsvec[problem_id];
 
@@ -698,10 +709,10 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
         // We adopt values from the smallest rank which has a valid value
         if ((val.second > pid || isBetterOutOfMeshValue(val.first)) &&
             !isBetterOutOfMeshValue(incoming_vals[val_offset]))
-          {
-            val.first = incoming_vals[val_offset];
-            val.second = pid;
-          }
+        {
+          val.first = incoming_vals[val_offset];
+          val.second = pid;
+        }
       }
     }
 
@@ -738,23 +749,21 @@ MultiAppGeneralFieldTransfer::setSolutionVectorValues(
     {
       // We may need to use existing data values in places where the
       // from app domain doesn't overlap
-      MeshFunction to_func (es, *to_sys->current_local_solution,
-                            to_sys->get_dof_map(), var_num);
+      MeshFunction to_func(es, *to_sys->current_local_solution, to_sys->get_dof_map(), var_num);
       to_func.init();
 
-      CachedData<Number> f(interp_caches[problem_id],
-                           to_func);
+      CachedData<Number> f(interp_caches[problem_id], to_func);
       libMesh::VectorSetAction<Number> setter(*to_sys->solution);
       const std::vector<unsigned int> varvec(1, var_num);
 
       libMesh::GenericProjector<CachedData<Number>,
-                                CachedData<Gradient>, Number,
+                                CachedData<Gradient>,
+                                Number,
                                 libMesh::VectorSetAction<Number>>
-        set_solution(*to_sys, f, nullptr, setter, varvec);
+          set_solution(*to_sys, f, nullptr, setter, varvec);
 
-      ConstElemRange active_local_elem_range
-        (to_mesh.active_local_elements_begin(),
-         to_mesh.active_local_elements_end());
+      ConstElemRange active_local_elem_range(to_mesh.active_local_elements_begin(),
+                                             to_mesh.active_local_elements_end());
 
       set_solution.project(active_local_elem_range);
     }
@@ -780,7 +789,8 @@ MultiAppGeneralFieldTransfer::setSolutionVectorValues(
           if (is_nodal)
             mooseError("Node ", dof_object_id, " for app ", problem_id, " could not be located ");
           else
-            mooseError("Element ", dof_object_id, " for app ", problem_id, " could not be located ");
+            mooseError(
+                "Element ", dof_object_id, " for app ", problem_id, " could not be located ");
         }
 
         // We should not put garbage into solution vector

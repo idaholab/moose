@@ -10,8 +10,8 @@
 #pragma once
 
 #include "MultiAppConservativeTransfer.h"
-
 #include "libmesh/mesh_function.h"
+#include "MooseHashing.h"
 
 /**
  * It is a general field transfer. It will do the following things
@@ -30,22 +30,22 @@ public:
   virtual void execute() override;
 
   // This needs to be moved into libMesh
-  struct hash_point {
+  struct hash_point
+  {
     std::size_t operator()(const Point & p) const
     {
-      std::size_t seed=0;
+      std::size_t seed = 0;
       Moose::hash_combine(seed, p(0), p(1), p(2));
       return seed;
     }
   };
-
 
 private:
   /// A map from pid to a set of points
   typedef std::unordered_map<processor_id_type, std::vector<Point>> ProcessorToPointVec;
 
   /// Point information
-  struct PointInfo
+  struct PointInfor
   {
     unsigned int problem_id;   // problem id
     dof_id_type dof_object_id; // node or elem id
@@ -53,11 +53,10 @@ private:
   };
 
   /// A map from pid to a set of point info
-  typedef std::unordered_map<processor_id_type, std::vector<PointInfo>> ProcessorToPointInfoVec;
+  typedef std::unordered_map<processor_id_type, std::vector<PointInfor>> ProcessorToPointInforVec;
 
   /// A vector, indexed by to-problem id, of maps from dof object to interpolation values
-  typedef std::vector<std::unordered_map<dof_id_type,
-                                         std::pair<Real, processor_id_type>>>
+  typedef std::vector<std::unordered_map<dof_id_type, std::pair<Real, processor_id_type>>>
       DofobjectToInterpValVec;
 
   /// A map for caching a single variable's values
@@ -88,7 +87,7 @@ private:
   std::vector<BoundingBox> _bboxes;
 
   /// A map from processor to pointInfo vector
-  ProcessorToPointInfoVec _processor_to_pointInfoVec;
+  ProcessorToPointInforVec _processor_to_pointInfoVec;
 
   /**
    * Performs the transfer for the variable of index i
@@ -149,7 +148,7 @@ private:
    */
   void cacheIncomingInterpVals(processor_id_type pid,
                                const VariableName & var_name,
-                               std::vector<PointInfo> & pointInfoVec,
+                               std::vector<PointInfor> & pointInfoVec,
                                const std::vector<Point> & point_requests,
                                const std::vector<Real> & incoming_vals,
                                DofobjectToInterpValVec & dofobject_to_valsvec,
