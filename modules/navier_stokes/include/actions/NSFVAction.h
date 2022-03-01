@@ -73,6 +73,7 @@ protected:
   void addINSEnergyHeatConductionKernels();
   void addINSEnergyAdvectionKernels();
   void addINSEnergyAmbientConvection();
+  void addINSEnergyExternalHeatSource();
 
   /// Functions adding boundary conditions for the incompressible simulation.
   void addINSInletBC();

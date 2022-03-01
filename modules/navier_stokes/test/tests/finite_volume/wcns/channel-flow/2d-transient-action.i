@@ -1,7 +1,4 @@
-rho = 'rho'
 l = 10
-velocity_interp_method = 'rc'
-advected_interp_method = 'average'
 
 # Artificial fluid properties
 # For a real case, use a GeneralFluidFunctorProperties and a viscosity rampdown
@@ -30,33 +27,35 @@ inlet_v = 0.001
 
 [Modules]
   [NavierStokesFV]
-    simulation_type = 'steady-state'
+    simulation_type = 'transient'
     compressibility = 'weakly-compressible'
-    turbulence_handling = 'mixing-length'
+    add_energy_equation = true
 
     density = 'rho'
     dynamic_viscosity = 'mu'
+    thermal_conductivity = 'k'
+    specific_heat = 'cp'
 
-    initial_velocity = '1e-6 1e-6 0'
+    initial_velocity = '${inlet_v} 1e-15 0'
+    initial_temperature = '${inlet_temp}'
+    initial_pressure = '${outlet_pressure}'
 
     inlet_boundaries = 'left'
     momentum_inlet_types = 'fixed-velocity'
-    momentum_inlet_function = '1 0'
+    momentum_inlet_function = '${inlet_v} 0'
+    energy_inlet_types = 'fixed-temperature'
+    energy_inlet_function = '${inlet_temp}'
 
     wall_boundaries = 'top bottom'
-    momentum_wall_types = 'wallfunction symmetry'
+    momentum_wall_types = 'noslip noslip'
+    energy_wall_types = 'heatflux heatflux'
+    energy_wall_function = '0 0'
 
     outlet_boundaries = 'right'
     momentum_outlet_types = 'fixed-pressure'
-    pressure_function = '0'
+    pressure_function = '${outlet_pressure}'
 
-    von_karman_const = ${von_karman_const}
-    mixing_length_delta = 0.5
-    mixing_length_walls = 'top'
-    mixing_length_aux_execute_on ='initial'
-
-    momentum_advection_interpolation = 'upwind'
-    mass_advection_interpolation = 'upwind'
+    external_heat_source = 'power_density'
   []
 []
 
@@ -64,174 +63,6 @@ inlet_v = 0.001
   [power_density]
     type = MooseVariableFVReal
     initial_condition = 1e4
-  []
-[]
-
-[FVKernels]
-  inactive = 'u_turb v_turb temp_turb'
-  [mass_time]
-    type = WCNSFVMassTimeDerivative
-    variable = pressure
-    drho_dt = drho_dt
-  []
-  [mass]
-    type = INSFVMassAdvection
-    variable = pressure
-    advected_interp_method = ${advected_interp_method}
-    velocity_interp_method = ${velocity_interp_method}
-    rho = ${rho}
-  []
-
-  [u_time]
-    type = WCNSFVMomentumTimeDerivative
-    variable = u
-    drho_dt = drho_dt
-    rho = rho
-    momentum_component = 'x'
-  []
-  [u_advection]
-    type = INSFVMomentumAdvection
-    variable = u
-    velocity_interp_method = ${velocity_interp_method}
-    advected_interp_method = ${advected_interp_method}
-    rho = ${rho}
-    momentum_component = 'x'
-  []
-  [u_viscosity]
-    type = INSFVMomentumDiffusion
-    variable = u
-    mu = ${mu}
-    momentum_component = 'x'
-  []
-  [u_pressure]
-    type = INSFVMomentumPressure
-    variable = u
-    momentum_component = 'x'
-    pressure = pressure
-  []
-  [u_turb]
-    type = INSFVMixingLengthReynoldsStress
-    variable = u
-    rho = ${rho}
-    mixing_length = mixing_len
-    momentum_component = 'x'
-    u = u
-    v = v
-  []
-
-  [v_time]
-    type = WCNSFVMomentumTimeDerivative
-    variable = v
-    drho_dt = drho_dt
-    rho = rho
-    momentum_component = 'y'
-  []
-  [v_advection]
-    type = INSFVMomentumAdvection
-    variable = v
-    velocity_interp_method = ${velocity_interp_method}
-    advected_interp_method = ${advected_interp_method}
-    rho = ${rho}
-    momentum_component = 'y'
-  []
-  [v_viscosity]
-    type = INSFVMomentumDiffusion
-    variable = v
-    momentum_component = 'y'
-    mu = ${mu}
-  []
-  [v_pressure]
-    type = INSFVMomentumPressure
-    variable = v
-    momentum_component = 'y'
-    pressure = pressure
-  []
-  [v_turb]
-    type = INSFVMixingLengthReynoldsStress
-    variable = v
-    rho = ${rho}
-    mixing_length = mixing_len
-    momentum_component = 'y'
-    u = u
-    v = v
-  []
-
-  [temp_time]
-    type = WCNSFVEnergyTimeDerivative
-    variable = T
-    cp = cp
-    rho = rho
-    drho_dt = drho_dt
-    dcp_dt = dcp_dt
-  []
-  [temp_conduction]
-    type = FVDiffusion
-    coeff = 'k'
-    variable = T
-  []
-  [temp_advection]
-    type = INSFVEnergyAdvection
-    variable = T
-    velocity_interp_method = ${velocity_interp_method}
-    advected_interp_method = ${advected_interp_method}
-  []
-  [heat_source]
-    type = FVCoupledForce
-    variable = T
-    v = power_density
-  []
-  [temp_turb]
-    type = WCNSFVMixingLengthEnergyDiffusion
-    variable = T
-    rho = rho
-    cp = cp
-    mixing_length = mixing_len
-    schmidt_number = 1
-    u = u
-    v = v
-  []
-[]
-
-[FVBCs]
-  [no_slip_x]
-    type = INSFVNoSlipWallBC
-    variable = u
-    boundary = 'top bottom'
-    function = 0
-  []
-
-  [no_slip_y]
-    type = INSFVNoSlipWallBC
-    variable = v
-    boundary = 'top bottom'
-    function = 0
-  []
-
-  # Inlet
-  [inlet_u]
-    type = INSFVInletVelocityBC
-    variable = u
-    boundary = 'left'
-    function = ${inlet_v}
-  []
-  [inlet_v]
-    type = INSFVInletVelocityBC
-    variable = v
-    boundary = 'left'
-    function = 0
-  []
-  [inlet_T]
-    type = FVDirichletBC
-    variable = T
-    boundary = 'left'
-    value = ${inlet_temp}
-  []
-
-  [outlet_p]
-    type = INSFVOutletPressureBC
-    variable = pressure
-    boundary = 'right'
-    function = ${outlet_pressure}
   []
 []
 
@@ -246,30 +77,14 @@ inlet_v = 0.001
 [Materials]
   [const_functor]
     type = ADGenericFunctorMaterial
-    prop_names = 'cp k dcp_dt'
-    prop_values = '${cp} ${k} 0'
+    prop_names = 'cp k dcp_dt mu'
+    prop_values = '${cp} ${k} 0 ${mu}'
   []
   [rho]
     type = RhoFromPTFunctorMaterial
     fp = fp
-    temperature = T
+    temperature = T_fluid
     pressure = pressure
-  []
-  [ins_fv]
-    type = INSFVEnthalpyMaterial
-    temperature = 'T'
-    rho = ${rho}
-  []
-[]
-
-[AuxKernels]
-  inactive = 'mixing_len'
-  [mixing_len]
-    type = WallDistanceMixingLengthAux
-    walls = 'top'
-    variable = mixing_len
-    execute_on = 'initial'
-    delta = 0.5
   []
 []
 
