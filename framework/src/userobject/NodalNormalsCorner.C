@@ -13,10 +13,9 @@
 #include "AuxiliarySystem.h"
 #include "MooseMesh.h"
 #include "MooseVariableFE.h"
+#include "NodalNormalsPreprocessor.h"
 
 #include "libmesh/numeric_vector.h"
-
-Threads::spin_mutex nodal_normals_corner_mutex;
 
 registerMooseObject("MooseApp", NodalNormalsCorner);
 
@@ -40,7 +39,7 @@ NodalNormalsCorner::NodalNormalsCorner(const InputParameters & parameters)
 void
 NodalNormalsCorner::execute()
 {
-  Threads::spin_mutex::scoped_lock lock(nodal_normals_corner_mutex);
+  std::scoped_lock lock(NodalNormalsPreprocessor::_nodal_normals_mutex);
   NumericVector<Number> & sln = _aux.solution();
 
   // Get a reference to our BoundaryInfo object
