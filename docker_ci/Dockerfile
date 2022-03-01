@@ -50,7 +50,7 @@ chown -R dev:dev /home/dev
 # Install managed packages and clear cache
 #-----------------------------------------------------------------------------#
 COPY docker_ci/install_packages.sh docker_ci/apt_installs.sh docker_ci/yum_installs.sh ./
-RUN ./install_packages.sh; rm *.sh
+RUN ./install_packages.sh || exit 1; rm *.sh
 
 #-----------------------------------------------------------------------------#
 # Install mpich-3.3 to system path
@@ -81,7 +81,9 @@ F77FLAGS='' ; \
 make -j ${MOOSE_JOBS} ; \
 make install ; \
 # Cleanup
-cd ../../ ; rm -rf mpich-3.3*
+cd ../../ ; rm -rf mpich-3.3* ; \
+# Ensure mpich was installed by checking for binary
+if [ ! -f $(which mpicc) ]; then exit 1; fi
 
 ENV CC=mpicc \
 CXX=mpicxx \
@@ -94,14 +96,15 @@ WORKDIR ${MOOSE_DIR}
 #-----------------------------------------------------------------------------#
 ARG PETSC_REV
 ARG PETSC_OPTIONS
+ENV PETSC_DIR=/usr/local
 COPY scripts/update_and_rebuild_petsc.sh ${MOOSE_DIR}/scripts/update_and_rebuild_petsc.sh
 COPY scripts/configure_petsc.sh ${MOOSE_DIR}/scripts/configure_petsc.sh
 RUN git clone https://gitlab.com/petsc/petsc.git ; \
 cd petsc && git checkout ${PETSC_REV} && cd .. ; \
-PETSC_PREFIX=/usr/local ./scripts/update_and_rebuild_petsc.sh ${PETSC_OPTIONS} ; \
-rm -rf petsc/* petsc/.* || true
-
-ENV PETSC_DIR=/usr/local
+PETSC_PREFIX=$PETSC_DIR ./scripts/update_and_rebuild_petsc.sh ${PETSC_OPTIONS} ; \
+rm -rf petsc/* petsc/.* || true ; \
+# Ensure PETSc was installed based on present of library directory
+if [ ! -d $PETSC_DIR/lib/petsc ]; then exit 1; fi
 
 #-----------------------------------------------------------------------------#
 # Install Libmesh to system path
@@ -121,7 +124,9 @@ git checkout ${LIBMESH_REV} ; \
 git submodule update --init ; \
 cd .. ; \
 METHODS="${LIBMESH_METHODS}" ./scripts/update_and_rebuild_libmesh.sh ${LIBMESH_OPTIONS} ; \
-rm -rf libmesh/* libmesh/.* || true
+rm -rf libmesh/* libmesh/.* || true ; \
+# Ensure Libmesh was installed via include directory
+if [ ! -d $LIBMESH_DIR/include/libmesh ]; then exit 1; fi
 
 #-----------------------------------------------------------------------------#
 # Copy and build MOOSE framework, test, and optionally modules
@@ -133,7 +138,9 @@ COPY --chown=dev:dev . ${MOOSE_DIR}
 
 ARG BUILD_MODULES
 ARG MOOSE_METHODS=opt
-RUN ./docker_ci/build_moose.sh
+RUN ./docker_ci/build_moose.sh ; \
+# Ensure a MOOSE test binary was built
+if [ ! -f $MOOSE_DIR/test/moose_test* ]; then exit 1; fi
 
 #-----------------------------------------------------------------------------#
 # Add needed env vars to /etc/environment
