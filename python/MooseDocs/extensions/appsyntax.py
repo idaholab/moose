@@ -106,7 +106,7 @@ class AppSyntaxExtension(command.CommandExtension):
         config['unregister'] = (None,
                                 "A `dict` or `dict` of `dict` including syntax to unregister (key='moose_base', value='parent_syntax')")
         config['markdown'] = (None,
-                             "A `dict` or `dict` of `dict` including markdown files to explicitly set markdown reference (key='syntax', value='file.md')")
+                             "A `dict` or `dict` of `dict` including markdown files to explicitly set a custom, additional markdown reference (key='syntax', value='file.md')")
         config['external_icon'] = ('feedback', "Icon name for the alert title when unavailable syntax is located on an external page.")
         config['external_alert'] = ('warning', "Alert name when unavailable syntax is located on an external page.")
         return config
