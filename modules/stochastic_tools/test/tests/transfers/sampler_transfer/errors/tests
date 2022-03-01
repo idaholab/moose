@@ -35,7 +35,7 @@
                  "values which have a size of 2."
     design = 'SamplerParameterTransfer.md'
     requirement = "The system shall produce an error if supplied vector of real values is not sized "
-                  "correctly."
+                  "correctly within the SamplerParameterTransfer object."
   []
   [sampler_mismatch]
     type = RunException
