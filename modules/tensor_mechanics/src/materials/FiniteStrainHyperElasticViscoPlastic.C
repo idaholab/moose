@@ -465,9 +465,9 @@ FiniteStrainHyperElasticViscoPlastic::computePK2StressAndDerivative()
   _pk2[_qp] = _elasticity_tensor[_qp] * _ee;
 
   _dce_dfe.zero();
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-    for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
-      for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
+  for (const auto i: make_range(Moose::dim))
+    for (const auto j: make_range(Moose::dim))
+      for (const auto k: make_range(Moose::dim))
       {
         _dce_dfe(i, j, k, i) = _dce_dfe(i, j, k, i) + _fe(k, j);
         _dce_dfe(i, j, k, j) = _dce_dfe(i, j, k, j) + _fe(k, i);
@@ -488,8 +488,8 @@ FiniteStrainHyperElasticViscoPlastic::computeDeeDce()
 {
   _dee_dce.zero();
 
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-    for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
+  for (const auto i: make_range(Moose::dim))
+    for (const auto j: make_range(Moose::dim))
       _dee_dce(i, j, i, j) = 0.5;
 }
 
@@ -516,9 +516,9 @@ FiniteStrainHyperElasticViscoPlastic::computeElasticPlasticDeformGrad()
 void
 FiniteStrainHyperElasticViscoPlastic::computeDpk2Dfpinv()
 {
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-    for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
-      for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
+  for (const auto i: make_range(Moose::dim))
+    for (const auto j: make_range(Moose::dim))
+      for (const auto k: make_range(Moose::dim))
         _dfe_dfpinv(i, j, k, j) = _dfgrd_tmp(i, k);
 
   _dpk2_dfpinv = _dpk2_dce * _dce_dfe * _dfe_dfpinv;
@@ -550,9 +550,9 @@ FiniteStrainHyperElasticViscoPlastic::computeQpJacobian()
   _pk2_fet = _pk2[_qp] * _fe.transpose();
   _fe_pk2 = _fe * _pk2[_qp];
 
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-    for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
-      for (unsigned int l = 0; l < LIBMESH_DIM; ++l)
+  for (const auto i: make_range(Moose::dim))
+    for (const auto j: make_range(Moose::dim))
+      for (const auto l: make_range(Moose::dim))
       {
         _tan_mod(i, j, i, l) += _pk2_fet(l, j);
         _tan_mod(i, j, j, l) += _fe_pk2(i, l);
@@ -560,15 +560,15 @@ FiniteStrainHyperElasticViscoPlastic::computeQpJacobian()
 
   _tan_mod /= _fe.det();
 
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-    for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
-      for (unsigned int l = 0; l < LIBMESH_DIM; ++l)
+  for (const auto i: make_range(Moose::dim))
+    for (const auto j: make_range(Moose::dim))
+      for (const auto l: make_range(Moose::dim))
         _dfe_df(i, j, i, l) = _fp_tmp_inv(l, j);
 
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-    for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
-      for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
-        for (unsigned int l = 0; l < LIBMESH_DIM; ++l)
+  for (const auto i: make_range(Moose::dim))
+    for (const auto j: make_range(Moose::dim))
+      for (const auto k: make_range(Moose::dim))
+        for (const auto l: make_range(Moose::dim))
           _df_dstretch_inc(i, j, k, l) =
               _rotation_increment[_qp](i, k) * _deformation_gradient_old[_qp](l, j);
 

@@ -186,7 +186,7 @@ PorousFlowDispersiveFlux::computeQpJac(unsigned int jvar) const
       dvelocity += _dpermeability_dvar[_qp][pvar] * _phi[_j][_qp] *
                    (_grad_p[_qp][ph] - _fluid_density_qp[_qp][ph] * _gravity);
 
-      for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+      for (const auto i: make_range(Moose::dim))
         dvelocity += _dpermeability_dgradvar[_qp][i][pvar] * _grad_phi[_j][_qp](i) *
                      (_grad_p[_qp][ph] - _fluid_density_qp[_qp][ph] * _gravity);
     }

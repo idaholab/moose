@@ -194,7 +194,7 @@ void
 PolycrystalVoronoi::precomputeGrainStructure()
 {
   // Set up domain bounds with mesh tools
-  for (unsigned int i = 0; i < LIBMESH_DIM; i++)
+  for (const auto i: make_range(Moose::dim))
   {
     _bottom_left(i) = _mesh.getMinInDimension(i);
     _top_right(i) = _mesh.getMaxInDimension(i);
@@ -239,7 +239,7 @@ PolycrystalVoronoi::precomputeGrainStructure()
 
     for (auto grain = decltype(_grain_num)(0); grain < _grain_num; grain++)
     {
-      for (unsigned int i = 0; i < LIBMESH_DIM; i++)
+      for (const auto i: make_range(Moose::dim))
         _centerpoints[grain](i) = _bottom_left(i) + _range(i) * MooseRandom::rand();
       if (_columnar_3D)
         _centerpoints[grain](2) = _bottom_left(2) + _range(2) * 0.5;

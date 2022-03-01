@@ -1843,7 +1843,7 @@ MechanicalContactConstraint::getCoupledVarComponent(unsigned int var_num, unsign
 {
   component = std::numeric_limits<unsigned int>::max();
   bool coupled_var_is_disp_var = false;
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+  for (const auto i: make_range(Moose::dim))
   {
     if (var_num == _vars[i])
     {

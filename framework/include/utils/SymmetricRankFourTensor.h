@@ -68,15 +68,15 @@ class SymmetricRankFourTensorTempl
 {
 public:
   ///@{ tensor dimension, Mandel matrix dimension, and Mandel matrix size
-  static constexpr unsigned int Ndim = 3;
-  static constexpr unsigned int N = 2 * Ndim;
+  static constexpr unsigned int Ndim = LIBMESH_DIM;
+  static constexpr unsigned int N = Ndim + Ndim * (Ndim - 1) / 2;
   static constexpr unsigned int N2 = N * N;
   ///@}
 
   /// returns the 1, sqrt(2), or 2 prefactor in the Mandel notation for the indices i,j ranging from 0-5.
   static constexpr Real mandelFactor(unsigned int i, unsigned int j)
   {
-    return i < 3 ? (j < 3 ? 1.0 : MathUtils::sqrt2) : (j < 3 ? MathUtils::sqrt2 : 2.0);
+    return i < Ndim ? (j < Ndim ? 1.0 : MathUtils::sqrt2) : (j < Ndim ? MathUtils::sqrt2 : 2.0);
   }
 
   /// Initialization method
@@ -496,6 +496,7 @@ template <typename T2>
 void
 SymmetricRankFourTensorTempl<T>::fillSymmetric9FromInputVector(const T2 & input)
 {
+  mooseAssert(LIBMESH_DIM == 3, "This method assumes LIBMESH_DIM == 3");
   mooseAssert(input.size() == 9,
               "To use fillSymmetric9FromInputVector, your input must have size 9.");
   zero();
@@ -529,6 +530,7 @@ SymmetricRankFourTensorTempl<T>::fillSymmetric21FromInputVector(const T2 & input
   //                         C1313 C1312
   //                               C1212
 
+  mooseAssert(LIBMESH_DIM == 3, "This method assumes LIBMESH_DIM == 3");
   mooseAssert(input.size() == 21,
               "To use fillSymmetric21FromInputVector, your input must have size 21.");
   std::size_t index = 0;
@@ -550,7 +552,7 @@ SymmetricRankFourTensorTempl<T>
 SymmetricRankFourTensorTempl<T>::invSymm() const
 {
   SymmetricRankFourTensorTempl<T> result(initNone);
-  Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> mat(6, 6);
+  Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> mat(N, N);
   for (auto i : make_range(N))
     for (auto j : make_range(N))
       mat(i, j) = (*this)(i, j);

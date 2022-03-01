@@ -333,7 +333,7 @@ MaterialOutputAction::materialOutputHelper<RealVectorValue>(const std::string & 
 {
   std::array<char, 3> suffix = {{'x', 'y', 'z'}};
   std::vector<std::string> names(3);
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+  for (const auto i : make_range(Moose::dim))
   {
     std::ostringstream oss;
     oss << property_name << "_" << suffix[i];
@@ -358,7 +358,7 @@ MaterialOutputAction::materialOutputHelper<ADRealVectorValue>(const std::string 
 {
   std::array<char, 3> suffix = {{'x', 'y', 'z'}};
   std::vector<std::string> names(3);
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+  for (const auto i : make_range(Moose::dim))
   {
     std::ostringstream oss;
     oss << property_name << "_" << suffix[i];
@@ -381,14 +381,14 @@ MaterialOutputAction::materialOutputHelper<RealTensorValue>(const std::string & 
                                                             const MaterialBase & material,
                                                             bool get_names_only)
 {
-  std::vector<std::string> names(LIBMESH_DIM * LIBMESH_DIM);
+  std::vector<std::string> names(Moose::dim * Moose::dim);
 
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-    for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
+  for (const auto i : make_range(Moose::dim))
+    for (const auto j : make_range(Moose::dim))
     {
       std::ostringstream oss;
       oss << property_name << "_" << i << j;
-      names[i * LIBMESH_DIM + j] = oss.str();
+      names[i * Moose::dim + j] = oss.str();
 
       if (!get_names_only)
       {
@@ -408,14 +408,14 @@ MaterialOutputAction::materialOutputHelper<RankTwoTensor>(const std::string & pr
                                                           const MaterialBase & material,
                                                           bool get_names_only)
 {
-  std::vector<std::string> names(LIBMESH_DIM * LIBMESH_DIM);
+  std::vector<std::string> names(Moose::dim * Moose::dim);
 
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-    for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
+  for (const auto i : make_range(Moose::dim))
+    for (const auto j : make_range(Moose::dim))
     {
       std::ostringstream oss;
       oss << property_name << "_" << i << j;
-      names[i * LIBMESH_DIM + j] = oss.str();
+      names[i * Moose::dim + j] = oss.str();
 
       if (!get_names_only)
       {
@@ -435,14 +435,14 @@ MaterialOutputAction::materialOutputHelper<ADRankTwoTensor>(const std::string & 
                                                             const MaterialBase & material,
                                                             bool get_names_only)
 {
-  std::vector<std::string> names(LIBMESH_DIM * LIBMESH_DIM);
+  std::vector<std::string> names(Moose::dim * Moose::dim);
 
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-    for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
+  for (const auto i : make_range(Moose::dim))
+    for (const auto j : make_range(Moose::dim))
     {
       std::ostringstream oss;
       oss << property_name << "_" << i << j;
-      names[i * LIBMESH_DIM + j] = oss.str();
+      names[i * Moose::dim + j] = oss.str();
 
       if (!get_names_only)
       {
@@ -462,13 +462,13 @@ MaterialOutputAction::materialOutputHelper<RankFourTensor>(const std::string & p
                                                            const MaterialBase & material,
                                                            bool get_names_only)
 {
-  std::vector<std::string> names(Utility::pow<4>(LIBMESH_DIM));
+  std::vector<std::string> names(Utility::pow<4>(Moose::dim));
 
   unsigned int counter = 0;
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-    for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
-      for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
-        for (unsigned int l = 0; l < LIBMESH_DIM; ++l)
+  for (const auto i : make_range(Moose::dim))
+    for (const auto j : make_range(Moose::dim))
+      for (const auto k : make_range(Moose::dim))
+        for (const auto l : make_range(Moose::dim))
         {
           std::ostringstream oss;
           oss << property_name << "_" << i << j << k << l;

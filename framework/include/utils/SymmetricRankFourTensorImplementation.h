@@ -429,6 +429,7 @@ template <typename T>
 void
 SymmetricRankFourTensorTempl<T>::fillGeneralOrthotropicFromInputVector(const std::vector<T> & input)
 {
+  mooseAssert(LIBMESH_DIM == 3, "This method assumes LIBMESH_DIM == 3");
   if (input.size() != 12)
     mooseError("To use fillGeneralOrhotropicFromInputVector, your input must have size 12. Yours "
                "has size ",
@@ -486,6 +487,7 @@ template <typename T>
 T
 SymmetricRankFourTensorTempl<T>::sum3x3() const
 {
+  mooseAssert(LIBMESH_DIM == 3, "This method assumes LIBMESH_DIM == 3");
   // summation of Ciijj used in the volumetric locking correction
   T sum = 0;
   for (auto i : make_range(3))
@@ -498,6 +500,7 @@ template <typename T>
 VectorValue<T>
 SymmetricRankFourTensorTempl<T>::sum3x1() const
 {
+  mooseAssert(LIBMESH_DIM == 3, "This method assumes LIBMESH_DIM == 3");
   // used for volumetric locking correction
   return VectorValue<T>(_vals[0] + _vals[1] + _vals[2],
                         _vals[6] + _vals[7] + _vals[8],
@@ -520,6 +523,8 @@ template <typename T>
 bool
 SymmetricRankFourTensorTempl<T>::isIsotropic() const
 {
+  mooseAssert(LIBMESH_DIM == 3, "This method assumes LIBMESH_DIM == 3");
+
   // prerequisite is symmetry
   if (!isSymmetric())
     return false;

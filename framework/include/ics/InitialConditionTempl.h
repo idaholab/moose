@@ -92,7 +92,7 @@ public:
   RealEigenVector dotHelper(const RealVectorArrayValue & op1, const RealGradient & op2)
   {
     RealEigenVector v = op1.col(0) * op2(0);
-    for (unsigned int i = 1; i < LIBMESH_DIM; ++i)
+    for (const auto i : make_range(Moose::dim))
       v += op1.col(i) * op2(i);
     return v;
   }

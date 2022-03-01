@@ -20,7 +20,7 @@ namespace MathUtils
 {
 
 /// std::sqrt is not constexpr, so we add sqrt(2) as a constant (used in Mandel notation)
-constexpr Real sqrt2 = 1.4142135623730951;
+static constexpr Real sqrt2 = 1.4142135623730951;
 
 Real poly1Log(Real x, Real tol, unsigned int derivative_order);
 Real poly2Log(Real x, Real tol, unsigned int derivative_order);

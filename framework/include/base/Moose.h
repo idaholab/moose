@@ -129,8 +129,20 @@ extern const ExecFlagType EXEC_PRE_MULTIAPP_SETUP;
 extern const ExecFlagType EXEC_TRANSFER;
 extern const ExecFlagType EXEC_PRE_KERNELS;
 extern const ExecFlagType EXEC_ALWAYS;
+
 namespace Moose
 {
+// MOOSE is not tested with LIBMESH_DIM != 3
+static_assert(LIBMESH_DIM == 3,
+              "MOOSE must be built with a libmesh library compiled without --enable-1D-only "
+              "or --enable-2D-only");
+
+/**
+ * This is the dimension of all vector and tensor datastructures used in MOOSE.
+ * We enforce LIBMESH_DIM == 3 through a static assertion above.
+ * Note that lower dimensional simulations embedded in 3D space can always be requested at runtime.
+ */
+static constexpr std::size_t dim = LIBMESH_DIM;
 
 /**
  * Set to true (the default) to print the stack trace with error and warning

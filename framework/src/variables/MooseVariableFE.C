@@ -565,7 +565,7 @@ MooseVariableFE<RealEigenVector>::getGradient(
   {
     for (unsigned int i = 0; i < dof_indices.size(); ++i)
       for (unsigned int j = 0; j < _count; ++j)
-        for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
+        for (const auto k: make_range(Moose::dim))
         {
           // The zero index is because we only have one point that the phis are evaluated at
           value(j, k) += grad_phi[i][0](k) * (*this->_sys.currentSolution())(dof_indices[i] + j);

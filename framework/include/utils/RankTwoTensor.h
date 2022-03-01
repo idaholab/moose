@@ -77,6 +77,11 @@ template <typename T>
 class RankTwoTensorTempl : public TensorValue<T>
 {
 public:
+  ///@{ tensor dimension and dimension squared
+  static constexpr unsigned int N = Moose::dim;
+  static constexpr unsigned int N2 = N * N;
+  ///@}
+
   // Select initialization
   enum InitMethod
   {
@@ -560,11 +565,6 @@ public:
 
   /// set the tensor to the identity matrix
   void setToIdentity();
-
-  ///@{ tensor dimension and dimension squared
-  static constexpr unsigned int N = 3;
-  static constexpr unsigned int N2 = N * N;
-  ///@}
 
 private:
   static constexpr Real identityCoords[N2] = {1, 0, 0, 0, 1, 0, 0, 0, 1};

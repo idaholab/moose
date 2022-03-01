@@ -338,7 +338,7 @@ MultiAppTransfer::getFromBoundingBoxes(BoundaryID boundary_id)
       {
         at_least_one = true;
         const auto & node = *bnode->_node;
-        for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+        for (const auto i: make_range(Moose::dim))
         {
           min(i) = std::min(min(i), node(i));
           max(i) = std::max(max(i), node(i));

@@ -65,7 +65,7 @@ class RankFourTensorTempl
 {
 public:
   ///@{ tensor dimension and powers of the dimension
-  static constexpr unsigned int N = 3;
+  static constexpr unsigned int N = Moose::dim;
   static constexpr unsigned int N2 = N * N;
   static constexpr unsigned int N3 = N * N * N;
   static constexpr unsigned int N4 = N * N * N * N;

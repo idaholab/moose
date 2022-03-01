@@ -36,8 +36,8 @@ public:
    * Constructor that sets an initial number of entries and shape.
    * Defaults to creating the same size tensor as TensorValue
    */
-  explicit ColumnMajorMatrixTempl(const unsigned int rows = LIBMESH_DIM,
-                                  const unsigned int cols = LIBMESH_DIM);
+  explicit ColumnMajorMatrixTempl(const unsigned int rows = Moose::dim,
+                                  const unsigned int cols = Moose::dim);
 
   /**
    * Copy Constructor defined in terms of operator=()
@@ -417,13 +417,13 @@ template <typename T>
 inline void
 ColumnMajorMatrixTempl<T>::fill(TypeTensor<T> & tensor)
 {
-  if (LIBMESH_DIM * LIBMESH_DIM != _n_entries)
+  if (Moose::dim * Moose::dim != _n_entries)
     mooseError(
         "Cannot fill tensor! The ColumnMajorMatrix doesn't have the same number of entries!");
 
-  for (unsigned int j = 0, index = 0; j < LIBMESH_DIM; ++j)
-    for (unsigned int i = 0; i < LIBMESH_DIM; ++i, ++index)
-      tensor(i, j) = _values[index];
+  for (const auto j : make_range(Moose::dim))
+    for (const auto i : make_range(Moose::dim))
+      tensor(i, j) = _values[j * Moose::dim + i];
 }
 
 template <typename T>
@@ -584,14 +584,14 @@ inline ColumnMajorMatrixTempl<T> &
 ColumnMajorMatrixTempl<T>::operator=(const TypeTensor<T> & rhs)
 {
   // Resize the tensor if necessary
-  if ((LIBMESH_DIM * LIBMESH_DIM) != _n_entries)
+  if ((Moose::dim * Moose::dim) != _n_entries)
   {
-    _n_entries = LIBMESH_DIM * LIBMESH_DIM;
+    _n_entries = Moose::dim * Moose::dim;
     _values.resize(_n_entries);
   }
 
   // Make sure the shape is correct
-  reshape(LIBMESH_DIM, LIBMESH_DIM);
+  reshape(Moose::dim, Moose::dim);
 
   ColumnMajorMatrixTempl<T> & s = (*this);
 
@@ -633,7 +633,7 @@ template <typename T>
 inline ColumnMajorMatrixTempl<T>
 ColumnMajorMatrixTempl<T>::operator*(const TypeVector<T> & rhs) const
 {
-  if (_n_cols != LIBMESH_DIM)
+  if (_n_cols != Moose::dim)
     mooseError("Cannot perform matvec operation! The column dimension of "
                "the ColumnMajorMatrix does not match the TypeVector!");
 
@@ -725,12 +725,12 @@ template <typename T>
 inline ColumnMajorMatrixTempl<T> &
 ColumnMajorMatrixTempl<T>::operator+=(const TypeTensor<T> & rhs)
 {
-  if ((_n_rows != LIBMESH_DIM) || (_n_cols != LIBMESH_DIM))
+  if ((_n_rows != Moose::dim) || (_n_cols != Moose::dim))
     mooseError("Cannot perform matrix addition and assignment! The shapes of the two operands are "
                "not compatible!");
 
-  for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
-    for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+  for (const auto j : make_range(Moose::dim))
+    for (const auto i : make_range(Moose::dim))
       (*this)(i, j) += rhs(i, j);
 
   return *this;

@@ -1912,7 +1912,7 @@ FeatureFloodCount::FeatureData::updateBBoxExtremes(MeshBase & mesh)
 void
 FeatureFloodCount::FeatureData::updateBBoxExtremes(BoundingBox & bbox, const BoundingBox & rhs_bbox)
 {
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+  for (const auto i: make_range(Moose::dim))
   {
     bbox.min()(i) = std::min(bbox.min()(i), rhs_bbox.min()(i));
     bbox.max()(i) = std::max(bbox.max()(i), rhs_bbox.max()(i));
@@ -2210,7 +2210,7 @@ operator<<(std::ostream & out, const FeatureFloodCount::FeatureData & feature)
 void
 updateBBoxExtremesHelper(BoundingBox & bbox, const Point & node)
 {
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+  for (const auto i: make_range(Moose::dim))
   {
     bbox.min()(i) = std::min(bbox.min()(i), node(i));
     bbox.max()(i) = std::max(bbox.max()(i), node(i));
