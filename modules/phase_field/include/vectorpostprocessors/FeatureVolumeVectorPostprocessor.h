@@ -54,7 +54,9 @@ protected:
   /// A reference to the feature flood count object
   const FeatureFloodCount & _feature_counter;
 
+  VectorPostprocessorValue & _feature_id;
   VectorPostprocessorValue & _var_num;
+  VectorPostprocessorValue & _adjacent_num;
   VectorPostprocessorValue & _feature_volumes;
   VectorPostprocessorValue & _intersects_bounds;
   VectorPostprocessorValue & _intersects_specified_bounds;

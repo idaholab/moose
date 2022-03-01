@@ -51,7 +51,9 @@ FeatureVolumeVectorPostprocessor::FeatureVolumeVectorPostprocessor(
     _single_feature_per_elem(getParam<bool>("single_feature_per_element")),
     _output_centroids(getParam<bool>("output_centroids")),
     _feature_counter(getUserObject<FeatureFloodCount>("flood_counter")),
+    _feature_id(declareVector("feature_id")),
     _var_num(declareVector("var_num")),
+    _adjacent_num(declareVector("adjacent_num")),
     _feature_volumes(declareVector("feature_volumes")),
     _intersects_bounds(declareVector("intersects_bounds")),
     _intersects_specified_bounds(declareVector("intersects_specified_bounds")),
@@ -91,15 +93,25 @@ FeatureVolumeVectorPostprocessor::execute()
   const auto num_features = _feature_counter.getTotalFeatureCount();
 
   // Reset the variable index and intersect bounds vectors
+  _feature_id.assign(num_features, -1);                  // Invalid
   _var_num.assign(num_features, -1);                     // Invalid
+  _adjacent_num.assign(num_features, 0);                 // Invalid
   _intersects_bounds.assign(num_features, -1);           // Invalid
   _intersects_specified_bounds.assign(num_features, -1); // Invalid
   _percolated.assign(num_features, -1);                  // Invalid
   for (MooseIndex(num_features) feature_num = 0; feature_num < num_features; ++feature_num)
   {
+    auto feature_id = _feature_counter.getFeatureID(feature_num);
     auto var_num = _feature_counter.getFeatureVar(feature_num);
+    auto adjacent_num = _feature_counter.getAdjacentGrainNum(feature_num);
+
     if (var_num != FeatureFloodCount::invalid_id)
+    {
+      _feature_id[feature_num] = feature_num;
       _var_num[feature_num] = var_num;
+      _adjacent_num[feature_num] = adjacent_num;
+    }
+      
 
     _intersects_bounds[feature_num] =
         static_cast<unsigned int>(_feature_counter.doesFeatureIntersectBoundary(feature_num));
