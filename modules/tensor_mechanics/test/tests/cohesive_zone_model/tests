@@ -295,8 +295,8 @@
 
   [bilinear_mixed_mode]
     design = 'source/materials/cohesive_zone_model/BiLinearMixedModeTraction.md'
-    requirement = 'The MOOSE shall be able to model decohesion of composites using cohesive znoe '
-                  'model.'
+    requirement = 'The system shall be able to model decohesion of composites using cohesive zone '
+                  'model'
     issues = '#18611 #18763'
     [normal]
       type = Exodiff

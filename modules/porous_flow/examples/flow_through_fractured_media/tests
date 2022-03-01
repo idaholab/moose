@@ -79,6 +79,6 @@
     threading = '!pthreads'
     issues = '#10683'
     design = 'flow_through_fractured_media.md'
-    requirement = 'MOOSE shall be able to simulate diffusion along fracture embedded in a porous matrix'
+    requirement = 'The system shall be able to simulate diffusion along fracture embedded in a porous matrix'
   [../]
 []

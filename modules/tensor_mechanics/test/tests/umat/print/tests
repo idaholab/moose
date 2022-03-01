@@ -49,7 +49,7 @@
     cli_args = "Materials/active='elasticity_tensor strain_dependent_elasticity_tensor stress "
                "prefactor_material_block'"
     exodiff = 'print_shear_out.e'
-    requirement = 'MOOSE shall avoid regression in a simple mechanical problem where two strain '
+    requirement = 'The system shall avoid regression in a simple mechanical problem where two strain '
                   'increments modify the stiffness of the material through '
                   'CompositeElasticityTensor. This test also serves as a reference for UMAT behavior '
                   'in the presence of shear deformation. '

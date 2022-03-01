@@ -5,7 +5,7 @@
     exodiff = 'power_law_creep_out.e'
     issues = "#8642"
     design = 'ADPowerLawCreepStressUpdate.md'
-    requirement = 'Moose shall be able to calculate a coupled thermo-mechanics solve with power law
+    requirement = 'The system shall be able to calculate a coupled thermo-mechanics solve with power law
                    creep and finite strain using the AD formulation and match non-AD formulation
                    results'
   [../]
@@ -15,7 +15,7 @@
     recover = false
     issues = "#8642"
     design = "ADPowerLawCreepStressUpdate.md"
-    requirement = 'Moose shall be able to restart a thermo-mechanics solve with power law creep and
+    requirement = 'The system shall be able to restart a thermo-mechanics solve with power law creep and
                    finite strain using the AD formulation and match non-AD formulations (precurser)'
   [../]
   [./testRestart2]
@@ -27,7 +27,7 @@
     exodiff_opts = '-TM'
     issues = "#8642"
     design = "ADPowerLawCreepStressUpdate.md"
-    requirement = 'Moose shall be able to restart a thermo-mechanics solve with power law creep and
+    requirement = 'The system shall be able to restart a thermo-mechanics solve with power law creep and
                    finite strain using the AD formulation and match non-AD formulations'
   [../]
   [./small_strain]
@@ -36,7 +36,7 @@
     exodiff = 'power_law_creep_smallstrain_out.e'
     issues = "#8642"
     design = "ADPowerLawCreepStressUpdate.md"
-    requirement = 'Moose shall be able to calculate a coupled thermo-mechanics solve with power law
+    requirement = 'The system shall be able to calculate a coupled thermo-mechanics solve with power law
                    creep and small strain using the AD formulation and match non-AD formulation
                    results'
   [../]
@@ -50,7 +50,7 @@
     run_sim = True
     issues = '#12650'
     design = 'ADPowerLawCreepStressUpdate.md'
-    requirement = 'Moose shall be able to calculate a coupled thermo-mechanics solve with power law
+    requirement = 'The system shall be able to calculate a coupled thermo-mechanics solve with power law
                    creep and finite strain using the AD formulation and calculate a perfect Jacobian'
   [../]
 
@@ -63,7 +63,7 @@
     run_sim = True
     issues = '#12650'
     design = 'ADPowerLawCreepStressUpdate.md'
-    requirement = 'Moose shall be able to calculate a coupled thermo-mechanics solve with power law
+    requirement = 'The system shall be able to calculate a coupled thermo-mechanics solve with power law
                    creep and finite strain using the AD formulation and calculate a perfect Jacobian'
   [../]
   [./small_strain-jac]
@@ -75,7 +75,7 @@
     run_sim = True
     issues = '#12650'
     design = 'ADPowerLawCreepStressUpdate.md'
-    requirement = 'Moose shall be able to calculate a coupled thermo-mechanics solve with power law
+    requirement = 'The system shall be able to calculate a coupled thermo-mechanics solve with power law
                    creep and small strain using the AD formulation and calculate a perfect Jacobian'
   [../]
 []

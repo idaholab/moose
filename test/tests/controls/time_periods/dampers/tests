@@ -7,7 +7,7 @@
     input = 'enable_disable.i'
     absent_out = '6\s*Nonlinear'
     cli_args = "Dampers/const_damp/enable=false Outputs/exodus=false"
-    requirement = "MOOSE shall support the disabling an object using an input parameter."
+    requirement = "The system shall support disabling an object using an input parameter."
   [../]
   [./enable_true]
     # Tests that MooseObject parameter operates correctly when set to 'true'
@@ -15,13 +15,13 @@
     input = 'enable_disable.i'
     expect_out = '6\s*Nonlinear'
     cli_args = "Dampers/const_damp/enable=true Outputs/exodus=false"
-    requirement = "MOOSE shall support the enabling an object using an input parameter."
+    requirement = "The system shall support enabling an object using an input parameter."
   [../]
   [./control]
     # Test that a damper may be disabled during simulation
     type = CSVDiff
     input = 'control.i'
     csvdiff = control_out.csv
-    requirement = "The Control system shall be capable of activating or deactivating Damper objects with time."
+    requirement = "The system shall be capable of activating or deactivating Damper objects with time via the Control system."
   [../]
 []

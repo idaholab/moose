@@ -5,6 +5,6 @@
     type = 'Exodiff'
     input = 'time_period_test.i'
     exodiff = 'time_period_test_out.e'
-    requirement = "MOOSE shall support controlling what objects are executing based on start and end times."
+    requirement = "The system shall support controlling what objects are executing based on start and end times."
   [../]
 []

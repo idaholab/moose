@@ -5,13 +5,13 @@
     input = 'bc_function_preset.i'
     exodiff = 'bc_func_out.e'
     design = 'bcs/FunctionDirichletBC.md'
-    requirement = "MOOSE shall support setting Dirichlet type boundary conditions, supplied as a function, directly to the solution vector prior to the solve."
+    requirement = "The system shall support setting Dirichlet type boundary conditions, supplied as a function, directly to the solution vector prior to the solve."
   [../]
   [./bc_preset_nodal_test]
     type = 'Exodiff'
     input = 'bc_preset_nodal.i'
     exodiff = 'bc_preset_out.e'
     design = 'bcs/DirichletBC.md'
-    requirement = "MOOSE shall support setting Dirichlet type boundary conditions directly to the solution vector prior to the solve."
+    requirement = "The system shall support setting Dirichlet type boundary conditions directly to the solution vector prior to the solve."
   [../]
 []

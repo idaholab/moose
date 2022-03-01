@@ -4,7 +4,7 @@
     input = 'test.i'
     exodiff = 'test_out.e-s005'
     group = 'adpative'
-    requirement = 'MOOSE shall provide a polycrystalline material model with grain growth'
+    requirement = 'The system shall provide a polycrystalline material model with grain growth'
     design = 'PolycrystalKernelAction.md'
     issues = '98e22eda8bfaa1f6ded00c127145d832542aff70'
   [../]

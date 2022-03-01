@@ -59,7 +59,7 @@
     type = 'Exodiff'
     input = 'green-lagrange.i'
     exodiff = 'green-lagrange_out.e'
-    requirement = 'MOOSE shall provide an AD enabled Green-Lagrange strain calculator'
+    requirement = 'The system shall provide an AD enabled Green-Lagrange strain calculator'
     allow_test_objects = true
     design = 'ADComputeGreenLagrangeStrain.md'
   [../]

@@ -5,7 +5,7 @@
     exodiff = 'single_out.e'
     allow_test_objects = true
     abs_zero = 1E-6
-    requirement = 'MOOSE shall be able to simulate convective flow through lower-dimensional fractures embedded in a higher-dimensional solid'
+    requirement = 'The system shall be able to simulate convective flow through lower-dimensional fractures embedded in a higher-dimensional solid'
     design = 'misc/index.md'
     issues = '#13318'
   [../]

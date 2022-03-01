@@ -11,7 +11,7 @@
     min_parallel = 3
     max_parallel = 3
 
-    requirement = "MOOSE shall ghost additional neighboring elements without also supplying solution information when a developer registers a RelationshipManager with an optional second argument to restrict functionality"
+    requirement = "The system shall ghost additional neighboring elements without also supplying solution information when a developer registers a RelationshipManager with an optional second argument to restrict functionality"
   [../]
 
   [./geometric_edge_neighbor_3D]
@@ -24,6 +24,6 @@
     min_parallel = 3
     max_parallel = 3
 
-    requirement = "MOOSE shall ghost additional neighboring elements without also supplying solution information when a developer registers a RelationshipManager with an optional second argument to restrict functionality in 3D"
+    requirement = "The system shall ghost additional neighboring elements without also supplying solution information when a developer registers a RelationshipManager with an optional second argument to restrict functionality in 3D"
   [../]
 []

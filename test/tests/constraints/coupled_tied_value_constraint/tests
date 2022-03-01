@@ -5,6 +5,6 @@
     type = 'Exodiff'
     input = 'coupled_tied_value_constraint.i'
     exodiff = 'out.e'
-    requirement = "MOOSE shall include ability to force the value of a variable to be the same on both sides of an interface using Lagrange multipliers."
+    requirement = "The system shall include ability to force the value of a variable to be the same on both sides of an interface using Lagrange multipliers."
   [../]
 []

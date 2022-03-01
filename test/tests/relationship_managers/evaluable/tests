@@ -10,7 +10,7 @@
     min_parallel = 3
     max_parallel = 3
 
-    requirement = "MOOSE shall ghost additional solution information when running in parallel with "
+    requirement = "The system shall ghost additional solution information when running in parallel with "
                   "an active RelationshipManager"
   []
 
@@ -24,7 +24,7 @@
     min_parallel = 3
     max_parallel = 3
 
-    requirement = "MOOSE shall ghost additional neighboring elements surrounding a partition when "
+    requirement = "The system shall ghost additional neighboring elements surrounding a partition when "
                   "running in parallel with DistributedMesh"
   []
 
@@ -39,7 +39,7 @@
     min_parallel = 3
     max_parallel = 3
 
-    requirement = "MOOSE shall ghost additional neighboring elements surrounding a partition when "
+    requirement = "The system shall ghost additional neighboring elements surrounding a partition when "
                   "running in parallel with DistributedMesh with 3D"
   []
   [all_systems_evaluable]

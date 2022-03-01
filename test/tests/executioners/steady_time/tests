@@ -5,7 +5,7 @@
     type = 'Exodiff'
     input = 'steady_time.i'
     exodiff = 'steady_time_out.e'
-    requirement = "MOOSE shall not change the system time during steady-state execution."
+    requirement = "The system shall not change the system time during steady-state execution."
   [../]
 
   [./test_steady_set_time]
@@ -13,6 +13,6 @@
     input = 'steady_time.i'
     cli_args = 'Executioner/time=1 Outputs/file_base=steady_time_one_out'
     exodiff = 'steady_time_one_out.e'
-    requirement = "MOOSE shall be able to set the system time for steady-state execution."
+    requirement = "The system shall be able to set the system time for steady-state execution."
   [../]
 []

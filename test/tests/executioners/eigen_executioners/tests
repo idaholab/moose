@@ -11,7 +11,7 @@
     allow_warnings = true
     use_old_floor = true
     design = 'source/executioners/InversePowerMethod.md'
-    requirement = "MOOSE shall support solving an Eigen value problem using the inverse power method."
+    requirement = "The system shall support solving an Eigen value problem using the inverse power method."
   [../]
   [./test_nonlinear_eigen]
     type = 'Exodiff'
@@ -23,7 +23,7 @@
     max_parallel = 1
     recover = false
     design = 'source/executioners/NonlinearEigen.md'
-    requirement = "MOOSE shall support solving an Eigen value problem using Newton's method."
+    requirement = "The system shall support solving an Eigen value problem using Newton's method."
   [../]
   [./test_nonlinear_eigen_parallel]
     type = 'Exodiff'
@@ -35,7 +35,7 @@
     recover = false
     allow_warnings = true
     design = 'source/executioners/NonlinearEigen.md'
-    requirement = "MOOSE shall support solving an Eigen value problem using Newton's method in parallel."
+    requirement = "The system shall support solving an Eigen value problem using Newton's method in parallel."
   [../]
   [./test_nonlinear_eigen_material]
     type = 'Exodiff'
@@ -46,7 +46,7 @@
 # we have to use one processor due to the the preconditioner change.
     max_parallel = 1
     recover = false
-    requirement = "MOOSE shall support the use of material properties during an Eigen problem solve."
+    requirement = "The system shall support the use of material properties during an Eigen problem solve."
   [../]
   [./test_normal_eigenkernel]
     type = 'Exodiff'
@@ -55,7 +55,7 @@
     abs_zero = 1e-09
     recover = false
     design = 'source/kernels/MassEigenKernel.md'
-    requirement = "MOOSE shall be capable of solving a diffusion problem using an Eigen value solver."
+    requirement = "The system shall be capable of solving a diffusion problem using an Eigen value solver."
   [../]
   [./test_another_nonlinear_eigen]
     type = 'Exodiff'
@@ -63,7 +63,7 @@
     exodiff = 'ane.e'
     abs_zero = 1e-09
     recover = false
-    requirement = "MOOSE shall be capable of solving a nonlinear diffusion problem using an Eigen value solver."
+    requirement = "The system shall be capable of solving a nonlinear diffusion problem using an Eigen value solver."
   [../]
   [./test_coupled_nonlinear_eigen]
     type = 'Exodiff'
@@ -71,7 +71,7 @@
     exodiff = 'ne_coupled.e'
     abs_zero = 1e-09
     recover = false
-    requirement = "MOOSE shall be capable of solving a coupled nonlinear diffusion problem using an Eigen value solver."
+    requirement = "The system shall be capable of solving a coupled nonlinear diffusion problem using an Eigen value solver."
   [../]
   [./test_deficient_B_eigen]
     type = 'Exodiff'
@@ -79,6 +79,6 @@
     exodiff = 'ne_deficient_b.e'
     abs_zero = 1e-09
     recover = false
-    requirement = "The EigenKernel object shall be capable of using coupled variables."
+    requirement = "The system shall be capable of using coupled variables in the EigenKernel object."
   [../]
 []

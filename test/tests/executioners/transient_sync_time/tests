@@ -6,13 +6,13 @@
     input = 'transient_sync_time_test.i'
     exodiff = 'out.e'
     max_parallel = 1
-    requirement = "MOOSE shall support explicit definition of execution times."
+    requirement = "The system shall support explicit definition of execution times."
   [../]
   [./test_time_out_interval]
     type = 'Exodiff'
     input = 'transient_time_interval_output_test.i'
     exodiff = 'out_tio.e'
     max_parallel = 1
-    requirement = "MOOSE shall support output using a time interval."
+    requirement = "The system shall support output using a time interval."
   [../]
 []

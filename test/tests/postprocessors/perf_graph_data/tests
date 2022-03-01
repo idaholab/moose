@@ -3,13 +3,13 @@
   issues = '#11551'
 
   [test]
-    requirement = "MOOSE shall have the abililty to pull information from the PerfGraph into a Postprocessor"
+    requirement = "The system shall have the abililty to pull information from the PerfGraph into a Postprocessor"
     type = 'CheckFiles'
     input = 'perf_graph.i'
     check_files = 'perf_graph_out.csv'
   []
   [missing]
-    requirement = "MOOSE shall report a reasonable error when trying to obtain information from the PerfGraph for a section that does not exist"
+    requirement = "The system shall report a reasonable error when trying to obtain information from the PerfGraph for a section that does not exist"
     type = RunException
     input = 'perf_graph.i'
     cli_args = 'Postprocessors/self/must_exist=true'

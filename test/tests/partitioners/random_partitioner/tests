@@ -1,6 +1,6 @@
 [Tests]
   [./test]
-    requirement = 'MOOSE shall provide a random partitioner'
+    requirement = 'The system shall provide a random partitioner'
     design = '/RandomPartitioner.md'
     issues = '#14419'
     type = 'Exodiff'

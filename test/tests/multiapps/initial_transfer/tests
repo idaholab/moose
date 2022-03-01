@@ -5,6 +5,6 @@
     type = 'CSVDiff'
     input = 'master.i'
     csvdiff = 'master_out_sub0.csv'
-    requirement = 'MOOSE shall allow forcely evaluating general user objects on initial before applying initial conditions.'
+    requirement = 'The system shall allow forcibly evaluating general user objects on the initial timestep before applying initial conditions.'
   [../]
 []

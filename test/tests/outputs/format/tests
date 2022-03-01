@@ -12,7 +12,7 @@
     min_parallel = 1
     issues = '#920'
     design = 'Nemesis.md'
-    requirement = 'Nemesis output shall work'
+    requirement = 'The system shall support Nemesis output.'
   [../]
 
   [./gmv_out_test]
@@ -22,7 +22,7 @@
     recover = false
     issues = '#920'
     design = 'GMVOutput.md'
-    requirement = 'GMV output shall work'
+    requirement = 'The system shall support GMV output.'
   [../]
 
   [./yaml_dump_test]
@@ -34,7 +34,7 @@
     errors = 'zzzzzzzzzz'
     issues = '#920'
     design = 'YAMLFormatter.md'
-    requirement = 'We shall be able to dump YAML data'
+    requirement = 'The system shall be able to dump YAML data.'
   [../]
 
   [./no_double_executioner_output]
@@ -46,7 +46,7 @@
     cli_args = '--yaml /Executioner'
     issues = '#2855'
     design = 'YAMLFormatter.md'
-    requirement = 'Executioner output shall only be given once'
+    requirement = 'The system shall only give Executioner output once.'
   [../]
 
   [./tecplot_out_test]
@@ -54,7 +54,7 @@
     input = 'output_test_tecplot.i'
     check_files = 'output_test_tecplot_out_0000.dat'
     design = 'Tecplot.md'
-    requirement = 'Tecplot output shall work'
+    requirement = 'The system shall support Tecplot output.'
     issues = '#920'
   [../]
 
@@ -65,7 +65,7 @@
     tecplot = true
     issues = '#3403'
     design = 'Tecplot.md'
-    requirement = 'If tecplot api is available, tecplot output will be given in tecplot binary format'
+    requirement = 'If the Tecplot API is available, the system shall support Tecplot output given in Tecplot binary format.'
   [../]
 
   [./tecplot_bin_test_override]
@@ -76,7 +76,7 @@
     allow_warnings = true
     design = 'Tecplot.md'
     issues = '#3403'
-    requirement = 'If tecplot api is not available, tecplot output will be given in ASCII format'
+    requirement = 'If the Tecplot API is not available, the system shall support Tecplot output given in ASCII format.'
   [../]
 
   [./gnuplot_ps_out_test]
@@ -85,7 +85,7 @@
     check_files = 'output_test_gnuplot_ps_out.gp output_test_gnuplot_ps_out.dat'
     issues = '#920'
     design = 'Gnuplot.md'
-    requirement = 'We shall be able to generate gnuplot postscript output'
+    requirement = 'The system shall be able to generate gnuplot PostScript output.'
   [../]
 
   [./gnuplot_png_out_test]
@@ -94,7 +94,7 @@
     check_files = 'output_test_gnuplot_out.gp output_test_gnuplot_out.dat'
     issues = '#920'
     design = 'Gnuplot.md'
-    requirement = 'We shall be able to generate gnuplot png output'
+    requirement = 'The system shall be able to generate gnuplot PNG output.'
   [../]
 
   [./gnuplot_gif_out_test]
@@ -103,7 +103,7 @@
     check_files = 'output_test_gnuplot_gif_out.gp output_test_gnuplot_gif_out.dat'
     issues = '#920'
     design = 'Gnuplot.md'
-    requirement = 'We shall be able to generate gnuplot gif output'
+    requirement = 'The system shall be able to generate gnuplot GIF output.'
   [../]
 
   [./pps_screen_out_warn_test]
@@ -114,7 +114,7 @@
     max_parallel = 1 # warning can mix on multiple processes
     issues = '#1426'
     design = 'syntax/Outputs/index.md'
-    requirement = 'If a postprocessor utilizes the "outputs" parameter, but postprocessor output is disable for the console object, we shall warn the user'
+    requirement = 'If a postprocessor utilizes the "outputs" parameter, but postprocessor output is disabled for the console object, the system shall warn the user.'
   [../]
 
   [./show_input_test]
@@ -125,7 +125,7 @@
     prereq = 'gmv_out_test'
     issues = '#1404 #1131'
     design = 'MooseApp.md'
-    requirement = '--show-input shall print parameters'
+    requirement = 'The system shall print parameters when the `--show-input` flag is used on the command line.'
   [../]
 
   [./sln_out_test]
@@ -143,7 +143,7 @@
     check_files = 'output_test_xdr_out_0001.xdr output_test_xdr_out_0001_mesh.xdr'
     design = 'XDA.md'
     issues = '#2243'
-    requirement = 'MOOSE shall support XDR output'
+    requirement = 'The system shall support XDR output.'
   [../]
 
   [./json_full]
@@ -153,7 +153,7 @@
     max_buffer_size = -1
     issues = '#7855 #7661 #2881 #10839 #12455'
     design = 'JsonInputFileFormatter.md MooseApp.md'
-    requirement = 'The system shall be able to dump input file syntax in JSON format'
+    requirement = 'The system shall be able to dump input file syntax in JSON format.'
   [../]
 
   [./json_no_test_objects]
@@ -225,7 +225,7 @@
     errors = 'zzzzzzzzzz'
     max_buffer_size = -1
     issues = '#16165'
-    requirement = 'MOOSE shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check InputChoices'
+    requirement = 'The system shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check InputChoices'
     design = 'SONDefinitionFormatter.md'
     valgrind = 'HEAVY'
   [../]
@@ -239,7 +239,7 @@
     errors = 'zzzzzzzzzz'
     max_buffer_size = -1
     issues = '#9651'
-    requirement = 'MOOSE shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check ChildAtLeastOne'
+    requirement = 'The system shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check ChildAtLeastOne'
     design = 'SONDefinitionFormatter.md'
     valgrind = 'NONE' # Tested in "definition_input_choices_test"
   [../]
@@ -253,7 +253,7 @@
     errors = 'zzzzzzzzzz'
     max_buffer_size = -1
     issues = '#9651'
-    requirement = 'MOOSE shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check ValEnums'
+    requirement = 'The system shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check ValEnums'
     design = 'SONDefinitionFormatter.md'
     valgrind = 'NONE' # Tested in "definition_input_choices_test"
   [../]
@@ -267,7 +267,7 @@
     errors = 'zzzzzzzzzz'
     max_buffer_size = -1
     issues = '#9651'
-    requirement = 'MOOSE shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check active parameter'
+    requirement = 'The system shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check active parameter'
     design = 'SONDefinitionFormatter.md'
     valgrind = 'NONE' # Tested in "definition_input_choices_test"
   [../]
@@ -281,7 +281,7 @@
     errors = 'zzzzzzzzzz'
     max_buffer_size = -1
     issues = '#9651'
-    requirement = 'MOOSE shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check normal_sub'
+    requirement = 'The system shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check normal_sub'
     design = 'SONDefinitionFormatter.md'
     valgrind = 'NONE' # Tested in "definition_input_choices_test"
   [../]
@@ -295,7 +295,7 @@
     errors = 'zzzzzzzzzz'
     max_buffer_size = -1
     issues = '#9651'
-    requirement = 'MOOSE shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check type_sub'
+    requirement = 'The system shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check type_sub'
     design = 'SONDefinitionFormatter.md'
     valgrind = 'NONE' # Tested in "definition_input_choices_test"
   [../]
@@ -309,7 +309,7 @@
     errors = 'zzzzzzzzzz'
     max_buffer_size = -1
     issues = '#9651'
-    requirement = 'MOOSE shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check default type'
+    requirement = 'The system shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check default type'
     design = 'SONDefinitionFormatter.md'
     valgrind = 'NONE' # Tested in "definition_input_choices_test"
   [../]
@@ -323,7 +323,7 @@
     errors = 'zzzzzzzzzz'
     max_buffer_size = -1
     issues = '#9651'
-    requirement = 'MOOSE shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check MinValInc'
+    requirement = 'The system shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check MinValInc'
     design = 'SONDefinitionFormatter.md'
     valgrind = 'NONE' # Tested in "definition_input_choices_test"
   [../]
@@ -337,7 +337,7 @@
     errors = 'zzzzzzzzzz'
     max_buffer_size = -1
     issues = '#14277'
-    requirement = 'MOOSE shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check Block type MaxOccurs NoLimit'
+    requirement = 'The system shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check Block type MaxOccurs NoLimit'
     design = 'SONDefinitionFormatter.md'
     valgrind = 'NONE' # Tested in "definition_input_choices_test"
   [../]
@@ -351,7 +351,7 @@
     errors = 'zzzzzzzzzz'
     max_buffer_size = -1
     issues = '#14277'
-    requirement = 'MOOSE shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check FunctionName type MaxOccurs NoLimit'
+    requirement = 'The system shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check FunctionName type MaxOccurs NoLimit'
     design = 'SONDefinitionFormatter.md'
     valgrind = 'NONE' # Tested in "definition_input_choices_test"
   [../]
@@ -365,7 +365,7 @@
     errors = 'zzzzzzzzzz'
     max_buffer_size = -1
     issues = '#14277'
-    requirement = 'MOOSE shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check Array type MinOccurs zero'
+    requirement = 'The system shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check Array type MinOccurs zero'
     design = 'SONDefinitionFormatter.md'
     valgrind = 'NONE' # Tested in "definition_input_choices_test"
   [../]
@@ -379,7 +379,7 @@
     errors = 'zzzzzzzzzz'
     max_buffer_size = -1
     issues = '#17324'
-    requirement = 'MOOSE shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check declarator MinOccurs zero'
+    requirement = 'The system shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check declarator MinOccurs zero'
     design = 'SONDefinitionFormatter.md'
     valgrind = 'NONE' # Tested in "definition_input_choices_test"
   [../]
@@ -393,7 +393,7 @@
     errors = 'zzzzzzzzzz'
     max_buffer_size = -1
     issues = '#17324'
-    requirement = 'MOOSE shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check Eigen::Matrix type MaxOccurs NoLimit'
+    requirement = 'The system shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check Eigen::Matrix type MaxOccurs NoLimit'
     design = 'SONDefinitionFormatter.md'
     valgrind = 'NONE' # Tested in "definition_input_choices_test"
   [../]
@@ -407,7 +407,7 @@
     errors = 'zzzzzzzzzz'
     max_buffer_size = -1
     issues = '#18639'
-    requirement = 'MOOSE shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check default types child parameter promotion'
+    requirement = 'The system shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check default types child parameter promotion'
     design = 'SONDefinitionFormatter.md'
     valgrind = 'NONE' # Tested in "definition_input_choices_test"
   [../]
@@ -421,7 +421,7 @@
     errors = 'zzzzzzzzzz'
     max_buffer_size = -1
     issues = '#18639'
-    requirement = 'MOOSE shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check default subblock_types child parameter promotion'
+    requirement = 'The system shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check default subblock_types child parameter promotion'
     design = 'SONDefinitionFormatter.md'
     valgrind = 'NONE' # Tested in "definition_input_choices_test"
   [../]
@@ -435,7 +435,7 @@
     errors = 'zzzzzzzzzz'
     max_buffer_size = -1
     issues = '#18639'
-    requirement = 'MOOSE shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check Mesh file parameter requirement removal'
+    requirement = 'The system shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check Mesh file parameter requirement removal'
     design = 'SONDefinitionFormatter.md'
     valgrind = 'NONE' # Tested in "definition_input_choices_test"
   [../]
@@ -449,7 +449,7 @@
     errors = 'zzzzzzzzzz'
     max_buffer_size = -1
     issues = '#18639'
-    requirement = 'MOOSE shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check Boolean type ValEnums choices'
+    requirement = 'The system shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check Boolean type ValEnums choices'
     design = 'SONDefinitionFormatter.md'
     valgrind = 'NONE' # Tested in "definition_input_choices_test"
   [../]
@@ -463,7 +463,7 @@
     errors = 'zzzzzzzzzz'
     max_buffer_size = -1
     issues = '#17324'
-    requirement = 'MOOSE shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check beginning and ending markers'
+    requirement = 'The system shall be able to convert a JsonSyntaxTree into Standard Object Notation (SON) for use by the NEAMS workbench. Check beginning and ending markers'
     design = 'SONDefinitionFormatter.md'
     valgrind = 'NONE' # Tested in "definition_input_choices_test"
   [../]

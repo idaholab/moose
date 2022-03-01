@@ -1,6 +1,6 @@
 [Tests]
   [./test]
-    requirement = 'MOOSE shall provide a simple regular grid-based partitioner'
+    requirement = 'The system shall provide a simple regular grid-based partitioner'
     design = '/GridPartitioner.md'
     issues = '#11437'
     type = 'Exodiff'

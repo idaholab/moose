@@ -5,6 +5,6 @@
     type = 'Exodiff'
     input = 'array_var_component.i'
     exodiff = 'array_var_component_out.e'
-    requirement = 'MOOSE shall provide a way to convert a component of an array variable to a standard variable.'
+    requirement = 'The system shall provide a way to convert a component of an array variable to a standard variable.'
   [../]
 []

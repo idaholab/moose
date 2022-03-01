@@ -4,7 +4,7 @@
     input = 'spiral_annular_mesh_generator.i'
     cli_args = '--mesh-only'
     exodiff = 'spiral_annular_mesh_generator_in.e'
-    requirement = 'MOOSE shall be able to create meshes.'
+    requirement = 'The system shall be able to create a spiral annular mesh with triangle elements (TRI3 or TRI6).'
     design = 'meshgenerators/SpiralAnnularMeshGenerator.md'
     issues = '#11640'
     mesh_mode = 'REPLICATED'

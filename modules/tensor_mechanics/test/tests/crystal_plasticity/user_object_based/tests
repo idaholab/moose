@@ -4,7 +4,7 @@
     input = 'test.i'
     exodiff = 'test_out.e'
     issues = '#6097'
-    requirement = 'MOOSE shall provide a plug-in based extensible crystal plasticity system'
+    requirement = 'The system shall provide a plug-in based extensible crystal plasticity system'
     design = '/FiniteStrainUObasedCP.md'
   [../]
   [./user_object_011orientation]

@@ -7,6 +7,6 @@
     issues = '#17749'
     abs_zero = 1e-9
     rel_err = 5e-4
-    requirement = 'MOOSE shall be able to create separate blocks in a mesh and generate two sides interface boundaries to be used in thermal and mechanical contact.'
+    requirement = 'The system shall be able to create separate blocks in a mesh and generate two sides interface boundaries to be used in thermal and mechanical contact.'
   []
 []

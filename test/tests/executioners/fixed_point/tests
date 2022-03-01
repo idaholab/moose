@@ -3,7 +3,7 @@
 
   [tagged_residual]
     issues = '#9669'
-    requirement = 'MOOSE shall provide a cability to solve a problem iteratively with a tagged residual vector for'
+    requirement = 'The system shall provide a capability to solve a problem iteratively with a tagged residual vector for'
 
     [diffusion]
       type = 'Exodiff'
@@ -24,7 +24,7 @@
 
   [tagged_solution_vector]
     issues = '#17586'
-    requirement = 'MOOSE shall provide a capability to solve a problem iteratively with a tagged solution vector being coupled in '
+    requirement = 'The system shall provide a capability to solve a problem iteratively with a tagged solution vector being coupled in '
 
     [var]
       type = 'Exodiff'

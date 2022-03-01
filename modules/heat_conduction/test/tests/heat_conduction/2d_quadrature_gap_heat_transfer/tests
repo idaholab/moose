@@ -3,7 +3,7 @@
     type = 'Exodiff'
     input = 'perfect.i'
     exodiff = 'perfect_out.e'
-    requirement = "MOOSE shall compute the heat transfer across small gaps for supported
+    requirement = "The system shall compute the heat transfer across small gaps for supported
                    FEM orders and quadratures (QUAD4)."
     design = "/materials/GapConductance.md"
     issues = "#6750"
@@ -13,7 +13,7 @@
     type = 'Exodiff'
     input = 'perfectQ8.i'
     exodiff = 'perfectQ8_out.e'
-    requirement = "MOOSE shall compute the heat transfer across small gaps for supported
+    requirement = "The system shall compute the heat transfer across small gaps for supported
                    FEM orders and quadratures (QUAD8)"
     design = "/materials/GapConductance.md"
     issues = "#6750"
@@ -23,7 +23,7 @@
     type = 'Exodiff'
     input = 'perfectQ9.i'
     exodiff = 'perfectQ9_out.e'
-    requirement = "MOOSE shall compute the heat transfer across small gaps for supported
+    requirement = "The system shall compute the heat transfer across small gaps for supported
                    FEM orders and quadratures (QUAD9)"
     design = "/materials/GapConductance.md"
     issues = "#6750"
@@ -33,7 +33,7 @@
     type = 'Exodiff'
     input = 'nonmatching.i'
     exodiff = 'nonmatching_out.e'
-    requirement = "MOOSE shall compute the heat transfer across small gaps for non-matching meshes."
+    requirement = "The system shall compute the heat transfer across small gaps for non-matching meshes."
     design = "/actions/ThermalContactAction.md"
     issues = "#6750"
   [../]
@@ -42,7 +42,7 @@
     type = 'Exodiff'
     input = 'second_order.i'
     exodiff = 'second_order_out.e'
-    requirement = "MOOSE shall compute the heat transfer across small gaps for second order FEM bases."
+    requirement = "The system shall compute the heat transfer across small gaps for second order FEM bases."
     design = "/actions/ThermalContactAction.md"
     issues = "#6750"
   [../]
@@ -52,7 +52,7 @@
     input = 'moving.i'
     exodiff = 'moving_out.e'
     allow_warnings = true
-    requirement = "MOOSE shall compute the heat transfer across small gaps for moving interfaces."
+    requirement = "The system shall compute the heat transfer across small gaps for moving interfaces."
     design = "/actions/ThermalContactAction.md"
     issues = "#6750"
   [../]
@@ -61,7 +61,7 @@
     type = 'Exodiff'
     input = 'gap_conductivity_property.i'
     exodiff = 'gap_conductivity_property_out.e'
-    requirement = "MOOSE shall compute the heat transfer across small gaps with a specified gap conductivity."
+    requirement = "The system shall compute the heat transfer across small gaps with a specified gap conductivity."
     design = "/actions/ThermalContactAction.md"
     issues = "#6750"
   [../]
@@ -71,7 +71,7 @@
     input = 'gap_conductivity_property.i'
     cli_args = 'Mesh/uniform_refine=1'
     expect_err = 'GapConductance does not work with uniform mesh refinement.'
-    requirement = "MOOSE shall throw an error if the gap conductance model is used
+    requirement = "The system shall throw an error if the gap conductance model is used
                    with uniform mesh refinement"
     design = "/actions/ThermalContactAction.md"
     issues = "#13043"

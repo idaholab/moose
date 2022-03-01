@@ -3,7 +3,7 @@
     issues = '#11408'
 
   [./test]
-    requirement = 'MOOSE shall provide VectorPostprocessor results to all processors as scattered data'
+    requirement = 'The system shall provide VectorPostprocessor results to all processors as scattered data.'
 
     type = 'Exodiff'
     input = 'parallel_consistency.i'
@@ -12,7 +12,7 @@
     max_parallel = 2
   [../]
   [./broadcast]
-    requirement = 'MOOSE shall provide VectorPostprocessor results to all processors as replicated data'
+    requirement = 'The system shall provide VectorPostprocessor results to all processors as replicated data.'
 
     type = 'Exodiff'
     input = 'parallel_consistency.i'

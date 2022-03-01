@@ -4,7 +4,7 @@
     input = 'update_method_test.i'
     exodiff = 'update_method_test_out.e'
     issues = '#16064'
-    requirement = 'MOOSE shall provide a StressUpdate material-based extensible crystal plasticity '
+    requirement = 'The system shall provide a StressUpdate material-based extensible crystal plasticity '
                   'system'
     design = '/ComputeMultipleCrystalPlasticityStress.md /CrystalPlasticityKalidindiUpdate.md'
   []

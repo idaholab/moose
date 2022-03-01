@@ -5,6 +5,6 @@
     type = 'Exodiff'
     input = 'multi_element_integer.i'
     exodiff = 'multi_element_integer_out.e'
-    requirement = "MOOSE shall generate meshes with different set of element integers and properly stitch them."
+    requirement = "The system shall generate meshes with different sets of element integers and properly stitch them."
   [../]
 []

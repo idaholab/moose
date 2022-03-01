@@ -35,7 +35,7 @@
     input = 'print_compare_c.i'
     cli_args = "Materials/active='umat_c'"
     exodiff = 'print_compare_c_out.e'
-    requirement = 'MOOSE shall generate identical numerical results regardless of whether the UMAT '
+    requirement = 'The system shall generate identical numerical results regardless of whether the UMAT '
                   'interface is written in Fortran or C. Generation of reference results.'
   []
   [print_compare_f]
@@ -43,7 +43,7 @@
     input = 'print_compare_c.i'
     cli_args = "Materials/active='umat_f'"
     exodiff = 'print_compare_c_out.e'
-    requirement = 'MOOSE shall generate identical numerical results regardless of whether the UMAT '
+    requirement = 'The system shall generate identical numerical results regardless of whether the UMAT '
                   'interface is written in Fortran or C. Verification.'
   []
   [print_eigen]
@@ -52,6 +52,6 @@
     cli_args = "Materials/active='umat_eigen'"
     expect_out = 'Eigenvalues 0 769.231\nEigenvalues 1 2500\nEigenvalues 2 769.231\nEigenvalues 3 '
                  '384.615\nEigenvalues 4 384.615\nEigenvalues 5 384.615\n'
-    requirement = 'MOOSE shall allow for the correct use of Eigen matrices in C UMAT functions.'
+    requirement = 'The system shall allow for the correct use of Eigen matrices in C UMAT functions.'
   []
 []
