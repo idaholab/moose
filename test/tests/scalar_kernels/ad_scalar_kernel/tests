@@ -11,6 +11,6 @@
     max_parallel = 1
     # AD scalar kernels only work with global AD indexing
     ad_indexing_type = 'global'
-    requirement = 'MOOSE shall be able to correctly compute the Jacobian of an ADScalarKernel using automatic differentiation.'
+    requirement = 'The system shall be able to correctly compute the Jacobian of an ADScalarKernel using automatic differentiation.'
   []
 []

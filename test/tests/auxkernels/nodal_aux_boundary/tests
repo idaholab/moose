@@ -5,6 +5,6 @@
     type = 'Exodiff'
     input = 'nodal_aux_boundary.i'
     exodiff = 'nodal_aux_boundary_out.e'
-    requirement = "MOOSE shall have the ability to restrict AuxKernel objects with coupled variables to a boundary."
+    requirement = "The system shall have the ability to restrict AuxKernel objects with coupled variables to a boundary."
   [../]
 []

@@ -5,6 +5,6 @@
     type = 'Exodiff'
     input = 'time_integration.i'
     exodiff = 'time_integration_out.e'
-    requirement = "MOOSE shall include the ability to compute the integral of a variable over time."
+    requirement = "The system shall include the ability to compute the integral of a variable over time."
   [../]
 []

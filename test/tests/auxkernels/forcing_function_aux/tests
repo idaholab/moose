@@ -5,6 +5,6 @@
     type = 'Exodiff'
     input = 'forcing_function_aux.i'
     exodiff = 'forcing_function_aux_out.e'
-    requirement = "MOOSE shall include the ability to increase the value of an AuxVariable from the previous time step using a forcing function."
+    requirement = "The system shall include the ability to increase the value of an AuxVariable from the previous time step using a forcing function."
   [../]
 []

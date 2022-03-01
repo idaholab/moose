@@ -2,7 +2,7 @@
   issues = '#13260'
 
   [dirichlet]
-    requirement = 'MOOSE shall provide an ability to solve a 2D diffusion problem with Dirichlet '
+    requirement = 'The system shall provide an ability to solve a 2D diffusion problem with Dirichlet '
                   'boundary conditions using'
     design = '/ADDirichletBC.md'
 
@@ -25,7 +25,7 @@
   []
 
   [neumann]
-    requirement = 'MOOSE shall provide an ability to solve a 2D diffusion problem Neumann boundary '
+    requirement = 'The system shall provide an ability to solve a 2D diffusion problem Neumann boundary '
                   'conditions using'
     issues = '#12903'
     design = '/ADNeumannBC.md'
@@ -47,7 +47,7 @@
     []
   []
   [bodyforce]
-    requirement = 'MOOSE shall provide an ability to solve a 2D diffusion problem including a '
+    requirement = 'The system shall provide an ability to solve a 2D diffusion problem including a '
                   'volumetric source term using'
     issues = '#13260'
     design = '/ADBodyForce.md'

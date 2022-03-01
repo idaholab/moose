@@ -6,7 +6,7 @@
     exodiff = 'out.e'
     scale_refine = 3
     issues = '#4807'
-    requirement = "MOOSE shall include an AuxKernel object capable of computing values from a functional expression."
+    requirement = "The system shall include an AuxKernel object capable of computing values from a functional expression."
   [../]
   [./xyzt]
     type = 'Exodiff'
@@ -14,6 +14,6 @@
     exodiff = 'xyzt_out.e'
     scale_refine = 3
     issues = '#15877'
-    requirement = "The parsed expression AuxKernel in MOOSE shall expose quadrature/nodal point coordinates and time if requested by the user."
+    requirement = "The parsed expression AuxKernel in The system shall expose quadrature/nodal point coordinates and time if requested by the user."
   [../]
 []

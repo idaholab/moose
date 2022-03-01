@@ -1,6 +1,6 @@
 [Tests]
   [break_mesh_by_blocks_generator]
-    requirement = 'MOOSE shall be able to create separate blocks in a mesh'
+    requirement = 'The system shall be able to create separate blocks in a mesh'
     design = 'meshgenerators/BreakMeshByBlockGenerator.md'
     issues = '#11640'
 
@@ -164,7 +164,7 @@
   []
 
   [block_pairs_restricted_3blocks]
-    requirement = 'MOOSE shall be able to break the mesh between listed block pairs'
+    requirement = 'The system shall be able to break the mesh between listed block pairs'
     design = 'meshgenerators/BreakMeshByBlockGenerator.md'
     issues = '#17749'
     [one_new_node]

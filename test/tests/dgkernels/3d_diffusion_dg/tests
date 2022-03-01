@@ -8,6 +8,6 @@
     group = 'adaptive'
     max_parallel = 1
     valgrind = 'HEAVY'
-    requirement = "MOOSE shall support solving 3D diffusion using the discontinuous Galerkin method."
+    requirement = "The system shall support solving 3D diffusion using the discontinuous Galerkin method."
   [../]
 []

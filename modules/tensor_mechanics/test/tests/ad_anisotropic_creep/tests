@@ -7,14 +7,14 @@
     exodiff = 'anis_mech_hill_tensor_creep_small_tiny_step_ts_limit_test_out.e'
     min_parallel = 2
     custom_cmp = 'generalized.exodiff'
-    requirement = 'Moose shall avoid regression on material time step and combined anisotropic creep '
+    requirement = 'The system shall avoid regression on material time step and combined anisotropic creep '
                   'computations'
   []
   [ad_aniso_creep_x_3d]
     type = 'CSVDiff'
     input = 'ad_aniso_creep_x_3d.i'
     csvdiff = ad_aniso_creep_x_3d_out.csv
-    requirement = 'Moose shall be capable of reproducing verification results of creep strain ratios '
+    requirement = 'The system shall be capable of reproducing verification results of creep strain ratios '
                   'along the X direction.'
     min_parallel = 2
     rel_err = 1.0e-4
@@ -24,7 +24,7 @@
     type = 'CSVDiff'
     input = 'ad_aniso_creep_y_3d.i'
     csvdiff = ad_aniso_creep_y_3d_out.csv
-    requirement = 'Moose shall be capable of reproducing verification results of creep strain ratios '
+    requirement = 'The system shall be capable of reproducing verification results of creep strain ratios '
                   'along the Y direction.'
     min_parallel = 2
     rel_err = 1.0e-5
@@ -34,7 +34,7 @@
     type = 'CSVDiff'
     input = 'ad_aniso_creep_z_3d.i'
     csvdiff = ad_aniso_creep_z_3d_out.csv
-    requirement = 'Moose shall be capable of reproducing verification results of creep strain ratios '
+    requirement = 'The system shall be capable of reproducing verification results of creep strain ratios '
                   'along the Z direction.'
     min_parallel = 2
     rel_err = 1.0e-5
@@ -47,7 +47,7 @@
     cli_args = "Materials/elastic_strain/inelastic_models='trial_creep_iso' "
                "Materials/inactive='trial_creep_aniso_iso' "
                "Outputs/file_base=ad_aniso_iso_creep_x_3d_out"
-    requirement = 'Moose shall be capable of reproducing isotropic creep with the right anisotropic '
+    requirement = 'The system shall be capable of reproducing isotropic creep with the right anisotropic '
                   'creep parameters: Baseline'
     min_parallel = 2
     rel_err = 1.0e-5
@@ -76,7 +76,7 @@
     cli_args = "Materials/elastic_strain/inelastic_models='trial_creep_aniso_iso' "
                "Materials/inactive='trial_creep_iso' "
                "Outputs/file_base=ad_aniso_iso_aniso_creep_x_3d_out"
-    requirement = 'Moose shall be capable of reproducing isotropic creep with the right anisotropic '
+    requirement = 'The system shall be capable of reproducing isotropic creep with the right anisotropic '
                   'creep parameters.'
     min_parallel = 2
     rel_err = 1.0e-4
@@ -86,7 +86,7 @@
     type = 'CSVDiff'
     input = 'ad_aniso_creep_integration_error.i'
     csvdiff = ad_aniso_creep_integration_error_out.csv
-    requirement = 'Moose shall be capable of enforcing a time step such that the creep rate '
+    requirement = 'The system shall be capable of enforcing a time step such that the creep rate '
                   'integration error is controled by the user with the aid of a soft terminator.'
     heavy = true
     rel_err = 1.0e-4
@@ -96,7 +96,7 @@
     type = 'Exodiff'
     input = 'ad_aniso_creep_temperature_coefficients.i'
     exodiff = ad_aniso_creep_temperature_coefficients_out.e
-    requirement = 'Moose shall be capable of running Hill materials with constant coefficients and '
+    requirement = 'The system shall be capable of running Hill materials with constant coefficients and '
                   'coefficients that are function of temperature to capture material texture. This '
                   'test performs a reference run with constant coefficients'
     rel_err = 1.0e-4
@@ -108,7 +108,7 @@
     input = 'ad_aniso_creep_temperature_coefficients_function.i'
     exodiff = ad_aniso_creep_temperature_coefficients_function_out.e
     custom_cmp = 'temperature.exodiff'
-    requirement = 'Moose shall be capable of running Hill materials with constant coefficients and '
+    requirement = 'The system shall be capable of running Hill materials with constant coefficients and '
                   'coefficients that are function of temperature to capture material texture. This '
                   'test performs a run using a constant temperature function.'
     rel_err = 1.0e-4
@@ -119,7 +119,7 @@
     type = 'Exodiff'
     input = 'ad_aniso_creep_temperature_coefficients_function_variation.i'
     exodiff = ad_aniso_creep_temperature_coefficients_function_variation_out.e
-    requirement = 'Moose shall be capable of running anisotropic Hill creep with '
+    requirement = 'The system shall be capable of running anisotropic Hill creep with '
                   'temperature-dependent Hill coefficients and generating correct output.'
     rel_err = 1.0e-4
     abs_zero = 1.0e-8
@@ -129,7 +129,7 @@
     type = 'CSVDiff'
     input = '3d_bar_orthotropic_90deg_rotation_ad_creep_z_no_rotation.i'
     csvdiff = 3d_bar_orthotropic_90deg_rotation_ad_creep_z_no_rotation_out.csv
-    requirement = 'Moose shall be capable of using large deformation rotation to update the '
+    requirement = 'The system shall be capable of using large deformation rotation to update the '
                   'orientation of Hill parameters even when there is no rigid body rotation. This '
                   'test also serves as a reference to verify the updates to the Hill parameters when '
                   'there is significant rigid body motion'
@@ -141,7 +141,7 @@
     type = 'CSVDiff'
     input = '3d_bar_orthotropic_90deg_rotation_ad_creep_z.i'
     csvdiff = 3d_bar_orthotropic_90deg_rotation_ad_creep_z_out.csv
-    requirement = 'Moose shall be capable of using large deformation rotation to update the '
+    requirement = 'The system shall be capable of using large deformation rotation to update the '
                   'orientation of Hill parameters when there is 90-degree rigid body orientation '
                   'change about the Z axis. The creep strains have to be very similar to the output '
                   'when there is no rigid body motion (Note: The mere constraints enforcing rigid '
@@ -154,7 +154,7 @@
     type = 'CSVDiff'
     input = '3d_bar_orthotropic_90deg_rotation_ad_creep_x_no_rotation.i'
     csvdiff = 3d_bar_orthotropic_90deg_rotation_ad_creep_x_no_rotation_out.csv
-    requirement = 'Moose shall be capable of using large deformation rotation to update the '
+    requirement = 'The system shall be capable of using large deformation rotation to update the '
                   'orientation of Hill parameters even when there is no rigid body rotation. This '
                   'test also serves as a reference to verify the updates to the Hill parameters when '
                   'there is significant rigid body motion'
@@ -170,7 +170,7 @@
                "Materials/trial_creep/use_transformation=false "
                "Outputs/file_base=3d_bar_orthotropic_90deg_rotation_ad_creep_x_no_rotation_no_transfo"
                "rmation_out"
-    requirement = 'Moose shall be capable of not using large deformation rotation to define '
+    requirement = 'The system shall be capable of not using large deformation rotation to define '
                   'Hill anisotropic parameters. '
     rel_err = 1.0e-3
     abs_zero = 1.0e-10
@@ -180,7 +180,7 @@
     type = 'CSVDiff'
     input = '3d_bar_orthotropic_90deg_rotation_ad_creep_x.i'
     csvdiff = 3d_bar_orthotropic_90deg_rotation_ad_creep_x_out.csv
-    requirement = 'Moose shall be capable of using large deformation rotation to update the '
+    requirement = 'The system shall be capable of using large deformation rotation to update the '
                   'orientation of Hill parameters when there is 90-degree rigid body orientation '
                   'change about the X axis. The creep strains have to be very similar to the output '
                   'when there is no rigid body motion (Note: The mere constraints enforcing rigid '

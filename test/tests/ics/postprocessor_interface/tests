@@ -4,7 +4,7 @@
     input = 'postprocessor_interface.i'
     csvdiff = 'postprocessor_interface_out.csv'
 
-    requirement = 'MOOSE shall allow initial conditions to retrieve post-processor values.'
+    requirement = 'The system shall allow initial conditions to retrieve post-processor values.'
     design = '/InitialCondition.md /PostprocessorInterface.md'
     issues = '#17692'
   []

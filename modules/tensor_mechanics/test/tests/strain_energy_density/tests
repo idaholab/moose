@@ -7,7 +7,7 @@
     rel_err = 1e-6
     abs_zero = 1e-8
     design = 'StrainEnergyDensity.md'
-    requirement = 'Moose shall be capable of calculating strain energy density incrementally in '
+    requirement = 'The system shall be capable of calculating strain energy density incrementally in '
                   'materials with elastic stress and finite strain.'
   []
   [incr_chk1]
@@ -17,7 +17,7 @@
     design = 'StrainEnergyDensity.md'
     expect_err = 'StrainEnergyDensity: Specified incremental = false, but material model is '
                  'incremental.'
-    requirement = 'Moose shall be capable of informing a user when they incorrectly choose not to '
+    requirement = 'The system shall be capable of informing a user when they incorrectly choose not to '
                   'use the incremental strain energy density formulation with an incremental '
                   'material model.'
   []
@@ -27,7 +27,7 @@
     csvdiff = 'tot_model_out.csv'
     rel_err = 1e-6
     design = 'StrainEnergyDensity.md'
-    requirement = 'Moose shall be capable of calculating strain energy density for materials with '
+    requirement = 'The system shall be capable of calculating strain energy density for materials with '
                   'elastic stress and small strain.'
   []
   [tot_chk1]
@@ -37,7 +37,7 @@
     design = 'StrainEnergyDensity.md'
     expect_err = "StrainEnergyDensity: Specified incremental = true, but material model is not "
                  "incremental."
-    requirement = 'Moose shall be capable of informing a user when they incorrectly choose to use '
+    requirement = 'The system shall be capable of informing a user when they incorrectly choose to use '
                   'the incremental strain energy density formulation in a material utilizing small '
                   'strain.'
   []
@@ -47,7 +47,7 @@
     csvdiff = 'incr_model_elas_plas_out.csv'
     rel_err = 1e-6
     design = 'StrainEnergyDensity.md'
-    requirement = 'Moose shall be capable of calculating strain energy density incrementally in '
+    requirement = 'The system shall be capable of calculating strain energy density incrementally in '
                   'materials with inelastic stress and isotropic plasticity.'
   []
   [rate_model]
@@ -57,7 +57,7 @@
     rel_err = 1e-6
     abs_zero = 1e-8
     design = 'StrainEnergyRateDensity.md'
-    requirement = 'Moose shall be capable of calculating strain energy rate density with elastic '
+    requirement = 'The system shall be capable of calculating strain energy rate density with elastic '
                   'stress and finite strain.'
   []
   [rate_model_small]
@@ -66,7 +66,7 @@
     csvdiff = 'rate_model_small_out.csv'
     rel_err = 1e-6
     design = 'StrainEnergyRateDensity.md'
-    requirement = 'Moose shall be capable of calculating strain energy rate density when using small '
+    requirement = 'The system shall be capable of calculating strain energy rate density when using small '
                   'strain assumptions.'
   []
 
@@ -77,7 +77,7 @@
     rel_err = 1e-6
     abs_zero = 1e-8
     design = 'StrainEnergyRateDensity.md'
-    requirement = 'Moose shall be capable of calculating strain energy rate density when using '
+    requirement = 'The system shall be capable of calculating strain energy rate density when using '
                   'automatic differentiation and weak plane stress.'
   []
 
@@ -88,7 +88,7 @@
     rel_err = 1e-6
     abs_zero = 1e-8
     design = 'StrainEnergyRateDensity.md'
-    requirement = 'Moose shall be capable of calculating strain energy rate density when using '
+    requirement = 'The system shall be capable of calculating strain energy rate density when using '
                   'hand-coded Jacobian and weak plane stress.'
   []
 []

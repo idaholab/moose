@@ -5,27 +5,27 @@
     type = 'Exodiff'
     input = 'convective_flux_bc.i'
     exodiff = 'convective_flux_bc_out.e'
-    requirement = "MOOSE shall support the ability to create convective flux boundary conditions."
+    requirement = "The system shall support the ability to create convective flux boundary conditions."
   [../]
 
   [./vacuumbc_test]
     type = 'Exodiff'
     input = 'vacuum_bc_test.i'
     exodiff = 'vacuum_bc_test_out.e'
-    requirement = "MOOSE shall support a vacuum boundary condition for neutron diffusion on the boundary."
+    requirement = "The system shall support a vacuum boundary condition for neutron diffusion on the boundary."
   [../]
 
   [./vector_neumann_test]
     type = 'Exodiff'
     input = 'vector_neumann_bc_test.i'
     exodiff = 'vector_neumann_bc_test_out.e'
-    requirement = "MOOSE shall support Neumann type boundary conditions where the specified value is defined as the value of a vector, $v$, in the direction of the boundary outward facing normal, $\hat{n}$ (i.e., $v\cdot\hat{n}$)."
+    requirement = "The system shall support Neumann type boundary conditions where the specified value is defined as the value of a vector, $v$, in the direction of the boundary outward facing normal, $\hat{n}$ (i.e., $v\cdot\hat{n}$)."
   [../]
 
   [./weak_gradient_bc_test]
     type = 'Exodiff'
     input = 'weak_gradient_bc_test.i'
     exodiff = 'weak_gradient_bc_test_out.e'
-    requirement = "MOOSE shall support the 'no boundary condition' type boundary condition [!citep](griffiths1997noboundary)."
+    requirement = "The system shall support the 'no boundary condition' type boundary condition [!citep](griffiths1997noboundary)."
   [../]
 []

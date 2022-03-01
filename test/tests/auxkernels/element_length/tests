@@ -5,6 +5,6 @@
     type = Exodiff
     input = element_length.i
     exodiff = element_length_out.e
-    requirement = "MOOSE shall include an AuxKernel object for returning the element length."
+    requirement = "The system shall include an AuxKernel object for returning the element length."
   [../]
 []

@@ -5,6 +5,6 @@
     type = 'Exodiff'
     input = 'coupled_dirichlet_bc.i'
     exodiff = 'out.e'
-    requirement = "MOOSE shall support the creation of BoundaryCondition objects that couple to nonlinear variables."
+    requirement = "The system shall support the creation of BoundaryCondition objects that couple to nonlinear variables."
   [../]
 []

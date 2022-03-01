@@ -13,7 +13,7 @@
     max_time = 800
     allow_warnings = true
     rel_err = 1e-4
-    requirement = 'MOOSE shall support mechanics frictional contact problems'
+    requirement = 'The system shall support mechanics frictional contact problems'
   [../]
 
   [./frictional_mu04_penalty]
@@ -26,7 +26,7 @@
     rel_err = 1e-4
     max_time = 800
 #    deleted = '#6139'
-    requirement = 'MOOSE shall support mechanics frictional contact problems'
+    requirement = 'The system shall support mechanics frictional contact problems'
   [../]
 
   [./frictionless_kinematic]
@@ -39,7 +39,7 @@
     rel_err = 1e-4
     max_time = 800
 #    deleted = '#6139'
-    requirement = 'MOOSE shall support mechanics frictionless contact problems'
+    requirement = 'The system shall support mechanics frictionless contact problems'
   [../]
 
   [./frictionless_penalty]
@@ -52,7 +52,7 @@
     abs_zero = 1e-7
     rel_err = 1e-4
     max_time = 800
-    requirement = 'MOOSE shall support mechanics frictionless contact problems'
+    requirement = 'The system shall support mechanics frictionless contact problems'
   [../]
 
   [./frictionless_aug]
@@ -65,7 +65,7 @@
     abs_zero = 1e-4
     rel_err = 1e-4
     max_time = 800
-    requirement = 'MOOSE shall support mechanics frictionless contact problems'
+    requirement = 'The system shall support mechanics frictionless contact problems'
   [../]
 
   [./frictional_mu02_aug]
@@ -78,7 +78,7 @@
     rel_err = 1e-4
     abs_zero = 1e-4
     max_time = 800
-    requirement = 'MOOSE shall support mechanics frictional contact problems'
+    requirement = 'The system shall support mechanics frictional contact problems'
   [../]
 
 []

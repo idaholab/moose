@@ -8,7 +8,7 @@
     # The true solution and l2_err for this test are nearly zero, so don't use relative differences to compare them.
     abs_zero = 1e-9
     design = 'syntax/ScalarKernels/index.md'
-    requirement = 'MOOSE shall solve the constrained Neumann problem using the Lagrange multiplier approach.'
+    requirement = 'The system shall solve the constrained Neumann problem using the Lagrange multiplier approach.'
     issues = 'cbf6d2235379f6ad75908b0f9d4be792dbce6c3d'
   [../]
 
@@ -18,7 +18,7 @@
     exodiff = 'scalar_constraint_kernel_disp_out.e'
     max_parallel = 1
     design = 'syntax/ScalarKernels/index.md'
-    requirement = 'MOOSE shall solve the constrained Neumann problem using the Lagrange multiplier approach when displacements are active.'
+    requirement = 'The system shall solve the constrained Neumann problem using the Lagrange multiplier approach when displacements are active.'
     issues = '#7699'
   [../]
 
@@ -28,7 +28,7 @@
     exodiff = 'scalar_constraint_bc_out.e'
     max_parallel = 1
     design = 'syntax/ScalarKernels/index.md'
-    requirement = 'MOOSE shall support the ability to set Dirichlet boundary conditions using the Lagrange multiplier approach.'
+    requirement = 'The system shall support the ability to set Dirichlet boundary conditions using the Lagrange multiplier approach.'
     issues = '#1800'
   [../]
 []

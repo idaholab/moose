@@ -5,6 +5,6 @@
     type = 'Exodiff'
     input = 'aux_nodal_scalar_kernel.i'
     exodiff = 'aux_nodal_scalar_kernel_out.e'
-    requirement = "MOOSE shall support auxiliary calculations for scalar variables at nodes."
+    requirement = "The system shall support auxiliary calculations for scalar variables at nodes."
   [../]
 []

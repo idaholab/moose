@@ -5,7 +5,7 @@
     csvdiff = 'framework_out_tracer_0011.csv'
     abs_zero = 1.0E-5
     threading = '!pthreads'
-    requirement = "MOOSE shall be able to solve the advection equation"
+    requirement = "The system shall be able to solve the advection equation"
     issues = '#12346'
     design = 'porous_flow/numerical_diffusion.md'
   [../]

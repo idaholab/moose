@@ -3,7 +3,7 @@
     type = 'Exodiff'
     input = 'hardware_id_aux.i'
     exodiff = 'hardware_id_aux_out.e'
-    requirement = 'MOOSE shall allow visualization of the MPI processes mapping to compute nodes'
+    requirement = 'The system shall allow visualization of the MPI processes mapping to compute nodes'
     design = 'HardwareIDAux.md'
     issues = '#12629 #12630'
 

@@ -5,7 +5,7 @@
     type = 'Exodiff'
     input = 'all_periodic_trans.i'
     exodiff = 'all_periodic_trans_out.e'
-    requirement = "MOOSE shall support periodic boundary conditions with transforms defined as functions."
+    requirement = "The system shall support periodic boundary conditions with transforms defined as functions."
   [../]
 
   [./auto_wrap_2d_test]
@@ -15,14 +15,14 @@
     group = 'periodic'
     abs_zero = 1e-6
     rel_err = 1e-5
-    requirement = "MOOSE shall support periodic boundary conditions with transforms that are computed automatically in the 'x' and 'y' directions."
+    requirement = "The system shall support periodic boundary conditions with transforms that are computed automatically in the 'x' and 'y' directions."
   [../]
 
   [./auto_wrap_2d_test_non_generated]
     type = 'Exodiff'
     input =  'auto_periodic_bc_non_generated.i'
     exodiff = 'out_auto_non_generated.e'
-    requirement = "MOOSE shall support periodic boundary conditions with transforms that are computed automatically in the 'x' and 'y' directions using a non-generated mesh."
+    requirement = "The system shall support periodic boundary conditions with transforms that are computed automatically in the 'x' and 'y' directions using a non-generated mesh."
   [../]
 
   [./auto_wrap_2d_test_error_check]
@@ -31,7 +31,7 @@
     expect_err = '"point" is outside of the domain'
     cli_args = 'AuxKernels/periodic_dist/point="0 99999 0"'
     prereq = 'auto_wrap_2d_test'
-    requirement = "The PeriodicDistanceAux object shall produce an error when a point is provided that is outside the mesh domain."
+    requirement = "The system shall produce an error within the PeriodicDistanceAux object when a point is provided that is outside the mesh domain."
   [../]
 
   [./auto_wrap_3d_test]
@@ -44,7 +44,7 @@
     # This test is very sensitive to partitioner (parmetis).
     # GridPartitioner is robust and beautiful
     cli_args = 'Mesh/Partitioner/type=GridPartitioner'
-    requirement = "MOOSE shall support periodic boundary conditions with transforms that are computed automatically in the 'x', 'y', and 'z' directions."
+    requirement = "The system shall support periodic boundary conditions with transforms that are computed automatically in the 'x', 'y', and 'z' directions."
   [../]
 
   [./orthogonal_pbc_on_square_test]
@@ -52,14 +52,14 @@
     input = 'orthogonal_pbc_on_square.i'
     exodiff = 'orthogonal_pbc_on_square_out.e'
     use_old_floor = true
-    requirement = "MOOSE shall support periodic boundary conditions on orthogonal boundaries with transforms defined as functions."
+    requirement = "The system shall support periodic boundary conditions on orthogonal boundaries with transforms defined as functions."
   [../]
 
   [./parallel_pbc_using_trans_test]
     type = 'Exodiff'
     input = ' parallel_pbc_using_trans.i '
     exodiff = 'parallel_pbc_using_trans_out.e'
-    requirement = "MOOSE shall support periodic boundary conditions on parallel boundaries with transforms defined as functions."
+    requirement = "The system shall support periodic boundary conditions on parallel boundaries with transforms defined as functions."
   [../]
 
   [./subdomain_restricted_vars_test]
@@ -68,7 +68,7 @@
     exodiff = 'out_restrict.e'
     group = 'periodic'
     deleted = 'Libmesh Bug #1410'
-    requirement = "MOOSE shall support periodic boundary conditions on subdomain restricted variables."
+    requirement = "The system shall support periodic boundary conditions on subdomain restricted variables."
   [../]
 
   [./testlevel1]
@@ -78,7 +78,7 @@
     max_parallel = 4
     valgrind = 'HEAVY'
     abs_zero = 1e-6
-    requirement = "MOOSE shall support periodic boundary conditions with mesh adaptivity."
+    requirement = "The system shall support periodic boundary conditions with mesh adaptivity."
   [../]
 
   [./testperiodic]
@@ -88,7 +88,7 @@
     group = 'periodic'
     abs_zero = 1e-6
     rel_err = 1e-5
-    requirement = "MOOSE shall support periodic boundary conditions with transforms prescribed as a translation."
+    requirement = "The system shall support periodic boundary conditions with transforms prescribed as a translation."
   [../]
 
   [./testperiodic_vector]
@@ -98,7 +98,7 @@
     group = 'periodic'
     abs_zero = 1e-6
     rel_err = 1e-5
-    requirement = "MOOSE shall support periodic boundary conditions on vector variables with transforms prescribed as a translation."
+    requirement = "The system shall support periodic boundary conditions on vector variables with transforms prescribed as a translation."
   [../]
 
   [./testperiodic_dp]
@@ -109,14 +109,14 @@
     abs_zero = 1e-6
     max_parallel = 2
     min_parallel = 2
-    requirement = "MOOSE shall support periodic boundary conditions with displacements."
+    requirement = "The system shall support periodic boundary conditions with displacements."
   [../]
 
   [./testtrapezoid]
     type = 'Exodiff'
     input = 'trapezoid.i'
     exodiff = 'out_trapezoid.e'
-    requirement = "MOOSE shall support periodic boundary conditions on a trapezoid domain with transforms prescribed as functions."
+    requirement = "The system shall support periodic boundary conditions on a trapezoid domain with transforms prescribed as functions."
   [../]
 
   [./trapezoid_non_periodic]
@@ -125,14 +125,14 @@
     exodiff = 'trapezoid_non_periodic_out.e'
     design = 'mesh/MooseMesh.md'
     issues = '#11939'
-    requirement = "Calls to periodic distance and bounds methods on the mesh shall work when periodic boundary conditions are not used."
+    requirement = "The system shall support calls to periodic distance and bounds methods on the mesh when periodic boundary conditions are not used."
   [../]
 
   [./testwedge]
     type = 'Exodiff'
     input = 'wedge.i'
     exodiff = 'out_wedge.e'
-    requirement = "MOOSE shall support periodic boundary conditions on a wedge domain with transforms prescribed as functions."
+    requirement = "The system shall support periodic boundary conditions on a wedge domain with transforms prescribed as functions."
   [../]
 
   [./testwedgesys]
@@ -140,14 +140,14 @@
     input = ' wedge_sys.i '
     exodiff = 'out_wedge_sys.e'
     max_parallel = 1
-    requirement = "MOOSE shall support periodic boundary conditions for a single variable on a wedge domain with transforms prescribed as functions."
+    requirement = "The system shall support periodic boundary conditions for a single variable on a wedge domain with transforms prescribed as functions."
   [../]
 
   [./auto_dir_repeated_id]
     type = 'Exodiff'
     input = 'auto_dir_repeated_id.i'
     exodiff = 'auto_dir_repeated_id_out.e'
-    requirement = "MOOSE shall support periodic boundary conditions for input meshes that have repeated element ids."
+    requirement = "The system shall support periodic boundary conditions for input meshes that have repeated element ids."
   [../]
 
   [./no_add_scalar]
@@ -155,7 +155,7 @@
     input = 'no_add_scalar.i'
     exodiff = 'no_add_scalar_out.e'
 
-    requirement = "The Periodic Boundary system shall not attempt to add periodic boundary conditions to scalar variables."
+    requirement = "When using periodic boundary detection, the system shall not attempt to add periodic boundary conditions to scalar variables."
     design = 'source/actions/AddPeriodicBCAction.md'
     issues = '#11417'
   [../]

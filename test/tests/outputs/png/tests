@@ -1,6 +1,6 @@
 [Tests]
   [image_tests]
-    requirement = 'MOOSE shall be able to produce png images:'
+    requirement = 'The system shall be able to produce png images:'
     issues = '#12846'
     design = 'PNGOutput.md'
 

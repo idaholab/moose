@@ -7,6 +7,6 @@
     input = 'pre_post_aux_test.i'
     csvdiff = 'pre_post_aux_test_out.csv'
 
-    requirement = 'MOOSE shall consider that when auxkernel depends on a UO, the exec flag will be taken into consideration to determin when the UO must be executed preaux.'
+    requirement = 'The system shall consider that when auxkernel depends on a UO, the exec flag will be taken into consideration to determin when the UO must be executed preaux.'
   [../]
 []

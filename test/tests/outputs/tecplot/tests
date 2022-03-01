@@ -7,7 +7,7 @@
     input = 'tecplot.i'
     check_files = 'tecplot_out_0000.dat tecplot_out_0001.dat'
 
-    requirement = "The system shall support Tecplot output."
+    requirement = "The system shall support writing ASCII Tecplot output."
   [../]
 
   [./test_append]
@@ -26,6 +26,6 @@
     check_files = 'tecplot_binary_out_0000.plt tecplot_binary_out_0001.plt'
     tecplot = true
 
-    requirement = "The system shall optionally support writing binary Teckplot files."
+    requirement = "The system shall optionally support writing binary Tecplot files."
   [../]
 []

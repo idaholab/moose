@@ -5,7 +5,7 @@
     csvdiff = 'poly_out_out_0001.csv'
     issues = '#13184'
     design = 'MathUtils.md'
-    requirement = 'Moose shall have a function that evaluates the polynomial and derivative of polyonimal of varying degree and arbitrary coefficients'
+    requirement = 'The system shall have a function that evaluates the polynomial and derivative of polyonimal of varying degree and arbitrary coefficients'
   [../]
   [./clamp]
     type = 'CSVDiff'
@@ -13,7 +13,7 @@
     csvdiff = 'clamp_out_functions_0001.csv'
     issues = '#13231'
     design = 'MathUtils.md'
-    requirement = 'Moose shall have a clamp function that returns a value limited to upper and lower bounds'
+    requirement = 'The system shall have a clamp function that returns a value limited to upper and lower bounds'
   [../]
   [./smootherstep]
     type = 'CSVDiff'
@@ -21,6 +21,6 @@
     csvdiff = 'smootherstep_out_functions_0001.csv'
     issues = '#13231'
     design = 'MathUtils.md'
-    requirement = 'Moose shall have a smootherstep function that returns a smooth transition value between an upper and lower bound'
+    requirement = 'The system shall have a smootherstep function that returns a smooth transition value between an upper and lower bound'
   [../]
 []

@@ -7,7 +7,7 @@
     input = image_2d.i
     exodiff = image_2d_out.e
     vtk = true
-    requirement = "MOOSE shall include the ability to define a function based on a 2D image and "
+    requirement = "The system shall include the ability to define a function based on a 2D image and "
                   "initialize a nodal variable."
   []
   [2d_elemental]
@@ -16,7 +16,7 @@
     input = image_2d_elemental.i
     exodiff = image_2d_elemental_out.e
     vtk = true
-    requirement = "MOOSE shall include the ability to define a function based on a 2D image and "
+    requirement = "The system shall include the ability to define a function based on a 2D image and "
                   "initialize a elemental variable."
   []
   [3d]
@@ -25,7 +25,7 @@
     input = image_3d.i
     exodiff = image_3d_out.e
     vtk = true
-    requirement = "MOOSE shall include the ability to define a function based on a stack of images "
+    requirement = "The system shall include the ability to define a function based on a stack of images "
                   "and initialize a nodal variable."
   []
   [3d_subset]
@@ -34,7 +34,7 @@
     input = image_3d_subset.i
     exodiff = image_3d_subset_out.e
     vtk = true
-    requirement = "MOOSE shall include the ability to define a function based on a subset stack of "
+    requirement = "The system shall include the ability to define a function based on a subset stack of "
                   "images and initialize a nodal variable."
   []
   [threshold]
@@ -43,7 +43,7 @@
     input = threshold.i
     exodiff = threshold_out.e
     vtk = true
-    requirement = "The ImageFunction object shall allow the image data to be set as one of two "
+    requirement = "The system shall allow the image data within the ImageFunction object to be set as one of two "
                   "values based on a threshold value."
   []
   [threshold_adapt]
@@ -52,7 +52,7 @@
     input = threshold_adapt.i
     exodiff = threshold_adapt_out.e
     vtk = true
-    requirement = "MOOSE shall be capable of initializing a variable from image data and perform "
+    requirement = "The system shall be capable of initializing a variable from image data and perform "
                   "initial adaptivity based on the data."
   []
   [threshold_adapt_parallel]
@@ -65,7 +65,7 @@
     max_parallel = 3
     vtk = true
     recover = false
-    requirement = "MOOSE shall be capable of initializing a variable from image data and perform "
+    requirement = "The system shall be capable of initializing a variable from image data and perform "
                   "initial adaptivity based on the data, in parallel."
   []
   [threshold_adapt_parallel_check_files]
@@ -79,7 +79,7 @@
     cli_args = Outputs/nemesis=true
     vtk = true
     recover = false
-    requirement = "MOOSE shall be capable of initializing a variable from image data and perform "
+    requirement = "The system shall be capable of initializing a variable from image data and perform "
                   "initial adaptivity based on the data, in parallel and produce Nemesis output "
                   "files."
   []
@@ -89,7 +89,7 @@
     input = component.i
     exodiff = component_out.e
     vtk = true
-    requirement = "The ImageFunction object shall be capable of limiting the supplied data to a "
+    requirement = "The system shall be capable of limiting the supplied data to the ImageFunction object to a "
                   "single component of the RGB image data."
   []
   [shift_and_scale]
@@ -98,8 +98,8 @@
     input = shift_and_scale.i
     exodiff = shift_and_scale_out.e
     vtk = true
-    requirement = "The ImageFunction object shall be capable of shifting and scaling the supplied "
-                  "data."
+    requirement = "The system shall be capable of shifting and scaling the supplied "
+                  "image data to the ImageFunction object."
   []
   [subset]
     # Test the image may be a subset of the domain
@@ -107,8 +107,8 @@
     input = subset.i
     exodiff = subset_out.e
     vtk = true
-    requirement = "The ImageFunction object shall be capable of operating on domains that are larger "
-                  "than the image size."
+    requirement = "The system shall be capable of operating on domains that are larger "
+                  "than the image size in the ImageFunction object."
   []
   [flip]
     # Test the flipping feature
@@ -116,8 +116,8 @@
     input = flip.i
     exodiff = flip_out.e
     vtk = true
-    requirement = "The ImageFunction object shall be capable of flipping the data along the vertical "
-                  "axis."
+    requirement = "The system shall be capable of flipping image data along the vertical "
+                  "axis in the ImageFunction object."
   []
   [flip_dual]
     # Tests the flipping and images on subdomains
@@ -125,8 +125,8 @@
     input = flip_dual.i
     exodiff = flip_dual_out.e
     vtk = true
-    requirement = "The ImageFunction object shall be capable of flipping the data along vertical "
-                  "axis and shifting the origin."
+    requirement = "The system shall be capable of flipping image data along vertical "
+                  "axis and shifting the origin using the ImageFunction object."
   []
   [flip_quad]
     # Tests the flipping and images on subdomains
@@ -134,8 +134,8 @@
     input = flip_quad.i
     exodiff = flip_quad_out.e
     vtk = true
-    requirement = "The ImageFunction object shall be capable of flipping the data along vertical and "
-                  "horizontal axis."
+    requirement = "The system shall be capable of flipping image data along vertical and "
+                  "horizontal axis within the ImageFunction object."
   []
   [crop]
     # Tests ability for mesh to be a subset of image
@@ -143,8 +143,8 @@
     input = crop.i
     exodiff = crop_out.e
     vtk = true
-    requirement = "The ImageFunction object shall be capable of operating on domains that are "
-                  "smaller than the image size."
+    requirement = "The system shall be capable of operating on domains that are "
+                  "smaller than the image size within the ImageFunction object."
   []
   [image_mesh_3d]
     # Tests ability to read a stack of 3D images into a Mesh
@@ -153,8 +153,8 @@
     exodiff = image_mesh_3d_out.e
     vtk = true
     design = 'source/mesh/ImageMesh.md'
-    requirement = "The ImageMesh object shall be capable of generating a 3D mesh based on a stack of "
-                  "2D images."
+    requirement = "The system shall be capable of generating a 3D mesh based on a stack of "
+                  "2D images using the ImageMesh object."
   []
   [image_mesh_2d]
     # Tests ability to read a 2D image into a Mesh
@@ -163,7 +163,7 @@
     exodiff = image_mesh_2d_out.e
     vtk = true
     design = 'source/mesh/ImageMesh.md'
-    requirement = "The ImageMesh object shall be capable of generating a 2D mesh based on an image."
+    requirement = "The system shall be capable of generating a 2D mesh based on an image using the ImageMesh object."
   []
   [moose_logo]
     # Tests ability to shift and scale separately
@@ -171,6 +171,6 @@
     input = moose_logo_test_2D.i
     exodiff = moose_logo_test_2D_out.e
     vtk = true
-    requirement = "The ImageFunction shift and scale options shall operate independently."
+    requirement = "The system shall perform shift and scale options independently using the ImageFunction object."
   []
 []

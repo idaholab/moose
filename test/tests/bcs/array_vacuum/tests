@@ -5,6 +5,6 @@
     type = 'Exodiff'
     input = 'array_vacuum.i'
     exodiff = 'array_vacuum_out.e'
-    requirement = 'MOOSE shall provide array vacuum boundary condition.'
+    requirement = 'The system shall provide array vacuum boundary condition.'
   [../]
 []
