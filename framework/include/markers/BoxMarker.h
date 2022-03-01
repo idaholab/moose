@@ -13,11 +13,6 @@
 
 #include "libmesh/bounding_box.h"
 
-class BoxMarker;
-
-template <>
-InputParameters validParams<BoxMarker>();
-
 class BoxMarker : public Marker
 {
 public:

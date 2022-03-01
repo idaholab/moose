@@ -13,8 +13,6 @@
 
 registerMooseObject("MooseApp", CylindricalAverage);
 
-defineLegacyParams(CylindricalAverage);
-
 InputParameters
 CylindricalAverage::validParams()
 {

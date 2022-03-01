@@ -19,8 +19,6 @@
 
 registerMooseObject("MooseApp", MeshSideSetGenerator);
 
-defineLegacyParams(MeshSideSetGenerator);
-
 InputParameters
 MeshSideSetGenerator::validParams()
 {

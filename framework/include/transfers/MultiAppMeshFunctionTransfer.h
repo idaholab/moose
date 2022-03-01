@@ -11,12 +11,6 @@
 
 #include "MultiAppConservativeTransfer.h"
 
-// Forward declarations
-class MultiAppMeshFunctionTransfer;
-
-template <>
-InputParameters validParams<MultiAppMeshFunctionTransfer>();
-
 /**
  * Transfers a vector of variables. For each individual one,
  * samples the variable's value in the Master domain at the point where

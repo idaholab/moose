@@ -11,8 +11,6 @@
 
 registerMooseObject("MooseApp", VectorPostprocessorVisualizationAux);
 
-defineLegacyParams(VectorPostprocessorVisualizationAux);
-
 InputParameters
 VectorPostprocessorVisualizationAux::validParams()
 {

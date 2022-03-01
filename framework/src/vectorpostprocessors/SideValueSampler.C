@@ -16,8 +16,6 @@
 
 registerMooseObject("MooseApp", SideValueSampler);
 
-defineLegacyParams(SideValueSampler);
-
 InputParameters
 SideValueSampler::validParams()
 {

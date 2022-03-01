@@ -16,8 +16,6 @@
 
 registerMooseObject("MooseApp", ControlOutput);
 
-defineLegacyParams(ControlOutput);
-
 InputParameters
 ControlOutput::validParams()
 {

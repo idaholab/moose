@@ -11,11 +11,6 @@
 
 #include "MooseMesh.h"
 
-class SpiralAnnularMesh;
-
-template <>
-InputParameters validParams<SpiralAnnularMesh>();
-
 /**
  * Mesh generated from parameters
  */

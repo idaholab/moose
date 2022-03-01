@@ -16,8 +16,6 @@
 
 #include "libmesh/sparse_matrix.h"
 
-defineLegacyParams(NodalConstraint);
-
 InputParameters
 NodalConstraint::validParams()
 {

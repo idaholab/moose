@@ -11,11 +11,7 @@
 
 #include "Control.h"
 
-class BoolFunctionControl;
 class Function;
-
-template <>
-InputParameters validParams<BoolFunctionControl>();
 
 /**
  * A basic control for changing a boolean-valued input parameter using a Function

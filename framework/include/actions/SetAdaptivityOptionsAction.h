@@ -11,11 +11,6 @@
 
 #include "Action.h"
 
-class SetAdaptivityOptionsAction;
-
-template <>
-InputParameters validParams<SetAdaptivityOptionsAction>();
-
 class SetAdaptivityOptionsAction : public Action
 {
 public:

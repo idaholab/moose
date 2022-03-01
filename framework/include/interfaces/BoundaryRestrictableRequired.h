@@ -12,16 +12,10 @@
 // Moose includes
 #include "BoundaryRestrictable.h"
 
-// Forward declarations
-class BoundaryRestrictableRequired;
-
-template <>
-InputParameters validParams<BoundaryRestrictableRequired>();
-
 /**
  * A class for requiring an object to be boundary restricted.
  * This class acts as a wrapper for BoundaryRestrictable, it allows
- * an additional validParams<> specialization that adds the 'boundary'
+ * an additional validParams that adds the 'boundary'
  * parameter as required.
  */
 class BoundaryRestrictableRequired : public BoundaryRestrictable

@@ -15,8 +15,6 @@
 #include "MooseMesh.h"
 #include "SystemBase.h"
 
-defineLegacyParams(NodalScalarKernel);
-
 InputParameters
 NodalScalarKernel::validParams()
 {

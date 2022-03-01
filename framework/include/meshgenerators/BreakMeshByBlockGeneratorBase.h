@@ -11,12 +11,6 @@
 
 #include "MeshGenerator.h"
 
-// Forward declarations
-class BreakMeshByBlockGeneratorBase;
-
-template <>
-InputParameters validParams<BreakMeshByBlockGeneratorBase>();
-
 /**
  *
  */

@@ -14,11 +14,6 @@
 #include "MooseVariableDependencyInterface.h"
 
 class NodalScalarKernel;
-class AuxNodalScalarKernel;
-
-template <>
-InputParameters validParams<AuxNodalScalarKernel>();
-
 /**
  *
  */

@@ -11,12 +11,6 @@
 
 #include "MeshGenerator.h"
 
-// Forward declarations
-class SideSetsBetweenSubdomainsGenerator;
-
-template <>
-InputParameters validParams<SideSetsBetweenSubdomainsGenerator>();
-
 /**
  * MeshGenerator that creates a sideset composed of the nodes located between
  * two or more subdomains.

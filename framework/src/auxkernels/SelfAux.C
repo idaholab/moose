@@ -11,8 +11,6 @@
 
 registerMooseObject("MooseApp", SelfAux);
 
-defineLegacyParams(SelfAux);
-
 InputParameters
 SelfAux::validParams()
 {

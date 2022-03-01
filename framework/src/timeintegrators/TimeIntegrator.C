@@ -15,8 +15,6 @@
 #include "SystemBase.h"
 #include "NonlinearSystem.h"
 
-defineLegacyParams(TimeIntegrator);
-
 InputParameters
 TimeIntegrator::validParams()
 {

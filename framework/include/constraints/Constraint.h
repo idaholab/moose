@@ -13,12 +13,6 @@
 #include "NeighborResidualObject.h"
 #include "GeometricSearchInterface.h"
 
-// Forward Declarations
-class Constraint;
-
-template <>
-InputParameters validParams<Constraint>();
-
 /**
  * Base class for all Constraint types
  */

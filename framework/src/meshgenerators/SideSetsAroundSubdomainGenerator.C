@@ -20,8 +20,6 @@
 
 registerMooseObject("MooseApp", SideSetsAroundSubdomainGenerator);
 
-defineLegacyParams(SideSetsAroundSubdomainGenerator);
-
 InputParameters
 SideSetsAroundSubdomainGenerator::validParams()
 {

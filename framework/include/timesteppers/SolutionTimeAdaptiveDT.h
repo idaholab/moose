@@ -13,11 +13,6 @@
 
 #include <fstream>
 
-class SolutionTimeAdaptiveDT;
-
-template <>
-InputParameters validParams<SolutionTimeAdaptiveDT>();
-
 /**
  *
  */

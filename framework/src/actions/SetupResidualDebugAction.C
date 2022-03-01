@@ -21,8 +21,6 @@
 
 registerMooseAction("MooseApp", SetupResidualDebugAction, "setup_residual_debug");
 
-defineLegacyParams(SetupResidualDebugAction);
-
 InputParameters
 SetupResidualDebugAction::validParams()
 {

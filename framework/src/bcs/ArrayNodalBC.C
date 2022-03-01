@@ -14,8 +14,6 @@
 #include "SystemBase.h"
 #include "NonlinearSystemBase.h"
 
-defineLegacyParams(ArrayNodalBC);
-
 InputParameters
 ArrayNodalBC::validParams()
 {

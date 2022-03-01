@@ -13,12 +13,6 @@
 #include "LinearInterpolation.h"
 #include "DerivativeMaterialInterface.h"
 
-// Forward Declarations
-class PiecewiseLinearInterpolationMaterial;
-
-template <>
-InputParameters validParams<PiecewiseLinearInterpolationMaterial>();
-
 /**
  * This material uses a LinearInterpolation object to define the dependence
  * of the material's value on a variable.

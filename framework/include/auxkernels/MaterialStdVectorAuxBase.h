@@ -12,16 +12,10 @@
 // MOOSE includes
 #include "MaterialAuxBase.h"
 
-// Forward declarations
-template <typename T = Real>
-class MaterialStdVectorAuxBase;
-
-template <>
-InputParameters validParams<MaterialStdVectorAuxBase<>>();
 /**
  * A base class for the various Material related AuxKernal objects
  */
-template <typename T>
+template <typename T = Real>
 class MaterialStdVectorAuxBase : public MaterialAuxBase<std::vector<T>>
 {
 public:

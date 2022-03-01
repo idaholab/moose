@@ -13,12 +13,6 @@
 #include "GeneralVectorPostprocessor.h"
 #include "DelimitedFileReader.h"
 
-// Forward declarations
-class CSVReader;
-
-template <>
-InputParameters validParams<CSVReader>();
-
 class CSVReader : public GeneralVectorPostprocessor
 {
 public:

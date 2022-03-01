@@ -11,12 +11,6 @@
 
 #include "ScalarKernelBase.h"
 
-// Forward declarations
-class ScalarKernel;
-
-template <>
-InputParameters validParams<ScalarKernel>();
-
 class ScalarKernel : public ScalarKernelBase
 {
 public:

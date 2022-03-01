@@ -11,11 +11,6 @@
 
 #include "ExplicitTimeIntegrator.h"
 
-class ActuallyExplicitEuler;
-
-template <>
-InputParameters validParams<ActuallyExplicitEuler>();
-
 /**
  * Implements a truly explicit (no nonlinear solve) first-order, forward Euler
  * time integration scheme.

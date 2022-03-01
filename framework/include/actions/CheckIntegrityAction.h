@@ -11,11 +11,6 @@
 
 #include "Action.h"
 
-class CheckIntegrityAction;
-
-template <>
-InputParameters validParams<CheckIntegrityAction>();
-
 class CheckIntegrityAction : public Action
 {
 public:

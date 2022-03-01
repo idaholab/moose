@@ -11,11 +11,6 @@
 
 #include "FEProblem.h"
 
-class ReferenceResidualProblem;
-
-template <>
-InputParameters validParams<ReferenceResidualProblem>();
-
 /**
  * FEProblemBase derived class to enable convergence checking relative to a user-specified
  * postprocessor

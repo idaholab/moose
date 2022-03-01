@@ -16,8 +16,6 @@
 registerMooseObject("MooseApp", NodalMaxValueId);
 registerMooseObjectRenamed("MooseApp", NodalProxyMaxValue, "04/01/2022 00:00", NodalMaxValueId);
 
-defineLegacyParams(NodalMaxValueId);
-
 InputParameters
 NodalMaxValueId::validParams()
 {

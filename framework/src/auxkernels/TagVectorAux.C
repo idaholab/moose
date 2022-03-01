@@ -11,8 +11,6 @@
 
 registerMooseObject("MooseApp", TagVectorAux);
 
-defineLegacyParams(TagVectorAux);
-
 InputParameters
 TagVectorAux::validParams()
 {

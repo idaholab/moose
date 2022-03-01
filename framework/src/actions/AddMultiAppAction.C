@@ -12,8 +12,6 @@
 
 registerMooseAction("MooseApp", AddMultiAppAction, "add_multi_app");
 
-defineLegacyParams(AddMultiAppAction);
-
 InputParameters
 AddMultiAppAction::validParams()
 {

@@ -11,11 +11,6 @@
 
 #include "Kernel.h"
 
-class NullKernel;
-
-template <>
-InputParameters validParams<NullKernel>();
-
 /**
  *
  */

@@ -21,8 +21,6 @@
 
 registerMooseObject("MooseApp", ParsedGenerateSideset);
 
-defineLegacyParams(ParsedGenerateSideset);
-
 InputParameters
 ParsedGenerateSideset::validParams()
 {

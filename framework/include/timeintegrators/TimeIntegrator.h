@@ -13,8 +13,6 @@
 #include "MooseObject.h"
 #include "Restartable.h"
 
-// Forward declarations
-class TimeIntegrator;
 class FEProblemBase;
 class SystemBase;
 class NonlinearSystemBase;
@@ -25,9 +23,6 @@ template <typename T>
 class NumericVector;
 class NonlinearImplicitSystem;
 } // namespace libMesh
-
-template <>
-InputParameters validParams<TimeIntegrator>();
 
 /**
  * Base class for time integrators

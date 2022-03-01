@@ -11,12 +11,6 @@
 
 #include "MortarConstraintBase.h"
 
-// Forward Declarations
-class MortarConstraint;
-
-template <>
-InputParameters validParams<MortarConstraint>();
-
 class MortarConstraint : public MortarConstraintBase
 {
 public:

@@ -20,8 +20,6 @@ registerMooseAction("MooseApp", CreateDisplacedProblemAction, "add_geometric_rm"
 registerMooseAction("MooseApp", CreateDisplacedProblemAction, "add_algebraic_rm");
 registerMooseAction("MooseApp", CreateDisplacedProblemAction, "add_coupling_rm");
 
-defineLegacyParams(CreateDisplacedProblemAction);
-
 InputParameters
 CreateDisplacedProblemAction::validParams()
 {

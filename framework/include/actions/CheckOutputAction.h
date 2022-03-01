@@ -12,12 +12,6 @@
 // MOOSE includes
 #include "Action.h"
 
-// Forward declerations
-class CheckOutputAction;
-
-template <>
-InputParameters validParams<CheckOutputAction>();
-
 /**
  * Action for checking that "outputs" is properly populated for Materials
  */

@@ -14,8 +14,6 @@
 
 registerMooseAction("MooseApp", CreateProblemAction, "create_problem");
 
-defineLegacyParams(CreateProblemAction);
-
 InputParameters
 CreateProblemAction::validParams()
 {

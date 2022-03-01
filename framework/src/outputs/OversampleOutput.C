@@ -19,8 +19,6 @@
 #include "libmesh/mesh_function.h"
 #include "libmesh/explicit_system.h"
 
-defineLegacyParams(OversampleOutput);
-
 InputParameters
 OversampleOutput::validParams()
 {

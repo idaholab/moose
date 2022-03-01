@@ -23,8 +23,6 @@
 
 registerMooseObject("MooseApp", WorkBalance);
 
-defineLegacyParams(WorkBalance);
-
 InputParameters
 WorkBalance::validParams()
 {

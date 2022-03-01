@@ -11,12 +11,6 @@
 
 #include "Kernel.h"
 
-// Forward Declaration
-class CoupledForce;
-
-template <>
-InputParameters validParams<CoupledForce>();
-
 /**
  * Simple class to demonstrate off diagonal Jacobian contributions.
  */

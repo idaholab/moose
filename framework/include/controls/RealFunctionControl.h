@@ -12,12 +12,7 @@
 // MOOSE includes
 #include "Control.h"
 
-// Forward declarations
-class RealFunctionControl;
 class Function;
-
-template <>
-InputParameters validParams<RealFunctionControl>();
 
 /**
  * A basic control for changing an input parameter using a Function

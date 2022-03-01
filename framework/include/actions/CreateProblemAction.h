@@ -12,11 +12,6 @@
 // MOOSE includes
 #include "MooseObjectAction.h"
 
-class CreateProblemAction;
-
-template <>
-InputParameters validParams<CreateProblemAction>();
-
 class CreateProblemAction : public MooseObjectAction
 {
 public:

@@ -11,12 +11,6 @@
 
 #include "MooseMesh.h"
 
-// forward declaration
-class FileMesh;
-
-template <>
-InputParameters validParams<FileMesh>();
-
 class FileMesh : public MooseMesh
 {
 public:

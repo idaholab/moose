@@ -11,12 +11,6 @@
 
 #include "NodalKernel.h"
 
-// Forward Declarations
-class ConstantRate;
-
-template <>
-InputParameters validParams<ConstantRate>();
-
 /**
  * Represents the rate in a simple ODE of du/dt = rate
  */

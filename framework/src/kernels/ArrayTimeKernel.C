@@ -9,8 +9,6 @@
 
 #include "ArrayTimeKernel.h"
 
-defineLegacyParams(ArrayTimeKernel);
-
 InputParameters
 ArrayTimeKernel::validParams()
 {

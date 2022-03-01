@@ -11,11 +11,6 @@
 
 #include "MooseMesh.h"
 
-class RinglebMesh;
-
-template <>
-InputParameters validParams<RinglebMesh>();
-
 /**
  * Mesh generated from parameters
  */

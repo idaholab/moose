@@ -11,11 +11,6 @@
 
 #include "MooseObjectAction.h"
 
-class AddDiracKernelAction;
-
-template <>
-InputParameters validParams<AddDiracKernelAction>();
-
 class AddDiracKernelAction : public MooseObjectAction
 {
 public:

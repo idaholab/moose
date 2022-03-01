@@ -19,12 +19,8 @@
 #include "SubProblem.h"
 
 // Forward declarations
-class MaterialPropertyInterface;
 class MooseObject;
 class FEProblemBase;
-
-template <>
-InputParameters validParams<MaterialPropertyInterface>();
 
 /**
  * Helper class for deferred getting of material properties after the construction

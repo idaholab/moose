@@ -12,18 +12,11 @@
 // MOOSE includes
 #include "AuxKernel.h"
 
-// Forward declarations
-template <typename T = Real, bool is_ad = false, typename RT = Real>
-class MaterialAuxBaseTempl;
-
-template <>
-InputParameters validParams<MaterialAuxBaseTempl<>>();
-
 /**
  * A base class for the various Material related AuxKernal objects.
  * \p RT is short for return type
  */
-template <typename T, bool is_ad, typename RT>
+template <typename T, bool is_ad = false, typename RT = Real>
 class MaterialAuxBaseTempl : public AuxKernelTempl<RT>
 {
 public:

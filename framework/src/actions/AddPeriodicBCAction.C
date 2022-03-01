@@ -26,8 +26,6 @@ registerMooseAction("MooseApp", AddPeriodicBCAction, "add_periodic_bc");
 registerMooseAction("MooseApp", AddPeriodicBCAction, "add_geometric_rm");
 registerMooseAction("MooseApp", AddPeriodicBCAction, "add_algebraic_rm");
 
-defineLegacyParams(AddPeriodicBCAction);
-
 InputParameters
 AddPeriodicBCAction::validParams()
 {

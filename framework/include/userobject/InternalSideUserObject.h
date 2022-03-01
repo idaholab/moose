@@ -17,11 +17,6 @@
 #include "TransientInterface.h"
 #include "ElementIDInterface.h"
 
-class InternalSideUserObject;
-
-template <>
-InputParameters validParams<InternalSideUserObject>();
-
 /**
  *
  */

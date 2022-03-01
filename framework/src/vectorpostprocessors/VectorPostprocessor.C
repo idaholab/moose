@@ -14,8 +14,6 @@
 #include "UserObject.h"
 #include "FEProblem.h"
 
-defineLegacyParams(VectorPostprocessor);
-
 InputParameters
 VectorPostprocessor::validParams()
 {

@@ -11,8 +11,6 @@
 
 registerMooseObject("MooseApp", PostprocessorNeumannBC);
 
-defineLegacyParams(PostprocessorNeumannBC);
-
 InputParameters
 PostprocessorNeumannBC::validParams()
 {

@@ -11,11 +11,6 @@
 
 #include "GeneralPostprocessor.h"
 
-class ScalePostprocessor;
-
-template <>
-InputParameters validParams<ScalePostprocessor>();
-
 /**
  * Scale a postprocessor
  */

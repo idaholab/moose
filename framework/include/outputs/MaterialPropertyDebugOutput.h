@@ -12,13 +12,8 @@
 // MOOSE includes
 #include "Output.h"
 
-// Forward declerations
-class MaterialPropertyDebugOutput;
 class MaterialBase;
 class MooseObjectName;
-
-template <>
-InputParameters validParams<MaterialPropertyDebugOutput>();
 
 /**
  * A class for producing various debug related outputs

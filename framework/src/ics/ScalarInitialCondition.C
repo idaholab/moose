@@ -12,8 +12,6 @@
 #include "FEProblem.h"
 #include "SystemBase.h"
 
-defineLegacyParams(ScalarInitialCondition);
-
 InputParameters
 ScalarInitialCondition::validParams()
 {

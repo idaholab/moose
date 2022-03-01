@@ -14,8 +14,6 @@
 
 registerMooseObject("MooseApp", MemoryUsage);
 
-defineLegacyParams(MemoryUsage);
-
 InputParameters
 MemoryUsage::validParams()
 {

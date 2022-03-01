@@ -12,12 +12,6 @@
 // MOOSE includes
 #include "NodalUserObject.h"
 
-// Forward Declarations
-class VerifyNodalUniqueID;
-
-template <>
-InputParameters validParams<VerifyNodalUniqueID>();
-
 class VerifyNodalUniqueID : public NodalUserObject
 {
 public:

@@ -841,6 +841,11 @@ public:
   template <typename T>
   bool isType(const std::string & name) const;
 
+  /**
+   * @returns True if these parameters were constructed using the legacy method.
+   **/
+  bool fromLegacyConstruction() const { return _from_legacy_construction; }
+
 private:
   // Private constructor so that InputParameters can only be created in certain places.
   InputParameters();
@@ -996,6 +1001,9 @@ private:
   /// A flag for toggling the error message in the copy constructor.
   bool _allow_copy;
 
+  /// Whether or not these parameters were constructed using legacy contruction (remove with #19440)
+  bool _from_legacy_construction;
+
   /// A map from deprecated coupled variable names to the new blessed name
   std::unordered_map<std::string, std::string> _new_to_deprecated_coupled_vars;
 
@@ -1003,6 +1011,10 @@ private:
   friend InputParameters emptyInputParameters();
   friend class InputParameterWarehouse;
   friend class Parser;
+
+  // For setting _from_legacy_construction (remove with #19440)
+  template <typename T>
+  friend InputParameters validParams();
 };
 
 template <typename T>
@@ -1645,14 +1657,13 @@ validParams()
   // should get an error - so it is okay for us to try to call the new
   // validParams static function - which will error if they didn't implement
   // the new function
-  // The SFINAE for toggling between old and new-style templating in
-  // callValidParams() will always see this function and call it even if
-  // an object has *only* the new style validParams. Therefore, we
-  // set _called_legacy_params to false so that we can avoid throwing
-  // a warning for using legacy parameters even though callValidParams()
-  // will result in calling validParams<T>. This is in support of #19439.
   auto params = T::validParams();
-  params.template addPrivateParam<bool>("_called_legacy_params", false);
+
+  // If calling the static member method worked, we didn't build these parameters
+  // using the legacy method. Therefore, we won't throw an error for this object
+  // in CheckLegacyParamsAction. This should be removed with the closure of #19439.
+  params._from_legacy_construction = false;
+
   return params;
 }
 
@@ -1660,40 +1671,20 @@ namespace moose
 {
 namespace internal
 {
-template <typename T>
-auto
-callValidParamsInner(long) -> decltype(T::validParams(), emptyInputParameters())
-{
-  return T::validParams();
-}
-
-template <typename T>
-auto
-callValidParamsInner(int) -> decltype(validParams<T>(), emptyInputParameters())
-{
-  auto params = validParams<T>();
-  // If we're calling the legacy validParams<T> method, we want to keep
-  // track of it so that we can throw a warning. But, we must make sure
-  // we didn't get here via the general definition of validParams<T>,
-  // which actually calls the correct T::validParams method
-  // This is in support of #19439
-  if (!params.template have_parameter<bool>("_called_legacy_params"))
-    params.template addPrivateParam<bool>("_called_legacy_params", true);
-  return params;
-}
-
 /**
  * Calls the valid parameter method for the object of type T.
  *
- * Uses SFINAE with callValidParamsInner() to access the legacy
- * parameter construction method validParams<T> in the event that
- * the new construction method T::validParams is not available.
+ * This isn't necessary anymore, but is hanging around until we finally
+ * get rid of all mention of the legacy parameter construction. Once
+ * #19439 is closed, we can replace
+ * moose::internal::callValidParams<T>() -> T::validParams(), and we
+ * should return T::validParams() here instead.
  */
 template <typename T>
-auto
-callValidParams() -> decltype(callValidParamsInner<T>(0), emptyInputParameters())
+InputParameters
+callValidParams()
 {
-  return callValidParamsInner<T>(0);
+  return validParams<T>();
 }
 }
 }

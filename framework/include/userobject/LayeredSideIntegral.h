@@ -13,12 +13,6 @@
 #include "SideIntegralVariableUserObject.h"
 #include "LayeredBase.h"
 
-// Forward Declarations
-class LayeredSideIntegral;
-
-template <>
-InputParameters validParams<LayeredSideIntegral>();
-
 /**
  * This UserObject computes volume integrals of a variable storing
  * partial sums for the specified number of intervals in a direction

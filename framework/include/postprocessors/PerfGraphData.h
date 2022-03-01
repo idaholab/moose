@@ -11,12 +11,6 @@
 
 #include "GeneralPostprocessor.h"
 
-// Forward Declarations
-class PerfGraphData;
-
-template <>
-InputParameters validParams<PerfGraphData>();
-
 class PerfGraphData : public GeneralPostprocessor
 {
 public:

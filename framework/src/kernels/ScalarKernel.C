@@ -10,8 +10,6 @@
 #include "ScalarKernel.h"
 #include "MooseVariableScalar.h"
 
-defineLegacyParams(ScalarKernel);
-
 InputParameters
 ScalarKernel::validParams()
 {

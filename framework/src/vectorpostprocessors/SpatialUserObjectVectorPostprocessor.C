@@ -13,8 +13,6 @@
 
 registerMooseObject("MooseApp", SpatialUserObjectVectorPostprocessor);
 
-defineLegacyParams(SpatialUserObjectVectorPostprocessor);
-
 InputParameters
 SpatialUserObjectVectorPostprocessor::validParams()
 {

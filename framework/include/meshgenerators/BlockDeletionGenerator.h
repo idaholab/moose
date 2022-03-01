@@ -11,12 +11,6 @@
 
 #include "ElementDeletionGeneratorBase.h"
 
-// Forward declarations
-class BlockDeletionGenerator;
-
-template <>
-InputParameters validParams<BlockDeletionGenerator>();
-
 /**
  * MeshGenerator for removing blocks from the mesh
  */

@@ -11,11 +11,6 @@
 
 #include "FunctorRelationshipManager.h"
 
-class MooseGhostPointNeighbors;
-
-template <>
-InputParameters validParams<MooseGhostPointNeighbors>();
-
 /**
  * MooseGhostPointNeighbors is used to increase the halo or stencil depth of each processor's
  * partition. It is useful when non-local element resources are needed when using DistributedMesh.

@@ -15,8 +15,6 @@
 
 #include <memory>
 
-defineLegacyParams(OrientedBoxInterface);
-
 InputParameters
 OrientedBoxInterface::validParams()
 {

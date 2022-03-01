@@ -12,8 +12,6 @@
 
 registerMooseObject("MooseApp", VectorFunctionAux);
 
-defineLegacyParams(VectorFunctionAux);
-
 InputParameters
 VectorFunctionAux::validParams()
 {

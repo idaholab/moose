@@ -11,12 +11,7 @@
 
 #include "MultiApp.h"
 
-// Forward declarations
-class FullSolveMultiApp;
 class Executioner;
-
-template <>
-InputParameters validParams<FullSolveMultiApp>();
 
 /**
  * This type of MultiApp will do a full solve when it is asked to take a step.

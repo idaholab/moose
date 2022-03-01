@@ -11,8 +11,6 @@
 
 registerMooseObject("MooseApp", ArrayPenaltyDirichletBC);
 
-defineLegacyParams(ArrayPenaltyDirichletBC);
-
 InputParameters
 ArrayPenaltyDirichletBC::validParams()
 {

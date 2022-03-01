@@ -17,8 +17,6 @@
 
 registerMooseObject("MooseApp", ExplicitSSPRungeKutta);
 
-defineLegacyParams(ExplicitSSPRungeKutta);
-
 InputParameters
 ExplicitSSPRungeKutta::validParams()
 {

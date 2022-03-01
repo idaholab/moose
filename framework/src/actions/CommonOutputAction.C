@@ -27,8 +27,6 @@
 registerMooseAction("MooseApp", CommonOutputAction, "common_output");
 registerMooseAction("MooseApp", CommonOutputAction, "add_output");
 
-defineLegacyParams(CommonOutputAction);
-
 InputParameters
 CommonOutputAction::validParams()
 {

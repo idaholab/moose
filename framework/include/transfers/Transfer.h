@@ -15,8 +15,6 @@
 #include "SetupInterface.h"
 #include "Restartable.h"
 
-// Forward declarations
-class Transfer;
 class SubProblem;
 class FEProblemBase;
 class FEProblem;
@@ -27,9 +25,6 @@ namespace libMesh
 class System;
 class EquationSystems;
 }
-
-template <>
-InputParameters validParams<Transfer>();
 
 /**
  * Base class for all Transfer objects.

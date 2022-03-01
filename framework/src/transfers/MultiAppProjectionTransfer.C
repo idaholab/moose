@@ -40,8 +40,6 @@ assemble_l2(EquationSystems & es, const std::string & system_name)
 
 registerMooseObject("MooseApp", MultiAppProjectionTransfer);
 
-defineLegacyParams(MultiAppProjectionTransfer);
-
 InputParameters
 MultiAppProjectionTransfer::validParams()
 {

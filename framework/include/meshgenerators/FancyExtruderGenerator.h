@@ -13,12 +13,6 @@
 
 #include "libmesh/point.h"
 
-// Forward declarations
-class FancyExtruderGenerator;
-
-template <>
-InputParameters validParams<FancyExtruderGenerator>();
-
 /**
  * Extrudes a mesh to another dimension
  */

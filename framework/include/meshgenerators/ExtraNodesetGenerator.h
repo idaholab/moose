@@ -11,12 +11,6 @@
 
 #include "MeshGenerator.h"
 
-// Forward declarations
-class ExtraNodesetGenerator;
-
-template <>
-InputParameters validParams<ExtraNodesetGenerator>();
-
 /*
  * Mesh generator to create a new node set and a new boundary with the nodes the user provides
  */

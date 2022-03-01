@@ -12,13 +12,11 @@
 
 registerMooseObject("MooseApp", NearestPointIntegralVariablePostprocessor);
 
-defineLegacyParams(NearestPointIntegralVariablePostprocessor);
-
 InputParameters
 NearestPointIntegralVariablePostprocessor::validParams()
 {
-  InputParameters params = nearestPointBaseValidParams<ElementIntegralVariablePostprocessor,
-                                                       ElementVariableVectorPostprocessor>();
+  InputParameters params = NearestPointBase<ElementIntegralVariablePostprocessor,
+                                            ElementVariableVectorPostprocessor>::validParams();
 
   params.addClassDescription(
       "Compute element variable integrals for nearest-point based subdomains");

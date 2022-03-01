@@ -12,12 +12,6 @@
 // MOOSE includes
 #include "FileOutput.h"
 
-// Forward declerations
-class SolutionHistory;
-
-template <>
-InputParameters validParams<SolutionHistory>();
-
 /**
  * Based class for adding basic filename support to output base class
  *

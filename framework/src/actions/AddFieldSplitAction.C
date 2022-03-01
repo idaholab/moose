@@ -14,8 +14,6 @@
 
 registerMooseAction("MooseApp", AddFieldSplitAction, "add_field_split");
 
-defineLegacyParams(AddFieldSplitAction);
-
 InputParameters
 AddFieldSplitAction::validParams()
 {

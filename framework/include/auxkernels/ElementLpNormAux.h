@@ -12,12 +12,6 @@
 // MOOSE includes
 #include "AuxKernel.h"
 
-// Forward declarations
-class ElementLpNormAux;
-
-template <>
-InputParameters validParams<ElementLpNormAux>();
-
 /**
  * Compute an elemental field variable (single value per element)
  * equal to the Lp-norm of a coupled Variable.

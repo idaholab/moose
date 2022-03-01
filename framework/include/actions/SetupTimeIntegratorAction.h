@@ -11,11 +11,6 @@
 
 #include "MooseObjectAction.h"
 
-class SetupTimeIntegratorAction;
-
-template <>
-InputParameters validParams<SetupTimeIntegratorAction>();
-
 /**
  *
  */

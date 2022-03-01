@@ -11,12 +11,6 @@
 
 #include "MeshGenerator.h"
 
-// Forward declarations
-class ElementSubdomainIDGenerator;
-
-template <>
-InputParameters validParams<ElementSubdomainIDGenerator>();
-
 /**
  * MeshGenerator for assigning subdomain IDs of all elements
  */

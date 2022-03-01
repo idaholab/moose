@@ -279,11 +279,3 @@ NearestPointBase<UserObjectType, BaseType>::spatialPoints() const
 
   return points;
 }
-
-// Deprecated method that will be removed in #19440
-template <typename UserObjectType, typename BaseType>
-InputParameters
-nearestPointBaseValidParams()
-{
-  return NearestPointBase<UserObjectType, BaseType>::validParams();
-}

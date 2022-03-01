@@ -17,7 +17,7 @@ InputParameters
 NearestRadiusLayeredAverage::validParams()
 {
   InputParameters params =
-      nearestPointBaseValidParams<LayeredAverage, ElementIntegralVariableUserObject>();
+      NearestPointBase<LayeredAverage, ElementIntegralVariableUserObject>::validParams();
 
   // this object sets 'dist_norm' so the user shouldn't input it
   params.set<MooseEnum>("dist_norm") = "radius";

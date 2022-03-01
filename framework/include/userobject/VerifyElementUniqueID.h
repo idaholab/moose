@@ -12,12 +12,6 @@
 // MOOSE includes
 #include "ElementUserObject.h"
 
-// Forward Declarations
-class VerifyElementUniqueID;
-
-template <>
-InputParameters validParams<VerifyElementUniqueID>();
-
 class VerifyElementUniqueID : public ElementUserObject
 {
 public:

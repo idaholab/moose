@@ -20,8 +20,6 @@
 
 registerMooseObject("MooseApp", CartesianMeshGenerator);
 
-defineLegacyParams(CartesianMeshGenerator);
-
 InputParameters
 CartesianMeshGenerator::validParams()
 {

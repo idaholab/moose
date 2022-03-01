@@ -14,8 +14,6 @@
 #include <algorithm>
 #include <functional>
 
-defineLegacyParams(TimeSequenceStepperBase);
-
 InputParameters
 TimeSequenceStepperBase::validParams()
 {

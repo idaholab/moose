@@ -11,12 +11,6 @@
 
 #include "EigenExecutionerBase.h"
 
-// Forward Declarations
-class NonlinearEigen;
-
-template <>
-InputParameters validParams<NonlinearEigen>();
-
 class NonlinearEigen : public EigenExecutionerBase
 {
 public:

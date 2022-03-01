@@ -11,11 +11,6 @@
 
 #include "MooseObjectAction.h"
 
-class AddVectorPostprocessorAction;
-
-template <>
-InputParameters validParams<AddVectorPostprocessorAction>();
-
 class AddVectorPostprocessorAction : public MooseObjectAction
 {
 public:

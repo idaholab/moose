@@ -14,12 +14,6 @@
 #include "NearestPointBase.h"
 #include "LayeredAverage.h"
 
-// Forward Declarations
-class NearestPointLayeredAverage;
-
-template <>
-InputParameters validParams<NearestPointLayeredAverage>();
-
 /**
  * This UserObject computes averages of a variable storing partial
  * sums for the specified number of intervals in a direction (x,y,z).

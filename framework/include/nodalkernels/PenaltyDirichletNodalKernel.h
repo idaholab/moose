@@ -11,12 +11,6 @@
 
 #include "NodalKernel.h"
 
-// Forward Declarations
-class PenaltyDirichletNodalKernel;
-
-template <>
-InputParameters validParams<PenaltyDirichletNodalKernel>();
-
 class PenaltyDirichletNodalKernel : public NodalKernel
 {
 public:

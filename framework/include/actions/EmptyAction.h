@@ -11,11 +11,6 @@
 
 #include "Action.h"
 
-class EmptyAction;
-
-template <>
-InputParameters validParams<EmptyAction>();
-
 /**
  * Do nothing action.
  */

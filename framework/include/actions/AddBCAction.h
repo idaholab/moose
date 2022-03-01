@@ -11,11 +11,6 @@
 
 #include "MooseObjectAction.h"
 
-class AddBCAction;
-
-template <>
-InputParameters validParams<AddBCAction>();
-
 class AddBCAction : public MooseObjectAction
 {
 public:

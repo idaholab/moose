@@ -12,11 +12,6 @@
 #include "Function.h"
 #include "FunctionInterface.h"
 
-class LinearCombinationFunction;
-
-template <>
-InputParameters validParams<LinearCombinationFunction>();
-
 /**
  * Sum_over_i (w_i * functions_i)
  */

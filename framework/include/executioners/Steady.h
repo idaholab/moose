@@ -16,14 +16,10 @@
 
 // Forward declarations
 class InputParameters;
-class Steady;
 class FEProblemBase;
 
 template <typename T>
 InputParameters validParams();
-
-template <>
-InputParameters validParams<Steady>();
 
 /**
  * Steady executioners usually only call "solve()" on the NonlinearSystem once.

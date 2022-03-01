@@ -11,12 +11,6 @@
 
 #include "ElementIntegralVariablePostprocessor.h"
 
-// Forward Declarations
-class VariableInnerProduct;
-
-template <>
-InputParameters validParams<VariableInnerProduct>();
-
 class VariableInnerProduct : public ElementIntegralVariablePostprocessor
 {
 public:

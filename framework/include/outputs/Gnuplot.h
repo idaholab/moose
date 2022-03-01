@@ -12,12 +12,6 @@
 // MOOSE includes
 #include "TableOutput.h"
 
-// Forward declarations
-class Gnuplot;
-
-template <>
-InputParameters validParams<Gnuplot>();
-
 /**
  * Based class for adding basic filename support to output base class
  *

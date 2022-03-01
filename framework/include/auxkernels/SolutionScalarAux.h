@@ -11,11 +11,7 @@
 
 #include "AuxScalarKernel.h"
 
-class SolutionScalarAux;
 class SolutionUserObject;
-
-template <>
-InputParameters validParams<SolutionScalarAux>();
 
 /**
  * AuxScalarKernel for reading a solution from file.

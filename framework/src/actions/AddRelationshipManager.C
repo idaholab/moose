@@ -19,8 +19,6 @@ registerMooseAction("MooseApp", AddRelationshipManager, "add_geometric_rm");
 registerMooseAction("MooseApp", AddRelationshipManager, "add_algebraic_rm");
 registerMooseAction("MooseApp", AddRelationshipManager, "add_coupling_rm");
 
-defineLegacyParams(AddRelationshipManager);
-
 InputParameters
 AddRelationshipManager::validParams()
 {

@@ -12,8 +12,6 @@
 
 registerMooseAction("MooseApp", AddFunctionAction, "add_function");
 
-defineLegacyParams(AddFunctionAction);
-
 InputParameters
 AddFunctionAction::validParams()
 {

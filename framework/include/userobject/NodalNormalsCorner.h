@@ -11,11 +11,7 @@
 
 #include "SideUserObject.h"
 
-class NodalNormalsCorner;
 class AuxiliarySystem;
-
-template <>
-InputParameters validParams<NodalNormalsCorner>();
 
 /**
  *

@@ -52,9 +52,7 @@ CheckLegacyParamsAction::act()
         if (Registry::isRegisteredObj(object_name))
         {
           const auto params = entry._params_ptr();
-          if (params.template have_parameter<bool>("_called_legacy_params") &&
-              params.template get<bool>("_called_legacy_params") &&
-              (label != "MooseApp" || for_test))
+          if (params.fromLegacyConstruction() || for_test)
             objects.insert(std::make_pair(object_name, label));
         }
       }
@@ -68,29 +66,28 @@ CheckLegacyParamsAction::act()
   for (const auto & app_param_ptr_pair : AppFactory::instance().registeredObjectParamPointers())
   {
     const auto params = app_param_ptr_pair.second();
-    if (params.have_parameter<bool>("_called_legacy_params") &&
-        params.get<bool>("_called_legacy_params"))
+    if (params.fromLegacyConstruction() || for_test)
       objects.insert(std::make_pair(app_param_ptr_pair.first, ""));
   }
 
   if (objects.size())
   {
-    std::stringstream warning;
-    warning << "The following object(s) are constructed using the legacy input parameter "
-               "construction:\n\n";
+    std::stringstream err;
+    err << "The following object(s) are constructed using the legacy input parameter "
+           "construction:\n\n";
     for (const auto & object_label_pair : objects)
     {
-      warning << "  " << object_label_pair.first;
+      err << "  " << object_label_pair.first;
       if (object_label_pair.second.size())
-        warning << " (" << object_label_pair.second << ")";
-      warning << "\n";
+        err << " (" << object_label_pair.second << ")";
+      err << "\n";
     }
 
-    warning
-        << "\nConvert InputParameters validParams<T>() for each object into a static"
+    err << "\nLegacy input parameter construction is no longer supported."
+        << "\n\nConvert InputParameters validParams<T>() for each object into a static"
         << "\nmember function InputParameters T::validParams() and remove the old function."
         << "\n\nSee mooseframework.org/newsletter/2021_11.html#legacy-input-parameter-deprecation"
         << "\nfor more information.\n";
-    mooseDeprecated(warning.str());
+    mooseError(err.str());
   }
 }

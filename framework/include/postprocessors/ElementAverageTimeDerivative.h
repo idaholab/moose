@@ -11,12 +11,6 @@
 
 #include "ElementAverageValue.h"
 
-// Forward Declarations
-class ElementAverageTimeDerivative;
-
-template <>
-InputParameters validParams<ElementAverageTimeDerivative>();
-
 /**
  * This postprocessor computes a volume integral of the time derivative of a given variable.
  */

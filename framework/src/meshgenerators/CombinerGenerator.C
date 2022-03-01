@@ -21,8 +21,6 @@
 
 registerMooseObject("MooseApp", CombinerGenerator);
 
-defineLegacyParams(CombinerGenerator);
-
 InputParameters
 CombinerGenerator::validParams()
 {

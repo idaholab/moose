@@ -16,8 +16,6 @@
 
 registerMooseObject("MooseApp", IntersectionPointsAlongLine);
 
-defineLegacyParams(IntersectionPointsAlongLine);
-
 InputParameters
 IntersectionPointsAlongLine::validParams()
 {

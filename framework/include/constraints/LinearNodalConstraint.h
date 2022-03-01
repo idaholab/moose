@@ -11,11 +11,6 @@
 
 #include "NodalConstraint.h"
 
-class LinearNodalConstraint;
-
-template <>
-InputParameters validParams<LinearNodalConstraint>();
-
 /**
  * The secondary node variable is programmed as a linear combination of
  * the primary node variables (i.e, secondary_var = a_1*primary_var_1+

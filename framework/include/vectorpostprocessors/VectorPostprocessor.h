@@ -22,14 +22,10 @@
 class FEProblemBase;
 class InputParameters;
 class SamplerBase;
-class VectorPostprocessor;
 class VectorPostprocessorData;
 
 template <typename T>
 InputParameters validParams();
-
-template <>
-InputParameters validParams<VectorPostprocessor>();
 
 /**
  * Base class for Postprocessors that produce a vector of values.

@@ -15,12 +15,7 @@
 
 #include "libmesh/fe_type.h"
 
-// Forward declarations
-class NodalNormalsPreprocessor;
 class AuxiliarySystem;
-
-template <>
-InputParameters validParams<NodalNormalsPreprocessor>();
 
 /**
  * An ElementUserObject that prepares MOOSE for computing nodal

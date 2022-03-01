@@ -14,8 +14,6 @@
 
 #include "libmesh/mesh_tools.h"
 
-defineLegacyParams(MeshBaseImageSampler);
-
 InputParameters
 MeshBaseImageSampler::validParams()
 {

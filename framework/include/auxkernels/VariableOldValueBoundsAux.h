@@ -11,12 +11,6 @@
 
 #include "BoundsAuxBase.h"
 
-// Forward Declarations
-class VariableOldValueBoundsAux;
-
-template <>
-InputParameters validParams<VariableOldValueBoundsAux>();
-
 /**
  * Provides a bound of a variable using its old value.
  */

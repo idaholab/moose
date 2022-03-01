@@ -12,11 +12,6 @@
 #include "MeshGenerator.h"
 #include "MooseEnum.h"
 
-class PatchMeshGenerator;
-
-template <>
-InputParameters validParams<PatchMeshGenerator>();
-
 /*
  * Mesh generator to generate 2D or 3D mesh patches
  */

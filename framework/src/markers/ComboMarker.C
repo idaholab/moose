@@ -11,8 +11,6 @@
 
 registerMooseObject("MooseApp", ComboMarker);
 
-defineLegacyParams(ComboMarker);
-
 InputParameters
 ComboMarker::validParams()
 {

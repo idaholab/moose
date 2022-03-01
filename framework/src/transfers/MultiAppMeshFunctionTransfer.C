@@ -26,7 +26,6 @@
 #include "timpi/communicator.h"
 #include "timpi/parallel_sync.h"
 
-defineLegacyParams(MultiAppMeshFunctionTransfer);
 registerMooseObject("MooseApp", MultiAppMeshFunctionTransfer);
 
 InputParameters

@@ -20,15 +20,6 @@
 class FEProblemBase;
 class Assembly;
 
-template <typename>
-class InitialConditionTempl;
-template <>
-InputParameters validParams<InitialConditionTempl<Real>>();
-template <>
-InputParameters validParams<InitialConditionTempl<RealVectorValue>>();
-template <>
-InputParameters validParams<InitialConditionTempl<RealEigenVector>>();
-
 /**
  * This is a template class that implements the workhorse `compute` and `computeNodal` methods. The
  * former method is used for setting block initial conditions. It first projects the initial

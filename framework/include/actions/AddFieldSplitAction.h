@@ -11,11 +11,6 @@
 
 #include "MooseObjectAction.h"
 
-class AddFieldSplitAction;
-
-template <>
-InputParameters validParams<AddFieldSplitAction>();
-
 class AddFieldSplitAction : public MooseObjectAction
 {
 public:

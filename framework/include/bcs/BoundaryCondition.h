@@ -16,11 +16,6 @@
 #include "GeometricSearchInterface.h"
 #include "BoundaryRestrictableRequired.h"
 
-class BoundaryCondition;
-
-template <>
-InputParameters validParams<BoundaryCondition>();
-
 /**
  * Base class for creating new types of boundary conditions.
  */

@@ -12,12 +12,6 @@
 #include "IntegratedBCBase.h"
 #include "MooseVariableInterface.h"
 
-// Forward declarations
-class VectorIntegratedBC;
-
-template <>
-InputParameters validParams<VectorIntegratedBC>();
-
 /**
  * Base class for deriving any boundary condition of a integrated type
  */

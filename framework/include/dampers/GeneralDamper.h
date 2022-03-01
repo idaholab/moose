@@ -12,13 +12,8 @@
 // Moose Includes
 #include "Damper.h"
 
-// Forward Declarations
-class GeneralDamper;
 class SubProblem;
 class SystemBase;
-
-template <>
-InputParameters validParams<GeneralDamper>();
 
 /**
  * Base class for deriving general dampers

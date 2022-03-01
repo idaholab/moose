@@ -13,12 +13,6 @@
 
 #include "libmesh/point.h"
 
-// Forward declarations
-class SideSetsAroundSubdomainGenerator;
-
-template <>
-InputParameters validParams<SideSetsAroundSubdomainGenerator>();
-
 /**
  * Adds the faces on the boundary of given block
  * to the sidesets specified by "boundary"

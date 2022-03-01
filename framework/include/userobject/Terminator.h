@@ -16,12 +16,6 @@
 #include "GeneralUserObject.h"
 #include "libmesh/fparser.hh"
 
-// Forward Declarations
-class Terminator;
-
-template <>
-InputParameters validParams<Terminator>();
-
 /**
  * This Userobject requests termination of the current solve based on
  * the values of Postprocessors (and a logical expression testing them)

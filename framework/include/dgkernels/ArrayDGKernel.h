@@ -13,11 +13,6 @@
 
 #include "MooseVariableScalar.h"
 
-class ArrayDGKernel;
-
-template <>
-InputParameters validParams<ArrayDGKernel>();
-
 /**
  * The DGKernel class is responsible for calculating the residuals for various
  * physics on internal sides (edges/faces).

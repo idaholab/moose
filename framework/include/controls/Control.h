@@ -19,13 +19,8 @@
 #include "PostprocessorInterface.h"
 #include "VectorPostprocessorInterface.h"
 
-// Forward declarations
-class Control;
 class FEProblemBase;
 class InputParameterWarehouse;
-
-template <>
-InputParameters validParams<Control>();
 
 /**
  * Base class for Control objects.

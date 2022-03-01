@@ -12,8 +12,6 @@
 #include "SubProblem.h"
 #include "Conversion.h"
 
-defineLegacyParams(Damper);
-
 InputParameters
 Damper::validParams()
 {

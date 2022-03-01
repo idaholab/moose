@@ -11,8 +11,6 @@
 
 registerMooseObject("MooseApp", MaterialRealDenseMatrixAux);
 
-defineLegacyParams(MaterialRealDenseMatrixAux);
-
 InputParameters
 MaterialRealDenseMatrixAux::validParams()
 {

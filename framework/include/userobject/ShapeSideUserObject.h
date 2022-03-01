@@ -12,12 +12,6 @@
 #include "SideUserObject.h"
 #include "ShapeUserObject.h"
 
-// Forward Declarations
-class ShapeSideUserObject;
-
-template <>
-InputParameters validParams<ShapeSideUserObject>();
-
 /**
  * SideUserObject class in which the _phi and _grad_phi shape function data
  * is available and correctly initialized on EXEC_NONLINEAR (the Jacobian calculation).

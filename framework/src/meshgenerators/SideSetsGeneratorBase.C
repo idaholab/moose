@@ -20,8 +20,6 @@
 #include "libmesh/fe_base.h"
 #include "libmesh/elem.h"
 
-defineLegacyParams(SideSetsGeneratorBase);
-
 InputParameters
 SideSetsGeneratorBase::validParams()
 {

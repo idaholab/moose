@@ -13,11 +13,6 @@
 #include "FEProblemBase.h"
 #include "libmesh/parallel.h"
 
-class Postprocessor;
-
-template <>
-InputParameters validParams<Postprocessor>();
-
 /**
  * Base class for all Postprocessors.  Defines a name and sets up the
  * virtual getValue() interface which must be overridden by derived

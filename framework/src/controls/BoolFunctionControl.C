@@ -12,8 +12,6 @@
 
 registerMooseObject("MooseApp", BoolFunctionControl);
 
-defineLegacyParams(BoolFunctionControl);
-
 InputParameters
 BoolFunctionControl::validParams()
 {

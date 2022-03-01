@@ -11,8 +11,6 @@
 
 using namespace Moose;
 
-defineLegacyParams(Function);
-
 template <typename T>
 InputParameters
 FunctionTempl<T>::validParams()

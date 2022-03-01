@@ -13,12 +13,6 @@
 #include "Marker.h"
 #include "OrientedBoxInterface.h"
 
-// Forward declarations
-class OrientedBoxMarker;
-
-template <>
-InputParameters validParams<OrientedBoxMarker>();
-
 /**
  * Creates a box of specified width, length and height,
  * with its center at specified position,

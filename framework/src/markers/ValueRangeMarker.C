@@ -13,8 +13,6 @@
 
 registerMooseObject("MooseApp", ValueRangeMarker);
 
-defineLegacyParams(ValueRangeMarker);
-
 InputParameters
 ValueRangeMarker::validParams()
 {

@@ -20,17 +20,11 @@
 
 #include "Assembly.h"
 
-// Forward Declarations
-class DGKernelBase;
-
 #define usingDGKernelBaseMembers                                                                   \
   usingNeighborCoupleableMembers;                                                                  \
   usingFunctionInterfaceMembers;                                                                   \
   usingBlockRestrictableMembers;                                                                   \
   usingTransientInterfaceMembers
-
-template <>
-InputParameters validParams<DGKernelBase>();
 
 /**
  * Serves as a base class for DGKernel and ADDGKernel

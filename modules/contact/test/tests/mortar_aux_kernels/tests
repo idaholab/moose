@@ -48,4 +48,30 @@
                   'input file.'
 
   []
+  [frictional-mortar-3d-status]
+    type = 'Exodiff'
+    exodiff = 'frictional-mortar-3d-status_out.e'
+    input = 'frictional-mortar-3d-status.i'
+    rel_err = 1.0e-3
+    abs_zero = 1.0e-4
+    min_parallel = 1
+    max_parallel = 2
+    min_ad_size = '100'
+    ad_indexing_type = 'global'
+    cli_args = 'AuxKernels/frictional_state/tangent_two=mortar_tangential_3d_lm'
+    requirement = 'Contact module shall compute nodal frictional status of mortar surfaces for a '
+                  'simple problem in which nodes are in stick and slip states.'
+  []
+  [frictional-mortar-3d-status-error]
+    type = RunException
+    input = 'frictional-mortar-3d-status.i'
+    expect_err = 'tangent_two: MortarFrictionalStateAux auxiliary kernel requires a second tangent Lagrange multiplier for three-dimensional problems'
+    min_parallel = 1
+    max_parallel = 2
+    min_ad_size = '100'
+    ad_indexing_type = 'global'
+    requirement = 'Contact module shall generate an informative error if the nodal frictional status '
+                  'auxiliary kernel is not provided a second frictional Lagrange multiplier for a '
+                  'three-dimensional problem.'
+  []
 []

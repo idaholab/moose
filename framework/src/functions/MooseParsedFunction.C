@@ -17,8 +17,6 @@
 registerMooseObjectAliased("MooseApp", MooseParsedFunction, "ParsedFunction");
 registerMooseObjectAliased("MooseApp", ADMooseParsedFunction, "ADParsedFunction");
 
-defineLegacyParams(MooseParsedFunction);
-
 template <typename T>
 InputParameters
 MooseParsedFunctionTempl<T>::validParams()

@@ -15,11 +15,7 @@
 
 // Forward declarations
 class Distribution;
-class DistributionInterface;
 class FEProblemBase;
-
-template <>
-InputParameters validParams<DistributionInterface>();
 
 /**
  * Interface for objects that need to use distributions

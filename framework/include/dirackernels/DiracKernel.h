@@ -19,12 +19,6 @@
 #include "MooseVariableInterface.h"
 #include "BlockRestrictable.h"
 
-// Forward Declarations
-class DiracKernel;
-
-template <>
-InputParameters validParams<DiracKernel>();
-
 /**
  * A DiracKernel is used when you need to add contributions to the residual by means of
  * multiplying some number by the shape functions on an element and adding the value into

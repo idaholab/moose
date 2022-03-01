@@ -12,12 +12,6 @@
 // MOOSE includes
 #include "OversampleOutput.h"
 
-// Forward declerations
-class VTKOutput;
-
-template <>
-InputParameters validParams<VTKOutput>();
-
 /**
  *
  */

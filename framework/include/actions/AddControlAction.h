@@ -12,12 +12,6 @@
 // MOOSE includes
 #include "MooseObjectAction.h"
 
-// Forward declarations
-class AddControlAction;
-
-template <>
-InputParameters validParams<AddControlAction>();
-
 /**
  * Action for creating Control objects
  *

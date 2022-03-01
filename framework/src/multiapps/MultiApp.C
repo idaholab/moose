@@ -41,8 +41,6 @@
 #include <sys/utsname.h>
 #endif
 
-defineLegacyParams(MultiApp);
-
 InputParameters
 MultiApp::validParams()
 {

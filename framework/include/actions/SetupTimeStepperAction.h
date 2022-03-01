@@ -11,11 +11,6 @@
 
 #include "MooseObjectAction.h"
 
-class SetupTimeStepperAction;
-
-template <>
-InputParameters validParams<SetupTimeStepperAction>();
-
 /**
  *
  */

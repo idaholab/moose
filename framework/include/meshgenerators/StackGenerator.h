@@ -13,12 +13,6 @@
 #include "libmesh/replicated_mesh.h"
 #include "MooseEnum.h"
 
-// Forward declarations
-class StackGenerator;
-
-template <>
-InputParameters validParams<StackGenerator>();
-
 /**
  * Take several 3D meshes and stitch them on top of each other like a stack.
  */
