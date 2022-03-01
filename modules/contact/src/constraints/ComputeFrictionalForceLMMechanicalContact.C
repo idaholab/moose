@@ -244,6 +244,7 @@ ComputeFrictionalForceLMMechanicalContact::incorrectEdgeDroppingPost(
       continue;
 
     _weighted_gap_ptr = &_dof_to_weighted_gap[dof].first;
+    _normalization_ptr = &_dof_to_weighted_gap[dof].second;
     _tangential_vel_ptr[0] = &pr.second[0];
 
     if (_3d)
@@ -296,7 +297,7 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(const DofObj
   else
   {
     // Espilon to avoid automatic differentiation singularity
-    const Real epsilon_sqrt = 1.0e-14;
+    const Real epsilon_sqrt = 1.0e-48;
 
     const auto lamdba_plus_cg = contact_pressure + c * weighted_gap;
     std::array<ADReal, 2> lambda_t_plus_ctu;

@@ -205,7 +205,6 @@ ComputeDynamicFrictionalForceLMMechanicalContact::post()
     // identified to be into contact.
 
     _weighted_gap_ptr = &_dof_to_weighted_gap[dof].first;
-
     _normalization_ptr = &_dof_to_weighted_gap[dof].second;
     _tangential_vel_ptr[0] = &(pr.second[0]);
 
@@ -238,7 +237,7 @@ ComputeDynamicFrictionalForceLMMechanicalContact::incorrectEdgeDroppingPost(
 
     // Use always weighted gap for dynamic PDASS
     _weighted_gap_ptr = &_dof_to_weighted_gap[dof].first;
-
+    _normalization_ptr = &_dof_to_weighted_gap[dof].second;
     _tangential_vel_ptr[0] = &pr.second[0];
 
     if (_3d)
@@ -289,7 +288,7 @@ ComputeDynamicFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(
   }
   else
   {
-    const Real epsilon_sqrt = 1.0e-14;
+    const Real epsilon_sqrt = 1.0e-48;
 
     const auto lamdba_plus_cg = contact_pressure + c * weighted_gap;
     std::array<ADReal, 2> lambda_t_plus_ctu;
