@@ -42,6 +42,7 @@ dataStore(std::ostream & stream, FeatureFloodCount::FeatureData & feature, void 
   storeHelper(stream, feature._var_index, context);
   storeHelper(stream, feature._id, context);
   storeHelper(stream, feature._bboxes, context);
+  storeHelper(stream, feature._adjacent_grain_id, context);
   storeHelper(stream, feature._orig_ids, context);
   storeHelper(stream, feature._min_entity_id, context);
   storeHelper(stream, feature._vol_count, context);
@@ -73,6 +74,7 @@ dataLoad(std::istream & stream, FeatureFloodCount::FeatureData & feature, void *
   loadHelper(stream, feature._var_index, context);
   loadHelper(stream, feature._id, context);
   loadHelper(stream, feature._bboxes, context);
+  loadHelper(stream, feature._adjacent_grain_id, context);
   loadHelper(stream, feature._orig_ids, context);
   loadHelper(stream, feature._min_entity_id, context);
   loadHelper(stream, feature._vol_count, context);
@@ -704,6 +706,17 @@ FeatureFloodCount::getVarToFeatureVector(dof_id_type elem_id) const
 void
 FeatureFloodCount::scatterAndUpdateRanks()
 {
+
+  // create _adjacent_grain_id
+  unsigned int _num_feature;
+  for (MooseIndex(_feature_sets) _num_feature = 0; _num_feature < _feature_sets.size(); ++_num_feature)
+  {
+      _feature_sets[_num_feature]._adjacent_grain_id.clear();  // reset _adjacent_grain_id
+      _feature_sets[_num_feature]._adjacent_grain_id = createAdjacentGrainMap(_num_feature); 
+
+  }  
+
+
   // local to global map (one per processor)
   std::vector<int> counts;
   std::vector<std::size_t> local_to_global_all;
@@ -810,6 +823,61 @@ FeatureFloodCount::getFeatureVar(unsigned int feature_id) const
   }
 
   return invalid_id;
+}
+
+unsigned int
+FeatureFloodCount::getFeatureID(unsigned int feature_id) const
+{   
+  if (feature_id >= _feature_id_to_local_index.size())
+    return invalid_id;
+
+  auto local_index = _feature_id_to_local_index[feature_id];
+  if (local_index != invalid_size_t)
+  {
+    mooseAssert(local_index < _feature_sets.size(), "local_index out of bounds");
+
+    return _feature_sets[local_index]._status != Status::INACTIVE
+               ? _feature_sets[local_index]._id
+               : invalid_id;
+  }
+
+  return invalid_id;
+}
+
+unsigned int
+FeatureFloodCount::getAdjacentGrainNum(unsigned int feature_id) const
+{   
+  if (feature_id >= _feature_id_to_local_index.size())
+    return invalid_id;
+
+  auto local_index = _feature_id_to_local_index[feature_id];
+  if (local_index != invalid_size_t)
+  {
+    mooseAssert(local_index < _feature_sets.size(), "local_index out of bounds");
+
+    return _feature_sets[local_index]._status != Status::INACTIVE
+               ? _feature_sets[local_index]._adjacent_grain_id.size()
+               : invalid_id;
+  }
+
+  return invalid_id;
+}
+
+std::vector<unsigned int> 
+FeatureFloodCount::createAdjacentGrainMap(int num_feature)
+{
+  unsigned int i = num_feature;
+  std::vector<unsigned int> adjacent_grain; // create a vector of grain I adjacent to grain J
+  
+  for (MooseIndex(_feature_sets) j = 0; j < _feature_sets.size(); ++j)
+  {
+    if (i != j && _feature_sets[i].boundingBoxesIntersect(_feature_sets[j]) &&
+        _feature_sets[i].halosIntersect(_feature_sets[j]))
+    {      
+      adjacent_grain.push_back(_feature_sets[j]._id); 
+    }
+  }
+  return adjacent_grain;
 }
 
 bool

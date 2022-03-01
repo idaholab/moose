@@ -83,6 +83,15 @@ public:
   /// Returns the variable representing the passed in feature
   virtual unsigned int getFeatureVar(unsigned int feature_id) const;
 
+  /// Returns the feature ID representing the passed in feature (Grain ID)
+  virtual unsigned int getFeatureID(unsigned int feature_id) const;
+
+  /// Create a vector<unsigned int> including adjacent feature ID for one feature
+  std::vector<unsigned int> createAdjacentGrainMap(int num_feature);
+
+  /// Returns the number of adjacent grains for grain ID
+  virtual unsigned int getAdjacentGrainNum(unsigned int feature_id) const;
+
   /// Returns the number of coupled varaibles
   std::size_t numCoupledVars() const { return _n_vars; }
 
@@ -159,9 +168,11 @@ public:
 
     FeatureData(std::size_t var_index,
                 Status status,
+                std::vector<unsigned int> adjacent_grain_id = std::vector<unsigned int>(), // a vector including all adjacent feature ID for one feature
                 unsigned int id = invalid_id,
                 std::vector<BoundingBox> bboxes = {BoundingBox()})
       : _var_index(var_index),
+        _adjacent_grain_id(adjacent_grain_id), // initialize
         _id(id),
         _bboxes(bboxes), // Assume at least one bounding box
         _min_entity_id(DofObject::invalid_id),
@@ -287,6 +298,9 @@ public:
     /// The vector of bounding boxes completely enclosing this feature
     /// (multiple used with periodic constraints)
     std::vector<BoundingBox> _bboxes;
+
+    /// The vecor of adjacent feature ID for this feature 
+    std::vector<unsigned int> _adjacent_grain_id;
 
     /// Original processor/local ids
     std::list<std::pair<processor_id_type, unsigned int>> _orig_ids;
