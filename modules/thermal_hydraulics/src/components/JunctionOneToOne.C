@@ -23,5 +23,5 @@ JunctionOneToOne::validParams()
 
 JunctionOneToOne::JunctionOneToOne(const InputParameters & params) : FlowJunction(params)
 {
-  logError("Depreacted component. Use JunctionOneToOne1Phase or JunctionOneToOne2Phase instead.");
+  logError("Deprecated component. Use JunctionOneToOne1Phase or JunctionOneToOne2Phase instead.");
 }
