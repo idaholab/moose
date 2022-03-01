@@ -50,39 +50,41 @@ protected:
   /// Fnction adding kernels for the incompressible continuity equation
   void addINSMassKernels();
 
-  /// Functions adding kernels for the incompressible momentum equation
+  /**
+   * Functions adding kernels for the incompressible momentum equation
+   * If the material properties are not constant, these can be used for
+   * weakly-compressible simulations as well.
+   */
   void addINSMomentumTimeKernels();
-  void addINSMomentumDiffusionKernels();
+  void addINSMomentumViscousDiscipationKernels();
+  void addINSMomentumMixingLengthKernels();
   void addINSMomentumAdvectionKernels();
   void addINSMomentumPressureKernels();
   void addINSMomentumGravityKernels();
+  void addINSMomentumBoussinesqKernels();
   void addINSMomentumFrictionKernels();
 
-  /// Functions adding kernels for the ethalpy equation in an incompressible
-  /// Navier-Stokes setting
+  /**
+   * Functions adding kernels for the incompressible energy equation
+   * If the material properties are not constant, these can be used for
+   * weakly-compressible simulations as well.
+   */
   void addINSEnergyTimeKernels();
-  void addINSEnergyDiffusionKernels();
+  void addINSEnergyHeatConductionKernels();
   void addINSEnergyAdvectionKernels();
+  void addINSEnergyAmbientConvection();
 
-  void addINSEnergy();
+  /// Functions adding boundary conditions for the incompressible simulation.
   void addINSInletBC();
   void addINSOutletBC();
   void addINSWallBC();
 
-  void addWCNSTimeKernels();
-  void addWCNSEnergy();
-  void addWCNSVelocityBC();
-  void addWCNSInletBC();
-  void addWCNSOutletBC();
-  void addWCNSWallBC();
+  /// Functions which add time kernels for transient, weakly-compressible simulations.
+  void addWCNSMassTimeKernels();
+  void addWCNSMomentumTimeKernels();
+  void addWCNSEnergyTimeKernels();
 
-  void addCNSTimeKernels();
-  void addCNSMass();
-  void addCNSMomentum();
-  void addCNSEnergy();
-  void addCNSInletBC();
-  void addCNSOutletBC();
-  void addCNSWallBC();
+  void addWCNSEnergyMixingLengthKernels();
 
   /// Add Enthalpy material for incompressible simulations
   void addEnthalpyMaterial();
