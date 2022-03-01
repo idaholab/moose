@@ -28,19 +28,6 @@ FiniteDifferencePreconditioner::validParams()
   params.addClassDescription("Finite difference preconditioner (FDP) builds a numerical Jacobian "
                              "for preconditioning, only use for testing and verification.");
 
-  params.addParam<std::vector<std::string>>(
-      "off_diag_row",
-      "The off diagonal row you want to add into the matrix, it will be associated "
-      "with an off diagonal column from the same position in off_diag_colum.");
-  params.addParam<std::vector<std::string>>("off_diag_column",
-                                            "The off diagonal column you want to add into the "
-                                            "matrix, it will be associated with an off diagonal "
-                                            "row from the same position in off_diag_row.");
-  params.addParam<bool>("full",
-                        false,
-                        "Set to true if you want the full set of couplings.  Simply "
-                        "for convenience so you don't have to set every "
-                        "off_diag_row and off_diag_column combination.");
   params.addParam<bool>("implicit_geometric_coupling",
                         false,
                         "Set to true if you want to add entries into the "
@@ -83,12 +70,14 @@ FiniteDifferencePreconditioner::FiniteDifferencePreconditioner(const InputParame
 
     // off-diagonal entries
     std::vector<std::vector<unsigned int>> off_diag(n_vars);
-    for (unsigned int i = 0; i < getParam<std::vector<std::string>>("off_diag_row").size(); i++)
+    for (const auto i : index_range(getParam<std::vector<NonlinearVariableName>>("off_diag_row")))
     {
       unsigned int row =
-          nl.getVariable(0, getParam<std::vector<std::string>>("off_diag_row")[i]).number();
+          nl.getVariable(0, getParam<std::vector<NonlinearVariableName>>("off_diag_row")[i])
+              .number();
       unsigned int column =
-          nl.getVariable(0, getParam<std::vector<std::string>>("off_diag_column")[i]).number();
+          nl.getVariable(0, getParam<std::vector<NonlinearVariableName>>("off_diag_column")[i])
+              .number();
       (*cm)(row, column) = 1;
     }
 

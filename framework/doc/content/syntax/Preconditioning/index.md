@@ -46,23 +46,22 @@ Thus, for this example, the default preconditioning matrix is defined as:
 
 ## Example Input File Syntax
 
+A single preconditioner may be specified as below:
+
 !listing!
 [Preconditioning]
-  active = 'my_prec'
-
   [my_prec]
     type = SMP
     # SMP Options Go Here!
     # Override PETSc Options Here!
   []
-
-  [other_prec]
-    type = PBP
-    # PBP Options Go Here!
-    # Override PETSc Options Here!
-  []
 []
 !listing-end!
+
+Nested preconditioners may be specified as below, for the [FieldSplitPreconditioner.md]
+for example:
+
+!listing test/tests/preconditioners/fsp/fsp_test.i block=Preconditioning
 
 !syntax list /Preconditioning objects=True actions=False subsystems=False
 

@@ -8,7 +8,6 @@ ParMETIS is an MPI-based parallel graph partitioner implementing mainly a multil
 of the multilevel K-way algorithm is to coarsen the graph firstly, partition the coarsened graph and then refine the the partition.
 It is solving a multi-constraints optimization problem.
 
-
 ## [PTScotch](https://www.labri.fr/perso/pelegrin/scotch/)
 
 PTScotch is a software package  which compute parallel static mappings and parallel sparse matrix block orderings of graphs. It implements graph bipartitioning methods including band, diffusion and multilevel methods.
@@ -41,10 +40,6 @@ These packages can be accessed via an unified interface in MOOSE, `PetscExternal
   parallel_type = distributed
 []
 ```
-
-Note that in order to use {Chaco, Party, PTScotch}, you need to upgrade PETSc to PETSc-3.9.3 or higher
-with additional options: --download-chaco,  --download-party, and --download-ptscotch. But we do NOT encourage
-regular users to upgrade PETSc on their own. We will officially upgrade PETSc soon that will carries all these packages.
 
 ## Partitioning Examples
 
@@ -88,3 +83,8 @@ regular users to upgrade PETSc on their own. We will officially upgrade PETSc so
 !media ptscotch_8parts.png caption=`ptscotch`
 !col-end!
 !row-end!
+
+!alert note
+By default, all element and face weights are uniform. This can be modified by implementing `computeElementWeight`
+and `computeSideWeight` in a derived class of `PetscExternalPartitioner`. For example, the [BlockWeightedPartitioner.md]
+returns different weights for all elements in a block.

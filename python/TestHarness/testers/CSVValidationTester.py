@@ -119,7 +119,7 @@ class CSVValidationTester(FileTester):
             return output
 
         output = ""
-        # Make sure that all of the Exodiff files are actually available
+        # Make sure that all of the CSVDiff files are actually available
         for file in self.specs['csvdiff']:
             if not os.path.exists(os.path.join(self.getTestDir(), self.specs['gold_dir'], file)):
                 output += "File Not Found: " + os.path.join(self.getTestDir(), self.specs['gold_dir'], file)

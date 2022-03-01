@@ -1,33 +1,33 @@
 # FSP
 
-!alert! construction title=Undocumented Class
-The FSP has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
-```markdown
-# FSP
-
 !syntax description /Preconditioning/FSP
 
 ## Overview
 
-!! Replace these lines with information regarding the FSP object.
+The `FieldSplitPreconditioner` allows for custom preconditioning for each nonlinear variable in the numerical
+system. One or more variables may be targeted in a subsolve that will only consider part of the numerical system.
+The preconditioning defined for these subsolves is used for the relevant block(s) in the global numerical system.
 
-## Example Input File Syntax
+A `FSP` may for example be used for block-diagonal preconditioning by setting `full=false`
+and no off-diagonal variable couplings. Numerical systems considering only a single variable
+are then preconditioned individually. This is the default preconditioner for the `PJFNK` solves. See the
+[Executioner documentation](Executioner/index.md) for more information on the default preconditioner.
 
-!! Describe and include an example of how to use the FSP object.
+More information about field split preconditioning may be found in the
+[PETSc manual]([here](https://www.mcs.anl.gov/petsc/petsc-current/docs/manualpages/).
 
-!syntax parameters /Preconditioning/FSP
+## Example input syntax
 
-!syntax inputs /Preconditioning/FSP
+In this example, the preconditioning is performed by solving individual problems for each variables,
+as described in the comments in the snippet. The solution for these subsolves is used to perform
+the Schur decomposition preconditioning of the main numerical system.
 
-!syntax children /Preconditioning/FSP
-```
-!alert-end!
+!listing test/tests/preconditioners/fsp/fsp_test.i block=Preconditioning
 
-!syntax description /Preconditioning/FSP
+An example of setting the [!param](/Preconditioning/FSP/off_diag_row) and
+[!param](/Preconditioning/FSP/off_diag_column) parameters to create a custom
+coupling matrix may be found in the
+[PhysicsBasedPreconditioner.md] documentation.
 
 !syntax parameters /Preconditioning/FSP
 

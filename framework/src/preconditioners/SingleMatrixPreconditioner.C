@@ -30,23 +30,9 @@ SingleMatrixPreconditioner::validParams()
                              "user defined off-diagonal parts of the Jacobian.");
 
   params.addParam<std::vector<NonlinearVariableName>>(
-      "off_diag_row",
-      "The off diagonal row you want to add into the matrix, it will be associated "
-      "with an off diagonal column from the same position in off_diag_colum.");
-  params.addParam<std::vector<NonlinearVariableName>>(
-      "off_diag_column",
-      "The off diagonal column you want to add into the matrix, it will be "
-      "associated with an off diagonal row from the same position in "
-      "off_diag_row.");
-  params.addParam<std::vector<NonlinearVariableName>>(
       "coupled_groups",
       "List multiple space separated groups of comma separated variables. "
       "Off-diagonal jacobians will be generated for all pairs within a group.");
-  params.addParam<bool>("full",
-                        false,
-                        "Set to true if you want the full set of couplings.  Simply "
-                        "for convenience so you don't have to set every "
-                        "off_diag_row and off_diag_column combination.");
   params.addParam<bool>(
       "trust_my_coupling",
       false,
@@ -94,7 +80,7 @@ SingleMatrixPreconditioner::SingleMatrixPreconditioner(const InputParameters & p
         mooseError("No variable name match found for '", e.what(), "'.");
       }
 
-      for (unsigned int j = 0; j < vars.size(); ++j)
+      for (const auto j : index_range(vars))
         for (unsigned int k = j + 1; k < vars.size(); ++k)
         {
           const auto row = nl.getVariable(0, vars[j]).number();

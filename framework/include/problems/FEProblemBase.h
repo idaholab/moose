@@ -548,7 +548,7 @@ public:
   void forceOutput();
 
   /**
-   * Reinitialize petsc output for proper linear/nonlinear iteration display
+   * Reinitialize PETSc output for proper linear/nonlinear iteration display
    */
   virtual void initPetscOutput();
 
@@ -1781,7 +1781,7 @@ public:
   bool isSNESMFReuseBaseSetbyUser() { return _snesmf_reuse_base_set_by_user; }
 
   /**
-   * If petsc options are already inserted
+   * If PETSc options are already inserted
    */
   bool & petscOptionsInserted() { return _is_petsc_options_inserted; }
 
@@ -2259,7 +2259,7 @@ protected:
   PetscOptions _petsc_option_data_base;
 #endif
 
-  /// If or not petsc options have been added to database
+  /// If or not PETSc options have been added to database
   bool _is_petsc_options_inserted;
 
   std::shared_ptr<LineSearch> _line_search;
