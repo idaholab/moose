@@ -11,17 +11,12 @@
 
 #include "GeneralPostprocessor.h"
 
-// Forward Declarations
-class NodalVariableValue;
 class MooseMesh;
 
 namespace libMesh
 {
 class Node;
 }
-
-template <>
-InputParameters validParams<NodalVariableValue>();
 
 /**
  * Sums a nodal value across all processors and multiplies the result

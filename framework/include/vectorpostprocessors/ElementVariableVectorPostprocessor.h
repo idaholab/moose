@@ -11,11 +11,6 @@
 
 #include "ElementVectorPostprocessor.h"
 
-class ElementVariableVectorPostprocessor;
-
-template <>
-InputParameters validParams<ElementVariableVectorPostprocessor>();
-
 /**
  * Base class VectorPostprocessors operating on elemental variables.
  */

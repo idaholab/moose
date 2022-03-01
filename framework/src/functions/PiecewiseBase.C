@@ -10,8 +10,6 @@
 #include "PiecewiseBase.h"
 #include "DelimitedFileReader.h"
 
-defineLegacyParams(PiecewiseBase);
-
 InputParameters
 PiecewiseBase::validParams()
 {

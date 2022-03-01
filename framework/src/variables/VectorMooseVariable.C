@@ -10,12 +10,3 @@
 #include "VectorMooseVariable.h"
 
 registerMooseObject("MooseApp", VectorMooseVariable);
-
-template <>
-InputParameters
-validParams<VectorMooseVariable>()
-{
-  auto params = validParams<MooseVariableFEBase>();
-  params.addClassDescription("Represents vector field variables, e.g. Vector Lagrange or Nedelec");
-  return params;
-}

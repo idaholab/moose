@@ -15,9 +15,6 @@
 #include "GeometricSearchInterface.h"
 #include "ElementIDInterface.h"
 
-template <>
-InputParameters validParams<KernelBase>();
-
 /**
  * This is the common base class for the three main
  * kernel types implemented in MOOSE, Kernel, VectorKernel and ArrayKernel.

@@ -17,11 +17,10 @@
 
 registerMooseObject("MooseApp", CentralDifference);
 
-template <>
 InputParameters
-validParams<CentralDifference>()
+CentralDifference::validParams()
 {
-  InputParameters params = validParams<ActuallyExplicitEuler>();
+  InputParameters params = ActuallyExplicitEuler::validParams();
 
   params.addClassDescription("Implementation of explicit, Central Difference integration without "
                              "invoking any of the nonlinear solver");

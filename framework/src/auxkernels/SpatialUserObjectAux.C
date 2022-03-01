@@ -12,8 +12,6 @@
 
 registerMooseObject("MooseApp", SpatialUserObjectAux);
 
-defineLegacyParams(SpatialUserObjectAux);
-
 InputParameters
 SpatialUserObjectAux::validParams()
 {

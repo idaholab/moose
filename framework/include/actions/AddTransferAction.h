@@ -11,11 +11,6 @@
 
 #include "MooseObjectAction.h"
 
-class AddTransferAction;
-
-template <>
-InputParameters validParams<AddTransferAction>();
-
 class AddTransferAction : public MooseObjectAction
 {
 public:

@@ -20,8 +20,6 @@
 #include "AdvancedOutputUtils.h"
 #include "PerfGraphInterface.h"
 
-// Forward declarations
-class Output;
 class MooseMesh;
 
 // libMesh forward declarations
@@ -29,9 +27,6 @@ namespace libMesh
 {
 class EquationSystems;
 }
-
-template <>
-InputParameters validParams<Output>();
 
 /**
  * Based class for output objects

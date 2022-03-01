@@ -11,11 +11,6 @@
 
 #include "InternalSideIndicator.h"
 
-class GradientJumpIndicator;
-
-template <>
-InputParameters validParams<GradientJumpIndicator>();
-
 class GradientJumpIndicator : public InternalSideIndicator
 {
 public:

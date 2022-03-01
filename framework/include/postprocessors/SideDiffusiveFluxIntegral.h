@@ -20,9 +20,6 @@ typedef SideDiffusiveFluxIntegralTempl<true, Real> ADSideDiffusiveFluxIntegral;
 typedef SideDiffusiveFluxIntegralTempl<false, RealVectorValue> SideVectorDiffusivityFluxIntegral;
 typedef SideDiffusiveFluxIntegralTempl<true, RealVectorValue> ADSideVectorDiffusivityFluxIntegral;
 
-template <>
-InputParameters validParams<SideDiffusiveFluxIntegral>();
-
 /**
  * This postprocessor computes a side integral of the mass flux.
  */

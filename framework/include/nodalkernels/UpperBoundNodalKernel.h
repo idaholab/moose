@@ -11,12 +11,6 @@
 
 #include "NodalKernel.h"
 
-// Forward Declarations
-class UpperBoundNodalKernel;
-
-template <>
-InputParameters validParams<UpperBoundNodalKernel>();
-
 /**
  * Class used to enforce a upper bound on a coupled variable
  */

@@ -12,12 +12,6 @@
 // MOOSE includes
 #include "TableOutput.h"
 
-// Forward declarations
-class Console;
-
-template <>
-InputParameters validParams<Console>();
-
 /**
  * An output object for writing to the console (screen)
  */

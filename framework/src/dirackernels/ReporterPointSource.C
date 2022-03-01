@@ -12,8 +12,6 @@
 
 registerMooseObject("MooseApp", ReporterPointSource);
 
-defineLegacyParams(ReporterPointSource);
-
 InputParameters
 ReporterPointSource::validParams()
 {

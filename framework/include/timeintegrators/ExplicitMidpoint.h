@@ -11,11 +11,6 @@
 
 #include "ExplicitRK2.h"
 
-class ExplicitMidpoint;
-
-template <>
-InputParameters validParams<ExplicitMidpoint>();
-
 /**
  * The explicit midpoint time integration method.
  *

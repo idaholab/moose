@@ -13,11 +13,6 @@
 #include "PerfGraphInterface.h"
 
 class TimePeriodOld;
-class Problem;
-
-template <>
-InputParameters validParams<Problem>();
-
 /**
  * Class that hold the whole problem being solved.
  */

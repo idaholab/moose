@@ -15,12 +15,6 @@
 
 #include "libmesh/mesh_base.h"
 
-// Forward declarations
-class MultiAppInterpolationTransfer;
-
-template <>
-InputParameters validParams<MultiAppInterpolationTransfer>();
-
 namespace libMesh
 {
 template <unsigned int>

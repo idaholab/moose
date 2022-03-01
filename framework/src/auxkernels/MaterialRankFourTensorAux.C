@@ -11,8 +11,6 @@
 
 registerMooseObject("MooseApp", MaterialRankFourTensorAux);
 
-defineLegacyParams(MaterialRankFourTensorAux);
-
 InputParameters
 MaterialRankFourTensorAux::validParams()
 {

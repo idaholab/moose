@@ -9,8 +9,6 @@
 
 #include "MooseVariableFieldBase.h"
 
-defineLegacyParams(MooseVariableFieldBase);
-
 InputParameters
 MooseVariableFieldBase::validParams()
 {

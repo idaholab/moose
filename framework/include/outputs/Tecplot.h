@@ -12,12 +12,6 @@
 // MOOSE includes
 #include "OversampleOutput.h"
 
-// Forward declarations
-class Tecplot;
-
-template <>
-InputParameters validParams<Tecplot>();
-
 /**
  * Class for output data to the TecplotII format
  */

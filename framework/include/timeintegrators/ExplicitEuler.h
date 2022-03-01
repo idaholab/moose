@@ -11,11 +11,6 @@
 
 #include "TimeIntegrator.h"
 
-class ExplicitEuler;
-
-template <>
-InputParameters validParams<ExplicitEuler>();
-
 /**
  * Explicit Euler time integrator
  */

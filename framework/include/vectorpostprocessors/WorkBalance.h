@@ -11,11 +11,6 @@
 
 #include "GeneralVectorPostprocessor.h"
 
-class WorkBalance;
-
-template <>
-InputParameters validParams<WorkBalance>();
-
 /**
  * Compute several metrics for each MPI process.
  *

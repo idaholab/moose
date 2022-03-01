@@ -15,6 +15,35 @@
 #include "Assembly.h"
 #include "MooseVariableData.h"
 
+template <>
+InputParameters
+MooseVariableFE<Real>::validParams()
+{
+  auto params = MooseVariableField<Real>::validParams();
+  params.addClassDescription(
+      "Represents standard field variables, e.g. Lagrange, Hermite, or non-constant Monomials");
+  return params;
+}
+
+template <>
+InputParameters
+MooseVariableFE<RealVectorValue>::validParams()
+{
+  auto params = MooseVariableField<RealVectorValue>::validParams();
+  params.addClassDescription("Represents vector field variables, e.g. Vector Lagrange or Nedelec");
+  return params;
+}
+
+template <>
+InputParameters
+MooseVariableFE<RealEigenVector>::validParams()
+{
+  auto params = MooseVariableField<RealEigenVector>::validParams();
+  params.addClassDescription(
+      "Used for grouping standard field variables with the same finite element family and order");
+  return params;
+}
+
 template <typename OutputType>
 MooseVariableFE<OutputType>::MooseVariableFE(const InputParameters & parameters)
   : MooseVariableField<OutputType>(parameters)

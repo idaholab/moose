@@ -13,8 +13,6 @@
 #include "MooseObject.h"
 #include "Restartable.h"
 
-// Forward declarations
-class Predictor;
 class FEProblemBase;
 class NonlinearSystemBase;
 
@@ -23,9 +21,6 @@ namespace libMesh
 template <typename T>
 class NumericVector;
 }
-
-template <>
-InputParameters validParams<Predictor>();
 
 /**
  * Base class for predictors.

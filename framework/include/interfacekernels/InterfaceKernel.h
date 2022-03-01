@@ -26,12 +26,6 @@ class InterfaceKernelTempl;
 typedef InterfaceKernelTempl<Real> InterfaceKernel;
 typedef InterfaceKernelTempl<RealVectorValue> VectorInterfaceKernel;
 
-template <>
-InputParameters validParams<InterfaceKernel>();
-
-template <>
-InputParameters validParams<VectorInterfaceKernel>();
-
 /**
  * InterfaceKernel and VectorInterfaceKernel is responsible for interfacing physics across
  * subdomains

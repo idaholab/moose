@@ -12,12 +12,6 @@
 #include "MeshGenerator.h"
 #include "MooseEnum.h"
 
-// Forward declarations
-class TransformGenerator;
-
-template <>
-InputParameters validParams<TransformGenerator>();
-
 /*
  * A mesh generator that applies a linear transformation (rotation, translation) to the mesh
  */

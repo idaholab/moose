@@ -11,12 +11,6 @@
 
 #include "LayeredIntegral.h"
 
-// Forward Declarations
-class LayeredAverage;
-
-template <>
-InputParameters validParams<LayeredAverage>();
-
 /**
  * This UserObject computes averages of a variable storing partial
  * sums for the specified number of intervals in a direction (x,y,z).

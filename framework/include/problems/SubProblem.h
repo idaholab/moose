@@ -34,7 +34,6 @@ class GhostingFunctor;
 }
 
 class MooseMesh;
-class SubProblem;
 class Factory;
 class Assembly;
 class MooseVariableFieldBase;
@@ -66,9 +65,6 @@ template <typename T>
 class NumericVector;
 class System;
 } // namespace libMesh
-
-template <>
-InputParameters validParams<SubProblem>();
 
 /**
  * Generic class for solving transient nonlinear problems

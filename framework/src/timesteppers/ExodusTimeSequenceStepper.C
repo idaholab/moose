@@ -14,8 +14,6 @@
 
 registerMooseObject("MooseApp", ExodusTimeSequenceStepper);
 
-defineLegacyParams(ExodusTimeSequenceStepper);
-
 InputParameters
 ExodusTimeSequenceStepper::validParams()
 {

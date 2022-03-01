@@ -12,12 +12,6 @@
 // MOOSE includes
 #include "LayeredSideIntegral.h"
 
-// Forward Declarations
-class LayeredSideAverage;
-
-template <>
-InputParameters validParams<LayeredSideAverage>();
-
 /**
  * This UserObject computes side averages of a variable storing partial sums for the specified
  * number of intervals in a direction (x,y,z).

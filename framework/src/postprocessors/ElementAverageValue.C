@@ -11,8 +11,6 @@
 
 registerMooseObject("MooseApp", ElementAverageValue);
 
-defineLegacyParams(ElementAverageValue);
-
 InputParameters
 ElementAverageValue::validParams()
 {

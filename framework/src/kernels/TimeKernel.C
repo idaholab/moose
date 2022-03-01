@@ -16,8 +16,6 @@
 
 #include "libmesh/quadrature.h"
 
-defineLegacyParams(TimeKernel);
-
 InputParameters
 TimeKernel::validParams()
 {

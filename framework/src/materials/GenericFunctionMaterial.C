@@ -13,8 +13,6 @@
 registerMooseObject("MooseApp", GenericFunctionMaterial);
 registerMooseObject("MooseApp", ADGenericFunctionMaterial);
 
-defineLegacyParams(GenericFunctionMaterial);
-
 template <bool is_ad>
 InputParameters
 GenericFunctionMaterialTempl<is_ad>::validParams()

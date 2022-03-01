@@ -14,8 +14,6 @@
 // System includes
 #include <string>
 
-// Forward Declarations
-class ConstantIC;
 class InputParameters;
 
 namespace libMesh
@@ -25,9 +23,6 @@ class Point;
 
 template <typename T>
 InputParameters validParams();
-
-template <>
-InputParameters validParams<ConstantIC>();
 
 /**
  * ConstantIC just returns a constant value.

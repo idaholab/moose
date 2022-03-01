@@ -11,8 +11,6 @@
 
 registerMooseObject("MooseApp", MaterialStdVectorRealGradientAux);
 
-defineLegacyParams(MaterialStdVectorRealGradientAux);
-
 InputParameters
 MaterialStdVectorRealGradientAux::validParams()
 {

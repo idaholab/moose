@@ -11,12 +11,6 @@
 
 #include "AuxKernel.h"
 
-// Forward Declarations
-class SelfAux;
-
-template <>
-InputParameters validParams<SelfAux>();
-
 /**
  * Self auxiliary value
  */

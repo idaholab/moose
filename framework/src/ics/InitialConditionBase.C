@@ -12,8 +12,6 @@
 #include "MooseVariableFE.h"
 #include "UserObject.h"
 
-defineLegacyParams(InitialConditionBase);
-
 InputParameters
 InitialConditionBase::validParams()
 {

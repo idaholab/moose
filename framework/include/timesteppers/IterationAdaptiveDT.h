@@ -112,5 +112,3 @@ protected:
   double _large_step_rejection_threshold;
 };
 
-template <>
-InputParameters validParams<IterationAdaptiveDT>();

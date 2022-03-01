@@ -11,12 +11,7 @@
 
 #include "AuxKernel.h"
 
-// Forward Declarations
-class SpatialUserObjectAux;
 class UserObject;
-
-template <>
-InputParameters validParams<SpatialUserObjectAux>();
 
 /**
  * Function auxiliary value

@@ -16,9 +16,6 @@ class ElementIntegralMaterialPropertyTempl;
 typedef ElementIntegralMaterialPropertyTempl<false> ElementIntegralMaterialProperty;
 typedef ElementIntegralMaterialPropertyTempl<true> ADElementIntegralMaterialProperty;
 
-template <>
-InputParameters validParams<ElementIntegralMaterialProperty>();
-
 template <bool is_ad>
 class ElementIntegralMaterialPropertyTempl : public ElementIntegralPostprocessor
 {

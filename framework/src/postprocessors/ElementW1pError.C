@@ -12,8 +12,6 @@
 
 registerMooseObject("MooseApp", ElementW1pError);
 
-defineLegacyParams(ElementW1pError);
-
 InputParameters
 ElementW1pError::validParams()
 {

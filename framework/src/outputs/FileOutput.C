@@ -20,8 +20,6 @@
 
 #include "libmesh/utility.h"
 
-defineLegacyParams(FileOutput);
-
 InputParameters
 FileOutput::validParams()
 {

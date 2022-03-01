@@ -13,16 +13,12 @@
 #include "MooseEnum.h"
 #include "MoosePartitioner.h"
 
-class GridPartitioner;
 class MooseMesh;
 
 namespace libMesh
 {
 class SubdomainPartitioner;
 }
-
-template <>
-InputParameters validParams<GridPartitioner>();
 
 /**
  * Partitions a mesh using a regular grid.

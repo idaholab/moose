@@ -11,11 +11,6 @@
 
 #include "Action.h"
 
-class SetupMeshCompleteAction;
-
-template <>
-InputParameters validParams<SetupMeshCompleteAction>();
-
 class SetupMeshCompleteAction : public Action
 {
 public:

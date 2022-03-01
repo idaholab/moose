@@ -22,8 +22,6 @@
 #include "libmesh/dof_map.h"
 #include "libmesh/string_to_enum.h"
 
-defineLegacyParams(TableOutput);
-
 InputParameters
 TableOutput::validParams()
 {

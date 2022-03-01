@@ -11,11 +11,6 @@
 
 #include "ElementVectorPostprocessor.h"
 
-class SpatialAverageBase;
-
-template <>
-InputParameters validParams<SpatialAverageBase>();
-
 /**
  * Base clase for computing spatial average of a variable over simple spatial regions
  * of the computation domain

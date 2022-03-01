@@ -12,12 +12,6 @@
 // MOOSE includes
 #include "ElementL2ErrorFunctionAux.h"
 
-// Forward declarations
-class ElementH1ErrorFunctionAux;
-
-template <>
-InputParameters validParams<ElementH1ErrorFunctionAux>();
-
 /**
  * A class for computing the element-wise H1 error (actually W^{1,p}
  * error, if you set the value of p to something other than 2.0) of

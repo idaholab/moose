@@ -11,12 +11,6 @@
 
 #include "MeshGenerator.h"
 
-// Forward declarations
-class BreakBoundaryOnSubdomainGenerator;
-
-template <>
-InputParameters validParams<BreakBoundaryOnSubdomainGenerator>();
-
 /**
  * MeshGenerator for breaking all boundaries based on which block they are attached to
  */

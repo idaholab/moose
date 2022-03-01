@@ -13,8 +13,6 @@
 
 registerMooseAction("MooseApp", SetupDampersAction, "setup_dampers");
 
-defineLegacyParams(SetupDampersAction);
-
 InputParameters
 SetupDampersAction::validParams()
 {

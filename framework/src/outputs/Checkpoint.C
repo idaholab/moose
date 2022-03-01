@@ -25,8 +25,6 @@
 
 registerMooseObject("MooseApp", Checkpoint);
 
-defineLegacyParams(Checkpoint);
-
 InputParameters
 Checkpoint::validParams()
 {

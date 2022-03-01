@@ -11,12 +11,6 @@
 
 #include "SideSetsGeneratorBase.h"
 
-// Forward declarations
-class AllSideSetsByNormalsGenerator;
-
-template <>
-InputParameters validParams<AllSideSetsByNormalsGenerator>();
-
 /**
  * This class will add sidesets to the entire mesh based on unique normals.
  * Note: This algorithm may not work well with meshes containing curved faces.

@@ -11,12 +11,6 @@
 
 #include "ScalarInitialCondition.h"
 
-// Forward Declarations
-class ScalarConstantIC;
-
-template <>
-InputParameters validParams<ScalarConstantIC>();
-
 /**
  * ScalarConstantIC just returns a constant value.
  */

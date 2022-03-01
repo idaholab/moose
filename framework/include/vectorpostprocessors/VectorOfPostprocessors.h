@@ -11,12 +11,6 @@
 
 #include "GeneralVectorPostprocessor.h"
 
-// Forward Declarations
-class VectorOfPostprocessors;
-
-template <>
-InputParameters validParams<VectorOfPostprocessors>();
-
 /**
  *  VectorOfPostprocessors is a type of VectorPostprocessor that outputs the
  *  values of an arbitrary user-specified set of postprocessors as a vector in the order specified

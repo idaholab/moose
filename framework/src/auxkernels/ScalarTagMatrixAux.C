@@ -11,8 +11,6 @@
 
 registerMooseObject("MooseApp", ScalarTagMatrixAux);
 
-defineLegacyParams(ScalarTagMatrixAux);
-
 InputParameters
 ScalarTagMatrixAux::validParams()
 {

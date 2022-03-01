@@ -11,12 +11,7 @@
 
 #include "AuxKernel.h"
 
-// Forward Declarations
-class FunctionAux;
 class Function;
-
-template <>
-InputParameters validParams<FunctionAux>();
 
 /**
  * Function auxiliary value

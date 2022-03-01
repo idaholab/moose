@@ -14,8 +14,6 @@
 
 registerMooseObject("MooseApp", SpiralAnnularMesh);
 
-defineLegacyParams(SpiralAnnularMesh);
-
 InputParameters
 SpiralAnnularMesh::validParams()
 {

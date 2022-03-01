@@ -13,8 +13,6 @@
 #include "MooseTypes.h"
 #include "FEProblemBase.h"
 
-defineLegacyParams(FunctionInterface);
-
 InputParameters
 FunctionInterface::validParams()
 {

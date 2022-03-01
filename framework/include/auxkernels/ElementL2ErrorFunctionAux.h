@@ -12,12 +12,6 @@
 // MOOSE includes
 #include "ElementLpNormAux.h"
 
-// Forward declarations
-class ElementL2ErrorFunctionAux;
-
-template <>
-InputParameters validParams<ElementL2ErrorFunctionAux>();
-
 /**
  * A class for computing the element-wise L^2 error (actually L^p
  * error, if you set the value of p to something other than 2) of the

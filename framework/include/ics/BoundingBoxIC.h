@@ -11,12 +11,6 @@
 
 #include "InitialCondition.h"
 
-// Forward Declarations
-class BoundingBoxIC;
-
-template <>
-InputParameters validParams<BoundingBoxIC>();
-
 /**
  * BoundingBoxIC allows setting the initial condition of a value inside and outside of a specified
  * box. The box is aligned with the x, y, z axes and is specified by passing in the x, y, z

@@ -12,11 +12,6 @@
 #include "MeshGenerator.h"
 #include "MooseEnum.h"
 
-class CartesianMeshGenerator;
-
-template <>
-InputParameters validParams<CartesianMeshGenerator>();
-
 /*
  * Mesh generator to create a Cartesian mesh
  */

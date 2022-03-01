@@ -13,13 +13,11 @@
 
 registerMooseObject("MooseApp", NearestPointLayeredAverage);
 
-defineLegacyParams(NearestPointLayeredAverage);
-
 InputParameters
 NearestPointLayeredAverage::validParams()
 {
   InputParameters params =
-      nearestPointBaseValidParams<LayeredAverage, ElementIntegralVariableUserObject>();
+      NearestPointBase<LayeredAverage, ElementIntegralVariableUserObject>::validParams();
 
   params.addClassDescription(
       "Computes averages of a variable storing partial sums for the specified number of intervals "

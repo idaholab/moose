@@ -38,7 +38,6 @@
 class Executioner;
 class Executor;
 class NullExecutor;
-class MooseApp;
 class Backup;
 class FEProblemBase;
 class MeshGenerator;
@@ -50,9 +49,6 @@ namespace libMesh
 {
 class ExodusII_IO;
 }
-
-template <>
-InputParameters validParams<MooseApp>();
 
 /**
  * Base class for MOOSE-based applications

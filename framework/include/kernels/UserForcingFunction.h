@@ -24,6 +24,3 @@ public:
 protected:
   Real f();
 };
-
-template <>
-InputParameters validParams<UserForcingFunction>();

@@ -23,8 +23,6 @@
 
 registerMooseAction("MooseApp", AddOutputAction, "add_output");
 
-defineLegacyParams(AddOutputAction);
-
 InputParameters
 AddOutputAction::validParams()
 {

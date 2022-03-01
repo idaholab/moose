@@ -17,13 +17,8 @@
 // Forward declarations
 class InputParameters;
 class MooseObject;
-class SetupInterface;
-
 template <typename T>
 InputParameters validParams();
-
-template <>
-InputParameters validParams<SetupInterface>();
 
 class SetupInterface
 {

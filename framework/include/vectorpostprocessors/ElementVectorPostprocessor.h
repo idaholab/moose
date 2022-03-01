@@ -12,12 +12,6 @@
 #include "ElementUserObject.h"
 #include "VectorPostprocessor.h"
 
-// Forward Declarations
-class ElementVectorPostprocessor;
-
-template <>
-InputParameters validParams<ElementVectorPostprocessor>();
-
 class ElementVectorPostprocessor : public ElementUserObject, public VectorPostprocessor
 {
 public:

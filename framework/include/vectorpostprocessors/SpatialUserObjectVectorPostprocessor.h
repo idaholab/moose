@@ -11,11 +11,6 @@
 
 #include "GeneralVectorPostprocessor.h"
 
-class SpatialUserObjectVectorPostprocessor;
-
-template <>
-InputParameters validParams<SpatialUserObjectVectorPostprocessor>();
-
 /**
  *  SpatialUserObjectVectorPostprocessor is a type of VectorPostprocessor that outputs the
  *  values of a spatial user object as a vector in the order of the provided points.

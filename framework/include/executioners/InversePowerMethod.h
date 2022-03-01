@@ -11,12 +11,6 @@
 
 #include "EigenExecutionerBase.h"
 
-// Forward Declarations
-class InversePowerMethod;
-
-template <>
-InputParameters validParams<InversePowerMethod>();
-
 class InversePowerMethod : public EigenExecutionerBase
 {
 public:

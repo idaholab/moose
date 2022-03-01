@@ -11,12 +11,6 @@
 
 #include "GeneralVectorPostprocessor.h"
 
-// Forward Declarations
-class LeastSquaresFit;
-
-template <>
-InputParameters validParams<LeastSquaresFit>();
-
 /**
  *  LeastSquaresFit is a VectorPostprocessor that performs a least squares
  *  fit on data calculated in another VectorPostprocessor.

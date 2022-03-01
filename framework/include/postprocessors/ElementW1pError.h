@@ -13,12 +13,6 @@
 
 class Function;
 
-// Forward Declarations
-class ElementW1pError;
-
-template <>
-InputParameters validParams<ElementW1pError>();
-
 /**
  * This postprocessor computes the Sobolev norm W^{1,p} of the
  * difference between the computed solution and the passed in function.

@@ -12,11 +12,6 @@
 #include "TimeIntegrator.h"
 #include "MathUtils.h"
 
-class NewmarkBeta;
-
-template <>
-InputParameters validParams<NewmarkBeta>();
-
 /**
  * Newmark-Beta time integration method
  */

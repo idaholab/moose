@@ -14,8 +14,6 @@
 registerMooseObject("MooseApp", MaterialRankTwoTensorAux);
 registerMooseObject("MooseApp", ADMaterialRankTwoTensorAux);
 
-defineLegacyParams(MaterialRankTwoTensorAux);
-
 template <bool is_ad>
 InputParameters
 MaterialRankTwoTensorAuxTempl<is_ad>::validParams()

@@ -11,11 +11,6 @@
 
 #include "TimeSequenceStepperBase.h"
 
-class ExodusTimeSequenceStepper;
-
-template <>
-InputParameters validParams<ExodusTimeSequenceStepper>();
-
 /**
  * Solves the PDEs at a sequence of time points given as a vector in the input file.
  * Adjusts the time sequence vector according to Transient start_time and end_time.

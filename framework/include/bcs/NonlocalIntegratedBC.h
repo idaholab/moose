@@ -11,11 +11,6 @@
 
 #include "IntegratedBC.h"
 
-class NonlocalIntegratedBC;
-
-template <>
-InputParameters validParams<NonlocalIntegratedBC>();
-
 /**
  * NonlocalIntegratedBC is used for solving integral terms in integro-differential equations.
  * Integro-differential equations includes spatial integral terms over variables in the domain.

@@ -12,8 +12,6 @@
 
 registerMooseObject("MooseApp", PiecewiseFunctionTabulate);
 
-defineLegacyParams(PiecewiseFunctionTabulate);
-
 InputParameters
 PiecewiseFunctionTabulate::validParams()
 {

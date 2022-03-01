@@ -11,12 +11,6 @@
 
 #include "GeneralPostprocessor.h"
 
-// Forward Declarations
-class Receiver;
-
-template <>
-InputParameters validParams<Receiver>();
-
 /**
  * A class for storing data, it allows the user to change the value of the
  * postprocessor by altering the _my_value reference

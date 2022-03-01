@@ -12,12 +12,6 @@
 // MOOSE includes
 #include "MultiAppConservativeTransfer.h"
 
-// Forward declarations
-class MultiAppUserObjectTransfer;
-
-template <>
-InputParameters validParams<MultiAppUserObjectTransfer>();
-
 /**
  * Loops over a target mesh and uses either node or element centroid location (based on the target
  * variable type) for sampling a user object (i.e. the object must implement `spatialValue` API).

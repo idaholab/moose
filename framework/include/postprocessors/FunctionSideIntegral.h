@@ -11,12 +11,7 @@
 
 #include "SideIntegralPostprocessor.h"
 
-// Forward Declarations
-class FunctionSideIntegral;
 class Function;
-
-template <>
-InputParameters validParams<FunctionSideIntegral>();
 
 /**
  * This postprocessor computes the integral of a function over a specified boundary

@@ -13,8 +13,6 @@
 
 registerMooseObject("MooseApp", SolutionScalarAux);
 
-defineLegacyParams(SolutionScalarAux);
-
 InputParameters
 SolutionScalarAux::validParams()
 {

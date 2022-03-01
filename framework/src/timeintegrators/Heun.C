@@ -11,8 +11,6 @@
 
 registerMooseObject("MooseApp", Heun);
 
-defineLegacyParams(Heun);
-
 InputParameters
 Heun::validParams()
 {

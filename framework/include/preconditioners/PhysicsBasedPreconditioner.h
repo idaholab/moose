@@ -22,11 +22,6 @@
 
 // Forward declarations
 class NonlinearSystemBase;
-class PhysicsBasedPreconditioner;
-
-template <>
-InputParameters validParams<PhysicsBasedPreconditioner>();
-
 /**
  * Implements a segregated solve preconditioner.
  */

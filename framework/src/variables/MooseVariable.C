@@ -10,13 +10,3 @@
 #include "MooseVariable.h"
 
 registerMooseObject("MooseApp", MooseVariable);
-
-template <>
-InputParameters
-validParams<MooseVariable>()
-{
-  auto params = validParams<MooseVariableFEBase>();
-  params.addClassDescription(
-      "Represents standard field variables, e.g. Lagrange, Hermite, or non-constant Monomials");
-  return params;
-}

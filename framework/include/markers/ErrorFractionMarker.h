@@ -11,11 +11,6 @@
 
 #include "IndicatorMarker.h"
 
-class ErrorFractionMarker;
-
-template <>
-InputParameters validParams<ErrorFractionMarker>();
-
 class ErrorFractionMarker : public IndicatorMarker
 {
 public:

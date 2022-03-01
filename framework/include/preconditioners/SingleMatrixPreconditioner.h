@@ -11,11 +11,6 @@
 
 #include "MoosePreconditioner.h"
 
-class SingleMatrixPreconditioner;
-
-template <>
-InputParameters validParams<SingleMatrixPreconditioner>();
-
 /**
  * Single matrix preconditioner.
  */

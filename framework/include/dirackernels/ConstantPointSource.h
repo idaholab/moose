@@ -12,12 +12,6 @@
 // Moose Includes
 #include "DiracKernel.h"
 
-// Forward Declarations
-class ConstantPointSource;
-
-template <>
-InputParameters validParams<ConstantPointSource>();
-
 /**
  * TOOD
  */

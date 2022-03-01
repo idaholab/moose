@@ -12,11 +12,6 @@
 #include "KernelBase.h"
 #include "MooseVariableInterface.h"
 
-class Kernel;
-
-template <>
-InputParameters validParams<Kernel>();
-
 class Kernel : public KernelBase, public MooseVariableInterface<Real>
 {
 public:

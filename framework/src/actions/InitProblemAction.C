@@ -12,8 +12,6 @@
 
 registerMooseAction("MooseApp", InitProblemAction, "init_problem");
 
-defineLegacyParams(InitProblemAction);
-
 InputParameters
 InitProblemAction::validParams()
 {

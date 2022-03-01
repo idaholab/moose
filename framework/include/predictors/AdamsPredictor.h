@@ -12,17 +12,11 @@
 // MOOSE includes
 #include "Predictor.h"
 
-// Forward declarations
-class AdamsPredictor;
-
 namespace libMesh
 {
 template <typename T>
 class NumericVector;
 }
-
-template <>
-InputParameters validParams<AdamsPredictor>();
 
 /**
  * Implements an explicit Adams predictor based on two old solution

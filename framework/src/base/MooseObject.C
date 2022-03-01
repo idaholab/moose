@@ -26,8 +26,6 @@ paramErrorPrefix(const InputParameters & params, const std::string & param)
   return params.errorPrefix(param);
 }
 
-defineLegacyParams(MooseObject);
-
 InputParameters
 MooseObject::validParams()
 {

@@ -11,8 +11,6 @@
 
 registerMooseObject("MooseApp", NonlinearEigen);
 
-defineLegacyParams(NonlinearEigen);
-
 InputParameters
 NonlinearEigen::validParams()
 {

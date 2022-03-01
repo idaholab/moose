@@ -11,12 +11,6 @@
 
 #include "Material.h"
 
-// Forward Declarations
-class GenericConstant2DArray;
-
-template <>
-InputParameters validParams<GenericConstant2DArray>();
-
 class GenericConstant2DArray : public Material
 {
 public:

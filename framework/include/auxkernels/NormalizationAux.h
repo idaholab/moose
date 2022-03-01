@@ -11,12 +11,6 @@
 
 #include "AuxKernel.h"
 
-// Forward Declarations
-class NormalizationAux;
-
-template <>
-InputParameters validParams<NormalizationAux>();
-
 /**
  * This auxiliary kernel normalizes a variable based on a postprocessor.
  * Typically this postprocessor is a norm of the variable to be normalized.

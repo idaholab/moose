@@ -17,9 +17,6 @@ template <bool>
 class MaterialRealAuxTempl;
 typedef MaterialRealAuxTempl<false> MaterialRealAux;
 
-template <>
-InputParameters validParams<MaterialRealAux>();
-
 /**
  * Object for passing a scalar, REAL material property to an AuxVariable
  */

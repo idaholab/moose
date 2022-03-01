@@ -12,11 +12,6 @@
 #include "BreakMeshByBlockGeneratorBase.h"
 #include <unordered_set>
 
-class BreakMeshByBlockGenerator;
-
-template <>
-InputParameters validParams<BreakMeshByBlockGenerator>();
-
 /*
  * A mesh generator to split a mesh by a set of blocks
  */

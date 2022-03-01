@@ -14,8 +14,6 @@
 
 registerMooseObject("MooseApp", SidesetInfoVectorPostprocessor);
 
-defineLegacyParams(SidesetInfoVectorPostprocessor);
-
 InputParameters
 SidesetInfoVectorPostprocessor::validParams()
 {

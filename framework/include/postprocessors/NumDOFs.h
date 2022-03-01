@@ -11,18 +11,12 @@
 
 #include "GeneralPostprocessor.h"
 
-// Forward Declarations
-class NumDOFs;
-
 // libMesh forward declarations
 namespace libMesh
 {
 class System;
 class EquationSystems;
 }
-
-template <>
-InputParameters validParams<NumDOFs>();
 
 class NumDOFs : public GeneralPostprocessor
 {

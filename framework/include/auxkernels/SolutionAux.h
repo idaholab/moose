@@ -11,12 +11,7 @@
 
 #include "AuxKernel.h"
 
-// Forward declaration
-class SolutionAux;
 class SolutionUserObject;
-
-template <>
-InputParameters validParams<SolutionAux>();
 
 /**
  * AuxKernel for reading a solution from file.

@@ -12,12 +12,6 @@
 // local includes
 #include "InterfaceKernel.h"
 
-// Forward Declarations
-class InterfaceTimeKernel;
-
-template <>
-InputParameters validParams<InterfaceTimeKernel>();
-
 /**
  * InterfaceTimeKernel is responsible for adding time derivative contributions for physics across
  * interfaces

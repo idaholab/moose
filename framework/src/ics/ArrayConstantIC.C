@@ -13,8 +13,6 @@
 
 registerMooseObject("MooseApp", ArrayConstantIC);
 
-defineLegacyParams(ArrayConstantIC);
-
 InputParameters
 ArrayConstantIC::validParams()
 {

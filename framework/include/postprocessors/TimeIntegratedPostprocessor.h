@@ -11,11 +11,6 @@
 
 #include "GeneralPostprocessor.h"
 
-class TimeIntegratedPostprocessor;
-
-template <>
-InputParameters validParams<TimeIntegratedPostprocessor>();
-
 /**
  * Integrate a post-processor value over time using trapezoidal rule
  */

@@ -14,8 +14,6 @@
 
 registerMooseObject("MooseApp", FunctionDT);
 
-defineLegacyParams(FunctionDT);
-
 InputParameters
 FunctionDT::validParams()
 {

@@ -13,8 +13,6 @@
 
 registerMooseObject("MooseApp", SideIntegralVariablePostprocessor);
 
-defineLegacyParams(SideIntegralVariablePostprocessor);
-
 InputParameters
 SideIntegralVariablePostprocessor::validParams()
 {

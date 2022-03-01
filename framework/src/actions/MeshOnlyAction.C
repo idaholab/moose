@@ -18,8 +18,6 @@
 
 registerMooseAction("MooseApp", MeshOnlyAction, "mesh_only");
 
-defineLegacyParams(MeshOnlyAction);
-
 InputParameters
 MeshOnlyAction::validParams()
 {

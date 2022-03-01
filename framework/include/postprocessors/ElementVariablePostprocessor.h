@@ -12,12 +12,6 @@
 #include "ElementPostprocessor.h"
 #include "MooseVariableInterface.h"
 
-// Forward Declarations
-class ElementVariablePostprocessor;
-
-template <>
-InputParameters validParams<ElementVariablePostprocessor>();
-
 class ElementVariablePostprocessor : public ElementPostprocessor,
                                      public MooseVariableInterface<Real>
 {

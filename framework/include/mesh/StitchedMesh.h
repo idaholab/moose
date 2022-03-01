@@ -11,16 +11,10 @@
 
 #include "MooseMesh.h"
 
-// Forward declarations
-class StitchedMesh;
-
 namespace libMesh
 {
 class ReplicatedMesh;
 }
-
-template <>
-InputParameters validParams<StitchedMesh>();
 
 /**
  * Reads an arbitrary set of meshes and attempts to "stitch" (join) them

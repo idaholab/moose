@@ -11,12 +11,7 @@
 
 #include "Kernel.h"
 
-// Forward Declarations
-class EigenKernel;
 class MooseEigenSystem;
-
-template <>
-InputParameters validParams<EigenKernel>();
 
 /**
  * The behavior of this kernel is controlled by one problem-wise global parameter

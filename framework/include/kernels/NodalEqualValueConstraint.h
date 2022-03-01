@@ -11,11 +11,6 @@
 
 #include "NodalScalarKernel.h"
 
-class NodalEqualValueConstraint;
-
-template <>
-InputParameters validParams<NodalEqualValueConstraint>();
-
 /**
  * Constraint to enforce equal values (in 1D)
  *

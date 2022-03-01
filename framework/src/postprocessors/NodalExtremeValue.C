@@ -14,8 +14,6 @@
 
 registerMooseObject("MooseApp", NodalExtremeValue);
 
-defineLegacyParams(NodalExtremeValue);
-
 InputParameters
 NodalExtremeValue::validParams()
 {

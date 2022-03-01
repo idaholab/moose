@@ -12,11 +12,6 @@
 #include "MoosePreconditioner.h"
 #include "MooseEnum.h"
 
-class FiniteDifferencePreconditioner;
-
-template <>
-InputParameters validParams<FiniteDifferencePreconditioner>();
-
 /**
  * Finite difference preconditioner.
  */

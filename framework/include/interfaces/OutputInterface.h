@@ -19,14 +19,10 @@
 // Forward declerations
 class InputParameters;
 class MooseApp;
-class OutputInterface;
 class OutputWarehouse;
 
 template <typename T>
 InputParameters validParams();
-
-template <>
-InputParameters validParams<OutputInterface>();
 
 /**
  * A class to provide an common interface to objects requiring "outputs" option

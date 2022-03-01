@@ -13,12 +13,6 @@
 #include "libmesh/replicated_mesh.h"
 #include "MooseEnum.h"
 
-// Forward declarations
-class StitchedMeshGenerator;
-
-template <>
-InputParameters validParams<StitchedMeshGenerator>();
-
 /**
  * Allows multiple mesh files to be "stitched" together to form a single mesh.
  */

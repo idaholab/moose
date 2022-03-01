@@ -11,11 +11,6 @@
 
 #include "GeneralPostprocessor.h"
 
-class LinearCombinationPostprocessor;
-
-template <>
-InputParameters validParams<LinearCombinationPostprocessor>();
-
 /**
  * Computes a linear combination between an arbitrary number of post-processors
  *

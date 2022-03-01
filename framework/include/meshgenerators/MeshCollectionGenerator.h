@@ -13,12 +13,6 @@
 #include "libmesh/replicated_mesh.h"
 #include "MooseEnum.h"
 
-// Forward declarations
-class MeshCollectionGenerator;
-
-template <>
-InputParameters validParams<MeshCollectionGenerator>();
-
 /**
  * Collects multiple meshes into a single (unconnected) mesh
  */

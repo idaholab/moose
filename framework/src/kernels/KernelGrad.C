@@ -12,8 +12,6 @@
 #include "SystemBase.h"
 #include "libmesh/quadrature.h"
 
-defineLegacyParams(KernelGrad);
-
 InputParameters
 KernelGrad::validParams()
 {

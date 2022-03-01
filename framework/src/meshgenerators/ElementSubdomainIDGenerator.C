@@ -14,8 +14,6 @@
 
 registerMooseObject("MooseApp", ElementSubdomainIDGenerator);
 
-defineLegacyParams(ElementSubdomainIDGenerator);
-
 InputParameters
 ElementSubdomainIDGenerator::validParams()
 {

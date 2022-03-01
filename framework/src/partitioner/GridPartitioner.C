@@ -19,8 +19,6 @@ registerMooseObject("MooseApp", GridPartitioner);
 
 #include <memory>
 
-defineLegacyParams(GridPartitioner);
-
 InputParameters
 GridPartitioner::validParams()
 {

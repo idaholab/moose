@@ -13,12 +13,6 @@
 #include "Postprocessor.h"
 #include "GeneralUserObject.h"
 
-// Forward Declarations
-class GeneralPostprocessor;
-
-template <>
-InputParameters validParams<GeneralPostprocessor>();
-
 /**
  * This class is here to combine the Postprocessor interface and the
  * base class Postprocessor object along with adding MooseObject to the inheritance tree.

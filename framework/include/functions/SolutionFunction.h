@@ -11,12 +11,7 @@
 
 #include "Function.h"
 
-// Forward decleration
-class SolutionFunction;
 class SolutionUserObject;
-
-template <>
-InputParameters validParams<SolutionFunction>();
 
 /** Function for reading a solution from file
  * Creates a function that extracts values from a solution read from a file,

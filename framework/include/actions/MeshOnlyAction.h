@@ -13,11 +13,6 @@
 
 #include <string>
 
-class MeshOnlyAction;
-
-template <>
-InputParameters validParams<MeshOnlyAction>();
-
 class MeshOnlyAction : public Action
 {
 public:

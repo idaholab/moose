@@ -18,13 +18,8 @@
 
 // Forward declarations
 class InputParameters;
-class OrientedBoxInterface;
-
 template <typename T>
 InputParameters validParams();
-
-template <>
-InputParameters validParams<OrientedBoxInterface>();
 
 /*
  * An interface class for testing if a point is within a bounding box with arbitrary orientation

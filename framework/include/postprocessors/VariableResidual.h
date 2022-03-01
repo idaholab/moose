@@ -11,12 +11,6 @@
 
 #include "GeneralPostprocessor.h"
 
-// Forward Declarations
-class VariableResidual;
-
-template <>
-InputParameters validParams<VariableResidual>();
-
 class VariableResidual : public GeneralPostprocessor
 {
 public:

@@ -17,15 +17,10 @@
 #include "MooseVariableInterface.h"
 #include "MaterialPropertyInterface.h"
 
-// Forward declarations
-class ElementIndicator;
 template <typename>
 class MooseVariableFE;
 typedef MooseVariableFE<Real> MooseVariable;
 typedef MooseVariableFE<VectorValue<Real>> VectorMooseVariable;
-
-template <>
-InputParameters validParams<ElementIndicator>();
 
 class ElementIndicator : public Indicator,
                          public TransientInterface,

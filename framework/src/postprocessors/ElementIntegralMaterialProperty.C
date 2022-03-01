@@ -14,8 +14,6 @@
 registerMooseObject("MooseApp", ElementIntegralMaterialProperty);
 registerMooseObject("MooseApp", ADElementIntegralMaterialProperty);
 
-defineLegacyParams(ElementIntegralMaterialProperty);
-
 template <bool is_ad>
 InputParameters
 ElementIntegralMaterialPropertyTempl<is_ad>::validParams()

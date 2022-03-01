@@ -11,11 +11,6 @@
 
 #include "MooseObjectAction.h"
 
-class AddPostprocessorAction;
-
-template <>
-InputParameters validParams<AddPostprocessorAction>();
-
 class AddPostprocessorAction : public MooseObjectAction
 {
 public:

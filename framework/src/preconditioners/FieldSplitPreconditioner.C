@@ -23,8 +23,6 @@
 
 registerMooseObjectAliased("MooseApp", FieldSplitPreconditioner, "FSP");
 
-defineLegacyParams(FieldSplitPreconditioner);
-
 InputParameters
 FieldSplitPreconditioner::validParams()
 {

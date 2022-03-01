@@ -13,8 +13,6 @@
 
 registerMooseObject("MooseApp", ErrorFractionMarker);
 
-defineLegacyParams(ErrorFractionMarker);
-
 InputParameters
 ErrorFractionMarker::validParams()
 {

@@ -11,12 +11,6 @@
 
 #include "TimeKernel.h"
 
-// Forward Declaration
-class MassLumpedTimeDerivative;
-
-template <>
-InputParameters validParams<MassLumpedTimeDerivative>();
-
 class MassLumpedTimeDerivative : public TimeKernel
 {
 public:

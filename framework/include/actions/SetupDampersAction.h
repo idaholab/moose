@@ -11,11 +11,6 @@
 
 #include "Action.h"
 
-class SetupDampersAction;
-
-template <>
-InputParameters validParams<SetupDampersAction>();
-
 class SetupDampersAction : public Action
 {
 public:

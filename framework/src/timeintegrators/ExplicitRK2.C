@@ -12,8 +12,6 @@
 #include "FEProblem.h"
 #include "PetscSupport.h"
 
-defineLegacyParams(ExplicitRK2);
-
 InputParameters
 ExplicitRK2::validParams()
 {

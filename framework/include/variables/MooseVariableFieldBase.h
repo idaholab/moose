@@ -22,10 +22,6 @@ class Point;
 
 class FaceInfo;
 
-class MooseVariableFieldBase;
-template <>
-InputParameters validParams<MooseVariableFieldBase>();
-
 /**
  * This class provides an interface for common operations on field variables of
  * both FE and FV types with all their scalar, vector, eigenvector

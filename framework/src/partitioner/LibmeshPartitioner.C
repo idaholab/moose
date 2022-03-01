@@ -20,8 +20,6 @@
 
 registerMooseObject("MooseApp", LibmeshPartitioner);
 
-defineLegacyParams(LibmeshPartitioner);
-
 InputParameters
 LibmeshPartitioner::validParams()
 {

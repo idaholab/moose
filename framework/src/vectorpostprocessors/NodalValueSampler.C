@@ -17,8 +17,6 @@
 
 registerMooseObject("MooseApp", NodalValueSampler);
 
-defineLegacyParams(NodalValueSampler);
-
 InputParameters
 NodalValueSampler::validParams()
 {

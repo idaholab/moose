@@ -14,8 +14,6 @@ registerMooseAction("MooseApp", AddKernelAction, "add_kernel");
 
 registerMooseAction("MooseApp", AddKernelAction, "add_aux_kernel");
 
-defineLegacyParams(AddKernelAction);
-
 InputParameters
 AddKernelAction::validParams()
 {

@@ -12,12 +12,6 @@
 #include "NodalVariableVectorPostprocessor.h"
 #include "SamplerBase.h"
 
-// Forward Declarations
-class NodalValueSampler;
-
-template <>
-InputParameters validParams<NodalValueSampler>();
-
 /**
  * Samples values of nodal variable(s).
  */

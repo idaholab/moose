@@ -11,12 +11,6 @@
 
 #include "ElementIntegralPostprocessor.h"
 
-// Forward Declarations
-class VolumePostprocessor;
-
-template <>
-InputParameters validParams<VolumePostprocessor>();
-
 /**
  * This postprocessor computes the volume of a specified block.
  */

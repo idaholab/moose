@@ -11,12 +11,6 @@
 
 #include "Kernel.h"
 
-// Forward Declaration
-class TimeKernel;
-
-template <>
-InputParameters validParams<TimeKernel>();
-
 /**
  * All time kernels should inherit from this class
  *

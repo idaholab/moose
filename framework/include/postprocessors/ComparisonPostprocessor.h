@@ -11,11 +11,6 @@
 
 #include "GeneralPostprocessor.h"
 
-class ComparisonPostprocessor;
-
-template <>
-InputParameters validParams<ComparisonPostprocessor>();
-
 /**
  * Base class for comparing quantities and producing a boolean value
  *

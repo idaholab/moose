@@ -11,12 +11,6 @@
 
 #include "MeshGenerator.h"
 
-// Forward declarations
-class ElementDeletionGeneratorBase;
-
-template <>
-InputParameters validParams<ElementDeletionGeneratorBase>();
-
 /**
  * This class deletes elements from the mesh data structure
  * after it has been generated or read but before any FEM

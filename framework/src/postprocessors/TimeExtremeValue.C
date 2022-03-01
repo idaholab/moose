@@ -14,8 +14,6 @@
 
 registerMooseObject("MooseApp", TimeExtremeValue);
 
-defineLegacyParams(TimeExtremeValue);
-
 InputParameters
 TimeExtremeValue::validParams()
 {

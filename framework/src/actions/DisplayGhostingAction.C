@@ -16,8 +16,6 @@ registerMooseAction("MooseApp", DisplayGhostingAction, "add_aux_kernel");
 
 registerMooseAction("MooseApp", DisplayGhostingAction, "add_user_object");
 
-defineLegacyParams(DisplayGhostingAction);
-
 InputParameters
 DisplayGhostingAction::validParams()
 {

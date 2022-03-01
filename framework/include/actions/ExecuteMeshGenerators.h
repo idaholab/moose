@@ -11,11 +11,6 @@
 
 #include "Action.h"
 
-class ExecuteMeshGenerators;
-
-template <>
-InputParameters validParams<ExecuteMeshGenerators>();
-
 class ExecuteMeshGenerators : public Action
 {
 public:

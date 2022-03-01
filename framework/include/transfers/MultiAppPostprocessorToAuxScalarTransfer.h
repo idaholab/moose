@@ -12,12 +12,6 @@
 // MOOSE includes
 #include "MultiAppTransfer.h"
 
-// Forward declerations
-class MultiAppPostprocessorToAuxScalarTransfer;
-
-template <>
-InputParameters validParams<MultiAppPostprocessorToAuxScalarTransfer>();
-
 /**
  * Copies the value of a Postprocessor from one app to a scalar AuxVariable in another.
  */

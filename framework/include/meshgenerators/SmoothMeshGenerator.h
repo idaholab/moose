@@ -11,12 +11,6 @@
 
 #include "MeshGenerator.h"
 
-// Forward declarations
-class SmoothMeshGenerator;
-
-template <>
-InputParameters validParams<SmoothMeshGenerator>();
-
 /**
  * MeshGenerator for doing mesh smoothing
  */

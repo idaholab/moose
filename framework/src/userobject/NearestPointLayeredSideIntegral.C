@@ -12,13 +12,11 @@
 
 registerMooseObject("MooseApp", NearestPointLayeredSideIntegral);
 
-defineLegacyParams(NearestPointLayeredSideIntegral);
-
 InputParameters
 NearestPointLayeredSideIntegral::validParams()
 {
   InputParameters params =
-      nearestPointBaseValidParams<LayeredSideIntegral, SideIntegralVariableUserObject>();
+      NearestPointBase<LayeredSideIntegral, SideIntegralVariableUserObject>::validParams();
 
   params.addClassDescription("Compute layered side integrals for nearest-point based sidesets");
 

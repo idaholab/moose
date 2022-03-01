@@ -9,5 +9,3 @@
 
 // MOOSE includes
 #include "MaterialAuxBase.h"
-
-defineLegacyParams(MaterialAuxBaseTempl<>);

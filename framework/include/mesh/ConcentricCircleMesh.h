@@ -12,11 +12,6 @@
 #include "MooseMesh.h"
 #include "MooseEnum.h"
 
-class ConcentricCircleMesh;
-
-template <>
-InputParameters validParams<ConcentricCircleMesh>();
-
 /**
  * Mesh generated from parameters
  */

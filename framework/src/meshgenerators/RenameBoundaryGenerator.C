@@ -18,8 +18,6 @@
 
 registerMooseObject("MooseApp", RenameBoundaryGenerator);
 
-defineLegacyParams(RenameBoundaryGenerator);
-
 InputParameters
 RenameBoundaryGenerator::validParams()
 {

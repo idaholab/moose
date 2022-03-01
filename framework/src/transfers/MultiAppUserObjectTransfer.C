@@ -28,8 +28,6 @@
 
 registerMooseObject("MooseApp", MultiAppUserObjectTransfer);
 
-defineLegacyParams(MultiAppUserObjectTransfer);
-
 InputParameters
 MultiAppUserObjectTransfer::validParams()
 {

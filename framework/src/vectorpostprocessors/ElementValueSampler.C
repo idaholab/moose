@@ -17,8 +17,6 @@
 
 registerMooseObject("MooseApp", ElementValueSampler);
 
-defineLegacyParams(ElementValueSampler);
-
 InputParameters
 ElementValueSampler::validParams()
 {

@@ -15,8 +15,6 @@ registerMooseObjectRenamed("MooseApp",
                            "04/01/2022 00:00",
                            TimeIntegratedPostprocessor);
 
-defineLegacyParams(TimeIntegratedPostprocessor);
-
 InputParameters
 TimeIntegratedPostprocessor::validParams()
 {

@@ -11,11 +11,6 @@
 
 #include "NodalConstraint.h"
 
-class EqualValueBoundaryConstraint;
-
-template <>
-InputParameters validParams<EqualValueBoundaryConstraint>();
-
 class EqualValueBoundaryConstraint : public NodalConstraint
 {
 public:

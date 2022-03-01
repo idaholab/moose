@@ -14,12 +14,6 @@
 #include "NeighborCoupleable.h"
 #include "TwoMaterialPropertyInterface.h"
 
-// forward declarations
-class InterfaceMaterial;
-
-template <>
-InputParameters validParams<InterfaceMaterial>();
-
 /**
  * Interface materials compute MaterialProperties.
  */

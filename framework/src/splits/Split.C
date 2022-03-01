@@ -17,8 +17,6 @@
 
 registerMooseObject("MooseApp", Split);
 
-defineLegacyParams(Split);
-
 InputParameters
 Split::validParams()
 {

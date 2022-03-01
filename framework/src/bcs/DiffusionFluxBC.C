@@ -11,8 +11,6 @@
 
 registerMooseObject("MooseApp", DiffusionFluxBC);
 
-defineLegacyParams(DiffusionFluxBC);
-
 InputParameters
 DiffusionFluxBC::validParams()
 {

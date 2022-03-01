@@ -9,8 +9,6 @@
 
 #include "BoundaryCondition.h"
 
-defineLegacyParams(BoundaryCondition);
-
 InputParameters
 BoundaryCondition::validParams()
 {

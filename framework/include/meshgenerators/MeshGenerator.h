@@ -19,17 +19,12 @@
 #include "libmesh/mesh_base.h"
 #include "libmesh/parameters.h"
 
-// Forward declarations
-class MeshGenerator;
 class MooseMesh;
 namespace libMesh
 {
 class ReplicatedMesh;
 class DistributedMesh;
 }
-
-template <>
-InputParameters validParams<MeshGenerator>();
 
 /**
  * MeshGenerators are objects that can modify or add to an existing mesh.

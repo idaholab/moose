@@ -9,8 +9,6 @@
 
 #include "DirichletBCBase.h"
 
-defineLegacyParams(DirichletBCBase);
-
 InputParameters
 DirichletBCBase::validParams()
 {

@@ -24,8 +24,6 @@ registerMooseObjectRenamed("MooseApp",
                            "06/30/2021 24:00",
                            ADSideDiffusiveFluxIntegral);
 
-defineLegacyParams(SideDiffusiveFluxIntegral);
-
 template <bool is_ad, typename T>
 InputParameters
 SideDiffusiveFluxIntegralTempl<is_ad, T>::validParams()

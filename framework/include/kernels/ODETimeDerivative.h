@@ -11,12 +11,6 @@
 
 #include "ODETimeKernel.h"
 
-// Forward Declaration
-class ODETimeDerivative;
-
-template <>
-InputParameters validParams<ODETimeDerivative>();
-
 class ODETimeDerivative : public ODETimeKernel
 {
 public:

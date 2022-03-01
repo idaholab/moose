@@ -11,8 +11,6 @@
 
 registerMooseObject("MooseApp", RelativeDifferencePostprocessor);
 
-defineLegacyParams(RelativeDifferencePostprocessor);
-
 InputParameters
 RelativeDifferencePostprocessor::validParams()
 {

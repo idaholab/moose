@@ -12,12 +12,6 @@
 // MOOSE includes
 #include "Action.h"
 
-// Forward declerations
-class SetupRecoverFileBaseAction;
-
-template <>
-InputParameters validParams<SetupRecoverFileBaseAction>();
-
 /**
  *
  */

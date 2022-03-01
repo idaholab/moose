@@ -11,8 +11,6 @@
 
 #include "SubProblem.h"
 
-defineLegacyParams(Constraint);
-
 InputParameters
 Constraint::validParams()
 {

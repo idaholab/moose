@@ -12,8 +12,6 @@
 
 registerMooseObjectRenamed("MooseApp", UserForcingFunction, "04/01/2018 00:00", BodyForce);
 
-defineLegacyParams(UserForcingFunction);
-
 InputParameters
 UserForcingFunction::validParams()
 {
