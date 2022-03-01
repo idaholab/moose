@@ -21,6 +21,8 @@ GateValve1Phase::validParams()
 
   params.addRequiredParam<Real>("open_area_fraction", "Fraction of flow area that is open [-]");
 
+  params.declareControllable("open_area_fraction");
+
   params.addClassDescription("Gate valve component for 1-phase flow");
 
   return params;

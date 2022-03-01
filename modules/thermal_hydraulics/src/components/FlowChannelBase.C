@@ -69,6 +69,9 @@ FlowChannelBase::validParams()
   params.addRequiredParam<std::string>("closures", "Closures type");
 
   params.addPrivateParam<std::string>("component_type", "pipe");
+
+  params.declareControllable("A f");
+
   return params;
 }
 

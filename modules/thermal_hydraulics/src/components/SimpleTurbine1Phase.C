@@ -20,6 +20,8 @@ SimpleTurbine1Phase::validParams()
   params.addRequiredParam<Real>("power", "Turbine power [W]");
   params.addRequiredParam<bool>("on", "Flag determining if turbine is operating or not [-]");
 
+  params.declareControllable("power on");
+
   params.addClassDescription(
       "Simple turbine model that extracts prescribed power from the working fluid");
 

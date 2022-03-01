@@ -20,6 +20,7 @@ ShaftConnectedMotor::validParams()
   params.addRequiredParam<FunctionName>("torque", "Driving torque supplied by the motor [kg-m^2]");
   params.addRequiredParam<FunctionName>("inertia", "Moment of inertia from the motor [N-m]");
   params.addParam<bool>("ad", true, "Use AD version or not");
+  params.declareControllable("torque inertia");
   params.addClassDescription("Motor to drive a shaft component");
   return params;
 }

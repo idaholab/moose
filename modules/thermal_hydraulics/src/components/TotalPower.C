@@ -16,6 +16,7 @@ TotalPower::validParams()
 {
   InputParameters params = TotalPowerBase::validParams();
   params.addRequiredParam<Real>("power", "Total power [W]");
+  params.declareControllable("power");
   params.addClassDescription("Prescribes total power via a user supplied value");
   return params;
 }
