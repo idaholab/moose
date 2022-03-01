@@ -105,6 +105,8 @@ class AppSyntaxExtension(command.CommandExtension):
         config['alias'] = (None, "Dictionary of syntax aliases.")
         config['unregister'] = (None,
                                 "A `dict` or `dict` of `dict` including syntax to unregister (key='moose_base', value='parent_syntax')")
+        config['markdown'] = (None,
+                             "A `dict` or `dict` of `dict` including markdown files to explicitly set a custom, additional markdown reference (key='syntax', value='file.md')")
         config['external_icon'] = ('feedback', "Icon name for the alert title when unavailable syntax is located on an external page.")
         config['external_alert'] = ('warning', "Alert name when unavailable syntax is located on an external page.")
         return config
@@ -156,7 +158,8 @@ class AppSyntaxExtension(command.CommandExtension):
                 self._app_syntax = moosesyntax.get_moose_syntax_tree(exe,
                                                                      remove=self['remove'],
                                                                      alias=self['alias'],
-                                                                     unregister=self['unregister'])
+                                                                     unregister=self['unregister'],
+                                                                     markdown=self['markdown'])
 
                 out = mooseutils.runExe(exe, ['--type'])
                 match = re.search(r'^MooseApp Type:\s+(?P<type>.*?)$', out, flags=re.MULTILINE)
