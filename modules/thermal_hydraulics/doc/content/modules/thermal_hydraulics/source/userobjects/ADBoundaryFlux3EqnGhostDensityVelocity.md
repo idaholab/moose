@@ -1,0 +1,7 @@
+!syntax description /UserObjects/ADBoundaryFlux3EqnGhostDensityVelocity
+
+!syntax parameters /UserObjects/ADBoundaryFlux3EqnGhostDensityVelocity
+
+!syntax inputs /UserObjects/ADBoundaryFlux3EqnGhostDensityVelocity
+
+!syntax children /UserObjects/ADBoundaryFlux3EqnGhostDensityVelocity
