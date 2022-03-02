@@ -780,7 +780,6 @@ NSFVAction::addINSMomentumMixingLengthKernels()
       _problem->addFVKernel(kernel_type,
                             "pins_momentum_" + NS::directions[d] + "_mixing_length_reynolds_stress",
                             params);
-
     }
   }
   else
@@ -1625,7 +1624,6 @@ NSFVAction::addWCNSEnergyMixingLengthKernels()
     addRelationshipManager("pins_energy_mixing_length_diffusion", 2, params);
 
     _problem->addFVKernel(kernel_type, "pins_energy_mixing_length_diffusion", params);
-
   }
   else
   {
@@ -1634,7 +1632,6 @@ NSFVAction::addWCNSEnergyMixingLengthKernels()
     addRelationshipManager("ins_energy_mixing_length_diffusion", 2, params);
 
     _problem->addFVKernel(kernel_type, "ins_energy_mixing_length_diffusion", params);
-
   }
 }
 
