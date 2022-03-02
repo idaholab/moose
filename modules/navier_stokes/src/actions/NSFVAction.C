@@ -253,6 +253,22 @@ NSFVAction::validParams()
                              "The numerical scheme to interpolate the pressure to the "
                              "face (separate from the advected quantity interpolation).");
 
+  params.addParam<bool>(
+      "momentum_two_term_bc_expansion",
+      false,
+      "If a two-term Taylor expansion is needed for the determination of the boundary values"
+      "of the velocity/momentum.");
+  params.addParam<bool>(
+      "energy_two_term_bc_expansion",
+      false,
+      "If a two-term Taylor expansion is needed for the determination of the boundary values"
+      "of the temperature/energy.");
+  params.addParam<bool>(
+      "pressure_two_term_bc_expansion",
+      false,
+      "If a two-term Taylor expansion is needed for the determination of the boundary values"
+      "of the pressure.");
+
   params.addParam<Real>("momentum_scaling", 1.0, "The scaling factor for the momentum variables.");
   params.addParam<Real>("energy_scaling", 1.0, "The scaling factor for the energy variables.");
   params.addParam<Real>("mass_scaling",
@@ -346,6 +362,9 @@ NSFVAction::NSFVAction(InputParameters parameters)
     _momentum_face_interpolation(getParam<MooseEnum>("momentum_face_interpolation")),
     _energy_face_interpolation(getParam<MooseEnum>("energy_face_interpolation")),
     _pressure_face_interpolation(getParam<MooseEnum>("pressure_face_interpolation")),
+    _momentum_two_term_bc_expansion(getParam<bool>("momentum_two_term_bc_expansion")),
+    _energy_two_term_bc_expansion(getParam<bool>("energy_two_term_bc_expansion")),
+    _pressure_two_term_bc_expansion(getParam<bool>("pressure_two_term_bc_expansion")),
     _momentum_scaling(getParam<Real>("momentum_scaling")),
     _energy_scaling(getParam<Real>("energy_scaling")),
     _mass_scaling(getParam<Real>("mass_scaling"))
@@ -467,6 +486,8 @@ NSFVAction::addINSVariables()
     params.set<std::vector<SubdomainName>>("block") = _blocks;
     params.set<std::vector<Real>>("scaling") = {_momentum_scaling};
     params.set<MooseEnum>("face_interp_method") = _momentum_face_interpolation;
+    params.set<bool>("two_term_boundary_expansion") = _momentum_two_term_bc_expansion;
+
     for (unsigned int d = 0; d < _dim; ++d)
       _problem->addVariable(
           "PINSFVSuperficialVelocityVariable", NS::superficial_velocity_vector[d], params);
@@ -477,6 +498,7 @@ NSFVAction::addINSVariables()
     params.set<std::vector<SubdomainName>>("block") = _blocks;
     params.set<std::vector<Real>>("scaling") = {_momentum_scaling};
     params.set<MooseEnum>("face_interp_method") = _momentum_face_interpolation;
+    params.set<bool>("two_term_boundary_expansion") = _momentum_two_term_bc_expansion;
 
     for (unsigned int d = 0; d < _dim; ++d)
       _problem->addVariable("INSFVVelocityVariable", NS::velocity_vector[d], params);
@@ -486,6 +508,7 @@ NSFVAction::addINSVariables()
   params.set<std::vector<SubdomainName>>("block") = _blocks;
   params.set<std::vector<Real>>("scaling") = {_mass_scaling};
   params.set<MooseEnum>("face_interp_method") = _pressure_face_interpolation;
+  params.set<bool>("two_term_boundary_expansion") = _pressure_two_term_bc_expansion;
 
   _problem->addVariable("INSFVPressureVariable", NS::pressure, params);
 
@@ -512,6 +535,7 @@ NSFVAction::addINSVariables()
     params.set<std::vector<SubdomainName>>("block") = _blocks;
     params.set<std::vector<Real>>("scaling") = {_energy_scaling};
     params.set<MooseEnum>("face_interp_method") = _energy_face_interpolation;
+    params.set<bool>("two_term_boundary_expansion") = _energy_two_term_bc_expansion;
 
     _problem->addVariable("INSFVEnergyVariable", NS::T_fluid, params);
   }
@@ -1784,14 +1808,6 @@ NSFVAction::processBlocks()
   {
     SubdomainID id = _mesh->getSubdomainID(subdomain_name);
     _block_ids.insert(id);
-    if (_problem->getCoordSystem(id) != Moose::COORD_XYZ)
-      mooseError("RZ has not been added in action");
-  }
-  if (_blocks.size() == 0)
-  {
-    for (auto & id : _mesh->meshSubdomains())
-      if (_problem->getCoordSystem(id) != Moose::COORD_XYZ)
-        mooseError("RZ has not been added in action");
   }
 
   if (_momentum_inlet_function.size() != _inlet_boundaries.size() * _dim)

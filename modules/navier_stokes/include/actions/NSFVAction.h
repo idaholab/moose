@@ -196,6 +196,16 @@ protected:
   /// The type of the pressure/density interpolation method
   MooseEnum _pressure_face_interpolation;
 
+  /// If a two-term Taylor expansion is needed for the determination of the boundary values
+  /// of the velocity/momentum
+  bool _momentum_two_term_bc_expansion;
+  /// If a two-term Taylor expansion is needed for the determination of the boundary values
+  /// of the temperature/energy
+  bool _energy_two_term_bc_expansion;
+  /// If a two-term Taylor expansion is needed for the determination of the boundary values
+  /// of the pressure
+  bool _pressure_two_term_bc_expansion;
+
   /// The scaling factor for the momentum variables
   Real _momentum_scaling;
   /// The scaling factor for the energy variables

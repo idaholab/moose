@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#15640'
+  issues = '#15640 #19472'
   design = 'navier_stokes/insfv.md'
   [average-no-slip]
     type = 'Exodiff'
@@ -37,6 +37,14 @@
     exodiff = 'no-slip-tris_out.e'
     cli_args = "FVBCs/active='inlet-u inlet-v no-slip-wall-u no-slip-wall-v outlet-p axis-u axis-v' -pc_type lu -pc_factor_shift_type NONZERO"
     requirement = 'The system shall be able to solve a straight channel problem in cylindrical coordinates using triangular elements with no slip boundary conditions.'
+    ad_indexing_type = 'global'
+  []
+  [rz-no-slip-tris-action]
+    type = 'Exodiff'
+    input = no-slip-tris-action.i
+    exodiff = 'no-slip-tris-action_out.e'
+    cli_args = "-pc_type lu -pc_factor_shift_type NONZERO"
+    requirement = 'The system shall be able to solve a straight channel problem in cylindrical coordinates using triangular elements with no slip boundary conditions and the INSFV action syntax.'
     ad_indexing_type = 'global'
   []
   [rz-diverging-free-slip]
