@@ -42,7 +42,8 @@ AccumulateReporter::initialSetup()
         !declareAccumulateHelper<std::string>(rname) &&
         !declareAccumulateHelper<std::vector<int>>(rname) &&
         !declareAccumulateHelper<std::vector<Real>>(rname) &&
-        !declareAccumulateHelper<std::vector<std::string>>(rname))
+        !declareAccumulateHelper<std::vector<std::string>>(rname) &&
+        !declareAccumulateHelper<std::vector<dof_id_type>>(rname))
       paramError("reporters",
                  "Reporter value ",
                  rname,
