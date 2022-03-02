@@ -170,7 +170,7 @@ ParallelSubsetSimulation::sampleSetUp(const SampleMode mode)
 Real
 ParallelSubsetSimulation::computeSample(dof_id_type row_index, dof_id_type col_index)
 {
-  unsigned int seed_value = (_step - 1) * 2;
+  unsigned int seed_value = _step > 0 ? (_step - 1) * 2 : 0;
   Real val;
 
   if (_subset == 0)
