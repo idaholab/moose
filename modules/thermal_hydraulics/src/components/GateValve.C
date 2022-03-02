@@ -28,5 +28,5 @@ GateValve::validParams()
 
 GateValve::GateValve(const InputParameters & params) : FlowJunction(params)
 {
-  logError("Deprecated component. Use GateValve or GateValve2Phase instead.");
+  logError("Deprecated component. Use GateValve1Phase or GateValve2Phase instead.");
 }

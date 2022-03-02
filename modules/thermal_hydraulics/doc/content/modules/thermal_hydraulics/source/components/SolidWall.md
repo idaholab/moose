@@ -2,17 +2,4 @@
 
 # SolidWall
 
-!alert construction title=Undocumented Class
-The SolidWall has not been documented. The content contained on this page includes the
-typical automatic documentation associated with a MooseObject; however, what is contained is
-ultimately determined by what is necessary to make the documentation clear for users.
-
-!syntax description /Components/SolidWall
-
-!syntax parameters /Components/SolidWall
-
-!syntax inputs /Components/SolidWall
-
-!syntax children /Components/SolidWall
-
-!bibtex bibliography
+This component is deprecated. Use SolidWall1Phase or SolidWall2Phase instead.
