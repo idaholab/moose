@@ -11,6 +11,9 @@
 # This script is used in docker_ci/Dockerfile to setup
 # the base container environment for Debian-based images
 
+# Want to exit if there's an errror
+set -e
+
 export DEBIAN_FRONTEND=noninteractive
 
 # Update package lists

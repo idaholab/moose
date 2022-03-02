@@ -30,5 +30,5 @@ HeatGeneration::validParams()
 HeatGeneration::HeatGeneration(const InputParameters & parameters) : Component(parameters)
 {
   logError("'HeatGeneration' component is deprecated, use 'HeatSourceFromTotalPower' or "
-           "'HeatSourceFromPowerDensity' insteat.");
+           "'HeatSourceFromPowerDensity' instead.");
 }

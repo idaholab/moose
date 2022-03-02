@@ -18,7 +18,7 @@
 #include "libmesh/numeric_vector.h"
 #include "libmesh/quadrature.h"
 
-Threads::spin_mutex nodal_normals_preprocessor_mutex;
+std::mutex NodalNormalsPreprocessor::_nodal_normals_mutex;
 
 registerMooseObject("MooseApp", NodalNormalsPreprocessor);
 
@@ -153,7 +153,7 @@ NodalNormalsPreprocessor::execute()
 
           for (unsigned int qp = 0; qp < _qrule->n_points(); qp++)
           {
-            Threads::spin_mutex::scoped_lock lock(nodal_normals_preprocessor_mutex);
+            std::scoped_lock lock(_nodal_normals_mutex);
 
             sln.add(dof_x, _JxW[qp] * _grad_phi[i][qp](0));
             sln.add(dof_y, _JxW[qp] * _grad_phi[i][qp](1));

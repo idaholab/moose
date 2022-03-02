@@ -19,6 +19,11 @@ for MGR in "${MGR_ARY[@]}"; do
     # Run matching install
     if [ $(command -v $MGR | grep -c $MGR) -gt 0 ]; then
         ./${MGR}_installs.sh
+
+        if [ $? -ne 0 ]; then
+            printf "Error with $MGR package installs.  Aborting build\n"
+            exit 1
+        fi
     fi
 done
 

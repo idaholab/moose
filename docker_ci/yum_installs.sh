@@ -11,9 +11,13 @@
 # This script is used in docker_ci/Dockerfile to setup
 # the base container environment for Red Hat-based images
 
+# Want to exit if there's an errror
+set -e
+
 # Per https://stackoverflow.com/a/70930049, we need these commands for Yum mirrors
+# Per https://serverfault.com/a/1093928, switch to vault.epel.cloud
 sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-Linux-*
-sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-Linux-*
+sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.epel.cloud|g' /etc/yum.repos.d/CentOS-Linux-*
 
 # Update package lists
 yum update -y

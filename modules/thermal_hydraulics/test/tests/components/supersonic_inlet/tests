@@ -1,0 +1,12 @@
+[Tests]
+  [not_implemented]
+    type = 'RunException'
+    input = 'err.i'
+    expect_err = "This component is not implemented for single-phase flow."
+    max_parallel = 1
+    ad_indexing_type = 'global'
+    design = 'SupersonicInlet.md'
+    requirement = 'The system shall report an error if the SupersonicInlet component is used.'
+    issues = '#20383'
+  []
+[]
