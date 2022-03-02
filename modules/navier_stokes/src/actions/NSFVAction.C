@@ -255,17 +255,17 @@ NSFVAction::validParams()
 
   params.addParam<bool>(
       "momentum_two_term_bc_expansion",
-      false,
+      true,
       "If a two-term Taylor expansion is needed for the determination of the boundary values"
       "of the velocity/momentum.");
   params.addParam<bool>(
       "energy_two_term_bc_expansion",
-      false,
+      true,
       "If a two-term Taylor expansion is needed for the determination of the boundary values"
       "of the temperature/energy.");
   params.addParam<bool>(
       "pressure_two_term_bc_expansion",
-      false,
+      true,
       "If a two-term Taylor expansion is needed for the determination of the boundary values"
       "of the pressure.");
 
@@ -1819,17 +1819,9 @@ NSFVAction::processBlocks()
 void
 NSFVAction::checkGeneralControErrors()
 {
-  if (isParamValid("add_energy_equation"))
-    if (_compressibility == "compressible" && !_has_energy_equation)
-      paramError("add_energy_equation",
-                 "The user must have an energy equation for compressible simulation! Either delete "
-                 "the parameter or set it to 'true'!");
-
-  if ((_compressibility == "weakly-compressible" || _compressibility == "compressible") &&
-      _boussinesq_approximation == true)
+  if (_compressibility == "weakly-compressible" && _boussinesq_approximation == true)
     paramError("boussinesq_approximation",
-               "We cannot use boussinesq approximation while running in compressible or "
-               "weakly-compressible modes!");
+               "We cannot use boussinesq approximation while running in weakly-compressible mode!");
 
   if (_porous_medium_treatment && !isParamValid("porosity"))
     paramError("porosity", "Porosity should be defined if porous medium treatment is required!");
