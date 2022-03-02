@@ -65,4 +65,15 @@
     expect_out = 'SNES Object:'
     requirement = "The system shall support extra power iterations and check eigenvalue."
   [../]
+
+  [./newton_with_exact_initialization]
+    type = 'RunApp'
+    input = 'ne_ic_no_free.i'
+    cli_args = 'Executioner/initial_eigenvalue=0.1999416740 Postprocessors/niter/type=NumNonlinearIterations'
+    issues = '#20454'
+    slepc_version = '>=3.13.0'
+    expect_out = 'Iteration 0 eigenvalue = 0.1999416740'
+    requirement = "The system shall support eigenvalue calculations with an initial condition including the initial solution vector and the initial eigenvalue."
+    slepc = true
+  [../]
 []
