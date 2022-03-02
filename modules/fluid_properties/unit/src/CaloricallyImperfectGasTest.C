@@ -71,48 +71,39 @@ TEST_F(CaloricallyImperfectGasTest, testAll)
       Real cv = fp->cv_from_p_T(p, T);
       Real k = fp->k_from_p_T(p, T);
       Real mu = fp->mu_from_p_T(p, T);
+      Real s = fp->s_from_p_T(p, T);
+
+      // test rho_from_p_s
+      REL_TEST(fp->rho_from_p_s(p, s), rho, 10.0 * REL_TOL_CONSISTENCY);
 
       // test e_from_x_y functions
-      Real e_1 = fp->e_from_v_h(v, h);
-      Real e_2 = fp->e_from_p_rho(p, rho);
-      Real e_3 = fp->e_from_T_v(T, v);
-      REL_TEST(e_1, e, 10.0 * REL_TOL_CONSISTENCY);
-      REL_TEST(e_2, e, 10.0 * REL_TOL_CONSISTENCY);
-      REL_TEST(e_3, e, 10.0 * REL_TOL_CONSISTENCY);
+      REL_TEST(fp->e_from_v_h(v, h), e, 10.0 * REL_TOL_CONSISTENCY);
+      REL_TEST(fp->e_from_p_rho(p, rho), e, 10.0 * REL_TOL_CONSISTENCY);
+      REL_TEST(fp->e_from_T_v(T, v), e, 10.0 * REL_TOL_CONSISTENCY);
 
       // test cv_x_y  functions
-      Real cv_1 = fp->cv_from_T_v(T, v);
-      Real cv_2 = fp->cv_from_v_e(v, e);
-      REL_TEST(cv_1, cv, 10.0 * REL_TOL_CONSISTENCY);
-      REL_TEST(cv_2, cv, 10.0 * REL_TOL_CONSISTENCY);
+      REL_TEST(fp->cv_from_T_v(T, v), cv, 10.0 * REL_TOL_CONSISTENCY);
+      REL_TEST(fp->cv_from_v_e(v, e), cv, 10.0 * REL_TOL_CONSISTENCY);
 
       // test cp_x_y  functions
-      Real cp_1 = fp->cp_from_v_e(v, e);
-      REL_TEST(cp_1, cp, 10.0 * REL_TOL_CONSISTENCY);
+      REL_TEST(fp->cp_from_v_e(v, e), cp, 10.0 * REL_TOL_CONSISTENCY);
 
       // test h_from_x_y functions
-      Real h_1 = fp->h_from_T_v(T, v);
-      REL_TEST(h_1, h, 10.0 * REL_TOL_CONSISTENCY);
+      REL_TEST(fp->h_from_T_v(T, v), h, 10.0 * REL_TOL_CONSISTENCY);
 
       // test p_from_x_y functions
-      Real p_1 = fp->p_from_v_e(v, e);
-      Real p_2 = fp->p_from_T_v(T, v);
-      REL_TEST(p_1, p, 10.0 * REL_TOL_CONSISTENCY);
-      REL_TEST(p_2, p, 10.0 * REL_TOL_CONSISTENCY);
+      REL_TEST(fp->p_from_v_e(v, e), p, 10.0 * REL_TOL_CONSISTENCY);
+      REL_TEST(fp->p_from_T_v(T, v), p, 10.0 * REL_TOL_CONSISTENCY);
 
       // test T_from_x_y functions
-      Real T_1 = fp->T_from_p_h(p, h);
-      Real T_2 = fp->T_from_v_e(v, e);
-      REL_TEST(T_1, T, 10.0 * REL_TOL_CONSISTENCY);
-      REL_TEST(T_2, T, 10.0 * REL_TOL_CONSISTENCY);
+      REL_TEST(fp->T_from_p_h(p, h), T, 10.0 * REL_TOL_CONSISTENCY);
+      REL_TEST(fp->T_from_v_e(v, e), T, 10.0 * REL_TOL_CONSISTENCY);
 
       // test k_from_x_y functions
-      Real k_1 = fp->k_from_v_e(v, e);
-      REL_TEST(k_1, k, 10.0 * REL_TOL_CONSISTENCY);
+      REL_TEST(fp->k_from_v_e(v, e), k, 10.0 * REL_TOL_CONSISTENCY);
 
       // test mu_from_x_y functions
-      Real mu_1 = fp->mu_from_v_e(v, e);
-      REL_TEST(mu_1, mu, 10.0 * REL_TOL_CONSISTENCY);
+      REL_TEST(fp->mu_from_v_e(v, e), mu, 10.0 * REL_TOL_CONSISTENCY);
     }
   }
 
@@ -131,38 +122,27 @@ TEST_F(CaloricallyImperfectGasTest, testAll)
       ADReal ad_e = e;
       ADReal ad_v = v;
       ADReal ad_p = fp->p_from_v_e(ad_v, ad_e);
-      REL_TEST(MetaPhysicL::raw_value(ad_p), p, 10.0 * REL_TOL_CONSISTENCY);
+      Real tol = 1e-11;
+      REL_TEST(MetaPhysicL::raw_value(ad_p), p, tol);
 
       ADReal ad_T = fp->T_from_v_e(ad_v, ad_e);
-      REL_TEST(MetaPhysicL::raw_value(ad_T), T, 10.0 * REL_TOL_CONSISTENCY);
+      REL_TEST(MetaPhysicL::raw_value(ad_T), T, tol);
 
-      ADReal ad_cv = fp->cv_from_v_e(ad_v, ad_e);
-      REL_TEST(MetaPhysicL::raw_value(ad_cv), cv, 10.0 * REL_TOL_CONSISTENCY);
+      REL_TEST(MetaPhysicL::raw_value(fp->cv_from_v_e(ad_v, ad_e)), cv, tol);
 
       ADReal ad_rho = fp->rho_from_p_T(ad_p, ad_T);
-      REL_TEST(MetaPhysicL::raw_value(ad_rho), rho, 10.0 * REL_TOL_CONSISTENCY);
+      REL_TEST(MetaPhysicL::raw_value(ad_rho), rho, tol);
 
-      ADReal ad_ee = fp->e_from_p_rho(ad_p, ad_rho);
-      REL_TEST(MetaPhysicL::raw_value(ad_ee), e, 10.0 * REL_TOL_CONSISTENCY);
-
-      ADReal ad_eee = fp->e_from_T_v(ad_T, ad_v);
-      REL_TEST(MetaPhysicL::raw_value(ad_eee), e, 10.0 * REL_TOL_CONSISTENCY);
-
-      ADReal ad_4e = fp->e_from_p_T(ad_p, ad_T);
-      REL_TEST(MetaPhysicL::raw_value(ad_4e), e, 10.0 * REL_TOL_CONSISTENCY);
-
-      ADReal ad_gamma = fp->gamma_from_v_e(ad_v, ad_e);
-      ADReal gamma = fp->gamma_from_v_e(v, e);
-      REL_TEST(MetaPhysicL::raw_value(ad_gamma), gamma, 10.0 * REL_TOL_CONSISTENCY);
-
-      ADReal ad_gamma_pt = fp->gamma_from_p_T(ad_p, ad_T);
-      ADReal gamma_pt = fp->gamma_from_p_T(ad_p, ad_T);
-      REL_TEST(MetaPhysicL::raw_value(ad_gamma_pt), gamma_pt, 10.0 * REL_TOL_CONSISTENCY);
-
-      ADReal ad_c = fp->c_from_v_e(ad_v, ad_e);
-      REL_TEST(MetaPhysicL::raw_value(ad_c), c, 10.0 * REL_TOL_CONSISTENCY);
-      ADReal ad_cc = fp->c_from_p_T(ad_p, ad_T);
-      REL_TEST(MetaPhysicL::raw_value(ad_cc), c, 10.0 * REL_TOL_CONSISTENCY);
+      REL_TEST(MetaPhysicL::raw_value(fp->e_from_p_rho(ad_p, ad_rho)), e, tol);
+      REL_TEST(MetaPhysicL::raw_value(fp->e_from_T_v(ad_T, ad_v)), e, tol);
+      REL_TEST(MetaPhysicL::raw_value(fp->e_from_p_T(ad_p, ad_T)), e, tol);
+      REL_TEST(
+          MetaPhysicL::raw_value(fp->gamma_from_v_e(ad_v, ad_e)), fp->gamma_from_v_e(v, e), tol);
+      REL_TEST(MetaPhysicL::raw_value(fp->gamma_from_p_T(ad_p, ad_T)),
+               fp->gamma_from_p_T(ad_p, ad_T),
+               tol);
+      REL_TEST(MetaPhysicL::raw_value(fp->c_from_v_e(ad_v, ad_e)), c, tol);
+      REL_TEST(MetaPhysicL::raw_value(fp->c_from_p_T(ad_p, ad_T)), c, tol);
     }
   }
 
@@ -172,15 +152,11 @@ TEST_F(CaloricallyImperfectGasTest, testAll)
     Real p = 1.0e6;
     Real e = 10342290 * 0.75 + 17034360 * 0.25;
     Real h = e + p / fp->rho_from_p_T(p, T);
-
-    Real h_pT = fp->h_from_p_T(p, T);
-    Real e_pT = fp->e_from_p_T(p, T);
-    REL_TEST(h, h_pT, 1e-5);
-    REL_TEST(e, e_pT, 1e-5);
-
     Real v = fp->v_from_p_T(p, T);
-    Real e_vh = fp->e_from_v_h(v, h);
-    REL_TEST(e, e_vh, 1e-5);
+
+    REL_TEST(h, fp->h_from_p_T(p, T), 1e-5);
+    REL_TEST(e, fp->e_from_p_T(p, T), 1e-5);
+    REL_TEST(e, fp->e_from_v_h(v, h), 1e-5);
   }
 
   // check cv/cp lookups for T = 325.0
@@ -189,17 +165,13 @@ TEST_F(CaloricallyImperfectGasTest, testAll)
     Real p = 1.0e6;
     Real cv = (17034360.0 - 10342290.0) / 100.0;
     Real cp = cv + 8.3144598 / 0.002;
-    Real cp_pT = fp->cp_from_p_T(p, T);
-    Real cv_pT = fp->cv_from_p_T(p, T);
-    REL_TEST(cp, cp_pT, 1e-5);
-    REL_TEST(cv, cv_pT, 1e-5);
+    REL_TEST(cp, fp->cp_from_p_T(p, T), 1e-5);
+    REL_TEST(cv, fp->cv_from_p_T(p, T), 1e-5);
 
     Real v = fp->v_from_p_T(p, T);
     Real e = fp->e_from_p_T(p, T);
-    Real cp_ve = fp->cp_from_v_e(v, e);
-    Real cv_ve = fp->cv_from_v_e(v, e);
-    REL_TEST(cp, cp_ve, 1e-5);
-    REL_TEST(cv, cv_ve, 1e-5);
+    REL_TEST(cp, fp->cp_from_v_e(v, e), 1e-5);
+    REL_TEST(cv, fp->cv_from_v_e(v, e), 1e-5);
   }
 
   // test mu(p, T), mu(v, e), k(p, T), k(v, e) & derivatives
@@ -232,6 +204,213 @@ TEST_F(CaloricallyImperfectGasTest, testAll)
     REL_TEST(dk_de, -0.025 / cv, 0.001);
   }
 
+  // 5 argument functions
+  {
+    Real T = 325.0;
+    Real p = 1.0e6;
+    Real e = 10342290 * 0.75 + 17034360 * 0.25;
+    Real h = e + p / fp->rho_from_p_T(p, T);
+    Real v = fp->v_from_p_T(p, T);
+    Real rho = 1.0 / v;
+    Real cp = fp->cp_from_p_T(p, T);
+    Real cv = fp->cv_from_p_T(p, T);
+    Real s = fp->s_from_p_T(p, T);
+    Real mu = fp->mu_from_v_e(v, e);
+    Real k = fp->k_from_v_e(v, e);
+    Real gamma = fp->gamma_from_p_T(p, T);
+    Real ssound = fp->c_from_p_T(p, T);
+    Real tol = 1e-12;
+
+    {
+      Real a, b, c;
+      fp->p_from_v_e(v, e, a, b, c);
+      REL_TEST(a, p, tol);
+      DERIV_TEST_CUSTOM_PERTURBATION(fp->p_from_v_e, v, e, 1e-4, 1e-4);
+    }
+
+    {
+      Real a, b, c;
+      fp->T_from_v_e(v, e, a, b, c);
+      REL_TEST(a, T, tol);
+      DERIV_TEST_CUSTOM_PERTURBATION(fp->T_from_v_e, v, e, 1e-4, 1e-4);
+    }
+
+    {
+      Real a, b, c;
+      fp->cp_from_v_e(v, e, a, b, c);
+      REL_TEST(a, cp, tol);
+      DERIV_TEST_CUSTOM_PERTURBATION(fp->cp_from_v_e, v, e, 1e-4, 1e-4);
+    }
+
+    {
+      Real a, b, c;
+      fp->cv_from_v_e(v, e, a, b, c);
+      REL_TEST(a, cv, tol);
+      DERIV_TEST_CUSTOM_PERTURBATION(fp->cv_from_v_e, v, e, 1e-4, 1e-4);
+    }
+
+    {
+      Real a, b, c;
+      fp->mu_from_v_e(v, e, a, b, c);
+      REL_TEST(a, mu, tol);
+      DERIV_TEST_CUSTOM_PERTURBATION(fp->mu_from_v_e, v, e, 1e-4, 1e-4);
+    }
+
+    {
+      Real a, b, c;
+      fp->k_from_v_e(v, e, a, b, c);
+      REL_TEST(a, k, tol);
+      DERIV_TEST_CUSTOM_PERTURBATION(fp->k_from_v_e, v, e, 1e-4, 1e-4);
+    }
+
+    {
+      Real a, b, c;
+      fp->s_from_v_e(v, e, a, b, c);
+      REL_TEST(a, s, tol);
+      DERIV_TEST_CUSTOM_PERTURBATION(fp->s_from_v_e, v, e, 1e-4, 1e-4);
+    }
+
+    {
+      Real a, b, c;
+      fp->s_from_p_T(p, T, a, b, c);
+      REL_TEST(a, s, tol);
+      DERIV_TEST_CUSTOM_PERTURBATION(fp->s_from_p_T, p, T, 1e-4, 1e-4);
+    }
+
+    {
+      Real a, b, c;
+      fp->s_from_h_p(h, p, a, b, c);
+      REL_TEST(a, s, tol);
+      DERIV_TEST_CUSTOM_PERTURBATION(fp->s_from_h_p, h, p, 1e-4, 1e-4);
+    }
+
+    {
+      Real a, b, c;
+      fp->e_from_v_h(v, h, a, b, c);
+      REL_TEST(a, e, tol);
+      DERIV_TEST_CUSTOM_PERTURBATION(fp->e_from_v_h, v, h, 1e-4, 1e-4);
+    }
+
+    {
+      Real a, b, c;
+      fp->rho_from_p_T(p, T, a, b, c);
+      REL_TEST(a, rho, tol);
+      DERIV_TEST_CUSTOM_PERTURBATION(fp->rho_from_p_T, p, T, 1e-4, 1e-4);
+    }
+
+    {
+      Real a, b, c;
+      fp->e_from_p_rho(p, rho, a, b, c);
+      REL_TEST(a, e, tol);
+      DERIV_TEST_CUSTOM_PERTURBATION(fp->e_from_p_rho, p, rho, 1e-4, 1e-4);
+    }
+
+    {
+      Real a, b, c;
+      fp->e_from_T_v(T, v, a, b, c);
+      REL_TEST(a, e, tol);
+      DERIV_TEST_CUSTOM_PERTURBATION(fp->e_from_T_v, T, v, 1e-4, 1e-4);
+    }
+
+    {
+      Real a, b, c;
+      fp->p_from_T_v(T, v, a, b, c);
+      REL_TEST(a, p, tol);
+      DERIV_TEST_CUSTOM_PERTURBATION(fp->p_from_T_v, T, v, 1e-4, 1e-4);
+    }
+
+    {
+      Real a, b, c;
+      fp->h_from_T_v(T, v, a, b, c);
+      REL_TEST(a, h, tol);
+      DERIV_TEST_CUSTOM_PERTURBATION(fp->h_from_T_v, T, v, 1e-4, 1e-4);
+    }
+
+    {
+      Real a, b, c;
+      fp->s_from_T_v(T, v, a, b, c);
+      REL_TEST(a, s, tol);
+      DERIV_TEST_CUSTOM_PERTURBATION(fp->s_from_T_v, T, v, 1e-4, 1e-4);
+    }
+
+    {
+      Real a, b, c;
+      fp->h_from_p_T(p, T, a, b, c);
+      REL_TEST(a, h, tol);
+      DERIV_TEST_CUSTOM_PERTURBATION(fp->h_from_p_T, p, T, 1e-4, 1e-4);
+    }
+
+    {
+      Real a, b, c;
+      fp->e_from_p_T(p, T, a, b, c);
+      REL_TEST(a, e, tol);
+      DERIV_TEST_CUSTOM_PERTURBATION(fp->e_from_p_T, p, T, 1e-4, 1e-4);
+    }
+
+    {
+      Real a, b, c;
+      fp->T_from_p_h(p, h, a, b, c);
+      REL_TEST(a, T, tol);
+      DERIV_TEST_CUSTOM_PERTURBATION(fp->T_from_p_h, p, h, 1e-4, 1e-4);
+    }
+
+    {
+      Real a, b, c;
+      fp->cv_from_p_T(p, T, a, b, c);
+      REL_TEST(a, cv, tol);
+      DERIV_TEST_CUSTOM_PERTURBATION(fp->cv_from_p_T, p, T, 1e-4, 1e-4);
+    }
+
+    {
+      Real a, b, c;
+      fp->cp_from_p_T(p, T, a, b, c);
+      REL_TEST(a, cp, tol);
+      DERIV_TEST_CUSTOM_PERTURBATION(fp->cp_from_p_T, p, T, 1e-4, 1e-4);
+    }
+
+    {
+      Real a, b, c;
+      fp->mu_from_p_T(p, T, a, b, c);
+      REL_TEST(a, mu, tol);
+      DERIV_TEST_CUSTOM_PERTURBATION(fp->mu_from_p_T, p, T, 1e-4, 1e-4);
+    }
+
+    {
+      Real a, b, c;
+      fp->k_from_p_T(p, T, a, b, c);
+      REL_TEST(a, k, tol);
+      DERIV_TEST_CUSTOM_PERTURBATION(fp->k_from_p_T, p, T, 1e-4, 1e-4);
+    }
+
+    {
+      Real a, b, c;
+      fp->gamma_from_p_T(p, T, a, b, c);
+      REL_TEST(a, gamma, tol);
+      DERIV_TEST_CUSTOM_PERTURBATION(fp->gamma_from_p_T, p, T, 1e-4, 1e-4);
+    }
+
+    {
+      Real a, b, c;
+      fp->gamma_from_v_e(v, e, a, b, c);
+      REL_TEST(a, gamma, tol);
+      DERIV_TEST_CUSTOM_PERTURBATION(fp->gamma_from_v_e, v, e, 1e-4, 1e-4);
+    }
+
+    {
+      Real a, b, c;
+      fp->c_from_v_e(v, e, a, b, c);
+      REL_TEST(a, ssound, tol);
+      DERIV_TEST_CUSTOM_PERTURBATION(fp->c_from_v_e, v, e, 1e-4, 1e-4);
+    }
+
+    {
+      Real a, b, c;
+      fp->c_from_p_T(p, T, a, b, c);
+      REL_TEST(a, ssound, tol);
+      DERIV_TEST_CUSTOM_PERTURBATION(fp->c_from_p_T, p, T, 1e-4, 1e-4);
+    }
+  }
+
   // test entropy functions
   {
     Real T = 489.305;
@@ -244,32 +423,17 @@ TEST_F(CaloricallyImperfectGasTest, testAll)
     Real h = fp->h_from_p_T(p, T);
     Real s = Z + Rs * std::log(v / v0);
 
-    Real s_pT = fp->s_from_p_T(p, T);
-    REL_TEST(s_pT, s, 1e-6);
-
-    Real s_ve = fp->s_from_v_e(v, e);
-    REL_TEST(s_ve, s, 1e-6);
-
-    Real s_hp = fp->s_from_h_p(h, p);
-    REL_TEST(s_hp, s, 1e-6);
-
-    Real s_Tv = fp->s_from_T_v(T, v);
-    REL_TEST(s_Tv, s, 1e-6);
+    REL_TEST(fp->s_from_p_T(p, T), s, 1e-6);
+    REL_TEST(fp->s_from_v_e(v, e), s, 1e-6);
+    REL_TEST(fp->s_from_h_p(h, p), s, 1e-6);
+    REL_TEST(fp->s_from_T_v(T, v), s, 1e-6);
 
     // test 5 arg functions with derivatives for s(p, T)
     {
       Real s_alt, ds_dp, ds_dT;
       fp->s_from_p_T(p, T, s_alt, ds_dp, ds_dT);
       REL_TEST(s_alt, s, 1e-5);
-      Real eps = 1e-4;
-      Real pp1 = p * (1 + eps);
-      Real pp2 = p * (1 - eps);
-      Real TT1 = T * (1 + eps);
-      Real TT2 = T * (1 - eps);
-      Real ds_dp_fd = (fp->s_from_p_T(pp1, T) - fp->s_from_p_T(pp2, T)) / (2 * eps * p);
-      REL_TEST(ds_dp_fd, ds_dp, 1e-3);
-      Real ds_dT_fd = (fp->s_from_p_T(p, TT1) - fp->s_from_p_T(p, TT2)) / (2 * eps * T);
-      REL_TEST(ds_dT_fd, ds_dT, 1e-3);
+      DERIV_TEST_CUSTOM_PERTURBATION(fp->s_from_p_T, p, T, 1e-4, 1e-4);
     }
 
     // test 5 arg functions with derivatives for s(e, v)
@@ -277,15 +441,7 @@ TEST_F(CaloricallyImperfectGasTest, testAll)
       Real s_alt, ds_dv, ds_de;
       fp->s_from_v_e(v, e, s_alt, ds_dv, ds_de);
       REL_TEST(s_alt, s, 1e-5);
-      Real eps = 1e-4;
-      Real vv1 = v * (1 + eps);
-      Real vv2 = v * (1 - eps);
-      Real ee1 = e * (1 + eps);
-      Real ee2 = e * (1 - eps);
-      Real ds_dv_fd = (fp->s_from_v_e(vv1, e) - fp->s_from_v_e(vv2, e)) / (2 * eps * v);
-      REL_TEST(ds_dv_fd, ds_dv, 1e-3);
-      Real ds_de_fd = (fp->s_from_v_e(v, ee1) - fp->s_from_v_e(v, ee2)) / (2 * eps * e);
-      REL_TEST(ds_de_fd, ds_de, 1e-3);
+      DERIV_TEST_CUSTOM_PERTURBATION(fp->s_from_v_e, v, e, 1e-4, 1e-4);
     }
 
     // test 5 arg functions with derivatives for s(h, p)
@@ -293,15 +449,7 @@ TEST_F(CaloricallyImperfectGasTest, testAll)
       Real s_alt, ds_dh, ds_dp;
       fp->s_from_h_p(h, p, s_alt, ds_dh, ds_dp);
       REL_TEST(s_alt, s, 1e-5);
-      Real eps = 1e-4;
-      Real hh1 = h * (1 + eps);
-      Real hh2 = h * (1 - eps);
-      Real pp1 = p * (1 + eps);
-      Real pp2 = p * (1 - eps);
-      Real ds_dh_fd = (fp->s_from_h_p(hh1, p) - fp->s_from_h_p(hh2, p)) / (2 * eps * h);
-      REL_TEST(ds_dh_fd, ds_dh, 1e-3);
-      Real ds_dp_fd = (fp->s_from_h_p(h, pp1) - fp->s_from_h_p(h, pp2)) / (2 * eps * p);
-      REL_TEST(ds_dp_fd, ds_dp, 1e-3);
+      DERIV_TEST_CUSTOM_PERTURBATION(fp->s_from_h_p, h, p, 1e-4, 1e-4);
     }
   }
 
