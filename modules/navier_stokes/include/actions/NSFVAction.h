@@ -104,18 +104,22 @@ protected:
   /// Compressibility type, can be compressible, incompressible
   /// or weakly-incompressible
   MooseEnum _compressibility;
-  /// Swich dedicated to show if porous medium treatment is requested or not
-  bool _porous_medium_treatment;
-  /// Switch that can be used to create an integrated energy equation for
+  // Switch that can be used to create an integrated energy equation for
   /// incompressible/weakly compressible simulations.
   bool _has_energy_equation;
   /// Switch to use to enable the Boussinesq approximation for incompressible
   /// fluid simulations
   bool _boussinesq_approximation;
-  /// The name of the auxiliary variable for the porosity field
-  AuxVariableName _porosity_name;
   /// Turbulent diffusivity handling type (mixing-length, etc.)
   MooseEnum _turbulence_handling;
+
+  /// Swich dedicated to show if porous medium treatment is requested or not
+  bool _porous_medium_treatment;
+  /// The name of the auxiliary variable for the porosity field
+  AuxVariableName _porosity_name;
+  /// Switch to enable friction correction for the porous medium momentum
+  /// equations
+  bool _use_friction_correction;
 
   /// Subdomains Navier-Stokes equation is defined on
   std::vector<SubdomainName> _blocks;
@@ -164,9 +168,6 @@ protected:
   /// The coefficients used for each item if friction type
   std::vector<std::vector<std::string>> _friction_coeffs;
 
-  /// Temperature variable name in the solid subscale structure (in porous medium treatment)
-  /// to facilitate temperature variable added outside
-  VariableName _solid_temperature_variable_name;
   /// Mesh dimension
   unsigned int _dim;
 

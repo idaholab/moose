@@ -31,6 +31,16 @@
     ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
   []
+  [pressure-corrected-action]
+    type = PythonUnitTest
+    input = test.py
+    test_case = TestPressureCorrectedAction
+    requirement = 'The system shall show second order convergence for all variables when using porosity reconstructions and friction corrections together with NSFV action syntax.'
+    method = '!dbg'
+    min_parallel = 8
+    ad_indexing_type = 'global'
+    required_python_packages = 'pandas matplotlib'
+  []
   [pressure-corrected-jac]
     type = 'PetscJacobianTester'
     input = pressure-interpolation-corrected.i
