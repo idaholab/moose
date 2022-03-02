@@ -101,7 +101,7 @@
     point_file = bh03.bh
     function_of = pressure
     fluid_phase = 0
-    bottom_p_or_t = 1E7
+    bottom_p_or_t = 'insitu_pp'
     unit_weight = '0 0 0'
     use_mobility = true
     character = -1
@@ -144,6 +144,10 @@
     value = abs((a-c+d)/2/(a+c))
     vars = 'a c d'
     vals = 'fluid_mass1 fluid_mass0 bh_report'
+  []
+  [insitu_pp]
+    type = ParsedFunction
+    value = 2*0.5e7
   []
 []
 
