@@ -5,11 +5,6 @@
     requirement = 'The system shall generate a full 3D square core mesh with 3 pin types and 2 assembly types'
     type = 'Exodiff'
     input = 'core.i'
-    cli_args = "Mesh/pin1/region_ids='1 2 5'
-                Mesh/pin2/region_ids='2'
-                Mesh/pin3/region_ids='3 4'
-                Mesh/rmp/assembly_pitch=2.84126
-                Outputs/file_base=core_in"
     exodiff = 'core_in.e'
     recover = false
   []
@@ -20,7 +15,6 @@
     cli_args = "Mesh/pin1/region_ids='1 2 5'
                 Mesh/pin2/region_ids='2'
                 Mesh/pin3/region_ids='3 4'
-                Mesh/rmp/assembly_pitch=2.84126
                 Mesh/cmg/pattern='2 1; 1 0'
                 Outputs/file_base=core_empty_in"
     exodiff = 'core_empty_in.e'
@@ -31,6 +25,7 @@
     type = 'Exodiff'
     input = 'core.i'
     cli_args = "Mesh/rmp/geom='Hex'
+                Mesh/rmp/assembly_pitch=7.10315
                 Mesh/pin1/quad_center_elements=false
                 Mesh/pin1/region_ids='11 12 13'
                 Mesh/pin2/quad_center_elements=false

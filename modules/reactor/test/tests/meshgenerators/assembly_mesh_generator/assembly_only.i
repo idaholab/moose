@@ -3,7 +3,7 @@
     type = ReactorMeshParams
     dim = 3
     geom = "Square"
-    assembly_pitch = 7.10315
+    assembly_pitch = 2.84126
     axial_regions = '1.0 1.0'
     axial_mesh_intervals = '1 1'
     top_boundary_id = 201
@@ -20,6 +20,7 @@
     duct_halfpitch = '0.68'
     mesh_intervals = '1 1 1'
     quad_center_elements = false
+    region_ids='1 2 5; 11 12 15'
   []
 
   [pin2]
@@ -29,6 +30,7 @@
     pitch = 1.42063
     num_sectors = 2
     mesh_intervals = '2'
+    region_ids='3; 13'
   []
 
   [amg]

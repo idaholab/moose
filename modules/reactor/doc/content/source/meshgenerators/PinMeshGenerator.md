@@ -17,7 +17,11 @@ The `PinMeshGenerator` object adopts much of the existing input structure of `Po
 
 ## Block ID Information
 
-The [!param](/Mesh/PinMeshGenerator/region_ids) parameter provides a map of subdomain_id and region_id values to assign to zones in the pin mesh. Each row in this map corresponds to a single axial layer of the pin and contains individual entries corresponding to the radial zones within the pin, starting from the centermost region and extending radially outward. The number of columns (entries in the row) should be identical to the number of rings + 1 (background region) + number of ducts. The required number of rows is dependent on the number of axial layers in the pin. For 2D pins, a single row of entries should be provided. For 3D pins, multiple rows must be provided (one for each axial layer). For 3D pins, the top row corresponds to the bottom of the pin cell. 
+The [!param](/Mesh/PinMeshGenerator/region_ids) parameter provides a map of subdomain_id and region_id values to assign to zones in the pin mesh. Each row in this map corresponds to a single axial layer of the pin and contains individual entries corresponding to the radial zones within the pin, starting from the centermost region and extending radially outward. The number of columns (entries in the row) should be identical to the number of rings + 1 (background region) + number of ducts. The required number of rows is dependent on the number of axial layers in the pin. For 2D pins, a single row of entries should be provided. For 3D pins, multiple rows must be provided (one for each axial layer). For 3D pins, the top row corresponds to the bottom of the pin cell.
+
+!alert! note title=Pin block IDs are modified to match region IDs
+It should be noted here that both the extra integer "region_id" and the block ID of the resultant pin elements will be modified to match the same value as specified by [!param](/Mesh/PinMeshGenerator/region_ids).
+!alert-end!
 
 The region_ids parameter entries can conveniently be selected to match material ids to be assigned to each region of the problem. Using the same value in multiple entries of the region_id parameter will effectively assign elements in multiple zones to the same subdomain_id and the same region_id. For meshes with all quadrilateral elements, this approach does not present any conflicts. However, if [!param](/Mesh/PinMeshGenerator/quad_center_elements) is set to false, the innermost radial zone of the pin is discretized into triangular elements, and therefore only one radial meshing interval may be defined for this radial zone using the [!param](/Mesh/PinMeshGenerator/mesh_intervals) parameter.  This ensures that a single region id does not correspond to a mesh discretization with both triangle and quadrilateral mesh elements, which will occur if more than one meshing interval is applied to the centermost pin zone with triangular elements. Moreover, the subdomain ID associated with any zone of triangular elements should not be shared with another zone containing quadrilateral elements, otherwise MOOSE will error out.
 
@@ -35,7 +39,7 @@ If the pin is extruded to three dimensions the top-most boundary ID must be assi
 
 ## Example Syntax
 
-!listing modules/reactor/test/tests/meshgenerators/pin_mesh_generator/pin_only_hex_complex.i block=Mesh
+!listing modules/reactor/test/tests/meshgenerators/pin_mesh_generator/pin_only.i block=Mesh
 
 !media reactor/meshgenerators/pin_mesh_generator.png
 

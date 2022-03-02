@@ -16,6 +16,7 @@
     pin_type = 2
     pitch = 1.42063
     num_sectors = 2
+    region_ids='3; 13'
 
     mesh_intervals = '2'
     quad_center_elements = true

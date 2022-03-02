@@ -20,8 +20,6 @@
 
 registerMooseObject("ReactorApp", ReactorMeshParams);
 
-defineLegacyParams(ReactorMeshParams);
-
 InputParameters
 ReactorMeshParams::validParams()
 {

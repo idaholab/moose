@@ -21,10 +21,11 @@ CoreMeshGenerator::validParams()
   auto params = MeshGenerator::validParams();
 
   params.addRequiredParam<std::vector<MeshGeneratorName>>(
-      "inputs", "The PinMeshGenerators that form the components of the assembly.");
+      "inputs", "The AssemblyMeshGenerators that form the components of the assembly.");
 
-  params.addRequiredParam<MeshGeneratorName>(
+  params.addParam<MeshGeneratorName>(
       "dummy_assembly_name",
+      "dummy",
       "The place holder name in \"inputs\" that indicates an empty position.");
 
   params.addRequiredParam<std::vector<std::vector<unsigned int>>>(
@@ -36,7 +37,7 @@ CoreMeshGenerator::validParams()
                         false,
                         "Determines if this is the final step in the geometry construction"
                         " and extrudes the 2D geometry to 3D. If this is true then this mesh "
-                        "cannot be used in further mesh building");
+                        "cannot be used in further mesh building in the Reactor workflow");
 
   params.addClassDescription("This CoreMeshGenerator object is designed to generate a core-like "
                              "structure, with IDs, from a reactor geometry. "
@@ -60,7 +61,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
      The reactor params gives the axial info if we are to extrude as well as the assembly pitch
      that the pin pattern is to be checked against.
      We then create the PatternedMesh subgenerators and pass the parameter info needed for the
-     inputs. Finally, if the the mesh is to be extruded we create the FancyExtruderGenerator
+     inputs. Finally, if the mesh is to be extruded we create the FancyExtruderGenerator
      subgenerator and the PlaneIDMeshGenerator subgenerator to handle this.
   */
   MeshGeneratorName _reactor_params =
@@ -69,7 +70,9 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
   // Ensure that the user has supplied the correct info for conformal mesh generation
   if (!hasMeshProperty("mesh_dimensions", _reactor_params) ||
       !hasMeshProperty("mesh_geometry", _reactor_params))
-    mooseError("The reactor_params input must be a ReactorMeshParams type MeshGenerator\n");
+    mooseError("The reactor_params input must be a ReactorMeshParams type MeshGenerator\n Please "
+               "check that a valid definition and name of ReactorMeshParams has been provided to "
+               "the input PinMeshGenerators.");
   else
   {
     _geom_type = getMeshProperty<std::string>("mesh_geometry", _reactor_params);
@@ -98,11 +101,13 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
     }
     else
     {
+      // Found dummy assembly in input assembly names
       make_empty = true;
       for (const auto i : make_range(_pattern.size()))
       {
         for (const auto j : make_range(_pattern[i].size()))
         {
+          // Found dummy assembly in input lattice definition
           if (_pattern[i][j] == empty_pattern_loc)
             _empty_pos = true;
         }
@@ -166,7 +171,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
           {0, -1, 0}}; // normal directions over which to define boundaries
       params.set<bool>("fixed_normal") = true;
       params.set<bool>("replace") = false;
-      params.set<std::vector<BoundaryName>>("new_boundary") = {"10001", "10002", "10003", "10004"};
+      params.set<std::vector<BoundaryName>>("new_boundary") = {"26001", "26002", "26003", "26004"};
 
       _build_mesh =
           &addMeshSubgenerator("SideSetsFromNormalsGenerator", name() + "_pattern", params);
@@ -395,11 +400,10 @@ CoreMeshGenerator::generate()
   std::string region_id_name = "region_id";
   if (!(*_build_mesh)->has_elem_integer(region_id_name))
   {
-    mooseError("Expected mesh inputs to have extra integer ids.\n");
+    mooseError("Expected mesh inputs to have the extra integer id: region_id.\n");
   }
 
   unsigned int rid = (*_build_mesh)->get_elem_integer_index(region_id_name);
-  ;
 
   std::map<subdomain_id_type, std::string> subdomain_name_map;
   for (auto & elem : (*_build_mesh)->active_element_ptr_range())
@@ -420,10 +424,10 @@ CoreMeshGenerator::generate()
         MeshGeneratorName(getMeshProperty<std::string>("reactor_params_name", _inputs[0]));
     const auto radial_boundary =
         getMeshProperty<boundary_id_type>("radial_boundary_id", _reactor_params);
-    MooseMesh::changeBoundaryId(*(_build_mesh->get()), 10001, radial_boundary, false);
-    MooseMesh::changeBoundaryId(*(_build_mesh->get()), 10002, radial_boundary, false);
-    MooseMesh::changeBoundaryId(*(_build_mesh->get()), 10003, radial_boundary, false);
-    MooseMesh::changeBoundaryId(*(_build_mesh->get()), 10004, radial_boundary, false);
+    MooseMesh::changeBoundaryId(*(_build_mesh->get()), 26001, radial_boundary, false);
+    MooseMesh::changeBoundaryId(*(_build_mesh->get()), 26002, radial_boundary, false);
+    MooseMesh::changeBoundaryId(*(_build_mesh->get()), 26003, radial_boundary, false);
+    MooseMesh::changeBoundaryId(*(_build_mesh->get()), 26004, radial_boundary, false);
 
     (*_build_mesh)->get_boundary_info().sideset_name(radial_boundary) = "outer_core";
     (*_build_mesh)->get_boundary_info().nodeset_name(radial_boundary) = "outer_core";

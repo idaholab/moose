@@ -17,6 +17,10 @@ The [!param](/Mesh/AssemblyMeshGenerator/background_region_id) and [!param](/Mes
 
 The user defined ID assignment using [!param](/Mesh/AssemblyMeshGenerator/background_region_id) is given as a 1-D vector of size `A`, where `A` is the number of axial levels. This vector defines the background block IDs (single value per axial layer) starting from the bottom axial layer and ending with the top axial layer. Similarly, [!param](/Mesh/AssemblyMeshGenerator/duct_region_ids) is given as an `A` by `D` vector, where `D` is the number of duct intervals per axial layer. This vector assignment starts from the innermost duct region of the bottom axial layer, and extends out first radially and then axially.
 
+!alert! note title=Background and duct block IDs are modified to match background and duct region IDs
+It should be noted here that the extra integer "region_id" and the block ID of the resultant background and duct elements will be modified to match the same value as specified by [!param](/Mesh/AssemblyMeshGenerator/background_region_id) and [!param](/Mesh/AssemblyMeshGenerator/duct_region_ids).
+!alert-end!
+
 ## Reporting ID Information
 
 The `AssemblyMeshGenerator` object will tag all elements (that do not belong to one of the constituent pins) with the extra integer reporting ID named "region_id" with the value equal to their region ID.

@@ -46,16 +46,16 @@ AssemblyMeshGenerator::validParams()
 
   params.addParam<std::vector<subdomain_id_type>>(
       "background_region_id",
-      "The region id for the background area between the pins and the ducts");
+      "The region id for the background area between the pins and the ducts to set block ID and region_id extra-element integer");
 
   params.addParam<std::vector<std::vector<subdomain_id_type>>>(
-      "duct_region_ids", "The region id for the ducts from innermost to outermost.");
+      "duct_region_ids", "The region id for the ducts from innermost to outermost, to set block ID and region_id extra-element integer.");
 
   params.addParam<bool>("extrude",
                         false,
                         "Determines if this is the final step in the geometry construction"
                         " and extrudes the 2D geometry to 3D. If this is true then this mesh "
-                        "cannot be used in further mesh building");
+                        "cannot be used in further mesh building in the Reactor workflow");
 
   params.addClassDescription("This AssemblyMeshGenerator object is designed to generate "
                              "assembly-like structures, with IDs, from a reactor geometry. "
@@ -92,7 +92,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
      The reactor params gives the axial info if we are to extrude as well as the assembly pitch
      that the pin pattern is to be checked against.
      We then create the PatternedMesh subgenerators and pass the parameter info needed for the
-     inputs. Finally, if the the mesh is to be extruded we create the FancyExtruderGenerator
+     inputs. Finally, if the mesh is to be extruded we create the FancyExtruderGenerator
      subgenerator and the PlaneIDMeshGenerator subgenerator to handle this.
   */
   MeshGeneratorName _reactor_params =
@@ -101,7 +101,9 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
   // Ensure that the user has supplied the correct info for conformal mesh generation
   if (!hasMeshProperty("mesh_dimensions", _reactor_params) ||
       !hasMeshProperty("mesh_geometry", _reactor_params))
-    mooseError("The reactor_params input must be a ReactorMeshParams type MeshGenerator\n");
+    mooseError("The reactor_params input must be a ReactorMeshParams type MeshGenerator\n Please "
+               "check that a valid definition and name of ReactorMeshParams has been provided to "
+               "the input PinMeshGenerators.");
   else
   {
     _geom_type = getMeshProperty<std::string>("mesh_geometry", _reactor_params);
@@ -125,7 +127,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
     else
     {
       auto pitch = getMeshProperty<Real>("pitch", pin);
-      if (pitch != base_pitch)
+      if (!MooseUtils::absoluteFuzzyEqual(pitch, base_pitch))
         mooseError("All pins within an assembly must have the same pitch");
     }
     if (getMeshProperty<bool>("extruded", pin))
@@ -137,8 +139,8 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
   {
     if (_duct_sizes.size() != 0 || _duct_intervals.size() != 0 || _background_intervals != 0)
       mooseError("Ducts and background regions are not currently supported for square assemblies");
-    if ((base_pitch * _pattern.size() != assembly_pitch) ||
-        (base_pitch * _pattern[0].size() != assembly_pitch))
+    if ((!MooseUtils::absoluteFuzzyEqual(base_pitch * _pattern.size(), assembly_pitch)) ||
+        (!MooseUtils::absoluteFuzzyEqual(base_pitch * _pattern[0].size(), assembly_pitch)))
       mooseError("Assembly pitch must be equal to lattice dimension times pin pitch for Cartesian "
                  "assemblies");
   }
@@ -200,7 +202,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
           {0, -1, 0}}; // normal directions over which to define boundaries
       params.set<bool>("fixed_normal") = true;
       params.set<bool>("replace") = false;
-      params.set<std::vector<BoundaryName>>("new_boundary") = {"10001", "10002", "10003", "10004"};
+      params.set<std::vector<BoundaryName>>("new_boundary") = {"21001", "21002", "21003", "21004"};
 
       _build_mesh =
           &addMeshSubgenerator("SideSetsFromNormalsGenerator", name() + "_pattern", params);
@@ -400,7 +402,6 @@ AssemblyMeshGenerator::generate()
   {
     // swap the region ids on the subdomain ids to the correct ones
     // for their axial layer
-    _mesh_name = name() + "_extrudedIDs";
     if (!(*_build_mesh)->has_elem_integer(plane_id_name))
       mooseError("Expected extruded mesh to have plane IDs");
 
@@ -442,8 +443,6 @@ AssemblyMeshGenerator::generate()
   }
   else
   {
-    _mesh_name = name() + "_pattern";
-
     for (const auto i : make_range(_peripheral_regions))
     {
       subdomain_id_type region = UINT16_MAX - (i + 1);
@@ -488,10 +487,10 @@ AssemblyMeshGenerator::generate()
     // the boundaries need to be directly assigned for cartesian cores
     // since the CartesianIDPatternedMeshGenerator lacks the ability
     // to assign them during construction.
-    MooseMesh::changeBoundaryId(*(_build_mesh->get()), 10001, _assembly_boundary_id, false);
-    MooseMesh::changeBoundaryId(*(_build_mesh->get()), 10002, _assembly_boundary_id, false);
-    MooseMesh::changeBoundaryId(*(_build_mesh->get()), 10003, _assembly_boundary_id, false);
-    MooseMesh::changeBoundaryId(*(_build_mesh->get()), 10004, _assembly_boundary_id, false);
+    MooseMesh::changeBoundaryId(*(_build_mesh->get()), 21001, _assembly_boundary_id, false);
+    MooseMesh::changeBoundaryId(*(_build_mesh->get()), 21002, _assembly_boundary_id, false);
+    MooseMesh::changeBoundaryId(*(_build_mesh->get()), 21003, _assembly_boundary_id, false);
+    MooseMesh::changeBoundaryId(*(_build_mesh->get()), 21004, _assembly_boundary_id, false);
 
     (*_build_mesh)->get_boundary_info().sideset_name(_assembly_boundary_id) =
         _assembly_boundary_name;

@@ -43,10 +43,10 @@ protected:
   ///The number of divisions in the meshes of the ducts
   const std::vector<unsigned int> _duct_intervals;
 
-  ///The IDs for the background axial region that will be assigned to the block ID, name, and an extra element integer
+  ///Vector used to set both the block id and "region_id" extra-element integer of the assembly background elements
   std::vector<subdomain_id_type> _background_region_id;
 
-  ///The ID for the duct regions that will be assigned to the block ID, name, and an extra element integer
+  ///2-D vector used to set both the block id and "region_id" extra-element integer of the assembly duct elements
   std::vector<std::vector<subdomain_id_type>> _duct_region_ids;
 
   ///Whether this mesh should be extruded to 3-D, making it the final structure in the reactor mesh

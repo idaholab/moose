@@ -8,7 +8,7 @@ The `ReactorMeshParams` object stores persistent mesh information about a reacto
 
 ## Example Syntax
 
-!listing modules/reactor/test/tests/meshgenerators/pin_mesh_generator/pin_only_hex_complex.i block=Mesh/rmp
+!listing modules/reactor/test/tests/meshgenerators/pin_mesh_generator/pin_only.i block=Mesh/rmp
 
 !syntax parameters /Mesh/ReactorMeshParams
 

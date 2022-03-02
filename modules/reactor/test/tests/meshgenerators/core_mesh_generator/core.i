@@ -3,7 +3,7 @@
     type = ReactorMeshParams
     dim = 3
     geom = "Square"
-    assembly_pitch = 7.10315
+    assembly_pitch = 2.84126
     axial_regions = '1.0'
     axial_mesh_intervals = '1'
     top_boundary_id = 201
@@ -20,6 +20,7 @@
     ring_radii = '0.2'
     duct_halfpitch = '0.68'
     mesh_intervals = '1 1 1'
+    region_ids='1 2 5'
 
     quad_center_elements = true
   []
@@ -31,6 +32,7 @@
     pitch = 1.42063
     num_sectors = 2
     mesh_intervals = '2'
+    region_ids='2'
 
     quad_center_elements = true
   []
@@ -44,6 +46,7 @@
     num_sectors = 2
     ring_radii = '0.3818'
     mesh_intervals = '1 1'
+    region_ids='3 4'
 
     quad_center_elements = true
   []
@@ -144,4 +147,5 @@
 
 [Outputs]
   exodus = true
+  file_base = core_in
 []
