@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ADOneD3EqnEnergyHeatFluxFromHeatStructure3D.h"
-#include "HeatFluxFromHeatStructureBaseUserObject.h"
+#include "ADHeatFluxFromHeatStructureBaseUserObject.h"
 #include "THMIndices3Eqn.h"
 #include "FlowModelSinglePhase.h"
 #include "HeatConductionModel.h"

@@ -11,7 +11,6 @@
 
 #include "VolumeJunction1Phase.h"
 #include "ShaftConnectable.h"
-#include "ShaftConnectedTurbine1PhaseUserObject.h"
 
 /**
  * 1-phase turbine that must be connected to a Shaft component

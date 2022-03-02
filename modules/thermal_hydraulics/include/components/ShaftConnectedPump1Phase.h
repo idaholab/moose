@@ -11,7 +11,6 @@
 
 #include "VolumeJunction1Phase.h"
 #include "ShaftConnectable.h"
-#include "ShaftConnectedPump1PhaseUserObject.h"
 
 /**
  * 1-phase pump that must be connected to a Shaft component

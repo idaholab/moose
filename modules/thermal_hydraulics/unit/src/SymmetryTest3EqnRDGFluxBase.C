@@ -24,17 +24,17 @@ SymmetryTest3EqnRDGFluxBase::test()
     const auto & WL = W_pair.first;
     const auto & WR = W_pair.second;
 
-    const Real AL = 1.0;
-    const Real AR = 1.5;
+    const ADReal AL = 1.0;
+    const ADReal AR = 1.5;
 
-    const std::vector<Real> UL = computeConservativeSolution(WL, AL);
-    const std::vector<Real> UR = computeConservativeSolution(WR, AR);
+    const std::vector<ADReal> UL = computeConservativeSolution(WL, AL);
+    const std::vector<ADReal> UR = computeConservativeSolution(WR, AR);
 
-    std::vector<Real> FLR, FRL;
+    std::vector<ADReal> FLR, FRL;
     _flux->calcFlux(UL, UR, _nLR_dot_d, FLR, FRL);
     flux_regions.insert(_flux->getLastRegionIndex());
 
-    std::vector<Real> FRL_flipped, FLR_flipped;
+    std::vector<ADReal> FRL_flipped, FLR_flipped;
     _flux->calcFlux(UR, UL, -_nLR_dot_d, FRL_flipped, FLR_flipped);
     flux_regions.insert(_flux->getLastRegionIndex());
 
