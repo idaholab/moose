@@ -225,18 +225,33 @@ NSFVAction::validParams()
       "friction_coeffs", "The firction coefficients for every item in 'friction_types'.");
 
   // Control of numerical schemes
-  params.addParam<std::string>("momentum_advection_interpolation",
-                               "average",
-                               "The numerical scheme to use for interpolating momentum/velocity, "
-                               "as an advected quantity, to the face.");
-  params.addParam<std::string>("energy_advection_interpolation",
-                               "average",
-                               "The numerical scheme to use for interpolating energy/temperature, "
-                               "as an advected quantity, to the face.");
-  params.addParam<std::string>("mass_advection_interpolation",
-                               "average",
-                               "The numerical scheme to use for interpolating density, "
-                               "as an advected quantity, to the face.");
+  MooseEnum adv_interpol_types("average upwind skewness-corrected", "average");
+  params.addParam<MooseEnum>("momentum_advection_interpolation",
+                             adv_interpol_types,
+                             "The numerical scheme to use for interpolating momentum/velocity, "
+                             "as an advected quantity, to the face.");
+  params.addParam<MooseEnum>("energy_advection_interpolation",
+                             adv_interpol_types,
+                             "The numerical scheme to use for interpolating energy/temperature, "
+                             "as an advected quantity, to the face.");
+  params.addParam<MooseEnum>("mass_advection_interpolation",
+                             adv_interpol_types,
+                             "The numerical scheme to use for interpolating density, "
+                             "as an advected quantity, to the face.");
+
+  MooseEnum face_interpol_types("average skewness-corrected", "average");
+  params.addParam<MooseEnum>("momentum_face_interpolation",
+                             face_interpol_types,
+                             "The numerical scheme to interpolate the velocity/momentum to the "
+                             "face (separate from the advected quantity interpolation).");
+  params.addParam<MooseEnum>("energy_face_interpolation",
+                             face_interpol_types,
+                             "The numerical scheme to interpolate the temperature/energy to the "
+                             "face (separate from the advected quantity interpolation).");
+  params.addParam<MooseEnum>("pressure_face_interpolation",
+                             face_interpol_types,
+                             "The numerical scheme to interpolate the pressure to the "
+                             "face (separate from the advected quantity interpolation).");
 
   params.addParam<Real>("momentum_scaling", 1.0, "The scaling factor for the momentum variables.");
   params.addParam<Real>("energy_scaling", 1.0, "The scaling factor for the energy variables.");
@@ -325,9 +340,12 @@ NSFVAction::NSFVAction(InputParameters parameters)
     _specific_heat_name(getParam<MaterialPropertyName>("specific_heat")),
     _thermal_conductivity_name(getParam<MaterialPropertyName>("thermal_conductivity")),
     _thermal_expansion_name(getParam<MaterialPropertyName>("thermal_expansion")),
-    _momentum_advection_interpolation(getParam<std::string>("momentum_advection_interpolation")),
-    _energy_advection_interpolation(getParam<std::string>("energy_advection_interpolation")),
-    _mass_advection_interpolation(getParam<std::string>("mass_advection_interpolation")),
+    _momentum_advection_interpolation(getParam<MooseEnum>("momentum_advection_interpolation")),
+    _energy_advection_interpolation(getParam<MooseEnum>("energy_advection_interpolation")),
+    _mass_advection_interpolation(getParam<MooseEnum>("mass_advection_interpolation")),
+    _momentum_face_interpolation(getParam<MooseEnum>("momentum_face_interpolation")),
+    _energy_face_interpolation(getParam<MooseEnum>("energy_face_interpolation")),
+    _pressure_face_interpolation(getParam<MooseEnum>("pressure_face_interpolation")),
     _momentum_scaling(getParam<Real>("momentum_scaling")),
     _energy_scaling(getParam<Real>("energy_scaling")),
     _mass_scaling(getParam<Real>("mass_scaling"))
@@ -443,13 +461,12 @@ NSFVAction::act()
 void
 NSFVAction::addINSVariables()
 {
-
   if (_porous_medium_treatment)
   {
     auto params = _factory.getValidParams("PINSFVSuperficialVelocityVariable");
     params.set<std::vector<SubdomainName>>("block") = _blocks;
-
     params.set<std::vector<Real>>("scaling") = {_momentum_scaling};
+    params.set<MooseEnum>("face_interp_method") = _momentum_face_interpolation;
     for (unsigned int d = 0; d < _dim; ++d)
       _problem->addVariable(
           "PINSFVSuperficialVelocityVariable", NS::superficial_velocity_vector[d], params);
@@ -458,6 +475,8 @@ NSFVAction::addINSVariables()
   {
     auto params = _factory.getValidParams("INSFVVelocityVariable");
     params.set<std::vector<SubdomainName>>("block") = _blocks;
+    params.set<std::vector<Real>>("scaling") = {_momentum_scaling};
+    params.set<MooseEnum>("face_interp_method") = _momentum_face_interpolation;
 
     for (unsigned int d = 0; d < _dim; ++d)
       _problem->addVariable("INSFVVelocityVariable", NS::velocity_vector[d], params);
@@ -466,6 +485,7 @@ NSFVAction::addINSVariables()
   auto params = _factory.getValidParams("INSFVPressureVariable");
   params.set<std::vector<SubdomainName>>("block") = _blocks;
   params.set<std::vector<Real>>("scaling") = {_mass_scaling};
+  params.set<MooseEnum>("face_interp_method") = _pressure_face_interpolation;
 
   _problem->addVariable("INSFVPressureVariable", NS::pressure, params);
 
@@ -491,6 +511,7 @@ NSFVAction::addINSVariables()
     auto params = _factory.getValidParams("INSFVEnergyVariable");
     params.set<std::vector<SubdomainName>>("block") = _blocks;
     params.set<std::vector<Real>>("scaling") = {_energy_scaling};
+    params.set<MooseEnum>("face_interp_method") = _energy_face_interpolation;
 
     _problem->addVariable("INSFVEnergyVariable", NS::T_fluid, params);
   }

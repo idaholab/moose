@@ -179,15 +179,22 @@ protected:
   MaterialPropertyName _specific_heat_name;
   /// Name of the thermal conductivity material property
   MaterialPropertyName _thermal_conductivity_name;
-  /// NAme of the thermal expansion material property
+  /// Name of the thermal expansion material property
   MaterialPropertyName _thermal_expansion_name;
 
   /// The type of the advected quantity interpolation method for momentum/velocity
-  std::string _momentum_advection_interpolation;
+  MooseEnum _momentum_advection_interpolation;
   /// The type of the advected quantity interpolation method for energy/temperature
-  std::string _energy_advection_interpolation;
+  MooseEnum _energy_advection_interpolation;
   /// The type of the advected quantity interpolation method for continuity equation
-  std::string _mass_advection_interpolation;
+  MooseEnum _mass_advection_interpolation;
+
+  /// The type of the face interpolation method for the velocity/momentum
+  MooseEnum _momentum_face_interpolation;
+  /// The type of the face interpolation method for the temperature/energy
+  MooseEnum _energy_face_interpolation;
+  /// The type of the pressure/density interpolation method
+  MooseEnum _pressure_face_interpolation;
 
   /// The scaling factor for the momentum variables
   Real _momentum_scaling;
