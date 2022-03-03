@@ -2,7 +2,7 @@
 
 #include <vector>
 #include "SubChannelMesh.h"
-#include "Enums.h"
+#include "SubChannelEnums.h"
 
 /**
  * Mesh class for triangular, edge and corner subchannels for hexagonal lattice fuel assemblies
@@ -54,6 +54,11 @@ public:
   {
     return _nodes[i_chan][iz];
   }
+  virtual Node * getPinNode(unsigned int /*i_pin*/, unsigned /*iz*/) const override
+  {
+    return nullptr;
+  }
+  virtual bool pinMeshExist() const override { return false; }
   virtual const unsigned int & getNumOfChannels() const override { return _n_channels; }
   virtual const unsigned int & getNumOfGapsPerLayer() const override { return _n_gaps; }
   virtual const std::pair<unsigned int, unsigned int> &
@@ -72,6 +77,7 @@ public:
   }
 
   virtual unsigned int getSubchannelIndexFromPoint(const Point & p) const override;
+  virtual unsigned int channelIndex(const Point & point) const override;
 
   virtual EChannelType getSubchannelType(unsigned int index) const override
   {
@@ -89,6 +95,22 @@ public:
   {
     return _chan_pairs_sf[i_chan];
   }
+
+  virtual const unsigned int & getNumOfPins() const override { return _nrods; }
+
+  virtual const std::vector<unsigned int> & getPinChannels(unsigned int i_pin) const override
+  {
+    return _pin_to_chan_map[i_pin];
+  }
+
+  virtual const std::vector<unsigned int> & getChannelPins(unsigned int i_chan) const override
+  {
+    return _subchannel_to_rod_map[i_chan];
+  }
+
+  virtual unsigned int getPinIndexFromPoint(const Point &) const override { return 0; }
+
+  virtual unsigned int pinIndex(const Point &) const override { return 0; }
 
 protected:
   /// number of rings of fuel rods
@@ -149,6 +171,8 @@ protected:
   std::vector<std::pair<unsigned int, unsigned int>> _gap_pairs_sf;
   /// sweeping flow model channel pairs to specify directional edge flow
   std::vector<std::pair<unsigned int, unsigned int>> _chan_pairs_sf;
+
+  std::vector<std::vector<unsigned int>> _pin_to_chan_map;
 
 private:
   /// number of corners in the duct x-sec
