@@ -16,6 +16,7 @@ HeatTransferFromSpecifiedTemperature1Phase::validParams()
 {
   InputParameters params = HeatTransferFromTemperature1Phase::validParams();
   params.addRequiredParam<FunctionName>("T_wall", "Specified wall temperature [K]");
+  params.declareControllable("T_wall");
   params.addClassDescription(
       "Heat transfer connection from a fixed temperature function for 1-phase flow");
   return params;

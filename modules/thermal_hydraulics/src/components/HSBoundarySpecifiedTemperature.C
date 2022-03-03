@@ -19,6 +19,8 @@ HSBoundarySpecifiedTemperature::validParams()
 
   params.addRequiredParam<FunctionName>("T", "Prescribed temperature [K]");
 
+  params.declareControllable("T");
+
   params.addClassDescription("Applies Dirichlet boundary conditions on a heat structure");
 
   return params;

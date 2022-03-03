@@ -19,6 +19,7 @@ InletStagnationPressureTemperature1Phase::validParams()
   params.addRequiredParam<Real>("p0", "Prescribed stagnation pressure [Pa]");
   params.addRequiredParam<Real>("T0", "Prescribed stagnation temperature [K]");
   params.addParam<bool>("reversible", true, "True for reversible, false for pure inlet");
+  params.declareControllable("p0 T0");
   params.addClassDescription("Boundary condition with prescribed stagnation pressure and "
                              "temperature for 1-phase flow channels.");
   return params;

@@ -23,6 +23,7 @@ HeatSourceFromTotalPower::validParams()
   params.addParam<Real>(
       "power_fraction", 1., "Fraction of the total power that goes into the heat structure [-]");
   params.addParam<FunctionName>("power_shape_function", "Axial power shape [-]");
+  params.declareControllable("power_fraction");
   params.addClassDescription("Heat generation from total power");
   return params;
 }
