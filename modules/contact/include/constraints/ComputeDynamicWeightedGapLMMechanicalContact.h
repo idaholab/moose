@@ -41,6 +41,8 @@ protected:
   virtual void
   incorrectEdgeDroppingPost(const std::unordered_set<const Node *> & inactive_lm_nodes) override;
 
+  void communicateWear();
+
   /// A small threshold gap value to consider that a node needs a "persistency" constraint
   const Real _capture_tolerance;
 

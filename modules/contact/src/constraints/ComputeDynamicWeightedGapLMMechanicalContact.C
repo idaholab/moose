@@ -126,9 +126,6 @@ ComputeDynamicWeightedGapLMMechanicalContact::computeQpIProperties()
 
   _dof_to_nodal_wear_depth[dof] += _test[_i][_qp] * _wear_depth[_qp] * _JxW_msm[_qp] * _coord[_qp];
 
-  //  if (_has_wear)
-  //    _dof_to_weighted_gap[dof].first += _dof_to_nodal_wear_depth[dof];
-
   if (_normalize_c)
     _dof_to_weighted_gap[dof].second += _test[_i][_qp] * _qp_factor;
 }
@@ -138,6 +135,7 @@ ComputeDynamicWeightedGapLMMechanicalContact::timestepSetup()
 {
   _dof_to_old_weighted_gap.clear();
   _dof_to_old_velocity.clear();
+  _dof_to_nodal_old_wear_depth.clear();
 
   for (auto & map_pr : _dof_to_weighted_gap)
     _dof_to_old_weighted_gap.emplace(map_pr.first, std::move(map_pr.second.first));
@@ -158,13 +156,15 @@ ComputeDynamicWeightedGapLMMechanicalContact::residualSetup()
 
   // Wear
   _dof_to_nodal_wear_depth.clear();
-  _dof_to_nodal_old_wear_depth.clear();
 }
 
 void
 ComputeDynamicWeightedGapLMMechanicalContact::post()
 {
   communicateGaps();
+
+  if (_has_wear)
+    communicateWear();
 
   // There is a need for the dynamic constraint to uncouple the computation of the weighted gap from
   // the computation of the constraint itself since we are switching from gap constraint to
@@ -207,6 +207,9 @@ ComputeDynamicWeightedGapLMMechanicalContact::incorrectEdgeDroppingPost(
 {
   communicateGaps();
 
+  if (_has_wear)
+    communicateWear();
+
   for (const auto & pr : _dof_to_weighted_gap)
   {
     if ((inactive_lm_nodes.find(static_cast<const Node *>(pr.first)) != inactive_lm_nodes.end()) ||
@@ -238,4 +241,43 @@ ComputeDynamicWeightedGapLMMechanicalContact::incorrectEdgeDroppingPost(
 
     ComputeWeightedGapLMMechanicalContact::enforceConstraintOnDof(pr.first);
   }
+}
+
+void
+ComputeDynamicWeightedGapLMMechanicalContact::communicateWear()
+{
+#ifdef MOOSE_SPARSE_AD
+  // We may have wear depth information that should go to other processes that own the dofs
+  using Datum = std::pair<dof_id_type, ADReal>;
+  std::unordered_map<processor_id_type, std::vector<Datum>> push_data;
+
+  for (auto & pr : _dof_to_nodal_wear_depth)
+  {
+    const auto * const dof_object = pr.first;
+    const auto proc_id = dof_object->processor_id();
+    if (proc_id == this->processor_id())
+      continue;
+
+    push_data[proc_id].push_back(std::make_pair(dof_object->id(), std::move(pr.second)));
+  }
+
+  const auto & lm_mesh = _mesh.getMesh();
+
+  auto action_functor = [this, &lm_mesh](const processor_id_type libmesh_dbg_var(pid),
+                                         const std::vector<Datum> & sent_data)
+  {
+    mooseAssert(pid != this->processor_id(), "We do not send messages to ourself here");
+    for (auto & pr : sent_data)
+    {
+      const auto dof_id = pr.first;
+      const auto * const dof_object =
+          _nodal ? static_cast<const DofObject *>(lm_mesh.node_ptr(dof_id))
+                 : static_cast<const DofObject *>(lm_mesh.elem_ptr(dof_id));
+      mooseAssert(dof_object, "This should be non-null");
+      _dof_to_nodal_wear_depth[dof_object] += std::move(pr.second);
+    }
+  };
+
+  TIMPI::push_parallel_vector_data(_communicator, push_data, action_functor);
+#endif
 }

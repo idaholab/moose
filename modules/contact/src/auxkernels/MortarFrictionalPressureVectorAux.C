@@ -98,7 +98,7 @@ MortarFrictionalPressureVectorAux::computeValue()
   // A node id may correspond to more than one lower-d elements on the secondary surface.
   // However, we are looping over nodes below, so we will locate the correct geometry
   const Elem * lower_dimensional_element =
-      _mortar_generation_object->nodesToSecondaryElem().at(_current_node->id())[0];
+      libmesh_map_find(_mortar_generation_object->nodesToSecondaryElem(), _current_node->id())[0];
 
   // Get nodal tangents for this element
   std::array<std::vector<Point>, 2> nodal_tangents =

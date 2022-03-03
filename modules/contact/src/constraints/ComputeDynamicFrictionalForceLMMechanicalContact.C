@@ -67,8 +67,7 @@ ComputeDynamicFrictionalForceLMMechanicalContact::ComputeDynamicFrictionalForceL
 #endif
 
   if (!_has_friction_function && !isParamValid("mu"))
-    paramError(
-        "mu",
+    mooseError(
         "A coefficient of friction needs to be provided as a constant value of via a function.");
 
   if (_has_friction_function && isParamValid("mu"))
@@ -295,8 +294,7 @@ ComputeDynamicFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(
   const Real c_t = _normalize_c ? _c_t / *_normalization_ptr : _c_t;
 
   // Compute the friction coefficient (constant or function)
-  ADReal mu_ad = 0.0;
-  computeFrictionValue(mu_ad, contact_pressure, *tangential_vel[0], *tangential_vel[1]);
+  ADReal mu_ad = computeFrictionValue(contact_pressure, *tangential_vel[0], *tangential_vel[1]);
 
   ADReal dof_residual;
   ADReal dof_residual_dir;
@@ -369,11 +367,9 @@ ComputeDynamicFrictionalForceLMMechanicalContact::enforceConstraintOnDof(
   const Real c_t = _normalize_c ? _c_t / *_normalization_ptr : _c_t;
 
   // Compute the friction coefficient (constant or function)
-  ADReal mu_ad = 0.0;
-  computeFrictionValue(mu_ad, contact_pressure, tangential_vel, ADReal(0.0));
+  ADReal mu_ad = computeFrictionValue(contact_pressure, tangential_vel, ADReal(0.0));
 
   ADReal dof_residual;
-
   // Primal-dual active set strategy (PDASS)
   if (contact_pressure < _epsilon)
     dof_residual = friction_lm_value;
@@ -394,14 +390,14 @@ ComputeDynamicFrictionalForceLMMechanicalContact::enforceConstraintOnDof(
     _assembly.processResidual(dof_residual.value(), friction_dof_index, _vector_tags);
 }
 
-void
+ADReal
 ComputeDynamicFrictionalForceLMMechanicalContact::computeFrictionValue(
-    ADReal & mu_ad,
     const ADReal & contact_pressure,
     const ADReal & tangential_vel,
     const ADReal & tangential_vel_dir)
 {
   // TODO: Introduce temperature dependence in the function. Do this when we have an example.
+  ADReal mu_ad;
 
   if (!_has_friction_function)
     mu_ad = _mu;
@@ -412,4 +408,6 @@ ComputeDynamicFrictionalForceLMMechanicalContact::computeFrictionValue(
 
     mu_ad = _function_friction->value<ADReal>(0.0, contact_pressure, tangential_vel_magnitude, 0.0);
   }
+
+  return mu_ad;
 }
