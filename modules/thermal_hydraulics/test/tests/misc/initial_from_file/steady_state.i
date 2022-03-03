@@ -122,7 +122,7 @@
 []
 
 [Preconditioning]
-  [SMP_PJFNK]
+  [pc]
     type = SMP
     full = true
   []
@@ -137,7 +137,7 @@
   num_steps = 100
   abort_on_solve_fail = true
 
-  solve_type = 'PJFNK'
+  solve_type = 'NEWTON'
   line_search = 'basic'
   nl_rel_tol = 1e-7
   nl_abs_tol = 1e-8
