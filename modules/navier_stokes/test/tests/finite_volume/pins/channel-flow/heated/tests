@@ -57,11 +57,11 @@
     method = "!dbg"
     abs_zero = 1e-9
     issues = '#19472'
+    design = 'NSFVAction.md'
     requirement = 'The system shall be able to solve for fluid energy diffusion, advection and convection with the solid phase in a 2D channel using the NSFV action syntax.'
     ad_indexing_type = 'global'
     valgrind = HEAVY
     cli_args = "Outputs/file_base='rc-heated-solid-fluid-action'"
-
   []
   [transient]
     type = 'Exodiff'
@@ -82,6 +82,7 @@
     method = "!dbg"
     abs_zero = 1e-9
     issues = '#19472'
+    design = 'NSFVAction.md'
     requirement = 'The system shall be able to run transient simulations with fluid energy diffusion, advection and convection with the solid phase in a 2D channel, modeling both fluid and solid temperature using the NSFV action syntax.'
     ad_indexing_type = 'global'
     valgrind = 'none'
@@ -104,6 +105,7 @@
     exodiff = rc-heated-boussinesq-action.e
     method = "!dbg"
     issues = '#19472'
+    design = 'NSFVAction.md'
     requirement = 'The system shall be able to solve for fluid energy diffusion, advection and convection with the solid phase in a 2D channel with a Boussinesq approximation using the NSFV action syntax.'
     ad_indexing_type = 'global'
     valgrind = HEAVY

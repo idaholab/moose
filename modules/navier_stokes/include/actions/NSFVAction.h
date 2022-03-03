@@ -93,10 +93,9 @@ protected:
   /// Add mixing length material for turbulence handling
   void addMixingLengthMaterial();
 
-  /// Add relationship manager to extend the number of ghosted layers
-  void addRelationshipManager(std::string name,
-                              unsigned int no_layers,
-                              const InputParameters & obj_params);
+  /// Add relationship manager to extend the number of ghosted layers if necessary
+  using Action::addRelationshipManagers;
+  virtual void addRelationshipManagers(Moose::RelationshipManagerType input_rm_type) override;
 
   /// Equation type, transient or steady-state
   MooseEnum _type;
@@ -120,6 +119,8 @@ protected:
   /// Switch to enable friction correction for the porous medium momentum
   /// equations
   bool _use_friction_correction;
+  /// The number of smoothing layers necessary for the simulation.
+  unsigned short _smoothing_layers;
 
   /// Subdomains Navier-Stokes equation is defined on
   std::vector<SubdomainName> _blocks;

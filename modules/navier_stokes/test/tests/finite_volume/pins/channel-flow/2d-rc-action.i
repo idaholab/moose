@@ -1,6 +1,10 @@
 mu=1.1
 rho=1.1
 
+[Problem]
+  error_on_jacobian_nonzero_reallocation = true
+[]
+
 [Mesh]
   [gen]
     type = GeneratedMeshGenerator

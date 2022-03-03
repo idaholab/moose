@@ -553,10 +553,10 @@ NSFVAction::addRhieChowUserObjects()
 
     params.set<VariableName>("pressure") = NS::pressure;
     params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
-    params.set<unsigned short>("smoothing_layers") =
-        isParamValid("porosity_smoothing_layers")
-            ? getParam<unsigned short>("porosity_smoothing_layers")
-            : 0;
+    unsigned short smoothing_layers = isParamValid("porosity_smoothing_layers")
+                                          ? getParam<unsigned short>("porosity_smoothing_layers")
+                                          : 0;
+    params.set<unsigned short>("smoothing_layers") = smoothing_layers;
 
     _problem->addUserObject("PINSFVRhieChowInterpolator", "pins_rhie_chow_interpolator", params);
   }
@@ -793,7 +793,6 @@ NSFVAction::addINSMomentumViscousDiscipationKernels()
     {
       params.set<NonlinearVariableName>("variable") = NS::superficial_velocity_vector[d];
       params.set<MooseEnum>("momentum_component") = NS::directions[d];
-      addRelationshipManager("pins_momentum_" + NS::directions[d] + "_diffusion", 2, params);
 
       _problem->addFVKernel(
           diff_kernel_type, "pins_momentum_" + NS::directions[d] + "_diffusion", params);
@@ -811,7 +810,6 @@ NSFVAction::addINSMomentumViscousDiscipationKernels()
     {
       params.set<NonlinearVariableName>("variable") = NS::velocity_vector[d];
       params.set<MooseEnum>("momentum_component") = NS::directions[d];
-      addRelationshipManager("ins_momentum_" + NS::directions[d] + "_diffusion", 2, params);
 
       _problem->addFVKernel(
           diff_kernel_type, "ins_momentum_" + NS::directions[d] + "_diffusion", params);
@@ -840,8 +838,6 @@ NSFVAction::addINSMomentumMixingLengthKernels()
     {
       params.set<NonlinearVariableName>("variable") = NS::superficial_velocity_vector[d];
       params.set<MooseEnum>("momentum_component") = NS::directions[d];
-      addRelationshipManager(
-          "pins_momentum_" + NS::directions[d] + "_mixing_length_reynolds_stress", 3, params);
 
       _problem->addFVKernel(kernel_type,
                             "pins_momentum_" + NS::directions[d] + "_mixing_length_reynolds_stress",
@@ -863,8 +859,6 @@ NSFVAction::addINSMomentumMixingLengthKernels()
       _problem->addFVKernel(kernel_type,
                             "ins_momentum_" + NS::directions[d] + "_mixing_length_reynolds_stress",
                             params);
-      addRelationshipManager(
-          "ins_momentum_" + NS::directions[d] + "_mixing_length_reynolds_stress", 3, params);
     }
   }
 
@@ -1321,7 +1315,6 @@ NSFVAction::addINSOutletBC()
       params.set<std::vector<BoundaryName>>("boundary") = {_outlet_boundaries[bc_ind]};
 
       _problem->addFVBC(bc_type, NS::pressure + "_" + _outlet_boundaries[bc_ind], params);
-      addRelationshipManager(NS::pressure + "_" + _outlet_boundaries[bc_ind], 2, params);
     }
     else if (_momentum_outlet_types[bc_ind] == "zero-gradient")
     {
@@ -1723,7 +1716,6 @@ NSFVAction::addWCNSEnergyMixingLengthKernels()
   {
     for (unsigned int dim_i = 0; dim_i < _dim; ++dim_i)
       params.set<CoupledName>(u_names[dim_i]) = {NS::superficial_velocity_vector[dim_i]};
-    addRelationshipManager("pins_energy_mixing_length_diffusion", 2, params);
 
     _problem->addFVKernel(kernel_type, "pins_energy_mixing_length_diffusion", params);
   }
@@ -1731,7 +1723,6 @@ NSFVAction::addWCNSEnergyMixingLengthKernels()
   {
     for (unsigned int dim_i = 0; dim_i < _dim; ++dim_i)
       params.set<CoupledName>(u_names[dim_i]) = {NS::velocity_vector[dim_i]};
-    addRelationshipManager("ins_energy_mixing_length_diffusion", 2, params);
 
     _problem->addFVKernel(kernel_type, "ins_energy_mixing_length_diffusion", params);
   }
@@ -1771,31 +1762,25 @@ NSFVAction::addMixingLengthMaterial()
 }
 
 void
-NSFVAction::addRelationshipManager(std::string name,
-                                   unsigned int no_layers,
-                                   const InputParameters & obj_params)
+NSFVAction::addRelationshipManagers(Moose::RelationshipManagerType input_rm_type)
 {
-  auto & factory = _app.getFactory();
-  auto rm_params = factory.getValidParams("ElementSideNeighborLayers");
+  unsigned short necessary_layers = 2;
+  if (_momentum_face_interpolation == "skewness-corrected" ||
+      _energy_face_interpolation == "skewness-corrected" ||
+      _pressure_face_interpolation == "skewness-corrected")
+    necessary_layers = 3;
 
-  rm_params.set<std::string>("for_whom") = name;
-  rm_params.set<MooseMesh *>("mesh") = _mesh.get();
-  rm_params.set<Moose::RelationshipManagerType>("rm_type") =
-      Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC |
-      Moose::RelationshipManagerType::COUPLING;
-  rm_params.set<unsigned short>("layers") = no_layers;
-  rm_params.set<bool>("attach_geometric_early") = false;
-  if (obj_params.isParamValid("use_point_neighbors"))
-    rm_params.set<bool>("use_point_neighbors") = obj_params.get<bool>("use_point_neighbors");
+  if (_turbulence_handling != "none")
+    necessary_layers = 3;
 
-  rm_params.set<bool>("use_displaced_mesh") = obj_params.get<bool>("use_displaced_mesh");
-  mooseAssert(rm_params.areAllRequiredParamsValid(),
-              "All relationship manager parameters should be valid.");
+  if (_porous_medium_treatment && isParamValid("porosity_smoothing_layers"))
+    necessary_layers =
+        std::max(getParam<unsigned short>("porosity_smoothing_layers"), necessary_layers);
 
-  auto rm_obj = factory.create<RelationshipManager>("ElementSideNeighborLayers", name, rm_params);
-
-  if (!_app.addRelationshipManager(rm_obj))
-    factory.releaseSharedObjects(*rm_obj);
+  const std::string kernel_type = "INSFVMixingLengthReynoldsStress";
+  InputParameters params = _factory.getValidParams(kernel_type);
+  params.set<unsigned short>("ghost_layers") = necessary_layers;
+  addRelationshipManagers(input_rm_type, params);
 }
 
 void

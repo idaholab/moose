@@ -22,6 +22,7 @@
     requirement = 'The system shall be able to simulate mixing-length-based turbulent systems using the NSFV action input syntax.'
     ad_indexing_type = 'global'
     issues = '#19472'
+    design = 'NSFVAction.md'
     mesh_mode = REPLICATED
     valgrind = 'none'
     recover = false
