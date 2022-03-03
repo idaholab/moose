@@ -25,6 +25,9 @@ SolidMaterialProperties::validParams()
 
   params.addPrivateParam<ExecFlagEnum>("execute_on");
   params.addPrivateParam<bool>("use_displaced_mesh");
+
+  params.declareControllable("rho cp k");
+
   params.registerBase("SolidMaterialProperties");
 
   return params;

@@ -23,6 +23,8 @@ Pump1Phase::validParams()
   params.addRequiredParam<Real>("head", "Pump head [m]");
   params.makeParamRequired<Real>("A_ref");
 
+  params.declareControllable("head");
+
   params.addClassDescription("Pump between two 1-phase flow channels that has a non-zero volume");
 
   return params;

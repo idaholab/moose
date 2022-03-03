@@ -18,6 +18,7 @@ HeatTransfer1PhaseBase::validParams()
 {
   InputParameters params = HeatTransferBase::validParams();
   params.addParam<FunctionName>("Hw", "Convective heat transfer coefficient [W/(m^2-K)]");
+  params.declareControllable("Hw");
   return params;
 }
 

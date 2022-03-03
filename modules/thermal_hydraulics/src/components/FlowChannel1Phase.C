@@ -26,6 +26,8 @@ FlowChannel1Phase::validParams()
   params.addParam<FunctionName>("initial_T", "Initial temperature in the flow channel [K]");
   params.addParam<FunctionName>("D_h", "Hydraulic diameter [m]");
 
+  params.declareControllable("initial_p initial_T initial_vel D_h");
+
   params.addClassDescription("1-phase 1D flow channel");
 
   return params;

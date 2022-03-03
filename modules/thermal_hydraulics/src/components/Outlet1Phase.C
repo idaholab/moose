@@ -17,6 +17,7 @@ Outlet1Phase::validParams()
 {
   InputParameters params = FlowBoundary1Phase::validParams();
   params.addRequiredParam<Real>("p", "Prescribed pressure [Pa]");
+  params.declareControllable("p");
   params.addClassDescription(
       "Boundary condition with prescribed pressure for 1-phase flow channels.");
   return params;
