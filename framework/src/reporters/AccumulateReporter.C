@@ -39,6 +39,7 @@ AccumulateReporter::initialSetup()
       paramError("reporters", "Reporter ", rname, " does not exist.");
 
     if (!declareAccumulateHelper<int>(rname) && !declareAccumulateHelper<Real>(rname) &&
+        !declareAccumulateHelper<dof_id_type>(rname) &&
         !declareAccumulateHelper<std::string>(rname) &&
         !declareAccumulateHelper<std::vector<int>>(rname) &&
         !declareAccumulateHelper<std::vector<Real>>(rname) &&

@@ -1,6 +1,6 @@
 [Tests]
   design = 'AccumulateReporter.md'
-  issues = '#18469'
+  issues = '#18469 #20467'
 
   [accumulate_reporter]
     type = 'JSONDiff'

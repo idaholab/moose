@@ -1,6 +1,6 @@
 [Tests]
   design = 'ConstantReporter.md'
-  issues = '#16055'
+  issues = '#16055 #20467'
 
   [constant_reporter]
     type = 'JSONDiff'
