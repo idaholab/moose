@@ -36,54 +36,14 @@ class PackageExtension(command.CommandExtension):
 
         # Assign a key/value for every item in packages_config.yml
         for k, v in packages_config.items():
-            if k != 'moose_packages':
-                config[k] = (v, 'Default version for %s' % (k))
-            else:
-                config[k] = (v, 'MOOSE Environment installer package')
-
-        config['link'] = (r'http://www.mooseframework.org/moose_packages',
-                          "Location of packages.")
+            config[k] = (v, 'Default version for %s' % (k))
 
         return config
 
     def extend(self, reader, renderer):
         self.requires(core, command)
-        self.addCommand(reader, PackageCommand())
         self.addCommand(reader, PackageCodeReplace())
         self.addCommand(reader, PackageTextReplace())
-
-class PackageCommand(command.CommandComponent):
-    """
-    Replace arch with matching moose-environment package, as specified in
-    the yaml configuration file.
-
-    YAML Syntax:
-        moose_packages:
-            centos: moose-environment-1_centos.rpm
-
-    Markdown Syntax:
-        [!package!name arch=centos]
-    """
-    COMMAND = 'package'
-    SUBCOMMAND = 'name'
-
-    @staticmethod
-    def defaultSettings():
-        settings = command.CommandComponent.defaultSettings()
-        settings['arch'] = (None, "The name of the OS package name to retrieve.")
-        return settings
-
-    def createToken(self, parent, info, page, settings):
-        arch = settings['arch']
-        packages = self.extension.get('moose_packages', dict())
-
-        if arch not in packages:
-            msg = "The supplied value for the 'arch' settings, {}, was not found."
-            raise exceptions.MooseDocsException(msg, arch)
-
-        href = os.path.join(self.extension.get('link'), packages[arch])
-        core.Link(parent, url=str(href), string=str(packages[arch]))
-        return parent
 
 class PackageCodeReplace(command.CommandComponent):
     """

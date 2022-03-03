@@ -1,6 +1,6 @@
 ## GCC
 
-We need a modern C++14 capable compiler. Our minimum requirements are: GCC [!package!minimum_gcc], Clang [!package!minimum_clang]. This section will focus on building a GCC [!package!gcc] compiler stack.
+We need a modern C++17 capable compiler. Our minimum requirements are: GCC [!package!minimum_gcc], Clang [!package!minimum_clang]. This section will focus on building a GCC [!package!gcc] compiler stack.
 
 What version of GCC do we have?
 
