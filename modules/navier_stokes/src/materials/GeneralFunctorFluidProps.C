@@ -26,7 +26,10 @@ GeneralFunctorFluidProps::validParams()
   params.addRequiredParam<MooseFunctorName>(NS::T_fluid, "Fluid temperature");
   params.addRequiredParam<MooseFunctorName>(NS::speed, "Velocity norm");
   params.addParam<MooseFunctorName>(NS::density, "Density");
-  params.addParam<bool>("force_define_density", false, "Whether to force the definition of a density functor from the fluid properties");
+  params.addParam<bool>(
+      "force_define_density",
+      false,
+      "Whether to force the definition of a density functor from the fluid properties");
 
   params.addParam<FunctionName>(
       "mu_rampdown", 1, "A function describing a ramp down of viscosity over time");

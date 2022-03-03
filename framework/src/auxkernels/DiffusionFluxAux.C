@@ -18,7 +18,7 @@ DiffusionFluxAux::validParams()
   InputParameters params = AuxKernel::validParams();
   MooseEnum component("x y z normal");
   params.addClassDescription("Compute components of flux vector for diffusion problems "
-                             "$(\\vv{J} = -D \\nabla C)$.");
+                             "$(\\vec{J} = -D \\nabla C)$.");
   params.addRequiredParam<MooseEnum>("component", component, "The desired component of flux.");
   params.addRequiredCoupledVar("diffusion_variable", "The name of the variable");
   params.addRequiredParam<MaterialPropertyName>(

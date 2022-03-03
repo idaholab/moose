@@ -14,7 +14,7 @@ where:
 - $\beta$ is the fluid expansion coefficient
 - $l$ is the size of the system in the direction of the temperature difference
 - $g$ is the magnitude of the gravity
-- $mu$ is the dynamic viscosity of the fluid
+- $\mu$ is the dynamic viscosity of the fluid
 - $k$ is the thermal diffusivity of the fluid
 
 
