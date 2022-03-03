@@ -59,9 +59,9 @@ void mooseSetToZero<ADSymmetricRankFourTensor>(ADSymmetricRankFourTensor & v);
 }
 
 /**
- * SymmetricRankFourTensorTempl is designed to handle a symmetric N-dimensional fourth order tensor,
- * C. Since N is hard-coded to 3, SymmetricRankFourTensorTempl holds 36 separate C_ij entries.
- * Within the code i,j = 0, .., 5.
+ * SymmetricRankFourTensorTempl is designed to handle an N-dimensional fourth order tensor with
+ * minor symmetry, C. Since N is hard-coded to 3, SymmetricRankFourTensorTempl holds 36 separate
+ * C_ij entries. Within the code i,j = 0, .., 5.
  */
 template <typename T>
 class SymmetricRankFourTensorTempl
@@ -76,7 +76,8 @@ public:
   /// returns the 1, sqrt(2), or 2 prefactor in the Mandel notation for the indices i,j ranging from 0-5.
   static constexpr Real mandelFactor(unsigned int i, unsigned int j)
   {
-    return i < Ndim ? (j < Ndim ? 1.0 : MathUtils::sqrt2) : (j < Ndim ? MathUtils::sqrt2 : 2.0);
+    return SymmetricRankTwoTensorTempl<T>::mandelFactor(i) *
+           SymmetricRankTwoTensorTempl<T>::mandelFactor(j);
   }
 
   /// Initialization method
@@ -146,11 +147,11 @@ public:
   explicit operator RankFourTensorTempl<T>();
 
   // Named constructors
-  static SymmetricRankFourTensorTempl<T> Identity()
+  static SymmetricRankFourTensorTempl<T> identity()
   {
     return SymmetricRankFourTensorTempl<T>(initIdentity);
   }
-  static SymmetricRankFourTensorTempl<T> IdentitySymmetricFour()
+  static SymmetricRankFourTensorTempl<T> identitySymmetricFour()
   {
     return SymmetricRankFourTensorTempl<T>(initIdentitySymmetricFour);
   };
@@ -437,7 +438,7 @@ template <typename T2>
 SymmetricRankFourTensorTempl<T>::SymmetricRankFourTensorTempl(
     const SymmetricRankFourTensorTempl<T2> & copy)
 {
-  for (std::size_t i = 0; i < N2; ++i)
+  for (const auto i : make_range(N2))
     _vals[i] = copy._vals[i];
 }
 
@@ -451,7 +452,7 @@ SymmetricRankFourTensorTempl<T>::operator*(const T2 & b) const ->
   typedef decltype(T() * T2()) ValueType;
   SymmetricRankFourTensorTempl<ValueType> result;
 
-  for (std::size_t i = 0; i < N2; ++i)
+  for (const auto i : make_range(N2))
     result._vals[i] = _vals[i] * b;
 
   return result;
@@ -467,10 +468,10 @@ SymmetricRankFourTensorTempl<T>::operator*(const SymmetricRankTwoTensorTempl<T2>
   SymmetricRankTwoTensorTempl<ValueType> result;
 
   std::size_t index = 0;
-  for (std::size_t i = 0; i < N; ++i)
+  for (const auto i : make_range(N))
   {
     ValueType tmp = 0.0;
-    for (std::size_t j = 0; j < N; ++j)
+    for (const auto j : make_range(N))
       tmp += _vals[index++] * b._vals[j];
     result._vals[i] = tmp;
   }
@@ -486,7 +487,7 @@ SymmetricRankFourTensorTempl<T>::operator/(const T2 & b) const ->
                             SymmetricRankFourTensorTempl<decltype(T() / T2())>>::type
 {
   SymmetricRankFourTensorTempl<decltype(T() / T2())> result;
-  for (std::size_t i = 0; i < N2; ++i)
+  for (const auto i : make_range(N2))
     result._vals[i] = _vals[i] / b;
   return result;
 }
@@ -534,8 +535,8 @@ SymmetricRankFourTensorTempl<T>::fillSymmetric21FromInputVector(const T2 & input
   mooseAssert(input.size() == 21,
               "To use fillSymmetric21FromInputVector, your input must have size 21.");
   std::size_t index = 0;
-  for (auto i : make_range(N))
-    for (auto j : make_range(i, N))
+  for (const auto i : make_range(N))
+    for (const auto j : make_range(i, N))
     {
       _vals[i + N * j] = mandelFactor(i, j) * input[index];
       _vals[j + N * i] = mandelFactor(j, i) * input[index];
@@ -553,12 +554,12 @@ SymmetricRankFourTensorTempl<T>::invSymm() const
 {
   SymmetricRankFourTensorTempl<T> result(initNone);
   Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> mat(N, N);
-  for (auto i : make_range(N))
-    for (auto j : make_range(N))
+  for (const auto i : make_range(N))
+    for (const auto j : make_range(N))
       mat(i, j) = (*this)(i, j);
   mat = mat.inverse();
-  for (auto i : make_range(N))
-    for (auto j : make_range(N))
+  for (const auto i : make_range(N))
+    for (const auto j : make_range(N))
       result(i, j) = mat(i, j);
   return result;
 }

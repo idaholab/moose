@@ -80,22 +80,22 @@ SymmetricRankTwoTensorTempl<T>::SymmetricRankTwoTensorTempl(
   _vals[0] = S11;
   _vals[1] = S22;
   _vals[2] = S33;
-  _vals[3] = MathUtils::sqrt2 * S23;
-  _vals[4] = MathUtils::sqrt2 * S13;
-  _vals[5] = MathUtils::sqrt2 * S12;
+  _vals[3] = mandelFactor(3) * S23;
+  _vals[4] = mandelFactor(4) * S13;
+  _vals[5] = mandelFactor(5) * S12;
 }
 
 template <typename T>
 SymmetricRankTwoTensorTempl<T>::operator RankTwoTensorTempl<T>()
 {
   return RankTwoTensorTempl<T>(_vals[0],
-                               _vals[5] / MathUtils::sqrt2,
-                               _vals[4] / MathUtils::sqrt2,
-                               _vals[5] / MathUtils::sqrt2,
+                               _vals[5] / mandelFactor(5),
+                               _vals[4] / mandelFactor(4),
+                               _vals[5] / mandelFactor(5),
                                _vals[1],
-                               _vals[3] / MathUtils::sqrt2,
-                               _vals[4] / MathUtils::sqrt2,
-                               _vals[3] / MathUtils::sqrt2,
+                               _vals[3] / mandelFactor(3),
+                               _vals[4] / mandelFactor(4),
+                               _vals[3] / mandelFactor(3),
                                _vals[2]);
 }
 
@@ -113,9 +113,9 @@ SymmetricRankTwoTensorTempl<T>::SymmetricRankTwoTensorTempl(const T & S11,
   _vals[0] = S11;
   _vals[1] = S22;
   _vals[2] = S33;
-  _vals[3] = (S23 + S32) / MathUtils::sqrt2;
-  _vals[4] = (S13 + S31) / MathUtils::sqrt2;
-  _vals[5] = (S12 + S21) / MathUtils::sqrt2;
+  _vals[3] = (S23 + S32) / mandelFactor(3);
+  _vals[4] = (S13 + S31) / mandelFactor(4);
+  _vals[5] = (S12 + S21) / mandelFactor(5);
 }
 
 template <typename T>
@@ -178,9 +178,9 @@ SymmetricRankTwoTensorTempl<T>::fillFromInputVector(const std::vector<T> & input
       _vals[0] = input[0];
       _vals[1] = input[1];
       _vals[2] = input[2];
-      _vals[3] = MathUtils::sqrt2 * input[3];
-      _vals[4] = MathUtils::sqrt2 * input[4];
-      _vals[5] = MathUtils::sqrt2 * input[5];
+      _vals[3] = mandelFactor(3) * input[3];
+      _vals[4] = mandelFactor(4) * input[4];
+      _vals[5] = mandelFactor(5) * input[5];
       break;
 
     default:
@@ -210,16 +210,16 @@ SymmetricRankTwoTensorTempl<T>::fillFromScalarVariable(const VariableValue & sca
       _vals[2] = 0.0;
       _vals[3] = 0.0;
       _vals[4] = 0.0;
-      _vals[5] = MathUtils::sqrt2 * scalar_variable[2];
+      _vals[5] = mandelFactor(5) * scalar_variable[2];
       break;
 
     case 6:
       _vals[0] = scalar_variable[0];
       _vals[1] = scalar_variable[1];
       _vals[2] = scalar_variable[2];
-      _vals[3] = MathUtils::sqrt2 * scalar_variable[3];
-      _vals[4] = MathUtils::sqrt2 * scalar_variable[4];
-      _vals[5] = MathUtils::sqrt2 * scalar_variable[5];
+      _vals[3] = mandelFactor(3) * scalar_variable[3];
+      _vals[4] = mandelFactor(4) * scalar_variable[4];
+      _vals[5] = mandelFactor(5) * scalar_variable[5];
       break;
 
     default:
@@ -245,20 +245,17 @@ SymmetricRankTwoTensorTempl<T>::transpose() const
 
 /// multiply vector v with row n of this tensor
 template <typename T>
-T
-SymmetricRankTwoTensorTempl<T>::rowMultiply(std::size_t n, const TypeVector<T> & v) const
+VectorValue<T>
+SymmetricRankTwoTensorTempl<T>::row(const unsigned int n) const
 {
   switch (n)
   {
     case 0:
-      return _vals[0] * v(0) + _vals[5] / MathUtils::sqrt2 * v(1) +
-             _vals[4] / MathUtils::sqrt2 * v(2);
+      return VectorValue<T>(_vals[0], _vals[5] / mandelFactor(5), _vals[4] / mandelFactor(4));
     case 1:
-      return _vals[5] / MathUtils::sqrt2 * v(0) + _vals[1] * v(1) +
-             _vals[3] / MathUtils::sqrt2 * v(2);
+      return VectorValue<T>(_vals[5] / mandelFactor(5), _vals[1], _vals[3] / mandelFactor(3));
     case 2:
-      return _vals[4] / MathUtils::sqrt2 * v(0) + _vals[3] / MathUtils::sqrt2 * v(1) +
-             _vals[2] * v(2);
+      return VectorValue<T>(_vals[4] / mandelFactor(4), _vals[3] / mandelFactor(3), _vals[2]);
     default:
       mooseError("Invalid row");
   }
@@ -290,6 +287,25 @@ SymmetricRankTwoTensorTempl<T>::timesTranspose(const SymmetricRankTwoTensorTempl
           a._vals[3] * a._vals[5] / MathUtils::sqrt2,
       a._vals[0] * a._vals[5] + a._vals[1] * a._vals[5] +
           a._vals[3] * a._vals[4] / MathUtils::sqrt2);
+}
+
+template <typename T>
+SymmetricRankTwoTensorTempl<T>
+SymmetricRankTwoTensorTempl<T>::transposeTimes(const RankTwoTensorTempl<T> & a)
+{
+  return SymmetricRankTwoTensorTempl<T>(a(0, 0) * a(0, 0) + a(1, 0) * a(1, 0) + a(2, 0) * a(2, 0),
+                                        a(0, 1) * a(0, 1) + a(1, 1) * a(1, 1) + a(2, 1) * a(2, 1),
+                                        a(0, 2) * a(0, 2) + a(1, 2) * a(1, 2) + a(2, 2) * a(2, 2),
+                                        a(0, 1) * a(0, 2) + a(1, 1) * a(1, 2) + a(2, 1) * a(2, 2),
+                                        a(0, 0) * a(0, 2) + a(1, 0) * a(1, 2) + a(2, 0) * a(2, 2),
+                                        a(0, 0) * a(0, 1) + a(1, 0) * a(1, 1) + a(2, 0) * a(2, 1));
+}
+
+template <typename T>
+SymmetricRankTwoTensorTempl<T>
+SymmetricRankTwoTensorTempl<T>::transposeTimes(const SymmetricRankTwoTensorTempl<T> & a)
+{
+  return timesTranspose(a);
 }
 
 template <typename T>
@@ -500,7 +516,7 @@ template <typename T>
 T
 SymmetricRankTwoTensorTempl<T>::trace() const
 {
-  return _vals[0] + _vals[1] + _vals[2];
+  return tr();
 }
 
 template <typename T>

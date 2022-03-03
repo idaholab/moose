@@ -38,7 +38,7 @@ ResetDisplacedMeshThread::onNode(NodeRange::const_iterator & nd)
   Node & reference_node = _ref_mesh.nodeRef(displaced_node.id());
 
   // Undisplace the node
-  for (const auto i: make_range(Moose::dim))
+  for (const auto i : make_range(Moose::dim))
     displaced_node(i) = reference_node(i);
 }
 

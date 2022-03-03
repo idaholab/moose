@@ -72,7 +72,7 @@ RankTwoTensorTempl<T>::RankTwoTensorTempl()
   mooseAssert(N == 3, "RankTwoTensorTempl is currently only tested for 3 dimensions.");
 
   for (unsigned int i = 0; i < N2; i++)
-    this->_coords[i] = 0.0;
+    _coords[i] = 0.0;
 }
 
 template <typename T>
@@ -85,7 +85,7 @@ RankTwoTensorTempl<T>::RankTwoTensorTempl(const InitMethod init)
 
     case initIdentity:
       this->zero();
-      for (auto i : make_range(N))
+      for (const auto i : make_range(N))
         (*this)(i, i) = 1.0;
       break;
 
@@ -103,14 +103,14 @@ RankTwoTensorTempl<T>::RankTwoTensorTempl(const TypeVector<T> & row1,
       "This constructor is deprecated in favor of RankTwoTensorTempl<T>::initializeFromRows");
 
   // Initialize the Tensor matrix from the passed in vectors
-  for (auto i : make_range(N))
-    this->_coords[i] = row1(i);
+  for (const auto i : make_range(N))
+    _coords[i] = row1(i);
 
-  for (auto i : make_range(N))
-    this->_coords[N + i] = row2(i);
+  for (const auto i : make_range(N))
+    _coords[N + i] = row2(i);
 
-  for (auto i : make_range(N))
-    this->_coords[2 * N + i] = row3(i);
+  for (const auto i : make_range(N))
+    _coords[2 * N + i] = row3(i);
 }
 
 template <typename T>
@@ -268,23 +268,10 @@ RankTwoTensorTempl<T>::fillFromScalarVariable(const VariableValue & scalar_varia
 }
 
 template <typename T>
-TypeVector<T>
+VectorValue<T>
 RankTwoTensorTempl<T>::column(const unsigned int c) const
 {
-  VectorValue<T> result;
-  for (auto i : make_range(N))
-    result(i) = (*this)(i, c);
-  return result;
-}
-
-template <typename T>
-T
-RankTwoTensorTempl<T>::rowMultiply(std::size_t n, const TypeVector<T> & v) const
-{
-  T sum = 0.0;
-  for (auto i : make_range(N))
-    sum += (*this)(n, i) * v(i);
-  return sum;
+  return VectorValue<T>(_coords[c], _coords[c + N], _coords[c + 2 * N]);
 }
 
 template <typename T>
@@ -292,6 +279,13 @@ RankTwoTensorTempl<T>
 RankTwoTensorTempl<T>::timesTranspose(const RankTwoTensorTempl<T> & a)
 {
   return a * a.transpose();
+}
+
+template <typename T>
+RankTwoTensorTempl<T>
+RankTwoTensorTempl<T>::transposeTimes(const RankTwoTensorTempl<T> & a)
+{
+  return a.transpose() * a;
 }
 
 template <typename T>
@@ -322,10 +316,10 @@ void
 RankTwoTensorTempl<T>::rotate(const RankTwoTensorTempl<T> & R)
 {
   RankTwoTensorTempl<T> temp;
-  for (auto i : make_range(N))
+  for (const auto i : make_range(N))
   {
     const auto i1 = i * N;
-    for (auto j : make_range(N))
+    for (const auto j : make_range(N))
     {
       // tmp += R(i,k)*R(j,l)*(*this)(k,l);
       // clang-format off
@@ -344,7 +338,7 @@ RankTwoTensorTempl<T>::rotate(const RankTwoTensorTempl<T> & R)
     }
   }
   for (unsigned int i = 0; i < N2; i++)
-    this->_coords[i] = temp._coords[i];
+    _coords[i] = temp._coords[i];
 }
 
 template <typename T>
@@ -432,8 +426,8 @@ template <typename T>
 bool
 RankTwoTensorTempl<T>::operator==(const RankTwoTensorTempl<T> & a) const
 {
-  for (auto i : make_range(N))
-    for (auto j : make_range(N))
+  for (const auto i : make_range(N))
+    for (const auto j : make_range(N))
       if (!MooseUtils::absoluteFuzzyEqual((*this)(i, j), a(i, j)))
         return false;
 
@@ -448,9 +442,9 @@ RankTwoTensorTempl<T>::operator=(const ColumnMajorMatrixTempl<T> & a)
     mooseError("Dimensions of ColumnMajorMatrixTempl<T> are incompatible with RankTwoTensorTempl");
 
   const T * cmm_rawdata = a.rawData();
-  for (auto i : make_range(N))
-    for (auto j : make_range(N))
-      this->_coords[i * N + j] = cmm_rawdata[i + j * N];
+  for (const auto i : make_range(N))
+    for (const auto j : make_range(N))
+      _coords[i * N + j] = cmm_rawdata[i + j * N];
 
   return *this;
 }
@@ -471,7 +465,7 @@ RankTwoTensorTempl<T>::outerProduct(const RankTwoTensorTempl<T> & b) const
   unsigned int index = 0;
   for (unsigned int ij = 0; ij < N2; ++ij)
   {
-    const T & a = this->_coords[ij];
+    const T & a = _coords[ij];
     for (unsigned int kl = 0; kl < N2; ++kl)
       result._vals[index++] = a * b._coords[kl];
   }
@@ -483,10 +477,10 @@ RankFourTensorTempl<T>
 RankTwoTensorTempl<T>::mixedProductIkJl(const RankTwoTensorTempl<T> & b) const
 {
   RankFourTensorTempl<T> result;
-  for (auto i : make_range(N))
-    for (auto j : make_range(N))
-      for (auto k : make_range(N))
-        for (auto l : make_range(N))
+  for (const auto i : make_range(N))
+    for (const auto j : make_range(N))
+      for (const auto k : make_range(N))
+        for (const auto l : make_range(N))
           result(i, j, k, l) = (*this)(i, k) * b(j, l);
   return result;
 }
@@ -497,10 +491,10 @@ RankTwoTensorTempl<T>::mixedProductIlJk(const RankTwoTensorTempl<T> & b) const
 {
   RankFourTensorTempl<T> result;
 
-  for (auto i : make_range(N))
-    for (auto j : make_range(N))
-      for (auto k : make_range(N))
-        for (auto l : make_range(N))
+  for (const auto i : make_range(N))
+    for (const auto j : make_range(N))
+      for (const auto k : make_range(N))
+        for (const auto l : make_range(N))
           result(i, j, k, l) = (*this)(i, l) * b(j, k);
 
   return result;
@@ -511,10 +505,10 @@ RankFourTensorTempl<T>
 RankTwoTensorTempl<T>::mixedProductJkIl(const RankTwoTensorTempl<T> & b) const
 {
   RankFourTensorTempl<T> result;
-  for (auto i : make_range(N))
-    for (auto j : make_range(N))
-      for (auto k : make_range(N))
-        for (auto l : make_range(N))
+  for (const auto i : make_range(N))
+    for (const auto j : make_range(N))
+      for (const auto k : make_range(N))
+        for (const auto l : make_range(N))
           result(i, j, k, l) = (*this)(j, k) * b(i, l);
   return result;
 }
@@ -524,11 +518,11 @@ RankFourTensorTempl<T>
 RankTwoTensorTempl<T>::mixedProductIjJklm(const RankFourTensorTempl<T> & b) const
 {
   RankFourTensorTempl<T> result;
-  for (auto i : make_range(N))
-    for (auto j : make_range(N))
-      for (auto k : make_range(N))
-        for (auto l : make_range(N))
-          for (auto m : make_range(N))
+  for (const auto i : make_range(N))
+    for (const auto j : make_range(N))
+      for (const auto k : make_range(N))
+        for (const auto l : make_range(N))
+          for (const auto m : make_range(N))
             result(i, k, l, m) += (*this)(i, j) * b(j, k, l, m);
   return result;
 }
@@ -538,11 +532,11 @@ RankFourTensorTempl<T>
 RankTwoTensorTempl<T>::mixedProductJmIjkl(const RankFourTensorTempl<T> & b) const
 {
   RankFourTensorTempl<T> result;
-  for (auto i : make_range(N))
-    for (auto j : make_range(N))
-      for (auto k : make_range(N))
-        for (auto l : make_range(N))
-          for (auto m : make_range(N))
+  for (const auto i : make_range(N))
+    for (const auto j : make_range(N))
+      for (const auto k : make_range(N))
+        for (const auto l : make_range(N))
+          for (const auto m : make_range(N))
             result(i, k, l, m) += (*this)(j, m) * b(i, j, k, l);
   return result;
 }
@@ -553,11 +547,11 @@ RankTwoTensorTempl<T>::mixedProductJkIjlm(const RankFourTensorTempl<T> & b) cons
 {
   RankFourTensorTempl<T> result;
 
-  for (auto i : make_range(N))
-    for (auto j : make_range(N))
-      for (auto k : make_range(N))
-        for (auto l : make_range(N))
-          for (auto m : make_range(N))
+  for (const auto i : make_range(N))
+    for (const auto j : make_range(N))
+      for (const auto k : make_range(N))
+        for (const auto l : make_range(N))
+          for (const auto m : make_range(N))
             result(i, k, l, m) += (*this)(j, k) * b(i, j, l, m);
 
   return result;
@@ -569,10 +563,10 @@ RankTwoTensorTempl<T>::mixedProductIjJkl(const RankThreeTensorTempl<T> & b) cons
 {
   RankThreeTensorTempl<T> result;
 
-  for (auto i : make_range(N))
-    for (auto j : make_range(N))
-      for (auto k : make_range(N))
-        for (auto l : make_range(N))
+  for (const auto i : make_range(N))
+    for (const auto j : make_range(N))
+      for (const auto k : make_range(N))
+        for (const auto l : make_range(N))
           result(i, k, l) += (*this)(i, j) * b(j, k, l);
 
   return result;
@@ -584,9 +578,9 @@ RankTwoTensorTempl<T>::mixedProductJkI(const VectorValue<T> & b) const
 {
   RankThreeTensorTempl<T> result;
 
-  for (auto i : make_range(N))
-    for (auto j : make_range(N))
-      for (auto k : make_range(N))
+  for (const auto i : make_range(N))
+    for (const auto j : make_range(N))
+      for (const auto k : make_range(N))
         result(i, j, k) += (*this)(j, k) * b(i);
 
   return result;
@@ -642,10 +636,10 @@ RankFourTensorTempl<T>
 RankTwoTensorTempl<T>::d2secondInvariant() const
 {
   RankFourTensorTempl<T> result;
-  for (auto i : make_range(N))
-    for (auto j : make_range(N))
-      for (auto k : make_range(N))
-        for (auto l : make_range(N))
+  for (const auto i : make_range(N))
+    for (const auto j : make_range(N))
+      for (const auto k : make_range(N))
+        for (const auto l : make_range(N))
           result(i, j, k, l) = 0.5 * (i == k) * (j == l) + 0.5 * (i == l) * (j == k) -
                                (1.0 / 3.0) * (i == j) * (k == l);
   return result;
@@ -710,14 +704,14 @@ RankTwoTensorTempl<T>::d2thirdInvariant() const
   const auto s = RankTwoTensorTempl<T>::plusTranspose(deviatoric()) * 0.5;
 
   RankFourTensorTempl<T> d2;
-  for (auto i : make_range(N))
-    for (auto j : make_range(N))
-      for (auto k : make_range(N))
-        for (auto l : make_range(N))
+  for (const auto i : make_range(N))
+    for (const auto j : make_range(N))
+      for (const auto k : make_range(N))
+        for (const auto l : make_range(N))
         {
           d2(i, j, k, l) = Real(i == j) * s(k, l) / 3.0 + Real(k == l) * s(i, j) / 3.0;
-          // for (auto a: make_range(N))
-          //  for (auto b: make_range(N))
+          // for (const auto a: make_range(N))
+          //  for (const auto b: make_range(N))
           //    d2(i, j, k, l) += 0.5*(PermutationTensor::eps(i, k, a)*PermutationTensor::eps(j, l,
           //    b) + PermutationTensor::eps(i, l, a)*PermutationTensor::eps(j, k, b))*s(a, b);
         }
@@ -817,9 +811,9 @@ void
 RankTwoTensorTempl<T>::print(std::ostream & stm) const
 {
   const RankTwoTensorTempl<T> & a = *this;
-  for (auto i : make_range(N))
+  for (const auto i : make_range(N))
   {
-    for (auto j : make_range(N))
+    for (const auto j : make_range(N))
       stm << std::setw(15) << a(i, j) << ' ';
     stm << std::endl;
   }
@@ -837,9 +831,9 @@ void
 ADRankTwoTensor::printReal(std::ostream & stm) const
 {
   const ADRankTwoTensor & a = *this;
-  for (auto i : make_range(N))
+  for (const auto i : make_range(N))
   {
-    for (auto j : make_range(N))
+    for (const auto j : make_range(N))
       stm << std::setw(15) << a(i, j).value() << ' ';
     stm << std::endl;
   }
@@ -850,12 +844,12 @@ void
 ADRankTwoTensor::printDualReal(unsigned int nDual, std::ostream & stm) const
 {
   const ADRankTwoTensor & a = *this;
-  for (auto i : make_range(N))
+  for (const auto i : make_range(N))
   {
-    for (auto j : make_range(N))
+    for (const auto j : make_range(N))
     {
       stm << std::setw(15) << a(i, j).value() << " {";
-      for (auto k : make_range(nDual))
+      for (const auto k : make_range(nDual))
         stm << std::setw(5) << a(i, j).derivatives()[k] << ' ';
       stm << " }";
     }
@@ -867,7 +861,7 @@ template <typename T>
 void
 RankTwoTensorTempl<T>::addIa(const T & a)
 {
-  for (auto i : make_range(N))
+  for (const auto i : make_range(N))
     (*this)(i, i) += a;
 }
 
@@ -876,9 +870,9 @@ T
 RankTwoTensorTempl<T>::L2norm() const
 {
   T norm = 0.0;
-  for (auto i : make_range(N2))
+  for (const auto i : make_range(N2))
   {
-    T v = this->_coords[i];
+    T v = _coords[i];
     norm += v * v;
   }
   return norm == 0.0 ? 0.0 : std::sqrt(norm);
@@ -924,8 +918,8 @@ RankTwoTensor::syev(const char * calculation_type,
   PetscBLASInt info;
   std::vector<PetscScalar> work(lwork);
 
-  for (auto i : make_range(N))
-    for (auto j : make_range(N))
+  for (const auto i : make_range(N))
+    for (const auto j : make_range(N))
       // a is destroyed by dsyev, and if calculation_type == "V" then eigenvectors are placed
       // there Note the explicit symmeterisation
       a[i * N + j] = 0.5 * (this->operator()(i, j) + this->operator()(j, i));
@@ -975,8 +969,8 @@ RankTwoTensor::symmetricEigenvaluesEigenvectors(std::vector<Real> & eigvals,
   std::vector<Real> a;
   syev("V", eigvals, a);
 
-  for (auto i : make_range(N))
-    for (auto j : make_range(N))
+  for (const auto i : make_range(N))
+    for (const auto j : make_range(N))
       eigvecs(j, i) = a[i * N + j];
 }
 
@@ -987,7 +981,7 @@ ADRankTwoTensor::symmetricEigenvaluesEigenvectors(std::vector<ADReal> & eigvals,
 {
   typedef Eigen::Matrix<ADReal, N, N> RankTwoMatrix;
   RankTwoMatrix self;
-  for (auto i : make_range(N))
+  for (const auto i : make_range(N))
     for (unsigned int j = i; j < N; ++j)
     {
       auto & v = self(j, i);
@@ -1001,12 +995,12 @@ ADRankTwoTensor::symmetricEigenvaluesEigenvectors(std::vector<ADReal> & eigvals,
 
   const auto & lambda = es.eigenvalues();
   eigvals.resize(N);
-  for (auto i : make_range(N))
+  for (const auto i : make_range(N))
     eigvals[i] = lambda(i);
 
   const auto & v = es.eigenvectors();
-  for (auto i : make_range(N))
-    for (auto j : make_range(N))
+  for (const auto i : make_range(N))
+    for (const auto j : make_range(N))
       eigvecs(i, j) = v(i, j);
 }
 
@@ -1025,12 +1019,12 @@ RankTwoTensorTempl<T>::dsymmetricEigenvalues(std::vector<T> & eigvals,
   std::vector<T> eig_vec;
   eig_vec.resize(N);
 
-  for (auto i : make_range(N))
+  for (const auto i : make_range(N))
   {
-    for (auto j : make_range(N))
+    for (const auto j : make_range(N))
       eig_vec[j] = a[i * N + j];
-    for (auto j : make_range(N))
-      for (auto k : make_range(N))
+    for (const auto j : make_range(N))
+      for (const auto k : make_range(N))
         deigvals[i](j, k) = eig_vec[j] * eig_vec[k];
   }
 
@@ -1063,8 +1057,8 @@ RankTwoTensorTempl<T>::d2symmetricEigenvalues(std::vector<RankFourTensorTempl<T>
   // get eigen values and eigen vectors
   syev("V", eigvals, eigvec);
 
-  for (auto i : make_range(N))
-    for (auto j : make_range(N))
+  for (const auto i : make_range(N))
+    for (const auto j : make_range(N))
       ev[i][j] = eigvec[i * N + j];
 
   for (unsigned int alpha = 0; alpha < N; ++alpha)
@@ -1073,10 +1067,10 @@ RankTwoTensorTempl<T>::d2symmetricEigenvalues(std::vector<RankFourTensorTempl<T>
       if (eigvals[alpha] == eigvals[beta])
         continue;
 
-      for (auto i : make_range(N))
-        for (auto j : make_range(N))
-          for (auto k : make_range(N))
-            for (auto l : make_range(N))
+      for (const auto i : make_range(N))
+        for (const auto j : make_range(N))
+          for (const auto k : make_range(N))
+            for (const auto l : make_range(N))
             {
               deriv[alpha](i, j, k, l) +=
                   0.5 * (ev[beta][i] * ev[alpha][j] + ev[alpha][i] * ev[beta][j]) *
@@ -1107,8 +1101,8 @@ RankTwoTensor::getRUDecompositionRotation(RankTwoTensor & rot) const
 
   c = a.transpose() * a;
 
-  for (auto i : make_range(N))
-    for (auto j : make_range(N))
+  for (const auto i : make_range(N))
+    for (const auto j : make_range(N))
       cmat[i][j] = c(i, j);
 
   LAPACKsyev_("V", "U", &nd, &cmat[0][0], &nd, w, work, &lwork, &info);
@@ -1120,11 +1114,11 @@ RankTwoTensor::getRUDecompositionRotation(RankTwoTensor & rot) const
 
   diag.zero();
 
-  for (auto i : make_range(N))
+  for (const auto i : make_range(N))
     diag(i, i) = std::sqrt(w[i]);
 
-  for (auto i : make_range(N))
-    for (auto j : make_range(N))
+  for (const auto i : make_range(N))
+    for (const auto j : make_range(N))
       evec(i, j) = cmat[i][j];
 
   rot = a * (evec.transpose() * diag * evec).inverse();
@@ -1142,8 +1136,8 @@ RankTwoTensorTempl<T>
 RankTwoTensorTempl<T>::genRandomTensor(T scale, T offset)
 {
   RankTwoTensorTempl<T> result;
-  for (auto i : make_range(N))
-    for (auto j : make_range(N))
+  for (const auto i : make_range(N))
+    for (const auto j : make_range(N))
       result(i, j) = (MooseRandom::rand() + offset) * scale;
   return result;
 }
@@ -1157,12 +1151,14 @@ RankTwoTensorTempl<T>::genRandomSymmTensor(T scale, T offset)
 }
 
 template <typename T>
-void
+RankTwoTensorTempl<T>
 RankTwoTensorTempl<T>::vectorOuterProduct(const TypeVector<T> & v1, const TypeVector<T> & v2)
 {
-  for (auto i : make_range(N))
-    for (auto j : make_range(N))
-      (*this)(i, j) = v1(i) * v2(j);
+  RankTwoTensorTempl<T> result;
+  for (const auto i : make_range(N))
+    for (const auto j : make_range(N))
+      result(i, j) = v1(i) * v2(j);
+  return result;
 }
 
 template <typename T>
@@ -1180,8 +1176,8 @@ template <typename T>
 void
 RankTwoTensorTempl<T>::fillRealTensor(TensorValue<T> & tensor)
 {
-  for (auto i : make_range(N))
-    for (auto j : make_range(N))
+  for (const auto i : make_range(N))
+    for (const auto j : make_range(N))
       tensor(i, j) = (*this)(i, j);
 }
 
@@ -1189,7 +1185,7 @@ template <typename T>
 void
 RankTwoTensorTempl<T>::fillRow(unsigned int r, const TypeVector<T> & v)
 {
-  for (auto i : make_range(N))
+  for (const auto i : make_range(N))
     (*this)(r, i) = v(i);
 }
 
@@ -1197,7 +1193,7 @@ template <typename T>
 void
 RankTwoTensorTempl<T>::fillColumn(unsigned int c, const TypeVector<T> & v)
 {
-  for (auto i : make_range(N))
+  for (const auto i : make_range(N))
     (*this)(i, c) = v(i);
 }
 
@@ -1206,10 +1202,10 @@ RankTwoTensorTempl<T>
 RankTwoTensorTempl<T>::initialContraction(const RankFourTensorTempl<T> & b) const
 {
   RankTwoTensorTempl<T> result;
-  for (auto i : make_range(N))
-    for (auto j : make_range(N))
-      for (auto k : make_range(N))
-        for (auto l : make_range(N))
+  for (const auto i : make_range(N))
+    for (const auto j : make_range(N))
+      for (const auto k : make_range(N))
+        for (const auto l : make_range(N))
           result(k, l) += (*this)(i, j) * b(i, j, k, l);
   return result;
 }
@@ -1219,6 +1215,6 @@ void
 RankTwoTensorTempl<T>::setToIdentity()
 {
   mooseAssert(N2 == 9, "RankTwoTensorTempl is currently only tested for 3 dimensions.");
-  for (auto i : make_range(N2))
-    this->_coords[i] = identityCoords[i];
+  for (const auto i : make_range(N2))
+    _coords[i] = identityCoords[i];
 }

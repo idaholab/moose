@@ -61,13 +61,13 @@ SymmetricRankFourTensorTempl<T>::SymmetricRankFourTensorTempl(const InitMethod i
 
     case initIdentity:
       zero();
-      for (auto i : make_range(Ndim))
+      for (const auto i : make_range(Ndim))
         (*this)(i, i) = 1.0;
       break;
 
     case initIdentitySymmetricFour:
       zero();
-      for (auto i : make_range(N))
+      for (const auto i : make_range(N))
         (*this)(i, i) = 1.0;
       break;
 
@@ -80,7 +80,7 @@ template <typename T>
 SymmetricRankFourTensorTempl<T>::operator RankFourTensorTempl<T>()
 {
   // Full tensor indices in the Mandel/Voigt representation
-  constexpr unsigned int g[6][6][4] = {
+  static constexpr unsigned int g[6][6][4] = {
       {{1, 1, 1, 1}, {1, 1, 2, 2}, {1, 1, 3, 3}, {1, 1, 2, 3}, {1, 1, 1, 3}, {1, 1, 1, 2}},
       {{2, 2, 1, 1}, {2, 2, 2, 2}, {2, 2, 3, 3}, {2, 2, 2, 3}, {2, 2, 1, 3}, {2, 2, 1, 2}},
       {{3, 3, 1, 1}, {3, 3, 2, 2}, {3, 3, 3, 3}, {3, 3, 2, 3}, {3, 3, 1, 3}, {3, 3, 1, 2}},
@@ -90,8 +90,8 @@ SymmetricRankFourTensorTempl<T>::operator RankFourTensorTempl<T>()
 
   auto & q = *this;
   RankFourTensorTempl<T> r;
-  for (auto a : make_range(6))
-    for (auto b : make_range(6))
+  for (const auto a : make_range(N))
+    for (const auto b : make_range(N))
     {
       const auto i = g[a][b][0] - 1;
       const auto j = g[a][b][1] - 1;
@@ -163,7 +163,7 @@ template <typename T>
 SymmetricRankFourTensorTempl<T> &
 SymmetricRankFourTensorTempl<T>::operator*=(const T & a)
 {
-  for (std::size_t i = 0; i < N2; ++i)
+  for (const auto i : make_range(N2))
     _vals[i] *= a;
   return *this;
 }
@@ -172,7 +172,7 @@ template <typename T>
 SymmetricRankFourTensorTempl<T> &
 SymmetricRankFourTensorTempl<T>::operator/=(const T & a)
 {
-  for (std::size_t i = 0; i < N2; ++i)
+  for (const auto i : make_range(N2))
     _vals[i] /= a;
   return *this;
 }
@@ -181,7 +181,7 @@ template <typename T>
 SymmetricRankFourTensorTempl<T> &
 SymmetricRankFourTensorTempl<T>::operator+=(const SymmetricRankFourTensorTempl<T> & a)
 {
-  for (std::size_t i = 0; i < N2; ++i)
+  for (const auto i : make_range(N2))
     _vals[i] += a._vals[i];
   return *this;
 }
@@ -193,7 +193,7 @@ SymmetricRankFourTensorTempl<T>::operator+(const SymmetricRankFourTensorTempl<T2
     -> SymmetricRankFourTensorTempl<decltype(T() + T2())>
 {
   SymmetricRankFourTensorTempl<decltype(T() + T2())> result;
-  for (std::size_t i = 0; i < N2; ++i)
+  for (const auto i : make_range(N2))
     result._vals[i] = _vals[i] + b._vals[i];
   return result;
 }
@@ -202,7 +202,7 @@ template <typename T>
 SymmetricRankFourTensorTempl<T> &
 SymmetricRankFourTensorTempl<T>::operator-=(const SymmetricRankFourTensorTempl<T> & a)
 {
-  for (std::size_t i = 0; i < N2; ++i)
+  for (const auto i : make_range(N2))
     _vals[i] -= a._vals[i];
   return *this;
 }
@@ -214,7 +214,7 @@ SymmetricRankFourTensorTempl<T>::operator-(const SymmetricRankFourTensorTempl<T2
     -> SymmetricRankFourTensorTempl<decltype(T() - T2())>
 {
   SymmetricRankFourTensorTempl<decltype(T() - T2())> result;
-  for (std::size_t i = 0; i < N2; ++i)
+  for (const auto i : make_range(N2))
     result._vals[i] = _vals[i] - b._vals[i];
   return result;
 }
@@ -224,7 +224,7 @@ SymmetricRankFourTensorTempl<T>
 SymmetricRankFourTensorTempl<T>::operator-() const
 {
   SymmetricRankFourTensorTempl<T> result;
-  for (std::size_t i = 0; i < N2; ++i)
+  for (const auto i : make_range(N2))
     result._vals[i] = -_vals[i];
   return result;
 }
@@ -238,9 +238,9 @@ SymmetricRankFourTensorTempl<T>::operator*(const SymmetricRankFourTensorTempl<T2
   typedef decltype(T() * T2()) ValueType;
   SymmetricRankFourTensorTempl<ValueType> result;
 
-  for (auto i : make_range(N))
-    for (auto j : make_range(N))
-      for (auto p : make_range(N))
+  for (const auto i : make_range(N))
+    for (const auto j : make_range(N))
+      for (const auto p : make_range(N))
         result(i, j) += (*this)(i, p) * b(p, j);
 
   return result;
@@ -251,7 +251,7 @@ T
 SymmetricRankFourTensorTempl<T>::L2norm() const
 {
   T l2 = Utility::pow<2>(_vals[0]);
-  for (std::size_t i = 1; i < N2; ++i)
+  for (const auto i : make_range(1u, N2))
     l2 += Utility::pow<2>(_vals[i]);
   return std::sqrt(l2);
 }
@@ -260,11 +260,10 @@ template <typename T>
 void
 SymmetricRankFourTensorTempl<T>::print(std::ostream & stm) const
 {
-  std::size_t index = 0;
-  for (unsigned int i = 0; i < N; ++i)
+  for (const auto i : make_range(N))
   {
-    for (unsigned int j = 0; j < N; ++j)
-      stm << std::setw(15) << _vals[index++] << " ";
+    for (const auto j : make_range(N))
+      stm << std::setw(15) << _vals[i * N + j] << " ";
     stm << '\n';
   }
   stm << std::flush;
@@ -274,11 +273,10 @@ template <typename T>
 void
 SymmetricRankFourTensorTempl<T>::printReal(std::ostream & stm) const
 {
-  std::size_t index = 0;
-  for (unsigned int i = 0; i < N; ++i)
+  for (const auto i : make_range(N))
   {
-    for (unsigned int j = 0; j < N; ++j)
-      stm << std::setw(15) << MetaPhysicL::raw_value(_vals[index++]) << " ";
+    for (const auto j : make_range(N))
+      stm << std::setw(15) << MetaPhysicL::raw_value(_vals[i * N + j]) << " ";
     stm << '\n';
   }
   stm << std::flush;
@@ -290,8 +288,8 @@ SymmetricRankFourTensorTempl<T>::transposeMajor() const
 {
   std::size_t index = 0;
   SymmetricRankFourTensorTempl<T> ret;
-  for (unsigned int i = 0; i < N; ++i)
-    for (unsigned int j = 0; j < N; ++j)
+  for (const auto i : make_range(N))
+    for (const auto j : make_range(N))
       ret._vals[index++] = _vals[i + N * j];
   return ret;
 }
@@ -490,8 +488,8 @@ SymmetricRankFourTensorTempl<T>::sum3x3() const
   mooseAssert(LIBMESH_DIM == 3, "This method assumes LIBMESH_DIM == 3");
   // summation of Ciijj used in the volumetric locking correction
   T sum = 0;
-  for (auto i : make_range(3))
-    for (auto j : make_range(3))
+  for (const auto i : make_range(3))
+    for (const auto j : make_range(3))
       sum += (*this)(i, j);
   return sum;
 }
@@ -523,8 +521,6 @@ template <typename T>
 bool
 SymmetricRankFourTensorTempl<T>::isIsotropic() const
 {
-  mooseAssert(LIBMESH_DIM == 3, "This method assumes LIBMESH_DIM == 3");
-
   // prerequisite is symmetry
   if (!isSymmetric())
     return false;
@@ -541,8 +537,8 @@ SymmetricRankFourTensorTempl<T>::isIsotropic() const
     return false;
 
   // off diagonal blocks in Voigt
-  for (auto i : make_range(3))
-    for (auto j : make_range(3))
+  for (const auto i : make_range(3))
+    for (const auto j : make_range(3))
       if (_vals[3 + i + N * j] != 0.0)
         return false;
 
@@ -554,8 +550,8 @@ SymmetricRankFourTensorTempl<T>::isIsotropic() const
   if (_vals[7] != K1 || _vals[14] != K1)
     return false;
 
-  for (auto i : make_range(1, 3))
-    for (auto j : make_range(i))
+  for (const auto i : make_range(1, 3))
+    for (const auto j : make_range(i))
       if (_vals[i + N * j] != K2)
         return false;
 

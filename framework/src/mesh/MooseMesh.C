@@ -1523,7 +1523,7 @@ MooseMesh::detectOrthogonalDimRanges(Real tol)
   for (const auto & node : getMesh().node_ptr_range())
     // Check all coordinates, we don't know if this mesh might be lying in a higher dim even if the
     // mesh dimension is lower.
-    for (const auto i: make_range(Moose::dim))
+    for (const auto i : make_range(Moose::dim))
     {
       if ((*node)(i) < min[i])
         min[i] = (*node)(i);
@@ -1543,7 +1543,7 @@ MooseMesh::detectOrthogonalDimRanges(Real tol)
     // See if the current node is located at one of the extremes
     unsigned int coord_match = 0;
 
-    for (const auto i: make_range(Moose::dim))
+    for (const auto i : make_range(Moose::dim))
     {
       if (std::abs((*node)(i)-min[i]) < tol)
       {
@@ -1571,7 +1571,7 @@ MooseMesh::detectOrthogonalDimRanges(Real tol)
 
   // Set the bounds
   _bounds.resize(LIBMESH_DIM);
-  for (const auto i: make_range(Moose::dim))
+  for (const auto i : make_range(Moose::dim))
   {
     _bounds[i].resize(2);
     _bounds[i][MIN] = min[i];

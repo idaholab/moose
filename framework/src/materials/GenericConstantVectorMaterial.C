@@ -63,7 +63,7 @@ void
 GenericConstantVectorMaterialTempl<is_ad>::computeQpProperties()
 {
   for (unsigned int i = 0; i < _num_props; i++)
-    for (const auto j: make_range(Moose::dim))
+    for (const auto j : make_range(Moose::dim))
       (*_properties[i])[_qp](j) = _prop_values[i * LIBMESH_DIM + j];
 }
 

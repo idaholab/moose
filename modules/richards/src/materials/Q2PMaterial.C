@@ -68,8 +68,8 @@ Q2PMaterial::computeQpProperties()
   _porosity_old[_qp] = _material_por + _por_change_old[_qp];
 
   _permeability[_qp] = _material_perm;
-  for (const auto i: make_range(Moose::dim))
-    for (const auto j: make_range(Moose::dim))
+  for (const auto i : make_range(Moose::dim))
+    for (const auto j : make_range(Moose::dim))
       _permeability[_qp](i, j) *= std::pow(10, (*_perm_change[LIBMESH_DIM * i + j])[_qp]);
 
   _gravity[_qp] = _material_gravity;

@@ -936,8 +936,8 @@ RankFourTensorTempl<T>::sum3x3() const
 {
   // used in the volumetric locking correction
   T sum = 0;
-  for (auto i : make_range(3))
-    for (auto j : make_range(3))
+  for (auto i : make_range(N))
+    for (auto j : make_range(N))
       sum += (*this)(i, i, j, j);
   return sum;
 }

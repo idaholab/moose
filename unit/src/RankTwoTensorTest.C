@@ -188,10 +188,10 @@ TEST_F(RankTwoTensorTest, d2secondInvariant)
   mep = _m3;
   d1 = _m3.dsecondInvariant();
   d2 = _m3.d2secondInvariant();
-  for (auto i : make_range(3))
-    for (auto j : make_range(3))
-      for (auto k : make_range(3))
-        for (auto l : make_range(3))
+  for (auto i : make_range(N))
+    for (auto j : make_range(N))
+      for (auto k : make_range(N))
+        for (auto l : make_range(N))
         {
           mep(k, l) += ep;
           d1ep = mep.dsecondInvariant();
@@ -202,18 +202,18 @@ TEST_F(RankTwoTensorTest, d2secondInvariant)
   mep = _unsymmetric1;
   d1 = _unsymmetric1.dsecondInvariant();
   d2 = _unsymmetric1.d2secondInvariant();
-  for (auto i : make_range(3))
-    for (auto j : make_range(3))
-      for (auto k : make_range(3))
-        for (auto l : make_range(3))
+  for (auto i : make_range(N))
+    for (auto j : make_range(N))
+      for (auto k : make_range(N))
+        for (auto l : make_range(N))
         {
           mep(k, l) += ep;
           d1ep = mep.dsecondInvariant();
           EXPECT_NEAR((d1ep(i, j) - d1(i, j)) / ep, d2(i, j, k, l), ep);
           mep(k, l) -= ep;
 
-          // note that because d1 and d2 explicitly symmeterise the matrix
-          // the derivative may or may not explicitly symmeterise
+          // note that because d1 and d2 explicitly symmetrise the matrix
+          // the derivative may or may not explicitly symmetrise
           mep(k, l) += 0.5 * ep;
           mep(l, k) += 0.5 * ep;
           d1ep = mep.dsecondInvariant();
@@ -240,8 +240,8 @@ TEST_F(RankTwoTensorTest, dthirdInvariant)
   thirdInvariant = _m3.thirdInvariant();
   deriv = _m3.dthirdInvariant();
   mep = _m3;
-  for (auto i : make_range(3))
-    for (auto j : make_range(3))
+  for (auto i : make_range(N))
+    for (auto j : make_range(N))
     {
       mep(i, j) += ep;
       EXPECT_NEAR((mep.thirdInvariant() - thirdInvariant) / ep, deriv(i, j), 10 * ep);
@@ -251,8 +251,8 @@ TEST_F(RankTwoTensorTest, dthirdInvariant)
   thirdInvariant = _unsymmetric1.thirdInvariant();
   deriv = _unsymmetric1.dthirdInvariant();
   mep = _unsymmetric1;
-  for (auto i : make_range(3))
-    for (auto j : make_range(3))
+  for (auto i : make_range(N))
+    for (auto j : make_range(N))
     {
       mep(i, j) += ep;
       EXPECT_NEAR((mep.thirdInvariant() - thirdInvariant) / ep, deriv(i, j), 10 * ep);
@@ -282,10 +282,10 @@ TEST_F(RankTwoTensorTest, d2thirdInvariant)
   mep = _m3;
   d1 = _m3.dthirdInvariant();
   d2 = _m3.d2thirdInvariant();
-  for (auto i : make_range(3))
-    for (auto j : make_range(3))
-      for (auto k : make_range(3))
-        for (auto l : make_range(3))
+  for (auto i : make_range(N))
+    for (auto j : make_range(N))
+      for (auto k : make_range(N))
+        for (auto l : make_range(N))
         {
           mep(k, l) += ep;
           d1ep = mep.dthirdInvariant();
@@ -296,10 +296,10 @@ TEST_F(RankTwoTensorTest, d2thirdInvariant)
   mep = _unsymmetric1;
   d1 = _unsymmetric1.dthirdInvariant();
   d2 = _unsymmetric1.d2thirdInvariant();
-  for (auto i : make_range(3))
-    for (auto j : make_range(3))
-      for (auto k : make_range(3))
-        for (auto l : make_range(3))
+  for (auto i : make_range(N))
+    for (auto j : make_range(N))
+      for (auto k : make_range(N))
+        for (auto l : make_range(N))
         {
           mep(k, l) += ep;
           d1ep = mep.dthirdInvariant();
@@ -334,8 +334,8 @@ TEST_F(RankTwoTensorTest, dsin3Lode)
   sin3Lode = _m3.sin3Lode(0, 0);
   deriv = _m3.dsin3Lode(0);
   mep = _m3;
-  for (auto i : make_range(3))
-    for (auto j : make_range(3))
+  for (auto i : make_range(N))
+    for (auto j : make_range(N))
     {
       mep(i, j) += ep;
       EXPECT_NEAR((mep.sin3Lode(0, 0) - sin3Lode) / ep, deriv(i, j), 10 * ep);
@@ -345,8 +345,8 @@ TEST_F(RankTwoTensorTest, dsin3Lode)
   sin3Lode = _unsymmetric1.sin3Lode(0, 0);
   deriv = _unsymmetric1.dsin3Lode(0);
   mep = _unsymmetric1;
-  for (auto i : make_range(3))
-    for (auto j : make_range(3))
+  for (auto i : make_range(N))
+    for (auto j : make_range(N))
     {
       mep(i, j) += ep;
       EXPECT_NEAR((mep.sin3Lode(0, 0) - sin3Lode) / ep, deriv(i, j), 10 * ep);
@@ -392,10 +392,10 @@ TEST_F(RankTwoTensorTest, d2sin3Lode)
   mep = _unsymmetric1;
   d1 = _unsymmetric1.dsin3Lode(0);
   d2 = _unsymmetric1.d2sin3Lode(0);
-  for (auto i : make_range(3))
-    for (auto j : make_range(3))
-      for (auto k : make_range(3))
-        for (auto l : make_range(3))
+  for (auto i : make_range(N))
+    for (auto j : make_range(N))
+      for (auto k : make_range(N))
+        for (auto l : make_range(N))
         {
           mep(k, l) += ep;
           d1ep = mep.dsin3Lode(0);
@@ -425,8 +425,8 @@ TEST_F(RankTwoTensorTest, ddet)
   det = _m3.det();
   deriv = _m3.ddet();
   mep = _m3;
-  for (auto i : make_range(3))
-    for (auto j : make_range(3))
+  for (auto i : make_range(N))
+    for (auto j : make_range(N))
     {
       mep(i, j) += ep;
       EXPECT_NEAR((mep.det() - det) / ep, deriv(i, j), ep);
@@ -436,8 +436,8 @@ TEST_F(RankTwoTensorTest, ddet)
   det = _unsymmetric1.det();
   deriv = _unsymmetric1.ddet();
   mep = _unsymmetric1;
-  for (auto i : make_range(3))
-    for (auto j : make_range(3))
+  for (auto i : make_range(N))
+    for (auto j : make_range(N))
     {
       mep(i, j) += ep;
       EXPECT_NEAR((mep.det() - det) / ep, deriv(i, j), ep);
@@ -520,10 +520,10 @@ TEST_F(RankTwoTensorTest, mixedProductIjJklm)
        483, 490, 497, 504, 511, 518, 525, 532, 539, 546, 553, 560, 567},
       RankFourTensor::general);
 
-  for (auto i : make_range(3))
-    for (auto j : make_range(3))
-      for (auto k : make_range(3))
-        for (auto l : make_range(3))
+  for (auto i : make_range(N))
+    for (auto j : make_range(N))
+      for (auto k : make_range(N))
+        for (auto l : make_range(N))
           EXPECT_NEAR(expected_val(i, j, k, l), computed_val(i, j, k, l), 1e-5);
 }
 
@@ -540,10 +540,10 @@ TEST_F(RankTwoTensorTest, mixedProductJmIjkl)
        -1053, 1752, 438,  -1068, 1777, 444,   -1083, 1802, 450,   -1098, 1827},
       RankFourTensor::general);
 
-  for (auto i : make_range(3))
-    for (auto j : make_range(3))
-      for (auto k : make_range(3))
-        for (auto l : make_range(3))
+  for (auto i : make_range(N))
+    for (auto j : make_range(N))
+      for (auto k : make_range(N))
+        for (auto l : make_range(N))
           EXPECT_EQ(expected_val(i, j, k, l), computed_val(i, j, k, l));
 }
 
@@ -560,10 +560,10 @@ TEST_F(RankTwoTensorTest, mixedProductJkIjlm)
        -1083, -1098, 1627, 1652, 1677, 1702, 1727, 1752, 1777, 1802,  1827},
       RankFourTensor::general);
 
-  for (auto i : make_range(3))
-    for (auto j : make_range(3))
-      for (auto k : make_range(3))
-        for (auto l : make_range(3))
+  for (auto i : make_range(N))
+    for (auto j : make_range(N))
+      for (auto k : make_range(N))
+        for (auto l : make_range(N))
           EXPECT_EQ(expected_val(i, j, k, l), computed_val(i, j, k, l));
 }
 
@@ -575,9 +575,9 @@ TEST_F(RankTwoTensorTest, mixedProductIjJkl)
                                     104, 109, 114, 119, 124, 129, 134, 139, 144,
                                     133, 140, 147, 154, 161, 168, 175, 182, 189},
                                    RankThreeTensor::general);
-  for (auto i : make_range(3))
-    for (auto j : make_range(3))
-      for (auto k : make_range(3))
+  for (auto i : make_range(N))
+    for (auto j : make_range(N))
+      for (auto k : make_range(N))
         EXPECT_EQ(expected_val(i, j, k), computed_val(i, j, k));
 }
 
@@ -589,9 +589,9 @@ TEST_F(RankTwoTensorTest, mixedProductJkI)
                                     16, 6,  -12, 20, 3,  -12, 21, 6,  -15, 24, 9,  -18, 30},
                                    RankThreeTensor::general);
 
-  for (auto i : make_range(3))
-    for (auto j : make_range(3))
-      for (auto k : make_range(3))
+  for (auto i : make_range(N))
+    for (auto j : make_range(N))
+      for (auto k : make_range(N))
         EXPECT_EQ(expected_val(i, j, k), computed_val(i, j, k));
 }
 
@@ -607,16 +607,16 @@ TEST_F(RankTwoTensorTest, initializeSymmetric)
   auto sym2 = RankTwoTensor::initializeFromRows(
       RealVectorValue(1, 3, 5), RealVectorValue(3, 5, 7), RealVectorValue(5, 7, 9));
 
-  for (auto i : make_range(3))
-    for (auto j : make_range(3))
+  for (auto i : make_range(N))
+    for (auto j : make_range(N))
       EXPECT_EQ(sym1(i, j), sym2(i, j));
 }
 
-TEST_F(RankTwoTensorTest, rowMultiply)
+TEST_F(RankTwoTensorTest, row)
 {
-  EXPECT_EQ(_unsymmetric0.rowMultiply(0, _v), 14);
-  EXPECT_EQ(_unsymmetric0.rowMultiply(1, _v), 16);
-  EXPECT_EQ(_unsymmetric0.rowMultiply(2, _v), 18);
+  EXPECT_EQ(_unsymmetric0.row(0) * _v, 14);
+  EXPECT_EQ(_unsymmetric0.row(1) * _v, 16);
+  EXPECT_EQ(_unsymmetric0.row(2) * _v, 18);
 }
 
 TEST_F(RankTwoTensorTest, timesTranspose)
@@ -640,8 +640,7 @@ TEST_F(RankTwoTensorTest, sqr)
 TEST_F(RankTwoTensorTest, vectorOuterProduct)
 {
   RealVectorValue v2(5, -4, 7);
-  RankTwoTensor A;
-  A.vectorOuterProduct(v2, _v);
+  auto A = RankTwoTensor::vectorOuterProduct(v2, _v);
   auto B = RankTwoTensor(5, -4, 7, 10, -8, 14, 15, -12, 21);
   EXPECT_EQ((A - B).L2norm(), 0);
 }

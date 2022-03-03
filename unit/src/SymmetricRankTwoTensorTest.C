@@ -56,11 +56,6 @@ TEST_F(SymmetricRankTwoTensorTest, transpose)
   EXPECT_NEAR(0, (_m3.transpose() - _m3).L2norm(), 1e-9);
 }
 
-// TEST_F(SymmetricRankTwoTensorTest, doubleContraction)
-// {
-//   EXPECT_NEAR(121, _m3.doubleContraction(_unsymmetric0), 0.0001);
-// }
-
 TEST_F(SymmetricRankTwoTensorTest, trace)
 {
   EXPECT_NEAR(0, _m0.tr(), 1e-9);
@@ -154,10 +149,10 @@ TEST_F(SymmetricRankTwoTensorTest, initializeSymmetric)
   EXPECT_NEAR((RankTwoTensor(A) - B).L2norm(), 0, 1e-9);
 }
 
-TEST_F(SymmetricRankTwoTensorTest, rowMultiply)
+TEST_F(SymmetricRankTwoTensorTest, row)
 {
   for (auto i : make_range(3))
-    EXPECT_NEAR(_m3.rowMultiply(i, _v), RankTwoTensor(_m3).rowMultiply(i, _v), 1e-9);
+    EXPECT_NEAR(_m3.row(i) * _v, RankTwoTensor(_m3).row(i) * _v, 1e-9);
 }
 
 TEST_F(SymmetricRankTwoTensorTest, timesTranspose)
@@ -165,6 +160,15 @@ TEST_F(SymmetricRankTwoTensorTest, timesTranspose)
   auto A = SymmetricRankTwoTensor::timesTranspose(_m3);
   auto B = SymmetricRankTwoTensor::timesTranspose(RankTwoTensor(_m3));
   auto C = RankTwoTensor::timesTranspose(RankTwoTensor(_m3));
+  EXPECT_NEAR((A - B).L2norm(), 0, 1e-9);
+  EXPECT_NEAR((RankTwoTensor(A) - C).L2norm(), 0, 1e-9);
+}
+
+TEST_F(SymmetricRankTwoTensorTest, transposeTimes)
+{
+  auto A = SymmetricRankTwoTensor::transposeTimes(_m3);
+  auto B = SymmetricRankTwoTensor::transposeTimes(RankTwoTensor(_m3));
+  auto C = RankTwoTensor::transposeTimes(RankTwoTensor(_m3));
   EXPECT_NEAR((A - B).L2norm(), 0, 1e-9);
   EXPECT_NEAR((RankTwoTensor(A) - C).L2norm(), 0, 1e-9);
 }
@@ -392,41 +396,6 @@ TEST_F(SymmetricRankTwoTensorTest, printReal)
   const std::string gold = "              1\n             -5\n              9\n       -8.48528\n   "
                            "     4.24264\n        2.82843\n";
   EXPECT_EQ(ss.str(), gold);
-}
-
-TEST_F(SymmetricRankTwoTensorTest, syev)
-{
-  std::vector<Real> A1;
-  std::vector<Real> A2;
-  _m3.syev("V", A1, A2);
-
-  std::vector<Real> B1;
-  std::vector<Real> B2;
-  auto B = RankTwoTensor(_m3);
-  B.syev("V", B1, B2);
-
-  EXPECT_EQ(A1.size(), B1.size());
-  EXPECT_EQ(A2.size(), B2.size());
-
-  for (auto i : index_range(A1))
-    EXPECT_NEAR(A1[i], B1[i], 1e-9);
-  for (auto i : index_range(A2))
-    EXPECT_NEAR(A2[i], B2[i], 1e-9);
-
-  try
-  {
-    ADSymmetricRankTwoTensor A;
-    std::vector<ADReal> v1, v2;
-    A.syev("N", v1, v2);
-    FAIL() << "missing expected exception";
-  }
-  catch (const std::exception & e)
-  {
-    std::string msg(e.what());
-    ASSERT_TRUE(msg.find("The syev method is only supported for Real valued tensors") !=
-                std::string::npos)
-        << "Failed with unexpected error message: " << msg;
-  }
 }
 
 TEST_F(SymmetricRankTwoTensorTest, symmetricEigenvaluesEigenvectors)

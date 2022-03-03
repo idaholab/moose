@@ -14,6 +14,7 @@
 #include "ADSymmetricRankTwoTensorForward.h"
 #include "ADSymmetricRankFourTensorForward.h"
 #include "MooseUtils.h"
+#include "MathUtils.h"
 
 #include "libmesh/libmesh.h"
 #include "libmesh/tensor_value.h"
@@ -32,6 +33,8 @@ template <typename>
 class ColumnMajorMatrixTempl;
 namespace libMesh
 {
+template <typename>
+class VectorValue;
 template <typename>
 class TypeVector;
 template <typename>
@@ -71,9 +74,12 @@ class SymmetricRankTwoTensorTempl
 {
 public:
   ///@{ tensor dimension and Mandel vector length
-  static constexpr unsigned int Ndim = 3;
-  static constexpr unsigned int N = 2 * Ndim;
+  static constexpr unsigned int Ndim = Moose::dim;
+  static constexpr unsigned int N = Ndim + (Ndim * (Ndim - 1)) / 2;
   ///@}
+
+  /// returns the 1 or sqrt(2) prefactor in the Mandel notation for the index i ranging from 0-5.
+  static constexpr Real mandelFactor(unsigned int i) { return i < Ndim ? 1.0 : MathUtils::sqrt2; }
 
   // Select initialization
   enum InitMethod
@@ -100,14 +106,6 @@ public:
     diagonal3 = 3,
     symmetric6 = 6
   };
-
-  /**
-   * Constructor that takes in 3 vectors and uses them to create rows
-   * _vals[0][i] = row1(i), _vals[1][i] = row2(i), _vals[2][i] = row3(i)
-   */
-  SymmetricRankTwoTensorTempl(const TypeVector<T> & row1,
-                              const TypeVector<T> & row2,
-                              const TypeVector<T> & row3);
 
   /// Constructor that proxies the fillFromInputVector method
   SymmetricRankTwoTensorTempl(const std::vector<T> & input) { this->fillFromInputVector(input); };
@@ -149,12 +147,12 @@ public:
   template <typename T2>
   SymmetricRankTwoTensorTempl(const SymmetricRankTwoTensorTempl<T2> & a)
   {
-    for (std::size_t i = 0; i < N; ++i)
+    for (const auto i : make_range(N))
       _vals[i] = a(i);
   }
 
   // Named constructors
-  static SymmetricRankTwoTensorTempl Identity()
+  static SymmetricRankTwoTensorTempl identity()
   {
     return SymmetricRankTwoTensorTempl(initIdentity);
   }
@@ -178,12 +176,19 @@ public:
   /// Gets the value for the index specified.  Takes index = 0,1,2,3,4,5
   inline T & operator()(unsigned int i) { return _vals[i]; }
 
-  /// multiply vector v with row n of this tensor
-  T rowMultiply(std::size_t n, const TypeVector<T> & v) const;
+  /// get the specified row of the tensor
+  VectorValue<T> row(const unsigned int n) const;
+
+  /// get the specified column of the tensor
+  VectorValue<T> column(const unsigned int n) const { return row(n); }
 
   /// return the matrix multiplied with its transpose A*A^T (guaranteed symmetric)
   static SymmetricRankTwoTensorTempl<T> timesTranspose(const RankTwoTensorTempl<T> &);
   static SymmetricRankTwoTensorTempl<T> timesTranspose(const SymmetricRankTwoTensorTempl<T> &);
+
+  /// return the matrix multiplied with its transpose A^T*A (guaranteed symmetric)
+  static SymmetricRankTwoTensorTempl<T> transposeTimes(const RankTwoTensorTempl<T> &);
+  static SymmetricRankTwoTensorTempl<T> transposeTimes(const SymmetricRankTwoTensorTempl<T> &);
 
   /// return the matrix plus its transpose A-A^T (guaranteed symmetric)
   static SymmetricRankTwoTensorTempl<T> plusTranspose(const RankTwoTensorTempl<T> &);
@@ -429,17 +434,6 @@ public:
                                         RankTwoTensorTempl<T> & eigvecs) const;
 
   /**
-   * Uses the petscblaslapack.h LAPACKsyev_ routine to find, for symmetric _vals:
-   *  (1) the eigenvalues (if calculation_type == "N")
-   *  (2) the eigenvalues and eigenvectors (if calculation_type == "V")
-   * @param calculation_type If "N" then calculation eigenvalues only
-   * @param eigvals Eigenvalues are placed in this array, in ascending order
-   * @param a Eigenvectors are placed in this array if calculation_type == "V".
-   * See code in dsymmetricEigenvalues for extracting eigenvectors from the a output.
-   */
-  void syev(const char * calculation_type, std::vector<T> & eigvals, std::vector<T> & a) const;
-
-  /**
    * This function initializes random seed based on a user-defined number.
    */
   static void initRandom(unsigned int);
@@ -460,6 +454,18 @@ public:
 
   /// set the tensor to the identity matrix
   void setToIdentity();
+
+protected:
+  /**
+   * Uses the petscblaslapack.h LAPACKsyev_ routine to find, for symmetric _vals:
+   *  (1) the eigenvalues (if calculation_type == "N")
+   *  (2) the eigenvalues and eigenvectors (if calculation_type == "V")
+   * @param calculation_type If "N" then calculation eigenvalues only
+   * @param eigvals Eigenvalues are placed in this array, in ascending order
+   * @param a Eigenvectors are placed in this array if calculation_type == "V".
+   * See code in dsymmetricEigenvalues for extracting eigenvectors from the a output.
+   */
+  void syev(const char * calculation_type, std::vector<T> & eigvals, std::vector<T> & a) const;
 
 private:
   static constexpr std::array<Real, N> identityCoords = {{1, 1, 1, 0, 0, 0}};
@@ -502,7 +508,7 @@ SymmetricRankTwoTensorTempl<T>::operator*(const T2 & a) const ->
                             SymmetricRankTwoTensorTempl<decltype(T() * T2())>>::type
 {
   SymmetricRankTwoTensorTempl<decltype(T() * T2())> result;
-  for (std::size_t i = 0; i < N; ++i)
+  for (const auto i : make_range(N))
     result._vals[i] = _vals[i] * a;
   return result;
 }
@@ -515,7 +521,7 @@ SymmetricRankTwoTensorTempl<T>::operator/(const T2 & a) const ->
                             SymmetricRankTwoTensorTempl<decltype(T() / T2())>>::type
 {
   SymmetricRankTwoTensorTempl<decltype(T() / T2())> result;
-  for (std::size_t i = 0; i < N; ++i)
+  for (const auto i : make_range(N))
     result._vals[i] = _vals[i] / a;
   return result;
 }
@@ -556,19 +562,18 @@ SymmetricRankTwoTensorTempl<T>::positiveProjectionEigenDecomposition(
   // projection tensor
   SymmetricRankFourTensorTempl<T> proj_pos;
   SymmetricRankFourTensorTempl<T> Gab, Gba;
-  SymmetricRankTwoTensorTempl<T> Ma, Mb;
 
   for (unsigned int a = 0; a < N; ++a)
   {
-    Ma.vectorOuterProduct(eigvec.column(a), eigvec.column(a));
+    const auto Ma = SymmetricRankTwoTensorTempl<T>::vectorSelfOuterProduct(eigvec.column(a));
     proj_pos += d[a] * Ma.outerProduct(Ma);
   }
 
   for (unsigned int a = 0; a < N; ++a)
     for (unsigned int b = 0; b < a; ++b)
     {
-      Ma.vectorOuterProduct(eigvec.column(a), eigvec.column(a));
-      Mb.vectorOuterProduct(eigvec.column(b), eigvec.column(b));
+      const auto Ma = SymmetricRankTwoTensorTempl<T>::vectorSelfOuterProduct(eigvec.column(a));
+      const auto Mb = SymmetricRankTwoTensorTempl<T>::vectorSelfOuterProduct(eigvec.column(b));
 
       Gab = Ma.mixedProductIkJl(Mb) + Ma.mixedProductIlJk(Mb);
       Gba = Mb.mixedProductIkJl(Ma) + Mb.mixedProductIlJk(Ma);

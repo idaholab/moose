@@ -115,7 +115,7 @@ PorousFlowDarcyBase::darcyQpJacobian(unsigned int jvar, unsigned int ph) const
   {
     deriv += _dpermeability_dvar[_qp][pvar] * _phi[_j][_qp] *
              (_grad_p[_qp][ph] - _fluid_density_qp[_qp][ph] * _gravity);
-    for (const auto i: make_range(Moose::dim))
+    for (const auto i : make_range(Moose::dim))
       deriv += _dpermeability_dgradvar[_qp][i][pvar] * _grad_phi[_j][_qp](i) *
                (_grad_p[_qp][ph] - _fluid_density_qp[_qp][ph] * _gravity);
   }

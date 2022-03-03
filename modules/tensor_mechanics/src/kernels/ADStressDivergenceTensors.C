@@ -77,8 +77,7 @@ template <typename R2>
 ADReal
 ADStressDivergenceTensorsTempl<R2>::computeQpResidual()
 {
-  // multiply _stress tensor row _component with the test function gradient
-  ADReal residual = _stress[_qp].rowMultiply(_component, _grad_test[_i][_qp]);
+  ADReal residual = _stress[_qp].row(_component) * _grad_test[_i][_qp];
 
   // volumetric locking correction
   if (_volumetric_locking_correction)

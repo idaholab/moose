@@ -356,10 +356,10 @@ ComputeMultiPlasticityStress::postReturnMap()
     }
 
     // Rotate n by _rotation_increment
-    for (const auto i: make_range(Moose::dim))
+    for (const auto i : make_range(Moose::dim))
     {
       _n[_qp](i) = 0;
-      for (const auto j: make_range(Moose::dim))
+      for (const auto j : make_range(Moose::dim))
         _n[_qp](i) += _rotation_increment[_qp](i, j) * _n_old[_qp](j);
     }
   }

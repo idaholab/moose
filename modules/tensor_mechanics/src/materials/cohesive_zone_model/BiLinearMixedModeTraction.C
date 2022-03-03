@@ -216,7 +216,7 @@ BiLinearMixedModeTraction::computeTraction()
                  (eff_disp_full_degradation - eff_disp_damage_init) /
                  Utility::pow<2>(maximum_mixed_mode_relative_displacement);
 
-      _dDdu.vectorOuterProduct(
+      _dDdu = RankTwoTensor::vectorOuterProduct(
           RealVectorValue(
               -1.0 * _stiffness * interface_displacement_jump(0) +
                   _stiffness *

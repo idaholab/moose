@@ -69,7 +69,7 @@ public:
 
     coord_t dist = 0.0;
 
-    for (const auto i: make_range(Moose::dim))
+    for (const auto i : make_range(Moose::dim))
       dist += Utility::pow<2>(p1[i] - p2(i));
 
     return dist;

@@ -316,7 +316,7 @@ Coupleable::getDefaultVectorValue(const std::string & var_name) const
     auto value = std::make_unique<VectorVariableValue>(_coupleable_max_qps, 0);
     bool already_warned = false;
     for (unsigned int qp = 0; qp < _coupleable_max_qps; ++qp)
-      for (const auto i: make_range(Moose::dim))
+      for (const auto i : make_range(Moose::dim))
       {
         try
         {

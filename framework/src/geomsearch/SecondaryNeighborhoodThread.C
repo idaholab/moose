@@ -59,7 +59,7 @@ SecondaryNeighborhoodThread::operator()(const NodeIdRange & range)
   {
     const Node & node = _mesh.nodeRef(node_id);
     Point query_pt;
-    for (const auto i: make_range(Moose::dim))
+    for (const auto i : make_range(Moose::dim))
       query_pt(i) = node(i);
 
     /**

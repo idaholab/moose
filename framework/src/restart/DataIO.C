@@ -217,8 +217,8 @@ template <typename T>
 void
 dataStore(std::ostream & stream, TensorValue<T> & v, void * context)
 {
-  for (const auto i: make_range(Moose::dim))
-    for (const auto j: make_range(Moose::dim))
+  for (const auto i : make_range(Moose::dim))
+    for (const auto j : make_range(Moose::dim))
     {
       T r = v(i, j);
       dataStore(stream, r, context);
@@ -253,7 +253,7 @@ dataStore(std::ostream & stream, VectorValue<T> & v, void * context)
 {
   // Obviously if someone loads data with different LIBMESH_DIM than was used for saving them, it
   // won't work.
-  for (const auto i: make_range(Moose::dim))
+  for (const auto i : make_range(Moose::dim))
   {
     T r = v(i);
     dataStore(stream, r, context);
@@ -266,7 +266,7 @@ template void dataStore(std::ostream & stream, VectorValue<DualReal> & v, void *
 void
 dataStore(std::ostream & stream, Point & p, void * context)
 {
-  for (const auto i: make_range(Moose::dim))
+  for (const auto i : make_range(Moose::dim))
   {
     Real r = p(i);
     dataStore(stream, r, context);
@@ -519,8 +519,8 @@ dataLoad(std::istream & stream, TensorValue<T> & v, void * context)
 {
   // Obviously if someone loads data with different LIBMESH_DIM than was used for saving them, it
   // won't work.
-  for (const auto i: make_range(Moose::dim))
-    for (const auto j: make_range(Moose::dim))
+  for (const auto i : make_range(Moose::dim))
+    for (const auto j : make_range(Moose::dim))
     {
       T r = 0;
       dataLoad(stream, r, context);
@@ -557,7 +557,7 @@ dataLoad(std::istream & stream, VectorValue<T> & v, void * context)
 {
   // Obviously if someone loads data with different LIBMESH_DIM than was used for saving them, it
   // won't work.
-  for (const auto i: make_range(Moose::dim))
+  for (const auto i : make_range(Moose::dim))
   {
     T r = 0;
     dataLoad(stream, r, context);
@@ -571,7 +571,7 @@ template void dataLoad(std::istream & stream, VectorValue<DualReal> & v, void * 
 void
 dataLoad(std::istream & stream, Point & p, void * context)
 {
-  for (const auto i: make_range(Moose::dim))
+  for (const auto i : make_range(Moose::dim))
   {
     Real r = 0;
     dataLoad(stream, r, context);

@@ -80,10 +80,10 @@ OutputTestMaterial::computeQpProperties()
   _ranktwotensor_property[_qp] = tensor;
 
   RankFourTensor rankfourtensor;
-  for (const auto i: make_range(Moose::dim))
-    for (const auto j: make_range(Moose::dim))
-      for (const auto k: make_range(Moose::dim))
-        for (const auto l: make_range(Moose::dim))
+  for (const auto i : make_range(Moose::dim))
+    for (const auto j : make_range(Moose::dim))
+      for (const auto k : make_range(Moose::dim))
+        for (const auto l : make_range(Moose::dim))
           _rankfourtensor_property[_qp](i, j, k, l) =
               i * 1000 + j * 100 + k * 10 + l + _variable[_qp] / 10.0;
 

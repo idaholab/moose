@@ -107,10 +107,10 @@ HEVPFlowRatePowerLawJ2::computeTensorDerivative(unsigned int qp,
     RankTwoTensor ce_inv = _ce[qp].inverse();
 
     RankFourTensor dpk2dev_dpk2;
-    for (const auto i: make_range(Moose::dim))
-      for (const auto j: make_range(Moose::dim))
-        for (const auto k: make_range(Moose::dim))
-          for (const auto l: make_range(Moose::dim))
+    for (const auto i : make_range(Moose::dim))
+      for (const auto j : make_range(Moose::dim))
+        for (const auto k : make_range(Moose::dim))
+          for (const auto l : make_range(Moose::dim))
           {
             dpk2dev_dpk2(i, j, k, l) = 0.0;
             if (i == k && j == l)

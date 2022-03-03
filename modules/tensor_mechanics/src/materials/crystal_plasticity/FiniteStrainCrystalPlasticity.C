@@ -432,7 +432,7 @@ FiniteStrainCrystalPlasticity::getSlipSystems()
   for (unsigned int i = 0; i < _nss; ++i)
   {
     // Read the slip normal
-    for (const auto j: make_range(Moose::dim))
+    for (const auto j : make_range(Moose::dim))
       if (!(fileslipsys >> vec[j]))
         mooseError("Crystal Plasticity Error: Premature end of file reading slip system file \n");
 
@@ -445,7 +445,7 @@ FiniteStrainCrystalPlasticity::getSlipSystems()
       _no(i * LIBMESH_DIM + j) = vec[j] / mag;
 
     // Read the slip direction
-    for (const auto j: make_range(Moose::dim))
+    for (const auto j : make_range(Moose::dim))
       if (!(fileslipsys >> vec[j]))
         mooseError("Crystal Plasticity Error: Premature end of file reading slip system file \n");
 
@@ -453,11 +453,11 @@ FiniteStrainCrystalPlasticity::getSlipSystems()
     mag = Utility::pow<2>(vec[0]) + Utility::pow<2>(vec[1]) + Utility::pow<2>(vec[2]);
     mag = std::sqrt(mag);
 
-    for (const auto j: make_range(Moose::dim))
+    for (const auto j : make_range(Moose::dim))
       _mo(i * LIBMESH_DIM + j) = vec[j] / mag;
 
     mag = 0.0;
-    for (const auto j: make_range(Moose::dim))
+    for (const auto j : make_range(Moose::dim))
       mag += _mo(i * LIBMESH_DIM + j) * _no(i * LIBMESH_DIM + j);
 
     if (std::abs(mag) > 1e-8)
@@ -933,14 +933,14 @@ FiniteStrainCrystalPlasticity::calcJacobian(RankFourTensor & jac)
     dfpinvdslip[i] = -_fp_old_inv * _s0[i];
   }
 
-  for (const auto i: make_range(Moose::dim))
-    for (const auto j: make_range(Moose::dim))
-      for (const auto k: make_range(Moose::dim))
+  for (const auto i : make_range(Moose::dim))
+    for (const auto j : make_range(Moose::dim))
+      for (const auto k : make_range(Moose::dim))
         dfedfpinv(i, j, k, j) = _dfgrd_tmp(i, k);
 
-  for (const auto i: make_range(Moose::dim))
-    for (const auto j: make_range(Moose::dim))
-      for (const auto k: make_range(Moose::dim))
+  for (const auto i : make_range(Moose::dim))
+    for (const auto j : make_range(Moose::dim))
+      for (const auto k : make_range(Moose::dim))
       {
         deedfe(i, j, k, i) = deedfe(i, j, k, i) + _fe(k, j) * 0.5;
         deedfe(i, j, k, j) = deedfe(i, j, k, j) + _fe(k, i) * 0.5;
@@ -996,8 +996,8 @@ FiniteStrainCrystalPlasticity::getMatRot(const RankTwoTensor & a)
 
   c = a.transpose() * a;
 
-  for (const auto i: make_range(Moose::dim))
-    for (const auto j: make_range(Moose::dim))
+  for (const auto i : make_range(Moose::dim))
+    for (const auto j : make_range(Moose::dim))
       cmat[i][j] = c(i, j);
 
   LAPACKsyev_("V", "U", &nd, &cmat[0][0], &nd, w, work, &lwork, &info);
@@ -1007,11 +1007,11 @@ FiniteStrainCrystalPlasticity::getMatRot(const RankTwoTensor & a)
 
   diag.zero();
 
-  for (const auto i: make_range(Moose::dim))
+  for (const auto i : make_range(Moose::dim))
     diag(i, i) = std::sqrt(w[i]);
 
-  for (const auto i: make_range(Moose::dim))
-    for (const auto j: make_range(Moose::dim))
+  for (const auto i : make_range(Moose::dim))
+    for (const auto j : make_range(Moose::dim))
       evec(i, j) = cmat[i][j];
 
   rot = a * ((evec.transpose() * diag * evec).inverse());
@@ -1050,18 +1050,18 @@ FiniteStrainCrystalPlasticity::calc_schmid_tensor()
   // Update slip direction and normal with crystal orientation
   for (unsigned int i = 0; i < _nss; ++i)
   {
-    for (const auto j: make_range(Moose::dim))
+    for (const auto j : make_range(Moose::dim))
     {
       mo(i * LIBMESH_DIM + j) = 0.0;
-      for (const auto k: make_range(Moose::dim))
+      for (const auto k : make_range(Moose::dim))
         mo(i * LIBMESH_DIM + j) =
             mo(i * LIBMESH_DIM + j) + _crysrot[_qp](j, k) * _mo(i * LIBMESH_DIM + k);
     }
 
-    for (const auto j: make_range(Moose::dim))
+    for (const auto j : make_range(Moose::dim))
     {
       no(i * LIBMESH_DIM + j) = 0.0;
-      for (const auto k: make_range(Moose::dim))
+      for (const auto k : make_range(Moose::dim))
         no(i * LIBMESH_DIM + j) =
             no(i * LIBMESH_DIM + j) + _crysrot[_qp](j, k) * _no(i * LIBMESH_DIM + k);
     }
@@ -1069,8 +1069,8 @@ FiniteStrainCrystalPlasticity::calc_schmid_tensor()
 
   // Calculate Schmid tensor and resolved shear stresses
   for (unsigned int i = 0; i < _nss; ++i)
-    for (const auto j: make_range(Moose::dim))
-      for (const auto k: make_range(Moose::dim))
+    for (const auto j : make_range(Moose::dim))
+      for (const auto k : make_range(Moose::dim))
         _s0[i](j, k) = mo(i * LIBMESH_DIM + j) * no(i * LIBMESH_DIM + k);
 }
 
@@ -1083,9 +1083,9 @@ FiniteStrainCrystalPlasticity::elastoPlasticTangentModuli()
 
   // Fill in the matrix stiffness material property
 
-  for (const auto i: make_range(Moose::dim))
-    for (const auto j: make_range(Moose::dim))
-      for (const auto k: make_range(Moose::dim))
+  for (const auto i : make_range(Moose::dim))
+    for (const auto j : make_range(Moose::dim))
+      for (const auto k : make_range(Moose::dim))
       {
         deedfe(i, j, k, i) = deedfe(i, j, k, i) + _fe(k, j) * 0.5;
         deedfe(i, j, k, j) = deedfe(i, j, k, j) + _fe(k, i) * 0.5;
@@ -1096,9 +1096,9 @@ FiniteStrainCrystalPlasticity::elastoPlasticTangentModuli()
   pk2fet = _pk2_tmp * _fe.transpose();
   fepk2 = _fe * _pk2_tmp;
 
-  for (const auto i: make_range(Moose::dim))
-    for (const auto j: make_range(Moose::dim))
-      for (const auto l: make_range(Moose::dim))
+  for (const auto i : make_range(Moose::dim))
+    for (const auto j : make_range(Moose::dim))
+      for (const auto l : make_range(Moose::dim))
       {
         tan_mod(i, j, i, l) = tan_mod(i, j, i, l) + pk2fet(l, j);
         tan_mod(i, j, j, l) = tan_mod(i, j, j, l) + fepk2(i, l);

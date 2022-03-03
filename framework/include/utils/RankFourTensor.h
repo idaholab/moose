@@ -151,14 +151,14 @@ public:
     return RankFourTensorTempl<T>(initIdentityDeviatoric);
   };
 
-  /// Gets the value for the indices specified. Takes indices ranging from 0-5 for i and j.
+  /// Gets the value for the indices specified. Takes indices ranging from 0-2 for i, j, k, and l.
   inline T & operator()(unsigned int i, unsigned int j, unsigned int k, unsigned int l)
   {
     return _vals[i * N3 + j * N2 + k * N + l];
   }
 
   /**
-   * Gets the value for the indices specified. Takes indices ranging from 0-5 for i and j.
+   * Gets the value for the indices specified. Takes indices ranging from 0-2 for i, j, k, and l.
    * used for const
    */
   inline const T & operator()(unsigned int i, unsigned int j, unsigned int k, unsigned int l) const

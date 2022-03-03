@@ -52,6 +52,6 @@ protected:
   RankThreeTensor _r3;
   RankFourTensor _r4;
 
-private:
+protected:
   static constexpr auto N = RankTwoTensor::N;
 };
