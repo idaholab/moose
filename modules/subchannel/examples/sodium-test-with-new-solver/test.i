@@ -2,19 +2,21 @@ T_in = 660
 # [1e+6 kg/m^2-hour] turns into kg/m^2-sec
 mass_flux_in = ${fparse 1e+6 * 37.00 / 36000.*0.5}
 P_out = 2.0e5 # Pa
-[Mesh]
-  type = BetterTriSubChannelMesh
-  nrings = 4
-  n_cells = 100
-  n_blocks = 1
-  flat_to_flat = 0.077
-  heated_length = 1.0
-  rod_diameter = 0.01
-  pitch = 0.012
-  dwire = 0.002
-  hwire = 0.0833
-  spacer_z = '0 0.2 0.4 0.6 0.8'
-  spacer_k = '0.1 0.1 0.1 0.1 0.10'
+[TriSubChannelMesh]
+  [subchannel]
+    type = TriSubChannelMeshGenerator
+    nrings = 4
+    n_cells = 100
+    n_blocks = 1
+    flat_to_flat = 0.077
+    heated_length = 1.0
+    rod_diameter = 0.01
+    pitch = 0.012
+    dwire = 0.002
+    hwire = 0.0833
+    spacer_z = '0 0.2 0.4 0.6 0.8'
+    spacer_k = '0.1 0.1 0.1 0.1 0.10'
+  []
 []
 
 [AuxVariables]
@@ -53,7 +55,7 @@ P_out = 2.0e5 # Pa
 []
 
 [Problem]
-  type = BetterLiquidMetalSubChannel1PhaseProblem
+  type = LiquidMetalSubChannel1PhaseProblem
   fp = sodium
   beta = 0.1
   P_out = 2.0e5
@@ -68,17 +70,17 @@ P_out = 2.0e5 # Pa
 
 [ICs]
   [S_IC]
-    type = BetterTriFlowAreaIC
+    type = TriFlowAreaIC
     variable = S
   []
 
   [w_perim_IC]
-    type = BetterTriWettedPerimIC
+    type = TriWettedPerimIC
     variable = w_perim
   []
 
    [q_prime_IC]
-    type = BetterTriPowerIC
+    type = TriPowerIC
     variable = q_prime
     power = 1.000e5 # W
     filename = "pin_power_profile37.txt"
@@ -100,7 +102,7 @@ P_out = 2.0e5 # Pa
     type = ConstantIC
     variable = DP
     value = 0.0
-  []  
+  []
     [Viscosity_ic]
     type = ViscosityIC
     variable = mu
@@ -108,7 +110,7 @@ P_out = 2.0e5 # Pa
     T = T
     fp = sodium
   []
-    
+
 
   [rho_ic]
     type = RhoFromPressureTemperatureIC

@@ -21,6 +21,5 @@ TriSubChannelBaseIC::getMesh(MooseMesh & mesh)
   else
     mooseError(name(),
                ": This initial condition works only with triangular subchannel geometry. Update "
-               "your input "
-               "file to use TriSubChannelMesh in the mesh block.");
+               "your input file to use TriSubChannelMesh in the mesh block.");
 }

@@ -1,21 +1,29 @@
 T_in = 660
 # [1e+6 kg/m^2-hour] turns into kg/m^2-sec
-mass_flux_in = ${fparse 1e+6 * 17.00 / 36000.*0.5}
+mass_flux_in = ${fparse 1e+6 * 300.00 / 36000.*0.5}
 P_out = 2.0e5 # Pa
+
+[GlobalParams]
+  nrings = 4
+  n_cells = 100
+  flat_to_flat = 0.077
+  heated_length = 1.0
+  pitch = 0.012
+[]
+
 [TriSubChannelMesh]
   [subchannel]
     type = TriSubChannelMeshGenerator
-    nrings = 4
-    flat_to_flat = 0.077
-    heated_length = 3.658
     n_blocks = 1
-    n_cells = 183
     rod_diameter = 0.01
-    pitch = 0.012
     dwire = 0.002
     hwire = 0.0833
-    spacer_z = '0 0.229 0.457 0.686 0.914 1.143 1.372 1.600 1.829 2.057 2.286 2.515 2.743 2.972 3.200 3.429'
-    spacer_k = '0.7 0.4 1.0 0.4 1.0 0.4 1.0 0.4 1.0 0.4 1.0 0.4 1.0 0.4 1.0 0.4'
+    spacer_z = '0'
+    spacer_k = '5.0'
+  []
+  [duct]
+    type = TriDuctMeshGenerator
+    input = subchannel
   []
 []
 
@@ -42,6 +50,8 @@ P_out = 2.0e5 # Pa
   []
   [q_prime]
   []
+  [mu]
+  []
 []
 
 [Modules]
@@ -55,9 +65,12 @@ P_out = 2.0e5 # Pa
 [Problem]
   type = LiquidMetalSubChannel1PhaseProblem
   fp = sodium
-  abeta = 0.01
+  beta = 0.1
+  P_out = 2.0e5
   CT = 1.0
-  enforce_uniform_pressure = false
+  compute_density = true
+  compute_viscosity = true
+  compute_power = true
 []
 
 [ICs]
@@ -74,7 +87,7 @@ P_out = 2.0e5 # Pa
    [q_prime_IC]
     type = TriPowerIC
     variable = q_prime
-    power = 1.500e5 # W
+    power = 1.000e6 # W
     filename = "pin_power_profile37.txt"
   []
 
@@ -95,6 +108,14 @@ P_out = 2.0e5 # Pa
     variable = DP
     value = 0.0
   []
+    [Viscosity_ic]
+    type = ViscosityIC
+    variable = mu
+    p = ${P_out}
+    T = T
+    fp = sodium
+  []
+
 
   [rho_ic]
     type = RhoFromPressureTemperatureIC

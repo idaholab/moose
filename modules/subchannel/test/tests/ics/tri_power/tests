@@ -3,10 +3,12 @@
     type = Exodiff
     input = 'test_pin_power.i'
     exodiff = 'test_pin_power_out.e'
+    recover = false
   []
    [test_axial_shape]
     type = Exodiff
     input = 'test_axial_shape.i'
     exodiff = 'test_axial_shape_out.e'
+    recover = false
   []
 []

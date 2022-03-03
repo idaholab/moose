@@ -99,7 +99,8 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
     _atol(getParam<PetscReal>("atol")),
     _dtol(getParam<PetscReal>("dtol")),
     _maxit(getParam<PetscInt>("maxit")),
-    _fp(nullptr)
+    _fp(nullptr),
+    _Tpin_soln(nullptr)
 {
   _n_cells = _subchannel_mesh.getNumOfAxialCells();
   _n_blocks = _subchannel_mesh.getNumOfAxialBlocks();
@@ -133,7 +134,8 @@ SubChannel1PhaseProblem::initialSetup()
   _DP_soln = new SolutionHandle(getVariable(0, SubChannelApp::PRESSURE_DROP));
   _h_soln = new SolutionHandle(getVariable(0, SubChannelApp::ENTHALPY));
   _T_soln = new SolutionHandle(getVariable(0, SubChannelApp::TEMPERATURE));
-  _Tpin_soln = new SolutionHandle(getVariable(0, SubChannelApp::PIN_TEMPERATURE));
+  if (_pin_mesh_exist)
+    _Tpin_soln = new SolutionHandle(getVariable(0, SubChannelApp::PIN_TEMPERATURE));
   _rho_soln = new SolutionHandle(getVariable(0, SubChannelApp::DENSITY));
   _mu_soln = new SolutionHandle(getVariable(0, SubChannelApp::VISCOSITY));
   _S_flow_soln = new SolutionHandle(getVariable(0, SubChannelApp::SURFACE_AREA));
