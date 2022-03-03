@@ -404,7 +404,7 @@ BetterTriSubChannelMesh::BetterTriSubChannelMesh(const InputParameters & params)
       } // if
     }   // for j
   }     // for i
-  
+
   // find the _gap_to_chan_map and _chan_to_gap_map using the gap_to_rod and subchannel_to_rod_maps
 
   for (unsigned int i = 0; i < _n_channels; i++)
@@ -589,7 +589,6 @@ BetterTriSubChannelMesh::BetterTriSubChannelMesh(const InputParameters & params)
         _chan_pairs_sf[k].second = _gap_to_chan_map[k2].first;
       }
     }
-  
   }
 
   // set the _gij_map
@@ -782,6 +781,13 @@ BetterTriSubChannelMesh::getSubchannelIndexFromPoint(const Point & p) const
     } // if
   }   // for
   return j;
+}
+
+unsigned int
+BetterTriSubChannelMesh::channelIndex(const Point & /*point*/) const
+{
+  // TODO: implement this
+  return 0;
 }
 
 void
