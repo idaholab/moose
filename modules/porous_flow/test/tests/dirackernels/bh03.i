@@ -6,8 +6,8 @@
   nx = 1
   ny = 1
   nz = 1
-  xmin = -1
-  xmax = 1
+  xmin = 1
+  xmax = 3
   ymin = -1
   ymax = 1
   zmin = -1
@@ -101,7 +101,7 @@
     point_file = bh03.bh
     function_of = pressure
     fluid_phase = 0
-    bottom_p_or_t = 1E7
+    bottom_p_or_t = 'insitu_pp'
     unit_weight = '0 0 0'
     use_mobility = true
     character = -1
@@ -133,7 +133,7 @@
   [p0]
     type = PointValue
     variable = pp
-    point = '0 0 0'
+    point = '2 0 0'
     execute_on = timestep_end
   []
 []
@@ -144,6 +144,10 @@
     value = abs((a-c+d)/2/(a+c))
     vars = 'a c d'
     vals = 'fluid_mass1 fluid_mass0 bh_report'
+  []
+  [insitu_pp]
+    type = ParsedFunction
+    value = '0.5e7*x'  #bh is located at x=2
   []
 []
 
