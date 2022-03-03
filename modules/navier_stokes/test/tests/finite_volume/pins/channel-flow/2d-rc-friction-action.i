@@ -2,15 +2,14 @@ mu=1.1
 rho=1
 
 [Mesh]
-  [gen]
-    type = GeneratedMeshGenerator
+  [mesh]
+    type = CartesianMeshGenerator
     dim = 2
-    xmin = 0
-    xmax = 5
-    ymin = 0
-    ymax = 1
-    nx = 40
-    ny = 20
+    dx = '2.5 2.5'
+    dy = '1.0'
+    ix = '20 20'
+    iy = '20'
+    subdomain_id = '1 2'
   []
 []
 

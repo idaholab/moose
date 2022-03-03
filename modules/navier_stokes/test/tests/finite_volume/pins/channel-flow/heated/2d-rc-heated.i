@@ -8,15 +8,14 @@ advected_interp_method='average'
 velocity_interp_method='rc'
 
 [Mesh]
-  [gen]
-    type = GeneratedMeshGenerator
+  [mesh]
+    type = CartesianMeshGenerator
     dim = 2
-    xmin = 0
-    xmax = 10
-    ymin = 0
-    ymax = 1
-    nx = 100
-    ny = 20
+    dx = '5 5'
+    dy = '1.0'
+    ix = '50 50'
+    iy = '20'
+    subdomain_id = '1 2'
   []
 []
 

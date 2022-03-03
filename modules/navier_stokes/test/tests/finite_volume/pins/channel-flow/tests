@@ -1,6 +1,6 @@
 [Tests]
   issues = '#16756 #19472'
-  design = 'navier_stokes/pinsfv.md'
+  design = 'navier_stokes/pinsfv.md NSFVAction.md'
   [free-slip]
     type = 'Exodiff'
     input = 2d-rc.i
@@ -15,6 +15,7 @@
     input = 2d-rc-action.i
     exodiff = rc-action.e
     method = "!dbg"
+    issues = "#19472"
     requirement = 'The system should be able to run a porous medium channel computation using the NSFV action.'
     ad_indexing_type = 'global'
     cli_args = "Outputs/file_base='rc-action'"
@@ -55,6 +56,7 @@
     method = "!dbg"
     requirement = 'The system shall be able to model no-slip conditions in a porous media channel with flow driven by a pressure differential using the NSFVAction syntax.'
     abs_zero = 1e-9
+    issues = "#19472"
     ad_indexing_type = 'global'
     cli_args = "Modules/NavierStokesFV/inlet_boundaries='' Modules/NavierStokesFV/momentum_inlet_types='' Modules/NavierStokesFV/momentum_inlet_function='' Modules/NavierStokesFV/outlet_boundaries='left right' Modules/NavierStokesFV/momentum_outlet_types='fixed-pressure fixed-pressure' Modules/NavierStokesFV/momentum_wall_types='noslip noslip'  Modules/NavierStokesFV/pinned_pressure_value=0.01  Outputs/file_base='rc-no-slip-delta-pressure-action' Modules/NavierStokesFV/pressure_function='1 0'"
   []
@@ -75,6 +77,7 @@
     method = "!dbg"
     requirement = 'The system shall be able to model no-slip conditions in a porous media channel using the NSFV action and a set mean pressure.'
     abs_zero = 1e-9
+    issues = "#19472"
     ad_indexing_type = 'global'
     cli_args = "Modules/NavierStokesFV/momentum_wall_types='noslip noslip' Modules/NavierStokesFV/momentum_outlet_types='zero-gradient'  Modules/NavierStokesFV/pin_pressure=true  Modules/NavierStokesFV/pinned_pressure_type=average  Modules/NavierStokesFV/pinned_pressure_value=0.01  Outputs/file_base='rc-no-slip-mean-pressure-action' Modules/NavierStokesFV/pressure_function=''"
   []
@@ -115,6 +118,7 @@
     method = "!dbg"
     requirement = 'The system shall be able to model no-slip conditions in a symmetric porous media channel using the NSFV action.'
     abs_zero = 1e-9
+    issues = "#19472"
     ad_indexing_type = 'global'
     cli_args = "Modules/NavierStokesFV/momentum_wall_types='noslip symmetry' Outputs/file_base='rc-no-slip-symmetry-action'"
   []
@@ -145,6 +149,7 @@
     method = "!dbg"
     requirement = 'The system shall be able to model porous flow with volumetric friction, using the Darcy and Forchheimer friction models and the NSFV action input syntax.'
     abs_zero = 1e-9
+    issues = "#19472"
     ad_indexing_type = 'global'
     cli_args = "Outputs/file_base='rc-friction-action' -pc_type lu -pc_factor_shift_type NONZERO"
   []
@@ -157,7 +162,40 @@
     abs_zero = 1e-9
     ad_indexing_type = 'global'
     cli_args = "FVBCs/inactive='no-slip-u no-slip-v' Outputs/file_base='rc-friction-free-slip' -pc_type lu -pc_factor_shift_type NONZERO"
-    issues = '#16765 #16756'
+    issues = '#16765'
+  []
+  [friction-free-slip-action]
+    type = 'Exodiff'
+    input = 2d-rc-friction-action.i
+    exodiff = rc-friction-free-slip-action.e
+    method = "!dbg"
+    requirement = 'The system shall be able to model porous flow with volumetric friction, using the Darcy and Forchheimer friction models with free slip boundary conditions using the NSFV action.'
+    abs_zero = 1e-9
+    ad_indexing_type = 'global'
+    cli_args = "Modules/NavierStokesFV/momentum_wall_types='slip symmetry' Outputs/file_base='rc-friction-free-slip-action' -pc_type lu -pc_factor_shift_type NONZERO"
+    issues = '#19472'
+  []
+  [friction-block]
+    type = 'Exodiff'
+    input = 2d-rc-friction.i
+    exodiff = rc-friction-block.e
+    method = "!dbg"
+    requirement = 'The system shall be able to model porous flow with block-restricted volumetric friction.'
+    abs_zero = 1e-9
+    ad_indexing_type = 'global'
+    cli_args = "FVBCs/inactive='no-slip-u no-slip-v' FVKernels/u_friction/block=2  FVKernels/v_friction/block=2 Outputs/file_base='rc-friction-block' -pc_type lu -pc_factor_shift_type NONZERO"
+    issues = '#16765'
+  []
+  [friction-block-action]
+    type = 'Exodiff'
+    input = 2d-rc-friction-action.i
+    exodiff = rc-friction-block-action.e
+    method = "!dbg"
+    requirement = 'The system shall be able to model porous flow with block-restricted volumetric friction using the NSFV action.'
+    abs_zero = 1e-9
+    ad_indexing_type = 'global'
+    cli_args = "Modules/NavierStokesFV/momentum_wall_types='slip symmetry' Modules/NavierStokesFV/friction_blocks='2' Outputs/file_base='rc-friction-block-action' -pc_type lu -pc_factor_shift_type NONZERO"
+    issues = '#19472'
   []
   [rz-by-parts]
     type = Exodiff
