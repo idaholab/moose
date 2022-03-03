@@ -25,7 +25,8 @@ RayleighNumber::validParams()
   params.addParam<PostprocessorName>("rho_max", "Maximum density");
 
   // Compute it from a temperature change
-  params.addParam<PostprocessorName>("drho_dT", "Absolute value of fluid expansion coefficient");
+  params.addParam<PostprocessorName>("beta",
+                                     "Absolute value of fluid volumetric expansion coefficient");
   params.addParam<PostprocessorName>("T_hot", "Maximum temperature, or hot source temperature");
   params.addParam<PostprocessorName>("T_cold", "Minimum temperature, or cold source temperature");
 
@@ -45,7 +46,7 @@ RayleighNumber::RayleighNumber(const InputParameters & parameters)
     _rho_min(isParamValid("rho_min") ? &getPostprocessorValue("rho_min") : nullptr),
     _rho_max(isParamValid("rho_max") ? &getPostprocessorValue("rho_max") : nullptr),
     _rho_ave(getPostprocessorValue("rho_ave")),
-    _beta(isParamValid("drho_dT") ? &getPostprocessorValue("drho_dT") : nullptr),
+    _beta(isParamValid("beta") ? &getPostprocessorValue("beta") : nullptr),
     _T_hot(isParamValid("T_hot") ? &getPostprocessorValue("T_hot") : nullptr),
     _T_cold(isParamValid("T_cold") ? &getPostprocessorValue("T_cold") : nullptr),
     _l(getPostprocessorValue("l")),
@@ -68,7 +69,7 @@ RayleighNumber::getValue()
   if (_rho_min)
     drho = *_rho_max - *_rho_min;
   else
-    drho = *_beta * (*_T_hot - *_T_cold);
+    drho = *_beta * (*_T_hot - *_T_cold) * _rho_ave;
 
   if (_mu <= 0 || _k <= 0 || _rho_ave <= 0)
     mooseError("Average viscosity, density and thermal conductivity should be strictly positive");
