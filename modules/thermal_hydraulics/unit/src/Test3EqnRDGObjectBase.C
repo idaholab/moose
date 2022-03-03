@@ -10,19 +10,19 @@
 #include "Test3EqnRDGObjectBase.h"
 #include "THMIndices3Eqn.h"
 
-std::vector<Real>
-Test3EqnRDGObjectBase::computeConservativeSolution(const std::vector<Real> & W,
-                                                   const Real & A) const
+std::vector<ADReal>
+Test3EqnRDGObjectBase::computeConservativeSolution(const std::vector<ADReal> & W,
+                                                   const ADReal & A) const
 {
-  const Real & p = W[0];
-  const Real & T = W[1];
-  const Real & vel = W[2];
+  const ADReal & p = W[0];
+  const ADReal & T = W[1];
+  const ADReal & vel = W[2];
 
-  const Real rho = _fp.rho_from_p_T(p, T);
-  const Real e = _fp.e_from_p_rho(p, rho);
-  const Real E = e + 0.5 * vel * vel;
+  const ADReal rho = _fp.rho_from_p_T(p, T);
+  const ADReal e = _fp.e_from_p_rho(p, rho);
+  const ADReal E = e + 0.5 * vel * vel;
 
-  std::vector<Real> U(THM3Eqn::N_CONS_VAR, 0.0);
+  std::vector<ADReal> U(THM3Eqn::N_CONS_VAR, 0.0);
   U[THM3Eqn::CONS_VAR_RHOA] = rho * A;
   U[THM3Eqn::CONS_VAR_RHOUA] = rho * vel * A;
   U[THM3Eqn::CONS_VAR_RHOEA] = rho * E * A;

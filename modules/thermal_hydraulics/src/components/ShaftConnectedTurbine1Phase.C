@@ -11,13 +11,10 @@
 #include "FlowModelSinglePhase.h"
 #include "Numerics.h"
 #include "Shaft.h"
-#include "ShaftConnectedTurbine1PhaseUserObject.h"
 #include "MooseVariableScalar.h"
 #include "Assembly.h"
 #include "ScalarKernel.h"
 #include "GeometricalFlowComponent.h"
-#include "VolumeJunction1PhaseUserObject.h"
-#include "VolumeJunctionBaseUserObject.h"
 
 registerMooseObject("ThermalHydraulicsApp", ShaftConnectedTurbine1Phase);
 

@@ -50,7 +50,7 @@ protected:
   /// Areas at each connection
   std::vector<ADReal> _areas;
   /// Directions at each connection
-  std::vector<ADRealVectorValue> _directions;
+  std::vector<RealVectorValue> _directions;
   /// Check if the connection is an inlet
   std::vector<bool> _is_inlet;
 

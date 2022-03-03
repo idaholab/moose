@@ -20,22 +20,22 @@ ConsistencyTest3EqnRDGFluxBase::test()
   const Real T = 300.0;
   const Real vel = 1.5;
 
-  const Real rho = _fp.rho_from_p_T(p, T);
-  const Real e = _fp.e_from_p_rho(p, rho);
-  const Real E = e + 0.5 * vel * vel;
+  const ADReal rho = _fp.rho_from_p_T(p, T);
+  const ADReal e = _fp.e_from_p_rho(p, rho);
+  const ADReal E = e + 0.5 * vel * vel;
 
-  const Real A = 2.0;
+  const ADReal A = 2.0;
 
-  std::vector<Real> U(THM3Eqn::N_CONS_VAR, 0.0);
+  std::vector<ADReal> U(THM3Eqn::N_CONS_VAR, 0.0);
   U[THM3Eqn::CONS_VAR_RHOA] = rho * A;
   U[THM3Eqn::CONS_VAR_RHOUA] = rho * vel * A;
   U[THM3Eqn::CONS_VAR_RHOEA] = rho * E * A;
   U[THM3Eqn::CONS_VAR_AREA] = A;
 
-  std::vector<Real> FL_computed, FR_computed;
+  std::vector<ADReal> FL_computed, FR_computed;
   _flux->calcFlux(U, U, _nLR_dot_d, FL_computed, FR_computed);
 
-  std::vector<Real> F_expected(THM3Eqn::N_EQ, 0.0);
+  std::vector<ADReal> F_expected(THM3Eqn::N_EQ, 0.0);
   F_expected[THM3Eqn::EQ_MASS] = rho * vel * A;
   F_expected[THM3Eqn::EQ_MOMENTUM] = (rho * vel * vel + p) * A;
   F_expected[THM3Eqn::EQ_ENERGY] = vel * (rho * E + p) * A;

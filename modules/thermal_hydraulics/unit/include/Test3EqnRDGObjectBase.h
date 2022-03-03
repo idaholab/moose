@@ -10,7 +10,7 @@
 #pragma once
 
 #include "MooseObjectUnitTest.h"
-#include "NumericalFlux3EqnBase.h"
+#include "ADNumericalFlux3EqnBase.h"
 #include "IdealGasFluidProperties.h"
 
 /**
@@ -49,12 +49,13 @@ protected:
    * @param[in] W   Primitive solution vector: {p, T, vel}
    * @param[in] A   Cross-sectional area
    */
-  std::vector<Real> computeConservativeSolution(const std::vector<Real> & W, const Real & A) const;
+  std::vector<ADReal> computeConservativeSolution(const std::vector<ADReal> & W,
+                                                  const ADReal & A) const;
 
   /**
    * Creates the flux object to be tested
    */
-  virtual const NumericalFlux3EqnBase * createFluxObject() = 0;
+  virtual const ADNumericalFlux3EqnBase * createFluxObject() = 0;
 
   /**
    * Runs the tests
@@ -70,5 +71,5 @@ protected:
   const Real _nLR_dot_d;
 
   /// Flux object to be tested
-  const NumericalFlux3EqnBase * _flux;
+  const ADNumericalFlux3EqnBase * _flux;
 };

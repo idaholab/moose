@@ -28,7 +28,7 @@ protected:
   /**
    * Gets a vector of pairs of primitive solution vectors to use for tests
    */
-  virtual std::vector<std::pair<std::vector<Real>, std::vector<Real>>>
+  virtual std::vector<std::pair<std::vector<ADReal>, std::vector<ADReal>>>
   getPrimitiveSolutionPairs() const = 0;
 
   virtual void test() override;
