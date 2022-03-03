@@ -168,6 +168,7 @@ BetterTriPowerIC::value(const Point & p)
         sum = 1.0 / 6.0 * _ref_qprime[rod_idx] * _pin_power_correction[rod_idx] *
           _axial_heat_rate.value(_t, p);
         return sum;
+
     }
   }
   return 0.;

@@ -264,91 +264,79 @@ void
 BetterLiquidMetalSubChannel1PhaseProblem::computeDP(int iblock)
 {
   unsigned int last_node = (iblock + 1) * _block_size;
-  unsigned int first_node = iblock * _block_size + 1;  
- 
+  unsigned int first_node = iblock * _block_size + 1;
+
   for (unsigned int iz = first_node; iz < last_node + 1; iz++)
   {
-  if (iz == 0)
-  {
-    mooseError(name(),
-               ": Cannot compute pressure drop at the inlet of the assembly. Boundary conditions "
-               "are applied here");
-  }
-  auto z_grid = _subchannel_mesh.getZGrid();
-  auto dz = z_grid[iz] - z_grid[iz - 1];
-  // Sweep through the channels of level
-  for (unsigned int i_ch = 0; i_ch < _subchannel_mesh.getNumOfChannels(); i_ch++)
-  {
-    // Find the nodes for the top and bottom of this element.
-    auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
-    auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
-    auto rho_in = (*_rho_soln)(node_in);
-    auto rho_out = (*_rho_soln)(node_out);
-    auto T_in = (*_T_soln)(node_in);
-    auto S = (*_S_flow_soln)(node_in);
-    
-    auto w_perim = (*_w_perim_soln)(node_in);
-    // hydraulic diameter in the i direction
-    auto Dh_i = 4.0 * S / w_perim;
-    auto time_term =
-        _TR * ((*_mdot_soln)(node_out)-_mdot_soln->old(node_out)) * dz / _dt -
-        dz * 2.0 * (*_mdot_soln)(node_out) * (rho_out - _rho_soln->old(node_out)) / rho_in / _dt;
-
-    auto mass_term1 =
-        std::pow((*_mdot_soln)(node_out), 2.0) * (1.0 / S / rho_out - 1.0 / S / rho_in);
-    auto mass_term2 = -2.0 * (*_mdot_soln)(node_out) * (*_SumWij_soln)(node_out) / S / rho_in;
-
-    auto crossflow_term = 0.0;
-    auto turbulent_term = 0.0;
-
-    unsigned int counter = 0;
-    for (auto i_gap : _subchannel_mesh.getChannelGaps(i_ch))
+    auto z_grid = _subchannel_mesh.getZGrid();
+    auto k_grid = _subchannel_mesh.getKGrid();
+    auto dz = z_grid[iz] - z_grid[iz - 1];
+    for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
     {
-      auto chans = _subchannel_mesh.getGapNeighborChannels(i_gap);
-      unsigned int ii_ch = chans.first;
-      unsigned int jj_ch = chans.second;
-      auto * node_in_i = _subchannel_mesh.getChannelNode(ii_ch, iz - 1);
-      auto * node_in_j = _subchannel_mesh.getChannelNode(jj_ch, iz - 1);
-      auto * node_out_i = _subchannel_mesh.getChannelNode(ii_ch, iz);
-      auto * node_out_j = _subchannel_mesh.getChannelNode(jj_ch, iz);
-      auto rho_i = (*_rho_soln)(node_in_i);
-      auto rho_j = (*_rho_soln)(node_in_j);
-      auto Si = (*_S_flow_soln)(node_in_i);
-      auto Sj = (*_S_flow_soln)(node_in_j);
-      auto U_star = 0.0;
-      // figure out donor axial velocity
-      if (_Wij(i_gap, iz) > 0.0)
-      {
-        U_star = (*_mdot_soln)(node_out_i) / Si / rho_i;
-      }
-      else
-      {
-        U_star = (*_mdot_soln)(node_out_j) / Sj / rho_j;
-      }
+      auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
+      auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
+      auto rho_in = (*_rho_soln)(node_in);
+      auto rho_out = (*_rho_soln)(node_out);
+      auto mu_in = (*_mu_soln)(node_in);
+      auto S = (*_S_flow_soln)(node_in);
+      auto w_perim = (*_w_perim_soln)(node_in);
+      // hydraulic diameter in the i direction
+      auto Dh_i = 4.0 * S / w_perim;
+      auto time_term =
+          _TR * ((*_mdot_soln)(node_out)-_mdot_soln->old(node_out)) * dz / _dt -
+          dz * 2.0 * (*_mdot_soln)(node_out) * (rho_out - _rho_soln->old(node_out)) / rho_in / _dt;
 
-      crossflow_term += _subchannel_mesh.getCrossflowSign(i_ch, counter) * _Wij(i_gap, iz) * U_star;
+      auto mass_term1 =
+          std::pow((*_mdot_soln)(node_out), 2.0) * (1.0 / S / rho_out - 1.0 / S / rho_in);
+      auto mass_term2 = -2.0 * (*_mdot_soln)(node_out) * (*_SumWij_soln)(node_out) / S / rho_in;
 
-      turbulent_term += _WijPrime(i_gap, iz) * (2 * (*_mdot_soln)(node_out) / rho_in / S -
-                                               (*_mdot_soln)(node_out_j) / Sj / rho_j -
-                                               (*_mdot_soln)(node_out_i) / Si / rho_i);
-      counter++;
+      auto crossflow_term = 0.0;
+      auto turbulent_term = 0.0;
+
+      unsigned int counter = 0;
+      for (auto i_gap : _subchannel_mesh.getChannelGaps(i_ch))
+      {
+        auto chans = _subchannel_mesh.getGapNeighborChannels(i_gap);
+        unsigned int ii_ch = chans.first;
+        unsigned int jj_ch = chans.second;
+        auto * node_in_i = _subchannel_mesh.getChannelNode(ii_ch, iz - 1);
+        auto * node_in_j = _subchannel_mesh.getChannelNode(jj_ch, iz - 1);
+        auto * node_out_i = _subchannel_mesh.getChannelNode(ii_ch, iz);
+        auto * node_out_j = _subchannel_mesh.getChannelNode(jj_ch, iz);
+        auto rho_i = (*_rho_soln)(node_in_i);
+        auto rho_j = (*_rho_soln)(node_in_j);
+        auto Si = (*_S_flow_soln)(node_in_i);
+        auto Sj = (*_S_flow_soln)(node_in_j);
+        auto u_star = 0.0;
+        // figure out donor axial velocity
+        if (_Wij(i_gap, iz) > 0.0)
+          u_star = (*_mdot_soln)(node_out_i) / Si / rho_i;
+        else
+          u_star = (*_mdot_soln)(node_out_j) / Sj / rho_j;
+
+        crossflow_term +=
+            _subchannel_mesh.getCrossflowSign(i_ch, counter) * _Wij(i_gap, iz) * u_star;
+
+        turbulent_term += _WijPrime(i_gap, iz) * (2 * (*_mdot_soln)(node_out) / rho_in / S -
+                                                  (*_mdot_soln)(node_out_j) / Sj / rho_j -
+                                                  (*_mdot_soln)(node_out_i) / Si / rho_i);
+        counter++;
+      }
+      turbulent_term *= _CT;
+
+      auto Re = (((*_mdot_soln)(node_in) / S) * Dh_i / mu_in);
+      auto fi = computeFrictionFactor(Re, i_ch, S, w_perim, Dh_i);
+      auto ki = k_grid[iz - 1];
+      auto friction_term = (fi * dz / Dh_i + ki) * 0.5 * (std::pow((*_mdot_soln)(node_out), 2.0)) /
+                           (S * (*_rho_soln)(node_out));
+      auto gravity_term = _g_grav * (*_rho_soln)(node_out)*dz * S;
+      auto DP = std::pow(S, -1.0) * (time_term + mass_term1 + mass_term2 + crossflow_term +
+                                     turbulent_term + friction_term + gravity_term); // Pa
+      _DP_soln->set(node_out, DP);
     }
-    turbulent_term *= _CT;
-
-    auto mu = _fp->mu_from_rho_T(rho_in, T_in);
-    auto Re = (((*_mdot_soln)(node_in) / S) * Dh_i / mu);
-    auto fi = computeFrictionFactor(Re, i_ch, S, w_perim, Dh_i);
-    // auto fi = computeFrictionFactor(Re);
-    auto friction_term = (fi * dz / Dh_i) * 0.5 * (std::pow((*_mdot_soln)(node_out), 2.0)) /
-                         (S * (*_rho_soln)(node_out));
-    auto gravity_term = _g_grav * (*_rho_soln)(node_out)*dz * S;
-    auto DP = std::pow(S, -1.0) * (time_term + mass_term1 + mass_term2 + crossflow_term +
-                                   turbulent_term + friction_term + gravity_term); // Pa
-    // update solution
-    _DP_soln->set(node_out, DP);
-  }
   }
 }
+
 
 double
 BetterLiquidMetalSubChannel1PhaseProblem::computeMassFlowForDPDZ(double dpdz, int i_ch)
