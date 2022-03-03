@@ -7,7 +7,7 @@ Because this document assumes the reader *is* an administrator, most of the cont
 ## Prerequisites
 
 - Some sort of environmental module management software. Such as [Environment Modules](http://modules.sourceforge.net/).
-- A working MPI wrapper (MPICH/OpenMPI/MVAPICH) which wraps to a C++14 compliant compiler.
+- A working MPI wrapper (MPICH/OpenMPI/MVAPICH) which wraps to a C++17 compliant compiler.
 - Knowledge on Access Control Lists (ACLs) or other means to safeguard a directory from further tampering by others.
 
 !alert warning
