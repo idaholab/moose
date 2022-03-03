@@ -404,7 +404,7 @@ BetterTriSubChannelMesh::BetterTriSubChannelMesh(const InputParameters & params)
       } // if
     }   // for j
   }     // for i
-
+  
   // find the _gap_to_chan_map and _chan_to_gap_map using the gap_to_rod and subchannel_to_rod_maps
 
   for (unsigned int i = 0; i < _n_channels; i++)
@@ -737,9 +737,6 @@ BetterTriSubChannelMesh::BetterTriSubChannelMesh(const InputParameters & params)
       _subchannel_position[i][0] = (a2 * x1 - a1 * x0) / (a2 - a1);
       _subchannel_position[i][1] = (a2 * y1 - a1 * y0) / (a2 - a1);
     }
-//    if(_subch_type[i] == EChannelType::CORNER || _subch_type[i] == EChannelType::EDGE) {
-//    _console << "ich= " << i << " x = " <<  _subchannel_position[i][0] << " y= " << _subchannel_position[i][1] <<" subch= " << std::pow((std::pow(_subchannel_position[i][0],2) + std::pow(_subchannel_position[i][1],2)),0.5)<< std::endl;
-//    }
   } // i
   // Reduce reserved memory in the channel-to-gap map.
   for (auto & gap : _chan_to_gap_map)
