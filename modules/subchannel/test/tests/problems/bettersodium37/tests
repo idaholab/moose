@@ -1,0 +1,10 @@
+[Tests]
+  [test1]
+    type = Exodiff
+    input = test37.i
+    exodiff = test37_out.e
+    method = '!DBG'
+    valgrind = NONE
+    recover = false
+  []
+[]
