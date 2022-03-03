@@ -138,7 +138,7 @@ EigenProblem::execute(const ExecFlagType & exec_type)
   if (exec_type == EXEC_INITIAL)
     // we need to scale the solution properly and we can do this only all initial setup of
     // depending objects by the residual evaluations has been done to this point.
-    preScaleEigenVector();
+    preScaleEigenVector(std::pair<Real, Real>(_initial_eigenvalue, 0));
 
   FEProblemBase::execute(exec_type);
 }
@@ -394,17 +394,11 @@ EigenProblem::initEigenvector(const Real initial_value)
 }
 
 void
-EigenProblem::preScaleEigenVector()
+EigenProblem::preScaleEigenVector(const std::pair<Real, Real> & eig)
 {
   // pre-scale the solution to make sure ||Bx||_2 is equal to inverse of eigenvalue
   computeResidualTag(
       *_nl_eigen->currentSolution(), _nl_eigen->residualVectorBX(), _nl_eigen->eigenVectorTag());
-
-  // If we do not have eigenvalue yet, we scale 1/|Bx| to unity
-  std::pair<Real, Real> eig(1, 0);
-  // If there is an eigenvalue, we scale 1/|Bx| to eigenvalue
-  if (_active_eigen_index < _nl_eigen->getNumConvergedEigenvalues())
-    eig = _nl_eigen->getConvergedEigenvalue(_active_eigen_index);
 
   // Eigenvalue magnitude
   Real v = std::sqrt(eig.first * eig.first + eig.second * eig.second);
@@ -513,8 +507,12 @@ EigenProblem::solve()
     // could rebuild matrices due to mesh changes or something else.
     _nl_eigen->attachSLEPcCallbacks();
 
-    // Scale eigen vector if necessary
-    preScaleEigenVector();
+    // If there is an eigenvalue, we scale 1/|Bx| to eigenvalue
+    if (_active_eigen_index < _nl_eigen->getNumConvergedEigenvalues())
+    {
+      std::pair<Real, Real> eig = _nl_eigen->getConvergedEigenvalue(_active_eigen_index);
+      preScaleEigenVector(eig);
+    }
 
     if (isNonlinearEigenvalueSolver() &&
         solverParams()._eigen_solve_type != Moose::EST_NONLINEAR_POWER)
