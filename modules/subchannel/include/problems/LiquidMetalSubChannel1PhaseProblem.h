@@ -1,13 +1,13 @@
 #pragma once
 
-#include "SubChannel1PhaseProblemBase.h"
+#include "SubChannel1PhaseProblem.h"
 
 class LiquidMetalSubChannel1PhaseProblem;
 class TriSubChannelMesh;
 /**
  * Steady state subchannel solver for 1-phase liquid metal coolants
  */
-class LiquidMetalSubChannel1PhaseProblem : public SubChannel1PhaseProblemBase
+class LiquidMetalSubChannel1PhaseProblem : public SubChannel1PhaseProblem
 {
 public:
   LiquidMetalSubChannel1PhaseProblem(const InputParameters & params);
@@ -22,14 +22,14 @@ protected:
   /// computeFrictionFactor(double Re) is currently not used for sodium coolant
   virtual double computeFrictionFactor(double Re) override;
   /// computeDP(int iz) is defined/overridden in order to use the friction factor for sodium
-  virtual void computeDP(int iz) override;
+  virtual void computeDP(int iblock) override;
   /// computeMassFlowForDPDZ(double dpdz, int i_ch) and enforceUniformDPDZAtInlet()
   /// are overriden to define the sodium friction factor
-  virtual double computeMassFlowForDPDZ(double dpdz, int i_ch) override;
-  virtual void enforceUniformDPDZAtInlet() override;
-  virtual void computeWijPrime(int iz) override;
+  virtual double computeMassFlowForDPDZ(double dpdz, int i_ch);
+  virtual void enforceUniformDPDZAtInlet();
+  virtual void computeWijPrime(int iblock) override;
   ///
-  virtual void computeH(int iz) override;
+  virtual void computeh(int iblock) override;
   /**
    * computeInletMassFlowDist corrects the inlet mass flow rate distribution
    * in order to satisfy the uniform inlet pressure condition, iteratively.
