@@ -4,10 +4,6 @@
   scaling_factor_1phase = '1. 1.e-2 1.e-4'
   scaling_factor_temperature = 1e-2
 
-  initial_T = 500
-  initial_p = 6.e6
-  initial_vel = 0
-
   closures = simple_closures
 
   initial_from_file = 'steady_state_out.e'
@@ -42,7 +38,7 @@
 []
 
 [Functions]
-  [Ts_init]
+  [Ts_bc]
     type = ParsedFunction
     value = '2*sin(x*pi)+507'
   []
@@ -67,10 +63,6 @@
     connections = 'pipe1:out pipe2:in'
     volume = 1
     position = '1 0 0'
-
-    initial_vel_x = 0
-    initial_vel_y = 0
-    initial_vel_z = 0
 
     scaling_factor_rhoV  = 1
     scaling_factor_rhouV = 1
@@ -102,14 +94,13 @@
     n_part_elems = 1
     materials = 'mat1'
     widths = 0.1
-    initial_T = Ts_init
   []
 
   [temp_outside]
     type = HSBoundarySpecifiedTemperature
     hs = hs
     boundary = hs:outer
-    T = Ts_init
+    T = Ts_bc
   []
 
   [inlet]
@@ -126,7 +117,7 @@
 []
 
 [Preconditioning]
-  [SMP_PJFNK]
+  [pc]
     type = SMP
     full = true
   []
@@ -141,7 +132,7 @@
   num_steps = 1
   abort_on_solve_fail = true
 
-  solve_type = 'PJFNK'
+  solve_type = 'NEWTON'
   line_search = 'basic'
   nl_rel_tol = 1e-7
   nl_abs_tol = 1e-8
