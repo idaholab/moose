@@ -1,6 +1,6 @@
 [Tests]
-  design = 'fv_design.md'
-  issues = '#14549'
+  design = 'fv_design.md FVScalarLagrangeMultiplier.md'
+  issues = '#14549 #19472'
 
   [test]
     requirement = "The system shall be able to produce correct mathematical results for a "
@@ -24,5 +24,12 @@
       detail = "the correct Jacobian entries."
       ad_indexing_type = 'global'
     []
+  []
+  [point-constraint]
+    requirement = "The system shall be able to couple use a point-constraint with finite volume discretization."
+    type = 'Exodiff'
+    input = point-constraint.i
+    exodiff = point-constraint_out.e
+    ad_indexing_type = 'global'
   []
 []
