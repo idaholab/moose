@@ -58,6 +58,7 @@ Eigenvalue::validParams()
 
   params.addPrivateParam<bool>("_use_eigen_value", true);
 
+  params.addParam<Real>("initial_eigenvalue", 1, "Initial eigenvalue");
   params.addParam<PostprocessorName>(
       "normalization", "Postprocessor evaluating norm of eigenvector for normalization");
   params.addParam<Real>("normal_factor",
@@ -120,6 +121,8 @@ Eigenvalue::Eigenvalue(const InputParameters & parameters)
     else
       _eigen_problem.setNormalization(normpp);
   }
+
+  _eigen_problem.setInitialEigenvalue(getParam<Real>("initial_eigenvalue"));
 
   // Set a flag to nonlinear eigen system
   _eigen_problem.getNonlinearEigenSystem().precondMatrixIncludesEigenKernels(

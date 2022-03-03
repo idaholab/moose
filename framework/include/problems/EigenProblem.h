@@ -66,6 +66,14 @@ public:
                         const Real value = std::numeric_limits<Real>::max());
 
   /**
+   * Set an initial eigenvalue for initial normalization
+   */
+  void setInitialEigenvalue(const Real initial_eigenvalue)
+  {
+    _initial_eigenvalue = initial_eigenvalue;
+  }
+
+  /**
    * Whether or not we are doing free power iteration. It is used in convergence check.
    * We need to mark the solver as "converged" when doing free power to retrieve
    * the final solution from SLPEc
@@ -84,7 +92,7 @@ public:
    * We pre-scale eigen vector using the same factor as the one computed in
    * "postScaleEigenVector"
    */
-  void preScaleEigenVector();
+  void preScaleEigenVector(const std::pair<Real, Real> & eig);
 
   /**
    * Normalize eigen vector. Scale eigen vector such as ||x|| = _normal_factor
@@ -264,4 +272,6 @@ protected:
   Real _normal_factor;
   /// A flag to indicate if it is the first time calling the solve
   bool & _first_solve;
+  /// A value used for initial normalization
+  Real _initial_eigenvalue;
 };
