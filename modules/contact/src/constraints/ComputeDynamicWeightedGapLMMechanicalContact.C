@@ -11,6 +11,12 @@
 #include "DisplacedProblem.h"
 #include "Assembly.h"
 
+#include "metaphysicl/dualsemidynamicsparsenumberarray.h"
+#include "metaphysicl/parallel_dualnumber.h"
+#include "metaphysicl/parallel_dynamic_std_array_wrapper.h"
+#include "metaphysicl/parallel_semidynamicsparsenumberarray.h"
+#include "timpi/parallel_sync.h"
+
 registerMooseObject("ContactApp", ComputeDynamicWeightedGapLMMechanicalContact);
 
 namespace
@@ -23,8 +29,6 @@ ComputeDynamicWeightedGapLMMechanicalContact::validParams()
   InputParameters params = ComputeWeightedGapLMMechanicalContact::validParams();
   params.addClassDescription(
       "Computes the normal contact mortar constraints for dynamic simulations");
-  params.addCoupledVar("wear_depth", "The name of the mortar auxiliary variable that ");
-
   params.addRangeCheckedParam<Real>("capture_tolerance",
                                     1.0e-5,
                                     "capture_tolerance>=0",
@@ -51,12 +55,10 @@ ComputeDynamicWeightedGapLMMechanicalContact::ComputeDynamicWeightedGapLMMechani
     _primary_y_dot(adCoupledNeighborValueDot("disp_y")),
     _secondary_z_dot(_has_disp_z ? &adCoupledDot("disp_z") : nullptr),
     _primary_z_dot(_has_disp_z ? &adCoupledNeighborValueDot("disp_z") : nullptr),
-    _wear_depth(coupledValueLower("wear_depth")),
-    _wear_depth_old(getVar("wear_depth", 0)->slnLowerOld()),
     _has_wear(isParamValid("wear_depth")),
+    _wear_depth(_has_wear ? coupledValueLower("wear_depth") : _zero),
     _newmark_beta(getParam<Real>("newmark_beta")),
     _newmark_gamma(getParam<Real>("newmark_gamma"))
-
 {
   mooseAssert(!_interpolate_normals,
               "Dynamic mortar mechanical contact constraints require the surface geometry to be "

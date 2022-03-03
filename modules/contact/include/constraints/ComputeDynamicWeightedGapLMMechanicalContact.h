@@ -54,14 +54,11 @@ protected:
   const ADVariableValue * _secondary_z_dot;
   const ADVariableValue * _primary_z_dot;
 
-  /// Wear depth to include contact
-  const VariableValue & _wear_depth;
-
-  /// Wear depth to include contact (previous step)
-  const VariableValue & _wear_depth_old;
-
   /// Flag to determine whether wear needs to be included in the contact constraints
   const bool _has_wear;
+
+  /// Wear depth to include contact
+  const VariableValue & _wear_depth;
 
   /// A map from dof-object to the old weighted gap
   std::unordered_map<const DofObject *, ADReal> _dof_to_old_weighted_gap;
