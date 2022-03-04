@@ -1,6 +1,6 @@
 [Tests]
-  issues = '#16756'
-  design = 'navier_stokes/pinsfv.md'
+  issues = '#16756 #19472'
+  design = 'navier_stokes/pinsfv.md NSFVAction.md'
   [1D_continuous_porosity]
     type = PythonUnitTest
     input = test.py

@@ -17,9 +17,14 @@
 /**
  * This class allows us to have a section of the input file like the
  * following which automatically adds variables, kernels, aux kernels, bcs
- * for setting up the incompressible Navier-Stokes equation.
- *
- * [FiniteVolumeNavierStokes]
+ * for setting up the incompressible/weakly-compressible Navier-Stokes equations.
+ * Create it using the following input syntax:
+ * [Modeles]
+ *   [NavierStokesFV]
+ *     param_1 = value_1
+ *     param_2 = value_2
+ *     ...
+ *   []
  * []
  */
 class NSFVAction : public Action
@@ -38,14 +43,12 @@ protected:
   /// Functions for defining the variables depending on the compressibility option
   /// selected by the user
   void addINSVariables();
-  void addCNSVariables();
 
   /// Function which adds the RhieChow interpolator user objects
   void addRhieChowUserObjects();
 
   /// Functions that add the initial conditions for the variables
   void addINSInitialConditions();
-  void addCNSInitialConditions();
 
   /// Fnction adding kernels for the incompressible continuity equation
   void addINSMassKernels();
@@ -66,7 +69,7 @@ protected:
 
   /**
    * Functions adding kernels for the incompressible energy equation
-   * If the material properties are not constant, these can be used for
+   * If the material properties are not constant, some of these can be used for
    * weakly-compressible simulations as well.
    */
   void addINSEnergyTimeKernels();
@@ -76,6 +79,7 @@ protected:
   void addINSEnergyExternalHeatSource();
 
   /// Functions adding boundary conditions for the incompressible simulation.
+  /// These are used for weakly-compressible simulations as well.
   void addINSInletBC();
   void addINSOutletBC();
   void addINSWallBC();
@@ -85,6 +89,7 @@ protected:
   void addWCNSMomentumTimeKernels();
   void addWCNSEnergyTimeKernels();
 
+  /// Add weakly compressible mixing length kernels in case of turbulent flows
   void addWCNSEnergyMixingLengthKernels();
 
   /// Add Enthalpy material for incompressible simulations
@@ -93,13 +98,23 @@ protected:
   /// Add mixing length material for turbulence handling
   void addMixingLengthMaterial();
 
-  /// Add relationship manager to extend the number of ghosted layers if necessary
+  /**
+   * Add relationship manager to extend the number of ghosted layers if necessary.
+   * This is executed before the kernels and other objects are added.
+   */
   using Action::addRelationshipManagers;
   virtual void addRelationshipManagers(Moose::RelationshipManagerType input_rm_type) override;
 
+  /// Subdomains Navier-Stokes equation is defined on
+  std::vector<SubdomainName> _blocks;
+  /// Subdomain IDs
+  std::set<SubdomainID> _block_ids;
+
+  /// Mesh dimension
+  unsigned int _dim;
+
   /// Equation type, transient or steady-state
   MooseEnum _type;
-
   /// Compressibility type, can be compressible, incompressible
   /// or weakly-incompressible
   MooseEnum _compressibility;
@@ -121,11 +136,6 @@ protected:
   bool _use_friction_correction;
   /// The number of smoothing layers necessary for the simulation.
   unsigned short _smoothing_layers;
-
-  /// Subdomains Navier-Stokes equation is defined on
-  std::vector<SubdomainName> _blocks;
-  /// Subdomain IDs
-  std::set<SubdomainID> _block_ids;
 
   /// Boundaries with a flow inlet specified on them
   std::vector<BoundaryName> _inlet_boundaries;
@@ -169,9 +179,6 @@ protected:
   /// The coefficients used for each item if friction type
   std::vector<std::vector<std::string>> _friction_coeffs;
 
-  /// Mesh dimension
-  unsigned int _dim;
-
   /// Name of the density material property
   MaterialPropertyName _density_name;
   /// Name of the dynamic viscosity material property
@@ -194,7 +201,7 @@ protected:
   MooseEnum _momentum_face_interpolation;
   /// The type of the face interpolation method for the temperature/energy
   MooseEnum _energy_face_interpolation;
-  /// The type of the pressure/density interpolation method
+  /// The type of the pressure interpolation method
   MooseEnum _pressure_face_interpolation;
 
   /// If a two-term Taylor expansion is needed for the determination of the boundary values

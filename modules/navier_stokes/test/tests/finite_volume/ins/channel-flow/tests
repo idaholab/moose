@@ -1,6 +1,6 @@
 [Tests]
-  issues = '#15640'
-  design = 'navier_stokes/insfv.md'
+  issues = '#15640 #19472'
+  design = 'navier_stokes/insfv.md NSFVAction.md'
   [1d-rc]
     type = 'Exodiff'
     input = 1d-rc.i
@@ -192,5 +192,25 @@
     exodiff = discontinuous-body-forces_out.e
     design = INSFVRhieChowInterpolator.md
     requirement = 'The system shall show a monotone pressure profile in the presence of discontinuous body forces, in this case a transient from free flow to linear drag.'
+  []
+  [transient]
+    type = 'Exodiff'
+    input = 2d-rc-transient.i
+    exodiff = 2d-rc-transient_out.e
+    method = "!dbg"
+    requirement = 'The system shall be able to simulate a transient flow in a channel with enthalpy as an advected quantity.'
+    ad_indexing_type = 'global'
+    abs_zero = 6e-9
+    valgrind = HEAVY
+  []
+  [transient-action]
+    type = 'Exodiff'
+    input = 2d-rc-transient-action.i
+    exodiff = 2d-rc-transient-action_out.e
+    method = "!dbg"
+    requirement = 'The system shall be able to simulate a transient flow in a channel with enthalpy as an advected quantity using the NSFV action syntax.'
+    ad_indexing_type = 'global'
+    abs_zero = 6e-9
+    valgrind = HEAVY
   []
 []
