@@ -22,6 +22,7 @@ inlet_v = 0.001
 
 [GlobalParams]
   rhie_chow_user_object = 'rc'
+  rho = 'rho'
 []
 
 [UserObjects]
@@ -221,6 +222,10 @@ inlet_v = 0.001
     pressure = 'pressure'
     T_fluid = 'T'
     speed = 'velocity_norm'
+
+    # even though we provide rho from the parameters, we
+    # want to get rho from the fluid properties
+    force_define_density = true
 
     # To initialize with a high viscosity
     mu_rampdown = 'mu_rampdown'
