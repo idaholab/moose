@@ -1,0 +1,21 @@
+[Tests]
+  design = 'PecletNumberFunctorAux.md ThermalDiffusivityFunctorMaterial.md'
+  issues = '#20476'
+  [peclet]
+    requirement = 'The system shall be able to compute element thermal Peclet numbers for:'
+    [fv]
+      type = Exodiff
+      input = fv-thermal.i
+      exodiff = fv-thermal_out.e
+      detail = 'finite volume discretizations'
+      ad_indexing_type = 'global'
+    []
+    [fe]
+      type = Exodiff
+      input = fe-thermal.i
+      exodiff = fe-thermal_out.e
+      detail = 'finite element discretizations'
+      ad_indexing_type = 'global'
+    []
+  []
+[]
