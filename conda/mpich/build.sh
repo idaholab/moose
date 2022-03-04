@@ -1,5 +1,6 @@
 #!/bin/bash
 set -eu
+printf "\n\n\n\n`env`\n\n\n\n"
 export PATH=/bin:$PATH
 
 export FCFLAGS="$FFLAGS"
