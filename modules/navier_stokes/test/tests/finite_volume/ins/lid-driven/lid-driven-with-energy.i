@@ -127,7 +127,7 @@ advected_interp_method = 'average'
     pressure = pressure
   []
 
-  [temp-condution]
+  [temp_conduction]
     type = FVDiffusion
     coeff = 'k'
     variable = T

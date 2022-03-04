@@ -19,17 +19,17 @@ INSFVEnthalpyMaterial::validParams()
   params.addClassDescription("This is the material class used to compute enthalpy for "
                              "the incompressible/weakly-compressible finite-volume implementation "
                              "of the Navier-Stokes equations.");
-  params.addRequiredParam<MooseFunctorName>("rho", "The value for the density");
+  params.addRequiredParam<MooseFunctorName>(NS::density, "The value for the density");
   params.addRequiredParam<MooseFunctorName>("temperature", "the temperature");
-  params.addParam<MooseFunctorName>("cp_name", "cp", "the name of the specific heat capacity");
+  params.addParam<MooseFunctorName>(NS::cp, NS::cp, "the name of the specific heat capacity");
   return params;
 }
 
 INSFVEnthalpyMaterial::INSFVEnthalpyMaterial(const InputParameters & parameters)
   : FunctorMaterial(parameters),
-    _rho(getFunctor<ADReal>("rho")),
+    _rho(getFunctor<ADReal>(NS::density)),
     _temperature(getFunctor<ADReal>("temperature")),
-    _cp(getFunctor<ADReal>("cp_name"))
+    _cp(getFunctor<ADReal>(NS::cp))
 {
   addFunctorProperty<ADReal>("rho_cp_temp",
                              [this](const auto & r, const auto & t) -> ADReal
