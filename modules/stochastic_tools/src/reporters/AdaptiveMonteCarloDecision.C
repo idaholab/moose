@@ -72,7 +72,7 @@ AdaptiveMonteCarloDecision::AdaptiveMonteCarloDecision(const InputParameters & p
     _inputs_sto.resize(cols, std::vector<Real>(_pss->getNumSamplesSub()));
     _inputs_sorted.resize(cols);
     _outputs_sto.resize(_pss->getNumSamplesSub());
-    _output_limit = std::numeric_limits<Real>::min();
+    _output_limit = -std::numeric_limits<Real>::max();
   }
 }
 
