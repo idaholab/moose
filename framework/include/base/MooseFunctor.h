@@ -37,6 +37,12 @@ struct ElemArg
   const libMesh::Elem * elem;
   bool correct_skewness;
   bool apply_gradient_to_skewness;
+
+  friend bool operator<(const ElemArg & l, const ElemArg & r)
+  {
+    return std::make_tuple(l.elem, l.correct_skewness, l.apply_gradient_to_skewness) <
+           std::make_tuple(r.elem, r.correct_skewness, r.apply_gradient_to_skewness);
+  }
 };
 
 /**
@@ -74,6 +80,14 @@ struct ElemFromFaceArg
    * Make a \p ElemArg from our data
    */
   ElemArg makeElem() const { return {elem, correct_skewness, apply_gradient_to_skewness}; }
+
+  friend bool operator<(const ElemFromFaceArg & l, const ElemFromFaceArg & r)
+  {
+    return std::make_tuple(
+               l.elem, l.fi, l.correct_skewness, l.apply_gradient_to_skewness, l.sub_id) <
+           std::make_tuple(
+               r.elem, r.fi, r.correct_skewness, r.apply_gradient_to_skewness, r.sub_id);
+  }
 };
 
 /**
@@ -139,6 +153,23 @@ struct FaceArg
   {
     return {fi->neighborPtr(), fi, correct_skewness, apply_gradient_to_skewness, neighbor_sub_id};
   }
+
+  friend bool operator<(const FaceArg & l, const FaceArg & r)
+  {
+    return std::make_tuple(l.fi,
+                           l.limiter_type,
+                           l.elem_is_upwind,
+                           l.correct_skewness,
+                           l.apply_gradient_to_skewness,
+                           l.elem_sub_id,
+                           l.neighbor_sub_id) < std::make_tuple(r.fi,
+                                                                r.limiter_type,
+                                                                r.elem_is_upwind,
+                                                                r.correct_skewness,
+                                                                r.apply_gradient_to_skewness,
+                                                                r.elem_sub_id,
+                                                                l.neighbor_sub_id);
+  }
 };
 
 /**
@@ -183,6 +214,21 @@ struct SingleSidedFaceArg
   ElemArg makeNeighbor() const
   {
     return {fi->neighborPtr(), correct_skewness, apply_gradient_to_skewness};
+  }
+
+  friend bool operator<(const SingleSidedFaceArg & l, const SingleSidedFaceArg & r)
+  {
+    return std::make_tuple(l.fi,
+                           l.limiter_type,
+                           l.elem_is_upwind,
+                           l.correct_skewness,
+                           l.apply_gradient_to_skewness,
+                           l.sub_id) < std::make_tuple(r.fi,
+                                                       r.limiter_type,
+                                                       r.elem_is_upwind,
+                                                       r.correct_skewness,
+                                                       r.apply_gradient_to_skewness,
+                                                       r.sub_id);
   }
 };
 
@@ -474,6 +520,13 @@ private:
                          const SpaceArg & space,
                          const TimeArg & time) const;
 
+  /**
+   * check a finite volume spatial argument cache and if invalid then evaluate
+   */
+  template <typename SpaceArg>
+  ValueType queryFVArgCache(std::map<SpaceArg, ValueType> & cache_data,
+                            const SpaceArg & space) const;
+
   /// How often to clear the material property cache
   std::set<ExecFlagType> _clearance_schedule;
 
@@ -484,14 +537,14 @@ private:
   mutable dof_id_type _current_qp_map_key = DofObject::invalid_id;
 
   /// Current value for qp map cache
-  mutable std::vector<std::pair<bool, T>> * _current_qp_map_value = nullptr;
+  mutable std::vector<std::pair<bool, ValueType>> * _current_qp_map_value = nullptr;
 
   /// Cached element quadrature point functor property evaluations. The map key is the element
   /// id. The map values should have size corresponding to the number of quadrature points on the
   /// element. The vector elements are pairs. The first member of the pair indicates whether a
   /// cached value has been computed. The second member of the pair is the (cached) value. If the
   /// boolean is false, then the value cannot be trusted
-  mutable std::unordered_map<dof_id_type, std::vector<std::pair<bool, T>>> _qp_to_value;
+  mutable std::unordered_map<dof_id_type, std::vector<std::pair<bool, ValueType>>> _qp_to_value;
 
   // Data for traditional element-side-quadrature point property evaluations which are useful for
   // caching implementation
@@ -500,7 +553,8 @@ private:
   mutable dof_id_type _current_side_qp_map_key = DofObject::invalid_id;
 
   /// Current value for side-qp map cache
-  mutable std::vector<std::vector<std::pair<bool, T>>> * _current_side_qp_map_value = nullptr;
+  mutable std::vector<std::vector<std::pair<bool, ValueType>>> * _current_side_qp_map_value =
+      nullptr;
 
   /// Cached element quadrature point functor property evaluations. The map key is the element
   /// id. The map values are a multi-dimensional vector (or vector of vectors) with the first index
@@ -508,36 +562,89 @@ private:
   /// index. The elements returned after double indexing are pairs. The first member of the pair
   /// indicates whether a cached value has been computed. The second member of the pair is the
   /// (cached) value. If the boolean is false, then the value cannot be trusted
-  mutable std::unordered_map<dof_id_type, std::vector<std::vector<std::pair<bool, T>>>>
+  mutable std::unordered_map<dof_id_type, std::vector<std::vector<std::pair<bool, ValueType>>>>
       _side_qp_to_value;
+
+  /// Map from element arguments to their cached evaluations
+  mutable std::map<ElemArg, ValueType> _elem_arg_to_value;
+
+  /// Map from element-from-face  arguments to their cached evaluations
+  mutable std::map<ElemFromFaceArg, ValueType> _elem_from_face_arg_to_value;
+
+  /// Map from face arguments to their cached evaluations
+  mutable std::map<FaceArg, ValueType> _face_arg_to_value;
+
+  /// Map from single-sided-face arguments to their cached evaluations
+  mutable std::map<SingleSidedFaceArg, ValueType> _ssf_arg_to_value;
 };
+
+template <typename T>
+template <typename SpaceArg>
+typename FunctorBase<T>::ValueType
+FunctorBase<T>::queryFVArgCache(std::map<SpaceArg, ValueType> & cache_data,
+                                const SpaceArg & space) const
+{
+  // We don't want to evaluate if the key already exists, so instead we value initialize
+  auto [it, inserted] = cache_data.try_emplace(space, ValueType());
+  auto & value = it->second;
+
+  if (inserted)
+    // value not ready to go
+    value = evaluate(space, 0);
+
+  return value;
+}
 
 template <typename T>
 typename FunctorBase<T>::ValueType
 FunctorBase<T>::operator()(const ElemArg & elem, const unsigned int state) const
 {
-  return evaluate(elem, state);
+  if (_clearance_schedule.count(EXEC_ALWAYS))
+    return evaluate(elem, state);
+
+  mooseAssert(state == 0,
+              "Cached evaluations are only currently supported for the current time state.");
+
+  return queryFVArgCache(_elem_arg_to_value, elem);
 }
 
 template <typename T>
 typename FunctorBase<T>::ValueType
 FunctorBase<T>::operator()(const ElemFromFaceArg & elem_from_face, const unsigned int state) const
 {
-  return evaluate(elem_from_face, state);
+  if (_clearance_schedule.count(EXEC_ALWAYS))
+    return evaluate(elem_from_face, state);
+
+  mooseAssert(state == 0,
+              "Cached evaluations are only currently supported for the current time state.");
+
+  return queryFVArgCache(_elem_from_face_arg_to_value, elem_from_face);
 }
 
 template <typename T>
 typename FunctorBase<T>::ValueType
 FunctorBase<T>::operator()(const FaceArg & face, const unsigned int state) const
 {
-  return evaluate(face, state);
+  if (_clearance_schedule.count(EXEC_ALWAYS))
+    return evaluate(face, state);
+
+  mooseAssert(state == 0,
+              "Cached evaluations are only currently supported for the current time state.");
+
+  return queryFVArgCache(_face_arg_to_value, face);
 }
 
 template <typename T>
 typename FunctorBase<T>::ValueType
 FunctorBase<T>::operator()(const SingleSidedFaceArg & face, const unsigned int state) const
 {
-  return evaluate(face, state);
+  if (_clearance_schedule.count(EXEC_ALWAYS))
+    return evaluate(face, state);
+
+  mooseAssert(state == 0,
+              "Cached evaluations are only currently supported for the current time state.");
+
+  return queryFVArgCache(_ssf_arg_to_value, face);
 }
 
 template <typename T>
@@ -545,7 +652,7 @@ template <typename SpaceArg, typename TimeArg>
 typename FunctorBase<T>::ValueType
 FunctorBase<T>::queryQpCache(const unsigned int qp,
                              const QBase & qrule,
-                             std::vector<std::pair<bool, T>> & qp_cache_data,
+                             std::vector<std::pair<bool, ValueType>> & qp_cache_data,
                              const SpaceArg & space,
                              const TimeArg & time) const
 {
@@ -553,7 +660,7 @@ FunctorBase<T>::queryQpCache(const unsigned int qp,
   // must evaluate
   if (qp >= qp_cache_data.size())
   {
-    qp_cache_data.resize(qrule.n_points(), std::make_pair(false, T()));
+    qp_cache_data.resize(qrule.n_points(), std::make_pair(false, ValueType()));
     auto & pr = qp_cache_data[qp];
     pr.second = evaluate(space, time);
     pr.first = true;
@@ -649,6 +756,11 @@ FunctorBase<T>::clearCacheData()
   _current_qp_map_value = nullptr;
   _current_side_qp_map_key = DofObject::invalid_id;
   _current_side_qp_map_value = nullptr;
+
+  _elem_arg_to_value.clear();
+  _elem_from_face_arg_to_value.clear();
+  _face_arg_to_value.clear();
+  _ssf_arg_to_value.clear();
 }
 
 template <typename T>
