@@ -10,6 +10,7 @@
 #include "ComputeDynamicFrictionalForceLMMechanicalContact.h"
 #include "DisplacedProblem.h"
 #include "Assembly.h"
+#include "Function.h"
 
 #include "DualRealOps.h"
 
@@ -18,6 +19,8 @@
 #include "metaphysicl/parallel_dynamic_std_array_wrapper.h"
 #include "metaphysicl/parallel_semidynamicsparsenumberarray.h"
 #include "timpi/parallel_sync.h"
+
+#include <limits>
 
 registerMooseObject("ContactApp", ComputeDynamicFrictionalForceLMMechanicalContact);
 
@@ -29,13 +32,14 @@ ComputeDynamicFrictionalForceLMMechanicalContact::validParams()
   params.addRequiredCoupledVar("friction_lm", "The frictional Lagrange's multiplier");
   params.addCoupledVar("friction_lm_dir",
                        "The frictional Lagrange's multiplier for an addtional direction.");
-
+  params.addParam<FunctionName>("function_friction",
+                                "Coupled function to evaluate with values from v");
   params.addParam<Real>("c_t", 1e0, "Numerical parameter for tangential constraints");
   params.addParam<Real>(
       "epsilon",
       1.0e-7,
       "Minimum value of contact pressure that will trigger frictional enforcement");
-  params.addRequiredParam<Real>("mu", "The friction coefficient for the Coulomb friction law");
+  params.addParam<Real>("mu", "The friction coefficient for the Coulomb friction law");
   return params;
 }
 
@@ -50,7 +54,10 @@ ComputeDynamicFrictionalForceLMMechanicalContact::ComputeDynamicFrictionalForceL
     _secondary_z_dot(_has_disp_z ? &adCoupledDot("disp_z") : nullptr),
     _primary_z_dot(_has_disp_z ? &adCoupledNeighborValueDot("disp_z") : nullptr),
     _epsilon(getParam<Real>("epsilon")),
-    _mu(getParam<Real>("mu")),
+    _mu(isParamValid("mu") ? getParam<Real>("mu") : std::numeric_limits<double>::quiet_NaN()),
+    _function_friction(isParamValid("function_friction") ? &getFunction("function_friction")
+                                                         : nullptr),
+    _has_friction_function(isParamValid("function_friction")),
     _3d(_has_disp_z)
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
@@ -58,6 +65,15 @@ ComputeDynamicFrictionalForceLMMechanicalContact::ComputeDynamicFrictionalForceL
       "ComputeFrictionalForceLMMechanicalContact relies on use of the global indexing container "
       "in order to make its implementation feasible");
 #endif
+
+  if (!_has_friction_function && !isParamValid("mu"))
+    mooseError(
+        "A coefficient of friction needs to be provided as a constant value of via a function.");
+
+  if (_has_friction_function && isParamValid("mu"))
+    paramError("mu",
+               "Either provide a constant coefficient of friction or a function defining the "
+               "coefficient of friction. Both inputs cannot be provided simultaneously.");
 
   if (!getParam<bool>("use_displaced_mesh"))
     paramError("use_displaced_mesh",
@@ -70,7 +86,7 @@ ComputeDynamicFrictionalForceLMMechanicalContact::ComputeDynamicFrictionalForceL
                "frictional Lagrange's multiplier to enforce a second tangential pressure");
 
   mooseAssert(!_interpolate_normals,
-              "Dynamic mortar mechanical contact constraints require the surface geometry be "
+              "Dynamic mortar mechanical contact constraints require the surface geometry to be "
               "attached to nodes");
 
   _friction_vars.push_back(getVar("friction_lm", 0));
@@ -277,6 +293,9 @@ ComputeDynamicFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(
   const Real c = _normalize_c ? _c / *_normalization_ptr : _c;
   const Real c_t = _normalize_c ? _c_t / *_normalization_ptr : _c_t;
 
+  // Compute the friction coefficient (constant or function)
+  ADReal mu_ad = computeFrictionValue(contact_pressure, *tangential_vel[0], *tangential_vel[1]);
+
   ADReal dof_residual;
   ADReal dof_residual_dir;
 
@@ -296,20 +315,20 @@ ComputeDynamicFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(
     lambda_t_plus_ctu[1] = friction_lm_values[1] + c_t * *tangential_vel[1] * _dt;
 
     const auto term_1_x =
-        std::max(_mu * lamdba_plus_cg,
+        std::max(mu_ad * lamdba_plus_cg,
                  std::sqrt(lambda_t_plus_ctu[0] * lambda_t_plus_ctu[0] +
                            lambda_t_plus_ctu[1] * lambda_t_plus_ctu[1] + epsilon_sqrt)) *
         friction_lm_values[0];
 
     const auto term_1_y =
-        std::max(_mu * lamdba_plus_cg,
+        std::max(mu_ad * lamdba_plus_cg,
                  std::sqrt(lambda_t_plus_ctu[0] * lambda_t_plus_ctu[0] +
                            lambda_t_plus_ctu[1] * lambda_t_plus_ctu[1] + epsilon_sqrt)) *
         friction_lm_values[1];
 
-    const auto term_2_x = _mu * std::max(0.0, lamdba_plus_cg) * lambda_t_plus_ctu[0];
+    const auto term_2_x = mu_ad * std::max(0.0, lamdba_plus_cg) * lambda_t_plus_ctu[0];
 
-    const auto term_2_y = _mu * std::max(0.0, lamdba_plus_cg) * lambda_t_plus_ctu[1];
+    const auto term_2_y = mu_ad * std::max(0.0, lamdba_plus_cg) * lambda_t_plus_ctu[1];
 
     dof_residual = term_1_x - term_2_x;
     dof_residual_dir = term_1_y - term_2_y;
@@ -347,8 +366,10 @@ ComputeDynamicFrictionalForceLMMechanicalContact::enforceConstraintOnDof(
   const Real c = _normalize_c ? _c / *_normalization_ptr : _c;
   const Real c_t = _normalize_c ? _c_t / *_normalization_ptr : _c_t;
 
-  ADReal dof_residual;
+  // Compute the friction coefficient (constant or function)
+  ADReal mu_ad = computeFrictionValue(contact_pressure, tangential_vel, ADReal(0.0));
 
+  ADReal dof_residual;
   // Primal-dual active set strategy (PDASS)
   if (contact_pressure < _epsilon)
     dof_residual = friction_lm_value;
@@ -367,4 +388,26 @@ ComputeDynamicFrictionalForceLMMechanicalContact::enforceConstraintOnDof(
     _assembly.processDerivatives(dof_residual, friction_dof_index, _matrix_tags);
   else
     _assembly.processResidual(dof_residual.value(), friction_dof_index, _vector_tags);
+}
+
+ADReal
+ComputeDynamicFrictionalForceLMMechanicalContact::computeFrictionValue(
+    const ADReal & contact_pressure,
+    const ADReal & tangential_vel,
+    const ADReal & tangential_vel_dir)
+{
+  // TODO: Introduce temperature dependence in the function. Do this when we have an example.
+  ADReal mu_ad;
+
+  if (!_has_friction_function)
+    mu_ad = _mu;
+  else
+  {
+    ADReal tangential_vel_magnitude = std::sqrt(tangential_vel * tangential_vel +
+                                                tangential_vel_dir * tangential_vel_dir + 1.0e-24);
+
+    mu_ad = _function_friction->value<ADReal>(0.0, contact_pressure, tangential_vel_magnitude, 0.0);
+  }
+
+  return mu_ad;
 }

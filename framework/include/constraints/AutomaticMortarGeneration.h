@@ -326,6 +326,14 @@ public:
    */
   const std::set<SubdomainID> & primaryIPSubIDs() const { return _primary_ip_sub_ids; }
 
+  /**
+   * @return Map from node id to secondary lower-d element pointer
+   */
+  const std::unordered_map<dof_id_type, std::vector<const Elem *>> & nodesToSecondaryElem() const
+  {
+    return _nodes_to_secondary_elem_map;
+  }
+
 private:
   MooseApp & _app;
 
