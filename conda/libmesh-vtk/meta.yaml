@@ -1,5 +1,5 @@
 # Do not use jinja templating (A physical change to this file is required to trigger a build)
-{% set build = 4 %}
+{% set build = 5 %}
 {% set strbuild = "build_" + build|string %}
 {% set vtk_version = "9.1.0" %}
 {% set friendly_version = "9.1" %}
