@@ -22,7 +22,6 @@ APPLICATION_NAME   := moose_test
 BUILD_EXEC         := yes
 BUILD_TEST_OBJECTS_LIB := no
 GEN_REVISION       := no
-INSTALLABLE_DIRS   := tests
 include            $(FRAMEWORK_DIR)/app.mk
 
 ###############################################################################

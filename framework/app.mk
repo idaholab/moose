@@ -5,6 +5,7 @@
 # This variable is used to determine whether a C++ header revision file is generated for use
 # in your application. You can turn it on/off by changing it in your application Makefile.
 GEN_REVISION ?= yes
+INSTALLABLE_DIRS ?= tests
 
 # list of application-wide excluded source files
 excluded_srcfiles :=
@@ -410,7 +411,6 @@ $(app_EXEC): $(app_LIBS) $(mesh_library) $(main_object) $(app_test_LIB) $(depend
 	@$(codesign)
 
 ###### install stuff #############
-INSTALLABLE_DIRS ?= test/tests
 docs_dir := $(APPLICATION_DIR)/doc
 bindst = $(bin_install_dir)/$(notdir $(app_EXEC))
 binlink = $(share_install_dir)/$(notdir $(app_EXEC))
