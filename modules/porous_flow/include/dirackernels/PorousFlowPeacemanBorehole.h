@@ -40,7 +40,7 @@ protected:
   const Function & _character;
 
   /// Bottomhole pressure of borehole
-  const Real _p_bot;
+  const Function & _p_bot;
 
   /// Unit weight of fluid in borehole (for calculating bottomhole pressure at each Dirac Point)
   const RealVectorValue _unit_weight;
