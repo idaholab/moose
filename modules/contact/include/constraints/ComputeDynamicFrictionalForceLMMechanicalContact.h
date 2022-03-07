@@ -63,6 +63,13 @@ protected:
    */
   void communicateVelocities();
 
+  /**
+   * Apply constant or function-based friction coefficient
+   */
+  ADReal computeFrictionValue(const ADReal & contact_pressure,
+                              const ADReal & tangential_vel,
+                              const ADReal & tangential_vel_dir);
+
   /// A map from node to two tangential velocities
   std::unordered_map<const DofObject *, std::array<ADReal, 2>> _dof_to_weighted_tangential_velocity;
 
@@ -104,6 +111,12 @@ protected:
 
   /// Friction coefficient
   const Real _mu;
+
+  /// input function
+  const Function * const _function_friction;
+
+  /// Boolean to determine whether the friction coefficient is taken from a function
+  const bool _has_friction_function;
 
   /// Automatic flag to determine whether we are doing three-dimensional work
   bool _3d;

@@ -26,6 +26,10 @@ GeneralFunctorFluidProps::validParams()
   params.addRequiredParam<MooseFunctorName>(NS::T_fluid, "Fluid temperature");
   params.addRequiredParam<MooseFunctorName>(NS::speed, "Velocity norm");
   params.addParam<MooseFunctorName>(NS::density, "Density");
+  params.addParam<bool>(
+      "force_define_density",
+      false,
+      "Whether to force the definition of a density functor from the fluid properties");
 
   params.addParam<FunctionName>(
       "mu_rampdown", 1, "A function describing a ramp down of viscosity over time");
@@ -46,6 +50,7 @@ GeneralFunctorFluidProps::GeneralFunctorFluidProps(const InputParameters & param
     _pressure(getFunctor<ADReal>(NS::pressure)),
     _T_fluid(getFunctor<ADReal>(NS::T_fluid)),
     _speed(getFunctor<ADReal>(NS::speed)),
+    _force_define_density(getParam<bool>("force_define_density")),
     _rho(getFunctor<ADReal>(NS::density)),
     _mu_rampdown(getFunction("mu_rampdown"))
 {
@@ -53,7 +58,7 @@ GeneralFunctorFluidProps::GeneralFunctorFluidProps(const InputParameters & param
   // Set material properties functors
   //
 
-  if (!isParamValid(NS::density))
+  if (!isParamValid(NS::density) || _force_define_density)
     addFunctorProperty<ADReal>(NS::density,
                                [this](const auto & r, const auto & t) -> ADReal
                                { return _fluid.rho_from_p_T(_pressure(r, t), _T_fluid(r, t)); });

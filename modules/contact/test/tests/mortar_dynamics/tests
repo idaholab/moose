@@ -84,4 +84,15 @@
                   'mortar constraint using nodal-attached geometry and the incorrect edge dropping '
                   'setting'
   []
+  [frictional-mortar-3d-dynamics-light-function]
+    type = 'Exodiff'
+    exodiff = 'frictional-mortar-3d-dynamics-light-function_out.e'
+    input = 'frictional-mortar-3d-dynamics-light-function.i'
+    rel_err = 5.0e-4
+    abs_zero = 1.0e-5
+    min_ad_size = 100
+    ad_indexing_type = 'global'
+    max_parallel = '2'
+    requirement = 'MOOSE shall solve a dynamic 3D frictional one-element bouncing block problem with mortar constraint using nodal-attached geometry and a friction coefficient that depends on the normal contact pressure and the relative tangential velocity'
+  []
 []

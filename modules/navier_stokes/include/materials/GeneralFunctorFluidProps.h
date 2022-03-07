@@ -42,6 +42,9 @@ protected:
   const Moose::Functor<ADReal> & _T_fluid;
   const Moose::Functor<ADReal> & _speed;
 
+  /// A parameter to force definition of a functor material property for density
+  const bool _force_define_density;
+
   /// Density as a functor, which could be from the variable set or the property
   const Moose::Functor<ADReal> & _rho;
 

@@ -8,8 +8,9 @@ See also: [AllSideSetsByNormalsGenerator](/AllSideSetsByNormalsGenerator.md)
 If the mesh contains multiple disjoint faces with the same normal, they will all be added to the sideset.
 
 !alert note
-This will generate internal (within a block) sidesets as well if there are internal faces with the desired normal.
-For external (on the boundary of a block) only sidesets, use [SideSetsAroundSubdomainGenerator](/SideSetsAroundSubdomainGenerator.md)
+This will not generate internal (within the domain, on boundaries between blocks) sidesets,
+even if there are internal faces with the desired normal.
+For internal sidesets, use [SideSetsAroundSubdomainGenerator](/SideSetsAroundSubdomainGenerator.md)
 with a [!param](/Mesh/SideSetsAroundSubdomainGenerator/normal) parameter.
 
 !syntax parameters /Mesh/SideSetsFromNormalsGenerator

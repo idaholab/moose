@@ -736,12 +736,27 @@ AuxiliarySystem::computeMortarNodalVars(const ExecFlagType type)
       {
         PARALLEL_TRY
         {
-          ComputeMortarNodalAuxBndThread<AuxKernel> mnabt(_fe_problem, mortar_nodal, bnd_id, index);
-          Threads::parallel_reduce(bnd_nodes, mnabt);
-          solution().close();
-          _sys.update();
+          try
+          {
+            ComputeMortarNodalAuxBndThread<AuxKernel> mnabt(
+                _fe_problem, mortar_nodal, bnd_id, index);
+            Threads::parallel_reduce(bnd_nodes, mnabt);
+          }
+          catch (MooseException & e)
+          {
+            _fe_problem.setException(e.what());
+          }
+          catch (libMesh::LogicError & e)
+          {
+            _fe_problem.setException("We caught a libMesh::LogicError.");
+          }
         }
         PARALLEL_CATCH;
+
+        // We need to make sure we propagate exceptions to all processes before trying to close
+        // here, which is a parallel operation
+        solution().close();
+        _sys.update();
       }
     }
   }

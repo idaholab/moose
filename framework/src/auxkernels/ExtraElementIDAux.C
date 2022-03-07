@@ -25,6 +25,8 @@ ExtraElementIDAux::validParams()
 ExtraElementIDAux::ExtraElementIDAux(const InputParameters & parameters)
   : AuxKernel(parameters), _id(getElementID("extra_id_name"))
 {
+  if (isNodal())
+    paramError("variable", "This AuxKernel only supports Elemental fields");
 }
 
 Real

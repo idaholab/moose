@@ -24,7 +24,7 @@ ElementExtremeMaterialPropertyTempl<is_ad>::validParams()
   InputParameters params = ElementPostprocessor::validParams();
 
   params.addRequiredParam<MaterialPropertyName>("mat_prop",
-                                                "Material property for which to find extreme");
+                                                "Material property for which to find the extreme");
   MooseEnum type_options("max=0 min=1");
   params.addRequiredParam<MooseEnum>("value_type",
                                      type_options,
