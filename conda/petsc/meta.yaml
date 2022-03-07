@@ -21,6 +21,8 @@ build:
   skip: true  # [win]
   run_exports:
     - {{ pin_subpackage('moose-petsc', max_pin='x.x')}}
+  script_env:
+    - MOOSE_JOBS
 
 requirements:
   build:

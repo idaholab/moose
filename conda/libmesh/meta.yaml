@@ -10,12 +10,13 @@ package:
 source:
   - path: ../../libmesh
   - path: ../../scripts/configure_libmesh.sh
-  - path: ../../scripts/cpu_count.sh
 
 build:
   number: {{ build }}
   string: {{ strbuild }}
   skip: true                                            # [win]
+  script_env:
+    - MOOSE_JOBS
 
 requirements:
   build:

@@ -10,7 +10,6 @@ source:
   fn: mpich-{{ version }}.tar.gz
   url: https://www.mpich.org/static/downloads/{{ version }}/mpich-{{ version }}.tar.gz
   sha256: 5c19bea8b84e8d74cca5f047e82b147ff3fba096144270e3911ad623d6c587bf
-  path: ../../scripts/cpu_count.sh
 
 build:
   number: {{ build }}
@@ -18,6 +17,8 @@ build:
   skip: True  # [win]
   run_exports:
     - {{ pin_subpackage('moose-mpich', max_pin='x.x') }}
+  script_env:
+    - MOOSE_JOBS
 
 requirements:
   build:

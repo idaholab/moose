@@ -30,7 +30,7 @@ cmake .. -G "Ninja" \
     -DVTK_GROUP_ENABLE_Web:STRING=NO \
     -DCMAKE_OSX_SYSROOT=${CONDA_BUILD_SYSROOT}
 
-ninja install -v -j $(./cpu_count.sh)
+ninja install -v -j ${MOOSE_JOBS:-2}
 
 # VTK 9.1 now places libs in lib64 when installed on linux, linking to the "expected" location of lib
 if [[ $(uname) == Linux ]]; then

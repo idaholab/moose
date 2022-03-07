@@ -79,7 +79,7 @@ LIBMESH_DIR=${PREFIX}/libmesh \
                     --with-vtk-include=${BUILD_PREFIX}/libmesh-vtk/include/vtk-${SHORT_VTK_NAME} \
                     $*
 
-make -j $(./cpu_count.sh)
+make -j ${MOOSE_JOBS:-2}
 make install
 sed_replace
 

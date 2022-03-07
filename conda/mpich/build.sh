@@ -90,7 +90,7 @@ fi
             CFLAGS="${CTUNING}" CXXFLAGS="${CTUNING}" FFLAGS="${FTUNING}" LDFLAGS="${LDFLAGS}" \
             FCFLAGS="${FTUNING}" F90FLAGS="" F77FLAGS="" \
             ${OPTIONS}
-make -j $(./cpu_count.sh)
+make -j ${MOOSE_JOBS:-2}
 make install
 
 # Set MPICH environment variables for those that need it, and set CXXFLAGS using our ACTIVATION_CXXFLAGS variable
