@@ -6,10 +6,6 @@ export CC=$(basename "$CC")
 export CXX=$(basename "$CXX")
 export FC=$(basename "$FC")
 
-if [ -f utils.sh ]; then
-    source utils.sh
-fi
-
 if [[ $HOST == arm64-apple-darwin20.0.0 ]]; then
     # use Conda-Forge's Arm64 config.guess and config.sub, see
     # https://conda-forge.org/blog/posts/2020-10-29-macos-arm64/
@@ -94,8 +90,7 @@ fi
             CFLAGS="${CTUNING}" CXXFLAGS="${CTUNING}" FFLAGS="${FTUNING}" LDFLAGS="${LDFLAGS}" \
             FCFLAGS="${FTUNING}" F90FLAGS="" F77FLAGS="" \
             ${OPTIONS}
-printf "Building with $CPU_COUNT cores...\n"
-make -j $CPU_COUNT
+make -j $(./cpu_count.sh)
 make install
 
 # Set MPICH environment variables for those that need it, and set CXXFLAGS using our ACTIVATION_CXXFLAGS variable

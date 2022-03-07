@@ -10,6 +10,7 @@ package:
 source:
   - path: ../../libmesh
   - path: ../../scripts/configure_libmesh.sh
+  - path: ../../scripts/cpu_count.sh
 
 build:
   number: {{ build }}

@@ -12,6 +12,7 @@ package:
 source:
   url: https://www.vtk.org/files/release/{{ friendly_version }}/VTK-{{ vtk_version }}.tar.gz
   sha256: {{ sha256 }}
+  path: ../../scripts/cpu_count.sh
 
 build:
   number: {{ build }}

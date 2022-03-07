@@ -10,10 +10,6 @@ if [ -z $PETSC_DIR ]; then
     exit 1
 fi
 
-if [ -f utils.sh ]; then
-    source utils.sh
-fi
-
 function sed_replace(){
     if [ `uname` = "Darwin" ]; then
         sed -i '' -e "s|${BUILD_PREFIX}|${PREFIX}|g" $PREFIX/libmesh/bin/libmesh-config
@@ -83,7 +79,7 @@ LIBMESH_DIR=${PREFIX}/libmesh \
                     --with-vtk-include=${BUILD_PREFIX}/libmesh-vtk/include/vtk-${SHORT_VTK_NAME} \
                     $*
 
-make -j $CPU_COUNT
+make -j $(./cpu_count.sh)
 make install
 sed_replace
 

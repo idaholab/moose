@@ -9,10 +9,6 @@ export CC=$(basename "$CC")
 export CXX=$(basename "$CXX")
 export FC=$(basename "$FC")
 
-if [ -f utils.sh ]; then
-    source utils.sh
-fi
-
 # feed-stock recommendation
 # scrub debug-prefix-map args, which cause problems in pkg-config
 export CFLAGS=$(echo ${CFLAGS:-} | sed -E 's@\-fdebug\-prefix\-map[^ ]*@@g')
