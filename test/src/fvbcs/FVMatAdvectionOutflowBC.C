@@ -9,7 +9,7 @@
 
 #include "FVMatAdvectionOutflowBC.h"
 
-registerADMooseObject("MooseApp", FVMatAdvectionOutflowBC);
+registerMooseObject("MooseTestApp", FVMatAdvectionOutflowBC);
 
 InputParameters
 FVMatAdvectionOutflowBC::validParams()
