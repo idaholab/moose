@@ -1,39 +1,21 @@
 mu = 1
 rho = 1
-k = .01
+k = 1
 cp = 1
-velocity_interp_method = 'rc'
-advected_interp_method = 'average'
 
 [GlobalParams]
+  velocity_interp_method = 'rc'
+  # Maximum cell Peclet number is ~.1 so energy transport is stable without upwinding
+  advected_interp_method = 'average'
   rhie_chow_user_object = 'rc'
-[]
-
-[UserObjects]
-  [rc]
-    type = INSFVRhieChowInterpolator
-    u = u
-    v = v
-    pressure = pressure
-  []
 []
 
 [Mesh]
   [gen]
     type = GeneratedMeshGenerator
     dim = 2
-    xmin = 0
-    xmax = 1
-    ymin = 0
-    ymax = 1
-    nx = 32
-    ny = 32
-  []
-  [pin]
-    type = ExtraNodesetGenerator
-    input = gen
-    new_boundary = 'pin'
-    nodes = '0'
+    nx = 10
+    ny = 10
   []
 []
 
@@ -56,28 +38,27 @@ advected_interp_method = 'average'
   []
 []
 
-[ICs]
-  [T]
-    type = ConstantIC
-    variable = T
-    value = 1
-  []
-[]
-
 [AuxVariables]
-  [U]
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
+  [Pe]
+    type = MooseVariableFVReal
   []
 []
 
 [AuxKernels]
-  [mag]
-    type = VectorMagnitudeAux
-    variable = U
-    x = u
-    y = v
+  [Pe]
+    type = PecletNumberFunctorAux
+    variable = Pe
+    speed = speed
+    thermal_diffusivity = 'thermal_diffusivity'
+  []
+[]
+
+[UserObjects]
+  [rc]
+    type = INSFVRhieChowInterpolator
+    u = u
+    v = v
+    pressure = pressure
   []
 []
 
@@ -85,8 +66,6 @@ advected_interp_method = 'average'
   [mass]
     type = INSFVMassAdvection
     variable = pressure
-    advected_interp_method = ${advected_interp_method}
-    velocity_interp_method = ${velocity_interp_method}
     rho = ${rho}
   []
   [mean_zero_pressure]
@@ -95,24 +74,16 @@ advected_interp_method = 'average'
     lambda = lambda
   []
 
-  [u_time]
-    type = INSFVMomentumTimeDerivative
-    variable = 'u'
-    rho = ${rho}
-    momentum_component = 'x'
-  []
   [u_advection]
     type = INSFVMomentumAdvection
     variable = u
-    velocity_interp_method = ${velocity_interp_method}
-    advected_interp_method = ${advected_interp_method}
     rho = ${rho}
     momentum_component = 'x'
   []
   [u_viscosity]
     type = INSFVMomentumDiffusion
     variable = u
-    mu = ${mu}
+    mu = 'mu'
     momentum_component = 'x'
   []
   [u_pressure]
@@ -122,24 +93,16 @@ advected_interp_method = 'average'
     pressure = pressure
   []
 
-  [v_time]
-    type = INSFVMomentumTimeDerivative
-    variable = v
-    rho = ${rho}
-    momentum_component = 'y'
-  []
   [v_advection]
     type = INSFVMomentumAdvection
     variable = v
-    velocity_interp_method = ${velocity_interp_method}
-    advected_interp_method = ${advected_interp_method}
     rho = ${rho}
     momentum_component = 'y'
   []
   [v_viscosity]
     type = INSFVMomentumDiffusion
     variable = v
-    mu = ${mu}
+    mu = 'mu'
     momentum_component = 'y'
   []
   [v_pressure]
@@ -149,21 +112,14 @@ advected_interp_method = 'average'
     pressure = pressure
   []
 
-  [temp_time]
-    type = INSFVEnergyTimeDerivative
-    variable = T
-    rho = ${rho}
-  []
   [temp_conduction]
     type = FVDiffusion
-    coeff = 'k'
+    coeff = ${k}
     variable = T
   []
   [temp_advection]
     type = INSFVEnergyAdvection
     variable = T
-    velocity_interp_method = ${velocity_interp_method}
-    advected_interp_method = ${advected_interp_method}
   []
 []
 
@@ -172,9 +128,8 @@ advected_interp_method = 'average'
     type = INSFVNoSlipWallBC
     variable = u
     boundary = 'top'
-    function = 'lid_function'
+    function = 1
   []
-
   [no_slip_x]
     type = INSFVNoSlipWallBC
     variable = u
@@ -195,7 +150,6 @@ advected_interp_method = 'average'
     boundary = 'bottom'
     value = 1
   []
-
   [T_cold]
     type = FVDirichletBC
     variable = T
@@ -205,39 +159,37 @@ advected_interp_method = 'average'
 []
 
 [Materials]
-  [functor_constants]
+  [mu]
     type = ADGenericFunctorMaterial
-    prop_names = 'cp k'
-    prop_values = '${cp} ${k}'
+    prop_names = 'mu'
+    prop_values = '${mu}'
   []
-  [ins_fv]
-    type = INSFVEnthalpyMaterial
-    temperature = 'T'
+  [speed]
+    type = ADVectorMagnitudeFunctorMaterial
+    x_functor = u
+    y_functor = v
+    vector_functor_name = speed
+  []
+  [thermal_diffusivity]
+    type = ThermalDiffusivityFunctorMaterial
+    k = ${k}
     rho = ${rho}
+    cp = ${cp}
+  []
+  [enthalpy]
+    type = INSFVEnthalpyMaterial
+    rho = ${rho}
+    temperature = T
+    cp = ${cp}
   []
 []
-
-[Functions]
-  [lid_function]
-    type = ParsedFunction
-    value = '4*x*(1-x)'
-  []
-[]
-
 
 [Executioner]
-  type = Transient
-  solve_type = NEWTON
-  # Run for 100+ timesteps to reach steady state.
-  num_steps = 5
-  dt = .5
-  dtmin = .5
-  petsc_options_iname = '-pc_type -sub_pc_type -sub_pc_factor_shift_type -ksp_gmres_restart'
-  petsc_options_value = 'asm      lu           NONZERO                   200'
-  line_search = 'none'
+  type = Steady
+  solve_type = 'NEWTON'
+  petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_pc_type -sub_pc_factor_shift_type'
+  petsc_options_value = 'asm      100                lu           NONZERO'
   nl_rel_tol = 1e-12
-  nl_max_its = 6
-  l_max_its = 200
 []
 
 [Outputs]
