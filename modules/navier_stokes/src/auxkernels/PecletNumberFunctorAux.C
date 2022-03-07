@@ -17,7 +17,7 @@ InputParameters
 PecletNumberFunctorAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
-  params.addClassDescription("Computes u*L/alpha.");
+  params.addClassDescription("Computes the Peclet number: u*L/alpha.");
   params.addRequiredParam<MooseFunctorName>(NS::speed, "The fluid speed");
   params.addRequiredParam<MooseFunctorName>(
       NS::thermal_diffusivity,

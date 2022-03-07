@@ -5,6 +5,7 @@ cp = 1
 
 [GlobalParams]
   velocity_interp_method = 'rc'
+  # Maximum cell Peclet number is ~.1 so energy transport is stable without upwinding
   advected_interp_method = 'average'
   rhie_chow_user_object = 'rc'
 []

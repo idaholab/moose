@@ -8,7 +8,7 @@ The `PecletNumberFunctorAux` object computes the element/cell Peclet number
 given by
 
 \begin{equation}
-Re = \frac{h u}{\alpha}
+Pe = \frac{h u}{\alpha}
 \end{equation}
 
 where $u$ is the norm of the velocity, e.g. the speed, $h$ the largest dimension
