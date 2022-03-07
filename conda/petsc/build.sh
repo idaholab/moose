@@ -16,7 +16,7 @@ export CXXFLAGS=$(echo ${CXXFLAGS:-} | sed -E 's@\-fdebug\-prefix\-map[^ ]*@@g')
 export FFLAGS=$(echo ${FFLAGS:-} | sed -E 's@\-fdebug\-prefix\-map[^ ]*@@g')
 export FCFLAGS="$FFLAGS"
 export HYDRA_LAUNCHER=fork
-export LIBS="-lmpifort -lgfortran"
+#export LIBS="-lmpifort -lgfortran"
 
 if [[ $(uname) == Darwin ]]; then
     if [[ $HOST == arm64-apple-darwin20.0.0 ]]; then
@@ -65,7 +65,6 @@ configure_petsc \
     FFLAGS="$FFLAGS" \
     FCFLAGS="$FCFLAGS" \
     LDFLAGS="$LDFLAGS" \
-    LIBS="$LIBS" \
     --prefix=$PREFIX || (cat configure.log && exit 1)
 
 # Verify that gcc_ext isn't linked
