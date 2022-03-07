@@ -9,13 +9,13 @@
 
 #pragma once
 
-#include "TagVectorAux.h"
+#include "TagAuxBase.h"
 
 /**
  * For visualization or other purposes, the diagnal of the matrix of a tag
  * is extracted, and nodal values are assigned by using the matrix diagnal values.
  */
-class TagMatrixAux : public AuxKernel
+class TagMatrixAux : public TagAuxBase<AuxKernel>
 {
 public:
   static InputParameters validParams();
@@ -26,4 +26,5 @@ protected:
   virtual Real computeValue() override;
 
   const VariableValue & _v;
+  const MooseVariableBase & _v_var;
 };
