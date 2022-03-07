@@ -28,10 +28,15 @@ FunctorElementalAuxTempl<is_ad>::validParams()
   InputParameters params = AuxKernel::validParams();
   params.addClassDescription(
       "Evaluates a functor (variable, function or functor material property) on the current "
-      "element. For finite volume, this evaluates the material property at the centroid.");
+      "element or quadrature point.");
   params.addRequiredParam<MooseFunctorName>("functor", "The functor to evaluate");
   params.addParam<MooseFunctorName>("factor", 1, "A factor to apply on the functor");
-
+  params.addParam<bool>(
+      "use_qp_arg",
+      false,
+      "Whether to use the quadrature point based functor agument to evaluate the functors. If "
+      "false, then the argument is element-based, which is more appropriate for finite volume. A "
+      "value of true is more appropriate for finite element computations.");
   return params;
 }
 
@@ -39,7 +44,8 @@ template <bool is_ad>
 FunctorElementalAuxTempl<is_ad>::FunctorElementalAuxTempl(const InputParameters & parameters)
   : AuxKernel(parameters),
     _functor(getFunctor<GenericReal<is_ad>>("functor")),
-    _factor(getFunctor<GenericReal<is_ad>>("factor"))
+    _factor(getFunctor<GenericReal<is_ad>>("factor")),
+    _use_qp_arg(getParam<bool>("use_qp_arg"))
 {
   if (isNodal())
     paramError("variable", "This AuxKernel only supports Elemental fields");
@@ -49,6 +55,15 @@ template <bool is_ad>
 Real
 FunctorElementalAuxTempl<is_ad>::computeValue()
 {
-  const auto elem_arg = makeElemArg(_current_elem);
-  return MetaPhysicL::raw_value(_factor(elem_arg)) * MetaPhysicL::raw_value(_functor(elem_arg));
+  using MetaPhysicL::raw_value;
+  if (_use_qp_arg)
+  {
+    const auto qp_arg = std::make_tuple(_current_elem, _qp, _qrule);
+    return raw_value(_factor(qp_arg)) * raw_value(_functor(qp_arg));
+  }
+  else
+  {
+    const auto elem_arg = makeElemArg(_current_elem);
+    return raw_value(_factor(elem_arg)) * raw_value(_functor(elem_arg));
+  }
 }

@@ -73,7 +73,7 @@
     type = ADVectorMagnitudeFunctorMaterial
     x_functor = u
     y_functor = v
-    vector_functor_name = mat_mag
+    vector_magnitude_name = mat_mag
   []
 []
 
