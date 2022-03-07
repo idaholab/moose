@@ -29,6 +29,11 @@ FVMatAdvectionOutflowBC::validParams()
                              advected_interp_method,
                              "The interpolation to use for the advected quantity. Options are "
                              "'upwind' and 'average', with the default being 'upwind'.");
+  params.addParam<bool>(
+      "use_ssf",
+      false,
+      "Whether to evaluate functors using a single-sided face argument. If this is false, then we "
+      "will evaluate the functors using ElemFromFace arguments.");
   return params;
 }
 
@@ -36,7 +41,8 @@ FVMatAdvectionOutflowBC::FVMatAdvectionOutflowBC(const InputParameters & params)
   : FVFluxBC(params),
     _vel(getFunctor<ADRealVectorValue>("vel")),
     _adv_quant(getFunctor<ADReal>(isParamValid("advected_quantity") ? "advected_quantity"
-                                                                    : variable().name()))
+                                                                    : variable().name())),
+    _use_ssf(getParam<bool>("use_ssf"))
 {
   using namespace Moose::FV;
 
@@ -58,18 +64,28 @@ FVMatAdvectionOutflowBC::computeQpResidual()
   ADRealVectorValue v;
   ADReal adv_quant_boundary;
 
-  const auto elem_face = elemFromFace();
-  const auto neighbor_face = neighborFromFace();
+  if (_use_ssf)
+  {
+    const auto ssf = singleSidedFaceArg();
+    v = _vel(ssf);
+    adv_quant_boundary = _adv_quant(ssf);
+  }
+  else
+  {
+    const auto elem_face = elemFromFace();
+    const auto neighbor_face = neighborFromFace();
 
-  // Currently only Average is supported for the velocity
-  interpolate(InterpMethod::Average, v, _vel(elem_face), _vel(neighbor_face), *_face_info, true);
+    // Currently only Average is supported for the velocity
+    interpolate(InterpMethod::Average, v, _vel(elem_face), _vel(neighbor_face), *_face_info, true);
 
-  interpolate(_advected_interp_method,
-              adv_quant_boundary,
-              _adv_quant(elem_face),
-              _adv_quant(neighbor_face),
-              v,
-              *_face_info,
-              true);
+    interpolate(_advected_interp_method,
+                adv_quant_boundary,
+                _adv_quant(elem_face),
+                _adv_quant(neighbor_face),
+                v,
+                *_face_info,
+                true);
+  }
+
   return _normal * v * adv_quant_boundary;
 }
