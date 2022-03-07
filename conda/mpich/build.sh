@@ -1,12 +1,14 @@
 #!/bin/bash
 set -eu
-printf "\n\n\n\n`env`\n\n\n\n"
 export PATH=/bin:$PATH
-
 export FCFLAGS="$FFLAGS"
 export CC=$(basename "$CC")
 export CXX=$(basename "$CXX")
 export FC=$(basename "$FC")
+
+if [ -f utils.sh ]; then
+    source utils.sh
+fi
 
 if [[ $HOST == arm64-apple-darwin20.0.0 ]]; then
     # use Conda-Forge's Arm64 config.guess and config.sub, see
@@ -92,8 +94,8 @@ fi
             CFLAGS="${CTUNING}" CXXFLAGS="${CTUNING}" FFLAGS="${FTUNING}" LDFLAGS="${LDFLAGS}" \
             FCFLAGS="${FTUNING}" F90FLAGS="" F77FLAGS="" \
             ${OPTIONS}
-CORES=$(echo "${CPU_COUNT:-2} / 2" | bc)
-make -j $CORES
+printf "Building with $CPU_COUNT cores...\n"
+make -j $CPU_COUNT
 make install
 
 # Set MPICH environment variables for those that need it, and set CXXFLAGS using our ACTIVATION_CXXFLAGS variable

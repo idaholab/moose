@@ -2,6 +2,10 @@
 set -eu
 export PATH=/bin:$PATH
 
+if [ -f utils.sh ]; then
+    source utils.sh
+fi
+
 if [[ $mpi == "openmpi" ]]; then
   export OMPI_MCA_plm=isolated
   export OMPI_MCA_rmaps_base_oversubscribe=yes
@@ -30,8 +34,7 @@ cmake .. -G "Ninja" \
     -DVTK_GROUP_ENABLE_Web:STRING=NO \
     -DCMAKE_OSX_SYSROOT=${CONDA_BUILD_SYSROOT}
 
-CORES=$(echo "${CPU_COUNT:-2} / 2" | bc)
-ninja install -v -j $CORES
+ninja install -v -j $CPU_COUNT
 
 # VTK 9.1 now places libs in lib64 when installed on linux, linking to the "expected" location of lib
 if [[ $(uname) == Linux ]]; then
