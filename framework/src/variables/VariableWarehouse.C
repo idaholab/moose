@@ -124,58 +124,68 @@ VariableWarehouse::boundaryVars(BoundaryID bnd) const
   return _boundary_vars.find(bnd)->second;
 }
 
-template <typename T>
+namespace
+{
+template <typename T, typename Map, typename Key>
 MooseVariableFE<T> *
-VariableWarehouse::getFieldVariable(const std::string & var_name)
+getFieldVariableHelper(const Map & map, const Key & key, const std::string & container_name)
 {
   // TODO: the requested variable might be an FV variable - how to we
   // reconcile this since this function returns an FE (not Field) pointer?
   // crap tons of objects depend on this.
-  return _regular_vars_by_name.at(var_name);
+
+  auto it = map.find(key);
+  if (it == map.end())
+    mooseError("Key '", key, "' not found in VariableWarehouse container '", container_name, "'");
+
+  return it->second;
+}
+}
+
+template <typename T>
+MooseVariableFE<T> *
+VariableWarehouse::getFieldVariable(const std::string & var_name)
+{
+  return getFieldVariableHelper<T>(_regular_vars_by_name, var_name, "_regular_vars_by_name");
 }
 
 template <typename T>
 MooseVariableFE<T> *
 VariableWarehouse::getFieldVariable(unsigned int var_number)
 {
-  // TODO: the requested variable might be an FV variable - how to we
-  // reconcile this since this function returns an FE (not Field) pointer?
-  // crap tons of objects depend on this.
-  return _regular_vars_by_number.at(var_number);
+  return getFieldVariableHelper<T>(_regular_vars_by_number, var_number, "_regular_vars_by_number");
 }
 
 template <>
 VectorMooseVariable *
 VariableWarehouse::getFieldVariable<RealVectorValue>(const std::string & var_name)
 {
-  // TODO: the requested variable might be an FV variable - how to we
-  // reconcile this since this function returns an FE (not Field) pointer?
-  // crap tons of objects depend on this.
-  return _vector_vars_by_name.at(var_name);
+  return getFieldVariableHelper<RealVectorValue>(
+      _vector_vars_by_name, var_name, "_vector_vars_by_name");
 }
 
 template <>
 VectorMooseVariable *
 VariableWarehouse::getFieldVariable<RealVectorValue>(unsigned int var_number)
 {
-  // TODO: the requested variable might be an FV variable - how to we
-  // reconcile this since this function returns an FE (not Field) pointer?
-  // crap tons of objects depend on this.
-  return _vector_vars_by_number.at(var_number);
+  return getFieldVariableHelper<RealVectorValue>(
+      _vector_vars_by_number, var_number, "_vector_vars_by_number");
 }
 
 template <>
 ArrayMooseVariable *
 VariableWarehouse::getFieldVariable<RealEigenVector>(const std::string & var_name)
 {
-  return _array_vars_by_name.at(var_name);
+  return getFieldVariableHelper<RealEigenVector>(
+      _array_vars_by_name, var_name, "_array_vars_by_name");
 }
 
 template <>
 ArrayMooseVariable *
 VariableWarehouse::getFieldVariable<RealEigenVector>(unsigned int var_number)
 {
-  return _array_vars_by_number.at(var_number);
+  return getFieldVariableHelper<RealEigenVector>(
+      _array_vars_by_number, var_number, "_array_vars_by_number");
 }
 
 template MooseVariableFE<Real> *
