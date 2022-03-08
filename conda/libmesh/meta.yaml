@@ -22,7 +22,7 @@ requirements:
   build:
     - libtool                                           # [arm64]
     - autoconf                                          # [arm64]
-    - automake                                          # [arm64]
+    - automake 1.16.1                                   # [arm64]
     - make                                              # [arm64]
     - m4                                                # [arm64]
     - pkg-config

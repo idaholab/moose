@@ -38,7 +38,7 @@ requirements:
     - {{ moose_hdf5 }}
     - {{ moose_ld64 }}          # [osx]
     - autoconf                  # [osx]
-    - automake                  # [osx]
+    - automake 1.16.1           # [osx]
     - libtool                   # [osx]
     - make                      # [osx]
     - openssl <3
