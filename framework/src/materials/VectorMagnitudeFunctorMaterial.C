@@ -46,11 +46,35 @@ VectorMagnitudeFunctorMaterialTempl<is_ad>::VectorMagnitudeFunctorMaterialTempl(
                         ? &getFunctor<VectorValue<GenericReal<is_ad>>>("vector_functor")
                         : nullptr)
 {
-  if ((isParamValid("x_functor") + isParamValid("vector_functor")) != 1)
-    mooseError("Either a 'x_functor' (indicating the x-component) or 'vector_functor' parameter "
-               "must be provided to '",
-               name(),
-               "'");
+  auto check_error =
+      [this, &parameters](const std::string & scalar_functor, const bool must_equal_one)
+  {
+    auto error_message = [&scalar_functor, this]()
+    {
+      mooseError("Either a '",
+                 scalar_functor,
+                 "' or 'vector_functor' parameter "
+                 "must be provided to '",
+                 name(),
+                 "'");
+    };
+    const unsigned short sum =
+        parameters.isParamSetByUser(scalar_functor) + parameters.isParamSetByUser("vector_functor");
+    if (must_equal_one)
+    {
+      if (sum != 1)
+        error_message();
+    }
+    else
+    {
+      if (sum > 1)
+        error_message();
+    }
+  };
+
+  check_error("x_functor", true);
+  check_error("y_functor", false);
+  check_error("z_functor", false);
 
   const std::set<ExecFlagType> clearance_schedule(_execute_enum.begin(), _execute_enum.end());
 
