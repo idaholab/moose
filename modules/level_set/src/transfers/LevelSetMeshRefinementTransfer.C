@@ -25,7 +25,6 @@ LevelSetMeshRefinementTransfer::validParams()
   params.addClassDescription("Transfers the mesh from the master application to the sub "
                              "application for the purposes of level set reinitialization problems "
                              "with mesh adaptivity.");
-  params.set<MultiMooseEnum>("direction") = "TO_MULTIAPP";
   params.suppressParameter<MultiMooseEnum>("direction");
 
   ExecFlagEnum & exec = params.set<ExecFlagEnum>("execute_on");
@@ -40,6 +39,10 @@ LevelSetMeshRefinementTransfer::validParams()
 LevelSetMeshRefinementTransfer::LevelSetMeshRefinementTransfer(const InputParameters & parameters)
   : MultiAppCopyTransfer(parameters)
 {
+  // Handle deprecated parameter
+  if (isParamValid("multi_app"))
+    _to_multi_app = _fe_problem.getMultiApp(getParam<MultiAppName>("multi_app"));
+
   if (_from_multi_app)
     paramError("from_multiapp", "from_multiapp or between_multiapp transfers are not supported");
 }
