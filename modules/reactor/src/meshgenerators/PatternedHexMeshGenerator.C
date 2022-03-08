@@ -233,6 +233,13 @@ PatternedHexMeshGenerator::generate()
       meshes[i] = replicated_mesh;
     else
       paramError("inputs", "Mesh '", _input_names[i], "' is not a replicated mesh but it must be");
+    // throw an error message if the input mesh has a flat side up
+    if (hasMeshProperty("flat_side_up", _input_names[i]))
+      if (getMeshProperty<bool>("flat_side_up", _input_names[i]))
+        paramError("inputs",
+                   "Mesh '",
+                   _input_names[i],
+                   "' has a flat side facing up, which is not supported.");
   }
 
   std::vector<Real> pitch_array;

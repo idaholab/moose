@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/PatternedHexMeshGenerator.md'
-  issues = '#18628 #20148'
+  issues = '#18628 #20148 #20514'
   [hexagon_boundary]
     type = 'Exodiff'
     input = 'patterned_2d.i'
@@ -40,6 +40,13 @@
     cli_args = '--mesh-only "patterned_pattern_cd.e"'
     requirement ='The system shall stitch hexagon meshes twice to form a larger mesh with a control drum.'
     recover = false
+  []
+  [err_input_flat_side_up]
+    type = 'RunException'
+    input = 'patterned_2d.i'
+    cli_args = 'Mesh/pattern/pattern_boundary=none Mesh/hex_1/flat_side_up=true --mesh-only "patterned_err.e"'
+    expect_err = "has a flat side facing up, which is not supported."
+    requirement ='The system shall throw an error if one of the input meshes has a flat side facing up.'
   []
   [err_block_name_conflict]
     type = 'RunException'
