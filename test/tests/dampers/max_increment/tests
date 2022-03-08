@@ -16,4 +16,11 @@
     absent_out = '13\s*Nonlinear'
     requirement = "The Damper system shall be capable of reducing the change in non linear residual based on an allowable increment on elements using an fractional increment."
   [../]
+  [bad_key]
+    type = RunException
+    input = max_increment_damper_test.i
+    expect_err = "Key 'u v' not found in VariableWarehouse container '_regular_vars_by_name'"
+    requirement = 'The system shall give an informative error if user code requests a variable from the warehouse with a bad key.'
+    cli_args = "Dampers/max_inc_damp/variable='u v'"
+  []
 []

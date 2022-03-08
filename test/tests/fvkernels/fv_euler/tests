@@ -18,4 +18,13 @@
     requirement = 'The system shall have an accurate Jacobian when coupling variables at faces and using the finite volume method.'
     ad_indexing_type = 'global'
   []
+  [ssf_caching]
+    type = Exodiff
+    input = fv_euler.i
+    exodiff = ssf-caching.e
+    cli_args = "Outputs/file_base=ssf-caching FVBCs/right_vel/use_ssf=true FVBCs/adv_rho/use_ssf=true Materials/euler_material/execute_on='linear nonlinear'"
+    ad_indexing_type = 'global'
+    requirement = 'The system shall support caching of functor evaluations performed with boundary face arguments.'
+    issues = '#20470'
+  []
 []

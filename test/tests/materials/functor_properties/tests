@@ -107,4 +107,13 @@
     design = 'Materials/index.md'
     cli_args = "Materials/block0/prop_names='matprop mat_x' Materials/block0/prop_values='4 2 mat_x 3 4 1'"
   []
+  [elem_arg_caching]
+    type = Exodiff
+    ad_indexing_type = 'global'
+    input = 1d_dirichlet.i
+    exodiff = elem-arg-caching.e
+    cli_args = "Materials/functor/execute_on='linear nonlinear' Outputs/file_base=elem-arg-caching"
+    requirement = 'The system shall be able to cache functor evaluations associated with cell centers.'
+    issues = '#20470'
+  []
 []
