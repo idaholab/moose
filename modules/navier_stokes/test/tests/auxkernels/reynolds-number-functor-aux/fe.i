@@ -35,7 +35,6 @@ mu=1
     speed = speed
     rho = ${rho}
     mu = ${mu}
-    use_qp_arg = true
   []
 []
 

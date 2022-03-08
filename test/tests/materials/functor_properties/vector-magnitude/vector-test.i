@@ -27,7 +27,6 @@
     type = ADFunctorElementalAux
     variable = mag
     functor = mat_mag
-    use_qp_arg = true
   []
 []
 

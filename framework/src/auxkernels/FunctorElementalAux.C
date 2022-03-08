@@ -31,12 +31,6 @@ FunctorElementalAuxTempl<is_ad>::validParams()
       "element or quadrature point.");
   params.addRequiredParam<MooseFunctorName>("functor", "The functor to evaluate");
   params.addParam<MooseFunctorName>("factor", 1, "A factor to apply on the functor");
-  params.addParam<bool>(
-      "use_qp_arg",
-      false,
-      "Whether to use the quadrature point based functor agument to evaluate the functors. If "
-      "false, then the argument is element-based, which is more appropriate for finite volume. A "
-      "value of true is more appropriate for finite element computations.");
   return params;
 }
 
@@ -45,8 +39,13 @@ FunctorElementalAuxTempl<is_ad>::FunctorElementalAuxTempl(const InputParameters 
   : AuxKernel(parameters),
     _functor(getFunctor<GenericReal<is_ad>>("functor")),
     _factor(getFunctor<GenericReal<is_ad>>("factor")),
-    _use_qp_arg(getParam<bool>("use_qp_arg"))
+    _use_qp_arg(dynamic_cast<MooseVariableFE<Real> *>(&_var))
 {
+  if (!_use_qp_arg && !dynamic_cast<MooseVariableFV<Real> *>(&_var))
+    paramError(
+        "variable",
+        "The variable must be a non-vector, non-array finite-volume/finite-element variable.");
+
   if (isNodal())
     paramError("variable", "This AuxKernel only supports Elemental fields");
 }

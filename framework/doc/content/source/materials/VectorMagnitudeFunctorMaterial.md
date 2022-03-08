@@ -27,7 +27,7 @@ symmetric about the line y=x with the field value increasing moving to the top-r
 ### Vector input
 
 In this example, the functor provided by `ADVectorMagnitudeFunctorMaterial`
-(which we name `mat_ag` to avoid collision with the auxiliary variable `mag`)
+(which we name `mat_mag` to avoid collision with the auxiliary variable `mag`)
 computes the norm of the vector functor `u`, which is a nonlinear variable in
 this simulation.
 

@@ -36,7 +36,6 @@ cp = 1
     variable = Pe
     speed = speed
     thermal_diffusivity = 'thermal_diffusivity'
-    use_qp_arg = true
   []
 []
 
