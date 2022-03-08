@@ -54,7 +54,8 @@ PinMeshGenerator::validParams()
 
   params.addParam<std::vector<std::vector<subdomain_id_type>>>(
       "region_ids",
-      "IDs for each radial and axial zone for assignment of block id and region_id extra element id. "
+      "IDs for each radial and axial zone for assignment of block id and region_id extra element "
+      "id. "
       "Inner indexing is radial zones (pin/background/duct), outer indexing is axial");
 
   params.addParam<bool>("extrude",
@@ -208,7 +209,6 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
       params.set<boundary_id_type>("interface_boundary_id_shift") =
           30000; // need to shift interface boundaries to avoid clashing
                  // with default IDs for PatternedMeshGenerator
-      params.set<std::string>("external_boundary_name") = "outer_pin_" + std::to_string(_pin_type);
 
       addMeshSubgenerator("PolygonConcentricCircleMeshGenerator", name() + "_circle", params);
     }
@@ -237,9 +237,22 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
           {0, -1, 0}}; // normal directions over which to define boundaries
       params.set<bool>("fixed_normal") = true;
       params.set<bool>("replace") = false;
-      params.set<std::vector<BoundaryName>>("new_boundary") = {"16001", "16002", "16003", "16004"};
+      params.set<std::vector<BoundaryName>>("new_boundary") = {
+          "tmp_left", "tmp_right", "tmp_top", "tmp_bottom"};
 
-      _build_mesh = &addMeshSubgenerator("SideSetsFromNormalsGenerator", name() + "_2D", params);
+      _build_mesh = &addMeshSubgenerator("SideSetsFromNormalsGenerator", name() + "_bds", params);
+    }
+    {
+      auto params = _app.getFactory().getValidParams("RenameBoundaryGenerator");
+
+      params.set<MeshGeneratorName>("input") = name() + "_bds";
+      params.set<std::vector<BoundaryName>>("old_boundary") = {
+          "tmp_left", "tmp_right", "tmp_top", "tmp_bottom"};
+      auto external_boundary_name = "outer_pin_" + std::to_string(_pin_type);
+      params.set<std::vector<BoundaryName>>("new_boundary") =
+          std::vector<BoundaryName>(4, external_boundary_name);
+
+      _build_mesh = &addMeshSubgenerator("RenameBoundaryGenerator", name() + "_2D", params);
     }
   }
   else
@@ -280,6 +293,23 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
       _build_mesh =
           &addMeshSubgenerator("PolygonConcentricCircleMeshGenerator", name() + "_2D", params);
     }
+  }
+  // Remove extra sidesets created by PolygonConcentricCircleMeshGenerator
+  {
+    auto params = _app.getFactory().getValidParams("BoundaryDeletionGenerator");
+
+    params.set<MeshGeneratorName>("input") = name() + "_2D";
+
+    auto num_sides = (_mesh_geometry == "Square") ? 4 : 6;
+    std::vector<BoundaryName> boundaries_to_delete = {};
+    for (int i = 0; i < num_sides; i++)
+      boundaries_to_delete.insert(boundaries_to_delete.end(),
+                                  {std::to_string(10001 + i), std::to_string(15001 + i)});
+    if (num_sides == 4)
+      boundaries_to_delete.push_back(std::to_string(20000 + _pin_type));
+    params.set<std::vector<BoundaryName>>("boundary_names") = boundaries_to_delete;
+
+    _build_mesh = &addMeshSubgenerator("BoundaryDeletionGenerator", name() + "_del_bds", params);
   }
 
   // Pass mesh meta-data from subgenerator to this MeshGenerator
@@ -324,7 +354,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
       declareMeshProperty("extruded", true);
       auto params = _app.getFactory().getValidParams("FancyExtruderGenerator");
 
-      params.set<MeshGeneratorName>("input") = name() + "_2D";
+      params.set<MeshGeneratorName>("input") = name() + "_del_bds";
       params.set<Point>("direction") = Point(0, 0, 1);
       params.set<std::vector<unsigned int>>("num_layers") =
           getMeshProperty<std::vector<unsigned int>>("axial_mesh_intervals", _reactor_params);

@@ -171,11 +171,23 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
           {0, -1, 0}}; // normal directions over which to define boundaries
       params.set<bool>("fixed_normal") = true;
       params.set<bool>("replace") = false;
-      params.set<std::vector<BoundaryName>>("new_boundary") = {"26001", "26002", "26003", "26004"};
+      params.set<std::vector<BoundaryName>>("new_boundary") = {
+          "tmp_left", "tmp_right", "tmp_top", "tmp_bottom"};
 
-      _build_mesh =
-          &addMeshSubgenerator("SideSetsFromNormalsGenerator", name() + "_pattern", params);
+      _build_mesh = &addMeshSubgenerator("SideSetsFromNormalsGenerator", name() + "_bds", params);
     }
+    {
+      auto params = _app.getFactory().getValidParams("RenameBoundaryGenerator");
+
+      params.set<MeshGeneratorName>("input") = name() + "_bds";
+      params.set<std::vector<BoundaryName>>("old_boundary") = {
+          "tmp_left", "tmp_right", "tmp_top", "tmp_bottom"};
+      params.set<std::vector<BoundaryName>>("new_boundary") =
+          std::vector<BoundaryName>(4, "outer_core");
+
+      _build_mesh = &addMeshSubgenerator("RenameBoundaryGenerator", name() + "_pattern", params);
+    }
+    //***Add assembly duct around PatternedMesh
   }
   else
   {
@@ -233,6 +245,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
 
     params.set<SubdomainID>("block_id") = UINT16_MAX - 1;
     params.set<MeshGeneratorName>("input") = name() + "_pattern";
+    params.set<BoundaryName>("new_boundary") = "outer_core";
 
     _build_mesh = &addMeshSubgenerator("BlockDeletionGenerator", name() + "_deleted", params);
   }
@@ -413,24 +426,6 @@ CoreMeshGenerator::generate()
     if (subdomain_name_map.find(elem->subdomain_id()) == subdomain_name_map.end())
       subdomain_name_map.insert(std::pair<subdomain_id_type, std::string>(
           elem->subdomain_id(), std::to_string(elem->subdomain_id())));
-  }
-
-  if (_geom_type == "Square")
-  {
-    // the boundaries need to be directly assigned for cartesian cores
-    // since the CartesianIDPatternedMeshGenerator lacks the ability
-    // to assign them during construction.
-    MeshGeneratorName _reactor_params =
-        MeshGeneratorName(getMeshProperty<std::string>("reactor_params_name", _inputs[0]));
-    const auto radial_boundary =
-        getMeshProperty<boundary_id_type>("radial_boundary_id", _reactor_params);
-    MooseMesh::changeBoundaryId(*(_build_mesh->get()), 26001, radial_boundary, false);
-    MooseMesh::changeBoundaryId(*(_build_mesh->get()), 26002, radial_boundary, false);
-    MooseMesh::changeBoundaryId(*(_build_mesh->get()), 26003, radial_boundary, false);
-    MooseMesh::changeBoundaryId(*(_build_mesh->get()), 26004, radial_boundary, false);
-
-    (*_build_mesh)->get_boundary_info().sideset_name(radial_boundary) = "outer_core";
-    (*_build_mesh)->get_boundary_info().nodeset_name(radial_boundary) = "outer_core";
   }
 
   (*_build_mesh)->set_subdomain_name_map() = subdomain_name_map;

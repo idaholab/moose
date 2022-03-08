@@ -46,10 +46,13 @@ AssemblyMeshGenerator::validParams()
 
   params.addParam<std::vector<subdomain_id_type>>(
       "background_region_id",
-      "The region id for the background area between the pins and the ducts to set block ID and region_id extra-element integer");
+      "The region id for the background area between the pins and the ducts to set block ID and "
+      "region_id extra-element integer");
 
   params.addParam<std::vector<std::vector<subdomain_id_type>>>(
-      "duct_region_ids", "The region id for the ducts from innermost to outermost, to set block ID and region_id extra-element integer.");
+      "duct_region_ids",
+      "The region id for the ducts from innermost to outermost, to set block ID and region_id "
+      "extra-element integer.");
 
   params.addParam<bool>("extrude",
                         false,
@@ -202,10 +205,21 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
           {0, -1, 0}}; // normal directions over which to define boundaries
       params.set<bool>("fixed_normal") = true;
       params.set<bool>("replace") = false;
-      params.set<std::vector<BoundaryName>>("new_boundary") = {"21001", "21002", "21003", "21004"};
+      params.set<std::vector<BoundaryName>>("new_boundary") = {
+          "tmp_left", "tmp_right", "tmp_top", "tmp_bottom"};
 
-      _build_mesh =
-          &addMeshSubgenerator("SideSetsFromNormalsGenerator", name() + "_pattern", params);
+      _build_mesh = &addMeshSubgenerator("SideSetsFromNormalsGenerator", name() + "_bds", params);
+    }
+    {
+      auto params = _app.getFactory().getValidParams("RenameBoundaryGenerator");
+
+      params.set<MeshGeneratorName>("input") = name() + "_bds";
+      params.set<std::vector<BoundaryName>>("old_boundary") = {
+          "tmp_left", "tmp_right", "tmp_top", "tmp_bottom"};
+      params.set<std::vector<BoundaryName>>("new_boundary") =
+          std::vector<BoundaryName>(4, _assembly_boundary_name);
+
+      _build_mesh = &addMeshSubgenerator("RenameBoundaryGenerator", name() + "_pattern", params);
     }
     //***Add assembly duct around PatternedMesh
   }
@@ -480,23 +494,6 @@ AssemblyMeshGenerator::generate()
   }
 
   (*_build_mesh)->set_subdomain_name_map() = subdomain_name_map;
-
-  // Setting Boundary Info
-  if (_geom_type == "Square")
-  {
-    // the boundaries need to be directly assigned for cartesian cores
-    // since the CartesianIDPatternedMeshGenerator lacks the ability
-    // to assign them during construction.
-    MooseMesh::changeBoundaryId(*(_build_mesh->get()), 21001, _assembly_boundary_id, false);
-    MooseMesh::changeBoundaryId(*(_build_mesh->get()), 21002, _assembly_boundary_id, false);
-    MooseMesh::changeBoundaryId(*(_build_mesh->get()), 21003, _assembly_boundary_id, false);
-    MooseMesh::changeBoundaryId(*(_build_mesh->get()), 21004, _assembly_boundary_id, false);
-
-    (*_build_mesh)->get_boundary_info().sideset_name(_assembly_boundary_id) =
-        _assembly_boundary_name;
-    (*_build_mesh)->get_boundary_info().nodeset_name(_assembly_boundary_id) =
-        _assembly_boundary_name;
-  }
 
   return std::move(*_build_mesh);
 }
