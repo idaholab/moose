@@ -4,10 +4,10 @@ mass_flux_in = ${fparse 1e+6 * 300.00 / 36000.*0.5}
 P_out = 2.0e5 # Pa
 
 [GlobalParams]
-  nrings = 4
-  n_cells = 100
-  flat_to_flat = 0.077
-  heated_length = 1.0
+  nrings = 3
+  n_cells = 20
+  flat_to_flat = 0.056
+  heated_length = 0.2
   pitch = 0.012
 []
 
@@ -71,6 +71,8 @@ P_out = 2.0e5 # Pa
   compute_density = true
   compute_viscosity = true
   compute_power = true
+  T_tol = 1.0e-7
+  P_tol = 1.0e-7
 []
 
 [ICs]
@@ -87,8 +89,8 @@ P_out = 2.0e5 # Pa
    [q_prime_IC]
     type = TriPowerIC
     variable = q_prime
-    power = 1.000e6 # W
-    filename = "pin_power_profile37.txt"
+    power = 5.000e5 # W
+    filename = "pin_power_profile19.txt"
   []
 
   [T_ic]
