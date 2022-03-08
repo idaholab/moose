@@ -90,6 +90,23 @@ faceArgSubdomains(const SubdomainRestrictable & obj, const FaceInfo & fi)
                         makeSidedFace(obj, fi.neighborPtr(), fi).sub_id);
 }
 
+inline FaceArg
+makeFace(const FaceInfo & fi,
+         const LimiterType limiter_type,
+         const bool elem_is_upwind,
+         const std::pair<SubdomainID, SubdomainID> & subs,
+         const bool skewness_correction = false,
+         const bool apply_gradient_correction = false)
+{
+  return {&fi,
+          limiter_type,
+          elem_is_upwind,
+          skewness_correction,
+          apply_gradient_correction,
+          subs.first,
+          subs.second};
+}
+
 /**
  * Make a functor face argument with a central differencing limiter, e.g. compose a face argument
  * that will tell functors to perform (possibly skew-corrected) linear interpolations from cell
@@ -111,13 +128,12 @@ makeCDFace(const FaceInfo & fi,
            const bool skewness_correction = false,
            const bool apply_gradient_correction = false)
 {
-  return {&fi,
-          Moose::FV::LimiterType::CentralDifference,
-          true,
-          skewness_correction,
-          apply_gradient_correction,
-          subs.first,
-          subs.second};
+  return makeFace(fi,
+                  LimiterType::CentralDifference,
+                  true,
+                  subs,
+                  skewness_correction,
+                  apply_gradient_correction);
 }
 
 /**
@@ -482,11 +498,6 @@ interpCoeffs(const Limiter<T> & limiter,
   return std::make_pair(1. - g, g);
 }
 
-template <typename T>
-struct GradientType
-{
-};
-
 /**
  * Interpolates with a limiter
  */
@@ -526,6 +537,105 @@ interpolate(const Limiter & limiter,
   for (const auto i : make_range(unsigned(LIBMESH_DIM)))
     ret(i) = interpolate(
         limiter, phi_upwind(i), phi_downwind(i), &example_gradient, fi, fi_elem_is_upwind);
+
+  return ret;
+}
+
+/**
+ * Interpolates with a limiter and a face argument
+ * @return a pair of pairs. The first pair corresponds to the interpolation coefficients with the
+ * first corresponding to the face information element and the second corresponding to the face
+ * information neighbor. This pair should sum to unity. The second pair corresponds to the face
+ * information functor element value and neighbor
+ */
+template <typename T, typename Enable = typename std::enable_if<ScalarTraits<T>::value>::type>
+std::pair<std::pair<T, T>, std::pair<T, T>>
+interpCoeffsAndAdvected(const FunctorBase<T> & functor, const FaceArg & face)
+{
+  typedef typename FunctorBase<T>::GradientType GradientType;
+  static const GradientType zero(0);
+
+  mooseAssert(face.fi, "this must be non-null");
+  const auto limiter = Limiter<typename LimiterValueType<T>::value_type>::build(face.limiter_type);
+
+  const auto upwind_arg = face.elem_is_upwind ? face.elemFromFace() : face.neighborFromFace();
+  const auto downwind_arg = face.elem_is_upwind ? face.neighborFromFace() : face.elemFromFace();
+  auto phi_upwind = functor(upwind_arg);
+  auto phi_downwind = functor(downwind_arg);
+
+  std::pair<T, T> interp_coeffs;
+  if (face.limiter_type == LimiterType::Upwind ||
+      face.limiter_type == LimiterType::CentralDifference)
+    interp_coeffs =
+        interpCoeffs(*limiter, phi_upwind, phi_downwind, &zero, *face.fi, face.elem_is_upwind);
+  else
+  {
+    const auto grad_phi_upwind = functor.gradient(upwind_arg);
+    interp_coeffs = interpCoeffs(
+        *limiter, phi_upwind, phi_downwind, &grad_phi_upwind, *face.fi, face.elem_is_upwind);
+  }
+
+  if (face.elem_is_upwind)
+    return std::make_pair(std::move(interp_coeffs),
+                          std::make_pair(std::move(phi_upwind), std::move(phi_downwind)));
+  else
+    return std::make_pair(
+        std::make_pair(std::move(interp_coeffs.second), std::move(interp_coeffs.first)),
+        std::make_pair(std::move(phi_downwind), std::move(phi_upwind)));
+}
+
+template <typename T, typename Enable = typename std::enable_if<ScalarTraits<T>::value>::type>
+T
+interpolate(const FunctorBase<T> & functor, const FaceArg & face)
+{
+  const auto [interp_coeffs, advected] = interpCoeffsAndAdvected(functor, face);
+  return interp_coeffs.first * advected.first + interp_coeffs.second * advected.second;
+}
+
+template <typename T>
+VectorValue<T>
+interpolate(const FunctorBase<VectorValue<T>> & functor, const FaceArg & face)
+{
+  static const VectorValue<T> grad_zero(0);
+
+  mooseAssert(face.fi, "this must be non-null");
+  const auto limiter = Limiter<typename LimiterValueType<T>::value_type>::build(face.limiter_type);
+
+  const auto upwind_arg = face.elem_is_upwind ? face.elemFromFace() : face.neighborFromFace();
+  const auto downwind_arg = face.elem_is_upwind ? face.neighborFromFace() : face.elemFromFace();
+  auto phi_upwind = functor(upwind_arg);
+  auto phi_downwind = functor(downwind_arg);
+
+  VectorValue<T> ret;
+  T coeff_upwind, coeff_downwind;
+
+  if (face.limiter_type == LimiterType::Upwind ||
+      face.limiter_type == LimiterType::CentralDifference)
+  {
+    for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+    {
+      const auto &component_upwind = phi_upwind(i), component_downwind = phi_downwind(i);
+      std::tie(coeff_upwind, coeff_downwind) = interpCoeffs(*limiter,
+                                                            component_upwind,
+                                                            component_downwind,
+                                                            &grad_zero,
+                                                            *face.fi,
+                                                            face.elem_is_upwind);
+      ret(i) = coeff_upwind * component_upwind + coeff_downwind * component_downwind;
+    }
+  }
+  else
+  {
+    const auto grad_phi_upwind = functor.gradient(upwind_arg);
+    for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+    {
+      const auto &component_upwind = phi_upwind(i), component_downwind = phi_downwind(i);
+      const VectorValue<T> grad = grad_phi_upwind.row(i);
+      std::tie(coeff_upwind, coeff_downwind) = interpCoeffs(
+          *limiter, component_upwind, component_downwind, &grad, *face.fi, face.elem_is_upwind);
+      ret(i) = coeff_upwind * component_upwind + coeff_downwind * component_downwind;
+    }
+  }
 
   return ret;
 }

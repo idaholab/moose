@@ -11,6 +11,7 @@
 
 #include "INSFVAdvectionKernel.h"
 #include "INSFVMomentumResidualObject.h"
+#include "PiecewiseByBlockLambdaFunctor.h"
 
 /**
  * An advection kernel that implements interpolation schemes specific to Navier-Stokes flow
@@ -29,6 +30,9 @@ protected:
 
   /// Density
   const Moose::Functor<ADReal> & _rho;
+
+  /// Our local momentum functor
+  const PiecewiseByBlockLambdaFunctor<ADReal> _rho_u;
 
   /// The a coefficient for the element
   ADReal _ae = 0;
