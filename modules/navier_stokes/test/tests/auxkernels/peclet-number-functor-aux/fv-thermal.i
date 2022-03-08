@@ -168,7 +168,7 @@ cp = 1
     type = ADVectorMagnitudeFunctorMaterial
     x_functor = u
     y_functor = v
-    vector_functor_name = speed
+    vector_magnitude_name = speed
   []
   [thermal_diffusivity]
     type = ThermalDiffusivityFunctorMaterial

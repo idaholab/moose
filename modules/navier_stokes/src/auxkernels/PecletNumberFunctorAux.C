@@ -23,12 +23,6 @@ PecletNumberFunctorAux::validParams()
       NS::thermal_diffusivity,
       "The fluid thermal diffusivity, or if using this object for evaluating mass transfer, the "
       "mass diffusivity. Regardless of which, this should have units of length^2/time");
-  params.addParam<bool>(
-      "use_qp_arg",
-      false,
-      "Whether to use the quadrature point based functor agument to evaluate the functors. If "
-      "false, then the argument is element-based, which is more appropriate for finite volume. A "
-      "value of true is more appropriate for finite element computations.");
   return params;
 }
 
@@ -36,8 +30,13 @@ PecletNumberFunctorAux::PecletNumberFunctorAux(const InputParameters & parameter
   : AuxKernel(parameters),
     _speed(getFunctor<ADReal>(NS::speed)),
     _alpha(getFunctor<ADReal>(NS::thermal_diffusivity)),
-    _use_qp_arg(getParam<bool>("use_qp_arg"))
+    _use_qp_arg(dynamic_cast<MooseVariableFE<Real> *>(&_var))
 {
+  if (!_use_qp_arg && !dynamic_cast<MooseVariableFV<Real> *>(&_var))
+    paramError(
+        "variable",
+        "The variable must be a non-vector, non-array finite-volume/finite-element variable.");
+
   if (isNodal())
     mooseError("This AuxKernel only supports Elemental fields");
 }

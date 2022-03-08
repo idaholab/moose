@@ -35,7 +35,6 @@ mu=1
     speed = speed
     rho = ${rho}
     mu = ${mu}
-    use_qp_arg = true
   []
 []
 
@@ -115,7 +114,7 @@ mu=1
     type = ADVectorMagnitudeFunctorMaterial
     x_functor = vel_x
     y_functor = vel_y
-    vector_functor_name = speed
+    vector_magnitude_name = speed
   []
 []
 
