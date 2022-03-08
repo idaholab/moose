@@ -43,4 +43,37 @@
     design = 'meshgenerators/AnnularMeshGenerator.md'
     issues = '#18486'
   [../]
+  [equal_area]
+    type = Exodiff
+    input = equal_area.i
+    cli_args = 'Mesh/amg/nr=10 --mesh-only'
+    exodiff = equal_area_in.e
+    mesh_mode = 'REPLICATED'
+    recover = false
+    requirement = 'The system shall have the capability of generating an annular mesh with equal-area elements'
+    design = 'meshgenerators/AnnularMeshGenerator.md'
+    issues = '#20422'
+  []
+  [conflicting_settings]
+    type = RunException
+    input = equal_area.i
+    cli_args = 'Mesh/amg/growth_r=1.2 Mesh/amg/nr=10 --mesh-only'
+    mesh_mode = 'REPLICATED'
+    recover = false
+    requirement = 'The system shall error when generating an annular mesh with equal-area elements when a growth ratio is also provided'
+    expect_err = "The 'growth_r' parameter cannot be combined with 'equal_area'"
+    design = 'meshgenerators/AnnularMeshGenerator.md'
+    issues = '#20422'
+  []
+  [conflicting_settings_nr]
+    type = RunException
+    input = equal_area.i
+    cli_args = "Mesh/amg/radial_positions='1.5' --mesh-only"
+    mesh_mode = 'REPLICATED'
+    recover = false
+    requirement = 'The system shall error when generating an annual mesh with equal-area elements when radial positions are also provided'
+    expect_err = "The 'equal_area' parameter cannot be specified together with 'radial_positions'"
+    design = 'meshgenerators/AnnularMeshGenerator.md'
+    issues = '#20422'
+  []
 []
