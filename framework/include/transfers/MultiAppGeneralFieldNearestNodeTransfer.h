@@ -12,6 +12,7 @@
 #include "MultiAppConservativeTransfer.h"
 #include "libmesh/mesh_function.h"
 #include "MooseHashing.h"
+#include "KDTree.h"
 
 /**
  * It is a general field transfer. It will do the following things
@@ -132,14 +133,16 @@ private:
   /*
    * Build mesh functions
    */
-  void buildMeshFunctions(const VariableName & var_name,
-                          std::vector<std::shared_ptr<MeshFunction>> & local_meshfuns);
+  void buildKDTrees(const VariableName & var_name,
+                    std::vector<std::shared_ptr<KDTree>> & local_kdtrees,
+                    std::vector<std::vector<Point>> & local_points,
+                    std::vector<std::vector<Real>> & local_values);
 
   /*
    * Evaluate interpolation values for incoming points
    */
-  void evaluateInterpValues(const std::vector<BoundingBox> & local_bboxes,
-                            const std::vector<std::shared_ptr<MeshFunction>> & local_meshfuns,
+  void evaluateInterpValues(const std::vector<std::shared_ptr<KDTree>> & local_kdtrees,
+                            const std::vector<std::vector<Real>> & local_values,
                             const std::vector<Point> & incoming_points,
                             std::vector<Real> & outgoing_vals);
 

@@ -3,8 +3,10 @@
   dim = 2
   nx = 10
   ny = 10
-  xmax = 0.2
-  ymax = 0.2
+  xmin = 0
+  ymin = 1.2
+  xmax = 1.2
+  ymax = 2
   displacements = 'x_disp y_disp'
 []
 

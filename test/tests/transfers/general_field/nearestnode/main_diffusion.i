@@ -58,10 +58,11 @@
 
 [MultiApps]
   [sub]
-    positions = '.1 .1 0 0.4 0.4 0 0.7 0.1 0'
+#    positions = '.1 .1 0 0.4 0.4 0 0.7 0.1 0'
+    positions = '.1 .1 0'
     type = TransientMultiApp
     app_type = MooseTestApp
-    input_files = tosub_sub.i
+    input_files = sub_diffusion.i
     execute_on = timestep_end
   []
 []
@@ -71,15 +72,16 @@
     source_variable = u
     direction = to_multiapp
     variable = transferred_u
-    type = MultiAppGeneralFieldTransfer
+    type = MultiAppGeneralFieldNearestNodeTransfer
     multi_app = sub
+    bbox_tol = 10
   []
 
   [elemental_to_sub]
     source_variable = u
     direction = to_multiapp
     variable = elemental_transferred_u
-    type = MultiAppGeneralFieldTransfer
+    type = MultiAppGeneralFieldNearestNodeTransfer
     multi_app = sub
   []
 
@@ -87,7 +89,7 @@
     source_variable = sub_u
     direction = from_multiapp
     variable = from_sub
-    type = MultiAppGeneralFieldTransfer
+    type = MultiAppGeneralFieldNearestNodeTransfer
     multi_app = sub
   []
 
@@ -95,7 +97,7 @@
     source_variable = sub_u
     direction = from_multiapp
     variable = elemental_from_sub
-    type = MultiAppGeneralFieldTransfer
+    type = MultiAppGeneralFieldNearestNodeTransfer
     multi_app = sub
   []
 []

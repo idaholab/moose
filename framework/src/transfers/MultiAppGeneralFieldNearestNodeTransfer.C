@@ -28,7 +28,7 @@
 #include "timpi/parallel_sync.h"
 
 // Anonymous namespace for data, functors to use with GenericProjector.
-namespace
+namespace NearestNode
 {
 
 // Transfer::OutOfMeshValue is an actual number.  Why?  Why!
@@ -40,7 +40,7 @@ inline bool
 isBetterOutOfMeshValue(Number val)
 {
   // Might need to be changed for e.g. NaN
-  return val == BetterOutOfMeshValue;
+  return val == NearestNode::BetterOutOfMeshValue;
 }
 
 // We need two functors that record point (value and gradient,
@@ -165,7 +165,8 @@ protected:
   typedef typename TensorTools::MakeBaseNumber<Output>::type DofValueType;
 
 public:
-  typedef std::unordered_map<Point, Output, MultiAppGeneralFieldNearestNodeTransfer::hash_point> Cache;
+  typedef std::unordered_map<Point, Output, MultiAppGeneralFieldNearestNodeTransfer::hash_point>
+      Cache;
 
   typedef typename TensorTools::MakeReal<Output>::type RealType;
   typedef DofValueType ValuePushType;
@@ -273,7 +274,8 @@ MultiAppGeneralFieldNearestNodeTransfer::validParams()
   return params;
 }
 
-MultiAppGeneralFieldNearestNodeTransfer::MultiAppGeneralFieldNearestNodeTransfer(const InputParameters & parameters)
+MultiAppGeneralFieldNearestNodeTransfer::MultiAppGeneralFieldNearestNodeTransfer(
+    const InputParameters & parameters)
   : MultiAppConservativeTransfer(parameters),
     _error_on_miss(getParam<bool>("error_on_miss")),
     _bbox_tol(getParam<Real>("bbox_tol")),
@@ -342,19 +344,22 @@ MultiAppGeneralFieldNearestNodeTransfer::transferVariable(unsigned int i)
   extractLocalFromBoundingBoxes(local_bboxes);
 
   // Setup the local mesh functions.
-  std::vector<std::shared_ptr<MeshFunction>> local_meshfuns;
-  buildMeshFunctions(_from_var_names[i], local_meshfuns);
+  std::vector<std::shared_ptr<KDTree>> local_kdtrees;
+  std::vector<std::vector<Point>> local_points;
+  std::vector<std::vector<Real>> local_values;
+
+  buildKDTrees(_from_var_names[i], local_kdtrees, local_points, local_values);
 
   // Fill values and app ids for incoming points
   // We are responsible to compute values for these incoming points
   auto gather_functor =
-      [this, &local_bboxes, &local_meshfuns](processor_id_type /*pid*/,
-                                             const std::vector<Point> & incoming_points,
-                                             std::vector<Real> & outgoing_vals)
+      [this, &local_kdtrees, &local_values](processor_id_type /*pid*/,
+                                            const std::vector<Point> & incoming_points,
+                                            std::vector<Real> & outgoing_vals)
   {
-    outgoing_vals.resize(incoming_points.size(), BetterOutOfMeshValue);
+    outgoing_vals.resize(incoming_points.size(), NearestNode::BetterOutOfMeshValue);
     // Evaluate interpolation values for these incoming points
-    evaluateInterpValues(local_bboxes, local_meshfuns, incoming_points, outgoing_vals);
+    evaluateInterpValues(local_kdtrees, local_values, incoming_points, outgoing_vals);
   };
 
   DofobjectToInterpValVec dofobject_to_valsvec(_to_problems.size());
@@ -389,8 +394,8 @@ MultiAppGeneralFieldNearestNodeTransfer::transferVariable(unsigned int i)
 }
 
 void
-MultiAppGeneralFieldNearestNodeTransfer::locatePointReceivers(const Point point,
-                                                   std::vector<processor_id_type> & processors)
+MultiAppGeneralFieldNearestNodeTransfer::locatePointReceivers(
+    const Point point, std::vector<processor_id_type> & processors)
 {
   // Check which processors include this point
   // One point might have more than one points
@@ -412,10 +417,11 @@ MultiAppGeneralFieldNearestNodeTransfer::locatePointReceivers(const Point point,
 }
 
 void
-MultiAppGeneralFieldNearestNodeTransfer::cacheOutgoingPointInfor(const Point point,
-                                                      const dof_id_type dof_object_id,
-                                                      const unsigned int problem_id,
-                                                      ProcessorToPointVec & outgoing_points)
+MultiAppGeneralFieldNearestNodeTransfer::cacheOutgoingPointInfor(
+    const Point point,
+    const dof_id_type dof_object_id,
+    const unsigned int problem_id,
+    ProcessorToPointVec & outgoing_points)
 {
   std::vector<processor_id_type> processors;
   // Try to find which processors
@@ -437,8 +443,8 @@ MultiAppGeneralFieldNearestNodeTransfer::cacheOutgoingPointInfor(const Point poi
 }
 
 void
-MultiAppGeneralFieldNearestNodeTransfer::extractOutgoingPoints(const VariableName & var_name,
-                                                    ProcessorToPointVec & outgoing_points)
+MultiAppGeneralFieldNearestNodeTransfer::extractOutgoingPoints(
+    const VariableName & var_name, ProcessorToPointVec & outgoing_points)
 {
   // Clean up the map from processor to pointInfo vector
   // This map should be consistent with outgoing_points
@@ -481,15 +487,15 @@ MultiAppGeneralFieldNearestNodeTransfer::extractOutgoingPoints(const VariableNam
     // We support more general variables via libMesh GenericProjector
     if (fe_type.order > CONSTANT && !is_nodal)
     {
-      RecordRequests<Number> f;
-      RecordRequests<Gradient> g;
-      NullAction<Number> nullsetter;
+      NearestNode::RecordRequests<Number> f;
+      NearestNode::RecordRequests<Gradient> g;
+      NearestNode::NullAction<Number> nullsetter;
       const std::vector<unsigned int> varvec(1, var_num);
 
-      libMesh::GenericProjector<RecordRequests<Number>,
-                                RecordRequests<Gradient>,
+      libMesh::GenericProjector<NearestNode::RecordRequests<Number>,
+                                NearestNode::RecordRequests<Gradient>,
                                 Number,
-                                NullAction<Number>>
+                                NearestNode::NullAction<Number>>
           request_gather(*to_sys, f, &g, nullsetter, varvec);
 
       const MeshBase::element_iterator to_begin =
@@ -557,7 +563,8 @@ MultiAppGeneralFieldNearestNodeTransfer::extractOutgoingPoints(const VariableNam
 }
 
 void
-MultiAppGeneralFieldNearestNodeTransfer::extractLocalFromBoundingBoxes(std::vector<BoundingBox> & local_bboxes)
+MultiAppGeneralFieldNearestNodeTransfer::extractLocalFromBoundingBoxes(
+    std::vector<BoundingBox> & local_bboxes)
 {
   local_bboxes.resize(_froms_per_proc[processor_id()]);
   // Find the index to the first of this processor's local bounding boxes.
@@ -575,9 +582,16 @@ MultiAppGeneralFieldNearestNodeTransfer::extractLocalFromBoundingBoxes(std::vect
 }
 
 void
-MultiAppGeneralFieldNearestNodeTransfer::buildMeshFunctions(
-    const VariableName & var_name, std::vector<std::shared_ptr<MeshFunction>> & local_meshfuns)
+MultiAppGeneralFieldNearestNodeTransfer::buildKDTrees(
+    const VariableName & var_name,
+    std::vector<std::shared_ptr<KDTree>> & kdtrees,
+    std::vector<std::vector<Point>> & points,
+    std::vector<std::vector<Real>> & local_values)
 {
+  kdtrees.resize(_from_problems.size());
+  points.resize(_from_problems.size());
+  local_values.resize(_from_problems.size());
+
   // Construct a local mesh for each problem
   for (unsigned int i_from = 0; i_from < _from_problems.size(); ++i_from)
   {
@@ -587,20 +601,40 @@ MultiAppGeneralFieldNearestNodeTransfer::buildMeshFunctions(
 
     System & from_sys = from_var.sys().system();
     unsigned int from_var_num = from_sys.variable_number(from_var.name());
+    // FEM type info
+    auto & fe_type = from_sys.variable_type(from_var.number());
+    bool is_nodal = fe_type.family == LAGRANGE;
 
-    std::shared_ptr<MeshFunction> from_func;
-    from_func.reset(new MeshFunction(
-        from_problem.es(), *from_sys.current_local_solution, from_sys.get_dof_map(), from_var_num));
-    from_func->init();
-    from_func->enable_out_of_mesh_mode(BetterOutOfMeshValue);
-    local_meshfuns.push_back(from_func);
+    if (is_nodal)
+    {
+      for (const auto & node : from_problem.mesh().getMesh().local_node_ptr_range())
+      {
+        points[i_from].push_back(*node);
+        auto dof = node->dof_number(from_sys.number(), from_var_num, 0);
+        local_values[i_from].push_back((*from_sys.solution)(dof));
+      }
+    }
+    else
+    {
+      for (auto & elem : as_range(from_problem.mesh().getMesh().local_elements_begin(),
+                                  from_problem.mesh().getMesh().local_elements_end()))
+      {
+        points[i_from].push_back(elem->centroid());
+        auto dof = elem->dof_number(from_sys.number(), from_var_num, 0);
+        local_values[i_from].push_back((*from_sys.solution)(dof));
+      }
+    }
+
+    std::shared_ptr<KDTree> _kd_tree =
+        std::make_shared<KDTree>(points[i_from], from_problem.mesh().getMaxLeafSize());
+    kdtrees[i_from] = _kd_tree;
   }
 }
 
 void
 MultiAppGeneralFieldNearestNodeTransfer::evaluateInterpValues(
-    const std::vector<BoundingBox> & local_bboxes,
-    const std::vector<std::shared_ptr<MeshFunction>> & local_meshfuns,
+    const std::vector<std::shared_ptr<KDTree>> & local_kdtrees,
+    const std::vector<std::vector<Real>> & local_values,
     const std::vector<Point> & incoming_points,
     std::vector<Real> & outgoing_vals)
 {
@@ -610,16 +644,17 @@ MultiAppGeneralFieldNearestNodeTransfer::evaluateInterpValues(
     // Loop until we've found the lowest-ranked app that actually contains
     // the quadrature point.
     for (MooseIndex(_from_problems.size()) i_from = 0;
-         i_from < _from_problems.size() && outgoing_vals[i_pt] == BetterOutOfMeshValue;
+         i_from < _from_problems.size() && outgoing_vals[i_pt] == NearestNode::BetterOutOfMeshValue;
          ++i_from)
     {
-      if (local_bboxes[i_from].contains_point(pt))
-      {
-        // Use mesh funciton to compute interpolation values
-        auto val = (*local_meshfuns[i_from])(pt - _from_positions[i_from]);
-        // Assign value
-        outgoing_vals[i_pt] = val;
-      }
+
+      std::vector<std::size_t> return_index(1);
+      std::vector<Real> return_dist_sqr(1);
+      local_kdtrees[i_from]->neighborSearch(pt, 1, return_index, return_dist_sqr);
+      // Use mesh funciton to compute interpolation values
+      auto val = local_values[i_from][return_index[0]];
+      // Assign value
+      outgoing_vals[i_pt] = val;
     }
 
     // Move to next point
@@ -667,7 +702,7 @@ MultiAppGeneralFieldNearestNodeTransfer::cacheIncomingInterpVals(
       // We should only have one value for each variable at any given point.
       libmesh_assert(cache.count(p) == 0);
       const Number val = incoming_vals[val_offset];
-      if (!isBetterOutOfMeshValue(val))
+      if (!NearestNode::isBetterOutOfMeshValue(val))
         cache[p] = val;
     }
     else
@@ -707,8 +742,8 @@ MultiAppGeneralFieldNearestNodeTransfer::cacheIncomingInterpVals(
       {
         auto & val = values_ptr->second;
         // We adopt values from the smallest rank which has a valid value
-        if ((val.second > pid || isBetterOutOfMeshValue(val.first)) &&
-            !isBetterOutOfMeshValue(incoming_vals[val_offset]))
+        if ((val.second > pid || NearestNode::isBetterOutOfMeshValue(val.first)) &&
+            !NearestNode::isBetterOutOfMeshValue(incoming_vals[val_offset]))
         {
           val.first = incoming_vals[val_offset];
           val.second = pid;
@@ -752,12 +787,12 @@ MultiAppGeneralFieldNearestNodeTransfer::setSolutionVectorValues(
       MeshFunction to_func(es, *to_sys->current_local_solution, to_sys->get_dof_map(), var_num);
       to_func.init();
 
-      CachedData<Number> f(interp_caches[problem_id], to_func);
+      NearestNode::CachedData<Number> f(interp_caches[problem_id], to_func);
       libMesh::VectorSetAction<Number> setter(*to_sys->solution);
       const std::vector<unsigned int> varvec(1, var_num);
 
-      libMesh::GenericProjector<CachedData<Number>,
-                                CachedData<Gradient>,
+      libMesh::GenericProjector<NearestNode::CachedData<Number>,
+                                NearestNode::CachedData<Gradient>,
                                 Number,
                                 libMesh::VectorSetAction<Number>>
           set_solution(*to_sys, f, nullptr, setter, varvec);
@@ -784,7 +819,7 @@ MultiAppGeneralFieldNearestNodeTransfer::setSolutionVectorValues(
         auto val = val_pair.second.first;
 
         // This will happen if meshes are mismatched
-        if (_error_on_miss && isBetterOutOfMeshValue(val))
+        if (_error_on_miss && NearestNode::isBetterOutOfMeshValue(val))
         {
           if (is_nodal)
             mooseError("Node ", dof_object_id, " for app ", problem_id, " could not be located ");
@@ -794,7 +829,7 @@ MultiAppGeneralFieldNearestNodeTransfer::setSolutionVectorValues(
         }
 
         // We should not put garbage into solution vector
-        if (isBetterOutOfMeshValue(val))
+        if (NearestNode::isBetterOutOfMeshValue(val))
           continue;
 
         to_sys->solution->set(dof, val);
@@ -820,15 +855,16 @@ MultiAppGeneralFieldNearestNodeTransfer::blockRestrictedSource() const
 }
 
 bool
-MultiAppGeneralFieldNearestNodeTransfer::hasBlocks(std::set<SubdomainID> & blocks, const Elem * elem) const
+MultiAppGeneralFieldNearestNodeTransfer::hasBlocks(std::set<SubdomainID> & blocks,
+                                                   const Elem * elem) const
 {
   return blocks.find(elem->subdomain_id()) != blocks.end();
 }
 
 bool
 MultiAppGeneralFieldNearestNodeTransfer::hasBlocks(std::set<SubdomainID> & blocks,
-                                        const MooseMesh * mesh,
-                                        const Node * node) const
+                                                   const MooseMesh * mesh,
+                                                   const Node * node) const
 {
   const std::set<SubdomainID> & node_blocks = mesh->getNodeBlockIds(*node);
   std::set<SubdomainID> u;
