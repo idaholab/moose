@@ -1,4 +1,3 @@
-
 # MultiBarrierFunctionMaterial
 
 !syntax description /Materials/MultiBarrierFunctionMaterial

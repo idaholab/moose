@@ -1,3 +1,5 @@
+# GasFreeEnergyBase
+
 $n_Q$ is the _quantum concentration_ defined by
 
 \begin{equation}

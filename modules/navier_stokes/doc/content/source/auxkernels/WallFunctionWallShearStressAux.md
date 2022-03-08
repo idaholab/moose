@@ -1,4 +1,4 @@
-#WallFunctionWallShearStressAux
+# WallFunctionWallShearStressAux
 
 This function computes the wall shear stress obtained using the standard
 wall function in [INSFVWallFunctionBC](source/fvbcs/INSFVWallFunctionBC.md).

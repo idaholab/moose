@@ -1,4 +1,3 @@
-
 # SinNeumannBC
 
 !syntax description /BCs/SinNeumannBC

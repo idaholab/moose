@@ -1,4 +1,3 @@
-
 # DerivativeParsedMaterial
 
 !syntax description /Materials/DerivativeParsedMaterial

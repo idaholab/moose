@@ -1,4 +1,3 @@
-
 # ErrorToleranceMarker
 
 !syntax description /Adaptivity/Markers/ErrorToleranceMarker

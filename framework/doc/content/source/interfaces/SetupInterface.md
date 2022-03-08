@@ -49,10 +49,10 @@ consider the snippet below (see [Output.C](/framework/src/outputs/Output.C)).
 !listing framework/src/outputs/Output.C start=ExecFlagEnum end=setDocString include-end=True
 
 First, the "execute_on" is retrieved for modification by using the "set" method. Notice, that a
-second boolean argument is passed to "set", this second flag enables "quite mode". Quite mode will
+second boolean argument is passed to "set", this second flag enables "quiet mode". Quiet mode will
 modify the parameter silently as if the default was the modified parameter. In this case, the
 parameter will be listed as un-modified by the user. That is, `InputParameters::isParamSetByUser`
-returns false, if quite mode is not enabled this method would return true.
+returns false, if quiet mode is not enabled this method would return true.
 
 Second, the two new execution flags are added (`EXEC_FINAL` and `EXEC_FAILED`), therefore these
 additional options are available to all classes (all Output objects in this case) that

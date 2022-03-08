@@ -1,4 +1,4 @@
-#JouleHeatingHeatGeneratedAux
+# JouleHeatingHeatGeneratedAux
 
 !syntax description /AuxKernels/JouleHeatingHeatGeneratedAux
 

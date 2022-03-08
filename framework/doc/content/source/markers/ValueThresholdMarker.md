@@ -1,4 +1,3 @@
-
 # ValueThresholdMarker
 
 !syntax description /Adaptivity/Markers/ValueThresholdMarker
