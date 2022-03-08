@@ -5,7 +5,6 @@
     input = 'phy.conservation.1phase.i'
     csvdiff = 'phy.conservation.1phase_out.csv'
     abs_zero = 1e-9
-    max_parallel = 1
     # because output has execute_on = 'final'
     recover = false
     ad_indexing_type = 'global'

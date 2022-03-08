@@ -4,7 +4,6 @@
     type = 'RunException'
     input = 'free_boundary.i'
     expect_err = "Deprecated component. Use FreeBoundary1Phase or FreeBoundary2Phase instead."
-    max_parallel = 1
     ad_indexing_type = 'global'
     design = 'FreeBoundary.md'
     requirement = 'The system shall report an error if the FreeBoundary component is used.'
@@ -22,7 +21,6 @@
     type = 'RunException'
     input = 'solid_wall.i'
     expect_err = "Deprecated component. Use SolidWall1Phase or SolidWall2Phase instead."
-    max_parallel = 1
     ad_indexing_type = 'global'
     design = 'SolidWall.md'
     requirement = 'The system shall report an error if the SolidWall component is used.'
@@ -49,7 +47,6 @@
     type = 'RunException'
     input = 'heat_source_volumetric.i'
     expect_err = "Deprecated component. Use HeatSourceVolumetric1Phase or HeatSourceVolumetric2Phase instead."
-    max_parallel = 1
     ad_indexing_type = 'global'
     design = 'HeatSourceVolumetric.md'
     requirement = 'The system shall report an error if the HeatSourceVolumetric component is used.'
