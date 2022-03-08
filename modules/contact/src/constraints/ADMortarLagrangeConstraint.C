@@ -15,15 +15,24 @@
 #include "SystemBase.h"
 #include "ADUtils.h"
 
+#include <algorithm>
+#include <vector>
+
 InputParameters
 ADMortarLagrangeConstraint::validParams()
 {
   InputParameters params = ADMortarConstraint::validParams();
+  params.addParam<Real>(
+      "derivative_threshold",
+      1.0e-17,
+      "Threshold to discard automatic differentiation derivatives. This number is chosen on the "
+      "order of the machine epsilon based on current experience.");
+
   return params;
 }
 
 ADMortarLagrangeConstraint::ADMortarLagrangeConstraint(const InputParameters & parameters)
-  : ADMortarConstraint(parameters)
+  : ADMortarConstraint(parameters), _ad_derivative_threshold(getParam<Real>("derivative_threshold"))
 {
 }
 
@@ -149,6 +158,46 @@ ADMortarLagrangeConstraint::computeJacobian(Moose::MortarType mortar_type)
     {
       _i = index;
       residuals_lower[index_lower] += _JxW_msm[_qp] * _coord[_qp] * computeQpResidual(mortar_type);
+
+      // Now it's more safe to do elementary operations involving 'residuals_lower' since it's more
+      // unlikely we'll run out of derivative container size.
+
+      // 1. Remove data (only data, indices will follow below)
+      std::remove_if(residuals_lower[index_lower].derivatives().nude_data().begin(),
+                     residuals_lower[index_lower].derivatives().nude_data().end(),
+                     [this](const auto & derivative_element)
+                     {
+                       const bool should_remove =
+                           std::abs(derivative_element) < _ad_derivative_threshold;
+                       return should_remove;
+                     });
+
+      // 3. Resize array
+      auto md_it = residuals_lower[index_lower].derivatives().nude_data().begin();
+      auto mi_it = residuals_lower[index_lower].derivatives().nude_indices().begin();
+
+      // Our old values:
+      auto d_it = residuals_lower[index_lower].derivatives().nude_data().begin();
+
+      // These lines below mostly taken from DynamicSparseNumberBase::sparsity_trim
+      for (auto i_it = residuals_lower[index_lower].derivatives().nude_indices().begin();
+           i_it != residuals_lower[index_lower].derivatives().nude_indices().end();
+           ++i_it, ++d_it)
+        if (*d_it)
+        {
+          *mi_it = *i_it;
+          *md_it = *d_it;
+          ++mi_it;
+          ++md_it;
+        }
+
+      const std::size_t n_indices =
+          md_it - residuals_lower[index_lower].derivatives().nude_data().begin();
+
+      residuals_lower[index_lower].derivatives().nude_indices().resize(n_indices);
+      residuals_lower[index_lower].derivatives().nude_data().resize(n_indices);
+
+      // 4. Increase lower-d index counter
       index_lower++;
     }
   }
