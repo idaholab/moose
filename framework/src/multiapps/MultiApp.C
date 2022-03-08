@@ -246,6 +246,10 @@ MultiApp::MultiApp(const InputParameters & parameters)
       parameters.isParamValid("cli_args_files"))
     paramError("cli_args",
                "'cli_args' and 'cli_args_files' cannot be specified simultaneously in MultiApp ");
+
+  if ((_reset_apps.size() > 0 && _reset_time == std::numeric_limits<Real>::max()) ||
+      (_reset_apps.size() == 0 && _reset_time < std::numeric_limits<Real>::max()))
+    mooseError("reset_time and reset_apps may only be specified together");
 }
 
 void
