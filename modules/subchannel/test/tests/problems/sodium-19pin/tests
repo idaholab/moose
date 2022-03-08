@@ -1,8 +1,9 @@
 [Tests]
   [test1]
     type = Exodiff
-    input = test37.i
-    exodiff = test37_out.e
+    input = test19.i
+    exodiff = test19_out.e
+    custom_cmp = 'test.exodiff'
     method = '!DBG'
     valgrind = NONE
     recover = false
