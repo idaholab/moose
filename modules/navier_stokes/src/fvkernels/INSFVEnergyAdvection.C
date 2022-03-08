@@ -35,18 +35,12 @@ INSFVEnergyAdvection::INSFVEnergyAdvection(const InputParameters & params)
 ADReal
 INSFVEnergyAdvection::computeQpResidual()
 {
-  ADReal adv_quant_interface;
-
-  const auto elem_face = elemFromFace();
-  const auto neighbor_face = neighborFromFace();
-
   const auto v = _rc_vel_provider.getVelocity(_velocity_interp_method, *_face_info, _tid);
-  Moose::FV::interpolate(_advected_interp_method,
-                         adv_quant_interface,
-                         _adv_quant(elem_face),
-                         _adv_quant(neighbor_face),
-                         v,
-                         *_face_info,
-                         true);
+  const auto adv_quant_interface =
+      Moose::FV::interpolate(_adv_quant,
+                             Moose::FV::makeFace(*_face_info,
+                                                 limiterType(_advected_interp_method),
+                                                 MetaPhysicL::raw_value(v) * _normal > 0,
+                                                 faceArgSubdomains()));
   return _normal * v * adv_quant_interface;
 }

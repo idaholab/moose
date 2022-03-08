@@ -10,12 +10,14 @@
 #include "INSFVAdvectionKernel.h"
 #include "NS.h"
 #include "MooseVariableFV.h"
+#include "RelationshipManager.h"
 
 InputParameters
 INSFVAdvectionKernel::validParams()
 {
   InputParameters params = FVFluxKernel::validParams();
-  MooseEnum advected_interp_method("average upwind skewness-corrected", "upwind");
+  MooseEnum advected_interp_method("average upwind sou min_mod vanLeer quick skewness-corrected",
+                                   "upwind");
   params.addParam<MooseEnum>(
       "advected_interp_method",
       advected_interp_method,
@@ -53,8 +55,46 @@ INSFVAdvectionKernel::INSFVAdvectionKernel(const InputParameters & params)
   else if (advected_interp_method == "upwind")
     _advected_interp_method = InterpMethod::Upwind;
   else
-    mooseError("Unrecognized interpolation type ",
-               static_cast<std::string>(advected_interp_method));
+  {
+    if (advected_interp_method == "sou")
+      _advected_interp_method = InterpMethod::SOU;
+    else if (advected_interp_method == "min_mod")
+      _advected_interp_method = InterpMethod::MinMod;
+    else if (advected_interp_method == "vanLeer")
+      _advected_interp_method = InterpMethod::VanLeer;
+    else if (advected_interp_method == "quick")
+      _advected_interp_method = InterpMethod::QUICK;
+    else
+      mooseError("Unrecognized interpolation type ",
+                 static_cast<std::string>(advected_interp_method));
+
+    if (_tid == 0)
+    {
+      auto & factory = _app.getFactory();
+
+      auto rm_params = factory.getValidParams("ElementSideNeighborLayers");
+
+      rm_params.set<std::string>("for_whom") = name();
+      rm_params.set<MooseMesh *>("mesh") = &const_cast<MooseMesh &>(_mesh);
+      rm_params.set<Moose::RelationshipManagerType>("rm_type") =
+          Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC |
+          Moose::RelationshipManagerType::COUPLING;
+      FVKernel::setRMParams(
+          _pars,
+          rm_params,
+          std::max((unsigned short)(3), _pars.get<unsigned short>("ghost_layers")));
+      mooseAssert(rm_params.areAllRequiredParamsValid(),
+                  "All relationship manager parameters should be valid.");
+
+      auto rm_obj = factory.create<RelationshipManager>(
+          "ElementSideNeighborLayers", name() + "_skew_correction", rm_params);
+
+      // Delete the resources created on behalf of the RM if it ends up not being added to the
+      // App.
+      if (!_app.addRelationshipManager(rm_obj))
+        factory.releaseSharedObjects(*rm_obj);
+    }
+  }
 
   const auto & velocity_interp_method = getParam<MooseEnum>("velocity_interp_method");
   if (velocity_interp_method == "average")
