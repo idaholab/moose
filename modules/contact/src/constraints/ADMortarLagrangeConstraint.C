@@ -59,12 +59,10 @@ ADMortarLagrangeConstraint::computeResidual(Moose::MortarType mortar_type)
   // Find out if nodes are on the surface
   for (_i = 0; _i < test_space_size; _i++)
   {
-    if (mortar_type == Moose::MortarType::Primary && !_interpolate_normals &&
-        !_primary_ip_lowerd_map.count(_i))
+    if (mortar_type == Moose::MortarType::Primary && !_primary_ip_lowerd_map.count(_i))
       continue;
 
-    if (mortar_type == Moose::MortarType::Secondary && !_interpolate_normals &&
-        !_secondary_ip_lowerd_map.count(_i))
+    if (mortar_type == Moose::MortarType::Secondary && !_secondary_ip_lowerd_map.count(_i))
       continue;
 
     is_index_on_lower_dimension.push_back(_i);
@@ -125,12 +123,10 @@ ADMortarLagrangeConstraint::computeJacobian(Moose::MortarType mortar_type)
 
   for (_i = 0; _i < test_space_size; _i++)
   {
-    if (mortar_type == Moose::MortarType::Primary && !_interpolate_normals &&
-        !_primary_ip_lowerd_map.count(_i))
+    if (mortar_type == Moose::MortarType::Primary && !_primary_ip_lowerd_map.count(_i))
       continue;
 
-    if (mortar_type == Moose::MortarType::Secondary && !_interpolate_normals &&
-        !_secondary_ip_lowerd_map.count(_i))
+    if (mortar_type == Moose::MortarType::Secondary && !_secondary_ip_lowerd_map.count(_i))
       continue;
 
     is_index_on_lower_dimension.push_back(_i);
@@ -142,25 +138,19 @@ ADMortarLagrangeConstraint::computeJacobian(Moose::MortarType mortar_type)
   residuals_lower.resize(number_indices_on_lowerd, 0);
 
   // Only populate nodal residuals on the primary/secondary surfaces
-  if (!_interpolate_normals)
+  // We do this regardless of whether we are interpolating normals. Use of this class
+  // implies we have Lagrange elements, so internal (high-dimensional) normals have no meaning
+  // and should be zero. As such, we decide to omit them and avoid possible spurious population of
+  // automatic differentiation-generated derivatives.
+  for (_qp = 0; _qp < _qrule_msm->n_points(); _qp++)
   {
-    for (_qp = 0; _qp < _qrule_msm->n_points(); _qp++)
+    unsigned int index_lower = 0;
+    for (const auto index : is_index_on_lower_dimension)
     {
-      unsigned int index_lower = 0;
-      for (const auto index : is_index_on_lower_dimension)
-      {
-        _i = index;
-        residuals_lower[index_lower] +=
-            _JxW_msm[_qp] * _coord[_qp] * computeQpResidual(mortar_type);
-        index_lower++;
-      }
+      _i = index;
+      residuals_lower[index_lower] += _JxW_msm[_qp] * _coord[_qp] * computeQpResidual(mortar_type);
+      index_lower++;
     }
-  }
-  else
-  {
-    for (_qp = 0; _qp < _qrule_msm->n_points(); _qp++)
-      for (_i = 0; _i < test_space_size; _i++)
-        residuals[_i] += _JxW_msm[_qp] * _coord[_qp] * computeQpResidual(mortar_type);
   }
 
   auto local_functor = [&](const std::vector<ADReal> & input_residuals,
@@ -224,12 +214,10 @@ ADMortarLagrangeConstraint::computeJacobian(Moose::MortarType mortar_type)
         // Find out if nodes are on the surface
         for (_i = 0; _i < test_space_size; _i++)
         {
-          if (mortar_type == Moose::MortarType::Primary && !_interpolate_normals &&
-              !_primary_ip_lowerd_map.count(_i))
+          if (mortar_type == Moose::MortarType::Primary && !_primary_ip_lowerd_map.count(_i))
             continue;
 
-          if (mortar_type == Moose::MortarType::Secondary && !_interpolate_normals &&
-              !_secondary_ip_lowerd_map.count(_i))
+          if (mortar_type == Moose::MortarType::Secondary && !_secondary_ip_lowerd_map.count(_i))
             continue;
 
           is_index_on_lower_dimension.push_back(_i);
@@ -255,8 +243,6 @@ ADMortarLagrangeConstraint::computeJacobian(Moose::MortarType mortar_type)
       }
     }
   };
-  if (_interpolate_normals)
-    _assembly.processDerivatives(residuals, dof_indices, _matrix_tags, local_functor);
-  else
-    _assembly.processDerivatives(residuals_lower, dof_indices_lower, _matrix_tags, local_functor);
+
+  _assembly.processDerivatives(residuals_lower, dof_indices_lower, _matrix_tags, local_functor);
 }
