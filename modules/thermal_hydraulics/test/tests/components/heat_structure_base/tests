@@ -5,21 +5,18 @@
     cli_args = "Components/hs/axial_region_names='region1 region2 region3'"
     exodiff = 'axial_regions_out.e'
     rel_err = 1e-5
-    max_parallel = 1
   []
 
   [phy:variable_init_t]
     type = Exodiff
     input = 'phy.variable_init_t.i'
     exodiff = 'phy.variable_init_t_out.e'
-    max_parallel = 1
   []
 
   [phy:sub_discretization]
     type = Exodiff
     input = 'phy.sub_discretization.i'
     exodiff = 'phy.sub_discretization_out.e'
-    max_parallel = 1
   []
 
   [inner_radial_boundary]
@@ -27,7 +24,6 @@
     input = 'inner_radial_boundary.i'
     csvdiff = 'inner_radial_boundary_out_test_vpp_0000.csv'
     recover = false
-    max_parallel = 1
   []
 
   [interior_axial_boundaries]
@@ -35,14 +31,12 @@
     input = 'interior_axial_boundaries.i'
     csvdiff = 'interior_axial_boundaries_out.csv'
     recover = false
-    max_parallel = 1
   []
 
   [2nd_order]
     type = 'RunApp'
     input = '2nd_order.i'
     expect_out = "Solve Converged"
-    max_parallel = 1
   []
 
   [err:missing_axial_regions_parameter]

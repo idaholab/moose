@@ -4,6 +4,5 @@
     input = 'heat_rate_radiation.i'
     csvdiff = 'heat_rate_radiation.csv'
     recover = false
-    max_parallel = 1
   []
 []
