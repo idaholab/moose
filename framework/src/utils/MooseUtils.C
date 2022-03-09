@@ -91,10 +91,12 @@ installedInputsDir(const std::string & app_name, const std::string & dir_name)
   std::string installed_path =
       pathjoin(Moose::getExecutablePath(), "..", "share", app_name, dir_name);
 
-  auto testroot = pathjoin(installed_path, "testroot");
-  if (pathExists(testroot) && checkFileReadable(testroot))
-    return installed_path;
-  return "";
+  auto test_root = pathjoin(installed_path, "testroot");
+  if (!pathExists(installed_path))
+    mooseError("Couldn't locate any installed inputs to copy in path: ", installed_path);
+
+  checkFileReadable(test_root);
+  return installed_path;
 }
 
 std::string

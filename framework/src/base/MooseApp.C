@@ -1428,18 +1428,13 @@ MooseApp::copyInputs()
     auto binname = appBinaryName();
     if (binname == "")
       mooseError("could not locate installed tests to run (unresolved binary/app name)");
+
     auto src_dir = MooseUtils::installedInputsDir(binname, dir_to_copy);
-    if (src_dir == "")
-      mooseError("couldn't locate any installed tests to copy");
-    if (!MooseUtils::checkFileReadable(src_dir, false, false))
-      mooseError(
-          "You don't have permissions to read/copy tests from their current installed location: \"",
-          src_dir,
-          "\"");
     auto dst_dir = binname + "_" + dir_to_copy;
     auto cmdname = Moose::getExecutableName();
     if (cmdname.find_first_of("/") != std::string::npos)
       cmdname = cmdname.substr(cmdname.find_first_of("/") + 1, std::string::npos);
+
     if (MooseUtils::pathExists(dst_dir))
       mooseError(
           "The directory \"./",
@@ -1458,7 +1453,7 @@ MooseApp::copyInputs()
     int ret = system(cmd.c_str());
     if (WIFEXITED(ret) && WEXITSTATUS(ret) != 0)
       mooseError("Failed to copy the requested directory.");
-    Moose::out << "Directory successfully copied into ./" << dst_dir << "\n";
+    Moose::out << "Directory successfully copied into ./" << dst_dir << '\n';
     return true;
   }
   return false;
