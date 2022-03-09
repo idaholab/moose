@@ -134,7 +134,7 @@ AdaptiveImportanceSampler::computeSample(dof_id_type /*row_index*/, dof_id_type 
     if (sample)
     {
       for (dof_id_type j = 0; j < _distributions.size(); ++j)
-        _prev_value[j] = Normal::quantile(_distributions[j]->cdf(_inputs[0][j]), 0, 1);
+        _prev_value[j] = Normal::quantile(_distributions[j]->cdf(_inputs[j][0]), 0, 1);
       Real acceptance_ratio = 0.0;
       for (dof_id_type i = 0; i < _distributions.size(); ++i)
         acceptance_ratio += std::log(Normal::pdf(_prev_value[i], 0, 1)) -
