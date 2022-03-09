@@ -63,7 +63,7 @@ offset = 1.0
 [Modules/TensorMechanics/DynamicMaster]
   [all]
     add_variables = true
-    alpha = 0.0
+    hht_alpha = 0.0
     beta = 0.25
     gamma = 0.5
     mass_damping_coefficient = 0.0
