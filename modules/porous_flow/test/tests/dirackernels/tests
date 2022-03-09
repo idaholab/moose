@@ -360,6 +360,28 @@
     design = 'porous_flow/tests/dirackernels/dirackernels_tests.md porous_flow/sinks.md PorousFlowPolyLineSink.md'
     issues = '#20018'
   [../]
+  [./pls02reporter_wrongSize]
+    type = RunException
+    input = 'pls02reporter.i'
+    cli_args = "Reporters/pls02file/real_vector_values='0.10; 0 0; 0 0; -0.25 0.25'"
+    expect_err = 'weight size = 1;  x_coord size = 2;  y_coord size = 2;  z_coord size = 2'
+    threading = '!pthreads'
+    requirement = 'PorousFlowPolyLineSink shall abort with an error if the reporter containing the coordinates is not the same size as the reporter containing weights'
+    design = 'PorousFlowPolyLineSink.md'
+    issues = '#20506'
+  [../]
+  [./pls02reporter_empty]
+    type = RunException
+    input = 'pls02reporter.i'
+    cli_args = "Reporters/pls02file/type=EmptyReporter"
+    expect_err = 'PorousFlowLineGeometry: No points found in input.'
+    allow_test_objects = true
+    threading = '!pthreads'
+    requirement = 'PorousFlowPolyLineSink shall abort with an error if the coordinates reporter is empty'
+    design = 'PorousFlowPolyLineSink.md'
+    issues = '#20506'
+  [../]
+
 
   [./bh02]
     type = 'CSVDiff'
