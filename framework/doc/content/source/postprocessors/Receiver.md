@@ -15,9 +15,9 @@ value with the "default" parameter.
 In this example, the value of the Receiver 'pp' in the subapp 'quad' is being populated by
 the value of a variable 'master_aux' in the main appplication.
 
-!listing test/tests/transfers/multiapp_variable_value_sample_transfer/master.i block=Postprocessors caption='Snippet from the subapp'
+!listing test/tests/transfers/multiapp_variable_value_sample_transfer/pp_sub.i block=Postprocessors caption='Snippet from the subapp showing the Receiver'
 
-!listing test/tests/transfers/multiapp_variable_value_sample_transfer/pp_sub.i block=Transfers caption='Snippet from the main app, populating the Receiver with a transfer of the variable value at different points'
+!listing test/tests/transfers/multiapp_variable_value_sample_transfer/pp_master.i block=Transfers caption='Snippet from the main app, populating the Receiver with a transfer of the variable value at different points'
 
 !syntax parameters /Postprocessors/Receiver
 

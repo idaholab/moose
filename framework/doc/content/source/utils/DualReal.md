@@ -29,7 +29,7 @@ options for `D` types, including:
 3. `SemiDynamicSparseNumberArray`
     - `std::array` as underlying storage for derivative data and indices
     - Fast because of static storage
-    - Indice storage allows sparse operations and hence flexibility
+    - Indices storage allows sparse operations and hence flexibility
     - Avoid looping over the whole size of the std::array by
       maintaining a dynamic size data member
 
@@ -40,7 +40,7 @@ storage type by running `./configure --with-derivative-type=sparse` in MOOSE's
 framework directory. The underlying derivative storage array size for both
 `NumberArray` and `SemiDynamicSparseNumberArray` can be modified by running
 `configure` with the option `--with-derivative-size=<n>` where `<n>` is the
-desired size of the container. By default, MOOSE is configured `--with-derivative-size=50`.
+desired size of the container. By default, MOOSE is configured `--with-derivative-size=53`.
 
 ## AD-Related Timings id=timings
 

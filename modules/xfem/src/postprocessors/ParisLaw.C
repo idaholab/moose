@@ -17,7 +17,7 @@
 
 #include "libmesh/system.h"
 
-registerMooseObject("MooseApp", ParisLaw);
+registerMooseObject("XFEMApp", ParisLaw);
 
 InputParameters
 ParisLaw::validParams()
