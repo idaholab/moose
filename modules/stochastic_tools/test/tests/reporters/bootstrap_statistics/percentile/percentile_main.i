@@ -54,7 +54,7 @@
 
 [Transfers/data]
   type = SamplerReporterTransfer
-  multi_app = sub
+  from_multi_app = sub
   from_reporter = 'const/num_vec'
   stochastic_reporter = storage
 []

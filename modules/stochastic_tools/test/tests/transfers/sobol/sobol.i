@@ -46,7 +46,7 @@
 [Transfers]
   [sub]
     type = SamplerParameterTransfer
-    multi_app = sub
+    to_multi_app = sub
     sampler = sobol
     parameters = 'BCs/left/value BCs/right/value'
     to_control = 'stochastic'

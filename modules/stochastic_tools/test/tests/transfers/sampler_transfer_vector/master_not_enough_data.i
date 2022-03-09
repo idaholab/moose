@@ -31,7 +31,7 @@
 [Transfers]
   [sub]
     type = SamplerParameterTransfer
-    multi_app = sub
+    to_multi_app = sub
     sampler = sample
     parameters = 'Materials/mat/prop_values'
     to_control = 'stochastic'

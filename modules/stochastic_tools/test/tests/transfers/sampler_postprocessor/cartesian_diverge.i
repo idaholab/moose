@@ -22,7 +22,7 @@
 [Transfers]
   [data]
     type = SamplerPostprocessorTransfer
-    multi_app = sub
+    from_multi_app = sub
     sampler = cartesian
     to_vector_postprocessor = storage
     from_postprocessor = avg

@@ -46,7 +46,7 @@
 [Transfers]
   [param]
     type = SamplerParameterTransfer
-    multi_app = sub
+    to_multi_app = sub
     sampler = sample
     parameters = 'Materials/k/prop_values Materials/alpha/prop_values Kernels/source/value BCs/left/value'
     to_control = 'stochastic'
@@ -71,7 +71,7 @@
   []
   [res]
     type = PODResidualTransfer
-    multi_app = sub
+    from_multi_app = sub
     sampler = sample
     trainer_name = "pod_rb"
     execute_on = 'final'
