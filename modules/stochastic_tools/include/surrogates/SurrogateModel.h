@@ -71,6 +71,9 @@ public:
   const T & getModelData(const std::string & data_name) const;
   ///@}
 
+  template <typename T>
+  T & setModelData(const std::string & data_name);
+
 private:
   /// Name used for model data. If a SurrogateTrainer object is supplied it's name is used. This
   /// results in the SurrogateModel having a reference to the training data so it is always current
@@ -92,6 +95,14 @@ SurrogateModel::getModelData(const std::string & data_name) const
 {
   RestartableData<T> & data_ref = getModelDataHelper<T>(data_name);
   return data_ref.get();
+}
+
+template <typename T>
+T &
+SurrogateModel::setModelData(const std::string & data_name)
+{
+  RestartableData<T> & data_ref = getModelDataHelper<T>(data_name);
+  return data_ref.set();
 }
 
 template <typename T>

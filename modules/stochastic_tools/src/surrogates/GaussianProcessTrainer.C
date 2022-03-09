@@ -62,9 +62,6 @@ GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameter
     _training_params(declareModelData<RealEigenMatrix>("_training_params")),
     _standardize_params(getParam<bool>("standardize_params")),
     _standardize_data(getParam<bool>("standardize_data")),
-    _covariance_function(
-        getCovarianceFunctionByName(getParam<UserObjectName>("covariance_function"))),
-    _covar_type(declareModelData<std::string>("_covar_type", _covariance_function->type())),
     _do_tuning(isParamValid("tune_parameters")),
     _tao_options(getParam<std::string>("tao_options")),
     _show_tao(getParam<bool>("show_tao")),
@@ -79,6 +76,7 @@ GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameter
     _n_params((_pvals.empty() && _pcols.empty()) ? _sampler.getNumberOfCols()
                                                  : (_pvals.size() + _pcols.size()))
 {
+  _gp_utils.linkCovarianceFunction(parameters);
   const auto & pnames = getParam<std::vector<ReporterName>>("predictors");
   for (unsigned int i = 0; i < pnames.size(); ++i)
     _pvals[i] = &getTrainingData<Real>(pnames[i]);
@@ -103,13 +101,13 @@ GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameter
   for (unsigned int ii = 0; ii < tune_parameters.size(); ++ii)
   {
     const auto & hp = tune_parameters[ii];
-    if (_covariance_function->isTunable(hp))
+    if (_gp_utils.covarFunction().isTunable(hp))
     {
       unsigned int size;
       Real min;
       Real max;
       // Get size and default min/max
-      _covariance_function->getTuningData(hp, size, min, max);
+      _gp_utils.covarFunction().getTuningData(hp, size, min, max);
       // Check for overridden min/max
       min = isParamValid("tuning_min") ? getParam<std::vector<Real>>("tuning_min")[ii] : min;
       max = isParamValid("tuning_max") ? getParam<std::vector<Real>>("tuning_max")[ii] : max;
@@ -176,11 +174,11 @@ GaussianProcessTrainer::postTrain()
     if (hyperparamTuning())
       mooseError("PETSc/TAO error in hyperparameter tuning.");
 
-  _covariance_function->computeCovarianceMatrix(
+  _gp_utils.covarFunction().computeCovarianceMatrix(
       _gp_utils.K(), _training_params, _training_params, true);
   _gp_utils.setupStoredMatrices(_training_data);
 
-  _covariance_function->buildHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
+  _gp_utils.covarFunction().buildHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
 }
 
 PetscErrorCode
@@ -230,7 +228,7 @@ GaussianProcessTrainer::hyperparamTuning()
     theta.print();
   }
 
-  _covariance_function->loadHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
+  _gp_utils.covarFunction().loadHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
 
   ierr = TaoDestroy(&tao);
   CHKERRQ(ierr);
@@ -242,7 +240,7 @@ PetscErrorCode
 GaussianProcessTrainer::FormInitialGuess(GaussianProcessTrainer * GP_ptr, Vec theta_vec)
 {
   libMesh::PetscVector<Number> theta(theta_vec, GP_ptr->_tao_comm);
-  _covariance_function->buildHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
+  _gp_utils.covarFunction().buildHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
   _gp_utils.mapToPetscVec(_tuning_data, _hyperparam_map, _hyperparam_vec_map, theta);
   return 0;
 }
@@ -266,8 +264,8 @@ GaussianProcessTrainer::FormFunctionGradient(Tao /*tao*/,
   libMesh::PetscVector<Number> grad(grad_vec, _tao_comm);
 
   _gp_utils.petscVecToMap(_tuning_data, _hyperparam_map, _hyperparam_vec_map, theta);
-  _covariance_function->loadHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
-  _covariance_function->computeCovarianceMatrix(
+  _gp_utils.covarFunction().loadHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
+  _gp_utils.covarFunction().computeCovarianceMatrix(
       _gp_utils.K(), _training_params, _training_params, true);
   _gp_utils.setupStoredMatrices(_training_data);
 
@@ -279,7 +277,7 @@ GaussianProcessTrainer::FormFunctionGradient(Tao /*tao*/,
     std::string hyper_param_name = iter->first;
     for (unsigned int ii = 0; ii < std::get<1>(iter->second); ++ii)
     {
-      _covariance_function->computedKdhyper(dKdhp, _training_params, hyper_param_name, ii);
+      _gp_utils.covarFunction().computedKdhyper(dKdhp, _training_params, hyper_param_name, ii);
       RealEigenMatrix tmp = alpha * dKdhp - _gp_utils.KCholeskyDecomp().solve(dKdhp);
       grad.set(std::get<0>(iter->second) + ii, -tmp.trace() / 2.0);
     }

@@ -8,9 +8,34 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "GaussianProcessUtils.h"
+#include "FEProblemBase.h"
 
 namespace StochasticTools
 {
+
+void
+GaussianProcessUtils::setupStoredMatrices(const RealEigenMatrix & input)
+{
+  _K_cho_decomp = _K.llt();
+  _K_results_solve = _K_cho_decomp.solve(input);
+}
+
+void
+GaussianProcessUtils::linkCovarianceFunction(const InputParameters & parameters)
+{
+  const auto & feproblem = *parameters.get<FEProblemBase *>("_fe_problem_base");
+  const auto & name = parameters.get<UserObjectName>("covariance_function");
+  std::vector<CovarianceFunctionBase *> models;
+  feproblem.theWarehouse()
+      .query()
+      .condition<AttribName>(name)
+      .condition<AttribSystem>("CovarianceFunctionBase")
+      .queryInto(models);
+  if (models.empty())
+    ::mooseError("Unable to find a CovarianceFunction object with the name '" + name + "'");
+
+  _covariance_function = models[0];
+}
 
 void
 GaussianProcessUtils::mapToPetscVec(
@@ -55,13 +80,6 @@ GaussianProcessUtils::petscVecToMap(
   }
 }
 
-void
-GaussianProcessUtils::setupStoredMatrices(const RealEigenMatrix & input)
-{
-  _K_cho_decomp = _K.llt();
-  _K_results_solve = _K_cho_decomp.solve(input);
-}
-
 } // StochasticTools namespace
 
 template <>
@@ -87,6 +105,7 @@ template <>
 void
 dataStore(std::ostream & stream, StochasticTools::GaussianProcessUtils & gp_utils, void * context)
 {
+  dataStore(stream, gp_utils.covarType(), context);
   dataStore(stream, gp_utils.K(), context);
   dataStore(stream, gp_utils.KResultsSolve(), context);
   dataStore(stream, gp_utils.KCholeskyDecomp(), context);
@@ -98,6 +117,7 @@ template <>
 void
 dataLoad(std::istream & stream, StochasticTools::GaussianProcessUtils & gp_utils, void * context)
 {
+  dataLoad(stream, gp_utils.covarType(), context);
   dataLoad(stream, gp_utils.K(), context);
   dataLoad(stream, gp_utils.KResultsSolve(), context);
   dataLoad(stream, gp_utils.KCholeskyDecomp(), context);

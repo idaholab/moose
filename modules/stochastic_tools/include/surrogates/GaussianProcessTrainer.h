@@ -20,8 +20,7 @@
 
 #include "GaussianProcessUtils.h"
 
-class GaussianProcessTrainer : public SurrogateTrainer,
-                               public CovarianceInterface
+class GaussianProcessTrainer : public SurrogateTrainer, public CovarianceInterface
 {
 public:
   static InputParameters validParams();
@@ -29,8 +28,6 @@ public:
   virtual void preTrain() override;
   virtual void train() override;
   virtual void postTrain() override;
-
-  CovarianceFunctionBase * getCovarPtr() const { return _covariance_function; }
 
   // Routine to perform hyperparameter tuning
   PetscErrorCode hyperparamTuning();
@@ -53,8 +50,9 @@ public:
   // loads PetscVec to stored hyperparam_vecs
   void vecToMap(libMesh::PetscVector<Number> & theta);
 
-private:
+  StochasticTools::GaussianProcessUtils & getGPUtils() { return _gp_utils; }
 
+private:
   StochasticTools::GaussianProcessUtils & _gp_utils;
 
   /// Paramaters (x) used for training, along with statistics
@@ -65,12 +63,6 @@ private:
 
   /// Switch for training data(y) standardization
   bool _standardize_data;
-
-  /// Covariance function object
-  CovarianceFunctionBase * _covariance_function;
-
-  /// Type of covariance function used for this surrogate
-  std::string & _covar_type;
 
   /// Flag to toggle hyperparameter tuning/optimization
   bool _do_tuning;

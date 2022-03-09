@@ -26,15 +26,18 @@ GaussianProcess::validParams()
 GaussianProcess::GaussianProcess(const InputParameters & parameters)
   : SurrogateModel(parameters),
     CovarianceInterface(parameters),
-    _gp_utils(getModelData<StochasticTools::GaussianProcessUtils>("_gp_utils")),
+    _gp_utils(
+        isParamValid("trainer")
+            ? dynamic_cast<GaussianProcessTrainer &>(getSurrogateTrainer("trainer")).getGPUtils()
+            : setModelData<StochasticTools::GaussianProcessUtils>("_gp_utils")),
     _training_params(getModelData<RealEigenMatrix>("_training_params")),
-    _covar_type(getModelData<std::string>("_covar_type")),
+    _covar_type(_gp_utils.getCovarType()),
     _hyperparam_map(getModelData<std::unordered_map<std::string, Real>>("_hyperparam_map")),
     _hyperparam_vec_map(
         getModelData<std::unordered_map<std::string, std::vector<Real>>>("_hyperparam_vec_map")),
     _covariance_function(
         isParamValid("trainer")
-            ? dynamic_cast<GaussianProcessTrainer &>(getSurrogateTrainer("trainer")).getCovarPtr()
+            ? &dynamic_cast<GaussianProcessTrainer &>(getSurrogateTrainer("trainer")).getGPUtils().covarFunction()
             : nullptr)
 {
 }

@@ -43,7 +43,7 @@ public:
 
 private:
 
-  const StochasticTools::GaussianProcessUtils & _gp_utils;
+  StochasticTools::GaussianProcessUtils & _gp_utils;
 
   /// Paramaters (x) used for training
   const RealEigenMatrix & _training_params;

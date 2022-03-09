@@ -13,7 +13,6 @@
 #include <Eigen/Dense>
 
 #include "CovarianceFunctionBase.h"
-#include "CovarianceInterface.h"
 
 namespace StochasticTools
 {
@@ -22,6 +21,10 @@ class GaussianProcessUtils
 {
 public:
   GaussianProcessUtils() = default;
+
+  void setupStoredMatrices(const RealEigenMatrix & input);
+
+  void linkCovarianceFunction(const InputParameters & parameters);
 
   void mapToPetscVec(
       const std::unordered_map<std::string, std::tuple<unsigned int, unsigned int, Real, Real>> &
@@ -39,21 +42,27 @@ public:
 
   const StochasticTools::Standardizer & getParamStandardizer() const { return _param_standardizer; }
   const StochasticTools::Standardizer & getDataStandardizer() const { return _data_standardizer; }
-
-  StochasticTools::Standardizer & paramStandardizer() { return _param_standardizer; }
-  StochasticTools::Standardizer & dataStandardizer() { return _data_standardizer; }
-
   const RealEigenMatrix & getK() const { return _K; }
   const RealEigenMatrix & getKResultsSolve() const { return _K_results_solve; }
   const Eigen::LLT<RealEigenMatrix> & getKCholeskyDecomp() const { return _K_cho_decomp; }
+  const CovarianceFunctionBase & getCovarFunction() const { return *_covariance_function; }
+  const std::string & getCovarType() const { return _covar_type; }
 
+  StochasticTools::Standardizer & paramStandardizer() { return _param_standardizer; }
+  StochasticTools::Standardizer & dataStandardizer() { return _data_standardizer; }
   RealEigenMatrix & K() { return _K; }
   RealEigenMatrix & KResultsSolve() { return _K_results_solve; }
   Eigen::LLT<RealEigenMatrix> & KCholeskyDecomp() { return _K_cho_decomp; }
-
-  void setupStoredMatrices(const RealEigenMatrix & input);
+  CovarianceFunctionBase & covarFunction() { return *_covariance_function; }
+  std::string & covarType() { return _covar_type; }
 
 protected:
+  /// Covariance function object
+  CovarianceFunctionBase * _covariance_function;
+
+  /// Type of covariance function used for this surrogate
+  std::string _covar_type;
+
   /// Standardizer for use with params (x)
   StochasticTools::Standardizer _param_standardizer;
 
