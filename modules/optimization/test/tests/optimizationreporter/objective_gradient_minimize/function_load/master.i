@@ -6,11 +6,11 @@
   parameter_names = 'parameter_results'
   num_values = '4'
   initial_condition = '100 1 -10 -10'
-  points = '0.2 0.2 0
-            0.8 0.6 0
-            0.2 1.4 0
-            0.8 1.8 0'
-  measured_values = '209 218 164 121'
+  measurement_points = '0.2 0.2 0
+                        0.8 0.6 0
+                        0.2 1.4 0
+                        0.8 1.8 0'
+  measurement_values = '209 218 164 121'
 []
 
 [Executioner]
@@ -59,22 +59,29 @@
     multi_app = forward
     direction = from_multiapp
     #the second vector in the reporterTransfer just writes to teh constantReporter below for the csvDiff in the test file
-    from_reporters = 'data_pt/temperature data_pt/temperature'
-    to_reporters = 'OptimizationReporter/simulation_values receiver/measured'
+    from_reporters = 'data_pt/temperature'
+    to_reporters = 'OptimizationReporter/simulation_values'
   []
   [toAdjoint]
     type = MultiAppReporterTransfer
     multi_app = adjoint
     direction = to_multiapp
-    from_reporters = 'OptimizationReporter/measurement_points OptimizationReporter/misfit_values'
-    to_reporters = 'misfit/measurement_points misfit/misfit_values'
+    from_reporters = 'OptimizationReporter/measurement_xcoord OptimizationReporter/measurement_ycoord OptimizationReporter/measurement_zcoord OptimizationReporter/misfit_values'
+    to_reporters = 'misfit/measurement_xcoord misfit/measurement_ycoord misfit/measurement_zcoord misfit/misfit_values'
   []
-  [fromAdjoint]
+  [toForward_measument]
+    type = MultiAppReporterTransfer
+    multi_app = forward
+    direction = to_multiapp
+    from_reporters = 'OptimizationReporter/measurement_xcoord OptimizationReporter/measurement_ycoord OptimizationReporter/measurement_zcoord'
+    to_reporters = 'measure_data/measurement_xcoord measure_data/measurement_ycoord measure_data/measurement_zcoord'
+  []
+  [fromadjoint]
     type = MultiAppReporterTransfer
     multi_app = adjoint
-    direction = from_multiapp
     from_reporters = 'adjoint_pt/adjoint_pt'
     to_reporters = 'OptimizationReporter/adjoint'
+    direction = from_multiapp
   []
 []
 

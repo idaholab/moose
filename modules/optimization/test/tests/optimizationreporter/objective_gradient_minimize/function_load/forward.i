@@ -18,8 +18,8 @@
     variable = temperature
   []
   [./heat_source]
-    type = MatHeatSource
-    material_property = volumetric_heat
+    type = HeatSource
+    function = volumetric_heat_func
     variable = temperature
   [../]
 []
@@ -66,11 +66,6 @@
     prop_names = thermal_conductivity
     prop_values = 5
   []
-  [volumetric_heat]
-    type = GenericFunctionMaterial
-    prop_names = 'volumetric_heat'
-    prop_values = volumetric_heat_func
-  []
 []
 
 [Executioner]
@@ -80,6 +75,36 @@
   nl_rel_tol = 1e-8
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
+[]
+
+[VectorPostprocessors]
+  [data_pt]
+    type = VppPointValueSampler
+    variable = temperature
+    reporter_name = measure_data
+  []
+  [horizontal]
+    type = LineValueSampler
+    variable = 'temperature'
+    start_point = '0 0.5 0'
+    end_point = '2 0.5 0'
+    num_points = 21
+    sort_by = x
+  [../]
+  [horizontal2]
+    type = LineValueSampler
+    variable = 'temperature'
+    start_point = '0 1.1 0'
+    end_point = '2 1.1 0'
+    num_points = 21
+    sort_by = x
+  [../]
+[]
+
+[Reporters]
+  [measure_data]
+    type=OptimizationData
+  []
 []
 
 [Outputs]

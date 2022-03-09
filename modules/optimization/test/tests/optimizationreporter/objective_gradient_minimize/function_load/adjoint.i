@@ -23,10 +23,12 @@ function_vals = '100 1 -10 -10'
 
 [DiracKernels]
   [pt]
-    type = OptimizationDataPointSource
+    type = ReporterPointSource
     variable = temperature
-    points = misfit/measurement_points
-    values = misfit/misfit_values
+    x_coord_name = misfit/measurement_xcoord
+    y_coord_name = misfit/measurement_ycoord
+    z_coord_name = misfit/measurement_zcoord
+    value_name = misfit/misfit_values
   []
 []
 
@@ -143,6 +145,13 @@ function_vals = '100 1 -10 -10'
 []
 
 [VectorPostprocessors]
+  [point_source]
+    type = ConstantVectorPostprocessor
+    vector_names = 'x y z value'
+    # value = '0.2 0.5 1.5 1.8; 0.5 0.5 0.5 0.5; 0 0 0 0; 10 10 10 10'
+    value = '0.2 0.5 1.5 1.8 0.3 0.6 0.9 1.2;0.5 0.5 0.5 0.5 1.1 1.1 1.1 1.1;0 0 0 0 0 0 0 0;10 10 10 10 10 10 10 10'
+    execute_on = LINEAR
+  []
   [adjoint_pt]
     type = VectorOfPostprocessors
     postprocessors = 'adjoint_pt_0 adjoint_pt_1 adjoint_pt_2 adjoint_pt_3'
