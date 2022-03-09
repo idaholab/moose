@@ -215,26 +215,27 @@ PeripheralRingMeshGenerator::generate()
   if (_input_mesh_external_bid != OUTER_SIDESET_ID)
     MooseMesh::changeBoundaryId(*input_mesh, _input_mesh_external_bid, OUTER_SIDESET_ID, true);
   mesh->prepare_for_use();
-  mesh->stitch_meshes(*input_mesh, OUTER_SIDESET_ID_ALT, _input_mesh_external_bid, TOLERANCE, true);
+  // Use input_mesh here to retain the subdomain name map
+  input_mesh->stitch_meshes(*mesh, _input_mesh_external_bid, OUTER_SIDESET_ID_ALT, TOLERANCE, true);
 
   // Assign subdomain name to the new block if applicable
   if (isParamValid("peripheral_ring_block_name"))
-    mesh->subdomain_name(_peripheral_ring_block_id) = _peripheral_ring_block_name;
+    input_mesh->subdomain_name(_peripheral_ring_block_id) = _peripheral_ring_block_name;
   // Assign customized external boundary id
   if (_external_boundary_id > 0)
-    MooseMesh::changeBoundaryId(*mesh, OUTER_SIDESET_ID, _external_boundary_id, false);
+    MooseMesh::changeBoundaryId(*input_mesh, OUTER_SIDESET_ID, _external_boundary_id, false);
   // Assign customized external boundary name
   if (!_external_boundary_name.empty())
   {
-    mesh->get_boundary_info().sideset_name(
+    input_mesh->get_boundary_info().sideset_name(
         _external_boundary_id > 0 ? _external_boundary_id : (boundary_id_type)OUTER_SIDESET_ID) =
         _external_boundary_name;
-    mesh->get_boundary_info().nodeset_name(
+    input_mesh->get_boundary_info().nodeset_name(
         _external_boundary_id > 0 ? _external_boundary_id : (boundary_id_type)OUTER_SIDESET_ID) =
         _external_boundary_name;
   }
 
-  return dynamic_pointer_cast<MeshBase>(mesh);
+  return dynamic_pointer_cast<MeshBase>(_input);
 }
 
 bool
