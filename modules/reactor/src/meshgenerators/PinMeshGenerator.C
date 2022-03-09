@@ -66,6 +66,10 @@ PinMeshGenerator::validParams()
 
   params.addParam<bool>(
       "quad_center_elements", true, "Whether the center elements are quad or triangular.");
+  params.addParamNamesToGroup("region_ids pin_type", "ID assigment");
+  params.addParamNamesToGroup("mesh_intervals ring_radii num_sectors pin_type",
+                              "Pin specifications");
+  params.addParamNamesToGroup("mesh_intervals duct_halfpitch num_sectors", "Duct specifications");
 
   params.addClassDescription("This PinMeshGenerator object is designed to generate pin-like "
                              "structures, with IDs, from a reactor geometry. "

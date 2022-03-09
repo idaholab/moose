@@ -59,6 +59,11 @@ AssemblyMeshGenerator::validParams()
                         "Determines if this is the final step in the geometry construction"
                         " and extrudes the 2D geometry to 3D. If this is true then this mesh "
                         "cannot be used in further mesh building in the Reactor workflow");
+  params.addParamNamesToGroup("background_region_id duct_region_ids assembly_type", "ID assigment");
+  params.addParamNamesToGroup("background_intervals background_region_id",
+                              "Background specifications");
+  params.addParamNamesToGroup("duct_intervals duct_region_ids duct_halfpitch",
+                              "Duct specifications");
 
   params.addClassDescription("This AssemblyMeshGenerator object is designed to generate "
                              "assembly-like structures, with IDs, from a reactor geometry. "
