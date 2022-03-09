@@ -1,4 +1,3 @@
-
 # ComboMarker
 
 !syntax description /Adaptivity/Markers/ComboMarker

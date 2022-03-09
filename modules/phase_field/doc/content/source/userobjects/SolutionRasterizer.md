@@ -1,4 +1,3 @@
-
 # SolutionRasterizer
 
 !syntax description /UserObjects/SolutionRasterizer

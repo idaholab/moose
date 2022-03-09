@@ -4,7 +4,6 @@
     input = 'phy.velocity_t_3eqn.i'
     exodiff = 'phy.velocity_t_3eqn.e'
     custom_cmp = 'rdg_1phase.exodiff'
-    max_parallel = 1
     group = 'outlet pipe 1phase rdg'
     max_time = 600
     ad_indexing_type = 'global'
@@ -13,14 +12,12 @@
     type = 'Exodiff'
     input = 'phy.reversed_flow.i'
     exodiff = 'phy.reversed_flow.e'
-    max_parallel = 1
     ad_indexing_type = 'global'
   []
   [clg:velocity_t_3eqn]
     type = 'CSVDiff'
     input = 'clg.velocity_t_3eqn.i'
     csvdiff = 'clg.velocity_t_3eqn_out.csv'
-    max_parallel = 1
     ad_indexing_type = 'global'
   []
 []

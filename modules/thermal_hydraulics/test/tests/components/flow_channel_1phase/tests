@@ -5,7 +5,6 @@
     input = 'phy.f_fn.3eqn.i'
     csvdiff = 'phy.f_fn.3eqn_out.csv'
     rel_err = 1e-10
-    max_parallel = 1
     ad_indexing_type = 'global'
   []
 
@@ -14,7 +13,6 @@
     input = 'phy.par_fn.i'
     csvdiff = 'phy.par_fn_out.csv'
     rel_err = 1e-10
-    max_parallel = 1
     ad_indexing_type = 'global'
   []
 
@@ -25,7 +23,6 @@
     custom_cmp = 'phy.sub_discretization.exodiff'
     # matching geometry at t=0
     recover = false
-    max_parallel = 1
     ad_indexing_type = 'global'
   []
 

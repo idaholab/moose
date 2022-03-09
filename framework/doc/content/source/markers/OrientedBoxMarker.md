@@ -1,4 +1,3 @@
-
 # OrientedBoxMarker
 
 !syntax description /Adaptivity/Markers/OrientedBoxMarker

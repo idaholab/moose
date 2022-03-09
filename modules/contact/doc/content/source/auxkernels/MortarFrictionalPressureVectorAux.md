@@ -1,11 +1,10 @@
-
 # MortarFrictionalPressureVectorAux
 
 ## Description
 
 The `MortarFrictionalPressureVectorAux` outputs the frictional pressure vector components using information from the mortar contact solution and its
 geometry. Nodal information is used to associate the two frictional Lagrange's multiplier vectors in three-dimensions with their corresponding
-tangent vectors generated at the time the mortar segment mesh is generated. This auxiliary kernel is automatically included in the `ContactAction` when the user selects three-dimensional, frictional mortar contact. 
+tangent vectors generated at the time the mortar segment mesh is generated. This auxiliary kernel is automatically included in the `ContactAction` when the user selects three-dimensional, frictional mortar contact.
 The computation of the frictional pressure vector can be expressed as:
 
 \begin{equation*}

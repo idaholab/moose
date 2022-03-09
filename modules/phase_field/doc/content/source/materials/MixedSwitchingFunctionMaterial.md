@@ -1,4 +1,3 @@
-
 # MixedSwitchingFunctionMaterial
 
 !syntax description /Materials/MixedSwitchingFunctionMaterial

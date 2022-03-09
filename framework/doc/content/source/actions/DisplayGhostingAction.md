@@ -1,4 +1,4 @@
-#DisplayGhostingAction
+# DisplayGhostingAction
 
 The `DisplayGhostingAction` is for outputting the ghosting of your simulation. In MOOSE, we attempt
 to ghost only the minimum amount of data for running the simulation. In order to know what ghosting

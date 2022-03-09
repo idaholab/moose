@@ -1,4 +1,3 @@
-
 # WeakGradientBC
 
 !syntax description /BCs/WeakGradientBC

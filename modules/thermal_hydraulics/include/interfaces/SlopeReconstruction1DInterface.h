@@ -72,6 +72,9 @@ protected:
   virtual std::vector<GenericReal<is_ad>>
   computeElementPrimitiveVariables(const Elem * elem) const = 0;
 
+  /// MooseObject this interface is extending
+  const MooseObject * const _moose_object;
+
   /// Slope reconstruction scheme
   const ESlopeReconstructionType _scheme;
 
@@ -134,7 +137,8 @@ SlopeReconstruction1DInterface<is_ad>::validParams()
 template <bool is_ad>
 SlopeReconstruction1DInterface<is_ad>::SlopeReconstruction1DInterface(
     const MooseObject * moose_object)
-  : _scheme(THM::stringToEnum<ESlopeReconstructionType>(
+  : _moose_object(moose_object),
+    _scheme(THM::stringToEnum<ESlopeReconstructionType>(
         moose_object->parameters().get<MooseEnum>("scheme")))
 {
 }
@@ -149,7 +153,11 @@ SlopeReconstruction1DInterface<is_ad>::getElementSlopes(const Elem * elem) const
 
   std::vector<const Elem *> neighbors(_n_side, nullptr);
   for (unsigned int i_side = 0; i_side < _n_side; i_side++)
-    neighbors[i_side] = elem->neighbor_ptr(i_side);
+  {
+    auto neighbor = elem->neighbor_ptr(i_side);
+    if (neighbor && (neighbor->processor_id() == _moose_object->processor_id()))
+      neighbors[i_side] = neighbor;
+  }
 
   // get this element's position and solution
   const Point x_elem = elem->vertex_average();

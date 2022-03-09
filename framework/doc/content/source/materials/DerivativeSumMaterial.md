@@ -1,4 +1,3 @@
-
 # DerivativeSumMaterial
 
 !syntax description /Materials/DerivativeSumMaterial

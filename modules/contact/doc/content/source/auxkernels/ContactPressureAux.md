@@ -1,4 +1,3 @@
-
 # ContactPressureAux
 
 ## Description
