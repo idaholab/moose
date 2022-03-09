@@ -5,8 +5,12 @@
 ## Overview
 
 This object populates an elemental auxiliary variable by evaluating a functor
-with an element argument. This functor may be a material property, a function or another
-variable.
+with a cell-center/elemental or quadrature-point based argument. This
+functor may be a material property, a function or another variable. A cell-center/elemental
+argument should be used when a cell-averaged quantity (like for finite volume
+computations) is desired. Cell-center/elemental vs. quadrature-point based
+evaluations are controlled by the `use_qp_arg` boolean parameter. By default the
+parameter is `false`.
 
 !alert note
 The version of this auxiliary kernel for automatic differentiation (AD) functors

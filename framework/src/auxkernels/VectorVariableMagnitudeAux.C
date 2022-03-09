@@ -30,6 +30,7 @@ VectorVariableMagnitudeAux::VectorVariableMagnitudeAux(const InputParameters & p
 Real
 VectorVariableMagnitudeAux::computeValue()
 {
-  return std::sqrt(std::pow(_variable_value[_qp](0), 2) + std::pow(_variable_value[_qp](1), 2) +
-                   std::pow(_variable_value[_qp](2), 2));
+  return std::sqrt(Utility::pow<2>(_variable_value[_qp](0)) +
+                   Utility::pow<2>(_variable_value[_qp](1)) +
+                   Utility::pow<2>(_variable_value[_qp](2)));
 }

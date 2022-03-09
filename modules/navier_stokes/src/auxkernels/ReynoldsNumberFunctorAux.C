@@ -21,12 +21,6 @@ ReynoldsNumberFunctorAux::validParams()
   params.addRequiredParam<MooseFunctorName>(NS::speed, "The fluid speed");
   params.addRequiredParam<MooseFunctorName>(NS::density, "The fluid density");
   params.addRequiredParam<MooseFunctorName>(NS::mu, "The fluid dynamic viscosity");
-  params.addParam<bool>(
-      "use_qp_arg",
-      false,
-      "Whether to use the quadrature point based functor agument to evaluate the functors. If "
-      "false, then the argument is element-based, which is more appropriate for finite volume. A "
-      "value of true is more appropriate for finite element computations.");
   return params;
 }
 
@@ -35,8 +29,13 @@ ReynoldsNumberFunctorAux::ReynoldsNumberFunctorAux(const InputParameters & param
     _speed(getFunctor<ADReal>(NS::speed)),
     _rho(getFunctor<ADReal>(NS::density)),
     _mu(getFunctor<ADReal>(NS::mu)),
-    _use_qp_arg(getParam<bool>("use_qp_arg"))
+    _use_qp_arg(dynamic_cast<MooseVariableFE<Real> *>(&_var))
 {
+  if (!_use_qp_arg && !dynamic_cast<MooseVariableFV<Real> *>(&_var))
+    paramError(
+        "variable",
+        "The variable must be a non-vector, non-array finite-volume/finite-element variable.");
+
   if (isNodal())
     mooseError("This AuxKernel only supports Elemental fields");
 }

@@ -12,8 +12,8 @@
 #include "AuxKernel.h"
 
 /**
- * Evaluate a functor (functor material property, function or variable) with the element as the
- * functor argument
+ * Evaluate a functor (functor material property, function or variable) with either the cell-center
+ * or quadrature point as the functor argument
  */
 template <bool is_ad>
 class FunctorElementalAuxTempl : public AuxKernel
@@ -31,6 +31,11 @@ protected:
 
   /// Factor to multiply the functor with
   const Moose::Functor<GenericReal<is_ad>> & _factor;
+
+  /// Whether to use a quadrature-based functor argument, appropriate for finite element
+  /// evaluations. If false, use a cell-center functor argument appropriate for finite volume
+  /// calculations
+  const bool _use_qp_arg;
 };
 
 typedef FunctorElementalAuxTempl<false> FunctorElementalAux;

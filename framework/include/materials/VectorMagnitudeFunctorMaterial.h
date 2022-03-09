@@ -25,11 +25,14 @@ public:
 
 protected:
   /// The x-component functor
-  const Moose::Functor<GenericReal<is_ad>> & _x;
+  const Moose::Functor<GenericReal<is_ad>> * const _x;
   /// The y-component functor
   const Moose::Functor<GenericReal<is_ad>> & _y;
   /// The z-component functor
   const Moose::Functor<GenericReal<is_ad>> & _z;
+
+  /// Vector functor
+  const Moose::Functor<VectorValue<GenericReal<is_ad>>> * const _vector_functor;
 };
 
 typedef VectorMagnitudeFunctorMaterialTempl<false> VectorMagnitudeFunctorMaterial;
