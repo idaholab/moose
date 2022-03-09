@@ -58,6 +58,11 @@ ModularGapConductanceConstraint::ModularGapConductanceConstraint(const InputPara
     _adjusted_length(0.0)
 
 {
+#ifndef MOOSE_GLOBAL_AD_INDEXING
+  mooseError("ModularGapConductanceConstraint relies on use of the global indexing container "
+             "in order to make its implementation feasible");
+#endif
+
   if (_n_disp && !getParam<bool>("use_displaced_mesh"))
     paramWarning("displacements",
                  "You are coupling displacement variables but are evaluating the gap width on the "
@@ -318,11 +323,42 @@ ModularGapConductanceConstraint::computeQpResidual(Moose::MortarType mortar_type
       // ...which uses the derivative vector of the primary and secondary displacements as
       // an approximation of the true phys points derivatives when the mesh is displacing
       if (_displaced)
+      {
+        // Trim interior node variable derivatives
+        const auto & primary_ip_lowerd_map = amg().getPrimaryIpToLowerElementMap(
+            *_lower_primary_elem, *_lower_primary_elem->interior_parent(), *_lower_secondary_elem);
+        const auto & secondary_ip_lowerd_map =
+            amg().getSecondaryIpToLowerElementMap(*_lower_secondary_elem);
+
+        std::array<ADReal, 3> primary_disp;
+        std::array<ADReal, 3> secondary_disp;
+
         for (unsigned int i = 0; i < _n_disp; ++i)
         {
-          ad_phys_points_primary(i).derivatives() = (*_disp_primary[i])[_qp].derivatives();
-          ad_phys_points_secondary(i).derivatives() = (*_disp_secondary[i])[_qp].derivatives();
+          primary_disp[i] = (*_disp_primary[i])[_qp];
+          secondary_disp[i] = (*_disp_secondary[i])[_qp];
         }
+
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+        std::array<MooseVariable *, 3> var_array{
+            {getVar("displacements", 0),
+             getVar("displacements", 1),
+             _n_disp == 3 ? getVar("displacements", 2) : nullptr}};
+        trimInteriorNodeDerivatives(
+            primary_ip_lowerd_map, var_array, primary_disp[0], primary_disp[1], primary_disp[2]);
+        trimInteriorNodeDerivatives(secondary_ip_lowerd_map,
+                                    var_array,
+                                    secondary_disp[0],
+                                    secondary_disp[1],
+                                    secondary_disp[2]);
+#endif
+        // Populate quantities with trimmed derivatives
+        for (unsigned int i = 0; i < _n_disp; ++i)
+        {
+          ad_phys_points_primary(i).derivatives() = primary_disp[i].derivatives();
+          ad_phys_points_secondary(i).derivatives() = secondary_disp[i].derivatives();
+        }
+      }
 
       // compute an ADReal gap width to pass to each gap flux model
       _gap_width = (ad_phys_points_primary - ad_phys_points_secondary) * _normals[_qp];

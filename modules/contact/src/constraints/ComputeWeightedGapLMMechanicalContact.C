@@ -97,16 +97,36 @@ ADReal ComputeWeightedGapLMMechanicalContact::computeQpResidual(Moose::MortarTyp
 void
 ComputeWeightedGapLMMechanicalContact::computeQpProperties()
 {
+  // Trim interior node variable derivatives
+  const auto & primary_ip_lowerd_map = amg().getPrimaryIpToLowerElementMap(
+      *_lower_primary_elem, *_lower_primary_elem->interior_parent(), *_lower_secondary_elem);
+  const auto & secondary_ip_lowerd_map =
+      amg().getSecondaryIpToLowerElementMap(*_lower_secondary_elem);
+
+  ADReal prim_x = _primary_disp_x[_qp];
+  ADReal prim_y = _primary_disp_y[_qp];
+  ADReal prim_z = _primary_disp_z ? (*_primary_disp_z)[_qp] : 0.0;
+
+  ADReal sec_x = _secondary_disp_x[_qp];
+  ADReal sec_y = _secondary_disp_y[_qp];
+  ADReal sec_z = _secondary_disp_z ? (*_secondary_disp_z)[_qp] : 0.0;
+
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+  std::array<MooseVariable *, 3> var_array{
+      {getVar("disp_x", 0), getVar("disp_y", 0), _has_disp_z ? getVar("disp_z", 0) : nullptr}};
+  trimInteriorNodeDerivatives(primary_ip_lowerd_map, var_array, prim_x, prim_y, prim_z);
+  trimInteriorNodeDerivatives(secondary_ip_lowerd_map, var_array, sec_x, sec_y, sec_z);
+#endif
+
+  // Compute gap vector
   ADRealVectorValue gap_vec = _phys_points_primary[_qp] - _phys_points_secondary[_qp];
 
-  gap_vec(0).derivatives() =
-      _primary_disp_x[_qp].derivatives() - _secondary_disp_x[_qp].derivatives();
-  gap_vec(1).derivatives() =
-      _primary_disp_y[_qp].derivatives() - _secondary_disp_y[_qp].derivatives();
+  gap_vec(0).derivatives() = prim_x.derivatives() - sec_x.derivatives();
+  gap_vec(1).derivatives() = prim_y.derivatives() - sec_y.derivatives();
   if (_has_disp_z)
-    gap_vec(2).derivatives() =
-        (*_primary_disp_z)[_qp].derivatives() - (*_secondary_disp_z)[_qp].derivatives();
+    gap_vec(2).derivatives() = prim_z.derivatives() - sec_z.derivatives();
 
+  // Compute integration point quantities
   if (_interpolate_normals)
     _qp_gap = gap_vec * (_normals[_qp] * _JxW_msm[_qp] * _coord[_qp]);
   else

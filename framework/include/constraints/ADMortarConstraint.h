@@ -36,6 +36,24 @@ protected:
    */
   void computeJacobian(Moose::MortarType mortar_type) override;
 
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+
+  /**
+   * Get rid of AD derivative entries by dof index
+   */
+  void trimDerivative(const dof_id_type & remove_derivative_index, ADReal & var);
+
+  /**
+   * Get rid of interior node variable's derivatives
+   */
+  void
+  trimInteriorNodeDerivatives(const std::map<unsigned int, unsigned int> & primary_ip_lowerd_map,
+                              std::array<MooseVariable *, 3> & moose_var,
+                              ADReal & var1,
+                              ADReal & var2,
+                              ADReal & var3);
+#endif
+
 private:
   /// A dummy object useful for constructing _lambda when not using Lagrange multipliers
   const ADVariableValue _lambda_dummy;

@@ -301,7 +301,7 @@ offset = -0.19
 []
 
 [Postprocessors]
-  active = 'num_nl cumulative contact'
+  active = 'contact'
   [num_nl]
     type = NumNonlinearIterations
   []

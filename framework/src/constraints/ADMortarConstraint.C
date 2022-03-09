@@ -170,3 +170,61 @@ ADMortarConstraint::computeJacobian(Moose::MortarType mortar_type)
 
   _assembly.processDerivatives(residuals, dof_indices, _matrix_tags, local_functor);
 }
+
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+void
+ADMortarConstraint::trimDerivative(const dof_id_type & remove_derivative_index, ADReal & var)
+{
+  auto md_it = var.derivatives().nude_data().begin();
+  auto mi_it = var.derivatives().nude_indices().begin();
+
+  auto d_it = var.derivatives().nude_data().begin();
+
+  for (auto i_it = var.derivatives().nude_indices().begin();
+       i_it != var.derivatives().nude_indices().end();
+       ++i_it, ++d_it)
+    if (*i_it != remove_derivative_index)
+    {
+      *mi_it = *i_it;
+      *md_it = *d_it;
+      ++mi_it;
+      ++md_it;
+    }
+
+  std::size_t n_indices = md_it - var.derivatives().nude_data().begin();
+  var.derivatives().nude_indices().resize(n_indices);
+  var.derivatives().nude_data().resize(n_indices);
+}
+
+void
+ADMortarConstraint::trimInteriorNodeDerivatives(
+    const std::map<unsigned int, unsigned int> & primary_ip_lowerd_map,
+    std::array<MooseVariable *, 3> & moose_var,
+    ADReal & var1,
+    ADReal & var2,
+    ADReal & var3)
+{
+  // Remove interior node variable's derivatives from AD objects.
+  for (const auto i_primary : make_range(_test_primary.size()))
+    if (!primary_ip_lowerd_map.count(i_primary))
+    {
+      if (moose_var[0])
+      {
+        const auto & remove_derivative_index_x = moose_var[0]->dofIndicesNeighbor()[i_primary];
+        trimDerivative(remove_derivative_index_x, var1);
+      }
+
+      if (moose_var[1])
+      {
+        const auto & remove_derivative_index_y = moose_var[1]->dofIndicesNeighbor()[i_primary];
+        trimDerivative(remove_derivative_index_y, var2);
+      }
+
+      if (moose_var[2])
+      {
+        const auto & remove_derivative_index_z = moose_var[2]->dofIndicesNeighbor()[i_primary];
+        trimDerivative(remove_derivative_index_z, var3);
+      }
+    }
+}
+#endif

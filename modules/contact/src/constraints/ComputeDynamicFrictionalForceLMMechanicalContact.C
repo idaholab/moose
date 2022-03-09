@@ -107,26 +107,34 @@ ComputeDynamicFrictionalForceLMMechanicalContact::computeQpProperties()
   // Compute the value of _qp_gap
   ComputeDynamicWeightedGapLMMechanicalContact::computeQpProperties();
 
+  // Trim interior node variable derivatives
+  const auto & primary_ip_lowerd_map = amg().getPrimaryIpToLowerElementMap(
+      *_lower_primary_elem, *_lower_primary_elem->interior_parent(), *_lower_secondary_elem);
+  const auto & secondary_ip_lowerd_map =
+      amg().getSecondaryIpToLowerElementMap(*_lower_secondary_elem);
+
+  ADReal prim_x_dot = _primary_x_dot[_qp];
+  ADReal prim_y_dot = _primary_y_dot[_qp];
+  ADReal prim_z_dot = _primary_z_dot ? (*_primary_z_dot)[_qp] : 0.0;
+
+  ADReal sec_x_dot = _secondary_x_dot[_qp];
+  ADReal sec_y_dot = _secondary_y_dot[_qp];
+  ADReal sec_z_dot = _secondary_z_dot ? (*_secondary_z_dot)[_qp] : 0.0;
+
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+  std::array<MooseVariable *, 3> var_array{
+      {getVar("disp_x", 0), getVar("disp_y", 0), _3d ? getVar("disp_z", 0) : nullptr}};
+  trimInteriorNodeDerivatives(primary_ip_lowerd_map, var_array, prim_x_dot, prim_y_dot, prim_z_dot);
+  trimInteriorNodeDerivatives(secondary_ip_lowerd_map, var_array, sec_x_dot, sec_y_dot, sec_z_dot);
+#endif
+
+  // Compute required constraint quantities with trimmed derivatives
   ADRealVectorValue relative_velocity;
 
   if (_3d)
-    relative_velocity = {_secondary_x_dot[_qp] - _primary_x_dot[_qp],
-                         _secondary_y_dot[_qp] - _primary_y_dot[_qp],
-                         (*_secondary_z_dot)[_qp] - (*_primary_z_dot)[_qp]};
+    relative_velocity = {sec_x_dot - prim_x_dot, sec_y_dot - prim_y_dot, sec_z_dot - prim_z_dot};
   else
-    relative_velocity = {_secondary_x_dot[_qp] - _primary_x_dot[_qp],
-                         _secondary_y_dot[_qp] - _primary_y_dot[_qp],
-                         0.0};
-
-  // Add derivative information
-  relative_velocity(0).derivatives() =
-      _secondary_x_dot[_qp].derivatives() - _primary_x_dot[_qp].derivatives();
-  relative_velocity(1).derivatives() =
-      _secondary_y_dot[_qp].derivatives() - _primary_y_dot[_qp].derivatives();
-
-  if (_3d)
-    relative_velocity(2).derivatives() =
-        (*_secondary_z_dot)[_qp].derivatives() - (*_primary_z_dot)[_qp].derivatives();
+    relative_velocity = {sec_x_dot - prim_x_dot, sec_y_dot - prim_y_dot, 0.0};
 
   _qp_tangential_velocity_nodal = relative_velocity * (_JxW_msm[_qp] * _coord[_qp]);
 }
