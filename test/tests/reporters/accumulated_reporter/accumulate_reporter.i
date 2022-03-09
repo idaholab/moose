@@ -33,6 +33,8 @@
 [Reporters]
   [rep]
     type = ConstantReporter
+    dof_id_type_names  = 'dofid'
+    dof_id_type_values = '1'
     integer_names  = 'int'
     integer_values = '1'
     string_names  = 'str'
@@ -41,11 +43,13 @@
     integer_vector_values = '3 4'
     string_vector_names  = 'str_vec'
     string_vector_values = 'five six seven eight'
+    dof_id_type_vector_names  = 'dofid_vec'
+    dof_id_type_vector_values = '1 2 3'
     outputs = none
   []
   [accumulate]
     type = AccumulateReporter
-    reporters = 'pp/value vpp/fun rep/int rep/str rep/int_vec rep/str_vec'
+    reporters = 'pp/value vpp/fun rep/int rep/str rep/int_vec rep/str_vec rep/dofid rep/dofid_vec'
   []
 []
 

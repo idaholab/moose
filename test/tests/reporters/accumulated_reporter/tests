@@ -1,12 +1,12 @@
 [Tests]
   design = 'AccumulateReporter.md'
-  issues = '#18469'
+  issues = '#18469 #20467'
 
   [accumulate_reporter]
     type = 'JSONDiff'
     input = 'accumulate_reporter.i'
     jsondiff = 'accumulate_reporter_out.json'
-
+    skip_keys = 'type'
     requirement = 'The system shall be able to accumulate reporter values over time steps into a vector reporter value.'
   []
 []
