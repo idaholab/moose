@@ -19,7 +19,6 @@ PODResidualTransfer::validParams()
   InputParameters params = PODSamplerSolutionTransfer::validParams();
   params.addClassDescription("Transfers residual vectors from the sub-application to a "
                              "a container in the Trainer object.");
-  params.set<MultiMooseEnum>("direction") = "from_multiapp";
   params.suppressParameter<MultiMooseEnum>("direction");
   return params;
 }
@@ -27,6 +26,12 @@ PODResidualTransfer::validParams()
 PODResidualTransfer::PODResidualTransfer(const InputParameters & parameters)
   : PODSamplerSolutionTransfer(parameters)
 {
+  // Handle deprecated parameter
+  if (isParamValid("multi_app"))
+    _from_multi_app = _fe_problem.getMultiApp(getParam<MultiAppName>("multi_app"));
+
+  if (_to_multi_app)
+    paramError("to_multi_app", "To and between multiapp directions are not implemented");
 }
 
 void

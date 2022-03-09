@@ -55,7 +55,6 @@ SamplerPostprocessorTransfer::validParams()
                         "If true, whatever the value the sub app has upon exitting is used. "
                         "If false, NaN will be transferred.");
 
-  params.set<MultiMooseEnum>("direction") = "from_multiapp";
   params.suppressParameter<MultiMooseEnum>("direction");
   return params;
 }
@@ -69,6 +68,12 @@ SamplerPostprocessorTransfer::SamplerPostprocessorTransfer(const InputParameters
                    : getVectorNamesHelper(_name, _sub_pp_names)),
     _keep_diverge(getParam<bool>("keep_solve_fail_value"))
 {
+  // Handle deprecated parameter
+  if (isParamValid("multi_app"))
+    _from_multi_app = _fe_problem.getMultiApp(getParam<MultiAppName>("multi_app"));
+
+  if (_to_multi_app)
+    paramError("to_multi_app", "To and between multiapp directions are not implemented");
 }
 
 const std::vector<VectorPostprocessorName> &

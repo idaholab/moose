@@ -34,7 +34,6 @@ SamplerReporterTransfer::validParams()
                                "Use the supplied string as the prefix for reporter "
                                "name rather than the transfer name.");
 
-  params.set<MultiMooseEnum>("direction") = "from_multiapp";
   params.suppressParameter<MultiMooseEnum>("direction");
   return params;
 }
@@ -44,6 +43,12 @@ SamplerReporterTransfer::SamplerReporterTransfer(const InputParameters & paramet
     ReporterTransferInterface(this),
     _sub_reporter_names(getParam<std::vector<ReporterName>>("from_reporter"))
 {
+  // Handle deprecated parameter
+  if (isParamValid("multi_app"))
+    _from_multi_app = _fe_problem.getMultiApp(getParam<MultiAppName>("multi_app"));
+
+  if (_to_multi_app)
+    paramError("to_multi_app", "To and between multiapp directions are not implemented");
 }
 
 void

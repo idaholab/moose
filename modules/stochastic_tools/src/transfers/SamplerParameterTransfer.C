@@ -25,7 +25,6 @@ SamplerParameterTransfer::validParams()
 {
   InputParameters params = StochasticToolsTransfer::validParams();
   params.addClassDescription("Copies Sampler data to a SamplerReceiver object.");
-  params.set<MultiMooseEnum>("direction") = "to_multiapp";
   params.suppressParameter<MultiMooseEnum>("direction");
   params.addParam<std::vector<std::string>>(
       "parameters",
@@ -43,6 +42,12 @@ SamplerParameterTransfer::SamplerParameterTransfer(const InputParameters & param
     _parameter_names(getParam<std::vector<std::string>>("parameters")),
     _receiver_name(getParam<std::string>("to_control"))
 {
+  // Handle deprecated parameter
+  if (isParamValid("multi_app"))
+    _to_multi_app = _fe_problem.getMultiApp(getParam<MultiAppName>("multi_app"));
+
+  if (_from_multi_app)
+    paramError("from_multi_app", "From and between multiapp directions are not implemented");
 }
 
 void

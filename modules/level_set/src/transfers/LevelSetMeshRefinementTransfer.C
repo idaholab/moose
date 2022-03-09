@@ -44,7 +44,7 @@ LevelSetMeshRefinementTransfer::LevelSetMeshRefinementTransfer(const InputParame
     _to_multi_app = _fe_problem.getMultiApp(getParam<MultiAppName>("multi_app"));
 
   if (_from_multi_app)
-    paramError("from_multiapp", "from_multiapp or between_multiapp transfers are not supported");
+    paramError("from_multi_app", "from_multiapp or between_multiapp transfers are not supported");
 }
 
 void
