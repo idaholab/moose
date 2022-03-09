@@ -58,12 +58,8 @@ GaussianProcessTrainer::validParams()
 GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameters)
   : SurrogateTrainer(parameters),
     CovarianceInterface(parameters),
+    _gp_utils(declareModelData<StochasticTools::GaussianProcessUtils>("_gp_utils")),
     _training_params(declareModelData<RealEigenMatrix>("_training_params")),
-    _param_standardizer(declareModelData<StochasticTools::Standardizer>("_param_standardizer")),
-    _data_standardizer(declareModelData<StochasticTools::Standardizer>("_data_standardizer")),
-    _K(declareModelData<RealEigenMatrix>("_K")),
-    _K_results_solve(declareModelData<RealEigenMatrix>("_K_results_solve")),
-    _K_cho_decomp(declareModelData<Eigen::LLT<RealEigenMatrix>>("_K_cho_decomp")),
     _standardize_params(getParam<bool>("standardize_params")),
     _standardize_data(getParam<bool>("standardize_data")),
     _covariance_function(
@@ -157,32 +153,32 @@ GaussianProcessTrainer::postTrain()
   // Standardize (center and scale) training params
   if (_standardize_params)
   {
-    _param_standardizer.computeSet(_training_params);
-    _param_standardizer.getStandardized(_training_params);
+    _gp_utils.paramStandardizer().computeSet(_training_params);
+    _gp_utils.paramStandardizer().getStandardized(_training_params);
   }
   // if not standardizing data set mean=0, std=1 for use in surrogate
   else
-    _param_standardizer.set(0, 1, _n_params);
+    _gp_utils.paramStandardizer().set(0, 1, _n_params);
 
   // Standardize (center and scale) training data
   if (_standardize_data)
   {
-    _data_standardizer.computeSet(_training_data);
-    _data_standardizer.getStandardized(_training_data);
+    _gp_utils.dataStandardizer().computeSet(_training_data);
+    _gp_utils.dataStandardizer().getStandardized(_training_data);
   }
   // if not standardizing data set mean=0, std=1 for use in surrogate
   else
-    _param_standardizer.set(0, 1, _n_params);
+    _gp_utils.dataStandardizer().set(0, 1, _n_params);
 
-  _K.resize(_training_params.rows(), _training_params.rows());
+  _gp_utils.K().resize(_training_params.rows(), _training_params.rows());
 
   if (_do_tuning)
     if (hyperparamTuning())
       mooseError("PETSc/TAO error in hyperparameter tuning.");
 
-  _covariance_function->computeCovarianceMatrix(_K, _training_params, _training_params, true);
-  _K_cho_decomp = _K.llt();
-  _K_results_solve = _K_cho_decomp.solve(_training_data);
+  _covariance_function->computeCovarianceMatrix(
+      _gp_utils.K(), _training_params, _training_params, true);
+  _gp_utils.setupStoredMatrices(_training_data);
 
   _covariance_function->buildHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
 }
@@ -247,7 +243,7 @@ GaussianProcessTrainer::FormInitialGuess(GaussianProcessTrainer * GP_ptr, Vec th
 {
   libMesh::PetscVector<Number> theta(theta_vec, GP_ptr->_tao_comm);
   _covariance_function->buildHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
-  mapToVec(theta);
+  _gp_utils.mapToPetscVec(_tuning_data, _hyperparam_map, _hyperparam_vec_map, theta);
   return 0;
 }
 
@@ -269,29 +265,29 @@ GaussianProcessTrainer::FormFunctionGradient(Tao /*tao*/,
   libMesh::PetscVector<Number> theta(theta_vec, _tao_comm);
   libMesh::PetscVector<Number> grad(grad_vec, _tao_comm);
 
-  vecToMap(theta);
+  _gp_utils.petscVecToMap(_tuning_data, _hyperparam_map, _hyperparam_vec_map, theta);
   _covariance_function->loadHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
-  _covariance_function->computeCovarianceMatrix(_K, _training_params, _training_params, true);
-  _K_cho_decomp = _K.llt();
-  _K_results_solve = _K_cho_decomp.solve(_training_data);
+  _covariance_function->computeCovarianceMatrix(
+      _gp_utils.K(), _training_params, _training_params, true);
+  _gp_utils.setupStoredMatrices(_training_data);
 
   // testing auto tuning
   RealEigenMatrix dKdhp(_training_params.rows(), _training_params.rows());
-  RealEigenMatrix alpha = _K_results_solve * _K_results_solve.transpose();
+  RealEigenMatrix alpha = _gp_utils.KResultsSolve() * _gp_utils.KResultsSolve().transpose();
   for (auto iter = _tuning_data.begin(); iter != _tuning_data.end(); ++iter)
   {
     std::string hyper_param_name = iter->first;
     for (unsigned int ii = 0; ii < std::get<1>(iter->second); ++ii)
     {
       _covariance_function->computedKdhyper(dKdhp, _training_params, hyper_param_name, ii);
-      RealEigenMatrix tmp = alpha * dKdhp - _K_cho_decomp.solve(dKdhp);
+      RealEigenMatrix tmp = alpha * dKdhp - _gp_utils.KCholeskyDecomp().solve(dKdhp);
       grad.set(std::get<0>(iter->second) + ii, -tmp.trace() / 2.0);
     }
   }
   //
   Real log_likelihood = 0;
-  log_likelihood += -(_training_data.transpose() * _K_results_solve)(0, 0);
-  log_likelihood += -std::log(_K.determinant());
+  log_likelihood += -(_training_data.transpose() * _gp_utils.KResultsSolve())(0, 0);
+  log_likelihood += -std::log(_gp_utils.K().determinant());
   log_likelihood += -_training_data.rows() * std::log(2 * M_PI);
   log_likelihood = -log_likelihood / 2;
   *f = log_likelihood;
@@ -309,63 +305,4 @@ GaussianProcessTrainer::buildHyperParamBounds(libMesh::PetscVector<Number> & the
       theta_u.set(std::get<0>(iter->second) + ii, std::get<3>(iter->second));
     }
   }
-}
-
-void
-GaussianProcessTrainer::mapToVec(libMesh::PetscVector<Number> & theta) const
-{
-  for (auto iter = _tuning_data.begin(); iter != _tuning_data.end(); ++iter)
-  {
-    std::string hyper_param_name = iter->first;
-    if (_hyperparam_map.find(hyper_param_name) != _hyperparam_map.end())
-    {
-      theta.set(std::get<0>(iter->second), _hyperparam_map[hyper_param_name]);
-    }
-    else if (_hyperparam_vec_map.find(hyper_param_name) != _hyperparam_vec_map.end())
-    {
-      for (unsigned int ii = 0; ii < std::get<1>(iter->second); ++ii)
-      {
-        theta.set(std::get<0>(iter->second) + ii, _hyperparam_vec_map[hyper_param_name][ii]);
-      }
-    }
-  }
-}
-
-void
-GaussianProcessTrainer::vecToMap(libMesh::PetscVector<Number> & theta)
-{
-  for (auto iter = _tuning_data.begin(); iter != _tuning_data.end(); ++iter)
-  {
-    std::string hyper_param_name = iter->first;
-    if (_hyperparam_map.find(hyper_param_name) != _hyperparam_map.end())
-    {
-      _hyperparam_map[hyper_param_name] = theta(std::get<0>(iter->second));
-    }
-    else if (_hyperparam_vec_map.find(hyper_param_name) != _hyperparam_vec_map.end())
-    {
-      for (unsigned int ii = 0; ii < std::get<1>(iter->second); ++ii)
-      {
-        _hyperparam_vec_map[hyper_param_name][ii] = theta(std::get<0>(iter->second) + ii);
-      }
-    }
-  }
-}
-
-template <>
-void
-dataStore(std::ostream & stream, Eigen::LLT<RealEigenMatrix> & decomp, void * context)
-{
-  // Store the L matrix as opposed to the full matrix to avoid compounding
-  // roundoff error and decomposition error
-  RealEigenMatrix L(decomp.matrixL());
-  dataStore(stream, L, context);
-}
-
-template <>
-void
-dataLoad(std::istream & stream, Eigen::LLT<RealEigenMatrix> & decomp, void * context)
-{
-  RealEigenMatrix L;
-  dataLoad(stream, L, context);
-  decomp.compute(L * L.transpose());
 }

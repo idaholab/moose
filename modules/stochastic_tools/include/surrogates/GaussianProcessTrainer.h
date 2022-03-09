@@ -18,7 +18,10 @@
 #include "CovarianceFunctionBase.h"
 #include "CovarianceInterface.h"
 
-class GaussianProcessTrainer : public SurrogateTrainer, public CovarianceInterface
+#include "GaussianProcessUtils.h"
+
+class GaussianProcessTrainer : public SurrogateTrainer,
+                               public CovarianceInterface
 {
 public:
   static InputParameters validParams();
@@ -51,23 +54,11 @@ public:
   void vecToMap(libMesh::PetscVector<Number> & theta);
 
 private:
+
+  StochasticTools::GaussianProcessUtils & _gp_utils;
+
   /// Paramaters (x) used for training, along with statistics
   RealEigenMatrix & _training_params;
-
-  /// Standardizer for use with params (x)
-  StochasticTools::Standardizer & _param_standardizer;
-
-  /// Standardizer for use with data (y)
-  StochasticTools::Standardizer & _data_standardizer;
-
-  /// An _n_sample by _n_sample covariance matrix constructed from the selected kernel function
-  RealEigenMatrix & _K;
-
-  /// A solve of Ax=b via Cholesky.
-  RealEigenMatrix & _K_results_solve;
-
-  /// Cholesky decomposition Eigen object
-  Eigen::LLT<RealEigenMatrix> & _K_cho_decomp;
 
   /// Switch for training param (x) standardization
   bool _standardize_params;
@@ -123,8 +114,3 @@ private:
   /// Data (y) used for training
   RealEigenMatrix _training_data;
 };
-
-template <>
-void dataStore(std::ostream & stream, Eigen::LLT<RealEigenMatrix> & decomp, void * context);
-template <>
-void dataLoad(std::istream & stream, Eigen::LLT<RealEigenMatrix> & decomp, void * context);

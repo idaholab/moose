@@ -26,12 +26,8 @@ GaussianProcess::validParams()
 GaussianProcess::GaussianProcess(const InputParameters & parameters)
   : SurrogateModel(parameters),
     CovarianceInterface(parameters),
+    _gp_utils(getModelData<StochasticTools::GaussianProcessUtils>("_gp_utils")),
     _training_params(getModelData<RealEigenMatrix>("_training_params")),
-    _param_standardizer(getModelData<StochasticTools::Standardizer>("_param_standardizer")),
-    _data_standardizer(getModelData<StochasticTools::Standardizer>("_data_standardizer")),
-    _K(getModelData<RealEigenMatrix>("_K")),
-    _K_results_solve(getModelData<RealEigenMatrix>("_K_results_solve")),
-    _K_cho_decomp(getModelData<Eigen::LLT<RealEigenMatrix>>("_K_cho_decomp")),
     _covar_type(getModelData<std::string>("_covar_type")),
     _hyperparam_map(getModelData<std::unordered_map<std::string, Real>>("_hyperparam_map")),
     _hyperparam_vec_map(
@@ -74,7 +70,7 @@ GaussianProcess::evaluate(const std::vector<Real> & x, Real & std_dev) const
   for (unsigned int ii = 0; ii < _n_params; ++ii)
     test_points(0, ii) = x[ii];
 
-  _param_standardizer.getStandardized(test_points);
+  _gp_utils.getParamStandardizer().getStandardized(test_points);
 
   RealEigenMatrix K_train_test(_training_params.rows(), test_points.rows());
   _covariance_function->computeCovarianceMatrix(K_train_test, _training_params, test_points, false);
@@ -82,16 +78,16 @@ GaussianProcess::evaluate(const std::vector<Real> & x, Real & std_dev) const
   _covariance_function->computeCovarianceMatrix(K_test, test_points, test_points, true);
 
   // Compute the predicted mean value (centered)
-  RealEigenMatrix pred_value = (K_train_test.transpose() * _K_results_solve);
+  RealEigenMatrix pred_value = (K_train_test.transpose() * _gp_utils.getKResultsSolve());
   // De-center/scale the value and store for return
-  _data_standardizer.getDestandardized(pred_value);
+  _gp_utils.getDataStandardizer().getDestandardized(pred_value);
 
   RealEigenMatrix pred_var =
-      K_test - (K_train_test.transpose() * _K_cho_decomp.solve(K_train_test));
+      K_test - (K_train_test.transpose() * _gp_utils.getKCholeskyDecomp().solve(K_train_test));
 
   // Vairance computed, take sqrt for standard deviation, scale up by training data std and store
   RealEigenMatrix std_dev_mat = pred_var.array().sqrt();
-  _data_standardizer.getDescaled(std_dev_mat);
+  _gp_utils.getDataStandardizer().getDescaled(std_dev_mat);
   std_dev = std_dev_mat(0, 0);
 
   return pred_value(0, 0);
