@@ -198,6 +198,9 @@ void
 PorousFlowLineGeometry::calcLineLengths()
 {
   const int num_pts = _zs.size();
+  if (num_pts == 0)
+    mooseError("PorousFlowLineGeometry: No points found in input.\nIf using reporters, make sure "
+               "they have data.");
   _bottom_point(0) = _xs[num_pts - 1];
   _bottom_point(1) = _ys[num_pts - 1];
   _bottom_point(2) = _zs[num_pts - 1];
