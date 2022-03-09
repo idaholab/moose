@@ -72,14 +72,14 @@
 
   [mc]
     type = SamplerParameterTransfer
-    multi_app = mc
+    to_multi_app = mc
     sampler = mc
     parameters = 'BCs/left/value BCs/right/value'
     to_control = 'stochastic'
   []
   [mc_data]
     type = SamplerPostprocessorTransfer
-    multi_app = mc
+    from_multi_app = mc
     sampler = mc
     to_vector_postprocessor = storage
     from_postprocessor = "avg max"

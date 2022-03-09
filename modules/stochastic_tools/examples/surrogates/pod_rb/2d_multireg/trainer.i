@@ -73,7 +73,7 @@
 [Transfers]
   [param]
     type = SamplerParameterTransfer
-    multi_app = sub
+    to_multi_app = sub
     sampler = sample
     parameters = 'Materials/D0/prop_values
                   Materials/D1/prop_values
@@ -108,7 +108,7 @@
   []
   [res]
     type = PODResidualTransfer
-    multi_app = sub
+    from_multi_app = sub
     sampler = sample
     trainer_name = 'pod_rb'
     execute_on = 'final'

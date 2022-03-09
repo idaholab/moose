@@ -62,7 +62,7 @@
 [Transfers]
   [quad]
     type = SamplerParameterTransfer
-    multi_app = runner
+    to_multi_app = runner
     sampler = sample
     parameters = 'Materials/D0/prop_values
                   Materials/D1/prop_values
@@ -80,7 +80,7 @@
   []
   [results]
     type = SamplerPostprocessorTransfer
-    multi_app = runner
+    from_multi_app = runner
     sampler = sample
     to_vector_postprocessor = results
     from_postprocessor = 'nodal_l2'
