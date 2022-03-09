@@ -31,8 +31,28 @@ SolutionInitialCondition::SolutionInitialCondition(const InputParameters & param
 {
 }
 
+void
+SolutionInitialCondition::initialSetup()
+{
+  // remap block names this IC is defined on into the ExodusII file block IDs
+  const std::map<SubdomainName, SubdomainID> & block_names_to_ids_from =
+      _solution_object.getBlockNamesToIds();
+  for (auto & blk_name : blocks())
+  {
+    auto jt = block_names_to_ids_from.find(blk_name);
+    if (jt != block_names_to_ids_from.end())
+      _exo_block_ids.insert(jt->second);
+    else
+      mooseError("Block '",
+                 blk_name,
+                 "' does not exist in the file '",
+                 _solution_object.getMeshFileName(),
+                 "'.");
+  }
+}
+
 Real
 SolutionInitialCondition::value(const Point & p)
 {
-  return _solution_object.pointValue(0., p, _solution_object_var_name);
+  return _solution_object.pointValue(0., p, _solution_object_var_name, &_exo_block_ids);
 }
