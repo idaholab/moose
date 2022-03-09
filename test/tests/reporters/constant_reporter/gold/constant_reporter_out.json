@@ -3,6 +3,18 @@
         "constant": {
             "type": "ConstantReporter",
             "values": {
+                "dofid_1": {
+                    "type": "unsigned long long"
+                },
+                "dofid_2": {
+                    "type": "unsigned long long"
+                },
+                "dofid_3": {
+                    "type": "unsigned long long"
+                },
+                "dofid_vec": {
+                    "type": "std::vector<unsigned long long>"
+                },
                 "int_1": {
                     "type": "int"
                 },
@@ -39,6 +51,13 @@
     "time_steps": [
         {
             "constant": {
+                "dofid_1": 1,
+                "dofid_2": 2,
+                "dofid_3": 3,
+                "dofid_vec": [
+                    7,
+                    3
+                ],
                 "int_1": 1,
                 "int_2": 2,
                 "int_3": -3,

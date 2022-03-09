@@ -22,6 +22,9 @@
     string_names  = 'str'
     string_values = 'six'
 
+    dof_id_type_names  = 'dofid_1 dofid_2 dofid_3'
+    dof_id_type_values = '1     2     3'
+
     integer_vector_names  = 'int_vec'
     integer_vector_values = '7 8'
 
@@ -30,6 +33,9 @@
 
     string_vector_names  = 'str_vec'
     string_vector_values = 'ten eleven twelve thirteen'
+
+    dof_id_type_vector_names  = 'dofid_vec'
+    dof_id_type_vector_values = '7 3'
   []
   [error]
     type = ConstantReporter

@@ -21,6 +21,7 @@ ConstantReporter::validParams()
   params += addReporterTypeParams<int>("integer");
   params += addReporterTypeParams<Real>("real");
   params += addReporterTypeParams<std::string>("string");
+  params += addReporterTypeParams<dof_id_type>("dof_id_type");
 
   return params;
 }
@@ -30,7 +31,9 @@ ConstantReporter::ConstantReporter(const InputParameters & parameters) : General
   declareConstantReporterValues<int>("integer");
   declareConstantReporterValues<Real>("real");
   declareConstantReporterValues<std::string>("string");
+  declareConstantReporterValues<dof_id_type>("dof_id_type");
   declareConstantVectorReporterValues<int>("integer");
   declareConstantVectorReporterValues<Real>("real");
   declareConstantVectorReporterValues<std::string>("string");
+  declareConstantVectorReporterValues<dof_id_type>("dof_id_type");
 }
