@@ -58,14 +58,14 @@ there will be $0.1~M$ Markov chains, with each chain simulating $1/0.1$ samples.
 In general, if the intermediate failure probabilities (except $P_{N_s|N_{s-1}}$) are
 fixed to $p_o$ instead of 0.1, there will be $p_o~M$ Markov chains, with each chain
 simulating $1/p_o$ samples. Once $M$ samples are generated from $p_o~M$
- Markov chains, the second intermediate failure threshold ${F}_2$ is the $(1-p_o) \times 100$
- percentile value of all the samples' outputs. Samples between ${F}_1$ and ${F}_2$ comprise the second subset.
- A similar procedure of simulating $(p_o~M)$ Markov chains is repeated for determining
- the subsequent failure thresholds until the final required failure threshold $F$ is reached.
- More details on the practical implementation of the PSS method are presented in [!cite](li2016pss).
- Figure [pss_sch] presents a schematic of the PSS method.
+Markov chains, the second intermediate failure threshold ${F}_2$ is the $(1-p_o) \times 100$
+percentile value of all the samples' outputs. Samples between ${F}_1$ and ${F}_2$ comprise the second subset.
+A similar procedure of simulating $(p_o~M)$ Markov chains is repeated for determining
+the subsequent failure thresholds until the final required failure threshold $F$ is reached.
+More details on the practical implementation of the PSS method are presented in [!cite](li2016pss).
+[!ref](pss_sch) presents a schematic of the PSS method.
 
- !media Parallel_Subset_Simulation_Sampler.svg style=width:50%; id=pss_sch caption=Schematic of the PSS method
+!media Parallel_Subset_Simulation_Sampler.svg style=width:50%; id=pss_sch caption=Schematic of the PSS method
 
 ## Parallelization of Parallel Subset Simulation: An example
 
@@ -80,7 +80,7 @@ probability, there will be 1000 Markov chains per subset with each chain making 
 model evaluations. Therefore each processor evaluates the FE model 10 times per subset.
 With 4 subsets, each processor evaluates the FE model 40 times. In contrast, if we use
 only 100 processors, each processor solves the FE model 100 times per subset.
-With 4 subsets, each processor solves the FE model 400 times in total.   
+With 4 subsets, each processor solves the FE model 400 times in total.
 
 Alternatively, if we use 2000 processors, a unique set of two processors jointly
 solves the FE model 10 times per subset and 40 times overall. Beyond 1000 processors,
