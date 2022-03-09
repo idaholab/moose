@@ -100,7 +100,11 @@ PorousFlowLineGeometry::PorousFlowLineGeometry(const InputParameters & parameter
         "point_file",
         "PorousFlowLineGeometry: must specify at least one of 'point_file' or 'line_base' or "
         "reporter based input");
+}
 
+void
+PorousFlowLineGeometry::initialSetup()
+{
   if (!_point_file.empty())
   {
     // open file
