@@ -24,7 +24,7 @@ public:
 
   void setupStoredMatrices(const RealEigenMatrix & input);
 
-  void linkCovarianceFunction(const InputParameters & parameters);
+  void linkCovarianceFunction(const InputParameters & parameters, const UserObjectName & name);
 
   void mapToPetscVec(
       const std::unordered_map<std::string, std::tuple<unsigned int, unsigned int, Real, Real>> &
@@ -53,12 +53,13 @@ public:
   RealEigenMatrix & K() { return _K; }
   RealEigenMatrix & KResultsSolve() { return _K_results_solve; }
   Eigen::LLT<RealEigenMatrix> & KCholeskyDecomp() { return _K_cho_decomp; }
+  CovarianceFunctionBase * covarFunctionPtr() { return _covariance_function; }
   CovarianceFunctionBase & covarFunction() { return *_covariance_function; }
   std::string & covarType() { return _covar_type; }
 
 protected:
   /// Covariance function object
-  CovarianceFunctionBase * _covariance_function;
+  CovarianceFunctionBase * _covariance_function = nullptr;
 
   /// Type of covariance function used for this surrogate
   std::string _covar_type;

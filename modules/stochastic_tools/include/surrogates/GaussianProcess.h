@@ -32,7 +32,7 @@ public:
    */
   virtual void setupCovariance(UserObjectName _covar_name);
 
-  const std::string & getCovarType() const { return _covar_type; }
+  const std::string & getCovarType() const { return _gp_utils.getCovarType(); }
 
   const std::unordered_map<std::string, Real> & getHyperParamMap() const { return _hyperparam_map; }
 
@@ -48,15 +48,10 @@ private:
   /// Paramaters (x) used for training
   const RealEigenMatrix & _training_params;
 
-  /// Type of covariance function used for this surrogate
-  const std::string & _covar_type;
-
   /// Scalar hyperparameters. Stored for use in surrogate
   const std::unordered_map<std::string, Real> & _hyperparam_map;
 
   /// Vector hyperparameters. Stored for use in surrogate
   const std::unordered_map<std::string, std::vector<Real>> & _hyperparam_vec_map;
 
-  /// Covariance function object
-  CovarianceFunctionBase * _covariance_function = nullptr;
 };

@@ -76,7 +76,8 @@ GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameter
     _n_params((_pvals.empty() && _pcols.empty()) ? _sampler.getNumberOfCols()
                                                  : (_pvals.size() + _pcols.size()))
 {
-  _gp_utils.linkCovarianceFunction(parameters);
+  _gp_utils.linkCovarianceFunction(parameters,
+                                   parameters.get<UserObjectName>("covariance_function"));
   const auto & pnames = getParam<std::vector<ReporterName>>("predictors");
   for (unsigned int i = 0; i < pnames.size(); ++i)
     _pvals[i] = &getTrainingData<Real>(pnames[i]);

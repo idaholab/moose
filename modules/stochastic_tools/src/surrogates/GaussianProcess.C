@@ -31,23 +31,18 @@ GaussianProcess::GaussianProcess(const InputParameters & parameters)
             ? dynamic_cast<GaussianProcessTrainer &>(getSurrogateTrainer("trainer")).getGPUtils()
             : setModelData<StochasticTools::GaussianProcessUtils>("_gp_utils")),
     _training_params(getModelData<RealEigenMatrix>("_training_params")),
-    _covar_type(_gp_utils.getCovarType()),
     _hyperparam_map(getModelData<std::unordered_map<std::string, Real>>("_hyperparam_map")),
     _hyperparam_vec_map(
-        getModelData<std::unordered_map<std::string, std::vector<Real>>>("_hyperparam_vec_map")),
-    _covariance_function(
-        isParamValid("trainer")
-            ? &dynamic_cast<GaussianProcessTrainer &>(getSurrogateTrainer("trainer")).getGPUtils().covarFunction()
-            : nullptr)
+        getModelData<std::unordered_map<std::string, std::vector<Real>>>("_hyperparam_vec_map"))
 {
 }
 
 void
 GaussianProcess::setupCovariance(UserObjectName covar_name)
 {
-  if (_covariance_function != nullptr)
+  if (_gp_utils.covarFunctionPtr() != nullptr)
     ::mooseError("Attempting to redefine covariance function using setupCovariance.");
-  _covariance_function = getCovarianceFunctionByName(covar_name);
+  _gp_utils.linkCovarianceFunction(_pars, covar_name);
 }
 
 Real
@@ -76,9 +71,10 @@ GaussianProcess::evaluate(const std::vector<Real> & x, Real & std_dev) const
   _gp_utils.getParamStandardizer().getStandardized(test_points);
 
   RealEigenMatrix K_train_test(_training_params.rows(), test_points.rows());
-  _covariance_function->computeCovarianceMatrix(K_train_test, _training_params, test_points, false);
+  _gp_utils.getCovarFunction().computeCovarianceMatrix(
+      K_train_test, _training_params, test_points, false);
   RealEigenMatrix K_test(test_points.rows(), test_points.rows());
-  _covariance_function->computeCovarianceMatrix(K_test, test_points, test_points, true);
+  _gp_utils.getCovarFunction().computeCovarianceMatrix(K_test, test_points, test_points, true);
 
   // Compute the predicted mean value (centered)
   RealEigenMatrix pred_value = (K_train_test.transpose() * _gp_utils.getKResultsSolve());

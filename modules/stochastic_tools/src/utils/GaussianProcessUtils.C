@@ -21,10 +21,10 @@ GaussianProcessUtils::setupStoredMatrices(const RealEigenMatrix & input)
 }
 
 void
-GaussianProcessUtils::linkCovarianceFunction(const InputParameters & parameters)
+GaussianProcessUtils::linkCovarianceFunction(const InputParameters & parameters,
+                                             const UserObjectName & name)
 {
   const auto & feproblem = *parameters.get<FEProblemBase *>("_fe_problem_base");
-  const auto & name = parameters.get<UserObjectName>("covariance_function");
   std::vector<CovarianceFunctionBase *> models;
   feproblem.theWarehouse()
       .query()
