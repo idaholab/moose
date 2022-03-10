@@ -44,6 +44,9 @@ MultiAppVariableValueSampleTransfer::MultiAppVariableValueSampleTransfer(
 {
   if (_directions.size() != 1 || (isParamValid("from_multi_app") && isParamValid("to_multi_app")))
     paramError("direction", "This transfer is only unidirectional");
+
+  if (_from_multi_app)
+    paramError("from_multi_app", "This transfer direction has not been implemented");
 }
 
 void

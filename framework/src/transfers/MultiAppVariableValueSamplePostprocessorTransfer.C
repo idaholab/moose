@@ -45,6 +45,9 @@ MultiAppVariableValueSamplePostprocessorTransfer::MultiAppVariableValueSamplePos
 {
   if (_directions.size() != 1)
     paramError("direction", "This transfer is only unidirectional");
+
+  if (_from_multi_app)
+    paramError("from_multi_app", "This transfer direction has not been implemented");
 }
 
 void

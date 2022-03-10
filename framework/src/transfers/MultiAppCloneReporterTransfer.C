@@ -55,7 +55,8 @@ MultiAppCloneReporterTransfer::MultiAppCloneReporterTransfer(const InputParamete
 {
   // Deprecating direction proves fatal for this parameter for this class
   if (isParamValid("multi_app"))
-    paramError("The multi_app parameter is no longer valid for this class, use to_multi_app");
+    paramError("multi_app",
+               "The multi_app parameter is no longer valid for this class, use to_multi_app");
 
   if (isParamValid("to_multi_app"))
     paramError("to_multi_app",

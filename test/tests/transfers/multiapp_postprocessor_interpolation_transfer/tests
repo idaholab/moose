@@ -77,4 +77,12 @@
     cli_args = 'AuxVariables/from_sub/order=FIRST AuxVariables/from_sub/family=MONOMIAL Outputs/exodus=false'
     requirement = "The system shall report an error if a variable is specified that is not LINEAR LAGRANGE or CONSTANT MONOMIAL"
   []
+
+  [direction_error]
+    type = 'RunException'
+    input = 'master.i'
+    expect_err = "Bi-directional or MultiApp-to-MultiApp transfers are not implemented"
+    cli_args = 'Transfers/pp_transfer/to_multi_app=sub'
+    requirement = "The system shall report an error if parameters for an unsupported direction are provided for the transfer between sub-app scalars and a main app field variablea."
+  []
 []
