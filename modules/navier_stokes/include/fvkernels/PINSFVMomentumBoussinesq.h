@@ -21,9 +21,10 @@ public:
   static InputParameters validParams();
   PINSFVMomentumBoussinesq(const InputParameters & params);
 
-protected:
-  ADReal computeQpResidual() override;
+  using INSFVMomentumBoussinesq::gatherRCData;
+  void gatherRCData(const Elem & elem) override;
 
+protected:
   /// the porosity
   const Moose::Functor<ADReal> & _eps;
 };

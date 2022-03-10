@@ -20,9 +20,10 @@ public:
   static InputParameters validParams();
   PINSFVMomentumPressure(const InputParameters & params);
 
-protected:
-  ADReal computeQpResidual() override;
+  using INSFVMomentumPressure::gatherRCData;
+  void gatherRCData(const Elem & elem) override;
 
+protected:
   /// the porosity
   const Moose::Functor<ADReal> & _eps;
 };

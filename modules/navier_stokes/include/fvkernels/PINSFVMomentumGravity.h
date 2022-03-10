@@ -21,9 +21,10 @@ public:
   static InputParameters validParams();
   PINSFVMomentumGravity(const InputParameters & params);
 
-protected:
-  ADReal computeQpResidual() override;
+  using INSFVMomentumGravity::gatherRCData;
+  void gatherRCData(const Elem & elem) override;
 
+protected:
   /// the porosity
   const Moose::Functor<ADReal> & _eps;
 };

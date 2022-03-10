@@ -27,8 +27,14 @@ PINSFVMomentumGravity::PINSFVMomentumGravity(const InputParameters & params)
 {
 }
 
-ADReal
-PINSFVMomentumGravity::computeQpResidual()
+void
+PINSFVMomentumGravity::gatherRCData(const Elem & elem)
 {
-  return _eps(makeElemArg(_current_elem)) * INSFVMomentumGravity::computeQpResidual();
+  const auto strong_residual =
+      -_rho(makeElemArg(&elem)) * _eps(makeElemArg(&elem)) * _gravity(_index);
+  const auto dof_number = elem.dof_number(_sys.number(), _var.number(), 0);
+
+  _rc_uo.addToA(&elem, _index, strong_residual);
+
+  processResidual(strong_residual * _assembly.elementVolume(&elem), dof_number);
 }

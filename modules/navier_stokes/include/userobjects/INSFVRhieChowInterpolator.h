@@ -196,6 +196,11 @@ private:
   /// application solving precursor advection, and another application has computed the fluid flow
   /// field
   bool _a_data_provided;
+
+  const Real _rc_scale_factor;
+
+  std::vector<const Moose::Functor<ADReal> *> _rhos;
+  std::vector<const Moose::Functor<ADReal> *> _mus;
 };
 
 inline const Moose::FunctorBase<ADReal> & INSFVRhieChowInterpolator::epsilon(THREAD_ID) const

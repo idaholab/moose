@@ -74,6 +74,10 @@ INSFVRhieChowInterpolator::validParams()
       "supplied when the mesh dimension is greater than 2. It represents the on-diagonal "
       "coefficients for the 'z' component velocity, solved "
       "via the Navier-Stokes equations.");
+  params.addParam<Real>(
+      "rc_scale_factor", 1, "How much to scale the RC addition to the face velocity.");
+  params.addRequiredParam<MooseFunctorName>(NS::density, "The density.");
+  params.addRequiredParam<MooseFunctorName>(NS::mu, "The dynamic viscosity");
   return params;
 }
 
@@ -106,7 +110,10 @@ INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & par
     _az(_a, 2),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _example(0),
-    _a_data_provided(false)
+    _a_data_provided(false),
+    _rc_scale_factor(getParam<Real>("rc_scale_factor")),
+    _rhos(libMesh::n_threads(), nullptr),
+    _mus(libMesh::n_threads(), nullptr)
 {
   if (!_p)
     paramError(NS::pressure, "the pressure must be a INSFVPressureVariable.");
@@ -185,6 +192,10 @@ INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & par
         std::set<ExecFlagType>({EXEC_ALWAYS}),
         _moose_mesh,
         blockIDs());
+
+    _rhos[tid] =
+        &UserObject::_subproblem.getFunctor<ADReal>(deduceFunctorName(NS::density), tid, name());
+    _mus[tid] = &UserObject::_subproblem.getFunctor<ADReal>(deduceFunctorName(NS::mu), tid, name());
   }
 
   const auto & velocity_interp_method = params.get<MooseEnum>("velocity_interp_method");
@@ -329,8 +340,8 @@ INSFVRhieChowInterpolator::execute()
   // operators we pull out the 'a' coefficents by querying the ADReal residual derivatives member at
   // the element or neighbor dof locations. Consequently we need to enable derivative computation.
   // We do this here outside the threaded regions
-  const auto saved_do_derivatives = ADReal::do_derivatives;
-  ADReal::do_derivatives = true;
+  // const auto saved_do_derivatives = ADReal::do_derivatives;
+  // ADReal::do_derivatives = true;
 
   PARALLEL_TRY
   {
@@ -348,7 +359,7 @@ INSFVRhieChowInterpolator::execute()
   }
   PARALLEL_CATCH;
 
-  ADReal::do_derivatives = saved_do_derivatives;
+  // ADReal::do_derivatives = saved_do_derivatives;
 }
 
 void
@@ -433,7 +444,7 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
   const Elem * const elem = &fi.elem();
   const Elem * const neighbor = fi.neighborPtr();
   auto & vel = *_vel[tid];
-  auto & p = *_ps[tid];
+  // auto & p = *_ps[tid];
   auto * const u = _us[tid];
   MooseVariableFVReal * const v = _v ? _vs[tid] : nullptr;
   MooseVariableFVReal * const w = _w ? _ws[tid] : nullptr;
@@ -476,51 +487,23 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
   mooseAssert(neighbor && this->hasBlocks(neighbor->subdomain_id()),
               "We should be on an internal face...");
 
-  // Get pressure gradient. This is the uncorrected gradient plus a correction from cell centroid
-  // values on either side of the face
-  const VectorValue<ADReal> & grad_p = p.adGradSln(fi);
-
-  // Get uncorrected pressure gradient. This will use the element centroid gradient if we are
-  // along a boundary face
-  const VectorValue<ADReal> & unc_grad_p = p.uncorrectedAdGradSln(fi);
-
+  // Volume computations
+  mooseAssert(UserObject::_subproblem.getCoordSystem(elem->subdomain_id()) ==
+                  UserObject::_subproblem.getCoordSystem(neighbor->subdomain_id()),
+              "Coordinate systems must be the same between the two elements");
   const Point & elem_centroid = fi.elemCentroid();
   const Point & neighbor_centroid = fi.neighborCentroid();
   Real elem_volume = fi.elemVolume();
   Real neighbor_volume = fi.neighborVolume();
-
-  // Now we need to perform the computations of D
-  const auto elem_a = (*_a_read[tid])(makeElemArg(elem));
-
-  mooseAssert(UserObject::_subproblem.getCoordSystem(elem->subdomain_id()) ==
-                  UserObject::_subproblem.getCoordSystem(neighbor->subdomain_id()),
-              "Coordinate systems must be the same between the two elements");
-
   Real coord;
   coordTransformFactor(UserObject::_subproblem, elem->subdomain_id(), elem_centroid, coord);
-
   elem_volume *= coord;
-
-  VectorValue<ADReal> elem_D = 0;
-  for (const auto i : make_range(_dim))
-  {
-    mooseAssert(elem_a(i).value() != 0, "We should not be dividing by zero");
-    elem_D(i) = elem_volume / elem_a(i);
-  }
-
-  VectorValue<ADReal> face_D;
-
-  const auto neighbor_a = (*_a_read[tid])(makeElemArg(neighbor));
-
   coordTransformFactor(UserObject::_subproblem, neighbor->subdomain_id(), neighbor_centroid, coord);
   neighbor_volume *= coord;
 
-  VectorValue<ADReal> neighbor_D = 0;
-  for (const auto i : make_range(_dim))
-  {
-    mooseAssert(neighbor_a(i).value() != 0, "We should not be dividing by zero");
-    neighbor_D(i) = neighbor_volume / neighbor_a(i);
-  }
+  // Get the strong residual values
+  const auto elem_a = (*_a_read[tid])(makeElemArg(elem));
+  const auto neighbor_a = (*_a_read[tid])(makeElemArg(neighbor));
 
   // We require this to ensure that the correct interpolation weights are used.
   // This will change once the traditional weights are replaced by the weights
@@ -528,19 +511,28 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
   Moose::FV::InterpMethod coeff_interp_method = correct_skewness
                                                     ? Moose::FV::InterpMethod::SkewCorrectedAverage
                                                     : Moose::FV::InterpMethod::Average;
-  Moose::FV::interpolate(coeff_interp_method, face_D, elem_D, neighbor_D, fi, true);
+  Real face_volume;
+  Moose::FV::interpolate(coeff_interp_method, face_volume, elem_volume, neighbor_volume, fi, true);
 
   const auto face = Moose::FV::makeCDFace(
       fi, Moose::FV::faceArgSubdomains(*this, fi), correct_skewness, correct_skewness);
+  const auto face_a = (*_a_read[tid])(face);
+  const auto face_rho = (*_rhos[tid])(face);
+  const auto face_mu = (*_mus[tid])(face);
+  const auto face_area = fi.faceArea() * fi.faceCoord();
+  const auto face_h = face_volume / face_area;
 
-  // evaluate face porosity, see (18) in Hanimann 2021 or (11) in Nordlund 2016
-  const auto face_eps = epsilon(tid)(face);
+  // pspg tau analog
+  const auto face_nu = face_mu / face_rho;
+  const auto transient_part = _is_transient ? 4. / (_dt * _dt) : 0.;
+  const auto tau =
+      _rc_scale_factor /
+      std::sqrt(transient_part + (2. * velocity.norm() / face_h) * (2. * velocity.norm() / face_h) +
+                9. * (4. * face_nu / (face_h * face_h)) * (4. * face_nu / (face_h * face_h)));
 
-  // Perform the pressure correction. We don't use skewness-correction on the pressure since
-  // it only influences the averaged cell gradients which cancel out in the correction
-  // below.
-  for (const auto i : make_range(_dim))
-    velocity(i) -= face_D(i) * face_eps * (grad_p(i) - unc_grad_p(i));
+  // Added velocity
+  const auto added_velocity = tau / face_rho * face_a;
 
-  return velocity;
+  // Minus sign in order to get positive diagonals for pressure
+  return velocity - added_velocity;
 }

@@ -9,25 +9,19 @@
 
 #pragma once
 
-#include "FVElementalKernel.h"
+#include "INSFVElementalKernel.h"
 #include "INSFVMomentumResidualObject.h"
 
-class INSFVMomentumPressure : public FVElementalKernel, public INSFVMomentumResidualObject
+class INSFVMomentumPressure : public INSFVElementalKernel
 {
 public:
   static InputParameters validParams();
   INSFVMomentumPressure(const InputParameters & params);
 
-  // This object neither contributes to the A coefficients nor to the B (source) coefficients
-  void gatherRCData(const Elem &) override {}
-  void gatherRCData(const FaceInfo &) override {}
+  using INSFVElementalKernel::gatherRCData;
+  void gatherRCData(const Elem &) override;
 
 protected:
-  ADReal computeQpResidual() override;
-
   /// The pressure variable
   const MooseVariableFVReal * const _p_var;
-
-  /// index x|y|z
-  const unsigned int _index;
 };

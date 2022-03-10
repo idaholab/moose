@@ -32,11 +32,10 @@ INSFVMomentumTimeDerivative::INSFVMomentumTimeDerivative(const InputParameters &
 void
 INSFVMomentumTimeDerivative::gatherRCData(const Elem & elem)
 {
-  const auto residual = _rho * _var.dot(makeElemArg(&elem)) * _assembly.elementVolume(&elem);
+  const auto strong_residual = _rho * _var.dot(makeElemArg(&elem));
   const auto dof_number = elem.dof_number(_sys.number(), _var.number(), 0);
-  const Real a = residual.derivatives()[dof_number];
 
-  _rc_uo.addToA(&elem, _index, a);
+  _rc_uo.addToA(&elem, _index, strong_residual);
 
-  processResidual(residual, dof_number);
+  processResidual(strong_residual * _assembly.elementVolume(&elem), dof_number);
 }

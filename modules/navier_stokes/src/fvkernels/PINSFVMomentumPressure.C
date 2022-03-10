@@ -32,8 +32,20 @@ PINSFVMomentumPressure::PINSFVMomentumPressure(const InputParameters & params)
                "variable, of variable type PINSFVSuperficialVelocityVariable.");
 }
 
-ADReal
-PINSFVMomentumPressure::computeQpResidual()
+void
+PINSFVMomentumPressure::gatherRCData(const Elem & elem)
 {
-  return _eps(makeElemArg(_current_elem)) * INSFVMomentumPressure::computeQpResidual();
+#ifndef MOOSE_GLOBAL_AD_INDEXING
+  mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
+             "configure script in the root MOOSE directory with the configure option "
+             "'--with-ad-indexing-type=global'");
+#else
+  bool correct_skewness =
+      (_p_var->faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage);
+  const auto strong_residual =
+      _eps(makeElemArg(&elem)) * _p_var->adGradSln(&elem, correct_skewness)(_index);
+  const auto dof_number = elem.dof_number(_sys.number(), _var.number(), 0);
+  _rc_uo.addToA(&elem, _index, strong_residual);
+  processResidual(strong_residual * _assembly.elementVolume(&elem), dof_number);
+#endif
 }

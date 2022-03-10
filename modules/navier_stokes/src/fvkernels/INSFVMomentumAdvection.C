@@ -81,13 +81,13 @@ INSFVMomentumAdvection::gatherRCData(const FaceInfo & fi)
   const auto saved_velocity_interp_method = _velocity_interp_method;
   _velocity_interp_method = Moose::FV::InterpMethod::Average;
   // Fill-in the coefficients _ae and _an (but without multiplication by A)
-  computeQpResidual();
+  const auto strong_residual = computeQpResidual();
   _velocity_interp_method = saved_velocity_interp_method;
 
   if (_face_type == FaceInfo::VarFaceNeighbors::ELEM ||
       _face_type == FaceInfo::VarFaceNeighbors::BOTH)
-    _rc_uo.addToA(&fi.elem(), _index, _ae * (fi.faceArea() * fi.faceCoord()));
+    _rc_uo.addToA(&fi.elem(), _index, strong_residual);
   if (_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR ||
       _face_type == FaceInfo::VarFaceNeighbors::BOTH)
-    _rc_uo.addToA(fi.neighborPtr(), _index, _an * (fi.faceArea() * fi.faceCoord()));
+    _rc_uo.addToA(fi.neighborPtr(), _index, -strong_residual);
 }

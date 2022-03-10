@@ -15,25 +15,17 @@ registerMooseObject("NavierStokesApp", INSFVMomentumPressure);
 InputParameters
 INSFVMomentumPressure::validParams()
 {
-  InputParameters params = FVElementalKernel::validParams();
-  params += INSFVMomentumResidualObject::validParams();
+  InputParameters params = INSFVElementalKernel::validParams();
   params.addClassDescription(
       "Introduces the coupled pressure term into the Navier-Stokes momentum equation.");
   params.addRequiredCoupledVar(NS::pressure, "The pressure");
   params.addDeprecatedCoupledVar("p", NS::pressure, "1/1/2022");
-  MooseEnum momentum_component("x=0 y=1 z=2");
-  params.addRequiredParam<MooseEnum>(
-      "momentum_component",
-      momentum_component,
-      "The component of the momentum equation that this kernel applies to.");
   return params;
 }
 
 INSFVMomentumPressure::INSFVMomentumPressure(const InputParameters & params)
-  : FVElementalKernel(params),
-    INSFVMomentumResidualObject(*this),
-    _p_var(dynamic_cast<const MooseVariableFVReal *>(getFieldVar(NS::pressure, 0))),
-    _index(getParam<MooseEnum>("momentum_component"))
+  : INSFVElementalKernel(params),
+    _p_var(dynamic_cast<const MooseVariableFVReal *>(getFieldVar(NS::pressure, 0)))
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
@@ -45,8 +37,8 @@ INSFVMomentumPressure::INSFVMomentumPressure(const InputParameters & params)
     paramError(NS::pressure, "p must be a finite volume variable");
 }
 
-ADReal
-INSFVMomentumPressure::computeQpResidual()
+void
+INSFVMomentumPressure::gatherRCData(const Elem & elem)
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
@@ -55,6 +47,9 @@ INSFVMomentumPressure::computeQpResidual()
 #else
   bool correct_skewness =
       (_p_var->faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage);
-  return _p_var->adGradSln(_current_elem, correct_skewness)(_index);
+  const auto strong_residual = _p_var->adGradSln(&elem, correct_skewness)(_index);
+  const auto dof_number = elem.dof_number(_sys.number(), _var.number(), 0);
+  _rc_uo.addToA(&elem, _index, strong_residual);
+  processResidual(strong_residual * _assembly.elementVolume(&elem), dof_number);
 #endif
 }
