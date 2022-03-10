@@ -79,9 +79,9 @@ protected:
   bool isBoundaryElem(const MooseMesh * mesh, const Elem * elem) const;
 
   /**
-   * Get's the userobject to transfer from when transferring from_multiapp
+   * Gets the UserObject to transfer from when transferring from_multiapp
    * @param p The point in the parent app that is being transferred to
-   * @return will return static_cast<unsigned int>(-1) if none is found
+   * @return the subapp index, will return static_cast<unsigned int>(-1) if none is found
    */
   unsigned int findSubAppToTransferFrom(const Point & p);
 

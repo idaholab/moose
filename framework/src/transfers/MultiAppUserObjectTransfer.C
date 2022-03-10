@@ -573,11 +573,8 @@ MultiAppUserObjectTransfer::findSubAppToTransferFrom(const Point & p)
 
     mooseAssert(_multi_app->numGlobalApps() > 0, "No Multiapps To Transfer From");
 
-    for (unsigned int i = 0; _multi_app->numGlobalApps(); i++)
+    for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
     {
-      if (!_multi_app->hasLocalApp(i))
-        continue;
-
       auto & app_position = _multi_app->position(i);
 
       auto distance = (p - app_position).norm();
@@ -589,7 +586,12 @@ MultiAppUserObjectTransfer::findSubAppToTransferFrom(const Point & p)
       }
     }
 
-    return closest_app;
+    // We can only get the value if we have this app
+    // otherwise - another processor will set it
+    if (_multi_app->hasLocalApp(closest_app))
+      return closest_app;
+    else
+      return -1;
   }
 
   // Find the app that contains this point...
@@ -601,7 +603,6 @@ MultiAppUserObjectTransfer::findSubAppToTransferFrom(const Point & p)
     if (!_multi_app->hasLocalApp(i))
       continue;
 
-    Point app_position = _multi_app->position(i);
     BoundingBox app_box = _multi_app->getBoundingBox(i, _displaced_source_mesh);
 
     if (_skip_bbox_check || app_box.contains_point(p))

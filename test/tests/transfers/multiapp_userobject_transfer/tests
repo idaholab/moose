@@ -1,5 +1,5 @@
 [Tests]
-  issues = "#10313"
+  issues = "#10313 #19056"
   design = "MultiAppUserObjectTransfer.md"
 
   [transfer]
@@ -11,6 +11,14 @@
       exodiff = 'master_out.e master_out_sub_app0.e master_out_sub_app1.e'
 
       detail = "to a master application from sub-applications,"
+    []
+
+    [from_sub_nearest_sub_app]
+      type = 'Exodiff'
+      input = 'main_nearest_sub_app.i'
+      exodiff = 'main_nearest_sub_app_out.e'
+
+      detail = "to a master application from the nearest sub-applications,"
     []
 
     [to_sub]
