@@ -16,7 +16,6 @@ export CXXFLAGS=$(echo ${CXXFLAGS:-} | sed -E 's@\-fdebug\-prefix\-map[^ ]*@@g')
 export FFLAGS=$(echo ${FFLAGS:-} | sed -E 's@\-fdebug\-prefix\-map[^ ]*@@g')
 export FCFLAGS="$FFLAGS"
 export HYDRA_LAUNCHER=fork
-#export LIBS="-lmpifort -lgfortran"
 
 if [[ $(uname) == Darwin ]]; then
     if [[ $HOST == arm64-apple-darwin20.0.0 ]]; then
