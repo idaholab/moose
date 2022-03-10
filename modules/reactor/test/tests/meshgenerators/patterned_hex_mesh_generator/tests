@@ -46,7 +46,7 @@
     input = 'patterned_2d.i'
     cli_args = 'Mesh/pattern/pattern_boundary=none Mesh/hex_1/flat_side_up=true --mesh-only "patterned_err.e"'
     expect_err = "has a flat side facing up, which is not supported."
-    requirement ='The system shall throw an error if one of the input meshes has a flat side facing up.'
+    requirement ='The system shall throw a reasonable error when generating patterned hexagon mesh if one of the input meshes has a flat side facing up.'
   []
   [err_block_name_conflict]
     type = 'RunException'
