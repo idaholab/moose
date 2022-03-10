@@ -90,8 +90,11 @@ energy_change = ${fparse power_fraction * power * t}
   type = Transient
   scheme = 'bdf2'
 
-  solve_type = 'PJFNK'
+  solve_type = 'NEWTON'
   line_search = 'basic'
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = ' lu'
+
   nl_rel_tol = 0
   nl_abs_tol = 1e-6
   nl_max_its = 15

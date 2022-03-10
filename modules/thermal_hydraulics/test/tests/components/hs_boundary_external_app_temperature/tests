@@ -3,6 +3,5 @@
     type = Exodiff
     input = 'phy.master.i'
     exodiff = 'phy.master_out.e phy.master_out_thm0.e'
-    max_parallel = 1
   []
 []

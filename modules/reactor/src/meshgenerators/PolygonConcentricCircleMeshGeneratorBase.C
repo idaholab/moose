@@ -78,6 +78,10 @@ PolygonConcentricCircleMeshGeneratorBase::validParams()
                                 0,
                                 "Number of Laplacian smoothing iterations. This number is "
                                 "disregarded when duct_sizes is present.");
+  params.addParam<bool>(
+      "flat_side_up",
+      false,
+      "Whether to rotate the generated polygon mesh to ensure that one flat side faces up.");
   params.addParamNamesToGroup(
       "background_block_ids background_block_names duct_block_ids duct_block_names ring_block_ids "
       "ring_block_names external_boundary_id external_boundary_name interface_boundary_names "
@@ -152,6 +156,7 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
                                   : std::vector<std::string>()),
     _uniform_mesh_on_sides(getParam<bool>("uniform_mesh_on_sides")),
     _quad_center_elements(getParam<bool>("quad_center_elements")),
+    _flat_side_up(declareMeshProperty<bool>("flat_side_up", getParam<bool>("flat_side_up"))),
     _smoothing_max_it(getParam<unsigned int>("smoothing_max_it")),
     _sides_to_adapt(isParamValid("sides_to_adapt")
                         ? getParam<std::vector<unsigned int>>("sides_to_adapt")
@@ -541,5 +546,7 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
           i + interface_id_shift + _interface_boundary_id_shift) = _interface_boundary_names[i];
     }
   }
+  if (_flat_side_up)
+    MeshTools::Modification::rotate(*mesh0, 180.0 / (Real)_num_sides, 0.0, 0.0);
   return dynamic_pointer_cast<MeshBase>(mesh0);
 }

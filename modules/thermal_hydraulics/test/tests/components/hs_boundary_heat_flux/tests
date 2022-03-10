@@ -4,14 +4,12 @@
     input = 'cylindrical.i'
     csvdiff = 'cylindrical_out.csv'
     abs_zero = 1e-6
-    max_parallel = 1
   []
   [energy_conservation_plate]
     type = 'CSVDiff'
     input = 'plate.i'
     csvdiff = 'plate_out.csv'
     abs_zero = 1e-6
-    max_parallel = 1
   []
   [energy_conservation_from_file_3d]
     type = 'CSVDiff'
@@ -20,6 +18,5 @@
     abs_zero = 1e-6
     # because output has execute_on = 'final'
     recover = false
-    max_parallel = 1
   []
 []

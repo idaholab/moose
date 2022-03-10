@@ -77,6 +77,8 @@ protected:
   const bool _uniform_mesh_on_sides;
   /// Whether the central elements need to be QUAD4
   const bool _quad_center_elements;
+  /// Whether to rotate the generated polygon mesh to ensure that one flat side faces up
+  const bool & _flat_side_up;
   /// Maximum smooth iteration number
   const unsigned int _smoothing_max_it;
   /// Indices of the hexagon sides that need to adapt
