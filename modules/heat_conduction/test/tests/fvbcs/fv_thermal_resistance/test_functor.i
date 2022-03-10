@@ -67,7 +67,7 @@
 
 [Materials]
   [cht]
-    type = ADGenericConstantFunctorMaterial
+    type = ADGenericFunctorMaterial
     prop_names = 'htc'
     prop_values = '1'
   []
