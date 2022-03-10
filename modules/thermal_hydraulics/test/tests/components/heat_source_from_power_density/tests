@@ -6,7 +6,6 @@
     exodiff = 'phy.cylinder_power_shape_aux_var_out.e'
     rel_err = 1e-4
     abs_zero = 1e-9
-    max_parallel = 1
 
     requirement = "The system shall provide the heat source shape when power density is supplied"
   []
@@ -17,7 +16,6 @@
     csvdiff = 'phy.conservation_from_file_3d_out.csv'
     rel_err = 1e-4
     abs_zero = 1e-9
-    max_parallel = 1
     # because output has execute_on = 'final'
     recover = false
   []

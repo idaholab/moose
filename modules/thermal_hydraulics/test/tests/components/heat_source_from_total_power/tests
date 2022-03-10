@@ -6,7 +6,6 @@
     exodiff = 'phy.cylinder_power_shape_fn_out.e'
     rel_err = 1e-4
     abs_zero = 1e-9
-    max_parallel = 1
 
     requirement = "The system shall provide the heat source shape for a cylindrical heat structure when power component and power shape function are supplied"
   []
@@ -16,7 +15,6 @@
     exodiff = 'phy.plate_out.e'
     rel_err = 1e-4
     abs_zero = 1e-9
-    max_parallel = 1
 
     requirement = "The system shall provide the heat source shape for a plate heat structure when power component and power shape function are supplied"
   []
@@ -31,8 +29,7 @@
       Postprocessors/E_tot/plate_depth=2
       Outputs/file_base=phy.conservation_plate"
     csvdiff = 'phy.conservation_plate.csv'
-    abs_zero = 1e-7
-    max_parallel = 1
+    abs_zero = 4e-7
     # because output has execute_on = 'initial final'
     recover = false
   []
@@ -48,7 +45,6 @@
       Outputs/file_base=phy.conservation_cylinder"
     csvdiff = 'phy.conservation_cylinder.csv'
     abs_zero = 1e-7
-    max_parallel = 1
     # because output has execute_on = 'initial final'
     recover = false
   []
@@ -57,7 +53,6 @@
     input = 'phy.conservation_from_file_3d.i'
     csvdiff = 'phy.conservation_from_file_3d_out.csv'
     abs_zero = 1e-7
-    max_parallel = 1
     # because output has execute_on = 'final'
     recover = false
   []
