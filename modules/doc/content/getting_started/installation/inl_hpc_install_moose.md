@@ -88,6 +88,16 @@ nodes (`Compute CPU`) cannot perform this step as it requires more direct access
   ./update_and_rebuild_libmesh.sh
 ```
 
+### Step 3: Build MOOSE and the app
+
+This should be as simple as going into the app directory and building using the Makefile.
+For example for MOOSE, we build the test executable as shown below
+
+```
+  cd /scratch/$USER/projects/moose/test
+  make -j6
+```
+
 ## Option 3: conda (mamba) installation (not recommended, light users)
 
 !alert warning
