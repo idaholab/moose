@@ -42,10 +42,10 @@ LoadCovarianceDataAction::act()
 void
 LoadCovarianceDataAction::load(GaussianProcess & model)
 {
-  const std::string & covar_type = model.getGPUtils().getCovarType();
-  const std::unordered_map<std::string, Real> & map = model.getGPUtils().getHyperParamMap();
+  const std::string & covar_type = model.getGPHandler().getCovarType();
+  const std::unordered_map<std::string, Real> & map = model.getGPHandler().getHyperParamMap();
   const std::unordered_map<std::string, std::vector<Real>> & vec_map =
-      model.getGPUtils().getHyperParamVectorMap();
+      model.getGPHandler().getHyperParamVectorMap();
   const UserObjectName & covar_name = model.name() + "_covar_func";
 
   InputParameters covar_params = _factory.getValidParams(covar_type);
@@ -59,5 +59,5 @@ LoadCovarianceDataAction::load(GaussianProcess & model)
   _problem->addObject<CovarianceFunctionBase>(
       covar_type, covar_name, covar_params, /* threaded = */ false);
 
-  model.gpUtils().linkCovarianceFunction(model.parameters(), covar_name);
+  model.gpHandler().linkCovarianceFunction(model.parameters(), covar_name);
 }

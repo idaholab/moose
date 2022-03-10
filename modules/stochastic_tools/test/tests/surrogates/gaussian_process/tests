@@ -73,4 +73,14 @@
       detail = 'a Matern half integer kernel;'
     []
   []
+  [errors]
+    requirement = 'The system shall throw an error when '
+    [optimization]
+      type = RunException
+      input = GP_squared_exponential_tuned.i
+      cli_args = "Trainers/GP_avg_trainer/tuning_algorithm='none'"
+      detail = 'the no optimization is selected while parameter tuning is required. '
+      expect_err = "No tuning algorithm is selected for the hyper parameter optimization!"
+    []
+  []
 []

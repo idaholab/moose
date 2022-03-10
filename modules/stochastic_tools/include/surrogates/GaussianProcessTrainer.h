@@ -18,9 +18,9 @@
 #include "CovarianceFunctionBase.h"
 #include "CovarianceInterface.h"
 
-#include "GaussianProcessUtils.h"
+#include "GaussianProcessHandler.h"
 
-class GaussianProcessTrainer : public SurrogateTrainer, public CovarianceInterface
+class GaussianProcessTrainer : public SurrogateTrainer
 {
 public:
   static InputParameters validParams();
@@ -29,11 +29,11 @@ public:
   virtual void train() override;
   virtual void postTrain() override;
 
-  StochasticTools::GaussianProcessUtils & gpUtils() { return _gp_utils; }
-  const StochasticTools::GaussianProcessUtils & getGPUtils() const { return _gp_utils; }
+  StochasticTools::GaussianProcessHandler & gpHandler() { return _gp_handler; }
+  const StochasticTools::GaussianProcessHandler & getGPHandler() const { return _gp_handler; }
 
 private:
-  StochasticTools::GaussianProcessUtils & _gp_utils;
+  StochasticTools::GaussianProcessHandler & _gp_handler;
 
   /// Paramaters (x) used for training, along with statistics
   RealEigenMatrix & _training_params;
@@ -47,14 +47,8 @@ private:
   /// Flag to toggle hyperparameter tuning/optimization
   bool _do_tuning;
 
-  /// Command line options to feed to TAO optimization
-  std::string _tao_options;
-
-  /// Flag to toggle printing of TAO output
-  bool _show_tao;
-
-  /// Tao Communicator
-  Parallel::Communicator _tao_comm;
+  /// Enum which contains the hyper parameter optimizaton type requested by the user
+  MooseEnum _tuning_algorithm;
 
   /// Data from the current sampler row
   const std::vector<Real> & _sampler_row;

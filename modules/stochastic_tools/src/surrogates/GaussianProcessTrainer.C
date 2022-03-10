@@ -25,7 +25,6 @@ InputParameters
 GaussianProcessTrainer::validParams()
 {
   InputParameters params = SurrogateTrainer::validParams();
-  params += CovarianceInterface::validParams();
   params.addClassDescription(
       "Provides data preperation and training for a Gaussian Process surrogate model.");
   params.addRequiredParam<ReporterName>(
@@ -45,9 +44,13 @@ GaussianProcessTrainer::validParams()
       "standardize_params", true, "Standardize (center and scale) training parameters (x values)");
   params.addParam<bool>(
       "standardize_data", true, "Standardize (center and scale) training data (y values)");
-  params.addParam<std::string>(
-      "tao_options", "", "Command line options for PETSc/TAO hyperparameter optimization");
-  params.addParam<bool>("show_tao", false, "Switch to show TAO solver results");
+  // Already preparing to use ADAM here
+  MooseEnum tuning_type("tao none", "none");
+  params.addParam<MooseEnum>(
+      "tuning_algorithm", tuning_type, "Hyper parameter optimizaton algorithm");
+  params.addParam<std::string>("tao_options",
+                               "Command line options for PETSc/TAO hyperparameter optimization");
+  params.addParam<bool>("show_tao", "Switch to show TAO solver results");
   params.addParam<std::vector<std::string>>("tune_parameters",
                                             "Select hyperparameters to be tuned");
   params.addParam<std::vector<Real>>("tuning_min", "Minimum allowable tuning value");
@@ -57,15 +60,12 @@ GaussianProcessTrainer::validParams()
 
 GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameters)
   : SurrogateTrainer(parameters),
-    CovarianceInterface(parameters),
-    _gp_utils(declareModelData<StochasticTools::GaussianProcessUtils>("_gp_utils")),
+    _gp_handler(declareModelData<StochasticTools::GaussianProcessHandler>("_gp_handler")),
     _training_params(declareModelData<RealEigenMatrix>("_training_params")),
     _standardize_params(getParam<bool>("standardize_params")),
     _standardize_data(getParam<bool>("standardize_data")),
     _do_tuning(isParamValid("tune_parameters")),
-    _tao_options(getParam<std::string>("tao_options")),
-    _show_tao(getParam<bool>("show_tao")),
-    _tao_comm(MPI_COMM_SELF),
+    _tuning_algorithm(getParam<MooseEnum>("tuning_algorithm")),
     _sampler_row(getSamplerData()),
     _rval(getTrainingData<Real>(getParam<ReporterName>("response"))),
     _pvals(getParam<std::vector<ReporterName>>("predictors").size()),
@@ -73,8 +73,6 @@ GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameter
     _n_params((_pvals.empty() && _pcols.empty()) ? _sampler.getNumberOfCols()
                                                  : (_pvals.size() + _pcols.size()))
 {
-  _gp_utils.linkCovarianceFunction(parameters,
-                                   parameters.get<UserObjectName>("covariance_function"));
   const auto & pnames = getParam<std::vector<ReporterName>>("predictors");
   for (unsigned int i = 0; i < pnames.size(); ++i)
     _pvals[i] = &getTrainingData<Real>(pnames[i]);
@@ -85,6 +83,10 @@ GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameter
     _pcols.resize(_sampler.getNumberOfCols());
     std::iota(_pcols.begin(), _pcols.end(), 0);
   }
+
+  if (_do_tuning && _tuning_algorithm == "none")
+    paramError("tuning_algorithm",
+               "No tuning algorithm is selected for the hyper parameter optimization!");
 
   std::vector<std::string> tune_parameters(getParam<std::vector<std::string>>("tune_parameters"));
   // Error Checking
@@ -101,7 +103,11 @@ GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameter
   if (isParamValid("tuning_max"))
     upper_bounds = getParam<std::vector<Real>>("tuning_max");
 
-  _gp_utils.generateTuningMap(tune_parameters, lower_bounds, upper_bounds);
+  _gp_handler.initialize(parameters,
+                         parameters.get<UserObjectName>("covariance_function"),
+                         tune_parameters,
+                         lower_bounds,
+                         upper_bounds);
 }
 
 void
@@ -136,30 +142,23 @@ GaussianProcessTrainer::postTrain()
 
   // Standardize (center and scale) training params
   if (_standardize_params)
-    _gp_utils.standardizeParameters(_training_params);
+    _gp_handler.standardizeParameters(_training_params);
   // if not standardizing data set mean=0, std=1 for use in surrogate
   else
-    _gp_utils.paramStandardizer().set(0, 1, _n_params);
+    _gp_handler.paramStandardizer().set(0, 1, _n_params);
 
   // Standardize (center and scale) training data
   if (_standardize_data)
-    _gp_utils.standardizeData(_training_data);
+    _gp_handler.standardizeData(_training_data);
   // if not standardizing data set mean=0, std=1 for use in surrogate
   else
-    _gp_utils.dataStandardizer().set(0, 1, _n_params);
+    _gp_handler.dataStandardizer().set(0, 1, _n_params);
 
-  _gp_utils.K().resize(_training_params.rows(), _training_params.rows());
-
-  if (_do_tuning)
-  {
-    if (_gp_utils.tuneHyperParamsTAO(_training_params, _training_data, _tao_options, _show_tao))
-      mooseError("PETSc/TAO error in hyperparameter tuning.");
-  }
-
-  _gp_utils.covarFunction().computeCovarianceMatrix(
-      _gp_utils.K(), _training_params, _training_params, true);
-  _gp_utils.setupStoredMatrices(_training_data);
-
-  _gp_utils.covarFunction().buildHyperParamMap(_gp_utils.hyperparamMap(),
-                                               _gp_utils.hyperparamVectorMap());
+  // Setup the covariance
+  _gp_handler.setupCovarianceMatrix(
+      _training_params,
+      _training_data,
+      _tuning_algorithm,
+      isParamValid("tao_options") ? getParam<std::string>("tao_options") : "",
+      isParamValid("show_tao") ? getParam<bool>("show_tao") : false);
 }

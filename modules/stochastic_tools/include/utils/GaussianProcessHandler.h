@@ -17,29 +17,109 @@
 namespace StochasticTools
 {
 
-class GaussianProcessUtils
+/**
+ * Utility class dedicated to hold structures and functions commont to
+ * Gaussian Processes. It can be used to standardize parameters, manipulate
+ * covariance data and compute additional stored matrices.
+ */
+class GaussianProcessHandler
 {
 public:
-  GaussianProcessUtils();
+  GaussianProcessHandler();
 
+  /**
+   * Initializes the most important structures in the Gaussian Process: the
+   * covariance function and a tuning map which is used if the user requires
+   * parameter tuning.
+   * @param parameters The input parameters of the class holding this object.
+   *                   It is used to recover other objects in the problem holding
+   *                   this handler.
+   * @param covar_name The name of the covariance user object.
+   * @param params_to_tune List of parameters which need to be tuned.
+   * @param min List of lower bounds for the parameter tuning.
+   * @param max List of upper bounds for parameter tuning.
+   */
+  void initialize(const InputParameters & parameters,
+                  const UserObjectName & covar_name,
+                  const std::vector<std::string> params_to_tune,
+                  std::vector<Real> min = std::vector<Real>(),
+                  std::vector<Real> max = std::vector<Real>());
+
+  /**
+   * Sets up the covariance matrix given data and optimization options.
+   * @param training_params The training parameter values (x values) for the
+   *                        covariance matrix.
+   * @param training_data The training data (y values) for the inversion of the
+   *                      covariance matrix.
+   * @param opt_type The optimization algorithm for the hyperparameters.
+   * @param tao_options Additional options if TAO is used for parameter optimization.
+   * @param show_tao Switch to show details of TAO optimization.
+   */
+  void setupCovarianceMatrix(const RealEigenMatrix & training_params,
+                             const RealEigenMatrix & training_data,
+                             MooseEnum opt_type,
+                             std::string tao_options = "",
+                             bool show_tao = false);
+
+  /**
+   * Sets up the Cholesky decomposition and inverse action of the covariance matrix.
+   * @param input The vector/matrix which right multiples the inverse of the covariance matrix.
+   */
   void setupStoredMatrices(const RealEigenMatrix & input);
 
-  void linkCovarianceFunction(const InputParameters & parameters, const UserObjectName & name);
+  /**
+   * Finds and links the covariance function to this object. Used mainly in the
+   * covariance data action.
+   * @param parameters The input parameters of the class holding this object.
+   *                   It is used to recover other objects in the problem holding
+   *                   this handler.
+   * @param covar_name The name of the covariance user object.
+   */
+  void linkCovarianceFunction(const InputParameters & parameters,
+                              const UserObjectName & covar_name);
 
+  /**
+   * Sets up the tuning map which is used if the user requires parameter tuning.
+   * @param params_to_tune List of parameters which need to be tuned.
+   * @param min List of lower bounds for the parameter tuning.
+   * @param max List of upper bounds for parameter tuning.
+   */
   void generateTuningMap(const std::vector<std::string> params_to_tune,
                          std::vector<Real> min = std::vector<Real>(),
                          std::vector<Real> max = std::vector<Real>());
 
+  /**
+   * Standardizes the vector of input parameters (x values).
+   * @param parameters The vector/matrix of input data.
+   * @param keep_moments If previously computed or new moments are to be used.
+   */
   void standardizeParameters(RealEigenMatrix & parameters, bool keep_moments = false);
+
+  /**
+   * Standardizes the vector of responses (y values).
+   * @param data The vector/matrix of input data.
+   * @param keep_moments If previously computed or new moments are to be used.
+   */
   void standardizeData(RealEigenMatrix & data, bool keep_moments = false);
 
+  /**
+   * Tune the hyper parameters in the covariance function using PETSc-TAO.
+   * @param training_params The training parameter values (x values) for the
+   *                        covariance matrix.
+   * @param training_data The training data (y values) for the inversion of the
+   *                      covariance matrix.
+   * @param tao_options Additional options for TAO.
+   * @param show_tao Switch to show details of TAO optimization.
+   */
   PetscErrorCode tuneHyperParamsTAO(const RealEigenMatrix & training_params,
                                     const RealEigenMatrix & training_data,
                                     std::string tao_options = "",
                                     bool show_tao = false);
 
+  /// Used to form initial guesses in the TAO optimization routines
   PetscErrorCode formInitialGuessTAO(Vec theta_vec);
 
+  /// Build the bounds for the hyper parameter optimization with TAO
   void buildHyperParamBoundsTAO(libMesh::PetscVector<Number> & theta_l,
                                 libMesh::PetscVector<Number> & theta_u) const;
 
@@ -50,6 +130,8 @@ public:
   // Computes Gradient of the loss function
   void formFunctionGradient(Tao tao, Vec theta, PetscReal * f, Vec Grad);
 
+  /// Function used to convert the hyperparameter maps in this object to
+  /// Petsc vectors
   void mapToPetscVec(
       const std::unordered_map<std::string, std::tuple<unsigned int, unsigned int, Real, Real>> &
           tuning_data,
@@ -57,6 +139,7 @@ public:
       const std::unordered_map<std::string, std::vector<Real>> & vector_map,
       libMesh::PetscVector<Number> & petsc_vec);
 
+  /// Function used to convert the PETSc vectors back to hyperparameter maps
   void petscVecToMap(
       const std::unordered_map<std::string, std::tuple<unsigned int, unsigned int, Real, Real>> &
           tuning_data,
@@ -64,6 +147,10 @@ public:
       std::unordered_map<std::string, std::vector<Real>> & vector_map,
       const libMesh::PetscVector<Number> & petsc_vec);
 
+  /// @{
+  /**
+   * Get constant reference to the contained structures
+   */
   const StochasticTools::Standardizer & getParamStandardizer() const { return _param_standardizer; }
   const StochasticTools::Standardizer & getDataStandardizer() const { return _data_standardizer; }
   const RealEigenMatrix & getK() const { return _K; }
@@ -77,7 +164,13 @@ public:
   {
     return _hyperparam_vec_map;
   }
+  ///@}
 
+  /// @{
+  /**
+   * Get non-constant reference to the contained structures (if they need to be modified from the
+   * utside)
+   */
   StochasticTools::Standardizer & paramStandardizer() { return _param_standardizer; }
   StochasticTools::Standardizer & dataStandardizer() { return _data_standardizer; }
   RealEigenMatrix & K() { return _K; }
@@ -95,6 +188,7 @@ public:
   {
     return _hyperparam_vec_map;
   }
+  ///@}
 
 protected:
   /// Covariance function object
@@ -148,8 +242,9 @@ template <>
 void dataLoad(std::istream & stream, Eigen::LLT<RealEigenMatrix> & decomp, void * context);
 
 template <>
-void
-dataStore(std::ostream & stream, StochasticTools::GaussianProcessUtils & gp_utils, void * context);
+void dataStore(std::ostream & stream,
+               StochasticTools::GaussianProcessHandler & gp_utils,
+               void * context);
 template <>
 void
-dataLoad(std::istream & stream, StochasticTools::GaussianProcessUtils & gp_utils, void * context);
+dataLoad(std::istream & stream, StochasticTools::GaussianProcessHandler & gp_utils, void * context);
