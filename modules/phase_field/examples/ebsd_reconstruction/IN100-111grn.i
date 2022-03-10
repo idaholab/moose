@@ -2,7 +2,7 @@
   [ebsd_mesh]
     type = EBSDMeshGenerator
     filename = IN100_120x120.txt
-    uniform_refine = 2
+    pre_refine = 2
   []
 []
 
