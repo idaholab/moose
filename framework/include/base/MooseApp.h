@@ -969,6 +969,12 @@ protected:
   /// The MPI communicator this App is going to use
   const std::shared_ptr<Parallel::Communicator> _comm;
 
+  /// Level of multiapp, the master is level 0. This used by the Console to indent output
+  unsigned int _multiapp_level;
+
+  /// Numbering in all the sub-apps on the same level
+  unsigned int _multiapp_number;
+
   /// Input file names used
   std::vector<std::string> _input_filenames;
 
@@ -1228,12 +1234,6 @@ private:
 
   /// The combined warehouse for storing any MooseObject based object
   std::unique_ptr<TheWarehouse> _the_warehouse;
-
-  /// Level of multiapp, the master is level 0. This used by the Console to indent output
-  unsigned int _multiapp_level;
-
-  /// Numbering in all the sub-apps on the same level
-  unsigned int _multiapp_number;
 
   /// The mesh from master app
   const MooseMesh * const _master_mesh;

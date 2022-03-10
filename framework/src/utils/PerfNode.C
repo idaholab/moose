@@ -15,7 +15,7 @@
 std::chrono::steady_clock::duration
 PerfNode::selfTime() const
 {
-  return _total_time - childrenTime();
+  return totalTime() - childrenTime();
 }
 
 std::chrono::steady_clock::duration
@@ -23,7 +23,9 @@ PerfNode::totalTime() const
 {
   // Note that all of the children's time is already
   // accounted for in the total time
-  return _total_time;
+  // If we aren't counting self time then the total
+  // is just the childrenTime()
+  return _no_self ? childrenTime() : _total_time;
 }
 
 std::chrono::steady_clock::duration

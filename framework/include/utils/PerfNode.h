@@ -27,7 +27,10 @@ public:
   /**
    * Create a PerfNode with the given ID
    */
-  PerfNode(const PerfID id) : _id(id), _total_time(0), _num_calls(0), _total_memory(0) {}
+  PerfNode(const PerfID id, const bool no_self = false)
+    : _id(id), _no_self(no_self), _total_time(0), _num_calls(0), _total_memory(0)
+  {
+  }
 
   /**
    * Get the ID of this Node
@@ -163,6 +166,9 @@ public:
 private:
   /// The unique ID for the section this Node corresponds to
   const PerfID _id;
+
+  /// Whether or not this node should accrue "self" time
+  const bool _no_self;
 
   /// The current start_time for this node (if it's on the stack)
   std::chrono::time_point<std::chrono::steady_clock> _start_time;

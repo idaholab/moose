@@ -326,6 +326,10 @@ MooseApp::MooseApp(InputParameters parameters)
     _pars(parameters),
     _type(getParam<std::string>("_type")),
     _comm(getParam<std::shared_ptr<Parallel::Communicator>>("_comm")),
+    _multiapp_level(
+        isParamValid("_multiapp_level") ? parameters.get<unsigned int>("_multiapp_level") : 0),
+    _multiapp_number(
+        isParamValid("_multiapp_number") ? parameters.get<unsigned int>("_multiapp_number") : 0),
     _file_base_set_by_user(false),
     _output_position_set(false),
     _start_time_set(false),
@@ -361,10 +365,6 @@ MooseApp::MooseApp(InputParameters parameters)
     _restart_recover_suffix("cpr"),
     _half_transient(false),
     _check_input(getParam<bool>("check_input")),
-    _multiapp_level(
-        isParamValid("_multiapp_level") ? parameters.get<unsigned int>("_multiapp_level") : 0),
-    _multiapp_number(
-        isParamValid("_multiapp_number") ? parameters.get<unsigned int>("_multiapp_number") : 0),
     _master_mesh(isParamValid("_master_mesh") ? parameters.get<const MooseMesh *>("_master_mesh")
                                               : nullptr),
     _master_displaced_mesh(isParamValid("_master_displaced_mesh")
