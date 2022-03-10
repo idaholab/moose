@@ -54,7 +54,6 @@
   []
   [cavity_zero_effective_stress_x]
     type = Pressure
-    component = 0
     variable = disp_r
     function = 1E6
     boundary = left
