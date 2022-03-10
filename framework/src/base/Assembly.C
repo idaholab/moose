@@ -4609,6 +4609,34 @@ Assembly::modifyArbitraryWeights(const std::vector<Real> & weights)
     _current_JxW[i] = weights[i];
 }
 
+void
+Assembly::processUnconstrainedDerivatives(const std::vector<ADReal> & residuals,
+                                          const std::vector<dof_id_type> & row_indices,
+                                          const std::set<TagID> & matrix_tags)
+{
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+  mooseAssert(residuals.size() == row_indices.size(),
+              "The number of residuals should match the number of dof indices");
+  mooseAssert(residuals.size() >= 1, "Why you calling me with no residuals?");
+
+  for (const auto i : index_range(row_indices))
+  {
+    const auto row_index = row_indices[i];
+    const Real scalar = _scaling_vector ? (*_scaling_vector)(row_index) : 1.;
+
+    const auto & sparse_derivatives = residuals[i].derivatives();
+    const auto & column_indices = sparse_derivatives.nude_indices();
+    const auto & raw_derivatives = sparse_derivatives.nude_data();
+
+    for (std::size_t j = 0; j < column_indices.size(); ++j)
+      cacheJacobian(row_index, column_indices[j], raw_derivatives[j] * scalar, matrix_tags);
+  }
+
+#else
+  mooseError("Only supported with global AD indexing");
+#endif
+}
+
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiValue &
 Assembly::fePhi<VectorValue<Real>>(FEType type) const
