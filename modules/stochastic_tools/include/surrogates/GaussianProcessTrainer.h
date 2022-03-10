@@ -29,28 +29,8 @@ public:
   virtual void train() override;
   virtual void postTrain() override;
 
-  // Routine to perform hyperparameter tuning
-  PetscErrorCode hyperparamTuning();
-
-  PetscErrorCode FormInitialGuess(GaussianProcessTrainer * GP_ptr, Vec theta);
-
-  // Wrapper for PETSc function callback
-  static PetscErrorCode
-  FormFunctionGradientWrapper(Tao tao, Vec theta, PetscReal * f, Vec Grad, void * ptr);
-
-  // Computes Gradient of the loss function
-  void FormFunctionGradient(Tao tao, Vec theta, PetscReal * f, Vec Grad);
-
-  // Sets bounds for hyperparameters
-  void buildHyperParamBounds(libMesh::PetscVector<Number> & theta_l,
-                             libMesh::PetscVector<Number> & theta_u) const;
-  // write stored hyperparam_vecs to PetscVec
-  void mapToVec(libMesh::PetscVector<Number> & theta) const;
-
-  // loads PetscVec to stored hyperparam_vecs
-  void vecToMap(libMesh::PetscVector<Number> & theta);
-
-  StochasticTools::GaussianProcessUtils & getGPUtils() { return _gp_utils; }
+  StochasticTools::GaussianProcessUtils & gpUtils() { return _gp_utils; }
+  const StochasticTools::GaussianProcessUtils & getGPUtils() const { return _gp_utils; }
 
 private:
   StochasticTools::GaussianProcessUtils & _gp_utils;
@@ -75,18 +55,6 @@ private:
 
   /// Tao Communicator
   Parallel::Communicator _tao_comm;
-
-  /// Contains tuning inforation. Index of hyperparam, size, and min/max bounds
-  std::unordered_map<std::string, std::tuple<unsigned int, unsigned int, Real, Real>> _tuning_data;
-
-  /// Number of tunable hyperparameters
-  unsigned int _num_tunable;
-
-  /// Scalar hyperparameters. Stored for use in surrogate
-  std::unordered_map<std::string, Real> & _hyperparam_map;
-
-  /// Vector hyperparameters. Stored for use in surrogate
-  std::unordered_map<std::string, std::vector<Real>> & _hyperparam_vec_map;
 
   /// Data from the current sampler row
   const std::vector<Real> & _sampler_row;

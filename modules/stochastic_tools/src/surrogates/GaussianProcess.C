@@ -26,23 +26,11 @@ GaussianProcess::validParams()
 GaussianProcess::GaussianProcess(const InputParameters & parameters)
   : SurrogateModel(parameters),
     CovarianceInterface(parameters),
-    _gp_utils(
-        isParamValid("trainer")
-            ? dynamic_cast<GaussianProcessTrainer &>(getSurrogateTrainer("trainer")).getGPUtils()
-            : setModelData<StochasticTools::GaussianProcessUtils>("_gp_utils")),
-    _training_params(getModelData<RealEigenMatrix>("_training_params")),
-    _hyperparam_map(getModelData<std::unordered_map<std::string, Real>>("_hyperparam_map")),
-    _hyperparam_vec_map(
-        getModelData<std::unordered_map<std::string, std::vector<Real>>>("_hyperparam_vec_map"))
+    _gp_utils(isParamValid("trainer")
+                  ? dynamic_cast<GaussianProcessTrainer &>(getSurrogateTrainer("trainer")).gpUtils()
+                  : setModelData<StochasticTools::GaussianProcessUtils>("_gp_utils")),
+    _training_params(getModelData<RealEigenMatrix>("_training_params"))
 {
-}
-
-void
-GaussianProcess::setupCovariance(UserObjectName covar_name)
-{
-  if (_gp_utils.covarFunctionPtr() != nullptr)
-    ::mooseError("Attempting to redefine covariance function using setupCovariance.");
-  _gp_utils.linkCovarianceFunction(_pars, covar_name);
 }
 
 Real
