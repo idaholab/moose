@@ -42,7 +42,7 @@ AllLocalDofIndicesThread::AllLocalDofIndicesThread(FEProblemBase & problem,
     else
       _sys = &var.sys().system();
 
-    if (var.count() > 1) // array variable
+    if (var.isArray())
     {
       const auto & array_var = _problem.getArrayVariable(0, vars[i]);
       for (unsigned int p = 0; p < var.count(); ++p)

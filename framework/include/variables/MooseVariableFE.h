@@ -150,6 +150,7 @@ public:
 
   bool isNodal() const override { return _element_data->isNodal(); }
   Moose::VarFieldType fieldType() const override;
+  bool isArray() const override;
   bool isVector() const override;
   const Node * const & node() const { return _element_data->node(); }
   const dof_id_type & nodalDofIndex() const override { return _element_data->nodalDofIndex(); }
