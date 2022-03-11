@@ -189,3 +189,16 @@
    fun:*boost*math*
    ...
 }
+{
+   hypre_leaks
+   Memcheck:Leak
+   fun:hypre_HostMalloc
+   fun:hypre_MAlloc_core
+   fun:hypre_CAlloc
+   fun:hypre_IntArrayCreate
+   fun:hypre_BoomerAMGCoarseParmsHost
+   fun:hypre_BoomerAMGCoarseParms
+   fun:hypre_BoomerAMGSetup
+   fun:HYPRE_BoomerAMGSetup
+   fun:PCSetUp_HYPRE
+}
