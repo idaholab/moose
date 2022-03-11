@@ -201,6 +201,13 @@ private:
 
   std::vector<const Moose::Functor<ADReal> *> _rhos;
   std::vector<const Moose::Functor<ADReal> *> _mus;
+  std::vector<const Moose::Functor<ADReal> *> _T_fluids;
+  const bool _has_boussinesq;
+  const bool _has_gravity;
+  const Real _alpha_b;
+  const Real _ref_temp;
+  const RealVectorValue _gravity;
+  const Real _gravity_mag;
 };
 
 inline const Moose::FunctorBase<ADReal> & INSFVRhieChowInterpolator::epsilon(THREAD_ID) const

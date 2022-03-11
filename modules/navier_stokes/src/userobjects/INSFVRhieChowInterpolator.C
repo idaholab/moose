@@ -78,6 +78,10 @@ INSFVRhieChowInterpolator::validParams()
       "rc_scale_factor", 1, "How much to scale the RC addition to the face velocity.");
   params.addRequiredParam<MooseFunctorName>(NS::density, "The density.");
   params.addRequiredParam<MooseFunctorName>(NS::mu, "The dynamic viscosity");
+  params.addParam<MooseFunctorName>(NS::T_fluid, "The fluid temperature.");
+  params.addParam<Real>(NS::alpha_boussinesq, 0, "The coefficient of thermal expansion.");
+  params.addParam<Real>("ref_temperature", 0, "The reference temperature");
+  params.addParam<RealVectorValue>("gravity", "The gravity vector.");
   return params;
 }
 
@@ -113,7 +117,14 @@ INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & par
     _a_data_provided(false),
     _rc_scale_factor(getParam<Real>("rc_scale_factor")),
     _rhos(libMesh::n_threads(), nullptr),
-    _mus(libMesh::n_threads(), nullptr)
+    _mus(libMesh::n_threads(), nullptr),
+    _T_fluids(libMesh::n_threads(), nullptr),
+    _has_boussinesq(params.isParamSetByUser(NS::alpha_boussinesq)),
+    _has_gravity(isParamValid("gravity")),
+    _alpha_b(getParam<Real>(NS::alpha_boussinesq)),
+    _ref_temp(getParam<Real>("ref_temperature")),
+    _gravity(isParamValid("gravity") ? getParam<RealVectorValue>("gravity") : RealVectorValue(0)),
+    _gravity_mag(_has_gravity ? _gravity.norm() : 0)
 {
   if (!_p)
     paramError(NS::pressure, "the pressure must be a INSFVPressureVariable.");
@@ -196,6 +207,9 @@ INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & par
     _rhos[tid] =
         &UserObject::_subproblem.getFunctor<ADReal>(deduceFunctorName(NS::density), tid, name());
     _mus[tid] = &UserObject::_subproblem.getFunctor<ADReal>(deduceFunctorName(NS::mu), tid, name());
+    if (_has_boussinesq)
+      _T_fluids[tid] =
+          &UserObject::_subproblem.getFunctor<ADReal>(deduceFunctorName(NS::T_fluid), tid, name());
   }
 
   const auto & velocity_interp_method = params.get<MooseEnum>("velocity_interp_method");
@@ -521,14 +535,24 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
   const auto face_mu = (*_mus[tid])(face);
   const auto face_area = fi.faceArea() * fi.faceCoord();
   const auto face_h = face_volume / face_area;
+  const auto face_T = _T_fluids[tid] ? (*_T_fluids[tid])(face) : ADReal(0);
 
   // pspg tau analog
-  const auto face_nu = face_mu / face_rho;
+  // every one of these terms should have units of 1/time^2
   const auto transient_part = _is_transient ? 4. / (_dt * _dt) : 0.;
-  const auto tau =
-      _rc_scale_factor /
-      std::sqrt(transient_part + (2. * velocity.norm() / face_h) * (2. * velocity.norm() / face_h) +
-                9. * (4. * face_nu / (face_h * face_h)) * (4. * face_nu / (face_h * face_h)));
+
+  const auto vel_norm = velocity.norm();
+  const auto advective_part = (2. * vel_norm / face_h) * (2. * vel_norm / face_h);
+
+  const auto face_nu = face_mu / face_rho;
+  const auto viscous_part =
+      9. * (4. * face_nu / (face_h * face_h)) * (4. * face_nu / (face_h * face_h));
+
+  const auto dT = std::abs(face_T - _ref_temp);
+  const auto boussinesq_part = dT == 0 ? ADReal(0) : 4. * _alpha_b * _gravity_mag * dT / face_h;
+  const auto gravity_part = 4. * _gravity_mag / face_h;
+  const auto tau = _rc_scale_factor / std::sqrt(transient_part + advective_part + viscous_part +
+                                                boussinesq_part + gravity_part);
 
   // Added velocity
   const auto added_velocity = tau / face_rho * face_a;
