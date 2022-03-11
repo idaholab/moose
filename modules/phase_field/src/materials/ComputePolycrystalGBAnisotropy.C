@@ -17,7 +17,7 @@ ComputePolycrystalGBAnisotropy::validParams()
 {
   InputParameters params = Material::validParams();
   params.addClassDescription(
-      "Compute of grain boundary energy and grain boundary mobility based on misorientation");
+      "Compute of the grain misorientation based on grian euler phi_1");
   params.addRequiredParam<UserObjectName>(
       "grain_tracker", "Name of GrainTracker user object that provides Grain ID according to element ID");
   params.addRequiredParam<UserObjectName>("euler_angle_provider",
@@ -44,9 +44,12 @@ ComputePolycrystalGBAnisotropy::computeQpProperties()
   const auto & op_to_grains = _grain_tracker.getVarToFeatureVector(_current_elem->id());
 
   unsigned int num_grain_id = 0; // the number of vaild graid IDs
-  std::vector<std::vector<unsigned int>> grainID_varibaleIndex; // Create a vector of grain IDs to order parameter indices
-  grainID_varibaleIndex.clear();
-
+  // std::vector<std::vector<unsigned int>> grainID_varibaleIndex; // Create a vector of grain IDs to order parameter indices
+  std::vector<unsigned int> grainID; // Create a vector of grain IDs to 
+  std::vector<unsigned int> varibaleIndex; // Create a vector of order parameter indices
+  grainID.clear();
+  varibaleIndex.clear();
+  
   for (MooseIndex(op_to_grains) op_index = 0; op_index < op_to_grains.size(); ++op_index)
   {
     auto grain_id = op_to_grains[op_index];
@@ -54,27 +57,29 @@ ComputePolycrystalGBAnisotropy::computeQpProperties()
     if (grain_id == FeatureFloodCount::invalid_id)
       continue;    
     
-    grainID_varibaleIndex[num_grain_id][0] = grain_id;
-    grainID_varibaleIndex[num_grain_id][1] = op_index; 
+    // grainID_varibaleIndex[num_grain_id][0] = grain_id;
+    // grainID_varibaleIndex[num_grain_id][1] = op_index; 
+    grainID.push_back(grain_id);
+    varibaleIndex.push_back(op_index);
     num_grain_id++;
   }
   
-  if (grainID_varibaleIndex.size() == 1) // inside the grain 
+  if (grainID.size() == 1 || grainID.size() == 0) // inside the grain 
     _delta_theta[_qp] = 0; // the misorientation 
   else // on the grain boudary
   {
     Real sum_val = 0;
     Real sum_delta_theta = 0;
     Real Val = 0.0;
-    for (unsigned int i = 0; i < grainID_varibaleIndex.size(); ++i)
+    for (unsigned int i = 0; i < grainID.size(); ++i)
     {
-      for (unsigned int j = i+1; j < grainID_varibaleIndex.size(); ++j)
+      for (unsigned int j = i+1; j < grainID.size(); ++j)
       {
-        const RealVectorValue angles_i = _euler.getEulerAngles(grainID_varibaleIndex[i][0]); // Get the sequence of Euler angles for grain i
-        const RealVectorValue angles_j = _euler.getEulerAngles(grainID_varibaleIndex[j][0]);
+        const RealVectorValue angles_i = _euler.getEulerAngles(grainID[i]); // Get the sequence of Euler angles for grain i
+        const RealVectorValue angles_j = _euler.getEulerAngles(grainID[j]);
 
-        unsigned int m = grainID_varibaleIndex[i][1]; // Get the order parameter index of grain i
-        unsigned int n = grainID_varibaleIndex[j][1];
+        unsigned int m = varibaleIndex[i]; // Get the order parameter index of grain i
+        unsigned int n = varibaleIndex[j];
 
         Val = (100000.0 * ((*_vals[m])[_qp]) * ((*_vals[m])[_qp]) + 0.01) *
               (100000.0 * ((*_vals[n])[_qp]) * ((*_vals[n])[_qp]) + 0.01); // eta_i^2 * eta_j^2
