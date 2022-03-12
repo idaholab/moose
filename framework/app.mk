@@ -422,6 +422,7 @@ $(app_EXEC): $(app_LIBS) $(mesh_library) $(main_object) $(app_test_LIB) $(depend
 docs_dir := $(APPLICATION_DIR)/doc
 bindst = $(bin_install_dir)/$(notdir $(app_EXEC))
 binlink = $(share_install_dir)/$(notdir $(app_EXEC))
+copy_input_targets := $(foreach dir,$(INSTALLABLE_DIRS),target_$(APPLICATION_NAME)_$(dir))
 
 lib_install_targets = $(foreach lib,$(applibs),$(dir $(lib))install_lib_$(notdir $(lib)))
 ifneq ($(app_test_LIB),)
@@ -430,24 +431,23 @@ endif
 
 install_libs: $(lib_install_targets)
 
-install_$(APPLICATION_NAME)_tests: all
-	@echo "Installing the following directories: $(INSTALLABLE_DIRS)"
-	@for dir in $(INSTALLABLE_DIRS); \
-	do \
-		base_dir=$$(basename $$dir); \
-		rm -rf $(share_install_dir)/$$base_dir; \
-		mkdir -p $(share_install_dir)/$$base_dir; \
-		cp -R $(APPLICATION_DIR)/$$dir $(share_install_dir)/$$base_dir; \
-		if [ -e $(APPLICATION_DIR)/testroot ]; \
-		then \
-			cp -f $(APPLICATION_DIR)/testroot $(share_install_dir)/$$base_dir/; \
-		elif [ -e $$dir/testroot ]; \
-		then \
-			cp -f $$dir/testroot $(share_install_dir)/$$base_dir/; \
-		else \
-			echo "app_name = $(APPLICATION_NAME)" > $(share_install_dir)/$$base_dir/testroot; \
-		fi; \
-	done
+$(copy_input_targets): all
+	@$(eval target_dir := $(subst target_$(APPLICATION_NAME)_,,$@))
+	@$(eval base_dir := $(notdir $(target_dir)))
+	@echo "Installing inputs from directory \"$(target_dir)\""
+	@rm -rf $(share_install_dir)/$(base_dir)
+	@mkdir -p $(share_install_dir)/$(base_dir)
+	@cp -R $(APPLICATION_DIR)/$(target_dir) $(share_install_dir)/$(base_dir)
+	@if [ -e $(APPLICATION_DIR)/testroot ]; \
+	then \
+		cp -f $(APPLICATION_DIR)/testroot $(share_install_dir)/$(base_dir)/; \
+	elif [ -e $(target_dir)/testroot ]; \
+	then \
+		cp -f $(target_dir)/testroot $(share_install_dir)/$(base_dir)/; \
+	else \
+		echo "app_name = $(APPLICATION_NAME)" > $(share_install_dir)/$(base_dir)/testroot; \
+	fi; \
+
 
 install_lib_%: % all
 	@echo "Installing $<"
@@ -462,7 +462,7 @@ install_lib_%: % all
 	@$(eval libpaths := $(foreach lib,$(applibs),$(dir $(lib))$(shell grep "dlname='.*'" $(lib) 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")))
 	@for lib in $(libpaths); do $(call patch_relink,$(libdst),$$lib,$$(basename $$lib)); done
 
-$(binlink): all install_$(APPLICATION_NAME)_tests
+$(binlink): all $(copy_input_targets)
 	ln -sf ../../bin/$(notdir $(app_EXEC)) $@
 
 install_$(APPLICATION_NAME)_docs:
@@ -474,7 +474,7 @@ else
 	@echo "Skipping docs installation."
 endif
 
-$(bindst): $(app_EXEC) all install_$(APPLICATION_NAME)_tests install_$(APPLICATION_NAME)_docs $(binlink)
+$(bindst): $(app_EXEC) all $(copy_input_targets) install_$(APPLICATION_NAME)_docs $(binlink)
 	@echo "Installing $<"
 	@mkdir -p $(bin_install_dir)
 	@cp $< $@

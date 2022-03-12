@@ -395,7 +395,7 @@ install_exodiff: all
 	@cp $(MOOSE_DIR)/framework/contrib/exodiff/exodiff $(bin_install_dir)
 
 install_harness:
-	@echo "Installing test harness"
+	@echo "Installing TestHarness"
 	@rm -rf $(python_install_dir)
 	@mkdir -p $(python_install_dir)
 	@mkdir -p $(moose_share_dir)/bin
