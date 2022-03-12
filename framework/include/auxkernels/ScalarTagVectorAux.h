@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "AuxScalarKernel.h"
 #include "TagAuxBase.h"
 
 /**

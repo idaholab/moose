@@ -90,6 +90,8 @@
       # so that we do not need to run the test
       # in parallel
       max_parallel = 1
+      # csv file contains more rows 
+      recover = false
 
       detail = 'the scalar kernel system (without the variable scaling),'
     []

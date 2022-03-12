@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include "InputParameters.h"
+
 /**
  * The value of a tagged vector for a given node and a given variable is coupled to
  * the current AuxVariable. TagVectorAux returns the coupled nodal value.
