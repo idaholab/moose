@@ -1450,8 +1450,14 @@ MooseApp::copyInputs()
           "\".");
 
     std::string cmd = "cp -R " + src_dir + " " + dst_dir;
-    int ret = system(cmd.c_str());
-    if (WIFEXITED(ret) && WEXITSTATUS(ret) != 0)
+
+    // Only perform the copy on the root processor
+    int return_value = 0;
+    if (processor_id() == 0)
+      return_value = system(cmd.c_str());
+    _communicator.broadcast(return_value);
+
+    if (WIFEXITED(return_value) && WEXITSTATUS(return_value) != 0)
       mooseError("Failed to copy the requested directory.");
     Moose::out << "Directory successfully copied into ./" << dst_dir << '\n';
     return true;
@@ -1510,9 +1516,15 @@ MooseApp::runInputs()
       if (ret != 0)
         mooseError("Failed to change directory into ", working_dir);
     }
+
+    // Only launch the tests on the root processor
     Moose::out << "Working Directory: " << working_dir << "\nRunning Command: " << cmd << std::endl;
-    int ret = system(cmd.c_str());
-    if (WIFEXITED(ret) && WEXITSTATUS(ret) != 0)
+    int return_value = 0;
+    if (processor_id() == 0)
+      return_value = system(cmd.c_str());
+    _communicator.broadcast(return_value);
+
+    if (WIFEXITED(return_value) && WEXITSTATUS(return_value) != 0)
       mooseError("Run failed");
     return true;
   }
