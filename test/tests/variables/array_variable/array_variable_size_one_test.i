@@ -9,7 +9,7 @@
 
 [Variables]
   [u]
-    order = CONSTANT
+    order = FIRST
     family = MONOMIAL
     components = 1
     array = true
