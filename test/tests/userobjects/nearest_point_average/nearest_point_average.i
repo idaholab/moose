@@ -60,7 +60,7 @@
   []
 []
 
-[VectorProcessors]
+[UserObjects]
   [npa]
     type = NearestPointAverage
     points_file = points.txt

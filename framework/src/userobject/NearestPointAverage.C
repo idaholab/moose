@@ -16,7 +16,7 @@ InputParameters
 NearestPointAverage::validParams()
 {
   InputParameters params =
-      nearestPointBaseValidParams<ElementAverageValue, ElementVariableVectorPostprocessor>();
+      NearestPointBase<ElementAverageValue, ElementVariableVectorPostprocessor>::validParams();
 
   params.addClassDescription(
       "Compute element variable averages for nearest-point based subdomains");
