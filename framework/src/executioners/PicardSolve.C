@@ -53,10 +53,9 @@ PicardSolve::validParams()
                                   "performed based on the Master app's nonlinear "
                                   "residual.",
                                   "Deprecated, use fixed_point_abs_tol");
-  params.addDeprecatedParam<PostprocessorName>(
-      "picard_custom_pp",
-      "Postprocessor for custom picard convergence check.",
-      "Deprecated, use custom_pp");
+  params.addDeprecatedParam<PostprocessorName>("picard_custom_pp",
+                                               "Postprocessor for custom picard convergence check.",
+                                               "Deprecated, use custom_pp");
 
   params.addDeprecatedParam<bool>(
       "picard_force_norms",
