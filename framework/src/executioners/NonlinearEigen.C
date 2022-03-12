@@ -34,7 +34,7 @@ NonlinearEigen::NonlinearEigen(const InputParameters & parameters)
     _free_l_tol(getParam<Real>("free_l_tol")),
     _output_after_pi(getParam<bool>("output_after_power_iterations"))
 {
-  mooseDeprecated(
+  mooseInfo(
       "'NonlinearEigen' executioner is deprecated in favor of 'Eigenvalue' executioner.\n",
       "Few parameters such as 'bx_norm', 'k0', 'free_l_tol', 'output_before_normalization' and "
       "'output_after_power_iterations' are no longer supported.\n",
