@@ -14,7 +14,7 @@
     requirement = 'The system shall support the ability to "install" inputs:'
     [setup_fake_test_structure]
       type = 'RunCommand'
-      command = 'rm -rf moose_test_tests; rm -rf ../../../share/moose_test; mkdir -p ../../../share/moose_test/tests; cp -R ../kernels/2d_diffusion ../../../share/moose_test/tests/; cp ../../testroot ../../../share/moose_test/tests/'
+      command = 'rm -rf moose_test_tests; rm -rf ../../../share/moose_test; mkdir -p ../../../share/moose_test/tests/version; cp ../misc/version/tests ../../../share/moose_test/tests/version; cp ../../testroot ../../../share/moose_test/tests/'
       installed = False
 
       detail = 'from a pre-determined user-readable location;'
@@ -22,8 +22,8 @@
 
     [copy_tests]
       type = 'RunApp'
-      input = 'DUMMY'
       cli_args = "--copy-inputs tests"
+      no_additional_cli_args = True
       expect_out = 'Directory successfully copied'
       installed = False
       prereq = 'test_copy_install/setup_fake_test_structure'
@@ -35,7 +35,7 @@
       type = 'CheckFiles'
       input = 'DUMMY'
       should_execute = False
-      check_files = 'moose_test_tests/testroot moose_test_tests/2d_diffusion/tests'
+      check_files = 'moose_test_tests/testroot moose_test_tests/version/tests'
       installed = False
       prereq = 'test_copy_install/copy_tests'
 
@@ -44,8 +44,8 @@
 
     [copy_warn_overwrite]
       type = 'RunException'
-      input = 'DUMMY'
       cli_args = "--copy-inputs tests"
+      no_additional_cli_args = True
       expect_err = 'The directory \S+ already exists.'
       installed = False
       prereq = 'test_copy_install/check_files'
@@ -53,12 +53,25 @@
       detail = 'able to report an error if overwriting may occur using a MOOSE-based binary;'
     []
 
+    [link_exec_installed]
+      type = 'RunCommand'
+      command = 'ln -s ../../../moose_test-opt .'
+      working_directory = "./moose_test_tests"
+      installed = False
+      method = opt
+      prereq = 'test_copy_install/copy_warn_overwrite'
+
+      detail = 'able to link a binary to an installed location;'
+    []
+
     [run]
       type = 'RunApp'
       cli_args = "--run tests"
+      working_directory = "./moose_test_tests"
       no_additional_cli_args = True
       installed = False
-      prereq = 'test_copy_install/copy_warn_overwrite'
+      method = opt
+      prereq = 'test_copy_install/link_exec_installed'
 
       detail = 'able to successfully launch the TestHarness using a MOOSE-based binary;'
     []

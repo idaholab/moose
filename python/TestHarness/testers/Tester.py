@@ -315,6 +315,14 @@ class Tester(MooseObject):
         cmd = self.getCommand(options)
         cwd = self.getTestDir()
 
+        # Verify that the working directory is available right before we execute.
+        if not os.path.exists(cwd):
+            # Timers must be used since they are directly indexed in the Job class
+            timer.start()
+            self.setStatus(self.fail, 'WORKING DIRECTORY NOT FOUND')
+            timer.stop()
+            return
+
         self.process = None
         try:
             f = SpooledTemporaryFile(max_size=1000000) # 1M character buffer
@@ -637,12 +645,10 @@ class Tester(MooseObject):
             if missing:
                 reasons['requires'] = ', '.join(['no {}'.format(p) for p in missing])
 
-        # Verify working_directory is relative and available
+        # Verify working_directory is relative. We'll check to make sure it's available just in time.
         if self.specs['working_directory']:
             if self.specs['working_directory'][:1] == os.path.sep:
                 self.setStatus(self.fail, 'ABSOLUTE PATH DETECTED')
-            elif not os.path.exists(self.getTestDir()):
-                self.setStatus(self.fail, 'WORKING DIRECTORY NOT FOUND')
 
         ##### The below must be performed last to register all above caveats #####
         # Remove any matching user supplied caveats from accumulated checkRunnable caveats that
