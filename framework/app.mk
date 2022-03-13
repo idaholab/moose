@@ -5,7 +5,15 @@
 # This variable is used to determine whether a C++ header revision file is generated for use
 # in your application. You can turn it on/off by changing it in your application Makefile.
 GEN_REVISION ?= yes
-INSTALLABLE_DIRS ?= tests
+
+# Set a default to install the main application's tests if one isn't set in the Makefile
+ifeq ($(INSTALLABLE_DIRS),)
+  ifneq ($(wildcard $(APPLICATION_DIR)/test/.),)
+    INSTALLABLE_DIRS := test/tests
+  else
+    INSTALLABLE_DIRS := tests
+  endif
+endif
 
 # list of application-wide excluded source files
 excluded_srcfiles :=
