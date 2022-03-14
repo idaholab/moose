@@ -22,8 +22,7 @@ SubChannelMesh::SubChannelMesh(const SubChannelMesh & other_mesh)
     _kij(other_mesh._kij),
     _pitch(other_mesh._pitch),
     _rod_diameter(other_mesh._rod_diameter),
-    _n_cells(other_mesh._n_cells),
-    _n_blocks(other_mesh._n_blocks)
+    _n_cells(other_mesh._n_cells)
 {
 }
 

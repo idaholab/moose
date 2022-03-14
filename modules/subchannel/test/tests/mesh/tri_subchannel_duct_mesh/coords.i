@@ -9,7 +9,6 @@
 [TriSubChannelMesh]
   [sub_channel]
     type = TriSubChannelMeshGenerator
-    n_blocks = 1
     rod_diameter = 0.1
     dwire = 0.03
     hwire = 0.3

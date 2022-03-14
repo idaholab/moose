@@ -34,8 +34,6 @@ protected:
   Real _rod_diameter;
   /// number of axial cells
   unsigned int _n_cells;
-  /// number of axial blocks
-  unsigned int _n_blocks;
   /// number of rings of fuel rods
   unsigned int _n_rings;
   /// number of subchannels

@@ -36,11 +36,6 @@ public:
   virtual const unsigned int & getNumOfAxialCells() const { return _n_cells; }
 
   /**
-   * Return the number of axial blocks
-   */
-  virtual const unsigned int & getNumOfAxialBlocks() const { return _n_blocks; }
-
-  /**
    * Get the subchannel mesh node for a given channel index and elevation index
    */
   virtual Node * getChannelNode(unsigned int i_chan, unsigned iz) const = 0;
@@ -173,8 +168,6 @@ protected:
   Real _rod_diameter;
   /// number of axial cells
   unsigned int _n_cells;
-  /// number of axial blocks
-  unsigned int _n_blocks;
 
 public:
   static InputParameters validParams();

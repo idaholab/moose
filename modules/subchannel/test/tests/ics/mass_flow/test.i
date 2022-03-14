@@ -6,7 +6,6 @@ mass_flux_in = ${fparse 1e+6 * 17.00 / 3600.}
     nx = 3
     ny = 3
     n_cells = 10
-    n_blocks = 1
     pitch = 0.25
     rod_diameter = 0.125
     gap = 0.1

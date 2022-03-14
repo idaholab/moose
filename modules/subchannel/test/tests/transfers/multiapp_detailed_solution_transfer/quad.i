@@ -9,7 +9,6 @@
 [QuadSubChannelMesh]
   [sub_channel]
     type = QuadSubChannelMeshGenerator
-    n_blocks = 1
     rod_diameter = 0.5
     gap = 0.1
     spacer_z = '0'

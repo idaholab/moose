@@ -7,7 +7,6 @@ P_out = 101325 # Pa
     nx = 7
     ny = 3
     n_cells = 60
-    n_blocks = 1
     pitch = 0.014605
     rod_diameter = 0.012065
     gap = 0.0015875
@@ -29,6 +28,7 @@ P_out = 101325 # Pa
 [SubChannel]
   type = LiquidWaterSubChannel1PhaseProblem
   fp = water
+  n_blocks = 1
   beta = 0.006
   CT = 2.6
   P_tol = 1e-6
