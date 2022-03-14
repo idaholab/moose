@@ -198,31 +198,39 @@ ADMortarConstraint::trimDerivative(const dof_id_type & remove_derivative_index, 
 
 void
 ADMortarConstraint::trimInteriorNodeDerivatives(
-    const std::map<unsigned int, unsigned int> & primary_ip_lowerd_map,
+    const std::map<unsigned int, unsigned int> & domain_ip_lowerd_map,
     std::array<MooseVariable *, 3> & moose_var,
     ADReal & var1,
     ADReal & var2,
-    ADReal & var3)
+    ADReal & var3,
+    const bool is_secondary)
 {
   // Remove interior node variable's derivatives from AD objects.
-  for (const auto i_primary : make_range(_test_primary.size()))
-    if (!primary_ip_lowerd_map.count(i_primary))
+  for (const auto dof_index :
+       (is_secondary ? make_range(_test_secondary.size()) : make_range(_test_primary.size())))
+    if (!domain_ip_lowerd_map.count(dof_index))
     {
       if (moose_var[0])
       {
-        const auto & remove_derivative_index_x = moose_var[0]->dofIndicesNeighbor()[i_primary];
+        const auto & remove_derivative_index_x =
+            is_secondary ? moose_var[0]->dofIndices()[dof_index]
+                         : moose_var[0]->dofIndicesNeighbor()[dof_index];
         trimDerivative(remove_derivative_index_x, var1);
       }
 
       if (moose_var[1])
       {
-        const auto & remove_derivative_index_y = moose_var[1]->dofIndicesNeighbor()[i_primary];
+        const auto & remove_derivative_index_y =
+            is_secondary ? moose_var[1]->dofIndices()[dof_index]
+                         : moose_var[1]->dofIndicesNeighbor()[dof_index];
         trimDerivative(remove_derivative_index_y, var2);
       }
 
       if (moose_var[2])
       {
-        const auto & remove_derivative_index_z = moose_var[2]->dofIndicesNeighbor()[i_primary];
+        const auto & remove_derivative_index_z =
+            is_secondary ? moose_var[2]->dofIndices()[dof_index]
+                         : moose_var[2]->dofIndicesNeighbor()[dof_index];
         trimDerivative(remove_derivative_index_z, var3);
       }
     }

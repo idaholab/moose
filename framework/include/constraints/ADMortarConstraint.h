@@ -51,7 +51,8 @@ protected:
                               std::array<MooseVariable *, 3> & moose_var,
                               ADReal & var1,
                               ADReal & var2,
-                              ADReal & var3);
+                              ADReal & var3,
+                              const bool is_secondary);
 #endif
 
 private:

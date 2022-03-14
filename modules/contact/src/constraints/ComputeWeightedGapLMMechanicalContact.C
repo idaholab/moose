@@ -114,8 +114,8 @@ ComputeWeightedGapLMMechanicalContact::computeQpProperties()
 #ifdef MOOSE_GLOBAL_AD_INDEXING
   std::array<MooseVariable *, 3> var_array{
       {getVar("disp_x", 0), getVar("disp_y", 0), _has_disp_z ? getVar("disp_z", 0) : nullptr}};
-  trimInteriorNodeDerivatives(primary_ip_lowerd_map, var_array, prim_x, prim_y, prim_z);
-  trimInteriorNodeDerivatives(secondary_ip_lowerd_map, var_array, sec_x, sec_y, sec_z);
+  trimInteriorNodeDerivatives(primary_ip_lowerd_map, var_array, prim_x, prim_y, prim_z, false);
+  trimInteriorNodeDerivatives(secondary_ip_lowerd_map, var_array, sec_x, sec_y, sec_z, true);
 #endif
 
   // Compute gap vector

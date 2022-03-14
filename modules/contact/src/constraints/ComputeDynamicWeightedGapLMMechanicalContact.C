@@ -89,8 +89,8 @@ ComputeDynamicWeightedGapLMMechanicalContact::computeQpProperties()
 #ifdef MOOSE_GLOBAL_AD_INDEXING
   std::array<MooseVariable *, 3> var_array{
       {getVar("disp_x", 0), getVar("disp_y", 0), _has_disp_z ? getVar("disp_z", 0) : nullptr}};
-  trimInteriorNodeDerivatives(primary_ip_lowerd_map, var_array, prim_x, prim_y, prim_z);
-  trimInteriorNodeDerivatives(secondary_ip_lowerd_map, var_array, sec_x, sec_y, sec_z);
+  trimInteriorNodeDerivatives(primary_ip_lowerd_map, var_array, prim_x, prim_y, prim_z, false);
+  trimInteriorNodeDerivatives(secondary_ip_lowerd_map, var_array, sec_x, sec_y, sec_z, true);
 #endif
 
   ADReal prim_x_dot = _primary_x_dot[_qp];
@@ -102,8 +102,10 @@ ComputeDynamicWeightedGapLMMechanicalContact::computeQpProperties()
   ADReal sec_z_dot = _secondary_z_dot ? (*_secondary_z_dot)[_qp] : 0.0;
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
-  trimInteriorNodeDerivatives(primary_ip_lowerd_map, var_array, prim_x_dot, prim_y_dot, prim_z_dot);
-  trimInteriorNodeDerivatives(secondary_ip_lowerd_map, var_array, sec_x_dot, sec_y_dot, sec_z_dot);
+  trimInteriorNodeDerivatives(
+      primary_ip_lowerd_map, var_array, prim_x_dot, prim_y_dot, prim_z_dot, false);
+  trimInteriorNodeDerivatives(
+      secondary_ip_lowerd_map, var_array, sec_x_dot, sec_y_dot, sec_z_dot, true);
 #endif
 
   // Compute dynamic constraint-related quantities

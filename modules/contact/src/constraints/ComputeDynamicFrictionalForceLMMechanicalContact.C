@@ -124,8 +124,10 @@ ComputeDynamicFrictionalForceLMMechanicalContact::computeQpProperties()
 #ifdef MOOSE_GLOBAL_AD_INDEXING
   std::array<MooseVariable *, 3> var_array{
       {getVar("disp_x", 0), getVar("disp_y", 0), _3d ? getVar("disp_z", 0) : nullptr}};
-  trimInteriorNodeDerivatives(primary_ip_lowerd_map, var_array, prim_x_dot, prim_y_dot, prim_z_dot);
-  trimInteriorNodeDerivatives(secondary_ip_lowerd_map, var_array, sec_x_dot, sec_y_dot, sec_z_dot);
+  trimInteriorNodeDerivatives(
+      primary_ip_lowerd_map, var_array, prim_x_dot, prim_y_dot, prim_z_dot, false);
+  trimInteriorNodeDerivatives(
+      secondary_ip_lowerd_map, var_array, sec_x_dot, sec_y_dot, sec_z_dot, true);
 #endif
 
   // Compute required constraint quantities with trimmed derivatives
