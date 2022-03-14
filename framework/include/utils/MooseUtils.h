@@ -97,9 +97,8 @@ std::string runTestsExecutable();
 /// the first testroot file found.
 std::string findTestRoot();
 
-/// Returns the directory of any installed tests - or the empty string if none
-/// are found.
-std::string installedTestsDir(const std::string & app_name);
+/// Returns the directory of any installed inputs or the empty string if none are found.
+std::string installedInputsDir(const std::string & app_name, const std::string & dir_name);
 
 /// Returns the directory of any installed docs/site.
 std::string docsDir(const std::string & app_name);

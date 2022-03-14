@@ -82,6 +82,7 @@ class Tester(MooseObject):
         params.addParam('asio',          ['ALL'], "A test that runs only if ASIO is available ('ALL', 'TRUE', 'FALSE')")
         params.addParam('fparser_jit',   ['ALL'], "A test that runs only if FParser JIT is available ('ALL', 'TRUE', 'FALSE')")
         params.addParam('libpng',        ['ALL'], "A test that runs only if libpng is available ('ALL', 'TRUE', 'FALSE')")
+        params.addParam('installed',     ['ALL'], "A test that runs only if it is installed ('ALL', 'TRUE', 'FALSE')")
 
         params.addParam('depend_files',  [], "A test that only runs if all depend files exist (files listed are expected to be relative to the base directory, not the test directory")
         params.addParam('env_vars',      [], "A test that only runs if all the environment variables listed exist")
@@ -314,6 +315,14 @@ class Tester(MooseObject):
         cmd = self.getCommand(options)
         cwd = self.getTestDir()
 
+        # Verify that the working directory is available right before we execute.
+        if not os.path.exists(cwd):
+            # Timers must be used since they are directly indexed in the Job class
+            timer.start()
+            self.setStatus(self.fail, 'WORKING DIRECTORY NOT FOUND')
+            timer.stop()
+            return
+
         self.process = None
         try:
             f = SpooledTemporaryFile(max_size=1000000) # 1M character buffer
@@ -533,7 +542,7 @@ class Tester(MooseObject):
         # PETSc and SLEPc is being explicitly checked above
         local_checks = ['platform', 'compiler', 'mesh_mode', 'ad_mode', 'ad_indexing_type', 'method', 'library_mode', 'dtk', 'unique_ids', 'vtk', 'tecplot',
                         'petsc_debug', 'curl', 'superlu', 'mumps', 'strumpack', 'cxx11', 'asio', 'unique_id', 'slepc', 'petsc_version_release', 'boost', 'fparser_jit',
-                        'parmetis', 'chaco', 'party', 'ptscotch', 'threading', 'libpng']
+                        'parmetis', 'chaco', 'party', 'ptscotch', 'threading', 'libpng', 'installed']
         for check in local_checks:
             test_platforms = set()
             operator_display = '!='
@@ -636,12 +645,10 @@ class Tester(MooseObject):
             if missing:
                 reasons['requires'] = ', '.join(['no {}'.format(p) for p in missing])
 
-        # Verify working_directory is relative and available
+        # Verify working_directory is relative. We'll check to make sure it's available just in time.
         if self.specs['working_directory']:
             if self.specs['working_directory'][:1] == os.path.sep:
                 self.setStatus(self.fail, 'ABSOLUTE PATH DETECTED')
-            elif not os.path.exists(self.getTestDir()):
-                self.setStatus(self.fail, 'WORKING DIRECTORY NOT FOUND')
 
         ##### The below must be performed last to register all above caveats #####
         # Remove any matching user supplied caveats from accumulated checkRunnable caveats that

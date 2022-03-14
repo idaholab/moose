@@ -67,6 +67,7 @@ runTestsExecutable()
   // TODO: maybe no path prefix - just moose_test_runner here?
   return pathjoin(Moose::getExecutablePath(), "moose_test_runner");
 }
+
 std::string
 findTestRoot()
 {
@@ -82,21 +83,31 @@ findTestRoot()
 }
 
 std::string
-installedTestsDir(const std::string & app_name)
+installedInputsDir(const std::string & app_name, const std::string & dir_name)
 {
-  std::string installed_path = pathjoin(Moose::getExecutablePath(), "../share", app_name, "test");
+  // See moose.mk for a detailed explanation of the assumed installed application
+  // layout. Installed inputs are expected to be installed in "share/<app_name>/<folder>".
+  // The binary, which has a defined location will be in "bin", a peer directory to "share".
+  std::string installed_path =
+      pathjoin(Moose::getExecutablePath(), "..", "share", app_name, dir_name);
 
-  auto testroot = pathjoin(installed_path, "testroot");
-  if (pathExists(testroot) && checkFileReadable(testroot))
-    return installed_path;
-  return "";
+  auto test_root = pathjoin(installed_path, "testroot");
+  if (!pathExists(installed_path))
+    mooseError("Couldn't locate any installed inputs to copy in path: ", installed_path);
+
+  checkFileReadable(test_root);
+  return installed_path;
 }
 
 std::string
 docsDir(const std::string & app_name)
 {
-  std::string installed_path = pathjoin(Moose::getExecutablePath(), "../share", app_name, "doc");
-  auto docfile = pathjoin(installed_path, "css/moose.css");
+  // See moose.mk for a detailed explanation of the assumed installed application
+  // layout. Installed docs are expected to be installed in "share/<app_name>/doc".
+  // The binary, which has a defined location will be in "bin", a peer directory to "share".
+  std::string installed_path = pathjoin(Moose::getExecutablePath(), "..", "share", app_name, "doc");
+
+  auto docfile = pathjoin(installed_path, "css", "moose.css");
   if (pathExists(docfile) && checkFileReadable(docfile))
     return installed_path;
   return "";

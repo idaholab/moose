@@ -208,3 +208,49 @@ when building MOOSE or a MOOSE-based application.
 
 - `framework/conf_var.mk.in` - This file is where you put your new expansion expressions. Typically these
   are in the form of "@VARAIBLE@".
+
+### Make Install
+
+MOOSE's build system has the ability to create installed binaries suitable for use with the conda package manager, or installation on a shared computing resource such as Sawtooth. The `install` target will copy binary and required libraries to a file tree based on the prefix you configured with (set by the variable `PREFIX` or the `--prefix` argument.
+
+```
+$ cd moose/framework
+$ ./configure --prefix=<installation path>
+$ make
+$ make install
+```
+
+Additionally each application may wish to make an one or more file structures available for end users to install into their own environment. This allows for end-users to install and run the application test suite, examples, tutorials, or other inputs of interest. To customize what is available for installation, the application developer will define the list of directories in their application make file. For example:
+
+```
+INSTALLABLE_DIRS := test/tests examples
+```
+
+These paths should be relative to the root location of the application.
+
+!alert warning
+Make sure that installed paths do not include source code. This could result in an accidental export of information for those cleared for only binary access.
+
+### Copying and Running Installed Inputs
+
+Once an application has been installed, end users that have access to those binaries can install or copy those paths to their home directories and also run the tests using the test harness using convenient command line parameters.
+
+Example:
+
+```
+$ cd <user writable location>
+$ export PATH=$PATH:<prefix>/bin  # See instructions for HPC computers below
+$ bison-opt --copy-inputs <installable input type>  # e.g. tests, examples, etc.
+$ bison-opt --run <installable input type>
+
+```
+
+Where `<installable input type>` is one of the installable directories as defined by the application developers (i.e. `tests`, `examples`, `tutorials`, etc.)
+
+When using INL HPC systems to run your input, you will load a module that will set your path correctly
+
+Example:
+
+```
+$ module load use.moose <app name> # e.g bison
+```

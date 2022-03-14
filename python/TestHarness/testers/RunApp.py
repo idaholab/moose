@@ -44,6 +44,7 @@ class RunApp(Tester):
         params.addParam('allow_override', True, "Whether or not overriding a parameter/block in the input file generates an error.  Can be globally overridden by setting 'allow_override = False' in the testroot file.");
         params.addParam('allow_deprecated', True, "Whether or not deprecated warnings are allowed.  Setting to False will cause deprecation warnings to be treated as test failures.  We do NOT recommend you globally set this permanently to False!  Deprecations are a part of the normal development flow and _SHOULD_ be allowed!")
         params.addParam('no_error_deprecated', False, "Don't pass --error-deprecated on the command line even when running the TestHarness with --error-deprecated")
+        params.addParam('no_additional_cli_args', False, "A Boolean indicating that no additional CLI args should be added from the TestHarness. Note: This parameter should be rarely used as it will not pass on additional options such as those related to mpi, threads, distributed mesh, errors, etc.")
 
         # Valgrind
         params.addParam('valgrind', 'NORMAL', "Set to (NONE, NORMAL, HEAVY) to determine which configurations where valgrind will run.")
@@ -60,8 +61,8 @@ class RunApp(Tester):
             self.force_mpi = False
 
         # Make sure that either input or command is supplied
-        if not (params.isValid('input') or params.isValid('command')):
-            raise Exception('Either "input" or "command" must be supplied for a RunApp test')
+        if not (params.isValid('input') or params.isValid('command') or params['no_additional_cli_args']):
+            raise Exception('One of "input", "command", or "no_additional_cli_args" must be supplied for a RunApp test')
 
     def getInputFile(self):
         if self.specs.isValid('input'):
@@ -138,13 +139,19 @@ class RunApp(Tester):
         if specs.isValid('command'):
             return os.path.join(specs['test_dir'], specs['command']) + ' ' + ' '.join(specs['cli_args'])
 
-        # Create the additional command line arguments list
-        cli_args = list(specs['cli_args'])
-
         # Check for built application
         if shutil.which(specs['executable']) is None:
             self.setStatus(self.fail, 'Application not found')
             return ''
+
+        # If no_additional_cli_args is set to True, return early with a simplified command line ignoring
+        # all other TestHarness supplied options.
+        if specs['no_additional_cli_args']:
+            # TODO: Do error checking for TestHarness options that will be silently ignored
+            return os.path.join(specs['test_dir'], specs['executable']) + ' ' + ' '.join(specs['cli_args'])
+
+        # Create the additional command line arguments list
+        cli_args = list(specs['cli_args'])
 
         if (options.parallel_mesh or options.distributed_mesh) and ('--parallel-mesh' not in cli_args or '--distributed-mesh' not in cli_args):
             # The user has passed the parallel-mesh option to the test harness

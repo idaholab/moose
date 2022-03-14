@@ -6,6 +6,15 @@
 # in your application. You can turn it on/off by changing it in your application Makefile.
 GEN_REVISION ?= yes
 
+# Set a default to install the main application's tests if one isn't set in the Makefile
+ifeq ($(INSTALLABLE_DIRS),)
+  ifneq ($(wildcard $(APPLICATION_DIR)/test/.),)
+    INSTALLABLE_DIRS := test/tests
+  else
+    INSTALLABLE_DIRS := tests
+  endif
+endif
+
 # list of application-wide excluded source files
 excluded_srcfiles :=
 
@@ -19,12 +28,12 @@ $APPLICATION_NAME$(STACK) := $(APPLICATION_NAME)
 $DEPEND_MODULES$(STACK) := $(DEPEND_MODULES)
 $GEN_REVISION$(STACK) := $(GEN_REVISION)
 $BUILD_EXEC$(STACK) := $(BUILD_EXEC)
+$INSTALLABLE_DIRS$(STACK) := $(INSTALLABLE_DIRS)
 
 -include $(APPLICATION_DIR)/$(APPLICATION_NAME).mk
 
 # install target related stuff
 share_install_dir := $(share_dir)/$(APPLICATION_NAME)
-tests_install_dir := $(share_install_dir)/test
 docs_install_dir := $(share_install_dir)/doc
 
 #
@@ -35,6 +44,7 @@ APPLICATION_NAME := $($APPLICATION_NAME$(STACK))
 DEPEND_MODULES := $($DEPEND_MODULES$(STACK))
 GEN_REVISION := $($GEN_REVISION$(STACK))
 BUILD_EXEC := $($BUILD_EXEC$(STACK))
+INSTALLABLE_DIRS := $($INSTALLABLE_DIRS$(STACK))
 STACK := $(basename $(STACK))
 
 ifneq ($(SUFFIX),)
@@ -409,15 +419,10 @@ $(app_EXEC): $(app_LIBS) $(mesh_library) $(main_object) $(app_test_LIB) $(depend
 	@$(codesign)
 
 ###### install stuff #############
-
 docs_dir := $(APPLICATION_DIR)/doc
 bindst = $(bin_install_dir)/$(notdir $(app_EXEC))
-binlink = $(tests_install_dir)/$(notdir $(app_EXEC))
-
-test_dir := $(APPLICATION_DIR)
-ifneq ($(wildcard $(APPLICATION_DIR)/test/.),)
-	test_dir := $(APPLICATION_DIR)/test
-endif
+binlink = $(share_install_dir)/$(notdir $(app_EXEC))
+copy_input_targets := $(foreach dir,$(INSTALLABLE_DIRS),target_$(APPLICATION_NAME)_$(dir))
 
 lib_install_targets = $(foreach lib,$(applibs),$(dir $(lib))install_lib_$(notdir $(lib)))
 ifneq ($(app_test_LIB),)
@@ -426,20 +431,23 @@ endif
 
 install_libs: $(lib_install_targets)
 
-install_$(APPLICATION_NAME)_tests: all
-	@echo "Installing tests"
-	@rm -rf $(tests_install_dir)
-	@mkdir -p $(tests_install_dir)
-	@cp -R $(test_dir)/tests $(tests_install_dir)/
-ifneq (,$(wildcard $(APPLICATION_DIR)/testroot))
-	@cp -f $(APPLICATION_DIR)/testroot $(tests_install_dir)/
-else
-ifneq (,$(wildcard $(test_dir)/testroot))
-	@cp -f $(test_dir)/testroot $(tests_install_dir)/
-else
-	@echo "app_name = $(APPLICATION_NAME)" > $(tests_install_dir)/testroot
-endif
-endif
+$(copy_input_targets): all
+	@$(eval target_dir := $(subst target_$(APPLICATION_NAME)_,,$@))
+	@$(eval base_dir := $(notdir $(target_dir)))
+	@echo "Installing inputs from directory \"$(target_dir)\""
+	@rm -rf $(share_install_dir)/$(base_dir)
+	@mkdir -p $(share_install_dir)/$(base_dir)
+	@cp -R $(APPLICATION_DIR)/$(target_dir) $(share_install_dir)/$(base_dir)
+	@if [ -e $(APPLICATION_DIR)/testroot ]; \
+	then \
+		cp -f $(APPLICATION_DIR)/testroot $(share_install_dir)/$(base_dir)/; \
+	elif [ -e $(target_dir)/testroot ]; \
+	then \
+		cp -f $(target_dir)/testroot $(share_install_dir)/$(base_dir)/; \
+	else \
+		echo "app_name = $(APPLICATION_NAME)" > $(share_install_dir)/$(base_dir)/testroot; \
+	fi; \
+
 
 install_lib_%: % all
 	@echo "Installing $<"
@@ -454,8 +462,8 @@ install_lib_%: % all
 	@$(eval libpaths := $(foreach lib,$(applibs),$(dir $(lib))$(shell grep "dlname='.*'" $(lib) 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")))
 	@for lib in $(libpaths); do $(call patch_relink,$(libdst),$$lib,$$(basename $$lib)); done
 
-$(binlink): all install_$(APPLICATION_NAME)_tests
-	@ln -s ../../../bin/$(notdir $(app_EXEC)) $@
+$(binlink): all $(copy_input_targets)
+	ln -sf ../../bin/$(notdir $(app_EXEC)) $@
 
 install_$(APPLICATION_NAME)_docs:
 ifeq ($(MOOSE_SKIP_DOCS),)
@@ -466,7 +474,7 @@ else
 	@echo "Skipping docs installation."
 endif
 
-$(bindst): $(app_EXEC) all install_$(APPLICATION_NAME)_tests install_$(APPLICATION_NAME)_docs $(binlink)
+$(bindst): $(app_EXEC) all $(copy_input_targets) install_$(APPLICATION_NAME)_docs $(binlink)
 	@echo "Installing $<"
 	@mkdir -p $(bin_install_dir)
 	@cp $< $@

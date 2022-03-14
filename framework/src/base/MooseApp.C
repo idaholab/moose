@@ -149,13 +149,22 @@ MooseApp::validParams()
       "syntax", "--syntax", false, "Dumps the associated Action syntax paths ONLY");
   params.addCommandLineParam<bool>("run_tests", "--tests", false, "run all tests");
   params.addCommandLineParam<bool>(
-      "copy_tests", "--copy-tests", false, "copy installed tests to an [appname]_tests dir");
+      "copy_tests", "--copy-tests", false, "copy installed tests to an <appname>_tests dir");
   params.addCommandLineParam<bool>(
       "show_docs", "--docs", false, "print url/path to the documentation website");
   params.addCommandLineParam<bool>("check_input",
                                    "--check-input",
                                    false,
                                    "Check the input file (i.e. requires -i <filename>) and quit.");
+  params.addCommandLineParam<std::string>("copy_inputs",
+                                          "--copy-inputs <dir>",
+                                          "Copies installed inputs (e.g. tests, examples, etc.) to "
+                                          "an directory named  <appname>_<dir>.");
+  params.addCommandLineParam<std::string>("run",
+                                          "--run <dir>",
+                                          "Runs the inputs in the specified directory copied to a "
+                                          "user-writable location by \"--copy-inputs\"");
+
   params.addCommandLineParam<bool>(
       "list_constructed_objects",
       "--list-constructed-objects",
@@ -1371,79 +1380,8 @@ MooseApp::run()
     return;
   }
 
-  if (getParam<bool>("copy_tests"))
+  if (copyInputs() || runInputs())
   {
-    auto binname = appBinaryName();
-    if (binname == "")
-      mooseError("could not locate installed tests to run (unresolved binary/app name)");
-    auto src_dir = MooseUtils::installedTestsDir(binname);
-    if (src_dir == "")
-      mooseError("couldn't locate any installed tests to copy");
-    if (!MooseUtils::checkFileReadable(src_dir, false, false))
-      mooseError(
-          "You don't have permissions to read/copy tests from their current installed location: \"",
-          src_dir,
-          "\"");
-    auto dst_dir = binname + "_tests";
-    auto cmdname = Moose::getExecutableName();
-    if (cmdname.find_first_of("/") != std::string::npos)
-      cmdname = cmdname.substr(cmdname.find_first_of("/") + 1, std::string::npos);
-    if (MooseUtils::pathExists(dst_dir))
-      mooseError("The tests directory \"./",
-                 dst_dir,
-                 "\" already exists.\nTo update/recopy tests, rename (\"mv ",
-                 dst_dir,
-                 " new_dir_name\") or remove (\"rm -r ",
-                 dst_dir,
-                 "\") the existing directory.\nThen re-run \"",
-                 cmdname,
-                 " --copy-tests\".");
-
-    std::string cmd = "cp -R " + src_dir + " " + dst_dir;
-    int ret = system(cmd.c_str());
-    if (WIFEXITED(ret) && WEXITSTATUS(ret) != 0)
-      mooseError("Failed to copy the tests.");
-    Moose::out << "Tests successfully copied into ./" << dst_dir << "\n";
-    _ready_to_exit = true;
-    return;
-  }
-
-  if (isParamValid("run_tests") && getParam<bool>("run_tests"))
-  {
-    std::string args;
-    for (int i = 2; i < _sys_info->argc(); i++)
-      args += " " + std::string(*(_sys_info->argv() + i));
-    auto cmd = MooseUtils::runTestsExecutable() + args;
-    if (MooseUtils::findTestRoot() == "")
-    {
-      // run installed tests instead of cwd tests
-      auto binname = appBinaryName();
-      if (binname == "")
-        mooseError("could not locate installed tests to run (unresolved binary/app name)");
-      auto dir = MooseUtils::installedTestsDir(binname);
-      if (dir == "")
-        mooseError("no could not find any tests to run");
-
-      auto cmdname = Moose::getExecutableName();
-      if (cmdname.find_first_of("/") != std::string::npos)
-        cmdname = cmdname.substr(cmdname.find_first_of("/") + 1, std::string::npos);
-      if (!MooseUtils::checkFileWriteable(MooseUtils::pathjoin(dir, "testroot"), false))
-        mooseError(
-            "You don't have permissions to run tests at their current installed location.\nRun \"",
-            cmdname,
-            " --copy-tests\" to copy the tests to a \"./",
-            binname,
-            "_tests\" directory.\nChange into that directory and try \"",
-            cmdname,
-            " --tests\" again.");
-
-      int ret = chdir(dir.c_str());
-      if (ret != 0)
-        mooseError("Failed to change to testing directory ", dir);
-    }
-    int ret = system(cmd.c_str());
-    if (WIFEXITED(ret) && WEXITSTATUS(ret) != 0)
-      mooseError("Tests failed");
     _ready_to_exit = true;
     return;
   }
@@ -1470,6 +1408,127 @@ MooseApp::run()
     // Output to stderr, so it is easier for peacock to get the result
     Moose::err << "Syntax OK" << std::endl;
   }
+}
+
+bool
+MooseApp::copyInputs()
+{
+  std::string dir_to_copy = "tests";
+  bool copy_param_valid = false;
+
+  if (isParamValid("copy_inputs"))
+  {
+    // Get command line argument following --copy-inputs on command line
+    dir_to_copy = getParam<std::string>("copy_inputs");
+    copy_param_valid = true;
+  }
+
+  if (getParam<bool>("copy_tests") || copy_param_valid)
+  {
+    auto binname = appBinaryName();
+    if (binname == "")
+      mooseError("could not locate installed tests to run (unresolved binary/app name)");
+
+    auto src_dir = MooseUtils::installedInputsDir(binname, dir_to_copy);
+    auto dst_dir = binname + "_" + dir_to_copy;
+    auto cmdname = Moose::getExecutableName();
+    if (cmdname.find_first_of("/") != std::string::npos)
+      cmdname = cmdname.substr(cmdname.find_first_of("/") + 1, std::string::npos);
+
+    if (MooseUtils::pathExists(dst_dir))
+      mooseError(
+          "The directory \"./",
+          dst_dir,
+          "\" already exists.\nTo update/recopy the contents of this directory, rename (\"mv ",
+          dst_dir,
+          " new_dir_name\") or remove (\"rm -r ",
+          dst_dir,
+          "\") the existing directory.\nThen re-run \"",
+          cmdname,
+          " --copy-inputs ",
+          dir_to_copy,
+          "\".");
+
+    std::string cmd = "cp -R " + src_dir + " " + dst_dir;
+
+    // Only perform the copy on the root processor
+    int return_value = 0;
+    if (processor_id() == 0)
+      return_value = system(cmd.c_str());
+    _communicator.broadcast(return_value);
+
+    if (WIFEXITED(return_value) && WEXITSTATUS(return_value) != 0)
+      mooseError("Failed to copy the requested directory.");
+    Moose::out << "Directory successfully copied into ./" << dst_dir << '\n';
+    return true;
+  }
+  return false;
+}
+
+bool
+MooseApp::runInputs()
+{
+  std::string dir_to_run = "tests";
+  bool run_param_valid = false;
+  int skip_args = 2;
+
+  if (isParamValid("run"))
+  {
+    // Get command line argument following --run on command line
+    dir_to_run = getParam<std::string>("run");
+    run_param_valid = true;
+    skip_args = 3;
+  }
+
+  if ((isParamValid("run_tests") && getParam<bool>("run_tests")) || run_param_valid)
+  {
+    std::string args;
+    for (int i = skip_args; i < _sys_info->argc(); i++)
+      args += " " + std::string(*(_sys_info->argv() + i));
+    auto cmd = MooseUtils::runTestsExecutable() + args;
+
+    std::string working_dir;
+    if (MooseUtils::findTestRoot() == "")
+    {
+      // run installed tests instead of cwd tests
+      auto binname = appBinaryName();
+      if (binname == "")
+        mooseError("could not locate installed tests to run (unresolved binary/app name)");
+
+      working_dir = MooseUtils::installedInputsDir(binname, dir_to_run);
+      if (working_dir == "")
+        mooseError("could not find any directory to run");
+
+      auto cmdname = Moose::getExecutableName();
+      if (cmdname.find_first_of("/") != std::string::npos)
+        cmdname = cmdname.substr(cmdname.find_first_of("/") + 1, std::string::npos);
+      if (!MooseUtils::checkFileWriteable(MooseUtils::pathjoin(working_dir, "testroot"), false))
+        mooseError("You don't have permissions to run contents of directory at their current "
+                   "installed location.\nRun \"",
+                   cmdname,
+                   " --copy-inputs <dir>\" to copy the contents of <dir> to a \"./",
+                   binname,
+                   "_<dir>\" directory.\nChange into that directory and try \"",
+                   cmdname,
+                   " --run <dir>\" again.");
+
+      int ret = chdir(working_dir.c_str());
+      if (ret != 0)
+        mooseError("Failed to change directory into ", working_dir);
+    }
+
+    // Only launch the tests on the root processor
+    Moose::out << "Working Directory: " << working_dir << "\nRunning Command: " << cmd << std::endl;
+    int return_value = 0;
+    if (processor_id() == 0)
+      return_value = system(cmd.c_str());
+    _communicator.broadcast(return_value);
+
+    if (WIFEXITED(return_value) && WEXITSTATUS(return_value) != 0)
+      mooseError("Run failed");
+    return true;
+  }
+  return false;
 }
 
 void
