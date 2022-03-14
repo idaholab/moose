@@ -455,6 +455,8 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
                                        const FaceInfo & fi,
                                        const THREAD_ID tid) const
 {
+  using namespace Moose::FV;
+
   const Elem * const elem = &fi.elem();
   const Elem * const neighbor = fi.neighborPtr();
   auto & vel = *_vel[tid];
@@ -505,57 +507,50 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
   mooseAssert(UserObject::_subproblem.getCoordSystem(elem->subdomain_id()) ==
                   UserObject::_subproblem.getCoordSystem(neighbor->subdomain_id()),
               "Coordinate systems must be the same between the two elements");
-  const Point & elem_centroid = fi.elemCentroid();
-  const Point & neighbor_centroid = fi.neighborCentroid();
-  Real elem_volume = fi.elemVolume();
-  Real neighbor_volume = fi.neighborVolume();
-  Real coord;
-  coordTransformFactor(UserObject::_subproblem, elem->subdomain_id(), elem_centroid, coord);
-  elem_volume *= coord;
-  coordTransformFactor(UserObject::_subproblem, neighbor->subdomain_id(), neighbor_centroid, coord);
-  neighbor_volume *= coord;
 
-  // Get the strong residual values
-  const auto elem_a = (*_a_read[tid])(makeElemArg(elem));
-  const auto neighbor_a = (*_a_read[tid])(makeElemArg(neighbor));
-
-  // We require this to ensure that the correct interpolation weights are used.
-  // This will change once the traditional weights are replaced by the weights
-  // that are used by the skewness-correction.
-  Moose::FV::InterpMethod coeff_interp_method = correct_skewness
-                                                    ? Moose::FV::InterpMethod::SkewCorrectedAverage
-                                                    : Moose::FV::InterpMethod::Average;
-  Real face_volume;
-  Moose::FV::interpolate(coeff_interp_method, face_volume, elem_volume, neighbor_volume, fi, true);
-
-  const auto face = Moose::FV::makeCDFace(
-      fi, Moose::FV::faceArgSubdomains(*this, fi), correct_skewness, correct_skewness);
-  const auto face_a = (*_a_read[tid])(face);
-  const auto face_rho = (*_rhos[tid])(face);
-  const auto face_mu = (*_mus[tid])(face);
   const auto face_area = fi.faceArea() * fi.faceCoord();
-  const auto face_h = face_volume / face_area;
-  const auto face_T = _T_fluids[tid] ? (*_T_fluids[tid])(face) : ADReal(0);
 
-  // pspg tau analog
-  // every one of these terms should have units of 1/time^2
-  const auto transient_part = _is_transient ? 4. / (_dt * _dt) : 0.;
+  const auto cell_center_added_velocity =
+      [this, face_area, tid, &velocity](const Elem * const elem_in)
+  {
+    const auto elem_arg = makeElemArg(elem_in);
+    const auto elem_volume = _assembly.elementVolume(elem_in);
+    const auto elem_a = (*_a_read[tid])(elem_arg);
+    const auto elem_rho = (*_rhos[tid])(elem_arg);
+    const auto elem_mu = (*_mus[tid])(elem_arg);
+    const auto elem_h = elem_volume / face_area;
+    const auto elem_T = _T_fluids[tid] ? (*_T_fluids[tid])(elem_arg) : ADReal(0);
 
-  const auto vel_norm = velocity.norm();
-  const auto advective_part = (2. * vel_norm / face_h) * (2. * vel_norm / face_h);
+    // pspg tau analog
+    // every one of these terms should have units of 1/time^2
+    const auto transient_part = _is_transient ? 4. / (_dt * _dt) : 0.;
 
-  const auto face_nu = face_mu / face_rho;
-  const auto viscous_part =
-      9. * (4. * face_nu / (face_h * face_h)) * (4. * face_nu / (face_h * face_h));
+    const auto vel_norm = velocity.norm();
+    const auto advective_part = (2. * vel_norm / elem_h) * (2. * vel_norm / elem_h);
 
-  const auto dT = std::abs(face_T - _ref_temp);
-  const auto boussinesq_part = dT == 0 ? ADReal(0) : 4. * _alpha_b * _gravity_mag * dT / face_h;
-  const auto gravity_part = 4. * _gravity_mag / face_h;
-  const auto tau = _rc_scale_factor / std::sqrt(transient_part + advective_part + viscous_part +
-                                                boussinesq_part + gravity_part);
+    const auto elem_nu = elem_mu / elem_rho;
+    const auto viscous_part =
+        9. * (4. * elem_nu / (elem_h * elem_h)) * (4. * elem_nu / (elem_h * elem_h));
 
-  // Added velocity
-  const auto added_velocity = tau / face_rho * face_a;
+    const auto dT = std::abs(elem_T - _ref_temp);
+    const auto boussinesq_part = dT == 0 ? ADReal(0) : 4. * _alpha_b * _gravity_mag * dT / elem_h;
+    const auto gravity_part = 4. * _gravity_mag / elem_h;
+    const auto tau = _rc_scale_factor / std::sqrt(transient_part + advective_part + viscous_part +
+                                                  boussinesq_part + gravity_part);
+
+    // Added velocity
+    return tau / elem_rho * elem_a;
+  };
+
+  const auto elem_added_velocity = cell_center_added_velocity(elem);
+  const auto neighbor_added_velocity = cell_center_added_velocity(neighbor);
+  ADRealVectorValue added_velocity;
+  interpolate(InterpMethod::Average,
+              added_velocity,
+              elem_added_velocity,
+              neighbor_added_velocity,
+              fi,
+              true);
 
   // Minus sign in order to get positive diagonals for pressure
   return velocity - added_velocity;
