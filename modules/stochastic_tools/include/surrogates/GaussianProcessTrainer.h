@@ -18,6 +18,8 @@
 #include "CovarianceFunctionBase.h"
 #include "CovarianceInterface.h"
 
+#include "GaussianProcessHandler.h"
+
 class GaussianProcessTrainer : public SurrogateTrainer, public CovarianceInterface
 {
 public:
@@ -27,47 +29,14 @@ public:
   virtual void train() override;
   virtual void postTrain() override;
 
-  CovarianceFunctionBase * getCovarPtr() const { return _covariance_function; }
-
-  // Routine to perform hyperparameter tuning
-  PetscErrorCode hyperparamTuning();
-
-  PetscErrorCode FormInitialGuess(GaussianProcessTrainer * GP_ptr, Vec theta);
-
-  // Wrapper for PETSc function callback
-  static PetscErrorCode
-  FormFunctionGradientWrapper(Tao tao, Vec theta, PetscReal * f, Vec Grad, void * ptr);
-
-  // Computes Gradient of the loss function
-  void FormFunctionGradient(Tao tao, Vec theta, PetscReal * f, Vec Grad);
-
-  // Sets bounds for hyperparameters
-  void buildHyperParamBounds(libMesh::PetscVector<Number> & theta_l,
-                             libMesh::PetscVector<Number> & theta_u) const;
-  // write stored hyperparam_vecs to PetscVec
-  void mapToVec(libMesh::PetscVector<Number> & theta) const;
-
-  // loads PetscVec to stored hyperparam_vecs
-  void vecToMap(libMesh::PetscVector<Number> & theta);
+  StochasticTools::GaussianProcessHandler & gpHandler() { return _gp_handler; }
+  const StochasticTools::GaussianProcessHandler & getGPHandler() const { return _gp_handler; }
 
 private:
+  StochasticTools::GaussianProcessHandler & _gp_handler;
+
   /// Paramaters (x) used for training, along with statistics
   RealEigenMatrix & _training_params;
-
-  /// Standardizer for use with params (x)
-  StochasticTools::Standardizer & _param_standardizer;
-
-  /// Standardizer for use with data (y)
-  StochasticTools::Standardizer & _data_standardizer;
-
-  /// An _n_sample by _n_sample covariance matrix constructed from the selected kernel function
-  RealEigenMatrix & _K;
-
-  /// A solve of Ax=b via Cholesky.
-  RealEigenMatrix & _K_results_solve;
-
-  /// Cholesky decomposition Eigen object
-  Eigen::LLT<RealEigenMatrix> & _K_cho_decomp;
 
   /// Switch for training param (x) standardization
   bool _standardize_params;
@@ -75,35 +44,11 @@ private:
   /// Switch for training data(y) standardization
   bool _standardize_data;
 
-  /// Covariance function object
-  CovarianceFunctionBase * _covariance_function;
-
-  /// Type of covariance function used for this surrogate
-  std::string & _covar_type;
-
   /// Flag to toggle hyperparameter tuning/optimization
   bool _do_tuning;
 
-  /// Command line options to feed to TAO optimization
-  std::string _tao_options;
-
-  /// Flag to toggle printing of TAO output
-  bool _show_tao;
-
-  /// Tao Communicator
-  Parallel::Communicator _tao_comm;
-
-  /// Contains tuning inforation. Index of hyperparam, size, and min/max bounds
-  std::unordered_map<std::string, std::tuple<unsigned int, unsigned int, Real, Real>> _tuning_data;
-
-  /// Number of tunable hyperparameters
-  unsigned int _num_tunable;
-
-  /// Scalar hyperparameters. Stored for use in surrogate
-  std::unordered_map<std::string, Real> & _hyperparam_map;
-
-  /// Vector hyperparameters. Stored for use in surrogate
-  std::unordered_map<std::string, std::vector<Real>> & _hyperparam_vec_map;
+  /// Enum which contains the hyper parameter optimizaton type requested by the user
+  MooseEnum _tuning_algorithm;
 
   /// Data from the current sampler row
   const std::vector<Real> & _sampler_row;
@@ -123,8 +68,3 @@ private:
   /// Data (y) used for training
   RealEigenMatrix _training_data;
 };
-
-template <>
-void dataStore(std::ostream & stream, Eigen::LLT<RealEigenMatrix> & decomp, void * context);
-template <>
-void dataLoad(std::istream & stream, Eigen::LLT<RealEigenMatrix> & decomp, void * context);

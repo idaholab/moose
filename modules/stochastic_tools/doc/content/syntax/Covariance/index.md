@@ -10,29 +10,32 @@ A covariance function is created by inheriting from `CovarainceFunctionBase` and
 
 ## Using a Covariance Function
 
-#### In a Trainer
+#### In the GaussianProcessHandler
 
-Within the surrogate/trainer framework in the Stochastic Tools module, the covariance function will often be used within the trainer object. The trainer should inherit from the `CovarianceInterface` class to enable determining the covariance object by name.
+The [GaussianProcessHandler.md] is a class which incorporates the necessary data structures and
+functions to create, train, and use Gaussian Processes. One of the most important members
+of this handler class is the covariance function:
 
-!listing GaussianProcessTrainer.h line=class GaussianProcessTrainer
+!listing GaussianProcessHandler.h line=CovarianceFunctionBase *
 
-Because many trainers which use a covariance function should be compatible with many different types of covariance functions, polymorphism of C++ pointers are often used.
+The covariance function can be initialized in the handler by following the examples
+given in [source description](GaussianProcessHandler.md). Objects like
+[GaussianProcessTrainer.md] or [GaussianProcess.md] can then access the
+covariance function through the handler class.
 
-!listing GaussianProcessTrainer.h line=CovarianceFunctionBase *
+#### CovarianceInterface
 
-The covariance can be found by name using the interface
+Alternatively, by inheriting from
+`CovarianceInterface`, the child classes can easily fetch covariance functions
+using the helper functions. Good examples are the [GaussianProcessTrainer.md] and
+[GaussianProcess.md] which utilize the helper functions to link an input
+covariance function to the [GaussianProcessHandler.md]:
 
-!listing GaussianProcessTrainer.C line=covariance_function(
+!listing GaussianProcessTrainer.C start=_gp_handler.initialize( end=}
 
 #### In a Surrogate
 
-The covariance function may also be used in the surrogate. For convenience the surrogate is able to determine the correct covariance used in the training step.
-
-If the surrogate is given the trainer (not loaded from a file) the covariance function can be linked via the trainer object.
-
-!listing surrogates/GaussianProcess.C start=covariance_function( end=: nullptr) include-end=True
-
-If the surrogate loads the training data from a file, the [](LoadCovarianceDataAction.md) automatically reconstructs the covariance object used in the training phase, and calls the surrogate `setupCovariance()` method to make the linkage. This recreation is done by storing the `buildHyperParamMap()` in the trainer, and storing the hyperparameters for use in the surrogate.
+If the surrogate loads the training data from a file, the [LoadCovarianceDataAction.md] automatically reconstructs the covariance object used in the training phase, and calls the surrogate `setupCovariance()` method to make the linkage. This recreation is done by storing the hyper parameter map in the Gaussian Process handler of the trainer for use in the surrogate.
 
 
 ## Example Input File Syntax
