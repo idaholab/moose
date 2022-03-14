@@ -28,7 +28,7 @@ If the core is extruded to three dimensions the top-most boundary ID must be ass
 
 !listing modules/reactor/test/tests/meshgenerators/core_mesh_generator/core.i block=Mesh
 
-!media reactor/meshgenerators/core_mesh_generator.png
+!media reactor/meshgenerators/core_mesh_generator.png style=width:60%;
 
 !syntax parameters /Mesh/CoreMeshGenerator
 

@@ -3,6 +3,7 @@
 !syntax description /Mesh/AssemblyMeshGenerator
 
 ## Overview
+
 This object is designed to be used in the Reactor MeshGenerator workflow, which also consists of [`ReactorMeshParams`](ReactorMeshParams.md), [`PinMeshGenerator`](PinMeshGenerator.md), and [`CoreMeshGenerator`](CoreMeshGenerator.md).
 
 The `AssemblyMeshGenerator` object generates assembly reactor geometry structures in either square or hexagonal geometries using component pin cell meshes from the [`PinMeshGenerator`](PinMeshGenerator.md) in [!param](/Mesh/AssemblyMeshGenerator/inputs). The component pin cell meshes are tagged with pin cell `reporting ID` values according to their location in the assembly grid. Any newly created regions such as ducts are given block ID assignments.
@@ -37,7 +38,7 @@ If the assembly is extruded to three dimensions the top-most boundary ID must be
 
 !listing modules/reactor/test/tests/meshgenerators/assembly_mesh_generator/assembly_only.i block=Mesh
 
-!media reactor/meshgenerators/assembly_mesh_generator.png
+!media reactor/meshgenerators/assembly_mesh_generator.png style=width:60%;
 
 !syntax parameters /Mesh/AssemblyMeshGenerator
 
