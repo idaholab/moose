@@ -1,7 +1,6 @@
 [TriSubChannelMesh]
   [subchannel]
     type = TriSubChannelMeshGenerator
-    n_blocks = 1
     n_cells = 2
     nrings = 3
     flat_to_flat = 0.60

@@ -14,7 +14,6 @@ P_out = 2.0e5 # Pa
 [TriSubChannelMesh]
   [subchannel]
     type = TriSubChannelMeshGenerator
-    n_blocks = 1
     rod_diameter = 0.01
     dwire = 0.002
     hwire = 0.0833
@@ -65,6 +64,7 @@ P_out = 2.0e5 # Pa
 [Problem]
   type = LiquidMetalSubChannel1PhaseProblem
   fp = sodium
+  n_blocks = 1
   beta = 0.1
   P_out = 2.0e5
   CT = 1.0

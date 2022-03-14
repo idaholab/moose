@@ -6,7 +6,6 @@ length = 1.0
     type = TriSubChannelMeshGenerator
     nrings = 3
     n_cells = 10
-    n_blocks = 1
     flat_to_flat = 0.60
     heated_length = ${length}
     rod_diameter = 0.1

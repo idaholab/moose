@@ -55,6 +55,7 @@ InputParameters
 SubChannel1PhaseProblem::validParams()
 {
   InputParameters params = ExternalProblem::validParams();
+  params.addRequiredParam<unsigned int>("n_blocks", "The number of blocks in the axial direction");
   params.addRequiredParam<Real>("beta",
                                 "Thermal diffusion coefficient used in turbulent crossflow");
   params.addRequiredParam<Real>("CT", "Turbulent modeling parameter");
@@ -79,6 +80,7 @@ SubChannel1PhaseProblem::validParams()
 SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
   : ExternalProblem(params),
     _subchannel_mesh(dynamic_cast<SubChannelMesh &>(_mesh)),
+    _n_blocks(getParam<unsigned int>("n_blocks")),
     _Wij(declareRestartableData<libMesh::DenseMatrix<Real>>("Wij")),
     _g_grav(9.87),
     _kij(_subchannel_mesh.getKij()),
@@ -103,7 +105,6 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
     _Tpin_soln(nullptr)
 {
   _n_cells = _subchannel_mesh.getNumOfAxialCells();
-  _n_blocks = _subchannel_mesh.getNumOfAxialBlocks();
   _n_gaps = _subchannel_mesh.getNumOfGapsPerLayer();
   _n_pins = _subchannel_mesh.getNumOfPins();
   _n_channels = _subchannel_mesh.getNumOfChannels();

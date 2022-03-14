@@ -8,7 +8,6 @@ P_out = 155e+5 # Pa
     nx = 2
     ny = 1
     n_cells = 100
-    n_blocks = 1
     pitch = 0.0126
     rod_diameter = 0.00950
     gap = 0.00095 # the half gap between sub-channel assemblies
@@ -36,6 +35,7 @@ P_out = 155e+5 # Pa
 [SubChannel]
   type = LiquidWaterSubChannel1PhaseProblem
   fp = water
+  n_blocks = 1
   beta = 0.006
   CT = 0.0
   compute_density = true

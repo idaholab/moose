@@ -11,7 +11,6 @@ TriSubChannelMeshGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
   params.addRequiredParam<unsigned int>("n_cells", "The number of cells in the axial direction");
-  params.addRequiredParam<unsigned int>("n_blocks", "The number of blocks in the axial direction");
   params.addRequiredParam<Real>("pitch", "Pitch [m]");
   params.addRequiredParam<Real>("rod_diameter", "Rod diameter [m]");
   params.addParam<Real>("unheated_length_entry", 0.0, "Unheated length at entry [m]");
@@ -39,7 +38,6 @@ TriSubChannelMeshGenerator::TriSubChannelMeshGenerator(const InputParameters & p
     _pitch(getParam<Real>("pitch")),
     _rod_diameter(getParam<Real>("rod_diameter")),
     _n_cells(getParam<unsigned int>("n_cells")),
-    _n_blocks(getParam<unsigned int>("n_blocks")),
     _n_rings(getParam<unsigned int>("nrings")),
     _flat_to_flat(getParam<Real>("flat_to_flat")),
     _dwire(getParam<Real>("dwire")),
@@ -695,7 +693,6 @@ TriSubChannelMeshGenerator::generate()
   sch_mesh->_pitch = _pitch;
   sch_mesh->_rod_diameter = _rod_diameter;
   sch_mesh->_n_cells = _n_cells;
-  sch_mesh->_n_blocks = _n_blocks;
   sch_mesh->_n_rings = _n_rings;
   sch_mesh->_n_channels = _n_channels;
   sch_mesh->_flat_to_flat = _flat_to_flat;

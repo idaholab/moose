@@ -56,13 +56,14 @@ protected:
   friend PetscErrorCode formFunction(SNES snes, Vec x, Vec f, void * ctx);
 
   SubChannelMesh & _subchannel_mesh;
+  /// number of axial blocks
+  unsigned int _n_blocks;
   libMesh::DenseMatrix<Real> & _Wij;
   libMesh::DenseMatrix<Real> _Wij_old;
   libMesh::DenseMatrix<Real> _WijPrime;
   const Real _g_grav;
   const Real & _kij;
   unsigned int _n_cells;
-  unsigned int _n_blocks;
   unsigned int _n_gaps;
   unsigned int _n_pins;
   unsigned int _n_channels;

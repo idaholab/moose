@@ -42,7 +42,6 @@ QuadSubChannelMeshGenerator::validParams()
       "spacer_k", "K-loss coefficient of spacers/vanes/mixing_vanes [-]");
   params.addParam<Real>("Kij", 0.5, "Lateral form loss coefficient [-]");
   params.addRequiredParam<unsigned int>("n_cells", "The number of cells in the axial direction");
-  params.addRequiredParam<unsigned int>("n_blocks", "The number of blocks in the axial direction");
   params.addRequiredParam<unsigned int>("nx", "Number of channels in the x direction [-]");
   params.addRequiredParam<unsigned int>("ny", "Number of channels in the y direction [-]");
   params.addRequiredParam<Real>("gap", "Half gap between assemblies [m]");
@@ -61,7 +60,6 @@ QuadSubChannelMeshGenerator::QuadSubChannelMeshGenerator(const InputParameters &
     _pitch(getParam<Real>("pitch")),
     _rod_diameter(getParam<Real>("rod_diameter")),
     _n_cells(getParam<unsigned int>("n_cells")),
-    _n_blocks(getParam<unsigned int>("n_blocks")),
     _nx(getParam<unsigned int>("nx")),
     _ny(getParam<unsigned int>("ny")),
     _n_channels(_nx * _ny),
@@ -331,7 +329,6 @@ QuadSubChannelMeshGenerator::generate()
   sch_mesh->_pitch = _pitch;
   sch_mesh->_rod_diameter = _rod_diameter;
   sch_mesh->_n_cells = _n_cells;
-  sch_mesh->_n_blocks = _n_blocks;
   sch_mesh->_nx = _nx;
   sch_mesh->_ny = _ny;
   sch_mesh->_n_channels = _n_channels;

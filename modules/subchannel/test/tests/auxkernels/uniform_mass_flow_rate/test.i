@@ -4,7 +4,6 @@
     nx = 6
     ny = 6
     n_cells = 10
-    n_blocks = 1
     pitch = 0.0126
     rod_diameter = 0.00950
     gap = 0.00095

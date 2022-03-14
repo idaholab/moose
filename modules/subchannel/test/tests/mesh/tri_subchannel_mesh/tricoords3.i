@@ -3,7 +3,6 @@
     type = TriSubChannelMeshGenerator
     nrings = 3
     n_cells = 2
-    n_blocks = 1
     flat_to_flat = 0.60
     heated_length = 1.0
     rod_diameter = 0.1

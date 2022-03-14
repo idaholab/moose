@@ -7,7 +7,6 @@ P_out = 2.0e5 # Pa
     type = TriSubChannelMeshGenerator
     nrings = 4
     n_cells = 100
-    n_blocks = 1
     flat_to_flat = 0.077
     heated_length = 1.0
     rod_diameter = 0.01
@@ -57,6 +56,7 @@ P_out = 2.0e5 # Pa
 [Problem]
   type = LiquidMetalSubChannel1PhaseProblem
   fp = sodium
+  n_blocks = 1
   beta = 0.1
   P_out = 2.0e5
   CT = 1.0

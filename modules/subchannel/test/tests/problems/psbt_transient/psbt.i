@@ -9,7 +9,6 @@ P_out = 4.923e6 # Pa
     nx = 6
     ny = 6
     n_cells = 50
-    n_blocks = 1
     pitch = 0.0126
     rod_diameter = 0.00950
     gap = 0.00095 # the half gap between sub-channel assemblies
@@ -29,6 +28,7 @@ P_out = 4.923e6 # Pa
 
 [SubChannel]
   type = LiquidWaterSubChannel1PhaseProblem
+  n_blocks = 1
   fp = water
   beta = 0.006
   CT = 2.0
