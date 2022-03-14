@@ -21,9 +21,9 @@ either be done using the `initialize` function as in [GaussianProcessTrainer.md]
 !listing GaussianProcessTrainer.C start=_gp_handler.initialize(
                                   end=}
 
-Or by linking it directly as in [LoadCovarianceDataAction.md]:
+Or by linking it directly as in [GaussianProcess.md]:
 
-!listing LoadCovarianceDataAction.C line=linkCovarianceFunction
+!listing GaussianProcess.C line=linkCovarianceFunction
 
 ### Creating a covariance matrix
 
