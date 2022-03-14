@@ -459,4 +459,18 @@ TEST(MooseUtils, SemidynamicVector)
   for (auto & i : ctest)
     count += i;
   EXPECT_EQ(count, 1 + 2 + 3 + 4 + 5 + 6);
+
+  // test push back
+  test.push_back(100);
+  count = 0;
+  for (auto & i : ctest)
+    count += i;
+  EXPECT_EQ(count, 1 + 2 + 3 + 4 + 5 + 6 + 100);
+
+  // test emplace_back
+  test.emplace_back(200);
+  count = 0;
+  for (auto & i : ctest)
+    count += i;
+  EXPECT_EQ(count, 1 + 2 + 3 + 4 + 5 + 6 + 100 + 200);
 }

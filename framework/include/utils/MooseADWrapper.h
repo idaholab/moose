@@ -60,14 +60,16 @@ struct MooseADWrapperStruct<std::array<T, N>, is_ad>
 
 namespace MooseUtils
 {
-template <typename, std::size_t>
+template <typename, std::size_t, bool>
 class SemidynamicVector;
 }
 
-template <typename T, std::size_t N, bool is_ad>
-struct MooseADWrapperStruct<MooseUtils::SemidynamicVector<T, N>, is_ad>
+template <typename T, std::size_t N, bool is_ad, bool zero_initialize>
+struct MooseADWrapperStruct<MooseUtils::SemidynamicVector<T, N, zero_initialize>, is_ad>
 {
-  typedef MooseUtils::SemidynamicVector<typename MooseADWrapperStruct<T, is_ad>::type, N> type;
+  typedef MooseUtils::
+      SemidynamicVector<typename MooseADWrapperStruct<T, is_ad>::type, N, zero_initialize>
+          type;
 };
 
 template <typename T, bool is_ad>
