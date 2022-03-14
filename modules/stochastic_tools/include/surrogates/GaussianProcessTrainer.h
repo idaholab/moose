@@ -20,7 +20,7 @@
 
 #include "GaussianProcessHandler.h"
 
-class GaussianProcessTrainer : public SurrogateTrainer
+class GaussianProcessTrainer : public SurrogateTrainer, public CovarianceInterface
 {
 public:
   static InputParameters validParams();

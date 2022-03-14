@@ -31,16 +31,13 @@ public:
    * Initializes the most important structures in the Gaussian Process: the
    * covariance function and a tuning map which is used if the user requires
    * parameter tuning.
-   * @param parameters The input parameters of the class holding this object.
-   *                   It is used to recover other objects in the problem holding
-   *                   this handler.
-   * @param covar_name The name of the covariance user object.
+   * @param covariance_function Pointer to the covariance function that
+   *                            needs to be used for the Gaussian Process.
    * @param params_to_tune List of parameters which need to be tuned.
    * @param min List of lower bounds for the parameter tuning.
    * @param max List of upper bounds for parameter tuning.
    */
-  void initialize(const InputParameters & parameters,
-                  const UserObjectName & covar_name,
+  void initialize(CovarianceFunctionBase * covariance_function,
                   const std::vector<std::string> params_to_tune,
                   std::vector<Real> min = std::vector<Real>(),
                   std::vector<Real> max = std::vector<Real>());
@@ -70,13 +67,10 @@ public:
   /**
    * Finds and links the covariance function to this object. Used mainly in the
    * covariance data action.
-   * @param parameters The input parameters of the class holding this object.
-   *                   It is used to recover other objects in the problem holding
-   *                   this handler.
-   * @param covar_name The name of the covariance user object.
+   * @param covariance_function Pointer to the covariance function that
+   *                            needs to be used for the Gaussian Process.
    */
-  void linkCovarianceFunction(const InputParameters & parameters,
-                              const UserObjectName & covar_name);
+  void linkCovarianceFunction(CovarianceFunctionBase * covariance_function);
 
   /**
    * Sets up the tuning map which is used if the user requires parameter tuning.
@@ -157,6 +151,7 @@ public:
   const RealEigenMatrix & getKResultsSolve() const { return _K_results_solve; }
   const Eigen::LLT<RealEigenMatrix> & getKCholeskyDecomp() const { return _K_cho_decomp; }
   const CovarianceFunctionBase & getCovarFunction() const { return *_covariance_function; }
+  const CovarianceFunctionBase * getCovarFunctionPtr() const { return _covariance_function; }
   const std::string & getCovarType() const { return _covar_type; }
   const unsigned int & getNumTunableParams() const { return _num_tunable; }
   const std::unordered_map<std::string, Real> & getHyperParamMap() const { return _hyperparam_map; }

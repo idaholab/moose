@@ -59,5 +59,5 @@ LoadCovarianceDataAction::load(GaussianProcess & model)
   _problem->addObject<CovarianceFunctionBase>(
       covar_type, covar_name, covar_params, /* threaded = */ false);
 
-  model.gpHandler().linkCovarianceFunction(model.parameters(), covar_name);
+  model.setupCovariance(covar_name);
 }

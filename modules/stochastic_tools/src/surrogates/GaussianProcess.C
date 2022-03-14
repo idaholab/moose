@@ -24,12 +24,21 @@ GaussianProcess::validParams()
 
 GaussianProcess::GaussianProcess(const InputParameters & parameters)
   : SurrogateModel(parameters),
+    CovarianceInterface(parameters),
     _gp_handler(
         isParamValid("trainer")
             ? dynamic_cast<GaussianProcessTrainer &>(getSurrogateTrainer("trainer")).gpHandler()
             : setModelData<StochasticTools::GaussianProcessHandler>("_gp_handler")),
     _training_params(getModelData<RealEigenMatrix>("_training_params"))
 {
+}
+
+void
+GaussianProcess::setupCovariance(UserObjectName covar_name)
+{
+  if (_gp_handler.getCovarFunctionPtr() != nullptr)
+    ::mooseError("Attempting to redefine covariance function using setupCovariance.");
+  _gp_handler.linkCovarianceFunction(getCovarianceFunctionByName(covar_name));
 }
 
 Real

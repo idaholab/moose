@@ -60,6 +60,7 @@ GaussianProcessTrainer::validParams()
 
 GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameters)
   : SurrogateTrainer(parameters),
+    CovarianceInterface(parameters),
     _gp_handler(declareModelData<StochasticTools::GaussianProcessHandler>("_gp_handler")),
     _training_params(declareModelData<RealEigenMatrix>("_training_params")),
     _standardize_params(getParam<bool>("standardize_params")),
@@ -103,11 +104,11 @@ GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameter
   if (isParamValid("tuning_max"))
     upper_bounds = getParam<std::vector<Real>>("tuning_max");
 
-  _gp_handler.initialize(parameters,
-                         parameters.get<UserObjectName>("covariance_function"),
-                         tune_parameters,
-                         lower_bounds,
-                         upper_bounds);
+  _gp_handler.initialize(
+      getCovarianceFunctionByName(parameters.get<UserObjectName>("covariance_function")),
+      tune_parameters,
+      lower_bounds,
+      upper_bounds);
 }
 
 void

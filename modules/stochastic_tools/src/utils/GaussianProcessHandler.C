@@ -23,14 +23,20 @@ namespace StochasticTools
 GaussianProcessHandler::GaussianProcessHandler() : _tao_comm(MPI_COMM_SELF) {}
 
 void
-GaussianProcessHandler::initialize(const InputParameters & parameters,
-                                   const UserObjectName & covar_name,
+GaussianProcessHandler::initialize(CovarianceFunctionBase * covariance_function,
                                    const std::vector<std::string> params_to_tune,
                                    std::vector<Real> min,
                                    std::vector<Real> max)
 {
-  linkCovarianceFunction(parameters, covar_name);
+  linkCovarianceFunction(covariance_function);
   generateTuningMap(params_to_tune, min, max);
+}
+
+void
+GaussianProcessHandler::linkCovarianceFunction(CovarianceFunctionBase * covariance_function)
+{
+  _covariance_function = covariance_function;
+  _covar_type = _covariance_function->type();
 }
 
 void
@@ -60,27 +66,6 @@ GaussianProcessHandler::setupStoredMatrices(const RealEigenMatrix & input)
 {
   _K_cho_decomp = _K.llt();
   _K_results_solve = _K_cho_decomp.solve(input);
-}
-
-void
-GaussianProcessHandler::linkCovarianceFunction(const InputParameters & parameters,
-                                               const UserObjectName & name)
-{
-  // Fetch the covariance function in hte problem. There is a moderate overlap
-  // with the CovarianceInterface, but this class cannot inherit from that
-  const auto & feproblem = *parameters.get<FEProblemBase *>("_fe_problem_base");
-  std::vector<CovarianceFunctionBase *> models;
-  feproblem.theWarehouse()
-      .query()
-      .condition<AttribName>(name)
-      .condition<AttribSystem>("CovarianceFunctionBase")
-      .queryInto(models);
-  if (models.empty())
-    ::mooseError("Unable to find a CovarianceFunction object with the name '" + name + "'");
-
-  _covariance_function = models[0];
-  if (_covariance_function->type() != _covar_type)
-    _covar_type = _covariance_function->type();
 }
 
 void
