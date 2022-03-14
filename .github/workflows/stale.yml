@@ -24,3 +24,4 @@ jobs:
         stale-pr-label: 'stale'
         days-before-pr-stale: 30
         days-before-pr-close: 3
+        operations-per-run: 100
