@@ -25,6 +25,7 @@
 #include "libmesh/parallel_mesh.h"
 #include "libmesh/serial_mesh.h"
 #include "libmesh/exodusII_io.h"
+#include "libmesh/exodusII_io_helper.h"
 #include "libmesh/enum_xdr_mode.h"
 
 registerMooseObject("MooseApp", SolutionUserObject);
@@ -208,6 +209,7 @@ SolutionUserObject::readExodusII()
   // Read the Exodus file
   _exodusII_io = std::make_unique<ExodusII_IO>(*_mesh);
   _exodusII_io->read(_mesh_file);
+  readBlockIdMapFromExodusII();
   _exodus_times = &_exodusII_io->get_time_steps();
 
   if (isParamValid("timestep"))
@@ -1204,4 +1206,16 @@ SolutionUserObject::scalarValue(Real /*t*/, const std::string & var_name) const
   dof_map.SCALAR_dof_indices(dofs, var_num);
   // We can handle only FIRST order scalar variables
   return directValue(dofs[0]);
+}
+
+void
+SolutionUserObject::readBlockIdMapFromExodusII()
+{
+#ifdef LIBMESH_HAVE_EXODUS_API
+  ExodusII_IO_Helper & exio_helper = _exodusII_io->get_exio_helper();
+  std::map<int, std::string> & id_to_block = exio_helper.id_to_block_names;
+  _block_name_to_id.clear();
+  for (auto & it : id_to_block)
+    _block_name_to_id[it.second] = it.first;
+#endif
 }

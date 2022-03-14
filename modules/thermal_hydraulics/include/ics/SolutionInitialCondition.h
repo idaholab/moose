@@ -21,6 +21,8 @@ class SolutionInitialCondition : public InitialCondition
 public:
   SolutionInitialCondition(const InputParameters & parameters);
 
+  virtual void initialSetup() override;
+
   virtual Real value(const Point & p) override;
 
 protected:
@@ -29,6 +31,9 @@ protected:
 
   /// The variable name extracted from the SolutionUserObject
   const VariableName & _solution_object_var_name;
+
+  /// Remapped IDs from the current mesh to the ExodusII mesh
+  std::set<SubdomainID> _exo_block_ids;
 
 public:
   static InputParameters validParams();
