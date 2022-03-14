@@ -12,15 +12,15 @@ A covariance function is created by inheriting from `CovarainceFunctionBase` and
 
 #### In the GaussianProcessHandler
 
-The [](GaussianProcessHandler.md) is a class which incorporates the necessary data structures and
-functions to create and manipulate Gaussian Processes. One of the most important members
+The [GaussianProcessHandler.md] is a class which incorporates the necessary data structures and
+functions to create, train, and use Gaussian Processes. One of the most important members
 of this handler class is the covariance function:
 
 !listing GaussianProcessHandler.h line=CovarianceFunctionBase *
 
 The covariance function can be initialized in the handler by following the examples
 given in [source description](GaussianProcessHandler.md). Objects like
-[](GaussianProcessTrainer.md) or [](GaussianProcess.md) can then access the
+[GaussianProcessTrainer.md] or [GaussianProcess.md] can then access the
 covariance function through the handler class.
 
 #### CovarianceInterface
