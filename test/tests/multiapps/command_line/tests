@@ -15,6 +15,13 @@
     requirement = "The MultiApp system shall include the ability to set common command line parameters for all sub applications from the input file."
   []
 
+  [master_common_vector]
+    type = Exodiff
+    input = master_common_vector.i
+    exodiff = 'master_common_vector_out_sub0.e master_common_vector_out_sub1.e'
+    requirement = "The MultiApp system shall include the ability to set common command line vector parameters for all sub applications from the input file."
+  []
+
   [wrong_size]
     type = RunException
     input = parent_wrong_size.i

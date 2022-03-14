@@ -175,9 +175,8 @@ MultiApp::validParams()
   params.addParam<std::vector<Point>>("move_positions",
                                       "The positions corresponding to each move_app.");
 
-  params.addParam<std::vector<std::string>>(
+  params.addParam<std::string>(
       "cli_args",
-      std::vector<std::string>(),
       "Additional command line arguments to pass to the sub apps. If one set is provided the "
       "arguments are applied to all, otherwise there must be a set for each sub app.");
 
@@ -275,7 +274,7 @@ MultiApp::MultiApp(const InputParameters & parameters)
     _move_positions(getParam<std::vector<Point>>("move_positions")),
     _move_happened(false),
     _has_an_app(true),
-    _cli_args(getParam<std::vector<std::string>>("cli_args")),
+    _cli_args(getParam<std::vector<CLIArgString>>("cli_args")),
     _keep_solution_during_restore(getParam<bool>("keep_solution_during_restore")),
     _run_in_position(getParam<bool>("run_in_position")),
     _sub_app_backups(declareRestartableDataWithContext<SubAppBackups>("sub_app_backups", this)),
@@ -305,6 +304,32 @@ MultiApp::MultiApp(const InputParameters & parameters)
   std::sort(sorted_times.begin(), sorted_times.end());
   if (_reset_times.size() && _reset_times != sorted_times)
     paramError("reset_time", "List of reset times must be sorted in increasing order");
+
+  if (isParamValid("cli_args"))
+    _cli_args = parseCliArgs(getParam<std::string>("cli_args"));
+  else
+    _cli_args = std::vector<std::string>();
+}
+
+std::vector<std::string>
+MultiApp::parseCliArgs(const std::string & cli_arg) const
+{
+  std::string local_cli_arg = cli_arg;
+  bool last_char_space = false;
+  unsigned int n_quote = 0;
+  const std::string sq = "\'";
+  const std::string dq = "\"";
+  for (unsigned int j = 0; j < cli_arg.size(); ++j)
+  {
+    if (cli_arg[j] == sq[0] || cli_arg[j] == dq[0])
+      n_quote += 1;
+    bool is_char_space = std::isspace(static_cast<unsigned char>(cli_arg[j]));
+    // Replace single spaces by commas, only if outside quotes
+    if (is_char_space && !last_char_space && n_quote % 2 == 0)
+      local_cli_arg.replace(j, 1, ",");
+    last_char_space = is_char_space;
+  }
+  return MooseUtils::split(local_cli_arg, ",");
 }
 
 void

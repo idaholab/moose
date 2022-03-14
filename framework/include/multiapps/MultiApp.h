@@ -431,6 +431,14 @@ protected:
   virtual std::string getCommandLineArgsParamHelper(unsigned int local_app);
 
   /**
+   * Parses the std::string parameter "cli_args" to a std::vector of strings
+   * where the strings are separated at spaces _not_ included in quoted sections
+   * @param cli_arg the command line arguments as a string
+   * @return command line arguments separated in a vector
+   */
+  std::vector<std::string> parseCliArgs(const std::string & cli_arg) const;
+
+  /**
    * Build communicators and reserve backups.
    */
   void init(unsigned int num_apps, bool batch_mode = false);
@@ -583,7 +591,7 @@ protected:
   bool _has_an_app;
 
   /// CommandLine arguments
-  const std::vector<std::string> & _cli_args;
+  std::vector<std::string> _cli_args;
 
   /// CommandLine arguments from files
   std::vector<std::string> _cli_args_from_file;

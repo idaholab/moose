@@ -1,8 +1,3 @@
-[Mesh]
-  type = GeneratedMesh
-  dim = 1
-[]
-
 [Variables]
   [u]
     initial_condition = 1980
