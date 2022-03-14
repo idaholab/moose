@@ -265,6 +265,21 @@ public:
    */
   unsigned int getMeshFileDimension() const { return _mesh->spatial_dimension(); }
 
+  /**
+   * Return the name of the mesh file this object read the solution from
+   */
+  const std::string getMeshFileName() const { return _mesh_file; }
+
+  /**
+   * Get the map from block ID to block name. Only works for ExodsuII files.
+   *
+   * @return Map from block ID to block name
+   */
+  const std::map<SubdomainName, SubdomainID> & getBlockNamesToIds() const
+  {
+    return _block_name_to_id;
+  }
+
 protected:
   /**
    * Method for reading XDA mesh and equation systems file(s)
@@ -359,6 +374,11 @@ protected:
       const unsigned int local_var_index,
       unsigned int func_num,
       const std::set<subdomain_id_type> * subdomain_ids = nullptr) const;
+
+  /**
+   * Read block ID map from the ExodusII file
+   */
+  void readBlockIdMapFromExodusII();
 
   /// File type to read (0 = xda; 1 = ExodusII)
   MooseEnum _file_type;
@@ -470,6 +490,9 @@ protected:
 
   /// True if initial_setup has executed
   bool _initialized;
+
+  /// Map from block ID to block names. Read from the ExodusII file
+  std::map<SubdomainName, SubdomainID> _block_name_to_id;
 
 private:
   static Threads::spin_mutex _solution_user_object_mutex;

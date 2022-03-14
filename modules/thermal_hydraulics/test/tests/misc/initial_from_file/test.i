@@ -45,32 +45,6 @@
 []
 
 [Components]
-  [pipe1]
-    type = FlowChannel1Phase
-    fp = fp
-    # geometry
-    position = '0 0 0'
-    orientation = '1 0 0'
-    length = 1
-    n_elems = 3
-    A = 1.907720E-04
-    D_h = 1.698566E-02
-    f = 0.1
-  []
-
-  [junction]
-    type = VolumeJunction1Phase
-    connections = 'pipe1:out pipe2:in'
-    volume = 1
-    position = '1 0 0'
-
-    scaling_factor_rhoV  = 1
-    scaling_factor_rhouV = 1
-    scaling_factor_rhovV = 1
-    scaling_factor_rhowV = 1
-    scaling_factor_rhoEV = 1e-4
-  []
-
   [pipe2]
     type = FlowChannel1Phase
     fp = fp
@@ -105,7 +79,7 @@
 
   [inlet]
     type = InletMassFlowRateTemperature1Phase
-    input = 'pipe1:in'
+    input = 'pipe2:in'
     m_dot = 0.1
     T = 500
   []
