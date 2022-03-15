@@ -8,6 +8,7 @@
       type = RunApp
       no_additional_cli_args = True
       expect_out = "Usage: \S+"
+      valgrind = NONE
 
       detail = "reports the available options when none are provided and"
     []
@@ -16,6 +17,7 @@
       cli_args = "--help"
       no_additional_cli_args = True
       expect_out = "Usage: \S+"
+      valgrind = NONE
 
       detail = "accepts defined command-line flags."
     []
