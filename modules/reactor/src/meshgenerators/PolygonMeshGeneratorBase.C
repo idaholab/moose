@@ -145,10 +145,21 @@ PolygonMeshGeneratorBase::buildSimpleSlice(const std::vector<Real> ring_radii,
   // Assign elements, boundaries, and subdomains;
   // Add Tri3 or Quad4 mesh into innermost (central) region
   if (quad_center_elements)
-    cenQuadElemDef(*mesh, div_num, block_id_shift, boundary_id_shift, nodes);
+    cenQuadElemDef(*mesh,
+                   div_num,
+                   block_id_shift,
+                   boundary_id_shift,
+                   nodes,
+                   (!has_rings) && (!has_ducts) && (background_intervals == 1),
+                   side_index);
   else
-    cenTriElemDef(
-        *mesh, num_sectors_per_side, azimuthal_tangent, block_id_shift, boundary_id_shift);
+    cenTriElemDef(*mesh,
+                  num_sectors_per_side,
+                  azimuthal_tangent,
+                  block_id_shift,
+                  boundary_id_shift,
+                  (!has_rings) && (!has_ducts) && (background_intervals == 1),
+                  side_index);
 
   // Add Quad4 mesh into outer circle
   // total number of mesh should be all the rings for pin regions + background regions;
@@ -454,7 +465,9 @@ PolygonMeshGeneratorBase::cenQuadElemDef(ReplicatedMesh & mesh,
                                          const unsigned int div_num,
                                          const subdomain_id_type block_id_shift,
                                          const boundary_id_type boundary_id_shift,
-                                         std::vector<std::vector<Node *>> & nodes) const
+                                         std::vector<std::vector<Node *>> & nodes,
+                                         const bool assign_external_boundary,
+                                         const unsigned int side_index) const
 {
 
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
@@ -496,6 +509,11 @@ PolygonMeshGeneratorBase::cenQuadElemDef(ReplicatedMesh & mesh,
       boundary_info.add_side(elem_Quad4, 3, SLICE_BEGIN);
     if (i == div_num * div_num - 2)
       boundary_info.add_side(elem_Quad4, 1, SLICE_END);
+    if (assign_external_boundary)
+      boundary_info.add_side(
+          elem_Quad4,
+          2,
+          (i < div_num * (div_num - 1) ? OUTER_SIDESET_ID : OUTER_SIDESET_ID_ALT) + side_index);
   }
 }
 
@@ -504,7 +522,9 @@ PolygonMeshGeneratorBase::cenTriElemDef(ReplicatedMesh & mesh,
                                         const unsigned int num_sectors_per_side,
                                         const std::vector<Real> azimuthal_tangent,
                                         const subdomain_id_type block_id_shift,
-                                        const boundary_id_type boundary_id_shift) const
+                                        const boundary_id_type boundary_id_shift,
+                                        const bool assign_external_boundary,
+                                        const unsigned int side_index) const
 {
   unsigned int angle_number =
       azimuthal_tangent.size() == 0 ? num_sectors_per_side : (azimuthal_tangent.size() - 1);
@@ -522,6 +542,9 @@ PolygonMeshGeneratorBase::cenTriElemDef(ReplicatedMesh & mesh,
       boundary_info.add_side(elem, 2, SLICE_BEGIN);
     else if (i == angle_number)
       boundary_info.add_side(elem, 0, SLICE_END);
+    if (assign_external_boundary)
+      boundary_info.add_side(
+          elem, 1, (i <= angle_number / 2 ? OUTER_SIDESET_ID : OUTER_SIDESET_ID_ALT) + side_index);
   }
 }
 

@@ -16,7 +16,12 @@ ReportingIDGeneratorUtils::getCellwiseIntegerIDs(
     const bool use_exclude_id,
     const std::vector<bool> & exclude_ids)
 {
+  dof_id_type n = 0;
+  for (MooseIndex(pattern) i = 0; i < pattern.size(); ++i)
+    for (MooseIndex(pattern[i]) j = 0; j < pattern[i].size(); ++j)
+      n += meshes[pattern[i][j]]->n_elem();
   std::vector<dof_id_type> integer_ids;
+  integer_ids.reserve(n);
   dof_id_type id = 0;
   for (MooseIndex(pattern) i = 0; i < pattern.size(); ++i)
     for (MooseIndex(pattern[i]) j = 0; j < pattern[i].size(); ++j)
@@ -33,7 +38,12 @@ ReportingIDGeneratorUtils::getPatternIntegerIDs(
     const std::vector<std::unique_ptr<ReplicatedMesh>> & meshes,
     const std::vector<std::vector<unsigned int>> & pattern)
 {
+  dof_id_type n = 0;
+  for (MooseIndex(pattern) i = 0; i < pattern.size(); ++i)
+    for (MooseIndex(pattern[i]) j = 0; j < pattern[i].size(); ++j)
+      n += meshes[pattern[i][j]]->n_elem();
   std::vector<dof_id_type> integer_ids;
+  integer_ids.reserve(n);
   for (MooseIndex(pattern) i = 0; i < pattern.size(); ++i)
     for (MooseIndex(pattern[i]) j = 0; j < pattern[i].size(); ++j)
       integer_ids.insert(integer_ids.end(), meshes[pattern[i][j]]->n_elem(), pattern[i][j]);
@@ -46,7 +56,12 @@ ReportingIDGeneratorUtils::getManualIntegerIDs(
     const std::vector<std::vector<unsigned int>> & pattern,
     const std::vector<std::vector<dof_id_type>> & id_pattern)
 {
+  dof_id_type n = 0;
+  for (MooseIndex(pattern) i = 0; i < pattern.size(); ++i)
+    for (MooseIndex(pattern[i]) j = 0; j < pattern[i].size(); ++j)
+      n += meshes[pattern[i][j]]->n_elem();
   std::vector<dof_id_type> integer_ids;
+  integer_ids.reserve(n);
   for (MooseIndex(pattern) i = 0; i < pattern.size(); ++i)
     for (MooseIndex(pattern[i]) j = 0; j < pattern[i].size(); ++j)
       integer_ids.insert(integer_ids.end(), meshes[pattern[i][j]]->n_elem(), id_pattern[i][j]);
@@ -71,20 +86,22 @@ ReportingIDGeneratorUtils::getCellBlockIDs(
 
 std::map<SubdomainID, unsigned int>
 ReportingIDGeneratorUtils::getDuckBlockIDs(const std::unique_ptr<MeshBase> & mesh,
-                                           const bool has_assembly_duct,
+                                           const bool has_assembly_boundary,
+                                           const std::set<subdomain_id_type> background_blk_ids,
                                            const std::set<SubdomainID> & blks)
 {
   std::map<SubdomainID, unsigned int> blks_duct;
-  if (has_assembly_duct)
+  if (has_assembly_boundary)
   {
     std::set<SubdomainID> mesh_blks;
     mesh->subdomain_ids(mesh_blks);
     unsigned int i = 0;
     for (const auto mesh_blk : mesh_blks)
-      if (!blks.count(mesh_blk))
+      if (!blks.count(mesh_blk) && !background_blk_ids.count(mesh_blk))
         blks_duct[mesh_blk] = i++;
     // delete the first entry because it is for surrouding regions between the assembly duct and pin
-    blks_duct.erase(blks_duct.begin());
+    if (background_blk_ids.size() == 0)
+      blks_duct.erase(blks_duct.begin());
   }
   return blks_duct;
 }
@@ -96,7 +113,8 @@ ReportingIDGeneratorUtils::assignReportingIDs(
     const std::string assign_type,
     const bool use_exclude_id,
     const std::vector<bool> & exclude_ids,
-    const bool has_assembly_duct,
+    const bool has_assembly_boundary,
+    const std::set<subdomain_id_type> background_block_ids,
     const std::vector<std::unique_ptr<ReplicatedMesh>> & input_meshes,
     const std::vector<std::vector<unsigned int>> & pattern,
     const std::vector<std::vector<dof_id_type>> & id_pattern)
@@ -111,14 +129,14 @@ ReportingIDGeneratorUtils::assignReportingIDs(
   else if (assign_type == "manual")
     integer_ids = getManualIntegerIDs(input_meshes, pattern, id_pattern);
 
-  if (has_assembly_duct)
+  if (has_assembly_boundary)
   {
     // setup assembly duct information
     const std::set<SubdomainID> blks = getCellBlockIDs(input_meshes, pattern);
     const unsigned int duct_boundary_id =
         *std::max_element(integer_ids.begin(), integer_ids.end()) + 1;
     const std::map<SubdomainID, unsigned int> blks_duct =
-        getDuckBlockIDs(mesh, has_assembly_duct, blks);
+        getDuckBlockIDs(mesh, has_assembly_boundary, background_block_ids, blks);
 
     // assign reporting IDs to individual elements
     unsigned int i = 0;
@@ -144,7 +162,8 @@ ReportingIDGeneratorUtils::assignReportingIDs(
         elem->set_extra_integer(extra_id_index, id);
         ++i;
         old_id = id;
-        id = integer_ids[i];
+        if (i < integer_ids.size())
+          id = integer_ids[i];
       }
     }
   }
