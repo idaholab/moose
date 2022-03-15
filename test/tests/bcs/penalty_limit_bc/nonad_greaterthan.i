@@ -11,15 +11,15 @@
 
 [Kernels]
   [dt]
-    type = ADTimeDerivative
+    type = TimeDerivative
     variable = u
   []
   [diff]
-    type = ADDiffusion
+    type = Diffusion
     variable = u
   []
   [source]
-    type = ADBodyForce
+    type = BodyForce
     variable = u
     value = 15
   []
@@ -27,13 +27,13 @@
 
 [BCs]
   [top]
-    type = ADDirichletBC
+    type = DirichletBC
     variable = u
     value = 1
     boundary = 'left'
   []
   [bc_all]
-    type = ADPenaltyLimitBC
+    type = PenaltyLimitBC
     variable = u
     value = 7
     boundary = 'right'

@@ -11,15 +11,15 @@
 
 [Kernels]
   [dt]
-    type = ADTimeDerivative
+    type = TimeDerivative
     variable = u
   []
   [diff]
-    type = ADDiffusion
+    type = Diffusion
     variable = u
   []
   [source]
-    type = ADBodyForce
+    type = BodyForce
     variable = u
     value = 15
   []
@@ -27,18 +27,18 @@
 
 [BCs]
   [top]
-    type = ADDirichletBC
+    type = DirichletBC
     variable = u
     value = 1
     boundary = 'left'
   []
   [bc_all]
-    type = ADPenaltyLimitBC
+    type = PenaltyLimitBC
     variable = u
-    value = 7
+    value = 10
     boundary = 'right'
     penalty = 10000
-    apply_penalty_when = greaterthan
+    apply_penalty_when = lessthan
   []
 []
 
@@ -46,9 +46,8 @@
 [Executioner]
   type = Transient
   solve_type = 'NEWTON'
-  line_search = none
   nl_abs_tol = 1e-10
-  num_steps = 10
+  num_steps = 3
   dt = 1
 []
 

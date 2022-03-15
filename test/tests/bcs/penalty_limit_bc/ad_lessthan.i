@@ -27,7 +27,7 @@
 
 [BCs]
   [top]
-    type = DirichletBC
+    type = ADDirichletBC
     variable = u
     value = 1
     boundary = 'left'
