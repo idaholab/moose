@@ -735,6 +735,13 @@ MooseVariableFE<OutputType>::insertNodalValue(NumericVector<Number> & residual,
 
 template <typename OutputType>
 bool
+MooseVariableFE<OutputType>::isArray() const
+{
+  return std::is_same<OutputType, RealEigenVector>::value;
+}
+
+template <typename OutputType>
+bool
 MooseVariableFE<OutputType>::isVector() const
 {
   return std::is_same<OutputType, RealVectorValue>::value;

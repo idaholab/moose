@@ -70,6 +70,11 @@ public:
   virtual Moose::VarFieldType fieldType() const = 0;
 
   /**
+   * @returns true if this is an array variable, false otherwise.
+   */
+  virtual bool isArray() const = 0;
+
+  /**
    * @returns true if this is a vector-valued element, false otherwise.
    */
   virtual bool isVector() const = 0;

@@ -188,6 +188,7 @@ public:
   bool activeOnSubdomain(SubdomainID subdomain) const override;
 
   Moose::VarFieldType fieldType() const override;
+  bool isArray() const override;
   bool isVector() const override;
 
   virtual const Elem * const & currentElem() const override { return _element_data->currentElem(); }
