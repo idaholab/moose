@@ -7,24 +7,29 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "AddComponentPhysicsAction.h"
+#include "AddComponentMooseObjectsAction.h"
 #include "THMProblem.h"
 
-registerMooseAction("ThermalHydraulicsApp", AddComponentPhysicsAction, "THM:add_component_physics");
+registerMooseAction("ThermalHydraulicsApp",
+                    AddComponentMooseObjectsAction,
+                    "THM:add_component_moose_objects");
 
 InputParameters
-AddComponentPhysicsAction::validParams()
+AddComponentMooseObjectsAction::validParams()
 {
   InputParameters params = Action::validParams();
   return params;
 }
 
-AddComponentPhysicsAction::AddComponentPhysicsAction(InputParameters params) : Action(params) {}
+AddComponentMooseObjectsAction::AddComponentMooseObjectsAction(InputParameters params)
+  : Action(params)
+{
+}
 
 void
-AddComponentPhysicsAction::act()
+AddComponentMooseObjectsAction::act()
 {
   THMProblem * thm_problem = dynamic_cast<THMProblem *>(_problem.get());
   if (thm_problem)
-    thm_problem->addComponentPhysics();
+    thm_problem->addMooseObjects();
 }

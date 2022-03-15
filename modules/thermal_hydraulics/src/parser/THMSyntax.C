@@ -42,7 +42,7 @@ registerActions(Syntax & syntax)
   registerTask("THM:identify_loops", true);
   registerTask("THM:add_variables", true);
   registerTask("THM:setup_output", true);
-  registerTask("THM:add_component_physics", true);
+  registerTask("THM:add_component_moose_objects", true);
   registerTask("THM:integrity_check", true);
   registerTask("THM:control_data_integrity_check", true);
   registerTask("THM:preconditioning_integrity_check", true);
@@ -79,11 +79,11 @@ registerActions(Syntax & syntax)
     syntax.addDependency("THM:init_components", "THM:add_closures");
     syntax.addDependency("THM:add_variables", "THM:init_components");
     syntax.addDependency("THM:setup_output", "add_output");
-    syntax.addDependency("THM:add_component_physics", "add_material");
-    syntax.addDependency("check_output", "THM:add_component_physics");
+    syntax.addDependency("THM:add_component_moose_objects", "add_material");
+    syntax.addDependency("check_output", "THM:add_component_moose_objects");
     syntax.addDependency("THM:control_data_integrity_check", "check_integrity");
     syntax.addDependency("add_user_object", "THM:add_variables");
-    syntax.addDependency("add_output_aux_variables", "THM:add_component_physics");
+    syntax.addDependency("add_output_aux_variables", "THM:add_component_moose_objects");
     syntax.addDependency("add_periodic_bc", "THM:add_variables");
     syntax.addDependency("THM:print_component_loops", "THM:control_data_integrity_check");
     syntax.addDependency("THM:preconditioning_integrity_check", "check_integrity");

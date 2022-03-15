@@ -559,9 +559,8 @@ Simulation::setupInitialConditionObjects()
 }
 
 void
-Simulation::addComponentPhysics()
+Simulation::addMooseObjects()
 {
-  // let all components add their own
   for (auto && comp : _components)
     comp->addMooseObjects();
 }

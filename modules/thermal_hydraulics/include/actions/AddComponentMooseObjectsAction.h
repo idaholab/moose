@@ -11,10 +11,10 @@
 
 #include "Action.h"
 
-class AddComponentPhysicsAction : public Action
+class AddComponentMooseObjectsAction : public Action
 {
 public:
-  AddComponentPhysicsAction(InputParameters params);
+  AddComponentMooseObjectsAction(InputParameters params);
 
   virtual void act();
 

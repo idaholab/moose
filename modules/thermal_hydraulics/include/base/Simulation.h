@@ -188,9 +188,9 @@ public:
   virtual void addVariables();
 
   /**
-   * Add components based physics
+   * Add component MOOSE objects
    */
-  virtual void addComponentPhysics();
+  virtual void addMooseObjects();
 
   /**
    * Perform mesh setup actions such as setting up the coordinate system(s) and
