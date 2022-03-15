@@ -566,6 +566,24 @@ Simulation::addMooseObjects()
 }
 
 void
+Simulation::addRelationshipManagers()
+{
+  {
+    const std::string class_name = "AugmentSparsityBetweenElements";
+    auto params = _factory.getValidParams(class_name);
+    params.set<Moose::RelationshipManagerType>("rm_type") =
+        Moose::RelationshipManagerType::ALGEBRAIC;
+    params.set<std::string>("for_whom") = _fe_problem.name();
+    params.set<MooseMesh *>("mesh") = &_mesh;
+    params.set<std::map<dof_id_type, std::vector<dof_id_type>> *>("_elem_map") =
+        &_sparsity_elem_augmentation;
+    auto rm = _factory.create<RelationshipManager>(class_name, "thm:sparsity_btw_elems", params);
+    if (!_app.addRelationshipManager(rm))
+      _factory.releaseSharedObjects(*rm);
+  }
+}
+
+void
 Simulation::setupCoordinateSystem()
 {
   MultiMooseEnum coord_types("XYZ RZ RSPHERICAL");

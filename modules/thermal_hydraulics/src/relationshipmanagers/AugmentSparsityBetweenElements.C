@@ -29,13 +29,31 @@ AugmentSparsityBetweenElements::AugmentSparsityBetweenElements(const InputParame
 {
 }
 
+AugmentSparsityBetweenElements::AugmentSparsityBetweenElements(
+    const AugmentSparsityBetweenElements & other)
+  : RelationshipManager(other), _elem_map(other._elem_map)
+{
+}
+
+std::unique_ptr<GhostingFunctor>
+AugmentSparsityBetweenElements::clone() const
+{
+  return std::make_unique<AugmentSparsityBetweenElements>(*this);
+}
+
 void
 AugmentSparsityBetweenElements::mesh_reinit()
+{
+  RelationshipManager::mesh_reinit();
+}
+
+void
+AugmentSparsityBetweenElements::redistribute()
 {
 }
 
 void
-AugmentSparsityBetweenElements::internalInit()
+AugmentSparsityBetweenElements::internalInitWithMesh(const MeshBase &)
 {
 }
 
@@ -50,7 +68,7 @@ AugmentSparsityBetweenElements::getInfo() const
 void
 AugmentSparsityBetweenElements::operator()(const MeshBase::const_element_iterator & range_begin,
                                            const MeshBase::const_element_iterator & range_end,
-                                           processor_id_type /*p*/,
+                                           processor_id_type p,
                                            map_type & coupled_elements)
 {
   const CouplingMatrix * const null_mat = libmesh_nullptr;
@@ -60,7 +78,11 @@ AugmentSparsityBetweenElements::operator()(const MeshBase::const_element_iterato
     if (it != _elem_map.end())
     {
       for (auto & coupled_elem_id : it->second)
-        coupled_elements.insert(std::make_pair(_moose_mesh->elemPtr(coupled_elem_id), null_mat));
+      {
+        auto coupled_elem = _moose_mesh->elemPtr(coupled_elem_id);
+        if (coupled_elem->processor_id() != p)
+          coupled_elements.insert(std::make_pair(coupled_elem, null_mat));
+      }
     }
   }
 }

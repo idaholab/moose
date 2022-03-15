@@ -322,6 +322,11 @@ public:
    */
   void setVectorValuedVelocity(bool vector_velocity) { _output_vector_velocity = vector_velocity; }
 
+  /**
+   * Add additional relationship managers to run the simulation
+   */
+  void addRelationshipManagers();
+
 protected:
   struct VariableInfo
   {
