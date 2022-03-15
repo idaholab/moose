@@ -35,7 +35,6 @@ JunctionOneToOne1Phase::setupMesh()
 {
   FlowJunction::setupMesh();
 
-  std::vector<dof_id_type> connected_elems;
   const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem = _mesh.nodeToElemMap();
   for (auto & nid : _nodes)
   {
@@ -45,11 +44,11 @@ JunctionOneToOne1Phase::setupMesh()
 
     const std::vector<dof_id_type> & elems = it->second;
     for (const auto & e : elems)
-      connected_elems.push_back(e);
+      _connected_elems.push_back(e);
   }
 
-  if (connected_elems.size() == 2)
-    _sim.augmentSparsity(connected_elems[0], connected_elems[1]);
+  if (_connected_elems.size() == 2)
+    _sim.augmentSparsity(_connected_elems[0], _connected_elems[1]);
 }
 
 void
@@ -85,10 +84,18 @@ JunctionOneToOne1Phase::addMooseObjects()
 
   // Add user object for computing and storing the fluxes
   {
+    std::vector<processor_id_type> proc_ids;
+    for (auto & eid : _connected_elems)
+    {
+      const Elem * elem = _mesh.elemPtr(eid);
+      proc_ids.push_back(elem->processor_id());
+    }
+
     const std::string class_name = "ADJunctionOneToOne1PhaseUserObject";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<std::vector<BoundaryName>>("boundary") = _boundary_names;
     params.set<std::vector<Real>>("normals") = _normals;
+    params.set<std::vector<processor_id_type>>("processor_ids") = proc_ids;
     // It is assumed that each channel should have the same numerical flux, so
     // just use the first one.
     params.set<UserObjectName>("numerical_flux") = _numerical_flux_names[0];

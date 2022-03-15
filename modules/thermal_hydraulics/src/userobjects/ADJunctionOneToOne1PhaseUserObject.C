@@ -11,6 +11,10 @@
 #include "THMIndices3Eqn.h"
 #include "ADNumericalFlux3EqnBase.h"
 #include "Numerics.h"
+#include "metaphysicl/parallel_numberarray.h"
+#include "metaphysicl/parallel_dualnumber.h"
+#include "metaphysicl/parallel_semidynamicsparsenumberarray.h"
+#include "libmesh/parallel_algebra.h"
 
 registerMooseObject("ThermalHydraulicsApp", ADJunctionOneToOne1PhaseUserObject);
 
@@ -73,6 +77,10 @@ void
 ADJunctionOneToOne1PhaseUserObject::initialize()
 {
   _connection_indices.clear();
+
+  std::vector<ADReal> zero(THM3Eqn::N_CONS_VAR, ADReal(0.));
+  for (auto & s : _solutions)
+    s = zero;
 }
 
 void
@@ -92,7 +100,7 @@ ADJunctionOneToOne1PhaseUserObject::execute()
   }
 
   // Store solution vector for connection
-  std::vector<ADReal> U(THM3Eqn::N_CONS_VAR, 0.);
+  std::vector<ADReal> U(THM3Eqn::N_CONS_VAR, ADReal(0.));
   U[THM3Eqn::CONS_VAR_RHOA] = _rhoA[0];
   U[THM3Eqn::CONS_VAR_RHOUA] = _rhouA[0];
   U[THM3Eqn::CONS_VAR_RHOEA] = _rhoEA[0];
@@ -134,6 +142,15 @@ ADJunctionOneToOne1PhaseUserObject::finalize()
   // Check direction compatibility
   if (!THM::areParallelVectors(_directions[0], _directions[1]))
     mooseError(_junction_name, ": The connected channels must be parallel at the junction.");
+
+  for (unsigned int i = 0; i < _n_connections; i++)
+  {
+    processor_id_type owner_proc = _processor_ids[i];
+    comm().broadcast(_elem_ids[i], owner_proc, true);
+    comm().broadcast(_local_side_ids[i], owner_proc, true);
+    comm().broadcast(_solutions[i], owner_proc, true);
+    comm().broadcast(_directions[i], owner_proc, true);
+  }
 
   // Apply transformation to first connection's reference frame
   const Real n_direction1 = _directions[0] * _directions[1];

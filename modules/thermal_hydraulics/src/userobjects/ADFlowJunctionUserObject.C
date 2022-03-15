@@ -17,6 +17,8 @@ ADFlowJunctionUserObject::validParams()
 
   params.addRequiredParam<std::vector<Real>>(
       "normals", "Flow channel outward normals or junction inward normals");
+  params.addParam<std::vector<processor_id_type>>(
+      "processor_ids", "Processor IDs owning each connected flow channel element");
 
   params.addClassDescription("Provides common interfaces for flow junction user objects");
 
@@ -30,8 +32,19 @@ ADFlowJunctionUserObject::ADFlowJunctionUserObject(const InputParameters & param
     _n_bnd_ids(_bnd_ids_vector.size()),
     _normal(getParam<std::vector<Real>>("normals")),
     _dir(getMaterialProperty<RealVectorValue>("direction")),
-    _n_connections(_normal.size())
+    _n_connections(_normal.size()),
+    _processor_ids(getParam<std::vector<processor_id_type>>("processor_ids"))
 {
+  if (comm().size() > 1)
+  {
+    if (_processor_ids.size() != _n_connections)
+      mooseError("The number of entries in the 'processor_ids' parameter must equal the number of "
+                 "connections (",
+                 _n_connections,
+                 ").");
+  }
+  else
+    _processor_ids.resize(_n_connections, 0.);
 }
 
 void
