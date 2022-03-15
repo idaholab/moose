@@ -598,10 +598,6 @@ Simulation::setupCoordinateSystem()
 void
 Simulation::setupMesh()
 {
-  // _fe_problem = dynamic_cast<FEProblem *>(_action_warehouse.problemBase().get());
-  // if (_fe_problem == nullptr)
-  //   mooseError("You need to be running with FEProblem derived class.");
-
   if (_components.size() == 0)
     return;
 
