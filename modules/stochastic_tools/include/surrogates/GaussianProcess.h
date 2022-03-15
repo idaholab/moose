@@ -14,6 +14,7 @@
 #include "Standardizer.h"
 #include <Eigen/Dense>
 #include "CovarianceInterface.h"
+#include "GaussianProcessHandler.h"
 
 class GaussianProcess : public SurrogateModel, public CovarianceInterface
 {
@@ -31,43 +32,12 @@ public:
    */
   virtual void setupCovariance(UserObjectName _covar_name);
 
-  const std::string & getCovarType() const { return _covar_type; }
-
-  const std::unordered_map<std::string, Real> & getHyperParamMap() const { return _hyperparam_map; }
-
-  const std::unordered_map<std::string, std::vector<Real>> & getHyperParamVecMap() const
-  {
-    return _hyperparam_vec_map;
-  }
+  StochasticTools::GaussianProcessHandler & gpHandler() { return _gp_handler; }
+  const StochasticTools::GaussianProcessHandler & getGPHandler() const { return _gp_handler; }
 
 private:
+  StochasticTools::GaussianProcessHandler & _gp_handler;
+
   /// Paramaters (x) used for training
   const RealEigenMatrix & _training_params;
-
-  /// Standardizer for use with params (x)
-  const StochasticTools::Standardizer & _param_standardizer;
-
-  /// Standardizer for use with data (y)
-  const StochasticTools::Standardizer & _data_standardizer;
-
-  /// An _n_sample by _n_sample covariance matrix constructed from the selected kernel function
-  const RealEigenMatrix & _K;
-
-  /// A solve of Ax=b via Cholesky.
-  const RealEigenMatrix & _K_results_solve;
-
-  /// Cholesky decomposition Eigen object
-  const Eigen::LLT<RealEigenMatrix> & _K_cho_decomp;
-
-  /// Type of covariance function used for this surrogate
-  const std::string & _covar_type;
-
-  /// Scalar hyperparameters. Stored for use in surrogate
-  const std::unordered_map<std::string, Real> & _hyperparam_map;
-
-  /// Vector hyperparameters. Stored for use in surrogate
-  const std::unordered_map<std::string, std::vector<Real>> & _hyperparam_vec_map;
-
-  /// Covariance function object
-  CovarianceFunctionBase * _covariance_function = nullptr;
 };

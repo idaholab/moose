@@ -657,6 +657,33 @@ def getInitializedSubmodules(root_dir):
     # This ignores submodules that have a '-' at the beginning which means they are not initialized
     return re.findall(r'^[ +]\S+ (\S+)', output, flags=re.MULTILINE)
 
+def checkInstalled(root_dir):
+    """
+    Returns a set containing 'ALL' and whether or not the TestHarness
+    is running in an "installed" directory. Since we don't have a fool-proof
+    way of knowing whether a binary is installed or not... Actually we really
+    don't have even a "bad" way of telling. People can install tests just about
+    anywhere that they can write too so we'll see all sorts of good and bad
+    practices. So, for now, let's just detect whether or not we are in a Git
+    repository since usually installed tests won't be in a git area.
+
+    - If somebody tarballs MOOSE up, this report an incorrect result
+    - If somebody installs tests into their git repository, this report an incorrect results
+
+    Neither of these cases a significant risk.
+    """
+
+    option_set = set(['ALL'])
+
+    # If we are in a git repo assume we are not installed
+    output = str(runCommand("git submodule status", cwd=root_dir))
+    if output.startswith("ERROR"):
+        option_set.add('TRUE')
+    else:
+        option_set.add('FALSE')
+
+    return option_set
+
 def addObjectsFromBlock(objs, node, block_name):
     """
     Utility function that iterates over a dictionary and adds keys

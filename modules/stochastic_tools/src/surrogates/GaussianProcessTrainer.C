@@ -25,7 +25,6 @@ InputParameters
 GaussianProcessTrainer::validParams()
 {
   InputParameters params = SurrogateTrainer::validParams();
-  params += CovarianceInterface::validParams();
   params.addClassDescription(
       "Provides data preperation and training for a Gaussian Process surrogate model.");
   params.addRequiredParam<ReporterName>(
@@ -45,9 +44,13 @@ GaussianProcessTrainer::validParams()
       "standardize_params", true, "Standardize (center and scale) training parameters (x values)");
   params.addParam<bool>(
       "standardize_data", true, "Standardize (center and scale) training data (y values)");
-  params.addParam<std::string>(
-      "tao_options", "", "Command line options for PETSc/TAO hyperparameter optimization");
-  params.addParam<bool>("show_tao", false, "Switch to show TAO solver results");
+  // Already preparing to use ADAM here
+  MooseEnum tuning_type("tao none", "none");
+  params.addParam<MooseEnum>(
+      "tuning_algorithm", tuning_type, "Hyper parameter optimizaton algorithm");
+  params.addParam<std::string>("tao_options",
+                               "Command line options for PETSc/TAO hyperparameter optimization");
+  params.addParam<bool>("show_tao", "Switch to show TAO solver results");
   params.addParam<std::vector<std::string>>("tune_parameters",
                                             "Select hyperparameters to be tuned");
   params.addParam<std::vector<Real>>("tuning_min", "Minimum allowable tuning value");
@@ -58,24 +61,12 @@ GaussianProcessTrainer::validParams()
 GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameters)
   : SurrogateTrainer(parameters),
     CovarianceInterface(parameters),
+    _gp_handler(declareModelData<StochasticTools::GaussianProcessHandler>("_gp_handler")),
     _training_params(declareModelData<RealEigenMatrix>("_training_params")),
-    _param_standardizer(declareModelData<StochasticTools::Standardizer>("_param_standardizer")),
-    _data_standardizer(declareModelData<StochasticTools::Standardizer>("_data_standardizer")),
-    _K(declareModelData<RealEigenMatrix>("_K")),
-    _K_results_solve(declareModelData<RealEigenMatrix>("_K_results_solve")),
-    _K_cho_decomp(declareModelData<Eigen::LLT<RealEigenMatrix>>("_K_cho_decomp")),
     _standardize_params(getParam<bool>("standardize_params")),
     _standardize_data(getParam<bool>("standardize_data")),
-    _covariance_function(
-        getCovarianceFunctionByName(getParam<UserObjectName>("covariance_function"))),
-    _covar_type(declareModelData<std::string>("_covar_type", _covariance_function->type())),
     _do_tuning(isParamValid("tune_parameters")),
-    _tao_options(getParam<std::string>("tao_options")),
-    _show_tao(getParam<bool>("show_tao")),
-    _tao_comm(MPI_COMM_SELF),
-    _hyperparam_map(declareModelData<std::unordered_map<std::string, Real>>("_hyperparam_map")),
-    _hyperparam_vec_map(declareModelData<std::unordered_map<std::string, std::vector<Real>>>(
-        "_hyperparam_vec_map")),
+    _tuning_algorithm(getParam<MooseEnum>("tuning_algorithm")),
     _sampler_row(getSamplerData()),
     _rval(getTrainingData<Real>(getParam<ReporterName>("response"))),
     _pvals(getParam<std::vector<ReporterName>>("predictors").size()),
@@ -94,7 +85,10 @@ GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameter
     std::iota(_pcols.begin(), _pcols.end(), 0);
   }
 
-  _num_tunable = 0;
+  if (_do_tuning && _tuning_algorithm == "none")
+    paramError("tuning_algorithm",
+               "No tuning algorithm is selected for the hyper parameter optimization!");
+
   std::vector<std::string> tune_parameters(getParam<std::vector<std::string>>("tune_parameters"));
   // Error Checking
   if (isParamValid("tuning_min") &&
@@ -103,25 +97,18 @@ GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameter
   if (isParamValid("tuning_max") &&
       (getParam<std::vector<Real>>("tuning_max").size() != tune_parameters.size()))
     mooseError("tuning_max size does not match tune_parameters");
-  // Fill Out Tunable Paramater information
-  for (unsigned int ii = 0; ii < tune_parameters.size(); ++ii)
-  {
-    const auto & hp = tune_parameters[ii];
-    if (_covariance_function->isTunable(hp))
-    {
-      unsigned int size;
-      Real min;
-      Real max;
-      // Get size and default min/max
-      _covariance_function->getTuningData(hp, size, min, max);
-      // Check for overridden min/max
-      min = isParamValid("tuning_min") ? getParam<std::vector<Real>>("tuning_min")[ii] : min;
-      max = isParamValid("tuning_max") ? getParam<std::vector<Real>>("tuning_max")[ii] : max;
-      // Save data in tuple
-      _tuning_data[hp] = std::make_tuple(_num_tunable, size, min, max);
-      _num_tunable += size;
-    }
-  }
+
+  std::vector<Real> lower_bounds, upper_bounds;
+  if (isParamValid("tuning_min"))
+    lower_bounds = getParam<std::vector<Real>>("tuning_min");
+  if (isParamValid("tuning_max"))
+    upper_bounds = getParam<std::vector<Real>>("tuning_max");
+
+  _gp_handler.initialize(
+      getCovarianceFunctionByName(parameters.get<UserObjectName>("covariance_function")),
+      tune_parameters,
+      lower_bounds,
+      upper_bounds);
 }
 
 void
@@ -156,216 +143,23 @@ GaussianProcessTrainer::postTrain()
 
   // Standardize (center and scale) training params
   if (_standardize_params)
-  {
-    _param_standardizer.computeSet(_training_params);
-    _param_standardizer.getStandardized(_training_params);
-  }
+    _gp_handler.standardizeParameters(_training_params);
   // if not standardizing data set mean=0, std=1 for use in surrogate
   else
-    _param_standardizer.set(0, 1, _n_params);
+    _gp_handler.paramStandardizer().set(0, 1, _n_params);
 
   // Standardize (center and scale) training data
   if (_standardize_data)
-  {
-    _data_standardizer.computeSet(_training_data);
-    _data_standardizer.getStandardized(_training_data);
-  }
+    _gp_handler.standardizeData(_training_data);
   // if not standardizing data set mean=0, std=1 for use in surrogate
   else
-    _param_standardizer.set(0, 1, _n_params);
+    _gp_handler.dataStandardizer().set(0, 1, _n_params);
 
-  _K.resize(_training_params.rows(), _training_params.rows());
-
-  if (_do_tuning)
-    if (hyperparamTuning())
-      mooseError("PETSc/TAO error in hyperparameter tuning.");
-
-  _covariance_function->computeCovarianceMatrix(_K, _training_params, _training_params, true);
-  _K_cho_decomp = _K.llt();
-  _K_results_solve = _K_cho_decomp.solve(_training_data);
-
-  _covariance_function->buildHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
-}
-
-PetscErrorCode
-GaussianProcessTrainer::hyperparamTuning()
-{
-  PetscErrorCode ierr;
-  Tao tao;
-  GaussianProcessTrainer * GP_ptr = this;
-
-  // Setup Tao optimization problem
-  ierr = TaoCreate(_tao_comm.get(), &tao);
-  CHKERRQ(ierr);
-  ierr = PetscOptionsSetValue(NULL, "-tao_type", "bncg");
-  CHKERRQ(ierr);
-  ierr = PetscOptionsInsertString(NULL, _tao_options.c_str());
-  CHKERRQ(ierr);
-  ierr = TaoSetFromOptions(tao);
-  CHKERRQ(ierr);
-
-  // Define petsc vetor to hold tunalbe hyper-params
-  libMesh::PetscVector<Number> theta(_tao_comm, _num_tunable);
-  ierr = GaussianProcessTrainer::FormInitialGuess(GP_ptr, theta.vec());
-  CHKERRQ(ierr);
-  ierr = TaoSetInitialVector(tao, theta.vec());
-  CHKERRQ(ierr);
-
-  // Get Hyperparameter bounds.
-  libMesh::PetscVector<Number> lower(_tao_comm, _num_tunable);
-  libMesh::PetscVector<Number> upper(_tao_comm, _num_tunable);
-  buildHyperParamBounds(lower, upper);
-  CHKERRQ(ierr);
-  ierr = TaoSetVariableBounds(tao, lower.vec(), upper.vec());
-  CHKERRQ(ierr);
-
-  // Set Objective and Graident Callback
-  ierr = TaoSetObjectiveAndGradientRoutine(
-      tao, GaussianProcessTrainer::FormFunctionGradientWrapper, (void *)this);
-  CHKERRQ(ierr);
-
-  // Solve
-  ierr = TaoSolve(tao);
-  CHKERRQ(ierr);
-  //
-  if (_show_tao)
-  {
-    ierr = TaoView(tao, PETSC_VIEWER_STDOUT_WORLD);
-    theta.print();
-  }
-
-  _covariance_function->loadHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
-
-  ierr = TaoDestroy(&tao);
-  CHKERRQ(ierr);
-
-  return 0;
-}
-
-PetscErrorCode
-GaussianProcessTrainer::FormInitialGuess(GaussianProcessTrainer * GP_ptr, Vec theta_vec)
-{
-  libMesh::PetscVector<Number> theta(theta_vec, GP_ptr->_tao_comm);
-  _covariance_function->buildHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
-  mapToVec(theta);
-  return 0;
-}
-
-PetscErrorCode
-GaussianProcessTrainer::FormFunctionGradientWrapper(
-    Tao tao, Vec theta_vec, PetscReal * f, Vec grad_vec, void * ptr)
-{
-  GaussianProcessTrainer * GP_ptr = (GaussianProcessTrainer *)ptr;
-  GP_ptr->FormFunctionGradient(tao, theta_vec, f, grad_vec);
-  return 0;
-}
-
-void
-GaussianProcessTrainer::FormFunctionGradient(Tao /*tao*/,
-                                             Vec theta_vec,
-                                             PetscReal * f,
-                                             Vec grad_vec)
-{
-  libMesh::PetscVector<Number> theta(theta_vec, _tao_comm);
-  libMesh::PetscVector<Number> grad(grad_vec, _tao_comm);
-
-  vecToMap(theta);
-  _covariance_function->loadHyperParamMap(_hyperparam_map, _hyperparam_vec_map);
-  _covariance_function->computeCovarianceMatrix(_K, _training_params, _training_params, true);
-  _K_cho_decomp = _K.llt();
-  _K_results_solve = _K_cho_decomp.solve(_training_data);
-
-  // testing auto tuning
-  RealEigenMatrix dKdhp(_training_params.rows(), _training_params.rows());
-  RealEigenMatrix alpha = _K_results_solve * _K_results_solve.transpose();
-  for (auto iter = _tuning_data.begin(); iter != _tuning_data.end(); ++iter)
-  {
-    std::string hyper_param_name = iter->first;
-    for (unsigned int ii = 0; ii < std::get<1>(iter->second); ++ii)
-    {
-      _covariance_function->computedKdhyper(dKdhp, _training_params, hyper_param_name, ii);
-      RealEigenMatrix tmp = alpha * dKdhp - _K_cho_decomp.solve(dKdhp);
-      grad.set(std::get<0>(iter->second) + ii, -tmp.trace() / 2.0);
-    }
-  }
-  //
-  Real log_likelihood = 0;
-  log_likelihood += -(_training_data.transpose() * _K_results_solve)(0, 0);
-  log_likelihood += -std::log(_K.determinant());
-  log_likelihood += -_training_data.rows() * std::log(2 * M_PI);
-  log_likelihood = -log_likelihood / 2;
-  *f = log_likelihood;
-}
-
-void
-GaussianProcessTrainer::buildHyperParamBounds(libMesh::PetscVector<Number> & theta_l,
-                                              libMesh::PetscVector<Number> & theta_u) const
-{
-  for (auto iter = _tuning_data.begin(); iter != _tuning_data.end(); ++iter)
-  {
-    for (unsigned int ii = 0; ii < std::get<1>(iter->second); ++ii)
-    {
-      theta_l.set(std::get<0>(iter->second) + ii, std::get<2>(iter->second));
-      theta_u.set(std::get<0>(iter->second) + ii, std::get<3>(iter->second));
-    }
-  }
-}
-
-void
-GaussianProcessTrainer::mapToVec(libMesh::PetscVector<Number> & theta) const
-{
-  for (auto iter = _tuning_data.begin(); iter != _tuning_data.end(); ++iter)
-  {
-    std::string hyper_param_name = iter->first;
-    if (_hyperparam_map.find(hyper_param_name) != _hyperparam_map.end())
-    {
-      theta.set(std::get<0>(iter->second), _hyperparam_map[hyper_param_name]);
-    }
-    else if (_hyperparam_vec_map.find(hyper_param_name) != _hyperparam_vec_map.end())
-    {
-      for (unsigned int ii = 0; ii < std::get<1>(iter->second); ++ii)
-      {
-        theta.set(std::get<0>(iter->second) + ii, _hyperparam_vec_map[hyper_param_name][ii]);
-      }
-    }
-  }
-}
-
-void
-GaussianProcessTrainer::vecToMap(libMesh::PetscVector<Number> & theta)
-{
-  for (auto iter = _tuning_data.begin(); iter != _tuning_data.end(); ++iter)
-  {
-    std::string hyper_param_name = iter->first;
-    if (_hyperparam_map.find(hyper_param_name) != _hyperparam_map.end())
-    {
-      _hyperparam_map[hyper_param_name] = theta(std::get<0>(iter->second));
-    }
-    else if (_hyperparam_vec_map.find(hyper_param_name) != _hyperparam_vec_map.end())
-    {
-      for (unsigned int ii = 0; ii < std::get<1>(iter->second); ++ii)
-      {
-        _hyperparam_vec_map[hyper_param_name][ii] = theta(std::get<0>(iter->second) + ii);
-      }
-    }
-  }
-}
-
-template <>
-void
-dataStore(std::ostream & stream, Eigen::LLT<RealEigenMatrix> & decomp, void * context)
-{
-  // Store the L matrix as opposed to the full matrix to avoid compounding
-  // roundoff error and decomposition error
-  RealEigenMatrix L(decomp.matrixL());
-  dataStore(stream, L, context);
-}
-
-template <>
-void
-dataLoad(std::istream & stream, Eigen::LLT<RealEigenMatrix> & decomp, void * context)
-{
-  RealEigenMatrix L;
-  dataLoad(stream, L, context);
-  decomp.compute(L * L.transpose());
+  // Setup the covariance
+  _gp_handler.setupCovarianceMatrix(
+      _training_params,
+      _training_data,
+      _tuning_algorithm,
+      isParamValid("tao_options") ? getParam<std::string>("tao_options") : "",
+      isParamValid("show_tao") ? getParam<bool>("show_tao") : false);
 }

@@ -48,7 +48,8 @@ cut back if the change in the function from the previous step exceeds the value 
 `max_function_change`. This allows the step size to be changed to limit the change in the boundary
 conditions applied to the model over a step. In addition to that limit, the boolean parameter
 `force_step_every_function_point` can be set to `true` to force a time step at every point in a
-`PiecewiseLinear` function.
+`Piecewise` function. The time step size post function sync can be reset via the [!param](/Executioner/TimeStepper/IterationAdaptiveDT/post_function_sync_dt)
+input parameter as well.
 
 !media media/executioner/adaptive_dt_criteria.png style=width:70%; id=fig:adaptive_dt_criteria caption=Criteria used to determine adaptive time step size
 

@@ -34,9 +34,10 @@ GaussianProcessData::GaussianProcessData(const InputParameters & parameters)
 void
 GaussianProcessData::initialize()
 {
-  const std::unordered_map<std::string, Real> & _hyperparam_map = _gp_uo.getHyperParamMap();
+  const std::unordered_map<std::string, Real> & _hyperparam_map =
+      _gp_uo.getGPHandler().getHyperParamMap();
   const std::unordered_map<std::string, std::vector<Real>> & _hyperparam_vec_map =
-      _gp_uo.getHyperParamVecMap();
+      _gp_uo.getGPHandler().getHyperParamVectorMap();
 
   for (auto iter = _hyperparam_map.begin(); iter != _hyperparam_map.end(); ++iter)
   {

@@ -1,0 +1,88 @@
+# Copying tests with the binary is intended to copy from an installed location
+# (i.e. after "make install"). The logic in the binary however attempts to find
+# installed tests relative to the binary location, which is also installed
+# through "make install". If we run it from the non-installed version of the binary
+# it'll look for tests in <bin location>/../share/moose_test/tests/. To get
+# line coverage, we'll just copy a file to that area.
+# See application_development/build_system.md for more information.
+
+[Tests]
+  issues = '#19022'
+  design = 'MooseApp.md'
+
+  [test_copy_install]
+    requirement = 'The system shall support the ability to "install" inputs:'
+    [setup_fake_test_structure]
+      type = 'RunCommand'
+      command = 'rm -rf moose_test_tests; rm -rf ../../../share/moose_test; mkdir -p ../../../share/moose_test/tests/version; cp ../misc/version/tests ../../../share/moose_test/tests/version; cp ../../testroot ../../../share/moose_test/tests/'
+      installed = False
+
+      detail = 'from a pre-determined user-readable location;'
+    []
+
+    [copy_tests]
+      type = 'RunApp'
+      cli_args = "--copy-inputs tests"
+      no_additional_cli_args = True
+      expect_out = 'Directory successfully copied'
+      installed = False
+      prereq = 'test_copy_install/setup_fake_test_structure'
+
+      detail = 'copied using a MOOSE-based binary;'
+    []
+
+    [check_files]
+      type = 'CheckFiles'
+      input = 'DUMMY'
+      should_execute = False
+      check_files = 'moose_test_tests/testroot moose_test_tests/version/tests'
+      installed = False
+      prereq = 'test_copy_install/copy_tests'
+
+      detail = 'verifying a successful copy operation;'
+    []
+
+    [copy_warn_overwrite]
+      type = 'RunException'
+      cli_args = "--copy-inputs tests"
+      no_additional_cli_args = True
+      expect_err = 'The directory \S+ already exists.'
+      installed = False
+      prereq = 'test_copy_install/check_files'
+
+      detail = 'able to report an error if overwriting may occur using a MOOSE-based binary;'
+    []
+
+    [link_exec_installed]
+      type = 'RunCommand'
+      command = 'ln -s ../../../moose_test-opt .'
+      working_directory = "./moose_test_tests"
+      installed = False
+      method = opt
+      prereq = 'test_copy_install/copy_warn_overwrite'
+
+      detail = 'able to link a binary to an installed location;'
+    []
+
+    [run]
+      type = 'RunApp'
+      cli_args = "--run tests"
+      working_directory = "./moose_test_tests"
+      no_additional_cli_args = True
+      installed = False
+      method = opt
+      prereq = 'test_copy_install/link_exec_installed'
+
+      detail = 'able to successfully launch the TestHarness using a MOOSE-based binary;'
+    []
+
+    [tear_down]
+      type = 'RunCommand'
+      command = 'rm -rf ../../../share/; rm -rf moose_test_tests'
+      prereq = 'test_copy_install/run'
+      installed = False
+
+      detail = 'and cleaned up from a user-readable location.'
+    []
+  []
+[]

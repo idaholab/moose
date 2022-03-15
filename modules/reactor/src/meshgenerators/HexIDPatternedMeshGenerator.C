@@ -90,12 +90,16 @@ HexIDPatternedMeshGenerator::generate()
   }
 
   // asssign reporting IDs to individual elements
+  std::set<subdomain_id_type> background_block_ids;
+  if (isParamValid("background_block_id"))
+    background_block_ids.insert(getParam<subdomain_id_type>("background_block_id"));
   ReportingIDGeneratorUtils::assignReportingIDs(mesh,
                                                 extra_id_index,
                                                 _assign_type,
                                                 _use_exclude_id,
                                                 _exclude_ids,
-                                                _has_assembly_duct,
+                                                _pattern_boundary == "hexagon",
+                                                background_block_ids,
                                                 meshes,
                                                 _pattern,
                                                 _id_pattern);

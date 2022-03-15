@@ -79,6 +79,7 @@
     tune_parameters = ' signal_variance length_factor'
     tuning_min = ' 1e-9 1e-3'
     tuning_max = ' 100  100'
+    tuning_algorithm = 'tao'
   []
 []
 
