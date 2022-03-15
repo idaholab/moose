@@ -1,12 +1,11 @@
+# Test that the initial conditions read from the exodus file are correct
+
 [GlobalParams]
   scaling_factor_1phase = '1. 1.e-2 1.e-4'
-  scaling_factor_temperature = 1e-2
-
-  initial_T = 500
-  initial_p = 6.e6
-  initial_vel = 0
 
   closures = simple_closures
+
+  initial_from_file = 'steady_state_out.e'
 []
 
 [Modules/FluidProperties]
@@ -28,22 +27,6 @@
   []
 []
 
-[HeatStructureMaterials]
-  [mat1]
-    type = SolidMaterialProperties
-    k = 16
-    cp = 356.
-    rho = 6.551400E+03
-  []
-[]
-
-[Functions]
-  [Ts_init]
-    type = ParsedFunction
-    value = '2*sin(x*pi)+507'
-  []
-[]
-
 [Components]
   [pipe1]
     type = FlowChannel1Phase
@@ -60,13 +43,9 @@
 
   [junction]
     type = VolumeJunction1Phase
-    connections  = 'pipe1:out pipe2:in'
+    connections = 'pipe1:out pipe2:in'
     volume = 1
     position = '1 0 0'
-
-    initial_vel_x = 0
-    initial_vel_y = 0
-    initial_vel_z = 0
 
     scaling_factor_rhoV  = 1
     scaling_factor_rhouV = 1
@@ -86,26 +65,6 @@
     A = 1.907720E-04
     D_h = 1.698566E-02
     f = 0.1
-  []
-
-  [hs]
-    type = HeatStructureCylindrical
-    position = '1 0.01 0'
-    orientation = '1 0 0'
-    length = 1
-    n_elems = 3
-    names = 'wall'
-    n_part_elems = 1
-    materials = 'mat1'
-    widths = 0.1
-    initial_T = Ts_init
-  []
-
-  [temp_outside]
-    type = HSBoundarySpecifiedTemperature
-    hs = hs
-    boundary = hs:outer
-    T = Ts_init
   []
 
   [inlet]
@@ -134,7 +93,7 @@
 
   start_time = 0
   dt = 1
-  num_steps = 100
+  num_steps = 1
   abort_on_solve_fail = true
 
   solve_type = 'NEWTON'
@@ -149,6 +108,6 @@
 
 [Outputs]
   exodus = true
-  execute_on = 'initial final'
+  execute_on = 'initial'
   velocity_as_vector = false
 []

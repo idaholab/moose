@@ -1,0 +1,41 @@
+[Tests]
+  [steady_state]
+    type = 'Exodiff'
+    input = 'steady_state.i'
+    exodiff = 'steady_state_out.e'
+    recover = false
+    max_parallel = 1
+    ad_indexing_type = 'global'
+
+    requirement = 'The system shall be able to produce an exodus file for setting initial conditions in flow channels'
+    design = 'FlowChannel1Phase.md'
+    issues = '#20553'
+  []
+
+  [test]
+    type = 'Exodiff'
+    input = 'test.i'
+    exodiff = 'test_out.e'
+    prereq = steady_state
+    recover = false
+    max_parallel = 1
+    ad_indexing_type = 'global'
+
+    requirement = 'The system shall be able to use an exodus file for setting initial conditions in flow channels'
+    design = 'FlowChannel1Phase.md SolutionInitialCondition.md'
+    issues = '#20553'
+  []
+
+  [non_existent_block]
+    type = 'RunException'
+    input = 'err.non_existent_block.i'
+    prereq = steady_state
+    recover = false
+    ad_indexing_type = 'global'
+    expect_err = "Block 'asdf' does not exist in the file '.+'"
+
+    requirement = 'The system shall report an error when a block is non found in the restart ExodusII file'
+    design = 'SolutionInitialCondition.md'
+    issues = '#20526'
+  []
+[]

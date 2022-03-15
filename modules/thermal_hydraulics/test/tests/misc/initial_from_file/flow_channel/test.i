@@ -28,28 +28,12 @@
   []
 []
 
-[HeatStructureMaterials]
-  [mat1]
-    type = SolidMaterialProperties
-    k = 16
-    cp = 356.
-    rho = 6.551400E+03
-  []
-[]
-
-[Functions]
-  [Ts_bc]
-    type = ParsedFunction
-    value = '2*sin(x*pi)+507'
-  []
-[]
-
 [Components]
-  [pipe2]
+  [pipe]
     type = FlowChannel1Phase
     fp = fp
     # geometry
-    position = '1 0 0'
+    position = '0 0 0'
     orientation = '1 0 0'
     length = 1
     n_elems = 3
@@ -58,34 +42,15 @@
     f = 0.1
   []
 
-  [hs]
-    type = HeatStructureCylindrical
-    position = '1 0.01 0'
-    orientation = '1 0 0'
-    length = 1
-    n_elems = 3
-    names = 'wall'
-    n_part_elems = 1
-    materials = 'mat1'
-    widths = 0.1
-  []
-
-  [temp_outside]
-    type = HSBoundarySpecifiedTemperature
-    hs = hs
-    boundary = hs:outer
-    T = Ts_bc
-  []
-
   [inlet]
     type = InletMassFlowRateTemperature1Phase
-    input = 'pipe2:in'
+    input = 'pipe:in'
     m_dot = 0.1
     T = 500
   []
   [outlet]
     type = Outlet1Phase
-    input = 'pipe2:out'
+    input = 'pipe:out'
     p = 6e6
   []
 []
