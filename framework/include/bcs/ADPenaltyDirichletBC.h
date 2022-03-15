@@ -41,7 +41,6 @@ public:
 protected:
   virtual ADReal computeQpResidual() override;
 
-private:
   /// Penalty value
   const Real _p;
 

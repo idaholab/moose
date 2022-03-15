@@ -1,0 +1,17 @@
+[Tests]
+  issues = '#5268'
+  design = 'source/bcs/PenaltyDirichletBC.md'
+  [./ad_greaterthan]
+    type = 'Exodiff'
+    input = 'ad_greaterthan.i'
+    exodiff = 'ad_greaterthan_out.e'
+    requirement = "The system shall support the application of Dirichlet type boundary conditions using the penalty method when the variable value goes above a specified limit."
+  [../]
+  [./ad_lessthan]
+    type = 'Exodiff'
+    input = 'ad.i'
+    exodiff = 'ad_lessthan_out.e'
+    cli_args = 'apply_penalty_when'
+    requirement = "The system shall support the application of Dirichlet type boundary conditions using the penalty method when the variable value goes below a specified limit."
+  [../]
+[]
