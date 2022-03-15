@@ -81,15 +81,16 @@ protected:
                                    const ADReal & /*scalar*/) = 0;
 
   /**
-   * Compute the residual for a predicted value of the scalar.  This residual should be
-   * in strain increment units for all models for consistency.
+   * Compute the residual and the derivative for a predicted value of the scalar.  This residual
+   * should be in strain increment units for all models for consistency.
    * @param effective_trial_stress Effective trial stress
    * @param scalar                 Inelastic strain increment magnitude being solved for
    */
   virtual ChainedADReal computeResidualAndDerivative(const ADReal & /*effective_trial_stress*/,
                                                      const ChainedADReal & /*scalar*/)
   {
-    mooseError("Not implemented");
+    mooseError("computeResidualAndDerivative has to be implemented if "
+               "automatic_differentiation_return_mapping = true.");
     return 0;
   };
 
