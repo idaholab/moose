@@ -32,7 +32,7 @@
     value = 1
     boundary = 'left'
   []
-  [bc_all]
+  [penalty_limit]
     type = PenaltyLimitBC
     variable = u
     value = 10
@@ -41,7 +41,6 @@
     apply_penalty_when = lessthan
   []
 []
-
 
 [Executioner]
   type = Transient
