@@ -25,9 +25,6 @@ public:
 protected:
   virtual void setupMesh() override;
 
-  /// Element IDs of connected flow channels
-  std::vector<dof_id_type> _connected_elems;
-
 public:
   static InputParameters validParams();
 };

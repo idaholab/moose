@@ -119,6 +119,7 @@ ShaftConnectedTurbine1Phase::buildVolumeJunctionUserObject()
     InputParameters params = _factory.getValidParams(class_name);
     params.set<std::vector<BoundaryName>>("boundary") = _boundary_names;
     params.set<std::vector<Real>>("normals") = _normals;
+    params.set<std::vector<processor_id_type>>("processor_ids") = _proc_ids;
     params.set<std::vector<UserObjectName>>("numerical_flux_names") = _numerical_flux_names;
     params.set<Real>("volume") = _volume;
     params.set<std::vector<VariableName>>("A") = {FlowModel::AREA};

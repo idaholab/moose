@@ -161,19 +161,12 @@ VolumeJunction1Phase::buildVolumeJunctionUserObject()
   ExecFlagEnum execute_on(MooseUtils::getDefaultExecFlagEnum());
   execute_on = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
 
-  std::vector<processor_id_type> proc_ids;
-  for (auto & eid : _connected_elems)
-  {
-    const Elem * elem = _mesh.elemPtr(eid);
-    proc_ids.push_back(elem->processor_id());
-  }
-
   {
     const std::string class_name = "ADVolumeJunction1PhaseUserObject";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<std::vector<BoundaryName>>("boundary") = _boundary_names;
     params.set<std::vector<Real>>("normals") = _normals;
-    params.set<std::vector<processor_id_type>>("processor_ids") = proc_ids;
+    params.set<std::vector<processor_id_type>>("processor_ids") = _proc_ids;
     params.set<std::vector<UserObjectName>>("numerical_flux_names") = _numerical_flux_names;
     params.set<Real>("volume") = _volume;
     params.set<std::vector<VariableName>>("A") = {FlowModel::AREA};
