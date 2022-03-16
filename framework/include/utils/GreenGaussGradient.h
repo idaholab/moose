@@ -14,6 +14,7 @@
 #include "FVUtils.h"
 #include "MooseMeshUtils.h"
 #include "VectorComponentFunctor.h"
+#include "ArrayComponentFunctor.h"
 #include "libmesh/elem.h"
 
 namespace Moose
@@ -311,15 +312,14 @@ TensorValue<T>
 greenGaussGradient(const ElemArg & elem_arg,
                    const Moose::FunctorBase<VectorValue<T>> & functor,
                    const bool two_term_boundary_expansion,
-                   const MooseMesh & mesh,
-                   std::unordered_map<const FaceInfo *, T> * const face_to_value_cache = nullptr)
+                   const MooseMesh & mesh)
 {
   TensorValue<T> ret;
   for (const auto i : make_range(unsigned(LIBMESH_DIM)))
   {
     VectorComponentFunctor<T> scalar_functor(functor, i);
-    const auto row_gradient = greenGaussGradient(
-        elem_arg, scalar_functor, two_term_boundary_expansion, mesh, face_to_value_cache);
+    const auto row_gradient =
+        greenGaussGradient(elem_arg, scalar_functor, two_term_boundary_expansion, mesh);
     for (const auto j : make_range(unsigned(LIBMESH_DIM)))
       ret(i, j) = row_gradient(j);
   }
@@ -353,11 +353,33 @@ typename Moose::FunctorBase<std::vector<T>>::GradientType
 greenGaussGradient(const ElemArg &,
                    const Moose::FunctorBase<std::vector<T>> &,
                    const bool,
-                   const MooseMesh &,
-                   std::unordered_map<const FaceInfo *, std::vector<T>> * const = nullptr)
+                   const MooseMesh &)
 {
-  mooseError(
-      "It doesn't make any sense to call this function. There is no size to a vector functor.");
+  mooseError("It doesn't make any sense to call this function. There is no size to a vector "
+             "functor. I suppose we could call the value type overload and get the size from the "
+             "returned vector size, but that's not very efficient. If you want us to do that "
+             "though, please contact a MOOSE developer");
+}
+
+template <typename T, std::size_t N>
+typename Moose::FunctorBase<std::array<T, N>>::GradientType
+greenGaussGradient(const ElemArg & elem_arg,
+                   const Moose::FunctorBase<std::array<T, N>> & functor,
+                   const bool two_term_boundary_expansion,
+                   const MooseMesh & mesh)
+{
+  typedef typename Moose::FunctorBase<std::array<T, N>>::GradientType GradientType;
+  GradientType ret;
+  for (const auto i : make_range(N))
+  {
+    // Note that this can be very inefficient. Within the scalar greenGaussGradient routine we're
+    // going to do value type evaluations of the array functor from scalar_functor and we will be
+    // discarding all the value type evaluations other than the one corresponding to i
+    ArrayComponentFunctor<T, FunctorBase<std::array<T, N>>> scalar_functor(functor, i);
+    ret[i] = greenGaussGradient(elem_arg, scalar_functor, two_term_boundary_expansion, mesh);
+  }
+
+  return ret;
 }
 }
 }

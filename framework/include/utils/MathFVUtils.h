@@ -571,6 +571,34 @@ interpolate(const Limiter & limiter,
 }
 
 /**
+ * std::array overload
+ */
+template <typename Limiter, typename ValueType, typename GradientType, std::size_t N>
+std::array<ValueType, N>
+interpolate(const Limiter & limiter,
+            const std::array<ValueType, N> & phi_upwind,
+            const std::array<ValueType, N> & phi_downwind,
+            const std::array<GradientType, N> * const grad_phi_upwind,
+            const FaceInfo & fi,
+            const bool fi_elem_is_upwind)
+{
+  mooseAssert(limiter.constant() || grad_phi_upwind,
+              "Non-null gradient only supported for constant limiters.");
+
+  std::array<ValueType, N> ret;
+  const GradientType * gradient = nullptr;
+  for (const auto i : make_range(N))
+  {
+    if (grad_phi_upwind)
+      gradient = &(*grad_phi_upwind)[i];
+
+    ret[i] = interpolate(limiter, phi_upwind[i], phi_downwind[i], gradient, fi, fi_elem_is_upwind);
+  }
+
+  return ret;
+}
+
+/**
  * Return whether the supplied face is on a boundary of the \p object's execution
  */
 template <typename SubdomainRestrictable>
