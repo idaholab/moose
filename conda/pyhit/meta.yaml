@@ -1,5 +1,5 @@
 {% set build = 0 %}
-{% set version = "2022.01.24" %}
+{% set version = "2022.03.15" %}
 
 package:
   name: moose-pyhit
@@ -14,17 +14,17 @@ build:
 
 requirements:
   build:
-    - {{ moose_cxx }}
+    - {{ moose_mpich }}
     - {{ moose_python }}
     - cython
 
   host:
-    - {{ moose_cxx }}
+    - {{ moose_mpich }}
     - {{ moose_python }}
     - cython
 
   run:
-    - {{ moose_cxx }}
+    - {{ moose_mpich }}
     - {{ pin_compatible('setuptools', lower_bound='58', upper_bound='60') }}
     - python
 

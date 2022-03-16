@@ -1,15 +1,13 @@
-{% set build = 3 %}
+{% set build = 0 %}
 {% set strbuild = "build_" + build|string %}
-{% set version = "3.4.2" %}
+{% set version = "4.0.1" %}
 
 package:
   name: moose-mpich
   version: {{ version }}
 
 source:
-  fn: mpich-{{ version }}.tar.gz
-  url: https://www.mpich.org/static/downloads/{{ version }}/mpich-{{ version }}.tar.gz
-  sha256: 5c19bea8b84e8d74cca5f047e82b147ff3fba096144270e3911ad623d6c587bf
+  - path: .
 
 build:
   number: {{ build }}
@@ -20,19 +18,10 @@ build:
 
 requirements:
   build:
-    - {{ moose_cc }}
-    - {{ moose_cxx }}
-    - {{ moose_fortran }}
-    - {{ moose_impl }}          # [linux]
-    - {{ moose_impl_xx }}       # [linux]
-    - {{ moose_libgcc }}        # [linux]
-    - {{ moose_libstd }}        # [linux]
-    - {{ moose_sysroot }}       # [linux]
-    - {{ moose_libcxx }}        # [osx]
-    - {{ moose_libclang }}      # [osx]
-    - {{ moose_openmp }}        # [osx]
-    - {{ moose_llvm_tools }}    # [osx]
-    - {{ moose_ld64 }}          # [osx]
+    - {{ base_mpich }}
+    - {{ base_mpicc }}
+    - {{ base_mpicxx }}
+    - {{ base_mpifort }}
     - autoconf                  # [unix]
     - automake                  # [unix]
     - libtool                   # [unix]
@@ -40,19 +29,10 @@ requirements:
     - gnuconfig                 # [arm64]
   host: []
   run:
-    - {{ moose_cc }}
-    - {{ moose_cxx }}
-    - {{ moose_fortran }}
-    - {{ moose_impl }}          # [linux]
-    - {{ moose_impl_xx }}       # [linux]
-    - {{ moose_libgcc }}        # [linux]
-    - {{ moose_libstd }}        # [linux]
-    - {{ moose_sysroot }}       # [linux]
-    - {{ moose_libcxx }}        # [osx]
-    - {{ moose_libclang }}      # [osx]
-    - {{ moose_openmp }}        # [osx]
-    - {{ moose_llvm_tools }}    # [osx]
-    - {{ moose_ld64 }}          # [osx]
+    - {{ base_mpich }}
+    - {{ base_mpicc }}
+    - {{ base_mpicxx }}
+    - {{ base_mpifort }}
     - autoconf                  # [osx]
     - automake                  # [osx]
     - libtool                   # [osx]
@@ -60,17 +40,13 @@ requirements:
     - {{ pin_compatible('setuptools', lower_bound='58', upper_bound='60') }}
     - mpi 1.0 mpich
 test:
-  script: run_test.sh
-  files:
-    - mpiexec.sh
-    - tests/helloworld.sh
+  commands:
+    - test -f $PREFIX/etc/conda/activate.d/activate_moose-mpich.sh
 
 about:
-  home: http://www.mpich.org/
-  license: MPICH
-  license_file: COPYRIGHT
-  license_family: Other
-  summary: 'A high performance widely portable implementation of the MPI standard.'
+  home: https://mooseframework.org/
+  license: LGPL 2.1
+  summary: 'Top Level packages designed to control environment variables for conda-forge mpich'
   description: |
     MPICH is a high performance and widely portable implementation of the
     Message Passing Interface (MPI) standard.

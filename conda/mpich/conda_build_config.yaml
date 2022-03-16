@@ -11,13 +11,13 @@ vtk_version:
   - 9.1.0
 
 moose_libmesh_vtk:
-  - moose-libmesh-vtk 9.1.0 build_4
+  - moose-libmesh-vtk 9.1.0 build_5
 
 moose_petsc:
   - moose-petsc 3.15.1 build_8
 
 moose_mpich:
-  - moose-mpich 3.4.2 build_3
+  - moose-mpich 4.0.1 build_0
 
 #### MOOSE_TOOLS stuff (order is important, must match python version order)
 moose_python:
@@ -194,55 +194,25 @@ zip_keys:
   - moose_sympy
 
 #### Compilers
-moose_cc:                                                   # [unix]
-  - gcc_linux-64 9.3.0 h7247604_29                          # [linux]
-  - clang_osx-64 12.0.1 h633439f_6                          # [not arm64 and osx]
-  - clang_osx-arm64 12.0.1 h54d7cd3_0                       # [arm64]
+base_mpich:
+  - mpich 4.0.1 h846660c_100                               # [linux]
+  - mpich 4.0.1 hd33e60e_100                               # [not arm64 and osx]
+  - mpich 4.0.1 hd4b5bf3_100                               # [arm64]
 
-moose_cxx:                                                  # [unix]
-  - gxx_linux-64 9.3.0 h0d07fa4_29                          # [linux]
-  - clangxx_osx-64 12.0.1 hdb584c0_6                        # [not arm64 and osx]
-  - clangxx_osx-arm64 12.0.1 hb84c830_0                     # [arm64]
+base_mpicc:
+  - mpich-mpicc 4.0.1 hb600da9_100                         # [linux]
+  - mpich-mpicc 4.0.1 h4fd26ce_100                         # [not arm64 and osx]
+  - mpich-mpicc 4.0.1 haad7f49_100                         # [arm64]
 
-moose_fortran:                                              # [unix]
-  - gfortran_linux-64 9.3.0 ha1c937c_29                     # [linux]
-  - gfortran_osx-64 9.3.0 h18f7dce_15                       # [not arm64 and osx]
-  - gfortran_osx-arm64 11.0.1.dev0 h57527a5_14              # [arm64]
+base_mpicxx:
+  - mpich-mpicxx 4.0.1 h166bdaf_100                        # [linux]
+  - mpich-mpicxx 4.0.1 h5eb16cf_100                        # [not arm64 and osx]
+  - mpich-mpicxx 4.0.1 h1c322ee_100                        # [arm64]
 
-moose_impl:                                                 # [linux]
-  - gcc_impl_linux-64 9.3.0 h70c0ae5_19                     # [linux]
-
-moose_impl_xx:                                              # [linux]
-  - gxx_impl_linux-64 9.3.0 hd87eabc_19                     # [linux]
-
-moose_libgcc:                                               # [linux]
-  - libgcc-devel_linux-64 9.3.0 h7864c58_19                 # [linux]
-
-moose_libstd:                                               # [linux]
-  - libstdcxx-devel_linux-64 9.3.0 hb016644_19              # [linux]
-
-moose_sysroot:                                              # [linux]
-  - sysroot_linux-64 2.17 h4a8ded7_13                       # [linux]
-
-moose_libcxx:                                               # [osx]
-  - libcxx 12.0.1 habf9029_1                                # [not arm64 and osx]
-  - libcxx 12.0.1 h168391b_0                                # [arm64]
-
-moose_libclang:                                             # [osx]
-  - libclang 13.0.0 default_he082bbe_0                      # [not arm64 and osx]
-  - libclang 12.0.1 default_h2cfa9b4_4                      # [arm64]
-
-moose_openmp:                                               # [osx]
-  - llvm-openmp 12.0.1 hda6cdc1_1                           # [not arm64 and osx]
-  - llvm-openmp 12.0.1 hf3c4609_1                           # [arm64]
-
-moose_llvm_tools:                                           # [osx]
-  - llvm-tools 12.0.1 hd011deb_2                            # [not arm64 and osx]
-  - llvm-tools 12.0.1 h93073aa_2                            # [arm64]
-
-moose_ld64:                                                 # [osx]
-  - ld64 609 hd2e7500_4                                     # [not arm64 and osx]
-  - ld64_osx-arm64 530 ha291f0b_23                          # [arm64]
+base_mpifort:
+  - mpich-mpifort 4.0.1 h924138e_100                       # [linux]
+  - mpich-mpifort 4.0.1 hbb4e6a2_100                       # [not arm64 and osx]
+  - mpich-mpifort 4.0.1 h3e96240_100                       # [arm64]
 
 #### Support Libraries (libMesh and VTK)
 moose_libglu:                                               # [linux]
