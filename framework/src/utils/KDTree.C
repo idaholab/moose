@@ -15,8 +15,10 @@
 
 KDTree::KDTree(std::vector<Point> & master_points, unsigned int max_leaf_size)
   : _point_list_adaptor(master_points.begin(), master_points.end()),
-    _kd_tree(std::make_unique<KdTreeT>(
-        LIBMESH_DIM, _point_list_adaptor, nanoflann::KDTreeSingleIndexAdaptorParams(max_leaf_size)))
+    _kd_tree(std::make_unique<KdTreeT>(LIBMESH_DIM,
+                                       _point_list_adaptor,
+                                       nanoflann::KDTreeSingleIndexAdaptorParams(max_leaf_size))),
+    _number_points(master_points.size())
 {
   mooseAssert(_kd_tree != nullptr, "KDTree was not properly initialized.");
 
@@ -57,4 +59,10 @@ KDTree::radiusSearch(const Point & query_point,
 {
   nanoflann::SearchParams sp;
   _kd_tree->radiusSearch(&query_point(0), radius * radius, indices_dist, sp);
+}
+
+std::size_t
+KDTree::numberCandidatePoints()
+{
+  return _number_points;
 }

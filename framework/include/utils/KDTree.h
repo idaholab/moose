@@ -36,6 +36,8 @@ public:
                     Real radius,
                     std::vector<std::pair<std::size_t, Real>> & indices_dist);
 
+  std::size_t numberCandidatePoints();
+
   using KdTreeT = nanoflann::KDTreeSingleIndexAdaptor<
       nanoflann::L2_Simple_Adaptor<Real,
                                    /* DataSource = */ PointListAdaptor<Point>,
@@ -48,4 +50,5 @@ public:
 protected:
   PointListAdaptor<Point> _point_list_adaptor;
   std::unique_ptr<KdTreeT> _kd_tree;
+  const std::size_t _number_points;
 };

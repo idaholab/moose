@@ -745,16 +745,25 @@ MultiAppGeneralFieldNearestNodeTransfer::evaluateInterpValues(
 
       std::vector<std::size_t> return_index(_num_nearest_points);
       std::vector<Real> return_dist_sqr(_num_nearest_points);
-      local_kdtrees[i_from]->neighborSearch(pt, _num_nearest_points, return_index, return_dist_sqr);
-      Real val_sum = 0, dist_sum = 0;
-      for (auto index : return_index)
+      if (local_kdtrees[i_from]->numberCandidatePoints())
       {
-        val_sum += local_values[i_from][index];
-        dist_sum += (local_points[i_from][index] - pt).norm();
+        local_kdtrees[i_from]->neighborSearch(
+            pt, _num_nearest_points, return_index, return_dist_sqr);
+        Real val_sum = 0, dist_sum = 0;
+        for (auto index : return_index)
+        {
+          val_sum += local_values[i_from][index];
+          dist_sum += (local_points[i_from][index] - pt).norm();
+        }
+        // Use mesh funciton to compute interpolation values
+        // Assign value
+        outgoing_vals[i_pt] = {val_sum / return_index.size(), dist_sum / return_dist_sqr.size()};
       }
-      // Use mesh funciton to compute interpolation values
-      // Assign value
-      outgoing_vals[i_pt] = {val_sum / return_index.size(), dist_sum / return_dist_sqr.size()};
+      else
+      {
+        outgoing_vals[i_pt] = {NearestNode::BetterOutOfMeshValue,
+                               NearestNode::BetterOutOfMeshValue};
+      }
       /*Real min_distance = std::numeric_limits<Real>::max();
       dof_id_type min_id = 0, count = 0;
       for (auto point: local_points[i_from])
