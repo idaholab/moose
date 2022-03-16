@@ -15,6 +15,8 @@ build:
   number: {{ build }}
   string: {{ strbuild }}
   skip: true                                            # [win]
+  script_env:
+    - MOOSE_JOBS
 
 requirements:
   build:
@@ -24,7 +26,6 @@ requirements:
     - make                                              # [arm64]
     - m4                                                # [arm64]
     - pkg-config
-    - {{ moose_ld64 }}                                  # [osx]
     - {{ moose_libmesh_vtk }}
     - {{ moose_petsc }}
 
