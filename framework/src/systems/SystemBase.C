@@ -1238,7 +1238,7 @@ SystemBase::copyVars(ExodusII_IO & io)
     if (hasVariable(vci._dest_name))
     {
       const auto & var = getVariable(0, vci._dest_name);
-      if (var.count() > 1) // array variable
+      if (var.isArray())
       {
         const auto & array_var = getFieldVariable<RealEigenVector>(0, vci._dest_name);
         for (MooseIndex(var.count()) i = 0; i < var.count(); ++i)

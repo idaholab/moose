@@ -428,6 +428,13 @@ MooseVariableFV<OutputType>::setDofValues(const DenseVector<OutputData> & values
 
 template <typename OutputType>
 bool
+MooseVariableFV<OutputType>::isArray() const
+{
+  return std::is_same<OutputType, RealEigenVector>::value;
+}
+
+template <typename OutputType>
+bool
 MooseVariableFV<OutputType>::isVector() const
 {
   return std::is_same<OutputType, RealVectorValue>::value;

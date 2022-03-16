@@ -418,7 +418,7 @@ AdvancedOutput::initAvailableLists()
       for (unsigned int i = 0; i < var.count(); ++i)
       {
         VariableName vname = var_name;
-        if (var.count() > 1)
+        if (var.isArray())
           vname = SubProblem::arrayVariableComponent(var_name, i);
 
         if (type.order == CONSTANT && type.family != MONOMIAL_VEC)
@@ -505,7 +505,7 @@ AdvancedOutput::initShowHideLists(const std::vector<VariableName> & show,
       for (unsigned int i = 0; i < var.count(); ++i)
       {
         VariableName vname = var_name;
-        if (var.count() > 1)
+        if (var.isArray())
           vname = SubProblem::arrayVariableComponent(var_name, i);
 
         if (type.order == CONSTANT)
@@ -560,7 +560,7 @@ AdvancedOutput::initShowHideLists(const std::vector<VariableName> & show,
       for (unsigned int i = 0; i < var.count(); ++i)
       {
         VariableName vname = var_name;
-        if (var.count() > 1)
+        if (var.isArray())
           vname = SubProblem::arrayVariableComponent(var_name, i);
 
         if (type.order == CONSTANT)

@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "ChainedReal.h"
 #include "InputParameters.h"
 #include "ConsoleStream.h"
 
@@ -64,7 +65,8 @@ protected:
    * @param effective_trial_stress Effective trial stress
    * @param scalar                 Inelastic strain increment magnitude being solved for
    */
-  virtual Real computeResidual(const Real & effective_trial_stress, const Real & scalar) = 0;
+  virtual Real computeResidual(const Real & /*effective_trial_stress*/,
+                               const Real & /*scalar*/) = 0;
 
   /**
    * Compute the derivative of the residual as a function of the scalar variable.  The
@@ -72,7 +74,22 @@ protected:
    * @param effective_trial_stress Effective trial stress
    * @param scalar                 Inelastic strain increment magnitude being solved for
    */
-  virtual Real computeDerivative(const Real & effective_trial_stress, const Real & scalar) = 0;
+  virtual Real computeDerivative(const Real & /*effective_trial_stress*/,
+                                 const Real & /*scalar*/) = 0;
+
+  /**
+   * Compute the residual and the derivative for a predicted value of the scalar.  This residual
+   * should be in strain increment units for all models for consistency.
+   * @param effective_trial_stress Effective trial stress
+   * @param scalar                 Inelastic strain increment magnitude being solved for
+   */
+  virtual ChainedReal computeResidualAndDerivative(const Real & /*effective_trial_stress*/,
+                                                   const ChainedReal & /*scalar*/)
+  {
+    mooseError("computeResidualAndDerivative has to be implemented if "
+               "automatic_differentiation_return_mapping = true.");
+    return 0;
+  };
 
   /**
    * Compute a reference quantity to be used for checking relative convergence. This should
@@ -141,6 +158,9 @@ protected:
   bool _bracket_solution;
 
 private:
+  /// Helper function to compute and set the _residual and _derivative
+  void computeResidualAndDerivativeHelper(const Real & effective_trial_stress, const Real & scalar);
+
   enum class InternalSolveOutput
   {
     NEVER,
@@ -171,6 +191,11 @@ private:
   /// Multiplier applied to relative and absolute tolerances for acceptable convergence
   Real _acceptable_multiplier;
 
+  // Whether to use automatic differentiation to calculate the derivative. If set to false, you must
+  // override both computeResidual and computeDerivative methods. If set to true, you must override
+  // the computeResidualAndDerivative method.
+  const bool _ad_derivative;
+
   /// Number of residuals to be stored in history
   const std::size_t _num_resids;
 
@@ -184,6 +209,9 @@ private:
   Real _initial_residual;
   Real _residual;
   ///@}
+
+  /// Derivative of the residual
+  Real _derivative;
 
   /// MOOSE input name of the object performing the solve
   const std::string _svrms_name;

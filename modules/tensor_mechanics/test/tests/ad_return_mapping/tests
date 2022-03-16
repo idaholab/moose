@@ -1,0 +1,12 @@
+[Tests]
+  [reference]
+    type = 'Exodiff'
+    input = 'ad_return_mapping_derivative.i'
+    exodiff = 'reference.e'
+    issues = '#20407'
+    design = 'materials/RadialReturnStressUpdate.md'
+    requirement = "The return mapping algorithm shall use automatic differentiation to compute the "
+                  "derivative of the yield function with respect to the internal variable, and the "
+                  "solution should be the same as existing hand coded derivative."
+  []
+[]

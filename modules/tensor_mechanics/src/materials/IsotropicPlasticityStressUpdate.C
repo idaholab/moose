@@ -162,33 +162,15 @@ IsotropicPlasticityStressUpdateTempl<is_ad>::computeStressFinalize(
   _plastic_strain[_qp] += plastic_strain_increment;
 }
 
-template <>
-Real
-IsotropicPlasticityStressUpdateTempl<false>::computeHardeningValue(const Real & scalar)
+template <bool is_ad>
+GenericReal<is_ad>
+IsotropicPlasticityStressUpdateTempl<is_ad>::computeHardeningValue(
+    const GenericReal<is_ad> & scalar)
 {
   if (_hardening_function)
   {
     const Real strain_old = this->_effective_inelastic_strain_old[_qp];
     return _hardening_function->value(strain_old + scalar) - _yield_stress;
-  }
-
-  return _hardening_variable_old[_qp] + _hardening_slope * scalar;
-}
-
-template <>
-ADReal
-IsotropicPlasticityStressUpdateTempl<true>::computeHardeningValue(const ADReal & scalar)
-{
-  if (_hardening_function)
-  {
-    const Real strain_old = this->_effective_inelastic_strain_old[_qp];
-    const Real t = strain_old + MetaPhysicL::raw_value(scalar);
-
-    DualReal hardening_function_value = _hardening_function->value(t);
-    hardening_function_value.derivatives() =
-        (strain_old + scalar).derivatives() * _hardening_function->timeDerivative(t);
-
-    return hardening_function_value - _yield_stress;
   }
 
   return _hardening_variable_old[_qp] + _hardening_slope * scalar;

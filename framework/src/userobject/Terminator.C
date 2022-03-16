@@ -34,10 +34,11 @@ Terminator::validParams()
       "fail_mode",
       failModeOption,
       "Abort entire simulation (HARD) or just the current time step (SOFT).");
-  params.addParam<std::string>(
-      "message", "An optional message to be output when the termination condition is triggered");
+  params.addParam<std::string>("message",
+                               "An optional message to be output instead of the default message "
+                               "when the termination condition is triggered");
 
-  MooseEnum errorLevel("INFO WARNING ERROR");
+  MooseEnum errorLevel("INFO WARNING ERROR NONE", "INFO");
   params.addParam<MooseEnum>(
       "error_level",
       errorLevel,
@@ -49,9 +50,7 @@ Terminator::validParams()
 Terminator::Terminator(const InputParameters & parameters)
   : GeneralUserObject(parameters),
     _fail_mode(getParam<MooseEnum>("fail_mode").getEnum<FailMode>()),
-    _error_level(isParamValid("error_level")
-                     ? getParam<MooseEnum>("error_level").getEnum<ErrorLevel>()
-                     : ErrorLevel::NONE),
+    _error_level(getParam<MooseEnum>("error_level").getEnum<ErrorLevel>()),
     _pp_names(),
     _pp_values(),
     _expression(getParam<std::string>("expression")),
@@ -59,10 +58,12 @@ Terminator::Terminator(const InputParameters & parameters)
 {
   // sanity check the parameters
   if (_error_level == ErrorLevel::ERROR && _fail_mode == FailMode::SOFT)
-    paramError("error_level", "Setting the error level to ERROR always causes a hard failure.");
-  if (_error_level != ErrorLevel::NONE && !isParamValid("message"))
     paramError("error_level",
-               "If this parameter is specified a `message` must be supplied as well.");
+               "Setting the error level to ERROR always causes a hard failure, which is "
+               "incompatible with `fail_mode=SOFT`.");
+  if (_error_level == ErrorLevel::NONE && isParamValid("message"))
+    paramError("error_level",
+               "Cannot specify `error_level=NONE` together with the `message` parameter.");
 
   // build the expression object
   if (_fp.ParseAndDeduceVariables(_expression, _pp_names) >= 0)
@@ -82,10 +83,18 @@ Terminator::Terminator(const InputParameters & parameters)
 void
 Terminator::handleMessage()
 {
+  std::string message;
   if (!isParamValid("message"))
-    return;
+  {
+    message = "Terminator '" + name() + "' is causing ";
+    if (_fail_mode == FailMode::HARD)
+      message += "the execution to terminate.\n";
+    else
+      message += "a time step cutback by marking the current step as failed.\n";
+  }
+  else
+    message = getParam<std::string>("message");
 
-  auto message = getParam<std::string>("message");
   switch (_error_level)
   {
     case ErrorLevel::INFO:
@@ -115,17 +124,11 @@ Terminator::execute()
   // request termination of the run or timestep in case the expression evaluates to true
   if (_fp.Eval(_params.data()) != 0)
   {
+    handleMessage();
     if (_fail_mode == FailMode::HARD)
-    {
-      handleMessage();
       _fe_problem.terminateSolve();
-    }
     else
-    {
-      _console << name() << " is marking the current solve step as failed.\n";
-      handleMessage();
       getMooseApp().getExecutioner()->fixedPointSolve().failStep();
-    }
   }
 }
 
