@@ -366,15 +366,15 @@ public:
   RankTwoTensorTempl<T> dtrace() const;
 
   /**
-   * Denote the _coords[i][j] by A_ij, then
-   * S_ij = A_ij - de_ij*tr(A)/3
-   * Then this returns (S_ij + S_ji)*(S_ij + S_ji)/8
-   * Note the explicit symmeterisation
+   * Calculates the second invariant (I2) of a tensor
    */
   T generalSecondInvariant() const;
 
   /**
-   * Calculates the second invariant (I2) of a tensor
+   * Denote the _vals[i][j] by A_ij, then
+   * S_ij = A_ij - de_ij*tr(A)/3
+   * Then this returns (S_ij + S_ji)*(S_ij + S_ji)/8
+   * Note the explicit symmeterisation
    */
   T secondInvariant() const;
 
