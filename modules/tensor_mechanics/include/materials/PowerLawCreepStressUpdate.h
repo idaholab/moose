@@ -41,8 +41,16 @@ protected:
                                        const RankFourTensor & elasticity_tensor) override;
   virtual void computeStressFinalize(const RankTwoTensor & plastic_strain_increment) override;
 
-  virtual Real computeResidual(const Real & effective_trial_stress, const Real & scalar) override;
+  virtual Real computeResidual(const Real & effective_trial_stress, const Real & scalar) override
+  {
+    return computeResidualInternal<Real>(effective_trial_stress, scalar);
+  }
   virtual Real computeDerivative(const Real & effective_trial_stress, const Real & scalar) override;
+  virtual ChainedReal computeResidualAndDerivative(const Real & effective_trial_stress,
+                                                   const ChainedReal & scalar) override
+  {
+    return computeResidualInternal<ChainedReal>(effective_trial_stress, scalar);
+  }
 
   /// Flag to determine if temperature is supplied by the user
   const bool _has_temp;
@@ -73,4 +81,9 @@ protected:
 
   /// Exponential calculated from current time
   Real _exp_time;
+
+private:
+  template <typename ScalarType>
+  ScalarType computeResidualInternal(const Real & effective_trial_stress,
+                                     const ScalarType & scalar);
 };

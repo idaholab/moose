@@ -31,6 +31,12 @@ struct MooseADWrapperStruct<Point, true>
   typedef ADPoint type;
 };
 
+template <>
+struct MooseADWrapperStruct<ChainedReal, true>
+{
+  typedef ChainedADReal type;
+};
+
 // W<T> -> W<ADT>, e.g. RankTwoTensorTempl<Real> -> RankTwoTensorTempl<ADReal>
 template <template <typename> class W, typename T, bool is_ad>
 struct MooseADWrapperStruct<W<T>, is_ad>

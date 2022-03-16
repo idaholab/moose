@@ -58,12 +58,13 @@ ADPowerLawCreepStressUpdate::computeStressInitialize(const ADReal & /*effective_
   _exp_time = std::pow(_t - _start_time, _m_exponent);
 }
 
-ADReal
-ADPowerLawCreepStressUpdate::computeResidual(const ADReal & effective_trial_stress,
-                                             const ADReal & scalar)
+template <typename ScalarType>
+ScalarType
+ADPowerLawCreepStressUpdate::computeResidualInternal(const ADReal & effective_trial_stress,
+                                                     const ScalarType & scalar)
 {
-  const ADReal stress_delta = effective_trial_stress - _three_shear_modulus * scalar;
-  const ADReal creep_rate =
+  const ScalarType stress_delta = effective_trial_stress - _three_shear_modulus * scalar;
+  const ScalarType creep_rate =
       _coefficient * std::pow(stress_delta, _n_exponent) * _exponential * _exp_time;
   return creep_rate * _dt - scalar;
 }
@@ -109,3 +110,9 @@ ADPowerLawCreepStressUpdate::substeppingCapabilityEnabled()
 {
   return getParam<bool>("use_substep");
 }
+
+template ADReal ADPowerLawCreepStressUpdate::computeResidualInternal<ADReal>(const ADReal &,
+                                                                             const ADReal &);
+template ChainedADReal
+ADPowerLawCreepStressUpdate::computeResidualInternal<ChainedADReal>(const ADReal &,
+                                                                    const ChainedADReal &);
