@@ -1,12 +1,27 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 10
-  ny = 10
+  nx = 20
+  ny = 20
 []
 
 [Variables]
   [u]
+  []
+[]
+
+[AuxKernels]
+  [pid_aux]
+    type = ProcessorIDAux
+    variable = pid
+    execute_on = 'INITIAL'
+  []
+[]
+
+[AuxVariables]
+  [pid]
+    family = MONOMIAL
+    order = CONSTANT
   []
 []
 
@@ -58,8 +73,6 @@
 
 [MultiApps]
   [sub]
-#    positions = '.1 .1 0 0.4 0.4 0 0.7 0.1 0'
-    positions = '.1 .1 0'
     type = TransientMultiApp
     app_type = MooseTestApp
     input_files = sub_diffusion.i
@@ -74,7 +87,6 @@
     variable = transferred_u
     type = MultiAppGeneralFieldNearestNodeTransfer
     multi_app = sub
-    bbox_tol = 10
   []
 
   [elemental_to_sub]

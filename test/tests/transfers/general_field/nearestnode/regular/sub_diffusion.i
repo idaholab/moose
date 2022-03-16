@@ -1,11 +1,11 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 10
-  ny = 10
+  nx = 20
+  ny = 20
   xmin = 0
   ymin = 1.2
-  xmax = 1.2
+  xmax = 1
   ymax = 2
   displacements = 'x_disp y_disp'
 []
@@ -62,4 +62,19 @@
 
 [Outputs]
   exodus = true
+[]
+
+[AuxKernels]
+  [pid_aux]
+    type = ProcessorIDAux
+    variable = pid
+    execute_on = 'INITIAL'
+  []
+[]
+
+[AuxVariables]
+  [pid]
+    family = MONOMIAL
+    order = CONSTANT
+  []
 []
