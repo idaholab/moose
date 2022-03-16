@@ -1,0 +1,21 @@
+[Tests]
+  issues = '#16427 #16429'
+  design = 'transfers/MultiAppGeneralFieldTransfer.md'
+
+  [./tosub1]
+    type = 'Exodiff'
+    input = 'main_boundary_diffusion.i'
+    exodiff = 'main_boundary_diffusion_out.e'
+    requirement = "The system shall support the general nearest node transfer on restricted boundaries"
+    custom_cmp = 'main.cmp'
+  [../]
+
+  [./tosub2]
+    type = 'Exodiff'
+    input = 'main_boundary_diffusion.i'
+    exodiff = 'main_boundary_diffusion_out_sub0.e'
+    requirement = "The system shall support the general nearest node transfer on restricted boundaries 2"
+    custom_cmp = 'sub.cmp'
+    prereq  = tosub1
+  [../]
+[]

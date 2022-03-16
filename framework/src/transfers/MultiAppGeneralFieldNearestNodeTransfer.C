@@ -434,7 +434,7 @@ MultiAppGeneralFieldNearestNodeTransfer::locatePointReceivers(
     {
       Real distance = bboxMinDistance(point, _bboxes[i_from]);
       // We will not break here because we want to send a point to all possible source domains
-      if (distance <= nearest_max_distance || _bboxes[i_from].contains_point(point))
+      // if (distance <= nearest_max_distance || _bboxes[i_from].contains_point(point))
       {
         processors.push_back(i_proc);
         found = true;
