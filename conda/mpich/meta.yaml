@@ -1,15 +1,13 @@
-{% set build = 4 %}
+{% set build = 1 %}
 {% set strbuild = "build_" + build|string %}
-{% set version = "3.4.2" %}
+{% set version = "1.0" %}
 
 package:
   name: moose-mpich
   version: {{ version }}
 
 source:
-  fn: mpich-{{ version }}.tar.gz
-  url: https://www.mpich.org/static/downloads/{{ version }}/mpich-{{ version }}.tar.gz
-  sha256: 5c19bea8b84e8d74cca5f047e82b147ff3fba096144270e3911ad623d6c587bf
+  - path: .
 
 build:
   number: {{ build }}
@@ -17,11 +15,10 @@ build:
   skip: True  # [win]
   run_exports:
     - {{ pin_subpackage('moose-mpich', max_pin='x.x') }}
-  script_env:
-    - MOOSE_JOBS
 
 requirements:
   build:
+    - {{ base_mpich }}
     - {{ moose_cc }}
     - {{ moose_cxx }}
     - {{ moose_fortran }}
@@ -42,6 +39,7 @@ requirements:
     - gnuconfig                 # [arm64]
   host: []
   run:
+    - {{ base_mpich }}
     - {{ moose_cc }}
     - {{ moose_cxx }}
     - {{ moose_fortran }}
@@ -62,17 +60,13 @@ requirements:
     - {{ pin_compatible('setuptools', lower_bound='58', upper_bound='60') }}
     - mpi 1.0 mpich
 test:
-  script: run_test.sh
-  files:
-    - mpiexec.sh
-    - tests/helloworld.sh
+  commands:
+    - test -f $PREFIX/etc/conda/activate.d/activate_moose-mpich.sh
 
 about:
-  home: http://www.mpich.org/
-  license: MPICH
-  license_file: COPYRIGHT
-  license_family: Other
-  summary: 'A high performance widely portable implementation of the MPI standard.'
+  home: https://mooseframework.org/
+  license: LGPL 2.1
+  summary: 'Top Level packages designed to control environment variables for conda-forge mpich'
   description: |
     MPICH is a high performance and widely portable implementation of the
     Message Passing Interface (MPI) standard.
