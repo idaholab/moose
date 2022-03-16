@@ -347,5 +347,17 @@ greenGaussGradient(const FaceArg & face_arg,
 
   return ret;
 }
+
+template <typename T>
+typename Moose::FunctorBase<std::vector<T>>::GradientType
+greenGaussGradient(const ElemArg &,
+                   const Moose::FunctorBase<std::vector<T>> &,
+                   const bool,
+                   const MooseMesh &,
+                   std::unordered_map<const FaceInfo *, std::vector<T>> * const = nullptr)
+{
+  mooseError(
+      "It doesn't make any sense to call this function. There is no size to a vector functor.");
+}
 }
 }

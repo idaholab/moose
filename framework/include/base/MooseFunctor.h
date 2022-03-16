@@ -22,6 +22,8 @@
 #include "libmesh/remote_elem.h"
 #include "libmesh/tensor_tools.h"
 
+#include "metaphysicl/ct_types.h"
+
 #include <unordered_map>
 #include <functional>
 
@@ -266,7 +268,9 @@ public:
   using FunctorType = FunctorBase<T>;
   using FunctorReturnType = T;
   using ValueType = T;
-  using GradientType = typename libMesh::TensorTools::IncrementRank<T>::type;
+  using GradientType = typename MetaPhysicL::ReplaceAlgebraicType<
+      T,
+      typename TensorTools::IncrementRank<typename MetaPhysicL::ValueType<T>::type>::type>::type;
   using DotType = ValueType;
 
   virtual ~FunctorBase() = default;

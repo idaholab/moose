@@ -234,7 +234,7 @@ PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::FaceArg & face, unsigned
 
   mooseAssert(face.fi,
               "We must have a non-null face_info in order to prepare our ElemFromFace tuples");
-  static const typename libMesh::TensorTools::IncrementRank<T>::type example_gradient(0);
+  static const GradientType example_gradient(0);
 
   switch (face.limiter_type)
   {
