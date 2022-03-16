@@ -6,14 +6,14 @@
     input = 'terminator.i'
     exodiff = 'terminator_out.e'
     issues = '#3735'
-    requirement = "The system shall be able to terminate the execution of a solve based on post-processing calculations performed within the simulation."
+    requirement = "The system shall terminate the execution of a solve based on post-processing calculations performed within the simulation."
   []
   [terminator_soft]
     type = 'CSVDiff'
     input = 'terminator_soft.i'
     csvdiff = 'terminator_soft_out.csv'
     issues = '#16452'
-    requirement = "The system shall be able to terminate abort the current step in a solve based on post-processing calculations performed within the simulation to cut the timestep."
+    requirement = "The system shall abort the current step in a solve based on post-processing calculations performed within the simulation to cut the timestep."
   []
   [terminator_message_1]
     type = 'RunException'
@@ -21,11 +21,11 @@
     expect_err = "This is an error!"
     input = 'terminator_message.i'
     issues = '#17000'
-    requirement = "The terminator system shall be able to output a custom info, warning, or error message."
+    requirement = "The terminator system shall output a custom info, warning, or error message."
   []
   [terminator_message_2]
     type = 'RunException'
-    expect_err = "Setting the error level to ERROR always causes a hard failure."
+    expect_err = "Setting the error level to ERROR always causes a hard failure, which is incompatible with `fail_mode=SOFT`."
     input = 'terminator_soft.i'
     cli_args = 'UserObjects/arnold/error_level=ERROR'
     issues = '#17000'
@@ -33,18 +33,18 @@
   []
   [terminator_message_3]
     type = 'RunException'
-    expect_err = "If this parameter is specified a `message` must be supplied as well."
+    expect_err = "Cannot specify `error_level=NONE` together with the `message` parameter."
     input = 'terminator_soft.i'
-    cli_args = 'UserObjects/arnold/error_level=INFO'
+    cli_args = 'UserObjects/arnold/error_level=NONE UserObjects/arnold/message=dummy'
     issues = '#17000'
-    requirement = "The terminator system shall check that a message is supplied if required."
+    requirement = "The terminator system shall check that if a message is supplied, an appropriate error level for reporting that message is also used."
   []
   [terminator_pass]
     type = 'CSVDiff'
     input = 'terminator_pass.i'
     csvdiff = 'terminator_pass_out.csv'
     issues = '#16452'
-    requirement = "The system shall be able to terminate the current time step solve, and accept the result, based on post-processing calculations performed within the simulation."
+    requirement = "The system shall check a criterion for early termination of the run, but continue with the regular simulation when that criterion is not met."
     recover = false # changes the time steps
   []
 []
