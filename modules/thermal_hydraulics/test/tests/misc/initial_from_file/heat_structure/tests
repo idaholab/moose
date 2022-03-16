@@ -9,7 +9,7 @@
 
     requirement = 'The system shall be able to produce an exodus file for setting initial conditions in heat structures'
     design = 'heat_structure.md'
-    issues = '#20465 #20526'
+    issues = '#20465'
   []
 
   [test]
@@ -22,20 +22,7 @@
     ad_indexing_type = 'global'
 
     requirement = 'The system shall be able to use an exodus file for setting initial conditions in heat structures'
-    design = 'heat_structure.md SolutionInitialCondition.md ScalarSolutionInitialCondition.md'
-    issues = '#20465 #20526'
-  []
-
-  [non_existent_block]
-    type = 'RunException'
-    input = 'err.non_existent_block.i'
-    prereq = steady_state
-    recover = false
-    ad_indexing_type = 'global'
-    expect_err = "Block 'asdf' does not exist in the file '.+'"
-
-    requirement = 'The system shall report an error when a block is non found in the restart ExodusII file'
-    design = 'SolutionInitialCondition.md'
-    issues = '#20526'
+    design = 'heat_structure.md SolutionInitialCondition.md'
+    issues = '#20465'
   []
 []

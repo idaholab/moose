@@ -248,7 +248,7 @@ HeatTransferFromHeatStructure3D1Phase::addVariables()
   _sim.addSimVariable(false, _T_wall_name, FEType(CONSTANT, MONOMIAL), _flow_channel_subdomains);
 
   // wall temperature initial condition
-  if (!_app.isRestarting())
+  if (!_sim.hasInitialConditionsFromFile() && !_app.isRestarting())
   {
     const HeatStructureBase & hs = getComponentByName<HeatStructureBase>(_hs_name);
     _sim.addFunctionIC(_T_wall_name, hs.getInitialT(), _flow_channel_subdomains);

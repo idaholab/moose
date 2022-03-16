@@ -77,7 +77,8 @@ HeatStructureFromFile3D::check() const
 {
   GeometricalComponent::check();
 
-  if (!isParamValid("initial_T") && !_app.isRestarting())
+  bool ics_set = _sim.hasInitialConditionsFromFile() || isParamValid("initial_T");
+  if (!ics_set && !_app.isRestarting())
     logError("Missing initial condition for temperature.");
 }
 
