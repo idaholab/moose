@@ -53,12 +53,19 @@ private:
     dof_id_type offset;        // Useful when there are more than one point in a given dof object
   };
 
+  /// InterpInfor
+  struct InterpInfor
+  {
+    processor_id_type pid; // Processor id type
+    Real interp;           // Interpolation
+    Real distance;         // distance from target to source
+  };
+
   /// A map from pid to a set of point info
   typedef std::unordered_map<processor_id_type, std::vector<PointInfor>> ProcessorToPointInforVec;
 
   /// A vector, indexed by to-problem id, of maps from dof object to interpolation values
-  typedef std::vector<std::unordered_map<dof_id_type, std::pair<Real, processor_id_type>>>
-      DofobjectToInterpValVec;
+  typedef std::vector<std::unordered_map<dof_id_type, InterpInfor>> DofobjectToInterpValVec;
 
   /// A map for caching a single variable's values
   typedef std::unordered_map<Point, Number, hash_point> InterpCache;
@@ -75,11 +82,8 @@ private:
   /// How much we should relax bounding boxes
   Real _bbox_tol;
 
-  /// This transfer is restricted to subdomains on the target emsh?
-  bool _has_to_blocks;
-
-  /// Source mesh blocks this transfer is restricted to
-  std::set<SubdomainID> _from_blocks;
+  /// Number of nearest points are chosen
+  unsigned int _num_nearest_points;
 
   /// Number of froms per processor
   std::vector<unsigned int> _froms_per_proc;
@@ -106,16 +110,6 @@ private:
   void locatePointReceivers(const Point point, std::vector<processor_id_type> & processors);
 
   /*
-   * Whether or not it is block restricted transfer for target domains
-   */
-  bool blockRestrictedTarget() const;
-
-  /*
-   * Whether or not it is block restricted transfer for source domains
-   */
-  bool blockRestrictedSource() const;
-
-  /*
    * Whether or not a given element has blocks
    */
   bool hasBlocks(std::set<SubdomainID> & blocks, const Elem * elem) const;
@@ -123,7 +117,13 @@ private:
   /*
    * Whether or not a given node has blocks
    */
-  bool hasBlocks(std::set<SubdomainID> & blocks, const MooseMesh * mesh, const Node * node) const;
+  bool hasBlocks(std::set<SubdomainID> & blocks, const MooseMesh & mesh, const Node * node) const;
+
+  /*
+   * Whether or not a given node has blocks
+   */
+  bool
+  hasBoundaries(std::set<BoundaryID> & boundaries, const MooseMesh & mesh, const Node * node) const;
 
   /*
    * Local from bounding boxes for current processor
@@ -142,9 +142,10 @@ private:
    * Evaluate interpolation values for incoming points
    */
   void evaluateInterpValues(const std::vector<std::shared_ptr<KDTree>> & local_kdtrees,
+                            const std::vector<std::vector<Point>> & local_points,
                             const std::vector<std::vector<Real>> & local_values,
                             const std::vector<Point> & incoming_points,
-                            std::vector<Real> & outgoing_vals);
+                            std::vector<std::pair<Real, Real>> & outgoing_vals);
 
   /*
    * cache incoming values
@@ -153,7 +154,7 @@ private:
                                const VariableName & var_name,
                                std::vector<PointInfor> & pointInfoVec,
                                const std::vector<Point> & point_requests,
-                               const std::vector<Real> & incoming_vals,
+                               const std::vector<std::pair<Real, Real>> & incoming_vals,
                                DofobjectToInterpValVec & dofobject_to_valsvec,
                                InterpCaches & interp_caches);
 
@@ -171,4 +172,14 @@ private:
                                const dof_id_type dof_object_id,
                                const unsigned int problem_id,
                                ProcessorToPointVec & outgoing_points);
+
+  /*
+   * Compute minimum distance
+   */
+  Real bboxMinDistance(const Point & p, const BoundingBox & bbox);
+
+  /*
+   * Compute max distance
+   */
+  Real bboxMaxDistance(const Point & p, const BoundingBox & bbox);
 };
