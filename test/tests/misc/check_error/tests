@@ -640,24 +640,34 @@
   [../]
 
   [./unused_param_test]
-    type = 'RunApp'
-    expect_out = "unused parameter 'Mesh/unused_param'"
+    type = 'RunException'
+    expect_err = "unused parameter 'Mesh/unused_param'"
     input = 'unused_param_test.i'
     allow_unused = true
 
-    requirement = 'The system shall report a warning when an unused parameter is provided through the input file or an Action.'
-    issues = '#709 #759 #4101'
+    requirement = 'The system shall report an error when an unused parameter is provided through the input file or an Action.'
+    issues = '#709 #759 #4101 #20567'
+  [../]
+
+  [./unused_param_multi_app_test]
+    type = 'RunException'
+    expect_err = "unused parameter 'Executioner/unused_param"
+    input = 'multi_master.i'
+    allow_unused = true
+    cli_args = 'full_solve:Executioner/unused_param=true'
+    requirement = 'The system shall report an error when an unused parameter is provided in the sub app.'
+    issues = '#20567'
   [../]
 
   [./unused_param_test_cli]
-    type = 'RunApp'
-    expect_out = "unused parameter 'Executioner/unused_param'"
+    type = 'RunException'
+    expect_err = "unused parameter 'Executioner/unused_param'"
     input = 'unused_param_test.i'
     cli_args = 'Executioner/unused_param=true'
     allow_unused = true
 
     requirement = 'The system shall report a warning when an unused parameter is supplied on the command line.'
-    issues = '#709 #759 #4101'
+    issues = '#709 #759 #4101 #20567'
   [../]
 
   [./uo_pps_name_collision_test]

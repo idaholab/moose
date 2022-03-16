@@ -352,7 +352,7 @@ MooseApp::MooseApp(InputParameters parameters)
     _null_executor(NULL),
     _use_nonlinear(true),
     _use_eigen_value(false),
-    _enable_unused_check(WARN_UNUSED),
+    _enable_unused_check(ERROR_UNUSED),
     _factory(*this),
     _error_overridden(false),
     _ready_to_exit(false),
@@ -1172,9 +1172,7 @@ void
 MooseApp::setCheckUnusedFlag(bool warn_is_error)
 {
   /**
-   * _enable_unused_check is initialized to WARN_UNUSED. If an application chooses to promote
-   * this value to ERROR_UNUSED programmatically prior to running the simulation, we certainly
-   * don't want to allow it to fall back. Therefore, we won't set it if it's already at the
+   * _enable_unused_check is initialized to ERROR_UNUSED. We won't set it if it's already at the
    * highest value (i.e. error). If however a developer turns it off, it can still be turned on.
    */
   if (_enable_unused_check != ERROR_UNUSED || warn_is_error)

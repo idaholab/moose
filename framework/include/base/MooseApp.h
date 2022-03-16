@@ -912,6 +912,11 @@ public:
   template <class T>
   const std::vector<T *> & getInterfaceObjects() const;
 
+  /**
+   * Return true if _enable_unused_check is set to be ERROR_UNUSED.
+   */
+  bool unusedCheckError() { return _enable_unused_check == ERROR_UNUSED; };
+
   static void addAppParam(InputParameters & params);
 
 protected:
