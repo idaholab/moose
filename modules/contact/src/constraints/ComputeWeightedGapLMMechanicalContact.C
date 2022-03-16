@@ -112,10 +112,18 @@ ComputeWeightedGapLMMechanicalContact::computeQpProperties()
   ADReal sec_z = _secondary_disp_z ? (*_secondary_disp_z)[_qp] : 0.0;
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
-  std::array<MooseVariable *, 3> var_array{
-      {getVar("disp_x", 0), getVar("disp_y", 0), _has_disp_z ? getVar("disp_z", 0) : nullptr}};
-  trimInteriorNodeDerivatives(primary_ip_lowerd_map, var_array, prim_x, prim_y, prim_z, false);
-  trimInteriorNodeDerivatives(secondary_ip_lowerd_map, var_array, sec_x, sec_y, sec_z, true);
+  std::vector<const MooseVariable *> var_array{{getVar("disp_x", 0), getVar("disp_y", 0)}};
+  std::vector<ADReal *> primary_disp({&prim_x, &prim_y});
+  std::vector<ADReal *> secondary_disp({&sec_x, &sec_y});
+
+  if (_has_disp_z)
+  {
+    var_array.push_back(getVar("disp_z", 0));
+    primary_disp.push_back(&prim_z);
+    secondary_disp.push_back(&sec_z);
+  }
+  trimInteriorNodeDerivatives(primary_ip_lowerd_map, var_array, primary_disp, false);
+  trimInteriorNodeDerivatives(secondary_ip_lowerd_map, var_array, secondary_disp, true);
 #endif
 
   // Compute gap vector

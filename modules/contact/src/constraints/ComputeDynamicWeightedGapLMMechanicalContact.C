@@ -87,10 +87,19 @@ ComputeDynamicWeightedGapLMMechanicalContact::computeQpProperties()
   ADReal sec_z = _secondary_disp_z ? (*_secondary_disp_z)[_qp] : 0.0;
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
-  std::array<MooseVariable *, 3> var_array{
-      {getVar("disp_x", 0), getVar("disp_y", 0), _has_disp_z ? getVar("disp_z", 0) : nullptr}};
-  trimInteriorNodeDerivatives(primary_ip_lowerd_map, var_array, prim_x, prim_y, prim_z, false);
-  trimInteriorNodeDerivatives(secondary_ip_lowerd_map, var_array, sec_x, sec_y, sec_z, true);
+  std::vector<const MooseVariable *> var_array{{getVar("disp_x", 0), getVar("disp_y", 0)}};
+  std::vector<ADReal *> primary_disp({&prim_x, &prim_y});
+  std::vector<ADReal *> secondary_disp({&sec_x, &sec_y});
+
+  if (_has_disp_z)
+  {
+    var_array.push_back(getVar("disp_z", 0));
+    primary_disp.push_back(&prim_z);
+    secondary_disp.push_back(&sec_z);
+  }
+
+  trimInteriorNodeDerivatives(primary_ip_lowerd_map, var_array, primary_disp, false);
+  trimInteriorNodeDerivatives(secondary_ip_lowerd_map, var_array, secondary_disp, true);
 #endif
 
   ADReal prim_x_dot = _primary_x_dot[_qp];
@@ -102,10 +111,17 @@ ComputeDynamicWeightedGapLMMechanicalContact::computeQpProperties()
   ADReal sec_z_dot = _secondary_z_dot ? (*_secondary_z_dot)[_qp] : 0.0;
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
-  trimInteriorNodeDerivatives(
-      primary_ip_lowerd_map, var_array, prim_x_dot, prim_y_dot, prim_z_dot, false);
-  trimInteriorNodeDerivatives(
-      secondary_ip_lowerd_map, var_array, sec_x_dot, sec_y_dot, sec_z_dot, true);
+  std::vector<ADReal *> primary_vel({&prim_x_dot, &prim_y_dot});
+  std::vector<ADReal *> secondary_vel({&sec_x_dot, &sec_y_dot});
+
+  if (_has_disp_z)
+  {
+    primary_vel.push_back(&prim_z_dot);
+    secondary_vel.push_back(&sec_z_dot);
+  }
+
+  trimInteriorNodeDerivatives(primary_ip_lowerd_map, var_array, primary_vel, false);
+  trimInteriorNodeDerivatives(secondary_ip_lowerd_map, var_array, secondary_vel, true);
 #endif
 
   // Compute dynamic constraint-related quantities

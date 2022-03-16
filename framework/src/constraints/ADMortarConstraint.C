@@ -199,10 +199,8 @@ ADMortarConstraint::trimDerivative(const dof_id_type & remove_derivative_index, 
 void
 ADMortarConstraint::trimInteriorNodeDerivatives(
     const std::map<unsigned int, unsigned int> & domain_ip_lowerd_map,
-    std::array<MooseVariable *, 3> & moose_var,
-    ADReal & var1,
-    ADReal & var2,
-    ADReal & var3,
+    const std::vector<const MooseVariable *> & moose_vars,
+    std::vector<ADReal *> & ad_vars,
     const bool is_secondary)
 {
   // Remove interior node variable's derivatives from AD objects.
@@ -210,28 +208,16 @@ ADMortarConstraint::trimInteriorNodeDerivatives(
        (is_secondary ? make_range(_test_secondary.size()) : make_range(_test_primary.size())))
     if (!domain_ip_lowerd_map.count(dof_index))
     {
-      if (moose_var[0])
+      for (const auto moose_var_index : make_range(moose_vars.size()))
       {
+        mooseAssert(moose_vars[moose_var_index]->isNodal(),
+                    "Trimming of interior node's derivatives is only supported for Lagrange "
+                    "elements in mortar constraints");
+
         const auto & remove_derivative_index_x =
-            is_secondary ? moose_var[0]->dofIndices()[dof_index]
-                         : moose_var[0]->dofIndicesNeighbor()[dof_index];
-        trimDerivative(remove_derivative_index_x, var1);
-      }
-
-      if (moose_var[1])
-      {
-        const auto & remove_derivative_index_y =
-            is_secondary ? moose_var[1]->dofIndices()[dof_index]
-                         : moose_var[1]->dofIndicesNeighbor()[dof_index];
-        trimDerivative(remove_derivative_index_y, var2);
-      }
-
-      if (moose_var[2])
-      {
-        const auto & remove_derivative_index_z =
-            is_secondary ? moose_var[2]->dofIndices()[dof_index]
-                         : moose_var[2]->dofIndicesNeighbor()[dof_index];
-        trimDerivative(remove_derivative_index_z, var3);
+            is_secondary ? moose_vars[moose_var_index]->dofIndices()[dof_index]
+                         : moose_vars[moose_var_index]->dofIndicesNeighbor()[dof_index];
+        trimDerivative(remove_derivative_index_x, *ad_vars[moose_var_index]);
       }
     }
 }

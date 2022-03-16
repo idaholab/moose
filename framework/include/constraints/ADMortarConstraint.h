@@ -48,10 +48,8 @@ protected:
    */
   void
   trimInteriorNodeDerivatives(const std::map<unsigned int, unsigned int> & primary_ip_lowerd_map,
-                              std::array<MooseVariable *, 3> & moose_var,
-                              ADReal & var1,
-                              ADReal & var2,
-                              ADReal & var3,
+                              const std::vector<const MooseVariable *> & moose_var,
+                              std::vector<ADReal *> & ad_vars,
                               const bool is_secondary);
 #endif
 

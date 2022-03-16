@@ -340,22 +340,21 @@ ModularGapConductanceConstraint::computeQpResidual(Moose::MortarType mortar_type
         }
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
-        std::array<MooseVariable *, 3> var_array{
-            {getVar("displacements", 0),
-             getVar("displacements", 1),
-             _n_disp == 3 ? getVar("displacements", 2) : nullptr}};
-        trimInteriorNodeDerivatives(primary_ip_lowerd_map,
-                                    var_array,
-                                    primary_disp[0],
-                                    primary_disp[1],
-                                    primary_disp[2],
-                                    false);
-        trimInteriorNodeDerivatives(secondary_ip_lowerd_map,
-                                    var_array,
-                                    secondary_disp[0],
-                                    secondary_disp[1],
-                                    secondary_disp[2],
-                                    true);
+        std::vector<const MooseVariable *> var_array{
+            {getVar("displacements", 0), getVar("displacements", 1)}};
+
+        std::vector<ADReal *> primary_disp_ptr({&primary_disp[0], &primary_disp[1]});
+        std::vector<ADReal *> secondary_disp_ptr({&secondary_disp[0], &secondary_disp[1]});
+
+        if (_n_disp == 3)
+        {
+          var_array.push_back(getVar("displacements", 2));
+          primary_disp_ptr.push_back(&primary_disp[2]);
+          secondary_disp_ptr.push_back(&secondary_disp[2]);
+        }
+
+        trimInteriorNodeDerivatives(primary_ip_lowerd_map, var_array, primary_disp_ptr, false);
+        trimInteriorNodeDerivatives(secondary_ip_lowerd_map, var_array, secondary_disp_ptr, true);
 #endif
         // Populate quantities with trimmed derivatives
         for (unsigned int i = 0; i < _n_disp; ++i)

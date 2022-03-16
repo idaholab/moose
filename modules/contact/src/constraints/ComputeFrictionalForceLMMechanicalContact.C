@@ -102,12 +102,19 @@ ComputeFrictionalForceLMMechanicalContact::computeQpProperties()
   ADReal sec_z_dot = _secondary_z_dot ? (*_secondary_z_dot)[_qp] : 0.0;
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
-  std::array<MooseVariable *, 3> var_array{
-      {getVar("disp_x", 0), getVar("disp_y", 0), _3d ? getVar("disp_z", 0) : nullptr}};
-  trimInteriorNodeDerivatives(
-      primary_ip_lowerd_map, var_array, prim_x_dot, prim_y_dot, prim_z_dot, false);
-  trimInteriorNodeDerivatives(
-      secondary_ip_lowerd_map, var_array, sec_x_dot, sec_y_dot, sec_z_dot, true);
+  std::vector<const MooseVariable *> var_array{{getVar("disp_x", 0), getVar("disp_y", 0)}};
+  std::vector<ADReal *> primary_vel({&prim_x_dot, &prim_y_dot});
+  std::vector<ADReal *> secondary_vel({&sec_x_dot, &sec_y_dot});
+
+  if (_3d)
+  {
+    var_array.push_back(getVar("disp_z", 0));
+    primary_vel.push_back(&prim_z_dot);
+    secondary_vel.push_back(&sec_z_dot);
+  }
+
+  trimInteriorNodeDerivatives(primary_ip_lowerd_map, var_array, primary_vel, false);
+  trimInteriorNodeDerivatives(secondary_ip_lowerd_map, var_array, secondary_vel, true);
 #endif
 
   // Build relative velocity vector
