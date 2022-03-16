@@ -79,4 +79,48 @@
       detail = 'for a full physics test.'
     []
   []
+  [diagonal]
+    requirement = 'The system shall error if a user attempts to use nonlocal residual objects without appropriate coupling specified in a preconditioning object. These residual objects include'
+    [kernels]
+      type = RunException
+      input = 'jacobian.i'
+      expect_err = 'Nonlocal kernels only supported for non-diagonal coupling'
+      detail = 'kernels'
+      cli_args = "Preconditioning/active='' Executioner/solve_type=PJFNK"
+      allow_warnings = true
+      recover = false
+      max_threads = 1
+    []
+    [bcs]
+      type = RunException
+      input = 'shape_side_uo_jac_test.i'
+      expect_err = 'Nonlocal boundary conditions only supported for non-diagonal coupling'
+      detail = 'boundary conditions'
+      cli_args = "Preconditioning/active='' Executioner/solve_type=PJFNK"
+      allow_warnings = true
+      recover = false
+      max_threads = 1
+    []
+  []
+  [automatic_scaling]
+    requirement = 'The system shall be able to perform automatic scaling in the presence of nonlocal residual objects such as'
+    [kernels]
+      type = RunApp
+      input = 'jacobian.i'
+      detail = 'kernels'
+      cli_args = 'Executioner/automatic_scaling=true'
+      allow_warnings = true
+      recover = false
+      max_threads = 1
+    []
+    [bcs]
+      type = RunApp
+      input = 'shape_side_uo_physics_test.i'
+      detail = 'boundary conditions'
+      cli_args = 'Executioner/automatic_scaling=true'
+      allow_warnings = true
+      recover = false
+      max_threads = 1
+    []
+  []
 []
