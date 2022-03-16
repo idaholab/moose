@@ -513,19 +513,59 @@ VectorValue<T>
 interpolate(const Limiter & limiter,
             const TypeVector<T> & phi_upwind,
             const TypeVector<T> & phi_downwind,
-            const Tensor * const /*grad_phi_upwind*/,
+            const Tensor * const grad_phi_upwind,
             const FaceInfo & fi,
             const bool fi_elem_is_upwind)
 {
-  mooseAssert(limiter.constant(),
-              "Non-constant limiters are not currently supported in the vector overload of the "
-              "limited interpolate method");
-  static const VectorValue<T> example_gradient(0);
+  mooseAssert(limiter.constant() || grad_phi_upwind,
+              "Non-null gradient only supported for constant limiters.");
 
+  const VectorValue<T> * const gradient_example = nullptr;
   VectorValue<T> ret;
   for (const auto i : make_range(unsigned(LIBMESH_DIM)))
-    ret(i) = interpolate(
-        limiter, phi_upwind(i), phi_downwind(i), &example_gradient, fi, fi_elem_is_upwind);
+  {
+    if (grad_phi_upwind)
+    {
+      const VectorValue<T> gradient = grad_phi_upwind->row(i);
+      ret(i) =
+          interpolate(limiter, phi_upwind(i), phi_downwind(i), &gradient, fi, fi_elem_is_upwind);
+    }
+    else
+      ret(i) = interpolate(
+          limiter, phi_upwind(i), phi_downwind(i), gradient_example, fi, fi_elem_is_upwind);
+  }
+
+  return ret;
+}
+
+/**
+ * std::vector overload
+ */
+template <typename Limiter, typename ValueType, typename GradientType>
+std::vector<ValueType>
+interpolate(const Limiter & limiter,
+            const std::vector<ValueType> & phi_upwind,
+            const std::vector<ValueType> & phi_downwind,
+            const std::vector<GradientType> * const grad_phi_upwind,
+            const FaceInfo & fi,
+            const bool fi_elem_is_upwind)
+{
+  mooseAssert(limiter.constant() || grad_phi_upwind,
+              "Non-null gradient only supported for constant limiters.");
+  mooseAssert(!grad_phi_upwind || (grad_phi_upwind->size() == phi_upwind.size()),
+              "Gradient and value container sizes must be the same.");
+  mooseAssert(phi_upwind.size() == phi_downwind.size(),
+              "Upwind and downwind value sizes must be the same.");
+
+  std::vector<ValueType> ret;
+  const GradientType * gradient = nullptr;
+  for (const auto i : index_range(phi_upwind))
+  {
+    if (grad_phi_upwind)
+      gradient = &(*grad_phi_upwind)[i];
+
+    ret[i] = interpolate(limiter, phi_upwind[i], phi_downwind[i], gradient, fi, fi_elem_is_upwind);
+  }
 
   return ret;
 }
