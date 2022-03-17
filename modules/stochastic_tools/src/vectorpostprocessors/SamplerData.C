@@ -42,9 +42,13 @@ SamplerData::SamplerData(const InputParameters & parameters)
     _sampler(getSampler("sampler")),
     _sampler_method(getParam<MooseEnum>("sampler_method"))
 {
+  const int padding = MooseUtils::numDigits(_sampler.getNumberOfCols());
   for (dof_id_type j = 0; j < _sampler.getNumberOfCols(); ++j)
-    _sample_vectors.push_back(
-        &declareVector(getParam<SamplerName>("sampler") + "_" + std::to_string(j)));
+  {
+    std::stringstream nm;
+    nm << getParam<SamplerName>("sampler") << "_" << std::setw(padding) << std::setfill('0') << j;
+    _sample_vectors.push_back(&declareVector(nm.str()));
+  }
 }
 
 void

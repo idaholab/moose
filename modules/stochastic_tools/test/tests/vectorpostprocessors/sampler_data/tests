@@ -1,0 +1,84 @@
+[Tests]
+  design = 'SamplerData.md'
+
+  [get_sample_types]
+    issues = '#9402'
+    requirement = 'The system shall be able to ouptut samples from a sampler using the sampling method'
+    [get_global_samples]
+      type = CSVDiff
+      input = sampler_data.i
+      cli_args = 'VectorPostprocessors/data/sampler_method=get_global_samples'
+      csvdiff = sampler_data_out_data_0001.csv
+      detail = 'get global matrix;'
+    []
+    [get_local_samples]
+      type = CSVDiff
+      input = sampler_data.i
+      cli_args = 'VectorPostprocessors/data/sampler_method=get_local_samples'
+      csvdiff = sampler_data_out_data_0001.csv
+      detail = 'get local matrix;'
+    []
+    [get_next_local_row]
+      type = CSVDiff
+      input = sampler_data.i
+      cli_args = 'VectorPostprocessors/data/sampler_method=get_next_local_row'
+      csvdiff = sampler_data_out_data_0001.csv
+      detail = 'get next local row;'
+    []
+  []
+
+  [parallel]
+    issues = '#13906'
+    requirement = 'The system shall be able to ouptut distributed samples from a sampler using the sampling method'
+    [get_local_samples]
+      type = CSVDiff
+      input = sampler_data.i
+      cli_args = 'VectorPostprocessors/data/sampler_method=get_local_samples  VectorPostprocessors/data/parallel_type=distributed'
+      csvdiff = 'sampler_data_out_data_0001.csv.0 sampler_data_out_data_0001.csv.1 sampler_data_out_data_0001.csv.2'
+      min_parallel = 3
+      max_parallel = 3
+      detail = 'get local matrix;'
+    []
+    [get_next_local_row]
+      type = CSVDiff
+      input = sampler_data.i
+      cli_args = 'VectorPostprocessors/data/sampler_method=get_next_local_row  VectorPostprocessors/data/parallel_type=distributed'
+      csvdiff = 'sampler_data_out_data_0001.csv.0 sampler_data_out_data_0001.csv.1 sampler_data_out_data_0001.csv.2'
+      min_parallel = 3
+      max_parallel = 3
+      detail = 'get next local row;'
+    []
+  []
+
+  [cols]
+    issues = '#20576'
+    requirement = 'The system shall be able to ouptut samples from a sampler with'
+    [one]
+      type = CSVDiff
+      input = sampler_data.i
+      cli_args = "Samplers/sample/distributions='dist'"
+      csvdiff = sampler_data_out_data_0001.csv
+      detail = 'one column;'
+    []
+    [multi]
+      type = CSVDiff
+      input = sampler_data.i
+      cli_args = "Samplers/sample/distributions='dist dist dist' Outputs/file_base=multi_col"
+      csvdiff = multi_col_data_0001.csv
+      detail = 'multiple columns;'
+    []
+    [lots]
+      type = CSVDiff
+      input = sampler_data.i
+      cli_args = "Samplers/sample/distributions='dist dist dist dist dist "
+                                                "dist dist dist dist dist "
+                                                "dist dist dist dist dist "
+                                                "dist dist dist dist dist "
+                                                "dist dist dist dist dist "
+                                                "dist dist dist dist dist "
+                                                "dist dist' Outputs/file_base=lots_col"
+      csvdiff = lots_col_data_0001.csv
+      detail = 'large number of columns;'
+    []
+  []
+[]
