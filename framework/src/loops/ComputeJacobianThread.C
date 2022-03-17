@@ -15,8 +15,6 @@
 #include "InterfaceKernelBase.h"
 #include "MooseVariableFE.h"
 #include "NonlinearSystem.h"
-#include "NonlocalIntegratedBC.h"
-#include "NonlocalKernel.h"
 #include "SwapBackSentinel.h"
 #include "TimeDerivative.h"
 #include "FVElementalKernel.h"
@@ -64,14 +62,11 @@ ComputeJacobianThread::computeJacobian()
       {
         kernel->prepareShapes(kernel->variable().number());
         kernel->computeJacobian();
-        /// done only when nonlocal kernels exist in the system
-        if (_fe_problem.checkNonlocalCouplingRequirement())
-        {
-          std::shared_ptr<NonlocalKernel> nonlocal_kernel =
-              std::dynamic_pointer_cast<NonlocalKernel>(kernel);
-          if (nonlocal_kernel)
-            kernel->computeNonlocalJacobian();
-        }
+        if (_fe_problem.checkNonlocalCouplingRequirement() &&
+            !_fe_problem.computingScalingJacobian())
+          mooseError(
+              "Nonlocal kernels only supported for non-diagonal coupling. Please specify an SMP "
+              "preconditioner, with appropriate row-column coupling or specify full = true.");
       }
   }
 
@@ -101,14 +96,10 @@ ComputeJacobianThread::computeFaceJacobian(BoundaryID bnd_id, const Elem *)
     {
       bc->prepareShapes(bc->variable().number());
       bc->computeJacobian();
-      /// done only when nonlocal integrated_bcs exist in the system
-      if (_fe_problem.checkNonlocalCouplingRequirement())
-      {
-        std::shared_ptr<NonlocalIntegratedBC> nonlocal_integrated_bc =
-            std::dynamic_pointer_cast<NonlocalIntegratedBC>(bc);
-        if (nonlocal_integrated_bc)
-          bc->computeNonlocalJacobian();
-      }
+      if (_fe_problem.checkNonlocalCouplingRequirement() && !_fe_problem.computingScalingJacobian())
+        mooseError("Nonlocal boundary conditions only supported for non-diagonal coupling. Please "
+                   "specify an SMP preconditioner, with appropriate row-column coupling or specify "
+                   "full = true.");
     }
 }
 
