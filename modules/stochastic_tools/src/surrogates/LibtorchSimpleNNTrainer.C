@@ -153,7 +153,7 @@ LibtorchSimpleNNTrainer::postTrain()
       torch::Tensor prediction = _nn->forward(batch.data);
 
       // Compute loss values using a MSE ( mean squared error)
-      torch::Tensor loss = torch::mse_loss(prediction, batch.target);
+      torch::Tensor loss = torch::mse_loss(prediction.reshape({prediction.size(0)}), batch.target);
 
       // Propagate error back
       loss.backward();
