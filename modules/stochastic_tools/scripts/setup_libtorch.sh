@@ -71,7 +71,7 @@ if [[ $OP_SYS == linux ]]; then
   if [[ -f "libtorch-cxx11-abi-shared-with-deps-$VERSION.0%2Bcpu.zip" ]]; then
     echo "Found requested package for libtorch v. $VERSION, no need to download."
   else
-    curl -L -O https://download.pytorch.org/libtorch/cpu/libtorch-cxx11-abi-shared-with-deps-$VERSION.0%2Bcpu.zip
+    curl -L -O -k https://download.pytorch.org/libtorch/cpu/libtorch-cxx11-abi-shared-with-deps-$VERSION.0%2Bcpu.zip
   fi
   echo "Extracting libtorch-cxx11-abi-shared-with-deps-$VERSION.0%2Bcpu.zip."
   unzip -q -o libtorch-cxx11-abi-shared-with-deps-$VERSION.0%2Bcpu.zip
@@ -79,7 +79,7 @@ elif [[ $OP_SYS == mac ]]; then
   if [[ -f libtorch-macos-$VERSION.0.zip ]]; then
     echo "Found requested package for libtorch v. $VERSION, no need to download."
   else
-    curl -L -O https://download.pytorch.org/libtorch/cpu/libtorch-macos-$VERSION.0.zip
+    curl -L -O -k https://download.pytorch.org/libtorch/cpu/libtorch-macos-$VERSION.0.zip
   fi
   echo "Extracting libtorch-macos-$VERSION.0.zip."
   unzip -q -o libtorch-macos-$VERSION.0.zip
