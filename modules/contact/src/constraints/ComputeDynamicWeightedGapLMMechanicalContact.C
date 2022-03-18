@@ -130,7 +130,7 @@ ComputeDynamicWeightedGapLMMechanicalContact::computeQpProperties()
 
   if (_has_disp_z)
   {
-    // gap_vec(2).derivatives() = prim_z->derivatives() - sec_z->derivatives();
+    gap_vec(2).derivatives() = prim_z->derivatives() - sec_z->derivatives();
     _relative_velocity(2) = *prim_z_dot - *sec_z_dot;
   }
 
