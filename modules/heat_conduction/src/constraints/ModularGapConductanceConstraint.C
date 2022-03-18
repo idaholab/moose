@@ -55,8 +55,10 @@ ModularGapConductanceConstraint::ModularGapConductanceConstraint(const InputPara
     _r1(0),
     _r2(0),
     _max_gap(getParam<Real>("max_gap")),
-    _adjusted_length(0.0)
-
+    _adjusted_length(0.0),
+    _disp_x_var(getVar("displacements", 0)),
+    _disp_y_var(getVar("displacements", 1)),
+    _disp_z_var(_n_disp == 3 ? getVar("displacements", 2) : nullptr)
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError("ModularGapConductanceConstraint relies on use of the global indexing container "
@@ -306,8 +308,13 @@ ModularGapConductanceConstraint::computeGapRadii(const ADReal & gap_length)
 }
 
 ADReal
-ModularGapConductanceConstraint::computeQpResidual(Moose::MortarType mortar_type)
+ModularGapConductanceConstraint::computeQpResidual(Moose::MortarType
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+                                                       mortar_type
+#endif
+)
 {
+#ifdef MOOSE_GLOBAL_AD_INDEXING
   switch (mortar_type)
   {
     case Moose::MortarType::Primary:
@@ -330,6 +337,7 @@ ModularGapConductanceConstraint::computeQpResidual(Moose::MortarType mortar_type
         const auto & secondary_ip_lowerd_map =
             amg().getSecondaryIpToLowerElementMap(*_lower_secondary_elem);
 
+        std::array<const MooseVariable *, 3> var_array{{_disp_x_var, _disp_y_var, _disp_z_var}};
         std::array<ADReal, 3> primary_disp;
         std::array<ADReal, 3> secondary_disp;
 
@@ -339,23 +347,9 @@ ModularGapConductanceConstraint::computeQpResidual(Moose::MortarType mortar_type
           secondary_disp[i] = (*_disp_secondary[i])[_qp];
         }
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-        std::vector<const MooseVariable *> var_array{
-            {getVar("displacements", 0), getVar("displacements", 1)}};
+        trimInteriorNodeDerivatives(primary_ip_lowerd_map, var_array, primary_disp, false);
+        trimInteriorNodeDerivatives(secondary_ip_lowerd_map, var_array, secondary_disp, true);
 
-        std::vector<ADReal *> primary_disp_ptr({&primary_disp[0], &primary_disp[1]});
-        std::vector<ADReal *> secondary_disp_ptr({&secondary_disp[0], &secondary_disp[1]});
-
-        if (_n_disp == 3)
-        {
-          var_array.push_back(getVar("displacements", 2));
-          primary_disp_ptr.push_back(&primary_disp[2]);
-          secondary_disp_ptr.push_back(&secondary_disp[2]);
-        }
-
-        trimInteriorNodeDerivatives(primary_ip_lowerd_map, var_array, primary_disp_ptr, false);
-        trimInteriorNodeDerivatives(secondary_ip_lowerd_map, var_array, secondary_disp_ptr, true);
-#endif
         // Populate quantities with trimmed derivatives
         for (unsigned int i = 0; i < _n_disp; ++i)
         {
@@ -388,4 +382,7 @@ ModularGapConductanceConstraint::computeQpResidual(Moose::MortarType mortar_type
     default:
       return 0;
   }
+#else
+  mooseError("We should never get here. We should have errored in the constructor.");
+#endif
 }

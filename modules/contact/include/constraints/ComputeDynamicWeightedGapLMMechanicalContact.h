@@ -88,4 +88,7 @@ protected:
 
   /// A map from node to wear in old step
   std::unordered_map<const DofObject *, ADReal> _dof_to_nodal_old_wear_depth;
+
+  /// The relative velocity
+  ADRealVectorValue _relative_velocity;
 };

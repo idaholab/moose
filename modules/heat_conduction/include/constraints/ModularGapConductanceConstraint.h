@@ -94,5 +94,12 @@ private:
 
   ADReal _adjusted_length;
 
+  /// x-displacement variable
+  const MooseVariable * const _disp_x_var;
+  /// y-displacement variable
+  const MooseVariable * const _disp_y_var;
+  /// z-displacement variable
+  const MooseVariable * const _disp_z_var;
+
   friend class GapFluxModelBase;
 };

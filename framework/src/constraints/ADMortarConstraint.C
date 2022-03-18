@@ -99,6 +99,10 @@ ADMortarConstraint::computeJacobian(Moose::MortarType mortar_type)
     for (_i = 0; _i < test_space_size; _i++)
       residuals[_i] += _JxW_msm[_qp] * _coord[_qp] * computeQpResidual(mortar_type);
 
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+  _assembly.processUnconstrainedDerivatives(residuals, dof_indices, _matrix_tags);
+#else
+
   auto local_functor = [&](const std::vector<ADReal> & input_residuals,
                            const std::vector<dof_id_type> &,
                            const std::set<TagID> &)
@@ -169,19 +173,20 @@ ADMortarConstraint::computeJacobian(Moose::MortarType mortar_type)
   };
 
   _assembly.processDerivatives(residuals, dof_indices, _matrix_tags, local_functor);
+#endif
 }
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
 void
-ADMortarConstraint::trimDerivative(const dof_id_type & remove_derivative_index, ADReal & var)
+ADMortarConstraint::trimDerivative(const dof_id_type remove_derivative_index, ADReal & dual_number)
 {
-  auto md_it = var.derivatives().nude_data().begin();
-  auto mi_it = var.derivatives().nude_indices().begin();
+  auto md_it = dual_number.derivatives().nude_data().begin();
+  auto mi_it = dual_number.derivatives().nude_indices().begin();
 
-  auto d_it = var.derivatives().nude_data().begin();
+  auto d_it = dual_number.derivatives().nude_data().begin();
 
-  for (auto i_it = var.derivatives().nude_indices().begin();
-       i_it != var.derivatives().nude_indices().end();
+  for (auto i_it = dual_number.derivatives().nude_indices().begin();
+       i_it != dual_number.derivatives().nude_indices().end();
        ++i_it, ++d_it)
     if (*i_it != remove_derivative_index)
     {
@@ -191,34 +196,8 @@ ADMortarConstraint::trimDerivative(const dof_id_type & remove_derivative_index, 
       ++md_it;
     }
 
-  std::size_t n_indices = md_it - var.derivatives().nude_data().begin();
-  var.derivatives().nude_indices().resize(n_indices);
-  var.derivatives().nude_data().resize(n_indices);
-}
-
-void
-ADMortarConstraint::trimInteriorNodeDerivatives(
-    const std::map<unsigned int, unsigned int> & domain_ip_lowerd_map,
-    const std::vector<const MooseVariable *> & moose_vars,
-    std::vector<ADReal *> & ad_vars,
-    const bool is_secondary)
-{
-  // Remove interior node variable's derivatives from AD objects.
-  for (const auto dof_index :
-       (is_secondary ? make_range(_test_secondary.size()) : make_range(_test_primary.size())))
-    if (!domain_ip_lowerd_map.count(dof_index))
-    {
-      for (const auto moose_var_index : make_range(moose_vars.size()))
-      {
-        mooseAssert(moose_vars[moose_var_index]->isNodal(),
-                    "Trimming of interior node's derivatives is only supported for Lagrange "
-                    "elements in mortar constraints");
-
-        const auto & remove_derivative_index_x =
-            is_secondary ? moose_vars[moose_var_index]->dofIndices()[dof_index]
-                         : moose_vars[moose_var_index]->dofIndicesNeighbor()[dof_index];
-        trimDerivative(remove_derivative_index_x, *ad_vars[moose_var_index]);
-      }
-    }
+  std::size_t n_indices = md_it - dual_number.derivatives().nude_data().begin();
+  dual_number.derivatives().nude_indices().resize(n_indices);
+  dual_number.derivatives().nude_data().resize(n_indices);
 }
 #endif
