@@ -123,12 +123,6 @@ ComputeFrictionalForceLMMechanicalContact::computeQpProperties()
   else
     relative_velocity = {sec_x_dot - prim_x_dot, sec_y_dot - prim_y_dot, 0.0};
 
-  // Add derivative information
-  relative_velocity(0).derivatives() = sec_x_dot.derivatives() - prim_x_dot.derivatives();
-  relative_velocity(1).derivatives() = sec_y_dot.derivatives() - prim_y_dot.derivatives();
-  if (_3d)
-    relative_velocity(2).derivatives() = sec_z_dot->derivatives() - prim_z_dot->derivatives();
-
   // Compute integration point quantity for constraint enforcement
   if (_interpolate_normals)
   {
