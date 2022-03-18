@@ -157,7 +157,7 @@ AdaptiveMonteCarloDecision::execute()
       if (sub_ind % count_max == 0)
       {
         const unsigned int soffset = (sub_ind / count_max) * _sampler.getNumberOfRows();
-        // Reinitialize the starting inputs values for the next set of Markov chains
+        // Reinitialize the starting input values for the next set of Markov chains
         for (dof_id_type j = 0; j < _sampler.getNumberOfCols(); ++j)
           _prev_val[j].assign(_inputs_sorted[j].begin() + soffset,
                               _inputs_sorted[j].begin() + soffset + _sampler.getNumberOfRows());

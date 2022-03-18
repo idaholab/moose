@@ -9,4 +9,13 @@
     input = 'pss.i'
     jsondiff = 'pss_out.json'
   []
+  [pss_errors]
+    requirement = 'The system shall throw an error when '
+    [pss_error1]
+      type = RunException
+      input = 'pss_error1.i'
+      detail = 'the selected sampler type is not of an adaptive type. '
+      expect_err = "The selected sampler is not an adaptive sampler."
+    []
+  []
 []

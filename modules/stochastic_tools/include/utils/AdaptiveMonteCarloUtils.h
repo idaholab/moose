@@ -39,8 +39,8 @@ Real computeMean(const std::vector<Real> & data, const unsigned int & start_inde
  *
  ****** FOR PARALLEL SUBSET SIMULATION SAMPLER ********
  *
- * @param the inputs vector
- * @param the outputs vector
+ * @param the input vector
+ * @param the output vector
  * @param the number of samples per subset
  * @param the subset index
  * @param the subset intermediate failure probability
@@ -55,7 +55,7 @@ std::vector<std::vector<Real>> sortInput(const std::vector<std::vector<Real>> & 
  *
  ****** FOR PARALLEL SUBSET SIMULATION SAMPLER ********
  *
- * @param the outputs vector
+ * @param the output vector
  * @param the number of samples per subset
  * @param the subset index
  * @param the subset intermediate failure probability

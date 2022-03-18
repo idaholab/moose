@@ -24,7 +24,7 @@ ParallelSubsetSimulation::validParams()
       "The distribution names to be sampled, the number of distributions provided defines the "
       "number of columns per matrix.");
   params.addRequiredParam<ReporterName>("output_reporter",
-                                        "Reporter with results of samples created by trainer.");
+                                        "Reporter with results of samples created by the SubApp.");
   params.addRequiredParam<ReporterName>("inputs_reporter", "Reporter with input parameters.");
   params.addRangeCheckedParam<Real>("subset_probability",
                                     0.1,
@@ -121,12 +121,12 @@ ParallelSubsetSimulation::sampleSetUp(const SampleMode mode)
   const unsigned int sub_ind = (_step - 1) - (_num_samplessub / getNumberOfRows()) * _subset;
   const unsigned int offset = sub_ind * getNumberOfRows();
 
-  // Get and store the accepted samples inputs across all the procs from the previous step
+  // Get and store the accepted samples input across all the procs from the previous step
   for (dof_id_type j = 0; j < _distributions.size(); ++j)
     for (dof_id_type ss = 0; ss < getNumberOfRows(); ++ss)
       _inputs_sto[j][ss + offset] = Normal::quantile(_distributions[j]->cdf(_inputs[j][ss]), 0, 1);
 
-  // Get the accepted samples outputs across all the procs from the previous step
+  // Get the accepted sample outputs across all the procs from the previous step
   std::vector<Real> tmp =
       _use_absolute_value ? AdaptiveMonteCarloUtils::computeVectorABS(_outputs) : _outputs;
   if (mode == Sampler::SampleMode::GLOBAL)

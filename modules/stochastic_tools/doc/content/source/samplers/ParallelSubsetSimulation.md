@@ -5,12 +5,12 @@
 ## Description
 
 PSS is used for efficiently estimating small failure probabilities and for conducting
-optimization under uncertainties when dealing with computationally expensive finite element (FE) models.
-It can result in 2-3 orders of magnitude lesser calls to the FE model when estimating
-failure probabilities or conducting optimization under uncertain compared to standard
+optimization under uncertainties when dealing with computationally expensive numerical models.
+It can result in 2-3 orders of magnitude fewer calls to the numerical model when estimating
+failure probabilities or conducting optimization under uncertainty compared to standard
 Monte Carlo or Latin Hypercube Sampling. PSS works by creating intermediate failure
 thresholds to efficiently transition from sampling from the nominal input space to sampling
-from input spaces which optimize the FE model output. Use of Markov Chain Monte Carlo (MCMC)
+from input spaces which optimize the numerical model output. Use of Markov Chain Monte Carlo (MCMC)
 is key to the PSS algorithm. In fact, PSS uses hundreds of Markov Chains to efficiently
 propagate to the regions of the input space that are most important with respect
 to optimizing the model output. Since these Markov chains are independent of each other,
@@ -19,7 +19,7 @@ parallelization can only be achieved across Markov chains and not within a chain
 That is, a given set of processors should completely run an entire chain composed
 of a certain number of samples (this number is usually 10). Coupled with several
 Markov chains and massively parallel computing, PSS may require only 1E1 to 1E2
-order of magnitude FE model evaluations for accurately estimating low failure probabilities or
+order of magnitude numerical model evaluations for accurately estimating low failure probabilities or
 for conducting optimization studies.
 
 ## Brief algorithmic details
@@ -39,17 +39,17 @@ where, $P_f$ is the failure probability of interest, $P_1$ and $P_{i|i-1}~~(i \i
 are the intermediate failure probabilities defining the intermediate failure thresholds, and
 $N_s$ is the number of subsets. Through the intermediate failure probabilities $P_1$ and $P_{i|i-1}$
 PSS creates intermediate failure thresholds that allow to efficiently transition to sampling
-from input spaces which cause FE model failure or FE model optimal output. These
+from input spaces which cause numerical model failure or numerical model optimal output. These
 intermediate failure thresholds are created with the aid of numerous Markov chains.
 
 In practice, SS is implemented in the following manner. If $N$ is the total number
-of FE model evaluations, each subset will have $M=N/N_s$ samples. An MCS is first used to generate $M$ samples.
+of numerical model evaluations, each subset will have $M=N/N_s$ samples. An MCS is first used to generate $M$ samples.
 If the intermediate failure probabilities (except $P_{N_s|N_{s-1}}$)
 are all fixed to 0.1, then the first intermediate failure threshold ${F}_1$
-is estimated as the $90^{\textrm{th}}$ percentile value of all the $M$ FE model outputs.
+is estimated as the $90^{\textrm{th}}$ percentile value of all the $M$ numerical model outputs.
 The outputs that do not exceed $\mathcal{F}_1$ constitute Subset 1. To determine
 the next failure threshold $\mathcal{F}_2$, conditional samples should be generated
-such that the FE model outputs always exceed $\mathcal{F}_1$. An MCMC method---in particular,
+such that the numerical model outputs always exceed $\mathcal{F}_1$. An MCMC method---in particular,
 a component-wise Metropolis method---is used to estimate $\mathcal{F}_2$ by simulating
 numerous Markov chains. From the $M$ MCS samples in the first subset, those that exceeded
 the threshold $\mathcal{F}_1$ are used as seeds (or starting values) for these Markov chains.
@@ -70,23 +70,23 @@ More details on the practical implementation of the PSS method are presented in 
 ## Parallelization of Parallel Subset Simulation: An example
 
 Since PSS relies of numerous Markov chains, it can be parallelized. Each Markov chain
-can be run independently on separate set of processors in parallel to other Markov chains.
+can be run independently on separate sets of processors in parallel to other Markov chains.
 For optimal PSS performance, it is recommended that the number of samples evaluated
 by each processor is a multiple of 10. For example, consider that we are interested
-in evaluating a small failure probability of an FE model of the order $1E-4$. For this,
-we selected 4 subsets with 10,000 samples per subset. In total, there will be 40,000
-FE model evaluations. If we use 1000 processors with $0.1$ as the intermediate failure
-probability, there will be 1000 Markov chains per subset with each chain making 10 FE
-model evaluations. Therefore each processor evaluates the FE model 10 times per subset.
-With 4 subsets, each processor evaluates the FE model 40 times. In contrast, if we use
-only 100 processors, each processor solves the FE model 100 times per subset.
-With 4 subsets, each processor solves the FE model 400 times in total.
+in evaluating the small failure probability (of the order $1E-4$) of a numerical model. For this,
+we select 4 subsets with 10,000 samples per subset. In total, there will be 40,000
+numerical model evaluations. If we use 1000 processors with $0.1$ as the intermediate failure
+probability, there will be 1000 Markov chains per subset with each chain making 10 numerical
+model evaluations. Therefore each processor evaluates the numerical model 10 times per subset.
+With 4 subsets, each processor evaluates the numerical model 40 times. In contrast, if we use
+only 100 processors, each processor solves the numerical model 100 times per subset.
+With 4 subsets, each processor solves the numerical model 400 times in total.
 
 Alternatively, if we use 2000 processors, a unique set of two processors jointly
-solves the FE model 10 times per subset and 40 times overall. Beyond 1000 processors,
-the number of FE solves per processor cannot be reduced further. This is due to
+solves the numerical model 10 times per subset and 40 times overall. Beyond 1000 processors,
+the number of numerical model solves per processor cannot be reduced further. This is due to
 the fact that parallelization can only be achieved across Markov chains and not within
-a chain. Each processor should solve the FE model a minimum of 10 times per subset in this
+a chain. Each processor should solve the numerical model a minimum of 10 times per subset in this
 example because the number of samples in a Markov chain are $1/0.1$ with the intermediate
 failure probability fixed to 0.1.
 
@@ -113,18 +113,20 @@ The input file for using the PSS algorithm is somewhat similar to the other samp
 !listing modules/stochastic_tools/test/tests/samplers/ParallelSubsetSimulation/pss.i block=Samplers
 
 where, `num_samplessub` is the number of samples per subset and `use_absolute_value`
-is used this when failure is defined as a non-exceedance rather than an exceedance.
+is used when failure is defined as a non-exceedance rather than an exceedance.
 `inputs_reporter` and `output_reporter` are the reporter values which transfer
-information between the `ParallelSubsetSimulation` sampler and the `AdaptiveMonteCarloDecision` reporter.
-There is an optional input parameter `subset_probability` which has been defaulted to
+information between the `ParallelSubsetSimulation` sampler and the `AdaptiveMonteCarloDecision` reporter. There is an optional input parameter `subset_probability` which has been defaulted to
 `0.1`, meaning that there are $1/0.1$ samples per Markov chain. This can, however, be
-changed as per the user preference.
+changed as per the user preference. `num_parallel_chains` is also an optional parameter
+that explicitly specifies the number of Markov chains to be run in parallel per subset.
+If `num_parallel_chains` is not specified, the number of parallel Markov chains per subset
+will be equal to the number of processors.
 
 Second, the `Reporters` block is presented below with the `AdaptiveMonteCarloDecision` reporter:
 
 !listing modules/stochastic_tools/test/tests/samplers/ParallelSubsetSimulation/pss.i block=Reporters
 
-where, output reporter and the inputs reporter are both initialized.
+where, the output and input reporters are both initialized.
 
 Third, the `Executioner` block is presented below:
 
@@ -135,12 +137,11 @@ where, it is noticed that unlike some other sampler classes, the `type` is trans
 This value should not be less than $(1/p_o~N_s)$ (i.e., one over the subset probability
 times the number of subsets).
 
-!alert note title=Fixing the total number of samples or FE model evaluations
+!alert note title=Fixing the total number of samples or numerical model evaluations
 `num_steps` is used to fix the total number of samples. Note that this is the total
   number of samples per processors rather than the absolute total number of samples.
   If you require 1000 samples across 4 subsets and are using 50 processors, then
   `num_steps` will be $1000 \times 4~/~50$.
-
 
 ## Output format
 
