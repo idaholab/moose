@@ -36,7 +36,6 @@ yum install -y \
   gcc-gfortran \
   git \
   make \
-  cmake \
   tcl \
   m4 \
   freeglut-devel \
