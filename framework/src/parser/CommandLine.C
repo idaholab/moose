@@ -195,6 +195,37 @@ CommandLine::addOption(const std::string & name, Option cli_opt)
   _cli_options[name] = cli_opt;
 }
 
+std::vector<std::string>::const_iterator
+CommandLine::find(const std::string & option_name) const
+{
+  auto pos = _cli_options.find(option_name);
+  auto it = _args.end();
+
+  if (pos != _cli_options.end())
+  {
+    for (const auto & search_string : pos->second.cli_switch)
+    {
+      auto it = std::find(_args.begin(), _args.end(), search_string);
+      if (it != _args.end())
+        return it;
+    }
+  }
+
+  return it;
+}
+
+std::vector<std::string>::const_iterator
+CommandLine::begin() const
+{
+  return _args.begin();
+}
+
+std::vector<std::string>::const_iterator
+CommandLine::end() const
+{
+  return _args.end();
+}
+
 bool
 CommandLine::search(const std::string & option_name)
 {
