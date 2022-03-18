@@ -14,17 +14,16 @@ build:
 
 requirements:
   build:
-    - {{ moose_mpich }}
+    - {{ compiler('cxx') }}
     - {{ moose_python }}
     - cython
 
   host:
-    - {{ moose_mpich }}
+    - {{ compiler('cxx') }}
     - {{ moose_python }}
     - cython
 
   run:
-    - {{ moose_mpich }}
     - {{ pin_compatible('setuptools', lower_bound='58', upper_bound='60') }}
     - python
 
