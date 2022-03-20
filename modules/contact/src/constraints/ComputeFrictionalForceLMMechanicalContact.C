@@ -84,29 +84,46 @@ ComputeFrictionalForceLMMechanicalContact::ComputeFrictionalForceLMMechanicalCon
 void
 ComputeFrictionalForceLMMechanicalContact::computeQpProperties()
 {
+#ifdef MOOSE_GLOBAL_AD_INDEXING
   // Compute the value of _qp_gap
   ComputeWeightedGapLMMechanicalContact::computeQpProperties();
 
+  // Trim derivatives
+  const auto & primary_ip_lowerd_map = amg().getPrimaryIpToLowerElementMap(
+      *_lower_primary_elem, *_lower_primary_elem->interior_parent(), *_lower_secondary_elem);
+  const auto & secondary_ip_lowerd_map =
+      amg().getSecondaryIpToLowerElementMap(*_lower_secondary_elem);
+
+  std::array<const MooseVariable *, 3> var_array{{_disp_x_var, _disp_y_var, _disp_z_var}};
+  std::array<ADReal, 3> primary_disp_dot{
+      {_primary_x_dot[_qp], _primary_y_dot[_qp], _has_disp_z ? (*_primary_z_dot)[_qp] : 0}};
+  std::array<ADReal, 3> secondary_disp_dot{
+      {_secondary_x_dot[_qp], _secondary_y_dot[_qp], _has_disp_z ? (*_secondary_z_dot)[_qp] : 0}};
+
+  trimInteriorNodeDerivatives(primary_ip_lowerd_map, var_array, primary_disp_dot, false);
+  trimInteriorNodeDerivatives(secondary_ip_lowerd_map, var_array, secondary_disp_dot, true);
+
+  const ADReal & prim_x_dot = primary_disp_dot[0];
+  const ADReal & prim_y_dot = primary_disp_dot[1];
+  const ADReal * prim_z_dot = nullptr;
+  if (_has_disp_z)
+    prim_z_dot = &primary_disp_dot[2];
+
+  const ADReal & sec_x_dot = secondary_disp_dot[0];
+  const ADReal & sec_y_dot = secondary_disp_dot[1];
+  const ADReal * sec_z_dot = nullptr;
+  if (_has_disp_z)
+    sec_z_dot = &secondary_disp_dot[2];
+
+  // Build relative velocity vector
   ADRealVectorValue relative_velocity;
 
   if (_3d)
-    relative_velocity = {_secondary_x_dot[_qp] - _primary_x_dot[_qp],
-                         _secondary_y_dot[_qp] - _primary_y_dot[_qp],
-                         (*_secondary_z_dot)[_qp] - (*_primary_z_dot)[_qp]};
+    relative_velocity = {sec_x_dot - prim_x_dot, sec_y_dot - prim_y_dot, *sec_z_dot - *prim_z_dot};
   else
-    relative_velocity = {_secondary_x_dot[_qp] - _primary_x_dot[_qp],
-                         _secondary_y_dot[_qp] - _primary_y_dot[_qp],
-                         0.0};
+    relative_velocity = {sec_x_dot - prim_x_dot, sec_y_dot - prim_y_dot, 0.0};
 
-  // Add derivative information
-  relative_velocity(0).derivatives() =
-      _secondary_x_dot[_qp].derivatives() - _primary_x_dot[_qp].derivatives();
-  relative_velocity(1).derivatives() =
-      _secondary_y_dot[_qp].derivatives() - _primary_y_dot[_qp].derivatives();
-  if (_3d)
-    relative_velocity(2).derivatives() =
-        (*_secondary_z_dot)[_qp].derivatives() - (*_primary_z_dot)[_qp].derivatives();
-
+  // Compute integration point quantity for constraint enforcement
   if (_interpolate_normals)
   {
     _qp_tangential_velocity[0] =
@@ -117,6 +134,7 @@ ComputeFrictionalForceLMMechanicalContact::computeQpProperties()
   }
   else
     _qp_tangential_velocity_nodal = relative_velocity * (_JxW_msm[_qp] * _coord[_qp]);
+#endif
 }
 
 void
@@ -324,16 +342,19 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(const DofObj
     dof_residual_dir = term_1_y - term_2_y;
   }
 
+#ifdef MOOSE_GLOBAL_AD_INDEXING
   if (_subproblem.currentlyComputingJacobian())
   {
-    _assembly.processDerivatives(dof_residual, friction_dof_indices[0], _matrix_tags);
-    _assembly.processDerivatives(dof_residual_dir, friction_dof_indices[1], _matrix_tags);
+    _assembly.processUnconstrainedDerivatives({dof_residual, dof_residual_dir},
+                                              {friction_dof_indices[0], friction_dof_indices[1]},
+                                              _matrix_tags);
   }
   else
   {
     _assembly.processResidual(dof_residual.value(), friction_dof_indices[0], _vector_tags);
     _assembly.processResidual(dof_residual_dir.value(), friction_dof_indices[1], _vector_tags);
   }
+#endif
 }
 
 void
@@ -373,8 +394,10 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof(const DofObjec
     dof_residual = term_1 - term_2;
   }
 
+#ifdef MOOSE_GLOBAL_AD_INDEXING
   if (_subproblem.currentlyComputingJacobian())
-    _assembly.processDerivatives(dof_residual, friction_dof_index, _matrix_tags);
+    _assembly.processUnconstrainedDerivatives({dof_residual}, {friction_dof_index}, _matrix_tags);
   else
     _assembly.processResidual(dof_residual.value(), friction_dof_index, _vector_tags);
+#endif
 }

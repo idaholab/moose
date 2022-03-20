@@ -72,7 +72,10 @@ ComputeWeightedGapLMMechanicalContact::ComputeWeightedGapLMMechanicalContact(
     _primary_disp_z(_has_disp_z ? &adCoupledNeighborValue("disp_z") : nullptr),
     _c(getParam<Real>("c")),
     _normalize_c(getParam<bool>("normalize_c")),
-    _nodal(getVar("disp_x", 0)->feType().family == LAGRANGE)
+    _nodal(getVar("disp_x", 0)->feType().family == LAGRANGE),
+    _disp_x_var(getVar("disp_x", 0)),
+    _disp_y_var(getVar("disp_y", 0)),
+    _disp_z_var(_has_disp_z ? getVar("disp_z", 0) : nullptr)
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError("ComputeWeightedGapLMMechanicalContact relies on use of the global indexing container "
@@ -97,16 +100,44 @@ ADReal ComputeWeightedGapLMMechanicalContact::computeQpResidual(Moose::MortarTyp
 void
 ComputeWeightedGapLMMechanicalContact::computeQpProperties()
 {
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+  // Trim interior node variable derivatives
+  const auto & primary_ip_lowerd_map = amg().getPrimaryIpToLowerElementMap(
+      *_lower_primary_elem, *_lower_primary_elem->interior_parent(), *_lower_secondary_elem);
+  const auto & secondary_ip_lowerd_map =
+      amg().getSecondaryIpToLowerElementMap(*_lower_secondary_elem);
+
+  std::array<const MooseVariable *, 3> var_array{{_disp_x_var, _disp_y_var, _disp_z_var}};
+  std::array<ADReal, 3> primary_disp{
+      {_primary_disp_x[_qp], _primary_disp_y[_qp], _has_disp_z ? (*_primary_disp_z)[_qp] : 0}};
+  std::array<ADReal, 3> secondary_disp{{_secondary_disp_x[_qp],
+                                        _secondary_disp_y[_qp],
+                                        _has_disp_z ? (*_secondary_disp_z)[_qp] : 0}};
+
+  trimInteriorNodeDerivatives(primary_ip_lowerd_map, var_array, primary_disp, false);
+  trimInteriorNodeDerivatives(secondary_ip_lowerd_map, var_array, secondary_disp, true);
+
+  const ADReal & prim_x = primary_disp[0];
+  const ADReal & prim_y = primary_disp[1];
+  const ADReal * prim_z = nullptr;
+  if (_has_disp_z)
+    prim_z = &primary_disp[2];
+
+  const ADReal & sec_x = secondary_disp[0];
+  const ADReal & sec_y = secondary_disp[1];
+  const ADReal * sec_z = nullptr;
+  if (_has_disp_z)
+    sec_z = &secondary_disp[2];
+
+  // Compute gap vector
   ADRealVectorValue gap_vec = _phys_points_primary[_qp] - _phys_points_secondary[_qp];
 
-  gap_vec(0).derivatives() =
-      _primary_disp_x[_qp].derivatives() - _secondary_disp_x[_qp].derivatives();
-  gap_vec(1).derivatives() =
-      _primary_disp_y[_qp].derivatives() - _secondary_disp_y[_qp].derivatives();
+  gap_vec(0).derivatives() = prim_x.derivatives() - sec_x.derivatives();
+  gap_vec(1).derivatives() = prim_y.derivatives() - sec_y.derivatives();
   if (_has_disp_z)
-    gap_vec(2).derivatives() =
-        (*_primary_disp_z)[_qp].derivatives() - (*_secondary_disp_z)[_qp].derivatives();
+    gap_vec(2).derivatives() = prim_z->derivatives() - sec_z->derivatives();
 
+  // Compute integration point quantities
   if (_interpolate_normals)
     _qp_gap = gap_vec * (_normals[_qp] * _JxW_msm[_qp] * _coord[_qp]);
   else
@@ -114,6 +145,7 @@ ComputeWeightedGapLMMechanicalContact::computeQpProperties()
 
   // To do normalization of constraint coefficient (c_n)
   _qp_factor = _JxW_msm[_qp] * _coord[_qp];
+#endif
 }
 
 void
@@ -267,8 +299,10 @@ ComputeWeightedGapLMMechanicalContact::enforceConstraintOnDof(const DofObject * 
 
   const ADReal dof_residual = std::min(lm_value, weighted_gap * c);
 
+#ifdef MOOSE_GLOBAL_AD_INDEXING
   if (_subproblem.currentlyComputingJacobian())
-    _assembly.processDerivatives(dof_residual, dof_index, _matrix_tags);
+    _assembly.processUnconstrainedDerivatives({dof_residual}, {dof_index}, _matrix_tags);
   else
     _assembly.processResidual(dof_residual.value(), dof_index, _vector_tags);
+#endif
 }

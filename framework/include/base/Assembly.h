@@ -1723,9 +1723,13 @@ public:
                           LocalFunctor & local_functor);
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
+  void processUnconstrainedDerivatives(const std::vector<ADReal> & residuals,
+                                       const std::vector<dof_id_type> & row_indices,
+                                       const std::set<TagID> & matrix_tags);
+
   /**
-   * signals this object that a vector containing variable scaling factors should be used when doing
-   * residual and matrix assembly
+   * signals this object that a vector containing variable scaling factors should be used when
+   * doing residual and matrix assembly
    */
   void hasScalingVector();
 #endif

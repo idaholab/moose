@@ -19,6 +19,7 @@ offset = -0.05
   [normal_lm]
     block = 3
     use_dual = true
+    scaling = 1.0e3
   []
   [frictional_lm]
     block = 3
@@ -291,6 +292,8 @@ offset = -0.05
   petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_shift_amount'
   petsc_options_value = 'lu       NONZERO               1e-15'
   nl_max_its = 40
+  nl_abs_tol = 1.0e-11
+  nl_rel_tol = 1.0e-11
   line_search = 'l2'
   snesmf_reuse_base = true
 
@@ -318,7 +321,7 @@ offset = -0.05
 []
 
 [Postprocessors]
-  active = 'num_nl cumulative contact'
+  active = 'contact'
   [num_nl]
     type = NumNonlinearIterations
   []

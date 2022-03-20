@@ -6,38 +6,50 @@
   [frictionless-mortar-3d]
     type = 'Exodiff'
     input = 'frictionless-mortar-3d.i'
+    min_ad_size = 100
     exodiff = 'frictionless-mortar-3d_out.e'
     mesh_mode = 'REPLICATED'
-    requirement = 'The system shall solve a 3D frictionless bouncing block problem with mortar constraint'
-    min_ad_size = 100
+    requirement = 'The system shall solve a 3D frictionless bouncing block problem with mortar '
+                  'constraint'
+  []
+  [frictionless-mortar-3d-test-derivative-trimming]
+    type = 'RunApp'
+    input = 'frictionless-mortar-3d-test-derivative-trimming.i'
+    requirement = 'The system shall solve a 3D frictionless bouncing block problem with mortar '
+                  'constraints where the primary suface is composed of a single element and the '
+                  'secondary side is composed of first order faces with a required derivative '
+                  'container size of less than 50'
+    ad_indexing_type = 'global'
   []
   [frictionless-mortar-3d-action]
     type = 'CSVDiff'
     input = 'frictionless-mortar-3d-action.i'
+    min_ad_size = 100
     csvdiff = 'frictionless-mortar-3d-action_out_contact-pressure_0002.csv'
     mesh_mode = 'REPLICATED'
-    requirement = 'The system shall solve a 3D frictionless bouncing block problem with mortar constraint '
-                  'using the contact action'
-    min_ad_size = 100
+    requirement = 'The system shall solve a 3D frictionless bouncing block problem with mortar '
+                  'constraint using the contact action'
     rel_err = 1.0e-5
     abs_zero = 1.0e-5
   []
   [frictionless-mortar-3d-action-correct-edge-dropping]
     type = 'CSVDiff'
     input = 'frictionless-mortar-3d-action.i'
+    min_ad_size = 100
     csvdiff = 'frictionless-mortar-3d-action-correct-edge-dropping_out_contact-pressure_0002.csv'
     mesh_mode = 'REPLICATED'
-    requirement = 'The system shall solve a 3D frictionless bouncing block problem with mortar constraint '
-                  'using the contact action and selecting the temporary flag correct edge dropping'
+    requirement = 'The system shall solve a 3D frictionless bouncing block problem with mortar '
+                  'constraint using the contact action and selecting the temporary flag correct edge '
+                  'dropping'
     cli_args = 'Contact/mortar/correct_edge_dropping=true '
                'Outputs/file_base=frictionless-mortar-3d-action-correct-edge-dropping_out'
-    min_ad_size = 100
     rel_err = 1.0e-5
     abs_zero = 1.0e-5
   []
   [frictionless-mortar-3d-debug-mesh]
     type = 'Exodiff'
     input = 'frictionless-mortar-3d.i'
+    min_ad_size = 100
     exodiff = 'mortar_segment_mesh.e'
     mesh_mode = 'REPLICATED'
     cli_args = 'Executioner/end_time=0.5 Executioner/dtmin=0.5 Constraints/normal_lm/debug_mesh=true '
@@ -45,12 +57,12 @@
                'Constraints/normal_z/debug_mesh=true'
     requirement = 'The system shall solve a 3D frictionless bouncing block problem with mortar '
                   'constraint and output the mortar segment mesh for debugging purposes'
-    min_ad_size = 100
     max_parallel = 1
   []
   [frictionless-mortar-3d-debug-mesh-geometry]
     type = 'Exodiff'
     input = 'frictionless-mortar-3d.i'
+    min_ad_size = 100
     exodiff = 'nodal_geometry_only.e'
     mesh_mode = 'REPLICATED'
     cli_args = 'Executioner/end_time=0.5 Executioner/dtmin=0.5 Constraints/normal_lm/debug_mesh=true '
@@ -58,45 +70,45 @@
                'Constraints/normal_z/debug_mesh=true Outputs/exodus=false Problem/solve=false'
     requirement = 'The system shall solve a 3D frictionless bouncing block problem with mortar '
                   'constraint and output the normal and tangent vector fields for debugging purposes'
-    min_ad_size = 100
     max_parallel = 1
   []
   [frictional-mortar-3d]
     type = 'Exodiff'
     input = 'frictional-mortar-3d.i'
+    min_ad_size = 100
     exodiff = 'frictional-mortar-3d_out.e'
-    requirement = 'The system shall solve a 3D frictional bouncing block problem with mortar constraint '
-                  'using nodal-attached geometry'
+    requirement = 'The system shall solve a 3D frictional bouncing block problem with mortar '
+                  'constraint using nodal-attached geometry'
     rel_err = 1.0e-5
     abs_zero = 1.0e-5
-    min_ad_size = 100
     max_parallel = 8
   []
   [frictional-mortar-3d-action]
     type = 'CSVDiff'
     input = 'frictional-mortar-3d-action.i'
+    min_ad_size = 100
     csvdiff = 'frictional-mortar-3d-action_out_frictional-pressure_0001.csv '
               'frictional-mortar-3d-action_out_frictional-pressure-3d_0001.csv '
               'frictional-mortar-3d-action_out_tangent_x_0001.csv '
               'frictional-mortar-3d-action_out_tangent_y_0001.csv'
-    requirement = 'The system shall solve a 3D frictional bouncing block problem with mortar constraints '
-                  'using nodal-attached geometry and a frictional pressure vector generated by an '
-                  'auxiliary kernel through a user-friendly action. Results are diffed against '
-                  'non-action output'
+    requirement = 'The system shall solve a 3D frictional bouncing block problem with mortar '
+                  'constraints using nodal-attached geometry and a frictional pressure vector '
+                  'generated by an auxiliary kernel through a user-friendly action. Results are '
+                  'diffed against non-action output'
     rel_err = 1.0e-5
     abs_zero = 1.0e-5
-    min_ad_size = 100
     max_parallel = 8
   []
   [frictional-mortar-3d-interp-geometry]
     type = 'Exodiff'
     input = 'frictional-mortar-3d-interp-geometry.i'
+    min_ad_size = 100
     exodiff = 'frictional-mortar-3d-interp-geometry_out.e'
-    requirement = 'The system shall solve a 3D frictional bouncing block problem with mortar constraint '
-                  'using weakly interpolated mesh geometry, such as normal and tangent vectors'
+    requirement = 'The system shall solve a 3D frictional bouncing block problem with mortar '
+                  'constraint using weakly interpolated mesh geometry, such as normal and tangent '
+                  'vectors'
     rel_err = 1.0e-5
     abs_zero = 1.0e-5
-    min_ad_size = 100
     max_parallel = 8
   []
 []

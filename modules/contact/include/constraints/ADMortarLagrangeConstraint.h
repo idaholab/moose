@@ -41,4 +41,9 @@ protected:
 
   /// Nodal map from primary interior parent to lower dimensional domain
   std::map<unsigned int, unsigned int> _primary_ip_lowerd_map;
+
+  /// Threshold to discard derivatives and shrink the AD object.
+  /// This may help for multiphysics, three-dimensional mortar problems where,
+  /// otherwise, the size of the AD derivative container would be prohibitive.
+  const Real _ad_derivative_threshold;
 };

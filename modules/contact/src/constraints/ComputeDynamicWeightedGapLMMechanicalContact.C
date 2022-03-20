@@ -72,33 +72,70 @@ ComputeDynamicWeightedGapLMMechanicalContact::ComputeDynamicWeightedGapLMMechani
 void
 ComputeDynamicWeightedGapLMMechanicalContact::computeQpProperties()
 {
+#ifdef MOOSE_GLOBAL_AD_INDEXING
+  // Trim interior node variable derivatives
+  const auto & primary_ip_lowerd_map = amg().getPrimaryIpToLowerElementMap(
+      *_lower_primary_elem, *_lower_primary_elem->interior_parent(), *_lower_secondary_elem);
+  const auto & secondary_ip_lowerd_map =
+      amg().getSecondaryIpToLowerElementMap(*_lower_secondary_elem);
+
+  std::array<const MooseVariable *, 3> var_array{{_disp_x_var, _disp_y_var, _disp_z_var}};
+  std::array<ADReal, 3> primary_disp{
+      {_primary_disp_x[_qp], _primary_disp_y[_qp], _has_disp_z ? (*_primary_disp_z)[_qp] : 0}};
+  std::array<ADReal, 3> secondary_disp{{_secondary_disp_x[_qp],
+                                        _secondary_disp_y[_qp],
+                                        _has_disp_z ? (*_secondary_disp_z)[_qp] : 0}};
+
+  trimInteriorNodeDerivatives(primary_ip_lowerd_map, var_array, primary_disp, false);
+  trimInteriorNodeDerivatives(secondary_ip_lowerd_map, var_array, secondary_disp, true);
+
+  const ADReal & prim_x = primary_disp[0];
+  const ADReal & prim_y = primary_disp[1];
+  const ADReal * prim_z = nullptr;
+  if (_has_disp_z)
+    prim_z = &primary_disp[2];
+
+  const ADReal & sec_x = secondary_disp[0];
+  const ADReal & sec_y = secondary_disp[1];
+  const ADReal * sec_z = nullptr;
+  if (_has_disp_z)
+    sec_z = &secondary_disp[2];
+
+  std::array<ADReal, 3> primary_disp_dot{
+      {_primary_x_dot[_qp], _primary_y_dot[_qp], _has_disp_z ? (*_primary_z_dot)[_qp] : 0}};
+  std::array<ADReal, 3> secondary_disp_dot{
+      {_secondary_x_dot[_qp], _secondary_y_dot[_qp], _has_disp_z ? (*_secondary_z_dot)[_qp] : 0}};
+
+  trimInteriorNodeDerivatives(primary_ip_lowerd_map, var_array, primary_disp_dot, false);
+  trimInteriorNodeDerivatives(secondary_ip_lowerd_map, var_array, secondary_disp_dot, true);
+
+  const ADReal & prim_x_dot = primary_disp_dot[0];
+  const ADReal & prim_y_dot = primary_disp_dot[1];
+  const ADReal * prim_z_dot = nullptr;
+  if (_has_disp_z)
+    prim_z_dot = &primary_disp_dot[2];
+
+  const ADReal & sec_x_dot = secondary_disp_dot[0];
+  const ADReal & sec_y_dot = secondary_disp_dot[1];
+  const ADReal * sec_z_dot = nullptr;
+  if (_has_disp_z)
+    sec_z_dot = &secondary_disp_dot[2];
+
+  // Compute dynamic constraint-related quantities
   ADRealVectorValue gap_vec = _phys_points_primary[_qp] - _phys_points_secondary[_qp];
+  gap_vec(0).derivatives() = prim_x.derivatives() - sec_x.derivatives();
+  gap_vec(1).derivatives() = prim_y.derivatives() - sec_y.derivatives();
 
-  ADRealVectorValue relative_velocity(_primary_x_dot[_qp] - _secondary_x_dot[_qp],
-                                      _primary_y_dot[_qp] - _secondary_y_dot[_qp],
-                                      0.0);
-
-  gap_vec(0).derivatives() =
-      _primary_disp_x[_qp].derivatives() - _secondary_disp_x[_qp].derivatives();
-  gap_vec(1).derivatives() =
-      _primary_disp_y[_qp].derivatives() - _secondary_disp_y[_qp].derivatives();
-
-  relative_velocity(0).derivatives() =
-      _primary_x_dot[_qp].derivatives() - _secondary_x_dot[_qp].derivatives();
-  relative_velocity(1).derivatives() =
-      _primary_y_dot[_qp].derivatives() - _secondary_y_dot[_qp].derivatives();
+  _relative_velocity = ADRealVectorValue(prim_x_dot - sec_x_dot, prim_y_dot - sec_y_dot, 0.0);
 
   if (_has_disp_z)
   {
-    relative_velocity(2) = (*_primary_z_dot)[_qp] - (*_secondary_z_dot)[_qp];
-    relative_velocity(2).derivatives() =
-        (*_primary_z_dot)[_qp].derivatives() - (*_secondary_z_dot)[_qp].derivatives();
-    gap_vec(2).derivatives() =
-        (*_primary_disp_z)[_qp].derivatives() - (*_secondary_disp_z)[_qp].derivatives();
+    gap_vec(2).derivatives() = prim_z->derivatives() - sec_z->derivatives();
+    _relative_velocity(2) = *prim_z_dot - *sec_z_dot;
   }
 
   _qp_gap_nodal = gap_vec * (_JxW_msm[_qp] * _coord[_qp]);
-  _qp_velocity = relative_velocity * (_JxW_msm[_qp] * _coord[_qp]);
+  _qp_velocity = _relative_velocity * (_JxW_msm[_qp] * _coord[_qp]);
 
   // Current part of the gap velocity Newmark-beta time discretization
   _qp_gap_nodal_dynamics =
@@ -106,6 +143,7 @@ ComputeDynamicWeightedGapLMMechanicalContact::computeQpProperties()
 
   // To do normalization of constraint coefficient (c_n)
   _qp_factor = _JxW_msm[_qp] * _coord[_qp];
+#endif
 }
 
 void
