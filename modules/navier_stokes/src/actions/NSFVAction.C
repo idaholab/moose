@@ -469,7 +469,7 @@ NSFVAction::act()
       // for weakly-compressible simulations.
       addINSMassKernels();
       addINSMomentumAdvectionKernels();
-      addINSMomentumViscousDiscipationKernels();
+      addINSMomentumViscousDissipationKernels();
       addINSMomentumPressureKernels();
       addINSMomentumGravityKernels();
       if (_porous_medium_treatment)
@@ -1865,14 +1865,14 @@ NSFVAction::checkBoundaryParameterErrors()
   for (unsigned int enum_ind = 0; enum_ind < _outlet_boundaries.size(); ++enum_ind)
     if (_momentum_outlet_types[enum_ind] == "fixed-pressure" ||
         _momentum_outlet_types[enum_ind] == "fixed-pressure-zero-gradient")
-      no_pressure_outlets += 1;
+      num_pressure_outlets += 1;
 
-  if (_outlet_boundaries.size() > 0 && _pressure_function.size() != no_pressure_outlets)
+  if (_outlet_boundaries.size() > 0 && _pressure_function.size() != num_pressure_outlets)
     paramError("pressure_function",
                "Size is not the same as the number of pressure outlet boundaries!");
 
   if (_compressibility == "incompressible")
-    if (no_pressure_outlets == 0 && !(getParam<bool>("pin_pressure")))
+    if (num_pressure_outlets == 0 && !(getParam<bool>("pin_pressure")))
       mooseError("The pressure must be fixed for an incompressible simulation! Try setting "
                  "pin_pressure or change the compressibility settings!");
 
@@ -1894,14 +1894,14 @@ NSFVAction::checkBoundaryParameterErrors()
     for (unsigned int enum_ind = 0; enum_ind < _energy_wall_types.size(); ++enum_ind)
       if (_energy_wall_types[enum_ind] == "fixed-temperature" ||
           _energy_wall_types[enum_ind] == "heatflux")
-        no_fixed_energy_walls += 1;
+        num_fixed_energy_walls += 1;
 
-    if (_wall_boundaries.size() > 0 && _energy_wall_function.size() != no_fixed_energy_walls)
+    if (_wall_boundaries.size() > 0 && _energy_wall_function.size() != num_fixed_energy_walls)
       paramError("energy_wall_function",
                  "Size " + std::to_string(_energy_wall_function.size()) +
                      " is not the same as the number of Dirichlet/Neumann conditions in "
                      "'energy_wall_types' (" +
-                     std::to_string(no_fixed_energy_walls) + ")");
+                     std::to_string(num_fixed_energy_walls) + ")");
 
     if (_inlet_boundaries.size() > 0 && _inlet_boundaries.size() != _energy_inlet_types.size())
       paramError("energy_inlet_types",

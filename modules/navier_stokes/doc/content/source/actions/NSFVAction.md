@@ -6,9 +6,10 @@
 
 This action is used for setting up the Navier-Stokes equations over a subdomain
 using a finite volume discretization. Furthermore, the action is able to handle
-clean or porous medium formulations using incompressible and
-weakly-compressible approximations.
+regular (clean fluid flow) or porous medium (with homogenized structures)
+formulations using incompressible and weakly-compressible approximations.
 This action is triggered with */Modules/NavierStokesFV* input syntax.
+For more information, visit [NavierStokesFV](/Modules/NavierStokesFV/index.md).
 
 ## Example Input File Syntax
 

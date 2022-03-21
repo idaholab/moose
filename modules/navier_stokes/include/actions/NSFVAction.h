@@ -59,7 +59,7 @@ protected:
    * weakly-compressible simulations (except the Boussinesq kernel) as well.
    */
   void addINSMomentumTimeKernels();
-  void addINSMomentumViscousDiscipationKernels();
+  void addINSMomentumViscousDissipationKernels();
   void addINSMomentumMixingLengthKernels();
   void addINSMomentumAdvectionKernels();
   void addINSMomentumPressureKernels();
