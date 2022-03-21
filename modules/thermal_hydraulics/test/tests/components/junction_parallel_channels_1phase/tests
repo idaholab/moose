@@ -5,8 +5,8 @@
     # The gold file was actually produced with equal_area_no_junction.i and
     # then renamed to equal_area_with_junction_out.csv.
     csvdiff = 'equal_area_with_junction_out.csv'
-    max_parallel = 1
     ad_indexing_type = 'global'
+    mesh_mode = 'replicated'
   []
 
   [phy:unequal_area]
@@ -16,8 +16,8 @@
     abs_zero = 5e-5
     rel_err = 0
     recover = false
-    max_parallel = 1
     ad_indexing_type = 'global'
+    mesh_mode = 'replicated'
   []
 
   [phy:shower_syntax]
@@ -26,8 +26,8 @@
     check_input = true
     recover = false
     max_threads = 1
-    max_parallel = 1
     ad_indexing_type = 'global'
+    mesh_mode = 'replicated'
   []
 
   [phy:shower]
@@ -36,9 +36,9 @@
     csvdiff = 'phy.shower_out.csv'
     abs_zero = 8e-8
     rel_err = 0
-    max_parallel = 1
     heavy = true
     ad_indexing_type = 'global'
+    mesh_mode = 'replicated'
   []
 
   # Tests conservation of mass and energy for 1-phase flow.
@@ -47,8 +47,8 @@
     input = 'conservation.i'
     csvdiff = 'conservation_out.csv'
     abs_zero = 2e-8
-    max_parallel = 1
     ad_indexing_type = 'global'
+    mesh_mode = 'replicated'
   []
 
   # error checking
@@ -56,6 +56,7 @@
     type = 'RunException'
     input = 'err.missing_ics.i'
     expect_err = "junction: The following initial condition parameters are missing: initial_p initial_T initial_vel_x initial_vel_y initial_vel_z"
+    mesh_mode = 'replicated'
   []
 
   [err.non_parallel_channels]
@@ -65,6 +66,7 @@
     expect_err = "junction: Connected flow channels are not parallel, use "
     "VolumeJunction1Phase component instead."
     ad_indexing_type = 'global'
+    mesh_mode = 'replicated'
   []
 
   # jacobian test

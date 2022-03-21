@@ -91,7 +91,10 @@
   num_steps = 5
   abort_on_solve_fail = true
 
-  solve_type = 'PJFNK'
+  solve_type = 'NEWTON'
+  line_search = basic
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = ' lu'
   nl_rel_tol = 0
   nl_abs_tol = 1e-6
   nl_max_its = 20
@@ -172,7 +175,4 @@
     type = CSV
     show = 'mass_tot_change E_tot_change'
   []
-[]
-[Debug]
-  show_var_residual_norms = true
 []

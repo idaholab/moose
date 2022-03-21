@@ -28,7 +28,6 @@ JunctionParallelChannels1Phase::validParams()
 
 JunctionParallelChannels1Phase::JunctionParallelChannels1Phase(const InputParameters & params)
   : VolumeJunction1Phase(params)
-
 {
 }
 

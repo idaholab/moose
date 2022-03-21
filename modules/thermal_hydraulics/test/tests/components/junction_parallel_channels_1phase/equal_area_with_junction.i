@@ -123,7 +123,9 @@
   num_steps = 5
   abort_on_solve_fail = true
 
-  solve_type = 'PJFNK'
+  solve_type = 'NEWTON'
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = ' lu'
   line_search = 'basic'
   nl_rel_tol = 0
   nl_abs_tol = 1e-6

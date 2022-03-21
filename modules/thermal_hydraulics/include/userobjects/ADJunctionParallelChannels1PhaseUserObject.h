@@ -28,12 +28,10 @@ public:
   ADJunctionParallelChannels1PhaseUserObject(const InputParameters & params);
 
   virtual void initialize() override;
-  virtual void execute() override;
   virtual void threadJoin(const UserObject & uo) override;
   virtual void finalize() override;
 
 protected:
-  virtual void storeConnectionData() override;
   virtual void computeFluxesAndResiduals(const unsigned int & c) override;
 
   /// Pressure material property
@@ -42,20 +40,15 @@ protected:
   /// Channel direction for the first connection
   RealVectorValue _dir_c0;
   /// Flow direction for the first connection
-  ADRealVectorValue _d_flow;
+  RealVectorValue _d_flow;
 
   //// Stored pressure for each connection
   std::vector<ADReal> _stored_pA;
 
   /// Areas at each connection
   std::vector<ADReal> _areas;
-  /// Directions at each connection
-  std::vector<RealVectorValue> _directions;
   /// Check if the connection is an inlet
   std::vector<bool> _is_inlet;
-
-  /// Connection indices for this thread
-  std::vector<unsigned int> _connection_indices;
 
   /// Connection index for inlet flow channel connections
   std::vector<unsigned int> _c_in;
