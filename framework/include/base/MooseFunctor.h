@@ -271,10 +271,13 @@ public:
 
   virtual ~FunctorBase() = default;
   FunctorBase() : _clearance_schedule({EXEC_ALWAYS}) {}
-  FunctorBase(const std::set<ExecFlagType> & clearance_schedule)
-    : _clearance_schedule(clearance_schedule)
+  FunctorBase(const std::set<ExecFlagType> & clearance_schedule, const MooseFunctorName & name)
+    : _clearance_schedule(clearance_schedule), _functor_name(name)
   {
   }
+
+  /// Return the functor name
+  const MooseFunctorName & fname() const { return _functor_name; }
 
   ///@{
   /**
@@ -382,7 +385,7 @@ protected:
    */
   virtual GradientType evaluateGradient(const ElemArg &, unsigned int) const
   {
-    mooseError("not implemented");
+    mooseError("Element gradient not implemented for functor " + fname());
   }
 
   /**
@@ -393,7 +396,7 @@ protected:
    */
   virtual GradientType evaluateGradient(const ElemFromFaceArg &, unsigned int) const
   {
-    mooseError("not implemented");
+    mooseError("Element (obtained from a face) gradient not implemented for functor " + fname());
   }
 
   /**
@@ -404,7 +407,7 @@ protected:
    */
   virtual GradientType evaluateGradient(const FaceArg &, unsigned int) const
   {
-    mooseError("not implemented");
+    mooseError("Face gradient not implemented for functor " + fname());
   }
 
   /**
@@ -415,7 +418,7 @@ protected:
    */
   virtual GradientType evaluateGradient(const SingleSidedFaceArg &, unsigned int) const
   {
-    mooseError("not implemented");
+    mooseError("One-sided face gradient not implemented for functor " + fname());
   }
 
   /**
@@ -426,7 +429,7 @@ protected:
    */
   virtual GradientType evaluateGradient(const ElemQpArg &, unsigned int) const
   {
-    mooseError("not implemented");
+    mooseError("Element quadrature point gradient not implemented for functor " + fname());
   }
 
   /**
@@ -437,7 +440,7 @@ protected:
    */
   virtual GradientType evaluateGradient(const ElemSideQpArg &, unsigned int) const
   {
-    mooseError("not implemented");
+    mooseError("Element side quadrature point gradient not implemented for functor " + fname());
   }
 
   /**
@@ -446,7 +449,7 @@ protected:
    */
   virtual DotType evaluateDot(const ElemArg &, unsigned int) const
   {
-    mooseError("not implemented");
+    mooseError("Element time derivative not implemented for functor " + fname());
   }
 
   /**
@@ -457,7 +460,8 @@ protected:
    */
   virtual DotType evaluateDot(const ElemFromFaceArg &, unsigned int) const
   {
-    mooseError("not implemented");
+    mooseError("Element (obtained from a face) time derivative not implemented for functor " +
+               fname());
   }
 
   /**
@@ -468,7 +472,7 @@ protected:
    */
   virtual DotType evaluateDot(const FaceArg &, unsigned int) const
   {
-    mooseError("not implemented");
+    mooseError("Face time derivative not implemented for functor " + fname());
   }
 
   /**
@@ -479,7 +483,7 @@ protected:
    */
   virtual DotType evaluateDot(const SingleSidedFaceArg &, unsigned int) const
   {
-    mooseError("not implemented");
+    mooseError("One-sided face time derivative not implemented for functor " + fname());
   }
 
   /**
@@ -490,7 +494,7 @@ protected:
    */
   virtual DotType evaluateDot(const ElemQpArg &, unsigned int) const
   {
-    mooseError("not implemented");
+    mooseError("Element quadrature point time derivative not implemented for functor " + fname());
   }
 
   /**
@@ -501,7 +505,8 @@ protected:
    */
   virtual DotType evaluateDot(const ElemSideQpArg &, unsigned int) const
   {
-    mooseError("not implemented");
+    mooseError("Element side quadrature point time derivative not implemented for functor " +
+               fname());
   }
 
 private:
@@ -576,6 +581,9 @@ private:
 
   /// Map from single-sided-face arguments to their cached evaluations
   mutable std::map<SingleSidedFaceArg, ValueType> _ssf_arg_to_value;
+
+  /// name of the functor
+  const MooseFunctorName _functor_name;
 };
 
 template <typename T>
